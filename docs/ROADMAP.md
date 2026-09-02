@@ -17,7 +17,7 @@ The backend increments follow, and keep their original numbers.
 - [x] 0.3 Decision records for the founding decisions, and the first experiment
 - [x] 0.10 Frontend workspaces, linting, typechecking, and the core to interface boundary
 - [x] 0.11 The map renders with attribution
-- [ ] 0.12 The sprite overlay draws one jiggling sprite pinned to a place
+- [x] 0.12 The sprite overlay draws one jiggling sprite pinned to a place
 - [ ] 0.13 End-to-end smoke test
 - [ ] 0.4 Local infrastructure: MongoDB replica set and RabbitMQ in Compose
 - [ ] 0.5 Gradle wrapper, version catalog, module skeletons with their dependency edges

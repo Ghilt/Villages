@@ -33,6 +33,13 @@ body,
   inset: 0;
 }
 
+/* The sprites sit above the map and below the interface, and never intercept a drag. */
+.sprites {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
 /* The interface floats over the world and never steals a drag from it. */
 .hud {
   position: absolute;

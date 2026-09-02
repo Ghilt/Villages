@@ -12,6 +12,7 @@
     "@villages/client-core": "*",
     "@villages/protocol": "*",
     "maplibre-gl": "^6.6.0",
+    "pixi.js": "^8.20.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   }

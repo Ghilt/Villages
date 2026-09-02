@@ -36,6 +36,18 @@ The architecture, answered in passing rather than tested for its own sake:
 
 ## Observations
 
+**2026-09-02, the sprite overlay (increment 0.12).** The hand-written projection agrees with the map's own
+`project` to the pixel: horizontal offsets were exactly zero across eight seats, at zoom 4 and at zoom 10, after
+panning and after zooming. Vertical offsets sat inside the 2.2 pixel idle amplitude, which is the breathing motion
+rather than error, and varied over time per sprite as intended.
+
+One real limitation: while the camera is *animating* under program control, sprites trail the ground by a few
+pixels, measured at 4.3 during a fast programmatic pan and 1.9 during a zoom. It is zero once the camera settles.
+The cause is that the map and the overlay draw on separate animation frames. Fixing it properly means drawing the
+sprites inside the map's render pass, which costs a permanent sixty-frame repaint of the map because the sprites
+always move. Left as it is, on the grounds that players drag the map rather than fly it, and that a house does not
+need to be pixel-locked while the world is in motion. Revisit if the founding flight looks wrong.
+
 ## Result
 
 ## Decision
