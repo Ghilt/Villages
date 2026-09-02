@@ -1,6 +1,6 @@
 # 0009. A human vets every change before it is committed
 
-- Status: accepted
+- Status: accepted, extended by 0016
 - Date: 2026-09-01
 
 ## Context

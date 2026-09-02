@@ -8,9 +8,12 @@ the experiment journal.
 An empty but complete skeleton, where every layer exists, every check runs, and every document has a first version.
 The increment list lives in the startup plan under `docs/plans/`.
 
-The order is not the order they were planned in. The primary way we judge this project is by looking at it, so the
-increments that put something on the screen come first, and they happen to be the ones that need nothing installed.
-The backend increments follow, and keep their original numbers.
+This list is a menu, not a queue. The order below is a suggestion; Adam picks the next step after each commit from
+options offered then, and reordering costs nothing. See decision record 0016.
+
+The order changed once already, for a reason worth keeping: the primary way we judge this project is by looking at
+it, so the increments that put something on the screen came first, and they happen to be the ones that need nothing
+installed. The backend increments follow, and keep their original numbers.
 
 - [x] 0.1 Repository, working agreement, commit gate
 - [x] 0.2 Core documents and templates

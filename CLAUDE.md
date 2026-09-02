@@ -20,13 +20,32 @@ thousands of concurrent players in one shared world. The startup plan that produ
 
 ## Working agreement
 
-1. State the step (what, why, files) in one short paragraph before touching code.
-2. Small steps: one coherent step per commit (a module skeleton, a document, one test-plus-implementation pair).
-3. Run the relevant checks. `scripts/check.ps1` or `scripts/check.sh` runs everything.
-4. Docs travel with code: a change to a decision, an event, or a term updates `docs/` in the same commit
-   (ADR, `EVENTS.md`, `GLOSSARY.md`, `ARCHITECTURE.md`).
-5. Definition of done: compiles, checks green, docs updated, glossary terms used verbatim, no layer-rule violation.
-6. Read `docs/ROADMAP.md` ("Now") at the start of a session.
+This is a loop, and Adam holds both ends of it: he approves what lands, and he chooses what comes next.
+
+1. **Agree the step.** State it in one short paragraph, what and why and which files, before touching code.
+2. **Build it small.** One coherent step per commit: a module skeleton, a document, one test with its
+   implementation. If it grows past a few hundred lines, it was two steps.
+3. **Verify it.** Run the checks, and for anything visible, look at it in a browser and say what you saw. Report
+   what failed, including the things you had to fix on the way.
+4. **Documents travel with it.** A change to a decision, an event or a term updates its document in the same
+   commit: a decision record, the event catalogue, the glossary, the architecture.
+5. **Present it for review and stop.** A summary, the file list, the check output, the documents touched, and a
+   proposed commit message. Do not commit.
+6. **Commit only on Adam's word,** then say what landed.
+7. **Offer the next steps and stop again.** Two to four concrete options, each a sentence or two on what it
+   would produce and what it would cost, with a recommendation and the reason for it. Say plainly what is
+   blocked and on what. Always leave room for a fifth answer that is none of them, because the point of the
+   options is to give Adam the wheel, not to make him pick from a menu.
+
+Never choose the next increment alone, and never chain increments together to save a round trip. The roadmap is a
+menu, not a queue: its order is a suggestion, and Adam reorders it freely. When an option is not on the roadmap
+but is clearly better, offer it anyway and say why.
+
+Definition of done for a step: it compiles, the checks are green, the documents that describe it are updated,
+glossary terms are used verbatim, and no layer rule is violated.
+
+Read `docs/ROADMAP.md` under "Now" at the start of a session, and the last few commits, to see where things
+stand.
 
 ## Layout
 
