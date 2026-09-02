@@ -1,0 +1,136 @@
+:root {
+  --ink: #241c14;
+  --ink-soft: #5d4f3f;
+  --parchment: #efe6d3;
+  --parchment-edge: #cfbf9f;
+  --gold: #9d7c2a;
+  --shadow: rgba(36, 28, 20, 0.22);
+
+  color-scheme: light;
+  font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif;
+  color: var(--ink);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+.app {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}
+
+.map {
+  position: absolute;
+  inset: 0;
+}
+
+/* The interface floats over the world and never steals a drag from it. */
+.hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1rem;
+}
+
+.hud__title {
+  pointer-events: none;
+  font-size: 0.95rem;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  background: linear-gradient(to right, rgba(239, 230, 211, 0.92), rgba(239, 230, 211, 0));
+  padding: 0.4rem 2.5rem 0.4rem 0.6rem;
+  border-radius: 2px;
+}
+
+.hud__panel {
+  pointer-events: auto;
+  display: flex;
+  gap: 0.9rem;
+  align-items: stretch;
+  min-width: 17rem;
+  padding: 0.85rem 1rem;
+  background: var(--parchment);
+  border: 1px solid var(--parchment-edge);
+  border-radius: 3px;
+  box-shadow: 0 2px 10px var(--shadow);
+}
+
+.hud__banner {
+  width: 3rem;
+  flex: none;
+  display: flex;
+  align-items: center;
+}
+
+.hud__banner svg {
+  width: 100%;
+  height: auto;
+}
+
+.hud__shield {
+  fill: rgba(157, 124, 42, 0.07);
+  stroke: var(--gold);
+  stroke-width: 1.4;
+  stroke-dasharray: 3 3;
+}
+
+.hud__house {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.3rem;
+}
+
+.hud__name {
+  margin: 0;
+  font-size: 1.15rem;
+  font-variant: small-caps;
+  letter-spacing: 0.04em;
+}
+
+.hud__hint {
+  margin: 0;
+  max-width: 22ch;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: var(--ink-soft);
+}
+
+.hud__resources {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 0 0.6rem;
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+}
+
+.hud__resources dt {
+  color: var(--ink-soft);
+  font-variant: small-caps;
+  letter-spacing: 0.06em;
+}
+
+.hud__resources dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* MapLibre's own furniture, brought closer to the parchment. */
+.maplibregl-ctrl-attrib {
+  font-family: system-ui, sans-serif;
+  font-size: 0.68rem;
+}

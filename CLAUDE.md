@@ -68,7 +68,12 @@ and ESLint restricted imports on the frontend.
 Prerequisites: Docker Desktop (WSL2), Eclipse Temurin 21 on `JAVA_HOME`, Node 24. Commands are added here as the
 increments land:
 
+- Frontend, once: `npm install --prefix frontend`
+- Frontend, look at it: `npm run dev --prefix frontend`, then open http://localhost:5173
+- Frontend, checks: `npm run check --prefix frontend` (typecheck, lint, format, unit tests)
 - Infra: `docker compose -f infra/docker-compose.yml up -d` (increment 0.4)
-- Backend: `cd backend; ./gradlew check` and `./gradlew :app:bootRun` (0.5 onwards)
-- Frontend: `cd frontend; npm install; npm run check` and `npm run dev` (0.10 onwards)
+- Backend: `cd backend` then `./gradlew check`, and `./gradlew :app:bootRun` (0.5 onwards)
 - Everything: `scripts/check.ps1` or `scripts/check.sh` (0.14)
+
+The dev server is also registered in `.claude/launch.json` under the name `web`, so the preview tooling can start
+it directly. TypeScript is pinned below 7 on purpose; see `docs/adr/0015`.

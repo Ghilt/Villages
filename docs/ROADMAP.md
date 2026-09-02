@@ -8,23 +8,27 @@ the experiment journal.
 An empty but complete skeleton, where every layer exists, every check runs, and every document has a first version.
 The increment list lives in the startup plan under `docs/plans/`.
 
+The order is not the order they were planned in. The primary way we judge this project is by looking at it, so the
+increments that put something on the screen come first, and they happen to be the ones that need nothing installed.
+The backend increments follow, and keep their original numbers.
+
 - [x] 0.1 Repository, working agreement, commit gate
 - [x] 0.2 Core documents and templates
 - [x] 0.3 Decision records for the founding decisions, and the first experiment
+- [x] 0.10 Frontend workspaces, linting, typechecking, and the core to interface boundary
+- [x] 0.11 The map renders with attribution
+- [ ] 0.12 The sprite overlay draws one jiggling sprite pinned to a place
+- [ ] 0.13 End-to-end smoke test
 - [ ] 0.4 Local infrastructure: MongoDB replica set and RabbitMQ in Compose
 - [ ] 0.5 Gradle wrapper, version catalog, module skeletons with their dependency edges
 - [ ] 0.6 Architecture tests that fail on a layer violation
 - [ ] 0.7 Occurrent smoke test on the in-memory event store
 - [ ] 0.8 Testcontainers smoke test on MongoDB and RabbitMQ
 - [ ] 0.9 The application boots and the gateway answers a hello
-- [ ] 0.10 Frontend workspaces, linting, typechecking, and the core to interface boundary
-- [ ] 0.11 The map renders with attribution
-- [ ] 0.12 The sprite overlay draws one jiggling sprite pinned to a place
-- [ ] 0.13 End-to-end smoke test
 - [ ] 0.14 One check script for the whole repository
 
-Blocked on the machine, needed from 0.4 and 0.5 onwards: Docker Desktop with the WSL2 backend, and Eclipse Temurin 21
-on `JAVA_HOME`.
+Blocked on the machine, needed from 0.4 onwards: Docker Desktop with the WSL2 backend, and Eclipse Temurin 21 on
+`JAVA_HOME`. Nothing before then needs either.
 
 ## Next: Phase 1, the walking skeleton
 

@@ -21,6 +21,18 @@ thousands of concurrent players.
 
 ## Five-minute start
 
-Prerequisites: Docker Desktop, Eclipse Temurin 21 (JAVA_HOME), Node 24.
+Node 24 is all you need for the part that exists today.
 
-The start commands are added as the corresponding increments land; see `docs/ROADMAP.md`.
+```
+npm install --prefix frontend
+npm run dev --prefix frontend
+```
+
+Then open http://localhost:5173 and you are looking at the world: pan and zoom the map, and see the frame your
+house will occupy. The map style comes from OpenFreeMap and needs no key; point `VITE_MAP_STYLE_URL` somewhere else
+to use another one.
+
+`npm run check --prefix frontend` runs the typecheck, the linter, the formatter and the unit tests.
+
+The server needs Docker Desktop and Eclipse Temurin 21 on `JAVA_HOME`, and arrives with the increments listed in
+`docs/ROADMAP.md`.
