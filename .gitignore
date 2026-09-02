@@ -1,0 +1,36 @@
+# Gradle
+.gradle/
+**/build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# JVM
+*.class
+*.log
+hs_err_pid*
+
+# IDEs
+.idea/
+*.iml
+out/
+.vscode/
+
+# Node
+node_modules/
+dist/
+coverage/
+playwright-report/
+test-results/
+.vite/
+*.tsbuildinfo
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Claude Code local overrides
+.claude/settings.local.json
