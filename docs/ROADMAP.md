@@ -10,7 +10,7 @@ The increment list lives in the startup plan under `docs/plans/`.
 
 - [x] 0.1 Repository, working agreement, commit gate
 - [x] 0.2 Core documents and templates
-- [ ] 0.3 Decision records for the founding decisions, and the first experiment
+- [x] 0.3 Decision records for the founding decisions, and the first experiment
 - [ ] 0.4 Local infrastructure: MongoDB replica set and RabbitMQ in Compose
 - [ ] 0.5 Gradle wrapper, version catalog, module skeletons with their dependency edges
 - [ ] 0.6 Architecture tests that fail on a layer violation
