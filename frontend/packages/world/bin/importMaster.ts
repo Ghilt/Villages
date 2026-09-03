@@ -10,6 +10,7 @@ import { createRaster } from '../src/raster.ts';
 import type { ClassRaster } from '../src/raster.ts';
 import { encodeIndexedPng } from '../src/png.ts';
 import { doubleSignedArea, simplify, smooth } from '../src/simplify.ts';
+import { MAX_MERCATOR_LATITUDE } from '../src/sphere.ts';
 import { toLngLat, traceClass } from '../src/trace.ts';
 import type { Ring } from '../src/trace.ts';
 
@@ -54,7 +55,9 @@ if (problems.length > 0) {
   throw new Error('the palette is unusable; fix world/palette.json');
 }
 
-const masterPath = resolve(MASTER_DIR, 'terrain.png');
+/** Reads `world/master/terrain.png` unless told otherwise, so a fresh master can be judged first. */
+const named = process.argv[2];
+const masterPath = named === undefined ? resolve(MASTER_DIR, 'terrain.png') : resolve(named);
 const decoded = PNG.sync.read(await readFile(masterPath));
 console.log(`read ${decoded.width} by ${decoded.height} from ${masterPath}\n`);
 
@@ -135,6 +138,13 @@ interface ShapeFeature {
 const features: ShapeFeature[] = [];
 // Four decimals is about eleven metres, far finer than a world painted at 2.4 kilometres a pixel.
 const round = (value: number) => Number(value.toFixed(4));
+/**
+ * Mercator sends the poles to infinity, so a shape traced to the very edge of the image would carry a
+ * coordinate the map cannot project. Antarctica reaches that edge, and four such points were enough to
+ * stop the whole world from loading, silently, with the source simply never appearing.
+ */
+const holdInsideMercator = (latitude: number) =>
+  Math.min(MAX_MERCATOR_LATITUDE, Math.max(-MAX_MERCATOR_LATITUDE, latitude));
 
 /**
  * The coast is the one line that matters most, and no single class describes it: it is where anything that
@@ -182,7 +192,7 @@ for (const terrain of targets) {
 
     const coordinates = shaped.map((point) => {
       const [lng, lat] = toLngLat(point, terrain.from);
-      return [round(lng), round(lat)];
+      return [round(lng), round(holdInsideMercator(lat))];
     });
 
     features.push({
@@ -223,6 +233,27 @@ for (let id = 0; id <= Math.max(...palette.classes.map((terrain) => terrain.id))
 await writeFile(
   resolve(OUTPUT_DIR, 'terrain-lookup.png'),
   encodeIndexedPng(lookup, colours, (data) => new Uint8Array(deflateSync(data, { level: 9 }))),
+);
+
+/**
+ * A small copy of the world for glancing at, written here rather than by the master build because this
+ * is the only place that reads the image the game is actually drawn from. Nearest neighbour, since
+ * averaging two terrain classes would invent a third.
+ */
+const previewScale = Math.max(1, Math.round(raster.width / 2048));
+const preview = createRaster(
+  Math.floor(raster.width / previewScale),
+  Math.floor(raster.height / previewScale),
+);
+for (let row = 0; row < preview.height; row += 1) {
+  for (let column = 0; column < preview.width; column += 1) {
+    preview.cells[row * preview.width + column] =
+      raster.cells[row * previewScale * raster.width + column * previewScale] ?? 0;
+  }
+}
+await writeFile(
+  resolve(MASTER_DIR, 'terrain-preview.png'),
+  encodeIndexedPng(preview, colours, (data) => new Uint8Array(deflateSync(data, { level: 9 }))),
 );
 
 console.log(`\n${features.length} shapes, ${(shapes.length / 1048576).toFixed(2)} MB`);

@@ -12,7 +12,8 @@
     "fetch": "node bin/fetchSource.ts",
     "build": "node bin/buildWorld.ts",
     "master": "node bin/buildMaster.ts",
-    "import": "node bin/importMaster.ts"
+    "import": "node bin/importMaster.ts",
+    "merge": "node bin/mergeMaster.ts"
   },
   "dependencies": {
     "fflate": "^0.8.3",

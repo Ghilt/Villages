@@ -5,9 +5,9 @@
 
   "layers": [
     {
-      "$comment": "Land first, in a single colour, so that anywhere the biome data misses is still land rather than sea.",
+      "$comment": "Land first, marked as land with no terrain decided. The two datasets disagree about where a coast is, so this leaves a thin fringe the build fills from the terrain behind it rather than guessing a single colour. It never survives into the finished image.",
       "source": "ne_50m_land",
-      "class": "grassland"
+      "class": "unassigned"
     },
     {
       "$comment": "Earth's biomes. The mapping turns the dataset's own biome numbers into our classes.",

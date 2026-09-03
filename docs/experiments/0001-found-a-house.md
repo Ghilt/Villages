@@ -107,6 +107,32 @@ Numbers worth keeping, because they are the dials:
 Still open: 6.4 MB of shapes is a slow first load. The fix is vector tiles rather than one file, which is
 a known, mechanical step and not needed until the world is being played rather than looked at.
 
+**2026-09-03, cleaning the fringe, and three lessons.** The coastal slivers came from the base land layer
+being painted in a real terrain colour, so every pixel where the biome data failed to reach the coastline
+survived as that terrain. Painting it as an unassigned marker instead, and filling each such pixel from
+the terrain its neighbours have, fixed it at the source. 172,225 pixels were unassigned; 170,100 took a
+terrain from their neighbours, and 2,125 fell back, which are islands the biome data does not cover at all.
+
+| | Grassland shapes | Grassland specks dropped | Total shapes | Size |
+|---|---|---|---|---|
+| Before | 1,173 | 32,948 | 8,559 | 6.43 MB |
+| After | 282 | 3,369 | 7,529 | 6.00 MB |
+
+Three things learned, in rising order of how much they cost:
+
+- A rebuild must not overwrite hand-authored work. The master build now refuses, writes alongside, and
+  says so. A three-way merge replays hand edits onto a freshly built master by applying only the pixels
+  that actually differ from the base, so improving the generator no longer means losing a world.
+- That merge immediately proved its worth as a diagnostic: it reported two edits where one was expected,
+  and rendering the difference showed Scandinavia and the whole of southern Africa. Being able to see
+  what changed between two masters is worth having for its own sake.
+- **A single unprojectable coordinate silently destroys the entire world.** Antarctica traced to the very
+  bottom edge of the image, giving four points at latitude exactly ninety south, which Mercator sends to
+  infinity. The source then never loads, no layer draws, and nothing appears in the console: the only
+  trace is an error event on the map object saying there is no tile manager for the source. Latitude is
+  now held inside what Mercator can draw as the shapes are written. Worth remembering that a blank map
+  with a working style means asking the map itself for its errors.
+
 ## Result
 
 ## Decision

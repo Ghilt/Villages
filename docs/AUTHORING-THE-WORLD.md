@@ -86,10 +86,33 @@ smaller than about 140 square kilometres are dropped as specks, which is what a 
 Outlines are simplified by about two pixels and then smoothed once, so a coast is smooth at every zoom
 rather than a staircase, and no finer than what you painted.
 
+## The files in world/master
+
+| File | What it is |
+|---|---|
+| `terrain.png` | The world. Yours. This is the one you edit |
+| `terrain-base.png` | The generated master your edits sit on top of. Do not edit it |
+| `terrain-preview.png` | A small copy for glancing at. Generated |
+| `palette-strip.png` | The thirteen colours, to eyedrop from. Generated |
+
+The base matters for one reason: it lets a rebuild happen without losing your work. When the master build
+improves, it writes a fresh master alongside rather than over yours, and then
+
+```
+npm run merge --workspace @villages/world -- <base> <yours> <fresh> <out>
+```
+
+compares your master against its base, and applies only the pixels you actually changed to the fresh one.
+Everything you painted survives; everything you never touched comes out improved. Promote the result to
+`terrain.png` and the fresh master to `terrain-base.png`, and you are ready for the next time.
+
+It also prints what it found, terrain by terrain, which doubles as a description of your own edits.
+
 ## Regenerating the starting point
 
-`npm run world:master --prefix frontend` repaints the master from Earth and **overwrites your edits**. It
-is for starting again, not for updating. The raw data it needs comes from
+`npm run world:master --prefix frontend` repaints the master from Earth. It **refuses to overwrite** an
+existing `terrain.png` and writes `terrain-fresh.png` alongside instead, so a rebuild can never destroy a
+world somebody painted. Merge it as above, or pass `-- --force` if you really do want to start again. The raw data it needs comes from
 `npm run world:fetch --prefix frontend`, about 145 MB, downloaded once and not committed.
 
 The master itself is committed, so the world travels with the repository and a fresh clone needs no

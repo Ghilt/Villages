@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { angularDistance, rotate, toLngLat, toVector } from './sphere.ts';
+import { MAX_MERCATOR_LATITUDE, angularDistance, rotate, toLngLat, toVector } from './sphere.ts';
 
 const NO_TURN = { yaw: 0, pitch: 0, roll: 0 };
 
@@ -54,5 +54,19 @@ describe('turning the globe', () => {
     const after = angularDistance(rotate(a, turn), rotate(b, turn));
 
     expect(after).toBeCloseTo(before, 9);
+  });
+});
+
+describe('what Mercator can draw', () => {
+  it('stops just short of the pole, where the projection would run to infinity', () => {
+    expect(MAX_MERCATOR_LATITUDE).toBeGreaterThan(84);
+    expect(MAX_MERCATOR_LATITUDE).toBeLessThan(90);
+  });
+
+  it('is the latitude where the projected world becomes square, which is what fixes the number', () => {
+    // At the limit, the Mercator y of the latitude equals half the width of the world.
+    const y = Math.log(Math.tan(Math.PI / 4 + (MAX_MERCATOR_LATITUDE * Math.PI) / 360));
+
+    expect(y).toBeCloseTo(Math.PI, 5);
   });
 });

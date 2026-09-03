@@ -3,6 +3,12 @@
  * longitude and latitude in degrees come out, and everything in between is a unit vector.
  */
 
+/**
+ * The greatest latitude Web Mercator can draw. Beyond it the projection runs to infinity, so any shape
+ * handed to a map has to stop here, however far north or south the data itself goes.
+ */
+export const MAX_MERCATOR_LATITUDE = 85.051129;
+
 export interface LngLat {
   lng: number;
   lat: number;

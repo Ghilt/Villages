@@ -97,8 +97,9 @@ Commands are added here as the increments land:
   writes what the game draws. That is the loop: edit the image, import, reload. See
   `docs/AUTHORING-THE-WORLD.md`.
 - Repainting the master from Earth needs the raw data first, about 145 MB, downloaded once and not
-  committed: `npm run world:fetch --prefix frontend` then `npm run world:master --prefix frontend`. It
-  **overwrites hand edits**, so it is for starting again. `world:build` warps Earth into raw material for
+  committed: `npm run world:fetch --prefix frontend` then `npm run world:master --prefix frontend`. It refuses
+  to overwrite an existing master and writes `terrain-fresh.png` alongside; the merge script replays hand
+  edits onto it. See `docs/AUTHORING-THE-WORLD.md`. `world:build` warps Earth into raw material for
   a different starting point.
 - Frontend, look at it: `npm run dev --prefix frontend`, then open http://localhost:5173
 - Frontend, checks: `npm run check --prefix frontend` (typecheck, lint, format, unit tests)

@@ -44,6 +44,11 @@ export function MapView({ onReady }: MapViewProps) {
 
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
 
+    if (import.meta.env.DEV) {
+      // A handle for the browser console and for the end-to-end tests, which assert on the camera.
+      (window as unknown as { villagesMap?: maplibregl.Map }).villagesMap = map;
+    }
+
     const announce = () => onReady?.(map);
     if (map.loaded()) {
       announce();
