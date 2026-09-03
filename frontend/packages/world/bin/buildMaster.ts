@@ -15,11 +15,13 @@ import { MASTER_CONFIG, MASTER_DIR, PALETTE } from './paths.ts';
 import { streamFeatures } from './sources.ts';
 
 /**
- * Paints the master image: the world as one terrain class per pixel, from real Earth data.
+ * Paints a master image: the world as one terrain class per pixel, from real Earth data.
  *
- * This is the file a human then edits. Everything the game knows about the shape of the world is derived
- * from it afterwards, so this script exists to give the editing a starting point, not to have the last
- * word. See docs/AUTHORING-THE-WORLD.md.
+ * STALE. This built the thirteen-class master. The world now has thirty-two classes and is painted by the
+ * generator in `world/master/experiment/tools`, from land cover, lake and river data this script knows
+ * nothing about. It will refuse to run against the current palette, because the class names in
+ * `world/master.json` no longer exist, and that is the intended behaviour until the newer generator is
+ * ported into this package. See the last section of `world/master/experiment/README.md`.
  */
 
 interface LayerSpec {
@@ -91,6 +93,7 @@ function ringsOf(feature: Feature): Ring[][] {
 for (const layer of config.layers) {
   let painted = 0;
   let skipped = 0;
+  let covered = 0;
 
   for await (const feature of streamFeatures(layer.source)) {
     let value: number | undefined;
@@ -113,14 +116,17 @@ for (const layer of config.layers) {
           strokeLine(raster, line, value, layer.lineWidth);
         }
       } else {
-        fillPolygon(raster, rings, value);
+        covered += fillPolygon(raster, rings, value);
       }
     }
     painted += 1;
   }
 
   const note = skipped > 0 ? `, ${skipped} without a class of ours` : '';
-  console.log(`${layer.source.padEnd(42)} ${String(painted).padStart(5)} painted${note}`);
+  console.log(
+    `${layer.source.padEnd(42)} ${String(painted).padStart(5)} painted, ` +
+      `${covered.toLocaleString('en')} pixels${note}`,
+  );
 }
 
 // Resolve the coastal fringe before anything is written, so no sliver of a fallback terrain survives.

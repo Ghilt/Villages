@@ -41,6 +41,8 @@ A side mission that grew, because the map is the main screen and it has to be ou
 - [x] Fidelity: lakes, rivers and biomes, and a global wobble so the whole world differs from Earth
 - [x] The master image: Earth's terrain as one editable colour per class, and the guide to editing it
 - [x] The importer: read the edited master back, trace coastlines, and give the game its world
+- [x] A higher-fidelity world: 32 terrain classes from land cover, lake and river data
+- [x] Terrain drawn from tiles rather than traced, so the fidelity is affordable
 - [ ] The painterly renderer: what the world actually looks like
 - [ ] Place names carried through from Earth, mutated
 

@@ -1,0 +1,47 @@
+{
+  "$comment": "What the world looks like. One colour per terrain class, baked into the map tiles by `npm run world:tile --prefix frontend`. These are not the colours of world/master/terrain.png: those are data, chosen to be far apart so a painted pixel can be read back. These are chosen to sit together. A first pass, to be replaced by the painterly treatment.",
+  "sea": "#93aebc",
+  "coast": "#5f5544",
+  "colours": {
+    "ocean": "#93aebc",
+    "shallow-sea": "#a8c2cc",
+    "lake": "#8ab4cb",
+    "$river": "Drawn much quieter than a lake. The drainage network is every reach of Strahler order three and up, which is dense enough to read as lace over a whole continent if it is given a lake's colour. Thinning it properly means rebuilding the master with a higher minimum order.",
+    "river": "#a6c0c6",
+
+    "ice": "#f1f3f2",
+    "polar-desert": "#dfded6",
+    "tundra": "#c8c6b2",
+
+    "taiga": "#6e9078",
+    "taiga-open": "#8aa284",
+    "conifer-forest": "#7b9c74",
+    "broadleaf-forest": "#9dbc7e",
+    "mixed-forest": "#8cb079",
+    "rainforest": "#6f9f6c",
+    "dry-forest": "#aeb878",
+    "mangrove": "#7ba084",
+    "swamp-forest": "#82a17b",
+
+    "steppe": "#d2cd91",
+    "meadow": "#c4ce8d",
+    "savanna": "#d8c079",
+    "scrub": "#c7bf88",
+    "heath": "#b4b08e",
+
+    "farmland": "#e2d795",
+    "farmland-with-woods": "#cfd08d",
+    "paddy": "#c0d199",
+
+    "marsh": "#adb98c",
+    "bog": "#a4af8b",
+    "floodplain": "#b8c493",
+
+    "salt-flat": "#ece8d6",
+    "desert-sand": "#ead9a4",
+    "desert-stone": "#d9c99c",
+
+    "alpine-meadow": "#bebd9c",
+    "bare-rock": "#c3bba9"
+  }
+}

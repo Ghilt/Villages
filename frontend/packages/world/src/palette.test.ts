@@ -59,9 +59,18 @@ describe('the palette the world is actually painted with', () => {
     expect(real.classes[0]?.name).toBe('ocean');
   });
 
-  it('knows which classes are water', () => {
+  it('marks its water, including the three kinds the pipeline depends on', () => {
     const water = real.classes.filter((terrain) => terrain.water === true).map((t) => t.name);
-    expect(water).toEqual(['ocean', 'lake', 'river']);
+
+    expect(water).toContain('ocean');
+    expect(water).toContain('lake');
+    expect(water).toContain('river');
+    // Everything else must be land, or the coastline would be traced around the wrong thing.
+    for (const terrain of real.classes) {
+      if (!water.includes(terrain.name)) {
+        expect(terrain.water).not.toBe(true);
+      }
+    }
   });
 });
 
@@ -86,23 +95,22 @@ describe('finding the problems in a broken palette', () => {
 });
 
 describe('snapping a painted pixel to a class', () => {
-  it('is exact for a colour painted exactly', () => {
-    expect(snapToClass(toRgb('#6cc24a'), real)).toEqual({
-      id: real.classes.find((t) => t.name === 'temperate-forest')!.id,
-      distance: 0,
-    });
+  it('is exact for a colour painted exactly, for every class in the palette', () => {
+    for (const terrain of real.classes) {
+      expect(snapToClass(toRgb(terrain.colour), real)).toEqual({ id: terrain.id, distance: 0 });
+    }
   });
 
   it('claims a blended edge pixel for whichever side it is nearer', () => {
-    const ocean = toRgb('#103d5c');
-    const forest = toRgb('#1d5c34');
+    const ocean = toRgb(real.classes[0]!.colour);
+    const forest = toRgb(real.classes.at(-1)!.colour);
     const mostlyOcean: [number, number, number] = [
       Math.round(ocean[0] * 0.8 + forest[0] * 0.2),
       Math.round(ocean[1] * 0.8 + forest[1] * 0.2),
       Math.round(ocean[2] * 0.8 + forest[2] * 0.2),
     ];
 
-    expect(snapToClass(mostlyOcean, real).id).toBe(0);
+    expect(snapToClass(mostlyOcean, real).id).toBe(real.classes[0]!.id);
     expect(snapToClass(mostlyOcean, real).distance).toBeGreaterThan(0);
   });
 

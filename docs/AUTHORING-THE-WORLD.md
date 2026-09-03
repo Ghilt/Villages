@@ -8,12 +8,14 @@ from that image. This document is how to edit it without fighting the pipeline.
 
 An indexed PNG, 16384 by 8192, unprojected: longitude runs left to right from -180 to 180, latitude runs
 top to bottom from 90 to -90. Each pixel is about 2.4 kilometres at the equator. One flat colour per
-terrain class, thirteen of them, listed in `world/palette.json` and laid out as a strip in
-`world/master/palette-strip.png` to pick from with an eyedropper.
+terrain class, thirty-two of them, listed in `world/palette.json` and drawn with their names and meanings
+in `world/master/palette-strip.png`, which is the chart to eyedrop from.
 
-The starting point was painted from real Earth: coastlines, lakes, rivers and ice from Natural Earth, and
-biomes from RESOLVE Ecoregions 2017, whose fourteen biomes map onto our classes. So the world begins as
-Earth, with Earth's terrain in the right places, and becomes ours as you cut it up.
+The starting point was painted from real Earth: coastlines, ice and big lake outlines from Natural Earth,
+land cover from Copernicus at 100 metres, every lake down to ten hectares from HydroLAKES, the drainage
+network from HydroRIVERS, and biome context from RESOLVE Ecoregions. So the world begins as Earth, with
+Earth's terrain in the right places, and becomes ours as you cut it up. How it was made, and every
+threshold in it, is in `world/master/experiment/README.md`.
 
 `world/master/terrain-preview.png` is a small copy for glancing at. It is generated, never edited.
 
@@ -23,7 +25,9 @@ The greens and browns in the master are not what the game draws. They exist so t
 apart while painting, and so that the importer can tell them apart afterwards. What a forest looks like is
 the renderer's business, and it will not resemble this.
 
-Two classes are never closer than 48 apart in colour, which is what makes the next part safe.
+Two classes are never closer than 40 apart in colour, which is what makes the next part safe. There is a
+second palette, `world/render.json`, which is what the terrain is actually *drawn* in. Editing that
+changes how the world looks without touching what it is.
 
 ## Editing
 
@@ -69,7 +73,13 @@ From the repository root, not from inside `frontend/`:
 
 ```
 npm run world:import --prefix frontend
+npm run world:tile --prefix frontend
 ```
+
+The first traces the coast and the large lakes into the lines the map draws in ink. The second cuts the
+world into map tiles, which is how the terrain itself is drawn: thirty-two classes over a world this
+detailed come to well over a hundred thousand outlines, so terrain is pixels and only the ink is vector.
+See `docs/adr/0019`. The tiler takes about thirty seconds and writes 5,461 tiles totalling 13 MB.
 
 From inside `frontend/` it is `npm run world:import`, with no prefix. The prefix is what tells npm where
 the workspace is, so using it in the wrong place makes npm look for `frontend/frontend`.
@@ -93,7 +103,8 @@ rather than a staircase, and no finer than what you painted.
 | `terrain.png` | The world. Yours. This is the one you edit |
 | `terrain-base.png` | The generated master your edits sit on top of. Do not edit it |
 | `terrain-preview.png` | A small copy for glancing at. Generated |
-| `palette-strip.png` | The thirteen colours, to eyedrop from. Generated |
+| `palette-strip.png` | The thirty-two classes with their names and meanings, to eyedrop from |
+| `experiment/` | How this world was made, its sources, its thresholds and the generator |
 
 The base matters for one reason: it lets a rebuild happen without losing your work. When the master build
 improves, it writes a fresh master alongside rather than over yours, and then

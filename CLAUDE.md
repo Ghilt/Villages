@@ -93,9 +93,11 @@ part is what points npm at the frontend workspace, so running them from inside `
 Commands are added here as the increments land:
 
 - Frontend, once: `npm install --prefix frontend`
-- The world: `npm run world:import --prefix frontend` reads the hand-painted master in `world/master/` and
-  writes what the game draws. That is the loop: edit the image, import, reload. See
-  `docs/AUTHORING-THE-WORLD.md`.
+- The world: `npm run world:import --prefix frontend` traces the coast and the large lakes, and
+  `npm run world:tile --prefix frontend` cuts the terrain into map tiles. Both read the hand-painted
+  master in `world/master/`. That is the loop: edit the image, import, tile, reload. Terrain is drawn from
+  tiles rather than outlines; see `docs/adr/0019`. What it is painted in is `world/palette.json`, what it
+  is drawn in is `world/render.json`.
 - Repainting the master from Earth needs the raw data first, about 145 MB, downloaded once and not
   committed: `npm run world:fetch --prefix frontend` then `npm run world:master --prefix frontend`. It refuses
   to overwrite an existing master and writes `terrain-fresh.png` alongside; the merge script replays hand

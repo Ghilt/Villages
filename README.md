@@ -28,13 +28,14 @@ From the repository root:
 ```
 npm install --prefix frontend
 npm run world:import --prefix frontend
+npm run world:tile --prefix frontend
 npm run dev --prefix frontend
 ```
 
 Then open http://localhost:5173 and you are looking at the world: pan and zoom, and see the frame your house will
 occupy. The map is ours, and it carries no text at all. It is painted by hand as an image,
-`world/master/terrain.png`, one flat colour per terrain: edit that in any image editor, import it again, and the
-world changes. `docs/AUTHORING-THE-WORLD.md` explains how. Setting `VITE_MAP_STYLE_URL` shows a real map of Earth
+`world/master/terrain.png`, one flat colour per terrain across thirty-two of them: edit that in any image editor,
+run the two world commands again, and the world changes. `docs/AUTHORING-THE-WORLD.md` explains how. Setting `VITE_MAP_STYLE_URL` shows a real map of Earth
 instead, for comparison.
 
 `npm run check --prefix frontend` runs the typecheck, the linter, the formatter and the unit tests.

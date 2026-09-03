@@ -178,3 +178,60 @@ describe('drawing a river', () => {
     expect(raster.cells.length).toBe(36 * 18);
   });
 });
+
+describe('the smallest things on the map', () => {
+  /** A lake of a third of a degree, on a grid of one degree per pixel: smaller than a pixel. */
+  const tiny = (west: number, south: number): Ring => [
+    [west, south],
+    [west + 0.3, south],
+    [west + 0.3, south + 0.3],
+    [west, south + 0.3],
+  ];
+
+  it('paints a shape smaller than a pixel, rather than losing it', () => {
+    const raster = createRaster(360, 180);
+
+    expect(fillPolygon(raster, [tiny(10.1, 20.1)], 2)).toBe(1);
+    expect(classHistogram(raster).get(2)).toBe(1);
+  });
+
+  it('paints it wherever it sits, not only when it straddles a pixel centre', () => {
+    // The defect this replaced: the same lake appeared or vanished depending on its position.
+    for (const [west, south] of [
+      [10.1, 20.1],
+      [10.4, 20.4],
+      [10.55, 20.02],
+      [10.98, 20.99],
+    ]) {
+      const raster = createRaster(360, 180);
+      expect(fillPolygon(raster, [tiny(west!, south!)], 2)).toBe(1);
+    }
+  });
+
+  it('reports how many pixels it covered', () => {
+    const raster = createRaster(360, 180);
+    const covered = fillPolygon(
+      raster,
+      [
+        [
+          [0, 0],
+          [10, 0],
+          [10, 10],
+          [0, 10],
+        ],
+      ],
+      3,
+    );
+
+    expect(covered).toBe(100);
+    expect(classHistogram(raster).get(3)).toBe(100);
+  });
+
+  it('reports nothing for a ring with no area at all', () => {
+    const raster = createRaster(36, 18);
+
+    expect(fillPolygon(raster, [[[0, 0]]], 4)).toBe(0);
+    expect(fillPolygon(raster, [[]], 4)).toBe(0);
+    expect(classHistogram(raster).get(4)).toBeUndefined();
+  });
+});

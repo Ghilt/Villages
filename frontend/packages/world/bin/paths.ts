@@ -8,6 +8,8 @@ export const REPO = resolve(here, '..', '..', '..', '..');
 
 export const WARP_CONFIG = resolve(REPO, 'world', 'warp.json');
 export const PALETTE = resolve(REPO, 'world', 'palette.json');
+/** What each terrain class is drawn in, as opposed to what it is painted in. */
+export const RENDER = resolve(REPO, 'world', 'render.json');
 export const MASTER_CONFIG = resolve(REPO, 'world', 'master.json');
 /** The master image a human edits, and the palette strip to pick its colours from. */
 export const MASTER_DIR = resolve(REPO, 'world', 'master');

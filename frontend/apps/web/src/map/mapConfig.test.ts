@@ -7,35 +7,40 @@ describe('the map style', () => {
     const style = resolveStyle({});
 
     expect(typeof style).not.toBe('string');
-    expect(Object.keys((style as { sources: object }).sources)).toEqual(['terrain']);
+    expect(Object.keys((style as { sources: object }).sources).sort()).toEqual(['outlines', 'terrain']);
   });
 
-  it('draws a layer for every terrain, and a coastline over them', () => {
-    const style = resolveStyle({}) as { layers: { id: string }[] };
-    const ids = style.layers.map((layer) => layer.id);
+  it('draws terrain from our own tiles, and no tile service', () => {
+    const style = resolveStyle({}) as {
+      sources: Record<string, { type: string; tiles?: string[]; data?: string; attribution?: string }>;
+    };
 
-    expect(ids[0]).toBe('sea');
-    expect(ids.at(-1)).toBe('coast');
-    expect(ids.filter((id) => id.startsWith('terrain-')).length).toBeGreaterThan(8);
+    expect(style.sources.terrain?.type).toBe('raster');
+    expect(style.sources.terrain?.tiles?.[0]).toMatch(/^\/world\/tiles\//);
+    expect(style.sources.outlines?.data).toMatch(/^\/world\//);
+  });
+
+  it('credits the data, which three of its four sources require', () => {
+    const style = resolveStyle({}) as { sources: Record<string, { attribution?: string }> };
+
+    expect(style.sources.terrain?.attribution).toContain('Copernicus');
+    expect(style.sources.terrain?.attribution).toContain('Natural Earth');
   });
 
   it('draws no text at all, because a place name would name the wrong world', () => {
-    const style = resolveStyle({}) as {
-      layers: { layout?: Record<string, unknown> }[];
-    };
+    const style = resolveStyle({}) as { layers: { layout?: Record<string, unknown> }[] };
 
     for (const layer of style.layers) {
       expect(layer.layout?.['text-field']).toBeUndefined();
     }
   });
 
-  it('draws the whole world from our own files and no tile service', () => {
-    const style = resolveStyle({}) as { sources: Record<string, { type: string; data?: string }> };
+  it('paints terrain first and its outlines over the top', () => {
+    const style = resolveStyle({}) as { layers: { id: string }[] };
+    const ids = style.layers.map((layer) => layer.id);
 
-    for (const source of Object.values(style.sources)) {
-      expect(source.type).toBe('geojson');
-      expect(source.data).toMatch(/^\/world\//);
-    }
+    expect(ids.indexOf('terrain')).toBeLessThan(ids.indexOf('coast'));
+    expect(ids.at(-1)).toBe('coast');
   });
 
   it('uses a configured style instead, which is how we compare against the real Earth', () => {

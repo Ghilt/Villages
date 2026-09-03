@@ -133,6 +133,39 @@ Three things learned, in rising order of how much they cost:
   now held inside what Mercator can draw as the shapes are written. Worth remembering that a blank map
   with a working style means asking the map itself for its errors.
 
+**2026-09-03, the world gets thirty-two terrains, and stops being outlines.** A second session built a
+much better world from land cover, lake and river data, and measuring what the importer would do with it
+settled an architectural question the earlier work had left open.
+
+| World | Shapes | One GeoJSON |
+|---|---|---|
+| Thirteen classes, traced | 7,529 | 6.0 MB |
+| Thirty-two, traced, same thresholds | 117,649 | ~54 MB |
+| Thirty-two, traced, keeping sub-pixel features | 414,824 | ~86 MB |
+| Thirty-two, tiles plus coast and large lakes | 1,980 outlines and 5,461 tiles | 1.9 MB and 12.8 MB |
+
+The tiles win outright: 2.4 kilobytes each, so a screen costs tens of kilobytes rather than megabytes, the
+ten-second first load is gone, and nothing in the master is discarded any more.
+
+Three things learned:
+
+- **Categorical data cannot be point sampled.** The first tiles took whichever master pixel a tile pixel
+  landed on, which turned a coast speckled with lakes and fields into dithered noise at low zoom. Taking
+  the class most of the block has fixed it: at zoom three, rivers no longer even reach the top five
+  classes of a Saharan tile, where at native zoom they are 18% of it.
+- **A defect in the fill was losing most of the world's lakes**, and worse than by size alone: a sub-pixel
+  polygon painted one pixel if it happened to straddle a pixel centre and nothing if it did not, so the
+  same lake appeared or vanished depending on where it sat. Anything with area now gets at least its own
+  pixel, and the fill reports what it covered.
+- **The drainage network is too dense.** Every reach of Strahler order three and up reads as lace over a
+  whole continent. Softening the river colour in the render palette made it texture rather than noise
+  without touching the data; thinning it properly means rebuilding the master at order four, which needs
+  2.3 GB of sources.
+
+The two hand edits from the day before are not in this world: they were painted in thirteen classes whose
+meanings no longer exist, so they could not be replayed onto it. They remain in the commit that carried
+them.
+
 ## Result
 
 ## Decision

@@ -27,12 +27,6 @@ import { MASTER_DIR, OUTPUT_DIR, PALETTE } from './paths.ts';
  * See docs/AUTHORING-THE-WORLD.md.
  */
 
-/**
- * Below this many square pixels a shape is a speck. At 2.4 kilometres a pixel this is about 140 square
- * kilometres, which keeps a real island like Gotland, at some five hundred pixels, and throws away the
- * fringe left where two datasets disagree about where a coast is.
- */
-const SMALLEST_SHAPE = 24;
 /** How far a vertex may be moved to be dropped, in pixels of the master. */
 const SIMPLIFY_TOLERANCE = 2;
 const SMOOTHING_PASSES = 1;
@@ -43,10 +37,33 @@ const SMOOTHING_PASSES = 1;
 const TIDY_TOLERANCE = 0.7;
 /** The terrain grid the game keeps for lookups, small enough to load without thinking about it. */
 const LOOKUP_WIDTH = 2048;
-/** A colour further than this from every class was probably not chosen on purpose. */
-const SUSPICIOUS_DISTANCE = 24;
+/**
+ * A colour further than this from every class was probably not chosen on purpose. Kept at roughly half the
+ * minimum distance between two classes, so that it stayed sensitive when that minimum was loosened to 40.
+ */
+const SUSPICIOUS_DISTANCE = 18;
 
-const palette = JSON.parse(await readFile(PALETTE, 'utf8')) as Palette;
+/**
+ * Reads `world/master/terrain.png` against `world/palette.json` and writes the world the game draws,
+ * unless told otherwise. The overrides exist so that a candidate master and palette can be measured
+ * without disturbing the world being played.
+ *
+ *   node bin/importMaster.ts [master.png] [--palette palette.json] [--out directory]
+ */
+const args = process.argv.slice(2);
+const flag = (name: string): string | undefined => {
+  const at = args.indexOf(`--${name}`);
+  return at < 0 ? undefined : args[at + 1];
+};
+const named = args.filter(
+  (value, index) => !value.startsWith('--') && args[index - 1]?.startsWith('--') !== true,
+);
+
+const masterPath = named[0] === undefined ? resolve(MASTER_DIR, 'terrain.png') : resolve(named[0]);
+const palettePath = flag('palette') ?? PALETTE;
+const outputDir = flag('out') ?? OUTPUT_DIR;
+
+const palette = JSON.parse(await readFile(palettePath, 'utf8')) as Palette;
 const problems = paletteProblems(palette);
 if (problems.length > 0) {
   for (const problem of problems) {
@@ -54,10 +71,6 @@ if (problems.length > 0) {
   }
   throw new Error('the palette is unusable; fix world/palette.json');
 }
-
-/** Reads `world/master/terrain.png` unless told otherwise, so a fresh master can be judged first. */
-const named = process.argv[2];
-const masterPath = named === undefined ? resolve(MASTER_DIR, 'terrain.png') : resolve(named);
 const decoded = PNG.sync.read(await readFile(masterPath));
 console.log(`read ${decoded.width} by ${decoded.height} from ${masterPath}\n`);
 
@@ -147,6 +160,20 @@ const holdInsideMercator = (latitude: number) =>
   Math.min(MAX_MERCATOR_LATITUDE, Math.max(-MAX_MERCATOR_LATITUDE, latitude));
 
 /**
+ * What is traced into outlines, and how small a shape may be before it is not worth a line.
+ *
+ * Terrain is drawn from tiles now, so tracing it into polygons would be a hundred thousand shapes nobody
+ * looks at. What outlines still earn their place are the lines a stylised map draws in ink: the coast, and
+ * the lakes big enough to have a shape rather than a position. Everything else is pixels.
+ *
+ * A threshold is in square pixels of the master, where one pixel is about 5.8 square kilometres.
+ */
+const TRACED: readonly { name: string; smallestShape: number }[] = [
+  { name: 'land', smallestShape: 24 },
+  { name: 'lake', smallestShape: 400 },
+];
+
+/**
  * The coast is the one line that matters most, and no single class describes it: it is where anything that
  * is not sea meets the sea. So it is traced from a copy of the world reduced to land and water.
  */
@@ -160,14 +187,19 @@ interface TraceTarget {
   id: number;
   from: ClassRaster;
   value: number;
+  smallestShape: number;
 }
 
-const targets: TraceTarget[] = [
-  { name: 'land', id: -1, from: landMask, value: 1 },
-  ...palette.classes
-    .filter((terrain) => terrain.id !== 0)
-    .map((terrain) => ({ name: terrain.name, id: terrain.id, from: raster, value: terrain.id })),
-];
+const targets: TraceTarget[] = TRACED.flatMap((wanted): TraceTarget[] => {
+  if (wanted.name === 'land') {
+    return [{ ...wanted, id: -1, from: landMask, value: 1 }];
+  }
+  const terrain = palette.classes.find((candidate) => candidate.name === wanted.name);
+  if (terrain === undefined) {
+    throw new Error(`${wanted.name} is traced but is not a class in the palette`);
+  }
+  return [{ ...wanted, id: terrain.id, from: raster, value: terrain.id }];
+});
 
 console.log('\ntracing:');
 for (const terrain of targets) {
@@ -176,7 +208,7 @@ for (const terrain of targets) {
   let vertices = 0;
 
   for (const ring of traceClass(terrain.from, terrain.value)) {
-    if (Math.abs(doubleSignedArea(ring)) / 2 < SMALLEST_SHAPE) {
+    if (Math.abs(doubleSignedArea(ring)) / 2 < terrain.smallestShape) {
       dropped += 1;
       continue;
     }
@@ -211,9 +243,9 @@ for (const terrain of targets) {
   );
 }
 
-await mkdir(OUTPUT_DIR, { recursive: true });
+await mkdir(outputDir, { recursive: true });
 const shapes = JSON.stringify({ type: 'FeatureCollection', features });
-await writeFile(resolve(OUTPUT_DIR, 'terrain.geojson'), shapes);
+await writeFile(resolve(outputDir, 'terrain.geojson'), shapes);
 
 // The grid the game asks questions of: what terrain is under this place, and is it land at all.
 const scale = Math.max(1, Math.round(raster.width / LOOKUP_WIDTH));
@@ -231,7 +263,7 @@ for (let id = 0; id <= Math.max(...palette.classes.map((terrain) => terrain.id))
   colours.push(toRgb(index.get(id)?.colour ?? '#ff00ff'));
 }
 await writeFile(
-  resolve(OUTPUT_DIR, 'terrain-lookup.png'),
+  resolve(outputDir, 'terrain-lookup.png'),
   encodeIndexedPng(lookup, colours, (data) => new Uint8Array(deflateSync(data, { level: 9 }))),
 );
 
@@ -258,4 +290,4 @@ await writeFile(
 
 console.log(`\n${features.length} shapes, ${(shapes.length / 1048576).toFixed(2)} MB`);
 console.log(`lookup grid ${lookup.width} by ${lookup.height}`);
-console.log(`into ${OUTPUT_DIR}`);
+console.log(`into ${outputDir}`);

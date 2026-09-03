@@ -50,10 +50,19 @@ export function colourDistance(a: Rgb, b: Rgb): number {
 }
 
 /**
- * How close two classes are allowed to be. Comfortably above the fringe an image editor leaves behind, so
- * that snapping a blended pixel can never land on the wrong terrain.
+ * How close two classes are allowed to be.
+ *
+ * The rule exists so that snapping a blended pixel cannot land on the wrong terrain. It was 48 while there
+ * were thirteen classes; thirty-two of them do fit at 48, but only by shoving colours a long way from what
+ * they should look like, which makes the image harder to paint and read.
+ *
+ * At 40 the worst case is a pixel exactly midway between two classes, twenty from each: still resolved the
+ * same way every time, merely the least confident case there is. What actually keeps blends out is the
+ * authoring discipline in docs/AUTHORING-THE-WORLD.md, which mandates the Pencil, no anti-aliasing, zero
+ * bucket tolerance and nearest-neighbour interpolation. The importer reports any colour it had to reach
+ * far for, and that alarm was tightened when this was loosened.
  */
-export const MINIMUM_CLASS_DISTANCE = 48;
+export const MINIMUM_CLASS_DISTANCE = 40;
 
 export interface PaletteProblem {
   kind: 'duplicate-id' | 'duplicate-name' | 'too-close' | 'bad-colour';

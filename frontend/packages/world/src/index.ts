@@ -43,3 +43,9 @@ export { toLngLat as latticeToLngLat, traceClass } from './trace.ts';
 export type { LatticePoint, Ring as LatticeRing } from './trace.ts';
 
 export { doubleSignedArea, simplify, smooth } from './simplify.ts';
+
+export { TILE_SIZE, cutTile, sourceColumnFor, sourceRowFor, tileAddresses, tileCount } from './tiles.ts';
+export type { TileAddress } from './tiles.ts';
+
+export { fillUnassigned } from './fill.ts';
+export type { FillOptions, FillReport } from './fill.ts';

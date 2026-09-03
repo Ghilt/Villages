@@ -56,12 +56,17 @@ export function classAt(raster: ClassRaster, place: LngLat): number {
 export type Ring = readonly (readonly [number, number, ...number[]])[];
 
 /**
- * Paints one polygon, holes and all, in a single class.
+ * Paints one polygon, holes and all, in a single class, and reports how many pixels it painted.
  *
  * All of a polygon's rings are crossed in the same pass and filled by the even-odd rule, which is what
  * makes a hole a hole: a lake ring inside an island ring leaves the lake unpainted.
+ *
+ * A scanline fill needs two crossings on a row through a pixel's centre, so a shape smaller than a pixel
+ * paints one pixel if it happens to straddle a centre and nothing at all if it does not: the same lake
+ * appears or vanishes depending on where it sits. Anything with area therefore gets at least the pixel it
+ * sits in. Most of the world's lakes are smaller than a pixel of the master, so this is not an edge case.
  */
-export function fillPolygon(raster: ClassRaster, rings: readonly Ring[], value: number): void {
+export function fillPolygon(raster: ClassRaster, rings: readonly Ring[], value: number): number {
   const edges: { x0: number; y0: number; x1: number; y1: number }[] = [];
   let top = Infinity;
   let bottom = -Infinity;
@@ -82,8 +87,19 @@ export function fillPolygon(raster: ClassRaster, rings: readonly Ring[], value: 
   }
 
   if (edges.length === 0) {
-    return;
+    return 0;
   }
+
+  let painted = 0;
+  const paint = (column: number, row: number): void => {
+    if (column < 0 || row < 0 || column >= raster.width || row >= raster.height) {
+      return;
+    }
+    // Pixels covered, not pixels changed: painting over terrain of the same class still covers it, and
+    // the count is what decides whether the shape was too small to land anywhere at all.
+    raster.cells[row * raster.width + column] = value;
+    painted += 1;
+  };
 
   const firstRow = Math.max(0, Math.floor(top));
   const lastRow = Math.min(raster.height - 1, Math.ceil(bottom));
@@ -111,11 +127,22 @@ export function fillPolygon(raster: ClassRaster, rings: readonly Ring[], value: 
     for (let pair = 0; pair + 1 < crossings.length; pair += 2) {
       const from = Math.max(0, Math.ceil(crossings[pair]! - 0.5));
       const to = Math.min(raster.width - 1, Math.floor(crossings[pair + 1]! - 0.5));
-      if (to >= from) {
-        raster.cells.fill(value, row * raster.width + from, row * raster.width + to + 1);
+      for (let column = from; column <= to; column += 1) {
+        paint(column, row);
       }
     }
   }
+
+  if (painted === 0) {
+    // Too small, or too unluckily placed, to cross a pixel centre. It still exists, so it gets a pixel.
+    const first = rings[0]?.[0];
+    if (first !== undefined) {
+      const { x, y } = toPixel({ lng: first[0], lat: first[1] }, raster);
+      paint(Math.floor(x), Math.floor(y));
+    }
+  }
+
+  return painted;
 }
 
 /**

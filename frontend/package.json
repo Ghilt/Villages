@@ -20,7 +20,8 @@
     "world:fetch": "npm run fetch --workspace @villages/world",
     "world:build": "npm run build --workspace @villages/world",
     "world:master": "npm run master --workspace @villages/world",
-    "world:import": "npm run import --workspace @villages/world"
+    "world:import": "npm run import --workspace @villages/world",
+    "world:tile": "npm run tile --workspace @villages/world"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
