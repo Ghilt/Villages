@@ -11,15 +11,18 @@
     "dev": "npm run dev --workspace @villages/web",
     "build": "npm run build --workspace @villages/web",
     "preview": "npm run preview --workspace @villages/web",
-    "typecheck": "tsc --noEmit -p packages/protocol && tsc --noEmit -p packages/client-core && tsc --noEmit -p apps/web",
+    "typecheck": "tsc --noEmit -p packages/protocol && tsc --noEmit -p packages/client-core && tsc --noEmit -p packages/world && tsc --noEmit -p packages/world/tsconfig.bin.json && tsc --noEmit -p apps/web",
     "lint": "eslint .",
     "format": "prettier --check .",
     "format:write": "prettier --write .",
     "test": "vitest run",
-    "check": "npm run typecheck && npm run lint && npm run format && npm run test"
+    "check": "npm run typecheck && npm run lint && npm run format && npm run test",
+    "world:fetch": "npm run fetch --workspace @villages/world",
+    "world:build": "npm run build --workspace @villages/world"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
     "@vitejs/plugin-react": "^6.1.1",

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import * as maplibregl from 'maplibre-gl';
 
-import { CAMERA, resolveStyleUrl } from './mapConfig';
+import { CAMERA, resolveStyle } from './mapConfig';
 
 import 'maplibre-gl/dist/maplibre-gl.css';
 
@@ -25,7 +25,7 @@ export function MapView({ onReady }: MapViewProps) {
 
     const map = new maplibregl.Map({
       container,
-      style: resolveStyleUrl(import.meta.env),
+      style: resolveStyle(import.meta.env),
       center: [CAMERA.center.lng, CAMERA.center.lat],
       zoom: CAMERA.initialZoom,
       minZoom: CAMERA.minZoom,

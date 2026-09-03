@@ -1,20 +1,27 @@
 import { describe, expect, it } from 'vitest';
 
-import { CAMERA, DEFAULT_STYLE_URL, resolveStyleUrl } from './mapConfig';
+import { CAMERA, EARTH_STYLE_URL, resolveStyle } from './mapConfig';
 
 describe('the map style', () => {
-  it('falls back to the default when nothing is configured', () => {
-    expect(resolveStyleUrl({})).toBe(DEFAULT_STYLE_URL);
+  it('is our own world when nothing is configured', () => {
+    const style = resolveStyle({});
+
+    expect(typeof style).not.toBe('string');
+    expect(Object.keys((style as { sources: object }).sources).sort()).toEqual(['lakes', 'land', 'rivers']);
   });
 
-  it('uses a configured style, so that a provider can be swapped without a code change', () => {
-    expect(resolveStyleUrl({ VITE_MAP_STYLE_URL: 'https://example.test/style.json' })).toBe(
-      'https://example.test/style.json',
-    );
+  it('draws no text at all, because a place name would name the wrong world', () => {
+    const style = resolveStyle({}) as { layers: { type: string }[] };
+
+    expect(style.layers.some((layer) => layer.type === 'symbol')).toBe(false);
+  });
+
+  it('uses a configured style instead, which is how we compare against the real Earth', () => {
+    expect(resolveStyle({ VITE_MAP_STYLE_URL: EARTH_STYLE_URL })).toBe(EARTH_STYLE_URL);
   });
 
   it('treats a blank setting as absent', () => {
-    expect(resolveStyleUrl({ VITE_MAP_STYLE_URL: '   ' })).toBe(DEFAULT_STYLE_URL);
+    expect(typeof resolveStyle({ VITE_MAP_STYLE_URL: '   ' })).not.toBe('string');
   });
 });
 
@@ -22,6 +29,10 @@ describe('the camera', () => {
   it('opens inside the range it allows', () => {
     expect(CAMERA.initialZoom).toBeGreaterThanOrEqual(CAMERA.minZoom);
     expect(CAMERA.initialZoom).toBeLessThanOrEqual(CAMERA.maxZoom);
+  });
+
+  it('stops where our world runs out of detail', () => {
+    expect(CAMERA.maxZoom).toBeLessThanOrEqual(10);
   });
 
   it('starts somewhere on the map', () => {

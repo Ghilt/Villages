@@ -13,7 +13,7 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    files: ['packages/client-core/**/*.ts', 'packages/protocol/**/*.ts'],
+    files: ['packages/client-core/**/*.ts', 'packages/protocol/**/*.ts', 'packages/world/src/**/*.ts'],
     rules: {
       'no-restricted-imports': ['error', { patterns: CORE_MAY_NOT_IMPORT }],
     },

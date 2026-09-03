@@ -1,0 +1,42 @@
+{
+  "$comment": "How the real Earth becomes our world. Edit this, run `npm run world:build --prefix frontend`, and look. Every number is degrees. See docs/adr/0017.",
+
+  "rotation": {
+    "$comment": "Turning the globe keeps every coastline perfect but drags land across the antimeridian, which needs polygon cutting we have not written. Leave at zero for now.",
+    "yaw": 0,
+    "pitch": 0,
+    "roll": 0
+  },
+
+  "controls": [
+    { "$name": "north sea opens westward", "lng": 2, "lat": 56, "radius": 11, "dLng": -3.4, "dLat": 1.1 },
+    { "$name": "scandinavia leans south", "lng": 15, "lat": 61, "radius": 13, "dLng": 2.2, "dLat": -3.1 },
+    { "$name": "the baltic widens", "lng": 20, "lat": 57, "radius": 9, "dLng": 2.6, "dLat": 1.4 },
+    { "$name": "britain drifts out", "lng": -3, "lat": 54, "radius": 8, "dLng": -2.8, "dLat": -1.6 },
+    { "$name": "iberia turns", "lng": -5, "lat": 40, "radius": 10, "dLng": -2.4, "dLat": 2.2 },
+    { "$name": "the alps rise east", "lng": 12, "lat": 46, "radius": 9, "dLng": 3.1, "dLat": 0.8 },
+    { "$name": "the black sea pulls in", "lng": 34, "lat": 44, "radius": 12, "dLng": -2.9, "dLat": -1.2 },
+    { "$name": "north africa presses up", "lng": 12, "lat": 30, "radius": 15, "dLng": 1.4, "dLat": 3.2 },
+    { "$name": "the levant bends", "lng": 36, "lat": 32, "radius": 10, "dLng": 2.7, "dLat": -2.4 },
+    { "$name": "the atlantic breathes", "lng": -28, "lat": 45, "radius": 22, "dLng": 2.1, "dLat": -1.8 },
+    { "$name": "the urals sink", "lng": 60, "lat": 58, "radius": 18, "dLng": -3.3, "dLat": -2.6 },
+    { "$name": "greenland drops", "lng": -42, "lat": 72, "radius": 16, "dLng": 4.2, "dLat": -3.4 }
+  ],
+
+  "noise": {
+    "$comment": "A gentle wobble on every coastline, so that nothing traces an atlas. Amplitude is degrees; above about one, coastlines start to look chewed.",
+    "seed": 20260902,
+    "cellsX": 48,
+    "cellsY": 24,
+    "amplitude": 0.42
+  },
+
+  "seamGuard": 25,
+  "maxLatitude": 84,
+
+  "layers": [
+    { "name": "land", "source": "ne_50m_land", "keep": [] },
+    { "name": "lakes", "source": "ne_50m_lakes", "keep": [] },
+    { "name": "rivers", "source": "ne_50m_rivers_lake_centerlines", "keep": [] }
+  ]
+}

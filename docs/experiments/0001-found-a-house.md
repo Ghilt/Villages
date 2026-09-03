@@ -48,6 +48,22 @@ sprites inside the map's render pass, which costs a permanent sixty-frame repain
 always move. Left as it is, on the grounds that players drag the map rather than fly it, and that a house does not
 need to be pixel-locked while the world is in motion. Revisit if the founding flight looks wrong.
 
+**2026-09-02, the warped world (a side mission, not on the roadmap).** The question was whether a heavily warped
+Earth reads as another world while keeping the recognition that made the setting attractive. It does, and more
+strongly than expected. Parchment land on a dusty sea with no text at all, and coastlines pulled about by twelve
+control points and a 0.42 degree wobble: Scandinavia is unmistakably Scandinavia and unmistakably wrong. Removing
+every place name turned out to matter as much as moving the coast.
+
+Three things learned that shape the work:
+
+- The pull only reaches where a control point is placed. Sub-Saharan Africa still traces Earth exactly, because
+  no control is near it. Warping the whole world means covering the whole world, or adding a global component.
+- Natural Earth at 1:50m runs out at about zoom 7 and is visibly faceted by zoom 10. Either the maximum zoom
+  drops, or 1:10m data comes in at roughly six times the size, or the faceting becomes a deliberate woodcut look.
+- The placeholder seats are still at Earth's coordinates, so they no longer sit on the places they were named
+  after. That is not a bug but it is a lesson: any real-world place we want in the game has to be carried through
+  the warp once, which is exactly the mechanism the naming work will need.
+
 ## Result
 
 ## Decision

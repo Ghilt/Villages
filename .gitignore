@@ -23,6 +23,12 @@ test-results/
 .vite/
 *.tsbuildinfo
 
+# Raw material for the world generator: downloaded, not ours, and large
+world/source/
+
+# The generated world: reproducible from world/warp.json, and it would bloat the history
+frontend/apps/web/public/world/
+
 # Environment
 .env
 .env.*

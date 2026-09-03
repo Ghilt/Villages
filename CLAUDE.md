@@ -88,6 +88,9 @@ Prerequisites: Docker Desktop (WSL2), Eclipse Temurin 21 on `JAVA_HOME`, Node 24
 increments land:
 
 - Frontend, once: `npm install --prefix frontend`
+- The world, once: `npm run world:fetch --prefix frontend` then `npm run world:build --prefix frontend`.
+  Neither the downloaded Natural Earth data nor the generated world is committed; the world is reproducible
+  from `world/warp.json`, and re-running the build after editing that file is the whole tuning loop.
 - Frontend, look at it: `npm run dev --prefix frontend`, then open http://localhost:5173
 - Frontend, checks: `npm run check --prefix frontend` (typecheck, lint, format, unit tests)
 - Infra: `docker compose -f infra/docker-compose.yml up -d` (increment 0.4)
@@ -95,4 +98,8 @@ increments land:
 - Everything: `scripts/check.ps1` or `scripts/check.sh` (0.14)
 
 The dev server is also registered in `.claude/launch.json` under the name `web`, so the preview tooling can start
-it directly. TypeScript is pinned below 7 on purpose; see `docs/adr/0015`.
+it directly. Restart it rather than trusting hot reload after a file has been rewritten wholesale: Vite reports a
+missing export that is plainly there. TypeScript is pinned below 7 on purpose; see `docs/adr/0015`.
+
+Setting `VITE_MAP_STYLE_URL` swaps our world for someone else's map, which is how to compare against the real
+Earth.
