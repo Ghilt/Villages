@@ -1,0 +1,92 @@
+The experimental terrain palette: 32 classes
+============================================
+
+One flat colour per terrain class in terrain.png, which is an 8-bit indexed PNG of 16384 by 8192,
+unprojected: longitude runs -180 to 180 left to right, latitude 90 to -90 top to bottom. One pixel is
+about 2.4 km north to south, and 2.4 km east to west at the equator.
+
+The colours are DATA, not a look. They exist so a person can tell classes apart while painting and so
+the importer can snap any pixel back to exactly one class. What a forest looks like in the game is the
+renderer's business. No two classes are closer than 40 apart in straight-line RGB distance
+(closest pair: taiga-open and swamp-forest).
+
+Paint with the Pencil, not the Brush. Anti-aliasing off, bucket tolerance zero, interpolation set to
+Nearest Neighbour. See docs/AUTHORING-THE-WORLD.md.
+
+id  name                  hex       kind   what it means
+--  --------------------  --------  -----  -------------------------------------------------------------
+ 0  ocean                 #104058   water  Open sea. The base colour of the image: anywhere no land layer painted.
+ 1  shallow-sea           #207098   water  Continental shelf, inside the 200 m isobath. Sea a ship can anchor in.
+ 2  lake                  #2890d0   water  Standing fresh water. Every lake down to 10 ha gets at least one pixel.
+ 3  river                 #80d0f0   water  Running water. Every reach of Strahler order three and up, drawn one to three pixels wide by size.
+
+ 4  ice                   #f0f8f8   land   Permanent ice: ice caps, ice sheets, glaciers, shelf ice.
+ 5  polar-desert          #c8c8d8   land   Bare frozen ground with almost nothing growing on it. High arctic gravel and rock.
+ 6  tundra                #b0a8c8   land   Moss, lichen and dwarf shrub over permafrost. Treeless but alive.
+
+ 7  taiga                 #105028   land   Closed boreal conifer forest. Dark, dense, unbroken.
+ 8  taiga-open            #407848   land   Thin boreal forest: lichen woodland, bog margins, trees with sky between them.
+ 9  conifer-forest        #187850   land   Temperate needleleaf forest. Pine and spruce south of the taiga.
+10  broadleaf-forest      #68c048   land   Temperate deciduous forest. Oak, beech, birch.
+11  mixed-forest          #48a038   land   Temperate forest of both kinds together, which is most of northern Europe.
+12  rainforest            #008070   land   Closed tropical moist broadleaf forest.
+13  dry-forest            #90b038   land   Tropical and subtropical dry forest, and open woodland with a grass floor.
+14  mangrove              #306068   land   Salt-tolerant coastal forest standing in tidal water.
+15  swamp-forest          #405830   land   Forest standing in fresh water: flooded forest, carr, varzea.
+
+16  steppe                #d0d848   land   Dry temperate grassland. Prairie, pampas, the Eurasian steppe.
+17  meadow                #a8d878   land   Moist grassland and pasture. Grass that is grazed rather than ploughed.
+18  savanna               #e08830   land   Tropical grassland with scattered trees.
+19  scrub                 #a89850   land   Shrubland: maquis, garrigue, chaparral, xeric scrub. Waist-high and woody.
+20  heath                 #887088   land   Cool oceanic moor and heath. Heather, gorse, wind, no trees.
+
+21  farmland              #f0e060   land   Ploughed and managed land, open field to the horizon.
+22  farmland-with-woods   #b0c058   land   The mosaic: fields with woodlots, hedges and copses between them. Most of settled Europe is this.
+23  paddy                 #80d0a0   land   Flooded cropland. Rice terraces and delta paddies.
+
+24  marsh                 #607028   land   Treeless freshwater wetland: reed bed, fen, sedge marsh.
+25  bog                   #685040   land   Peatland and mire. Acid, spongy, cold. The Swedish and Finnish mosse.
+26  floodplain            #a8c8a0   land   Seasonally flooded grassland. Dry half the year, under water the other half.
+
+27  salt-flat             #e8e8c0   land   Playa, salar, sabkha. Flat, white, and lethal to cross.
+28  desert-sand           #f0d898   land   Sand desert. Dunes and erg, nothing growing at all.
+29  desert-stone          #c8a878   land   Stony desert and sparse xeric ground: reg, hamada, gravel plain.
+
+30  alpine-meadow         #c0e0b8   land   Montane grassland above the treeline but below the rock.
+31  bare-rock             #886850   land   Scree, cliff and bare mountain stone.
+
+Just the codes, in id order, for pasting into a swatch file:
+
+#104058  ocean
+#207098  shallow-sea
+#2890d0  lake
+#80d0f0  river
+#f0f8f8  ice
+#c8c8d8  polar-desert
+#b0a8c8  tundra
+#105028  taiga
+#407848  taiga-open
+#187850  conifer-forest
+#68c048  broadleaf-forest
+#48a038  mixed-forest
+#008070  rainforest
+#90b038  dry-forest
+#306068  mangrove
+#405830  swamp-forest
+#d0d848  steppe
+#a8d878  meadow
+#e08830  savanna
+#a89850  scrub
+#887088  heath
+#f0e060  farmland
+#b0c058  farmland-with-woods
+#80d0a0  paddy
+#607028  marsh
+#685040  bog
+#a8c8a0  floodplain
+#e8e8c0  salt-flat
+#f0d898  desert-sand
+#c8a878  desert-stone
+#c0e0b8  alpine-meadow
+#886850  bare-rock
+
