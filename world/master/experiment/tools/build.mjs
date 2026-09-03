@@ -87,10 +87,22 @@ const T = {
    * The smallest river worth a pixel, as a Strahler order.
    *
    * A master pixel is two and a half kilometres wide, so a first-order ditch drawn one pixel wide is a
-   * river two and a half kilometres across. There are 4.4 million of those. Order three and up is a
-   * stream a person would name, and still laces southern Sweden with water.
+   * river two and a half kilometres across. There are 4.4 million of those. Order three laced every
+   * continent with water until it read as nothing but drainage, so this is five: a river a person would
+   * name and expect to need a bridge for. The named rivers of Natural Earth are drawn regardless.
    */
-  minimumRiverOrder: 3,
+  minimumRiverOrder: 5,
+
+  /**
+   * Terrain that keeps its own class where a river claims to cross it.
+   *
+   * HydroRIVERS is derived from a terrain model rather than from water, so it carries the drainage a
+   * landscape would have if it rained: the Sahara comes threaded with wadis that hold water a few days a
+   * decade. The same problem as its rivers across the Greenland ice sheet, and the same answer. The named
+   * rivers that really do cross deserts, the Nile above all, come from Natural Earth afterwards and are
+   * not affected.
+   */
+  tooDryForRivers: ['desert-sand', 'desert-stone', 'salt-flat', 'polar-desert'],
 };
 
 /** Copernicus class values, grouped into the things the decision actually asks about. */
@@ -212,6 +224,14 @@ const say = (message) => {
 const problems = closestPair();
 say(`${CLASSES.length} classes, closest pair ${problems.distance.toFixed(1)} apart (${problems.a} / ${problems.b})`);
 say(`painting ${WIDTH} by ${HEIGHT}${WINDOW ? `, window ${JSON.stringify(WINDOW)}` : ''}, sampling every ${STEP}`);
+
+/**
+ * How much wider the master is than the size the thresholds in `T` were chosen against. Anything in
+ * `T` measured in pixels is multiplied by this, so that doubling the resolution makes features finer
+ * rather than changing which of them exist: without it, a higher resolution would push every small
+ * lake past the disc cap and lose it.
+ */
+const SCALE = WIDTH / 16384;
 
 const raster = createRaster(WIDTH, HEIGHT, idOf.ocean);
 /** The biome of each pixel, kept beside the classes because the land cover decision asks about climate. */
@@ -721,6 +741,9 @@ paintGeoJson('ne_10m_playas', 'salt-flat', { minimumOnePixel: true });
   if (!existsSync(shp)) {
     say('HydroRIVERS is missing: only Natural Earth rivers will be drawn');
   } else {
+    // Kept so that a river crossing dry ground can be taken back off it again afterwards.
+    const beforeRivers = raster.cells.slice();
+    const dry = new Set(T.tooDryForRivers.map((name) => idOf[name]));
     const dbf = new Dbf(join(SOURCE, 'rivers', 'HydroRIVERS_v10.dbf'), ['ORD_STRA', 'ORD_CLAS']);
     let drawn = 0;
     let skipped = 0;
@@ -734,16 +757,28 @@ paintGeoJson('ne_10m_playas', 'salt-flat', { minimumOnePixel: true });
       if (!overlapsWindow(pixelBounds(shape.rings))) {
         continue;
       }
-      // Width by order, so a trunk river reads as one. Nothing gets a second pixel until order seven:
-      // at this scale one pixel is already a river two and a half kilometres wide.
-      const width = order >= 9 ? 3 : order >= 7 ? 2 : 1;
+      // A river is a line, and one pixel of the master is already a river more than a kilometre
+      // across, so almost everything gets exactly one pixel and only the greatest rivers on Earth get
+      // two. Deliberately not scaled with the master: a finer master should draw finer rivers, which
+      // is the whole reason to have one.
+      const width = order >= 9 ? 2 : 1;
       for (const line of shape.rings) {
         strokeAcross(line, value, width);
       }
       drawn += 1;
     }
     dbf.close();
+
+    let undone = 0;
+    for (let index = 0; index < raster.cells.length; index += 1) {
+      if (raster.cells[index] === value && dry.has(beforeRivers[index])) {
+        raster.cells[index] = beforeRivers[index];
+        undone += 1;
+      }
+    }
+
     say(`HydroRIVERS                            ${String(drawn).padStart(7)} reaches drawn, ${skipped} below order ${T.minimumRiverOrder} left out`);
+    say(`  ${undone} pixels taken back off ground too dry to hold a river`);
   }
 }
 
@@ -775,7 +810,7 @@ paintGeoJson('ne_10m_antarctic_ice_shelves_polys', 'ice');
       const pixelArea =
         degreesPerPixel * 110.57 * degreesPerPixel * 111.32 * Math.cos((lat * Math.PI) / 180);
       const radius = Math.sqrt(area / Math.max(0.01, pixelArea) / Math.PI);
-      if (radius > T.maximumLakeDiscRadius) {
+      if (radius > T.maximumLakeDiscRadius * SCALE) {
         big += 1;
         continue;
       }

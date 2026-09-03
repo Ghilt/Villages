@@ -73,7 +73,7 @@ Everything is a direct download, no account needed, and all of it is either publ
 | --- | --- | --- | --- |
 | [Copernicus Global Land Cover 100 m, collection 3, epoch 2019](https://zenodo.org/records/3939050) — discrete classification map | Cropland, the closed/open forest split, needleleaf vs broadleaf, shrubs, herbaceous vegetation, herbaceous wetland, bare ground. **This is the layer that fixes Europe.** | 1.71 GB | CC-BY 4.0 |
 | [HydroLAKES v1.0](https://www.hydrosheds.org/products/hydrolakes) — pour points | 1,427,688 lakes down to 10 ha, each with its area. **This is the layer that fixes Blekinge.** | 79 MB | CC-BY 4.0 |
-| [HydroRIVERS v1.0](https://www.hydrosheds.org/products/hydrorivers) | 8.5 million river reaches with Strahler order; 2.1 million of order three and up are drawn. | 544 MB | CC-BY 4.0 |
+| [HydroRIVERS v1.0](https://www.hydrosheds.org/products/hydrorivers) | 8.5 million river reaches with Strahler order; 510,179 of order five and up are drawn. | 544 MB | CC-BY 4.0 |
 | [RESOLVE Ecoregions 2017](https://ecoregions.appspot.com/) | Biome and ecoregion name, for climate context and for the poles the land cover map does not reach. | 149 MB | CC-BY 4.0 |
 | [Natural Earth 10 m](https://www.naturalearthdata.com/) | Coastline, minor islands, big lake outlines, glaciers, Antarctic ice shelves, playas, named rivers, and the 200 m isobath. | ~35 MB | public domain |
 
@@ -106,6 +106,8 @@ Invented, and worth arguing about:
   where sand mostly is, but it is a proxy, not a measurement.
 - **`heath` and `paddy`** are inferred rather than mapped: shrubland north of 50 degrees is called heath,
   and cropland with standing water is called paddy.
+- **The minimum river order, and which ground is too dry for one.** Both are in `T`, and both were
+  changed after looking at the result: order three and rivers everywhere.
 - **Taiga is decided by biome, never by latitude.** An earlier pass used "north of 55 degrees" and made
   taiga of southern Sweden, the Baltic states and the whole Russian mixed-forest belt. Biome 6 and 11
   only, now, which is why southern Sweden reads as `conifer-forest` and Norrland as `taiga`.
@@ -129,8 +131,14 @@ Invented, and worth arguing about:
   Earth glaciers. That is why the far north is coarser than the rest.
 - **The coastlines disagree.** Copernicus and Natural Earth do not draw the same shore, so a land cover
   class is only written where Natural Earth already says land. The coast is Natural Earth's, everywhere.
-- **Rivers may be too dense, or not dense enough.** Order three and up is a judgement call. `T` has
-  `minimumRiverOrder` for exactly this; raising it to 4 roughly halves the river network.
+- **Rivers were too dense at order three**, which laced every continent with water until the map read as
+  nothing but drainage. `T.minimumRiverOrder` is 5 now: 510,179 reaches instead of 2.1 million, which
+  leaves the rivers a person would name and expect to need a bridge for. Still a judgement call.
+- **Rivers are kept off ground too dry to hold one.** HydroRIVERS is derived from a terrain model, so the
+  Sahara arrived threaded with wadis. `T.tooDryForRivers` names the classes that keep their own terrain
+  where a river claims to cross them, which took 92,774 pixels back. It is the same problem as the network
+  across the Greenland ice sheet, and the named rivers that really do cross deserts come from Natural
+  Earth afterwards, so the Nile is unaffected.
 - **`salt-flat`, `marsh`, `paddy` and `floodplain` are thin.** They exist but they are rare. GLWD v2
   (Lehner et al. 2025, 33 wetland classes at 15 arc-seconds) would fill all four in properly, and would
   give Sweden and Finland their mires from data rather than from a threshold. It is on Figshare and I have

@@ -174,12 +174,31 @@ const TRACED: readonly { name: string; smallestShape: number }[] = [
 ];
 
 /**
- * The coast is the one line that matters most, and no single class describes it: it is where anything that
- * is not sea meets the sea. So it is traced from a copy of the world reduced to land and water.
+ * The sea, as opposed to water in general.
+ *
+ * The coast runs between the sea and the land, and the continental shelf is sea: drawing the coastline at
+ * the edge of the deep ocean instead puts it out past the horizon, which is where it was until this was
+ * named. Lakes and rivers are water but they are not sea, and they get their own lines or none.
  */
+const SEA = ['ocean', 'shallow-sea'];
+
+/**
+ * The coast is the one line that matters most, and no single class describes it: it is where anything that
+ * is not sea meets the sea. So it is traced from a copy of the world reduced to land and sea.
+ */
+const seaIds = new Set(
+  SEA.map((name) => {
+    const terrain = palette.classes.find((candidate) => candidate.name === name);
+    if (terrain === undefined) {
+      throw new Error(`${name} is counted as sea but is not a class in the palette`);
+    }
+    return terrain.id;
+  }),
+);
+
 const landMask = createRaster(raster.width, raster.height);
 for (let index = 0; index < raster.cells.length; index += 1) {
-  landMask.cells[index] = raster.cells[index] === 0 ? 0 : 1;
+  landMask.cells[index] = seaIds.has(raster.cells[index]!) ? 0 : 1;
 }
 
 interface TraceTarget {

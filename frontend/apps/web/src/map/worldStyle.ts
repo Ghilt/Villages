@@ -12,8 +12,11 @@ import type { StyleSpecification } from 'maplibre-gl';
  * The colours the terrain is drawn in live in `world/render.json` and are baked into the tiles.
  */
 
-/** Beyond this the tiles are stretched, because a tile pixel is already a master pixel here. */
-export const TERRAIN_TILE_MAX_ZOOM = 6;
+/**
+ * Beyond this the tiles are stretched, because a tile pixel is already a master pixel here. The master is
+ * 32768 across, and 256 times two to the seventh is 32768.
+ */
+export const TERRAIN_TILE_MAX_ZOOM = 7;
 
 export const WORLD_MAX_ZOOM = 10;
 
@@ -45,7 +48,14 @@ export function warpedWorldStyle(): StyleSpecification {
     },
     layers: [
       { id: 'sea', type: 'background', paint: { 'background-color': SEA } },
-      { id: 'terrain', type: 'raster', source: 'terrain', paint: { 'raster-opacity': 1 } },
+      {
+        // Nearest neighbour, so that zooming past the closest tiles shows honest square pixels rather
+        // than a smear. A terrain class has no meaningful blend with its neighbour.
+        id: 'terrain',
+        type: 'raster',
+        source: 'terrain',
+        paint: { 'raster-opacity': 1, 'raster-resampling': 'nearest' },
+      },
       {
         // Drawn over the tiles, so that a shoreline is a line rather than a staircase of pixels.
         id: 'lake-shore',

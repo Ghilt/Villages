@@ -6,8 +6,9 @@ from that image. This document is how to edit it without fighting the pipeline.
 
 ## What the image is
 
-An indexed PNG, 16384 by 8192, unprojected: longitude runs left to right from -180 to 180, latitude runs
-top to bottom from 90 to -90. Each pixel is about 2.4 kilometres at the equator. One flat colour per
+An indexed PNG, 32768 by 16384, unprojected: longitude runs left to right from -180 to 180, latitude runs
+top to bottom from 90 to -90. Each pixel is about 1.2 kilometres at the equator. That is 537 megapixels,
+so give an image editor a moment to open it. One flat colour per
 terrain class, thirty-two of them, listed in `world/palette.json` and drawn with their names and meanings
 in `world/master/palette-strip.png`, which is the chart to eyedrop from.
 
@@ -79,7 +80,9 @@ npm run world:tile --prefix frontend
 The first traces the coast and the large lakes into the lines the map draws in ink. The second cuts the
 world into map tiles, which is how the terrain itself is drawn: thirty-two classes over a world this
 detailed come to well over a hundred thousand outlines, so terrain is pixels and only the ink is vector.
-See `docs/adr/0019`. The tiler takes about thirty seconds and writes 5,461 tiles totalling 13 MB.
+See `docs/adr/0019`. The tiler works out where the master's detail runs out, which is zoom seven for a master this wide, and
+writes 21,845 tiles totalling 38 MB. It takes about a minute. A screen of map costs a few tens of
+kilobytes of that.
 
 From inside `frontend/` it is `npm run world:import`, with no prefix. The prefix is what tells npm where
 the workspace is, so using it in the wrong place makes npm look for `frontend/frontend`.

@@ -29,8 +29,6 @@ const flag = (name: string): string | undefined => {
   return at < 0 ? undefined : args[at + 1];
 };
 
-/** At zoom six a tile pixel is a master pixel; beyond it the map stretches what is there. */
-const maxZoom = Number(flag('zoom') ?? 6);
 const outputDir = flag('out') ?? resolve(OUTPUT_DIR, 'tiles');
 
 const palette = JSON.parse(await readFile(PALETTE, 'utf8')) as Palette;
@@ -70,8 +68,17 @@ for (let index = 0; index < world.cells.length; index += 1) {
   world.cells[index] = id;
 }
 
+/**
+ * The zoom at which a tile pixel is a master pixel, taken from the master itself rather than written
+ * down: 256 tile pixels times two to the zoom is the width of the world. Cutting further would only
+ * stretch what is already there; cutting less would throw away detail somebody painted.
+ */
+const nativeZoom = Math.round(Math.log2(decoded.width / TILE_SIZE));
+const maxZoom = flag('zoom') === undefined ? nativeZoom : Number(flag('zoom'));
+
 console.log(
-  `read ${decoded.width} by ${decoded.height}, cutting ${tileCount(maxZoom)} tiles to zoom ${maxZoom}`,
+  `read ${decoded.width} by ${decoded.height}, detail running out at zoom ${nativeZoom}; ` +
+    `cutting ${tileCount(maxZoom)} tiles`,
 );
 
 const deflate = (data: Uint8Array) => new Uint8Array(deflateSync(data, { level: 9 }));

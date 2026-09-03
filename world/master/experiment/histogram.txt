@@ -1,33 +1,33 @@
 id  class                 share    pixels
- 0  ocean                 59.990%   80516713
- 1  shallow-sea            5.865%    7872085
- 2  lake                   1.301%    1745978
- 3  river                  3.220%    4321548
- 4  ice                   11.395%   15294025
- 5  polar-desert           0.221%     297206
- 6  tundra                 1.478%    1983156
- 7  taiga                  2.005%    2690795
- 8  taiga-open             0.465%     624602
- 9  conifer-forest         0.557%     747311
-10  broadleaf-forest       0.733%     983305
-11  mixed-forest           0.820%    1100163
-12  rainforest             1.340%    1798838
-13  dry-forest             0.828%    1110776
-14  mangrove               0.022%      29801
-15  swamp-forest           0.174%     233877
-16  steppe                 0.539%     722863
-17  meadow                 1.463%    1963834
-18  savanna                0.557%     747077
-19  scrub                  0.622%     834839
-20  heath                  0.130%     174246
-21  farmland               2.123%    2849001
-22  farmland-with-woods    0.617%     827997
-23  paddy                  0.021%      28237
-24  marsh                  0.059%      79575
-25  bog                    0.345%     462549
-26  floodplain             0.034%      45325
-27  salt-flat              0.016%      21418
-28  desert-sand            1.798%    2413782
-29  desert-stone           0.602%     807678
-30  alpine-meadow          0.302%     405045
-31  bare-rock              0.361%     484083
+ 0  ocean                 59.990%  322067743
+ 1  shallow-sea            5.875%   31538721
+ 2  lake                   0.827%    4440044
+ 3  river                  0.566%    3040662
+ 4  ice                   11.401%   61207905
+ 5  polar-desert           0.233%    1252764
+ 6  tundra                 1.703%    9140476
+ 7  taiga                  2.316%   12435458
+ 8  taiga-open             0.565%    3035441
+ 9  conifer-forest         0.646%    3466658
+10  broadleaf-forest       0.848%    4553852
+11  mixed-forest           1.064%    5710082
+12  rainforest             1.643%    8823420
+13  dry-forest             0.932%    5001125
+14  mangrove               0.027%     145319
+15  swamp-forest           0.175%     942075
+16  steppe                 0.649%    3481748
+17  meadow                 1.711%    9187853
+18  savanna                0.646%    3468674
+19  scrub                  0.743%    3988416
+20  heath                  0.187%    1003067
+21  farmland               2.518%   13516407
+22  farmland-with-woods    0.563%    3020442
+23  paddy                  0.030%     160248
+24  marsh                  0.095%     512640
+25  bog                    0.452%    2424290
+26  floodplain             0.042%     228079
+27  salt-flat              0.021%     114339
+28  desert-sand            2.180%   11704408
+29  desert-stone           0.639%    3432286
+30  alpine-meadow          0.334%    1793851
+31  bare-rock              0.379%    2032419
