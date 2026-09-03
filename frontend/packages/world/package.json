@@ -11,10 +11,12 @@
   "scripts": {
     "fetch": "node bin/fetchSource.ts",
     "build": "node bin/buildWorld.ts",
-    "master": "node bin/buildMaster.ts"
+    "master": "node bin/buildMaster.ts",
+    "import": "node bin/importMaster.ts"
   },
   "dependencies": {
     "fflate": "^0.8.3",
+    "pngjs": "^7.0.0",
     "shapefile": "^0.6.6"
   }
 }

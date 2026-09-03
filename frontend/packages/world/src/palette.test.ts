@@ -6,6 +6,8 @@ import {
   byId,
   colourDistance,
   paletteProblems,
+  preparePalette,
+  snapPrepared,
   snapToClass,
   toHex,
   toRgb,
@@ -120,5 +122,39 @@ describe('looking a class up', () => {
     const index = byId(real);
     expect(index.size).toBe(real.classes.length);
     expect(index.get(0)?.name).toBe('ocean');
+  });
+});
+
+describe('preparing the palette for a loop', () => {
+  it('agrees with the slow path on every class colour', () => {
+    const prepared = preparePalette(real);
+
+    for (const terrain of real.classes) {
+      expect(snapPrepared(toRgb(terrain.colour), prepared)).toEqual(snapToClass(toRgb(terrain.colour), real));
+    }
+  });
+
+  it('agrees with the slow path on colours nobody painted', () => {
+    const prepared = preparePalette(real);
+
+    for (const wild of [
+      [0, 0, 0],
+      [255, 255, 255],
+      [130, 90, 200],
+      [17, 62, 93],
+    ] as [number, number, number][]) {
+      const fast = snapPrepared(wild, prepared);
+      const slow = snapToClass(wild, real);
+
+      expect(fast.id).toBe(slow.id);
+      expect(fast.distance).toBeCloseTo(slow.distance, 9);
+    }
+  });
+
+  it('keeps the classes in the order the palette gave them', () => {
+    const prepared = preparePalette(real);
+
+    expect([...prepared.ids]).toEqual(real.classes.map((terrain) => terrain.id));
+    expect(prepared.channels.length).toBe(real.classes.length * 3);
   });
 });

@@ -38,3 +38,8 @@ export type { ClassRaster, Ring } from './raster.ts';
 
 export { chunk, crc32, encodeIndexedPng } from './png.ts';
 export type { Deflate } from './png.ts';
+
+export { toLngLat as latticeToLngLat, traceClass } from './trace.ts';
+export type { LatticePoint, Ring as LatticeRing } from './trace.ts';
+
+export { doubleSignedArea, simplify, smooth } from './simplify.ts';

@@ -88,6 +88,25 @@ warping a raster needs the inverse of the warp, which our forward function does 
 we ever want relief shading rather than drawn peaks, the way in is to turn elevation into vector contours
 once, offline, and then warp those like everything else.
 
+**2026-09-03, the round trip closes.** The master is read back, every pixel snapped to a class, each
+terrain traced into outlines, simplified and smoothed, and drawn. Editing the image and seeing the world
+change is now two commands and a reload.
+
+Numbers worth keeping, because they are the dials:
+
+- Traced at full resolution with no thresholds, the world came to 27,461 shapes and 32 MB, which is far
+  too much to serve. Dropping shapes under about 140 square kilometres, simplifying by two pixels, and
+  smoothing once instead of twice brought it to 8,550 shapes and 6.4 MB.
+- Grassland alone had 32,491 specks dropped. That is a real finding, not noise: grassland is the fallback
+  the base land layer is painted in, so every pixel where the ecoregion polygons fail to reach the Natural
+  Earth coastline becomes a sliver of it. The world would be cleaner if those gaps were filled from their
+  neighbours before tracing.
+- Smoothed coastlines at 2.4 kilometres a pixel look good, which was the open question. Britain, Denmark
+  and Gotland all read correctly, and no staircase is visible at any zoom the map allows.
+
+Still open: 6.4 MB of shapes is a slow first load. The fix is vector tiles rather than one file, which is
+a known, mechanical step and not needed until the world is being played rather than looked at.
+
 ## Result
 
 ## Decision

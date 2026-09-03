@@ -63,6 +63,29 @@ it snaps to will surprise you.
 Terrain does, because terrain is the pixel. Rivers do, because they are painted into the image as a class
 two pixels wide rather than kept as lines. Nothing else exists yet.
 
+## Seeing your edit
+
+From the repository root, not from inside `frontend/`:
+
+```
+npm run world:import --prefix frontend
+```
+
+From inside `frontend/` it is `npm run world:import`, with no prefix. The prefix is what tells npm where
+the workspace is, so using it in the wrong place makes npm look for `frontend/frontend`.
+
+That reads the master, snaps every pixel to a class, traces each terrain into outlines, smooths them, and
+writes the world the game draws. It prints what it found: how many pixels were not an exact class colour,
+which unexpected colours it had to reach for, and how many shapes each terrain became. Then reload the
+app.
+
+It also writes a small terrain grid the game can ask questions of, such as what a house is standing on.
+
+Two numbers in the importer decide how faithful the tracing is, and they are worth knowing about. Shapes
+smaller than about 140 square kilometres are dropped as specks, which is what a stray brush pixel becomes.
+Outlines are simplified by about two pixels and then smoothed once, so a coast is smooth at every zoom
+rather than a staircase, and no finer than what you painted.
+
 ## Regenerating the starting point
 
 `npm run world:master --prefix frontend` repaints the master from Earth and **overwrites your edits**. It

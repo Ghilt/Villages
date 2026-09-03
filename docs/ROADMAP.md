@@ -40,7 +40,7 @@ A side mission that grew, because the map is the main screen and it has to be ou
 - [x] The warp: a pure transformation from Earth to our world, configured by one file
 - [x] Fidelity: lakes, rivers and biomes, and a global wobble so the whole world differs from Earth
 - [x] The master image: Earth's terrain as one editable colour per class, and the guide to editing it
-- [ ] The importer: read the edited master back, trace coastlines, and give the game its world
+- [x] The importer: read the edited master back, trace coastlines, and give the game its world
 - [ ] The painterly renderer: what the world actually looks like
 - [ ] Place names carried through from Earth, mutated
 

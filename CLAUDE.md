@@ -84,13 +84,22 @@ and ESLint restricted imports on the frontend.
 
 ## How to run
 
-Prerequisites: Docker Desktop (WSL2), Eclipse Temurin 21 on `JAVA_HOME`, Node 24. Commands are added here as the
-increments land:
+Prerequisites: Docker Desktop (WSL2), Eclipse Temurin 21 on `JAVA_HOME`, Node 24.
+
+All the commands below are run **from the repository root**, `E:\Code\Villages`. The `--prefix frontend`
+part is what points npm at the frontend workspace, so running them from inside `frontend/` looks for
+`frontend/frontend` and fails. From inside `frontend/` drop the prefix: `npm run world:import`.
+
+Commands are added here as the increments land:
 
 - Frontend, once: `npm install --prefix frontend`
-- The world, once: `npm run world:fetch --prefix frontend` then `npm run world:build --prefix frontend`.
-  Neither the downloaded Natural Earth data nor the generated world is committed; the world is reproducible
-  from `world/warp.json`, and re-running the build after editing that file is the whole tuning loop.
+- The world: `npm run world:import --prefix frontend` reads the hand-painted master in `world/master/` and
+  writes what the game draws. That is the loop: edit the image, import, reload. See
+  `docs/AUTHORING-THE-WORLD.md`.
+- Repainting the master from Earth needs the raw data first, about 145 MB, downloaded once and not
+  committed: `npm run world:fetch --prefix frontend` then `npm run world:master --prefix frontend`. It
+  **overwrites hand edits**, so it is for starting again. `world:build` warps Earth into raw material for
+  a different starting point.
 - Frontend, look at it: `npm run dev --prefix frontend`, then open http://localhost:5173
 - Frontend, checks: `npm run check --prefix frontend` (typecheck, lint, format, unit tests)
 - Infra: `docker compose -f infra/docker-compose.yml up -d` (increment 0.4)

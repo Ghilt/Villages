@@ -19,7 +19,8 @@
     "check": "npm run typecheck && npm run lint && npm run format && npm run test",
     "world:fetch": "npm run fetch --workspace @villages/world",
     "world:build": "npm run build --workspace @villages/world",
-    "world:master": "npm run master --workspace @villages/world"
+    "world:master": "npm run master --workspace @villages/world",
+    "world:import": "npm run import --workspace @villages/world"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

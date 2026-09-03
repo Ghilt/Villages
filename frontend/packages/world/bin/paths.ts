@@ -13,5 +13,7 @@ export const MASTER_CONFIG = resolve(REPO, 'world', 'master.json');
 export const MASTER_DIR = resolve(REPO, 'world', 'master');
 /** Downloaded Natural Earth files. Not committed: they are raw material, not our world. */
 export const SOURCE_DIR = resolve(REPO, 'world', 'source');
-/** Where the generated world goes, served statically by the dev server and the build. */
+/** Where the world the game plays on goes, served statically by the dev server and the build. */
 export const OUTPUT_DIR = resolve(REPO, 'frontend', 'apps', 'web', 'public', 'world');
+/** Where a warped copy of Earth goes: raw material for a new master, never read by the game. */
+export const WARPED_DIR = resolve(REPO, 'world', 'warped');

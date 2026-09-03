@@ -7,13 +7,16 @@ describe('the map style', () => {
     const style = resolveStyle({});
 
     expect(typeof style).not.toBe('string');
-    expect(Object.keys((style as { sources: object }).sources).sort()).toEqual([
-      'lakes',
-      'lakesFine',
-      'land',
-      'peaks',
-      'rivers',
-    ]);
+    expect(Object.keys((style as { sources: object }).sources)).toEqual(['terrain']);
+  });
+
+  it('draws a layer for every terrain, and a coastline over them', () => {
+    const style = resolveStyle({}) as { layers: { id: string }[] };
+    const ids = style.layers.map((layer) => layer.id);
+
+    expect(ids[0]).toBe('sea');
+    expect(ids.at(-1)).toBe('coast');
+    expect(ids.filter((id) => id.startsWith('terrain-')).length).toBeGreaterThan(8);
   });
 
   it('draws no text at all, because a place name would name the wrong world', () => {

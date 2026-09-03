@@ -2,7 +2,6 @@ import { useEffect, useRef } from 'react';
 import * as maplibregl from 'maplibre-gl';
 
 import { CAMERA, resolveStyle } from './mapConfig';
-import { WORLD_IMAGES } from './worldStyle';
 
 import 'maplibre-gl/dist/maplibre-gl.css';
 
@@ -44,20 +43,6 @@ export function MapView({ onReady }: MapViewProps) {
     map.keyboard.disableRotation();
 
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
-
-    // The world draws its own glyphs, such as a mountain, rather than loading a sprite sheet. MapLibre asks
-    // for an image by name the first time it needs one, which also covers a style reload.
-    map.on('styleimagemissing', (event) => {
-      const draw = WORLD_IMAGES[event.id];
-      if (draw !== undefined && !map.hasImage(event.id)) {
-        map.addImage(event.id, draw());
-      }
-    });
-
-    if (import.meta.env.DEV) {
-      // A handle for the browser console and for the end-to-end tests, which assert on the camera.
-      (window as unknown as { villagesMap?: maplibregl.Map }).villagesMap = map;
-    }
 
     const announce = () => onReady?.(map);
     if (map.loaded()) {

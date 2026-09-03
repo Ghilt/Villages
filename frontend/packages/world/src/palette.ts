@@ -111,19 +111,56 @@ export interface Snap {
 }
 
 /**
+ * A palette with its colours already parsed, for asking the same question a hundred million times.
+ *
+ * Reading a colour out of its hexadecimal text is cheap once and ruinous in a loop over every pixel of a
+ * world, so a caller that is snapping an image prepares the palette first.
+ */
+export interface PreparedPalette {
+  ids: Int32Array;
+  /** Three bytes a class, in the same order as the ids. */
+  channels: Uint8Array;
+}
+
+export function preparePalette(palette: Palette): PreparedPalette {
+  const ids = new Int32Array(palette.classes.length);
+  const channels = new Uint8Array(palette.classes.length * 3);
+
+  palette.classes.forEach((terrain, index) => {
+    ids[index] = terrain.id;
+    channels.set(toRgb(terrain.colour), index * 3);
+  });
+
+  return { ids, channels };
+}
+
+/**
  * The class a pixel belongs to. Every colour resolves to something, because an image editor leaves blended
  * pixels along every edge and refusing them would mean refusing every edit. How far it had to reach is
  * reported so that the importer can complain about a colour nobody meant to paint.
  */
-export function snapToClass(colour: Rgb, palette: Palette): Snap {
-  let best: Snap = { id: palette.classes[0]?.id ?? 0, distance: Infinity };
-  for (const terrain of palette.classes) {
-    const distance = colourDistance(colour, toRgb(terrain.colour));
-    if (distance < best.distance) {
-      best = { id: terrain.id, distance };
+export function snapPrepared([red, green, blue]: Rgb, prepared: PreparedPalette): Snap {
+  let bestId = prepared.ids[0] ?? 0;
+  let bestSquared = Infinity;
+
+  for (let index = 0; index < prepared.ids.length; index += 1) {
+    const at = index * 3;
+    const dr = red - prepared.channels[at]!;
+    const dg = green - prepared.channels[at + 1]!;
+    const db = blue - prepared.channels[at + 2]!;
+    const squared = dr * dr + dg * dg + db * db;
+    if (squared < bestSquared) {
+      bestSquared = squared;
+      bestId = prepared.ids[index]!;
     }
   }
-  return best;
+
+  return { id: bestId, distance: Math.sqrt(bestSquared) };
+}
+
+/** The same question, for a caller asking it once. Prepare the palette instead if you are in a loop. */
+export function snapToClass(colour: Rgb, palette: Palette): Snap {
+  return snapPrepared(colour, preparePalette(palette));
 }
 
 /** A lookup from class id to its definition, for the many places that need one. */

@@ -5,13 +5,14 @@ import { warpCollection } from '../src/geometry.ts';
 import type { FeatureCollection } from '../src/geometry.ts';
 import type { WarpConfig } from '../src/warp.ts';
 
-import { OUTPUT_DIR, SOURCE_DIR, WARP_CONFIG } from './paths.ts';
+import { SOURCE_DIR, WARP_CONFIG, WARPED_DIR } from './paths.ts';
 
 /**
- * Turns the real Earth into our world: reads the warp configuration and the Natural Earth layers, moves
- * every coordinate through the warp, and writes the result where the app can serve it.
+ * Warps the real Earth, and writes the result as raw material.
  *
- * The output is the world the game treats as real. Nothing at runtime knows about the Earth it came from.
+ * The world the game plays on is painted by hand now, so this is no longer how the world is shaped: it is
+ * a way to produce a different Earth to start painting from, when a recognisable one is not wanted. Feed
+ * its output into the master build. See docs/adr/0018.
  */
 
 interface LayerSpec {
@@ -23,7 +24,7 @@ interface LayerSpec {
 type WarpFile = WarpConfig & { layers: LayerSpec[] };
 
 const config = JSON.parse(await readFile(WARP_CONFIG, 'utf8')) as WarpFile;
-await mkdir(OUTPUT_DIR, { recursive: true });
+await mkdir(WARPED_DIR, { recursive: true });
 
 const summary: string[] = [];
 
@@ -37,7 +38,7 @@ for (const layer of config.layers) {
   const source = JSON.parse(raw) as FeatureCollection;
   const warped = warpCollection(source, config, layer.keep ?? []);
   const body = JSON.stringify(warped);
-  await writeFile(resolve(OUTPUT_DIR, `${layer.name}.geojson`), body);
+  await writeFile(resolve(WARPED_DIR, `${layer.name}.geojson`), body);
 
   summary.push(
     `${layer.name.padEnd(8)} ${String(warped.features.length).padStart(6)} features  ` +
@@ -51,4 +52,4 @@ const octaves = config.noise
 console.log(`warped with ${config.controls.length} controls and wobble in degrees: ${octaves}`);
 console.log();
 console.log(summary.join('\n'));
-console.log(`\ninto ${OUTPUT_DIR}`);
+console.log(`\ninto ${WARPED_DIR}`);
