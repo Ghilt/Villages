@@ -45,6 +45,10 @@ for (const layer of config.layers) {
   );
 }
 
-console.log(`warped with ${config.controls.length} controls, wobble ${config.noise.amplitude} degrees\n`);
+const octaves = config.noise
+  .map((octave) => `${octave.cellsX}x${octave.cellsY} at ${octave.amplitude}`)
+  .join(', ');
+console.log(`warped with ${config.controls.length} controls and wobble in degrees: ${octaves}`);
+console.log();
 console.log(summary.join('\n'));
 console.log(`\ninto ${OUTPUT_DIR}`);

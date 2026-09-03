@@ -1,0 +1,10 @@
+{
+  "$comment": "The shipped source may not touch a platform, and its tests run on one. Two configs rather than one loose one, so that purity stays enforced where it matters.",
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2023"],
+    "types": ["node"],
+    "allowImportingTsExtensions": true
+  },
+  "include": ["src/**/*.test.ts", "src"]
+}

@@ -16,11 +16,20 @@ export interface WarpControl {
   dLat: number;
 }
 
+/**
+ * One scale of wobble. Several together are what make the whole world differ from Earth: a coarse octave
+ * with few cells and a large amplitude drifts whole continents, a fine one with many cells and a small
+ * amplitude roughens a coastline. Unlike a control, an octave reaches everywhere.
+ */
+export interface WarpOctave extends NoiseField {
+  amplitude: number;
+}
+
 export interface WarpConfig {
   /** Turning the globe is powerful and needs antimeridian cutting first, so it defaults to nothing. */
   rotation: EulerAngles;
   controls: readonly WarpControl[];
-  noise: NoiseField & { amplitude: number };
+  noise: readonly WarpOctave[];
   /**
    * Offsets fade to nothing within this many degrees of the antimeridian. Without it, land would be
    * carried across the seam, where Mercator needs a polygon cut in two before it can draw it.
@@ -70,8 +79,13 @@ export function warpPoint(point: LngLat, config: WarpConfig): LngLat {
   const damping = seamDamping(turned.lng, config.seamGuard);
 
   const pull = controlOffset(turned, config.controls);
-  const wobbleLng = noiseAt(turned.lng, turned.lat, config.noise, 0) * config.noise.amplitude;
-  const wobbleLat = noiseAt(turned.lng, turned.lat, config.noise, 1) * config.noise.amplitude;
+
+  let wobbleLng = 0;
+  let wobbleLat = 0;
+  for (const octave of config.noise) {
+    wobbleLng += noiseAt(turned.lng, turned.lat, octave, 0) * octave.amplitude;
+    wobbleLat += noiseAt(turned.lng, turned.lat, octave, 1) * octave.amplitude;
+  }
 
   const lng = turned.lng + (pull.dLng + wobbleLng) * damping;
   const lat = turned.lat + (pull.dLat + wobbleLat) * damping;

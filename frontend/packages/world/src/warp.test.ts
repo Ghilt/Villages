@@ -7,7 +7,7 @@ import type { WarpConfig } from './warp.ts';
 const QUIET: WarpConfig = {
   rotation: { yaw: 0, pitch: 0, roll: 0 },
   controls: [],
-  noise: { cellsX: 12, cellsY: 6, seed: 1, amplitude: 0 },
+  noise: [],
   seamGuard: 0,
   maxLatitude: 85,
 };
@@ -90,7 +90,10 @@ describe('warping a place', () => {
     const wild: WarpConfig = {
       ...QUIET,
       controls: [{ lng: 0, lat: 80, radius: 90, dLng: 300, dLat: 300 }],
-      noise: { cellsX: 12, cellsY: 6, seed: 3, amplitude: 40 },
+      noise: [
+        { cellsX: 5, cellsY: 3, seed: 3, amplitude: 40 },
+        { cellsX: 40, cellsY: 20, seed: 4, amplitude: 12 },
+      ],
     };
 
     for (let lng = -180; lng <= 180; lng += 11) {

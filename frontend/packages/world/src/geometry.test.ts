@@ -7,7 +7,7 @@ import type { WarpConfig } from './warp.ts';
 const SHIFT_EAST: WarpConfig = {
   rotation: { yaw: 0, pitch: 0, roll: 0 },
   controls: [{ lng: 0, lat: 0, radius: 400, dLng: 5, dLat: 0 }],
-  noise: { cellsX: 4, cellsY: 2, seed: 1, amplitude: 0 },
+  noise: [],
   seamGuard: 0,
   maxLatitude: 85,
 };

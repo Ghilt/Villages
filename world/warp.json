@@ -1,5 +1,5 @@
 {
-  "$comment": "How the real Earth becomes our world. Edit this, run `npm run world:build --prefix frontend`, and look. Every number is degrees. See docs/adr/0017.",
+  "$comment": "How the real Earth becomes our world. Edit this, run `npm run world:build --prefix frontend`, and look. Every distance is degrees. See docs/adr/0017.",
 
   "rotation": {
     "$comment": "Turning the globe keeps every coastline perfect but drags land across the antimeridian, which needs polygon cutting we have not written. Leave at zero for now.",
@@ -7,6 +7,30 @@
     "pitch": 0,
     "roll": 0
   },
+
+  "noise": [
+    {
+      "$name": "continental drift: reaches the whole world, moves it in broad sweeps",
+      "seed": 20260902,
+      "cellsX": 6,
+      "cellsY": 3,
+      "amplitude": 3.2
+    },
+    {
+      "$name": "regional reshaping: bays deepen, peninsulas thicken",
+      "seed": 771103,
+      "cellsX": 18,
+      "cellsY": 9,
+      "amplitude": 1.1
+    },
+    {
+      "$name": "coastline roughness: so that no shoreline traces an atlas",
+      "seed": 40518,
+      "cellsX": 48,
+      "cellsY": 24,
+      "amplitude": 0.35
+    }
+  ],
 
   "controls": [
     { "$name": "north sea opens westward", "lng": 2, "lat": 56, "radius": 11, "dLng": -3.4, "dLat": 1.1 },
@@ -23,20 +47,14 @@
     { "$name": "greenland drops", "lng": -42, "lat": 72, "radius": 16, "dLng": 4.2, "dLat": -3.4 }
   ],
 
-  "noise": {
-    "$comment": "A gentle wobble on every coastline, so that nothing traces an atlas. Amplitude is degrees; above about one, coastlines start to look chewed.",
-    "seed": 20260902,
-    "cellsX": 48,
-    "cellsY": 24,
-    "amplitude": 0.42
-  },
-
   "seamGuard": 25,
   "maxLatitude": 84,
 
   "layers": [
     { "name": "land", "source": "ne_50m_land", "keep": [] },
     { "name": "lakes", "source": "ne_50m_lakes", "keep": [] },
-    { "name": "rivers", "source": "ne_50m_rivers_lake_centerlines", "keep": [] }
+    { "name": "lakes-fine", "source": "ne_10m_lakes_europe", "keep": [] },
+    { "name": "rivers", "source": "ne_50m_rivers_lake_centerlines", "keep": [] },
+    { "name": "peaks", "source": "ne_10m_geography_regions_elevation_points", "keep": ["elevation"] }
   ]
 }

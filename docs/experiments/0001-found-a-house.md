@@ -64,6 +64,30 @@ Three things learned that shape the work:
   after. That is not a bug but it is a lesson: any real-world place we want in the game has to be carried through
   the warp once, which is exactly the mechanism the naming work will need.
 
+**2026-09-03, fidelity and reach.** Two questions from looking at the first warped world: does it warp
+everywhere, and can the lost detail come back?
+
+The reach was the real problem. Control points only move what they reach, so the first world was a warped
+Europe attached to an unwarped Earth. Replacing the single wobble with three octaves fixed it: one at six
+cells across the world drifts continents, one at eighteen reshapes regions, one at forty-eight roughens
+coastlines. Every shore now differs from Earth's, and the twelve hand-placed controls remain for deliberate
+moves.
+
+Fidelity turned out to be cheap, because the warp is generic over GeoJSON: any vector layer costs a line in
+the configuration and nothing else.
+
+- Lakes: Natural Earth's European supplement adds 767 lakes, 137 of them inside Sweden alone, for under a
+  megabyte. Sweden and Finland now read as lake country.
+- Mountains: 711 named peaks with elevations, drawn as pictorial glyphs in the old-map manner rather than as
+  shaded relief, sized by height and by how close the camera is. One layer for great ranges at world scale
+  and one for everything above 1200 metres up close, because a single layer either crowds the world or
+  empties the region.
+
+What stays expensive is anything that is not vector. A hillshade or a satellite texture is a raster, and
+warping a raster needs the inverse of the warp, which our forward function does not provide analytically. If
+we ever want relief shading rather than drawn peaks, the way in is to turn elevation into vector contours
+once, offline, and then warp those like everything else.
+
 ## Result
 
 ## Decision

@@ -26,6 +26,9 @@ test-results/
 # Raw material for the world generator: downloaded, not ours, and large
 world/source/
 
+# world/master/ is deliberately NOT ignored: the master image is the authored source of truth for
+# the shape of the world, and it travels with the repository. See docs/AUTHORING-THE-WORLD.md.
+
 # The generated world: reproducible from world/warp.json, and it would bloat the history
 frontend/apps/web/public/world/
 

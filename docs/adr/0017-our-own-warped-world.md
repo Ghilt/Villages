@@ -17,8 +17,9 @@ Generate our own world by warping the real one, and treat the result as the only
 
 - The raw material is Natural Earth, which is public domain and carries coastlines, lakes, rivers and places
   and nothing else. No roads, no buildings, no shops. At the 1:50m scale it is under two megabytes a layer.
-- The warp is a pure function of a place and one configuration file, `world/warp.json`: a set of control
-  points that drag their surroundings, a seeded wobble on every coastline, and an optional turn of the globe.
+- The warp is a pure function of a place and one configuration file, `world/warp.json`: control points that
+  drag their surroundings where we want a deliberate change, seeded wobble at several scales that reaches
+  the whole world, and an optional turn of the globe.
 - It runs offline, at build time. The warped coordinates are the game's coordinates. Nothing at runtime knows
   about the Earth the world came from.
 - The map draws that output through a style of our own with no text in it at all, and no tile service.
@@ -38,10 +39,15 @@ close zoom ever matters.
 We also stop depending on a public tile service that promises nothing about availability, which removes a risk
 the startup plan flagged, and the whole map becomes three files we serve ourselves.
 
-Two limits are worth stating plainly. Turning the globe drags land across the antimeridian, where a polygon
+One limit is worth stating plainly. Turning the globe drags land across the antimeridian, where a polygon
 must be cut in two before Mercator can draw it, so the turn is available but defaults to nothing and offsets
-fade to zero near the seam. And the warp only changes what a control point reaches: with no control nearby,
-a coastline stays exactly Earth's.
+fade to zero near the seam.
+
+A second limit was found and removed within the hour, and the record is corrected rather than left wrong: a
+control point only changes what it reaches, so a world described by controls alone stays Earth wherever no
+control was placed. The wobble therefore became a stack of octaves, from one that drifts whole continents to
+one that roughens a shoreline, and those reach everywhere. Controls remain, for changes we want to author by
+hand rather than roll.
 
 ## Alternatives considered
 

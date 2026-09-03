@@ -33,6 +33,21 @@ installed. The backend increments follow, and keep their original numbers.
 Blocked on the machine, needed from 0.4 onwards: Docker Desktop with the WSL2 backend, and Eclipse Temurin 21 on
 `JAVA_HOME`. Nothing before then needs either.
 
+## Also now: the world, authored by hand
+
+A side mission that grew, because the map is the main screen and it has to be ours.
+
+- [x] The warp: a pure transformation from Earth to our world, configured by one file
+- [x] Fidelity: lakes, rivers and biomes, and a global wobble so the whole world differs from Earth
+- [x] The master image: Earth's terrain as one editable colour per class, and the guide to editing it
+- [ ] The importer: read the edited master back, trace coastlines, and give the game its world
+- [ ] The painterly renderer: what the world actually looks like
+- [ ] Place names carried through from Earth, mutated
+
+Decided along the way: the world is authored in an image editor rather than in a tool of our own, because
+terrain that travels with a copied coastline is free in a raster and expensive in anything else. See
+decision record 0018.
+
 ## Next: Phase 1, the walking skeleton
 
 Found a House. Open the app, see the map, found a house at a chosen spot with a generated banner, see the banner and

@@ -1,4 +1,4 @@
-import type { StyleSpecification } from 'maplibre-gl';
+import type { LayerSpecification, StyleSpecification } from 'maplibre-gl';
 
 /**
  * The look of our world, and the whole of it: sea, land, lakes, rivers, and not one word of text.
@@ -14,10 +14,113 @@ const PALETTE = {
   land: '#ece2cd',
   coast: '#6d6047',
   river: '#8ba7b3',
+  ink: '#5f5340',
+  peakFace: '#e3d7bd',
 } as const;
+
+/** Peaks below this are not drawn. Natural Earth carries 711 of them, so the map never crowds. */
+const PEAK_FLOOR_METRES = 1200;
+
+/**
+ * A mountain drawn the way an old map draws one: a pictorial glyph rather than shaded relief. Made here
+ * rather than shipped as a file so that the whole look of the world lives in this one module.
+ */
+function peakImage(size = 96): ImageData {
+  const canvas = new OffscreenCanvas(size, size);
+  const ink = canvas.getContext('2d');
+  if (ink === null) {
+    throw new Error('no drawing context for the mountain glyph');
+  }
+
+  const base = size * 0.86;
+  const ridge = (from: number, to: number, peak: number, height: number) => {
+    ink.beginPath();
+    ink.moveTo(from, base);
+    ink.lineTo(peak, base - height);
+    ink.lineTo(to, base);
+    ink.closePath();
+    ink.fillStyle = PALETTE.peakFace;
+    ink.fill();
+    ink.strokeStyle = PALETTE.ink;
+    ink.lineWidth = size * 0.045;
+    ink.lineJoin = 'round';
+    ink.stroke();
+  };
+
+  // A shoulder behind, then the main summit, so the glyph reads as a range rather than a triangle.
+  ridge(size * 0.06, size * 0.52, size * 0.28, size * 0.42);
+  ridge(size * 0.3, size * 0.94, size * 0.62, size * 0.66);
+
+  // A few hatch strokes down the shaded flank.
+  ink.strokeStyle = PALETTE.ink;
+  ink.lineWidth = size * 0.022;
+  for (let step = 1; step <= 3; step += 1) {
+    const t = step / 4;
+    ink.beginPath();
+    ink.moveTo(size * 0.62 + (size * 0.32 - size * 0.02) * t * 0.5, base - size * 0.66 * (1 - t));
+    ink.lineTo(size * 0.62 + (size * 0.32 + size * 0.06) * t, base - size * 0.66 * (1 - t) * 0.35);
+    ink.stroke();
+  }
+
+  return ink.getImageData(0, 0, size, size);
+}
+
+/**
+ * Images the style asks for by name. The map adds them when it finds them missing, which also covers a
+ * style reload, and keeps the drawing out of the map component.
+ */
+export const WORLD_IMAGES: Record<string, () => ImageData> = { peak: peakImage };
 
 /** Natural Earth at this scale has no more detail to give past about this zoom. */
 export const WORLD_MAX_ZOOM = 10;
+
+interface PeakBand {
+  minzoom: number;
+  maxzoom: number;
+  /** Icon scale at the band's near zoom, for the lowest and the highest mountain in it. */
+  small: number;
+  large: number;
+}
+
+/**
+ * One band of mountains. The zoom expression has to sit at the top of the property, so the elevation
+ * interpolations are the values it interpolates between rather than a factor multiplied into it.
+ */
+function peakLayer(id: string, floor: number, band: PeakBand): LayerSpecification {
+  const byElevation = (nearest: number) => [
+    'interpolate',
+    ['linear'],
+    ['get', 'elevation'],
+    floor,
+    Number((nearest * 0.62).toFixed(3)),
+    8000,
+    nearest,
+  ];
+
+  return {
+    id,
+    type: 'symbol',
+    source: 'peaks',
+    minzoom: band.minzoom,
+    maxzoom: band.maxzoom,
+    filter: ['>=', ['get', 'elevation'], floor],
+    layout: {
+      'icon-image': 'peak',
+      'icon-anchor': 'bottom',
+      'icon-allow-overlap': true,
+      'icon-size': [
+        'interpolate',
+        ['linear'],
+        ['zoom'],
+        band.minzoom,
+        byElevation(band.small),
+        band.maxzoom,
+        byElevation(band.large),
+      ],
+    } as LayerSpecification['layout'],
+    paint: { 'icon-opacity': 0.9 },
+  } as LayerSpecification;
+}
 
 export function warpedWorldStyle(): StyleSpecification {
   const geojson = (path: string) => ({ type: 'geojson', data: path, maxzoom: WORLD_MAX_ZOOM }) as const;
@@ -28,7 +131,9 @@ export function warpedWorldStyle(): StyleSpecification {
     sources: {
       land: geojson('/world/land.geojson'),
       lakes: geojson('/world/lakes.geojson'),
+      lakesFine: geojson('/world/lakes-fine.geojson'),
       rivers: geojson('/world/rivers.geojson'),
+      peaks: geojson('/world/peaks.geojson'),
     },
     layers: [
       {
@@ -59,6 +164,13 @@ export function warpedWorldStyle(): StyleSpecification {
         paint: { 'fill-color': PALETTE.seaDeep },
       },
       {
+        id: 'lakes-fine',
+        type: 'fill',
+        source: 'lakesFine',
+        minzoom: 4,
+        paint: { 'fill-color': PALETTE.seaDeep },
+      },
+      {
         id: 'rivers',
         type: 'line',
         source: 'rivers',
@@ -68,6 +180,10 @@ export function warpedWorldStyle(): StyleSpecification {
           'line-width': ['interpolate', ['linear'], ['zoom'], 3, 0.4, 7, 1.2, 10, 2.4],
         },
       },
+      // Mountains twice over: only the great ranges when the whole world is in view, and everything
+      // worth drawing once we are close. A single layer either crowds the world or empties the region.
+      peakLayer('peaks-major', 4000, { minzoom: 2, maxzoom: 5, small: 0.1, large: 0.3 }),
+      peakLayer('peaks', PEAK_FLOOR_METRES, { minzoom: 5, maxzoom: 24, small: 0.28, large: 0.95 }),
     ],
   };
 }

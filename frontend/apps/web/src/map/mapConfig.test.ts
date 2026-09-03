@@ -7,13 +7,32 @@ describe('the map style', () => {
     const style = resolveStyle({});
 
     expect(typeof style).not.toBe('string');
-    expect(Object.keys((style as { sources: object }).sources).sort()).toEqual(['lakes', 'land', 'rivers']);
+    expect(Object.keys((style as { sources: object }).sources).sort()).toEqual([
+      'lakes',
+      'lakesFine',
+      'land',
+      'peaks',
+      'rivers',
+    ]);
   });
 
   it('draws no text at all, because a place name would name the wrong world', () => {
-    const style = resolveStyle({}) as { layers: { type: string }[] };
+    const style = resolveStyle({}) as {
+      layers: { layout?: Record<string, unknown> }[];
+    };
 
-    expect(style.layers.some((layer) => layer.type === 'symbol')).toBe(false);
+    for (const layer of style.layers) {
+      expect(layer.layout?.['text-field']).toBeUndefined();
+    }
+  });
+
+  it('draws the whole world from our own files and no tile service', () => {
+    const style = resolveStyle({}) as { sources: Record<string, { type: string; data?: string }> };
+
+    for (const source of Object.values(style.sources)) {
+      expect(source.type).toBe('geojson');
+      expect(source.data).toMatch(/^\/world\//);
+    }
   });
 
   it('uses a configured style instead, which is how we compare against the real Earth', () => {

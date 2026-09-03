@@ -1,0 +1,46 @@
+{
+  "$comment": "How the master image is painted from real Earth data. Layers are painted in order, so a later one covers an earlier one: biomes first, then ice, then water. Every class name here must exist in palette.json. Run `npm run world:master --prefix frontend`.",
+
+  "base": "ocean",
+
+  "layers": [
+    {
+      "$comment": "Land first, in a single colour, so that anywhere the biome data misses is still land rather than sea.",
+      "source": "ne_50m_land",
+      "class": "grassland"
+    },
+    {
+      "$comment": "Earth's biomes. The mapping turns the dataset's own biome numbers into our classes.",
+      "source": "ECOREGIONS",
+      "classFrom": {
+        "property": "BIOME_NUM",
+        "map": {
+          "1": "tropical-forest",
+          "2": "tropical-forest",
+          "3": "tropical-forest",
+          "4": "temperate-forest",
+          "5": "temperate-forest",
+          "6": "boreal-forest",
+          "7": "savanna",
+          "8": "grassland",
+          "9": "wetland",
+          "10": "alpine",
+          "11": "tundra",
+          "12": "temperate-forest",
+          "13": "desert",
+          "14": "wetland"
+        }
+      }
+    },
+    { "source": "ne_50m_glaciated_areas", "class": "ice" },
+    { "source": "ne_10m_playas", "class": "desert" },
+    { "source": "ne_50m_lakes", "class": "lake" },
+    { "source": "ne_10m_lakes_europe", "class": "lake" },
+    {
+      "$comment": "Rivers are thinner than a pixel, so they are drawn as a line of a given width rather than filled.",
+      "source": "ne_50m_rivers_lake_centerlines",
+      "class": "river",
+      "lineWidth": 2
+    }
+  ]
+}

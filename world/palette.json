@@ -1,0 +1,19 @@
+{
+  "$comment": "The terrain classes of the world, and the colour each one wears in the master image. These colours are data, not the look of the game: the renderer decides what a forest looks like. They are chosen to be far apart, so that an anti-aliased pixel can always be snapped back to exactly one class. Editing guide in docs/AUTHORING-THE-WORLD.md.",
+  "master": { "width": 16384, "height": 8192, "projection": "equirectangular" },
+  "classes": [
+    { "id": 0, "name": "ocean", "colour": "#103d5c", "water": true },
+    { "id": 1, "name": "lake", "colour": "#2b8fd0", "water": true },
+    { "id": 2, "name": "river", "colour": "#7fd4f0", "water": true },
+    { "id": 3, "name": "ice", "colour": "#f2f6f8" },
+    { "id": 4, "name": "tundra", "colour": "#b9a9c9" },
+    { "id": 5, "name": "boreal-forest", "colour": "#1d5c34" },
+    { "id": 6, "name": "temperate-forest", "colour": "#6cc24a" },
+    { "id": 7, "name": "tropical-forest", "colour": "#0a7d6e" },
+    { "id": 8, "name": "grassland", "colour": "#d4d94a" },
+    { "id": 9, "name": "savanna", "colour": "#e08a2e" },
+    { "id": 10, "name": "desert", "colour": "#f0d9a0" },
+    { "id": 11, "name": "wetland", "colour": "#5a6b2a" },
+    { "id": 12, "name": "alpine", "colour": "#8a6b52" }
+  ]
+}
