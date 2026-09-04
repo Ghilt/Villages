@@ -15,6 +15,7 @@
     "import": "node --max-old-space-size=8192 bin/importMaster.ts",
     "merge": "node --max-old-space-size=8192 bin/mergeMaster.ts",
     "tile": "node --max-old-space-size=8192 bin/tileWorld.ts",
+    "paint": "node --max-old-space-size=8192 bin/renderPainterly.ts",
     "fetch-world": "node --max-old-space-size=4096 bin/fetchWorld.ts"
   },
   "dependencies": {

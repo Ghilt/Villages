@@ -17,12 +17,13 @@
     "format:write": "prettier --write .",
     "test": "vitest run",
     "check": "npm run typecheck && npm run lint && npm run format && npm run test",
-    "world:fetch": "npm run fetch --workspace @villages/world",
-    "world:build": "npm run build --workspace @villages/world",
-    "world:master": "npm run master --workspace @villages/world",
-    "world:import": "npm run import --workspace @villages/world",
-    "world:tile": "npm run tile --workspace @villages/world",
-    "world:fetch-all": "npm run fetch-world --workspace @villages/world"
+    "world:fetch": "npm run fetch --workspace @villages/world --",
+    "world:build": "npm run build --workspace @villages/world --",
+    "world:master": "npm run master --workspace @villages/world --",
+    "world:import": "npm run import --workspace @villages/world --",
+    "world:tile": "npm run tile --workspace @villages/world --",
+    "world:paint": "npm run paint --workspace @villages/world --",
+    "world:fetch-all": "npm run fetch-world --workspace @villages/world --"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

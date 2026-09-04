@@ -12,6 +12,10 @@ export interface TerrainClass {
   /** As `#rrggbb`, which is what an image editor shows and what the master holds. */
   colour: string;
   water?: boolean;
+  /** Which family of terrain this belongs to. The painterly treatment is chosen per group, not per class. */
+  group?: string;
+  /** What the class means on the ground, for whoever is painting the master. */
+  meaning?: string;
 }
 
 export interface MasterShape {

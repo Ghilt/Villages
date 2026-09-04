@@ -55,13 +55,14 @@ export function chunk(name: string, data: Uint8Array): Uint8Array {
 }
 
 const COLOUR_TYPE_INDEXED = 3;
+const COLOUR_TYPE_RGB = 2;
 
-function header(width: number, height: number): Uint8Array {
+function header(width: number, height: number, colourType: number): Uint8Array {
   const data = new Uint8Array(13);
   writeUint32(data, 0, width);
   writeUint32(data, 4, height);
   data[8] = 8; // bits per pixel
-  data[9] = COLOUR_TYPE_INDEXED;
+  data[9] = colourType;
   data[10] = 0; // deflate, the only compression PNG has
   data[11] = 0; // the standard filter set
   data[12] = 0; // not interlaced
@@ -83,6 +84,17 @@ function scanlines(raster: ClassRaster): Uint8Array {
   return out;
 }
 
+/** The chunks, end to end, which is all a PNG file is. */
+function join(parts: readonly Uint8Array[]): Uint8Array {
+  const png = new Uint8Array(parts.reduce((sum, part) => sum + part.length, 0));
+  let at = 0;
+  for (const part of parts) {
+    png.set(part, at);
+    at += part.length;
+  }
+  return png;
+}
+
 export function encodeIndexedPng(raster: ClassRaster, colours: readonly Rgb[], deflate: Deflate): Uint8Array {
   if (colours.length === 0 || colours.length > 256) {
     throw new Error(`an indexed image needs between 1 and 256 colours, not ${colours.length}`);
@@ -95,18 +107,44 @@ export function encodeIndexedPng(raster: ClassRaster, colours: readonly Rgb[], d
 
   const parts = [
     new Uint8Array(SIGNATURE),
-    chunk('IHDR', header(raster.width, raster.height)),
+    chunk('IHDR', header(raster.width, raster.height, COLOUR_TYPE_INDEXED)),
     chunk('PLTE', table),
     chunk('IDAT', deflate(scanlines(raster))),
     chunk('IEND', new Uint8Array(0)),
   ];
 
-  const total = parts.reduce((sum, part) => sum + part.length, 0);
-  const png = new Uint8Array(total);
-  let at = 0;
-  for (const part of parts) {
-    png.set(part, at);
-    at += part.length;
+  return join(parts);
+}
+
+/** A painted image: three bytes a pixel, row by row from the top. What the painterly renderer makes. */
+export interface RgbImage {
+  width: number;
+  height: number;
+  pixels: Uint8Array;
+}
+
+/**
+ * A truecolour PNG. The master is indexed because it is data and a class must survive a round trip
+ * through an image editor unchanged; a painted image is the opposite, thousands of colours none of which
+ * mean anything, so it is written as plain RGB.
+ */
+export function encodeRgbPng(image: RgbImage, deflate: Deflate): Uint8Array {
+  const expected = image.width * image.height * 3;
+  if (image.pixels.length !== expected) {
+    throw new Error(`${image.width} by ${image.height} needs ${expected} bytes, not ${image.pixels.length}`);
   }
-  return png;
+
+  const stride = image.width * 3;
+  const raw = new Uint8Array((stride + 1) * image.height);
+  for (let row = 0; row < image.height; row += 1) {
+    raw[row * (stride + 1)] = 0;
+    raw.set(image.pixels.subarray(row * stride, (row + 1) * stride), row * (stride + 1) + 1);
+  }
+
+  return join([
+    new Uint8Array(SIGNATURE),
+    chunk('IHDR', header(image.width, image.height, COLOUR_TYPE_RGB)),
+    chunk('IDAT', deflate(raw)),
+    chunk('IEND', new Uint8Array(0)),
+  ]);
 }

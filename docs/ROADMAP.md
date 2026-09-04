@@ -43,7 +43,8 @@ A side mission that grew, because the map is the main screen and it has to be ou
 - [x] The importer: read the edited master back, trace coastlines, and give the game its world
 - [x] A higher-fidelity world: 32 terrain classes from land cover, lake and river data
 - [x] Terrain drawn from tiles rather than traced, so the fidelity is affordable
-- [ ] The painterly renderer: what the world actually looks like
+- [x] The painterly treatment, settled offline in still images: what the world actually looks like
+- [ ] The same treatment in the live map, as a WebGL layer, so it is drawn at any zoom
 - [ ] Place names carried through from Earth, mutated
 
 Decided along the way: the world is authored in an image editor rather than in a tool of our own, because

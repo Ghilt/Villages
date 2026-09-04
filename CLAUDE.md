@@ -104,16 +104,24 @@ Commands are added here as the increments land:
 - The world: `npm run world:import --prefix frontend` traces the coast and the large lakes, and
   `npm run world:tile --prefix frontend` cuts the terrain into map tiles. Both read the hand-painted
   master in `world/master/`. That is the loop: edit the image, import, tile, reload. Terrain is drawn from
-  tiles rather than outlines; see `docs/adr/0019`. What it is painted in is `world/palette.json`, what it
-  is drawn in is `world/render.json`.
+  tiles rather than outlines; see `docs/adr/0019`. What it is painted in is `world/palette.json`, what
+  colour it is drawn in is `world/render.json`, and how it is painted is `world/painterly.json`.
 - The 4.4 GB the world is built from lives in `world/source/`, not committed:
   `npm run world:fetch-all --prefix frontend` fills it from nothing, and `-- --list` says what each source
   is for. The generator is `world/master/experiment/tools/build.mjs`; two minutes for the whole world.
 - The older thirteen-class path, `world:fetch` and `world:master`, is stale and says so when run. It
   refuses to overwrite a hand-painted master and writes alongside; the merge script replays hand edits. `world:build` warps Earth into raw material for
   a different starting point.
+- What it looks like: `npm run world:paint --prefix frontend` paints every view in `world/painterly.json`
+  into `world/painterly/`, each one painted and flat so the two can be held against each other. Add
+  `-- --view alps` for one of them. The treatment itself is pure functions in
+  `frontend/packages/world/src/painterly.ts`, meant for a shader; see `docs/adr/0021`. It is not in the
+  live map yet, which still draws flat tiles.
 - Frontend, look at it: `npm run dev --prefix frontend`, then open http://localhost:5173
 - Frontend, checks: `npm run check --prefix frontend` (typecheck, lint, format, unit tests)
+The three below do not exist yet. They arrive with the increments named, and `infra/`, `backend/` and
+`scripts/` in the layout above are where they will go rather than where they are.
+
 - Infra: `docker compose -f infra/docker-compose.yml up -d` (increment 0.4)
 - Backend: `cd backend` then `./gradlew check`, and `./gradlew :app:bootRun` (0.5 onwards)
 - Everything: `scripts/check.ps1` or `scripts/check.sh` (0.14)

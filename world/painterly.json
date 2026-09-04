@@ -1,0 +1,94 @@
+{
+  "$comment": "How the world is painted. Read by `npm run world:paint --prefix frontend`, which writes one image per view into world/painterly/. The colours themselves stay in world/render.json: this file says what the paint does to them. Two units appear here and mixing them up is the one way to get this wrong. `mark` is always output pixels, so a mark stays the size of a mark at every zoom, because it belongs to the medium. `wander` and `scale` under boundary are master pixels, roughly 1.2 km each, because a coastline belongs to the world.",
+
+  "$warm": "The two ends every colour is washed between. Warm is the light coming from somewhere; cool is the shadow in the paper. Every class gets its own pair, this far toward each.",
+  "warm": "#fff0cf",
+  "cool": "#4a5a58",
+  "wash": { "amount": 0.16, "mark": 46 },
+
+  "$boundary": "How far a region's edge strays from the pixel grid it was stored on. This is what dissolves the staircase when the map is zoomed past the resolution of the master, and it is the single most important number in this file.",
+  "boundary": { "wander": 1.4, "scale": 3 },
+
+  "$edge": "Pigment gathers where a wash stops. `reach` is in output pixels, so the dark line keeps its width at every zoom instead of swelling into a band.",
+  "edge": { "amount": 0.16, "reach": 1.4 },
+
+  "$shore": "The one line that is drawn rather than painted, wherever water meets land.",
+  "shore": { "ink": "#5f5544", "amount": 0.55 },
+
+  "$paper": "What everything is painted on. Grain is the tooth of it, fibre the long streaks in it.",
+  "paper": { "grain": 0.1, "mark": 2.2, "fibre": 0.03 },
+
+  "$groups": "One treatment per group in world/palette.json. The point of a treatment is that the map can say `forest` without drawing a tree, and `desert` without drawing a dune.",
+  "groups": {
+    "water": {
+      "treatment": "ripple",
+      "mark": 9,
+      "amount": 0.035,
+      "angle": 8,
+      "wash": 0.3
+    },
+    "cold": {
+      "treatment": "speckle",
+      "mark": 3.5,
+      "amount": 0.03,
+      "wash": 0.5
+    },
+    "forest": { "treatment": "stipple", "mark": 3.2, "amount": 0.11 },
+    "open": { "treatment": "speckle", "mark": 2.6, "amount": 0.055 },
+    "farmed": {
+      "treatment": "patchwork",
+      "mark": 7,
+      "amount": 0.05,
+      "angle": 12
+    },
+    "wetland": { "treatment": "dashes", "mark": 4, "amount": 0.1 },
+    "dry": { "treatment": "dunes", "mark": 6, "amount": 0.07, "angle": 20 },
+    "high": { "treatment": "hatch", "mark": 4.5, "amount": 0.12, "angle": 35 }
+  },
+
+  "$views": "What the style is judged on. Web Mercator, like the map, so these are directly comparable to a screenshot of it. `width` sets both the size of the image and how much ground a pixel covers, which is what every mark is sized against.",
+  "views": [
+    {
+      "name": "world",
+      "$": "The whole thing, about what zoom two shows.",
+      "lng": [-180, 180],
+      "lat": [-85.05, 85.05],
+      "width": 3072
+    },
+    {
+      "name": "scandinavia",
+      "$": "Lakes by the thousand, taiga, and a coast that is mostly islands.",
+      "lng": [5, 32],
+      "lat": [54, 71],
+      "width": 1600
+    },
+    {
+      "name": "sahara-shore",
+      "$": "Where dune, stone and salt meet the sea. The test of the dry treatment.",
+      "lng": [-18, 12],
+      "lat": [18, 36],
+      "width": 1600
+    },
+    {
+      "name": "alps",
+      "$": "High ground, and whether hatching can carry relief without a mountain icon.",
+      "lng": [4, 18],
+      "lat": [43, 49],
+      "width": 1600
+    },
+    {
+      "name": "islands",
+      "$": "Rainforest and ten thousand coastlines, which is the hardest thing to draw.",
+      "lng": [95, 130],
+      "lat": [-11, 8],
+      "width": 1600
+    },
+    {
+      "name": "close",
+      "$": "Five output pixels to a master pixel, which is roughly zoom nine. The view the flat map looks worst in, and the reason the boundary wanders.",
+      "lng": [16.5, 19.5],
+      "lat": [58.6, 60.2],
+      "width": 1400
+    }
+  ]
+}

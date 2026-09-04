@@ -36,8 +36,8 @@ export {
 } from './raster.ts';
 export type { ClassRaster, Ring } from './raster.ts';
 
-export { chunk, crc32, encodeIndexedPng } from './png.ts';
-export type { Deflate } from './png.ts';
+export { chunk, crc32, encodeIndexedPng, encodeRgbPng } from './png.ts';
+export type { Deflate, RgbImage } from './png.ts';
 
 export { toLngLat as latticeToLngLat, traceClass } from './trace.ts';
 export type { LatticePoint, Ring as LatticeRing } from './trace.ts';
@@ -49,3 +49,22 @@ export type { TileAddress } from './tiles.ts';
 
 export { fillUnassigned } from './fill.ts';
 export type { FillOptions, FillReport } from './fill.ts';
+
+export {
+  fbm,
+  hash2,
+  mix,
+  paintPixel,
+  painterlyProblems,
+  preparePainterly,
+  smoothstep,
+  treatment,
+  valueNoise,
+} from './painterly.ts';
+export type {
+  ClassSampler,
+  GroupStyle,
+  PainterlyStyle,
+  PreparedPainterly,
+  TreatmentKind,
+} from './painterly.ts';

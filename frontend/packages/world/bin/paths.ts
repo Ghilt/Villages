@@ -11,6 +11,10 @@ export const PALETTE = resolve(REPO, 'world', 'palette.json');
 /** What each terrain class is drawn in, as opposed to what it is painted in. */
 export const RENDER = resolve(REPO, 'world', 'render.json');
 export const MASTER_CONFIG = resolve(REPO, 'world', 'master.json');
+/** How the world is painted, as opposed to what colour each class is. */
+export const PAINTERLY = resolve(REPO, 'world', 'painterly.json');
+/** Where the painterly renderer writes its views. Not committed: they are output, and they are large. */
+export const PAINTERLY_DIR = resolve(REPO, 'world', 'painterly');
 /** The master image a human edits, and the palette strip to pick its colours from. */
 export const MASTER_DIR = resolve(REPO, 'world', 'master');
 /** Downloaded Natural Earth files. Not committed: they are raw material, not our world. */
