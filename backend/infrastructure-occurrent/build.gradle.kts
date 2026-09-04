@@ -17,7 +17,9 @@ dependencies {
     implementation(libs.occurrent.decider)
     implementation(libs.occurrent.converter.jackson3)
     implementation(libs.jackson.module.kotlin)
+    implementation(libs.occurrent.subscription.api)
+    // In memory until MongoDB exists, behind the same ports. See the session note and increment 0.8.
+    implementation(libs.occurrent.eventstore.inmemory)
+    implementation(libs.occurrent.subscription.inmemory)
 
-    // The in-memory store is for tests. The real one arrives with MongoDB in 0.8.
-    testImplementation(libs.occurrent.eventstore.inmemory)
 }

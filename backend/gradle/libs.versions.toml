@@ -15,6 +15,7 @@ testcontainers = "2.0.5"
 spring-boot-dependencies = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "spring-boot" }
 spring-boot-starter = { module = "org.springframework.boot:spring-boot-starter" }
 spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test" }
+spring-boot-starter-websocket = { module = "org.springframework.boot:spring-boot-starter-websocket" }
 occurrent-bom = { module = "org.occurrent:occurrent-bom", version.ref = "occurrent" }
 # Versions come from the Occurrent BOM, so none is written here.
 occurrent-eventstore-api = { module = "org.occurrent:occurrent-eventstore-api-blocking" }
@@ -22,6 +23,8 @@ occurrent-eventstore-inmemory = { module = "org.occurrent:occurrent-eventstore-i
 occurrent-application-service = { module = "org.occurrent:occurrent-application-service-blocking" }
 occurrent-decider = { module = "org.occurrent:occurrent-decider" }
 occurrent-converter-jackson3 = { module = "org.occurrent:occurrent-cloudevent-converter-jackson3" }
+occurrent-subscription-api = { module = "org.occurrent:occurrent-subscription-api-blocking" }
+occurrent-subscription-inmemory = { module = "org.occurrent:occurrent-subscription-inmemory" }
 # Jackson 3 lives under tools.jackson; Spring Boot manages its version.
 jackson-module-kotlin = { module = "tools.jackson.module:jackson-module-kotlin" }
 jackson-databind = { module = "tools.jackson.core:jackson-databind" }
