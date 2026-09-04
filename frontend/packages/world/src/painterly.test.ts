@@ -294,3 +294,54 @@ describe('painting a pixel', () => {
     }
   });
 });
+
+describe('cutting the wash into steps', () => {
+  /** Everything but the wash silenced, so the count of colours in a region is the count of steps. */
+  const bare: PainterlyStyle = {
+    ...style,
+    paper: { grain: 0, mark: 2.2, fibre: 0 },
+    groups: Object.fromEntries(
+      Object.entries(style.groups).map(([group, spec]) => [group, { ...spec, amount: 0 }]),
+    ),
+  };
+
+  const coloursIn = (prepared: ReturnType<typeof preparePainterly>): Set<string> => {
+    const seen = new Set<string>();
+    for (let index = 0; index < 900; index += 1) {
+      // Well away from any boundary, so the wet edge cannot add shades of its own.
+      seen.add(paintPixel(prepared, everywhereMeadow, 300 + index * 1.7, index * 2.3, 1).join(','));
+    }
+    return seen;
+  };
+
+  it('leaves the wash alone when it is not asked for', () => {
+    expect(coloursIn(preparePainterly(bare, palette, colours)).size).toBeGreaterThan(20);
+  });
+
+  it('holds the wash to the number of steps asked for', () => {
+    const printed = preparePainterly({ ...bare, posterise: 4 }, palette, colours);
+
+    // Four steps means five values from nothing to all of it, and no more.
+    expect(coloursIn(printed).size).toBeLessThanOrEqual(5);
+    expect(coloursIn(printed).size).toBeGreaterThan(1);
+  });
+
+  it('changes nothing but the wash, and at a fine enough step nothing anybody can see', () => {
+    // The knob may only touch the wash. Sixty-four steps is a third of a level of lightness apiece, so
+    // it cannot land on the same byte every time, but it must never be more than a rounding away.
+    const many = preparePainterly(bare, palette, colours);
+    const few = preparePainterly({ ...bare, posterise: 64 }, palette, colours);
+    let worst = 0;
+
+    for (let index = 0; index < 200; index += 1) {
+      const at = 300 + index * 1.7;
+      const a = paintPixel(many, everywhereMeadow, at, index, 1);
+      const b = paintPixel(few, everywhereMeadow, at, index, 1);
+      for (let channel = 0; channel < 3; channel += 1) {
+        worst = Math.max(worst, Math.abs(a[channel]! - b[channel]!));
+      }
+    }
+
+    expect(worst).toBeLessThanOrEqual(1);
+  });
+});

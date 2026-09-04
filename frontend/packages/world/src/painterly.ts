@@ -151,6 +151,11 @@ export interface PainterlyStyle {
   /** The drawn shore, wherever water meets land. */
   shore: { ink: string; amount: number };
   paper: { grain: number; mark: number; fibre: number };
+  /**
+   * How many steps the wash is allowed, or absent for as many as there are. Cutting it to a handful is
+   * what separates a print from a painting: the colour goes flat inside a band and steps at its edge.
+   */
+  posterise?: number;
   groups: Record<string, GroupStyle>;
 }
 
@@ -174,6 +179,7 @@ export interface PreparedPainterly {
   edge: PainterlyStyle['edge'];
   shore: { amount: number };
   paper: PainterlyStyle['paper'];
+  posterise: number;
 }
 
 function clamp255(value: number): number {
@@ -187,10 +193,6 @@ export function mix(a: Rgb, b: Rgb, at: number): Rgb {
     clamp255(a[1] + (b[1] - a[1]) * t),
     clamp255(a[2] + (b[2] - a[2]) * t),
   ];
-}
-
-function scaleRgb(colour: Rgb, by: number): Rgb {
-  return [clamp255(colour[0] * by), clamp255(colour[1] * by), clamp255(colour[2] * by)];
 }
 
 /** A stable seed per group, so every class of forest shares one canopy and not one per class. */
@@ -278,8 +280,9 @@ export function paintPixel(
 
   // Colour pools and thins across a region rather than filling it. The spread widens what noise gives,
   // which clusters hard around its middle, so a wash reaches its warm or its cool end now and again.
-  const drift = 0.5 + (fbm(brushX / wash.mark, brushY / wash.mark, 4241, 2) - 0.5) * 1.8;
-  const washed = mix(here.darker, here.lighter, drift);
+  const spread = 0.5 + (fbm(brushX / wash.mark, brushY / wash.mark, 4241, 2) - 0.5) * 1.8;
+  const steps = prepared.posterise;
+  const drift = steps > 0 ? Math.round(Math.min(1, Math.max(0, spread)) * steps) / steps : spread;
 
   const alongX = (brushX * here.cos + brushY * here.sin) / here.mark;
   const alongY = (brushY * here.cos - brushX * here.sin) / here.mark;
@@ -290,7 +293,23 @@ export function paintPixel(
     (valueNoise(brushX / (paper.mark * 2.2), brushY / (paper.mark * 1.3), 8663) - 0.5) * paper.fibre;
 
   const light = 1 + mark + grain + fibre - boundaryAmount * edge.amount;
-  return mix(scaleRgb(washed, light), prepared.ink, shoreAmount * shore.amount);
+
+  // One allocation a pixel rather than three. This runs sixty-five thousand times a map tile while the
+  // map is being moved, so the wash, the shading and the ink are carried as numbers, not as colours.
+  const between = drift < 0 ? 0 : drift > 1 ? 1 : drift;
+  const inked = Math.min(1, Math.max(0, shoreAmount * shore.amount));
+  const dark = here.darker;
+  const pale = here.lighter;
+  const ink = prepared.ink;
+  const red = (dark[0] + (pale[0] - dark[0]) * between) * light;
+  const green = (dark[1] + (pale[1] - dark[1]) * between) * light;
+  const blue = (dark[2] + (pale[2] - dark[2]) * between) * light;
+
+  return [
+    clamp255(red + (ink[0] - red) * inked),
+    clamp255(green + (ink[1] - green) * inked),
+    clamp255(blue + (ink[2] - blue) * inked),
+  ];
 }
 
 /** Everything wrong with a style, all of it, so one run says all of what to fix. */
@@ -377,5 +396,6 @@ export function preparePainterly(
     edge: style.edge,
     shore: { amount: style.shore.amount },
     paper: style.paper,
+    posterise: style.posterise ?? 0,
   };
 }

@@ -112,11 +112,16 @@ Commands are added here as the increments land:
 - The older thirteen-class path, `world:fetch` and `world:master`, is stale and says so when run. It
   refuses to overwrite a hand-painted master and writes alongside; the merge script replays hand edits. `world:build` warps Earth into raw material for
   a different starting point.
-- What it looks like: `npm run world:paint --prefix frontend` paints every view in `world/painterly.json`
-  into `world/painterly/`, each one painted and flat so the two can be held against each other. Add
-  `-- --view alps` for one of them. The treatment itself is pure functions in
-  `frontend/packages/world/src/painterly.ts`, meant for a shader; see `docs/adr/0021`. It is not in the
-  live map yet, which still draws flat tiles.
+- What it looks like: the picker at the top right of the running app switches renderer. `Raw` is the flat
+  tiles as cut; the other three are painted in the browser, tile by tile, by the same functions that paint
+  the stills. Only the terrain is precomputed: a tile knows its own zoom, so the treatment is drawn at the
+  size it should be at whatever you are looking at. Painting happens in a pool of workers, and the tiles
+  around the view are painted during the pauses so that moving the map finds them done;
+  `window.villagesPainterly` in a dev build counts how often that worked. See `docs/adr/0021` and `0022`.
+- The styles live in `world/painterly.json`. `npm run world:paint --prefix frontend` paints every view in
+  every style into `world/painterly/`, flat once and then once per style, and writes the runtime copy the
+  app reads. `-- --view alps`, `-- --style woodblock` for one of them; `-- --config-only` writes just the
+  runtime copy, in a second, which is all the app needs after a style edit.
 - Frontend, look at it: `npm run dev --prefix frontend`, then open http://localhost:5173
 - Frontend, checks: `npm run check --prefix frontend` (typecheck, lint, format, unit tests)
 The three below do not exist yet. They arrive with the increments named, and `infra/`, `backend/` and
