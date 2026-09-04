@@ -70,7 +70,7 @@ one rate-based ticker, and see other players' houses appear live and jiggle. Six
 - [x] 1.1 The value types of a house: seat, cell, name, banner with the rule of tincture, treasury as a rate
 - [x] 1.2 FoundHouse, HouseFounded, the state and the decider; the first row in the event catalogue
 - [x] 1.3 The frames, in Kotlin and in zod, both held to the same fixtures
-- [ ] 1.4 The FoundHouse use case and the ports
+- [x] 1.4 The FoundHouse use case and the ports
 - [ ] 1.5 The event store behind the ports, and the type mapper held to the catalogue
 - [ ] 1.6 The bridge from the store to the broker
 - [ ] 1.7 The houses-by-cell projection
