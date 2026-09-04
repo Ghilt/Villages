@@ -1,5 +1,7 @@
 import type { StyleSpecification } from 'maplibre-gl';
 
+import { FLAT_MAX_ZOOM } from './painterlyMessages';
+
 /**
  * The look of our world, and the whole of it: terrain, a coastline, lake shores, and not one word of text.
  *
@@ -12,13 +14,10 @@ import type { StyleSpecification } from 'maplibre-gl';
  * The colours the terrain is drawn in live in `world/render.json` and are baked into the tiles.
  */
 
-/**
- * Beyond this the tiles are stretched, because a tile pixel is already a master pixel here. The master is
- * 32768 across, and 256 times two to the seventh is 32768.
- */
-export const TERRAIN_TILE_MAX_ZOOM = 7;
-
 export const WORLD_MAX_ZOOM = 10;
+
+/** How wide the master is, which is what sets how much ground a tile pixel covers at each zoom. */
+export const WORLD_MASTER_WIDTH = 32768;
 
 const SEA = '#93aebc';
 const INK = '#5f5544';
@@ -37,7 +36,8 @@ export function warpedWorldStyle(): StyleSpecification {
         tiles: ['/world/tiles/{z}/{x}/{y}.png'],
         tileSize: 256,
         minzoom: 0,
-        maxzoom: TERRAIN_TILE_MAX_ZOOM,
+        // Beyond this the tiles are stretched: a tile pixel is already a master pixel here.
+        maxzoom: FLAT_MAX_ZOOM,
         attribution: CREDITS,
       },
       outlines: {

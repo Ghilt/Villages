@@ -183,3 +183,114 @@ body,
   line-height: 1.35;
   color: var(--ink-soft);
 }
+
+/* What the program thinks is happening. Development scaffolding, and it looks like it on purpose. */
+.debug {
+  position: absolute;
+  top: 9.75rem;
+  right: 1rem;
+  z-index: 3;
+  pointer-events: auto;
+  width: 21rem;
+  max-width: calc(100% - 2rem);
+  max-height: calc(100% - 12rem);
+  display: flex;
+  flex-direction: column;
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace;
+  font-size: 0.68rem;
+  line-height: 1.45;
+  color: var(--ink);
+  background: rgba(251, 247, 236, 0.94);
+  border: 1px solid var(--parchment-edge);
+  border-radius: 3px;
+  box-shadow: 0 2px 10px var(--shadow);
+}
+
+.debug--shut {
+  width: auto;
+  max-height: none;
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-size: 0.62rem;
+}
+
+.debug__bar {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid var(--parchment-edge);
+}
+
+.debug__title {
+  flex: 1;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-size: 0.62rem;
+  color: var(--ink-soft);
+}
+
+.debug__button {
+  font: inherit;
+  font-size: 0.62rem;
+  padding: 0.1rem 0.4rem;
+  cursor: pointer;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--parchment-edge);
+  border-radius: 2px;
+}
+
+.debug__button:hover {
+  background: rgba(157, 124, 42, 0.12);
+}
+
+.debug__state {
+  margin: 0;
+  padding: 0.4rem 0.5rem;
+  border-bottom: 1px solid var(--parchment-edge);
+}
+
+.debug__row {
+  display: grid;
+  grid-template-columns: 5.6rem 1fr;
+  gap: 0 0.4rem;
+}
+
+.debug__row dt {
+  color: var(--ink-soft);
+}
+
+.debug__row dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.debug__log {
+  margin: 0;
+  padding: 0.4rem 0.5rem;
+  list-style: none;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 3rem;
+}
+
+.debug__log li {
+  overflow-wrap: anywhere;
+}
+
+.debug__quiet {
+  color: var(--ink-soft);
+}
+
+.debug__when {
+  color: var(--ink-soft);
+  margin-right: 0.35rem;
+}
+
+.debug__area {
+  color: var(--gold);
+  margin-right: 0.35rem;
+}

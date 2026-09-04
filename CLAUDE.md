@@ -116,8 +116,15 @@ Commands are added here as the increments land:
   tiles as cut; the other three are painted in the browser, tile by tile, by the same functions that paint
   the stills. Only the terrain is precomputed: a tile knows its own zoom, so the treatment is drawn at the
   size it should be at whatever you are looking at. Painting happens in a pool of workers, and the tiles
-  around the view are painted during the pauses so that moving the map finds them done;
-  `window.villagesPainterly` in a dev build counts how often that worked. See `docs/adr/0021` and `0022`.
+  around the view are painted during the pauses so that moving the map finds them done. See
+  `docs/adr/0021` and `0022`.
+- What the program thinks is happening: the debug panel, under the renderer picker, minimises to a chip
+  and remembers which. It shows the renderer, the zoom against the zoom of tiles being asked for, how far
+  the terrain is being stretched past the depth it was cut at, how much ground a pixel covers, and how
+  many painted tiles were ready before the map asked. Its copy button puts the state and the log on the
+  clipboard, which is the shortest way to tell a session what the program is doing. Anything worth saying
+  goes through `note(area, message)` in `apps/web/src/debug/log.ts`. `window.villagesPainterly()` gives
+  the paint counters from a console.
 - The styles live in `world/painterly.json`. `npm run world:paint --prefix frontend` paints every view in
   every style into `world/painterly/`, flat once and then once per style, and writes the runtime copy the
   app reads. `-- --view alps`, `-- --style woodblock` for one of them; `-- --config-only` writes just the

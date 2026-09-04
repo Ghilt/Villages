@@ -1,4 +1,5 @@
 import { addProtocol } from 'maplibre-gl';
+import { note } from '../debug/log';
 import { TILE } from './painterlyMessages';
 import type { PaintReply, PaintRequest } from './painterlyMessages';
 import { WORLD_MAX_ZOOM } from './worldStyle';
@@ -69,12 +70,33 @@ let nextId = 1;
 
 /**
  * How well the looking ahead is working: of the tiles the map asked for, how many were already painted.
- * A handle for the console and for a test, next to `villagesMap`. Ready is what the eye notices, because
- * a tile that is not ready shows the flat terrain first and then changes.
+ *
+ * Ready is the number that decides how this feels, because a tile that is not ready is a tile the eye
+ * catches arriving. It does not show up in a profile, so it is counted here and shown in the debug panel.
  */
 const tally = { ready: 0, waited: 0, aheadPainted: 0 };
+
+export interface PaintedTally {
+  ready: number;
+  waited: number;
+  aheadPainted: number;
+  /** How many painted tiles are being kept, against the cap. */
+  held: number;
+}
+
+export function paintedTally(): PaintedTally {
+  return { ...tally, held: painted.size };
+}
+
+/** Starts the counting again, so a single movement can be measured on its own. */
+export function forgetPaintedTally(): void {
+  tally.ready = 0;
+  tally.waited = 0;
+  tally.aheadPainted = 0;
+}
+
 if (import.meta.env.DEV) {
-  (window as unknown as { villagesPainterly?: typeof tally }).villagesPainterly = tally;
+  (window as unknown as { villagesPainterly?: () => PaintedTally }).villagesPainterly = paintedTally;
 }
 
 const addressOf = (request: PaintRequest): string =>
@@ -105,7 +127,9 @@ function pool(): Worker[] {
       const waiting = pending.get(event.data.id);
       pending.delete(event.data.id);
       if (event.data.pixels === undefined) {
-        waiting?.fail(new Error(event.data.error ?? 'the painter gave no reason'));
+        const why = event.data.error ?? 'the painter gave no reason';
+        note('paint', `a tile failed: ${why}`);
+        waiting?.fail(new Error(why));
       } else {
         waiting?.settle(event.data.pixels);
       }
