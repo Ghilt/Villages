@@ -35,6 +35,10 @@ world/painterly/
 # The generated world: reproducible from world/warp.json, and it would bloat the history
 frontend/apps/web/public/world/
 
+# What the two servers printed while debug-quick-start ran them. Machine-local and rewritten on
+# every start.
+.logs/
+
 # Environment
 .env
 .env.*

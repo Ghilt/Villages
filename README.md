@@ -21,24 +21,40 @@ thousands of concurrent players.
 
 ## Five-minute start
 
-Node 24 is all you need for the part that exists today.
+One command, from the repository root:
 
-From the repository root:
+```
+.\debug-quick-start.ps1
+```
+
+It checks the tools, generates whatever part of the world is missing, starts the game server and the dev
+server, waits until both answer, prints the address to open, and opens it. From Explorer,
+`debug-quick-start.cmd` beside it does the same on a double click. Add `-Stop` to shut both down,
+`-Logs` to print what they said, `-WebOnly` for the map without the game server. Node 24 is the only
+thing it needs; without a JDK it starts the map alone and says so.
+
+The commands it runs, if you would rather run them yourself:
 
 ```
 npm install --prefix frontend
 npm run world:import --prefix frontend
 npm run world:tile --prefix frontend
 npm run dev --prefix frontend
+cd backend && .\gradlew.bat :app:bootRun
 ```
 
-Then open http://localhost:5173 and you are looking at the world: pan and zoom, and see the frame your house will
-occupy. The map is ours, and it carries no text at all. It is painted by hand as an image,
-`world/master/terrain.png`, one flat colour per terrain across thirty-two of them: edit that in any image editor,
-run the two world commands again, and the world changes. `docs/AUTHORING-THE-WORLD.md` explains how. Setting `VITE_MAP_STYLE_URL` shows a real map of Earth
-instead, for comparison.
+Then open http://localhost:5173 and you are looking at the world: pan and zoom, and see the frame your
+house will occupy. The map is ours, and it carries no text at all. It is painted by hand as an image,
+`world/master/terrain.png`, one flat colour per terrain across thirty-two of them: edit that in any image
+editor, run the two world commands again, and the world changes. `docs/AUTHORING-THE-WORLD.md` explains
+how. Setting `VITE_MAP_STYLE_URL` shows a real map of Earth instead, for comparison.
+
+The picker at the top right switches renderer, and the debug panel under it says what the program thinks
+is happening: the state of the world, and every event as it arrives. Its "found a house here" button
+sends a real command. Nothing is stored yet, so a restart of the game server forgets the houses; that is
+deliberate until MongoDB arrives with increment 0.4.
 
 `npm run check --prefix frontend` runs the typecheck, the linter, the formatter and the unit tests.
 
-The server needs Docker Desktop and Eclipse Temurin 21 on `JAVA_HOME`, and arrives with the increments listed in
-`docs/ROADMAP.md`.
+Docker Desktop is not needed yet: the event store and the broker are in memory behind their ports until
+the increments in `docs/ROADMAP.md` put the real ones there.

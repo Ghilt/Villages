@@ -60,7 +60,7 @@ stand.
 ## Layout
 
 ```
-CLAUDE.md  README.md  .claude/settings.json  scripts/check.{ps1,sh}
+CLAUDE.md  README.md  debug-quick-start.{ps1,cmd}  .claude/settings.json  scripts/check.{ps1,sh}
 docs/       VISION GLOSSARY ARCHITECTURE ROADMAP TESTING EVENTS, adr/, experiments/, plans/
 contracts/  fixtures/*.json shared by the Kotlin and TypeScript protocol tests
 infra/      docker-compose.yml (MongoDB replica set, RabbitMQ)
@@ -94,7 +94,10 @@ and ESLint restricted imports on the frontend.
 
 ## How to run
 
-Prerequisites: Docker Desktop (WSL2), Eclipse Temurin 21 on `JAVA_HOME`, Node 24.
+Prerequisites: Node 24, and a JDK on the path for the server. Any recent one will do, because the
+Gradle toolchain fetches the 21 it compiles with; the machine's `JAVA_HOME` is on Temurin 17 and that
+is fine. Docker Desktop is needed by increment 0.4 and not before: the event store and the broker are
+in memory behind their ports until then.
 
 All the commands below are run **from the repository root**, `E:\Code\Villages`. The `--prefix frontend`
 part is what points npm at the frontend workspace, so running them from inside `frontend/` looks for
@@ -102,6 +105,13 @@ part is what points npm at the frontend workspace, so running them from inside `
 
 Commands are added here as the increments land:
 
+- Everything, from a cold machine: `.\debug-quick-start.ps1` from the repository root, or
+  `debug-quick-start.cmd` on a double click from Explorer. It checks the tools, generates whatever part
+  of the world is missing, starts the game server and the dev server hidden with their output in
+  `.logs/`, waits until both ports answer, and prints the address. `-Stop` stops both, `-Logs` prints
+  their tails, `-WebOnly` skips the game server, `-NoBrowser` leaves the browser alone. This is how
+  Adam runs the program without an agent in the loop, so it stays true: a step that adds a server, a
+  generated file or a prerequisite adds it there in the same commit.
 - Frontend, once: `npm install --prefix frontend`
 - The world: `npm run world:import --prefix frontend` traces the coast and the large lakes, and
   `npm run world:tile --prefix frontend` cuts the terrain into map tiles. Both read the hand-painted
