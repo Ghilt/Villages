@@ -757,11 +757,12 @@ paintGeoJson('ne_10m_playas', 'salt-flat', { minimumOnePixel: true });
       if (!overlapsWindow(pixelBounds(shape.rings))) {
         continue;
       }
-      // A river is a line, and one pixel of the master is already a river more than a kilometre
-      // across, so almost everything gets exactly one pixel and only the greatest rivers on Earth get
-      // two. Deliberately not scaled with the master: a finer master should draw finer rivers, which
-      // is the whole reason to have one.
-      const width = order >= 9 ? 2 : 1;
+      // One pixel, always. A pixel of the master is a river 1.2 kilometres across, which is already
+      // wider than all but a handful of rivers on Earth, and a stroke any wider paints a cross rather
+      // than a line: measured across a master built with the greatest rivers at two pixels, the median
+      // crossing was three pixels and some were eleven. Deliberately not scaled with the master, so
+      // that a finer master draws finer rivers.
+      const width = 1;
       for (const line of shape.rings) {
         strokeAcross(line, value, width);
       }
@@ -782,8 +783,8 @@ paintGeoJson('ne_10m_playas', 'salt-flat', { minimumOnePixel: true });
   }
 }
 
-paintGeoJson('ne_10m_rivers_lake_centerlines', 'river', { lineWidth: 2 });
-paintGeoJson('ne_10m_rivers_europe', 'river', { lineWidth: 2 });
+paintGeoJson('ne_10m_rivers_lake_centerlines', 'river', { lineWidth: 1 });
+paintGeoJson('ne_10m_rivers_europe', 'river', { lineWidth: 1 });
 
 // Ice after the rivers, because HydroRIVERS carries a drainage network straight across the Greenland ice
 // sheet — derived from the terrain model, not from any river that exists — and it combs the ice cap with

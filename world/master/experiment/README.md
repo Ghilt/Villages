@@ -179,14 +179,17 @@ Fetch the sources into one directory, laid out as `LC100.tif`, `eco/Ecoregions20
 `.geojson` files at the top level. Then:
 
 ```bash
-node --max-old-space-size=8192 tools/build.mjs --source <that directory> --width 16384 --step 2
+node --max-old-space-size=12288 tools/build.mjs --source <that directory> --width 32768 --step 2
 ```
 
-Under two minutes for the whole world, most of it inflating 782,736 land cover tiles. For tuning
+Two minutes for the whole world at 32768 across, most of it inflating 782,736 land cover tiles. Anything
+in `T` measured in pixels is multiplied by the master's width over 16384, so that a finer master draws
+finer features rather than changing which of them exist. River width is deliberately exempt: it stays at
+one pixel, which is what makes a finer master draw a thinner river. For tuning
 thresholds, `--window w,s,e,n` paints one box at full resolution in seconds:
 
 ```bash
-node tools/build.mjs --source <that directory> --window 13,55,17.6,57.4 --width 16384
+node tools/build.mjs --source <that directory> --window 13,55,17.6,57.4 --width 32768
 ```
 
 `--step` is how finely the land cover map is sampled inside each master pixel: 2 gives about 121 samples,
@@ -201,7 +204,7 @@ The parts worth moving into `frontend/packages/world` are, in order of how much 
 2. **HydroLAKES pour points as a source**, with a disc sized from the lake's area.
 3. **A BigTIFF raster source kind**, and a layer type that assigns classes from land cover fractions with
    the thresholds in `master.json` rather than in code.
-4. **HydroRIVERS**, with width from Strahler order. Note that `unzipSync` on a whole archive will not
+4. **HydroRIVERS**, one pixel wide whatever the order. Note that `unzipSync` on a whole archive will not
    survive an 820 MB zip; these were extracted to disk first.
 5. **The ecoregion name hints**, which cost nothing — the data is already downloaded — and would give
    Europe several greens even with no other change.

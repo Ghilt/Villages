@@ -206,6 +206,24 @@ Costs: 140 seconds to build the world, 20 to import it, 52 to tile it, and about
 The tiler now works out the native zoom from the master's own width rather than being told, so nothing has
 to be remembered when the resolution changes again.
 
+**2026-09-03, measuring a river rather than arguing about it.** Adam said most rivers looked about five
+pixels wide and should be about three. Counting runs of river pixels along transects across Germany,
+France, Poland, Sweden and the Amazon said he was right and I had been wrong to think them one pixel: the
+median crossing was three pixels and the widest eleven.
+
+The cause was the stroke, not the data. A line drawn two pixels wide by the raster paints a cross three
+pixels across, and the named rivers of Natural Earth and every reach above Strahler order nine were being
+drawn at two. Every river is one pixel now.
+
+| | Median crossing | Mean | Widest |
+|---|---|---|---|
+| Before | 3 px | 2.99 | 11 |
+| After | 1 px | 1.69 | 6 |
+
+The crossings still wider than one are diagonals and confluences, which is honest: a river crossed at a
+shallow angle really does span more pixels. Worth remembering that "make it thinner" was answerable with
+a measurement, and that my belief about my own code was wrong until I counted.
+
 ## Result
 
 ## Decision
