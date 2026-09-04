@@ -3,6 +3,7 @@ import type * as maplibregl from 'maplibre-gl';
 
 import { DebugPanel } from './debug/DebugPanel';
 import { note } from './debug/log';
+import { gateway } from './net/gateway';
 import { HudShell } from './hud/HudShell';
 import { MapView } from './map/MapView';
 import { RendererPicker } from './map/RendererPicker';
@@ -13,6 +14,11 @@ import { SpriteOverlay } from './sprites/SpriteOverlay';
 export function App() {
   const [map, setMap] = useState<maplibregl.Map | null>(null);
   const [renderer, setRenderer] = useState(DEFAULT_RENDERER);
+
+  // The one connection to the gateway, opened as the app mounts.
+  useEffect(() => {
+    gateway();
+  }, []);
 
   useEffect(() => {
     if (map !== null) {

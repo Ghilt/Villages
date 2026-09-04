@@ -5,6 +5,7 @@ import { FLAT_MAX_ZOOM, TILE } from '../map/painterlyMessages';
 import { forgetPaintedTally, paintedTally } from '../map/painterlyTiles';
 import { WORLD_MASTER_WIDTH } from '../map/worldStyle';
 import { atToClock, note, notesNow, watchNotes } from './log';
+import { EventsView } from './EventsView';
 import { describeState } from './report';
 import type { Line } from './report';
 
@@ -191,6 +192,8 @@ export function DebugPanel({ map, renderer }: DebugPanelProps) {
           </div>
         ))}
       </dl>
+
+      <EventsView map={map} />
 
       <ol className="debug__log">
         {notes.length === 0 && <li className="debug__quiet">nothing logged yet</li>}

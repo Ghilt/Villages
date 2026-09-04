@@ -294,3 +294,60 @@ body,
   color: var(--gold);
   margin-right: 0.35rem;
 }
+
+/* The events, inside the debug panel. */
+.events {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--parchment-edge);
+  min-height: 4rem;
+}
+
+.events__bar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid var(--parchment-edge);
+}
+
+.events__link {
+  flex: 1;
+  font-size: 0.62rem;
+  color: var(--ink-soft);
+}
+
+.events__link--open {
+  color: #3f7d4e;
+}
+
+.events__link--closed {
+  color: #9b3a2f;
+}
+
+.events__list {
+  margin: 0;
+  padding: 0.3rem 0.5rem;
+  list-style: none;
+  overflow-y: auto;
+  max-height: 14rem;
+}
+
+.events__event summary {
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.events__stream {
+  color: var(--ink-soft);
+}
+
+.events__json {
+  margin: 0.25rem 0 0.4rem;
+  padding: 0.4rem;
+  font-size: 0.62rem;
+  line-height: 1.35;
+  background: rgba(157, 124, 42, 0.07);
+  border-radius: 2px;
+  overflow-x: auto;
+}

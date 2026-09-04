@@ -27,7 +27,7 @@ installed. The backend increments follow, and keep their original numbers.
 - [x] 0.6 Architecture tests that fail on a layer violation
 - [x] 0.7 Occurrent smoke test on the in-memory event store
 - [ ] 0.8 Testcontainers smoke test on MongoDB and RabbitMQ
-- [ ] 0.9 The application boots and the gateway answers a hello
+- [x] 0.9 The application boots and the gateway answers a hello, in memory, without MongoDB
 - [ ] 0.14 One check script for the whole repository
 
 Blocked on the machine: Docker Desktop with the WSL2 backend, needed for 0.4, 0.8 and 0.9. Temurin 21 is not
@@ -58,8 +58,8 @@ Adam verifies by looking at the running program, not by reading code, and the de
 program says what it is doing. It grows with every increment that adds behaviour. See decision record 0023.
 
 - [x] State of the map, the renderer and the paint, copyable in one click
-- [ ] Domain events as they reach the browser: one line each in words, opening to the whole CloudEvent
-- [ ] Commands sent and their acceptance or rejection, alongside the events they caused
+- [x] Domain events as they reach the browser: one line each in words, opening to the whole CloudEvent
+- [x] Commands sent and their acceptance or rejection, in the log beside the events they caused
 - [ ] The connection: hello, subscriptions, resyncs, reconnects
 
 ## Next: Phase 1, the walking skeleton
@@ -71,13 +71,13 @@ one rate-based ticker, and see other players' houses appear live and jiggle. Six
 - [x] 1.2 FoundHouse, HouseFounded, the state and the decider; the first row in the event catalogue
 - [x] 1.3 The frames, in Kotlin and in zod, both held to the same fixtures
 - [x] 1.4 The FoundHouse use case and the ports
-- [ ] 1.5 The event store behind the ports, and the type mapper held to the catalogue
+- [x] 1.5 The event store behind the ports, and the type mapper held to the catalogue: in memory until 0.8
 - [ ] 1.6 The bridge from the store to the broker
 - [ ] 1.7 The houses-by-cell projection
-- [ ] 1.8 The gateway: sessions, cells, snapshot then deltas
-- [ ] 1.9 The client core: cells, connection, state
+- [ ] 1.8 The gateway: sessions, cells, snapshot then deltas. Hello, ping and an event feed are there; cells wait for the projection
+- [ ] 1.9 The client core: cells, connection, state. The connection is there, over an injected socket; cells and state wait
 - [ ] 1.10 Houses on the map from the gateway, and a seed script
-- [ ] 1.11 Command intake, end to end
+- [x] 1.11 Command intake, end to end: a house founded over the socket comes back as its event; houseAppeared arrives with the projection
 - [ ] 1.12 The banner drawn
 - [ ] 1.13 Founding a house from the interface
 - [ ] 1.14 The ticker

@@ -123,8 +123,10 @@ Commands are added here as the increments land:
 - What the program thinks is happening: the debug panel, under the renderer picker, minimises to a chip
   and remembers which. It shows the renderer, the zoom against the zoom of tiles being asked for, how far
   the terrain is being stretched past the depth it was cut at, how much ground a pixel covers, and how
-  many painted tiles were ready before the map asked. Its copy button puts the state and the log on the
-  clipboard, which is the shortest way to tell a session what the program is doing. Anything worth saying
+  many painted tiles were ready before the map asked, and every event the world stores as it arrives, one
+  line each, opening to the whole thing. Its copy button puts the state and the log on the clipboard, which is
+  the shortest way to tell a session what the program is doing. The `found a house here` button in it sends a
+  real command and is how to make an event happen on purpose. Anything worth saying
   goes through `note(area, message)` in `apps/web/src/debug/log.ts`. `window.villagesPainterly()` gives
   the paint counters from a console.
 - The styles live in `world/painterly.json`. `npm run world:paint --prefix frontend` paints every view in
@@ -133,6 +135,9 @@ Commands are added here as the increments land:
   runtime copy, in a second, which is all the app needs after a style edit.
 - Frontend, look at it: `npm run dev --prefix frontend`, then open http://localhost:5173
 - Frontend, checks: `npm run check --prefix frontend` (typecheck, lint, format, unit tests)
+- Backend, running: `cd backend` then `./gradlew :app:bootRun`, or the `backend` entry in `.claude/launch.json`. The
+  gateway is a WebSocket at `ws://localhost:8080/ws`; the web app connects to it on load, or to
+  `VITE_GATEWAY_URL`. Everything is in memory until MongoDB exists, so nothing survives a restart, on purpose.
 - Backend, checks: `cd backend` then `./gradlew check`. Gradle fetches the JDK 21 the toolchain asks for, so
   `JAVA_HOME` may stay on the Temurin 17 that is installed; the first run downloads it. Every module's
   `build.gradle.kts` declares only its allowed dependency edges, and `buildSrc` holds the one convention
@@ -142,7 +147,6 @@ The two below do not exist yet. They arrive with the increments named, and `infr
 layout above are where they will go rather than where they are.
 
 - Infra: `docker compose -f infra/docker-compose.yml up -d` (increment 0.4)
-- Backend, running: `./gradlew :app:bootRun` (0.9, once there is a MongoDB to boot against)
 - Everything: `scripts/check.ps1` or `scripts/check.sh` (0.14)
 
 The dev server is also registered in `.claude/launch.json` under the name `web`, so the preview tooling can start
