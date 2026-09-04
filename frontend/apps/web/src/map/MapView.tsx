@@ -6,6 +6,8 @@ import { CAMERA, resolveStyle } from './mapConfig';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 interface MapViewProps {
+  /** Where the world this page is drawing was cut to, as the root of a URL. See map/masters.ts. */
+  worldRoot: string;
   /** Called once the map has a style and a camera, so that overlays can attach to it. */
   onReady?: (map: maplibregl.Map) => void;
 }
@@ -14,7 +16,7 @@ interface MapViewProps {
  * The map is the world, so it owns the camera and everything else follows it. This component is the only
  * place that talks to MapLibre imperatively; the rest of the interface reads state and draws over it.
  */
-export function MapView({ onReady }: MapViewProps) {
+export function MapView({ worldRoot, onReady }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -25,7 +27,7 @@ export function MapView({ onReady }: MapViewProps) {
 
     const map = new maplibregl.Map({
       container,
-      style: resolveStyle(import.meta.env),
+      style: resolveStyle(import.meta.env, worldRoot),
       center: [CAMERA.center.lng, CAMERA.center.lat],
       zoom: CAMERA.initialZoom,
       minZoom: CAMERA.minZoom,
@@ -59,7 +61,7 @@ export function MapView({ onReady }: MapViewProps) {
     return () => {
       map.remove();
     };
-  }, [onReady]);
+  }, [worldRoot, onReady]);
 
   return <div className="map" ref={containerRef} data-testid="map" />;
 }

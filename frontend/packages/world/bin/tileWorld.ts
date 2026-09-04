@@ -1,6 +1,6 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { deflateSync } from 'node:zlib';
-import { resolve } from 'node:path';
+import { basename, resolve } from 'node:path';
 
 import { PNG } from 'pngjs';
 
@@ -11,6 +11,8 @@ import type { ClassRaster } from '../src/raster.ts';
 import { encodeIndexedPng } from '../src/png.ts';
 import { TILE_SIZE, cutTile, tileAddresses, tileCount } from '../src/tiles.ts';
 
+import { DEFAULT_MASTER, masterNameOf, worldDirOf } from '../src/masters.ts';
+
 import { MASTER_DIR, OUTPUT_DIR, PALETTE, RENDER } from './paths.ts';
 
 /**
@@ -20,7 +22,10 @@ import { MASTER_DIR, OUTPUT_DIR, PALETTE, RENDER } from './paths.ts';
  * to well over a hundred thousand shapes, most of which any servable threshold throws away. As tiles it
  * costs nothing and arrives only where the player is looking. See docs/adr/0019.
  *
- *   node bin/tileWorld.ts [--zoom 6] [--out directory]
+ *   node bin/tileWorld.ts [master.png] [--zoom 6] [--out directory]
+ *
+ * Each master is cut into its own directory, named after it, so several worlds can exist at once and
+ * the debug map panel can load any of them.
  */
 
 const args = process.argv.slice(2);
@@ -28,8 +33,13 @@ const flag = (name: string): string | undefined => {
   const at = args.indexOf(`--${name}`);
   return at < 0 ? undefined : args[at + 1];
 };
+const named = args.filter(
+  (value, index) => !value.startsWith('--') && args[index - 1]?.startsWith('--') !== true,
+);
 
-const outputDir = flag('out') ?? resolve(OUTPUT_DIR, 'tiles');
+const masterPath = named[0] === undefined ? resolve(MASTER_DIR, `${DEFAULT_MASTER}.png`) : resolve(named[0]);
+const master = masterNameOf(basename(masterPath)) ?? DEFAULT_MASTER;
+const outputDir = flag('out') ?? resolve(OUTPUT_DIR, worldDirOf(master), 'tiles');
 
 const palette = JSON.parse(await readFile(PALETTE, 'utf8')) as Palette;
 const render = JSON.parse(await readFile(RENDER, 'utf8')) as {
@@ -50,7 +60,7 @@ for (let id = 0; id <= Math.max(...palette.classes.map((terrain) => terrain.id))
 }
 
 const prepared = preparePalette(palette);
-const decoded = PNG.sync.read(await readFile(resolve(MASTER_DIR, 'terrain.png')));
+const decoded = PNG.sync.read(await readFile(masterPath));
 const world: ClassRaster = createRaster(decoded.width, decoded.height);
 const remembered = new Int16Array(1 << 24).fill(-1);
 
@@ -77,8 +87,8 @@ const nativeZoom = Math.round(Math.log2(decoded.width / TILE_SIZE));
 const maxZoom = flag('zoom') === undefined ? nativeZoom : Number(flag('zoom'));
 
 console.log(
-  `read ${decoded.width} by ${decoded.height}, detail running out at zoom ${nativeZoom}; ` +
-    `cutting ${tileCount(maxZoom)} tiles`,
+  `read ${master}, ${decoded.width} by ${decoded.height}, detail running out at zoom ` +
+    `${nativeZoom}; cutting ${tileCount(maxZoom)} tiles`,
 );
 
 const deflate = (data: Uint8Array) => new Uint8Array(deflateSync(data, { level: 9 }));
@@ -106,6 +116,18 @@ for (const address of tileAddresses(maxZoom)) {
     console.log(`  ${written} tiles, ${(bytes / 1048576).toFixed(1)} MB`);
   }
 }
+
+/**
+ * What was cut, written last of all.
+ *
+ * The debug map panel says when a master was last cut, and compares that against when the image was
+ * last saved. Nothing else on disk can answer it: the outlines are written minutes before the tiles are
+ * finished, so a world would claim to be current when it was not.
+ */
+await writeFile(
+  resolve(outputDir, 'cut.json'),
+  `${JSON.stringify({ master, at: new Date().toISOString(), tiles: written, bytes, maxZoom }, null, 2)}\n`,
+);
 
 console.log(`\n${written} tiles, ${(bytes / 1048576).toFixed(1)} MB, ${TILE_SIZE} pixels square`);
 console.log(`average ${(bytes / written / 1024).toFixed(1)} kB a tile`);

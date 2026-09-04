@@ -6,12 +6,18 @@ import { note } from './debug/log';
 import { gateway } from './net/gateway';
 import { HudShell } from './hud/HudShell';
 import { MapView } from './map/MapView';
-import { RendererPicker } from './map/RendererPicker';
+import { DebugMapPanel } from './map/DebugMapPanel';
+import { worldRootOf } from './map/masters';
 import { DEFAULT_RENDERER, RENDERERS, applyRenderer } from './map/renderers';
 import { DEMO_SEATS } from './sprites/demoSeats';
 import { SpriteOverlay } from './sprites/SpriteOverlay';
 
-export function App() {
+interface AppProps {
+  /** Which hand-painted master this page load is drawing. Decided once, in main.tsx. */
+  master: string;
+}
+
+export function App({ master }: AppProps) {
   const [map, setMap] = useState<maplibregl.Map | null>(null);
   const [renderer, setRenderer] = useState(DEFAULT_RENDERER);
 
@@ -30,11 +36,13 @@ export function App() {
 
   return (
     <main className="app">
-      <MapView onReady={setMap} />
+      <MapView worldRoot={worldRootOf(master)} onReady={setMap} />
       {map !== null && <SpriteOverlay map={map} sprites={DEMO_SEATS} />}
       <HudShell />
-      <RendererPicker value={renderer} onChange={setRenderer} />
-      <DebugPanel map={map} renderer={renderer} />
+      <div className="rail">
+        <DebugMapPanel master={master} renderer={renderer} onRenderer={setRenderer} />
+        <DebugPanel map={map} renderer={renderer} />
+      </div>
     </main>
   );
 }

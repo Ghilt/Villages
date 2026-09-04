@@ -69,13 +69,19 @@ async function load(): Promise<Ready> {
 const decoded = new Map<string, Uint8Array | null>();
 const DECODED_CAP = 400;
 
-async function classesOf(zoom: number, x: number, y: number, at: Ready): Promise<Uint8Array | null> {
+async function classesOf(
+  tiles: string,
+  zoom: number,
+  x: number,
+  y: number,
+  at: Ready,
+): Promise<Uint8Array | null> {
   const across = 2 ** zoom;
   if (y < 0 || y >= across) {
     return null;
   }
   const wrapped = ((x % across) + across) % across;
-  const key = `${zoom}/${wrapped}/${y}`;
+  const key = `${tiles}/${zoom}/${wrapped}/${y}`;
   const held = decoded.get(key);
   if (held !== undefined) {
     return held;
@@ -83,7 +89,7 @@ async function classesOf(zoom: number, x: number, y: number, at: Ready): Promise
 
   let classes: Uint8Array | null = null;
   try {
-    const response = await fetch(`/world/tiles/${zoom}/${wrapped}/${y}.png`);
+    const response = await fetch(`${tiles}/tiles/${zoom}/${wrapped}/${y}.png`);
     if (response.ok) {
       const bitmap = await createImageBitmap(await response.blob());
       const canvas = new OffscreenCanvas(TILE, TILE);
@@ -146,6 +152,7 @@ async function classesOf(zoom: number, x: number, y: number, at: Ready): Promise
  * ocean.
  */
 async function neighbourhood(
+  tiles: string,
   sourceZoom: number,
   centreX: number,
   centreY: number,
@@ -155,7 +162,7 @@ async function neighbourhood(
   await Promise.all(
     [-1, 0, 1].flatMap((dy) =>
       [-1, 0, 1].map(async (dx) => {
-        const classes = await classesOf(sourceZoom, centreX + dx, centreY + dy, at);
+        const classes = await classesOf(tiles, sourceZoom, centreX + dx, centreY + dy, at);
         if (classes === null) {
           return;
         }
@@ -239,7 +246,7 @@ const inside = self as unknown as {
 };
 
 inside.addEventListener('message', async (event) => {
-  const { id, style: styleName, zoom, x, y } = event.data;
+  const { id, style: styleName, tiles, zoom, x, y } = event.data;
   try {
     ready ??= load();
     const at = await ready;
@@ -253,7 +260,7 @@ inside.addEventListener('message', async (event) => {
     const centreX = Math.floor(x / scale);
     const centreY = Math.floor(y / scale);
 
-    const field = await neighbourhood(sourceZoom, centreX, centreY, at);
+    const field = await neighbourhood(tiles, sourceZoom, centreX, centreY, at);
     const image = paintTile(style, field, sourceZoom, centreX, centreY, zoom, x, y, at);
     const pixels = image.data.buffer;
     inside.postMessage({ id, pixels }, [pixels]);

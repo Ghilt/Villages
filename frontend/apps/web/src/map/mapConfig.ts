@@ -27,7 +27,10 @@ export const CAMERA = {
  * and no text. Setting a style URL in the environment swaps in someone else's map instead, which is how
  * we look at the real Earth for comparison.
  */
-export function resolveStyle(env: { VITE_MAP_STYLE_URL?: string }): string | StyleSpecification {
+export function resolveStyle(
+  env: { VITE_MAP_STYLE_URL?: string },
+  worldRoot: string,
+): string | StyleSpecification {
   const configured = env.VITE_MAP_STYLE_URL?.trim();
-  return configured !== undefined && configured !== '' ? configured : warpedWorldStyle();
+  return configured !== undefined && configured !== '' ? configured : warpedWorldStyle(worldRoot);
 }

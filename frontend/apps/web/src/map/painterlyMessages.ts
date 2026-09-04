@@ -13,6 +13,11 @@ export const FLAT_MAX_ZOOM = 7;
 export interface PaintRequest {
   id: number;
   style: string;
+  /**
+   * Where the flat tiles this is painted from live, as the root of a URL. Carried on the request rather
+   * than known by the painter, so that which master is being drawn is one decision made in one place.
+   */
+  tiles: string;
   zoom: number;
   x: number;
   y: number;

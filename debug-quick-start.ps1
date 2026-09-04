@@ -230,6 +230,9 @@ if (-not (Test-Path (Join-Path $Root 'frontend\node_modules'))) {
 $WorldDir = Join-Path $Root 'frontend\apps\web\public\world'
 $Frontend = Join-Path $Root 'frontend'
 $Master = Join-Path $Root 'world\master\terrain.png'
+# One directory per hand-painted master, so the debug map panel can hold more than one world at once.
+# This is the one the two world commands write when given no arguments.
+$DefaultWorld = Join-Path $WorldDir 'masters\terrain'
 
 if (-not (Test-Path $Master)) {
     Bad "the hand-painted world is missing: $Master"
@@ -237,13 +240,13 @@ if (-not (Test-Path $Master)) {
     exit 1
 }
 
-if (-not (Test-Path (Join-Path $WorldDir 'terrain.geojson'))) {
+if (-not (Test-Path (Join-Path $DefaultWorld 'terrain.geojson'))) {
     Run 'tracing the coast and the lakes' $Npm @('run', 'world:import') $Frontend
 } else {
     Good 'the coast and the lakes are traced'
 }
 
-$Tiles = Join-Path $WorldDir 'tiles'
+$Tiles = Join-Path $DefaultWorld 'tiles'
 if (-not (Test-Path (Join-Path $Tiles '7'))) {
     Run 'cutting the world into tiles (about two minutes, once)' $Npm @('run', 'world:tile') $Frontend
 } else {

@@ -77,7 +77,14 @@ two pixels wide rather than kept as lines. Nothing else exists yet.
 
 ## Seeing your edit
 
-From the repository root, not from inside `frontend/`:
+Save the image, alt-tab to the running app, and pick it in the **Debug map** panel at the top right. Its
+terrain dropdown is every PNG in this folder, so a candidate saved as `terrain2.png` is offered beside
+`terrain.png` rather than having to overwrite it, and the panel says whether what is on the screen is
+still what the image says. A master nobody has cut yet, or one saved since it was last cut, gets a button
+that runs the two commands below and puts their output in the debug log while it works. See
+`docs/adr/0025`.
+
+The same two commands from the repository root, not from inside `frontend/`:
 
 ```
 npm run world:import --prefix frontend
@@ -88,7 +95,8 @@ The first traces the coast and the large lakes into the lines the map draws in i
 world into map tiles, which is how the terrain itself is drawn: thirty-two classes over a world this
 detailed come to well over a hundred thousand outlines, so terrain is pixels and only the ink is vector.
 See `docs/adr/0019`. The tiler works out where the master's detail runs out, which is zoom seven for a master this wide, and
-writes 21,845 tiles totalling 38 MB. It takes about a minute. A screen of map costs a few tens of
+writes 21,845 tiles totalling 65 MB into `masters/<name>/tiles`. Tracing takes under a minute and
+cutting takes another four. A screen of map costs a few tens of
 kilobytes of that.
 
 From inside `frontend/` it is `npm run world:import`, with no prefix. The prefix is what tells npm where
@@ -110,9 +118,10 @@ rather than a staircase, and no finer than what you painted.
 
 | File | What it is |
 |---|---|
-| `terrain.png` | The world. Yours. This is the one you edit |
+| `terrain.png` | The world. Yours. This is the one you edit, and the one the app draws by default |
+| `terrain2.png`, anything else | Any other PNG here is a world too, offered in the Debug map dropdown |
 | `terrain-base.png` | The generated master your edits sit on top of. Do not edit it |
-| `terrain-preview.png` | A small copy for glancing at. Generated |
+| `<name>-preview.png` | A small copy of that master for glancing at. Generated |
 | `palette-strip.png` | The thirty-two classes with their names and meanings, to eyedrop from |
 | `experiment/` | How this world was made, its sources, its thresholds and the generator |
 

@@ -224,7 +224,7 @@ function lookAhead(): void {
     if (painted.has(key) || inProgress.has(key) || wanted.has(key)) {
       return;
     }
-    around.push({ id: 0, style, zoom, x, y });
+    around.push({ id: 0, style, tiles: tilesRoot, zoom, x, y });
   };
 
   // Nearest first, so that what is painted ahead is what a small movement reaches first.
@@ -284,13 +284,22 @@ export function painterlyTiles(style: string): string {
 }
 
 let registered = false;
+/**
+ * Where the flat tiles the paint reads come from, which is to say which master is being drawn.
+ *
+ * Set once, before a map exists, and never changed: switching master reloads the page. Changing it in
+ * place would leave every painted tile in the store, and every decoded tile in every painter, holding
+ * terrain from the master before it.
+ */
+let tilesRoot = '/world/masters/terrain';
 
 /** Teaches MapLibre the `painterly://` scheme. Called once, before a map is built. */
-export function registerPainterlyTiles(): void {
+export function registerPainterlyTiles(worldRoot: string): void {
   if (registered) {
     return;
   }
   registered = true;
+  tilesRoot = worldRoot;
 
   addProtocol(SCHEME, async (params, abortController) => {
     const parts = /^painterly:\/\/([^/]+)\/(\d+)\/(\d+)\/(\d+)/.exec(params.url);
@@ -300,6 +309,7 @@ export function registerPainterlyTiles(): void {
     const request: PaintRequest = {
       id: 0,
       style: parts[1]!,
+      tiles: tilesRoot,
       zoom: Number(parts[2]),
       x: Number(parts[3]),
       y: Number(parts[4]),

@@ -115,22 +115,29 @@ Commands are added here as the increments land:
 - Frontend, once: `npm install --prefix frontend`
 - The world: `npm run world:import --prefix frontend` traces the coast and the large lakes, and
   `npm run world:tile --prefix frontend` cuts the terrain into map tiles. Both read the hand-painted
-  master in `world/master/`. That is the loop: edit the image, import, tile, reload. Terrain is drawn from
-  tiles rather than outlines; see `docs/adr/0019`. What it is painted in is `world/palette.json`, what
-  colour it is drawn in is `world/render.json`, and how it is painted is `world/painterly.json`.
+  master in `world/master/` and take another as their first argument; each master's world is written to
+  `public/world/masters/<name>/`, the default included. Terrain is drawn from tiles rather than outlines;
+  see `docs/adr/0019`. What it is painted in is `world/palette.json`, what colour it is drawn in is
+  `world/render.json`, and how it is painted is `world/painterly.json`.
+- Which world is drawn: the **Debug map** panel at the top right. Its terrain dropdown is every PNG in
+  `world/master/`, with each one's size and when it was last cut, and it says when the image has been
+  saved since - which it re-checks whenever the window is given focus. A master nobody has cut yet gets
+  a button, and pressing it runs those same two commands from the dev server with their output going
+  into the debug log: about five minutes, once per master. Switching reloads the page on purpose. So the
+  loop is: paint, save, alt-tab, pick it. See `docs/adr/0025`.
 - The 4.4 GB the world is built from lives in `world/source/`, not committed:
   `npm run world:fetch-all --prefix frontend` fills it from nothing, and `-- --list` says what each source
   is for. The generator is `world/master/experiment/tools/build.mjs`; two minutes for the whole world.
 - The older thirteen-class path, `world:fetch` and `world:master`, is stale and says so when run. It
   refuses to overwrite a hand-painted master and writes alongside; the merge script replays hand edits. `world:build` warps Earth into raw material for
   a different starting point.
-- What it looks like: the picker at the top right of the running app switches renderer. `Raw` is the flat
+- What it looks like: the renderer dropdown in that same panel. `Raw` is the flat
   tiles as cut; the other three are painted in the browser, tile by tile, by the same functions that paint
   the stills. Only the terrain is precomputed: a tile knows its own zoom, so the treatment is drawn at the
   size it should be at whatever you are looking at. Painting happens in a pool of workers, and the tiles
   around the view are painted during the pauses so that moving the map finds them done. See
   `docs/adr/0021` and `0022`.
-- What the program thinks is happening: the debug panel, under the renderer picker, minimises to a chip
+- What the program thinks is happening: the debug panel, under the Debug map panel, minimises to a chip
   and remembers which. It shows the renderer, the zoom against the zoom of tiles being asked for, how far
   the terrain is being stretched past the depth it was cut at, how much ground a pixel covers, and how
   many painted tiles were ready before the map asked, and every event the world stores as it arrives, one

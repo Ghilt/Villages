@@ -12,6 +12,9 @@ import { FLAT_MAX_ZOOM } from './painterlyMessages';
  * and the lakes large enough to have a shape rather than a position. See docs/adr/0019.
  *
  * The colours the terrain is drawn in live in `world/render.json` and are baked into the tiles.
+ *
+ * Which master all of that was cut from is the `root` every function here is given: one directory per
+ * master, so the debug map panel can draw any of them. See `map/masters.ts`.
  */
 
 export const WORLD_MAX_ZOOM = 10;
@@ -26,14 +29,14 @@ const INK = '#5f5544';
 const CREDITS =
   'Copernicus Global Land Service &middot; HydroSHEDS &middot; RESOLVE Ecoregions &middot; Natural Earth';
 
-export function warpedWorldStyle(): StyleSpecification {
+export function warpedWorldStyle(root: string): StyleSpecification {
   return {
     version: 8,
     name: 'Villages',
     sources: {
       terrain: {
         type: 'raster',
-        tiles: ['/world/tiles/{z}/{x}/{y}.png'],
+        tiles: [`${root}/tiles/{z}/{x}/{y}.png`],
         tileSize: 256,
         minzoom: 0,
         // Beyond this the tiles are stretched: a tile pixel is already a master pixel here.
@@ -42,7 +45,7 @@ export function warpedWorldStyle(): StyleSpecification {
       },
       outlines: {
         type: 'geojson',
-        data: '/world/terrain.geojson',
+        data: `${root}/terrain.geojson`,
         maxzoom: WORLD_MAX_ZOOM,
       },
     },

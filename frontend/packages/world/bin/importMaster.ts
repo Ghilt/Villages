@@ -1,6 +1,6 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { deflateSync } from 'node:zlib';
-import { resolve } from 'node:path';
+import { basename, resolve } from 'node:path';
 
 import { PNG } from 'pngjs';
 
@@ -13,6 +13,8 @@ import { doubleSignedArea, simplify, smooth } from '../src/simplify.ts';
 import { MAX_MERCATOR_LATITUDE } from '../src/sphere.ts';
 import { toLngLat, traceClass } from '../src/trace.ts';
 import type { Ring } from '../src/trace.ts';
+
+import { DEFAULT_MASTER, masterNameOf, worldDirOf } from '../src/masters.ts';
 
 import { MASTER_DIR, OUTPUT_DIR, PALETTE } from './paths.ts';
 
@@ -49,6 +51,9 @@ const SUSPICIOUS_DISTANCE = 18;
  * without disturbing the world being played.
  *
  *   node bin/importMaster.ts [master.png] [--palette palette.json] [--out directory]
+ *
+ * Each master gets its own directory, named after it, so several can exist at once and the debug map
+ * panel can load any of them. The preview is named after it too, for the same reason.
  */
 const args = process.argv.slice(2);
 const flag = (name: string): string | undefined => {
@@ -59,9 +64,10 @@ const named = args.filter(
   (value, index) => !value.startsWith('--') && args[index - 1]?.startsWith('--') !== true,
 );
 
-const masterPath = named[0] === undefined ? resolve(MASTER_DIR, 'terrain.png') : resolve(named[0]);
+const masterPath = named[0] === undefined ? resolve(MASTER_DIR, `${DEFAULT_MASTER}.png`) : resolve(named[0]);
+const master = masterNameOf(basename(masterPath)) ?? DEFAULT_MASTER;
 const palettePath = flag('palette') ?? PALETTE;
-const outputDir = flag('out') ?? OUTPUT_DIR;
+const outputDir = flag('out') ?? resolve(OUTPUT_DIR, worldDirOf(master));
 
 const palette = JSON.parse(await readFile(palettePath, 'utf8')) as Palette;
 const problems = paletteProblems(palette);
@@ -303,7 +309,7 @@ for (let row = 0; row < preview.height; row += 1) {
   }
 }
 await writeFile(
-  resolve(MASTER_DIR, 'terrain-preview.png'),
+  resolve(MASTER_DIR, `${master}-preview.png`),
   encodeIndexedPng(preview, colours, (data) => new Uint8Array(deflateSync(data, { level: 9 }))),
 );
 

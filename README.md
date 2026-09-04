@@ -49,10 +49,12 @@ house will occupy. The map is ours, and it carries no text at all. It is painted
 editor, run the two world commands again, and the world changes. `docs/AUTHORING-THE-WORLD.md` explains
 how. Setting `VITE_MAP_STYLE_URL` shows a real map of Earth instead, for comparison.
 
-The picker at the top right switches renderer, and the debug panel under it says what the program thinks
-is happening: the state of the world, and every event as it arrives. Its "found a house here" button
-sends a real command. Nothing is stored yet, so a restart of the game server forgets the houses; that is
-deliberate until MongoDB arrives with increment 0.4.
+The **Debug map** panel at the top right picks which master is drawn - every PNG in `world/master/` is
+offered, and one that has never been cut into tiles can be cut from there - and which renderer draws it.
+The debug panel under it says what the program thinks is happening: the state of the world, and every
+event as it arrives. Its "found a house here" button sends a real command. Nothing is stored yet, so a
+restart of the game server forgets the houses; that is deliberate until MongoDB arrives with increment
+0.4.
 
 `npm run check --prefix frontend` runs the typecheck, the linter, the formatter and the unit tests.
 

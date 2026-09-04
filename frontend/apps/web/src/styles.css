@@ -142,17 +142,35 @@ body,
   font-size: 0.68rem;
 }
 
-/* Which renderer draws the world. Scaffolding for choosing a look, not part of a player's interface. */
-.renderer {
+/*
+ * The scaffolding down the right-hand side: which world is drawn and how, then what the program thinks
+ * is happening. A column rather than two panels at fixed offsets, because the top one changes height
+ * with what it has to say and the one below it would then be under or over it.
+ */
+.rail {
   position: absolute;
   top: 1rem;
   right: 1rem;
-  z-index: 2;
+  bottom: 1rem;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.75rem;
+  pointer-events: none;
+}
+
+.rail > * {
   pointer-events: auto;
+}
+
+/* Which world is on the screen, and what draws it. Not part of a player's interface. */
+.debug-map {
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
-  width: 13.5rem;
+  width: 15rem;
+  max-width: calc(100vw - 2rem);
   padding: 0.6rem 0.75rem;
   background: var(--parchment);
   border: 1px solid var(--parchment-edge);
@@ -160,14 +178,22 @@ body,
   box-shadow: 0 2px 10px var(--shadow);
 }
 
-.renderer__label {
+.debug-map__title {
+  margin: 0 0 0.15rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.debug-map__label {
   font-size: 0.7rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--ink-soft);
 }
 
-.renderer__select {
+.debug-map__select {
   font: inherit;
   font-size: 0.95rem;
   color: var(--ink);
@@ -175,25 +201,43 @@ body,
   border: 1px solid var(--parchment-edge);
   border-radius: 2px;
   padding: 0.25rem 0.35rem;
+  max-width: 100%;
 }
 
-.renderer__note {
+.debug-map__note {
   margin: 0;
   font-size: 0.72rem;
   line-height: 1.35;
   color: var(--ink-soft);
 }
 
+.debug-map__cut {
+  font: inherit;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.4rem;
+  cursor: pointer;
+  color: var(--ink);
+  background: #fbf7ec;
+  border: 1px solid var(--parchment-edge);
+  border-radius: 2px;
+}
+
+.debug-map__cut:hover:enabled {
+  background: rgba(157, 124, 42, 0.12);
+}
+
+.debug-map__cut:disabled {
+  cursor: progress;
+  color: var(--ink-soft);
+}
+
 /* What the program thinks is happening. Development scaffolding, and it looks like it on purpose. */
 .debug {
-  position: absolute;
-  top: 9.75rem;
-  right: 1rem;
-  z-index: 3;
-  pointer-events: auto;
   width: 21rem;
-  max-width: calc(100% - 2rem);
-  max-height: calc(100% - 12rem);
+  max-width: calc(100vw - 2rem);
+  /* The rail bounds the column, so shrinking is what makes the log scroll rather than overflow. */
+  min-height: 0;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace;
@@ -208,7 +252,8 @@ body,
 
 .debug--shut {
   width: auto;
-  max-height: none;
+  flex: 0 0 auto;
+  overflow: visible;
   padding: 0.3rem 0.7rem;
   cursor: pointer;
   letter-spacing: 0.14em;

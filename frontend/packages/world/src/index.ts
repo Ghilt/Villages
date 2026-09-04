@@ -47,6 +47,8 @@ export { doubleSignedArea, simplify, smooth } from './simplify.ts';
 export { TILE_SIZE, cutTile, sourceColumnFor, sourceRowFor, tileAddresses, tileCount } from './tiles.ts';
 export type { TileAddress } from './tiles.ts';
 
+export { DEFAULT_MASTER, isSafeMasterName, masterNameOf, worldDirOf } from './masters.ts';
+
 export { fillUnassigned } from './fill.ts';
 export type { FillOptions, FillReport } from './fill.ts';
 
