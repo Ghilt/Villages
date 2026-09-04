@@ -57,6 +57,11 @@ violation when the rule was introduced.
 | `arch-tests` | The layer rules, as tests |
 | `load-bots` | The swarm that proves the scale numbers |
 
+Packages are shorter than module names: `villages.domain`, `villages.application`, `villages.protocol`,
+`villages.occurrent`, `villages.rabbit`, `villages.projections`, `villages.gateway`, `villages.app`,
+`villages.bots`. The two infrastructure modules take the name of the thing they wrap, which is also their
+commit scope.
+
 Deployment starts as one process. The gateway is written as though it were already separate, so extracting it later is
 a configuration change rather than a rewrite.
 

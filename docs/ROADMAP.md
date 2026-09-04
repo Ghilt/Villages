@@ -23,15 +23,16 @@ installed. The backend increments follow, and keep their original numbers.
 - [x] 0.12 The sprite overlay draws one jiggling sprite pinned to a place
 - [ ] 0.13 End-to-end smoke test
 - [ ] 0.4 Local infrastructure: MongoDB replica set and RabbitMQ in Compose
-- [ ] 0.5 Gradle wrapper, version catalog, module skeletons with their dependency edges
+- [x] 0.5 Gradle wrapper, version catalog, module skeletons with their dependency edges
 - [ ] 0.6 Architecture tests that fail on a layer violation
 - [ ] 0.7 Occurrent smoke test on the in-memory event store
 - [ ] 0.8 Testcontainers smoke test on MongoDB and RabbitMQ
 - [ ] 0.9 The application boots and the gateway answers a hello
 - [ ] 0.14 One check script for the whole repository
 
-Blocked on the machine, needed from 0.4 onwards: Docker Desktop with the WSL2 backend, and Eclipse Temurin 21 on
-`JAVA_HOME`. Nothing before then needs either.
+Blocked on the machine: Docker Desktop with the WSL2 backend, needed for 0.4, 0.8 and 0.9. Temurin 21 is not
+a blocker after all: Gradle provisions the toolchain itself, so 0.5 to 0.7 build on the Temurin 17 that is
+there. Installing 21 is still worth doing for IntelliJ.
 
 ## Also now: the world, authored by hand
 

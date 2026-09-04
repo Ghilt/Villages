@@ -131,11 +131,16 @@ Commands are added here as the increments land:
   runtime copy, in a second, which is all the app needs after a style edit.
 - Frontend, look at it: `npm run dev --prefix frontend`, then open http://localhost:5173
 - Frontend, checks: `npm run check --prefix frontend` (typecheck, lint, format, unit tests)
-The three below do not exist yet. They arrive with the increments named, and `infra/`, `backend/` and
-`scripts/` in the layout above are where they will go rather than where they are.
+- Backend, checks: `cd backend` then `./gradlew check`. Gradle fetches the JDK 21 the toolchain asks for, so
+  `JAVA_HOME` may stay on the Temurin 17 that is installed; the first run downloads it. Every module's
+  `build.gradle.kts` declares only its allowed dependency edges, and `buildSrc` holds the one convention
+  they share. Versions live in `backend/gradle/libs.versions.toml`.
+
+The two below do not exist yet. They arrive with the increments named, and `infra/` and `scripts/` in the
+layout above are where they will go rather than where they are.
 
 - Infra: `docker compose -f infra/docker-compose.yml up -d` (increment 0.4)
-- Backend: `cd backend` then `./gradlew check`, and `./gradlew :app:bootRun` (0.5 onwards)
+- Backend, running: `./gradlew :app:bootRun` (0.9, once there is a MongoDB to boot against)
 - Everything: `scripts/check.ps1` or `scripts/check.sh` (0.14)
 
 The dev server is also registered in `.claude/launch.json` under the name `web`, so the preview tooling can start
