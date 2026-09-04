@@ -1,0 +1,31 @@
+{
+  "type": "event",
+  "id": "3f2b1a0c-9d8e-4f7a-b6c5-d4e3f2a1b0c9",
+  "eventType": "villages.house.founded.v1",
+  "stream": "house:6d5b0a2e-1c3f-4d7e-9a8b-0f1e2d3c4b5a",
+  "streamVersion": 1,
+  "time": 1788609600000,
+  "data": {
+    "houseId": "6d5b0a2e-1c3f-4d7e-9a8b-0f1e2d3c4b5a",
+    "player": "0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8d",
+    "name": "Ravenscar",
+    "seat": {
+      "lat": 59.33,
+      "lon": 18.07
+    },
+    "cell": "12003122",
+    "banner": {
+      "field": "SABLE",
+      "division": "PLAIN",
+      "second": null,
+      "charge": "STAG",
+      "chargeTincture": "ARGENT"
+    },
+    "treasury": {
+      "amount": 0,
+      "ratePerSecond": 1,
+      "asOf": "2026-09-04T12:00:00Z"
+    },
+    "at": "2026-09-04T12:00:00Z"
+  }
+}

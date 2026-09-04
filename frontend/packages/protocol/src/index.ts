@@ -29,6 +29,7 @@ export type {
   CommandPayload,
   Delta,
   Division,
+  EventFrame,
   HouseView,
   Point,
   Rate,

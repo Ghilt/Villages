@@ -7,7 +7,9 @@ plugins {
 // domain type by accident. Its one third-party dependency is Jackson 3, because a wire format needs a JSON
 // library and this is the project's; the version is Spring Boot's.
 dependencies {
-    implementation(platform(libs.spring.boot.dependencies))
-    implementation(libs.jackson.databind)
+    // api, not implementation: EventFrame carries its data as a JsonNode, so whoever handles frames sees
+    // Jackson's node type. The Kotlin module is the codec's own business.
+    api(platform(libs.spring.boot.dependencies))
+    api(libs.jackson.databind)
     implementation(libs.jackson.module.kotlin)
 }

@@ -62,6 +62,7 @@ export const clientFrameSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('unsubscribeCells'), cells: z.array(cellSchema) }),
   z.object({ type: z.literal('command'), commandId: z.string(), command: commandPayloadSchema }),
   z.object({ type: z.literal('ping'), t0: z.number().int() }),
+  z.object({ type: z.literal('watchEvents'), on: z.boolean() }),
 ]);
 
 export const deltaSchema = z.discriminatedUnion('type', [
@@ -88,6 +89,15 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('resync'), cells: z.array(cellSchema) }),
   z.object({ type: z.literal('pong'), t0: z.number().int(), serverTime: z.number().int() }),
   z.object({ type: z.literal('error'), code: z.string(), message: z.string() }),
+  z.object({
+    type: z.literal('event'),
+    id: z.string(),
+    eventType: z.string(),
+    stream: z.string(),
+    streamVersion: z.number().int(),
+    time: z.number().int(),
+    data: z.record(z.string(), z.unknown()),
+  }),
 ]);
 
 export type Point = z.infer<typeof pointSchema>;
@@ -101,6 +111,8 @@ export type CommandPayload = z.infer<typeof commandPayloadSchema>;
 export type ClientFrame = z.infer<typeof clientFrameSchema>;
 export type Delta = z.infer<typeof deltaSchema>;
 export type ServerFrame = z.infer<typeof serverFrameSchema>;
+/** One stored event as the panel shows it: the `event` frame on its own. */
+export type EventFrame = Extract<ServerFrame, { type: 'event' }>;
 
 /** The `type` names a discriminated union accepts, read off the schema so no test lists them by hand. */
 export function frameTypesOf(union: {

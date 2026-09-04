@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import tools.jackson.databind.JsonNode
 
 /**
  * The frames that cross the WebSocket, as JSON text with a `type` field naming each. Mirrored in
@@ -73,6 +74,7 @@ data class HouseView(
     JsonSubTypes.Type(UnsubscribeCells::class, name = "unsubscribeCells"),
     JsonSubTypes.Type(Command::class, name = "command"),
     JsonSubTypes.Type(Ping::class, name = "ping"),
+    JsonSubTypes.Type(WatchEvents::class, name = "watchEvents"),
 )
 sealed interface ClientFrame
 
@@ -86,6 +88,12 @@ data class UnsubscribeCells(val cells: List<String>) : ClientFrame
 data class Command(val commandId: String, val command: CommandPayload) : ClientFrame
 
 data class Ping(val t0: Long) : ClientFrame
+
+/**
+ * Asks for every stored event as it is stored, or stops asking. This is how the debug panel sees the
+ * world happen; a player's interface never sends it. See decision record 0023.
+ */
+data class WatchEvents(val on: Boolean) : ClientFrame
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes(
@@ -106,6 +114,7 @@ data class FoundHousePayload(val houseId: String, val name: String, val seat: Po
     JsonSubTypes.Type(Resync::class, name = "resync"),
     JsonSubTypes.Type(Pong::class, name = "pong"),
     JsonSubTypes.Type(ErrorFrame::class, name = "error"),
+    JsonSubTypes.Type(EventFrame::class, name = "event"),
 )
 sealed interface ServerFrame
 
@@ -129,6 +138,20 @@ data class Resync(val cells: List<String>) : ServerFrame
 data class Pong(val t0: Long, val serverTime: Long) : ServerFrame
 
 data class ErrorFrame(val code: String, val message: String) : ServerFrame
+
+/**
+ * One stored event, as stored: the envelope and the data, for a client that asked to watch. `eventType` is
+ * the catalogued CloudEvent type, `time` the server's clock in milliseconds, `data` the event's own fields.
+ * Generic on purpose: it carries any event the catalogue ever lists.
+ */
+data class EventFrame(
+    val id: String,
+    val eventType: String,
+    val stream: String,
+    val streamVersion: Long,
+    val time: Long,
+    val data: JsonNode,
+) : ServerFrame
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes(
