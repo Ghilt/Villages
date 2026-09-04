@@ -14,4 +14,7 @@ dependencies {
     testImplementation(project(":projections"))
     testImplementation(project(":gateway"))
     testImplementation(project(":app"))
+    // The swarm is held to the rules too: it speaks the protocol and nothing else. Leaving it out made
+    // its layer empty, which the layered rule rightly refused.
+    testImplementation(project(":load-bots"))
 }
