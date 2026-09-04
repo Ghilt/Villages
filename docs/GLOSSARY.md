@@ -16,6 +16,7 @@ in the source.
 | **Division** | How the field of a banner is partitioned: plain, per pale, per fess, quarterly. `Division` |
 | **Event** | Something that happened, named in the past tense: `HouseFounded`. Events are the only durable state and are never edited or deleted. |
 | **Event store** | The append-only record of every event, one stream per aggregate. MongoDB, through Occurrent. |
+| **Frame** | One message on the wire between the gateway and the browser: JSON text with a `type` field naming it. The fixtures in `contracts/fixtures/frames` own the format, and both ends are tested against them. `ClientFrame`, `ServerFrame` |
 | **Gateway** | The service that holds player connections, serves snapshots and pushes deltas. Stateless apart from its live connections. |
 | **House** | The thing a player plays: a noble lineage with a name, a banner, a seat and a treasury. One event stream each. `House` |
 | **Player** | The human. Identified for now by an anonymous token generated in the browser. `PlayerId` |

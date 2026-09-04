@@ -1,0 +1,5 @@
+{
+  "type": "error",
+  "code": "tooManyCells",
+  "message": "at most 64 cells may be subscribed at once; zoom in"
+}

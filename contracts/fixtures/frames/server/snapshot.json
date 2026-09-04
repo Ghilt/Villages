@@ -1,0 +1,50 @@
+{
+  "type": "snapshot",
+  "cell": "12003122",
+  "houses": [
+    {
+      "id": "6d5b0a2e-1c3f-4d7e-9a8b-0f1e2d3c4b5a",
+      "name": "Ravenscar",
+      "cell": "12003122",
+      "seat": {
+        "lat": 59.33,
+        "lon": 18.07
+      },
+      "banner": {
+        "field": "sable",
+        "division": "plain",
+        "charge": "stag",
+        "chargeTincture": "argent"
+      },
+      "treasury": {
+        "amount": 0,
+        "ratePerSecond": 1,
+        "asOf": 1788609600000
+      },
+      "version": 1
+    },
+    {
+      "id": "0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8d",
+      "name": "Hollin",
+      "cell": "12003122",
+      "seat": {
+        "lat": 59.41,
+        "lon": 17.95
+      },
+      "banner": {
+        "field": "gules",
+        "division": "perPale",
+        "second": "azure",
+        "charge": "tower",
+        "chargeTincture": "or"
+      },
+      "treasury": {
+        "amount": 420,
+        "ratePerSecond": 1,
+        "asOf": 1788609660000
+      },
+      "version": 3
+    }
+  ],
+  "asOfVersion": 3
+}

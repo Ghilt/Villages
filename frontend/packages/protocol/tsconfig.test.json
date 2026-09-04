@@ -1,0 +1,9 @@
+{
+  "$comment": "The shipped schemas may not touch a platform, and the contract test reads fixtures off the disk. Two configs rather than one loose one, so that purity stays enforced where it matters.",
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2023"],
+    "types": ["node"]
+  },
+  "include": ["src/**/*.test.ts", "src"]
+}

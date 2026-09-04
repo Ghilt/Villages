@@ -24,6 +24,7 @@ occurrent-decider = { module = "org.occurrent:occurrent-decider" }
 occurrent-converter-jackson3 = { module = "org.occurrent:occurrent-cloudevent-converter-jackson3" }
 # Jackson 3 lives under tools.jackson; Spring Boot manages its version.
 jackson-module-kotlin = { module = "tools.jackson.module:jackson-module-kotlin" }
+jackson-databind = { module = "tools.jackson.core:jackson-databind" }
 kotest-runner = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
 kotest-assertions = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
 kotest-property = { module = "io.kotest:kotest-property", version.ref = "kotest" }

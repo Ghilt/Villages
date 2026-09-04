@@ -1,0 +1,5 @@
+{
+  "type": "commandRejected",
+  "commandId": "c-0002",
+  "reason": "alreadyFounded"
+}
