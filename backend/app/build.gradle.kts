@@ -9,6 +9,7 @@ plugins {
 dependencies {
     implementation(platform(libs.spring.boot.dependencies))
     implementation(libs.spring.boot.starter)
+    implementation(libs.spring.boot.starter.websocket)
     implementation(project(":domain"))
     implementation(project(":application"))
     implementation(project(":protocol"))

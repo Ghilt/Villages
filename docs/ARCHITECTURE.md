@@ -17,6 +17,7 @@ domain  <-  application  <-  infrastructure-occurrent
                           <- infrastructure-rabbit
                           <- projections
                           <- gateway            <-  app
+        <-  gateway (values in, HouseError out; see decision 0013)
         <-  protocol      <- gateway
 ```
 
@@ -64,6 +65,15 @@ commit scope.
 
 Deployment starts as one process. The gateway is written as though it were already separate, so extracting it later is
 a configuration change rather than a rewrite.
+
+## What is in memory, for now
+
+There is no MongoDB or RabbitMQ on the machine yet, so the ports have in-memory adapters: Occurrent's
+in-memory event store and subscription model, wired in `InMemoryWorld`, behind `HouseCommandExecutor` and
+`EventFeed`. The gateway consumes the feed in-process and fans events out to every connection that asked to
+watch, which is the broker's job from increment 1.6 on. Nothing above the ports changes when the real store
+and broker arrive; nothing survives a restart until then, on purpose. The whole path is proven by
+`AppBootsTest`: a real socket, hello, a founded house, the event back.
 
 ## What was verified about Occurrent
 
