@@ -43,3 +43,8 @@ Thumbs.db
 
 # Claude Code local overrides
 .claude/settings.local.json
+
+# What each live session is doing. Machine-local by design: a file every session edited would be the
+# merge conflict it exists to prevent. The convention itself is committed.
+.sessions/*
+!.sessions/README.md

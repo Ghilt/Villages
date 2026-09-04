@@ -14,7 +14,8 @@
     "master": "node --max-old-space-size=8192 bin/buildMaster.ts",
     "import": "node --max-old-space-size=8192 bin/importMaster.ts",
     "merge": "node --max-old-space-size=8192 bin/mergeMaster.ts",
-    "tile": "node --max-old-space-size=8192 bin/tileWorld.ts"
+    "tile": "node --max-old-space-size=8192 bin/tileWorld.ts",
+    "fetch-world": "node --max-old-space-size=4096 bin/fetchWorld.ts"
   },
   "dependencies": {
     "fflate": "^0.8.3",

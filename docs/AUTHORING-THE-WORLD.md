@@ -124,6 +124,17 @@ It also prints what it found, terrain by terrain, which doubles as a description
 
 ## Regenerating the starting point
 
+The world is built from 4.4 GB of downloaded data, in `world/source/`, which is not committed. To fill it
+from nothing:
+
+```
+npm run world:fetch-all --prefix frontend
+```
+
+About ten minutes on a decent connection, once. Adding `-- --list` says what the five sources are, what
+each one contributes and how it is licensed, without downloading anything. Three of them are CC-BY and
+must be credited, which the map does in its attribution control.
+
 `npm run world:master --prefix frontend` repaints the master from Earth. It **refuses to overwrite** an
 existing `terrain.png` and writes `terrain-fresh.png` alongside instead, so a rebuild can never destroy a
 world somebody painted. Merge it as above, or pass `-- --force` if you really do want to start again. The raw data it needs comes from

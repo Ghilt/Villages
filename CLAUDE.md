@@ -41,6 +41,14 @@ Never choose the next increment alone, and never chain increments together to sa
 menu, not a queue: its order is a suggestion, and Adam reorders it freely. When an option is not on the roadmap
 but is clearly better, offer it anyway and say why.
 
+## Say what you are working on, while you are working on it
+
+Before touching code, write `.sessions/<date>-<slug>.md` saying what this session is doing and which parts of the
+tree it is touching, and read the other files in that directory first. Keep the areas current as they change, and
+delete the file when the work lands. More than one agent may be working at once, and the point is that a collision
+is visible before it happens rather than discovered in a merge. `.sessions/README.md` has the shape and the
+reasoning; the directory is gitignored on purpose.
+
 Definition of done for a step: it compiles, the checks are green, the documents that describe it are updated,
 glossary terms are used verbatim, and no layer rule is violated.
 
@@ -98,10 +106,11 @@ Commands are added here as the increments land:
   master in `world/master/`. That is the loop: edit the image, import, tile, reload. Terrain is drawn from
   tiles rather than outlines; see `docs/adr/0019`. What it is painted in is `world/palette.json`, what it
   is drawn in is `world/render.json`.
-- Repainting the master from Earth needs the raw data first, about 145 MB, downloaded once and not
-  committed: `npm run world:fetch --prefix frontend` then `npm run world:master --prefix frontend`. It refuses
-  to overwrite an existing master and writes `terrain-fresh.png` alongside; the merge script replays hand
-  edits onto it. See `docs/AUTHORING-THE-WORLD.md`. `world:build` warps Earth into raw material for
+- The 4.4 GB the world is built from lives in `world/source/`, not committed:
+  `npm run world:fetch-all --prefix frontend` fills it from nothing, and `-- --list` says what each source
+  is for. The generator is `world/master/experiment/tools/build.mjs`; two minutes for the whole world.
+- The older thirteen-class path, `world:fetch` and `world:master`, is stale and says so when run. It
+  refuses to overwrite a hand-painted master and writes alongside; the merge script replays hand edits. `world:build` warps Earth into raw material for
   a different starting point.
 - Frontend, look at it: `npm run dev --prefix frontend`, then open http://localhost:5173
 - Frontend, checks: `npm run check --prefix frontend` (typecheck, lint, format, unit tests)
