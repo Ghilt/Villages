@@ -8,3 +8,6 @@
 
 export { PLAYER_TOKEN_KEY, ensurePlayerToken } from './identity';
 export type { TokenStore } from './identity';
+
+export { connect } from './connection';
+export type { Connection, ConnectionOptions, ConnectionState, SocketLike } from './connection';
