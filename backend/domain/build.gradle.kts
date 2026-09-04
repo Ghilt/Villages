@@ -7,4 +7,7 @@ plugins {
 // an import of something not declared here does not compile.
 dependencies {
     testImplementation(libs.kotest.property)
+    // Test scope only: the catalogue test reads an event's fields off its constructor. The domain itself stays
+    // on the standard library.
+    testImplementation(kotlin("reflect"))
 }

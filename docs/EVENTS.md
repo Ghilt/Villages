@@ -3,8 +3,9 @@
 Every domain event in the world. Events are the only durable state: they are never edited and never deleted, so this
 catalogue is the contract between the past and every future version of the code.
 
-This file is parsed by a test. From increment 1.5, the event type catalogue test reads the tables below and fails if
-the code and the catalogue disagree in either direction. Keep the format exactly as described:
+This file is parsed by a test. The domain's catalogue test reads the tables below and fails if the code and the
+catalogue disagree in either direction, in the set of events or in the fields of any one of them; from increment 1.5
+the event store's type mapper is held to the same rows. Keep the format exactly as described:
 
 - One section headed with the aggregate name per aggregate, and inside it exactly one table.
 - Columns, in order: Type, Payload, Meaning, Produced by, Consumers.
@@ -28,4 +29,4 @@ One stream per house, addressed as house followed by its identifier.
 
 | Type | Payload | Meaning | Produced by | Consumers |
 |---|---|---|---|---|
-| _none yet; the first arrives in increment 1.2_ | | | | |
+| `villages.house.founded.v1` | `houseId`, `player`, `name`, `seat`, `cell`, `banner`, `treasury`, `at` | A player founded a house at a seat, with a name and a banner. The cell is computed here and carried; the treasury starts at nothing and earns at the founding rate. | `FoundHouse` | The houses-by-cell projection; the event bridge, and through it every gateway subscribed to the cell |

@@ -67,6 +67,23 @@ program says what it is doing. It grows with every increment that adds behaviour
 Found a House. Open the app, see the map, found a house at a chosen spot with a generated banner, see the banner and
 one rate-based ticker, and see other players' houses appear live and jiggle. Sixteen increments, listed in the plan.
 
+- [x] 1.1 The value types of a house: seat, cell, name, banner with the rule of tincture, treasury as a rate
+- [x] 1.2 FoundHouse, HouseFounded, the state and the decider; the first row in the event catalogue
+- [ ] 1.3 The frames, in Kotlin and in zod, both held to the same fixtures
+- [ ] 1.4 The FoundHouse use case and the ports
+- [ ] 1.5 The event store behind the ports, and the type mapper held to the catalogue
+- [ ] 1.6 The bridge from the store to the broker
+- [ ] 1.7 The houses-by-cell projection
+- [ ] 1.8 The gateway: sessions, cells, snapshot then deltas
+- [ ] 1.9 The client core: cells, connection, state
+- [ ] 1.10 Houses on the map from the gateway, and a seed script
+- [ ] 1.11 Command intake, end to end
+- [ ] 1.12 The banner drawn
+- [ ] 1.13 Founding a house from the interface
+- [ ] 1.14 The ticker
+- [ ] 1.15 Inspecting a house, and the connection badge
+- [ ] 1.16 Two browsers, one house appearing in both, readable in both debug panels
+
 The milestone: a second browser sees the first browser's house appear, with no page reload, and the event
 that made it appear is readable in the debug panel of both.
 
