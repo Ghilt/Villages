@@ -16,6 +16,14 @@ spring-boot-dependencies = { module = "org.springframework.boot:spring-boot-depe
 spring-boot-starter = { module = "org.springframework.boot:spring-boot-starter" }
 spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test" }
 occurrent-bom = { module = "org.occurrent:occurrent-bom", version.ref = "occurrent" }
+# Versions come from the Occurrent BOM, so none is written here.
+occurrent-eventstore-api = { module = "org.occurrent:occurrent-eventstore-api-blocking" }
+occurrent-eventstore-inmemory = { module = "org.occurrent:occurrent-eventstore-inmemory" }
+occurrent-application-service = { module = "org.occurrent:occurrent-application-service-blocking" }
+occurrent-decider = { module = "org.occurrent:occurrent-decider" }
+occurrent-converter-jackson3 = { module = "org.occurrent:occurrent-cloudevent-converter-jackson3" }
+# Jackson 3 lives under tools.jackson; Spring Boot manages its version.
+jackson-module-kotlin = { module = "tools.jackson.module:jackson-module-kotlin" }
 kotest-runner = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
 kotest-assertions = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
 kotest-property = { module = "io.kotest:kotest-property", version.ref = "kotest" }

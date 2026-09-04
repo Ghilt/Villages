@@ -25,7 +25,7 @@ installed. The backend increments follow, and keep their original numbers.
 - [ ] 0.4 Local infrastructure: MongoDB replica set and RabbitMQ in Compose
 - [x] 0.5 Gradle wrapper, version catalog, module skeletons with their dependency edges
 - [x] 0.6 Architecture tests that fail on a layer violation
-- [ ] 0.7 Occurrent smoke test on the in-memory event store
+- [x] 0.7 Occurrent smoke test on the in-memory event store
 - [ ] 0.8 Testcontainers smoke test on MongoDB and RabbitMQ
 - [ ] 0.9 The application boots and the gateway answers a hello
 - [ ] 0.14 One check script for the whole repository

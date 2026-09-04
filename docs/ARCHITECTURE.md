@@ -65,6 +65,21 @@ commit scope.
 Deployment starts as one process. The gateway is written as though it were already separate, so extracting it later is
 a configuration change rather than a rewrite.
 
+## What was verified about Occurrent
+
+Increment 0.7 compiled and ran the plan's riskiest assumption, on Occurrent 0.33.0 under Spring Boot 4.1.1:
+
+- A Kotlin decider built with `decider(initialState, decide, evolve)` from `org.occurrent.dsl.decider` drives
+  the application service through the extension `ApplicationService<E>.execute(streamId, command, decider)`,
+  which loads the stream, folds it, calls decide, and appends with the stream-version write condition. A
+  decision that yields no event writes nothing.
+- `GenericApplicationService(eventStore, cloudEventConverter)` is the constructor, and
+  `JacksonCloudEventConverter.Builder<E>(objectMapper, source).typeMapper(...)` builds the converter on
+  Jackson 3. The house events get their own type mapper in 1.5, so the CloudEvent type can be
+  `villages.house.founded.v1` rather than a class name.
+- Occurrent pins `jackson-databind` 3.1.4 and Spring Boot 4.1.1 manages 3.1.5; Gradle resolves to 3.1.5 and
+  the round trip works on it. CloudEvents is 4.0.1. The in-memory store is `InMemoryEventStore()`.
+
 ## How a change travels
 
 ```mermaid
