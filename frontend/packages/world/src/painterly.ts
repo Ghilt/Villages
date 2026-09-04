@@ -218,12 +218,21 @@ const NEIGHBOURS: readonly (readonly [number, number])[] = [
 ];
 
 /**
- * How wide the wet edge is allowed to be, in master pixels. Held between a third of a pixel, below which
- * it stops finding the boundary at all, and three, beyond which a whole-world view turns to mud because
- * every coast in the world is a thick dark band.
+ * The narrowest the wet edge may be, in master pixels.
+ *
+ * The reach wants to be `edge.reach` output pixels, which is `edge.reach * masterPerPixel` in master
+ * pixels, and that is right at every zoom but the closest ones. Past the depth the terrain was cut at,
+ * one terrain sample covers several output pixels, so the wanted reach falls below a sample and the
+ * neighbours all land in the same one: no boundary is ever found and the edge disappears. A third of a
+ * sample is enough to cross into the next one often enough to draw a line.
+ *
+ * There was a ceiling here too, of three master pixels, put in to stop a whole-world view turning to
+ * mud. It was a units error and it caused exactly the opposite. Below the cut depth a terrain sample IS
+ * a master pixel times `masterPerPixel`, so at zoom three the wanted reach is 22 master pixels and the
+ * ceiling cut it to three, which is a fifth of one sample: no shore, no lake edge, nothing. The step up
+ * to zoom four then put them back, which is the jump that gave it away.
  */
 const REACH_FLOOR = 0.35;
-const REACH_CEILING = 3;
 
 /**
  * The colour of one pixel of the world.
@@ -259,7 +268,7 @@ export function paintPixel(
     throw new Error('the painterly style has no classes prepared');
   }
 
-  const reach = Math.min(REACH_CEILING, Math.max(REACH_FLOOR, edge.reach * masterPerPixel));
+  const reach = Math.max(REACH_FLOOR, edge.reach * masterPerPixel);
   let differing = 0;
   let acrossShore = 0;
   for (const [dx, dy] of NEIGHBOURS) {

@@ -282,10 +282,9 @@ describe('painting a pixel', () => {
     expect(near).toEqual(far);
   });
 
-  it('still finds an edge at any zoom, because the reach is held off nothing and off too much', () => {
-    // The reach is in output pixels, so at a far enough view it would fall below a master pixel and stop
-    // finding boundaries at all, and at a close enough one it would swell into a band. It is clamped at
-    // both ends, and the wet edge has to survive both clamps.
+  it('still finds an edge at any zoom', () => {
+    // The reach is in output pixels, so at a close enough view it falls below one master pixel and would
+    // stop finding boundaries at all. It is held off nothing, and the wet edge has to survive that.
     for (const masterPerPixel of [0.05, 1, 20]) {
       const onTheEdge = averageDown(meadowMeetsTaiga, 100, luminance, prepared, masterPerPixel);
       const wellInside = averageDown(meadowMeetsTaiga, 60, luminance, prepared, masterPerPixel);
@@ -293,8 +292,47 @@ describe('painting a pixel', () => {
       expect(onTheEdge).toBeLessThan(wellInside);
     }
   });
-});
+  it('keeps the shore the same weight however coarse the terrain it can see is', () => {
+    // The regression that named itself the layer difference problem, and the shape of it matters. A tile
+    // cut for zoom three carries one terrain sample per output pixel, so a sample covers sixteen master
+    // pixels; at zoom four, eight. The shore always lies exactly on a sample edge, so it is never absent
+    // altogether: what changes is how wide the inked band is in output pixels, and so whether the eye
+    // sees a line at all. It has to be measured across a row of output pixels straddling the shore,
+    // because the one pixel on the boundary is inked at every coarseness and says nothing.
+    // Every source of variation but the ink is silenced, because the paper and the wash are sampled at
+    // different places when the coarseness changes and they are far louder than the line being measured.
+    const quiet: PainterlyStyle = {
+      ...style,
+      wash: { amount: 0, mark: 46 },
+      paper: { grain: 0, mark: 2.2, fibre: 0 },
+      groups: Object.fromEntries(
+        Object.entries(style.groups).map(([group, spec]) => [group, { ...spec, amount: 0 }]),
+      ),
+    };
+    const prepared = preparePainterly(quiet, palette, colours);
+    const SHORE_AT = 1600;
 
+    const inkAcrossTheShore = (sample: number): number => {
+      const coarse: ClassSampler = (x) => (Math.floor(x / sample) * sample < SHORE_AT ? MEADOW : OCEAN);
+      let total = 0;
+      let taken = 0;
+      for (let row = 0; row < 80; row += 1) {
+        for (let step = -6; step < 6; step += 1) {
+          // One output pixel covers `sample` master pixels, so the row is walked in steps of that.
+          const x = SHORE_AT + (step + 0.5) * sample;
+          total += luminance(paintPixel(prepared, coarse, x, row * sample, sample));
+          taken += 1;
+        }
+      }
+      return total / taken;
+    };
+
+    const weights = [4, 8, 16].map(inkAcrossTheShore);
+
+    // Equal ground either side at every coarseness, so everything but the ink cancels out.
+    expect(Math.max(...weights) - Math.min(...weights)).toBeLessThan(1.5);
+  });
+});
 describe('cutting the wash into steps', () => {
   /** Everything but the wash silenced, so the count of colours in a region is the count of steps. */
   const bare: PainterlyStyle = {

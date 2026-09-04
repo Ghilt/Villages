@@ -35,7 +35,7 @@ export function DebugPanel({ map, renderer }: DebugPanelProps) {
   const [copied, setCopied] = useState<'no' | 'yes' | 'failed'>('no');
   /** Recent frame gaps, so the worst one shown is the worst one lately and not the worst one ever. */
   const gaps = useRef<{ at: number; gap: number }[]>([]);
-  const stretchWas = useRef<number | undefined>(undefined);
+  const tileZoomWas = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     try {
@@ -51,6 +51,17 @@ export function DebugPanel({ map, renderer }: DebugPanelProps) {
   useEffect(() => {
     let last = performance.now();
     let running = true;
+
+    // Animation frames stop entirely while the page is hidden, so the first frame back would otherwise
+    // be recorded as a stall of however long it was in the background. It reads as a catastrophe and it
+    // means nothing, so the clock starts again instead.
+    const restart = () => {
+      if (document.visibilityState === 'visible') {
+        last = performance.now();
+      }
+    };
+    document.addEventListener('visibilitychange', restart);
+
     const tick = () => {
       const now = performance.now();
       gaps.current.push({ at: now, gap: now - last });
@@ -65,6 +76,7 @@ export function DebugPanel({ map, renderer }: DebugPanelProps) {
     requestAnimationFrame(tick);
     return () => {
       running = false;
+      document.removeEventListener('visibilitychange', restart);
     };
   }, []);
 
@@ -76,18 +88,19 @@ export function DebugPanel({ map, renderer }: DebugPanelProps) {
       const centre = map.getCenter();
       const tileZoom = Math.min(Math.round(map.getZoom()), map.getMaxZoom());
 
-      // How far the terrain is being stretched changes in steps, and a step is the sort of thing that
-      // is felt but hard to name. Logged so it can be named.
+      // Every change of tile zoom is logged, not just the ones that change the stretch. A step between
+      // two zooms is the sort of thing that is felt and hard to name, and below the depth the terrain
+      // was cut at the stretch never moves, so watching only the stretch says nothing about z3 to z4.
       const stretch = 2 ** Math.max(0, tileZoom - FLAT_MAX_ZOOM);
-      if (stretchWas.current !== undefined && stretchWas.current !== stretch) {
+      if (tileZoomWas.current !== undefined && tileZoomWas.current !== tileZoom) {
+        const ground = WORLD_MASTER_WIDTH / (TILE * 2 ** tileZoom);
         note(
           'terrain',
-          stretch === 1
-            ? `z${tileZoom}, as cut, no stretch`
-            : `z${tileZoom} is z${FLAT_MAX_ZOOM} stretched ${stretch}x`,
+          `z${tileZoomWas.current} to z${tileZoom}: ${ground.toFixed(2)} master px a pixel` +
+            (stretch === 1 ? ', as cut' : `, z${FLAT_MAX_ZOOM} stretched ${stretch}x`),
         );
       }
-      stretchWas.current = stretch;
+      tileZoomWas.current = tileZoom;
 
       setLines(
         describeState({

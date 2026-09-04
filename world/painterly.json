@@ -1,16 +1,31 @@
 {
   "$comment": "How the world is painted. Three styles, and the views they are judged on. Read by `npm run world:paint --prefix frontend`, which writes one image per view per style into world/painterly/, and also writes the runtime copy the app reads at frontend/apps/web/public/world/paint.json. The colours themselves stay in world/render.json: this file says what the paint does to them. Two units appear here and mixing them up is the one way to get this wrong. `mark` is always output pixels, so a mark stays the size of a mark at every zoom, because it belongs to the medium. `wander` and `scale` under boundary are master pixels, roughly 1.2 km each, because a coastline belongs to the world.",
-
   "styles": {
     "painted": {
       "$": "Watercolour. Colour pools and thins, pigment gathers where a wash stops, and each kind of ground has its own mark.",
       "warm": "#fff0cf",
       "cool": "#4a5a58",
-      "wash": { "amount": 0.16, "mark": 46 },
-      "boundary": { "wander": 1.4, "scale": 3 },
-      "edge": { "amount": 0.16, "reach": 1.4 },
-      "shore": { "ink": "#5f5544", "amount": 0.55 },
-      "paper": { "grain": 0.1, "mark": 2.2, "fibre": 0.03 },
+      "wash": {
+        "amount": 0.16,
+        "mark": 46
+      },
+      "boundary": {
+        "wander": 1.4,
+        "scale": 3
+      },
+      "edge": {
+        "amount": 0.16,
+        "reach": 1.4
+      },
+      "shore": {
+        "ink": "#5f5544",
+        "amount": 0.55
+      },
+      "paper": {
+        "grain": 0.1,
+        "mark": 2.2,
+        "fibre": 0.03
+      },
       "groups": {
         "water": {
           "treatment": "ripple",
@@ -25,16 +40,33 @@
           "amount": 0.03,
           "wash": 0.5
         },
-        "forest": { "treatment": "stipple", "mark": 3.2, "amount": 0.11 },
-        "open": { "treatment": "speckle", "mark": 2.6, "amount": 0.055 },
+        "forest": {
+          "treatment": "stipple",
+          "mark": 3.2,
+          "amount": 0.11
+        },
+        "open": {
+          "treatment": "speckle",
+          "mark": 2.6,
+          "amount": 0.055
+        },
         "farmed": {
           "treatment": "patchwork",
           "mark": 7,
           "amount": 0.05,
           "angle": 12
         },
-        "wetland": { "treatment": "dashes", "mark": 4, "amount": 0.1 },
-        "dry": { "treatment": "dunes", "mark": 6, "amount": 0.07, "angle": 20 },
+        "wetland": {
+          "treatment": "dashes",
+          "mark": 4,
+          "amount": 0.1
+        },
+        "dry": {
+          "treatment": "dunes",
+          "mark": 6,
+          "amount": 0.07,
+          "angle": 20
+        },
         "high": {
           "treatment": "hatch",
           "mark": 4.5,
@@ -43,38 +75,102 @@
         }
       }
     },
-
     "atlas": {
       "$": "Ink and wash, and the experiment is subtraction: no mark for any kind of ground at all. Everything is carried by the line where a wash stops and by the shore. If this reads as well as the painted one, most of the treatment is not earning its keep.",
       "warm": "#fffaf0",
       "cool": "#5a6763",
-      "wash": { "amount": 0.09, "mark": 64 },
-      "boundary": { "wander": 1.1, "scale": 3 },
-      "edge": { "amount": 0.32, "reach": 1.8 },
-      "shore": { "ink": "#4b4335", "amount": 0.85 },
-      "paper": { "grain": 0.13, "mark": 1.9, "fibre": 0.05 },
+      "wash": {
+        "amount": 0.09,
+        "mark": 64
+      },
+      "boundary": {
+        "wander": 1.1,
+        "scale": 3
+      },
+      "edge": {
+        "amount": 0.32,
+        "reach": 1.8
+      },
+      "shore": {
+        "ink": "#4b4335",
+        "amount": 0.85
+      },
+      "paper": {
+        "grain": 0.13,
+        "mark": 1.9,
+        "fibre": 0.05
+      },
       "groups": {
-        "water": { "treatment": "none", "mark": 9, "amount": 0, "wash": 0.35 },
-        "cold": { "treatment": "none", "mark": 3, "amount": 0, "wash": 0.5 },
-        "forest": { "treatment": "none", "mark": 3, "amount": 0 },
-        "open": { "treatment": "none", "mark": 3, "amount": 0 },
-        "farmed": { "treatment": "none", "mark": 3, "amount": 0 },
-        "wetland": { "treatment": "none", "mark": 3, "amount": 0 },
-        "dry": { "treatment": "none", "mark": 3, "amount": 0 },
-        "high": { "treatment": "none", "mark": 3, "amount": 0 }
+        "water": {
+          "treatment": "none",
+          "mark": 9,
+          "amount": 0,
+          "wash": 0.35
+        },
+        "cold": {
+          "treatment": "none",
+          "mark": 3,
+          "amount": 0,
+          "wash": 0.5
+        },
+        "forest": {
+          "treatment": "none",
+          "mark": 3,
+          "amount": 0
+        },
+        "open": {
+          "treatment": "none",
+          "mark": 3,
+          "amount": 0
+        },
+        "farmed": {
+          "treatment": "none",
+          "mark": 3,
+          "amount": 0
+        },
+        "wetland": {
+          "treatment": "none",
+          "mark": 3,
+          "amount": 0
+        },
+        "dry": {
+          "treatment": "none",
+          "mark": 3,
+          "amount": 0
+        },
+        "high": {
+          "treatment": "none",
+          "mark": 3,
+          "amount": 0
+        }
       }
     },
-
     "woodblock": {
       "$": "A print rather than a painting, and the experiment is the opposite one: the wash is cut to four steps so colour goes flat inside a band and steps at its edge, the marks are coarse enough to read as carving, and the paper is nearly gone.",
       "warm": "#fbf1d8",
       "cool": "#33403f",
-      "wash": { "amount": 0.34, "mark": 26 },
+      "wash": {
+        "amount": 0.34,
+        "mark": 26
+      },
       "posterise": 4,
-      "boundary": { "wander": 2.2, "scale": 4 },
-      "edge": { "amount": 0.3, "reach": 2 },
-      "shore": { "ink": "#3b3226", "amount": 0.9 },
-      "paper": { "grain": 0.02, "mark": 3, "fibre": 0 },
+      "boundary": {
+        "wander": 2.2,
+        "scale": 4
+      },
+      "edge": {
+        "amount": 0.3,
+        "reach": 2
+      },
+      "shore": {
+        "ink": "#3b3226",
+        "amount": 0.9
+      },
+      "paper": {
+        "grain": 0.02,
+        "mark": 3,
+        "fibre": 0
+      },
       "groups": {
         "water": {
           "treatment": "ripple",
@@ -89,26 +185,187 @@
           "amount": 0.05,
           "wash": 0.5
         },
-        "forest": { "treatment": "stipple", "mark": 6, "amount": 0.22 },
-        "open": { "treatment": "speckle", "mark": 5, "amount": 0.1 },
+        "forest": {
+          "treatment": "stipple",
+          "mark": 6,
+          "amount": 0.22
+        },
+        "open": {
+          "treatment": "speckle",
+          "mark": 5,
+          "amount": 0.1
+        },
         "farmed": {
           "treatment": "patchwork",
           "mark": 11,
           "amount": 0.1,
           "angle": 12
         },
-        "wetland": { "treatment": "dashes", "mark": 6, "amount": 0.2 },
+        "wetland": {
+          "treatment": "dashes",
+          "mark": 6,
+          "amount": 0.2
+        },
         "dry": {
           "treatment": "dunes",
           "mark": 10,
           "amount": 0.14,
           "angle": 20
         },
-        "high": { "treatment": "hatch", "mark": 7, "amount": 0.26, "angle": 35 }
+        "high": {
+          "treatment": "hatch",
+          "mark": 7,
+          "amount": 0.26,
+          "angle": 35
+        }
+      }
+    },
+    "ink": {
+      "$": "Atlas taken further: no mark for any ground except a whisper of hatching on high land, almost no wash, and the line doing all the work. If the map holds up here it holds up anywhere.",
+      "warm": "#fffdf5",
+      "cool": "#6b6a5e",
+      "wash": {
+        "amount": 0.06,
+        "mark": 72
+      },
+      "boundary": {
+        "wander": 1.2,
+        "scale": 3
+      },
+      "edge": {
+        "amount": 0.46,
+        "reach": 2.2
+      },
+      "shore": {
+        "ink": "#3a3428",
+        "amount": 1
+      },
+      "paper": {
+        "grain": 0.06,
+        "mark": 2,
+        "fibre": 0.02
+      },
+      "groups": {
+        "water": {
+          "treatment": "none",
+          "mark": 9,
+          "amount": 0,
+          "wash": 0.3
+        },
+        "cold": {
+          "treatment": "none",
+          "mark": 3,
+          "amount": 0,
+          "wash": 0.5
+        },
+        "forest": {
+          "treatment": "none",
+          "mark": 3,
+          "amount": 0
+        },
+        "open": {
+          "treatment": "none",
+          "mark": 3,
+          "amount": 0
+        },
+        "farmed": {
+          "treatment": "none",
+          "mark": 3,
+          "amount": 0
+        },
+        "wetland": {
+          "treatment": "dashes",
+          "mark": 5,
+          "amount": 0.06
+        },
+        "dry": {
+          "treatment": "none",
+          "mark": 3,
+          "amount": 0
+        },
+        "high": {
+          "treatment": "hatch",
+          "mark": 5,
+          "amount": 0.09,
+          "angle": 35
+        }
+      }
+    },
+    "dusk": {
+      "$": "The painted treatment with the light changed and nothing else: a low warm sun and a blue shadow, and a wash strong enough to carry it. Whether a mood can come out of the two ends of a wash alone.",
+      "warm": "#ffdcab",
+      "cool": "#3d4a63",
+      "wash": {
+        "amount": 0.3,
+        "mark": 38
+      },
+      "boundary": {
+        "wander": 1.4,
+        "scale": 3
+      },
+      "edge": {
+        "amount": 0.19,
+        "reach": 1.4
+      },
+      "shore": {
+        "ink": "#463a33",
+        "amount": 0.6
+      },
+      "paper": {
+        "grain": 0.09,
+        "mark": 2.2,
+        "fibre": 0.03
+      },
+      "groups": {
+        "water": {
+          "treatment": "ripple",
+          "mark": 9,
+          "amount": 0.035,
+          "angle": 8,
+          "wash": 0.3
+        },
+        "cold": {
+          "treatment": "speckle",
+          "mark": 3.5,
+          "amount": 0.03,
+          "wash": 0.5
+        },
+        "forest": {
+          "treatment": "stipple",
+          "mark": 3.2,
+          "amount": 0.11
+        },
+        "open": {
+          "treatment": "speckle",
+          "mark": 2.6,
+          "amount": 0.055
+        },
+        "farmed": {
+          "treatment": "patchwork",
+          "mark": 7,
+          "amount": 0.05,
+          "angle": 12
+        },
+        "wetland": {
+          "treatment": "dashes",
+          "mark": 4,
+          "amount": 0.1
+        },
+        "dry": {
+          "treatment": "dunes",
+          "mark": 6,
+          "amount": 0.07,
+          "angle": 20
+        },
+        "high": {
+          "treatment": "hatch",
+          "mark": 4.5,
+          "amount": 0.12,
+          "angle": 35
+        }
       }
     }
   },
-
   "$views": "What the styles are judged on. Web Mercator, like the map, so these are directly comparable to a screenshot of it. `width` sets both the size of the image and how much ground a pixel covers, which is what every mark is sized against.",
   "views": [
     {
@@ -117,15 +374,35 @@
       "lat": [-85.05, 85.05],
       "width": 2048
     },
-    { "name": "scandinavia", "lng": [5, 32], "lat": [54, 71], "width": 1400 },
+    {
+      "name": "scandinavia",
+      "lng": [5, 32],
+      "lat": [54, 71],
+      "width": 1400
+    },
     {
       "name": "sahara-shore",
       "lng": [-18, 12],
       "lat": [18, 36],
       "width": 1400
     },
-    { "name": "alps", "lng": [4, 18], "lat": [43, 49], "width": 1400 },
-    { "name": "islands", "lng": [95, 130], "lat": [-11, 8], "width": 1400 },
-    { "name": "close", "lng": [16.5, 19.5], "lat": [58.6, 60.2], "width": 1200 }
+    {
+      "name": "alps",
+      "lng": [4, 18],
+      "lat": [43, 49],
+      "width": 1400
+    },
+    {
+      "name": "islands",
+      "lng": [95, 130],
+      "lat": [-11, 8],
+      "width": 1400
+    },
+    {
+      "name": "close",
+      "lng": [16.5, 19.5],
+      "lat": [58.6, 60.2],
+      "width": 1200
+    }
   ]
 }

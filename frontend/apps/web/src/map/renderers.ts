@@ -23,6 +23,8 @@ export const RENDERERS: readonly RendererChoice[] = [
   { name: 'painted', title: 'Painted', note: 'Washes, wet edges, and a mark for each kind of ground' },
   { name: 'atlas', title: 'Atlas', note: 'Ink and wash, with no mark at all: does the line carry it?' },
   { name: 'woodblock', title: 'Woodblock', note: 'A print: four steps of colour, coarse marks, hard ink' },
+  { name: 'ink', title: 'Ink', note: 'Atlas further still: the line does all of the work' },
+  { name: 'dusk', title: 'Dusk', note: 'The painted treatment under a low sun and a blue shadow' },
 ];
 
 export const DEFAULT_RENDERER = 'painted';
