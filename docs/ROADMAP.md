@@ -52,12 +52,23 @@ Decided along the way: the world is authored in an image editor rather than in a
 terrain that travels with a copied coastline is free in a raster and expensive in anything else. See
 decision record 0018.
 
+## Also now: the debug panel, which is how Adam checks the program
+
+Adam verifies by looking at the running program, not by reading code, and the debug panel is where the
+program says what it is doing. It grows with every increment that adds behaviour. See decision record 0023.
+
+- [x] State of the map, the renderer and the paint, copyable in one click
+- [ ] Domain events as they reach the browser: one line each in words, opening to the whole CloudEvent
+- [ ] Commands sent and their acceptance or rejection, alongside the events they caused
+- [ ] The connection: hello, subscriptions, resyncs, reconnects
+
 ## Next: Phase 1, the walking skeleton
 
 Found a House. Open the app, see the map, found a house at a chosen spot with a generated banner, see the banner and
 one rate-based ticker, and see other players' houses appear live and jiggle. Sixteen increments, listed in the plan.
 
-The milestone: a second browser sees the first browser's house appear, with no page reload.
+The milestone: a second browser sees the first browser's house appear, with no page reload, and the event
+that made it appear is readable in the debug panel of both.
 
 ## Later
 

@@ -26,7 +26,8 @@ This is a loop, and Adam holds both ends of it: he approves what lands, and he c
 2. **Build it small.** One coherent step per commit: a module skeleton, a document, one test with its
    implementation. If it grows past a few hundred lines, it was two steps.
 3. **Verify it.** Run the checks, and for anything visible, look at it in a browser and say what you saw. Report
-   what failed, including the things you had to fix on the way.
+   what failed, including the things you had to fix on the way. Adam verifies through the debug panel, not
+   through code, so whatever the step makes the program do must show there; see decision record 0023.
 4. **Documents travel with it.** A change to a decision, an event or a term updates its document in the same
    commit: a decision record, the event catalogue, the glossary, the architecture.
 5. **Present it for review and stop.** A summary, the file list, the check output, the documents touched, and a
@@ -50,7 +51,8 @@ is visible before it happens rather than discovered in a merge. `.sessions/READM
 reasoning; the directory is gitignored on purpose.
 
 Definition of done for a step: it compiles, the checks are green, the documents that describe it are updated,
-glossary terms are used verbatim, and no layer rule is violated.
+glossary terms are used verbatim, no layer rule is violated, and whatever it makes the program do can be seen
+in the debug panel.
 
 Read `docs/ROADMAP.md` under "Now" at the start of a session, and the last few commits, to see where things
 stand.
