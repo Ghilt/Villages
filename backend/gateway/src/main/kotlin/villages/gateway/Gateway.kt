@@ -4,6 +4,7 @@ import villages.application.EventFeed
 import villages.application.FoundHouseService
 import villages.application.HouseRow
 import villages.application.HousesByCell
+import villages.application.Start
 import villages.application.HousesByPlayer
 import villages.application.PlayerTokens
 import villages.application.StoredEvent
@@ -124,7 +125,9 @@ class Gateway(
      */
     private val sessions = ConcurrentHashMap<PlayerId, Connection>()
 
-    private val feed: AutoCloseable = events.subscribe { stored -> fanOutEvent(stored) }
+    // From now: the debug panel watches the world happening, and would not thank us for the whole
+    // chronicle replayed at it on every connect.
+    private val feed: AutoCloseable = events.subscribe(Start.FROM_NOW) { stored -> fanOutEvent(stored) }
     private val changes: AutoCloseable = houses.watch { row -> fanOutChange(row) }
 
     fun connect(out: Outbound): Connection = Connection(out)

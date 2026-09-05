@@ -78,10 +78,34 @@ data class StoredEvent(
     val event: HouseEvent,
 )
 
-/** Every event, as it is stored, in order. What the gateway fans out and the projections fold. */
-fun interface EventFeed {
-    /** Delivers every event stored from now on, until the returned handle is closed. */
-    fun subscribe(subscriber: (StoredEvent) -> Unit): AutoCloseable
+/**
+ * Where a subscriber wants a feed to begin.
+ *
+ * The two callers want opposite things, and the difference matters the moment events outlive the process.
+ * A read model folded from the beginning is the whole of its own correctness; a watcher that replayed
+ * every event ever stored on each connect would be showing history rather than what is happening.
+ */
+enum class Start {
+    /**
+     * Everything the store holds, then everything that follows. What a read model needs: it is rebuilt by
+     * replaying, so a projection that only saw what came after it was built would be quietly incomplete.
+     */
+    FROM_THE_BEGINNING,
+
+    /** Only what is stored from here on. What a watcher of the world happening wants. */
+    FROM_NOW,
+}
+
+/**
+ * Every event, as it is stored, in order. What the gateway fans out and the projections fold.
+ *
+ * Delivery is at least once: a subscriber that starts from the beginning may see an event twice if it was
+ * appended while the replay was running, and folding the same event twice must be harmless. That is the
+ * ordinary bargain of reading a log, and it is why events are folded by identity rather than counted.
+ */
+interface EventFeed {
+    /** Delivers events until the returned handle is closed. */
+    fun subscribe(from: Start, subscriber: (StoredEvent) -> Unit): AutoCloseable
 }
 
 /**

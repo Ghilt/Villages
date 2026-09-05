@@ -10,6 +10,7 @@ import villages.application.AnonymousTokens
 import villages.application.EventFeed
 import villages.application.FoundHouseService
 import villages.application.HouseCommandExecutor
+import villages.application.Start
 import villages.application.StoredEvent
 import villages.application.WorldClock
 import villages.domain.HouseCommand
@@ -46,6 +47,8 @@ import java.util.UUID
  */
 private class TinyWorld : HouseCommandExecutor, EventFeed {
     val events = mutableListOf<HouseEvent>()
+    /** What has been stored, so a subscriber that wants the beginning can be given it. */
+    private val stored = mutableListOf<StoredEvent>()
     private val subscribers = mutableListOf<(StoredEvent) -> Unit>()
 
     override fun execute(command: HouseCommand) {
@@ -54,7 +57,7 @@ private class TinyWorld : HouseCommandExecutor, EventFeed {
         events += fresh
         fresh.forEachIndexed { index, event ->
             val founded = event as HouseFounded
-            val stored = StoredEvent(
+            val record = StoredEvent(
                 id = "e-${events.size}",
                 type = "villages.house.founded.v1",
                 stream = founded.houseId.stream,
@@ -63,11 +66,15 @@ private class TinyWorld : HouseCommandExecutor, EventFeed {
                 data = """{"name":"${founded.name.value}","significance":${founded.significance.value}}""",
                 event = event,
             )
-            subscribers.toList().forEach { it(stored) }
+            this.stored += record
+            subscribers.toList().forEach { it(record) }
         }
     }
 
-    override fun subscribe(subscriber: (StoredEvent) -> Unit): AutoCloseable {
+    override fun subscribe(from: Start, subscriber: (StoredEvent) -> Unit): AutoCloseable {
+        if (from == Start.FROM_THE_BEGINNING) {
+            stored.forEach(subscriber)
+        }
         subscribers += subscriber
         return AutoCloseable { subscribers -= subscriber }
     }

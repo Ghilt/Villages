@@ -113,6 +113,13 @@ there: one updates the read model, one publishes to the broker with a routing ke
 node consumes that feed, matches each event against the cells its sessions are watching, and pushes a coalesced batch.
 A newly subscribed client is served a snapshot from the read model first, and drops any delta it has already seen.
 
+There is no outbox table and no dual write. The append to the stream is the only write there is, and the
+event is the change rather than a notification about one, so the store *is* the outbox and the subscription
+is the relay. What a relay owes is delivery: a feed says where it begins - everything, for a read model that
+is the fold of every event, or only what follows, for a watcher - and one that begins at the beginning
+subscribes before it replays, so an event appended in between arrives twice rather than not at all. Folding
+an event twice is harmless. See decision record 0029.
+
 A player has one session. The gateway keeps one connection per player, and a second hello takes the player
 over: the newcomer becomes the session and the one before is stood down, told so, and dropped from every
 cell it held. What a session holds - its cells, the day its scrubber is on - is its own; what is the

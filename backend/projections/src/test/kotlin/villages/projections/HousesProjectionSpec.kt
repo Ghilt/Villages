@@ -6,6 +6,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import villages.application.EventFeed
 import villages.application.HouseRow
+import villages.application.Start
 import villages.application.StoredEvent
 import villages.domain.Banner
 import villages.domain.Charge
@@ -22,11 +23,15 @@ import villages.domain.WorldTime
 import java.time.Instant
 import java.util.UUID
 
-/** A feed that delivers what it is handed, when it is handed it. */
+/** A feed that delivers what it is handed, when it is handed it, and can hand over what came before. */
 private class HandFed : EventFeed {
+    private val stored = mutableListOf<StoredEvent>()
     private val subscribers = mutableListOf<(StoredEvent) -> Unit>()
 
-    override fun subscribe(subscriber: (StoredEvent) -> Unit): AutoCloseable {
+    override fun subscribe(from: Start, subscriber: (StoredEvent) -> Unit): AutoCloseable {
+        if (from == Start.FROM_THE_BEGINNING) {
+            stored.forEach(subscriber)
+        }
         subscribers += subscriber
         return AutoCloseable { subscribers -= subscriber }
     }
@@ -41,6 +46,7 @@ private class HandFed : EventFeed {
             data = "{}",
             event = event,
         )
+        this.stored += stored
         subscribers.toList().forEach { it(stored) }
     }
 }
@@ -179,5 +185,31 @@ class HousesProjectionSpec : StringSpec({
         houses.ofPlayer(adam)?.name shouldBe HouseName("Ravenscar")
         houses.ofPlayer(adam)?.id shouldBe HouseId.of(adam)
         houses.ofPlayer(nobody) shouldBe null
+    }
+
+    "a projection built after the events already exist still has them" {
+        // The bug this prevents: a store that outlives the process, and a read model that starts from now
+        // and is therefore missing everything founded before the last restart, silently and for ever.
+        val feed = HandFed()
+        feed.deliver(founded("Ravenscar", 59.33, 18.07))
+        feed.deliver(founded("Hollin", 59.34, 18.08))
+
+        val houses = HousesProjection(feed)
+
+        houses.size shouldBe 2
+        houses.inCell(STOCKHOLM_Z8, someDay, 10).houses.map { it.name.value }.sorted() shouldBe
+            listOf("Hollin", "Ravenscar")
+    }
+
+    "folding the same event twice leaves one house, because a feed delivers at least once" {
+        val feed = HandFed()
+        val houses = HousesProjection(feed)
+        val twice = founded("Ravenscar", 59.33, 18.07)
+
+        feed.deliver(twice)
+        feed.deliver(twice)
+
+        houses.size shouldBe 1
+        houses.inCell(STOCKHOLM_Z8, someDay, 10).houses shouldHaveSize 1
     }
 })

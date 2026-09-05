@@ -5,6 +5,7 @@ import villages.application.EventFeed
 import villages.application.HouseRow
 import villages.application.HousesByCell
 import villages.application.HousesByPlayer
+import villages.application.Start
 import villages.application.StoredEvent
 import villages.domain.HouseFounded
 import villages.domain.HouseId
@@ -38,7 +39,9 @@ class HousesProjection(feed: EventFeed) : HousesByCell, HousesByPlayer, AutoClos
     private val byPlayer = ConcurrentHashMap<PlayerId, HouseId>()
     private val listeners = CopyOnWriteArraySet<(HouseRow) -> Unit>()
     private val applied = AtomicLong()
-    private val subscription: AutoCloseable = feed.subscribe(::apply)
+    // From the beginning: a read model is its fold of every event, so one it never saw is one it is
+    // permanently wrong about. See decision record 0029.
+    private val subscription: AutoCloseable = feed.subscribe(Start.FROM_THE_BEGINNING, ::apply)
 
     /** Folds one stored event into its row. Exhaustive over the event types, so a new one has to be placed. */
     internal fun apply(stored: StoredEvent) {
