@@ -20,9 +20,12 @@ export {
 } from './cells';
 export type { Tile, View } from './cells';
 
+export { DAYS_PER_YEAR, dayOf, dayOfYearOf, describeDay, yearOf } from './calendar';
+
 export {
   bannerSchema,
   cellSchema,
+  worldDaySchema,
   chargeSchema,
   clientFrameSchema,
   commandPayloadSchema,

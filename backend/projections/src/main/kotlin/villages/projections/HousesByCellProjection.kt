@@ -7,21 +7,23 @@ import villages.application.HousesByCell
 import villages.application.StoredEvent
 import villages.domain.HouseFounded
 import villages.domain.HouseId
+import villages.domain.WorldTime
 import villages.protocol.Cell
 import villages.protocol.coarsestZoom
-import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.atomic.AtomicLong
 
 /**
  * The map's read model, folded from the event feed: one row per house, indexed by the deepest cell its
- * seat falls in and by the coarsest zoom it is worth drawing at.
+ * seat falls in and by the coarsest zoom it is worth drawing at, and carrying the span of world-time it
+ * exists over.
  *
- * A query for a cell is then the three conditions of decision 0026 and nothing else: the row's quadkey
- * starts with the cell, the cell's zoom is at least the row's coarsest, and the house exists at the
- * moment asked about. In memory the first is a `startsWith` over every row; in MongoDB it is an anchored
- * regex over an index, and nothing above this class changes.
+ * A query for a cell at a moment is then the three conditions of decision 0026 and nothing else: the row's
+ * quadkey starts with the cell, the cell's zoom is at least the row's coarsest, and the house exists on the
+ * world-day asked about. Move the day and the same query is the timeline scrubber. In memory the first
+ * condition is a `startsWith` over every row; in MongoDB it is an anchored regex over an index, and nothing
+ * above this class changes.
  *
  * Disposable, like every read model: delete it, replay the feed, get it back.
  */
@@ -43,7 +45,7 @@ class HousesByCellProjection(feed: EventFeed) : HousesByCell, AutoCloseable {
                 significance = event.significance,
                 banner = event.banner,
                 treasury = event.treasury,
-                since = event.at,
+                since = event.worldTime,
                 until = null,
                 version = stored.streamVersion,
             )
@@ -59,7 +61,7 @@ class HousesByCellProjection(feed: EventFeed) : HousesByCell, AutoCloseable {
         }
     }
 
-    override fun inCell(cell: String, at: Instant, most: Int): CellContents {
+    override fun inCell(cell: String, at: WorldTime, most: Int): CellContents {
         val zoom = cell.length
         val worthDrawing = rows.values
             .filter { it.quadkey.startsWith(cell) && it.coarsestZoom <= zoom && it.row.existsAt(at) }
@@ -70,6 +72,8 @@ class HousesByCellProjection(feed: EventFeed) : HousesByCell, AutoCloseable {
             asOf = applied.get(),
         )
     }
+
+    override fun earliest(): WorldTime? = rows.values.minOfOrNull { it.row.since }
 
     override fun watch(listener: (HouseRow) -> Unit): AutoCloseable {
         listeners += listener

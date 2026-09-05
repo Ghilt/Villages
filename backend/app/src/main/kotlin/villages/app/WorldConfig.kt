@@ -3,11 +3,16 @@ package villages.app
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import villages.application.AnonymousTokens
+import villages.application.DailyWorldClock
 import villages.application.FoundHouseService
+import villages.application.WorldClock
+import villages.domain.WorldTime
 import villages.gateway.Gateway
 import villages.occurrent.InMemoryWorld
 import villages.projections.HousesByCellProjection
+import villages.protocol.Calendar
 import java.time.Clock
+import java.time.Instant
 
 /**
  * The wiring. Everything the world is made of, chosen here and nowhere else: today the in-memory world,
@@ -22,9 +27,20 @@ class WorldConfig {
     @Bean
     fun clock(): Clock = Clock.systemUTC()
 
+    /**
+     * The world's day: one a real day since the world opened on the first of September 2026, in year 1200.
+     * The chrono-engine's placeholder; see SETTING.md on the shared world-day, and decision record 0027.
+     */
     @Bean
-    fun foundHouse(world: InMemoryWorld, clock: Clock): FoundHouseService =
-        FoundHouseService(world.executor, clock = { clock.instant() })
+    fun worldClock(clock: Clock): WorldClock = DailyWorldClock(
+        clock = { clock.instant() },
+        opened = Instant.parse("2026-09-01T00:00:00Z"),
+        openingDay = WorldTime(Calendar.dayOf(1200, 1)),
+    )
+
+    @Bean
+    fun foundHouse(world: InMemoryWorld, clock: Clock, worldClock: WorldClock): FoundHouseService =
+        FoundHouseService(world.executor, clock = { clock.instant() }, world = worldClock)
 
     /** The map's read model, folded from the feed. In memory, so it starts empty with the store. */
     @Bean(destroyMethod = "close")
@@ -36,11 +52,13 @@ class WorldConfig {
         foundHouse: FoundHouseService,
         houses: HousesByCellProjection,
         clock: Clock,
+        worldClock: WorldClock,
     ): Gateway = Gateway(
         tokens = AnonymousTokens,
         foundHouse = foundHouse,
         events = world.feed,
         houses = houses,
         clock = clock,
+        world = worldClock,
     )
 }

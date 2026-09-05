@@ -16,7 +16,8 @@ class HouseDeciderSpec : StringSpec({
         name = HouseName("Ravenscar"),
         seat = Location(59.33, 18.07),
         banner = Banner(Tincture.SABLE, Division.PLAIN, null, Charge.STAG, Tincture.ARGENT),
-        at = noon,
+        worldTime = WorldTime(454901),
+        recordedAt = noon,
     )
 
     "founding a house that does not exist yields one HouseFounded, with a significance and an empty treasury" {
@@ -29,7 +30,8 @@ class HouseDeciderSpec : StringSpec({
         founded.seat shouldBe ravenscar.seat
         founded.significance shouldBe HouseDecider.FOUNDING_SIGNIFICANCE
         founded.treasury shouldBe Treasury(0, HouseDecider.FOUNDING_RATE, noon)
-        founded.at shouldBe noon
+        founded.worldTime shouldBe ravenscar.worldTime
+        founded.recordedAt shouldBe noon
     }
 
     "founding it again is refused" {

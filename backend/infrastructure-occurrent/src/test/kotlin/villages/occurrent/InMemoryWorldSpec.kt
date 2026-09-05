@@ -16,6 +16,7 @@ import villages.domain.HouseName
 import villages.domain.Location
 import villages.domain.PlayerId
 import villages.domain.Tincture
+import villages.domain.WorldTime
 import java.time.Instant
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
@@ -29,7 +30,8 @@ class InMemoryWorldSpec : StringSpec({
         name = HouseName("Ravenscar"),
         seat = Location(59.33, 18.07),
         banner = Banner(Tincture.SABLE, Division.PLAIN, null, Charge.STAG, Tincture.ARGENT),
-        at = noon,
+        worldTime = WorldTime(454901),
+        recordedAt = noon,
     )
 
     "a command run through the port is stored as its catalogued type and delivered on the feed" {

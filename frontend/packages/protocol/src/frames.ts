@@ -37,6 +37,9 @@ export const rateSchema = z.object({
   asOf: z.number().int(),
 });
 
+/** A day in the world's calendar, counted from the first day of year one. The calendar reads it. */
+export const worldDaySchema = z.number().int().nonnegative();
+
 export const houseViewSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -44,6 +47,8 @@ export const houseViewSchema = z.object({
   seat: pointSchema,
   banner: bannerSchema,
   treasury: rateSchema,
+  /** The world-day it exists from. */
+  since: worldDaySchema,
   version: z.number().int(),
 });
 
@@ -64,6 +69,8 @@ export const clientFrameSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('command'), commandId: z.string(), command: commandPayloadSchema }),
   z.object({ type: z.literal('ping'), t0: z.number().int() }),
   z.object({ type: z.literal('watchEvents'), on: z.boolean() }),
+  /** Look at the world as it was on a day, or at live when null. The timeline scrubber's one frame. */
+  z.object({ type: z.literal('viewTime'), at: worldDaySchema.nullable() }),
 ]);
 
 export const deltaSchema = z.discriminatedUnion('type', [
@@ -76,6 +83,8 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
     type: z.literal('welcome'),
     serverTime: z.number().int(),
     playerId: z.string(),
+    /** Where the world's clock stands: today, and the earliest day anything is known to exist from. */
+    world: z.object({ today: worldDaySchema, earliest: worldDaySchema }),
     ownHouse: houseViewSchema.optional(),
   }),
   z.object({

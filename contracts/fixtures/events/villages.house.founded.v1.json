@@ -11,6 +11,7 @@
     "significance": 20.0,
     "banner": { "field": "SABLE", "division": "PLAIN", "second": null, "charge": "STAG", "chargeTincture": "ARGENT" },
     "treasury": { "amount": 0, "ratePerSecond": 1.0, "asOf": "2026-09-04T12:00:00Z" },
-    "at": "2026-09-04T12:00:00Z"
+    "worldTime": 454901,
+    "recordedAt": "2026-09-04T12:00:00Z"
   }
 }

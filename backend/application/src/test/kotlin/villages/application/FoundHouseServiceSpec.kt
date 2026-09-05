@@ -17,6 +17,7 @@ import villages.domain.HouseName
 import villages.domain.Location
 import villages.domain.PlayerId
 import villages.domain.Tincture
+import villages.domain.WorldTime
 import java.time.Instant
 import java.util.UUID
 
@@ -32,7 +33,7 @@ private class RememberingExecutor : HouseCommandExecutor {
 class FoundHouseServiceSpec : StringSpec({
     val noon = Instant.parse("2026-09-04T12:00:00Z")
     val executor = RememberingExecutor()
-    val service = FoundHouseService(executor, clock = { noon })
+    val service = FoundHouseService(executor, clock = { noon }, world = { WorldTime(454901) })
     val house = HouseId(UUID.fromString("6d5b0a2e-1c3f-4d7e-9a8b-0f1e2d3c4b5a"))
     val player = PlayerId(UUID.fromString("0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8d"))
     val banner = Banner(Tincture.SABLE, Division.PLAIN, null, Charge.STAG, Tincture.ARGENT)
@@ -41,7 +42,8 @@ class FoundHouseServiceSpec : StringSpec({
         service.found(house, player, HouseName("Ravenscar"), Location(59.33, 18.07), banner)
 
         val founded = executor.events.single().shouldBeInstanceOf<villages.domain.HouseFounded>()
-        founded.at shouldBe noon
+        founded.recordedAt shouldBe noon
+        founded.worldTime shouldBe WorldTime(454901)
         founded.treasury.asOf shouldBe noon
     }
 

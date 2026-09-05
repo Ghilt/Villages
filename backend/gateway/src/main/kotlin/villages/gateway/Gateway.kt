@@ -6,12 +6,14 @@ import villages.application.HouseRow
 import villages.application.HousesByCell
 import villages.application.PlayerTokens
 import villages.application.StoredEvent
+import villages.application.WorldClock
 import villages.domain.Banner
 import villages.domain.HouseError
 import villages.domain.HouseId
 import villages.domain.HouseName
 import villages.domain.Location
 import villages.domain.PlayerId
+import villages.domain.WorldTime
 import villages.protocol.BannerSpec
 import villages.protocol.Batch
 import villages.protocol.Cell
@@ -41,8 +43,10 @@ import villages.protocol.Snapshot
 import villages.protocol.SubscribeCells
 import villages.protocol.Tincture
 import villages.protocol.UnsubscribeCells
+import villages.protocol.ViewTime
 import villages.protocol.WatchEvents
 import villages.protocol.Welcome
+import villages.protocol.WorldNow
 import villages.protocol.coarsestZoom
 import java.time.Clock
 import java.util.UUID
@@ -103,6 +107,7 @@ class Gateway(
     events: EventFeed,
     private val houses: HousesByCell,
     private val clock: Clock,
+    private val world: WorldClock,
     private val later: Later = ScheduledLater(),
 ) : AutoCloseable {
     private val watching = ConcurrentHashMap<Connection, Unit>()
@@ -129,7 +134,9 @@ class Gateway(
         for (zoom in coarsestZoom(row.significance.value)..Cell.MAX_ZOOM) {
             val holders = holding[deepest.at(zoom).quadkey] ?: continue
             for (connection in holders) {
-                connection.enqueue(delta)
+                if (connection.sees(row)) {
+                    connection.enqueue(delta)
+                }
             }
         }
     }
@@ -148,6 +155,15 @@ class Gateway(
         private val cells = LinkedHashSet<String>()
         private val waiting = ArrayDeque<Delta>()
         private var flushPlanned = false
+
+        /** The world-day this connection is looking at, or null for live: the scrubber's position. */
+        @Volatile
+        private var viewingAt: WorldTime? = null
+
+        private fun viewing(): WorldTime = viewingAt ?: world.today()
+
+        /** Whether a change is on this connection's day. Live sees everything; the past sees what existed then. */
+        internal fun sees(row: HouseRow): Boolean = viewingAt?.let { row.existsAt(it) } ?: true
 
         /** The cells this connection holds, for the tests and the panel. */
         fun cells(): Set<String> = synchronized(lock) { cells.toSet() }
@@ -170,6 +186,7 @@ class Gateway(
                 is Command -> command(frame)
                 is SubscribeCells -> subscribe(frame.cells)
                 is UnsubscribeCells -> unsubscribe(frame.cells)
+                is ViewTime -> viewTime(frame.at)
             }
         }
 
@@ -185,7 +202,14 @@ class Gateway(
                 return
             }
             player = who
-            out.send(Welcome(serverTime = clock.millis(), playerId = who.value.toString()))
+            val today = world.today()
+            out.send(
+                Welcome(
+                    serverTime = clock.millis(),
+                    playerId = who.value.toString(),
+                    world = WorldNow(today = today.day, earliest = (houses.earliest() ?: today).day),
+                ),
+            )
         }
 
         private fun command(frame: Command) {
@@ -235,15 +259,35 @@ class Gateway(
             }
             for (cell in fresh) {
                 holding.computeIfAbsent(cell) { ConcurrentHashMap.newKeySet() }.add(this)
-                val contents = houses.inCell(cell, clock.instant(), MOST_IN_A_CELL)
-                out.send(
-                    Snapshot(
-                        cell = cell,
-                        houses = contents.houses.map { it.toView() },
-                        asOfVersion = contents.asOf,
-                        omitted = contents.omitted,
-                    ),
-                )
+                snapshot(cell)
+            }
+        }
+
+        /** What the cell holds on the day this connection is looking at. */
+        private fun snapshot(cell: String) {
+            val contents = houses.inCell(cell, viewing(), MOST_IN_A_CELL)
+            out.send(
+                Snapshot(
+                    cell = cell,
+                    houses = contents.houses.map { it.toView() },
+                    asOfVersion = contents.asOf,
+                    omitted = contents.omitted,
+                ),
+            )
+        }
+
+        /**
+         * Moves this connection's eye along the timeline. Every held cell is answered again as of that day, so
+         * the map redraws the world as it was; from then on only changes that exist on that day are sent.
+         */
+        private fun viewTime(at: Long?) {
+            if (at != null && at < 0) {
+                out.send(ErrorFrame("badTime", "the world's calendar starts at day 0, not $at"))
+                return
+            }
+            viewingAt = at?.let { WorldTime(it) }
+            for (cell in cells()) {
+                snapshot(cell)
             }
         }
 
@@ -343,6 +387,7 @@ internal fun HouseRow.toView(deepest: Cell = Cell.of(seat.lat, seat.lon)): House
     seat = Point(seat.lat, seat.lon),
     banner = banner.toWire(),
     treasury = Rate(treasury.amount, treasury.ratePerSecond, treasury.asOf.toEpochMilli()),
+    since = since.day,
     version = version,
 )
 

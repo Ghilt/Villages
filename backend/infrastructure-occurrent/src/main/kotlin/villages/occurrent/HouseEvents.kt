@@ -18,10 +18,10 @@ import java.time.ZoneOffset
 /**
  * How a house event is written and read: the format decision record 0024 describes.
  *
- * The source is ours, the subject is the house, the time is the event's own instant rather than the clock
- * at the moment of storing, and the data is the event's fields as Jackson writes a Kotlin class: value
- * classes unwrapped, instants as ISO-8601 text, enums by their names, nulls written out so that a type's
- * shape is constant. Held to contracts/fixtures/events by a test.
+ * The source is ours, the subject is the house, the time is the instant the event was recorded, and the
+ * data is the event's fields as Jackson writes a Kotlin class: value classes unwrapped, so a world-time is
+ * a number, instants as ISO-8601 text, enums by their names, nulls written out so that a type's shape is
+ * constant. Held to contracts/fixtures/events by a test.
  */
 object HouseEvents {
     val SOURCE: URI = URI.create("urn:villages")
@@ -34,7 +34,7 @@ object HouseEvents {
         JacksonCloudEventConverter.Builder<HouseEvent>(json, SOURCE)
             .typeMapper(HouseEventTypes)
             .subjectMapper { event -> event.houseId.value.toString() }
-            .timeMapper { event -> event.at.atOffset(ZoneOffset.UTC) }
+            .timeMapper { event -> event.recordedAt.atOffset(ZoneOffset.UTC) }
             .build()
 
     /** The domain's decider in the shape Occurrent drives. The rules stay in the domain. */

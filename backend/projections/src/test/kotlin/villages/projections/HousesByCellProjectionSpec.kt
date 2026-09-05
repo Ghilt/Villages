@@ -18,6 +18,7 @@ import villages.domain.PlayerId
 import villages.domain.Significance
 import villages.domain.Tincture
 import villages.domain.Treasury
+import villages.domain.WorldTime
 import java.time.Instant
 import java.util.UUID
 
@@ -36,7 +37,7 @@ private class HandFed : EventFeed {
             type = "villages.house.founded.v1",
             stream = event.houseId.stream,
             streamVersion = version,
-            time = event.at,
+            time = event.recordedAt,
             data = "{}",
             event = event,
         )
@@ -46,11 +47,15 @@ private class HandFed : EventFeed {
 
 private val noon = Instant.parse("2026-09-04T12:00:00Z")
 
+/** Year 1247, day 112: the world-day the fixtures stand on. */
+private val someDay = WorldTime(454901)
+
 private fun founded(
     name: String,
     lat: Double,
     lon: Double,
     significance: Double = 20.0,
+    on: WorldTime = someDay,
     at: Instant = noon,
 ) = HouseFounded(
     houseId = HouseId(UUID.nameUUIDFromBytes(name.toByteArray())),
@@ -60,7 +65,8 @@ private fun founded(
     significance = Significance(significance),
     banner = Banner(Tincture.SABLE, Division.PLAIN, null, Charge.STAG, Tincture.ARGENT),
     treasury = Treasury(0, 1.0, at),
-    at = at,
+    worldTime = on,
+    recordedAt = at,
 )
 
 /** Stockholm, before the warp: the shared vector every zoom of it is known for. */
@@ -76,11 +82,11 @@ class HousesByCellProjectionSpec : StringSpec({
         feed.deliver(founded("Ravenscar", 59.33, 18.07, significance = 20.0))
 
         // Twenty is worth drawing from zoom eight in, and not from further out.
-        houses.inCell(STOCKHOLM_Z10, noon, 10).houses.map { it.name } shouldBe listOf(HouseName("Ravenscar"))
-        houses.inCell(STOCKHOLM_Z8, noon, 10).houses shouldHaveSize 1
-        houses.inCell(STOCKHOLM_Z8.take(7), noon, 10).houses.shouldBeEmpty()
-        houses.inCell(STOCKHOLM_Z4, noon, 10).houses.shouldBeEmpty()
-        houses.inCell("", noon, 10).houses.shouldBeEmpty()
+        houses.inCell(STOCKHOLM_Z10, someDay, 10).houses.map { it.name } shouldBe listOf(HouseName("Ravenscar"))
+        houses.inCell(STOCKHOLM_Z8, someDay, 10).houses shouldHaveSize 1
+        houses.inCell(STOCKHOLM_Z8.take(7), someDay, 10).houses.shouldBeEmpty()
+        houses.inCell(STOCKHOLM_Z4, someDay, 10).houses.shouldBeEmpty()
+        houses.inCell("", someDay, 10).houses.shouldBeEmpty()
     }
 
     "a legendary thing is drawn from the whole world" {
@@ -88,8 +94,8 @@ class HousesByCellProjectionSpec : StringSpec({
         val houses = HousesByCellProjection(feed)
         feed.deliver(founded("St John's", 59.33, 18.07, significance = 100.0))
 
-        houses.inCell("", noon, 10).houses shouldHaveSize 1
-        houses.inCell(STOCKHOLM_Z4, noon, 10).houses shouldHaveSize 1
+        houses.inCell("", someDay, 10).houses shouldHaveSize 1
+        houses.inCell(STOCKHOLM_Z4, someDay, 10).houses shouldHaveSize 1
     }
 
     "a house is not in a cell its seat does not fall in" {
@@ -98,17 +104,28 @@ class HousesByCellProjectionSpec : StringSpec({
         feed.deliver(founded("Ravenscar", 59.33, 18.07))
 
         // Cape Town's cell, at the same zoom.
-        houses.inCell("30023103", noon, 10).houses.shouldBeEmpty()
+        houses.inCell("30023103", someDay, 10).houses.shouldBeEmpty()
     }
 
-    "a house exists from its founding onward, and not before" {
+    "a house exists from its founding world-day onward, and not the day before, whenever it was recorded" {
         val feed = HandFed()
         val houses = HousesByCellProjection(feed)
-        feed.deliver(founded("Ravenscar", 59.33, 18.07, at = noon))
+        feed.deliver(founded("Ravenscar", 59.33, 18.07, on = someDay, at = noon))
 
-        houses.inCell(STOCKHOLM_Z8, noon.minusSeconds(1), 10).houses.shouldBeEmpty()
-        houses.inCell(STOCKHOLM_Z8, noon, 10).houses shouldHaveSize 1
-        houses.inCell(STOCKHOLM_Z8, noon.plusSeconds(3600 * 24 * 365), 10).houses shouldHaveSize 1
+        houses.inCell(STOCKHOLM_Z8, someDay - 1, 10).houses.shouldBeEmpty()
+        houses.inCell(STOCKHOLM_Z8, someDay, 10).houses shouldHaveSize 1
+        houses.inCell(STOCKHOLM_Z8, someDay + 365 * 300, 10).houses shouldHaveSize 1
+    }
+
+    "the earliest world-day anything exists from is the scrubber's left end, and nothing means nothing" {
+        val feed = HandFed()
+        val houses = HousesByCellProjection(feed)
+        houses.earliest() shouldBe null
+
+        feed.deliver(founded("Later", 59.33, 18.07, on = someDay))
+        feed.deliver(founded("Earlier", 59.34, 18.08, on = someDay - 36500))
+
+        houses.earliest() shouldBe someDay - 36500
     }
 
     "the most significant come first, and what will not fit is counted rather than lost" {
@@ -118,7 +135,7 @@ class HousesByCellProjectionSpec : StringSpec({
         feed.deliver(founded("Greatest", 59.331, 18.071, significance = 90.0))
         feed.deliver(founded("Middling", 59.332, 18.072, significance = 60.0))
 
-        val contents = houses.inCell(STOCKHOLM_Z8, noon, 2)
+        val contents = houses.inCell(STOCKHOLM_Z8, someDay, 2)
 
         contents.houses.map { it.name.value } shouldBe listOf("Greatest", "Middling")
         contents.omitted shouldBe 1
@@ -135,7 +152,7 @@ class HousesByCellProjectionSpec : StringSpec({
 
         heard.map { it.name.value } shouldBe listOf("Ravenscar", "Hollin")
         heard.first().version shouldBe 1
-        houses.inCell(STOCKHOLM_Z8, noon, 10).asOf shouldBe 2
+        houses.inCell(STOCKHOLM_Z8, someDay, 10).asOf shouldBe 2
         houses.size shouldBe 2
     }
 

@@ -28,8 +28,9 @@ object HouseDecider {
                     seat = command.seat,
                     significance = FOUNDING_SIGNIFICANCE,
                     banner = command.banner,
-                    treasury = Treasury(amount = 0, ratePerSecond = FOUNDING_RATE, asOf = command.at),
-                    at = command.at,
+                    treasury = Treasury(amount = 0, ratePerSecond = FOUNDING_RATE, asOf = command.recordedAt),
+                    worldTime = command.worldTime,
+                    recordedAt = command.recordedAt,
                 ),
             )
         }
@@ -44,7 +45,8 @@ object HouseDecider {
             significance = event.significance,
             banner = event.banner,
             treasury = event.treasury,
-            foundedAt = event.at,
+            foundedOn = event.worldTime,
+            foundedAt = event.recordedAt,
         )
     }
 

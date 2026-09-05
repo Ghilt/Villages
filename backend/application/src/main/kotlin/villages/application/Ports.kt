@@ -9,6 +9,7 @@ import villages.domain.Location
 import villages.domain.PlayerId
 import villages.domain.Significance
 import villages.domain.Treasury
+import villages.domain.WorldTime
 import java.time.Instant
 
 /**
@@ -24,6 +25,32 @@ fun interface HouseCommandExecutor {
 /** The server's clock, so that a use case can be tested at a chosen instant. */
 fun interface Clock {
     fun now(): Instant
+}
+
+/**
+ * What day it is in the world: the world-time a thing done now is recorded as having happened at. Whose to
+ * decide is the chrono-engine's, eventually; today it is one day a real day, server-wide. See 0027.
+ */
+fun interface WorldClock {
+    fun today(): WorldTime
+}
+
+/**
+ * One world-day for every real day since the world opened, the same for everyone: the placeholder for the
+ * chrono-engine's shared world-day, which `SETTING.md` says is the leaning. Pure, so it is a policy and not
+ * infrastructure, and a test can stand at any real instant.
+ */
+class DailyWorldClock(
+    private val clock: Clock,
+    /** The real instant the world opened. */
+    private val opened: Instant,
+    /** The world-day it was on when it opened. */
+    private val openingDay: WorldTime,
+) : WorldClock {
+    override fun today(): WorldTime {
+        val realDays = java.time.Duration.between(opened, clock.now()).toDays()
+        return openingDay + realDays.coerceAtLeast(0)
+    }
 }
 
 /** Who a token belongs to. Anonymous browser tokens for now; accounts replace this without moving anything. */
@@ -44,7 +71,7 @@ data class StoredEvent(
     val stream: String,
     /** Its position in that stream, from one. */
     val streamVersion: Long,
-    /** When it happened, by the server's clock. */
+    /** When it was recorded, by the server's clock. The world-time is inside the event. */
     val time: Instant,
     /** The event's data as the store holds it, JSON text. What the debug panel opens. */
     val data: String,
@@ -70,13 +97,13 @@ data class HouseRow(
     val banner: Banner,
     val treasury: Treasury,
     /** From when, in world-time, this house exists. */
-    val since: Instant,
+    val since: WorldTime,
     /** Until when, in world-time, or null while it still does. */
-    val until: Instant?,
+    val until: WorldTime?,
     /** The stream version this row reflects, so a snapshot and a later delta can be put in order. */
     val version: Long,
 ) {
-    fun existsAt(at: Instant): Boolean = !at.isBefore(since) && (until == null || at.isBefore(until))
+    fun existsAt(at: WorldTime): Boolean = at >= since && (until == null || at < until)
 }
 
 /** What one cell holds at one moment: the houses worth drawing, and how many more there were. */
@@ -93,8 +120,11 @@ data class CellContents(
  * which houses are worth drawing at that zoom is the read model's business, not the caller's. Decision 0026.
  */
 interface HousesByCell {
-    /** The houses in `cell` that exist at `at`, most significant first, at most `most` of them. */
-    fun inCell(cell: String, at: Instant, most: Int): CellContents
+    /** The houses in `cell` that exist at world-time `at`, most significant first, at most `most` of them. */
+    fun inCell(cell: String, at: WorldTime, most: Int): CellContents
+
+    /** The earliest world-time anything is known to exist from, or null while nothing is. The scrubber's left end. */
+    fun earliest(): WorldTime?
 
     /** Every row the read model changes from now on, in the order it applied them, until closed. */
     fun watch(listener: (HouseRow) -> Unit): AutoCloseable

@@ -11,10 +11,12 @@ import villages.application.EventFeed
 import villages.application.FoundHouseService
 import villages.application.HouseCommandExecutor
 import villages.application.StoredEvent
+import villages.application.WorldClock
 import villages.domain.HouseCommand
 import villages.domain.HouseDecider
 import villages.domain.HouseEvent
 import villages.domain.HouseFounded
+import villages.domain.WorldTime
 import villages.projections.HousesByCellProjection
 import villages.protocol.Batch
 import villages.protocol.CommandAccepted
@@ -28,6 +30,7 @@ import villages.protocol.Resync
 import villages.protocol.ServerFrame
 import villages.protocol.Snapshot
 import villages.protocol.Welcome
+import villages.protocol.WorldNow
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneOffset
@@ -52,7 +55,7 @@ private class TinyWorld : HouseCommandExecutor, EventFeed {
                 type = "villages.house.founded.v1",
                 stream = founded.houseId.stream,
                 streamVersion = (stream.size + index + 1).toLong(),
-                time = founded.at,
+                time = founded.recordedAt,
                 data = """{"name":"${founded.name.value}","significance":${founded.significance.value}}""",
                 event = event,
             )
@@ -84,6 +87,9 @@ private class ManualLater : Later {
 }
 
 private val noon = Instant.parse("2026-09-04T12:00:00Z")
+
+/** Year 1247, day 112: the world-day every test stands on. */
+private val today = WorldTime(454901)
 private const val TOKEN = "0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8d"
 private val hello = """{"type":"hello","playerToken":"$TOKEN","protocolVersion":1}"""
 private const val RAVENSCAR = "6d5b0a2e-1c3f-4d7e-9a8b-0f1e2d3c4b5a"
@@ -108,12 +114,14 @@ private class Rig {
     val world = TinyWorld()
     val later = ManualLater()
     val houses = HousesByCellProjection(world)
+    val worldClock = WorldClock { today }
     val gateway = Gateway(
         tokens = AnonymousTokens,
-        foundHouse = FoundHouseService(world, clock = { noon }),
+        foundHouse = FoundHouseService(world, clock = { noon }, world = worldClock),
         events = world,
         houses = houses,
         clock = Clock.fixed(noon, ZoneOffset.UTC),
+        world = worldClock,
         later = later,
     )
 
@@ -129,11 +137,67 @@ private class Rig {
 
 class GatewaySpec : StringSpec({
 
-    "hello is answered with welcome, naming the player and the server's time" {
+    "hello is answered with welcome, naming the player, the server's time, and where the world's clock stands" {
         val sent = mutableListOf<ServerFrame>()
         Rig().gateway.connect { sent += it }.receive(hello)
 
-        sent.single() shouldBe Welcome(serverTime = noon.toEpochMilli(), playerId = TOKEN)
+        sent.single() shouldBe Welcome(
+            serverTime = noon.toEpochMilli(),
+            playerId = TOKEN,
+            world = WorldNow(today = today.day, earliest = today.day),
+        )
+    }
+
+    "welcome's earliest day is the first anything is known to exist from" {
+        val rig = Rig()
+        val (founder, _) = rig.introduced()
+        founder.receive(founding())
+        val sent = mutableListOf<ServerFrame>()
+
+        rig.gateway.connect { sent += it }.receive(hello)
+
+        sent.single().shouldBeInstanceOf<Welcome>().world shouldBe WorldNow(today = today.day, earliest = today.day)
+    }
+
+    "looking at a day before a house was founded, its cell is empty; looking at live again, it is back" {
+        val rig = Rig()
+        val (founder, _) = rig.introduced()
+        founder.receive(founding())
+        val (looker, sent) = rig.introduced()
+        looker.receive(subscribe(STOCKHOLM_Z8))
+        sent.single().shouldBeInstanceOf<Snapshot>().houses shouldHaveSize 1
+        sent.clear()
+
+        looker.receive("""{"type":"viewTime","at":${today.day - 1}}""")
+        sent.single().shouldBeInstanceOf<Snapshot>().houses.shouldBeEmpty()
+        sent.clear()
+
+        looker.receive("""{"type":"viewTime","at":null}""")
+        val back = sent.single().shouldBeInstanceOf<Snapshot>()
+        back.houses shouldHaveSize 1
+        back.houses.single().since shouldBe today.day
+    }
+
+    "a connection looking at the past is not told of a founding on a later day" {
+        val rig = Rig()
+        val (looker, sent) = rig.introduced()
+        looker.receive(subscribe(STOCKHOLM_Z8))
+        looker.receive("""{"type":"viewTime","at":${today.day - 100}}""")
+        sent.clear()
+        val (founder, _) = rig.introduced()
+
+        founder.receive(founding())
+        rig.later.tick()
+
+        sent.shouldBeEmpty()
+    }
+
+    "a day before the calendar began is refused" {
+        val (looker, sent) = Rig().introduced()
+
+        looker.receive("""{"type":"viewTime","at":-5}""")
+
+        sent.single().shouldBeInstanceOf<ErrorFrame>().code shouldBe "badTime"
     }
 
     "a client of another protocol version, or with no token, is told so and not welcomed" {

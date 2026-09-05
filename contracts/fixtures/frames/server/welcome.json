@@ -1,5 +1,9 @@
 {
   "type": "welcome",
   "serverTime": 1788609600200,
-  "playerId": "a1b2c3d4-0000-4000-8000-000000000001"
+  "playerId": "a1b2c3d4-0000-4000-8000-000000000001",
+  "world": {
+    "today": 454901,
+    "earliest": 437635
+  }
 }

@@ -56,7 +56,10 @@ data class BannerSpec(
 /** A resource as a rate: the amount at `asOf`, server milliseconds, and how fast it grows. Clients interpolate. */
 data class Rate(val amount: Long, val ratePerSecond: Double, val asOf: Long)
 
-/** A house as the map shows it. `version` is the stream version, so snapshots and deltas can be ordered. */
+/**
+ * A house as the map shows it. `since` is the world-day it exists from, as a count the calendar reads;
+ * `version` is the stream version, so snapshots and deltas can be ordered.
+ */
 data class HouseView(
     val id: String,
     val name: String,
@@ -64,8 +67,12 @@ data class HouseView(
     val seat: Point,
     val banner: BannerSpec,
     val treasury: Rate,
+    val since: Long,
     val version: Long,
 )
+
+/** Where the world's clock stands: today's world-day, and the earliest day anything is known to exist from. */
+data class WorldNow(val today: Long, val earliest: Long)
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes(
@@ -75,6 +82,7 @@ data class HouseView(
     JsonSubTypes.Type(Command::class, name = "command"),
     JsonSubTypes.Type(Ping::class, name = "ping"),
     JsonSubTypes.Type(WatchEvents::class, name = "watchEvents"),
+    JsonSubTypes.Type(ViewTime::class, name = "viewTime"),
 )
 sealed interface ClientFrame
 
@@ -94,6 +102,13 @@ data class Ping(val t0: Long) : ClientFrame
  * world happen; a player's interface never sends it. See decision record 0023.
  */
 data class WatchEvents(val on: Boolean) : ClientFrame
+
+/**
+ * Looks at the world as it was on a world-day, or at live when `at` is null. Every held cell is answered
+ * with a fresh snapshot as of that day, and from then on only changes that exist on it are sent. This is
+ * the timeline scrubber's one frame.
+ */
+data class ViewTime(val at: Long?) : ClientFrame
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes(
@@ -118,9 +133,14 @@ data class FoundHousePayload(val houseId: String, val name: String, val seat: Po
 )
 sealed interface ServerFrame
 
-/** The answer to hello. `ownHouse` is absent for a player who has not founded one. */
+/** The answer to hello, carrying where the world's clock stands. `ownHouse` is absent for a player without one. */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-data class Welcome(val serverTime: Long, val playerId: String, val ownHouse: HouseView? = null) : ServerFrame
+data class Welcome(
+    val serverTime: Long,
+    val playerId: String,
+    val world: WorldNow,
+    val ownHouse: HouseView? = null,
+) : ServerFrame
 
 /**
  * What a cell holds, sent on subscribing to it, before any deltas. `omitted` is how many more houses the

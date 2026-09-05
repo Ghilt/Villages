@@ -15,6 +15,7 @@ import villages.domain.PlayerId
 import villages.domain.Significance
 import villages.domain.Tincture
 import villages.domain.Treasury
+import villages.domain.WorldTime
 import java.io.File
 import java.time.Instant
 import java.util.UUID
@@ -35,7 +36,8 @@ class HouseEventFormatSpec : StringSpec({
         significance = Significance(20.0),
         banner = Banner(Tincture.SABLE, Division.PLAIN, null, Charge.STAG, Tincture.ARGENT),
         treasury = Treasury(0, 1.0, noon),
-        at = noon,
+        worldTime = WorldTime(454901),
+        recordedAt = noon,
     )
     val pinned: JsonNode = HouseEvents.json.readTree(File("../../contracts/fixtures/events/villages.house.founded.v1.json"))
 

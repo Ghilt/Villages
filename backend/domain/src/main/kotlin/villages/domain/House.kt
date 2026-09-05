@@ -15,6 +15,8 @@ sealed interface House {
         val significance: Significance,
         val banner: Banner,
         val treasury: Treasury,
+        /** The world-day it was founded on, and the instant that was recorded. */
+        val foundedOn: WorldTime,
         val foundedAt: Instant,
     ) : House
 }

@@ -93,8 +93,10 @@ by whoever needs to partition - it is not something the world knows about.
 
 Proposals, flagged as such. None is decided; each will become a decision record when it is.
 
-1. **Two times on every event.** `at` today is both; it becomes world-time and player-time, and the
-   catalogue in `EVENTS.md` carries both on every row. Cheap now with one event type, annoying later.
+1. **Two times on every event. Decided: see decision record 0027.** Every event carries `worldTime`, a
+   day in the world's calendar, and `recordedAt`, the server's instant; the catalogue lists both. The
+   world's day is a server fact - one a real day since the world opened, until the chrono-engine chooses
+   it - and a connection looks at the world as of a day with one frame, which is the scrubber.
 2. **Retroactive play appends at the head.** Playing 1247 today records an event *now* whose world-time
    is 1247. The stream only grows; nothing is rewritten; the event store's guarantees survive intact.
    Recording order is the order of truth, and **recording order arbitrates the shared past**: two players
@@ -109,8 +111,9 @@ Proposals, flagged as such. None is decided; each will become a decision record 
    it discharges them - by rolling the construction into the chronicle, or by leaving a debt the world pays
    later - and it checks each new command against them. Each thing's lifetime is a small interval
    constraint problem of its own, which is what keeps consistency per thing rather than global.
-5. **The map is a temporal read model.** Features carry `[from, to)`, and the map at world-time T is a range
-   query: `from <= T < to`. A retroactive event inserts a feature; a destruction sets its end. No re-folding
+5. **The map is a temporal read model. Decided with 0027, for houses.** Rows carry `since` and `until` in
+   world-time, and the map at world-time T is a range query: `since <= T < until`. A retroactive event
+   inserts a feature; a destruction sets its end. No re-folding
    for the map, and the timeline scrubber is the same query with T moving. The house-spirit is a second
    fold over the same events in **player-time** order.
 6. **Cell is derived, not carried. Decided: see decision record 0026.** The event carries a place and a

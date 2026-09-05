@@ -48,9 +48,21 @@ describe('the connection', () => {
       heard.push(frame),
     );
 
-    fake.gatewaySays({ type: 'welcome', serverTime: 1788609600200, playerId: token });
+    fake.gatewaySays({
+      type: 'welcome',
+      serverTime: 1788609600200,
+      playerId: token,
+      world: { today: 454901, earliest: 437635 },
+    });
 
-    expect(heard).toEqual([{ type: 'welcome', serverTime: 1788609600200, playerId: token }]);
+    expect(heard).toEqual([
+      {
+        type: 'welcome',
+        serverTime: 1788609600200,
+        playerId: token,
+        world: { today: 454901, earliest: 437635 },
+      },
+    ]);
   });
 
   it('reports a frame the schema refuses rather than passing it on or throwing', () => {
