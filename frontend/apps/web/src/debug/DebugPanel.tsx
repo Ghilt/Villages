@@ -13,6 +13,12 @@ import { EventsView } from './EventsView';
 import { describeState } from './report';
 import type { Line } from './report';
 
+/** Where the world's clock stands and the day being shown, read together so they cannot disagree. */
+function worldNow(): { today: number; earliest: number; viewingAt: number | null } | null {
+  const heard = gatewayState();
+  return heard.world === null ? null : { ...heard.world, viewingAt: heard.viewingAt };
+}
+
 interface DebugPanelProps {
   map: maplibregl.Map | null;
   renderer: string;
@@ -134,6 +140,7 @@ export function DebugPanel({ map, renderer }: DebugPanelProps) {
             held: cellsHeld(gatewayState().houses).length,
             omitted: omittedInView(gatewayState().houses),
           },
+          world: worldNow(),
         }),
       );
     };

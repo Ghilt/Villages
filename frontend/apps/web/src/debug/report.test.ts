@@ -17,6 +17,7 @@ const state: MapState = {
   worstFrameGap: 17.4,
   cells: ['3000000', '3000001', '3000002', '3000003'],
   houses: { drawn: 12, held: 4, omitted: 0 },
+  world: { today: 454901, earliest: 437635, viewingAt: null },
 };
 
 const valueOf = (from: MapState, label: string): string =>
@@ -119,5 +120,21 @@ describe('saying what the gateway has handed over', () => {
     expect(valueOf({ ...state, houses: { drawn: 0, held: 0, omitted: 0 } }, 'houses')).toBe(
       'no cells held yet',
     );
+  });
+});
+
+describe('saying which day the map is showing', () => {
+  it('names today and says the map is live', () => {
+    expect(valueOf(state, 'world')).toBe('year 1247, day 112 today, showing live');
+  });
+
+  it('names the day being looked at when the scrubber has been moved', () => {
+    expect(
+      valueOf({ ...state, world: { today: 454901, earliest: 437635, viewingAt: 437635 } }, 'world'),
+    ).toBe('year 1247, day 112 today, showing year 1200');
+  });
+
+  it('says so before the gateway has spoken', () => {
+    expect(valueOf({ ...state, world: null }, 'world')).toBe('not heard from the gateway yet');
   });
 });

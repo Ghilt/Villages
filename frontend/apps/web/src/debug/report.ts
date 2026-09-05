@@ -1,3 +1,5 @@
+import { describeDay } from '@villages/protocol';
+
 /**
  * What the program will say about itself, as text.
  *
@@ -25,6 +27,8 @@ export interface MapState {
   cells: string[];
   /** What the gateway has handed over for those cells: houses drawn, cells held, and houses left out. */
   houses: { drawn: number; held: number; omitted: number };
+  /** Where the world's clock stands and which day is being looked at, or null before welcome. */
+  world: { today: number; earliest: number; viewingAt: number | null } | null;
 }
 
 export interface Line {
@@ -37,6 +41,15 @@ const EARTH_CIRCUMFERENCE = 40075017;
 
 /** How many cell names will fit on a line of the panel before it stops being readable. */
 const CELLS_SHOWN = 3;
+
+/** The world's day, and the day the map is showing, which differ when the scrubber has been moved. */
+function describeWorld(world: { today: number; earliest: number; viewingAt: number | null } | null): string {
+  if (world === null) {
+    return 'not heard from the gateway yet';
+  }
+  const looking = world.viewingAt === null ? 'showing live' : `showing ${describeDay(world.viewingAt)}`;
+  return `${describeDay(world.today)} today, ${looking}`;
+}
 
 /** What the map is drawing from the gateway, and what it was not sent. */
 function describeHouses(houses: { drawn: number; held: number; omitted: number }): string {
@@ -90,6 +103,7 @@ export function describeState(state: MapState): Line[] {
     },
     { label: 'cells', value: describeCells(state.cells, state.tileZoom) },
     { label: 'houses', value: describeHouses(state.houses) },
+    { label: 'world', value: describeWorld(state.world) },
     {
       label: 'painted',
       value:

@@ -16,6 +16,7 @@ import { DEFAULT_RENDERER, RENDERERS, applyRenderer } from './map/renderers';
 import { SpriteOverlay } from './sprites/SpriteOverlay';
 import type { MapSprite } from './sprites/SpriteRenderer';
 import { tinctureColour } from './sprites/tinctures';
+import { Timeline } from './timeline/Timeline';
 
 /** A house as the renderer draws it: a mark at its seat, in its field's tincture. */
 function toSprite(house: HouseView): MapSprite {
@@ -58,6 +59,7 @@ export function App({ master }: AppProps) {
       <MapView worldRoot={worldRootOf(master)} onReady={setMap} />
       {map !== null && <SpriteOverlay map={map} sprites={sprites} />}
       <HudShell />
+      <Timeline />
       <div className="rail">
         <DebugMapPanel master={master} renderer={renderer} onRenderer={setRenderer} />
         <DebugPanel map={map} renderer={renderer} />

@@ -8,7 +8,7 @@ import {
   reduceHouses,
   whatToFollow,
 } from '@villages/client-core';
-import { PROTOCOL_VERSION } from '@villages/protocol';
+import { PROTOCOL_VERSION, describeDay } from '@villages/protocol';
 import type { EventFrame, ServerFrame } from '@villages/protocol';
 
 import { note } from '../debug/log';
@@ -28,10 +28,21 @@ export interface GatewayState {
   playerId?: string;
   events: readonly EventFrame[];
   houses: HousesState;
+  /** Where the world's clock stands, as welcome said, or null until it has. */
+  world: { today: number; earliest: number } | null;
+  /** The world-day being looked at, or null for live. The timeline scrubber's position. */
+  viewingAt: number | null;
   playerToken: string;
 }
 
-let state: GatewayState = { connection: 'connecting', events: [], houses: NO_HOUSES, playerToken: '' };
+let state: GatewayState = {
+  connection: 'connecting',
+  events: [],
+  houses: NO_HOUSES,
+  world: null,
+  viewingAt: null,
+  playerToken: '',
+};
 const listeners = new Set<() => void>();
 let connection: Connection | null = null;
 /** What the camera last asked for, so it can be asked for again once the gateway is listening. */
@@ -45,10 +56,14 @@ function update(change: Partial<GatewayState>): void {
 function heard(frame: ServerFrame): void {
   switch (frame.type) {
     case 'welcome':
-      update({ connection: 'open', playerId: frame.playerId });
+      update({ connection: 'open', playerId: frame.playerId, world: frame.world });
       note(
         'gateway',
         `welcome: player ${frame.playerId.slice(0, 8)}, server time ${new Date(frame.serverTime).toISOString()}`,
+      );
+      note(
+        'world',
+        `today is ${describeDay(frame.world.today)}; the earliest thing is from ${describeDay(frame.world.earliest)}`,
       );
       // Anything the camera wanted before the gateway was listening is asked for now.
       sendFollowing(wanted);
@@ -106,6 +121,16 @@ function sendFollowing(cells: string[]): void {
   if (ask.length + letGo.length > 0) {
     note('cells', `following ${cells.length} at z${cells[0]?.length ?? 0}: +${ask.length} -${letGo.length}`);
   }
+}
+
+/** Looks at the world as of a day, or at live when null. Every held cell comes back as of that day. */
+export function viewAt(day: number | null): void {
+  if (connection === null || state.connection !== 'open') {
+    return;
+  }
+  update({ viewingAt: day });
+  connection.send({ type: 'viewTime', at: day });
+  note('world', day === null ? 'looking at live' : `looking at ${describeDay(day)}`);
 }
 
 /**

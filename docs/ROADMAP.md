@@ -90,10 +90,14 @@ that made it appear is readable in the debug panel of both.
 ## Then: the world at a moment
 
 Adam's first milestone, from `SETTING.md`: **a small seed of events that makes a starting world, with no pins,
-looked at through two tools together - the map, and a timeline scrubber along the bottom.** It needs two
-times on every event and a world calendar (the read model already carries a world-time span per house, so
-the scrubber queries it rather than rebuilds it), the scrubber itself, and the seed. Drag the scrubber and
-the map shows the world as it was; leave it at live and the world runs.
+looked at through two tools together - the map, and a timeline scrubber along the bottom.** Drag the
+scrubber and the map shows the world as it was; leave it at live and the world runs.
+
+- [x] Two times on every event, and a world calendar both ends compute alike (decision 0027)
+- [x] A viewing day per connection, one frame to move it, every held cell answered again as of that day
+- [x] The scrubber along the bottom of the map, and the day it shows in the debug panel
+- [ ] The seed: a small set of events, spread across centuries, that makes a starting world
+- [ ] A house's line on the timeline, so the scrubber shows where things are before you drag to them
 
 ## Later
 

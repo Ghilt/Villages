@@ -43,9 +43,10 @@ export function forgetCells(state: HousesState, cells: readonly string[]): House
 /**
  * Folds one frame from the gateway in. Anything that is not about houses leaves the state untouched.
  *
- * A snapshot is what the cell held when it was read; a delta that arrived before it, from a change made
- * after that reading, is newer and is kept. So a snapshot replaces a cell except where the cell already
- * holds a higher version of the same house.
+ * A snapshot is the whole of what the cell holds on the day being looked at, so it replaces the cell: a
+ * house it no longer lists is gone, which is exactly how looking at an earlier day empties the map. The
+ * one thing kept from before is a higher version of a house the snapshot does list, from a delta that
+ * overtook it.
  */
 export function reduceHouses(state: HousesState, frame: ServerFrame): HousesState {
   switch (frame.type) {
@@ -60,7 +61,7 @@ export function reduceHouses(state: HousesState, frame: ServerFrame): HousesStat
       }
       for (const [id, held] of previous) {
         const arrived = fresh.get(id);
-        if (arrived === undefined || held.version > arrived.version) {
+        if (arrived !== undefined && held.version > arrived.version) {
           fresh.set(id, held);
         }
       }

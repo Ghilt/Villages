@@ -91,6 +91,15 @@ describe('a snapshot', () => {
     expect(housesInView(state)[0]?.version).toBe(3);
   });
 
+  it('drops the houses it no longer lists, which is how looking at an earlier day empties the map', () => {
+    let state = holdCells(NO_HOUSES, [Z8]);
+    state = reduceHouses(state, snapshot(Z8, [house('a'), house('b')]));
+
+    state = reduceHouses(state, snapshot(Z8, []));
+
+    expect(housesInView(state)).toEqual([]);
+  });
+
   it('remembers how many more the cell held than it carried', () => {
     let state = holdCells(NO_HOUSES, [Z8, Z4]);
     state = reduceHouses(state, snapshot(Z8, [house('a')], 47));
