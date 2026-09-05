@@ -16,6 +16,7 @@ const state: MapState = {
   painted: { ready: 0, waited: 0, aheadPainted: 0, held: 0 },
   worstFrameGap: 17.4,
   cells: ['3000000', '3000001', '3000002', '3000003'],
+  houses: { drawn: 12, held: 4, omitted: 0 },
 };
 
 const valueOf = (from: MapState, label: string): string =>
@@ -100,5 +101,23 @@ describe('saying which cells the view covers', () => {
 
   it('says so plainly when the view covers nothing', () => {
     expect(valueOf({ ...state, cells: [] }, 'cells')).toBe('none');
+  });
+});
+
+describe('saying what the gateway has handed over', () => {
+  it('says how many houses are drawn from how many cells', () => {
+    expect(valueOf(state, 'houses')).toBe('12 drawn from 4 cells');
+  });
+
+  it('says when a crowd was cut, so what is drawn is never mistaken for all there is', () => {
+    expect(valueOf({ ...state, houses: { drawn: 200, held: 1, omitted: 47 } }, 'houses')).toBe(
+      '200 drawn from 1 cell, 47 more not sent',
+    );
+  });
+
+  it('says so when nothing has been asked for yet', () => {
+    expect(valueOf({ ...state, houses: { drawn: 0, held: 0, omitted: 0 } }, 'houses')).toBe(
+      'no cells held yet',
+    );
   });
 });

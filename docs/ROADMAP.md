@@ -75,8 +75,8 @@ one rate-based ticker, and see other players' houses appear live and jiggle. Six
 - [ ] 1.6 The bridge from the store to the broker
 - [x] 1.7 The houses-by-cell projection: a row per house with its world-time span, indexed by its deepest cell and the coarsest zoom it is worth drawing at
 - [x] 1.8 The gateway: sessions, cells at any zoom, snapshot then deltas coalesced a quarter second at a time, and resync for a client that falls behind
-- [ ] 1.9 The client core: cells, connection, state. The connection is there, over an injected socket; cells and state wait
-- [ ] 1.10 Houses on the map from the gateway, and a seed script
+- [x] 1.9 The client core: what each held cell holds, deltas ordered by version, and what to ask for when the view moves. Reconnecting is still to come
+- [x] 1.10 Houses on the map from the gateway, following the camera cell by cell, and a seed button in the debug panel
 - [x] 1.11 Command intake, end to end: a house founded over the socket comes back as its event, and as houseAppeared to whoever holds its cell
 - [ ] 1.12 The banner drawn
 - [ ] 1.13 Founding a house from the interface

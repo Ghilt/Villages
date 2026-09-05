@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
+import { cellsHeld, housesInView, omittedInView } from '@villages/client-core';
 import { cellsForView } from '@villages/protocol';
 
 import { FLAT_MAX_ZOOM, TILE } from '../map/painterlyMessages';
 import { forgetPaintedTally, paintedTally } from '../map/painterlyTiles';
 import { WORLD_MASTER_WIDTH } from '../map/worldStyle';
 import { atToClock, note, notesNow, watchNotes } from './log';
+import { gatewayState } from '../net/gateway';
 import { EventsView } from './EventsView';
 import { describeState } from './report';
 import type { Line } from './report';
@@ -126,6 +128,12 @@ export function DebugPanel({ map, renderer }: DebugPanelProps) {
             west: bounds.getWest(),
             zoom: tileZoom,
           }),
+          // Read at the moment of looking, not captured when the effect was made, or it would be stale.
+          houses: {
+            drawn: housesInView(gatewayState().houses).length,
+            held: cellsHeld(gatewayState().houses).length,
+            omitted: omittedInView(gatewayState().houses),
+          },
         }),
       );
     };

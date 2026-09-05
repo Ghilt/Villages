@@ -11,3 +11,17 @@ export type { TokenStore } from './identity';
 
 export { connect } from './connection';
 export type { Connection, ConnectionOptions, ConnectionState, SocketLike } from './connection';
+
+export {
+  NO_HOUSES,
+  cellsHeld,
+  forgetCells,
+  holdCells,
+  housesInView,
+  omittedInView,
+  reduceHouses,
+} from './houses';
+export type { HousesState } from './houses';
+
+export { whatToFollow } from './following';
+export type { Following } from './following';

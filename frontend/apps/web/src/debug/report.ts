@@ -23,6 +23,8 @@ export interface MapState {
   worstFrameGap: number;
   /** The cells covering the view, at the camera's own zoom. What the map will subscribe to. */
   cells: string[];
+  /** What the gateway has handed over for those cells: houses drawn, cells held, and houses left out. */
+  houses: { drawn: number; held: number; omitted: number };
 }
 
 export interface Line {
@@ -35,6 +37,15 @@ const EARTH_CIRCUMFERENCE = 40075017;
 
 /** How many cell names will fit on a line of the panel before it stops being readable. */
 const CELLS_SHOWN = 3;
+
+/** What the map is drawing from the gateway, and what it was not sent. */
+function describeHouses(houses: { drawn: number; held: number; omitted: number }): string {
+  if (houses.held === 0) {
+    return 'no cells held yet';
+  }
+  const drawn = `${houses.drawn} drawn from ${houses.held} cell${houses.held === 1 ? '' : 's'}`;
+  return houses.omitted > 0 ? `${drawn}, ${houses.omitted} more not sent` : drawn;
+}
 
 /**
  * The cells the view covers, which is what the map will ask the gateway for.
@@ -78,6 +89,7 @@ export function describeState(state: MapState): Line[] {
       value: `${state.centre.lng.toFixed(3)}, ${state.centre.lat.toFixed(3)}`,
     },
     { label: 'cells', value: describeCells(state.cells, state.tileZoom) },
+    { label: 'houses', value: describeHouses(state.houses) },
     {
       label: 'painted',
       value:

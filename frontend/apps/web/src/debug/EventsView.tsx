@@ -35,6 +35,23 @@ function randomBanner(): BannerSpec {
 
 const NAMES = ['Ravenscar', 'Hollin', 'Thornwick', 'Ashby', 'Greymere', 'Corvane', 'Ellerby', 'Marrow'];
 
+/** How many the seeding button founds at once: enough to see a region fill, few enough to read the log. */
+const SEED = 20;
+
+function foundHouse(seat: { lat: number; lon: number }, commandId: string): void {
+  gateway().send({
+    type: 'command',
+    commandId,
+    command: {
+      type: 'foundHouse',
+      houseId: crypto.randomUUID(),
+      name: `${pick(NAMES)} ${Math.floor(Math.random() * 90 + 10)}`,
+      seat,
+      banner: randomBanner(),
+    },
+  });
+}
+
 /**
  * The events, as the world stores them, one line each and any of them open. This is decision 0023 made
  * real: Adam watches the world happen here. The founding button is scaffolding for exactly that, a way to
@@ -48,17 +65,24 @@ export function EventsView({ map }: EventsViewProps) {
     const centre = map.getCenter();
     const commandId = `c-${Date.now().toString(36)}`;
     note('command', `founding a house at ${centre.lat.toFixed(3)}, ${centre.lng.toFixed(3)} as ${commandId}`);
-    gateway().send({
-      type: 'command',
-      commandId,
-      command: {
-        type: 'foundHouse',
-        houseId: crypto.randomUUID(),
-        name: `${pick(NAMES)} ${Math.floor(Math.random() * 90 + 10)}`,
-        seat: { lat: centre.lat, lon: centre.lng },
-        banner: randomBanner(),
-      },
-    });
+    foundHouse({ lat: centre.lat, lon: centre.lng }, commandId);
+  };
+
+  /** Scatters houses over the view, so a region can be watched filling and the counts checked. */
+  const seedHere = () => {
+    if (map === null) return;
+    const bounds = map.getBounds();
+    const stamp = Date.now().toString(36);
+    note('command', `seeding ${SEED} houses across the view as s-${stamp}-*`);
+    for (let index = 0; index < SEED; index += 1) {
+      foundHouse(
+        {
+          lat: bounds.getSouth() + Math.random() * (bounds.getNorth() - bounds.getSouth()),
+          lon: bounds.getWest() + Math.random() * (bounds.getEast() - bounds.getWest()),
+        },
+        `s-${stamp}-${index}`,
+      );
+    }
   };
 
   return (
@@ -73,6 +97,14 @@ export function EventsView({ map }: EventsViewProps) {
           disabled={state.connection !== 'open'}
         >
           found a house here
+        </button>
+        <button
+          type="button"
+          className="debug__button"
+          onClick={seedHere}
+          disabled={state.connection !== 'open'}
+        >
+          seed {SEED}
         </button>
       </header>
       <ol className="events__list">
