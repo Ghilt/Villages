@@ -330,7 +330,10 @@ class GatewaySpec : StringSpec({
 
         sent.single() shouldBe Resync(listOf(STOCKHOLM_Z8))
         rig.later.tick()
-        // Nothing more: the backlog went with the resync, and the client will take a fresh snapshot.
+        // Nothing more: the backlog went with the resync, and so did the cell, so asking again gets a snapshot.
         sent shouldHaveSize 1
+        looker.cells().shouldBeEmpty()
+        looker.receive(subscribe(STOCKHOLM_Z8))
+        sent.last().shouldBeInstanceOf<Snapshot>().houses shouldHaveSize MOST_IN_A_CELL
     }
 })

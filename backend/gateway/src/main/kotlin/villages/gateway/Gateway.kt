@@ -256,15 +256,18 @@ class Gateway(
 
         /**
          * Queues a delta for the next batch. A connection that cannot keep up is not allowed to grow a queue:
-         * past the bound, what is waiting is dropped and the connection is told to ask for its cells again.
+         * past the bound, what is waiting is dropped, the cells are let go, and the connection is told to ask
+         * for them again - which it must, because asking for a cell already held is answered with nothing,
+         * and the point of a resync is a fresh snapshot.
          */
         internal fun enqueue(delta: Delta) {
-            var overflowed: List<String>? = null
+            var letGo: List<String>? = null
             var plan = false
             synchronized(lock) {
                 if (waiting.size >= MOST_WAITING) {
                     waiting.clear()
-                    overflowed = cells.toList()
+                    letGo = cells.toList()
+                    cells.clear()
                 } else {
                     waiting.addLast(delta)
                     if (!flushPlanned) {
@@ -273,7 +276,12 @@ class Gateway(
                     }
                 }
             }
-            overflowed?.let { out.send(Resync(it)) }
+            letGo?.let { gone ->
+                for (cell in gone) {
+                    holding[cell]?.remove(this)
+                }
+                out.send(Resync(gone))
+            }
             if (plan) {
                 later.schedule(COALESCE_MS) { flush() }
             }
