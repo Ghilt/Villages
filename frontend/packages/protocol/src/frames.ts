@@ -83,6 +83,8 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
     cell: cellSchema,
     houses: z.array(houseViewSchema),
     asOfVersion: z.number().int(),
+    /** How many more the cell held than the snapshot carries. Absent means none. */
+    omitted: z.number().int().nonnegative().optional(),
   }),
   z.object({ type: z.literal('batch'), deltas: z.array(deltaSchema) }),
   z.object({ type: z.literal('commandAccepted'), commandId: z.string() }),

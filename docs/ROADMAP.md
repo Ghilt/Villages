@@ -73,11 +73,11 @@ one rate-based ticker, and see other players' houses appear live and jiggle. Six
 - [x] 1.4 The FoundHouse use case and the ports
 - [x] 1.5 The event store behind the ports, and the type mapper held to the catalogue: in memory until 0.8
 - [ ] 1.6 The bridge from the store to the broker
-- [ ] 1.7 The houses-by-cell projection
-- [ ] 1.8 The gateway: sessions, cells, snapshot then deltas. Hello, ping and an event feed are there; cells wait for the projection
+- [x] 1.7 The houses-by-cell projection: a row per house with its world-time span, indexed by its deepest cell and the coarsest zoom it is worth drawing at
+- [x] 1.8 The gateway: sessions, cells at any zoom, snapshot then deltas coalesced a quarter second at a time, and resync for a client that falls behind
 - [ ] 1.9 The client core: cells, connection, state. The connection is there, over an injected socket; cells and state wait
 - [ ] 1.10 Houses on the map from the gateway, and a seed script
-- [x] 1.11 Command intake, end to end: a house founded over the socket comes back as its event; houseAppeared arrives with the projection
+- [x] 1.11 Command intake, end to end: a house founded over the socket comes back as its event, and as houseAppeared to whoever holds its cell
 - [ ] 1.12 The banner drawn
 - [ ] 1.13 Founding a house from the interface
 - [ ] 1.14 The ticker
@@ -86,6 +86,14 @@ one rate-based ticker, and see other players' houses appear live and jiggle. Six
 
 The milestone: a second browser sees the first browser's house appear, with no page reload, and the event
 that made it appear is readable in the debug panel of both.
+
+## Then: the world at a moment
+
+Adam's first milestone, from `SETTING.md`: **a small seed of events that makes a starting world, with no pins,
+looked at through two tools together - the map, and a timeline scrubber along the bottom.** It needs two
+times on every event and a world calendar (the read model already carries a world-time span per house, so
+the scrubber queries it rather than rebuilds it), the scrubber itself, and the seed. Drag the scrubber and
+the map shows the world as it was; leave it at live and the world runs.
 
 ## Later
 

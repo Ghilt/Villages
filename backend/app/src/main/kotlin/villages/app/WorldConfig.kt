@@ -6,6 +6,7 @@ import villages.application.AnonymousTokens
 import villages.application.FoundHouseService
 import villages.gateway.Gateway
 import villages.occurrent.InMemoryWorld
+import villages.projections.HousesByCellProjection
 import java.time.Clock
 
 /**
@@ -25,7 +26,21 @@ class WorldConfig {
     fun foundHouse(world: InMemoryWorld, clock: Clock): FoundHouseService =
         FoundHouseService(world.executor, clock = { clock.instant() })
 
+    /** The map's read model, folded from the feed. In memory, so it starts empty with the store. */
     @Bean(destroyMethod = "close")
-    fun gateway(world: InMemoryWorld, foundHouse: FoundHouseService, clock: Clock): Gateway =
-        Gateway(tokens = AnonymousTokens, foundHouse = foundHouse, events = world.feed, clock = clock)
+    fun houses(world: InMemoryWorld): HousesByCellProjection = HousesByCellProjection(world.feed)
+
+    @Bean(destroyMethod = "close")
+    fun gateway(
+        world: InMemoryWorld,
+        foundHouse: FoundHouseService,
+        houses: HousesByCellProjection,
+        clock: Clock,
+    ): Gateway = Gateway(
+        tokens = AnonymousTokens,
+        foundHouse = foundHouse,
+        events = world.feed,
+        houses = houses,
+        clock = clock,
+    )
 }

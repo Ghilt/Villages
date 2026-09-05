@@ -122,8 +122,16 @@ sealed interface ServerFrame
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class Welcome(val serverTime: Long, val playerId: String, val ownHouse: HouseView? = null) : ServerFrame
 
-/** Everything in a cell, sent on subscribing to it, before any deltas. */
-data class Snapshot(val cell: String, val houses: List<HouseView>, val asOfVersion: Long) : ServerFrame
+/**
+ * What a cell holds, sent on subscribing to it, before any deltas. `omitted` is how many more houses the
+ * cell had than a snapshot carries, so a screen never claims to show all of what it shows most of.
+ */
+data class Snapshot(
+    val cell: String,
+    val houses: List<HouseView>,
+    val asOfVersion: Long,
+    @get:JsonInclude(JsonInclude.Include.NON_DEFAULT) val omitted: Int = 0,
+) : ServerFrame
 
 /** Deltas coalesced over a short window into one frame. */
 data class Batch(val deltas: List<Delta>) : ServerFrame

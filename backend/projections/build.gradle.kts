@@ -7,4 +7,7 @@ dependencies {
     implementation(project(":application"))
     implementation(project(":domain"))
     implementation(project(":infrastructure-occurrent"))
+    // The cell grid: which tile a place falls in, and how far out a thing is drawn. Decision 0026.
+    implementation(project(":protocol"))
+    testImplementation(libs.kotest.property)
 }

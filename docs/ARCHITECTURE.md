@@ -113,6 +113,14 @@ there: one updates the read model, one publishes to the broker with a routing ke
 node consumes that feed, matches each event against the cells its sessions are watching, and pushes a coalesced batch.
 A newly subscribed client is served a snapshot from the read model first, and drops any delta it has already seen.
 
+Today there is no broker. The read model's own change stream stands in for the exchange: the gateway watches
+the projection for changes and queries it for snapshots, both through the `HousesByCell` port. When RabbitMQ
+arrives the exchange takes over the fan-out between processes, and the gateway's side does not change - it
+still holds an index from cell to sessions and, for each changed house, walks that house's deepest cell up
+through its prefixes from the coarsest zoom its significance is worth drawing at. A cell is a quadkey at any
+zoom, so a client asks for data on the same grid, at the same zoom, as the terrain tiles it draws; see
+decision record 0026.
+
 ## Scale principles
 
 1. One stream per house, and no global aggregate. Anything world-shaped is a projection.

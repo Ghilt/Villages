@@ -64,7 +64,8 @@ class LayerRulesSpec : StringSpec({
             // rejection code, which decision 0013 places there.
             .whereLayer("Domain").mayOnlyBeAccessedByLayers("Application", "Occurrent", "Rabbit", "Projections", "Gateway", "App")
             .whereLayer("Application").mayOnlyBeAccessedByLayers("Occurrent", "Rabbit", "Projections", "Gateway", "App")
-            .whereLayer("Protocol").mayOnlyBeAccessedByLayers("Gateway", "App", "Bots")
+            // Projections reach the protocol for the cell grid, which both ends must compute alike; see 0026.
+            .whereLayer("Protocol").mayOnlyBeAccessedByLayers("Projections", "Gateway", "App", "Bots")
             .whereLayer("Occurrent").mayOnlyBeAccessedByLayers("Rabbit", "Projections", "App")
             .whereLayer("Rabbit").mayOnlyBeAccessedByLayers("Gateway", "App")
             .whereLayer("Projections").mayOnlyBeAccessedByLayers("App")

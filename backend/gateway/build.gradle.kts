@@ -8,4 +8,6 @@ dependencies {
     implementation(project(":application"))
     implementation(project(":protocol"))
     implementation(project(":infrastructure-rabbit"))
+    // Tests run the gateway over the real read model rather than a fake of it.
+    testImplementation(project(":projections"))
 }

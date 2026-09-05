@@ -1,8 +1,14 @@
 package villages.application
 
+import villages.domain.Banner
 import villages.domain.HouseCommand
 import villages.domain.HouseEvent
+import villages.domain.HouseId
+import villages.domain.HouseName
+import villages.domain.Location
 import villages.domain.PlayerId
+import villages.domain.Significance
+import villages.domain.Treasury
 import java.time.Instant
 
 /**
@@ -49,4 +55,47 @@ data class StoredEvent(
 fun interface EventFeed {
     /** Delivers every event stored from now on, until the returned handle is closed. */
     fun subscribe(subscriber: (StoredEvent) -> Unit): AutoCloseable
+}
+
+/**
+ * A house as the map's read model holds it. Not the domain's `House`: this is shaped for drawing, and it
+ * carries the span of world-time the house exists over, which the domain's state never needed to. Today
+ * `since` is the founding instant and `until` is open; the timeline scrubber reads these two.
+ */
+data class HouseRow(
+    val id: HouseId,
+    val name: HouseName,
+    val seat: Location,
+    val significance: Significance,
+    val banner: Banner,
+    val treasury: Treasury,
+    /** From when, in world-time, this house exists. */
+    val since: Instant,
+    /** Until when, in world-time, or null while it still does. */
+    val until: Instant?,
+    /** The stream version this row reflects, so a snapshot and a later delta can be put in order. */
+    val version: Long,
+) {
+    fun existsAt(at: Instant): Boolean = !at.isBefore(since) && (until == null || at.isBefore(until))
+}
+
+/** What one cell holds at one moment: the houses worth drawing, and how many more there were. */
+data class CellContents(
+    val houses: List<HouseRow>,
+    /** Houses in the cell that were left out because the cell holds more than a screen should carry. */
+    val omitted: Int,
+    /** How many changes the read model had applied when this was read. Monotonic, and only ever compared. */
+    val asOf: Long,
+)
+
+/**
+ * The map's read model: houses by cell, at a moment in world-time. A cell is a quadkey at any zoom, and
+ * which houses are worth drawing at that zoom is the read model's business, not the caller's. Decision 0026.
+ */
+interface HousesByCell {
+    /** The houses in `cell` that exist at `at`, most significant first, at most `most` of them. */
+    fun inCell(cell: String, at: Instant, most: Int): CellContents
+
+    /** Every row the read model changes from now on, in the order it applied them, until closed. */
+    fun watch(listener: (HouseRow) -> Unit): AutoCloseable
 }
