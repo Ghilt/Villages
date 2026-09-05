@@ -82,7 +82,9 @@ one rate-based ticker, and see other players' houses appear live and jiggle. Six
 - [ ] 1.13 Founding a house from the interface
 - [ ] 1.14 The ticker
 - [ ] 1.15 Inspecting a house, and the connection badge
-- [ ] 1.16 Two browsers, one house appearing in both, readable in both debug panels
+- [ ] 1.16 Two browsers, one house appearing in both, readable in both debug panels. This means **two
+  different players**, which works today; two windows of *one* player is now a thing that ends rather than
+  a thing that works, decided in 0028. What is left is the browser-level test, which needs 0.13 first
 
 The milestone: a second browser sees the first browser's house appear, with no page reload, and the event
 that made it appear is readable in the debug panel of both.

@@ -4,6 +4,7 @@ import villages.application.EventFeed
 import villages.application.FoundHouseService
 import villages.application.HouseRow
 import villages.application.HousesByCell
+import villages.application.HousesByPlayer
 import villages.application.PlayerTokens
 import villages.application.StoredEvent
 import villages.application.WorldClock
@@ -41,15 +42,16 @@ import villages.protocol.Resync
 import villages.protocol.ServerFrame
 import villages.protocol.Snapshot
 import villages.protocol.SubscribeCells
+import villages.protocol.TakenOver
 import villages.protocol.Tincture
 import villages.protocol.UnsubscribeCells
 import villages.protocol.ViewTime
 import villages.protocol.WatchEvents
 import villages.protocol.Welcome
 import villages.protocol.WorldNow
+import villages.protocol.YourHouse
 import villages.protocol.coarsestZoom
 import java.time.Clock
-import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -106,6 +108,7 @@ class Gateway(
     private val foundHouse: FoundHouseService,
     events: EventFeed,
     private val houses: HousesByCell,
+    private val theirHouses: HousesByPlayer,
     private val clock: Clock,
     private val world: WorldClock,
     private val later: Later = ScheduledLater(),
@@ -114,6 +117,12 @@ class Gateway(
 
     /** Which connections hold each cell: the whole of the fan-out index. */
     private val holding = ConcurrentHashMap<String, MutableSet<Connection>>()
+
+    /**
+     * The one session a player has. A player plays from one place: a second hello takes the player over
+     * and the older connection is stood down. One connection a player, not a set. See decision 0028.
+     */
+    private val sessions = ConcurrentHashMap<PlayerId, Connection>()
 
     private val feed: AutoCloseable = events.subscribe { stored -> fanOutEvent(stored) }
     private val changes: AutoCloseable = houses.watch { row -> fanOutChange(row) }
@@ -130,6 +139,10 @@ class Gateway(
     private fun fanOutChange(row: HouseRow) {
         val deepest = Cell.of(row.seat.lat, row.seat.lon)
         val view = row.toView(deepest)
+
+        // Your own house reaches you wherever you are looking, not only when you hold its cell.
+        sessions[row.player]?.out?.send(YourHouse(view))
+
         val delta: Delta = if (row.version == 1L) HouseAppeared(view) else HouseChanged(view)
         for (zoom in coarsestZoom(row.significance.value)..Cell.MAX_ZOOM) {
             val holders = holding[deepest.at(zoom).quadkey] ?: continue
@@ -160,6 +173,10 @@ class Gateway(
         @Volatile
         private var viewingAt: WorldTime? = null
 
+        /** Set when this session is over, by a takeover or by the socket going away. It then does nothing. */
+        @Volatile
+        private var finished = false
+
         private fun viewing(): WorldTime = viewingAt ?: world.today()
 
         /** Whether a change is on this connection's day. Live sees everything; the past sees what existed then. */
@@ -169,6 +186,9 @@ class Gateway(
         fun cells(): Set<String> = synchronized(lock) { cells.toSet() }
 
         fun receive(text: String) {
+            if (finished) {
+                return
+            }
             val frame = try {
                 ProtocolJson.decodeClient(text)
             } catch (unreadable: Exception) {
@@ -191,6 +211,10 @@ class Gateway(
         }
 
         private fun hello(frame: Hello) {
+            if (player != null) {
+                out.send(ErrorFrame("alreadyIntroduced", "this session has already said who it is"))
+                return
+            }
             if (frame.protocolVersion != PROTOCOL_VERSION) {
                 out.send(ErrorFrame("protocolVersion", "this gateway speaks version $PROTOCOL_VERSION"))
                 return
@@ -202,6 +226,10 @@ class Gateway(
                 return
             }
             player = who
+
+            // A player plays from one place. Whoever arrives last is the session; the one before is done.
+            sessions.put(who, this)?.takeIf { it !== this }?.standDown()
+
             val today = world.today()
             out.send(
                 Welcome(
@@ -210,6 +238,21 @@ class Gateway(
                     world = WorldNow(today = today.day, earliest = (houses.earliest() ?: today).day),
                 ),
             )
+            out.send(YourHouse(theirHouses.ofPlayer(who)?.toView()))
+        }
+
+        /**
+         * Ends this session without ending its socket: it holds no cells, hears nothing more and accepts
+         * nothing more. The gateway does not close sockets - `Outbound` says frames and nothing else - so
+         * the client is told and closes its own. One that does not is left holding something inert.
+         */
+        internal fun standDown() {
+            if (finished) {
+                return
+            }
+            finished = true
+            letEverythingGo()
+            out.send(TakenOver("another window took this player over"))
         }
 
         private fun command(frame: Command) {
@@ -221,7 +264,7 @@ class Gateway(
             try {
                 when (val payload = frame.command) {
                     is FoundHousePayload -> foundHouse.found(
-                        houseId = HouseId(UUID.fromString(payload.houseId)),
+                        houseId = HouseId.of(who),
                         player = who,
                         name = HouseName.of(payload.name),
                         seat = Location(payload.seat.lat, payload.seat.lon),
@@ -345,6 +388,14 @@ class Gateway(
         }
 
         fun disconnected() {
+            finished = true
+            letEverythingGo()
+            // Only if this is still the session: the loser of a takeover often closes afterwards, and
+            // removing by key alone would evict the window that just won.
+            player?.let { sessions.remove(it, this) }
+        }
+
+        private fun letEverythingGo() {
             watching.remove(this)
             val held = synchronized(lock) { cells.toList().also { cells.clear() } }
             for (cell in held) {

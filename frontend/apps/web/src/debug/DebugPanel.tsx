@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from '
 import type * as maplibregl from 'maplibre-gl';
 
 import { cellsHeld, housesInView, omittedInView } from '@villages/client-core';
-import { cellsForView } from '@villages/protocol';
+import { cellsForView, describeDay } from '@villages/protocol';
 
 import { FLAT_MAX_ZOOM, TILE } from '../map/painterlyMessages';
 import { forgetPaintedTally, paintedTally } from '../map/painterlyTiles';
@@ -12,6 +12,15 @@ import { gatewayState } from '../net/gateway';
 import { EventsView } from './EventsView';
 import { describeState } from './report';
 import type { Line } from './report';
+
+/** The player's own house, as one line, or nothing when they have none. */
+function describeYourHouse(): string | null {
+  const heard = gatewayState();
+  if (heard.yourHouse === null) {
+    return null;
+  }
+  return `${heard.yourHouse.name}, founded ${describeDay(heard.yourHouse.since)}`;
+}
 
 /** Where the world's clock stands and the day being shown, read together so they cannot disagree. */
 function worldNow(): { today: number; earliest: number; viewingAt: number | null } | null {
@@ -141,6 +150,11 @@ export function DebugPanel({ map, renderer }: DebugPanelProps) {
             omitted: omittedInView(gatewayState().houses),
           },
           world: worldNow(),
+          player: {
+            id: gatewayState().playerId,
+            connection: gatewayState().connection,
+            house: describeYourHouse(),
+          },
         }),
       );
     };

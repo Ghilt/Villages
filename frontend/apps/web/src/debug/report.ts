@@ -29,6 +29,8 @@ export interface MapState {
   houses: { drawn: number; held: number; omitted: number };
   /** Where the world's clock stands and which day is being looked at, or null before welcome. */
   world: { today: number; earliest: number; viewingAt: number | null } | null;
+  /** Who this window is playing as, whether it still is, and which house is theirs. */
+  player: { id?: string; connection: string; house: string | null };
 }
 
 export interface Line {
@@ -41,6 +43,26 @@ const EARTH_CIRCUMFERENCE = 40075017;
 
 /** How many cell names will fit on a line of the panel before it stops being readable. */
 const CELLS_SHOWN = 3;
+
+/**
+ * Who is playing here, and whether this window still is.
+ *
+ * A player plays from one place: opening a second window takes the player over and leaves this one saying
+ * so, rather than two windows quietly halving the world between them. See decision record 0028.
+ */
+function describePlayer(player: { id?: string; connection: string }): string {
+  const who = player.id === undefined ? 'not introduced yet' : player.id.slice(0, 8);
+  switch (player.connection) {
+    case 'open':
+      return `${who}, playing here`;
+    case 'takenOver':
+      return `${who}, taken over in another window`;
+    case 'closed':
+      return `${who}, the connection closed`;
+    default:
+      return `${who}, connecting`;
+  }
+}
 
 /** The world's day, and the day the map is showing, which differ when the scrubber has been moved. */
 function describeWorld(world: { today: number; earliest: number; viewingAt: number | null } | null): string {
@@ -104,6 +126,8 @@ export function describeState(state: MapState): Line[] {
     { label: 'cells', value: describeCells(state.cells, state.tileZoom) },
     { label: 'houses', value: describeHouses(state.houses) },
     { label: 'world', value: describeWorld(state.world) },
+    { label: 'player', value: describePlayer(state.player) },
+    { label: 'house', value: state.player.house ?? 'none yet' },
     {
       label: 'painted',
       value:

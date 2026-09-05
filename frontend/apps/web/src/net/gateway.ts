@@ -9,7 +9,7 @@ import {
   whatToFollow,
 } from '@villages/client-core';
 import { PROTOCOL_VERSION, describeDay } from '@villages/protocol';
-import type { EventFrame, ServerFrame } from '@villages/protocol';
+import type { EventFrame, HouseView, ServerFrame } from '@villages/protocol';
 
 import { note } from '../debug/log';
 import { browserSocket } from './browserSocket';
@@ -20,12 +20,15 @@ import { browserSocket } from './browserSocket';
  * decision records 0023, 0024 and 0026.
  */
 
-const GATEWAY_URL = (import.meta.env.VITE_GATEWAY_URL as string | undefined) ?? 'ws://localhost:8080/ws';
+export const GATEWAY_URL =
+  (import.meta.env.VITE_GATEWAY_URL as string | undefined) ?? 'ws://localhost:8080/ws';
 const MOST_EVENTS = 300;
 
 export interface GatewayState {
-  connection: 'connecting' | 'open' | 'closed';
+  connection: 'connecting' | 'open' | 'closed' | 'takenOver';
   playerId?: string;
+  /** The player's own house, wherever they are looking, or null when they have none. */
+  yourHouse: HouseView | null;
   events: readonly EventFrame[];
   houses: HousesState;
   /** Where the world's clock stands, as welcome said, or null until it has. */
@@ -38,6 +41,7 @@ export interface GatewayState {
 let state: GatewayState = {
   connection: 'connecting',
   events: [],
+  yourHouse: null,
   houses: NO_HOUSES,
   world: null,
   viewingAt: null,
@@ -101,6 +105,16 @@ function heard(frame: ServerFrame): void {
     case 'pong':
       note('gateway', `pong, round trip ${Date.now() - frame.t0} ms`);
       return;
+    case 'yourHouse':
+      update({ yourHouse: frame.house });
+      note('house', frame.house === null ? 'no house yet' : `your house is ${frame.house.name}`);
+      return;
+    case 'takenOver':
+      // A player plays from one place. This window is finished; the socket goes with it. See 0028.
+      update({ connection: 'takenOver', houses: NO_HOUSES, yourHouse: null });
+      note('gateway', `${frame.message}; this window is no longer playing`);
+      connection?.close();
+      return;
   }
 }
 
@@ -155,6 +169,11 @@ export function gateway(): Connection {
 
   const socket = browserSocket(GATEWAY_URL);
   socket.onClose(() => {
+    // A window that was taken over closed its own socket on purpose. Saying "the connection closed, is
+    // the backend running?" over the top of that would be the panel telling a plain lie; see 0023.
+    if (state.connection === 'takenOver') {
+      return;
+    }
     update({ connection: 'closed', houses: NO_HOUSES });
     note('gateway', 'the connection closed; is the backend running? cd backend then ./gradlew :app:bootRun');
   });

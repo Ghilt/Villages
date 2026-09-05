@@ -4,6 +4,7 @@ import type * as maplibregl from 'maplibre-gl';
 import type { BannerSpec, EventFrame } from '@villages/protocol';
 
 import { gateway, gatewayState, watchGateway } from '../net/gateway';
+import { seedHouses } from '../net/seed';
 import { atToClock, note } from './log';
 
 interface EventsViewProps {
@@ -38,18 +39,9 @@ const NAMES = ['Ravenscar', 'Hollin', 'Thornwick', 'Ashby', 'Greymere', 'Corvane
 /** How many the seeding button founds at once: enough to see a region fill, few enough to read the log. */
 const SEED = 20;
 
-function foundHouse(seat: { lat: number; lon: number }, commandId: string): void {
-  gateway().send({
-    type: 'command',
-    commandId,
-    command: {
-      type: 'foundHouse',
-      houseId: crypto.randomUUID(),
-      name: `${pick(NAMES)} ${Math.floor(Math.random() * 90 + 10)}`,
-      seat,
-      banner: randomBanner(),
-    },
-  });
+/** A name a house might have. The house's identity is the server's business; this is only what to call it. */
+function aName(): string {
+  return `${pick(NAMES)} ${Math.floor(Math.random() * 90 + 10)}`;
 }
 
 /**
@@ -60,29 +52,42 @@ function foundHouse(seat: { lat: number; lon: number }, commandId: string): void
 export function EventsView({ map }: EventsViewProps) {
   const state = useSyncExternalStore(watchGateway, gatewayState);
 
+  /** Founds this player's one house, here. Pressed twice, the second is refused: you have a house. */
   const foundHere = () => {
     if (map === null) return;
     const centre = map.getCenter();
     const commandId = `c-${Date.now().toString(36)}`;
     note('command', `founding a house at ${centre.lat.toFixed(3)}, ${centre.lng.toFixed(3)} as ${commandId}`);
-    foundHouse({ lat: centre.lat, lon: centre.lng }, commandId);
+    gateway().send({
+      type: 'command',
+      commandId,
+      command: {
+        type: 'foundHouse',
+        name: aName(),
+        seat: { lat: centre.lat, lon: centre.lng },
+        banner: randomBanner(),
+      },
+    });
   };
 
-  /** Scatters houses over the view, so a region can be watched filling and the counts checked. */
+  /**
+   * Scatters houses over the view, as that many other players: a player founds one house, so twenty
+   * houses is twenty players. See net/seed.ts.
+   */
   const seedHere = () => {
     if (map === null) return;
     const bounds = map.getBounds();
-    const stamp = Date.now().toString(36);
-    note('command', `seeding ${SEED} houses across the view as s-${stamp}-*`);
-    for (let index = 0; index < SEED; index += 1) {
-      foundHouse(
-        {
+    note('seed', `founding ${SEED} houses across the view, as ${SEED} other players`);
+    void seedHouses(
+      Array.from({ length: SEED }, () => ({
+        name: aName(),
+        seat: {
           lat: bounds.getSouth() + Math.random() * (bounds.getNorth() - bounds.getSouth()),
           lon: bounds.getWest() + Math.random() * (bounds.getEast() - bounds.getWest()),
         },
-        `s-${stamp}-${index}`,
-      );
-    }
+        banner: randomBanner(),
+      })),
+    ).then((taken) => note('seed', `${taken} of ${SEED} founded`));
   };
 
   return (

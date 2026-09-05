@@ -9,7 +9,23 @@ value class HouseId(val value: UUID) {
     val stream: String get() = "house:$value"
 
     companion object {
-        fun fresh(): HouseId = HouseId(UUID.randomUUID())
+        /** What a player's house is named after, so the derivation cannot collide with anything else. */
+        private const val NAMED_AFTER = "villages:house:"
+
+        /**
+         * The house a player founds. Worked out from the player rather than chosen, so that founding twice
+         * writes to the same stream and the second is refused by the decider rather than by a race.
+         *
+         * This is a rule about *founding*, not a claim that a house belongs to its founder for ever: the
+         * identity stays an opaque UUID, and a house that is later transferred, or a second house, needs
+         * nothing changed here. See decision record 0028.
+         *
+         * A name-based UUID, so it is the same on every machine and every run. The digest inside it is a
+         * naming function and not a security boundary; a house identity is public, and anyone holding the
+         * player's token has already got everything.
+         */
+        fun of(player: PlayerId): HouseId =
+            HouseId(UUID.nameUUIDFromBytes("$NAMED_AFTER${player.value}".toByteArray(Charsets.UTF_8)))
     }
 }
 

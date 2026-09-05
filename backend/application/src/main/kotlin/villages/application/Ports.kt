@@ -91,6 +91,8 @@ fun interface EventFeed {
  */
 data class HouseRow(
     val id: HouseId,
+    /** Whose house it is. Kept, because a player has to be told which house is theirs. */
+    val player: PlayerId,
     val name: HouseName,
     val seat: Location,
     val significance: Significance,
@@ -128,4 +130,12 @@ interface HousesByCell {
 
     /** Every row the read model changes from now on, in the order it applied them, until closed. */
     fun watch(listener: (HouseRow) -> Unit): AutoCloseable
+}
+
+/**
+ * Which house is a player's, if any. Its own port rather than a method on the one above, because it
+ * answers a different question for a different reason: not what is on the map, but what is yours.
+ */
+fun interface HousesByPlayer {
+    fun ofPlayer(player: PlayerId): HouseRow?
 }

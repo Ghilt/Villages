@@ -113,6 +113,12 @@ there: one updates the read model, one publishes to the broker with a routing ke
 node consumes that feed, matches each event against the cells its sessions are watching, and pushes a coalesced batch.
 A newly subscribed client is served a snapshot from the read model first, and drops any delta it has already seen.
 
+A player has one session. The gateway keeps one connection per player, and a second hello takes the player
+over: the newcomer becomes the session and the one before is stood down, told so, and dropped from every
+cell it held. What a session holds - its cells, the day its scrubber is on - is its own; what is the
+player's, which today is which house is theirs, is sent to whichever window they are in. See decision
+record 0028.
+
 Today there is no broker. The read model's own change stream stands in for the exchange: the gateway watches
 the projection for changes and queries it for snapshots, both through the `HousesByCell` port. When RabbitMQ
 arrives the exchange takes over the fan-out between processes, and the gateway's side does not change - it

@@ -116,8 +116,12 @@ data class ViewTime(val at: Long?) : ClientFrame
 )
 sealed interface CommandPayload
 
-/** The player is whoever holds the session; the instant is the server's. Neither is on the wire. */
-data class FoundHousePayload(val houseId: String, val name: String, val seat: Point, val banner: BannerSpec) : CommandPayload
+/**
+ * The player is whoever holds the session, the instant is the server's, and the house's identity is worked
+ * out from the player. None of the three is on the wire: a client naming its own stream could name one
+ * that is not its own. See decision record 0028.
+ */
+data class FoundHousePayload(val name: String, val seat: Point, val banner: BannerSpec) : CommandPayload
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes(
@@ -130,17 +134,13 @@ data class FoundHousePayload(val houseId: String, val name: String, val seat: Po
     JsonSubTypes.Type(Pong::class, name = "pong"),
     JsonSubTypes.Type(ErrorFrame::class, name = "error"),
     JsonSubTypes.Type(EventFrame::class, name = "event"),
+    JsonSubTypes.Type(YourHouse::class, name = "yourHouse"),
+    JsonSubTypes.Type(TakenOver::class, name = "takenOver"),
 )
 sealed interface ServerFrame
 
-/** The answer to hello, carrying where the world's clock stands. `ownHouse` is absent for a player without one. */
-@JsonInclude(JsonInclude.Include.NON_NULL)
-data class Welcome(
-    val serverTime: Long,
-    val playerId: String,
-    val world: WorldNow,
-    val ownHouse: HouseView? = null,
-) : ServerFrame
+/** The answer to hello, carrying where the world's clock stands. The player's own house follows in `yourHouse`. */
+data class Welcome(val serverTime: Long, val playerId: String, val world: WorldNow) : ServerFrame
 
 /**
  * What a cell holds, sent on subscribing to it, before any deltas. `omitted` is how many more houses the
@@ -166,6 +166,18 @@ data class Resync(val cells: List<String>) : ServerFrame
 data class Pong(val t0: Long, val serverTime: Long) : ServerFrame
 
 data class ErrorFrame(val code: String, val message: String) : ServerFrame
+
+/**
+ * The player's own house, wherever they are looking. Sent after welcome, with null when they have none so
+ * that the answer is definite, and again whenever it appears or changes.
+ */
+data class YourHouse(val house: HouseView?) : ServerFrame
+
+/**
+ * Another window took this player over, and this session is finished: it holds no cells, hears nothing
+ * more and accepts no commands. A player plays from one place. See decision record 0028.
+ */
+data class TakenOver(val message: String) : ServerFrame
 
 /**
  * One stored event, as stored: the envelope and the data, for a client that asked to watch. `eventType` is

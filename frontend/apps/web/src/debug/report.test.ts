@@ -18,6 +18,7 @@ const state: MapState = {
   cells: ['3000000', '3000001', '3000002', '3000003'],
   houses: { drawn: 12, held: 4, omitted: 0 },
   world: { today: 454901, earliest: 437635, viewingAt: null },
+  player: { id: '3c8f9e1a-0000-4000-8000-000000000001', connection: 'open', house: null },
 };
 
 const valueOf = (from: MapState, label: string): string =>
@@ -136,5 +137,39 @@ describe('saying which day the map is showing', () => {
 
   it('says so before the gateway has spoken', () => {
     expect(valueOf({ ...state, world: null }, 'world')).toBe('not heard from the gateway yet');
+  });
+});
+
+describe('saying who is playing here', () => {
+  const asPlayer = (over: Partial<MapState['player']>) => ({
+    ...state,
+    player: { ...state.player, ...over },
+  });
+
+  it('names the player and says this window is the one playing', () => {
+    expect(valueOf(state, 'player')).toBe('3c8f9e1a, playing here');
+  });
+
+  it('says plainly when another window has taken over, because this one has stopped', () => {
+    expect(valueOf(asPlayer({ connection: 'takenOver' }), 'player')).toBe(
+      '3c8f9e1a, taken over in another window',
+    );
+  });
+
+  it('says when the connection went away, which is not the same thing', () => {
+    expect(valueOf(asPlayer({ connection: 'closed' }), 'player')).toBe('3c8f9e1a, the connection closed');
+  });
+
+  it('copes with having heard nothing yet', () => {
+    expect(valueOf(asPlayer({ id: undefined, connection: 'connecting' }), 'player')).toBe(
+      'not introduced yet, connecting',
+    );
+  });
+
+  it('names your house, or says you have none', () => {
+    expect(valueOf(state, 'house')).toBe('none yet');
+    expect(valueOf(asPlayer({ house: 'Ravenscar 42, founded year 1200' }), 'house')).toBe(
+      'Ravenscar 42, founded year 1200',
+    );
   });
 });

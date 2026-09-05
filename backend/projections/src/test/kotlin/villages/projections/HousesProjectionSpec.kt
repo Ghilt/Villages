@@ -57,9 +57,10 @@ private fun founded(
     significance: Double = 20.0,
     on: WorldTime = someDay,
     at: Instant = noon,
+    player: PlayerId = PlayerId(UUID.randomUUID()),
 ) = HouseFounded(
-    houseId = HouseId(UUID.nameUUIDFromBytes(name.toByteArray())),
-    player = PlayerId(UUID.randomUUID()),
+    houseId = HouseId.of(player),
+    player = player,
     name = HouseName(name),
     seat = Location(lat, lon),
     significance = Significance(significance),
@@ -74,11 +75,11 @@ private const val STOCKHOLM_Z10 = "1200312213"
 private const val STOCKHOLM_Z8 = "12003122"
 private const val STOCKHOLM_Z4 = "1200"
 
-class HousesByCellProjectionSpec : StringSpec({
+class HousesProjectionSpec : StringSpec({
 
     "a founded house is in its own cell, and in every cell above it down to where its significance runs out" {
         val feed = HandFed()
-        val houses = HousesByCellProjection(feed)
+        val houses = HousesProjection(feed)
         feed.deliver(founded("Ravenscar", 59.33, 18.07, significance = 20.0))
 
         // Twenty is worth drawing from zoom eight in, and not from further out.
@@ -91,7 +92,7 @@ class HousesByCellProjectionSpec : StringSpec({
 
     "a legendary thing is drawn from the whole world" {
         val feed = HandFed()
-        val houses = HousesByCellProjection(feed)
+        val houses = HousesProjection(feed)
         feed.deliver(founded("St John's", 59.33, 18.07, significance = 100.0))
 
         houses.inCell("", someDay, 10).houses shouldHaveSize 1
@@ -100,7 +101,7 @@ class HousesByCellProjectionSpec : StringSpec({
 
     "a house is not in a cell its seat does not fall in" {
         val feed = HandFed()
-        val houses = HousesByCellProjection(feed)
+        val houses = HousesProjection(feed)
         feed.deliver(founded("Ravenscar", 59.33, 18.07))
 
         // Cape Town's cell, at the same zoom.
@@ -109,7 +110,7 @@ class HousesByCellProjectionSpec : StringSpec({
 
     "a house exists from its founding world-day onward, and not the day before, whenever it was recorded" {
         val feed = HandFed()
-        val houses = HousesByCellProjection(feed)
+        val houses = HousesProjection(feed)
         feed.deliver(founded("Ravenscar", 59.33, 18.07, on = someDay, at = noon))
 
         houses.inCell(STOCKHOLM_Z8, someDay - 1, 10).houses.shouldBeEmpty()
@@ -119,7 +120,7 @@ class HousesByCellProjectionSpec : StringSpec({
 
     "the earliest world-day anything exists from is the scrubber's left end, and nothing means nothing" {
         val feed = HandFed()
-        val houses = HousesByCellProjection(feed)
+        val houses = HousesProjection(feed)
         houses.earliest() shouldBe null
 
         feed.deliver(founded("Later", 59.33, 18.07, on = someDay))
@@ -130,7 +131,7 @@ class HousesByCellProjectionSpec : StringSpec({
 
     "the most significant come first, and what will not fit is counted rather than lost" {
         val feed = HandFed()
-        val houses = HousesByCellProjection(feed)
+        val houses = HousesProjection(feed)
         feed.deliver(founded("Lesser", 59.33, 18.07, significance = 30.0))
         feed.deliver(founded("Greatest", 59.331, 18.071, significance = 90.0))
         feed.deliver(founded("Middling", 59.332, 18.072, significance = 60.0))
@@ -143,7 +144,7 @@ class HousesByCellProjectionSpec : StringSpec({
 
     "a watcher hears each row as it is applied, and the read model counts what it applied" {
         val feed = HandFed()
-        val houses = HousesByCellProjection(feed)
+        val houses = HousesProjection(feed)
         val heard = mutableListOf<HouseRow>()
         houses.watch { heard += it }
 
@@ -158,12 +159,25 @@ class HousesByCellProjectionSpec : StringSpec({
 
     "a watcher that stopped hears nothing more" {
         val feed = HandFed()
-        val houses = HousesByCellProjection(feed)
+        val houses = HousesProjection(feed)
         val heard = mutableListOf<HouseRow>()
         houses.watch { heard += it }.close()
 
         feed.deliver(founded("Ravenscar", 59.33, 18.07))
 
         heard.shouldBeEmpty()
+    }
+
+    "a player's own house can be found, and a player without one has none" {
+        val feed = HandFed()
+        val houses = HousesProjection(feed)
+        val adam = PlayerId(UUID.fromString("0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8d"))
+        val nobody = PlayerId(UUID.randomUUID())
+
+        feed.deliver(founded("Ravenscar", 59.33, 18.07, player = adam))
+
+        houses.ofPlayer(adam)?.name shouldBe HouseName("Ravenscar")
+        houses.ofPlayer(adam)?.id shouldBe HouseId.of(adam)
+        houses.ofPlayer(nobody) shouldBe null
     }
 })

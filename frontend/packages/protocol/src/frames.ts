@@ -53,9 +53,9 @@ export const houseViewSchema = z.object({
 });
 
 export const commandPayloadSchema = z.discriminatedUnion('type', [
+  /** No house id: the server works it out from the player, so a client cannot name a stream. See 0028. */
   z.object({
     type: z.literal('foundHouse'),
-    houseId: z.string(),
     name: z.string(),
     seat: pointSchema,
     banner: bannerSchema,
@@ -85,8 +85,11 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
     playerId: z.string(),
     /** Where the world's clock stands: today, and the earliest day anything is known to exist from. */
     world: z.object({ today: worldDaySchema, earliest: worldDaySchema }),
-    ownHouse: houseViewSchema.optional(),
   }),
+  /** The player's own house, wherever they are looking. Null when they have none. */
+  z.object({ type: z.literal('yourHouse'), house: houseViewSchema.nullable() }),
+  /** Another window took this player over; this session is finished. */
+  z.object({ type: z.literal('takenOver'), message: z.string() }),
   z.object({
     type: z.literal('snapshot'),
     cell: cellSchema,

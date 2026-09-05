@@ -4,9 +4,11 @@ import villages.application.CellContents
 import villages.application.EventFeed
 import villages.application.HouseRow
 import villages.application.HousesByCell
+import villages.application.HousesByPlayer
 import villages.application.StoredEvent
 import villages.domain.HouseFounded
 import villages.domain.HouseId
+import villages.domain.PlayerId
 import villages.domain.WorldTime
 import villages.protocol.Cell
 import villages.protocol.coarsestZoom
@@ -27,10 +29,13 @@ import java.util.concurrent.atomic.AtomicLong
  *
  * Disposable, like every read model: delete it, replay the feed, get it back.
  */
-class HousesByCellProjection(feed: EventFeed) : HousesByCell, AutoCloseable {
+class HousesProjection(feed: EventFeed) : HousesByCell, HousesByPlayer, AutoCloseable {
     private class Indexed(val row: HouseRow, val quadkey: String, val coarsestZoom: Int)
 
     private val rows = ConcurrentHashMap<HouseId, Indexed>()
+
+    /** Which house is whose. One entry a player, because a player founds one house; see decision 0028. */
+    private val byPlayer = ConcurrentHashMap<PlayerId, HouseId>()
     private val listeners = CopyOnWriteArraySet<(HouseRow) -> Unit>()
     private val applied = AtomicLong()
     private val subscription: AutoCloseable = feed.subscribe(::apply)
@@ -40,6 +45,7 @@ class HousesByCellProjection(feed: EventFeed) : HousesByCell, AutoCloseable {
         val row = when (val event = stored.event) {
             is HouseFounded -> HouseRow(
                 id = event.houseId,
+                player = event.player,
                 name = event.name,
                 seat = event.seat,
                 significance = event.significance,
@@ -55,6 +61,7 @@ class HousesByCellProjection(feed: EventFeed) : HousesByCell, AutoCloseable {
             quadkey = Cell.of(row.seat.lat, row.seat.lon).quadkey,
             coarsestZoom = coarsestZoom(row.significance.value),
         )
+        byPlayer[row.player] = row.id
         applied.incrementAndGet()
         for (listener in listeners) {
             listener(row)
@@ -74,6 +81,8 @@ class HousesByCellProjection(feed: EventFeed) : HousesByCell, AutoCloseable {
     }
 
     override fun earliest(): WorldTime? = rows.values.minOfOrNull { it.row.since }
+
+    override fun ofPlayer(player: PlayerId): HouseRow? = byPlayer[player]?.let { rows[it]?.row }
 
     override fun watch(listener: (HouseRow) -> Unit): AutoCloseable {
         listeners += listener

@@ -9,7 +9,7 @@ import villages.application.WorldClock
 import villages.domain.WorldTime
 import villages.gateway.Gateway
 import villages.occurrent.InMemoryWorld
-import villages.projections.HousesByCellProjection
+import villages.projections.HousesProjection
 import villages.protocol.Calendar
 import java.time.Clock
 import java.time.Instant
@@ -44,13 +44,13 @@ class WorldConfig {
 
     /** The map's read model, folded from the feed. In memory, so it starts empty with the store. */
     @Bean(destroyMethod = "close")
-    fun houses(world: InMemoryWorld): HousesByCellProjection = HousesByCellProjection(world.feed)
+    fun houses(world: InMemoryWorld): HousesProjection = HousesProjection(world.feed)
 
     @Bean(destroyMethod = "close")
     fun gateway(
         world: InMemoryWorld,
         foundHouse: FoundHouseService,
-        houses: HousesByCellProjection,
+        houses: HousesProjection,
         clock: Clock,
         worldClock: WorldClock,
     ): Gateway = Gateway(
@@ -58,6 +58,7 @@ class WorldConfig {
         foundHouse = foundHouse,
         events = world.feed,
         houses = houses,
+        theirHouses = houses,
         clock = clock,
         world = worldClock,
     )

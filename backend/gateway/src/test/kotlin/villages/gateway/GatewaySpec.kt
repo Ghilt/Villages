@@ -16,8 +16,10 @@ import villages.domain.HouseCommand
 import villages.domain.HouseDecider
 import villages.domain.HouseEvent
 import villages.domain.HouseFounded
+import villages.domain.HouseId
+import villages.domain.PlayerId
 import villages.domain.WorldTime
-import villages.projections.HousesByCellProjection
+import villages.projections.HousesProjection
 import villages.protocol.Batch
 import villages.protocol.CommandAccepted
 import villages.protocol.CommandRejected
@@ -29,8 +31,10 @@ import villages.protocol.ProtocolJson
 import villages.protocol.Resync
 import villages.protocol.ServerFrame
 import villages.protocol.Snapshot
+import villages.protocol.TakenOver
 import villages.protocol.Welcome
 import villages.protocol.WorldNow
+import villages.protocol.YourHouse
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneOffset
@@ -99,9 +103,9 @@ private const val STOCKHOLM_Z10 = "1200312213"
 private const val STOCKHOLM_Z8 = "12003122"
 private const val STOCKHOLM_Z4 = "1200"
 
-private fun founding(houseId: String = RAVENSCAR, commandId: String = "c-1", name: String = "Ravenscar") =
+private fun founding(commandId: String = "c-1", name: String = "Ravenscar") =
     """{"type":"command","commandId":"$commandId","command":{"type":"foundHouse",""" +
-        """"houseId":"$houseId","name":"$name","seat":{"lat":59.33,"lon":18.07},""" +
+        """"name":"$name","seat":{"lat":59.33,"lon":18.07},""" +
         """"banner":{"field":"sable","division":"plain","charge":"stag","chargeTincture":"argent"}}}"""
 
 private fun subscribe(vararg cells: String) =
@@ -113,55 +117,87 @@ private fun unsubscribe(vararg cells: String) =
 private class Rig {
     val world = TinyWorld()
     val later = ManualLater()
-    val houses = HousesByCellProjection(world)
+    val houses = HousesProjection(world)
     val worldClock = WorldClock { today }
     val gateway = Gateway(
         tokens = AnonymousTokens,
         foundHouse = FoundHouseService(world, clock = { noon }, world = worldClock),
         events = world,
         houses = houses,
+        theirHouses = houses,
         clock = Clock.fixed(noon, ZoneOffset.UTC),
         world = worldClock,
         later = later,
     )
 
-    /** A connection that has said hello, and everything it has been sent. */
-    fun introduced(): Pair<Gateway.Connection, MutableList<ServerFrame>> {
+    /**
+     * A connection that has said hello, and everything it has been sent since. Every call uses the same
+     * token unless told otherwise, so two of these are two windows of one player - which is exactly the
+     * case worth testing, and now the case that ends in a takeover.
+     */
+    fun introduced(token: String = TOKEN): Pair<Gateway.Connection, MutableList<ServerFrame>> {
         val sent = mutableListOf<ServerFrame>()
         val connection = gateway.connect { sent += it }
-        connection.receive(hello)
+        connection.receive("""{"type":"hello","playerToken":"$token","protocolVersion":1}""")
         sent.clear()
         return connection to sent
+    }
+
+    /** Somebody else entirely: a fresh token, so this is another player rather than a takeover. */
+    fun someoneElse(): Pair<Gateway.Connection, MutableList<ServerFrame>> =
+        introduced(UUID.randomUUID().toString())
+
+    /** A fresh player founds a house. Many houses means many players, one each; see decision 0028. */
+    fun aHouseIsFounded(name: String = "Ravenscar") {
+        val (someone, _) = someoneElse()
+        someone.receive(founding(name = name))
     }
 }
 
 class GatewaySpec : StringSpec({
 
-    "hello is answered with welcome, naming the player, the server's time, and where the world's clock stands" {
+    "hello is answered with welcome, then with the house this player has, which is none yet" {
         val sent = mutableListOf<ServerFrame>()
         Rig().gateway.connect { sent += it }.receive(hello)
 
-        sent.single() shouldBe Welcome(
-            serverTime = noon.toEpochMilli(),
-            playerId = TOKEN,
-            world = WorldNow(today = today.day, earliest = today.day),
+        sent shouldBe listOf(
+            Welcome(
+                serverTime = noon.toEpochMilli(),
+                playerId = TOKEN,
+                world = WorldNow(today = today.day, earliest = today.day),
+            ),
+            YourHouse(null),
         )
     }
 
-    "welcome's earliest day is the first anything is known to exist from" {
+    "a player who already has a house is told which on hello, before looking at anything" {
         val rig = Rig()
+        // The same player, coming back: a fresh window, and the house is still theirs.
         val (founder, _) = rig.introduced()
         founder.receive(founding())
+        founder.disconnected()
         val sent = mutableListOf<ServerFrame>()
 
         rig.gateway.connect { sent += it }.receive(hello)
 
-        sent.single().shouldBeInstanceOf<Welcome>().world shouldBe WorldNow(today = today.day, earliest = today.day)
+        val mine = sent.last().shouldBeInstanceOf<YourHouse>().house
+        mine?.name shouldBe "Ravenscar"
+        mine?.cell shouldBe STOCKHOLM_Z10
+    }
+
+    "welcome's earliest day is the first anything is known to exist from" {
+        val rig = Rig()
+        rig.aHouseIsFounded()
+        val sent = mutableListOf<ServerFrame>()
+
+        rig.gateway.connect { sent += it }.receive(hello)
+
+        sent.first().shouldBeInstanceOf<Welcome>().world shouldBe WorldNow(today = today.day, earliest = today.day)
     }
 
     "looking at a day before a house was founded, its cell is empty; looking at live again, it is back" {
         val rig = Rig()
-        val (founder, _) = rig.introduced()
+        val (founder, _) = rig.someoneElse()
         founder.receive(founding())
         val (looker, sent) = rig.introduced()
         looker.receive(subscribe(STOCKHOLM_Z8))
@@ -184,7 +220,7 @@ class GatewaySpec : StringSpec({
         looker.receive(subscribe(STOCKHOLM_Z8))
         looker.receive("""{"type":"viewTime","at":${today.day - 100}}""")
         sent.clear()
-        val (founder, _) = rig.introduced()
+        val (founder, _) = rig.someoneElse()
 
         founder.receive(founding())
         rig.later.tick()
@@ -214,8 +250,8 @@ class GatewaySpec : StringSpec({
     "a founding command is accepted, and the event reaches everyone watching" {
         val rig = Rig()
         val (founding, founder) = rig.introduced()
-        val (watching, watcher) = rig.introduced()
-        val (_, bystander) = rig.introduced()
+        val (watching, watcher) = rig.someoneElse()
+        val (_, bystander) = rig.someoneElse()
         watching.receive("""{"type":"watchEvents","on":true}""")
 
         founding.receive(founding())
@@ -224,11 +260,21 @@ class GatewaySpec : StringSpec({
         rig.world.events shouldHaveSize 1
         val event = watcher.last().shouldBeInstanceOf<EventFrame>()
         event.eventType shouldBe "villages.house.founded.v1"
-        event.stream shouldBe "house:$RAVENSCAR"
+        // The house is the player's own, worked out from the token rather than chosen by the browser.
+        event.stream shouldBe HouseId.of(PlayerId(UUID.fromString(TOKEN))).stream
         event.streamVersion shouldBe 1
         event.time shouldBe noon.toEpochMilli()
         event.data.get("significance").asDouble() shouldBe 20.0
         bystander.shouldBeEmpty()
+    }
+
+    "the founder is told which house is theirs, without holding its cell" {
+        val (connection, sent) = Rig().introduced()
+
+        connection.receive(founding())
+
+        connection.cells().shouldBeEmpty()
+        sent.filterIsInstance<YourHouse>().last().house?.name shouldBe "Ravenscar"
     }
 
     "founding twice is rejected with the decider's reason as a code" {
@@ -257,7 +303,7 @@ class GatewaySpec : StringSpec({
 
     "subscribing to a cell answers with a snapshot of what is there, at every zoom it is worth drawing at" {
         val rig = Rig()
-        val (founder, _) = rig.introduced()
+        val (founder, _) = rig.someoneElse()
         founder.receive(founding())
         val (looker, sent) = rig.introduced()
 
@@ -278,7 +324,7 @@ class GatewaySpec : StringSpec({
         val (looker, sent) = rig.introduced()
         looker.receive(subscribe(STOCKHOLM_Z8))
         sent.clear()
-        val (founder, _) = rig.introduced()
+        val (founder, _) = rig.someoneElse()
 
         founder.receive(founding())
         sent.shouldBeEmpty()
@@ -295,7 +341,7 @@ class GatewaySpec : StringSpec({
         val (looker, sent) = rig.introduced()
         looker.receive(subscribe(STOCKHOLM_Z10, STOCKHOLM_Z8))
         sent.clear()
-        val (founder, _) = rig.introduced()
+        val (founder, _) = rig.someoneElse()
 
         founder.receive(founding())
         rig.later.tick()
@@ -308,7 +354,7 @@ class GatewaySpec : StringSpec({
         val (looker, sent) = rig.introduced()
         looker.receive(subscribe(STOCKHOLM_Z4))
         sent.clear()
-        val (founder, _) = rig.introduced()
+        val (founder, _) = rig.someoneElse()
 
         founder.receive(founding())
         rig.later.tick()
@@ -321,11 +367,10 @@ class GatewaySpec : StringSpec({
         val (looker, sent) = rig.introduced()
         looker.receive(subscribe(STOCKHOLM_Z8))
         sent.clear()
-        val (founder, _) = rig.introduced()
 
-        founder.receive(founding(houseId = UUID.randomUUID().toString(), commandId = "c-1", name = "One"))
-        founder.receive(founding(houseId = UUID.randomUUID().toString(), commandId = "c-2", name = "Two"))
-        founder.receive(founding(houseId = UUID.randomUUID().toString(), commandId = "c-3", name = "Three"))
+        rig.aHouseIsFounded("One")
+        rig.aHouseIsFounded("Two")
+        rig.aHouseIsFounded("Three")
         rig.later.pending shouldBe 1
         rig.later.tick()
 
@@ -338,7 +383,7 @@ class GatewaySpec : StringSpec({
         looker.receive(subscribe(STOCKHOLM_Z8))
         looker.receive(unsubscribe(STOCKHOLM_Z8))
         sent.clear()
-        val (founder, _) = rig.introduced()
+        val (founder, _) = rig.someoneElse()
 
         founder.receive(founding())
         rig.later.tick()
@@ -353,7 +398,7 @@ class GatewaySpec : StringSpec({
         looker.receive(subscribe(STOCKHOLM_Z8))
         looker.disconnected()
         sent.clear()
-        val (founder, _) = rig.introduced()
+        val (founder, _) = rig.someoneElse()
 
         founder.receive(founding())
         rig.later.tick()
@@ -386,11 +431,8 @@ class GatewaySpec : StringSpec({
         val (looker, sent) = rig.introduced()
         looker.receive(subscribe(STOCKHOLM_Z8))
         sent.clear()
-        val (founder, _) = rig.introduced()
 
-        repeat(MOST_WAITING + 1) { index ->
-            founder.receive(founding(houseId = UUID.randomUUID().toString(), commandId = "c-$index", name = "H$index"))
-        }
+        repeat(MOST_WAITING + 1) { index -> rig.aHouseIsFounded("H$index") }
 
         sent.single() shouldBe Resync(listOf(STOCKHOLM_Z8))
         rig.later.tick()
@@ -399,5 +441,74 @@ class GatewaySpec : StringSpec({
         looker.cells().shouldBeEmpty()
         looker.receive(subscribe(STOCKHOLM_Z8))
         sent.last().shouldBeInstanceOf<Snapshot>().houses shouldHaveSize MOST_IN_A_CELL
+    }
+
+    "a second window takes the player over, and the first is told and stood down" {
+        val rig = Rig()
+        val (first, one) = rig.introduced()
+        first.receive(subscribe(STOCKHOLM_Z8))
+        one.clear()
+
+        val (second, two) = rig.introduced()
+
+        one.single().shouldBeInstanceOf<TakenOver>()
+        first.cells().shouldBeEmpty()
+        two.shouldBeEmpty()
+        second.receive(founding())
+        two.last() shouldBe CommandAccepted("c-1")
+    }
+
+    "a stood-down session hears nothing more and can do nothing more" {
+        val rig = Rig()
+        val (first, one) = rig.introduced()
+        first.receive(subscribe(STOCKHOLM_Z8))
+        rig.introduced()
+        one.clear()
+
+        first.receive(founding())
+        first.receive(subscribe(STOCKHOLM_Z4))
+        first.receive("""{"type":"ping","t0":1}""")
+        rig.aHouseIsFounded()
+        rig.later.tick()
+
+        one.shouldBeEmpty()
+        rig.world.events.shouldHaveSize(1)
+    }
+
+    "the loser's close does not evict the window that took over, however late it arrives" {
+        val rig = Rig()
+        val (first, _) = rig.introduced()
+        val (second, two) = rig.introduced()
+        two.clear()
+
+        // The old socket goes away after the takeover, which is the ordinary case and the dangerous one.
+        first.disconnected()
+        rig.aHouseIsFounded()
+
+        // Still the session: its own house would still find it, and it is still able to act.
+        second.receive(founding(name = "Mine"))
+        two.last() shouldBe CommandAccepted("c-1")
+        two.filterIsInstance<YourHouse>().last().house?.name shouldBe "Mine"
+    }
+
+    "saying hello twice on one connection is refused rather than quietly changing who you are" {
+        val (connection, sent) = Rig().introduced()
+
+        connection.receive(hello)
+
+        sent.single().shouldBeInstanceOf<ErrorFrame>().code shouldBe "alreadyIntroduced"
+    }
+
+    "a player founds one house, and founding again is refused however many windows have tried" {
+        val rig = Rig()
+        val (first, _) = rig.introduced()
+        first.receive(founding())
+
+        val (second, two) = rig.introduced()
+        second.receive(founding(commandId = "c-2"))
+
+        two.last() shouldBe CommandRejected("c-2", "alreadyFounded")
+        rig.world.events shouldHaveSize 1
+        rig.houses.ofPlayer(PlayerId(UUID.fromString(TOKEN)))?.name?.value shouldBe "Ravenscar"
     }
 })
