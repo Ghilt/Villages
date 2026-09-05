@@ -12,7 +12,7 @@ sealed interface House {
         val player: PlayerId,
         val name: HouseName,
         val seat: Location,
-        val cell: Cell,
+        val significance: Significance,
         val banner: Banner,
         val treasury: Treasury,
         val foundedAt: Instant,

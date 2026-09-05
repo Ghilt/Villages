@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
+import { cellsForView } from '@villages/protocol';
+
 import { FLAT_MAX_ZOOM, TILE } from '../map/painterlyMessages';
 import { forgetPaintedTally, paintedTally } from '../map/painterlyTiles';
 import { WORLD_MASTER_WIDTH } from '../map/worldStyle';
@@ -87,6 +89,7 @@ export function DebugPanel({ map, renderer }: DebugPanelProps) {
     }
     const look = () => {
       const centre = map.getCenter();
+      const bounds = map.getBounds();
       const tileZoom = Math.min(Math.round(map.getZoom()), map.getMaxZoom());
 
       // Every change of tile zoom is logged, not just the ones that change the stretch. A step between
@@ -116,6 +119,13 @@ export function DebugPanel({ map, renderer }: DebugPanelProps) {
           pixelRatio: window.devicePixelRatio,
           painted: paintedTally(),
           worstFrameGap: gaps.current.reduce((worst, entry) => Math.max(worst, entry.gap), 0),
+          cells: cellsForView({
+            north: bounds.getNorth(),
+            south: bounds.getSouth(),
+            east: bounds.getEast(),
+            west: bounds.getWest(),
+            zoom: tileZoom,
+          }),
         }),
       );
     };

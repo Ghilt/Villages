@@ -46,7 +46,7 @@ class InMemoryWorldSpec : StringSpec({
                 stored.streamVersion shouldBe 1
                 stored.time shouldBe noon
                 stored.event.shouldBeInstanceOf<HouseFounded>().name shouldBe HouseName("Ravenscar")
-                stored.data.contains("\"cell\":\"12003122\"") shouldBe true
+                stored.data.contains("\"significance\":20.0") shouldBe true
             }
         }
     }

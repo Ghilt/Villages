@@ -8,7 +8,7 @@ in the source.
 |---|---|
 | **Aggregate** | A consistency boundary with its own event stream. `House` is the only one so far. |
 | **Banner** | A house's heraldic device: a field of one or two tinctures, a division, and a charge. The visible identity of a house, shown in the interface and as its sprite on the map. `Banner` |
-| **Cell** | A fixed square of the world used to partition live updates and map queries. A quadkey at zoom 8. Carried on events so that nothing downstream has to recompute it. `Cell` |
+| **Cell** | A square of the world used to partition live updates and map queries: a quadkey at any zoom from 0 to 10, so a cell's ancestor is its prefix. Derived from a place wherever it is needed, never carried on an event. See decision record 0026. `Cell` |
 | **Charge** | The figure borne on a banner, such as a tower, a stag or a star. `Charge` |
 | **Chrono-engine** | The part of the game that rolls what can happen to a house at a moment in world-time, and that owns the pins which keep the world's history from contradicting itself. Described in `SETTING.md`; not yet in the source. |
 | **Command** | A request to change the world, named as an imperative: `FoundHouse`. It may be rejected. Commands are not stored. |
@@ -29,7 +29,7 @@ in the source.
 | **Projection** | A read model built by folding events, kept in MongoDB and queried by the interface. The event store is never queried to draw the map. |
 | **Rate** | A resource expressed as an amount, a rate per second, and the instant at which that was true. Clients interpolate between updates, so the world needs no tick events. |
 | **Seat** | Where a house is founded: its place on the map, and the anchor of its sprite. `Location` |
-| **Significance** | How much a thing matters to the world, carried on the event that made it, and deciding how far out on the map it stays visible. A hundred is visible at any zoom. Proposed in `SETTING.md`; not yet in the source. |
+| **Significance** | How much a thing matters to the world, from nothing to a hundred, carried on the event that made it and deciding how far out on the map it stays drawn. A hundred is drawn from the whole world. `Significance`, and `coarsestZoom` turns it into a zoom |
 | **Snapshot** | The current contents of a cell, sent when a client subscribes to it, before any deltas. |
 | **Stream** | The ordered events of one aggregate instance, addressed as `house:<uuid>`. |
 | **Tincture** | A heraldic colour. Metals are or and argent; colours are gules, azure, sable, vert and purpure. A charge of a metal goes on a field of a colour, and the reverse. `Tincture` |

@@ -13,6 +13,13 @@ the event store's type mapper is held to the same rows. Keep the format exactly 
 - The Payload cell lists field names in backticks, separated by commas.
 - Rows are ordered by version, then alphabetically.
 
+## What an event carries
+
+An event that puts something on the map, or moves it, carries **where** (a place in our world) and
+**how much it matters** (a significance from nothing to a hundred). It never carries a map cell: which
+tile a place falls in is worked out downstream, by the one shared function in `villages.protocol.Cell`,
+and how far out it stays drawn is worked out from the significance. See decision record 0026.
+
 ## Naming and versioning
 
 - A type reads as villages, then the aggregate, then the event in the past tense, then the version. The first one is
@@ -29,4 +36,4 @@ One stream per house, addressed as house followed by its identifier.
 
 | Type | Payload | Meaning | Produced by | Consumers |
 |---|---|---|---|---|
-| `villages.house.founded.v1` | `houseId`, `player`, `name`, `seat`, `cell`, `banner`, `treasury`, `at` | A player founded a house at a seat, with a name and a banner. The cell is computed here and carried; the treasury starts at nothing and earns at the founding rate. | `FoundHouse` | The houses-by-cell projection; the event bridge, and through it every gateway subscribed to the cell |
+| `villages.house.founded.v1` | `houseId`, `player`, `name`, `seat`, `significance`, `banner`, `treasury`, `at` | A player founded a house at a seat, with a name and a banner. It carries where and how much that matters; the tile it falls in is derived downstream. The treasury starts at nothing and earns at the founding rate. | `FoundHouse` | The map projection; the event bridge, and through it every gateway subscribed to a tile containing it |

@@ -19,14 +19,15 @@ class HouseDeciderSpec : StringSpec({
         at = noon,
     )
 
-    "founding a house that does not exist yields one HouseFounded, with its cell and an empty treasury" {
+    "founding a house that does not exist yields one HouseFounded, with a significance and an empty treasury" {
         val events = HouseDecider.decide(ravenscar, HouseDecider.initial)
 
         events shouldHaveSize 1
         val founded = events.single().shouldBeInstanceOf<HouseFounded>()
         founded.houseId shouldBe ravenscar.houseId
         founded.name shouldBe HouseName("Ravenscar")
-        founded.cell shouldBe Cell.of(ravenscar.seat)
+        founded.seat shouldBe ravenscar.seat
+        founded.significance shouldBe HouseDecider.FOUNDING_SIGNIFICANCE
         founded.treasury shouldBe Treasury(0, HouseDecider.FOUNDING_RATE, noon)
         founded.at shouldBe noon
     }

@@ -12,15 +12,16 @@ sealed interface HouseEvent {
 }
 
 /**
- * A house was founded. The cell is computed here, once, so that routing, subscriptions and read models
- * downstream never recompute it. The treasury starts at nothing and begins to earn at the founding rate.
+ * A house was founded. It carries where, and how much that matters: those two are what put a thing on the
+ * map, and which tile it falls in is worked out downstream from the first. The treasury starts at nothing
+ * and begins to earn at the founding rate. See decision record 0026.
  */
 data class HouseFounded(
     override val houseId: HouseId,
     val player: PlayerId,
     val name: HouseName,
     val seat: Location,
-    val cell: Cell,
+    val significance: Significance,
     val banner: Banner,
     val treasury: Treasury,
     override val at: Instant,

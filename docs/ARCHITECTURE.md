@@ -117,8 +117,10 @@ A newly subscribed client is served a snapshot from the read model first, and dr
 
 1. One stream per house, and no global aggregate. Anything world-shaped is a projection.
 2. Resources are rates. Events are emitted when something changes, never on a clock, so idle players cost nothing.
-3. The world is partitioned into cells. Routing keys, subscriptions and read model queries all use the same cell, and
-   the cell is computed once, in the domain, and carried on the event.
+3. The world is partitioned into cells, at every zoom: a quadkey, so a cell's ancestor is its prefix. Routing keys,
+   subscriptions and read model queries all derive the cell from the place on the event by one shared function,
+   mirrored in the browser and held to shared vectors. An event carries where it happened and how much it matters,
+   never a cell; how far out a thing is drawn comes from its significance. See decision record 0026.
 4. Gateway nodes are stateless apart from their live connections: one broker consumer per node, an in-memory index
    from cell to sessions, and no stickiness required from a load balancer.
 5. Pushes are coalesced per session on a short timer, and outbound queues are bounded. A client that cannot keep up is

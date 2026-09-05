@@ -12,4 +12,6 @@ dependencies {
     api(platform(libs.spring.boot.dependencies))
     api(libs.jackson.databind)
     implementation(libs.jackson.module.kotlin)
+    // The cell grid is arithmetic over every place in the world, so it is checked over every place.
+    testImplementation(libs.kotest.property)
 }

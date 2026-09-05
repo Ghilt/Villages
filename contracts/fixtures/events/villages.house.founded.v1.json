@@ -8,7 +8,7 @@
     "player": "0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8d",
     "name": "Ravenscar",
     "seat": { "lat": 59.33, "lon": 18.07 },
-    "cell": "12003122",
+    "significance": 20.0,
     "banner": { "field": "SABLE", "division": "PLAIN", "second": null, "charge": "STAG", "chargeTincture": "ARGENT" },
     "treasury": { "amount": 0, "ratePerSecond": 1.0, "asOf": "2026-09-04T12:00:00Z" },
     "at": "2026-09-04T12:00:00Z"

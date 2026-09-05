@@ -1,11 +1,24 @@
 /**
- * The wire format between the gateway and the browser: zod schemas for every frame, and the types inferred
- * from them. The fixtures in `contracts/fixtures` own the format; this package and the Kotlin `protocol`
- * module are both tested against them.
+ * What the gateway and the browser must agree on: the frames that cross between them, and the grid the
+ * world is partitioned by. The fixtures in `contracts/fixtures` own both; this package and the Kotlin
+ * `protocol` module are held to the same ones.
  */
 
 /** Sent on the handshake so that the gateway can refuse a client it cannot speak to. */
 export const PROTOCOL_VERSION = 1;
+
+export {
+  MAX_ZOOM,
+  MERCATOR_EDGE,
+  cellAt,
+  cellAtZoom,
+  cellsForView,
+  coarsestZoom,
+  isInside,
+  quadkeyOf,
+  tileAt,
+} from './cells';
+export type { Tile, View } from './cells';
 
 export {
   bannerSchema,

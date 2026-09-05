@@ -5,7 +5,6 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldMatch
 import tools.jackson.databind.JsonNode
 import villages.domain.Banner
-import villages.domain.Cell
 import villages.domain.Charge
 import villages.domain.Division
 import villages.domain.HouseFounded
@@ -13,6 +12,7 @@ import villages.domain.HouseId
 import villages.domain.HouseName
 import villages.domain.Location
 import villages.domain.PlayerId
+import villages.domain.Significance
 import villages.domain.Tincture
 import villages.domain.Treasury
 import java.io.File
@@ -32,7 +32,7 @@ class HouseEventFormatSpec : StringSpec({
         player = PlayerId(UUID.fromString("0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8d")),
         name = HouseName("Ravenscar"),
         seat = Location(59.33, 18.07),
-        cell = Cell("12003122"),
+        significance = Significance(20.0),
         banner = Banner(Tincture.SABLE, Division.PLAIN, null, Charge.STAG, Tincture.ARGENT),
         treasury = Treasury(0, 1.0, noon),
         at = noon,

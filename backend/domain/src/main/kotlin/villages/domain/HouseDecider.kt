@@ -9,6 +9,12 @@ object HouseDecider {
     /** What a new house earns each second, until anything else in the world says otherwise. */
     const val FOUNDING_RATE = 1.0
 
+    /**
+     * How much the world thinks a new house matters: enough to see standing over the region, not enough
+     * to see from the next country. A placeholder, like the rate above, until the chrono-engine judges it.
+     */
+    val FOUNDING_SIGNIFICANCE = Significance(20.0)
+
     val initial: House = House.NotFounded
 
     fun decide(command: HouseCommand, state: House): List<HouseEvent> = when (command) {
@@ -20,7 +26,7 @@ object HouseDecider {
                     player = command.player,
                     name = command.name,
                     seat = command.seat,
-                    cell = Cell.of(command.seat),
+                    significance = FOUNDING_SIGNIFICANCE,
                     banner = command.banner,
                     treasury = Treasury(amount = 0, ratePerSecond = FOUNDING_RATE, asOf = command.at),
                     at = command.at,
@@ -35,7 +41,7 @@ object HouseDecider {
             player = event.player,
             name = event.name,
             seat = event.seat,
-            cell = event.cell,
+            significance = event.significance,
             banner = event.banner,
             treasury = event.treasury,
             foundedAt = event.at,

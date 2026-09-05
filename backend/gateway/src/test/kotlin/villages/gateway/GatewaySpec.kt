@@ -44,7 +44,7 @@ private class TinyWorld : HouseCommandExecutor, EventFeed {
                 stream = founded.houseId.stream,
                 streamVersion = events.size.toLong(),
                 time = founded.at,
-                data = """{"name":"${founded.name.value}","cell":"${founded.cell.quadkey}"}""",
+                data = """{"name":"${founded.name.value}","significance":${founded.significance.value}}""",
                 event = event,
             )
             subscribers.toList().forEach { it(stored) }
@@ -113,7 +113,7 @@ class GatewaySpec : StringSpec({
         event.stream shouldBe "house:6d5b0a2e-1c3f-4d7e-9a8b-0f1e2d3c4b5a"
         event.streamVersion shouldBe 1
         event.time shouldBe noon.toEpochMilli()
-        event.data.get("cell").asString() shouldBe "12003122"
+        event.data.get("significance").asDouble() shouldBe 20.0
         bystander shouldHaveSize 1
     }
 

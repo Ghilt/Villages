@@ -15,6 +15,7 @@ const state: MapState = {
   pixelRatio: 1,
   painted: { ready: 0, waited: 0, aheadPainted: 0, held: 0 },
   worstFrameGap: 17.4,
+  cells: ['3000000', '3000001', '3000002', '3000003'],
 };
 
 const valueOf = (from: MapState, label: string): string =>
@@ -81,5 +82,23 @@ describe('the report as a whole', () => {
 
   it('says the zoom the camera is at and the zoom of the tiles, which differ', () => {
     expect(valueOf({ ...state, zoom: 8.62, tileZoom: 9 }, 'zoom')).toBe('8.62, asking for z9 tiles');
+  });
+});
+
+describe('saying which cells the view covers', () => {
+  it('says how many and at what zoom, because the count should not grow as you zoom out', () => {
+    expect(valueOf(state, 'cells')).toContain('4 at z7');
+  });
+
+  it('names a few and counts the rest, so the line stays readable', () => {
+    expect(valueOf(state, 'cells')).toBe('4 at z7: 3000000 3000001 3000002 and 1 more');
+  });
+
+  it('names them all when there are few enough to name', () => {
+    expect(valueOf({ ...state, cells: ['12', '13'] }, 'cells')).toBe('2 at z7: 12 13');
+  });
+
+  it('says so plainly when the view covers nothing', () => {
+    expect(valueOf({ ...state, cells: [] }, 'cells')).toBe('none');
   });
 });

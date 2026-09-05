@@ -21,6 +21,8 @@ export interface MapState {
   pixelRatio: number;
   painted: { ready: number; waited: number; aheadPainted: number; held: number };
   worstFrameGap: number;
+  /** The cells covering the view, at the camera's own zoom. What the map will subscribe to. */
+  cells: string[];
 }
 
 export interface Line {
@@ -30,6 +32,25 @@ export interface Line {
 
 /** One master pixel at the equator, in metres. The master spans the world's circumference. */
 const EARTH_CIRCUMFERENCE = 40075017;
+
+/** How many cell names will fit on a line of the panel before it stops being readable. */
+const CELLS_SHOWN = 3;
+
+/**
+ * The cells the view covers, which is what the map will ask the gateway for.
+ *
+ * Shown because it is the one place the grid is visible: the count should stay roughly the same at
+ * every zoom, and each name should be exactly as many digits as the zoom. A count that climbs as you
+ * zoom out means the client is asking for the world a tile at a time. See decision record 0026.
+ */
+function describeCells(cells: string[], zoom: number): string {
+  if (cells.length === 0) {
+    return 'none';
+  }
+  const named = [...cells].sort().slice(0, CELLS_SHOWN).join(' ');
+  const rest = cells.length - CELLS_SHOWN;
+  return `${cells.length} at z${zoom}: ${named}${rest > 0 ? ` and ${rest} more` : ''}`;
+}
 
 export function describeState(state: MapState): Line[] {
   const masterPerPixel = state.masterWidth / (state.tileSize * 2 ** state.tileZoom);
@@ -56,6 +77,7 @@ export function describeState(state: MapState): Line[] {
       label: 'centre',
       value: `${state.centre.lng.toFixed(3)}, ${state.centre.lat.toFixed(3)}`,
     },
+    { label: 'cells', value: describeCells(state.cells, state.tileZoom) },
     {
       label: 'painted',
       value:

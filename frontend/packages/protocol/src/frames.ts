@@ -10,7 +10,8 @@ import { z } from 'zod';
  */
 
 /** A quadkey at zoom 8: eight digits, each 0 to 3. */
-export const cellSchema = z.string().regex(/^[0-3]{8}$/);
+/** A cell at any zoom the grid has: the empty string is the whole world, ten digits the deepest tile. */
+export const cellSchema = z.string().regex(/^[0-3]{0,10}$/);
 
 export const pointSchema = z.object({
   lat: z.number().min(-90).max(90),
