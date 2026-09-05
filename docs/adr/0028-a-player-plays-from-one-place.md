@@ -73,6 +73,11 @@ freshly made token. That is what seeding a world means, it uses only the real pa
 "found as anyone" frame, and it is the shape the NPC houses in `SETTING.md` will take: an NPC house is a
 house, and the difference is only who issues its commands.
 
+**A stopped window has to look stopped.** The first cut said so only in the debug panel and by greying a
+button, and that was not enough: the map still panned, the scrubber still slid, the terrain was still
+there, so a finished window looked alive. It now dims and says it, with a way back - a reload, because
+whoever says hello last is the session, so the window that lost can simply take the player back.
+
 `Outbound` stays a one-method interface. The gateway says `takenOver` and the client closes its own socket;
 the gateway does not close sockets, because giving it that power would mean growing the interface every
 test fake implements. A client that ignores the frame is left holding something inert, which is the

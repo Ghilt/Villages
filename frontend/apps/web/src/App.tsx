@@ -9,6 +9,7 @@ import { note } from './debug/log';
 import { gateway, gatewayState, watchGateway } from './net/gateway';
 import { followMap } from './net/followMap';
 import { HudShell } from './hud/HudShell';
+import { StoodDown } from './hud/StoodDown';
 import { MapView } from './map/MapView';
 import { DebugMapPanel } from './map/DebugMapPanel';
 import { worldRootOf } from './map/masters';
@@ -59,6 +60,7 @@ export function App({ master }: AppProps) {
       <MapView worldRoot={worldRootOf(master)} onReady={setMap} />
       {map !== null && <SpriteOverlay map={map} sprites={sprites} />}
       <HudShell />
+      <StoodDown />
       <Timeline />
       <div className="rail">
         <DebugMapPanel master={master} renderer={renderer} onRenderer={setRenderer} />
