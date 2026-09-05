@@ -1,5 +1,7 @@
 # Vision
 
+What the experience is. What the world is and how its time works is `SETTING.md`.
+
 Villages is a persistent world in which each player is a fictional noble house on a map of the real Earth. You found a
 seat, raise a banner, and watch your house accumulate what it accumulates. There is no campaign to complete. The
 question the experience asks is not "did you win" but "what is your house, and what does it stand for".
