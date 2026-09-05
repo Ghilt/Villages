@@ -123,19 +123,53 @@ Proposals, flagged as such. None is decided; each will become a decision record 
 The first increment on this path is deliberately tiny: a world calendar, the two times on `HouseFounded`,
 and a scrubber that shows foundings across world-time. That proves the model before a single pin exists.
 
-## Open questions, to iron out
+## The first milestone
 
-- **How is a session's world-time chosen?** Rolled? Offered as a few eras? Tied to where the house is
-  strong or weak, so a low power state is what makes a past glory worth visiting?
-- **What can a player in the past see of the recorded future?** Everything, nothing, or only the pins?
-- **What does a pin look like when it cannot be discharged?** Two pins on one place that no lifetime
-  satisfies. Does the engine refuse the second roll, rewrite one, or let the chronicle carry a contradiction
-  as a mystery?
-- **Do NPC factions and famous characters have streams and pins of their own,** or are they scenery the
-  engine reads from a script?
-- **Which traits of the house-spirit are permanent, which fade, and on what clock** - player-time sessions,
-  or something else?
-- **What is the smallest set of influence zones**, and is territory a thing with a lifetime like a
-  cathedral?
-- **How many kinds of filter**, and does each have its own roll table or does the filter merely weight
-  one table?
+**A small seed of events that makes a starting world, looked at through two tools together: the map, and
+a timeline scrubber along the bottom.** The seed is tiny beside what the full world will be, and it has
+no pins. What it proves is the two clocks and the temporal read model: drag the scrubber and the map shows
+the world as it was; leave it at live and the world runs. Everything else in this document builds on that
+being true.
+
+## Answered, 2026-09-05
+
+Adam's answers to the questions the first draft left open. Recorded in his terms; the engineering that
+follows from each is marked.
+
+- **How is a session's world-time chosen?** Every real-time day a new world-day is chosen, and the leaning
+  is that it is **the same day for every player, server-wide** - a shared moment makes server-wide events
+  possible, a great conflict everyone can take part in. Perhaps both, later. Choosing it is the
+  chrono-engine's job. It should be visible to the player - an icon, and a hover that says *Fated date,
+  everyone is here*. *Engineering:* the world-time of a session is a server fact, not a client choice, and
+  it arrives in `welcome`.
+- **What can a player in the past see of the recorded future?** Everything. The whole timeline is their
+  legacy. *Engineering:* the scrubber runs the full range for everyone; there is no fog on the future.
+- **What does a pin look like when it cannot be discharged?** The aim is to **avoid them completely**. If
+  they truly cannot be avoided, a rare fallback tells the player it happened and rewards them - but it
+  should be very rare. *Engineering:* the engine never offers a roll whose pin would be unsatisfiable: it
+  checks a thing's lifetime constraints before the roll is shown, so a contradiction is refused at the
+  source rather than discovered later. Two players rolling against the same thing at once are ordered by
+  recording order, and the second is re-rolled before it is accepted. The fallback exists for whatever
+  slips past that, and its rarity is a thing to measure.
+- **Do NPC factions and famous characters have streams of their own?** Yes: a decision AI plays them, and
+  they work roughly as human players do - but as a more constant force, some of them more the shape of the
+  landscape than a figure in it. *Engineering:* an NPC house is a house; the difference is who issues its
+  commands.
+- **Which traits of the house-spirit are permanent?** Mostly a permanent progression. Things can fade by
+  decision, if a player wants to recraft their identity, and there may be short-lived bonuses in
+  player-time. Spirit items are the example: guide the house down an evil route and it earns a permanent
+  sacrificial knife - a spirit item, not a physical one - that can be applied to a decision to sacrifice a
+  key figure at great cost. Items can be spirit items or physical possessions in the world; spiritness is
+  an attribute of the item. *Engineering:* the spirit is a fold in player-time with explicit forgetting,
+  and items are one shape with a flag.
+- **Is territory a thing with a lifetime?** Yes, territory is pinned too. *Engineering:* an influence zone
+  is a thing with `[from, to)` like a cathedral, and the same constraint machinery covers it.
+- **How many kinds of filter?** Unknown, and it will grow. *Engineering:* the architecture must afford new
+  filters and dimensions being added without disturbing what exists - a filter is data the roll reads, not
+  a code path.
+
+## Still open
+
+- Whether the shared world-day and a personal one can coexist, and what the player sees when they differ.
+- What the rare fallback for an undischargeable pin actually gives, and how its rarity is measured.
+- The first set of filters, and the shape of a roll table that takes a filter as input.
