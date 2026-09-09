@@ -14,9 +14,16 @@ thousands of concurrent players in one shared world. The startup plan that produ
 - One commit per increment. Conventional Commits with these scopes: `domain`, `application`, `occurrent`, `rabbit`,
   `projections`, `gateway`, `protocol`, `web`, `client-core`, `docs`, `infra`, `build`. End every commit message with
   the `Co-Authored-By` trailer.
+- **His word is the whole of the approval, and it is given once.** When Adam says commit, commit: do not ask
+  again, do not restate the change set for a second confirmation, and do not wait for anything else. Saying it
+  twice is not a safeguard, it is a tax, and the safeguard is that nothing is committed until he has said it at
+  all. The same goes for a rebase or a push he has asked for in that turn.
 - No amends, force pushes, hard resets, or history rewrites without explicit approval.
-- `.claude/settings.json` makes the harness prompt on these commands regardless of permission mode. This file states
-  the rule in words so it survives tooling changes.
+- `.claude/settings.json` is where the harness half of this lives. It denies force pushes, hard resets and
+  `git clean` outright, and prompts on `git push`, `git rebase` and `git tag`, which are rare and hard to undo.
+  `git commit` belongs in its `allow` list rather than its `ask` list, so that Adam's word is the only gate on
+  it; that entry is still to be made by hand, because an agent may not edit its own permission rules. This file
+  states the rule in words so it survives tooling changes.
 
 ## Working agreement
 
@@ -35,7 +42,8 @@ This is a loop, and Adam holds both ends of it: he approves what lands, and he c
    commit: a decision record, the event catalogue, the glossary, the architecture.
 6. **Present it for review and stop.** A summary, the file list, the check output, the documents touched, and a
    proposed commit message. Do not commit.
-7. **Commit only on Adam's word,** then say what landed.
+7. **Commit on Adam's word, immediately,** then say what landed. One "commit" is the approval; asking for it
+   again is the failure, not the caution.
 8. **Offer the next steps and stop again.** Two to four concrete options, each a sentence or two on what it
    would produce and what it would cost, with a recommendation and the reason for it. Say plainly what is
    blocked and on what. Always leave room for a fifth answer that is none of them, because the point of the
