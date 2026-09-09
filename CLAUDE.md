@@ -28,12 +28,15 @@ This is a loop, and Adam holds both ends of it: he approves what lands, and he c
 3. **Verify it.** Run the checks, and for anything visible, look at it in a browser and say what you saw. Report
    what failed, including the things you had to fix on the way. Adam verifies through the debug panel, not
    through code, so whatever the step makes the program do must show there; see decision record 0023.
-4. **Documents travel with it.** A change to a decision, an event or a term updates its document in the same
+4. **Hand it over ready to look at, not ready to build.** Regenerate whatever the change made stale and leave
+   the program running, before asking for review. See below: this is not optional and it is never an option
+   on the menu.
+5. **Documents travel with it.** A change to a decision, an event or a term updates its document in the same
    commit: a decision record, the event catalogue, the glossary, the architecture.
-5. **Present it for review and stop.** A summary, the file list, the check output, the documents touched, and a
+6. **Present it for review and stop.** A summary, the file list, the check output, the documents touched, and a
    proposed commit message. Do not commit.
-6. **Commit only on Adam's word,** then say what landed.
-7. **Offer the next steps and stop again.** Two to four concrete options, each a sentence or two on what it
+7. **Commit only on Adam's word,** then say what landed.
+8. **Offer the next steps and stop again.** Two to four concrete options, each a sentence or two on what it
    would produce and what it would cost, with a recommendation and the reason for it. Say plainly what is
    blocked and on what. Always leave room for a fifth answer that is none of them, because the point of the
    options is to give Adam the wheel, not to make him pick from a menu.
@@ -41,6 +44,49 @@ This is a loop, and Adam holds both ends of it: he approves what lands, and he c
 Never choose the next increment alone, and never chain increments together to save a round trip. The roadmap is a
 menu, not a queue: its order is a suggestion, and Adam reorders it freely. When an option is not on the roadmap
 but is clearly better, offer it anyway and say why.
+
+## Adam paints the master. Everything else derived from it is the agent's to regenerate
+
+The division of labour is this: Adam edits `world/master/terrain.png`, and picks the numbers that are matters of
+taste. Everything that a tool can rebuild from those, an agent rebuilds, without being asked and without offering
+it as a choice. He should never be handed a change whose evidence he has to generate himself.
+
+So when a step changes the master, the palette, the render colours, the style file, or any code the paint or the
+tiles go through, that same step **also**:
+
+- **Re-cuts the tiles** if the master or the tiling changed: `npm run world:import --prefix frontend` then
+  `npm run world:tile --prefix frontend`. About five minutes. The Debug map panel offers this per master too.
+- **Re-paints every view in every style**: `npm run world:paint --prefix frontend`. About four minutes for all of
+  them, and it also writes the runtime `paint.json` the app reads. After only a style edit,
+  `-- --config-only` is a second and is all the app needs.
+- **Says what moved.** Not "re-painted" but which views changed and by how much, and a before-and-after of the
+  worst one. A number and a picture, because a look cannot be reviewed from a claim.
+- **Re-tunes, or says plainly why not.** If the change altered what a style number means, the numbers are now
+  wrong and saying so is not enough. Either propose new ones with the pictures to argue them, or state in one
+  sentence that the judgement is Adam's eye and what to look for. Never leave a stale still and a tuning job on
+  the menu as though it were an optional extra.
+
+Stale output is worse than missing output, because it looks like evidence. A still painted by the previous rules
+is not a preview of anything.
+
+## Leave the program running, and say where to look
+
+A step is not ready for review until Adam can see it. Reaching the end of the work is not the end of the step: the
+last thing an agent does before presenting is put the running program in the state that shows the change, and say
+in one line where to look and what should be there.
+
+- **Start the dev server** through the `web` entry in `.claude/launch.json`, not from a shell.
+- **Drive it to the place the change shows** — the right renderer, the right master, the right part of the world,
+  the right zoom — rather than leaving it on whatever it opened with, and say so: the address, and what is on the
+  screen at it.
+- **Copy the debug panel** into the presentation when the change is one the panel reports, because that is the
+  instrument Adam reads; see decision record 0023.
+- **The port is 5173 and `strictPort` pins it on purpose**, so only one tree can serve at a time. When another
+  worktree already holds it, do not stop that server: it belongs to somebody else's session. Say which worktree
+  holds it, and either verify against it when the code being compared is provably identical, or ask.
+
+Where a change genuinely cannot be seen in the running program — the offline renderer, a build rule, a document —
+say that plainly and say what stands in for it instead, whether that is a test, a still, or a number.
 
 ## Say what you are working on, while you are working on it
 
@@ -51,7 +97,8 @@ is visible before it happens rather than discovered in a merge. `.sessions/READM
 reasoning; the directory is gitignored on purpose.
 
 Definition of done for a step: it compiles, the checks are green, the documents that describe it are updated,
-glossary terms are used verbatim, no layer rule is violated, and whatever it makes the program do can be seen
+glossary terms are used verbatim, no layer rule is violated, everything the change made stale has been
+regenerated, the program is running on the thing that changed, and whatever it makes the program do can be seen
 in the debug panel.
 
 Read `docs/ROADMAP.md` under "Now" at the start of a session, and the last few commits, to see where things
