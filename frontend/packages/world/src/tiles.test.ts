@@ -5,6 +5,7 @@ import {
   TILE_SIZE,
   cutTile,
   masterRowsAt,
+  mercatorRowOf,
   sourceColumnFor,
   sourceRowFor,
   tileAddresses,
@@ -108,6 +109,55 @@ describe('the world space the paint is measured in', () => {
     // Off the square there is no world, so it clamps rather than reading somewhere else.
     expect(masterRowAt(-50)).toBe(top);
     expect(masterRowAt(width + 50)).toBe(bottom);
+  });
+});
+
+describe('finding a row of the master in the tiles', () => {
+  /** The real master, and the zoom it is cut to, because that is the case that has to be exact. */
+  const height = 16384;
+  const nativeZoom = 7;
+
+  it('reads back as the row it was asked for, at the zoom the tiles were cut to', () => {
+    // The tiles are the only copy of the master a browser has, so a row that cannot be found there
+    // cannot be counted at all.
+    for (const row of [451, 1000, 4000, 8000, 8192, 12000, 15900]) {
+      const found = mercatorRowOf(row, height, nativeZoom);
+
+      expect(found).not.toBeNull();
+      const tileY = Math.floor(found! / TILE_SIZE);
+      expect(sourceRowFor(tileY, found! - tileY * TILE_SIZE, nativeZoom, height)).toBe(row);
+    }
+  });
+
+  it('has no row at all past the edge Mercator can draw', () => {
+    expect(mercatorRowOf(0, height, nativeZoom)).toBeNull();
+    expect(mercatorRowOf(height - 1, height, nativeZoom)).toBeNull();
+  });
+
+  it('runs north to south, as the rows it is looking for do', () => {
+    expect(mercatorRowOf(1000, height, nativeZoom)!).toBeLessThan(mercatorRowOf(9000, height, nativeZoom)!);
+  });
+
+  it('gives the nearest row further out, where several rows of the master share one', () => {
+    const coarse = mercatorRowOf(4000, height, 2);
+
+    expect(coarse).not.toBeNull();
+    expect(coarse!).toBeGreaterThanOrEqual(0);
+    expect(coarse!).toBeLessThan(TILE_SIZE * 2 ** 2);
+  });
+
+  it('agrees with masterRowsAt, because the two are one conversion run in opposite directions', () => {
+    // The table goes from the world into the master and this goes back, and both are `rowDown`. That is
+    // the whole reason they cannot drift, and this is what would notice if one of them did.
+    const width = TILE_SIZE * 2 ** nativeZoom;
+    const table = masterRowsAt(width, height);
+
+    for (const row of [451, 1000, 4000, 8000, 8192, 12000, 15900]) {
+      const found = mercatorRowOf(row, height, nativeZoom);
+
+      expect(found).not.toBeNull();
+      expect(table[found!]).toBe(row);
+    }
   });
 });
 

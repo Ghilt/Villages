@@ -44,8 +44,29 @@ export type { LatticePoint, Ring as LatticeRing } from './trace.ts';
 
 export { doubleSignedArea, simplify, smooth } from './simplify.ts';
 
-export { TILE_SIZE, cutTile, sourceColumnFor, sourceRowFor, tileAddresses, tileCount } from './tiles.ts';
+export {
+  TILE_SIZE,
+  cutTile,
+  mercatorRowOf,
+  sourceColumnFor,
+  sourceRowFor,
+  tileAddresses,
+  tileCount,
+} from './tiles.ts';
 export type { TileAddress } from './tiles.ts';
+
+export {
+  closePath,
+  enclose,
+  enclosedBy,
+  fenceAround,
+  fenceSize,
+  fenceToPolygons,
+  fenceWindow,
+  insideFence,
+  withoutCollinear,
+} from './area.ts';
+export type { EnclosedPixels, Fence, FencePart, MasterGrid, PixelSpan, PixelWindow } from './area.ts';
 
 export { DEFAULT_MASTER, isSafeMasterName, masterNameOf, worldDirOf } from './masters.ts';
 

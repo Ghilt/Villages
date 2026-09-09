@@ -45,6 +45,21 @@ export function sourceRowFor(tileY: number, rowInTile: number, zoom: number, hei
 }
 
 /**
+ * How far down the Mercator world a row of the master sits. The inverse of `rowDown`, and the only one.
+ *
+ * Null past the edge Mercator can draw: those rows of the master are on no tile at all, so nothing that
+ * reads the master through the tiles can answer for them.
+ */
+function downOfRow(masterRow: number, height: number): number | null {
+  const latitude = 90 - ((masterRow + 0.5) / height) * 180;
+  if (latitude > MERCATOR_EDGE || latitude < -MERCATOR_EDGE) {
+    return null;
+  }
+  const radians = (latitude * Math.PI) / 180;
+  return (1 - Math.log(Math.tan(Math.PI / 4 + radians / 2)) / Math.PI) / 2;
+}
+
+/**
  * Where every row of the painterly treatment's world space falls in the master, worked out once.
  *
  * World space is the Mercator square, `worldSize` on a side, which is the master's width, so a world
@@ -66,6 +81,39 @@ export function masterRowsAt(worldSize: number, height: number): Int32Array {
     rows[worldY] = rowDown((worldY + 0.5) / worldSize, height);
   }
   return rows;
+}
+
+/**
+ * Which row of the tile grid carries a row of the master: the other way through `rowDown`.
+ *
+ * `masterRowsAt` goes from the world into the master, which is what anything reading the master needs.
+ * This goes the other way, which is what anything reading the master out of the tiles needs, because the
+ * tiles are the only copy of it a browser has. Both are `rowDown`, forwards and back, so neither can
+ * drift from the tiling. See decision 0032.
+ *
+ * At the zoom the tiles were cut to it is exact, because Mercator has at least as many rows to a degree
+ * as the master everywhere: equal at the equator, and more the further from it. Flooring can land either
+ * side of the answer where the two grids share a pitch, so the neighbours are tried before settling.
+ * Further out than that zoom several master rows share one tile row, and the nearest is the best that
+ * can be said.
+ */
+export function mercatorRowOf(masterRow: number, height: number, zoom: number): number | null {
+  const down = downOfRow(masterRow, height);
+  if (down === null) {
+    return null;
+  }
+  const rows = TILE_SIZE * 2 ** zoom;
+  const guess = Math.min(rows - 1, Math.max(0, Math.floor(down * rows)));
+
+  for (const row of [guess, guess - 1, guess + 1]) {
+    if (row < 0 || row >= rows) {
+      continue;
+    }
+    if (rowDown((row + 0.5) / rows, height) === masterRow) {
+      return row;
+    }
+  }
+  return guess;
 }
 
 /** Where a column of a tile falls in the image. Longitude is linear in both, so this is a scaling. */
