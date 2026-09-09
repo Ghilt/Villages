@@ -17,15 +17,23 @@ import type { Palette, Rgb } from './palette.ts';
  *
  * Two coordinate spaces, and keeping them apart is the whole trick.
  *
- * **World space** is master pixels, so a distance in it is a distance on the ground. The shape of the
- * land lives here, and only that: which class a point is, and how far a boundary strays from the grid it
- * was stored on. Zooming in magnifies it, as it should, because it is the terrain.
+ * **World space** is the Web Mercator square the map is drawn on, as many units on a side as the master
+ * is wide, so one unit is one pixel of a tile at the zoom the tiles were cut. The shape of the land lives
+ * here, and only that: which class a point is, and how far a boundary strays from the grid it was stored
+ * on. Zooming in magnifies it, as it should, because it is the terrain.
  *
- * **Brush space** is world position divided by how much ground one output pixel covers, so one unit is
- * one pixel on screen wherever you are. The medium lives here: the grain of the paper, the wash of colour
- * pooling and thinning, the stipple of a forest, the hatch on bare rock. A mark stays the size of a mark at every zoom, which is what makes it
- * read as a mark rather than as geography. It is anchored to the world rather than to the screen, so the
- * texture stays put on the land when the map is panned.
+ * What matters about it is that a unit is the same in both directions: a boundary wanders as far north as
+ * it does east, and the neighbour probe is a round cross rather than an oval. What a unit is worth on the
+ * ground is not fixed, and shrinks with latitude as `cos(latitude)` does, from about 1.2 km at the equator
+ * to 600 m at sixty degrees. That is Mercator and it is the trade rather than a defect: a projection can
+ * be square or it can be constant-scale, not both, and round on the screen the look is judged on is worth
+ * more than a fixed number of metres. Decision 0030 is where this was got wrong once, in this comment.
+ *
+ * **Brush space** is world position divided by how much of the world one output pixel covers, so one
+ * unit is one pixel on screen wherever you are. The medium lives here: the grain of the paper, the wash
+ * of colour pooling and thinning, the stipple of a forest, the hatch on bare rock. A mark stays the size
+ * of a mark at every zoom, which is what makes it read as a mark rather than as geography. It is anchored
+ * to the world rather than to the screen, so the texture stays put on the land when the map is panned.
  */
 
 /** A deterministic value in [0, 1) from two integers and a seed. WebGL2 has the integer maths for this. */
@@ -144,7 +152,7 @@ export interface PainterlyStyle {
   warm: string;
   cool: string;
   wash: { amount: number; mark: number };
-  /** How far a boundary strays from the grid it was stored on, in master pixels. */
+  /** How far a boundary strays from the grid it was stored on, in world-space units. */
   boundary: { wander: number; scale: number };
   /** Pigment gathering along an edge. `reach` is in output pixels, so the line keeps its width. */
   edge: { amount: number; reach: number };
@@ -218,17 +226,17 @@ const NEIGHBOURS: readonly (readonly [number, number])[] = [
 ];
 
 /**
- * The narrowest the wet edge may be, in master pixels.
+ * The narrowest the wet edge may be, in world-space units.
  *
- * The reach wants to be `edge.reach` output pixels, which is `edge.reach * masterPerPixel` in master
- * pixels, and that is right at every zoom but the closest ones. Past the depth the terrain was cut at,
+ * The reach wants to be `edge.reach` output pixels, which is `edge.reach * masterPerPixel` in world
+ * space, and that is right at every zoom but the closest ones. Past the depth the terrain was cut at,
  * one terrain sample covers several output pixels, so the wanted reach falls below a sample and the
  * neighbours all land in the same one: no boundary is ever found and the edge disappears. A third of a
  * sample is enough to cross into the next one often enough to draw a line.
  *
- * There was a ceiling here too, of three master pixels, put in to stop a whole-world view turning to
- * mud. It was a units error and it caused exactly the opposite. Below the cut depth a terrain sample IS
- * a master pixel times `masterPerPixel`, so at zoom three the wanted reach is 22 master pixels and the
+ * There was a ceiling here too, of three world-space units, put in to stop a whole-world view turning
+ * to mud. It was a units error and it caused exactly the opposite. Below the cut depth a terrain sample
+ * IS a world-space unit times `masterPerPixel`, so at zoom three the wanted reach is 22 units and the
  * ceiling cut it to three, which is a fifth of one sample: no shore, no lake edge, nothing. The step up
  * to zoom four then put them back, which is the jump that gave it away.
  */
@@ -242,8 +250,8 @@ const REACH_FLOOR = 0.35;
  * version of the class, the ground's own mark and the paper move the lightness, and a shore is drawn in
  * ink wherever water meets land.
  *
- * `masterPerPixel` is how much ground one output pixel covers, in master pixels. It is the only thing the
- * view tells the paint, and it exists so that a mark stays the size of a mark at every zoom.
+ * `masterPerPixel` is how much of the world one output pixel covers, in world-space units. It is the
+ * only thing the view tells the paint, and it exists so that a mark stays the size of a mark at every zoom.
  */
 export function paintPixel(
   prepared: PreparedPainterly,

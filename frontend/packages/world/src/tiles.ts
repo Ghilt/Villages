@@ -25,19 +25,47 @@ export interface TileAddress {
 }
 
 /**
- * Where a row of a Mercator tile falls in an unprojected image.
+ * Where a fraction of the way down the Mercator world falls in an unprojected image, from 0 at the top
+ * to 1 at the bottom.
  *
  * The master runs linearly in latitude and the map runs linearly in the Mercator projection of it, so
- * every row has to be converted rather than scaled. This is the only real work in tiling.
+ * every row has to be converted rather than scaled. This is the only real work in tiling, and it is the
+ * whole of it: both ways into the master go through here so that they cannot disagree.
  */
-export function sourceRowFor(tileY: number, rowInTile: number, zoom: number, height: number): number {
-  const tiles = 2 ** zoom;
-  // How far down the whole Mercator world this row is, from 0 at the top to 1 at the bottom.
-  const down = (tileY + (rowInTile + 0.5) / TILE_SIZE) / tiles;
+function rowDown(down: number, height: number): number {
   const latitude = (Math.atan(Math.sinh(Math.PI * (1 - 2 * down))) * 180) / Math.PI;
   const clamped = Math.min(MERCATOR_EDGE, Math.max(-MERCATOR_EDGE, latitude));
   const row = ((90 - clamped) / 180) * height;
   return Math.min(height - 1, Math.max(0, Math.floor(row)));
+}
+
+/** Where a row of a Mercator tile falls in an unprojected image. */
+export function sourceRowFor(tileY: number, rowInTile: number, zoom: number, height: number): number {
+  return rowDown((tileY + (rowInTile + 0.5) / TILE_SIZE) / 2 ** zoom, height);
+}
+
+/**
+ * Where every row of the painterly treatment's world space falls in the master, worked out once.
+ *
+ * World space is the Mercator square, `worldSize` on a side, which is the master's width, so a world
+ * column is a master column already and this is the only direction that has to be projected. The browser
+ * gets the conversion for free because it reads Mercator tiles; whatever reads the master instead needs
+ * it written down, and this is that. See decision 0030.
+ *
+ * A table rather than a function of one row, for two reasons. The paint takes nine terrain samples a
+ * pixel and a view can be four million pixels, so an `atan` of a `sinh` per sample would cost several
+ * times the paint itself. And a whole row is the honest granularity: the browser floors its lookup to a
+ * whole tile pixel, and at the zoom the tiles were cut a tile pixel is one world-space unit, so this is
+ * the same sampling the map does rather than an approximation of it. Each row is taken at its middle,
+ * for the same reason `sourceRowFor` takes one at its middle: a class should come from the centre of the
+ * pixel that holds it and not from its top edge.
+ */
+export function masterRowsAt(worldSize: number, height: number): Int32Array {
+  const rows = new Int32Array(worldSize);
+  for (let worldY = 0; worldY < worldSize; worldY += 1) {
+    rows[worldY] = rowDown((worldY + 0.5) / worldSize, height);
+  }
+  return rows;
 }
 
 /** Where a column of a tile falls in the image. Longitude is linear in both, so this is a scaling. */

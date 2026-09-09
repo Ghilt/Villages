@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest';
 
 import { createRaster } from './raster.ts';
-import { TILE_SIZE, cutTile, sourceColumnFor, sourceRowFor, tileAddresses, tileCount } from './tiles.ts';
+import {
+  TILE_SIZE,
+  cutTile,
+  masterRowsAt,
+  sourceColumnFor,
+  sourceRowFor,
+  tileAddresses,
+  tileCount,
+} from './tiles.ts';
 
 describe('finding the source of a tile row', () => {
   const height = 8192;
@@ -40,6 +48,66 @@ describe('finding the source of a tile row', () => {
       expect(byZoom[index]!).toBeLessThanOrEqual(byZoom[index - 1]!);
     }
     expect(byZoom.at(-1)!).toBeLessThan(byZoom[0]!);
+  });
+});
+
+describe('the world space the paint is measured in', () => {
+  // The real shape of it: the master is 32768 by 16384 and the tiles were cut at the zoom where a tile
+  // pixel is a master pixel, which is seven.
+  const width = 32768;
+  const height = 16384;
+  const cutZoom = 7;
+  const masterRowOf = masterRowsAt(width, height);
+
+  /**
+   * What the browser's painter passes as `worldY`, from `painterlyWorker.ts`: the tile's own row times
+   * `masterPerPixel`, which at the cut zoom is one. Spelled out rather than imported, because importing
+   * it from the app would only assert that a line equals itself.
+   */
+  const workerWorldY = (tileY: number, rowInTile: number, zoom: number): number =>
+    (tileY * TILE_SIZE + rowInTile + 0.5) * (width / (TILE_SIZE * 2 ** zoom));
+
+  /** How whatever paints from the master reads it: this table, indexed the way its sampler indexes it. */
+  const masterRowAt = (worldY: number): number =>
+    masterRowOf[Math.min(width - 1, Math.max(0, Math.floor(worldY)))]!;
+
+  it('is the same space the tiles were cut in, so the offline painter and the map agree', () => {
+    // This is the check that matters, and it is exhaustive because it can be: every row of the cut
+    // world, the browser's coordinate for it against the master row the tiler took its class from. The
+    // offline renderer used to pass an equirectangular row here, which is a different place by a factor
+    // of two at sixty degrees north, so the stills were not evidence about the map. See decision 0030.
+    // It covers the half a unit too: build the table at the top of each row rather than its middle and
+    // 7741 of these 32768 rows read the master row above the one the tiler read.
+    for (let tileY = 0; tileY < 2 ** cutZoom; tileY += 1) {
+      for (let rowInTile = 0; rowInTile < TILE_SIZE; rowInTile += 1) {
+        const worldY = workerWorldY(tileY, rowInTile, cutZoom);
+
+        expect(masterRowAt(worldY)).toBe(sourceRowFor(tileY, rowInTile, cutZoom, height));
+      }
+    }
+  });
+
+  it('is square, so a world unit is the same distance north as it is east', () => {
+    // Half way down the square is the equator, and a quarter of the way down is the latitude Mercator
+    // puts a quarter of the way down. An equirectangular row would have put the equator a quarter of the
+    // way down instead, and made the space an oblong twice as tall on the ground as it is wide.
+    expect(masterRowAt(width / 2)).toBe(height / 2);
+    expect(masterRowAt(width / 4)).toBeLessThan(height / 4);
+  });
+
+  it('stops where Mercator stops, so the rows above that are never painted', () => {
+    // Mercator reaches 85 degrees and the master runs to the pole, so the top of the square is already
+    // some way down the master and the rows above it are simply never asked for.
+    const top = masterRowAt(0);
+    const bottom = masterRowAt(width - 1);
+
+    expect(top).toBeGreaterThan(0);
+    expect(top).toBeLessThan(height / 32);
+    // The square is symmetric about the equator, so what it leaves off the bottom it leaves off the top.
+    expect(bottom).toBe(height - 1 - top);
+    // Off the square there is no world, so it clamps rather than reading somewhere else.
+    expect(masterRowAt(-50)).toBe(top);
+    expect(masterRowAt(width + 50)).toBe(bottom);
   });
 });
 

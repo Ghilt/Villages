@@ -12,6 +12,7 @@ import type { ClassRaster } from '../src/raster.ts';
 import { encodeRgbPng } from '../src/png.ts';
 import type { RgbImage } from '../src/png.ts';
 import { paintPixel, preparePainterly } from '../src/painterly.ts';
+import { masterRowsAt } from '../src/tiles.ts';
 import type { ClassSampler, PainterlyStyle, PreparedPainterly } from '../src/painterly.ts';
 
 import { MASTER_DIR, OUTPUT_DIR, PAINTERLY, PAINTERLY_DIR, PALETTE, RENDER } from './paths.ts';
@@ -142,16 +143,16 @@ function readMaster(): ClassRaster {
 
 const RADIANS = Math.PI / 180;
 
-/** Web Mercator's vertical coordinate. The map is linear in this and the master is linear in latitude. */
+/** Web Mercator's vertical coordinate, running to plus or minus pi. World space is a scaling of it. */
 function mercatorY(latitude: number): number {
   return Math.log(Math.tan(Math.PI / 4 + (latitude * RADIANS) / 2));
 }
 
-function latitudeAt(y: number): number {
-  return (2 * Math.atan(Math.exp(y)) - Math.PI / 2) / RADIANS;
-}
-
-/** How much ground one pixel of a view covers, in master pixels, which is all the paint knows of a view. */
+/**
+ * How much of the world one pixel of a view covers, in world-space units, which is all the paint knows
+ * of a view. Both are linear in longitude, so across is a scaling; down needs no separate answer because
+ * world space is square.
+ */
 function groundPerPixel(view: View, world: ClassRaster, width: number): number {
   return (world.width * ((view.lng[1] - view.lng[0]) / 360)) / width;
 }
@@ -159,8 +160,9 @@ function groundPerPixel(view: View, world: ClassRaster, width: number): number {
 /**
  * One view, in one style, or flat when no style is given.
  *
- * The view is Web Mercator so that it is directly comparable with a screenshot of the running map, which
- * means every row has its latitude converted rather than scaled.
+ * The view is Web Mercator so that it is directly comparable with a screenshot of the running map, and
+ * world space is Mercator too, so a row of the view is a row of world space and nothing here converts a
+ * latitude. The projection happens once, on the way into the master, in `classAt`. See decision 0030.
  */
 function renderView(
   view: View,
@@ -180,8 +182,8 @@ function renderView(
   let at = 0;
 
   for (let row = 0; row < height; row += 1) {
-    const latitude = latitudeAt(top - ((top - bottom) * (row + 0.5)) / height);
-    const worldY = ((90 - latitude) / 180) * world.height;
+    const mercator = top - ((top - bottom) * (row + 0.5)) / height;
+    const worldY = (0.5 - mercator / (2 * Math.PI)) * world.width;
     for (let column = 0; column < width; column += 1) {
       const longitude = west + ((east - west) * (column + 0.5)) / width;
       const worldX = ((longitude + 180) / 360) * world.width;
@@ -201,14 +203,17 @@ function renderView(
 
 const world = readMaster();
 
+/** World space is Mercator and the master is not, so every row of it is projected once, up front. */
+const masterRowOf = masterRowsAt(world.width, world.height);
+
 /**
  * Nearest, always: the average of two terrains is a third terrain. Longitude wraps, because the world
  * does; latitude clamps, because it does not.
  */
 const classAt: ClassSampler = (x, y) => {
   const column = ((Math.floor(x) % world.width) + world.width) % world.width;
-  const row = Math.min(world.height - 1, Math.max(0, Math.floor(y)));
-  return world.cells[row * world.width + column]!;
+  const down = Math.min(world.width - 1, Math.max(0, Math.floor(y)));
+  return world.cells[masterRowOf[down]! * world.width + column]!;
 };
 
 await mkdir(outputDir, { recursive: true });

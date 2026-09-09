@@ -1,6 +1,6 @@
 # 0021. The painterly look is procedural, and settled offline before it is drawn live
 
-- Status: accepted
+- Status: accepted, the delivery of it superseded by 0022 and its world space corrected by 0030
 - Date: 2026-09-04
 
 ## Context
