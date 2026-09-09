@@ -4,6 +4,7 @@ import type * as maplibregl from 'maplibre-gl';
 import { housesInView } from '@villages/client-core';
 import type { HouseView } from '@villages/protocol';
 
+import { AreaOverlay } from './areas/AreaOverlay';
 import { DebugPanel } from './debug/DebugPanel';
 import { WorktreeTabs } from './debug/WorktreeTabs';
 import { note } from './debug/log';
@@ -56,17 +57,20 @@ export function App({ master }: AppProps) {
     }
   }, [map, renderer]);
 
+  const worldRoot = worldRootOf(master);
+
   return (
     <main className="app">
-      <MapView worldRoot={worldRootOf(master)} onReady={setMap} />
+      <MapView worldRoot={worldRoot} onReady={setMap} />
       {import.meta.env.DEV && <WorktreeTabs />}
       {map !== null && <SpriteOverlay map={map} sprites={sprites} />}
+      <AreaOverlay map={map} worldRoot={worldRoot} />
       <HudShell />
       <StoodDown />
       <Timeline />
       <div className="rail">
         <DebugMapPanel master={master} renderer={renderer} onRenderer={setRenderer} />
-        <DebugPanel map={map} renderer={renderer} />
+        <DebugPanel map={map} renderer={renderer} worldRoot={worldRoot} />
       </div>
     </main>
   );

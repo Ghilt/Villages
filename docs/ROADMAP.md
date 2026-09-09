@@ -61,6 +61,8 @@ program says what it is doing. It grows with every increment that adds behaviour
 - [x] Domain events as they reach the browser: one line each in words, opening to the whole CloudEvent
 - [x] Commands sent and their acceptance or rejection, in the log beside the events they caused
 - [ ] The connection: hello, subscriptions, resyncs, reconnects
+- [x] Areas: draw one on the map, see what terrain it encloses, delete it. A spike on the component
+  an influence zone, a holding and a neighbour's reach all want. See experiment 0002 and decision 0032
 
 ## Next: Phase 1, the walking skeleton
 

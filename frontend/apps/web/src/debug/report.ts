@@ -27,6 +27,12 @@ export interface MapState {
   cells: string[];
   /** What the gateway has handed over for those cells: houses drawn, cells held, and houses left out. */
   houses: { drawn: number; held: number; omitted: number };
+  /** The areas drawn on the map, and what the selected one holds. `kinds` is null until it is counted. */
+  areas: {
+    drawn: number;
+    armed: boolean;
+    selected: { id: string; pixels: number; kinds: number | null } | null;
+  };
   /** Where the world's clock stands and which day is being looked at, or null before welcome. */
   world: { today: number; earliest: number; viewingAt: number | null } | null;
   /** Who this window is playing as, whether it still is, and which house is theirs. */
@@ -98,6 +104,21 @@ function describeCells(cells: string[], zoom: number): string {
   return `${cells.length} at z${zoom}: ${named}${rest > 0 ? ` and ${rest} more` : ''}`;
 }
 
+function describeAreas(areas: MapState['areas']): string {
+  const drawn = areas.drawn === 0 ? 'none drawn' : `${areas.drawn} drawn`;
+  return areas.armed ? `${drawn}, drawing` : drawn;
+}
+
+/** What the selected area holds, in the unit it is counted in: master pixels, the ones a hand paints. */
+function describeArea(selected: MapState['areas']['selected']): string {
+  if (selected === null) {
+    return 'none selected';
+  }
+  const counted =
+    selected.kinds === null ? 'not counted yet' : `${selected.kinds} kind${selected.kinds === 1 ? '' : 's'}`;
+  return `${selected.id}: ${selected.pixels.toLocaleString()} master px, ${counted}`;
+}
+
 export function describeState(state: MapState): Line[] {
   const masterPerPixel = state.masterWidth / (state.tileSize * 2 ** state.tileZoom);
   const stretch = 2 ** Math.max(0, state.tileZoom - state.flatMaxZoom);
@@ -125,6 +146,8 @@ export function describeState(state: MapState): Line[] {
     },
     { label: 'cells', value: describeCells(state.cells, state.tileZoom) },
     { label: 'houses', value: describeHouses(state.houses) },
+    { label: 'areas', value: describeAreas(state.areas) },
+    { label: 'area', value: describeArea(state.areas.selected) },
     { label: 'world', value: describeWorld(state.world) },
     { label: 'player', value: describePlayer(state.player) },
     { label: 'house', value: state.player.house ?? 'none yet' },

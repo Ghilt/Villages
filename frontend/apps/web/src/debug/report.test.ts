@@ -17,6 +17,7 @@ const state: MapState = {
   worstFrameGap: 17.4,
   cells: ['3000000', '3000001', '3000002', '3000003'],
   houses: { drawn: 12, held: 4, omitted: 0 },
+  areas: { drawn: 0, armed: false, selected: null },
   world: { today: 454901, earliest: 437635, viewingAt: null },
   player: { id: '3c8f9e1a-0000-4000-8000-000000000001', connection: 'open', house: null },
 };
@@ -34,6 +35,38 @@ describe('saying where the terrain is coming from', () => {
     // This is the number that explains why a deep zoom looks the way it does, and it is not the zoom.
     expect(valueOf({ ...state, zoom: 8, tileZoom: 8 }, 'terrain')).toBe('z7 as cut, stretched 2x');
     expect(valueOf({ ...state, zoom: 10, tileZoom: 10 }, 'terrain')).toBe('z7 as cut, stretched 8x');
+  });
+});
+
+describe('saying what areas are drawn', () => {
+  it('says none rather than nothing at all, so the row never reads as broken', () => {
+    expect(valueOf(state, 'areas')).toBe('none drawn');
+    expect(valueOf(state, 'area')).toBe('none selected');
+  });
+
+  it('says when the next drag paints instead of moving the camera, because that is surprising', () => {
+    const armed = { ...state, areas: { ...state.areas, armed: true } };
+
+    expect(valueOf(armed, 'areas')).toBe('none drawn, drawing');
+  });
+
+  it('counts the selected area in master pixels, which is the unit a hand paints in', () => {
+    const one = {
+      ...state,
+      areas: { drawn: 2, armed: false, selected: { id: 'a-1', pixels: 5603, kinds: 7 } },
+    };
+
+    expect(valueOf(one, 'areas')).toBe('2 drawn');
+    expect(valueOf(one, 'area')).toBe('a-1: 5,603 master px, 7 kinds');
+  });
+
+  it('says an area is not counted yet rather than showing a nought that would read as empty ground', () => {
+    const counting = {
+      ...state,
+      areas: { drawn: 1, armed: false, selected: { id: 'a-1', pixels: 5603, kinds: null } },
+    };
+
+    expect(valueOf(counting, 'area')).toBe('a-1: 5,603 master px, not counted yet');
   });
 });
 

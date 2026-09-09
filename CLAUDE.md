@@ -220,6 +220,12 @@ Commands are added here as the increments land:
   real command and is how to make an event happen on purpose. Anything worth saying
   goes through `note(area, message)` in `apps/web/src/debug/log.ts`. `window.villagesPainterly()` gives
   the paint counters from a console.
+- Areas, in the same panel: `draw an area` arms the next drag on the map, and dragging paints one. The
+  ends join themselves and escape stops. Click an area to select it, which makes its line pulse and lists
+  how many master pixels of each terrain it encloses; `shade`, `recount` and `delete` are beside it. The
+  boundary runs between painted pixels rather than through them, so at z10 on the `raw` renderer it lines
+  up with the squares the terrain is drawn as. Areas live only in the browser and a reload forgets them.
+  See `docs/adr/0032` and experiment `0002`.
 - The styles live in `world/painterly.json`. `npm run world:paint --prefix frontend` paints every view in
   every style into `world/painterly/`, flat once and then once per style, and writes the runtime copy the
   app reads. `-- --view alps`, `-- --style woodblock` for one of them; `-- --config-only` writes just the

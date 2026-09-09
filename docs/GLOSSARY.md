@@ -7,7 +7,7 @@ in the source.
 | Term | Meaning |
 |---|---|
 | **Aggregate** | A consistency boundary with its own event stream. `House` is the only one so far. |
-| **Area** | A closed region of the world: a fence, drawn as a line with an optional shade inside, which knows the terrain census of what it encloses. The shape an influence zone is drawn as, and the component anything else fenced reuses. See decision record 0032. `Fence`, and `enclose` then `fenceAround` make one from a drawn path |
+| **Area** | A closed region of the world: a fence, drawn as a line with an optional shade inside, which knows the terrain census of what it encloses. The shape an influence zone is drawn as, and the component anything else fenced reuses. See decision record 0032. `Area`, `Fence`, and `enclose` then `fenceAround` make one from a drawn path |
 | **Banner** | A house's heraldic device: a field of one or two tinctures, a division, and a charge. The visible identity of a house, shown in the interface and as its sprite on the map. `Banner` |
 | **Cell** | A square of the world used to partition live updates and map queries: a quadkey at any zoom from 0 to 10, so a cell's ancestor is its prefix. Derived from a place wherever it is needed, never carried on an event. See decision record 0026. `Cell` |
 | **Charge** | The figure borne on a banner, such as a tower, a stag or a star. `Charge` |
@@ -36,7 +36,7 @@ in the source.
 | **Significance** | How much a thing matters to the world, from nothing to a hundred, carried on the event that made it and deciding how far out on the map it stays drawn. A hundred is drawn from the whole world. `Significance`, and `coarsestZoom` turns it into a zoom |
 | **Snapshot** | The current contents of a cell, sent when a client subscribes to it, before any deltas. |
 | **Stream** | The ordered events of one aggregate instance, addressed as `house:<uuid>`. |
-| **Terrain census** | How many master pixels of each terrain class an area encloses. Derived from the fence whenever it is asked for rather than stored, so a repainted world or a moved edge means a fresh answer. `enclosedBy` gives the pixels; reading their terrain arrives with the interface. |
+| **Terrain census** | How many master pixels of each terrain class an area encloses. Derived from the fence whenever it is asked for rather than stored, so a repainted world or a moved edge means a fresh answer. `Census`, and `censusOf` takes one by reading the pixels out of the tiles. |
 | **Tincture** | A heraldic colour. Metals are or and argent; colours are gules, azure, sable, vert and purpure. A charge of a metal goes on a field of a colour, and the reverse. `Tincture` |
 | **Treasury** | The stored wealth of a house, expressed as a rate. The first resource in the world. `Treasury` |
 | **Warp** | The pure transformation that turns a place on Earth into a place in our world: control points that drag their surroundings, a seeded wobble, and optionally a turn of the globe. Applied once, at build time, and configured by `world/warp.json`. |

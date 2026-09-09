@@ -1,8 +1,10 @@
 import { paintPixel, preparePainterly } from '@villages/world';
-import type { ClassSampler, Palette, PainterlyStyle, PreparedPainterly } from '@villages/world';
+import type { ClassSampler, PreparedPainterly } from '@villages/world';
 
 import { FLAT_MAX_ZOOM, TILE } from './painterlyMessages';
 import type { PaintReply, PaintRequest } from './painterlyMessages';
+import { classesOfTile, paintFile, terrainOf } from './terrainClasses';
+import type { TerrainPalette } from './terrainClasses';
 
 /**
  * Painting one map tile, off the main thread.
@@ -11,9 +13,9 @@ import type { PaintReply, PaintRequest } from './painterlyMessages';
  * On the main thread that is a stutter every time the map moves, however fast the arithmetic gets; in a
  * worker it is throughput, and several workers is more throughput. Nothing here touches the document.
  *
- * The terrain comes from the flat colour tiles that are already served: indexed PNGs of thirty-two
- * colours we chose, carrying no colour profile, so a canvas hands their bytes back unchanged and the
- * colour is the class. See docs/adr/0022.
+ * The terrain comes from the flat colour tiles that are already served, read back through
+ * `terrainClasses.ts`, which is the one place that knows a tile colour is a terrain class. An area asks
+ * the same question of the same tiles, and the two must not answer it differently. See docs/adr/0022.
  */
 
 /** The neighbourhood is three tiles square, so the paint can look past the edge of what it draws. */
@@ -21,126 +23,20 @@ const SPAN = TILE * 3;
 
 interface Ready {
   styles: Map<string, PreparedPainterly>;
-  byColour: Map<number, number>;
-  nearest: readonly { red: number; green: number; blue: number; id: number }[];
-  masterWidth: number;
+  terrain: TerrainPalette;
 }
 
 let ready: Promise<Ready> | null = null;
-let guessedColours = 0;
 
 async function load(): Promise<Ready> {
-  const response = await fetch('/world/paint.json');
-  if (!response.ok) {
-    throw new Error(`no /world/paint.json (${response.status}); run npm run world:paint --prefix frontend`);
-  }
-  const paint = (await response.json()) as {
-    palette: Palette;
-    colours: Record<string, string>;
-    styles: Record<string, PainterlyStyle>;
-  };
+  const paint = await paintFile();
 
   const styles = new Map<string, PreparedPainterly>();
   for (const [name, style] of Object.entries(paint.styles)) {
     styles.set(name, preparePainterly(style, paint.palette, paint.colours));
   }
 
-  const byColour = new Map<number, number>();
-  const nearest: { red: number; green: number; blue: number; id: number }[] = [];
-  for (const terrain of paint.palette.classes) {
-    const hex = paint.colours[terrain.name];
-    if (hex === undefined) {
-      continue;
-    }
-    const packed = Number.parseInt(hex.slice(1), 16);
-    byColour.set(packed, terrain.id);
-    nearest.push({
-      red: (packed >> 16) & 0xff,
-      green: (packed >> 8) & 0xff,
-      blue: packed & 0xff,
-      id: terrain.id,
-    });
-  }
-
-  return { styles, byColour, nearest, masterWidth: paint.palette.master.width };
-}
-
-/** Decoded flat tiles, as classes. A tile and its neighbours are wanted again the moment the map moves. */
-const decoded = new Map<string, Uint8Array | null>();
-const DECODED_CAP = 400;
-
-async function classesOf(
-  tiles: string,
-  zoom: number,
-  x: number,
-  y: number,
-  at: Ready,
-): Promise<Uint8Array | null> {
-  const across = 2 ** zoom;
-  if (y < 0 || y >= across) {
-    return null;
-  }
-  const wrapped = ((x % across) + across) % across;
-  const key = `${tiles}/${zoom}/${wrapped}/${y}`;
-  const held = decoded.get(key);
-  if (held !== undefined) {
-    return held;
-  }
-
-  let classes: Uint8Array | null = null;
-  try {
-    const response = await fetch(`${tiles}/tiles/${zoom}/${wrapped}/${y}.png`);
-    if (response.ok) {
-      const bitmap = await createImageBitmap(await response.blob());
-      const canvas = new OffscreenCanvas(TILE, TILE);
-      const context = canvas.getContext('2d', { willReadFrequently: true });
-      if (context === null) {
-        throw new Error('no 2d context to read a tile with');
-      }
-      context.drawImage(bitmap, 0, 0);
-      bitmap.close();
-      const { data } = context.getImageData(0, 0, TILE, TILE);
-
-      classes = new Uint8Array(TILE * TILE);
-      for (let index = 0; index < classes.length; index += 1) {
-        const packed = (data[index * 4]! << 16) | (data[index * 4 + 1]! << 8) | data[index * 4 + 2]!;
-        const known = at.byColour.get(packed);
-        if (known !== undefined) {
-          classes[index] = known;
-          continue;
-        }
-        let best = 0;
-        let closest = Infinity;
-        for (const candidate of at.nearest) {
-          const dr = ((packed >> 16) & 0xff) - candidate.red;
-          const dg = ((packed >> 8) & 0xff) - candidate.green;
-          const db = (packed & 0xff) - candidate.blue;
-          const distance = dr * dr + dg * dg + db * db;
-          if (distance < closest) {
-            closest = distance;
-            best = candidate.id;
-          }
-        }
-        at.byColour.set(packed, best);
-        classes[index] = best;
-        guessedColours += 1;
-        if (guessedColours === 1) {
-          console.warn('a tile colour was not one of ours, so the class was guessed');
-        }
-      }
-    }
-  } catch {
-    classes = null;
-  }
-
-  if (decoded.size >= DECODED_CAP) {
-    const oldest = decoded.keys().next();
-    if (oldest.done !== true) {
-      decoded.delete(oldest.value);
-    }
-  }
-  decoded.set(key, classes);
-  return classes;
+  return { styles, terrain: terrainOf(paint) };
 }
 
 /**
@@ -162,7 +58,7 @@ async function neighbourhood(
   await Promise.all(
     [-1, 0, 1].flatMap((dy) =>
       [-1, 0, 1].map(async (dx) => {
-        const classes = await classesOf(tiles, sourceZoom, centreX + dx, centreY + dy, at);
+        const classes = await classesOfTile(tiles, sourceZoom, centreX + dx, centreY + dy, at.terrain);
         if (classes === null) {
           return;
         }
@@ -195,8 +91,8 @@ function paintTile(
   y: number,
   at: Ready,
 ): ImageData {
-  const masterPerPixel = at.masterWidth / (TILE * 2 ** zoom);
-  const sourcePerPixel = at.masterWidth / (TILE * 2 ** sourceZoom);
+  const masterPerPixel = at.terrain.masterWidth / (TILE * 2 ** zoom);
+  const sourcePerPixel = at.terrain.masterWidth / (TILE * 2 ** sourceZoom);
   const baseX = (centreX - 1) * TILE;
   const baseY = (centreY - 1) * TILE;
 

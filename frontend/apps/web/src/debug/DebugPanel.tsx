@@ -7,11 +7,13 @@ import { cellsForView, describeDay } from '@villages/protocol';
 import { FLAT_MAX_ZOOM, TILE } from '../map/painterlyMessages';
 import { forgetPaintedTally, paintedTally } from '../map/painterlyTiles';
 import { WORLD_MASTER_WIDTH } from '../map/worldStyle';
+import { AreasView } from '../areas/AreasView';
+import { areasNow } from '../areas/areas';
 import { atToClock, note, notesNow, watchNotes } from './log';
 import { gatewayState } from '../net/gateway';
 import { EventsView } from './EventsView';
 import { describeState } from './report';
-import type { Line } from './report';
+import type { Line, MapState } from './report';
 
 /** The player's own house, as one line, or nothing when they have none. */
 function describeYourHouse(): string | null {
@@ -28,9 +30,25 @@ function worldNow(): { today: number; earliest: number; viewingAt: number | null
   return heard.world === null ? null : { ...heard.world, viewingAt: heard.viewingAt };
 }
 
+/** The areas drawn, and what the selected one holds. Read when the panel looks, like everything else. */
+function areasHere(): MapState['areas'] {
+  const state = areasNow();
+  const selected = state.areas.find((area) => area.id === state.selected) ?? null;
+  return {
+    drawn: state.areas.length,
+    armed: state.armed,
+    selected:
+      selected === null
+        ? null
+        : { id: selected.id, pixels: selected.pixels, kinds: selected.census?.byClass.size ?? null },
+  };
+}
+
 interface DebugPanelProps {
   map: maplibregl.Map | null;
   renderer: string;
+  /** Where this page's tiles live, which is what an area is counted against. */
+  worldRoot: string;
 }
 
 const OPEN_KEY = 'villages.debug.open';
@@ -42,7 +60,7 @@ const OPEN_KEY = 'villages.debug.open';
  * renderer, and where the terrain is coming from, and none of those are guessable from a screenshot.
  * The copy button puts the state and the log on the clipboard so it can be pasted into a conversation.
  */
-export function DebugPanel({ map, renderer }: DebugPanelProps) {
+export function DebugPanel({ map, renderer, worldRoot }: DebugPanelProps) {
   const notes = useSyncExternalStore(watchNotes, notesNow);
   const [open, setOpen] = useState(() => {
     try {
@@ -149,6 +167,7 @@ export function DebugPanel({ map, renderer }: DebugPanelProps) {
             held: cellsHeld(gatewayState().houses).length,
             omitted: omittedInView(gatewayState().houses),
           },
+          areas: areasHere(),
           world: worldNow(),
           player: {
             id: gatewayState().playerId,
@@ -231,6 +250,8 @@ export function DebugPanel({ map, renderer }: DebugPanelProps) {
           </div>
         ))}
       </dl>
+
+      <AreasView map={map} worldRoot={worldRoot} />
 
       <EventsView map={map} />
 
