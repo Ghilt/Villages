@@ -26,6 +26,10 @@ test-results/
 # Raw material for the world generator: downloaded, not ours, and large
 world/source/
 
+# Which ports and paths this checkout's servers use. Generated per worktree, because every field in it
+# is per-checkout: `node frontend/apps/web/vite/worktreePort.ts --launch` writes it. See decision 0031.
+.claude/launch.json
+
 # Views the painterly renderer paints. Output, reproducible, and tens of megabytes of it.
 world/painterly/
 

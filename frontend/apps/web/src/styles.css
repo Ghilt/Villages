@@ -266,6 +266,65 @@ body,
   pointer-events: auto;
 }
 
+/* Which worktree is on the screen. Top centre, between the title on the left and the rail on the
+   right, and small enough that it reads as a label rather than as part of the game. */
+.trees {
+  position: absolute;
+  top: 0.55rem;
+  /* Between the title and the rail rather than centred on the window, because centring put it under
+     both. One row that scrolls, never two: a second row pushes the strip over the map. */
+  left: 11rem;
+  right: 15.5rem;
+  z-index: 4;
+  display: flex;
+  /* `safe` matters: plain centring overflows equally at both ends, and the overflow at the start is
+     unreachable because scroll cannot go negative, so the tab you are on was cut off the left edge. */
+  justify-content: safe center;
+  gap: 0.2rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  pointer-events: auto;
+}
+
+.trees__tab {
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  padding: 0.28rem 0.5rem;
+  border-radius: 2px 2px 0 0;
+  border: 1px solid var(--parchment-edge);
+  border-bottom: none;
+  background: rgba(239, 230, 211, 0.72);
+  color: var(--ink-soft);
+  text-decoration: none;
+  white-space: nowrap;
+  /* The names are a slug and a hex suffix and run long. The whole of it is in the tooltip. */
+  max-width: 9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 0 0 auto;
+}
+
+a.trees__tab:hover {
+  background: var(--parchment);
+  color: var(--ink);
+}
+
+/* The one you are looking at: opaque, darker, and sitting a little proud of the others. */
+.trees__tab--here {
+  background: var(--parchment);
+  color: var(--ink);
+  border-color: var(--gold);
+  box-shadow: 0 1px 0 var(--gold);
+  font-weight: 600;
+}
+
+/* On disk, nothing serving it. Shown so the tree is known to exist, not offered as a link. */
+.trees__tab--down {
+  opacity: 0.45;
+  font-style: italic;
+}
+
 /* Which world is on the screen, and what draws it. Not part of a player's interface. */
 .debug-map {
   display: flex;

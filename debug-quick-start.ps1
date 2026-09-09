@@ -33,7 +33,18 @@ $WebLog = Join-Path $LogDir 'web.log'
 $WebErrors = Join-Path $LogDir 'web-errors.log'
 $StartedFile = Join-Path $LogDir 'started.json'
 
+<#
+    Which port this tree serves on. The main checkout is 5173 as it always was; a worktree gets its own,
+    worked out from its directory name, so several sessions can serve at once. Asked of the same file
+    Vite asks, because a launcher that guessed the port would send you to somebody else's world. See
+    decision record 0031.
+#>
+$PortScript = Join-Path $Root 'frontendpps\webite\worktreePort.ts'
 $WebPort = 5173
+if (Test-Path $PortScript) {
+    $answer = & node $PortScript '--launch' 2>$null
+    if ($LASTEXITCODE -eq 0 -and $answer -match '^\d+$') { $WebPort = [int] $answer }
+}
 $GamePort = 8080
 $Address = "http://localhost:$WebPort"
 

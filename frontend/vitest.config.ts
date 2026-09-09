@@ -32,7 +32,9 @@ export default defineConfig({
           name: 'web',
           root: 'apps/web',
           environment: 'node',
-          include: ['src/**/*.test.{ts,tsx}'],
+          // `vite/` too: the dev server's own code decides which port a worktree answers on, and that
+          // is a rule two things depend on rather than a detail of a config.
+          include: ['src/**/*.test.{ts,tsx}', 'vite/**/*.test.ts'],
         },
       },
     ],

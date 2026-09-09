@@ -5,6 +5,7 @@ import { housesInView } from '@villages/client-core';
 import type { HouseView } from '@villages/protocol';
 
 import { DebugPanel } from './debug/DebugPanel';
+import { WorktreeTabs } from './debug/WorktreeTabs';
 import { note } from './debug/log';
 import { gateway, gatewayState, watchGateway } from './net/gateway';
 import { followMap } from './net/followMap';
@@ -58,6 +59,7 @@ export function App({ master }: AppProps) {
   return (
     <main className="app">
       <MapView worldRoot={worldRootOf(master)} onReady={setMap} />
+      {import.meta.env.DEV && <WorktreeTabs />}
       {map !== null && <SpriteOverlay map={map} sprites={sprites} />}
       <HudShell />
       <StoodDown />

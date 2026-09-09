@@ -81,12 +81,39 @@ in one line where to look and what should be there.
   screen at it.
 - **Copy the debug panel** into the presentation when the change is one the panel reports, because that is the
   instrument Adam reads; see decision record 0023.
-- **The port is 5173 and `strictPort` pins it on purpose**, so only one tree can serve at a time. When another
-  worktree already holds it, do not stop that server: it belongs to somebody else's session. Say which worktree
-  holds it, and either verify against it when the code being compared is provably identical, or ask.
+- **Start it in this tree, not somebody else's.** Every worktree serves on its own port now, so there is
+  no excuse for reviewing a change in a tree that does not contain it. If a port is taken anyway, do not
+  stop the server holding it: it belongs to another session. Say so.
 
 Where a change genuinely cannot be seen in the running program — the offline renderer, a build rule, a document —
 say that plainly and say what stands in for it instead, whether that is a test, a still, or a number.
+
+## Every session works in its own git worktree
+
+An agent does not work in `E:\Code\Villages` itself. Each session gets a worktree under
+`.claude/worktrees/<name>/`, which is a full checkout of the tree on its own branch, so several sessions
+edit the same files at once without seeing each other's half-finished work. Adam's own checkout, the one
+he paints the master in, stays the main one.
+
+What follows from that, and bites in practice:
+
+- **Run everything from the worktree root**, never from the main checkout, and never `cd` out of it.
+- **`world/master/*.png` is per-worktree.** A master Adam saves in the main checkout is not in the
+  worktree until the worktree is refreshed from it. Say which one was read when it matters.
+- **`world/painterly/`, the cut tiles under `frontend/apps/web/public/world/`, and `.logs/` are output
+  and per-worktree.** They are gitignored, they do not travel with a branch, and a worktree that has
+  never cut them cannot serve a map. Junctioning the main checkout's tiles into the worktree is the cheap
+  way to get a map up without a five-minute recut.
+- **Each tree serves on its own port**, a hash of its directory name, so several can run at once and a
+  tree's address never moves. The main checkout keeps 5173.
+  `node frontend/apps/web/vite/worktreePort.ts` prints this tree's; `--launch` also writes
+  `.claude/launch.json`, which is generated rather than committed because every field in it is
+  per-checkout. `debug-quick-start.ps1` does both and prints the address. The tab strip across the top of
+  the page says which trees exist, which are serving, and which one you are looking at. See decision 0031.
+- **The stash stack is shared with every other worktree.** Never bare `git stash`; a WIP commit on the
+  session's own branch is safer, because a pop can take another session's work.
+- **`.sessions/` is the main repository's, not the worktree's** - it sits beside the shared `.git`, which
+  is what makes it the one place every session can see. See decision record 0020.
 
 ## Say what you are working on, while you are working on it
 
@@ -197,7 +224,8 @@ Commands are added here as the increments land:
   every style into `world/painterly/`, flat once and then once per style, and writes the runtime copy the
   app reads. `-- --view alps`, `-- --style woodblock` for one of them; `-- --config-only` writes just the
   runtime copy, in a second, which is all the app needs after a style edit.
-- Frontend, look at it: `npm run dev --prefix frontend`, then open http://localhost:5173
+- Frontend, look at it: `npm run dev --prefix frontend`, then open the address it prints. That is
+  http://localhost:5173 in the main checkout and a port of its own in each worktree; see decision 0031.
 - Frontend, checks: `npm run check --prefix frontend` (typecheck, lint, format, unit tests)
 - Backend, running: `cd backend` then `./gradlew :app:bootRun`, or the `backend` entry in `.claude/launch.json`. The
   gateway is a WebSocket at `ws://localhost:8080/ws`; the web app connects to it on load, or to
