@@ -41,6 +41,12 @@ checkout's game server. Nobody had noticed because nobody had run it from a work
   `node frontend/apps/web/vite/worktreePort.ts --launch`, which `debug-quick-start.ps1` runs. Every field
   in it is per-checkout, so it cannot be one file in git - the same reasoning that keeps `.sessions/` out
   of git in 0020.
+- **The gateway lets a page in from any localhost port.** `WebSocketConfig` allowed exactly one origin,
+  `http://localhost:5173`, so a page served from a worktree was refused with 403 while the server was
+  plainly up, and the debug panel said `closed`. It now allows the pattern `http://localhost:[*]`: any port
+  on this machine and nothing further, because `*` would let any site a browser here visits open a socket to
+  a local game server. `GatewayOriginTest` holds the rule from both sides, a worktree's port let in and a
+  foreign origin refused.
 - **The dev server says which trees exist and which are up**, at `/dev-api/worktrees`, and the app draws
   a strip of tabs across the top: the one you are on marked, the ones serving as links, the rest dim.
   Development only, and absent entirely when there is one tree.

@@ -12,12 +12,17 @@ import villages.gateway.Gateway
 import villages.protocol.ProtocolJson
 import java.util.concurrent.ConcurrentHashMap
 
-/** The gateway on a WebSocket at /ws. The browser's dev server is the one origin allowed, for now. */
+/**
+ * The gateway on a WebSocket at /ws. A page served from this machine may connect from whichever port it is
+ * on: the main checkout's dev server is on 5173 and every worktree's is on a port of its own, see decision
+ * 0031. Any port, but only localhost: `*` would let any site a browser here visits open a socket to the game
+ * server. GatewayOriginTest holds both halves.
+ */
 @Configuration
 @EnableWebSocket
 class WebSocketConfig(private val gateway: Gateway) : WebSocketConfigurer {
     override fun registerWebSocketHandlers(registry: WebSocketHandlerRegistry) {
-        registry.addHandler(GatewaySocket(gateway), "/ws").setAllowedOrigins("http://localhost:5173")
+        registry.addHandler(GatewaySocket(gateway), "/ws").setAllowedOriginPatterns("http://localhost:[*]")
     }
 }
 

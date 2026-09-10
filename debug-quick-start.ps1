@@ -318,7 +318,7 @@ Write-Host ''
 Write-Host "      $Address" -ForegroundColor White -BackgroundColor DarkBlue
 Write-Host ''
 
-Say '  The map is served on 5173. The picker at the top right switches renderer; the debug panel'
+Say "  The map is served on $WebPort. The picker at the top right switches renderer; the debug panel"
 Say '  under it says what the program thinks is happening, and minimises to a chip.'
 if ($GameUp) {
     Say ''
