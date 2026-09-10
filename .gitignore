@@ -1,5 +1,7 @@
 # Gradle
 .gradle/
+# The Kotlin Gradle plugin keeps its compiler daemon session files here, in every project that has one.
+.kotlin/
 **/build/
 !gradle/wrapper/gradle-wrapper.jar
 
