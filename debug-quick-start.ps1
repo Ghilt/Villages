@@ -39,7 +39,7 @@ $StartedFile = Join-Path $LogDir 'started.json'
     Vite asks, because a launcher that guessed the port would send you to somebody else's world. See
     decision record 0031.
 #>
-$PortScript = Join-Path $Root 'frontendpps\webite\worktreePort.ts'
+$PortScript = Join-Path $Root 'frontend\apps\web\vite\worktreePort.ts'
 $WebPort = 5173
 if (Test-Path $PortScript) {
     $answer = & node $PortScript '--launch' 2>$null
