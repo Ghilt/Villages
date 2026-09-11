@@ -22,7 +22,8 @@ export const WORLD_MAX_ZOOM = 10;
 /** How wide the master is, which is what sets how much ground a tile pixel covers at each zoom. */
 export const WORLD_MASTER_WIDTH = 32768;
 
-const SEA = '#93aebc';
+/** What the sea is drawn in, and so what the sheet is under the tiles. The desk's sheet reuses it. */
+export const SEA = '#93aebc';
 const INK = '#5f5544';
 
 /** Required: three of the four sources are CC-BY. See world/master/experiment/README.md. */

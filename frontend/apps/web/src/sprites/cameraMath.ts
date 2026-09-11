@@ -41,12 +41,31 @@ export function worldSize(zoom: number): number {
   return TILE_SIZE * 2 ** zoom;
 }
 
-export function toMercator({ lng, lat }: LngLat): MercatorPoint {
-  const clamped = Math.min(MAX_MERCATOR_LATITUDE, Math.max(-MAX_MERCATOR_LATITUDE, lat));
-  const latitudeInRadians = (clamped * Math.PI) / 180;
+/**
+ * Web Mercator with nothing clamped, so it runs on past the edges of the world. That is what the camera's
+ * centre needs once it may lie off the sheet; a place on the world is projected with `toMercator`.
+ */
+export function toMercatorExact({ lng, lat }: LngLat): MercatorPoint {
+  const latitudeInRadians = (lat * Math.PI) / 180;
   return {
     x: (lng + 180) / 360,
     y: 0.5 - Math.log(Math.tan(Math.PI / 4 + latitudeInRadians / 2)) / (2 * Math.PI),
+  };
+}
+
+export function toMercator({ lng, lat }: LngLat): MercatorPoint {
+  const clamped = Math.min(MAX_MERCATOR_LATITUDE, Math.max(-MAX_MERCATOR_LATITUDE, lat));
+  return toMercatorExact({ lng, lat: clamped });
+}
+
+/**
+ * The place a point on the Mercator plane stands for. The latitude saturates at the poles for any finite
+ * y rather than running away, so what comes back is always a latitude MapLibre accepts.
+ */
+export function fromMercator({ x, y }: MercatorPoint): LngLat {
+  return {
+    lng: x * 360 - 180,
+    lat: (360 / Math.PI) * Math.atan(Math.exp((0.5 - y) * 2 * Math.PI)) - 90,
   };
 }
 
@@ -57,7 +76,9 @@ export function toMercator({ lng, lat }: LngLat): MercatorPoint {
 export function toScreen(place: LngLat, view: CameraView): ScreenPoint {
   const size = worldSize(view.zoom);
   const place2d = toMercator(place);
-  const centre = toMercator(view.center);
+  // The centre may lie off the world once the sheet can be smaller than the window; clamping it would
+  // snap the sheet back. See docs/adr/0033.
+  const centre = toMercatorExact(view.center);
   return {
     x: (place2d.x - centre.x) * size + view.width / 2,
     y: (place2d.y - centre.y) * size + view.height / 2,

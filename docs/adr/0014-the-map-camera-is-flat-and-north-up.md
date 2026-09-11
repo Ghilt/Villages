@@ -1,6 +1,6 @@
 # 0014. The map camera is flat, north-up and single-world
 
-- Status: accepted
+- Status: accepted, its edge rule below the fit zoom extended by 0033
 - Date: 2026-09-01
 
 ## Context

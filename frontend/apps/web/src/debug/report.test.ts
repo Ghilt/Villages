@@ -13,6 +13,10 @@ const state: MapState = {
   centre: { lng: 0, lat: 0 },
   canvas: { width: 1280, height: 800 },
   pixelRatio: 1,
+  viewport: { width: 1280, height: 800 },
+  // At zoom 7 the world is 65536 pixels across, so it covers any window; the floor and the fit are the
+  // 1280 by 800 window's own, half of 800 being 400 and the fit being where 512 * 2^z reaches 1280.
+  sheet: { size: 65536, covers: true, floor: -0.36, fit: 1.32, atFloor: 0.5 },
   painted: { ready: 0, waited: 0, aheadPainted: 0, held: 0 },
   worstFrameGap: 17.4,
   cells: ['3000000', '3000001', '3000002', '3000003'],
@@ -35,6 +39,27 @@ describe('saying where the terrain is coming from', () => {
     // This is the number that explains why a deep zoom looks the way it does, and it is not the zoom.
     expect(valueOf({ ...state, zoom: 8, tileZoom: 8 }, 'terrain')).toBe('z7 as cut, stretched 2x');
     expect(valueOf({ ...state, zoom: 10, tileZoom: 10 }, 'terrain')).toBe('z7 as cut, stretched 8x');
+  });
+});
+
+describe('saying where the sheet lies', () => {
+  it('says the sheet covers the view while the world is bigger than the window', () => {
+    expect(valueOf(state, 'sheet')).toBe('covers the view');
+  });
+
+  it('gives the sheet as a share of the shorter side once it is on the desk, naming the side', () => {
+    const onTheDesk = { ...state, zoom: 0, tileZoom: 0, sheet: { ...state.sheet, size: 512, covers: false } };
+
+    expect(valueOf(onTheDesk, 'sheet')).toBe("512 px, 64% of the view's height, on the desk");
+    expect(valueOf({ ...onTheDesk, viewport: { width: 500, height: 900 } }, 'sheet')).toBe(
+      "512 px, 102% of the view's width, on the desk",
+    );
+  });
+
+  it('says where the floor is and from where the sheet covers the view, since both move with the window', () => {
+    expect(valueOf(state, 'floor')).toBe(
+      'z-0.36 (the sheet at 50% of the shorter side), covers the view from z1.32',
+    );
   });
 });
 
@@ -136,6 +161,10 @@ describe('saying which cells the view covers', () => {
 
   it('says so plainly when the view covers nothing', () => {
     expect(valueOf({ ...state, cells: [] }, 'cells')).toBe('none');
+  });
+
+  it('names the one cell at zoom 0, whose quadkey is the empty string, rather than trailing off', () => {
+    expect(valueOf({ ...state, tileZoom: 0, cells: [''] }, 'cells')).toBe('1 at z0: the whole world');
   });
 });
 

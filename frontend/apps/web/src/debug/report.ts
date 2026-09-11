@@ -21,6 +21,14 @@ export interface MapState {
   centre: { lng: number; lat: number };
   canvas: { width: number; height: number };
   pixelRatio: number;
+  /** The window in CSS pixels, which is what the sheet is measured against; `canvas` is device pixels. */
+  viewport: { width: number; height: number };
+  /**
+   * The sheet: the world's square as one object, its side in CSS pixels, whether it covers the window,
+   * and the two zooms that bound the desk: the floor it shrinks to, and the fit it covers the window from.
+   * `atFloor` is the fraction of the window's shorter side it is at the floor. See decision record 0033.
+   */
+  sheet: { size: number; covers: boolean; floor: number; fit: number; atFloor: number };
   painted: { ready: number; waited: number; aheadPainted: number; held: number };
   worstFrameGap: number;
   /** The cells covering the view, at the camera's own zoom. What the map will subscribe to. */
@@ -99,7 +107,12 @@ function describeCells(cells: string[], zoom: number): string {
   if (cells.length === 0) {
     return 'none';
   }
-  const named = [...cells].sort().slice(0, CELLS_SHOWN).join(' ');
+  // The one cell at zoom 0 is named by the empty string, which would leave the line looking cut off.
+  const named = [...cells]
+    .sort()
+    .slice(0, CELLS_SHOWN)
+    .map((cell) => (cell === '' ? 'the whole world' : cell))
+    .join(' ');
   const rest = cells.length - CELLS_SHOWN;
   return `${cells.length} at z${zoom}: ${named}${rest > 0 ? ` and ${rest} more` : ''}`;
 }
@@ -117,6 +130,27 @@ function describeArea(selected: MapState['areas']['selected']): string {
   const counted =
     selected.kinds === null ? 'not counted yet' : `${selected.kinds} kind${selected.kinds === 1 ? '' : 's'}`;
   return `${selected.id}: ${selected.pixels.toLocaleString()} master px, ${counted}`;
+}
+
+/**
+ * Where the sheet lies: covering the window, or a size on the desk as a share of the window's shorter
+ * side, since that is the side the floor is measured by. See decision record 0033.
+ */
+function describeSheet(sheet: MapState['sheet'], viewport: MapState['viewport']): string {
+  if (sheet.covers) {
+    return 'covers the view';
+  }
+  const shorter = Math.min(viewport.width, viewport.height);
+  const along = viewport.height <= viewport.width ? 'height' : 'width';
+  return `${Math.round(sheet.size)} px, ${Math.round((100 * sheet.size) / shorter)}% of the view's ${along}, on the desk`;
+}
+
+/** The two zooms that bound the desk, so a floor that moves with the window can be read rather than guessed. */
+function describeFloor(sheet: MapState['sheet']): string {
+  return (
+    `z${sheet.floor.toFixed(2)} (the sheet at ${Math.round(100 * sheet.atFloor)}% of the shorter side), ` +
+    `covers the view from z${sheet.fit.toFixed(2)}`
+  );
 }
 
 export function describeState(state: MapState): Line[] {
@@ -140,6 +174,8 @@ export function describeState(state: MapState): Line[] {
         metres >= 1000 ? `${(metres / 1000).toFixed(1)} km` : `${Math.round(metres)} m`
       }`,
     },
+    { label: 'sheet', value: describeSheet(state.sheet, state.viewport) },
+    { label: 'floor', value: describeFloor(state.sheet) },
     {
       label: 'centre',
       value: `${state.centre.lng.toFixed(3)}, ${state.centre.lat.toFixed(3)}`,

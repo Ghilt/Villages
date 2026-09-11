@@ -47,6 +47,8 @@ A side mission that grew, because the map is the main screen and it has to be ou
 - [x] The painterly treatment, settled offline in still images: what the world actually looks like
 - [ ] The same treatment in the live map, as a WebGL layer, so it is drawn at any zoom
 - [ ] Place names carried through from Earth, mutated
+- [x] The map lies on a desk: pull the camera back past the world and it shrinks to a sheet on a surface,
+  from the same camera, with no handoff. See experiment 0003 and decision 0033
 
 Decided along the way: the world is authored in an image editor rather than in a tool of our own, because
 terrain that travels with a copied coastline is free in a raster and expensive in anything else. See
@@ -114,6 +116,8 @@ Phase 3 and beyond, experiments. Each needs a hypothesis file before any code:
 - House leanings: what identity is made of, and how the world reflects it.
 - A second resource, and the first decision worth making about it.
 - Holdings on the map beyond the seat.
+- The workbench: the desk the map lies on becomes a place, with the house's papers on it and the map a
+  quarter of it, hovered and scrolled into. The same camera; see experiment 0003.
 - Neighbours: awareness of nearby houses, and the first thing two houses can do to each other.
 - Accounts behind the identity port.
 - The world-persistence milestone, after which the event store is never wiped and event changes need upcasters.

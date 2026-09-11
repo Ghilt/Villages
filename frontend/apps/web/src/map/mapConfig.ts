@@ -12,14 +12,21 @@ export const EARTH_STYLE_URL = 'https://tiles.openfreemap.org/styles/positron';
 
 /**
  * The camera is flat, north-up and shows the world once, which keeps the sprite overlay a two-multiply
- * projection against the map centre. See docs/adr/0014.
+ * projection against the map centre. See docs/adr/0014. Pulled back far enough, the world is a sheet
+ * lying on a desk; the rule for that is in map/sheet.ts. See docs/adr/0033.
  */
 export const CAMERA = {
   /** The northern reach of our world, which is a warped northern Europe. */
   center: { lng: 10.5, lat: 55.5 },
   initialZoom: 4,
-  minZoom: 2,
+  /**
+   * MapLibre's own hard floor, below which it refuses a minimum zoom. The floor that is felt is
+   * `floorZoom` in map/sheet.ts, which depends on the size of the window.
+   */
+  minZoom: -2,
   maxZoom: WORLD_MAX_ZOOM,
+  /** At the floor the sheet is this much of the window's shorter side: half, so the desk shows around it. */
+  sheetAtFloor: 0.5,
 } as const;
 
 /**

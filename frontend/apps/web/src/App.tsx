@@ -6,6 +6,7 @@ import type { HouseView } from '@villages/protocol';
 
 import { AreaOverlay } from './areas/AreaOverlay';
 import { DebugPanel } from './debug/DebugPanel';
+import { Desk } from './desk/Desk';
 import { WorktreeTabs } from './debug/WorktreeTabs';
 import { note } from './debug/log';
 import { gateway, gatewayState, watchGateway } from './net/gateway';
@@ -61,6 +62,7 @@ export function App({ master }: AppProps) {
 
   return (
     <main className="app">
+      <Desk map={map} />
       <MapView worldRoot={worldRoot} onReady={setMap} />
       {import.meta.env.DEV && <WorktreeTabs />}
       {map !== null && <SpriteOverlay map={map} sprites={sprites} />}

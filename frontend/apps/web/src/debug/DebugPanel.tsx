@@ -4,8 +4,10 @@ import type * as maplibregl from 'maplibre-gl';
 import { cellsHeld, housesInView, omittedInView } from '@villages/client-core';
 import { cellsForView, describeDay } from '@villages/protocol';
 
+import { CAMERA } from '../map/mapConfig';
 import { FLAT_MAX_ZOOM, TILE } from '../map/painterlyMessages';
 import { forgetPaintedTally, paintedTally } from '../map/painterlyTiles';
+import { fitZoom, floorZoom, sheetCoversView, sheetOnScreen } from '../map/sheet';
 import { WORLD_MASTER_WIDTH } from '../map/worldStyle';
 import { AreasView } from '../areas/AreasView';
 import { areasNow } from '../areas/areas';
@@ -74,6 +76,7 @@ export function DebugPanel({ map, renderer, worldRoot }: DebugPanelProps) {
   /** Recent frame gaps, so the worst one shown is the worst one lately and not the worst one ever. */
   const gaps = useRef<{ at: number; gap: number }[]>([]);
   const tileZoomWas = useRef<number | undefined>(undefined);
+  const coveredWas = useRef<boolean | undefined>(undefined);
 
   useEffect(() => {
     try {
@@ -125,7 +128,27 @@ export function DebugPanel({ map, renderer, worldRoot }: DebugPanelProps) {
     const look = () => {
       const centre = map.getCenter();
       const bounds = map.getBounds();
-      const tileZoom = Math.min(Math.round(map.getZoom()), map.getMaxZoom());
+      // Below zoom 0 MapLibre still asks for the z0 tile, so the panel says z0 rather than a zoom that no
+      // tile has. See decision 0033.
+      const tileZoom = Math.max(0, Math.min(Math.round(map.getZoom()), map.getMaxZoom()));
+
+      const container = map.getContainer();
+      const viewport = { width: container.clientWidth, height: container.clientHeight };
+      const sheet = sheetOnScreen({
+        center: { lng: centre.lng, lat: centre.lat },
+        zoom: map.getZoom(),
+        ...viewport,
+      });
+      const covered = sheetCoversView(sheet, viewport);
+      if (coveredWas.current !== undefined && coveredWas.current !== covered) {
+        note(
+          'camera',
+          covered
+            ? 'the sheet covers the view again'
+            : `the sheet no longer covers the view: ${Math.round(sheet.size)} px on ${viewport.width} by ${viewport.height}`,
+        );
+      }
+      coveredWas.current = covered;
 
       // Every change of tile zoom is logged, not just the ones that change the stretch. A step between
       // two zooms is the sort of thing that is felt and hard to name, and below the depth the terrain
@@ -152,6 +175,14 @@ export function DebugPanel({ map, renderer, worldRoot }: DebugPanelProps) {
           centre: { lng: centre.lng, lat: centre.lat },
           canvas: { width: map.getCanvas().width, height: map.getCanvas().height },
           pixelRatio: window.devicePixelRatio,
+          viewport,
+          sheet: {
+            size: sheet.size,
+            covers: covered,
+            floor: floorZoom(viewport),
+            fit: fitZoom(viewport),
+            atFloor: CAMERA.sheetAtFloor,
+          },
           painted: paintedTally(),
           worstFrameGap: gaps.current.reduce((worst, entry) => Math.max(worst, entry.gap), 0),
           cells: cellsForView({

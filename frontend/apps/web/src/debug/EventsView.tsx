@@ -3,6 +3,7 @@ import type * as maplibregl from 'maplibre-gl';
 
 import type { BannerSpec, EventFrame } from '@villages/protocol';
 
+import { clampBoundsToWorld } from '../map/sheet';
 import { gateway, gatewayState, watchGateway } from '../net/gateway';
 import { seedHouses } from '../net/seed';
 import { atToClock, note } from './log';
@@ -76,14 +77,21 @@ export function EventsView({ map }: EventsViewProps) {
    */
   const seedHere = () => {
     if (map === null) return;
-    const bounds = map.getBounds();
+    // Pulled back far enough the view runs past the world, and a seat off the world is refused.
+    const seen = map.getBounds();
+    const bounds = clampBoundsToWorld({
+      north: seen.getNorth(),
+      south: seen.getSouth(),
+      east: seen.getEast(),
+      west: seen.getWest(),
+    });
     note('seed', `founding ${SEED} houses across the view, as ${SEED} other players`);
     void seedHouses(
       Array.from({ length: SEED }, () => ({
         name: aName(),
         seat: {
-          lat: bounds.getSouth() + Math.random() * (bounds.getNorth() - bounds.getSouth()),
-          lon: bounds.getWest() + Math.random() * (bounds.getEast() - bounds.getWest()),
+          lat: bounds.south + Math.random() * (bounds.north - bounds.south),
+          lon: bounds.west + Math.random() * (bounds.east - bounds.west),
         },
         banner: randomBanner(),
       })),

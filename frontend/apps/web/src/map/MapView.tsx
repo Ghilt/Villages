@@ -1,9 +1,14 @@
 import { useEffect, useRef } from 'react';
 import * as maplibregl from 'maplibre-gl';
 
+import { fromMercator, toMercatorExact } from '../sprites/cameraMath';
+
 import { CAMERA, resolveStyle } from './mapConfig';
+import { constrainCamera, floorZoom } from './sheet';
 
 import 'maplibre-gl/dist/maplibre-gl.css';
+
+type Constrain = NonNullable<maplibregl.MapOptions['transformConstrain']>;
 
 interface MapViewProps {
   /** Where the world this page is drawing was cut to, as the root of a URL. See map/masters.ts. */
@@ -25,6 +30,17 @@ export function MapView({ worldRoot, onReady }: MapViewProps) {
       return;
     }
 
+    const viewport = () => ({ width: container.clientWidth, height: container.clientHeight });
+
+    // MapLibre asks this from inside its constructor, before `map` exists, so it may reach for the
+    // container and nothing else. It replaces MapLibre's rule that the world must fill the window with
+    // ours, under which the world may shrink to a sheet on the desk. See docs/adr/0033.
+    const keepOnTheSheet: Constrain = (lngLat, zoom) => {
+      const kept = constrainCamera({ centre: toMercatorExact(lngLat), zoom }, viewport(), CAMERA.maxZoom);
+      const centre = fromMercator(kept.centre);
+      return { center: new maplibregl.LngLat(centre.lng, centre.lat), zoom: kept.zoom };
+    };
+
     const map = new maplibregl.Map({
       container,
       style: resolveStyle(import.meta.env, worldRoot),
@@ -32,6 +48,7 @@ export function MapView({ worldRoot, onReady }: MapViewProps) {
       zoom: CAMERA.initialZoom,
       minZoom: CAMERA.minZoom,
       maxZoom: CAMERA.maxZoom,
+      transformConstrain: keepOnTheSheet,
       maxPitch: 0,
       dragRotate: false,
       pitchWithRotate: false,
@@ -43,6 +60,17 @@ export function MapView({ worldRoot, onReady }: MapViewProps) {
     // world is closed off here rather than left to the constructor alone. See docs/adr/0014.
     map.touchZoomRotate.disableRotation();
     map.keyboard.disableRotation();
+
+    // The wheel asks the rule above directly; the zoom-out button reads the minimum zoom to know when to
+    // grey out, so it is told where the floor is, which moves with the window.
+    const settleFloor = () => {
+      const floor = floorZoom(viewport());
+      if (map.getMinZoom() !== floor) {
+        map.setMinZoom(floor);
+      }
+    };
+    settleFloor();
+    map.on('resize', settleFloor);
 
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
 

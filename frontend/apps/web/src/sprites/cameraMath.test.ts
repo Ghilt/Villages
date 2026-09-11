@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
-import { MAX_MERCATOR_LATITUDE, isWithinView, toMercator, toScreen, worldSize } from './cameraMath';
+import {
+  MAX_MERCATOR_LATITUDE,
+  fromMercator,
+  isWithinView,
+  toMercator,
+  toMercatorExact,
+  toScreen,
+  worldSize,
+} from './cameraMath';
 import type { CameraView } from './cameraMath';
 
 const view: CameraView = { center: { lng: 0, lat: 0 }, zoom: 4, width: 1000, height: 600 };
@@ -23,6 +31,43 @@ describe('the Mercator projection', () => {
     const atLimit = toMercator({ lng: 0, lat: MAX_MERCATOR_LATITUDE });
     expect(toMercator({ lng: 0, lat: 90 }).y).toBeCloseTo(atLimit.y, 10);
     expect(Number.isFinite(toMercator({ lng: 0, lat: -90 }).y)).toBe(true);
+  });
+});
+
+describe('the exact projection and its inverse', () => {
+  it('agrees with the clamped one anywhere on the world', () => {
+    expect(toMercatorExact({ lng: 12, lat: 56 })).toEqual(toMercator({ lng: 12, lat: 56 }));
+  });
+
+  it('runs on past the edges of the world rather than stopping at them', () => {
+    expect(toMercatorExact({ lng: 0, lat: 89 }).y).toBeLessThan(0);
+    expect(toMercatorExact({ lng: 200, lat: 0 }).x).toBeGreaterThan(1);
+  });
+
+  it('comes back to where it started', () => {
+    for (const place of [
+      { lng: 10.5, lat: 55.5 },
+      { lng: -179, lat: -80 },
+      { lng: 0, lat: 89.99 },
+    ]) {
+      const back = fromMercator(toMercatorExact(place));
+      expect(back.lng).toBeCloseTo(place.lng, 9);
+      expect(back.lat).toBeCloseTo(place.lat, 9);
+    }
+  });
+
+  it('saturates at the poles, so any point on the plane is a latitude MapLibre accepts', () => {
+    expect(fromMercator({ x: 0.5, y: -1 }).lat).toBeGreaterThan(85);
+    expect(fromMercator({ x: 0.5, y: -1 }).lat).toBeLessThan(90);
+    expect(fromMercator({ x: 0.5, y: -50 }).lat).toBe(90);
+    expect(fromMercator({ x: 0.5, y: 50 }).lat).toBe(-90);
+  });
+
+  it('places the world by an exact centre, so a camera far north of it puts the top edge below the window', () => {
+    // Clamping the centre to the edge of the world would put the top edge at the middle of the window.
+    const farNorth: CameraView = { center: { lng: 0, lat: 89.99 }, zoom: 0, width: 1000, height: 1000 };
+
+    expect(toScreen({ lng: 0, lat: MAX_MERCATOR_LATITUDE }, farNorth).y).toBeGreaterThan(farNorth.height);
   });
 });
 

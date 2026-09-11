@@ -111,7 +111,8 @@ What follows from that, and bites in practice:
 - **`world/painterly/`, the cut tiles under `frontend/apps/web/public/world/`, and `.logs/` are output
   and per-worktree.** They are gitignored, they do not travel with a branch, and a worktree that has
   never cut them cannot serve a map. Junctioning the main checkout's tiles into the worktree is the cheap
-  way to get a map up without a five-minute recut.
+  way to get a map up without a five-minute recut. So is `frontend/node_modules`: a fresh tree needs
+  `npm install --prefix frontend` once before anything in it runs.
 - **Each tree serves on its own port**, a hash of its directory name, so several can run at once and a
   tree's address never moves. The main checkout keeps 5173.
   `node frontend/apps/web/vite/worktreePort.ts` prints this tree's; `--launch` also writes
@@ -221,9 +222,10 @@ Commands are added here as the increments land:
   `docs/adr/0021` and `0022`.
 - What the program thinks is happening: the debug panel, under the Debug map panel, minimises to a chip
   and remembers which. It shows the renderer, the zoom against the zoom of tiles being asked for, how far
-  the terrain is being stretched past the depth it was cut at, how much ground a pixel covers, and how
-  many painted tiles were ready before the map asked, and every event the world stores as it arrives, one
-  line each, opening to the whole thing. Its copy button puts the state and the log on the clipboard, which is
+  the terrain is being stretched past the depth it was cut at, how much ground a pixel covers, whether the
+  sheet covers the view or how much of it lies on the desk and where the floor the camera may pull back to
+  is, how many painted tiles were ready before the map asked, and every event the world stores as it
+  arrives, one line each, opening to the whole thing. Its copy button puts the state and the log on the clipboard, which is
   the shortest way to tell a session what the program is doing. The `found a house here` button in it sends a
   real command and is how to make an event happen on purpose. Anything worth saying
   goes through `note(area, message)` in `apps/web/src/debug/log.ts`. `window.villagesPainterly()` gives

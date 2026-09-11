@@ -74,6 +74,11 @@ describe('the camera', () => {
     expect(CAMERA.maxZoom).toBeLessThanOrEqual(10);
   });
 
+  it('leaves the sheet a real size at the floor, and no bigger than the window', () => {
+    expect(CAMERA.sheetAtFloor).toBeGreaterThan(0);
+    expect(CAMERA.sheetAtFloor).toBeLessThanOrEqual(1);
+  });
+
   it('starts somewhere on the map', () => {
     expect(Math.abs(CAMERA.center.lat)).toBeLessThan(85);
     expect(Math.abs(CAMERA.center.lng)).toBeLessThanOrEqual(180);

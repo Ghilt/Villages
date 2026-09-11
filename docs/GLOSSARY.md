@@ -15,6 +15,7 @@ in the source.
 | **Command** | A request to change the world, named as an imperative: `FoundHouse`. It may be rejected. Commands are not stored. |
 | **Decider** | The pure pair of functions that make up an aggregate: decide turns a command and the current state into events, evolve folds an event into the state. It holds the rules of the game and depends on nothing. `HouseDecider` |
 | **Delta** | An incremental change pushed to a client after its snapshot: a house appeared, or a house changed. |
+| **Desk** | The surface the map lies on: seen once the camera is pulled back past the fit zoom, where the sheet stops covering the window, and hidden above it. A drawn grain for now; later the player's workbench, with the house's papers on it. See decision record 0033. `Desk`, and `floorZoom` says how far back the camera may go |
 | **Division** | How the field of a banner is partitioned: plain, per pale, per fess, quarterly. `Division` |
 | **Event** | Something that happened, named in the past tense: `HouseFounded`. Events are the only durable state and are never edited or deleted. |
 | **Event store** | The append-only record of every event, one stream per aggregate. MongoDB, through Occurrent. |
@@ -33,6 +34,7 @@ in the source.
 | **Rate** | A resource expressed as an amount, a rate per second, and the instant at which that was true. Clients interpolate between updates, so the world needs no tick events. |
 | **Seat** | Where a house is founded: its place on the map, and the anchor of its sprite. `Location` |
 | **Session** | One live connection between a player and the gateway. A player has one: opening a second window takes the player over and stands the first down. What it holds - its cells, the day its scrubber is on - is its own; what is the player's is the same in whichever window they are in. See decision record 0028. |
+| **Sheet** | The world's square seen as one object: what the camera shows once it is pulled back past the fit zoom, where the sheet stops covering the window and the desk shows around it. Above the fit zoom the window stays inside the sheet, as it always did; below it the sheet stays inside the window, down to a floor where it is half the window's shorter side. One camera does both. See decision record 0033. `sheetOnScreen`, `fitZoom`, and `constrainCamera` is the rule |
 | **Significance** | How much a thing matters to the world, from nothing to a hundred, carried on the event that made it and deciding how far out on the map it stays drawn. A hundred is drawn from the whole world. `Significance`, and `coarsestZoom` turns it into a zoom |
 | **Snapshot** | The current contents of a cell, sent when a client subscribes to it, before any deltas. |
 | **Stream** | The ordered events of one aggregate instance, addressed as `house:<uuid>`. |
