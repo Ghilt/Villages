@@ -215,8 +215,11 @@ Commands are added here as the increments land:
   refuses to overwrite a hand-painted master and writes alongside; the merge script replays hand edits. `world:build` warps Earth into raw material for
   a different starting point.
 - What it looks like: the renderer dropdown in that same panel. `Raw` is the flat
-  tiles as cut; the other three are painted in the browser, tile by tile, by the same functions that paint
-  the stills. Only the terrain is precomputed: a tile knows its own zoom, so the treatment is drawn at the
+  tiles as cut; the rest are painted in the browser, tile by tile, by the same functions that paint
+  the stills. `Vivid` is the odd one: it draws the master's own colours out of `world/palette.json`
+  rather than the quieter ones out of `world/render.json`, saturation pushed, with the whole medium
+  turned off. It is the view to check a master against the file it was painted in, and it is two
+  numbers in `world/painterly.json` rather than a look. Only the terrain is precomputed: a tile knows its own zoom, so the treatment is drawn at the
   size it should be at whatever you are looking at. Painting happens in a pool of workers, and the tiles
   around the view are painted during the pauses so that moving the map finds them done. See
   `docs/adr/0021` and `0022`.

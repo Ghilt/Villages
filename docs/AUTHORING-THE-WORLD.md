@@ -26,6 +26,13 @@ The greens and browns in the master are not what the game draws. They exist so t
 apart while painting, and so that the importer can tell them apart afterwards. What a forest looks like is
 the renderer's business, and it will not resemble this.
 
+With one exception, and it is there to be useful rather than to be looked at. The `Vivid` renderer draws
+these very colours, pushed harder than they were painted, with none of the paint over them. That is the
+view to compare against what is on screen in the image editor: the same colours, the same hard pixel
+edges, at whatever zoom the map is at. `world/render.json` is a little over half as saturated as this
+palette, and two of its classes sit six apart in colour where the palette keeps every pair forty apart,
+so a stray pixel that is invisible in every other renderer is plain in this one.
+
 Two classes are never closer than 40 apart in colour, which is what makes the next part safe. There is a
 second palette, `world/render.json`, which is what the terrain is actually *drawn* in. Editing that
 changes how the world looks without touching what it is.

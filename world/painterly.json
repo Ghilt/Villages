@@ -364,6 +364,78 @@
           "angle": 35
         }
       }
+    },
+    "vivid": {
+      "$": "The master as it was painted: every class in its own colour out of world/palette.json rather than the quieter one out of world/render.json, saturation pushed past where it was authored, and every part of the medium turned off. Not a look, an instrument. It is the shortest way to see whether the paint that went into the master is the paint that came out, at the zoom being looked at rather than in an image editor.",
+      "$flat": "Every number below that could add a mark, a wash, a grain or a line is zero on purpose, because all of them cost colour and this style is only about colour. Turning any of them up is how to give it life: wash amount for pooling, boundary wander for an edge that leaves the pixel grid, edge amount for a dark rim, shore amount for a coast, paper grain for tooth.",
+      "colours": "palette",
+      "$vibrance": "1 is the master untouched. Above about 1.5 the classes start collapsing into each other again, which is the very thing being escaped: at 1.75 the closest pair falls under the 40 the palette keeps them apart by, and thirteen channels are pinned at an end.",
+      "vibrance": 1.35,
+      "warm": "#ffffff",
+      "cool": "#000000",
+      "wash": {
+        "amount": 0,
+        "mark": 46
+      },
+      "boundary": {
+        "wander": 0,
+        "scale": 3
+      },
+      "edge": {
+        "amount": 0,
+        "reach": 1
+      },
+      "shore": {
+        "ink": "#000000",
+        "amount": 0
+      },
+      "paper": {
+        "grain": 0,
+        "mark": 2,
+        "fibre": 0
+      },
+      "groups": {
+        "water": {
+          "treatment": "none",
+          "mark": 3,
+          "amount": 0
+        },
+        "cold": {
+          "treatment": "none",
+          "mark": 3,
+          "amount": 0
+        },
+        "forest": {
+          "treatment": "none",
+          "mark": 3,
+          "amount": 0
+        },
+        "open": {
+          "treatment": "none",
+          "mark": 3,
+          "amount": 0
+        },
+        "farmed": {
+          "treatment": "none",
+          "mark": 3,
+          "amount": 0
+        },
+        "wetland": {
+          "treatment": "none",
+          "mark": 3,
+          "amount": 0
+        },
+        "dry": {
+          "treatment": "none",
+          "mark": 3,
+          "amount": 0
+        },
+        "high": {
+          "treatment": "none",
+          "mark": 3,
+          "amount": 0
+        }
+      }
     }
   },
   "$views": "What the styles are judged on. Web Mercator, like the map, so these are directly comparable to a screenshot of it. `width` sets both the size of the image and how much ground a pixel covers, which is what every mark is sized against.",

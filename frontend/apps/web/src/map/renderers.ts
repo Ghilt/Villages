@@ -10,6 +10,10 @@ import { WORLD_MAX_ZOOM } from './worldStyle';
  * `raw` is the tiles as they are served: one flat colour a class, decided when the tiles were cut, with
  * the coast and the lake shores drawn over them as ink vectors. The rest are painted here in the browser
  * from the same terrain, and they draw their own shore, so the vector ink is turned off under them.
+ *
+ * `vivid` is painted like the rest and looks like neither: it draws the master's own colours with every
+ * part of the medium turned off, so it is `raw` in the colours the world was actually painted in, at any
+ * zoom and without cutting a second set of tiles. It answers a question rather than being a look.
  */
 
 export interface RendererChoice {
@@ -25,6 +29,7 @@ export const RENDERERS: readonly RendererChoice[] = [
   { name: 'woodblock', title: 'Woodblock', note: 'A print: four steps of colour, coarse marks, hard ink' },
   { name: 'ink', title: 'Ink', note: 'Atlas further still: the line does all of the work' },
   { name: 'dusk', title: 'Dusk', note: 'The painted treatment under a low sun and a blue shadow' },
+  { name: 'vivid', title: 'Vivid', note: "The master's own colours, pushed, with no medium over them" },
 ];
 
 export const DEFAULT_RENDERER = 'painted';

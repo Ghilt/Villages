@@ -1,5 +1,5 @@
 import { toRgb } from './palette.ts';
-import type { Palette, Rgb } from './palette.ts';
+import type { Palette, Rgb, TerrainClass } from './palette.ts';
 
 /**
  * What the world looks like: the painterly treatment, as pure functions of a position.
@@ -164,6 +164,21 @@ export interface PainterlyStyle {
    * what separates a print from a painting: the colour goes flat inside a band and steps at its edge.
    */
   posterise?: number;
+  /**
+   * Which colour table a class is drawn from. `render` is `world/render.json`, the colours chosen to
+   * sit together, and it is what every style but one uses. `palette` is the master's own colours, the
+   * ones the world is actually painted in, which are chosen to be far apart and twice as saturated for it.
+   *
+   * Drawing the data as the look is normally the mistake this whole module exists to correct. As one style
+   * among several it is the opposite: the shortest way to see whether what was painted is what arrived,
+   * at the zoom being looked at rather than in an image editor.
+   */
+  colours?: 'render' | 'palette';
+  /**
+   * How far to push the saturation of every class, one being the colour as it was authored. Chroma is
+   * scaled about each colour's own luma, so the hue and the lightness survive it and only the grey goes.
+   */
+  vibrance?: number;
   groups: Record<string, GroupStyle>;
 }
 
@@ -201,6 +216,48 @@ export function mix(a: Rgb, b: Rgb, at: number): Rgb {
     clamp255(a[1] + (b[1] - a[1]) * t),
     clamp255(a[2] + (b[2] - a[2]) * t),
   ];
+}
+
+/** Rec. 601 luma: the grey a colour would be if the colour were taken out of it. */
+function luma(colour: Rgb): number {
+  return 0.299 * colour[0] + 0.587 * colour[1] + 0.114 * colour[2];
+}
+
+/**
+ * Chroma scaled about a colour's own luma. One leaves it alone, zero is grey, and above one pushes it
+ * further than it was authored.
+ *
+ * About the luma rather than about a mid grey, so a dark green stays as dark as it was and only becomes
+ * greener. Channels clip at the ends, which is what a saturation push does rather than a fault in it,
+ * and is why the number is a matter of taste and not a correction.
+ */
+export function saturate(colour: Rgb, by: number): Rgb {
+  if (by === 1) {
+    return colour;
+  }
+  const grey = luma(colour);
+  return [
+    clamp255(grey + (colour[0] - grey) * by),
+    clamp255(grey + (colour[1] - grey) * by),
+    clamp255(grey + (colour[2] - grey) * by),
+  ];
+}
+
+/**
+ * The colour a class is drawn in before the paint touches it.
+ *
+ * A class the palette does not have falls back to the style's cool end, which is what a gap in the
+ * numbering was always drawn as.
+ */
+function baseColour(
+  terrain: TerrainClass | undefined,
+  style: PainterlyStyle,
+  colours: Record<string, string>,
+): Rgb {
+  if (terrain === undefined) {
+    return toRgb(style.cool);
+  }
+  return toRgb(style.colours === 'palette' ? terrain.colour : colours[terrain.name]!);
 }
 
 /** A stable seed per group, so every class of forest shares one canopy and not one per class. */
@@ -347,10 +404,18 @@ export function painterlyProblems(
       problems.push(`a treatment for ${group}, which no terrain class is in`);
     }
   }
-  for (const terrain of palette.classes) {
-    if (colours[terrain.name] === undefined) {
-      problems.push(`world/render.json has no colour for ${terrain.name}`);
+  if (style.colours !== undefined && style.colours !== 'render' && style.colours !== 'palette') {
+    problems.push(`${String(style.colours)} is not a colour source; it is render or palette`);
+  }
+  if (style.colours !== 'palette') {
+    for (const terrain of palette.classes) {
+      if (colours[terrain.name] === undefined) {
+        problems.push(`world/render.json has no colour for ${terrain.name}`);
+      }
     }
+  }
+  if (style.vibrance !== undefined && !(style.vibrance >= 0)) {
+    problems.push(`a vibrance of ${String(style.vibrance)} is not a number at or above zero`);
   }
   if (style.paper.mark <= 0) {
     problems.push('the paper mark must be a positive number of pixels');
@@ -390,7 +455,7 @@ export function preparePainterly(
     const terrain = palette.classes.find((candidate) => candidate.id === id);
     const group = terrain?.group ?? 'none';
     const treatmentOf = style.groups[group] ?? { treatment: 'none' as const, mark: 3, amount: 0, wash: 1 };
-    const base = toRgb(terrain === undefined ? style.cool : colours[terrain.name]!);
+    const base = saturate(baseColour(terrain, style, colours), style.vibrance ?? 1);
     const angle = ((treatmentOf.angle ?? 0) * Math.PI) / 180;
     classes.push({
       lighter: mix(base, warm, style.wash.amount * (treatmentOf.wash ?? 1)),

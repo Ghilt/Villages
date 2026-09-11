@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -7,11 +8,13 @@ import {
   paintPixel,
   painterlyProblems,
   preparePainterly,
+  saturate,
   smoothstep,
   treatment,
   valueNoise,
 } from './painterly.ts';
 import type { ClassSampler, PainterlyStyle, TreatmentKind } from './painterly.ts';
+import { MINIMUM_CLASS_DISTANCE, colourDistance, toHex, toRgb } from './palette.ts';
 import type { Palette } from './palette.ts';
 
 const palette: Palette = {
@@ -381,5 +384,161 @@ describe('cutting the wash into steps', () => {
     }
 
     expect(worst).toBeLessThanOrEqual(1);
+  });
+});
+
+describe('pushing the saturation of a colour', () => {
+  /** A dark green, which is the case that matters: the master is full of them. */
+  const green = [16, 80, 40] as const;
+  const spread = (colour: readonly number[]): number => Math.max(...colour) - Math.min(...colour);
+
+  it('leaves a colour exactly alone at one, so the default costs nothing', () => {
+    expect(saturate(green, 1)).toEqual(green);
+  });
+
+  it('takes all the colour out at zero, leaving the grey it was worth', () => {
+    const grey = saturate(green, 0);
+
+    expect(grey[0]).toBe(grey[1]);
+    expect(grey[1]).toBe(grey[2]);
+  });
+
+  it('widens the gap between the channels, which is what saturation is', () => {
+    expect(spread(saturate(green, 1.5))).toBeGreaterThan(spread(green));
+  });
+
+  it('keeps the lightness it had, so a dark green only becomes greener', () => {
+    // Rounding and the clip at zero move it a little. Two levels out of 255 is not a change of lightness.
+    expect(Math.abs(luminance(saturate(green, 1.4)) - luminance(green))).toBeLessThan(2);
+  });
+
+  it('clips at the ends rather than wrapping round them', () => {
+    for (const channel of saturate(green, 8)) {
+      expect(channel).toBeGreaterThanOrEqual(0);
+      expect(channel).toBeLessThanOrEqual(255);
+    }
+  });
+});
+
+describe('which colours a style draws a class in', () => {
+  /**
+   * Every part of the medium turned off, which is what the vivid style is: the colour and nothing else.
+   * With all of it at zero a painted pixel is exactly the class's colour, so it can be compared by name.
+   */
+  const bare: PainterlyStyle = {
+    ...style,
+    wash: { amount: 0, mark: 46 },
+    boundary: { wander: 0, scale: 3 },
+    edge: { amount: 0, reach: 1 },
+    shore: { ink: '#000000', amount: 0 },
+    paper: { grain: 0, mark: 2, fibre: 0 },
+    groups: Object.fromEntries(
+      Object.entries(style.groups).map(([group, spec]) => [
+        group,
+        { ...spec, treatment: 'none' as const, amount: 0 },
+      ]),
+    ),
+  };
+  const meadowIn = (of: PainterlyStyle): string =>
+    toHex(paintPixel(preparePainterly(of, palette, colours), everywhereMeadow, 300, 12, 1));
+  const spread = (colour: readonly number[]): number => Math.max(...colour) - Math.min(...colour);
+
+  it('is render.json by default, which is what every style before this one drew', () => {
+    expect(meadowIn(bare)).toBe(colours.meadow);
+  });
+
+  it("is the master's own colours when the style asks for them", () => {
+    expect(meadowIn({ ...bare, colours: 'palette' })).toBe('#88cc44');
+  });
+
+  it('changes nothing when neither field is given, so no style before this one moved', () => {
+    const asItWas = preparePainterly(style, palette, colours);
+
+    expect(preparePainterly({ ...style, colours: 'render', vibrance: 1 }, palette, colours)).toEqual(asItWas);
+  });
+
+  it('draws the master hotter than it was painted when the vibrance is turned up', () => {
+    const asPainted = paintPixel(
+      preparePainterly({ ...bare, colours: 'palette' }, palette, colours),
+      everywhereMeadow,
+      300,
+      12,
+      1,
+    );
+    const pushed = paintPixel(
+      preparePainterly({ ...bare, colours: 'palette', vibrance: 1.5 }, palette, colours),
+      everywhereMeadow,
+      300,
+      12,
+      1,
+    );
+
+    expect(spread(pushed)).toBeGreaterThan(spread(asPainted));
+  });
+
+  it('says so when the colour source is a word it does not know', () => {
+    const problems = painterlyProblems({ ...style, colours: 'pallete' as 'palette' }, palette, colours);
+
+    expect(problems).toContain('pallete is not a colour source; it is render or palette');
+  });
+
+  it('says so when the vibrance is not a number at or above zero', () => {
+    for (const vibrance of [-1, Number.NaN]) {
+      const problems = painterlyProblems({ ...style, vibrance }, palette, colours);
+
+      expect(problems.some((problem) => problem.includes('vibrance'))).toBe(true);
+    }
+  });
+
+  it('does not ask for a render colour it is never going to read', () => {
+    const onlyMeadow = { meadow: '#c4ce8d' };
+
+    expect(painterlyProblems({ ...style, colours: 'palette' }, palette, onlyMeadow)).toEqual([]);
+    // And still does when it would read them, or a missing colour would go unnoticed.
+    expect(painterlyProblems(style, palette, onlyMeadow)).toHaveLength(2);
+  });
+});
+
+describe('the styles the world is actually painted with', () => {
+  const real = JSON.parse(
+    readFileSync(new URL('../../../../world/painterly.json', import.meta.url), 'utf8'),
+  ) as { styles: Record<string, PainterlyStyle> };
+  const realPalette = JSON.parse(
+    readFileSync(new URL('../../../../world/palette.json', import.meta.url), 'utf8'),
+  ) as Palette;
+  const realColours = JSON.parse(
+    readFileSync(new URL('../../../../world/render.json', import.meta.url), 'utf8'),
+  ) as { colours: Record<string, string> };
+
+  /**
+   * Every style, checked against the palette and the colours it will actually be drawn with.
+   *
+   * The offline painter reports this on the way past, but only when somebody runs it, and a style is
+   * hand-edited JSON that nothing typechecks. A typo in it costs five minutes of painting or an empty
+   * renderer in the browser, and either is worse than a failing test.
+   */
+  it.each(Object.keys(real.styles))('%s can be used', (name) => {
+    expect(painterlyProblems(real.styles[name]!, realPalette, realColours.colours)).toEqual([]);
+  });
+
+  it('has at least the one that draws the master as it was painted', () => {
+    expect(real.styles.vivid?.colours).toBe('palette');
+  });
+
+  it('does not push the vivid colours so far that classes collapse into each other again', () => {
+    const pushed = realPalette.classes.map((terrain) =>
+      saturate(toRgb(terrain.colour), real.styles.vivid?.vibrance ?? 1),
+    );
+    let closest = Infinity;
+    for (let i = 0; i < pushed.length; i += 1) {
+      for (let j = i + 1; j < pushed.length; j += 1) {
+        closest = Math.min(closest, colourDistance(pushed[i]!, pushed[j]!));
+      }
+    }
+
+    // The whole point of the style is that the classes are far apart, so it may not undo what the
+    // palette guarantees. Past about 1.75 the push starts pinning channels at an end and does exactly
+    // that: two colours that differed only in how much of a channel they had arrive at the same place.
+    expect(closest).toBeGreaterThanOrEqual(MINIMUM_CLASS_DISTANCE);
   });
 });
