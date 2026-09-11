@@ -1,9 +1,11 @@
 {
   "permissions": {
-    "ask": [
+    "allow": [
       "Bash(git commit:*)",
+      "Bash(git rebase:*)"
+    ],
+    "ask": [
       "Bash(git push:*)",
-      "Bash(git rebase:*)",
       "Bash(git tag:*)"
     ],
     "deny": [
