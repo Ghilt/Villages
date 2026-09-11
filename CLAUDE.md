@@ -20,10 +20,10 @@ thousands of concurrent players in one shared world. The startup plan that produ
   all. The same goes for a rebase or a push he has asked for in that turn.
 - No amends, force pushes, hard resets, or history rewrites without explicit approval.
 - `.claude/settings.json` is where the harness half of this lives. It denies force pushes, hard resets and
-  `git clean` outright, and prompts on `git push`, `git rebase` and `git tag`, which are rare and hard to undo.
-  `git commit` belongs in its `allow` list rather than its `ask` list, so that Adam's word is the only gate on
-  it; that entry is still to be made by hand, because an agent may not edit its own permission rules. This file
-  states the rule in words so it survives tooling changes.
+  `git clean` outright, prompts on `git push` and `git tag`, which are rare and hard to undo, and allows
+  `git commit` and `git rebase`, so that Adam's word in the conversation is the only gate on them. Adam made
+  those entries by hand, because an agent may not edit its own permission rules. This file states the rule
+  in words so it survives tooling changes.
 
 ## Working agreement
 
