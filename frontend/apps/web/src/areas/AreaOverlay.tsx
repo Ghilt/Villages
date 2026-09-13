@@ -39,6 +39,17 @@ const SHADE = 'areas-shade';
 const LINE = 'areas-line';
 const PULSE = 'areas-pulse';
 
+/**
+ * The line as it is being drawn, before there is a fence to draw instead.
+ *
+ * Kept apart from the areas source because it is a different kind of thing: the raw drag, in longitude
+ * and latitude, exactly where the hand went and snapped to nothing. Snapping is what makes a fence exact
+ * and it is worth nothing while the hand is still moving, so it waits for the mouse to come up.
+ */
+const DRAFT = 'areas-draft';
+const DRAFT_LINE = 'areas-draft-line';
+const DRAFT_CLOSE = 'areas-draft-close';
+
 /** Not a terrain colour and not the map's ink: an area is a thing a player drew, and says so. */
 const FENCE = '#8f1d2f';
 
@@ -113,16 +124,38 @@ export function AreaOverlay({ map, worldRoot }: AreaOverlayProps) {
       paint: { 'line-color': FENCE, 'line-opacity': 1, 'line-width': 2.6 },
     });
 
+    // The draft, over everything, because while it is there it is the thing being looked at.
+    map.addSource(DRAFT, { type: 'geojson', data: EMPTY });
+    map.addLayer({
+      id: DRAFT_LINE,
+      type: 'line',
+      source: DRAFT,
+      filter: ['==', ['get', 'closing'], false],
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: { 'line-color': FENCE, 'line-opacity': 0.9, 'line-width': 2 },
+    });
+    map.addLayer({
+      id: DRAFT_CLOSE,
+      type: 'line',
+      source: DRAFT,
+      filter: ['==', ['get', 'closing'], true],
+      // Dashed, because this is the one piece of the shape the hand did not draw: it is where the ends
+      // will be joined, shown while there is still time to put the hand somewhere else.
+      paint: { 'line-color': FENCE, 'line-opacity': 0.45, 'line-width': 1.4, 'line-dasharray': [2, 2] },
+    });
+
     return () => {
       // The map may already have been taken down, in which case it has no style to take layers out of.
       try {
-        for (const layer of [PULSE, LINE, SHADE]) {
+        for (const layer of [DRAFT_CLOSE, DRAFT_LINE, PULSE, LINE, SHADE]) {
           if (map.getLayer(layer) !== undefined) {
             map.removeLayer(layer);
           }
         }
-        if (map.getSource(SOURCE) !== undefined) {
-          map.removeSource(SOURCE);
+        for (const source of [DRAFT, SOURCE]) {
+          if (map.getSource(source) !== undefined) {
+            map.removeSource(source);
+          }
         }
       } catch {
         // Nothing to undo.
@@ -232,10 +265,46 @@ export function AreaOverlay({ map, worldRoot }: AreaOverlayProps) {
       return [at.lng, at.lat];
     };
 
+    /**
+     * The drag so far, drawn where the hand actually went.
+     *
+     * Two features rather than one: what was drawn, and the segment that will join the ends, so that the
+     * shape being made is visible before it is made. Set on every sample, which is every few screen
+     * pixels, and a line of a few hundred points costs a map nothing.
+     */
+    const showDraft = (points: readonly [number, number][]) => {
+      const draft = map.getSource(DRAFT) as maplibregl.GeoJSONSource | undefined;
+      if (draft === undefined) {
+        return;
+      }
+      const features: FeatureCollection['features'] = [];
+      if (points.length >= 2) {
+        features.push({
+          type: 'Feature',
+          properties: { closing: false },
+          geometry: { type: 'LineString', coordinates: [...points] },
+        });
+      }
+      if (points.length >= 3) {
+        features.push({
+          type: 'Feature',
+          properties: { closing: true },
+          geometry: { type: 'LineString', coordinates: [points[points.length - 1]!, points[0]!] },
+        });
+      }
+      draft.setData({ type: 'FeatureCollection', features });
+    };
+
+    const clearDraft = () => {
+      const draft = map.getSource(DRAFT) as maplibregl.GeoJSONSource | undefined;
+      draft?.setData(EMPTY);
+    };
+
     const abandon = () => {
       drawing.current = false;
       path.current = [];
       lastAt.current = null;
+      clearDraft();
     };
 
     const finish = () => {
@@ -295,6 +364,7 @@ export function AreaOverlay({ map, worldRoot }: AreaOverlayProps) {
       }
       lastAt.current = { x: event.clientX, y: event.clientY };
       path.current.push(placeOf(event));
+      showDraft(path.current);
     };
 
     const onUp = (event: PointerEvent) => {
