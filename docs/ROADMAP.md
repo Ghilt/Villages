@@ -74,7 +74,7 @@ in `docs/plans/2026-09-15-first-gameplay-loop.md`; how a mechanic becomes events
 needs no explaining, is `docs/MECHANICS.md`. Decision records 0034, 0035 and 0036; experiment 0004.
 
 - [x] 0. The plan, the method, the decisions proposed, the experiment opened
-- [ ] 1. Provenance on every event: a correlation id and a causation id beside the event id
+- [x] 1. Provenance on every event: a correlation id and a causation id beside the event id
 - [ ] 2. The domain of choices: a house can be given a choice, and take one option of it
 - [ ] 3. Restart: the debug panel starts a player over
 - [ ] 4. The loop on the wire: a new player is given three seats, and taking one founds the house

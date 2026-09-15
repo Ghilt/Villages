@@ -11,7 +11,7 @@ import {
 import { PROTOCOL_VERSION, describeDay } from '@villages/protocol';
 import type { EventFrame, HouseView, ServerFrame } from '@villages/protocol';
 
-import { note } from '../debug/log';
+import { note, shortId } from '../debug/log';
 import { browserSocket } from './browserSocket';
 
 /**
@@ -94,10 +94,10 @@ function heard(frame: ServerFrame): void {
       connection?.send({ type: 'subscribeCells', cells: frame.cells });
       return;
     case 'commandAccepted':
-      note('gateway', `command ${frame.commandId} accepted`);
+      note('gateway', `command ${shortId(frame.commandId)} accepted`);
       return;
     case 'commandRejected':
-      note('gateway', `command ${frame.commandId} rejected: ${frame.reason}`);
+      note('gateway', `command ${shortId(frame.commandId)} rejected: ${frame.reason}`);
       return;
     case 'error':
       note('gateway', `error ${frame.code}: ${frame.message}`);

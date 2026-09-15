@@ -82,7 +82,10 @@ Increment 0.7 compiled and ran the plan's riskiest assumption, on Occurrent 0.33
 - A Kotlin decider built with `decider(initialState, decide, evolve)` from `org.occurrent.dsl.decider` drives
   the application service through the extension `ApplicationService<E>.execute(streamId, command, decider)`,
   which loads the stream, folds it, calls decide, and appends with the stream-version write condition. A
-  decision that yields no event writes nothing.
+  decision that yields no event writes nothing. **That extension is no longer what runs a command**: it gives
+  no way to put anything on the envelope of what it writes, and provenance has to go there, so the executor
+  does those four steps itself and retries a lost write three times as the extension did. See decision
+  record 0035. The smoke test still proves the library's own path works.
 - `GenericApplicationService(eventStore, cloudEventConverter)` is the constructor, and
   `JacksonCloudEventConverter.Builder<E>(objectMapper, source).typeMapper(...)` builds the converter on
   Jackson 3. The house events get their own type mapper in 1.5, so the CloudEvent type can be

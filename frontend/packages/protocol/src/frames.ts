@@ -66,7 +66,8 @@ export const clientFrameSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('hello'), playerToken: z.string(), protocolVersion: z.number().int() }),
   z.object({ type: z.literal('subscribeCells'), cells: z.array(cellSchema) }),
   z.object({ type: z.literal('unsubscribeCells'), cells: z.array(cellSchema) }),
-  z.object({ type: z.literal('command'), commandId: z.string(), command: commandPayloadSchema }),
+  /** The command id is a UUID: it becomes the causation id of every event the command writes. See 0035. */
+  z.object({ type: z.literal('command'), commandId: z.uuid(), command: commandPayloadSchema }),
   z.object({ type: z.literal('ping'), t0: z.number().int() }),
   z.object({ type: z.literal('watchEvents'), on: z.boolean() }),
   /** Look at the world as it was on a day, or at live when null. The timeline scrubber's one frame. */
@@ -111,6 +112,9 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
     stream: z.string(),
     streamVersion: z.number().int(),
     time: z.number().int(),
+    /** The story this event belongs to, and what directly caused it. See decision record 0035. */
+    correlationId: z.string(),
+    causationId: z.string(),
     data: z.record(z.string(), z.unknown()),
   }),
 ]);

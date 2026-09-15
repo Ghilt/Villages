@@ -18,7 +18,14 @@ class FoundHouseService(
     private val world: WorldClock,
 ) {
     /** Throws a HouseError when the decider refuses, exactly as the decider threw it. */
-    fun found(houseId: HouseId, player: PlayerId, name: HouseName, seat: Location, banner: Banner) {
+    fun found(
+        houseId: HouseId,
+        player: PlayerId,
+        name: HouseName,
+        seat: Location,
+        banner: Banner,
+        provenance: Provenance,
+    ) {
         executor.execute(
             FoundHouse(
                 houseId = houseId,
@@ -29,6 +36,7 @@ class FoundHouseService(
                 worldTime = world.today(),
                 recordedAt = clock.now(),
             ),
+            provenance,
         )
     }
 }

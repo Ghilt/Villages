@@ -16,6 +16,9 @@ list is docs/EVENTS.md, one row at a time, each a decision.
 
 ## Decision
 
+Extended by decision record 0035, which adds two attributes to the envelope: the story an event
+belongs to and what caused it.
+
 **An event is a CloudEvent**, version 1.0, as Occurrent stores it. Of its attributes we set:
 
 | attribute | value | why |

@@ -64,9 +64,13 @@ class AppBootsTest {
     }
 
     private val token = "0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8d"
+
+    /** A command id is a UUID, and the gateway refuses anything else. See decision record 0035. */
+    private val founding1 = "1c000001-0000-4000-8000-00000000000a"
+    private val founding2 = "1c000002-0000-4000-8000-00000000000b"
     private val hello = """{"type":"hello","playerToken":"$token","protocolVersion":1}"""
     private val founding =
-        """{"type":"command","commandId":"c-1","command":{"type":"foundHouse","name":"Ravenscar",""" +
+        """{"type":"command","commandId":"$founding1","command":{"type":"foundHouse","name":"Ravenscar",""" +
             """"seat":{"lat":59.33,"lon":18.07},""" +
             """"banner":{"field":"sable","division":"plain","charge":"stag","chargeTincture":"argent"}}}"""
 
@@ -111,7 +115,7 @@ class AppBootsTest {
         assertNotNull(first.last<TakenOver>().message)
 
         // And there is still one house: founding again is refused, whichever window asks.
-        second.say("""{"type":"command","commandId":"c-2","command":{"type":"foundHouse","name":"Another",""" +
+        second.say("""{"type":"command","commandId":"$founding2","command":{"type":"foundHouse","name":"Another",""" +
             """"seat":{"lat":59.33,"lon":18.07},""" +
             """"banner":{"field":"or","division":"plain","charge":"star","chargeTincture":"azure"}}}""")
         second.until("a refusal") { frames -> frames.any { it is CommandRejected } }

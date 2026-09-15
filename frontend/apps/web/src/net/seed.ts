@@ -54,7 +54,9 @@ export function foundAsSomeoneNew(seedling: Seedling): Promise<boolean> {
       if (frame.type === 'welcome') {
         connection.send({
           type: 'command',
-          commandId: 'seed',
+          // A UUID like any other command's: the gateway refuses anything else, because this id is
+          // the causation of the events the command writes. See decision record 0035.
+          commandId: crypto.randomUUID(),
           command: { type: 'foundHouse', name: seedling.name, seat: seedling.seat, banner: seedling.banner },
         });
         return;

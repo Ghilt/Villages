@@ -2,7 +2,6 @@ package villages.occurrent
 
 import io.cloudevents.CloudEvent
 import org.occurrent.application.converter.CloudEventConverter
-import org.occurrent.application.service.blocking.generic.GenericApplicationService
 import org.occurrent.eventstore.api.SortBy
 import org.occurrent.eventstore.api.blocking.EventStoreQueries
 import org.occurrent.eventstore.inmemory.InMemoryEventStore
@@ -78,6 +77,10 @@ internal fun CloudEvent.toStored(converter: CloudEventConverter<HouseEvent>): St
     streamVersion = (getExtension(STREAM_VERSION) as Number).toLong(),
     time = time!!.toInstant(),
     data = String(data!!.toBytes()),
+    // An event with no provenance on it is its own story, which is what a first message's correlation
+    // means anyway. Nothing this code writes lacks one; an older event might. See decision record 0035.
+    correlationId = getExtension(HouseEvents.CORRELATION_ID)?.toString() ?: id,
+    causationId = getExtension(HouseEvents.CAUSATION_ID)?.toString() ?: id,
     event = converter.toDomainEvent(this),
 )
 
@@ -90,9 +93,8 @@ class InMemoryWorld : AutoCloseable {
     private val subscriptions = InMemorySubscriptionModel()
     val store = InMemoryEventStore(subscriptions)
     val converter = HouseEvents.converter()
-    val service = GenericApplicationService(store, converter)
 
-    val executor: HouseCommandExecutor = OccurrentHouseCommandExecutor(service)
+    val executor: HouseCommandExecutor = OccurrentHouseCommandExecutor(store, converter)
     val feed: EventFeed = OccurrentEventFeed(subscriptions, store, converter)
 
     override fun close() {

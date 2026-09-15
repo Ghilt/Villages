@@ -10,9 +10,11 @@ import villages.application.AnonymousTokens
 import villages.application.EventFeed
 import villages.application.FoundHouseService
 import villages.application.HouseCommandExecutor
+import villages.application.Provenance
 import villages.application.Start
 import villages.application.StoredEvent
 import villages.application.WorldClock
+import villages.application.WriteConflict
 import villages.domain.HouseCommand
 import villages.domain.HouseDecider
 import villages.domain.HouseEvent
@@ -47,11 +49,17 @@ import java.util.UUID
  */
 private class TinyWorld : HouseCommandExecutor, EventFeed {
     val events = mutableListOf<HouseEvent>()
+
+    /** When set, every command loses the race for its stream, the way a contested one behaves. */
+    var contested = false
     /** What has been stored, so a subscriber that wants the beginning can be given it. */
     private val stored = mutableListOf<StoredEvent>()
     private val subscribers = mutableListOf<(StoredEvent) -> Unit>()
 
-    override fun execute(command: HouseCommand) {
+    override fun execute(command: HouseCommand, provenance: Provenance) {
+        if (contested) {
+            throw WriteConflict(command.houseId.stream, events.size.toLong())
+        }
         val stream = events.filter { it.houseId == command.houseId }
         val fresh = HouseDecider.decide(command, HouseDecider.fold(stream))
         events += fresh
@@ -64,6 +72,8 @@ private class TinyWorld : HouseCommandExecutor, EventFeed {
                 streamVersion = (stream.size + index + 1).toLong(),
                 time = founded.recordedAt,
                 data = """{"name":"${founded.name.value}","significance":${founded.significance.value}}""",
+                correlationId = provenance.correlationId.toString(),
+                causationId = provenance.commandId.toString(),
                 event = event,
             )
             this.stored += record
@@ -105,12 +115,16 @@ private const val TOKEN = "0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8d"
 private val hello = """{"type":"hello","playerToken":"$TOKEN","protocolVersion":1}"""
 private const val RAVENSCAR = "6d5b0a2e-1c3f-4d7e-9a8b-0f1e2d3c4b5a"
 
+/** A command id is a UUID: it becomes the causation of what the command writes. See 0035. */
+private const val COMMAND_ONE = "1c000001-0000-4000-8000-00000000000a"
+private const val COMMAND_TWO = "1c000002-0000-4000-8000-00000000000b"
+
 /** Stockholm, before the warp, at three depths: the shared vector every zoom of it is known for. */
 private const val STOCKHOLM_Z10 = "1200312213"
 private const val STOCKHOLM_Z8 = "12003122"
 private const val STOCKHOLM_Z4 = "1200"
 
-private fun founding(commandId: String = "c-1", name: String = "Ravenscar") =
+private fun founding(commandId: String = COMMAND_ONE, name: String = "Ravenscar") =
     """{"type":"command","commandId":"$commandId","command":{"type":"foundHouse",""" +
         """"name":"$name","seat":{"lat":59.33,"lon":18.07},""" +
         """"banner":{"field":"sable","division":"plain","charge":"stag","chargeTincture":"argent"}}}"""
@@ -263,7 +277,7 @@ class GatewaySpec : StringSpec({
 
         founding.receive(founding())
 
-        founder.last() shouldBe CommandAccepted("c-1")
+        founder.last() shouldBe CommandAccepted(COMMAND_ONE)
         rig.world.events shouldHaveSize 1
         val event = watcher.last().shouldBeInstanceOf<EventFrame>()
         event.eventType shouldBe "villages.house.founded.v1"
@@ -273,6 +287,40 @@ class GatewaySpec : StringSpec({
         event.time shouldBe noon.toEpochMilli()
         event.data.get("significance").asDouble() shouldBe 20.0
         bystander.shouldBeEmpty()
+    }
+
+    "the event says which command caused it, and which story it belongs to" {
+        val rig = Rig()
+        val (founder, _) = rig.introduced()
+        val (watching, watcher) = rig.someoneElse()
+        watching.receive("""{"type":"watchEvents","on":true}""")
+
+        founder.receive(founding())
+
+        val event = watcher.last().shouldBeInstanceOf<EventFrame>()
+        // A founding starts a story of its own, so both ids are the command's. Decision record 0035.
+        event.causationId shouldBe COMMAND_ONE
+        event.correlationId shouldBe COMMAND_ONE
+    }
+
+    "a command whose id is not a UUID is refused before it is decided" {
+        val rig = Rig()
+        val (connection, sent) = rig.introduced()
+
+        connection.receive(founding(commandId = "c-1"))
+
+        sent.single() shouldBe CommandRejected("c-1", "malformed: a command id is a UUID")
+        rig.world.events.shouldBeEmpty()
+    }
+
+    "a stream that will not stand still is a conflict, which is not a refusal" {
+        val rig = Rig()
+        rig.world.contested = true
+        val (connection, sent) = rig.introduced()
+
+        connection.receive(founding())
+
+        sent.last() shouldBe CommandRejected(COMMAND_ONE, "conflict")
     }
 
     "the founder is told which house is theirs, without holding its cell" {
@@ -288,16 +336,16 @@ class GatewaySpec : StringSpec({
         val (connection, sent) = Rig().introduced()
 
         connection.receive(founding())
-        connection.receive(founding(commandId = "c-2"))
+        connection.receive(founding(commandId = COMMAND_TWO))
 
-        sent.last() shouldBe CommandRejected("c-2", "alreadyFounded")
+        sent.last() shouldBe CommandRejected(COMMAND_TWO, "alreadyFounded")
     }
 
     "a command before hello is rejected, because nobody is speaking" {
         val sent = mutableListOf<ServerFrame>()
         Rig().gateway.connect { sent += it }.receive(founding())
 
-        sent.single() shouldBe CommandRejected("c-1", "notIntroduced")
+        sent.single() shouldBe CommandRejected(COMMAND_ONE, "notIntroduced")
     }
 
     "ping is answered with pong carrying the client's stamp and the server's time" {
@@ -462,7 +510,7 @@ class GatewaySpec : StringSpec({
         first.cells().shouldBeEmpty()
         two.shouldBeEmpty()
         second.receive(founding())
-        two.last() shouldBe CommandAccepted("c-1")
+        two.last() shouldBe CommandAccepted(COMMAND_ONE)
     }
 
     "a stood-down session hears nothing more and can do nothing more" {
@@ -494,7 +542,7 @@ class GatewaySpec : StringSpec({
 
         // Still the session: its own house would still find it, and it is still able to act.
         second.receive(founding(name = "Mine"))
-        two.last() shouldBe CommandAccepted("c-1")
+        two.last() shouldBe CommandAccepted(COMMAND_ONE)
         two.filterIsInstance<YourHouse>().last().house?.name shouldBe "Mine"
     }
 
@@ -512,9 +560,9 @@ class GatewaySpec : StringSpec({
         first.receive(founding())
 
         val (second, two) = rig.introduced()
-        second.receive(founding(commandId = "c-2"))
+        second.receive(founding(commandId = COMMAND_TWO))
 
-        two.last() shouldBe CommandRejected("c-2", "alreadyFounded")
+        two.last() shouldBe CommandRejected(COMMAND_TWO, "alreadyFounded")
         rig.world.events shouldHaveSize 1
         rig.houses.ofPlayer(PlayerId(UUID.fromString(TOKEN)))?.name?.value shouldBe "Ravenscar"
     }

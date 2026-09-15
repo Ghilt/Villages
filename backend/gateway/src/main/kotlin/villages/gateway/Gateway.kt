@@ -7,8 +7,10 @@ import villages.application.HousesByCell
 import villages.application.Start
 import villages.application.HousesByPlayer
 import villages.application.PlayerTokens
+import villages.application.Provenance
 import villages.application.StoredEvent
 import villages.application.WorldClock
+import villages.application.WriteConflict
 import villages.domain.Banner
 import villages.domain.HouseError
 import villages.domain.HouseId
@@ -264,6 +266,14 @@ class Gateway(
                 out.send(CommandRejected(frame.commandId, "notIntroduced"))
                 return
             }
+            // The id becomes the causation of every event this command writes, so it has to be an
+            // identity rather than whatever the client felt like sending. See decision record 0035.
+            val commandId = runCatching { java.util.UUID.fromString(frame.commandId) }.getOrNull()
+            if (commandId == null) {
+                out.send(CommandRejected(frame.commandId, "malformed: a command id is a UUID"))
+                return
+            }
+
             try {
                 when (val payload = frame.command) {
                     is FoundHousePayload -> foundHouse.found(
@@ -272,11 +282,15 @@ class Gateway(
                         name = HouseName.of(payload.name),
                         seat = Location(payload.seat.lat, payload.seat.lon),
                         banner = payload.banner.toDomain(),
+                        provenance = Provenance.startedBy(commandId),
                     )
                 }
                 out.send(CommandAccepted(frame.commandId))
             } catch (refused: HouseError) {
                 out.send(CommandRejected(frame.commandId, refused.reasonCode()))
+            } catch (@Suppress("SwallowedException") busy: WriteConflict) {
+                // Not a refusal: the stream moved under us. Trying again may well be accepted.
+                out.send(CommandRejected(frame.commandId, "conflict"))
             } catch (malformed: IllegalArgumentException) {
                 out.send(CommandRejected(frame.commandId, "malformed: ${malformed.message}"))
             }
@@ -430,6 +444,8 @@ internal fun StoredEvent.toFrame(): EventFrame = EventFrame(
     stream = stream,
     streamVersion = streamVersion,
     time = time.toEpochMilli(),
+    correlationId = correlationId,
+    causationId = causationId,
     data = ProtocolJson.tree(data),
 )
 

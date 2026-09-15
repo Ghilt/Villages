@@ -44,6 +44,8 @@ private class HandFed : EventFeed {
             streamVersion = version,
             time = event.recordedAt,
             data = "{}",
+            correlationId = UUID.randomUUID().toString(),
+            causationId = UUID.randomUUID().toString(),
             event = event,
         )
         this.stored += stored

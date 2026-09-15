@@ -11,16 +11,46 @@ import villages.domain.Significance
 import villages.domain.Treasury
 import villages.domain.WorldTime
 import java.time.Instant
+import java.util.UUID
 
 /**
  * The ports: what the use cases need from the world outside, as interfaces this module owns and the
  * infrastructure implements from the other side. Nothing here names Occurrent, MongoDB, RabbitMQ or Spring.
  */
 
+/**
+ * Where a command came from, so that the events it causes can say so.
+ *
+ * Provenance is a fact about messages rather than about the game, so it travels beside a command rather
+ * than inside it, and it lands on the envelope rather than in the event's data. The first message of a
+ * story is its own correlation: `Provenance(id, id)`. See decision record 0035.
+ */
+data class Provenance(
+    /** The command's own id, which becomes the causation of every event it writes. */
+    val commandId: UUID,
+    /** The story the command continues. The server decides this; a client never names it. */
+    val correlationId: UUID,
+) {
+    companion object {
+        /** A command that starts a story of its own. */
+        fun startedBy(commandId: UUID): Provenance = Provenance(commandId, commandId)
+    }
+}
+
 /** Runs a command against its house's stream: load, decide, append. Throws a HouseError when refused. */
 fun interface HouseCommandExecutor {
-    fun execute(command: HouseCommand)
+    fun execute(command: HouseCommand, provenance: Provenance)
 }
+
+/**
+ * Another writer reached the stream first and the command was not applied.
+ *
+ * Not a `HouseError`: the decider refused nothing, and the same command tried again against the stream
+ * as it now stands may well be accepted. The executor retries a few times before giving up and throwing
+ * this, so seeing it means the stream is genuinely busy. See decision record 0035.
+ */
+class WriteConflict(val stream: String, val expectedVersion: Long) :
+    RuntimeException("$stream moved on from version $expectedVersion while the command was being decided")
 
 /** The server's clock, so that a use case can be tested at a chosen instant. */
 fun interface Clock {
@@ -63,7 +93,7 @@ fun interface PlayerTokens {
  * the shape the rest of the system sees events in, whichever store they came from.
  */
 data class StoredEvent(
-    /** A UUID, unique across the world. */
+    /** The event id: a UUID, unique across the world. What a consumer deduplicates by. */
     val id: String,
     /** `villages.<aggregate>.<verb>.v<n>`, as catalogued in docs/EVENTS.md. */
     val type: String,
@@ -75,6 +105,10 @@ data class StoredEvent(
     val time: Instant,
     /** The event's data as the store holds it, JSON text. What the debug panel opens. */
     val data: String,
+    /** The story this event belongs to. Everything that followed from one command shares it. See 0035. */
+    val correlationId: String,
+    /** What directly caused it: for an event from a command, that command's id. See 0035. */
+    val causationId: String,
     val event: HouseEvent,
 )
 

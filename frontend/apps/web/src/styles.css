@@ -662,6 +662,16 @@ a.trees__tab:hover {
   color: var(--ink-soft);
 }
 
+/* The story an event belongs to. Two events of one command wear the same tag, which is the whole
+   point of it: a founding taken from a choice reads as one thing. See docs/adr/0035. */
+.events__story {
+  margin-right: 0.35rem;
+  padding: 0 0.25rem;
+  border-radius: 2px;
+  color: var(--ink-soft);
+  background: rgba(157, 124, 42, 0.16);
+}
+
 .events__json {
   margin: 0.25rem 0 0.4rem;
   padding: 0.4rem;

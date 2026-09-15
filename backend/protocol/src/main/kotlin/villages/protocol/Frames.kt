@@ -92,7 +92,12 @@ data class SubscribeCells(val cells: List<String>) : ClientFrame
 
 data class UnsubscribeCells(val cells: List<String>) : ClientFrame
 
-/** A command with a client-chosen id, so the answer can be matched to it. */
+/**
+ * A command with a client-chosen id, so the answer can be matched to it.
+ *
+ * The id is a UUID, and the gateway refuses anything else: it becomes the causation id of every event the
+ * command writes, and an identity a consumer can rely on has to be one. See decision record 0035.
+ */
 data class Command(val commandId: String, val command: CommandPayload) : ClientFrame
 
 data class Ping(val t0: Long) : ClientFrame
@@ -183,6 +188,10 @@ data class TakenOver(val message: String) : ServerFrame
  * One stored event, as stored: the envelope and the data, for a client that asked to watch. `eventType` is
  * the catalogued CloudEvent type, `time` the server's clock in milliseconds, `data` the event's own fields.
  * Generic on purpose: it carries any event the catalogue ever lists.
+ *
+ * `id` is the event's own identity; `correlationId` the story it belongs to, which everything following
+ * from one command shares; `causationId` what directly caused it, which for an event from a command is
+ * that command's id. See decision record 0035.
  */
 data class EventFrame(
     val id: String,
@@ -190,6 +199,8 @@ data class EventFrame(
     val stream: String,
     val streamVersion: Long,
     val time: Long,
+    val correlationId: String,
+    val causationId: String,
     val data: JsonNode,
 ) : ServerFrame
 

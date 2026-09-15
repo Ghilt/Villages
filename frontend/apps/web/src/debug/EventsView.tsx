@@ -6,7 +6,7 @@ import type { BannerSpec, EventFrame } from '@villages/protocol';
 import { clampBoundsToWorld } from '../map/sheet';
 import { gateway, gatewayState, watchGateway } from '../net/gateway';
 import { seedHouses } from '../net/seed';
-import { atToClock, note } from './log';
+import { atToClock, note, shortId } from './log';
 
 interface EventsViewProps {
   map: maplibregl.Map | null;
@@ -57,8 +57,12 @@ export function EventsView({ map }: EventsViewProps) {
   const foundHere = () => {
     if (map === null) return;
     const centre = map.getCenter();
-    const commandId = `c-${Date.now().toString(36)}`;
-    note('command', `founding a house at ${centre.lat.toFixed(3)}, ${centre.lng.toFixed(3)} as ${commandId}`);
+    // A UUID, because this id becomes the causation of the events the command writes. See 0035.
+    const commandId = crypto.randomUUID();
+    note(
+      'command',
+      `founding a house at ${centre.lat.toFixed(3)}, ${centre.lng.toFixed(3)} as ${shortId(commandId)}`,
+    );
     gateway().send({
       type: 'command',
       commandId,
@@ -143,6 +147,11 @@ function EventLine({ event }: { event: EventFrame }) {
         <summary>
           <span className="debug__when">{atToClock(event.time)}</span>
           <span className="debug__area">{saidPlainly(event.eventType)}</span>
+          {/* The story this belongs to. Events of one story carry one tag, which is how two events
+              from one command are seen to be two halves of the same thing. See decision 0035. */}
+          <span className="events__story" title={`story ${event.correlationId}`}>
+            {shortId(event.correlationId)}
+          </span>
           <span className="events__stream">
             {event.stream.slice(0, 14)}… v{event.streamVersion}
           </span>

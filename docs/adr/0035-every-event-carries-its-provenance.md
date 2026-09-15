@@ -1,6 +1,6 @@
 # 0035. Every event carries its provenance: an event id, a correlation id and a causation id
 
-- Status: proposed
+- Status: accepted
 - Date: 2026-09-15
 
 ## Context

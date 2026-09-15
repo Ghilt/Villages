@@ -13,13 +13,17 @@ dependencies {
     implementation(platform(libs.occurrent.bom))
     implementation(platform(libs.spring.boot.dependencies))
     implementation(libs.occurrent.eventstore.api)
-    implementation(libs.occurrent.application.service)
-    implementation(libs.occurrent.decider)
     implementation(libs.occurrent.converter.jackson3)
+    // The executor builds its own envelopes, so the CloudEvent builder is ours to name. See 0035.
+    implementation(libs.cloudevents.core)
     implementation(libs.jackson.module.kotlin)
     implementation(libs.occurrent.subscription.api)
     // In memory until MongoDB exists, behind the same ports. See the session note and increment 0.8.
     implementation(libs.occurrent.eventstore.inmemory)
     implementation(libs.occurrent.subscription.inmemory)
 
+    // Occurrent's application service and its decider DSL: what the executor used to be built on, kept
+    // for the smoke test of increment 0.7, which still proves the library works as the plan assumed.
+    testImplementation(libs.occurrent.application.service)
+    testImplementation(libs.occurrent.decider)
 }

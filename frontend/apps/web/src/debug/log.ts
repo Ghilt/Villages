@@ -45,6 +45,16 @@ export function watchNotes(listener: () => void): () => void {
   };
 }
 
+/**
+ * As much of an id as tells one apart from another on a screen.
+ *
+ * Eight characters of a UUID, which is what the panel shows of a player, a command and a story alike, so
+ * that a causation id on an event and the command line that caused it read as the same thing.
+ */
+export function shortId(id: string): string {
+  return id.slice(0, 8);
+}
+
 /** The clock time of a note, to the second, which is the resolution anybody reads a log at. */
 export function atToClock(at: number): string {
   const when = new Date(at);

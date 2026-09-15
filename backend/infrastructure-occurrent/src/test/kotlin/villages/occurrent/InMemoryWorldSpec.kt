@@ -1,13 +1,18 @@
 package villages.occurrent
 
+import io.cloudevents.CloudEvent
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import org.occurrent.eventstore.api.blocking.EventStore
+import org.occurrent.eventstore.api.blocking.EventStream
+import villages.application.Provenance
 import villages.application.Start
 import villages.application.StoredEvent
+import villages.application.WriteConflict
 import villages.domain.Banner
 import villages.domain.Charge
 import villages.domain.Division
@@ -42,12 +47,16 @@ class InMemoryWorldSpec : StringSpec({
         name = HouseName("Hollin"),
     )
 
+    val commandId = UUID.fromString("1c000001-0000-4000-8000-00000000000a")
+    val story = UUID.fromString("57000000-0000-4000-8000-0000000000ff")
+    val sent = Provenance(commandId = commandId, correlationId = story)
+
     "a command run through the port is stored as its catalogued type and delivered on the feed" {
         InMemoryWorld().use { world ->
             val delivered = mutableListOf<StoredEvent>()
             val arrived = CountDownLatch(1)
             world.feed.subscribe(Start.FROM_NOW) { delivered += it; arrived.countDown() }.use {
-                world.executor.execute(ravenscar)
+                world.executor.execute(ravenscar, sent)
 
                 arrived.await(5, TimeUnit.SECONDS) shouldBe true
                 val stored = delivered.single()
@@ -61,12 +70,62 @@ class InMemoryWorldSpec : StringSpec({
         }
     }
 
+    "and it carries where it came from: its own id, the story it belongs to, and what caused it" {
+        InMemoryWorld().use { world ->
+            val delivered = mutableListOf<StoredEvent>()
+            val arrived = CountDownLatch(1)
+            world.feed.subscribe(Start.FROM_NOW) { delivered += it; arrived.countDown() }.use {
+                world.executor.execute(ravenscar, sent)
+
+                arrived.await(5, TimeUnit.SECONDS) shouldBe true
+                val stored = delivered.single()
+                stored.correlationId shouldBe story.toString()
+                stored.causationId shouldBe commandId.toString()
+                // The event id is the store's own, and is neither of those: three ids, three questions.
+                UUID.fromString(stored.id) shouldBe UUID.fromString(stored.id)
+                (stored.id == stored.causationId) shouldBe false
+            }
+        }
+    }
+
+    "the provenance is on the envelope and not in the data, which stays the event's own fields" {
+        InMemoryWorld().use { world ->
+            world.executor.execute(ravenscar, sent)
+
+            val written = world.store.read(ravenscar.houseId.stream).eventList().single()
+            written.getExtension(HouseEvents.CORRELATION_ID) shouldBe story.toString()
+            written.getExtension(HouseEvents.CAUSATION_ID) shouldBe commandId.toString()
+            String(written.data!!.toBytes()).contains("correlation") shouldBe false
+        }
+    }
+
     "the decider's refusal comes back through the port as itself" {
         InMemoryWorld().use { world ->
-            world.executor.execute(ravenscar)
+            world.executor.execute(ravenscar, sent)
 
-            shouldThrow<HouseError.AlreadyFounded> { world.executor.execute(ravenscar) }
+            shouldThrow<HouseError.AlreadyFounded> { world.executor.execute(ravenscar, sent) }
             world.store.read(ravenscar.houseId.stream).events().count() shouldBe 1
+        }
+    }
+
+    "a stream that will not stand still is retried, and then given up on as a conflict" {
+        InMemoryWorld().use { world ->
+            // A store whose reads disagree with its writes about where the stream stands, which is what
+            // losing a race looks like from inside the executor: the write condition is never fulfilled.
+            val contested = object : EventStore by world.store {
+                override fun read(streamId: String): EventStream<CloudEvent> {
+                    val held = world.store.read(streamId)
+                    return object : EventStream<CloudEvent> by held {
+                        override fun version(): Long = held.version() + 1
+                    }
+                }
+            }
+            val executor = OccurrentHouseCommandExecutor(contested, world.converter)
+
+            val conflict = shouldThrow<WriteConflict> { executor.execute(ravenscar, sent) }
+
+            conflict.stream shouldBe ravenscar.houseId.stream
+            world.store.read(ravenscar.houseId.stream).events().count() shouldBe 0
         }
     }
 
@@ -75,7 +134,7 @@ class InMemoryWorldSpec : StringSpec({
             var heard = 0
             world.feed.subscribe(Start.FROM_NOW) { heard += 1 }.close()
 
-            world.executor.execute(ravenscar)
+            world.executor.execute(ravenscar, sent)
             Thread.sleep(200)
 
             heard shouldBe 0
@@ -84,14 +143,14 @@ class InMemoryWorldSpec : StringSpec({
 
     "a feed from the beginning hands over what the store already holds, then what follows" {
         InMemoryWorld().use { world ->
-            world.executor.execute(ravenscar)
+            world.executor.execute(ravenscar, sent)
 
             val caughtUp = mutableListOf<StoredEvent>()
             val bothArrived = CountDownLatch(2)
             world.feed.subscribe(Start.FROM_THE_BEGINNING) { caughtUp += it; bothArrived.countDown() }.use {
                 caughtUp.map { event -> event.stream } shouldBe listOf(ravenscar.houseId.stream)
 
-                world.executor.execute(hollin)
+                world.executor.execute(hollin, sent)
 
                 bothArrived.await(5, TimeUnit.SECONDS) shouldBe true
                 caughtUp.map { event -> event.stream } shouldBe
@@ -102,7 +161,7 @@ class InMemoryWorldSpec : StringSpec({
 
     "a feed from now hears nothing of what came before it" {
         InMemoryWorld().use { world ->
-            world.executor.execute(ravenscar)
+            world.executor.execute(ravenscar, sent)
 
             val heard = mutableListOf<StoredEvent>()
             world.feed.subscribe(Start.FROM_NOW) { heard += it }.use {
@@ -115,7 +174,7 @@ class InMemoryWorldSpec : StringSpec({
 
     "an event delivered twice is still one event, because the replay and the live feed may overlap" {
         InMemoryWorld().use { world ->
-            world.executor.execute(ravenscar)
+            world.executor.execute(ravenscar, sent)
 
             val heard = mutableListOf<StoredEvent>()
             world.feed.subscribe(Start.FROM_THE_BEGINNING) { heard += it }.use {

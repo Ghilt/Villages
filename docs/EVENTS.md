@@ -20,6 +20,12 @@ counted from the first day of year one; and `recordedAt`, the server's instant w
 They differ whenever the past is played. The map at a moment and the timeline order by the first; the
 store and the house-spirit order by the second. See decision record 0027.
 
+Every event also carries **where it came from**, on its envelope rather than in its data: its own
+**event id**, the **correlation id** of the story it belongs to, and the **causation id** of the
+message that directly caused it. Everything written by one command shares a correlation id, and a
+causation id is that command's id, which the debug log carries because commands are not stored. See
+decision record 0035.
+
 An event that puts something on the map, or moves it, carries **where** (a place in our world) and
 **how much it matters** (a significance from nothing to a hundred). It never carries a map cell: which
 tile a place falls in is worked out downstream, by the one shared function in `villages.protocol.Cell`,
