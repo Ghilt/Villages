@@ -7,10 +7,10 @@ import { DOT_RADIUS, detailForZoom, idleMotionAt, markerHeightForZoom, phaseFor 
 import type { SpriteDetail } from './spriteDetail';
 import type { CameraSource, MapSprite, SpriteRenderer } from './SpriteRenderer';
 
-/** Both shapes are drawn once, larger than they are ever shown, and scaled down to stay crisp. */
+/** Every shape is drawn once, larger than it is ever shown, and scaled down to stay crisp. */
 const TEXTURE = {
   markerHeight: 96,
-  markerWidth: 78,
+  markerWidth: 90,
   dotDiameter: 32,
   candidateHeight: 64,
   candidateWidth: 44,
@@ -50,15 +50,34 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
 
   function buildTextures(): { marker: Texture; dot: Texture; candidate: Texture } {
     const { markerWidth: w, markerHeight: h, dotDiameter: d } = TEXTURE;
-    const shoulder = h * 0.52;
 
-    // A shield, standing on its point, drawn in white so that a tint can colour it per house.
+    // A castle: two towers with a battlemented wall between them, drawn in white so that a tint can
+    // colour it per house. One outline, because a tinted sprite with seams in it shows them.
+    const tower = 24;
+    const towerTop = h * 0.3;
+    const wallTop = h * 0.56;
+    const crenel = 9;
     const marker = new Graphics()
-      .moveTo(2, 2)
-      .lineTo(w - 2, 2)
-      .lineTo(w - 2, shoulder)
-      .quadraticCurveTo(w - 2, h - 8, w / 2, h - 2)
-      .quadraticCurveTo(2, h - 8, 2, shoulder)
+      .moveTo(2, h - 2)
+      .lineTo(2, towerTop)
+      .lineTo(2 + tower / 3, towerTop)
+      .lineTo(2 + tower / 3, towerTop - crenel)
+      .lineTo(2 + (tower * 2) / 3, towerTop - crenel)
+      .lineTo(2 + (tower * 2) / 3, towerTop)
+      .lineTo(2 + tower, towerTop)
+      .lineTo(2 + tower, wallTop)
+      .lineTo(w / 2 - 8, wallTop)
+      .lineTo(w / 2 - 8, wallTop - crenel)
+      .lineTo(w / 2 + 8, wallTop - crenel)
+      .lineTo(w / 2 + 8, wallTop)
+      .lineTo(w - 2 - tower, wallTop)
+      .lineTo(w - 2 - tower, towerTop)
+      .lineTo(w - 2 - (tower * 2) / 3, towerTop)
+      .lineTo(w - 2 - (tower * 2) / 3, towerTop - crenel)
+      .lineTo(w - 2 - tower / 3, towerTop - crenel)
+      .lineTo(w - 2 - tower / 3, towerTop)
+      .lineTo(w - 2, towerTop)
+      .lineTo(w - 2, h - 2)
       .closePath()
       .fill(0xffffff)
       .stroke({ width: 4, color: 0x4a4034, alpha: 0.85 });
@@ -106,7 +125,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       entry.sprite.scale.set(CANDIDATE_HEIGHT / TEXTURE.candidateHeight);
     } else if (detail === 'marker') {
       entry.sprite.texture = textures.marker;
-      // The point of the shield is the seat, so the sprite hangs from its own bottom edge.
+      // The castle stands on the seat, so the sprite hangs from its own bottom edge.
       entry.sprite.anchor.set(0.5, 1);
       entry.sprite.scale.set(markerHeightForZoom(zoom) / TEXTURE.markerHeight);
     } else {

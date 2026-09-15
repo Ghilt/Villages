@@ -13,6 +13,7 @@ import { note } from './debug/log';
 import { gateway, gatewayState, watchGateway } from './net/gateway';
 import { followMap } from './net/followMap';
 import { HudShell } from './hud/HudShell';
+import { InfluenceOverlay } from './influence/InfluenceOverlay';
 import { StoodDown } from './hud/StoodDown';
 import { MapView } from './map/MapView';
 import { DebugMapPanel } from './map/DebugMapPanel';
@@ -78,9 +79,10 @@ export function App({ master }: AppProps) {
   const [map, setMap] = useState<maplibregl.Map | null>(null);
   const [renderer, setRenderer] = useState(DEFAULT_RENDERER);
   const heard = useSyncExternalStore(watchGateway, gatewayState);
+  const inView = useMemo(() => housesInView(heard.houses), [heard.houses]);
   const sprites = useMemo(
-    () => [...housesInView(heard.houses).map(toSprite), ...candidatesOf(heard.yourChoice)],
-    [heard.houses, heard.yourChoice],
+    () => [...inView.map(toSprite), ...candidatesOf(heard.yourChoice)],
+    [inView, heard.yourChoice],
   );
 
   // The one connection to the gateway, opened as the app mounts.
@@ -118,6 +120,7 @@ export function App({ master }: AppProps) {
       {import.meta.env.DEV && <WorktreeTabs />}
       {map !== null && <SpriteOverlay map={map} sprites={sprites} />}
       <AreaOverlay map={map} worldRoot={worldRoot} />
+      <InfluenceOverlay map={map} houses={inView} />
       <HudShell />
       <Parchment />
       <StoodDown />

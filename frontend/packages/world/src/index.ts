@@ -68,6 +68,8 @@ export {
 } from './area.ts';
 export type { EnclosedPixels, Fence, FencePart, MasterGrid, PixelSpan, PixelWindow } from './area.ts';
 
+export { MOST_GROUND, influenceZoneAround } from './influence.ts';
+
 export { DEFAULT_MASTER, isSafeMasterName, masterNameOf, worldDirOf } from './masters.ts';
 
 export { fillUnassigned } from './fill.ts';

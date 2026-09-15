@@ -48,7 +48,8 @@ spirit earned in all the others.
 
 On the map a house has **influence zones**: geographic areas drawn as fences. The most common is plainly
 owned or controlled territory; others will be other kinds of reach. This is the second thing on the map
-after a seat.
+after a seat, and the first of them exists: the ground about a seat, a fixed reach worked out from the
+seat rather than stored. What the world has to say about how far a house reaches is still to come.
 
 ## The chrono-engine
 
