@@ -66,6 +66,26 @@ program says what it is doing. It grows with every increment that adds behaviour
 - [x] Areas: draw one on the map, see what terrain it encloses, delete it. A spike on the component
   an influence zone, a holding and a neighbour's reach all want. See experiment 0002 and decision 0032
 
+## Also now: the first gameplay loop
+
+The first thing a player is asked, and the first thing they do: a choice put to them on a parchment
+over the map, three seats to found their house at, and the house founded from the one they take. Planned
+in `docs/plans/2026-09-15-first-gameplay-loop.md`; how a mechanic becomes events, so that the next one
+needs no explaining, is `docs/MECHANICS.md`. Decision records 0034, 0035 and 0036; experiment 0004.
+
+- [x] 0. The plan, the method, the decisions proposed, the experiment opened
+- [ ] 1. Provenance on every event: a correlation id and a causation id beside the event id
+- [ ] 2. The domain of choices: a house can be given a choice, and take one option of it
+- [ ] 3. Restart: the debug panel starts a player over
+- [ ] 4. The loop on the wire: a new player is given three seats, and taking one founds the house
+- [ ] 5. The parchment, the three marks on the map, and the flight to the seat
+- [ ] 6. Wipe the world, from the debug panel
+- [ ] 7. The castle, and the fence of ground about it
+- [ ] 8. Selecting a castle, and the inspector on the left
+- [ ] 9. What it taught: the experiment closed, the method corrected
+
+Phase 1's 1.13 and 1.15 below land through this list rather than on their own.
+
 ## Next: Phase 1, the walking skeleton
 
 Found a House. Open the app, see the map, found a house at a chosen spot with a generated banner, see the banner and

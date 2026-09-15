@@ -140,11 +140,15 @@ in the debug panel.
 Read `docs/ROADMAP.md` under "Now" at the start of a session, and the last few commits, to see where things
 stand.
 
+Before adding or changing a mechanic, read `docs/MECHANICS.md`. It says how a mechanic Adam describes
+becomes commands, events, frames, projections and panel lines, so that he does not have to say it each
+time.
+
 ## Layout
 
 ```
 CLAUDE.md  README.md  debug-quick-start.{ps1,cmd}  .claude/settings.json  scripts/check.{ps1,sh}
-docs/       VISION GLOSSARY ARCHITECTURE ROADMAP TESTING EVENTS, adr/, experiments/, plans/
+docs/       VISION GLOSSARY ARCHITECTURE ROADMAP TESTING EVENTS MECHANICS, adr/, experiments/, plans/
 contracts/  fixtures/*.json shared by the Kotlin and TypeScript protocol tests
 infra/      docker-compose.yml (MongoDB replica set, RabbitMQ)
 backend/    Gradle multi-module: domain, application, protocol, infrastructure-occurrent, infrastructure-rabbit,
