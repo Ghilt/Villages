@@ -2,9 +2,10 @@ import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
 import { housesInView } from '@villages/client-core';
-import type { HouseView } from '@villages/protocol';
+import type { ChoiceView, HouseView } from '@villages/protocol';
 
 import { AreaOverlay } from './areas/AreaOverlay';
+import { Parchment } from './choice/Parchment';
 import { DebugPanel } from './debug/DebugPanel';
 import { Desk } from './desk/Desk';
 import { WorktreeTabs } from './debug/WorktreeTabs';
@@ -28,8 +29,45 @@ function toSprite(house: HouseView): MapSprite {
     id: house.id,
     at: { lng: house.seat.lon, lat: house.seat.lat },
     tint: tinctureColour(house.banner.field),
+    kind: 'house',
   };
 }
+
+/** The gold of the interface, so a place being offered reads as the world asking rather than as a house. */
+const OFFERED = 0x9d7c2a;
+
+/**
+ * The seats a pending choice is offering, as marks on the map.
+ *
+ * They are there so that the three places can be looked at before one is taken: set the parchment aside,
+ * pull back, and see where the world is proposing to put you.
+ */
+function candidatesOf(choice: ChoiceView | null): MapSprite[] {
+  if (choice === null) {
+    return [];
+  }
+  return choice.options.flatMap((option) =>
+    option.effect.kind === 'foundAt'
+      ? [
+          {
+            id: `offered:${option.id}`,
+            at: { lng: option.effect.seat.lon, lat: option.effect.seat.lat },
+            tint: OFFERED,
+            kind: 'candidate' as const,
+          },
+        ]
+      : [],
+  );
+}
+
+/**
+ * How close the camera comes when the house is founded.
+ *
+ * Not a matter of taste: a new house has the founding significance, and `coarsestZoom` makes that zoom 8,
+ * so a flight that stopped at 7 would land on a seat with nothing standing on it. Past 8 the sprite is
+ * drawn as a marker rather than a dot, which is what arriving at your own house should look like.
+ */
+const FOUNDING_ZOOM = 8.5;
 
 interface AppProps {
   /** Which hand-painted master this page load is drawing. Decided once, in main.tsx. */
@@ -40,7 +78,10 @@ export function App({ master }: AppProps) {
   const [map, setMap] = useState<maplibregl.Map | null>(null);
   const [renderer, setRenderer] = useState(DEFAULT_RENDERER);
   const heard = useSyncExternalStore(watchGateway, gatewayState);
-  const sprites = useMemo(() => housesInView(heard.houses).map(toSprite), [heard.houses]);
+  const sprites = useMemo(
+    () => [...housesInView(heard.houses).map(toSprite), ...candidatesOf(heard.yourChoice)],
+    [heard.houses, heard.yourChoice],
+  );
 
   // The one connection to the gateway, opened as the app mounts.
   useEffect(() => {
@@ -49,6 +90,16 @@ export function App({ master }: AppProps) {
 
   // The gateway follows the camera: the cells covering the view, at the view's own zoom.
   useEffect(() => (map === null ? undefined : followMap(map)), [map]);
+
+  // When the house comes to be, the camera goes to it. It is the one moment in the whole world so far
+  // that is worth being taken to, and the seat was chosen from a parchment rather than from the map.
+  const seat = heard.yourHouse?.seat;
+  useEffect(() => {
+    if (map !== null && seat !== undefined) {
+      note('camera', `flying to the seat at ${seat.lat.toFixed(3)}, ${seat.lon.toFixed(3)}`);
+      map.flyTo({ center: [seat.lon, seat.lat], zoom: Math.max(map.getZoom(), FOUNDING_ZOOM) });
+    }
+  }, [map, seat]);
 
   useEffect(() => {
     if (map !== null) {
@@ -68,6 +119,7 @@ export function App({ master }: AppProps) {
       {map !== null && <SpriteOverlay map={map} sprites={sprites} />}
       <AreaOverlay map={map} worldRoot={worldRoot} />
       <HudShell />
+      <Parchment />
       <StoodDown />
       <Timeline />
       <div className="rail">

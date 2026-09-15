@@ -10,6 +10,12 @@ export interface MapSprite {
   at: LngLat;
   /** The tincture of the field, as a colour, until real banners arrive. */
   tint: number;
+  /**
+   * What sort of mark this is. A house is a thing standing in the world and fades out when the camera
+   * is too far back to make it out; a candidate is a place being offered to the player right now, and
+   * is drawn at every zoom because it is the thing they are being asked about.
+   */
+  kind: 'house' | 'candidate';
 }
 
 /**

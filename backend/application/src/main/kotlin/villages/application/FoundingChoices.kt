@@ -53,17 +53,19 @@ object FoundingChoices {
             val inRegion = Gazetteer.seats.filter { it.region == region }
             inRegion[rolling.nextInt(inRegion.size)]
         }
+        // Drawn without replacement: three destinies wearing two names between them is not three.
+        val names = NAMES.toMutableList()
 
         return Choice(
             id = ChoiceId(idFor(player, "choice")),
             prompt = "Where shall the house raise its seat?",
             options = chosen.mapIndexed { index, seat ->
-                val name = HouseName(NAMES[rolling.nextInt(NAMES.size)])
+                val name = HouseName(names.removeAt(rolling.nextInt(names.size)))
                 val banner = bannerFrom(rolling)
                 Option(
                     id = OptionId(idFor(player, "option:$index")),
                     label = "${seat.place}, in ${seat.region}",
-                    detail = "${seat.detail} The house would take the name $name, ${blazon(banner)}.",
+                    detail = "${seat.detail} The house would take the name ${name.value}, ${blazon(banner)}.",
                     effect = Effect.FoundAt(
                         seat = wobbled(seat.where, rolling),
                         name = name,

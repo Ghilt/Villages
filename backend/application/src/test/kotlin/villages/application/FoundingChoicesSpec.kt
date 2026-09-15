@@ -28,10 +28,28 @@ class FoundingChoicesSpec : StringSpec({
         for (option in choice.options) {
             val founding = option.effect.shouldBeInstanceOf<Effect.FoundAt>()
             option.label.isNotBlank() shouldBe true
-            option.detail.contains(founding.name.value) shouldBe true
+            // The name as a reader would see it, not as Kotlin prints a value class.
+            option.detail.contains("the name ${founding.name.value},") shouldBe true
+            option.detail.contains("HouseName") shouldBe false
             // The rule of tincture: a charge of a metal on a field of a colour, and the reverse. The
             // banner's own constructor enforces it, so building one at all is the assertion.
             (founding.banner.field.isMetal != founding.banner.chargeTincture.isMetal) shouldBe true
+        }
+    }
+
+    "and no two of them wear the same name" {
+        val choice = FoundingChoices.forPlayer(adam)
+
+        choice.options.map { it.effect.shouldBeInstanceOf<Effect.FoundAt>().name }.distinct() shouldHaveSize
+            FoundingChoices.OFFERED
+    }
+
+    "which holds for every player, not just one" {
+        for (nth in 1..200) {
+            val choice = FoundingChoices.forPlayer(PlayerId(UUID.nameUUIDFromBytes("player-$nth".toByteArray())))
+
+            choice.options.map { it.effect.shouldBeInstanceOf<Effect.FoundAt>().name }.distinct() shouldHaveSize
+                FoundingChoices.OFFERED
         }
     }
 

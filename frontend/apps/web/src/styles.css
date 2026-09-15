@@ -269,6 +269,120 @@ body,
 }
 
 /*
+ * A choice, lying over the map as a sheet of parchment. Above the timeline and below the rail, wide
+ * enough for three options to read as sentences rather than as buttons. It sets aside to a corner
+ * rather than closing, because the map is what the choice is about. See docs/adr/0034.
+ */
+.parchment {
+  position: absolute;
+  left: 50%;
+  bottom: 4.5rem;
+  transform: translateX(-50%);
+  z-index: 4;
+  width: min(46rem, calc(100% - 3rem));
+  padding: 1rem 1.15rem 1.15rem;
+  background: var(--parchment);
+  border: 1px solid var(--parchment-edge);
+  border-radius: 3px;
+  box-shadow: 0 4px 18px var(--shadow);
+}
+
+.parchment--folded {
+  left: auto;
+  right: 24rem;
+  bottom: 1.25rem;
+  width: auto;
+  padding: 0.45rem 0.9rem;
+  transform: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.parchment__head {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: 0.7rem;
+}
+
+.parchment__prompt {
+  flex: 1;
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: normal;
+  letter-spacing: 0.02em;
+}
+
+.parchment__fold,
+.parchment__option {
+  font-family: inherit;
+  color: var(--ink);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.parchment__fold {
+  flex: none;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.parchment__options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* One under the other once three across would make each a column of single words. */
+@media (max-width: 52rem) {
+  .parchment__options {
+    grid-template-columns: 1fr;
+  }
+}
+
+.parchment__option {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  width: 100%;
+  height: 100%;
+  padding: 0.7rem 0.8rem;
+  text-align: left;
+  border: 1px solid var(--parchment-edge);
+  border-radius: 2px;
+  background: rgba(157, 124, 42, 0.05);
+}
+
+.parchment__option:hover:not(:disabled) {
+  border-color: var(--gold);
+  background: rgba(157, 124, 42, 0.12);
+}
+
+.parchment__option:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.parchment__label {
+  font-size: 0.95rem;
+}
+
+.parchment__detail {
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+/*
  * The scaffolding down the right-hand side: which world is drawn and how, then what the program thinks
  * is happening. A column rather than two panels at fixed offsets, because the top one changes height
  * with what it has to say and the one below it would then be under or over it.

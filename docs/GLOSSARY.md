@@ -37,7 +37,7 @@ in the source.
 | **Key figure** | One of the few named members of a house the player acts through. A house has uncounted members behind them, so losing every key figure is a low power state, never a loss. Not yet in the source. |
 | **Master pixel** | One pixel of `world/master/terrain.png`, the image the world is painted in by hand: one terrain class, about 1.2 kilometres at the equator, and the unit an area is counted in. Read back out of the zoom 7 tiles, which carry them exactly. `MasterGrid` |
 | **Option** | One of the two to four things a choice offers: a label, a line of detail, and its effect. `Option` |
-| **Parchment** | How a choice is put to the player: a sheet lying over the map with the prompt and one button an option, which folds to a corner and is gone once the choice is taken. Not yet in the source; arrives with the first gameplay loop. |
+| **Parchment** | How a choice is put to the player: a sheet lying over the map with the prompt and one button an option, which folds to a corner and is gone once the choice is taken. `Parchment` |
 | **Pin** | A fact the chrono-engine has committed the world to at a world-time - a cathedral exists here in 1247 - which obliges the past or the future to make it true. Shown on the timeline as something cloudy that fades. Not yet in the source. |
 | **Player** | The human. Identified for now by an anonymous token generated in the browser, and playing from one place at a time. `PlayerId` |
 | **Player-time** | The order things were actually done in at a keyboard: the event store's own order. What the house-spirit and arbitration between players run on. Distinct from world-time. On every event as `recordedAt`, the server's instant. |

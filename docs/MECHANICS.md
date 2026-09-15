@@ -63,7 +63,9 @@ something" takes.
 3. A projection keeps the pending choice per player and the gateway sends it as `yourChoice`, on
    hello and whenever it changes, with null once it is gone.
 4. The **parchment** renders any choice from its words: the prompt, and one button an option. Nothing
-   in the interface knows what kind of choice it is showing.
+   in the interface knows what kind of choice it is showing, so a new kind of choice costs it nothing.
+   A `foundAt` effect also puts a mark on the map at the seat it offers, which is the one place the
+   interface reads an effect at all.
 5. The player picks. The browser sends `takeAction { choiceId, optionId }` with a fresh command id.
 6. `decide` records `HouseTookAction` **and the effect's consequences from the same decision**: a
    founding option yields `HouseTookAction` then `HouseFounded`, appended atomically, consecutive

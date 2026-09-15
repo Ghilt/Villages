@@ -12,7 +12,12 @@ const TEXTURE = {
   markerHeight: 96,
   markerWidth: 78,
   dotDiameter: 32,
+  candidateHeight: 64,
+  candidateWidth: 44,
 } as const;
+
+/** How tall a candidate's mark is drawn on the screen, whatever the camera is doing. */
+const CANDIDATE_HEIGHT = 26;
 
 /** What the development probe reports about one sprite. */
 export interface DrawnSprite {
@@ -38,12 +43,12 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
   const stage = new Container();
   const entries = new Map<string, Entry>();
 
-  let textures: { marker: Texture; dot: Texture } | null = null;
+  let textures: { marker: Texture; dot: Texture; candidate: Texture } | null = null;
   let drawnDetail: SpriteDetail | null = null;
   let started = 0;
   let disposed = false;
 
-  function buildTextures(): { marker: Texture; dot: Texture } {
+  function buildTextures(): { marker: Texture; dot: Texture; candidate: Texture } {
     const { markerWidth: w, markerHeight: h, dotDiameter: d } = TEXTURE;
     const shoulder = h * 0.52;
 
@@ -67,12 +72,26 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
         alpha: 0.8,
       });
 
+    // A pennant on a staff: a place the world is offering, rather than a house that stands there.
+    const { candidateWidth: cw, candidateHeight: ch } = TEXTURE;
+    const candidate = new Graphics()
+      .moveTo(4, 2)
+      .lineTo(cw - 2, 12)
+      .lineTo(4, 22)
+      .closePath()
+      .fill(0xffffff)
+      .rect(0, 0, 5, ch)
+      .fill(0xffffff)
+      .stroke({ width: 3, color: 0x4a4034, alpha: 0.85 });
+
     const built = {
       marker: app.renderer.generateTexture(marker),
       dot: app.renderer.generateTexture(dot),
+      candidate: app.renderer.generateTexture(candidate),
     };
     marker.destroy();
     dot.destroy();
+    candidate.destroy();
     return built;
   }
 
@@ -80,7 +99,12 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
     if (textures === null) {
       return;
     }
-    if (detail === 'marker') {
+    if (entry.spec.kind === 'candidate') {
+      entry.sprite.texture = textures.candidate;
+      // The staff's foot is the place, so the pennant flies above it.
+      entry.sprite.anchor.set(0, 1);
+      entry.sprite.scale.set(CANDIDATE_HEIGHT / TEXTURE.candidateHeight);
+    } else if (detail === 'marker') {
       entry.sprite.texture = textures.marker;
       // The point of the shield is the seat, so the sprite hangs from its own bottom edge.
       entry.sprite.anchor.set(0.5, 1);
@@ -104,7 +128,9 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
     drawnDetail = detail;
 
     for (const entry of entries.values()) {
-      if (detail === 'hidden') {
+      // A candidate is what the player is being asked about, so it is drawn however far back the
+      // camera is; a house fades out with the rest of the world's furniture.
+      if (detail === 'hidden' && entry.spec.kind !== 'candidate') {
         entry.sprite.visible = false;
         continue;
       }
@@ -117,7 +143,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
 
       if (detailChanged || !entry.sprite.visible) {
         dress(entry, detail, zoom);
-      } else if (detail === 'marker') {
+      } else if (detail === 'marker' && entry.spec.kind === 'house') {
         entry.sprite.scale.set(markerHeightForZoom(zoom) / TEXTURE.markerHeight);
       }
 
@@ -125,7 +151,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       entry.sprite.visible = true;
       entry.sprite.x = point.x;
       entry.sprite.y = point.y - motion.lift;
-      entry.sprite.rotation = detail === 'marker' ? motion.tilt : 0;
+      entry.sprite.rotation = detail === 'marker' && entry.spec.kind === 'house' ? motion.tilt : 0;
     }
   }
 

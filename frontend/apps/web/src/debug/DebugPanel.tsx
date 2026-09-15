@@ -109,12 +109,12 @@ export function DebugPanel({ map, renderer, worldRoot }: DebugPanelProps) {
     // Animation frames stop entirely while the page is hidden, so the first frame back would otherwise
     // be recorded as a stall of however long it was in the background. It reads as a catastrophe and it
     // means nothing, so the clock starts again instead.
-    const restart = () => {
+    const startTheClockAgain = () => {
       if (document.visibilityState === 'visible') {
         last = performance.now();
       }
     };
-    document.addEventListener('visibilitychange', restart);
+    document.addEventListener('visibilitychange', startTheClockAgain);
 
     const tick = () => {
       const now = performance.now();
@@ -130,7 +130,7 @@ export function DebugPanel({ map, renderer, worldRoot }: DebugPanelProps) {
     requestAnimationFrame(tick);
     return () => {
       running = false;
-      document.removeEventListener('visibilitychange', restart);
+      document.removeEventListener('visibilitychange', startTheClockAgain);
     };
   }, []);
 

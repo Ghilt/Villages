@@ -78,7 +78,7 @@ needs no explaining, is `docs/MECHANICS.md`. Decision records 0034, 0035 and 003
 - [x] 2. The domain of choices: a house can be given a choice, and take one option of it
 - [x] 3. Restart: the debug panel starts a player over
 - [x] 4. The loop on the wire: a new player is given three seats, and taking one founds the house
-- [ ] 5. The parchment, the three marks on the map, and the flight to the seat
+- [x] 5. The parchment, the three marks on the map, and the flight to the seat
 - [ ] 6. Wipe the world, from the debug panel
 - [ ] 7. The castle, and the fence of ground about it
 - [ ] 8. Selecting a castle, and the inspector on the left
@@ -103,7 +103,7 @@ one rate-based ticker, and see other players' houses appear live and jiggle. Six
 - [x] 1.10 Houses on the map from the gateway, following the camera cell by cell, and a seed button in the debug panel
 - [x] 1.11 Command intake, end to end: a house founded over the socket comes back as its event, and as houseAppeared to whoever holds its cell
 - [ ] 1.12 The banner drawn
-- [ ] 1.13 Founding a house from the interface
+- [x] 1.13 Founding a house from the interface
 - [ ] 1.14 The ticker
 - [ ] 1.15 Inspecting a house, and the connection badge
 - [ ] 1.16 Two browsers, one house appearing in both, readable in both debug panels. This means **two
