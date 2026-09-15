@@ -2,10 +2,18 @@ package villages.domain
 
 import java.time.Instant
 
-/** The state of one house, folded from its events. */
+/**
+ * The state of one house, folded from its events.
+ *
+ * Both states carry the choice pending on the house, because a house is asked things before it exists:
+ * where to found itself is the first of them. See decision record 0034.
+ */
 sealed interface House {
-    /** No events yet: the state every stream starts in. */
-    data object NotFounded : House
+    /** The choice this house has to make, or null when it has none. */
+    val pending: Choice?
+
+    /** Nothing founded yet: the state every stream starts in, and a house can be asked things in it. */
+    data class NotFounded(override val pending: Choice? = null) : House
 
     data class Founded(
         val id: HouseId,
@@ -18,5 +26,6 @@ sealed interface House {
         /** The world-day it was founded on, and the instant that was recorded. */
         val foundedOn: WorldTime,
         val foundedAt: Instant,
+        override val pending: Choice? = null,
     ) : House
 }

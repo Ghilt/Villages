@@ -3,6 +3,8 @@ package villages.occurrent
 import org.occurrent.application.converter.typemapper.CloudEventTypeMapper
 import villages.domain.HouseEvent
 import villages.domain.HouseFounded
+import villages.domain.HouseGivenChoice
+import villages.domain.HouseTookAction
 import kotlin.reflect.KClass
 
 /**
@@ -16,6 +18,8 @@ import kotlin.reflect.KClass
 object HouseEventTypes : CloudEventTypeMapper<HouseEvent> {
     val rows: Map<KClass<out HouseEvent>, String> = mapOf(
         HouseFounded::class to "villages.house.founded.v1",
+        HouseGivenChoice::class to "villages.house.givenChoice.v1",
+        HouseTookAction::class to "villages.house.tookAction.v1",
     )
 
     private val byType: Map<String, KClass<out HouseEvent>> = rows.entries.associate { (klass, type) -> type to klass }

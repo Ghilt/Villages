@@ -35,6 +35,8 @@ and how far out it stays drawn is worked out from the significance. See decision
 
 - A type reads as villages, then the aggregate, then the event in the past tense, then the version. The first one is
   going to be `villages.house.founded.v1`.
+- The verb is camelCase when the fact takes more than one word: `givenChoice`, `tookAction`. The Kotlin class is
+  the aggregate and the same words in PascalCase, `HouseGivenChoice`, and a test holds the two to each other.
 - Adding an optional field keeps the version.
 - Any other change creates the next version. The old type stays in this catalogue forever, and stays handled when
   folding a stream.
@@ -47,4 +49,6 @@ One stream per house, addressed as house followed by its identifier.
 
 | Type | Payload | Meaning | Produced by | Consumers |
 |---|---|---|---|---|
-| `villages.house.founded.v1` | `houseId`, `player`, `name`, `seat`, `significance`, `banner`, `treasury`, `worldTime`, `recordedAt` | A player founded a house at a seat, with a name and a banner. It carries where and how much that matters; the tile it falls in is derived downstream. The treasury starts at nothing and earns at the founding rate. | `FoundHouse` | The map projection; the event bridge, and through it every gateway subscribed to a tile containing it |
+| `villages.house.founded.v1` | `houseId`, `player`, `name`, `seat`, `significance`, `banner`, `treasury`, `worldTime`, `recordedAt` | A player founded a house at a seat, with a name and a banner. It carries where and how much that matters; the tile it falls in is derived downstream. The treasury starts at nothing and earns at the founding rate. | `FoundHouse`, or `TakeAction` on an option that founds | The map projection; the event bridge, and through it every gateway subscribed to a tile containing it |
+| `villages.house.givenChoice.v1` | `houseId`, `player`, `choice`, `worldTime`, `recordedAt` | The world put a decision to this house: a prompt and two to four options, each carrying the effect taking it would have. The whole choice is recorded, so the roads not taken are history too. One is pending at a time. Nothing is on the map yet, so it carries no place. | `GiveChoice` | The choices projection, and through it the parchment the player reads |
+| `villages.house.tookAction.v1` | `houseId`, `player`, `choiceId`, `optionId`, `worldTime`, `recordedAt` | The house took one option of the choice it was given. What that option does follows from the same decision, as the next events on this stream, so an action and its consequence are never seen apart. What the option was is on the event that gave the choice. | `TakeAction` | The choices projection, which forgets the pending choice |

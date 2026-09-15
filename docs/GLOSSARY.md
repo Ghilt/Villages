@@ -7,14 +7,14 @@ in the source.
 | Term | Meaning |
 |---|---|
 | **Aggregate** | A consistency boundary with its own event stream. `House` is the only one so far. |
-| **Action** | Taking one option of the choice pending on a house: the house's answer, recorded as an event, with the option's effect following from the same decision. See decision record 0034. Not yet in the source; `TakeAction` and `HouseTookAction` arrive with the first gameplay loop. |
+| **Action** | Taking one option of the choice pending on a house: the house's answer, recorded as an event, with the option's effect following from the same decision. See decision record 0034. `TakeAction`, `HouseTookAction` |
 | **Area** | A closed region of the world: a fence, drawn as a line with an optional shade inside, which knows the terrain census of what it encloses. The shape an influence zone is drawn as, and the component anything else fenced reuses. See decision record 0032. `Area`, `Fence`, and `enclose` then `fenceAround` make one from a drawn path |
 | **Arrival** | A player saying hello. A player with no house and no choice pending is given the founding choice on arrival; a player with either is given nothing. Not yet in the source; `Arrival` arrives with the first gameplay loop. |
 | **Banner** | A house's heraldic device: a field of one or two tinctures, a division, and a charge. The visible identity of a house, shown in the interface and as its sprite on the map. `Banner` |
 | **Causation id** | The id of the message that directly caused an event: for an event from a command, the command's id, which the debug log carries because commands are not stored. On every event's envelope as the `causationid` extension, and on the `event` frame. See decision record 0035. `StoredEvent.causationId` |
 | **Cell** | A square of the world used to partition live updates and map queries: a quadkey at any zoom from 0 to 10, so a cell's ancestor is its prefix. Derived from a place wherever it is needed, never carried on an event. See decision record 0026. `Cell` |
 | **Charge** | The figure borne on a banner, such as a tower, a stag or a star. `Charge` |
-| **Choice** | A prompt and two to four options put to a house at a moment. One is pending at a time, until an action takes an option or a founding settles it. Shown to the player as a parchment. See decision record 0034. Not yet in the source; `Choice` and `HouseGivenChoice` arrive with the first gameplay loop. |
+| **Choice** | A prompt and two to four options put to a house at a moment. One is pending at a time, until an action takes an option or a founding settles it. Shown to the player as a parchment. See decision record 0034. `Choice`, `GiveChoice`, `HouseGivenChoice`, and `House.pending` is the one a house has |
 | **Chrono-engine** | The part of the game that rolls what can happen to a house at a moment in world-time, and that owns the pins which keep the world's history from contradicting itself. Described in `SETTING.md`; not yet in the source. |
 | **Command** | A request to change the world, named as an imperative: `FoundHouse`. It may be rejected. Commands are not stored. |
 | **Correlation id** | The id of the story an event belongs to. The first message of a story is its own correlation, and everything that follows from it carries the same; the server decides which story a command continues. On every event's envelope as the `correlationid` extension, and the debug panel tags each event line with it. See decision record 0035. `StoredEvent.correlationId` |
@@ -22,7 +22,7 @@ in the source.
 | **Delta** | An incremental change pushed to a client after its snapshot: a house appeared, or a house changed. |
 | **Desk** | The surface the map lies on: seen once the camera is pulled back past the fit zoom, where the sheet stops covering the window, and hidden above it. A drawn grain for now; later the player's workbench, with the house's papers on it. See decision record 0033. `Desk`, and `floorZoom` says how far back the camera may go |
 | **Division** | How the field of a banner is partitioned: plain, per pale, per fess, quarterly. `Division` |
-| **Effect** | What taking an option does, carried on the option itself so that a choice is self-describing. Today the only kind founds the house at a seat with a name and a banner. The decider turns the taken option's effect into events in the same decision as the action. Not yet in the source; `Effect` arrives with the first gameplay loop. |
+| **Effect** | What taking an option does, carried on the option itself so that a choice is self-describing. Today the only kind founds the house at a seat with a name and a banner. The decider turns the taken option's effect into events in the same decision as the action. `Effect`, and `Effect.FoundAt` is the only kind so far |
 | **Event** | Something that happened, named in the past tense: `HouseFounded`. Events are the only durable state and are never edited or deleted. |
 | **Event id** | The identity of one event: the CloudEvent `id`, a UUID minted when it is written. What a consumer deduplicates by. See decision records 0024 and 0035. |
 | **Event store** | The append-only record of every event, one stream per aggregate. MongoDB, through Occurrent. |
@@ -36,7 +36,7 @@ in the source.
 | **Inspector** | The panel on the left of the screen that says what is selected on the map: a house, its seat, its treasury, and the ground it holds. Not yet in the source; arrives with the first gameplay loop. |
 | **Key figure** | One of the few named members of a house the player acts through. A house has uncounted members behind them, so losing every key figure is a low power state, never a loss. Not yet in the source. |
 | **Master pixel** | One pixel of `world/master/terrain.png`, the image the world is painted in by hand: one terrain class, about 1.2 kilometres at the equator, and the unit an area is counted in. Read back out of the zoom 7 tiles, which carry them exactly. `MasterGrid` |
-| **Option** | One of the two to four things a choice offers: a label, a line of detail, and its effect. Not yet in the source; `Option` arrives with the first gameplay loop. |
+| **Option** | One of the two to four things a choice offers: a label, a line of detail, and its effect. `Option` |
 | **Parchment** | How a choice is put to the player: a sheet lying over the map with the prompt and one button an option, which folds to a corner and is gone once the choice is taken. Not yet in the source; arrives with the first gameplay loop. |
 | **Pin** | A fact the chrono-engine has committed the world to at a world-time - a cathedral exists here in 1247 - which obliges the past or the future to make it true. Shown on the timeline as something cloudy that fades. Not yet in the source. |
 | **Player** | The human. Identified for now by an anonymous token generated in the browser, and playing from one place at a time. `PlayerId` |

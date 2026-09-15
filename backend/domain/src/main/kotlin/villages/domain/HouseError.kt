@@ -14,4 +14,18 @@ sealed class HouseError(message: String) : RuntimeException(message) {
     class InvalidLocation(reason: String) : HouseError("not a place in the world: $reason")
 
     class InvalidBanner(reason: String) : HouseError("not a banner: $reason")
+
+    class InvalidChoice(reason: String) : HouseError("not a choice: $reason")
+
+    /** A house is asked one thing at a time, and this one has not been answered. */
+    data object ChoicePending : HouseError("this house already has a choice to make")
+
+    /** An action was taken on nothing: there is no choice open. */
+    data object NoChoicePending : HouseError("this house has nothing to decide")
+
+    /** An action answering a choice that is not the one pending, which is a stale parchment. */
+    data object NoSuchChoice : HouseError("that is not the choice this house was given")
+
+    /** An action taking an option the pending choice does not offer. */
+    data object NoSuchOption : HouseError("that choice does not offer that option")
 }

@@ -19,7 +19,9 @@ import villages.domain.HouseCommand
 import villages.domain.HouseDecider
 import villages.domain.HouseEvent
 import villages.domain.HouseFounded
+import villages.domain.HouseGivenChoice
 import villages.domain.HouseId
+import villages.domain.HouseTookAction
 import villages.domain.PlayerId
 import villages.domain.WorldTime
 import villages.projections.HousesProjection
@@ -47,6 +49,20 @@ import java.util.UUID
  * A world small enough to hold in a test: one list of events, folded per stream, and a feed that delivers
  * synchronously. The gateway never knows the difference, which is the point of the ports.
  */
+/** The catalogued type of an event, as the store would name it. */
+private fun typeOf(event: HouseEvent): String = when (event) {
+    is HouseFounded -> "villages.house.founded.v1"
+    is HouseGivenChoice -> "villages.house.givenChoice.v1"
+    is HouseTookAction -> "villages.house.tookAction.v1"
+}
+
+/** Enough of the data for the panel's sake. The stored form proper is pinned by its own fixture. */
+private fun dataOf(event: HouseEvent): String = when (event) {
+    is HouseFounded -> """{"name":"${event.name.value}","significance":${event.significance.value}}"""
+    is HouseGivenChoice -> """{"prompt":"${event.choice.prompt}","options":${event.choice.options.size}}"""
+    is HouseTookAction -> """{"optionId":"${event.optionId.value}"}"""
+}
+
 private class TinyWorld : HouseCommandExecutor, EventFeed {
     val events = mutableListOf<HouseEvent>()
 
@@ -64,14 +80,13 @@ private class TinyWorld : HouseCommandExecutor, EventFeed {
         val fresh = HouseDecider.decide(command, HouseDecider.fold(stream))
         events += fresh
         fresh.forEachIndexed { index, event ->
-            val founded = event as HouseFounded
             val record = StoredEvent(
                 id = "e-${events.size}",
-                type = "villages.house.founded.v1",
-                stream = founded.houseId.stream,
+                type = typeOf(event),
+                stream = event.houseId.stream,
                 streamVersion = (stream.size + index + 1).toLong(),
-                time = founded.recordedAt,
-                data = """{"name":"${founded.name.value}","significance":${founded.significance.value}}""",
+                time = event.recordedAt,
+                data = dataOf(event),
                 correlationId = provenance.correlationId.toString(),
                 causationId = provenance.commandId.toString(),
                 event = event,

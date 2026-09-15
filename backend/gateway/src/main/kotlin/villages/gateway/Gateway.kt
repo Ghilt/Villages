@@ -436,6 +436,11 @@ internal fun HouseError.reasonCode(): String = when (this) {
     is HouseError.InvalidName -> "invalidName"
     is HouseError.InvalidLocation -> "invalidLocation"
     is HouseError.InvalidBanner -> "invalidBanner"
+    is HouseError.InvalidChoice -> "invalidChoice"
+    HouseError.ChoicePending -> "choicePending"
+    HouseError.NoChoicePending -> "noChoicePending"
+    HouseError.NoSuchChoice -> "noSuchChoice"
+    HouseError.NoSuchOption -> "noSuchOption"
 }
 
 internal fun StoredEvent.toFrame(): EventFrame = EventFrame(

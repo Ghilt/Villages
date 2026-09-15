@@ -17,3 +17,28 @@ data class FoundHouse(
     val worldTime: WorldTime,
     val recordedAt: Instant,
 ) : HouseCommand
+
+/**
+ * Put a choice to this house. Refused while it already has one to make, so that a player is asked one
+ * thing at a time. Issued by whatever decided the choice applies, which today is arrival.
+ */
+data class GiveChoice(
+    override val houseId: HouseId,
+    val player: PlayerId,
+    val choice: Choice,
+    val worldTime: WorldTime,
+    val recordedAt: Instant,
+) : HouseCommand
+
+/**
+ * Take one option of the choice this house was given. It names the choice as well as the option, so that
+ * a parchment left open while the world moved on is refused rather than answering something else.
+ */
+data class TakeAction(
+    override val houseId: HouseId,
+    val player: PlayerId,
+    val choiceId: ChoiceId,
+    val optionId: OptionId,
+    val worldTime: WorldTime,
+    val recordedAt: Instant,
+) : HouseCommand

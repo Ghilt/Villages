@@ -8,7 +8,9 @@ import villages.application.HousesByPlayer
 import villages.application.Start
 import villages.application.StoredEvent
 import villages.domain.HouseFounded
+import villages.domain.HouseGivenChoice
 import villages.domain.HouseId
+import villages.domain.HouseTookAction
 import villages.domain.PlayerId
 import villages.domain.WorldTime
 import villages.protocol.Cell
@@ -58,6 +60,10 @@ class HousesProjection(feed: EventFeed) : HousesByCell, HousesByPlayer, AutoClos
                 until = null,
                 version = stored.streamVersion,
             )
+
+            // Nothing is on the map until a house is founded. Being asked something and answering it are
+            // the choices projection's business; this one draws the map and has nothing to say about them.
+            is HouseGivenChoice, is HouseTookAction -> return
         }
         rows[row.id] = Indexed(
             row = row,

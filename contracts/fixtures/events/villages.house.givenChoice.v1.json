@@ -1,0 +1,52 @@
+{
+  "type": "villages.house.givenChoice.v1",
+  "source": "urn:villages",
+  "subject": "6d5b0a2e-1c3f-4d7e-9a8b-0f1e2d3c4b5a",
+  "time": "2026-09-04T12:00:00Z",
+  "data": {
+    "houseId": "6d5b0a2e-1c3f-4d7e-9a8b-0f1e2d3c4b5a",
+    "player": "0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8d",
+    "choice": {
+      "id": "aa000000-0000-4000-8000-00000000c401",
+      "prompt": "Where shall the house raise its seat?",
+      "options": [
+        {
+          "id": "aa000000-0000-4000-8000-000000000001",
+          "label": "Ravenscar, on the northern shore",
+          "detail": "Cold water, long winters, and nobody near enough to argue with.",
+          "effect": {
+            "kind": "foundAt",
+            "seat": { "lat": 59.33, "lon": 18.07 },
+            "name": "Ravenscar",
+            "banner": {
+              "field": "SABLE",
+              "division": "PLAIN",
+              "second": null,
+              "charge": "STAG",
+              "chargeTincture": "ARGENT"
+            }
+          }
+        },
+        {
+          "id": "aa000000-0000-4000-8000-000000000002",
+          "label": "Hollin, under the southern hills",
+          "detail": "Warm ground and old roads, and neighbours on every one of them.",
+          "effect": {
+            "kind": "foundAt",
+            "seat": { "lat": 47.5, "lon": 19.05 },
+            "name": "Hollin",
+            "banner": {
+              "field": "OR",
+              "division": "PLAIN",
+              "second": null,
+              "charge": "TOWER",
+              "chargeTincture": "GULES"
+            }
+          }
+        }
+      ]
+    },
+    "worldTime": 454901,
+    "recordedAt": "2026-09-04T12:00:00Z"
+  }
+}

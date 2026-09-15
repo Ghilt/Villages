@@ -36,3 +36,33 @@ data class HouseFounded(
     override val worldTime: WorldTime,
     override val recordedAt: Instant,
 ) : HouseEvent
+
+/**
+ * A house was given a choice to make. The whole choice is here, options and effects and all, so the
+ * stream says what was offered and not only what was taken: the roads not taken are history too.
+ *
+ * Nothing is on the map yet, so this carries no place and no significance. See decision record 0034.
+ */
+data class HouseGivenChoice(
+    override val houseId: HouseId,
+    val player: PlayerId,
+    val choice: Choice,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : HouseEvent
+
+/**
+ * A house took one option of the choice it was given. What the option does follows from the same
+ * decision, as the next events on the stream, so the action and its consequence are never seen apart.
+ *
+ * Only the two ids are here: what the option was is in the choice on the event that gave it, and copying
+ * it would be two places for one fact to be wrong in.
+ */
+data class HouseTookAction(
+    override val houseId: HouseId,
+    val player: PlayerId,
+    val choiceId: ChoiceId,
+    val optionId: OptionId,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : HouseEvent

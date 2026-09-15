@@ -1,6 +1,6 @@
 # 0034. A choice is put to a house on its own stream, and an action takes one option
 
-- Status: proposed
+- Status: accepted
 - Date: 2026-09-15
 
 ## Context
@@ -40,8 +40,10 @@ write to wait for. What the option promised is what the stream says happened.
 `ChoicePending`; an action with nothing pending as `NoChoicePending`; the wrong choice as
 `NoSuchChoice`; an unknown option as `NoSuchOption`. These rules live in `decide` and nowhere else,
 because a projection is a moment behind the stream and a rule read from one can be stale. A house
-founded by other means, the debug button or a seed, has no use for a pending founding choice, so
-`evolve(HouseFounded)` clears it: founding by any means settles the founding choice.
+founded by other means, the debug button or a seed, has no use for a pending choice about *where to
+found*, so `evolve(HouseFounded)` drops one and keeps a choice about anything else: founding by any
+means settles the founding question and answers nothing else. The keeping half has no case to arise in
+until a second kind of effect exists, and so no test until then; the rule is written for when it does.
 
 **Each option is a destiny.** The giver generates a seat, a house name and a banner per option,
 deterministically from the player, so the parchment reads as a chronicle and `decide` stays generic:

@@ -12,6 +12,7 @@ import tools.jackson.module.kotlin.KotlinModule
 import villages.application.HouseCommandExecutor
 import villages.application.Provenance
 import villages.application.WriteConflict
+import villages.domain.Effect
 import villages.domain.HouseCommand
 import villages.domain.HouseDecider
 import villages.domain.HouseEvent
@@ -36,6 +37,8 @@ object HouseEvents {
 
     val json: JsonMapper = JsonMapper.builder()
         .addModule(KotlinModule.Builder().build())
+        // A sealed field says which case it holds, and the domain stays free of annotations.
+        .addMixIn(Effect::class.java, EffectJson::class.java)
         .build()
 
     fun converter(): JacksonCloudEventConverter<HouseEvent> =

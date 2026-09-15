@@ -15,7 +15,7 @@ import java.io.File
 class EventTypeCatalogueSpec : StringSpec({
     val catalogue = File("../../docs/EVENTS.md").readText()
     // Character classes rather than backslash escapes, so the pattern survives every quoting on the way in.
-    val catalogued = Regex("""`(villages[.]house[.][a-z]+[.]v[0-9]+)`""").findAll(catalogue).map { it.groupValues[1] }.toSet()
+    val catalogued = Regex("""`(villages[.]house[.][a-zA-Z]+[.]v[0-9]+)`""").findAll(catalogue).map { it.groupValues[1] }.toSet()
 
     "every HouseEvent has a catalogued type in the table" {
         HouseEventTypes.rows.keys shouldContainExactlyInAnyOrder HouseEvent::class.sealedSubclasses

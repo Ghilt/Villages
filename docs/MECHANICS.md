@@ -8,10 +8,10 @@ is, `GLOSSARY.md` the words, `EVENTS.md` the catalogue every event must be in, `
 layers a change must respect, and the decision records the reasons. This says how to get from a
 described mechanic to all of those.
 
-State of the source at this writing: one aggregate, the `House`, with one event, `HouseFounded`, and
-provenance on every envelope. The first gameplay loop, planned in
-`plans/2026-09-15-first-gameplay-loop.md`, brings the choice pattern below into the source one increment
-at a time; this note goes when it has.
+State of the source at this writing: one aggregate, the `House`, with three events, provenance on every
+envelope, and the choice pattern below in the domain but not yet on the wire. The first gameplay loop,
+planned in `plans/2026-09-15-first-gameplay-loop.md`, brings the rest of it in one increment at a time;
+this note goes when it has.
 
 ## First, five questions
 

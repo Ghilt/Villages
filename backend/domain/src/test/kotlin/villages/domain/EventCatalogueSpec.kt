@@ -15,13 +15,17 @@ import kotlin.reflect.full.primaryConstructor
 class EventCatalogueSpec : StringSpec({
     val catalogue = File("../../docs/EVENTS.md").readText()
     val houseTable = catalogue.substringAfter("## House").substringBefore("\n## ", catalogue.substringAfter("## House"))
-    val rows = Regex("""^\|\s*`(villages\.house\.[a-z]+\.v\d+)`\s*\|\s*([^|]*)\|""", RegexOption.MULTILINE)
+    val rows = Regex("""^\|\s*`(villages\.house\.[a-zA-Z]+\.v\d+)`\s*\|\s*([^|]*)\|""", RegexOption.MULTILINE)
         .findAll(houseTable)
         .map { it.groupValues[1] to it.groupValues[2] }
         .toList()
 
-    /** `HouseFounded` is catalogued as `founded`: the aggregate is the prefix and the verb is the rest. */
-    fun catalogueNameOf(event: Class<out HouseEvent>): String = event.simpleName.removePrefix("House").lowercase()
+    /**
+     * `HouseFounded` is catalogued as `founded` and `HouseGivenChoice` as `givenChoice`: the aggregate is
+     * the prefix and the verb is the rest, camelCase, because not every fact is one word.
+     */
+    fun catalogueNameOf(event: Class<out HouseEvent>): String =
+        event.simpleName.removePrefix("House").replaceFirstChar { it.lowercase() }
 
     "every event in the code has a row in the catalogue" {
         val inCode = HouseEvent::class.sealedSubclasses.map { catalogueNameOf(it.java) }.sorted()
