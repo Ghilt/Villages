@@ -39,6 +39,15 @@ Answer these before touching code, in a paragraph Adam can read back. The answer
    (0026), a zoom from a significance, a fence from a seat. If two answers could disagree, only one of
    them is stored.
 
+Two things that bit while the first loop was built, and are worth reading before the second:
+
+- **Whether a thing is new is the read model's to say, not a stream version's.** Version one meant "it
+  appeared" only while one command wrote one event. The moment a decision yields two, the thing arrives
+  at version three and the rule is quietly wrong. Ask the projection whether its put was new.
+- **A rule that lives in a projection binds the interface too.** A house is only drawn from the zoom its
+  significance earns, so a camera flown to a new seat at a shallower zoom lands on empty ground. Whatever
+  decides what is shown has to be known wherever something is shown.
+
 ## The shapes a mechanic takes
 
 ### A fact recorded
@@ -61,7 +70,10 @@ something" takes.
    The event is self-describing: the roads not taken are history too, and a reader of the stream can
    say what each would have done. One choice is pending at a time; a second is refused.
 3. A projection keeps the pending choice per player and the gateway sends it as `yourChoice`, on
-   hello and whenever it changes, with null once it is gone.
+   hello and whenever it changes, with null once it is gone. **The giver hands back what it gave, and
+   that is what the gateway sends**: the projection folds on another thread, so reading it in the same
+   breath as writing sometimes says nothing. The projection's own word arrives later and is recognised
+   as the same choice rather than sent twice.
 4. The **parchment** renders any choice from its words: the prompt, and one button an option. Nothing
    in the interface knows what kind of choice it is showing, so a new kind of choice costs it nothing.
    A `foundAt` effect also puts a mark on the map at the seat it offers, which is the one place the

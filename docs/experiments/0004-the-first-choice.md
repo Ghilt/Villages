@@ -42,8 +42,62 @@ The architecture, answered in passing:
 
 ## Observations
 
+**2026-09-15, the loop is built and nobody has played it yet.** The experience half of the hypothesis is
+Adam's to observe; what follows is the architecture half, answered in passing while building it.
+
+*The three events of one founding do read as one story.* The panel shows `house given choice`,
+`house took action`, `house founded`, in that order, at stream versions one, two and three, wearing one
+correlation tag. Nothing else was needed to see that they belong together, and the causation id on the
+last two is the command id on the line above them in the log. Decision record 0035 earns itself here.
+
+*The race between a hello and a projection is real, and the fix is to hand back what you wrote.* Giving
+the choice writes an event; the projection that would answer "what is pending" folds on another thread.
+Reading it in the same breath as writing it sometimes says nothing. `Arrival.arrive` returns the choice
+it gave and the gateway sends that, and the projection's own word arrives later and is recognised as the
+same choice rather than sent twice. The guard for that is `tellChoice`, and without it a player was told
+the same thing twice on arriving.
+
+*Whether a house is new cannot be read off a stream version any more.* It used to be that version one
+meant a house had appeared. A house founded from a parchment arrives at version three, behind the choice
+it was given and the action that took it, so the read model now says whether its put was a new row. A
+rule that was true by accident stopped being true the moment one command wrote more than one event.
+
+*A rule in a projection is a rule the interface has to respect too.* A new house has the founding
+significance, which `coarsestZoom` makes zoom eight: below that the map is not told about it at all. The
+flight to a new seat stopped at seven and landed on empty ground. The number was not wrong; the interface
+did not know about it.
+
+*The store gave no hook for the envelope, so the loop became ours.* Occurrent's decider extension does
+read, fold, decide and append, and offers no way to put anything on the CloudEvent it writes. Provenance
+has to go there, so those four steps are twelve lines we own now, retry included. Nothing above the ports
+noticed.
+
+*Two tests sharing one in-memory world share a player.* `HouseId.of(player)` means one token is one house
+across a whole test class, so the second test to run found a house already standing. Each test needs a
+player of its own, which is obvious in hindsight and was not.
+
 ## Result
 
 ## Decision
 
 ## Follow-ups
+
+Open, in no order. The first two are the ones the loop asks for next.
+
+- **A second kind of choice.** Everything above the effect is generic now, so the cost of one is an
+  `Effect` case, a `decide` branch, a giver with the words, and rows for whatever it records. Until a
+  second one exists, `docs/MECHANICS.md` is a claim rather than a demonstration.
+- **A reason to prefer one seat over another.** Three places, three names, three banners, and nothing to
+  weigh them by. Whatever the answer is - the ground, the neighbours, what a house would be good at
+  there - it is the first thing that makes the opening a decision rather than a pick.
+- **The seed takes one of its offered seats** instead of founding directly, so the bot swarm exercises
+  the real loop and a seeded world is made of the same events a played one is.
+- **The house card in the corner is still a mock.** It says "No house yet" while the inspector beside it
+  names the house; roadmap 1.12 draws the banner, and this is where it goes.
+- **Seats as authored data.** `world/seats.json` beside the other world files, so the gazetteer is
+  Adam's to paint rather than the server's to hold. Decision record 0034 names this as the next step.
+- **A chronicle view.** The debug panel's event list already carries the story tag; grouping by it would
+  turn the log into what the vision calls a chronicle, and would be the first thing a player reads
+  rather than an instrument.
+- **The world's own port per worktree**, the way the web port already is, so a tree's backend address
+  never moves and no `.env` file has to be written by hand.

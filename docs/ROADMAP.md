@@ -82,7 +82,8 @@ needs no explaining, is `docs/MECHANICS.md`. Decision records 0034, 0035 and 003
 - [x] 6. Wipe the world, from the debug panel
 - [x] 7. The castle, and the fence of ground about it
 - [x] 8. Selecting a castle, and the inspector on the left
-- [ ] 9. What it taught: the experiment closed, the method corrected
+- [x] 9. What it taught: the method corrected, the follow-ups written down. The experiment stays
+      open until Adam has played the opening, because its hypothesis is about a player
 
 Phase 1's 1.13 and 1.15 below land through this list rather than on their own.
 

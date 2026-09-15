@@ -96,6 +96,12 @@ in one line where to look and what should be there.
 Where a change genuinely cannot be seen in the running program — the offline renderer, a build rule, a document —
 say that plainly and say what stands in for it instead, whether that is a test, a still, or a number.
 
+**The browser pane stops animation frames when it is hidden**, and MapLibre waits on one for its style to
+load and for every `flyTo`. A hidden pane therefore shows a map that never finishes loading and a camera
+that reports itself moving while standing still, neither of which is a bug in the program. A screenshot
+pumps one frame, so a handful of them in a row carries a flight to its end; the DOM, the debug panel and
+the log can be read without any of that.
+
 ## Every session works in its own git worktree
 
 An agent does not work in `E:\Code\Villages` itself. Each session gets a worktree under
