@@ -12,7 +12,7 @@ import { WORLD_MASTER_WIDTH } from '../map/worldStyle';
 import { AreasView } from '../areas/AreasView';
 import { areasNow } from '../areas/areas';
 import { atToClock, note, notesNow, watchNotes } from './log';
-import { gatewayState } from '../net/gateway';
+import { gatewayState, restart } from '../net/gateway';
 import { EventsView } from './EventsView';
 import { describeState } from './report';
 import type { Line, MapState } from './report';
@@ -267,6 +267,15 @@ export function DebugPanel({ map, renderer, worldRoot }: DebugPanelProps) {
           }}
         >
           reset
+        </button>
+        {/* No confirmation: the log line is the record, and this panel is not a player's. See 0023. */}
+        <button
+          type="button"
+          className="debug__button"
+          onClick={restart}
+          title="forget this player and arrive as a new one"
+        >
+          restart
         </button>
         <button type="button" className="debug__button" onClick={() => setOpen(false)}>
           hide

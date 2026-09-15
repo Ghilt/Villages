@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { PLAYER_TOKEN_KEY, ensurePlayerToken } from './identity';
+import { PLAYER_TOKEN_KEY, ensurePlayerToken, forgetPlayerToken } from './identity';
 import type { TokenStore } from './identity';
 
 function fakeStore(initial: Record<string, string> = {}): TokenStore & { contents: Record<string, string> } {
@@ -41,5 +41,13 @@ describe('the player token', () => {
 
     expect(token).toBe('replacement');
     expect(store.contents[PLAYER_TOKEN_KEY]).toBe('replacement');
+  });
+
+  it('is forgotten on request, so the next visit arrives as somebody new', () => {
+    const store = fakeStore({ [PLAYER_TOKEN_KEY]: 'the-old-player' });
+
+    forgetPlayerToken(store);
+
+    expect(ensurePlayerToken(store, () => 'the-new-player')).toBe('the-new-player');
   });
 });

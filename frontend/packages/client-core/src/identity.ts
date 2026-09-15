@@ -19,3 +19,17 @@ export function ensurePlayerToken(store: TokenStore, newToken: () => string): st
   store.set(PLAYER_TOKEN_KEY, token);
   return token;
 }
+
+/**
+ * Forgets who this browser was playing as, so that the next `ensurePlayerToken` makes a new one.
+ *
+ * Starting over is a debug affordance and not a player's: trying the opening means arriving new many
+ * times an hour. The house the old player founded stays in the world, because nothing is ever deleted.
+ * See decision record 0036.
+ *
+ * Blanking rather than removing, because `TokenStore` has no remove and does not need one: a blank
+ * value already means absent to the function above.
+ */
+export function forgetPlayerToken(store: TokenStore): void {
+  store.set(PLAYER_TOKEN_KEY, '');
+}

@@ -1,6 +1,6 @@
 # 0036. Starting over: a player forgets who they were, and a development world can be emptied
 
-- Status: proposed
+- Status: accepted
 - Date: 2026-09-15
 
 ## Context

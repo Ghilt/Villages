@@ -1,4 +1,4 @@
-import { connect, ensurePlayerToken } from '@villages/client-core';
+import { connect, ensurePlayerToken, forgetPlayerToken } from '@villages/client-core';
 import type { Connection, HousesState } from '@villages/client-core';
 import {
   NO_HOUSES,
@@ -181,6 +181,22 @@ export function gateway(): Connection {
   connection.onFrame(heard);
   connection.onProblem((problem) => note('gateway', problem));
   return connection;
+}
+
+/**
+ * Starts over as a new player: forgets who this browser was and reloads.
+ *
+ * The house the old player founded stays in the world as somebody's, because events are never deleted.
+ * A reload rather than a fresh socket, because a page carries the old player in more places than the
+ * connection: the houses it holds, the day it is looking at, what it thinks its house is. See 0036.
+ */
+export function restart(): void {
+  forgetPlayerToken({
+    get: (key) => localStorage.getItem(key),
+    set: (key, value) => localStorage.setItem(key, value),
+  });
+  note('player', 'starting over as somebody new');
+  window.location.reload();
 }
 
 export function gatewayState(): GatewayState {

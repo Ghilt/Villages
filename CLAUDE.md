@@ -234,7 +234,10 @@ Commands are added here as the increments land:
   is, how many painted tiles were ready before the map asked, and every event the world stores as it
   arrives, one line each, opening to the whole thing. Its copy button puts the state and the log on the clipboard, which is
   the shortest way to tell a session what the program is doing. The `found a house here` button in it sends a
-  real command and is how to make an event happen on purpose. Anything worth saying
+  real command and is how to make an event happen on purpose. The `restart` button beside `copy` forgets
+  this browser's player and reloads, so the opening can be tried again from nothing; the house the old
+  player founded stays in the world, because events are never deleted. See `docs/adr/0036`.
+  Anything worth saying
   goes through `note(area, message)` in `apps/web/src/debug/log.ts`. `window.villagesPainterly()` gives
   the paint counters from a console.
 - Areas, in the same panel: `draw an area` arms the next drag on the map, and dragging paints one. The
