@@ -45,6 +45,8 @@ export interface MapState {
   world: { today: number; earliest: number; viewingAt: number | null } | null;
   /** Who this window is playing as, whether it still is, and which house is theirs. */
   player: { id?: string; connection: string; house: string | null };
+  /** What the player has been asked, or null when nothing. What the parchment is showing. */
+  choice: { prompt: string; options: number; acting: boolean } | null;
 }
 
 export interface Line {
@@ -76,6 +78,15 @@ function describePlayer(player: { id?: string; connection: string }): string {
     default:
       return `${who}, connecting`;
   }
+}
+
+/** What the player has to decide, and whether an answer to it is in flight. See decision record 0034. */
+function describeChoice(choice: MapState['choice']): string {
+  if (choice === null) {
+    return 'nothing to decide';
+  }
+  const asked = `"${choice.prompt}", ${choice.options} option${choice.options === 1 ? '' : 's'}`;
+  return choice.acting ? `${asked}, answering` : asked;
 }
 
 /** The world's day, and the day the map is showing, which differ when the scrubber has been moved. */
@@ -187,6 +198,7 @@ export function describeState(state: MapState): Line[] {
     { label: 'world', value: describeWorld(state.world) },
     { label: 'player', value: describePlayer(state.player) },
     { label: 'house', value: state.player.house ?? 'none yet' },
+    { label: 'choice', value: describeChoice(state.choice) },
     {
       label: 'painted',
       value:

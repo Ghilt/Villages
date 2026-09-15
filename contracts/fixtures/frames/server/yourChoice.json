@@ -1,0 +1,57 @@
+{
+  "type": "yourChoice",
+  "choice": {
+    "id": "aa000000-0000-4000-8000-00000000c401",
+    "prompt": "Where shall the house raise its seat?",
+    "options": [
+      {
+        "id": "aa000000-0000-4000-8000-000000000001",
+        "label": "Skarnholt, in the northern reaches",
+        "detail": "Long winters and longer nights, and the light comes back all at once. The house would take the name Ravenscar, under sable, a stag argent.",
+        "effect": {
+          "kind": "foundAt",
+          "seat": { "lat": 61.12, "lon": 15.27 },
+          "name": "Ravenscar",
+          "banner": {
+            "field": "sable",
+            "division": "plain",
+            "charge": "stag",
+            "chargeTincture": "argent"
+          }
+        }
+      },
+      {
+        "id": "aa000000-0000-4000-8000-000000000002",
+        "label": "Ulmash, in the grass sea",
+        "detail": "Grass to the horizon in every direction, and riders who cross it in days. The house would take the name Hollin, under or, a tower gules.",
+        "effect": {
+          "kind": "foundAt",
+          "seat": { "lat": 46.88, "lon": 66.19 },
+          "name": "Hollin",
+          "banner": {
+            "field": "or",
+            "division": "plain",
+            "charge": "tower",
+            "chargeTincture": "gules"
+          }
+        }
+      },
+      {
+        "id": "aa000000-0000-4000-8000-000000000003",
+        "label": "Zafarai, in the sunlands",
+        "detail": "The last good ground before the sand, and the first after it. The house would take the name Thornwick, under argent, a star azure.",
+        "effect": {
+          "kind": "foundAt",
+          "seat": { "lat": 13.79, "lon": 4.08 },
+          "name": "Thornwick",
+          "banner": {
+            "field": "argent",
+            "division": "plain",
+            "charge": "star",
+            "chargeTincture": "azure"
+          }
+        }
+      }
+    ]
+  }
+}

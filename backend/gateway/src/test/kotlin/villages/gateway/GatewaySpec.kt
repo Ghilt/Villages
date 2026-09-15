@@ -7,14 +7,17 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import villages.application.AnonymousTokens
+import villages.application.Arrival
 import villages.application.EventFeed
 import villages.application.FoundHouseService
 import villages.application.HouseCommandExecutor
 import villages.application.Provenance
 import villages.application.Start
 import villages.application.StoredEvent
+import villages.application.TakeActionService
 import villages.application.WorldClock
 import villages.application.WriteConflict
+import villages.domain.Effect
 import villages.domain.HouseCommand
 import villages.domain.HouseDecider
 import villages.domain.HouseEvent
@@ -24,13 +27,16 @@ import villages.domain.HouseId
 import villages.domain.HouseTookAction
 import villages.domain.PlayerId
 import villages.domain.WorldTime
+import villages.projections.ChoicesProjection
 import villages.projections.HousesProjection
 import villages.protocol.Batch
 import villages.protocol.CommandAccepted
 import villages.protocol.CommandRejected
 import villages.protocol.ErrorFrame
+import villages.protocol.FoundAtView
 import villages.protocol.EventFrame
 import villages.protocol.HouseAppeared
+import villages.protocol.Point
 import villages.protocol.Pong
 import villages.protocol.ProtocolJson
 import villages.protocol.Resync
@@ -39,6 +45,7 @@ import villages.protocol.Snapshot
 import villages.protocol.TakenOver
 import villages.protocol.Welcome
 import villages.protocol.WorldNow
+import villages.protocol.YourChoice
 import villages.protocol.YourHouse
 import java.time.Clock
 import java.time.Instant
@@ -144,6 +151,10 @@ private fun founding(commandId: String = COMMAND_ONE, name: String = "Ravenscar"
         """"name":"$name","seat":{"lat":59.33,"lon":18.07},""" +
         """"banner":{"field":"sable","division":"plain","charge":"stag","chargeTincture":"argent"}}}"""
 
+private fun takingAction(choiceId: String, optionId: String, commandId: String = COMMAND_ONE) =
+    """{"type":"command","commandId":"$commandId","command":{"type":"takeAction",""" +
+        """"choiceId":"$choiceId","optionId":"$optionId"}}"""
+
 private fun subscribe(vararg cells: String) =
     """{"type":"subscribeCells","cells":[${cells.joinToString { "\"$it\"" }}]}"""
 
@@ -154,7 +165,9 @@ private class Rig {
     val world = TinyWorld()
     val later = ManualLater()
     val houses = HousesProjection(world)
+    val choices = ChoicesProjection(world)
     val worldClock = WorldClock { today }
+    var minted = 0
     val gateway = Gateway(
         tokens = AnonymousTokens,
         foundHouse = FoundHouseService(world, clock = { noon }, world = worldClock),
@@ -163,8 +176,20 @@ private class Rig {
         theirHouses = houses,
         clock = Clock.fixed(noon, ZoneOffset.UTC),
         world = worldClock,
+        arrival = Arrival(
+            world,
+            clock = { noon },
+            world = worldClock,
+            // Known ids rather than random ones, so a story can be named in an assertion.
+            ids = { UUID.fromString("a1000000-0000-4000-8000-%012x".format(++minted)) },
+        ),
+        takeAction = TakeActionService(world, clock = { noon }, world = worldClock),
+        choices = choices,
         later = later,
     )
+
+    /** The choice a player is holding, as the gateway would send it. */
+    fun pending(token: String = TOKEN) = choices.pendingOf(PlayerId(UUID.fromString(token)))?.choice
 
     /**
      * A connection that has said hello, and everything it has been sent since. Every call uses the same
@@ -192,11 +217,11 @@ private class Rig {
 
 class GatewaySpec : StringSpec({
 
-    "hello is answered with welcome, then with the house this player has, which is none yet" {
+    "hello is answered with welcome, the house this player has, and the choice they have to make" {
         val sent = mutableListOf<ServerFrame>()
         Rig().gateway.connect { sent += it }.receive(hello)
 
-        sent shouldBe listOf(
+        sent.take(2) shouldBe listOf(
             Welcome(
                 serverTime = noon.toEpochMilli(),
                 playerId = TOKEN,
@@ -204,6 +229,32 @@ class GatewaySpec : StringSpec({
             ),
             YourHouse(null),
         )
+        // Arriving with no house is what the founding choice answers, and it is said exactly once.
+        sent.filterIsInstance<YourChoice>().single().choice?.prompt shouldBe
+            "Where shall the house raise its seat?"
+    }
+
+    "and that choice offers three seats, in three different parts of the world" {
+        val sent = mutableListOf<ServerFrame>()
+        Rig().gateway.connect { sent += it }.receive(hello)
+
+        val choice = sent.filterIsInstance<YourChoice>().single().choice!!
+        choice.options shouldHaveSize 3
+        // Each option is a destiny: a place, a name and a banner of its own.
+        choice.options.map { it.effect.shouldBeInstanceOf<FoundAtView>().name }.distinct() shouldHaveSize 3
+        choice.options.map { it.label.substringAfter(", in ") }.distinct() shouldHaveSize 3
+    }
+
+    "a player who already has a house is given nothing to decide" {
+        val rig = Rig()
+        val (founder, _) = rig.introduced()
+        founder.receive(founding())
+        founder.disconnected()
+        val sent = mutableListOf<ServerFrame>()
+
+        rig.gateway.connect { sent += it }.receive(hello)
+
+        sent.filterIsInstance<YourChoice>().single().choice shouldBe null
     }
 
     "a player who already has a house is told which on hello, before looking at anything" {
@@ -216,7 +267,7 @@ class GatewaySpec : StringSpec({
 
         rig.gateway.connect { sent += it }.receive(hello)
 
-        val mine = sent.last().shouldBeInstanceOf<YourHouse>().house
+        val mine = sent.filterIsInstance<YourHouse>().last().house
         mine?.name shouldBe "Ravenscar"
         mine?.cell shouldBe STOCKHOLM_Z10
     }
@@ -293,12 +344,13 @@ class GatewaySpec : StringSpec({
         founding.receive(founding())
 
         founder.last() shouldBe CommandAccepted(COMMAND_ONE)
-        rig.world.events shouldHaveSize 1
+        rig.world.events.filterIsInstance<HouseFounded>() shouldHaveSize 1
         val event = watcher.last().shouldBeInstanceOf<EventFrame>()
         event.eventType shouldBe "villages.house.founded.v1"
         // The house is the player's own, worked out from the token rather than chosen by the browser.
         event.stream shouldBe HouseId.of(PlayerId(UUID.fromString(TOKEN))).stream
-        event.streamVersion shouldBe 1
+        // Second on the stream: arriving wrote the founding choice before this founded anything.
+        event.streamVersion shouldBe 2
         event.time shouldBe noon.toEpochMilli()
         event.data.get("significance").asDouble() shouldBe 20.0
         bystander.shouldBeEmpty()
@@ -325,7 +377,7 @@ class GatewaySpec : StringSpec({
         connection.receive(founding(commandId = "c-1"))
 
         sent.single() shouldBe CommandRejected("c-1", "malformed: a command id is a UUID")
-        rig.world.events.shouldBeEmpty()
+        rig.world.events.filterIsInstance<HouseFounded>().shouldBeEmpty()
     }
 
     "a stream that will not stand still is a conflict, which is not a refusal" {
@@ -354,6 +406,72 @@ class GatewaySpec : StringSpec({
         connection.receive(founding(commandId = COMMAND_TWO))
 
         sent.last() shouldBe CommandRejected(COMMAND_TWO, "alreadyFounded")
+    }
+
+    "taking an option founds the house where that option promised, and clears the parchment" {
+        val rig = Rig()
+        val (player, sent) = rig.introduced()
+        val choice = rig.pending()!!
+        val taking = choice.options[1]
+
+        player.receive(takingAction(choice.id.value.toString(), taking.id.value.toString()))
+
+        sent.filterIsInstance<CommandAccepted>().single().commandId shouldBe COMMAND_ONE
+        val mine = sent.filterIsInstance<YourHouse>().last().house!!
+        val promised = taking.effect.shouldBeInstanceOf<Effect.FoundAt>()
+        mine.name shouldBe promised.name.value
+        mine.seat shouldBe Point(promised.seat.lat, promised.seat.lon)
+        // Nothing left to decide: the parchment is gone, and the player is told so.
+        sent.filterIsInstance<YourChoice>().last().choice shouldBe null
+        rig.pending() shouldBe null
+    }
+
+    "and the action and the founding it caused are one story, told in that order" {
+        val rig = Rig()
+        val (player, _) = rig.introduced()
+        val (watching, watcher) = rig.someoneElse()
+        watching.receive("""{"type":"watchEvents","on":true}""")
+        val choice = rig.pending()!!
+
+        player.receive(takingAction(choice.id.value.toString(), choice.options[0].id.value.toString()))
+
+        val events = watcher.filterIsInstance<EventFrame>()
+        events.map { it.eventType } shouldBe
+            listOf("villages.house.tookAction.v1", "villages.house.founded.v1")
+        // One story, and it began with the choice: the action continues what arriving started.
+        events.map { it.correlationId }.distinct() shouldHaveSize 1
+        events.map { it.causationId }.distinct() shouldBe listOf(COMMAND_ONE)
+        events.map { it.streamVersion } shouldBe listOf(2L, 3L)
+    }
+
+    "taking an option that was not offered is refused, and says which rule refused it" {
+        val rig = Rig()
+        val (player, sent) = rig.introduced()
+        val choice = rig.pending()!!
+
+        player.receive(takingAction(choice.id.value.toString(), UUID.randomUUID().toString()))
+
+        sent.last() shouldBe CommandRejected(COMMAND_ONE, "noSuchOption")
+    }
+
+    "answering a choice this house was never given is refused" {
+        val rig = Rig()
+        val (player, sent) = rig.introduced()
+
+        player.receive(takingAction(UUID.randomUUID().toString(), UUID.randomUUID().toString()))
+
+        sent.last() shouldBe CommandRejected(COMMAND_ONE, "noSuchChoice")
+    }
+
+    "an option id that is not an identifier at all is refused as malformed" {
+        val rig = Rig()
+        val (player, sent) = rig.introduced()
+        val choice = rig.pending()!!
+
+        player.receive(takingAction(choice.id.value.toString(), "the-second-one"))
+
+        sent.last().shouldBeInstanceOf<CommandRejected>().reason shouldBe
+            "malformed: an option id is a UUID, not the-second-one"
     }
 
     "a command before hello is rejected, because nobody is speaking" {
@@ -403,7 +521,9 @@ class GatewaySpec : StringSpec({
         val batch = sent.single().shouldBeInstanceOf<Batch>()
         val appeared = batch.deltas.single().shouldBeInstanceOf<HouseAppeared>()
         appeared.house.name shouldBe "Ravenscar"
-        appeared.house.version shouldBe 1
+        // Version two, behind the choice this player was given, and it still appears rather than changes:
+        // whether a house is new is the read model's answer and not the stream version's.
+        appeared.house.version shouldBe 2
     }
 
     "a house that reaches a connection through two of its cells is sent once" {
@@ -542,7 +662,7 @@ class GatewaySpec : StringSpec({
         rig.later.tick()
 
         one.shouldBeEmpty()
-        rig.world.events.shouldHaveSize(1)
+        rig.world.events.filterIsInstance<HouseFounded>().shouldHaveSize(1)
     }
 
     "the loser's close does not evict the window that took over, however late it arrives" {
@@ -578,7 +698,7 @@ class GatewaySpec : StringSpec({
         second.receive(founding(commandId = COMMAND_TWO))
 
         two.last() shouldBe CommandRejected(COMMAND_TWO, "alreadyFounded")
-        rig.world.events shouldHaveSize 1
+        rig.world.events.filterIsInstance<HouseFounded>() shouldHaveSize 1
         rig.houses.ofPlayer(PlayerId(UUID.fromString(TOKEN)))?.name?.value shouldBe "Ravenscar"
     }
 })

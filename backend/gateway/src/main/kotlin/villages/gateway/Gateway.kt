@@ -1,7 +1,11 @@
 package villages.gateway
 
+import villages.application.Arrival
+import villages.application.ChoiceRow
+import villages.application.ChoicesByPlayer
 import villages.application.EventFeed
 import villages.application.FoundHouseService
+import villages.application.HouseChange
 import villages.application.HouseRow
 import villages.application.HousesByCell
 import villages.application.Start
@@ -9,19 +13,25 @@ import villages.application.HousesByPlayer
 import villages.application.PlayerTokens
 import villages.application.Provenance
 import villages.application.StoredEvent
+import villages.application.TakeActionService
 import villages.application.WorldClock
 import villages.application.WriteConflict
 import villages.domain.Banner
+import villages.domain.Choice
+import villages.domain.ChoiceId
+import villages.domain.Effect
 import villages.domain.HouseError
 import villages.domain.HouseId
 import villages.domain.HouseName
 import villages.domain.Location
+import villages.domain.OptionId
 import villages.domain.PlayerId
 import villages.domain.WorldTime
 import villages.protocol.BannerSpec
 import villages.protocol.Batch
 import villages.protocol.Cell
 import villages.protocol.Charge
+import villages.protocol.ChoiceView
 import villages.protocol.ClientFrame
 import villages.protocol.Command
 import villages.protocol.CommandAccepted
@@ -30,11 +40,13 @@ import villages.protocol.Delta
 import villages.protocol.Division
 import villages.protocol.ErrorFrame
 import villages.protocol.EventFrame
+import villages.protocol.FoundAtView
 import villages.protocol.FoundHousePayload
 import villages.protocol.Hello
 import villages.protocol.HouseAppeared
 import villages.protocol.HouseChanged
 import villages.protocol.HouseView
+import villages.protocol.OptionView
 import villages.protocol.PROTOCOL_VERSION
 import villages.protocol.Ping
 import villages.protocol.Point
@@ -45,6 +57,7 @@ import villages.protocol.Resync
 import villages.protocol.ServerFrame
 import villages.protocol.Snapshot
 import villages.protocol.SubscribeCells
+import villages.protocol.TakeActionPayload
 import villages.protocol.TakenOver
 import villages.protocol.Tincture
 import villages.protocol.UnsubscribeCells
@@ -52,6 +65,8 @@ import villages.protocol.ViewTime
 import villages.protocol.WatchEvents
 import villages.protocol.Welcome
 import villages.protocol.WorldNow
+import villages.protocol.EffectView
+import villages.protocol.YourChoice
 import villages.protocol.YourHouse
 import villages.protocol.coarsestZoom
 import java.time.Clock
@@ -114,6 +129,9 @@ class Gateway(
     private val theirHouses: HousesByPlayer,
     private val clock: Clock,
     private val world: WorldClock,
+    private val arrival: Arrival,
+    private val takeAction: TakeActionService,
+    private val choices: ChoicesByPlayer,
     private val later: Later = ScheduledLater(),
 ) : AutoCloseable {
     private val watching = ConcurrentHashMap<Connection, Unit>()
@@ -130,7 +148,12 @@ class Gateway(
     // From now: the debug panel watches the world happening, and would not thank us for the whole
     // chronicle replayed at it on every connect.
     private val feed: AutoCloseable = events.subscribe(Start.FROM_NOW) { stored -> fanOutEvent(stored) }
-    private val changes: AutoCloseable = houses.watch { row -> fanOutChange(row) }
+    private val changes: AutoCloseable = houses.watch { change -> fanOutChange(change) }
+
+    /** What a player has to decide reaches them wherever they are looking, like their house does. */
+    private val asked: AutoCloseable = choices.watch { player, row ->
+        sessions[player]?.tellChoice(row?.choice?.toView())
+    }
 
     fun connect(out: Outbound): Connection = Connection(out)
 
@@ -141,14 +164,17 @@ class Gateway(
         }
     }
 
-    private fun fanOutChange(row: HouseRow) {
+    private fun fanOutChange(change: HouseChange) {
+        val row = change.row
         val deepest = Cell.of(row.seat.lat, row.seat.lon)
         val view = row.toView(deepest)
 
         // Your own house reaches you wherever you are looking, not only when you hold its cell.
         sessions[row.player]?.out?.send(YourHouse(view))
 
-        val delta: Delta = if (row.version == 1L) HouseAppeared(view) else HouseChanged(view)
+        // Whether it is new is the read model's answer, not the stream version's: a house founded from a
+        // choice arrives at version three, behind the choice it was given and the action that took it.
+        val delta: Delta = if (change.appeared) HouseAppeared(view) else HouseChanged(view)
         for (zoom in coarsestZoom(row.significance.value)..Cell.MAX_ZOOM) {
             val holders = holding[deepest.at(zoom).quadkey] ?: continue
             for (connection in holders) {
@@ -162,6 +188,7 @@ class Gateway(
     override fun close() {
         feed.close()
         changes.close()
+        asked.close()
         (later as? AutoCloseable)?.close()
     }
 
@@ -182,7 +209,30 @@ class Gateway(
         @Volatile
         private var finished = false
 
+        /** Which choice this connection has been told of, and whether it has been told anything at all. */
+        private var toldChoice: String? = null
+        private var everToldChoice = false
+
         private fun viewing(): WorldTime = viewingAt ?: world.today()
+
+        /**
+         * Says what this player has to decide, unless they have already been told of that same choice.
+         *
+         * Two paths lead here and either may run first: the hello that gave the choice, and the watch on
+         * the read model that folded it. Without the guard a player would be told the same thing twice on
+         * arriving. The first call always sends, even with nothing pending, so the answer to hello is
+         * definite in the way `yourHouse` is.
+         */
+        internal fun tellChoice(choice: ChoiceView?) {
+            synchronized(lock) {
+                if (finished || (everToldChoice && choice?.id == toldChoice)) {
+                    return
+                }
+                everToldChoice = true
+                toldChoice = choice?.id
+            }
+            out.send(YourChoice(choice))
+        }
 
         /** Whether a change is on this connection's day. Live sees everything; the past sees what existed then. */
         internal fun sees(row: HouseRow): Boolean = viewingAt?.let { row.existsAt(it) } ?: true
@@ -244,6 +294,17 @@ class Gateway(
                 ),
             )
             out.send(YourHouse(theirHouses.ofPlayer(who)?.toView()))
+
+            // Arriving with no house and nothing to decide is what the founding choice answers. The
+            // choice arrive() hands back is what goes out, not a read of the projection: the projection
+            // folds on another thread and would sometimes say "nothing" about a choice just written.
+            val given = try {
+                arrival.arrive(who)
+            } catch (@Suppress("TooGenericExceptionCaught") wrong: RuntimeException) {
+                out.send(ErrorFrame("arrival", wrong.message ?: "could not be given a choice"))
+                null
+            }
+            tellChoice((given ?: choices.pendingOf(who)?.choice)?.toView())
         }
 
         /**
@@ -259,6 +320,10 @@ class Gateway(
             letEverythingGo()
             out.send(TakenOver("another window took this player over"))
         }
+
+        /** The story the pending choice began, so an action answering it belongs to that story. */
+        private fun pendingStory(who: PlayerId): java.util.UUID? =
+            choices.pendingOf(who)?.let { row -> runCatching { java.util.UUID.fromString(row.correlationId) }.getOrNull() }
 
         private fun command(frame: Command) {
             val who = player
@@ -283,6 +348,19 @@ class Gateway(
                         seat = Location(payload.seat.lat, payload.seat.lon),
                         banner = payload.banner.toDomain(),
                         provenance = Provenance.startedBy(commandId),
+                    )
+
+                    is TakeActionPayload -> takeAction.take(
+                        player = who,
+                        choiceId = ChoiceId(asUuid(payload.choiceId, "a choice id")),
+                        optionId = OptionId(asUuid(payload.optionId, "an option id")),
+                        // An action continues the story the choice began, so the action and what it does
+                        // wear the same correlation as the question. The server decides this, not the
+                        // client: nothing about correlation crosses the wire. See decision record 0035.
+                        provenance = Provenance(
+                            commandId = commandId,
+                            correlationId = pendingStory(who) ?: commandId,
+                        ),
                     )
                 }
                 out.send(CommandAccepted(frame.commandId))
@@ -423,6 +501,33 @@ class Gateway(
 }
 
 private fun isCell(candidate: String): Boolean = runCatching { Cell(candidate) }.isSuccess
+
+/** An identifier off the wire, or a refusal saying which one was not one. */
+private fun asUuid(value: String, what: String): java.util.UUID =
+    runCatching { java.util.UUID.fromString(value) }
+        .getOrElse { throw IllegalArgumentException("$what is a UUID, not $value") }
+
+/** A choice as the parchment shows it. What the interface renders and the whole of what it knows. */
+internal fun Choice.toView(): ChoiceView = ChoiceView(
+    id = id.value.toString(),
+    prompt = prompt,
+    options = options.map { option ->
+        OptionView(
+            id = option.id.value.toString(),
+            label = option.label,
+            detail = option.detail,
+            effect = option.effect.toView(),
+        )
+    },
+)
+
+internal fun Effect.toView(): EffectView = when (this) {
+    is Effect.FoundAt -> FoundAtView(
+        seat = Point(seat.lat, seat.lon),
+        name = name.value,
+        banner = banner.toWire(),
+    )
+}
 
 private val Delta.house: HouseView
     get() = when (this) {

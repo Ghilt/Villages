@@ -16,7 +16,9 @@ import villages.protocol.ProtocolJson
 import villages.protocol.ServerFrame
 import villages.protocol.Snapshot
 import villages.protocol.TakenOver
+import villages.protocol.FoundAtView
 import villages.protocol.Welcome
+import villages.protocol.YourChoice
 import villages.protocol.YourHouse
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
@@ -68,6 +70,13 @@ class AppBootsTest {
     /** A command id is a UUID, and the gateway refuses anything else. See decision record 0035. */
     private val founding1 = "1c000001-0000-4000-8000-00000000000a"
     private val founding2 = "1c000002-0000-4000-8000-00000000000b"
+    private val takingOne = "1c000003-0000-4000-8000-00000000000c"
+
+    /**
+     * A player of this test's own. The world is in memory and shared by every test in this class, so two
+     * tests on one token would be one player, and whichever ran second would find a house already there.
+     */
+    private val arriving = "5e3a91c4-2b60-4f18-9d73-08ac1e6f5b27"
     private val hello = """{"type":"hello","playerToken":"$token","protocolVersion":1}"""
     private val founding =
         """{"type":"command","commandId":"$founding1","command":{"type":"foundHouse","name":"Ravenscar",""" +
@@ -78,14 +87,63 @@ class AppBootsTest {
     private val cell = "12003122"
 
     @Test
+    fun `a player arrives, takes one of the seats offered, and the house stands where it promised`() {
+        val window = Window(port)
+        window.say("""{"type":"watchEvents","on":true}""")
+        window.say("""{"type":"hello","playerToken":"$arriving","protocolVersion":1}""")
+        window.until("a choice") { frames -> frames.any { it is YourChoice } }
+
+        val offered = window.last<YourChoice>().choice!!
+        val taking = offered.options[1]
+        window.say(
+            """{"type":"command","commandId":"$takingOne","command":{"type":"takeAction",""" +
+                """"choiceId":"${offered.id}","optionId":"${taking.id}"}}""",
+        )
+        window.until("the house") { frames -> frames.filterIsInstance<YourHouse>().last().house != null }
+
+        // The house stands where the option promised, under the name and banner it promised.
+        val promised = taking.effect as FoundAtView
+        val standing = window.last<YourHouse>().house!!
+        assertEquals(promised.name, standing.name)
+        assertEquals(promised.seat, standing.seat)
+        assertEquals(promised.banner, standing.banner)
+
+        // Three events, one story: asked where, answered, and founded. The action's cause is the command.
+        val ours = "house:" + java.util.UUID.nameUUIDFromBytes("villages:house:$arriving".toByteArray())
+        window.until("three events") { frames ->
+            frames.filterIsInstance<EventFrame>().count { it.stream == ours } == 3
+        }
+        val events = window.heard.filterIsInstance<EventFrame>().filter { it.stream == ours }
+        assertEquals(
+            listOf("villages.house.givenChoice.v1", "villages.house.tookAction.v1", "villages.house.founded.v1"),
+            events.map { it.eventType },
+        )
+        assertEquals(1, events.map { it.correlationId }.distinct().size, "one story: $events")
+        assertEquals(takingOne, events[1].causationId)
+        assertEquals(takingOne, events[2].causationId)
+        assertEquals(listOf(1L, 2L, 3L), events.map { it.streamVersion })
+
+        // And nothing is left to decide.
+        window.until("an empty parchment") { frames -> frames.filterIsInstance<YourChoice>().last().choice == null }
+
+        window.close()
+    }
+
+    @Test
     fun `a house is founded, read back from the map, and belongs to the one player who plays from one place`() {
         val first = Window(port)
         first.say(hello)
-        // Welcome and the house are two frames: wait for the second, or the first arrives on its own.
-        first.until("a welcome and a house") { frames ->
-            frames.any { it is Welcome } && frames.any { it is YourHouse }
+        // Welcome, the house and the choice are three frames: wait for all of them.
+        first.until("a welcome, a house and a choice") { frames ->
+            frames.any { it is Welcome } && frames.any { it is YourHouse } && frames.any { it is YourChoice }
         }
         assertNull(first.last<YourHouse>().house, "a new player has no house yet")
+
+        // Arriving with no house is answered with three seats to choose between.
+        val offered = first.last<YourChoice>().choice
+        assertNotNull(offered, "a new player is asked where to found")
+        assertEquals(3, offered!!.options.size)
+        assertEquals(3, offered.options.map { it.label.substringAfter(", in ") }.distinct().size)
 
         first.say("""{"type":"watchEvents","on":true}""")
         first.say(founding)
@@ -93,7 +151,8 @@ class AppBootsTest {
             frames.any { it is EventFrame } && frames.filterIsInstance<YourHouse>().last().house != null
         }
 
-        val event = first.heard.filterIsInstance<EventFrame>().single()
+        // The founding choice this player was given came first, and the founding follows it.
+        val event = first.heard.filterIsInstance<EventFrame>().last()
         assertEquals("villages.house.founded.v1", event.eventType)
         // The stream is worked out from the player, not chosen by the client: see HouseId.of.
         assertEquals("house:49d14206-e7b6-3cff-b12c-0fa929182509", event.stream)

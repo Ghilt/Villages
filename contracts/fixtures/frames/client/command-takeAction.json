@@ -1,0 +1,9 @@
+{
+  "type": "command",
+  "commandId": "8a3d5e21-7c04-4b96-a1f8-2d60e4c97b13",
+  "command": {
+    "type": "takeAction",
+    "choiceId": "aa000000-0000-4000-8000-00000000c401",
+    "optionId": "aa000000-0000-4000-8000-000000000001"
+  }
+}

@@ -77,7 +77,7 @@ needs no explaining, is `docs/MECHANICS.md`. Decision records 0034, 0035 and 003
 - [x] 1. Provenance on every event: a correlation id and a causation id beside the event id
 - [x] 2. The domain of choices: a house can be given a choice, and take one option of it
 - [x] 3. Restart: the debug panel starts a player over
-- [ ] 4. The loop on the wire: a new player is given three seats, and taking one founds the house
+- [x] 4. The loop on the wire: a new player is given three seats, and taking one founds the house
 - [ ] 5. The parchment, the three marks on the map, and the flight to the seat
 - [ ] 6. Wipe the world, from the debug panel
 - [ ] 7. The castle, and the fence of ground about it

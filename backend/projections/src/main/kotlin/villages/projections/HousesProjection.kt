@@ -2,6 +2,7 @@ package villages.projections
 
 import villages.application.CellContents
 import villages.application.EventFeed
+import villages.application.HouseChange
 import villages.application.HouseRow
 import villages.application.HousesByCell
 import villages.application.HousesByPlayer
@@ -39,7 +40,7 @@ class HousesProjection(feed: EventFeed) : HousesByCell, HousesByPlayer, AutoClos
 
     /** Which house is whose. One entry a player, because a player founds one house; see decision 0028. */
     private val byPlayer = ConcurrentHashMap<PlayerId, HouseId>()
-    private val listeners = CopyOnWriteArraySet<(HouseRow) -> Unit>()
+    private val listeners = CopyOnWriteArraySet<(HouseChange) -> Unit>()
     private val applied = AtomicLong()
     // From the beginning: a read model is its fold of every event, so one it never saw is one it is
     // permanently wrong about. See decision record 0029.
@@ -65,15 +66,21 @@ class HousesProjection(feed: EventFeed) : HousesByCell, HousesByPlayer, AutoClos
             // the choices projection's business; this one draws the map and has nothing to say about them.
             is HouseGivenChoice, is HouseTookAction -> return
         }
-        rows[row.id] = Indexed(
-            row = row,
-            quadkey = Cell.of(row.seat.lat, row.seat.lon).quadkey,
-            coarsestZoom = coarsestZoom(row.significance.value),
-        )
+        // Whether this house was already on the map is the read model's to say. A stream version cannot:
+        // a house founded from a choice arrives at version three, behind the choice and the action.
+        val appeared = rows.put(
+            row.id,
+            Indexed(
+                row = row,
+                quadkey = Cell.of(row.seat.lat, row.seat.lon).quadkey,
+                coarsestZoom = coarsestZoom(row.significance.value),
+            ),
+        ) == null
         byPlayer[row.player] = row.id
         applied.incrementAndGet()
+        val change = HouseChange(row, appeared)
         for (listener in listeners) {
-            listener(row)
+            listener(change)
         }
     }
 
@@ -93,7 +100,7 @@ class HousesProjection(feed: EventFeed) : HousesByCell, HousesByPlayer, AutoClos
 
     override fun ofPlayer(player: PlayerId): HouseRow? = byPlayer[player]?.let { rows[it]?.row }
 
-    override fun watch(listener: (HouseRow) -> Unit): AutoCloseable {
+    override fun watch(listener: (HouseChange) -> Unit): AutoCloseable {
         listeners += listener
         return AutoCloseable { listeners -= listener }
     }

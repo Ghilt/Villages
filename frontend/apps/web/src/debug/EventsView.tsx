@@ -12,10 +12,15 @@ interface EventsViewProps {
   map: maplibregl.Map | null;
 }
 
-/** `villages.house.founded.v1` reads as `house founded`, which is what a line in a list should say. */
+/**
+ * `villages.house.founded.v1` reads as `house founded`, which is what a line in a list should say, and
+ * `villages.house.givenChoice.v1` as `house given choice`: a catalogue verb is camelCase when the fact
+ * takes more than one word.
+ */
 function saidPlainly(eventType: string): string {
   const [, aggregate, verb] = eventType.split('.');
-  return `${aggregate ?? '?'} ${verb ?? eventType}`;
+  const words = (verb ?? eventType).replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase();
+  return `${aggregate ?? '?'} ${words}`;
 }
 
 const TINCTURES = {

@@ -24,6 +24,7 @@ const state: MapState = {
   areas: { drawn: 0, armed: false, selected: null },
   world: { today: 454901, earliest: 437635, viewingAt: null },
   player: { id: '3c8f9e1a-0000-4000-8000-000000000001', connection: 'open', house: null },
+  choice: null,
 };
 
 const valueOf = (from: MapState, label: string): string =>
@@ -39,6 +40,28 @@ describe('saying where the terrain is coming from', () => {
     // This is the number that explains why a deep zoom looks the way it does, and it is not the zoom.
     expect(valueOf({ ...state, zoom: 8, tileZoom: 8 }, 'terrain')).toBe('z7 as cut, stretched 2x');
     expect(valueOf({ ...state, zoom: 10, tileZoom: 10 }, 'terrain')).toBe('z7 as cut, stretched 8x');
+  });
+});
+
+describe('saying what the player has to decide', () => {
+  it('says nothing to decide when there is no parchment', () => {
+    expect(valueOf(state, 'choice')).toBe('nothing to decide');
+  });
+
+  it('says what is being asked and how many ways there are to answer it', () => {
+    const asked = { prompt: 'Where shall the house raise its seat?', options: 3, acting: false };
+
+    expect(valueOf({ ...state, choice: asked }, 'choice')).toBe(
+      '"Where shall the house raise its seat?", 3 options',
+    );
+  });
+
+  it('says when an answer is in flight, because a parchment that looks stuck is not', () => {
+    const answering = { prompt: 'Where shall the house raise its seat?', options: 3, acting: true };
+
+    expect(valueOf({ ...state, choice: answering }, 'choice')).toBe(
+      '"Where shall the house raise its seat?", 3 options, answering',
+    );
   });
 });
 

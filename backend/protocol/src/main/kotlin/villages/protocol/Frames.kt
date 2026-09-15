@@ -118,6 +118,7 @@ data class ViewTime(val at: Long?) : ClientFrame
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes(
     JsonSubTypes.Type(FoundHousePayload::class, name = "foundHouse"),
+    JsonSubTypes.Type(TakeActionPayload::class, name = "takeAction"),
 )
 sealed interface CommandPayload
 
@@ -127,6 +128,14 @@ sealed interface CommandPayload
  * that is not its own. See decision record 0028.
  */
 data class FoundHousePayload(val name: String, val seat: Point, val banner: BannerSpec) : CommandPayload
+
+/**
+ * Take one option of the choice this player has pending. It names the choice as well as the option, so a
+ * parchment left open while the world moved on is refused rather than answering something else.
+ *
+ * Which story this continues is not on the wire: the server reads it from the choice. See 0034 and 0035.
+ */
+data class TakeActionPayload(val choiceId: String, val optionId: String) : CommandPayload
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes(
@@ -140,6 +149,7 @@ data class FoundHousePayload(val name: String, val seat: Point, val banner: Bann
     JsonSubTypes.Type(ErrorFrame::class, name = "error"),
     JsonSubTypes.Type(EventFrame::class, name = "event"),
     JsonSubTypes.Type(YourHouse::class, name = "yourHouse"),
+    JsonSubTypes.Type(YourChoice::class, name = "yourChoice"),
     JsonSubTypes.Type(TakenOver::class, name = "takenOver"),
 )
 sealed interface ServerFrame
@@ -183,6 +193,29 @@ data class YourHouse(val house: HouseView?) : ServerFrame
  * more and accepts no commands. A player plays from one place. See decision record 0028.
  */
 data class TakenOver(val message: String) : ServerFrame
+
+/**
+ * What this player has to decide, or null when they have nothing. Sent after welcome and again whenever
+ * it changes, like `yourHouse`: what is pending is the player's, not the session's. See 0028 and 0034.
+ */
+data class YourChoice(val choice: ChoiceView?) : ServerFrame
+
+/**
+ * A choice as the parchment shows it: what is being asked, and the two to four things that could be done
+ * about it. The interface renders this and nothing else, so a new kind of choice needs no new frame.
+ */
+data class ChoiceView(val id: String, val prompt: String, val options: List<OptionView>)
+
+data class OptionView(val id: String, val label: String, val detail: String, val effect: EffectView)
+
+/** What taking an option would do. `kind` names the case, as it does in the store. See 0034. */
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "kind")
+@JsonSubTypes(
+    JsonSubTypes.Type(FoundAtView::class, name = "foundAt"),
+)
+sealed interface EffectView
+
+data class FoundAtView(val seat: Point, val name: String, val banner: BannerSpec) : EffectView
 
 /**
  * One stored event, as stored: the envelope and the data, for a client that asked to watch. `eventType` is

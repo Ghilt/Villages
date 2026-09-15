@@ -9,9 +9,9 @@ layers a change must respect, and the decision records the reasons. This says ho
 described mechanic to all of those.
 
 State of the source at this writing: one aggregate, the `House`, with three events, provenance on every
-envelope, and the choice pattern below in the domain but not yet on the wire. The first gameplay loop,
-planned in `plans/2026-09-15-first-gameplay-loop.md`, brings the rest of it in one increment at a time;
-this note goes when it has.
+envelope, and the whole choice pattern below running end to end, from arrival to a founded house. What
+is left of the first gameplay loop, planned in `plans/2026-09-15-first-gameplay-loop.md`, is what the
+player sees of it; this note goes when that has landed.
 
 ## First, five questions
 

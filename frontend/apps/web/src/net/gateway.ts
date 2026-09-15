@@ -9,7 +9,7 @@ import {
   whatToFollow,
 } from '@villages/client-core';
 import { PROTOCOL_VERSION, describeDay } from '@villages/protocol';
-import type { EventFrame, HouseView, ServerFrame } from '@villages/protocol';
+import type { ChoiceView, EventFrame, HouseView, OptionView, ServerFrame } from '@villages/protocol';
 
 import { note, shortId } from '../debug/log';
 import { browserSocket } from './browserSocket';
@@ -29,6 +29,10 @@ export interface GatewayState {
   playerId?: string;
   /** The player's own house, wherever they are looking, or null when they have none. */
   yourHouse: HouseView | null;
+  /** What this player has to decide, or null when they have nothing. What the parchment shows. */
+  yourChoice: ChoiceView | null;
+  /** The id of the command in flight, so the parchment can stop taking a second answer. */
+  acting: string | null;
   events: readonly EventFrame[];
   houses: HousesState;
   /** Where the world's clock stands, as welcome said, or null until it has. */
@@ -42,6 +46,8 @@ let state: GatewayState = {
   connection: 'connecting',
   events: [],
   yourHouse: null,
+  yourChoice: null,
+  acting: null,
   houses: NO_HOUSES,
   world: null,
   viewingAt: null,
@@ -94,9 +100,11 @@ function heard(frame: ServerFrame): void {
       connection?.send({ type: 'subscribeCells', cells: frame.cells });
       return;
     case 'commandAccepted':
+      if (state.acting === frame.commandId) update({ acting: null });
       note('gateway', `command ${shortId(frame.commandId)} accepted`);
       return;
     case 'commandRejected':
+      if (state.acting === frame.commandId) update({ acting: null });
       note('gateway', `command ${shortId(frame.commandId)} rejected: ${frame.reason}`);
       return;
     case 'error':
@@ -109,9 +117,18 @@ function heard(frame: ServerFrame): void {
       update({ yourHouse: frame.house });
       note('house', frame.house === null ? 'no house yet' : `your house is ${frame.house.name}`);
       return;
+    case 'yourChoice':
+      update({ yourChoice: frame.choice });
+      note(
+        'choice',
+        frame.choice === null
+          ? 'nothing to decide'
+          : `"${frame.choice.prompt}", ${frame.choice.options.length} options`,
+      );
+      return;
     case 'takenOver':
       // A player plays from one place. This window is finished; the socket goes with it. See 0028.
-      update({ connection: 'takenOver', houses: NO_HOUSES, yourHouse: null });
+      update({ connection: 'takenOver', houses: NO_HOUSES, yourHouse: null, yourChoice: null });
       note('gateway', `${frame.message}; this window is no longer playing`);
       connection?.close();
       return;
@@ -181,6 +198,26 @@ export function gateway(): Connection {
   connection.onFrame(heard);
   connection.onProblem((problem) => note('gateway', problem));
   return connection;
+}
+
+/**
+ * Takes one option of the choice this player has, and says so in the log.
+ *
+ * Which story this continues is not sent: the server reads it from the choice, because a client cannot
+ * name a story that is not its own. See decision record 0035.
+ */
+export function takeOption(choice: ChoiceView, option: OptionView): void {
+  if (connection === null || state.connection !== 'open' || state.acting !== null) {
+    return;
+  }
+  const commandId = crypto.randomUUID();
+  update({ acting: commandId });
+  note('command', `taking "${option.label}" as ${shortId(commandId)}`);
+  connection.send({
+    type: 'command',
+    commandId,
+    command: { type: 'takeAction', choiceId: choice.id, optionId: option.id },
+  });
 }
 
 /**

@@ -110,6 +110,13 @@ flowchart LR
   G -->|batched deltas| P
 ```
 
+A player arrives and is asked something. Saying hello with no house and nothing pending writes
+`HouseGivenChoice` to their house's stream, and the gateway answers with what it gave rather than with a
+read of the projection, because the projection folds on another thread and would sometimes say
+"nothing" about a choice just written. Taking one option writes the action and what it does from one
+decision, at consecutive versions and under one correlation id, and the map's read model draws the
+founding out of that. See decision records 0034 and 0035.
+
 A player founds a house. The gateway hands the command to the application, which loads the stream, calls `decide`,
 and appends the resulting events with the stream version as the write condition. Two subscriptions read the store from
 there: one updates the read model, one publishes to the broker with a routing key that carries the cell. Every gateway

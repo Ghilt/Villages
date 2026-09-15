@@ -1,6 +1,7 @@
 package villages.application
 
 import villages.domain.Banner
+import villages.domain.Choice
 import villages.domain.HouseCommand
 import villages.domain.HouseEvent
 import villages.domain.HouseId
@@ -86,6 +87,14 @@ class DailyWorldClock(
 /** Who a token belongs to. Anonymous browser tokens for now; accounts replace this without moving anything. */
 fun interface PlayerTokens {
     fun playerOf(token: String): PlayerId
+}
+
+/**
+ * Fresh identities, so that a use case can mint one without reaching for a random number generator and a
+ * test can hand out a known one. What it makes is a message id, never an aggregate's: those are derived.
+ */
+fun interface FreshIds {
+    fun fresh(): UUID
 }
 
 /**
@@ -176,6 +185,15 @@ data class CellContents(
 )
 
 /**
+ * A change the read model has applied, and whether it put a house there that was not there before.
+ *
+ * The distinction is the read model's to make and nobody else's: a stream version cannot tell you, because
+ * a house founded from a choice arrives at version three, behind the choice it was given and the action
+ * that took it.
+ */
+data class HouseChange(val row: HouseRow, val appeared: Boolean)
+
+/**
  * The map's read model: houses by cell, at a moment in world-time. A cell is a quadkey at any zoom, and
  * which houses are worth drawing at that zoom is the read model's business, not the caller's. Decision 0026.
  */
@@ -186,8 +204,8 @@ interface HousesByCell {
     /** The earliest world-time anything is known to exist from, or null while nothing is. The scrubber's left end. */
     fun earliest(): WorldTime?
 
-    /** Every row the read model changes from now on, in the order it applied them, until closed. */
-    fun watch(listener: (HouseRow) -> Unit): AutoCloseable
+    /** Every change the read model makes from now on, in the order it applied them, until closed. */
+    fun watch(listener: (HouseChange) -> Unit): AutoCloseable
 }
 
 /**
@@ -196,4 +214,29 @@ interface HousesByCell {
  */
 fun interface HousesByPlayer {
     fun ofPlayer(player: PlayerId): HouseRow?
+}
+
+/**
+ * The choice a player has to make, as the read model holds it. The correlation id is the story the choice
+ * began, so an action answering it can be recorded as part of the same story rather than a new one.
+ */
+data class ChoiceRow(
+    val player: PlayerId,
+    val houseId: HouseId,
+    val choice: Choice,
+    val correlationId: String,
+)
+
+/**
+ * What each player has been asked and has not yet answered. One pending choice a player, because a player
+ * has one house and a house is asked one thing at a time. See decision record 0034.
+ */
+interface ChoicesByPlayer {
+    fun pendingOf(player: PlayerId): ChoiceRow?
+
+    /**
+     * Every change to what a player has pending, until closed: the row when one is given, and null when it
+     * is answered or settled.
+     */
+    fun watch(listener: (PlayerId, ChoiceRow?) -> Unit): AutoCloseable
 }

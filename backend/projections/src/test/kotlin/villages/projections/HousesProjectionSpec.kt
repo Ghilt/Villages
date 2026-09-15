@@ -5,6 +5,7 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import villages.application.EventFeed
+import villages.application.HouseChange
 import villages.application.HouseRow
 import villages.application.Start
 import villages.application.StoredEvent
@@ -150,25 +151,40 @@ class HousesProjectionSpec : StringSpec({
         contents.omitted shouldBe 1
     }
 
-    "a watcher hears each row as it is applied, and the read model counts what it applied" {
+    "a watcher hears each change as it is applied, and the read model counts what it applied" {
         val feed = HandFed()
         val houses = HousesProjection(feed)
-        val heard = mutableListOf<HouseRow>()
+        val heard = mutableListOf<HouseChange>()
         houses.watch { heard += it }
 
         feed.deliver(founded("Ravenscar", 59.33, 18.07))
         feed.deliver(founded("Hollin", 59.41, 17.95))
 
-        heard.map { it.name.value } shouldBe listOf("Ravenscar", "Hollin")
-        heard.first().version shouldBe 1
+        heard.map { it.row.name.value } shouldBe listOf("Ravenscar", "Hollin")
+        heard.first().row.version shouldBe 1
         houses.inCell(STOCKHOLM_Z8, someDay, 10).asOf shouldBe 2
         houses.size shouldBe 2
+    }
+
+    "and says which of them put a house on the map that was not there before" {
+        val feed = HandFed()
+        val houses = HousesProjection(feed)
+        val heard = mutableListOf<HouseChange>()
+        houses.watch { heard += it }
+
+        val ravenscar = founded("Ravenscar", 59.33, 18.07)
+        feed.deliver(ravenscar)
+        // The same house again, as a replay would deliver it, and then changed.
+        feed.deliver(ravenscar)
+        feed.deliver(ravenscar.copy(name = HouseName("Ravenscar the Younger")), version = 2)
+
+        heard.map { it.appeared } shouldBe listOf(true, false, false)
     }
 
     "a watcher that stopped hears nothing more" {
         val feed = HandFed()
         val houses = HousesProjection(feed)
-        val heard = mutableListOf<HouseRow>()
+        val heard = mutableListOf<HouseChange>()
         houses.watch { heard += it }.close()
 
         feed.deliver(founded("Ravenscar", 59.33, 18.07))

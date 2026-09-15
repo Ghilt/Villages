@@ -26,6 +26,19 @@ function describeYourHouse(): string | null {
   return `${heard.yourHouse.name}, founded ${describeDay(heard.yourHouse.since)}`;
 }
 
+/** What this player has been asked, as the panel says it. Read when the panel looks, like the rest. */
+function choiceHere(): MapState['choice'] {
+  const heard = gatewayState();
+  if (heard.yourChoice === null) {
+    return null;
+  }
+  return {
+    prompt: heard.yourChoice.prompt,
+    options: heard.yourChoice.options.length,
+    acting: heard.acting !== null,
+  };
+}
+
 /** Where the world's clock stands and the day being shown, read together so they cannot disagree. */
 function worldNow(): { today: number; earliest: number; viewingAt: number | null } | null {
   const heard = gatewayState();
@@ -205,6 +218,7 @@ export function DebugPanel({ map, renderer, worldRoot }: DebugPanelProps) {
             connection: gatewayState().connection,
             house: describeYourHouse(),
           },
+          choice: choiceHere(),
         }),
       );
     };

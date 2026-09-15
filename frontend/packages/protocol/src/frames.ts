@@ -52,6 +52,28 @@ export const houseViewSchema = z.object({
   version: z.number().int(),
 });
 
+/** What taking an option would do. `kind` names the case, as it does in the store. See 0034. */
+export const effectViewSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('foundAt'), seat: pointSchema, name: z.string(), banner: bannerSchema }),
+]);
+
+export const optionViewSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  detail: z.string(),
+  effect: effectViewSchema,
+});
+
+/**
+ * A choice as the parchment shows it. The interface renders this and nothing else, so a new kind of
+ * choice needs no new frame and no new component. See decision record 0034.
+ */
+export const choiceViewSchema = z.object({
+  id: z.string(),
+  prompt: z.string(),
+  options: z.array(optionViewSchema),
+});
+
 export const commandPayloadSchema = z.discriminatedUnion('type', [
   /** No house id: the server works it out from the player, so a client cannot name a stream. See 0028. */
   z.object({
@@ -59,6 +81,12 @@ export const commandPayloadSchema = z.discriminatedUnion('type', [
     name: z.string(),
     seat: pointSchema,
     banner: bannerSchema,
+  }),
+  /** Which story this continues is not on the wire: the server reads it from the choice. See 0035. */
+  z.object({
+    type: z.literal('takeAction'),
+    choiceId: z.string(),
+    optionId: z.string(),
   }),
 ]);
 
@@ -89,6 +117,8 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
   }),
   /** The player's own house, wherever they are looking. Null when they have none. */
   z.object({ type: z.literal('yourHouse'), house: houseViewSchema.nullable() }),
+  /** What this player has to decide, or null when they have nothing. The parchment's one frame. */
+  z.object({ type: z.literal('yourChoice'), choice: choiceViewSchema.nullable() }),
   /** Another window took this player over; this session is finished. */
   z.object({ type: z.literal('takenOver'), message: z.string() }),
   z.object({
@@ -126,6 +156,9 @@ export type Charge = z.infer<typeof chargeSchema>;
 export type BannerSpec = z.infer<typeof bannerSchema>;
 export type Rate = z.infer<typeof rateSchema>;
 export type HouseView = z.infer<typeof houseViewSchema>;
+export type EffectView = z.infer<typeof effectViewSchema>;
+export type OptionView = z.infer<typeof optionViewSchema>;
+export type ChoiceView = z.infer<typeof choiceViewSchema>;
 export type CommandPayload = z.infer<typeof commandPayloadSchema>;
 export type ClientFrame = z.infer<typeof clientFrameSchema>;
 export type Delta = z.infer<typeof deltaSchema>;
