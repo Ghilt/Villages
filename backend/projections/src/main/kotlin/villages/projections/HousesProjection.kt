@@ -108,6 +108,19 @@ class HousesProjection(feed: EventFeed) : HousesByCell, HousesByPlayer, AutoClos
     /** How many rows there are, for the debug panel and for tests. */
     val size: Int get() = rows.size
 
+    /**
+     * Forgets every house, because the world they were in has been emptied. See decision record 0036.
+     *
+     * The count of applied changes keeps climbing rather than starting again: a client compares it to
+     * decide whether what it holds is stale, and a number that went backwards would tell it the opposite
+     * of the truth.
+     */
+    fun reset() {
+        rows.clear()
+        byPlayer.clear()
+        applied.incrementAndGet()
+    }
+
     override fun close() {
         subscription.close()
     }

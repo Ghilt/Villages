@@ -126,6 +126,12 @@ function heard(frame: ServerFrame): void {
           : `"${frame.choice.prompt}", ${frame.choice.options.length} options`,
       );
       return;
+    case 'worldWiped':
+      // The world this window was looking at is gone. Arriving anew is the only honest thing to do, and
+      // a reload is how a page arrives. See decision record 0036.
+      note('world', `${frame.message}; arriving anew`);
+      window.location.reload();
+      return;
     case 'takenOver':
       // A player plays from one place. This window is finished; the socket goes with it. See 0028.
       update({ connection: 'takenOver', houses: NO_HOUSES, yourHouse: null, yourChoice: null });
@@ -198,6 +204,15 @@ export function gateway(): Connection {
   connection.onFrame(heard);
   connection.onProblem((problem) => note('gateway', problem));
   return connection;
+}
+
+/** Empties the development world, for everyone connected to it. A debug affordance; see 0036. */
+export function wipeWorld(): void {
+  if (connection === null || state.connection !== 'open') {
+    return;
+  }
+  note('world', 'emptying the world');
+  connection.send({ type: 'wipeWorld' });
 }
 
 /**

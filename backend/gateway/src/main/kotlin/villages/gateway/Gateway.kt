@@ -15,6 +15,7 @@ import villages.application.Provenance
 import villages.application.StoredEvent
 import villages.application.TakeActionService
 import villages.application.WorldClock
+import villages.application.WorldWipe
 import villages.application.WriteConflict
 import villages.domain.Banner
 import villages.domain.Choice
@@ -63,8 +64,10 @@ import villages.protocol.Tincture
 import villages.protocol.UnsubscribeCells
 import villages.protocol.ViewTime
 import villages.protocol.WatchEvents
+import villages.protocol.WipeWorld
 import villages.protocol.Welcome
 import villages.protocol.WorldNow
+import villages.protocol.WorldWiped
 import villages.protocol.EffectView
 import villages.protocol.YourChoice
 import villages.protocol.YourHouse
@@ -132,6 +135,7 @@ class Gateway(
     private val arrival: Arrival,
     private val takeAction: TakeActionService,
     private val choices: ChoicesByPlayer,
+    private val emptyTheWorld: WorldWipe,
     private val later: Later = ScheduledLater(),
 ) : AutoCloseable {
     private val watching = ConcurrentHashMap<Connection, Unit>()
@@ -145,6 +149,9 @@ class Gateway(
      */
     private val sessions = ConcurrentHashMap<PlayerId, Connection>()
 
+    /** Every live connection, so that a wipe can tell all of them and not only the introduced ones. */
+    private val live = ConcurrentHashMap.newKeySet<Connection>()
+
     // From now: the debug panel watches the world happening, and would not thank us for the whole
     // chronicle replayed at it on every connect.
     private val feed: AutoCloseable = events.subscribe(Start.FROM_NOW) { stored -> fanOutEvent(stored) }
@@ -155,7 +162,21 @@ class Gateway(
         sessions[player]?.tellChoice(row?.choice?.toView())
     }
 
-    fun connect(out: Outbound): Connection = Connection(out)
+    fun connect(out: Outbound): Connection = Connection(out).also { live += it }
+
+    /**
+     * Empties the world and finishes every session with it.
+     *
+     * Everybody is told, because a wipe is everybody's: a window left holding a house that no longer
+     * exists would be showing a world that is not there. Each one reloads and arrives anew. See 0036.
+     */
+    private fun wipeTheWorld() {
+        val gone = emptyTheWorld.wipe()
+        sessions.clear()
+        for (connection in live) {
+            connection.finish(WorldWiped("the world was emptied; $gone event${if (gone == 1) "" else "s"} went"))
+        }
+    }
 
     private fun fanOutEvent(stored: StoredEvent) {
         val frame = stored.toFrame()
@@ -262,6 +283,7 @@ class Gateway(
                 is SubscribeCells -> subscribe(frame.cells)
                 is UnsubscribeCells -> unsubscribe(frame.cells)
                 is ViewTime -> viewTime(frame.at)
+                is WipeWorld -> wipeTheWorld()
             }
         }
 
@@ -312,13 +334,20 @@ class Gateway(
          * nothing more. The gateway does not close sockets - `Outbound` says frames and nothing else - so
          * the client is told and closes its own. One that does not is left holding something inert.
          */
-        internal fun standDown() {
+        internal fun standDown() = finish(TakenOver("another window took this player over"))
+
+        /**
+         * Ends this session without ending its socket, and says why. The gateway does not close sockets;
+         * the client is told and closes its own.
+         */
+        internal fun finish(why: ServerFrame) {
             if (finished) {
                 return
             }
             finished = true
             letEverythingGo()
-            out.send(TakenOver("another window took this player over"))
+            live -= this
+            out.send(why)
         }
 
         /** The story the pending choice began, so an action answering it belongs to that story. */
@@ -483,6 +512,7 @@ class Gateway(
         }
 
         fun disconnected() {
+            live -= this
             finished = true
             letEverythingGo()
             // Only if this is still the session: the loser of a takeover often closes afterwards, and

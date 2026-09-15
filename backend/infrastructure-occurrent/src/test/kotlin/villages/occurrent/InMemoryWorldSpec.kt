@@ -129,6 +129,23 @@ class InMemoryWorldSpec : StringSpec({
         }
     }
 
+    "a wiped world is empty, and the next founding is the first event of its stream again" {
+        InMemoryWorld().use { world ->
+            world.executor.execute(ravenscar, sent)
+            world.executor.execute(hollin, sent)
+
+            world.wipe() shouldBe 2
+
+            world.store.read(ravenscar.houseId.stream).events().count() shouldBe 0
+            world.executor.execute(ravenscar, sent)
+            world.store.read(ravenscar.houseId.stream).version() shouldBe 1
+        }
+    }
+
+    "wiping an empty world removes nothing and says so" {
+        InMemoryWorld().use { world -> world.wipe() shouldBe 0 }
+    }
+
     "a closed feed hears nothing more" {
         InMemoryWorld().use { world ->
             var heard = 0

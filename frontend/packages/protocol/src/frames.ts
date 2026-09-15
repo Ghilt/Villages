@@ -100,6 +100,8 @@ export const clientFrameSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('watchEvents'), on: z.boolean() }),
   /** Look at the world as it was on a day, or at live when null. The timeline scrubber's one frame. */
   z.object({ type: z.literal('viewTime'), at: worldDaySchema.nullable() }),
+  /** Empty the development world, for everyone. A debug frame, never a player's. See 0036. */
+  z.object({ type: z.literal('wipeWorld') }),
 ]);
 
 export const deltaSchema = z.discriminatedUnion('type', [
@@ -121,6 +123,8 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('yourChoice'), choice: choiceViewSchema.nullable() }),
   /** Another window took this player over; this session is finished. */
   z.object({ type: z.literal('takenOver'), message: z.string() }),
+  /** The world was emptied and this session is finished with it. Everyone is told. See 0036. */
+  z.object({ type: z.literal('worldWiped'), message: z.string() }),
   z.object({
     type: z.literal('snapshot'),
     cell: cellSchema,

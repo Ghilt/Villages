@@ -12,7 +12,7 @@ import { WORLD_MASTER_WIDTH } from '../map/worldStyle';
 import { AreasView } from '../areas/AreasView';
 import { areasNow } from '../areas/areas';
 import { atToClock, note, notesNow, watchNotes } from './log';
-import { gatewayState, restart } from '../net/gateway';
+import { gatewayState, restart, wipeWorld } from '../net/gateway';
 import { EventsView } from './EventsView';
 import { describeState } from './report';
 import type { Line, MapState } from './report';
@@ -290,6 +290,14 @@ export function DebugPanel({ map, renderer, worldRoot }: DebugPanelProps) {
           title="forget this player and arrive as a new one"
         >
           restart
+        </button>
+        <button
+          type="button"
+          className="debug__button"
+          onClick={wipeWorld}
+          title="empty the world for everyone connected to it"
+        >
+          wipe
         </button>
         <button type="button" className="debug__button" onClick={() => setOpen(false)}>
           hide

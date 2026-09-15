@@ -79,7 +79,7 @@ needs no explaining, is `docs/MECHANICS.md`. Decision records 0034, 0035 and 003
 - [x] 3. Restart: the debug panel starts a player over
 - [x] 4. The loop on the wire: a new player is given three seats, and taking one founds the house
 - [x] 5. The parchment, the three marks on the map, and the flight to the seat
-- [ ] 6. Wipe the world, from the debug panel
+- [x] 6. Wipe the world, from the debug panel
 - [ ] 7. The castle, and the fence of ground about it
 - [ ] 8. Selecting a castle, and the inspector on the left
 - [ ] 9. What it taught: the experiment closed, the method corrected

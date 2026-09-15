@@ -236,7 +236,8 @@ Commands are added here as the increments land:
   the shortest way to tell a session what the program is doing. The `found a house here` button in it sends a
   real command and is how to make an event happen on purpose. The `restart` button beside `copy` forgets
   this browser's player and reloads, so the opening can be tried again from nothing; the house the old
-  player founded stays in the world, because events are never deleted. See `docs/adr/0036`.
+  player founded stays in the world, because events are never deleted. `wipe` beside it empties the world
+  for everyone connected to it, and every window reloads and arrives anew. See `docs/adr/0036`.
   Anything worth saying
   goes through `note(area, message)` in `apps/web/src/debug/log.ts`. `window.villagesPainterly()` gives
   the paint counters from a console.

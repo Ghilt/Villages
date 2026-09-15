@@ -181,6 +181,20 @@ class HousesProjectionSpec : StringSpec({
         heard.map { it.appeared } shouldBe listOf(true, false, false)
     }
 
+    "a reset read model has forgotten every house, and still counts forward" {
+        val feed = HandFed()
+        val houses = HousesProjection(feed)
+        feed.deliver(founded("Ravenscar", 59.33, 18.07))
+        val before = houses.inCell(STOCKHOLM_Z8, someDay, 10).asOf
+
+        houses.reset()
+
+        houses.size shouldBe 0
+        houses.inCell(STOCKHOLM_Z8, someDay, 10).houses.shouldBeEmpty()
+        // A count that went backwards would tell a client the opposite of the truth about staleness.
+        (houses.inCell(STOCKHOLM_Z8, someDay, 10).asOf > before) shouldBe true
+    }
+
     "a watcher that stopped hears nothing more" {
         val feed = HandFed()
         val houses = HousesProjection(feed)

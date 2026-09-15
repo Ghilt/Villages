@@ -18,6 +18,7 @@ import villages.protocol.Snapshot
 import villages.protocol.TakenOver
 import villages.protocol.FoundAtView
 import villages.protocol.Welcome
+import villages.protocol.WorldWiped
 import villages.protocol.YourChoice
 import villages.protocol.YourHouse
 import java.util.concurrent.CopyOnWriteArrayList
@@ -71,6 +72,7 @@ class AppBootsTest {
     private val founding1 = "1c000001-0000-4000-8000-00000000000a"
     private val founding2 = "1c000002-0000-4000-8000-00000000000b"
     private val takingOne = "1c000003-0000-4000-8000-00000000000c"
+    private val wiping = "1c000004-0000-4000-8000-00000000000d"
 
     /**
      * A player of this test's own. The world is in memory and shared by every test in this class, so two
@@ -127,6 +129,38 @@ class AppBootsTest {
         window.until("an empty parchment") { frames -> frames.filterIsInstance<YourChoice>().last().choice == null }
 
         window.close()
+    }
+
+    @Test
+    fun `wiping the world empties it, and the next player to arrive is offered seats in a world with nothing in it`() {
+        val wiper = "9f1c74b2-6a35-4e90-8c21-b7d05fe3a648"
+        val first = Window(port)
+        first.say("""{"type":"hello","playerToken":"$wiper","protocolVersion":1}""")
+        first.until("a choice") { frames -> frames.any { it is YourChoice } }
+        val offered = first.last<YourChoice>().choice!!
+        first.say(
+            """{"type":"command","commandId":"$wiping","command":{"type":"takeAction",""" +
+                """"choiceId":"${offered.id}","optionId":"${offered.options[0].id}"}}""",
+        )
+        first.until("a house") { frames -> frames.filterIsInstance<YourHouse>().last().house != null }
+
+        first.say("""{"type":"wipeWorld"}""")
+        first.until("being told the world went") { frames -> frames.any { it is WorldWiped } }
+
+        // Arriving again, in a world with nothing in it: no house, and the founding choice afresh.
+        val second = Window(port)
+        second.say("""{"type":"watchEvents","on":true}""")
+        second.say("""{"type":"hello","playerToken":"$wiper","protocolVersion":1}""")
+        second.until("a choice again") { frames -> frames.any { it is YourChoice } }
+
+        assertNull(second.last<YourHouse>().house, "the house went with the world")
+        assertNotNull(second.last<YourChoice>().choice, "a player with no house is asked where to found")
+        // The first event of the stream again, which is what proves the store was emptied and not hidden.
+        second.until("the choice event") { frames -> frames.any { it is EventFrame } }
+        assertEquals(1L, second.heard.filterIsInstance<EventFrame>().first().streamVersion)
+
+        first.close()
+        second.close()
     }
 
     @Test

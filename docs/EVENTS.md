@@ -41,7 +41,9 @@ and how far out it stays drawn is worked out from the significance. See decision
 - Any other change creates the next version. The old type stays in this catalogue forever, and stays handled when
   folding a stream.
 - Pre-alpha exception, in force until the world-persistence milestone in the roadmap: the event store may be wiped
-  rather than migrated. Every wipe is recorded in the experiment journal. See decision record 0011.
+  rather than migrated. Every wipe is recorded in the experiment journal. See decision record 0011. The debug
+  panel's `wipe` button is not that wipe and is not journalled: it empties an in-memory development world that
+  dies at every restart of the server anyway. See decision record 0036.
 
 ## House
 

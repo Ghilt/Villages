@@ -163,6 +163,17 @@ class ChoicesProjectionSpec : StringSpec({
         ChoicesProjection(feed).pendingOf(adam)?.choice shouldBe whereToSettle
     }
 
+    "a reset projection has forgotten everyone, because the world they were asked in is gone" {
+        val feed = ChoicesFed()
+        val choices = ChoicesProjection(feed)
+        feed.deliver(given().first)
+
+        choices.reset()
+
+        choices.pendingOf(adam).shouldBeNull()
+        choices.size shouldBe 0
+    }
+
     "a watcher that stopped hears nothing more" {
         val feed = ChoicesFed()
         val choices = ChoicesProjection(feed)

@@ -9,6 +9,7 @@ import villages.application.FoundHouseService
 import villages.application.FreshIds
 import villages.application.TakeActionService
 import villages.application.WorldClock
+import villages.application.WorldWipe
 import villages.domain.WorldTime
 import villages.gateway.Gateway
 import villages.occurrent.InMemoryWorld
@@ -68,6 +69,19 @@ class WorldConfig {
     @Bean(destroyMethod = "close")
     fun choices(world: InMemoryWorld): ChoicesProjection = ChoicesProjection(world.feed)
 
+    /**
+     * Emptying the development world: the store and every read model folded from it, in one act, so that
+     * no projection is left holding a house whose events are gone. See decision record 0036.
+     */
+    @Bean
+    fun worldWipe(world: InMemoryWorld, houses: HousesProjection, choices: ChoicesProjection): WorldWipe =
+        WorldWipe {
+            world.wipe().also {
+                houses.reset()
+                choices.reset()
+            }
+        }
+
     @Bean(destroyMethod = "close")
     @Suppress("LongParameterList")
     fun gateway(
@@ -77,6 +91,7 @@ class WorldConfig {
         choices: ChoicesProjection,
         arrival: Arrival,
         takeAction: TakeActionService,
+        worldWipe: WorldWipe,
         clock: Clock,
         worldClock: WorldClock,
     ): Gateway = Gateway(
@@ -90,5 +105,6 @@ class WorldConfig {
         arrival = arrival,
         takeAction = takeAction,
         choices = choices,
+        emptyTheWorld = worldWipe,
     )
 }

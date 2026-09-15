@@ -44,6 +44,7 @@ import villages.protocol.ServerFrame
 import villages.protocol.Snapshot
 import villages.protocol.TakenOver
 import villages.protocol.Welcome
+import villages.protocol.WorldWiped
 import villages.protocol.WorldNow
 import villages.protocol.YourChoice
 import villages.protocol.YourHouse
@@ -185,6 +186,13 @@ private class Rig {
         ),
         takeAction = TakeActionService(world, clock = { noon }, world = worldClock),
         choices = choices,
+        emptyTheWorld = {
+            val gone = world.events.size
+            world.events.clear()
+            houses.reset()
+            choices.reset()
+            gone
+        },
         later = later,
     )
 
@@ -472,6 +480,37 @@ class GatewaySpec : StringSpec({
 
         sent.last().shouldBeInstanceOf<CommandRejected>().reason shouldBe
             "malformed: an option id is a UUID, not the-second-one"
+    }
+
+    "wiping the world empties it and finishes every session, whoever asked" {
+        val rig = Rig()
+        val (player, mine) = rig.introduced()
+        val (other, theirs) = rig.someoneElse()
+        other.receive(founding())
+        mine.clear()
+        theirs.clear()
+
+        player.receive("""{"type":"wipeWorld"}""")
+
+        // Everybody is told, because a wipe is everybody's.
+        mine.last().shouldBeInstanceOf<WorldWiped>().message shouldBe "the world was emptied; 3 events went"
+        theirs.last().shouldBeInstanceOf<WorldWiped>()
+        rig.world.events.shouldBeEmpty()
+        rig.houses.size shouldBe 0
+        rig.choices.size shouldBe 0
+    }
+
+    "and a session finished by a wipe can do nothing more" {
+        val rig = Rig()
+        val (player, sent) = rig.introduced()
+        player.receive("""{"type":"wipeWorld"}""")
+        sent.clear()
+
+        player.receive(founding())
+        player.receive(subscribe(STOCKHOLM_Z8))
+
+        sent.shouldBeEmpty()
+        player.cells().shouldBeEmpty()
     }
 
     "a command before hello is rejected, because nobody is speaking" {

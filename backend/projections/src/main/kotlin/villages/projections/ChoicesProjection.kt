@@ -74,6 +74,16 @@ class ChoicesProjection(feed: EventFeed) : ChoicesByPlayer, AutoCloseable {
     /** How many players have something to decide, for the debug panel and for tests. */
     val size: Int get() = pending.size
 
+    /**
+     * Forgets what everyone was asked, because the world they were asked in has been emptied.
+     *
+     * Watchers are not told. Every session is being finished in the same breath and will arrive anew;
+     * a last word about a parchment in a world that no longer exists would be noise. See 0036.
+     */
+    fun reset() {
+        pending.clear()
+    }
+
     override fun close() {
         subscription.close()
     }

@@ -83,6 +83,7 @@ data class WorldNow(val today: Long, val earliest: Long)
     JsonSubTypes.Type(Ping::class, name = "ping"),
     JsonSubTypes.Type(WatchEvents::class, name = "watchEvents"),
     JsonSubTypes.Type(ViewTime::class, name = "viewTime"),
+    JsonSubTypes.Type(WipeWorld::class, name = "wipeWorld"),
 )
 sealed interface ClientFrame
 
@@ -114,6 +115,18 @@ data class WatchEvents(val on: Boolean) : ClientFrame
  * the timeline scrubber's one frame.
  */
 data class ViewTime(val at: Long?) : ClientFrame
+
+/**
+ * Empties the development world, for everyone. A debug frame, like `watchEvents`, and not one a player's
+ * interface ever sends. It goes, or gains a guard, before there is anything worth keeping. See 0036.
+ */
+class WipeWorld : ClientFrame {
+    override fun equals(other: Any?): Boolean = other is WipeWorld
+
+    override fun hashCode(): Int = javaClass.hashCode()
+
+    override fun toString(): String = "WipeWorld"
+}
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes(
@@ -151,6 +164,7 @@ data class TakeActionPayload(val choiceId: String, val optionId: String) : Comma
     JsonSubTypes.Type(YourHouse::class, name = "yourHouse"),
     JsonSubTypes.Type(YourChoice::class, name = "yourChoice"),
     JsonSubTypes.Type(TakenOver::class, name = "takenOver"),
+    JsonSubTypes.Type(WorldWiped::class, name = "worldWiped"),
 )
 sealed interface ServerFrame
 
@@ -199,6 +213,12 @@ data class TakenOver(val message: String) : ServerFrame
  * it changes, like `yourHouse`: what is pending is the player's, not the session's. See 0028 and 0034.
  */
 data class YourChoice(val choice: ChoiceView?) : ServerFrame
+
+/**
+ * The world was emptied and this session is finished with it: it holds no cells, hears nothing more and
+ * accepts nothing more. Every session is told, because a wipe is everybody's. See decision record 0036.
+ */
+data class WorldWiped(val message: String) : ServerFrame
 
 /**
  * A choice as the parchment shows it: what is being asked, and the two to four things that could be done

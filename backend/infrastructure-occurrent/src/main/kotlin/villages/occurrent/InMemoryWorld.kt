@@ -97,6 +97,20 @@ class InMemoryWorld : AutoCloseable {
     val executor: HouseCommandExecutor = OccurrentHouseCommandExecutor(store, converter)
     val feed: EventFeed = OccurrentEventFeed(subscriptions, store, converter)
 
+    /**
+     * Empties the store, stream by stream, and says how many events went.
+     *
+     * Stream by stream rather than by one filter because the count is the point: a line saying "emptied
+     * the world, 37 events" is a line a reader can believe. See decision record 0036.
+     */
+    fun wipe(): Int {
+        val streams = store.all(SortBy.natural(SortBy.SortDirection.ASCENDING)).use { everything ->
+            everything.map { it.getExtension(STREAM_ID).toString() }.toList()
+        }
+        streams.distinct().forEach(store::deleteEventStream)
+        return streams.size
+    }
+
     override fun close() {
         subscriptions.shutdown()
     }
