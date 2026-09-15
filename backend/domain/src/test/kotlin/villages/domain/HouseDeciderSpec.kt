@@ -77,7 +77,7 @@ class HouseDeciderSpec : StringSpec({
     "a house with nothing to decide can be given a choice, and then has one" {
         val events = HouseDecider.decide(giving, HouseDecider.initial)
 
-        val given = events.single().shouldBeInstanceOf<HouseGivenChoice>()
+        val given = events.single().shouldBeInstanceOf<PlayerGivenChoice>()
         given.choice shouldBe whereToSettle
         // The whole choice is on the event, so the roads not taken are history too.
         given.choice.options.map { it.label } shouldBe listOf("Ravenscar", "Hollin")
@@ -102,7 +102,7 @@ class HouseDeciderSpec : StringSpec({
         val events = HouseDecider.decide(taking(), asked)
 
         events shouldHaveSize 2
-        val action = events[0].shouldBeInstanceOf<HouseTookAction>()
+        val action = events[0].shouldBeInstanceOf<PlayerTookAction>()
         action.choiceId shouldBe whereToSettle.id
         action.optionId shouldBe southern
         val founded = events[1].shouldBeInstanceOf<HouseFounded>()

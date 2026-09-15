@@ -22,13 +22,14 @@ import villages.domain.HouseCommand
 import villages.domain.HouseDecider
 import villages.domain.HouseEvent
 import villages.domain.HouseFounded
-import villages.domain.HouseGivenChoice
+import villages.domain.PlayerGivenChoice
 import villages.domain.HouseId
-import villages.domain.HouseTookAction
+import villages.domain.PlayerTookAction
 import villages.domain.PlayerId
 import villages.domain.WorldTime
 import villages.projections.ChoicesProjection
 import villages.projections.HousesProjection
+import villages.projections.RecentEventsProjection
 import villages.protocol.Batch
 import villages.protocol.CommandAccepted
 import villages.protocol.CommandRejected
@@ -60,15 +61,15 @@ import java.util.UUID
 /** The catalogued type of an event, as the store would name it. */
 private fun typeOf(event: HouseEvent): String = when (event) {
     is HouseFounded -> "villages.house.founded.v1"
-    is HouseGivenChoice -> "villages.house.givenChoice.v1"
-    is HouseTookAction -> "villages.house.tookAction.v1"
+    is PlayerGivenChoice -> "villages.player.givenChoice.v1"
+    is PlayerTookAction -> "villages.player.tookAction.v1"
 }
 
 /** Enough of the data for the panel's sake. The stored form proper is pinned by its own fixture. */
 private fun dataOf(event: HouseEvent): String = when (event) {
     is HouseFounded -> """{"name":"${event.name.value}","significance":${event.significance.value}}"""
-    is HouseGivenChoice -> """{"prompt":"${event.choice.prompt}","options":${event.choice.options.size}}"""
-    is HouseTookAction -> """{"optionId":"${event.optionId.value}"}"""
+    is PlayerGivenChoice -> """{"prompt":"${event.choice.prompt}","options":${event.choice.options.size}}"""
+    is PlayerTookAction -> """{"optionId":"${event.optionId.value}"}"""
 }
 
 private class TinyWorld : HouseCommandExecutor, EventFeed {
@@ -167,6 +168,7 @@ private class Rig {
     val later = ManualLater()
     val houses = HousesProjection(world)
     val choices = ChoicesProjection(world)
+    val recent = RecentEventsProjection(world)
     val worldClock = WorldClock { today }
     var minted = 0
     val gateway = Gateway(
@@ -186,11 +188,13 @@ private class Rig {
         ),
         takeAction = TakeActionService(world, clock = { noon }, world = worldClock),
         choices = choices,
+        recent = recent,
         emptyTheWorld = {
             val gone = world.events.size
             world.events.clear()
             houses.reset()
             choices.reset()
+            recent.reset()
             gone
         },
         later = later,
@@ -364,6 +368,44 @@ class GatewaySpec : StringSpec({
         bystander.shouldBeEmpty()
     }
 
+    "a watcher is given what it missed, oldest first, and then what happens next" {
+        val rig = Rig()
+        val (founder, _) = rig.someoneElse()
+        founder.receive(founding())
+
+        // Only now does anyone start watching: everything above happened before this window existed.
+        val (watching, watcher) = rig.someoneElse()
+        watching.receive("""{"type":"watchEvents","on":true}""")
+
+        // The founder arriving, the founder founding, and the watcher arriving: all before this asked.
+        val missed = watcher.filterIsInstance<EventFrame>().map { it.eventType }
+        missed shouldBe listOf(
+            "villages.player.givenChoice.v1",
+            "villages.house.founded.v1",
+            "villages.player.givenChoice.v1",
+        )
+
+        // And it keeps hearing them as they happen.
+        watcher.clear()
+        rig.aHouseIsFounded()
+        watcher.filterIsInstance<EventFrame>().map { it.eventType } shouldBe listOf(
+            "villages.player.givenChoice.v1",
+            "villages.house.founded.v1",
+        )
+    }
+
+    "and one that stops watching is given nothing more" {
+        val rig = Rig()
+        val (watching, watcher) = rig.introduced()
+        watching.receive("""{"type":"watchEvents","on":true}""")
+        watching.receive("""{"type":"watchEvents","on":false}""")
+        watcher.clear()
+
+        rig.aHouseIsFounded()
+
+        watcher.filterIsInstance<EventFrame>().shouldBeEmpty()
+    }
+
     "the event says which command caused it, and which story it belongs to" {
         val rig = Rig()
         val (founder, _) = rig.introduced()
@@ -440,12 +482,14 @@ class GatewaySpec : StringSpec({
         val (watching, watcher) = rig.someoneElse()
         watching.receive("""{"type":"watchEvents","on":true}""")
         val choice = rig.pending()!!
+        // A watcher is handed what it missed first. What this is about is what comes after it.
+        watcher.clear()
 
         player.receive(takingAction(choice.id.value.toString(), choice.options[0].id.value.toString()))
 
         val events = watcher.filterIsInstance<EventFrame>()
         events.map { it.eventType } shouldBe
-            listOf("villages.house.tookAction.v1", "villages.house.founded.v1")
+            listOf("villages.player.tookAction.v1", "villages.house.founded.v1")
         // One story, and it began with the choice: the action continues what arriving started.
         events.map { it.correlationId }.distinct() shouldHaveSize 1
         events.map { it.causationId }.distinct() shouldBe listOf(COMMAND_ONE)

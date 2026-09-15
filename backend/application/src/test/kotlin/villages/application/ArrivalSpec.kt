@@ -10,9 +10,9 @@ import villages.domain.HouseCommand
 import villages.domain.HouseDecider
 import villages.domain.HouseError
 import villages.domain.HouseEvent
-import villages.domain.HouseGivenChoice
+import villages.domain.PlayerGivenChoice
 import villages.domain.HouseId
-import villages.domain.HouseTookAction
+import villages.domain.PlayerTookAction
 import villages.domain.PlayerId
 import villages.domain.WorldTime
 import java.time.Instant
@@ -47,7 +47,7 @@ class ArrivalSpec : StringSpec({
         val choice = arrival.arrive(adam)
 
         choice shouldBe FoundingChoices.forPlayer(adam)
-        val event = world.events.single().shouldBeInstanceOf<HouseGivenChoice>()
+        val event = world.events.single().shouldBeInstanceOf<PlayerGivenChoice>()
         event.houseId shouldBe HouseId.of(adam)
         event.player shouldBe adam
         event.worldTime shouldBe day
@@ -90,7 +90,7 @@ class ArrivalSpec : StringSpec({
 
         // The choice, the action, and what the action did. Nothing more was written.
         world.events.map { it::class.simpleName } shouldBe
-            listOf("HouseGivenChoice", "HouseTookAction", "HouseFounded")
+            listOf("PlayerGivenChoice", "PlayerTookAction", "HouseFounded")
     }
 
     "taking an option founds the house where that option promised" {
@@ -101,7 +101,7 @@ class ArrivalSpec : StringSpec({
 
         service.take(adam, choice.id, taking.id, Provenance.startedBy(given))
 
-        world.events[1].shouldBeInstanceOf<HouseTookAction>().optionId shouldBe taking.id
+        world.events[1].shouldBeInstanceOf<PlayerTookAction>().optionId shouldBe taking.id
         val founded = world.events[2].shouldBeInstanceOf<villages.domain.HouseFounded>()
         founded.seat shouldBe taking.effect.shouldBeInstanceOf<Effect.FoundAt>().seat
     }

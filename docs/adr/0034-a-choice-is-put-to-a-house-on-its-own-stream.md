@@ -20,6 +20,10 @@ with events, or only a subject on the house's?
 
 ## Decision
 
+> Two of the names below were changed by the amendment at the end of this section: `HouseGivenChoice`
+> and `HouseTookAction` are `PlayerGivenChoice` and `PlayerTookAction` now, and their types are
+> `villages.player.*`. What was decided is left as it was written.
+
 **A choice is put to the house, on the house's own stream.** `HouseGivenChoice` and `HouseTookAction`
 are house events, `villages.house.givenChoice.v1` and `villages.house.tookAction.v1`, beside
 `villages.house.founded.v1`. A player's house has the player's identity (decision 0028), so the stream
@@ -58,6 +62,38 @@ they move to a data file beside the other world files; the code does not care wh
 **The encoding extends decision 0024 by one rule:** a field whose type is sealed carries `kind`, naming
 its case. The domain stays free of annotations; the store adapter says how the sealed type is written.
 Event types gain camelCase verb phrases, `givenChoice`, since the fact is not always one word.
+
+### Amended 2026-09-15: an event is the world's or the player's
+
+Adam drew a distinction the first cut did not have, and it is the right one. **Being asked something and
+answering it are not happenings in the world.** They are the mechanics by which a player reaches into it.
+A house being founded is a happening in the world; the parchment that led to it is not.
+
+So the events are in two halves, and both the code and the catalogue say which:
+
+| | The world's | The player's |
+|---|---|---|
+| What it is | something came to be, moved, changed or ended | something a player did to reach into the world |
+| Type | `villages.house.<verb>.v<n>` | `villages.player.<verb>.v<n>` |
+| In the code | `WorldEvent` | `PlayerEvent` |
+| Today | `HouseFounded` | `PlayerGivenChoice`, `PlayerTookAction` |
+| Expected to | **grow**, with every feature that puts something in the world | **stay small**; if it grows as fast as the other, the game has become a menu |
+
+`HouseGivenChoice` and `HouseTookAction` are therefore `PlayerGivenChoice` and `PlayerTookAction`, and
+their types moved from `villages.house.` to `villages.player.`. That is a breaking change to two event
+types, taken under the pre-alpha policy of decision record 0011 and costing nothing: the store is in
+memory and nothing written before the change outlives the process that wrote it.
+
+**Both halves stay on the house's stream**, `house:<uuid>`, and the decision above is unchanged. The
+stream is the consistency boundary a decision is taken inside: the action answering a choice and the
+thing that action does come out of one `decide` and are appended together, and splitting them across two
+streams would put a gap in the middle of that. The stream says where an event is kept; the type says what
+kind of thing happened. What would change our minds is a choice that is not about one house - a bargain
+between two of them, say - which cannot sit on either stream and is the thing-with-a-lifetime pattern of
+`SETTING.md` rather than this one.
+
+The split is visible where it matters: the event viewer marks every line world or player, and the
+catalogue has a table for each.
 
 ## Consequences
 

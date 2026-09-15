@@ -17,9 +17,13 @@ player sees of it; this note goes when that has landed.
 
 Answer these before touching code, in a paragraph Adam can read back. The answers are the design.
 
-1. **What happened?** Name the facts in the past tense, as a chronicle would state them: *the house was
-   given a choice*, *the house took an action*, *the house was founded*. Each fact is an event. A thing
-   that has not happened yet but is asked for is a command, in the imperative: *found the house*.
+1. **What happened, and is it the world's or the player's?** Name the facts in the past tense, as a
+   chronicle would state them: *a player was given a choice*, *a player took an action*, *a house was
+   founded*. Each fact is an event, and each is one of two kinds. Something that happened **in the
+   world** is a `WorldEvent`, typed `villages.house.<verb>.v<n>`; something **a player did** to reach
+   into the world is a `PlayerEvent`, typed `villages.player.<verb>.v<n>`. The first half grows with
+   every feature; the second should not. A thing that has not happened yet but is asked for is a
+   command, in the imperative: *found the house*. See decision record 0034.
 2. **Whose history is it?** Every event belongs to one stream, and the stream is the thing whose
    history it is. Today there is one kind of thing, the house, and a player's house has the player's
    identity (decision 0028), so anything a player is offered or does is the house's history: the vision
@@ -65,7 +69,7 @@ something" takes.
 1. A **giver** decides that a choice applies. Today the giver is arrival: a player who says hello with
    no house and no choice pending is given the founding choice. Later givers are the chrono-engine's
    rolls (`SETTING.md`). A giver is application code; it issues `GiveChoice`.
-2. `decide` records `HouseGivenChoice(choice)`. A **choice** is a prompt and two to four **options**;
+2. `decide` records `PlayerGivenChoice(choice)`. A **choice** is a prompt and two to four **options**;
    each option carries a label, a line of detail, and its **effect**, which is what taking it does.
    The event is self-describing: the roads not taken are history too, and a reader of the stream can
    say what each would have done. One choice is pending at a time; a second is refused.
@@ -79,10 +83,11 @@ something" takes.
    A `foundAt` effect also puts a mark on the map at the seat it offers, which is the one place the
    interface reads an effect at all.
 5. The player picks. The browser sends `takeAction { choiceId, optionId }` with a fresh command id.
-6. `decide` records `HouseTookAction` **and the effect's consequences from the same decision**: a
-   founding option yields `HouseTookAction` then `HouseFounded`, appended atomically, consecutive
-   versions, one correlation id. There is no reaction and no second write to wait for; what the
-   option promised is what the stream says happened.
+6. `decide` records `PlayerTookAction` **and the effect's consequences from the same decision**: a
+   founding option yields `PlayerTookAction` then `HouseFounded`, appended atomically, consecutive
+   versions, one correlation id. Note what that pair is: the player's event and the world's, out of one
+   decision. There is no reaction and no second write to wait for; what the option promised is what the
+   stream says happened.
 7. The projections fold the consequences as they would any other event, and the map draws them.
 
 To add a new kind of choice: a new `Effect` subtype in the domain; the `decide` branch that turns the
@@ -111,11 +116,11 @@ decision record before any code.
 
 ## Naming
 
-- An event type names the aggregate as its subject, then the fact in the past tense, camelCase, then a
-  version: `villages.house.founded.v1`, `villages.house.givenChoice.v1`, `villages.house.tookAction.v1`.
-  The Kotlin class is the aggregate prefix and the same words in PascalCase: `HouseFounded`,
-  `HouseGivenChoice`, `HouseTookAction`. A test holds the class names to the catalogue's verbs by
-  dropping the prefix and lowercasing the first letter.
+- An event type names whose event it is, then the fact in the past tense, camelCase, then a version:
+  `villages.house.founded.v1` for the world's, `villages.player.givenChoice.v1` for the player's. The
+  Kotlin class is the same word and the same fact in PascalCase: `HouseFounded`, `PlayerGivenChoice`,
+  `PlayerTookAction`. A test holds the names, the types and the two halves to each other, so an event
+  catalogued on the wrong side of the line fails rather than drifting.
 - A command is an imperative: `FoundHouse`, `GiveChoice`, `TakeAction`. Its payload on the wire is the
   same words in camelCase: `foundHouse`, `takeAction`.
 - A frame about the player's own things is `your` and the thing: `yourHouse`, `yourChoice`.

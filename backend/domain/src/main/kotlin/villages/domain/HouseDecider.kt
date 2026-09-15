@@ -33,7 +33,7 @@ object HouseDecider {
                 throw HouseError.AlreadyFounded
             }
             listOf(
-                HouseGivenChoice(
+                PlayerGivenChoice(
                     houseId = command.houseId,
                     player = command.player,
                     choice = command.choice,
@@ -53,7 +53,7 @@ object HouseDecider {
             // The action and what it does come out of one decision, so they are appended together and
             // are never seen apart. See decision record 0034.
             listOf(
-                HouseTookAction(
+                PlayerTookAction(
                     houseId = command.houseId,
                     player = command.player,
                     choiceId = command.choiceId,
@@ -116,12 +116,12 @@ object HouseDecider {
             },
         )
 
-        is HouseGivenChoice -> when (state) {
+        is PlayerGivenChoice -> when (state) {
             is House.NotFounded -> state.copy(pending = event.choice)
             is House.Founded -> state.copy(pending = event.choice)
         }
 
-        is HouseTookAction -> when (state) {
+        is PlayerTookAction -> when (state) {
             is House.NotFounded -> state.copy(pending = null)
             is House.Founded -> state.copy(pending = null)
         }

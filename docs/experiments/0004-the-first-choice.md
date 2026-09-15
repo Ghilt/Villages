@@ -72,6 +72,14 @@ read, fold, decide and append, and offers no way to put anything on the CloudEve
 has to go there, so those four steps are twelve lines we own now, retry included. Nothing above the ports
 noticed.
 
+*Naming the events for whose they are was worth doing and cost nothing.* The first cut called them
+`HouseGivenChoice` and `HouseTookAction`, which put the mechanics of play in the same family as the
+world's own happenings. They are `PlayerGivenChoice` and `PlayerTookAction` now, typed
+`villages.player.*`, and the split is a type in the code as well as a prefix on the wire. Renaming two
+event types is a breaking change under decision record 0011; it cost nothing at all, because the store
+is in memory and nothing written before the change outlives the process that wrote it. That will not be
+true after the world-persistence milestone, which is the point of naming the milestone.
+
 *Two tests sharing one in-memory world share a player.* `HouseId.of(player)` means one token is one house
 across a whole test class, so the second test to run found a house already standing. Each test needs a
 player of its own, which is obvious in hindsight and was not.

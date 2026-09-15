@@ -7,7 +7,7 @@ This file is parsed by a test. The domain's catalogue test reads the tables belo
 catalogue disagree in either direction, in the set of events or in the fields of any one of them; from increment 1.5
 the event store's type mapper is held to the same rows. Keep the format exactly as described:
 
-- One section headed with the aggregate name per aggregate, and inside it exactly one table.
+- Every row of every table in this file is read, so a table may go under any heading that suits it.
 - Columns, in order: Type, Payload, Meaning, Produced by, Consumers.
 - The Type cell holds the CloudEvent type in backticks and nothing else.
 - The Payload cell lists field names in backticks, separated by commas.
@@ -33,10 +33,11 @@ and how far out it stays drawn is worked out from the significance. See decision
 
 ## Naming and versioning
 
-- A type reads as villages, then the aggregate, then the event in the past tense, then the version. The first one is
-  going to be `villages.house.founded.v1`.
+- A type reads as villages, then whose event it is, then the event in the past tense, then the version:
+  `villages.house.founded.v1` for the world's events, `villages.player.tookAction.v1` for the player's.
 - The verb is camelCase when the fact takes more than one word: `givenChoice`, `tookAction`. The Kotlin class is
-  the aggregate and the same words in PascalCase, `HouseGivenChoice`, and a test holds the two to each other.
+  whose event it is and the same words in PascalCase, `PlayerGivenChoice`, and a test holds the two to
+  each other and to the half they belong in.
 - Adding an optional field keeps the version.
 - Any other change creates the next version. The old type stays in this catalogue forever, and stays handled when
   folding a stream.
@@ -45,12 +46,41 @@ and how far out it stays drawn is worked out from the significance. See decision
   panel's `wipe` button is not that wipe and is not journalled: it empties an in-memory development world that
   dies at every restart of the server anyway. See decision record 0036.
 
-## House
+## Two kinds of event
+
+Every event is one of two things, and the difference is worth keeping in sight.
+
+**The world's events** are things that happened in the world: something came to be, moved, changed or
+ended. They are what the chronicle is made of and what the map is drawn from. **This half grows**, and
+goes on growing: every feature that puts something in the world adds to it. Their types read
+`villages.house.<verb>.v<n>`, after the thing whose history they are, and in the code they implement
+`WorldEvent`.
+
+**The player's events** are things a player did, by which the world was reached into. Being asked
+something and answering it are the mechanics of play rather than happenings in the world, and a
+chronicler of the world would not write them down. They are recorded all the same, because they are how
+everything in the world came to happen and because the house-spirit is a fold over them. Their types
+read `villages.player.<verb>.v<n>`, and in the code they implement `PlayerEvent`. **This half stays
+small**: if it grows as fast as the other, the game has become a menu.
+
+Both kinds live on the same stream, `house:<uuid>`, because that is the consistency boundary a decision
+is taken inside: the action answering a choice and the thing that action does are decided together and
+appended together, and two streams would mean two writes with a gap between them. The stream says where
+the events are kept; the type says what kind of thing happened. See decision record 0034.
+
+## The world's events
 
 One stream per house, addressed as house followed by its identifier.
 
 | Type | Payload | Meaning | Produced by | Consumers |
 |---|---|---|---|---|
 | `villages.house.founded.v1` | `houseId`, `player`, `name`, `seat`, `significance`, `banner`, `treasury`, `worldTime`, `recordedAt` | A player founded a house at a seat, with a name and a banner. It carries where and how much that matters; the tile it falls in is derived downstream. The treasury starts at nothing and earns at the founding rate. | `FoundHouse`, or `TakeAction` on an option that founds | The map projection; the event bridge, and through it every gateway subscribed to a tile containing it |
-| `villages.house.givenChoice.v1` | `houseId`, `player`, `choice`, `worldTime`, `recordedAt` | The world put a decision to this house: a prompt and two to four options, each carrying the effect taking it would have. The whole choice is recorded, so the roads not taken are history too. One is pending at a time. Nothing is on the map yet, so it carries no place. | `GiveChoice` | The choices projection, and through it the parchment the player reads |
-| `villages.house.tookAction.v1` | `houseId`, `player`, `choiceId`, `optionId`, `worldTime`, `recordedAt` | The house took one option of the choice it was given. What that option does follows from the same decision, as the next events on this stream, so an action and its consequence are never seen apart. What the option was is on the event that gave the choice. | `TakeAction` | The choices projection, which forgets the pending choice |
+
+## The player's events
+
+On the same stream as the house they concern, for the reason above.
+
+| Type | Payload | Meaning | Produced by | Consumers |
+|---|---|---|---|---|
+| `villages.player.givenChoice.v1` | `houseId`, `player`, `choice`, `worldTime`, `recordedAt` | The world put a decision to this house: a prompt and two to four options, each carrying the effect taking it would have. The whole choice is recorded, so the roads not taken are history too. One is pending at a time. Nothing is on the map yet, so it carries no place. | `GiveChoice` | The choices projection, and through it the parchment the player reads |
+| `villages.player.tookAction.v1` | `houseId`, `player`, `choiceId`, `optionId`, `worldTime`, `recordedAt` | The house took one option of the choice it was given. What that option does follows from the same decision, as the next events on this stream, so an action and its consequence are never seen apart. What the option was is on the event that gave the choice. | `TakeAction` | The choices projection, which forgets the pending choice |

@@ -117,7 +117,7 @@ class AppBootsTest {
         }
         val events = window.heard.filterIsInstance<EventFrame>().filter { it.stream == ours }
         assertEquals(
-            listOf("villages.house.givenChoice.v1", "villages.house.tookAction.v1", "villages.house.founded.v1"),
+            listOf("villages.player.givenChoice.v1", "villages.player.tookAction.v1", "villages.house.founded.v1"),
             events.map { it.eventType },
         )
         assertEquals(1, events.map { it.correlationId }.distinct().size, "one story: $events")

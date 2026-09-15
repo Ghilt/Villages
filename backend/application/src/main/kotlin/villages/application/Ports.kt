@@ -165,6 +165,18 @@ interface EventFeed {
 }
 
 /**
+ * The events the world stored most recently, for reading rather than for folding.
+ *
+ * A window on the end of the chronicle, not the chronicle: a viewer that opened a moment ago has missed
+ * everything, and the world did not begin when it did. Reading the whole store instead would be a scan
+ * on every connect and an unbounded frame, which is why this is a read model like any other.
+ */
+fun interface RecentEvents {
+    /** The newest `most` events, oldest first, so a reader receives them in the order they happened. */
+    fun latest(most: Int): List<StoredEvent>
+}
+
+/**
  * A house as the map's read model holds it. Not the domain's `House`: this is shaped for drawing, and it
  * carries the span of world-time the house exists over, which the domain's state never needed to. Today
  * `since` is the founding instant and `until` is open; the timeline scrubber reads these two.

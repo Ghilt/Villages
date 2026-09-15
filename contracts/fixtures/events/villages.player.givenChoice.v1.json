@@ -1,5 +1,5 @@
 {
-  "type": "villages.house.givenChoice.v1",
+  "type": "villages.player.givenChoice.v1",
   "source": "urn:villages",
   "subject": "6d5b0a2e-1c3f-4d7e-9a8b-0f1e2d3c4b5a",
   "time": "2026-09-04T12:00:00Z",

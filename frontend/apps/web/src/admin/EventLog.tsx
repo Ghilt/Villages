@@ -17,8 +17,9 @@ const MOST = 2000;
  * history is inspected. It watches without playing - no hello, so the gateway knows of no player here and
  * opening it neither founds anything nor takes a window over. See decision records 0023 and 0028.
  *
- * Only what has happened since it was opened. The gateway's feed starts from now for a watcher, which is
- * deliberate: this shows the world happening rather than replaying the whole chronicle on every visit.
+ * It opens on the end of the chronicle - the hundred most recent events the world stored - and then goes
+ * on showing what happens next. That window is a read model and not the store: the whole chronicle,
+ * paged, is a different thing and is not this.
  */
 export function EventLog() {
   const [events, setEvents] = useState<readonly EventFrame[]>([]);
@@ -39,7 +40,11 @@ export function EventLog() {
     connection.onProblem((what) => live && setProblem(what));
     connection.onFrame((frame) => {
       if (live && frame.type === 'event') {
-        setEvents((held) => [frame, ...held].slice(0, MOST));
+        // An event can arrive twice: the gateway starts watching before it hands over what was missed,
+        // so that nothing appended in between is lost. Identity is what makes that harmless. See 0029.
+        setEvents((held) =>
+          held.some((seen) => seen.id === frame.id) ? held : [frame, ...held].slice(0, MOST),
+        );
       }
     });
 
@@ -55,7 +60,7 @@ export function EventLog() {
         <h1 className="log__title">Events</h1>
         <span className={`log__link log__link--${state}`}>{state}</span>
         <span className="log__count">
-          {events.length} {events.length === 1 ? 'event' : 'events'} since this page was opened
+          {events.length} {events.length === 1 ? 'event' : 'events'}, newest first
         </span>
         <button type="button" className="log__button" onClick={() => setEvents([])}>
           clear
@@ -68,7 +73,7 @@ export function EventLog() {
         {events.length === 0 && (
           <li className="log__quiet">
             {state === 'open'
-              ? 'Nothing yet. Play the world in another window and it appears here.'
+              ? 'Nothing has happened in this world yet. Play it in another window and it appears here.'
               : `Not connected to ${GATEWAY_URL}. Is the game server running?`}
           </li>
         )}
@@ -80,11 +85,20 @@ export function EventLog() {
   );
 }
 
-/** `villages.house.givenChoice.v1` reads as `house given choice`, which is what a line should say. */
+/** `villages.player.givenChoice.v1` reads as `given choice`: the verb, in words, and nothing else. */
 function saidPlainly(eventType: string): string {
-  const [, aggregate, verb] = eventType.split('.');
-  const words = (verb ?? eventType).replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase();
-  return `${aggregate ?? '?'} ${words}`;
+  const verb = eventType.split('.')[2] ?? eventType;
+  return verb.replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase();
+}
+
+/**
+ * Whose event this is: the world's, or the player's.
+ *
+ * The two halves of decision record 0034. The type says which, in its second segment, which is the whole
+ * of what the wire carries about it and the whole of what a reader needs.
+ */
+function whose(eventType: string): 'world' | 'player' {
+  return eventType.split('.')[1] === 'player' ? 'player' : 'world';
 }
 
 function clockOf(at: number): string {
@@ -99,6 +113,7 @@ function Entry({ event }: { event: EventFrame }) {
       <details>
         <summary className="log__line">
           <span className="log__when">{clockOf(event.time)}</span>
+          <span className={`log__whose log__whose--${whose(event.eventType)}`}>{whose(event.eventType)}</span>
           <span className="log__what">{saidPlainly(event.eventType)}</span>
           {/* The story it belongs to. Everything one command wrote wears the same tag. See 0035. */}
           <span className="log__story" title={`story ${event.correlationId}`}>

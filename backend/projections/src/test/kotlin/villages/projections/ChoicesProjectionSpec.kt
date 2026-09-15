@@ -16,10 +16,10 @@ import villages.domain.Division
 import villages.domain.Effect
 import villages.domain.HouseEvent
 import villages.domain.HouseFounded
-import villages.domain.HouseGivenChoice
+import villages.domain.PlayerGivenChoice
 import villages.domain.HouseId
 import villages.domain.HouseName
-import villages.domain.HouseTookAction
+import villages.domain.PlayerTookAction
 import villages.domain.Location
 import villages.domain.Option
 import villages.domain.OptionId
@@ -79,9 +79,9 @@ private val whereToSettle = Choice(
 )
 
 private fun given(story: String = "a-story") =
-    HouseGivenChoice(house, adam, whereToSettle, onDay, atNoon) to story
+    PlayerGivenChoice(house, adam, whereToSettle, onDay, atNoon) to story
 
-private fun tookAction() = HouseTookAction(house, adam, whereToSettle.id, northern, onDay, atNoon)
+private fun tookAction() = PlayerTookAction(house, adam, whereToSettle.id, northern, onDay, atNoon)
 
 private fun aFounding() = HouseFounded(
     houseId = house,

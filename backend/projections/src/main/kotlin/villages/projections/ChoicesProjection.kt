@@ -6,8 +6,8 @@ import villages.application.EventFeed
 import villages.application.Start
 import villages.application.StoredEvent
 import villages.domain.HouseFounded
-import villages.domain.HouseGivenChoice
-import villages.domain.HouseTookAction
+import villages.domain.PlayerGivenChoice
+import villages.domain.PlayerTookAction
 import villages.domain.PlayerId
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArraySet
@@ -31,7 +31,7 @@ class ChoicesProjection(feed: EventFeed) : ChoicesByPlayer, AutoCloseable {
     /** Folds one stored event. Exhaustive over the event types, so a new one has to be placed. */
     internal fun apply(stored: StoredEvent) {
         when (val event = stored.event) {
-            is HouseGivenChoice -> {
+            is PlayerGivenChoice -> {
                 val row = ChoiceRow(
                     player = event.player,
                     houseId = event.houseId,
@@ -44,7 +44,7 @@ class ChoicesProjection(feed: EventFeed) : ChoicesByPlayer, AutoCloseable {
                 tell(event.player, row)
             }
 
-            is HouseTookAction -> forget(event.player)
+            is PlayerTookAction -> forget(event.player)
 
             // Founding by any means settles the question of where to found, so whatever was pending goes.
             // The domain says the same thing in `evolve`; this is that rule read off the events.

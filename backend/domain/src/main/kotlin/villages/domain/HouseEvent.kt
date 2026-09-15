@@ -3,8 +3,13 @@ package villages.domain
 import java.time.Instant
 
 /**
- * Something that happened to a house, in the past tense. Events are the only durable state and are never
- * edited or deleted. Every subclass has a row in docs/EVENTS.md, and a test fails when they disagree.
+ * Something that happened on a house's stream, in the past tense. Events are the only durable state and
+ * are never edited or deleted. Every subclass has a row in docs/EVENTS.md, and a test fails when they
+ * disagree.
+ *
+ * The name says which stream, not which kind: everything here is addressed as `house:<uuid>`, because
+ * that is the consistency boundary a decision is taken inside. What kind of thing happened is the two
+ * sealed halves below, and it is the more interesting question of the two.
  *
  * Every event carries two times, because they can differ: when it happened in the world's own calendar,
  * and when it was written down by the clock on the wall. Playing the past appends an event now whose
@@ -21,6 +26,31 @@ sealed interface HouseEvent {
 }
 
 /**
+ * Something that happened **in the world**: a thing came to be, moved, changed or ended.
+ *
+ * This is the half that grows. Every feature that puts something on the map or changes what is there
+ * adds to it, and its events are what the chronicle is made of and what the map is drawn from. Their
+ * types read `villages.house.<verb>.v<n>`, after the thing whose history they are.
+ *
+ * See decision record 0034.
+ */
+sealed interface WorldEvent : HouseEvent
+
+/**
+ * Something **a player did**, by which the world was reached into.
+ *
+ * Not a happening in the world: being asked something and answering it are the mechanics of play, and a
+ * chronicler of the world would not write them down. They are recorded all the same, because they are
+ * how everything in the world came to happen and because the house-spirit is a fold over them. Their
+ * types read `villages.player.<verb>.v<n>`.
+ *
+ * This half stays small on purpose. If it grows as fast as the other, the game has become a menu.
+ *
+ * See decision record 0034.
+ */
+sealed interface PlayerEvent : HouseEvent
+
+/**
  * A house was founded. It carries where, and how much that matters: those two are what put a thing on the
  * map, and which tile it falls in is worked out downstream from the first. The treasury starts at nothing
  * and begins to earn at the founding rate. See decision record 0026.
@@ -35,34 +65,35 @@ data class HouseFounded(
     val treasury: Treasury,
     override val worldTime: WorldTime,
     override val recordedAt: Instant,
-) : HouseEvent
+) : WorldEvent
 
 /**
- * A house was given a choice to make. The whole choice is here, options and effects and all, so the
+ * A player was given a choice to make. The whole choice is here, options and effects and all, so the
  * stream says what was offered and not only what was taken: the roads not taken are history too.
  *
- * Nothing is on the map yet, so this carries no place and no significance. See decision record 0034.
+ * Nothing happened in the world when this was written. The world is unchanged; a question was put.
+ * See decision record 0034.
  */
-data class HouseGivenChoice(
+data class PlayerGivenChoice(
     override val houseId: HouseId,
     val player: PlayerId,
     val choice: Choice,
     override val worldTime: WorldTime,
     override val recordedAt: Instant,
-) : HouseEvent
+) : PlayerEvent
 
 /**
- * A house took one option of the choice it was given. What the option does follows from the same
- * decision, as the next events on the stream, so the action and its consequence are never seen apart.
+ * A player took one option of the choice they were given. What the option does follows from the same
+ * decision, as the next events on the stream, so the action and its consequences are never seen apart.
  *
  * Only the two ids are here: what the option was is in the choice on the event that gave it, and copying
  * it would be two places for one fact to be wrong in.
  */
-data class HouseTookAction(
+data class PlayerTookAction(
     override val houseId: HouseId,
     val player: PlayerId,
     val choiceId: ChoiceId,
     val optionId: OptionId,
     override val worldTime: WorldTime,
     override val recordedAt: Instant,
-) : HouseEvent
+) : PlayerEvent

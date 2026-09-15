@@ -335,8 +335,24 @@ body,
   color: var(--ink-soft);
 }
 
+/* Whose event it is: the world's, or the player's. The two halves of docs/adr/0034. */
+.log__whose {
+  min-width: 3.5rem;
+  font-size: 0.64rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.log__whose--world {
+  color: #2e6b4f;
+}
+
+.log__whose--player {
+  color: #5b3a86;
+}
+
 .log__what {
-  min-width: 12rem;
+  min-width: 10rem;
 }
 
 /* The story an event belongs to. One command's events wear one tag. See docs/adr/0035. */

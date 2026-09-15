@@ -14,10 +14,10 @@ import villages.domain.Division
 import villages.domain.Effect
 import villages.domain.HouseEvent
 import villages.domain.HouseFounded
-import villages.domain.HouseGivenChoice
+import villages.domain.PlayerGivenChoice
 import villages.domain.HouseId
 import villages.domain.HouseName
-import villages.domain.HouseTookAction
+import villages.domain.PlayerTookAction
 import villages.domain.Location
 import villages.domain.Option
 import villages.domain.OptionId
@@ -61,7 +61,7 @@ class HouseEventFormatSpec : StringSpec({
     val northern = OptionId(UUID.fromString("aa000000-0000-4000-8000-000000000001"))
     val southern = OptionId(UUID.fromString("aa000000-0000-4000-8000-000000000002"))
 
-    val whereToSettle = HouseGivenChoice(
+    val whereToSettle = PlayerGivenChoice(
         houseId = house,
         player = player,
         choice = Choice(
@@ -94,7 +94,7 @@ class HouseEventFormatSpec : StringSpec({
         recordedAt = noon,
     )
 
-    val tookNorthern = HouseTookAction(
+    val tookNorthern = PlayerTookAction(
         houseId = house,
         player = player,
         choiceId = choiceId,
@@ -106,8 +106,8 @@ class HouseEventFormatSpec : StringSpec({
     /** One event of every catalogued type, each pinned to the fixture of that name. */
     val samples: Map<String, HouseEvent> = mapOf(
         "villages.house.founded.v1" to ravenscar,
-        "villages.house.givenChoice.v1" to whereToSettle,
-        "villages.house.tookAction.v1" to tookNorthern,
+        "villages.player.givenChoice.v1" to whereToSettle,
+        "villages.player.tookAction.v1" to tookNorthern,
     )
 
     fun fixture(type: String): JsonNode =

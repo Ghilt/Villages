@@ -11,6 +11,7 @@ import villages.application.HousesByCell
 import villages.application.Start
 import villages.application.HousesByPlayer
 import villages.application.PlayerTokens
+import villages.application.RecentEvents
 import villages.application.Provenance
 import villages.application.StoredEvent
 import villages.application.TakeActionService
@@ -115,6 +116,14 @@ const val COALESCE_MS = 250L
 const val MOST_WAITING = 500
 
 /**
+ * How much of the end of the chronicle a watcher is given when it starts watching.
+ *
+ * A viewer that has just been opened has missed everything, and the world did not begin when it did.
+ * What is served is whatever the read model still holds, so asking for more than it keeps is harmless.
+ */
+const val MOST_RECENT_EVENTS = 100
+
+/**
  * The edge, without the transport: one instance per process, one `Connection` per socket. It speaks the
  * protocol, translates it to the application's terms and back, serves a cell's snapshot from the read
  * model on subscribing, and fans every change out to whoever holds a cell containing it. Nothing in here
@@ -135,6 +144,7 @@ class Gateway(
     private val arrival: Arrival,
     private val takeAction: TakeActionService,
     private val choices: ChoicesByPlayer,
+    private val recent: RecentEvents,
     private val emptyTheWorld: WorldWipe,
     private val later: Later = ScheduledLater(),
 ) : AutoCloseable {
@@ -278,12 +288,25 @@ class Gateway(
             when (frame) {
                 is Hello -> hello(frame)
                 is Ping -> out.send(Pong(frame.t0, clock.millis()))
-                is WatchEvents -> if (frame.on) watching[this] = Unit else watching.remove(this)
+                is WatchEvents -> if (frame.on) watchEvents() else watching.remove(this)
                 is Command -> command(frame)
                 is SubscribeCells -> subscribe(frame.cells)
                 is UnsubscribeCells -> unsubscribe(frame.cells)
                 is ViewTime -> viewTime(frame.at)
                 is WipeWorld -> wipeTheWorld()
+            }
+        }
+
+        /**
+         * Starts sending this connection every event, beginning with what it missed.
+         *
+         * Watching first and replaying after, so that nothing appended in between is lost. The cost is
+         * that something can arrive twice, which is the feed's own bargain and the reader's to absorb.
+         */
+        private fun watchEvents() {
+            watching[this] = Unit
+            for (stored in recent.latest(MOST_RECENT_EVENTS)) {
+                out.send(stored.toFrame())
             }
         }
 

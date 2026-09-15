@@ -111,7 +111,7 @@ flowchart LR
 ```
 
 A player arrives and is asked something. Saying hello with no house and nothing pending writes
-`HouseGivenChoice` to their house's stream, and the gateway answers with what it gave rather than with a
+`PlayerGivenChoice` to their house's stream, and the gateway answers with what it gave rather than with a
 read of the projection, because the projection folds on another thread and would sometimes say
 "nothing" about a choice just written. Taking one option writes the action and what it does from one
 decision, at consecutive versions and under one correlation id, and the map's read model draws the

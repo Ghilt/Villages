@@ -15,6 +15,7 @@ import villages.gateway.Gateway
 import villages.occurrent.InMemoryWorld
 import villages.projections.ChoicesProjection
 import villages.projections.HousesProjection
+import villages.projections.RecentEventsProjection
 import villages.protocol.Calendar
 import java.time.Clock
 import java.time.Instant
@@ -69,18 +70,27 @@ class WorldConfig {
     @Bean(destroyMethod = "close")
     fun choices(world: InMemoryWorld): ChoicesProjection = ChoicesProjection(world.feed)
 
+    /** The end of the chronicle, kept so the event viewer can show what happened before it opened. */
+    @Bean(destroyMethod = "close")
+    fun recentEvents(world: InMemoryWorld): RecentEventsProjection = RecentEventsProjection(world.feed)
+
     /**
      * Emptying the development world: the store and every read model folded from it, in one act, so that
      * no projection is left holding a house whose events are gone. See decision record 0036.
      */
     @Bean
-    fun worldWipe(world: InMemoryWorld, houses: HousesProjection, choices: ChoicesProjection): WorldWipe =
-        WorldWipe {
-            world.wipe().also {
-                houses.reset()
-                choices.reset()
-            }
+    fun worldWipe(
+        world: InMemoryWorld,
+        houses: HousesProjection,
+        choices: ChoicesProjection,
+        recentEvents: RecentEventsProjection,
+    ): WorldWipe = WorldWipe {
+        world.wipe().also {
+            houses.reset()
+            choices.reset()
+            recentEvents.reset()
         }
+    }
 
     @Bean(destroyMethod = "close")
     @Suppress("LongParameterList")
@@ -89,6 +99,7 @@ class WorldConfig {
         foundHouse: FoundHouseService,
         houses: HousesProjection,
         choices: ChoicesProjection,
+        recentEvents: RecentEventsProjection,
         arrival: Arrival,
         takeAction: TakeActionService,
         worldWipe: WorldWipe,
@@ -105,6 +116,7 @@ class WorldConfig {
         arrival = arrival,
         takeAction = takeAction,
         choices = choices,
+        recent = recentEvents,
         emptyTheWorld = worldWipe,
     )
 }
