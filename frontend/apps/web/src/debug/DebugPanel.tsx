@@ -53,10 +53,9 @@ function selectedHere(): MapState['selected'] {
   return { kind: what.kind, name: house?.name ?? `${what.id.slice(0, 8)}, out of view` };
 }
 
-/** Where the world's clock stands and the day being shown, read together so they cannot disagree. */
-function worldNow(): { today: number; earliest: number; viewingAt: number | null } | null {
-  const heard = gatewayState();
-  return heard.world === null ? null : { ...heard.world, viewingAt: heard.viewingAt };
+/** Where the world's clock stands, as welcome said it. */
+function worldNow(): { today: number; earliest: number } | null {
+  return gatewayState().world;
 }
 
 /** The areas drawn, and what the selected one holds. Read when the panel looks, like everything else. */

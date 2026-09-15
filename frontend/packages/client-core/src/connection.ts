@@ -17,9 +17,16 @@ export type ConnectionState = 'connecting' | 'open' | 'closed';
 
 export interface ConnectionOptions {
   socket: SocketLike;
-  playerToken: string;
+  /**
+   * Who is playing, or absent for a connection that is not playing at all.
+   *
+   * Without a token no hello is sent, and the gateway therefore knows of no player: nothing is founded,
+   * nothing is asked, and no session is taken over. That is what an event viewer is. A player plays from
+   * one place (decision 0028), and a watcher is not in that place.
+   */
+  playerToken?: string;
   protocolVersion: number;
-  /** Whether to ask for every stored event, which the debug panel wants and a player does not. */
+  /** Whether to ask for every stored event, which a viewer wants and a player does not. */
   watchEvents?: boolean;
 }
 
@@ -33,8 +40,8 @@ export interface Connection {
 }
 
 /**
- * Opens the conversation: hello on open, then optionally watchEvents, then whatever the interface sends.
- * Nothing about reconnecting yet; that is increment 1.9 proper.
+ * Opens the conversation: hello on open when there is a player to introduce, then optionally
+ * watchEvents, then whatever the interface sends. Nothing about reconnecting yet; that is 1.9 proper.
  */
 export function connect(options: ConnectionOptions): Connection {
   const { socket } = options;
@@ -58,7 +65,10 @@ export function connect(options: ConnectionOptions): Connection {
 
   socket.onOpen(() => {
     state = 'open';
-    send({ type: 'hello', playerToken: options.playerToken, protocolVersion: options.protocolVersion });
+    const playing = options.playerToken;
+    if (playing !== undefined) {
+      send({ type: 'hello', playerToken: playing, protocolVersion: options.protocolVersion });
+    }
     if (options.watchEvents === true) send({ type: 'watchEvents', on: true });
   });
 

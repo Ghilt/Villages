@@ -239,7 +239,9 @@ Commands are added here as the increments land:
   sheet covers the view or how much of it lies on the desk and where the floor the camera may pull back to
   is, how many painted tiles were ready before the map asked, and every event the world stores as it
   arrives, one line each, opening to the whole thing. Its copy button puts the state and the log on the clipboard, which is
-  the shortest way to tell a session what the program is doing. The `found a house here` button in it sends a
+  the shortest way to tell a session what the program is doing. The events themselves are not in the
+  panel: they are at **`/admin/inspect-events`**, a page of their own that watches the world without
+  playing in it, one line an event opening to the whole thing as the store holds it. The `found a house here` button in it sends a
   real command and is how to make an event happen on purpose. The `restart` button beside `copy` forgets
   this browser's player and reloads, so the opening can be tried again from nothing; the house the old
   player founded stays in the world, because events are never deleted. `wipe` beside it empties the world

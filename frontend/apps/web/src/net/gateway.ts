@@ -9,7 +9,7 @@ import {
   whatToFollow,
 } from '@villages/client-core';
 import { PROTOCOL_VERSION, describeDay } from '@villages/protocol';
-import type { ChoiceView, EventFrame, HouseView, OptionView, ServerFrame } from '@villages/protocol';
+import type { ChoiceView, HouseView, OptionView, ServerFrame } from '@villages/protocol';
 
 import { note, shortId } from '../debug/log';
 import { browserSocket } from './browserSocket';
@@ -22,7 +22,6 @@ import { browserSocket } from './browserSocket';
 
 export const GATEWAY_URL =
   (import.meta.env.VITE_GATEWAY_URL as string | undefined) ?? 'ws://localhost:8080/ws';
-const MOST_EVENTS = 300;
 
 export interface GatewayState {
   connection: 'connecting' | 'open' | 'closed' | 'takenOver';
@@ -33,24 +32,19 @@ export interface GatewayState {
   yourChoice: ChoiceView | null;
   /** The id of the command in flight, so the parchment can stop taking a second answer. */
   acting: string | null;
-  events: readonly EventFrame[];
   houses: HousesState;
   /** Where the world's clock stands, as welcome said, or null until it has. */
   world: { today: number; earliest: number } | null;
-  /** The world-day being looked at, or null for live. The timeline scrubber's position. */
-  viewingAt: number | null;
   playerToken: string;
 }
 
 let state: GatewayState = {
   connection: 'connecting',
-  events: [],
   yourHouse: null,
   yourChoice: null,
   acting: null,
   houses: NO_HOUSES,
   world: null,
-  viewingAt: null,
   playerToken: '',
 };
 const listeners = new Set<() => void>();
@@ -77,9 +71,6 @@ function heard(frame: ServerFrame): void {
       );
       // Anything the camera wanted before the gateway was listening is asked for now.
       sendFollowing(wanted);
-      return;
-    case 'event':
-      update({ events: [...state.events.slice(-(MOST_EVENTS - 1)), frame] });
       return;
     case 'snapshot':
       update({ houses: reduceHouses(state.houses, frame) });
@@ -160,16 +151,6 @@ function sendFollowing(cells: string[]): void {
   }
 }
 
-/** Looks at the world as of a day, or at live when null. Every held cell comes back as of that day. */
-export function viewAt(day: number | null): void {
-  if (connection === null || state.connection !== 'open') {
-    return;
-  }
-  update({ viewingAt: day });
-  connection.send({ type: 'viewTime', at: day });
-  note('world', day === null ? 'looking at live' : `looking at ${describeDay(day)}`);
-}
-
 /**
  * Follows the camera: the cells covering the view, at the view's own zoom, are what the map draws. Safe to
  * call before the gateway has answered hello; the request waits for the welcome.
@@ -200,7 +181,8 @@ export function gateway(): Connection {
     update({ connection: 'closed', houses: NO_HOUSES });
     note('gateway', 'the connection closed; is the backend running? cd backend then ./gradlew :app:bootRun');
   });
-  connection = connect({ socket, playerToken, protocolVersion: PROTOCOL_VERSION, watchEvents: true });
+  // Not watching events: those are read on their own page, which watches without playing. See 0023.
+  connection = connect({ socket, playerToken, protocolVersion: PROTOCOL_VERSION });
   connection.onFrame(heard);
   connection.onProblem((problem) => note('gateway', problem));
   return connection;

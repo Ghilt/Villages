@@ -122,7 +122,10 @@ scrubber and the map shows the world as it was; leave it at live and the world r
 
 - [x] Two times on every event, and a world calendar both ends compute alike (decision 0027)
 - [x] A viewing day per connection, one frame to move it, every held cell answered again as of that day
-- [x] The scrubber along the bottom of the map, and the day it shows in the debug panel
+- [~] The scrubber along the bottom of the map, and the day it shows in the debug panel. Built, then
+  taken out again on 2026-09-15 while the opening is the thing being looked at. The gateway still
+  speaks `viewTime` and the read model is still temporal; what went was the slider and the client's
+  half of it
 - [ ] The seed: a small set of events, spread across centuries, that makes a starting world
 - [ ] A house's line on the timeline, so the scrubber shows where things are before you drag to them
 

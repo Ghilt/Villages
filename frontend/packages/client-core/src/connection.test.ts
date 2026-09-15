@@ -41,6 +41,16 @@ describe('the connection', () => {
     ]);
   });
 
+  it('says nothing about a player when there is none, so a viewer takes nobody over', () => {
+    const fake = fakeSocket();
+
+    connect({ socket: fake.socket, protocolVersion: 1, watchEvents: true });
+    fake.gatewayOpens();
+
+    // No hello: the gateway knows of no player, so nothing is founded and no session is stood down.
+    expect(fake.sent).toEqual([{ type: 'watchEvents', on: true }]);
+  });
+
   it('hands decoded frames to whoever is listening', () => {
     const fake = fakeSocket();
     const heard: ServerFrame[] = [];

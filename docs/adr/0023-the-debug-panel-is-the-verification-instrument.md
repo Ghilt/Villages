@@ -26,6 +26,12 @@ The debug panel is a first-class verification instrument, not scaffolding, and i
   events reaching the browser as one short line each, in order, in words: what happened, to which house,
   when. Each line opens to the whole thing, every field of the CloudEvent as stored, so that "simple" is
   the default view and never a ceiling.
+
+  *Amended 2026-09-15:* this is true of the events but no longer of the panel. They moved to a page of
+  their own, `/admin/inspect-events`, because a log wants a column and the panel is a corner of a map.
+  The page watches without playing - it sends no hello, so the gateway knows of no player there and
+  opening it neither founds anything nor takes a window over - and the game window stopped asking for
+  raw events at all. Everything else here stands.
 - **The panel must never lie.** Its frame-gap figure once reported seventeen-second stalls that were the
   page being hidden. A figure that can mislead is worse than no figure, so every number in it says what it
   measures and is checked by a test where there is arithmetic to check.

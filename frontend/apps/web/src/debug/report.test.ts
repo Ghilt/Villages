@@ -22,7 +22,7 @@ const state: MapState = {
   cells: ['3000000', '3000001', '3000002', '3000003'],
   houses: { drawn: 12, held: 4, omitted: 0 },
   areas: { drawn: 0, armed: false, selected: null },
-  world: { today: 454901, earliest: 437635, viewingAt: null },
+  world: { today: 454901, earliest: 437635 },
   player: { id: '3c8f9e1a-0000-4000-8000-000000000001', connection: 'open', house: null },
   choice: null,
   selected: null,
@@ -222,15 +222,9 @@ describe('saying what the gateway has handed over', () => {
   });
 });
 
-describe('saying which day the map is showing', () => {
-  it('names today and says the map is live', () => {
-    expect(valueOf(state, 'world')).toBe('year 1247, day 112 today, showing live');
-  });
-
-  it('names the day being looked at when the scrubber has been moved', () => {
-    expect(
-      valueOf({ ...state, world: { today: 454901, earliest: 437635, viewingAt: 437635 } }, 'world'),
-    ).toBe('year 1247, day 112 today, showing year 1200');
+describe('saying where the clock of the world stands', () => {
+  it('names today, and the earliest day anything in the world is from', () => {
+    expect(valueOf(state, 'world')).toBe('year 1247, day 112 today, and nothing older than year 1200');
   });
 
   it('says so before the gateway has spoken', () => {

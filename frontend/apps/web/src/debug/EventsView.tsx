@@ -1,26 +1,15 @@
 import { useSyncExternalStore } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
-import type { BannerSpec, EventFrame } from '@villages/protocol';
+import type { BannerSpec } from '@villages/protocol';
 
 import { clampBoundsToWorld } from '../map/sheet';
 import { gateway, gatewayState, watchGateway } from '../net/gateway';
 import { seedHouses } from '../net/seed';
-import { atToClock, note, shortId } from './log';
+import { note, shortId } from './log';
 
 interface EventsViewProps {
   map: maplibregl.Map | null;
-}
-
-/**
- * `villages.house.founded.v1` reads as `house founded`, which is what a line in a list should say, and
- * `villages.house.givenChoice.v1` as `house given choice`: a catalogue verb is camelCase when the fact
- * takes more than one word.
- */
-function saidPlainly(eventType: string): string {
-  const [, aggregate, verb] = eventType.split('.');
-  const words = (verb ?? eventType).replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase();
-  return `${aggregate ?? '?'} ${words}`;
 }
 
 const TINCTURES = {
@@ -45,15 +34,19 @@ const NAMES = ['Ravenscar', 'Hollin', 'Thornwick', 'Ashby', 'Greymere', 'Corvane
 /** How many the seeding button founds at once: enough to see a region fill, few enough to read the log. */
 const SEED = 20;
 
+/** Where the events are read: its own page, which watches the world without playing in it. */
+const INSPECT_EVENTS = '/admin/inspect-events';
+
 /** A name a house might have. The house's identity is the server's business; this is only what to call it. */
 function aName(): string {
   return `${pick(NAMES)} ${Math.floor(Math.random() * 90 + 10)}`;
 }
 
 /**
- * The events, as the world stores them, one line each and any of them open. This is decision 0023 made
- * real: Adam watches the world happen here. The founding button is scaffolding for exactly that, a way to
- * make something happen and see it arrive.
+ * The ways to make something happen on purpose, and whether the gateway is listening.
+ *
+ * The events themselves are read on their own page rather than here: a panel over the map is the wrong
+ * shape for a log, and the game window no longer asks the gateway for them at all. See decision 0023.
  */
 export function EventsView({ map }: EventsViewProps) {
   const state = useSyncExternalStore(watchGateway, gatewayState);
@@ -110,7 +103,7 @@ export function EventsView({ map }: EventsViewProps) {
   return (
     <section className="events">
       <header className="events__bar">
-        <span className="debug__title">Events</span>
+        <span className="debug__title">World</span>
         <span className={`events__link events__link--${state.connection}`}>{state.connection}</span>
         <button
           type="button"
@@ -129,40 +122,9 @@ export function EventsView({ map }: EventsViewProps) {
           seed {SEED}
         </button>
       </header>
-      <ol className="events__list">
-        {state.events.length === 0 && (
-          <li className="debug__quiet">
-            {state.connection === 'open'
-              ? 'no events yet; found a house to see one'
-              : 'not connected to the gateway'}
-          </li>
-        )}
-        {[...state.events].reverse().map((event) => (
-          <EventLine key={event.id} event={event} />
-        ))}
-      </ol>
+      <p className="debug__quiet">
+        Events are at <a href={INSPECT_EVENTS}>{INSPECT_EVENTS}</a>
+      </p>
     </section>
-  );
-}
-
-function EventLine({ event }: { event: EventFrame }) {
-  return (
-    <li>
-      <details className="events__event">
-        <summary>
-          <span className="debug__when">{atToClock(event.time)}</span>
-          <span className="debug__area">{saidPlainly(event.eventType)}</span>
-          {/* The story this belongs to. Events of one story carry one tag, which is how two events
-              from one command are seen to be two halves of the same thing. See decision 0035. */}
-          <span className="events__story" title={`story ${event.correlationId}`}>
-            {shortId(event.correlationId)}
-          </span>
-          <span className="events__stream">
-            {event.stream.slice(0, 14)}… v{event.streamVersion}
-          </span>
-        </summary>
-        <pre className="events__json">{JSON.stringify({ ...event, type: undefined }, null, 2)}</pre>
-      </details>
-    </li>
   );
 }

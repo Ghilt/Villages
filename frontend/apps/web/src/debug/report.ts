@@ -41,8 +41,8 @@ export interface MapState {
     armed: boolean;
     selected: { id: string; pixels: number; kinds: number | null } | null;
   };
-  /** Where the world's clock stands and which day is being looked at, or null before welcome. */
-  world: { today: number; earliest: number; viewingAt: number | null } | null;
+  /** Where the world's clock stands, or null before welcome. */
+  world: { today: number; earliest: number } | null;
   /** Who this window is playing as, whether it still is, and which house is theirs. */
   player: { id?: string; connection: string; house: string | null };
   /** What the player has been asked, or null when nothing. What the parchment is showing. */
@@ -91,13 +91,12 @@ function describeChoice(choice: MapState['choice']): string {
   return choice.acting ? `${asked}, answering` : asked;
 }
 
-/** The world's day, and the day the map is showing, which differ when the scrubber has been moved. */
-function describeWorld(world: { today: number; earliest: number; viewingAt: number | null } | null): string {
+/** The world's day, and the earliest day anything in it is known to exist from. */
+function describeWorld(world: { today: number; earliest: number } | null): string {
   if (world === null) {
     return 'not heard from the gateway yet';
   }
-  const looking = world.viewingAt === null ? 'showing live' : `showing ${describeDay(world.viewingAt)}`;
-  return `${describeDay(world.today)} today, ${looking}`;
+  return `${describeDay(world.today)} today, and nothing older than ${describeDay(world.earliest)}`;
 }
 
 /** What the map is drawing from the gateway, and what it was not sent. */
