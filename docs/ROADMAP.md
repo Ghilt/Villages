@@ -81,7 +81,7 @@ needs no explaining, is `docs/MECHANICS.md`. Decision records 0034, 0035 and 003
 - [x] 5. The parchment, the three marks on the map, and the flight to the seat
 - [x] 6. Wipe the world, from the debug panel
 - [x] 7. The castle, and the fence of ground about it
-- [ ] 8. Selecting a castle, and the inspector on the left
+- [x] 8. Selecting a castle, and the inspector on the left
 - [ ] 9. What it taught: the experiment closed, the method corrected
 
 Phase 1's 1.13 and 1.15 below land through this list rather than on their own.
@@ -105,7 +105,7 @@ one rate-based ticker, and see other players' houses appear live and jiggle. Six
 - [ ] 1.12 The banner drawn
 - [x] 1.13 Founding a house from the interface
 - [ ] 1.14 The ticker
-- [ ] 1.15 Inspecting a house, and the connection badge
+- [~] 1.15 Inspecting a house: done through the inspector. The connection badge is still to come
 - [ ] 1.16 Two browsers, one house appearing in both, readable in both debug panels. This means **two
   different players**, which works today; two windows of *one* player is now a thing that ends rather than
   a thing that works, decided in 0028. What is left is the browser-level test, which needs 0.13 first

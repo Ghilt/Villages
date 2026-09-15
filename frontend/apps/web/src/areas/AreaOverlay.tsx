@@ -344,7 +344,8 @@ export function AreaOverlay({ map, worldRoot }: AreaOverlayProps) {
       return;
     }
     const onClick = (event: maplibregl.MapMouseEvent) => {
-      if (areasNow().armed || performance.now() - drewAt.current < 300) {
+      // A click that hit a house is that house's. The sprite overlay registers first and says so.
+      if (event.defaultPrevented || areasNow().armed || performance.now() - drewAt.current < 300) {
         return;
       }
       const measuredOn = gridRef.current;

@@ -25,6 +25,7 @@ const state: MapState = {
   world: { today: 454901, earliest: 437635, viewingAt: null },
   player: { id: '3c8f9e1a-0000-4000-8000-000000000001', connection: 'open', house: null },
   choice: null,
+  selected: null,
 };
 
 const valueOf = (from: MapState, label: string): string =>
@@ -62,6 +63,18 @@ describe('saying what the player has to decide', () => {
     expect(valueOf({ ...state, choice: answering }, 'choice')).toBe(
       '"Where shall the house raise its seat?", 3 options, answering',
     );
+  });
+});
+
+describe('saying what is selected', () => {
+  it('says nothing when nothing is', () => {
+    expect(valueOf(state, 'selected')).toBe('nothing');
+  });
+
+  it('names what is selected rather than identifying it', () => {
+    const picked = { kind: 'house', name: 'Ravenscar' };
+
+    expect(valueOf({ ...state, selected: picked }, 'selected')).toBe('house: Ravenscar');
   });
 });
 

@@ -13,6 +13,7 @@ import { AreasView } from '../areas/AreasView';
 import { areasNow } from '../areas/areas';
 import { atToClock, note, notesNow, watchNotes } from './log';
 import { gatewayState, restart, wipeWorld } from '../net/gateway';
+import { selectionNow } from '../select/selection';
 import { EventsView } from './EventsView';
 import { describeState } from './report';
 import type { Line, MapState } from './report';
@@ -37,6 +38,19 @@ function choiceHere(): MapState['choice'] {
     options: heard.yourChoice.options.length,
     acting: heard.acting !== null,
   };
+}
+
+/** What is selected on the map, named rather than identified: a panel is read, not parsed. */
+function selectedHere(): MapState['selected'] {
+  const what = selectionNow();
+  if (what === null) {
+    return null;
+  }
+  const heard = gatewayState();
+  const house =
+    housesInView(heard.houses).find((candidate) => candidate.id === what.id) ??
+    (heard.yourHouse?.id === what.id ? heard.yourHouse : undefined);
+  return { kind: what.kind, name: house?.name ?? `${what.id.slice(0, 8)}, out of view` };
 }
 
 /** Where the world's clock stands and the day being shown, read together so they cannot disagree. */
@@ -219,6 +233,7 @@ export function DebugPanel({ map, renderer, worldRoot }: DebugPanelProps) {
             house: describeYourHouse(),
           },
           choice: choiceHere(),
+          selected: selectedHere(),
         }),
       );
     };

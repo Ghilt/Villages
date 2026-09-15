@@ -32,6 +32,16 @@ export interface SpriteRenderer {
   mount(container: HTMLElement): Promise<void>;
   /** Replace what is on the map. The renderer works out what appeared, changed and went away. */
   setSprites(sprites: readonly MapSprite[]): void;
+  /**
+   * Which house is at this point on the screen, or null for none.
+   *
+   * The renderer answers because it is the only thing that knows where it drew: the canvas takes no
+   * pointer events, so the map hands the click over. Only houses answer; a candidate is a place being
+   * offered rather than a thing standing in the world.
+   */
+  hitTest(point: { x: number; y: number }): string | null;
+  /** Marks one sprite as the selected one, or nothing when null. */
+  setSelected(id: string | null): void;
   /** Stop following, release the canvas and the textures. */
   destroy(): void;
 }

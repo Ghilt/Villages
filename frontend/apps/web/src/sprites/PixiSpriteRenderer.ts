@@ -14,10 +14,17 @@ const TEXTURE = {
   dotDiameter: 32,
   candidateHeight: 64,
   candidateWidth: 44,
+  ringDiameter: 128,
 } as const;
 
 /** How tall a candidate's mark is drawn on the screen, whatever the camera is doing. */
 const CANDIDATE_HEIGHT = 26;
+
+/**
+ * What marks the selected house. The interface's own ink rather than its gold: the ground a house holds
+ * is drawn in gold already, and a gold ring on a gold field is a ring nobody can see.
+ */
+const SELECTED = 0x241c14;
 
 /** What the development probe reports about one sprite. */
 export interface DrawnSprite {
@@ -43,12 +50,14 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
   const stage = new Container();
   const entries = new Map<string, Entry>();
 
-  let textures: { marker: Texture; dot: Texture; candidate: Texture } | null = null;
+  let textures: { marker: Texture; dot: Texture; candidate: Texture; ring: Texture } | null = null;
+  let selected: string | null = null;
+  let ring: Sprite | null = null;
   let drawnDetail: SpriteDetail | null = null;
   let started = 0;
   let disposed = false;
 
-  function buildTextures(): { marker: Texture; dot: Texture; candidate: Texture } {
+  function buildTextures(): { marker: Texture; dot: Texture; candidate: Texture; ring: Texture } {
     const { markerWidth: w, markerHeight: h, dotDiameter: d } = TEXTURE;
 
     // A castle: two towers with a battlemented wall between them, drawn in white so that a tint can
@@ -103,14 +112,23 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       .fill(0xffffff)
       .stroke({ width: 3, color: 0x4a4034, alpha: 0.85 });
 
+    // What marks the selected house: a ring on the ground under it rather than a change to the mark
+    // itself, so that what is selected is still drawn as what it is.
+    const r = TEXTURE.ringDiameter;
+    const ringOf = new Graphics()
+      .ellipse(r / 2, r / 2, r / 2 - 4, r / 4 - 4)
+      .stroke({ width: 6, color: 0xffffff, alpha: 1 });
+
     const built = {
       marker: app.renderer.generateTexture(marker),
       dot: app.renderer.generateTexture(dot),
       candidate: app.renderer.generateTexture(candidate),
+      ring: app.renderer.generateTexture(ringOf),
     };
     marker.destroy();
     dot.destroy();
     candidate.destroy();
+    ringOf.destroy();
     return built;
   }
 
@@ -172,6 +190,26 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       entry.sprite.y = point.y - motion.lift;
       entry.sprite.rotation = detail === 'marker' && entry.spec.kind === 'house' ? motion.tilt : 0;
     }
+
+    dressTheRing(detail, zoom);
+  }
+
+  /** The ring sits on the ground under the selected house, so it does not bob with the mark above it. */
+  function dressTheRing(detail: SpriteDetail, zoom: number): void {
+    if (ring === null) {
+      return;
+    }
+    const on = selected === null ? undefined : entries.get(selected);
+    if (on === undefined || !on.sprite.visible || detail === 'hidden') {
+      ring.visible = false;
+      return;
+    }
+    // Wider than the mark it is under, or it would be a ring nobody can see behind a castle.
+    const across = detail === 'marker' ? markerHeightForZoom(zoom) * 1.7 : DOT_RADIUS * 5;
+    ring.visible = true;
+    ring.scale.set(across / TEXTURE.ringDiameter);
+    ring.x = on.sprite.x;
+    ring.y = on.sprite.y;
   }
 
   return {
@@ -189,6 +227,12 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       }
 
       textures = buildTextures();
+      // Under every sprite, because it marks the ground a house stands on rather than the house.
+      ring = new Sprite(textures.ring);
+      ring.anchor.set(0.5, 0.5);
+      ring.tint = SELECTED;
+      ring.visible = false;
+      stage.addChild(ring);
       app.stage.addChild(stage);
       container.appendChild(app.canvas);
       started = performance.now();
@@ -213,6 +257,31 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
             ]),
           );
       }
+    },
+
+    hitTest(point: { x: number; y: number }): string | null {
+      let nearest: { id: string; away: number } | null = null;
+
+      for (const [id, entry] of entries) {
+        if (!entry.sprite.visible || entry.spec.kind !== 'house') {
+          continue;
+        }
+        const box = entry.sprite.getBounds();
+        if (point.x < box.minX || point.x > box.maxX || point.y < box.minY || point.y > box.maxY) {
+          continue;
+        }
+        // Two marks can overlap where two houses are close. The nearer one is the one meant.
+        const away = Math.hypot(point.x - entry.sprite.x, point.y - entry.sprite.y);
+        if (nearest === null || away < nearest.away) {
+          nearest = { id, away };
+        }
+      }
+
+      return nearest?.id ?? null;
+    },
+
+    setSelected(id: string | null): void {
+      selected = id;
     },
 
     setSprites(sprites: readonly MapSprite[]): void {

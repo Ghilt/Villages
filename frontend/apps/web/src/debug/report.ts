@@ -47,6 +47,8 @@ export interface MapState {
   player: { id?: string; connection: string; house: string | null };
   /** What the player has been asked, or null when nothing. What the parchment is showing. */
   choice: { prompt: string; options: number; acting: boolean } | null;
+  /** What is selected on the map, or null when nothing is. What the inspector is showing. */
+  selected: { kind: string; name: string } | null;
 }
 
 export interface Line {
@@ -199,6 +201,10 @@ export function describeState(state: MapState): Line[] {
     { label: 'player', value: describePlayer(state.player) },
     { label: 'house', value: state.player.house ?? 'none yet' },
     { label: 'choice', value: describeChoice(state.choice) },
+    {
+      label: 'selected',
+      value: state.selected === null ? 'nothing' : `${state.selected.kind}: ${state.selected.name}`,
+    },
     {
       label: 'painted',
       value:

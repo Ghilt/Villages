@@ -10,10 +10,12 @@ import { DebugPanel } from './debug/DebugPanel';
 import { Desk } from './desk/Desk';
 import { WorktreeTabs } from './debug/WorktreeTabs';
 import { note } from './debug/log';
+import { select } from './select/selection';
 import { gateway, gatewayState, watchGateway } from './net/gateway';
 import { followMap } from './net/followMap';
 import { HudShell } from './hud/HudShell';
 import { InfluenceOverlay } from './influence/InfluenceOverlay';
+import { Inspector } from './inspect/Inspector';
 import { StoodDown } from './hud/StoodDown';
 import { MapView } from './map/MapView';
 import { DebugMapPanel } from './map/DebugMapPanel';
@@ -96,12 +98,15 @@ export function App({ master }: AppProps) {
   // When the house comes to be, the camera goes to it. It is the one moment in the whole world so far
   // that is worth being taken to, and the seat was chosen from a parchment rather than from the map.
   const seat = heard.yourHouse?.seat;
+  const mine = heard.yourHouse?.id;
   useEffect(() => {
-    if (map !== null && seat !== undefined) {
+    if (map !== null && seat !== undefined && mine !== undefined) {
       note('camera', `flying to the seat at ${seat.lat.toFixed(3)}, ${seat.lon.toFixed(3)}`);
       map.flyTo({ center: [seat.lon, seat.lat], zoom: Math.max(map.getZoom(), FOUNDING_ZOOM) });
+      // Arriving at your own house with it already selected: the inspector is what the flight is for.
+      select({ kind: 'house', id: mine });
     }
-  }, [map, seat]);
+  }, [map, seat, mine]);
 
   useEffect(() => {
     if (map !== null) {
@@ -122,6 +127,7 @@ export function App({ master }: AppProps) {
       <AreaOverlay map={map} worldRoot={worldRoot} />
       <InfluenceOverlay map={map} houses={inView} />
       <HudShell />
+      <Inspector />
       <Parchment />
       <StoodDown />
       <Timeline />
