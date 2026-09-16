@@ -2,6 +2,8 @@
 .gradle/
 # The Kotlin Gradle plugin keeps its compiler daemon session files here, in every project that has one.
 .kotlin/
+# Gradle output. This swallows any directory called build, wherever it is, so do not name a
+# source directory that: it will not be committed and nothing will say so.
 **/build/
 !gradle/wrapper/gradle-wrapper.jar
 

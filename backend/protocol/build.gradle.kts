@@ -14,4 +14,11 @@ dependencies {
     implementation(libs.jackson.module.kotlin)
     // The cell grid is arithmetic over every place in the world, so it is checked over every place.
     testImplementation(libs.kotest.property)
+    // The shape of the wire is read off the sealed hierarchies themselves, so nothing can be left out.
+    testImplementation(kotlin("reflect"))
+}
+
+tasks.test {
+    // Recording the wire is a deliberate act, and the switch has to reach the test's own JVM to do it.
+    systemProperty("protocol.record", providers.systemProperty("protocol.record").getOrElse("false"))
 }

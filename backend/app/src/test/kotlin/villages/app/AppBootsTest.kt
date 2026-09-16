@@ -18,6 +18,7 @@ import villages.protocol.Snapshot
 import villages.protocol.TakenOver
 import villages.protocol.FoundAtView
 import villages.protocol.Welcome
+import villages.protocol.PROTOCOL_VERSION
 import villages.protocol.WorldWiped
 import villages.protocol.YourChoice
 import villages.protocol.YourHouse
@@ -79,7 +80,7 @@ class AppBootsTest {
      * tests on one token would be one player, and whichever ran second would find a house already there.
      */
     private val arriving = "5e3a91c4-2b60-4f18-9d73-08ac1e6f5b27"
-    private val hello = """{"type":"hello","playerToken":"$token","protocolVersion":1}"""
+    private val hello = """{"type":"hello","playerToken":"$token","protocolVersion":$PROTOCOL_VERSION}"""
     private val founding =
         """{"type":"command","commandId":"$founding1","command":{"type":"foundHouse","name":"Ravenscar",""" +
             """"seat":{"lat":59.33,"lon":18.07},""" +
@@ -92,7 +93,7 @@ class AppBootsTest {
     fun `a player arrives, takes one of the seats offered, and the house stands where it promised`() {
         val window = Window(port)
         window.say("""{"type":"watchEvents","on":true}""")
-        window.say("""{"type":"hello","playerToken":"$arriving","protocolVersion":1}""")
+        window.say("""{"type":"hello","playerToken":"$arriving","protocolVersion":$PROTOCOL_VERSION}""")
         window.until("a choice") { frames -> frames.any { it is YourChoice } }
 
         val offered = window.last<YourChoice>().choice!!
@@ -135,7 +136,7 @@ class AppBootsTest {
     fun `wiping the world empties it, and the next player to arrive is offered seats in a world with nothing in it`() {
         val wiper = "9f1c74b2-6a35-4e90-8c21-b7d05fe3a648"
         val first = Window(port)
-        first.say("""{"type":"hello","playerToken":"$wiper","protocolVersion":1}""")
+        first.say("""{"type":"hello","playerToken":"$wiper","protocolVersion":$PROTOCOL_VERSION}""")
         first.until("a choice") { frames -> frames.any { it is YourChoice } }
         val offered = first.last<YourChoice>().choice!!
         first.say(
@@ -150,7 +151,7 @@ class AppBootsTest {
         // Arriving again, in a world with nothing in it: no house, and the founding choice afresh.
         val second = Window(port)
         second.say("""{"type":"watchEvents","on":true}""")
-        second.say("""{"type":"hello","playerToken":"$wiper","protocolVersion":1}""")
+        second.say("""{"type":"hello","playerToken":"$wiper","protocolVersion":$PROTOCOL_VERSION}""")
         second.until("a choice again") { frames -> frames.any { it is YourChoice } }
 
         assertNull(second.last<YourHouse>().house, "the house went with the world")

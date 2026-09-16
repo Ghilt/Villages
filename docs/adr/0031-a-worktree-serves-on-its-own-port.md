@@ -51,6 +51,22 @@ checkout's game server. Nobody had noticed because nobody had run it from a work
   a strip of tabs across the top: the one you are on marked, the ones serving as links, the rest dim.
   Development only, and absent entirely when there is one tree.
 
+### Amended 2026-09-16: and its own game port
+
+The port per tree was only ever half of it. The game server stayed on 8080 for every checkout, so one
+tree could run a backend and the rest either sat blind or - worse, and quietly - talked to whichever
+tree happened to own the port. A page built on one branch putting its events into another branch's
+store is not a thing you notice; it looks like the program working.
+
+**A tree's game server sits three thousand above its dev server**: 5548 serves the page and 8548 serves
+the world, and knowing either gives the other. The main checkout keeps 5173 and 8080, which are in every
+document and in Adam's muscle memory. `worktreePort.ts --game` prints it, `--launch` writes it into
+`.claude/launch.json` as both the port and `--server.port`, and the dev server hands it to the page as
+`VITE_GAME_PORT`, so a page connects to its own tree's world without anybody setting anything.
+
+What forced it was decision 0037's amendment: once the launcher takes a port it finds in the wrong
+hands, a game port shared by thirteen checkouts stops being a nuisance and becomes a fight.
+
 ## Consequences
 
 Several sessions can serve at once, so a change can be looked at in the tree it was made in. That is what

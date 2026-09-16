@@ -15,8 +15,15 @@ import tools.jackson.databind.JsonNode
  * clock in milliseconds since the epoch, identifiers are strings. The gateway translates.
  */
 
-/** The version both ends declare in the handshake, so the gateway can refuse a client it cannot speak to. */
-const val PROTOCOL_VERSION = 1
+/**
+ * The version both ends declare in the handshake, so the gateway can refuse a client it cannot speak to.
+ *
+ * It goes up whenever a frame or a field below changes, and `ProtocolShapeSpec` is what makes sure of
+ * that: the shape of every frame is recorded in contracts/protocol-v<n>.txt, and a wire that has moved
+ * without a new number is a failing build. Version 2 is the first gameplay loop, which added
+ * `takeAction`, `yourChoice`, `wipeWorld` and `worldWiped`, and gave every event its provenance.
+ */
+const val PROTOCOL_VERSION = 2
 
 data class Point(val lat: Double, val lon: Double)
 

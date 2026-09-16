@@ -167,10 +167,35 @@ body,
   font-variant-numeric: tabular-nums;
 }
 
+/*
+ * Which build this window is, in the corner, in the smallest type on the screen. Not part of the
+ * fiction: a dozen checkouts of this repository can serve and they all look alike. See 0037.
+ */
+.build {
+  position: absolute;
+  right: 0.45rem;
+  bottom: 0.2rem;
+  z-index: 4;
+  padding: 0 0.25rem;
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.01em;
+  color: var(--ink-soft);
+  background: rgba(239, 230, 211, 0.72);
+  border-radius: 2px;
+  pointer-events: none;
+  user-select: none;
+}
+
 /* MapLibre's own furniture, brought closer to the parchment. */
 .maplibregl-ctrl-attrib {
   font-family: system-ui, sans-serif;
   font-size: 0.68rem;
+}
+
+/* Lifted clear of the build label, which owns the very corner. */
+.maplibregl-ctrl-bottom-right {
+  padding-bottom: 0.9rem;
 }
 
 /*

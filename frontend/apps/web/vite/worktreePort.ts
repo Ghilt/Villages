@@ -25,6 +25,26 @@ export const MAIN_PORT = 5173;
 /** How many ports the worktrees share, above the main one. */
 export const WORKTREE_PORTS = 500;
 
+/** The main checkout's game server, which is in every document and every bookmark. */
+export const MAIN_GAME_PORT = 8080;
+
+/**
+ * How far above a tree's web port its game server sits.
+ *
+ * A worktree's two ports are one number apart by three thousand, so knowing either gives the other:
+ * 5548 serves the page and 8548 serves the world. That matters because the game port used to be 8080
+ * for everybody, which meant one tree could run a backend and the rest either sat blind or quietly
+ * talked to somebody else's world - a page from one branch putting events into another branch's store.
+ * The launcher now takes a port it finds in the wrong hands, which turned that old sharing from a
+ * nuisance into a fight. See decision records 0031 and 0037.
+ */
+export const GAME_PORT_ABOVE = 3000;
+
+/** The port a tree's game server answers on. The main checkout keeps 8080. */
+export function gamePortFor(worktree: string | null): number {
+  return worktree === null ? MAIN_GAME_PORT : portFor(worktree) + GAME_PORT_ABOVE;
+}
+
 /**
  * The port a worktree serves on, from its directory name. The main checkout is `null`.
  *
@@ -58,7 +78,10 @@ export interface Worktree {
   path: string;
   /** The branch checked out there, short form, or null when it is detached. */
   branch: string | null;
+  /** Where its dev server answers. */
   port: number;
+  /** Where its game server answers, which is the port its page connects to unless told otherwise. */
+  gamePort: number;
 }
 
 /**
@@ -81,7 +104,7 @@ export function parseWorktrees(porcelain: string, commonDir: string): Worktree[]
     const isMain = at === main;
     const branch = /^branch refs\/heads\/(.+)$/m.exec(record)?.[1]?.trim() ?? null;
     const name = isMain ? null : basename(at);
-    found.push({ name, path: at, branch, port: portFor(name) });
+    found.push({ name, path: at, branch, port: portFor(name), gamePort: gamePortFor(name) });
   }
 
   return found;
@@ -121,7 +144,7 @@ export function worktreeHere(root: string): Worktree {
   const mine = [...worktrees(root)]
     .sort((a, b) => b.path.length - a.path.length)
     .find((tree) => at === tree.path || at.startsWith(tree.path + sep));
-  return mine ?? { name: null, path: at, branch: null, port: MAIN_PORT };
+  return mine ?? { name: null, path: at, branch: null, port: MAIN_PORT, gamePort: MAIN_GAME_PORT };
 }
 
 /**
@@ -148,8 +171,13 @@ export function launchConfig(root: string): string {
         {
           name: 'backend',
           runtimeExecutable: resolve(root, 'backend', 'gradlew.bat'),
-          runtimeArgs: ['-p', resolve(root, 'backend'), ':app:bootRun'],
-          port: 8080,
+          runtimeArgs: [
+            '-p',
+            resolve(root, 'backend'),
+            ':app:bootRun',
+            `--args=--server.port=${tree.gamePort}`,
+          ],
+          port: tree.gamePort,
         },
       ],
     },
@@ -160,10 +188,11 @@ export function launchConfig(root: string): string {
 }
 
 /**
- * Run directly - `node frontend/apps/web/vite/worktreePort.ts` - it prints this tree's port and nothing
- * else, which is how `debug-quick-start.ps1` asks. With `--launch` it also writes `.claude/launch.json`
- * for this tree. The launcher, the dev server and the preview tooling have to agree on the address to
- * the digit, and the only way to be sure of that is for there to be one of these.
+ * Run directly - `node frontend/apps/web/vite/worktreePort.ts` - it prints this tree's dev server port
+ * and nothing else, which is how `debug-quick-start.ps1` asks; `--game` prints the game server's
+ * instead. With `--launch` it also writes `.claude/launch.json` for this tree. The launcher, the dev
+ * server and the preview tooling have to agree on the address to the digit, and the only way to be sure
+ * of that is for there to be one of these.
  */
 const asked = process.argv[1];
 if (asked !== undefined && resolve(asked) === resolve(fileURLToPath(import.meta.url))) {
@@ -172,5 +201,6 @@ if (asked !== undefined && resolve(asked) === resolve(fileURLToPath(import.meta.
     mkdirSync(resolve(root, '.claude'), { recursive: true });
     writeFileSync(resolve(root, '.claude', 'launch.json'), launchConfig(root));
   }
-  process.stdout.write(String(worktreeHere(root).port));
+  const tree = worktreeHere(root);
+  process.stdout.write(String(process.argv.includes('--game') ? tree.gamePort : tree.port));
 }

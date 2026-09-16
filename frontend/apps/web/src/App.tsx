@@ -5,6 +5,7 @@ import { housesInView } from '@villages/client-core';
 import type { ChoiceView, HouseView } from '@villages/protocol';
 
 import { AreaOverlay } from './areas/AreaOverlay';
+import { BuildBadge } from './version/BuildBadge';
 import { Parchment } from './choice/Parchment';
 import { DebugPanel } from './debug/DebugPanel';
 import { Desk } from './desk/Desk';
@@ -128,6 +129,7 @@ export function App({ master }: AppProps) {
       <HudShell />
       <Inspector />
       <Parchment />
+      <BuildBadge />
       <StoodDown />
       <div className="rail">
         <DebugMapPanel master={master} renderer={renderer} onRenderer={setRenderer} />

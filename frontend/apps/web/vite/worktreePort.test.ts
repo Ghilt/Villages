@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
-import { MAIN_PORT, WORKTREE_PORTS, parseWorktrees, portFor } from './worktreePort.ts';
+import {
+  GAME_PORT_ABOVE,
+  MAIN_GAME_PORT,
+  MAIN_PORT,
+  WORKTREE_PORTS,
+  gamePortFor,
+  parseWorktrees,
+  portFor,
+} from './worktreePort.ts';
 
 describe('the port a worktree serves on', () => {
   it('leaves the main checkout on 5173', () => {
@@ -34,6 +42,31 @@ describe('the port a worktree serves on', () => {
     // A thousand names into five hundred ports cannot give more than five hundred, and a fair hash gets
     // most of the way there. A poor one lands on a few dozen.
     expect(ports.size).toBeGreaterThan(WORKTREE_PORTS * 0.8);
+  });
+});
+
+describe('the port a tree runs its world on', () => {
+  it('leaves the main checkout on 8080, which is in every document there is', () => {
+    expect(gamePortFor(null)).toBe(MAIN_GAME_PORT);
+  });
+
+  it('sits a fixed distance above the web port, so knowing either gives the other', () => {
+    expect(gamePortFor('gameplay-loop-iteration-one-d71e80')).toBe(
+      portFor('gameplay-loop-iteration-one-d71e80') + GAME_PORT_ABOVE,
+    );
+  });
+
+  it('never collides with another tree, because the web ports do not either', () => {
+    const names = Array.from({ length: 400 }, (_, at) => `tree-${at}-${(at * 7919).toString(16)}`);
+    const web = new Set(names.map(portFor));
+    const game = new Set(names.map(gamePortFor));
+
+    expect(game.size).toBe(web.size);
+    // And no tree's world is ever reached at another tree's page, nor at the main checkout's world.
+    expect(game.has(MAIN_GAME_PORT)).toBe(false);
+    for (const port of game) {
+      expect(web.has(port)).toBe(false);
+    }
   });
 });
 

@@ -162,6 +162,7 @@ What one new event costs, and the check that fails until each part exists.
 | The stored form | `contracts/fixtures/events/<type>.json` | `HouseEventFormatSpec` |
 | Every projection's fold | `backend/projections` | the compiler: each `when` is exhaustive |
 | A frame, when the interface sees it directly | Kotlin `Frames.kt`, zod `frames.ts`, one fixture under `contracts/fixtures/frames` | both contract tests |
+| The wire moved, so its version does: `PROTOCOL_VERSION` up at both ends, and `contracts/protocol-v<n>.txt` recorded with `./gradlew :protocol:test -Dprotocol.record=true` | `backend/protocol`, `frontend/packages/protocol`, `contracts/` | `ProtocolShapeSpec` and `protocol.shape.test.ts`, which fail with the instructions (0037) |
 | What the browser does with the frame | `heard()` in `apps/web/src/net/gateway.ts`, with a `note` | reading the log |
 | The panel line | the debug panel's state, or its event list | Adam, by looking (0023) |
 | The words | `docs/GLOSSARY.md`; a decision record if a decision was taken; the roadmap tick | review |

@@ -119,9 +119,12 @@ What follows from that, and bites in practice:
   never cut them cannot serve a map. Junctioning the main checkout's tiles into the worktree is the cheap
   way to get a map up without a five-minute recut. So is `frontend/node_modules`: a fresh tree needs
   `npm install --prefix frontend` once before anything in it runs.
-- **Each tree serves on its own port**, a hash of its directory name, so several can run at once and a
-  tree's address never moves. The main checkout keeps 5173.
-  `node frontend/apps/web/vite/worktreePort.ts` prints this tree's; `--launch` also writes
+- **Each tree serves on its own pair of ports**, a hash of its directory name, so several can run at once
+  and a tree's address never moves. The main checkout keeps 5173 and 8080; a worktree's game server sits
+  three thousand above its dev server, so 5548 serves the page and 8548 serves the world, and the page
+  connects to its own tree's world without being told to. A backend on somebody else's port was how a
+  branch's events quietly ended up in another branch's store.
+  `node frontend/apps/web/vite/worktreePort.ts` prints this tree's, `--game` the game one; `--launch` also writes
   `.claude/launch.json`, which is generated rather than committed because every field in it is
   per-checkout. `debug-quick-start.ps1` does both and prints the address. The tab strip across the top of
   the page says which trees exist, which are serving, and which one you are looking at. See decision 0031.
@@ -173,7 +176,10 @@ and ESLint restricted imports on the frontend.
 - Frontend: `packages/protocol` <- `packages/client-core` <- `apps/web`. `client-core` never imports React, the DOM,
   MapLibre or Pixi; the socket is an injected interface.
 - The WebSocket protocol is a shared contract: Kotlin types and TypeScript (zod) schemas, both tested against the same
-  fixtures in `contracts/fixtures/`.
+  fixtures in `contracts/fixtures/`. It also has a version, and the version has a recording: change a frame or a field
+  and `PROTOCOL_VERSION` goes up at both ends and `contracts/protocol-v<n>.txt` is written beside the old ones, or two
+  tests stay red. That is what makes a server older than the page say so at the handshake instead of later and worse.
+  See decision record 0037.
 
 ## Event sourcing conventions
 
@@ -202,7 +208,13 @@ Commands are added here as the increments land:
   `debug-quick-start.cmd` on a double click from Explorer. It checks the tools, generates whatever part
   of the world is missing, starts the game server and the dev server hidden with their output in
   `.logs/`, waits until both ports answer, and prints the address. `-Stop` stops both, `-Logs` prints
-  their tails, `-WebOnly` skips the game server, `-NoBrowser` leaves the browser alone. This is how
+  their tails, `-WebOnly` skips the game server, `-NoBrowser` leaves the browser alone. **A port held by
+  anything that is not this checkout's current server is taken**: another tree's, or one started before
+  the code it serves was written. Launching it from a checkout means "show me this checkout", and the
+  ports are per-tree now so taking one back cannot take anyone else's world with it (0031, 0037). It ends
+  with every Villages server on the machine listed, whichever tree started it and how long it has been up.
+  Double-clicked, the window stays open and is the servers: `q` stops both, `l` tails the logs, closing it
+  leaves them running. This is how
   Adam runs the program without an agent in the loop, so it stays true: a step that adds a server, a
   generated file or a prerequisite adds it there in the same commit.
 - Frontend, once: `npm install --prefix frontend`
@@ -262,9 +274,11 @@ Commands are added here as the increments land:
 - Frontend, look at it: `npm run dev --prefix frontend`, then open the address it prints. That is
   http://localhost:5173 in the main checkout and a port of its own in each worktree; see decision 0031.
 - Frontend, checks: `npm run check --prefix frontend` (typecheck, lint, format, unit tests)
-- Backend, running: `cd backend` then `./gradlew :app:bootRun`, or the `backend` entry in `.claude/launch.json`. The
-  gateway is a WebSocket at `ws://localhost:8080/ws`; the web app connects to it on load, or to
-  `VITE_GATEWAY_URL`. Everything is in memory until MongoDB exists, so nothing survives a restart, on purpose.
+- Backend, running: the `backend` entry in `.claude/launch.json`, which carries this tree's port; by hand it is
+  `cd backend` then `./gradlew :app:bootRun --args=--server.port=<this tree's game port>`. The gateway is a
+  WebSocket at `ws://localhost:<that port>/ws`, 8080 in the main checkout; the web app connects to its own
+  tree's on load, or to `VITE_GATEWAY_URL` when that is set. Everything is in memory until MongoDB exists, so
+  nothing survives a restart, on purpose.
 - Backend, checks: `cd backend` then `./gradlew check`. Gradle fetches the JDK 21 the toolchain asks for, so
   `JAVA_HOME` may stay on the Temurin 17 that is installed; the first run downloads it. Every module's
   `build.gradle.kts` declares only its allowed dependency edges, and `buildSrc` holds the one convention

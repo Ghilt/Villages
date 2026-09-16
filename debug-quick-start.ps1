@@ -9,18 +9,23 @@
 
     Both servers run hidden, with everything they print going to .logs/ beside this file.
 
+    A port already held by another tree, or by a server older than the code it serves, is taken rather
+    than adopted: launching this from a checkout means "show me this checkout". See decision record 0037.
+
     Switches:
         -WebOnly     just the map. No game server, so no houses and no events.
         -NoBrowser   do not open the browser.
         -Stop        stop both, and whatever they started, and exit.
         -Logs        print the tail of both logs, and exit. This is what to paste into a conversation.
+        -Hold        stay open afterwards, with q to stop both. What the double-click wrapper passes.
 #>
 [CmdletBinding()]
 param(
     [switch] $WebOnly,
     [switch] $NoBrowser,
     [switch] $Stop,
-    [switch] $Logs
+    [switch] $Logs,
+    [switch] $Hold
 )
 
 $ErrorActionPreference = 'Stop'
@@ -34,18 +39,20 @@ $WebErrors = Join-Path $LogDir 'web-errors.log'
 $StartedFile = Join-Path $LogDir 'started.json'
 
 <#
-    Which port this tree serves on. The main checkout is 5173 as it always was; a worktree gets its own,
-    worked out from its directory name, so several sessions can serve at once. Asked of the same file
-    Vite asks, because a launcher that guessed the port would send you to somebody else's world. See
-    decision record 0031.
+    Which ports this tree uses. The main checkout is 5173 and 8080 as it always was; a worktree gets its
+    own pair, worked out from its directory name, so several sessions can run at once. Asked of the same
+    file Vite asks, because a launcher that guessed a port would send you to somebody else's world - and
+    that is not a figure of speech now that a port in the wrong hands gets taken. See 0031 and 0037.
 #>
 $PortScript = Join-Path $Root 'frontend\apps\web\vite\worktreePort.ts'
 $WebPort = 5173
+$GamePort = 8080
 if (Test-Path $PortScript) {
     $answer = & node $PortScript '--launch' 2>$null
     if ($LASTEXITCODE -eq 0 -and $answer -match '^\d+$') { $WebPort = [int] $answer }
+    $answer = & node $PortScript '--game' 2>$null
+    if ($LASTEXITCODE -eq 0 -and $answer -match '^\d+$') { $GamePort = [int] $answer }
 }
-$GamePort = 8080
 $Address = "http://localhost:$WebPort"
 
 # --- saying things ---------------------------------------------------------------------------------
@@ -69,6 +76,234 @@ function Bad([string] $Text) { Write-Host "  $Text" -ForegroundColor Red }
 function Test-Listening([int] $Port) {
     $listening = @(Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue)
     return $listening.Count -gt 0
+}
+
+<#
+    Every checkout of this repository on the machine: this one, and the worktrees beside it.
+
+    Asked of git rather than guessed from the directory layout, and compared with the separator
+    normalised and the case folded away, because a process command line spells a path the other way
+    round from the way git does. Worked out once, on first use, because git is not on the path until
+    the tools step has run.
+#>
+$Sep = [System.IO.Path]::DirectorySeparatorChar
+
+function Tidy-Path([string] $Path) {
+    if ([string]::IsNullOrWhiteSpace($Path)) { return '' }
+    return $Path.Replace('/', $Sep).TrimEnd($Sep).ToLowerInvariant()
+}
+
+$Here = Tidy-Path $Root
+$script:Trees = $null
+$script:MainTree = $null
+
+function Get-Trees {
+    if ($null -ne $script:Trees) { return $script:Trees }
+    $found = @($Here)
+    # First match only: this machine has git twice on the path, and a two-element array used as a
+    # command name becomes one long nonsense path. Resolve-Tool below learned the same lesson.
+    $git = @(Get-Command git -CommandType Application -ErrorAction SilentlyContinue)[0]
+    if ($null -ne $git) {
+        foreach ($line in @(& $git.Source -C $Root worktree list --porcelain 2>$null)) {
+            if ($line -like 'worktree *') {
+                $path = Tidy-Path $line.Substring(9)
+                # git lists the main checkout first, which is the only way to tell it from the rest.
+                if ($null -eq $script:MainTree) { $script:MainTree = $path }
+                $found += $path
+            }
+        }
+    }
+    $script:Trees = @($found | Where-Object { $_ -ne '' } | Select-Object -Unique)
+    return $script:Trees
+}
+
+<# What to call a tree in a sentence: the main checkout is not "villages", it is main. #>
+function Name-Of([string] $Tree) {
+    Get-Trees | Out-Null
+    if ($Tree -eq $script:MainTree) { return 'main' }
+    return Split-Path $Tree -Leaf
+}
+
+<#
+    Which checkout a running process belongs to, or nothing when it is none of ours.
+
+    The longest match wins. Every worktree path begins with the main checkout's, so the shorter one
+    would otherwise claim all of them and every tree would look like main.
+#>
+function Get-TreeOf($Process) {
+    if ($null -eq $Process) { return $null }
+    $said = ''
+    try {
+        $said = (Get-CimInstance Win32_Process -Filter "ProcessId=$($Process.Id)" `
+                -ErrorAction SilentlyContinue).CommandLine
+    } catch {
+        $said = ''
+    }
+    if ([string]::IsNullOrWhiteSpace($said)) { return $null }
+
+    $said = $said.Replace('/', $Sep).ToLowerInvariant()
+    $best = $null
+    foreach ($tree in Get-Trees) {
+        if ($said.Contains($tree) -and ($null -eq $best -or $tree.Length -gt $best.Length)) {
+            $best = $tree
+        }
+    }
+    return $best
+}
+
+<# A killed listener gives its port back in a moment rather than instantly, and strictPort does not forgive. #>
+function Wait-Free([int] $Port, [int] $Seconds = 10) {
+    $until = (Get-Date).AddSeconds($Seconds)
+    while ((Get-Date) -lt $until) {
+        if (-not (Test-Listening $Port)) { return $true }
+        Start-Sleep -Milliseconds 200
+    }
+    return $false
+}
+
+<#
+    When the dev server's own configuration was last edited.
+
+    Vite serves the app from disk, so a dev server is never stale about the app. Its configuration is
+    different: that is read when the process starts, and the plugins it names are the dev-only routes the
+    page asks for. A server older than its own config is answering 404 to things the page now expects.
+#>
+function Get-NewestWebConfigChange {
+    $web = Join-Path (Join-Path (Join-Path $Root 'frontend') 'apps') 'web'
+    $config = @(Join-Path $web 'vite.config.ts')
+    $plugins = @(Get-ChildItem -Path (Join-Path $web 'vite') -File -Filter '*.ts' -ErrorAction SilentlyContinue |
+        Select-Object -ExpandProperty FullName)
+    $newest = @($config + $plugins |
+        Where-Object { Test-Path $_ } |
+        ForEach-Object { (Get-Item $_).LastWriteTime } |
+        Sort-Object -Descending |
+        Select-Object -First 1)
+    if ($newest.Count -eq 0) { return $null }
+    return $newest[0]
+}
+
+<#
+    Whatever holds this port: is it this checkout's, and is it current? If it is not, it goes.
+
+    This is the rule, and the reason a held port is no longer merely reported: running this from a
+    checkout means "show me this checkout". A server from another tree, or one started before the code
+    it serves was written, is not that, however well it answers. The tree you launch from owns the ports
+    it uses, and anyone else's server was already in the wrong place. See decision record 0037.
+
+    True means keep what is there. False means the port is free and ours to start on.
+#>
+function Confirm-Port([int] $Port, [string] $What, $StaleAfter) {
+    if (-not (Test-Listening $Port)) { return $false }
+
+    $holder = Get-PortHolder $Port
+    if ($null -eq $holder) {
+        Warn "something holds $Port that this cannot see into, so it is being left alone"
+        return $true
+    }
+
+    $since = $null
+    try { $since = $holder.StartTime } catch { $since = $null }
+    $tree = Get-TreeOf $holder
+
+    $wrong = $null
+    if ($null -eq $tree) {
+        $wrong = "is not one of ours ($($holder.ProcessName), pid $($holder.Id))"
+    } elseif ($tree -ne $Here) {
+        $wrong = "belongs to $(Name-Of $tree)"
+    } elseif ($null -ne $StaleAfter -and $null -ne $since -and $since -lt $StaleAfter) {
+        $wrong = "started $(Describe-Since $since), before the code it serves was last changed"
+    }
+
+    if ($null -eq $wrong) {
+        Good "$What is already up on $Port, this checkout's, started $(Describe-Since $since)"
+        return $true
+    }
+
+    Warn "$What on $Port $wrong. Taking the port, so that what you see is this checkout."
+    Stop-Port $Port $What
+    if (-not (Wait-Free $Port)) {
+        Bad "$Port is still held. Stop whatever has it by hand and run this again."
+        return $true
+    }
+    return $false
+}
+
+<#
+    Every Villages server running on this machine, whichever checkout started it.
+
+    There are a dozen trees and they all look alike from a browser. This is the one place that says what
+    is up, where it came from, and how long it has been there.
+#>
+function Get-VillagesServers {
+    $rows = @()
+    $held = @(Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue |
+        Select-Object -Property LocalPort, OwningProcess -Unique)
+    foreach ($one in $held) {
+        $process = Get-Process -Id $one.OwningProcess -ErrorAction SilentlyContinue
+        if ($null -eq $process) { continue }
+        if ($process.ProcessName -notin @('java', 'node')) { continue }
+        $tree = Get-TreeOf $process
+        if ($null -eq $tree) { continue }
+        $since = $null
+        try { $since = $process.StartTime } catch { $since = $null }
+        $rows += [pscustomobject]@{
+            Tree  = Name-Of $tree
+            Kind  = if ($process.ProcessName -eq 'java') { 'game' } else { 'web ' }
+            Port  = [int] $one.LocalPort
+            Since = $since
+            Mine  = ($tree -eq $Here)
+        }
+    }
+    return @($rows | Sort-Object Tree, Port)
+}
+
+function Stop-Everything {
+    Stop-Remembered 'web' 'the dev server'
+    Stop-Remembered 'game' 'the game server'
+    Stop-Port $WebPort 'the dev server'
+    Stop-Port $GamePort 'the game server'
+}
+
+<#
+    Who holds a port, and since when.
+
+    A port that answers is not the same thing as the right program answering it. What bit: a game server
+    six days old, still listening on 8080 long after the session that started it had gone. The page found
+    it, the handshake passed because nobody had changed the protocol version, and the first frame that old
+    gateway had never heard of came back as Jackson's opinion of an unknown type id - which names
+    everything except the fault. So a port that is already held gets looked at rather than trusted.
+#>
+function Get-PortHolder([int] $Port) {
+    $owners = @(Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue |
+        Select-Object -ExpandProperty OwningProcess -Unique)
+    if ($owners.Count -eq 0) { return $null }
+    return Get-Process -Id $owners[0] -ErrorAction SilentlyContinue
+}
+
+<#
+    When the backend in this tree was last edited.
+
+    Only files under a module's src, because Gradle writes generated Kotlin into build directories every
+    time it runs, and a clock that moves whenever you build says nothing about the code.
+#>
+function Get-NewestBackendChange {
+    $roots = @(Get-ChildItem -Path (Join-Path $Root 'backend') -Directory -Recurse -Filter 'src' `
+            -ErrorAction SilentlyContinue)
+    $newest = $roots |
+        ForEach-Object { Get-ChildItem -Path $_.FullName -Recurse -File -Filter '*.kt' -ErrorAction SilentlyContinue } |
+        Sort-Object LastWriteTime -Descending |
+        Select-Object -First 1
+    if ($null -eq $newest) { return $null }
+    return $newest.LastWriteTime
+}
+
+<# The start of a process, in the units a person notices: minutes, hours, or the days that mean trouble. #>
+function Describe-Since($When) {
+    if ($null -eq $When) { return 'at some point' }
+    $span = (Get-Date) - $When
+    if ($span.TotalMinutes -lt 90) { return "$([int] $span.TotalMinutes) minutes ago" }
+    if ($span.TotalHours -lt 36) { return "$([int] $span.TotalHours) hours ago" }
+    return "$([int] $span.TotalDays) days ago"
 }
 
 <# Wait for a port, counting out loud, and give up rather than hang forever. #>
@@ -192,10 +427,7 @@ if ($Logs) {
 
 if ($Stop) {
     Head 'stopping'
-    Stop-Remembered 'web' 'the dev server'
-    Stop-Remembered 'game' 'the game server'
-    Stop-Port $WebPort 'the dev server'
-    Stop-Port $GamePort 'the game server'
+    Stop-Everything
     if (-not $script:Stopped) { Good 'nothing was running' }
     Write-Host ''
     exit 0
@@ -279,12 +511,12 @@ if (-not (Test-Path $LogDir)) { New-Item -ItemType Directory -Path $LogDir | Out
 
 $GameUp = $false
 if (-not $WebOnly) {
-    if (Test-Listening $GamePort) {
-        Good "the game server is already up on $GamePort, leaving it alone"
+    if (Confirm-Port $GamePort 'the game server' (Get-NewestBackendChange)) {
         $GameUp = $true
     } else {
         Step 'game server  '
-        Remember 'game' (Start-Server $Gradlew @('--console=plain', ':app:bootRun') `
+        Remember 'game' (Start-Server $Gradlew `
+            @('--console=plain', ':app:bootRun', "--args=--server.port=$GamePort") `
             (Join-Path $Root 'backend') $BackendLog $BackendErrors)
         $GameUp = Wait-Listening $GamePort 300 'the game server'
         if (-not $GameUp) {
@@ -295,8 +527,8 @@ if (-not $WebOnly) {
     }
 }
 
-if (Test-Listening $WebPort) {
-    Good "the dev server is already up on $WebPort, leaving it alone"
+# The app itself is served from disk and is never stale; the configuration is read once, at startup.
+if (Confirm-Port $WebPort 'the dev server' (Get-NewestWebConfigChange)) {
     $WebUp = $true
 } else {
     Step 'dev server   '
@@ -310,6 +542,7 @@ if (Test-Listening $WebPort) {
         exit 1
     }
 }
+
 
 # --- what to do now -------------------------------------------------------------------------------
 
@@ -330,6 +563,23 @@ if ($GameUp) {
     Warn 'The game server never came up, so the panel will say "closed" and there are no events.'
 }
 
+Head 'servers'
+
+$servers = Get-VillagesServers
+if ($servers.Count -eq 0) {
+    Say '  none that this can see, which is odd, since one of them is serving this page'
+} else {
+    foreach ($row in $servers) {
+        $mark = ' '
+        if ($row.Mine) { $mark = '*' }
+        Say ("  {0} {1,-38} {2}  {3,-5}  started {4}" -f $mark, $row.Tree, $row.Kind, $row.Port,
+            (Describe-Since $row.Since))
+    }
+    Say ''
+    Say '  * this checkout. The rest belong to other trees; leave them be unless they hold a port you'
+    Say '    need, in which case running this from that tree takes it back.'
+}
+
 Head 'if something looks wrong'
 Say  "  .\debug-quick-start.ps1 -Logs     the tail of both logs, which is what to paste to Claude"
 Say  "  .\debug-quick-start.ps1 -Stop     stop both servers"
@@ -344,3 +594,41 @@ if (-not $NoBrowser) {
 }
 
 Write-Host ''
+
+<#
+    Double-clicked, this window is the servers: it stays where you can see it, and q ends them.
+
+    Closing it instead leaves them running, which is what you want when you meant to keep playing and
+    were only done with the terminal. Nothing here holds the servers up; they are their own processes
+    and this is a keyboard.
+#>
+if ($Hold) {
+    Write-Host ''
+    Head 'this window'
+    Say  '  q   stop both servers and close this window'
+    Say  '  l   the tail of both logs'
+    Say  '  closing the window leaves them running'
+    Write-Host ''
+    while ($true) {
+        $key = $null
+        try {
+            $key = [Console]::ReadKey($true)
+        } catch {
+            # Nothing to read a key from, so there is nothing to hold on to either.
+            break
+        }
+        if ($key.KeyChar -eq 'q' -or $key.KeyChar -eq 'Q') {
+            Write-Host ''
+            Head 'stopping'
+            Stop-Everything
+            if (-not $script:Stopped) { Good 'nothing was running' }
+            Write-Host ''
+            exit 0
+        }
+        if ($key.KeyChar -eq 'l' -or $key.KeyChar -eq 'L') {
+            Show-Tail $BackendLog 20
+            Show-Tail $WebLog 15
+            Write-Host ''
+        }
+    }
+}

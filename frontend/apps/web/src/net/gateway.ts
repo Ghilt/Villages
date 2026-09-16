@@ -21,7 +21,8 @@ import { browserSocket } from './browserSocket';
  */
 
 export const GATEWAY_URL =
-  (import.meta.env.VITE_GATEWAY_URL as string | undefined) ?? 'ws://localhost:8080/ws';
+  (import.meta.env.VITE_GATEWAY_URL as string | undefined) ??
+  `ws://localhost:${(import.meta.env.VITE_GAME_PORT as string | undefined) ?? '8080'}/ws`;
 
 export interface GatewayState {
   connection: 'connecting' | 'open' | 'closed' | 'takenOver';
@@ -100,6 +101,15 @@ function heard(frame: ServerFrame): void {
       return;
     case 'error':
       note('gateway', `error ${frame.code}: ${frame.message}`);
+      if (frame.code === 'protocolVersion') {
+        // The one error whose cause is never in the code: a server left running from an older build.
+        // Saying what to do here saves reading the message and guessing. See decision record 0037.
+        note(
+          'gateway',
+          `this page speaks version ${PROTOCOL_VERSION}, so the server on the other end is a different ` +
+            'build of the program. Stop it and start it again from this tree with debug-quick-start.ps1 -Stop.',
+        );
+      }
       return;
     case 'pong':
       note('gateway', `pong, round trip ${Date.now() - frame.t0} ms`);

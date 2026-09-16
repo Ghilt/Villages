@@ -33,6 +33,7 @@ import villages.projections.RecentEventsProjection
 import villages.protocol.Batch
 import villages.protocol.CommandAccepted
 import villages.protocol.CommandRejected
+import villages.protocol.PROTOCOL_VERSION
 import villages.protocol.ErrorFrame
 import villages.protocol.FoundAtView
 import villages.protocol.EventFrame
@@ -136,7 +137,7 @@ private val noon = Instant.parse("2026-09-04T12:00:00Z")
 /** Year 1247, day 112: the world-day every test stands on. */
 private val today = WorldTime(454901)
 private const val TOKEN = "0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8d"
-private val hello = """{"type":"hello","playerToken":"$TOKEN","protocolVersion":1}"""
+private val hello = """{"type":"hello","playerToken":"$TOKEN","protocolVersion":$PROTOCOL_VERSION}"""
 private const val RAVENSCAR = "6d5b0a2e-1c3f-4d7e-9a8b-0f1e2d3c4b5a"
 
 /** A command id is a UUID: it becomes the causation of what the command writes. See 0035. */
@@ -211,7 +212,7 @@ private class Rig {
     fun introduced(token: String = TOKEN): Pair<Gateway.Connection, MutableList<ServerFrame>> {
         val sent = mutableListOf<ServerFrame>()
         val connection = gateway.connect { sent += it }
-        connection.receive("""{"type":"hello","playerToken":"$token","protocolVersion":1}""")
+        connection.receive("""{"type":"hello","playerToken":"$token","protocolVersion":$PROTOCOL_VERSION}""")
         sent.clear()
         return connection to sent
     }
@@ -339,8 +340,8 @@ class GatewaySpec : StringSpec({
         val sent = mutableListOf<ServerFrame>()
         val connection = Rig().gateway.connect { sent += it }
 
-        connection.receive("""{"type":"hello","playerToken":"$TOKEN","protocolVersion":2}""")
-        connection.receive("""{"type":"hello","playerToken":"nope","protocolVersion":1}""")
+        connection.receive("""{"type":"hello","playerToken":"$TOKEN","protocolVersion":${PROTOCOL_VERSION + 1}}""")
+        connection.receive("""{"type":"hello","playerToken":"nope","protocolVersion":$PROTOCOL_VERSION}""")
         connection.receive("this is not json")
 
         sent.map { it.shouldBeInstanceOf<ErrorFrame>().code } shouldBe listOf("protocolVersion", "playerToken", "unreadable")
