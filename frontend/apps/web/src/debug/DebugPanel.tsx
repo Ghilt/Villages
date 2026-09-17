@@ -1,80 +1,17 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
-import { cellsHeld, housesInView, omittedInView } from '@villages/client-core';
-import { cellsForView, describeDay } from '@villages/protocol';
-
-import { CAMERA } from '../map/mapConfig';
 import { FLAT_MAX_ZOOM, TILE } from '../map/painterlyMessages';
-import { forgetPaintedTally, paintedTally } from '../map/painterlyTiles';
-import { fitZoom, floorZoom, sheetCoversView, sheetOnScreen } from '../map/sheet';
+import { forgetPaintedTally } from '../map/painterlyTiles';
+import { sheetCoversView, sheetOnScreen } from '../map/sheet';
 import { WORLD_MASTER_WIDTH } from '../map/worldStyle';
 import { AreasView } from '../areas/AreasView';
-import { areasNow } from '../areas/areas';
 import { atToClock, note, notesNow, watchNotes } from './log';
-import { gatewayState, restart, wipeWorld } from '../net/gateway';
-import { selectionNow } from '../select/selection';
+import { restart, wipeWorld } from '../net/gateway';
 import { EventsView } from './EventsView';
-import { describeState } from './report';
-import type { Line, MapState } from './report';
-
-/** The player's own house, as one line, or nothing when they have none. */
-function describeYourHouse(): string | null {
-  const heard = gatewayState();
-  if (heard.yourHouse === null) {
-    return null;
-  }
-  return `${heard.yourHouse.name}, founded ${describeDay(heard.yourHouse.since)}`;
-}
-
-/** What this player has been asked, as the panel says it. Read when the panel looks, like the rest. */
-function choiceHere(): MapState['choice'] {
-  const heard = gatewayState();
-  if (heard.yourChoice === null) {
-    return null;
-  }
-  return {
-    prompt: heard.yourChoice.prompt,
-    options: heard.yourChoice.options.length,
-    acting: heard.acting !== null,
-  };
-}
-
-/** What is selected on the map, named rather than identified: a panel is read, not parsed. */
-function selectedHere(): MapState['selected'] {
-  const what = selectionNow();
-  if (what === null) {
-    return null;
-  }
-  const heard = gatewayState();
-  const house =
-    housesInView(heard.houses).find((candidate) => candidate.id === what.id) ??
-    (heard.yourHouse?.id === what.id ? heard.yourHouse : undefined);
-  return { kind: what.kind, name: house?.name ?? `${what.id.slice(0, 8)}, out of view` };
-}
-
-/** Where the world's clock stands, as welcome said it. */
-function worldNow(): { today: number; earliest: number } | null {
-  return gatewayState().world;
-}
-
-/** The areas drawn, and what the selected one holds. Read when the panel looks, like everything else. */
-function areasHere(): MapState['areas'] {
-  const state = areasNow();
-  const selected = state.areas.find((area) => area.id === state.selected) ?? null;
-  return {
-    drawn: state.areas.length,
-    armed: state.armed,
-    selected:
-      selected === null
-        ? null
-        : { id: selected.id, pixels: selected.pixels, kinds: selected.census?.byClass.size ?? null },
-  };
-}
 
 interface DebugPanelProps {
   map: maplibregl.Map | null;
-  renderer: string;
   /** Where this page's tiles live, which is what an area is counted against. */
   worldRoot: string;
 }
@@ -84,11 +21,16 @@ const OPEN_KEY = 'villages.debug.open';
 /**
  * What the program thinks is happening, on the screen rather than in a console.
  *
- * It exists to be read out loud. When something looks wrong, the useful question is which zoom, which
- * renderer, and where the terrain is coming from, and none of those are guessable from a screenshot.
- * The copy button puts the state and the log on the clipboard so it can be pasted into a conversation.
+ * It is the log and the buttons. The block of state that used to sit above them - the zoom, the sheet,
+ * the cell names, the counts - went on 2026-09-16, because it was not what Adam read: what a thing does
+ * is said as it happens, in a line of the log, and what he wants to change is a button. The copy button
+ * puts the log on the clipboard so it can be pasted into a conversation.
+ *
+ * The camera still says the two things about itself that are worth knowing - that the sheet stopped
+ * covering the view, and that the terrain changed zoom - but it says them to the log when they happen
+ * rather than to a row that is always there. See decision record 0023.
  */
-export function DebugPanel({ map, renderer, worldRoot }: DebugPanelProps) {
+export function DebugPanel({ map, worldRoot }: DebugPanelProps) {
   const notes = useSyncExternalStore(watchNotes, notesNow);
   const [open, setOpen] = useState(() => {
     try {
@@ -97,10 +39,7 @@ export function DebugPanel({ map, renderer, worldRoot }: DebugPanelProps) {
       return true;
     }
   });
-  const [lines, setLines] = useState<Line[]>([]);
   const [copied, setCopied] = useState<'no' | 'yes' | 'failed'>('no');
-  /** Recent frame gaps, so the worst one shown is the worst one lately and not the worst one ever. */
-  const gaps = useRef<{ at: number; gap: number }[]>([]);
   const tileZoomWas = useRef<number | undefined>(undefined);
   const coveredWas = useRef<boolean | undefined>(undefined);
 
@@ -112,50 +51,14 @@ export function DebugPanel({ map, renderer, worldRoot }: DebugPanelProps) {
     }
   }, [open]);
 
-  // The gap between animation frames is what lag is: how long the main thread could not respond. Only
-  // the last few seconds are kept, because a number from page load says nothing about now.
-  const RECENT_MS = 2500;
-  useEffect(() => {
-    let last = performance.now();
-    let running = true;
-
-    // Animation frames stop entirely while the page is hidden, so the first frame back would otherwise
-    // be recorded as a stall of however long it was in the background. It reads as a catastrophe and it
-    // means nothing, so the clock starts again instead.
-    const startTheClockAgain = () => {
-      if (document.visibilityState === 'visible') {
-        last = performance.now();
-      }
-    };
-    document.addEventListener('visibilitychange', startTheClockAgain);
-
-    const tick = () => {
-      const now = performance.now();
-      gaps.current.push({ at: now, gap: now - last });
-      while (gaps.current.length > 0 && now - gaps.current[0]!.at > RECENT_MS) {
-        gaps.current.shift();
-      }
-      last = now;
-      if (running) {
-        requestAnimationFrame(tick);
-      }
-    };
-    requestAnimationFrame(tick);
-    return () => {
-      running = false;
-      document.removeEventListener('visibilitychange', startTheClockAgain);
-    };
-  }, []);
-
   useEffect(() => {
     if (map === null) {
       return;
     }
     const look = () => {
       const centre = map.getCenter();
-      const bounds = map.getBounds();
-      // Below zoom 0 MapLibre still asks for the z0 tile, so the panel says z0 rather than a zoom that no
-      // tile has. See decision 0033.
+      // Below zoom 0 MapLibre still asks for the z0 tile, so this says z0 rather than a zoom no tile
+      // has. See decision 0033.
       const tileZoom = Math.max(0, Math.min(Math.round(map.getZoom()), map.getMaxZoom()));
 
       const container = map.getContainer();
@@ -189,52 +92,6 @@ export function DebugPanel({ map, renderer, worldRoot }: DebugPanelProps) {
         );
       }
       tileZoomWas.current = tileZoom;
-
-      setLines(
-        describeState({
-          renderer,
-          zoom: map.getZoom(),
-          tileZoom,
-          flatMaxZoom: FLAT_MAX_ZOOM,
-          masterWidth: WORLD_MASTER_WIDTH,
-          tileSize: TILE,
-          centre: { lng: centre.lng, lat: centre.lat },
-          canvas: { width: map.getCanvas().width, height: map.getCanvas().height },
-          pixelRatio: window.devicePixelRatio,
-          viewport,
-          sheet: {
-            size: sheet.size,
-            covers: covered,
-            floor: floorZoom(viewport),
-            fit: fitZoom(viewport),
-            atFloor: CAMERA.sheetAtFloor,
-          },
-          painted: paintedTally(),
-          worstFrameGap: gaps.current.reduce((worst, entry) => Math.max(worst, entry.gap), 0),
-          cells: cellsForView({
-            north: bounds.getNorth(),
-            south: bounds.getSouth(),
-            east: bounds.getEast(),
-            west: bounds.getWest(),
-            zoom: tileZoom,
-          }),
-          // Read at the moment of looking, not captured when the effect was made, or it would be stale.
-          houses: {
-            drawn: housesInView(gatewayState().houses).length,
-            held: cellsHeld(gatewayState().houses).length,
-            omitted: omittedInView(gatewayState().houses),
-          },
-          areas: areasHere(),
-          world: worldNow(),
-          player: {
-            id: gatewayState().playerId,
-            connection: gatewayState().connection,
-            house: describeYourHouse(),
-          },
-          choice: choiceHere(),
-          selected: selectedHere(),
-        }),
-      );
     };
     look();
     const often = setInterval(look, 400);
@@ -245,21 +102,16 @@ export function DebugPanel({ map, renderer, worldRoot }: DebugPanelProps) {
       map.off('move', look);
       map.off('idle', look);
     };
-  }, [map, renderer]);
+  }, [map]);
 
   const asText = useCallback(
-    () =>
-      [
-        ...lines.map((line) => `${line.label}: ${line.value}`),
-        '',
-        ...notes.map((entry) => `${atToClock(entry.at)} ${entry.area}: ${entry.message}`),
-      ].join('\n'),
-    [lines, notes],
+    () => notes.map((entry) => `${atToClock(entry.at)} ${entry.area}: ${entry.message}`).join('\n'),
+    [notes],
   );
 
   const copy = () => {
     // A browser may refuse the clipboard. Saying so is better than a button that looks like it worked;
-    // the panel is plain text on the page, so it can always be selected by hand instead.
+    // the log is plain text on the page, so it can always be selected by hand instead.
     try {
       void navigator.clipboard.writeText(asText()).then(
         () => setCopied('yes'),
@@ -290,7 +142,6 @@ export function DebugPanel({ map, renderer, worldRoot }: DebugPanelProps) {
           className="debug__button"
           onClick={() => {
             forgetPaintedTally();
-            gaps.current = [];
             setCopied('no');
           }}
         >
@@ -317,15 +168,6 @@ export function DebugPanel({ map, renderer, worldRoot }: DebugPanelProps) {
           hide
         </button>
       </header>
-
-      <dl className="debug__state">
-        {lines.map((line) => (
-          <div key={line.label} className="debug__row">
-            <dt>{line.label}</dt>
-            <dd>{line.value}</dd>
-          </div>
-        ))}
-      </dl>
 
       <AreasView map={map} worldRoot={worldRoot} />
 

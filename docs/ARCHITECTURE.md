@@ -140,9 +140,15 @@ Today there is no broker. The read model's own change stream stands in for the e
 the projection for changes and queries it for snapshots, both through the `HousesByCell` port. When RabbitMQ
 arrives the exchange takes over the fan-out between processes, and the gateway's side does not change - it
 still holds an index from cell to sessions and, for each changed house, walks that house's deepest cell up
-through its prefixes from the coarsest zoom its significance is worth drawing at. A cell is a quadkey at any
-zoom, so a client asks for data on the same grid, at the same zoom, as the terrain tiles it draws; see
-decision record 0026.
+through all of its prefixes, sending to the holders at the zooms its significance is worth drawing at and to
+anyone who is seeing everything at the rest. A cell is a quadkey at any zoom, so a client asks for data on
+the same grid, at the same zoom, as the terrain tiles it draws; see decision record 0026.
+
+Seeing everything is a connection's, not a house's: `seeAll` sets significance aside for whoever sent it, so
+the same house is in a coarse cell for one session and not for another. It is a way of looking rather than a
+fact about the world, which is why nothing about it is stored or recorded. The player's eye is a different
+thing and needs no frame at all: a player's own house reaches their session rather than a cell, so keeping
+it in sight is a page drawing what it already has. See decision record 0038.
 
 ## Scale principles
 

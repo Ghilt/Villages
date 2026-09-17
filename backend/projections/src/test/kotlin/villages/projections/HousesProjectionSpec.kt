@@ -99,6 +99,20 @@ class HousesProjectionSpec : StringSpec({
         houses.inCell("", someDay, 10).houses.shouldBeEmpty()
     }
 
+    "everything sets significance aside, and nothing else about the query" {
+        val feed = HandFed()
+        val houses = HousesProjection(feed)
+        feed.deliver(founded("Ravenscar", 59.33, 18.07, significance = 20.0, on = someDay))
+
+        // The whole world, however slight the thing in it: that is the eye. See decision record 0038.
+        houses.inCell("", someDay, 10, everything = true).houses shouldHaveSize 1
+        houses.inCell(STOCKHOLM_Z4, someDay, 10, everything = true).houses shouldHaveSize 1
+
+        // The other two conditions still hold: a cell the seat is not in, and a day before it existed.
+        houses.inCell("3", someDay, 10, everything = true).houses.shouldBeEmpty()
+        houses.inCell("", someDay - 1, 10, everything = true).houses.shouldBeEmpty()
+    }
+
     "a legendary thing is drawn from the whole world" {
         val feed = HandFed()
         val houses = HousesProjection(feed)

@@ -56,6 +56,7 @@ import villages.protocol.Pong
 import villages.protocol.ProtocolJson
 import villages.protocol.Rate
 import villages.protocol.Resync
+import villages.protocol.SeeAll
 import villages.protocol.ServerFrame
 import villages.protocol.Snapshot
 import villages.protocol.SubscribeCells
@@ -206,10 +207,13 @@ class Gateway(
         // Whether it is new is the read model's answer, not the stream version's: a house founded from a
         // choice arrives at version three, behind the choice it was given and the action that took it.
         val delta: Delta = if (change.appeared) HouseAppeared(view) else HouseChanged(view)
-        for (zoom in coarsestZoom(row.significance.value)..Cell.MAX_ZOOM) {
+        val coarsest = coarsestZoom(row.significance.value)
+        // Every zoom, not only the ones this house is significant enough for: a connection with the eye
+        // open holds shallower cells and is owed the change in them too. Still eleven lookups. See 0038.
+        for (zoom in 0..Cell.MAX_ZOOM) {
             val holders = holding[deepest.at(zoom).quadkey] ?: continue
             for (connection in holders) {
-                if (connection.sees(row)) {
+                if ((zoom >= coarsest || connection.seesEverything) && connection.sees(row)) {
                     connection.enqueue(delta)
                 }
             }
@@ -235,6 +239,14 @@ class Gateway(
         /** The world-day this connection is looking at, or null for live: the scrubber's position. */
         @Volatile
         private var viewingAt: WorldTime? = null
+
+        /**
+         * Whether this connection has the eye open: significance set aside, so every house in a held cell
+         * reaches it however far back the camera is. Read by the fan-out on another thread. See 0038.
+         */
+        @Volatile
+        internal var seesEverything: Boolean = false
+            private set
 
         /** Set when this session is over, by a takeover or by the socket going away. It then does nothing. */
         @Volatile
@@ -293,6 +305,7 @@ class Gateway(
                 is SubscribeCells -> subscribe(frame.cells)
                 is UnsubscribeCells -> unsubscribe(frame.cells)
                 is ViewTime -> viewTime(frame.at)
+                is SeeAll -> seeAll(frame.on)
                 is WipeWorld -> wipeTheWorld()
             }
         }
@@ -455,7 +468,7 @@ class Gateway(
 
         /** What the cell holds on the day this connection is looking at. */
         private fun snapshot(cell: String) {
-            val contents = houses.inCell(cell, viewing(), MOST_IN_A_CELL)
+            val contents = houses.inCell(cell, viewing(), MOST_IN_A_CELL, seesEverything)
             out.send(
                 Snapshot(
                     cell = cell,
@@ -476,6 +489,20 @@ class Gateway(
                 return
             }
             viewingAt = at?.let { WorldTime(it) }
+            for (cell in cells()) {
+                snapshot(cell)
+            }
+        }
+
+        /**
+         * Opens or closes the eye, and answers every held cell again so the map redraws at once rather
+         * than at the next pan. Modelled on `viewTime`: both change what is shown, not what is held.
+         */
+        private fun seeAll(on: Boolean) {
+            if (on == seesEverything) {
+                return
+            }
+            seesEverything = on
             for (cell in cells()) {
                 snapshot(cell)
             }

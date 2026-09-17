@@ -35,10 +35,23 @@ The debug panel is a first-class verification instrument, not scaffolding, and i
 - **The panel must never lie.** Its frame-gap figure once reported seventeen-second stalls that were the
   page being hidden. A figure that can mislead is worse than no figure, so every number in it says what it
   measures and is checked by a test where there is arithmetic to check.
+
+  *Amended 2026-09-16:* the block of state went entirely - the zoom, the terrain depth, the metres a
+  pixel, the sheet and the floor, the cell names, the house and area counts, the world, the player, the
+  choice, the selection, the paint tally, the worst frame gap, the canvas. Adam said he never read it.
+  The principle above is why it could go without loss: a figure that says what it measures is a figure
+  that can be said once, when it changes, as a line of the log, and the two the camera still owes - the
+  sheet leaving the view and the terrain changing zoom - are logged exactly that way. What is left is
+  the log and the buttons, and `describeState` and its tests are gone with the block. Everything else
+  here stands: the panel is still the instrument, and an increment still has to be visible in it.
 - **It stays out of a player's way.** It minimises to a chip, remembers that, and is not part of the
   interface a player will have. It is Adam's window, and a session's, and that is enough.
 - Anything the program has to say goes through `note(area, message)` so it can be copied out in one
-  click. The copy is how Adam tells a session what he sees.
+  click. The copy is how Adam tells a session what he sees. After the 2026-09-16 amendment this is the
+  whole of what the panel says, rather than the half of it below the state.
+- **What Adam wants to change is a button, not a reading.** `restart`, `wipe`, `found a house here`,
+  `seed 20`, `see everything`: the panel is a set of levers on a running world, and each one that lands
+  is one fewer thing to arrange by hand.
 
 ## Consequences
 

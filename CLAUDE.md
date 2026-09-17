@@ -246,12 +246,11 @@ Commands are added here as the increments land:
   around the view are painted during the pauses so that moving the map finds them done. See
   `docs/adr/0021` and `0022`.
 - What the program thinks is happening: the debug panel, under the Debug map panel, minimises to a chip
-  and remembers which. It shows the renderer, the zoom against the zoom of tiles being asked for, how far
-  the terrain is being stretched past the depth it was cut at, how much ground a pixel covers, whether the
-  sheet covers the view or how much of it lies on the desk and where the floor the camera may pull back to
-  is, how many painted tiles were ready before the map asked, and every event the world stores as it
-  arrives, one line each, opening to the whole thing. Its copy button puts the state and the log on the clipboard, which is
-  the shortest way to tell a session what the program is doing. The events themselves are not in the
+  and remembers which. It is the log and the buttons; the block of state above them went on 2026-09-16
+  because Adam never read it, and what it used to say every four hundred milliseconds is now said once,
+  when it changes, as a line of the log. Its copy button puts the log on the clipboard, which is the
+  shortest way to tell a session what the program is doing. So a change that wants to be seen there says
+  so with `note(area, message)` rather than by adding a row. The events themselves are not in the
   panel: they are at **`/admin/inspect-events`**, a page of their own that watches the world without
   playing in it, one line an event opening to the whole thing as the store holds it. The `found a house here` button in it sends a
   real command and is how to make an event happen on purpose. The `restart` button beside `copy` forgets
@@ -261,6 +260,16 @@ Commands are added here as the increments land:
   Anything worth saying
   goes through `note(area, message)` in `apps/web/src/debug/log.ts`. `window.villagesPainterly()` gives
   the paint counters from a console.
+- The player's own levers: the bar along the bottom of the house card, in the corner. The eye is the
+  first place in it and five stand empty. Open, the player's own seat stays drawn however far back the
+  camera goes and the ground about it is drawn below the zoom where everyone else's begins; theirs and
+  nobody else's, so the world still thins out with distance. It costs nothing on the wire, because a
+  player's own house already reaches them wherever they are looking. See `docs/adr/0038`.
+- Looking at a whole world at once: `see everything`, in the debug panel's World bar beside `seed 20`.
+  A house is founded at significance 20, so it reaches a page only from zoom 8 in, and pulling back past
+  about z7.5 empties the map because the gateway stopped sending rather than because anything is hidden.
+  This sets significance aside for this connection and takes the renderer's distance floor off with it.
+  Adam's switch, not a player's.
 - Areas, in the same panel: `draw an area` arms the next drag on the map, and dragging paints one. The
   ends join themselves and escape stops. Click an area to select it, which makes its line pulse and lists
   how many master pixels of each terrain it encloses; `shade`, `recount` and `delete` are beside it. The

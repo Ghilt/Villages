@@ -16,6 +16,11 @@ export interface MapSprite {
    * is drawn at every zoom because it is the thing they are being asked about.
    */
   kind: 'house' | 'candidate';
+  /**
+   * Drawn however far back the camera is, like a candidate and for a different reason: this one is the
+   * player's own and they asked to keep it in sight. Never set for anyone else's. See 0038.
+   */
+  always?: boolean;
 }
 
 /**
@@ -42,6 +47,11 @@ export interface SpriteRenderer {
   hitTest(point: { x: number; y: number }): string | null;
   /** Marks one sprite as the selected one, or nothing when null. */
   setSelected(id: string | null): void;
+  /**
+   * Whether this window is showing everything: the debug switch, which takes the distance floor off
+   * every mark rather than one. A player's own eye is `always` on the sprite instead. See 0038.
+   */
+  setEverything(on: boolean): void;
   /** Stop following, release the canvas and the textures. */
   destroy(): void;
 }

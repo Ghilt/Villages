@@ -1,6 +1,7 @@
 import { useEffect, useRef, useSyncExternalStore } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
+import { seeingEverything, watchSeeingEverything } from '../debug/seeEverything';
 import { select, selectionNow, watchSelection } from '../select/selection';
 import { cameraOf } from './mapCamera';
 import { createPixiSpriteRenderer } from './PixiSpriteRenderer';
@@ -19,6 +20,7 @@ export function SpriteOverlay({ map, sprites }: SpriteOverlayProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const rendererRef = useRef<ReturnType<typeof createPixiSpriteRenderer> | null>(null);
   const selected = useSyncExternalStore(watchSelection, selectionNow);
+  const everything = useSyncExternalStore(watchSeeingEverything, seeingEverything);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -39,6 +41,11 @@ export function SpriteOverlay({ map, sprites }: SpriteOverlayProps) {
   useEffect(() => {
     rendererRef.current?.setSprites(sprites);
   }, [sprites]);
+
+  // Also on the sprites, because a renderer made after the switch was thrown starts with it off.
+  useEffect(() => {
+    rendererRef.current?.setEverything(everything);
+  }, [everything, sprites]);
 
   useEffect(() => {
     rendererRef.current?.setSelected(selected?.kind === 'house' ? selected.id : null);

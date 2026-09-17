@@ -164,6 +164,8 @@ private fun subscribe(vararg cells: String) =
 private fun unsubscribe(vararg cells: String) =
     """{"type":"unsubscribeCells","cells":[${cells.joinToString { "\"$it\"" }}]}"""
 
+private fun seeAll(on: Boolean) = """{"type":"seeAll","on":$on}"""
+
 private class Rig {
     val world = TinyWorld()
     val later = ManualLater()
@@ -632,6 +634,63 @@ class GatewaySpec : StringSpec({
 
         founder.receive(founding())
         rig.later.tick()
+
+        sent.shouldBeEmpty()
+    }
+
+    "with the eye open a house too ordinary for a coarse cell is in its snapshot after all" {
+        val rig = Rig()
+        rig.aHouseIsFounded("Ravenscar")
+        val (looker, sent) = rig.introduced()
+
+        looker.receive(subscribe(STOCKHOLM_Z4))
+        sent.filterIsInstance<Snapshot>().single().houses.shouldBeEmpty()
+        sent.clear()
+
+        looker.receive(seeAll(true))
+
+        // Every held cell is answered again, so the map redraws at once rather than at the next pan.
+        val snapshot = sent.filterIsInstance<Snapshot>().single()
+        snapshot.cell shouldBe STOCKHOLM_Z4
+        snapshot.houses.single().name shouldBe "Ravenscar"
+    }
+
+    "with the eye open a founding reaches a connection holding only a coarse cell" {
+        val rig = Rig()
+        val (looker, sent) = rig.introduced()
+        looker.receive(subscribe(STOCKHOLM_Z4))
+        looker.receive(seeAll(true))
+        sent.clear()
+        val (founder, _) = rig.someoneElse()
+
+        founder.receive(founding())
+        rig.later.tick()
+
+        val batch = sent.single().shouldBeInstanceOf<Batch>()
+        batch.deltas.single().shouldBeInstanceOf<HouseAppeared>().house.name shouldBe "Ravenscar"
+    }
+
+    "closing the eye answers the held cells again, and they are empty once more" {
+        val rig = Rig()
+        rig.aHouseIsFounded("Ravenscar")
+        val (looker, sent) = rig.introduced()
+        looker.receive(subscribe(STOCKHOLM_Z4))
+        looker.receive(seeAll(true))
+        sent.clear()
+
+        looker.receive(seeAll(false))
+
+        sent.filterIsInstance<Snapshot>().single().houses.shouldBeEmpty()
+    }
+
+    "opening the eye twice says nothing the second time" {
+        val rig = Rig()
+        val (looker, sent) = rig.introduced()
+        looker.receive(subscribe(STOCKHOLM_Z4))
+        looker.receive(seeAll(true))
+        sent.clear()
+
+        looker.receive(seeAll(true))
 
         sent.shouldBeEmpty()
     }

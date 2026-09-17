@@ -52,6 +52,8 @@ const listeners = new Set<() => void>();
 let connection: Connection | null = null;
 /** What the camera last asked for, so it can be asked for again once the gateway is listening. */
 let wanted: string[] = [];
+/** Whether the eye is open, so a reconnection opens it again before the first cell is asked for. */
+let everything = false;
 
 function update(change: Partial<GatewayState>): void {
   state = { ...state, ...change };
@@ -70,6 +72,8 @@ function heard(frame: ServerFrame): void {
         'world',
         `today is ${describeDay(frame.world.today)}; the earliest thing is from ${describeDay(frame.world.earliest)}`,
       );
+      // The eye first, because it decides what a snapshot carries and the cells are asked for next.
+      sendEye();
       // Anything the camera wanted before the gateway was listening is asked for now.
       sendFollowing(wanted);
       return;
@@ -140,6 +144,26 @@ function heard(frame: ServerFrame): void {
       connection?.close();
       return;
   }
+}
+
+function sendEye(): void {
+  if (connection === null || state.connection !== 'open' || !everything) {
+    return;
+  }
+  connection.send({ type: 'seeAll', on: true });
+}
+
+/**
+ * Opens or closes the eye on this connection: with it open the gateway sets significance aside and every
+ * house in a held cell is sent, however far back the camera is. Safe before the gateway has answered
+ * hello; the welcome opens it. See decision record 0038.
+ */
+export function seeAll(on: boolean): void {
+  everything = on;
+  if (connection === null || state.connection !== 'open') {
+    return;
+  }
+  connection.send({ type: 'seeAll', on });
 }
 
 /** Asks for the cells not yet held and lets go of the ones no longer wanted, and says so in the log. */

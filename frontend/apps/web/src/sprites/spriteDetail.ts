@@ -23,11 +23,38 @@ export const MARKER_HEIGHT = {
   inPixels: { small: 22, large: 46 },
 } as const;
 
-export function detailForZoom(zoom: number): SpriteDetail {
+/**
+ * How much of anything is drawn at this zoom.
+ *
+ * `everything` is the debug switch: with it on nothing is hidden for being far away. It cannot make a
+ * house appear that the gateway never sent, which is why it comes with a frame. See 0038.
+ */
+export function detailForZoom(zoom: number, everything = false): SpriteDetail {
   if (zoom < DETAIL_FROM_ZOOM.dot) {
-    return 'hidden';
+    return everything ? 'dot' : 'hidden';
   }
   return zoom < DETAIL_FROM_ZOOM.marker ? 'dot' : 'marker';
+}
+
+/** What one mark in particular may be spared, on top of what the camera says about all of them. */
+export interface MarkContext {
+  /** This window is showing everything, so no mark is hidden for distance. */
+  everything?: boolean;
+  /**
+   * This mark is spared the distance floor: a candidate, because it is what the player is being asked
+   * about, or one of the player's own holdings while the eye is open. Never anyone else's.
+   */
+  spared?: boolean;
+}
+
+/**
+ * One mark's detail. A spared mark is never hidden, and is a dot where the rest are nothing; above the
+ * floor it is drawn like anything else, because being kept in sight is about distance and not about
+ * size. See decision record 0038.
+ */
+export function detailForMark(zoom: number, of: MarkContext = {}): SpriteDetail {
+  const detail = detailForZoom(zoom, of.everything ?? false);
+  return detail === 'hidden' && of.spared === true ? 'dot' : detail;
 }
 
 export function markerHeightForZoom(zoom: number): number {

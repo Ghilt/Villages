@@ -100,6 +100,8 @@ export const clientFrameSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('watchEvents'), on: z.boolean() }),
   /** Look at the world as it was on a day, or at live when null. The timeline scrubber's one frame. */
   z.object({ type: z.literal('viewTime'), at: worldDaySchema.nullable() }),
+  /** Set significance aside: every house in a held cell, however far back the camera is. See 0038. */
+  z.object({ type: z.literal('seeAll'), on: z.boolean() }),
   /** Empty the development world, for everyone. A debug frame, never a player's. See 0036. */
   z.object({ type: z.literal('wipeWorld') }),
 ]);

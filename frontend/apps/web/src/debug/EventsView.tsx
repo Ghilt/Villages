@@ -7,6 +7,7 @@ import { clampBoundsToWorld } from '../map/sheet';
 import { gateway, gatewayState, watchGateway } from '../net/gateway';
 import { seedHouses } from '../net/seed';
 import { note, shortId } from './log';
+import { seeEverything, seeingEverything, watchSeeingEverything } from './seeEverything';
 
 interface EventsViewProps {
   map: maplibregl.Map | null;
@@ -50,6 +51,7 @@ function aName(): string {
  */
 export function EventsView({ map }: EventsViewProps) {
   const state = useSyncExternalStore(watchGateway, gatewayState);
+  const everything = useSyncExternalStore(watchSeeingEverything, seeingEverything);
 
   /** Founds this player's one house, here. Pressed twice, the second is refused: you have a house. */
   const foundHere = () => {
@@ -120,6 +122,21 @@ export function EventsView({ map }: EventsViewProps) {
           disabled={state.connection !== 'open'}
         >
           seed {SEED}
+        </button>
+        {/*
+          Significance decides how far out a thing stays drawn, and a founding earns zoom 8, so pulling
+          back empties the map because the gateway stopped sending. This sets that aside for this
+          connection, which is the only way to look at a whole world at once. See 0038.
+        */}
+        <button
+          type="button"
+          className={everything ? 'debug__button debug__button--on' : 'debug__button'}
+          onClick={() => seeEverything(!everything)}
+          disabled={state.connection !== 'open'}
+          aria-pressed={everything}
+          title="show every house in the held cells, however slight, at any zoom"
+        >
+          {everything ? 'seeing everything' : 'see everything'}
         </button>
       </header>
       <p className="debug__quiet">

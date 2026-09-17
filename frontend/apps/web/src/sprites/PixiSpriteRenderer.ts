@@ -3,7 +3,14 @@ import type { Texture } from 'pixi.js';
 
 import { isWithinView, toScreen } from './cameraMath';
 import type { CameraView } from './cameraMath';
-import { DOT_RADIUS, detailForZoom, idleMotionAt, markerHeightForZoom, phaseFor } from './spriteDetail';
+import {
+  DOT_RADIUS,
+  detailForMark,
+  detailForZoom,
+  idleMotionAt,
+  markerHeightForZoom,
+  phaseFor,
+} from './spriteDetail';
 import type { SpriteDetail } from './spriteDetail';
 import type { CameraSource, MapSprite, SpriteRenderer } from './SpriteRenderer';
 
@@ -52,6 +59,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
 
   let textures: { marker: Texture; dot: Texture; candidate: Texture; ring: Texture } | null = null;
   let selected: string | null = null;
+  let everything = false;
   let ring: Sprite | null = null;
   let drawnDetail: SpriteDetail | null = null;
   let started = 0;
@@ -155,7 +163,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
 
   function frame(): void {
     const zoom = camera.zoom();
-    const detail = detailForZoom(zoom);
+    const detail = detailForZoom(zoom, everything);
     const { width, height } = camera.size();
     const view: CameraView = { center: camera.center(), zoom, width, height };
     const elapsed = performance.now() - started;
@@ -166,8 +174,11 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
 
     for (const entry of entries.values()) {
       // A candidate is what the player is being asked about, so it is drawn however far back the
-      // camera is; a house fades out with the rest of the world's furniture.
-      if (detail === 'hidden' && entry.spec.kind !== 'candidate') {
+      // camera is; so is a house the player has asked to keep in sight. Everything else fades out with
+      // the rest of the world's furniture.
+      const spared = entry.spec.kind === 'candidate' || entry.spec.always === true;
+      const shown = detailForMark(zoom, { everything, spared });
+      if (shown === 'hidden') {
         entry.sprite.visible = false;
         continue;
       }
@@ -179,8 +190,8 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       }
 
       if (detailChanged || !entry.sprite.visible) {
-        dress(entry, detail, zoom);
-      } else if (detail === 'marker' && entry.spec.kind === 'house') {
+        dress(entry, shown, zoom);
+      } else if (shown === 'marker' && entry.spec.kind === 'house') {
         entry.sprite.scale.set(markerHeightForZoom(zoom) / TEXTURE.markerHeight);
       }
 
@@ -188,24 +199,28 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       entry.sprite.visible = true;
       entry.sprite.x = point.x;
       entry.sprite.y = point.y - motion.lift;
-      entry.sprite.rotation = detail === 'marker' && entry.spec.kind === 'house' ? motion.tilt : 0;
+      entry.sprite.rotation = shown === 'marker' && entry.spec.kind === 'house' ? motion.tilt : 0;
     }
 
-    dressTheRing(detail, zoom);
+    dressTheRing(zoom);
   }
 
   /** The ring sits on the ground under the selected house, so it does not bob with the mark above it. */
-  function dressTheRing(detail: SpriteDetail, zoom: number): void {
+  function dressTheRing(zoom: number): void {
     if (ring === null) {
       return;
     }
     const on = selected === null ? undefined : entries.get(selected);
-    if (on === undefined || !on.sprite.visible || detail === 'hidden') {
+    // The mark's own detail, not the camera's: a house kept in sight is drawn where the rest are not,
+    // and a selected one with no ring under it would look like a different thing entirely.
+    const spared = on !== undefined && (on.spec.kind === 'candidate' || on.spec.always === true);
+    const shown = detailForMark(zoom, { everything, spared });
+    if (on === undefined || !on.sprite.visible || shown === 'hidden') {
       ring.visible = false;
       return;
     }
     // Wider than the mark it is under, or it would be a ring nobody can see behind a castle.
-    const across = detail === 'marker' ? markerHeightForZoom(zoom) * 1.7 : DOT_RADIUS * 5;
+    const across = shown === 'marker' ? markerHeightForZoom(zoom) * 1.7 : DOT_RADIUS * 5;
     ring.visible = true;
     ring.scale.set(across / TEXTURE.ringDiameter);
     ring.x = on.sprite.x;
@@ -282,6 +297,10 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
 
     setSelected(id: string | null): void {
       selected = id;
+    },
+
+    setEverything(on: boolean): void {
+      everything = on;
     },
 
     setSprites(sprites: readonly MapSprite[]): void {

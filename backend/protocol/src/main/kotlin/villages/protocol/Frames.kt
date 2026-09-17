@@ -22,8 +22,9 @@ import tools.jackson.databind.JsonNode
  * that: the shape of every frame is recorded in contracts/protocol-v<n>.txt, and a wire that has moved
  * without a new number is a failing build. Version 2 is the first gameplay loop, which added
  * `takeAction`, `yourChoice`, `wipeWorld` and `worldWiped`, and gave every event its provenance.
+ * Version 3 added `seeAll`, the eye that sets significance aside.
  */
-const val PROTOCOL_VERSION = 2
+const val PROTOCOL_VERSION = 3
 
 data class Point(val lat: Double, val lon: Double)
 
@@ -90,6 +91,7 @@ data class WorldNow(val today: Long, val earliest: Long)
     JsonSubTypes.Type(Ping::class, name = "ping"),
     JsonSubTypes.Type(WatchEvents::class, name = "watchEvents"),
     JsonSubTypes.Type(ViewTime::class, name = "viewTime"),
+    JsonSubTypes.Type(SeeAll::class, name = "seeAll"),
     JsonSubTypes.Type(WipeWorld::class, name = "wipeWorld"),
 )
 sealed interface ClientFrame
@@ -122,6 +124,15 @@ data class WatchEvents(val on: Boolean) : ClientFrame
  * the timeline scrubber's one frame.
  */
 data class ViewTime(val at: Long?) : ClientFrame
+
+/**
+ * Sets significance aside, so that every house in a held cell is sent however far back the camera is,
+ * rather than only the ones significant enough for the cell's zoom. The eye's one frame.
+ *
+ * Like `viewTime`, which it is modelled on: it changes what the connection is shown rather than what it
+ * holds, so every held cell is answered again as soon as it is sent. See decision record 0038.
+ */
+data class SeeAll(val on: Boolean) : ClientFrame
 
 /**
  * Empties the development world, for everyone. A debug frame, like `watchEvents`, and not one a player's

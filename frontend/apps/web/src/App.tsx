@@ -14,6 +14,7 @@ import { note } from './debug/log';
 import { select } from './select/selection';
 import { gateway, gatewayState, watchGateway } from './net/gateway';
 import { followMap } from './net/followMap';
+import { eyeIsOpen, watchEye } from './hud/eye';
 import { HudShell } from './hud/HudShell';
 import { InfluenceOverlay } from './influence/InfluenceOverlay';
 import { Inspector } from './inspect/Inspector';
@@ -26,13 +27,19 @@ import { SpriteOverlay } from './sprites/SpriteOverlay';
 import type { MapSprite } from './sprites/SpriteRenderer';
 import { tinctureColour } from './sprites/tinctures';
 
-/** A house as the renderer draws it: a mark at its seat, in its field's tincture. */
-function toSprite(house: HouseView): MapSprite {
+/**
+ * A house as the renderer draws it: a mark at its seat, in its field's tincture.
+ *
+ * `always` is the eye: a house drawn however far back the camera goes. Only ever the player's own, and
+ * only while the eye is open. See decision record 0038.
+ */
+function toSprite(house: HouseView, always: boolean): MapSprite {
   return {
     id: house.id,
     at: { lng: house.seat.lon, lat: house.seat.lat },
     tint: tinctureColour(house.banner.field),
     kind: 'house',
+    always,
   };
 }
 
@@ -81,10 +88,22 @@ export function App({ master }: AppProps) {
   const [map, setMap] = useState<maplibregl.Map | null>(null);
   const [renderer, setRenderer] = useState(DEFAULT_RENDERER);
   const heard = useSyncExternalStore(watchGateway, gatewayState);
+  const eye = useSyncExternalStore(watchEye, eyeIsOpen);
   const inView = useMemo(() => housesInView(heard.houses), [heard.houses]);
+  const yours = heard.yourHouse;
+  // With the eye open your own house is drawn whether or not a held cell carries it. It can be missing
+  // from one and still be known, because the gateway sends it to the session rather than to a cell.
+  const drawn = useMemo(
+    () =>
+      eye && yours !== null && !inView.some((house) => house.id === yours.id) ? [...inView, yours] : inView,
+    [inView, eye, yours],
+  );
   const sprites = useMemo(
-    () => [...inView.map(toSprite), ...candidatesOf(heard.yourChoice)],
-    [inView, heard.yourChoice],
+    () => [
+      ...drawn.map((house) => toSprite(house, eye && house.id === yours?.id)),
+      ...candidatesOf(heard.yourChoice),
+    ],
+    [drawn, eye, yours, heard.yourChoice],
   );
 
   // The one connection to the gateway, opened as the app mounts.
@@ -125,7 +144,7 @@ export function App({ master }: AppProps) {
       {import.meta.env.DEV && <WorktreeTabs />}
       {map !== null && <SpriteOverlay map={map} sprites={sprites} />}
       <AreaOverlay map={map} worldRoot={worldRoot} />
-      <InfluenceOverlay map={map} houses={inView} />
+      <InfluenceOverlay map={map} houses={drawn} mine={eye ? yours : null} />
       <HudShell />
       <Inspector />
       <Parchment />
@@ -133,7 +152,7 @@ export function App({ master }: AppProps) {
       <StoodDown />
       <div className="rail">
         <DebugMapPanel master={master} renderer={renderer} onRenderer={setRenderer} />
-        <DebugPanel map={map} renderer={renderer} worldRoot={worldRoot} />
+        <DebugPanel map={map} worldRoot={worldRoot} />
       </div>
     </main>
   );

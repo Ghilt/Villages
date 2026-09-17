@@ -223,8 +223,14 @@ data class HouseChange(val row: HouseRow, val appeared: Boolean)
  * which houses are worth drawing at that zoom is the read model's business, not the caller's. Decision 0026.
  */
 interface HousesByCell {
-    /** The houses in `cell` that exist at world-time `at`, most significant first, at most `most` of them. */
-    fun inCell(cell: String, at: WorldTime, most: Int): CellContents
+    /**
+     * The houses in `cell` that exist at world-time `at`, most significant first, at most `most` of them.
+     *
+     * `everything` sets significance aside: the cell hands back all it holds, however slight, rather than
+     * only what is worth drawing at its zoom. That is the eye, and it is a way of looking rather than a
+     * different question, which is why it is a parameter and not a port of its own. See 0038.
+     */
+    fun inCell(cell: String, at: WorldTime, most: Int, everything: Boolean = false): CellContents
 
     /** The earliest world-time anything is known to exist from, or null while nothing is. The scrubber's left end. */
     fun earliest(): WorldTime?
