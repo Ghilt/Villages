@@ -8,6 +8,7 @@ import { WORLD_MASTER_WIDTH } from '../map/worldStyle';
 import { AreasView } from '../areas/AreasView';
 import { atToClock, note, notesNow, watchNotes } from './log';
 import { restart, wipeWorld } from '../net/gateway';
+import { describeTerrainStep } from './terrainDepth';
 import { EventsView } from './EventsView';
 
 interface DebugPanelProps {
@@ -19,6 +20,15 @@ interface DebugPanelProps {
 const OPEN_KEY = 'villages.debug.open';
 
 /**
+ * How long the camera has to settle before the terrain says where it ended up.
+ *
+ * A `flyTo` crosses half a dozen tile zooms on its way and a pinch crosses several, and a line for each
+ * step was six lines about one movement. The run is said once, by where it started and where it
+ * stopped. The same quarter second everything else in the program gathers over.
+ */
+const SETTLE_MS = 250;
+
+/**
  * What the program thinks is happening, on the screen rather than in a console.
  *
  * It is the log and the buttons. The block of state that used to sit above them - the zoom, the sheet,
@@ -27,8 +37,9 @@ const OPEN_KEY = 'villages.debug.open';
  * puts the log on the clipboard so it can be pasted into a conversation.
  *
  * The camera still says the two things about itself that are worth knowing - that the sheet stopped
- * covering the view, and that the terrain changed zoom - but it says them to the log when they happen
- * rather than to a row that is always there. See decision record 0023.
+ * covering the view, and where the terrain came from and went - but it says them to the log when they
+ * happen rather than to a row that is always there, and a run of zoom steps is one line rather than
+ * six. See decision record 0023.
  */
 export function DebugPanel({ map, worldRoot }: DebugPanelProps) {
   const notes = useSyncExternalStore(watchNotes, notesNow);
@@ -41,6 +52,9 @@ export function DebugPanel({ map, worldRoot }: DebugPanelProps) {
   });
   const [copied, setCopied] = useState<'no' | 'yes' | 'failed'>('no');
   const tileZoomWas = useRef<number | undefined>(undefined);
+  /** Where a run of zoom steps began, and the timer that will say it once the camera stops moving. */
+  const cameFrom = useRef<number | undefined>(undefined);
+  const settling = useRef<ReturnType<typeof setTimeout> | null>(null);
   const coveredWas = useRef<boolean | undefined>(undefined);
 
   useEffect(() => {
@@ -79,17 +93,32 @@ export function DebugPanel({ map, worldRoot }: DebugPanelProps) {
       }
       coveredWas.current = covered;
 
-      // Every change of tile zoom is logged, not just the ones that change the stretch. A step between
-      // two zooms is the sort of thing that is felt and hard to name, and below the depth the terrain
-      // was cut at the stretch never moves, so watching only the stretch says nothing about z3 to z4.
-      const stretch = 2 ** Math.max(0, tileZoom - FLAT_MAX_ZOOM);
+      // Every change of tile zoom is worth knowing, not just the ones that change the stretch: a step
+      // between two zooms is the sort of thing that is felt and hard to name, and below the depth the
+      // terrain was cut at the stretch never moves, so watching only the stretch says nothing about z3
+      // to z4. But a run of them is one movement, so it is said once, when the camera has settled.
       if (tileZoomWas.current !== undefined && tileZoomWas.current !== tileZoom) {
-        const ground = WORLD_MASTER_WIDTH / (TILE * 2 ** tileZoom);
-        note(
-          'terrain',
-          `z${tileZoomWas.current} to z${tileZoom}: ${ground.toFixed(2)} master px a pixel` +
-            (stretch === 1 ? ', as cut' : `, z${FLAT_MAX_ZOOM} stretched ${stretch}x`),
-        );
+        cameFrom.current ??= tileZoomWas.current;
+        if (settling.current !== null) {
+          clearTimeout(settling.current);
+        }
+        settling.current = setTimeout(() => {
+          settling.current = null;
+          const from = cameFrom.current;
+          cameFrom.current = undefined;
+          const said =
+            from === undefined
+              ? null
+              : describeTerrainStep(from, {
+                  tileZoom,
+                  flatMaxZoom: FLAT_MAX_ZOOM,
+                  masterWidth: WORLD_MASTER_WIDTH,
+                  tileSize: TILE,
+                });
+          if (said !== null) {
+            note('terrain', said);
+          }
+        }, SETTLE_MS);
       }
       tileZoomWas.current = tileZoom;
     };
@@ -99,6 +128,10 @@ export function DebugPanel({ map, worldRoot }: DebugPanelProps) {
     map.on('idle', look);
     return () => {
       clearInterval(often);
+      if (settling.current !== null) {
+        clearTimeout(settling.current);
+        settling.current = null;
+      }
       map.off('move', look);
       map.off('idle', look);
     };

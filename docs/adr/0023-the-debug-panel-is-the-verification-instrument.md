@@ -48,7 +48,12 @@ The debug panel is a first-class verification instrument, not scaffolding, and i
   interface a player will have. It is Adam's window, and a session's, and that is enough.
 - Anything the program has to say goes through `note(area, message)` so it can be copied out in one
   click. The copy is how Adam tells a session what he sees. After the 2026-09-16 amendment this is the
-  whole of what the panel says, rather than the half of it below the state.
+  whole of what the panel says, rather than the half of it below the state, and the bar for a line rose
+  with it: **moving the camera about is not news.** A pan wrote a line for every cell it asked for,
+  almost all of them "0 houses", which was tolerable under a block of state and drowned the panel
+  without one. The snapshots of one burst are now counted and said in a single line, and a burst that
+  brought nothing is not said at all. A log kept for its signal has to be pruned when it stops being
+  read, the same way a figure that can mislead has to go.
 - **What Adam wants to change is a button, not a reading.** `restart`, `wipe`, `found a house here`,
   `seed 20`, `see everything`: the panel is a set of levers on a running world, and each one that lands
   is one fewer thing to arrange by hand.

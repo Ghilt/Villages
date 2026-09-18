@@ -12,6 +12,8 @@ import { PROTOCOL_VERSION, describeDay } from '@villages/protocol';
 import type { ChoiceView, HouseView, OptionView, ServerFrame } from '@villages/protocol';
 
 import { note, shortId } from '../debug/log';
+import { NOTHING_ARRIVED, alsoArrived, describeArrival } from './arrivals';
+import type { Arrival } from './arrivals';
 import { browserSocket } from './browserSocket';
 
 /**
@@ -52,8 +54,18 @@ const listeners = new Set<() => void>();
 let connection: Connection | null = null;
 /** What the camera last asked for, so it can be asked for again once the gateway is listening. */
 let wanted: string[] = [];
-/** Whether the eye is open, so a reconnection opens it again before the first cell is asked for. */
+/** Whether the switch is on, so a reconnection sets significance aside again before asking for a cell. */
 let everything = false;
+
+/**
+ * How long the snapshots of one burst are gathered before they are said in a line.
+ *
+ * The same quarter second the gateway coalesces its deltas over, and for the same reason: a view is a
+ * few dozen cells and each answers separately, so what is worth reading is the burst and not the frame.
+ */
+const GATHER_MS = 250;
+let arriving: Arrival = NOTHING_ARRIVED;
+let gathering: ReturnType<typeof setTimeout> | null = null;
 
 function update(change: Partial<GatewayState>): void {
   state = { ...state, ...change };
@@ -79,11 +91,7 @@ function heard(frame: ServerFrame): void {
       return;
     case 'snapshot':
       update({ houses: reduceHouses(state.houses, frame) });
-      note(
-        'cells',
-        `${frame.cell || 'the world'}: ${frame.houses.length} house${frame.houses.length === 1 ? '' : 's'}` +
-          ((frame.omitted ?? 0) > 0 ? ` and ${frame.omitted} more not sent` : ''),
-      );
+      gather(frame);
       return;
     case 'batch':
       update({ houses: reduceHouses(state.houses, frame) });
@@ -146,6 +154,27 @@ function heard(frame: ServerFrame): void {
   }
 }
 
+/**
+ * Counts one snapshot into the burst, and says what the burst brought once it stops arriving.
+ *
+ * A burst that brought nothing is not said at all: panning over empty world is not news, and a line a
+ * cell buried everything else in the panel once the panel was the log. See decision record 0023.
+ */
+function gather(frame: Extract<ServerFrame, { type: 'snapshot' }>): void {
+  arriving = alsoArrived(arriving, frame);
+  if (gathering !== null) {
+    clearTimeout(gathering);
+  }
+  gathering = setTimeout(() => {
+    gathering = null;
+    const said = describeArrival(arriving);
+    arriving = NOTHING_ARRIVED;
+    if (said !== null) {
+      note('cells', said);
+    }
+  }, GATHER_MS);
+}
+
 function sendEye(): void {
   if (connection === null || state.connection !== 'open' || !everything) {
     return;
@@ -166,7 +195,7 @@ export function seeAll(on: boolean): void {
   connection.send({ type: 'seeAll', on });
 }
 
-/** Asks for the cells not yet held and lets go of the ones no longer wanted, and says so in the log. */
+/** Asks for the cells not yet held, and lets go of the ones no longer wanted. */
 function sendFollowing(cells: string[]): void {
   if (connection === null || state.connection !== 'open') {
     return;
@@ -180,9 +209,8 @@ function sendFollowing(cells: string[]): void {
     update({ houses: holdCells(state.houses, ask) });
     connection.send({ type: 'subscribeCells', cells: ask });
   }
-  if (ask.length + letGo.length > 0) {
-    note('cells', `following ${cells.length} at z${cells[0]?.length ?? 0}: +${ask.length} -${letGo.length}`);
-  }
+  // Nothing is said about the asking. What the camera is following changes on every pan, and the answer
+  // says the same thing better: the cells that came back, at what depth, and what was in them.
 }
 
 /**
