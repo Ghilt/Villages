@@ -46,6 +46,9 @@ Wanted, not started, and each needs a hypothesis in `docs/experiments/` before a
   from the shared map. This is also what a **choice roll** is meant to cost, so the two are entangled.
 - **The fate engine**, and the choice roll built on it: a real roll from the house's state rather than a
   founding choice handed out on arrival. See `MECHANICS.md` and `ARCHITECTURE.md`.
+- **Character dialogue**: people talking to each other, and the mechanic storylines are carried in. See
+  `MECHANICS.md`; what it asks of the client is in `ARCHITECTURE.md`, and one of its questions - the DOM or
+  a Pixi surface - wants deciding before much of it is written.
 - **A responsive interface.** Every component laid out for a phone as well as a desktop. The rule is in
   `RESPONSIVE-DESIGN.md` and applies to new work from now on; what exists was written desktop-only and has
   to be brought over.

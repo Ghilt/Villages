@@ -207,6 +207,37 @@ the instant at which that was true, and an event is recorded when the rate chang
 See decision record 0006. **What** the resources are is undecided; that shape is only how one behaves once it
 exists.
 
+## What showing a dialogue asks of the client
+
+Nothing of this is built. `MECHANICS.md` describes **character dialogue**; what follows is what it would
+cost the client, recorded before anything is written so that the first increment starts from it.
+
+**Where it would be drawn is an open choice, and it matters.** PixiJS is in exactly one file today,
+`sprites/PixiSpriteRenderer.ts`, and it draws the map overlay behind the `SpriteRenderer` interface. Every
+other piece of interface, the parchment included, is React and the DOM. A dialogue is interface rather than
+map, so the DOM is where it would naturally go — but the mechanic exists for its feel, and characters that
+enter, leave and react are what Pixi is for. The two routes:
+
+- **DOM and CSS.** Simplest, responsive for free, animation limited to what CSS transitions and transforms
+  give. Nothing new in the stack.
+- **A Pixi surface inside the panel.** Sprite sheets, tweens and per-character animation, at the cost of
+  another WebGL surface beside the map's and a layout that has to be driven rather than declared.
+
+Whichever is picked gets a decision record, because it is hard to reverse once a dozen conversations are
+written against it.
+
+**The stepping belongs in `client-core`, not in the page.** Which line is current, who is speaking, what a
+step does and when an opportunity opens mid-conversation is logic with no DOM in it, so it sits in
+`packages/client-core` behind the layer rule and is tested without a browser. `apps/web` draws what that
+logic says. A dialogue that keeps its state in a React component is a dialogue that can only be tested by
+clicking through it.
+
+**It is responsive from the first line of it.** On a phone a dialogue is the screen; on a desktop it is a
+region of it. See `RESPONSIVE-DESIGN.md`.
+
+What the server owes a dialogue is undecided, because whether the lines themselves are events is undecided;
+`MECHANICS.md` says so under the mechanic.
+
 ## Events over time
 
 Event types are versioned by name and catalogued in the event catalogue, which a test parses. Until the

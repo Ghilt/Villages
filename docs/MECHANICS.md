@@ -74,3 +74,71 @@ Half built, under another name. The choice pattern runs end to end today — the
 player takes an option, and the taken option's consequences are recorded from the same decision — but what
 gives the choice is arrival rather than a roll, there is no fate engine, no rarity and no expiry. What
 exists is in `BUILDING-A-MECHANIC.md` under the choice pattern, and in decision record 0034.
+
+---
+
+## Character dialogue
+
+People talking to each other. Nothing here is new to games, and it is not meant to be: what it is for is
+making the world feel alive and personal.
+
+### What it is
+
+Two or more characters in conversation, shown as a back and forth of **speech bubbles** the player steps
+through. One character stands on the left, another on the right, and the bubbles run between them,
+scrollable so that what has already been said can be read back. In a discussion of more than two, each
+bubble carries a small tag saying who said it.
+
+The same shape covers three cases, and they are one mechanic rather than three:
+
+- A **conversation** between two characters.
+- A **monologue**, which is the same thing with one speaker.
+- A **group discussion**, where more than one character stands on each side.
+
+A dialogue can be triggered by anything: a storyline reaching a beat, a place the player has gone, another
+house acting, a choice roll's outcome.
+
+### What it is for
+
+**Making the world personal.** The world is a map of houses and ground until somebody in it speaks. A
+dialogue is where a key figure stops being a number on a card and becomes someone with a manner.
+
+**Carrying storylines.** A storyline is told through dialogue rather than announced in a log. This is the
+mechanic a quest, a pact or a betrayal is actually delivered in.
+
+**Holding other mechanics inside it.** Stepping through a dialogue can open an opportunity to take a
+**choice roll**, and the roll's options come back into the conversation. A dialogue is a place other
+mechanics happen, not only a thing to read.
+
+**Paying off what the house has built.** What a character says and what they will do for you depends on
+what they are to your house. A character loyal to the house can offer a reward inside the conversation
+that the same character would not offer a stranger. The house-spirit and whatever relationships the world
+grows are inputs to a dialogue, the way the house's state is an input to a roll.
+
+### Look and feel
+
+A section of the interface is given over to the dialogue while it runs, taking screen space rather than
+floating in a corner. Characters face each other from the two sides; in a group discussion they stack
+evenly on both sides. Behind them, preferably, a **background scene** rather than a flat panel.
+
+**Feel is the point of this one.** Characters should move — entering, leaving, reacting — and fade in
+rather than appear. A dialogue that pops between static portraits would deliver the same words and none of
+the aliveness it exists for.
+
+It is **responsive from the start**: on a desktop the dialogue sits beside what else is on screen, and on
+a phone it is what is on screen. See `RESPONSIVE-DESIGN.md`.
+
+### Not decided
+
+- **Who the characters are.** Key figures of a house, NPCs from the warped history, and whether another
+  player's house ever appears as a speaker.
+- **What the world remembers of a dialogue.** Whether lines are events, or only their outcomes are, and
+  what a reader of a house's stream sees of a conversation afterwards.
+- **What triggers one**, beyond "anything". The triggers are a list nobody has written.
+- **Where the art comes from** — the characters, their expressions, and the background scenes.
+- **Whether a dialogue can be left and returned to**, and what happens to one the player walks away from.
+
+### Where it stands
+
+Nothing of it exists. No event, no frame, no component. `ARCHITECTURE.md` records what showing one would
+ask of the client, and it is on the roadmap under Later.
