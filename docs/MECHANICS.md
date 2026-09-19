@@ -61,6 +61,19 @@ The options are shown as a **wooden desktop with an inkwell**, each choice a tex
 **parchment**. Hovering a parchment lifts it slightly, so it reads as something you can pick up. The shared
 language this draws on — the diegetic rule, the rarity colours — is in `LOOK-AND-FEEL.md`.
 
+It is a **pane** with three sizes, and the mechanic owns all three:
+
+- **Full** — the prompt and every option laid out to read through. What a question arrives at, because
+  reading it is the thing to do first. The bottom middle of the spread; on a phone it takes the big bay and
+  the pane beside it keeps the small one.
+- **Small** — the **carousel**: one option at a time, with the way between them. For deciding rather than
+  reading, because the places being offered are drawn on the map and the option you are on stays on the
+  screen beside the one it means.
+- **Minimised** — set aside to a strip. Not closed: the question is still standing.
+
+**Its size is the player's**, which no other pane's is. The two forms are two ways of using it and only they
+know which they are doing. See decision record 0044 and `RESPONSIVE-DESIGN.md`.
+
 ### Not decided
 
 - **What limits how many choice rolls a player can perform.** It is meant to cost something, and the
@@ -74,6 +87,10 @@ Half built, under another name. The choice pattern runs end to end today — the
 player takes an option, and the taken option's consequences are recorded from the same decision — but what
 gives the choice is arrival rather than a roll, there is no fate engine, no rarity and no expiry. What
 exists is in `BUILDING-A-MECHANIC.md` under the choice pattern, and in decision record 0034.
+
+It is a pane with its three sizes as of 0044, which is also where the last media query in the app died: this
+mechanic's one breakpoint asked the window rather than the stage and had never fired. There is no
+standardised button that provokes a roll, because there is nothing to spend on one yet.
 
 ---
 

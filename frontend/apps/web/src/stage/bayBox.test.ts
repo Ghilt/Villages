@@ -301,6 +301,27 @@ describe('the spread', () => {
       expect(spread({ w: 3840, h: 2160 }).bays.bottomMiddle?.w).toBe(736);
     });
 
+    /*
+     * The answer to "what if the bottom row is too narrow for both", which was a real question before the
+     * arithmetic existed to answer it.
+     *
+     * It cannot get very narrow: the column is capped at a third of the stage and the spread only happens
+     * above 600 on the shorter side, so the room left along the bottom has a floor. That floor is wide
+     * enough for the carousel, which is why the row never has to make the corner yield its tile. If someone
+     * widens the column, this is the test that says the bottom row stopped fitting.
+     */
+    it('never gets narrower than the carousel needs, at any stage the spread can be', () => {
+      let narrowest = Infinity;
+      for (let w = 601; w <= 2400; w += 7) {
+        for (const h of [601, 700, 900, 1080, 1440]) {
+          const box = spread({ w, h });
+          narrowest = Math.min(narrowest, box.bays.bottomMiddle?.w ?? Infinity);
+        }
+      }
+
+      expect(narrowest).toBeGreaterThanOrEqual(260);
+    });
+
     it('sits a gutter off the bottom, because it has no edge of its own to be cut into', () => {
       const box = spread(SPREAD);
 

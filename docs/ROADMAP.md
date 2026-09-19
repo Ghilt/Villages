@@ -53,10 +53,10 @@ Wanted, not started, and each needs a hypothesis in `docs/experiments/` before a
   shorter side and unfolds at 660 (0040), and the spread is tiles on a map that never overlap (0041). What
   remains is what goes in them. The corner tabs between the house status and **navigation** (0042), and on
   a phone the compass puts navigation in a bay with the panes above the trail and a needle per row (0043).
-  What is left is the choice roll becoming a pane with a carousel for its small size, which is what finally
-  kills the parchment's breakpoint against the window. The camera is still not told which part of the map
-  the tiles are covering, so *show it on the map* can fly a thing to under the column.
-  Touch is untouched: hover lifts a parchment and the map is driven by drag and wheel.
+  The choice roll is a pane with three sizes (0044), and its breakpoint against the window was the last
+  `@media` rule in the app. What is left is **touch**, which nothing has answered: hover lifts a parchment
+  and the map is driven by drag and wheel. The camera is also still not told which part of the map the
+  tiles are covering, so *show it on the map* can fly a thing to under the column.
 - **The inspect window**, beyond a house and an area: what it says about a subject once there is more than
   a name and a treasury to say, where its links come from, and whether it is a card or a paper on the desk.
   See `MECHANICS.md`.

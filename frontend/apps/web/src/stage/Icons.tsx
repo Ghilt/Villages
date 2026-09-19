@@ -27,7 +27,7 @@ const ROSE = {
 /** The house's own frame, the achievement's contour at the size of a mark. */
 const SHIELD = 'M5 4 H19 V13 C19 18 12 21.5 12 21.5 C12 21.5 5 18 5 13 Z';
 
-export type IconName = 'shield' | 'compass' | 'map' | 'window';
+export type IconName = 'shield' | 'compass' | 'map' | 'window' | 'letter';
 
 /** Which way a needle points. The four are one drawing turned, never four drawings. */
 export type Point = 'up' | 'down' | 'left' | 'right';
@@ -78,6 +78,12 @@ export function Icon({ name, title }: IconProps) {
         <>
           <path d="M3 6.5 L9 4 L15 6.5 L21 4 V17.5 L15 20 L9 17.5 L3 20 Z" className="icon__line" />
           <path d="M9 4 V17.5 M15 6.5 V20" className="icon__line" />
+        </>
+      )}
+      {name === 'letter' && (
+        <>
+          <path d="M3.5 6.5 H20.5 V17.5 H3.5 Z" className="icon__line" />
+          <path d="M3.5 6.5 L12 13 L20.5 6.5" className="icon__line" />
         </>
       )}
       {name === 'window' && (

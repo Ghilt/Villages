@@ -107,8 +107,14 @@ where they are — `left`, `bottomLeft`, `bottomMiddle` — so nothing in the la
 
 **A tile that runs out of room clips, and what is in it draws itself smaller.** Never a scrollbar, and
 **never a change of form**: only the stage's shorter side decides whether it is the spread or the bays. The
-house card's hint line goes when the column is squeezed, by a container query on its own tile, which is the
-same thing it does on a phone.
+house card's hint line goes when the column is squeezed, and the choice roll's options go from three across
+to one under the other — both by a container query on the tile, which is the same thing each does on a
+phone.
+
+**The bottom row cannot run out.** The column is capped at a third of the stage and the spread only exists
+above 600 on the shorter side, so the tile along the bottom middle is never narrower than **281 pixels**,
+which is room for the carousel. A test sweeps every stage the spread can be and asserts that floor, so if
+the column is ever widened the thing that breaks says so. See decision record 0044.
 
 ## Panes and bays
 
@@ -155,7 +161,7 @@ be the whole window is exactly what the rule at the top exists to prevent.
 | The house status, with the eye and the empty places | The corner tile, behind the shield tab | A pane; asks to be small, and can be minimised |
 | Navigation, the way back to what you have looked at | The corner tile, behind the compass tab | A pane; wants to be big |
 | An inspect window | A rail down the side, up to three | A pane; takes a bay, one at a time |
-| The parchment | Over the map, while a choice is pending | **Not brought over yet.** Its one breakpoint asks the window and never fires |
+| The choice roll, on its parchments | The bottom middle tile, while a choice is pending | A pane; arrives big in the map's bay, and the player folds it to the carousel |
 | The debug panel, with the debug map inside it | Docked down the right, taking room from the stage | Not in the picture at all — see below |
 | The worktree tabs and the build badge | Inside the debug panel | The same |
 

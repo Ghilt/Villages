@@ -42,8 +42,13 @@ should never have to learn them again.
 first use is the choice roll.
 
 **The parchment.** A textbox styled as a sheet of parchment, lying on the desk. Hovering one lifts it
-slightly, so it reads as something that can be picked up. One parchment carries one option of a choice roll;
-what else it might carry is not decided.
+slightly, so it reads as something that can be picked up. One parchment carries one **option** of a choice
+roll — the class named the whole choice until 0044, which had it backwards — and what else it might carry is
+not decided.
+
+**The carousel.** One thing at a time, with a step either side and a dot per thing beneath. The small form
+of a pane whose full form is a list, so that the list can be glanced through in a strip of screen while the
+map stays up beside it. Its first and only use is the choice roll. See decision record 0044.
 
 **The needle.** One mark, pointing at a **bay**. One drawing turned four ways, so a player learns it once:
 this mark means *there*.

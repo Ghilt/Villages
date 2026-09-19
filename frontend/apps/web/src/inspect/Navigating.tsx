@@ -3,7 +3,8 @@ import { useSyncExternalStore } from 'react';
 import { Arrows } from '../stage/Arrows';
 import { baysNow, put, type Which, watchBays } from '../stage/bays';
 import { Icon } from '../stage/Icons';
-import { FIXED_PANES, type Pane, type Room } from '../stage/panes';
+import { gatewayState, watchGateway } from '../net/gateway';
+import { type Pane, type Room, standingPanes } from '../stage/panes';
 import { inspect } from './opening';
 import { paneIdOf } from './subjects';
 import { clearTrail, stepKey, trailNow, watchTrail } from './trail';
@@ -30,6 +31,7 @@ import { clearTrail, stepKey, trailNow, watchTrail } from './trail';
 export function Navigating({ room, along }: { room: Room; along: 'rows' | 'columns' | null }) {
   const trail = useSyncExternalStore(watchTrail, trailNow);
   const bays = useSyncExternalStore(watchBays, baysNow);
+  const pending = useSyncExternalStore(watchGateway, gatewayState).yourChoice !== null;
 
   if (room.size === 'strip') {
     return (
@@ -61,7 +63,7 @@ export function Navigating({ room, along }: { room: Room; along: 'rows' | 'colum
             <h2 className="navigate__head">Go to</h2>
           </header>
           <ul className="navigate__list navigate__list--panes">
-            {FIXED_PANES.map((pane) => (
+            {standingPanes(pending).map((pane) => (
               <Row
                 key={pane.id}
                 icon={pane.icon}

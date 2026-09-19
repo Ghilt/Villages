@@ -1,3 +1,4 @@
+import { gatewayState } from '../net/gateway';
 import { paneIdOf, subjectOfPane, subjectsNow } from '../inspect/subjects';
 import type { Subject } from '../inspect/subjects';
 import type { Asking, BayName, SpreadWants } from './bayBox';
@@ -42,6 +43,28 @@ export interface Pane {
   tall: number;
   /** The mark it is known by where there is no room for its name, which is a tab. */
   icon: IconName;
+  /**
+   * Whether the **player** chooses between its big and its small form, rather than the layout deciding.
+   *
+   * False for nearly everything: the house status is small on a phone because that is all the room there
+   * is, and it has no say. The **choice roll** is the one that does, because its two forms are two ways of
+   * using it - reading three options through, or glancing at them while looking at the map they are about -
+   * and only the player knows which they are doing.
+   */
+  bothSizes: boolean;
+  /**
+   * The room its **full** form needs: a bay at least this **wide**, so the contents sit side by side, *or*
+   * at least this **tall**, so they sit one under another. Neither, and the pane is handed its small size.
+   *
+   * Null for a pane whose full form fits wherever it is put. Two numbers and not one because a phone is
+   * narrow and long while a tile along the bottom is wide and short, and the same list is at home in both -
+   * it is only a bay that is neither that has no room for it.
+   *
+   * This is how "a tile that runs out of room draws itself smaller" stops being a hope. The layout knows
+   * every bay's rectangle, so it hands back the size that fits rather than leaving the pane to grow a
+   * scrollbar. See decision record 0044.
+   */
+  needs: { wide: number; tall: number } | null;
 }
 
 export const MAP_PANE: Pane = {
@@ -56,6 +79,8 @@ export const MAP_PANE: Pane = {
   spread: 'floor',
   tall: 0,
   icon: 'map',
+  bothSizes: false,
+  needs: null,
 };
 
 export const HOUSE_PANE: Pane = {
@@ -71,6 +96,8 @@ export const HOUSE_PANE: Pane = {
   // What the card measures with the shield, the blazon, the treasury and the bar of levers in it.
   tall: 200,
   icon: 'shield',
+  bothSizes: false,
+  needs: null,
 };
 
 /**
@@ -92,9 +119,55 @@ export const NAVIGATION_PANE: Pane = {
   // The same height as the card it shares the tile with, so the column does not jump as the tab changes.
   tall: 200,
   icon: 'compass',
+  bothSizes: false,
+  needs: null,
+};
+
+/**
+ * **The choice roll**: what the world is asking, and the options it is offering.
+ *
+ * The one pane that is not always there. It arrives when the world asks something and goes when the
+ * question is answered, which is why it is not one of the fixed ones - and why an empty `bottomMiddle` tile
+ * takes no room at all, so with nothing pending the map runs clean to the bottom of the stage.
+ *
+ * It is the one pane whose size is the **player's** choice. Full is the options laid out to read through;
+ * small is the **carousel**, one option at a time, for glancing at them while looking at the map they are
+ * about. Minimised is the letter set aside. See `MECHANICS.md` and decision record 0044.
+ */
+export const CHOICE_PANE: Pane = {
+  id: 'choice',
+  title: 'a letter',
+  // Big when it arrives: the world has asked something and the first thing to do is read it.
+  wants: 'big',
+  // The carousel: the prompt, one option with room for its detail, the steps and the dots. Measured
+  // against the founding choice's wordiest option rather than picked, because an option that does not fit
+  // grows a scrollbar inside a sheet of parchment, which is not what parchment does.
+  small: 224,
+  // Set aside. The map is what a choice is about, and a player will want to look at it before answering.
+  strip: 44,
+  spread: 'bottomMiddle',
+  // The same, because a tile too narrow for three across draws the carousel in it and the tile's height
+  // does not change when that happens.
+  tall: 224,
+  icon: 'letter',
+  bothSizes: true,
+  // Three options across a wide tile, or three down a tall bay. A bay that is neither - the bottom middle
+  // of a small spread - gets the carousel, which is the whole answer to a row that has run out of room:
+  // the pane draws itself smaller, and the form does not change because a tile got tight.
+  needs: { wide: 544, tall: 460 },
 };
 
 export const FIXED_PANES: readonly Pane[] = [MAP_PANE, HOUSE_PANE, NAVIGATION_PANE];
+
+/**
+ * The panes that are not a window on a subject: the fixed three, and the choice roll while one is pending.
+ *
+ * What **navigation** lists under *Go to*, and what the layout places besides the rail. A window is not
+ * here because a window is in the **trail** instead, under its own name rather than as "a house".
+ */
+export function standingPanes(pending: boolean): readonly Pane[] {
+  return pending ? [...FIXED_PANES, CHOICE_PANE] : FIXED_PANES;
+}
 
 /**
  * The pane that holds a window on one subject.
@@ -115,6 +188,8 @@ export function inspectPane(subject: Subject): Pane {
     spread: 'left',
     tall: 0,
     icon: 'window',
+    bothSizes: false,
+    needs: null,
   };
 }
 
@@ -163,19 +238,19 @@ export function spreadWants(
  * Takes the subjects rather than reading them, so that it is pure and a component can memoise it against
  * exactly what it depends on.
  */
-export function panesFor(open: readonly Subject[]): readonly Pane[] {
-  return [...FIXED_PANES, ...open.map(inspectPane)];
+export function panesFor(open: readonly Subject[], pending: boolean): readonly Pane[] {
+  return [...standingPanes(pending), ...open.map(inspectPane)];
 }
 
-/** The same, for callers outside a render that have no subjects in hand. */
+/** The same, for callers outside a render, which read the two stores themselves. */
 export function panesNow(): readonly Pane[] {
-  return panesFor(subjectsNow().open);
+  return panesFor(subjectsNow().open, gatewayState().yourChoice !== null);
 }
 
 export function paneById(id: string): Pane | undefined {
-  const fixed = FIXED_PANES.find((pane) => pane.id === id);
-  if (fixed !== undefined) {
-    return fixed;
+  const standing = panesNow().find((pane) => pane.id === id && !pane.id.startsWith('inspect:'));
+  if (standing !== undefined) {
+    return standing;
   }
   const subject = subjectOfPane(id);
   // Built rather than looked up: a window's pane is a description of its subject, and the subject store is
@@ -193,6 +268,13 @@ export interface Room {
   size: PaneSize;
   /** Collapse to a strip, or open back up. Null when this pane has no strip to collapse to. */
   minimise: (() => void) | null;
+  /**
+   * Ask for the other of big and small. Null for every pane but the one whose size is the player's.
+   *
+   * Distinct from {@link minimise}, which puts a pane away. This is the difference between reading a thing
+   * and glancing at it, and the pane offers it as a control of its own.
+   */
+  resize: (() => void) | null;
 }
 
 /**
@@ -201,14 +283,15 @@ export interface Room {
  * Minimising is not a case the arithmetic knows about: a minimised pane asks for a smaller number than a
  * small one does, and that is the whole of it. A pane that cannot be minimised asks for what it wanted.
  */
-export function askingOf(pane: Pane | undefined, minimised: boolean): Asking {
+export function askingOf(pane: Pane | undefined, minimised: boolean, asked?: 'big' | 'small'): Asking {
   if (pane === undefined) {
     return 'big';
   }
   if (minimised && pane.strip !== null) {
     return { small: pane.strip };
   }
-  return pane.wants === 'small' ? { small: pane.small } : 'big';
+  // What the player asked for, where they get a say, and what the pane was declared to want otherwise.
+  return (asked ?? pane.wants) === 'small' ? { small: pane.small } : 'big';
 }
 
 /**
@@ -218,12 +301,31 @@ export function askingOf(pane: Pane | undefined, minimised: boolean): Asking {
  * that the *other* bay can have the rest, and in the spread there is no other bay. That is why the house
  * card in the corner is the same card it always was, and only a phone ever sees the small one.
  */
-export function sizeOf(form: 'spread' | 'bays', asking: Asking, minimised: boolean): PaneSize {
+export function sizeOf(
+  form: 'spread' | 'bays',
+  asking: Asking,
+  minimised: boolean,
+  cramped = false,
+): PaneSize {
   if (minimised) {
     return 'strip';
+  }
+  // Too narrow for the full form, whichever form the stage is in. The bay is a rectangle in both, so this
+  // is one rule and not a special case for the spread.
+  if (cramped) {
+    return 'small';
   }
   if (form === 'spread') {
     return 'full';
   }
   return typeof asking === 'object' ? 'small' : 'full';
+}
+
+/** Whether a bay is neither wide enough nor tall enough for the full form of the pane in it. */
+export function cramps(pane: Pane | undefined, bay: { w: number; h: number } | null): boolean {
+  const needs = pane?.needs;
+  if (needs == null || bay === null) {
+    return false;
+  }
+  return bay.w < needs.wide && bay.h < needs.tall;
 }

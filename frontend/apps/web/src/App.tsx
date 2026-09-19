@@ -6,7 +6,7 @@ import type { ChoiceView, HouseView } from '@villages/protocol';
 import type { MasterGrid } from '@villages/world';
 
 import { AreaOverlay } from './areas/AreaOverlay';
-import { Parchment } from './choice/Parchment';
+import { Choosing } from './choice/Choosing';
 import { DebugPanel } from './debug/DebugPanel';
 import { Desk } from './desk/Desk';
 import { Grips } from './debug/Grips';
@@ -27,7 +27,8 @@ import { flyWith } from './map/focus';
 import { MapView } from './map/MapView';
 import { terrainPalette } from './map/terrainClasses';
 import { Stage } from './stage/Stage';
-import { HOUSE_PANE, MAP_PANE, NAVIGATION_PANE } from './stage/panes';
+import { formNow, takeOver, theMapsBay } from './stage/bays';
+import { CHOICE_PANE, HOUSE_PANE, MAP_PANE, NAVIGATION_PANE } from './stage/panes';
 import { worldRootOf } from './map/masters';
 import { DEFAULT_RENDERER, RENDERERS, applyRenderer } from './map/renderers';
 import { SpriteOverlay } from './sprites/SpriteOverlay';
@@ -157,6 +158,21 @@ export function App({ master }: AppProps) {
     }
   }, [map, seat, mine]);
 
+  /*
+   * A question arriving takes the big bay, and the small one keeps whatever was in it.
+   *
+   * Only in the bays: the spread has a tile of its own along the bottom middle, and nothing is displaced
+   * to make room for it. Reading the question is the thing to do first, which is why it takes the map's
+   * bay rather than the other one - and the carousel is how a player puts the map back beside it. The
+   * takeover remembers, so answering gives the bay back. See decision record 0044.
+   */
+  const asking = heard.yourChoice?.id;
+  useEffect(() => {
+    if (asking !== undefined && formNow() === 'bays') {
+      takeOver(theMapsBay(), CHOICE_PANE.id);
+    }
+  }, [asking]);
+
   useEffect(() => {
     if (map !== null) {
       applyRenderer(map, renderer);
@@ -237,17 +253,15 @@ export function App({ master }: AppProps) {
           if (id === NAVIGATION_PANE.id) {
             return <Navigating room={room} along={along} />;
           }
+          if (id === CHOICE_PANE.id) {
+            return <Choosing room={room} />;
+          }
           const subject = subjectOfPane(id);
           return subject === null ? null : (
             <Inspecting subject={subject} room={room} along={along} grid={masterShape} />
           );
         }}
-        overlays={
-          <>
-            <Parchment />
-            <StoodDown />
-          </>
-        }
+        overlays={<StoodDown />}
       />
 
       <DebugPanel

@@ -1,5 +1,6 @@
 import { note } from '../debug/log';
 import { watchSubjects } from '../inspect/subjects';
+import { watchGateway } from '../net/gateway';
 import type { Asking, BayName } from './bayBox';
 import { askingOf, HOUSE_PANE, MAP_PANE, type Pane, paneById } from './panes';
 
@@ -41,6 +42,14 @@ export interface BaysState {
    * trail. It is the tab bar's whole state. See decision record 0042.
    */
   readonly showing: Readonly<Partial<Record<BayName, string>>>;
+  /**
+   * The panes whose size the player has asked for, against what they were declared to want.
+   *
+   * Almost nothing is in here. A pane's size is the layout's business - the house status is small on a
+   * phone because that is all the room there is. The **choice roll** is the exception, because its two
+   * forms are two ways of using it and only the player knows which they are doing. See 0044.
+   */
+  readonly asked: Readonly<Partial<Record<string, 'big' | 'small'>>>;
 }
 
 /** The map above and the house beneath it: the shape the bays open on. */
@@ -49,6 +58,7 @@ const OPENS_ON: BaysState = {
   minimised: new Set(),
   displaced: [null, null],
   showing: {},
+  asked: {},
 };
 
 let state: BaysState = OPENS_ON;
@@ -65,8 +75,8 @@ const listeners = new Set<() => void>();
 function askingFor(from: BaysState): readonly [Asking, Asking] {
   const [head, tail] = from.holding;
   return [
-    askingOf(paneById(head), from.minimised.has(head)),
-    askingOf(paneById(tail), from.minimised.has(tail)),
+    askingOf(paneById(head), from.minimised.has(head), from.asked[head]),
+    askingOf(paneById(tail), from.minimised.has(tail), from.asked[tail]),
   ];
 }
 
@@ -105,6 +115,17 @@ export function formNow(): 'spread' | 'bays' {
 /** The bay that is not the map's, which is the one a thing clicked on the map goes into. */
 export function awayFromTheMap(): Which {
   return state.holding[0] === MAP_PANE.id ? 1 : 0;
+}
+
+/**
+ * The map's own bay, which is the big one.
+ *
+ * What the **choice roll** takes when the world asks something: reading it is the thing to do first, and
+ * the pane beside it is already the small one. The map comes back when the choice is answered, because a
+ * takeover remembers what it displaced.
+ */
+export function theMapsBay(): Which {
+  return awayFromTheMap() === 0 ? 1 : 0;
 }
 
 /** What the player would call a bay, given how the stage is cut. */
@@ -183,6 +204,24 @@ export function put(which: Which, id: string): void {
   );
 }
 
+/**
+ * Ask for the other of a pane's two sizes.
+ *
+ * Only a pane that declared it has both: for everything else the size is the layout's answer to how much
+ * room there is, and a button offering to change it would be a button that does nothing.
+ */
+export function swapSize(id: string): void {
+  const pane = paneById(id);
+  if (pane === undefined || !pane.bothSizes) {
+    return;
+  }
+
+  const now = state.asked[id] ?? pane.wants;
+  const next = now === 'big' ? 'small' : 'big';
+  settle({ ...state, asked: { ...state.asked, [id]: next } });
+  note('bay', `${titleOf(id)} ${next === 'big' ? 'opened out' : 'folded to a carousel'}`);
+}
+
 /** Collapse a pane to its strip, or open it back up. A pane with no strip cannot be collapsed. */
 export function toggleMinimise(id: string): void {
   const pane = paneById(id);
@@ -256,19 +295,26 @@ export function giveBack(id: string): void {
 }
 
 /**
- * A bay holding a window whose subject has gone gets its old pane back.
+ * A bay holding a pane that has stopped existing gets its old one back.
  *
- * A subject leaves the list by more than one road - the player closes it, a fourth window pushes the oldest
- * off, an area is deleted out from under it - and a bay left holding a pane that no longer exists is a
- * bay with nothing in it. Rather than making every one of those roads remember to tidy up, the manager
- * watches the store and tidies up after all of them.
+ * Two kinds of pane come and go. A **window**'s subject leaves the list by more than one road - the player
+ * closes it, a fourth window pushes the oldest off, an area is deleted out from under it. And the **choice
+ * roll** goes the moment the question is answered, which is the road that mattered: the letter had taken
+ * the map's bay, so without this the map never came back and the top of the stage was left empty.
+ *
+ * Rather than making every one of those roads remember to tidy up, the manager watches the two stores that
+ * say what exists and tidies up after all of them. It asks whether the pane still exists rather than what
+ * kind it is, which is what stops the next pane that comes and goes from needing a line here.
  *
  * Subscribed once, at load, and never unsubscribed: there is one bay manager for the life of the page.
  */
-watchSubjects(() => {
+function tidyUp(): void {
   for (const which of [0, 1] as const) {
-    if (state.holding[which].startsWith('inspect:') && paneById(state.holding[which]) === undefined) {
+    if (paneById(state.holding[which]) === undefined) {
       giveBack(state.holding[which]);
     }
   }
-});
+}
+
+watchSubjects(tidyUp);
+watchGateway(tidyUp);

@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
 
 import { note } from '../debug/log';
 import { subjectsNow, watchSubjects } from '../inspect/subjects';
+import { gatewayState, watchGateway } from '../net/gateway';
 import { Compass } from './Compass';
 import { bayLayout, type BayName, type Box, isTabbed, type Rect, TAB_BAR, TILES } from './bayBox';
 import {
@@ -12,11 +13,12 @@ import {
   show,
   showingIn,
   stageIs,
+  swapSize,
   toggleMinimise,
   type Which,
   watchBays,
 } from './bays';
-import { FIXED_PANES, type Pane, panesFor, panesIn, type Room, sizeOf, spreadWants } from './panes';
+import { cramps, type Pane, panesFor, panesIn, type Room, sizeOf, spreadWants, standingPanes } from './panes';
 import { TabBar } from './TabBar';
 
 /**
@@ -63,7 +65,10 @@ export function Stage({ stage, contents, overlays }: StageProps) {
   const bays = useSyncExternalStore(watchBays, baysNow);
   const asking = useSyncExternalStore(watchBays, askingNow);
   const subjects = useSyncExternalStore(watchSubjects, subjectsNow);
-  const panes = useMemo(() => panesFor(subjects.open), [subjects.open]);
+  // The one thing the layout asks the world: whether there is a choice pending, because the choice roll is
+  // the one pane that comes and goes, and an empty tile takes no room.
+  const pending = useSyncExternalStore(watchGateway, gatewayState).yourChoice !== null;
+  const panes = useMemo(() => panesFor(subjects.open, pending), [subjects.open, pending]);
   const wants = useMemo(() => spreadWants(panes, bays.minimised, showingIn), [panes, bays]);
 
   // `formNow()` is the form the stage was in a moment ago, which is what gives the fold its dead band. It
@@ -111,11 +116,16 @@ export function Stage({ stage, contents, overlays }: StageProps) {
     const where = bayOf(id, pane);
     const at = bays.holding.indexOf(id);
     const shut = bays.minimised.has(id);
+    const whole = where === null ? null : box.bays[where];
     const room: Room = {
-      size: sizeOf(box.form, at === -1 ? 'big' : asking[at as Which], shut),
+      // The bay is a rectangle, so the layout can hand back the size that actually fits rather than
+      // leaving a pane too wide for its tile to grow a scrollbar inside it.
+      size: sizeOf(box.form, at === -1 ? 'big' : asking[at as Which], shut, cramps(pane, whole)),
       // Minimise is a property of a pane everywhere, not a feature of the small screen: the same button
       // works in the spread, where collapsing the house gives the column's room back to the rail.
       minimise: pane?.strip == null ? null : () => toggleMinimise(id),
+      // And only where the pane said the size is the player's to choose.
+      resize: pane?.bothSizes === true ? () => swapSize(id) : null,
     };
 
     // A window in the spread stacks inside the rail, which is itself the column's upper tile, so it is a
@@ -126,7 +136,6 @@ export function Stage({ stage, contents, overlays }: StageProps) {
     const sharing = where === null || box.form !== 'spread' ? [] : panesIn(panes, where);
     const tabbed = isTabbed(where, sharing.length);
     const up = !tabbed || showingIn(where as BayName, sharing).id === id;
-    const whole = where === null ? null : box.bays[where];
     const rect =
       whole !== null && tabbed
         ? { ...whole, y: whole.y + TAB_BAR, h: Math.max(0, whole.h - TAB_BAR) }
@@ -167,7 +176,7 @@ export function Stage({ stage, contents, overlays }: StageProps) {
       data-along={box.along}
       style={{ '--bay-first': seam } as CSSProperties}
     >
-      {FIXED_PANES.map((pane) => bayFor(pane.id))}
+      {standingPanes(pending).map((pane) => bayFor(pane.id))}
 
       {/*
        * The rail: where inspect windows stack in the spread, up to three, newest at the top.
