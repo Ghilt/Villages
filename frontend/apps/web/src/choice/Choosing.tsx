@@ -25,10 +25,14 @@ import type { Room } from '../stage/panes';
  * only they know which they are doing. Every other pane's size is the layout's answer to how much room
  * there is. See decision record 0044.
  *
- * Nothing here asks the window how wide it is. How the options lay out is a **container query** on the bay,
- * which is what replaced the one breakpoint on this mechanic that had never fired - it asked the window,
- * which is 1280 while the stage is 390. That defect outlived three decision records and is the reason
- * `RESPONSIVE-DESIGN.md` exists.
+ * Nothing here asks how big anything is. Whether there is room for the list at all is the layout's answer,
+ * handed down as the size; whether that list is three across or one under another is a **container query**
+ * on the bay. Between them they replaced the one breakpoint on this mechanic that had never fired - it
+ * asked the window, which is 1280 while the stage is 390. That defect outlived four decision records and is
+ * the reason `RESPONSIVE-DESIGN.md` exists.
+ *
+ * Its two buttons are marks and no words, drawn as the house card's chevron is: putting a pane away is one
+ * gesture wherever it is offered, and spelling it out in words here would make it two things to learn.
  */
 
 export function Choosing({ room }: { room: Room }) {
@@ -114,7 +118,7 @@ function Chrome({ room, carousel }: { room: Room; carousel: boolean }) {
           title="set it aside, and look at the map"
           onClick={room.minimise}
         >
-          set aside
+          {'▾'}
         </button>
       )}
     </span>

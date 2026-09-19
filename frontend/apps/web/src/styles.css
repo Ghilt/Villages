@@ -1043,23 +1043,24 @@ body,
   color: var(--ink-soft);
 }
 
+/*
+ * The pane's own two buttons, drawn as the house card's chevron is: a mark and no words, the same square,
+ * the same ink, gold under the pointer. Putting a pane away is one gesture wherever it is offered, and a
+ * gesture spelled out in words in one place and drawn in another is two gestures to learn.
+ */
 .choice__size,
 .choice__fold {
-  cursor: pointer;
-  font-size: 0.72rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.choice__size {
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
   font-size: 0.95rem;
-  letter-spacing: 0;
   line-height: 1;
+  cursor: pointer;
 }
 
 .choice__size:hover,
 .choice__fold:hover {
-  color: var(--ink);
+  color: var(--gold);
 }
 
 /* Set aside: the question is still standing, and this is the way back to it. */
