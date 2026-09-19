@@ -1,4 +1,4 @@
-import { Fragment } from 'react';
+import { Fragment, useEffect } from 'react';
 
 import { focusOn } from '../map/focus';
 import { Arrows } from '../stage/Arrows';
@@ -7,6 +7,7 @@ import { MAP_PANE } from '../stage/panes';
 import type { Description, Link } from './describe';
 import { inspect, stopInspecting } from './opening';
 import type { Subject } from './subjects';
+import { remember } from './trail';
 
 /**
  * **Inspect window**: what one thing in the world is, and the ways on from it.
@@ -31,6 +32,13 @@ interface InspectWindowProps {
 }
 
 export function InspectWindow({ subject, said, along }: InspectWindowProps) {
+  // The trail learns a thing's name here because here is the only place that knows one: a name is the
+  // description's, and the trail outlives the window - and a house that has left view has no name to look
+  // up later. See `trail.ts`.
+  useEffect(() => {
+    remember(subject, said.name);
+  }, [subject, said.name]);
+
   const follow = (link: Link, into: Which | null) => {
     if (link.to === 'map') {
       focusOn(link.at);

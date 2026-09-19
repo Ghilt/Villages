@@ -1,7 +1,7 @@
 import { note } from '../debug/log';
 import { watchSubjects } from '../inspect/subjects';
-import type { Asking } from './bayBox';
-import { askingOf, HOUSE_PANE, MAP_PANE, paneById } from './panes';
+import type { Asking, BayName } from './bayBox';
+import { askingOf, HOUSE_PANE, MAP_PANE, type Pane, paneById } from './panes';
 
 /**
  * The bay manager: which pane is in each bay, and which are collapsed to a strip.
@@ -33,6 +33,14 @@ export interface BaysState {
    * undoing it later would be the interface second-guessing them.
    */
   readonly displaced: readonly [string | null, string | null];
+  /**
+   * Which pane is up in each tile that more than one of them shares, by bay name.
+   *
+   * A tile with one pane in it never appears here, and a tile whose fronted pane is not recorded shows the
+   * first pane that declared itself into it - so the corner opens on the house status and not on an empty
+   * trail. It is the tab bar's whole state. See decision record 0042.
+   */
+  readonly showing: Readonly<Partial<Record<BayName, string>>>;
 }
 
 /** The map above and the house beneath it: the shape the bays open on. */
@@ -40,6 +48,7 @@ const OPENS_ON: BaysState = {
   holding: [MAP_PANE.id, HOUSE_PANE.id],
   minimised: new Set(),
   displaced: [null, null],
+  showing: {},
 };
 
 let state: BaysState = OPENS_ON;
@@ -121,6 +130,27 @@ function titleOf(id: string): string {
 /** What each bay is asking the layout for, which is decided by what each is holding. */
 export function askingNow(): readonly [Asking, Asking] {
   return asking;
+}
+
+/**
+ * Which of the panes sharing a tile is up.
+ *
+ * The first of them until somebody presses a tab, which is why the corner opens on the house status: it is
+ * declared before navigation, and what a player wants on arriving is their own house rather than a list of
+ * the nowhere they have been.
+ */
+export function showingIn(where: BayName, sharing: readonly Pane[]): Pane {
+  const chosen = state.showing[where];
+  return sharing.find((pane) => pane.id === chosen) ?? sharing[0]!;
+}
+
+/** Bring a pane to the front of the tile it shares. What pressing a tab does. */
+export function show(where: BayName, id: string): void {
+  if (state.showing[where] === id) {
+    return;
+  }
+  settle({ ...state, showing: { ...state.showing, [where]: id } });
+  note('bay', `${where === 'bottomLeft' ? 'the corner' : where} shows ${titleOf(id)}`);
 }
 
 /**

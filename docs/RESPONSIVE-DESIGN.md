@@ -97,6 +97,11 @@ that up to a third of the stage before it gives up anything else.
 **An empty tile takes no room.** Nothing in the corner and the column runs to the bottom; no choice pending
 and the map keeps the whole bottom of the stage. A tile is never reserved against a future.
 
+**A tile can hold more than one pane, behind a tab bar.** The corner does: the house status and
+**navigation** take turns in it, and a strip of marks across its top says which is up. The panes declare
+that they share; the layout never decides it, so the tabs cannot appear and vanish as the window is
+dragged. The tile is as tall as whichever pane is up. See decision record 0042 and `LOOK-AND-FEEL.md`.
+
 **A pane says which tile it sits in and how tall it is**, and the layout places it. The tiles are named for
 where they are — `left`, `bottomLeft`, `bottomMiddle` — so nothing in the layout knows what a map is.
 
@@ -144,7 +149,8 @@ be the whole window is exactly what the rule at the top exists to prevent.
 | Part | In the spread | In the bays |
 |---|---|---|
 | The map, with the sprite, area and influence overlays | Fills the stage | A pane; wants to be big |
-| The house status, with the eye and the empty places | A card in a corner | A pane; asks to be small, and can be minimised |
+| The house status, with the eye and the empty places | The corner tile, behind the shield tab | A pane; asks to be small, and can be minimised |
+| Navigation, the way back to what you have looked at | The corner tile, behind the compass tab | A pane; wants to be big |
 | An inspect window | A rail down the side, up to three | A pane; takes a bay, one at a time |
 | The parchment | Over the map, while a choice is pending | **Not brought over yet.** Its one breakpoint asks the window and never fires |
 | The debug panel, with the debug map inside it | Docked down the right, taking room from the stage | Not in the picture at all — see below |

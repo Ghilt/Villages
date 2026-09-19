@@ -245,17 +245,22 @@ record 0040 says why, and `RESPONSIVE-DESIGN.md` says what it looks like. What i
 and specific.
 
 **The layout is arithmetic, in a module of its own, with a test.** Given the stage's size and what each pane
-asked for, out comes which side the column is on, how big it is, and every bay's box - including which
-panes the layout had to merge into one tabbed bay to make them fit. No DOM, no React, nothing to click: the
+asked for, out comes which side the column is on, how big it is, and every bay's box. No DOM, no React,
+nothing to click: the
 same shape as `stageBox.ts`, which is the stage's own arithmetic and is pure for the same reason. It stays
 in `apps/web` rather than moving down to `client-core`, because the layer rule is there to keep *game* logic
 testable without a browser and this is presentation arithmetic that would mean nothing to a headless client.
 The test is what makes it reviewable; the component only renders what it is handed.
 
 **A pane is declared, not positioned.** A pane says what it is called, the room it wants, the least it can
-live in and whether it can be put away. The layout places it. Nothing in the layout knows what a map is, and
-no pane learns where it is beyond the room it was given - which is what lets a ui mechanic be written once
-and drawn at every size.
+live in, whether it can be put away, which bay it belongs in and the mark it is known by. The layout places
+it. Nothing in the layout knows what a map is, and no pane learns where it is beyond the room it was given -
+which is what lets a ui mechanic be written once and drawn at every size.
+
+**Two panes naming the same bay is a tab bar**, and that is the whole of how a bay holds more than one. The
+panes declare it rather than the layout deciding it when they stop fitting, so a tab cannot appear and
+vanish as a window is dragged; the arithmetic learns only that a shared bay is a strip taller than whichever
+pane is up in it. See decision record 0042.
 
 **Nothing is unmounted to move it.** A pane changes bays by changing which cell of a grid its wrapper sits
 in, not by being torn down and rebuilt elsewhere. That matters for exactly one pane and it matters a lot:
@@ -269,9 +274,11 @@ so the map's visible middle is not its geometric middle. Whatever flies the came
 for that, in one place, rather than every caller guessing.
 
 **Which bay holds what is where the player is, not a preference.** It is a module store with a listener
-set, like the gateway and the selection and the areas, and a reload forgets it. What the player has looked
-at does survive a reload, because a trail that empties itself is not a trail. What persists besides that -
-the phone toggle, the folded sections - is Adam's and lives in `debug/stage.ts`.
+set, like the gateway and the selection and the areas, and a reload forgets it. **The trail does survive a
+reload**, because a trail that empties itself is not a trail, and it is the only thing on the stage that
+does; what comes back from storage is checked rather than trusted, because a previous version of the code
+wrote it. What persists besides that - the phone toggle, the folded sections - is Adam's and lives in
+`debug/stage.ts`.
 
 ## Events over time
 

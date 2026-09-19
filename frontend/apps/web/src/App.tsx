@@ -15,6 +15,7 @@ import { stageBox } from './debug/stageBox';
 import { note } from './debug/log';
 import { inspect } from './inspect/opening';
 import { Inspecting } from './inspect/Inspecting';
+import { Navigating } from './inspect/Navigating';
 import { subjectOfPane } from './inspect/subjects';
 import { gateway, gatewayState, watchGateway } from './net/gateway';
 import { followMap } from './net/followMap';
@@ -26,7 +27,7 @@ import { flyWith } from './map/focus';
 import { MapView } from './map/MapView';
 import { terrainPalette } from './map/terrainClasses';
 import { Stage } from './stage/Stage';
-import { MAP_PANE, HOUSE_PANE } from './stage/panes';
+import { HOUSE_PANE, MAP_PANE, NAVIGATION_PANE } from './stage/panes';
 import { worldRootOf } from './map/masters';
 import { DEFAULT_RENDERER, RENDERERS, applyRenderer } from './map/renderers';
 import { SpriteOverlay } from './sprites/SpriteOverlay';
@@ -232,6 +233,9 @@ export function App({ master }: AppProps) {
           }
           if (id === HOUSE_PANE.id) {
             return <HouseStatus room={room} />;
+          }
+          if (id === NAVIGATION_PANE.id) {
+            return <Navigating room={room} />;
           }
           const subject = subjectOfPane(id);
           return subject === null ? null : (

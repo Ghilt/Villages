@@ -324,6 +324,81 @@ body,
 }
 
 /*
+ * The marks a pane is known by where there is no room for its name. One drawing, used on a tab and in the
+ * navigation list, so the same thing is never drawn twice and cannot drift.
+ */
+.icon {
+  width: 100%;
+  height: 100%;
+  color: var(--ink-soft);
+}
+
+.icon__line {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.icon__fill {
+  fill: currentColor;
+  stroke: none;
+}
+
+/*
+ * The tab bar: several panes sharing one tile, and a strip of marks saying which is up.
+ *
+ * It sits on the tile's own top edge and is part of the same piece of furniture, so it carries the border
+ * and the rounded corner that the pane beneath it gives up. Marks and no words, because the column is 26rem
+ * at its widest and two words on a tab is a tab that wraps. See decision record 0042.
+ */
+.tabs {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  align-items: stretch;
+  gap: 1px;
+  padding-left: 0.35rem;
+  background: var(--parchment-edge);
+  border: 1px solid var(--parchment-edge);
+  border-width: 1px 1px 0 0;
+  border-radius: 0 6px 0 0;
+  box-shadow: 0 -2px 18px var(--shadow);
+}
+
+.tabs__one {
+  width: 2.1rem;
+  padding: 0.28rem 0.42rem;
+  border: none;
+  border-radius: 3px 3px 0 0;
+  background: rgba(239, 230, 211, 0.45);
+  cursor: pointer;
+}
+
+.tabs__one:hover {
+  background: rgba(239, 230, 211, 0.78);
+}
+
+/* The one that is up: the same parchment as the pane below it, so the two read as one sheet. */
+.tabs__one--up {
+  background: var(--parchment);
+  cursor: default;
+}
+
+.tabs__one--up .icon {
+  color: var(--gold);
+}
+
+/* A pane sharing a tabbed tile gives its top edge to the strip of tabs above it. */
+.bay[data-tabbed] .hud__panel,
+.bay[data-tabbed] .navigate {
+  border-width: 0 1px 0 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/*
  * The game's own name, over the floor and in no bay.
  *
  * It was in the house card only because that card used to be the whole stage. Now every pixel is either
@@ -437,6 +512,9 @@ body,
   flex-direction: column;
   justify-content: center;
   gap: 0.35rem;
+  /* A flex child's floor is its content, so without this a long name widens the card instead of being
+     cut down to it - and the card is a tile now, with a width that is not its own to decide. */
+  min-width: 0;
 }
 
 .hud__name {
@@ -445,6 +523,9 @@ body,
   line-height: 1.1;
   font-variant: small-caps;
   letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .hud__hint {
@@ -529,6 +610,24 @@ body,
 @container (max-width: 23rem) {
   .hud__hint {
     display: none;
+  }
+
+  /*
+   * The card was drawn for a 26rem column and the column is squeezed to 18 on a narrow stage. The padding,
+   * the gap and the shield all give a little so that the name keeps the room: a house called Ravenscar fits
+   * with nothing to spare at the old numbers, which means the next house over does not.
+   */
+  .hud__achievement {
+    gap: 0.7rem;
+    padding: 0.9rem 0.8rem 0.85rem 0.8rem;
+  }
+
+  .hud__banner {
+    width: 4.6rem;
+  }
+
+  .hud__name {
+    font-size: 1.45rem;
   }
 }
 
@@ -1456,6 +1555,136 @@ body,
   inset: 0;
   border-width: 1px 0 0;
   border-radius: 0;
+}
+
+/*
+ * **Navigation**: the ways back, which in the spread is the trail and nothing else.
+ *
+ * The same sheet as the house card it shares the corner with - it is the other side of one piece of
+ * furniture, not a panel of its own - and it scrolls, because a list of where you have been is the one
+ * thing on the stage whose length is the player's business rather than the layout's.
+ */
+.navigate {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--parchment);
+  border: 1px solid var(--parchment-edge);
+  border-width: 1px 1px 0 0;
+  border-radius: 0 6px 0 0;
+  box-shadow: 0 -2px 18px var(--shadow);
+  pointer-events: auto;
+}
+
+.navigate__bar {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex: none;
+  padding: 0.5rem 0.75rem 0.35rem;
+}
+
+.navigate__head {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: normal;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.navigate__clear,
+.navigate__fold {
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.navigate__clear:hover {
+  color: var(--ink);
+}
+
+.navigate__empty {
+  margin: 0;
+  padding: 0.2rem 0.75rem 0.75rem;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.navigate__list {
+  flex: 1;
+  margin: 0;
+  padding: 0 0 0.4rem;
+  list-style: none;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.navigate__go {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  padding: 0.3rem 0.75rem;
+  border: none;
+  background: none;
+  font-family: inherit;
+  text-align: left;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.navigate__go:hover {
+  background: rgba(157, 124, 42, 0.12);
+}
+
+.navigate__go .icon {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+}
+
+.navigate__name {
+  flex: 1;
+  font-size: 0.95rem;
+  font-variant: small-caps;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.navigate__what {
+  flex: none;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+}
+
+/* Put away: what it is and the way back, and nothing else - the same strip the house card has. */
+.navigate--strip {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0 0.3rem 0 0.75rem;
+}
+
+.navigate__kind {
+  flex: 1;
+  font-size: 0.78rem;
+  font-variant: small-caps;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Put away: the kind it is and the way back, and nothing else. */

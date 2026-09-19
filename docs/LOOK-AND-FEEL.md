@@ -52,6 +52,17 @@ a pair. *Open this* and *open this there* are one decision, so they are one cont
 to choose between, so there the same link is a plain click and no arrows are drawn. See
 `RESPONSIVE-DESIGN.md` and decision record 0040.
 
+**The tab bar.** Several **panes** sharing one **bay**, and a strip of marks across its top saying which is
+up. Marks and no words: a column is 26rem at its widest and two words on a tab is a tab that wraps. Its
+first use is the corner of the spread, where the house status and navigation take turns. Only in the spread
+— a phone reaches the same panes through the compass, because a row of tabs on a 390-wide stage is a row of
+things too small to hit. See decision record 0042.
+
+**The marks.** Every pane declares the mark it is known by, drawn in one place so that the same thing on a
+tab, in a list and wherever a pane is named later cannot drift apart. **The compass is the arrows' needle
+inside a ring**, deliberately: the arrows say which bay a thing opens into and the compass opens the pane
+that lists them, so they read as one family rather than two unrelated drawings.
+
 ## Not decided
 
 - Theme and tone as a whole. See `VISION.md`.

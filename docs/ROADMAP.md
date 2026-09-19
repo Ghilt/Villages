@@ -51,8 +51,9 @@ Wanted, not started, and each needs a hypothesis in `docs/experiments/` before a
   a Pixi surface - wants deciding before much of it is written.
 - **A responsive interface.** Both forms have a layout now: the stage folds into two bays below 600 on its
   shorter side and unfolds at 660 (0040), and the spread is tiles on a map that never overlap (0041). What
-  remains is what goes in them - a **tab bar** so two panes can share the corner, a **navigation** pane
-  behind a compass, and the choice roll becoming a pane with a carousel for its small size, which is what
+  remains is what goes in them. The corner tabs between the house status and **navigation** now (0042);
+  what is left is the **compass** replacing the kebab on a phone, with the fixed panes above the trail and
+  a needle per row, and the choice roll becoming a pane with a carousel for its small size - which is what
   finally kills the parchment's breakpoint against the window. The camera is still not told which part of
   the map the tiles are covering, so *show it on the map* can fly a thing to under the column.
   Touch is untouched: hover lifts a parchment and the map is driven by drag and wheel.

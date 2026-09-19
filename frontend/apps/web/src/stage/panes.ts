@@ -1,6 +1,8 @@
 import { paneIdOf, subjectOfPane, subjectsNow } from '../inspect/subjects';
 import type { Subject } from '../inspect/subjects';
 import type { Asking, BayName, SpreadWants } from './bayBox';
+import { TAB_BAR } from './bayBox';
+import type { IconName } from './Icons';
 
 /**
  * What can occupy a bay, and what each one asks for.
@@ -9,7 +11,7 @@ import type { Asking, BayName, SpreadWants } from './bayBox';
  * learns which bay it is in beyond the room it was given - which is what lets a mechanic be written once
  * and drawn at up to three sizes. See decision records 0040 and 0041.
  *
- * Two of them are fixed and the rest come and go: an **inspect window** is a pane per subject, so the list
+ * Three of them are fixed and the rest come and go: an **inspect window** is a pane per subject, so the list
  * grows as the player opens them. Character dialogue will be another fixed one.
  */
 
@@ -38,6 +40,8 @@ export interface Pane {
    * one that decides it.
    */
   tall: number;
+  /** The mark it is known by where there is no room for its name, which is a tab. */
+  icon: IconName;
 }
 
 export const MAP_PANE: Pane = {
@@ -51,6 +55,7 @@ export const MAP_PANE: Pane = {
   // The ground everything else stands on, rather than a tile competing with the rest for room.
   spread: 'floor',
   tall: 0,
+  icon: 'map',
 };
 
 export const HOUSE_PANE: Pane = {
@@ -65,9 +70,31 @@ export const HOUSE_PANE: Pane = {
   spread: 'bottomLeft',
   // What the card measures with the shield, the blazon, the treasury and the bar of levers in it.
   tall: 200,
+  icon: 'shield',
 };
 
-export const FIXED_PANES: readonly Pane[] = [MAP_PANE, HOUSE_PANE];
+/**
+ * **Navigation**: the ways from here, and the ways back.
+ *
+ * It shares the corner with the house status, which is what the **tab bar** is for: two panes, one tile,
+ * and a strip of marks saying which is up. In the spread it is the trail and nothing else, because
+ * everything a player might navigate *to* is already on the screen - the map is the floor and the house is
+ * behind the other tab. On a phone it will say more, and that is its own step.
+ */
+export const NAVIGATION_PANE: Pane = {
+  id: 'navigation',
+  title: 'where you have been',
+  wants: 'big',
+  small: 200,
+  strip: 44,
+  // Beside the house, in the corner. The two of them are what makes the corner a tabbed tile at all.
+  spread: 'bottomLeft',
+  // The same height as the card it shares the tile with, so the column does not jump as the tab changes.
+  tall: 200,
+  icon: 'compass',
+};
+
+export const FIXED_PANES: readonly Pane[] = [MAP_PANE, HOUSE_PANE, NAVIGATION_PANE];
 
 /**
  * The pane that holds a window on one subject.
@@ -87,7 +114,13 @@ export function inspectPane(subject: Subject): Pane {
     // many, so a window asks the column for no height of its own.
     spread: 'left',
     tall: 0,
+    icon: 'window',
   };
+}
+
+/** The panes that share one tile of the spread, in the order they were declared. */
+export function panesIn(panes: readonly Pane[], where: BayName): readonly Pane[] {
+  return panes.filter((pane) => pane.spread === where);
 }
 
 /**
@@ -100,13 +133,21 @@ export function inspectPane(subject: Subject): Pane {
  * A tile nobody declared is `null` and is not laid out at all. That is the difference between an empty
  * tile and a small one: with no choice pending, the map runs clean to the bottom edge of the stage.
  */
-export function spreadWants(panes: readonly Pane[], minimised: ReadonlySet<string>): SpreadWants {
+export function spreadWants(
+  panes: readonly Pane[],
+  minimised: ReadonlySet<string>,
+  showing: (where: BayName, sharing: readonly Pane[]) => Pane,
+): SpreadWants {
   const tallOf = (where: BayName): number | null => {
-    const pane = panes.find((one) => one.spread === where);
-    if (pane === undefined) {
+    const sharing = panesIn(panes, where);
+    if (sharing.length === 0) {
       return null;
     }
-    return minimised.has(pane.id) && pane.strip !== null ? pane.strip : pane.tall;
+    // The tile is as tall as the pane that is up, not as the tallest of them: a tab that is not showing is
+    // not taking any room, and the tile would otherwise be sized by something nobody can see.
+    const pane = showing(where, sharing);
+    const tall = minimised.has(pane.id) && pane.strip !== null ? pane.strip : pane.tall;
+    return tall + (sharing.length > 1 ? TAB_BAR : 0);
   };
 
   return {

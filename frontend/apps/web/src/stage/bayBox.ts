@@ -42,6 +42,14 @@ export const BAY_LEAST = 32;
 export const GUTTER = 16;
 
 /**
+ * How much of a tile the strip of tabs takes, when more than one pane is sharing it.
+ *
+ * Here rather than in the stylesheet because it is room: a tile with two panes in it is that much taller
+ * than the pane inside it, and the tile below has to start below all of it.
+ */
+export const TAB_BAR = 30;
+
+/**
  * What is kept clear at the top of the column, for the game's name.
  *
  * The one number in the layout that exists for a decoration, and it is here rather than in the stylesheet
