@@ -40,7 +40,7 @@ This is a loop, and Adam holds both ends of it: he approves what lands, and he c
 5. **Documents travel with it.** A change to a decision, an event or a term updates its document in the same
    commit: a decision record, the event catalogue, the glossary, the architecture.
 6. **Present it for review and stop.** A summary, the file list, the check output, the documents touched, and a
-   proposed commit message. Do not commit.
+   proposed commit message. Do not commit. End it with the **verify checklist**, below.
 7. **Commit on Adam's word, immediately,** then say what landed. One "commit" is the approval; asking for it
    again is the failure, not the caution.
 8. **Offer the next steps and stop again.** Two to four concrete options, each a sentence or two on what it
@@ -100,6 +100,24 @@ load and for every `flyTo`. A hidden pane therefore shows a map that never finis
 that reports itself moving while standing still, neither of which is a bug in the program. A screenshot
 pumps one frame, so a handful of them in a row carries a flight to its end; the DOM, the debug panel and
 the log can be read without any of that.
+
+
+## End every stop with a verify checklist
+
+Whenever the loop comes back to Adam to look at something, **the last thing written is a checklist of three
+to five things to check**, and nothing comes after it. Not the summary, not the commit message, not an offer
+of next steps: those go above it, because the checklist is what he reads first and acts on.
+
+**Three to five, whatever the size of the commit.** It is there to refresh a memory, not to enumerate a diff.
+A checklist with one item a changed file is a checklist nobody reads, and a twenty-line change and a
+two-hundred-line one get the same five items, picked for what would be embarrassing to have got wrong.
+
+**Immediately above it goes where to look**, and only that:
+
+- **The running program**: the address with its port, this tree's own, and nothing else on the line.
+- **Documents**: links to them, when what there is to verify is something to read rather than run.
+
+One or the other, not a paragraph explaining either.
 
 ## Every session works in its own git worktree
 
