@@ -114,6 +114,32 @@ export type BayName = 'floor' | 'left' | 'bottomLeft' | 'bottomMiddle' | 'first'
 /** The tiles, in the order they are cut. The floor is not one of them and is never tested against them. */
 export const TILES: readonly BayName[] = ['left', 'bottomLeft', 'bottomMiddle', 'first', 'second'];
 
+/**
+ * The bays whose panes **stack** rather than take turns.
+ *
+ * The rail is the one: up to three inspect windows, one under another, all drawn. They are about different
+ * things and comparing two of them should not mean remembering one, which is the whole argument for a rail
+ * and is why `MOST_OPEN` is three. Everywhere else, panes sharing a bay are alternatives and take turns
+ * behind a **tab bar**.
+ */
+const STACKS: ReadonlySet<BayName> = new Set<BayName>(['left']);
+
+/**
+ * How the panes sharing a bay divide it.
+ *
+ * A property of the **bay** and not of the panes in it: two panes in one bay either take turns or they are
+ * both drawn, and it cannot differ between them. Reading it off the count alone was the bug - three windows
+ * in the rail are not three tabs, and the rail grew a strip of tabs over the top of its first window.
+ */
+export function sharedBy(where: BayName): 'tabs' | 'stack' {
+  return STACKS.has(where) ? 'stack' : 'tabs';
+}
+
+/** Whether this bay is showing a tab bar: more than one pane in it, and they take turns. */
+export function isTabbed(where: BayName | null, sharing: number): boolean {
+  return where !== null && sharing > 1 && sharedBy(where) === 'tabs';
+}
+
 export type Form = 'spread' | 'bays';
 
 /**

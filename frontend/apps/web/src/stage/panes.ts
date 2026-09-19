@@ -1,7 +1,7 @@
 import { paneIdOf, subjectOfPane, subjectsNow } from '../inspect/subjects';
 import type { Subject } from '../inspect/subjects';
 import type { Asking, BayName, SpreadWants } from './bayBox';
-import { TAB_BAR } from './bayBox';
+import { isTabbed, TAB_BAR } from './bayBox';
 import type { IconName } from './Icons';
 
 /**
@@ -147,7 +147,7 @@ export function spreadWants(
     // not taking any room, and the tile would otherwise be sized by something nobody can see.
     const pane = showing(where, sharing);
     const tall = minimised.has(pane.id) && pane.strip !== null ? pane.strip : pane.tall;
-    return tall + (sharing.length > 1 ? TAB_BAR : 0);
+    return tall + (isTabbed(where, sharing.length) ? TAB_BAR : 0);
   };
 
   return {

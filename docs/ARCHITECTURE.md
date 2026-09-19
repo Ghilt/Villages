@@ -257,10 +257,11 @@ live in, whether it can be put away, which bay it belongs in and the mark it is 
 it. Nothing in the layout knows what a map is, and no pane learns where it is beyond the room it was given -
 which is what lets a ui mechanic be written once and drawn at every size.
 
-**Two panes naming the same bay is a tab bar**, and that is the whole of how a bay holds more than one. The
+**Two panes naming the same bay share it**, and that is the whole of how a bay holds more than one. The
 panes declare it rather than the layout deciding it when they stop fitting, so a tab cannot appear and
-vanish as a window is dragged; the arithmetic learns only that a shared bay is a strip taller than whichever
-pane is up in it. See decision record 0042.
+vanish as a window is dragged. **Whether they take turns or stack is the bay's property** - the rail stacks
+its windows, everywhere else the panes are alternatives behind a tab bar - and the arithmetic learns only
+that a tabbed bay is a strip taller than whichever pane is up in it. See decision record 0042.
 
 **Nothing is unmounted to move it.** A pane changes bays by changing which cell of a grid its wrapper sits
 in, not by being torn down and rebuilt elsewhere. That matters for exactly one pane and it matters a lot:

@@ -11,8 +11,10 @@ import {
   formFor,
   GUTTER,
   inside,
+  isTabbed,
   overlap,
   type Rect,
+  sharedBy,
   type SpreadWants,
   TILES,
   UNFOLDS_OVER,
@@ -77,6 +79,42 @@ describe('formFor', () => {
         }
       }
     });
+  });
+});
+
+/**
+ * How panes sharing a bay divide it, which is a property of the bay and not of how many there are.
+ *
+ * Reading it off the count alone was a real defect: a second inspect window made the rail grow a strip of
+ * tabs across the top of its first window, on a bay whose whole purpose is that the windows stack.
+ */
+describe('sharedBy', () => {
+  it('stacks the rail, because comparing two windows should not mean remembering one', () => {
+    expect(sharedBy('left')).toBe('stack');
+  });
+
+  it('tabs the corner and the bottom middle, where panes are alternatives', () => {
+    expect(sharedBy('bottomLeft')).toBe('tabs');
+    expect(sharedBy('bottomMiddle')).toBe('tabs');
+  });
+
+  it('never tabs a bay with one pane in it, or none', () => {
+    expect(isTabbed('bottomLeft', 1)).toBe(false);
+    expect(isTabbed('bottomLeft', 0)).toBe(false);
+  });
+
+  it('tabs a shared bay whose panes take turns', () => {
+    expect(isTabbed('bottomLeft', 2)).toBe(true);
+  });
+
+  // The defect, as a test: three windows in the rail are not three tabs.
+  it('never tabs the rail, however many windows are in it', () => {
+    expect(isTabbed('left', 2)).toBe(false);
+    expect(isTabbed('left', 3)).toBe(false);
+  });
+
+  it('never tabs a pane that is in no bay at all', () => {
+    expect(isTabbed(null, 3)).toBe(false);
   });
 });
 

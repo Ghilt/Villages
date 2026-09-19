@@ -30,10 +30,16 @@ take turns in it. Everything 0041 built is untouched — the tiles still never o
 learns only that a shared tile is `TAB_BAR` taller than whatever is in it.
 
 **The panes declare that they share, and the layout never decides it.** A pane already said which tile it
-sits in; two panes naming the same tile *is* a tabbed tile, and nothing else is needed. This is deliberately
-not what `ARCHITECTURE.md` first guessed — that the layout would merge panes into a tab when they no longer
-fit. That version makes the tabs appear and disappear as the window is dragged, which is the jerking 0041
-exists to prevent, and it makes a pane's neighbours depend on the size of the screen.
+sits in; two panes naming the same tile share it, and nothing else is needed. This is deliberately not what
+`ARCHITECTURE.md` first guessed — that the layout would merge panes into a tab when they no longer fit. That
+version makes the tabs appear and disappear as the window is dragged, which is the jerking 0041 exists to
+prevent, and it makes a pane's neighbours depend on the size of the screen.
+
+**Whether panes sharing a bay take turns or stack is the bay's own property, not a count.** The rail stacks:
+up to three windows, one under another, all drawn, because they are about different things and comparing two
+of them should not mean remembering one — that is the whole argument for a rail. The corner tabs, because
+the house status and navigation are alternatives. Two panes in one bay either take turns or they do not, and
+it cannot differ between them, so the bay is where it is said.
 
 **The tile is as tall as the pane that is up**, not as the tallest of them. A tab nobody can see is not
 taking any room, and sizing the corner by something hidden would leave a band of nothing under whichever
@@ -83,6 +89,11 @@ module so the next person does not undo it.
 this code wrote, and the shape of a `Subject` has already changed once. Anything that is not a step is
 dropped rather than rendered, and a browser that refuses to remember is not a failure — the trail is a
 convenience, not state.
+
+**Sharing is not the same as tabbing, and reading it off the count was a defect.** The first version of this
+asked only how many panes were in a bay, so opening a second inspect window made the rail grow a strip of
+tabs across the top of its own first window — on the one bay whose entire purpose is that the windows stack.
+Adam found it by looking, which is what 0023 says the panel is for. It is a test now.
 
 The cost taken knowingly: **a tab is a place a player has to look.** A pending choice behind a tab is the
 world asking something the player cannot see, which is why the choice roll is going in a tile of its own and
