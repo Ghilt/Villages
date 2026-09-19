@@ -238,6 +238,41 @@ region of it. See `RESPONSIVE-DESIGN.md`.
 What the server owes a dialogue is undecided, because whether the lines themselves are events is undecided;
 `MECHANICS.md` says so under the mechanic.
 
+## What the panes ask of the client
+
+The stage is a map with a column of panes lying on it, and one rule places them at every size; decision
+record 0040 says why, and `RESPONSIVE-DESIGN.md` says what it looks like. What it costs the client is small
+and specific.
+
+**The layout is arithmetic, in a module of its own, with a test.** Given the stage's size and what each view
+asked for, out comes which side the column is on, how big it is, and every pane's box - including which
+views the layout had to merge into one tabbed pane to make them fit. No DOM, no React, nothing to click: the
+same shape as `stageBox.ts`, which is the stage's own arithmetic and is pure for the same reason. It stays
+in `apps/web` rather than moving down to `client-core`, because the layer rule is there to keep *game* logic
+testable without a browser and this is presentation arithmetic that would mean nothing to a headless client.
+The test is what makes it reviewable; the component only renders what it is handed.
+
+**A view is declared, not positioned.** A view says what it is called, the room it wants, the least it can
+live in and whether it can be put away. The layout places it. Nothing in the layout knows what a map is, and
+no view learns where it is beyond the room it was given - which is what lets a ui mechanic be written once
+and drawn at every size.
+
+**Nothing is unmounted to move it.** A view changes panes by changing which cell of a grid its wrapper sits
+in, not by being torn down and rebuilt elsewhere. That matters for exactly one view and it matters a lot:
+`MapView` calls `map.remove()` when it unmounts, and MapLibre holds the camera, the style and a WebGL
+context, with the sprite overlay's Pixi canvas beside it. One DOM tree and no portals is the whole
+technique, and it is free because everything on the stage is already `position: absolute; inset: 0` - a view
+only ever needed a positioned box around it, and the stage was already that box.
+
+**The camera is told what the column covers.** The column lies on the map rather than taking room from it,
+so the map's visible middle is not its geometric middle. Whatever flies the camera reads the layout's answer
+for that, in one place, rather than every caller guessing.
+
+**Which pane holds what is where the player is, not a preference.** It is a module store with a listener
+set, like the gateway and the selection and the areas, and a reload forgets it. What the player has looked
+at does survive a reload, because a trail that empties itself is not a trail. What persists besides that -
+the phone toggle, the folded sections - is Adam's and lives in `debug/stage.ts`.
+
 ## Events over time
 
 Event types are versioned by name and catalogued in the event catalogue, which a test parses. Until the

@@ -2,11 +2,16 @@ import { fenceSize, fenceWindow } from '@villages/world';
 import type { Fence } from '@villages/world';
 
 import { note } from '../debug/log';
+import { forgetSubject } from '../inspect/subjects';
 import { censusOf } from './census';
 import type { Census } from './census';
 
 /**
- * The areas drawn on the map, and which one is selected.
+ * The areas drawn on the map.
+ *
+ * Which one is being looked at is not here any more: an area is a **subject**, and what is being inspected
+ * is one store for every kind of thing (`inspect/subjects.ts`). This used to keep a selection of its own
+ * beside the houses' one, which is exactly the split that made two clicks mean two different things.
  *
  * A module with a listener set rather than a context, the same shape as the debug log and the gateway,
  * because that is what `useSyncExternalStore` wants and it keeps the state out of the component tree.
@@ -35,12 +40,11 @@ export interface Area {
 
 export interface AreasState {
   readonly areas: readonly Area[];
-  readonly selected: string | null;
   /** Whether the next drag on the map paints an area rather than moving the camera. */
   readonly armed: boolean;
 }
 
-const NO_AREAS: AreasState = { areas: [], selected: null, armed: false };
+const NO_AREAS: AreasState = { areas: [], armed: false };
 
 let state: AreasState = NO_AREAS;
 const listeners = new Set<() => void>();
@@ -104,7 +108,6 @@ export function addArea(fence: Fence, tilesRoot: string): string {
       ...state.areas,
       { id, fence, shaded: true, pixels, census: null, counting: false, problem: null },
     ],
-    selected: id,
   });
   countArea(id, tilesRoot);
   return id;
@@ -136,17 +139,6 @@ export function countArea(id: string, tilesRoot: string): void {
   );
 }
 
-export function selectArea(id: string | null): void {
-  if (state.selected === id) {
-    return;
-  }
-  if (id !== null) {
-    const area = state.areas.find((candidate) => candidate.id === id);
-    note('area', `${id} selected, ${area === undefined ? 'gone' : `${area.pixels.toLocaleString()} pixels`}`);
-  }
-  update({ selected: id });
-}
-
 export function shadeArea(id: string, shaded: boolean): void {
   replace(id, { shaded });
 }
@@ -156,16 +148,19 @@ export function deleteArea(id: string): void {
     return;
   }
   note('area', `${id} deleted`);
-  update({
-    areas: state.areas.filter((area) => area.id !== id),
-    selected: state.selected === id ? null : state.selected,
-  });
+  update({ areas: state.areas.filter((area) => area.id !== id) });
+  // A window open on it is now a window about nothing, and the player did not close it.
+  forgetSubject({ kind: 'area', id });
 }
 
 export function forgetAreas(): void {
   if (state.areas.length === 0) {
     return;
   }
-  note('area', `${state.areas.length} deleted`);
-  update({ areas: [], selected: null });
+  const had = state.areas;
+  note('area', `${had.length} deleted`);
+  update({ areas: [] });
+  for (const area of had) {
+    forgetSubject({ kind: 'area', id: area.id });
+  }
 }

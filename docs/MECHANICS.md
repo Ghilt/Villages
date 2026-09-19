@@ -6,8 +6,8 @@
 > (`LOOK-AND-FEEL.md`), what the world is (`SETTING.md`), when any of it gets built (`ROADMAP.md`).
 
 **Every mechanic has a name**, and that name is the word used everywhere afterwards: in conversation, in the
-glossary, in the code and in the interface. An entry has four parts — what it is, what it is for, its look
-and feel, and what is not decided about it.
+glossary, in the code and in the interface. An entry has five parts — what it is, what it is for, its look
+and feel, what is not decided about it, and where it stands in the source today.
 
 Where a mechanic is driven by a part of the program, the entry names that part and points at
 `ARCHITECTURE.md` rather than describing it. A mechanic is what the player meets; the engine behind it is
@@ -142,3 +142,173 @@ a phone it is what is on screen. See `RESPONSIVE-DESIGN.md`.
 
 Nothing of it exists. No event, no frame, no component. `ARCHITECTURE.md` records what showing one would
 ask of the client, and it is on the roadmap under Later.
+
+---
+
+## Inspect window
+
+The way the game answers "what is that". Not the map's own: the map is only the first place a player
+points at something.
+
+### What it is
+
+A window that says what one thing in the world is. That thing is its **subject** — today a house or an
+area, later a character, a holding, a work, a place named in a conversation. The window says what the
+world knows about that subject, and then it offers **links**: the things worth looking at from here, each
+of which opens on its own.
+
+**A link is a way on, and there are two kinds.** One is another subject, which opens another inspect
+window: from a house to the ground about its seat, from that ground to the house next door. The other is a
+view, which brings that view up on this subject rather than opening a window — *show it on the map* is the
+first of those, and it means the map, focused on the thing being looked at.
+
+**Nothing about it belongs to the map.** A player points at a subject and a window opens; pointing at a
+castle on the map is the first way to do that and not the only one. When **character dialogue** arrives,
+a highlighted word in a line of speech — *Castle Erebus* — is the same pointing and opens the same window.
+A mechanic that wants to say "and here is the thing I just mentioned" does not build anything.
+
+### What it is for
+
+**Knowing what a thing is.** A world of marks on a map is a world of marks until something says what they
+are. This is the plainest need the interface has and the one everything else is built over.
+
+**Getting somewhere from it.** A window is travelled from rather than read and closed. Following a link
+from a house to the ground it holds, and from there to a neighbour who holds the ground beside it, is how
+a player reads a neighbourhood — and it is reading, not searching, because the world hands over the next
+question rather than making the player think of it.
+
+**One window for every kind of thing.** The parchment renders any choice from its words and knows nothing
+about what kind of choice it is showing; the inspect window renders any subject the same way. A new kind
+of thing in the world costs a description of itself, not a component. This is the part that has to hold,
+because everything the world grows will want to be looked at.
+
+**Several at once, where there is room.** On a screen with space a player can have three open and compare
+them. On a phone they get one, and the same links, and the arrows that say where to put what they open
+next. Comparing two houses should not mean remembering one of them.
+
+### Look and feel
+
+A card, for now, with the subject's name at the top, what is known about it below, and its links at the
+bottom. That is a description of what is there rather than a decision: the diegetic rule in
+`LOOK-AND-FEEL.md` says what the player is shown should be part of the world, and a card is not, so this
+is the shape most likely to change.
+
+The links carry **the arrows** — the shared two-arrow control in `LOOK-AND-FEEL.md`, which says which of
+the two panes a thing would open into.
+
+It is **responsive from the start**: where there is room the windows stack in a rail, up to three, and on
+a phone one of them is a pane and its links ask which pane to open into. See `RESPONSIVE-DESIGN.md`.
+
+### Not decided
+
+Most of what it will eventually say. **This entry is a foundation and not a design**, and what follows is
+the list of what is still to be worked out.
+
+- **What it says about each subject.** A house's window says its name, its banner, its seat, the day it
+  was founded and its treasury, because that is everything the wire carries about a house. What a player
+  actually wants to know — who holds what nearby, what this house has done, whether it is a friend — needs
+  the things themselves before it needs a window.
+- **Where the links come from.** Whether a subject describes its own links, or the world is asked what is
+  near this thing and answers. The first is simple and the second is what a living world would do.
+- **Whether it should be diegetic.** The desk is already under the map and the workbench is on the
+  roadmap. A dossier, a letter or a page in a ledger would sit on it; a card floats over it.
+- **Whether a window is kept.** Pinning one so a rail does not push it off, stepping back through what has
+  been looked at, and whether any of it survives a reload.
+- **What else can be a subject**, and whether a subject is ever something the server names rather than
+  something the browser works out.
+
+### Where it stands
+
+The shape of it is built and what it can say is thin. A **subject** covers a house and an area, one store
+for both, which is what the two selections that used to run side by side became. A window renders a
+description and knows nothing of what made it. Links go both ways between a house and the ground somebody
+has fenced around it, and *show it on the map* moves the camera. Up to three stack in a rail in the spread,
+a fourth pushing the oldest off; on a phone one of them is a pane and its links carry the arrows.
+
+What it says is everything the wire carries and no more, which for a house is a name, a banner, a seat, a
+founding day and one resource. It added no event and no frame, so the protocol version did not move. The
+`Inspector` it replaces is gone, and so is `select/selection.ts`. The layout it sits in is decision record
+0040.
+
+---
+
+## House status
+
+How your own house stands, always to hand. The one thing on the screen that is yours rather than the
+world's.
+
+### What it is
+
+A card saying how the player's own house is: who it is, what it has, and what it can do. It carries the
+**bar of the house's own levers** along its bottom, and the **eye** is the first of them; five places
+stand empty beside it (decision record 0038).
+
+**This is the line between it and the inspect window, and it is worth stating plainly.** An inspect window
+is *opened on* a thing and closed again; it can be about anybody's house. House status is never opened,
+never closed, and is always about yours. One is a question the player asked; the other is the answer to a
+question they did not have to.
+
+**It can get out of the way.** Minimised, it collapses to a strip and gives its room back to whatever is
+beside it. A player reading the map for a while should be able to have the map.
+
+### What it is for
+
+**Knowing where you stand without asking.** The treasury goes up while the player is looking at something
+else. If seeing that costs a click, it will not be seen, and a resource nobody watches is a resource that
+is not really in the game.
+
+**The house's own levers, in one place.** The eye is not a setting and not a debug switch: it is something
+the house does, and it belongs to the house rather than floating over the map. Everything of that kind
+that comes later goes in the same bar, which is why the empty places are drawn rather than left out —
+the bar is already the shape it will be and nothing moves as it fills.
+
+**Making the house a face rather than a dot.** The banner and the name are what turn "my sprite" into "my
+house". The player's own identity should be the best-looking thing on the screen, because it is the thing
+they chose.
+
+**Getting out of the way.** A status card that cannot be dismissed stops being read and becomes furniture.
+Minimise is the mechanic admitting that the map is sometimes the whole point.
+
+### Look and feel
+
+A card in the corner, cut off by it: bordered on the two edges facing the world and flush against the two
+that are the screen's, so it reads as part of the furniture rather than as a dialogue over it. The shield,
+the name, the banner blazoned in words, and the treasury counting up.
+
+Three sizes, and the mechanic owns all three:
+
+- **Full** — everything above, with the bar beneath it.
+- **Small** — the shield, the name and the treasury on one line, with the bar under them. What it is when
+  it is sharing a screen with something else.
+- **Minimised** — a strip with the name on it and nothing more, so the player knows where it went.
+
+It is **responsive from the start**, and it is the mechanic that proves the rule: the card has never fitted
+a phone. See `RESPONSIVE-DESIGN.md`.
+
+### Not decided
+
+Nearly everything it will eventually say. **This entry is a foundation and not a design**, and it is thin
+today because a house is thin today.
+
+- **What a house has.** The treasury is the only resource in the world, and a status card with one number
+  on it is a status card with nothing to say. The resource system is on the roadmap under Later and this
+  mechanic is waiting on it more than on anything else.
+- **What the five empty places hold.** They are for the house's own levers and nobody has named the second
+  one.
+- **Whether it says what is happening as well as what is.** A choice pending, an event that just landed, a
+  neighbour who did something — whether any of that belongs here or somewhere else entirely.
+- **Whether it stays a card.** The workbench on the roadmap turns the desk under the map into a place with
+  the house's papers on it, and the house's papers are this.
+- **Whether it ever shows anything that is not yours** — a neighbour's standing beside your own, for
+  instance — or whether everything about somebody else is an **inspect window** and this stays purely the
+  player's.
+
+### Where it stands
+
+Named, and it fits. The house card from `1841023` is `HouseStatus` now, a **view** the layout places rather
+than a card positioned by hand, and it has the three sizes above: the corner card, one line and the bar, and
+a strip. The `min-width: 26rem` that would not fit a 390-pixel phone - the first thing decision 0039's
+instrument found - is gone.
+
+What it says has not changed and is the whole problem: a shield, a name, a blazon and one number. It is
+waiting on the resource system more than on anything else.

@@ -4,18 +4,11 @@ import type * as maplibregl from 'maplibre-gl';
 import type { TerrainClass } from '@villages/world';
 
 import { Section } from '../debug/Section';
+import { inspect, stopInspecting } from '../inspect/opening';
+import { subjectsNow, watchSubjects } from '../inspect/subjects';
 import { terrainPalette } from '../map/terrainClasses';
 import type { Census } from './census';
-import {
-  areasNow,
-  armDrawing,
-  countArea,
-  deleteArea,
-  forgetAreas,
-  selectArea,
-  shadeArea,
-  watchAreas,
-} from './areas';
+import { areasNow, armDrawing, countArea, deleteArea, forgetAreas, shadeArea, watchAreas } from './areas';
 import type { Area } from './areas';
 
 /**
@@ -120,7 +113,11 @@ export function AreasView({ map, worldRoot }: AreasViewProps) {
     };
   }, []);
 
-  const selected = state.areas.find((area) => area.id === state.selected) ?? null;
+  // Which area this section shows the census of is the same question as which one has an inspect window
+  // open on it, so it is the same answer: the newest subject, if that is an area. One store, one truth.
+  const top = useSyncExternalStore(watchSubjects, subjectsNow).open[0];
+  const looking = top?.kind === 'area' ? top.id : null;
+  const selected = state.areas.find((area) => area.id === looking) ?? null;
 
   const tools = (
     <>
@@ -155,8 +152,12 @@ export function AreasView({ map, worldRoot }: AreasViewProps) {
           <li key={area.id}>
             <button
               type="button"
-              className={`areas__pick${area.id === state.selected ? ' areas__pick--on' : ''}`}
-              onClick={() => selectArea(area.id === state.selected ? null : area.id)}
+              className={`areas__pick${area.id === looking ? ' areas__pick--on' : ''}`}
+              onClick={() =>
+                area.id === looking
+                  ? stopInspecting({ kind: 'area', id: area.id })
+                  : inspect({ kind: 'area', id: area.id })
+              }
             >
               <span className="debug__area">{area.id}</span>
               {area.pixels.toLocaleString()} px

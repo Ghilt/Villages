@@ -3,6 +3,7 @@ import type * as maplibregl from 'maplibre-gl';
 
 import { housesInView } from '@villages/client-core';
 import type { ChoiceView, HouseView } from '@villages/protocol';
+import type { MasterGrid } from '@villages/world';
 
 import { AreaOverlay } from './areas/AreaOverlay';
 import { Parchment } from './choice/Parchment';
@@ -12,15 +13,20 @@ import { Grips } from './debug/Grips';
 import { panelIsShut, stageMode, watchStage } from './debug/stage';
 import { stageBox } from './debug/stageBox';
 import { note } from './debug/log';
-import { select } from './select/selection';
+import { inspect } from './inspect/opening';
+import { Inspecting } from './inspect/Inspecting';
+import { subjectOfView } from './inspect/subjects';
 import { gateway, gatewayState, watchGateway } from './net/gateway';
 import { followMap } from './net/followMap';
-import { eyeIsOpen, watchEye } from './hud/eye';
-import { HudShell } from './hud/HudShell';
+import { eyeIsOpen, watchEye } from './house/eye';
+import { HouseStatus } from './house/HouseStatus';
 import { InfluenceOverlay } from './influence/InfluenceOverlay';
-import { Inspector } from './inspect/Inspector';
-import { StoodDown } from './hud/StoodDown';
+import { StoodDown } from './net/StoodDown';
+import { flyWith } from './map/focus';
 import { MapView } from './map/MapView';
+import { terrainPalette } from './map/terrainClasses';
+import { Stage } from './stage/Stage';
+import { MAP_VIEW, HOUSE_VIEW } from './stage/views';
 import { worldRootOf } from './map/masters';
 import { DEFAULT_RENDERER, RENDERERS, applyRenderer } from './map/renderers';
 import { SpriteOverlay } from './sprites/SpriteOverlay';
@@ -145,8 +151,8 @@ export function App({ master }: AppProps) {
     if (map !== null && seat !== undefined && mine !== undefined) {
       note('camera', `flying to the seat at ${seat.lat.toFixed(3)}, ${seat.lon.toFixed(3)}`);
       map.flyTo({ center: [seat.lon, seat.lat], zoom: Math.max(map.getZoom(), FOUNDING_ZOOM) });
-      // Arriving at your own house with it already selected: the inspector is what the flight is for.
-      select({ kind: 'house', id: mine });
+      // Arriving at your own house with a window already open on it: that is what the flight is for.
+      inspect({ kind: 'house', id: mine });
     }
   }, [map, seat, mine]);
 
@@ -157,6 +163,35 @@ export function App({ master }: AppProps) {
       note('renderer', `${renderer}${chosen === undefined ? '' : `, ${chosen.note.toLowerCase()}`}`);
     }
   }, [map, renderer]);
+
+  // How an inspect window's "show it on the map" link reaches the camera, without anything in the interface
+  // having to be handed a map it has no business holding.
+  useEffect(() => {
+    if (map === null) {
+      return;
+    }
+    flyWith((place) => {
+      note('camera', `showing ${place.lat.toFixed(3)}, ${place.lon.toFixed(3)}`);
+      map.flyTo({ center: [place.lon, place.lat], zoom: Math.max(map.getZoom(), FOUNDING_ZOOM) });
+    });
+    return () => flyWith(null);
+  }, [map]);
+
+  // The shape of the master, so a window can say which drawn area a seat falls inside. Runtime data rather
+  // than a constant, because which world is being drawn is a choice the browser makes; see 0025. The same
+  // one fetch the area overlay and the painter already made.
+  const [masterShape, setMasterShape] = useState<MasterGrid | null>(null);
+  useEffect(() => {
+    let looking = true;
+    void terrainPalette().then((palette) => {
+      if (looking) {
+        setMasterShape({ width: palette.masterWidth, height: palette.masterHeight });
+      }
+    });
+    return () => {
+      looking = false;
+    };
+  }, []);
 
   const worldRoot = worldRootOf(master);
 
@@ -176,18 +211,40 @@ export function App({ master }: AppProps) {
        * Everything a player would ever see, and nothing else, inside a box the debug panel takes room
        * from. That is what makes the phone toggle worth having: what is left at 390 pixels is what a
        * player would actually get. See decision record 0039.
+       *
+       * The stage divides itself: one box in the spread, two panes once there is no longer room for
+       * everything at once. A view is handed the room it got and draws itself at that size; nothing here
+       * knows which pane anything is in. See decision record 0040.
        */}
-      <div className="stage">
-        <Desk map={map} />
-        <MapView worldRoot={worldRoot} onReady={setMap} />
-        {map !== null && <SpriteOverlay map={map} sprites={sprites} />}
-        <AreaOverlay map={map} worldRoot={worldRoot} />
-        <InfluenceOverlay map={map} houses={drawn} mine={eye ? yours : null} />
-        <HudShell />
-        <Inspector />
-        <Parchment />
-        <StoodDown />
-      </div>
+      <Stage
+        stage={box.stage}
+        contents={(id, room, along) => {
+          if (id === MAP_VIEW.id) {
+            return (
+              <>
+                <Desk map={map} />
+                <MapView worldRoot={worldRoot} onReady={setMap} />
+                {map !== null && <SpriteOverlay map={map} sprites={sprites} />}
+                <AreaOverlay map={map} worldRoot={worldRoot} />
+                <InfluenceOverlay map={map} houses={drawn} mine={eye ? yours : null} />
+              </>
+            );
+          }
+          if (id === HOUSE_VIEW.id) {
+            return <HouseStatus room={room} />;
+          }
+          const subject = subjectOfView(id);
+          return subject === null ? null : (
+            <Inspecting subject={subject} room={room} along={along} grid={masterShape} />
+          );
+        }}
+        overlays={
+          <>
+            <Parchment />
+            <StoodDown />
+          </>
+        }
+      />
 
       <DebugPanel
         map={map}

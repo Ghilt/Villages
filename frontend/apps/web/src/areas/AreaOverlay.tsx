@@ -15,7 +15,9 @@ import type { MasterGrid } from '@villages/world';
 import { note } from '../debug/log';
 import { terrainPalette } from '../map/terrainClasses';
 import { MOST_PIXELS } from './census';
-import { addArea, areasNow, armDrawing, selectArea, watchAreas } from './areas';
+import { inspect } from '../inspect/opening';
+import { subjectsNow, watchSubjects } from '../inspect/subjects';
+import { addArea, areasNow, armDrawing, watchAreas } from './areas';
 
 /**
  * Areas on the map: the line, the shade, the pulse, and the drag that draws one.
@@ -63,6 +65,10 @@ const EMPTY: FeatureCollection = { type: 'FeatureCollection', features: [] };
 
 export function AreaOverlay({ map, worldRoot }: AreaOverlayProps) {
   const state = useSyncExternalStore(watchAreas, areasNow);
+  // Which area breathes: whatever was opened last, if that was an area. The map marks one thing, and with
+  // three windows up the newest is the one the player is looking at.
+  const top = useSyncExternalStore(watchSubjects, subjectsNow).open[0];
+  const pulsing = top?.kind === 'area' ? top.id : null;
   const [grid, setGrid] = useState<MasterGrid | null>(null);
 
   /** Read inside pointer handlers, which must see the grid without being rebuilt when it arrives. */
@@ -186,13 +192,13 @@ export function AreaOverlay({ map, worldRoot }: AreaOverlayProps) {
     if (map === null || map.getLayer(PULSE) === undefined) {
       return;
     }
-    map.setFilter(PULSE, ['==', ['get', 'id'], state.selected ?? '']);
-  }, [map, state.selected]);
+    map.setFilter(PULSE, ['==', ['get', 'id'], pulsing ?? '']);
+  }, [map, pulsing]);
 
   // The pulse: plain numbers set on one layer that holds only the selected area, so nothing is
   // recompiled per frame and no other area is touched.
   useEffect(() => {
-    if (map === null || state.selected === null) {
+    if (map === null || pulsing === null) {
       return;
     }
     const set = (phase: number) => {
@@ -222,7 +228,7 @@ export function AreaOverlay({ map, worldRoot }: AreaOverlayProps) {
     return () => {
       running = false;
     };
-  }, [map, state.selected]);
+  }, [map, pulsing]);
 
   // While armed the map does not move: the drag belongs to the area being drawn.
   useEffect(() => {
@@ -428,7 +434,10 @@ export function AreaOverlay({ map, worldRoot }: AreaOverlayProps) {
       const hit = [...areasNow().areas]
         .sort((one, other) => one.pixels - other.pixels)
         .find((area) => insideFence(area.fence, x, y));
-      selectArea(hit?.id ?? null);
+      // Empty ground closes nothing: a window is the player's to shut. Only a hit opens one.
+      if (hit !== undefined) {
+        inspect({ kind: 'area', id: hit.id });
+      }
     };
 
     map.on('click', onClick);

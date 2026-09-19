@@ -2,7 +2,8 @@ import { useEffect, useRef, useSyncExternalStore } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
 import { seeingEverything, watchSeeingEverything } from '../debug/seeEverything';
-import { select, selectionNow, watchSelection } from '../select/selection';
+import { inspect } from '../inspect/opening';
+import { subjectsNow, watchSubjects } from '../inspect/subjects';
 import { cameraOf } from './mapCamera';
 import { createPixiSpriteRenderer } from './PixiSpriteRenderer';
 import type { MapSprite } from './SpriteRenderer';
@@ -19,7 +20,7 @@ interface SpriteOverlayProps {
 export function SpriteOverlay({ map, sprites }: SpriteOverlayProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const rendererRef = useRef<ReturnType<typeof createPixiSpriteRenderer> | null>(null);
-  const selected = useSyncExternalStore(watchSelection, selectionNow);
+  const top = useSyncExternalStore(watchSubjects, subjectsNow).open[0];
   const everything = useSyncExternalStore(watchSeeingEverything, seeingEverything);
 
   useEffect(() => {
@@ -47,23 +48,28 @@ export function SpriteOverlay({ map, sprites }: SpriteOverlayProps) {
     rendererRef.current?.setEverything(everything);
   }, [everything, sprites]);
 
+  // The ring follows whatever was opened last. With three windows up the map can still only mark one, and
+  // the newest is the one the player is looking at.
   useEffect(() => {
-    rendererRef.current?.setSelected(selected?.kind === 'house' ? selected.id : null);
-  }, [selected, sprites]);
+    rendererRef.current?.setSelected(top?.kind === 'house' ? top.id : null);
+  }, [top, sprites]);
 
   /**
-   * Picking a house. The canvas takes no pointer events, so the map hands the click over and the
-   * renderer says what it drew there. A hit is marked handled, which is how the area overlay knows to
-   * leave its own selection alone: two things on one click would be one thing too many.
+   * Picking a house, which opens an **inspect window** on it.
+   *
+   * The canvas takes no pointer events, so the map hands the click over and the renderer says what it drew
+   * there. A hit is marked handled, which is how the area overlay knows to leave the click alone: two
+   * things opened by one click would be one thing too many.
+   *
+   * A click on empty ground closes nothing. A window is a thing the player opened and it is theirs to
+   * shut; the old inspector vanished on every stray click, which made it useless for reading.
    */
   useEffect(() => {
     const onClick = (event: maplibregl.MapMouseEvent) => {
       const hit = rendererRef.current?.hitTest(event.point) ?? null;
       if (hit !== null) {
         event.preventDefault();
-        select({ kind: 'house', id: hit });
-      } else if (selectionNow() !== null) {
-        select(null);
+        inspect({ kind: 'house', id: hit });
       }
     };
 

@@ -49,9 +49,16 @@ Wanted, not started, and each needs a hypothesis in `docs/experiments/` before a
 - **Character dialogue**: people talking to each other, and the mechanic storylines are carried in. See
   `MECHANICS.md`; what it asks of the client is in `ARCHITECTURE.md`, and one of its questions - the DOM or
   a Pixi surface - wants deciding before much of it is written.
-- **A responsive interface.** Every component laid out for a phone as well as a desktop. The rule is in
-  `RESPONSIVE-DESIGN.md` and applies to new work from now on; what exists was written desktop-only and has
-  to be brought over.
+- **A responsive interface.** The layout is decided now - the stage folds into two panes below 600 pixels
+  on its shorter side, a view occupies a pane, and any view can be minimised (decision record 0040) - and
+  what remains is bringing the rest over. The parchment is the one still written against the window rather
+  than the stage, so its breakpoint never fires. Touch is untouched: hover lifts a parchment and the map is
+  driven by drag and wheel.
+- **The inspect window**, beyond a house and an area: what it says about a subject once there is more than
+  a name and a treasury to say, where its links come from, and whether it is a card or a paper on the desk.
+  See `MECHANICS.md`.
+- **The house status**, beyond one number. It is waiting on the resource system more than on anything else,
+  and on somebody naming the second of the five empty places in its bar. See `MECHANICS.md`.
 - **House leanings**: what identity is made of, and how the world reflects it.
 - **Holdings on the map beyond the seat.**
 - **Neighbours**: awareness of nearby houses, and the first thing two houses can do to each other.

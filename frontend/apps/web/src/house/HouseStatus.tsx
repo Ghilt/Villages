@@ -1,9 +1,10 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 
 import { describeDay } from '@villages/protocol';
-import type { HouseView } from '@villages/protocol';
 
 import { gatewayState, watchGateway } from '../net/gateway';
+import type { Room } from '../stage/views';
+import { blazon, TICK_MS, treasuryAt } from './describe';
 import { HouseBar } from './HouseBar';
 
 /**
@@ -25,9 +26,6 @@ const ACHIEVEMENT = {
   stem: 'M40 85 V88',
 } as const;
 
-/** How often the treasury is redrawn. A resource is a rate, so a still number would be a lie. */
-const TICK_MS = 250;
-
 /** The tinctures as ink on parchment, the same muted set the map draws marks in. */
 const TINCTURE: Record<string, string> = {
   or: '#d4a017',
@@ -39,32 +37,44 @@ const TINCTURE: Record<string, string> = {
   purpure: '#5b3a86',
 };
 
-/** A banner in the words a herald would use, until the banner itself is drawn in increment 1.12. */
-function blazon(house: HouseView): string {
-  return `${house.banner.field}, a ${house.banner.charge} ${house.banner.chargeTincture}`;
-}
-
-/** The treasury as it stands now: an amount, a speed, and the instant that was true. See 0006. */
-function treasuryAt(house: HouseView, now: number): number {
-  const seconds = Math.max(0, (now - house.treasury.asOf) / 1000);
-  return Math.floor(house.treasury.amount + house.treasury.ratePerSecond * seconds);
+/** The chevron that puts the house away and brings it back. Window chrome, not one of the house's levers. */
+function Fold({ room, shut }: { room: Room; shut: boolean }) {
+  if (room.minimise === null) {
+    return null;
+  }
+  return (
+    <button
+      type="button"
+      className="hud__fold"
+      aria-pressed={shut}
+      aria-label={shut ? 'open your house back up' : 'put your house away'}
+      title={shut ? 'open it back up' : 'put it away and give the room to the map'}
+      onClick={room.minimise}
+    >
+      {shut ? '▴' : '▾'}
+    </button>
+  );
 }
 
 /**
- * The player's own house, in the corner, wherever they are looking.
+ * **House status**: how your own house stands, always to hand.
  *
- * It sits into the corner rather than floating near it: two edges are the window's own, and the card is
- * cut off by them the way a paper under the edge of a desk is. That is what lets it be this size without
- * reading as a panel laid over the map.
+ * Never opened and never closed, and always about yours - which is the line between it and an **inspect
+ * window**, which is opened on a thing and can be about anybody's house. See `MECHANICS.md`.
  *
- * Two parts: the achievement and the name above, and the bar of the house's own levers along the bottom.
- * The bar is part of the house rather than furniture floating over the map, because what it does is the
- * house's doing.
+ * Three sizes, and the mechanic owns all three. **Full** is the card in the corner, cut off by it: two edges
+ * are the stage's own and the card sits into them the way a paper sits under the edge of a desk, which is
+ * what lets it be this size without reading as a panel laid over the map. **Small** is one line of it and
+ * the bar, for when it is sharing a phone with something else. **Strip** is the name and no more, so the
+ * player who put it away knows where it went.
  *
- * Before there is a house it says so, because a player who has not founded one yet is the first thing
- * this has to handle: the frame is drawn either way, and the field inside it is empty.
+ * What it says is thin because a house is thin: a name, a banner, a seat and one resource. `MECHANICS.md`
+ * says what it is waiting on, and it is mostly the resource system.
+ *
+ * Before there is a house it says so, because a player who has not founded one yet is the first thing this
+ * has to handle: the frame is drawn either way, and the field inside it is empty.
  */
-export function HudShell() {
+export function HouseStatus({ room }: { room: Room }) {
   const heard = useSyncExternalStore(watchGateway, gatewayState);
   const [now, setNow] = useState(() => Date.now());
   const house = heard.yourHouse;
@@ -77,11 +87,28 @@ export function HudShell() {
     return () => clearInterval(often);
   }, [house]);
 
+  if (room.size === 'strip') {
+    return (
+      <div className="hud hud--strip">
+        <section className="hud__panel hud__panel--strip">
+          <span className="hud__name">{house === null ? 'No house yet' : house.name}</span>
+          <Fold room={room} shut />
+        </section>
+      </div>
+    );
+  }
+
+  const small = room.size === 'small';
+  const treasury = house === null ? '—' : treasuryAt(house, now).toLocaleString();
+
   return (
-    <div className="hud" aria-live="polite">
-      <header className="hud__title">Villages</header>
+    <div className={small ? 'hud hud--small' : 'hud'} aria-live="polite">
+      {/* The game's own name, not the house's. There is no room for it once the stage is two panes. */}
+      {!small && <header className="hud__title">Villages</header>}
 
       <section className={house === null ? 'hud__panel hud__panel--vacant' : 'hud__panel'}>
+        <Fold room={room} shut={false} />
+
         <div className="hud__achievement">
           <div className="hud__banner" aria-hidden="true">
             <svg viewBox="0 0 80 92" role="presentation">
@@ -102,27 +129,21 @@ export function HudShell() {
             </svg>
           </div>
 
-          {house === null ? (
-            <div className="hud__house">
-              <p className="hud__name">No house yet</p>
-              <p className="hud__hint">The map is the world. Your seat is somewhere on it.</p>
-              <dl className="hud__resources">
-                <dt>Treasury</dt>
-                <dd>&mdash;</dd>
-              </dl>
-            </div>
-          ) : (
-            <div className="hud__house">
-              <p className="hud__name">{house.name}</p>
+          <div className="hud__house">
+            <p className="hud__name">{house === null ? 'No house yet' : house.name}</p>
+            {/* The line that goes first when the room runs out: it is the most words and the least news. */}
+            {!small && (
               <p className="hud__hint">
-                {blazon(house)}. Founded {describeDay(house.since)}.
+                {house === null
+                  ? 'The map is the world. Your seat is somewhere on it.'
+                  : `${blazon(house)}. Founded ${describeDay(house.since)}.`}
               </p>
-              <dl className="hud__resources">
-                <dt>Treasury</dt>
-                <dd>{treasuryAt(house, now).toLocaleString()}</dd>
-              </dl>
-            </div>
-          )}
+            )}
+            <dl className="hud__resources">
+              <dt>Treasury</dt>
+              <dd>{treasury}</dd>
+            </dl>
+          </div>
         </div>
 
         <HouseBar borne={house !== null} />

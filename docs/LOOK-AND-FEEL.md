@@ -45,6 +45,13 @@ first use is the choice roll.
 slightly, so it reads as something that can be picked up. One parchment carries one option of a choice roll;
 what else it might carry is not decided.
 
+**The arrows.** Two marks, drawn as a compass needle would point, saying which of the two **panes** a thing
+would open into. Used in two places that are the same gesture: the kebab at the divider between the panes,
+where each view listed carries a pair, and the **links** on an **inspect window**, where each way on carries
+a pair. *Open this* and *open this there* are one decision, so they are one control. The spread has no panes
+to choose between, so there the same link is a plain click and no arrows are drawn. See
+`RESPONSIVE-DESIGN.md` and decision record 0040.
+
 ## Not decided
 
 - Theme and tone as a whole. See `VISION.md`.

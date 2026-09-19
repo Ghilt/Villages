@@ -151,6 +151,209 @@ body,
   padding: 0;
 }
 
+/*
+ * The panes: how the stage divides itself once there is no longer room for everything at once.
+ *
+ * In the spread the stage is one box and the views lie over one another exactly as they always did, which
+ * is why nothing inside them had to change: they were all `position: absolute; inset: 0` already, and a
+ * pane is the positioned box they were waiting for.
+ *
+ * In the panes the stage is a grid of two cut along its longer side, and a view moves between them by
+ * changing which cell it is in. **Nothing is unmounted to move it** - the map holds a camera, a style and a
+ * WebGL context, and `MapView` throws all three away when it unmounts. See decision record 0040.
+ */
+.stage[data-form='spread'] .pane {
+  position: absolute;
+  inset: 0;
+}
+
+/* Over the map and letting every click through to it; the card inside takes its own back. */
+.stage[data-form='spread'] .pane--house {
+  pointer-events: none;
+}
+
+.stage[data-form='panes'] {
+  display: grid;
+}
+
+.stage[data-form='panes'][data-along='rows'] {
+  grid-template-columns: 100%;
+  grid-template-rows: var(--pane-first, 1fr) var(--pane-second, 0px);
+}
+
+.stage[data-form='panes'][data-along='columns'] {
+  grid-template-columns: var(--pane-first, 1fr) var(--pane-second, 0px);
+  grid-template-rows: 100%;
+}
+
+/*
+ * A pane clips rather than scrolls. A view too big for its pane is a bug in the view, and a scrollbar is
+ * how that bug gets hidden. `min-width` and `min-height` because a grid item's floor is its content, and
+ * without them a wide card would push the grid wider than the stage instead of being cut off by it.
+ */
+.stage[data-form='panes'] .pane {
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+  min-height: 0;
+  container-type: size;
+}
+
+.stage[data-form='panes'][data-along='rows'] .pane[data-at='0'] {
+  grid-area: 1 / 1;
+}
+
+.stage[data-form='panes'][data-along='rows'] .pane[data-at='1'] {
+  grid-area: 2 / 1;
+}
+
+.stage[data-form='panes'][data-along='columns'] .pane[data-at='0'] {
+  grid-area: 1 / 1;
+}
+
+.stage[data-form='panes'][data-along='columns'] .pane[data-at='1'] {
+  grid-area: 1 / 2;
+}
+
+/* A view nobody has put in a pane. Hidden rather than unmounted, for the reason above. */
+.stage[data-form='panes'] .pane[data-at='nowhere'] {
+  display: none;
+}
+
+/*
+ * The kebab, on the seam between the two panes: what else there is, and which pane it would go into.
+ *
+ * Only in the panes. The spread shows everything at once, so there is nothing to choose between.
+ */
+.kebab {
+  position: absolute;
+  z-index: 5;
+}
+
+.kebab--rows {
+  top: var(--pane-first, 50%);
+  right: 0.3rem;
+  transform: translateY(-50%);
+}
+
+.kebab--columns {
+  left: var(--pane-first, 50%);
+  bottom: 0;
+  transform: translateX(-50%);
+}
+
+.kebab__open {
+  display: block;
+  width: 1.9rem;
+  height: 1.9rem;
+  padding: 0;
+  border: 1px solid var(--parchment-edge);
+  border-radius: 50%;
+  background: var(--parchment);
+  box-shadow: 0 1px 6px var(--shadow);
+  cursor: pointer;
+}
+
+.kebab__open svg {
+  width: 100%;
+  height: 100%;
+  fill: var(--ink-soft);
+}
+
+.kebab__open[aria-expanded='true'] svg {
+  fill: var(--gold);
+}
+
+.kebab__list {
+  position: absolute;
+  right: 0;
+  bottom: 2.2rem;
+  z-index: 5;
+  margin: 0;
+  padding: 0.3rem;
+  list-style: none;
+  min-width: 11rem;
+  background: var(--parchment);
+  border: 1px solid var(--parchment-edge);
+  border-radius: 3px;
+  box-shadow: 0 2px 14px var(--shadow);
+}
+
+.kebab--columns .kebab__list {
+  right: auto;
+  left: 0;
+}
+
+/*
+ * How much of a pane's top-right corner the kebab is standing in.
+ *
+ * The kebab sits at the far end of the divider - the right end of a horizontal one, the bottom end of a
+ * vertical one - so in rows it lands on the lower pane's top corner and there is exactly one pane that has
+ * to get out of its way. Any chrome a view puts in that corner reads this rather than knowing about kebabs.
+ */
+.pane {
+  --corner-taken: 0px;
+}
+
+.stage[data-form='panes'][data-along='rows'] .pane[data-at='1'] {
+  --corner-taken: 2.5rem;
+}
+
+.kebab__row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.25rem 0.1rem 0.25rem 0.45rem;
+}
+
+.kebab__what {
+  flex: 1;
+  font-size: 0.92rem;
+  font-variant: small-caps;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/*
+ * The arrows: which pane a thing would go into. One control in two places - the kebab's rows and, when it
+ * exists, an inspect window's links - because "open this" and "open this there" are one decision. See
+ * `LOOK-AND-FEEL.md`.
+ */
+.arrows {
+  display: inline-flex;
+  flex: none;
+}
+
+.arrows__one {
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0.15rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.arrows__one svg {
+  width: 100%;
+  height: 100%;
+  fill: var(--ink-soft);
+  opacity: 0.55;
+}
+
+.arrows__one:hover svg {
+  opacity: 1;
+}
+
+/* Where it already is: the needle you are standing on rather than a place to go. */
+.arrows__one--here svg {
+  fill: var(--gold);
+  opacity: 1;
+}
+
+.arrows__one--here {
+  cursor: default;
+}
+
 .hud__title {
   pointer-events: none;
   margin: 1rem;
@@ -291,6 +494,137 @@ body,
 .hud__resources dd {
   margin: 0;
   font-variant-numeric: tabular-nums;
+}
+
+/*
+ * The house at its other two sizes.
+ *
+ * **Small** is what it is when it is sharing a phone with something else: one line of the house and the bar
+ * beneath it, filling its pane edge to edge rather than sitting into a corner, because in a pane there is
+ * no corner to sit into. The blazon and the founding day are what go, being the most words and the least
+ * news. **Strip** is the name and the chevron, so a player who put the house away knows where it went.
+ *
+ * The card asked for `min-width: 26rem` until now, which is 416 pixels against a phone's 390 - the first
+ * thing decision 0039's instrument found, and the reason this mechanic was written down. It asks for
+ * nothing now and takes the room it is given.
+ */
+/*
+ * In a pane the card fills it, edge to edge, because a pane has no corner to sit into: it *is* the corner.
+ *
+ * Scoped to the panes and not written flat, because in the spread a pane is the whole stage - a card told
+ * to fill one there would be a sheet laid over the world, which is both wrong to look at and an invisible
+ * lid over every click meant for the map.
+ */
+.stage[data-form='panes'] .hud--small,
+.stage[data-form='panes'] .hud--strip {
+  display: block;
+}
+
+.stage[data-form='panes'] .hud--small .hud__panel,
+.stage[data-form='panes'] .hud--strip .hud__panel {
+  position: absolute;
+  inset: 0;
+  min-width: 0;
+  max-width: none;
+  border-width: 1px 0 0;
+  border-radius: 0;
+  box-shadow: 0 -2px 10px var(--shadow);
+}
+
+/*
+ * Put away in the spread: the same card in the same corner, now one line of it.
+ *
+ * `flex-end` because the title is the other thing `space-between` was holding apart, and a strip has no
+ * title - left alone it would spring to the top of the stage, which is nowhere the house has ever been.
+ */
+.stage[data-form='spread'] .hud--strip {
+  justify-content: flex-end;
+}
+
+.stage[data-form='spread'] .hud__panel--strip {
+  min-width: 0;
+  max-width: none;
+}
+
+.stage[data-form='panes'] .hud--small .hud__achievement {
+  flex: 1;
+  min-height: 0;
+  gap: 0.75rem;
+  padding: 0.4rem 0.75rem 0.3rem 0.6rem;
+}
+
+.stage[data-form='panes'] .hud--small .hud__banner {
+  width: 2.5rem;
+}
+
+/* One line: the name, then the treasury pushed to the far end where the eye will read it as a number. */
+.stage[data-form='panes'] .hud--small .hud__house {
+  flex: 1;
+  min-width: 0;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.stage[data-form='panes'] .hud--small .hud__name {
+  font-size: 1.25rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stage[data-form='panes'] .hud--small .hud__resources {
+  margin: 0 0 0 auto;
+  gap: 0 0.4rem;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+.hud__panel--strip {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0 0.3rem 0 0.75rem;
+}
+
+.hud__panel--strip .hud__name {
+  flex: 1;
+  font-size: 1.05rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/*
+ * The chevron that puts the house away and brings it back.
+ *
+ * Window chrome and not one of the house's levers, so it is up here on the card's own corner rather than
+ * in the bar along the bottom: those six places are the house's doing, and decision 0038 reserved the five
+ * empty ones for more of the same.
+ */
+.hud__fold {
+  position: absolute;
+  top: 0.15rem;
+  right: calc(0.2rem + var(--corner-taken, 0px));
+  z-index: 1;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: none;
+  background: none;
+  font-size: 0.85rem;
+  line-height: 1;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.hud__fold:hover {
+  color: var(--gold);
+}
+
+.hud__panel--strip .hud__fold {
+  position: static;
+  flex: none;
 }
 
 /*
@@ -1075,17 +1409,83 @@ body,
  * more than that; what it should look like is still Adam's to say.
  */
 .inspect {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  z-index: 2;
-  width: 17rem;
-  max-width: calc(100% - 2rem);
   padding: 0 0.85rem 0.85rem;
   background: var(--parchment);
   border: 1px solid var(--parchment-edge);
   border-radius: 3px;
   box-shadow: 0 2px 14px var(--shadow);
+  overflow-y: auto;
+}
+
+/*
+ * The rail: where inspect windows stack in the spread, up to three, newest at the top.
+ *
+ * `display: contents` in the panes, so the windows become grid items in their own right and crossing the
+ * fold moves nothing in the tree. The rail lets clicks through in the gaps between windows - it covers the
+ * whole left of the stage and most of that is map.
+ */
+.stage[data-form='spread'] .rail {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  bottom: 1rem;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.6rem;
+  width: 17rem;
+  max-width: calc(100% - 2rem);
+  pointer-events: none;
+}
+
+.stage[data-form='spread'] .rail .pane {
+  position: relative;
+  inset: auto;
+  width: 100%;
+  min-height: 0;
+  pointer-events: auto;
+}
+
+.stage[data-form='panes'] .rail {
+  display: contents;
+}
+
+/* In a pane a window fills it, the way the house does, because a pane has no corner to sit into. */
+.stage[data-form='panes'] .pane--inspect .inspect {
+  position: absolute;
+  inset: 0;
+  border-width: 1px 0 0;
+  border-radius: 0;
+}
+
+/* Put away: the kind it is and the way back, and nothing else. */
+.inspect--strip {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0 0.3rem 0 0.75rem;
+  overflow: hidden;
+}
+
+.inspect--strip .inspect__kind {
+  flex: 1;
+}
+
+.inspect__fold {
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: none;
+  background: none;
+  font-size: 0.85rem;
+  line-height: 1;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.inspect__fold:hover {
+  color: var(--gold);
 }
 
 .inspect__bar {
@@ -1165,6 +1565,63 @@ body,
 /* A resource is a rate, so this number is never still. Tabular figures keep it from jittering. */
 .inspect__ticking {
   font-variant-numeric: tabular-nums;
+}
+
+/*
+ * The links: the ways on from a window.
+ *
+ * The point of the mechanic rather than a footnote to it, so they are a list with a heading and not a row
+ * of small print. In the panes each carries **the arrows**, because there the player says which pane as
+ * well as what; in the spread there is one place a window goes and one map, so the whole row is the button.
+ */
+.inspect__onward {
+  margin: 0.9rem 0 0.3rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--parchment-edge);
+  font-size: 0.72rem;
+  font-weight: normal;
+  font-variant: small-caps;
+  letter-spacing: 0.1em;
+  color: var(--ink-soft);
+}
+
+.inspect__links {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.inspect__link {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 1.6rem;
+}
+
+.inspect__what {
+  flex: 1;
+  font-size: 0.85rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inspect__go {
+  flex: 1;
+  padding: 0.15rem 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 0.85rem;
+  text-align: left;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+/* A way on reads as one: underlined on the hover, the way a link in a book's margin would be a pointing. */
+.inspect__go:hover {
+  color: var(--gold);
+  text-decoration: underline;
 }
 
 /* The areas, inside the debug panel. Its bar is the Section's now. */
