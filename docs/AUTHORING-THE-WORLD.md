@@ -1,5 +1,9 @@
 # Authoring the world
 
+> **What belongs here:** how to edit the hand-painted master and what the pipeline does with it. **What
+> does not:** why the world is authored as an image (decision record 0018), or what the world is in the
+> fiction (`SETTING.md`).
+
 The shape of our world is not in the code. It is one image, `world/master/terrain.png`, and you edit it by
 hand. Everything the game knows about where land is, where a coast runs and what grows there is derived
 from that image. This document is how to edit it without fighting the pipeline.

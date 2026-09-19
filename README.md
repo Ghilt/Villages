@@ -12,11 +12,14 @@ thousands of concurrent players.
 - `CLAUDE.md` - how we work in this repository (conventions, layer rules, the commit gate)
 - `docs/VISION.md` - what the experience is and is not
 - `docs/SETTING.md` - the world, its two clocks, and what a house is inside it
+- `docs/MECHANICS.md` - what the mechanics are, one entry per named mechanic
+- `docs/BUILDING-A-MECHANIC.md` - how a described mechanic becomes commands, events and panel lines
+- `docs/LOOK-AND-FEEL.md` - the shared visual language and the components more than one mechanic uses
 - `docs/GLOSSARY.md` - the shared vocabulary used in code, events and UI
 - `docs/ARCHITECTURE.md` - layers, modules, event flow, scale principles
 - `docs/adr/` - architecture decision records
 - `docs/experiments/` - hypothesis, result, decision for every experiment
-- `docs/ROADMAP.md` - now / next / later
+- `docs/ROADMAP.md` - now / later / future ideas
 - `docs/EVENTS.md` - catalogue of every domain event
 - `docs/TESTING.md` - the test pyramid and how to run it
 

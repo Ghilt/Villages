@@ -99,7 +99,7 @@ catalogue has a table for each.
 
 Adding a kind of choice costs a new effect case, the `decide` branch that turns it into events, a giver
 with the words, and catalogue rows for any new consequence events. It costs no frame and no interface,
-because the parchment renders any choice from its words. `docs/MECHANICS.md` is the method.
+because the parchment renders any choice from its words. `docs/BUILDING-A-MECHANIC.md` is the method.
 
 The stream of a house reads as its chronicle: offered three seats, took one, founded there. The debug
 panel shows it in exactly that order, three lines with one correlation tag.

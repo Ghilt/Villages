@@ -1,8 +1,8 @@
 # 0001. Found a house
 
-- Status: open
+- Status: closed
 - Started: 2026-09-01
-- Closed:
+- Closed: 2026-09-19
 
 ## Hypothesis
 
@@ -226,6 +226,18 @@ a measurement, and that my belief about my own code was wrong until I counted.
 
 ## Result
 
+**Inconclusive, and overtaken.** Founding was built and has worked for weeks, but the hypothesis was
+about a player rather than about the code, and no player was ever put in front of it: the opening changed
+underneath the question. What a new player meets today is not a bare map but three seats on a parchment,
+which is experiment 0004's subject, and the ticker the hypothesis asked them to stay and watch is a future
+idea rather than a thing on the screen.
+
 ## Decision
 
+**Closed in favour of 0004.** The feel question it asked is the one 0004 asks about the opening that
+actually exists. Closed in the review of 2026-09-19, in which the vision test it echoed - "a new player,
+given no instructions, founds a house and stays with it for a few minutes" - was itself cut.
+
 ## Follow-ups
+
+None of its own. The question lives on in experiment 0004.

@@ -2,8 +2,7 @@
 
 Villages is an exploratory, persistent, multiplayer experience: each player plays a fictional noble house on a map of
 the real world. Gameplay is discovered by experiment. The architecture keeps change cheap and is designed for tens of
-thousands of concurrent players in one shared world. The startup plan that produced this layout is in
-`docs/plans/2026-09-01-startup-plan.md`.
+thousands of concurrent players in one shared world.
 
 ## The one hard rule: a human vets every change before it is committed
 
@@ -149,15 +148,27 @@ in the debug panel.
 Read `docs/ROADMAP.md` under "Now" at the start of a session, and the last few commits, to see where things
 stand.
 
-Before adding or changing a mechanic, read `docs/MECHANICS.md`. It says how a mechanic Adam describes
+Before adding or changing a mechanic, read `docs/MECHANICS.md`, which says what the mechanics are, one
+entry per named mechanic, and then `docs/BUILDING-A-MECHANIC.md`, which says how a mechanic Adam describes
 becomes commands, events, frames, projections and panel lines, so that he does not have to say it each
 time.
+
+## Every document has one purpose, and only what fits it goes in
+
+Each persistent document opens with a line saying what belongs in it and what does not. That line is the
+rule, not a decoration: material that does not fit moves to the document that owns it rather than being
+added where it was convenient. A mechanic goes in `MECHANICS.md` and not in `SETTING.md`; the engine behind
+it goes in `ARCHITECTURE.md` and not in either; what it looks like goes in `LOOK-AND-FEEL.md`; when it will
+be built goes in `ROADMAP.md`. A document that is about everything is read by nobody, and a claim in the
+wrong place is a claim nobody maintains. If a thing genuinely fits nowhere, that is a new document with its
+own purpose line, and saying so is part of presenting the step.
 
 ## Layout
 
 ```
 CLAUDE.md  README.md  debug-quick-start.{ps1,cmd}  .claude/settings.json  scripts/check.{ps1,sh}
-docs/       VISION GLOSSARY ARCHITECTURE ROADMAP TESTING EVENTS MECHANICS, adr/, experiments/, plans/
+docs/       VISION SETTING MECHANICS LOOK-AND-FEEL GLOSSARY ARCHITECTURE ROADMAP TESTING EVENTS
+            BUILDING-A-MECHANIC AUTHORING-THE-WORLD, adr/, experiments/, plans/
 contracts/  fixtures/*.json shared by the Kotlin and TypeScript protocol tests
 infra/      docker-compose.yml (MongoDB replica set, RabbitMQ)
 backend/    Gradle multi-module: domain, application, protocol, infrastructure-occurrent, infrastructure-rabbit,

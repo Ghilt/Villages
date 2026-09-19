@@ -1,5 +1,9 @@
 # Event catalogue
 
+> **What belongs here:** every event type the world can record, its payload and its meaning. **What does
+> not:** why the events are shaped as they are (decision records 0024 and 0034), or how to add one
+> (`BUILDING-A-MECHANIC.md`).
+
 Every domain event in the world. Events are the only durable state: they are never edited and never deleted, so this
 catalogue is the contract between the past and every future version of the code.
 

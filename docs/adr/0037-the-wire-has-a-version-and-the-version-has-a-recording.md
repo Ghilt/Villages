@@ -118,7 +118,7 @@ each about thirty lines, and their value is that a future argument about when a 
 settled by reading rather than by `git log`.
 
 Two tests now fail on any wire change, which is the point, and both fail with instructions rather than a
-diff. The cost is one extra step in a frame-adding increment, and it is on the `docs/MECHANICS.md`
+diff. The cost is one extra step in a frame-adding increment, and it is on the `docs/BUILDING-A-MECHANIC.md`
 checklist so it is not remembered but read.
 
 The launcher's staleness check compares clocks, so it is fooled by a tree checked out fresh (every file

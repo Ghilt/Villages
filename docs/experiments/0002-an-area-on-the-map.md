@@ -1,7 +1,8 @@
 # 0002. An area on the map, and what it encloses
 
-- Status: open
+- Status: closed
 - Started: 2026-09-09
+- Closed: 2026-09-19
 
 ## Hypothesis
 
@@ -84,6 +85,22 @@ cannot address one; the fence is still exact, but what a hand can point at is no
 
 ## Result
 
+**Confirmed.** An area drawn by hand at any zoom reports truthfully what it encloses, and putting the
+boundary on the lattice between master pixels rather than through them is what makes it exact rather than
+approximate: at z10 on the raw renderer the fence lines up with the squares the terrain is drawn as, and two
+areas drawn flush share their boundary exactly.
+
+Two costs, both recorded above and neither fatal: a drag of three samples fences a sliver that is correct
+and looks like nonsense, and at low zoom a screen pixel covers several master pixels, so the fence stays
+exact while what a hand can point at does not.
+
 ## Decision
 
+**Keep.** Decision record 0032 carries the rule. The fence is the component an influence zone, a holding
+and a neighbour's reach all reuse, which is what the spike was for.
+
 ## Follow-ups
+
+Holdings on the map beyond the seat, and neighbours, both on the roadmap under Later. Areas still live
+only in the browser and a reload forgets them; whenever one has to outlive a session it becomes a thing with
+a lifetime, which is a decision record of its own.

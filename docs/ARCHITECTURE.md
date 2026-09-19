@@ -168,7 +168,7 @@ it in sight is a page drawing what it already has. See decision record 0038.
    told to resynchronise rather than being allowed to grow a queue.
 6. The map is drawn from read models. The event store is never queried to render anything.
 7. Every principle above is checked by the bot swarm, not assumed. Ten thousand connections on one development
-   machine is the Phase 2 milestone.
+   machine is the number to prove, and proving it is on the roadmap under Later rather than next.
 
 ## The fate engine
 

@@ -1,147 +1,67 @@
 # Roadmap
 
-Three lists. "Now" holds only the current phase. Anything speculative stays in "Later" until it has a hypothesis in
-the experiment journal.
+> **What belongs here:** what is being built now, what is meant to be built later, and the ideas that are
+> not commitments. **What does not:** why any of it is wanted (`VISION.md`, `SETTING.md`, `MECHANICS.md`),
+> how it will be built (`BUILDING-A-MECHANIC.md`), or what has already landed, which is the git history.
 
-## Now: Phase 0, bootstrap
+Three lists, and nothing else. **Now** is what is on the table this session. **Later** is wanted and not
+started. **Future ideas** are things worth doing one day that nobody is promising.
 
-An empty but complete skeleton, where every layer exists, every check runs, and every document has a first version.
-The increment list lives in the startup plan under `docs/plans/`.
+This is a menu rather than a queue. The order is a suggestion; Adam picks the next step after each commit
+from options offered then, and reordering costs nothing. See decision record 0016. Anything speculative
+stays in Future ideas until it has a hypothesis in the experiment journal.
 
-This list is a menu, not a queue. The order below is a suggestion; Adam picks the next step after each commit from
-options offered then, and reordering costs nothing. See decision record 0016.
+Rebuilt 2026-09-19, when the documents were reviewed claim by claim. The old six lists had drifted into a
+record of what was done, which the git history already keeps.
 
-The order changed once already, for a reason worth keeping: the primary way we judge this project is by looking at
-it, so the increments that put something on the screen came first, and they happen to be the ones that need nothing
-installed. The backend increments follow, and keep their original numbers.
+## What stands today
 
-- [x] 0.1 Repository, working agreement, commit gate
-- [x] 0.2 Core documents and templates
-- [x] 0.3 Decision records for the founding decisions, and the first experiment
-- [x] 0.10 Frontend workspaces, linting, typechecking, and the core to interface boundary
-- [x] 0.11 The map renders with attribution
-- [x] 0.12 The sprite overlay draws one jiggling sprite pinned to a place
-- [ ] 0.13 End-to-end smoke test
-- [ ] 0.4 Local infrastructure: MongoDB replica set and RabbitMQ in Compose
-- [x] 0.5 Gradle wrapper, version catalog, module skeletons with their dependency edges
-- [x] 0.6 Architecture tests that fail on a layer violation
-- [x] 0.7 Occurrent smoke test on the in-memory event store
-- [ ] 0.8 Testcontainers smoke test on MongoDB and RabbitMQ
-- [x] 0.9 The application boots and the gateway answers a hello, in memory, without MongoDB
-- [ ] 0.14 One check script for the whole repository
+The map is ours: a hand-painted master, cut into tiles, painted in the browser at any zoom, lying on a desk
+when the camera pulls back past the world. A player arriving with no house is offered three seats on a
+parchment, takes one, and the house is founded from the same decision that records the taking — castle,
+ground about it, selectable, with an inspector on the left. Every event carries its two times, its place and
+significance, and its provenance. Two browsers see each other's houses live. Everything is in memory: there
+is no MongoDB and no RabbitMQ on the machine yet.
 
-Blocked on the machine: Docker Desktop with the WSL2 backend, needed for 0.4, 0.8 and 0.9. Temurin 21 is not
-a blocker after all: Gradle provisions the toolchain itself, so 0.5 to 0.7 build on the Temurin 17 that is
-there. Installing 21 is still worth doing for IntelliJ.
+## Now
 
-## Also now: the world, authored by hand
+Nothing here is started, and the first four wait on the same thing.
 
-A side mission that grew, because the map is the main screen and it has to be ours.
+- **0.4** Local infrastructure: MongoDB replica set and RabbitMQ in Compose
+- **0.8** Testcontainers smoke test on MongoDB and RabbitMQ
+- **1.6** The bridge from the store to the broker
+- **0.13** End-to-end smoke test
+- **0.14** One check script for the whole repository
+- **1.15** The connection badge, the last piece of inspecting a house
 
-- [x] The warp: a pure transformation from Earth to our world, configured by one file
-- [x] Fidelity: lakes, rivers and biomes, and a global wobble so the whole world differs from Earth
-- [x] The master image: Earth's terrain as one editable colour per class, and the guide to editing it
-- [x] The importer: read the edited master back, trace coastlines, and give the game its world
-- [x] A higher-fidelity world: 32 terrain classes from land cover, lake and river data
-- [x] Terrain drawn from tiles rather than traced, so the fidelity is affordable
-- [x] The painterly treatment, settled offline in still images: what the world actually looks like
-- [ ] The same treatment in the live map, as a WebGL layer, so it is drawn at any zoom
-- [ ] Place names carried through from Earth, mutated
-- [x] The map lies on a desk: pull the camera back past the world and it shrinks to a sheet on a surface,
-  from the same camera, with no handoff. See experiment 0003 and decision 0033
-
-Decided along the way: the world is authored in an image editor rather than in a tool of our own, because
-terrain that travels with a copied coastline is free in a raster and expensive in anything else. See
-decision record 0018.
-
-## Also now: the debug panel, which is how Adam checks the program
-
-Adam verifies by looking at the running program, not by reading code, and the debug panel is where the
-program says what it is doing. It grows with every increment that adds behaviour. See decision record 0023.
-
-- [x] State of the map, the renderer and the paint, copyable in one click
-- [x] Domain events as they reach the browser: one line each in words, opening to the whole CloudEvent
-- [x] Commands sent and their acceptance or rejection, in the log beside the events they caused
-- [ ] The connection: hello, subscriptions, resyncs, reconnects
-- [x] Areas: draw one on the map, see what terrain it encloses, delete it. A spike on the component
-  an influence zone, a holding and a neighbour's reach all want. See experiment 0002 and decision 0032
-
-## Also now: the first gameplay loop
-
-The first thing a player is asked, and the first thing they do: a choice put to them on a parchment
-over the map, three seats to found their house at, and the house founded from the one they take. Planned
-in `docs/plans/2026-09-15-first-gameplay-loop.md`; how a mechanic becomes events, so that the next one
-needs no explaining, is `docs/MECHANICS.md`. Decision records 0034, 0035 and 0036; experiment 0004.
-
-- [x] 0. The plan, the method, the decisions proposed, the experiment opened
-- [x] 1. Provenance on every event: a correlation id and a causation id beside the event id
-- [x] 2. The domain of choices: a house can be given a choice, and take one option of it
-- [x] 3. Restart: the debug panel starts a player over
-- [x] 4. The loop on the wire: a new player is given three seats, and taking one founds the house
-- [x] 5. The parchment, the three marks on the map, and the flight to the seat
-- [x] 6. Wipe the world, from the debug panel
-- [x] 7. The castle, and the fence of ground about it
-- [x] 8. Selecting a castle, and the inspector on the left
-- [x] 9. What it taught: the method corrected, the follow-ups written down. The experiment stays
-      open until Adam has played the opening, because its hypothesis is about a player
-
-Phase 1's 1.13 and 1.15 below land through this list rather than on their own.
-
-## Next: Phase 1, the walking skeleton
-
-Found a House. Open the app, see the map, found a house at a chosen spot with a generated banner, see the banner and
-one rate-based ticker, and see other players' houses appear live and jiggle. Sixteen increments, listed in the plan.
-
-- [x] 1.1 The value types of a house: seat, cell, name, banner with the rule of tincture, treasury as a rate
-- [x] 1.2 FoundHouse, HouseFounded, the state and the decider; the first row in the event catalogue
-- [x] 1.3 The frames, in Kotlin and in zod, both held to the same fixtures
-- [x] 1.4 The FoundHouse use case and the ports
-- [x] 1.5 The event store behind the ports, and the type mapper held to the catalogue: in memory until 0.8
-- [ ] 1.6 The bridge from the store to the broker
-- [x] 1.7 The houses-by-cell projection: a row per house with its world-time span, indexed by its deepest cell and the coarsest zoom it is worth drawing at
-- [x] 1.8 The gateway: sessions, cells at any zoom, snapshot then deltas coalesced a quarter second at a time, and resync for a client that falls behind
-- [x] 1.9 The client core: what each held cell holds, deltas ordered by version, and what to ask for when the view moves. Reconnecting is still to come
-- [x] 1.10 Houses on the map from the gateway, following the camera cell by cell, and a seed button in the debug panel
-- [x] 1.11 Command intake, end to end: a house founded over the socket comes back as its event, and as houseAppeared to whoever holds its cell
-- [ ] 1.12 The banner drawn
-- [x] 1.13 Founding a house from the interface
-- [ ] 1.14 The ticker
-- [~] 1.15 Inspecting a house: done through the inspector. The connection badge is still to come
-- [ ] 1.16 Two browsers, one house appearing in both, readable in both debug panels. This means **two
-  different players**, which works today; two windows of *one* player is now a thing that ends rather than
-  a thing that works, decided in 0028. What is left is the browser-level test, which needs 0.13 first
-
-The milestone: a second browser sees the first browser's house appear, with no page reload, and the event
-that made it appear is readable in the debug panel of both.
-
-## Then: the world at a moment
-
-Adam's first milestone, from `SETTING.md`: **a small seed of events that makes a starting world, with no pins,
-looked at through two tools together - the map, and a timeline scrubber along the bottom.** Drag the
-scrubber and the map shows the world as it was; leave it at live and the world runs.
-
-- [x] Two times on every event, and a world calendar both ends compute alike (decision 0027)
-- [x] A viewing day per connection, one frame to move it, every held cell answered again as of that day
-- [~] The scrubber along the bottom of the map, and the day it shows in the debug panel. Built, then
-  taken out again on 2026-09-15 while the opening is the thing being looked at. The gateway still
-  speaks `viewTime` and the read model is still temporal; what went was the slider and the client's
-  half of it
-- [ ] The seed: a small set of events, spread across centuries, that makes a starting world
-- [ ] A house's line on the timeline, so the scrubber shows where things are before you drag to them
+Blocked on the machine: Docker Desktop with the WSL2 backend, needed by the first three. Everything runs in
+memory until it exists, which is why nothing survives a restart.
 
 ## Later
 
-Phase 2, aliveness and scale. A bot swarm to ten thousand connections on one machine. Aggregation of sprites at low
-zoom, so that a large world never means a large sprite count. A custom stylised map style, checked in. Hardened
-reconnection and clock correction.
+Wanted, not started, and each needs a hypothesis in `docs/experiments/` before any code.
 
-Phase 3 and beyond, experiments. Each needs a hypothesis file before any code:
-
-- House leanings: what identity is made of, and how the world reflects it.
-- A second resource, and the first decision worth making about it.
-- Holdings on the map beyond the seat.
-- The workbench: the desk the map lies on becomes a place, with the house's papers on it and the map a
+- **A resource system.** A set of different things that model and simulate the world around the house.
+  Interaction between player and world, and player and player, needs to feel consistent. Tangibility comes
+  from the shared map. This is also what a **choice roll** is meant to cost, so the two are entangled.
+- **The fate engine**, and the choice roll built on it: a real roll from the house's state rather than a
+  founding choice handed out on arrival. See `MECHANICS.md` and `ARCHITECTURE.md`.
+- **House leanings**: what identity is made of, and how the world reflects it.
+- **Holdings on the map beyond the seat.**
+- **Neighbours**: awareness of nearby houses, and the first thing two houses can do to each other.
+- **The workbench**: the desk the map lies on becomes a place, with the house's papers on it and the map a
   quarter of it, hovered and scrolled into. The same camera; see experiment 0003.
-- Neighbours: awareness of nearby houses, and the first thing two houses can do to each other.
-- Accounts behind the identity port.
-- The world-persistence milestone, after which the event store is never wiped and event changes need upcasters.
+- **Accounts** behind the identity port.
+- **World persistence**, after which the event store is never wiped and event changes need upcasters.
+- **Aliveness and scale**: a bot swarm to ten thousand connections on one machine, aggregation of sprites at
+  low zoom, a custom stylised map style checked in, hardened reconnection and clock correction. The scale
+  the architecture is designed for is not in doubt; proving it is simply not next.
+
+## Future ideas
+
+Not commitments. Nobody is waiting on any of these.
+
+- **A ticking resource.** Some resource shown as a ticking income, which is what the rate shape in decision
+  0006 exists for. It needs the resource system to mean anything first.
+- **The banner drawn** from its own tinctures and charges instead of a plain shield. A luxury feature: it
+  would look good and no part of the game is waiting for it.

@@ -1,7 +1,8 @@
 # 0003. The map on a desk
 
-- Status: open
+- Status: closed
 - Started: 2026-09-10
+- Closed: 2026-09-19
 
 ## Hypothesis
 
@@ -78,6 +79,19 @@ wheel bursts. The cost of the repainted grain is for Adam's browser to say.
 
 ## Result
 
+**Confirmed for the camera.** One camera carries the world from filling the window to lying as a sheet on
+a surface, and the moment it stops covering the window needs no handoff, no second renderer and no
+transition. That much is mechanical and is in the source.
+
+The feel is Adam's to judge and cannot be read from a pane that pauses its animation frames between
+actions, which is why the frame numbers above are worthless.
+
 ## Decision
 
+**Keep.** Decision record 0033 carries it, and it survived the document review of 2026-09-19: the
+workbench - the desk becoming a place with the house's papers on it and the map a quarter of it - is on the
+roadmap under Later.
+
 ## Follow-ups
+
+The workbench. The cost of the repainted grain on Adam's own machine is still unmeasured.

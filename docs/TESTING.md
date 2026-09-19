@@ -1,5 +1,9 @@
 # Testing
 
+> **What belongs here:** how this repository is tested - the levels, what belongs at each, and how to run
+> them. **What does not:** what is being tested, and the definition of done for a mechanic, which is in
+> `BUILDING-A-MECHANIC.md`.
+
 Every increment lands with the test that proves it. The tests are the reason we can keep changing the game.
 
 ## Levels

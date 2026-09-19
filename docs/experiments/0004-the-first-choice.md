@@ -14,7 +14,7 @@ around it: a reason to prefer one place, a look at the ground, a name to weigh.
 
 ## Setup
 
-The first gameplay loop, increments 1 to 8 of `docs/plans/2026-09-15-first-gameplay-loop.md`: a
+The first gameplay loop, built in eight increments over 2026-09-15 and 16: a
 player who says hello with no house is given three seats in three regions, each with a name and a
 banner; the parchment shows them with one button each and folds to a corner; three marks on the map
 show where they are; taking one founds the house there, the camera flies to it, and the house is a
@@ -94,14 +94,14 @@ Open, in no order. The first two are the ones the loop asks for next.
 
 - **A second kind of choice.** Everything above the effect is generic now, so the cost of one is an
   `Effect` case, a `decide` branch, a giver with the words, and rows for whatever it records. Until a
-  second one exists, `docs/MECHANICS.md` is a claim rather than a demonstration.
+  second one exists, `docs/BUILDING-A-MECHANIC.md` is a claim rather than a demonstration.
 - **A reason to prefer one seat over another.** Three places, three names, three banners, and nothing to
   weigh them by. Whatever the answer is - the ground, the neighbours, what a house would be good at
   there - it is the first thing that makes the opening a decision rather than a pick.
 - **The seed takes one of its offered seats** instead of founding directly, so the bot swarm exercises
   the real loop and a seeded world is made of the same events a played one is.
 - **The house card in the corner is still a mock.** It says "No house yet" while the inspector beside it
-  names the house; roadmap 1.12 draws the banner, and this is where it goes.
+  names the house. Drawing the banner is a future idea on the roadmap, and this is where it goes.
 - **Seats as authored data.** `world/seats.json` beside the other world files, so the gazetteer is
   Adam's to paint rather than the server's to hold. Decision record 0034 names this as the next step.
 - **A chronicle view.** The debug panel's event list already carries the story tag; grouping by it would
