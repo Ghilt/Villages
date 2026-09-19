@@ -2,7 +2,8 @@
 
 > **What belongs here:** the shared visual language — the rules every part of the interface follows, and the
 > components more than one mechanic uses. **What does not:** how any single mechanic looks, which is that
-> mechanic's own look-and-feel section in `MECHANICS.md`, and what the experience is about (`VISION.md`).
+> mechanic's own look-and-feel section in `MECHANICS.md`, how the interface behaves across screen sizes
+> (`RESPONSIVE-DESIGN.md`), and what the experience is about (`VISION.md`).
 
 This document is new and deliberately thin. A unified component style is worth having and is not a mechanic,
 so it is collected here as it is decided, rather than being discovered again inside each feature. Most of it
@@ -13,6 +14,9 @@ is not decided yet, and says so.
 **Diegetic wherever it can be.** What the player is shown should be part of the world rather than a control
 panel laid over it. A choice arrives as something on a desk, not as a modal dialog. This is the one settled
 thing about the presentation; the theme and tone around it are not (see `VISION.md`).
+
+**Every screen, from the start.** A component is laid out for a phone and a desktop in the increment that
+builds it, never in a later pass. See `RESPONSIVE-DESIGN.md`.
 
 **A component is shared, not re-invented.** When a second mechanic needs something the first already showed
 the player, it uses the same component and this document gains an entry, rather than each mechanic growing

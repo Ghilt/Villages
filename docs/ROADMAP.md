@@ -46,6 +46,9 @@ Wanted, not started, and each needs a hypothesis in `docs/experiments/` before a
   from the shared map. This is also what a **choice roll** is meant to cost, so the two are entangled.
 - **The fate engine**, and the choice roll built on it: a real roll from the house's state rather than a
   founding choice handed out on arrival. See `MECHANICS.md` and `ARCHITECTURE.md`.
+- **A responsive interface.** Every component laid out for a phone as well as a desktop. The rule is in
+  `RESPONSIVE-DESIGN.md` and applies to new work from now on; what exists was written desktop-only and has
+  to be brought over.
 - **House leanings**: what identity is made of, and how the world reflects it.
 - **Holdings on the map beyond the seat.**
 - **Neighbours**: awareness of nearby houses, and the first thing two houses can do to each other.

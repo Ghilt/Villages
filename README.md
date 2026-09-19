@@ -15,6 +15,7 @@ thousands of concurrent players.
 - `docs/MECHANICS.md` - what the mechanics are, one entry per named mechanic
 - `docs/BUILDING-A-MECHANIC.md` - how a described mechanic becomes commands, events and panel lines
 - `docs/LOOK-AND-FEEL.md` - the shared visual language and the components more than one mechanic uses
+- `docs/RESPONSIVE-DESIGN.md` - how the interface behaves on a phone as well as a desktop
 - `docs/GLOSSARY.md` - the shared vocabulary used in code, events and UI
 - `docs/ARCHITECTURE.md` - layers, modules, event flow, scale principles
 - `docs/adr/` - architecture decision records
