@@ -20,9 +20,9 @@ being written and large once a dozen of them assume a big screen.
 The stage has two forms, and **one number picks between them: 600 pixels on the stage's shorter side.** Above
 it, the spread; at or below it, the bays. There is no tablet shape in between. See decision record 0040.
 
-**The spread shows everything at once.** The map fills the stage, the house status sits in a corner, inspect
-windows stack in a rail down the side, and whatever mechanic is running has room beside them. Seeing them
-together is part of reading the world, and a large screen can hold them.
+**The spread shows everything at once.** It is **tiles on a map**: the map is the floor, filling the stage
+and lying under everything, and the rest are tiles laid on it that never overlap each other. Seeing them
+together is part of reading the world, and a large screen can hold them. See decision record 0041.
 
 **The bays show two things at once.** The stage splits into two boxes along its **longer** dimension — a
 portrait stage divides top and bottom, a landscape one left and right — and the player says what goes in
@@ -66,6 +66,44 @@ puts back what was there.
 
 The player who wants the map **minimises** the house status. It collapses to a strip with its name on it and
 the map takes the rest — a single-bay screen without the layout needing a single-bay mode.
+
+## What the spread is made of
+
+The map is the **floor**. Everything else is a **tile** lying on it, and the tiles never overlap each other —
+which is arithmetic with a test rather than a stylesheet anybody has to trust. There are three.
+
+```
+┌──────────────────────────────────────────────┐
+│ VILLAGES                                     │
+│ ┌───────────┐                                │
+│ │           │                                │
+│ │  the rail │                                │
+│ │           │         the floor:             │
+│ │  up to 3  │      the map, under it all     │
+│ │  windows  │                                │
+│ ├───────────┤                                │
+│ │ Erebus    │   ┌──────────────────────┐     │
+│ │ ◉ · · · · │   │   the bottom middle   │    │
+│ └───────────┘   └──────────────────────┘     │
+└──────────────────────────────────────────────┘
+   the column          whatever is running
+```
+
+**The column is one piece of furniture**, set into the stage's left and bottom edges rather than floating a
+gutter off them. Its two tiles share a width and one gutter between them, so they read as a column and not
+as two cards that happen to be near each other. It wants the width the house card was drawn at and gives
+that up to a third of the stage before it gives up anything else.
+
+**An empty tile takes no room.** Nothing in the corner and the column runs to the bottom; no choice pending
+and the map keeps the whole bottom of the stage. A tile is never reserved against a future.
+
+**A pane says which tile it sits in and how tall it is**, and the layout places it. The tiles are named for
+where they are — `left`, `bottomLeft`, `bottomMiddle` — so nothing in the layout knows what a map is.
+
+**A tile that runs out of room clips, and what is in it draws itself smaller.** Never a scrollbar, and
+**never a change of form**: only the stage's shorter side decides whether it is the spread or the bays. The
+house card's hint line goes when the column is squeezed, by a container query on its own tile, which is the
+same thing it does on a phone.
 
 ## Panes and bays
 
@@ -127,10 +165,16 @@ written, at one click, on whatever monitor there happens to be. See decision rec
 faked: the layout folds and unfolds in place, and whether it does so gracefully is a thing to be looked at
 rather than asserted.
 
+**It folds at 600 and unfolds at 660**, which is not the same number on purpose. One threshold makes the
+boundary a cliff, and a grip resting on it flickers between two whole layouts; sixty pixels of dead band
+means the width that folds it is never the width that unfolds it. In between, the stage keeps what it had.
+See decision record 0041.
+
 What the instrument found, and where each stands:
 
-- **The house card asked for `min-width: 26rem`**, which is 416 pixels against a phone's 390. **Fixed**: the
-  house status is a pane with three sizes now and asks for nothing.
+- **The house card asked for `min-width: 26rem`**, which is 416 pixels against a phone's 390. **Fixed, and
+  then fixed again.** The three sizes fixed the folded form; the spread went on asking for 26rem until the
+  corner became a tile, and the card now fills whatever tile it is given at every size.
 - **The parchment's one breakpoint asks the window**, which is 1280 while the stage is 390, so it never
   fires. **Still open.** It is brought over when a choice roll is next worked on, not in a sweep.
 
@@ -140,8 +184,9 @@ What the instrument found, and where each stands:
   choice roll's parchments lift on hover and the map is driven by drag and wheel; neither has an answer on a
   finger. The kebab and the arrows were drawn as taps rather than hovers on purpose, which is a start and
   not a design.
-- **Whether 600 is right.** It is a number somebody picked, not one derived from anything, and it will move
-  once there is a real layout to judge at the boundary. One constant, in one place.
+- **Whether 600 and 660 are right.** Two numbers somebody picked, not derived from anything: the first is
+  where it folds and the gap between them is a guess about how fast a grip moves. Both move once there is
+  enough at the boundary to judge them by. Two constants, in one place.
 - **Whether a player can drag the split** after all, over the top of minimise. Nothing forecloses it.
 - **What happens when a third thing wants the screen** — a dialogue while an inspect window is open, on a
   phone. Two bays and three claimants is a queue nobody has designed.

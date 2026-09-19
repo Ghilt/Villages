@@ -273,7 +273,8 @@ Minimise is the mechanic admitting that the map is sometimes the whole point.
 
 A card in the corner, cut off by it: bordered on the two edges facing the world and flush against the two
 that are the screen's, so it reads as part of the furniture rather than as a dialogue over it. The shield,
-the name, the banner blazoned in words, and the treasury counting up.
+the name, the banner blazoned in words, and the treasury counting up. In the spread it is the lower tile of
+the column, sharing an edge with the rail above it; see decision record 0041.
 
 Three sizes, and the mechanic owns all three:
 

@@ -1,13 +1,13 @@
 import { paneIdOf, subjectOfPane, subjectsNow } from '../inspect/subjects';
 import type { Subject } from '../inspect/subjects';
-import type { Asking } from './bayBox';
+import type { Asking, BayName, SpreadWants } from './bayBox';
 
 /**
  * What can occupy a bay, and what each one asks for.
  *
  * A pane is declared here and placed by the layout. Nothing in the layout knows what a map is, and no pane
  * learns which bay it is in beyond the room it was given - which is what lets a mechanic be written once
- * and drawn at up to three sizes. See decision record 0040.
+ * and drawn at up to three sizes. See decision records 0040 and 0041.
  *
  * Two of them are fixed and the rest come and go: an **inspect window** is a pane per subject, so the list
  * grows as the player opens them. Character dialogue will be another fixed one.
@@ -24,6 +24,20 @@ export interface Pane {
   small: number;
   /** The pixels its strip is when minimised, or null when minimising it would leave nothing worth seeing. */
   strip: number | null;
+  /**
+   * Which tile of the spread it takes, where there is room for everything at once.
+   *
+   * Declared by the pane and not decided by the layout, which is what keeps the layout from knowing what a
+   * map is: the bays are named for where they are, and a pane says which one it belongs in.
+   */
+  spread: BayName;
+  /**
+   * How tall its tile is in the spread. Unread by a pane that takes the floor, which is the whole stage.
+   *
+   * A height and not a box: the column's width is shared by everything in it, so no pane in it can be the
+   * one that decides it.
+   */
+  tall: number;
 }
 
 export const MAP_PANE: Pane = {
@@ -34,6 +48,9 @@ export const MAP_PANE: Pane = {
   // A strip of map is not a map. Whether the player should be able to put the world away entirely to read
   // something long is a real question and `RESPONSIVE-DESIGN.md` has it open; until then, no.
   strip: null,
+  // The ground everything else stands on, rather than a tile competing with the rest for room.
+  spread: 'floor',
+  tall: 0,
 };
 
 export const HOUSE_PANE: Pane = {
@@ -44,6 +61,10 @@ export const HOUSE_PANE: Pane = {
   small: 132,
   // The name and nothing else, so the player knows where it went.
   strip: 44,
+  // Into the bottom-left corner, cut off by two of the stage's own edges, as the card always was.
+  spread: 'bottomLeft',
+  // What the card measures with the shield, the blazon, the treasury and the bar of levers in it.
+  tall: 200,
 };
 
 export const FIXED_PANES: readonly Pane[] = [MAP_PANE, HOUSE_PANE];
@@ -62,6 +83,36 @@ export function inspectPane(subject: Subject): Pane {
     wants: 'big',
     small: 220,
     strip: 44,
+    // Down the column, where up to three of them stack. The rail inside that one tile is what limits how
+    // many, so a window asks the column for no height of its own.
+    spread: 'left',
+    tall: 0,
+  };
+}
+
+/**
+ * What the spread's tiles are asked for, worked out from the panes that declared they sit in them.
+ *
+ * A minimised pane asks for its strip here exactly as it does in the bays form, which is what makes
+ * **minimise work in the spread too**: putting the house away gives the column's room back to the rail,
+ * and the map behind it was never competing for that room in the first place. See decision record 0040.
+ *
+ * A tile nobody declared is `null` and is not laid out at all. That is the difference between an empty
+ * tile and a small one: with no choice pending, the map runs clean to the bottom edge of the stage.
+ */
+export function spreadWants(panes: readonly Pane[], minimised: ReadonlySet<string>): SpreadWants {
+  const tallOf = (where: BayName): number | null => {
+    const pane = panes.find((one) => one.spread === where);
+    if (pane === undefined) {
+      return null;
+    }
+    return minimised.has(pane.id) && pane.strip !== null ? pane.strip : pane.tall;
+  };
+
+  return {
+    left: panes.some((pane) => pane.spread === 'left'),
+    bottomLeft: tallOf('bottomLeft'),
+    bottomMiddle: tallOf('bottomMiddle'),
   };
 }
 

@@ -152,71 +152,44 @@ body,
 }
 
 /*
- * The bays: how the stage divides itself once there is no longer room for everything at once.
+ * The bays: where everything on the stage is, as four numbers each.
  *
- * In the spread the stage is one box and the panes lie over one another exactly as they always did, which
- * is why nothing inside them had to change: they were all `position: absolute; inset: 0` already, and a
- * bay is the positioned box they were waiting for.
+ * Both forms work the same way. Every bay is absolutely positioned and its rectangle is written into its
+ * style by the component from `bayBox.ts`, so which cell of which grid a thing is in stopped being a
+ * question the stylesheet answers. That is what makes **no two tiles overlap** provable - it is arithmetic
+ * with a test rather than a stylesheet nobody can assert about. See decision records 0040 and 0041.
  *
- * In the bays the stage is a grid of two cut along its longer side, and a pane moves between them by
- * changing which cell it is in. **Nothing is unmounted to move it** - the map holds a camera, a style and a
- * WebGL context, and `MapView` throws all three away when it unmounts. See decision record 0040.
+ * **Nothing is unmounted to move it, and nothing moves in the tree**: a pane changes bays by having four
+ * different numbers written into its wrapper. The map holds a camera, a style and a WebGL context, and
+ * `MapView` throws all three away when it unmounts.
+ *
+ * A bay clips rather than scrolls. A pane too big for its bay is a bug in the pane, and a scrollbar is how
+ * that bug gets hidden. `container-type` is what lets what is inside react to the room it got, because a
+ * media query cannot see the stage, let alone one tile of it.
  */
-.stage[data-form='spread'] .bay {
+.bay {
   position: absolute;
-  inset: 0;
-}
-
-/* Over the map and letting every click through to it; the card inside takes its own back. */
-.stage[data-form='spread'] .bay--house {
-  pointer-events: none;
-}
-
-.stage[data-form='bays'] {
-  display: grid;
-}
-
-.stage[data-form='bays'][data-along='rows'] {
-  grid-template-columns: 100%;
-  grid-template-rows: var(--bay-first, 1fr) var(--bay-second, 0px);
-}
-
-.stage[data-form='bays'][data-along='columns'] {
-  grid-template-columns: var(--bay-first, 1fr) var(--bay-second, 0px);
-  grid-template-rows: 100%;
-}
-
-/*
- * A bay clips rather than scrolls. A pane too big for its bay is a bug in the pane, and a scrollbar is
- * how that bug gets hidden. `min-width` and `min-height` because a grid item's floor is its content, and
- * without them a wide card would push the grid wider than the stage instead of being cut off by it.
- */
-.stage[data-form='bays'] .bay {
-  position: relative;
   overflow: hidden;
   min-width: 0;
   min-height: 0;
   container-type: size;
+  z-index: 2;
+  --corner-taken: 0px;
 }
 
-.stage[data-form='bays'][data-along='rows'] .bay[data-at='0'] {
-  grid-area: 1 / 1;
+/*
+ * The floor: the map, filling the stage with every tile lying on it.
+ *
+ * The one bay exempt from the no-overlap rule, because everything overlaps it on purpose. In the bays form
+ * it is an ordinary tile like the rest and the z-index costs nothing, since there nothing overlaps at all.
+ */
+.bay--map {
+  z-index: 0;
 }
 
-.stage[data-form='bays'][data-along='rows'] .bay[data-at='1'] {
-  grid-area: 2 / 1;
-}
-
-.stage[data-form='bays'][data-along='columns'] .bay[data-at='0'] {
-  grid-area: 1 / 1;
-}
-
-.stage[data-form='bays'][data-along='columns'] .bay[data-at='1'] {
-  grid-area: 1 / 2;
-}
-
-/* A pane nobody has put in a bay. Hidden rather than unmounted, for the reason above. */
-.stage[data-form='bays'] .bay[data-at='nowhere'] {
+/* A pane the player has not got up. Hidden rather than unmounted, for the reason above. */
+.bay[hidden],
+.rail[hidden] {
   display: none;
 }
 
@@ -291,11 +264,7 @@ body,
  * vertical one - so in rows it lands on the lower bay's top corner and there is exactly one bay that has
  * to get out of its way. Any chrome a pane puts in that corner reads this rather than knowing about kebabs.
  */
-.bay {
-  --corner-taken: 0px;
-}
-
-.stage[data-form='bays'][data-along='rows'] .bay[data-at='1'] {
+.stage[data-form='bays'][data-along='rows'] .bay[data-at='second'] {
   --corner-taken: 2.5rem;
 }
 
@@ -354,7 +323,18 @@ body,
   cursor: default;
 }
 
-.hud__title {
+/*
+ * The game's own name, over the floor and in no bay.
+ *
+ * It was in the house card only because that card used to be the whole stage. Now every pixel is either
+ * the floor or a tile, so it is chrome on the floor - and the column keeps `TITLE_ROOM` clear at the top
+ * for it, which is the one thing in the layout that exists for a decoration.
+ */
+.stage__title {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1;
   pointer-events: none;
   margin: 1rem;
   font-size: 0.95rem;
@@ -375,8 +355,6 @@ body,
   pointer-events: auto;
   display: flex;
   flex-direction: column;
-  min-width: 26rem;
-  max-width: 34rem;
   background: var(--parchment);
   border: 1px solid var(--parchment-edge);
   border-width: 1px 1px 0 0;
@@ -532,18 +510,26 @@ body,
 }
 
 /*
- * Put away in the spread: the same card in the same corner, now one line of it.
+ * The card fills the tile it was given, at every size and in both forms.
  *
- * `flex-end` because the title is the other thing `space-between` was holding apart, and a strip has no
- * title - left alone it would spring to the top of the stage, which is nowhere the house has ever been.
+ * It used to demand `min-width: 26rem` - 416 pixels against a phone's 390, which is the defect decision
+ * 0039's instrument was built to find. It no longer asks for anything: the column is 26rem where there is
+ * room for it, and where there is not the card is whatever the tile is.
  */
-.stage[data-form='spread'] .hud--strip {
-  justify-content: flex-end;
+.hud__panel {
+  width: 100%;
+  height: 100%;
 }
 
-.stage[data-form='spread'] .hud__panel--strip {
-  min-width: 0;
-  max-width: none;
+/*
+ * The column squeezed below the width the card was drawn at: the line with the most words and the least
+ * news goes first, exactly as it does on a phone. A container query, because a media query cannot see one
+ * tile of a stage.
+ */
+@container (max-width: 23rem) {
+  .hud__hint {
+    display: none;
+  }
 }
 
 .stage[data-form='bays'] .hud--small .hud__achievement {
@@ -1426,24 +1412,37 @@ body,
  */
 .stage[data-form='spread'] .rail {
   position: absolute;
-  top: 1rem;
-  left: 1rem;
-  bottom: 1rem;
   z-index: 2;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: stretch;
   gap: 0.6rem;
-  width: 17rem;
-  max-width: calc(100% - 2rem);
+  overflow: hidden;
   pointer-events: none;
 }
 
+/*
+ * Set into the left edge, like the house card below it, rather than floating a gutter off it. The column
+ * is one piece of furniture and its two tiles share an edge, so they share how they meet the stage too.
+ */
+.stage[data-form='spread'] .rail .inspect {
+  border-width: 1px 1px 1px 0;
+  border-radius: 0 6px 6px 0;
+}
+
+/*
+ * A window in the rail is a flow item sharing the column's one rectangle, not a box of its own. That is
+ * what stops three of them pushing past the house in the corner: there is nowhere past to push to.
+ */
 .stage[data-form='spread'] .rail .bay {
   position: relative;
-  inset: auto;
-  width: 100%;
+  left: auto;
+  top: auto;
+  width: auto;
+  height: auto;
+  flex: 0 1 auto;
   min-height: 0;
+  container-type: normal;
   pointer-events: auto;
 }
 
