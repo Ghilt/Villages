@@ -1,244 +1,137 @@
-import { note } from '../debug/log';
-import { watchSubjects } from '../inspect/subjects';
-import type { Asking } from './paneBox';
-import { askingOf, HOUSE_VIEW, MAP_VIEW, viewById } from './views';
+import { paneIdOf, subjectOfPane, subjectsNow } from '../inspect/subjects';
+import type { Subject } from '../inspect/subjects';
+import type { Asking } from './bayBox';
 
 /**
- * The pane manager: which view is in each pane, and which are collapsed to a strip.
+ * What can occupy a bay, and what each one asks for.
  *
- * A module with a listener set rather than a context, the same shape as the gateway, the selection, the
- * areas and the debug log, because that is what `useSyncExternalStore` wants and it keeps the state out of
- * the tree.
+ * A pane is declared here and placed by the layout. Nothing in the layout knows what a map is, and no pane
+ * learns which bay it is in beyond the room it was given - which is what lets a mechanic be written once
+ * and drawn at up to three sizes. See decision record 0040.
  *
- * It holds what is where and calls the arithmetic rather than keeping the answer, so there is exactly one
- * place that knows how the room is divided and it is a pure function with a test. See decision record 0040.
- *
- * **Nothing here survives a reload.** Which pane holds what is where the player is, not a preference they
- * set; the areas make the same choice for the same reason. What does persist - the phone toggle, the folded
- * sections - is Adam's and lives in `debug/stage.ts`.
+ * Two of them are fixed and the rest come and go: an **inspect window** is a pane per subject, so the list
+ * grows as the player opens them. Character dialogue will be another fixed one.
  */
 
-/** Which of the two. `0` is the top or the left, `1` is the bottom or the right. */
-export type Which = 0 | 1;
-
-export interface PanesState {
-  /** The view in each pane, by id. */
-  readonly holding: readonly [string, string];
-  /** The ids of views collapsed to a strip. A view keeps this wherever it is put. */
-  readonly minimised: ReadonlySet<string>;
-  /**
-   * What each pane was showing before something took it over, so that closing the thing puts it back.
-   *
-   * Only a takeover is remembered. A view the player chose from the kebab is a thing they asked for, and
-   * undoing it later would be the interface second-guessing them.
-   */
-  readonly displaced: readonly [string | null, string | null];
+export interface Pane {
+  /** What the bay manager addresses it by, and what the debug log says. */
+  id: string;
+  /** What the kebab calls it, and what a minimised strip has written on it. */
+  title: string;
+  /** What its bay asks for when it is not minimised. */
+  wants: 'big' | 'small';
+  /** The pixels it needs when its bay is the small one. Unread when it wants to be big. */
+  small: number;
+  /** The pixels its strip is when minimised, or null when minimising it would leave nothing worth seeing. */
+  strip: number | null;
 }
 
-/** The map above and the house beneath it: the shape the panes open on. */
-const OPENS_ON: PanesState = {
-  holding: [MAP_VIEW.id, HOUSE_VIEW.id],
-  minimised: new Set(),
-  displaced: [null, null],
+export const MAP_PANE: Pane = {
+  id: 'map',
+  title: 'the map',
+  wants: 'big',
+  small: 200,
+  // A strip of map is not a map. Whether the player should be able to put the world away entirely to read
+  // something long is a real question and `RESPONSIVE-DESIGN.md` has it open; until then, no.
+  strip: null,
 };
 
-let state: PanesState = OPENS_ON;
-/**
- * What each pane is asking for, worked out once per change rather than on every read.
- *
- * `useSyncExternalStore` compares what the store hands back by identity, so a getter that builds a fresh
- * array each time it is called is an infinite render. It is derived from the state and it changes exactly
- * when the state does, so it is cached beside it.
- */
-let asking: readonly [Asking, Asking] = askingFor(OPENS_ON);
-const listeners = new Set<() => void>();
+export const HOUSE_PANE: Pane = {
+  id: 'house',
+  title: 'your house',
+  wants: 'small',
+  // Enough for one line of the house and the bar of its levers beneath. The bar is 2.6rem of it.
+  small: 132,
+  // The name and nothing else, so the player knows where it went.
+  strip: 44,
+};
 
-function askingFor(from: PanesState): readonly [Asking, Asking] {
-  const [head, tail] = from.holding;
-  return [
-    askingOf(viewById(head), from.minimised.has(head)),
-    askingOf(viewById(tail), from.minimised.has(tail)),
-  ];
-}
+export const FIXED_PANES: readonly Pane[] = [MAP_PANE, HOUSE_PANE];
 
 /**
- * What the stage made of itself last time it laid out.
+ * The pane that holds a window on one subject.
  *
- * Not part of the state: it is the layout's answer, not the manager's, and it changes on every resize. The
- * stage hands it back so that a line of the log reads the way Adam would say it out loud, and so that the
- * manager can tell whether putting a window somewhere means anything - in the spread there are no panes to
- * put it in.
+ * It **wants to be big**, which is what makes Adam's example come out right: the map wants to be big too,
+ * so two bays asking the same thing get half each and an opened window takes half the screen with the
+ * thing it is about still on the map above it.
  */
-let cutAlong: 'rows' | 'columns' = 'rows';
-let form: 'spread' | 'panes' = 'spread';
-
-export function panesNow(): PanesState {
-  return state;
-}
-
-export function watchPanes(listener: () => void): () => void {
-  listeners.add(listener);
-  return () => {
-    listeners.delete(listener);
+export function inspectPane(subject: Subject): Pane {
+  return {
+    id: paneIdOf(subject),
+    title: subject.kind === 'house' ? 'a house' : 'an area',
+    wants: 'big',
+    small: 220,
+    strip: 44,
   };
 }
 
-/** The stage telling the manager what it made of itself. */
-export function stageIs(which: 'spread' | 'panes', along: 'rows' | 'columns'): void {
-  form = which;
-  cutAlong = along;
+/**
+ * Every pane there is: the two fixed ones, then a window per subject, newest first.
+ *
+ * Takes the subjects rather than reading them, so that it is pure and a component can memoise it against
+ * exactly what it depends on.
+ */
+export function panesFor(open: readonly Subject[]): readonly Pane[] {
+  return [...FIXED_PANES, ...open.map(inspectPane)];
 }
 
-export function formNow(): 'spread' | 'panes' {
-  return form;
+/** The same, for callers outside a render that have no subjects in hand. */
+export function panesNow(): readonly Pane[] {
+  return panesFor(subjectsNow().open);
 }
 
-/** The pane that is not the map's, which is the one a thing clicked on the map goes into. */
-export function awayFromTheMap(): Which {
-  return state.holding[0] === MAP_VIEW.id ? 1 : 0;
-}
-
-/** What the player would call a pane, given how the stage is cut. */
-export function where(which: Which): string {
-  if (cutAlong === 'rows') {
-    return which === 0 ? 'top' : 'bottom';
+export function paneById(id: string): Pane | undefined {
+  const fixed = FIXED_PANES.find((pane) => pane.id === id);
+  if (fixed !== undefined) {
+    return fixed;
   }
-  return which === 0 ? 'left' : 'right';
+  const subject = subjectOfPane(id);
+  // Built rather than looked up: a window's pane is a description of its subject, and the subject store is
+  // the only place that knows whether it is still open.
+  return subject !== null && subjectsNow().open.some((one) => paneIdOf(one) === id)
+    ? inspectPane(subject)
+    : undefined;
 }
 
-function settle(next: PanesState): void {
-  state = next;
-  asking = askingFor(next);
-  for (const listener of listeners) {
-    listener();
-  }
-}
+/** The three sizes a pane can be drawn at. Not every pane has all three. */
+export type PaneSize = 'full' | 'small' | 'strip';
 
-function titleOf(id: string): string {
-  return viewById(id)?.title ?? id;
-}
-
-/** What each pane is asking the layout for, which is decided by what each is holding. */
-export function askingNow(): readonly [Asking, Asking] {
-  return asking;
+/** What a pane is handed: the room it got, and the way to give it back. Nothing about which bay it is in. */
+export interface Room {
+  size: PaneSize;
+  /** Collapse to a strip, or open back up. Null when this pane has no strip to collapse to. */
+  minimise: (() => void) | null;
 }
 
 /**
- * Put a view in a pane.
+ * What a bay holding this pane asks the layout for.
  *
- * A view is in one pane or neither, never both, so putting one where the other pane already has it is a
- * **swap**: with two panes there is nowhere else for the displaced one to go, and dropping it would leave a
- * pane empty. This is what the kebab's arrows do, and it is a thing the player asked for, so nothing is
- * remembered to be put back afterwards.
+ * Minimising is not a case the arithmetic knows about: a minimised pane asks for a smaller number than a
+ * small one does, and that is the whole of it. A pane that cannot be minimised asks for what it wanted.
  */
-export function put(which: Which, id: string): void {
-  if (viewById(id) === undefined || state.holding[which] === id) {
-    return;
+export function askingOf(pane: Pane | undefined, minimised: boolean): Asking {
+  if (pane === undefined) {
+    return 'big';
   }
-
-  const other: Which = which === 0 ? 1 : 0;
-  const displaced = state.holding[which];
-  const swapping = state.holding[other] === id;
-  const holding: [string, string] = which === 0 ? [id, state.holding[1]] : [state.holding[0], id];
-  if (swapping) {
-    holding[other] = displaced;
+  if (minimised && pane.strip !== null) {
+    return { small: pane.strip };
   }
-
-  settle({ ...state, holding });
-  note(
-    'pane',
-    swapping
-      ? `${titleOf(id)} and ${titleOf(displaced)} swapped, ${titleOf(id)} now ${where(which)}`
-      : `${where(which)}: ${titleOf(id)}, was ${titleOf(displaced)}`,
-  );
-}
-
-/** Collapse a view to its strip, or open it back up. A view with no strip cannot be collapsed. */
-export function toggleMinimise(id: string): void {
-  const view = viewById(id);
-  if (view === undefined || view.strip === null) {
-    return;
-  }
-
-  const minimised = new Set(state.minimised);
-  const shutting = !minimised.has(id);
-  if (shutting) {
-    minimised.add(id);
-  } else {
-    minimised.delete(id);
-  }
-
-  settle({ ...state, minimised });
-  note('pane', `${titleOf(id)} ${shutting ? 'minimised' : 'opened back up'}`);
+  return pane.wants === 'small' ? { small: pane.small } : 'big';
 }
 
 /**
- * Something taking a pane over, rather than the player choosing to put it there.
+ * How big a pane draws itself, given the form, what its bay asked for and whether it is collapsed.
  *
- * A thing clicked on the map lands in the pane that is not the map's, and what was there is remembered so
- * that closing the thing puts it back. That is the difference between this and {@link put}: one is the
- * world answering a click, the other is the player saying where they want something, and only the first is
- * undone afterwards.
+ * In the spread everything is full, because nothing is competing for the room: a pane asks to be small so
+ * that the *other* bay can have the rest, and in the spread there is no other bay. That is why the house
+ * card in the corner is the same card it always was, and only a phone ever sees the small one.
  */
-export function takeOver(which: Which, id: string): void {
-  if (state.holding[which] === id) {
-    return;
+export function sizeOf(form: 'spread' | 'bays', asking: Asking, minimised: boolean): PaneSize {
+  if (minimised) {
+    return 'strip';
   }
-
-  const was = state.holding[which];
-  const holding: [string, string] = which === 0 ? [id, state.holding[1]] : [state.holding[0], id];
-  const displaced: [string | null, string | null] = [...state.displaced] as [string | null, string | null];
-  displaced[which] = was;
-
-  settle({ ...state, holding, displaced });
-  note('pane', `${where(which)}: ${titleOf(id)}, over ${titleOf(was)}`);
+  if (form === 'spread') {
+    return 'full';
+  }
+  return typeof asking === 'object' ? 'small' : 'full';
 }
-
-/**
- * Put back whatever a view took the place of, if it took anyone's place.
- *
- * Called as a window closes. A view that is in no pane, or that the player put there themselves, leaves
- * nothing to put back and this does nothing.
- */
-export function giveBack(id: string): void {
-  const which = state.holding.indexOf(id) as Which | -1;
-  if (which === -1) {
-    return;
-  }
-
-  const other: Which = which === 0 ? 1 : 0;
-  // What it displaced, or - if that has since gone, or it displaced nothing - whichever of the two fixed
-  // views is not already up. A pane is never empty.
-  const remembered = state.displaced[which];
-  const back =
-    remembered !== null && remembered !== state.holding[other] && viewById(remembered) !== undefined
-      ? remembered
-      : state.holding[other] === MAP_VIEW.id
-        ? HOUSE_VIEW.id
-        : MAP_VIEW.id;
-
-  const holding: [string, string] = which === 0 ? [back, state.holding[1]] : [state.holding[0], back];
-  const displaced: [string | null, string | null] = [...state.displaced] as [string | null, string | null];
-  displaced[which] = null;
-
-  settle({ ...state, holding, displaced });
-  note('pane', `${where(which)}: ${titleOf(back)} back`);
-}
-
-/**
- * A pane holding a window whose subject has gone gets its old view back.
- *
- * A subject leaves the list by more than one road - the player closes it, a fourth window pushes the oldest
- * off, an area is deleted out from under it - and a pane left holding a view that no longer exists is a
- * pane with nothing in it. Rather than making every one of those roads remember to tidy up, the manager
- * watches the store and tidies up after all of them.
- *
- * Subscribed once, at load, and never unsubscribed: there is one pane manager for the life of the page.
- */
-watchSubjects(() => {
-  for (const which of [0, 1] as const) {
-    if (state.holding[which].startsWith('inspect:') && viewById(state.holding[which]) === undefined) {
-      giveBack(state.holding[which]);
-    }
-  }
-});

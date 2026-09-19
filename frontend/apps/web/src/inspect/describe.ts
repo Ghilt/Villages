@@ -31,8 +31,8 @@ export interface Fact {
  * A way on from a window.
  *
  * Two kinds, because there are two things a player means by "and that". **Another subject** opens a window
- * on it. **A view** brings that view up on this subject - showing it on the map is the first and so far the
- * only one. Both are drawn with the arrows in the panes, so the player says which pane as well as what.
+ * on it. **A pane** brings that pane up on this subject - showing it on the map is the first and so far the
+ * only one. Both are drawn with the arrows in the bays, so the player says which bay as well as what.
  */
 export type Link =
   | { what: string; to: 'subject'; subject: Subject }

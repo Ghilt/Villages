@@ -15,7 +15,7 @@ import { stageBox } from './debug/stageBox';
 import { note } from './debug/log';
 import { inspect } from './inspect/opening';
 import { Inspecting } from './inspect/Inspecting';
-import { subjectOfView } from './inspect/subjects';
+import { subjectOfPane } from './inspect/subjects';
 import { gateway, gatewayState, watchGateway } from './net/gateway';
 import { followMap } from './net/followMap';
 import { eyeIsOpen, watchEye } from './house/eye';
@@ -26,7 +26,7 @@ import { flyWith } from './map/focus';
 import { MapView } from './map/MapView';
 import { terrainPalette } from './map/terrainClasses';
 import { Stage } from './stage/Stage';
-import { MAP_VIEW, HOUSE_VIEW } from './stage/views';
+import { MAP_PANE, HOUSE_PANE } from './stage/panes';
 import { worldRootOf } from './map/masters';
 import { DEFAULT_RENDERER, RENDERERS, applyRenderer } from './map/renderers';
 import { SpriteOverlay } from './sprites/SpriteOverlay';
@@ -212,14 +212,14 @@ export function App({ master }: AppProps) {
        * from. That is what makes the phone toggle worth having: what is left at 390 pixels is what a
        * player would actually get. See decision record 0039.
        *
-       * The stage divides itself: one box in the spread, two panes once there is no longer room for
-       * everything at once. A view is handed the room it got and draws itself at that size; nothing here
-       * knows which pane anything is in. See decision record 0040.
+       * The stage divides itself: one box in the spread, two bays once there is no longer room for
+       * everything at once. A pane is handed the room it got and draws itself at that size; nothing here
+       * knows which bay anything is in. See decision record 0040.
        */}
       <Stage
         stage={box.stage}
         contents={(id, room, along) => {
-          if (id === MAP_VIEW.id) {
+          if (id === MAP_PANE.id) {
             return (
               <>
                 <Desk map={map} />
@@ -230,10 +230,10 @@ export function App({ master }: AppProps) {
               </>
             );
           }
-          if (id === HOUSE_VIEW.id) {
+          if (id === HOUSE_PANE.id) {
             return <HouseStatus room={room} />;
           }
-          const subject = subjectOfView(id);
+          const subject = subjectOfPane(id);
           return subject === null ? null : (
             <Inspecting subject={subject} room={room} along={along} grid={masterShape} />
           );

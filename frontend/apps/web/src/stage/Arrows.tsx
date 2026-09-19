@@ -1,9 +1,9 @@
-import type { Which } from './panes';
+import type { Which } from './bays';
 
 /**
- * The two arrows: which pane a thing would go into.
+ * The two arrows: which bay a thing would go into.
  *
- * One control in two places, because they are one gesture. The kebab lists the views and each carries a
+ * One control in two places, because they are one gesture. The kebab lists the panes and each carries a
  * pair; an inspect window's links each carry a pair. "Open this" and "open this *there*" are not two
  * decisions the player makes one after the other, so they are not two controls. See `LOOK-AND-FEEL.md`.
  *

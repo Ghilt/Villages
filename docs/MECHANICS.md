@@ -159,7 +159,7 @@ of which opens on its own.
 
 **A link is a way on, and there are two kinds.** One is another subject, which opens another inspect
 window: from a house to the ground about its seat, from that ground to the house next door. The other is a
-view, which brings that view up on this subject rather than opening a window — *show it on the map* is the
+pane, which brings that pane up on this subject rather than opening a window — *show it on the map* is the
 first of those, and it means the map, focused on the thing being looked at.
 
 **Nothing about it belongs to the map.** A player points at a subject and a window opens; pointing at a
@@ -194,10 +194,10 @@ bottom. That is a description of what is there rather than a decision: the diege
 is the shape most likely to change.
 
 The links carry **the arrows** — the shared two-arrow control in `LOOK-AND-FEEL.md`, which says which of
-the two panes a thing would open into.
+the two bays a thing would open into.
 
 It is **responsive from the start**: where there is room the windows stack in a rail, up to three, and on
-a phone one of them is a pane and its links ask which pane to open into. See `RESPONSIVE-DESIGN.md`.
+a phone one of them takes a bay and its links ask which bay to open into. See `RESPONSIVE-DESIGN.md`.
 
 ### Not decided
 
@@ -223,7 +223,7 @@ The shape of it is built and what it can say is thin. A **subject** covers a hou
 for both, which is what the two selections that used to run side by side became. A window renders a
 description and knows nothing of what made it. Links go both ways between a house and the ground somebody
 has fenced around it, and *show it on the map* moves the camera. Up to three stack in a rail in the spread,
-a fourth pushing the oldest off; on a phone one of them is a pane and its links carry the arrows.
+a fourth pushing the oldest off; on a phone one of them takes a bay and its links carry the arrows.
 
 What it says is everything the wire carries and no more, which for a house is a name, a banner, a seat, a
 founding day and one resource. It added no event and no frame, so the protocol version did not move. The
@@ -305,7 +305,7 @@ today because a house is thin today.
 
 ### Where it stands
 
-Named, and it fits. The house card from `1841023` is `HouseStatus` now, a **view** the layout places rather
+Named, and it fits. The house card from `1841023` is `HouseStatus` now, a **pane** the layout places rather
 than a card positioned by hand, and it has the three sizes above: the corner card, one line and the bar, and
 a strip. The `min-width: 26rem` that would not fit a 390-pixel phone - the first thing decision 0039's
 instrument found - is gone.

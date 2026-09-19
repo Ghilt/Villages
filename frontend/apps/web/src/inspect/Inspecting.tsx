@@ -7,7 +7,7 @@ import { areasNow, watchAreas } from '../areas/areas';
 import { TICK_MS } from '../house/describe';
 import { terrainPalette } from '../map/terrainClasses';
 import { gatewayState, watchGateway } from '../net/gateway';
-import type { Room } from '../stage/views';
+import type { Room } from '../stage/panes';
 import { describeArea, describeHouse, type Legend } from './describe';
 import { InspectWindow } from './InspectWindow';
 import { forgetSubject, type Subject } from './subjects';

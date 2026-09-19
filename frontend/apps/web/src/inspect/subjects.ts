@@ -11,7 +11,7 @@ import { note, shortId } from '../debug/log';
  * `state.selected` in `areas/areas.ts` for an area - which is what the first one's own docstring said the
  * second selectable thing would cost. One store now, and whatever is newest in it is what the map marks.
  *
- * A module with a listener set, like the gateway, the areas and the panes. Nothing here survives a reload.
+ * A module with a listener set, like the gateway, the areas and the bays. Nothing here survives a reload.
  */
 
 export type Subject = { kind: 'house'; id: string } | { kind: 'area'; id: string };
@@ -50,18 +50,18 @@ export function sameSubject(one: Subject | null, other: Subject | null): boolean
   return one?.kind === other?.kind && one?.id === other?.id;
 }
 
-/** What a subject is called on the wire between these modules, and what its view is addressed by. */
+/** What a subject is called on the wire between these modules, and what its pane is addressed by. */
 export function keyOf(subject: Subject): string {
   return `${subject.kind}:${subject.id}`;
 }
 
-/** The id of the view that holds a window on this subject, so a pane can be asked to show it. */
-export function viewIdOf(subject: Subject): string {
+/** The id of the pane that holds a window on this subject, so a bay can be asked to show it. */
+export function paneIdOf(subject: Subject): string {
   return `inspect:${keyOf(subject)}`;
 }
 
-/** The subject a view id names, or null when the view is not an inspect window. */
-export function subjectOfView(id: string): Subject | null {
+/** The subject a pane id names, or null when the pane is not an inspect window. */
+export function subjectOfPane(id: string): Subject | null {
   const [head, kind, rest] = id.split(':');
   if (head !== 'inspect' || rest === undefined) {
     return null;

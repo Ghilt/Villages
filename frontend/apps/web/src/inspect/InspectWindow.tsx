@@ -2,8 +2,8 @@ import { Fragment } from 'react';
 
 import { focusOn } from '../map/focus';
 import { Arrows } from '../stage/Arrows';
-import { put, type Which } from '../stage/panes';
-import { MAP_VIEW } from '../stage/views';
+import { put, type Which } from '../stage/bays';
+import { MAP_PANE } from '../stage/panes';
 import type { Description, Link } from './describe';
 import { inspect, stopInspecting } from './opening';
 import type { Subject } from './subjects';
@@ -24,7 +24,7 @@ interface InspectWindowProps {
   subject: Subject;
   said: Description;
   /**
-   * The arrows, when there are two panes to choose between. In the spread there is one place a window goes
+   * The arrows, when there are two bays to choose between. In the spread there is one place a window goes
    * and one map, so a link is a plain click and no arrows are drawn.
    */
   along: 'rows' | 'columns' | null;
@@ -35,7 +35,7 @@ export function InspectWindow({ subject, said, along }: InspectWindowProps) {
     if (link.to === 'map') {
       focusOn(link.at);
       if (into !== null) {
-        put(into, MAP_VIEW.id);
+        put(into, MAP_PANE.id);
       }
       return;
     }

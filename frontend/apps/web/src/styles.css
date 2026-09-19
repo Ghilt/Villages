@@ -152,46 +152,46 @@ body,
 }
 
 /*
- * The panes: how the stage divides itself once there is no longer room for everything at once.
+ * The bays: how the stage divides itself once there is no longer room for everything at once.
  *
- * In the spread the stage is one box and the views lie over one another exactly as they always did, which
+ * In the spread the stage is one box and the panes lie over one another exactly as they always did, which
  * is why nothing inside them had to change: they were all `position: absolute; inset: 0` already, and a
- * pane is the positioned box they were waiting for.
+ * bay is the positioned box they were waiting for.
  *
- * In the panes the stage is a grid of two cut along its longer side, and a view moves between them by
+ * In the bays the stage is a grid of two cut along its longer side, and a pane moves between them by
  * changing which cell it is in. **Nothing is unmounted to move it** - the map holds a camera, a style and a
  * WebGL context, and `MapView` throws all three away when it unmounts. See decision record 0040.
  */
-.stage[data-form='spread'] .pane {
+.stage[data-form='spread'] .bay {
   position: absolute;
   inset: 0;
 }
 
 /* Over the map and letting every click through to it; the card inside takes its own back. */
-.stage[data-form='spread'] .pane--house {
+.stage[data-form='spread'] .bay--house {
   pointer-events: none;
 }
 
-.stage[data-form='panes'] {
+.stage[data-form='bays'] {
   display: grid;
 }
 
-.stage[data-form='panes'][data-along='rows'] {
+.stage[data-form='bays'][data-along='rows'] {
   grid-template-columns: 100%;
-  grid-template-rows: var(--pane-first, 1fr) var(--pane-second, 0px);
+  grid-template-rows: var(--bay-first, 1fr) var(--bay-second, 0px);
 }
 
-.stage[data-form='panes'][data-along='columns'] {
-  grid-template-columns: var(--pane-first, 1fr) var(--pane-second, 0px);
+.stage[data-form='bays'][data-along='columns'] {
+  grid-template-columns: var(--bay-first, 1fr) var(--bay-second, 0px);
   grid-template-rows: 100%;
 }
 
 /*
- * A pane clips rather than scrolls. A view too big for its pane is a bug in the view, and a scrollbar is
+ * A bay clips rather than scrolls. A pane too big for its bay is a bug in the pane, and a scrollbar is
  * how that bug gets hidden. `min-width` and `min-height` because a grid item's floor is its content, and
  * without them a wide card would push the grid wider than the stage instead of being cut off by it.
  */
-.stage[data-form='panes'] .pane {
+.stage[data-form='bays'] .bay {
   position: relative;
   overflow: hidden;
   min-width: 0;
@@ -199,31 +199,31 @@ body,
   container-type: size;
 }
 
-.stage[data-form='panes'][data-along='rows'] .pane[data-at='0'] {
+.stage[data-form='bays'][data-along='rows'] .bay[data-at='0'] {
   grid-area: 1 / 1;
 }
 
-.stage[data-form='panes'][data-along='rows'] .pane[data-at='1'] {
+.stage[data-form='bays'][data-along='rows'] .bay[data-at='1'] {
   grid-area: 2 / 1;
 }
 
-.stage[data-form='panes'][data-along='columns'] .pane[data-at='0'] {
+.stage[data-form='bays'][data-along='columns'] .bay[data-at='0'] {
   grid-area: 1 / 1;
 }
 
-.stage[data-form='panes'][data-along='columns'] .pane[data-at='1'] {
+.stage[data-form='bays'][data-along='columns'] .bay[data-at='1'] {
   grid-area: 1 / 2;
 }
 
-/* A view nobody has put in a pane. Hidden rather than unmounted, for the reason above. */
-.stage[data-form='panes'] .pane[data-at='nowhere'] {
+/* A pane nobody has put in a bay. Hidden rather than unmounted, for the reason above. */
+.stage[data-form='bays'] .bay[data-at='nowhere'] {
   display: none;
 }
 
 /*
- * The kebab, on the seam between the two panes: what else there is, and which pane it would go into.
+ * The kebab, on the seam between the two bays: what else there is, and which bay it would go into.
  *
- * Only in the panes. The spread shows everything at once, so there is nothing to choose between.
+ * Only in the bays. The spread shows everything at once, so there is nothing to choose between.
  */
 .kebab {
   position: absolute;
@@ -231,13 +231,13 @@ body,
 }
 
 .kebab--rows {
-  top: var(--pane-first, 50%);
+  top: var(--bay-first, 50%);
   right: 0.3rem;
   transform: translateY(-50%);
 }
 
 .kebab--columns {
-  left: var(--pane-first, 50%);
+  left: var(--bay-first, 50%);
   bottom: 0;
   transform: translateX(-50%);
 }
@@ -285,17 +285,17 @@ body,
 }
 
 /*
- * How much of a pane's top-right corner the kebab is standing in.
+ * How much of a bay's top-right corner the kebab is standing in.
  *
  * The kebab sits at the far end of the divider - the right end of a horizontal one, the bottom end of a
- * vertical one - so in rows it lands on the lower pane's top corner and there is exactly one pane that has
- * to get out of its way. Any chrome a view puts in that corner reads this rather than knowing about kebabs.
+ * vertical one - so in rows it lands on the lower bay's top corner and there is exactly one bay that has
+ * to get out of its way. Any chrome a pane puts in that corner reads this rather than knowing about kebabs.
  */
-.pane {
+.bay {
   --corner-taken: 0px;
 }
 
-.stage[data-form='panes'][data-along='rows'] .pane[data-at='1'] {
+.stage[data-form='bays'][data-along='rows'] .bay[data-at='1'] {
   --corner-taken: 2.5rem;
 }
 
@@ -315,7 +315,7 @@ body,
 }
 
 /*
- * The arrows: which pane a thing would go into. One control in two places - the kebab's rows and, when it
+ * The arrows: which bay a thing would go into. One control in two places - the kebab's rows and, when it
  * exists, an inspect window's links - because "open this" and "open this there" are one decision. See
  * `LOOK-AND-FEEL.md`.
  */
@@ -500,7 +500,7 @@ body,
  * The house at its other two sizes.
  *
  * **Small** is what it is when it is sharing a phone with something else: one line of the house and the bar
- * beneath it, filling its pane edge to edge rather than sitting into a corner, because in a pane there is
+ * beneath it, filling its bay edge to edge rather than sitting into a corner, because in a bay there is
  * no corner to sit into. The blazon and the founding day are what go, being the most words and the least
  * news. **Strip** is the name and the chevron, so a player who put the house away knows where it went.
  *
@@ -509,19 +509,19 @@ body,
  * nothing now and takes the room it is given.
  */
 /*
- * In a pane the card fills it, edge to edge, because a pane has no corner to sit into: it *is* the corner.
+ * In a bay the card fills it, edge to edge, because a bay has no corner to sit into: it *is* the corner.
  *
- * Scoped to the panes and not written flat, because in the spread a pane is the whole stage - a card told
+ * Scoped to the bays and not written flat, because in the spread a bay is the whole stage - a card told
  * to fill one there would be a sheet laid over the world, which is both wrong to look at and an invisible
  * lid over every click meant for the map.
  */
-.stage[data-form='panes'] .hud--small,
-.stage[data-form='panes'] .hud--strip {
+.stage[data-form='bays'] .hud--small,
+.stage[data-form='bays'] .hud--strip {
   display: block;
 }
 
-.stage[data-form='panes'] .hud--small .hud__panel,
-.stage[data-form='panes'] .hud--strip .hud__panel {
+.stage[data-form='bays'] .hud--small .hud__panel,
+.stage[data-form='bays'] .hud--strip .hud__panel {
   position: absolute;
   inset: 0;
   min-width: 0;
@@ -546,19 +546,19 @@ body,
   max-width: none;
 }
 
-.stage[data-form='panes'] .hud--small .hud__achievement {
+.stage[data-form='bays'] .hud--small .hud__achievement {
   flex: 1;
   min-height: 0;
   gap: 0.75rem;
   padding: 0.4rem 0.75rem 0.3rem 0.6rem;
 }
 
-.stage[data-form='panes'] .hud--small .hud__banner {
+.stage[data-form='bays'] .hud--small .hud__banner {
   width: 2.5rem;
 }
 
 /* One line: the name, then the treasury pushed to the far end where the eye will read it as a number. */
-.stage[data-form='panes'] .hud--small .hud__house {
+.stage[data-form='bays'] .hud--small .hud__house {
   flex: 1;
   min-width: 0;
   flex-direction: row;
@@ -566,14 +566,14 @@ body,
   gap: 0.75rem;
 }
 
-.stage[data-form='panes'] .hud--small .hud__name {
+.stage[data-form='bays'] .hud--small .hud__name {
   font-size: 1.25rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.stage[data-form='panes'] .hud--small .hud__resources {
+.stage[data-form='bays'] .hud--small .hud__resources {
   margin: 0 0 0 auto;
   gap: 0 0.4rem;
   font-size: 0.95rem;
@@ -1420,7 +1420,7 @@ body,
 /*
  * The rail: where inspect windows stack in the spread, up to three, newest at the top.
  *
- * `display: contents` in the panes, so the windows become grid items in their own right and crossing the
+ * `display: contents` in the bays, so the windows become grid items in their own right and crossing the
  * fold moves nothing in the tree. The rail lets clicks through in the gaps between windows - it covers the
  * whole left of the stage and most of that is map.
  */
@@ -1439,7 +1439,7 @@ body,
   pointer-events: none;
 }
 
-.stage[data-form='spread'] .rail .pane {
+.stage[data-form='spread'] .rail .bay {
   position: relative;
   inset: auto;
   width: 100%;
@@ -1447,12 +1447,12 @@ body,
   pointer-events: auto;
 }
 
-.stage[data-form='panes'] .rail {
+.stage[data-form='bays'] .rail {
   display: contents;
 }
 
-/* In a pane a window fills it, the way the house does, because a pane has no corner to sit into. */
-.stage[data-form='panes'] .pane--inspect .inspect {
+/* In a bay a window fills it, the way the house does, because a bay has no corner to sit into. */
+.stage[data-form='bays'] .bay--inspect .inspect {
   position: absolute;
   inset: 0;
   border-width: 1px 0 0;
@@ -1571,7 +1571,7 @@ body,
  * The links: the ways on from a window.
  *
  * The point of the mechanic rather than a footnote to it, so they are a list with a heading and not a row
- * of small print. In the panes each carries **the arrows**, because there the player says which pane as
+ * of small print. In the bays each carries **the arrows**, because there the player says which bay as
  * well as what; in the spread there is one place a window goes and one map, so the whole row is the button.
  */
 .inspect__onward {

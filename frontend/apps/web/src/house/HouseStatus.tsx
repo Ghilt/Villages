@@ -3,7 +3,7 @@ import { useEffect, useState, useSyncExternalStore } from 'react';
 import { describeDay } from '@villages/protocol';
 
 import { gatewayState, watchGateway } from '../net/gateway';
-import type { Room } from '../stage/views';
+import type { Room } from '../stage/panes';
 import { blazon, TICK_MS, treasuryAt } from './describe';
 import { HouseBar } from './HouseBar';
 
@@ -103,7 +103,7 @@ export function HouseStatus({ room }: { room: Room }) {
 
   return (
     <div className={small ? 'hud hud--small' : 'hud'} aria-live="polite">
-      {/* The game's own name, not the house's. There is no room for it once the stage is two panes. */}
+      {/* The game's own name, not the house's. There is no room for it once the stage is two bays. */}
       {!small && <header className="hud__title">Villages</header>}
 
       <section className={house === null ? 'hud__panel hud__panel--vacant' : 'hud__panel'}>

@@ -1,17 +1,17 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 
 import { Arrows } from './Arrows';
-import { panesNow, put, type Which, watchPanes } from './panes';
-import { viewsNow } from './views';
+import { baysNow, put, type Which, watchBays } from './bays';
+import { panesNow } from './panes';
 
 /**
  * The kebab at the divider: what else there is, and where to put it.
  *
- * It sits on the seam between the two panes because that is what it is about. Every view is listed, whether
- * or not it is already up, and each carries **the arrows** saying which pane it would go into - so the
+ * It sits on the seam between the two bays because that is what it is about. Every pane is listed, whether
+ * or not it is already up, and each carries **the arrows** saying which bay it would go into - so the
  * player never has to open a thing and then move it.
  *
- * Only in the panes. The spread shows everything at once, so there is nothing to choose between and no
+ * Only in the bays. The spread shows everything at once, so there is nothing to choose between and no
  * kebab; that difference is the whole of what the two forms are. See decision record 0040.
  */
 
@@ -20,7 +20,7 @@ interface KebabProps {
 }
 
 export function Kebab({ along }: KebabProps) {
-  const panes = useSyncExternalStore(watchPanes, panesNow);
+  const bays = useSyncExternalStore(watchBays, baysNow);
   const [open, setOpen] = useState(false);
   const box = useRef<HTMLDivElement>(null);
 
@@ -72,16 +72,16 @@ export function Kebab({ along }: KebabProps) {
 
       {open && (
         <ul className="kebab__list">
-          {viewsNow().map((view) => {
-            const at = panes.holding.indexOf(view.id);
+          {panesNow().map((pane) => {
+            const at = bays.holding.indexOf(pane.id);
             return (
-              <li className="kebab__row" key={view.id}>
-                <span className="kebab__what">{view.title}</span>
+              <li className="kebab__row" key={pane.id}>
+                <span className="kebab__what">{pane.title}</span>
                 <Arrows
                   along={along}
                   here={at === -1 ? null : (at as Which)}
-                  what={view.title}
-                  onPick={(which) => pick(which, view.id)}
+                  what={pane.title}
+                  onPick={(which) => pick(which, pane.id)}
                 />
               </li>
             );

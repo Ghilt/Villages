@@ -49,8 +49,8 @@ Wanted, not started, and each needs a hypothesis in `docs/experiments/` before a
 - **Character dialogue**: people talking to each other, and the mechanic storylines are carried in. See
   `MECHANICS.md`; what it asks of the client is in `ARCHITECTURE.md`, and one of its questions - the DOM or
   a Pixi surface - wants deciding before much of it is written.
-- **A responsive interface.** The layout is decided now - the stage folds into two panes below 600 pixels
-  on its shorter side, a view occupies a pane, and any view can be minimised (decision record 0040) - and
+- **A responsive interface.** The layout is decided now - the stage folds into two bays below 600 pixels
+  on its shorter side, a pane occupies a bay, and any pane can be minimised (decision record 0040) - and
   what remains is bringing the rest over. The parchment is the one still written against the window rather
   than the stage, so its breakpoint never fires. Touch is untouched: hover lifts a parchment and the map is
   driven by drag and wheel.
