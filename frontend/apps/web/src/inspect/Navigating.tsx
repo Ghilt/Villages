@@ -1,10 +1,9 @@
 import { useSyncExternalStore } from 'react';
 
-import { Arrows } from '../stage/Arrows';
-import { baysNow, put, type Which, watchBays } from '../stage/bays';
-import { Icon } from '../stage/Icons';
+import { baysNow, put, type Which, watchBays, where } from '../stage/bays';
+import { Icon, Needle, pointAt } from '../stage/Icons';
 import { gatewayState, watchGateway } from '../net/gateway';
-import { type Pane, type Room, standingPanes } from '../stage/panes';
+import { NAVIGATION_PANE, type Pane, type Room, standingPanes } from '../stage/panes';
 import { inspect } from './opening';
 import { paneIdOf } from './subjects';
 import { clearTrail, stepKey, trailNow, watchTrail } from './trail';
@@ -23,9 +22,14 @@ import { clearTrail, stepKey, trailNow, watchTrail } from './trail';
  * it can be moved off the bay it is standing in. Which bay a pane shares with another on a *desktop* is a
  * fact about the spread and has nothing to say about any of this. See decision record 0043.
  *
- * In the bays each row carries **the arrows**, so the player says which bay; the one it is already in is
- * marked rather than taken away. In the spread there are no bays to choose between and a row is a plain
- * click.
+ * **A row is a place to go, and there is one of each.** Pressing the row itself puts the thing **here**, in
+ * the bay navigation is standing in, which is what a player means nine times in ten: they came to this list
+ * to leave it. The single **needle** at the far end sends it to the *other* bay instead, and it points
+ * there so it reads as somewhere rather than as a second way to do the same thing.
+ *
+ * That replaced a pair of arrows on every row. Two marks where one would do made a list of four rows into a
+ * list of eight decisions, and neither of them was the obvious one - which was pressing the row. In the
+ * spread there is one bay a thing goes into, so there is no needle at all and the row is a plain click.
  */
 
 export function Navigating({ room, along }: { room: Room; along: 'rows' | 'columns' | null }) {
@@ -52,8 +56,13 @@ export function Navigating({ room, along }: { room: Room; along: 'rows' | 'colum
     );
   }
 
-  /** Which bay a pane is standing in, or -1. What the arrows mark as the one you are already on. */
+  /** Which bay a pane is standing in, or -1. What the needle marks as the one it is already on. */
   const at = (id: string) => bays.holding.indexOf(id);
+
+  // Where a row lands when the row itself is pressed, and where the needle sends it instead.
+  const here = bays.holding.indexOf(NAVIGATION_PANE.id) as Which | -1;
+  const mine: Which = here === -1 ? 1 : here;
+  const there: Which = mine === 0 ? 1 : 0;
 
   return (
     <section className="navigate" aria-label="Where you have been">
@@ -71,6 +80,8 @@ export function Navigating({ room, along }: { room: Room; along: 'rows' | 'colum
                 aside={null}
                 along={along}
                 at={at(pane.id)}
+                here={mine}
+                there={there}
                 onGo={(which) => which !== null && put(which, pane.id)}
               />
             ))}
@@ -104,6 +115,8 @@ export function Navigating({ room, along }: { room: Room; along: 'rows' | 'colum
               aside={step.subject.kind}
               along={along}
               at={at(paneIdOf(step.subject))}
+              here={mine}
+              there={there}
               onGo={(which) => {
                 inspect(step.subject, which);
               }}
@@ -123,10 +136,14 @@ interface RowProps {
   along: 'rows' | 'columns' | null;
   /** The bay it is already in, or -1. */
   at: number;
+  /** The bay navigation is standing in, which is where pressing the row puts a thing. */
+  here: Which;
+  /** The other one, which is where the needle sends it. */
+  there: Which;
   onGo: (which: Which | null) => void;
 }
 
-function Row({ icon, name, aside, along, at, onGo }: RowProps) {
+function Row({ icon, name, aside, along, at, here, there, onGo }: RowProps) {
   if (along === null) {
     return (
       <li className="navigate__step">
@@ -139,13 +156,29 @@ function Row({ icon, name, aside, along, at, onGo }: RowProps) {
     );
   }
 
+  const already = at === there;
+
   return (
     <li className="navigate__step navigate__step--picked">
-      <span className="navigate__go navigate__go--label">
+      <button
+        type="button"
+        className="navigate__go"
+        aria-label={`${name}, ${where(here)}`}
+        onClick={() => onGo(here)}
+      >
         <Icon name={icon} />
         <span className="navigate__name">{name}</span>
-      </span>
-      <Arrows along={along} here={at === -1 ? null : (at as Which)} what={name} onPick={onGo} />
+      </button>
+      <button
+        type="button"
+        className={already ? 'navigate__there navigate__there--here' : 'navigate__there'}
+        aria-label={already ? `${name} is already ${where(there)}` : `put ${name} ${where(there)}`}
+        aria-pressed={already}
+        title={already ? `already ${where(there)}` : `put it ${where(there)}`}
+        onClick={() => onGo(there)}
+      >
+        <Needle point={pointAt(along, there)} />
+      </button>
     </li>
   );
 }

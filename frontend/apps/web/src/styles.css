@@ -1725,10 +1725,11 @@ body,
 }
 
 /*
- * A row in the bays: the label, and the arrows at the far end saying which bay it would go into.
+ * A row in the bays: the row itself is where it goes, and one needle sends it the other way instead.
  *
- * Every row is this row. No pane is privileged - the one a pane is already in is marked by the arrows
- * rather than taken away, so anything can be moved anywhere. See decision record 0043.
+ * Pressing the row puts the thing in the bay navigation is standing in, which is what a player means nine
+ * times in ten - they came to this list in order to leave it. The needle at the far end is the other bay.
+ * Every row is this row, and every pane can reach both. See decision record 0043.
  */
 .navigate__step--picked {
   display: flex;
@@ -1736,17 +1737,38 @@ body,
   padding-right: 0.35rem;
 }
 
-.navigate__go--label {
+.navigate__step--picked .navigate__go {
   flex: 1;
   min-width: 0;
-  cursor: default;
 }
 
-/* A finger is not a mouse: the arrows in a list are a row tall rather than a glyph tall. */
-.navigate__step--picked .arrows__one {
+/* A finger is not a mouse: the needle in a list is a row tall rather than a glyph tall. */
+.navigate__there {
+  flex: none;
   width: 2rem;
   height: 2rem;
   padding: 0.35rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.navigate__there .icon {
+  opacity: 0.55;
+}
+
+.navigate__there:hover .icon {
+  opacity: 1;
+}
+
+/* Where it already is: the needle you are standing on rather than a place to go. */
+.navigate__there--here {
+  cursor: default;
+}
+
+.navigate__there--here .icon {
+  color: var(--gold);
+  opacity: 1;
 }
 
 /* The panes, above the divider that the trail sits under. */
