@@ -14,6 +14,16 @@ export const PANEL_WANTS = 352;
 /** A typical phone in portrait, in the pixels a phone's own browser would report. A matter of taste. */
 export const PHONE = { w: 390, h: 844 };
 
+/**
+ * The same phone turned on its side.
+ *
+ * A second shape rather than a rotate button, because it is checked against the portrait one rather than
+ * instead of it. It is the shape that folds the stage into a **left and a right** instead of a top and a
+ * bottom, which is the half of the two-bay form that a portrait phone never exercises - and it is short,
+ * so it is where a pane finds out whether it can live in 390 pixels of height.
+ */
+export const PHONE_TURNED = { w: PHONE.h, h: PHONE.w };
+
 /** Smaller than the narrowest phone worth designing for, and there would be nothing to look at. */
 export const STAGE_LEAST = { w: 320, h: 240 };
 
@@ -23,7 +33,15 @@ export const STAGE_LEAST = { w: 320, h: 240 };
  * `fill` is the default: the panel at the width it wants and the stage taking everything else.
  * `phone` confines the stage to {@link PHONE}. A pair of numbers is a size Adam dragged it to.
  */
-export type StageMode = 'fill' | 'phone' | { w: number; h: number };
+export type StageMode = 'fill' | 'phone' | 'turned' | { w: number; h: number };
+
+/** The two shapes the toggles confine the stage to. */
+export const SHAPES = { phone: PHONE, turned: PHONE_TURNED } as const;
+
+/** Whether a mode is one of the named shapes rather than `fill` or a size Adam dragged it to. */
+export function isShape(mode: StageMode): mode is keyof typeof SHAPES {
+  return mode === 'phone' || mode === 'turned';
+}
 
 export interface Window {
   width: number;
@@ -73,8 +91,7 @@ export function stageBox(window: Window, mode: StageMode, panelShut: boolean): S
   const wants = panelShut ? 0 : PANEL_WANTS;
   const widest = Math.max(0, window.width - wants);
 
-  const asked =
-    mode === 'fill' ? { w: widest, h: window.height } : mode === 'phone' ? { w: PHONE.w, h: PHONE.h } : mode;
+  const asked = mode === 'fill' ? { w: widest, h: window.height } : isShape(mode) ? SHAPES[mode] : mode;
 
   const stage = {
     w: clamp(asked.w, Math.min(STAGE_LEAST.w, window.width), widest),

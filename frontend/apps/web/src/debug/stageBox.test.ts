@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
-import { PANEL_WANTS, PHONE, STAGE_LEAST, stageBox, stageFromSideGrip, stageFromTopGrip } from './stageBox';
+import {
+  PANEL_WANTS,
+  PHONE,
+  PHONE_TURNED,
+  STAGE_LEAST,
+  stageBox,
+  stageFromSideGrip,
+  stageFromTopGrip,
+} from './stageBox';
 
 const DESKTOP = { width: 1920, height: 1080 };
 
@@ -136,5 +144,28 @@ describe('the grips', () => {
   it('will not drag the panel narrower than the width it wants', () => {
     expect(stageFromSideGrip(DESKTOP, 1910, 1080).w).toBe(DESKTOP.width - PANEL_WANTS);
     expect(stageFromSideGrip(DESKTOP, 1700, 1080).w).toBe(DESKTOP.width - PANEL_WANTS);
+  });
+});
+
+/**
+ * The phone on its side, which is the shape that cuts the stage into a left and a right.
+ *
+ * A second named shape rather than a rotate, because it is checked *against* the upright one. See
+ * `DebugPanel`'s two toggles.
+ */
+describe('the turned phone', () => {
+  it('is the phone with its sides swapped', () => {
+    expect(PHONE_TURNED).toEqual({ w: PHONE.h, h: PHONE.w });
+  });
+
+  it('confines the stage to it, whatever the window is', () => {
+    const box = stageBox({ width: 1920, height: 1080 }, 'turned', false);
+
+    expect(box.stage).toEqual(PHONE_TURNED);
+  });
+
+  // The whole point of it: the longer side is now the width, so the bays are cut into columns.
+  it('is landscape, so its longer side is the one that gets divided', () => {
+    expect(PHONE_TURNED.w).toBeGreaterThan(PHONE_TURNED.h);
   });
 });

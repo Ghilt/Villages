@@ -1,4 +1,4 @@
-import type { StageMode } from './stageBox';
+import { isShape, type StageMode } from './stageBox';
 
 /**
  * How the debug panel and the stage are arranged, remembered between reloads.
@@ -15,8 +15,8 @@ const OPEN_KEY = 'villages.debug.open';
 function readBack(): StageMode {
   try {
     const kept = localStorage.getItem(REMEMBERED);
-    if (kept === 'phone') {
-      return 'phone';
+    if (kept !== null && isShape(kept as StageMode)) {
+      return kept as StageMode;
     }
     const dragged = /^(\d+(?:\.\d+)?)x(\d+(?:\.\d+)?)$/.exec(kept ?? '');
     return dragged === null ? 'fill' : { w: Number(dragged[1]), h: Number(dragged[2]) };
@@ -91,11 +91,13 @@ export function setPanelShut(next: boolean): void {
 }
 
 /**
- * The toggle in the very top right: a phone, or back to whatever the stage was before.
+ * The toggles in the very top right: a phone shape, or back to whatever the stage was before.
  *
- * Leaving the phone goes back to `fill` rather than to the last dragged size, because the toggle is
- * asked for as two states and a third remembered one would make it read as three.
+ * Two of them, a phone and the same phone turned. Pressing one while the other is on switches between the
+ * shapes rather than going back to `fill`, which is the comparison they are there to make. Leaving a shape
+ * goes back to `fill` rather than to the last dragged size, because each toggle is asked for as two states
+ * and a third remembered one would make it read as three.
  */
-export function togglePhone(): void {
-  setStage(mode === 'phone' ? 'fill' : 'phone');
+export function toggleShape(shape: 'phone' | 'turned'): void {
+  setStage(mode === shape ? 'fill' : shape);
 }

@@ -11,7 +11,7 @@ import { MapSection } from './MapSection';
 import { Section } from './Section';
 import { WorktreesSection } from './WorktreesSection';
 import { atToClock, note, notesNow, watchNotes } from './log';
-import { panelIsShut, setPanelShut, stageMode, togglePhone, watchStage } from './stage';
+import { panelIsShut, setPanelShut, stageMode, toggleShape, watchStage } from './stage';
 import { describeTerrainStep } from './terrainDepth';
 import { WorldSection } from './WorldSection';
 
@@ -199,15 +199,29 @@ export function DebugPanel({ map, worldRoot, master, renderer, onRenderer }: Deb
         >
           hide
         </button>
-        {/* The very top right, because that is where Adam asked for it. */}
+        {/*
+          The very top right, because that is where Adam asked for it. Two shapes and not one: a phone
+          upright and the same phone turned, which is the only way to see the stage cut into a left and a
+          right rather than a top and a bottom - and the only shape short enough to find out whether a pane
+          can live in 390 pixels of height.
+        */}
         <button
           type="button"
           className={`debug__button${mode === 'phone' ? ' debug__button--on' : ''}`}
-          onClick={togglePhone}
+          onClick={() => toggleShape('phone')}
           aria-pressed={mode === 'phone'}
           title="confine the stage to a phone, and back"
         >
           phone
+        </button>
+        <button
+          type="button"
+          className={`debug__button${mode === 'turned' ? ' debug__button--on' : ''}`}
+          onClick={() => toggleShape('turned')}
+          aria-pressed={mode === 'turned'}
+          title="confine the stage to a phone on its side, and back"
+        >
+          turned
         </button>
       </header>
 
