@@ -93,11 +93,11 @@ export function setPanelShut(next: boolean): void {
 /**
  * The toggles in the very top right: a phone shape, or back to whatever the stage was before.
  *
- * Two of them, a phone and the same phone turned. Pressing one while the other is on switches between the
+ * Two of them, a phone and the same phone in landscape. Pressing one while the other is on switches between
  * shapes rather than going back to `fill`, which is the comparison they are there to make. Leaving a shape
  * goes back to `fill` rather than to the last dragged size, because each toggle is asked for as two states
  * and a third remembered one would make it read as three.
  */
-export function toggleShape(shape: 'phone' | 'turned'): void {
+export function toggleShape(shape: 'phone' | 'landscape'): void {
   setStage(mode === shape ? 'fill' : shape);
 }

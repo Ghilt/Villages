@@ -201,7 +201,7 @@ export function DebugPanel({ map, worldRoot, master, renderer, onRenderer }: Deb
         </button>
         {/*
           The very top right, because that is where Adam asked for it. Two shapes and not one: a phone
-          upright and the same phone turned, which is the only way to see the stage cut into a left and a
+          upright and the same phone in landscape, which is the only way to see the stage cut into a left and a
           right rather than a top and a bottom - and the only shape short enough to find out whether a pane
           can live in 390 pixels of height.
         */}
@@ -216,12 +216,12 @@ export function DebugPanel({ map, worldRoot, master, renderer, onRenderer }: Deb
         </button>
         <button
           type="button"
-          className={`debug__button${mode === 'turned' ? ' debug__button--on' : ''}`}
-          onClick={() => toggleShape('turned')}
-          aria-pressed={mode === 'turned'}
-          title="confine the stage to a phone on its side, and back"
+          className={`debug__button${mode === 'landscape' ? ' debug__button--on' : ''}`}
+          onClick={() => toggleShape('landscape')}
+          aria-pressed={mode === 'landscape'}
+          title="confine the stage to a phone in landscape, and back"
         >
-          turned
+          landscape
         </button>
       </header>
 

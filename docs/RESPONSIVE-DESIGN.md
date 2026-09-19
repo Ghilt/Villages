@@ -128,9 +128,12 @@ and the pane says what it looks like in the room it got; a pane that has no sens
 the bay holding it never asks to be small. **Nobody drags a divider** — the split moves because what is in
 the bays changed, so it always sits where the content asked for it.
 
-**Minimise collapses a pane to a strip** and gives its room back to whatever is beside it. **It is not the
-bays' idea** — the same button works in the spread, where collapsing the house status gives the room to the
-map. It is a property of a pane everywhere, not a feature of the small screen.
+**Every pane carries a pane size control**, in both forms: three marks saying how much of the stage it is
+taking — put away, the normal size, opened out. In the **bays** it is a statement and not a request, so
+naming one pane's size names the arrangement and the other follows; both panes put away is not a state a
+player can reach. In the **spread** each tile's height is its own, because a tile is not dividing anything
+with anybody. A pane that cannot be put away offers two marks rather than three. See decision record 0045
+and `LOOK-AND-FEEL.md`.
 
 **The compass at the divider is the way to everything else.** One tap puts **navigation** in the bay that is
 not the map's, and navigation lists the panes above a divider and the **trail** below it. Every row carries
@@ -171,7 +174,12 @@ moved into it for the same reason.
 
 ## The instrument
 
-**The phone toggle, in the very top right of the debug panel, confines the stage to 390 by 844.** The stage
+**Two toggles in the very top right of the debug panel confine the stage to a phone**, upright and in
+landscape — 390 by 844, and the same turned. The landscape one is the only way to see the stage cut into a
+**left and a right** rather than a top and a bottom, and the only shape short enough to find out whether a
+pane lives in 390 pixels of height.
+
+**The phone toggle confines the stage to 390 by 844.** The stage
 is the box the player's interface is laid out in, and the panel takes room from it rather than floating over
 it. Two grips resize it to anything in between. So the rule above is checkable while a component is being
 written, at one click, on whatever monitor there happens to be. See decision record 0039.

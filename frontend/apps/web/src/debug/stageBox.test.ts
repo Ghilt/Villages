@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   PANEL_WANTS,
   PHONE,
-  PHONE_TURNED,
+  PHONE_LANDSCAPE,
   STAGE_LEAST,
   stageBox,
   stageFromSideGrip,
@@ -153,19 +153,19 @@ describe('the grips', () => {
  * A second named shape rather than a rotate, because it is checked *against* the upright one. See
  * `DebugPanel`'s two toggles.
  */
-describe('the turned phone', () => {
+describe('the landscape phone', () => {
   it('is the phone with its sides swapped', () => {
-    expect(PHONE_TURNED).toEqual({ w: PHONE.h, h: PHONE.w });
+    expect(PHONE_LANDSCAPE).toEqual({ w: PHONE.h, h: PHONE.w });
   });
 
   it('confines the stage to it, whatever the window is', () => {
-    const box = stageBox({ width: 1920, height: 1080 }, 'turned', false);
+    const box = stageBox({ width: 1920, height: 1080 }, 'landscape', false);
 
-    expect(box.stage).toEqual(PHONE_TURNED);
+    expect(box.stage).toEqual(PHONE_LANDSCAPE);
   });
 
   // The whole point of it: the longer side is now the width, so the bays are cut into columns.
   it('is landscape, so its longer side is the one that gets divided', () => {
-    expect(PHONE_TURNED.w).toBeGreaterThan(PHONE_TURNED.h);
+    expect(PHONE_LANDSCAPE.w).toBeGreaterThan(PHONE_LANDSCAPE.h);
   });
 });

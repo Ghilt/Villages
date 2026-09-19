@@ -70,6 +70,13 @@ let state: BaysState = OPENS_ON;
 let asking: readonly [Asking, Asking] = askingFor(OPENS_ON);
 const listeners = new Set<() => void>();
 
+/** What each size is called in the log, which is what the control's own labels say. */
+const SAID: Record<PaneSize, string> = {
+  strip: 'put away',
+  small: 'back to its normal size',
+  full: 'opened out',
+};
+
 /** How big a pane is drawn in the bays: what the player asked for, or what it was declared to want. */
 export function sizeAsked(id: string): PaneSize {
   return state.asked[id] ?? wantedIn(paneById(id));
@@ -221,15 +228,32 @@ export function askFor(id: string, size: PaneSize): void {
   if (pane === undefined || (size === 'strip' && pane.strip === null)) {
     return;
   }
-  if ((state.asked[id] ?? wantedIn(pane)) === size) {
-    return;
+
+  const asked: Partial<Record<string, PaneSize>> = { ...state.asked, [id]: size };
+  const which = state.holding.indexOf(id) as Which | -1;
+  let alsoSaid = '';
+
+  /*
+   * **The control is a statement, not a request, and the other bay follows.**
+   *
+   * Two bays divide one stage between them, so saying how big one of them is says how big the other is.
+   * Left to ask separately they could both ask to be put away and get half the stage each - a pair of
+   * 44-pixel strips rendered in 384 pixels of nothing, and a state a player can reach but never want.
+   * Naming one size names the arrangement, so that state is not reachable at all.
+   *
+   * Only in the bays. A tile in the spread is not dividing anything with anybody: its height is its own,
+   * and the map behind it takes whatever is left over without being asked.
+   */
+  if (form === 'bays' && which !== -1) {
+    const other = state.holding[which === 0 ? 1 : 0];
+    const beside = paneById(other);
+    const follows: PaneSize = size === 'full' ? (beside?.strip != null ? 'strip' : 'small') : 'full';
+    asked[other] = follows;
+    alsoSaid = `, ${titleOf(other)} ${SAID[follows]}`;
   }
 
-  settle({ ...state, asked: { ...state.asked, [id]: size } });
-  note(
-    'bay',
-    `${titleOf(id)} ${size === 'strip' ? 'put away' : size === 'small' ? 'back to its normal size' : 'opened out'}`,
-  );
+  settle({ ...state, asked });
+  note('bay', `${titleOf(id)} ${SAID[size]}${alsoSaid}`);
 }
 
 /**

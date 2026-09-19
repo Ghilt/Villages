@@ -2099,3 +2099,39 @@ body,
   border-radius: 2px;
   overflow-x: auto;
 }
+
+/*
+ * A strip that is a narrow upright sliver rather than a low wide band.
+ *
+ * Cut into columns - a phone in landscape - a put-away pane is 44 pixels **wide** and the whole height,
+ * so the row of name-then-control that a wide strip is becomes a name that pushes the control off the
+ * edge. There is no room for a name in 44 pixels anyway, so the name goes and the control stacks: the
+ * only thing a put-away pane has to offer is the way back, and that stays reachable.
+ *
+ * A container query, because the question is how wide this bay is and nothing else can see that - and it
+ * is **at the end of the file** because a container query carries no extra specificity. Three of the four
+ * strips it overrides are declared further down than it was, and simply won. That is the second time this
+ * has caught us; see decision record 0044.
+ */
+@container (max-width: 6rem) {
+  .hud__panel--strip,
+  .inspect--strip,
+  .navigate--strip,
+  .choice--strip {
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 0.2rem;
+    padding: 0.3rem 0;
+  }
+
+  .hud__panel--strip .hud__name,
+  .inspect--strip .inspect__kind,
+  .navigate--strip .navigate__kind,
+  .choice--strip .choice__aside {
+    display: none;
+  }
+
+  .pane-size {
+    flex-direction: column;
+  }
+}
