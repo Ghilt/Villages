@@ -66,6 +66,12 @@ everything that is not on the screen. On a phone it sits on the seam between the
 room each form has for it. The ordinals are outlined rather than filled so that it reads as eight points and
 not as a blob at the size a tab draws it. See decision record 0043.
 
+**The pane size control.** Three marks in a pane's corner saying how much of the stage it is taking: put
+away, the normal size, opened out. The mark is **how much of a box is filled**, which is the thing being
+chosen rather than a metaphor for it - no folder, no chevron, no arrow pointing anywhere. Every **pane**
+has one, in both forms, and it replaced a chevron that could only put a pane away. A pane that cannot be
+put away offers two marks rather than three. See decision record 0045.
+
 **The tab bar.** Several **panes** sharing one **bay**, and a strip of marks across its top saying which is
 up. Marks and no words: a column is 26rem at its widest and two words on a tab is a tab that wraps. Its
 first use is the corner of the spread, where the house status and navigation take turns. Only in the spread

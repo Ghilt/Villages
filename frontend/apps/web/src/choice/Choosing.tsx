@@ -3,6 +3,7 @@ import { useEffect, useState, useSyncExternalStore } from 'react';
 import type { ChoiceView, OptionView } from '@villages/protocol';
 
 import { gatewayState, takeOption, watchGateway } from '../net/gateway';
+import { PaneSizeControl } from '../stage/PaneSizeControl';
 import type { Room } from '../stage/panes';
 
 /**
@@ -54,17 +55,7 @@ export function Choosing({ room }: { room: Room }) {
     return (
       <section className="choice choice--strip">
         <span className="choice__aside">A letter awaits</span>
-        {room.minimise !== null && (
-          <button
-            type="button"
-            className="choice__fold"
-            aria-label="read it"
-            title="read it"
-            onClick={room.minimise}
-          >
-            {'▴'}
-          </button>
-        )}
+        <PaneSizeControl room={room} />
       </section>
     );
   }
@@ -77,7 +68,7 @@ export function Choosing({ room }: { room: Room }) {
     <section className={carousel ? 'choice choice--carousel' : 'choice'} aria-live="polite">
       <header className="choice__head">
         <h2 className="choice__prompt">{choice.prompt}</h2>
-        <Chrome room={room} carousel={carousel} />
+        <PaneSizeControl room={room} />
       </header>
 
       {carousel ? (
@@ -92,36 +83,6 @@ export function Choosing({ room }: { room: Room }) {
         </ol>
       )}
     </section>
-  );
-}
-
-/** The pane's own buttons: which size it is, and putting it aside. Not part of the choice. */
-function Chrome({ room, carousel }: { room: Room; carousel: boolean }) {
-  return (
-    <span className="choice__chrome">
-      {room.resize !== null && (
-        <button
-          type="button"
-          className="choice__size"
-          aria-label={carousel ? 'read them all' : 'one at a time, and keep the map'}
-          title={carousel ? 'read them all' : 'one at a time, and keep the map'}
-          onClick={room.resize}
-        >
-          {carousel ? '▤' : '▭'}
-        </button>
-      )}
-      {room.minimise !== null && (
-        <button
-          type="button"
-          className="choice__fold"
-          aria-label="set it aside"
-          title="set it aside, and look at the map"
-          onClick={room.minimise}
-        >
-          {'▾'}
-        </button>
-      )}
-    </span>
   );
 }
 

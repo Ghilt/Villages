@@ -4,6 +4,7 @@ import { housesInView } from '@villages/client-core';
 import type { MasterGrid, TerrainClass } from '@villages/world';
 
 import { areasNow, watchAreas } from '../areas/areas';
+import { PaneSizeControl } from '../stage/PaneSizeControl';
 import { TICK_MS } from '../house/describe';
 import { terrainPalette } from '../map/terrainClasses';
 import { gatewayState, watchGateway } from '../net/gateway';
@@ -65,7 +66,7 @@ export function Inspecting({ subject, room, along, grid }: InspectingProps) {
       return null;
     }
     const said = describeArea(area, housesInView(heard.houses), legend, grid);
-    return <InspectWindow subject={subject} said={said} along={along} />;
+    return <InspectWindow subject={subject} said={said} along={along} room={room} />;
   }
 
   const house =
@@ -77,7 +78,7 @@ export function Inspecting({ subject, room, along, grid }: InspectingProps) {
   }
 
   const said = describeHouse(house, now, heard.yourHouse?.id === house.id, areas.areas, grid);
-  return <InspectWindow subject={subject} said={said} along={along} />;
+  return <InspectWindow subject={subject} said={said} along={along} room={room} />;
 }
 
 /** A house that has left the held cells. It is not gone from the world, only from what this page can see. */
@@ -105,17 +106,7 @@ function Strip({ name, room }: { name: string; room: Room }) {
   return (
     <section className="inspect inspect--strip">
       <span className="inspect__kind">{name}</span>
-      {room.minimise !== null && (
-        <button
-          type="button"
-          className="inspect__fold"
-          aria-label="open it back up"
-          title="open it back up"
-          onClick={room.minimise}
-        >
-          {'▴'}
-        </button>
-      )}
+      <PaneSizeControl room={room} />
     </section>
   );
 }

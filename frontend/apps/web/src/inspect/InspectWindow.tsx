@@ -2,8 +2,9 @@ import { Fragment, useEffect } from 'react';
 
 import { focusOn } from '../map/focus';
 import { Arrows } from '../stage/Arrows';
+import { PaneSizeControl } from '../stage/PaneSizeControl';
 import { put, type Which } from '../stage/bays';
-import { MAP_PANE } from '../stage/panes';
+import { MAP_PANE, type Room } from '../stage/panes';
 import type { Description, Link } from './describe';
 import { inspect, stopInspecting } from './opening';
 import type { Subject } from './subjects';
@@ -29,9 +30,11 @@ interface InspectWindowProps {
    * and one map, so a link is a plain click and no arrows are drawn.
    */
   along: 'rows' | 'columns' | null;
+  /** The room it got, which is what its size control reports and changes. */
+  room: Room;
 }
 
-export function InspectWindow({ subject, said, along }: InspectWindowProps) {
+export function InspectWindow({ subject, said, along, room }: InspectWindowProps) {
   // The trail learns a thing's name here because here is the only place that knows one: a name is the
   // description's, and the trail outlives the window - and a house that has left view has no name to look
   // up later. See `trail.ts`.
@@ -54,6 +57,7 @@ export function InspectWindow({ subject, said, along }: InspectWindowProps) {
     <section className="inspect" aria-live="polite">
       <header className="inspect__bar">
         <span className="inspect__kind">{said.kind}</span>
+        <PaneSizeControl room={room} />
         <button
           type="button"
           className="inspect__close"

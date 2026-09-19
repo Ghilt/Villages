@@ -5,6 +5,7 @@ import { describeDay } from '@villages/protocol';
 import { gatewayState, watchGateway } from '../net/gateway';
 import type { Room } from '../stage/panes';
 import { blazon, TICK_MS, treasuryAt } from './describe';
+import { PaneSizeControl } from '../stage/PaneSizeControl';
 import { HouseBar } from './HouseBar';
 
 /**
@@ -36,25 +37,6 @@ const TINCTURE: Record<string, string> = {
   vert: '#2e6b4f',
   purpure: '#5b3a86',
 };
-
-/** The chevron that puts the house away and brings it back. Window chrome, not one of the house's levers. */
-function Fold({ room, shut }: { room: Room; shut: boolean }) {
-  if (room.minimise === null) {
-    return null;
-  }
-  return (
-    <button
-      type="button"
-      className="hud__fold"
-      aria-pressed={shut}
-      aria-label={shut ? 'open your house back up' : 'put your house away'}
-      title={shut ? 'open it back up' : 'put it away and give the room to the map'}
-      onClick={room.minimise}
-    >
-      {shut ? '▴' : '▾'}
-    </button>
-  );
-}
 
 /**
  * **House status**: how your own house stands, always to hand.
@@ -92,7 +74,7 @@ export function HouseStatus({ room }: { room: Room }) {
       <div className="hud hud--strip">
         <section className="hud__panel hud__panel--strip">
           <span className="hud__name">{house === null ? 'No house yet' : house.name}</span>
-          <Fold room={room} shut />
+          <PaneSizeControl room={room} />
         </section>
       </div>
     );
@@ -104,7 +86,7 @@ export function HouseStatus({ room }: { room: Room }) {
   return (
     <div className={small ? 'hud hud--small' : 'hud'} aria-live="polite">
       <section className={house === null ? 'hud__panel hud__panel--vacant' : 'hud__panel'}>
-        <Fold room={room} shut={false} />
+        <PaneSizeControl room={room} />
 
         <div className="hud__achievement">
           <div className="hud__banner" aria-hidden="true">

@@ -2,6 +2,7 @@ import { useSyncExternalStore } from 'react';
 
 import { baysNow, put, type Which, watchBays, where } from '../stage/bays';
 import { Icon, Needle, pointAt } from '../stage/Icons';
+import { PaneSizeControl } from '../stage/PaneSizeControl';
 import { gatewayState, watchGateway } from '../net/gateway';
 import { NAVIGATION_PANE, type Pane, type Room, standingPanes } from '../stage/panes';
 import { inspect } from './opening';
@@ -41,17 +42,7 @@ export function Navigating({ room, along }: { room: Room; along: 'rows' | 'colum
     return (
       <section className="navigate navigate--strip">
         <span className="navigate__kind">Where you have been</span>
-        {room.minimise !== null && (
-          <button
-            type="button"
-            className="navigate__fold"
-            aria-label="open it back up"
-            title="open it back up"
-            onClick={room.minimise}
-          >
-            {'▴'}
-          </button>
-        )}
+        <PaneSizeControl room={room} />
       </section>
     );
   }
@@ -70,6 +61,7 @@ export function Navigating({ room, along }: { room: Room; along: 'rows' | 'colum
         <>
           <header className="navigate__bar">
             <h2 className="navigate__head">Go to</h2>
+            <PaneSizeControl room={room} />
           </header>
           <ul className="navigate__list navigate__list--panes">
             {standingPanes(pending).map((pane) => (
@@ -91,6 +83,7 @@ export function Navigating({ room, along }: { room: Room; along: 'rows' | 'colum
 
       <header className="navigate__bar">
         <h2 className="navigate__head">Recent</h2>
+        {along === null && <PaneSizeControl room={room} />}
         {trail.length > 0 && (
           <button
             type="button"

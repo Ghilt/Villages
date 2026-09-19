@@ -2,7 +2,7 @@ import { note } from '../debug/log';
 import { watchSubjects } from '../inspect/subjects';
 import { watchGateway } from '../net/gateway';
 import type { Asking, BayName } from './bayBox';
-import { askingOf, HOUSE_PANE, MAP_PANE, type Pane, paneById } from './panes';
+import { askingOf, HOUSE_PANE, MAP_PANE, type Pane, paneById, type PaneSize, wantedIn } from './panes';
 
 /**
  * The bay manager: which pane is in each bay, and which are collapsed to a strip.
@@ -25,8 +25,15 @@ export type Which = 0 | 1;
 export interface BaysState {
   /** The pane in each bay, by id. */
   readonly holding: readonly [string, string];
-  /** The ids of panes collapsed to a strip. A pane keeps this wherever it is put. */
-  readonly minimised: ReadonlySet<string>;
+  /**
+   * How big each pane is drawn, where the player has said.
+   *
+   * One entry per pane that has been asked to be something other than what it was declared to want, and a
+   * pane keeps it wherever it is put. This replaced a set of what was minimised beside a record of what
+   * had been resized: they were the same question asked twice, and a pane was collapsed *and* small at
+   * once, which meant nothing. See decision record 0045.
+   */
+  readonly asked: Readonly<Partial<Record<string, PaneSize>>>;
   /**
    * What each bay was showing before something took it over, so that closing the thing puts it back.
    *
@@ -42,20 +49,11 @@ export interface BaysState {
    * trail. It is the tab bar's whole state. See decision record 0042.
    */
   readonly showing: Readonly<Partial<Record<BayName, string>>>;
-  /**
-   * The panes whose size the player has asked for, against what they were declared to want.
-   *
-   * Almost nothing is in here. A pane's size is the layout's business - the house status is small on a
-   * phone because that is all the room there is. The **choice roll** is the exception, because its two
-   * forms are two ways of using it and only the player knows which they are doing. See 0044.
-   */
-  readonly asked: Readonly<Partial<Record<string, 'big' | 'small'>>>;
 }
 
 /** The map above and the house beneath it: the shape the bays open on. */
 const OPENS_ON: BaysState = {
   holding: [MAP_PANE.id, HOUSE_PANE.id],
-  minimised: new Set(),
   displaced: [null, null],
   showing: {},
   asked: {},
@@ -72,12 +70,15 @@ let state: BaysState = OPENS_ON;
 let asking: readonly [Asking, Asking] = askingFor(OPENS_ON);
 const listeners = new Set<() => void>();
 
+/** How big a pane is drawn in the bays: what the player asked for, or what it was declared to want. */
+export function sizeAsked(id: string): PaneSize {
+  return state.asked[id] ?? wantedIn(paneById(id));
+}
+
 function askingFor(from: BaysState): readonly [Asking, Asking] {
   const [head, tail] = from.holding;
-  return [
-    askingOf(paneById(head), from.minimised.has(head), from.asked[head]),
-    askingOf(paneById(tail), from.minimised.has(tail), from.asked[tail]),
-  ];
+  const of = (id: string) => askingOf(paneById(id), from.asked[id] ?? wantedIn(paneById(id)));
+  return [of(head), of(tail)];
 }
 
 /**
@@ -205,40 +206,30 @@ export function put(which: Which, id: string): void {
 }
 
 /**
- * Ask for the other of a pane's two sizes.
+ * Ask for one of a pane's three sizes.
  *
- * Only a pane that declared it has both: for everything else the size is the layout's answer to how much
- * room there is, and a button offering to change it would be a button that does nothing.
+ * The one control every pane has, in both forms. It replaced a chevron that could only put a pane away and
+ * a second button on one pane that swapped between two sizes: they were the same question - how much of
+ * the stage is this taking - asked twice with different words. See decision record 0045.
+ *
+ * **The bays share themselves out from what each is asking**, so this is all it does: it says what the
+ * pane wants and lets the arithmetic answer. A pane asking to be small beside another asking to be small
+ * gets half each, which is decision 0040's rule and not this one's business.
  */
-export function swapSize(id: string): void {
+export function askFor(id: string, size: PaneSize): void {
   const pane = paneById(id);
-  if (pane === undefined || !pane.bothSizes) {
+  if (pane === undefined || (size === 'strip' && pane.strip === null)) {
+    return;
+  }
+  if ((state.asked[id] ?? wantedIn(pane)) === size) {
     return;
   }
 
-  const now = state.asked[id] ?? pane.wants;
-  const next = now === 'big' ? 'small' : 'big';
-  settle({ ...state, asked: { ...state.asked, [id]: next } });
-  note('bay', `${titleOf(id)} ${next === 'big' ? 'opened out' : 'folded to a carousel'}`);
-}
-
-/** Collapse a pane to its strip, or open it back up. A pane with no strip cannot be collapsed. */
-export function toggleMinimise(id: string): void {
-  const pane = paneById(id);
-  if (pane === undefined || pane.strip === null) {
-    return;
-  }
-
-  const minimised = new Set(state.minimised);
-  const shutting = !minimised.has(id);
-  if (shutting) {
-    minimised.add(id);
-  } else {
-    minimised.delete(id);
-  }
-
-  settle({ ...state, minimised });
-  note('bay', `${titleOf(id)} ${shutting ? 'minimised' : 'opened back up'}`);
+  settle({ ...state, asked: { ...state.asked, [id]: size } });
+  note(
+    'bay',
+    `${titleOf(id)} ${size === 'strip' ? 'put away' : size === 'small' ? 'back to its normal size' : 'opened out'}`,
+  );
 }
 
 /**
@@ -269,23 +260,29 @@ export function takeOver(which: Which, id: string): void {
  * Called as a window closes. A pane that is in no bay, or that the player put there themselves, leaves
  * nothing to put back and this does nothing.
  */
+/**
+ * What goes back into a bay when whatever is in it leaves.
+ *
+ * What it displaced, or - if that has since gone, or it displaced nothing - whichever of the two fixed
+ * panes is not already up. A bay is never empty.
+ */
+function whatGoesBack(which: Which): string {
+  const other: Which = which === 0 ? 1 : 0;
+  const remembered = state.displaced[which];
+  return remembered !== null && remembered !== state.holding[other] && paneById(remembered) !== undefined
+    ? remembered
+    : state.holding[other] === MAP_PANE.id
+      ? HOUSE_PANE.id
+      : MAP_PANE.id;
+}
+
 export function giveBack(id: string): void {
   const which = state.holding.indexOf(id) as Which | -1;
   if (which === -1) {
     return;
   }
 
-  const other: Which = which === 0 ? 1 : 0;
-  // What it displaced, or - if that has since gone, or it displaced nothing - whichever of the two fixed
-  // panes is not already up. A bay is never empty.
-  const remembered = state.displaced[which];
-  const back =
-    remembered !== null && remembered !== state.holding[other] && paneById(remembered) !== undefined
-      ? remembered
-      : state.holding[other] === MAP_PANE.id
-        ? HOUSE_PANE.id
-        : MAP_PANE.id;
-
+  const back = whatGoesBack(which);
   const holding: [string, string] = which === 0 ? [back, state.holding[1]] : [state.holding[0], back];
   const displaced: [string | null, string | null] = [...state.displaced] as [string | null, string | null];
   displaced[which] = null;

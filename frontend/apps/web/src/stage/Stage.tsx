@@ -6,19 +6,20 @@ import { subjectsNow, watchSubjects } from '../inspect/subjects';
 import { gatewayState, watchGateway } from '../net/gateway';
 import { Compass } from './Compass';
 import { bayLayout, type BayName, type Box, isTabbed, type Rect, TAB_BAR, TILES } from './bayBox';
+import { askingNow, baysNow, formNow, show, showingIn, stageIs, askFor, watchBays } from './bays';
 import {
-  askingNow,
-  baysNow,
-  formNow,
-  show,
-  showingIn,
-  stageIs,
-  swapSize,
-  toggleMinimise,
-  type Which,
-  watchBays,
-} from './bays';
-import { cramps, type Pane, panesFor, panesIn, type Room, sizeOf, spreadWants, standingPanes } from './panes';
+  cramps,
+  offersOf,
+  type Pane,
+  panesFor,
+  panesIn,
+  type PaneSize,
+  type Room,
+  sizeOf,
+  spreadWants,
+  standingPanes,
+  wantedIn,
+} from './panes';
 import { TabBar } from './TabBar';
 
 /**
@@ -69,7 +70,7 @@ export function Stage({ stage, contents, overlays }: StageProps) {
   // the one pane that comes and goes, and an empty tile takes no room.
   const pending = useSyncExternalStore(watchGateway, gatewayState).yourChoice !== null;
   const panes = useMemo(() => panesFor(subjects.open, pending), [subjects.open, pending]);
-  const wants = useMemo(() => spreadWants(panes, bays.minimised, showingIn), [panes, bays]);
+  const wants = useMemo(() => spreadWants(panes, bays.asked, showingIn), [panes, bays]);
 
   // `formNow()` is the form the stage was in a moment ago, which is what gives the fold its dead band. It
   // is read rather than passed because the layout is what sets it, and it only ever changes as a result of
@@ -114,18 +115,19 @@ export function Stage({ stage, contents, overlays }: StageProps) {
   const bayFor = (id: string) => {
     const pane = panes.find((one) => one.id === id);
     const where = bayOf(id, pane);
-    const at = bays.holding.indexOf(id);
-    const shut = bays.minimised.has(id);
     const whole = where === null ? null : box.bays[where];
+    // What the player asked for. The two forms start from different places: a tile in the spread is the
+    // size the pane asked for, while a bay is a share of a stage it is dividing with somebody, so there it
+    // starts at what the pane was declared to want.
+    const asked: PaneSize = bays.asked[id] ?? (box.form === 'spread' ? 'full' : wantedIn(pane));
     const room: Room = {
-      // The bay is a rectangle, so the layout can hand back the size that actually fits rather than
-      // leaving a pane too wide for its tile to grow a scrollbar inside it.
-      size: sizeOf(box.form, at === -1 ? 'big' : asking[at as Which], shut, cramps(pane, whole)),
-      // Minimise is a property of a pane everywhere, not a feature of the small screen: the same button
-      // works in the spread, where collapsing the house gives the column's room back to the rail.
-      minimise: pane?.strip == null ? null : () => toggleMinimise(id),
-      // And only where the pane said the size is the player's to choose.
-      resize: pane?.bothSizes === true ? () => swapSize(id) : null,
+      // The bay is a rectangle, so the layout caps what was asked for by what will actually fit, rather
+      // than leaving a pane too big for its tile to grow a scrollbar inside it.
+      size: sizeOf(asked, cramps(pane, whole)),
+      asked,
+      offers: offersOf(pane),
+      // One control on every pane, in both forms. See decision record 0045.
+      ask: (size) => askFor(id, size),
     };
 
     // A window in the spread stacks inside the rail, which is itself the column's upper tile, so it is a
