@@ -235,7 +235,7 @@ export function App({ master }: AppProps) {
             return <HouseStatus room={room} />;
           }
           if (id === NAVIGATION_PANE.id) {
-            return <Navigating room={room} />;
+            return <Navigating room={room} along={along} />;
           }
           const subject = subjectOfPane(id);
           return subject === null ? null : (

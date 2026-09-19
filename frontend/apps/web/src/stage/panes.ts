@@ -18,7 +18,7 @@ import type { IconName } from './Icons';
 export interface Pane {
   /** What the bay manager addresses it by, and what the debug log says. */
   id: string;
-  /** What the kebab calls it, and what a minimised strip has written on it. */
+  /** What **navigation** and a tab's label call it, and what a minimised strip has written on it. */
   title: string;
   /** What its bay asks for when it is not minimised. */
   wants: 'big' | 'small';

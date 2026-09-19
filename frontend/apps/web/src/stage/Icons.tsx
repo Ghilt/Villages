@@ -13,10 +13,48 @@
 /** The needle the arrows are drawn from, so the compass and the arrows are the same shape. */
 const NEEDLE = 'M12 3.5 L17 19 L12 15.4 L7 19 Z';
 
+/**
+ * A compass rose: four cardinal points filled, four between them drawn, inside a ring.
+ *
+ * The ordinals are outlined rather than filled so the rose reads as eight points and not as a blob at the
+ * size a tab draws it. The two stars are one shape, the second turned by an eighth and drawn smaller.
+ */
+const ROSE = {
+  cardinal: 'M12 1.7 L13.5 10.5 L22.3 12 L13.5 13.5 L12 22.3 L10.5 13.5 L1.7 12 L10.5 10.5 Z',
+  ordinal: 'M12 5.4 L12.9 11.1 L18.6 12 L12.9 12.9 L12 18.6 L11.1 12.9 L5.4 12 L11.1 11.1 Z',
+} as const;
+
 /** The house's own frame, the achievement's contour at the size of a mark. */
 const SHIELD = 'M5 4 H19 V13 C19 18 12 21.5 12 21.5 C12 21.5 5 18 5 13 Z';
 
 export type IconName = 'shield' | 'compass' | 'map' | 'window';
+
+/** Which way a needle points. The four are one drawing turned, never four drawings. */
+export type Point = 'up' | 'down' | 'left' | 'right';
+
+const TURN: Record<Point, number> = { up: 0, down: 180, left: -90, right: 90 };
+
+/**
+ * One needle, pointing at a bay.
+ *
+ * The same shape the compass has inside its ring, and the same one the **arrows** are a pair of. A player
+ * learns it once: this mark means *there*, and the ringed one means *the pane that lists the theres*.
+ */
+export function Needle({ point }: { point: Point }) {
+  return (
+    <svg className="icon icon--needle" viewBox="0 0 24 24" role="presentation" aria-hidden="true">
+      <path d={NEEDLE} className="icon__fill" transform={`rotate(${TURN[point]} 12 12)`} />
+    </svg>
+  );
+}
+
+/** Which way a needle points at one of the two bays, given how the stage is cut. */
+export function pointAt(along: 'rows' | 'columns', which: 0 | 1): Point {
+  if (along === 'rows') {
+    return which === 0 ? 'up' : 'down';
+  }
+  return which === 0 ? 'left' : 'right';
+}
 
 interface IconProps {
   name: IconName;
@@ -31,8 +69,9 @@ export function Icon({ name, title }: IconProps) {
       {name === 'shield' && <path d={SHIELD} className="icon__line" />}
       {name === 'compass' && (
         <>
-          <circle cx="12" cy="12" r="9.2" className="icon__line" />
-          <path d={NEEDLE} className="icon__fill" transform="scale(0.72) translate(4.7 4.7)" />
+          <circle cx="12" cy="12" r="10.6" className="icon__line" />
+          <path d={ROSE.ordinal} className="icon__line" transform="rotate(45 12 12)" />
+          <path d={ROSE.cardinal} className="icon__fill" />
         </>
       )}
       {name === 'map' && (

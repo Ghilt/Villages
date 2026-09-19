@@ -29,7 +29,7 @@ export interface BaysState {
   /**
    * What each bay was showing before something took it over, so that closing the thing puts it back.
    *
-   * Only a takeover is remembered. A pane the player chose from the kebab is a thing they asked for, and
+   * Only a takeover is remembered. A pane the player chose from **navigation** is a thing they asked for, and
    * undoing it later would be the interface second-guessing them.
    */
   readonly displaced: readonly [string | null, string | null];
@@ -158,7 +158,7 @@ export function show(where: BayName, id: string): void {
  *
  * A pane is in one bay or neither, never both, so putting one where the other bay already has it is a
  * **swap**: with two bays there is nowhere else for the displaced one to go, and dropping it would leave a
- * bay empty. This is what the kebab's arrows do, and it is a thing the player asked for, so nothing is
+ * bay empty. This is what navigation's rows do, and it is a thing the player asked for, so nothing is
  * remembered to be put back afterwards.
  */
 export function put(which: Which, id: string): void {

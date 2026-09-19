@@ -45,12 +45,21 @@ first use is the choice roll.
 slightly, so it reads as something that can be picked up. One parchment carries one option of a choice roll;
 what else it might carry is not decided.
 
-**The arrows.** Two marks, drawn as a compass needle would point, saying which of the two **bays** a thing
-would open into. Used in two places that are the same gesture: the kebab at the divider between the bays,
-where each pane listed carries a pair, and the **links** on an **inspect window**, where each way on carries
-a pair. *Open this* and *open this there* are one decision, so they are one control. The spread has no bays
-to choose between, so there the same link is a plain click and no arrows are drawn. See
-`RESPONSIVE-DESIGN.md` and decision record 0040.
+**The needle.** One mark, pointing at a **bay**. One drawing turned four ways, so a player learns it once:
+this mark means *there*.
+
+**The arrows.** A pair of needles, saying which of the two **bays** a thing would open into, with the bay it
+is already in **marked rather than taken away** — so anything can be moved anywhere. Drawn on the **links**
+of an **inspect window** and on every row of **navigation**, because *open this* and *open this there* are
+one decision and so one control. In a list they are a row tall rather than a glyph tall, because a finger is
+not a mouse. The spread has no bays to choose between, so there the same link is a plain click and no arrows
+are drawn. See `RESPONSIVE-DESIGN.md` and decision records 0040 and 0043.
+
+**The compass rose.** Four cardinal points filled and four between them drawn, inside a ring: the way to
+everything that is not on the screen. On a phone it sits on the seam between the bays and one tap puts
+**navigation** in a bay; in the spread it is a tab in the corner. The same mark doing the same job in the
+room each form has for it. The ordinals are outlined rather than filled so that it reads as eight points and
+not as a blob at the size a tab draws it. See decision record 0043.
 
 **The tab bar.** Several **panes** sharing one **bay**, and a strip of marks across its top saying which is
 up. Marks and no words: a column is 26rem at its widest and two words on a tab is a tab that wraps. Its

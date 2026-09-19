@@ -194,32 +194,33 @@ body,
 }
 
 /*
- * The kebab, on the seam between the two bays: what else there is, and which bay it would go into.
+ * The compass, on the seam between the two bays: the way to everything that is not on the screen.
  *
- * Only in the bays. The spread shows everything at once, so there is nothing to choose between.
+ * One tap that puts **navigation** in a bay, where a kebab used to open a menu over the world. Only in the
+ * bays - the spread reaches the same pane through the compass tab in the corner. See decision record 0043.
  */
-.kebab {
+.compass {
   position: absolute;
   z-index: 5;
 }
 
-.kebab--rows {
+.compass--rows {
   top: var(--bay-first, 50%);
   right: 0.3rem;
   transform: translateY(-50%);
 }
 
-.kebab--columns {
+.compass--columns {
   left: var(--bay-first, 50%);
   bottom: 0;
   transform: translateX(-50%);
 }
 
-.kebab__open {
+.compass__open {
   display: block;
-  width: 1.9rem;
-  height: 1.9rem;
-  padding: 0;
+  width: 2.1rem;
+  height: 2.1rem;
+  padding: 0.22rem;
   border: 1px solid var(--parchment-edge);
   border-radius: 50%;
   background: var(--parchment);
@@ -227,65 +228,29 @@ body,
   cursor: pointer;
 }
 
-.kebab__open svg {
-  width: 100%;
-  height: 100%;
-  fill: var(--ink-soft);
-}
-
-.kebab__open[aria-expanded='true'] svg {
-  fill: var(--gold);
-}
-
-.kebab__list {
-  position: absolute;
-  right: 0;
-  bottom: 2.2rem;
-  z-index: 5;
-  margin: 0;
-  padding: 0.3rem;
-  list-style: none;
-  min-width: 11rem;
+/* Open: the gold the interface says "this is the one you are on" in, the same as a tab that is up. */
+.compass__open--up {
   background: var(--parchment);
-  border: 1px solid var(--parchment-edge);
-  border-radius: 3px;
-  box-shadow: 0 2px 14px var(--shadow);
 }
 
-.kebab--columns .kebab__list {
-  right: auto;
-  left: 0;
+.compass__open--up .icon {
+  color: var(--gold);
 }
 
 /*
- * How much of a bay's top-right corner the kebab is standing in.
+ * How much of a bay's top-right corner the compass is standing in.
  *
- * The kebab sits at the far end of the divider - the right end of a horizontal one, the bottom end of a
- * vertical one - so in rows it lands on the lower bay's top corner and there is exactly one bay that has
- * to get out of its way. Any chrome a pane puts in that corner reads this rather than knowing about kebabs.
+ * It sits at the far end of the divider - the right end of a horizontal one, the bottom end of a vertical
+ * one - so in rows it lands on the lower bay's top corner and there is exactly one bay that has to get out
+ * of its way. Any chrome a pane puts in that corner reads this rather than knowing about the compass.
  */
 .stage[data-form='bays'][data-along='rows'] .bay[data-at='second'] {
   --corner-taken: 2.5rem;
 }
 
-.kebab__row {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.25rem 0.1rem 0.25rem 0.45rem;
-}
-
-.kebab__what {
-  flex: 1;
-  font-size: 0.92rem;
-  font-variant: small-caps;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
-}
-
 /*
- * The arrows: which bay a thing would go into. One control in two places - the kebab's rows and, when it
- * exists, an inspect window's links - because "open this" and "open this there" are one decision. See
+ * The arrows: a pair of the shared needle, saying which bay a thing would go into. Drawn on an inspect
+ * window's links, because "open this" and "open this there" are one decision and so one control. See
  * `LOOK-AND-FEEL.md`.
  */
 .arrows {
@@ -302,20 +267,17 @@ body,
   cursor: pointer;
 }
 
-.arrows__one svg {
-  width: 100%;
-  height: 100%;
-  fill: var(--ink-soft);
+.arrows__one .icon {
   opacity: 0.55;
 }
 
-.arrows__one:hover svg {
+.arrows__one:hover .icon {
   opacity: 1;
 }
 
 /* Where it already is: the needle you are standing on rather than a place to go. */
-.arrows__one--here svg {
-  fill: var(--gold);
+.arrows__one--here .icon {
+  color: var(--gold);
   opacity: 1;
 }
 
@@ -1641,8 +1603,40 @@ body,
   cursor: pointer;
 }
 
-.navigate__go:hover {
+.navigate__go:hover:not(:disabled) {
   background: rgba(157, 124, 42, 0.12);
+}
+
+/*
+ * A row in the bays: the label, and the arrows at the far end saying which bay it would go into.
+ *
+ * Every row is this row. No pane is privileged - the one a pane is already in is marked by the arrows
+ * rather than taken away, so anything can be moved anywhere. See decision record 0043.
+ */
+.navigate__step--picked {
+  display: flex;
+  align-items: center;
+  padding-right: 0.35rem;
+}
+
+.navigate__go--label {
+  flex: 1;
+  min-width: 0;
+  cursor: default;
+}
+
+/* A finger is not a mouse: the arrows in a list are a row tall rather than a glyph tall. */
+.navigate__step--picked .arrows__one {
+  width: 2rem;
+  height: 2rem;
+  padding: 0.35rem;
+}
+
+/* The panes, above the divider that the trail sits under. */
+.navigate__list--panes {
+  flex: none;
+  border-bottom: 1px solid var(--parchment-edge);
+  padding-bottom: 0.35rem;
 }
 
 .navigate__go .icon {

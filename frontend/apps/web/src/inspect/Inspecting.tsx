@@ -11,6 +11,7 @@ import type { Room } from '../stage/panes';
 import { describeArea, describeHouse, type Legend } from './describe';
 import { InspectWindow } from './InspectWindow';
 import { forgetSubject, type Subject } from './subjects';
+import { forget } from './trail';
 
 /**
  * One inspect window, fed from what the browser already knows.
@@ -44,11 +45,14 @@ export function Inspecting({ subject, room, along, grid }: InspectingProps) {
     return () => clearInterval(often);
   }, []);
 
-  // An area the player deleted is not a window they shut, so the window goes rather than saying nothing.
+  // An area the player deleted is not a window they shut, so the window goes rather than saying nothing -
+  // and it leaves the trail with it, because a thing that has stopped existing is not a way back to
+  // anything. A house merely out of view is a different case: it still exists, so the trail keeps it.
   const area = subject.kind === 'area' ? (areas.areas.find((one) => one.id === subject.id) ?? null) : null;
   useEffect(() => {
     if (subject.kind === 'area' && area === null) {
       forgetSubject(subject);
+      forget(subject);
     }
   }, [subject, area]);
 

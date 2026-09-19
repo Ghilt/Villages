@@ -1,24 +1,16 @@
+import { Needle, pointAt } from './Icons';
 import type { Which } from './bays';
 
 /**
  * The two arrows: which bay a thing would go into.
  *
- * One control in two places, because they are one gesture. The kebab lists the panes and each carries a
- * pair; an inspect window's links each carry a pair. "Open this" and "open this *there*" are not two
- * decisions the player makes one after the other, so they are not two controls. See `LOOK-AND-FEEL.md`.
+ * One control in two places, because they are one gesture. An **inspect window**'s links each carry a pair,
+ * and so does anywhere else a player says not only which pane but where. "Open this" and "open this *there*"
+ * are not two decisions made one after the other, so they are not two controls. See `LOOK-AND-FEEL.md`.
  *
- * Drawn as a compass needle rather than a chevron, so that the pair reads as two ends of one thing pointing
- * apart rather than as two buttons that happen to be next to each other. They turn with the stage: up and
- * down when it is cut into rows, left and right when it is cut into columns.
+ * The mark is the shared **needle**, which is also what the compass has inside its ring and what
+ * **navigation** puts on every row. One drawing, turned: a player learns it once.
  */
-
-/** A needle pointing up, which the other three are this one turned. */
-const NEEDLE = 'M12 3.5 L17 19 L12 15.4 L7 19 Z';
-
-const TURN: Record<'rows' | 'columns', [number, number]> = {
-  rows: [0, 180],
-  columns: [-90, 90],
-};
 
 interface ArrowsProps {
   along: 'rows' | 'columns';
@@ -30,7 +22,6 @@ interface ArrowsProps {
 }
 
 export function Arrows({ along, here = null, what, onPick }: ArrowsProps) {
-  const turns = TURN[along];
   const names = along === 'rows' ? (['top', 'bottom'] as const) : (['left', 'right'] as const);
 
   return (
@@ -45,9 +36,7 @@ export function Arrows({ along, here = null, what, onPick }: ArrowsProps) {
           title={here === which ? `already ${names[which]}` : `put it ${names[which]}`}
           onClick={() => onPick(which)}
         >
-          <svg viewBox="0 0 24 24" role="presentation" aria-hidden="true">
-            <path d={NEEDLE} transform={`rotate(${turns[which]} 12 12)`} />
-          </svg>
+          <Needle point={pointAt(along, which)} />
         </button>
       ))}
     </span>

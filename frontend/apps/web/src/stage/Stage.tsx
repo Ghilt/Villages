@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
 
 import { note } from '../debug/log';
 import { subjectsNow, watchSubjects } from '../inspect/subjects';
-import { Kebab } from './Kebab';
+import { Compass } from './Compass';
 import { bayLayout, type BayName, type Box, isTabbed, type Rect, TAB_BAR, TILES } from './bayBox';
 import {
   askingNow,
@@ -204,7 +204,7 @@ export function Stage({ stage, contents, overlays }: StageProps) {
         );
       })}
 
-      {box.form === 'bays' && <Kebab along={box.along} />}
+      {box.form === 'bays' && <Compass along={box.along} />}
       {overlays}
     </div>
   );

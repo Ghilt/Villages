@@ -126,10 +126,13 @@ the bays changed, so it always sits where the content asked for it.
 bays' idea** — the same button works in the spread, where collapsing the house status gives the room to the
 map. It is a property of a pane everywhere, not a feature of the small screen.
 
-**The kebab at the divider says what else there is.** It lists the panes, and each row carries **the arrows**
-— two marks pointing at the two bays, so the player says not only which pane but which bay. The same
-arrows appear on an inspect window's links: *open this*, and *open this there*, are one gesture. The arrows
-are a shared component and are described in `LOOK-AND-FEEL.md`.
+**The compass at the divider is the way to everything else.** One tap puts **navigation** in the bay that is
+not the map's, and navigation lists the panes above a divider and the **trail** below it. Every row carries
+**the arrows**, so any pane can be put in either bay and the one it is already in is marked rather than
+taken away. **No pane is privileged there**: the map is not pinned where it is, and which bay two panes
+share on a desktop has nothing to say about where either of them can go on a phone. In the spread the
+compass is a tab in the corner instead, and a row there is a plain click, because there are no bays to
+choose between. See decision record 0043 and `LOOK-AND-FEEL.md`.
 
 **The spread shows everything; the bays choose.** That is the whole difference, and it is what stops the
 phone from being a second design. A mechanic is written once, at up to three sizes.
@@ -188,7 +191,7 @@ What the instrument found, and where each stands:
 
 - **Touch.** The one question the layout above does not answer, and the next thing this document owes. The
   choice roll's parchments lift on hover and the map is driven by drag and wheel; neither has an answer on a
-  finger. The kebab and the arrows were drawn as taps rather than hovers on purpose, which is a start and
+  finger. The compass, the needles and the tabs were drawn as taps rather than hovers on purpose, which is a start and
   not a design.
 - **Whether 600 and 660 are right.** Two numbers somebody picked, not derived from anything: the first is
   where it folds and the gap between them is a guess about how fast a grip moves. Both move once there is
