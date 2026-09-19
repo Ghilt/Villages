@@ -5,11 +5,12 @@ import { housesInView } from '@villages/client-core';
 import type { ChoiceView, HouseView } from '@villages/protocol';
 
 import { AreaOverlay } from './areas/AreaOverlay';
-import { BuildBadge } from './version/BuildBadge';
 import { Parchment } from './choice/Parchment';
 import { DebugPanel } from './debug/DebugPanel';
 import { Desk } from './desk/Desk';
-import { WorktreeTabs } from './debug/WorktreeTabs';
+import { Grips } from './debug/Grips';
+import { panelIsShut, stageMode, watchStage } from './debug/stage';
+import { stageBox } from './debug/stageBox';
 import { note } from './debug/log';
 import { select } from './select/selection';
 import { gateway, gatewayState, watchGateway } from './net/gateway';
@@ -20,7 +21,6 @@ import { InfluenceOverlay } from './influence/InfluenceOverlay';
 import { Inspector } from './inspect/Inspector';
 import { StoodDown } from './hud/StoodDown';
 import { MapView } from './map/MapView';
-import { DebugMapPanel } from './map/DebugMapPanel';
 import { worldRootOf } from './map/masters';
 import { DEFAULT_RENDERER, RENDERERS, applyRenderer } from './map/renderers';
 import { SpriteOverlay } from './sprites/SpriteOverlay';
@@ -84,11 +84,34 @@ interface AppProps {
   master: string;
 }
 
+/**
+ * The window, as something a render can depend on.
+ *
+ * The stage is worked out from it rather than from a percentage, because the phone shape is a count of
+ * pixels and half of the arithmetic has no percentage to be written as.
+ */
+function useWindow(): { width: number; height: number } {
+  const [size, setSize] = useState(() => ({
+    width: globalThis.innerWidth,
+    height: globalThis.innerHeight,
+  }));
+  useEffect(() => {
+    const measure = () => setSize({ width: globalThis.innerWidth, height: globalThis.innerHeight });
+    globalThis.addEventListener('resize', measure);
+    return () => globalThis.removeEventListener('resize', measure);
+  }, []);
+  return size;
+}
+
 export function App({ master }: AppProps) {
   const [map, setMap] = useState<maplibregl.Map | null>(null);
   const [renderer, setRenderer] = useState(DEFAULT_RENDERER);
   const heard = useSyncExternalStore(watchGateway, gatewayState);
   const eye = useSyncExternalStore(watchEye, eyeIsOpen);
+  const mode = useSyncExternalStore(watchStage, stageMode);
+  const shut = useSyncExternalStore(watchStage, panelIsShut);
+  const window = useWindow();
+  const box = useMemo(() => stageBox(window, mode, shut), [window, mode, shut]);
   const inView = useMemo(() => housesInView(heard.houses), [heard.houses]);
   const yours = heard.yourHouse;
   // With the eye open your own house is drawn whether or not a held cell carries it. It can be missing
@@ -137,23 +160,44 @@ export function App({ master }: AppProps) {
 
   const worldRoot = worldRootOf(master);
 
+  // The four numbers the grid is laid out from. As custom properties rather than as a style object on
+  // each child, so that a drag moves one declaration and the browser does the rest.
+  const grid = {
+    '--blank': `${box.blank}px`,
+    '--stage-w': `${box.stage.w}px`,
+    '--stage-h': `${box.stage.h}px`,
+    '--panel': `${box.panel}px`,
+    '--inset': `${box.inset}px`,
+  } as React.CSSProperties;
+
   return (
-    <main className="app">
-      <Desk map={map} />
-      <MapView worldRoot={worldRoot} onReady={setMap} />
-      {import.meta.env.DEV && <WorktreeTabs />}
-      {map !== null && <SpriteOverlay map={map} sprites={sprites} />}
-      <AreaOverlay map={map} worldRoot={worldRoot} />
-      <InfluenceOverlay map={map} houses={drawn} mine={eye ? yours : null} />
-      <HudShell />
-      <Inspector />
-      <Parchment />
-      <BuildBadge />
-      <StoodDown />
-      <div className="rail">
-        <DebugMapPanel master={master} renderer={renderer} onRenderer={setRenderer} />
-        <DebugPanel map={map} worldRoot={worldRoot} />
+    <main className="app" style={grid}>
+      {/*
+       * Everything a player would ever see, and nothing else, inside a box the debug panel takes room
+       * from. That is what makes the phone toggle worth having: what is left at 390 pixels is what a
+       * player would actually get. See decision record 0039.
+       */}
+      <div className="stage">
+        <Desk map={map} />
+        <MapView worldRoot={worldRoot} onReady={setMap} />
+        {map !== null && <SpriteOverlay map={map} sprites={sprites} />}
+        <AreaOverlay map={map} worldRoot={worldRoot} />
+        <InfluenceOverlay map={map} houses={drawn} mine={eye ? yours : null} />
+        <HudShell />
+        <Inspector />
+        <Parchment />
+        <StoodDown />
       </div>
+
+      <DebugPanel
+        map={map}
+        worldRoot={worldRoot}
+        master={master}
+        renderer={renderer}
+        onRenderer={setRenderer}
+      />
+
+      <Grips box={box} />
     </main>
   );
 }

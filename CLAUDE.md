@@ -125,8 +125,9 @@ What follows from that, and bites in practice:
   branch's events quietly ended up in another branch's store.
   `node frontend/apps/web/vite/worktreePort.ts` prints this tree's, `--game` the game one; `--launch` also writes
   `.claude/launch.json`, which is generated rather than committed because every field in it is
-  per-checkout. `debug-quick-start.ps1` does both and prints the address. The tab strip across the top of
-  the page says which trees exist, which are serving, and which one you are looking at. See decision 0031.
+  per-checkout. `debug-quick-start.ps1` does both and prints the address. The **Worktrees** section of the
+  debug panel says which trees exist, which are serving, and which one you are looking at, with each
+  one's branch and port. See decision 0031.
 - **The stash stack is shared with every other worktree.** Never bare `git stash`; a WIP commit on the
   session's own branch is safer, because a pop can take another session's work.
 - **`.sessions/` is the main repository's, not the worktree's** - it sits beside the shared `.git`, which
@@ -235,7 +236,8 @@ Commands are added here as the increments land:
   `public/world/masters/<name>/`, the default included. Terrain is drawn from tiles rather than outlines;
   see `docs/adr/0019`. What it is painted in is `world/palette.json`, what colour it is drawn in is
   `world/render.json`, and how it is painted is `world/painterly.json`.
-- Which world is drawn: the **Debug map** panel at the top right. Its terrain dropdown is every PNG in
+- Which world is drawn: the **Debug map** part of the debug panel, down the right-hand side. Its terrain
+  dropdown is every PNG in
   `world/master/`, with each one's size and when it was last cut, and it says when the image has been
   saved since - which it re-checks whenever the window is given focus. A master nobody has cut yet gets
   a button, and pressing it runs those same two commands from the dev server with their output going
@@ -256,12 +258,19 @@ Commands are added here as the increments land:
   size it should be at whatever you are looking at. Painting happens in a pool of workers, and the tiles
   around the view are painted during the pauses so that moving the map finds them done. See
   `docs/adr/0021` and `0022`.
-- What the program thinks is happening: the debug panel, under the Debug map panel, minimises to a chip
-  and remembers which. It is the log and the buttons; the block of state above them went on 2026-09-16
+- What the program thinks is happening: the debug panel, one space docked down the right-hand side
+  holding everything that helps during development, which minimises to a badge and remembers that.
+  **It takes room from the game rather than floating over it.** What is left is the **stage**, the box
+  the player's interface is laid out in and the only thing a player would ever see; two grips resize it,
+  and the toggle in the very top right confines it to a phone, which is how to check that a mechanic
+  reads at both shapes without a second monitor. See `docs/adr/0039` and `docs/RESPONSIVE-DESIGN.md`.
+  It is the log and the buttons; the block of state above them went on 2026-09-16
   because Adam never read it, and what it used to say every four hundred milliseconds is now said once,
   when it changes, as a line of the log. Its copy button puts the log on the clipboard, which is the
   shortest way to tell a session what the program is doing. So a change that wants to be seen there says
-  so with `note(area, message)` rather than by adding a row. The events themselves are not in the
+  so with `note(area, message)` rather than by adding a row. **Everything in it is in a folding section,
+  and a step that puts something there says which section - and asks when that is not obvious from what
+  Adam said, rather than picking one.** Today they are Worktrees, Debug map, Areas, World and Log. The events themselves are not in the
   panel: they are at **`/admin/inspect-events`**, a page of their own that watches the world without
   playing in it, one line an event opening to the whole thing as the store holds it. The `found a house here` button in it sends a
   real command and is how to make an event happen on purpose. The `restart` button beside `copy` forgets

@@ -4,12 +4,13 @@ import type * as maplibregl from 'maplibre-gl';
 import type { BannerSpec } from '@villages/protocol';
 
 import { clampBoundsToWorld } from '../map/sheet';
-import { gateway, gatewayState, watchGateway } from '../net/gateway';
+import { gateway, gatewayState, restart, watchGateway, wipeWorld } from '../net/gateway';
 import { seedHouses } from '../net/seed';
 import { note, shortId } from './log';
+import { Section } from './Section';
 import { seeEverything, seeingEverything, watchSeeingEverything } from './seeEverything';
 
-interface EventsViewProps {
+interface WorldSectionProps {
   map: maplibregl.Map | null;
 }
 
@@ -46,10 +47,14 @@ function aName(): string {
 /**
  * The ways to make something happen on purpose, and whether the gateway is listening.
  *
+ * Starting over lives here too. Decision 0036 put `restart` and `wipe` beside `copy` and `reset`,
+ * which was where the buttons happened to be rather than where they belong: both are about the world
+ * or the player beginning again, and `copy` is about the log. Still no confirmation on either.
+ *
  * The events themselves are read on their own page rather than here: a panel over the map is the wrong
  * shape for a log, and the game window no longer asks the gateway for them at all. See decision 0023.
  */
-export function EventsView({ map }: EventsViewProps) {
+export function WorldSection({ map }: WorldSectionProps) {
   const state = useSyncExternalStore(watchGateway, gatewayState);
   const everything = useSyncExternalStore(watchSeeingEverything, seeingEverything);
 
@@ -102,46 +107,69 @@ export function EventsView({ map }: EventsViewProps) {
     ).then((taken) => note('seed', `${taken} of ${SEED} founded`));
   };
 
-  return (
-    <section className="events">
-      <header className="events__bar">
-        <span className="debug__title">World</span>
-        <span className={`events__link events__link--${state.connection}`}>{state.connection}</span>
-        <button
-          type="button"
-          className="debug__button"
-          onClick={foundHere}
-          disabled={state.connection !== 'open'}
-        >
-          found a house here
-        </button>
-        <button
-          type="button"
-          className="debug__button"
-          onClick={seedHere}
-          disabled={state.connection !== 'open'}
-        >
-          seed {SEED}
-        </button>
-        {/*
+  // Only the connection goes in the bar. A bar holds a status or a button or two; five of them at the
+  // panel's width wrapped into a column of slivers, and the body is the place with room.
+  const tools = <span className={`events__link events__link--${state.connection}`}>{state.connection}</span>;
+
+  const levers = (
+    <div className="debug__levers">
+      <button
+        type="button"
+        className="debug__button"
+        onClick={foundHere}
+        disabled={state.connection !== 'open'}
+      >
+        found a house here
+      </button>
+      <button
+        type="button"
+        className="debug__button"
+        onClick={seedHere}
+        disabled={state.connection !== 'open'}
+      >
+        seed {SEED}
+      </button>
+      {/*
           Significance decides how far out a thing stays drawn, and a founding earns zoom 8, so pulling
           back empties the map because the gateway stopped sending. This sets that aside for this
           connection, which is the only way to look at a whole world at once. See 0038.
         */}
-        <button
-          type="button"
-          className={everything ? 'debug__button debug__button--on' : 'debug__button'}
-          onClick={() => seeEverything(!everything)}
-          disabled={state.connection !== 'open'}
-          aria-pressed={everything}
-          title="show every house in the held cells, however slight, at any zoom"
-        >
-          {everything ? 'seeing everything' : 'see everything'}
-        </button>
-      </header>
+      <button
+        type="button"
+        className={everything ? 'debug__button debug__button--on' : 'debug__button'}
+        onClick={() => seeEverything(!everything)}
+        disabled={state.connection !== 'open'}
+        aria-pressed={everything}
+        title="show every house in the held cells, however slight, at any zoom"
+      >
+        {everything ? 'seeing everything' : 'see everything'}
+      </button>
+      {/* No confirmation on either: the log line is the record, and this panel is not a player's. 0036. */}
+      <button
+        type="button"
+        className="debug__button"
+        onClick={restart}
+        title="forget this player and arrive as a new one"
+      >
+        restart
+      </button>
+      <button
+        type="button"
+        className="debug__button"
+        onClick={wipeWorld}
+        title="empty the world for everyone connected to it"
+      >
+        wipe
+      </button>
+    </div>
+  );
+
+  return (
+    <Section name="World" tools={tools}>
+      {levers}
       <p className="debug__quiet">
         Events are at <a href={INSPECT_EVENTS}>{INSPECT_EVENTS}</a>
       </p>
-    </section>
+    </Section>
   );
 }

@@ -35,6 +35,11 @@ pressed many times a day; its record is the line in the debug log.
 Both are buttons in the debug panel, beside `copy` and `reset`, without a confirmation: the log line
 says what happened, and the panel is Adam's window and not a player's (decision 0023).
 
+*Amended 2026-09-19:* the panel is sections now, and these two are in the **World** section rather than
+beside `copy` and `reset`, which are the log's. Where they sat was where the buttons happened to be;
+both of these are about the world or the player beginning again. Still no confirmation on either, and
+still the log line as the record. See decision record 0039.
+
 ## Consequences
 
 The loop can be tried from nothing in one click, and a second browser can watch the first arrive.

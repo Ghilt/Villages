@@ -3,6 +3,7 @@ import type * as maplibregl from 'maplibre-gl';
 
 import type { TerrainClass } from '@villages/world';
 
+import { Section } from '../debug/Section';
 import { terrainPalette } from '../map/terrainClasses';
 import type { Census } from './census';
 import {
@@ -121,28 +122,29 @@ export function AreasView({ map, worldRoot }: AreasViewProps) {
 
   const selected = state.areas.find((area) => area.id === state.selected) ?? null;
 
-  return (
-    <section className="areas">
-      <header className="areas__bar">
-        <span className="debug__title">Areas</span>
-        <button
-          type="button"
-          className="debug__button"
-          onClick={() => armDrawing(!state.armed)}
-          disabled={map === null}
-        >
-          {state.armed ? 'stop drawing' : 'draw an area'}
-        </button>
-        <button
-          type="button"
-          className="debug__button"
-          onClick={forgetAreas}
-          disabled={state.areas.length === 0}
-        >
-          delete all
-        </button>
-      </header>
+  const tools = (
+    <>
+      <button
+        type="button"
+        className="debug__button"
+        onClick={() => armDrawing(!state.armed)}
+        disabled={map === null}
+      >
+        {state.armed ? 'stop drawing' : 'draw an area'}
+      </button>
+      <button
+        type="button"
+        className="debug__button"
+        onClick={forgetAreas}
+        disabled={state.areas.length === 0}
+      >
+        delete all
+      </button>
+    </>
+  );
 
+  return (
+    <Section name="Areas" tools={tools}>
       {state.armed && <p className="areas__hint">Drag on the map. The ends join themselves; escape stops.</p>}
 
       <ol className="areas__list">
@@ -165,6 +167,6 @@ export function AreasView({ map, worldRoot }: AreasViewProps) {
       </ol>
 
       {selected !== null && <Selected area={selected} legend={legend} worldRoot={worldRoot} />}
-    </section>
+    </Section>
   );
 }

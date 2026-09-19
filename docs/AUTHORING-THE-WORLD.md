@@ -88,8 +88,8 @@ two pixels wide rather than kept as lines. Nothing else exists yet.
 
 ## Seeing your edit
 
-Save the image, alt-tab to the running app, and pick it in the **Debug map** panel at the top right. Its
-terrain dropdown is every PNG in this folder, so a candidate saved as `terrain2.png` is offered beside
+Save the image, alt-tab to the running app, and pick it in the **Debug map** part of the debug panel,
+down the right-hand side. Its terrain dropdown is every PNG in this folder, so a candidate saved as `terrain2.png` is offered beside
 `terrain.png` rather than having to overwrite it, and the panel says whether what is on the screen is
 still what the image says. A master nobody has cut yet, or one saved since it was last cut, gets a button
 that runs the two commands below and puts their output in the debug log while it works. See

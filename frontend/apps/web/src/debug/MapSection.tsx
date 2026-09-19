@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { note } from '../debug/log';
-import { chooseMaster, cutMaster, describeMaster, isStale, listMasters } from './masters';
-import type { MasterOnDisk } from './masters';
-import { RENDERERS } from './renderers';
+import { note } from './log';
+import { Section } from './Section';
+import { chooseMaster, cutMaster, describeMaster, isStale, listMasters } from '../map/masters';
+import type { MasterOnDisk } from '../map/masters';
+import { RENDERERS } from '../map/renderers';
 
-interface DebugMapPanelProps {
+interface MapSectionProps {
   /** The master this page is drawing. Switching to another one reloads the page. */
   master: string;
   renderer: string;
@@ -21,7 +22,7 @@ interface DebugMapPanelProps {
  * be drawn - the browser draws map tiles, not a 32768 pixel image - so picking one offers to cut it,
  * and the commands' own output goes into the debug log below while it runs. See docs/adr/0025.
  */
-export function DebugMapPanel({ master, renderer, onRenderer }: DebugMapPanelProps) {
+export function MapSection({ master, renderer, onRenderer }: MapSectionProps) {
   const [masters, setMasters] = useState<MasterOnDisk[]>([]);
   const [wanted, setWanted] = useState(master);
   const [cutting, setCutting] = useState(false);
@@ -70,9 +71,7 @@ export function DebugMapPanel({ master, renderer, onRenderer }: DebugMapPanelPro
   const rendererChoice = RENDERERS.find((candidate) => candidate.name === renderer);
 
   return (
-    <div className="debug-map">
-      <p className="debug-map__title">Debug map</p>
-
+    <Section name="Debug map">
       <label className="debug-map__label" htmlFor="terrain">
         Terrain
       </label>
@@ -114,6 +113,6 @@ export function DebugMapPanel({ master, renderer, onRenderer }: DebugMapPanelPro
         ))}
       </select>
       {rendererChoice !== undefined && <p className="debug-map__note">{rendererChoice.note}</p>}
-    </div>
+    </Section>
   );
 }

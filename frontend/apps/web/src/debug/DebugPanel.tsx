@@ -6,18 +6,24 @@ import { forgetPaintedTally } from '../map/painterlyTiles';
 import { sheetCoversView, sheetOnScreen } from '../map/sheet';
 import { WORLD_MASTER_WIDTH } from '../map/worldStyle';
 import { AreasView } from '../areas/AreasView';
+import { BuildBadge } from '../version/BuildBadge';
+import { MapSection } from './MapSection';
+import { Section } from './Section';
+import { WorktreesSection } from './WorktreesSection';
 import { atToClock, note, notesNow, watchNotes } from './log';
-import { restart, wipeWorld } from '../net/gateway';
+import { panelIsShut, setPanelShut, stageMode, togglePhone, watchStage } from './stage';
 import { describeTerrainStep } from './terrainDepth';
-import { EventsView } from './EventsView';
+import { WorldSection } from './WorldSection';
 
 interface DebugPanelProps {
   map: maplibregl.Map | null;
   /** Where this page's tiles live, which is what an area is counted against. */
   worldRoot: string;
+  /** Which hand-painted master is drawn, and what draws it: the map controls live in here now. */
+  master: string;
+  renderer: string;
+  onRenderer: (renderer: string) => void;
 }
-
-const OPEN_KEY = 'villages.debug.open';
 
 /**
  * How long the camera has to settle before the terrain says where it ended up.
@@ -29,7 +35,12 @@ const OPEN_KEY = 'villages.debug.open';
 const SETTLE_MS = 250;
 
 /**
- * What the program thinks is happening, on the screen rather than in a console.
+ * Everything that helps while the game is being built, in one space down the right-hand side.
+ *
+ * It is not a card floating over the world: it takes room from the stage, so making it wider makes the
+ * play area smaller exactly as a smaller screen would, and the toggle in its top corner confines the
+ * stage to a phone. That is the instrument for the rule in `docs/RESPONSIVE-DESIGN.md` - a component
+ * that only works at 1600 pixels wide is not finished - and there was no way to see it before.
  *
  * It is the log and the buttons. The block of state that used to sit above them - the zoom, the sheet,
  * the cell names, the counts - went on 2026-09-16, because it was not what Adam read: what a thing does
@@ -39,31 +50,18 @@ const SETTLE_MS = 250;
  * The camera still says the two things about itself that are worth knowing - that the sheet stopped
  * covering the view, and where the terrain came from and went - but it says them to the log when they
  * happen rather than to a row that is always there, and a run of zoom steps is one line rather than
- * six. See decision record 0023.
+ * six. See decision records 0023 and 0039.
  */
-export function DebugPanel({ map, worldRoot }: DebugPanelProps) {
+export function DebugPanel({ map, worldRoot, master, renderer, onRenderer }: DebugPanelProps) {
   const notes = useSyncExternalStore(watchNotes, notesNow);
-  const [open, setOpen] = useState(() => {
-    try {
-      return localStorage.getItem(OPEN_KEY) !== 'no';
-    } catch {
-      return true;
-    }
-  });
+  const shut = useSyncExternalStore(watchStage, panelIsShut);
+  const mode = useSyncExternalStore(watchStage, stageMode);
   const [copied, setCopied] = useState<'no' | 'yes' | 'failed'>('no');
   const tileZoomWas = useRef<number | undefined>(undefined);
   /** Where a run of zoom steps began, and the timer that will say it once the camera stops moving. */
   const cameFrom = useRef<number | undefined>(undefined);
   const settling = useRef<ReturnType<typeof setTimeout> | null>(null);
   const coveredWas = useRef<boolean | undefined>(undefined);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(OPEN_KEY, open ? 'yes' : 'no');
-    } catch {
-      // A browser that will not remember the choice is not a reason to fail.
-    }
-  }, [open]);
 
   useEffect(() => {
     if (map === null) {
@@ -155,10 +153,36 @@ export function DebugPanel({ map, worldRoot }: DebugPanelProps) {
     }
   };
 
-  if (!open) {
+  const logTools = (
+    <>
+      <button type="button" className="debug__button" onClick={copy}>
+        {copied === 'yes' ? 'copied' : copied === 'failed' ? 'select it' : 'copy'}
+      </button>
+      <button
+        type="button"
+        className="debug__button"
+        onClick={() => {
+          forgetPaintedTally();
+          setCopied('no');
+        }}
+      >
+        reset
+      </button>
+    </>
+  );
+
+  // Minimised, it is a badge over the corner of the stage and nothing else. The stage keeps whatever
+  // size it had, so a phone-shaped stage with this alone over it is the interface undisturbed.
+  if (shut) {
     return (
-      <button type="button" className="debug debug--shut" onClick={() => setOpen(true)}>
-        Debug
+      <button
+        type="button"
+        className="debug__badge"
+        onClick={() => setPanelShut(false)}
+        title="the debug panel"
+        aria-label="Show the debug panel"
+      >
+        debug
       </button>
     );
   }
@@ -167,55 +191,54 @@ export function DebugPanel({ map, worldRoot }: DebugPanelProps) {
     <section className="debug">
       <header className="debug__bar">
         <span className="debug__title">Debug</span>
-        <button type="button" className="debug__button" onClick={copy}>
-          {copied === 'yes' ? 'copied' : copied === 'failed' ? 'select it' : 'copy'}
-        </button>
         <button
           type="button"
           className="debug__button"
-          onClick={() => {
-            forgetPaintedTally();
-            setCopied('no');
-          }}
+          onClick={() => setPanelShut(true)}
+          title="minimise to a badge"
         >
-          reset
-        </button>
-        {/* No confirmation: the log line is the record, and this panel is not a player's. See 0023. */}
-        <button
-          type="button"
-          className="debug__button"
-          onClick={restart}
-          title="forget this player and arrive as a new one"
-        >
-          restart
-        </button>
-        <button
-          type="button"
-          className="debug__button"
-          onClick={wipeWorld}
-          title="empty the world for everyone connected to it"
-        >
-          wipe
-        </button>
-        <button type="button" className="debug__button" onClick={() => setOpen(false)}>
           hide
+        </button>
+        {/* The very top right, because that is where Adam asked for it. */}
+        <button
+          type="button"
+          className={`debug__button${mode === 'phone' ? ' debug__button--on' : ''}`}
+          onClick={togglePhone}
+          aria-pressed={mode === 'phone'}
+          title="confine the stage to a phone, and back"
+        >
+          phone
         </button>
       </header>
 
-      <AreasView map={map} worldRoot={worldRoot} />
+      {/*
+        The sections scroll and the bar above them does not, so the way out is reachable however many
+        there are. The panel is expected to gain sections rather than stay this size.
+      */}
+      <div className="debug__sections">
+        {import.meta.env.DEV && <WorktreesSection />}
 
-      <EventsView map={map} />
+        <MapSection master={master} renderer={renderer} onRenderer={onRenderer} />
 
-      <ol className="debug__log">
-        {notes.length === 0 && <li className="debug__quiet">nothing logged yet</li>}
-        {[...notes].reverse().map((entry, index) => (
-          <li key={`${entry.at}-${index}`}>
-            <span className="debug__when">{atToClock(entry.at)}</span>
-            <span className="debug__area">{entry.area}</span>
-            {entry.message}
-          </li>
-        ))}
-      </ol>
+        <AreasView map={map} worldRoot={worldRoot} />
+
+        <WorldSection map={map} />
+
+        <Section name="Log" tools={logTools}>
+          <ol className="debug__log">
+            {notes.length === 0 && <li className="debug__quiet">nothing logged yet</li>}
+            {[...notes].reverse().map((entry, index) => (
+              <li key={`${entry.at}-${index}`}>
+                <span className="debug__when">{atToClock(entry.at)}</span>
+                <span className="debug__area">{entry.area}</span>
+                {entry.message}
+              </li>
+            ))}
+          </ol>
+        </Section>
+
+        <BuildBadge />
+      </div>
     </section>
   );
 }

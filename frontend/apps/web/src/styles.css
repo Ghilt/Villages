@@ -22,10 +22,80 @@ body,
   margin: 0;
 }
 
+/*
+ * The window is a stage with the debug panel beside it, not a map with panels floating over it.
+ *
+ * Three columns and three rows, all four numbers set as custom properties from stageBox.ts: the blank,
+ * the stage, the panel, and the inset above and below. The panel takes room from the stage rather than
+ * covering it, so narrowing it restricts the play area exactly as a smaller screen would, and the phone
+ * toggle is a shape Adam has no monitor for. See docs/adr/0039.
+ */
 .app {
   position: relative;
   height: 100%;
   overflow: hidden;
+  display: grid;
+  grid-template-columns: var(--blank, 0px) var(--stage-w, 1fr) var(--panel, 0px);
+  grid-template-rows: var(--inset, 0px) var(--stage-h, 1fr) var(--inset, 0px);
+  /* What is not the stage and not the panel. Darker than the desk, so the stage reads as a screen set
+     into a surface rather than as more world. */
+  background: #1a1410;
+}
+
+/*
+ * Everything a player would ever see, and nothing else.
+ *
+ * It is the containing block for the map, the desk, the overlays and the house card, all of which are
+ * still `position: absolute; inset: 0` and did not have to change: the stage took the role the window
+ * used to play. `overflow: hidden` is what stops the house card and the parchment spilling into the
+ * blank when the stage is small.
+ */
+.stage {
+  grid-column: 2;
+  grid-row: 2;
+  position: relative;
+  overflow: hidden;
+  /* So the stage reads as a screen with an edge, once there is anything around it to have an edge
+     against. Invisible at full size, because there is nothing beside it then. */
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5);
+}
+
+/*
+ * The two handles on the stage's edges.
+ *
+ * On the boundary rather than inside the stage, so the map keeps every pixel of itself, and wider than
+ * they look so that they can be caught without aiming. They are the only things over the stage that
+ * take a pointer.
+ */
+.grip {
+  z-index: 5;
+  background: transparent;
+  touch-action: none;
+}
+
+.grip:hover,
+.grip:focus-visible {
+  background: rgba(157, 124, 42, 0.45);
+  outline: none;
+}
+
+.grip--side {
+  grid-column: 2;
+  grid-row: 1 / -1;
+  justify-self: end;
+  width: 7px;
+  margin-right: -3px;
+  cursor: col-resize;
+}
+
+.grip--top {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: start;
+  width: 100%;
+  height: 7px;
+  margin-top: -3px;
+  cursor: row-resize;
 }
 
 /*
@@ -302,11 +372,9 @@ body,
  * fiction: a dozen checkouts of this repository can serve and they all look alike. See 0037.
  */
 .build {
-  position: absolute;
-  right: 0.45rem;
-  bottom: 0.2rem;
-  z-index: 4;
-  padding: 0 0.25rem;
+  flex: 0 0 auto;
+  align-self: flex-end;
+  padding: 0.15rem 0.5rem 0.3rem;
   font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
   font-size: 0.58rem;
   letter-spacing: 0.01em;
@@ -559,7 +627,7 @@ body,
 
 .parchment--folded {
   left: auto;
-  right: 24rem;
+  right: 1.25rem;
   bottom: 1.25rem;
   width: auto;
   padding: 0.45rem 0.9rem;
@@ -653,108 +721,81 @@ body,
 }
 
 /*
- * The scaffolding down the right-hand side: which world is drawn and how, then what the program thinks
- * is happening. A column rather than two panels at fixed offsets, because the top one changes height
- * with what it has to say and the one below it would then be under or over it.
+ * Which worktree is on the screen, and what else is up. One tree a row: its name, the branch it is on
+ * and whether anything is answering on its port. See docs/adr/0031.
  */
-.rail {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  bottom: 1rem;
-  z-index: 3;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.75rem;
-  pointer-events: none;
-}
-
-.rail > * {
-  pointer-events: auto;
-}
-
-/* Which worktree is on the screen. Top centre, between the title on the left and the rail on the
-   right, and small enough that it reads as a label rather than as part of the game. */
 .trees {
-  position: absolute;
-  top: 0.55rem;
-  /* Between the title and the rail rather than centred on the window, because centring put it under
-     both. One row that scrolls, never two: a second row pushes the strip over the map. */
-  left: 11rem;
-  right: 15.5rem;
-  z-index: 4;
-  display: flex;
-  /* `safe` matters: plain centring overflows equally at both ends, and the overflow at the start is
-     unreachable because scroll cannot go negative, so the tab you are on was cut off the left edge. */
-  justify-content: safe center;
-  gap: 0.2rem;
-  overflow-x: auto;
-  scrollbar-width: none;
-  pointer-events: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+  max-height: 11rem;
 }
 
-.trees__tab {
-  font-size: 0.62rem;
-  letter-spacing: 0.06em;
-  line-height: 1;
-  padding: 0.28rem 0.5rem;
-  border-radius: 2px 2px 0 0;
-  border: 1px solid var(--parchment-edge);
-  border-bottom: none;
-  background: rgba(239, 230, 211, 0.72);
+.trees__tree {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0 0.5rem;
+  padding: 0.18rem 0.25rem;
+  border-radius: 2px;
   color: var(--ink-soft);
+}
+
+.trees__open {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  color: inherit;
   text-decoration: none;
-  white-space: nowrap;
-  /* The names are a slug and a hex suffix and run long. The whole of it is in the tooltip. */
-  max-width: 9rem;
+}
+
+.trees__tree:has(.trees__open):hover {
+  background: rgba(157, 124, 42, 0.12);
+  color: var(--ink);
+}
+
+.trees__name {
+  /* The names are a slug and a hex suffix and run long. One line each, cut at the row's own width. */
   overflow: hidden;
   text-overflow: ellipsis;
-  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
-a.trees__tab:hover {
-  background: var(--parchment);
-  color: var(--ink);
+.trees__branch {
+  grid-column: 1;
+  font-size: 0.62rem;
+  opacity: 0.75;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* The one you are looking at: opaque, darker, and sitting a little proud of the others. */
-.trees__tab--here {
-  background: var(--parchment);
+.trees__port {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  font-size: 0.62rem;
+  white-space: nowrap;
+}
+
+/* The one you are looking at: darker, and marked down the edge it shares with the panel. */
+.trees__tree--here {
   color: var(--ink);
-  border-color: var(--gold);
-  box-shadow: 0 1px 0 var(--gold);
+  background: rgba(157, 124, 42, 0.14);
+  box-shadow: inset 2px 0 0 var(--gold);
+}
+
+.trees__tree--here .trees__name {
   font-weight: 600;
 }
 
 /* On disk, nothing serving it. Shown so the tree is known to exist, not offered as a link. */
-.trees__tab--down {
+.trees__tree--down {
   opacity: 0.45;
   font-style: italic;
 }
 
-/* Which world is on the screen, and what draws it. Not part of a player's interface. */
-.debug-map {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  width: 15rem;
-  max-width: calc(100vw - 2rem);
-  padding: 0.6rem 0.75rem;
-  background: var(--parchment);
-  border: 1px solid var(--parchment-edge);
-  border-radius: 3px;
-  box-shadow: 0 2px 10px var(--shadow);
-}
-
-.debug-map__title {
-  margin: 0 0 0.15rem;
-  font-size: 0.62rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-}
-
+/* Which world is on the screen, and what draws it: the Debug map section's own bits. */
 .debug-map__label {
   font-size: 0.7rem;
   letter-spacing: 0.18em;
@@ -800,11 +841,17 @@ a.trees__tab:hover {
   color: var(--ink-soft);
 }
 
-/* What the program thinks is happening. Development scaffolding, and it looks like it on purpose. */
+/*
+ * Everything that helps while the game is being built, in one column down the right-hand side.
+ *
+ * Docked rather than floating: the grid gives it a column, so its width is room the stage does not
+ * have. No radius and only the one border, the edge it faces the world with, because it is part of
+ * the window now in the way the house card is part of its corner. Development scaffolding, and it
+ * still looks like it on purpose. See docs/adr/0039.
+ */
 .debug {
-  width: 21rem;
-  max-width: calc(100vw - 2rem);
-  /* The rail bounds the column, so shrinking is what makes the log scroll rather than overflow. */
+  grid-column: 3;
+  grid-row: 1 / -1;
   min-height: 0;
   overflow: hidden;
   display: flex;
@@ -814,28 +861,130 @@ a.trees__tab:hover {
   line-height: 1.45;
   color: var(--ink);
   background: rgba(251, 247, 236, 0.94);
-  border: 1px solid var(--parchment-edge);
-  border-radius: 3px;
-  box-shadow: 0 2px 10px var(--shadow);
+  border-left: 1px solid var(--parchment-edge);
 }
 
-.debug--shut {
-  width: auto;
-  flex: 0 0 auto;
-  overflow: visible;
-  padding: 0.3rem 0.7rem;
-  cursor: pointer;
+/*
+ * Minimised: a badge over the corner of the stage and nothing else, so the interface can be looked at
+ * undisturbed. Out of the grid's flow entirely, because a shut panel is a panel of no width and the
+ * stage has already been given the room.
+ */
+.debug__badge {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 6;
+  font: inherit;
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace;
+  font-size: 0.55rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  font-size: 0.62rem;
+  padding: 0.2rem 0.45rem;
+  cursor: pointer;
+  color: var(--ink-soft);
+  background: rgba(251, 247, 236, 0.72);
+  border: 1px solid var(--parchment-edge);
+  border-radius: 2px;
+  opacity: 0.55;
+}
+
+.debug__badge:hover {
+  opacity: 1;
+  color: var(--ink);
 }
 
 .debug__bar {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: 0.35rem;
   padding: 0.35rem 0.5rem;
   border-bottom: 1px solid var(--parchment-edge);
+  background: rgba(251, 247, 236, 0.94);
+}
+
+/*
+ * Everything below the top bar, and the only thing that scrolls.
+ *
+ * The panel is expected to gain sections rather than stay the size it is, so the sections scroll and
+ * `hide` and `phone` stay put above them: a way out that scrolls off the top is not a way out.
+ */
+.debug__sections {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding-bottom: 0.4rem;
+}
+
+/*
+ * One folding part of the panel. The rule with a section is that every feature is in one, and a new
+ * thing is told which. See docs/adr/0039.
+ */
+.debug__section {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.debug__sectionbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0.3rem 0.5rem;
+  border-top: 1px solid var(--parchment-edge);
+  border-bottom: 1px solid var(--parchment-edge);
+  background: rgba(157, 124, 42, 0.05);
+}
+
+/* Folded, the bar is the whole section, so it keeps both its edges and needs no second line. */
+.debug__section--shut .debug__sectionbar {
+  border-bottom-color: transparent;
+}
+
+/* The whole empty width of the bar folds, not only the chevron: this is pressed often. */
+.debug__fold {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font: inherit;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  text-align: left;
+  background: none;
+  border: 0;
+}
+
+.debug__fold:hover .debug__title {
+  color: var(--ink);
+}
+
+.debug__chevron {
+  width: 0.7rem;
+  color: var(--gold);
+  font-size: 0.7rem;
+  line-height: 1;
+}
+
+/* A row of buttons that wraps, for a section with more levers than a bar can hold. */
+.debug__levers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.debug__sectionbody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-height: 0;
+  padding: 0.4rem 0.5rem 0.1rem;
 }
 
 .debug__title {
@@ -861,6 +1010,13 @@ a.trees__tab:hover {
   background: rgba(157, 124, 42, 0.12);
 }
 
+/* A toggle that is on. Applied by `see everything` since it was written, and never drawn until now. */
+.debug__button--on {
+  color: var(--ink);
+  background: rgba(157, 124, 42, 0.28);
+  border-color: var(--gold);
+}
+
 .debug__state {
   margin: 0;
   padding: 0.4rem 0.5rem;
@@ -882,13 +1038,14 @@ a.trees__tab:hover {
   overflow-wrap: anywhere;
 }
 
+/* Bounded rather than greedy: it used to take whatever height was left, which cannot work once the
+   panel scrolls and there are sections below it. Two hundred notes are kept, so it scrolls itself. */
 .debug__log {
   margin: 0;
-  padding: 0.4rem 0.5rem;
+  padding: 0;
   list-style: none;
   overflow-y: auto;
-  flex: 1;
-  min-height: 3rem;
+  max-height: 22rem;
 }
 
 .debug__log li {
@@ -909,34 +1066,116 @@ a.trees__tab:hover {
   margin-right: 0.35rem;
 }
 
-/* The areas, inside the debug panel. */
-.areas {
-  display: flex;
-  flex-direction: column;
-  border-top: 1px solid var(--parchment-edge);
+/*
+ * What is selected, down the left-hand side of the stage.
+ *
+ * Its markup was written on 2026-09-05 and never got a rule of its own, so it was the one element on
+ * the page still in normal flow - which put it behind the map, where a positioned element paints over
+ * an unpositioned one, and nobody ever saw it. This is the card its own docstring describes and no
+ * more than that; what it should look like is still Adam's to say.
+ */
+.inspect {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 2;
+  width: 17rem;
+  max-width: calc(100% - 2rem);
+  padding: 0 0.85rem 0.85rem;
+  background: var(--parchment);
+  border: 1px solid var(--parchment-edge);
+  border-radius: 3px;
+  box-shadow: 0 2px 14px var(--shadow);
 }
 
-.areas__bar {
+.inspect__bar {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.35rem 0.5rem;
+  gap: 0.5rem;
+  padding: 0.45rem 0 0.4rem;
   border-bottom: 1px solid var(--parchment-edge);
 }
 
-.areas__bar .debug__title {
+.inspect__kind {
   flex: 1;
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
 }
 
-.areas__hint {
+.inspect__close {
+  font: inherit;
+  font-size: 0.7rem;
+  padding: 0.05rem 0.4rem;
+  cursor: pointer;
+  color: var(--ink-soft);
+  background: transparent;
+  border: 1px solid var(--parchment-edge);
+  border-radius: 2px;
+}
+
+.inspect__close:hover {
+  color: var(--ink);
+  background: rgba(157, 124, 42, 0.12);
+}
+
+.inspect__gone {
+  margin: 0.7rem 0 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+.inspect__name {
+  margin: 0.7rem 0 0;
+  font-size: 1.25rem;
+  line-height: 1.15;
+  font-variant: small-caps;
+  letter-spacing: 0.03em;
+}
+
+.inspect__blazon {
+  margin: 0.15rem 0 0;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.inspect__facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.15rem 0.7rem;
+  margin: 0.7rem 0 0;
+  font-size: 0.85rem;
+}
+
+.inspect__facts dt {
+  color: var(--ink-soft);
+  font-variant: small-caps;
+  letter-spacing: 0.06em;
+}
+
+.inspect__facts dd {
   margin: 0;
-  padding: 0.3rem 0.5rem;
+  overflow-wrap: anywhere;
+}
+
+/* A resource is a rate, so this number is never still. Tabular figures keep it from jittering. */
+.inspect__ticking {
+  font-variant-numeric: tabular-nums;
+}
+
+/* The areas, inside the debug panel. Its bar is the Section's now. */
+.areas__hint {
+  margin: 0 0 0.3rem;
   color: var(--ink-soft);
 }
 
 .areas__list {
   margin: 0;
-  padding: 0.3rem 0.5rem;
+  padding: 0;
   list-style: none;
   overflow-y: auto;
   max-height: 7rem;
@@ -999,24 +1238,8 @@ a.trees__tab:hover {
   text-align: right;
 }
 
-/* The events, inside the debug panel. */
-.events {
-  display: flex;
-  flex-direction: column;
-  border-top: 1px solid var(--parchment-edge);
-  min-height: 4rem;
-}
-
-.events__bar {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.35rem 0.5rem;
-  border-bottom: 1px solid var(--parchment-edge);
-}
-
+/* The world, inside the debug panel. Its bar is the Section's now. */
 .events__link {
-  flex: 1;
   font-size: 0.62rem;
   color: var(--ink-soft);
 }

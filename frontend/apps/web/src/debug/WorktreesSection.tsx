@@ -1,12 +1,18 @@
 import { useCallback, useEffect, useState } from 'react';
 
+import { Section } from './Section';
+
 /**
  * Which worktree you are looking at, and what else is up.
  *
  * Several sessions work at once, each in its own worktree, each a whole copy of the world on its own
  * branch. They look identical on the screen, which is how you end up judging a change in the wrong one.
- * This says which is which, in the smallest thing that can: a strip of tabs, the one you are on marked,
- * the ones that are serving live, the rest dim. See decision record 0031.
+ * This says which is which: one tree a row, the one you are on marked, the ones that are serving live
+ * and clickable, the rest dim. Its branch and its port are written out rather than left in a tooltip,
+ * because which port answers is the thing you check when a tree is behaving oddly. See record 0031.
+ *
+ * It was a strip of tabs across the top until it became a section, which cut the names off at 9rem and
+ * scrolled sideways; a section has the panel's whole width and no reason to.
  *
  * Development only, and it draws nothing at all when there is one tree, because then there is nothing
  * to tell apart.
@@ -38,7 +44,7 @@ function inReadingOrder(trees: WorktreeOnDisk[]): WorktreeOnDisk[] {
   return [...trees].sort((a, b) => rank(a) - rank(b) || label(a).localeCompare(label(b)));
 }
 
-export function WorktreeTabs() {
+export function WorktreesSection() {
   const [trees, setTrees] = useState<WorktreeOnDisk[]>([]);
 
   const refresh = useCallback(() => {
@@ -61,38 +67,51 @@ export function WorktreeTabs() {
     return null;
   }
 
+  const serving = trees.filter((tree) => tree.running).length;
+
   return (
-    <nav className="trees" aria-label="worktrees">
-      {inReadingOrder(trees).map((tree) => {
-        const name = label(tree);
-        const where = `${tree.branch ?? 'detached'} — ${tree.running ? `serving on ${tree.port}` : `not running (${tree.port})`}`;
+    <Section name="Worktrees" tools={<span className="debug__quiet">{serving} serving</span>}>
+      <ul className="trees" aria-label="worktrees">
+        {inReadingOrder(trees).map((tree) => {
+          const name = label(tree);
+          const branch = tree.branch ?? 'detached';
+          const port = tree.running ? `serving on ${tree.port}` : `not running (${tree.port})`;
 
-        if (tree.here) {
-          return (
-            <span key={tree.path} className="trees__tab trees__tab--here" title={where}>
-              {name}
-            </span>
+          const inside = (
+            <>
+              <span className="trees__name">{name}</span>
+              <span className="trees__branch">{branch}</span>
+              <span className="trees__port">{port}</span>
+            </>
           );
-        }
 
-        // A tree that is not serving has nothing to open, so it is shown and not offered.
-        return tree.running ? (
-          <a
-            key={tree.path}
-            className="trees__tab"
-            href={`http://localhost:${tree.port}/`}
-            target="_blank"
-            rel="noreferrer"
-            title={where}
-          >
-            {name}
-          </a>
-        ) : (
-          <span key={tree.path} className="trees__tab trees__tab--down" title={where}>
-            {name}
-          </span>
-        );
-      })}
-    </nav>
+          if (tree.here) {
+            return (
+              <li key={tree.path} className="trees__tree trees__tree--here">
+                {inside}
+              </li>
+            );
+          }
+
+          // A tree that is not serving has nothing to open, so it is shown and not offered.
+          return tree.running ? (
+            <li key={tree.path} className="trees__tree">
+              <a
+                className="trees__open"
+                href={`http://localhost:${tree.port}/`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {inside}
+              </a>
+            </li>
+          ) : (
+            <li key={tree.path} className="trees__tree trees__tree--down">
+              {inside}
+            </li>
+          );
+        })}
+      </ul>
+    </Section>
   );
 }

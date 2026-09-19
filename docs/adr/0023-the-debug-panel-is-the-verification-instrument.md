@@ -44,8 +44,15 @@ The debug panel is a first-class verification instrument, not scaffolding, and i
   sheet leaving the view and the terrain changing zoom - are logged exactly that way. What is left is
   the log and the buttons, and `describeState` and its tests are gone with the block. Everything else
   here stands: the panel is still the instrument, and an increment still has to be visible in it.
-- **It stays out of a player's way.** It minimises to a chip, remembers that, and is not part of the
+- **It stays out of a player's way.** It minimises to a badge, remembers that, and is not part of the
   interface a player will have. It is Adam's window, and a session's, and that is enough.
+
+  *Amended 2026-09-19:* it is no longer a corner of the map. The panel is docked down the right-hand
+  side and takes room from the world rather than floating over it, and what is left is the stage; the
+  Debug map panel is part of it rather than a second card above it. Everything in this record stands -
+  the panel is still the instrument, an increment still has to be visible in it, and it still minimises
+  and remembers - but "a corner of a map" above is now only true of where it used to be. See decision
+  record 0039.
 - Anything the program has to say goes through `note(area, message)` so it can be copied out in one
   click. The copy is how Adam tells a session what he sees. After the 2026-09-16 amendment this is the
   whole of what the panel says, rather than the half of it below the state, and the bar for a line rose

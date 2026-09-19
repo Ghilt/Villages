@@ -35,15 +35,37 @@ on screen at once, positioned in corners of a full-window map:
 | Part | Where it sits today |
 |---|---|
 | The map, with the sprite, area and influence overlays | The whole window |
-| The debug map panel, and the debug panel under it | Top right, stacked |
+| The debug panel, with the debug map inside it | Docked down the right, taking room from the stage |
 | The inspector | Left, when something is selected |
 | The house card, with the eye and the empty places beside it | A corner |
 | The parchment | Over the map, while a choice is pending |
 | The worktree tabs and the build badge | Top, and a corner |
 
-On a phone these would overlap each other and the map would be whatever is left. The debug panels are
+On a phone these would overlap each other and the map would be whatever is left. The debug panel is
 Adam's instrument rather than a player's and need not survive the phone, but the house card, the inspector
 and the parchment are the player's and do.
+
+## The instrument
+
+**The phone toggle, in the very top right of the debug panel, confines the stage to 390 by 844.** The
+stage is the box the player's interface is laid out in - everything above except the debug panel itself -
+and the panel takes room from it rather than floating over it. Two grips resize it to anything in
+between. So the rule above is checkable while a component is being written, at one click, on whatever
+monitor there happens to be. See decision record 0039.
+
+This closes one of the questions below: the debug panel does not get a phone layout, because it is the
+frame the phone is looked at inside rather than something in the picture. The worktree tabs and the build
+badge moved into it for the same reason - what is on the stage is what a player would get, and nothing
+else.
+
+Two things it found immediately, both still open and both the layout's work rather than the
+instrument's:
+
+- **The house card asks for `min-width: 26rem`**, which is 416 pixels and does not fit a 390-pixel phone.
+- **A media query cannot see the stage.** The parchment's one breakpoint asks about the window, which is
+  1280 wide while the stage is 390, so it never fires. Responsive work inside the stage wants container
+  queries rather than breakpoints, and that is the right constraint: a component that only reads
+  correctly when it happens to be the whole window is what the rule exists to prevent.
 
 ## Not decided
 
@@ -54,6 +76,5 @@ the layout itself is still to be designed.
   something the world itself suggests.
 - Which breakpoints exist, and whether there is a tablet shape between the two or only the two.
 - What happens to the map while a mechanic is taking the screen — hidden, shrunk, or behind.
-- Whether the debug panels get a phone layout at all.
 - Touch: what replaces hover, given the choice roll's parchments lift on hover and the map is driven by
   drag and wheel today.

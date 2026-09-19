@@ -51,6 +51,11 @@ checkout's game server. Nobody had noticed because nobody had run it from a work
   a strip of tabs across the top: the one you are on marked, the ones serving as links, the rest dim.
   Development only, and absent entirely when there is one tree.
 
+  *Amended 2026-09-19:* it is the **Worktrees** section of the debug panel now rather than a strip
+  across the top, and a list rather than tabs: one tree a row, with its branch and its port written out.
+  The strip cut the names off at 9rem and scrolled sideways, which is what a tab is for and what a
+  section does not need. Same source, same rules about which are offered. See decision record 0039.
+
 ### Amended 2026-09-16: and its own game port
 
 The port per tree was only ever half of it. The game server stayed on 8080 for every checkout, so one

@@ -44,6 +44,10 @@ Every master in `world/master` is a world the browser can ask for, and the dev s
   last cut, and whether the image has been saved since - which it re-checks whenever the window is given
   focus, because that is exactly what coming back from an image editor looks like.
 
+  *Amended 2026-09-19:* "the panel" here is the Debug map panel, which is no longer a card of its own.
+  It is part of the one debug panel down the right-hand side, and everything above is true of it there.
+  See decision record 0039.
+
 ## Consequences
 
 The loop from a Photoshop save to looking at it is one dropdown, and comparing two masters no longer
