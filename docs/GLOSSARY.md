@@ -50,6 +50,7 @@ in the source.
 | **Player-time** | The order things were actually done in at a keyboard: the event store's own order. What arbitration between players runs on. Distinct from world-time. On every event as `recordedAt`, the server's instant. |
 | **Projection** | A read model built by folding events, kept in MongoDB and queried by the interface. The event store is never queried to draw the map. |
 | **Provenance** | What a command brings so that its events can say where they came from: the command's id and the correlation id of the story it continues, stamped on the envelope by the executor. See decision record 0035. `Provenance` |
+| **Rarity** | How good a rolled option is, in four bands: common, uncommon, rare and legendary, shown as gray, green, blue and orange. A choice roll offers options of comparable value, so a legendary never sits beside two commons. See `LOOK-AND-FEEL.md`. Not yet in the source. |
 | **Rate** | A resource expressed as an amount, a rate per second, and the instant at which that was true. Clients interpolate between updates, so the world needs no tick events. |
 | **Restart** | A player starting over: the browser forgets its player token and reloads as a new player, who is given the founding choice again. The old house stays in the world; nothing is deleted. A debug panel button. See decision record 0036. |
 | **Seat** | Where a house is founded: its place on the map, and the anchor of its sprite. `Location` |
