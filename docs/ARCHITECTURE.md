@@ -1,5 +1,9 @@
 # Architecture
 
+> **What belongs here:** how the program is put together — its layers, its modules, how a change travels
+> through it, and what the fiction asks of it. **What does not:** why any of it was chosen, which is in the
+> decision records, and what the game is (`VISION.md`, `SETTING.md`, `MECHANICS.md`).
+
 Villages is an event-sourced world with a map-first client. Commands are decided by pure functions, the resulting
 events are the only durable state, and everything a player sees is a projection of those events. The client is a view
 over a stream of changes, not a simulation of its own.
@@ -132,7 +136,7 @@ an event twice is harmless. See decision record 0029.
 
 A player has one session. The gateway keeps one connection per player, and a second hello takes the player
 over: the newcomer becomes the session and the one before is stood down, told so, and dropped from every
-cell it held. What a session holds - its cells, the day its scrubber is on - is its own; what is the
+cell it held. What a session holds - its cells, the day it is looking at - is its own; what is the
 player's, which today is which house is theirs, is sent to whichever window they are in. See decision
 record 0028.
 
@@ -165,6 +169,43 @@ it in sight is a page drawing what it already has. See decision record 0038.
 6. The map is drawn from read models. The event store is never queried to render anything.
 7. Every principle above is checked by the bot swarm, not assumed. Ten thousand connections on one development
    machine is the Phase 2 milestone.
+
+## The fate engine
+
+Nothing of this is in the source yet. It is here rather than in `SETTING.md` because it is a part of the
+program rather than a part of the fiction, and `MECHANICS.md` points at it from the mechanics it drives.
+
+The **fate engine** rolls what could happen to a house at a moment. Its inputs are the house's stats, its
+house-spirit, where the player is looking and what is around there; its output is a set of options of
+comparable value, each with a rarity, which reaches the player as a **choice roll**. It is one side of a coin
+whose other side is that mechanic, so what is asked of one is asked of the other: enough rolls that repeats
+are not noticeable, and never a legendary option sitting beside two commons.
+
+Two things follow for the architecture, and neither is built:
+
+- A roll is **not** a decision of the domain. The engine proposes; the player disposes; only the taken option
+  becomes an event. The giver of a choice is application code, as arrival is today, and the roll is what a
+  giver consults. See decision record 0034 for the pattern it plugs into.
+- A rolled option can name a thing that does not exist yet. Because play is chronological, that thing is
+  simply created going forward - there is nothing to reconcile with the past, and no constraint solver.
+
+## What the setting asks of the architecture
+
+`SETTING.md` describes a world; two of its demands are not yet met, and are recorded here so that the first
+increment to touch either starts from them.
+
+1. **Things with lifetimes are their own streams.** A cathedral raised by one house and ended by another is
+   shared state, so it cannot live inside a `House`. Places, structures and key figures become aggregates
+   with a lifetime `[from, to)` in world-time. One stream per house becomes one stream per thing that can
+   exist. Its first increment gets a decision record before any code.
+2. **The map is a temporal read model.** Rows carry `since` and `until` in world-time, and the map at
+   world-time T is a range query: `since <= T < until`. Decided and built for houses with decision record
+   0027; a thing that ends will need the other half of it.
+
+A third demand, a resource that ticks, already has its answer: a resource is an amount, a rate per second and
+the instant at which that was true, and an event is recorded when the rate changes rather than on a clock.
+See decision record 0006. **What** the resources are is undecided; that shape is only how one behaves once it
+exists.
 
 ## Events over time
 

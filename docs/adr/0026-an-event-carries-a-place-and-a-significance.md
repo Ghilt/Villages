@@ -2,6 +2,9 @@
 
 - Status: accepted
 - Date: 2026-09-05
+- Amended 2026-09-19: the chrono-engine named below is now the **fate engine**, described in
+  `ARCHITECTURE.md`, and the chrono jump it was named for is gone. The decision itself — a place and a
+  significance on the event, the cell derived wherever it is needed — is unaffected.
 
 ## Context
 

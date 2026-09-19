@@ -2,6 +2,10 @@
 
 - Status: accepted
 - Date: 2026-09-05
+- Amended 2026-09-19: the world is **no longer played out of order**, which is the premise the context
+  below opens with. The decision stands regardless: world-time and player-time still differ, because a
+  century of world-time does not take a century to play, so both still belong on every event. What has gone
+  with the jump is the scrubber as a way of *playing* the past; looking back at it remains.
 
 ## Context
 

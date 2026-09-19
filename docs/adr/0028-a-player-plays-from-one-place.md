@@ -2,6 +2,10 @@
 
 - Status: accepted
 - Date: 2026-09-05
+- Amended 2026-09-19: where the reasoning below speaks of the day a session's scrubber is on, read the day
+  the session is looking at. The slider went on 2026-09-15 and the chrono jump on 2026-09-19; the viewing
+  day is still a session's own. The decision — one session per player, the newcomer takes over — is
+  unaffected.
 
 ## Context
 

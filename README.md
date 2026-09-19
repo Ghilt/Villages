@@ -11,7 +11,7 @@ thousands of concurrent players.
 
 - `CLAUDE.md` - how we work in this repository (conventions, layer rules, the commit gate)
 - `docs/VISION.md` - what the experience is and is not
-- `docs/SETTING.md` - the world, its two clocks, and the chrono-engine that keeps its history consistent
+- `docs/SETTING.md` - the world, its two clocks, and what a house is inside it
 - `docs/GLOSSARY.md` - the shared vocabulary used in code, events and UI
 - `docs/ARCHITECTURE.md` - layers, modules, event flow, scale principles
 - `docs/adr/` - architecture decision records
