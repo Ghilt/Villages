@@ -174,7 +174,16 @@ body,
   min-height: 0;
   container-type: size;
   z-index: 2;
-  --corner-taken: 0px;
+  /*
+   * How much of this bay's **bottom right** corner something standing on the stage has taken.
+   *
+   * Two numbers and not one, because a pane steps clear in the direction it happens to lay itself out
+   * in - a row along the bottom moves in from the right, a column down the side moves up from the
+   * bottom - and which of those a pane is doing is its own business rather than something it reads off
+   * how the stage was cut.
+   */
+  --corner-right: 0px;
+  --corner-bottom: 0px;
 }
 
 /*
@@ -194,43 +203,58 @@ body,
 }
 
 /*
- * The compass, on the seam between the two bays: the way to everything that is not on the screen.
+ * The compass, standing in the stage's bottom right corner: the way to everything not on the screen.
  *
  * One tap that puts **navigation** in a bay, where a kebab used to open a menu over the world. Only in the
  * bays - the spread reaches the same pane through the compass tab in the corner. See decision record 0043.
+ *
+ * **It rode the seam until 0047**, which is the one place on the stage that moves: the seam is somewhere
+ * else every time a pane is resized, a window opens or a letter is answered, and a control that has moved
+ * because you used something else is a control you have to find twice. The corner never moves, and one
+ * rule places it in both cuts rather than two rules chasing a number.
+ *
+ * It is the one thing on the stage that lies over a bay rather than sitting in one, and what is under it
+ * steps clear rather than being covered: see `--corner-right` and `--corner-bottom` on `.bay`.
  */
 .compass {
   position: absolute;
   z-index: 5;
+  /* Clear of `.grip--side`, which is seven pixels of the stage's right edge and takes the pointer. */
+  right: 0.9rem;
+  bottom: 0.9rem;
 }
 
-.compass--rows {
-  top: var(--bay-first, 50%);
-  right: 0.3rem;
-  transform: translateY(-50%);
-}
-
-.compass--columns {
-  left: var(--bay-first, 50%);
-  bottom: 0;
-  transform: translateX(-50%);
-}
-
+/*
+ * A thumb's width, which is what a strip is, because it is the same thumb.
+ *
+ * Drawn as a seal pressed into the corner of the sheet rather than as a button laid on top of one:
+ * parchment, a rim, and a fainter gold ring nested inside it the way the achievement nests its contours
+ * instead of drawing one thick line.
+ */
 .compass__open {
   display: block;
-  width: 2.1rem;
-  height: 2.1rem;
-  padding: 0.22rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0.5rem;
   border: 1px solid var(--parchment-edge);
   border-radius: 50%;
   background: var(--parchment);
-  box-shadow: 0 1px 6px var(--shadow);
+  box-shadow:
+    0 2px 8px var(--shadow),
+    inset 0 0 0 1px rgba(157, 124, 42, 0.25);
   cursor: pointer;
 }
 
-/* Open: the gold the interface says "this is the one you are on" in, the same as a tab that is up. */
+.compass__open:hover {
+  background: #fbf7ec;
+}
+
+/* Open: the gold the interface says "this is the one you are on" in, the same as a tab that is up, and
+   pressed into the parchment rather than standing off it. */
 .compass__open--up {
-  background: var(--parchment);
+  border-color: var(--gold);
+  background: rgba(157, 124, 42, 0.16);
+  box-shadow: inset 0 1px 3px var(--shadow);
 }
 
 .compass__open--up .icon {
@@ -238,14 +262,16 @@ body,
 }
 
 /*
- * How much of a bay's top-right corner the compass is standing in.
+ * How much of a bay's bottom right corner the compass is standing in.
  *
- * It sits at the far end of the divider - the right end of a horizontal one, the bottom end of a vertical
- * one - so in rows it lands on the lower bay's top corner and there is exactly one bay that has to get out
- * of its way. Any chrome a pane puts in that corner reads this rather than knowing about the compass.
+ * The stage's own corner is always the second bay's - the bottom one cut into rows, the right-hand one
+ * cut into columns - so **one rule says it for both**, where before it said it for one and the landscape
+ * case was never covered at all. What reads it is the pane, and each reads whichever of the two numbers
+ * matches how it lays itself out.
  */
-.stage[data-form='bays'][data-along='rows'] .bay[data-at='second'] {
-  --corner-taken: 2.5rem;
+.stage[data-form='bays'] .bay[data-at='second'] {
+  --corner-right: 3.75rem;
+  --corner-bottom: 3.75rem;
 }
 
 /*
@@ -631,7 +657,9 @@ body,
   flex-direction: row;
   align-items: center;
   gap: 0.6rem;
-  padding: 0 0.3rem 0 0.75rem;
+  /* The compass is standing in the far end of this strip, so whatever the strip put there - the marks
+     on four of them, the word on the map's - steps in from the right rather than sitting under it. */
+  padding: 0 calc(0.3rem + var(--corner-right, 0px)) 0 0.75rem;
 }
 
 .hud__panel--strip .hud__name {
@@ -689,14 +717,12 @@ body,
   opacity: 1;
 }
 
-/*
- * On a pane that has no bar of its own to put it in, it sits in the top corner - and steps clear of the
- * compass when the compass is standing in that corner.
- */
+/* On a pane that has no bar of its own to put it in, it sits in the top corner. Nothing stands there
+   any more: the compass moved to the bottom one in 0047. */
 .hud__panel > .pane-size {
   position: absolute;
   top: 0.15rem;
-  right: calc(0.2rem + var(--corner-taken, 0px));
+  right: 0.2rem;
   z-index: 1;
 }
 
@@ -717,6 +743,9 @@ body,
 .housebar {
   display: flex;
   border-top: 1px solid var(--parchment-edge);
+  /* The compass is standing in the corner the last place would otherwise run into. The places are equal,
+     so all six give up a little rather than the last one being half a place. */
+  padding-right: var(--corner-right, 0px);
 }
 
 .housebar__slot {
@@ -805,8 +834,10 @@ body,
 }
 
 /* Lifted clear of the build label, which owns the very corner. */
+/* Lifted clear of the build badge, and of the compass where that is standing in the same corner. */
 .maplibregl-ctrl-bottom-right {
-  padding-bottom: 0.9rem;
+  padding-right: var(--corner-right, 0px);
+  padding-bottom: calc(0.9rem + var(--corner-bottom, 0px));
 }
 
 /*
@@ -1047,8 +1078,6 @@ body,
   gap: 0.8rem;
   flex: none;
   margin-bottom: 0.6rem;
-  /* The corner the compass is standing in, when this bay is the one under the divider. */
-  padding-right: var(--corner-taken, 0px);
 }
 
 .choice__prompt {
@@ -1078,7 +1107,9 @@ body,
   flex-direction: row;
   align-items: center;
   gap: 0.6rem;
-  padding: 0 0.3rem 0 0.75rem;
+  /* The compass is standing in the far end of this strip, so whatever the strip put there - the marks
+     on four of them, the word on the map's - steps in from the right rather than sitting under it. */
+  padding: 0 calc(0.3rem + var(--corner-right, 0px)) 0 0.75rem;
 }
 
 .choice__aside {
@@ -1577,7 +1608,7 @@ body,
  * more than that; what it should look like is still Adam's to say.
  */
 .inspect {
-  padding: 0 0.85rem 0.85rem;
+  padding: 0 0.85rem calc(0.85rem + var(--corner-bottom, 0px));
   background: var(--parchment);
   border: 1px solid var(--parchment-edge);
   border-radius: 3px;
@@ -1709,7 +1740,9 @@ body,
 .navigate__list {
   flex: 1;
   margin: 0;
-  padding: 0 0 0.4rem;
+  /* Padding on the scroller and not a shorter list: the last row scrolls out from under the compass
+     rather than being permanently half-covered by it. */
+  padding: 0 0 calc(0.4rem + var(--corner-bottom, 0px));
   list-style: none;
   overflow-y: auto;
   min-height: 0;
@@ -1815,7 +1848,9 @@ body,
   flex-direction: row;
   align-items: center;
   gap: 0.6rem;
-  padding: 0 0.3rem 0 0.75rem;
+  /* The compass is standing in the far end of this strip, so whatever the strip put there - the marks
+     on four of them, the word on the map's - steps in from the right rather than sitting under it. */
+  padding: 0 calc(0.3rem + var(--corner-right, 0px)) 0 0.75rem;
 }
 
 .navigate__kind {
@@ -1834,7 +1869,9 @@ body,
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  padding: 0 0.3rem 0 0.75rem;
+  /* The compass is standing in the far end of this strip, so whatever the strip put there - the marks
+     on four of them, the word on the map's - steps in from the right rather than sitting under it. */
+  padding: 0 calc(0.3rem + var(--corner-right, 0px)) 0 0.75rem;
   overflow: hidden;
 }
 
@@ -2119,7 +2156,9 @@ body,
   flex-direction: row;
   align-items: center;
   gap: 0.6rem;
-  padding: 0 0.3rem 0 0.75rem;
+  /* The compass is standing in the far end of this strip, so whatever the strip put there - the marks
+     on four of them, the word on the map's - steps in from the right rather than sitting under it. */
+  padding: 0 calc(0.3rem + var(--corner-right, 0px)) 0 0.75rem;
   overflow: hidden;
   font: inherit;
   text-align: left;
@@ -2146,6 +2185,19 @@ body,
 }
 
 /*
+ * The ways out of a put-away navigation: one mark a pane, and pressing one sends it to the other bay.
+ *
+ * Tighter than the strip's own gap, so that a row of the name, three marks and three more marks reads as
+ * two groups rather than as one row of six things. The marks themselves are the needle's own control,
+ * because that is exactly the job it already does. See decision record 0047.
+ */
+.navigate__ways {
+  display: flex;
+  flex: none;
+  gap: 0.15rem;
+}
+
+/*
  * A strip that is a narrow upright sliver rather than a low wide band.
  *
  * Cut into columns - a phone in landscape - a put-away pane is 44 pixels **wide** and the whole height,
@@ -2156,6 +2208,13 @@ body,
  * quarter turn round rather than a second drawing, which is what the whole stage does when the phone
  * turns. It used to be hidden, which left a put-away pane saying nothing about what it was - and left the
  * map, whose strip is its own way back and carries no marks, as a blank bar. See decision record 0046.
+ *
+ * **The marks go to the far end from the compass, and the name follows them.** Upright the strip runs
+ * along the bottom and the disc stands at the right of it, so the marks move in from the right and the
+ * name keeps the rest; turned, the strip runs down the side and the disc stands at the **bottom** of it,
+ * so the whole order flips - marks at the top, name under them, and the bottom of the strip left to the
+ * disc. A put-away pane's controls are the one thing on it that has to be hittable, so they go where
+ * nothing is standing. See decision record 0047.
  *
  * `writing-mode` and not a transform, because a transform turns what is drawn and leaves the box it was
  * drawn in where it was, which would put the marks a screen away from where they look. This way the
@@ -2172,10 +2231,15 @@ body,
   .navigate--strip,
   .choice--strip,
   .map-strip {
-    flex-direction: column;
-    justify-content: flex-start;
+    /*
+     * Reversed, so the marks are at the top and the name reads down from under them - the strip is 44
+     * wide and the whole height here, and the corner the disc stands in is the bottom of it rather than
+     * the far end. `flex-end` is the top in a reversed column, which is where everything packs.
+     */
+    flex-direction: column-reverse;
+    justify-content: flex-end;
     gap: 0.3rem;
-    padding: 0.4rem 0;
+    padding: 0.4rem 0 calc(0.4rem + var(--corner-bottom, 0px));
   }
 
   .hud__panel--strip .hud__name,
@@ -2189,7 +2253,8 @@ body,
     text-align: left;
   }
 
-  .pane-size {
+  .pane-size,
+  .navigate__ways {
     flex-direction: column;
   }
 }

@@ -99,7 +99,9 @@ export const HOUSE_PANE: Pane = {
  */
 export const NAVIGATION_PANE: Pane = {
   id: 'navigation',
-  title: 'where you have been',
+  // What it is *for* rather than what is in it. A player who pressed a compass is going somewhere;
+  // "where you have been" is the trail, which is only the lower half of what it offers.
+  title: 'go to',
   // Beside the house, in the corner. The two of them are what makes the corner a tabbed tile at all.
   spread: 'bottomLeft',
   // The same height as the card it shares the tile with, and the same at both sizes, so the column does

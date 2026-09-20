@@ -318,6 +318,35 @@ describe('what is in each bay', () => {
   });
 });
 
+describe('where the compass opens navigation', () => {
+  /*
+   * Adam's words are "the bottom/right pane", twice. 0043 read it as the bay that is not the map's, which
+   * put the door somewhere else depending on what the player had been looking at.
+   */
+  it('is the second bay, whatever the player has swapped into it', async () => {
+    const { NEAR_BAY, baysNow, put, takeOver } = await fresh();
+
+    expect(NEAR_BAY).toBe(1);
+
+    // The map swapped to the bottom: the old rule would have opened navigation at the top instead.
+    put(1, MAP_PANE.id);
+    takeOver(NEAR_BAY, NAVIGATION_PANE.id);
+
+    expect(baysNow().holding[1]).toBe(NAVIGATION_PANE.id);
+  });
+
+  it('lands in a strip without opening it, because a strip of it is still a list of ways on', async () => {
+    const { baysNow, askFor, takeOver } = await fresh();
+
+    // The bottom bay put away, then the compass.
+    askFor(MAP_PANE.id, 'full');
+    takeOver(1, NAVIGATION_PANE.id);
+
+    expect(baysNow().arrangement).toBe('secondAway');
+    expect(askedIn(baysNow().arrangement, 1)).toBe('strip');
+  });
+});
+
 describe('which bay is which', () => {
   it('is a top and a bottom cut into rows, and a left and a right cut into columns', async () => {
     const { stageIs, where } = await fresh();

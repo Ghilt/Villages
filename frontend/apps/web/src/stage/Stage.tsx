@@ -230,7 +230,7 @@ export function Stage({ stage, contents, overlays }: StageProps) {
         );
       })}
 
-      {box.form === 'bays' && <Compass along={box.along} />}
+      {box.form === 'bays' && <Compass />}
       {overlays}
     </div>
   );

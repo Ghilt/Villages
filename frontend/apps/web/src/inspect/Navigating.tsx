@@ -31,6 +31,9 @@ import { clearTrail, stepKey, trailNow, watchTrail } from './trail';
  * That replaced a pair of arrows on every row. Two marks where one would do made a list of four rows into a
  * list of eight decisions, and neither of them was the obvious one - which was pressing the row. In the
  * spread there is one bay a thing goes into, so there is no needle at all and the row is a plain click.
+ *
+ * **Put away it is still a way somewhere**, which is the third form and the reason the compass can land in
+ * a strip without resizing anything. See the strip below, and decision record 0047.
  */
 
 export function Navigating({ room, along }: { room: Room; along: 'rows' | 'columns' | null }) {
@@ -38,10 +41,51 @@ export function Navigating({ room, along }: { room: Room; along: 'rows' | 'colum
   const bays = useSyncExternalStore(watchBays, baysNow);
   const pending = useSyncExternalStore(watchGateway, gatewayState).yourChoice !== null;
 
+  /*
+   * Put away, and still a way somewhere.
+   *
+   * **A strip can do something, and this is the pane where that matters.** The compass puts navigation in
+   * the bay under the thumb without resizing anything, so it lands in a strip whenever the player left one
+   * there - and a strip that could only offer the way back out of itself would make the compass a button
+   * that does nothing useful half the time. So it carries the standing panes as marks: the map, your
+   * house, and the letter while a question stands. Pressing one sends that pane to the **other** bay,
+   * which is the only bay a 44-pixel list can usefully change - the player is looking at what is beside
+   * this, not at this.
+   *
+   * Marks and no words, the tab bar's argument: there is no room for a name in 44 pixels, and these are
+   * the same marks the same panes carry everywhere else. See decision records 0046 and 0047.
+   */
   if (room.size === 'strip') {
+    const mine = bays.holding.indexOf(NAVIGATION_PANE.id);
+    const beside: Which = mine === 0 ? 1 : 0;
+
     return (
-      <section className="navigate navigate--strip">
-        <span className="navigate__kind">Where you have been</span>
+      <section className="navigate navigate--strip" aria-label="Go to">
+        <span className="navigate__kind">Go to</span>
+        <span className="navigate__ways">
+          {standingPanes(pending)
+            .filter((pane) => pane.id !== NAVIGATION_PANE.id)
+            .map((pane) => {
+              const already = bays.holding[beside] === pane.id;
+              return (
+                <button
+                  key={pane.id}
+                  type="button"
+                  className={already ? 'navigate__there navigate__there--here' : 'navigate__there'}
+                  aria-pressed={already}
+                  aria-label={
+                    already
+                      ? `${pane.title} is already ${where(beside)}`
+                      : `put ${pane.title} ${where(beside)}`
+                  }
+                  title={already ? `already ${where(beside)}` : `put it ${where(beside)}`}
+                  onClick={() => put(beside, pane.id)}
+                >
+                  <Icon name={pane.icon} />
+                </button>
+              );
+            })}
+        </span>
         <PaneSizeControl room={room} />
       </section>
     );
@@ -56,7 +100,7 @@ export function Navigating({ room, along }: { room: Room; along: 'rows' | 'colum
   const there: Which = mine === 0 ? 1 : 0;
 
   return (
-    <section className="navigate" aria-label="Where you have been">
+    <section className="navigate" aria-label="Go to">
       {along !== null && (
         <>
           <header className="navigate__bar">

@@ -159,11 +159,15 @@ instrument has a toggle for each.
 | **Big** | the stage, less the other pane's strip | the same |
 
 **Minimised is the same for every pane, and unless a pane says otherwise it is just the pane's name.** One
-thickness, one shape, so that putting anything away looks like putting anything else away. Two panes say
+thickness, one shape, so that putting anything away looks like putting anything else away. **The controls
+go to the end the compass is not standing at** — in from the right upright, and at the top turned, with
+the name reading down from under them — because a strip's controls are the one thing on it that has to be
+hittable. Two panes say
 otherwise and say why: **navigation** carries the marks of the panes it could put in the other bay, because
 a list of ways on is what it is for; and the **map** carries no size control at all and is itself the way
 back, because three marks in 44 pixels of map would be three things to aim at where the only useful one is
-the map.
+the map. Both are **stated** exceptions rather than quiet ones, and navigation's is not a nicety: it is the
+strip a player arrives in by pressing the compass.
 
 **Medium and big are the pane's own business, and may be one drawing or two.** A pane whose full form is a
 list can draw the same list medium and simply show less of it; the **choice roll** is the one that
@@ -181,13 +185,17 @@ the other bay follows because both of them are reading one value. In the **sprea
 its own, because a tile is not dividing anything with anybody. See decision records 0045 and 0046 and
 `LOOK-AND-FEEL.md`.
 
-**The compass at the divider is the way to everything else.** One tap puts **navigation** in the bay that is
-not the map's, and navigation lists the panes above a divider and the **trail** below it. Every row carries
+**The compass in the corner is the way to everything else.** It stands in the stage's bottom right corner
+and is in the same place however the split moves - it rode the divider until 0047, and the divider is the
+one thing on the stage that moves. One tap puts **navigation** in the bay under the thumb, which is the
+bottom one on a tall phone and the right one on a wide one, and navigation lists the panes above a divider
+and the **trail** below it. It **never resizes anything**, which is what lets it land in a strip: a strip
+of navigation carries the marks of where else to go, so it is still a way somewhere. Every row carries
 **the arrows**, so any pane can be put in either bay and the one it is already in is marked rather than
 taken away. **No pane is privileged there**: the map is not pinned where it is, and which bay two panes
 share on a desktop has nothing to say about where either of them can go on a phone. In the spread the
 compass is a tab in the corner instead, and a row there is a plain click, because there are no bays to
-choose between. See decision record 0043 and `LOOK-AND-FEEL.md`.
+choose between. See decision records 0043 and 0047 and `LOOK-AND-FEEL.md`.
 
 **The spread shows everything; the bays choose.** That is the whole difference, and it is what stops the
 phone from being a second design. A mechanic is written once, at up to three sizes.
@@ -208,7 +216,7 @@ be the whole window is exactly what the rule at the top exists to prevent.
 |---|---|---|
 | The map, with the sprite, area and influence overlays | Fills the stage | A pane; opened out by default, and puts away to a strip that is its own way back |
 | The house status, with the eye and the empty places | The corner tile, behind the shield tab | A pane; a strip by default, and half the stage when the player asks |
-| Navigation, the way back to what you have looked at | The corner tile, behind the compass tab | A pane; it takes whatever the bay it lands in is |
+| Navigation, called *Go to*: the panes above, the trail below | The corner tile, behind the compass tab | A pane; it takes whatever the bay it lands in is |
 | An inspect window | A rail down the side, up to three | A pane; takes a bay one at a time, and opens it to half if it was a strip |
 | The choice roll, on its parchments | The bottom middle tile, while a choice is pending | A pane; arrives in the map's bay with room to read it, and the player folds it to the carousel |
 | The debug panel, with the debug map inside it | Docked down the right, taking room from the stage | Not in the picture at all — see below |

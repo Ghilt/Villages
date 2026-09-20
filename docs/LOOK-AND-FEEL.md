@@ -61,16 +61,33 @@ not a mouse. The spread has no bays to choose between, so there the same link is
 are drawn. See `RESPONSIVE-DESIGN.md` and decision records 0040 and 0043.
 
 **The compass rose.** Four cardinal points filled and four between them drawn, inside a ring: the way to
-everything that is not on the screen. On a phone it sits on the seam between the bays and one tap puts
-**navigation** in a bay; in the spread it is a tab in the corner. The same mark doing the same job in the
-room each form has for it. The ordinals are outlined rather than filled so that it reads as eight points and
-not as a blob at the size a tab draws it. See decision record 0043.
+everything that is not on the screen. On a phone it is a disc in the **bottom right corner of the stage**,
+always the same corner, and one tap puts **navigation** in the bay under the thumb; in the spread it is a
+tab in the corner. The same mark doing the same job in the room each form has for it. The ordinals are
+outlined rather than filled so that it reads as eight points and not as a blob at the size a tab draws it.
+
+It is the **one thing that floats over the world**, and it floats because what it opens is everywhere while
+what it used to stand on — the seam between the bays — moves every time anything is resized. It is drawn to
+earn the corner rather than to sit on it: parchment, a rim and a fainter gold ring nested inside, which is
+the achievement's own way of drawing a frame, so it reads as a seal pressed into the corner of the sheet
+rather than as a button laid on top of one. A thumb across, which is what a **strip** is, because it is the
+same thumb. Whatever is under it steps clear, so nothing the player needs is ever beneath it. See decision
+records 0043 and 0047.
 
 **The pane size control.** Three marks in a pane's corner saying how much of the stage it is taking: put
 away, the normal size, opened out. The mark is **how much of a box is filled**, which is the thing being
 chosen rather than a metaphor for it - no folder, no chevron, no arrow pointing anywhere. Every **pane**
 has one, in both forms, and it replaced a chevron that could only put a pane away. A pane that cannot be
 put away offers two marks rather than three. See decision record 0045.
+
+**The strip.** What every **pane** looks like put away: a band 44 pixels across with the pane's name on
+it and the **pane size control** beside it. The same band turned a quarter in landscape, 44 pixels wide
+down the side of the stage with the name written **down** it rather than dropped — there is no room for a
+word across 44 pixels and eight hundred pixels of room along one. One shape and one thickness for every
+pane, so that putting anything away looks like putting anything else away, and two panes that say
+otherwise and say why: the **map** carries no control and is itself the way back, and **navigation**
+carries the marks of what it could put in the other bay, because that is the strip a player arrives in by
+pressing the compass. See `RESPONSIVE-DESIGN.md` and decision records 0046 and 0047.
 
 **The tab bar.** Several **panes** sharing one **bay**, and a strip of marks across its top saying which is
 up. Marks and no words: a column is 26rem at its widest and two words on a tab is a tab that wraps. Its

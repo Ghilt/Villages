@@ -183,6 +183,16 @@ export function formNow(): 'spread' | 'bays' {
   return form;
 }
 
+/**
+ * Where the **compass** opens navigation: the bottom one on a tall phone, the right one on a wide one.
+ *
+ * Adam's words are "the bottom/right pane", twice, and this is literally that - the end of the stage the
+ * thumb reaches, whichever way it is cut, whatever the player has swapped into it. 0043 read it as the bay
+ * that is not the map's, so that the list never covered the world; the literal reading wins because a door
+ * that is somewhere else depending on what you were looking at is a door you have to find. See 0047.
+ */
+export const NEAR_BAY: Which = 1;
+
 /** The bay that is not the map's, which is the one a thing clicked on the map goes into. */
 export function awayFromTheMap(): Which {
   return state.holding[0] === MAP_PANE.id ? 1 : 0;
