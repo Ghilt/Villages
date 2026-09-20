@@ -115,7 +115,11 @@ The two are different drawings and not one drawing at two sizes. That is the who
 get the thing, with whatever detail it is worth giving; far out you get the sign for it, said in as few
 strokes as read at the size of a word. A house is a castle of two towers close in and a battlemented
 keep far out. What has only an icon is a thing the world is saying rather than a thing standing in it,
-like the seat a choice is offering. See decision record 0051.
+like the seat a choice is offering.
+
+**Nothing on the map pops.** A thing arriving fades up, a thing gone fades out and is only then let go
+of, and a thing changing form crosses over rather than swapping. All of it is a fifth of a second or
+less, so it reads as the world settling rather than as an animation. See decision record 0051.
 
 **The marks.** Every pane declares the mark it is known by, drawn in one place so that the same thing on a
 tab, in a list and wherever a pane is named later cannot drift apart. **The compass is the needle inside a

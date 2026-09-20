@@ -5,6 +5,8 @@ import {
   CROSSFADE_MS,
   CROSSOVER_STICK,
   DRAWN_FROM_ZOOM,
+  LONGEST_STEP_MS,
+  PRESENCE_MS,
   alphasFor,
   crossoverZoom,
   easeTowards,
@@ -117,6 +119,37 @@ describe('how long the trade takes', () => {
     expect(midTrade(0)).toBe(false);
     expect(midTrade(1)).toBe(false);
     expect(midTrade(0.5)).toBe(true);
+  });
+});
+
+describe('a thing arriving, or going', () => {
+  it('takes the time it says it does, which is its own and not the trade between forms', () => {
+    expect(easeTowards(0, 1, PRESENCE_MS, PRESENCE_MS)).toBe(1);
+    expect(easeTowards(0, 1, PRESENCE_MS / 2, PRESENCE_MS)).toBeCloseTo(0.5, 9);
+    expect(easeTowards(1, 0, PRESENCE_MS, PRESENCE_MS)).toBe(0);
+  });
+
+  it('is quicker than changing into something else, because it is a smaller event', () => {
+    expect(PRESENCE_MS).toBeLessThan(CROSSFADE_MS);
+  });
+
+  it('cannot be finished by one frame, however long that frame was', () => {
+    // A still map draws nothing, so the gap since the last frame is often seconds. Without the cap a
+    // house arriving on a still map would take its whole fade in one step, which is a pop.
+    expect(LONGEST_STEP_MS).toBeLessThan(PRESENCE_MS);
+    expect(LONGEST_STEP_MS).toBeLessThan(CROSSFADE_MS);
+    expect(easeTowards(0, 1, LONGEST_STEP_MS, PRESENCE_MS)).toBeLessThan(1);
+    expect(easeTowards(0, 1, LONGEST_STEP_MS, CROSSFADE_MS)).toBeLessThan(1);
+  });
+
+  it('runs alongside a trade rather than instead of it, so both can be part-way at once', () => {
+    // A house can arrive at a zoom that also wants it to change form. The two are multiplied, so
+    // neither has to wait for the other and neither can take the mark past being fully drawn.
+    const presence = easeTowards(0, 1, PRESENCE_MS / 2, PRESENCE_MS);
+    const { ground, icon } = alphasFor(easeTowards(0, 1, CROSSFADE_MS / 2));
+
+    expect(ground * presence + icon * presence).toBeCloseTo(presence, 9);
+    expect(ground * presence).toBeLessThanOrEqual(1);
   });
 });
 

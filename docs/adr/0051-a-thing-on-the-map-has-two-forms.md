@@ -59,6 +59,15 @@ doing. They trade places by crossfading where the ground form has grown to the i
   Both forms exist from the moment the mark does and are never created or destroyed by the camera;
   only their alpha moves, and the two always sum to one.
 - **One form answers a click**, whichever is more of the two, so there is never an invisible target.
+- **Nothing pops.** Arriving and going are their own fade, shorter than the trade between forms
+  because arriving is a smaller event than changing into something else. A mark the gateway has just
+  sent fades up; one that has gone fades out and is only then let go of; one crossing the distance
+  floor does the same. It multiplies with the trade rather than waiting for it, so a house can arrive
+  at a zoom that also wants it to change form.
+- **No single frame may finish a change.** The overlay draws when the map draws and a still map draws
+  nothing, so the gap since the last frame is often seconds. Left uncapped, a house arriving on a
+  still map would be handed the whole of its fade in one step - a pop, by a different route. A frame
+  advances a change by at most fifty milliseconds however long it really was.
 - **Whether a thing is drawn at all is a separate question**, asked by `isDrawn` and not by the fade. It
   is about distance rather than size, which is what lets 0038's rule survive intact: a spared mark is
   drawn where the rest are nothing, and is no larger for being spared.

@@ -3,7 +3,17 @@ import type { Texture } from 'pixi.js';
 
 import { isWithinView, toScreen } from './cameraMath';
 import type { CameraView } from './cameraMath';
-import { alphasFor, easeTowards, formForHit, isDrawn, midTrade, sizesAt, wantedForm } from './twoForms';
+import {
+  LONGEST_STEP_MS,
+  PRESENCE_MS,
+  alphasFor,
+  easeTowards,
+  formForHit,
+  isDrawn,
+  midTrade,
+  sizesAt,
+  wantedForm,
+} from './twoForms';
 import type { Form, TwoForms } from './twoForms';
 import type { CameraSource, MapSprite, SpriteRenderer } from './SpriteRenderer';
 
@@ -54,6 +64,8 @@ export interface DrawnSprite {
   form: 'ground' | 'icon' | 'both' | 'none';
   /** How tall it is on the screen right now, which is what a ground-anchored size is checked by. */
   height: number;
+  /** How much of it is here: nought on its way out, one arrived. */
+  presence: number;
 }
 
 interface Entry {
@@ -66,6 +78,15 @@ interface Entry {
   showing: Form;
   /** Where the trade between them has got to: nought the icon, one the ground form. */
   blend: number;
+  /**
+   * How much of this mark is here at all: nought gone, one arrived.
+   *
+   * Apart from the blend, because they answer different questions and can run at once: a house may
+   * arrive at a zoom that also wants it to change form. Multiplied together at the end.
+   */
+  presence: number;
+  /** No longer among the marks to draw. It fades out and is let go of when it reaches nothing. */
+  leaving: boolean;
 }
 
 interface Textures {
@@ -224,7 +245,16 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
     // Settled, not mid-trade: a house arriving while the camera is still should already be whichever
     // form this zoom calls for, rather than fading in from the other one.
     const showing = wantedForm(camera.zoom(), forms, 'icon');
-    const entry: Entry = { spec, ground: null, icon: null, showing, blend: showing === 'ground' ? 1 : 0 };
+    // Settled in its form, but not yet present: a mark fades up rather than appearing whole.
+    const entry: Entry = {
+      spec,
+      ground: null,
+      icon: null,
+      showing,
+      blend: showing === 'ground' ? 1 : 0,
+      presence: 0,
+      leaving: false,
+    };
     if (textures === null) {
       return entry;
     }
@@ -317,36 +347,54 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
     const view: CameraView = { center: camera.center(), zoom, width, height };
 
     const now = performance.now();
-    const elapsed = now - lastFrameAt;
+    // Capped, because a still map draws nothing and the gap since the last frame is then seconds. A
+    // house arriving on a still map would otherwise be handed the whole of its fade in one step.
+    const elapsed = Math.min(now - lastFrameAt, LONGEST_STEP_MS);
     lastFrameAt = now;
     let trading = false;
 
-    for (const entry of entries.values()) {
+    const gone: string[] = [];
+
+    for (const [id, entry] of entries) {
       const forms = KINDS[entry.spec.kind];
       // The camera decides which form, once and hard; time decides how long it takes to get there.
       // Advanced for every mark, on screen or not, so one that comes back into view is not stale.
       entry.showing = wantedForm(zoom, forms, entry.showing);
       entry.blend = easeTowards(entry.blend, entry.showing === 'ground' ? 1 : 0, elapsed);
-      trading = trading || midTrade(entry.blend);
 
       // A candidate is what the player is being asked about, so it is drawn however far back the
       // camera is; so is a house the player has asked to keep in sight. Everything else goes with the
       // rest of the world's furniture. Distance, not size: see 0038.
       const spared = entry.spec.kind === 'candidate' || entry.spec.always === true;
+      const here = !entry.leaving && isDrawn(zoom, { everything, spared });
+      entry.presence = easeTowards(entry.presence, here ? 1 : 0, elapsed, PRESENCE_MS);
+      trading = trading || midTrade(entry.blend) || midTrade(entry.presence);
+
+      // Gone, and now faded out, so it can be let go of. Collected rather than deleted here, because
+      // this is walking the very map it would be deleted from.
+      if (entry.leaving && entry.presence === 0) {
+        gone.push(id);
+        hide(entry);
+        continue;
+      }
+
       const sizes = sizesAt(zoom, forms);
       // The margin is the mark's own height rather than a constant, because a ground form at the
       // closest zoom is taller than any fixed margin worth writing down.
       const reach = Math.max(sizes.ground, sizes.icon) + 8;
       const point = toScreen(entry.spec.at, view);
 
-      if (!isDrawn(zoom, { everything, spared }) || !isWithinView(point, view, reach)) {
+      // Being off the screen is not the same as being gone, so it hides without touching the presence
+      // above. A mark panned back into view was there all along and arrives whole, rather than fading
+      // up at the edge as though it had just been founded.
+      if (entry.presence === 0 || !isWithinView(point, view, reach)) {
         hide(entry);
         continue;
       }
 
       const alphas = alphasFor(entry.blend);
-      show(entry.ground, sizes.ground, alphas.ground);
-      show(entry.icon, sizes.icon, alphas.icon);
+      show(entry.ground, sizes.ground, alphas.ground * entry.presence);
+      show(entry.icon, sizes.icon, alphas.icon * entry.presence);
 
       for (const sprite of [entry.ground, entry.icon]) {
         if (sprite !== null && sprite.visible) {
@@ -354,6 +402,13 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
           sprite.y = point.y;
         }
       }
+    }
+
+    for (const id of gone) {
+      const entry = entries.get(id);
+      entry?.ground?.destroy();
+      entry?.icon?.destroy();
+      entries.delete(id);
     }
 
     dressTheRing(zoom);
@@ -441,6 +496,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
                   visible: onGround || asIcon,
                   form: onGround && asIcon ? 'both' : onGround ? 'ground' : asIcon ? 'icon' : 'none',
                   height: above === null || above === undefined ? 0 : above.height,
+                  presence: entry.presence,
                 } satisfies DrawnSprite,
               ];
             }),
@@ -452,7 +508,9 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       let nearest: { id: string; away: number } | null = null;
 
       for (const [id, entry] of entries) {
-        if (entry.spec.kind !== 'house') {
+        // A mark on its way out takes no clicks: it is not a thing on the map any more, it is the
+        // last of a picture of one.
+        if (entry.spec.kind !== 'house' || entry.leaving) {
           continue;
         }
         // One form answers, and the switch is at the crossover where the two are the same size, so the
@@ -496,6 +554,8 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
         if (existing === undefined) {
           entries.set(spec.id, sproutFor(spec));
         } else {
+          // Back again before it finished going. It fades up from wherever it had got to.
+          existing.leaving = false;
           existing.spec = spec;
           if (existing.ground !== null) {
             existing.ground.tint = spec.tint;
@@ -506,12 +566,11 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
         }
       }
 
+      // A mark that has gone is not destroyed here. It is marked as leaving, fades out over the next
+      // frames, and is let go of once there is nothing left of it to see. Nothing on the map vanishes
+      // between one frame and the next.
       for (const [id, entry] of entries) {
-        if (!seen.has(id)) {
-          entry.ground?.destroy();
-          entry.icon?.destroy();
-          entries.delete(id);
-        }
+        entry.leaving = !seen.has(id);
       }
 
       // A house can arrive while the map is perfectly still, and a still map draws no frames.

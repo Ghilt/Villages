@@ -42,6 +42,29 @@ export const CROSSFADE_MS = 220;
 export const CROSSOVER_STICK = 0.08;
 
 /**
+ * How long a thing takes to arrive, or to go.
+ *
+ * Shorter than the trade between forms, because arriving is a smaller event than changing into
+ * something else and a mark that takes as long to appear as to transform reads as slow. Nothing on
+ * the map pops: a house the gateway has just sent fades up, one that has gone fades out and is only
+ * then let go of, and a mark crossing the distance floor does the same.
+ */
+export const PRESENCE_MS = 140;
+
+/**
+ * The longest step a single frame may take a change by, however long it really was since the last one.
+ *
+ * The overlay draws when the map draws, and a still map draws nothing, so the gap since the last frame
+ * is often seconds rather than milliseconds - and a house arriving on a still map would be handed the
+ * whole of its fade in one step and pop, which is the very thing the fade is for. Anything longer than
+ * a few frames is treated as a few frames, so a change that begins after a pause still animates.
+ *
+ * The cost is that a tab coming back from the background takes a handful of frames to settle instead of
+ * one. That is the better of the two: it looks like arriving rather than like a jump.
+ */
+export const LONGEST_STEP_MS = 50;
+
+/**
  * Below this a thing is not drawn at all, whatever size it would be.
  *
  * This is about distance, not about size, and it is deliberately not part of the trade: a continent
@@ -115,20 +138,25 @@ export function wantedForm(zoom: number, forms: TwoForms, showing: Form): Form {
 }
 
 /**
- * Moves the trade on by however long the last frame took.
+ * Moves something part-way done on by however long the last frame took.
  *
- * `blend` is nought showing the icon and one showing the ground form. Given a long enough frame it
- * lands exactly on the target rather than overshooting, which is what makes a hidden tab coming back
- * settle at once instead of crawling.
+ * Used for both of the things that change over time here: the trade between the two forms, and a
+ * thing arriving or going. It lands exactly on the target rather than overshooting; the caller is the
+ * one that keeps a frame from being too long a step, with `LONGEST_STEP_MS`.
  */
-export function easeTowards(blend: number, target: number, elapsedMs: number): number {
-  const step = Math.max(0, elapsedMs) / CROSSFADE_MS;
-  return target > blend ? Math.min(target, blend + step) : Math.max(target, blend - step);
+export function easeTowards(
+  value: number,
+  target: number,
+  elapsedMs: number,
+  overMs: number = CROSSFADE_MS,
+): number {
+  const step = Math.max(0, elapsedMs) / overMs;
+  return target > value ? Math.min(target, value + step) : Math.max(target, value - step);
 }
 
-/** Whether a trade is still running, and so whether another frame is owed. */
-export function midTrade(blend: number): boolean {
-  return blend > 0 && blend < 1;
+/** Whether something is part-way done, and so whether another frame is owed to it. */
+export function midTrade(value: number): boolean {
+  return value > 0 && value < 1;
 }
 
 /**
