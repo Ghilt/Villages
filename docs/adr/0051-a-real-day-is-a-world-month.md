@@ -2,6 +2,9 @@
 
 - Status: accepted
 - Date: 2026-09-20
+- Amended 2026-09-20: the world opens on the **first of January, 1790**, in Earth's own years, not
+  in year 1200 of a reckoning of its own. The calendar below is unchanged; only which day the world
+  starts on is. See `SETTING.md` on the age.
 
 ## Context
 

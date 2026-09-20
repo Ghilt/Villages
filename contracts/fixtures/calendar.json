@@ -65,27 +65,27 @@
     },
     {
       "name": "the day the world opened, in the calendar the app starts from",
-      "year": 1200,
+      "year": 1790,
       "month": 1,
       "dayOfMonth": 1,
-      "day": 437925,
-      "said": "the first of January, year 1200"
+      "day": 653419,
+      "said": "the first of January, year 1790"
     },
     {
-      "name": "a day in the middle of a year",
-      "year": 1247,
+      "name": "a day in the middle of the world's first year",
+      "year": 1790,
       "month": 4,
       "dayOfMonth": 22,
-      "day": 455203,
-      "said": "the twenty-second of April, year 1247"
+      "day": 653530,
+      "said": "the twenty-second of April, year 1790"
     },
     {
       "name": "the last day of a year centuries on",
-      "year": 1547,
+      "year": 2091,
       "month": 12,
       "dayOfMonth": 31,
-      "day": 565028,
-      "said": "the thirty-first of December, year 1547"
+      "day": 763721,
+      "said": "the thirty-first of December, year 2091"
     },
     {
       "name": "far along, and still Earth's calendar",
@@ -99,52 +99,52 @@
   "spans": [
     {
       "name": "one month, the plainest step the world takes",
-      "from": 437925,
+      "from": 653419,
       "months": 1,
-      "to": 437956,
-      "said": "the first of February, year 1200"
+      "to": 653450,
+      "said": "the first of February, year 1790"
     },
     {
       "name": "a month from the end of a long one is pulled back to the end of a short one",
-      "from": 437955,
+      "from": 653449,
       "months": 1,
-      "to": 437984,
-      "said": "the twenty-ninth of February, year 1200"
+      "to": 653477,
+      "said": "the twenty-eighth of February, year 1790"
     },
     {
       "name": "and the same step in a leap year reaches the twenty-ninth",
-      "from": 439416,
+      "from": 654179,
       "months": 1,
-      "to": 439445,
-      "said": "the twenty-ninth of February, year 1204"
+      "to": 654208,
+      "said": "the twenty-ninth of February, year 1792"
     },
     {
       "name": "a pledge of forty months",
-      "from": 437999,
+      "from": 653492,
       "months": 40,
-      "to": 439216,
-      "said": "the fifteenth of July, year 1203"
+      "to": 654710,
+      "said": "the fifteenth of July, year 1793"
     },
     {
       "name": "twelve months is a year, and the date does not move",
-      "from": 455203,
+      "from": 653530,
       "months": 12,
-      "to": 455569,
-      "said": "the twenty-second of April, year 1248"
+      "to": 653895,
+      "said": "the twenty-second of April, year 1791"
     },
     {
       "name": "no months at all is the same day",
-      "from": 455203,
+      "from": 653530,
       "months": 0,
-      "to": 455203,
-      "said": "the twenty-second of April, year 1247"
+      "to": 653530,
+      "said": "the twenty-second of April, year 1790"
     },
     {
       "name": "a span long enough to cross a century that is not a leap year",
-      "from": 474449,
+      "from": 693594,
       "months": 26,
-      "to": 475238,
-      "said": "the twenty-eighth of February, year 1302"
+      "to": 694383,
+      "said": "the twenty-eighth of February, year 1902"
     }
   ]
 }

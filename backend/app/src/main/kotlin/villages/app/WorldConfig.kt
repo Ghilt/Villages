@@ -45,7 +45,7 @@ class WorldConfig {
 
     /**
      * The world's day: one world-month for every real day since the world opened on the first of September
-     * 2026, in year 1200 of the world's own reckoning. The chrono-engine's placeholder; see SETTING.md on
+     * 2026, on the first of January 1790. The chrono-engine's placeholder; see SETTING.md on the age and
      * the shared world-day, and decision records 0027 and 0051.
      */
     @Bean
@@ -53,7 +53,7 @@ class WorldConfig {
         clock = { clock.instant() },
         calendar = calendar,
         opened = Instant.parse("2026-09-01T00:00:00Z"),
-        openingDay = WorldTime(Calendar.dayOf(1200, 1, 1)),
+        openingDay = WorldTime(Calendar.dayOf(1790, 1, 1)),
     )
 
     @Bean

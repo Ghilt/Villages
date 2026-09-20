@@ -123,6 +123,11 @@ dialogue is where a key figure stops being a number on a card and becomes someon
 **Carrying storylines.** A storyline is told through dialogue rather than announced in a log. This is the
 mechanic a quest, a pact or a betrayal is actually delivered in.
 
+It is also the only place the setting's one secret is allowed to come out. `SETTING.md` records what is
+actually happening to the world and states plainly that no player begins knowing it: **nothing in the
+interface may say so**, and a mechanic that gives it away early spends the only card the setting is
+holding. Dialogue, over a long time, is how it is meant to be found.
+
 **Holding other mechanics inside it.** Stepping through a dialogue can open an opportunity to take a
 **choice roll**, and the roll's options come back into the conversation. A dialogue is a place other
 mechanics happen, not only a thing to read.
