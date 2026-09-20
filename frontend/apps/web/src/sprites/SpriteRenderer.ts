@@ -57,11 +57,19 @@ export interface SpriteRenderer {
 }
 
 /**
- * The camera the renderer follows, which is all it needs from the map. There is no change notification
- * because the renderer draws every frame in any case: the sprites are never quite still.
+ * The camera the renderer follows, which is all it needs from the map.
+ *
+ * `watch` is what makes the two canvases agree. The overlay used to draw on its own animation frame,
+ * which read the camera at a different instant from the one the map had just drawn with, so the marks
+ * slid against the ground for the length of every flight. Now the map says when it has drawn and the
+ * overlay draws then, from the same camera, into the same browser frame. Nothing is drawn while the
+ * map is still, which is the other half of the bargain: with the idle motion gone there is nothing to
+ * animate, so a still map costs nothing at all.
  */
 export interface CameraSource {
   center(): LngLat;
   zoom(): number;
   size(): { width: number; height: number };
+  /** Calls back whenever the map has drawn. Returns what stops it. */
+  watch(drawn: () => void): () => void;
 }

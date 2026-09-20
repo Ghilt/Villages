@@ -1,6 +1,12 @@
 /**
- * How much of a house to draw at a given zoom, and the small idle motion that keeps the world from looking
- * like a printed map. Pure, so the decisions can be tested without a renderer.
+ * How much of a house to draw at a given zoom. Pure, so the decisions can be tested without a renderer.
+ *
+ * There was an idle motion here until 2026-09-20: every mark breathed, lifting 2.2 pixels and leaning a
+ * degree and a half over two and a half seconds, out of phase with its neighbours. It went because it
+ * was asked to go, and it took two faults with it. The lift was in screen pixels, so a 7 pixel dot bobbed
+ * by a third of itself while a castle barely stirred; and moving every mark by a fraction of a pixel every
+ * frame made antialiased edges crawl, which is one of the things that read as flicker. The ring under a
+ * selected house bobbed too, despite a comment saying it did not.
  */
 
 export type SpriteDetail = 'hidden' | 'dot' | 'marker';
@@ -62,39 +68,4 @@ export function markerHeightForZoom(zoom: number): number {
   const progress = (zoom - atZoom.small) / (atZoom.large - atZoom.small);
   const clamped = Math.min(1, Math.max(0, progress));
   return inPixels.small + clamped * (inPixels.large - inPixels.small);
-}
-
-/** How long one breath of the idle motion takes, and how far it carries. */
-export const IDLE_MOTION = {
-  periodMs: 2600,
-  liftPixels: 2.2,
-  swayRadians: 0.028,
-} as const;
-
-/**
- * A stable, arbitrary offset into the idle motion, so that neighbouring houses do not breathe in unison.
- * Derived from the identifier rather than stored, because it must survive a reload and a reconnection.
- */
-export function phaseFor(id: string): number {
-  let hash = 2166136261;
-  for (let index = 0; index < id.length; index += 1) {
-    hash ^= id.charCodeAt(index);
-    hash = Math.imul(hash, 16777619);
-  }
-  return ((hash >>> 0) / 2 ** 32) * Math.PI * 2;
-}
-
-export interface IdleMotion {
-  /** Pixels to raise the sprite by; positive is upwards on the screen. */
-  lift: number;
-  /** A slight lean, in radians. */
-  tilt: number;
-}
-
-export function idleMotionAt(elapsedMs: number, phase: number): IdleMotion {
-  const angle = (elapsedMs / IDLE_MOTION.periodMs) * Math.PI * 2 + phase;
-  return {
-    lift: Math.sin(angle) * IDLE_MOTION.liftPixels,
-    tilt: Math.cos(angle) * IDLE_MOTION.swayRadians,
-  };
 }

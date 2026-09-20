@@ -3,14 +3,7 @@ import type { Texture } from 'pixi.js';
 
 import { isWithinView, toScreen } from './cameraMath';
 import type { CameraView } from './cameraMath';
-import {
-  DOT_RADIUS,
-  detailForMark,
-  detailForZoom,
-  idleMotionAt,
-  markerHeightForZoom,
-  phaseFor,
-} from './spriteDetail';
+import { DOT_RADIUS, detailForMark, detailForZoom, markerHeightForZoom } from './spriteDetail';
 import type { SpriteDetail } from './spriteDetail';
 import type { CameraSource, MapSprite, SpriteRenderer } from './SpriteRenderer';
 
@@ -43,14 +36,17 @@ export interface DrawnSprite {
 interface Entry {
   spec: MapSprite;
   sprite: Sprite;
-  phase: number;
 }
 
 /**
- * Sprites drawn on a transparent canvas above the map, moved to follow the camera every frame.
+ * Sprites drawn on a transparent canvas above the map, moved to follow the camera whenever it moves.
  *
  * The map owns the camera; this only reads it. Positions are computed from the camera centre by the pure
  * functions in `cameraMath`, which is why nothing here needs to know about projections. See docs/adr/0005.
+ *
+ * It draws when the map draws, on the map's own `render`, rather than on an animation frame of its own.
+ * That is what keeps the two canvases agreeing: one camera, read once, into one browser frame. A still
+ * map draws nothing at all.
  */
 export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
   const app = new Application();
@@ -62,8 +58,25 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
   let everything = false;
   let ring: Sprite | null = null;
   let drawnDetail: SpriteDetail | null = null;
-  let started = 0;
   let disposed = false;
+  let unwatch: (() => void) | null = null;
+  /** What the canvas was last sized to, so it is only resized when the map's box actually changed. */
+  let canvasWas = { width: 0, height: 0 };
+
+  /**
+   * One shape, rasterised once, with the smaller copies of itself that a downscale needs.
+   *
+   * Every shape here is drawn far larger than it is shown - a 96 pixel castle at 22 - and without
+   * mipmaps that samples about one texel in twenty. The outline then sparkles whenever the sprite
+   * lands on a different fraction of a pixel, which is every frame the map moves, and on a display
+   * at 125 or 150 per cent it never lands on a whole one at all. The levels are built once, here.
+   */
+  function rasterise(shape: Graphics): Texture {
+    return app.renderer.generateTexture({
+      target: shape,
+      textureSourceOptions: { autoGenerateMipmaps: true, scaleMode: 'linear' },
+    });
+  }
 
   function buildTextures(): { marker: Texture; dot: Texture; candidate: Texture; ring: Texture } {
     const { markerWidth: w, markerHeight: h, dotDiameter: d } = TEXTURE;
@@ -128,10 +141,10 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       .stroke({ width: 6, color: 0xffffff, alpha: 1 });
 
     const built = {
-      marker: app.renderer.generateTexture(marker),
-      dot: app.renderer.generateTexture(dot),
-      candidate: app.renderer.generateTexture(candidate),
-      ring: app.renderer.generateTexture(ringOf),
+      marker: rasterise(marker),
+      dot: rasterise(dot),
+      candidate: rasterise(candidate),
+      ring: rasterise(ringOf),
     };
     marker.destroy();
     dot.destroy();
@@ -162,11 +175,20 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
   }
 
   function frame(): void {
+    if (textures === null || disposed) {
+      return;
+    }
     const zoom = camera.zoom();
     const detail = detailForZoom(zoom, everything);
     const { width, height } = camera.size();
+    // The map's box can change without the window changing, and Pixi's own `resizeTo` listens to the
+    // window alone. So the canvas is sized from the box the projection is about to use, not from a
+    // resize event that may never come.
+    if (width !== canvasWas.width || height !== canvasWas.height) {
+      canvasWas = { width, height };
+      app.renderer.resize(width, height);
+    }
     const view: CameraView = { center: camera.center(), zoom, width, height };
-    const elapsed = performance.now() - started;
 
     // The shape only changes when the zoom crosses a threshold, so the texture is not reassigned per frame.
     const detailChanged = detail !== drawnDetail;
@@ -195,17 +217,16 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
         entry.sprite.scale.set(markerHeightForZoom(zoom) / TEXTURE.markerHeight);
       }
 
-      const motion = idleMotionAt(elapsed, entry.phase);
       entry.sprite.visible = true;
       entry.sprite.x = point.x;
-      entry.sprite.y = point.y - motion.lift;
-      entry.sprite.rotation = shown === 'marker' && entry.spec.kind === 'house' ? motion.tilt : 0;
+      entry.sprite.y = point.y;
     }
 
     dressTheRing(zoom);
+    app.render();
   }
 
-  /** The ring sits on the ground under the selected house, so it does not bob with the mark above it. */
+  /** The ring sits on the ground under the selected house, marking what it stands on rather than it. */
   function dressTheRing(zoom: number): void {
     if (ring === null) {
       return;
@@ -232,9 +253,14 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       await app.init({
         backgroundAlpha: 0,
         antialias: true,
-        resizeTo: container,
+        // Not `resizeTo`: it listens to the window, and the map's box changes without the window
+        // changing whenever the stage folds or a pane takes room. `frame` sizes the canvas instead,
+        // from the very box it is about to project against. See docs/adr/0039 and 0040.
         resolution: window.devicePixelRatio,
         autoDensity: true,
+        // Nothing animates any more, so there is nothing for a clock of its own to do. The map says
+        // when it has drawn and `frame` draws then.
+        autoStart: false,
       });
       if (disposed) {
         app.destroy(true);
@@ -250,16 +276,13 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       stage.addChild(ring);
       app.stage.addChild(stage);
       container.appendChild(app.canvas);
-      started = performance.now();
 
-      // Pixi drives this from its own animation frame, which the browser stops while the tab is hidden.
-      //
-      // The overlay therefore draws on a different frame from the map. Standing still, or dragged by hand,
-      // the two agree exactly. During an animated camera flight the sprites can trail the ground by a few
-      // pixels for the length of the flight, because each loop reads the camera at a slightly different
-      // moment. The alternative is to draw the sprites inside the map's own render pass, which would force
-      // the map to repaint at sixty frames a second forever, since the sprites are never quite still.
-      app.ticker.add(frame);
+      // One clock. The map draws, then this draws, from the camera the map just used, into the same
+      // browser frame. Drawing on an animation frame of its own read the camera at a different instant,
+      // so the marks trailed the ground for the length of every flight - which the comment that used to
+      // stand here admitted, and accepted because the marks were never quite still. They are still now.
+      unwatch = camera.watch(frame);
+      frame();
 
       if (import.meta.env.DEV) {
         // Where every sprite actually ended up, for the console and for the end-to-end test, which has no
@@ -297,10 +320,12 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
 
     setSelected(id: string | null): void {
       selected = id;
+      frame();
     },
 
     setEverything(on: boolean): void {
       everything = on;
+      frame();
     },
 
     setSprites(sprites: readonly MapSprite[]): void {
@@ -314,7 +339,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
           sprite.visible = false;
           sprite.tint = spec.tint;
           stage.addChild(sprite);
-          entries.set(spec.id, { spec, sprite, phase: phaseFor(spec.id) });
+          entries.set(spec.id, { spec, sprite });
         } else {
           existing.spec = spec;
           existing.sprite.tint = spec.tint;
@@ -327,10 +352,15 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
           entries.delete(id);
         }
       }
+
+      // A house can arrive while the map is perfectly still, and a still map draws no frames.
+      frame();
     },
 
     destroy(): void {
       disposed = true;
+      unwatch?.();
+      unwatch = null;
       entries.clear();
       if (app.renderer !== null && app.renderer !== undefined) {
         app.destroy(true, { children: true });

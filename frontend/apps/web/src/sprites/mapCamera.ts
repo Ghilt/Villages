@@ -17,5 +17,16 @@ export function cameraOf(map: maplibregl.Map): CameraSource {
       const container = map.getContainer();
       return { width: container.clientWidth, height: container.clientHeight };
     },
+    // `render` fires after MapLibre has drawn, so reading the camera here reads the one it just drew
+    // with. `resize` is here too because the map's box can change without the window changing - the
+    // stage folding into bays, a pane taking room - and the overlay has to hear about that.
+    watch: (drawn) => {
+      map.on('render', drawn);
+      map.on('resize', drawn);
+      return () => {
+        map.off('render', drawn);
+        map.off('resize', drawn);
+      };
+    },
   };
 }
