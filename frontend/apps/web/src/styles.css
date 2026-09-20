@@ -353,43 +353,6 @@ body,
 }
 
 /*
- * The arrows: a pair of the shared needle, saying which bay a thing would go into. Drawn on an inspect
- * window's links, because "open this" and "open this there" are one decision and so one control. See
- * `LOOK-AND-FEEL.md`.
- */
-.arrows {
-  display: inline-flex;
-  flex: none;
-}
-
-.arrows__one {
-  width: 1.5rem;
-  height: 1.5rem;
-  padding: 0.15rem;
-  border: none;
-  background: none;
-  cursor: pointer;
-}
-
-.arrows__one .icon {
-  opacity: 0.55;
-}
-
-.arrows__one:hover .icon {
-  opacity: 1;
-}
-
-/* Where it already is: the needle you are standing on rather than a place to go. */
-.arrows__one--here .icon {
-  color: var(--gold);
-  opacity: 1;
-}
-
-.arrows__one--here {
-  cursor: default;
-}
-
-/*
  * The marks a pane is known by where there is no room for its name. One drawing, used on a tab and in the
  * navigation list, so the same thing is never drawn twice and cannot drift.
  */
@@ -1982,20 +1945,28 @@ body,
   color: var(--ink-soft);
 }
 
+/*
+ * A mark and not the word, drawn as every other icon button on the stage is: bare, and dimmed until it
+ * is wanted. It sits in a bar beside the size control, which is three marks, and a word among marks is
+ * the thing the eye goes to first - which *close* should not be.
+ */
 .inspect__close {
-  font: inherit;
-  font-size: 0.7rem;
-  padding: 0.05rem 0.4rem;
+  width: 1.4rem;
+  height: 1.4rem;
+  flex: none;
+  padding: 0.18rem;
+  border: none;
+  background: none;
   cursor: pointer;
-  color: var(--ink-soft);
-  background: transparent;
-  border: 1px solid var(--parchment-edge);
-  border-radius: 2px;
 }
 
-.inspect__close:hover {
+.inspect__close .icon {
+  opacity: 0.45;
+}
+
+.inspect__close:hover .icon {
   color: var(--ink);
-  background: rgba(157, 124, 42, 0.12);
+  opacity: 1;
 }
 
 .inspect__gone {
@@ -2076,14 +2047,6 @@ body,
   min-height: 1.6rem;
 }
 
-.inspect__what {
-  flex: 1;
-  font-size: 0.85rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .inspect__go {
   flex: 1;
   padding: 0.15rem 0;
@@ -2100,6 +2063,29 @@ body,
 .inspect__go:hover {
   color: var(--gold);
   text-decoration: underline;
+}
+
+/*
+ * Show it on the map: the mark rather than the words, in both forms.
+ *
+ * The one link that does not open a window, and the one thing on the stage a player already knows the
+ * mark for - it is on the map's own tab, in navigation's list and in navigation's strip. A row tall
+ * rather than a glyph tall, because a finger is not a mouse; the arrows in a list were made 32 pixels
+ * for the same reason before they were taken away. See decision record 0049.
+ */
+.inspect__go--map {
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  padding: 0.3rem;
+}
+
+.inspect__go--map:hover {
+  text-decoration: none;
+}
+
+.inspect__go--map:hover .icon {
+  color: var(--gold);
 }
 
 /* The areas, inside the debug panel. Its bar is the Section's now. */

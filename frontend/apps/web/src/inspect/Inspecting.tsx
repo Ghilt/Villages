@@ -4,6 +4,7 @@ import { housesInView } from '@villages/client-core';
 import type { MasterGrid, TerrainClass } from '@villages/world';
 
 import { areasNow, watchAreas } from '../areas/areas';
+import { Icon } from '../stage/Icons';
 import { PaneSizeControl } from '../stage/PaneSizeControl';
 import { TICK_MS } from '../house/describe';
 import { terrainPalette } from '../map/terrainClasses';
@@ -74,7 +75,7 @@ export function Inspecting({ subject, room, along, grid }: InspectingProps) {
     (heard.yourHouse?.id === subject.id ? heard.yourHouse : undefined);
 
   if (house === undefined) {
-    return <OutOfView subject={subject} />;
+    return <OutOfView subject={subject} room={room} />;
   }
 
   const said = describeHouse(house, now, heard.yourHouse?.id === house.id, areas.areas, grid);
@@ -82,19 +83,22 @@ export function Inspecting({ subject, room, along, grid }: InspectingProps) {
 }
 
 /** A house that has left the held cells. It is not gone from the world, only from what this page can see. */
-function OutOfView({ subject }: { subject: Subject }) {
+function OutOfView({ subject, room }: { subject: Subject; room: Room }) {
   return (
     <section className="inspect">
       <header className="inspect__bar">
         <span className="inspect__kind">House</span>
+        <PaneSizeControl room={room} />
         <button
           type="button"
           className="inspect__close"
+          aria-label="close this window"
+          title="close this window"
           onClick={() => {
             forgetSubject(subject);
           }}
         >
-          close
+          <Icon name="close" />
         </button>
       </header>
       <p className="inspect__gone">Out of view. Pan back to it, or pick something else.</p>

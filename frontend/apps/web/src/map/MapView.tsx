@@ -61,8 +61,9 @@ export function MapView({ worldRoot, onReady }: MapViewProps) {
     map.touchZoomRotate.disableRotation();
     map.keyboard.disableRotation();
 
-    // The wheel asks the rule above directly; the zoom-out button reads the minimum zoom to know when to
-    // grey out, so it is told where the floor is, which moves with the window.
+    // The wheel asks the rule below directly. There were two buttons here until 0049, in the corner the
+    // compass now stands in; the floor still moves with the window, because the wheel and the pinch both
+    // read it.
     const settleFloor = () => {
       const floor = floorZoom(viewport());
       if (map.getMinZoom() !== floor) {
@@ -71,8 +72,6 @@ export function MapView({ worldRoot, onReady }: MapViewProps) {
     };
     settleFloor();
     map.on('resize', settleFloor);
-
-    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
 
     if (import.meta.env.DEV) {
       // A handle for the browser console and for the end-to-end tests, which assert on the camera.

@@ -194,9 +194,9 @@ and is in the same place however the split moves - it rode the divider until 004
 one thing on the stage that moves. One tap puts **navigation** in the bay under the thumb, which is the
 bottom one on a tall phone and the right one on a wide one, and navigation lists the panes above a divider
 and the **trail** below it. It **never resizes anything**, which is what lets it land in a strip: a strip
-of navigation carries the marks of where else to go, so it is still a way somewhere. Every row carries
-**the arrows**, so any pane can be put in either bay and the one it is already in is marked rather than
-taken away. **No pane is privileged there**: the map is not pinned where it is, and which bay two panes
+of navigation carries the marks of where else to go, so it is still a way somewhere. Every row carries a
+**needle** to the other bay, so any pane can be put in either and the one it is already in is marked
+rather than taken away. **No pane is privileged there**: the map is not pinned where it is, and which bay two panes
 share on a desktop has nothing to say about where either of them can go on a phone. In the spread the
 compass is a tab in the corner instead, and a row there is a plain click, because there are no bays to
 choose between. See decision records 0043 and 0047 and `LOOK-AND-FEEL.md`.

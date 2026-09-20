@@ -48,6 +48,12 @@ This is a loop, and Adam holds both ends of it: he approves what lands, and he c
    blocked and on what. Always leave room for a fifth answer that is none of them, because the point of the
    options is to give Adam the wheel, not to make him pick from a menu.
 
+**A button is a mark or it is words, and which one is Adam's call.** When he asks for a button, ask
+which before drawing it, and do not guess from what is beside it. The two are different things: a mark
+has to be learnt once and then costs nothing, and a word costs nothing to learn and then has to keep
+fitting - in a 44-pixel strip, in a column squeezed to 18rem, in a language nobody has thought about yet.
+Guessing wrong is cheap to fix and it is still drawing it twice. The same question, once, is not.
+
 Never choose the next increment alone, and never chain increments together to save a round trip. The roadmap is a
 menu, not a queue: its order is a suggestion, and Adam reorders it freely. When an option is not on the roadmap
 but is clearly better, offer it anyway and say why.

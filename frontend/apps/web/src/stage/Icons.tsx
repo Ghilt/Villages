@@ -27,7 +27,7 @@ const ROSE = {
 /** The house's own frame, the achievement's contour at the size of a mark. */
 const SHIELD = 'M5 4 H19 V13 C19 18 12 21.5 12 21.5 C12 21.5 5 18 5 13 Z';
 
-export type IconName = 'shield' | 'compass' | 'map' | 'window' | 'letter';
+export type IconName = 'shield' | 'compass' | 'map' | 'window' | 'letter' | 'close';
 
 /** Which way a needle points. The four are one drawing turned, never four drawings. */
 export type Point = 'up' | 'down' | 'left' | 'right';
@@ -86,6 +86,9 @@ export function Icon({ name, title }: IconProps) {
           <path d="M3.5 6.5 L12 13 L20.5 6.5" className="icon__line" />
         </>
       )}
+      {/* Two strokes crossed, at the weight every other mark is drawn at. Shorter than the box it is
+          in, because a cross that runs corner to corner reads as a deletion rather than as a shut. */}
+      {name === 'close' && <path d="M7 7 L17 17 M17 7 L7 17" className="icon__line" />}
       {name === 'window' && (
         <>
           <path d="M4 5 H20 V19 H4 Z" className="icon__line" />

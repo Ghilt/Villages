@@ -53,13 +53,6 @@ map stays up beside it. Its first and only use is the choice roll. See decision 
 **The needle.** One mark, pointing at a **bay**. One drawing turned four ways, so a player learns it once:
 this mark means *there*.
 
-**The arrows.** A pair of needles, saying which of the two **bays** a thing would open into, with the bay it
-is already in **marked rather than taken away** — so anything can be moved anywhere. Drawn on the **links**
-of an **inspect window** and on every row of **navigation**, because *open this* and *open this there* are
-one decision and so one control. In a list they are a row tall rather than a glyph tall, because a finger is
-not a mouse. The spread has no bays to choose between, so there the same link is a plain click and no arrows
-are drawn. See `RESPONSIVE-DESIGN.md` and decision records 0040 and 0043.
-
 **The compass rose.** Four cardinal points filled and four between them drawn, inside a ring: the way to
 everything that is not on the screen. On a phone it is a disc in the **bottom right corner of the stage**,
 always the same corner, and one tap puts **navigation** in the bay under the thumb; in the spread it is a
@@ -113,9 +106,11 @@ first use is the corner of the spread, where the house status and navigation tak
 things too small to hit. See decision record 0042.
 
 **The marks.** Every pane declares the mark it is known by, drawn in one place so that the same thing on a
-tab, in a list and wherever a pane is named later cannot drift apart. **The compass is the arrows' needle
-inside a ring**, deliberately: the arrows say which bay a thing opens into and the compass opens the pane
-that lists them, so they read as one family rather than two unrelated drawings.
+tab, in a list and wherever a pane is named later cannot drift apart. **The compass is the needle inside a
+ring**, deliberately: the needle says which bay a thing goes to and the compass opens the pane that lists
+the bays, so they read as one family rather than two unrelated drawings. A **link** out of an inspect
+window is one button rather than a pair of needles, and *show it on the map* is the map's own mark; see
+decision record 0049.
 
 ## Not decided
 

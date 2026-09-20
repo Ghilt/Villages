@@ -200,7 +200,7 @@ of thing in the world costs a description of itself, not a component. This is th
 because everything the world grows will want to be looked at.
 
 **Several at once, where there is room.** On a screen with space a player can have three open and compare
-them. On a phone they get one, and the same links, and the arrows that say where to put what they open
+them. On a phone they get one, and the same links, each of which opens in the bay the window is not
 next. Comparing two houses should not mean remembering one of them.
 
 ### Look and feel
@@ -210,11 +210,12 @@ bottom. That is a description of what is there rather than a decision: the diege
 `LOOK-AND-FEEL.md` says what the player is shown should be part of the world, and a card is not, so this
 is the shape most likely to change.
 
-The links carry **the arrows** — the shared two-arrow control in `LOOK-AND-FEEL.md`, which says which of
-the two bays a thing would open into.
+A link is **one button**, and it opens in the bay this window is not in, so the window it came from stays
+on the screen; *show it on the map* is the map's own mark rather than words. It carried a pair of needles
+saying which bay to open into until 0049, which is one decision per link too many.
 
 It is **responsive from the start**: where there is room the windows stack in a rail, up to three, and on
-a phone one of them takes a bay and its links ask which bay to open into. See `RESPONSIVE-DESIGN.md`.
+a phone one of them takes a bay and its links open in the other one. See `RESPONSIVE-DESIGN.md`.
 
 ### Not decided
 
@@ -240,7 +241,7 @@ The shape of it is built and what it can say is thin. A **subject** covers a hou
 for both, which is what the two selections that used to run side by side became. A window renders a
 description and knows nothing of what made it. Links go both ways between a house and the ground somebody
 has fenced around it, and *show it on the map* moves the camera. Up to three stack in a rail in the spread,
-a fourth pushing the oldest off; on a phone one of them takes a bay and its links carry the arrows.
+a fourth pushing the oldest off; on a phone one of them takes a bay and its links open in the other.
 
 What it says is everything the wire carries and no more, which for a house is a name, a banner, a seat, a
 founding day and one resource. It added no event and no frame, so the protocol version did not move. The
