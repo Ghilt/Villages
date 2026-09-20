@@ -204,8 +204,10 @@ increment to touch either starts from them.
 
 A third demand, a resource that ticks, already has its answer: a resource is an amount, a rate per second and
 the instant at which that was true, and an event is recorded when the rate changes rather than on a clock.
-See decision record 0006. **What** the resources are is undecided; that shape is only how one behaves once it
-exists.
+See decision record 0006. **What** the resources are is now settled too - wealth, domain, influence, reason
+and piety, one `Stock` apiece - and every rate among them is zero, because nothing in the world generates
+income yet. The shape is carried anyway so that income, when it arrives, is a number changing rather than a
+frame changing. See `SETTING.md` and `GLOSSARY.md` for what each of the five is.
 
 ## What showing a dialogue asks of the client
 

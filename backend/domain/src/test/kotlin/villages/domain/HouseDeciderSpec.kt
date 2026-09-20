@@ -1,6 +1,7 @@
 package villages.domain
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.assertions.withClue
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
@@ -40,7 +41,7 @@ class HouseDeciderSpec : StringSpec({
     fun taking(choice: ChoiceId = whereToSettle.id, option: OptionId = southern) =
         TakeAction(house, player, choice, option, day, noon)
 
-    "founding a house that does not exist yields one HouseFounded, with a significance and an empty treasury" {
+    "founding a house that does not exist yields one HouseFounded, with a significance and a stock of everything" {
         val events = HouseDecider.decide(ravenscar, HouseDecider.initial)
 
         events shouldHaveSize 1
@@ -49,7 +50,7 @@ class HouseDeciderSpec : StringSpec({
         founded.name shouldBe HouseName("Ravenscar")
         founded.seat shouldBe ravenscar.seat
         founded.significance shouldBe HouseDecider.FOUNDING_SIGNIFICANCE
-        founded.treasury shouldBe Treasury(0, HouseDecider.FOUNDING_RATE, noon)
+        founded.resources shouldBe emptyStocks(noon)
         founded.worldTime shouldBe ravenscar.worldTime
         founded.recordedAt shouldBe noon
     }
@@ -67,7 +68,21 @@ class HouseDeciderSpec : StringSpec({
         founded.id shouldBe ravenscar.houseId
         founded.seat shouldBe ravenscar.seat
         founded.banner shouldBe ravenscar.banner
-        founded.treasury.at(noon.plusSeconds(90)) shouldBe 90
+        founded.stockOf(Resource.WEALTH).total shouldBe 0
+    }
+
+    "a house is founded with every resource standing still, because nothing generates income yet" {
+        val house = HouseDecider.fold(HouseDecider.decide(ravenscar, HouseDecider.initial))
+
+        val founded = house.shouldBeInstanceOf<House.Founded>()
+        for (resource in Resource.entries) {
+            withClue(resource) {
+                founded.stockOf(resource).total shouldBe 0
+                founded.stockOf(resource).ratePerSecond shouldBe 0.0
+                // Ninety seconds on and still nothing: the rate shape is carried, and it carries zero.
+                founded.stockOf(resource).at(noon.plusSeconds(90)) shouldBe 0
+            }
+        }
     }
 
     "nothing happens to a house nobody has founded" {

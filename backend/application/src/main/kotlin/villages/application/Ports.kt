@@ -9,7 +9,8 @@ import villages.domain.HouseName
 import villages.domain.Location
 import villages.domain.PlayerId
 import villages.domain.Significance
-import villages.domain.Treasury
+import villages.domain.Resource
+import villages.domain.Stock
 import villages.domain.WorldTime
 import java.time.Instant
 import java.util.UUID
@@ -205,7 +206,8 @@ data class HouseRow(
     val seat: Location,
     val significance: Significance,
     val banner: Banner,
-    val treasury: Treasury,
+    /** One stock of every resource, as the house's own events last said. */
+    val resources: Map<Resource, Stock>,
     /** From when, in world-time, this house exists. */
     val since: WorldTime,
     /** Until when, in world-time, or null while it still does. */
@@ -213,6 +215,9 @@ data class HouseRow(
     /** The stream version this row reflects, so a snapshot and a later delta can be put in order. */
     val version: Long,
 ) {
+    /** What this house has of one resource. A founded house has all five, so this never misses. */
+    fun stockOf(resource: Resource): Stock = resources.getValue(resource)
+
     fun existsAt(at: WorldTime): Boolean = at >= since && (until == null || at < until)
 }
 

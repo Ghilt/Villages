@@ -47,6 +47,17 @@ nothing else, and the calendar is in `protocol`, so the world clock could not si
 step crosses as a `WorldCalendar` port. That is the layer rules doing their job rather than getting in the
 way, and it kept the clock a pure policy class with a test.
 
+**The store was wiped, under the pre-alpha exception** (`EVENTS.md`, decision 0011). `villages.house.founded.v1`
+traded its `treasury` for a `resources` map of five stocks, which is not an added optional field and would
+normally be a `v2`. The catalogue test demands exactly one row per event class, so a v1 row with no v1 class
+fails the build, and there is no upcaster machinery yet; the exception exists for precisely this and the
+world is in memory, so the wipe was a restart. Recorded here because the exception says every use of it is.
+
+Increment 4a landed: five resources of one shape, and wealth replaced the treasury. The wire did not move -
+the gateway maps the wealth stock onto the `treasury` field the frame has always had - so this step changed
+what the world holds without changing what it says. The visible consequence is that **the treasury stopped
+ticking**: every rate is zero now, and the one live number on the screen stands still.
+
 ## Result
 
 Open.

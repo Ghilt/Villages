@@ -6,9 +6,6 @@ package villages.domain
  * a house is downstream of it.
  */
 object HouseDecider {
-    /** What a new house earns each second, until anything else in the world says otherwise. */
-    const val FOUNDING_RATE = 1.0
-
     /**
      * How much the world thinks a new house matters: enough to see standing over the region, not enough
      * to see from the next country. A placeholder, like the rate above, until the chrono-engine judges it.
@@ -77,7 +74,7 @@ object HouseDecider {
                     seat = effect.seat,
                     significance = FOUNDING_SIGNIFICANCE,
                     banner = effect.banner,
-                    treasury = Treasury(amount = 0, ratePerSecond = FOUNDING_RATE, asOf = command.recordedAt),
+                    resources = emptyStocks(command.recordedAt),
                     worldTime = command.worldTime,
                     recordedAt = command.recordedAt,
                 ),
@@ -92,7 +89,7 @@ object HouseDecider {
         seat = command.seat,
         significance = FOUNDING_SIGNIFICANCE,
         banner = command.banner,
-        treasury = Treasury(amount = 0, ratePerSecond = FOUNDING_RATE, asOf = command.recordedAt),
+        resources = emptyStocks(command.recordedAt),
         worldTime = command.worldTime,
         recordedAt = command.recordedAt,
     )
@@ -105,7 +102,7 @@ object HouseDecider {
             seat = event.seat,
             significance = event.significance,
             banner = event.banner,
-            treasury = event.treasury,
+            resources = event.resources,
             foundedOn = event.worldTime,
             foundedAt = event.recordedAt,
             // Founding by any means settles a choice that was about founding: a house founded from the

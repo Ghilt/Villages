@@ -19,7 +19,7 @@ import villages.domain.Location
 import villages.domain.PlayerId
 import villages.domain.Significance
 import villages.domain.Tincture
-import villages.domain.Treasury
+import villages.domain.emptyStocks
 import villages.domain.WorldTime
 import java.time.Instant
 import java.util.UUID
@@ -74,7 +74,7 @@ private fun founded(
     seat = Location(lat, lon),
     significance = Significance(significance),
     banner = Banner(Tincture.SABLE, Division.PLAIN, null, Charge.STAG, Tincture.ARGENT),
-    treasury = Treasury(0, 1.0, at),
+    resources = emptyStocks(at),
     worldTime = on,
     recordedAt = at,
 )

@@ -28,6 +28,7 @@ import villages.domain.HouseName
 import villages.domain.Location
 import villages.domain.OptionId
 import villages.domain.PlayerId
+import villages.domain.Resource
 import villages.domain.WorldTime
 import villages.protocol.BannerSpec
 import villages.protocol.Batch
@@ -646,7 +647,9 @@ internal fun HouseRow.toView(deepest: Cell = Cell.of(seat.lat, seat.lon)): House
     cell = deepest.quadkey,
     seat = Point(seat.lat, seat.lon),
     banner = banner.toWire(),
-    treasury = Rate(treasury.amount, treasury.ratePerSecond, treasury.asOf.toEpochMilli()),
+    // Wealth, under the name the wire still uses. The frame gains the other four in its own step; until
+    // then the interface sees the one resource it has always seen, and it no longer ticks.
+    treasury = stockOf(Resource.WEALTH).let { Rate(it.total, it.ratePerSecond, it.asOf.toEpochMilli()) },
     since = since.day,
     version = version,
 )

@@ -22,10 +22,14 @@ sealed interface House {
         val seat: Location,
         val significance: Significance,
         val banner: Banner,
-        val treasury: Treasury,
+        /** One stock of every resource. A house always has all five, even when they are nothing. */
+        val resources: Map<Resource, Stock>,
         /** The world-day it was founded on, and the instant that was recorded. */
         val foundedOn: WorldTime,
         val foundedAt: Instant,
         override val pending: Choice? = null,
-    ) : House
+    ) : House {
+        /** What this house has of one resource. A founded house has all five, so this never misses. */
+        fun stockOf(resource: Resource): Stock = resources.getValue(resource)
+    }
 }

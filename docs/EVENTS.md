@@ -78,7 +78,7 @@ One stream per house, addressed as house followed by its identifier.
 
 | Type | Payload | Meaning | Produced by | Consumers |
 |---|---|---|---|---|
-| `villages.house.founded.v1` | `houseId`, `player`, `name`, `seat`, `significance`, `banner`, `treasury`, `worldTime`, `recordedAt` | A player founded a house at a seat, with a name and a banner. It carries where and how much that matters; the tile it falls in is derived downstream. The treasury starts at nothing and earns at the founding rate. | `FoundHouse`, or `TakeAction` on an option that founds | The map projection; the event bridge, and through it every gateway subscribed to a tile containing it |
+| `villages.house.founded.v1` | `houseId`, `player`, `name`, `seat`, `significance`, `banner`, `resources`, `worldTime`, `recordedAt` | A player founded a house at a seat, with a name and a banner. It carries where and how much that matters; the tile it falls in is derived downstream. It carries a stock of every resource, all of them empty and none of them growing, because nothing generates income yet. | `FoundHouse`, or `TakeAction` on an option that founds | The map projection; the event bridge, and through it every gateway subscribed to a tile containing it |
 
 ## The player's events
 

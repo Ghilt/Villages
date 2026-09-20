@@ -52,8 +52,9 @@ sealed interface PlayerEvent : HouseEvent
 
 /**
  * A house was founded. It carries where, and how much that matters: those two are what put a thing on the
- * map, and which tile it falls in is worked out downstream from the first. The treasury starts at nothing
- * and begins to earn at the founding rate. See decision record 0026.
+ * map, and which tile it falls in is worked out downstream from the first. It carries a stock of every
+ * resource, all of them empty and none of them growing, because nothing generates income yet. See
+ * decision records 0026 and 0006.
  */
 data class HouseFounded(
     override val houseId: HouseId,
@@ -62,10 +63,18 @@ data class HouseFounded(
     val seat: Location,
     val significance: Significance,
     val banner: Banner,
-    val treasury: Treasury,
+    val resources: Map<Resource, Stock>,
     override val worldTime: WorldTime,
     override val recordedAt: Instant,
-) : WorldEvent
+) : WorldEvent {
+    init {
+        // A house has all five from the moment it exists, so nothing downstream has to ask whether it
+        // happens to have one. A stored event that is missing one is malformed and says so here.
+        require(resources.keys == Resource.entries.toSet()) {
+            "a house is founded with a stock of every resource, not ${resources.keys}"
+        }
+    }
+}
 
 /**
  * A player was given a choice to make. The whole choice is here, options and effects and all, so the

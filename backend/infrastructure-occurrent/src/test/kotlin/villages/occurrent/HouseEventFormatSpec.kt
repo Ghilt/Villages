@@ -24,7 +24,7 @@ import villages.domain.OptionId
 import villages.domain.PlayerId
 import villages.domain.Significance
 import villages.domain.Tincture
-import villages.domain.Treasury
+import villages.domain.emptyStocks
 import villages.domain.WorldTime
 import java.io.File
 import java.time.Instant
@@ -52,7 +52,7 @@ class HouseEventFormatSpec : StringSpec({
         seat = Location(59.33, 18.07),
         significance = Significance(20.0),
         banner = Banner(Tincture.SABLE, Division.PLAIN, null, Charge.STAG, Tincture.ARGENT),
-        treasury = Treasury(0, 1.0, noon),
+        resources = emptyStocks(noon),
         worldTime = day,
         recordedAt = noon,
     )

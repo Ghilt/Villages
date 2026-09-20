@@ -57,7 +57,7 @@ class HousesProjection(feed: EventFeed) : HousesByCell, HousesByPlayer, AutoClos
                 seat = event.seat,
                 significance = event.significance,
                 banner = event.banner,
-                treasury = event.treasury,
+                resources = event.resources,
                 since = event.worldTime,
                 until = null,
                 version = stored.streamVersion,

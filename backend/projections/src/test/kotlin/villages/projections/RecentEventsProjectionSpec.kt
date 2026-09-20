@@ -18,7 +18,7 @@ import villages.domain.Location
 import villages.domain.PlayerId
 import villages.domain.Significance
 import villages.domain.Tincture
-import villages.domain.Treasury
+import villages.domain.emptyStocks
 import villages.domain.WorldTime
 import java.time.Instant
 import java.util.UUID
@@ -60,7 +60,7 @@ private fun founding(nth: Int): HouseEvent = HouseFounded(
     seat = Location(59.33, 18.07),
     significance = Significance(20.0),
     banner = Banner(Tincture.SABLE, Division.PLAIN, null, Charge.STAG, Tincture.ARGENT),
-    treasury = Treasury(0, 1.0, Instant.parse("2026-09-04T12:00:00Z")),
+    resources = emptyStocks(Instant.parse("2026-09-04T12:00:00Z")),
     worldTime = WorldTime(454901),
     recordedAt = Instant.parse("2026-09-04T12:00:00Z"),
 )
