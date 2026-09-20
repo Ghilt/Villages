@@ -56,7 +56,7 @@ private class HandFed : EventFeed {
 
 private val noon = Instant.parse("2026-09-04T12:00:00Z")
 
-/** Year 1247, day 112: the world-day the fixtures stand on. */
+/** The twenty-fourth of June, year 1246: the world-day the fixtures stand on. */
 private val someDay = WorldTime(454901)
 
 private fun founded(

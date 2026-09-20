@@ -4,10 +4,11 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import villages.application.AnonymousTokens
 import villages.application.Arrival
-import villages.application.DailyWorldClock
 import villages.application.FoundHouseService
 import villages.application.FreshIds
+import villages.application.MonthlyWorldClock
 import villages.application.TakeActionService
+import villages.application.WorldCalendar
 import villages.application.WorldClock
 import villages.application.WorldWipe
 import villages.domain.WorldTime
@@ -35,14 +36,24 @@ class WorldConfig {
     fun clock(): Clock = Clock.systemUTC()
 
     /**
-     * The world's day: one a real day since the world opened on the first of September 2026, in year 1200.
-     * The chrono-engine's placeholder; see SETTING.md on the shared world-day, and decision record 0027.
+     * The world's calendar, handed to the application layer, which may not see the protocol module itself.
      */
     @Bean
-    fun worldClock(clock: Clock): WorldClock = DailyWorldClock(
+    fun worldCalendar(): WorldCalendar = WorldCalendar { day, months ->
+        WorldTime(Calendar.plusMonths(day.day, months))
+    }
+
+    /**
+     * The world's day: one world-month for every real day since the world opened on the first of September
+     * 2026, in year 1200 of the world's own reckoning. The chrono-engine's placeholder; see SETTING.md on
+     * the shared world-day, and decision records 0027 and 0051.
+     */
+    @Bean
+    fun worldClock(clock: Clock, calendar: WorldCalendar): WorldClock = MonthlyWorldClock(
         clock = { clock.instant() },
+        calendar = calendar,
         opened = Instant.parse("2026-09-01T00:00:00Z"),
-        openingDay = WorldTime(Calendar.dayOf(1200, 1)),
+        openingDay = WorldTime(Calendar.dayOf(1200, 1, 1)),
     )
 
     @Bean

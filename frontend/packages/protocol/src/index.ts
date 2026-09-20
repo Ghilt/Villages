@@ -20,7 +20,19 @@ export {
 } from './cells';
 export type { Tile, View } from './cells';
 
-export { DAYS_PER_YEAR, dayOf, dayOfYearOf, describeDay, yearOf } from './calendar';
+export {
+  MONTHS,
+  dateOf,
+  dayOf,
+  dayOfMonthOf,
+  daysInMonth,
+  describeDay,
+  isLeapYear,
+  monthOf,
+  plusMonths,
+  yearOf,
+} from './calendar';
+export type { WorldDate } from './calendar';
 
 export {
   bannerSchema,

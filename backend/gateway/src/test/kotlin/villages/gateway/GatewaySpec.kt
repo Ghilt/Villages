@@ -134,7 +134,7 @@ private class ManualLater : Later {
 
 private val noon = Instant.parse("2026-09-04T12:00:00Z")
 
-/** Year 1247, day 112: the world-day every test stands on. */
+/** The twenty-fourth of June, year 1246: the world-day every test stands on. */
 private val today = WorldTime(454901)
 private const val TOKEN = "0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8d"
 private val hello = """{"type":"hello","playerToken":"$TOKEN","protocolVersion":$PROTOCOL_VERSION}"""

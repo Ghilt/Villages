@@ -25,15 +25,17 @@ There are two times, and everything that happens carries both.
 
 | | What it is | What runs on it |
 |---|---|---|
-| **World-time** | The story's clock: a year in the world's calendar. 1247. | The chronicle, and the map as it was at a given moment. |
+| **World-time** | The story's clock: a date in the world's own calendar, which is Earth's - uneven months, leap years and all. The world opened on the first of January, year 1200. | The chronicle, and the map as it was at a given moment. |
 | **Player-time** | The order in which things were actually done at a keyboard. Today, then tomorrow. | Arbitration between players, and the event store's own order. |
 
 **The game is played chronologically.** The world moves forward and every house moves forward with it. A
 house's history is written, not visited: what happened in 1247 happened once, while people were playing it,
 and afterwards it is a thing to look back at rather than a place to return to.
 
-The two clocks still differ, because a century of world-time does not take a century to play. How fast
-world-time runs is not decided; see below.
+The two clocks differ by a fixed amount: **a real day is a world month**, the same for everyone. A month a
+visit is what lets a house's history move at the pace a person actually plays at, and it makes a real year a
+world year. **There is no fast-forward.** The world is shared, so its speed is not anybody's to change; a
+player who could run time on would be running it on for everyone standing in it. See decision record 0051.
 
 ## A house
 
@@ -73,6 +75,8 @@ than a figure in it. An NPC house is a house; the difference is who issues its c
 
 ## Not decided
 
-- **How fast world-time runs**, now that nobody chooses which day to play. A real day was once a world day,
-  and that was only ever a placeholder.
-- **What the world's calendar is** beyond a count of days from the first day of year one.
+- **Whether the world really spans centuries at a month a real day.** Decision 0051 set the clock at one
+  world month for every real day, which makes a real year a world year - so the centuries this document
+  opens with would be centuries of real time. Either the span is years rather than centuries, or the clock
+  is faster than a month a day. Nothing built so far depends on which, and the clock is one constant.
+- **What the chrono-engine is for**, now that it is no longer the thing that chooses the day.
