@@ -31,41 +31,59 @@ each.
 Two, not one. A map game where the map disappears whenever you read something is a map game played from
 memory; the thing being talked about and the thing it is about belong on the screen together.
 
-**How the room is divided is the bays' own asking.** A bay holding the map asks to be big; a bay holding
-the house status asks to be small. What each asks for comes from what it is holding, and the answer is one
-of three:
+**How the room is divided belongs to the fold, not to the panes in it.** A bay is not a pane's own room:
+it is one end of a stage two things are sharing, and what happens to be standing in it has nothing to say
+about how much of it there is. So there is one value with three settings, and there is no fourth
+arrangement:
 
-- **One asks small and the other does not** — the small one gets the size it asked for and the other takes
-  everything else. This is the common case and the one the default opens on.
-- **Both ask the same**, both small or both big — **half each**. The two bays always fill the stage between
-  them, so there is no third place for spare room to go and no reason to leave any.
-- **One is minimised** — it gets its strip whatever the other asked for, and the other takes the rest.
+- **A strip and the rest** — one bay is put away to 44 pixels and the other takes everything else. What a
+  phone opens on, with the map opened out.
+- **Half each** — measured, not declared. The middle size means the same thing on every pane.
+- **The rest and a strip** — the same again, the other way round.
+
+**Both bays put away is not a state a player can reach**, and not because a rule forbids it: there is no
+arrangement that says it. **Naming one bay's size names the whole arrangement**, so the two controls can
+never disagree — they read one value rather than writing into each other.
+
+**Nothing but the control moves the seam**, with one exception. Putting a different pane in a bay, pressing
+the **compass**, closing a window, answering a letter: none of them changes how the stage is divided. The
+exception is something *arriving* in a bay that is a strip — a window opened on a clicked castle, or a
+letter the world has just sent — which opens that bay to half, because a thing nobody can read is not an
+answer to a click. The compass is not one of those: what it opens is a list of ways on, and a strip of it
+is still a list of ways on. See decision record 0046.
 
 ### What that looks like
 
-The default: the **map** in the big bay, the **house status** small beneath it, because it asked to be
-small.
+The three arrangements, upright. The same three turned, cut into a left and a right.
 
 ```
 ┌─────────────┐   ┌─────────────┐   ┌─────────────┐
+│             │   │             │   │ Map         │
+│             │   │     map     │   ├─────────────┤
+│     map     │   │             │   │   Erebus    │
 │             │   │             │   │             │
-│             │   │     map     │   │             │
-│     map     │   │             │   │     map     │
-│             │   ├─────────────┤   │             │
-│             │   │             │   │             │
-├─────────────┤   │   inspect   │   │             │
-│ Erebus 1204 │   │             │   ├─────────────┤
-│ ◉ · · · · · │   │             │   │ Erebus    ▴ │
+│             │   ├─────────────┤   │  1204 marks │
+│             │   │   Erebus    │   │             │
+├─────────────┤   │  1204 marks │   │             │
+│ Erebus  ▁▄█ │   │ ◉ · · · ▁▄█ │   │ ◉ · · · ▁▄█ │
 └─────────────┘   └─────────────┘   └─────────────┘
-   the default      a thing clicked   house minimised
+  the default        half each      the house out
 ```
 
-The player clicks a castle on the map. The bay that is **not** the map becomes an **inspect window** on it,
-and takes half the screen; the map keeps the top and the thing being inspected is on it. Closing the window
-puts back what was there.
+**The default** is the map opened out with the house status a strip beneath it: the game is read off the
+map, and the card is 200 pixels of a phone's 844 that nobody has asked for yet. Pressing the strip is the
+first gesture there is, and it teaches the whole control.
 
-The player who wants the map **minimises** the house status. It collapses to a strip with its name on it and
-the map takes the rest — a single-bay screen without the layout needing a single-bay mode.
+**The player who wants their house presses the middle mark**, and gets half the stage — enough for the
+shield, the blazon, the treasury and the bar of levers, with the map still up above it.
+
+**Opened out, the map goes to a strip of its own** saying *Map*, and pressing that strip is the way back.
+That is the map's one exception among the panes: it carries no size control, because three marks in 44
+pixels of map would be three things to aim at where the only useful one is the map itself.
+
+**A thing clicked on the map takes the bay that is not the map's**, and if that bay was a strip it opens to
+half, because a window nobody can read is not an answer to a click. Closing it puts back what was there,
+and leaves the arrangement alone.
 
 ## What the spread is made of
 
@@ -123,17 +141,45 @@ one, and character dialogue will be one. A pane is declared once — what it is 
 big or small, whether it can be minimised — and the layout places it. Nothing in the layout knows what a map
 is, and no pane knows which bay it is in beyond the room it was given.
 
-**A pane has up to three sizes, and it owns all three.** Full, small, and minimised. The bays ask for room
-and the pane says what it looks like in the room it got; a pane that has no sensible small form says so, and
-the bay holding it never asks to be small. **Nobody drags a divider** — the split moves because what is in
-the bays changed, so it always sits where the content asked for it.
+**A pane has three sizes, and it owns all three.** Full, small, and minimised. The layout says how much
+room there is and the pane says what it looks like in the room it got. **Nobody drags a divider** — the
+split moves because the player named an arrangement, never because something was moved into a bay.
 
-**Every pane carries a pane size control**, in both forms: three marks saying how much of the stage it is
-taking — put away, the normal size, opened out. In the **bays** it is a statement and not a request, so
-naming one pane's size names the arrangement and the other follows; both panes put away is not a state a
-player can reach. In the **spread** each tile's height is its own, because a tile is not dividing anything
-with anybody. A pane that cannot be put away offers two marks rather than three. See decision record 0045
-and `LOOK-AND-FEEL.md`.
+### The six states a pane has on a phone
+
+**Three sizes, twice over: once upright and once turned.** A phone is 390 by 844 held one way and 844 by
+390 held the other, so a bay is a low wide box in the first and a tall narrow one in the second. Three
+sizes in two cuts is **six states**, and a pane is not finished until all six have been looked at. The
+instrument has a toggle for each.
+
+| | upright | turned |
+|---|---|---|
+| **Minimised** | a band across the stage, 44 tall, with the pane's name on it | a sliver down the stage, 44 wide, the same thing a quarter turn round |
+| **Medium** | the top half or the bottom half | the left half or the right half |
+| **Big** | the stage, less the other pane's strip | the same |
+
+**Minimised is the same for every pane, and unless a pane says otherwise it is just the pane's name.** One
+thickness, one shape, so that putting anything away looks like putting anything else away. Two panes say
+otherwise and say why: **navigation** carries the marks of the panes it could put in the other bay, because
+a list of ways on is what it is for; and the **map** carries no size control at all and is itself the way
+back, because three marks in 44 pixels of map would be three things to aim at where the only useful one is
+the map.
+
+**Medium and big are the pane's own business, and may be one drawing or two.** A pane whose full form is a
+list can draw the same list medium and simply show less of it; the **choice roll** is the one that
+genuinely draws something else, which is the **carousel**. What is not allowed is a size that only works in
+one cut — a pane that reads at 390 by 422 and not at 422 by 390 has five states and a hole.
+
+**The spread is not one of the six.** A tile's height there is its own and the map behind it takes what is
+left, so the desktop is a separate set of requirements and this section does not speak for it. It has the
+same three sizes and the same one control; what differs is who the room belongs to. See decision records
+0045 and 0046.
+
+**Every pane carries a pane size control** in both forms, bar the map — three marks saying how much of the
+stage it is taking: put away, the normal size, opened out. In the **bays** it names the arrangement, and
+the other bay follows because both of them are reading one value. In the **spread** each tile's height is
+its own, because a tile is not dividing anything with anybody. See decision records 0045 and 0046 and
+`LOOK-AND-FEEL.md`.
 
 **The compass at the divider is the way to everything else.** One tap puts **navigation** in the bay that is
 not the map's, and navigation lists the panes above a divider and the **trail** below it. Every row carries
@@ -160,11 +206,11 @@ be the whole window is exactly what the rule at the top exists to prevent.
 
 | Part | In the spread | In the bays |
 |---|---|---|
-| The map, with the sprite, area and influence overlays | Fills the stage | A pane; wants to be big |
-| The house status, with the eye and the empty places | The corner tile, behind the shield tab | A pane; asks to be small, and can be minimised |
-| Navigation, the way back to what you have looked at | The corner tile, behind the compass tab | A pane; wants to be big |
-| An inspect window | A rail down the side, up to three | A pane; takes a bay, one at a time |
-| The choice roll, on its parchments | The bottom middle tile, while a choice is pending | A pane; arrives big in the map's bay, and the player folds it to the carousel |
+| The map, with the sprite, area and influence overlays | Fills the stage | A pane; opened out by default, and puts away to a strip that is its own way back |
+| The house status, with the eye and the empty places | The corner tile, behind the shield tab | A pane; a strip by default, and half the stage when the player asks |
+| Navigation, the way back to what you have looked at | The corner tile, behind the compass tab | A pane; it takes whatever the bay it lands in is |
+| An inspect window | A rail down the side, up to three | A pane; takes a bay one at a time, and opens it to half if it was a strip |
+| The choice roll, on its parchments | The bottom middle tile, while a choice is pending | A pane; arrives in the map's bay with room to read it, and the player folds it to the carousel |
 | The debug panel, with the debug map inside it | Docked down the right, taking room from the stage | Not in the picture at all — see below |
 | The worktree tabs and the build badge | Inside the debug panel | The same |
 
@@ -198,8 +244,16 @@ What the instrument found, and where each stands:
 - **The house card asked for `min-width: 26rem`**, which is 416 pixels against a phone's 390. **Fixed, and
   then fixed again.** The three sizes fixed the folded form; the spread went on asking for 26rem until the
   corner became a tile, and the card now fills whatever tile it is given at every size.
-- **The parchment's one breakpoint asks the window**, which is 1280 while the stage is 390, so it never
-  fires. **Still open.** It is brought over when a choice roll is next worked on, not in a sweep.
+- **The parchment's one breakpoint asked the window**, which is 1280 while the stage is 390, so it never
+  fired. **Fixed**, by decision 0044, which deleted it and left no `@media` rule anywhere in the app.
+- **A strip turned on its side dropped its name.** There is no room for a word across 44 pixels, so a
+  put-away pane in landscape was two marks and nothing saying what it was. **Fixed** by decision 0046,
+  which turns the name to read down the strip instead - there is eight hundred pixels of room along one.
+  It was the map that forced it: the map's strip is its own way back and carries no marks, so dropping
+  the name left a blank bar.
+- **The house's bar of levers has six places, and a landscape bay half a phone wide is 422 pixels.** That
+  is 70 pixels a place, which is fine; put away it is 44 pixels wide and the bar is not drawn at all.
+  Nothing wrong yet, and the first thing to look at when the bar starts filling.
 
 ## Not decided
 

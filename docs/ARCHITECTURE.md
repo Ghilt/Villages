@@ -252,10 +252,18 @@ in `apps/web` rather than moving down to `client-core`, because the layer rule i
 testable without a browser and this is presentation arithmetic that would mean nothing to a headless client.
 The test is what makes it reviewable; the component only renders what it is handed.
 
-**A pane is declared, not positioned.** A pane says what it is called, the room it wants, the least it can
-live in, whether it can be put away, which bay it belongs in and the mark it is known by. The layout places
-it. Nothing in the layout knows what a map is, and no pane learns where it is beyond the room it was given -
-which is what lets a ui mechanic be written once and drawn at every size.
+**A pane is declared, not positioned.** A pane says what it is called, the mark it is known by, which tile
+of the spread it belongs in, how tall that tile is at each of its sizes, and - where it has one - what its
+full form needs before it has to draw itself smaller. The layout places it. Nothing in the layout knows
+what a map is, and no pane learns where it is beyond the room it was given, which is what lets a ui
+mechanic be written once and drawn at every size.
+
+**A pane declares nothing about a phone.** How the two bays divide the stage is one value with three
+settings, held by the fold: a strip and the rest, half each, or the rest and a strip. A bay is one end of a
+stage two panes are sharing, so what is standing in it has nothing to say about how much of it there is -
+which is what makes moving a pane between bays free, and what makes the three sizes mean the same thing on
+every pane. A tile in the spread is the other case and keeps its own heights, because nothing is competing
+for the room there. See decision record 0046.
 
 **Two panes naming the same bay share it**, and that is the whole of how a bay holds more than one. The
 panes declare it rather than the layout deciding it when they stop fitting, so a tab cannot appear and

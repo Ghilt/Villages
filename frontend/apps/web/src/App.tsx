@@ -24,10 +24,11 @@ import { HouseStatus } from './house/HouseStatus';
 import { InfluenceOverlay } from './influence/InfluenceOverlay';
 import { StoodDown } from './net/StoodDown';
 import { flyWith } from './map/focus';
+import { MapStrip } from './map/MapStrip';
 import { MapView } from './map/MapView';
 import { terrainPalette } from './map/terrainClasses';
 import { Stage } from './stage/Stage';
-import { formNow, takeOver, theMapsBay } from './stage/bays';
+import { formNow, roomToRead, takeOver, theMapsBay } from './stage/bays';
 import { CHOICE_PANE, HOUSE_PANE, MAP_PANE, NAVIGATION_PANE } from './stage/panes';
 import { worldRootOf } from './map/masters';
 import { DEFAULT_RENDERER, RENDERERS, applyRenderer } from './map/renderers';
@@ -169,7 +170,10 @@ export function App({ master }: AppProps) {
   const asking = heard.yourChoice?.id;
   useEffect(() => {
     if (asking !== undefined && formNow() === 'bays') {
-      takeOver(theMapsBay(), CHOICE_PANE.id);
+      const bay = theMapsBay();
+      takeOver(bay, CHOICE_PANE.id);
+      // A letter that arrived as a strip is a question the player cannot read. See decision record 0046.
+      roomToRead(bay);
     }
   }, [asking]);
 
@@ -244,6 +248,10 @@ export function App({ master }: AppProps) {
                 {map !== null && <SpriteOverlay map={map} sprites={sprites} />}
                 <AreaOverlay map={map} worldRoot={worldRoot} />
                 <InfluenceOverlay map={map} houses={drawn} mine={eye ? yours : null} />
+                {/* Put away, and still running underneath: a lid over the map, never instead of it. The
+                    guard is the form rather than the size, because what a pane was asked to be outlives
+                    the fold - and the floor of the spread is never put away. See `MapStrip`. */}
+                {along !== null && room.size === 'strip' && <MapStrip room={room} />}
               </>
             );
           }

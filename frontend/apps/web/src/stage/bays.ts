@@ -2,7 +2,8 @@ import { note } from '../debug/log';
 import { watchSubjects } from '../inspect/subjects';
 import { watchGateway } from '../net/gateway';
 import type { Asking, BayName } from './bayBox';
-import { askingOf, HOUSE_PANE, MAP_PANE, type Pane, paneById, type PaneSize, wantedIn } from './panes';
+import { STRIP } from './bayBox';
+import { HOUSE_PANE, MAP_PANE, type Pane, paneById, type PaneSize } from './panes';
 
 /**
  * The bay manager: which pane is in each bay, and which are collapsed to a strip.
@@ -22,18 +23,34 @@ import { askingOf, HOUSE_PANE, MAP_PANE, type Pane, paneById, type PaneSize, wan
 /** Which of the two. `0` is the top or the left, `1` is the bottom or the right. */
 export type Which = 0 | 1;
 
+/**
+ * How the two bays divide the stage between them. Three settings, and there is no fourth.
+ *
+ * **A property of the fold, not of the panes in it.** A bay is not a pane's own room: it is one end of a
+ * stage two things are sharing, and what happens to be standing in it has nothing to say about how much of
+ * it there is. That is what makes moving a pane free - the compass puts navigation where the house status
+ * was and the seam does not move, because the seam was never the house's.
+ *
+ * It is also what makes the three sizes mean the same thing on every pane, which they did not while each
+ * declared its own pixel count: **a strip, half the stage, or the rest**. See decision record 0046.
+ */
+export type Arrangement = 'firstAway' | 'halfEach' | 'secondAway';
+
 export interface BaysState {
   /** The pane in each bay, by id. */
   readonly holding: readonly [string, string];
+  /** How the bays divide the stage. Read in the bays form and meaningless in the spread. */
+  readonly arrangement: Arrangement;
   /**
-   * How big each pane is drawn, where the player has said.
+   * How tall each pane asked its **tile** to be, in the spread. Read there and meaningless in the bays.
    *
-   * One entry per pane that has been asked to be something other than what it was declared to want, and a
-   * pane keeps it wherever it is put. This replaced a set of what was minimised beside a record of what
-   * had been resized: they were the same question asked twice, and a pane was collapsed *and* small at
-   * once, which meant nothing. See decision record 0045.
+   * Per pane, where {@link Arrangement} is per fold, and that difference is the whole reason these are two
+   * fields rather than the one record they used to be. A tile is a pane's own and its height is its own
+   * business; a bay is one end of a split and belongs to neither of the two panes dividing it. One record
+   * for both meant a size chosen on a phone came back on the desktop - and meant the split was recomputed
+   * from whoever had just been moved into a bay, which is the defect 0046 exists to remove.
    */
-  readonly asked: Readonly<Partial<Record<string, PaneSize>>>;
+  readonly heights: Readonly<Partial<Record<string, PaneSize>>>;
   /**
    * What each bay was showing before something took it over, so that closing the thing puts it back.
    *
@@ -51,24 +68,81 @@ export interface BaysState {
   readonly showing: Readonly<Partial<Record<BayName, string>>>;
 }
 
-/** The map above and the house beneath it: the shape the bays open on. */
+/**
+ * The map opened out with the house status a strip beneath it: the shape the bays open on.
+ *
+ * The game is read off the map, and the house card is 200 pixels of a phone's 844 that the player has not
+ * asked for yet. Pressing the strip is the first gesture there is, and it teaches the whole control.
+ */
 const OPENS_ON: BaysState = {
   holding: [MAP_PANE.id, HOUSE_PANE.id],
+  arrangement: 'secondAway',
   displaced: [null, null],
   showing: {},
-  asked: {},
+  heights: {},
 };
 
 let state: BaysState = OPENS_ON;
-/**
- * What each bay is asking for, worked out once per change rather than on every read.
- *
- * `useSyncExternalStore` compares what the store hands back by identity, so a getter that builds a fresh
- * array each time it is called is an infinite render. It is derived from the state and it changes exactly
- * when the state does, so it is cached beside it.
- */
-let asking: readonly [Asking, Asking] = askingFor(OPENS_ON);
 const listeners = new Set<() => void>();
+
+/**
+ * What each bay asks the layout for, in each of the three arrangements.
+ *
+ * Three constants and not a derivation, which is the point. `useSyncExternalStore` compares what a store
+ * hands back by identity, so this returns the **same object** across every change that is not an
+ * arrangement change - and the stage does not so much as recompute its layout when the compass swaps a
+ * pane. "Moving a pane does not resize the bays" stops being a behaviour to be careful about and becomes
+ * an identity. It also retires the cache that used to sit here for the same identity reason.
+ *
+ * `bayBox` is untouched by any of it: `['big', 'big']` already meant half each and `[{ small }, 'big']`
+ * already meant a strip and the rest, floor, cap and all. The arithmetic was never what was wrong.
+ */
+const ASKING: Readonly<Record<Arrangement, readonly [Asking, Asking]>> = {
+  firstAway: [{ small: STRIP }, 'big'],
+  halfEach: ['big', 'big'],
+  secondAway: ['big', { small: STRIP }],
+};
+
+/**
+ * Which size the control marks on the pane in this bay.
+ *
+ * The two bays are always a mirrored pair and can never disagree, because there is one value under both of
+ * them. **Both put away is not reachable**, which decision 0045 wanted and had to enforce with a rule;
+ * here there is no rule, because there is no arrangement that says it.
+ */
+export function askedIn(how: Arrangement, which: Which): PaneSize {
+  if (how === 'halfEach') {
+    return 'small';
+  }
+  return (how === 'firstAway' ? 0 : 1) === which ? 'strip' : 'full';
+}
+
+/**
+ * What a bay asking for one of the three sizes means for the arrangement.
+ *
+ * The other bay follows by reading the same value rather than by having one written into it, which is what
+ * 0045 had to do while the size was a pane's own. Asking for half *is* the arrangement; asking to be
+ * opened out puts the other one away; asking to be put away opens the other one out.
+ */
+export function arrangementFor(which: Which, size: PaneSize): Arrangement {
+  if (size === 'small') {
+    return 'halfEach';
+  }
+  const away = size === 'strip' ? which : which === 0 ? 1 : 0;
+  return away === 0 ? 'firstAway' : 'secondAway';
+}
+
+/**
+ * What each of the three arrangements is called in the log.
+ *
+ * One line saying how the stage is divided, rather than two lines about two panes: it is one value, and a
+ * log that reported it twice would be reporting the mechanism instead of the thing.
+ */
+const ARRANGED: Record<Arrangement, () => string> = {
+  firstAway: () => `${where(0)} put away, ${where(1)} opened out`,
+  halfEach: () => `half each, ${where(0)} and ${where(1)}`,
+  secondAway: () => `${where(0)} opened out, ${where(1)} put away`,
+};
 
 /** What each size is called in the log, which is what the control's own labels say. */
 const SAID: Record<PaneSize, string> = {
@@ -76,17 +150,6 @@ const SAID: Record<PaneSize, string> = {
   small: 'back to its normal size',
   full: 'opened out',
 };
-
-/** How big a pane is drawn in the bays: what the player asked for, or what it was declared to want. */
-export function sizeAsked(id: string): PaneSize {
-  return state.asked[id] ?? wantedIn(paneById(id));
-}
-
-function askingFor(from: BaysState): readonly [Asking, Asking] {
-  const [head, tail] = from.holding;
-  const of = (id: string) => askingOf(paneById(id), from.asked[id] ?? wantedIn(paneById(id)));
-  return [of(head), of(tail)];
-}
 
 /**
  * What the stage made of itself last time it laid out.
@@ -146,7 +209,6 @@ export function where(which: Which): string {
 
 function settle(next: BaysState): void {
   state = next;
-  asking = askingFor(next);
   for (const listener of listeners) {
     listener();
   }
@@ -156,9 +218,9 @@ function titleOf(id: string): string {
   return paneById(id)?.title ?? id;
 }
 
-/** What each bay is asking the layout for, which is decided by what each is holding. */
+/** What each bay is asking the layout for, which is the arrangement and nothing else. */
 export function askingNow(): readonly [Asking, Asking] {
-  return asking;
+  return ASKING[state.arrangement];
 }
 
 /**
@@ -219,41 +281,59 @@ export function put(which: Which, id: string): void {
  * a second button on one pane that swapped between two sizes: they were the same question - how much of
  * the stage is this taking - asked twice with different words. See decision record 0045.
  *
- * **The bays share themselves out from what each is asking**, so this is all it does: it says what the
- * pane wants and lets the arithmetic answer. A pane asking to be small beside another asking to be small
- * gets half each, which is decision 0040's rule and not this one's business.
+ * **In the bays it names the arrangement**, which is 0045's rule with the mechanism taken out from under
+ * it. It used to write the neighbour's size into the neighbour's own entry, and the two could then be
+ * pulled apart by anything that moved a pane; now both bays read one value and the other follows because
+ * there is nothing else for it to read.
+ *
+ * **In the spread a tile's height is its own**: there is nobody for it to speak for, because the map
+ * behind it takes whatever is left over without being asked.
  */
 export function askFor(id: string, size: PaneSize): void {
-  const pane = paneById(id);
-  if (pane === undefined || (size === 'strip' && pane.strip === null)) {
+  if (paneById(id) === undefined) {
     return;
   }
 
-  const asked: Partial<Record<string, PaneSize>> = { ...state.asked, [id]: size };
-  const which = state.holding.indexOf(id) as Which | -1;
-  let alsoSaid = '';
-
-  /*
-   * **The control is a statement, not a request, and the other bay follows.**
-   *
-   * Two bays divide one stage between them, so saying how big one of them is says how big the other is.
-   * Left to ask separately they could both ask to be put away and get half the stage each - a pair of
-   * 44-pixel strips rendered in 384 pixels of nothing, and a state a player can reach but never want.
-   * Naming one size names the arrangement, so that state is not reachable at all.
-   *
-   * Only in the bays. A tile in the spread is not dividing anything with anybody: its height is its own,
-   * and the map behind it takes whatever is left over without being asked.
-   */
-  if (form === 'bays' && which !== -1) {
-    const other = state.holding[which === 0 ? 1 : 0];
-    const beside = paneById(other);
-    const follows: PaneSize = size === 'full' ? (beside?.strip != null ? 'strip' : 'small') : 'full';
-    asked[other] = follows;
-    alsoSaid = `, ${titleOf(other)} ${SAID[follows]}`;
+  if (form !== 'bays') {
+    if (state.heights[id] === size) {
+      return;
+    }
+    settle({ ...state, heights: { ...state.heights, [id]: size } });
+    note('bay', `${titleOf(id)} ${SAID[size]}`);
+    return;
   }
 
-  settle({ ...state, asked });
-  note('bay', `${titleOf(id)} ${SAID[size]}${alsoSaid}`);
+  // A pane the player has not got up is in no bay, so there is no arrangement for it to name.
+  const which = state.holding.indexOf(id) as Which | -1;
+  if (which === -1) {
+    return;
+  }
+
+  const how = arrangementFor(which, size);
+  if (how === state.arrangement) {
+    return;
+  }
+
+  settle({ ...state, arrangement: how });
+  // The whole arrangement in one line, because it is one arrangement rather than two panes that happen to
+  // agree, and because the log is the instrument Adam reads. See decision record 0023.
+  note('bay', ARRANGED[how]());
+}
+
+/**
+ * Open a bay to at least half, because something has arrived in it that is not worth arriving as a strip.
+ *
+ * The only thing besides the control that moves the seam, and it is deliberately **not** part of putting a
+ * pane in a bay: the compass has to leave the seam exactly where it was, and a castle clicked on the map
+ * has to open a window somebody can read. The difference is who asked - the player, or the world - and it
+ * belongs where that is known rather than in here. So the arrival calls this and the compass does not.
+ */
+export function roomToRead(which: Which): void {
+  if (askedIn(state.arrangement, which) !== 'strip') {
+    return;
+  }
+  settle({ ...state, arrangement: 'halfEach' });
+  note('bay', `${where(which)} opened to half, for something that arrived in it`);
 }
 
 /**
@@ -269,8 +349,16 @@ export function takeOver(which: Which, id: string): void {
     return;
   }
 
+  const other: Which = which === 0 ? 1 : 0;
   const was = state.holding[which];
   const holding: [string, string] = which === 0 ? [id, state.holding[1]] : [state.holding[0], id];
+  // Taking over a bay with something that is standing in the *other* one is a swap, as putting it there
+  // by hand is: with two bays there is nowhere else for the displaced pane to go, and without this both
+  // bays end up holding the same pane. Reachable from one gesture - put navigation top from its own list,
+  // then press the compass, which opens it at the bottom.
+  if (state.holding[other] === id) {
+    holding[other] = was;
+  }
   const displaced: [string | null, string | null] = [...state.displaced] as [string | null, string | null];
   displaced[which] = was;
 

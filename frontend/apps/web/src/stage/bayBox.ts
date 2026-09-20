@@ -35,6 +35,19 @@ export const FOLDS_UNDER = 600;
  */
 export const UNFOLDS_OVER = 660;
 
+/**
+ * How thick a pane put away is: in either form, and whichever way the stage is cut.
+ *
+ * **The same for every pane.** A strip is the pane's name and the way back and nothing else, so there is
+ * nothing one pane could need more of than another - and four declarations each carrying their own 44 were
+ * four chances to disagree about a number none of them had a reason to change. Cut into columns it is a
+ * width rather than a height, and it is still this.
+ *
+ * Here rather than in the stylesheet for the reason {@link TAB_BAR} is: it is room. A bay is this many
+ * pixels across, and what is drawn inside it fills what it was given.
+ */
+export const STRIP = 44;
+
 /** The least room a bay is ever given. Below this there is nothing to put in it, not even a strip. */
 export const BAY_LEAST = 32;
 

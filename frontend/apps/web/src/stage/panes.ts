@@ -1,8 +1,8 @@
 import { gatewayState } from '../net/gateway';
 import { paneIdOf, subjectOfPane, subjectsNow } from '../inspect/subjects';
 import type { Subject } from '../inspect/subjects';
-import type { Asking, BayName, SpreadWants } from './bayBox';
-import { isTabbed, TAB_BAR } from './bayBox';
+import type { BayName, SpreadWants } from './bayBox';
+import { isTabbed, STRIP, TAB_BAR } from './bayBox';
 import type { IconName } from './Icons';
 
 /**
@@ -10,7 +10,12 @@ import type { IconName } from './Icons';
  *
  * A pane is declared here and placed by the layout. Nothing in the layout knows what a map is, and no pane
  * learns which bay it is in beyond the room it was given - which is what lets a mechanic be written once
- * and drawn at up to three sizes. See decision records 0040 and 0041.
+ * and drawn at three sizes. See decision records 0040 and 0041.
+ *
+ * **What a pane declares is the spread's business only.** On a phone the three sizes are a strip, half the
+ * stage and the rest, the same three for every pane, and which of the three arrangements the stage is in
+ * belongs to the fold rather than to anything standing in it. So the numbers here are tile heights and
+ * nothing else. See decision record 0046.
  *
  * Three of them are fixed and the rest come and go: an **inspect window** is a pane per subject, so the list
  * grows as the player opens them. Character dialogue will be another fixed one.
@@ -21,12 +26,6 @@ export interface Pane {
   id: string;
   /** What **navigation** and a tab's label call it, and what a minimised strip has written on it. */
   title: string;
-  /** What its bay asks for when it is not minimised. */
-  wants: 'big' | 'small';
-  /** The pixels it needs when its bay is the small one. Unread when it wants to be big. */
-  small: number;
-  /** The pixels its strip is when minimised, or null when minimising it would leave nothing worth seeing. */
-  strip: number | null;
   /**
    * Which tile of the spread it takes, where there is room for everything at once.
    *
@@ -35,12 +34,21 @@ export interface Pane {
    */
   spread: BayName;
   /**
-   * How tall its tile is in the spread. Unread by a pane that takes the floor, which is the whole stage.
+   * How tall its tile is in the spread, at each size it is drawn at. Null for a pane with no tile of its
+   * own, which is the map on the floor and a window in the rail.
+   *
+   * **The spread's numbers, and only the spread's.** A bay on a phone is one end of a stage two panes are
+   * sharing, and how much of it each gets is the fold's business rather than either pane's - see
+   * `Arrangement` in `bays.ts`. A tile here is not dividing anything with anybody: the map behind it takes
+   * whatever is left over without being asked, so its height is its own. That is why these are the only
+   * numbers left on a pane, where there were three.
+   *
+   * The strip is not among them, because a strip is one thickness for every pane and it is {@link STRIP}.
    *
    * A height and not a box: the column's width is shared by everything in it, so no pane in it can be the
    * one that decides it.
    */
-  tall: number;
+  tall: { full: number; small: number } | null;
   /** The mark it is known by where there is no room for its name, which is a tab. */
   icon: IconName;
   /**
@@ -61,14 +69,10 @@ export interface Pane {
 export const MAP_PANE: Pane = {
   id: 'map',
   title: 'the map',
-  wants: 'big',
-  small: 200,
-  // A strip of map is not a map. Whether the player should be able to put the world away entirely to read
-  // something long is a real question and `RESPONSIVE-DESIGN.md` has it open; until then, no.
-  strip: null,
   // The ground everything else stands on, rather than a tile competing with the rest for room.
   spread: 'floor',
-  tall: 0,
+  // The floor is the whole stage and asks the column for nothing.
+  tall: null,
   icon: 'map',
   needs: null,
 };
@@ -76,15 +80,11 @@ export const MAP_PANE: Pane = {
 export const HOUSE_PANE: Pane = {
   id: 'house',
   title: 'your house',
-  wants: 'small',
-  // Enough for one line of the house and the bar of its levers beneath. The bar is 2.6rem of it.
-  small: 132,
-  // The name and nothing else, so the player knows where it went.
-  strip: 44,
   // Into the bottom-left corner, cut off by two of the stage's own edges, as the card always was.
   spread: 'bottomLeft',
-  // What the card measures with the shield, the blazon, the treasury and the bar of levers in it.
-  tall: 200,
+  // Full is what the card measures with the shield, the blazon, the treasury and the bar of levers in it;
+  // small is one line of the house and the bar beneath, of which the bar is 2.6rem.
+  tall: { full: 200, small: 132 },
   icon: 'shield',
   needs: null,
 };
@@ -100,13 +100,11 @@ export const HOUSE_PANE: Pane = {
 export const NAVIGATION_PANE: Pane = {
   id: 'navigation',
   title: 'where you have been',
-  wants: 'big',
-  small: 200,
-  strip: 44,
   // Beside the house, in the corner. The two of them are what makes the corner a tabbed tile at all.
   spread: 'bottomLeft',
-  // The same height as the card it shares the tile with, so the column does not jump as the tab changes.
-  tall: 200,
+  // The same height as the card it shares the tile with, and the same at both sizes, so the column does
+  // not jump as the tab changes or as the trail is opened out.
+  tall: { full: 200, small: 200 },
   icon: 'compass',
   needs: null,
 };
@@ -118,25 +116,21 @@ export const NAVIGATION_PANE: Pane = {
  * question is answered, which is why it is not one of the fixed ones - and why an empty `bottomMiddle` tile
  * takes no room at all, so with nothing pending the map runs clean to the bottom of the stage.
  *
- * It is the one pane whose size is the **player's** choice. Full is the options laid out to read through;
- * small is the **carousel**, one option at a time, for glancing at them while looking at the map they are
- * about. Minimised is the letter set aside. See `MECHANICS.md` and decision record 0044.
+ * Full is the options laid out to read through; small is the **carousel**, one option at a time, for
+ * glancing at them while looking at the map they are about; minimised is the letter set aside. It was the
+ * one pane whose size was the **player's** rather than the layout's, and since 0046 every pane's is: a
+ * phone's three arrangements are the player's to pick and nobody's to derive. See `MECHANICS.md` and
+ * decision records 0044 and 0046.
  */
 export const CHOICE_PANE: Pane = {
   id: 'choice',
   title: 'a letter',
-  // Big when it arrives: the world has asked something and the first thing to do is read it.
-  wants: 'big',
-  // The carousel: the prompt, one option with room for its detail, the steps and the dots. Measured
-  // against the founding choice's wordiest option rather than picked, because an option that does not fit
-  // grows a scrollbar inside a sheet of parchment, which is not what parchment does.
-  small: 224,
-  // Set aside. The map is what a choice is about, and a player will want to look at it before answering.
-  strip: 44,
   spread: 'bottomMiddle',
-  // The same, because a tile too narrow for three across draws the carousel in it and the tile's height
-  // does not change when that happens.
-  tall: 224,
+  // The same at both sizes, because a tile too narrow for three across draws the carousel in it and the
+  // tile's height does not change when that happens. Measured against the founding choice's wordiest
+  // option rather than picked, because an option that does not fit grows a scrollbar inside a sheet of
+  // parchment, which is not what parchment does.
+  tall: { full: 224, small: 224 },
   icon: 'letter',
   // Three options across a wide tile, or three down a tall bay. A bay that is neither - the bottom middle
   // of a small spread - gets the carousel, which is the whole answer to a row that has run out of room:
@@ -159,21 +153,19 @@ export function standingPanes(pending: boolean): readonly Pane[] {
 /**
  * The pane that holds a window on one subject.
  *
- * It **wants to be big**, which is what makes Adam's example come out right: the map wants to be big too,
- * so two bays asking the same thing get half each and an opened window takes half the screen with the
- * thing it is about still on the map above it.
+ * On a phone it arrives at **half the stage**, which is what makes Adam's example come out right: the
+ * thing that was clicked is still on the map above it. That is the arrival's doing rather than the pane's
+ * - see `roomToRead` in `bays.ts` - because since 0046 a pane has nothing to say about how much of a bay
+ * it gets.
  */
 export function inspectPane(subject: Subject): Pane {
   return {
     id: paneIdOf(subject),
     title: subject.kind === 'house' ? 'a house' : 'an area',
-    wants: 'big',
-    small: 220,
-    strip: 44,
     // Down the column, where up to three of them stack. The rail inside that one tile is what limits how
     // many, so a window asks the column for no height of its own.
     spread: 'left',
-    tall: 0,
+    tall: null,
     icon: 'window',
     needs: null,
   };
@@ -196,7 +188,7 @@ export function panesIn(panes: readonly Pane[], where: BayName): readonly Pane[]
  */
 export function spreadWants(
   panes: readonly Pane[],
-  asked: Readonly<Partial<Record<string, PaneSize>>>,
+  heights: Readonly<Partial<Record<string, PaneSize>>>,
   showing: (where: BayName, sharing: readonly Pane[]) => Pane,
 ): SpreadWants {
   const tallOf = (where: BayName): number | null => {
@@ -210,9 +202,8 @@ export function spreadWants(
     // A tile's three heights, which is what the control means on a desktop: put away, the normal card, and
     // opened out. Full is the default here, because a tile is the size the pane asked for rather than a
     // share of a stage it is dividing with somebody.
-    const size = asked[pane.id] ?? 'full';
-    const tall =
-      size === 'strip' && pane.strip !== null ? pane.strip : size === 'small' ? pane.small : pane.tall;
+    const size = heights[pane.id] ?? 'full';
+    const tall = size === 'strip' ? STRIP : (pane.tall?.[size] ?? 0);
     return tall + (isTabbed(where, sharing.length) ? TAB_BAR : 0);
   };
 
@@ -276,49 +267,10 @@ export interface Room {
    * change nothing visible and leave the mark sitting on the wrong one.
    */
   asked: PaneSize;
-  /** Which of the three it offers. A pane with no strip offers two. */
-  offers: readonly PaneSize[];
   /** Ask to be drawn at one of them. */
   ask: (size: PaneSize) => void;
 }
 
-/** Which sizes a pane offers: all three, unless collapsing it would leave nothing worth seeing. */
-export function offersOf(pane: Pane | undefined): readonly PaneSize[] {
-  return pane?.strip == null ? SIZES.filter((size) => size !== 'strip') : SIZES;
-}
-
-/**
- * What a bay holding this pane asks the layout for.
- *
- * Minimising is not a case the arithmetic knows about: a minimised pane asks for a smaller number than a
- * small one does, and that is the whole of it. A pane that cannot be minimised asks for what it wanted.
- */
-/**
- * The size a pane is drawn at in the **bays** when the player has not said, which is what it was declared
- * to want. The spread's own default is `full`, because a tile there is the size the pane asked for.
- */
-export function wantedIn(pane: Pane | undefined): PaneSize {
-  return pane?.wants === 'small' ? 'small' : 'full';
-}
-
-/** What a bay holding a pane at this size asks the layout for. */
-export function askingOf(pane: Pane | undefined, size: PaneSize): Asking {
-  if (pane === undefined) {
-    return 'big';
-  }
-  if (size === 'strip' && pane.strip !== null) {
-    return { small: pane.strip };
-  }
-  return size === 'full' ? 'big' : { small: pane.small };
-}
-
-/**
- * How big a pane draws itself, given the form, what its bay asked for and whether it is collapsed.
- *
- * In the spread everything is full, because nothing is competing for the room: a pane asks to be small so
- * that the *other* bay can have the rest, and in the spread there is no other bay. That is why the house
- * card in the corner is the same card it always was, and only a phone ever sees the small one.
- */
 /**
  * How big a pane draws itself: what the player asked for, capped by what the bay can actually hold.
  *

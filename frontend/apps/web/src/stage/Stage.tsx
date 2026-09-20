@@ -6,10 +6,20 @@ import { subjectsNow, watchSubjects } from '../inspect/subjects';
 import { gatewayState, watchGateway } from '../net/gateway';
 import { Compass } from './Compass';
 import { bayLayout, type BayName, type Box, isTabbed, type Rect, TAB_BAR, TILES } from './bayBox';
-import { askingNow, baysNow, formNow, show, showingIn, stageIs, askFor, watchBays } from './bays';
+import {
+  askedIn,
+  askFor,
+  askingNow,
+  baysNow,
+  formNow,
+  show,
+  showingIn,
+  stageIs,
+  watchBays,
+  type Which,
+} from './bays';
 import {
   cramps,
-  offersOf,
   type Pane,
   panesFor,
   panesIn,
@@ -18,7 +28,6 @@ import {
   sizeOf,
   spreadWants,
   standingPanes,
-  wantedIn,
 } from './panes';
 import { TabBar } from './TabBar';
 
@@ -70,7 +79,7 @@ export function Stage({ stage, contents, overlays }: StageProps) {
   // the one pane that comes and goes, and an empty tile takes no room.
   const pending = useSyncExternalStore(watchGateway, gatewayState).yourChoice !== null;
   const panes = useMemo(() => panesFor(subjects.open, pending), [subjects.open, pending]);
-  const wants = useMemo(() => spreadWants(panes, bays.asked, showingIn), [panes, bays]);
+  const wants = useMemo(() => spreadWants(panes, bays.heights, showingIn), [panes, bays]);
 
   // `formNow()` is the form the stage was in a moment ago, which is what gives the fold its dead band. It
   // is read rather than passed because the layout is what sets it, and it only ever changes as a result of
@@ -116,17 +125,23 @@ export function Stage({ stage, contents, overlays }: StageProps) {
     const pane = panes.find((one) => one.id === id);
     const where = bayOf(id, pane);
     const whole = where === null ? null : box.bays[where];
-    // What the player asked for. The two forms start from different places: a tile in the spread is the
-    // size the pane asked for, while a bay is a share of a stage it is dividing with somebody, so there it
-    // starts at what the pane was declared to want.
-    const asked: PaneSize = bays.asked[id] ?? (box.form === 'spread' ? 'full' : wantedIn(pane));
+    const at = bays.holding.indexOf(id);
+    // What the player asked for, and the two forms answer it from different places. A tile in the spread
+    // has a height of its own, so it is what this pane was asked to be; a bay is one end of a split, so it
+    // is whatever the arrangement makes of the end this pane is standing at. A pane in no bay is hidden,
+    // so what it says there is never drawn.
+    const asked: PaneSize =
+      box.form === 'spread'
+        ? (bays.heights[id] ?? 'full')
+        : at === -1
+          ? 'small'
+          : askedIn(bays.arrangement, at as Which);
     const room: Room = {
       // The bay is a rectangle, so the layout caps what was asked for by what will actually fit, rather
       // than leaving a pane too big for its tile to grow a scrollbar inside it.
       size: sizeOf(asked, cramps(pane, whole)),
       asked,
-      offers: offersOf(pane),
-      // One control on every pane, in both forms. See decision record 0045.
+      // One control on every pane, in both forms. See decision records 0045 and 0046.
       ask: (size) => askFor(id, size),
     };
 
