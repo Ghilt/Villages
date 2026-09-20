@@ -51,13 +51,24 @@ Wanted, not started, and each needs a hypothesis in `docs/experiments/` before a
   a Pixi surface - wants deciding before much of it is written.
 - **A responsive interface.** Both forms have a layout now: the stage folds into two bays below 600 on its
   shorter side and unfolds at 660 (0040), and the spread is tiles on a map that never overlap (0041). What
-  remains is what goes in them. The corner tabs between the house status and **navigation** (0042), and on
-  a phone the compass puts navigation in a bay with the panes above the trail and a needle per row (0043).
-  The choice roll is a pane with three sizes (0044), its breakpoint against the window was the last
-  `@media` rule in the app, and every pane now carries one **pane size control** that speaks for both bays
-  (0045). What is left is **touch**, which nothing has answered: hover lifts a parchment
-  and the map is driven by drag and wheel. The camera is also still not told which part of the map the
-  tiles are covering, so *show it on the map* can fly a thing to under the column.
+  goes in them is settled too. The corner tabs between the house status and **navigation** (0042); the
+  choice roll is a pane with three sizes (0044); every pane carries one **pane size control** (0045); how
+  much of the stage each bay gets belongs to the fold rather than to the panes, so the three sizes mean
+  the same thing everywhere and moving a pane resizes nothing (0046); the compass stands in the corner and
+  opens the bay under the thumb (0047); the join between the bays is drawn (0048); and a link goes one
+  place (0049). What is left is **touch**, which nothing has answered: hover lifts a parchment and the map
+  is driven by drag and wheel. The camera is also still not told which part of the map the tiles are
+  covering, so *show it on the map* can fly a thing to under the column.
+- **An inspect window that stays up to date.** A window is fed from the cells the camera is holding, so
+  panning away from a house leaves it with nothing to say. Your own house is the exception and shows the
+  shape of the answer: the gateway sends it to the **session** rather than to a cell. An open window
+  should be a subscription the same way - a frame, a version at both ends, a recording beside the old
+  ones - and then a window on anything with an event stream is never stale. A subject with no stream, a
+  piece of flavour with some lore attached, needs none of it.
+- **Somewhere the player can read the credits.** Three of the world's sources are CC-BY and must be
+  credited. The map used to do it and did it on one renderer of six, so it does not any more (0050); the
+  credit is in `AUTHORING-THE-WORLD.md` and there is nowhere in the game a player could find it. An about
+  or credits surface, before anything is released.
 - **The inspect window**, beyond a house and an area: what it says about a subject once there is more than
   a name and a treasury to say, where its links come from, and whether it is a card or a paper on the desk.
   See `MECHANICS.md`.

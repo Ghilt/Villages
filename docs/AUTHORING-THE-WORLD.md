@@ -159,8 +159,25 @@ npm run world:fetch-all --prefix frontend
 ```
 
 About ten minutes on a decent connection, once. Adding `-- --list` says what the five sources are, what
-each one contributes and how it is licensed, without downloading anything. Three of them are CC-BY and
-must be credited, which the map does in its attribution control.
+each one contributes and how it is licensed, without downloading anything.
+
+### The credit, which is owed
+
+**Three of the sources are CC-BY and must be credited**: the **Copernicus Global Land Service** land cover,
+**RESOLVE Ecoregions 2017**, and **HydroSHEDS** (HydroLAKES and HydroRIVERS). **Natural Earth** is public
+domain and needs nothing. Each one's exact credit line is on its entry in
+`frontend/packages/world/bin/worldSources.ts`, which is what `--list` prints.
+
+The map used to carry them in its attribution control, and **that was not working**: MapLibre credits the
+sources whose layers are showing, and a painted renderer hides the flat tiles, so the line appeared on
+`raw` and on none of the other five. A licence term honoured one time in six is not honoured, and a line
+of source credits along the bottom of the world is also the one thing on the stage that says the map is a
+map rather than the world. It is off the map entirely since decision record 0050.
+
+**So the credit lives here, and the game owes the player one.** That is fine while nothing is released and
+it is not fine at a release: there is no about screen, no credits page and nowhere a player could read
+this. It is on the roadmap under **Later**, and it is the kind of debt that is easy to carry past the
+point where carrying it is a problem.
 
 `npm run world:master --prefix frontend` repaints the master from Earth. It **refuses to overwrite** an
 existing `terrain.png` and writes `terrain-fresh.png` alongside instead, so a rebuild can never destroy a

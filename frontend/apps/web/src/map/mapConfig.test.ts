@@ -32,11 +32,17 @@ describe('the map style', () => {
     expect(style.sources.outlines?.data).toContain('/masters/terrain2/');
   });
 
-  it('credits the data, which three of its four sources require', () => {
+  /*
+   * The credit is owed and it is not the map's to give.
+   *
+   * MapLibre credits the sources whose layers are showing, so the line appeared on `raw` and on none of
+   * the five painted renderers - a licence term honoured one time in six is not honoured. It lives in
+   * `AUTHORING-THE-WORLD.md` now, with what the game still owes a player. See decision record 0050.
+   */
+  it('draws no source credits on the world, because it never drew them on more than one renderer', () => {
     const style = resolveStyle({}, ROOT) as { sources: Record<string, { attribution?: string }> };
 
-    expect(style.sources.terrain?.attribution).toContain('Copernicus');
-    expect(style.sources.terrain?.attribution).toContain('Natural Earth');
+    expect(style.sources.terrain?.attribution).toBeUndefined();
   });
 
   it('draws no text at all, because a place name would name the wrong world', () => {

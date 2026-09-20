@@ -26,10 +26,6 @@ export const WORLD_MASTER_WIDTH = 32768;
 export const SEA = '#93aebc';
 const INK = '#5f5544';
 
-/** Required: three of the four sources are CC-BY. See world/master/experiment/README.md. */
-const CREDITS =
-  'Copernicus Global Land Service &middot; HydroSHEDS &middot; RESOLVE Ecoregions &middot; Natural Earth';
-
 export function warpedWorldStyle(root: string): StyleSpecification {
   return {
     version: 8,
@@ -42,7 +38,6 @@ export function warpedWorldStyle(root: string): StyleSpecification {
         minzoom: 0,
         // Beyond this the tiles are stretched: a tile pixel is already a master pixel here.
         maxzoom: FLAT_MAX_ZOOM,
-        attribution: CREDITS,
       },
       outlines: {
         type: 'geojson',

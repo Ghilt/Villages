@@ -53,7 +53,13 @@ export function MapView({ worldRoot, onReady }: MapViewProps) {
       dragRotate: false,
       pitchWithRotate: false,
       renderWorldCopies: false,
-      attributionControl: { compact: false },
+      // No attribution control, and no controls at all: the map is the world rather than a map of it, and
+      // a line of source credits along the bottom of the world is the one thing on the stage that says
+      // otherwise. It never worked anyway - MapLibre credits the sources whose layers are showing, and a
+      // painted renderer hides the flat tiles, so the line appeared on one renderer of six. Three of the
+      // four sources are CC-BY and the credit is owed; `AUTHORING-THE-WORLD.md` says where it lives and
+      // what the game still owes a player. See decision record 0050.
+      attributionControl: false,
     });
 
     // The overlay projection assumes an unrotated, untilted camera, so every way a player could turn the
