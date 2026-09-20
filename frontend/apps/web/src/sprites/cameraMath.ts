@@ -6,6 +6,8 @@
  * map is configured to allow. See docs/adr/0014.
  */
 
+import { WORLD_MASTER_WIDTH } from '../map/worldStyle';
+
 /** Beyond this latitude the Mercator projection runs away to infinity, so the poles are clamped. */
 export const MAX_MERCATOR_LATITUDE = 85.051129;
 
@@ -40,6 +42,26 @@ export interface CameraView {
 export function worldSize(zoom: number): number {
   return TILE_SIZE * 2 ** zoom;
 }
+
+/**
+ * How many screen pixels one unit of world space covers.
+ *
+ * World space is the Web Mercator square the map is drawn on, as many units on a side as the master is
+ * wide, so one unit is one pixel of a tile at the zoom the tiles were cut. See decision record 0030.
+ * This is the number that lets a thing be given a size on the ground rather than a size on the screen:
+ * it doubles with every zoom level, exactly as the terrain under it does.
+ */
+export function pixelsPerWorldUnit(zoom: number): number {
+  return worldSize(zoom) / WORLD_MASTER_WIDTH;
+}
+
+/**
+ * The zoom at which one world unit is one screen pixel, which is where the doubling is measured from.
+ *
+ * Six, for a master 32768 across drawn on 512 pixel tiles. Derived rather than written down, because a
+ * master of another width moves it.
+ */
+export const WORLD_UNIT_ZOOM = Math.log2(WORLD_MASTER_WIDTH / TILE_SIZE);
 
 /**
  * Web Mercator with nothing clamped, so it runs on past the edges of the world. That is what the camera's

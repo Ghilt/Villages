@@ -105,6 +105,18 @@ first use is the corner of the spread, where the house status and navigation tak
 — a phone reaches the same panes through the compass, because a row of tabs on a 390-wide stage is a row of
 things too small to hit. See decision record 0042.
 
+**Two forms on the map.** Anything standing in the world is drawn two ways, and which one you see is how
+far away you are. Its **ground form** is what it is, sized in world units, so it grows with the terrain
+and keeps its size against the ground the way a building on a map does. Its **icon** is what it means,
+sized in screen pixels, so it stays readable however far back the camera goes. They trade places by
+crossfading exactly where the two are the same size, so nothing jumps.
+
+The two are different drawings and not one drawing at two sizes. That is the whole of it: close up you
+get the thing, with whatever detail it is worth giving; far out you get the sign for it, said in as few
+strokes as read at the size of a word. A house is a castle of two towers close in and a battlemented
+keep far out. What has only an icon is a thing the world is saying rather than a thing standing in it,
+like the seat a choice is offering. See decision record 0051.
+
 **The marks.** Every pane declares the mark it is known by, drawn in one place so that the same thing on a
 tab, in a list and wherever a pane is named later cannot drift apart. **The compass is the needle inside a
 ring**, deliberately: the needle says which bay a thing goes to and the compass opens the pane that lists
@@ -116,5 +128,6 @@ decision record 0049.
 
 - Theme and tone as a whole. See `VISION.md`.
 - The exact colours, the type, the grain of the desk, and whether the map's own look leads the rest of the
-  interface or stands apart from it.
+  interface or stands apart from it. Two forms settles one corner of this: what stands in the world is
+  drawn by distance, which is the map's rule and not the interface's.
 - Whether the parchment survives contact with a second mechanic, or turns out to be the choice roll's own.

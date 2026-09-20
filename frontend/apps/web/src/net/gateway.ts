@@ -84,6 +84,8 @@ const HOLD_MS = 2000;
  * cells are held but no longer followed - drawn, and not asked about.
  */
 let released = new Set<string>();
+/** The cells of the last subscription, so that a refusal knows which ones are not coming. */
+let askedFor: string[] = [];
 /** The cells whose snapshots the release is waiting for. Empty means nothing is waiting. */
 let awaiting = new Set<string>();
 let holding: ReturnType<typeof setTimeout> | null = null;
@@ -102,6 +104,38 @@ function letGoNow(why: string): void {
   released = new Set();
   note('cells', `let go of ${cells.length} cell${cells.length === 1 ? '' : 's'} ${why}`);
   update({ houses: forgetCells(state.houses, cells) });
+}
+
+/**
+ * Puts back what a refused subscription undid.
+ *
+ * The gateway refuses a subscription whole, so not one of the cells asked for is coming. Held and never
+ * sent, they would be held for ever: `whatToFollow` compares against what is held, so it would never
+ * ask for them again and the map could not recover by being moved back. So they are forgotten.
+ *
+ * And what was let go to make room for them is asked for again, because the gateway was told to stop
+ * sending it a moment ago and the thing meant to replace it never arrived. Without that the map keeps
+ * drawing houses nobody is updating until the release timer empties it.
+ */
+function askAgainAfterARefusal(why: string): void {
+  if (holding !== null) {
+    clearTimeout(holding);
+    holding = null;
+  }
+  awaiting = new Set();
+
+  const refused = askedFor;
+  askedFor = [];
+  const back = [...released];
+  released = new Set();
+
+  if (refused.length > 0) {
+    update({ houses: forgetCells(state.houses, refused) });
+  }
+  note('cells', `${why}: forgot ${refused.length} that never came, asking again for ${back.length}`);
+  if (back.length > 0 && connection !== null && state.connection === 'open') {
+    connection.send({ type: 'subscribeCells', cells: back });
+  }
 }
 
 /** Forgets that anything was being held late. For a connection that is starting or ending. */
@@ -164,6 +198,11 @@ function heard(frame: ServerFrame): void {
       return;
     case 'error':
       note('gateway', `error ${frame.code}: ${frame.message}`);
+      if (frame.code === 'tooManyCells' || frame.code === 'badCell') {
+        // The whole subscription was refused. Put the connection back the way it was, or the map goes
+        // blank and stays blank however far it is panned. See the note on `askAgainAfterARefusal`.
+        askAgainAfterARefusal(`the gateway refused ${frame.code}`);
+      }
       if (frame.code === 'protocolVersion') {
         // The one error whose cause is never in the code: a server left running from an older build.
         // Saying what to do here saves reading the message and guessing. See decision record 0037.
@@ -267,19 +306,25 @@ function sendFollowing(cells: string[]): void {
   const followed = cellsHeld(state.houses).filter((cell) => !released.has(cell));
   const { ask, letGo } = whatToFollow(followed, cells);
 
-  if (ask.length > 0) {
-    for (const cell of ask) {
-      released.delete(cell);
-    }
-    update({ houses: holdCells(state.houses, ask) });
-    connection.send({ type: 'subscribeCells', cells: ask });
-  }
-
+  // The gateway is told to stop sending **before** it is asked for more, because it holds at most
+  // sixty-four cells and refuses a subscription that would take it past that - whole, not in part.
+  // Asking first made it hold the old view and the new one at once, which at a wide zoom is ninety
+  // cells for a view of forty-five, and every pan out there was refused. Only the *forgetting* was
+  // ever meant to wait; the order on the wire is the one it always was.
   if (letGo.length > 0) {
     connection.send({ type: 'unsubscribeCells', cells: letGo });
     for (const cell of letGo) {
       released.add(cell);
     }
+  }
+
+  if (ask.length > 0) {
+    for (const cell of ask) {
+      released.delete(cell);
+    }
+    askedFor = ask;
+    update({ houses: holdCells(state.houses, ask) });
+    connection.send({ type: 'subscribeCells', cells: ask });
   }
 
   if (released.size === 0) {

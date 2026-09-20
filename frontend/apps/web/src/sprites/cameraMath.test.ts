@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest';
 
 import {
   MAX_MERCATOR_LATITUDE,
+  WORLD_UNIT_ZOOM,
   fromMercator,
   isWithinView,
+  pixelsPerWorldUnit,
   toMercator,
   toMercatorExact,
   toScreen,
@@ -119,5 +121,22 @@ describe('deciding what to draw', () => {
   it('drops sprites that are far away', () => {
     expect(isWithinView({ x: -500, y: 300 }, view)).toBe(false);
     expect(isWithinView({ x: 500, y: view.height + 500 }, view)).toBe(false);
+  });
+});
+
+describe('one unit of world space', () => {
+  it('is one screen pixel at the zoom the doubling is measured from', () => {
+    expect(pixelsPerWorldUnit(WORLD_UNIT_ZOOM)).toBeCloseTo(1, 9);
+    expect(WORLD_UNIT_ZOOM).toBe(6);
+  });
+
+  it('doubles with every zoom level, exactly as the terrain under it does', () => {
+    for (const zoom of [0, 4, 7, 9]) {
+      expect(pixelsPerWorldUnit(zoom + 1)).toBeCloseTo(pixelsPerWorldUnit(zoom) * 2, 9);
+    }
+  });
+
+  it('is sixteen pixels at the closest the camera comes', () => {
+    expect(pixelsPerWorldUnit(10)).toBeCloseTo(16, 9);
   });
 });
