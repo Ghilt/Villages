@@ -91,15 +91,15 @@ export function HouseStatus({ room }: { room: Room }) {
         <div className="hud__achievement">
           <div className="hud__banner" aria-hidden="true">
             <svg viewBox="0 0 80 92" role="presentation">
-              <path d={ACHIEVEMENT.scrollLeft} className="hud__ornament" />
-              <path d={ACHIEVEMENT.scrollRight} className="hud__ornament" />
-              <path d={ACHIEVEMENT.stem} className="hud__ornament" />
-              <circle cx="40" cy="89.6" r="2.4" className="hud__stud" />
+              <path d={ACHIEVEMENT.scrollLeft} className="ornament" />
+              <path d={ACHIEVEMENT.scrollRight} className="ornament" />
+              <path d={ACHIEVEMENT.stem} className="ornament" />
+              <circle cx="40" cy="89.6" r="2.4" className="ornament__stud" />
               <path d={ACHIEVEMENT.frame} className="hud__frame" />
               <path d={ACHIEVEMENT.rule} className="hud__rule" />
-              <circle cx="12" cy="40" r="1.6" className="hud__stud" />
-              <circle cx="68" cy="40" r="1.6" className="hud__stud" />
-              <path d={ACHIEVEMENT.crest} className="hud__stud" />
+              <circle cx="12" cy="40" r="1.6" className="ornament__stud" />
+              <circle cx="68" cy="40" r="1.6" className="ornament__stud" />
+              <path d={ACHIEVEMENT.crest} className="ornament__stud" />
               <path
                 d={ACHIEVEMENT.field}
                 className={house === null ? 'hud__shield' : 'hud__shield hud__shield--borne'}

@@ -80,6 +80,23 @@ chosen rather than a metaphor for it - no folder, no chevron, no arrow pointing 
 has one, in both forms, and it replaced a chevron that could only put a pane away. A pane that cannot be
 put away offers two marks rather than three. See decision record 0045.
 
+**The ornament.** Gold on parchment, drawn the same way wherever the interface embellishes an edge:
+**nested contours** at decreasing weight rather than one thick line, a **stud** where something is fixed,
+a **lozenge** where two runs meet, and an **open curl** that springs away from the line and turns back on
+itself without closing. Drawn once for the achievement the shield hangs in, and the vocabulary for any
+edge worth marking since. **None of it carries meaning** — the heraldry is the field and the charge, and
+this is the frame they hang in — so there is never anything in it for the player to read. A curl is drawn
+once and mirrored rather than drawn four times, which is the **needle**'s rule. See decision record 0048.
+
+**The seam.** The join between the two **bays**, drawn as a moulding lying over it: three gold rules
+running the length of the stage — a heavy one on the join and a lighter one either side — with a fixed
+**knot** of **ornament** at the middle. The knot is one size whatever the length, because an ornament that
+stretches is an ornament that has been noticed; the rules stretch because a rule is a rule at any length.
+They run out to the stage's own edges rather than fading, for the reason the house card is flush against
+the edges it meets. It lies **over** the two bays rather than taking room from them, so nothing in the
+layout changed to make room for it, and it takes no pointer. One drawing turned: a band across a portrait
+stage, the same band down a landscape one. The **compass** stands on it. See decision record 0048.
+
 **The strip.** What every **pane** looks like put away: a band 44 pixels across with the pane's name on
 it and the **pane size control** beside it. The same band turned a quarter in landscape, 44 pixels wide
 down the side of the stage with the name written **down** it rather than dropped — there is no room for a

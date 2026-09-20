@@ -5,6 +5,7 @@ import { note } from '../debug/log';
 import { subjectsNow, watchSubjects } from '../inspect/subjects';
 import { gatewayState, watchGateway } from '../net/gateway';
 import { Compass } from './Compass';
+import { Seam } from './Seam';
 import { bayLayout, type BayName, type Box, isTabbed, type Rect, TAB_BAR, TILES } from './bayBox';
 import {
   askedIn,
@@ -230,6 +231,9 @@ export function Stage({ stage, contents, overlays }: StageProps) {
         );
       })}
 
+      {/* The moulding over the join, and the disc that stands on it. Only where there is a join:
+          below 64 pixels the stage is one box and `--bay-first` is the whole of it. */}
+      {box.form === 'bays' && box.bays.second !== null && <Seam along={box.along} />}
       {box.form === 'bays' && <Compass />}
       {overlays}
     </div>

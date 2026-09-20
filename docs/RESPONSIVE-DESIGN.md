@@ -41,6 +41,10 @@ arrangement:
 - **Half each** — measured, not declared. The middle size means the same thing on every pane.
 - **The rest and a strip** — the same again, the other way round.
 
+**The join between them is drawn**, as a moulding lying over it rather than as room cut out of either
+side: three gold rules the length of the stage with a knot of ornament at the middle, turned a quarter
+when the stage is. See decision record 0048 and `LOOK-AND-FEEL.md`.
+
 **Both bays put away is not a state a player can reach**, and not because a rule forbids it: there is no
 arrangement that says it. **Naming one bay's size names the whole arrangement**, so the two controls can
 never disagree — they read one value rather than writing into each other.
