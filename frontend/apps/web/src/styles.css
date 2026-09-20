@@ -2331,3 +2331,20 @@ body,
     flex-direction: column;
   }
 }
+
+/*
+  The debug panel's first slider. Nothing in the app had one before scenery, which needed two: how
+  much of it there is, and how far in before it arrives. Both are numbers with a range and no
+  meaningful units to type, which is what a slider is for and what a button is not.
+*/
+.debug__slider {
+  width: 100%;
+  margin: 0.1rem 0 0.2rem;
+  accent-color: #9d7c2a;
+  cursor: pointer;
+}
+
+.debug__slider:focus-visible {
+  outline: 1px solid #9d7c2a;
+  outline-offset: 2px;
+}

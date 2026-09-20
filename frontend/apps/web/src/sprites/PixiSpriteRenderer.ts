@@ -15,7 +15,9 @@ import {
   wantedForm,
 } from './twoForms';
 import type { Form, TwoForms } from './twoForms';
-import type { CameraSource, MapSprite, SpriteRenderer } from './SpriteRenderer';
+import { createSceneryLayer } from './scenery/SceneryLayer';
+import { noteDrawn } from './scenery/sceneryCells';
+import type { CameraSource, MapSprite, SceneryHow, SpriteRenderer } from './SpriteRenderer';
 
 /**
  * What each shape is laid out in. Every one is drawn far larger than it is ever shown and scaled
@@ -127,6 +129,12 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
   let lastFrameAt = 0;
   /** A frame owed to a trade still running. The camera is not moving, so nobody else will ask. */
   let owed: number | null = null;
+  let scenery: ReturnType<typeof createSceneryLayer> | null = null;
+  let how: SceneryHow = { on: false, spacing: 2, laterBy: 0, tilesRoot: '' };
+  /** The worst gap between two frames of a moving map, which is what a stutter is. */
+  let worstGapMs = 0;
+  /** When the last frame was actually drawn, which is what a frame gap is measured between. */
+  let lastDrawnAt = 0;
 
   /**
    * One shape, rasterised once, with the smaller copies of itself that a downscale needs.
@@ -412,6 +420,25 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
     }
 
     dressTheRing(zoom);
+
+    if (scenery !== null) {
+      scenery.container.visible = how.on;
+      const drew = how.on
+        ? scenery.update(view, how.tilesRoot, how.spacing, how.laterBy, keepTrading)
+        : { particles: 0, showing: 0, cells: 0, waiting: 0 };
+      // Only gaps short enough to be a moving map are counted. A still map draws nothing, so the gap
+      // since its last frame is seconds, and reporting that as a frame gap would be the panel lying
+      // about a stall that never happened. See decision record 0023.
+      const gap = now - lastDrawnAt;
+      lastDrawnAt = now;
+      if (gap > 0 && gap < 200) {
+        worstGapMs = Math.max(worstGapMs, gap);
+        noteDrawn({ ...drew, frameGapMs: gap, worstGapMs });
+      } else {
+        noteDrawn(drew);
+      }
+    }
+
     app.render();
 
     if (trading) {
@@ -462,6 +489,9 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       }
 
       textures = buildTextures();
+      // Under everything, because it is the ground the rest stands on.
+      scenery = createSceneryLayer(app.renderer);
+      stage.addChild(scenery.container);
       // Under every sprite, because it marks the ground a house stands on rather than the house.
       ring = new Sprite(textures.ring);
       ring.anchor.set(0.5, 0.5);
@@ -476,6 +506,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       // so the marks trailed the ground for the length of every flight - which the comment that used to
       // stand here admitted, and accepted because the marks were never quite still. They are still now.
       lastFrameAt = performance.now();
+      lastDrawnAt = lastFrameAt;
       unwatch = camera.watch(frame);
       frame();
 
@@ -545,6 +576,17 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       frame();
     },
 
+    setScenery(next: SceneryHow): void {
+      // A different scattering is a different world's worth of points, so what was cut is thrown away
+      // rather than left to be a denser world's sparse half.
+      const recut = next.spacing !== how.spacing || next.tilesRoot !== how.tilesRoot;
+      how = next;
+      if (recut) {
+        scenery?.clear();
+      }
+      frame();
+    },
+
     setSprites(sprites: readonly MapSprite[]): void {
       const seen = new Set<string>();
 
@@ -579,6 +621,8 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
 
     destroy(): void {
       disposed = true;
+      scenery?.destroy();
+      scenery = null;
       unwatch?.();
       unwatch = null;
       if (owed !== null) {
