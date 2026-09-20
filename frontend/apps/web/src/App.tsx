@@ -21,7 +21,7 @@ import { gateway, gatewayState, watchGateway } from './net/gateway';
 import { followMap } from './net/followMap';
 import { eyeIsOpen, watchEye } from './house/eye';
 import { HouseStatus } from './house/HouseStatus';
-import { InfluenceOverlay } from './influence/InfluenceOverlay';
+import { HoldingOverlay } from './areas/HoldingOverlay';
 import { StoodDown } from './net/StoodDown';
 import { flyWith } from './map/focus';
 import { MapStrip } from './map/MapStrip';
@@ -247,7 +247,7 @@ export function App({ master }: AppProps) {
                 <MapView worldRoot={worldRoot} onReady={setMap} />
                 {map !== null && <SpriteOverlay map={map} sprites={sprites} />}
                 <AreaOverlay map={map} worldRoot={worldRoot} />
-                <InfluenceOverlay map={map} houses={drawn} mine={eye ? yours : null} />
+                <HoldingOverlay map={map} houses={drawn} mine={eye ? yours : null} />
                 {/* Put away, and still running underneath: a lid over the map, never instead of it. The
                     guard is the form rather than the size, because what a pane was asked to be outlives
                     the fold - and the floor of the spread is never put away. See `MapStrip`. */}

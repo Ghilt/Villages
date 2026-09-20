@@ -56,6 +56,8 @@ export {
 export type { TileAddress } from './tiles.ts';
 
 export {
+  MOST_ENCLOSED,
+  areaAround,
   closePath,
   enclose,
   enclosedBy,
@@ -67,8 +69,6 @@ export {
   withoutCollinear,
 } from './area.ts';
 export type { EnclosedPixels, Fence, FencePart, MasterGrid, PixelSpan, PixelWindow } from './area.ts';
-
-export { MOST_GROUND, influenceZoneAround } from './influence.ts';
 
 export { DEFAULT_MASTER, isSafeMasterName, masterNameOf, worldDirOf } from './masters.ts';
 

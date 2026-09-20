@@ -2,6 +2,11 @@
 
 - Status: accepted
 - Date: 2026-09-09
+- Amended 2026-09-20: **area is the technical term**, and the flavour has left the code. The circle
+  a house's ground was drawn as lived in an `influence.ts` of its own, called `influenceZoneAround`,
+  which named one use of it in the one place that should have named none. It is `areaAround` in
+  `area.ts` now, beside the rest of the component, and what a given area *means* belongs to whatever
+  draws it: a **Holding** today, a castle's influence zone later. The geometry did not change.
 
 ## Context
 

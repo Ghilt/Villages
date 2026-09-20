@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  areaAround,
   closePath,
   enclose,
   enclosedBy,
@@ -11,7 +12,7 @@ import {
   insideFence,
 } from './area.ts';
 import type { EnclosedPixels, PixelSpan } from './area.ts';
-import { createRaster, fillPolygon } from './raster.ts';
+import { createRaster, fillPolygon, toPixel } from './raster.ts';
 import type { Ring } from './raster.ts';
 import { doubleSignedArea } from './simplify.ts';
 
@@ -229,5 +230,62 @@ describe('a fence in longitude and latitude', () => {
       expect(lng + 180).toBeCloseTo(Math.round(lng + 180), 10);
       expect(90 - lat).toBeCloseTo(Math.round(90 - lat), 10);
     }
+  });
+});
+
+/** The master's own grid, which is what a fence is measured in. */
+const MASTER = { width: 32768, height: 16384 };
+
+const stockholm = { lng: 18.07, lat: 59.33 };
+const equator = { lng: 0, lat: 0 };
+
+describe('an area drawn a fixed reach round a point', () => {
+  it('encloses the point it is drawn round', () => {
+    const fence = areaAround(stockholm, MASTER, 20);
+    const at = toPixel(stockholm, MASTER);
+
+    expect(insideFence(fence, Math.floor(at.x), Math.floor(at.y))).toBe(true);
+  });
+
+  it('is one piece, with nothing missing out of the middle of it', () => {
+    const fence = areaAround(stockholm, MASTER, 20);
+
+    expect(fence.parts).toHaveLength(1);
+    expect(fence.parts[0]!.holes).toHaveLength(0);
+  });
+
+  it('holds about as many pixels as a circle of that reach does', () => {
+    const reach = 30;
+    const fence = areaAround(stockholm, MASTER, reach);
+
+    // Within a tenth of pi r squared: the rest is the staircase the lattice makes of a curve.
+    const circle = Math.PI * reach * reach;
+    expect(fenceSize(fence)).toBeGreaterThan(circle * 0.9);
+    expect(fenceSize(fence)).toBeLessThan(circle * 1.1);
+  });
+
+  it('is as wide as it is tall, because it is round on the master rather than in degrees', () => {
+    const window = fenceWindow(areaAround(stockholm, MASTER, 25));
+
+    expect(Math.abs(window.width - window.height)).toBeLessThanOrEqual(1);
+  });
+
+  it('is the same size wherever it is, north or on the equator', () => {
+    const north = fenceSize(areaAround(stockholm, MASTER, 25));
+    const middle = fenceSize(areaAround(equator, MASTER, 25));
+
+    // Within a percent: what differs is where the staircase falls, not how much ground there is.
+    expect(Math.abs(north - middle) / middle).toBeLessThan(0.02);
+  });
+
+  it('grows with the reach', () => {
+    const small = fenceSize(areaAround(equator, MASTER, 10));
+    const large = fenceSize(areaAround(equator, MASTER, 20));
+
+    expect(large).toBeGreaterThan(small * 3);
+  });
+
+  it('refuses a reach that would swallow the world rather than allocating one', () => {
+    expect(() => areaAround(equator, MASTER, 100_000)).toThrow();
   });
 });
