@@ -81,11 +81,14 @@ Wanted, not started, and each needs a hypothesis in `docs/experiments/` before a
   quarter of it, hovered and scrolled into. The same camera; see experiment 0003.
 - **Accounts** behind the identity port.
 - **World persistence**, after which the event store is never wiped and event changes need upcasters.
-- **The world-generator**: a world that seems lived in rather than scattered over - settlements
-  inferred from the terrain, ways between them, worked ground around them, and the scatter told what
-  it is standing in. Experiment 0006 proved the machine will draw it and found the budget by hand; the
-  path is `docs/plans/world-generator.md`. The largest thing on this list and the one that would change
-  how the world reads most.
+- **The biome sprite map**: the first half of the world-generator, and the half that needs nothing said
+  about people. A program that reads the master, decides what kind of place every part of the world is,
+  and arranges the scenery into stands that a painted forest shapes, instead of the even carpet 0006
+  measured. Seven increments in `docs/plans/biome-sprite-map.md`; the hypothesis is experiment 0007.
+- **The world-generator**, the other half: settlements inferred from the terrain, ways between them,
+  worked ground around them, and marks of time. Experiment 0006 proved the machine will draw it and
+  found the budget by hand; the path is `docs/plans/world-generator.md`. The largest thing on this list
+  and the one that would change how the world reads most.
 - **Aliveness and scale**: a bot swarm to ten thousand connections on one machine, aggregation of sprites at
   low zoom, a custom stylised map style checked in, hardened reconnection and clock correction. The scale
   the architecture is designed for is not in doubt; proving it is simply not next.

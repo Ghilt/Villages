@@ -2,10 +2,11 @@
 
 **What belongs here:** what the world-generator is for, what it has to work with, the order it would
 be built in, and the questions that have to be answered before it can be. **What does not:** how
-scenery is drawn today, which is decision record 0052 and experiment 0006; what the world is as
-fiction (`SETTING.md`); how the master is painted (`AUTHORING-THE-WORLD.md`); what any of it looks
-like (`LOOK-AND-FEEL.md`); or when it gets built (`ROADMAP.md`). Nothing here is decided. When a part
-of it is, that part becomes a decision record and leaves.
+scenery is drawn today, which is decision record 0052 and experiment 0006; how biomes and the
+arrangement of scenery get built, which left this document for `biome-sprite-map.md`; what the world
+is as fiction (`SETTING.md`); how the master is painted (`AUTHORING-THE-WORLD.md`); what any of it
+looks like (`LOOK-AND-FEEL.md`); or when it gets built (`ROADMAP.md`). Nothing here is decided. When a
+part of it is, that part becomes a decision record and leaves.
 
 ---
 
@@ -50,30 +51,39 @@ worth naming what they are not:
 **Every one of them is physical geography.** Not one of them knows where anybody lives. That is the
 gap the world-generator is about.
 
-## On finding an API for it
+## On leaning on the real world
 
-Adam asked whether there is something out there to help. There is, and there is a reason to be
-careful with it.
+Adam asked whether there is something out there to help. There is, and he has ruled on how to think
+about it.
 
 The obvious candidates are **Natural Earth populated places** (free, tiny, already a source this
 project consumes), the **GHSL settlement grid**, and **OpenStreetMap** for roads and field boundaries.
-Any of them would tell us where people are on *Earth*.
+Beyond those, and more interesting: **named historical sites and buildings**, which nobody publishes
+as a tidy dataset but which can be gathered from the web — a castle, an abbey, a battlefield, a mine.
+Any of it would tell us where people are, and were, on *Earth*.
 
-But this world is not Earth. It was warped from it by twelve control points and a 0.42-degree wobble
-(0017), and then **painted over by hand**. A settlement layer laid on from real Earth would put a town
-in the sea wherever Adam has moved a coast, and would keep putting it there every time he paints. The
-warp is reversible and the existing sources go through it, so it is *possible* — but it binds the
-world to a coastline Adam is free to change, which is the one thing the project has consistently
-refused (0018, 0025).
+**Adam's ruling: the potential there is real and we want it, later.** In his words, the warped map is
+not finished right now and the map may change; but there is great potential in leaning on our world,
+and even scraping the web for great historical sites and buildings would be useful. So the argument
+below is about **timing, not principle**, and the door stays open.
 
-**So the recommendation is the other way round: infer the human geography from the master rather than
-import it.** Where a settlement goes is a question the terrain can answer — the coast, a river mouth,
-a confluence, flat fertile ground, not too high, not in a marsh. That answer survives Adam repainting,
-costs no download, and is the same kind of thing the scatter already is. Real-Earth data is then worth
-having for one job only: **checking the generator's output against a place we know**, which is what
-the warped world was for in the first place.
+What makes it wait is that this world is not Earth yet *and is still moving*. It was warped from Earth
+by twelve control points and a 0.42-degree wobble (0017), and then **painted over by hand**. A
+settlement layer laid on from real Earth today would put a town in the sea wherever Adam has moved a
+coast, and would keep putting it there every time he paints. The warp is reversible and the existing
+sources already go through it, so it stays possible — the cost is that it binds the world to a
+coastline Adam is free to change, and it is that coastline which is not settled.
 
-This is the first thing to decide and it deserves its own record.
+**So for now the generator infers the human geography from the master rather than importing it.** Where
+a settlement goes is a question the terrain can answer — the coast, a river mouth, a confluence, flat
+fertile ground, not too high, not in a marsh. That answer survives Adam repainting, costs no download,
+and is the same kind of thing the scatter already is. Real-Earth data earns two jobs in the meantime:
+**checking the generator's output against a place we know**, which is what the warped world was for in
+the first place, and being **gathered while the map settles**, because a list of historical sites is
+worth having on disk long before anything is allowed to place one.
+
+When the map does settle, the thing to decide is not *whether* but *which layer first*, and that
+deserves its own record.
 
 ## What "lived in" is made of
 
@@ -82,6 +92,7 @@ Roughly in the order the eye reads them, and each one is a layer the next can le
 1. **Regions.** The world must not be uniform. Coherent stretches with character — a pine belt, a
    country of hedged fields, a bare upland — larger than a screen and smaller than a continent. Low
    frequency noise over the terrain, so that two forests of the same class are not the same forest.
+   *Taken out and made buildable as the **biome** in `docs/plans/biome-sprite-map.md`.*
 2. **Settlements.** Where people chose to be. Inferred from the terrain: water, fertile ground,
    shelter, a crossing. Sparse, global, and the anchor everything human hangs off.
 3. **Ways between them.** A track from one settlement to the next, following valleys, crossing rivers
@@ -93,9 +104,14 @@ Roughly in the order the eye reads them, and each one is a layer the next can le
    One in a screenful is a story; ten is a texture.
 6. **The scatter, told what it is standing in.** What 0006 built, but reading the layers above rather
    than the terrain class alone: sparse where a field is, dense in a wood, absent on a road, crowding
-   a boundary.
+   a boundary. *Taken out and made buildable as the **stand** in `docs/plans/biome-sprite-map.md`,
+   which reads one and six and leaves room for the rest.*
 
 The order matters. Six without the others is what we have now, and it is wallpaper.
+
+**One and six left this document and became `docs/plans/biome-sprite-map.md`**, because they are the
+two that can be built without answering a single question about people. Two to five stay here, and the
+seam is already cut for them: a sprite map is a directory, and a settlement layer is another one.
 
 ## The shape it probably wants
 
@@ -116,8 +132,9 @@ forty metres from a road.
 
 ## Open questions
 
-- **Infer the human world, or import it?** The recommendation above is to infer. It should be argued
-  properly and recorded.
+- ~~**Infer the human world, or import it?**~~ **Answered on timing.** Infer it while the map is still
+  moving; lean on the real world once it settles, and gather what would be needed — historical sites
+  and buildings among them — in the meantime. See the section above.
 - **Does a settlement here have anything to do with a player's house?** A generated town and a founded
   house are different things, and whether they may share ground is a question for `MECHANICS.md`, not
   for the generator.
@@ -126,8 +143,10 @@ forty metres from a road.
   them is unfinished.
 - **Where does the fiction constrain it?** `SETTING.md` decides whether this world has cities, roads,
   ruins at all. The generator should be told, not guess.
-- **How is it reviewed?** The stills answer this for the paint (0021). The generator wants the same:
-  a handful of named places rendered offline, so a change to it can be argued from a picture.
+- ~~**How is it reviewed?**~~ **Answered for the first two layers.** The stills answer it for the paint
+  (0021) and `biome-sprite-map.md` reuses the same six views, with a `biome` renderer in the Debug map
+  dropdown for the part of it a still cannot show. Layers two to five will want the same and have not
+  been asked yet.
 
 ## What is already true, and is the budget
 
