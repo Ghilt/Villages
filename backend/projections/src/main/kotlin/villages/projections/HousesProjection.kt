@@ -9,6 +9,11 @@ import villages.application.HousesByPlayer
 import villages.application.Start
 import villages.application.StoredEvent
 import villages.domain.HouseFounded
+import villages.domain.Pledge
+import villages.domain.HouseResourceSpent
+import villages.domain.HouseResourceReleased
+import villages.domain.HouseResourcePledged
+import villages.domain.HouseResourceGranted
 import villages.domain.PlayerGivenChoice
 import villages.domain.HouseId
 import villages.domain.PlayerTookAction
@@ -58,10 +63,39 @@ class HousesProjection(feed: EventFeed) : HousesByCell, HousesByPlayer, AutoClos
                 significance = event.significance,
                 banner = event.banner,
                 resources = event.resources,
+                pledges = emptyList(),
                 since = event.worldTime,
                 until = null,
                 version = stored.streamVersion,
             )
+
+            // What a house has changes its row but not where it is, so the same fan-out carries it: the
+            // owner is told wherever they are looking, and so is anyone holding its cell.
+            is HouseResourceGranted -> changed(event.houseId, stored) {
+                it.withStock(event.resource) { stock -> stock.plus(event.amount, event.recordedAt) }
+            } ?: return
+
+            is HouseResourceSpent -> changed(event.houseId, stored) {
+                it.withStock(event.resource) { stock -> stock.minus(event.amount, event.recordedAt) }
+            } ?: return
+
+            is HouseResourcePledged -> changed(event.houseId, stored) {
+                it.copy(
+                    pledges = it.pledges + Pledge(
+                        id = event.pledgeId,
+                        resource = event.resource,
+                        amount = event.amount,
+                        until = event.until,
+                        purpose = event.purpose,
+                    ),
+                )
+            } ?: return
+
+            // Dropping the pledge is the whole of the release: what is pledged is the sum of this list,
+            // so nothing is added back and there is no arithmetic to get wrong.
+            is HouseResourceReleased -> changed(event.houseId, stored) {
+                it.copy(pledges = it.pledges.filterNot { pledge -> pledge.id == event.pledgeId })
+            } ?: return
 
             // Nothing is on the map until a house is founded. Being asked something and answering it are
             // the choices projection's business; this one draws the map and has nothing to say about them.
@@ -83,6 +117,18 @@ class HousesProjection(feed: EventFeed) : HousesByCell, HousesByPlayer, AutoClos
         for (listener in listeners) {
             listener(change)
         }
+    }
+
+    /**
+     * The row this event changes, already at the event's version, or null when there is no such house.
+     *
+     * A resource event about a house the map has never seen cannot happen - the decider refuses every
+     * command that would write one - so the null is a replay that began mid-stream rather than a case
+     * worth handling.
+     */
+    private fun changed(houseId: HouseId, stored: StoredEvent, change: (HouseRow) -> HouseRow): HouseRow? {
+        val was = rows[houseId]?.row ?: return null
+        return change(was).copy(version = stored.streamVersion)
     }
 
     override fun inCell(cell: String, at: WorldTime, most: Int, everything: Boolean): CellContents {

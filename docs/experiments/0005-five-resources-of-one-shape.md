@@ -58,6 +58,20 @@ the gateway maps the wealth stock onto the `treasury` field the frame has always
 what the world holds without changing what it says. The visible consequence is that **the treasury stopped
 ticking**: every rate is zero now, and the one live number on the screen stands still.
 
+Increment 4b landed: the four verbs. **The first observation against the hypothesis is in, and it holds so
+far.** A gate and a pledge really are one shape - `freeOf` means the same thing for domain as it does for
+reason, and `has` is that same question asked without subtracting. Nothing needed a second kind of resource.
+
+The part that came out better than expected is the release. Because what is pledged is the sum of the live
+pledges and not a stored number, releasing one is `filterNot` and there is no arithmetic anywhere to get
+wrong or to drift. That is the derivation rule paying for itself rather than costing.
+
+**Nothing of 4b can be seen in the running program yet**, and that is worth saying plainly rather than
+glossing. The four commands have no caller: the wire gains their payloads in increment 5 and the debug
+levers arrive in 6. What stands in for a panel line is twelve decider tests and three projection tests,
+including the one that matters most - that a grant reaches the row and tells the watchers, which is the
+path to the player's screen.
+
 ## Result
 
 Open.

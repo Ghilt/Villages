@@ -9,6 +9,7 @@ import villages.domain.HouseName
 import villages.domain.Location
 import villages.domain.PlayerId
 import villages.domain.Significance
+import villages.domain.Pledge
 import villages.domain.Resource
 import villages.domain.Stock
 import villages.domain.WorldTime
@@ -208,6 +209,8 @@ data class HouseRow(
     val banner: Banner,
     /** One stock of every resource, as the house's own events last said. */
     val resources: Map<Resource, Stock>,
+    /** The live pledges against those stocks, and the only record of what is spoken for. */
+    val pledges: List<Pledge>,
     /** From when, in world-time, this house exists. */
     val since: WorldTime,
     /** Until when, in world-time, or null while it still does. */
@@ -217,6 +220,13 @@ data class HouseRow(
 ) {
     /** What this house has of one resource. A founded house has all five, so this never misses. */
     fun stockOf(resource: Resource): Stock = resources.getValue(resource)
+
+    /** How much of one resource is spoken for: the sum of the live pledges, exactly as the domain has it. */
+    fun pledgedOf(resource: Resource): Long = pledges.filter { it.resource == resource }.sumOf { it.amount }
+
+    /** The row with one of its stocks changed. */
+    fun withStock(resource: Resource, change: (Stock) -> Stock): HouseRow =
+        copy(resources = resources + (resource to change(stockOf(resource))))
 
     fun existsAt(at: WorldTime): Boolean = at >= since && (until == null || at < until)
 }

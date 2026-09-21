@@ -28,4 +28,12 @@ sealed class HouseError(message: String) : RuntimeException(message) {
 
     /** An action taking an option the pending choice does not offer. */
     data object NoSuchOption : HouseError("that choice does not offer that option")
+    data object NoSuchHouse : HouseError("there is no house here to do that to")
+    data object NoSuchPledge : HouseError("this house has no such pledge")
+    class InvalidAmount(reason: String) : HouseError("not an amount: $reason")
+    class InvalidPledge(reason: String) : HouseError("not a pledge: $reason")
+
+    /** Not enough of a resource is free, whether because there is little or because much is pledged. */
+    class NotEnoughFree(resource: Resource, wanted: Long, free: Long) :
+        HouseError("this house has $free ${resource.name.lowercase()} free, not $wanted")
 }

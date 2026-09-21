@@ -52,6 +52,12 @@ data class Stock(val total: Long, val ratePerSecond: Double, val asOf: Instant) 
         require(ratePerSecond.isFinite()) { "a rate is a number: $ratePerSecond" }
     }
 
+    /** The stock after gaining an amount: brought up to date first, so a running rate is not lost. */
+    fun plus(amount: Long, now: Instant): Stock = Stock(at(now) + amount, ratePerSecond, now)
+
+    /** The stock after losing an amount. The caller has already checked that there is enough free. */
+    fun minus(amount: Long, now: Instant): Stock = Stock(at(now) - amount, ratePerSecond, now)
+
     /** The total at a later instant, the rate having run on. Before `asOf` it is what it was. */
     fun at(now: Instant): Long {
         val elapsed = Duration.between(asOf, now)

@@ -76,6 +76,53 @@ data class HouseFounded(
     }
 }
 
+/** A house was given some of a resource. What gave it is the story around it, not a field on it. */
+data class HouseResourceGranted(
+    override val houseId: HouseId,
+    val resource: Resource,
+    val amount: Long,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : WorldEvent
+
+/** Some of a house's resource was used up, and is gone. */
+data class HouseResourceSpent(
+    override val houseId: HouseId,
+    val resource: Resource,
+    val amount: Long,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : WorldEvent
+
+/**
+ * Some of a house's resource was tied to an undertaking until a world-day. It is not spent: it comes back
+ * when the pledge is released, and until then it is not free for anything else.
+ */
+data class HouseResourcePledged(
+    override val houseId: HouseId,
+    val pledgeId: PledgeId,
+    val resource: Resource,
+    val amount: Long,
+    val until: WorldTime,
+    val purpose: String,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : WorldEvent
+
+/**
+ * A pledge ended and what it held is free again.
+ *
+ * Only the id is here. Which resource it was and how much is on the event that made the pledge, and
+ * copying it would be two places for one fact to be wrong in - the same reason `PlayerTookAction` carries
+ * ids and not the option.
+ */
+data class HouseResourceReleased(
+    override val houseId: HouseId,
+    val pledgeId: PledgeId,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : WorldEvent
+
 /**
  * A player was given a choice to make. The whole choice is here, options and effects and all, so the
  * stream says what was offered and not only what was taken: the roads not taken are history too.

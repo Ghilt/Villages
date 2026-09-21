@@ -79,6 +79,10 @@ One stream per house, addressed as house followed by its identifier.
 | Type | Payload | Meaning | Produced by | Consumers |
 |---|---|---|---|---|
 | `villages.house.founded.v1` | `houseId`, `player`, `name`, `seat`, `significance`, `banner`, `resources`, `worldTime`, `recordedAt` | A player founded a house at a seat, with a name and a banner. It carries where and how much that matters; the tile it falls in is derived downstream. It carries a stock of every resource, all of them empty and none of them growing, because nothing generates income yet. | `FoundHouse`, or `TakeAction` on an option that founds | The map projection; the event bridge, and through it every gateway subscribed to a tile containing it |
+| `villages.house.resourceGranted.v1` | `houseId`, `resource`, `amount`, `worldTime`, `recordedAt` | A house was given some of a resource. What gave it is the story the event belongs to rather than a field on it. | `GrantResource` | The map projection, which holds what a house has | 
+| `villages.house.resourcePledged.v1` | `houseId`, `pledgeId`, `resource`, `amount`, `until`, `purpose`, `worldTime`, `recordedAt` | Some of a house's resource was tied to an undertaking until a world-day. It is not spent: it is not free for anything else until the pledge is released, and then it comes back whole. The day is worked out from a span in months before the command is made. | `PledgeResource` | The map projection, which holds the live pledges | 
+| `villages.house.resourceReleased.v1` | `houseId`, `pledgeId`, `worldTime`, `recordedAt` | A pledge ended and what it held is free again, whether its span ran out or somebody ended it early. Only the id is here: which resource and how much is on the event that made the pledge. | `ReleasePledge` | The map projection, which drops the pledge | 
+| `villages.house.resourceSpent.v1` | `houseId`, `resource`, `amount`, `worldTime`, `recordedAt` | Some of a house's resource was used up and is gone. Refused unless that much of it was free, so what is pledged cannot be spent out from under a pledge. | `SpendResource` | The map projection, which holds what a house has | 
 
 ## The player's events
 
