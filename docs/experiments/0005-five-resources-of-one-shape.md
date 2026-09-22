@@ -84,6 +84,17 @@ went too. And `stockNow` finally moved into `client-core`, which makes that pack
 ("state, the protocol codec, the connection, cell maths and resource interpolation") true for the first
 time; it had been claiming that for months while the function lived in a pane.
 
+Increment 5b landed: the four commands cross the wire and the whole path works, from a command in a browser
+to an event in the store to a number changing on the card. Granting 1,204 wealth moved the card from 0 to
+1,204; pledging 35 reason for ten months came back as a pledge ending on the first of August, 1792, which is
+ten months after the world's own today. The events page needed no change at all to read the new types: it
+spells `villages.house.resourcePledged.v1` as "resource pledged" from the type alone.
+
+The one design point worth recording is that **months never reach the domain**. The wire asks for a span in
+months, the application layer turns it into a world-day with the calendar, and the decider only ever sees a
+day. That is the same seam the world clock uses, and it means the domain still knows nothing about what a
+month is.
+
 ## Result
 
 Open.

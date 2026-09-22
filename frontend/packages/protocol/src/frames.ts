@@ -113,6 +113,24 @@ export const choiceViewSchema = z.object({
 });
 
 export const commandPayloadSchema = z.discriminatedUnion('type', [
+  /**
+   * Give this house some of a resource, or use some of it up.
+   *
+   * Adam's levers rather than a player's: nothing in the game grants or spends anything yet, and these
+   * exist so that what the domain can do can be made to happen on purpose and watched. A mechanic that
+   * grants or spends later will go through these same commands.
+   */
+  z.object({ type: z.literal('grantResource'), resource: resourceNameSchema, amount: z.number().int() }),
+  z.object({ type: z.literal('spendResource'), resource: resourceNameSchema, amount: z.number().int() }),
+  /** The span is in months; which world-day that lands on is the server's to work out. See 0051. */
+  z.object({
+    type: z.literal('pledgeResource'),
+    resource: resourceNameSchema,
+    amount: z.number().int(),
+    months: z.number().int(),
+    purpose: z.string(),
+  }),
+  z.object({ type: z.literal('releasePledge'), pledgeId: z.string() }),
   /** No house id: the server works it out from the player, so a client cannot name a stream. See 0028. */
   z.object({
     type: z.literal('foundHouse'),

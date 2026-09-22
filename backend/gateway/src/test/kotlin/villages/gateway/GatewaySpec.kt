@@ -2,6 +2,8 @@ package villages.gateway
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.string.shouldStartWith
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldContainExactly
@@ -14,6 +16,7 @@ import villages.application.EventFeed
 import villages.application.FoundHouseService
 import villages.application.HouseCommandExecutor
 import villages.application.Provenance
+import villages.application.ResourceService
 import villages.application.Start
 import villages.application.StoredEvent
 import villages.application.TakeActionService
@@ -157,6 +160,8 @@ private const val RAVENSCAR = "6d5b0a2e-1c3f-4d7e-9a8b-0f1e2d3c4b5a"
 /** A command id is a UUID: it becomes the causation of what the command writes. See 0035. */
 private const val COMMAND_ONE = "1c000001-0000-4000-8000-00000000000a"
 private const val COMMAND_TWO = "1c000002-0000-4000-8000-00000000000b"
+private const val COMMAND_THREE = "1c000003-0000-4000-8000-00000000000c"
+private const val COMMAND_FOUR = "1c000004-0000-4000-8000-00000000000d"
 
 /** Stockholm, before the warp, at three depths: the shared vector every zoom of it is known for. */
 private const val STOCKHOLM_Z10 = "1200312213"
@@ -171,6 +176,22 @@ private fun founding(commandId: String = COMMAND_ONE, name: String = "Ravenscar"
 private fun takingAction(choiceId: String, optionId: String, commandId: String = COMMAND_ONE) =
     """{"type":"command","commandId":"$commandId","command":{"type":"takeAction",""" +
         """"choiceId":"$choiceId","optionId":"$optionId"}}"""
+
+private fun granting(resource: String = "wealth", amount: Long = 120, commandId: String = COMMAND_TWO) =
+    """{"type":"command","commandId":"$commandId","command":{"type":"grantResource",""" +
+        """"resource":"$resource","amount":$amount}}"""
+
+private fun spending(resource: String = "wealth", amount: Long = 50, commandId: String = COMMAND_TWO) =
+    """{"type":"command","commandId":"$commandId","command":{"type":"spendResource",""" +
+        """"resource":"$resource","amount":$amount}}"""
+
+private fun pledging(resource: String = "reason", amount: Long = 35, months: Long = 10, commandId: String = COMMAND_TWO) =
+    """{"type":"command","commandId":"$commandId","command":{"type":"pledgeResource",""" +
+        """"resource":"$resource","amount":$amount,"months":$months,"purpose":"clearer glass"}}"""
+
+private fun releasing(pledgeId: String, commandId: String = COMMAND_TWO) =
+    """{"type":"command","commandId":"$commandId","command":{"type":"releasePledge",""" +
+        """"pledgeId":"$pledgeId"}}"""
 
 private fun subscribe(vararg cells: String) =
     """{"type":"subscribeCells","cells":[${cells.joinToString { "\"$it\"" }}]}"""
@@ -204,6 +225,15 @@ private class Rig {
             ids = { UUID.fromString("a1000000-0000-4000-8000-%012x".format(++minted)) },
         ),
         takeAction = TakeActionService(world, clock = { noon }, world = worldClock),
+        resources = ResourceService(
+            world,
+            clock = { noon },
+            world = worldClock,
+            // Thirty days a month is enough here: what a month is belongs to the calendar and is held to
+            // the shared fixture there, not in a gateway test.
+            calendar = { day, months -> WorldTime(day.day + months * 30) },
+            ids = { UUID.fromString("b1000000-0000-4000-8000-%012x".format(++minted)) },
+        ),
         choices = choices,
         recent = recent,
         emptyTheWorld = {
@@ -325,6 +355,66 @@ class GatewaySpec : StringSpec({
         // so the privacy is the shape rather than a rule anybody has to remember. See decision 0028.
         theirs.filterIsInstance<YourHouse>().shouldBeEmpty()
         theirs.filterIsInstance<Batch>().flatMap { it.deltas }.shouldNotBeEmpty()
+    }
+
+    "a granted resource comes back on the owner's own house, and a spend takes it off again" {
+        val rig = Rig()
+        val (founder, mine) = rig.introduced()
+        founder.receive(founding())
+
+        founder.receive(granting(amount = 120))
+
+        mine.filterIsInstance<CommandAccepted>().map { it.commandId } shouldContain COMMAND_TWO
+        mine.filterIsInstance<YourHouse>().last().yours!!.resources.getValue("wealth").total shouldBe 120
+
+        founder.receive(spending(amount = 50, commandId = COMMAND_THREE))
+
+        mine.filterIsInstance<YourHouse>().last().yours!!.resources.getValue("wealth").total shouldBe 70
+    }
+
+    "a pledge is asked for in months and comes back as a day, held against what is free" {
+        val rig = Rig()
+        val (founder, mine) = rig.introduced()
+        founder.receive(founding())
+        founder.receive(granting(resource = "reason", amount = 100))
+
+        founder.receive(pledging(amount = 35, months = 10, commandId = COMMAND_THREE))
+
+        val yours = mine.filterIsInstance<YourHouse>().last().yours!!
+        yours.resources.getValue("reason").total shouldBe 100
+        yours.resources.getValue("reason").pledged shouldBe 35
+        val pledge = yours.pledges.single()
+        pledge.amount shouldBe 35
+        pledge.purpose shouldBe "clearer glass"
+        // Ten months on, by the calendar this rig was given. What a month is belongs to the calendar.
+        pledge.until shouldBe today.day + 300
+
+        founder.receive(releasing(pledge.id, commandId = COMMAND_FOUR))
+
+        val freed = mine.filterIsInstance<YourHouse>().last().yours!!
+        freed.pledges.shouldBeEmpty()
+        freed.resources.getValue("reason").pledged shouldBe 0
+    }
+
+    "a resource nobody has heard of is refused as malformed rather than guessed at" {
+        val rig = Rig()
+        val (founder, mine) = rig.introduced()
+        founder.receive(founding())
+
+        founder.receive(granting(resource = "domain", amount = 5, commandId = COMMAND_TWO))
+
+        // `domain` is the player's word; the wire's is `naturalDomain`, and the gateway does not translate.
+        mine.filterIsInstance<CommandRejected>().single().reason shouldStartWith "malformed"
+    }
+
+    "spending more than is free is refused, and says so" {
+        val rig = Rig()
+        val (founder, mine) = rig.introduced()
+        founder.receive(founding())
+
+        founder.receive(spending(amount = 1, commandId = COMMAND_TWO))
+
+        mine.filterIsInstance<CommandRejected>().single().reason shouldBe "notEnoughFree"
     }
 
     "welcome's earliest day is the first anything is known to exist from" {

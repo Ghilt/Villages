@@ -24,7 +24,7 @@ import tools.jackson.databind.JsonNode
  * `takeAction`, `yourChoice`, `wipeWorld` and `worldWiped`, and gave every event its provenance.
  * Version 3 added `seeAll`, the eye that sets significance aside.
  */
-const val PROTOCOL_VERSION = 4
+const val PROTOCOL_VERSION = 5
 
 data class Point(val lat: Double, val lon: Double)
 
@@ -181,6 +181,10 @@ class WipeWorld : ClientFrame {
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes(
     JsonSubTypes.Type(FoundHousePayload::class, name = "foundHouse"),
+    JsonSubTypes.Type(GrantResourcePayload::class, name = "grantResource"),
+    JsonSubTypes.Type(PledgeResourcePayload::class, name = "pledgeResource"),
+    JsonSubTypes.Type(ReleasePledgePayload::class, name = "releasePledge"),
+    JsonSubTypes.Type(SpendResourcePayload::class, name = "spendResource"),
     JsonSubTypes.Type(TakeActionPayload::class, name = "takeAction"),
 )
 sealed interface CommandPayload
@@ -191,6 +195,36 @@ sealed interface CommandPayload
  * that is not its own. See decision record 0028.
  */
 data class FoundHousePayload(val name: String, val seat: Point, val banner: BannerSpec) : CommandPayload
+
+/**
+ * Give this house some of a resource, or use some of it up.
+ *
+ * Which house is worked out from the session, like everything else: a client naming a stream could name
+ * one that is not its own. `resource` is a wire name, so `naturalDomain` and not Domain.
+ *
+ * **These two are Adam's levers rather than a player's.** Nothing in the game gives a house wealth yet,
+ * and nothing spends it; the commands exist so that what the domain can do can be made to happen on
+ * purpose and watched. When a mechanic grants or spends, it will do so through the same commands.
+ */
+data class GrantResourcePayload(val resource: String, val amount: Long) : CommandPayload
+
+data class SpendResourcePayload(val resource: String, val amount: Long) : CommandPayload
+
+/**
+ * Tie some of a resource to an undertaking for a span of months.
+ *
+ * The span is in months and the world-day it ends on is worked out by the server, because how long a
+ * month is belongs to the calendar and not to whoever is asking. See decision record 0051.
+ */
+data class PledgeResourcePayload(
+    val resource: String,
+    val amount: Long,
+    val months: Long,
+    val purpose: String,
+) : CommandPayload
+
+/** End a pledge and let what it holds come back, whether its span is up or not. */
+data class ReleasePledgePayload(val pledgeId: String) : CommandPayload
 
 /**
  * Take one option of the choice this player has pending. It names the choice as well as the option, so a

@@ -7,6 +7,7 @@ import villages.application.Arrival
 import villages.application.FoundHouseService
 import villages.application.FreshIds
 import villages.application.MonthlyWorldClock
+import villages.application.ResourceService
 import villages.application.TakeActionService
 import villages.application.WorldCalendar
 import villages.application.WorldClock
@@ -70,6 +71,16 @@ class WorldConfig {
         Arrival(world.executor, clock = { clock.instant() }, world = worldClock, ids = ids)
 
     @Bean
+    fun resources(
+        world: InMemoryWorld,
+        clock: Clock,
+        worldClock: WorldClock,
+        calendar: WorldCalendar,
+        ids: FreshIds,
+    ): ResourceService =
+        ResourceService(world.executor, clock = { clock.instant() }, world = worldClock, calendar = calendar, ids = ids)
+
+    @Bean
     fun takeAction(world: InMemoryWorld, clock: Clock, worldClock: WorldClock): TakeActionService =
         TakeActionService(world.executor, clock = { clock.instant() }, world = worldClock)
 
@@ -113,6 +124,7 @@ class WorldConfig {
         recentEvents: RecentEventsProjection,
         arrival: Arrival,
         takeAction: TakeActionService,
+        resources: ResourceService,
         worldWipe: WorldWipe,
         clock: Clock,
         worldClock: WorldClock,
@@ -126,6 +138,7 @@ class WorldConfig {
         world = worldClock,
         arrival = arrival,
         takeAction = takeAction,
+        resources = resources,
         choices = choices,
         recent = recentEvents,
         emptyTheWorld = worldWipe,

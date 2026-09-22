@@ -8,11 +8,12 @@ import villages.application.FoundHouseService
 import villages.application.HouseChange
 import villages.application.HouseRow
 import villages.application.HousesByCell
-import villages.application.Start
 import villages.application.HousesByPlayer
 import villages.application.PlayerTokens
-import villages.application.RecentEvents
 import villages.application.Provenance
+import villages.application.RecentEvents
+import villages.application.ResourceService
+import villages.application.Start
 import villages.application.StoredEvent
 import villages.application.TakeActionService
 import villages.application.WorldClock
@@ -28,6 +29,7 @@ import villages.domain.HouseName
 import villages.domain.Location
 import villages.domain.OptionId
 import villages.domain.PlayerId
+import villages.domain.PledgeId
 import villages.domain.Resource
 import villages.domain.WorldTime
 import villages.protocol.BannerSpec
@@ -46,6 +48,7 @@ import villages.protocol.ErrorFrame
 import villages.protocol.EventFrame
 import villages.protocol.FoundAtView
 import villages.protocol.FoundHousePayload
+import villages.protocol.GrantResourcePayload
 import villages.protocol.Hello
 import villages.protocol.HouseAppeared
 import villages.protocol.HouseChanged
@@ -53,14 +56,17 @@ import villages.protocol.HouseView
 import villages.protocol.OptionView
 import villages.protocol.PROTOCOL_VERSION
 import villages.protocol.Ping
+import villages.protocol.PledgeResourcePayload
 import villages.protocol.PledgeView
 import villages.protocol.Point
 import villages.protocol.Pong
 import villages.protocol.ProtocolJson
+import villages.protocol.ReleasePledgePayload
 import villages.protocol.Resync
 import villages.protocol.SeeAll
 import villages.protocol.ServerFrame
 import villages.protocol.Snapshot
+import villages.protocol.SpendResourcePayload
 import villages.protocol.Stock
 import villages.protocol.SubscribeCells
 import villages.protocol.TakeActionPayload
@@ -147,6 +153,7 @@ class Gateway(
     private val world: WorldClock,
     private val arrival: Arrival,
     private val takeAction: TakeActionService,
+    private val resources: ResourceService,
     private val choices: ChoicesByPlayer,
     private val recent: RecentEvents,
     private val emptyTheWorld: WorldWipe,
@@ -418,6 +425,35 @@ class Gateway(
                         provenance = Provenance.startedBy(commandId),
                     )
 
+                    is GrantResourcePayload -> resources.grant(
+                        player = who,
+                        resource = asResource(payload.resource),
+                        amount = payload.amount,
+                        provenance = Provenance.startedBy(commandId),
+                    )
+
+                    is SpendResourcePayload -> resources.spend(
+                        player = who,
+                        resource = asResource(payload.resource),
+                        amount = payload.amount,
+                        provenance = Provenance.startedBy(commandId),
+                    )
+
+                    is PledgeResourcePayload -> resources.pledge(
+                        player = who,
+                        resource = asResource(payload.resource),
+                        amount = payload.amount,
+                        months = payload.months,
+                        purpose = payload.purpose,
+                        provenance = Provenance.startedBy(commandId),
+                    )
+
+                    is ReleasePledgePayload -> resources.release(
+                        player = who,
+                        pledgeId = PledgeId(asUuid(payload.pledgeId, "a pledge id")),
+                        provenance = Provenance.startedBy(commandId),
+                    )
+
                     is TakeActionPayload -> takeAction.take(
                         player = who,
                         choiceId = ChoiceId(asUuid(payload.choiceId, "a choice id")),
@@ -586,6 +622,11 @@ class Gateway(
 private fun isCell(candidate: String): Boolean = runCatching { Cell(candidate) }.isSuccess
 
 /** An identifier off the wire, or a refusal saying which one was not one. */
+/** A resource named on the wire, or the refusal. The wire's names are the code's; see 0051 and the naming rule. */
+private fun asResource(name: String): Resource =
+    Resource.entries.firstOrNull { it.toWire() == name }
+        ?: throw IllegalArgumentException("not a resource: $name")
+
 private fun asUuid(value: String, what: String): java.util.UUID =
     runCatching { java.util.UUID.fromString(value) }
         .getOrElse { throw IllegalArgumentException("$what is a UUID, not $value") }

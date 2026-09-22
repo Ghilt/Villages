@@ -1,0 +1,8 @@
+{
+  "type": "command",
+  "commandId": "8d5e6f7a-9b0c-4d1e-8f3a-4b5c6d7e8f9a",
+  "command": {
+    "type": "releasePledge",
+    "pledgeId": "bb000000-0000-4000-8000-00000000d101"
+  }
+}

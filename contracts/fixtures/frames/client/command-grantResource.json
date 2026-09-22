@@ -1,0 +1,9 @@
+{
+  "type": "command",
+  "commandId": "5a2b3c4d-6e7f-4a8b-8c0d-1e2f3a4b5c6d",
+  "command": {
+    "type": "grantResource",
+    "resource": "wealth",
+    "amount": 120
+  }
+}
