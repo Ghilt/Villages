@@ -110,13 +110,24 @@ the log can be read without any of that.
 
 ## End every stop with a verify checklist
 
-Whenever the loop comes back to Adam to look at something, **the last thing written is a checklist of three
-to five things to check**, and nothing comes after it. Not the summary, not the commit message, not an offer
-of next steps: those go above it, because the checklist is what he reads first and acts on.
+Whenever the loop comes back to Adam to look at something, **the last thing written is a checklist of at
+most three things to check**, and nothing comes after it. Not the summary, not the commit message, not an
+offer of next steps: those go above it, because the checklist is what he reads first and acts on.
 
-**Three to five, whatever the size of the commit.** It is there to refresh a memory, not to enumerate a diff.
-A checklist with one item a changed file is a checklist nobody reads, and a twenty-line change and a
-two-hundred-line one get the same five items, picked for what would be embarrassing to have got wrong.
+**Three at most, whatever the size of the commit.** It is there to refresh a memory, not to enumerate a
+diff. A checklist with one item a changed file is a checklist nobody reads, and a twenty-line change and a
+two-hundred-line one get the same three items, picked for what would be embarrassing to have got wrong.
+
+**Mark with an eye, 👀, every item he can check by looking at the running program**, and say in the item
+where to look - which pane, which button, what should be there. An unmarked item is one he has to take on
+trust, read in a document, or accept from a test. **The marked ones go first**, because looking is cheaper
+than reading and it is the check that actually catches things; where there are three and one of them can
+be seen, that one is the first line.
+
+**A step with nothing to look at says so, and that is an answer rather than a failure.** The offline
+renderer, a build rule, a domain rule with no caller yet: none of them can be seen, and three honest
+unmarked items beat one marked item invented to fill the quota. Say in one line what stands in for it -
+the test, the still, or the number.
 
 **Immediately above it goes where to look**, and only that:
 
