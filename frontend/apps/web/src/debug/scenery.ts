@@ -4,22 +4,23 @@ import { note } from './log';
  * Whether the world is furnished, and how thickly.
  *
  * The same shape as `seeEverything.ts` and every other switch in the panel: a module with a set of
- * listeners, read through `useSyncExternalStore`. Adam's, not a player's - scenery is being tried out,
- * and what it costs is the question. See decision record 0023.
+ * listeners, read through `useSyncExternalStore`. Adam's, not a player's. See decision record 0023.
+ *
+ * The density here is a **multiplier on what the sprite map asked for**, not a spacing. That is the
+ * change experiment 0006's levers did not survive: how thick a wood is is now the generator's answer,
+ * biome by biome, and this is the one dial over the top of it - so that a look can be tried at half or
+ * at double without regenerating a world to see it.
  */
 
 export interface ScenerySettings {
   on: boolean;
-  /**
-   * How far apart the points of the scattering are, in world units. Smaller is denser, and the count
-   * goes as the square of it: halving this is four times the scenery.
-   */
-  spacing: number;
+  /** One is exactly what `world/biomes.json` asked for. A half is half of it, two is twice. */
+  dial: number;
   /** How much later than its natural zoom each kind arrives, in zoom levels. */
   laterBy: number;
 }
 
-const START: ScenerySettings = { on: true, spacing: 2, laterBy: 0 };
+const START: ScenerySettings = { on: true, dial: 1, laterBy: 0 };
 
 let settings: ScenerySettings = { ...START };
 const listeners = new Set<() => void>();
@@ -37,16 +38,19 @@ export function watchScenery(listener: () => void): () => void {
 
 export function setScenery(change: Partial<ScenerySettings>): void {
   const next = { ...settings, ...change };
-  if (next.on === settings.on && next.spacing === settings.spacing && next.laterBy === settings.laterBy) {
+  if (next.on === settings.on && next.dial === settings.dial && next.laterBy === settings.laterBy) {
     return;
   }
   if (next.on !== settings.on) {
     note('scenery', next.on ? 'furnishing the world' : 'bare ground');
   }
-  if (next.spacing !== settings.spacing) {
-    // Said as the thing that is felt, which is how much of it there is, not the number behind it.
-    const times = (settings.spacing / next.spacing) ** 2;
-    note('scenery', `a point every ${next.spacing} world units, ${times.toFixed(2)} times as much`);
+  if (next.dial !== settings.dial) {
+    note(
+      'scenery',
+      next.dial === 1
+        ? 'as thick as the sprite map asked for'
+        : `${next.dial} times what the sprite map asked for`,
+    );
   }
   if (next.laterBy !== settings.laterBy) {
     note('scenery', `arriving ${next.laterBy.toFixed(1)} zoom levels later`);

@@ -1,158 +1,232 @@
 import { describe, expect, it } from 'vitest';
 
-import { KINDS, TERRAIN, kindFor, whatGrows } from './kinds';
-import { CELL, cellOf, scatterCell } from './scatter';
-import type { ClassAt } from './scatter';
+import { NO_FAVOURITE, growingTable } from '@villages/world';
+import type { Palette, StandChunk } from '@villages/world';
 
+import { CELL, cellOf, scatterCell } from './scatter';
+import type { ScatteredPoint } from './scatter';
+import { BIOMES as biomesFile } from './fixture';
+import type { SpriteMap, SpriteMapFile } from './spriteMap';
+
+/** Two classes are all this needs: one that grows things and one that grows nothing. */
+const palette: Palette = {
+  master: { width: 32768, height: 16384, projection: 'equirectangular' },
+  classes: [
+    { id: 0, name: 'ocean', colour: '#104058', water: true, group: 'water' },
+    { id: 7, name: 'taiga', colour: '#105028', group: 'forest' },
+  ],
+};
+
+const kindOf = (name: string): number => biomesFile.kinds.findIndex((kind) => kind.name === name);
+
+const TAIGA = 7;
 const OCEAN = 0;
-const everywhere =
-  (id: number): ClassAt =>
-  () =>
-    id;
-/** Conifer forest west of the meridian of the cell, meadow east of it: a coast to test gating on. */
-const halfAndHalf =
-  (at: number): ClassAt =>
-  (x) =>
-    x < at ? TERRAIN.coniferForest : TERRAIN.meadow;
+const WHICH = 0;
+
+/** A sprite map with the fixture's wood everywhere, so only the rule is under test. */
+function makeMap(): SpriteMap {
+  const file: SpriteMapFile = {
+    master: 'test',
+    layer: 'biome',
+    at: new Date(0).toISOString(),
+    world: { side: 32768, tileUnits: 256, biomeSide: 2048 },
+    boundary: biomesFile.boundary,
+    biomes: biomesFile.biomes.map((biome) => ({
+      name: biome.name,
+      colour: biome.colour,
+      outside: biome.stands.outside,
+    })),
+    kinds: biomesFile.kinds,
+    grows: biomesFile.biomes.map((biome) => biome.grows),
+    stands: 0,
+    chunks: 0,
+    bytes: 0,
+    density: {
+      worst: 'test',
+      perUnit: 0,
+      ceiling: biomesFile.ceiling,
+      most: biomesFile.most,
+    },
+  };
+  return {
+    file,
+    biomeOf: new Uint8Array(2048 * 2048).fill(WHICH),
+    cellUnits: 16,
+    growing: growingTable(biomesFile, palette),
+    kinds: biomesFile.kinds,
+    colours: file.biomes.map((biome) => biome.colour),
+    names: file.biomes.map((biome) => biome.name),
+  };
+}
+
+const NO_STANDS: StandChunk = {
+  count: 0,
+  x: new Float32Array(0),
+  y: new Float32Array(0),
+  reach: new Float32Array(0),
+  dominant: new Uint8Array(0),
+  thickness: new Float32Array(0),
+  seed: new Uint8Array(0),
+};
+
+function oneStand(x: number, y: number, reach: number, dominant: number, thickness: number): StandChunk {
+  return {
+    count: 1,
+    x: Float32Array.of(x),
+    y: Float32Array.of(y),
+    reach: Float32Array.of(reach),
+    dominant: Uint8Array.of(dominant),
+    thickness: Float32Array.of(thickness),
+    seed: Uint8Array.of(7),
+  };
+}
+
+const map = makeMap();
+const allTaiga = () => TAIGA;
+const at = (point: ScatteredPoint): string => `${point.x.toFixed(6)},${point.y.toFixed(6)}`;
 
 describe('where scenery stands', () => {
-  it('is the same every time, so a cell thrown away and made again is the same ground', () => {
-    const once = scatterCell(40, 17, 2, everywhere(TERRAIN.coniferForest));
-    const twice = scatterCell(40, 17, 2, everywhere(TERRAIN.coniferForest));
-
-    expect(once.length).toBeGreaterThan(0);
-    expect(twice).toEqual(once);
+  it('grows nothing at all on ground the biome has no mix for', () => {
+    expect(scatterCell(4, 4, 1, () => OCEAN, map, NO_STANDS)).toEqual([]);
   });
 
-  it('gives no two points the same place, within a cell or across the seam between two', () => {
-    const left = scatterCell(0, 0, 2, everywhere(TERRAIN.coniferForest));
-    const right = scatterCell(1, 0, 2, everywhere(TERRAIN.coniferForest));
-    const places = new Set([...left, ...right].map((p) => `${p.x},${p.y}`));
+  it('puts the same pine on the same ground however the cache is cut', () => {
+    // A point's identity is its place on the world grid, so a cell is a cache and nothing else. If this
+    // ever stopped being true, panning would redraw the world slightly differently as cells were reused.
+    const together = scatterCell(10, 10, 1, allTaiga, map, NO_STANDS);
+    const again = scatterCell(10, 10, 1, allTaiga, map, NO_STANDS);
+    expect(again.map(at)).toEqual(together.map(at));
 
-    expect(places.size).toBe(left.length + right.length);
+    // And a neighbouring cell never repeats one of its points.
+    const beside = scatterCell(11, 10, 1, allTaiga, map, NO_STANDS);
+    const shared = new Set(together.map(at));
+    expect(beside.filter((point) => shared.has(at(point)))).toEqual([]);
   });
 
-  it('keeps each cell inside its own square, so the seam has no gap and no overlap', () => {
-    const points = scatterCell(3, 5, 2, everywhere(TERRAIN.coniferForest));
-
-    for (const point of points) {
-      expect(point.x).toBeGreaterThanOrEqual(3 * CELL);
-      expect(point.x).toBeLessThan(4 * CELL);
-      expect(point.y).toBeGreaterThanOrEqual(5 * CELL);
-      expect(point.y).toBeLessThan(6 * CELL);
-      expect(cellOf(point.x)).toBe(3);
-      expect(cellOf(point.y)).toBe(5);
+  it('stays inside the cell it was asked for', () => {
+    for (const point of scatterCell(10, 10, 1, allTaiga, map, NO_STANDS)) {
+      expect(cellOf(point.x)).toBe(10);
+      expect(cellOf(point.y)).toBe(10);
     }
   });
 });
 
-describe('what grows where', () => {
-  it('grows nothing at sea, however dense the scattering is asked to be', () => {
-    expect(scatterCell(0, 0, 0.5, everywhere(OCEAN))).toEqual([]);
-    expect(scatterCell(12, 9, 4, everywhere(OCEAN))).toEqual([]);
+describe('what a stand does', () => {
+  const spruce = kindOf('spruce');
+  const middleX = 10 * CELL + CELL / 2;
+  const middleY = 10 * CELL + CELL / 2;
+
+  it('thickens the ground under it', () => {
+    const bare = scatterCell(10, 10, 1, allTaiga, map, NO_STANDS);
+    const wooded = scatterCell(
+      10,
+      10,
+      1,
+      allTaiga,
+      map,
+      oneStand(middleX, middleY, CELL, spruce, biomesFile.most),
+    );
+    expect(wooded.length).toBeGreaterThan(bare.length * 2);
   });
 
-  it('grows only what belongs on the ground it is on', () => {
-    const conifer = scatterCell(0, 0, 2, everywhere(TERRAIN.coniferForest));
-    const names = new Set(conifer.map((p) => KINDS[p.kind]?.name));
-
-    // Only the pine has any weight on conifer forest.
-    expect([...names]).toEqual(['pine']);
+  it('thins away from its middle rather than stopping at an edge', () => {
+    // The whole point of a kernel over a flat disc: a wood has to have a ragged inside, or it is the
+    // even carpet this replaced with extra steps.
+    const stand = oneStand(middleX, middleY, CELL, spruce, biomesFile.most);
+    const points = scatterCell(10, 10, 1, allTaiga, map, stand);
+    const near = points.filter((point) => Math.hypot(point.x - middleX, point.y - middleY) < CELL / 3);
+    const far = points.filter((point) => {
+      const away = Math.hypot(point.x - middleX, point.y - middleY);
+      return away >= (CELL * 2) / 3 && away < CELL;
+    });
+    // Same ring area either way is not the comparison; density is. Points over the area they cover.
+    const nearArea = Math.PI * (CELL / 3) ** 2;
+    const farArea = Math.PI * (CELL ** 2 - ((CELL * 2) / 3) ** 2);
+    expect(near.length / nearArea).toBeGreaterThan((far.length / farArea) * 1.5);
   });
 
-  it('follows the ground across a coast rather than the cell it is in', () => {
-    const at = 3 * CELL + CELL / 2;
-    const points = scatterCell(3, 0, 1, halfAndHalf(at));
+  it('leans the mix towards its own favourite', () => {
+    const stand = oneStand(middleX, middleY, CELL * 2, spruce, biomesFile.most);
+    const inside = scatterCell(10, 10, 1, allTaiga, map, stand);
+    const outside = scatterCell(10, 10, 1, allTaiga, map, NO_STANDS);
 
-    for (const point of points) {
-      const name = KINDS[point.kind]?.name;
-      if (point.x < at) {
-        expect(name).toBe('pine');
-      } else {
-        // Meadow carries grass mostly and the odd oak, and never a pine.
-        expect(name).not.toBe('pine');
+    const share = (points: ScatteredPoint[]) =>
+      points.filter((point) => point.kind === spruce).length / Math.max(1, points.length);
+    expect(share(inside)).toBeGreaterThan(share(outside));
+  });
+
+  it('keeps a gathering kind off the open ground', () => {
+    // `gather` is what makes a fern a find in a meadow and a carpet in a wood. The fixture's heather and
+    // fernish are the same height and the same commonality and differ only in how hard they gather, so
+    // any difference between them out on the open ground is that and nothing else.
+    //
+    // Over a block of cells rather than one: open ground is thin by design, so a single cell holds about
+    // forty points and a share measured on forty points is noise wearing a decimal point.
+    const over = (stands: StandChunk): ScatteredPoint[] => {
+      const all: ScatteredPoint[] = [];
+      for (let cellY = 2; cellY < 20; cellY += 1) {
+        for (let cellX = 2; cellX < 20; cellX += 1) {
+          all.push(...scatterCell(cellX, cellY, 1, allTaiga, map, stands));
+        }
       }
-    }
-    expect(points.some((p) => p.x < at)).toBe(true);
-    expect(points.some((p) => p.x >= at)).toBe(true);
-  });
+      return all;
+    };
+    const open = over(NO_STANDS);
+    const wooded = over(oneStand(11 * CELL, 11 * CELL, CELL * 26, NO_FAVOURITE, biomesFile.most));
+    const share = (points: ScatteredPoint[], kind: number) =>
+      points.filter((point) => point.kind === kind).length / Math.max(1, points.length);
 
-  it('picks a kind by its weight, so the commoner one is commoner', () => {
-    const points = scatterCell(0, 0, 0.5, everywhere(TERRAIN.meadow));
-    const grass = points.filter((p) => KINDS[p.kind]?.name === 'grass tuft').length;
-    const oak = points.filter((p) => KINDS[p.kind]?.name === 'oak').length;
-
-    // Ten to one in the table, so grass should be far commoner than oak but oak should be there.
-    expect(oak).toBeGreaterThan(0);
-    expect(grass).toBeGreaterThan(oak * 4);
+    const clinging = kindOf('fernish');
+    const loose = kindOf('heather');
+    // Open ground is deliberately sparse now - a lone tree is meant to be rare - so the block has to
+    // be wide before a share measured on it means anything.
+    expect(open.length).toBeGreaterThan(700);
+    expect(share(open, clinging)).toBeLessThan(share(open, loose) / 2);
+    // And inside a stand the one that gathers is no longer held back at all.
+    expect(share(wooded, clinging)).toBeGreaterThan(share(open, clinging) * 2);
   });
 });
 
-describe('the order they are let in', () => {
-  it('runs from the lowest rank up, so taking the first so many takes the lowest', () => {
-    const points = scatterCell(7, 7, 1, everywhere(TERRAIN.coniferForest));
+describe('the density dial', () => {
+  it('lets points in and out without ever moving one', () => {
+    // This is what makes turning the dial watchable rather than a reshuffle: a thinner world is a strict
+    // subset of a fuller one, so nothing jumps.
+    const full = scatterCell(10, 10, 1, allTaiga, map, NO_STANDS);
+    const half = scatterCell(10, 10, 0.5, allTaiga, map, NO_STANDS);
 
+    expect(half.length).toBeLessThan(full.length);
+    const fullAt = new Set(full.map(at));
+    for (const point of half) {
+      expect(fullAt.has(at(point))).toBe(true);
+    }
+  });
+});
+
+describe('the order things arrive in', () => {
+  it('brings the big things before the floor they stand on', () => {
+    const points = scatterCell(
+      10,
+      10,
+      1,
+      allTaiga,
+      map,
+      oneStand(10 * CELL + CELL / 2, 10 * CELL + CELL / 2, CELL, NO_FAVOURITE, biomesFile.most),
+    );
+    const mean = (kind: number) => {
+      const of = points.filter((point) => point.kind === kind);
+      return of.length === 0 ? null : of.reduce((sum, point) => sum + point.rank, 0) / of.length;
+    };
+    const spruce = mean(kindOf('spruce'));
+    const heather = mean(kindOf('heather'));
+    expect(spruce).not.toBeNull();
+    expect(heather).not.toBeNull();
+    expect(spruce!).toBeLessThan(heather!);
+  });
+
+  it('sorts by rank, so drawing a prefix is drawing the earliest', () => {
+    const points = scatterCell(10, 10, 1, allTaiga, map, NO_STANDS);
     for (let index = 1; index < points.length; index += 1) {
       expect(points[index]!.rank).toBeGreaterThanOrEqual(points[index - 1]!.rank);
-    }
-  });
-
-  it('makes a thinner scattering a subset of a denser one, so nothing is reshuffled', () => {
-    const points = scatterCell(7, 7, 1, everywhere(TERRAIN.coniferForest));
-    const thin = points.slice(0, 20).map((p) => `${p.x},${p.y}`);
-    const dense = points.slice(0, 60).map((p) => `${p.x},${p.y}`);
-
-    expect(dense.slice(0, 20)).toEqual(thin);
-  });
-
-  it('spreads the ranks over the whole of nought to one', () => {
-    const ranks = scatterCell(2, 2, 1, everywhere(TERRAIN.coniferForest)).map((p) => p.rank);
-
-    expect(Math.min(...ranks)).toBeLessThan(0.05);
-    expect(Math.max(...ranks)).toBeGreaterThan(0.95);
-    for (const rank of ranks) {
-      expect(rank).toBeGreaterThanOrEqual(0);
-      expect(rank).toBeLessThan(1);
-    }
-  });
-});
-
-describe('how many there are, and how big', () => {
-  it('quadruples when the spacing is halved, because it is a grid over an area', () => {
-    const coarse = scatterCell(0, 0, 4, everywhere(TERRAIN.coniferForest)).length;
-    const fine = scatterCell(0, 0, 2, everywhere(TERRAIN.coniferForest)).length;
-
-    expect(fine).toBe(coarse * 4);
-  });
-
-  it('varies a height about its kind, and never past what the kind allows', () => {
-    const points = scatterCell(0, 0, 1, everywhere(TERRAIN.coniferForest));
-    const pine = KINDS[0]!;
-    const heights = new Set(points.map((p) => p.height));
-
-    expect(heights.size).toBeGreaterThan(10);
-    for (const point of points) {
-      expect(point.height).toBeGreaterThanOrEqual(pine.groundHeight * (1 - pine.vary) - 1e-9);
-      expect(point.height).toBeLessThanOrEqual(pine.groundHeight * (1 + pine.vary) + 1e-9);
-    }
-  });
-});
-
-describe('the table of what grows', () => {
-  it('says nothing grows on ground no kind claims', () => {
-    const growing = whatGrows();
-
-    expect(growing[OCEAN]?.total).toBe(0);
-    expect(kindFor(growing[OCEAN]!, 0.5)).toBe(-1);
-    // Ice and bare rock are claimed by nothing yet either.
-    expect(growing[4]?.total).toBe(0);
-  });
-
-  it('never picks a kind with no weight on that ground', () => {
-    const growing = whatGrows();
-    for (let roll = 0; roll < 1; roll += 0.01) {
-      const picked = kindFor(growing[TERRAIN.coniferForest]!, roll);
-      expect(KINDS[picked]?.on[TERRAIN.coniferForest]).toBeGreaterThan(0);
     }
   });
 });

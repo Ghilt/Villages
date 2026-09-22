@@ -1,35 +1,41 @@
-import { Graphics, Matrix, Particle, ParticleContainer, Rectangle, RenderTexture, Texture } from 'pixi.js';
+import { Matrix, Particle, ParticleContainer, Rectangle, RenderTexture, Texture } from 'pixi.js';
 import type { Renderer } from 'pixi.js';
 
 import { WORLD_MASTER_WIDTH } from '../../map/worldStyle';
 import { toMercatorExact, worldSize } from '../cameraMath';
 import type { CameraView } from '../cameraMath';
-import { KINDS } from './kinds';
+import { LONGEST_STEP_MS, PRESENCE_MS, easeTowards, midTrade } from '../twoForms';
 import { CELL, cellOf } from './scatter';
-import { pointsOf, sceneryTally } from './sceneryCells';
+import { noteDrawn, pointsOf, sceneryMap, sceneryTally } from './sceneryCells';
 import type { ScatteredPoint } from './scatter';
-import { MOST_CUT_AT_ONCE, alphaAt, worthDrawing } from './showing';
-
-/**
- * **This is experiment 0006, not a finished part of the game.** It was built to answer one question -
- * how much scenery the browser will draw before it lags - and it answers it. What it is *not* is a
- * world worth looking at: three kinds of the ten Adam named, drawn as a triangle, an ellipse and three
- * blades, scattered by one weight table nobody has tuned. Do not build on the look of it, and do not
- * take the numbers in it for settled. What replaces it is the **world-generator**, in
- * `docs/plans/world-generator.md`.
- */
+import { colourFor, shapeFor } from './shapes';
+import { MOST_CUT_AT_ONCE, groupCount, groupOf, thresholdOf, wantedAt, worthDrawing } from './showing';
+import type { Kind } from '@villages/world';
+import { biomeAt } from './spriteMap';
 
 /**
  * The world's furniture, drawn as particles under the marks.
  *
- * Every point is placed in **world units** and the whole layer is scaled and shifted once a frame, so
- * a pine grows with the ground exactly and not one of its twenty thousand positions is ever rewritten.
+ * Every point is placed in **world units** and the whole layer is scaled and shifted once a frame, so a
+ * pine grows with the ground exactly and not one of its twenty thousand positions is ever rewritten.
  * That is the shape Pixi wants: there is no per-particle scale attribute, only a vertex buffer that
  * carries the size, and touching it per particle per frame would re-upload the lot. Only the colour is
  * dynamic, because the fade lives in its alpha.
  *
- * Particles come and go a cell at a time rather than all at once, so panning across a cell boundary
- * costs one cell of work and not a screenful.
+ * **A group is the unit of everything.** A group is one kind at one step of its arrival; the zoom says
+ * whether a group belongs on the screen and time carries it there, which is the rule `twoForms.ts`
+ * states and this used to break. Two things fall out of that, and the second is the reason the first was
+ * worth doing:
+ *
+ * - **A particle exists only while its group does.** Experiment 0006's worst measurement was 42,087
+ *   particles held to draw 410, and the follow-up it named was exactly this. A point whose group has not
+ *   arrived is not a particle at all now, so pulling the camera back does not quietly build a screenful
+ *   of invisible furniture on the way out.
+ * - **A fade touches only the groups that are moving.** Standing still costs nothing, and a fade costs
+ *   one group's particles rather than every particle on the screen.
+ *
+ * Cells come and go as the view moves over them, so panning across a boundary costs one cell and not a
+ * screenful.
  */
 
 /** How deep a ring of cells around the view to hold, so a pan finds them already cut. */
@@ -39,84 +45,58 @@ const RING = 1;
 const SLOT = { width: 64, height: 72, pad: 8 } as const;
 
 export interface SceneryDrawn {
-  /** Particles in the container, whatever their alpha. */
+  /** Particles in the container. Every one of them is showing, because the others are not made. */
   particles: number;
-  /** Particles with anything of them showing, which is what the eye is actually being given. */
   showing: number;
   cells: number;
   waiting: number;
+  /** Groups part-way in or out right now. Nought means the screen has settled. */
+  moving: number;
+}
+
+/** One cell's points, split by group, and whichever of them are currently drawn. */
+interface Held {
+  points: Map<number, ScatteredPoint[]>;
+  made: Map<number, Particle[]>;
 }
 
 export function createSceneryLayer(renderer: Renderer) {
   const container = new ParticleContainer({
     // Only the colour moves. The positions and the sizes are in world units and never change, so the
-    // vertex buffer is written once a cell rather than once a frame.
+    // vertex buffer is written once a group rather than once a frame.
     dynamicProperties: { position: false, vertex: false, rotation: false, uvs: false, color: true },
   });
-  /**
-   * What each cell put in the container: the particles, and the points they were made from.
-   *
-   * The points are kept beside the particles rather than asked for again when the fade is rewritten.
-   * Asking again would reach the cache, and a cell the cache had let go of would be cut afresh - so
-   * every zoom step over a big view would set off a storm of fetches for ground already on screen.
-   */
-  const shown = new Map<string, { particles: Particle[]; points: ScatteredPoint[] }>();
+  const shown = new Map<string, Held>();
   let frames: Texture[] = [];
+  let tints: number[] = [];
   let atlas: RenderTexture | null = null;
-  let drawnAtZoom = Number.NaN;
-  let drawnLaterBy = Number.NaN;
-  let showing = 0;
 
-  function buildAtlas(): void {
+  /** How much of each group is on the screen, nought to one, moved by the clock and not by the zoom. */
+  let alphaOf = new Float32Array(0);
+  let drawnLaterBy = Number.NaN;
+  let lastAt = 0;
+
+  /**
+   * One texture a kind, baked once into one atlas.
+   *
+   * Built from the sprite map's kinds rather than from a table in code, so adding a kind to
+   * world/biomes.json and regenerating is the whole of adding a kind. A kind with no shape drawn for it
+   * falls back to the bush, which is visibly wrong rather than invisible - a missing kind should be
+   * noticed and not silently skipped.
+   */
+  function buildAtlas(kinds: readonly Kind[]): void {
+    tints = kinds.map((kind) => colourFor(kind.name));
     const { width: w, height: h, pad } = SLOT;
-    const across = KINDS.length;
     atlas = RenderTexture.create({
-      width: across * (w + pad * 2),
+      width: Math.max(1, kinds.length) * (w + pad * 2),
       height: h + pad * 2,
       antialias: true,
       resolution: 1,
     });
 
-    // A pine: three tiers of needles over a short trunk. A spire, because at twenty pixels the thing
-    // that reads is the outline and nothing else.
-    const pine = new Graphics()
-      .rect(w * 0.44, h * 0.78, w * 0.12, h * 0.22)
-      .fill(0x6b5a44)
-      .moveTo(w * 0.5, h * 0.02)
-      .lineTo(w * 0.78, h * 0.42)
-      .lineTo(w * 0.62, h * 0.42)
-      .lineTo(w * 0.86, h * 0.8)
-      .lineTo(w * 0.14, h * 0.8)
-      .lineTo(w * 0.38, h * 0.42)
-      .lineTo(w * 0.22, h * 0.42)
-      .closePath()
-      .fill(0xffffff)
-      .stroke({ width: 3, color: 0x3d4a33, alpha: 0.85 });
-
-    // An oak: a round crown on a trunk, wider than it is tall, so it tells against the pine at a
-    // glance rather than needing to be looked at.
-    const oak = new Graphics()
-      .rect(w * 0.45, h * 0.66, w * 0.1, h * 0.34)
-      .fill(0x6b5a44)
-      .ellipse(w * 0.5, h * 0.4, w * 0.42, h * 0.36)
-      .fill(0xffffff)
-      .stroke({ width: 3, color: 0x3d4a33, alpha: 0.85 });
-
-    // A tuft: three blades from one root. Small, and drawn to survive being small.
-    const tuft = new Graphics()
-      .moveTo(w * 0.5, h)
-      .lineTo(w * 0.18, h * 0.3)
-      .lineTo(w * 0.36, h * 0.34)
-      .lineTo(w * 0.5, h * 0.08)
-      .lineTo(w * 0.64, h * 0.34)
-      .lineTo(w * 0.82, h * 0.3)
-      .closePath()
-      .fill(0xffffff)
-      .stroke({ width: 3, color: 0x4a5237, alpha: 0.85 });
-
-    const shapes = [pine, oak, tuft];
     const move = new Matrix();
-    frames = shapes.map((shape, index) => {
+    frames = kinds.map((kind, index) => {
+      const shape = shapeFor(kind.name, w, h);
       const x = index * (w + pad * 2) + pad;
       renderer.render({
         container: shape,
@@ -139,19 +119,106 @@ export function createSceneryLayer(renderer: Renderer) {
     }
   }
 
+  /**
+   * What the layer actually has, from a console. `window.villagesScenery()`.
+   *
+   * The counters in the panel say how many particles there are; this says whether they could possibly be
+   * drawn - the atlas they point at, which groups are in, and where the first one stands. The difference
+   * between "none were made" and "they were made and are invisible" is otherwise a guess.
+   */
+  function report() {
+    const first = [...shown.values()][0];
+    const firstMade = first === undefined ? undefined : [...first.made.values()][0]?.[0];
+    return {
+      atlas: atlas === null ? null : { width: atlas.width, height: atlas.height },
+      frames: frames.length,
+      groups: {
+        of: alphaOf.length,
+        in: [...alphaOf].filter((a) => a > 0).length,
+        // Part-way in or out. Nought means the screen has settled, which it always does: the fade is
+        // a function of the clock and not of the zoom, so there is nowhere to rest half-drawn.
+        moving: [...alphaOf].filter((a) => a > 0 && a < 1).length,
+        part: [...alphaOf].filter((a) => a > 0 && a < 1).map((a) => Number(a.toFixed(3))),
+      },
+      particles: [...shown.values()].reduce(
+        (sum, cell) => sum + [...cell.made.values()].reduce((n, made) => n + made.length, 0),
+        0,
+      ),
+      first:
+        firstMade === undefined
+          ? null
+          : { x: firstMade.x, y: firstMade.y, alpha: firstMade.alpha, scaleY: firstMade.scaleY },
+      container: { visible: container.visible, scale: container.scale.x, x: container.x, y: container.y },
+    };
+  }
+  if (import.meta.env.DEV) {
+    (window as unknown as { villagesScenery?: typeof report }).villagesScenery = report;
+  }
+
   function keyOf(cellX: number, cellY: number): string {
     return `${cellX}/${cellY}`;
   }
 
+  /** The points of a cell, split by group once, because the group is what comes and goes. */
+  function splitByGroup(points: readonly ScatteredPoint[]): Map<number, ScatteredPoint[]> {
+    const by = new Map<number, ScatteredPoint[]>();
+    for (const point of points) {
+      const group = groupOf(point.kind, point.rank);
+      const already = by.get(group);
+      if (already === undefined) {
+        by.set(group, [point]);
+      } else {
+        already.push(point);
+      }
+    }
+    return by;
+  }
+
+  function makeGroup(cell: Held, group: number, alpha: number): void {
+    const points = cell.points.get(group);
+    if (points === undefined || points.length === 0) {
+      return;
+    }
+    const made = points.map((point) => {
+      const texture = frames[point.kind] ?? frames[0]!;
+      const particle = new Particle({ texture });
+      // The shapes are drawn white so that one tint colours the whole of one. Set once, here, because
+      // the vertex buffer is static and only the fade's alpha moves after this.
+      particle.tint = tints[point.kind] ?? 0xffffff;
+      particle.x = point.x;
+      particle.y = point.y;
+      // The foot stands on the place, the same anchor a castle's forms share.
+      particle.anchorX = 0.5;
+      particle.anchorY = 1;
+      // Sized in world units, so the container's one transform turns it into pixels.
+      particle.scaleY = point.height / texture.height;
+      particle.scaleX = particle.scaleY;
+      particle.alpha = alpha;
+      return particle;
+    });
+    cell.made.set(group, made);
+    container.addParticle(...made);
+  }
+
+  function dropGroup(cell: Held, group: number): void {
+    const made = cell.made.get(group);
+    if (made === undefined) {
+      return;
+    }
+    for (const particle of made) {
+      container.removeParticle(particle);
+    }
+    cell.made.delete(group);
+  }
+
   function takeEverythingOut(): void {
     for (const cell of shown.values()) {
-      for (const particle of cell.particles) {
-        container.removeParticle(particle);
+      for (const group of [...cell.made.keys()]) {
+        dropGroup(cell, group);
       }
     }
     shown.clear();
-    drawnAtZoom = Number.NaN;
-    showing = 0;
+    alphaOf.fill(0);
   }
 
   return {
@@ -166,19 +233,42 @@ export function createSceneryLayer(renderer: Renderer) {
     /**
      * Draws the furniture for this view.
      *
-     * Cells are added and taken away as the view moves over them; alphas are rewritten only when the
-     * zoom has actually changed, because a point's share of the fade is a function of the zoom and its
-     * own rank and of nothing else.
+     * Three passes, and each one is small. The groups are advanced by the clock; the cells in view are
+     * made to hold exactly the groups that are in; and the groups that moved this frame have their alpha
+     * written. Nothing walks every particle unless every group is moving, which only happens on the one
+     * frame a master changes.
      */
     update(
       view: CameraView,
       tilesRoot: string,
-      spacing: number,
+      dial: number,
       laterBy: number,
       askForAFrame: () => void,
     ): SceneryDrawn {
+      // The kinds come from the master's sprite map, so nothing can be drawn until it is in hand. One
+      // cell is asked for to set that fetch going, and the first frame after it lands builds the atlas.
+      const map = sceneryMap();
+      if (map === null) {
+        pointsOf(
+          tilesRoot,
+          cellOf(toMercatorExact(view.center).x * WORLD_MASTER_WIDTH),
+          0,
+          dial,
+          askForAFrame,
+        );
+        return { particles: 0, showing: 0, cells: 0, waiting: sceneryTally().waiting, moving: 0 };
+      }
       if (atlas === null) {
-        buildAtlas();
+        buildAtlas(map.kinds);
+      }
+      if (alphaOf.length !== groupCount(map.kinds)) {
+        alphaOf = new Float32Array(groupCount(map.kinds));
+      }
+      // A change to how far in things arrive moves every threshold at once, so everything is let go of
+      // and gathers again rather than half of it sitting at a stale alpha.
+      if (laterBy !== drawnLaterBy) {
+        drawnLaterBy = laterBy;
+        takeEverythingOut();
       }
 
       const size = worldSize(view.zoom);
@@ -187,6 +277,11 @@ export function createSceneryLayer(renderer: Renderer) {
       container.scale.set(perUnit);
       container.x = view.width / 2 - centre.x * size;
       container.y = view.height / 2 - centre.y * size;
+      // Which biome the camera is over, for the panel. One array read a frame, and it is the one reading
+      // that turns "the world looks different over there" into a name Adam can argue with.
+      noteDrawn({
+        biome: map.names[biomeAt(map, centre.x * WORLD_MASTER_WIDTH, centre.y * WORLD_MASTER_WIDTH)] ?? '',
+      });
 
       // Which cells the view stands on, in world units, with a ring so a pan finds them cut.
       const leftUnit = (centre.x * size - view.width / 2) / perUnit;
@@ -197,55 +292,71 @@ export function createSceneryLayer(renderer: Renderer) {
       const toY = cellOf(topUnit + view.height / perUnit) + RING;
 
       // Nothing is drawn until the camera is close enough that something would show, and the view is
-      // small enough to be worth walking. Pulled right back a cell is eight pixels across and the
-      // view holds twenty thousand of them; without this the page hangs before the map has drawn.
+      // small enough to be worth walking. Pulled right back a cell is eight pixels across and the view
+      // holds twenty thousand of them; without this the page hangs before the map has drawn.
       const cellsInView = (toX - fromX + 1) * (toY - fromY + 1);
-      if (!worthDrawing(view.zoom, cellsInView, laterBy)) {
+      if (!worthDrawing(map.kinds, view.zoom, cellsInView, laterBy)) {
         if (shown.size > 0) {
           takeEverythingOut();
         }
-        return { particles: 0, showing: 0, cells: 0, waiting: sceneryTally().waiting };
+        return { particles: 0, showing: 0, cells: 0, waiting: sceneryTally().waiting, moving: 0 };
       }
 
+      // Pass one: the clock. A frame is never allowed to be a long step, or a fade that begins after a
+      // pause would be handed the whole of itself at once and pop, which is the thing a fade is for.
+      const now = performance.now();
+      const elapsed = Math.min(LONGEST_STEP_MS, lastAt === 0 ? LONGEST_STEP_MS : now - lastAt);
+      lastAt = now;
+      const moved: number[] = [];
+      let moving = 0;
+      for (let group = 0; group < alphaOf.length; group += 1) {
+        const was = alphaOf[group]!;
+        const want = wantedAt(thresholdOf(map.kinds, group, laterBy), view.zoom, was > 0) ? 1 : 0;
+        const next = easeTowards(was, want, elapsed, PRESENCE_MS);
+        if (next !== was) {
+          alphaOf[group] = next;
+          moved.push(group);
+        }
+        if (midTrade(next)) {
+          moving += 1;
+        }
+      }
+      if (moving > 0) {
+        askForAFrame();
+      }
+
+      // Pass two: the cells, holding exactly the groups that are in.
       const wanted = new Set<string>();
       let cutting = 0;
       for (let cellY = fromY; cellY <= toY; cellY += 1) {
         for (let cellX = fromX; cellX <= toX; cellX += 1) {
           const key = keyOf(cellX, cellY);
           wanted.add(key);
-          if (shown.has(key)) {
-            continue;
+          let cell = shown.get(key);
+          if (cell === undefined) {
+            // Only so many new cells a frame. Arriving somewhere new otherwise cuts a screenful at
+            // once, which is one long frame exactly when the camera is moving.
+            if (cutting >= MOST_CUT_AT_ONCE) {
+              askForAFrame();
+              continue;
+            }
+            const points = pointsOf(tilesRoot, cellX, cellY, dial, askForAFrame);
+            if (points === null) {
+              continue;
+            }
+            cutting += 1;
+            cell = { points: splitByGroup(points), made: new Map() };
+            shown.set(key, cell);
           }
-          // Only so many new cells a frame. Arriving somewhere new otherwise cuts a screenful at
-          // once, which is one long frame exactly when the camera is moving.
-          if (cutting >= MOST_CUT_AT_ONCE) {
-            askForAFrame();
-            continue;
+          for (const group of cell.points.keys()) {
+            const alpha = alphaOf[group]!;
+            const has = cell.made.has(group);
+            if (alpha > 0 && !has) {
+              makeGroup(cell, group, alpha);
+            } else if (alpha === 0 && has) {
+              dropGroup(cell, group);
+            }
           }
-          const points = pointsOf(tilesRoot, cellX, cellY, spacing, askForAFrame);
-          if (points === null) {
-            continue;
-          }
-          cutting += 1;
-          const made = points.map((point) => {
-            const texture = frames[point.kind] ?? frames[0]!;
-            const particle = new Particle({ texture });
-            particle.x = point.x;
-            particle.y = point.y;
-            // The foot stands on the place, the same anchor a castle's forms share.
-            particle.anchorX = 0.5;
-            particle.anchorY = 1;
-            // Sized in world units, so the container's one transform turns it into pixels.
-            particle.scaleY = point.height / texture.height;
-            particle.scaleX = particle.scaleY;
-            particle.alpha = 0;
-            return particle;
-          });
-          shown.set(key, { particles: made, points });
-          if (made.length > 0) {
-            container.addParticle(...made);
-          }
-          drawnAtZoom = Number.NaN;
         }
       }
 
@@ -253,41 +364,33 @@ export function createSceneryLayer(renderer: Renderer) {
         if (wanted.has(key)) {
           continue;
         }
-        for (const particle of cell.particles) {
-          container.removeParticle(particle);
+        for (const group of [...cell.made.keys()]) {
+          dropGroup(cell, group);
         }
         shown.delete(key);
-        drawnAtZoom = Number.NaN;
       }
 
-      // The fade is a function of the zoom and each point's own rank, so it is rewritten when the
-      // zoom moves and not otherwise. Standing still costs nothing at all.
-      if (view.zoom !== drawnAtZoom || laterBy !== drawnLaterBy) {
-        drawnAtZoom = view.zoom;
-        drawnLaterBy = laterBy;
-        showing = 0;
+      // Pass three: the fade, over the groups that moved and nothing else.
+      for (const group of moved) {
+        const alpha = alphaOf[group]!;
         for (const cell of shown.values()) {
-          for (let index = 0; index < cell.particles.length; index += 1) {
-            const point = cell.points[index];
-            const particle = cell.particles[index];
-            if (point === undefined || particle === undefined) {
-              continue;
-            }
-            const alpha = alphaAt(view.zoom, point.height, point.rank, laterBy);
+          const made = cell.made.get(group);
+          if (made === undefined) {
+            continue;
+          }
+          for (const particle of made) {
             particle.alpha = alpha;
-            if (alpha > 0) {
-              showing += 1;
-            }
           }
         }
       }
 
-      const tally = sceneryTally();
       let particles = 0;
       for (const cell of shown.values()) {
-        particles += cell.particles.length;
+        for (const made of cell.made.values()) {
+          particles += made.length;
+        }
       }
-      return { particles, showing, cells: shown.size, waiting: tally.waiting };
+      return { particles, showing: particles, cells: shown.size, waiting: sceneryTally().waiting, moving };
     },
 
     /** Everything drawn is taken out, for a change that makes every cell wrong. */

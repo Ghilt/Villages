@@ -1,27 +1,27 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 
-import { forgetWorstGap, sceneryDrawn } from '../sprites/scenery/sceneryCells';
+import { forgetWorstGap, hasNoSpriteMap, sceneryDrawn, sceneryMap } from '../sprites/scenery/sceneryCells';
 import type { SceneryDrawnTally } from '../sprites/scenery/sceneryCells';
 import { sceneryNow, setScenery, watchScenery } from './scenery';
 import { Section } from './Section';
 
 /**
- * How thickly the world is furnished, and what it costs.
+ * What the world is furnished with, how thickly, and what it costs.
  *
- * **The levers of experiment 0006, not a part of the game.** They are here to find the ceiling and
- * not to furnish a world; see `docs/plans/world-generator.md` for what replaces them.
+ * This reads the **sprite map** the master was generated with - the biomes and the stands that
+ * `npm run world:sprites` wrote - and then what the browser actually did with it. So the top half says
+ * what was asked for and the bottom half says what happened, and the two numbers to compare are the
+ * density the generator promised and the frame gap while the map is moving.
  *
- * This is the instrument for the question Adam asked - how much scenery can the browser draw before
- * it lags - so it is levers and numbers and nothing else. The numbers say what they measure: the
- * frame gap is only counted between frames of a *moving* map, because a still map draws nothing at
+ * The frame gap is only counted between frames of a *moving* map, because a still map draws nothing at
  * all and reporting that as a stall would be the panel lying. See decision record 0023.
  */
 
 /** How often the readings are taken. The same quarter second everything else in the panel gathers over. */
 const EVERY_MS = 250;
 
-/** The spacings the slider steps through, in world units. Each step is about twice the scenery. */
-const SPACINGS = [8, 6, 4, 3, 2, 1.5, 1, 0.75, 0.5];
+/** What the dial steps through, as a multiple of what the sprite map asked for. */
+const DIALS = [0, 0.25, 0.5, 0.75, 1, 1.5, 2, 3];
 
 function useDrawn(): SceneryDrawnTally {
   const [drawn, setDrawn] = useState(sceneryDrawn);
@@ -32,10 +32,21 @@ function useDrawn(): SceneryDrawnTally {
   return drawn;
 }
 
+function useSpriteMap(): ReturnType<typeof sceneryMap> {
+  const [map, setMap] = useState(sceneryMap);
+  useEffect(() => {
+    // Polled rather than watched: it arrives once, early, and then never changes for this master.
+    const often = setInterval(() => setMap(sceneryMap()), EVERY_MS);
+    return () => clearInterval(often);
+  }, []);
+  return map;
+}
+
 export function ScenerySection() {
   const how = useSyncExternalStore(watchScenery, sceneryNow);
   const drawn = useDrawn();
-  const step = Math.max(0, SPACINGS.indexOf(how.spacing));
+  const map = useSpriteMap();
+  const step = Math.max(0, DIALS.indexOf(how.dial));
 
   const tools = (
     <button
@@ -51,22 +62,54 @@ export function ScenerySection() {
 
   return (
     <Section name="Scenery" tools={tools}>
+      {map === null ? (
+        <p className="debug-map__note">
+          {hasNoSpriteMap()
+            ? 'This master has no sprite map, so nothing grows on it. Run npm run world:sprites --prefix frontend'
+            : 'Reading the sprite map…'}
+        </p>
+      ) : (
+        <dl className="debug__state">
+          <div className="debug__row">
+            <dt>sprite map</dt>
+            <dd>
+              {map.file.stands.toLocaleString()} stands in {map.file.chunks.toLocaleString()} chunks,{' '}
+              {map.names.length} biomes, {map.kinds.length} kinds
+            </dd>
+          </div>
+          <div className="debug__row">
+            <dt>thickest</dt>
+            <dd>
+              {map.file.density.worst} at {map.file.density.perUnit} points a unit², against a ceiling of{' '}
+              {map.file.density.ceiling}
+            </dd>
+          </div>
+          <div className="debug__row">
+            <dt>here</dt>
+            <dd>{drawn.biome === '' ? 'nothing drawn yet' : drawn.biome}</dd>
+          </div>
+        </dl>
+      )}
+
       <label className="debug-map__label" htmlFor="scenery-density">
-        How much
+        How much of what the map asked for
       </label>
       <input
         id="scenery-density"
         className="debug__slider"
         type="range"
         min={0}
-        max={SPACINGS.length - 1}
+        max={DIALS.length - 1}
         step={1}
         value={step}
-        onChange={(event) => setScenery({ spacing: SPACINGS[Number(event.target.value)] ?? 2 })}
+        onChange={(event) => setScenery({ dial: DIALS[Number(event.target.value)] ?? 1 })}
       />
       <p className="debug-map__note">
-        A point every {how.spacing} world units, which is about{' '}
-        {Math.round(1000 / (how.spacing * how.spacing)) / 1000} to the unit squared
+        {how.dial === 1
+          ? 'Exactly what the sprite map asked for'
+          : how.dial === 0
+            ? 'None of it, so the stands can be seen against bare ground'
+            : `${how.dial} times what the sprite map asked for`}
       </p>
 
       <label className="debug-map__label" htmlFor="scenery-later">
@@ -92,14 +135,21 @@ export function ScenerySection() {
         <div className="debug__row">
           <dt>drawn</dt>
           <dd>
-            {drawn.showing.toLocaleString()} of {drawn.particles.toLocaleString()} held
+            {drawn.particles.toLocaleString()} particles
+            {drawn.moving > 0 ? `, ${drawn.moving} groups still arriving` : ', settled'}
           </dd>
         </div>
         <div className="debug__row">
           <dt>cells</dt>
           <dd>
             {drawn.cells} on screen, {drawn.held} cut, {drawn.points.toLocaleString()} points kept
-            {drawn.waiting > 0 && `, ${drawn.waiting} waiting on terrain`}
+            {drawn.waiting > 0 && `, ${drawn.waiting} waiting on the ground`}
+          </dd>
+        </div>
+        <div className="debug__row">
+          <dt>stands</dt>
+          <dd>
+            {drawn.stands.toLocaleString()} held, in {drawn.chunks.toLocaleString()} chunks
           </dd>
         </div>
         <div className="debug__row">
@@ -119,8 +169,8 @@ export function ScenerySection() {
         <button
           type="button"
           className="debug__button"
-          onClick={() => setScenery({ spacing: SPACINGS[SPACINGS.length - 1] ?? 0.5, on: true })}
-          title="as much as it will take"
+          onClick={() => setScenery({ dial: DIALS[DIALS.length - 1] ?? 3, on: true })}
+          title="three times what the generator asked for, to find the edge"
         >
           stress it
         </button>
