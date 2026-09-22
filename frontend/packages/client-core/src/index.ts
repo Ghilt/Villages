@@ -23,5 +23,7 @@ export {
 } from './houses';
 export type { HousesState } from './houses';
 
+export { TICK_MS, freeNow, stockNow } from './stocks';
+
 export { whatToFollow } from './following';
 export type { Following } from './following';

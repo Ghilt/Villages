@@ -72,6 +72,18 @@ levers arrive in 6. What stands in for a panel line is twelve decider tests and 
 including the one that matters most - that a grant reaches the row and tells the watchers, which is the
 path to the player's screen.
 
+Increment 5a landed: the wire carries the five, and **what a house has became private**. That was not in
+the hypothesis and it fell out of arithmetic rather than principle - a `houseView` goes to everyone holding
+a cell, up to two hundred at a time, and five stocks on it would have been twenty numbers a house on every
+snapshot. Putting them on a `yourHouseView` instead made snapshots smaller than they were before and made
+the privacy structural: there is nowhere on the public view for a resource to leak from.
+
+Two things fell out of it that were not planned. The inspect window lost its treasury line, because a
+neighbour's wealth is not public, and with it the last thing in that window that moved - so its redraw loop
+went too. And `stockNow` finally moved into `client-core`, which makes that package's own description
+("state, the protocol codec, the connection, cell maths and resource interpolation") true for the first
+time; it had been claiming that for months while the function lived in a pane.
+
 ## Result
 
 Open.

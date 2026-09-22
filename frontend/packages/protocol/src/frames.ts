@@ -30,15 +30,40 @@ export const bannerSchema = z.object({
   chargeTincture: tinctureSchema,
 });
 
-/** A resource as a rate. Clients interpolate: amount plus ratePerSecond times the seconds since asOf. */
-export const rateSchema = z.object({
-  amount: z.number().int(),
+/**
+ * How much of one resource a house has. Clients interpolate: total plus ratePerSecond times the seconds
+ * since asOf, and what is free is that less `pledged`.
+ *
+ * `pledged` is summed by the gateway from the live pledges and stored nowhere as a number; it is on the
+ * wire so the browser does not have to add up a list to draw one figure.
+ */
+export const stockSchema = z.object({
+  total: z.number().int(),
+  pledged: z.number().int().nonnegative(),
   ratePerSecond: z.number(),
   asOf: z.number().int(),
 });
 
+/**
+ * What the five resources are called on the wire: the code's names, not the player's.
+ *
+ * `naturalDomain` is shown to a player as Domain - the code qualifies it because `domain` already names
+ * the innermost layer of the server. Which word is shown is the interface's to decide, and it decides it
+ * in one place. See the naming rule in `BUILDING-A-MECHANIC.md`.
+ */
+export const resourceNameSchema = z.enum(['wealth', 'naturalDomain', 'influence', 'reason', 'piety']);
+
 /** A day in the world's calendar, counted from the first day of year one. The calendar reads it. */
 export const worldDaySchema = z.number().int().nonnegative();
+
+/** One live pledge: what is tied up, how much, until when, and what for. */
+export const pledgeViewSchema = z.object({
+  id: z.string(),
+  resource: resourceNameSchema,
+  amount: z.number().int(),
+  until: worldDaySchema,
+  purpose: z.string(),
+});
 
 export const houseViewSchema = z.object({
   id: z.string(),
@@ -46,10 +71,23 @@ export const houseViewSchema = z.object({
   cell: cellSchema,
   seat: pointSchema,
   banner: bannerSchema,
-  treasury: rateSchema,
   /** The world-day it exists from. */
   since: worldDaySchema,
   version: z.number().int(),
+});
+
+/**
+ * The player's own house: everything anybody can see of it, and what only its owner can.
+ *
+ * **What a house has is private.** A `houseView` goes to everyone holding the cell, up to two hundred at
+ * a time, so putting five stocks on it would tell the neighbours a house's business and multiply what a
+ * snapshot weighs. Resources reach one session, and the shape is what enforces that rather than a
+ * convention somebody has to remember.
+ */
+export const yourHouseViewSchema = z.object({
+  house: houseViewSchema,
+  resources: z.record(resourceNameSchema, stockSchema),
+  pledges: z.array(pledgeViewSchema),
 });
 
 /** What taking an option would do. `kind` names the case, as it does in the store. See 0034. */
@@ -119,8 +157,8 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
     /** Where the world's clock stands: today, and the earliest day anything is known to exist from. */
     world: z.object({ today: worldDaySchema, earliest: worldDaySchema }),
   }),
-  /** The player's own house, wherever they are looking. Null when they have none. */
-  z.object({ type: z.literal('yourHouse'), house: houseViewSchema.nullable() }),
+  /** The player's own house and what only they can see of it. Null when they have none. */
+  z.object({ type: z.literal('yourHouse'), yours: yourHouseViewSchema.nullable() }),
   /** What this player has to decide, or null when they have nothing. The parchment's one frame. */
   z.object({ type: z.literal('yourChoice'), choice: choiceViewSchema.nullable() }),
   /** Another window took this player over; this session is finished. */
@@ -160,7 +198,10 @@ export type Tincture = z.infer<typeof tinctureSchema>;
 export type Division = z.infer<typeof divisionSchema>;
 export type Charge = z.infer<typeof chargeSchema>;
 export type BannerSpec = z.infer<typeof bannerSchema>;
-export type Rate = z.infer<typeof rateSchema>;
+export type Stock = z.infer<typeof stockSchema>;
+export type ResourceName = z.infer<typeof resourceNameSchema>;
+export type PledgeView = z.infer<typeof pledgeViewSchema>;
+export type YourHouseView = z.infer<typeof yourHouseViewSchema>;
 export type HouseView = z.infer<typeof houseViewSchema>;
 export type EffectView = z.infer<typeof effectViewSchema>;
 export type OptionView = z.infer<typeof optionViewSchema>;

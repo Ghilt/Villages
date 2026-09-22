@@ -9,7 +9,7 @@ import {
   whatToFollow,
 } from '@villages/client-core';
 import { PROTOCOL_VERSION, describeDay } from '@villages/protocol';
-import type { ChoiceView, HouseView, OptionView, ServerFrame } from '@villages/protocol';
+import type { ChoiceView, OptionView, ServerFrame, YourHouseView } from '@villages/protocol';
 
 import { note, shortId } from '../debug/log';
 import { NOTHING_ARRIVED, alsoArrived, describeArrival } from './arrivals';
@@ -29,8 +29,8 @@ export const GATEWAY_URL =
 export interface GatewayState {
   connection: 'connecting' | 'open' | 'closed' | 'takenOver';
   playerId?: string;
-  /** The player's own house, wherever they are looking, or null when they have none. */
-  yourHouse: HouseView | null;
+  /** The player's own house and what only they can see of it, or null when they have none. */
+  yourHouse: YourHouseView | null;
   /** What this player has to decide, or null when they have nothing. What the parchment shows. */
   yourChoice: ChoiceView | null;
   /** The id of the command in flight, so the parchment can stop taking a second answer. */
@@ -127,8 +127,8 @@ function heard(frame: ServerFrame): void {
       note('gateway', `pong, round trip ${Date.now() - frame.t0} ms`);
       return;
     case 'yourHouse':
-      update({ yourHouse: frame.house });
-      note('house', frame.house === null ? 'no house yet' : `your house is ${frame.house.name}`);
+      update({ yourHouse: frame.yours });
+      note('house', frame.yours === null ? 'no house yet' : `your house is ${frame.yours.house.name}`);
       return;
     case 'yourChoice':
       update({ yourChoice: frame.choice });

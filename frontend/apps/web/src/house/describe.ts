@@ -14,12 +14,6 @@ export function blazon(house: HouseView): string {
   return `${house.banner.field}, a ${house.banner.charge} ${house.banner.chargeTincture}`;
 }
 
-/** The treasury as it stands now: an amount, a speed, and the instant that was true. See decision 0006. */
-export function treasuryAt(house: HouseView, now: number): number {
-  const seconds = Math.max(0, (now - house.treasury.asOf) / 1000);
-  return Math.floor(house.treasury.amount + house.treasury.ratePerSecond * seconds);
-}
-
 /** Where the seat is, to the three decimals that put it inside a master pixel. */
 export function whereabouts(house: HouseView): string {
   const northing = `${Math.abs(house.seat.lat).toFixed(3)}° ${house.seat.lat >= 0 ? 'N' : 'S'}`;
@@ -27,5 +21,5 @@ export function whereabouts(house: HouseView): string {
   return `${northing}, ${easting}`;
 }
 
-/** How often a treasury is redrawn. A resource is a rate, so a still number would be a lie. */
-export const TICK_MS = 250;
+// What a stock stands at, and how often it is redrawn, are `stockNow` and `TICK_MS` in client-core:
+// arithmetic over the protocol belongs beside the protocol, not in the pane that happens to draw it.

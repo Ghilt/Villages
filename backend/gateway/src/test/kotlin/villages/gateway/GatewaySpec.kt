@@ -2,6 +2,8 @@ package villages.gateway
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
@@ -294,9 +296,35 @@ class GatewaySpec : StringSpec({
 
         rig.gateway.connect { sent += it }.receive(hello)
 
-        val mine = sent.filterIsInstance<YourHouse>().last().house
+        val mine = sent.filterIsInstance<YourHouse>().last().yours?.house
         mine?.name shouldBe "Ravenscar"
         mine?.cell shouldBe STOCKHOLM_Z10
+    }
+
+    "what a house has reaches its owner, and reaches nobody else" {
+        val rig = Rig()
+        val (founder, mine) = rig.introduced()
+        val (neighbour, theirs) = rig.someoneElse()
+        neighbour.receive(subscribe(STOCKHOLM_Z10))
+        theirs.clear()
+
+        founder.receive(founding())
+        // The neighbour's deltas are coalesced, so nothing reaches them until the flush comes due.
+        rig.later.tick()
+
+        // The owner is told all five, under their wire names, which are the code's and not the player's.
+        val yours = mine.filterIsInstance<YourHouse>().last().yours!!
+        yours.resources.keys shouldContainExactlyInAnyOrder
+            setOf("wealth", "naturalDomain", "influence", "reason", "piety")
+        yours.resources.getValue("wealth").total shouldBe 0
+        yours.resources.getValue("wealth").pledged shouldBe 0
+        yours.pledges.shouldBeEmpty()
+
+        // The neighbour holding the cell sees the house arrive and is told nothing of what it has. A
+        // `yourHouse` is only ever about your own, and the public view has nowhere to carry a resource,
+        // so the privacy is the shape rather than a rule anybody has to remember. See decision 0028.
+        theirs.filterIsInstance<YourHouse>().shouldBeEmpty()
+        theirs.filterIsInstance<Batch>().flatMap { it.deltas }.shouldNotBeEmpty()
     }
 
     "welcome's earliest day is the first anything is known to exist from" {
@@ -461,7 +489,7 @@ class GatewaySpec : StringSpec({
         connection.receive(founding())
 
         connection.cells().shouldBeEmpty()
-        sent.filterIsInstance<YourHouse>().last().house?.name shouldBe "Ravenscar"
+        sent.filterIsInstance<YourHouse>().last().yours?.house?.name shouldBe "Ravenscar"
     }
 
     "founding twice is rejected with the decider's reason as a code" {
@@ -482,7 +510,7 @@ class GatewaySpec : StringSpec({
         player.receive(takingAction(choice.id.value.toString(), taking.id.value.toString()))
 
         sent.filterIsInstance<CommandAccepted>().single().commandId shouldBe COMMAND_ONE
-        val mine = sent.filterIsInstance<YourHouse>().last().house!!
+        val mine = sent.filterIsInstance<YourHouse>().last().yours!!.house
         val promised = taking.effect.shouldBeInstanceOf<Effect.FoundAt>()
         mine.name shouldBe promised.name.value
         mine.seat shouldBe Point(promised.seat.lat, promised.seat.lon)
@@ -833,7 +861,7 @@ class GatewaySpec : StringSpec({
         // Still the session: its own house would still find it, and it is still able to act.
         second.receive(founding(name = "Mine"))
         two.last() shouldBe CommandAccepted(COMMAND_ONE)
-        two.filterIsInstance<YourHouse>().last().house?.name shouldBe "Mine"
+        two.filterIsInstance<YourHouse>().last().yours?.house?.name shouldBe "Mine"
     }
 
     "saying hello twice on one connection is refused rather than quietly changing who you are" {

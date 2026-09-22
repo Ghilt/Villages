@@ -1,10 +1,11 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 
 import { describeDay } from '@villages/protocol';
+import { TICK_MS, stockNow } from '@villages/client-core';
 
 import { gatewayState, watchGateway } from '../net/gateway';
 import type { Room } from '../stage/panes';
-import { blazon, TICK_MS, treasuryAt } from './describe';
+import { blazon } from './describe';
 import { PaneSizeControl } from '../stage/PaneSizeControl';
 import { HouseBar } from './HouseBar';
 
@@ -59,7 +60,8 @@ const TINCTURE: Record<string, string> = {
 export function HouseStatus({ room }: { room: Room }) {
   const heard = useSyncExternalStore(watchGateway, gatewayState);
   const [now, setNow] = useState(() => Date.now());
-  const house = heard.yourHouse;
+  const yours = heard.yourHouse;
+  const house = yours === null ? null : yours.house;
 
   useEffect(() => {
     if (house === null) {
@@ -81,7 +83,8 @@ export function HouseStatus({ room }: { room: Room }) {
   }
 
   const small = room.size === 'small';
-  const treasury = house === null ? '—' : treasuryAt(house, now).toLocaleString();
+  // Wealth, still the only number on the card. The other four arrive with their marks in their own step.
+  const treasury = yours === null ? '—' : stockNow(yours.resources.wealth, now).toLocaleString();
 
   return (
     <div className={small ? 'hud hud--small' : 'hud'} aria-live="polite">

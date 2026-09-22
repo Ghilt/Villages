@@ -24,7 +24,7 @@ import tools.jackson.databind.JsonNode
  * `takeAction`, `yourChoice`, `wipeWorld` and `worldWiped`, and gave every event its provenance.
  * Version 3 added `seeAll`, the eye that sets significance aside.
  */
-const val PROTOCOL_VERSION = 3
+const val PROTOCOL_VERSION = 4
 
 data class Point(val lat: Double, val lon: Double)
 
@@ -61,8 +61,24 @@ data class BannerSpec(
     val chargeTincture: Tincture,
 )
 
-/** A resource as a rate: the amount at `asOf`, server milliseconds, and how fast it grows. Clients interpolate. */
-data class Rate(val amount: Long, val ratePerSecond: Double, val asOf: Long)
+/**
+ * How much of one resource a house has: the total at `asOf` in server milliseconds, how fast it grows, and
+ * how much of it is spoken for. Clients interpolate the total and subtract the pledged to get what is free.
+ *
+ * `pledged` is worked out by the gateway from the house's live pledges and is not stored anywhere as a
+ * number; it is on the wire so that the browser does not have to sum a list to draw one figure.
+ */
+data class Stock(val total: Long, val pledged: Long, val ratePerSecond: Double, val asOf: Long)
+
+/** One live pledge, so the player can see what their reason is tied up in and until when. */
+data class PledgeView(
+    val id: String,
+    val resource: String,
+    val amount: Long,
+    /** The world-day it comes back on, as a count the calendar reads. */
+    val until: Long,
+    val purpose: String,
+)
 
 /**
  * A house as the map shows it. `since` is the world-day it exists from, as a count the calendar reads;
@@ -74,9 +90,25 @@ data class HouseView(
     val cell: String,
     val seat: Point,
     val banner: BannerSpec,
-    val treasury: Rate,
     val since: Long,
     val version: Long,
+)
+
+/**
+ * The player's own house: everything anybody can see of it, and what only its owner can.
+ *
+ * **What a house has is private.** A `HouseView` goes to everyone holding the cell, up to two hundred at a
+ * time, so putting five stocks on it would both tell the neighbours a house's business and multiply what a
+ * snapshot weighs. Resources reach one session, the owner's, and the structure is what enforces that
+ * rather than a convention anybody has to remember.
+ *
+ * The keys of `resources` are the wire's names for the five, which are the code's names and not the
+ * player's: `naturalDomain` is shown as Domain. See the naming rule in `BUILDING-A-MECHANIC.md`.
+ */
+data class YourHouseView(
+    val house: HouseView,
+    val resources: Map<String, Stock>,
+    val pledges: List<PledgeView>,
 )
 
 /** Where the world's clock stands: today's world-day, and the earliest day anything is known to exist from. */
@@ -218,7 +250,7 @@ data class ErrorFrame(val code: String, val message: String) : ServerFrame
  * The player's own house, wherever they are looking. Sent after welcome, with null when they have none so
  * that the answer is definite, and again whenever it appears or changes.
  */
-data class YourHouse(val house: HouseView?) : ServerFrame
+data class YourHouse(val yours: YourHouseView?) : ServerFrame
 
 /**
  * Another window took this player over, and this session is finished: it holds no cells, hears nothing

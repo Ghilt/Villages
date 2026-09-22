@@ -102,11 +102,11 @@ class AppBootsTest {
             """{"type":"command","commandId":"$takingOne","command":{"type":"takeAction",""" +
                 """"choiceId":"${offered.id}","optionId":"${taking.id}"}}""",
         )
-        window.until("the house") { frames -> frames.filterIsInstance<YourHouse>().last().house != null }
+        window.until("the house") { frames -> frames.filterIsInstance<YourHouse>().last().yours != null }
 
         // The house stands where the option promised, under the name and banner it promised.
         val promised = taking.effect as FoundAtView
-        val standing = window.last<YourHouse>().house!!
+        val standing = window.last<YourHouse>().yours!!.house
         assertEquals(promised.name, standing.name)
         assertEquals(promised.seat, standing.seat)
         assertEquals(promised.banner, standing.banner)
@@ -143,7 +143,7 @@ class AppBootsTest {
             """{"type":"command","commandId":"$wiping","command":{"type":"takeAction",""" +
                 """"choiceId":"${offered.id}","optionId":"${offered.options[0].id}"}}""",
         )
-        first.until("a house") { frames -> frames.filterIsInstance<YourHouse>().last().house != null }
+        first.until("a house") { frames -> frames.filterIsInstance<YourHouse>().last().yours != null }
 
         first.say("""{"type":"wipeWorld"}""")
         first.until("being told the world went") { frames -> frames.any { it is WorldWiped } }
@@ -154,7 +154,7 @@ class AppBootsTest {
         second.say("""{"type":"hello","playerToken":"$wiper","protocolVersion":$PROTOCOL_VERSION}""")
         second.until("a choice again") { frames -> frames.any { it is YourChoice } }
 
-        assertNull(second.last<YourHouse>().house, "the house went with the world")
+        assertNull(second.last<YourHouse>().yours, "the house went with the world")
         assertNotNull(second.last<YourChoice>().choice, "a player with no house is asked where to found")
         // The first event of the stream again, which is what proves the store was emptied and not hidden.
         second.until("the choice event") { frames -> frames.any { it is EventFrame } }
@@ -172,7 +172,7 @@ class AppBootsTest {
         first.until("a welcome, a house and a choice") { frames ->
             frames.any { it is Welcome } && frames.any { it is YourHouse } && frames.any { it is YourChoice }
         }
-        assertNull(first.last<YourHouse>().house, "a new player has no house yet")
+        assertNull(first.last<YourHouse>().yours, "a new player has no house yet")
 
         // Arriving with no house is answered with three seats to choose between.
         val offered = first.last<YourChoice>().choice
@@ -183,7 +183,7 @@ class AppBootsTest {
         first.say("""{"type":"watchEvents","on":true}""")
         first.say(founding)
         first.until("the event and the house") { frames ->
-            frames.any { it is EventFrame } && frames.filterIsInstance<YourHouse>().last().house != null
+            frames.any { it is EventFrame } && frames.filterIsInstance<YourHouse>().last().yours != null
         }
 
         // The founding choice this player was given came first, and the founding follows it.
@@ -191,7 +191,7 @@ class AppBootsTest {
         assertEquals("villages.house.founded.v1", event.eventType)
         // The stream is worked out from the player, not chosen by the client: see HouseId.of.
         assertEquals("house:49d14206-e7b6-3cff-b12c-0fa929182509", event.stream)
-        assertEquals("Ravenscar", first.last<YourHouse>().house?.name)
+        assertEquals("Ravenscar", first.last<YourHouse>().yours?.house?.name)
 
         first.say("""{"type":"subscribeCells","cells":["$cell"]}""")
         first.until("a snapshot") { frames -> frames.any { it is Snapshot } }
@@ -203,7 +203,7 @@ class AppBootsTest {
         val second = Window(port)
         second.say(hello)
         second.until("the house on hello") { frames -> frames.filterIsInstance<YourHouse>().isNotEmpty() }
-        assertEquals("Ravenscar", second.last<YourHouse>().house?.name)
+        assertEquals("Ravenscar", second.last<YourHouse>().yours?.house?.name)
 
         first.until("being stood down") { frames -> frames.any { it is TakenOver } }
         assertNotNull(first.last<TakenOver>().message)
