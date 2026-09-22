@@ -10,6 +10,8 @@ export const WARP_CONFIG = resolve(REPO, 'world', 'warp.json');
 export const PALETTE = resolve(REPO, 'world', 'palette.json');
 /** What each terrain class is drawn in, as opposed to what it is painted in. */
 export const RENDER = resolve(REPO, 'world', 'render.json');
+/** What grows where: the biomes, the kinds, and how thickly each one stands. Hand-edited. */
+export const BIOMES = resolve(REPO, 'world', 'biomes.json');
 export const MASTER_CONFIG = resolve(REPO, 'world', 'master.json');
 /** How the world is painted, as opposed to what colour each class is. */
 export const PAINTERLY = resolve(REPO, 'world', 'painterly.json');

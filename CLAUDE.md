@@ -69,6 +69,9 @@ tiles go through, that same step **also**:
 
 - **Re-cuts the tiles** if the master or the tiling changed: `npm run world:import --prefix frontend` then
   `npm run world:tile --prefix frontend`. About five minutes. The Debug map panel offers this per master too.
+- **Re-works the sprite map** if the master, `world/biomes.json` or the generator changed:
+  `npm run world:sprites --prefix frontend`, half a minute a master, and it prints the density of every
+  biome against experiment 0006's ceiling. Without one a master draws no scenery at all.
 - **Re-paints every view in every style**: `npm run world:paint --prefix frontend`. About four minutes for all of
   them, and it also writes the runtime `paint.json` the app reads. After only a style edit,
   `-- --config-only` is a second and is all the app needs.
@@ -321,6 +324,13 @@ Commands are added here as the increments land:
   boundary runs between painted pixels rather than through them, so at z10 on the `raw` renderer it lines
   up with the squares the terrain is drawn as. Areas live only in the browser and a reload forgets them.
   See `docs/adr/0032` and experiment `0002`.
+- What grows where: `world/biomes.json`, hand-edited, one entry a kind and one a biome. What reads it is
+  `npm run world:sprites --prefix frontend`, which works out a biome for every sixteen world units and
+  where the scenery clumps, and writes a **sprite map** beside the cut tiles - about five megabytes and
+  half a minute a master. It takes a master's name as its first argument (`-- terrain2`). **A master
+  with no sprite map draws no scenery**, which is the rule rather than a fault. The Scenery section of
+  the debug panel says what the sprite map asked for and what the browser did with it. See
+  `docs/adr/0053` and `docs/plans/biome-sprite-map.md`.
 - The styles live in `world/painterly.json`. `npm run world:paint --prefix frontend` paints every view in
   every style into `world/painterly/`, flat once and then once per style, and writes the runtime copy the
   app reads. `-- --view alps`, `-- --style woodblock` for one of them; `-- --config-only` writes just the

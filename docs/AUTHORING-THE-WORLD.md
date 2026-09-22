@@ -92,14 +92,15 @@ Save the image, alt-tab to the running app, and pick it in the **Debug map** par
 down the right-hand side. Its terrain dropdown is every PNG in this folder, so a candidate saved as `terrain2.png` is offered beside
 `terrain.png` rather than having to overwrite it, and the panel says whether what is on the screen is
 still what the image says. A master nobody has cut yet, or one saved since it was last cut, gets a button
-that runs the two commands below and puts their output in the debug log while it works. See
+that runs the commands below and puts their output in the debug log while it works. See
 `docs/adr/0025`.
 
-The same two commands from the repository root, not from inside `frontend/`:
+The same three commands from the repository root, not from inside `frontend/`:
 
 ```
 npm run world:import --prefix frontend
 npm run world:tile --prefix frontend
+npm run world:sprites --prefix frontend
 ```
 
 The first traces the coast and the large lakes into the lines the map draws in ink. The second cuts the
@@ -117,6 +118,14 @@ That reads the master, snaps every pixel to a class, traces each terrain into ou
 writes the world the game draws. It prints what it found: how many pixels were not an exact class colour,
 which unexpected colours it had to reach for, and how many shapes each terrain became. Then reload the
 app.
+
+**The third works out what kind of place every part of the world is, and where the scenery clumps.** It
+writes a **sprite map** beside the tiles: a biome for every sixteen world units and about six hundred
+thousand stands, five megabytes in all, in about half a minute. What grows in each biome is
+`world/biomes.json`, which is hand-edited the way `world/painterly.json` is. **A master with no sprite
+map draws no scenery at all**, which is the rule rather than a fault - so a new candidate is bare until
+this is run on it. It takes the master's name: `-- terrain2`. See `docs/adr/0053` and
+`docs/plans/biome-sprite-map.md`.
 
 It also writes a small terrain grid the game can ask questions of, such as what a house is standing on.
 

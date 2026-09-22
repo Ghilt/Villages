@@ -6,6 +6,46 @@
  * browser. The scripts in `bin` are the only things here that touch a disk.
  */
 
+export {
+  CANOPY_HEIGHT,
+  NO_FAVOURITE,
+  NO_STANDS,
+  PARENT_STEP,
+  STAND_BYTES,
+  decodeStands,
+  encodeStands,
+  favouriteRoll,
+  favouritesOf,
+  pickKindIn,
+  standAt,
+  standWeight,
+  standsNear,
+  thicknessAt,
+} from './stands.ts';
+export type { Stand, StandChunk, Thickness } from './stands.ts';
+export {
+  biomeProblems,
+  chooseBiome,
+  growingTable,
+  pickKind,
+  regionAt,
+  wanderAt,
+  warmthOfLatitude,
+  wetnessOfDistance,
+} from './biome.ts';
+export type {
+  Band,
+  Biome,
+  BiomeAxes,
+  BiomeFile,
+  BiomeProblem,
+  BoundaryRule,
+  Growing,
+  Kind,
+  RegionField,
+  StandRule,
+  Where,
+} from './biome.ts';
 export { noiseAt } from './noise.ts';
 export type { NoiseField } from './noise.ts';
 export { MAX_MERCATOR_LATITUDE, angularDistance, rotate, toLngLat, toVector } from './sphere.ts';
