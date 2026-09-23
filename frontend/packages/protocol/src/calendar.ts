@@ -10,7 +10,7 @@
  * `Date.UTC` maps two-digit years into the nineteen-hundreds. Kotlin uses `java.time.LocalDate` for the
  * same job, which is the same calendar by a different road; the fixture is what keeps them honest.
  *
- * A real day is a world month. See decision record 0051.
+ * A real day is a world month. See decision record 0053.
  */
 
 /** Day zero is the first of January, year one, which is this many days before the Unix epoch. */

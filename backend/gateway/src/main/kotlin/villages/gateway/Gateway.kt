@@ -602,7 +602,7 @@ class Gateway(
 private fun isCell(candidate: String): Boolean = runCatching { Cell(candidate) }.isSuccess
 
 /** An identifier off the wire, or a refusal saying which one was not one. */
-/** A resource named on the wire, or the refusal. The wire's names are the code's; see 0051 and the naming rule. */
+/** A resource named on the wire, or the refusal. The wire's names are the code's; see 0053 and the naming rule. */
 private fun asResource(name: String): Resource =
     Resource.entries.firstOrNull { it.toWire() == name }
         ?: throw IllegalArgumentException("not a resource: $name")

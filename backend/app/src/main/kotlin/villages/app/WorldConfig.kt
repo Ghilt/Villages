@@ -52,7 +52,7 @@ class WorldConfig {
     /**
      * The world's day: one world-month for every real day since the world opened on the first of September
      * 2026, on the first of January 1790. The chrono-engine's placeholder; see SETTING.md on the age and
-     * the shared world-day, and decision records 0027 and 0051.
+     * the shared world-day, and decision records 0027 and 0053.
      */
     @Bean
     fun worldClock(clock: Clock, calendar: WorldCalendar): MonthlyWorldClock = MonthlyWorldClock(

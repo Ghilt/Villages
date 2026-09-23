@@ -17,7 +17,7 @@ import villages.domain.SpendResource
  * and hands the command to the decider, which is where the rules are. The one thing it actually decides is
  * the day a pledge comes back: the caller asks for a span in **months**, because that is the unit the
  * world moves in, and the calendar turns it into a world-day. Months cannot cross into the domain, which
- * may not see the calendar. See decision record 0051.
+ * may not see the calendar. See decision record 0053.
  *
  * Throws a `HouseError` when the decider refuses, exactly as the decider threw it.
  */

@@ -86,7 +86,7 @@ and afterwards it is a thing to look back at rather than a place to return to.
 The two clocks differ by a fixed amount: **a real day is a world month**, the same for everyone. A month a
 visit is what lets a house's history move at the pace a person actually plays at, and it makes a real year a
 world year. **There is no fast-forward.** The world is shared, so its speed is not anybody's to change; a
-player who could run time on would be running it on for everyone standing in it. See decision record 0051.
+player who could run time on would be running it on for everyone standing in it. See decision record 0053.
 
 ## A house
 
@@ -126,7 +126,7 @@ than a figure in it. An NPC house is a house; the difference is who issues its c
 
 ## Not decided
 
-- **Whether the world really spans centuries at a month a real day.** Decision 0051 set the clock at one
+- **Whether the world really spans centuries at a month a real day.** Decision 0053 set the clock at one
   world month for every real day, which makes a real year a world year - so the centuries this document
   opens with would be centuries of real time. Either the span is years rather than centuries, or the clock
   is faster than a month a day. Nothing built so far depends on which, and the clock is one constant.

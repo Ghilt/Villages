@@ -73,7 +73,7 @@ fun interface WorldClock {
  *
  * The arithmetic is `villages.protocol.Calendar`, which both ends of the wire compute alike and which this
  * layer may not see, because the application layer depends on the domain and on nothing else. So it crosses
- * as a port like everything else does. See decision record 0051.
+ * as a port like everything else does. See decision record 0053.
  */
 interface WorldCalendar {
     fun plusMonths(day: WorldTime, months: Long): WorldTime
@@ -126,7 +126,7 @@ class ScheduledLater : Later, AutoCloseable {
  * the player lives their life; a world that ran at a day a day would take a lifetime to reach anything. The
  * world is shared, so the speed is not anybody's to change - there is no fast-forward in a game other people
  * are standing in. The placeholder for the chrono-engine's shared world-day. Pure, so it is a policy and not
- * infrastructure, and a test can stand at any real instant. See decision record 0051.
+ * infrastructure, and a test can stand at any real instant. See decision record 0053.
  */
 class MonthlyWorldClock(
     private val clock: Clock,

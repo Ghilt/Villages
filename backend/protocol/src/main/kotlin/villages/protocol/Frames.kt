@@ -214,7 +214,7 @@ data class SpendResourcePayload(val resource: String, val amount: Long) : Comman
  * Tie some of a resource to an undertaking for a span of months.
  *
  * The span is in months and the world-day it ends on is worked out by the server, because how long a
- * month is belongs to the calendar and not to whoever is asking. See decision record 0051.
+ * month is belongs to the calendar and not to whoever is asking. See decision record 0053.
  */
 data class PledgeResourcePayload(
     val resource: String,

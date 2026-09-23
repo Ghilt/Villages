@@ -24,7 +24,7 @@ built anyway so that income, when something finally generates it, is a number ch
 changing. See decision record 0006.
 
 Two things had to be settled before any of it could be written down, and each got its own decision:
-a real day is a world month, so that a pledge can be given in months (decision 0051), and an area is the
+a real day is a world month, so that a pledge can be given in months (decision 0053), and an area is the
 technical thing a map region is, so that **influence** is free to be the name of a resource.
 
 ## What we will look at

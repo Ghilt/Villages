@@ -122,7 +122,7 @@ export const commandPayloadSchema = z.discriminatedUnion('type', [
    */
   z.object({ type: z.literal('grantResource'), resource: resourceNameSchema, amount: z.number().int() }),
   z.object({ type: z.literal('spendResource'), resource: resourceNameSchema, amount: z.number().int() }),
-  /** The span is in months; which world-day that lands on is the server's to work out. See 0051. */
+  /** The span is in months; which world-day that lands on is the server's to work out. See 0053. */
   z.object({
     type: z.literal('pledgeResource'),
     resource: resourceNameSchema,

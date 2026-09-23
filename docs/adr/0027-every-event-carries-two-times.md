@@ -2,7 +2,7 @@
 
 - Status: accepted
 - Date: 2026-09-05
-- Amended 2026-09-20: the calendar named below is **superseded by decision 0051**. The world keeps Earth's
+- Amended 2026-09-20: the calendar named below is **superseded by decision 0053**. The world keeps Earth's
   own calendar now, with uneven months and leap years, and the world clock advances a **month** for every
   real day rather than a day. Everything else here stands: two times on every event, world-time a count of
   days from the first day of year one, the calendar in `protocol` held to a shared fixture, and the day a

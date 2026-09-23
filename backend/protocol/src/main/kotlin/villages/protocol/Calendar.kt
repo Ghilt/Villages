@@ -15,7 +15,7 @@ import java.time.temporal.ChronoUnit
  * works out by hand, because the browser's `Date` cannot be trusted with year one. Two roads to one
  * calendar, and the fixture is what keeps them honest.
  *
- * A real day is a world month. See decision record 0051.
+ * A real day is a world month. See decision record 0053.
  */
 object Calendar {
 

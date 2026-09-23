@@ -30,7 +30,7 @@ data class SpendResource(
  * Some of a resource is tied to an undertaking until a world-day.
  *
  * The day is worked out before the command is made, from a span in months, because the calendar lives in
- * `protocol` and the domain may not see it. See decision record 0051.
+ * `protocol` and the domain may not see it. See decision record 0053.
  */
 data class PledgeResource(
     override val houseId: HouseId,
