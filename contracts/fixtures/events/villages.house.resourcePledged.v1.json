@@ -1,0 +1,16 @@
+{
+  "type": "villages.house.resourcePledged.v1",
+  "source": "urn:villages",
+  "subject": "6d5b0a2e-1c3f-4d7e-9a8b-0f1e2d3c4b5a",
+  "time": "2026-09-04T12:00:00Z",
+  "data": {
+    "houseId": "6d5b0a2e-1c3f-4d7e-9a8b-0f1e2d3c4b5a",
+    "pledgeId": "bb000000-0000-4000-8000-00000000d101",
+    "resource": "REASON",
+    "amount": 35,
+    "until": 455205,
+    "purpose": "the making of clearer glass",
+    "worldTime": 454901,
+    "recordedAt": "2026-09-04T12:00:00Z"
+  }
+}

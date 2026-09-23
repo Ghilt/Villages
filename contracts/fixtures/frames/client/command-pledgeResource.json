@@ -1,0 +1,11 @@
+{
+  "type": "command",
+  "commandId": "7c4d5e6f-8a9b-4c0d-8e2f-3a4b5c6d7e8f",
+  "command": {
+    "type": "pledgeResource",
+    "resource": "reason",
+    "amount": 35,
+    "months": 10,
+    "purpose": "the making of clearer glass"
+  }
+}

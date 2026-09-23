@@ -123,6 +123,11 @@ dialogue is where a key figure stops being a number on a card and becomes someon
 **Carrying storylines.** A storyline is told through dialogue rather than announced in a log. This is the
 mechanic a quest, a pact or a betrayal is actually delivered in.
 
+It is also the only place the setting's one secret is allowed to come out. `SETTING.md` records what is
+actually happening to the world and states plainly that no player begins knowing it: **nothing in the
+interface may say so**, and a mechanic that gives it away early spends the only card the setting is
+holding. Dialogue, over a long time, is how it is meant to be found.
+
 **Holding other mechanics inside it.** Stepping through a dialogue can open an opportunity to take a
 **choice roll**, and the roll's options come back into the conversation. A dialogue is a place other
 mechanics happen, not only a thing to read.
@@ -291,14 +296,23 @@ Minimise is the mechanic admitting that the map is sometimes the whole point.
 
 A card in the corner, cut off by it: bordered on the two edges facing the world and flush against the two
 that are the screen's, so it reads as part of the furniture rather than as a dialogue over it. The shield,
-the name, the banner blazoned in words, and the treasury counting up. In the spread it is the lower tile of
+the name, the banner blazoned in words, and **the five resources as a row of marks** with a figure beside
+each: a coin, a ridge of land, two rings that overlap, a pair of dividers, and a cross.
+
+**Marks rather than words, and that was a decision.** Five words will not sit on one line of a phone, and
+the small size of this card is one line. A mark is learnt once and then costs nothing; a word costs nothing
+to learn and then has to keep fitting - in a column squeezed to 18rem, and in a language nobody has thought
+about yet. The word is on the label until the mark is learnt. A resource with nothing pledged shows one
+figure; one with a pledge against it shows what is free over the total, `65/100`, because what can be used
+is the more urgent of the two. In the spread it is the lower tile of
 the column, sharing an edge with the rail above it; see decision record 0041.
 
 Three sizes, and the mechanic owns all three:
 
 - **Full** — everything above, with the bar beneath it.
-- **Small** — the shield, the name and the treasury on one line, with the bar under them. What it is when
-  it is sharing a screen with something else.
+- **Small** — the shield, the name and the row of marks, with the bar under them. What it is when it is
+  sharing a screen with something else. The row wraps to two lines in a bay too narrow for five marks, and
+  the pane's height allows for that rather than clipping it.
 - **Minimised** — a strip with the name on it and nothing more, so the player knows where it went.
 
 It is **responsive from the start**, and it is the mechanic that proves the rule: the card has never fitted
@@ -309,9 +323,15 @@ a phone. See `RESPONSIVE-DESIGN.md`.
 Nearly everything it will eventually say. **This entry is a foundation and not a design**, and it is thin
 today because a house is thin today.
 
-- **What a house has.** The treasury is the only resource in the world, and a status card with one number
-  on it is a status card with nothing to say. The resource system is on the roadmap under Later and this
-  mechanic is waiting on it more than on anything else.
+- **What a house does with what it has.** The five are there and the card says how much of each, but
+  nothing in the game grants, spends or gates anything yet: no mechanic gives a house wealth, no rule asks
+  whether it has enough domain, and a pledge is tied to a purpose written in free text because there is
+  nothing yet for it to be tied to. The shape is built; what fills it is the next question.
+- **What the marks actually are.** The five drawn today are **placeholders and were accepted as such**:
+  they are distinct at seventeen pixels and they are learnable, which is what was asked of them, but
+  whether a coin says wealth and a cross says piety to somebody who has not been told is a different
+  question and has not been asked. The shapes can change without anything else moving. The fallback if
+  marks turn out to be the wrong idea entirely - words at the full size, marks when squeezed - is open.
 - **What the five empty places hold.** They are for the house's own levers and nobody has named the second
   one.
 - **Whether it says what is happening as well as what is.** A choice pending, an event that just landed, a
@@ -329,5 +349,7 @@ than a card positioned by hand, and it has the three sizes above: the corner car
 a strip. The `min-width: 26rem` that would not fit a 390-pixel phone - the first thing decision 0039's
 instrument found - is gone.
 
-What it says has not changed and is the whole problem: a shield, a name, a blazon and one number. It is
-waiting on the resource system more than on anything else.
+It says a shield, a name, a blazon and **five figures** now: wealth, domain, influence, reason and piety,
+each behind its own mark, and reason showing what is free over its total while something is pledged out of
+it. That was what it was waiting on. What it is waiting on now is a reason for any of those numbers to
+move on their own.

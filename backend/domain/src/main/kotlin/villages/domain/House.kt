@@ -22,10 +22,38 @@ sealed interface House {
         val seat: Location,
         val significance: Significance,
         val banner: Banner,
-        val treasury: Treasury,
+        /** One stock of every resource. A house always has all five, even when they are nothing. */
+        val resources: Map<Resource, Stock>,
+        /** What is spoken for, and the only record of it. See `Pledge`. */
+        val pledges: List<Pledge> = emptyList(),
         /** The world-day it was founded on, and the instant that was recorded. */
         val foundedOn: WorldTime,
         val foundedAt: Instant,
         override val pending: Choice? = null,
-    ) : House
+    ) : House {
+        /** What this house has of one resource. A founded house has all five, so this never misses. */
+        fun stockOf(resource: Resource): Stock = resources.getValue(resource)
+
+        /** How much of one resource is spoken for: the sum of the live pledges against it, and nothing stored. */
+        fun pledgedOf(resource: Resource): Long =
+            pledges.filter { it.resource == resource }.sumOf { it.amount }
+
+        /**
+         * How much of one resource the house may actually do something with: what it has now, less what is
+         * pledged. Every rule that asks whether a house can afford or attempt a thing asks this.
+         */
+        fun freeOf(resource: Resource, now: Instant): Long = stockOf(resource).at(now) - pledgedOf(resource)
+
+        /**
+         * Whether the house has enough of a resource free to be allowed something. **The gate**, which is
+         * what domain and influence are for: it reads, and takes nothing. Nothing calls it yet, because
+         * there is nothing to build; it is here because a gate that is a question and not a subtraction is
+         * the whole distinction between those two resources and wealth.
+         */
+        fun has(resource: Resource, wanted: Long, now: Instant): Boolean = freeOf(resource, now) >= wanted
+
+        /** The house with one of its stocks changed. */
+        internal fun withStock(resource: Resource, change: (Stock) -> Stock): Founded =
+            copy(resources = resources + (resource to change(stockOf(resource))))
+    }
 }

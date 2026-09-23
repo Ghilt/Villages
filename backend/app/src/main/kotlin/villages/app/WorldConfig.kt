@@ -4,10 +4,15 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import villages.application.AnonymousTokens
 import villages.application.Arrival
-import villages.application.DailyWorldClock
 import villages.application.FoundHouseService
 import villages.application.FreshIds
+import villages.application.Later
+import villages.application.MonthlyWorldClock
+import villages.application.Pledges
+import villages.application.ResourceService
+import villages.application.ScheduledLater
 import villages.application.TakeActionService
+import villages.application.WorldCalendar
 import villages.application.WorldClock
 import villages.application.WorldWipe
 import villages.domain.WorldTime
@@ -35,14 +40,26 @@ class WorldConfig {
     fun clock(): Clock = Clock.systemUTC()
 
     /**
-     * The world's day: one a real day since the world opened on the first of September 2026, in year 1200.
-     * The chrono-engine's placeholder; see SETTING.md on the shared world-day, and decision record 0027.
+     * The world's calendar, handed to the application layer, which may not see the protocol module itself.
      */
     @Bean
-    fun worldClock(clock: Clock): WorldClock = DailyWorldClock(
+    fun worldCalendar(): WorldCalendar = object : WorldCalendar {
+        override fun plusMonths(day: WorldTime, months: Long) = WorldTime(Calendar.plusMonths(day.day, months))
+
+        override fun monthsBetween(from: WorldTime, to: WorldTime) = Calendar.monthsBetween(from.day, to.day)
+    }
+
+    /**
+     * The world's day: one world-month for every real day since the world opened on the first of September
+     * 2026, on the first of January 1790. The chrono-engine's placeholder; see SETTING.md on the age and
+     * the shared world-day, and decision records 0027 and 0053.
+     */
+    @Bean
+    fun worldClock(clock: Clock, calendar: WorldCalendar): MonthlyWorldClock = MonthlyWorldClock(
         clock = { clock.instant() },
+        calendar = calendar,
         opened = Instant.parse("2026-09-01T00:00:00Z"),
-        openingDay = WorldTime(Calendar.dayOf(1200, 1)),
+        openingDay = WorldTime(Calendar.dayOf(1790, 1, 1)),
     )
 
     @Bean
@@ -57,6 +74,31 @@ class WorldConfig {
     @Bean
     fun arrival(world: InMemoryWorld, clock: Clock, worldClock: WorldClock, ids: FreshIds): Arrival =
         Arrival(world.executor, clock = { clock.instant() }, world = worldClock, ids = ids)
+
+    @Bean
+    fun resources(
+        world: InMemoryWorld,
+        clock: Clock,
+        worldClock: WorldClock,
+        calendar: WorldCalendar,
+        ids: FreshIds,
+    ): ResourceService =
+        ResourceService(world.executor, clock = { clock.instant() }, world = worldClock, calendar = calendar, ids = ids)
+
+    /** One `Later` for the whole app: the gateway coalesces with it and a pledge waits out its span on it. */
+    @Bean(destroyMethod = "close")
+    fun later(): ScheduledLater = ScheduledLater()
+
+    /** Gives a pledge back when its span is up. One wake-up a pledge, and none at all without one. */
+    @Bean(destroyMethod = "close")
+    fun pledges(
+        world: InMemoryWorld,
+        later: ScheduledLater,
+        resources: ResourceService,
+        worldClock: MonthlyWorldClock,
+        clock: Clock,
+        ids: FreshIds,
+    ): Pledges = Pledges(world.feed, later, resources, worldClock, clock = { clock.instant() }, ids = ids)
 
     @Bean
     fun takeAction(world: InMemoryWorld, clock: Clock, worldClock: WorldClock): TakeActionService =
@@ -102,6 +144,7 @@ class WorldConfig {
         recentEvents: RecentEventsProjection,
         arrival: Arrival,
         takeAction: TakeActionService,
+        resources: ResourceService,
         worldWipe: WorldWipe,
         clock: Clock,
         worldClock: WorldClock,
@@ -115,6 +158,7 @@ class WorldConfig {
         world = worldClock,
         arrival = arrival,
         takeAction = takeAction,
+        resources = resources,
         choices = choices,
         recent = recentEvents,
         emptyTheWorld = worldWipe,

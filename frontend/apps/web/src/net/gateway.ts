@@ -9,7 +9,14 @@ import {
   whatToFollow,
 } from '@villages/client-core';
 import { PROTOCOL_VERSION, describeDay } from '@villages/protocol';
-import type { ChoiceView, HouseView, OptionView, ServerFrame } from '@villages/protocol';
+import type {
+  ChoiceView,
+  CommandPayload,
+  OptionView,
+  ResourceName,
+  ServerFrame,
+  YourHouseView,
+} from '@villages/protocol';
 
 import { note, shortId } from '../debug/log';
 import { NOTHING_ARRIVED, alsoArrived, describeArrival } from './arrivals';
@@ -29,8 +36,8 @@ export const GATEWAY_URL =
 export interface GatewayState {
   connection: 'connecting' | 'open' | 'closed' | 'takenOver';
   playerId?: string;
-  /** The player's own house, wherever they are looking, or null when they have none. */
-  yourHouse: HouseView | null;
+  /** The player's own house and what only they can see of it, or null when they have none. */
+  yourHouse: YourHouseView | null;
   /** What this player has to decide, or null when they have nothing. What the parchment shows. */
   yourChoice: ChoiceView | null;
   /** The id of the command in flight, so the parchment can stop taking a second answer. */
@@ -217,8 +224,8 @@ function heard(frame: ServerFrame): void {
       note('gateway', `pong, round trip ${Date.now() - frame.t0} ms`);
       return;
     case 'yourHouse':
-      update({ yourHouse: frame.house });
-      note('house', frame.house === null ? 'no house yet' : `your house is ${frame.house.name}`);
+      update({ yourHouse: frame.yours });
+      note('house', frame.yours === null ? 'no house yet' : `your house is ${frame.yours.house.name}`);
       return;
     case 'yourChoice':
       update({ yourChoice: frame.choice });
@@ -419,6 +426,52 @@ export function takeOption(choice: ChoiceView, option: OptionView): void {
     commandId,
     command: { type: 'takeAction', choiceId: choice.id, optionId: option.id },
   });
+}
+
+/**
+ * Doing something to what your house has.
+ *
+ * All four send a real command and are told the answer the same way anything else is: an accepted or a
+ * rejected frame, and then the house coming back changed. Nothing is assumed here - the number on the
+ * card moves when the world says it did.
+ *
+ * Granting and spending are **Adam's levers** for now rather than a player's: nothing in the game gives a
+ * house anything yet. They are here so that what the domain can do can be made to happen and watched.
+ */
+function act(what: string, command: CommandPayload): void {
+  if (connection === null || state.connection !== 'open') {
+    return;
+  }
+  const commandId = crypto.randomUUID();
+  note('resources', `${what} as ${shortId(commandId)}`);
+  connection.send({ type: 'command', commandId, command });
+}
+
+export function grantResource(resource: ResourceName, amount: number): void {
+  act(`granting ${amount} ${resource}`, { type: 'grantResource', resource, amount });
+}
+
+export function spendResource(resource: ResourceName, amount: number): void {
+  act(`spending ${amount} ${resource}`, { type: 'spendResource', resource, amount });
+}
+
+export function pledgeResource(
+  resource: ResourceName,
+  amount: number,
+  months: number,
+  purpose: string,
+): void {
+  act(`pledging ${amount} ${resource} for ${months} ${months === 1 ? 'month' : 'months'}`, {
+    type: 'pledgeResource',
+    resource,
+    amount,
+    months,
+    purpose,
+  });
+}
+
+export function releasePledge(pledgeId: string): void {
+  act(`releasing pledge ${shortId(pledgeId)}`, { type: 'releasePledge', pledgeId });
 }
 
 /**

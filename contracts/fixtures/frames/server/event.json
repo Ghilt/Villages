@@ -23,10 +23,32 @@
       "charge": "STAG",
       "chargeTincture": "ARGENT"
     },
-    "treasury": {
-      "amount": 0,
-      "ratePerSecond": 1.0,
-      "asOf": "2026-09-04T12:00:00Z"
+    "resources": {
+      "WEALTH": {
+        "total": 0,
+        "ratePerSecond": 0.0,
+        "asOf": "2026-09-04T12:00:00Z"
+      },
+      "NATURAL_DOMAIN": {
+        "total": 0,
+        "ratePerSecond": 0.0,
+        "asOf": "2026-09-04T12:00:00Z"
+      },
+      "INFLUENCE": {
+        "total": 0,
+        "ratePerSecond": 0.0,
+        "asOf": "2026-09-04T12:00:00Z"
+      },
+      "REASON": {
+        "total": 0,
+        "ratePerSecond": 0.0,
+        "asOf": "2026-09-04T12:00:00Z"
+      },
+      "PIETY": {
+        "total": 0,
+        "ratePerSecond": 0.0,
+        "asOf": "2026-09-04T12:00:00Z"
+      }
     },
     "worldTime": 454901,
     "recordedAt": "2026-09-04T12:00:00Z"

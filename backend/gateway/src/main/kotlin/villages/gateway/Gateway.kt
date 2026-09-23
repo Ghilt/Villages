@@ -8,11 +8,14 @@ import villages.application.FoundHouseService
 import villages.application.HouseChange
 import villages.application.HouseRow
 import villages.application.HousesByCell
-import villages.application.Start
 import villages.application.HousesByPlayer
 import villages.application.PlayerTokens
-import villages.application.RecentEvents
+import villages.application.Later
 import villages.application.Provenance
+import villages.application.ScheduledLater
+import villages.application.RecentEvents
+import villages.application.ResourceService
+import villages.application.Start
 import villages.application.StoredEvent
 import villages.application.TakeActionService
 import villages.application.WorldClock
@@ -28,6 +31,8 @@ import villages.domain.HouseName
 import villages.domain.Location
 import villages.domain.OptionId
 import villages.domain.PlayerId
+import villages.domain.PledgeId
+import villages.domain.Resource
 import villages.domain.WorldTime
 import villages.protocol.BannerSpec
 import villages.protocol.Batch
@@ -40,10 +45,12 @@ import villages.protocol.CommandAccepted
 import villages.protocol.CommandRejected
 import villages.protocol.Delta
 import villages.protocol.Division
+import villages.protocol.EffectView
 import villages.protocol.ErrorFrame
 import villages.protocol.EventFrame
 import villages.protocol.FoundAtView
 import villages.protocol.FoundHousePayload
+import villages.protocol.GrantResourcePayload
 import villages.protocol.Hello
 import villages.protocol.HouseAppeared
 import villages.protocol.HouseChanged
@@ -51,14 +58,18 @@ import villages.protocol.HouseView
 import villages.protocol.OptionView
 import villages.protocol.PROTOCOL_VERSION
 import villages.protocol.Ping
+import villages.protocol.PledgeResourcePayload
+import villages.protocol.PledgeView
 import villages.protocol.Point
 import villages.protocol.Pong
 import villages.protocol.ProtocolJson
-import villages.protocol.Rate
+import villages.protocol.ReleasePledgePayload
 import villages.protocol.Resync
 import villages.protocol.SeeAll
 import villages.protocol.ServerFrame
 import villages.protocol.Snapshot
+import villages.protocol.SpendResourcePayload
+import villages.protocol.Stock
 import villages.protocol.SubscribeCells
 import villages.protocol.TakeActionPayload
 import villages.protocol.TakenOver
@@ -66,42 +77,20 @@ import villages.protocol.Tincture
 import villages.protocol.UnsubscribeCells
 import villages.protocol.ViewTime
 import villages.protocol.WatchEvents
-import villages.protocol.WipeWorld
 import villages.protocol.Welcome
+import villages.protocol.WipeWorld
 import villages.protocol.WorldNow
 import villages.protocol.WorldWiped
-import villages.protocol.EffectView
 import villages.protocol.YourChoice
 import villages.protocol.YourHouse
+import villages.protocol.YourHouseView
 import villages.protocol.coarsestZoom
 import java.time.Clock
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 /** What the gateway needs to send a frame to a connection. The transport is Spring's; this is not. */
 fun interface Outbound {
     fun send(frame: ServerFrame)
-}
-
-/** Runs something a little later. Injected, so a test decides when later is. */
-fun interface Later {
-    fun schedule(delayMs: Long, action: Runnable)
-}
-
-/** Later on one daemon thread, which is all the coalescing of a whole process needs. */
-class ScheduledLater : Later, AutoCloseable {
-    private val thread = Executors.newSingleThreadScheduledExecutor { runnable ->
-        Thread(runnable, "gateway-coalesce").apply { isDaemon = true }
-    }
-
-    override fun schedule(delayMs: Long, action: Runnable) {
-        thread.schedule(action, delayMs, TimeUnit.MILLISECONDS)
-    }
-
-    override fun close() {
-        thread.shutdownNow()
-    }
 }
 
 /** Cells one connection may hold at once. A screen is a dozen or so; this is room to look ahead, not to hoard. */
@@ -144,6 +133,7 @@ class Gateway(
     private val world: WorldClock,
     private val arrival: Arrival,
     private val takeAction: TakeActionService,
+    private val resources: ResourceService,
     private val choices: ChoicesByPlayer,
     private val recent: RecentEvents,
     private val emptyTheWorld: WorldWipe,
@@ -202,7 +192,7 @@ class Gateway(
         val view = row.toView(deepest)
 
         // Your own house reaches you wherever you are looking, not only when you hold its cell.
-        sessions[row.player]?.out?.send(YourHouse(view))
+        sessions[row.player]?.out?.send(YourHouse(row.toYours(deepest)))
 
         // Whether it is new is the read model's answer, not the stream version's: a house founded from a
         // choice arrives at version three, behind the choice it was given and the action that took it.
@@ -351,7 +341,7 @@ class Gateway(
                     world = WorldNow(today = today.day, earliest = (houses.earliest() ?: today).day),
                 ),
             )
-            out.send(YourHouse(theirHouses.ofPlayer(who)?.toView()))
+            out.send(YourHouse(theirHouses.ofPlayer(who)?.toYours()))
 
             // Arriving with no house and nothing to decide is what the founding choice answers. The
             // choice arrive() hands back is what goes out, not a read of the projection: the projection
@@ -412,6 +402,35 @@ class Gateway(
                         name = HouseName.of(payload.name),
                         seat = Location(payload.seat.lat, payload.seat.lon),
                         banner = payload.banner.toDomain(),
+                        provenance = Provenance.startedBy(commandId),
+                    )
+
+                    is GrantResourcePayload -> resources.grant(
+                        player = who,
+                        resource = asResource(payload.resource),
+                        amount = payload.amount,
+                        provenance = Provenance.startedBy(commandId),
+                    )
+
+                    is SpendResourcePayload -> resources.spend(
+                        player = who,
+                        resource = asResource(payload.resource),
+                        amount = payload.amount,
+                        provenance = Provenance.startedBy(commandId),
+                    )
+
+                    is PledgeResourcePayload -> resources.pledge(
+                        player = who,
+                        resource = asResource(payload.resource),
+                        amount = payload.amount,
+                        months = payload.months,
+                        purpose = payload.purpose,
+                        provenance = Provenance.startedBy(commandId),
+                    )
+
+                    is ReleasePledgePayload -> resources.release(
+                        player = who,
+                        pledgeId = PledgeId(asUuid(payload.pledgeId, "a pledge id")),
                         provenance = Provenance.startedBy(commandId),
                     )
 
@@ -583,6 +602,11 @@ class Gateway(
 private fun isCell(candidate: String): Boolean = runCatching { Cell(candidate) }.isSuccess
 
 /** An identifier off the wire, or a refusal saying which one was not one. */
+/** A resource named on the wire, or the refusal. The wire's names are the code's; see 0053 and the naming rule. */
+private fun asResource(name: String): Resource =
+    Resource.entries.firstOrNull { it.toWire() == name }
+        ?: throw IllegalArgumentException("not a resource: $name")
+
 private fun asUuid(value: String, what: String): java.util.UUID =
     runCatching { java.util.UUID.fromString(value) }
         .getOrElse { throw IllegalArgumentException("$what is a UUID, not $value") }
@@ -626,6 +650,11 @@ internal fun HouseError.reasonCode(): String = when (this) {
     HouseError.NoChoicePending -> "noChoicePending"
     HouseError.NoSuchChoice -> "noSuchChoice"
     HouseError.NoSuchOption -> "noSuchOption"
+    HouseError.NoSuchHouse -> "noSuchHouse"
+    HouseError.NoSuchPledge -> "noSuchPledge"
+    is HouseError.InvalidAmount -> "invalidAmount"
+    is HouseError.InvalidPledge -> "invalidPledge"
+    is HouseError.NotEnoughFree -> "notEnoughFree"
 }
 
 internal fun StoredEvent.toFrame(): EventFrame = EventFrame(
@@ -646,10 +675,51 @@ internal fun HouseRow.toView(deepest: Cell = Cell.of(seat.lat, seat.lon)): House
     cell = deepest.quadkey,
     seat = Point(seat.lat, seat.lon),
     banner = banner.toWire(),
-    treasury = Rate(treasury.amount, treasury.ratePerSecond, treasury.asOf.toEpochMilli()),
     since = since.day,
     version = version,
 )
+
+/**
+ * The player's own house: the public view, and what only its owner is told.
+ *
+ * `pledged` is summed here rather than sent as a list for the browser to add up, and the resources go on
+ * this view rather than on `HouseView` so that what a house has reaches one session and not every
+ * neighbour holding its cell.
+ */
+internal fun HouseRow.toYours(deepest: Cell = Cell.of(seat.lat, seat.lon)): YourHouseView = YourHouseView(
+    house = toView(deepest),
+    resources = Resource.entries.associate { resource ->
+        val stock = stockOf(resource)
+        resource.toWire() to Stock(
+            total = stock.total,
+            pledged = pledgedOf(resource),
+            ratePerSecond = stock.ratePerSecond,
+            asOf = stock.asOf.toEpochMilli(),
+        )
+    },
+    pledges = pledges.map {
+        PledgeView(
+            id = it.id.value.toString(),
+            resource = it.resource.toWire(),
+            amount = it.amount,
+            until = it.until.day,
+            purpose = it.purpose,
+        )
+    },
+)
+
+/**
+ * A resource's name on the wire: the code's name and not the player's, because the wire is code talking
+ * to code and what a player is shown is the interface's to decide. Exhaustive, so a sixth resource cannot
+ * reach the wire without somebody naming it. See the naming rule in `BUILDING-A-MECHANIC.md`.
+ */
+internal fun Resource.toWire(): String = when (this) {
+    Resource.WEALTH -> "wealth"
+    Resource.NATURAL_DOMAIN -> "naturalDomain"
+    Resource.INFLUENCE -> "influence"
+    Resource.REASON -> "reason"
+    Resource.PIETY -> "piety"
+}
 
 /** The domain's heraldry, spelled for the interface. The two enums share their names on purpose. */
 internal fun Banner.toWire(): BannerSpec = BannerSpec(

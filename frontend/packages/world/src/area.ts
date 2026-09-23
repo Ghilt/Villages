@@ -1,6 +1,9 @@
-import { toPixel } from './raster.ts';
+// Aliased: `trace.ts` exports a `toLngLat` of its own, which takes a lattice point and gives a tuple.
+// This one takes a pixel and gives the point at its centre, and the two are not interchangeable.
+import { toLngLat as lngLatOfPixel, toPixel } from './raster.ts';
 import type { ClassRaster, Ring } from './raster.ts';
 import { doubleSignedArea } from './simplify.ts';
+import type { LngLat } from './sphere.ts';
 import { toLngLat, traceClass } from './trace.ts';
 import type { LatticePoint, Ring as LatticeRing } from './trace.ts';
 
@@ -442,4 +445,49 @@ export function fenceToPolygons(fence: Fence, grid: MasterGrid): [number, number
   return fence.parts.map((part) =>
     [part.outer, ...part.holes].map((ring) => ring.map((point) => toLngLat(point, grid))),
   );
+}
+
+/** How round a ring drawn as a circle is. Enough that a staircase of master pixels is what shows. */
+const AROUND = 72;
+
+/**
+ * The most pixels one area drawn round a point may enclose: a six-hundred-pixel reach or so, some seven
+ * hundred kilometres.
+ *
+ * An absolute ceiling rather than a multiple of what was asked for, because a cap that grows with the
+ * reach refuses nothing. Nothing in the game comes near it; a reach with a zero too many in it does.
+ */
+export const MOST_ENCLOSED = 1_200_000;
+
+/**
+ * The area a fixed reach out from a point, fenced like any other.
+ *
+ * This is the technical shape and nothing more. What it *means* is the caller's business: today it is the
+ * ground a house holds about its seat, and later it is as easily a castle's influence zone or the reach of
+ * a mine. Giving it a name of its own is what lets the flavour change without the geometry moving.
+ *
+ * The circle is drawn in pixel space rather than in degrees, so it is round on the master and stays the
+ * same size in kilometres wherever it is. In longitude and latitude the same ring would be an ellipse that
+ * grew towards the poles, which is a fact about the projection and not about the place.
+ *
+ * It lands on the lattice between master pixels for the reason every area does: a pixel is inside or
+ * outside, two areas drawn flush share their boundary exactly, and the line is where the count changes.
+ * Worked out when it is asked for rather than stored, so a repainted world or a changed reach gives a
+ * fresh answer. See decision record 0032.
+ */
+export function areaAround(centre: LngLat, grid: MasterGrid, reach: number): Fence {
+  const middle = toPixel(centre, grid);
+  const ring: [number, number][] = [];
+
+  for (let step = 0; step < AROUND; step += 1) {
+    const turn = (step / AROUND) * 2 * Math.PI;
+    const at = lngLatOfPixel(
+      middle.x + Math.cos(turn) * reach - 0.5,
+      middle.y + Math.sin(turn) * reach - 0.5,
+      grid,
+    );
+    ring.push([at.lng, at.lat]);
+  }
+
+  return fenceAround(enclose(closePath(ring) as Ring, grid, MOST_ENCLOSED));
 }

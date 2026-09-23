@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
-import { fenceToPolygons, influenceZoneAround } from '@villages/world';
+import { areaAround, fenceToPolygons } from '@villages/world';
 import type { Fence, MasterGrid } from '@villages/world';
 import type { HouseView } from '@villages/protocol';
 
@@ -9,21 +9,21 @@ import { note } from '../debug/log';
 import { seeingEverything, watchSeeingEverything } from '../debug/seeEverything';
 import { terrainPalette } from '../map/terrainClasses';
 
-interface InfluenceOverlayProps {
+interface HoldingOverlayProps {
   map: maplibregl.Map | null;
   houses: readonly HouseView[];
   /** The player's own house while the eye is open, whose ground is drawn at any zoom; null otherwise. */
   mine: HouseView | null;
 }
 
-const SOURCE = 'influence';
-const SHADE = 'influence-shade';
-const LINE = 'influence-line';
+const SOURCE = 'holding';
+const SHADE = 'holding-shade';
+const LINE = 'holding-line';
 
 /** The same again for the player's own ground, which is drawn under different rules. See 0038. */
-const OWN_SOURCE = 'influence-own';
-const OWN_SHADE = 'influence-own-shade';
-const OWN_LINE = 'influence-own-line';
+const OWN_SOURCE = 'holding-own';
+const OWN_SHADE = 'holding-own-shade';
+const OWN_LINE = 'holding-own-line';
 
 /** The gold of the interface: ground a house holds, rather than terrain or a line a player drew. */
 const HELD = '#9d7c2a';
@@ -44,7 +44,11 @@ const MINZOOM = 7;
 const NO_MINZOOM = 0;
 
 /**
- * The ground each house holds, drawn as a fence about its seat.
+ * A house's **holding**, drawn as a fence about its seat: the ground it has on the map.
+ *
+ * The shape is an **area** and nothing more - `areaAround`, the same component anything else fenced
+ * uses. What makes it a holding is what draws it and in what colour, which is this file. A castle's
+ * influence zone later is the same call with a different dress. See decision record 0032.
  *
  * Headless, like the area overlay it is modelled on: it owns its sources and layers and renders nothing
  * of its own. The fences are worked out from the seats rather than stored, and memoised by house,
@@ -54,7 +58,7 @@ const NO_MINZOOM = 0;
  * it sits under; the player's own, while the eye is open, is drawn below that too, and a zoom range in
  * MapLibre belongs to a layer rather than to a feature. See decision record 0038.
  */
-export function InfluenceOverlay({ map, houses, mine }: InfluenceOverlayProps) {
+export function HoldingOverlay({ map, houses, mine }: HoldingOverlayProps) {
   const [grid, setGrid] = useState<MasterGrid | null>(null);
   const fences = useRef(new Map<string, Fence>());
   const everything = useSyncExternalStore(watchSeeingEverything, seeingEverything);
@@ -64,7 +68,7 @@ export function InfluenceOverlay({ map, houses, mine }: InfluenceOverlayProps) {
   const fenceFor = useCallback((house: HouseView, on: MasterGrid): Fence => {
     let fence = fences.current.get(house.id);
     if (fence === undefined) {
-      fence = influenceZoneAround({ lng: house.seat.lon, lat: house.seat.lat }, on, REACH);
+      fence = areaAround({ lng: house.seat.lon, lat: house.seat.lat }, on, REACH);
       fences.current.set(house.id, fence);
     }
     return fence;
@@ -79,7 +83,7 @@ export function InfluenceOverlay({ map, houses, mine }: InfluenceOverlayProps) {
         }
       },
       (cause: unknown) => {
-        note('influence', `no palette, so no ground is drawn: ${String(cause)}`);
+        note('holding', `no palette, so no ground is drawn: ${String(cause)}`);
       },
     );
     return () => {

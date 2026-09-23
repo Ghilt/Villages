@@ -2,6 +2,10 @@ package villages.gateway
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.string.shouldStartWith
+import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
@@ -11,10 +15,13 @@ import villages.application.Arrival
 import villages.application.EventFeed
 import villages.application.FoundHouseService
 import villages.application.HouseCommandExecutor
+import villages.application.Later
 import villages.application.Provenance
+import villages.application.ResourceService
 import villages.application.Start
 import villages.application.StoredEvent
 import villages.application.TakeActionService
+import villages.application.WorldCalendar
 import villages.application.WorldClock
 import villages.application.WriteConflict
 import villages.domain.Effect
@@ -22,6 +29,10 @@ import villages.domain.HouseCommand
 import villages.domain.HouseDecider
 import villages.domain.HouseEvent
 import villages.domain.HouseFounded
+import villages.domain.HouseResourceSpent
+import villages.domain.HouseResourceReleased
+import villages.domain.HouseResourcePledged
+import villages.domain.HouseResourceGranted
 import villages.domain.PlayerGivenChoice
 import villages.domain.HouseId
 import villages.domain.PlayerTookAction
@@ -62,6 +73,10 @@ import java.util.UUID
 /** The catalogued type of an event, as the store would name it. */
 private fun typeOf(event: HouseEvent): String = when (event) {
     is HouseFounded -> "villages.house.founded.v1"
+    is HouseResourceGranted -> "villages.house.resourceGranted.v1"
+    is HouseResourcePledged -> "villages.house.resourcePledged.v1"
+    is HouseResourceReleased -> "villages.house.resourceReleased.v1"
+    is HouseResourceSpent -> "villages.house.resourceSpent.v1"
     is PlayerGivenChoice -> "villages.player.givenChoice.v1"
     is PlayerTookAction -> "villages.player.tookAction.v1"
 }
@@ -69,6 +84,10 @@ private fun typeOf(event: HouseEvent): String = when (event) {
 /** Enough of the data for the panel's sake. The stored form proper is pinned by its own fixture. */
 private fun dataOf(event: HouseEvent): String = when (event) {
     is HouseFounded -> """{"name":"${event.name.value}","significance":${event.significance.value}}"""
+    is HouseResourceGranted -> """{"resource":"${event.resource}","amount":${event.amount}}"""
+    is HouseResourcePledged -> """{"resource":"${event.resource}","amount":${event.amount}}"""
+    is HouseResourceReleased -> """{"pledgeId":"${event.pledgeId.value}"}"""
+    is HouseResourceSpent -> """{"resource":"${event.resource}","amount":${event.amount}}"""
     is PlayerGivenChoice -> """{"prompt":"${event.choice.prompt}","options":${event.choice.options.size}}"""
     is PlayerTookAction -> """{"optionId":"${event.optionId.value}"}"""
 }
@@ -116,6 +135,16 @@ private class TinyWorld : HouseCommandExecutor, EventFeed {
 }
 
 /** Later is whenever the test says. */
+/**
+ * Thirty days a month, which is enough for a test about stepping. What a month really is belongs to
+ * `villages.protocol.Calendar` and is held to the shared fixture there, not here.
+ */
+private val thirtyDayMonths = object : WorldCalendar {
+    override fun plusMonths(day: WorldTime, months: Long) = WorldTime(day.day + months * 30)
+
+    override fun monthsBetween(from: WorldTime, to: WorldTime) = (to.day - from.day) / 30
+}
+
 private class ManualLater : Later {
     private val planned = mutableListOf<Runnable>()
 
@@ -134,7 +163,7 @@ private class ManualLater : Later {
 
 private val noon = Instant.parse("2026-09-04T12:00:00Z")
 
-/** Year 1247, day 112: the world-day every test stands on. */
+/** The twenty-fourth of June, year 1246: the world-day every test stands on. */
 private val today = WorldTime(454901)
 private const val TOKEN = "0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8d"
 private val hello = """{"type":"hello","playerToken":"$TOKEN","protocolVersion":$PROTOCOL_VERSION}"""
@@ -143,6 +172,8 @@ private const val RAVENSCAR = "6d5b0a2e-1c3f-4d7e-9a8b-0f1e2d3c4b5a"
 /** A command id is a UUID: it becomes the causation of what the command writes. See 0035. */
 private const val COMMAND_ONE = "1c000001-0000-4000-8000-00000000000a"
 private const val COMMAND_TWO = "1c000002-0000-4000-8000-00000000000b"
+private const val COMMAND_THREE = "1c000003-0000-4000-8000-00000000000c"
+private const val COMMAND_FOUR = "1c000004-0000-4000-8000-00000000000d"
 
 /** Stockholm, before the warp, at three depths: the shared vector every zoom of it is known for. */
 private const val STOCKHOLM_Z10 = "1200312213"
@@ -157,6 +188,22 @@ private fun founding(commandId: String = COMMAND_ONE, name: String = "Ravenscar"
 private fun takingAction(choiceId: String, optionId: String, commandId: String = COMMAND_ONE) =
     """{"type":"command","commandId":"$commandId","command":{"type":"takeAction",""" +
         """"choiceId":"$choiceId","optionId":"$optionId"}}"""
+
+private fun granting(resource: String = "wealth", amount: Long = 120, commandId: String = COMMAND_TWO) =
+    """{"type":"command","commandId":"$commandId","command":{"type":"grantResource",""" +
+        """"resource":"$resource","amount":$amount}}"""
+
+private fun spending(resource: String = "wealth", amount: Long = 50, commandId: String = COMMAND_TWO) =
+    """{"type":"command","commandId":"$commandId","command":{"type":"spendResource",""" +
+        """"resource":"$resource","amount":$amount}}"""
+
+private fun pledging(resource: String = "reason", amount: Long = 35, months: Long = 10, commandId: String = COMMAND_TWO) =
+    """{"type":"command","commandId":"$commandId","command":{"type":"pledgeResource",""" +
+        """"resource":"$resource","amount":$amount,"months":$months,"purpose":"clearer glass"}}"""
+
+private fun releasing(pledgeId: String, commandId: String = COMMAND_TWO) =
+    """{"type":"command","commandId":"$commandId","command":{"type":"releasePledge",""" +
+        """"pledgeId":"$pledgeId"}}"""
 
 private fun subscribe(vararg cells: String) =
     """{"type":"subscribeCells","cells":[${cells.joinToString { "\"$it\"" }}]}"""
@@ -190,6 +237,13 @@ private class Rig {
             ids = { UUID.fromString("a1000000-0000-4000-8000-%012x".format(++minted)) },
         ),
         takeAction = TakeActionService(world, clock = { noon }, world = worldClock),
+        resources = ResourceService(
+            world,
+            clock = { noon },
+            world = worldClock,
+            calendar = thirtyDayMonths,
+            ids = { UUID.fromString("b1000000-0000-4000-8000-%012x".format(++minted)) },
+        ),
         choices = choices,
         recent = recent,
         emptyTheWorld = {
@@ -282,9 +336,95 @@ class GatewaySpec : StringSpec({
 
         rig.gateway.connect { sent += it }.receive(hello)
 
-        val mine = sent.filterIsInstance<YourHouse>().last().house
+        val mine = sent.filterIsInstance<YourHouse>().last().yours?.house
         mine?.name shouldBe "Ravenscar"
         mine?.cell shouldBe STOCKHOLM_Z10
+    }
+
+    "what a house has reaches its owner, and reaches nobody else" {
+        val rig = Rig()
+        val (founder, mine) = rig.introduced()
+        val (neighbour, theirs) = rig.someoneElse()
+        neighbour.receive(subscribe(STOCKHOLM_Z10))
+        theirs.clear()
+
+        founder.receive(founding())
+        // The neighbour's deltas are coalesced, so nothing reaches them until the flush comes due.
+        rig.later.tick()
+
+        // The owner is told all five, under their wire names, which are the code's and not the player's.
+        val yours = mine.filterIsInstance<YourHouse>().last().yours!!
+        yours.resources.keys shouldContainExactlyInAnyOrder
+            setOf("wealth", "naturalDomain", "influence", "reason", "piety")
+        yours.resources.getValue("wealth").total shouldBe 0
+        yours.resources.getValue("wealth").pledged shouldBe 0
+        yours.pledges.shouldBeEmpty()
+
+        // The neighbour holding the cell sees the house arrive and is told nothing of what it has. A
+        // `yourHouse` is only ever about your own, and the public view has nowhere to carry a resource,
+        // so the privacy is the shape rather than a rule anybody has to remember. See decision 0028.
+        theirs.filterIsInstance<YourHouse>().shouldBeEmpty()
+        theirs.filterIsInstance<Batch>().flatMap { it.deltas }.shouldNotBeEmpty()
+    }
+
+    "a granted resource comes back on the owner's own house, and a spend takes it off again" {
+        val rig = Rig()
+        val (founder, mine) = rig.introduced()
+        founder.receive(founding())
+
+        founder.receive(granting(amount = 120))
+
+        mine.filterIsInstance<CommandAccepted>().map { it.commandId } shouldContain COMMAND_TWO
+        mine.filterIsInstance<YourHouse>().last().yours!!.resources.getValue("wealth").total shouldBe 120
+
+        founder.receive(spending(amount = 50, commandId = COMMAND_THREE))
+
+        mine.filterIsInstance<YourHouse>().last().yours!!.resources.getValue("wealth").total shouldBe 70
+    }
+
+    "a pledge is asked for in months and comes back as a day, held against what is free" {
+        val rig = Rig()
+        val (founder, mine) = rig.introduced()
+        founder.receive(founding())
+        founder.receive(granting(resource = "reason", amount = 100))
+
+        founder.receive(pledging(amount = 35, months = 10, commandId = COMMAND_THREE))
+
+        val yours = mine.filterIsInstance<YourHouse>().last().yours!!
+        yours.resources.getValue("reason").total shouldBe 100
+        yours.resources.getValue("reason").pledged shouldBe 35
+        val pledge = yours.pledges.single()
+        pledge.amount shouldBe 35
+        pledge.purpose shouldBe "clearer glass"
+        // Ten months on, by the calendar this rig was given. What a month is belongs to the calendar.
+        pledge.until shouldBe today.day + 300
+
+        founder.receive(releasing(pledge.id, commandId = COMMAND_FOUR))
+
+        val freed = mine.filterIsInstance<YourHouse>().last().yours!!
+        freed.pledges.shouldBeEmpty()
+        freed.resources.getValue("reason").pledged shouldBe 0
+    }
+
+    "a resource nobody has heard of is refused as malformed rather than guessed at" {
+        val rig = Rig()
+        val (founder, mine) = rig.introduced()
+        founder.receive(founding())
+
+        founder.receive(granting(resource = "domain", amount = 5, commandId = COMMAND_TWO))
+
+        // `domain` is the player's word; the wire's is `naturalDomain`, and the gateway does not translate.
+        mine.filterIsInstance<CommandRejected>().single().reason shouldStartWith "malformed"
+    }
+
+    "spending more than is free is refused, and says so" {
+        val rig = Rig()
+        val (founder, mine) = rig.introduced()
+        founder.receive(founding())
+
+        founder.receive(spending(amount = 1, commandId = COMMAND_TWO))
+
+        mine.filterIsInstance<CommandRejected>().single().reason shouldBe "notEnoughFree"
     }
 
     "welcome's earliest day is the first anything is known to exist from" {
@@ -449,7 +589,7 @@ class GatewaySpec : StringSpec({
         connection.receive(founding())
 
         connection.cells().shouldBeEmpty()
-        sent.filterIsInstance<YourHouse>().last().house?.name shouldBe "Ravenscar"
+        sent.filterIsInstance<YourHouse>().last().yours?.house?.name shouldBe "Ravenscar"
     }
 
     "founding twice is rejected with the decider's reason as a code" {
@@ -470,7 +610,7 @@ class GatewaySpec : StringSpec({
         player.receive(takingAction(choice.id.value.toString(), taking.id.value.toString()))
 
         sent.filterIsInstance<CommandAccepted>().single().commandId shouldBe COMMAND_ONE
-        val mine = sent.filterIsInstance<YourHouse>().last().house!!
+        val mine = sent.filterIsInstance<YourHouse>().last().yours!!.house
         val promised = taking.effect.shouldBeInstanceOf<Effect.FoundAt>()
         mine.name shouldBe promised.name.value
         mine.seat shouldBe Point(promised.seat.lat, promised.seat.lon)
@@ -821,7 +961,7 @@ class GatewaySpec : StringSpec({
         // Still the session: its own house would still find it, and it is still able to act.
         second.receive(founding(name = "Mine"))
         two.last() shouldBe CommandAccepted(COMMAND_ONE)
-        two.filterIsInstance<YourHouse>().last().house?.name shouldBe "Mine"
+        two.filterIsInstance<YourHouse>().last().yours?.house?.name shouldBe "Mine"
     }
 
     "saying hello twice on one connection is refused rather than quietly changing who you are" {

@@ -1,14 +1,13 @@
 package villages.domain
 
+import java.time.Instant
+
 /**
  * The rules of a house as two pure functions: decide turns a command and the current state into events,
  * evolve folds an event into the state. It depends on nothing, and everything that stores, routes or shows
  * a house is downstream of it.
  */
 object HouseDecider {
-    /** What a new house earns each second, until anything else in the world says otherwise. */
-    const val FOUNDING_RATE = 1.0
-
     /**
      * How much the world thinks a new house matters: enough to see standing over the region, not enough
      * to see from the next country. A placeholder, like the rate above, until the chrono-engine judges it.
@@ -43,6 +42,80 @@ object HouseDecider {
             )
         }
 
+        is GrantResource -> {
+            founded(state)
+            anAmount(command.amount)
+            // Nothing else is checked: what a house may be given, and by what, is a mechanic and not a shape.
+            listOf(
+                HouseResourceGranted(
+                    houseId = command.houseId,
+                    resource = command.resource,
+                    amount = command.amount,
+                    worldTime = command.worldTime,
+                    recordedAt = command.recordedAt,
+                ),
+            )
+        }
+
+        is SpendResource -> {
+            val house = founded(state)
+            anAmount(command.amount)
+            enough(house, command.resource, command.amount, command.recordedAt)
+            listOf(
+                HouseResourceSpent(
+                    houseId = command.houseId,
+                    resource = command.resource,
+                    amount = command.amount,
+                    worldTime = command.worldTime,
+                    recordedAt = command.recordedAt,
+                ),
+            )
+        }
+
+        is PledgeResource -> {
+            val house = founded(state)
+            anAmount(command.amount)
+            if (command.until <= command.worldTime) {
+                throw HouseError.InvalidPledge("a pledge comes back after it is made, not before")
+            }
+            if (command.purpose.isBlank()) {
+                throw HouseError.InvalidPledge("a pledge is for something")
+            }
+            if (house.pledges.any { it.id == command.pledgeId }) {
+                throw HouseError.InvalidPledge("this house has already pledged under that name")
+            }
+            // Against what is free, not against what there is: twice-pledged reason is reason that was
+            // never there. This is the one rule that makes a pledge different from a note in the margin.
+            enough(house, command.resource, command.amount, command.recordedAt)
+            listOf(
+                HouseResourcePledged(
+                    houseId = command.houseId,
+                    pledgeId = command.pledgeId,
+                    resource = command.resource,
+                    amount = command.amount,
+                    until = command.until,
+                    purpose = command.purpose,
+                    worldTime = command.worldTime,
+                    recordedAt = command.recordedAt,
+                ),
+            )
+        }
+
+        is ReleasePledge -> {
+            val house = founded(state)
+            if (house.pledges.none { it.id == command.pledgeId }) {
+                throw HouseError.NoSuchPledge
+            }
+            listOf(
+                HouseResourceReleased(
+                    houseId = command.houseId,
+                    pledgeId = command.pledgeId,
+                    worldTime = command.worldTime,
+                    recordedAt = command.recordedAt,
+                ),
+            )
+        }
+
         is TakeAction -> {
             val pending = state.pending ?: throw HouseError.NoChoicePending
             if (pending.id != command.choiceId) {
@@ -65,6 +138,22 @@ object HouseDecider {
         }
     }
 
+    /** A house that exists, or the refusal. Everything a resource is done to needs one. */
+    private fun founded(state: House): House.Founded =
+        state as? House.Founded ?: throw HouseError.NoSuchHouse
+
+    private fun anAmount(amount: Long) {
+        if (amount <= 0) {
+            throw HouseError.InvalidAmount("an amount is more than nothing, and $amount is not")
+        }
+    }
+
+    private fun enough(house: House.Founded, resource: Resource, wanted: Long, now: Instant) {
+        if (!house.has(resource, wanted, now)) {
+            throw HouseError.NotEnoughFree(resource, wanted, house.freeOf(resource, now))
+        }
+    }
+
     /** What an option's effect records, beyond the action itself. */
     private fun follows(effect: Effect, command: TakeAction, state: House): List<HouseEvent> = when (effect) {
         is Effect.FoundAt -> when (state) {
@@ -77,7 +166,7 @@ object HouseDecider {
                     seat = effect.seat,
                     significance = FOUNDING_SIGNIFICANCE,
                     banner = effect.banner,
-                    treasury = Treasury(amount = 0, ratePerSecond = FOUNDING_RATE, asOf = command.recordedAt),
+                    resources = emptyStocks(command.recordedAt),
                     worldTime = command.worldTime,
                     recordedAt = command.recordedAt,
                 ),
@@ -92,7 +181,7 @@ object HouseDecider {
         seat = command.seat,
         significance = FOUNDING_SIGNIFICANCE,
         banner = command.banner,
-        treasury = Treasury(amount = 0, ratePerSecond = FOUNDING_RATE, asOf = command.recordedAt),
+        resources = emptyStocks(command.recordedAt),
         worldTime = command.worldTime,
         recordedAt = command.recordedAt,
     )
@@ -105,7 +194,7 @@ object HouseDecider {
             seat = event.seat,
             significance = event.significance,
             banner = event.banner,
-            treasury = event.treasury,
+            resources = event.resources,
             foundedOn = event.worldTime,
             foundedAt = event.recordedAt,
             // Founding by any means settles a choice that was about founding: a house founded from the
@@ -115,6 +204,38 @@ object HouseDecider {
                 choice.options.any { it.effect is Effect.FoundAt }
             },
         )
+
+        // A resource event on a house that does not exist cannot be reached: the decider refuses every
+        // command that would write one. Evolve is total anyway, because a fold must never throw.
+        is HouseResourceGranted -> when (state) {
+            is House.NotFounded -> state
+            is House.Founded -> state.withStock(event.resource) { it.plus(event.amount, event.recordedAt) }
+        }
+
+        is HouseResourceSpent -> when (state) {
+            is House.NotFounded -> state
+            is House.Founded -> state.withStock(event.resource) { it.minus(event.amount, event.recordedAt) }
+        }
+
+        is HouseResourcePledged -> when (state) {
+            is House.NotFounded -> state
+            is House.Founded -> state.copy(
+                pledges = state.pledges + Pledge(
+                    id = event.pledgeId,
+                    resource = event.resource,
+                    amount = event.amount,
+                    until = event.until,
+                    purpose = event.purpose,
+                ),
+            )
+        }
+
+        // Nothing is added back, because nothing was taken away: what is pledged is the sum of this list,
+        // so dropping the pledge is the whole of the release.
+        is HouseResourceReleased -> when (state) {
+            is House.NotFounded -> state
+            is House.Founded -> state.copy(pledges = state.pledges.filterNot { it.id == event.pledgeId })
+        }
 
         is PlayerGivenChoice -> when (state) {
             is House.NotFounded -> state.copy(pending = event.choice)

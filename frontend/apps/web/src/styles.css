@@ -574,23 +574,45 @@ body,
   color: var(--ink-soft);
 }
 
+/*
+ * What the house has: five marks in a row, each with its figure beside it.
+ *
+ * A row rather than a column of labelled lines, because five words will not sit on one line of a phone and
+ * the small size of this card is one line. It wraps rather than clipping if a bay is narrower than five of
+ * them; the pane's height allows for two rows for that reason.
+ */
 .hud__resources {
-  display: grid;
-  grid-template-columns: auto auto;
-  gap: 0 0.7rem;
-  margin: 0.45rem 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.9rem;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
   font-size: 1rem;
 }
 
-.hud__resources dt {
-  color: var(--ink-soft);
-  font-variant: small-caps;
-  letter-spacing: 0.06em;
+.hud__resource {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  /* The figures move, so they are tabular: a number that shifts its own digits about reads as noise. */
+  font-variant-numeric: tabular-nums;
 }
 
-.hud__resources dd {
-  margin: 0;
-  font-variant-numeric: tabular-nums;
+.hud__mark {
+  flex: none;
+  width: 1.05rem;
+  height: 1.05rem;
+  color: var(--ink-soft);
+}
+
+/* Stroked rather than filled, at the weight the other marks in the interface are drawn at. */
+.hud__mark path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 /*
@@ -1560,6 +1582,39 @@ body,
   display: flex;
   flex-wrap: wrap;
   gap: 0.3rem;
+}
+
+/*
+ * What a house has, in the panel: a row per resource, its figure, and the levers that move it.
+ *
+ * A grid rather than a flex row, so the five figures line up under each other and the buttons after them
+ * do too. The name column takes what it needs, the figure is right-aligned against the buttons, and the
+ * buttons are whatever they are - three of them, the same width every row.
+ */
+.debug__stocks {
+  display: grid;
+  grid-template-columns: auto 1fr repeat(3, auto);
+  gap: 0.25rem 0.4rem;
+  align-items: center;
+  margin: 0.2rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.debug__stock {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-items: center;
+}
+
+.debug__stock-name {
+  color: var(--ink-soft);
+}
+
+.debug__stock-figure {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 .debug__sectionbody {

@@ -1,6 +1,7 @@
 package villages.domain
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.assertions.withClue
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
@@ -40,7 +41,7 @@ class HouseDeciderSpec : StringSpec({
     fun taking(choice: ChoiceId = whereToSettle.id, option: OptionId = southern) =
         TakeAction(house, player, choice, option, day, noon)
 
-    "founding a house that does not exist yields one HouseFounded, with a significance and an empty treasury" {
+    "founding a house that does not exist yields one HouseFounded, with a significance and a stock of everything" {
         val events = HouseDecider.decide(ravenscar, HouseDecider.initial)
 
         events shouldHaveSize 1
@@ -49,7 +50,7 @@ class HouseDeciderSpec : StringSpec({
         founded.name shouldBe HouseName("Ravenscar")
         founded.seat shouldBe ravenscar.seat
         founded.significance shouldBe HouseDecider.FOUNDING_SIGNIFICANCE
-        founded.treasury shouldBe Treasury(0, HouseDecider.FOUNDING_RATE, noon)
+        founded.resources shouldBe emptyStocks(noon)
         founded.worldTime shouldBe ravenscar.worldTime
         founded.recordedAt shouldBe noon
     }
@@ -67,7 +68,21 @@ class HouseDeciderSpec : StringSpec({
         founded.id shouldBe ravenscar.houseId
         founded.seat shouldBe ravenscar.seat
         founded.banner shouldBe ravenscar.banner
-        founded.treasury.at(noon.plusSeconds(90)) shouldBe 90
+        founded.stockOf(Resource.WEALTH).total shouldBe 0
+    }
+
+    "a house is founded with every resource standing still, because nothing generates income yet" {
+        val house = HouseDecider.fold(HouseDecider.decide(ravenscar, HouseDecider.initial))
+
+        val founded = house.shouldBeInstanceOf<House.Founded>()
+        for (resource in Resource.entries) {
+            withClue(resource) {
+                founded.stockOf(resource).total shouldBe 0
+                founded.stockOf(resource).ratePerSecond shouldBe 0.0
+                // Ninety seconds on and still nothing: the rate shape is carried, and it carries zero.
+                founded.stockOf(resource).at(noon.plusSeconds(90)) shouldBe 0
+            }
+        }
     }
 
     "nothing happens to a house nobody has founded" {
@@ -167,5 +182,117 @@ class HouseDeciderSpec : StringSpec({
 
         allAtOnce shouldBe oneAtATime
         HouseDecider.fold(stream) shouldBe allAtOnce
+    }
+
+    // ---- resources -------------------------------------------------------------------------------
+
+    val standing = HouseDecider.fold(HouseDecider.decide(ravenscar, HouseDecider.initial))
+    val glass = PledgeId(UUID.fromString("bb000000-0000-4000-8000-00000000d101"))
+    val later = WorldTime(455205)
+
+    fun granting(resource: Resource = Resource.WEALTH, amount: Long = 120) =
+        GrantResource(house, resource, amount, day, noon)
+
+    fun spending(resource: Resource = Resource.WEALTH, amount: Long = 50) =
+        SpendResource(house, resource, amount, day, noon)
+
+    fun pledging(amount: Long = 35, id: PledgeId = glass, until: WorldTime = later) =
+        PledgeResource(house, id, Resource.REASON, amount, until, "the making of clearer glass", day, noon)
+
+    /** The house after everything these commands did to it, in order. */
+    fun after(vararg commands: HouseCommand): House.Founded =
+        commands.fold(standing) { state, command ->
+            HouseDecider.decide(command, state).fold(state, HouseDecider::evolve)
+        }.shouldBeInstanceOf<House.Founded>()
+
+    "a house given a resource has that much more of it" {
+        val house = after(granting(amount = 120))
+
+        house.stockOf(Resource.WEALTH).at(noon) shouldBe 120
+        house.freeOf(Resource.WEALTH, noon) shouldBe 120
+    }
+
+    "spending takes it away again, and nothing else with it" {
+        val house = after(granting(amount = 120), spending(amount = 50))
+
+        house.stockOf(Resource.WEALTH).at(noon) shouldBe 70
+        house.stockOf(Resource.PIETY).at(noon) shouldBe 0
+    }
+
+    "a house cannot spend what it has not got" {
+        shouldThrow<HouseError.NotEnoughFree> { HouseDecider.decide(spending(amount = 1), standing) }
+    }
+
+    "nothing can be granted, spent or pledged to a house nobody has founded" {
+        shouldThrow<HouseError.NoSuchHouse> { HouseDecider.decide(granting(), HouseDecider.initial) }
+        shouldThrow<HouseError.NoSuchHouse> { HouseDecider.decide(spending(), HouseDecider.initial) }
+        shouldThrow<HouseError.NoSuchHouse> { HouseDecider.decide(pledging(), HouseDecider.initial) }
+    }
+
+    "an amount is more than nothing, whichever way it is meant" {
+        shouldThrow<HouseError.InvalidAmount> { HouseDecider.decide(granting(amount = 0), standing) }
+        shouldThrow<HouseError.InvalidAmount> { HouseDecider.decide(spending(amount = -5), standing) }
+    }
+
+    "a pledge holds part of a stock without taking any of it away" {
+        val house = after(granting(Resource.REASON, 100), pledging(amount = 35))
+
+        house.stockOf(Resource.REASON).at(noon) shouldBe 100
+        house.pledgedOf(Resource.REASON) shouldBe 35
+        house.freeOf(Resource.REASON, noon) shouldBe 65
+    }
+
+    "what is pledged cannot be spent out from under the pledge" {
+        val house = after(granting(Resource.REASON, 100), pledging(amount = 35))
+
+        shouldThrow<HouseError.NotEnoughFree> {
+            HouseDecider.decide(spending(Resource.REASON, 66), house)
+        }
+        // Sixty-five is exactly what is free, so it goes through and the pledge is untouched.
+        val spent = after(granting(Resource.REASON, 100), pledging(amount = 35), spending(Resource.REASON, 65))
+        spent.freeOf(Resource.REASON, noon) shouldBe 0
+        spent.pledgedOf(Resource.REASON) shouldBe 35
+    }
+
+    "the same reason cannot be pledged twice" {
+        val house = after(granting(Resource.REASON, 100), pledging(amount = 60))
+
+        shouldThrow<HouseError.NotEnoughFree> {
+            HouseDecider.decide(pledging(amount = 60, id = PledgeId(UUID.randomUUID())), house)
+        }
+    }
+
+    "releasing a pledge gives back exactly what it held, and nothing is added anywhere" {
+        val house = after(granting(Resource.REASON, 100), pledging(amount = 35))
+
+        val freed = HouseDecider.decide(ReleasePledge(house.id, glass, later, noon), house)
+            .fold(house, HouseDecider::evolve)
+            .shouldBeInstanceOf<House.Founded>()
+
+        freed.pledges.shouldHaveSize(0)
+        freed.pledgedOf(Resource.REASON) shouldBe 0
+        freed.freeOf(Resource.REASON, noon) shouldBe 100
+        freed.stockOf(Resource.REASON).at(noon) shouldBe 100
+    }
+
+    "a pledge nobody made cannot be released" {
+        shouldThrow<HouseError.NoSuchPledge> {
+            HouseDecider.decide(ReleasePledge(house, glass, later, noon), standing)
+        }
+    }
+
+    "a pledge comes back after it is made, and is refused if it does not" {
+        val held = after(granting(Resource.REASON, 100))
+
+        shouldThrow<HouseError.InvalidPledge> { HouseDecider.decide(pledging(until = day), held) }
+    }
+
+    "the gate reads what is free and takes nothing, which is what makes it a gate" {
+        val house = after(granting(Resource.NATURAL_DOMAIN, 12))
+
+        house.has(Resource.NATURAL_DOMAIN, 12, noon) shouldBe true
+        house.has(Resource.NATURAL_DOMAIN, 13, noon) shouldBe false
+        // Asking took none of it: that is the whole difference between a gate and a price.
+        house.stockOf(Resource.NATURAL_DOMAIN).at(noon) shouldBe 12
     }
 })

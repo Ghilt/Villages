@@ -109,10 +109,11 @@ settlements in `evolve`, with the reason in a comment, and nowhere else.
 
 ### A rate that changes
 
-A resource is `{ amount, ratePerSecond, asOf }` (decision 0006): an event when the rate changes, never on
-a clock, and the client interpolates between them. `ARCHITECTURE.md` has the shape and its limits. The
-treasury's founding rate is the only rate so far, nothing changes it yet, and **what** the resources are
-is undecided.
+A resource is a `Stock` - `{ total, ratePerSecond, asOf }` (decision 0006): an event when the rate changes,
+never on a clock, and the client interpolates between them. `ARCHITECTURE.md` has the shape and its limits.
+There are five of them, named in `GLOSSARY.md`, and **every rate is zero**: nothing in the world generates
+income yet, so nothing has had to emit a rate change. The first mechanic that gives a house income is the
+first to need that event, and writing it is the whole of the work.
 
 ### A thing with a lifetime
 
@@ -134,6 +135,17 @@ it is in the source, and its first increment gets its own decision record before
   reason code on the wire is the same in camelCase.
 - Every word comes from `GLOSSARY.md` and is used verbatim in code, events and interface. A new word
   is a glossary row in the same commit as its first use.
+- **Where the player's word is already taken in the code, the code qualifies it and the interface does
+  not.** The player's Domain is `Resource.NATURAL_DOMAIN`, because `domain` is the innermost layer of the
+  server and a word that means two things is a word nobody can grep for. Three rules follow, and they
+  apply to the next such collision as much as to this one:
+  - **The qualifier goes on the code name, never on the player's.** A player should never meet a name
+    that was bent to suit a package.
+  - **The wire carries the code name**, because the wire is code talking to code. What a player is shown
+    is decided in the interface, in one place, and nowhere else - never in the domain, which has no
+    business holding words, and never in the store.
+  - **`GLOSSARY.md` records both, in the row for the player's word**, so that the player's word stays the
+    entry anyone looks up and the code name is found from it rather than the other way round.
 
 ## What every event carries
 

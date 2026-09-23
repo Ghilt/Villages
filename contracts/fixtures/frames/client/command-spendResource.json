@@ -1,0 +1,9 @@
+{
+  "type": "command",
+  "commandId": "6b3c4d5e-7f8a-4b9c-8d1e-2f3a4b5c6d7e",
+  "command": {
+    "type": "spendResource",
+    "resource": "wealth",
+    "amount": 50
+  }
+}

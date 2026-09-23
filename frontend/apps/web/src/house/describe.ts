@@ -1,4 +1,5 @@
-import type { HouseView } from '@villages/protocol';
+import { stockNow } from '@villages/client-core';
+import type { HouseView, ResourceName, Stock } from '@villages/protocol';
 
 /**
  * Saying what a house is, in the words the interface uses for it.
@@ -14,10 +15,49 @@ export function blazon(house: HouseView): string {
   return `${house.banner.field}, a ${house.banner.charge} ${house.banner.chargeTincture}`;
 }
 
-/** The treasury as it stands now: an amount, a speed, and the instant that was true. See decision 0006. */
-export function treasuryAt(house: HouseView, now: number): number {
-  const seconds = Math.max(0, (now - house.treasury.asOf) / 1000);
-  return Math.floor(house.treasury.amount + house.treasury.ratePerSecond * seconds);
+/**
+ * What a player calls each resource.
+ *
+ * **The one place the code's names become the player's.** The wire says `naturalDomain` because `domain`
+ * already names the innermost layer of the server; a player has never heard of that and is shown Domain.
+ * The qualifier belongs to the code and never to the person reading the screen. See the naming rule in
+ * `BUILDING-A-MECHANIC.md`.
+ */
+export const RESOURCE_WORDS: Record<ResourceName, string> = {
+  wealth: 'Wealth',
+  naturalDomain: 'Domain',
+  influence: 'Influence',
+  reason: 'Reason',
+  piety: 'Piety',
+};
+
+/**
+ * The order they are shown in: what is spent, then what gates, then what is pledged.
+ *
+ * Not alphabetical, because the three ways a resource behaves are worth reading as three groups, and a
+ * player who learns the row once should find the same thing in the same place every time after.
+ */
+export const RESOURCES_IN_ORDER: readonly ResourceName[] = [
+  'wealth',
+  'naturalDomain',
+  'influence',
+  'reason',
+  'piety',
+];
+
+/**
+ * What one resource reads as beside its mark: what the house can use, and the total behind it.
+ *
+ * A resource with nothing pledged is one number, because a slash where nothing is held back is a question
+ * a player has to answer for themselves. A resource with a pledge against it is free of total, in that
+ * order, because what can be used is the more urgent of the two.
+ */
+export function saysStock(stock: Stock, now: number): string {
+  const total = stockNow(stock, now);
+  if (stock.pledged === 0) {
+    return total.toLocaleString();
+  }
+  return `${(total - stock.pledged).toLocaleString()}/${total.toLocaleString()}`;
 }
 
 /** Where the seat is, to the three decimals that put it inside a master pixel. */
@@ -27,5 +67,5 @@ export function whereabouts(house: HouseView): string {
   return `${northing}, ${easting}`;
 }
 
-/** How often a treasury is redrawn. A resource is a rate, so a still number would be a lie. */
-export const TICK_MS = 250;
+// What a stock stands at, and how often it is redrawn, are `stockNow` and `TICK_MS` in client-core:
+// arithmetic over the protocol belongs beside the protocol, not in the pane that happens to draw it.
