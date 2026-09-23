@@ -247,7 +247,7 @@ export function App({ master }: AppProps) {
               <>
                 <Desk map={map} />
                 <MapView worldRoot={worldRoot} onReady={setMap} />
-                {map !== null && <SpriteOverlay map={map} sprites={sprites} />}
+                {map !== null && <SpriteOverlay map={map} sprites={sprites} worldRoot={worldRoot} />}
                 <AreaOverlay map={map} worldRoot={worldRoot} />
                 <HoldingOverlay map={map} houses={drawn} mine={eye ? yours : null} />
                 {/* Put away, and still running underneath: a lid over the map, never instead of it. The

@@ -8,6 +8,7 @@ import { WORLD_MASTER_WIDTH } from '../map/worldStyle';
 import { AreasView } from '../areas/AreasView';
 import { BuildBadge } from '../version/BuildBadge';
 import { MapSection } from './MapSection';
+import { ScenerySection } from './ScenerySection';
 import { Section } from './Section';
 import { WorktreesSection } from './WorktreesSection';
 import { atToClock, note, notesNow, watchNotes } from './log';
@@ -234,6 +235,8 @@ export function DebugPanel({ map, worldRoot, master, renderer, onRenderer }: Deb
         {import.meta.env.DEV && <WorktreesSection />}
 
         <MapSection master={master} renderer={renderer} onRenderer={onRenderer} />
+
+        <ScenerySection />
 
         <AreasView map={map} worldRoot={worldRoot} />
 

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useSyncExternalStore } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
+import { sceneryNow, watchScenery } from '../debug/scenery';
 import { seeingEverything, watchSeeingEverything } from '../debug/seeEverything';
 import { inspect } from '../inspect/opening';
 import { subjectsNow, watchSubjects } from '../inspect/subjects';
@@ -11,17 +12,20 @@ import type { MapSprite } from './SpriteRenderer';
 interface SpriteOverlayProps {
   map: maplibregl.Map;
   sprites: readonly MapSprite[];
+  /** Where this page's flat tiles live, which is the terrain the scenery is scattered from. */
+  worldRoot: string;
 }
 
 /**
  * Holds the renderer for as long as the map lives, and hands it whatever should be on the map. The
  * renderer type is the only thing this file knows about Pixi, so swapping it is a one-line change here.
  */
-export function SpriteOverlay({ map, sprites }: SpriteOverlayProps) {
+export function SpriteOverlay({ map, sprites, worldRoot }: SpriteOverlayProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const rendererRef = useRef<ReturnType<typeof createPixiSpriteRenderer> | null>(null);
   const top = useSyncExternalStore(watchSubjects, subjectsNow).open[0];
   const everything = useSyncExternalStore(watchSeeingEverything, seeingEverything);
+  const scenery = useSyncExternalStore(watchScenery, sceneryNow);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -47,6 +51,10 @@ export function SpriteOverlay({ map, sprites }: SpriteOverlayProps) {
   useEffect(() => {
     rendererRef.current?.setEverything(everything);
   }, [everything, sprites]);
+
+  useEffect(() => {
+    rendererRef.current?.setScenery({ ...scenery, tilesRoot: worldRoot });
+  }, [scenery, worldRoot, sprites]);
 
   // The ring follows whatever was opened last. With three windows up the map can still only mark one, and
   // the newest is the one the player is looking at.

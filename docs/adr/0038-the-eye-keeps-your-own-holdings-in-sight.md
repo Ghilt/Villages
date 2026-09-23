@@ -1,6 +1,6 @@
 # 0038. The eye keeps your own holdings in sight, and seeing everything is a different switch
 
-- Status: accepted
+- Status: accepted, its level of detail superseded by 0051 and its distance rule standing
 - Date: 2026-09-16
 
 ## Context

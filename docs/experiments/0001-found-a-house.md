@@ -241,3 +241,11 @@ given no instructions, founds a house and stays with it for a few minutes" - was
 ## Follow-ups
 
 None of its own. The question lives on in experiment 0004.
+
+**Revisited 2026-09-20.** The trailing measured above - 4.3 pixels during a fast programmatic pan, 1.9
+during a zoom - is gone, and the reason it was left is gone with it. It was left because drawing inside
+the map's render pass "costs a permanent sixty-frame repaint of the map because the sprites always
+move". The sprites no longer always move: the idle motion was removed at Adam's asking, so there is
+nothing to animate between camera movements and the overlay now draws on the map's own `render` with no
+repaint forced at all. Measured again the same way, across 27 marks through a move of both centre and
+zoom: no slip at all, where one screen pixel was 93 metres of ground.
