@@ -184,17 +184,52 @@ export function createSceneryLayer(renderer: Renderer) {
       const size = worldSize(view.zoom);
       const centre = toMercatorExact(view.center);
       const perUnit = size / WORLD_MASTER_WIDTH;
-      container.scale.set(perUnit);
-      container.x = view.width / 2 - centre.x * size;
-      container.y = view.height / 2 - centre.y * size;
+
+      // The whole layer is placed by one matrix, which is what makes twenty thousand pines cost one
+      // multiply rather than twenty thousand. Turning and tilting the camera does not change that: an
+      // orthographic camera is affine, so the turn and the squash fold into the same matrix and the
+      // particles' own buffer is still never touched. See decision record 0052 and experiment 0008.
+      //
+      // What it does not buy is a tree that stands up. The matrix squashes every particle along with the
+      // ground it stands on, so tilted the scatter lies down. Standing it up needs a per-particle scale,
+      // which is the one thing the static vertex buffer exists to avoid.
+      const turn = ((view.bearing ?? 0) * Math.PI) / 180;
+      const lean = Math.cos(((view.pitch ?? 0) * Math.PI) / 180);
+      const sin = Math.sin(turn);
+      const cos = Math.cos(turn);
+      container.setFromMatrix(
+        new Matrix(
+          perUnit * cos,
+          -perUnit * sin * lean,
+          perUnit * sin,
+          perUnit * cos * lean,
+          view.width / 2 - (centre.x * cos + centre.y * sin) * size,
+          view.height / 2 + (centre.x * sin - centre.y * cos) * size * lean,
+        ),
+      );
 
       // Which cells the view stands on, in world units, with a ring so a pan finds them cut.
-      const leftUnit = (centre.x * size - view.width / 2) / perUnit;
-      const topUnit = (centre.y * size - view.height / 2) / perUnit;
-      const fromX = cellOf(leftUnit) - RING;
-      const toX = cellOf(leftUnit + view.width / perUnit) + RING;
-      const fromY = cellOf(topUnit) - RING;
-      const toY = cellOf(topUnit + view.height / perUnit) + RING;
+      //
+      // Tilted, the ground under the window is a turned rectangle stretched along the lean, so the
+      // axis-aligned box that used to be the window's own corners would leave the far corners bare.
+      // These are the same four corners carried back through the projection above, which is exact at
+      // any angle and is the old arithmetic exactly when the camera is flat and north-up.
+      const halfWide = view.width / 2;
+      const halfHigh = view.height / 2 / (lean === 0 ? 1 : lean);
+      const eastsAndSouths = [
+        [-halfWide, -halfHigh],
+        [halfWide, -halfHigh],
+        [-halfWide, halfHigh],
+        [halfWide, halfHigh],
+      ].map(([sx = 0, sy = 0]) => [sx * cos - sy * sin, sx * sin + sy * cos] as const);
+      const centreUnitX = (centre.x * size) / perUnit;
+      const centreUnitY = (centre.y * size) / perUnit;
+      const eastUnits = eastsAndSouths.map(([east]) => centreUnitX + east / perUnit);
+      const southUnits = eastsAndSouths.map(([, south]) => centreUnitY + south / perUnit);
+      const fromX = cellOf(Math.min(...eastUnits)) - RING;
+      const toX = cellOf(Math.max(...eastUnits)) + RING;
+      const fromY = cellOf(Math.min(...southUnits)) - RING;
+      const toY = cellOf(Math.max(...southUnits)) + RING;
 
       // Nothing is drawn until the camera is close enough that something would show, and the view is
       // small enough to be worth walking. Pulled right back a cell is eight pixels across and the

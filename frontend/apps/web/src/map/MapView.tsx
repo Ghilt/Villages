@@ -49,9 +49,12 @@ export function MapView({ worldRoot, onReady }: MapViewProps) {
       minZoom: CAMERA.minZoom,
       maxZoom: CAMERA.maxZoom,
       transformConstrain: keepOnTheSheet,
-      maxPitch: 0,
-      dragRotate: false,
-      pitchWithRotate: false,
+      // The ceiling, not the camera. A player still gets a flat, north-up world, because nothing turns
+      // the handlers on and the camera starts and stays at zero; what this opens is the debug panel's
+      // Camera section, which is the instrument for experiment 0008. Eighty-five rather than the sixty
+      // MapLibre defaults to, so the lever can be pushed past the angles worth looking at rather than
+      // stopping exactly on one of them.
+      maxPitch: 85,
       renderWorldCopies: false,
       // No attribution control, and no controls at all: the map is the world rather than a map of it, and
       // a line of source credits along the bottom of the world is the one thing on the stage that says
@@ -62,8 +65,10 @@ export function MapView({ worldRoot, onReady }: MapViewProps) {
       attributionControl: false,
     });
 
-    // The overlay projection assumes an unrotated, untilted camera, so every way a player could turn the
-    // world is closed off here rather than left to the constructor alone. See docs/adr/0014.
+    // Every way a player could turn the world by hand stays closed. The camera can now be tilted, but
+    // only by the debug panel setting it, which is Adam's lever and not a player's control: 0014 says
+    // the map is flat and north-up and that is still what anybody playing gets. See experiment 0008.
+    map.dragRotate.disable();
     map.touchZoomRotate.disableRotation();
     map.keyboard.disableRotation();
 

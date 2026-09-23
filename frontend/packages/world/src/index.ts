@@ -77,8 +77,11 @@ export type { FillOptions, FillReport } from './fill.ts';
 
 export {
   fbm,
+  SQUARE_LATTICE,
   hash2,
+  isSquareLattice,
   mix,
+  onLattice,
   paintPixel,
   painterlyProblems,
   preparePainterly,
@@ -89,6 +92,7 @@ export {
 export type {
   ClassSampler,
   GroupStyle,
+  Lattice,
   PainterlyStyle,
   PreparedPainterly,
   TreatmentKind,

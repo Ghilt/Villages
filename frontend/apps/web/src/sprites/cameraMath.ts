@@ -2,8 +2,9 @@
  * The projection that keeps a sprite standing on its place while the map moves underneath it.
  *
  * Everything here is a pure function of the camera, so the overlay can be trusted without a browser and
- * tested without pixels. It assumes an unrotated, untilted camera showing the world once, which is what the
- * map is configured to allow. See docs/adr/0014.
+ * tested without pixels. It assumes a camera showing the world once, and carries the turn and the tilt of
+ * that camera rather than assuming there is none: see experiment 0008. Flat and north-up is still what a
+ * player gets, and is still the arithmetic below when pitch and bearing are zero. See docs/adr/0014.
  */
 
 import { WORLD_MASTER_WIDTH } from '../map/worldStyle';
@@ -36,6 +37,15 @@ export interface CameraView {
   zoom: number;
   width: number;
   height: number;
+  /**
+   * How far the camera has tipped from straight down, in degrees. Zero is the flat map a player gets.
+   *
+   * It only ever squashes: an orthographic camera foreshortens the axis it leans along and does nothing
+   * else, so sixty degrees is a half and the classic two-to-one of an isometric game. See 0008.
+   */
+  pitch?: number;
+  /** Which way is up, in degrees clockwise from north. Zero is north-up, which is what a player gets. */
+  bearing?: number;
 }
 
 /** The width of the entire world in pixels at a given zoom. */
@@ -101,9 +111,22 @@ export function toScreen(place: LngLat, view: CameraView): ScreenPoint {
   // The centre may lie off the world once the sheet can be smaller than the window; clamping it would
   // snap the sheet back. See docs/adr/0033.
   const centre = toMercatorExact(view.center);
+  const east = (place2d.x - centre.x) * size;
+  const south = (place2d.y - centre.y) * size;
+
+  // Turn, then squash. Both are multiplies and neither divides, which is the whole reason this stays a
+  // function rather than becoming a matrix the map has to hand over: with the field of view collapsed
+  // the camera is orthographic, so there is no perspective divide to do and the projection is affine.
+  // A round mark on the ground is an ellipse of the same shape everywhere on the screen, rather than one
+  // that grows toward a horizon. See experiment 0008.
+  const turn = ((view.bearing ?? 0) * Math.PI) / 180;
+  const lean = Math.cos(((view.pitch ?? 0) * Math.PI) / 180);
+  const sin = Math.sin(turn);
+  const cos = Math.cos(turn);
+
   return {
-    x: (place2d.x - centre.x) * size + view.width / 2,
-    y: (place2d.y - centre.y) * size + view.height / 2,
+    x: east * cos + south * sin + view.width / 2,
+    y: (south * cos - east * sin) * lean + view.height / 2,
   };
 }
 

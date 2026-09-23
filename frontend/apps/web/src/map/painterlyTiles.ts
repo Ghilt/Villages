@@ -1,4 +1,5 @@
 import { addProtocol } from 'maplibre-gl';
+import type { Lattice } from '@villages/world';
 import { note } from '../debug/log';
 import { TILE } from './painterlyMessages';
 import type { PaintReply, PaintRequest } from './painterlyMessages';
@@ -100,7 +101,7 @@ if (import.meta.env.DEV) {
 }
 
 const addressOf = (request: PaintRequest): string =>
-  `${request.style}/${request.zoom}/${request.x}/${request.y}`;
+  `${request.style}/${request.latticeTurn}/${request.latticeSize}/${request.zoom}/${request.x}/${request.y}`;
 
 function remember(key: string, pixels: Pixels): void {
   if (painted.size >= REMEMBER) {
@@ -212,7 +213,7 @@ function lookAhead(): void {
   quiet = undefined;
   const around: PaintRequest[] = [];
 
-  const consider = (style: string, zoom: number, x: number, y: number): void => {
+  const consider = (from: PaintRequest, zoom: number, x: number, y: number): void => {
     if (zoom < 0 || zoom > WORLD_MAX_ZOOM || around.length >= MOST_AHEAD) {
       return;
     }
@@ -220,11 +221,12 @@ function lookAhead(): void {
     if (x < 0 || x >= across || y < 0 || y >= across) {
       return;
     }
-    const key = `${style}/${zoom}/${x}/${y}`;
+    const next: PaintRequest = { ...from, id: 0, tiles: tilesRoot, zoom, x, y };
+    const key = addressOf(next);
     if (painted.has(key) || inProgress.has(key) || wanted.has(key)) {
       return;
     }
-    around.push({ id: 0, style, tiles: tilesRoot, zoom, x, y });
+    around.push(next);
   };
 
   // Nearest first, so that what is painted ahead is what a small movement reaches first.
@@ -233,21 +235,21 @@ function lookAhead(): void {
       for (let dy = -ring; dy <= ring; dy += 1) {
         for (let dx = -ring; dx <= ring; dx += 1) {
           if (Math.max(Math.abs(dx), Math.abs(dy)) === ring) {
-            consider(request.style, request.zoom, request.x + dx, request.y + dy);
+            consider(request, request.zoom, request.x + dx, request.y + dy);
           }
         }
       }
     }
   }
   for (const request of wanted.values()) {
-    consider(request.style, request.zoom + 1, request.x * 2, request.y * 2);
-    consider(request.style, request.zoom + 1, request.x * 2 + 1, request.y * 2);
-    consider(request.style, request.zoom + 1, request.x * 2, request.y * 2 + 1);
-    consider(request.style, request.zoom + 1, request.x * 2 + 1, request.y * 2 + 1);
+    consider(request, request.zoom + 1, request.x * 2, request.y * 2);
+    consider(request, request.zoom + 1, request.x * 2 + 1, request.y * 2);
+    consider(request, request.zoom + 1, request.x * 2, request.y * 2 + 1);
+    consider(request, request.zoom + 1, request.x * 2 + 1, request.y * 2 + 1);
     // Zooming out asks for the tile containing this one; two out as well, so that there is always a
     // coarse painted version for MapLibre to stretch while a sharp one is still being painted.
-    consider(request.style, request.zoom - 1, request.x >> 1, request.y >> 1);
-    consider(request.style, request.zoom - 2, request.x >> 2, request.y >> 2);
+    consider(request, request.zoom - 1, request.x >> 1, request.y >> 1);
+    consider(request, request.zoom - 2, request.x >> 2, request.y >> 2);
   }
 
   wanted.clear();
@@ -278,9 +280,15 @@ function paintAhead(): void {
   }
 }
 
-/** The URL template a raster source uses to ask for a painted tile in one of the styles. */
-export function painterlyTiles(style: string): string {
-  return `${SCHEME}://${style}/{z}/{x}/{y}`;
+/**
+ * The URL template a raster source uses to ask for a painted tile in one of the styles.
+ *
+ * The lattice is in the address rather than beside it, which is what makes turning it safe: a different
+ * lattice is a different URL, so MapLibre asks afresh and nothing painted on the old one is handed back.
+ * It is the same reasoning as the style being in there. See experiment 0008.
+ */
+export function painterlyTiles(style: string, lattice: Lattice): string {
+  return `${SCHEME}://${style}/${lattice.turn}/${lattice.size}/{z}/{x}/{y}`;
 }
 
 let registered = false;
@@ -302,7 +310,7 @@ export function registerPainterlyTiles(worldRoot: string): void {
   tilesRoot = worldRoot;
 
   addProtocol(SCHEME, async (params, abortController) => {
-    const parts = /^painterly:\/\/([^/]+)\/(\d+)\/(\d+)\/(\d+)/.exec(params.url);
+    const parts = /^painterly:\/\/([^/]+)\/([\d.]+)\/([\d.]+)\/(\d+)\/(\d+)\/(\d+)/.exec(params.url);
     if (parts === null) {
       throw new Error(`${params.url} is not a painterly tile`);
     }
@@ -310,9 +318,11 @@ export function registerPainterlyTiles(worldRoot: string): void {
       id: 0,
       style: parts[1]!,
       tiles: tilesRoot,
-      zoom: Number(parts[2]),
-      x: Number(parts[3]),
-      y: Number(parts[4]),
+      latticeTurn: Number(parts[2]),
+      latticeSize: Number(parts[3]),
+      zoom: Number(parts[4]),
+      x: Number(parts[5]),
+      y: Number(parts[6]),
     };
 
     wanted.set(addressOf(request), request);

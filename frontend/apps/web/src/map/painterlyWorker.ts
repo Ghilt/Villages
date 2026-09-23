@@ -1,5 +1,5 @@
-import { paintPixel, preparePainterly } from '@villages/world';
-import type { ClassSampler, PreparedPainterly } from '@villages/world';
+import { onLattice, paintPixel, preparePainterly } from '@villages/world';
+import type { ClassSampler, Lattice, PreparedPainterly } from '@villages/world';
 
 import { FLAT_MAX_ZOOM, TILE } from './painterlyMessages';
 import type { PaintReply, PaintRequest } from './painterlyMessages';
@@ -90,13 +90,14 @@ function paintTile(
   x: number,
   y: number,
   at: Ready,
+  lattice: Lattice,
 ): ImageData {
   const masterPerPixel = at.terrain.masterWidth / (TILE * 2 ** zoom);
   const sourcePerPixel = at.terrain.masterWidth / (TILE * 2 ** sourceZoom);
   const baseX = (centreX - 1) * TILE;
   const baseY = (centreY - 1) * TILE;
 
-  const read: ClassSampler = (worldX, worldY) => {
+  const straight: ClassSampler = (worldX, worldY) => {
     const column = Math.floor(worldX / sourcePerPixel) - baseX;
     const row = Math.floor(worldY / sourcePerPixel) - baseY;
     if (column < 0 || column >= SPAN || row < 0 || row >= SPAN) {
@@ -104,6 +105,10 @@ function paintTile(
     }
     return field[row * SPAN + column]!;
   };
+
+  // Every read the paint does goes through this, the wander and the nine neighbours alike, so the cells
+  // it draws are the lattice's cells and their edges and their shores come out of the same arithmetic.
+  const read = onLattice(straight, lattice);
 
   const originX = x * TILE;
   const originY = y * TILE;
@@ -120,6 +125,7 @@ function paintTile(
         (originX + column + 0.5) * masterPerPixel,
         worldY,
         masterPerPixel,
+        lattice,
       );
       pixels[at4] = colour[0];
       pixels[at4 + 1] = colour[1];
@@ -142,7 +148,7 @@ const inside = self as unknown as {
 };
 
 inside.addEventListener('message', async (event) => {
-  const { id, style: styleName, tiles, zoom, x, y } = event.data;
+  const { id, style: styleName, tiles, zoom, x, y, latticeTurn, latticeSize } = event.data;
   try {
     ready ??= load();
     const at = await ready;
@@ -157,7 +163,10 @@ inside.addEventListener('message', async (event) => {
     const centreY = Math.floor(y / scale);
 
     const field = await neighbourhood(tiles, sourceZoom, centreX, centreY, at);
-    const image = paintTile(style, field, sourceZoom, centreX, centreY, zoom, x, y, at);
+    const image = paintTile(style, field, sourceZoom, centreX, centreY, zoom, x, y, at, {
+      turn: latticeTurn,
+      size: latticeSize,
+    });
     const pixels = image.data.buffer;
     inside.postMessage({ id, pixels }, [pixels]);
   } catch (cause) {

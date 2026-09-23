@@ -89,6 +89,16 @@ export interface CameraSource {
   center(): LngLat;
   zoom(): number;
   size(): { width: number; height: number };
+  /**
+   * How far the camera has tipped, and which way is up, in degrees.
+   *
+   * Both are zero for every player, and are only ever moved by the debug panel's Camera section. They
+   * are here rather than assumed away because the overlay draws its own projection: a camera the map
+   * has tilted and an overlay that has not heard about it is marks sliding off their own ground. See
+   * experiment 0008.
+   */
+  pitch(): number;
+  bearing(): number;
   /** Calls back whenever the map has drawn. Returns what stops it. */
   watch(drawn: () => void): () => void;
 }

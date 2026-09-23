@@ -21,6 +21,12 @@ export interface PaintRequest {
   zoom: number;
   x: number;
   y: number;
+  /**
+   * The grid the colour is decided on, turned and sized in world units. The square one is what the world
+   * is stored on and what every painted tile was before there was a choice. See experiment 0008.
+   */
+  latticeTurn: number;
+  latticeSize: number;
 }
 
 export interface PaintReply {

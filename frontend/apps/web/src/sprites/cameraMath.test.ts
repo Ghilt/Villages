@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  DIAMOND_BEARING,
+  DIMETRIC_PITCH,
+  ISOMETRIC_PITCH,
+  TRIMETRIC_BEARING,
+  TRIMETRIC_PITCH,
+} from '../debug/camera';
+
+import {
   MAX_MERCATOR_LATITUDE,
   WORLD_UNIT_ZOOM,
   fromMercator,
@@ -140,3 +148,130 @@ describe('one unit of world space', () => {
     expect(pixelsPerWorldUnit(10)).toBeCloseTo(16, 9);
   });
 });
+
+describe('a camera that has been turned and tipped', () => {
+  /** The four corners of a square of ground, as the screen draws them. */
+  const cornersOf = (from: CameraView) => {
+    const span = 4;
+    const at = (lng: number, lat: number) => toScreen({ lng, lat }, from);
+    return { nw: at(-span, span), ne: at(span, span), sw: at(-span, -span), se: at(span, -span) };
+  };
+  const edge = (a: { x: number; y: number }, b: { x: number; y: number }) => ({
+    x: b.x - a.x,
+    y: b.y - a.y,
+  });
+
+  it('is exactly what it always was when it is flat and north-up', () => {
+    const place = { lng: 12, lat: 34 };
+    const was = toScreen(place, view);
+    expect(toScreen(place, { ...view, pitch: 0, bearing: 0 })).toEqual(was);
+  });
+
+  it('draws a square of ground twice as wide as it is tall at sixty degrees', () => {
+    // Sixty degrees is the whole reason isometric tiles are 2:1: its cosine is exactly a half.
+    const { nw, ne } = cornersOf({ ...view, pitch: 60, bearing: 45 });
+    const top = edge(nw, ne);
+    expect(Math.abs(top.x) / Math.abs(top.y)).toBeCloseTo(2, 9);
+  });
+
+  it('foreshortens all three axes equally at the true isometric angle', () => {
+    const { nw, ne } = cornersOf({ ...view, pitch: ISOMETRIC_PITCH, bearing: 45 });
+    const top = edge(nw, ne);
+    expect(Math.abs(top.x) / Math.abs(top.y)).toBeCloseTo(Math.sqrt(3), 9);
+  });
+
+  it('keeps opposite edges parallel, which is what makes it a projection and not a perspective', () => {
+    for (const pitch of [0, 30, 54.7356, 60, 80]) {
+      const { nw, ne, sw, se } = cornersOf({ ...view, pitch, bearing: 45 });
+      const top = edge(nw, ne);
+      const bottom = edge(sw, se);
+      expect(top.x).toBeCloseTo(bottom.x, 9);
+      expect(top.y).toBeCloseTo(bottom.y, 9);
+    }
+  });
+
+  it('turns the world without changing the size of anything on it', () => {
+    const flat = cornersOf({ ...view, bearing: 0 });
+    const turned = cornersOf({ ...view, bearing: 90 });
+    const was = edge(flat.nw, flat.ne);
+    const now = edge(turned.nw, turned.ne);
+    expect(Math.hypot(now.x, now.y)).toBeCloseTo(Math.hypot(was.x, was.y), 9);
+    // A quarter turn clockwise puts what was east up the screen.
+    expect(now.x).toBeCloseTo(0, 9);
+    expect(now.y).toBeCloseTo(-Math.abs(was.x), 9);
+  });
+
+  it('leaves the place the camera is pointing at in the middle, whatever it is doing', () => {
+    for (const [pitch, bearing] of [
+      [0, 0],
+      [60, 45],
+      [80, 200],
+    ]) {
+      const point = toScreen(view.center, { ...view, pitch, bearing });
+      expect(point.x).toBeCloseTo(view.width / 2, 9);
+      expect(point.y).toBeCloseTo(view.height / 2, 9);
+    }
+  });
+});
+
+describe('the three names for a parallel projection', () => {
+  /** How long each of the three axes is drawn, for a camera. One world unit east, north, and upright. */
+  const axesAt = (pitch: number, bearing: number) => {
+    const turn = (bearing * Math.PI) / 180;
+    const lean = Math.cos((pitch * Math.PI) / 180);
+    const east = Math.hypot(Math.cos(turn), Math.sin(turn) * lean);
+    const north = Math.hypot(Math.sin(turn), Math.cos(turn) * lean);
+    // Nothing in this world has height, so the upright is notional; it is still what the names count.
+    return [east, north, Math.sin((pitch * Math.PI) / 180)];
+  };
+  const alike = (a: number, b: number) => Math.abs(a - b) < 1e-9;
+  const howManyAlike = ([a, b, c]: number[]) =>
+    [alike(a!, b!), alike(b!, c!), alike(a!, c!)].filter(Boolean).length;
+
+  it('calls it isometric when all three axes are drawn the same length', () => {
+    expect(howManyAlike(axesAt(ISOMETRIC_PITCH, DIAMOND_BEARING))).toBe(3);
+  });
+
+  it('calls it dimetric when two are alike, which is what the diamond turn gives', () => {
+    const [east, north, up] = axesAt(DIMETRIC_PITCH, DIAMOND_BEARING);
+    expect(east).toBeCloseTo(north!, 9);
+    expect(up).not.toBeCloseTo(east!, 6);
+  });
+
+  it('calls it trimetric when no two are alike', () => {
+    expect(howManyAlike(axesAt(TRIMETRIC_PITCH, TRIMETRIC_BEARING))).toBe(0);
+  });
+
+  it('draws a lopsided diamond off the diamond turn, and an even one on it', () => {
+    const even = cornersOfSquare(DIMETRIC_PITCH, DIAMOND_BEARING);
+    expect(Math.abs(even.east)).toBeCloseTo(Math.abs(even.north), 9);
+    const lopsided = cornersOfSquare(TRIMETRIC_PITCH, TRIMETRIC_BEARING);
+    expect(Math.abs(lopsided.east)).not.toBeCloseTo(Math.abs(lopsided.north), 3);
+  });
+});
+
+/**
+ * The screen length of one small step of ground east and the same step north, for a camera.
+ *
+ * The step is small on purpose. Mercator stretches north as it goes, so a whole degree of latitude and a
+ * whole degree of longitude are not the same piece of ground even on the equator, and comparing them
+ * measures the projection of the world rather than the projection of the camera.
+ */
+function cornersOfSquare(pitch: number, bearing: number) {
+  const step = 0.001;
+  const from: CameraView = {
+    center: { lng: 0, lat: 0 },
+    zoom: 4,
+    width: 1000,
+    height: 600,
+    pitch,
+    bearing,
+  };
+  const middle = toScreen({ lng: 0, lat: 0 }, from);
+  const east = toScreen({ lng: step, lat: 0 }, from);
+  const north = toScreen({ lng: 0, lat: step }, from);
+  return {
+    east: Math.hypot(east.x - middle.x, east.y - middle.y),
+    north: Math.hypot(north.x - middle.x, north.y - middle.y),
+  };
+}

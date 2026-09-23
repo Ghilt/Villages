@@ -7,6 +7,7 @@ import { sheetCoversView, sheetOnScreen } from '../map/sheet';
 import { WORLD_MASTER_WIDTH } from '../map/worldStyle';
 import { AreasView } from '../areas/AreasView';
 import { BuildBadge } from '../version/BuildBadge';
+import { CameraSection } from './CameraSection';
 import { MapSection } from './MapSection';
 import { ScenerySection } from './ScenerySection';
 import { Section } from './Section';
@@ -236,6 +237,8 @@ export function DebugPanel({ map, worldRoot, master, renderer, onRenderer }: Deb
         <MapSection master={master} renderer={renderer} onRenderer={onRenderer} />
 
         <ScenerySection />
+
+        <CameraSection map={map} />
 
         <AreasView map={map} worldRoot={worldRoot} />
 

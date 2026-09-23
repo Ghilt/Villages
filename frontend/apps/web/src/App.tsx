@@ -31,6 +31,7 @@ import { Stage } from './stage/Stage';
 import { formNow, roomToRead, takeOver, theMapsBay } from './stage/bays';
 import { CHOICE_PANE, HOUSE_PANE, MAP_PANE, NAVIGATION_PANE } from './stage/panes';
 import { worldRootOf } from './map/masters';
+import { cameraNow, watchCamera } from './debug/camera';
 import { DEFAULT_RENDERER, RENDERERS, applyRenderer } from './map/renderers';
 import { SpriteOverlay } from './sprites/SpriteOverlay';
 import type { MapSprite } from './sprites/SpriteRenderer';
@@ -115,6 +116,8 @@ function useWindow(): { width: number; height: number } {
 export function App({ master }: AppProps) {
   const [map, setMap] = useState<maplibregl.Map | null>(null);
   const [renderer, setRenderer] = useState(DEFAULT_RENDERER);
+  // The lattice the ground is painted on, which is Adam's lever rather than a player's. See 0008.
+  const camera = useSyncExternalStore(watchCamera, cameraNow);
   const heard = useSyncExternalStore(watchGateway, gatewayState);
   const eye = useSyncExternalStore(watchEye, eyeIsOpen);
   const mode = useSyncExternalStore(watchStage, stageMode);
@@ -179,11 +182,11 @@ export function App({ master }: AppProps) {
 
   useEffect(() => {
     if (map !== null) {
-      applyRenderer(map, renderer);
+      applyRenderer(map, renderer, { turn: camera.latticeTurn, size: camera.latticeSize });
       const chosen = RENDERERS.find((candidate) => candidate.name === renderer);
       note('renderer', `${renderer}${chosen === undefined ? '' : `, ${chosen.note.toLowerCase()}`}`);
     }
-  }, [map, renderer]);
+  }, [map, renderer, camera.latticeTurn, camera.latticeSize]);
 
   // How an inspect window's "show it on the map" link reaches the camera, without anything in the interface
   // having to be handed a map it has no business holding.

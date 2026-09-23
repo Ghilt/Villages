@@ -133,6 +133,58 @@ export function treatment(kind: TreatmentKind, x: number, y: number, seed: numbe
 /** The class of the terrain at a position in world space. Nearest, always: classes do not average. */
 export type ClassSampler = (x: number, y: number) => number;
 
+/**
+ * The grid the ground's colour is decided on, which need not be the grid the world is stored on.
+ *
+ * The terrain arrives on a square lattice lying along the world's own axes, because that is how a master
+ * is painted and how a tile is cut. Nothing says it has to be drawn on that one. Turn the lattice and a
+ * cell is a diamond; make it bigger and a cell is a tile of ground rather than a pixel of it. The world
+ * underneath is untouched - this decides only where the colour is read, so north stays where it was and
+ * a coastline stays where it was. Turning the camera instead would turn the world with it, which is the
+ * whole reason this exists. See experiment 0008.
+ */
+export interface Lattice {
+  /** How far the lattice is turned from the world's own axes, in degrees. */
+  turn: number;
+  /** How wide one cell is, in world-space units, where one is a master pixel. */
+  size: number;
+}
+
+/** The lattice the world is stored on, and the one everything used before there was a choice. */
+export const SQUARE_LATTICE: Lattice = { turn: 0, size: 1 };
+
+/** Whether a lattice is the plain one, in which case nothing need be done about it at all. */
+export function isSquareLattice(lattice: Lattice): boolean {
+  return lattice.turn === 0 && lattice.size === 1;
+}
+
+/**
+ * The same terrain, read on a different lattice.
+ *
+ * A sampler in and a sampler out, so everything downstream of it is unchanged: the wander still wanders
+ * before the read, the neighbours are still read at a reach, and the shore is still drawn where water
+ * meets land. They simply all land on cell middles now, so every one of them follows the new cells - the
+ * edge shading and the ink outline come along for free rather than being drawn a second time.
+ */
+export function onLattice(read: ClassSampler, lattice: Lattice): ClassSampler {
+  if (isSquareLattice(lattice)) {
+    return read;
+  }
+  const turn = (lattice.turn * Math.PI) / 180;
+  const sin = Math.sin(turn);
+  const cos = Math.cos(turn);
+  const { size } = lattice;
+  return (x, y) => {
+    // Into the lattice's own frame, down to whole cells, and back out at the middle of the one it landed
+    // in. The middle rather than the corner because a cell's colour should be the ground at its heart.
+    const alongU = (x * cos + y * sin) / size;
+    const alongV = (y * cos - x * sin) / size;
+    const middleU = (Math.floor(alongU) + 0.5) * size;
+    const middleV = (Math.floor(alongV) + 0.5) * size;
+    return read(middleU * cos - middleV * sin, middleU * sin + middleV * cos);
+  };
+}
+
 /** How one group of terrain is drawn. The eight groups are the palette's own. */
 export interface GroupStyle {
   treatment: TreatmentKind;
@@ -316,6 +368,7 @@ export function paintPixel(
   worldX: number,
   worldY: number,
   masterPerPixel: number,
+  lattice: Lattice = SQUARE_LATTICE,
 ): Rgb {
   const { boundary, wash, edge, shore, paper } = prepared;
 
@@ -333,7 +386,11 @@ export function paintPixel(
     throw new Error('the painterly style has no classes prepared');
   }
 
-  const reach = Math.max(REACH_FLOOR, edge.reach * masterPerPixel);
+  // A cell bigger than a pixel needs a longer arm, or all nine reads land inside the same cell, no
+  // boundary is ever found, and the cells come out as flat colour with no edge and no shore at all.
+  // Just over half a cell is the shortest reach that always crosses into the next one.
+  const cellReach = lattice.size > 1 ? lattice.size * 0.7 : 0;
+  const reach = Math.max(REACH_FLOOR, edge.reach * masterPerPixel, cellReach);
   let differing = 0;
   let acrossShore = 0;
   for (const [dx, dy] of NEIGHBOURS) {

@@ -13,6 +13,8 @@ export function cameraOf(map: maplibregl.Map): CameraSource {
       return { lng: centre.lng, lat: centre.lat };
     },
     zoom: () => map.getZoom(),
+    pitch: () => map.getPitch(),
+    bearing: () => map.getBearing(),
     size: () => {
       const container = map.getContainer();
       return { width: container.clientWidth, height: container.clientHeight };

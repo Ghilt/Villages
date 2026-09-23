@@ -1,10 +1,13 @@
 import { readFileSync } from 'node:fs';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import {
+  SQUARE_LATTICE,
   fbm,
   hash2,
+  isSquareLattice,
   mix,
+  onLattice,
   paintPixel,
   painterlyProblems,
   preparePainterly,
@@ -540,5 +543,65 @@ describe('the styles the world is actually painted with', () => {
     // palette guarantees. Past about 1.75 the push starts pinning channels at an end and does exactly
     // that: two colours that differed only in how much of a channel they had arrive at the same place.
     expect(closest).toBeGreaterThanOrEqual(MINIMUM_CLASS_DISTANCE);
+  });
+});
+
+describe('the lattice the ground is read on', () => {
+  /** A sampler that reports where it was asked, so a wrapper can be checked by what it passes through. */
+  const asked: { x: number; y: number }[] = [];
+  const spy: ClassSampler = (x, y) => {
+    asked.push({ x, y });
+    return MEADOW;
+  };
+
+  beforeEach(() => {
+    asked.length = 0;
+  });
+
+  it('is the sampler it was given when it is the plain square one', () => {
+    expect(onLattice(spy, SQUARE_LATTICE)).toBe(spy);
+    expect(isSquareLattice(SQUARE_LATTICE)).toBe(true);
+    expect(isSquareLattice({ turn: 45, size: 1 })).toBe(false);
+  });
+
+  it('reads the middle of the cell a place falls in rather than the place itself', () => {
+    onLattice(spy, { turn: 0, size: 4 })(9.3, 2.1);
+    expect(asked).toEqual([{ x: 10, y: 2 }]);
+  });
+
+  it('puts everywhere in one cell onto the same reading, which is what makes a cell a cell', () => {
+    const read = onLattice(spy, { turn: 45, size: 4 });
+    // Well inside a cell rather than on its edge: on a boundary the answer flips for any step at all,
+    // which is what a boundary is and not what this is about.
+    const middle = [19.8, 22.6] as const;
+    read(...middle);
+    const first = asked[0]!;
+    // A step much shorter than a cell cannot leave it, whichever way it is taken.
+    for (const [dx, dy] of [
+      [0.4, 0],
+      [0, 0.4],
+      [-0.4, -0.4],
+    ] as const) {
+      asked.length = 0;
+      read(middle[0] + dx, middle[1] + dy);
+      expect(asked[0]!.x).toBeCloseTo(first.x, 9);
+      expect(asked[0]!.y).toBeCloseTo(first.y, 9);
+    }
+  });
+
+  it('turns the cells without moving the world, so a cell still covers the ground it stands on', () => {
+    const size = 4;
+    const read = onLattice(spy, { turn: 45, size });
+    // Whatever cell a place lands in, its middle is within half a diagonal of the place itself: the
+    // lattice is turned, not shifted, so nothing is read from somewhere else on the map.
+    for (const [x, y] of [
+      [0, 0],
+      [13.7, -22.1],
+      [1000.5, 999.5],
+    ] as const) {
+      asked.length = 0;
+      read(x, y);
+      expect(Math.hypot(asked[0]!.x - x, asked[0]!.y - y)).toBeLessThanOrEqual((size * Math.SQRT2) / 2);
+    }
   });
 });

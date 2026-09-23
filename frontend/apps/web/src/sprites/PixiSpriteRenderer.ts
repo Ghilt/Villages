@@ -352,7 +352,14 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       canvasWas = { width, height };
       app.renderer.resize(width, height);
     }
-    const view: CameraView = { center: camera.center(), zoom, width, height };
+    const view: CameraView = {
+      center: camera.center(),
+      zoom,
+      width,
+      height,
+      pitch: camera.pitch(),
+      bearing: camera.bearing(),
+    };
 
     const now = performance.now();
     // Capped, because a still map draws nothing and the gap since the last frame is then seconds. A

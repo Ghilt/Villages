@@ -2348,3 +2348,14 @@ body,
   outline: 1px solid #9d7c2a;
   outline-offset: 2px;
 }
+
+/*
+  A line between the two halves of the Camera section: where the camera stands, and what grid the ground
+  is painted on. They are both turns and they are not the same turn, so the eye needs telling. See
+  experiment 0008.
+*/
+.debug__rule {
+  border: 0;
+  border-top: 1px solid var(--parchment-edge);
+  margin: 0.75rem 0 0.5rem;
+}

@@ -1,4 +1,5 @@
 import type * as maplibregl from 'maplibre-gl';
+import type { Lattice } from '@villages/world';
 
 import { painterlyTiles } from './painterlyTiles';
 import { WORLD_MAX_ZOOM } from './worldStyle';
@@ -30,6 +31,7 @@ export const RENDERERS: readonly RendererChoice[] = [
   { name: 'ink', title: 'Ink', note: 'Atlas further still: the line does all of the work' },
   { name: 'dusk', title: 'Dusk', note: 'The painted treatment under a low sun and a blue shadow' },
   { name: 'vivid', title: 'Vivid', note: "The master's own colours, pushed, with no medium over them" },
+  { name: 'plate', title: 'Plate', note: "Raw's quieter colours, pushed the way vivid pushes the master's" },
 ];
 
 export const DEFAULT_RENDERER = 'painted';
@@ -51,7 +53,7 @@ const INK_LAYERS = ['lake-shore', 'coast'];
  */
 const FLAT_LAYER = 'terrain';
 
-export function applyRenderer(map: maplibregl.Map, name: string): void {
+export function applyRenderer(map: maplibregl.Map, name: string, lattice: Lattice): void {
   // Swapping style means a different tile URL, so the source goes and comes back rather than mutating.
   if (map.getLayer(LAYER) !== undefined) {
     map.removeLayer(LAYER);
@@ -72,7 +74,7 @@ export function applyRenderer(map: maplibregl.Map, name: string): void {
 
   map.addSource(SOURCE, {
     type: 'raster',
-    tiles: [painterlyTiles(name)],
+    tiles: [painterlyTiles(name, lattice)],
     tileSize: 256,
     minzoom: 0,
     // Past the flat tiles' own seven, so the paint is asked for a tile at the zoom being looked at and

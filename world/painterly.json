@@ -436,44 +436,151 @@
           "amount": 0
         }
       }
+    },
+    "plate": {
+      "$": "Raw the way vivid treats the master: the quiet colours out of world/render.json rather than the master's own, saturation pushed the same amount vivid pushes it, and every part of the medium turned off. What raw and vivid really differ by is the colour table and that push, not sharpness - both draw a master pixel as a hard block of the same size, because the terrain itself stops at zoom seven. This is the one that separates the two: raw picked apart.",
+      "$flat": "Every number that could add a mark, a wash, a grain or a line is zero, exactly as in vivid, and for the same reason: this style is about colour and edge and nothing else.",
+      "warm": "#ffffff",
+      "cool": "#000000",
+      "wash": {
+        "amount": 0,
+        "mark": 46
+      },
+      "boundary": {
+        "wander": 0,
+        "scale": 3
+      },
+      "edge": {
+        "amount": 0,
+        "reach": 1
+      },
+      "shore": {
+        "ink": "#000000",
+        "amount": 0
+      },
+      "paper": {
+        "grain": 0,
+        "mark": 2,
+        "fibre": 0
+      },
+      "groups": {
+        "water": {
+          "treatment": "none",
+          "mark": 3,
+          "amount": 0
+        },
+        "cold": {
+          "treatment": "none",
+          "mark": 3,
+          "amount": 0
+        },
+        "forest": {
+          "treatment": "none",
+          "mark": 3,
+          "amount": 0
+        },
+        "open": {
+          "treatment": "none",
+          "mark": 3,
+          "amount": 0
+        },
+        "farmed": {
+          "treatment": "none",
+          "mark": 3,
+          "amount": 0
+        },
+        "wetland": {
+          "treatment": "none",
+          "mark": 3,
+          "amount": 0
+        },
+        "dry": {
+          "treatment": "none",
+          "mark": 3,
+          "amount": 0
+        },
+        "high": {
+          "treatment": "none",
+          "mark": 3,
+          "amount": 0
+        }
+      },
+      "$vibrance": "The same 1.35 vivid uses, so the only thing left between them is which table the colour comes from. Down at 1 it is raw exactly, which is the comparison worth making; it is the number to move.",
+      "vibrance": 1.35
     }
   },
   "$views": "What the styles are judged on. Web Mercator, like the map, so these are directly comparable to a screenshot of it. `width` sets both the size of the image and how much ground a pixel covers, which is what every mark is sized against.",
   "views": [
     {
       "name": "world",
-      "lng": [-180, 180],
-      "lat": [-85.05, 85.05],
+      "lng": [
+        -180,
+        180
+      ],
+      "lat": [
+        -85.05,
+        85.05
+      ],
       "width": 2048
     },
     {
       "name": "scandinavia",
-      "lng": [5, 32],
-      "lat": [54, 71],
+      "lng": [
+        5,
+        32
+      ],
+      "lat": [
+        54,
+        71
+      ],
       "width": 1400
     },
     {
       "name": "sahara-shore",
-      "lng": [-18, 12],
-      "lat": [18, 36],
+      "lng": [
+        -18,
+        12
+      ],
+      "lat": [
+        18,
+        36
+      ],
       "width": 1400
     },
     {
       "name": "alps",
-      "lng": [4, 18],
-      "lat": [43, 49],
+      "lng": [
+        4,
+        18
+      ],
+      "lat": [
+        43,
+        49
+      ],
       "width": 1400
     },
     {
       "name": "islands",
-      "lng": [95, 130],
-      "lat": [-11, 8],
+      "lng": [
+        95,
+        130
+      ],
+      "lat": [
+        -11,
+        8
+      ],
       "width": 1400
     },
     {
       "name": "close",
-      "lng": [16.5, 19.5],
-      "lat": [58.6, 60.2],
+      "lng": [
+        16.5,
+        19.5
+      ],
+      "lat": [
+        58.6,
+        60.2
+      ],
       "width": 1200
     }
   ]
