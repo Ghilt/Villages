@@ -95,6 +95,22 @@ months, the application layer turns it into a world-day with the calendar, and t
 day. That is the same seam the world clock uses, and it means the domain still knows nothing about what a
 month is.
 
+Increment 5c landed: a pledge gives itself back. One wake-up per pledge, at the instant the world reaches
+the day it was pledged until, and nothing at all while a house has no pledges - decision 0006's "events on
+change, never on a clock" applied to something that is not a rate.
+
+Two things were learnt writing it. **`plusMonths` and `monthsBetween` are not exact inverses**: a month
+added to the thirty-first of January lands on the twenty-eighth of February, which is not a whole month
+later. An independently generated fixture caught that, against my own wrong expectation written in a test
+name. It never bites, because the world opens on the first of a month and only ever adds whole months, so
+every day it produces is the first of a month - but it would bite the day somebody opens the world on the
+thirty-first, and the fixture now pins the case.
+
+And **the timer does not cancel**. A pledge released early still has a wake-up coming; when it arrives the
+decider refuses it and the refusal is swallowed, which is what `Arrival` already does for a question the
+world has moved past. Keeping a cancellation table in step with the stream would be more machinery and one
+more thing to be wrong.
+
 ## Result
 
 Open.

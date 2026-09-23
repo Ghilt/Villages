@@ -146,5 +146,55 @@
       "to": 694383,
       "said": "the twenty-eighth of February, year 1902"
     }
+  ],
+  "betweens": [
+    {
+      "name": "the same day is no months at all",
+      "from": 653419,
+      "to": 653419,
+      "months": 0
+    },
+    {
+      "name": "one whole month",
+      "from": 653419,
+      "to": 653450,
+      "months": 1
+    },
+    {
+      "name": "a day short of a month is no months",
+      "from": 653419,
+      "to": 653449,
+      "months": 0
+    },
+    {
+      "name": "a month short of a day, where the month was pulled back, is still not whole",
+      "from": 653449,
+      "to": 653477,
+      "months": 0
+    },
+    {
+      "name": "a month pulled back to the end of a shorter month is not a whole month back, so plusMonths and this are not exact inverses",
+      "from": 653508,
+      "to": 653538,
+      "months": 0
+    },
+    {
+      "name": "ten months, which is the span a pledge is asked for in",
+      "from": 653492,
+      "to": 653798,
+      "months": 10
+    },
+    {
+      "name": "a year and a half",
+      "from": 653419,
+      "to": 653965,
+      "months": 18
+    },
+    {
+      "name": "the world's whole span so far",
+      "from": 653419,
+      "to": 654362,
+      "months": 31
+    }
   ]
 }

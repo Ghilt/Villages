@@ -1,6 +1,7 @@
 package villages.protocol
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.assertions.withClue
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.property.Arb
@@ -39,6 +40,18 @@ class CalendarSpec : StringSpec({
             val landed = Calendar.plusMonths(span["from"].asLong(), span["months"].asLong())
             landed shouldBe span["to"].asLong()
             Calendar.describe(landed) shouldBe span["said"].asString()
+        }
+    }
+
+    "counts the whole months between every shared pair, and only the whole ones" {
+        val betweens = (0 until fixture["betweens"].size()).map { fixture["betweens"][it] }
+        betweens.size shouldBe 8
+
+        for (pair in betweens) {
+            withClue(pair["name"].asString()) {
+                Calendar.monthsBetween(pair["from"].asLong(), pair["to"].asLong()) shouldBe
+                    pair["months"].asLong()
+            }
         }
     }
 

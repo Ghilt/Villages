@@ -10,13 +10,22 @@ import java.time.Instant
  * held to `contracts/fixtures/calendar.json`; what is checked here is the stepping, so the fake below counts
  * a month as thirty days and nothing depends on which month it landed in.
  */
+/**
+ * Thirty days a month, which is enough for a test about stepping. What a month really is belongs to
+ * `villages.protocol.Calendar` and is held to the shared fixture there, not here.
+ */
+private val thirtyDayMonths = object : WorldCalendar {
+    override fun plusMonths(day: WorldTime, months: Long) = WorldTime(day.day + months * 30)
+
+    override fun monthsBetween(from: WorldTime, to: WorldTime) = (to.day - from.day) / 30
+}
+
 class WorldClockSpec : StringSpec({
 
     val opened = Instant.parse("2026-09-01T00:00:00Z")
 
-    val calendar = WorldCalendar { day, months -> WorldTime(day.day + months * 30) }
 
-    fun clockAt(now: Instant) = MonthlyWorldClock({ now }, calendar, opened, WorldTime(1000))
+    fun clockAt(now: Instant) = MonthlyWorldClock({ now }, thirtyDayMonths, opened, WorldTime(1000))
 
     "stands on the opening day at the instant the world opened" {
         clockAt(opened).today() shouldBe WorldTime(1000)

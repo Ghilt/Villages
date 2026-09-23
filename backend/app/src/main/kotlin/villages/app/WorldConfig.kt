@@ -6,8 +6,11 @@ import villages.application.AnonymousTokens
 import villages.application.Arrival
 import villages.application.FoundHouseService
 import villages.application.FreshIds
+import villages.application.Later
 import villages.application.MonthlyWorldClock
+import villages.application.Pledges
 import villages.application.ResourceService
+import villages.application.ScheduledLater
 import villages.application.TakeActionService
 import villages.application.WorldCalendar
 import villages.application.WorldClock
@@ -40,8 +43,10 @@ class WorldConfig {
      * The world's calendar, handed to the application layer, which may not see the protocol module itself.
      */
     @Bean
-    fun worldCalendar(): WorldCalendar = WorldCalendar { day, months ->
-        WorldTime(Calendar.plusMonths(day.day, months))
+    fun worldCalendar(): WorldCalendar = object : WorldCalendar {
+        override fun plusMonths(day: WorldTime, months: Long) = WorldTime(Calendar.plusMonths(day.day, months))
+
+        override fun monthsBetween(from: WorldTime, to: WorldTime) = Calendar.monthsBetween(from.day, to.day)
     }
 
     /**
@@ -50,7 +55,7 @@ class WorldConfig {
      * the shared world-day, and decision records 0027 and 0051.
      */
     @Bean
-    fun worldClock(clock: Clock, calendar: WorldCalendar): WorldClock = MonthlyWorldClock(
+    fun worldClock(clock: Clock, calendar: WorldCalendar): MonthlyWorldClock = MonthlyWorldClock(
         clock = { clock.instant() },
         calendar = calendar,
         opened = Instant.parse("2026-09-01T00:00:00Z"),
@@ -79,6 +84,21 @@ class WorldConfig {
         ids: FreshIds,
     ): ResourceService =
         ResourceService(world.executor, clock = { clock.instant() }, world = worldClock, calendar = calendar, ids = ids)
+
+    /** One `Later` for the whole app: the gateway coalesces with it and a pledge waits out its span on it. */
+    @Bean(destroyMethod = "close")
+    fun later(): ScheduledLater = ScheduledLater()
+
+    /** Gives a pledge back when its span is up. One wake-up a pledge, and none at all without one. */
+    @Bean(destroyMethod = "close")
+    fun pledges(
+        world: InMemoryWorld,
+        later: ScheduledLater,
+        resources: ResourceService,
+        worldClock: MonthlyWorldClock,
+        clock: Clock,
+        ids: FreshIds,
+    ): Pledges = Pledges(world.feed, later, resources, worldClock, clock = { clock.instant() }, ids = ids)
 
     @Bean
     fun takeAction(world: InMemoryWorld, clock: Clock, worldClock: WorldClock): TakeActionService =

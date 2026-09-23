@@ -15,11 +15,13 @@ import villages.application.Arrival
 import villages.application.EventFeed
 import villages.application.FoundHouseService
 import villages.application.HouseCommandExecutor
+import villages.application.Later
 import villages.application.Provenance
 import villages.application.ResourceService
 import villages.application.Start
 import villages.application.StoredEvent
 import villages.application.TakeActionService
+import villages.application.WorldCalendar
 import villages.application.WorldClock
 import villages.application.WriteConflict
 import villages.domain.Effect
@@ -133,6 +135,16 @@ private class TinyWorld : HouseCommandExecutor, EventFeed {
 }
 
 /** Later is whenever the test says. */
+/**
+ * Thirty days a month, which is enough for a test about stepping. What a month really is belongs to
+ * `villages.protocol.Calendar` and is held to the shared fixture there, not here.
+ */
+private val thirtyDayMonths = object : WorldCalendar {
+    override fun plusMonths(day: WorldTime, months: Long) = WorldTime(day.day + months * 30)
+
+    override fun monthsBetween(from: WorldTime, to: WorldTime) = (to.day - from.day) / 30
+}
+
 private class ManualLater : Later {
     private val planned = mutableListOf<Runnable>()
 
@@ -229,9 +241,7 @@ private class Rig {
             world,
             clock = { noon },
             world = worldClock,
-            // Thirty days a month is enough here: what a month is belongs to the calendar and is held to
-            // the shared fixture there, not in a gateway test.
-            calendar = { day, months -> WorldTime(day.day + months * 30) },
+            calendar = thirtyDayMonths,
             ids = { UUID.fromString("b1000000-0000-4000-8000-%012x".format(++minted)) },
         ),
         choices = choices,

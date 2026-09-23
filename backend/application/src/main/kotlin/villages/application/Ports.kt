@@ -75,8 +75,48 @@ fun interface WorldClock {
  * layer may not see, because the application layer depends on the domain and on nothing else. So it crosses
  * as a port like everything else does. See decision record 0051.
  */
-fun interface WorldCalendar {
+interface WorldCalendar {
     fun plusMonths(day: WorldTime, months: Long): WorldTime
+
+    /** Whole months from one day to another, counting only the completed ones. */
+    fun monthsBetween(from: WorldTime, to: WorldTime): Long
+}
+
+/**
+ * When the world will reach a day, by the clock on the wall.
+ *
+ * The inverse of the world clock, and what anything waiting for a world-day needs: a pledge that comes
+ * back in ten months has to be woken at some real instant, and only the clock knows which. Separate from
+ * `WorldClock` so that that one stays a single method a test can hand over as a lambda.
+ */
+fun interface WorldSchedule {
+    fun whenIsDay(day: WorldTime): Instant
+}
+
+/**
+ * Something to be done later, once: a delay and an action.
+ *
+ * Owned here because two things need it and neither owns the other - the gateway coalesces its deltas
+ * with it, and a pledge waits out its span with it. There is no cancelling: whatever is scheduled runs,
+ * and a caller whose reason for running has gone away is expected to find that out and do nothing.
+ */
+fun interface Later {
+    fun schedule(delayMs: Long, action: Runnable)
+}
+
+/** A `Later` on a timer thread. One thread, because nothing here is heavy and order does not matter. */
+class ScheduledLater : Later, AutoCloseable {
+    private val timer = java.util.concurrent.Executors.newSingleThreadScheduledExecutor { runnable ->
+        Thread(runnable, "villages-later").apply { isDaemon = true }
+    }
+
+    override fun schedule(delayMs: Long, action: Runnable) {
+        timer.schedule(action, delayMs.coerceAtLeast(0), java.util.concurrent.TimeUnit.MILLISECONDS)
+    }
+
+    override fun close() {
+        timer.shutdownNow()
+    }
 }
 
 /**
@@ -95,11 +135,21 @@ class MonthlyWorldClock(
     private val opened: Instant,
     /** The world-day it was on when it opened. */
     private val openingDay: WorldTime,
-) : WorldClock {
+) : WorldClock, WorldSchedule {
     override fun today(): WorldTime {
         val realDays = java.time.Duration.between(opened, clock.now()).toDays()
         return calendar.plusMonths(openingDay, realDays.coerceAtLeast(0))
     }
+
+    /**
+     * Read backwards: a month of the world's is a real day, so the world reaches a day as many real days
+     * after it opened as there are whole months between.
+     *
+     * Exact as long as the world opens on the first of a month, because then every day it produces is the
+     * first of a month and no day-of-month is ever clamped. See the note on `Calendar.monthsBetween`.
+     */
+    override fun whenIsDay(day: WorldTime): Instant =
+        opened.plus(java.time.Duration.ofDays(calendar.monthsBetween(openingDay, day).coerceAtLeast(0)))
 }
 
 /** Who a token belongs to. Anonymous browser tokens for now; accounts replace this without moving anything. */

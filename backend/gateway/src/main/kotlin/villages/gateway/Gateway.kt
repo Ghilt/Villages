@@ -10,7 +10,9 @@ import villages.application.HouseRow
 import villages.application.HousesByCell
 import villages.application.HousesByPlayer
 import villages.application.PlayerTokens
+import villages.application.Later
 import villages.application.Provenance
+import villages.application.ScheduledLater
 import villages.application.RecentEvents
 import villages.application.ResourceService
 import villages.application.Start
@@ -85,32 +87,10 @@ import villages.protocol.YourHouseView
 import villages.protocol.coarsestZoom
 import java.time.Clock
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 /** What the gateway needs to send a frame to a connection. The transport is Spring's; this is not. */
 fun interface Outbound {
     fun send(frame: ServerFrame)
-}
-
-/** Runs something a little later. Injected, so a test decides when later is. */
-fun interface Later {
-    fun schedule(delayMs: Long, action: Runnable)
-}
-
-/** Later on one daemon thread, which is all the coalescing of a whole process needs. */
-class ScheduledLater : Later, AutoCloseable {
-    private val thread = Executors.newSingleThreadScheduledExecutor { runnable ->
-        Thread(runnable, "gateway-coalesce").apply { isDaemon = true }
-    }
-
-    override fun schedule(delayMs: Long, action: Runnable) {
-        thread.schedule(action, delayMs, TimeUnit.MILLISECONDS)
-    }
-
-    override fun close() {
-        thread.shutdownNow()
-    }
 }
 
 /** Cells one connection may hold at once. A screen is a dozen or so; this is room to look ahead, not to hoard. */

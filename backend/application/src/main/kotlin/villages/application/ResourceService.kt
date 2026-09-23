@@ -75,9 +75,16 @@ class ResourceService(
     }
 
     fun release(player: PlayerId, pledgeId: PledgeId, provenance: Provenance) {
-        executor.execute(
-            ReleasePledge(HouseId.of(player), pledgeId, world.today(), clock.now()),
-            provenance,
-        )
+        releaseHeldBy(HouseId.of(player), pledgeId, provenance)
+    }
+
+    /**
+     * Release a pledge of a house, named by the house rather than by a player.
+     *
+     * What the world does of its own accord goes through here: a pledge whose span has run out is
+     * released by the clock and not by anybody, and the clock knows which house from the event.
+     */
+    fun releaseHeldBy(houseId: HouseId, pledgeId: PledgeId, provenance: Provenance) {
+        executor.execute(ReleasePledge(houseId, pledgeId, world.today(), clock.now()), provenance)
     }
 }
