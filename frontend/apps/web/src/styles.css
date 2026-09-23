@@ -108,8 +108,22 @@ body,
   inset: 0;
   overflow: hidden;
   pointer-events: none;
+}
+
+/*
+ * The desk itself, with edges, because pulled back far enough it stands in a room and a surface with no
+ * end would be a backdrop. Sized and placed from the sheet by `deskTop.ts`; off the screen on every side
+ * with the sheet anywhere near the middle, so the floor looks as it always did.
+ */
+.desk__top {
+  position: absolute;
+  left: 0;
+  top: 0;
   background-color: #5c3f28;
   background-repeat: repeat;
+  box-shadow:
+    0 6px 14px rgba(0, 0, 0, 0.4),
+    0 28px 70px rgba(0, 0, 0, 0.5);
 }
 
 /* The sheet under the transparent canvas, with a shadow so the map reads as lying on the surface. */
@@ -120,6 +134,45 @@ body,
   box-shadow:
     0 1px 2px rgba(0, 0, 0, 0.3),
     0 12px 32px rgba(0, 0, 0, 0.35);
+}
+
+/*
+ * The room the desk stands in, reached by pulling back past the end of the map's zoom. Not a zoom: the
+ * camera is pinned and this is a scale on what is already drawn. See experiment 0009.
+ */
+.room {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+/* Everything that lies on the desk, and the room's floor behind it. The scale is taken about the middle. */
+.room__scene {
+  position: absolute;
+  inset: 0;
+}
+
+/* The room's floor, behind the desk and the map, shrinking away from the window as the pull grows. */
+.room__walls {
+  position: absolute;
+  left: 0;
+  top: 0;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+/*
+ * The one thing ever drawn in front of the map: the room coming in through the ceiling, and the room
+ * getting out of the way once the camera has jumped underneath it.
+ */
+.room__still {
+  position: absolute;
+  left: 0;
+  top: 0;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  pointer-events: none;
 }
 
 .map {

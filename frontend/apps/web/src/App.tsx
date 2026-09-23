@@ -26,6 +26,7 @@ import { StoodDown } from './net/StoodDown';
 import { flyWith } from './map/focus';
 import { MapStrip } from './map/MapStrip';
 import { MapView } from './map/MapView';
+import { Room } from './room/Room';
 import { terrainPalette } from './map/terrainClasses';
 import { Stage } from './stage/Stage';
 import { formNow, roomToRead, takeOver, theMapsBay } from './stage/bays';
@@ -248,9 +249,14 @@ export function App({ master }: AppProps) {
           if (id === MAP_PANE.id) {
             return (
               <>
-                <Desk map={map} />
-                <MapView worldRoot={worldRoot} onReady={setMap} />
-                {map !== null && <SpriteOverlay map={map} sprites={sprites} worldRoot={worldRoot} />}
+                {/* The map, the desk it lies on and the room the desk stands in, which is the one thing
+                    that can scale them all together once the camera has run out of zoom. The overlays
+                    below draw nothing of their own and stay outside it. See experiment 0009. */}
+                <Room map={map} seat={yours?.seat ?? null} strip={along !== null && room.size === 'strip'}>
+                  <Desk map={map} />
+                  <MapView worldRoot={worldRoot} onReady={setMap} />
+                  {map !== null && <SpriteOverlay map={map} sprites={sprites} worldRoot={worldRoot} />}
+                </Room>
                 <AreaOverlay map={map} worldRoot={worldRoot} />
                 <HoldingOverlay map={map} houses={drawn} mine={eye ? yours : null} />
                 {/* Put away, and still running underneath: a lid over the map, never instead of it. The

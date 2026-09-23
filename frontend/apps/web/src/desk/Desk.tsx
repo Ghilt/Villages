@@ -4,6 +4,7 @@ import type * as maplibregl from 'maplibre-gl';
 import { sheetCoversView, sheetOnScreen } from '../map/sheet';
 import { SEA } from '../map/worldStyle';
 
+import { deskOnScreen } from './deskTop';
 import { deskGrain } from './deskTexture';
 
 interface DeskProps {
@@ -21,15 +22,23 @@ const GRAINS_ACROSS_THE_SHEET = 4;
  * sheet and its shadow never part from the tiles. The sheet element sits under the transparent canvas in
  * the sea's colour, so the half pixel between MapLibre's tiles and this edge never shows as a hairline.
  * See docs/adr/0033.
+ *
+ * The desk has edges now, because something can see past them: pulled back further still it stands in a
+ * room, and a surface with no end would have been a backdrop rather than a thing. They are off the screen
+ * with the sheet anywhere near the middle, so nothing about the floor has changed; shove the sheet hard
+ * against one side of the window and the far edge comes into view, which is the desk being an object.
+ * See `deskTop.ts` and experiment 0009.
  */
 export function Desk({ map }: DeskProps) {
   const deskRef = useRef<HTMLDivElement | null>(null);
+  const topRef = useRef<HTMLDivElement | null>(null);
   const sheetRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const desk = deskRef.current;
+    const top = topRef.current;
     const sheet = sheetRef.current;
-    if (map === null || desk === null || sheet === null) {
+    if (map === null || desk === null || top === null || sheet === null) {
       return;
     }
 
@@ -47,8 +56,12 @@ export function Desk({ map }: DeskProps) {
       if (covered) {
         return;
       }
-      desk.style.backgroundSize = `${lying.size / GRAINS_ACROSS_THE_SHEET}px`;
-      desk.style.backgroundPosition = `${lying.left}px ${lying.top}px`;
+      const standing = deskOnScreen(lying, viewport);
+      top.style.transform = `translate(${standing.left}px, ${standing.top}px)`;
+      top.style.width = `${standing.width}px`;
+      top.style.height = `${standing.height}px`;
+      top.style.backgroundSize = `${lying.size / GRAINS_ACROSS_THE_SHEET}px`;
+      top.style.backgroundPosition = `${lying.left - standing.left}px ${lying.top - standing.top}px`;
       sheet.style.transform = `translate(${lying.left}px, ${lying.top}px)`;
       sheet.style.width = `${lying.size}px`;
       sheet.style.height = `${lying.size}px`;
@@ -64,7 +77,8 @@ export function Desk({ map }: DeskProps) {
   }, [map]);
 
   return (
-    <div className="desk" ref={deskRef} hidden style={{ backgroundImage: deskGrain }}>
+    <div className="desk" ref={deskRef} hidden>
+      <div className="desk__top" ref={topRef} style={{ backgroundImage: deskGrain }} />
       <div className="desk__sheet" ref={sheetRef} style={{ background: SEA }} />
     </div>
   );

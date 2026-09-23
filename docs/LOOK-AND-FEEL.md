@@ -129,6 +129,12 @@ like the seat a choice is offering.
 of, and a thing changing form crosses over rather than swapping. All of it is a fifth of a second or
 less, so it reads as the world settling rather than as an animation. See decision record 0051.
 
+The one thing longer than that is the **dive**, which is not a thing on the map settling but a passage
+between two places: the camera holds still over your own castle and the whole picture is scaled up into
+the sprite's own pixels until the room inside them is the window. It takes a second and three quarters and
+it runs on a rail, so the wheel has nothing to say while it is happening. Whether an interface whose rule
+is that nothing pops is allowed one thing that takes over is part of what experiment 0009 is asking.
+
 **The marks.** Every pane declares the mark it is known by, drawn in one place so that the same thing on a
 tab, in a list and wherever a pane is named later cannot drift apart. **The compass is the needle inside a
 ring**, deliberately: the needle says which bay a thing goes to and the compass opens the pane that lists
@@ -142,4 +148,7 @@ decision record 0049.
 - The exact colours, the type, the grain of the desk, and whether the map's own look leads the rest of the
   interface or stands apart from it. Two forms settles one corner of this: what stands in the world is
   drawn by distance, which is the map's rule and not the interface's.
+- What the **room** the desk stands in is made of, and whether it is a place with anything in it or only
+  the far end of a zoom. It is simple shapes today, deliberately, so that the motion of pulling back into
+  it can be judged before anything is drawn properly. See experiment 0009.
 - Whether the parchment survives contact with a second mechanic, or turns out to be the choice roll's own.
