@@ -67,6 +67,14 @@ rather than as a button laid on top of one. A thumb across, which is what a **st
 same thumb. Whatever is under it steps clear, so nothing the player needs is ever beneath it. See decision
 records 0043 and 0047.
 
+**The resource marks.** Five glyphs, one per resource, drawn stroked at the same weight as every other
+mark in the interface and coloured `--ink-soft`: a coin for wealth, a ridge of land for domain, two rings
+that overlap for influence, a pair of dividers for reason, and a cross for piety. **Each is a different
+silhouette before it is a different picture**, because five of them have to be told apart at about
+seventeen pixels: a ring, a jagged line, a wide double, a triangle with a dot over it, and a cross. The
+word each one stands for is on its label rather than beside it, until it is learnt. Drawn in the house card
+rather than in `Icons.tsx`, which is the marks a **pane** is known by. See `MECHANICS.md` on house status.
+
 **The pane size control.** Three marks in a pane's corner saying how much of the stage it is taking: put
 away, the normal size, opened out. The mark is **how much of a box is filled**, which is the thing being
 chosen rather than a metaphor for it - no folder, no chevron, no arrow pointing anywhere. Every **pane**
