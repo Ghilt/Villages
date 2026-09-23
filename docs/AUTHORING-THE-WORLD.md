@@ -44,7 +44,7 @@ changes how the world looks without touching what it is.
 How it is drawn is two more files, and neither of them is this one. `world/render.json` is the colour each
 class wears on the map. `world/painterly.json` is what the paint does to that colour: how a boundary
 frays, how pigment gathers along an edge, what mark each kind of ground is drawn with, the grain of the
-paper. `npm run world:paint --prefix frontend` shows the result, every view painted and flat side by side.
+paper, and where a group's mark gives way to the scenery standing on it - its `handOver`. `npm run world:paint --prefix frontend` shows the result, every view painted and flat side by side.
 Editing either changes how the world looks without touching what it is, and neither needs the master
 rebuilt.
 

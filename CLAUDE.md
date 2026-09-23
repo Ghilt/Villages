@@ -336,7 +336,11 @@ Commands are added here as the increments land:
   both stale. The panel also watches `world/biomes.json`'s own mtime, because tuning a look makes every
   sprite map stale without touching a master. See `docs/adr/0053` and
   `docs/plans/biome-sprite-map.md`.
-- The styles live in `world/painterly.json`. `npm run world:paint --prefix frontend` paints every view in
+- The styles live in `world/painterly.json`. A group in one may carry a `handOver`, which is where its
+  treatment gives way to the scenery standing on the same ground: whole far out, mostly gone by the zoom
+  the trees are all in, keeping a third of itself so a wood is not bare between them. It is the far end
+  of 0051's handoff, named as unfinished in 0006 and 0052 and done in 0053.
+  `npm run world:paint --prefix frontend` paints every view in
   every style into `world/painterly/`, flat once and then once per style, and writes the runtime copy the
   app reads. `-- --view alps`, `-- --style woodblock` for one of them; `-- --config-only` writes just the
   runtime copy, in a second, which is all the app needs after a style edit.

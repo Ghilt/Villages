@@ -72,6 +72,12 @@ pixels in brush space, so it does not resolve into anything. Fading the group's 
 same band the scenery fades in is one number through `preparePainterly` and is the next step, not a
 change of mind.
 
+> **Paid, 2026-09-23.** A group in `world/painterly.json` may now carry a `handOver`, and the forest and
+> open groups of every painted style do: the treatment stands whole far out, gives way as the scenery
+> arrives, and keeps a third of itself so that a wood is not bare between its trees. It is measured in
+> `masterPerPixel`, which is the one thing the paint is ever told about the view. See decision record
+> 0053 and experiment 0007.
+
 Three kinds of the ten are drawn, and drawn crudely. **What this record settles is how scenery is
 worked out, not what it looks like or how much of it there should be.** Those are the
 **world-generator**'s, in `docs/plans/world-generator.md`, and the measurements behind them are in

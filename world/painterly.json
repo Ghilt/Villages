@@ -43,12 +43,22 @@
         "forest": {
           "treatment": "stipple",
           "mark": 3.2,
-          "amount": 0.11
+          "amount": 0.11,
+          "handOver": {
+            "from": 0.8,
+            "to": 0.15,
+            "keep": 0.3
+          }
         },
         "open": {
           "treatment": "speckle",
           "mark": 2.6,
-          "amount": 0.055
+          "amount": 0.055,
+          "handOver": {
+            "from": 0.8,
+            "to": 0.15,
+            "keep": 0.3
+          }
         },
         "farmed": {
           "treatment": "patchwork",
@@ -188,12 +198,22 @@
         "forest": {
           "treatment": "stipple",
           "mark": 6,
-          "amount": 0.22
+          "amount": 0.22,
+          "handOver": {
+            "from": 0.8,
+            "to": 0.15,
+            "keep": 0.3
+          }
         },
         "open": {
           "treatment": "speckle",
           "mark": 5,
-          "amount": 0.1
+          "amount": 0.1,
+          "handOver": {
+            "from": 0.8,
+            "to": 0.15,
+            "keep": 0.3
+          }
         },
         "farmed": {
           "treatment": "patchwork",
@@ -333,12 +353,22 @@
         "forest": {
           "treatment": "stipple",
           "mark": 3.2,
-          "amount": 0.11
+          "amount": 0.11,
+          "handOver": {
+            "from": 0.8,
+            "to": 0.15,
+            "keep": 0.3
+          }
         },
         "open": {
           "treatment": "speckle",
           "mark": 2.6,
-          "amount": 0.055
+          "amount": 0.055,
+          "handOver": {
+            "from": 0.8,
+            "to": 0.15,
+            "keep": 0.3
+          }
         },
         "farmed": {
           "treatment": "patchwork",
@@ -442,38 +472,74 @@
   "views": [
     {
       "name": "world",
-      "lng": [-180, 180],
-      "lat": [-85.05, 85.05],
+      "lng": [
+        -180,
+        180
+      ],
+      "lat": [
+        -85.05,
+        85.05
+      ],
       "width": 2048
     },
     {
       "name": "scandinavia",
-      "lng": [5, 32],
-      "lat": [54, 71],
+      "lng": [
+        5,
+        32
+      ],
+      "lat": [
+        54,
+        71
+      ],
       "width": 1400
     },
     {
       "name": "sahara-shore",
-      "lng": [-18, 12],
-      "lat": [18, 36],
+      "lng": [
+        -18,
+        12
+      ],
+      "lat": [
+        18,
+        36
+      ],
       "width": 1400
     },
     {
       "name": "alps",
-      "lng": [4, 18],
-      "lat": [43, 49],
+      "lng": [
+        4,
+        18
+      ],
+      "lat": [
+        43,
+        49
+      ],
       "width": 1400
     },
     {
       "name": "islands",
-      "lng": [95, 130],
-      "lat": [-11, 8],
+      "lng": [
+        95,
+        130
+      ],
+      "lat": [
+        -11,
+        8
+      ],
       "width": 1400
     },
     {
       "name": "close",
-      "lng": [16.5, 19.5],
-      "lat": [58.6, 60.2],
+      "lng": [
+        16.5,
+        19.5
+      ],
+      "lat": [
+        58.6,
+        60.2
+      ],
       "width": 1200
     }
   ]

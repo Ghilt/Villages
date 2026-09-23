@@ -162,6 +162,6 @@ own readings.
 - ~~A `biome` renderer~~ and ~~a generate button~~: both built, and both immediately found a fault.
 - **Offline stills**, so a change to the generator can be argued from a picture rather than from a
   running browser. The painterly views already exist to reuse.
-- **The far end of the handoff**, still: 0051 says the painted terrain is scenery's far-out form and it
-  is not, because the canopy treatment is a constant 3.2 screen pixels in brush space. Named in 0052,
-  named in 0006, and still one number through `preparePainterly`.
+- ~~**The far end of the handoff**~~, done 2026-09-23: a group in `world/painterly.json` carries a
+  `handOver`, and the forest and open groups of every painted style give way as the scenery arrives,
+  keeping a third of themselves. Named as unfinished in 0006, in 0052 and here.

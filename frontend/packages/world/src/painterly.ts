@@ -133,6 +133,26 @@ export function treatment(kind: TreatmentKind, x: number, y: number, seed: numbe
 /** The class of the terrain at a position in world space. Nearest, always: classes do not average. */
 export type ClassSampler = (x: number, y: number) => number;
 
+/**
+ * Where a group's treatment gives way to the scenery standing on it.
+ *
+ * Decision record 0051 says the painted terrain is scenery's far-out form, and until this it was not: a
+ * canopy stipple is a constant few pixels of brush space, so it looked exactly the same at the zoom
+ * trees arrived as it had five zooms out, and it resolved into nothing. Named as unfinished in 0052, in
+ * experiment 0006 and again in 0007.
+ *
+ * Measured in `masterPerPixel`, which is how much world one output pixel covers - the one thing the
+ * paint is ever told about the view. Larger is further out. So the treatment is whole at `from`, gone by
+ * `to`, and `keep` is how much of it survives at the close end, because a wood with its trees drawn and
+ * nothing at all between them reads as bare rather than as a wood.
+ */
+export interface HandOver {
+  from: number;
+  to: number;
+  /** A fraction of the group's own amount, nought to one. Nought means the treatment goes entirely. */
+  keep?: number;
+}
+
 /** How one group of terrain is drawn. The eight groups are the palette's own. */
 export interface GroupStyle {
   treatment: TreatmentKind;
@@ -144,6 +164,8 @@ export interface GroupStyle {
   angle?: number;
   /** How much of the global wash this group takes, one being all of it. Water wants far less. */
   wash?: number;
+  /** Where this group's treatment hands over to the scenery. Left out, it never does. */
+  handOver?: HandOver;
 }
 
 /** The style, as it is written in `world/painterly.json`. */
@@ -192,6 +214,7 @@ interface PreparedClass {
   sin: number;
   seed: number;
   water: boolean;
+  handOver: HandOver | null;
 }
 
 export interface PreparedPainterly {
@@ -300,6 +323,21 @@ const NEIGHBOURS: readonly (readonly [number, number])[] = [
 const REACH_FLOOR = 0.35;
 
 /**
+ * How much of a group's treatment is still standing at this distance, nought to one.
+ *
+ * One wherever a group never hands over, which is every group in every style until somebody writes a
+ * `handOver` into it - so this costs nothing and changes nothing by default.
+ */
+function standing(here: { handOver: HandOver | null }, masterPerPixel: number): number {
+  const hand = here.handOver;
+  if (hand === null) {
+    return 1;
+  }
+  const keep = hand.keep ?? 0;
+  return keep + (1 - keep) * smoothstep(hand.to, hand.from, masterPerPixel);
+}
+
+/**
  * The colour of one pixel of the world.
  *
  * Everything the treatment does happens here, in this order: the boundary wanders, the class is read at
@@ -360,7 +398,10 @@ export function paintPixel(
 
   const alongX = (brushX * here.cos + brushY * here.sin) / here.mark;
   const alongY = (brushY * here.cos - brushX * here.sin) / here.mark;
-  const mark = treatment(here.treatment, alongX, alongY, here.seed) * here.amount;
+  // Far out the treatment is whole; coming in it gives way to the scenery that stands on the same
+  // ground, down to whatever `keep` leaves so that a wood is not bare between its trees.
+  const mark =
+    treatment(here.treatment, alongX, alongY, here.seed) * here.amount * standing(here, masterPerPixel);
 
   const grain = (fbm(brushX / paper.mark, brushY / paper.mark, 5077, 2) - 0.5) * paper.grain;
   const fibre =
@@ -428,6 +469,22 @@ export function painterlyProblems(
       problems.push(`the ${group} mark must be a positive number of pixels`);
     }
   }
+
+  for (const [group, style_] of Object.entries(style.groups)) {
+    const hand = style_.handOver;
+    if (hand === undefined) {
+      continue;
+    }
+    // Written the wrong way round it would hand over backwards - the treatment arriving as the trees
+    // did - which is a look nobody would ask for and a bug nothing else would catch.
+    if (!(hand.from > hand.to)) {
+      problems.push(`${group} hands over from ${hand.from} to ${hand.to}, which is not further to nearer`);
+    }
+    if (hand.keep !== undefined && (hand.keep < 0 || hand.keep > 1)) {
+      problems.push(`${group} keeps ${hand.keep} of its treatment, which is not a fraction`);
+    }
+  }
+
   return problems;
 }
 
@@ -463,6 +520,7 @@ export function preparePainterly(
       treatment: treatmentOf.treatment,
       mark: treatmentOf.mark,
       amount: treatmentOf.amount,
+      handOver: treatmentOf.handOver ?? null,
       cos: Math.cos(angle),
       sin: Math.sin(angle),
       seed: seedOf(group),

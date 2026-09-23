@@ -100,6 +100,13 @@ a sprite map also goes stale when `world/biomes.json` is saved and no master has
 is what tuning a look is, over and over. That second staleness is the one worth watching, and the panel
 watches the file's own mtime for it.
 
+**The paint now gives way to what stands on it.** 0051 says the painted terrain is scenery's far-out
+form, and it was not: a canopy stipple is a constant few pixels of brush space, so it looked the same at
+the zoom trees arrived as it had five zooms out. A group in `world/painterly.json` may carry a
+`handOver` - two distances in `masterPerPixel` and how much of itself to keep - and the forest and open
+groups of every painted style do. The `close` still moves by fifteen per cent of its pixels, worst by
+fifteen of 255: quiet, which is what a handoff should be.
+
 **Reviewing a biome needs its own renderer**, because a biome is invisible under the scenery standing on
 it. `Biome` in the Debug map dropdown lays the raster on the world flat, through no painter and no
 worker: the raster is already a Mercator square of the whole world, so MapLibre places it on the world's
