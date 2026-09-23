@@ -41,9 +41,6 @@ memory until it exists, which is why nothing survives a restart.
 
 Wanted, not started, and each needs a hypothesis in `docs/experiments/` before any code.
 
-- **A resource system.** A set of different things that model and simulate the world around the house.
-  Interaction between player and world, and player and player, needs to feel consistent. Tangibility comes
-  from the shared map. This is also what a **choice roll** is meant to cost, so the two are entangled.
 - **The fate engine**, and the choice roll built on it: a real roll from the house's state rather than a
   founding choice handed out on arrival. See `MECHANICS.md` and `ARCHITECTURE.md`.
 - **Character dialogue**: people talking to each other, and the mechanic storylines are carried in. See
@@ -72,8 +69,14 @@ Wanted, not started, and each needs a hypothesis in `docs/experiments/` before a
 - **The inspect window**, beyond a house and an area: what it says about a subject once there is more than
   a name and a treasury to say, where its links come from, and whether it is a card or a paper on the desk.
   See `MECHANICS.md`.
-- **The house status**, beyond one number. It is waiting on the resource system more than on anything else,
-  and on somebody naming the second of the five empty places in its bar. See `MECHANICS.md`.
+- **Something for a resource to be for.** The five exist and can be granted, spent, pledged and gated, and
+  nothing in the game does any of it: no mechanic gives a house wealth, no rule asks whether it has enough
+  domain, and a pledge is tied to a purpose in free text. The engine is built and waiting on a mechanic to
+  use it; experiment 0005 is not settled until one does. This is also what a **choice roll** is meant to
+  cost, so the two are entangled.
+- **The house status**, beyond the five figures. It says what a house has now; what it does not say is
+  what is happening to it, and nobody has named the second of the five empty places in its bar. See
+  `MECHANICS.md`.
 - **House leanings**: what identity is made of, and how the world reflects it.
 - **Holdings on the map beyond the seat.**
 - **Neighbours**: awareness of nearby houses, and the first thing two houses can do to each other.
@@ -90,6 +93,8 @@ Wanted, not started, and each needs a hypothesis in `docs/experiments/` before a
 Not commitments. Nobody is waiting on any of these.
 
 - **A ticking resource.** Some resource shown as a ticking income, which is what the rate shape in decision
-  0006 exists for. It needs the resource system to mean anything first.
+  0006 exists for. The shape is on the wire and the browser knows how to count with it; every rate is zero
+  because nothing generates income. The first mechanic that gives a house an income turns this on, and it
+  is a number changing rather than a frame changing.
 - **The banner drawn** from its own tinctures and charges instead of a plain shield. A luxury feature: it
   would look good and no part of the game is waiting for it.

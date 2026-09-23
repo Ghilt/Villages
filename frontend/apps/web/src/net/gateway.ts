@@ -319,7 +319,7 @@ export function pledgeResource(
   months: number,
   purpose: string,
 ): void {
-  act(`pledging ${amount} ${resource} for ${months} months`, {
+  act(`pledging ${amount} ${resource} for ${months} ${months === 1 ? 'month' : 'months'}`, {
     type: 'pledgeResource',
     resource,
     amount,

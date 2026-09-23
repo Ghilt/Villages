@@ -13,6 +13,7 @@ import { WorktreesSection } from './WorktreesSection';
 import { atToClock, note, notesNow, watchNotes } from './log';
 import { panelIsShut, setPanelShut, stageMode, toggleShape, watchStage } from './stage';
 import { describeTerrainStep } from './terrainDepth';
+import { ResourcesSection } from './ResourcesSection';
 import { WorldSection } from './WorldSection';
 
 interface DebugPanelProps {
@@ -237,6 +238,7 @@ export function DebugPanel({ map, worldRoot, master, renderer, onRenderer }: Deb
         <AreasView map={map} worldRoot={worldRoot} />
 
         <WorldSection map={map} />
+        <ResourcesSection />
 
         <Section name="Log" tools={logTools}>
           <ol className="debug__log">

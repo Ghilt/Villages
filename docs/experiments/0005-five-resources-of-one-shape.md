@@ -128,9 +128,45 @@ means. Not done: it is a decision rather than a tidy-up.
 The honest reading is that this was a bad verification to promise. A check that takes seventeen hours and
 depends on a desktop staying awake is not a check.
 
+Increment 6 landed: five marks on the house card, and a **Resources** fold in the debug panel with give,
+take and pledge on every one of them and release on every live pledge. The whole loop is a button now.
+Pressing give moved the panel, the card and the log together; a misdirected press tried to pledge 100 piety
+against 40 and came back `rejected: notEnoughFree`, which was a better demonstration of the refusal path
+than the one I had planned.
+
 ## Result
 
-Open.
+**Confirmed for the infrastructure, and not yet tested where it matters.**
+
+One shape carried all three behaviours without a second kind of thing appearing anywhere: `freeOf` means
+the same for domain as for reason, `has` is that question asked without subtracting, and the only thing
+that distinguishes wealth is which commands anybody sends it. Nothing in the build wanted a `Spendable`
+apart from a `Bindable`.
+
+But the hypothesis was about whether a *mechanic* could be built on the shape, and no mechanic has been.
+What is confirmed is that the shape can be built and driven; what is untested is whether the first real
+rule that needs a resource finds the shape sufficient. That is why this stays open.
+
+Two things were better than expected. Deriving what is pledged from the list of pledges rather than storing
+it made the release `filterNot` and no arithmetic at all. And the marks, which were the part most likely to
+fail, failed in a way that was visible in thirty seconds of looking - dividers with a crossbar read as a
+capital A - and were fixed before anybody had to live with them.
+
+One thing was worse. **A seventeen-hour verification is not a verification.** The pledge timer's overnight
+check failed because the machine slept, and no amount of correct arithmetic in a test would have told me
+that; it took the check failing. The lesson is about what to promise in a checklist, not about the timer.
+
+## Decision
+
+**Keep.** The shape stands and the next question is what fills it. Nothing here needs reworking first.
+
+## Follow-ups
+
+- **A mechanic that uses a resource**, which is what actually tests the hypothesis. On the roadmap.
+- **Income**, which turns the rate shape from something carried to something used.
+- **The pledge timer's long wait**, which is monotonic and so is wrong after a machine sleeps. Capping the
+  wait and re-arming would fix it; it is a decision rather than a tidy-up and nothing needs it yet.
+- **The marks**, which are placeholders and say so in `MECHANICS.md`.
 
 ## Decision
 

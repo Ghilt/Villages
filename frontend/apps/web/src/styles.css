@@ -1584,6 +1584,39 @@ body,
   gap: 0.3rem;
 }
 
+/*
+ * What a house has, in the panel: a row per resource, its figure, and the levers that move it.
+ *
+ * A grid rather than a flex row, so the five figures line up under each other and the buttons after them
+ * do too. The name column takes what it needs, the figure is right-aligned against the buttons, and the
+ * buttons are whatever they are - three of them, the same width every row.
+ */
+.debug__stocks {
+  display: grid;
+  grid-template-columns: auto 1fr repeat(3, auto);
+  gap: 0.25rem 0.4rem;
+  align-items: center;
+  margin: 0.2rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.debug__stock {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-items: center;
+}
+
+.debug__stock-name {
+  color: var(--ink-soft);
+}
+
+.debug__stock-figure {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
 .debug__sectionbody {
   display: flex;
   flex-direction: column;
