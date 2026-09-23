@@ -111,6 +111,23 @@ decider refuses it and the refusal is swallowed, which is what `Arrival` already
 world has moved past. Keeping a cancellation table in step with the stream would be more machinery and one
 more thing to be wrong.
 
+**The overnight check failed, and the reason is worth keeping.** I pledged 35 reason for one month in the
+live world, due at 2026-09-23T00:00Z, and said the release would be in the events page by morning. It was
+not. The machine slept overnight - Windows logged a return from low power at 08:30 - and a `Later` delay is
+measured by `System.nanoTime()`, which on Windows does not advance across sleep. The wake-up is still
+pending, hours behind the wall clock.
+
+Nothing about the mechanism is wrong: `PledgesSpec` proves the arithmetic and the release, and a server
+that does not sleep would have fired on time. But it says a long single timer is a thin thread to hang a
+game rule on, and the mitigation already written - a replay on restart schedules an overdue pledge at once
+- cannot help while the world is in memory and dies with the process. The fix, when it is wanted, is to cap
+the wait and re-arm rather than sleep the whole span in one go; that costs a periodic wake while any pledge
+is outstanding, and nothing at all when none is, so it stays off the clock in the sense decision 0006
+means. Not done: it is a decision rather than a tidy-up.
+
+The honest reading is that this was a bad verification to promise. A check that takes seventeen hours and
+depends on a desktop staying awake is not a check.
+
 ## Result
 
 Open.
