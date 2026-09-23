@@ -124,7 +124,7 @@ writes a **sprite map** beside the tiles: a biome for every sixteen world units 
 thousand stands, five megabytes in all, in about half a minute. What grows in each biome is
 `world/biomes.json`, which is hand-edited the way `world/painterly.json` is. **A master with no sprite
 map draws no scenery at all**, which is the rule rather than a fault - so a new candidate is bare until
-this is run on it. It takes the master's name: `-- terrain2`. See `docs/adr/0053` and
+this is run on it. It takes the master's name: `-- terrain2`. See `docs/adr/0054` and
 `docs/plans/biome-sprite-map.md`.
 
 There is a button for it too, beside `cut it` in the **Debug map** panel, and `cut it` runs it as well -

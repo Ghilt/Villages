@@ -76,7 +76,7 @@ change of mind.
 > open groups of every painted style do: the treatment stands whole far out, gives way as the scenery
 > arrives, and keeps a third of itself so that a wood is not bare between its trees. It is measured in
 > `masterPerPixel`, which is the one thing the paint is ever told about the view. See decision record
-> 0053 and experiment 0007.
+> 0054 and experiment 0007.
 
 Three kinds of the ten are drawn, and drawn crudely. **What this record settles is how scenery is
 worked out, not what it looks like or how much of it there should be.** Those are the

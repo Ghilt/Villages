@@ -34,7 +34,7 @@ const TILE_UNITS = TILE;
  */
 const REMEMBER = 400;
 
-/** The layer of the sprite map the scenery is drawn from. Others will join it; see decision 0053. */
+/** The layer of the sprite map the scenery is drawn from. Others will join it; see decision 0054. */
 const LAYER = 'biome';
 
 const held = new Map<string, ScatteredPoint[]>();

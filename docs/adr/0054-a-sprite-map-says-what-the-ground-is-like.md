@@ -1,4 +1,4 @@
-# 0053. A sprite map says what the ground is like, and the scenery is still worked out from it
+# 0054. A sprite map says what the ground is like, and the scenery is still worked out from it
 
 - Status: accepted
 - Date: 2026-09-21

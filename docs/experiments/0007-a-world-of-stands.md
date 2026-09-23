@@ -54,7 +54,7 @@ whole approach is `points kept` at zoom 6.5, where 0006 measured 42,087 held to 
 **2026-09-21, the ground was measured rather than guessed.** Counting the master's own pixels and
 integrating them over the Mercator square: **159 million square world units grow anything**. At 0006's
 ceiling that is seventy million pieces of scenery, and even at a quarter of it seventeen million. That
-number is what decided the sprite map holds stands rather than stems, and it is in decision record 0053.
+number is what decided the sprite map holds stands rather than stems, and it is in decision record 0054.
 
 **2026-09-21, the generator.** Twenty-five seconds a master on Adam's machine, for all three:
 
@@ -170,7 +170,7 @@ between a carpet and a wood.
 
 ## Decision
 
-**Keep.** The mechanism is decision record 0053, which extends 0052 rather than replacing it. It adds
+**Keep.** The mechanism is decision record 0054, which extends 0052 rather than replacing it. It adds
 `Biome`, `Stand`, `Sprite map` and `Kind` to `GLOSSARY.md`, a third command to `AUTHORING-THE-WORLD.md`
 and to `debug-quick-start.ps1`, and replaces the Scenery section of the debug panel with the generator's
 own readings.

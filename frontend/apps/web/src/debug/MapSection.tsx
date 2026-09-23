@@ -25,7 +25,7 @@ interface MapSectionProps {
  * **Two errands, because they go stale together and are mended apart.** Cutting traces the coast, cuts
  * the tiles and works out the biomes, which is five minutes; furnishing does only the last of those,
  * which is half a minute and is what an edit to `world/biomes.json` needs. A master that is cut but not
- * furnished draws a bare world, and the dropdown says so. See docs/adr/0053.
+ * furnished draws a bare world, and the dropdown says so. See docs/adr/0054.
  */
 export function MapSection({ master, renderer, onRenderer }: MapSectionProps) {
   const [masters, setMasters] = useState<MasterOnDisk[]>([]);
