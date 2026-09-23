@@ -1,5 +1,7 @@
-import { dirname, resolve } from 'node:path';
+import { dirname, isAbsolute, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { DEFAULT_MASTER } from '../src/masters.ts';
 
 const here = dirname(fileURLToPath(import.meta.url));
 
@@ -25,3 +27,24 @@ export const SOURCE_DIR = resolve(REPO, 'world', 'source');
 export const OUTPUT_DIR = resolve(REPO, 'frontend', 'apps', 'web', 'public', 'world');
 /** Where a warped copy of Earth goes: raw material for a new master, never read by the game. */
 export const WARPED_DIR = resolve(REPO, 'world', 'warped');
+
+/**
+ * The master, named however is convenient.
+ *
+ * `terrain2`, `terrain2.png`, `world/master/terrain2.png` from the repository root, or an absolute path
+ * all mean the same file. npm runs a workspace script from the workspace's own directory, so a relative
+ * path typed at the repository root would otherwise resolve three levels below where it was typed - and
+ * the error for that is a missing file with a path nobody recognises.
+ */
+export function masterAt(given: string | undefined): string {
+  if (given === undefined) {
+    return resolve(MASTER_DIR, `${DEFAULT_MASTER}.png`);
+  }
+  if (isAbsolute(given)) {
+    return given;
+  }
+  if (!/[/\\]/.test(given)) {
+    return resolve(MASTER_DIR, given.endsWith('.png') ? given : `${given}.png`);
+  }
+  return resolve(REPO, given);
+}

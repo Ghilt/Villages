@@ -135,3 +135,11 @@ export type {
   PreparedPainterly,
   TreatmentKind,
 } from './painterly.ts';
+
+export { CELL, cellOf, scatterCell, thickestOf } from './scatter.ts';
+export type { ClassAt, ScatteredPoint } from './scatter.ts';
+export { biomeAt, biomesByColour } from './spriteMap.ts';
+export type { SpriteMap, SpriteMapFile } from './spriteMap.ts';
+
+/** A worked example of a biome file, for the tests of anything that reads one. See `fixture.ts`. */
+export { EXAMPLE_BIOMES, EXAMPLE_KINDS } from './fixture.ts';

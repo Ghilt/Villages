@@ -1,8 +1,10 @@
-import { hash2, pickKindIn, standsNear, thicknessAt, wanderAt } from '@villages/world';
-import type { Kind, StandChunk } from '@villages/world';
-
-import type { SpriteMap } from './spriteMap';
-import { biomeAt } from './spriteMap';
+import { wanderAt } from './biome.ts';
+import type { Kind } from './biome.ts';
+import { hash2 } from './painterly.ts';
+import { biomeAt } from './spriteMap.ts';
+import type { SpriteMap } from './spriteMap.ts';
+import { pickKindIn, standsNear, thicknessAt } from './stands.ts';
+import type { StandChunk } from './stands.ts';
 
 /**
  * Where scenery stands, worked out from the world rather than stored in it.

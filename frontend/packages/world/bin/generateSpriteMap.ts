@@ -1,6 +1,6 @@
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { deflateSync } from 'node:zlib';
-import { basename, isAbsolute, resolve } from 'node:path';
+import { basename, resolve } from 'node:path';
 
 import { PNG } from 'pngjs';
 
@@ -32,7 +32,7 @@ import {
 import type { Stand } from '../src/stands.ts';
 import { DEFAULT_MASTER, masterNameOf, worldDirOf } from '../src/masters.ts';
 
-import { BIOMES, MASTER_DIR, OUTPUT_DIR, PAINTERLY, PALETTE, REPO } from './paths.ts';
+import { BIOMES, OUTPUT_DIR, PAINTERLY, PALETTE, masterAt } from './paths.ts';
 
 /**
  * Works out what kind of place every part of the world is, and where the scenery clumps.
@@ -56,27 +56,6 @@ const flag = (name: string): string | undefined => {
 const named = args.filter(
   (value, index) => !value.startsWith('--') && args[index - 1]?.startsWith('--') !== true,
 );
-
-/**
- * The master, named however is convenient.
- *
- * `terrain2`, `terrain2.png`, `world/master/terrain2.png` from the repository root, or an absolute path
- * all mean the same file. npm runs a workspace script from the workspace's own directory, so a relative
- * path typed at the repository root would otherwise resolve three levels below where it was typed - and
- * the error for that is a missing file with a path nobody recognises.
- */
-function masterAt(given: string | undefined): string {
-  if (given === undefined) {
-    return resolve(MASTER_DIR, `${DEFAULT_MASTER}.png`);
-  }
-  if (isAbsolute(given)) {
-    return given;
-  }
-  if (!/[/\\]/.test(given)) {
-    return resolve(MASTER_DIR, given.endsWith('.png') ? given : `${given}.png`);
-  }
-  return resolve(REPO, given);
-}
 
 const masterPath = masterAt(named[0]);
 const master = masterNameOf(basename(masterPath)) ?? DEFAULT_MASTER;

@@ -133,6 +133,23 @@ sprite map goes stale: saving `world/biomes.json`, which changes every master's 
 image. The panel watches that file and says which of the two it is waiting on. To look at the biomes
 themselves rather than the scenery standing on them, pick `Biome` in the renderer dropdown.
 
+To argue about what grows rather than about where the biomes are, there is a fourth command:
+
+```
+npm run world:scenery --prefix frontend
+```
+
+It paints five places at zoom 9.6 - the zoom the scenery is actually in - and stamps every point the
+sprite map asks for onto them, writing `world/painterly/<place>-scenery.png` and printing each one's
+count, its density against experiment 0006's ceiling, and which biomes and kinds it is made of. **The
+marks are marks, not silhouettes.** The sixteen shapes are drawn in the browser and there is nothing
+offline to draw them with, so this is a plan of what stands where and how big it is, not a picture of
+the game - the game's answer is the running map. Where it beats the running map is that it is a file:
+tune `world/biomes.json`, re-run the sprite map, re-run this, and the before and after sit side by side.
+
+`-- --at 15.5,61` looks anywhere at all, `-- --view alps` at one place, `-- --zoom 10.4` closer in,
+`-- --style flat` with the paint off, and `-- terrain2` at another master.
+
 It also writes a small terrain grid the game can ask questions of, such as what a house is standing on.
 
 Two numbers in the importer decide how faithful the tracing is, and they are worth knowing about. Shapes

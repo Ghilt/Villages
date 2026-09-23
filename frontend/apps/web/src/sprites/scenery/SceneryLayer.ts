@@ -5,13 +5,11 @@ import { WORLD_MASTER_WIDTH } from '../../map/worldStyle';
 import { toMercatorExact, worldSize } from '../cameraMath';
 import type { CameraView } from '../cameraMath';
 import { LONGEST_STEP_MS, PRESENCE_MS, easeTowards, midTrade } from '../twoForms';
-import { CELL, cellOf } from './scatter';
+import { CELL, biomeAt, cellOf } from '@villages/world';
+import type { Kind, ScatteredPoint } from '@villages/world';
 import { noteDrawn, pointsOf, sceneryMap, sceneryTally } from './sceneryCells';
-import type { ScatteredPoint } from './scatter';
 import { colourFor, shapeFor } from './shapes';
 import { MOST_CUT_AT_ONCE, groupCount, groupOf, thresholdOf, wantedAt, worthDrawing } from './showing';
-import type { Kind } from '@villages/world';
-import { biomeAt } from './spriteMap';
 
 /**
  * The world's furniture, drawn as particles under the marks.

@@ -72,6 +72,9 @@ tiles go through, that same step **also**:
 - **Re-works the sprite map** if the master, `world/biomes.json` or the generator changed:
   `npm run world:sprites --prefix frontend`, half a minute a master, and it prints the density of every
   biome against experiment 0006's ceiling. Without one a master draws no scenery at all.
+- **Re-renders the scenery stills** after that, `npm run world:scenery --prefix frontend`, half a
+  minute, because a sprite map that changed and a still that did not is the stale-evidence trap in its
+  purest form. Say which places moved and by how much: the counts are printed beside every picture.
 - **Re-paints every view in every style**: `npm run world:paint --prefix frontend`. About four minutes for all of
   them, and it also writes the runtime `paint.json` the app reads. After only a style edit,
   `-- --config-only` is a second and is all the app needs.
@@ -336,6 +339,13 @@ Commands are added here as the increments land:
   both stale. The panel also watches `world/biomes.json`'s own mtime, because tuning a look makes every
   sprite map stale without touching a master. See `docs/adr/0053` and
   `docs/plans/biome-sprite-map.md`.
+- A picture of the scenery, without a browser: `npm run world:scenery --prefix frontend` paints five
+  places at the zoom the scenery is actually in and stamps every point the sprite map asks for onto
+  them, into `world/painterly/<place>-scenery.png`, half a minute for all of them. It prints each one's
+  marks, its density against the ceiling, and its biome and kind mix. **They are marks, not
+  silhouettes**: the shapes are drawn in Pixi and this is the generator's answer, not the map's. `-- --at
+  lng,lat` looks anywhere, `-- --view alps` at one of them, `-- --zoom 10.4` closer, `-- --style flat`
+  without the paint. This is what a change to `world/biomes.json` is argued from.
 - The styles live in `world/painterly.json`. A group in one may carry a `handOver`, which is where its
   treatment gives way to the scenery standing on the same ground: whole far out, mostly gone by the zoom
   the trees are all in, keeping a third of itself so a wood is not bare between them. It is the far end

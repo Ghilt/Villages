@@ -137,6 +137,26 @@ having changed - and the button would have been missing for precisely the loop i
 server now reports that file's own mtime beside the masters, the panel says which of the two went stale,
 and the button is offered whenever there is a world to furnish at all.
 
+**2026-09-23, the first stills of the scenery, and what they showed in one look.** Five places at zoom
+9.6, painted and then stamped with every point the scatter yields:
+
+| place | marks | a square unit | biomes | the mix |
+| --- | --- | --- | --- | --- |
+| scandinavia | 1,089 | 0.017 | northern-woods 40%, boreal-open 38%, boreal-dense 22% | pine 42, spruce 30, birch 16 |
+| sahara-shore | 0 | 0.000 | - | - |
+| alps | 3,674 | 0.050 | oceanic 73%, temperate 27% | grass 36, pine 22, oak 17 |
+| islands | 5,506 | 0.067 | tropical 72%, monsoon 27% | jungle 47, palm 32, scrub 20 |
+| close | 2,282 | 0.031 | northern-woods 100% | pine 44, spruce 21, grass 14 |
+
+Two things are visible that no number had said. **The tropics are lumpier than a jungle should be**: on
+uniform jungle terrain the only structure is the stands themselves, and at reach 3 to 9 units a stand is
+a hundred-pixel blob with bare ground between blobs. Everywhere else the master's own patchwork breaks
+the stands up and hides it. The lever is `outside`, which is 0.03 there against an `inside` of 0.272 -
+nine to one, the same ratio as temperate, on ground that has no clearings. **And the centre of
+`sahara-shore` grows nothing at all**, correctly: it is the middle of the Sahara. A still of it is an
+empty picture, which is the right answer to the wrong question - the shore is what that view is for and
+its centre is not on it.
+
 ## Result
 
 **Confirmed on the machine and on the numbers; the look is Adam's to judge.** The arrangement is
@@ -160,8 +180,14 @@ own readings.
 - **The look, which is the open half.** Sixteen shapes and fifteen biomes. Once tuned against Adam's
   eye: half as thick, twice as big, and lone trees made rare. `world/biomes.json` is where that goes.
 - ~~A `biome` renderer~~ and ~~a generate button~~: both built, and both immediately found a fault.
-- **Offline stills**, so a change to the generator can be argued from a picture rather than from a
-  running browser. The painterly views already exist to reuse.
+- ~~**Offline stills**~~, done 2026-09-23: `npm run world:scenery` paints a place and stamps every point
+  the scatter yields onto it. Marks rather than silhouettes, and the script says so in its own output.
+- **One definition of a pine.** The still draws a mark because the sixteen shapes are Pixi `Graphics`
+  calls and nothing offline can run them. Expressing each silhouette as path data in `packages/world`
+  would let both draw the same outline - but it would redraw all sixteen, and the look was approved as
+  it stands, so it waits for a reason better than tidiness.
+- **The tropics want more floor between their stands**, from the stills above. A number in
+  `world/biomes.json`, and therefore Adam's.
 - ~~**The far end of the handoff**~~, done 2026-09-23: a group in `world/painterly.json` carries a
   `handOver`, and the forest and open groups of every painted style give way as the scenery arrives,
   keeping a third of themselves. Named as unfinished in 0006, in 0052 and here.

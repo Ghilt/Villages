@@ -1,10 +1,10 @@
 import { TILE } from '../../map/painterlyMessages';
 import { classesOfTile, terrainPalette } from '../../map/terrainClasses';
 import type { TerrainPalette } from '../../map/terrainClasses';
-import { CELL, scatterCell } from './scatter';
-import type { ScatteredPoint } from './scatter';
+import { CELL, scatterCell } from '@villages/world';
+import type { ScatteredPoint, SpriteMap } from '@villages/world';
+
 import { spriteMap, standsHeld, standsOfTile } from './spriteMap';
-import type { SpriteMap } from './spriteMap';
 
 /**
  * The scattered points already worked out, and the terrain they were worked out from.

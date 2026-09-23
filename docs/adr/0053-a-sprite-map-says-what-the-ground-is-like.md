@@ -107,6 +107,26 @@ the zoom trees arrived as it had five zooms out. A group in `world/painterly.jso
 groups of every painted style do. The `close` still moves by fifteen per cent of its pixels, worst by
 fifteen of 255: quiet, which is what a handoff should be.
 
+**The scatter belongs to the world, not to the browser.** It was written in `apps/web` because the
+browser was the only thing that ran it, and it was pure the whole time: a point is a function of its
+grid point, its terrain class and its stands, and nothing in it has ever known what a canvas is. It now
+lives in `packages/world` beside the biome and the stands it reads, because a second thing runs it -
+`bin/renderScenery.ts` - and the one property worth protecting is that both run the *same* scatter
+rather than two that agree today. What stayed in the browser is the half that is genuinely the
+browser's: fetching a manifest, decoding a raster through a canvas, and keeping four hundred stand
+chunks against the camera.
+
+**A still of the scenery is marks, not silhouettes, and says so.** `npm run world:scenery` paints a
+place in a style and stamps every point the scatter yields onto it, sized off the kind's own
+`groundHeight` so the picture is to scale. It is deliberately not a picture of the game: the sixteen
+shapes are drawn in Pixi and there is no rasteriser offline to draw them with, and inventing a second
+set would be two definitions of a pine drifting apart. What it answers is the generator's questions -
+is it clumpy, is it too thick, is the mix right, does a wood stop where the master says it stops - and
+those are answered from a file in the repository rather than from a running browser. It takes the
+**places** from `world/painterly.json`, because choosing where to look is taste; it takes the
+**distance** itself, because scenery only exists from about zoom 9 and five of the six painterly views
+are further out than that.
+
 **Reviewing a biome needs its own renderer**, because a biome is invisible under the scenery standing on
 it. `Biome` in the Debug map dropdown lays the raster on the world flat, through no painter and no
 worker: the raster is already a Mercator square of the whole world, so MapLibre places it on the world's

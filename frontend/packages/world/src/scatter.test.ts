@@ -1,12 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
-import { NO_FAVOURITE, growingTable } from '@villages/world';
-import type { Palette, StandChunk } from '@villages/world';
-
-import { CELL, cellOf, scatterCell } from './scatter';
-import type { ScatteredPoint } from './scatter';
-import { BIOMES as biomesFile } from './fixture';
-import type { SpriteMap, SpriteMapFile } from './spriteMap';
+import { growingTable } from './biome.ts';
+import { EXAMPLE_BIOMES as biomesFile } from './fixture.ts';
+import type { Palette } from './palette.ts';
+import { CELL, cellOf, scatterCell } from './scatter.ts';
+import type { ScatteredPoint } from './scatter.ts';
+import type { SpriteMap, SpriteMapFile } from './spriteMap.ts';
+import { NO_FAVOURITE } from './stands.ts';
+import type { StandChunk } from './stands.ts';
+import { TILE_SIZE } from './tiles.ts';
 
 /** Two classes are all this needs: one that grows things and one that grows nothing. */
 const palette: Palette = {
@@ -111,6 +113,21 @@ describe('where scenery stands', () => {
     for (const point of scatterCell(10, 10, 1, allTaiga, map, NO_STANDS)) {
       expect(cellOf(point.x)).toBe(10);
       expect(cellOf(point.y)).toBe(10);
+    }
+  });
+
+  it('cuts cells that a zoom 7 tile divides exactly, so one cell wants one chunk', () => {
+    // `scatterCell` is handed one stand chunk, and both callers pick it by dividing the cell's address
+    // by the cells to a tile: the browser against what it has fetched, the still renderer against what
+    // it has read off the disk. A CELL that did not divide TILE_SIZE would put some cells across two
+    // tiles, and those cells would quietly lose the stands belonging to the other one.
+    expect(TILE_SIZE % CELL).toBe(0);
+    const perTile = TILE_SIZE / CELL;
+    for (const cell of [0, 1, perTile - 1, perTile, perTile * 3 + 2]) {
+      const tile = Math.floor(cell / perTile);
+      expect(cellOf(cell * CELL)).toBe(cell);
+      expect(cellOf(cell * CELL + CELL - 0.001)).toBe(cell);
+      expect(Math.floor((cell * CELL + CELL - 0.001) / TILE_SIZE)).toBe(tile);
     }
   });
 });
