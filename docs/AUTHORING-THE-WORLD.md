@@ -127,6 +127,12 @@ map draws no scenery at all**, which is the rule rather than a fault - so a new 
 this is run on it. It takes the master's name: `-- terrain2`. See `docs/adr/0053` and
 `docs/plans/biome-sprite-map.md`.
 
+There is a button for it too, beside `cut it` in the **Debug map** panel, and `cut it` runs it as well -
+a repaint makes the tiles and the sprite map stale together. The separate button is for the other way a
+sprite map goes stale: saving `world/biomes.json`, which changes every master's scenery and no master's
+image. The panel watches that file and says which of the two it is waiting on. To look at the biomes
+themselves rather than the scenery standing on them, pick `Biome` in the renderer dropdown.
+
 It also writes a small terrain grid the game can ask questions of, such as what a house is standing on.
 
 Two numbers in the importer decide how faithful the tracing is, and they are worth knowing about. Shapes

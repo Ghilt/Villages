@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { note } from './log';
 import { Section } from './Section';
-import { chooseMaster, cutMaster, describeMaster, isStale, listMasters } from '../map/masters';
+import { chooseMaster, cutMaster, describeMaster, furnishMaster, isStale, listMasters } from '../map/masters';
 import type { MasterOnDisk } from '../map/masters';
 import { RENDERERS } from '../map/renderers';
 
@@ -21,14 +21,23 @@ interface MapSectionProps {
  * the point is to see a Photoshop save without leaving the browser. A master nobody has cut yet cannot
  * be drawn - the browser draws map tiles, not a 32768 pixel image - so picking one offers to cut it,
  * and the commands' own output goes into the debug log below while it runs. See docs/adr/0025.
+ *
+ * **Two errands, because they go stale together and are mended apart.** Cutting traces the coast, cuts
+ * the tiles and works out the biomes, which is five minutes; furnishing does only the last of those,
+ * which is half a minute and is what an edit to `world/biomes.json` needs. A master that is cut but not
+ * furnished draws a bare world, and the dropdown says so. See docs/adr/0053.
  */
 export function MapSection({ master, renderer, onRenderer }: MapSectionProps) {
   const [masters, setMasters] = useState<MasterOnDisk[]>([]);
+  const [tunedAt, setTunedAt] = useState<number | null>(null);
   const [wanted, setWanted] = useState(master);
-  const [cutting, setCutting] = useState(false);
+  const [working, setWorking] = useState<false | 'cut' | 'furnish'>(false);
 
   const refresh = useCallback(() => {
-    void listMasters().then(setMasters);
+    void listMasters().then((answer) => {
+      setMasters(answer.masters);
+      setTunedAt(answer.tunedAt);
+    });
   }, []);
 
   // Also whenever the window is given focus, which is what coming back from an image editor looks like:
@@ -42,6 +51,11 @@ export function MapSection({ master, renderer, onRenderer }: MapSectionProps) {
   const chosen = masters.find((candidate) => candidate.name === wanted);
   const needsCutting = chosen !== undefined && (chosen.cutAt === null || isStale(chosen));
   const cutLabel = chosen?.cutAt === null ? 'cut it' : 'cut it again';
+  // Offered whenever there is a world to furnish, not only when something looks out of date. Tuning a
+  // look is running this over and over against a master nothing has touched, and a button that hid
+  // itself until the panel thought it was needed would be missing for exactly that.
+  const canFurnish = chosen !== undefined && chosen.cutAt !== null;
+  const furnishLabel = chosen?.furnishedAt === null ? 'furnish it' : 'furnish it again';
 
   const pick = (name: string): void => {
     setWanted(name);
@@ -52,19 +66,24 @@ export function MapSection({ master, renderer, onRenderer }: MapSectionProps) {
     }
   };
 
-  const cut = (): void => {
-    if (chosen === undefined || cutting) {
+  /**
+   * Runs one of the two errands, and starts the page again if it worked.
+   *
+   * The reload is not laziness. Every painter, every decoded tile and the whole sprite map are read once
+   * at startup and held, so the one way to be certain nothing is still holding the old world is to begin
+   * again - which is the same reason picking a different master reloads.
+   */
+  const run = (which: 'cut' | 'furnish'): void => {
+    if (chosen === undefined || working !== false) {
       return;
     }
-    setCutting(true);
-    void cutMaster(chosen.name).then((ready) => {
-      setCutting(false);
+    setWorking(which);
+    void (which === 'cut' ? cutMaster(chosen.name) : furnishMaster(chosen.name)).then((ready) => {
+      setWorking(false);
       refresh();
-      if (!ready) {
-        return;
+      if (ready) {
+        chooseMaster(chosen.name);
       }
-      // Either way the page has to start again: a different master to draw, or the same one cut afresh.
-      chooseMaster(chosen.name);
     });
   };
 
@@ -79,21 +98,37 @@ export function MapSection({ master, renderer, onRenderer }: MapSectionProps) {
         id="terrain"
         className="debug-map__select"
         value={wanted}
-        disabled={cutting}
+        disabled={working !== false}
         onChange={(event) => pick(event.target.value)}
       >
         {masters.length === 0 && <option value={master}>{master}</option>}
         {masters.map((candidate) => (
           <option key={candidate.name} value={candidate.name}>
             {candidate.name}
-            {candidate.cutAt === null ? ' (not cut)' : ''}
+            {candidate.cutAt === null ? ' (not cut)' : candidate.furnishedAt === null ? ' (bare)' : ''}
           </option>
         ))}
       </select>
-      <p className="debug-map__note">{describeMaster(chosen, master, cutting)}</p>
+      <p className="debug-map__note">{describeMaster(chosen, master, working, tunedAt)}</p>
       {needsCutting && (
-        <button type="button" className="debug-map__cut" onClick={cut} disabled={cutting}>
-          {cutting ? 'cutting, watch the log' : cutLabel}
+        <button
+          type="button"
+          className="debug-map__cut"
+          onClick={() => run('cut')}
+          disabled={working !== false}
+        >
+          {working === 'cut' ? 'cutting, watch the log' : cutLabel}
+        </button>
+      )}
+      {canFurnish && (
+        <button
+          type="button"
+          className="debug-map__cut"
+          onClick={() => run('furnish')}
+          disabled={working !== false}
+          title="work out the biomes and the stands again, without recutting the tiles"
+        >
+          {working === 'furnish' ? 'furnishing, watch the log' : furnishLabel}
         </button>
       )}
 

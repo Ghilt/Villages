@@ -1,5 +1,5 @@
 import { growingTable } from '@villages/world';
-import type { BoundaryRule, Growing, Kind, Palette } from '@villages/world';
+import type { BoundaryRule, Growing, Kind } from '@villages/world';
 import { NO_STANDS, decodeStands } from '@villages/world';
 import type { StandChunk } from '@villages/world';
 
@@ -101,28 +101,7 @@ async function load(tilesRoot: string, layer: string): Promise<SpriteMap | null>
   // here with the very same function it used - one definition of what a weight means, as terrainClasses
   // is one definition of what a colour means.
   const paint = await paintFile();
-  const palette: Palette = paint.palette;
-  const growing = growingTable(
-    {
-      ceiling: file.density.ceiling,
-      most: file.density.most,
-      region: {
-        coarse: { cellsX: 1, cellsY: 1, seed: 0 },
-        fine: { cellsX: 1, cellsY: 1, seed: 0 },
-        fineWeight: 0,
-      },
-      boundary: file.boundary,
-      kinds: file.kinds,
-      biomes: file.biomes.map((biome, index) => ({
-        name: biome.name,
-        colour: biome.colour,
-        where: {},
-        stands: { per1000: 0, reach: [0, 0], inside: 0, outside: biome.outside },
-        grows: file.grows[index] ?? {},
-      })),
-    },
-    palette,
-  );
+  const growing = growingTable(file.kinds, file.grows, paint.palette);
 
   return {
     file,

@@ -37,6 +37,11 @@ scenery rather than the scenery.** What is in it has a reason. What is only a te
   `world/biomes.json` that accepts all four wins, so the order in the file is the rule and the last
   entry is the catch-all. **A biome never overrides the terrain class**; it chooses which kinds grow on
   that class here and how commonly.
+- **The warmth is swayed before it is looked up.** A master row *is* a latitude, so warmth taken
+  straight off it drew every band edge as one dead straight line the full width of the world - the first
+  thing the biome renderer showed, and nothing a boundary wander at the scale of a scenery point could
+  soften. A slow noise field of a few warmth either side makes the edge wander about eighteen hundred
+  kilometres, which is what a climate boundary does.
 - **A stand is a disc of clumped scenery** — a middle, a reach, a favourite kind and a thickness. Its
   thickness falls off from the middle as `1 - t²` and **stands add together** rather than one winning,
   which is the intensity function of a Neyman-Scott cluster process and is what makes a wood lumpy. The
@@ -89,7 +94,17 @@ Three costs, knowingly.
 
 **A second thing to regenerate.** `world:import`, `world:tile` and now `world:sprites`. A master that has
 been cut but not furnished draws a bare world and says so in the panel, which is the least confusing of
-the wrong answers but is still a state that exists.
+the wrong answers but is still a state that exists. Two things reach it from the debug map: **cutting
+furnishes too**, because a repaint makes both stale, and **furnishing alone** is its own button, because
+a sprite map also goes stale when `world/biomes.json` is saved and no master has changed at all - which
+is what tuning a look is, over and over. That second staleness is the one worth watching, and the panel
+watches the file's own mtime for it.
+
+**Reviewing a biome needs its own renderer**, because a biome is invisible under the scenery standing on
+it. `Biome` in the Debug map dropdown lays the raster on the world flat, through no painter and no
+worker: the raster is already a Mercator square of the whole world, so MapLibre places it on the world's
+own corners. Deliberately nearest-neighbour and deliberately blocky - the coarseness is the thing being
+looked at.
 
 **The browser's first binary fetch.** Everything else it reads is JSON or a PNG through a canvas. A
 stand chunk is eight bytes a stand read through `arrayBuffer()`, and the encoding now has to agree in

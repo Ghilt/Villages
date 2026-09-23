@@ -26,6 +26,7 @@ export const BIOMES: BiomeFile = {
     fine: { cellsX: 216, cellsY: 108, seed: 2 },
     fineWeight: 0.35,
   },
+  sway: { amount: 6, cellsX: 48, cellsY: 24, seed: 7717 },
   boundary: { wander: 7, scale: 26, seed: 9931 },
   kinds: KINDS,
   biomes: [

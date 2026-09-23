@@ -29,6 +29,7 @@ export {
   growingTable,
   pickKind,
   regionAt,
+  swayAt,
   wanderAt,
   warmthOfLatitude,
   wetnessOfDistance,
@@ -44,6 +45,7 @@ export type {
   Kind,
   RegionField,
   StandRule,
+  SwayField,
   Where,
 } from './biome.ts';
 export { noiseAt } from './noise.ts';

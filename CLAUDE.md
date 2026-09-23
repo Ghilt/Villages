@@ -276,7 +276,9 @@ Commands are added here as the increments land:
 - The older thirteen-class path, `world:fetch` and `world:master`, is stale and says so when run. It
   refuses to overwrite a hand-painted master and writes alongside; the merge script replays hand edits. `world:build` warps Earth into raw material for
   a different starting point.
-- What it looks like: the renderer dropdown in that same panel. `Raw` is the flat
+- What it looks like: the renderer dropdown in that same panel. `Biome` is not a look and not even the
+  terrain: it lays the sprite map's own biome raster on the world, flat and blocky, which is the only way
+  to review a biome without the scenery standing on it in the way. `Raw` is the flat
   tiles as cut; the rest are painted in the browser, tile by tile, by the same functions that paint
   the stills. `Vivid` is the odd one: it draws the master's own colours out of `world/palette.json`
   rather than the quieter ones out of `world/render.json`, saturation pushed, with the whole medium
@@ -329,8 +331,11 @@ Commands are added here as the increments land:
   where the scenery clumps, and writes a **sprite map** beside the cut tiles - about five megabytes and
   half a minute a master. It takes a master's name as its first argument (`-- terrain2`). **A master
   with no sprite map draws no scenery**, which is the rule rather than a fault. The Scenery section of
-  the debug panel says what the sprite map asked for and what the browser did with it. See
-  `docs/adr/0053` and `docs/plans/biome-sprite-map.md`.
+  the debug panel says what the sprite map asked for and what the browser did with it. The **Debug map**
+  section has a `furnish it again` button beside `cut it`, and `cut it` furnishes too - a repaint makes
+  both stale. The panel also watches `world/biomes.json`'s own mtime, because tuning a look makes every
+  sprite map stale without touching a master. See `docs/adr/0053` and
+  `docs/plans/biome-sprite-map.md`.
 - The styles live in `world/painterly.json`. `npm run world:paint --prefix frontend` paints every view in
   every style into `world/painterly/`, flat once and then once per style, and writes the runtime copy the
   app reads. `-- --view alps`, `-- --style woodblock` for one of them; `-- --config-only` writes just the

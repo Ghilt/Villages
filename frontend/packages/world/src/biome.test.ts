@@ -7,6 +7,7 @@ import {
   growingTable,
   pickKind,
   regionAt,
+  swayAt,
   wanderAt,
   warmthOfLatitude,
   wetnessOfDistance,
@@ -82,6 +83,34 @@ describe('the axes', () => {
   });
 });
 
+describe('the sway that keeps a band edge from being a stripe', () => {
+  it('stays inside the amount it is given, and wraps at the antimeridian', () => {
+    for (let lng = -180; lng <= 180; lng += 3) {
+      for (let lat = -80; lat <= 80; lat += 7) {
+        expect(Math.abs(swayAt(lng, lat, real.sway))).toBeLessThanOrEqual(real.sway.amount);
+      }
+    }
+    expect(swayAt(-180, 20, real.sway)).toBeCloseTo(swayAt(180, 20, real.sway), 9);
+  });
+
+  /**
+   * The whole reason it exists. Warmth comes straight off the master row, so without a sway every band
+   * edge is one straight line the width of the world - which is the first thing the biome renderer
+   * showed. Along a line of latitude the warmth must actually move, and by enough to cross a band.
+   */
+  it('moves the warmth along a line of latitude, by enough to matter', () => {
+    const along = [];
+    for (let lng = -180; lng < 180; lng += 1.5) {
+      along.push(warmthOfLatitude(55) + swayAt(lng, 55, real.sway));
+    }
+    const spread = Math.max(...along) - Math.min(...along);
+    // A band in world/biomes.json is about fifteen warmth wide, so the edge has to be able to stray a
+    // good part of one - and not so far that two bands trade places.
+    expect(spread).toBeGreaterThan(6);
+    expect(spread).toBeLessThan(2 * real.sway.amount + 0.001);
+  });
+});
+
 describe('the wander that keeps a biome edge off the grid', () => {
   it('stays in range, and gives the same answer twice', () => {
     for (let x = 0; x < 2000; x += 37) {
@@ -135,6 +164,7 @@ describe('what grows', () => {
     ceiling: real.ceiling,
     most: real.most,
     region: real.region,
+    sway: real.sway,
     boundary: real.boundary,
     kinds: [
       { name: 'pine', groundHeight: 1.5, vary: 0.2, order: 8, gather: 0.8, apart: 0.8, underCanopy: false },
@@ -144,13 +174,21 @@ describe('what grows', () => {
   };
 
   it('grows nothing on a class the biome does not list', () => {
-    const table = growingTable(file, realPalette);
+    const table = growingTable(
+      file.kinds,
+      file.biomes.map((one) => one.grows),
+      realPalette,
+    );
     const meadow = realPalette.classes.find((terrain) => terrain.name === 'meadow')!;
     expect(pickKind(table[0 * 256 + meadow.id]!, 0.5)).toBe(-1);
   });
 
   it('honours the weights as commonality rather than probability', () => {
-    const table = growingTable(file, realPalette);
+    const table = growingTable(
+      file.kinds,
+      file.biomes.map((one) => one.grows),
+      realPalette,
+    );
     const taiga = realPalette.classes.find((terrain) => terrain.name === 'taiga')!;
     const growing = table[0 * 256 + taiga.id]!;
     expect(growing.total).toBe(4);
@@ -258,6 +296,7 @@ describe('a broken file, so the check is known to work', () => {
     ceiling: real.ceiling,
     most: real.most,
     region: real.region,
+    sway: real.sway,
     boundary: real.boundary,
     kinds: [
       { name: 'pine', groundHeight: 1.5, vary: 0.2, order: 8, gather: 0.8, apart: 0.8, underCanopy: false },

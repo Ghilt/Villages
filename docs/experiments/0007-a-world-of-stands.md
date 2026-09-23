@@ -118,6 +118,25 @@ it does. And `most` - the cap on a single point - turned out to be the density t
 at, so a round number above what the file reaches was grid points hashed and thrown away on every cell,
 for ever. It is now tied to the thickest stand, with a test either side of it.
 
+**2026-09-22, the biome renderer earned itself in one look.** Laid flat on the world, the biome map
+showed a fault no number had: **every warmth band edge was a dead straight line the full width of the
+world.** Warmth comes off the master row, and a master row is exactly a latitude, so of course it was.
+Swaying it with a slow noise field of six warmth makes the temperate band's edge wander across 95
+raster cells - about 1,520 world units, some eighteen hundred kilometres - and all fifteen biomes are in
+use. Measured off the raster rather than judged from a screenshot: for every fourth column, the first
+row that is `temperate`, min 663, median 700, max 758.
+
+The region field was the first suspect and was innocent: sampled over the world its median is 50.0 with
+a quartile either side at 37 and 62, and 30% of the world is over the threshold the heath biomes want.
+The view that made it look banded simply sat inside one low patch.
+
+**2026-09-22, a button that would never have appeared.** The furnish button was first shown only when
+the panel thought a sprite map was out of date, which it worked out from the master's mtime. But tuning
+a look edits `world/biomes.json` and no master, so the sprite map goes stale with nothing on any image
+having changed - and the button would have been missing for precisely the loop it exists for. The dev
+server now reports that file's own mtime beside the masters, the panel says which of the two went stale,
+and the button is offered whenever there is a world to furnish at all.
+
 ## Result
 
 **Confirmed on the machine and on the numbers; the look is Adam's to judge.** The arrangement is
@@ -140,9 +159,7 @@ own readings.
 
 - **The look, which is the open half.** Sixteen shapes and fifteen biomes. Once tuned against Adam's
   eye: half as thick, twice as big, and lone trees made rare. `world/biomes.json` is where that goes.
-- **A `biome` renderer** in the Debug map dropdown, to review the biome layer on its own rather than
-  through the scenery standing on it. Named in the plan and not built.
-- **A generate button** beside `cut it`, so a repainted master can be refurnished without a terminal.
+- ~~A `biome` renderer~~ and ~~a generate button~~: both built, and both immediately found a fault.
 - **Offline stills**, so a change to the generator can be argued from a picture rather than from a
   running browser. The painterly views already exist to reuse.
 - **The far end of the handoff**, still: 0051 says the painted terrain is scenery's far-out form and it

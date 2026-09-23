@@ -52,7 +52,11 @@ function makeMap(): SpriteMap {
     file,
     biomeOf: new Uint8Array(2048 * 2048).fill(WHICH),
     cellUnits: 16,
-    growing: growingTable(biomesFile, palette),
+    growing: growingTable(
+      biomesFile.kinds,
+      biomesFile.biomes.map((one) => one.grows),
+      palette,
+    ),
     kinds: biomesFile.kinds,
     colours: file.biomes.map((biome) => biome.colour),
     names: file.biomes.map((biome) => biome.name),

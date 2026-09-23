@@ -9,6 +9,7 @@ import {
   chooseBiome,
   growingTable,
   regionAt,
+  swayAt,
   warmthOfLatitude,
   wetnessOfDistance,
 } from '../src/biome.ts';
@@ -110,7 +111,11 @@ if (problems.length > 0) {
 const catchAll = file.biomes.length - 1;
 const kindIndex = new Map(file.kinds.map((kind, index) => [kind.name, index]));
 const favourites = file.biomes.map((biome) => favouritesOf(biome.grows, kindIndex));
-const growing = growingTable(file, palette);
+const growing = growingTable(
+  file.kinds,
+  file.biomes.map((biome) => biome.grows),
+  palette,
+);
 const highGroup = new Set(
   palette.classes.filter((terrain) => terrain.group === 'high').map((terrain) => terrain.id),
 );
@@ -233,7 +238,9 @@ for (let cellY = 0; cellY < BIOME_SIDE; cellY += 1) {
   const worldY = cellY * cellUnits + cellUnits / 2;
   const masterRow = masterRowOf[Math.min(WORLD_SIDE - 1, Math.round(worldY))]!;
   const latitude = 90 - ((masterRow + 0.5) / world.height) * 180;
-  const warmth = warmthOfLatitude(latitude);
+  // Off the latitude, then swayed per cell: the row alone would draw every band edge as a straight
+  // line the whole width of the world.
+  const fromLatitude = warmthOfLatitude(latitude);
 
   for (let cellX = 0; cellX < BIOME_SIDE; cellX += 1) {
     const worldX = cellX * cellUnits + cellUnits / 2;
@@ -263,7 +270,7 @@ for (let cellY = 0; cellY < BIOME_SIDE; cellY += 1) {
         toWater[Math.floor(masterRow / WATER_EVERY) * waterWide + Math.floor(worldX / WATER_EVERY)] ?? 0;
       chosen = chooseBiome(
         {
-          warmth,
+          warmth: Math.min(100, Math.max(0, fromLatitude + swayAt(longitude, latitude, file.sway))),
           wet: wetnessOfDistance(chamfer * CHAMFER_TO_PIXELS),
           high: (high / land) * 100,
           region: regionAt(longitude, latitude, file.region),

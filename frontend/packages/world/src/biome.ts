@@ -84,6 +84,20 @@ export interface RegionField {
   fineWeight: number;
 }
 
+/**
+ * How much the warmth of a place strays from what its latitude says.
+ *
+ * Warmth comes straight off the master row, which is exactly a latitude, so without this every band
+ * edge is a dead straight line running the whole width of the world - thirty-two thousand units of it,
+ * visible from the first glance at the biome map and in nothing that a boundary wander at the scale of
+ * a scenery point could soften. `amount` is in warmth, which runs nought to a hundred; a band is about
+ * fifteen of it wide, so six lets an edge wander by a good part of a band without ever swapping two
+ * bands over.
+ */
+export interface SwayField extends NoiseField {
+  amount: number;
+}
+
 /** How far a biome edge is allowed to stray from the grid it was stored on, and at what wavelength. */
 export interface BoundaryRule {
   wander: number;
@@ -111,6 +125,7 @@ export interface BiomeFile {
    */
   most: number;
   region: RegionField;
+  sway: SwayField;
   boundary: BoundaryRule;
   kinds: Kind[];
   biomes: Biome[];
@@ -220,6 +235,9 @@ export function biomeProblems(file: BiomeFile, palette: Palette): BiomeProblem[]
     problems.push({ kind: 'bad-number', detail: `ceiling is ${String(file.ceiling)}` });
   }
   const peak = Math.max(0, ...file.biomes.map((biome) => biome.stands.inside));
+  if (!Number.isFinite(file.sway?.amount) || file.sway.amount < 0) {
+    problems.push({ kind: 'bad-number', detail: `sway.amount is ${String(file.sway?.amount)}` });
+  }
   if (!Number.isFinite(file.most) || file.most < peak) {
     problems.push({
       kind: 'bad-number',
@@ -325,6 +343,17 @@ export function wetnessOfDistance(unitsToWater: number): number {
   return 100 * (1 - smoothstep(0, 40, unitsToWater));
 }
 
+/**
+ * How much warmer or colder than its latitude a place is, in warmth.
+ *
+ * The one thing standing between a biome map and a set of horizontal stripes. Slow, because a climate
+ * boundary wanders over hundreds of kilometres rather than metres, and the same wrapping noise the
+ * region field uses so that nothing happens at the antimeridian.
+ */
+export function swayAt(lng: number, lat: number, field: SwayField): number {
+  return noiseAt(lng, lat, field, 2) * field.amount;
+}
+
 /** The region field: one slow octave with a faster one folded in, mapped from [-1, 1] onto [0, 100]. */
 export function regionAt(lng: number, lat: number, field: RegionField): number {
   const coarse = noiseAt(lng, lat, field.coarse, 0);
@@ -384,14 +413,22 @@ const NOTHING: Growing = { kinds: new Int32Array(0), upTo: new Float64Array(0), 
  * Every (biome, terrain class) pair flattened into running totals, indexed
  * `biomeIndex * 256 + classId`. A class a biome does not list grows nothing, which is how ocean, ice and
  * bare sand stay empty without a rule saying so anywhere.
+ *
+ * Takes the kinds and the `grows` tables rather than the whole file, because those are all it reads and
+ * because the browser does not have the whole file: the manifest carries `grows` on its own, and asking
+ * for a `BiomeFile` made the browser build a hollow one with a noise field it would never use.
  */
-export function growingTable(file: BiomeFile, palette: Palette): Growing[] {
+export function growingTable(
+  kinds: readonly Kind[],
+  grows: readonly Record<string, Record<string, number>>[],
+  palette: Palette,
+): Growing[] {
   const classId = new Map(palette.classes.map((terrain) => [terrain.name, terrain.id]));
-  const kindIndex = new Map(file.kinds.map((kind, index) => [kind.name, index]));
-  const table: Growing[] = new Array<Growing>(file.biomes.length * 256).fill(NOTHING);
+  const kindIndex = new Map(kinds.map((kind, index) => [kind.name, index]));
+  const table: Growing[] = new Array<Growing>(grows.length * 256).fill(NOTHING);
 
-  file.biomes.forEach((biome, biomeIndex) => {
-    for (const [className, mix] of Object.entries(biome.grows)) {
+  grows.forEach((forBiome, biomeIndex) => {
+    for (const [className, mix] of Object.entries(forBiome)) {
       const id = classId.get(className);
       if (id === undefined) {
         continue;
