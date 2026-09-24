@@ -502,6 +502,123 @@ describe('which colours a style draws a class in', () => {
   });
 });
 
+describe('where the paint gives way to the scenery', () => {
+  const palette: Palette = {
+    master: { width: 32768, height: 16384, projection: 'equirectangular' },
+    classes: [
+      { id: 0, name: 'ocean', colour: '#104058', water: true, group: 'water' },
+      { id: 7, name: 'taiga', colour: '#105028', group: 'forest' },
+    ],
+  };
+  const colours = { ocean: '#104058', taiga: '#2f4a33' };
+  const base: PainterlyStyle = {
+    warm: '#fff3d0',
+    cool: '#2a3b4a',
+    wash: { amount: 0.3, mark: 40 },
+    boundary: { wander: 2, scale: 30 },
+    edge: { amount: 0.2, reach: 1 },
+    shore: { ink: '#1a2a38', amount: 0.5 },
+    paper: { grain: 0.02, mark: 6, fibre: 0.01 },
+    groups: {
+      water: { treatment: 'none', mark: 3, amount: 0 },
+      forest: { treatment: 'stipple', mark: 3.2, amount: 0.3 },
+    },
+  };
+  const taiga = () => 7;
+
+  /**
+   * How much the group's treatment moves the paint, and nothing else.
+   *
+   * The same style painted twice, once with the mark and once with its amount at nought, and the mean
+   * difference between them. Measuring the spread of the paint on its own would not do: the wash and the
+   * paper are in brush space too, so their frequency moves with `masterPerPixel` and the spread would
+   * change for reasons that have nothing to do with the treatment. This subtracts all of that out.
+   */
+  const markStrength = (style: PainterlyStyle, masterPerPixel: number): number => {
+    const withMark = preparePainterly(style, palette, colours);
+    const flat = preparePainterly(
+      { ...style, groups: { ...style.groups, forest: { ...style.groups.forest!, amount: 0 } } },
+      palette,
+      colours,
+    );
+    let sum = 0;
+    const of = 400;
+    for (let at = 0; at < of; at += 1) {
+      const x = 1000 + at * 0.37;
+      const y = 2000 + at * 0.61;
+      sum += Math.abs(
+        paintPixel(withMark, taiga, x, y, masterPerPixel)[0] -
+          paintPixel(flat, taiga, x, y, masterPerPixel)[0],
+      );
+    }
+    return sum / of;
+  };
+
+  it('leaves a style alone that never hands over, which is every style until one says so', () => {
+    const far = markStrength(base, 2);
+    const near = markStrength(base, 0.1);
+
+    expect(far).toBeGreaterThan(1);
+    expect(near / far).toBeGreaterThan(0.75);
+    expect(near / far).toBeLessThan(1.33);
+  });
+
+  /**
+   * Decision record 0051 says the painted terrain is scenery's far-out form, and until this it was not:
+   * a canopy stipple is a constant few pixels of brush space, so it looked the same at the zoom trees
+   * arrived as it had five zooms out. Named as unfinished in 0052, in experiment 0006 and in 0007.
+   */
+  it('keeps the treatment whole far out and gives it up close in', () => {
+    const handing: PainterlyStyle = {
+      ...base,
+      groups: { ...base.groups, forest: { ...base.groups.forest!, handOver: { from: 0.8, to: 0.15 } } },
+    };
+
+    expect(markStrength(handing, 2) / markStrength(base, 2)).toBeGreaterThan(0.98);
+    expect(markStrength(handing, 0.1) / markStrength(base, 0.1)).toBeLessThan(0.02);
+    // And in between it is in between, rather than stepping at one zoom.
+    const middle = markStrength(handing, 0.45);
+    expect(middle).toBeGreaterThan(markStrength(handing, 0.1));
+    expect(middle).toBeLessThan(markStrength(handing, 2));
+  });
+
+  it('keeps what it is told to keep, so a wood is not bare between its trees', () => {
+    const keeping: PainterlyStyle = {
+      ...base,
+      groups: {
+        ...base.groups,
+        forest: { ...base.groups.forest!, handOver: { from: 0.8, to: 0.15, keep: 0.5 } },
+      },
+    };
+
+    const share = markStrength(keeping, 0.1) / markStrength(base, 0.1);
+
+    expect(share).toBeGreaterThan(0.4);
+    expect(share).toBeLessThan(0.6);
+  });
+
+  it('refuses a hand over written the wrong way round', () => {
+    const backwards: PainterlyStyle = {
+      ...base,
+      groups: { ...base.groups, forest: { ...base.groups.forest!, handOver: { from: 0.15, to: 0.8 } } },
+    };
+
+    expect(painterlyProblems(backwards, palette, colours).join(' ')).toContain('further to nearer');
+  });
+
+  it('refuses a keep that is not a fraction', () => {
+    const odd: PainterlyStyle = {
+      ...base,
+      groups: {
+        ...base.groups,
+        forest: { ...base.groups.forest!, handOver: { from: 0.8, to: 0.15, keep: 2 } },
+      },
+    };
+
+    expect(painterlyProblems(odd, palette, colours).join(' ')).toContain('not a fraction');
+  });
+});
+
 describe('the styles the world is actually painted with', () => {
   const real = JSON.parse(
     readFileSync(new URL('../../../../world/painterly.json', import.meta.url), 'utf8'),

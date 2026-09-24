@@ -69,6 +69,12 @@ tiles go through, that same step **also**:
 
 - **Re-cuts the tiles** if the master or the tiling changed: `npm run world:import --prefix frontend` then
   `npm run world:tile --prefix frontend`. About five minutes. The Debug map panel offers this per master too.
+- **Re-works the sprite map** if the master, `world/biomes.json` or the generator changed:
+  `npm run world:sprites --prefix frontend`, half a minute a master, and it prints the density of every
+  biome against experiment 0006's ceiling. Without one a master draws no scenery at all.
+- **Re-renders the scenery stills** after that, `npm run world:scenery --prefix frontend`, half a
+  minute, because a sprite map that changed and a still that did not is the stale-evidence trap in its
+  purest form. Say which places moved and by how much: the counts are printed beside every picture.
 - **Re-paints every view in every style**: `npm run world:paint --prefix frontend`. About four minutes for all of
   them, and it also writes the runtime `paint.json` the app reads. After only a style edit,
   `-- --config-only` is a second and is all the app needs.
@@ -110,13 +116,24 @@ the log can be read without any of that.
 
 ## End every stop with a verify checklist
 
-Whenever the loop comes back to Adam to look at something, **the last thing written is a checklist of three
-to five things to check**, and nothing comes after it. Not the summary, not the commit message, not an offer
-of next steps: those go above it, because the checklist is what he reads first and acts on.
+Whenever the loop comes back to Adam to look at something, **the last thing written is a checklist of at
+most three things to check**, and nothing comes after it. Not the summary, not the commit message, not an
+offer of next steps: those go above it, because the checklist is what he reads first and acts on.
 
-**Three to five, whatever the size of the commit.** It is there to refresh a memory, not to enumerate a diff.
-A checklist with one item a changed file is a checklist nobody reads, and a twenty-line change and a
-two-hundred-line one get the same five items, picked for what would be embarrassing to have got wrong.
+**Three at most, whatever the size of the commit.** It is there to refresh a memory, not to enumerate a
+diff. A checklist with one item a changed file is a checklist nobody reads, and a twenty-line change and a
+two-hundred-line one get the same three items, picked for what would be embarrassing to have got wrong.
+
+**Mark with an eye, 👀, every item he can check by looking at the running program**, and say in the item
+where to look - which pane, which button, what should be there. An unmarked item is one he has to take on
+trust, read in a document, or accept from a test. **The marked ones go first**, because looking is cheaper
+than reading and it is the check that actually catches things; where there are three and one of them can
+be seen, that one is the first line.
+
+**A step with nothing to look at says so, and that is an answer rather than a failure.** The offline
+renderer, a build rule, a domain rule with no caller yet: none of them can be seen, and three honest
+unmarked items beat one marked item invented to fill the quota. Say in one line what stands in for it -
+the test, the still, or the number.
 
 **Immediately above it goes where to look**, and only that:
 
@@ -273,7 +290,9 @@ Commands are added here as the increments land:
 - The older thirteen-class path, `world:fetch` and `world:master`, is stale and says so when run. It
   refuses to overwrite a hand-painted master and writes alongside; the merge script replays hand edits. `world:build` warps Earth into raw material for
   a different starting point.
-- What it looks like: the renderer dropdown in that same panel. `Raw` is the flat
+- What it looks like: the renderer dropdown in that same panel. `Biome` is not a look and not even the
+  terrain: it lays the sprite map's own biome raster on the world, flat and blocky, which is the only way
+  to review a biome without the scenery standing on it in the way. `Raw` is the flat
   tiles as cut; the rest are painted in the browser, tile by tile, by the same functions that paint
   the stills. `Vivid` is the odd one: it draws the master's own colours out of `world/palette.json`
   rather than the quieter ones out of `world/render.json`, saturation pushed, with the whole medium
@@ -321,7 +340,28 @@ Commands are added here as the increments land:
   boundary runs between painted pixels rather than through them, so at z10 on the `raw` renderer it lines
   up with the squares the terrain is drawn as. Areas live only in the browser and a reload forgets them.
   See `docs/adr/0032` and experiment `0002`.
-- The styles live in `world/painterly.json`. `npm run world:paint --prefix frontend` paints every view in
+- What grows where: `world/biomes.json`, hand-edited, one entry a kind and one a biome. What reads it is
+  `npm run world:sprites --prefix frontend`, which works out a biome for every sixteen world units and
+  where the scenery clumps, and writes a **sprite map** beside the cut tiles - about five megabytes and
+  half a minute a master. It takes a master's name as its first argument (`-- terrain2`). **A master
+  with no sprite map draws no scenery**, which is the rule rather than a fault. The Scenery section of
+  the debug panel says what the sprite map asked for and what the browser did with it. The **Debug map**
+  section has a `furnish it again` button beside `cut it`, and `cut it` furnishes too - a repaint makes
+  both stale. The panel also watches `world/biomes.json`'s own mtime, because tuning a look makes every
+  sprite map stale without touching a master. See `docs/adr/0054` and
+  `docs/plans/biome-sprite-map.md`.
+- A picture of the scenery, without a browser: `npm run world:scenery --prefix frontend` paints five
+  places at the zoom the scenery is actually in and stamps every point the sprite map asks for onto
+  them, into `world/painterly/<place>-scenery.png`, half a minute for all of them. It prints each one's
+  marks, its density against the ceiling, and its biome and kind mix. **They are marks, not
+  silhouettes**: the shapes are drawn in Pixi and this is the generator's answer, not the map's. `-- --at
+  lng,lat` looks anywhere, `-- --view alps` at one of them, `-- --zoom 10.4` closer, `-- --style flat`
+  without the paint. This is what a change to `world/biomes.json` is argued from.
+- The styles live in `world/painterly.json`. A group in one may carry a `handOver`, which is where its
+  treatment gives way to the scenery standing on the same ground: whole far out, mostly gone by the zoom
+  the trees are all in, keeping a third of itself so a wood is not bare between them. It is the far end
+  of 0051's handoff, named as unfinished in 0006 and 0052 and done in 0054.
+  `npm run world:paint --prefix frontend` paints every view in
   every style into `world/painterly/`, flat once and then once per style, and writes the runtime copy the
   app reads. `-- --view alps`, `-- --style woodblock` for one of them; `-- --config-only` writes just the
   runtime copy, in a second, which is all the app needs after a style edit.

@@ -52,8 +52,9 @@ sealed interface PlayerEvent : HouseEvent
 
 /**
  * A house was founded. It carries where, and how much that matters: those two are what put a thing on the
- * map, and which tile it falls in is worked out downstream from the first. The treasury starts at nothing
- * and begins to earn at the founding rate. See decision record 0026.
+ * map, and which tile it falls in is worked out downstream from the first. It carries a stock of every
+ * resource, all of them empty and none of them growing, because nothing generates income yet. See
+ * decision records 0026 and 0006.
  */
 data class HouseFounded(
     override val houseId: HouseId,
@@ -62,7 +63,62 @@ data class HouseFounded(
     val seat: Location,
     val significance: Significance,
     val banner: Banner,
-    val treasury: Treasury,
+    val resources: Map<Resource, Stock>,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : WorldEvent {
+    init {
+        // A house has all five from the moment it exists, so nothing downstream has to ask whether it
+        // happens to have one. A stored event that is missing one is malformed and says so here.
+        require(resources.keys == Resource.entries.toSet()) {
+            "a house is founded with a stock of every resource, not ${resources.keys}"
+        }
+    }
+}
+
+/** A house was given some of a resource. What gave it is the story around it, not a field on it. */
+data class HouseResourceGranted(
+    override val houseId: HouseId,
+    val resource: Resource,
+    val amount: Long,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : WorldEvent
+
+/** Some of a house's resource was used up, and is gone. */
+data class HouseResourceSpent(
+    override val houseId: HouseId,
+    val resource: Resource,
+    val amount: Long,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : WorldEvent
+
+/**
+ * Some of a house's resource was tied to an undertaking until a world-day. It is not spent: it comes back
+ * when the pledge is released, and until then it is not free for anything else.
+ */
+data class HouseResourcePledged(
+    override val houseId: HouseId,
+    val pledgeId: PledgeId,
+    val resource: Resource,
+    val amount: Long,
+    val until: WorldTime,
+    val purpose: String,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : WorldEvent
+
+/**
+ * A pledge ended and what it held is free again.
+ *
+ * Only the id is here. Which resource it was and how much is on the event that made the pledge, and
+ * copying it would be two places for one fact to be wrong in - the same reason `PlayerTookAction` carries
+ * ids and not the option.
+ */
+data class HouseResourceReleased(
+    override val houseId: HouseId,
+    val pledgeId: PledgeId,
     override val worldTime: WorldTime,
     override val recordedAt: Instant,
 ) : WorldEvent

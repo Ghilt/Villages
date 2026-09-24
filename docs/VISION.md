@@ -40,7 +40,7 @@ part of the world rather than a control panel laid over it. See `LOOK-AND-FEEL.m
 
 - Not a conquest optimiser. If the dominant verb becomes "expand efficiently", we have taken a wrong turn.
 - Not an idle clicker. Tickers exist to make time legible, not to be tapped.
-- Not a simulation of medieval economics. Plausibility serves the fiction, not the reverse.
+- Not a simulation of period economics. Plausibility serves the fiction, not the reverse.
 - Not player-versus-player first. Other houses are context and company before they are opposition.
 
 ## How we will know it is working

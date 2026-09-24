@@ -82,9 +82,10 @@ export const HOUSE_PANE: Pane = {
   title: 'your house',
   // Into the bottom-left corner, cut off by two of the stage's own edges, as the card always was.
   spread: 'bottomLeft',
-  // Full is what the card measures with the shield, the blazon, the treasury and the bar of levers in it;
-  // small is one line of the house and the bar beneath, of which the bar is 2.6rem.
-  tall: { full: 200, small: 132 },
+  // Full is what the card measures with the shield, the blazon, the row of five resources and the bar of
+  // levers in it; small is one line of the house, that row, and the bar beneath, of which the bar is
+  // 2.6rem. Both allow for the row wrapping to two, which it does in a bay too narrow for five marks.
+  tall: { full: 232, small: 168 },
   icon: 'shield',
   needs: null,
 };

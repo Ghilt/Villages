@@ -9,7 +9,9 @@ import villages.domain.HouseName
 import villages.domain.Location
 import villages.domain.PlayerId
 import villages.domain.Significance
-import villages.domain.Treasury
+import villages.domain.Pledge
+import villages.domain.Resource
+import villages.domain.Stock
 import villages.domain.WorldTime
 import java.time.Instant
 import java.util.UUID
@@ -67,21 +69,87 @@ fun interface WorldClock {
 }
 
 /**
- * One world-day for every real day since the world opened, the same for everyone: the placeholder for the
- * chrono-engine's shared world-day, which `SETTING.md` says is the leaning. Pure, so it is a policy and not
- * infrastructure, and a test can stand at any real instant.
+ * The world's calendar, as much of it as a use case needs: how to step a world-day on by months.
+ *
+ * The arithmetic is `villages.protocol.Calendar`, which both ends of the wire compute alike and which this
+ * layer may not see, because the application layer depends on the domain and on nothing else. So it crosses
+ * as a port like everything else does. See decision record 0053.
  */
-class DailyWorldClock(
+interface WorldCalendar {
+    fun plusMonths(day: WorldTime, months: Long): WorldTime
+
+    /** Whole months from one day to another, counting only the completed ones. */
+    fun monthsBetween(from: WorldTime, to: WorldTime): Long
+}
+
+/**
+ * When the world will reach a day, by the clock on the wall.
+ *
+ * The inverse of the world clock, and what anything waiting for a world-day needs: a pledge that comes
+ * back in ten months has to be woken at some real instant, and only the clock knows which. Separate from
+ * `WorldClock` so that that one stays a single method a test can hand over as a lambda.
+ */
+fun interface WorldSchedule {
+    fun whenIsDay(day: WorldTime): Instant
+}
+
+/**
+ * Something to be done later, once: a delay and an action.
+ *
+ * Owned here because two things need it and neither owns the other - the gateway coalesces its deltas
+ * with it, and a pledge waits out its span with it. There is no cancelling: whatever is scheduled runs,
+ * and a caller whose reason for running has gone away is expected to find that out and do nothing.
+ */
+fun interface Later {
+    fun schedule(delayMs: Long, action: Runnable)
+}
+
+/** A `Later` on a timer thread. One thread, because nothing here is heavy and order does not matter. */
+class ScheduledLater : Later, AutoCloseable {
+    private val timer = java.util.concurrent.Executors.newSingleThreadScheduledExecutor { runnable ->
+        Thread(runnable, "villages-later").apply { isDaemon = true }
+    }
+
+    override fun schedule(delayMs: Long, action: Runnable) {
+        timer.schedule(action, delayMs.coerceAtLeast(0), java.util.concurrent.TimeUnit.MILLISECONDS)
+    }
+
+    override fun close() {
+        timer.shutdownNow()
+    }
+}
+
+/**
+ * One world-month for every real day since the world opened, the same for everyone.
+ *
+ * A browser game is played in short visits, and a month a visit is what lets a house's history move while
+ * the player lives their life; a world that ran at a day a day would take a lifetime to reach anything. The
+ * world is shared, so the speed is not anybody's to change - there is no fast-forward in a game other people
+ * are standing in. The placeholder for the chrono-engine's shared world-day. Pure, so it is a policy and not
+ * infrastructure, and a test can stand at any real instant. See decision record 0053.
+ */
+class MonthlyWorldClock(
     private val clock: Clock,
+    private val calendar: WorldCalendar,
     /** The real instant the world opened. */
     private val opened: Instant,
     /** The world-day it was on when it opened. */
     private val openingDay: WorldTime,
-) : WorldClock {
+) : WorldClock, WorldSchedule {
     override fun today(): WorldTime {
         val realDays = java.time.Duration.between(opened, clock.now()).toDays()
-        return openingDay + realDays.coerceAtLeast(0)
+        return calendar.plusMonths(openingDay, realDays.coerceAtLeast(0))
     }
+
+    /**
+     * Read backwards: a month of the world's is a real day, so the world reaches a day as many real days
+     * after it opened as there are whole months between.
+     *
+     * Exact as long as the world opens on the first of a month, because then every day it produces is the
+     * first of a month and no day-of-month is ever clamped. See the note on `Calendar.monthsBetween`.
+     */
+    override fun whenIsDay(day: WorldTime): Instant =
+        opened.plus(java.time.Duration.ofDays(calendar.monthsBetween(openingDay, day).coerceAtLeast(0)))
 }
 
 /** Who a token belongs to. Anonymous browser tokens for now; accounts replace this without moving anything. */
@@ -91,7 +159,11 @@ fun interface PlayerTokens {
 
 /**
  * Fresh identities, so that a use case can mint one without reaching for a random number generator and a
- * test can hand out a known one. What it makes is a message id, never an aggregate's: those are derived.
+ * test can hand out a known one.
+ *
+ * What it makes is a message id, or the identity of something inside an aggregate such as a pledge. Never
+ * an aggregate's own: those are derived, so that founding twice writes to one stream and is refused by the
+ * decider rather than by a race. See decision record 0028.
  */
 fun interface FreshIds {
     fun fresh(): UUID
@@ -189,7 +261,10 @@ data class HouseRow(
     val seat: Location,
     val significance: Significance,
     val banner: Banner,
-    val treasury: Treasury,
+    /** One stock of every resource, as the house's own events last said. */
+    val resources: Map<Resource, Stock>,
+    /** The live pledges against those stocks, and the only record of what is spoken for. */
+    val pledges: List<Pledge>,
     /** From when, in world-time, this house exists. */
     val since: WorldTime,
     /** Until when, in world-time, or null while it still does. */
@@ -197,6 +272,16 @@ data class HouseRow(
     /** The stream version this row reflects, so a snapshot and a later delta can be put in order. */
     val version: Long,
 ) {
+    /** What this house has of one resource. A founded house has all five, so this never misses. */
+    fun stockOf(resource: Resource): Stock = resources.getValue(resource)
+
+    /** How much of one resource is spoken for: the sum of the live pledges, exactly as the domain has it. */
+    fun pledgedOf(resource: Resource): Long = pledges.filter { it.resource == resource }.sumOf { it.amount }
+
+    /** The row with one of its stocks changed. */
+    fun withStock(resource: Resource, change: (Stock) -> Stock): HouseRow =
+        copy(resources = resources + (resource to change(stockOf(resource))))
+
     fun existsAt(at: WorldTime): Boolean = at >= since && (until == null || at < until)
 }
 

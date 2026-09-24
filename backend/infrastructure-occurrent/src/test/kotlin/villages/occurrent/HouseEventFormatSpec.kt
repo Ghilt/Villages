@@ -14,6 +14,12 @@ import villages.domain.Division
 import villages.domain.Effect
 import villages.domain.HouseEvent
 import villages.domain.HouseFounded
+import villages.domain.Resource
+import villages.domain.PledgeId
+import villages.domain.HouseResourceSpent
+import villages.domain.HouseResourceReleased
+import villages.domain.HouseResourcePledged
+import villages.domain.HouseResourceGranted
 import villages.domain.PlayerGivenChoice
 import villages.domain.HouseId
 import villages.domain.HouseName
@@ -24,7 +30,7 @@ import villages.domain.OptionId
 import villages.domain.PlayerId
 import villages.domain.Significance
 import villages.domain.Tincture
-import villages.domain.Treasury
+import villages.domain.emptyStocks
 import villages.domain.WorldTime
 import java.io.File
 import java.time.Instant
@@ -52,7 +58,7 @@ class HouseEventFormatSpec : StringSpec({
         seat = Location(59.33, 18.07),
         significance = Significance(20.0),
         banner = Banner(Tincture.SABLE, Division.PLAIN, null, Charge.STAG, Tincture.ARGENT),
-        treasury = Treasury(0, 1.0, noon),
+        resources = emptyStocks(noon),
         worldTime = day,
         recordedAt = noon,
     )
@@ -104,8 +110,48 @@ class HouseEventFormatSpec : StringSpec({
     )
 
     /** One event of every catalogued type, each pinned to the fixture of that name. */
+    val pledgeId = PledgeId(UUID.fromString("bb000000-0000-4000-8000-00000000d101"))
+
+    val givenGold = HouseResourceGranted(
+        houseId = house,
+        resource = Resource.WEALTH,
+        amount = 120,
+        worldTime = day,
+        recordedAt = noon,
+    )
+
+    val spentGold = HouseResourceSpent(
+        houseId = house,
+        resource = Resource.WEALTH,
+        amount = 50,
+        worldTime = day,
+        recordedAt = noon,
+    )
+
+    val pledgedReason = HouseResourcePledged(
+        houseId = house,
+        pledgeId = pledgeId,
+        resource = Resource.REASON,
+        amount = 35,
+        until = WorldTime(455205),
+        purpose = "the making of clearer glass",
+        worldTime = day,
+        recordedAt = noon,
+    )
+
+    val releasedReason = HouseResourceReleased(
+        houseId = house,
+        pledgeId = pledgeId,
+        worldTime = WorldTime(455205),
+        recordedAt = noon,
+    )
+
     val samples: Map<String, HouseEvent> = mapOf(
         "villages.house.founded.v1" to ravenscar,
+        "villages.house.resourceGranted.v1" to givenGold,
+        "villages.house.resourcePledged.v1" to pledgedReason,
+        "villages.house.resourceReleased.v1" to releasedReason,
+        "villages.house.resourceSpent.v1" to spentGold,
         "villages.player.givenChoice.v1" to whereToSettle,
         "villages.player.tookAction.v1" to tookNorthern,
     )

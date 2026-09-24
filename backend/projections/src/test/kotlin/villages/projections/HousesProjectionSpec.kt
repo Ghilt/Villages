@@ -13,13 +13,19 @@ import villages.domain.Banner
 import villages.domain.Charge
 import villages.domain.Division
 import villages.domain.HouseFounded
+import villages.domain.Resource
+import villages.domain.PledgeId
+import villages.domain.HouseResourceReleased
+import villages.domain.HouseResourcePledged
+import villages.domain.HouseResourceGranted
+import villages.domain.HouseEvent
 import villages.domain.HouseId
 import villages.domain.HouseName
 import villages.domain.Location
 import villages.domain.PlayerId
 import villages.domain.Significance
 import villages.domain.Tincture
-import villages.domain.Treasury
+import villages.domain.emptyStocks
 import villages.domain.WorldTime
 import java.time.Instant
 import java.util.UUID
@@ -37,10 +43,10 @@ private class HandFed : EventFeed {
         return AutoCloseable { subscribers -= subscriber }
     }
 
-    fun deliver(event: HouseFounded, version: Long = 1) {
+    fun deliver(event: HouseEvent, version: Long = 1) {
         val stored = StoredEvent(
             id = UUID.randomUUID().toString(),
-            type = "villages.house.founded.v1",
+            type = "villages.house.${event::class.simpleName}",
             stream = event.houseId.stream,
             streamVersion = version,
             time = event.recordedAt,
@@ -56,7 +62,7 @@ private class HandFed : EventFeed {
 
 private val noon = Instant.parse("2026-09-04T12:00:00Z")
 
-/** Year 1247, day 112: the world-day the fixtures stand on. */
+/** The twenty-fourth of June, year 1246: the world-day the fixtures stand on. */
 private val someDay = WorldTime(454901)
 
 private fun founded(
@@ -74,7 +80,7 @@ private fun founded(
     seat = Location(lat, lon),
     significance = Significance(significance),
     banner = Banner(Tincture.SABLE, Division.PLAIN, null, Charge.STAG, Tincture.ARGENT),
-    treasury = Treasury(0, 1.0, at),
+    resources = emptyStocks(at),
     worldTime = on,
     recordedAt = at,
 )
@@ -257,5 +263,54 @@ class HousesProjectionSpec : StringSpec({
 
         houses.size shouldBe 1
         houses.inCell(STOCKHOLM_Z8, someDay, 10).houses shouldHaveSize 1
+    }
+
+    "what a house is given reaches its row, so the owner is told wherever they are looking" {
+        val feed = HandFed()
+        val houses = HousesProjection(feed)
+        val ravenscar = founded("Ravenscar", 59.33, 18.07)
+        feed.deliver(ravenscar)
+
+        feed.deliver(HouseResourceGranted(ravenscar.houseId, Resource.WEALTH, 120, someDay, noon), version = 2)
+
+        val row = houses.ofPlayer(ravenscar.player)!!
+        row.stockOf(Resource.WEALTH).at(noon) shouldBe 120
+        row.version shouldBe 2
+    }
+
+    "a pledge reaches the row as a pledge, and releasing it takes it off again" {
+        val feed = HandFed()
+        val houses = HousesProjection(feed)
+        val ravenscar = founded("Ravenscar", 59.33, 18.07)
+        val glass = PledgeId(UUID.randomUUID())
+        feed.deliver(ravenscar)
+        feed.deliver(HouseResourceGranted(ravenscar.houseId, Resource.REASON, 100, someDay, noon), version = 2)
+
+        feed.deliver(
+            HouseResourcePledged(ravenscar.houseId, glass, Resource.REASON, 35, WorldTime(455205), "glass", someDay, noon),
+            version = 3,
+        )
+
+        houses.ofPlayer(ravenscar.player)!!.pledgedOf(Resource.REASON) shouldBe 35
+
+        feed.deliver(HouseResourceReleased(ravenscar.houseId, glass, WorldTime(455205), noon), version = 4)
+
+        val freed = houses.ofPlayer(ravenscar.player)!!
+        freed.pledgedOf(Resource.REASON) shouldBe 0
+        freed.stockOf(Resource.REASON).at(noon) shouldBe 100
+    }
+
+    "a change to what a house has tells the watchers, so the fan-out carries it without new plumbing" {
+        val feed = HandFed()
+        val houses = HousesProjection(feed)
+        val ravenscar = founded("Ravenscar", 59.33, 18.07)
+        feed.deliver(ravenscar)
+        val heard = mutableListOf<Boolean>()
+        houses.watch { heard += it.appeared }
+
+        feed.deliver(HouseResourceGranted(ravenscar.houseId, Resource.WEALTH, 10, someDay, noon), version = 2)
+
+        // Told, and told that it is not a new house: an appearance would redraw it on every map.
+        heard shouldBe listOf(false)
     }
 })

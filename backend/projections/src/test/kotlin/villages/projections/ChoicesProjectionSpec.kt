@@ -26,7 +26,7 @@ import villages.domain.OptionId
 import villages.domain.PlayerId
 import villages.domain.Significance
 import villages.domain.Tincture
-import villages.domain.Treasury
+import villages.domain.emptyStocks
 import villages.domain.WorldTime
 import java.time.Instant
 import java.util.UUID
@@ -90,7 +90,7 @@ private fun aFounding() = HouseFounded(
     seat = Location(61.0, 15.0),
     significance = Significance(20.0),
     banner = sable,
-    treasury = Treasury(0, 1.0, atNoon),
+    resources = emptyStocks(atNoon),
     worldTime = onDay,
     recordedAt = atNoon,
 )

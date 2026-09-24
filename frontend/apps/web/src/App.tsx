@@ -21,7 +21,7 @@ import { gateway, gatewayState, watchGateway } from './net/gateway';
 import { followMap } from './net/followMap';
 import { eyeIsOpen, watchEye } from './house/eye';
 import { HouseStatus } from './house/HouseStatus';
-import { InfluenceOverlay } from './influence/InfluenceOverlay';
+import { HoldingOverlay } from './areas/HoldingOverlay';
 import { StoodDown } from './net/StoodDown';
 import { flyWith } from './map/focus';
 import { MapStrip } from './map/MapStrip';
@@ -125,7 +125,9 @@ export function App({ master }: AppProps) {
   const window = useWindow();
   const box = useMemo(() => stageBox(window, mode, shut), [window, mode, shut]);
   const inView = useMemo(() => housesInView(heard.houses), [heard.houses]);
-  const yours = heard.yourHouse;
+  // The public half of your own house: what the map draws is the same view everyone else's house is
+  // drawn from, and what only you can see hangs off it.
+  const yours = heard.yourHouse?.house ?? null;
   // With the eye open your own house is drawn whether or not a held cell carries it. It can be missing
   // from one and still be known, because the gateway sends it to the session rather than to a cell.
   const drawn = useMemo(
@@ -151,8 +153,8 @@ export function App({ master }: AppProps) {
 
   // When the house comes to be, the camera goes to it. It is the one moment in the whole world so far
   // that is worth being taken to, and the seat was chosen from a parchment rather than from the map.
-  const seat = heard.yourHouse?.seat;
-  const mine = heard.yourHouse?.id;
+  const seat = heard.yourHouse?.house.seat;
+  const mine = heard.yourHouse?.house.id;
   useEffect(() => {
     if (map !== null && seat !== undefined && mine !== undefined) {
       note('camera', `flying to the seat at ${seat.lat.toFixed(3)}, ${seat.lon.toFixed(3)}`);
@@ -250,7 +252,7 @@ export function App({ master }: AppProps) {
                 <MapView worldRoot={worldRoot} onReady={setMap} />
                 {map !== null && <SpriteOverlay map={map} sprites={sprites} worldRoot={worldRoot} />}
                 <AreaOverlay map={map} worldRoot={worldRoot} />
-                <InfluenceOverlay map={map} houses={drawn} mine={eye ? yours : null} />
+                <HoldingOverlay map={map} houses={drawn} mine={eye ? yours : null} />
                 {/* Put away, and still running underneath: a lid over the map, never instead of it. The
                     guard is the form rather than the size, because what a pane was asked to be outlives
                     the fold - and the floor of the spread is never put away. See `MapStrip`. */}

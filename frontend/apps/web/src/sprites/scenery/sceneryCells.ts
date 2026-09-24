@@ -1,18 +1,10 @@
 import { TILE } from '../../map/painterlyMessages';
 import { classesOfTile, terrainPalette } from '../../map/terrainClasses';
 import type { TerrainPalette } from '../../map/terrainClasses';
-import { CELL, scatterCell } from './scatter';
-import type { ScatteredPoint } from './scatter';
-import { whatGrows } from './kinds';
+import { CELL, scatterCell } from '@villages/world';
+import type { ScatteredPoint, SpriteMap } from '@villages/world';
 
-/**
- * **This is experiment 0006, not a finished part of the game.** It was built to answer one question -
- * how much scenery the browser will draw before it lags - and it answers it. What it is *not* is a
- * world worth looking at: three kinds of the ten Adam named, drawn as a triangle, an ellipse and three
- * blades, scattered by one weight table nobody has tuned. Do not build on the look of it, and do not
- * take the numbers in it for settled. What replaces it is the **world-generator**, in
- * `docs/plans/world-generator.md`.
- */
+import { spriteMap, standsHeld, standsOfTile } from './spriteMap';
 
 /**
  * The scattered points already worked out, and the terrain they were worked out from.
@@ -42,14 +34,19 @@ const TILE_UNITS = TILE;
  */
 const REMEMBER = 400;
 
+/** The layer of the sprite map the scenery is drawn from. Others will join it; see decision 0054. */
+const LAYER = 'biome';
+
 const held = new Map<string, ScatteredPoint[]>();
 /** Tiles being fetched, so the same one is never asked for twice at once. */
 const asking = new Set<string>();
-const growing = whatGrows();
 let palette: TerrainPalette | null = null;
 let waiting = 0;
+/** Null until asked, then the master's sprite map or null for ever if it has none. */
+let map: SpriteMap | null = null;
+let noMap = false;
 
-const keyOf = (spacing: number, cellX: number, cellY: number): string => `${spacing}/${cellX}/${cellY}`;
+const keyOf = (dial: number, cellX: number, cellY: number): string => `${dial}/${cellX}/${cellY}`;
 
 /** Everything cut so far is thrown away. For a change that makes every cell wrong: a new master. */
 export function forgetScenery(): void {
@@ -57,19 +54,34 @@ export function forgetScenery(): void {
   asking.clear();
   palette = null;
   waiting = 0;
+  map = null;
+  noMap = false;
+}
+
+/** What the sprite map says about this world, once it is in hand. Null before that, and null without one. */
+export function sceneryMap(): SpriteMap | null {
+  return map;
+}
+
+/** Whether this master simply has no sprite map, which is a state and not a failure. */
+export function hasNoSpriteMap(): boolean {
+  return noMap;
 }
 
 export interface SceneryTally {
   /** Cells whose points are worked out and ready to draw. */
   held: number;
-  /** Cells asked for whose terrain has not arrived. */
+  /** Cells asked for whose terrain or stands have not arrived. */
   waiting: number;
   /** Points held across every cell, which is what the scattering costs in memory. */
   points: number;
+  /** Stand chunks held, and the stands in them. */
+  chunks: number;
+  stands: number;
 }
 
 /** What the last frame actually drew, put here by the layer so the panel has one thing to read. */
-let drawn = { particles: 0, showing: 0, cells: 0, frameGapMs: 0, worstGapMs: 0 };
+let drawn = { particles: 0, showing: 0, cells: 0, frameGapMs: 0, worstGapMs: 0, biome: '', moving: 0 };
 
 export type SceneryDrawnTally = typeof drawn & SceneryTally;
 
@@ -92,7 +104,7 @@ export function sceneryTally(): SceneryTally {
   for (const cell of held.values()) {
     points += cell.length;
   }
-  return { held: held.size, waiting, points };
+  return { held: held.size, waiting, points, ...standsHeld() };
 }
 
 /**
@@ -106,10 +118,10 @@ export function pointsOf(
   tilesRoot: string,
   cellX: number,
   cellY: number,
-  spacing: number,
+  dial: number,
   whenReady: () => void,
 ): ScatteredPoint[] | null {
-  const key = keyOf(spacing, cellX, cellY);
+  const key = keyOf(dial, cellX, cellY);
   const already = held.get(key);
   if (already !== undefined) {
     return already;
@@ -120,7 +132,7 @@ export function pointsOf(
 
   asking.add(key);
   waiting += 1;
-  void cut(tilesRoot, cellX, cellY, spacing, key).then(() => {
+  void cut(tilesRoot, cellX, cellY, dial, key).then(() => {
     asking.delete(key);
     waiting -= 1;
     whenReady();
@@ -132,11 +144,21 @@ async function cut(
   tilesRoot: string,
   cellX: number,
   cellY: number,
-  spacing: number,
+  dial: number,
   key: string,
 ): Promise<void> {
   palette ??= await terrainPalette();
-  // One cell needs exactly one tile, because a cell is 32 world units and a tile is 256 of them.
+  if (map === null && !noMap) {
+    map = await spriteMap(tilesRoot, LAYER);
+    noMap = map === null;
+  }
+  if (map === null) {
+    // No sprite map, no scenery. The cell is remembered as empty so it is never asked for again.
+    held.set(key, []);
+    return;
+  }
+
+  // One cell needs exactly one tile and one chunk, because a cell is 32 world units and both are 256.
   const tileX = Math.floor((cellX * CELL) / TILE_UNITS);
   const tileY = Math.floor((cellY * CELL) / TILE_UNITS);
   const classes = await classesOfTile(tilesRoot, FLAT, tileX, tileY, palette);
@@ -152,11 +174,24 @@ async function cut(
           return classes[intoY * TILE + intoX] ?? 0;
         };
 
+  const stands = await new Promise<ReturnType<typeof standsOfTile>>((settle) => {
+    const ask = () => {
+      const chunk = standsOfTile(tilesRoot, LAYER, tileX, tileY, 2 ** FLAT, ask);
+      if (chunk !== null) {
+        settle(chunk);
+      }
+    };
+    ask();
+  });
+  if (stands === null) {
+    return;
+  }
+
   if (held.size >= REMEMBER) {
     const oldest = held.keys().next();
     if (oldest.done !== true) {
       held.delete(oldest.value);
     }
   }
-  held.set(key, scatterCell(cellX, cellY, spacing, classAt, growing));
+  held.set(key, scatterCell(cellX, cellY, dial, classAt, map, stands));
 }

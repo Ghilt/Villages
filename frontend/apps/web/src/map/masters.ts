@@ -58,6 +58,7 @@ export interface MasterOnDisk {
   bytes: number;
   editedAt: number;
   cutAt: number | null;
+  furnishedAt: number | null;
 }
 
 /** Painted since it was last cut, so what the map is drawing is not what the image says. */
@@ -66,19 +67,37 @@ export function isStale(master: MasterOnDisk): boolean {
 }
 
 /**
+ * Whether a master's sprite map is out of date, and so whether its scenery is standing on stale ground.
+ *
+ * Two ways for it to be: the image was painted since, or **`world/biomes.json` was saved since**. The
+ * second is the one that matters in practice and the one this existed without for a moment: tuning a
+ * look edits that file and nothing else, so a sprite map goes out of date without any master changing,
+ * and a panel that only watched the image would have gone on saying every world was current.
+ *
+ * Separate from `isStale` because the two go stale together and are mended apart: furnishing is half a
+ * minute where cutting is five.
+ */
+export function isUnfurnished(master: MasterOnDisk, tunedAt: number | null): boolean {
+  if (master.furnishedAt === null) {
+    return true;
+  }
+  return master.editedAt > master.furnishedAt || (tunedAt !== null && tunedAt > master.furnishedAt);
+}
+
+/**
  * Every master in the folder. Empty if nothing answers, which is what a built app looks like: there is
  * no dev server there to read a directory, and the world was cut before it was built.
  */
-export async function listMasters(): Promise<MasterOnDisk[]> {
+export async function listMasters(): Promise<{ masters: MasterOnDisk[]; tunedAt: number | null }> {
   try {
     const response = await fetch('/world-api/masters');
     if (!response.ok) {
-      return [];
+      return { masters: [], tunedAt: null };
     }
-    const body = (await response.json()) as { masters?: MasterOnDisk[] };
-    return body.masters ?? [];
+    const body = (await response.json()) as { masters?: MasterOnDisk[]; tunedAt?: number | null };
+    return { masters: body.masters ?? [], tunedAt: body.tunedAt ?? null };
   } catch {
-    return [];
+    return { masters: [], tunedAt: null };
   }
 }
 
@@ -89,16 +108,30 @@ export async function listMasters(): Promise<MasterOnDisk[]> {
  * says nothing for minutes cannot be told from a hang.
  */
 export async function cutMaster(name: string): Promise<boolean> {
+  return errand(name, 'cut');
+}
+
+/**
+ * Works out one master's biomes and stands, without recutting its tiles.
+ *
+ * The errand for a `world/biomes.json` edit, which is the one somebody tuning a look does over and over:
+ * half a minute rather than five minutes, because the tiles have not changed.
+ */
+export async function furnishMaster(name: string): Promise<boolean> {
+  return errand(name, 'furnish');
+}
+
+async function errand(name: string, which: 'cut' | 'furnish'): Promise<boolean> {
   let response: Response;
   try {
-    response = await fetch(`/world-api/masters/${encodeURIComponent(name)}/cut`, { method: 'POST' });
+    response = await fetch(`/world-api/masters/${encodeURIComponent(name)}/${which}`, { method: 'POST' });
   } catch (cause) {
-    note('world', `could not ask for ${name} to be cut: ${(cause as Error).message}`);
+    note('world', `could not ask for ${name} to be ${which}: ${(cause as Error).message}`);
     return false;
   }
 
   if (!response.ok || response.body === null) {
-    note('world', `cutting ${name} was refused: ${(await response.text()).trim() || response.status}`);
+    note('world', `${which} on ${name} was refused: ${(await response.text()).trim() || response.status}`);
     return false;
   }
 
@@ -141,9 +174,17 @@ export async function cutMaster(name: string): Promise<boolean> {
  * Picking a master that is already cut reloads the page straight away, so the only states that get as
  * far as being described are the one being drawn and the ones that need cutting first.
  */
-export function describeMaster(chosen: MasterOnDisk | undefined, master: string, cutting: boolean): string {
-  if (cutting) {
-    return 'tracing the coast, then cutting the tiles. Five minutes or so.';
+export function describeMaster(
+  chosen: MasterOnDisk | undefined,
+  master: string,
+  working: false | 'cut' | 'furnish',
+  tunedAt: number | null = null,
+): string {
+  if (working === 'cut') {
+    return 'tracing the coast, cutting the tiles, then working out the biomes. Five minutes or so.';
+  }
+  if (working === 'furnish') {
+    return 'working out the biomes and the stands. Half a minute.';
   }
   if (chosen === undefined) {
     return `drawing ${master}; no dev server to ask what else there is`;
@@ -161,7 +202,17 @@ export function describeMaster(chosen: MasterOnDisk | undefined, master: string,
   if (isStale(chosen)) {
     return `${size}${odd}, painted ${since(chosen.editedAt)} ago, after it was last cut`;
   }
-  return `${size}${odd}, cut ${since(chosen.cutAt)} ago, and on the screen`;
+  if (chosen.furnishedAt === null) {
+    return `${size}${odd}, cut ${since(chosen.cutAt)} ago, and growing nothing: it has no sprite map`;
+  }
+  if (isUnfurnished(chosen, tunedAt)) {
+    const why =
+      tunedAt !== null && tunedAt > chosen.furnishedAt
+        ? `world/biomes.json saved ${since(tunedAt)} ago`
+        : `painted ${since(chosen.editedAt)} ago`;
+    return `${size}${odd}, ${why}, after its biomes were worked out`;
+  }
+  return `${size}${odd}, cut ${since(chosen.cutAt)} ago, furnished ${since(chosen.furnishedAt)} ago`;
 }
 
 /** How long ago, in the roughest terms that are still useful. */

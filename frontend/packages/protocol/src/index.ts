@@ -5,7 +5,7 @@
  */
 
 /** Sent on the handshake so that the gateway can refuse a client it cannot speak to. */
-export const PROTOCOL_VERSION = 3;
+export const PROTOCOL_VERSION = 5;
 
 export {
   MAX_ZOOM,
@@ -20,7 +20,19 @@ export {
 } from './cells';
 export type { Tile, View } from './cells';
 
-export { DAYS_PER_YEAR, dayOf, dayOfYearOf, describeDay, yearOf } from './calendar';
+export {
+  MONTHS,
+  dateOf,
+  dayOf,
+  dayOfMonthOf,
+  daysInMonth,
+  describeDay,
+  isLeapYear,
+  monthOf,
+  plusMonths,
+  yearOf,
+} from './calendar';
+export type { WorldDate } from './calendar';
 
 export {
   bannerSchema,
@@ -37,7 +49,10 @@ export {
   frameTypesOf,
   houseViewSchema,
   pointSchema,
-  rateSchema,
+  pledgeViewSchema,
+  resourceNameSchema,
+  stockSchema,
+  yourHouseViewSchema,
   serverFrameSchema,
   tinctureSchema,
 } from './frames';
@@ -54,7 +69,10 @@ export type {
   HouseView,
   OptionView,
   Point,
-  Rate,
+  PledgeView,
+  ResourceName,
+  Stock,
+  YourHouseView,
   ServerFrame,
   Tincture,
 } from './frames';

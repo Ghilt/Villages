@@ -3,6 +3,10 @@ package villages.occurrent
 import org.occurrent.application.converter.typemapper.CloudEventTypeMapper
 import villages.domain.HouseEvent
 import villages.domain.HouseFounded
+import villages.domain.HouseResourceGranted
+import villages.domain.HouseResourcePledged
+import villages.domain.HouseResourceReleased
+import villages.domain.HouseResourceSpent
 import villages.domain.PlayerGivenChoice
 import villages.domain.PlayerTookAction
 import kotlin.reflect.KClass
@@ -18,6 +22,10 @@ import kotlin.reflect.KClass
 object HouseEventTypes : CloudEventTypeMapper<HouseEvent> {
     val rows: Map<KClass<out HouseEvent>, String> = mapOf(
         HouseFounded::class to "villages.house.founded.v1",
+        HouseResourceGranted::class to "villages.house.resourceGranted.v1",
+        HouseResourcePledged::class to "villages.house.resourcePledged.v1",
+        HouseResourceReleased::class to "villages.house.resourceReleased.v1",
+        HouseResourceSpent::class to "villages.house.resourceSpent.v1",
         PlayerGivenChoice::class to "villages.player.givenChoice.v1",
         PlayerTookAction::class to "villages.player.tookAction.v1",
     )

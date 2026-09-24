@@ -22,6 +22,8 @@
     "world:master": "npm run master --workspace @villages/world --",
     "world:import": "npm run import --workspace @villages/world --",
     "world:tile": "npm run tile --workspace @villages/world --",
+    "world:sprites": "npm run sprites --workspace @villages/world --",
+    "world:scenery": "npm run scenery --workspace @villages/world --",
     "world:paint": "npm run paint --workspace @villages/world --",
     "world:fetch-all": "npm run fetch-world --workspace @villages/world --"
   },

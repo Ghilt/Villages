@@ -503,6 +503,17 @@ if (-not (Test-Path (Join-Path $WorldDir 'paint.json'))) {
     Good 'the painting styles are written'
 }
 
+# What kind of place every part of the world is, and where the scenery clumps. Without it the map draws
+# no scenery at all - which is the rule rather than a fault, but it is not what anyone starting from
+# nothing is expecting to see. Half a minute, once per master. See decision record 0054.
+$SpriteMap = Join-Path $DefaultWorld 'sprites/biome/map.json'
+if (-not (Test-Path $SpriteMap)) {
+    Run 'working out the biomes and the stands (about half a minute, once)' $Npm @('run', 'world:sprites') $Frontend
+} else {
+    $map = Get-Content $SpriteMap -Raw | ConvertFrom-Json
+    Good ("the world is furnished: {0:N0} stands in {1:N0} chunks" -f $map.stands, $map.chunks)
+}
+
 # --- starting the servers --------------------------------------------------------------------------
 
 Head 'starting'

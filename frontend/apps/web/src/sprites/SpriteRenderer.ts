@@ -68,7 +68,7 @@ export interface SpriteRenderer {
 export interface SceneryHow {
   on: boolean;
   /** How far apart the points of the scattering are, in world units. Smaller is denser. */
-  spacing: number;
+  dial: number;
   /** How much later than its natural zoom each kind arrives, in zoom levels. */
   laterBy: number;
   /** Where this page's flat tiles live, which is what the terrain is read from. */

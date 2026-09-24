@@ -6,6 +6,48 @@
  * browser. The scripts in `bin` are the only things here that touch a disk.
  */
 
+export {
+  CANOPY_HEIGHT,
+  NO_FAVOURITE,
+  NO_STANDS,
+  PARENT_STEP,
+  STAND_BYTES,
+  decodeStands,
+  encodeStands,
+  favouriteRoll,
+  favouritesOf,
+  pickKindIn,
+  standAt,
+  standWeight,
+  standsNear,
+  thicknessAt,
+} from './stands.ts';
+export type { Stand, StandChunk, Thickness } from './stands.ts';
+export {
+  biomeProblems,
+  chooseBiome,
+  growingTable,
+  pickKind,
+  regionAt,
+  swayAt,
+  wanderAt,
+  warmthOfLatitude,
+  wetnessOfDistance,
+} from './biome.ts';
+export type {
+  Band,
+  Biome,
+  BiomeAxes,
+  BiomeFile,
+  BiomeProblem,
+  BoundaryRule,
+  Growing,
+  Kind,
+  RegionField,
+  StandRule,
+  SwayField,
+  Where,
+} from './biome.ts';
 export { noiseAt } from './noise.ts';
 export type { NoiseField } from './noise.ts';
 export { MAX_MERCATOR_LATITUDE, angularDistance, rotate, toLngLat, toVector } from './sphere.ts';
@@ -56,6 +98,8 @@ export {
 export type { TileAddress } from './tiles.ts';
 
 export {
+  MOST_ENCLOSED,
+  areaAround,
   closePath,
   enclose,
   enclosedBy,
@@ -67,8 +111,6 @@ export {
   withoutCollinear,
 } from './area.ts';
 export type { EnclosedPixels, Fence, FencePart, MasterGrid, PixelSpan, PixelWindow } from './area.ts';
-
-export { MOST_GROUND, influenceZoneAround } from './influence.ts';
 
 export { DEFAULT_MASTER, isSafeMasterName, masterNameOf, worldDirOf } from './masters.ts';
 
@@ -97,3 +139,11 @@ export type {
   PreparedPainterly,
   TreatmentKind,
 } from './painterly.ts';
+
+export { CELL, cellOf, scatterCell, thickestOf } from './scatter.ts';
+export type { ClassAt, ScatteredPoint } from './scatter.ts';
+export { biomeAt, biomesByColour } from './spriteMap.ts';
+export type { SpriteMap, SpriteMapFile } from './spriteMap.ts';
+
+/** A worked example of a biome file, for the tests of anything that reads one. See `fixture.ts`. */
+export { EXAMPLE_BIOMES, EXAMPLE_KINDS } from './fixture.ts';

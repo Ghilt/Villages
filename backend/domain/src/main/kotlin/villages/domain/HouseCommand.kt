@@ -8,6 +8,55 @@ sealed interface HouseCommand {
 }
 
 /** Found a house: give it a name, a seat on the map and a banner, on this world-day, recorded now. */
+/** A house was given some of a resource, from wherever the world gives things from. */
+data class GrantResource(
+    override val houseId: HouseId,
+    val resource: Resource,
+    val amount: Long,
+    val worldTime: WorldTime,
+    val recordedAt: Instant,
+) : HouseCommand
+
+/** Some of a resource is used up. Refused unless that much of it is free. */
+data class SpendResource(
+    override val houseId: HouseId,
+    val resource: Resource,
+    val amount: Long,
+    val worldTime: WorldTime,
+    val recordedAt: Instant,
+) : HouseCommand
+
+/**
+ * Some of a resource is tied to an undertaking until a world-day.
+ *
+ * The day is worked out before the command is made, from a span in months, because the calendar lives in
+ * `protocol` and the domain may not see it. See decision record 0053.
+ */
+data class PledgeResource(
+    override val houseId: HouseId,
+    val pledgeId: PledgeId,
+    val resource: Resource,
+    val amount: Long,
+    val until: WorldTime,
+    val purpose: String,
+    val worldTime: WorldTime,
+    val recordedAt: Instant,
+) : HouseCommand
+
+/**
+ * A pledge ends and what it held comes back.
+ *
+ * One command for both ways it can happen: the span running out, and somebody ending it early. The
+ * domain records that it ended; whose idea it was, and whether ending early should cost something, is a
+ * mechanic and not the shape.
+ */
+data class ReleasePledge(
+    override val houseId: HouseId,
+    val pledgeId: PledgeId,
+    val worldTime: WorldTime,
+    val recordedAt: Instant,
+) : HouseCommand
+
 data class FoundHouse(
     override val houseId: HouseId,
     val player: PlayerId,

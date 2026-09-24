@@ -4,7 +4,7 @@ import { insideFence, toRasterPixel } from '@villages/world';
 import type { MasterGrid, TerrainClass } from '@villages/world';
 
 import type { Area } from '../areas/areas';
-import { blazon, treasuryAt, whereabouts } from '../house/describe';
+import { blazon, whereabouts } from '../house/describe';
 import type { Subject } from './subjects';
 
 /**
@@ -64,7 +64,6 @@ const MOST_TERRAINS = 3;
  */
 export function describeHouse(
   house: HouseView,
-  now: number,
   yours: boolean,
   areas: readonly Area[],
   grid: MasterGrid | null,
@@ -76,7 +75,6 @@ export function describeHouse(
     facts: [
       { what: 'Seat', said: whereabouts(house) },
       { what: 'Founded', said: describeDay(house.since) },
-      { what: 'Treasury', said: treasuryAt(house, now).toLocaleString(), ticking: true },
       { what: 'Cell', said: house.cell },
     ],
     links: [

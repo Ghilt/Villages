@@ -15,8 +15,10 @@
     "import": "node --max-old-space-size=8192 bin/importMaster.ts",
     "merge": "node --max-old-space-size=8192 bin/mergeMaster.ts",
     "tile": "node --max-old-space-size=8192 bin/tileWorld.ts",
+    "sprites": "node --max-old-space-size=8192 bin/generateSpriteMap.ts",
     "paint": "node --max-old-space-size=8192 bin/renderPainterly.ts",
-    "fetch-world": "node --max-old-space-size=4096 bin/fetchWorld.ts"
+    "fetch-world": "node --max-old-space-size=4096 bin/fetchWorld.ts",
+    "scenery": "node --max-old-space-size=8192 bin/renderScenery.ts"
   },
   "dependencies": {
     "fflate": "^0.8.3",

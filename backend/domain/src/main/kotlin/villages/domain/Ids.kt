@@ -29,6 +29,10 @@ value class HouseId(val value: UUID) {
     }
 }
 
+/** The identity of one pledge, so that the release can name which one came back. */
+@JvmInline
+value class PledgeId(val value: UUID)
+
 /** The human, for now an anonymous token the browser generated. */
 @JvmInline
 value class PlayerId(val value: UUID)

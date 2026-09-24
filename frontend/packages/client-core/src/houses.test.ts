@@ -24,7 +24,6 @@ function house(id: string, version = 1, cell = Z10): HouseView {
     cell,
     seat: { lat: 59.33, lon: 18.07 },
     banner: { field: 'sable', division: 'plain', charge: 'stag', chargeTincture: 'argent' },
-    treasury: { amount: 0, ratePerSecond: 1, asOf: 0 },
     since: 437635,
     version,
   };

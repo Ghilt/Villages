@@ -16,6 +16,7 @@ import villages.domain.HouseId
 import villages.domain.HouseName
 import villages.domain.Location
 import villages.domain.PlayerId
+import villages.domain.Resource
 import villages.domain.Tincture
 import villages.domain.WorldTime
 import java.time.Instant
@@ -54,7 +55,7 @@ class FoundHouseServiceSpec : StringSpec({
         val founded = executor.events.single().shouldBeInstanceOf<villages.domain.HouseFounded>()
         founded.recordedAt shouldBe noon
         founded.worldTime shouldBe WorldTime(454901)
-        founded.treasury.asOf shouldBe noon
+        founded.resources.getValue(Resource.WEALTH).asOf shouldBe noon
     }
 
     "and hands the provenance down untouched, because the events have to say where they came from" {

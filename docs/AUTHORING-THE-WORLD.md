@@ -44,7 +44,7 @@ changes how the world looks without touching what it is.
 How it is drawn is two more files, and neither of them is this one. `world/render.json` is the colour each
 class wears on the map. `world/painterly.json` is what the paint does to that colour: how a boundary
 frays, how pigment gathers along an edge, what mark each kind of ground is drawn with, the grain of the
-paper. `npm run world:paint --prefix frontend` shows the result, every view painted and flat side by side.
+paper, and where a group's mark gives way to the scenery standing on it - its `handOver`. `npm run world:paint --prefix frontend` shows the result, every view painted and flat side by side.
 Editing either changes how the world looks without touching what it is, and neither needs the master
 rebuilt.
 
@@ -92,14 +92,15 @@ Save the image, alt-tab to the running app, and pick it in the **Debug map** par
 down the right-hand side. Its terrain dropdown is every PNG in this folder, so a candidate saved as `terrain2.png` is offered beside
 `terrain.png` rather than having to overwrite it, and the panel says whether what is on the screen is
 still what the image says. A master nobody has cut yet, or one saved since it was last cut, gets a button
-that runs the two commands below and puts their output in the debug log while it works. See
+that runs the commands below and puts their output in the debug log while it works. See
 `docs/adr/0025`.
 
-The same two commands from the repository root, not from inside `frontend/`:
+The same three commands from the repository root, not from inside `frontend/`:
 
 ```
 npm run world:import --prefix frontend
 npm run world:tile --prefix frontend
+npm run world:sprites --prefix frontend
 ```
 
 The first traces the coast and the large lakes into the lines the map draws in ink. The second cuts the
@@ -117,6 +118,37 @@ That reads the master, snaps every pixel to a class, traces each terrain into ou
 writes the world the game draws. It prints what it found: how many pixels were not an exact class colour,
 which unexpected colours it had to reach for, and how many shapes each terrain became. Then reload the
 app.
+
+**The third works out what kind of place every part of the world is, and where the scenery clumps.** It
+writes a **sprite map** beside the tiles: a biome for every sixteen world units and about six hundred
+thousand stands, five megabytes in all, in about half a minute. What grows in each biome is
+`world/biomes.json`, which is hand-edited the way `world/painterly.json` is. **A master with no sprite
+map draws no scenery at all**, which is the rule rather than a fault - so a new candidate is bare until
+this is run on it. It takes the master's name: `-- terrain2`. See `docs/adr/0054` and
+`docs/plans/biome-sprite-map.md`.
+
+There is a button for it too, beside `cut it` in the **Debug map** panel, and `cut it` runs it as well -
+a repaint makes the tiles and the sprite map stale together. The separate button is for the other way a
+sprite map goes stale: saving `world/biomes.json`, which changes every master's scenery and no master's
+image. The panel watches that file and says which of the two it is waiting on. To look at the biomes
+themselves rather than the scenery standing on them, pick `Biome` in the renderer dropdown.
+
+To argue about what grows rather than about where the biomes are, there is a fourth command:
+
+```
+npm run world:scenery --prefix frontend
+```
+
+It paints five places at zoom 9.6 - the zoom the scenery is actually in - and stamps every point the
+sprite map asks for onto them, writing `world/painterly/<place>-scenery.png` and printing each one's
+count, its density against experiment 0006's ceiling, and which biomes and kinds it is made of. **The
+marks are marks, not silhouettes.** The sixteen shapes are drawn in the browser and there is nothing
+offline to draw them with, so this is a plan of what stands where and how big it is, not a picture of
+the game - the game's answer is the running map. Where it beats the running map is that it is a file:
+tune `world/biomes.json`, re-run the sprite map, re-run this, and the before and after sit side by side.
+
+`-- --at 15.5,61` looks anywhere at all, `-- --view alps` at one place, `-- --zoom 10.4` closer in,
+`-- --style flat` with the paint off, and `-- terrain2` at another master.
 
 It also writes a small terrain grid the game can ask questions of, such as what a house is standing on.
 

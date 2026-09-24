@@ -1,0 +1,942 @@
+{
+  "$comment": "What grows where. Hand-edited; see docs/plans/biome-sprite-map.md. A biome is matched on four axes, all 0 to 100, and the FIRST biome whose 'where' accepts all four wins - so order matters and the last one is the catch-all. 'grows' is keyed by terrain class name and its numbers are commonality: a weight, not a probability.",
+  "ceiling": 0.44,
+  "most": 0.31,
+  "region": {
+    "coarse": {
+      "cellsX": 72,
+      "cellsY": 36,
+      "seed": 20260921
+    },
+    "fine": {
+      "cellsX": 216,
+      "cellsY": 108,
+      "seed": 4801
+    },
+    "fineWeight": 0.35
+  },
+  "sway": {
+    "amount": 6,
+    "cellsX": 48,
+    "cellsY": 24,
+    "seed": 7717
+  },
+  "boundary": {
+    "wander": 7,
+    "scale": 26,
+    "seed": 9931
+  },
+  "kinds": [
+    { "name": "pine", "groundHeight": 3.0, "vary": 0.25, "order": 8, "gather": 0.95, "apart": 0.8, "underCanopy": false },
+    { "name": "spruce", "groundHeight": 3.4, "vary": 0.22, "order": 9, "gather": 0.96, "apart": 0.9, "underCanopy": false },
+    { "name": "birch", "groundHeight": 2.6, "vary": 0.3, "order": 6, "gather": 0.88, "apart": 0.7, "underCanopy": false },
+    { "name": "oak", "groundHeight": 3.8, "vary": 0.2, "order": 9, "gather": 0.92, "apart": 1.1, "underCanopy": false },
+    { "name": "beech", "groundHeight": 3.6, "vary": 0.2, "order": 9, "gather": 0.94, "apart": 1.0, "underCanopy": false },
+    { "name": "palm", "groundHeight": 3.2, "vary": 0.25, "order": 7, "gather": 0.85, "apart": 0.9, "underCanopy": false },
+    { "name": "jungle", "groundHeight": 4.2, "vary": 0.18, "order": 10, "gather": 0.96, "apart": 1.2, "underCanopy": false },
+    { "name": "acacia", "groundHeight": 2.8, "vary": 0.3, "order": 7, "gather": 0.6, "apart": 1.4, "underCanopy": false },
+    { "name": "mangrove", "groundHeight": 2.0, "vary": 0.25, "order": 5, "gather": 0.95, "apart": 0.5, "underCanopy": false },
+    { "name": "snag", "groundHeight": 2.4, "vary": 0.35, "order": 4, "gather": 0.15, "apart": 2.0, "underCanopy": true },
+    { "name": "scrub", "groundHeight": 1.8, "vary": 0.3, "order": 3, "gather": 0.5, "apart": 0.5, "underCanopy": true },
+    { "name": "heather", "groundHeight": 1.4, "vary": 0.3, "order": 1, "gather": 0.4, "apart": 0.3, "underCanopy": true },
+    { "name": "grass", "groundHeight": 1.4, "vary": 0.3, "order": 2, "gather": 0.25, "apart": 0.3, "underCanopy": true },
+    { "name": "reed", "groundHeight": 1.4, "vary": 0.25, "order": 2, "gather": 0.8, "apart": 0.3, "underCanopy": true },
+    { "name": "boulder", "groundHeight": 1.6, "vary": 0.4, "order": 5, "gather": 0.3, "apart": 0.8, "underCanopy": true },
+    { "name": "cactus", "groundHeight": 1.8, "vary": 0.3, "order": 4, "gather": 0.3, "apart": 1.0, "underCanopy": false }
+  ],
+  "biomes": [
+    {
+      "name": "highland",
+      "colour": "#8e93a8",
+      "where": {
+        "high": [45, 100]
+      },
+      "stands": {
+        "per1000": 5.0,
+        "reach": [3.0, 8.0],
+        "inside": 0.1575,
+        "outside": 0.01
+      },
+      "grows": {
+        "alpine-meadow": {
+          "grass": 10,
+          "boulder": 3,
+          "scrub": 2
+        },
+        "bare-rock": {
+          "boulder": 10
+        },
+        "conifer-forest": {
+          "spruce": 10,
+          "pine": 6,
+          "boulder": 2
+        },
+        "taiga": {
+          "spruce": 10,
+          "pine": 5,
+          "boulder": 2
+        },
+        "mixed-forest": {
+          "spruce": 6,
+          "birch": 6,
+          "pine": 4
+        },
+        "meadow": {
+          "grass": 10,
+          "boulder": 2
+        },
+        "heath": {
+          "heather": 10,
+          "boulder": 3,
+          "scrub": 2
+        },
+        "scrub": {
+          "scrub": 10,
+          "boulder": 4
+        },
+        "tundra": {
+          "heather": 8,
+          "boulder": 5
+        }
+      }
+    },
+    {
+      "name": "arctic",
+      "colour": "#a9b6c6",
+      "where": {
+        "warmth": [0, 20]
+      },
+      "stands": {
+        "per1000": 3.0,
+        "reach": [2.5, 7.0],
+        "inside": 0.175,
+        "outside": 0.005
+      },
+      "grows": {
+        "tundra": {
+          "heather": 10,
+          "boulder": 3,
+          "scrub": 1
+        },
+        "taiga-open": {
+          "birch": 6,
+          "heather": 8,
+          "snag": 0.6
+        },
+        "taiga": {
+          "spruce": 8,
+          "birch": 4,
+          "snag": 0.5
+        },
+        "bog": {
+          "heather": 8,
+          "reed": 3,
+          "snag": 0.8
+        },
+        "alpine-meadow": {
+          "grass": 8,
+          "boulder": 3
+        },
+        "bare-rock": {
+          "boulder": 8
+        }
+      }
+    },
+    {
+      "name": "boreal-dense",
+      "colour": "#27492f",
+      "where": {
+        "warmth": [20, 37],
+        "region": [0, 55]
+      },
+      "stands": {
+        "per1000": 6.0,
+        "reach": [3.0, 9.0],
+        "inside": 0.245,
+        "outside": 0.02
+      },
+      "grows": {
+        "taiga": {
+          "spruce": 10,
+          "pine": 9,
+          "birch": 2,
+          "snag": 0.4
+        },
+        "conifer-forest": {
+          "pine": 10,
+          "spruce": 7,
+          "birch": 2
+        },
+        "taiga-open": {
+          "pine": 5,
+          "birch": 5,
+          "heather": 5,
+          "snag": 0.6
+        },
+        "mixed-forest": {
+          "spruce": 6,
+          "pine": 5,
+          "birch": 5
+        },
+        "bog": {
+          "heather": 8,
+          "reed": 3,
+          "snag": 1
+        },
+        "marsh": {
+          "reed": 10,
+          "grass": 3
+        },
+        "meadow": {
+          "grass": 10,
+          "birch": 1
+        },
+        "heath": {
+          "heather": 10,
+          "scrub": 2
+        },
+        "farmland-with-woods": {
+          "spruce": 3,
+          "birch": 4,
+          "grass": 5
+        },
+        "alpine-meadow": {
+          "grass": 9,
+          "boulder": 2
+        },
+        "bare-rock": {
+          "boulder": 8
+        },
+        "floodplain": {
+          "grass": 8,
+          "reed": 4
+        }
+      }
+    },
+    {
+      "name": "boreal-open",
+      "colour": "#3f6b46",
+      "where": {
+        "warmth": [20, 37],
+        "region": [55, 100]
+      },
+      "stands": {
+        "per1000": 5.0,
+        "reach": [3.0, 8.0],
+        "inside": 0.187,
+        "outside": 0.0175
+      },
+      "grows": {
+        "taiga": {
+          "pine": 10,
+          "spruce": 4,
+          "birch": 4,
+          "snag": 0.8
+        },
+        "taiga-open": {
+          "pine": 4,
+          "birch": 7,
+          "heather": 8,
+          "snag": 1
+        },
+        "conifer-forest": {
+          "pine": 10,
+          "birch": 3
+        },
+        "mixed-forest": {
+          "pine": 5,
+          "birch": 7
+        },
+        "bog": {
+          "heather": 9,
+          "reed": 3,
+          "snag": 1.2
+        },
+        "marsh": {
+          "reed": 10,
+          "grass": 3
+        },
+        "meadow": {
+          "grass": 10
+        },
+        "heath": {
+          "heather": 10,
+          "scrub": 2
+        },
+        "tundra": {
+          "heather": 9,
+          "boulder": 3
+        },
+        "bare-rock": {
+          "boulder": 8
+        },
+        "floodplain": {
+          "grass": 8,
+          "reed": 4
+        }
+      }
+    },
+    {
+      "name": "northern-woods",
+      "colour": "#2f7a3d",
+      "where": {
+        "warmth": [37, 53],
+        "region": [0, 60]
+      },
+      "stands": {
+        "per1000": 6.0,
+        "reach": [3.0, 9.0],
+        "inside": 0.2655,
+        "outside": 0.0225
+      },
+      "grows": {
+        "mixed-forest": {
+          "oak": 7,
+          "pine": 7,
+          "birch": 5,
+          "spruce": 3
+        },
+        "broadleaf-forest": {
+          "oak": 10,
+          "beech": 6,
+          "birch": 3
+        },
+        "conifer-forest": {
+          "pine": 10,
+          "spruce": 5,
+          "birch": 2
+        },
+        "taiga": {
+          "spruce": 9,
+          "pine": 7,
+          "birch": 3
+        },
+        "taiga-open": {
+          "pine": 4,
+          "birch": 6,
+          "heather": 5
+        },
+        "farmland-with-woods": {
+          "oak": 5,
+          "birch": 3,
+          "grass": 6,
+          "scrub": 2
+        },
+        "meadow": {
+          "grass": 10,
+          "oak": 0.8
+        },
+        "heath": {
+          "heather": 10,
+          "scrub": 3
+        },
+        "scrub": {
+          "scrub": 10,
+          "grass": 4
+        },
+        "marsh": {
+          "reed": 10,
+          "grass": 3
+        },
+        "bog": {
+          "heather": 8,
+          "reed": 3,
+          "snag": 0.8
+        },
+        "floodplain": {
+          "grass": 9,
+          "reed": 4
+        },
+        "swamp-forest": {
+          "oak": 5,
+          "reed": 6,
+          "snag": 1.5
+        },
+        "alpine-meadow": {
+          "grass": 9,
+          "boulder": 2
+        },
+        "bare-rock": {
+          "boulder": 8
+        }
+      }
+    },
+    {
+      "name": "northern-heath",
+      "colour": "#6d6f8c",
+      "where": {
+        "warmth": [37, 53],
+        "region": [60, 100]
+      },
+      "stands": {
+        "per1000": 5.0,
+        "reach": [3.0, 8.0],
+        "inside": 0.177,
+        "outside": 0.025
+      },
+      "grows": {
+        "heath": {
+          "heather": 10,
+          "scrub": 3,
+          "boulder": 1
+        },
+        "mixed-forest": {
+          "pine": 6,
+          "birch": 6,
+          "oak": 3
+        },
+        "broadleaf-forest": {
+          "oak": 8,
+          "birch": 5
+        },
+        "conifer-forest": {
+          "pine": 10,
+          "birch": 3
+        },
+        "meadow": {
+          "grass": 10,
+          "heather": 2
+        },
+        "scrub": {
+          "scrub": 10,
+          "heather": 4
+        },
+        "bog": {
+          "heather": 10,
+          "reed": 2,
+          "snag": 1
+        },
+        "marsh": {
+          "reed": 10,
+          "grass": 3
+        },
+        "farmland-with-woods": {
+          "oak": 3,
+          "birch": 3,
+          "grass": 6,
+          "scrub": 3
+        },
+        "floodplain": {
+          "grass": 9,
+          "reed": 4
+        },
+        "tundra": {
+          "heather": 10,
+          "boulder": 2
+        },
+        "bare-rock": {
+          "boulder": 8
+        }
+      }
+    },
+    {
+      "name": "oceanic",
+      "colour": "#47a05a",
+      "where": {
+        "warmth": [53, 67],
+        "wet": [55, 100]
+      },
+      "stands": {
+        "per1000": 6.0,
+        "reach": [3.0, 9.0],
+        "inside": 0.1905,
+        "outside": 0.03
+      },
+      "grows": {
+        "broadleaf-forest": {
+          "oak": 10,
+          "beech": 8,
+          "birch": 3
+        },
+        "mixed-forest": {
+          "oak": 8,
+          "beech": 4,
+          "pine": 4,
+          "birch": 3
+        },
+        "farmland-with-woods": {
+          "oak": 6,
+          "scrub": 4,
+          "grass": 7
+        },
+        "meadow": {
+          "grass": 10,
+          "oak": 1,
+          "scrub": 1
+        },
+        "heath": {
+          "heather": 10,
+          "scrub": 3
+        },
+        "scrub": {
+          "scrub": 10,
+          "grass": 4
+        },
+        "marsh": {
+          "reed": 10,
+          "grass": 3
+        },
+        "floodplain": {
+          "grass": 9,
+          "reed": 5
+        },
+        "swamp-forest": {
+          "oak": 5,
+          "reed": 6,
+          "snag": 1.5
+        },
+        "bog": {
+          "heather": 8,
+          "reed": 3,
+          "snag": 1
+        },
+        "conifer-forest": {
+          "pine": 10,
+          "spruce": 4
+        },
+        "alpine-meadow": {
+          "grass": 9,
+          "boulder": 2
+        },
+        "bare-rock": {
+          "boulder": 8
+        }
+      }
+    },
+    {
+      "name": "temperate",
+      "colour": "#5aad3d",
+      "where": {
+        "warmth": [53, 67]
+      },
+      "stands": {
+        "per1000": 6.0,
+        "reach": [3.0, 9.0],
+        "inside": 0.238,
+        "outside": 0.0225
+      },
+      "grows": {
+        "broadleaf-forest": {
+          "oak": 10,
+          "beech": 7,
+          "birch": 2
+        },
+        "mixed-forest": {
+          "oak": 7,
+          "pine": 6,
+          "beech": 4,
+          "birch": 3
+        },
+        "conifer-forest": {
+          "pine": 10,
+          "spruce": 4
+        },
+        "farmland-with-woods": {
+          "oak": 6,
+          "grass": 6,
+          "scrub": 3
+        },
+        "meadow": {
+          "grass": 10,
+          "oak": 0.8
+        },
+        "steppe": {
+          "grass": 10,
+          "scrub": 2
+        },
+        "scrub": {
+          "scrub": 10,
+          "grass": 4
+        },
+        "heath": {
+          "heather": 10,
+          "scrub": 3
+        },
+        "marsh": {
+          "reed": 10,
+          "grass": 3
+        },
+        "floodplain": {
+          "grass": 9,
+          "reed": 4
+        },
+        "swamp-forest": {
+          "oak": 5,
+          "reed": 6,
+          "snag": 1.5
+        },
+        "alpine-meadow": {
+          "grass": 9,
+          "boulder": 2
+        },
+        "bare-rock": {
+          "boulder": 8
+        }
+      }
+    },
+    {
+      "name": "mediterranean",
+      "colour": "#9aa63c",
+      "where": {
+        "warmth": [67, 80],
+        "wet": [35, 100]
+      },
+      "stands": {
+        "per1000": 5.0,
+        "reach": [3.0, 8.0],
+        "inside": 0.197,
+        "outside": 0.025
+      },
+      "grows": {
+        "scrub": {
+          "scrub": 10,
+          "oak": 2,
+          "grass": 3
+        },
+        "dry-forest": {
+          "oak": 8,
+          "scrub": 6,
+          "grass": 2
+        },
+        "broadleaf-forest": {
+          "oak": 10,
+          "beech": 3,
+          "scrub": 3
+        },
+        "conifer-forest": {
+          "pine": 10,
+          "scrub": 4
+        },
+        "mixed-forest": {
+          "oak": 7,
+          "pine": 6,
+          "scrub": 3
+        },
+        "farmland-with-woods": {
+          "oak": 4,
+          "scrub": 5,
+          "grass": 5
+        },
+        "meadow": {
+          "grass": 10,
+          "scrub": 2
+        },
+        "steppe": {
+          "grass": 9,
+          "scrub": 4
+        },
+        "marsh": {
+          "reed": 10,
+          "grass": 3
+        },
+        "floodplain": {
+          "grass": 8,
+          "reed": 4
+        },
+        "desert-stone": {
+          "scrub": 5,
+          "boulder": 4,
+          "cactus": 1
+        },
+        "alpine-meadow": {
+          "grass": 9,
+          "boulder": 2
+        },
+        "bare-rock": {
+          "boulder": 8
+        }
+      }
+    },
+    {
+      "name": "steppe",
+      "colour": "#c6c24a",
+      "where": {
+        "warmth": [60, 84]
+      },
+      "stands": {
+        "per1000": 3.0,
+        "reach": [2.5, 7.0],
+        "inside": 0.2625,
+        "outside": 0.025
+      },
+      "grows": {
+        "steppe": {
+          "grass": 10,
+          "scrub": 2
+        },
+        "scrub": {
+          "scrub": 10,
+          "grass": 5
+        },
+        "meadow": {
+          "grass": 10
+        },
+        "dry-forest": {
+          "oak": 5,
+          "scrub": 7,
+          "grass": 3
+        },
+        "savanna": {
+          "acacia": 4,
+          "grass": 10
+        },
+        "desert-stone": {
+          "scrub": 4,
+          "boulder": 4,
+          "cactus": 1.5
+        },
+        "floodplain": {
+          "grass": 9,
+          "reed": 4
+        },
+        "marsh": {
+          "reed": 10,
+          "grass": 3
+        },
+        "bare-rock": {
+          "boulder": 8
+        }
+      }
+    },
+    {
+      "name": "desert-margin",
+      "colour": "#cba06a",
+      "where": {
+        "warmth": [78, 95],
+        "wet": [0, 35]
+      },
+      "stands": {
+        "per1000": 3.0,
+        "reach": [2.5, 7.0],
+        "inside": 0.1225,
+        "outside": 0.006
+      },
+      "grows": {
+        "desert-stone": {
+          "cactus": 4,
+          "scrub": 5,
+          "boulder": 6
+        },
+        "scrub": {
+          "scrub": 10,
+          "cactus": 2,
+          "boulder": 2
+        },
+        "steppe": {
+          "grass": 8,
+          "scrub": 4
+        },
+        "savanna": {
+          "acacia": 3,
+          "grass": 8,
+          "scrub": 3
+        },
+        "dry-forest": {
+          "acacia": 6,
+          "scrub": 6
+        },
+        "bare-rock": {
+          "boulder": 8
+        },
+        "floodplain": {
+          "grass": 8,
+          "reed": 4
+        }
+      }
+    },
+    {
+      "name": "savanna",
+      "colour": "#d99a3a",
+      "where": {
+        "warmth": [78, 93]
+      },
+      "stands": {
+        "per1000": 5.0,
+        "reach": [3.0, 8.0],
+        "inside": 0.1575,
+        "outside": 0.025
+      },
+      "grows": {
+        "savanna": {
+          "acacia": 5,
+          "grass": 10,
+          "scrub": 3
+        },
+        "dry-forest": {
+          "acacia": 8,
+          "scrub": 5,
+          "grass": 4
+        },
+        "steppe": {
+          "grass": 10,
+          "acacia": 1,
+          "scrub": 2
+        },
+        "scrub": {
+          "scrub": 10,
+          "acacia": 2,
+          "grass": 4
+        },
+        "meadow": {
+          "grass": 10
+        },
+        "floodplain": {
+          "grass": 9,
+          "reed": 5
+        },
+        "marsh": {
+          "reed": 10,
+          "grass": 3
+        },
+        "rainforest": {
+          "jungle": 8,
+          "palm": 4
+        },
+        "desert-stone": {
+          "scrub": 4,
+          "boulder": 4,
+          "cactus": 1
+        },
+        "bare-rock": {
+          "boulder": 8
+        }
+      }
+    },
+    {
+      "name": "monsoon",
+      "colour": "#3f9e6e",
+      "where": {
+        "warmth": [88, 100],
+        "wet": [0, 62]
+      },
+      "stands": {
+        "per1000": 6.0,
+        "reach": [3.0, 9.0],
+        "inside": 0.204,
+        "outside": 0.025
+      },
+      "grows": {
+        "dry-forest": {
+          "acacia": 6,
+          "palm": 4,
+          "scrub": 5
+        },
+        "rainforest": {
+          "jungle": 9,
+          "palm": 5
+        },
+        "paddy": {
+          "reed": 8,
+          "palm": 2,
+          "grass": 3
+        },
+        "savanna": {
+          "acacia": 5,
+          "grass": 9
+        },
+        "swamp-forest": {
+          "palm": 5,
+          "reed": 7,
+          "snag": 1.5
+        },
+        "marsh": {
+          "reed": 10,
+          "grass": 3
+        },
+        "floodplain": {
+          "grass": 9,
+          "reed": 5
+        },
+        "scrub": {
+          "scrub": 10,
+          "grass": 4
+        },
+        "meadow": {
+          "grass": 10
+        },
+        "mangrove": {
+          "mangrove": 10,
+          "palm": 2
+        },
+        "bare-rock": {
+          "boulder": 8
+        }
+      }
+    },
+    {
+      "name": "tropical",
+      "colour": "#0f7f63",
+      "where": {
+        "warmth": [88, 100]
+      },
+      "stands": {
+        "per1000": 6.0,
+        "reach": [3.0, 9.0],
+        "inside": 0.272,
+        "outside": 0.03
+      },
+      "grows": {
+        "rainforest": {
+          "jungle": 10,
+          "palm": 5,
+          "scrub": 2
+        },
+        "swamp-forest": {
+          "jungle": 5,
+          "palm": 4,
+          "reed": 6,
+          "snag": 1.5
+        },
+        "mangrove": {
+          "mangrove": 10,
+          "palm": 2
+        },
+        "paddy": {
+          "reed": 8,
+          "palm": 3,
+          "grass": 3
+        },
+        "dry-forest": {
+          "palm": 5,
+          "acacia": 4,
+          "scrub": 5
+        },
+        "savanna": {
+          "acacia": 4,
+          "grass": 10,
+          "palm": 1
+        },
+        "marsh": {
+          "reed": 10,
+          "grass": 3
+        },
+        "floodplain": {
+          "grass": 8,
+          "reed": 5
+        },
+        "meadow": {
+          "grass": 10
+        },
+        "scrub": {
+          "scrub": 10,
+          "grass": 4
+        },
+        "bare-rock": {
+          "boulder": 8
+        }
+      }
+    },
+    {
+      "name": "none",
+      "colour": "#1d232b",
+      "where": {},
+      "stands": {
+        "per1000": 0,
+        "reach": [1, 1],
+        "inside": 0.0,
+        "outside": 0.0
+      },
+      "grows": {}
+    }
+  ]
+}

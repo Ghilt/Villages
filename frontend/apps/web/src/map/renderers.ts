@@ -1,6 +1,7 @@
 import type * as maplibregl from 'maplibre-gl';
 import type { Lattice } from '@villages/world';
 
+import { chosenMaster, worldRootOf } from './masters';
 import { PAINTED_MAX_ZOOM, PAINTED_TILE } from './painterlyMessages';
 import { painterlyTiles } from './painterlyTiles';
 
@@ -15,6 +16,12 @@ import { painterlyTiles } from './painterlyTiles';
  * `vivid` is painted like the rest and looks like neither: it draws the master's own colours with every
  * part of the medium turned off, so it is `raw` in the colours the world was actually painted in, at any
  * zoom and without cutting a second set of tiles. It answers a question rather than being a look.
+ *
+ * `biome` is not a look either, and is not even the terrain: it is the sprite map's own biome raster laid
+ * on the world, flat, one colour a biome. It goes through no painter and no worker, because the raster is
+ * already a Mercator square of the whole world - the same square the map is drawn on - so MapLibre places
+ * it on the world's own corners and stretches it at any zoom. It is deliberately blocky: a biome is
+ * sixteen world units, and seeing exactly how coarse that is is the point of looking.
  */
 
 export interface RendererChoice {
@@ -32,6 +39,7 @@ export const RENDERERS: readonly RendererChoice[] = [
   { name: 'dusk', title: 'Dusk', note: 'The painted treatment under a low sun and a blue shadow' },
   { name: 'vivid', title: 'Vivid', note: "The master's own colours, pushed, with no medium over them" },
   { name: 'plate', title: 'Plate', note: "Raw's quieter colours, pushed the way vivid pushes the master's" },
+  { name: 'biome', title: 'Biome', note: 'Not the terrain: what kind of place the sprite map thinks it is' },
 ];
 
 export const DEFAULT_RENDERER = 'painted';
@@ -73,6 +81,24 @@ const COARSE_LAYER = 'painterly-coarse';
 
 /** How much wider the coarse copy's tiles are declared than they are: four, which is two zooms. */
 const COARSE_STRETCH = 4;
+
+const BIOME_SOURCE = 'biome-raster';
+const BIOME_LAYER = 'biome-raster';
+
+/**
+ * The corners of the world, as the biome raster covers them.
+ *
+ * World space is the Mercator square (0030), and the raster is a square of it, so its corners are the
+ * square's corners: the whole of longitude, and latitude out to the Mercator limit. Anything less exact
+ * and the biome under the camera would disagree with the biome the scenery is reading.
+ */
+const MERCATOR_LIMIT = 85.051129;
+const WORLD_CORNERS: [[number, number], [number, number], [number, number], [number, number]] = [
+  [-180, MERCATOR_LIMIT],
+  [180, MERCATOR_LIMIT],
+  [180, -MERCATOR_LIMIT],
+  [-180, -MERCATOR_LIMIT],
+];
 /** Drawn as vectors over the flat tiles. A painted renderer draws its own shore and does not want them. */
 const INK_LAYERS = ['lake-shore', 'coast'];
 
@@ -89,15 +115,41 @@ const FLAT_LAYER = 'terrain';
 
 export function applyRenderer(map: maplibregl.Map, name: string, lattice: Lattice): void {
   // Swapping style means a different tile URL, so the sources go and come back rather than mutating.
-  for (const layer of [LAYER, COARSE_LAYER]) {
+  for (const [layer, source] of [
+    [LAYER, SOURCE],
+    [COARSE_LAYER, COARSE_SOURCE],
+    [BIOME_LAYER, BIOME_SOURCE],
+  ] as const) {
     if (map.getLayer(layer) !== undefined) {
       map.removeLayer(layer);
     }
-  }
-  for (const source of [SOURCE, COARSE_SOURCE]) {
     if (map.getSource(source) !== undefined) {
       map.removeSource(source);
     }
+  }
+
+  if (name === 'biome') {
+    // The flat terrain stays hidden under it: this is a different question about the same ground, and
+    // showing both at once would only make the biome's own edges hard to find.
+    for (const layer of [...INK_LAYERS, FLAT_LAYER]) {
+      if (map.getLayer(layer) !== undefined) {
+        map.setLayoutProperty(layer, 'visibility', 'none');
+      }
+    }
+    map.addSource(BIOME_SOURCE, {
+      type: 'image',
+      url: `${worldRootOf(chosenMaster())}/sprites/biome/biomes.png`,
+      coordinates: WORLD_CORNERS,
+    });
+    map.addLayer({
+      id: BIOME_LAYER,
+      type: 'raster',
+      source: BIOME_SOURCE,
+      // Nearest, so a biome cell is a square with an edge rather than a smear. The coarseness is the
+      // thing being looked at and softening it would be the panel lying about the resolution.
+      paint: { 'raster-opacity': 1, 'raster-resampling': 'nearest' },
+    });
+    return;
   }
 
   const painted = name !== 'raw';

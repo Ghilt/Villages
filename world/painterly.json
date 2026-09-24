@@ -43,12 +43,22 @@
         "forest": {
           "treatment": "stipple",
           "mark": 3.2,
-          "amount": 0.11
+          "amount": 0.11,
+          "handOver": {
+            "from": 0.8,
+            "to": 0.15,
+            "keep": 0.3
+          }
         },
         "open": {
           "treatment": "speckle",
           "mark": 2.6,
-          "amount": 0.055
+          "amount": 0.055,
+          "handOver": {
+            "from": 0.8,
+            "to": 0.15,
+            "keep": 0.3
+          }
         },
         "farmed": {
           "treatment": "patchwork",
@@ -188,12 +198,22 @@
         "forest": {
           "treatment": "stipple",
           "mark": 6,
-          "amount": 0.22
+          "amount": 0.22,
+          "handOver": {
+            "from": 0.8,
+            "to": 0.15,
+            "keep": 0.3
+          }
         },
         "open": {
           "treatment": "speckle",
           "mark": 5,
-          "amount": 0.1
+          "amount": 0.1,
+          "handOver": {
+            "from": 0.8,
+            "to": 0.15,
+            "keep": 0.3
+          }
         },
         "farmed": {
           "treatment": "patchwork",
@@ -333,12 +353,22 @@
         "forest": {
           "treatment": "stipple",
           "mark": 3.2,
-          "amount": 0.11
+          "amount": 0.11,
+          "handOver": {
+            "from": 0.8,
+            "to": 0.15,
+            "keep": 0.3
+          }
         },
         "open": {
           "treatment": "speckle",
           "mark": 2.6,
-          "amount": 0.055
+          "amount": 0.055,
+          "handOver": {
+            "from": 0.8,
+            "to": 0.15,
+            "keep": 0.3
+          }
         },
         "farmed": {
           "treatment": "patchwork",
