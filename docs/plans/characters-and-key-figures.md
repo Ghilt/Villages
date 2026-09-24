@@ -151,6 +151,10 @@ never waits on a house the browser happens not to hold. A reason code for every 
 **`characterGone`**. For each connection the gateway looks at the cell a character was in and the cell they
 are in now, and sends whichever of the three fits. A change to a stat sends no map delta at all.
 
+**Version 8, a correction.** Version 7 sent a character on the map without `bornOn` and `agedYears`,
+which the character's view above has, and an inspect window cannot say an age without them. They were put
+back, and because the change is inside a view the version moved by the convention below.
+
 `ProtocolShapeSpec` records the fields of a frame's top level and not what is inside a view, so a change
 inside a view moves the version by convention; the fixtures are what catch the format.
 
@@ -276,6 +280,9 @@ A menu rather than a queue, one commit each.
 | **18** | a key figure on the map: the sprite, its two forms, its colours, *put them here* | the map from zoom 9 |
 | **19** | inspecting a key figure: the subject, the trail, the window, the click | a window opened from a figure on the map |
 | *20* | optional: a lever to look at an earlier day, which nothing in the page does today | a figure absent on a day before they were placed |
+
+**Where it stands, 2026-09-24: nought to nineteen are built**, one commit each, and twenty is not. The
+wire is at version 8 rather than 7, for the correction above.
 
 One to ten are seen only through their specs, and eleven is the first thing on the screen. Twelve and
 thirteen need nothing from the server and can be taken at any point. Fourteen and fifteen could come before

@@ -25,14 +25,15 @@ is no MongoDB and no RabbitMQ on the machine yet.
 
 ## Now
 
-Characters and key figures are on the table. Nothing else here is started, and the four after them wait on
-the same thing.
+Characters and key figures are built and waiting on Adam's eye. Nothing else here is started, and the four
+after them wait on the same thing.
 
 - **Characters and key figures**: the people of the world, each with a history of their own, and the
   house's tie to the few it acts through, shown in a pane in the corner beside the house status. The shape
-  is decision record 0055; the steps, one commit each, are in `docs/plans/characters-and-key-figures.md`;
-  the hypothesis is experiment 0010. The portraits are Adam's own art, and placeholders stand in until he
-  has drawn them.
+  is decision record 0055, and the corner reaching along the bottom is 0056; the steps, one commit each,
+  are in `docs/plans/characters-and-key-figures.md`, and nought to nineteen are built; the hypothesis is
+  experiment 0010. The portraits are Adam's own art, and placeholders stand in until he has drawn them.
+  Step twenty, looking at an earlier day, is optional and not built.
 - **0.4** Local infrastructure: MongoDB replica set and RabbitMQ in Compose
 - **0.8** Testcontainers smoke test on MongoDB and RabbitMQ
 - **1.6** The bridge from the store to the broker
