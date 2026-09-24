@@ -22,9 +22,10 @@ import tools.jackson.databind.JsonNode
  * that: the shape of every frame is recorded in contracts/protocol-v<n>.txt, and a wire that has moved
  * without a new number is a failing build. Version 2 is the first gameplay loop, which added
  * `takeAction`, `yourChoice`, `wipeWorld` and `worldWiped`, and gave every event its provenance.
- * Version 3 added `seeAll`, the eye that sets significance aside.
+ * Version 3 added `seeAll`, the eye that sets significance aside. Version 6 added the key figures:
+ * `yourKeyFigures`, and the commands that bring one in and act through one. See decision record 0055.
  */
-const val PROTOCOL_VERSION = 5
+const val PROTOCOL_VERSION = 6
 
 data class Point(val lat: Double, val lon: Double)
 
@@ -114,6 +115,41 @@ data class YourHouseView(
 /** Where the world's clock stands: today's world-day, and the earliest day anything is known to exist from. */
 data class WorldNow(val today: Long, val earliest: Long)
 
+/** A house holding a character as a key figure, named the way a view of the tie needs it. */
+data class HolderView(val id: String, val name: String, val banner: BannerSpec)
+
+/**
+ * A character's four stats, each a whole number from one to twenty. On the owner's view of a key figure and
+ * nowhere else: what another house's people are like is that house's to know. See decision record 0055.
+ */
+data class StatsView(val piety: Int, val reason: Int, val kindness: Int, val physical: Int)
+
+/**
+ * One of the player's key figures, as the pane shows them.
+ *
+ * Their age is not on the wire. It is the completed months from `bornOn` to today, over twelve, plus
+ * `agedYears`, and the browser has the calendar to work it out and the day to work it out on. `version` is
+ * the read model's revision, so that of two copies of one figure the newer wins.
+ */
+@JsonInclude(JsonInclude.Include.NON_NULL)
+data class KeyFigureView(
+    val id: String,
+    val givenName: String,
+    val familyName: String,
+    /** `woman` or `man`. */
+    val sex: String,
+    /** `person`, and nothing else yet. */
+    val species: String,
+    val bornOn: Long,
+    val agedYears: Int,
+    val stats: StatsView,
+    /** The portrait's key, the file's name in `world/portraits/` without its `.png`; absent for none. */
+    val portrait: String? = null,
+    /** Every house holding them, in the order they were taken in: the first is whose colours they wear. */
+    val keyFigureOf: List<HolderView>,
+    val version: Long,
+)
+
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes(
     JsonSubTypes.Type(Hello::class, name = "hello"),
@@ -180,8 +216,13 @@ class WipeWorld : ClientFrame {
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes(
+    JsonSubTypes.Type(AddKeyFigurePayload::class, name = "addKeyFigure"),
+    JsonSubTypes.Type(AgeCharacterPayload::class, name = "ageCharacter"),
+    JsonSubTypes.Type(ChangePortraitPayload::class, name = "changePortrait"),
+    JsonSubTypes.Type(ChangeStatPayload::class, name = "changeStat"),
     JsonSubTypes.Type(FoundHousePayload::class, name = "foundHouse"),
     JsonSubTypes.Type(GrantResourcePayload::class, name = "grantResource"),
+    JsonSubTypes.Type(KillCharacterPayload::class, name = "killCharacter"),
     JsonSubTypes.Type(PledgeResourcePayload::class, name = "pledgeResource"),
     JsonSubTypes.Type(ReleasePledgePayload::class, name = "releasePledge"),
     JsonSubTypes.Type(SpendResourcePayload::class, name = "spendResource"),
@@ -234,6 +275,33 @@ data class ReleasePledgePayload(val pledgeId: String) : CommandPayload
  */
 data class TakeActionPayload(val choiceId: String, val optionId: String) : CommandPayload
 
+/**
+ * Bring a newcomer in as one of this player's house's key figures: rolled by the server and named by nobody.
+ * Adam's lever for now, and the only way a character comes into the world. See decision record 0055.
+ */
+class AddKeyFigurePayload : CommandPayload {
+    override fun equals(other: Any?): Boolean = other is AddKeyFigurePayload
+
+    override fun hashCode(): Int = javaClass.hashCode()
+
+    override fun toString(): String = "AddKeyFigurePayload"
+}
+
+/**
+ * The levers on one of this player's key figures. Each names the character, and the server asks the player's
+ * own house first: anybody who is not one of its key figures is refused `noSuchKeyFigure` before their record
+ * is touched. `stat` is `piety`, `reason`, `kindness` or `physical`, and `by` and `years` may be negative.
+ */
+data class ChangeStatPayload(val characterId: String, val stat: String, val by: Int) : CommandPayload
+
+data class AgeCharacterPayload(val characterId: String, val years: Int) : CommandPayload
+
+/** Another portrait by its key, or none when `portrait` is absent. */
+@JsonInclude(JsonInclude.Include.NON_NULL)
+data class ChangePortraitPayload(val characterId: String, val portrait: String? = null) : CommandPayload
+
+data class KillCharacterPayload(val characterId: String, val cause: String) : CommandPayload
+
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes(
     JsonSubTypes.Type(Welcome::class, name = "welcome"),
@@ -247,6 +315,7 @@ data class TakeActionPayload(val choiceId: String, val optionId: String) : Comma
     JsonSubTypes.Type(EventFrame::class, name = "event"),
     JsonSubTypes.Type(YourHouse::class, name = "yourHouse"),
     JsonSubTypes.Type(YourChoice::class, name = "yourChoice"),
+    JsonSubTypes.Type(YourKeyFigures::class, name = "yourKeyFigures"),
     JsonSubTypes.Type(TakenOver::class, name = "takenOver"),
     JsonSubTypes.Type(WorldWiped::class, name = "worldWiped"),
 )
@@ -297,6 +366,13 @@ data class TakenOver(val message: String) : ServerFrame
  * it changes, like `yourHouse`: what is pending is the player's, not the session's. See 0028 and 0034.
  */
 data class YourChoice(val choice: ChoiceView?) : ServerFrame
+
+/**
+ * The player's key figures, in the order their house took them in, wherever they are looking. Sent after
+ * `yourHouse` on hello, always a list and empty when there are none, and again whenever one is taken in or
+ * lost or changes in their own record. What a house holds is its own, like what it has. See decision 0055.
+ */
+data class YourKeyFigures(val keyFigures: List<KeyFigureView>) : ServerFrame
 
 /**
  * The world was emptied and this session is finished with it: it holds no cells, hears nothing more and

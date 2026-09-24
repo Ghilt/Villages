@@ -90,6 +90,38 @@ export const yourHouseViewSchema = z.object({
   pledges: z.array(pledgeViewSchema),
 });
 
+/** A character's four stats by the wire's names. Piety and reason are the resources' words on purpose. */
+export const statNameSchema = z.enum(['piety', 'reason', 'kindness', 'physical']);
+export const sexSchema = z.enum(['woman', 'man']);
+export const speciesSchema = z.enum(['person']);
+
+/** A stat is a whole number from one to twenty. */
+const statSchema = z.number().int().min(1).max(20);
+
+/** A house holding a character as a key figure, named the way a view of the tie needs it. */
+export const holderViewSchema = z.object({ id: z.string(), name: z.string(), banner: bannerSchema });
+
+/**
+ * One of the player's key figures, as the pane shows them. Their age is not on the wire: it is the completed
+ * months from `bornOn` to today, over twelve, plus `agedYears`, worked out here with the calendar. The stats
+ * are on the owner's view and nobody else's. `version` is the read model's revision. See decision 0055.
+ */
+export const keyFigureViewSchema = z.object({
+  id: z.string(),
+  givenName: z.string(),
+  familyName: z.string(),
+  sex: sexSchema,
+  species: speciesSchema,
+  bornOn: worldDaySchema,
+  agedYears: z.number().int(),
+  stats: z.object({ piety: statSchema, reason: statSchema, kindness: statSchema, physical: statSchema }),
+  /** The portrait's key, its file's name in `world/portraits/` without the `.png`. Absent means none. */
+  portrait: z.string().optional(),
+  /** Every house holding them, in the order they were taken in: the first is whose colours they wear. */
+  keyFigureOf: z.array(holderViewSchema),
+  version: z.number().int(),
+});
+
 /** What taking an option would do. `kind` names the case, as it does in the store. See 0034. */
 export const effectViewSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('foundAt'), seat: pointSchema, name: z.string(), banner: bannerSchema }),
@@ -144,6 +176,22 @@ export const commandPayloadSchema = z.discriminatedUnion('type', [
     choiceId: z.string(),
     optionId: z.string(),
   }),
+  /** Bring a newcomer in as a key figure: rolled by the server, named by nobody. Adam's lever. See 0055. */
+  z.object({ type: z.literal('addKeyFigure') }),
+  /**
+   * The levers on one of the player's key figures. The server asks the player's own house first, and anybody
+   * who is not one of its key figures is refused `noSuchKeyFigure`. `by` and `years` may be negative.
+   */
+  z.object({
+    type: z.literal('changeStat'),
+    characterId: z.string(),
+    stat: statNameSchema,
+    by: z.number().int(),
+  }),
+  z.object({ type: z.literal('ageCharacter'), characterId: z.string(), years: z.number().int() }),
+  /** Another portrait by its key, or none when `portrait` is absent. */
+  z.object({ type: z.literal('changePortrait'), characterId: z.string(), portrait: z.string().optional() }),
+  z.object({ type: z.literal('killCharacter'), characterId: z.string(), cause: z.string() }),
 ]);
 
 export const clientFrameSchema = z.discriminatedUnion('type', [
@@ -179,6 +227,8 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('yourHouse'), yours: yourHouseViewSchema.nullable() }),
   /** What this player has to decide, or null when they have nothing. The parchment's one frame. */
   z.object({ type: z.literal('yourChoice'), choice: choiceViewSchema.nullable() }),
+  /** The player's key figures in the order their house took them in, always a list. The pane's frame. */
+  z.object({ type: z.literal('yourKeyFigures'), keyFigures: z.array(keyFigureViewSchema) }),
   /** Another window took this player over; this session is finished. */
   z.object({ type: z.literal('takenOver'), message: z.string() }),
   /** The world was emptied and this session is finished with it. Everyone is told. See 0036. */
@@ -224,6 +274,10 @@ export type HouseView = z.infer<typeof houseViewSchema>;
 export type EffectView = z.infer<typeof effectViewSchema>;
 export type OptionView = z.infer<typeof optionViewSchema>;
 export type ChoiceView = z.infer<typeof choiceViewSchema>;
+export type StatName = z.infer<typeof statNameSchema>;
+export type Sex = z.infer<typeof sexSchema>;
+export type HolderView = z.infer<typeof holderViewSchema>;
+export type KeyFigureView = z.infer<typeof keyFigureViewSchema>;
 export type CommandPayload = z.infer<typeof commandPayloadSchema>;
 export type ClientFrame = z.infer<typeof clientFrameSchema>;
 export type Delta = z.infer<typeof deltaSchema>;

@@ -1,6 +1,7 @@
 package villages.gateway
 
 import villages.application.Arrival
+import villages.application.CharacterRow
 import villages.application.ChoiceRow
 import villages.application.ChoicesByPlayer
 import villages.application.EventFeed
@@ -9,6 +10,8 @@ import villages.application.HouseChange
 import villages.application.HouseRow
 import villages.application.HousesByCell
 import villages.application.HousesByPlayer
+import villages.application.KeyFigureService
+import villages.application.KeyFiguresByHouse
 import villages.application.PlayerTokens
 import villages.application.Later
 import villages.application.Provenance
@@ -23,6 +26,7 @@ import villages.application.WorldWipe
 import villages.application.WriteConflict
 import villages.domain.Banner
 import villages.domain.CharacterError
+import villages.domain.CharacterId
 import villages.domain.Choice
 import villages.domain.ChoiceId
 import villages.domain.Effect
@@ -35,10 +39,15 @@ import villages.domain.OptionId
 import villages.domain.PlayerId
 import villages.domain.PledgeId
 import villages.domain.Resource
+import villages.domain.Stat
 import villages.domain.WorldTime
+import villages.protocol.AddKeyFigurePayload
+import villages.protocol.AgeCharacterPayload
 import villages.protocol.BannerSpec
 import villages.protocol.Batch
 import villages.protocol.Cell
+import villages.protocol.ChangePortraitPayload
+import villages.protocol.ChangeStatPayload
 import villages.protocol.Charge
 import villages.protocol.ChoiceView
 import villages.protocol.ClientFrame
@@ -54,9 +63,12 @@ import villages.protocol.FoundAtView
 import villages.protocol.FoundHousePayload
 import villages.protocol.GrantResourcePayload
 import villages.protocol.Hello
+import villages.protocol.HolderView
 import villages.protocol.HouseAppeared
 import villages.protocol.HouseChanged
 import villages.protocol.HouseView
+import villages.protocol.KeyFigureView
+import villages.protocol.KillCharacterPayload
 import villages.protocol.OptionView
 import villages.protocol.PROTOCOL_VERSION
 import villages.protocol.Ping
@@ -71,6 +83,7 @@ import villages.protocol.SeeAll
 import villages.protocol.ServerFrame
 import villages.protocol.Snapshot
 import villages.protocol.SpendResourcePayload
+import villages.protocol.StatsView
 import villages.protocol.Stock
 import villages.protocol.SubscribeCells
 import villages.protocol.TakeActionPayload
@@ -86,6 +99,7 @@ import villages.protocol.WorldWiped
 import villages.protocol.YourChoice
 import villages.protocol.YourHouse
 import villages.protocol.YourHouseView
+import villages.protocol.YourKeyFigures
 import villages.protocol.coarsestZoom
 import java.time.Clock
 import java.util.concurrent.ConcurrentHashMap
@@ -139,6 +153,8 @@ class Gateway(
     private val choices: ChoicesByPlayer,
     private val recent: RecentEvents,
     private val emptyTheWorld: WorldWipe,
+    private val keyFigures: KeyFigureService,
+    private val figures: KeyFiguresByHouse,
     private val later: Later = ScheduledLater(),
 ) : AutoCloseable {
     private val watching = ConcurrentHashMap<Connection, Unit>()
@@ -163,6 +179,14 @@ class Gateway(
     /** What a player has to decide reaches them wherever they are looking, like their house does. */
     private val asked: AutoCloseable = choices.watch { player, row ->
         sessions[player]?.tellChoice(row?.choice?.toView())
+    }
+
+    /**
+     * A house's key figures reach its player wherever they are looking, like the house does: whom a house
+     * holds is its own, and needs no cell. See decision record 0055.
+     */
+    private val figuresChanged: AutoCloseable = figures.watch { change ->
+        sessions[change.player]?.out?.send(YourKeyFigures(change.keyFigures.map { it.toView() }))
     }
 
     fun connect(out: Outbound): Connection = Connection(out).also { live += it }
@@ -216,6 +240,7 @@ class Gateway(
         feed.close()
         changes.close()
         asked.close()
+        figuresChanged.close()
         (later as? AutoCloseable)?.close()
     }
 
@@ -344,6 +369,7 @@ class Gateway(
                 ),
             )
             out.send(YourHouse(theirHouses.ofPlayer(who)?.toYours()))
+            out.send(YourKeyFigures(figures.of(HouseId.of(who)).map { it.toView() }))
 
             // Arriving with no house and nothing to decide is what the founding choice answers. The
             // choice arrive() hands back is what goes out, not a read of the projection: the projection
@@ -447,6 +473,37 @@ class Gateway(
                             commandId = commandId,
                             correlationId = pendingStory(who) ?: commandId,
                         ),
+                    )
+
+                    is AddKeyFigurePayload -> keyFigures.add(who, Provenance.startedBy(commandId))
+
+                    is ChangeStatPayload -> keyFigures.changeStat(
+                        player = who,
+                        characterId = CharacterId(asUuid(payload.characterId, "a character id")),
+                        stat = asStat(payload.stat),
+                        by = payload.by,
+                        provenance = Provenance.startedBy(commandId),
+                    )
+
+                    is AgeCharacterPayload -> keyFigures.age(
+                        player = who,
+                        characterId = CharacterId(asUuid(payload.characterId, "a character id")),
+                        years = payload.years,
+                        provenance = Provenance.startedBy(commandId),
+                    )
+
+                    is ChangePortraitPayload -> keyFigures.changePortrait(
+                        player = who,
+                        characterId = CharacterId(asUuid(payload.characterId, "a character id")),
+                        portrait = payload.portrait,
+                        provenance = Provenance.startedBy(commandId),
+                    )
+
+                    is KillCharacterPayload -> keyFigures.kill(
+                        player = who,
+                        characterId = CharacterId(asUuid(payload.characterId, "a character id")),
+                        cause = payload.cause,
+                        provenance = Provenance.startedBy(commandId),
                     )
                 }
                 out.send(CommandAccepted(frame.commandId))
@@ -612,6 +669,34 @@ private fun asResource(name: String): Resource =
 private fun asUuid(value: String, what: String): java.util.UUID =
     runCatching { java.util.UUID.fromString(value) }
         .getOrElse { throw IllegalArgumentException("$what is a UUID, not $value") }
+
+/** A stat named on the wire, which is its name in lower case, or the refusal. */
+private fun asStat(name: String): Stat =
+    Stat.entries.firstOrNull { it.name.lowercase() == name }
+        ?: throw IllegalArgumentException("not a stat: $name")
+
+/**
+ * A key figure as the pane shows them: the whole row, with the stats, because this goes to the session of a
+ * house that holds them and to nobody else. See decision record 0055.
+ */
+internal fun CharacterRow.toView(): KeyFigureView = KeyFigureView(
+    id = id.value.toString(),
+    givenName = name.given,
+    familyName = name.family,
+    sex = sex.name.lowercase(),
+    species = species.name.lowercase(),
+    bornOn = bornOn.day,
+    agedYears = agedYears,
+    stats = StatsView(
+        piety = stats.getValue(Stat.PIETY),
+        reason = stats.getValue(Stat.REASON),
+        kindness = stats.getValue(Stat.KINDNESS),
+        physical = stats.getValue(Stat.PHYSICAL),
+    ),
+    portrait = portrait,
+    keyFigureOf = keyFigureOf.map { HolderView(it.house.value.toString(), it.name.value, it.banner.toWire()) },
+    version = revision,
+)
 
 /** A choice as the parchment shows it. What the interface renders and the whole of what it knows. */
 internal fun Choice.toView(): ChoiceView = ChoiceView(

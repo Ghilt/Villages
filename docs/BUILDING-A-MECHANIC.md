@@ -31,16 +31,16 @@ Answer these before touching code, in a paragraph Adam can read back. The answer
    every feature; the second should not. A thing that has not happened yet but is asked for is a
    command, in the imperative: *found the house*. See decision record 0034.
 2. **Whose history is it?** Every event belongs to one stream, and the stream is the thing whose
-   history it is. Today there is one kind of thing, the house, and a player's house has the player's
-   identity (decision 0028), so anything a player is offered or does is the house's history: the vision
-   says decisions are taken in the house's name and remembered as the house's history. A thing whose
-   lifetime is shared between houses, a cathedral, a territory or a person, is its own stream when it comes
-   (`ARCHITECTURE.md`, "things with lifetimes are their own streams"). The first, the character, is decided
-   in decision record 0055 and not built yet; what a house is to such a thing is still the house's history.
+   history it is. There are two kinds of thing today. The house has the player's identity (decision
+   0028), so anything a player is offered or does is the house's history: the vision says decisions are
+   taken in the house's name and remembered as the house's history. A thing whose lifetime is shared
+   between houses, a cathedral, a territory or a person, is its own stream (`ARCHITECTURE.md`, "things
+   with lifetimes are their own streams"), and the character is the first of them, decision record 0055.
+   What a house is to such a thing is still the house's history, as a key figure is.
 3. **What does the player see?** Which frame carries it, and from where: a view read from a projection
-   (`snapshot`, `batch`, `yourHouse`, `yourChoice`) for the interface, and the stored event itself on
-   the `event` frame for the debug panel. Then which panel line says it happened, in words. A behaviour
-   the panel cannot show is one Adam cannot verify (decision 0023).
+   (`snapshot`, `batch`, `yourHouse`, `yourChoice`, `yourKeyFigures`) for the interface, and the
+   stored event itself on the `event` frame for the debug panel. Then which panel line says it happened,
+   in words. A behaviour the panel cannot show is one Adam cannot verify (decision 0023).
 4. **What can the player do about it?** A command, its payload, and its refusals. The payload never
    carries what the server can work out: not the house's id, not the player, not the instant, not the
    story a command continues. Each way it can be refused is a `DomainError` named for the rule, under
@@ -147,7 +147,7 @@ first: see `ARCHITECTURE.md` on what acts on its own for the rules a reaction ke
   catalogued on the wrong side of the line fails rather than drifting.
 - A command is an imperative: `FoundHouse`, `GiveChoice`, `TakeAction`. Its payload on the wire is the
   same words in camelCase: `foundHouse`, `takeAction`.
-- A frame about the player's own things is `your` and the thing: `yourHouse`, `yourChoice`.
+- A frame about the player's own things is `your` and the thing: `yourHouse`, `yourChoice`, `yourKeyFigures`.
 - A refusal is named for the rule it enforces, `ChoicePending`, `NoSuchOption`, under the `DomainError`
   of the kind of thing whose rule it is, and its reason code on the wire is the same in camelCase.
 - Every word comes from `GLOSSARY.md` and is used verbatim in code, events and interface. A new word

@@ -201,6 +201,8 @@ class WorldConfig {
         worldWipe: WorldWipe,
         clock: Clock,
         worldClock: WorldClock,
+        keyFigures: KeyFigureService,
+        characters: CharactersProjection,
     ): Gateway = Gateway(
         tokens = AnonymousTokens,
         foundHouse = foundHouse,
@@ -215,5 +217,7 @@ class WorldConfig {
         choices = choices,
         recent = recentEvents,
         emptyTheWorld = worldWipe,
+        keyFigures = keyFigures,
+        figures = characters,
     )
 }

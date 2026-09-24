@@ -3,6 +3,7 @@ package villages.app
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
@@ -17,11 +18,13 @@ import villages.protocol.ServerFrame
 import villages.protocol.Snapshot
 import villages.protocol.TakenOver
 import villages.protocol.FoundAtView
+import villages.protocol.KeyFigureView
 import villages.protocol.Welcome
 import villages.protocol.PROTOCOL_VERSION
 import villages.protocol.WorldWiped
 import villages.protocol.YourChoice
 import villages.protocol.YourHouse
+import villages.protocol.YourKeyFigures
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
 
@@ -128,6 +131,58 @@ class AppBootsTest {
 
         // And nothing is left to decide.
         window.until("an empty parchment") { frames -> frames.filterIsInstance<YourChoice>().last().choice == null }
+
+        window.close()
+    }
+
+    @Test
+    fun `a house takes a key figure in with a portrait from the folder, and their death reaches the house`() {
+        val keeper = "7d2e5f10-3c4b-4a8d-9e6f-1a2b3c4d5e6f"
+        val window = Window(port)
+        window.say("""{"type":"watchEvents","on":true}""")
+        window.say("""{"type":"hello","playerToken":"$keeper","protocolVersion":$PROTOCOL_VERSION}""")
+        window.until("the key figures") { frames -> frames.any { it is YourKeyFigures } }
+        assertEquals(emptyList<KeyFigureView>(), window.last<YourKeyFigures>().keyFigures)
+
+        // Far from every other test's house, because they share one world and some of them count a cell.
+        window.say(
+            """{"type":"command","commandId":"1c000005-0000-4000-8000-00000000000e","command":{"type":"foundHouse",""" +
+                """"name":"Keepwell","seat":{"lat":-33.9,"lon":151.2},""" +
+                """"banner":{"field":"vert","division":"plain","charge":"star","chargeTincture":"or"}}}""",
+        )
+        window.until("the house") { frames -> frames.filterIsInstance<YourHouse>().last().yours != null }
+        val adding = "1c000006-0000-4000-8000-00000000000f"
+        window.say("""{"type":"command","commandId":"$adding","command":{"type":"addKeyFigure"}}""")
+        window.until("a key figure") { frames ->
+            frames.filterIsInstance<YourKeyFigures>().last().keyFigures.size == 1
+        }
+
+        // Rolled by the server, with one of the portraits in world/portraits that suits them.
+        val figure = window.last<YourKeyFigures>().keyFigures.single()
+        assertNotNull(figure.portrait, "a portrait from the folder for $figure")
+        assertTrue(figure.portrait!!.startsWith("${figure.sex}-"), "a portrait that suits them: $figure")
+
+        // The chronicle reads in the order it happened: the newcomer appears, then the house takes them in.
+        window.until("the two events") { frames -> frames.filterIsInstance<EventFrame>().count { it.causationId == adding } == 2 }
+        val takenIn = window.heard.filterIsInstance<EventFrame>().filter { it.causationId == adding }
+        assertEquals(listOf("villages.character.appeared.v1", "villages.house.gainedKeyFigure.v1"), takenIn.map { it.eventType })
+
+        val killing = "1c000007-0000-4000-8000-000000000010"
+        window.say(
+            """{"type":"command","commandId":"$killing","command":{"type":"killCharacter",""" +
+                """"characterId":"${figure.id}","cause":"struck down from the debug panel"}}""",
+        )
+        window.until("the loss") { frames ->
+            frames.filterIsInstance<EventFrame>().any { it.eventType == "villages.house.lostKeyFigure.v1" }
+        }
+        assertEquals(emptyList<KeyFigureView>(), window.last<YourKeyFigures>().keyFigures)
+
+        // The mourning's loss is part of the death's story, and caused by it.
+        val events = window.heard.filterIsInstance<EventFrame>()
+        val died = events.single { it.eventType == "villages.character.died.v1" }
+        val lost = events.single { it.eventType == "villages.house.lostKeyFigure.v1" }
+        assertEquals(died.correlationId, lost.correlationId)
+        assertEquals(died.id, lost.causationId)
 
         window.close()
     }

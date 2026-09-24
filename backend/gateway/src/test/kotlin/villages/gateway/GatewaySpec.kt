@@ -13,8 +13,10 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import villages.application.AnonymousTokens
 import villages.application.Arrival
 import villages.application.EventFeed
+import villages.application.CharacterCommandExecutor
 import villages.application.FoundHouseService
 import villages.application.HouseCommandExecutor
+import villages.application.KeyFigureService
 import villages.application.Later
 import villages.application.Provenance
 import villages.application.ResourceService
@@ -25,6 +27,9 @@ import villages.application.WorldCalendar
 import villages.application.WorldClock
 import villages.application.WriteConflict
 import villages.domain.Effect
+import villages.domain.CharacterCommand
+import villages.domain.CharacterDecider
+import villages.domain.CharacterEvent
 import villages.domain.HouseCommand
 import villages.domain.HouseDecider
 import villages.domain.HouseEvent
@@ -40,6 +45,7 @@ import villages.domain.HouseId
 import villages.domain.PlayerTookAction
 import villages.domain.PlayerId
 import villages.domain.WorldTime
+import villages.projections.CharactersProjection
 import villages.projections.ChoicesProjection
 import villages.projections.HousesProjection
 import villages.projections.RecentEventsProjection
@@ -62,7 +68,9 @@ import villages.protocol.Welcome
 import villages.protocol.WorldWiped
 import villages.protocol.WorldNow
 import villages.protocol.YourChoice
+import villages.protocol.StatsView
 import villages.protocol.YourHouse
+import villages.protocol.YourKeyFigures
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneOffset
@@ -98,8 +106,34 @@ private fun dataOf(event: HouseEvent): String = when (event) {
     is PlayerTookAction -> """{"optionId":"${event.optionId.value}"}"""
 }
 
-private class TinyWorld : HouseCommandExecutor, EventFeed {
+/** A character's events, catalogued the same way; the panel's copy of their data is not what is tested here. */
+private fun typeOf(event: CharacterEvent): String =
+    "villages.character.${event::class.simpleName!!.removePrefix("Character").replaceFirstChar { it.lowercase() }}.v1"
+
+private class TinyWorld : HouseCommandExecutor, CharacterCommandExecutor, EventFeed {
     val events = mutableListOf<HouseEvent>()
+    val characterEvents = mutableListOf<CharacterEvent>()
+
+    override fun execute(command: CharacterCommand, provenance: Provenance) {
+        val stream = characterEvents.filter { it.characterId == command.characterId }
+        val fresh = CharacterDecider.decide(command, CharacterDecider.fold(stream))
+        characterEvents += fresh
+        fresh.forEachIndexed { index, event ->
+            val record = StoredEvent(
+                id = "c-${characterEvents.size}-$index",
+                type = typeOf(event),
+                stream = event.characterId.stream,
+                streamVersion = (stream.size + index + 1).toLong(),
+                time = event.recordedAt,
+                data = "{}",
+                correlationId = provenance.correlationId.toString(),
+                causationId = provenance.commandId.toString(),
+                event = event,
+            )
+            this.stored += record
+            subscribers.toList().forEach { it(record) }
+        }
+    }
 
     /** When set, every command loses the race for its stream, the way a contested one behaves. */
     var contested = false
@@ -219,12 +253,27 @@ private fun unsubscribe(vararg cells: String) =
 
 private fun seeAll(on: Boolean) = """{"type":"seeAll","on":$on}"""
 
+private fun addingAKeyFigure(commandId: String) =
+    """{"type":"command","commandId":"$commandId","command":{"type":"addKeyFigure"}}"""
+
+private fun changingStat(characterId: String, stat: String, by: Int, commandId: String) =
+    """{"type":"command","commandId":"$commandId","command":{"type":"changeStat",""" +
+        """"characterId":"$characterId","stat":"$stat","by":$by}}"""
+
+private fun killing(characterId: String, commandId: String) =
+    """{"type":"command","commandId":"$commandId","command":{"type":"killCharacter",""" +
+        """"characterId":"$characterId","cause":"struck down from the debug panel"}}"""
+
+/** A command id of its own for every command a test sends, since a key figure's id is worked out from one. */
+private fun commandNumber(n: Int) = "c0000000-0000-4000-8000-%012d".format(n)
+
 private class Rig {
     val world = TinyWorld()
     val later = ManualLater()
     val houses = HousesProjection(world)
     val choices = ChoicesProjection(world)
     val recent = RecentEventsProjection(world)
+    val characters = CharactersProjection(world)
     val worldClock = WorldClock { today }
     var minted = 0
     val gateway = Gateway(
@@ -253,13 +302,26 @@ private class Rig {
         choices = choices,
         recent = recent,
         emptyTheWorld = {
-            val gone = world.events.size
+            val gone = world.events.size + world.characterEvents.size
             world.events.clear()
+            world.characterEvents.clear()
             houses.reset()
             choices.reset()
             recent.reset()
+            characters.reset()
             gone
         },
+        // A die that always comes up one, so every newcomer is the same known woman of eighteen.
+        keyFigures = KeyFigureService(
+            houses = world,
+            characters = world,
+            clock = { noon },
+            world = worldClock,
+            calendar = thirtyDayMonths,
+            dice = { 1 },
+            portraits = { listOf("woman-01", "man-01") },
+        ),
+        figures = characters,
         later = later,
     )
 
@@ -307,6 +369,97 @@ class GatewaySpec : StringSpec({
         // Arriving with no house is what the founding choice answers, and it is said exactly once.
         sent.filterIsInstance<YourChoice>().single().choice?.prompt shouldBe
             "Where shall the house raise its seat?"
+    }
+
+    "hello also says which key figures the house holds, which is none before it holds any" {
+        val sent = mutableListOf<ServerFrame>()
+        Rig().gateway.connect { sent += it }.receive(hello)
+
+        sent[2] shouldBe YourKeyFigures(emptyList())
+    }
+
+    "a house takes a key figure in, and its player is told who they are, stats and all" {
+        val rig = Rig()
+        val (mine, sent) = rig.introduced()
+        mine.receive(founding())
+        sent.clear()
+
+        mine.receive(addingAKeyFigure(commandNumber(1)))
+
+        sent.filterIsInstance<CommandAccepted>().single().commandId shouldBe commandNumber(1)
+        val agnes = sent.filterIsInstance<YourKeyFigures>().last().keyFigures.single()
+        agnes.givenName shouldBe "Agnes"
+        agnes.familyName shouldBe "Achterberg"
+        agnes.sex shouldBe "woman"
+        agnes.species shouldBe "person"
+        agnes.stats shouldBe StatsView(piety = 3, reason = 3, kindness = 3, physical = 3)
+        agnes.portrait shouldBe "woman-01"
+        agnes.keyFigureOf.single().name shouldBe "Ravenscar"
+    }
+
+    "a lever on one of the house's own key figures changes what its player is told" {
+        val rig = Rig()
+        val (mine, sent) = rig.introduced()
+        mine.receive(founding())
+        mine.receive(addingAKeyFigure(commandNumber(1)))
+        val agnes = sent.filterIsInstance<YourKeyFigures>().last().keyFigures.single().id
+
+        mine.receive(changingStat(agnes, "piety", 2, commandNumber(2)))
+
+        sent.filterIsInstance<CommandAccepted>().last().commandId shouldBe commandNumber(2)
+        sent.filterIsInstance<YourKeyFigures>().last().keyFigures.single().stats.piety shouldBe 5
+    }
+
+    "a lever on somebody else's key figure is refused as not one of the house's own" {
+        val rig = Rig()
+        val (mine, sent) = rig.introduced()
+        mine.receive(founding())
+        mine.receive(addingAKeyFigure(commandNumber(1)))
+        val agnes = sent.filterIsInstance<YourKeyFigures>().last().keyFigures.single().id
+        val (theirs, told) = rig.someoneElse()
+        theirs.receive(founding(name = "Hollin"))
+
+        theirs.receive(changingStat(agnes, "piety", 2, commandNumber(2)))
+
+        told.filterIsInstance<CommandRejected>().single().reason shouldBe "noSuchKeyFigure"
+        sent.filterIsInstance<YourKeyFigures>().last().keyFigures.single().stats.piety shouldBe 3
+    }
+
+    "a stat the wire does not know is refused as malformed" {
+        val rig = Rig()
+        val (mine, sent) = rig.introduced()
+        mine.receive(founding())
+        mine.receive(addingAKeyFigure(commandNumber(1)))
+        val agnes = sent.filterIsInstance<YourKeyFigures>().last().keyFigures.single().id
+
+        mine.receive(changingStat(agnes, "luck", 2, commandNumber(2)))
+
+        sent.filterIsInstance<CommandRejected>().single().reason shouldBe "malformed: not a stat: luck"
+    }
+
+    "a key figure killed leaves the list at once" {
+        val rig = Rig()
+        val (mine, sent) = rig.introduced()
+        mine.receive(founding())
+        mine.receive(addingAKeyFigure(commandNumber(1)))
+        val agnes = sent.filterIsInstance<YourKeyFigures>().last().keyFigures.single().id
+
+        mine.receive(killing(agnes, commandNumber(2)))
+
+        sent.filterIsInstance<CommandAccepted>().last().commandId shouldBe commandNumber(2)
+        sent.filterIsInstance<YourKeyFigures>().last().keyFigures.shouldBeEmpty()
+    }
+
+    "a tenth key figure is refused, because a house holds nine" {
+        val rig = Rig()
+        val (mine, sent) = rig.introduced()
+        mine.receive(founding())
+        (1..9).forEach { mine.receive(addingAKeyFigure(commandNumber(it))) }
+
+        mine.receive(addingAKeyFigure(commandNumber(10)))
+
+        sent.filterIsInstance<CommandRejected>().single().reason shouldBe "tooManyKeyFigures"
+        sent.filterIsInstance<YourKeyFigures>().last().keyFigures shouldHaveSize 9
     }
 
     "and that choice offers three seats, in three different parts of the world" {
