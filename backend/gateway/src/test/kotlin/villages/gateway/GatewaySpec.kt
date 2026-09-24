@@ -29,6 +29,8 @@ import villages.domain.HouseCommand
 import villages.domain.HouseDecider
 import villages.domain.HouseEvent
 import villages.domain.HouseFounded
+import villages.domain.HouseGainedKeyFigure
+import villages.domain.HouseLostKeyFigure
 import villages.domain.HouseResourceSpent
 import villages.domain.HouseResourceReleased
 import villages.domain.HouseResourcePledged
@@ -73,6 +75,8 @@ import java.util.UUID
 /** The catalogued type of an event, as the store would name it. */
 private fun typeOf(event: HouseEvent): String = when (event) {
     is HouseFounded -> "villages.house.founded.v1"
+    is HouseGainedKeyFigure -> "villages.house.gainedKeyFigure.v1"
+    is HouseLostKeyFigure -> "villages.house.lostKeyFigure.v1"
     is HouseResourceGranted -> "villages.house.resourceGranted.v1"
     is HouseResourcePledged -> "villages.house.resourcePledged.v1"
     is HouseResourceReleased -> "villages.house.resourceReleased.v1"
@@ -84,6 +88,8 @@ private fun typeOf(event: HouseEvent): String = when (event) {
 /** Enough of the data for the panel's sake. The stored form proper is pinned by its own fixture. */
 private fun dataOf(event: HouseEvent): String = when (event) {
     is HouseFounded -> """{"name":"${event.name.value}","significance":${event.significance.value}}"""
+    is HouseGainedKeyFigure -> """{"characterId":"${event.characterId.value}"}"""
+    is HouseLostKeyFigure -> """{"characterId":"${event.characterId.value}"}"""
     is HouseResourceGranted -> """{"resource":"${event.resource}","amount":${event.amount}}"""
     is HouseResourcePledged -> """{"resource":"${event.resource}","amount":${event.amount}}"""
     is HouseResourceReleased -> """{"pledgeId":"${event.pledgeId.value}"}"""

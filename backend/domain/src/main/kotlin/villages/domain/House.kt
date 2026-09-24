@@ -26,6 +26,11 @@ sealed interface House {
         val resources: Map<Resource, Stock>,
         /** What is spoken for, and the only record of it. See `Pledge`. */
         val pledges: List<Pledge> = emptyList(),
+        /**
+         * The characters this house acts through, in the order it took them in: a tie in the house's own
+         * history, never in theirs. At most nine. See decision record 0055.
+         */
+        val keyFigures: List<CharacterId> = emptyList(),
         /** The world-day it was founded on, and the instant that was recorded. */
         val foundedOn: WorldTime,
         val foundedAt: Instant,

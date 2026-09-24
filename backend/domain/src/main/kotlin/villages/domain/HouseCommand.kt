@@ -91,3 +91,38 @@ data class TakeAction(
     val worldTime: WorldTime,
     val recordedAt: Instant,
 ) : HouseCommand
+
+/** Take a character in as one of the house's key figures. Refused for a tenth, or for someone already held. */
+data class TakeKeyFigure(
+    override val houseId: HouseId,
+    val characterId: CharacterId,
+    val worldTime: WorldTime,
+    val recordedAt: Instant,
+) : HouseCommand
+
+/** Lose one of the house's key figures. Refused for anybody the house does not hold. */
+data class LoseKeyFigure(
+    override val houseId: HouseId,
+    val characterId: CharacterId,
+    val worldTime: WorldTime,
+    val recordedAt: Instant,
+) : HouseCommand
+
+/**
+ * Act through one of the house's key figures: a command that can only be refused. Nothing happens to the
+ * house, so nothing is written when the character is one of its own, and it is refused `NoSuchKeyFigure`
+ * when they are not. That is how a lever naming a character is decided against the house's own history
+ * before it touches the character's stream. See decision record 0055.
+ */
+data class ActThrough(
+    override val houseId: HouseId,
+    val characterId: CharacterId,
+) : HouseCommand
+
+/**
+ * Ask whether the house has room for another key figure before anybody is brought in to fill it: a command
+ * that can only be refused, as `ActThrough` is. Refused `TooManyKeyFigures` when all nine places are taken.
+ */
+data class CheckRoomForKeyFigure(
+    override val houseId: HouseId,
+) : HouseCommand

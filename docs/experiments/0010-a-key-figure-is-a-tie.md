@@ -29,7 +29,7 @@ As little as possible: no succession, no old age, no key figures from choices, n
 
 - Whether the second kind of stream costs one generic executor and no special cases, or grows a parallel
   stack beside the house's.
-- Whether the nine and the gate are decided against the house's own stream alone, without reading the
+- Whether the nine and acting through are decided against the house's own stream alone, without reading the
   character's.
 - Whether the mourning stays the only thing that carries a character's history into a house's.
 - Whether two houses tied to one character, and a death reaching both, pass as tests without either house

@@ -262,7 +262,7 @@ A menu rather than a queue, one commit each.
 | **4** | a character's record changes: `statChanged`, `aged`, `portraitChanged` | the decider's spec |
 | **5** | the placeholder portraits in `world/portraits/`, their generator and their test | the folder, and a picture of it |
 | **6** | a newcomer is rolled: `Dice`, `Portraits`, the list of names | the spec, and the names to read |
-| **7** | a key figure is taken in and acted through: the order, the gate | the spec |
+| **7** | a key figure is taken in and acted through: the order of the writes, and the refusal for anybody else's | the spec |
 | **8** | the mourning | the spec |
 | **9** | the characters projection: the ties, the rows, the reverse index | the spec |
 | **10** | wire version 6 and the gateway: the commands, `yourKeyFigures`, the reason codes | the contract specs |

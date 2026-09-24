@@ -124,8 +124,15 @@ A place, a structure or a character that exists between two world-times and is s
 houses: its own stream, and a `[from, to)` span in world-time. **A house's tie to such a thing is not the
 thing**: being a key figure is a tie between a house and a character, written in the house's history and
 never in the character's, so a rule about whom a house holds is decided on the house's stream. See
-decision record 0055. `ARCHITECTURE.md` describes the pattern; nothing of it is in the source yet, and
-`docs/plans/characters-and-key-figures.md` is the order its first kind gets built in.
+decision record 0055.
+
+**A lever that names such a thing asks the house first**, with a command that can only be refused: it
+writes nothing when the thing is the house's own and is refused when it is not. `ActThrough` is the first,
+and `CheckRoomForKeyFigure` the second. The rule stays in `decide`, and nothing needs a port for reading a
+house.
+
+`ARCHITECTURE.md` describes the pattern. Characters and the tie are in the source, and
+`docs/plans/characters-and-key-figures.md` is the order the rest of them gets built in.
 
 ## Naming
 

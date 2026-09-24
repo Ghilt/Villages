@@ -129,3 +129,26 @@ data class PlayerTookAction(
     override val worldTime: WorldTime,
     override val recordedAt: Instant,
 ) : PlayerEvent
+
+/**
+ * A house took a character in as one of its key figures. A tie in the house's history, which the character's
+ * own record never mentions: who they are is on their stream, and what they are to this house is here. See
+ * decision record 0055.
+ */
+data class HouseGainedKeyFigure(
+    override val houseId: HouseId,
+    val characterId: CharacterId,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : HouseEvent, WorldEvent
+
+/**
+ * A house lost one of its key figures. Why is the story it belongs to rather than a field on it: a loss that
+ * follows a death carries the death's correlation, so the two read as one thing.
+ */
+data class HouseLostKeyFigure(
+    override val houseId: HouseId,
+    val characterId: CharacterId,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : HouseEvent, WorldEvent

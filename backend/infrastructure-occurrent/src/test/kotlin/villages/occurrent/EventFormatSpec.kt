@@ -18,6 +18,8 @@ import villages.domain.Division
 import villages.domain.Effect
 import villages.domain.Event
 import villages.domain.HouseFounded
+import villages.domain.HouseGainedKeyFigure
+import villages.domain.HouseLostKeyFigure
 import villages.domain.Resource
 import villages.domain.PledgeId
 import villages.domain.HouseResourceSpent
@@ -167,10 +169,15 @@ class EventFormatSpec : StringSpec({
     )
     val agnesDied = CharacterDied(agnes, "a fever that did not break", WorldTime(653_705), noon)
 
+    val tookAgnesIn = HouseGainedKeyFigure(house, agnes, day, noon)
+    val lostAgnes = HouseLostKeyFigure(house, agnes, day, noon)
+
     val samples: Map<String, Event> = mapOf(
         "villages.character.appeared.v1" to agnesAppeared,
         "villages.character.died.v1" to agnesDied,
         "villages.house.founded.v1" to ravenscar,
+        "villages.house.gainedKeyFigure.v1" to tookAgnesIn,
+        "villages.house.lostKeyFigure.v1" to lostAgnes,
         "villages.house.resourceGranted.v1" to givenGold,
         "villages.house.resourcePledged.v1" to pledgedReason,
         "villages.house.resourceReleased.v1" to releasedReason,

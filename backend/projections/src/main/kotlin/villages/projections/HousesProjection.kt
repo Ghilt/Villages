@@ -10,6 +10,8 @@ import villages.application.Start
 import villages.application.StoredEvent
 import villages.domain.CharacterEvent
 import villages.domain.HouseFounded
+import villages.domain.HouseGainedKeyFigure
+import villages.domain.HouseLostKeyFigure
 import villages.domain.Pledge
 import villages.domain.HouseResourceSpent
 import villages.domain.HouseResourceReleased
@@ -101,6 +103,9 @@ class HousesProjection(feed: EventFeed) : HousesByCell, HousesByPlayer, AutoClos
             // Nothing is on the map until a house is founded. Being asked something and answering it are
             // the choices projection's business; this one draws the map and has nothing to say about them.
             is PlayerGivenChoice, is PlayerTookAction -> return
+
+            // Whom a house holds is the characters projection's business; the map's row of a house is unchanged.
+            is HouseGainedKeyFigure, is HouseLostKeyFigure -> return
 
             // A person is not a house, and what one is to a house is the house's own history: nothing a
             // character's stream says moves a house's row. See decision record 0055.

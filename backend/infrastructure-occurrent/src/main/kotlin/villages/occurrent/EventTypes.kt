@@ -5,6 +5,8 @@ import villages.domain.CharacterAppeared
 import villages.domain.CharacterDied
 import villages.domain.Event
 import villages.domain.HouseFounded
+import villages.domain.HouseGainedKeyFigure
+import villages.domain.HouseLostKeyFigure
 import villages.domain.HouseResourceGranted
 import villages.domain.HouseResourcePledged
 import villages.domain.HouseResourceReleased
@@ -26,6 +28,8 @@ object EventTypes : CloudEventTypeMapper<Event> {
         CharacterAppeared::class to "villages.character.appeared.v1",
         CharacterDied::class to "villages.character.died.v1",
         HouseFounded::class to "villages.house.founded.v1",
+        HouseGainedKeyFigure::class to "villages.house.gainedKeyFigure.v1",
+        HouseLostKeyFigure::class to "villages.house.lostKeyFigure.v1",
         HouseResourceGranted::class to "villages.house.resourceGranted.v1",
         HouseResourcePledged::class to "villages.house.resourcePledged.v1",
         HouseResourceReleased::class to "villages.house.resourceReleased.v1",

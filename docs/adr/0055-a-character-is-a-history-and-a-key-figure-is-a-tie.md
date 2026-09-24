@@ -95,7 +95,7 @@ leaving the map or by death, which makes a character the first thing on the map 
 
 What becomes easier:
 
-- **A house enforces its own rules.** The nine and the gate are decided against the house's own stream, the
+- **A house enforces its own rules.** The nine and acting through a key figure are decided against the house's own stream, the
   way every rule has been, rather than against a read model a moment behind.
 - **A choice can hand a house a key figure** in the same decision as the action that takes it, when a choice
   first does: the tie is on the stream the choice pattern already writes to (0034).
@@ -137,5 +137,5 @@ screen.
   say *gained a key figure* before the key figure existed, and a failure between the two leaves the house
   holding someone who never appeared, a place in the nine gone for good. Rejected for the order the
   chronicle reads in.
-- **A read port for the gate**, loading and folding a house on request. A new port, an adapter and three
+- **A read port for acting through**, loading and folding a house on request. A new port, an adapter and three
   test fakes to do what a command that can only be refused does with none. Rejected.

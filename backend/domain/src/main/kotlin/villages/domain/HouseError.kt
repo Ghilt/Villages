@@ -30,6 +30,14 @@ sealed class HouseError(message: String) : DomainError(message) {
     class InvalidAmount(reason: String) : HouseError("not an amount: $reason")
     class InvalidPledge(reason: String) : HouseError("not a pledge: $reason")
 
+    /** A house acts through at most nine people. */
+    data object TooManyKeyFigures : HouseError("this house already holds as many key figures as it can")
+
+    data object AlreadyAKeyFigure : HouseError("that character is already one of this house's key figures")
+
+    /** The character is not one of this house's key figures, which is also what acting through refuses with. */
+    data object NoSuchKeyFigure : HouseError("that character is not one of this house's key figures")
+
     /** Not enough of a resource is free, whether because there is little or because much is pledged. */
     class NotEnoughFree(resource: Resource, wanted: Long, free: Long) :
         HouseError("this house has $free ${resource.name.lowercase()} free, not $wanted")

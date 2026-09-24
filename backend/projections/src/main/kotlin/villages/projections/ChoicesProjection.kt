@@ -7,6 +7,8 @@ import villages.application.Start
 import villages.application.StoredEvent
 import villages.domain.CharacterEvent
 import villages.domain.HouseFounded
+import villages.domain.HouseGainedKeyFigure
+import villages.domain.HouseLostKeyFigure
 import villages.domain.HouseResourceSpent
 import villages.domain.HouseResourceReleased
 import villages.domain.HouseResourcePledged
@@ -54,7 +56,7 @@ class ChoicesProjection(feed: EventFeed) : ChoicesByPlayer, AutoCloseable {
             // Founding by any means settles the question of where to found, so whatever was pending goes.
             // The domain says the same thing in `evolve`; this is that rule read off the events.
             is HouseResourceGranted, is HouseResourcePledged, is HouseResourceReleased,
-            is HouseResourceSpent,
+            is HouseResourceSpent, is HouseGainedKeyFigure, is HouseLostKeyFigure,
             ->
                 // What a house has is the map projection's business. This one only tracks what is pending.
                 return

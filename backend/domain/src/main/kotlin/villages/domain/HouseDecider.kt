@@ -14,6 +14,9 @@ object HouseDecider : Decider<HouseCommand, House, HouseEvent> {
      */
     val FOUNDING_SIGNIFICANCE = Significance(20.0)
 
+    /** How many key figures a house can hold: the three by three the pane shows them in. See decision 0055. */
+    const val MOST_KEY_FIGURES = 9
+
     override val initial: House = House.NotFounded()
 
     override fun decide(command: HouseCommand, state: House): List<HouseEvent> = when (command) {
@@ -136,6 +139,40 @@ object HouseDecider : Decider<HouseCommand, House, HouseEvent> {
                 ),
             ) + follows(taken.effect, command, state)
         }
+
+        is TakeKeyFigure -> {
+            val house = founded(state)
+            if (command.characterId in house.keyFigures) {
+                throw HouseError.AlreadyAKeyFigure
+            }
+            if (house.keyFigures.size >= MOST_KEY_FIGURES) {
+                throw HouseError.TooManyKeyFigures
+            }
+            listOf(HouseGainedKeyFigure(command.houseId, command.characterId, command.worldTime, command.recordedAt))
+        }
+
+        is LoseKeyFigure -> {
+            if (command.characterId !in founded(state).keyFigures) {
+                throw HouseError.NoSuchKeyFigure
+            }
+            listOf(HouseLostKeyFigure(command.houseId, command.characterId, command.worldTime, command.recordedAt))
+        }
+
+        // The two commands that can only be refused. Nothing happens to the house either way, so nothing is
+        // written, and the refusal is the whole of the answer. See decision record 0055.
+        is ActThrough -> {
+            if (command.characterId !in founded(state).keyFigures) {
+                throw HouseError.NoSuchKeyFigure
+            }
+            emptyList()
+        }
+
+        is CheckRoomForKeyFigure -> {
+            if (founded(state).keyFigures.size >= MOST_KEY_FIGURES) {
+                throw HouseError.TooManyKeyFigures
+            }
+            emptyList()
+        }
     }
 
     /** A house that exists, or the refusal. Everything a resource is done to needs one. */
@@ -245,6 +282,16 @@ object HouseDecider : Decider<HouseCommand, House, HouseEvent> {
         is PlayerTookAction -> when (state) {
             is House.NotFounded -> state.copy(pending = null)
             is House.Founded -> state.copy(pending = null)
+        }
+
+        is HouseGainedKeyFigure -> when (state) {
+            is House.NotFounded -> state
+            is House.Founded -> state.copy(keyFigures = state.keyFigures + event.characterId)
+        }
+
+        is HouseLostKeyFigure -> when (state) {
+            is House.NotFounded -> state
+            is House.Founded -> state.copy(keyFigures = state.keyFigures - event.characterId)
         }
     }
 }
