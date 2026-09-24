@@ -79,7 +79,8 @@ fun interface WorldClock {
 }
 
 /**
- * The world's calendar, as much of it as a use case needs: how to step a world-day on by months.
+ * The world's calendar, as much of it as a use case needs: how to step a world-day on by months, or back by
+ * them with a negative number.
  *
  * The arithmetic is `villages.protocol.Calendar`, which both ends of the wire compute alike and which this
  * layer may not see, because the application layer depends on the domain and on nothing else. So it crosses
@@ -160,6 +161,26 @@ class MonthlyWorldClock(
      */
     override fun whenIsDay(day: WorldTime): Instant =
         opened.plus(java.time.Duration.ofDays(calendar.monthsBetween(openingDay, day).coerceAtLeast(0)))
+}
+
+/**
+ * Chance, as a die with some number of sides: `roll(6)` is one to six. A port so that a use case that rolls
+ * can be tested with a die that always comes up the same.
+ *
+ * Never seeded from anything a client sends: a command's id is the browser's to mint, and a roll seeded from
+ * it could be sent again until it came up four eighteens.
+ */
+fun interface Dice {
+    fun roll(sides: Int): Int
+}
+
+/**
+ * The portraits there are to give a character: every picture's key, which is its file's name without the
+ * `.png`, and whose first word says whom it suits, `woman-01`. Asked each time, so a picture saved into the
+ * folder is given out without a restart. See `docs/plans/characters-and-key-figures.md`.
+ */
+fun interface Portraits {
+    fun keys(): List<String>
 }
 
 /** Who a token belongs to. Anonymous browser tokens for now; accounts replace this without moving anything. */
