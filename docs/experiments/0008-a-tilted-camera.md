@@ -233,6 +233,122 @@ so nothing is pulled in from the distance. A perspective tilt has no such bound,
 found the scatter's cost tracks cells in view rather than particles on screen - so the orthographic
 camera is on the kind side of the one axis that was known to hurt.
 
+### What it cost, and the number that was already wrong
+
+Adam felt it before it was measured: panning and zooming out tilted, the map lagged behind. Three things
+compound and only one of them is inherent.
+
+**The tilt doubles the ground on screen**, which is the half-cosine again and is not fixable - measured
+as 25 to 49 scenery cells. **The lattice costs about a fifth more per tile**, measured offline over five
+runs at z10: 51.8 ms a tile on square ground, 61.7 with diamonds four units across. `classAt` runs nine
+times a pixel, once for the centre and once for each neighbour that finds an edge, and every one of them
+now rotates, floors and rotates back. Together that is about two and a half times the painting.
+
+**And the tile store was already sized too small for it.** Its own comment said a flat screenful and its
+ring is about a hundred and seventy tiles, against a cap of two hundred - thirty spare. Tilted, that is
+about three hundred and forty, and the thing the number existed to prevent happened: the looking-ahead
+evicted what it had just painted. Zooming out was worst because each level needs a fresh set, the
+look-ahead only runs after 180 ms of stillness so a fast zoom gets none, and the coarser parents that
+would have been kept had already been thrown away.
+
+Raised to **450**. Measured on the running program, one cold trimetric zoom-out from z10 to z4 settles at
+**240 tiles held** - above the old cap, so the old cap was binding, and below the new one, so it no longer
+throws anything away. The store now says so in the log the first time it does fill, once, because
+nothing displayed the counter and a number nobody can see is not an instrument. See decision record 0023.
+
+It helped the pan and not the zoom out, which is what Adam reported, and the reason turned out to be
+specific to zooming out.
+
+### Where a zoom out actually goes
+
+A fast zoom out passes through every level between where it starts and where it stops, and MapLibre asks
+for a screenful at each one. The painters answer every request, because the abort is only checked after
+a tile is painted - deliberately, since on a pan a tile that just left the screen is usually wanted again.
+On a zoom out it is not. Measured trimetric, from z10 to z4:
+
+| | what was measured | tiles |
+| --- | --- | --- |
+| a jump straight to z4 | asked for, which is the screenful | 6 |
+| the same zoom through every level | painted, with the looking-ahead held off | 89 |
+
+**About nineteen tiles in twenty that a fast zoom out paints are ones nobody will see**, and the ones on screen
+queue behind them. And on the way out the terrain costs more than the paint: below zoom seven every
+painted tile brings its own neighbourhood of flat tiles, read and decoded by whichever painter got it -
+2642 ms of assembling terrain against 2367 ms of painting, summed across the painters.
+
+### The 512-pixel tile, tried and measured worse
+
+The obvious structural fix was a bigger painted tile: a quarter of the tiles for the same ground, so a
+quarter of the per-tile cost. It went in as one constant, `PAINTED_TILE`, with everything that depends on
+it derived rather than restated - the store, the ring, the look-ahead bound - so it is an honest A/B by
+changing one number. Two things had to be got right for it to be a fair trial. The terrain field
+generalises from three flat tiles square to the block a painted tile covers plus a ring, four square
+below zoom seven. And the source stops one zoom earlier, because MapLibre asks a raster source for tile
+zoom `round(mapZoom + log2(512 / tileSize))`: left at ten, the closest half-zoom would have painted four
+times what it did, and a test now pins the resolution to be identical at every zoom.
+
+It made the zoom out worse. The same sequence, the same ground, cold caches:
+
+| painted tile | tiles | terrain ms | paint ms | total |
+| --- | --- | --- | --- | --- |
+| 256 | 89 | 2642 | 2367 | **5009** |
+| 512 | 34 | 3313 | 3512 | **6825** |
+
+A 512-pixel tile is wider than the map area at the window this was measured in, so every view straddles
+tile edges and paints a band of ground off the screen. The per-tile saving is real but it is the cheap
+kind of cost; overhang is paid in pixels, which are the expensive kind. At a bigger window the overhang
+shrinks and so does the loss, but it does not become a gain.
+
+**The finding is that tile size was never the problem on a zoom out: painting what has been abandoned
+is.** Nothing about the size of a tile touches that.
+
+### Not painting what has been given up on
+
+So the queue moved to the main thread. MapLibre's requests wait there instead of in a painter's inbox; a
+painter is handed the newest when it has room, and holds at most two; and a tile every request has given
+up on, which no painter has yet, is taken out and never painted. A tile already under a brush still
+finishes and is kept, for the reason the old code gave. MapLibre is answered the moment it gives up,
+rather than after a paint it no longer wanted - an answer it had been holding a request open for.
+
+The rules live in `map/paintQueue.ts`, apart from the workers, because they are the part that breaks
+quietly: a tile two requests share must survive one of them giving up, and a tile with a painter must
+never be dropped. Both are tests, and both were proved by breaking them.
+
+Measured with a harness that drives a real quarter-zoom-a-step zoom out through MapLibre's synchronous
+`redraw()`, so it needs no animation frames, at 256 pixels, painting time only because it is one loop and
+exact:
+
+| scheduling | tiles painted | given up before painting | paint ms |
+| --- | --- | --- | --- |
+| the original: everything posted at once, first in first out | 77 | 0 | 1978 |
+| newest first, nothing dropped | 70 | 0 | 1743 |
+| **newest first, abandoned dropped** - two runs | **39, 56** | **16, 33** | **998, 1393** |
+
+**Somewhere between a third and a half of the painting on a fast zoom out is gone.** The runs vary with
+how fast the harness manages to step, and the harness is slower than a hand on a wheel - every redraw
+does real work - so the painters catch up between steps more than they would for Adam. A faster zoom piles
+up more waiting tiles, and waiting tiles are exactly the ones this drops, so the table understates it.
+
+The 512-pixel tile was tried once more with the new scheduling: 16 painted and 40 dropped, but 1601 ms of
+paint against 998 at 256. Fewer tiles, more pixels; the overhang still loses. **The painted tile stays at
+256**, with the rest of that change kept because it is correct at either size and tested at both.
+
+### What is inherent
+
+Adam went to MapLibre's own site to see whether its maps do this too, and found the same behaviour, much
+less of it. That is the right reading. MapLibre asks for every level on the way out whatever the source;
+its demos just draw tiles that were *downloaded*, which cost a fetch and an upload, a few milliseconds.
+Ours are *computed* - 25 to 100 ms of painting each, and on the way out as much again assembling terrain -
+so the same behaviour costs ten to fifty times as much. And a download that is aborted stops downloading,
+which is the thing this change gives the painters. What remains is what painting in the browser costs.
+
+Found on the way, and not changed: **the closest half-zoom has always been painted at half resolution.**
+At 256 the painted source's ceiling of ten was hit from map zoom 9.5 onward, so those tiles were drawn from
+half as many pixels and stretched. Lifting it is sharper at the closest zoom and four times the painting
+there, which was the wrong direction for this step.
+
+The painters now say how long they spend, split into terrain and paint, in `window.villagesPainterly()`.
+
 ## Result
 
 The first half of the hypothesis is **confirmed, and more cheaply than expected**: the projection is

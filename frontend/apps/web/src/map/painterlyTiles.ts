@@ -1,9 +1,10 @@
 import { addProtocol } from 'maplibre-gl';
 import type { Lattice } from '@villages/world';
 import { note } from '../debug/log';
-import { TILE } from './painterlyMessages';
+import { PAINTED_MAX_ZOOM, PAINTED_TILE, TILE } from './painterlyMessages';
 import type { PaintReply, PaintRequest } from './painterlyMessages';
-import { WORLD_MAX_ZOOM } from './worldStyle';
+import { PaintQueue } from './paintQueue';
+import type { QueuedJob } from './paintQueue';
 
 /**
  * The painterly renderer's front door: a URL scheme MapLibre can ask for tiles on, a pool of workers that
@@ -32,12 +33,29 @@ const SCHEME = 'painterly';
 const MOST_PAINTERS = 4;
 
 /**
- * Painted tiles kept as pixels, at a quarter of a megabyte each, so this is about forty megabytes.
+ * How many 256-pixel tiles one painted tile is worth, in ground and in bytes. The numbers below were all
+ * found at 256 and are kept in those terms, so that the tile size is one number and everything follows it.
+ */
+const PER_TILE = (PAINTED_TILE / TILE) ** 2;
+
+/**
+ * Painted tiles kept as pixels, about a hundred and ten megabytes of them whatever size a tile is.
  *
  * It has to hold the view and everything painted around it at once, or looking ahead evicts the very
- * tiles it just painted. A screenful at this depth of ring is around a hundred and seventy tiles.
+ * tiles it just painted. At 256 pixels a flat screenful and its ring was around a hundred and seventy.
+ *
+ * It was two hundred, which left thirty spare, and then the camera learnt to tip. An orthographic tilt
+ * at sixty degrees covers exactly twice the ground - that is what a half-cosine means - so a screenful
+ * became about three hundred and forty against a cap of two hundred, and the thing the number was chosen
+ * to prevent happened: the looking-ahead evicted what it had just painted, every pan found nothing ready,
+ * and a fast zoom out was worst of all because the coarser tiles it needed had been thrown away on the
+ * way in. Four hundred and fifty held a tilted screenful and its ring with room to spare, and a flat one
+ * twice over. Adam felt it before it was measured. See experiment 0008.
+ *
+ * Then the tiles grew to 512 pixels, four times the ground each, so the same ground is a quarter of the
+ * tiles and the same memory: four hundred and fifty 256-pixel tiles is a hundred and twelve 512-pixel ones.
  */
-const REMEMBER = 200;
+const REMEMBER = Math.round(450 / PER_TILE);
 
 /** How long the map has to be still before anything is painted ahead of being asked for. */
 const QUIET_MS = 180;
@@ -46,12 +64,13 @@ const QUIET_MS = 180;
  * How deep a ring around the view to paint ahead, in tiles.
  *
  * One was tried and left half the tiles of a screen-sized pan still to paint, because a pan of a whole
- * screen moves two to three tiles. Two covers it.
+ * screen moved two to three 256-pixel tiles. Two covered it. At 512 pixels the same pan is one to one and
+ * a half, and one ring is the same ground two was.
  */
-const RING = 2;
+const RING = Math.max(1, Math.round((2 * TILE) / PAINTED_TILE));
 
 /** A bound on how much to paint ahead, so a fast pan cannot queue up a thousand tiles. */
-const MOST_AHEAD = 140;
+const MOST_AHEAD = Math.round(140 / PER_TILE);
 
 /** A painted tile, four bytes a pixel. Its buffer is the one transferred out of a painter. */
 type Pixels = Uint8ClampedArray<ArrayBuffer>;
@@ -73,14 +92,21 @@ let nextId = 1;
  * How well the looking ahead is working: of the tiles the map asked for, how many were already painted.
  *
  * Ready is the number that decides how this feels, because a tile that is not ready is a tile the eye
- * catches arriving. It does not show up in a profile, so it is counted here and shown in the debug panel.
+ * catches arriving. It does not show up in a profile, so it is counted here, read from a console with
+ * `window.villagesPainterly()`, and said in the log the one time it matters - see `crowded` below.
  */
-const tally = { ready: 0, waited: 0, aheadPainted: 0 };
+const tally = { ready: 0, waited: 0, aheadPainted: 0, dropped: 0, painted: 0, terrainMs: 0, paintMs: 0 };
 
 export interface PaintedTally {
   ready: number;
   waited: number;
   aheadPainted: number;
+  /** Tiles MapLibre asked for and gave up on before any painter had them, so they were never painted. */
+  dropped: number;
+  /** Tiles painted, wanted or not, and the painters' own time on them, summed across all of them. */
+  painted: number;
+  terrainMs: number;
+  paintMs: number;
   /** How many painted tiles are being kept, against the cap. */
   held: number;
 }
@@ -89,11 +115,35 @@ export function paintedTally(): PaintedTally {
   return { ...tally, held: painted.size };
 }
 
+/**
+ * Whether the store has ever been full enough to start throwing tiles away.
+ *
+ * Said once, because it is the one thing about the store worth interrupting for: while there is room,
+ * every tile painted ahead is still there when the map asks for it, and once there is not, a pan can
+ * evict what it is about to want. It is how to tell whether `REMEMBER` is big enough for the camera
+ * being used without reading a counter nobody displays. See decision record 0023 and experiment 0008.
+ */
+let crowded = false;
+
+/**
+ * Tiles given up on since the map last came to rest, said in one line when it does.
+ *
+ * Only when there were some, which on a pan is rarely and on a fast zoom out is nearly always: a zoom out
+ * asks for a screenful at every level it passes and wants only the last. The number is the work that used
+ * to be done anyway, in front of the tiles on screen. See decision record 0023 and experiment 0008.
+ */
+let droppedSinceRest = 0;
+
 /** Starts the counting again, so a single movement can be measured on its own. */
 export function forgetPaintedTally(): void {
   tally.ready = 0;
   tally.waited = 0;
   tally.aheadPainted = 0;
+  tally.dropped = 0;
+  tally.painted = 0;
+  tally.terrainMs = 0;
+  tally.paintMs = 0;
+  crowded = false;
 }
 
 if (import.meta.env.DEV) {
@@ -105,6 +155,13 @@ const addressOf = (request: PaintRequest): string =>
 
 function remember(key: string, pixels: Pixels): void {
   if (painted.size >= REMEMBER) {
+    if (!crowded) {
+      crowded = true;
+      note(
+        'paint',
+        `the tile store is full at ${REMEMBER} and is now throwing painted tiles away to make room`,
+      );
+    }
     const oldest = painted.keys().next();
     if (oldest.done !== true) {
       painted.delete(oldest.value);
@@ -132,9 +189,12 @@ function pool(): Worker[] {
         note('paint', `a tile failed: ${why}`);
         waiting?.fail(new Error(why));
       } else {
+        tally.painted += 1;
+        tally.terrainMs += event.data.terrainMs ?? 0;
+        tally.paintMs += event.data.paintMs ?? 0;
         waiting?.settle(event.data.pixels);
       }
-      paintAhead();
+      dispatch();
     });
     return painter;
   });
@@ -142,61 +202,164 @@ function pool(): Worker[] {
 }
 
 /**
- * Which painter gets a tile: whichever has least in hand.
+ * How many tiles a painter holds at once: the one under its brush and the next.
  *
- * Sending neighbouring tiles to the same painter was tried first, so that it would already hold the
- * decoded terrain they share. It measured the same, and it has a fault this does not: past zoom seven
- * every tile on the screen has the same ancestor, so a whole screen would go to one painter.
+ * A tile handed to a painter cannot be taken back, so this is also how much abandoned work there can be:
+ * two a painter rather than everything MapLibre ever asked for. One would be tighter still, but a painter
+ * that finishes would then wait for the main thread to notice and hand it the next, and during a zoom the
+ * main thread is busy drawing - a frame of idleness a tile is a fifth of the painting thrown away.
  */
-function leastBusy(): number {
-  let chosen = 0;
-  for (let index = 1; index < inFlight.length; index += 1) {
-    if (inFlight[index]! < inFlight[chosen]!) {
-      chosen = index;
-    }
-  }
-  return chosen;
+const DEPTH = 2;
+
+/** One tile somebody wants painted, from being asked for until its pixels arrive. */
+interface Job extends QueuedJob {
+  request: PaintRequest;
+  pixels: Promise<Pixels>;
+  settle: (pixels: Pixels) => void;
+  fail: (error: Error) => void;
 }
 
-/** Sends one tile to a painter and resolves with its pixels. */
-function commission(request: PaintRequest, to: number): Promise<ArrayBuffer> {
-  const available = pool();
-  const painter = available[to]!;
-  inFlight[to] = (inFlight[to] ?? 0) + 1;
-  return new Promise<ArrayBuffer>((settle, fail) => {
-    pending.set(request.id, { settle, fail });
-    painter.postMessage(request);
+/**
+ * The tiles being waited on, and the rules for which to start and which to give up on. The rules live in
+ * `paintQueue.ts`, where they can be tested without a worker; this file is only the wiring.
+ */
+const queue = new PaintQueue<Job>(DEPTH);
+
+function newJob(request: PaintRequest, key: string): Job {
+  let settle: (pixels: Pixels) => void = () => undefined;
+  let fail: (error: Error) => void = () => undefined;
+  const pixels = new Promise<Pixels>((resolve, reject) => {
+    settle = resolve;
+    fail = reject;
   });
+  // Nobody may be listening by the time a dropped or failed job says so, and that is not an error.
+  pixels.catch(() => undefined);
+  return { request, key, state: 'waiting', wantedBy: 0, pixels, settle, fail };
 }
 
-/** Paints one tile, or hands back the one already painted, and never paints the same tile twice at once. */
-function pixelsFor(request: PaintRequest, to: number): Promise<Pixels> {
+/** Posts a job to a painter. From here it will be painted whatever happens. */
+function start(job: Job, to: number): void {
+  const painter = pool()[to]!;
+  job.request.id = nextId;
+  nextId += 1;
+  inFlight[to] = (inFlight[to] ?? 0) + 1;
+  pending.set(job.request.id, {
+    settle: (buffer) => {
+      const pixels = new Uint8ClampedArray(buffer);
+      remember(job.key, pixels);
+      queue.finish(job);
+      job.settle(pixels);
+    },
+    fail: (error) => {
+      queue.finish(job);
+      job.fail(error);
+    },
+  });
+  painter.postMessage(job.request);
+}
+
+/**
+ * Hands out work to whichever painters have room, and is the only thing that does.
+ *
+ * Tiles the map is waiting for go first, newest first, to any painter holding fewer than `DEPTH`. Tiles
+ * painted on speculation go only to a painter holding nothing at all and only when no wanted tile is
+ * waiting, which is the whole safety of looking ahead: a tile the map is actually waiting for is never
+ * queued behind one that nobody has asked for.
+ */
+function dispatch(): void {
+  const available = pool();
+  for (let next = queue.next(inFlight); next !== null; next = queue.next(inFlight)) {
+    start(next.job, next.painter);
+  }
+  if (queue.anyWaiting) {
+    return;
+  }
+  for (let index = 0; index < available.length && ahead.length > 0; index += 1) {
+    if ((inFlight[index] ?? 0) !== 0) {
+      continue;
+    }
+    const next = ahead.shift();
+    if (next === undefined) {
+      break;
+    }
+    const key = addressOf(next);
+    if (painted.has(key) || queue.has(key)) {
+      index -= 1;
+      continue;
+    }
+    const job = newJob(next, key);
+    queue.track(job);
+    tally.aheadPainted += 1;
+    start(job, index);
+  }
+}
+
+/**
+ * The pixels of one tile, painted or already held, for one of MapLibre's requests.
+ *
+ * Gives up the moment MapLibre does. If nobody else wants the tile and no painter has it yet, it is taken
+ * out of the queue and never painted; if a painter has it, it is finished and kept. Either way MapLibre is
+ * answered at once, rather than after a paint it no longer wants - an answer it was holding a request
+ * open for, while the tiles for where the map actually is waited their turn.
+ */
+function wantPixels(request: PaintRequest, signal: AbortSignal): Promise<Pixels> {
   const key = addressOf(request);
   const held = painted.get(key);
   if (held !== undefined) {
     return Promise.resolve(held);
   }
-  const already = inProgress.get(key);
-  if (already !== undefined) {
-    return already;
-  }
 
-  request.id = nextId;
-  nextId += 1;
-  const started = commission(request, to)
-    .then((buffer) => {
-      const pixels = new Uint8ClampedArray(buffer);
-      remember(key, pixels);
-      return pixels;
-    })
-    .finally(() => {
-      inProgress.delete(key);
-    });
-  inProgress.set(key, started);
-  return started;
+  let job = queue.find(key);
+  if (job === undefined) {
+    job = newJob(request, key);
+    queue.enqueue(job);
+  }
+  const mine = job;
+  mine.wantedBy += 1;
+
+  return new Promise<Pixels>((settle, fail) => {
+    // A request ends once, whichever comes first - the pixels or MapLibre giving up - and whichever comes
+    // second is ignored, or a request that gave up and then saw its tile finish would be counted off twice.
+    let ended = false;
+    const end = (): boolean => {
+      if (ended) {
+        return false;
+      }
+      ended = true;
+      signal.removeEventListener('abort', giveUp);
+      return true;
+    };
+    function giveUp(): void {
+      if (!end()) {
+        return;
+      }
+      if (queue.giveUp(mine)) {
+        tally.dropped += 1;
+        droppedSinceRest += 1;
+      }
+      fail(new DOMException('the tile was no longer wanted', 'AbortError'));
+    }
+    if (signal.aborted) {
+      giveUp();
+      return;
+    }
+    signal.addEventListener('abort', giveUp, { once: true });
+    mine.pixels.then(
+      (pixels) => {
+        if (end()) {
+          settle(pixels);
+        }
+      },
+      (error: unknown) => {
+        if (end()) {
+          fail(error instanceof Error ? error : new Error(String(error)));
+        }
+      },
+    );
+    dispatch();
+  });
 }
 
-const inProgress = new Map<string, Promise<Pixels>>();
 /** Addresses MapLibre has asked for lately. What is around these is what it will ask for next. */
 const wanted = new Map<string, PaintRequest>();
 let ahead: PaintRequest[] = [];
@@ -211,10 +374,17 @@ let quiet: ReturnType<typeof setTimeout> | undefined;
  */
 function lookAhead(): void {
   quiet = undefined;
+  if (droppedSinceRest > 0) {
+    note(
+      'paint',
+      `that movement gave up on ${droppedSinceRest} tile${droppedSinceRest === 1 ? '' : 's'} before a painter reached ${droppedSinceRest === 1 ? 'it' : 'them'}, so ${droppedSinceRest === 1 ? 'it was' : 'they were'} never painted`,
+    );
+    droppedSinceRest = 0;
+  }
   const around: PaintRequest[] = [];
 
   const consider = (from: PaintRequest, zoom: number, x: number, y: number): void => {
-    if (zoom < 0 || zoom > WORLD_MAX_ZOOM || around.length >= MOST_AHEAD) {
+    if (zoom < 0 || zoom > PAINTED_MAX_ZOOM || around.length >= MOST_AHEAD) {
       return;
     }
     const across = 2 ** zoom;
@@ -223,7 +393,7 @@ function lookAhead(): void {
     }
     const next: PaintRequest = { ...from, id: 0, tiles: tilesRoot, zoom, x, y };
     const key = addressOf(next);
-    if (painted.has(key) || inProgress.has(key) || wanted.has(key)) {
+    if (painted.has(key) || queue.has(key) || wanted.has(key)) {
       return;
     }
     around.push(next);
@@ -254,30 +424,7 @@ function lookAhead(): void {
 
   wanted.clear();
   ahead = around;
-  paintAhead();
-}
-
-/**
- * Hands out the tiles painted on speculation, and only to a painter with nothing in hand.
- *
- * That condition is the whole safety of the idea: a tile the map is actually waiting for is never queued
- * behind one that nobody has asked for.
- */
-function paintAhead(): void {
-  if (ahead.length === 0) {
-    return;
-  }
-  const available = pool();
-  for (let index = 0; index < available.length && ahead.length > 0; index += 1) {
-    if ((inFlight[index] ?? 0) !== 0) {
-      continue;
-    }
-    const next = ahead.shift();
-    if (next !== undefined) {
-      tally.aheadPainted += 1;
-      void pixelsFor(next, index).catch(() => undefined);
-    }
-  }
+  dispatch();
 }
 
 /**
@@ -337,12 +484,7 @@ export function registerPainterlyTiles(worldRoot: string): void {
       tally.waited += 1;
     }
 
-    const pixels = await pixelsFor(request, leastBusy());
-    // The paint is kept either way: a tile that scrolled off screen has usually only just scrolled off,
-    // and asking for it again is free now.
-    if (abortController.signal.aborted) {
-      throw new DOMException('the tile was no longer wanted', 'AbortError');
-    }
-    return { data: await createImageBitmap(new ImageData(pixels, TILE, TILE)) };
+    const pixels = await wantPixels(request, abortController.signal);
+    return { data: await createImageBitmap(new ImageData(pixels, PAINTED_TILE, PAINTED_TILE)) };
   });
 }

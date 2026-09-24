@@ -1,8 +1,8 @@
 import type * as maplibregl from 'maplibre-gl';
 import type { Lattice } from '@villages/world';
 
+import { PAINTED_MAX_ZOOM, PAINTED_TILE } from './painterlyMessages';
 import { painterlyTiles } from './painterlyTiles';
-import { WORLD_MAX_ZOOM } from './worldStyle';
 
 /**
  * The renderers the world can be drawn with, and the one piece of imperative map work needed to swap
@@ -75,11 +75,13 @@ export function applyRenderer(map: maplibregl.Map, name: string, lattice: Lattic
   map.addSource(SOURCE, {
     type: 'raster',
     tiles: [painterlyTiles(name, lattice)],
-    tileSize: 256,
+    tileSize: PAINTED_TILE,
     minzoom: 0,
     // Past the flat tiles' own seven, so the paint is asked for a tile at the zoom being looked at and
-    // the treatment stays the right size all the way in. This is the whole reason it is not baked.
-    maxzoom: WORLD_MAX_ZOOM,
+    // the treatment stays the right size all the way in. This is the whole reason it is not baked. One
+    // less than the world's own ten, because a 512-pixel tile is a zoom ahead of a 256 one; see
+    // PAINTED_MAX_ZOOM for why that keeps exactly the pixels there were.
+    maxzoom: PAINTED_MAX_ZOOM,
   });
   map.addLayer(
     {
