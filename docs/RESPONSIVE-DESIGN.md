@@ -140,6 +140,14 @@ house card's hint line goes when the column is squeezed, and the choice roll's o
 to one under the other — both by a container query on the tile, which is the same thing each does on a
 phone.
 
+**One stated exception to never a scrollbar: a key figure at half a phone.** Their portrait and name fill
+what is in view and their stats are below the fold, on purpose, one gesture off: there for a player who
+wants them and out of the way of one who does not, where squeezing all three into half a phone would make
+all three too small to read. The spread keeps the rule without exception. At the other sizes the key
+figure's details are arranged rather than scrolled: in the spread the portrait beside the name, and the
+stats beside them opened out; on a phone opened out the portrait, name and stats one under another, or
+side by side on its side.
+
 **The bottom row cannot run out.** The column is capped at a third of the stage and the spread only exists
 above 600 on the shorter side, so the tile along the bottom middle is never narrower than **281 pixels**,
 which is room for the carousel. A test sweeps every stage the spread can be and asserts that floor, so if

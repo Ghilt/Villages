@@ -217,8 +217,9 @@ body,
  * `MapView` throws all three away when it unmounts.
  *
  * A bay clips rather than scrolls. A pane too big for its bay is a bug in the pane, and a scrollbar is how
- * that bug gets hidden. `container-type` is what lets what is inside react to the room it got, because a
- * media query cannot see the stage, let alone one tile of it.
+ * that bug gets hidden. The one stated exception is a key figure at half a phone, whose stats are below
+ * the fold on purpose; see `RESPONSIVE-DESIGN.md`. `container-type` is what lets what is inside react to
+ * the room it got, because a media query cannot see the stage, let alone one tile of it.
  */
 .bay {
   position: absolute;
@@ -2212,33 +2213,37 @@ body,
 }
 
 /*
- * One figure: the portrait, and beside it who they are.
+ * One figure: the portrait, their name, and their stats, laid out for the room and the shape it has.
  *
- * The portrait is as tall as the room under the bar, up to the size a face is worth looking at, and the
- * name takes what is left across. The stats join the name where there is room for them.
+ * Three areas of one grid, so each size and each cut is a different arrangement of the same three things
+ * rather than a different drawing. **Beside** is the default: the portrait as tall as the room under the
+ * bar, and the name above the stats to its right - the spread opened out, and a phone opened out on its
+ * side. The rest are below, one rule each. `--room-h` and `--room-w` are what is left of the bay once the
+ * bar, the padding and the compass's corner are taken, in the bay's own container units.
  */
 .figures__one {
+  --room-h: calc(100cqh - 2rem - 1.1rem - var(--corner-bottom, 0px));
+  --room-w: calc(100cqw - 1.8rem);
   flex: 1;
   min-height: 0;
-  display: flex;
-  gap: 0.9rem;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-areas:
+    'portrait name'
+    'portrait stats';
+  align-content: start;
+  gap: 0.45rem 0.9rem;
   padding: 0.3rem 0.9rem calc(0.8rem + var(--corner-bottom, 0px));
 }
 
-.figures__one .portrait {
-  flex: none;
-  height: min(100%, 24rem);
-}
-
-.figures__who {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  min-width: 0;
+.figures__one > .portrait {
+  grid-area: portrait;
+  height: min(var(--room-h), 24rem, calc(var(--room-w) * 0.5 * 4 / 3));
 }
 
 .figures__name {
+  grid-area: name;
   margin: 0;
   font-size: 1.35rem;
   font-weight: normal;
@@ -2246,6 +2251,87 @@ body,
   font-variant: small-caps;
   letter-spacing: 0.03em;
   overflow-wrap: anywhere;
+}
+
+/* The stats: a mark, a word and a number a line, the numbers in a column of their own. */
+.figures__stats {
+  grid-area: stats;
+  display: grid;
+  grid-template-columns: 1.1rem auto 2ch;
+  justify-content: start;
+  align-content: start;
+  align-items: center;
+  gap: 0.45rem 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.95rem;
+}
+
+.figures__stat {
+  display: contents;
+}
+
+.figures__mark {
+  width: 1.1rem;
+  height: 1.1rem;
+  color: var(--ink-soft);
+}
+
+/* Stroked at the weight the house card's marks are, because they are the same drawings. */
+.figures__mark path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.figures__word {
+  color: var(--ink-soft);
+}
+
+.figures__figure {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The spread at its normal size: the portrait beside the name, and the stats wait for it opened out. */
+.stage[data-form='spread'] .figures--small .figures__stats {
+  display: none;
+}
+
+/*
+ * Half a phone, either way up: the portrait and the name fill what is in view, and the stats are **below
+ * the fold, on purpose**. The first pane to scroll, and the one exception to a bay never growing a
+ * scrollbar: the stats are there for a player who wants them and in the way of one who does not, so they
+ * are one gesture off rather than squeezed in. See `RESPONSIVE-DESIGN.md`.
+ */
+.stage[data-form='bays'] .figures--small .figures__one {
+  overflow-y: auto;
+  grid-template-rows: var(--room-h) auto;
+  grid-template-areas:
+    'portrait name'
+    'stats stats';
+  row-gap: 1rem;
+}
+
+/*
+ * A phone opened out and upright: everything in view, one thing under another - the portrait as wide as
+ * the bay will let it be and still leave the name and the five lines room below it.
+ */
+.stage[data-form='bays'][data-along='rows'] .figures--full .figures__one {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto auto;
+  grid-template-areas:
+    'portrait'
+    'name'
+    'stats';
+  justify-items: center;
+}
+
+.stage[data-form='bays'][data-along='rows'] .figures--full .figures__one > .portrait {
+  height: min(calc(var(--room-h) - 12rem), calc(var(--room-w) * 4 / 3), 30rem);
 }
 
 /*

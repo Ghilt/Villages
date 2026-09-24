@@ -72,8 +72,16 @@ mark in the interface and coloured `--ink-soft`: a coin for wealth, a ridge of l
 that overlap for influence, a pair of dividers for reason, and a cross for piety. **Each is a different
 silhouette before it is a different picture**, because five of them have to be told apart at about
 seventeen pixels: a ring, a jagged line, a wide double, a triangle with a dot over it, and a cross. The
-word each one stands for is on its label rather than beside it, until it is learnt. Drawn in the house card
-rather than in `Icons.tsx`, which is the marks a **pane** is known by. See `MECHANICS.md` on house status.
+word each one stands for is on its label rather than beside it, until it is learnt. See `MECHANICS.md` on
+house status.
+
+**The stat marks.** A key figure's stats are drawn in the same family, and **piety and reason are the
+resources' own drawings**, the cross and the dividers, because the two are to be joined and a player who
+has learnt the house card has already learnt half of a key figure. Kindness is a heart, physical an arm
+bent at the elbow and age an hourglass, all three placeholders until the marks are drawn properly. Beside
+a stat the word is written too, where the house card has only the mark: a key figure's details have room
+for five words, and the words teach the marks. Every mark a number is known by is in `marks/Mark.tsx`;
+`Icons.tsx` is the marks a **pane** is known by.
 
 **The pane size control.** Three marks in a pane's corner saying how much of the stage it is taking: put
 away, the normal size, opened out. The mark is **how much of a box is filled**, which is the thing being

@@ -495,7 +495,9 @@ The tie exists on the server and on the wire, and the debug panel's Characters s
 figures in and changes them. The pane is in the corner, the middle tab, and in *Go to* on a phone, at its
 three sizes: with nobody in it, it says key figures will be shown here; with one it opens on them; with
 more it is a grid of their portraits in the order they joined, three by three, and one pressed opens on
-their portrait and name with nine small squares to go back by. The stats are not on it yet. A house gains and loses key figures in
+them with nine small squares to go back by. Their details are the portrait and the name, and the age and
+four stats as a mark, a word and a number wherever there is room: opened out in the spread, below a scroll
+at half a phone, and in view opened out on one. A house gains and loses key figures in
 its own history, holds nine at most and never the same character twice, and says
 whether a character is one of its own without writing anything, which is how every lever naming a
 character is let through or refused. When a character dies the mourning writes the loss into every house

@@ -1,13 +1,15 @@
 import { useState, useSyncExternalStore } from 'react';
 
+import { ageOn } from '@villages/client-core';
 import type { KeyFigureView } from '@villages/protocol';
 
 import { note } from '../debug/log';
+import { Mark } from '../marks/Mark';
 import { gatewayState, watchGateway } from '../net/gateway';
 import { Icon } from '../stage/Icons';
 import type { Room } from '../stage/panes';
 import { PaneSizeControl } from '../stage/PaneSizeControl';
-import { fullName } from './describe';
+import { STATS_IN_ORDER, STAT_WORDS, fullName } from './describe';
 import { Portrait } from './Portrait';
 import { stillOpen, viewOf } from './view';
 
@@ -26,6 +28,7 @@ import { stillOpen, viewOf } from './view';
 export function KeyFigures({ room }: { room: Room }) {
   const heard = useSyncExternalStore(watchGateway, gatewayState);
   const figures = heard.yourKeyFigures ?? [];
+  const today = heard.world?.today ?? null;
   const [open, setOpen] = useState<string | null>(null);
 
   // A lone figure is open whether or not anybody pressed them, and is kept open, so that a second
@@ -101,11 +104,39 @@ export function KeyFigures({ room }: { room: Room }) {
       {view.kind === 'details' && (
         <article className="figures__one">
           <Portrait portrait={view.figure.portrait} name={fullName(view.figure)} />
-          <div className="figures__who">
-            <h3 className="figures__name">{fullName(view.figure)}</h3>
-          </div>
+          <h3 className="figures__name">{fullName(view.figure)}</h3>
+          <Stats figure={view.figure} today={today} />
         </article>
       )}
     </section>
+  );
+}
+
+/**
+ * A key figure's power, which is their stats, and their age: a mark, a word and a number a line.
+ *
+ * Words beside the marks here, where the house card has only marks, because a key figure's details have
+ * the room for five words and the house card's one line has not; the marks are the same drawings, so the
+ * words teach them. Age first, because it is what anybody asks first about somebody. Where the room is
+ * too little for them, the stylesheet leaves them out rather than this leaving them unsaid.
+ */
+function Stats({ figure, today }: { figure: KeyFigureView; today: number | null }) {
+  const age = today === null ? '—' : String(ageOn(figure.bornOn, figure.agedYears, today));
+
+  return (
+    <ul className="figures__stats">
+      <li className="figures__stat" aria-label={`Age: ${age}`}>
+        <Mark name="age" className="figures__mark" />
+        <span className="figures__word">Age</span>
+        <span className="figures__figure">{age}</span>
+      </li>
+      {STATS_IN_ORDER.map((stat) => (
+        <li className="figures__stat" key={stat} aria-label={`${STAT_WORDS[stat]}: ${figure.stats[stat]}`}>
+          <Mark name={stat} className="figures__mark" />
+          <span className="figures__word">{STAT_WORDS[stat]}</span>
+          <span className="figures__figure">{figure.stats[stat]}</span>
+        </li>
+      ))}
+    </ul>
   );
 }

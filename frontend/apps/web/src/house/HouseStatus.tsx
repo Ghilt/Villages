@@ -7,6 +7,7 @@ import { TICK_MS } from '@villages/client-core';
 import { gatewayState, watchGateway } from '../net/gateway';
 import type { Room } from '../stage/panes';
 import { RESOURCES_IN_ORDER, RESOURCE_WORDS, blazon, saysStock } from './describe';
+import { Mark } from '../marks/Mark';
 import { PaneSizeControl } from '../stage/PaneSizeControl';
 import { HouseBar } from './HouseBar';
 
@@ -29,39 +30,11 @@ const ACHIEVEMENT = {
   stem: 'M40 85 V88',
 } as const;
 
-/**
- * The five resources as marks, because five words will not sit on one line of a phone.
- *
- * A mark is learnt once and then costs nothing; a word costs nothing to learn and then has to keep
- * fitting. Five of these have to be told apart at a shade over a sixteenth of the card's width, so each
- * is a different silhouette before it is a different picture: rings inside each other, a jagged ridge,
- * two rings side by side, an A of straight legs, and a cross. What each one means is on its label, until
- * it is learnt.
- *
- * Drawn here rather than in `Icons.tsx`, which is the marks a **pane** is known by. These belong to the
- * house card the way the eye belongs to its bar.
+/*
+ * The five resources are marks, because five words will not sit on one line of a phone. They are drawn in
+ * `marks/Mark.tsx`, which a key figure's stats share, so the house's piety and a key figure's piety are
+ * one drawing. What each one means is on its label, until it is learnt.
  */
-const MARKS = {
-  /** Wealth: a coin, with a boss struck in the middle of it so it has some weight against the rings. */
-  wealth: ['M12 5 A7 7 0 1 1 11.99 5', 'M12 10 A2 2 0 1 1 11.99 10'],
-  /** Domain: the ridge of land a house holds, and the ground it stands on. */
-  naturalDomain: ['M3 16 L8 8 L12.5 13.5 L16 9.5 L21 16', 'M3 19.5 H21'],
-  /** Influence: two rings that overlap, which is what reach over people amounts to. */
-  influence: ['M9.5 7 A5 5 0 1 1 9.49 7', 'M14.5 7 A5 5 0 1 1 14.49 7'],
-  /**
-   * Reason: a pair of dividers standing over the arc they have scribed - the instrument the age argues
-   * with. Drawn with a hinge and no crossbar on purpose: legs joined by a bar read as a capital A, and a
-   * mark that reads as a letter is a word pretending to be a mark.
-   */
-  reason: [
-    'M12 7 L7 18.5',
-    'M12 7 L17 18.5',
-    'M6.6 19.6 Q12 22.4 17.4 19.6',
-    'M12 4.2 A1.6 1.6 0 1 1 11.99 4.2',
-  ],
-  /** Piety: a cross, which is what observance looks like from the street. */
-  piety: ['M12 4 V20', 'M7.5 9.5 H16.5'],
-} as const;
 
 /** The tinctures as ink on parchment, the same muted set the map draws marks in. */
 const TINCTURE: Record<string, string> = {
@@ -158,11 +131,7 @@ export function HouseStatus({ room }: { room: Room }) {
             <ul className="hud__resources">
               {RESOURCES_IN_ORDER.map((name) => (
                 <li className="hud__resource" key={name} title={RESOURCE_WORDS[name]}>
-                  <svg className="hud__mark" viewBox="0 0 24 24" role="presentation" aria-hidden="true">
-                    {MARKS[name].map((d) => (
-                      <path d={d} key={d} />
-                    ))}
-                  </svg>
+                  <Mark name={name} className="hud__mark" />
                   {/* The word is on the label rather than on the card: a mark nobody can read yet is
                       still a mark a screen reader has to say, and a tooltip is how the five are learnt. */}
                   <span aria-label={`${RESOURCE_WORDS[name]}: ${said(name)}`}>{said(name)}</span>
