@@ -23,6 +23,7 @@ import villages.application.WorldWipe
 import villages.domain.WorldTime
 import villages.gateway.Gateway
 import villages.occurrent.InMemoryWorld
+import villages.projections.CharactersProjection
 import villages.projections.ChoicesProjection
 import villages.projections.HousesProjection
 import villages.projections.RecentEventsProjection
@@ -159,22 +160,29 @@ class WorldConfig {
     @Bean(destroyMethod = "close")
     fun recentEvents(world: InMemoryWorld): RecentEventsProjection = RecentEventsProjection(world.feed)
 
+    /** The characters, and which of them each house holds, folded from the same feed. See decision 0055. */
+    @Bean(destroyMethod = "close")
+    fun characters(world: InMemoryWorld): CharactersProjection = CharactersProjection(world.feed)
+
     /**
      * Emptying the development world: the store and every read model folded from it, in one act, so that
      * no projection is left holding a house whose events are gone. See decision record 0036.
      */
     @Bean
+    @Suppress("LongParameterList")
     fun worldWipe(
         world: InMemoryWorld,
         houses: HousesProjection,
         choices: ChoicesProjection,
         recentEvents: RecentEventsProjection,
+        characters: CharactersProjection,
         mourning: Mourning,
     ): WorldWipe = WorldWipe {
         world.wipe().also {
             houses.reset()
             choices.reset()
             recentEvents.reset()
+            characters.reset()
             mourning.reset()
         }
     }
