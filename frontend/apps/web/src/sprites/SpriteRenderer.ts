@@ -39,11 +39,11 @@ export interface SpriteRenderer {
   /** Replace what is on the map. The renderer works out what appeared, changed and went away. */
   setSprites(sprites: readonly MapSprite[]): void;
   /**
-   * Which house is at this point on the screen, or null for none.
+   * Which house or person is at this point on the screen, by the id they were drawn under, or null.
    *
    * The renderer answers because it is the only thing that knows where it drew: the canvas takes no
-   * pointer events, so the map hands the click over. Only houses answer; a candidate is a place being
-   * offered rather than a thing standing in the world.
+   * pointer events, so the map hands the click over. Houses and characters answer; a candidate is a place
+   * being offered rather than a thing standing in the world.
    */
   hitTest(point: { x: number; y: number }): string | null;
   /** Marks one sprite as the selected one, or nothing when null. */

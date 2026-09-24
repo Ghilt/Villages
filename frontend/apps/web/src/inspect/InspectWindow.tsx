@@ -2,6 +2,7 @@ import { Fragment, useEffect } from 'react';
 
 import { useSyncExternalStore } from 'react';
 
+import { Portrait } from '../figures/Portrait';
 import { focusOn } from '../map/focus';
 import { Icon } from '../stage/Icons';
 import { PaneSizeControl } from '../stage/PaneSizeControl';
@@ -94,6 +95,11 @@ export function InspectWindow({ subject, said, along, room }: InspectWindowProps
         </button>
       </header>
 
+      {said.likeness !== undefined && (
+        <div className="inspect__likeness">
+          <Portrait portrait={said.likeness.portrait} name={said.name} />
+        </div>
+      )}
       <h2 className="inspect__name">{said.name}</h2>
       {said.under !== undefined && <p className="inspect__blazon">{said.under}</p>}
 

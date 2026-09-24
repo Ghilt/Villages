@@ -9,6 +9,9 @@ import { cameraOf } from './mapCamera';
 import { createPixiSpriteRenderer } from './PixiSpriteRenderer';
 import type { MapSprite } from './SpriteRenderer';
 
+/** How a person's mark is told from a house's: its id is theirs with this in front. See App.tsx. */
+const CHARACTER = 'character:';
+
 interface SpriteOverlayProps {
   map: maplibregl.Map;
   sprites: readonly MapSprite[];
@@ -59,11 +62,13 @@ export function SpriteOverlay({ map, sprites, worldRoot }: SpriteOverlayProps) {
   // The ring follows whatever was opened last. With three windows up the map can still only mark one, and
   // the newest is the one the player is looking at.
   useEffect(() => {
-    rendererRef.current?.setSelected(top?.kind === 'house' ? top.id : null);
+    rendererRef.current?.setSelected(
+      top?.kind === 'house' ? top.id : top?.kind === 'character' ? `${CHARACTER}${top.id}` : null,
+    );
   }, [top, sprites]);
 
   /**
-   * Picking a house, which opens an **inspect window** on it.
+   * Picking a house or a person, which opens an **inspect window** on them.
    *
    * The canvas takes no pointer events, so the map hands the click over and the renderer says what it drew
    * there. A hit is marked handled, which is how the area overlay knows to leave the click alone: two
@@ -77,7 +82,11 @@ export function SpriteOverlay({ map, sprites, worldRoot }: SpriteOverlayProps) {
       const hit = rendererRef.current?.hitTest(event.point) ?? null;
       if (hit !== null) {
         event.preventDefault();
-        inspect({ kind: 'house', id: hit });
+        inspect(
+          hit.startsWith(CHARACTER)
+            ? { kind: 'character', id: hit.slice(CHARACTER.length) }
+            : { kind: 'house', id: hit },
+        );
       }
     };
 

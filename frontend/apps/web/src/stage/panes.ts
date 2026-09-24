@@ -206,7 +206,7 @@ export function standingPanes(pending: boolean): readonly Pane[] {
 export function inspectPane(subject: Subject): Pane {
   return {
     id: paneIdOf(subject),
-    title: subject.kind === 'house' ? 'a house' : 'an area',
+    title: subject.kind === 'house' ? 'a house' : subject.kind === 'area' ? 'an area' : 'a key figure',
     // Down the column, where up to three of them stack. The rail inside that one tile is what limits how
     // many, so a window asks the column for no height of its own.
     spread: 'left',

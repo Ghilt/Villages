@@ -28,6 +28,8 @@
       "familyName": "Hollin",
       "sex": "woman",
       "species": "person",
+      "bornOn": 642700,
+      "agedYears": 0,
       "portrait": "woman-03",
       "place": {
         "lat": 59.34,
@@ -55,6 +57,8 @@
       "familyName": "Ystad",
       "sex": "man",
       "species": "person",
+      "bornOn": 634500,
+      "agedYears": 10,
       "place": {
         "lat": 59.35,
         "lon": 18.1

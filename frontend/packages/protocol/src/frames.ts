@@ -125,9 +125,10 @@ export const keyFigureViewSchema = z.object({
 });
 
 /**
- * A character standing on the map, as everyone holding the cell sees them: who and whose, and where. Not
- * their stats or their birthday, which are their house's own. `cell` is the deepest cell the place falls
- * in, as a house's is; `since` the world-day they came to stand there; `version` the read model's revision.
+ * A character standing on the map, as everyone holding the cell sees them: who and whose, how old and
+ * where. Not their stats, which are their house's own. The age is counted here from `bornOn` and
+ * `agedYears`, as a key figure's is. `cell` is the deepest cell the place falls in, as a house's is;
+ * `since` the world-day they came to stand there; `version` the read model's revision.
  */
 export const characterOnMapViewSchema = z.object({
   id: z.string(),
@@ -135,6 +136,8 @@ export const characterOnMapViewSchema = z.object({
   familyName: z.string(),
   sex: sexSchema,
   species: speciesSchema,
+  bornOn: worldDaySchema,
+  agedYears: z.number().int(),
   portrait: z.string().optional(),
   place: pointSchema,
   cell: cellSchema,

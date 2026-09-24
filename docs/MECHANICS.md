@@ -174,8 +174,8 @@ points at something.
 
 ### What it is
 
-A window that says what one thing in the world is. That thing is its **subject** — today a house or an
-area, later a character, a holding, a work, a place named in a conversation. The window says what the
+A window that says what one thing in the world is. That thing is its **subject** — today a house, an
+area or a character, later a holding, a work, a place named in a conversation. The window says what the
 world knows about that subject, and then it offers **links**: the things worth looking at from here, each
 of which opens on its own.
 
@@ -242,8 +242,11 @@ the list of what is still to be worked out.
 
 ### Where it stands
 
-The shape of it is built and what it can say is thin. A **subject** covers a house and an area, one store
-for both, which is what the two selections that used to run side by side became. A window renders a
+The shape of it is built and what it can say is thin. A **subject** covers a house, an area and a
+character, one store for all three, which is what the two selections that used to run side by side became.
+A window on a character is the first with a face: their portrait in its frame beside their name, their age,
+whom they serve and where they stand, with a link to each house that holds them - and not their stats,
+which are their house's own. A window renders a
 description and knows nothing of what made it. Links go both ways between a house and the ground somebody
 has fenced around it, and *show it on the map* moves the camera. Up to three stack in a rail in the spread,
 a fourth pushing the oldest off; on a phone one of them takes a bay and its links open in the other.
@@ -423,7 +426,8 @@ its houses, and a move reaches whoever holds the cells either side of it as the 
 arrived, changed or gone, because a thing that moves would otherwise stay drawn where it was. The page
 draws them: a small standing figure close in and a head and shoulders far out, in their house's colours,
 from the zoom 9 cells in, which is a camera at about 8.5. The debug panel puts one where the camera is
-looking and takes them off the map again. Clicking one does nothing yet. Decision record 0055 says what a character is to the program, and
+looking and takes them off the map again. Clicking one opens an inspect window on them, and so can a row
+of the trail; from wire version 8 the map carries the birthday their age is counted from. Decision record 0055 says what a character is to the program, and
 `docs/plans/characters-and-key-figures.md` is the order the rest gets built in, one commit a step.
 
 ---

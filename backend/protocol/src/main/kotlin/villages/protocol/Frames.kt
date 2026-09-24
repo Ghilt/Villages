@@ -25,9 +25,11 @@ import tools.jackson.databind.JsonNode
  * Version 3 added `seeAll`, the eye that sets significance aside. Version 6 added the key figures:
  * `yourKeyFigures`, and the commands that bring one in and act through one. Version 7 put them on the map:
  * the characters in a cell ride its snapshot beside the houses, three deltas say one arrived, changed or
- * went, and two commands move one and take one off the map. See decision record 0055.
+ * went, and two commands move one and take one off the map. Version 8 gave a character on the map the
+ * birthday and the years an age is counted from, so a window on them can say how old they are. See
+ * decision record 0055.
  */
-const val PROTOCOL_VERSION = 7
+const val PROTOCOL_VERSION = 8
 
 data class Point(val lat: Double, val lon: Double)
 
@@ -157,10 +159,11 @@ data class KeyFigureView(
 /**
  * A character standing on the map, as everyone holding the cell sees them.
  *
- * Less than a key figure's view on purpose: a stranger sees who somebody is, whose they are and where they
- * stand, and not their stats or their birthday, which are the house's own. `cell` is the deepest cell the
- * place falls in, as a house's is; `since` is the world-day they came to stand there; `version` is the read
- * model's revision, so of two copies the newer wins. See decision record 0055.
+ * Less than a key figure's view on purpose: a stranger sees who somebody is, how old, whose they are and
+ * where they stand, and not their stats, which are the house's own. The age is not on the wire, for the
+ * reason it is not on a key figure's: it is counted from `bornOn` and `agedYears` on the day it is read.
+ * `cell` is the deepest cell the place falls in, as a house's is; `since` is the world-day they came to
+ * stand there; `version` is the read model's revision, so of two copies the newer wins. See 0055.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class CharacterOnMapView(
@@ -169,6 +172,8 @@ data class CharacterOnMapView(
     val familyName: String,
     val sex: String,
     val species: String,
+    val bornOn: Long,
+    val agedYears: Int,
     val portrait: String? = null,
     val place: Point,
     val cell: String,

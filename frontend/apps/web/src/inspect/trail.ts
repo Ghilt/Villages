@@ -54,7 +54,9 @@ function readStored(): readonly Step[] {
         step !== null &&
         typeof (step as Step).name === 'string' &&
         typeof (step as Step).at === 'number' &&
-        ((step as Step).subject?.kind === 'house' || (step as Step).subject?.kind === 'area') &&
+        ((step as Step).subject?.kind === 'house' ||
+          (step as Step).subject?.kind === 'area' ||
+          (step as Step).subject?.kind === 'character') &&
         typeof (step as Step).subject?.id === 'string',
     );
   } catch {

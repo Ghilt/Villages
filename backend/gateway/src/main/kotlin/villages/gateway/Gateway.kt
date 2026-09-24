@@ -783,8 +783,8 @@ internal fun CharacterRow.toView(): KeyFigureView = KeyFigureView(
 )
 
 /**
- * A character standing on the map as everyone holding the cell sees them: who and whose, and where, and not
- * the stats, which are their house's own. The span is where they stood on the day the map was asked about.
+ * A character standing on the map as everyone holding the cell sees them: who and whose, how old and
+ * where, and not the stats, which are their house's own. The span is where they stood on the day the map was asked about.
  */
 internal fun CharacterRow.toMapView(span: CharacterSpan): CharacterOnMapView = CharacterOnMapView(
     id = id.value.toString(),
@@ -792,6 +792,8 @@ internal fun CharacterRow.toMapView(span: CharacterSpan): CharacterOnMapView = C
     familyName = name.family,
     sex = sex.name.lowercase(),
     species = species.name.lowercase(),
+    bornOn = bornOn.day,
+    agedYears = agedYears,
     portrait = portrait,
     place = Point(span.place.lat, span.place.lon),
     cell = Cell.of(span.place.lat, span.place.lon).quadkey,

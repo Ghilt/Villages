@@ -2457,6 +2457,16 @@ body,
   color: var(--ink-soft);
 }
 
+/*
+ * A person's face in their window: the portrait frame, hung at the top right beside the name and the
+ * facts rather than above them, so a window on a person is no taller than a window on a house.
+ */
+.inspect__likeness {
+  float: right;
+  width: 4.6rem;
+  margin: 0.7rem 0 0.4rem 0.8rem;
+}
+
 .inspect__name {
   margin: 0.7rem 0 0;
   font-size: 1.25rem;

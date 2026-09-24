@@ -602,7 +602,9 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       for (const [id, entry] of entries) {
         // A mark on its way out takes no clicks: it is not a thing on the map any more, it is the
         // last of a picture of one.
-        if (entry.spec.kind !== 'house' || entry.leaving) {
+        // A candidate is a place being offered rather than a thing standing in the world, so it is not
+        // one; a house and a person are.
+        if (entry.spec.kind === 'candidate' || entry.leaving) {
           continue;
         }
         // One form answers, and the switch is at the crossover where the two are the same size, so the

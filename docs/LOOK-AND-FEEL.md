@@ -98,7 +98,8 @@ this is the frame they hang in — so there is never anything in it for the play
 once and mirrored rather than drawn four times, which is the **needle**'s rule. See decision record 0048.
 
 **The portrait frame.** One upright picture of a character, three by four, wherever a face is shown: the
-key figures now, the inspect window and dialogue later. The frame is the ornament's two contours, a gold
+key figures and the inspect window now, dialogue later. In a window it hangs at the top right, beside the
+name and the facts, so a window on a person is no taller than one on a house. The frame is the ornament's two contours, a gold
 edge and a fainter rule inside it drawn over the picture, so a dark picture keeps its frame. **Somebody
 with no picture is still somebody**: a character with no portrait, or one whose file is missing or will not
 load, is a bust in soft ink, never an empty frame and never the browser's broken-image mark. `Portrait`,

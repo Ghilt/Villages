@@ -191,6 +191,8 @@ function character(id: string, version = 1, cell = Z10): CharacterOnMapView {
     familyName: 'Hollin',
     sex: 'woman',
     species: 'person',
+    bornOn: 642700,
+    agedYears: 0,
     place: { lat: 59.34, lon: 18.06 },
     cell,
     keyFigureOf: [],

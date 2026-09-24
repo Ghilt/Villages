@@ -1,5 +1,6 @@
+import { ageOn } from '@villages/client-core';
 import { describeDay } from '@villages/protocol';
-import type { HouseView } from '@villages/protocol';
+import type { HolderView, HouseView, Point, Sex } from '@villages/protocol';
 import { insideFence, toRasterPixel } from '@villages/world';
 import type { MasterGrid, TerrainClass } from '@villages/world';
 
@@ -44,8 +45,29 @@ export interface Description {
   name: string;
   /** A line under the name, when the thing has one worth reading. */
   under?: string;
+  /**
+   * A face, for a thing that has one: a person. Present with no portrait for somebody who has none, so
+   * the window draws the bust rather than nothing; absent for a house or an area, which have no face.
+   */
+  likeness?: { portrait: string | undefined };
   facts: readonly Fact[];
   links: readonly Link[];
+}
+
+/**
+ * What a window needs to know of a character, which both ways of hearing of one carry: standing on the
+ * map in a held cell, or as one of your own key figures wherever they are.
+ */
+export interface CharacterSeen {
+  id: string;
+  givenName: string;
+  familyName: string;
+  sex: Sex;
+  bornOn: number;
+  agedYears: number;
+  portrait?: string | undefined;
+  keyFigureOf: readonly HolderView[];
+  place?: Point | undefined;
 }
 
 /** What terrain a class id means, for a census that would otherwise be a list of numbers. */
@@ -89,6 +111,46 @@ export function describeHouse(
           subject: { kind: 'area', id: area.id },
         })),
     ],
+  };
+}
+
+/**
+ * A character: their face, their name, their age, and whose key figure they are, with a way to each of
+ * those houses and to where they stand. Their stats are not here, because a stranger cannot see them and
+ * this window is anybody's. `today` is the world's day, null before the world has said it.
+ */
+export function describeCharacter(
+  character: CharacterSeen,
+  today: number | null,
+  yours: boolean,
+): Description {
+  const age = today === null ? null : ageOn(character.bornOn, character.agedYears, today);
+  const holders = character.keyFigureOf.map((holder) => holder.name).join(', ');
+  const links: Link[] = [];
+  if (character.place !== undefined) {
+    links.push({ what: 'show them on the map', to: 'map', at: character.place });
+  }
+  for (const holder of character.keyFigureOf) {
+    links.push({ what: holder.name, to: 'subject', subject: { kind: 'house', id: holder.id } });
+  }
+
+  return {
+    kind: yours ? 'Your key figure' : 'Key figure',
+    name: `${character.givenName} ${character.familyName}`,
+    under: age === null ? `a ${character.sex}` : `a ${character.sex} of ${age}`,
+    likeness: { portrait: character.portrait },
+    facts: [
+      { what: 'Age', said: age === null ? '—' : String(age) },
+      { what: 'Serves', said: holders === '' ? 'nobody' : holders },
+      {
+        what: 'Stands',
+        said:
+          character.place === undefined
+            ? 'on no map'
+            : `${character.place.lat.toFixed(3)}, ${character.place.lon.toFixed(3)}`,
+      },
+    ],
+    links,
   };
 }
 

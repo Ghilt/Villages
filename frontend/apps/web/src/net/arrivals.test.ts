@@ -73,6 +73,8 @@ describe('saying what a batch brought', () => {
     familyName: 'Hollin',
     sex: 'woman',
     species: 'person',
+    bornOn: 642700,
+    agedYears: 0,
     place: { lat: 59.34, lon: 18.06 },
     cell: '1200312213',
     keyFigureOf: [],

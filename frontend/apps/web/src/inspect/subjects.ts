@@ -14,7 +14,8 @@ import { note, shortId } from '../debug/log';
  * A module with a listener set, like the gateway, the areas and the bays. Nothing here survives a reload.
  */
 
-export type Subject = { kind: 'house'; id: string } | { kind: 'area'; id: string };
+export type Subject =
+  { kind: 'house'; id: string } | { kind: 'area'; id: string } | { kind: 'character'; id: string };
 
 /**
  * How many can be open at once where there is room for them.
@@ -66,7 +67,7 @@ export function subjectOfPane(id: string): Subject | null {
   if (head !== 'inspect' || rest === undefined) {
     return null;
   }
-  return kind === 'house' || kind === 'area' ? { kind, id: rest } : null;
+  return kind === 'house' || kind === 'area' || kind === 'character' ? { kind, id: rest } : null;
 }
 
 /** What the map marks: the newest thing opened, because that is what the player is looking at. */

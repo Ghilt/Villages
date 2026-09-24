@@ -1,6 +1,6 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 
-import { housesInView } from '@villages/client-core';
+import { charactersInView, housesInView } from '@villages/client-core';
 import type { MasterGrid, TerrainClass } from '@villages/world';
 
 import { areasNow, watchAreas } from '../areas/areas';
@@ -9,7 +9,7 @@ import { PaneSizeControl } from '../stage/PaneSizeControl';
 import { terrainPalette } from '../map/terrainClasses';
 import { gatewayState, watchGateway } from '../net/gateway';
 import type { Room } from '../stage/panes';
-import { describeArea, describeHouse, type Legend } from './describe';
+import { describeArea, describeCharacter, describeHouse, type Legend } from './describe';
 import { InspectWindow } from './InspectWindow';
 import { forgetSubject, type Subject } from './subjects';
 import { forget } from './trail';
@@ -57,7 +57,20 @@ export function Inspecting({ subject, room, along, grid }: InspectingProps) {
   }, [subject, area]);
 
   if (room.size === 'strip') {
-    return <Strip name={subject.kind === 'house' ? 'House' : 'Area'} room={room} />;
+    return <Strip name={KIND_WORDS[subject.kind]} room={room} />;
+  }
+
+  // A character is seen standing in a held cell, or as one of this player's own key figures wherever they
+  // are; the second is how your own people stay inspectable after the camera has left them.
+  if (subject.kind === 'character') {
+    const standing = charactersInView(heard.houses).find((one) => one.id === subject.id);
+    const yours = heard.yourKeyFigures?.find((one) => one.id === subject.id);
+    const seen = standing ?? yours;
+    if (seen === undefined) {
+      return <OutOfView subject={subject} room={room} />;
+    }
+    const said = describeCharacter(seen, heard.world?.today ?? null, yours !== undefined);
+    return <InspectWindow subject={subject} said={said} along={along} room={room} />;
   }
 
   if (subject.kind === 'area') {
@@ -80,12 +93,22 @@ export function Inspecting({ subject, room, along, grid }: InspectingProps) {
   return <InspectWindow subject={subject} said={said} along={along} room={room} />;
 }
 
-/** A house that has left the held cells. It is not gone from the world, only from what this page can see. */
+/** What each kind of subject is called above its window, and on its strip. */
+const KIND_WORDS: Record<Subject['kind'], string> = {
+  house: 'House',
+  area: 'Area',
+  character: 'Key figure',
+};
+
+/**
+ * A house or a person who has left the held cells. Not gone from the world, only from what this page can
+ * see: a stranger's key figure the camera has left, or a house panned away from.
+ */
 function OutOfView({ subject, room }: { subject: Subject; room: Room }) {
   return (
     <section className="inspect">
       <header className="inspect__bar">
-        <span className="inspect__kind">House</span>
+        <span className="inspect__kind">{KIND_WORDS[subject.kind]}</span>
         <PaneSizeControl room={room} />
         <button
           type="button"
