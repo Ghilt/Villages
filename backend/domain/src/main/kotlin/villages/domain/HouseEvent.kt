@@ -3,38 +3,14 @@ package villages.domain
 import java.time.Instant
 
 /**
- * Something that happened on a house's stream, in the past tense. Events are the only durable state and
- * are never edited or deleted. Every subclass has a row in docs/EVENTS.md, and a test fails when they
- * disagree.
- *
- * The name says which stream, not which kind: everything here is addressed as `house:<uuid>`, because
- * that is the consistency boundary a decision is taken inside. What kind of thing happened is the two
- * sealed halves below, and it is the more interesting question of the two.
- *
- * Every event carries two times, because they can differ: when it happened in the world's own calendar,
- * and when it was written down by the clock on the wall. Playing the past appends an event now whose
- * world-time is centuries ago. See decision record 0027.
+ * An event kept on a house's stream, `house:<uuid>`: the consistency boundary a house's decisions are taken
+ * inside. The name says which stream, not which kind. Whether it happened in the world or was done by a
+ * player is the other question, answered by [WorldEvent] and [PlayerEvent], and the more interesting of the
+ * two. See [Event].
  */
-sealed interface HouseEvent {
+sealed interface HouseEvent : Event {
     val houseId: HouseId
-
-    /** When it happened, in the world's calendar. What the map at a moment and the scrubber order by. */
-    val worldTime: WorldTime
-
-    /** When it was recorded, by the server's clock. The store's own order, and the house-spirit's. */
-    val recordedAt: Instant
 }
-
-/**
- * Something that happened **in the world**: a thing came to be, moved, changed or ended.
- *
- * This is the half that grows. Every feature that puts something on the map or changes what is there
- * adds to it, and its events are what the chronicle is made of and what the map is drawn from. Their
- * types read `villages.house.<verb>.v<n>`, after the thing whose history they are.
- *
- * See decision record 0034.
- */
-sealed interface WorldEvent : HouseEvent
 
 /**
  * Something **a player did**, by which the world was reached into.
@@ -66,7 +42,7 @@ data class HouseFounded(
     val resources: Map<Resource, Stock>,
     override val worldTime: WorldTime,
     override val recordedAt: Instant,
-) : WorldEvent {
+) : HouseEvent, WorldEvent {
     init {
         // A house has all five from the moment it exists, so nothing downstream has to ask whether it
         // happens to have one. A stored event that is missing one is malformed and says so here.
@@ -83,7 +59,7 @@ data class HouseResourceGranted(
     val amount: Long,
     override val worldTime: WorldTime,
     override val recordedAt: Instant,
-) : WorldEvent
+) : HouseEvent, WorldEvent
 
 /** Some of a house's resource was used up, and is gone. */
 data class HouseResourceSpent(
@@ -92,7 +68,7 @@ data class HouseResourceSpent(
     val amount: Long,
     override val worldTime: WorldTime,
     override val recordedAt: Instant,
-) : WorldEvent
+) : HouseEvent, WorldEvent
 
 /**
  * Some of a house's resource was tied to an undertaking until a world-day. It is not spent: it comes back
@@ -107,7 +83,7 @@ data class HouseResourcePledged(
     val purpose: String,
     override val worldTime: WorldTime,
     override val recordedAt: Instant,
-) : WorldEvent
+) : HouseEvent, WorldEvent
 
 /**
  * A pledge ended and what it held is free again.
@@ -121,7 +97,7 @@ data class HouseResourceReleased(
     val pledgeId: PledgeId,
     override val worldTime: WorldTime,
     override val recordedAt: Instant,
-) : WorldEvent
+) : HouseEvent, WorldEvent
 
 /**
  * A player was given a choice to make. The whole choice is here, options and effects and all, so the

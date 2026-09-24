@@ -7,16 +7,16 @@ import java.time.Instant
  * evolve folds an event into the state. It depends on nothing, and everything that stores, routes or shows
  * a house is downstream of it.
  */
-object HouseDecider {
+object HouseDecider : Decider<HouseCommand, House, HouseEvent> {
     /**
      * How much the world thinks a new house matters: enough to see standing over the region, not enough
      * to see from the next country. A placeholder, like the rate above, until the chrono-engine judges it.
      */
     val FOUNDING_SIGNIFICANCE = Significance(20.0)
 
-    val initial: House = House.NotFounded()
+    override val initial: House = House.NotFounded()
 
-    fun decide(command: HouseCommand, state: House): List<HouseEvent> = when (command) {
+    override fun decide(command: HouseCommand, state: House): List<HouseEvent> = when (command) {
         is FoundHouse -> when (state) {
             is House.Founded -> throw HouseError.AlreadyFounded
             is House.NotFounded -> listOf(founding(command))
@@ -186,7 +186,7 @@ object HouseDecider {
         recordedAt = command.recordedAt,
     )
 
-    fun evolve(state: House, event: HouseEvent): House = when (event) {
+    override fun evolve(state: House, event: HouseEvent): House = when (event) {
         is HouseFounded -> House.Founded(
             id = event.houseId,
             player = event.player,
@@ -247,7 +247,4 @@ object HouseDecider {
             is House.Founded -> state.copy(pending = null)
         }
     }
-
-    /** The state after every event so far, from the beginning. */
-    fun fold(events: List<HouseEvent>): House = events.fold(initial, ::evolve)
 }

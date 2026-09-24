@@ -25,6 +25,7 @@ import villages.domain.Banner
 import villages.domain.Choice
 import villages.domain.ChoiceId
 import villages.domain.Effect
+import villages.domain.DomainError
 import villages.domain.HouseError
 import villages.domain.HouseId
 import villages.domain.HouseName
@@ -448,7 +449,7 @@ class Gateway(
                     )
                 }
                 out.send(CommandAccepted(frame.commandId))
-            } catch (refused: HouseError) {
+            } catch (refused: DomainError) {
                 out.send(CommandRejected(frame.commandId, refused.reasonCode()))
             } catch (@Suppress("SwallowedException") busy: WriteConflict) {
                 // Not a refusal: the stream moved under us. Trying again may well be accepted.
@@ -640,10 +641,10 @@ private val Delta.house: HouseView
     }
 
 /** A domain refusal as the short code the protocol carries, which the interface turns into words. */
-internal fun HouseError.reasonCode(): String = when (this) {
+internal fun DomainError.reasonCode(): String = when (this) {
     HouseError.AlreadyFounded -> "alreadyFounded"
     is HouseError.InvalidName -> "invalidName"
-    is HouseError.InvalidLocation -> "invalidLocation"
+    is DomainError.InvalidLocation -> "invalidLocation"
     is HouseError.InvalidBanner -> "invalidBanner"
     is HouseError.InvalidChoice -> "invalidChoice"
     HouseError.ChoicePending -> "choicePending"

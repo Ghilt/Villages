@@ -42,8 +42,9 @@ Answer these before touching code, in a paragraph Adam can read back. The answer
    the panel cannot show is one Adam cannot verify (decision 0023).
 4. **What can the player do about it?** A command, its payload, and its refusals. The payload never
    carries what the server can work out: not the house's id, not the player, not the instant, not the
-   story a command continues. Each way it can be refused is a `HouseError` named for the rule, mapped
-   to a reason code in the one place the gateway does that.
+   story a command continues. Each way it can be refused is a `DomainError` named for the rule, under
+   the kind of thing whose rule it is - a `HouseError` for a house's - and mapped to a reason code in the
+   one place the gateway does that.
 5. **What does the world remember, and what does it work out?** A projection folds the events it
    needs into rows; everything that can be derived is derived and never stored: a cell from a place
    (0026), a zoom from a significance, a fence from a seat. If two answers could disagree, only one of
@@ -135,8 +136,8 @@ decision record 0055. `ARCHITECTURE.md` describes the pattern; nothing of it is 
 - A command is an imperative: `FoundHouse`, `GiveChoice`, `TakeAction`. Its payload on the wire is the
   same words in camelCase: `foundHouse`, `takeAction`.
 - A frame about the player's own things is `your` and the thing: `yourHouse`, `yourChoice`.
-- A refusal is a `HouseError` named for the rule it enforces, `ChoicePending`, `NoSuchOption`, and its
-  reason code on the wire is the same in camelCase.
+- A refusal is named for the rule it enforces, `ChoicePending`, `NoSuchOption`, under the `DomainError`
+  of the kind of thing whose rule it is, and its reason code on the wire is the same in camelCase.
 - Every word comes from `GLOSSARY.md` and is used verbatim in code, events and interface. A new word
   is a glossary row in the same commit as its first use.
 - **Where the player's word is already taken in the code, the code qualifies it and the interface does
@@ -179,9 +180,9 @@ What one new event costs, and the check that fails until each part exists.
 | Part | Where | Held by |
 |---|---|---|
 | The class, the `decide` branch, the `evolve` branch | `backend/domain` | `HouseDeciderSpec`: given, when, then over events |
-| The type row | `HouseEventTypes` in `backend/infrastructure-occurrent` | `EventTypeCatalogueSpec` |
+| The type row | `EventTypes` in `backend/infrastructure-occurrent` | `EventTypeCatalogueSpec` |
 | The catalogue row: type, payload in constructor order, meaning, producer, consumers | `docs/EVENTS.md` | `EventCatalogueSpec`, in both directions |
-| The stored form | `contracts/fixtures/events/<type>.json` | `HouseEventFormatSpec` |
+| The stored form | `contracts/fixtures/events/<type>.json` | `EventFormatSpec` |
 | Every projection's fold | `backend/projections` | the compiler: each `when` is exhaustive |
 | A frame, when the interface sees it directly | Kotlin `Frames.kt`, zod `frames.ts`, one fixture under `contracts/fixtures/frames` | both contract tests |
 | The wire moved, so its version does: `PROTOCOL_VERSION` up at both ends, and `contracts/protocol-v<n>.txt` recorded with `./gradlew :protocol:test -Dprotocol.record=true` | `backend/protocol`, `frontend/packages/protocol`, `contracts/` | `ProtocolShapeSpec` and `protocol.shape.test.ts`, which fail with the instructions (0037) |

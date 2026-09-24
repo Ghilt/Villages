@@ -12,7 +12,9 @@ import tools.jackson.module.kotlin.KotlinModule
 import villages.application.HouseCommandExecutor
 import villages.application.Provenance
 import villages.application.WriteConflict
+import villages.domain.Decider
 import villages.domain.Effect
+import villages.domain.Event
 import villages.domain.HouseCommand
 import villages.domain.HouseDecider
 import villages.domain.HouseEvent
@@ -20,15 +22,18 @@ import java.net.URI
 import java.time.ZoneOffset
 
 /**
- * How a house event is written and read: the format decision record 0024 describes, with the provenance
- * decision record 0035 adds.
+ * How an event is written and read, whichever stream it is on: the format decision record 0024 describes,
+ * with the provenance decision record 0035 adds.
  *
- * The source is ours, the subject is the house, the time is the instant the event was recorded, and the
- * data is the event's fields as Jackson writes a Kotlin class: value classes unwrapped, so a world-time is
- * a number, instants as ISO-8601 text, enums by their names, nulls written out so that a type's shape is
- * constant. Held to contracts/fixtures/events by a test.
+ * The source is ours, the subject is the thing whose stream it is, the time is the instant the event was
+ * recorded, and the data is the event's fields as Jackson writes a Kotlin class: value classes unwrapped, so
+ * a world-time is a number, instants as ISO-8601 text, enums by their names, nulls written out so that a
+ * type's shape is constant. Held to contracts/fixtures/events by a test.
+ *
+ * One converter for every kind of stream, because there is one store and one feed: an event read off the
+ * feed is converted before anybody knows whose it is. See decision record 0055.
  */
-object HouseEvents {
+object Events {
     val SOURCE: URI = URI.create("urn:villages")
 
     /** The story an event belongs to, and what directly caused it, as CloudEvent extensions. See 0035. */
@@ -41,19 +46,24 @@ object HouseEvents {
         .addMixIn(Effect::class.java, EffectJson::class.java)
         .build()
 
-    fun converter(): JacksonCloudEventConverter<HouseEvent> =
-        JacksonCloudEventConverter.Builder<HouseEvent>(json, SOURCE)
-            .typeMapper(HouseEventTypes)
-            .subjectMapper { event -> event.houseId.value.toString() }
+    fun converter(): JacksonCloudEventConverter<Event> =
+        JacksonCloudEventConverter.Builder<Event>(json, SOURCE)
+            .typeMapper(EventTypes)
+            .subjectMapper(::subjectOf)
             .timeMapper { event -> event.recordedAt.atOffset(ZoneOffset.UTC) }
             .build()
+
+    /** The id of the thing whose stream an event is on, which is what a CloudEvent's subject is. */
+    private fun subjectOf(event: Event): String = when (event) {
+        is HouseEvent -> event.houseId.value.toString()
+    }
 }
 
 /** The same event, saying where it came from. The converter writes the data; this writes the envelope. */
 internal fun CloudEvent.stamped(provenance: Provenance): CloudEvent =
     CloudEventBuilder.v1(this)
-        .withExtension(HouseEvents.CORRELATION_ID, provenance.correlationId.toString())
-        .withExtension(HouseEvents.CAUSATION_ID, provenance.commandId.toString())
+        .withExtension(Events.CORRELATION_ID, provenance.correlationId.toString())
+        .withExtension(Events.CAUSATION_ID, provenance.commandId.toString())
         .build()
 
 /**
@@ -64,26 +74,30 @@ internal fun CloudEvent.stamped(provenance: Provenance): CloudEvent =
 private const val ATTEMPTS = 3
 
 /**
- * The command executor port: read the stream, fold it, decide, and append what was decided under the
- * stream's version.
+ * The loop every command executor runs, whatever the stream holds: read the stream, fold it, decide, and
+ * append what was decided under the stream's version.
  *
  * Written out rather than delegated to Occurrent's decider extension, which does exactly this and gives
  * no way to put anything on the envelope of what it writes. Provenance has to go on the envelope - it is
  * about the message and not about the game - so the loop is ours. See decision record 0035.
+ *
+ * Written once for every kind of stream, so a second kind of thing borrows the loop rather than growing a
+ * copy of it that drifts. See decision record 0055.
  */
-class OccurrentHouseCommandExecutor(
+internal class StreamExecutor<C, S, E : Event>(
     private val store: EventStore,
-    private val converter: CloudEventConverter<HouseEvent>,
-) : HouseCommandExecutor {
-    override fun execute(command: HouseCommand, provenance: Provenance) {
-        val stream = command.houseId.stream
-
+    private val converter: CloudEventConverter<Event>,
+    private val decider: Decider<C, S, E>,
+    /** The kind of event this stream holds, which is every event the converter hands back from it. */
+    private val holds: Class<E>,
+) {
+    fun execute(stream: String, command: C, provenance: Provenance) {
         repeat(ATTEMPTS) {
             val held = store.read(stream)
             val version = held.version()
-            val decided = HouseDecider.decide(
+            val decided = decider.decide(
                 command,
-                HouseDecider.fold(held.eventList().map(converter::toDomainEvent)),
+                decider.fold(held.eventList().map { holds.cast(converter.toDomainEvent(it)) }),
             )
 
             // A decision that yields nothing writes nothing, which is how a repeated command stays harmless.
@@ -107,4 +121,15 @@ class OccurrentHouseCommandExecutor(
             }
         }
     }
+}
+
+/** The house command executor port: the loop above, over a house's stream and a house's rules. */
+class OccurrentHouseCommandExecutor(
+    store: EventStore,
+    converter: CloudEventConverter<Event>,
+) : HouseCommandExecutor {
+    private val loop = StreamExecutor(store, converter, HouseDecider, HouseEvent::class.java)
+
+    override fun execute(command: HouseCommand, provenance: Provenance) =
+        loop.execute(command.houseId.stream, command, provenance)
 }

@@ -12,7 +12,7 @@ import villages.domain.Choice
 import villages.domain.ChoiceId
 import villages.domain.Division
 import villages.domain.Effect
-import villages.domain.HouseEvent
+import villages.domain.Event
 import villages.domain.HouseFounded
 import villages.domain.Resource
 import villages.domain.PledgeId
@@ -37,15 +37,15 @@ import java.time.Instant
 import java.util.UUID
 
 /**
- * The stored form of a house event is a contract with every future version of the code, so it is pinned to
+ * The stored form of an event is a contract with every future version of the code, so it is pinned to
  * a fixture: contracts/fixtures/events holds one CloudEvent per catalogued type, exactly as stored. A field
  * renamed, a value class boxed, an instant written as a number, would all show here first.
  *
  * Every catalogued type is checked, not only the first one: a type with no fixture is a shape nobody
  * agreed to, and the first case below is what makes forgetting one impossible.
  */
-class HouseEventFormatSpec : StringSpec({
-    val converter = HouseEvents.converter()
+class EventFormatSpec : StringSpec({
+    val converter = Events.converter()
     val noon = Instant.parse("2026-09-04T12:00:00Z")
     val house = HouseId(UUID.fromString("6d5b0a2e-1c3f-4d7e-9a8b-0f1e2d3c4b5a"))
     val player = PlayerId(UUID.fromString("0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8d"))
@@ -146,7 +146,7 @@ class HouseEventFormatSpec : StringSpec({
         recordedAt = noon,
     )
 
-    val samples: Map<String, HouseEvent> = mapOf(
+    val samples: Map<String, Event> = mapOf(
         "villages.house.founded.v1" to ravenscar,
         "villages.house.resourceGranted.v1" to givenGold,
         "villages.house.resourcePledged.v1" to pledgedReason,
@@ -157,10 +157,10 @@ class HouseEventFormatSpec : StringSpec({
     )
 
     fun fixture(type: String): JsonNode =
-        HouseEvents.json.readTree(File("../../contracts/fixtures/events/$type.json"))
+        Events.json.readTree(File("../../contracts/fixtures/events/$type.json"))
 
     "every catalogued type has a sample here, so none of them goes unpinned" {
-        samples.keys shouldContainExactlyInAnyOrder HouseEventTypes.rows.values.toSet()
+        samples.keys shouldContainExactlyInAnyOrder EventTypes.rows.values.toSet()
     }
 
     "each event is stored exactly as its fixture says" {
@@ -174,7 +174,7 @@ class HouseEventFormatSpec : StringSpec({
                 stored.subject shouldBe pinned["subject"].asString()
                 stored.time!!.toInstant() shouldBe Instant.parse(pinned["time"].asString())
                 stored.id shouldMatch Regex("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
-                HouseEvents.json.readTree(stored.data!!.toBytes()) shouldBe pinned["data"]
+                Events.json.readTree(stored.data!!.toBytes()) shouldBe pinned["data"]
             }
         }
     }
@@ -189,16 +189,16 @@ class HouseEventFormatSpec : StringSpec({
 
     "the fixtures themselves read back as the events, so the files are the contract and not the code" {
         for ((type, event) in samples) {
-            val bytes = HouseEvents.json.writeValueAsBytes(fixture(type)["data"])
+            val bytes = Events.json.writeValueAsBytes(fixture(type)["data"])
 
             withClue(type) {
-                HouseEvents.json.readValue(bytes, event.javaClass) shouldBe event
+                Events.json.readValue(bytes, event.javaClass) shouldBe event
             }
         }
     }
 
     "a sealed field says which case it holds, so a reader never has to guess" {
-        val written = HouseEvents.json.readTree(converter.toCloudEvent(whereToSettle).data!!.toBytes())
+        val written = Events.json.readTree(converter.toCloudEvent(whereToSettle).data!!.toBytes())
 
         written["choice"]["options"][0]["effect"][EFFECT_KIND].asString() shouldBe FOUND_AT
     }

@@ -93,8 +93,8 @@ class InMemoryWorldSpec : StringSpec({
             world.executor.execute(ravenscar, sent)
 
             val written = world.store.read(ravenscar.houseId.stream).eventList().single()
-            written.getExtension(HouseEvents.CORRELATION_ID) shouldBe story.toString()
-            written.getExtension(HouseEvents.CAUSATION_ID) shouldBe commandId.toString()
+            written.getExtension(Events.CORRELATION_ID) shouldBe story.toString()
+            written.getExtension(Events.CAUSATION_ID) shouldBe commandId.toString()
             String(written.data!!.toBytes()).contains("correlation") shouldBe false
         }
     }

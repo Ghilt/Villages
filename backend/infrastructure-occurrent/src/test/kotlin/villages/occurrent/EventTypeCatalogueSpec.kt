@@ -3,7 +3,7 @@ package villages.occurrent
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
-import villages.domain.HouseEvent
+import villages.domain.Event
 import villages.domain.HouseFounded
 import villages.domain.PlayerTookAction
 import java.io.File
@@ -22,24 +22,24 @@ class EventTypeCatalogueSpec : StringSpec({
         .map { it.groupValues[1] }
         .toSet()
 
-    /** The events themselves, under whichever sealed halves of the hierarchy they sit in. */
-    fun leaves(of: KClass<out HouseEvent>): List<KClass<out HouseEvent>> =
-        of.sealedSubclasses.flatMap { if (it.isSealed) leaves(it) else listOf(it) }
+    /** The events themselves, reached once through their stream and once through their half, so once each. */
+    fun leaves(of: KClass<out Event>): List<KClass<out Event>> =
+        of.sealedSubclasses.flatMap { if (it.isSealed) leaves(it) else listOf(it) }.distinct()
 
     "every event has a catalogued type in the table" {
-        HouseEventTypes.rows.keys shouldContainExactlyInAnyOrder leaves(HouseEvent::class)
+        EventTypes.rows.keys shouldContainExactlyInAnyOrder leaves(Event::class)
     }
 
     "every type in the table is in docs/EVENTS.md, and nothing in the catalogue is missing from the table" {
-        HouseEventTypes.rows.values.toSet() shouldBe catalogued
+        EventTypes.rows.values.toSet() shouldBe catalogued
     }
 
     "the mapping runs both ways, for the world's events and the player's alike" {
-        HouseEventTypes.getCloudEventType(HouseFounded::class.java) shouldBe "villages.house.founded.v1"
-        HouseEventTypes.getDomainEventType<HouseFounded>("villages.house.founded.v1") shouldBe HouseFounded::class.java
+        EventTypes.getCloudEventType(HouseFounded::class.java) shouldBe "villages.house.founded.v1"
+        EventTypes.getDomainEventType<HouseFounded>("villages.house.founded.v1") shouldBe HouseFounded::class.java
 
-        HouseEventTypes.getCloudEventType(PlayerTookAction::class.java) shouldBe "villages.player.tookAction.v1"
-        HouseEventTypes.getDomainEventType<PlayerTookAction>("villages.player.tookAction.v1") shouldBe
+        EventTypes.getCloudEventType(PlayerTookAction::class.java) shouldBe "villages.player.tookAction.v1"
+        EventTypes.getDomainEventType<PlayerTookAction>("villages.player.tookAction.v1") shouldBe
             PlayerTookAction::class.java
     }
 })

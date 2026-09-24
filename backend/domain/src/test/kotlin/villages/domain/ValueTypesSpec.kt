@@ -17,9 +17,9 @@ class ValueTypesSpec : StringSpec({
 
     "a location is held to the world" {
         Location(59.33, 18.07).lat shouldBe 59.33
-        shouldThrow<HouseError.InvalidLocation> { Location(90.1, 0.0) }
-        shouldThrow<HouseError.InvalidLocation> { Location(0.0, -180.1) }
-        shouldThrow<HouseError.InvalidLocation> { Location(Double.NaN, 0.0) }
+        shouldThrow<DomainError.InvalidLocation> { Location(90.1, 0.0) }
+        shouldThrow<DomainError.InvalidLocation> { Location(0.0, -180.1) }
+        shouldThrow<DomainError.InvalidLocation> { Location(Double.NaN, 0.0) }
     }
 
     "a house id names its stream" {

@@ -2,8 +2,8 @@ package villages.application
 
 import villages.domain.Banner
 import villages.domain.Choice
+import villages.domain.Event
 import villages.domain.HouseCommand
-import villages.domain.HouseEvent
 import villages.domain.HouseId
 import villages.domain.HouseName
 import villages.domain.Location
@@ -61,8 +61,9 @@ fun interface Clock {
 }
 
 /**
- * What day it is in the world: the world-time a thing done now is recorded as having happened at. Whose to
- * decide is the chrono-engine's, eventually; today it is one day a real day, server-wide. See 0027.
+ * What day it is in the world: the world-time a thing done now is recorded as having happened at. A world
+ * month for every real day since the world opened, the same for everyone and nobody's to change. See
+ * decision record 0053.
  */
 fun interface WorldClock {
     fun today(): WorldTime
@@ -191,7 +192,7 @@ data class StoredEvent(
     val id: String,
     /** `villages.<aggregate>.<verb>.v<n>`, as catalogued in docs/EVENTS.md. */
     val type: String,
-    /** The stream it belongs to, `house:<uuid>`. */
+    /** The stream it belongs to: `house:<uuid>` for a house's. */
     val stream: String,
     /** Its position in that stream, from one. */
     val streamVersion: Long,
@@ -203,7 +204,7 @@ data class StoredEvent(
     val correlationId: String,
     /** What directly caused it: for an event from a command, that command's id. See 0035. */
     val causationId: String,
-    val event: HouseEvent,
+    val event: Event,
 )
 
 /**

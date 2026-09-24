@@ -12,7 +12,7 @@ import villages.application.EventFeed
 import villages.application.HouseCommandExecutor
 import villages.application.Start
 import villages.application.StoredEvent
-import villages.domain.HouseEvent
+import villages.domain.Event
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 class OccurrentEventFeed(
     private val subscriptions: SubscriptionModel,
     private val store: EventStoreQueries,
-    private val converter: CloudEventConverter<HouseEvent>,
+    private val converter: CloudEventConverter<Event>,
 ) : EventFeed {
     override fun subscribe(from: Start, subscriber: (StoredEvent) -> Unit): AutoCloseable {
         val id = "feed-${UUID.randomUUID()}"
@@ -70,7 +70,7 @@ class OccurrentEventFeed(
 private const val STREAM_ID = "streamid"
 private const val STREAM_VERSION = "streamversion"
 
-internal fun CloudEvent.toStored(converter: CloudEventConverter<HouseEvent>): StoredEvent = StoredEvent(
+internal fun CloudEvent.toStored(converter: CloudEventConverter<Event>): StoredEvent = StoredEvent(
     id = id,
     type = type,
     stream = getExtension(STREAM_ID).toString(),
@@ -79,8 +79,8 @@ internal fun CloudEvent.toStored(converter: CloudEventConverter<HouseEvent>): St
     data = String(data!!.toBytes()),
     // An event with no provenance on it is its own story, which is what a first message's correlation
     // means anyway. Nothing this code writes lacks one; an older event might. See decision record 0035.
-    correlationId = getExtension(HouseEvents.CORRELATION_ID)?.toString() ?: id,
-    causationId = getExtension(HouseEvents.CAUSATION_ID)?.toString() ?: id,
+    correlationId = getExtension(Events.CORRELATION_ID)?.toString() ?: id,
+    causationId = getExtension(Events.CAUSATION_ID)?.toString() ?: id,
     event = converter.toDomainEvent(this),
 )
 
@@ -92,7 +92,7 @@ internal fun CloudEvent.toStored(converter: CloudEventConverter<HouseEvent>): St
 class InMemoryWorld : AutoCloseable {
     private val subscriptions = InMemorySubscriptionModel()
     val store = InMemoryEventStore(subscriptions)
-    val converter = HouseEvents.converter()
+    val converter = Events.converter()
 
     val executor: HouseCommandExecutor = OccurrentHouseCommandExecutor(store, converter)
     val feed: EventFeed = OccurrentEventFeed(subscriptions, store, converter)

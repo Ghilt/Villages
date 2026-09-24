@@ -60,7 +60,7 @@ class LayerRulesSpec : StringSpec({
             .layer("Gateway").definedBy("villages.gateway..")
             .layer("App").definedBy("villages.app..")
             .layer("Bots").definedBy("villages.bots..")
-            // The gateway sees the domain: it turns the wire's values into domain values and a HouseError into a
+            // The gateway sees the domain: it turns the wire's values into domain values and a DomainError into a
             // rejection code, which decision 0013 places there.
             .whereLayer("Domain").mayOnlyBeAccessedByLayers("Application", "Occurrent", "Rabbit", "Projections", "Gateway", "App")
             .whereLayer("Application").mayOnlyBeAccessedByLayers("Occurrent", "Rabbit", "Projections", "Gateway", "App")
