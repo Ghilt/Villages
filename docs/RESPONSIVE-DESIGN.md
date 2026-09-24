@@ -227,7 +227,7 @@ be the whole window is exactly what the rule at the top exists to prevent.
 |---|---|---|
 | The map, with the sprite, area and influence overlays | Fills the stage | A pane; opened out by default, and puts away to a strip that is its own way back |
 | The house status, with the eye and the empty places | The corner tile, behind the shield tab | A pane; a strip by default, and half the stage when the player asks |
-| The key figures, the house's few named people | The corner tile, behind the bust tab between the other two, opening at its normal size so the corner holds still between tabs | A pane, reached from *Go to*; it takes whatever the bay it lands in is |
+| The key figures: a grid of portraits three by three that never scrolls, or one figure with the nine squares back | The corner tile, behind the bust tab between the other two, opening at its normal size so the corner holds still between tabs; opened out, the corner reaches along the bottom | A pane, reached from *Go to*; the grid is as big as the bay allows, with the given names under it where there is a line to spare |
 | Navigation, called *Go to*: the panes above, the trail below | The corner tile, behind the compass tab | A pane; it takes whatever the bay it lands in is |
 | An inspect window | A rail down the side, up to three | A pane; takes a bay one at a time, and opens it to half if it was a strip |
 | The choice roll, on its parchments | The bottom middle tile, while a choice is pending | A pane; arrives in the map's bay with room to read it, and the player folds it to the carousel |

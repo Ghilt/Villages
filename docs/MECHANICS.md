@@ -493,8 +493,9 @@ On a desktop it opens at the normal size, so changing tabs moves nothing.
 
 The tie exists on the server and on the wire, and the debug panel's Characters section takes key
 figures in and changes them. The pane is in the corner, the middle tab, and in *Go to* on a phone, at its
-three sizes: with nobody in it, it says key figures will be shown here, and with somebody it lists their
-names in the order they joined until the portraits take their place. A house gains and loses key figures in
+three sizes: with nobody in it, it says key figures will be shown here; with one it opens on them; with
+more it is a grid of their portraits in the order they joined, three by three, and one pressed opens on
+their portrait and name with nine small squares to go back by. The stats are not on it yet. A house gains and loses key figures in
 its own history, holds nine at most and never the same character twice, and says
 whether a character is one of its own without writing anything, which is how every lever naming a
 character is let through or refused. When a character dies the mourning writes the loss into every house

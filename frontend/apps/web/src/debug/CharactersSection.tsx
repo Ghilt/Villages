@@ -4,14 +4,17 @@ import { ageOn } from '@villages/client-core';
 import type { KeyFigureView, StatName } from '@villages/protocol';
 
 import { STATS_IN_ORDER, STAT_WORDS, fullName } from '../figures/describe';
+import { anotherPortrait, portraitsNow } from '../figures/portraits';
 import {
   addKeyFigure,
   ageCharacter,
+  changePortrait,
   changeStat,
   gatewayState,
   killCharacter,
   watchGateway,
 } from '../net/gateway';
+import { note } from './log';
 import { Section } from './Section';
 
 /** As many as a house may hold. The server refuses a tenth; the lever says so before it is pressed. */
@@ -22,6 +25,28 @@ const AGE_STEP = 10;
 
 /** What a death from this panel is put down to, since a death is always for a cause. */
 const CAUSE = 'killed from the debug panel';
+
+/**
+ * Gives somebody another portrait from Adam's folder, one that suits them, at random.
+ *
+ * The folder is asked afresh on every press, so a picture saved into it a moment ago is among the ones
+ * that can come up. A folder with no other that suits them says so in the log rather than doing nothing.
+ */
+function anotherPortraitFor(figure: KeyFigureView): void {
+  portraitsNow().then(
+    (keys) => {
+      const next = anotherPortrait(keys, figure.sex, figure.portrait, (count) =>
+        Math.floor(Math.random() * count),
+      );
+      if (next === null) {
+        note('characters', `no other portrait in world/portraits suits ${fullName(figure)}`);
+        return;
+      }
+      changePortrait(figure, next);
+    },
+    (cause: Error) => note('characters', `could not read the portraits: ${cause.message}`),
+  );
+}
 
 /**
  * A house's key figures, and the levers that change them, on purpose.
@@ -148,6 +173,15 @@ function Figure({ figure, today, idle }: FigureProps) {
           onClick={() => ageCharacter(figure, -AGE_STEP)}
         >
           ten years younger
+        </button>
+        <button
+          type="button"
+          className="debug__button"
+          disabled={idle}
+          title={`give ${name} another portrait from world/portraits, one that suits them`}
+          onClick={() => anotherPortraitFor(figure)}
+        >
+          another portrait
         </button>
         <button
           type="button"

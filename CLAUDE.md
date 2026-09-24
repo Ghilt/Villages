@@ -342,10 +342,10 @@ Commands are added here as the increments land:
   See `docs/adr/0032` and experiment `0002`.
 - Key figures, in the same panel: the **Characters** section. `add a key figure` rolls a newcomer and
   the house takes them in, nine at most, and it is the only way a character comes into the world. Each
-  figure has `up` and `down` for every stat, `ten years older`, `ten years younger` and `kill`, every one
-  a real command: the asking and the answer are lines of the log under `characters`, and what changed is
-  a third. The stat levers stay pressable at one and at twenty, so a refusal is seen rather than
-  guessed. The events are at `/admin/inspect-events`. See `docs/adr/0055`.
+  figure has `up` and `down` for every stat, `ten years older`, `ten years younger`, `another portrait`
+  and `kill`, every one a real command: the asking and the answer are lines of the log under
+  `characters`, and what changed is a third. The stat levers stay pressable at one and at twenty, so a
+  refusal is seen rather than guessed. The events are at `/admin/inspect-events`. See `docs/adr/0055`.
 - What grows where: `world/biomes.json`, hand-edited, one entry a kind and one a biome. What reads it is
   `npm run world:sprites --prefix frontend`, which works out a biome for every sixteen world units and
   where the scenery clumps, and writes a **sprite map** beside the cut tiles - about five megabytes and
@@ -368,7 +368,9 @@ Commands are added here as the increments land:
   without `.png` is the key a character keeps for life. **Saving over a placeholder replaces it and
   saving a new name adds one**, with no list to edit. `npm run world:portraits --prefix frontend` draws
   the cut-paper placeholders, two seconds, and **never overwrites a file that is there**: delete one to
-  have its placeholder back. A test holds the folder to these rules. See
+  have its placeholder back. A test holds the folder to these rules. The dev server serves the folder
+  at `/portraits/` with no cache, so a picture saved over another is the one drawn on the next reload,
+  and the Characters section's `another portrait` picks one from whatever is there. See
   `docs/plans/characters-and-key-figures.md`.
 - The styles live in `world/painterly.json`. A group in one may carry a `handOver`, which is where its
   treatment gives way to the scenery standing on the same ground: whole far out, mostly gone by the zoom

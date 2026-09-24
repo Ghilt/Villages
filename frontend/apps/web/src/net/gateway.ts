@@ -545,6 +545,19 @@ export function ageCharacter(figure: KeyFigureView, years: number): void {
   act('characters', said, { type: 'ageCharacter', characterId: figure.id, years });
 }
 
+/** Gives somebody another portrait, or none, which is theirs from then on. */
+export function changePortrait(figure: KeyFigureView, portrait: string | undefined): void {
+  act(
+    'characters',
+    portrait === undefined
+      ? `taking ${fullName(figure)}'s portrait away`
+      : `giving ${fullName(figure)} another portrait, ${portrait}`,
+    portrait === undefined
+      ? { type: 'changePortrait', characterId: figure.id }
+      : { type: 'changePortrait', characterId: figure.id, portrait },
+  );
+}
+
 export function killCharacter(figure: KeyFigureView, cause: string): void {
   act('characters', `killing ${fullName(figure)}, ${cause}`, {
     type: 'killCharacter',

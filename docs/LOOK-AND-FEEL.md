@@ -89,6 +89,13 @@ edge worth marking since. **None of it carries meaning** — the heraldry is the
 this is the frame they hang in — so there is never anything in it for the player to read. A curl is drawn
 once and mirrored rather than drawn four times, which is the **needle**'s rule. See decision record 0048.
 
+**The portrait frame.** One upright picture of a character, three by four, wherever a face is shown: the
+key figures now, the inspect window and dialogue later. The frame is the ornament's two contours, a gold
+edge and a fainter rule inside it drawn over the picture, so a dark picture keeps its frame. **Somebody
+with no picture is still somebody**: a character with no portrait, or one whose file is missing or will not
+load, is a bust in soft ink, never an empty frame and never the browser's broken-image mark. `Portrait`,
+in `figures/Portrait.tsx`.
+
 **The seam.** The join between the two **bays**, drawn as a moulding lying over it: three gold rules
 running the length of the stage — a heavy one on the join and a lighter one either side — with a fixed
 **knot** of **ornament** at the middle. The knot is one size whatever the length, because an ornament that
@@ -142,7 +149,8 @@ tab, in a list and wherever a pane is named later cannot drift apart. **The comp
 ring**, deliberately: the needle says which bay a thing goes to and the compass opens the pane that lists
 the bays, so they read as one family rather than two unrelated drawings. A **link** out of an inspect
 window is one button rather than a pair of needles, and *show it on the map* is the map's own mark; see
-decision record 0049.
+decision record 0049. **The way back from one key figure to all of them is nine small squares**, the grid
+it goes back to, filled rather than outlined because nine outlines at the size of a mark are a blur.
 
 ## Not decided
 

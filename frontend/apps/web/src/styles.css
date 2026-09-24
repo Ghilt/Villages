@@ -2082,12 +2082,34 @@ body,
   pointer-events: auto;
 }
 
+/* A fixed height, because the grid below works out how big a portrait can be from what is left. */
 .figures__bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 0.4rem;
   flex: none;
-  padding: 0.35rem 0.4rem 0.2rem 0.75rem;
+  box-sizing: border-box;
+  height: 2rem;
+  padding: 0.2rem 0.4rem 0 0.75rem;
+}
+
+.figures__bar .pane-size {
+  margin-left: auto;
+}
+
+/* The way back from one figure to all of them: nine small squares, the grid it goes back to. */
+.figures__back {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-left: -0.35rem;
+  padding: 0.2rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.figures__back:hover .icon {
+  color: var(--gold);
 }
 
 .figures__head {
@@ -2111,11 +2133,159 @@ body,
   color: var(--ink-soft);
 }
 
-.figures__names {
+/*
+ * The grid: three by three, in the order they joined, and never a scrollbar.
+ *
+ * Every portrait is the same size however many there are, so a tenth never arrives and a third never
+ * rearranges the first two. How big is worked out from the room the bay has - three rows down what is left
+ * under the bar, three across its width, whichever is tighter - in container units, which the bay's own
+ * `container-type` is what makes possible. Measuring it this way rather than letting the grid find it is
+ * what keeps an upright picture's width from being asked of a height that is itself being worked out.
+ */
+.figures__grid {
+  --gap: 0.4rem;
+  --caption: 0rem;
+  --row: calc((100cqh - 2rem - 0.7rem - var(--corner-bottom, 0px) - 2 * var(--gap)) / 3);
+  --across: calc((100cqw - 1.5rem - 2 * var(--gap)) / 3);
+  --tall: min(calc(var(--row) - var(--caption)), calc(var(--across) * 4 / 3));
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(3, calc(var(--tall) * 3 / 4));
+  grid-auto-rows: var(--row);
+  justify-content: center;
+  align-content: start;
+  gap: var(--gap);
   margin: 0;
-  padding: 0.2rem 0.75rem 0.75rem 2rem;
-  font-size: 0.95rem;
-  line-height: 1.5;
+  padding: 0.2rem 0.75rem 0;
+  list-style: none;
+}
+
+.figures__cell {
+  min-width: 0;
+  min-height: 0;
+}
+
+.figures__thumb {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.figures__thumb .portrait {
+  height: var(--tall);
+}
+
+.figures__thumb:hover .portrait,
+.figures__thumb:focus-visible .portrait {
+  border-color: var(--ink-soft);
+}
+
+/* The given name under each, where the rows are tall enough to spare a line for it. */
+.figures__caption {
+  display: none;
+  max-width: 100%;
+  font-size: 0.78rem;
+  line-height: 1.1rem;
+  font-variant: small-caps;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@container (min-height: 20rem) {
+  .figures__grid {
+    --caption: 1.1rem;
+  }
+
+  .figures__caption {
+    display: block;
+  }
+}
+
+/*
+ * One figure: the portrait, and beside it who they are.
+ *
+ * The portrait is as tall as the room under the bar, up to the size a face is worth looking at, and the
+ * name takes what is left across. The stats join the name where there is room for them.
+ */
+.figures__one {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: 0.9rem;
+  align-items: flex-start;
+  padding: 0.3rem 0.9rem calc(0.8rem + var(--corner-bottom, 0px));
+}
+
+.figures__one .portrait {
+  flex: none;
+  height: min(100%, 24rem);
+}
+
+.figures__who {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.figures__name {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: normal;
+  line-height: 1.15;
+  font-variant: small-caps;
+  letter-spacing: 0.03em;
+  overflow-wrap: anywhere;
+}
+
+/*
+ * **A portrait in its frame**, wherever a face is shown: three by four, a gold edge and a fainter rule
+ * inside it, the achievement's way of drawing a frame rather than one thick line. The rule is drawn over
+ * the picture, so a dark picture keeps its frame.
+ */
+.portrait {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: #e6dcc8;
+  border: 1px solid var(--gold);
+  border-radius: 2px;
+  box-shadow: 0 1px 3px var(--shadow);
+}
+
+.portrait::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border: 1px solid rgba(157, 124, 42, 0.45);
+  pointer-events: none;
+}
+
+.portrait__picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Nobody's likeness yet: a bust in soft ink, never an empty frame and never a broken image. */
+.portrait__bust {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: rgba(36, 28, 20, 0.3);
 }
 
 /* Put away: its name and the way back, and nothing else - the same strip the house card has. */
