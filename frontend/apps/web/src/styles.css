@@ -1670,6 +1670,45 @@ body,
   font-variant-numeric: tabular-nums;
 }
 
+/* The same grid with two levers a row rather than three: a stat goes up and down, and that is all. */
+.debug__stocks--two {
+  grid-template-columns: auto 1fr repeat(2, auto);
+}
+
+/*
+ * A house's key figures, in the panel: a block a figure, in the order they joined. Who they are on one
+ * line, their stats in the resources' grid, and the levers for the whole of them under that, with a rule
+ * between one figure and the next so nine of them still read as nine.
+ */
+.debug__figures {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.debug__figure {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid var(--parchment-edge);
+}
+
+.debug__figure:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.debug__figure-who {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.4rem;
+  align-items: baseline;
+}
+
 .debug__sectionbody {
   display: flex;
   flex-direction: column;

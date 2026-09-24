@@ -1,7 +1,7 @@
 /**
- * The game client, with no interface attached: state, the protocol codec, the connection, cell maths and
- * resource interpolation. Nothing in here may touch the DOM, a framework, the map or the renderer, and the
- * compiler enforces that by typechecking this package without DOM definitions.
+ * The game client, with no interface attached: state, the protocol codec, the connection, cell maths,
+ * resource interpolation and ages. Nothing in here may touch the DOM, a framework, the map or the
+ * renderer, and the compiler enforces that by typechecking this package without DOM definitions.
  *
  * Everything from the outside world arrives as an injected dependency.
  */
@@ -24,6 +24,8 @@ export {
 export type { HousesState } from './houses';
 
 export { TICK_MS, freeNow, stockNow } from './stocks';
+
+export { ageOn } from './ages';
 
 export { whatToFollow } from './following';
 export type { Following } from './following';

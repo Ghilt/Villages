@@ -29,6 +29,7 @@ export {
   describeDay,
   isLeapYear,
   monthOf,
+  monthsBetween,
   plusMonths,
   yearOf,
 } from './calendar';

@@ -10,6 +10,7 @@ import {
   describeDay,
   isLeapYear,
   monthOf,
+  monthsBetween,
   plusMonths,
   yearOf,
 } from './calendar';
@@ -20,6 +21,7 @@ const fixture = JSON.parse(
   months: string[];
   vectors: { name: string; year: number; month: number; dayOfMonth: number; day: number; said: string }[];
   spans: { name: string; from: number; months: number; to: number; said: string }[];
+  betweens: { name: string; from: number; to: number; months: number }[];
 };
 
 describe('the shared calendar vectors, which the Kotlin side is held to as well', () => {
@@ -38,6 +40,10 @@ describe('the shared calendar vectors, which the Kotlin side is held to as well'
   it.each(fixture.spans)('steps $name', (span) => {
     expect(plusMonths(span.from, span.months)).toBe(span.to);
     expect(describeDay(span.to)).toBe(span.said);
+  });
+
+  it.each(fixture.betweens)('counts $name', (pair) => {
+    expect(monthsBetween(pair.from, pair.to)).toBe(pair.months);
   });
 });
 
@@ -65,6 +71,13 @@ describe('the calendar', () => {
     expect(daysInMonth(1204, 2)).toBe(29);
     expect(daysInMonth(1300, 2)).toBe(28);
     expect(() => dayOf(1301, 2, 29)).toThrow(RangeError);
+  });
+
+  it('counts whole months backwards, and a part-month backwards as none, as java.time does', () => {
+    expect(monthsBetween(dayOf(1790, 3, 1), dayOf(1790, 1, 1))).toBe(-2);
+    expect(monthsBetween(dayOf(1790, 3, 15), dayOf(1790, 2, 20))).toBe(0);
+    expect(monthsBetween(dayOf(1760, 5, 9), dayOf(1790, 5, 8))).toBe(359);
+    expect(monthsBetween(dayOf(1760, 5, 9), dayOf(1790, 5, 9))).toBe(360);
   });
 
   it('holds the day of the month where it can and pulls it back where it cannot', () => {

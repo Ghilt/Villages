@@ -152,6 +152,20 @@ export function plusMonths(day: number, months: number): number {
   return dayOf(intoYear, intoMonth, Math.min(dayOfMonth, daysInMonth(intoYear, intoMonth)));
 }
 
+/**
+ * Whole months from one day to another, counting only the ones completed, as the server counts them.
+ *
+ * **Not the exact inverse of `plusMonths`.** A month added to the thirty-first of January is pulled back
+ * to the twenty-eighth of February, and the twenty-eighth of February is not a whole month after the
+ * thirty-first of January. The shared fixture pins that case. The arithmetic is `java.time`'s own, so the
+ * two ends agree on a part-month counted backwards too: it is no month at all, rather than minus one.
+ */
+export function monthsBetween(from: number, to: number): number {
+  const packed = ({ year, month, dayOfMonth }: WorldDate) => (year * 12 + month - 1) * 32 + dayOfMonth;
+  // Truncating a part-month backwards gives minus nought, which is no month and must read as one.
+  return Math.trunc((packed(dateOf(to)) - packed(dateOf(from))) / 32) || 0;
+}
+
 /** How a day is written for a person: the day, its month, and the year it falls in. */
 export function describeDay(day: number): string {
   const { year, month, dayOfMonth } = dateOf(day);

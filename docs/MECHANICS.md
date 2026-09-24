@@ -411,13 +411,13 @@ rather than a different sort of thing. See decision record 0055.
 ### Where it stands
 
 The record exists on the server, and the one thing that makes one is a house taking a key figure in,
-which the wire carries and nothing in the page sends yet. A character appears with a name, a sex, a
-species, a birthday, four stats and a portrait's key, and is kept on a stream of their own; their stats
-move within one to twenty, they can be aged out of the ordinary or given another portrait, and they die,
-after which nothing about them changes. The refusals are named for their rules, and the stored form is
-pinned by a fixture. Decision record 0055 says
-what a character is to the program, and `docs/plans/characters-and-key-figures.md` is the order the rest
-gets built in, one commit a step.
+from the debug panel's Characters section. A character appears with a name, a sex, a species, a
+birthday, four stats and a portrait's key, and is kept on a stream of their own; their stats move within
+one to twenty, they can be aged out of the ordinary or given another portrait, and they die, after which
+nothing about them changes. An age is worked out in the browser from the birthday and never stored. The
+refusals are named for their rules, and the stored form is pinned by a fixture. Nothing draws a character
+yet but the panel's lines. Decision record 0055 says what a character is to the program, and
+`docs/plans/characters-and-key-figures.md` is the order the rest gets built in, one commit a step.
 
 ---
 
@@ -491,8 +491,9 @@ On a desktop it opens at the normal size, so changing tabs moves nothing.
 
 ### Where it stands
 
-The tie exists on the server and on the wire, and nothing in the page shows it yet. A house gains and
-loses key figures in its own history, holds nine at most and never the same character twice, and says
+The tie exists on the server and on the wire, and the debug panel's Characters section takes key
+figures in and changes them; no pane shows them to a player yet. A house gains and loses key figures in
+its own history, holds nine at most and never the same character twice, and says
 whether a character is one of its own without writing anything, which is how every lever naming a
 character is let through or refused. When a character dies the mourning writes the loss into every house
 that held them. A player is sent their living key figures, in the order they joined, on arriving and

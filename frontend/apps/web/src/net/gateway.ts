@@ -12,13 +12,16 @@ import { PROTOCOL_VERSION, describeDay } from '@villages/protocol';
 import type {
   ChoiceView,
   CommandPayload,
+  KeyFigureView,
   OptionView,
   ResourceName,
   ServerFrame,
+  StatName,
   YourHouseView,
 } from '@villages/protocol';
 
 import { note, shortId } from '../debug/log';
+import { STAT_WORDS, fullName, whatChanged } from '../figures/describe';
 import { NOTHING_ARRIVED, alsoArrived, describeArrival } from './arrivals';
 import type { Arrival } from './arrivals';
 import { browserSocket } from './browserSocket';
@@ -40,6 +43,11 @@ export interface GatewayState {
   yourHouse: YourHouseView | null;
   /** What this player has to decide, or null when they have nothing. What the parchment shows. */
   yourChoice: ChoiceView | null;
+  /**
+   * The player's living key figures, in the order they joined the house, or null until the gateway has
+   * said. An empty list is a house with none; null is not having heard yet. See decision record 0055.
+   */
+  yourKeyFigures: readonly KeyFigureView[] | null;
   /** The id of the command in flight, so the parchment can stop taking a second answer. */
   acting: string | null;
   houses: HousesState;
@@ -52,6 +60,7 @@ let state: GatewayState = {
   connection: 'connecting',
   yourHouse: null,
   yourChoice: null,
+  yourKeyFigures: null,
   acting: null,
   houses: NO_HOUSES,
   world: null,
@@ -63,6 +72,18 @@ let connection: Connection | null = null;
 let wanted: string[] = [];
 /** Whether the switch is on, so a reconnection sets significance aside again before asking for a cell. */
 let everything = false;
+/**
+ * Which part of the log each command in flight was asked from, so its answer is filed beside the line that
+ * asked. Forgotten when it is answered, and all of it when the connection closes.
+ */
+const askedFrom = new Map<string, string>();
+
+/** The part of the log a command's answer goes in: where it was asked from, or the gateway's own. */
+function answerArea(commandId: string): string {
+  const area = askedFrom.get(commandId) ?? 'gateway';
+  askedFrom.delete(commandId);
+  return area;
+}
 
 /**
  * How long the snapshots of one burst are gathered before they are said in a line.
@@ -197,11 +218,11 @@ function heard(frame: ServerFrame): void {
       return;
     case 'commandAccepted':
       if (state.acting === frame.commandId) update({ acting: null });
-      note('gateway', `command ${shortId(frame.commandId)} accepted`);
+      note(answerArea(frame.commandId), `command ${shortId(frame.commandId)} accepted`);
       return;
     case 'commandRejected':
       if (state.acting === frame.commandId) update({ acting: null });
-      note('gateway', `command ${shortId(frame.commandId)} rejected: ${frame.reason}`);
+      note(answerArea(frame.commandId), `command ${shortId(frame.commandId)} rejected: ${frame.reason}`);
       return;
     case 'error':
       note('gateway', `error ${frame.code}: ${frame.message}`);
@@ -236,6 +257,13 @@ function heard(frame: ServerFrame): void {
           : `"${frame.choice.prompt}", ${frame.choice.options.length} options`,
       );
       return;
+    case 'yourKeyFigures':
+      // Said before the state moves, because what is worth saying is the difference from what was held.
+      for (const line of whatChanged(state.yourKeyFigures, frame.keyFigures, state.world?.today ?? null)) {
+        note('characters', line);
+      }
+      update({ yourKeyFigures: frame.keyFigures });
+      return;
     case 'worldWiped':
       // The world this window was looking at is gone. Arriving anew is the only honest thing to do, and
       // a reload is how a page arrives. See decision record 0036.
@@ -245,7 +273,13 @@ function heard(frame: ServerFrame): void {
     case 'takenOver':
       // A player plays from one place. This window is finished; the socket goes with it. See 0028.
       forgetTheHold();
-      update({ connection: 'takenOver', houses: NO_HOUSES, yourHouse: null, yourChoice: null });
+      update({
+        connection: 'takenOver',
+        houses: NO_HOUSES,
+        yourHouse: null,
+        yourChoice: null,
+        yourKeyFigures: null,
+      });
       note('gateway', `${frame.message}; this window is no longer playing`);
       connection?.close();
       return;
@@ -389,6 +423,7 @@ export function gateway(): Connection {
       return;
     }
     forgetTheHold();
+    askedFrom.clear();
     update({ connection: 'closed', houses: NO_HOUSES });
     note('gateway', 'the connection closed; is the backend running? cd backend then ./gradlew :app:bootRun');
   });
@@ -420,6 +455,7 @@ export function takeOption(choice: ChoiceView, option: OptionView): void {
   }
   const commandId = crypto.randomUUID();
   update({ acting: commandId });
+  askedFrom.set(commandId, 'command');
   note('command', `taking "${option.label}" as ${shortId(commandId)}`);
   connection.send({
     type: 'command',
@@ -429,30 +465,35 @@ export function takeOption(choice: ChoiceView, option: OptionView): void {
 }
 
 /**
- * Doing something to what your house has.
+ * Sends one of the debug panel's levers as a real command, and says so in the part of the log it belongs to.
  *
- * All four send a real command and are told the answer the same way anything else is: an accepted or a
- * rejected frame, and then the house coming back changed. Nothing is assumed here - the number on the
- * card moves when the world says it did.
- *
- * Granting and spending are **Adam's levers** for now rather than a player's: nothing in the game gives a
- * house anything yet. They are here so that what the domain can do can be made to happen and watched.
+ * Every one is told its answer the way anything else is: an accepted or a rejected frame, filed in the
+ * same part of the log as the asking, and then the thing itself coming back changed. Nothing is assumed
+ * here - the number on the card moves when the world says it did.
  */
-function act(what: string, command: CommandPayload): void {
+function act(area: string, what: string, command: CommandPayload): void {
   if (connection === null || state.connection !== 'open') {
     return;
   }
   const commandId = crypto.randomUUID();
-  note('resources', `${what} as ${shortId(commandId)}`);
+  askedFrom.set(commandId, area);
+  note(area, `${what} as ${shortId(commandId)}`);
   connection.send({ type: 'command', commandId, command });
 }
 
+/*
+ * Doing something to what your house has.
+ *
+ * Granting and spending are **Adam's levers** for now rather than a player's: nothing in the game gives a
+ * house anything yet. They are here so that what the domain can do can be made to happen and watched.
+ */
+
 export function grantResource(resource: ResourceName, amount: number): void {
-  act(`granting ${amount} ${resource}`, { type: 'grantResource', resource, amount });
+  act('resources', `granting ${amount} ${resource}`, { type: 'grantResource', resource, amount });
 }
 
 export function spendResource(resource: ResourceName, amount: number): void {
-  act(`spending ${amount} ${resource}`, { type: 'spendResource', resource, amount });
+  act('resources', `spending ${amount} ${resource}`, { type: 'spendResource', resource, amount });
 }
 
 export function pledgeResource(
@@ -461,7 +502,7 @@ export function pledgeResource(
   months: number,
   purpose: string,
 ): void {
-  act(`pledging ${amount} ${resource} for ${months} ${months === 1 ? 'month' : 'months'}`, {
+  act('resources', `pledging ${amount} ${resource} for ${months} ${months === 1 ? 'month' : 'months'}`, {
     type: 'pledgeResource',
     resource,
     amount,
@@ -471,7 +512,45 @@ export function pledgeResource(
 }
 
 export function releasePledge(pledgeId: string): void {
-  act(`releasing pledge ${shortId(pledgeId)}`, { type: 'releasePledge', pledgeId });
+  act('resources', `releasing pledge ${shortId(pledgeId)}`, { type: 'releasePledge', pledgeId });
+}
+
+/*
+ * Doing something to your house's key figures.
+ *
+ * **Adam's levers**, like the resources': a house takes key figures in only from the debug panel, and
+ * nothing in the game changes a stat or kills anyone yet. Every one that names a character is refused
+ * `noSuchKeyFigure` unless the character is this house's own. See decision record 0055.
+ */
+
+export function addKeyFigure(): void {
+  act('characters', 'taking a key figure in', { type: 'addKeyFigure' });
+}
+
+export function changeStat(figure: KeyFigureView, stat: StatName, by: number): void {
+  const way = by > 0 ? 'raising' : 'lowering';
+  act('characters', `${way} ${fullName(figure)}'s ${STAT_WORDS[stat].toLowerCase()} by ${Math.abs(by)}`, {
+    type: 'changeStat',
+    characterId: figure.id,
+    stat,
+    by,
+  });
+}
+
+export function ageCharacter(figure: KeyFigureView, years: number): void {
+  const said =
+    years > 0
+      ? `ageing ${fullName(figure)} by ${years} years`
+      : `making ${fullName(figure)} ${-years} years younger`;
+  act('characters', said, { type: 'ageCharacter', characterId: figure.id, years });
+}
+
+export function killCharacter(figure: KeyFigureView, cause: string): void {
+  act('characters', `killing ${fullName(figure)}, ${cause}`, {
+    type: 'killCharacter',
+    characterId: figure.id,
+    cause,
+  });
 }
 
 /**

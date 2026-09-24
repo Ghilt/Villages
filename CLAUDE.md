@@ -313,7 +313,7 @@ Commands are added here as the increments land:
   shortest way to tell a session what the program is doing. So a change that wants to be seen there says
   so with `note(area, message)` rather than by adding a row. **Everything in it is in a folding section,
   and a step that puts something there says which section - and asks when that is not obvious from what
-  Adam said, rather than picking one.** Today they are Worktrees, Debug map, Areas, World and Log. The events themselves are not in the
+  Adam said, rather than picking one.** Today they are Worktrees, Debug map, Scenery, Camera, Areas, World, Resources, Characters and Log. The events themselves are not in the
   panel: they are at **`/admin/inspect-events`**, a page of their own that watches the world without
   playing in it, one line an event opening to the whole thing as the store holds it. The `found a house here` button in it sends a
   real command and is how to make an event happen on purpose. The `restart` button beside `copy` forgets
@@ -340,6 +340,12 @@ Commands are added here as the increments land:
   boundary runs between painted pixels rather than through them, so at z10 on the `raw` renderer it lines
   up with the squares the terrain is drawn as. Areas live only in the browser and a reload forgets them.
   See `docs/adr/0032` and experiment `0002`.
+- Key figures, in the same panel: the **Characters** section. `add a key figure` rolls a newcomer and
+  the house takes them in, nine at most, and it is the only way a character comes into the world. Each
+  figure has `up` and `down` for every stat, `ten years older`, `ten years younger` and `kill`, every one
+  a real command: the asking and the answer are lines of the log under `characters`, and what changed is
+  a third. The stat levers stay pressable at one and at twenty, so a refusal is seen rather than
+  guessed. The events are at `/admin/inspect-events`. See `docs/adr/0055`.
 - What grows where: `world/biomes.json`, hand-edited, one entry a kind and one a biome. What reads it is
   `npm run world:sprites --prefix frontend`, which works out a biome for every sixteen world units and
   where the scenery clumps, and writes a **sprite map** beside the cut tiles - about five megabytes and
