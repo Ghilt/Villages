@@ -118,6 +118,62 @@ class CharacterDeciderSpec : StringSpec({
         }
     }
 
+    fun after(state: Character, events: List<CharacterEvent>): Character = events.fold(state, CharacterDecider::evolve)
+
+    "a stat rises and falls by what it is changed by, and the event says where it now stands" {
+        val events = CharacterDecider.decide(ChangeStat(agnes, Stat.PIETY, 2, today, noon), appeared())
+
+        val changed = events.single().shouldBeInstanceOf<CharacterStatChanged>()
+        changed.stat shouldBe Stat.PIETY
+        changed.value shouldBe 15
+        val character = after(appeared(), events).shouldBeInstanceOf<Character.Appeared>()
+        character.stats[Stat.PIETY] shouldBe 15
+        character.stats[Stat.REASON] shouldBe 9
+    }
+
+    "a stat never leaves one to twenty, and a change of nothing writes nothing" {
+        shouldThrow<CharacterError.InvalidStat> { CharacterDecider.decide(ChangeStat(agnes, Stat.PHYSICAL, -7, today, noon), appeared()) }
+        shouldThrow<CharacterError.InvalidStat> { CharacterDecider.decide(ChangeStat(agnes, Stat.PIETY, 8, today, noon), appeared()) }
+        CharacterDecider.decide(ChangeStat(agnes, Stat.PIETY, 7, today, noon), appeared()) shouldHaveSize 1
+        CharacterDecider.decide(ChangeStat(agnes, Stat.PIETY, 0, today, noon), appeared()) shouldHaveSize 0
+    }
+
+    "a character is aged out of the ordinary by years, and can be made younger by them again" {
+        val older = after(appeared(), CharacterDecider.decide(AgeCharacter(agnes, 10, today, noon), appeared()))
+
+        older.shouldBeInstanceOf<Character.Appeared>().agedYears shouldBe 10
+        val again = after(older, CharacterDecider.decide(AgeCharacter(agnes, -10, today, noon), older))
+        again.shouldBeInstanceOf<Character.Appeared>().agedYears shouldBe 0
+        CharacterDecider.decide(AgeCharacter(agnes, 0, today, noon), appeared()) shouldHaveSize 0
+    }
+
+    /** Agnes is eleven thousand and five days old, which is thirty years and a little. */
+    "nobody is made younger than newborn, nor aged more than two hundred years at once" {
+        CharacterDecider.decide(AgeCharacter(agnes, -30, today, noon), appeared()) shouldHaveSize 1
+        shouldThrow<CharacterError.InvalidAge> { CharacterDecider.decide(AgeCharacter(agnes, -31, today, noon), appeared()) }
+        shouldThrow<CharacterError.InvalidAge> {
+            CharacterDecider.decide(AgeCharacter(agnes, CharacterDecider.MOST_YEARS_AT_ONCE + 1, today, noon), appeared())
+        }
+    }
+
+    "a portrait can be swapped or taken away, and swapping it for itself writes nothing" {
+        val swapped = CharacterDecider.decide(ChangePortrait(agnes, "woman-04", today, noon), appeared()).single()
+
+        swapped.shouldBeInstanceOf<CharacterPortraitChanged>().portrait shouldBe "woman-04"
+        after(appeared(), listOf(swapped)).shouldBeInstanceOf<Character.Appeared>().portrait shouldBe "woman-04"
+        CharacterDecider.decide(ChangePortrait(agnes, null, today, noon), appeared()) shouldHaveSize 1
+        CharacterDecider.decide(ChangePortrait(agnes, "woman-03", today, noon), appeared()) shouldHaveSize 0
+        shouldThrow<CharacterError.InvalidPortrait> { CharacterDecider.decide(ChangePortrait(agnes, "Woman 04", today, noon), appeared()) }
+    }
+
+    "the dead do not change" {
+        val dead = after(appeared(), CharacterDecider.decide(killing, appeared()))
+
+        shouldThrow<CharacterError.AlreadyDead> { CharacterDecider.decide(ChangeStat(agnes, Stat.PIETY, 1, today, noon), dead) }
+        shouldThrow<CharacterError.AlreadyDead> { CharacterDecider.decide(AgeCharacter(agnes, 1, today, noon), dead) }
+        shouldThrow<CharacterError.AlreadyDead> { CharacterDecider.decide(ChangePortrait(agnes, "woman-04", today, noon), dead) }
+    }
+
     "folding is total: a death on a stream with nobody on it changes nothing" {
         val stray = CharacterDied(agnes, "nothing", today, noon)
 

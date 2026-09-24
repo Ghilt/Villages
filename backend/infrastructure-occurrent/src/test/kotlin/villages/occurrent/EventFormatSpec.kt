@@ -7,10 +7,13 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldMatch
 import tools.jackson.databind.JsonNode
 import villages.domain.Banner
+import villages.domain.CharacterAged
 import villages.domain.CharacterAppeared
 import villages.domain.CharacterDied
 import villages.domain.CharacterId
 import villages.domain.CharacterName
+import villages.domain.CharacterPortraitChanged
+import villages.domain.CharacterStatChanged
 import villages.domain.Charge
 import villages.domain.Choice
 import villages.domain.ChoiceId
@@ -171,10 +174,16 @@ class EventFormatSpec : StringSpec({
 
     val tookAgnesIn = HouseGainedKeyFigure(house, agnes, day, noon)
     val lostAgnes = HouseLostKeyFigure(house, agnes, day, noon)
+    val agnesAged = CharacterAged(agnes, 10, WorldTime(653_705), noon)
+    val agnesRedrawn = CharacterPortraitChanged(agnes, "woman-04", WorldTime(653_705), noon)
+    val agnesPiety = CharacterStatChanged(agnes, Stat.PIETY, 15, WorldTime(653_705), noon)
 
     val samples: Map<String, Event> = mapOf(
+        "villages.character.aged.v1" to agnesAged,
         "villages.character.appeared.v1" to agnesAppeared,
         "villages.character.died.v1" to agnesDied,
+        "villages.character.portraitChanged.v1" to agnesRedrawn,
+        "villages.character.statChanged.v1" to agnesPiety,
         "villages.house.founded.v1" to ravenscar,
         "villages.house.gainedKeyFigure.v1" to tookAgnesIn,
         "villages.house.lostKeyFigure.v1" to lostAgnes,

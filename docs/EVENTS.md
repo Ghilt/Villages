@@ -97,8 +97,11 @@ world's.
 
 | Type | Payload | Meaning | Produced by | Consumers |
 |---|---|---|---|---|
+| `villages.character.aged.v1` | `characterId`, `years`, `worldTime`, `recordedAt` | A character aged out of the ordinary by some years, or grew younger by them when the number is negative. Ordinary ageing is never an event: an age is counted from the birthday, plus every year of these. | `AgeCharacter` | The event list |
 | `villages.character.appeared.v1` | `characterId`, `name`, `sex`, `species`, `bornOn`, `stats`, `portrait`, `worldTime`, `recordedAt` | A character came into the world's story: a given and a family name, a sex, a species, the day they were born, which can be long before this one, all four stats, and a portrait's key or none. They are on no map until something moves them onto one, so it carries no place. | `IntroduceCharacter` | The event list |
 | `villages.character.died.v1` | `characterId`, `cause`, `worldTime`, `recordedAt` | A character died, for a cause said in a line. Their history ends here; each house that held them as a key figure loses them in its own. | `KillCharacter` | The event list |
+| `villages.character.portraitChanged.v1` | `characterId`, `portrait`, `worldTime`, `recordedAt` | A character was given another portrait, or none: a new likeness, kept from now on. | `ChangePortrait` | The event list |
+| `villages.character.statChanged.v1` | `characterId`, `stat`, `value`, `worldTime`, `recordedAt` | One of a character's stats became a new value, between one and twenty. The value and not the change, so a reader knows where it stands without adding anything up; a key figure's power is their stats, so this is a key figure growing more or less powerful. | `ChangeStat` | The event list |
 
 ## The player's events
 

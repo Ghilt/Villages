@@ -30,3 +30,31 @@ data class KillCharacter(
     val worldTime: WorldTime,
     val recordedAt: Instant,
 ) : CharacterCommand
+
+/**
+ * Raise or lower one of a character's stats by an amount. The amount rather than the result, so that the
+ * decider does the arithmetic against the truth and two quick presses on a stale screen both count.
+ */
+data class ChangeStat(
+    override val characterId: CharacterId,
+    val stat: Stat,
+    val by: Int,
+    val worldTime: WorldTime,
+    val recordedAt: Instant,
+) : CharacterCommand
+
+/** Age a character out of the ordinary, by some years or, with a negative number, back by some. */
+data class AgeCharacter(
+    override val characterId: CharacterId,
+    val years: Int,
+    val worldTime: WorldTime,
+    val recordedAt: Instant,
+) : CharacterCommand
+
+/** Give a character another portrait, or none. */
+data class ChangePortrait(
+    override val characterId: CharacterId,
+    val portrait: String?,
+    val worldTime: WorldTime,
+    val recordedAt: Instant,
+) : CharacterCommand

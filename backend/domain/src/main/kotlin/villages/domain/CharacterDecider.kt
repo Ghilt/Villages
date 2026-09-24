@@ -1,5 +1,7 @@
 package villages.domain
 
+import kotlin.math.abs
+
 /**
  * The rules of a character as two pure functions: decide turns a command and the current state into events,
  * evolve folds an event into the state. What a character is to a house is not decided here, because it is
@@ -11,6 +13,11 @@ object CharacterDecider : Decider<CharacterCommand, Character, CharacterEvent> {
 
     /** The most a cause of death may say, which is a line and not a story. */
     const val LONGEST_CAUSE = 120
+
+    /** The most years a character can be aged, or made younger, at once. */
+    const val MOST_YEARS_AT_ONCE = 200
+
+    private const val DAYS_IN_A_SHORT_YEAR = 365L
 
     /** A portrait's key is a file's name without its `.png`: lower-case words joined by dashes, `woman-01`. */
     private val PORTRAIT_KEY = Regex("[a-z0-9]+(-[a-z0-9]+)*")
@@ -53,6 +60,47 @@ object CharacterDecider : Decider<CharacterCommand, Character, CharacterEvent> {
             }
             listOf(CharacterDied(command.characterId, command.cause, command.worldTime, command.recordedAt))
         }
+
+        is ChangeStat -> {
+            val character = living(state)
+            if (command.by == 0) {
+                emptyList()
+            } else {
+                val value = character.stats.getValue(command.stat) + command.by
+                if (value !in STAT_RANGE) {
+                    throw CharacterError.InvalidStat("${command.stat.name.lowercase()} would be $value, outside $STAT_RANGE")
+                }
+                listOf(CharacterStatChanged(command.characterId, command.stat, value, command.worldTime, command.recordedAt))
+            }
+        }
+
+        is AgeCharacter -> {
+            val character = living(state)
+            if (command.years == 0) {
+                emptyList()
+            } else {
+                if (abs(command.years) > MOST_YEARS_AT_ONCE) {
+                    throw CharacterError.InvalidAge("${command.years} years at once is more than $MOST_YEARS_AT_ONCE")
+                }
+                // Nobody grows younger than newborn. A year is at least 365 days, which is as near as the
+                // domain can come without a calendar, and it errs on the side of allowing the change.
+                val daysOld = command.worldTime.day - character.bornOn.day
+                if (daysOld + (character.agedYears + command.years) * DAYS_IN_A_SHORT_YEAR < 0) {
+                    throw CharacterError.InvalidAge("${command.years} years would make them younger than newborn")
+                }
+                listOf(CharacterAged(command.characterId, command.years, command.worldTime, command.recordedAt))
+            }
+        }
+
+        is ChangePortrait -> {
+            val character = living(state)
+            command.portrait?.let(::refuseUnlessPortraitKey)
+            if (command.portrait == character.portrait) {
+                emptyList()
+            } else {
+                listOf(CharacterPortraitChanged(command.characterId, command.portrait, command.worldTime, command.recordedAt))
+            }
+        }
     }
 
     override fun evolve(state: Character, event: CharacterEvent): Character = when (event) {
@@ -72,6 +120,21 @@ object CharacterDecider : Decider<CharacterCommand, Character, CharacterEvent> {
         is CharacterDied -> when (state) {
             is Character.NotAppeared -> state
             is Character.Appeared -> state.copy(death = Death(event.worldTime, event.cause))
+        }
+
+        is CharacterStatChanged -> when (state) {
+            is Character.NotAppeared -> state
+            is Character.Appeared -> state.copy(stats = state.stats + (event.stat to event.value))
+        }
+
+        is CharacterAged -> when (state) {
+            is Character.NotAppeared -> state
+            is Character.Appeared -> state.copy(agedYears = state.agedYears + event.years)
+        }
+
+        is CharacterPortraitChanged -> when (state) {
+            is Character.NotAppeared -> state
+            is Character.Appeared -> state.copy(portrait = event.portrait)
         }
     }
 

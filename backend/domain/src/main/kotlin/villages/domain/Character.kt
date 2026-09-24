@@ -58,6 +58,11 @@ sealed interface Character {
         /** A portrait's key, kept for life, or none. */
         val portrait: String?,
         val appearedOn: WorldTime,
+        /**
+         * Years they were aged out of the ordinary, which an age adds to the years since the birthday. The
+         * domain has no calendar, so the age itself is worked out wherever there is one. See decision 0055.
+         */
+        val agedYears: Int = 0,
         val death: Death? = null,
     ) : Character
 }

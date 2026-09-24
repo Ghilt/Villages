@@ -45,3 +45,36 @@ data class CharacterDied(
     override val worldTime: WorldTime,
     override val recordedAt: Instant,
 ) : CharacterEvent, WorldEvent
+
+/**
+ * One of a character's stats became a new value. The value and not the change, so that a reader of the
+ * stream knows where the stat stands without adding anything up. A key figure's power is their stats, so this
+ * is what a key figure growing more or less powerful looks like. See decision record 0055.
+ */
+data class CharacterStatChanged(
+    override val characterId: CharacterId,
+    val stat: Stat,
+    val value: Int,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : CharacterEvent, WorldEvent
+
+/**
+ * A character aged out of the ordinary, by some years, or grew younger by them when the number is negative.
+ * Ordinary ageing is never an event: an age is counted from the birthday, as a resource is counted from its
+ * rate. See decision records 0006 and 0055.
+ */
+data class CharacterAged(
+    override val characterId: CharacterId,
+    val years: Int,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : CharacterEvent, WorldEvent
+
+/** A character was given another portrait, or none: a new likeness, kept from now on. */
+data class CharacterPortraitChanged(
+    override val characterId: CharacterId,
+    val portrait: String?,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : CharacterEvent, WorldEvent
