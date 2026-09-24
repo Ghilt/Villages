@@ -156,7 +156,8 @@ it in sight is a page drawing what it already has. See decision record 0038.
 
 ## Scale principles
 
-1. One stream per house, and no global aggregate. Anything world-shaped is a projection.
+1. One stream per house and one per character (decision 0055), and no global aggregate. Anything
+   world-shaped is a projection.
 2. Resources are rates. Events are emitted when something changes, never on a clock, so idle players cost nothing.
 3. The world is partitioned into cells, at every zoom: a quadkey, so a cell's ancestor is its prefix. Routing keys,
    subscriptions and read model queries all derive the cell from the place on the event by one shared function,
@@ -195,12 +196,15 @@ Two things follow for the architecture, and neither is built:
 increment to touch either starts from them.
 
 1. **Things with lifetimes are their own streams.** A cathedral raised by one house and ended by another is
-   shared state, so it cannot live inside a `House`. Places, structures and key figures become aggregates
+   shared state, so it cannot live inside a `House`. Places, structures and characters become aggregates
    with a lifetime `[from, to)` in world-time. One stream per house becomes one stream per thing that can
-   exist. Its first increment gets a decision record before any code.
+   exist. **A key figure is not one of them**: it is a tie between a house and a character, written in the
+   house's own history, so the house keeps its own rules about whom it holds. Characters are the first,
+   decided in decision record 0055 before any code; each later kind gets its record the same way.
 2. **The map is a temporal read model.** Rows carry `since` and `until` in world-time, and the map at
    world-time T is a range query: `since <= T < until`. Decided and built for houses with decision record
-   0027; a thing that ends will need the other half of it.
+   0027; a thing that ends will need the other half of it, and a character, who moves and dies, is the first
+   (0055).
 
 A third demand, a resource that ticks, already has its answer: a resource is an amount, a rate per second and
 the instant at which that was true, and an event is recorded when the rate changes rather than on a clock.

@@ -84,8 +84,8 @@ house's history is written, not visited: what happened in 1793 happened once, wh
 and afterwards it is a thing to look back at rather than a place to return to.
 
 The two clocks differ by a fixed amount: **a real day is a world month**, the same for everyone. A month a
-visit is what lets a house's history move at the pace a person actually plays at, and it makes a real year a
-world year. **There is no fast-forward.** The world is shared, so its speed is not anybody's to change; a
+visit is what lets a house's history move at the pace a person actually plays at. **There is no
+fast-forward.** The world is shared, so its speed is not anybody's to change; a
 player who could run time on would be running it on for everyone standing in it. See decision record 0053.
 
 ## A house
@@ -98,7 +98,7 @@ one — and the power state rises and falls across the centuries.
 
 ## The house-spirit
 
-What never falls is the **house-spirit**: the character a house has built through everything it has done,
+What never falls is the **house-spirit**: what a house has made of itself through everything it has done,
 expressed as traits, stats and special effects. A house that has been greedy and lazy and taken the path of
 least resistance has those perks, and they colour the rolls it gets.
 
@@ -113,10 +113,14 @@ possession in the world; spiritness is an attribute of the item.
 
 ## Things that come to be, and cease to be
 
-A cathedral, a key figure, a stretch of territory: each exists between the moment it comes to be and the
+A cathedral, a person, a stretch of territory: each exists between the moment it comes to be and the
 moment it stops, and what it is between those moments is shared by every house that can see it. One house
 may raise a thing and another end it. In engineering terms each is its own stream with a lifetime in
 world-time; see `ARCHITECTURE.md`.
+
+A key figure is not one of these things. It is a person the house has taken in: the person is what comes to
+be and ceases to be, and the house's tie to them begins and ends in the house's own history. See decision
+record 0055.
 
 ## NPCs
 
@@ -126,10 +130,9 @@ than a figure in it. An NPC house is a house; the difference is who issues its c
 
 ## Not decided
 
-- **Whether the world really spans centuries at a month a real day.** Decision 0053 set the clock at one
-  world month for every real day, which makes a real year a world year - so the centuries this document
-  opens with would be centuries of real time. Either the span is years rather than centuries, or the clock
-  is faster than a month a day. Nothing built so far depends on which, and the clock is one constant.
+- **Whether one person can serve two houses.** The engine lets a character be a key figure of several
+  houses at once (decision 0055), and nothing in the fiction yet says what that would mean: a shared
+  bishop, a double agent, a marriage that binds two lines.
 - **What the chrono-engine is for**, now that it is no longer the thing that chooses the day.
 - **Why the gods took fright.** That they did is settled; what exactly about reason spreading frightened
   them is not, and it is the question every storyline about them eventually has to answer.

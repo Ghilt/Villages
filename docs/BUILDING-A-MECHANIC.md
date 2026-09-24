@@ -33,8 +33,9 @@ Answer these before touching code, in a paragraph Adam can read back. The answer
    history it is. Today there is one kind of thing, the house, and a player's house has the player's
    identity (decision 0028), so anything a player is offered or does is the house's history: the vision
    says decisions are taken in the house's name and remembered as the house's history. A thing whose
-   lifetime is shared between houses, a cathedral or a territory, is its own stream when it comes
-   (`ARCHITECTURE.md`, "things with lifetimes are their own streams"); it is not here yet.
+   lifetime is shared between houses, a cathedral, a territory or a person, is its own stream when it comes
+   (`ARCHITECTURE.md`, "things with lifetimes are their own streams"). The first, the character, is decided
+   in decision record 0055 and not built yet; what a house is to such a thing is still the house's history.
 3. **What does the player see?** Which frame carries it, and from where: a view read from a projection
    (`snapshot`, `batch`, `yourHouse`, `yourChoice`) for the interface, and the stored event itself on
    the `event` frame for the debug panel. Then which panel line says it happened, in words. A behaviour
@@ -117,9 +118,12 @@ first to need that event, and writing it is the whole of the work.
 
 ### A thing with a lifetime
 
-A place, a structure or a key figure that exists between two world-times and is shared between
-houses: its own stream, and a `[from, to)` span in world-time. `ARCHITECTURE.md` describes it; nothing of
-it is in the source, and its first increment gets its own decision record before any code.
+A place, a structure or a character that exists between two world-times and is shared between
+houses: its own stream, and a `[from, to)` span in world-time. **A house's tie to such a thing is not the
+thing**: being a key figure is a tie between a house and a character, written in the house's history and
+never in the character's, so a rule about whom a house holds is decided on the house's stream. See
+decision record 0055. `ARCHITECTURE.md` describes the pattern; nothing of it is in the source yet, and
+`docs/plans/characters-and-key-figures.md` is the order its first kind gets built in.
 
 ## Naming
 

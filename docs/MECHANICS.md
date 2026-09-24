@@ -353,3 +353,138 @@ It says a shield, a name, a blazon and **five figures** now: wealth, domain, inf
 each behind its own mark, and reason showing what is free over its total while something is pledged out of
 it. That was what it was waiting on. What it is waiting on now is a reason for any of those numbers to
 move on their own.
+
+---
+
+## Character
+
+The people of the world: in Adam's words, the people and actors in it, and perhaps one day its pets.
+
+### What it is
+
+Someone in the world with a history of their own. A character has a name, is a woman or a man, is of a
+**species** - a person, and only a person so far - and has a birthday and **four stats**. Their stats can
+change, their age can be changed out of the ordinary, and they can die.
+
+**The four stats are Piety, Reason, Kindness and Physical**, whole numbers from 1 to 20. Piety and Reason
+are the house's Piety and Reason on purpose, the same words and the same marks, and one day they will be
+connected. Nothing connects them yet.
+
+**A character can be somewhere, or nowhere.** One with a place in the world is drawn there; one without
+still exists, and is simply not on the map. They come onto it and leave it by what happens to them.
+
+**A character ages with the world.** Their age is counted from their birthday rather than ticked: no event
+marks a birthday. At a world month for every real day, that is a year every twelve real days - someone of
+twenty-five is fifty-five after a real year - so a player watches the people of their house grow old.
+
+### What it is for
+
+**A world with people in it.** The world is a map of houses and ground until there is somebody on it. A
+character is who a house acts through, who will speak in a **character dialogue**, and who can be standing
+somewhere on the map when a player looks.
+
+**Something to build on.** This is groundwork, and deliberately thin: "we will do more with key figures and
+characters in the future". The one thing that has to hold is that a character is not a kind of anything.
+What a character is to a house is a tie the house keeps, and a pet would be a character of another species
+rather than a different sort of thing. See decision record 0055.
+
+### Look and feel
+
+- **A portrait**, one for life, from Adam's own hand-made art, in one frame wherever a face is shown. Until
+  he has drawn them, placeholders stand in: cut-paper silhouettes of the period.
+- **On the map, a small standing figure** drawn in code as the castle is, in the colours of the house they
+  serve, with a ground form and an icon like everything else standing in the world. From zoom 9 by default,
+  which "will depend greatly on the character".
+- **Clicked on the map, an inspect window**: their name, their age, and whose key figure they are, with a
+  link to that house.
+
+### Not decided
+
+- **What else a character carries.** Nothing is hidden today: no traits, no loyalty, no lifespan.
+- **Other species**: what a pet's stats would be, and whether it has all four.
+- **What decides how far out a character is drawn**, beyond the default.
+- **Characters who belong to no house**: the famous characters of the warped history, who `SETTING.md` says
+  have streams of their own and a decision AI to play them.
+- **Dying of old age**, and whether anyone has a lifespan.
+- **Whether a player can name one**, and whether a portrait ages with its sitter.
+
+### Where it stands
+
+Nothing of it exists. Decision record 0055 says what a character is to the program, and
+`docs/plans/characters-and-key-figures.md` is the order it gets built in, one commit a step.
+
+---
+
+## Key figure
+
+One of the few people a house acts through. In Adam's words it is a mechanic "kinda": a state a character
+can be in, and the pane that shows them.
+
+### What it is
+
+A character a house has taken in. It is **a tie written in the house's history** - the house gained a key
+figure, the house lost one - and **not a kind of character**: the character's own record does not change when
+they become one. A house holds at most **nine**. One character may be the key figure of more than one house
+at once, and what that means in the fiction is still open.
+
+**Their power is their stats.** They "can become more powerful and lose power depending on what happens",
+and what rises and falls is their four stats. Nothing else sits on the tie.
+
+**When a key figure dies they leave**, and the loss is written into every house that held them. **A house
+whose last key figure dies stays empty, for now.** `SETTING.md` says that if every key figure dies, someone
+rises to the task: that is not built, and this is where it is recorded as deferred rather than forgotten.
+
+For now a house gets key figures only from the debug panel, and starts with none.
+
+### What it is for
+
+**A house with faces.** A house is a bloodline acting through a handful of people (`SETTING.md`), and until
+now the handful had no names. Key figures are those people, and the pane is where a player sees who they are,
+how old they are and what they are good at - which is what turns a banner into a family.
+
+**Power that moves.** A key figure's standing is their stats, so a mechanic that changes how pious or how
+strong someone is changes what the house can do through them. Nothing does yet.
+
+### Look and feel
+
+**A pane of its own, in the corner with the house status**: its middle tab in the spread, between the shield
+and the compass, and a row of *Go to* on a phone. Its mark is a head and shoulders in profile, a placeholder.
+On a desktop it opens at the normal size, so changing tabs moves nothing.
+
+**Two states.**
+
+- **The grid**: small portraits, three by three, at most nine, in the order they joined, and it never
+  scrolls. With none it says that key figures will be shown here. With exactly one there is no grid: the
+  pane opens straight on them.
+- **The details**: one key figure's portrait and name, and where there is room their stats, one to a line,
+  each a mark, a word and a number: Age, Piety (the house card's cross), Reason (its dividers), Kindness,
+  Physical. The way back to the grid is a mark of **nine small squares**.
+
+**What each size shows**, the pane owning all three:
+
+- **Phone, medium**: the portrait and the name, with the stats below a scroll.
+- **Phone, big**: the same with room; turned, the stats beside the portrait.
+- **Desktop, medium**: the portrait and the name.
+- **Desktop, big**: the corner opens out **wider than the column**, along the bottom of the screen, with the
+  portrait beside the name and the stats. The windows above keep the column's width, and a letter along the
+  bottom moves over and never shrinks below the width it can be read at.
+- **Minimised**: the strip, with the pane's name.
+
+### Not decided
+
+- **How a key figure is gained in play**: a choice, a storyline, or founding a house.
+- **Succession**: someone rising when the last of them dies.
+- **Being let go** rather than dying.
+- **What another house sees** of your key figures, stats included.
+- **What it means for one person to serve two houses**, and a way to see it happen on the screen.
+- **Whether the eye keeps key figures in sight** far out, as it keeps the house's holdings.
+- **Loyalty**, and what a key figure will do for the house. Character dialogue already wants it: a character
+  loyal to the house can offer a reward the same character would not offer a stranger.
+- **How the house's power state follows its key figures**, and the sacrificial knife of `SETTING.md`, which
+  sacrifices one at great cost.
+
+### Where it stands
+
+Nothing of it exists. Decision record 0055 is the shape: the tie in the house's history, the gate, the
+mourning. `docs/plans/characters-and-key-figures.md` has the order, one commit a step, and the corner that
+opens out wider than the column will get decision record 0056 when it is built.

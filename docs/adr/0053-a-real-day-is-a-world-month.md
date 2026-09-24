@@ -5,6 +5,9 @@
 - Amended 2026-09-20: the world opens on the **first of January, 1790**, in Earth's own years, not
   in year 1200 of a reckoning of its own. The calendar below is unchanged; only which day the world
   starts on is. See `SETTING.md` on the age.
+- Amended 2026-09-24: "a real year is a world year" is struck from the decision, on Adam's word. The clock
+  below never ran that way: at a month a real day, a real year is about thirty world years and a century
+  passes in a little over three. See decision 0055, whose characters age at that pace.
 
 ## Context
 
@@ -26,8 +29,7 @@ a person reaches for is a number of months. Months had to exist before a pledge 
 
 **A real day is a world month.** The world advances one month for every real day since it opened, the same
 for everyone. This is a browser game played in short visits, and a month a visit is what lets a house's
-history move at the pace a person actually plays at: a real year is a world year, which is the whole clock
-in one sentence.
+history move at the pace a person actually plays at.
 
 **The speed is nobody's to change.** There is no fast-forward, no speed lever and no per-player clock. The
 world is shared, and a player who could run time forward would be running it forward for everybody standing
