@@ -490,8 +490,9 @@ On a desktop it opens at the normal size, so changing tabs moves nothing.
 
 ### Where it stands
 
-The tie exists on the server and nothing takes anybody in yet. A house gains and loses key figures in its
-own history, holds nine at most and never the same character twice, and says whether a character is one of
-its own without writing anything, which is how a lever naming a character will be let through. Decision
-record 0055 is the shape. `docs/plans/characters-and-key-figures.md` has the rest in order, one commit a
+The tie exists on the server, and the service that takes a newcomer in, but nothing on the wire calls it
+yet. A house gains and loses key figures in its own history, holds nine at most and never the same
+character twice, and says whether a character is one of its own without writing anything, which is how
+every lever naming a character is let through or refused. When a character dies the mourning writes the
+loss into every house that held them. Decision record 0055 is the shape. `docs/plans/characters-and-key-figures.md` has the rest in order, one commit a
 step, and the corner that opens out wider than the column will get decision record 0056 when it is built.

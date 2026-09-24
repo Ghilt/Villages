@@ -1,14 +1,19 @@
 package villages.app
 
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import villages.application.AnonymousTokens
 import villages.application.Arrival
+import villages.application.Dice
 import villages.application.FoundHouseService
 import villages.application.FreshIds
+import villages.application.KeyFigureService
 import villages.application.Later
 import villages.application.MonthlyWorldClock
+import villages.application.Mourning
 import villages.application.Pledges
+import villages.application.Portraits
 import villages.application.ResourceService
 import villages.application.ScheduledLater
 import villages.application.TakeActionService
@@ -22,9 +27,11 @@ import villages.projections.ChoicesProjection
 import villages.projections.HousesProjection
 import villages.projections.RecentEventsProjection
 import villages.protocol.Calendar
+import java.nio.file.Path
 import java.time.Clock
 import java.time.Instant
 import java.util.UUID
+import java.util.concurrent.ThreadLocalRandom
 
 /**
  * The wiring. Everything the world is made of, chosen here and nowhere else: today the in-memory world,
@@ -104,6 +111,42 @@ class WorldConfig {
     fun takeAction(world: InMemoryWorld, clock: Clock, worldClock: WorldClock): TakeActionService =
         TakeActionService(world.executor, clock = { clock.instant() }, world = worldClock)
 
+    /** Chance, for whatever the world rolls. Never seeded from anything a client sends. */
+    @Bean
+    fun dice(): Dice = Dice { sides -> ThreadLocalRandom.current().nextInt(1, sides + 1) }
+
+    /**
+     * Adam's portraits, from the repository's `world/portraits/`, two directories above the one Gradle runs
+     * the server in. `villages.portraits` points it somewhere else.
+     */
+    @Bean
+    fun portraits(@Value("\${villages.portraits:../../world/portraits}") folder: String): Portraits =
+        FolderPortraits(Path.of(folder))
+
+    @Bean
+    @Suppress("LongParameterList")
+    fun keyFigures(
+        world: InMemoryWorld,
+        clock: Clock,
+        worldClock: WorldClock,
+        calendar: WorldCalendar,
+        dice: Dice,
+        portraits: Portraits,
+    ): KeyFigureService = KeyFigureService(
+        houses = world.executor,
+        characters = world.characterExecutor,
+        clock = { clock.instant() },
+        world = worldClock,
+        calendar = calendar,
+        dice = dice,
+        portraits = portraits,
+    )
+
+    /** Writes a character's death into every house that held them. See decision record 0055. */
+    @Bean(destroyMethod = "close")
+    fun mourning(world: InMemoryWorld, later: ScheduledLater, keyFigures: KeyFigureService): Mourning =
+        Mourning(world.feed, later, keyFigures)
+
     /** The map's read model, folded from the feed. In memory, so it starts empty with the store. */
     @Bean(destroyMethod = "close")
     fun houses(world: InMemoryWorld): HousesProjection = HousesProjection(world.feed)
@@ -126,11 +169,13 @@ class WorldConfig {
         houses: HousesProjection,
         choices: ChoicesProjection,
         recentEvents: RecentEventsProjection,
+        mourning: Mourning,
     ): WorldWipe = WorldWipe {
         world.wipe().also {
             houses.reset()
             choices.reset()
             recentEvents.reset()
+            mourning.reset()
         }
     }
 

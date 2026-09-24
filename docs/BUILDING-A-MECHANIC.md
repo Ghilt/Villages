@@ -131,6 +131,10 @@ writes nothing when the thing is the house's own and is refused when it is not. 
 and `CheckRoomForKeyFigure` the second. The rule stays in `decide`, and nothing needs a port for reading a
 house.
 
+**When such a thing ends, a reaction carries the end to every house tied to it**, because the end is on
+the thing's stream and the losses are on the houses', and no one decision writes both. The mourning is the
+first: see `ARCHITECTURE.md` on what acts on its own for the rules a reaction keeps.
+
 `ARCHITECTURE.md` describes the pattern. Characters and the tie are in the source, and
 `docs/plans/characters-and-key-figures.md` is the order the rest of them gets built in.
 

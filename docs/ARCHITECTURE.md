@@ -154,6 +154,21 @@ fact about the world, which is why nothing about it is stored or recorded. The p
 thing and needs no frame at all: a player's own house reaches their session rather than a cell, so keeping
 it in sight is a page drawing what it already has. See decision record 0038.
 
+## What acts on its own
+
+Two things in the program act without anybody sending a command, and they keep the same rules: one
+subscription to the feed from the beginning, with a fold of their own rather than a read of a read model,
+because two subscriptions can stand at different points in the feed; commands issued through `Later`,
+never inside the feed's own callback; no cancellation table; and every refusal that means "already done"
+swallowed, which is what makes a replay write nothing twice.
+
+- **The pledge release**, `Pledges`, waits out a pledge's span and gives it back: one wake-up a pledge, at
+  the moment it is due, and none without one. See decision record 0053.
+- **The mourning**, `Mourning`, writes a character's death into every house that held them as a key
+  figure, in the death's own story, and undoes a tie made to somebody already dead. It is how a death on a
+  character's stream reaches the houses' streams, which no one decision can write together. See decision
+  record 0055.
+
 ## Scale principles
 
 1. One stream per house and one per character (decision 0055), and no global aggregate. Anything
