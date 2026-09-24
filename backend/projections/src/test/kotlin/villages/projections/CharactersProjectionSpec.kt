@@ -5,6 +5,8 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.comparables.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
+import villages.application.CharacterMapChange
+import villages.application.CharacterSpan
 import villages.application.EventFeed
 import villages.application.KeyFiguresChange
 import villages.application.Start
@@ -14,6 +16,8 @@ import villages.domain.CharacterAged
 import villages.domain.CharacterAppeared
 import villages.domain.CharacterDied
 import villages.domain.CharacterId
+import villages.domain.CharacterLeftTheMap
+import villages.domain.CharacterMoved
 import villages.domain.CharacterName
 import villages.domain.CharacterStatChanged
 import villages.domain.Charge
@@ -33,6 +37,7 @@ import villages.domain.Stat
 import villages.domain.Tincture
 import villages.domain.WorldTime
 import villages.domain.emptyStocks
+import villages.protocol.Cell
 import java.time.Instant
 import java.util.UUID
 
@@ -196,5 +201,78 @@ class CharactersProjectionSpec : StringSpec({
         feed.deliver(HouseGainedKeyFigure(adas, figure(1), today, noon))
 
         projection.of(adas).single().revision shouldBeGreaterThan before
+    }
+
+    val helsinki = Location(60.17, 24.94)
+    val stockholm = Location(59.33, 18.07)
+    val ten = Significance(10.0)
+    val later = WorldTime(today.day + 31)
+    fun cellOf(place: Location, zoom: Int) = Cell.of(place.lat, place.lon, zoom).quadkey
+
+    // Ten is the significance every key figure has on the map, and it is drawn from zoom 9 in.
+    "a character moved onto the map is in the cell their place falls in, from the zoom their significance says" {
+        val (feed, projection, _) = rig()
+        feed.deliver(appeared(1))
+        feed.deliver(CharacterMoved(figure(1), helsinki, ten, today, noon))
+
+        projection.inCell(cellOf(helsinki, 9), today, 10).characters.single().row.id shouldBe figure(1)
+        projection.inCell(cellOf(helsinki, 9), today, 10).characters.single().span.place shouldBe helsinki
+        projection.inCell(cellOf(helsinki, 8), today, 10).characters.shouldBeEmpty()
+        projection.inCell(cellOf(helsinki, 8), today, 10, everything = true).characters shouldHaveSize 1
+        projection.inCell(cellOf(stockholm, 9), today, 10).characters.shouldBeEmpty()
+    }
+
+    "a character nobody has moved is on no map at all" {
+        val (feed, projection, _) = rig()
+        feed.deliver(appeared(1))
+
+        projection.inCell(cellOf(helsinki, 9), today, 10, everything = true).characters.shouldBeEmpty()
+    }
+
+    // The defect a span exists to stop: a character who moves staying drawn in the cell they left.
+    "a move closes the span they stood in, so the cell they left held them only until the day they moved" {
+        val (feed, projection, _) = rig()
+        feed.deliver(appeared(1))
+        feed.deliver(CharacterMoved(figure(1), helsinki, ten, today, noon))
+        feed.deliver(CharacterMoved(figure(1), stockholm, ten, later, noon))
+
+        projection.inCell(cellOf(helsinki, 9), today, 10).characters shouldHaveSize 1
+        projection.inCell(cellOf(helsinki, 9), later, 10).characters.shouldBeEmpty()
+        projection.inCell(cellOf(stockholm, 9), later, 10).characters shouldHaveSize 1
+        projection.inCell(cellOf(stockholm, 9), today, 10).characters.shouldBeEmpty()
+    }
+
+    "leaving the map and dying both close the span, and the days before still hold them" {
+        val (feed, projection, _) = rig()
+        feed.deliver(appeared(1))
+        feed.deliver(appeared(2))
+        feed.deliver(CharacterMoved(figure(1), helsinki, ten, today, noon))
+        feed.deliver(CharacterMoved(figure(2), helsinki, ten, today, noon))
+
+        feed.deliver(CharacterLeftTheMap(figure(1), later, noon))
+        feed.deliver(CharacterDied(figure(2), "a fever", later, noon))
+
+        projection.inCell(cellOf(helsinki, 9), later, 10).characters.shouldBeEmpty()
+        projection.inCell(cellOf(helsinki, 9), today, 10).characters shouldHaveSize 2
+    }
+
+    "the map is told where they stood and where they stand now, and a stat change tells it nothing" {
+        val (feed, projection, _) = rig()
+        val moves = mutableListOf<CharacterMapChange>()
+        projection.watchTheMap { moves += it }
+        feed.deliver(appeared(1))
+
+        feed.deliver(CharacterMoved(figure(1), helsinki, ten, today, noon))
+        feed.deliver(CharacterMoved(figure(1), stockholm, ten, later, noon))
+        feed.deliver(CharacterStatChanged(figure(1), Stat.PIETY, 15, later, noon))
+        feed.deliver(CharacterLeftTheMap(figure(1), later, noon))
+
+        moves shouldHaveSize 3
+        moves[0].was shouldBe null
+        moves[0].now?.place shouldBe helsinki
+        moves[1].was shouldBe CharacterSpan(helsinki, ten, since = today, until = later)
+        moves[1].now?.place shouldBe stockholm
+        moves[2].was?.place shouldBe stockholm
+        moves[2].now shouldBe null
     }
 })

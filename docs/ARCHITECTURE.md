@@ -218,8 +218,9 @@ increment to touch either starts from them.
    decided in decision record 0055 before any code; each later kind gets its record the same way.
 2. **The map is a temporal read model.** Rows carry `since` and `until` in world-time, and the map at
    world-time T is a range query: `since <= T < until`. Decided and built for houses with decision record
-   0027; a thing that ends will need the other half of it, and a character, who moves and dies, is the first
-   (0055).
+   0027. A character, who moves and dies, is the first thing to use the other half of it: the characters
+   projection keeps a **span** for every stretch a character stood in one place, closed by a move, by
+   leaving the map or by death, and a cell at T is the spans that hold T (0055).
 
 A third demand, a resource that ticks, already has its answer: a resource is an amount, a rate per second and
 the instant at which that was true, and an event is recorded when the rate changes rather than on a clock.

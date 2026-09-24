@@ -1,0 +1,16 @@
+{
+  "type": "villages.character.moved.v1",
+  "source": "urn:villages",
+  "subject": "cb732500-39bd-3b39-a838-bb89f719578f",
+  "time": "2026-09-04T12:00:00Z",
+  "data": {
+    "characterId": "cb732500-39bd-3b39-a838-bb89f719578f",
+    "place": {
+      "lat": 59.33,
+      "lon": 18.07
+    },
+    "significance": 10.0,
+    "worldTime": 653705,
+    "recordedAt": "2026-09-04T12:00:00Z"
+  }
+}

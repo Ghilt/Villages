@@ -63,6 +63,13 @@ sealed interface Character {
          * domain has no calendar, so the age itself is worked out wherever there is one. See decision 0055.
          */
         val agedYears: Int = 0,
+        /**
+         * Where they stand in the world, or null while they are on no map. A character is nowhere until
+         * something moves them, and a death leaves this where it was: it is where they died.
+         */
+        val place: Location? = null,
+        /** How much they matter to the world where they stand, which decides how far out they are drawn. */
+        val significance: Significance? = null,
         val death: Death? = null,
     ) : Character
 }

@@ -4,6 +4,8 @@ import org.occurrent.application.converter.typemapper.CloudEventTypeMapper
 import villages.domain.CharacterAged
 import villages.domain.CharacterAppeared
 import villages.domain.CharacterDied
+import villages.domain.CharacterLeftTheMap
+import villages.domain.CharacterMoved
 import villages.domain.CharacterPortraitChanged
 import villages.domain.CharacterStatChanged
 import villages.domain.Event
@@ -31,6 +33,8 @@ object EventTypes : CloudEventTypeMapper<Event> {
         CharacterAged::class to "villages.character.aged.v1",
         CharacterAppeared::class to "villages.character.appeared.v1",
         CharacterDied::class to "villages.character.died.v1",
+        CharacterLeftTheMap::class to "villages.character.leftTheMap.v1",
+        CharacterMoved::class to "villages.character.moved.v1",
         CharacterPortraitChanged::class to "villages.character.portraitChanged.v1",
         CharacterStatChanged::class to "villages.character.statChanged.v1",
         HouseFounded::class to "villages.house.founded.v1",

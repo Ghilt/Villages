@@ -13,6 +13,8 @@ import villages.domain.CharacterDecider
 import villages.domain.CharacterDied
 import villages.domain.CharacterEvent
 import villages.domain.CharacterId
+import villages.domain.CharacterLeftTheMap
+import villages.domain.CharacterMoved
 import villages.domain.CharacterPortraitChanged
 import villages.domain.CharacterStatChanged
 import villages.domain.Charge
@@ -158,7 +160,23 @@ class KeyFigureServiceSpec : StringSpec({
 
         shouldThrow<HouseError.NoSuchKeyFigure> { service.changeStat(ada, beasFigure, Stat.PIETY, 1, sent(2)) }
         shouldThrow<HouseError.NoSuchKeyFigure> { service.kill(ada, beasFigure, "envy", sent(3)) }
+        shouldThrow<HouseError.NoSuchKeyFigure> { service.move(ada, beasFigure, Location(60.17, 24.94), sent(4)) }
         streams.written shouldHaveSize 0
+    }
+
+    // The place is the player's to say and how much it matters is not: it is set here and never sent.
+    "a key figure is put on the map at a key figure's significance, and taken off it again" {
+        val (streams, service) = world()
+        val agnes = service.add(ada, sent(1))
+        streams.written.clear()
+
+        service.move(ada, agnes, Location(60.17, 24.94), sent(2))
+        service.takeOffTheMap(ada, agnes, sent(3))
+
+        val moved = streams.written[0].first.shouldBeInstanceOf<CharacterMoved>()
+        moved.place shouldBe Location(60.17, 24.94)
+        moved.significance shouldBe KeyFigureService.ON_THE_MAP
+        streams.written[1].first.shouldBeInstanceOf<CharacterLeftTheMap>()
     }
 
     "a house loses a key figure on the mourning's word, and nobody it does not hold" {

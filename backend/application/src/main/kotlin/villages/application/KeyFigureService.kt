@@ -10,10 +10,14 @@ import villages.domain.CheckRoomForKeyFigure
 import villages.domain.HouseError
 import villages.domain.HouseId
 import villages.domain.KillCharacter
+import villages.domain.Location
 import villages.domain.LoseKeyFigure
+import villages.domain.MoveCharacter
 import villages.domain.PlayerId
+import villages.domain.Significance
 import villages.domain.Stat
 import villages.domain.TakeKeyFigure
+import villages.domain.TakeOffTheMap
 
 /**
  * A house's key figures: taking one in, and every lever on one of them.
@@ -81,6 +85,20 @@ class KeyFigureService(
         characters.execute(ChangePortrait(characterId, portrait, world.today(), clock.now()), provenance)
     }
 
+    /**
+     * Put a key figure somewhere on the map, at the significance a key figure has there. The place is the
+     * player's to say; how much it matters is the world's, so it is set here and never sent.
+     */
+    fun move(player: PlayerId, characterId: CharacterId, place: Location, provenance: Provenance) {
+        actThrough(player, characterId, provenance)
+        characters.execute(MoveCharacter(characterId, place, ON_THE_MAP, world.today(), clock.now()), provenance)
+    }
+
+    fun takeOffTheMap(player: PlayerId, characterId: CharacterId, provenance: Provenance) {
+        actThrough(player, characterId, provenance)
+        characters.execute(TakeOffTheMap(characterId, world.today(), clock.now()), provenance)
+    }
+
     fun kill(player: PlayerId, characterId: CharacterId, cause: String, provenance: Provenance) {
         actThrough(player, characterId, provenance)
         characters.execute(KillCharacter(characterId, cause, world.today(), clock.now()), provenance)
@@ -97,5 +115,14 @@ class KeyFigureService(
     /** The player's house says whether the character is one of its own; the answer is a refusal or nothing. */
     private fun actThrough(player: PlayerId, characterId: CharacterId, provenance: Provenance) {
         houses.execute(ActThrough(HouseId.of(player), characterId), provenance)
+    }
+
+    companion object {
+        /**
+         * How much a key figure on the map matters to the world: ten, which is drawn from zoom 9, a little
+         * closer in than a house. The same for every one of them until something decides it per person -
+         * Adam's words were that it will depend greatly on the character. See decision record 0026.
+         */
+        val ON_THE_MAP: Significance = Significance(10.0)
     }
 }

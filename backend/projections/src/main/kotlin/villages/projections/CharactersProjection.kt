@@ -1,10 +1,15 @@
 package villages.projections
 
+import villages.application.CharacterMapChange
 import villages.application.CharacterRow
+import villages.application.CharacterSpan
+import villages.application.CharactersByCell
+import villages.application.CharactersInCell
 import villages.application.EventFeed
 import villages.application.Holder
 import villages.application.KeyFiguresByHouse
 import villages.application.KeyFiguresChange
+import villages.application.PlacedCharacter
 import villages.application.Start
 import villages.application.StoredEvent
 import villages.domain.Banner
@@ -12,6 +17,8 @@ import villages.domain.CharacterAged
 import villages.domain.CharacterAppeared
 import villages.domain.CharacterDied
 import villages.domain.CharacterId
+import villages.domain.CharacterLeftTheMap
+import villages.domain.CharacterMoved
 import villages.domain.CharacterPortraitChanged
 import villages.domain.CharacterStatChanged
 import villages.domain.HouseFounded
@@ -20,6 +27,9 @@ import villages.domain.HouseId
 import villages.domain.HouseLostKeyFigure
 import villages.domain.HouseName
 import villages.domain.PlayerId
+import villages.domain.WorldTime
+import villages.protocol.Cell
+import villages.protocol.coarsestZoom
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CopyOnWriteArraySet
@@ -37,16 +47,25 @@ import java.util.concurrent.atomic.AtomicLong
  * make, is kept and filled in when they appear. A dead character leaves every house's list at once, the
  * moment they die, rather than when the mourning's loss lands: a dead key figure leaves the grid.
  *
+ * **Where they stood is spans**, one for each stretch of world-time a character stood in one place, closed
+ * by a move, by leaving the map or by dying. A cell at a moment is then the span that holds that day, which
+ * is how the houses' map is asked too; a character who moves would otherwise stay drawn in a cell they left.
+ *
  * Disposable, like every read model: delete it, replay the feed, get it back.
  */
-class CharactersProjection(feed: EventFeed) : KeyFiguresByHouse, AutoCloseable {
+class CharactersProjection(feed: EventFeed) : KeyFiguresByHouse, CharactersByCell, AutoCloseable {
     private class HouseFacts(val player: PlayerId, val name: HouseName, val banner: Banner)
+
+    /** A span with the deepest cell its place falls in and the coarsest zoom it is drawn at, worked out once. */
+    private class Indexed(val span: CharacterSpan, val quadkey: String, val coarsestZoom: Int)
 
     private val characters = ConcurrentHashMap<CharacterId, CharacterRow>()
     private val ties = ConcurrentHashMap<HouseId, CopyOnWriteArrayList<CharacterId>>()
     private val holders = ConcurrentHashMap<CharacterId, CopyOnWriteArrayList<HouseId>>()
     private val houses = ConcurrentHashMap<HouseId, HouseFacts>()
     private val listeners = CopyOnWriteArraySet<(KeyFiguresChange) -> Unit>()
+    private val spans = ConcurrentHashMap<CharacterId, CopyOnWriteArrayList<Indexed>>()
+    private val mapListeners = CopyOnWriteArraySet<(CharacterMapChange) -> Unit>()
     private val revisions = AtomicLong()
 
     // From the beginning: a read model is its fold of every event. See decision record 0029.
@@ -106,10 +125,44 @@ class CharactersProjection(feed: EventFeed) : KeyFiguresByHouse, AutoCloseable {
             is CharacterDied -> {
                 changed(event.characterId) { it.copy(diedOn = event.worldTime) }
                 tellHoldersOf(event.characterId)
+                // They are on no map from the day they die, and no `leftTheMap` is written to say so.
+                moveOnTheMap(event.characterId, to = null, on = event.worldTime)
             }
+
+            is CharacterMoved -> moveOnTheMap(
+                event.characterId,
+                to = CharacterSpan(event.place, event.significance, since = event.worldTime, until = null),
+                on = event.worldTime,
+            )
+
+            is CharacterLeftTheMap -> moveOnTheMap(event.characterId, to = null, on = event.worldTime)
 
             // What a house has, and what it is asked, are other read models' business.
             else -> Unit
+        }
+    }
+
+    /**
+     * Closes the span a character stood in, on the day they moved or left, and opens the one they stand in
+     * now, if any; then tells whoever is watching the map where they were and where they are.
+     */
+    private fun moveOnTheMap(id: CharacterId, to: CharacterSpan?, on: WorldTime) {
+        val stood = spans.getOrPut(id) { CopyOnWriteArrayList() }
+        val open = stood.lastOrNull()?.takeIf { it.span.until == null }
+        val was = open?.span?.copy(until = on)
+        if (open != null && was != null) {
+            stood[stood.lastIndex] = Indexed(was, open.quadkey, open.coarsestZoom)
+        }
+        if (to != null) {
+            stood += Indexed(to, Cell.of(to.place.lat, to.place.lon).quadkey, coarsestZoom(to.significance.value))
+        }
+        val row = characters[id] ?: return
+        if (was == null && to == null) {
+            return
+        }
+        val change = CharacterMapChange(row, was, to)
+        for (listener in mapListeners) {
+            listener(change)
         }
     }
 
@@ -142,6 +195,29 @@ class CharactersProjection(feed: EventFeed) : KeyFiguresByHouse, AutoCloseable {
         return AutoCloseable { listeners -= listener }
     }
 
+    override fun inCell(cell: String, at: WorldTime, most: Int, everything: Boolean): CharactersInCell {
+        val zoom = cell.length
+        val standing = spans.entries
+            .mapNotNull { (id, stood) ->
+                val here = stood.firstOrNull { it.span.covers(at) } ?: return@mapNotNull null
+                val row = characters[id] ?: return@mapNotNull null
+                if (here.quadkey.startsWith(cell) && (everything || here.coarsestZoom <= zoom)) {
+                    PlacedCharacter(row, here.span)
+                } else {
+                    null
+                }
+            }
+            .sortedWith(
+                compareByDescending<PlacedCharacter> { it.span.significance.value }.thenBy { it.row.id.value },
+            )
+        return CharactersInCell(standing.take(most), (standing.size - most).coerceAtLeast(0))
+    }
+
+    override fun watchTheMap(listener: (CharacterMapChange) -> Unit): AutoCloseable {
+        mapListeners += listener
+        return AutoCloseable { mapListeners -= listener }
+    }
+
     /** Every character the read model knows of, alive or dead, for the debug panel and for tests. */
     val size: Int get() = characters.size
 
@@ -154,6 +230,7 @@ class CharactersProjection(feed: EventFeed) : KeyFiguresByHouse, AutoCloseable {
         ties.clear()
         holders.clear()
         houses.clear()
+        spans.clear()
     }
 
     override fun close() {

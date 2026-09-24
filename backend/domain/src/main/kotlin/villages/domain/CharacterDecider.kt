@@ -92,6 +92,32 @@ object CharacterDecider : Decider<CharacterCommand, Character, CharacterEvent> {
             }
         }
 
+        is MoveCharacter -> {
+            val character = living(state)
+            // Moving somebody to where they already stand, mattering as much as they did, is no move.
+            if (command.place == character.place && command.significance == character.significance) {
+                emptyList()
+            } else {
+                listOf(
+                    CharacterMoved(
+                        command.characterId,
+                        command.place,
+                        command.significance,
+                        command.worldTime,
+                        command.recordedAt,
+                    ),
+                )
+            }
+        }
+
+        is TakeOffTheMap -> {
+            val character = living(state)
+            if (character.place == null) {
+                throw CharacterError.NotOnTheMap
+            }
+            listOf(CharacterLeftTheMap(command.characterId, command.worldTime, command.recordedAt))
+        }
+
         is ChangePortrait -> {
             val character = living(state)
             command.portrait?.let(::refuseUnlessPortraitKey)
@@ -135,6 +161,16 @@ object CharacterDecider : Decider<CharacterCommand, Character, CharacterEvent> {
         is CharacterPortraitChanged -> when (state) {
             is Character.NotAppeared -> state
             is Character.Appeared -> state.copy(portrait = event.portrait)
+        }
+
+        is CharacterMoved -> when (state) {
+            is Character.NotAppeared -> state
+            is Character.Appeared -> state.copy(place = event.place, significance = event.significance)
+        }
+
+        is CharacterLeftTheMap -> when (state) {
+            is Character.NotAppeared -> state
+            is Character.Appeared -> state.copy(place = null, significance = null)
         }
     }
 

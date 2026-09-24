@@ -51,6 +51,26 @@ data class AgeCharacter(
     val recordedAt: Instant,
 ) : CharacterCommand
 
+/**
+ * Put a character somewhere in the world, from nowhere or from where they stood, with how much they matter
+ * there. The significance is the character's own and is the caller's to say: it depends on who they are,
+ * which nothing decides yet. See decision records 0026 and 0055.
+ */
+data class MoveCharacter(
+    override val characterId: CharacterId,
+    val place: Location,
+    val significance: Significance,
+    val worldTime: WorldTime,
+    val recordedAt: Instant,
+) : CharacterCommand
+
+/** Take a character off the map, so that they are nowhere again. Refused for somebody on no map. */
+data class TakeOffTheMap(
+    override val characterId: CharacterId,
+    val worldTime: WorldTime,
+    val recordedAt: Instant,
+) : CharacterCommand
+
 /** Give a character another portrait, or none. */
 data class ChangePortrait(
     override val characterId: CharacterId,

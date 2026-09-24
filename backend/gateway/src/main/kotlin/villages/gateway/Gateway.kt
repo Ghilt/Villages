@@ -754,6 +754,7 @@ internal fun DomainError.reasonCode(): String = when (this) {
     is CharacterError.InvalidAge -> "invalidAge"
     is CharacterError.InvalidPortrait -> "invalidPortrait"
     is CharacterError.InvalidCause -> "invalidCause"
+    CharacterError.NotOnTheMap -> "notOnTheMap"
 }
 
 internal fun StoredEvent.toFrame(): EventFrame = EventFrame(

@@ -34,6 +34,8 @@ class CharacterDeciderSpec : StringSpec({
     fun appeared(): Character = CharacterDecider.fold(CharacterDecider.decide(introducing(), CharacterDecider.initial))
 
     val killing = KillCharacter(agnes, "a fever that did not break", today, noon)
+    val stockholm = Location(59.33, 18.07)
+    val ten = Significance(10.0)
 
     "a character appears once, with everything they were introduced with" {
         val events = CharacterDecider.decide(introducing(), CharacterDecider.initial)
@@ -166,12 +168,59 @@ class CharacterDeciderSpec : StringSpec({
         shouldThrow<CharacterError.InvalidPortrait> { CharacterDecider.decide(ChangePortrait(agnes, "Woman 04", today, noon), appeared()) }
     }
 
+    "a character is on no map until they are moved onto one, and then stands where they were put" {
+        appeared().shouldBeInstanceOf<Character.Appeared>().place.shouldBeNull()
+
+        val moved = CharacterDecider.decide(MoveCharacter(agnes, stockholm, ten, today, noon), appeared()).single()
+
+        val came = moved.shouldBeInstanceOf<CharacterMoved>()
+        came.place shouldBe stockholm
+        came.significance shouldBe ten
+        val there = after(appeared(), listOf(moved)).shouldBeInstanceOf<Character.Appeared>()
+        there.place shouldBe stockholm
+        there.significance shouldBe ten
+    }
+
+    "moving somebody to where they stand, mattering as much, is no move; moving them on is" {
+        val there = after(appeared(), CharacterDecider.decide(MoveCharacter(agnes, stockholm, ten, today, noon), appeared()))
+
+        CharacterDecider.decide(MoveCharacter(agnes, stockholm, ten, today, noon), there) shouldHaveSize 0
+        CharacterDecider.decide(MoveCharacter(agnes, stockholm, Significance(30.0), today, noon), there) shouldHaveSize 1
+        CharacterDecider.decide(MoveCharacter(agnes, Location(60.17, 24.94), ten, today, noon), there) shouldHaveSize 1
+    }
+
+    "a character taken off the map is nowhere again, and nobody is taken off a map they are not on" {
+        val there = after(appeared(), CharacterDecider.decide(MoveCharacter(agnes, stockholm, ten, today, noon), appeared()))
+        val left = CharacterDecider.decide(TakeOffTheMap(agnes, today, noon), there).single()
+
+        left.shouldBeInstanceOf<CharacterLeftTheMap>()
+        val nowhere = after(there, listOf(left)).shouldBeInstanceOf<Character.Appeared>()
+        nowhere.place.shouldBeNull()
+        nowhere.significance.shouldBeNull()
+        shouldThrow<CharacterError.NotOnTheMap> { CharacterDecider.decide(TakeOffTheMap(agnes, today, noon), nowhere) }
+        shouldThrow<CharacterError.NoSuchCharacter> {
+            CharacterDecider.decide(TakeOffTheMap(agnes, today, noon), CharacterDecider.initial)
+        }
+    }
+
+    // A death does not also write that they left the map: where they stood is where they died.
+    "a death leaves them where they stood, and the dead are neither moved nor taken off the map" {
+        val there = after(appeared(), CharacterDecider.decide(MoveCharacter(agnes, stockholm, ten, today, noon), appeared()))
+        val died = CharacterDecider.decide(killing, there)
+
+        died.single().shouldBeInstanceOf<CharacterDied>()
+        val dead = after(there, died).shouldBeInstanceOf<Character.Appeared>()
+        dead.place shouldBe stockholm
+        shouldThrow<CharacterError.AlreadyDead> { CharacterDecider.decide(TakeOffTheMap(agnes, today, noon), dead) }
+    }
+
     "the dead do not change" {
         val dead = after(appeared(), CharacterDecider.decide(killing, appeared()))
 
         shouldThrow<CharacterError.AlreadyDead> { CharacterDecider.decide(ChangeStat(agnes, Stat.PIETY, 1, today, noon), dead) }
         shouldThrow<CharacterError.AlreadyDead> { CharacterDecider.decide(AgeCharacter(agnes, 1, today, noon), dead) }
         shouldThrow<CharacterError.AlreadyDead> { CharacterDecider.decide(ChangePortrait(agnes, "woman-04", today, noon), dead) }
+        shouldThrow<CharacterError.AlreadyDead> { CharacterDecider.decide(MoveCharacter(agnes, stockholm, ten, today, noon), dead) }
     }
 
     "folding is total: a death on a stream with nobody on it changes nothing" {

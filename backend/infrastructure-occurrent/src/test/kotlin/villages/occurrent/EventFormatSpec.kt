@@ -12,6 +12,8 @@ import villages.domain.CharacterAppeared
 import villages.domain.CharacterDied
 import villages.domain.CharacterId
 import villages.domain.CharacterName
+import villages.domain.CharacterLeftTheMap
+import villages.domain.CharacterMoved
 import villages.domain.CharacterPortraitChanged
 import villages.domain.CharacterStatChanged
 import villages.domain.Charge
@@ -177,11 +179,15 @@ class EventFormatSpec : StringSpec({
     val agnesAged = CharacterAged(agnes, 10, WorldTime(653_705), noon)
     val agnesRedrawn = CharacterPortraitChanged(agnes, "woman-04", WorldTime(653_705), noon)
     val agnesPiety = CharacterStatChanged(agnes, Stat.PIETY, 15, WorldTime(653_705), noon)
+    val agnesMoved = CharacterMoved(agnes, Location(59.33, 18.07), Significance(10.0), WorldTime(653_705), noon)
+    val agnesLeft = CharacterLeftTheMap(agnes, WorldTime(653_705), noon)
 
     val samples: Map<String, Event> = mapOf(
         "villages.character.aged.v1" to agnesAged,
         "villages.character.appeared.v1" to agnesAppeared,
         "villages.character.died.v1" to agnesDied,
+        "villages.character.leftTheMap.v1" to agnesLeft,
+        "villages.character.moved.v1" to agnesMoved,
         "villages.character.portraitChanged.v1" to agnesRedrawn,
         "villages.character.statChanged.v1" to agnesPiety,
         "villages.house.founded.v1" to ravenscar,

@@ -71,6 +71,29 @@ data class CharacterAged(
     override val recordedAt: Instant,
 ) : CharacterEvent, WorldEvent
 
+/**
+ * A character came to stand somewhere in the world, from nowhere or from where they stood before. It
+ * carries where and how much that matters, as everything that puts a thing on the map does; the cell it
+ * falls in is worked out downstream. See decision record 0026.
+ */
+data class CharacterMoved(
+    override val characterId: CharacterId,
+    val place: Location,
+    val significance: Significance,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : CharacterEvent, WorldEvent
+
+/**
+ * A character left the map and is nowhere again. A death does not also write this: the dead are on no map
+ * from the day they die, and where they stood is where they died.
+ */
+data class CharacterLeftTheMap(
+    override val characterId: CharacterId,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : CharacterEvent, WorldEvent
+
 /** A character was given another portrait, or none: a new likeness, kept from now on. */
 data class CharacterPortraitChanged(
     override val characterId: CharacterId,

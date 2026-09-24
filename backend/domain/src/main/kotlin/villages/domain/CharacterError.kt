@@ -22,4 +22,7 @@ sealed class CharacterError(message: String) : DomainError(message) {
     class InvalidPortrait(reason: String) : CharacterError("not a portrait: $reason")
 
     class InvalidCause(reason: String) : CharacterError("not a cause of death: $reason")
+
+    /** Nobody can be taken off a map they are not on. */
+    data object NotOnTheMap : CharacterError("this character is on no map")
 }
