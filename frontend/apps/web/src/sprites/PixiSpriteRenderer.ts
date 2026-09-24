@@ -33,6 +33,10 @@ const TEXTURE = {
   markWidth: 48,
   candidateHeight: 64,
   candidateWidth: 44,
+  figureHeight: 160,
+  figureWidth: 80,
+  bustHeight: 64,
+  bustWidth: 60,
   ringDiameter: 128,
 } as const;
 
@@ -45,10 +49,16 @@ const TEXTURE = {
  *
  * A candidate has no ground form at all. It is a question the world is asking rather than a thing
  * standing in the world, so it is the same size wherever the camera is.
+ *
+ * A character is a person, smaller than a house on the ground and as a sign: a figure a unit and a half
+ * tall, and a bust of sixteen pixels. They cross over at zoom 9.4, just in from zoom 9 where a key
+ * figure's significance first has them drawn, so they arrive as the sign and stand up as the camera comes
+ * in; by zoom 10 the figure is 24 pixels beside a castle's 64.
  */
 const KINDS: Record<MapSprite['kind'], TwoForms> = {
   house: { groundHeight: 4, iconHeight: 22 },
   candidate: { iconHeight: 26 },
+  character: { groundHeight: 1.5, iconHeight: 16 },
 };
 
 /**
@@ -95,6 +105,8 @@ interface Textures {
   castle: Texture;
   mark: Texture;
   candidate: Texture;
+  figure: Texture;
+  bust: Texture;
   ring: Texture;
 }
 
@@ -222,6 +234,37 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       .fill(0xffffff)
       .stroke({ width: 3, color: 0x4a4034, alpha: 0.85 });
 
+    // A person standing on their place: a head over a cloak that widens to the hem, drawn in white so
+    // a tint gives them the colours of the house they serve. The ground form, so it is what they are.
+    const { figureWidth: fw, figureHeight: fh } = TEXTURE;
+    const head = fw * 0.2;
+    const figure = new Graphics()
+      .moveTo(fw / 2 - fw * 0.14, head * 2.55)
+      .lineTo(fw * 0.2, head * 3.5)
+      .lineTo(4, fh - 3)
+      .lineTo(fw - 4, fh - 3)
+      .lineTo(fw * 0.8, head * 3.5)
+      .lineTo(fw / 2 + fw * 0.14, head * 2.55)
+      .closePath()
+      .fill(0xffffff)
+      .stroke({ width: 5, color: 0x4a4034, alpha: 0.85 })
+      .circle(fw / 2, head + 4, head)
+      .fill(0xffffff)
+      .stroke({ width: 5, color: 0x4a4034, alpha: 0.85 });
+
+    // The sign for a person: a head and shoulders, the key figures' own mark, said at the size of a word.
+    const { bustWidth: bw, bustHeight: bh } = TEXTURE;
+    const bust = new Graphics()
+      .moveTo(3, bh - 3)
+      .bezierCurveTo(3, bh * 0.62, bw * 0.24, bh * 0.52, bw / 2, bh * 0.52)
+      .bezierCurveTo(bw * 0.76, bh * 0.52, bw - 3, bh * 0.62, bw - 3, bh - 3)
+      .closePath()
+      .fill(0xffffff)
+      .stroke({ width: 5, color: 0x4a4034, alpha: 0.9 })
+      .circle(bw / 2, bh * 0.28, bh * 0.2)
+      .fill(0xffffff)
+      .stroke({ width: 5, color: 0x4a4034, alpha: 0.9 });
+
     // What marks the selected house: a ring on the ground under it rather than a change to the mark
     // itself, so that what is selected is still drawn as what it is.
     const r = TEXTURE.ringDiameter;
@@ -233,11 +276,15 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       castle: rasterise(castle),
       mark: rasterise(mark),
       candidate: rasterise(candidate),
+      figure: rasterise(figure),
+      bust: rasterise(bust),
       ring: rasterise(ringOf),
     };
     castle.destroy();
     mark.destroy();
     candidate.destroy();
+    figure.destroy();
+    bust.destroy();
     ringOf.destroy();
     return built;
   }
@@ -268,8 +315,9 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
     }
 
     if (forms.groundHeight !== undefined) {
-      const sprite = new Sprite(textures.castle);
-      // The castle stands on the seat, so the sprite hangs from its own bottom edge.
+      const sprite = new Sprite(spec.kind === 'character' ? textures.figure : textures.castle);
+      // The castle stands on the seat, and a person on their place, so the sprite hangs from its own
+      // bottom edge.
       sprite.anchor.set(0.5, 1);
       sprite.tint = spec.tint;
       sprite.visible = false;
@@ -277,7 +325,13 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       entry.ground = sprite;
     }
     if (forms.iconHeight !== undefined) {
-      const sprite = new Sprite(spec.kind === 'candidate' ? textures.candidate : textures.mark);
+      const sprite = new Sprite(
+        spec.kind === 'candidate'
+          ? textures.candidate
+          : spec.kind === 'character'
+            ? textures.bust
+            : textures.mark,
+      );
       // The same anchor as the ground form, because the two forms of one thing stand on one point: a
       // crossfade between two shapes hung from different places trades a jump in size for a jump in
       // position, and the eye catches a translation far harder than a scale. A candidate has only this

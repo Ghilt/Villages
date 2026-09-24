@@ -15,6 +15,7 @@ import type {
   CommandPayload,
   KeyFigureView,
   OptionView,
+  Point,
   ResourceName,
   ServerFrame,
   StatName,
@@ -566,6 +567,22 @@ export function changePortrait(figure: KeyFigureView, portrait: string | undefin
       ? { type: 'changePortrait', characterId: figure.id }
       : { type: 'changePortrait', characterId: figure.id, portrait },
   );
+}
+
+/** Puts one of the house's key figures somewhere on the map; how much they matter there is the world's. */
+export function moveCharacter(figure: KeyFigureView, place: Point): void {
+  act('characters', `putting ${fullName(figure)} at ${place.lat.toFixed(3)}, ${place.lon.toFixed(3)}`, {
+    type: 'moveCharacter',
+    characterId: figure.id,
+    place,
+  });
+}
+
+export function takeOffTheMap(figure: KeyFigureView): void {
+  act('characters', `taking ${fullName(figure)} off the map`, {
+    type: 'takeOffTheMap',
+    characterId: figure.id,
+  });
 }
 
 export function killCharacter(figure: KeyFigureView, cause: string): void {

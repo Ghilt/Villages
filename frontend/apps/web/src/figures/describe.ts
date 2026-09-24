@@ -57,6 +57,13 @@ function whatMoved(before: KeyFigureView, after: KeyFigureView, today: number | 
     const way = aged > 0 ? `was aged ${years(aged)}` : `was made ${years(-aged)} younger`;
     said.push(today === null ? way : `${way}, and is ${ageOn(after.bornOn, after.agedYears, today)}`);
   }
+  if (before.place?.lat !== after.place?.lat || before.place?.lon !== after.place?.lon) {
+    said.push(
+      after.place === undefined
+        ? 'is on no map now'
+        : `now stands at ${after.place.lat.toFixed(3)}, ${after.place.lon.toFixed(3)}`,
+    );
+  }
   if (before.portrait !== after.portrait) {
     said.push(
       after.portrait === undefined ? 'has no portrait now' : `has another portrait, ${after.portrait}`,

@@ -139,8 +139,11 @@ crossfading exactly where the two are the same size, so nothing jumps.
 The two are different drawings and not one drawing at two sizes. That is the whole of it: close up you
 get the thing, with whatever detail it is worth giving; far out you get the sign for it, said in as few
 strokes as read at the size of a word. A house is a castle of two towers close in and a battlemented
-keep far out. What has only an icon is a thing the world is saying rather than a thing standing in it,
-like the seat a choice is offering.
+keep far out. A **person** is a small standing figure close in - a head over a cloak that widens to the
+hem, a unit and a half tall - and a head and shoulders far out, sixteen pixels, the key figures' own mark;
+they trade at zoom 9.4, just in from where a key figure is first drawn, and both are in the colours of
+the house they serve, the first that took them in. What has only an icon is a thing the world is saying
+rather than a thing standing in it, like the seat a choice is offering.
 
 **Nothing on the map pops.** A thing arriving fades up, a thing gone fades out and is only then let go
 of, and a thing changing form crosses over rather than swapping. All of it is a fifth of a second or

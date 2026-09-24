@@ -13,9 +13,10 @@ export interface MapSprite {
   /**
    * What sort of mark this is. A house is a thing standing in the world and fades out when the camera
    * is too far back to make it out; a candidate is a place being offered to the player right now, and
-   * is drawn at every zoom because it is the thing they are being asked about.
+   * is drawn at every zoom because it is the thing they are being asked about. A character is a person
+   * standing somewhere, in the colours of the house they serve. See decision record 0055.
    */
-  kind: 'house' | 'candidate';
+  kind: 'house' | 'candidate' | 'character';
   /**
    * Drawn however far back the camera is, like a candidate and for a different reason: this one is the
    * player's own and they asked to keep it in sight. Never set for anyone else's. See 0038.

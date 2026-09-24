@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react';
+import type * as maplibregl from 'maplibre-gl';
 
 import { ageOn } from '@villages/client-core';
 import type { KeyFigureView, StatName } from '@villages/protocol';
@@ -12,6 +13,8 @@ import {
   changeStat,
   gatewayState,
   killCharacter,
+  moveCharacter,
+  takeOffTheMap,
   watchGateway,
 } from '../net/gateway';
 import { note } from './log';
@@ -57,7 +60,12 @@ function anotherPortraitFor(figure: KeyFigureView): void {
  * pressed. The stat levers stay pressable at one and at twenty, so that the server's refusal can be seen
  * in the log rather than guessed at from a greyed button. See decision records 0023 and 0055.
  */
-export function CharactersSection() {
+interface CharactersSectionProps {
+  /** The map, so a figure can be put where the camera is looking. Null until it has loaded. */
+  map: maplibregl.Map | null;
+}
+
+export function CharactersSection({ map }: CharactersSectionProps) {
   const heard = useSyncExternalStore(watchGateway, gatewayState);
   const yours = heard.yourHouse;
   const figures = heard.yourKeyFigures ?? [];
@@ -100,7 +108,7 @@ export function CharactersSection() {
       ) : (
         <ol className="debug__figures">
           {figures.map((figure) => (
-            <Figure key={figure.id} figure={figure} today={today} idle={idle} />
+            <Figure key={figure.id} figure={figure} today={today} idle={idle} map={map} />
           ))}
         </ol>
       )}
@@ -112,16 +120,30 @@ interface FigureProps {
   figure: KeyFigureView;
   today: number | null;
   idle: boolean;
+  map: maplibregl.Map | null;
 }
 
 /** One key figure: who they are, a row a stat with its two levers, and the levers for the whole of them. */
-function Figure({ figure, today, idle }: FigureProps) {
+function Figure({ figure, today, idle, map }: FigureProps) {
   const name = fullName(figure);
   const who =
     today === null
       ? `a ${figure.sex}`
       : `a ${figure.sex} of ${ageOn(figure.bornOn, figure.agedYears, today)}`;
   const likeness = figure.portrait === undefined ? 'no portrait' : `portrait ${figure.portrait}`;
+  const whereabouts =
+    figure.place === undefined
+      ? 'on no map'
+      : `at ${figure.place.lat.toFixed(3)}, ${figure.place.lon.toFixed(3)}`;
+
+  /** Where the camera is looking, which is where `put them here` puts them. */
+  const putHere = () => {
+    if (map === null) {
+      return;
+    }
+    const centre = map.getCenter();
+    moveCharacter(figure, { lat: centre.lat, lon: centre.lng });
+  };
 
   const stepper = (stat: StatName, by: number, word: string, limit: string) => (
     <button
@@ -140,7 +162,7 @@ function Figure({ figure, today, idle }: FigureProps) {
       <div className="debug__figure-who">
         <span>{name}</span>
         <span className="debug__quiet">
-          {who}, {likeness}
+          {who}, {likeness}, {whereabouts}
         </span>
       </div>
 
@@ -182,6 +204,24 @@ function Figure({ figure, today, idle }: FigureProps) {
           onClick={() => anotherPortraitFor(figure)}
         >
           another portrait
+        </button>
+        <button
+          type="button"
+          className="debug__button"
+          disabled={idle || map === null}
+          title={`put ${name} where the camera is looking; drawn from zoom 9 in`}
+          onClick={putHere}
+        >
+          put them here
+        </button>
+        <button
+          type="button"
+          className="debug__button"
+          disabled={idle}
+          title={`take ${name} off the map; refused when they are on none`}
+          onClick={() => takeOffTheMap(figure)}
+        >
+          take off the map
         </button>
         <button
           type="button"

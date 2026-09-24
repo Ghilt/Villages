@@ -342,9 +342,10 @@ Commands are added here as the increments land:
   See `docs/adr/0032` and experiment `0002`.
 - Key figures, in the same panel: the **Characters** section. `add a key figure` rolls a newcomer and
   the house takes them in, nine at most, and it is the only way a character comes into the world. Each
-  figure has `up` and `down` for every stat, `ten years older`, `ten years younger`, `another portrait`
-  and `kill`, every one a real command: the asking and the answer are lines of the log under
-  `characters`, and what changed is a third. The stat levers stay pressable at one and at twenty, so a
+  figure has `up` and `down` for every stat, `ten years older`, `ten years younger`, `another portrait`,
+  `put them here` (where the camera is looking; drawn from about camera zoom 8.5 in), `take off the
+  map` and `kill`, every one a real command: the asking and the answer are lines of the log under
+  `characters`, and what changed is a third; a move is a fourth, under `cells`, naming who arrived. The stat levers stay pressable at one and at twenty, so a
   refusal is seen rather than guessed. The events are at `/admin/inspect-events`. See `docs/adr/0055`.
 - What grows where: `world/biomes.json`, hand-edited, one entry a kind and one a biome. What reads it is
   `npm run world:sprites --prefix frontend`, which works out a biome for every sixteen world units and

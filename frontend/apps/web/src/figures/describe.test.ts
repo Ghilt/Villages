@@ -86,6 +86,13 @@ describe('what a new list of key figures is worth saying', () => {
     ]);
   });
 
+  it('says where they came to stand on the map, and when they left it', () => {
+    const there = figure({ place: { lat: 59.34, lon: 18.06 } });
+
+    expect(whatChanged([figure()], [there], today)).toEqual(['Agnes Hollin: now stands at 59.340, 18.060']);
+    expect(whatChanged([there], [figure()], today)).toEqual(['Agnes Hollin: is on no map now']);
+  });
+
   it('says a figure who left the list, whatever took them', () => {
     expect(whatChanged([figure(), wilhelm], [wilhelm], today)).toEqual([
       'Agnes Hollin is no longer a key figure of your house',

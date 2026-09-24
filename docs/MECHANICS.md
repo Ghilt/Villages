@@ -420,8 +420,10 @@ and the server keeps where they stood as spans of world-time by cell; a death le
 stood and off the map from that day. The refusals are named for their rules, and the stored form is
 pinned by a fixture. From wire version 7 a cell's snapshot carries the characters standing in it, beside
 its houses, and a move reaches whoever holds the cells either side of it as the one delta that fits:
-arrived, changed or gone, because a thing that moves would otherwise stay drawn where it was. Nothing
-in the page draws them yet. Decision record 0055 says what a character is to the program, and
+arrived, changed or gone, because a thing that moves would otherwise stay drawn where it was. The page
+draws them: a small standing figure close in and a head and shoulders far out, in their house's colours,
+from the zoom 9 cells in, which is a camera at about 8.5. The debug panel puts one where the camera is
+looking and takes them off the map again. Clicking one does nothing yet. Decision record 0055 says what a character is to the program, and
 `docs/plans/characters-and-key-figures.md` is the order the rest gets built in, one commit a step.
 
 ---

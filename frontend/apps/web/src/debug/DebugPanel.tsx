@@ -246,7 +246,7 @@ export function DebugPanel({ map, worldRoot, master, renderer, onRenderer }: Deb
 
         <WorldSection map={map} />
         <ResourcesSection />
-        <CharactersSection />
+        <CharactersSection map={map} />
 
         <Section name="Log" tools={logTools}>
           <ol className="debug__log">

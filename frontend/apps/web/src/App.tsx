@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
-import { housesInView } from '@villages/client-core';
-import type { ChoiceView, HouseView } from '@villages/protocol';
+import { charactersInView, housesInView } from '@villages/client-core';
+import type { CharacterOnMapView, ChoiceView, HouseView } from '@villages/protocol';
 import type { MasterGrid } from '@villages/world';
 
 import { AreaOverlay } from './areas/AreaOverlay';
@@ -52,6 +52,23 @@ function toSprite(house: HouseView, always: boolean): MapSprite {
     tint: tinctureColour(house.banner.field),
     kind: 'house',
     always,
+  };
+}
+
+/** The soft ink of the interface, for somebody standing on the map whom no house holds. */
+const NOBODYS = 0x8a7a64;
+
+/**
+ * A character as the renderer draws them: a figure at their place, in the colours of the house they serve,
+ * which is the first that took them in. Their own id space, so a person and a house can never be one mark.
+ */
+function toCharacterSprite(character: CharacterOnMapView): MapSprite {
+  const serves = character.keyFigureOf[0];
+  return {
+    id: `character:${character.id}`,
+    at: { lng: character.place.lon, lat: character.place.lat },
+    tint: serves === undefined ? NOBODYS : tinctureColour(serves.banner.field),
+    kind: 'character',
   };
 }
 
@@ -127,6 +144,7 @@ export function App({ master }: AppProps) {
   const window = useWindow();
   const box = useMemo(() => stageBox(window, mode, shut), [window, mode, shut]);
   const inView = useMemo(() => housesInView(heard.houses), [heard.houses]);
+  const standing = useMemo(() => charactersInView(heard.houses), [heard.houses]);
   // The public half of your own house: what the map draws is the same view everyone else's house is
   // drawn from, and what only you can see hangs off it.
   const yours = heard.yourHouse?.house ?? null;
@@ -140,9 +158,10 @@ export function App({ master }: AppProps) {
   const sprites = useMemo(
     () => [
       ...drawn.map((house) => toSprite(house, eye && house.id === yours?.id)),
+      ...standing.map(toCharacterSprite),
       ...candidatesOf(heard.yourChoice),
     ],
-    [drawn, eye, yours, heard.yourChoice],
+    [drawn, standing, eye, yours, heard.yourChoice],
   );
 
   // The one connection to the gateway, opened as the app mounts.
