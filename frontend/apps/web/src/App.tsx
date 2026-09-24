@@ -21,6 +21,7 @@ import { gateway, gatewayState, watchGateway } from './net/gateway';
 import { followMap } from './net/followMap';
 import { eyeIsOpen, watchEye } from './house/eye';
 import { HouseStatus } from './house/HouseStatus';
+import { KeyFigures } from './figures/KeyFigures';
 import { HoldingOverlay } from './areas/HoldingOverlay';
 import { StoodDown } from './net/StoodDown';
 import { flyWith } from './map/focus';
@@ -30,7 +31,7 @@ import { Room } from './room/Room';
 import { terrainPalette } from './map/terrainClasses';
 import { Stage } from './stage/Stage';
 import { formNow, roomToRead, takeOver, theMapsBay } from './stage/bays';
-import { CHOICE_PANE, HOUSE_PANE, MAP_PANE, NAVIGATION_PANE } from './stage/panes';
+import { CHOICE_PANE, HOUSE_PANE, KEY_FIGURES_PANE, MAP_PANE, NAVIGATION_PANE } from './stage/panes';
 import { worldRootOf } from './map/masters';
 import { cameraNow, watchCamera } from './debug/camera';
 import { DEFAULT_RENDERER, RENDERERS, applyRenderer } from './map/renderers';
@@ -268,6 +269,9 @@ export function App({ master }: AppProps) {
           }
           if (id === HOUSE_PANE.id) {
             return <HouseStatus room={room} />;
+          }
+          if (id === KEY_FIGURES_PANE.id) {
+            return <KeyFigures room={room} />;
           }
           if (id === NAVIGATION_PANE.id) {
             return <Navigating room={room} along={along} />;

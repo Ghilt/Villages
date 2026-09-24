@@ -21,6 +21,7 @@ import {
 } from './bays';
 import {
   cramps,
+  heightAsked,
   type Pane,
   panesFor,
   panesIn,
@@ -133,7 +134,9 @@ export function Stage({ stage, contents, overlays }: StageProps) {
     // so what it says there is never drawn.
     const asked: PaneSize =
       box.form === 'spread'
-        ? (bays.heights[id] ?? 'full')
+        ? pane === undefined
+          ? 'full'
+          : heightAsked(pane, bays.heights)
         : at === -1
           ? 'small'
           : askedIn(bays.arrangement, at as Which);

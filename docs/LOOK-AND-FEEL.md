@@ -109,9 +109,11 @@ pressing the compass. See `RESPONSIVE-DESIGN.md` and decision records 0046 and 0
 
 **The tab bar.** Several **panes** sharing one **bay**, and a strip of marks across its top saying which is
 up. Marks and no words: a column is 26rem at its widest and two words on a tab is a tab that wraps. Its
-first use is the corner of the spread, where the house status and navigation take turns. Only in the spread
-— a phone reaches the same panes through the compass, because a row of tabs on a 390-wide stage is a row of
-things too small to hit. See decision record 0042.
+first use is the corner of the spread, where the house status, the key figures and navigation take turns,
+in that order: the house's own two first, then the way elsewhere. The key figures' mark is **a head and
+shoulders**, a bust as a portrait is framed, and a placeholder until the marks are drawn properly. Only in
+the spread — a phone reaches the same panes through the compass, because a row of tabs on a 390-wide stage
+is a row of things too small to hit. See decision record 0042.
 
 **Two forms on the map.** Anything standing in the world is drawn two ways, and which one you see is how
 far away you are. Its **ground form** is what it is, sized in world units, so it grows with the terrain

@@ -27,7 +27,16 @@ const ROSE = {
 /** The house's own frame, the achievement's contour at the size of a mark. */
 const SHIELD = 'M5 4 H19 V13 C19 18 12 21.5 12 21.5 C12 21.5 5 18 5 13 Z';
 
-export type IconName = 'shield' | 'compass' | 'map' | 'window' | 'letter' | 'close';
+/**
+ * A head and shoulders, for the key figures: a bust, as a portrait is framed, rather than a whole figure,
+ * because what the pane holds is portraits. Adam's placeholder, to be drawn properly when the rest are.
+ */
+const BUST = {
+  head: 'M12 4.4 A3.7 3.7 0 1 1 11.99 4.4',
+  shoulders: 'M4.6 20.4 C5.1 15.9 8.1 13.7 12 13.7 C15.9 13.7 18.9 15.9 19.4 20.4 Z',
+} as const;
+
+export type IconName = 'shield' | 'compass' | 'map' | 'window' | 'letter' | 'close' | 'figure';
 
 /** Which way a needle points. The four are one drawing turned, never four drawings. */
 export type Point = 'up' | 'down' | 'left' | 'right';
@@ -67,6 +76,12 @@ export function Icon({ name, title }: IconProps) {
     <svg className={`icon icon--${name}`} viewBox="0 0 24 24" role="presentation" aria-hidden="true">
       {title !== undefined && <title>{title}</title>}
       {name === 'shield' && <path d={SHIELD} className="icon__line" />}
+      {name === 'figure' && (
+        <>
+          <path d={BUST.head} className="icon__line" />
+          <path d={BUST.shoulders} className="icon__line" />
+        </>
+      )}
       {name === 'compass' && (
         <>
           <circle cx="12" cy="12" r="10.6" className="icon__line" />

@@ -17,7 +17,7 @@ import type { IconName } from './Icons';
  * belongs to the fold rather than to anything standing in it. So the numbers here are tile heights and
  * nothing else. See decision record 0046.
  *
- * Three of them are fixed and the rest come and go: an **inspect window** is a pane per subject, so the list
+ * Four of them are fixed and the rest come and go: an **inspect window** is a pane per subject, so the list
  * grows as the player opens them. Character dialogue will be another fixed one.
  */
 
@@ -64,6 +64,15 @@ export interface Pane {
    * scrollbar. See decision record 0044.
    */
   needs: { wide: number; tall: number } | null;
+  /**
+   * The size its tile opens at in the spread, before the player has asked for any. Full when it is not
+   * said, which is every pane but one.
+   *
+   * The one is the **key figures** pane, which shares the corner with the house status and opens at its
+   * normal size because that is the house card's full height: so pressing between their two tabs moves
+   * nothing, and opening it out is the player's own doing. See `KEY_FIGURES_PANE`.
+   */
+  startsAt?: PaneSize;
 }
 
 export const MAP_PANE: Pane = {
@@ -88,6 +97,27 @@ export const HOUSE_PANE: Pane = {
   tall: { full: 232, small: 168 },
   icon: 'shield',
   needs: null,
+};
+
+/**
+ * **Key figures**: the few named people the house acts through, as a grid of their portraits.
+ *
+ * The corner's middle tab, between the house status and navigation, because it is the house's own and a
+ * player reaches it the way they reach the house. It opens at its **normal size**, the house card's full
+ * height, so the column holds still as the tabs are pressed; opened out, it is taller and - once the
+ * corner can reach along the bottom - wider than the column, for the stats beside the portrait. See
+ * `MECHANICS.md` and decision record 0055.
+ */
+export const KEY_FIGURES_PANE: Pane = {
+  id: 'key-figures',
+  title: 'key figures',
+  spread: 'bottomLeft',
+  // Small is the house card's full height, on purpose; full is as tall as the corner can be and still
+  // leave the rail room for a window on the shortest stage the spread is ever drawn on. A test holds both.
+  tall: { full: 340, small: 232 },
+  icon: 'figure',
+  needs: null,
+  startsAt: 'small',
 };
 
 /**
@@ -141,10 +171,11 @@ export const CHOICE_PANE: Pane = {
   needs: { wide: 544, tall: 460 },
 };
 
-export const FIXED_PANES: readonly Pane[] = [MAP_PANE, HOUSE_PANE, NAVIGATION_PANE];
+/** In the order their tabs stand in the corner, which is the order they are declared in. */
+export const FIXED_PANES: readonly Pane[] = [MAP_PANE, HOUSE_PANE, KEY_FIGURES_PANE, NAVIGATION_PANE];
 
 /**
- * The panes that are not a window on a subject: the fixed three, and the choice roll while one is pending.
+ * The panes that are not a window on a subject: the fixed four, and the choice roll while one is pending.
  *
  * What **navigation** lists under *Go to*, and what the layout places besides the rail. A window is not
  * here because a window is in the **trail** instead, under its own name rather than as "a house".
@@ -204,8 +235,8 @@ export function spreadWants(
     const pane = showing(where, sharing);
     // A tile's three heights, which is what the control means on a desktop: put away, the normal card, and
     // opened out. Full is the default here, because a tile is the size the pane asked for rather than a
-    // share of a stage it is dividing with somebody.
-    const size = heights[pane.id] ?? 'full';
+    // share of a stage it is dividing with somebody - unless the pane said it opens at another.
+    const size = heightAsked(pane, heights);
     const tall = size === 'strip' ? STRIP : (pane.tall?.[size] ?? 0);
     return tall + (isTabbed(where, sharing.length) ? TAB_BAR : 0);
   };
@@ -218,7 +249,16 @@ export function spreadWants(
 }
 
 /**
- * Every pane there is: the two fixed ones, then a window per subject, newest first.
+ * The size a pane's tile was asked to be in the spread: what the player asked for, or what the pane opens
+ * at until they have. One function, because the layout sizes the tile from it and the control marks it,
+ * and the two disagreeing is a mark on a size the tile is not.
+ */
+export function heightAsked(pane: Pane, heights: Readonly<Partial<Record<string, PaneSize>>>): PaneSize {
+  return heights[pane.id] ?? pane.startsAt ?? 'full';
+}
+
+/**
+ * Every pane there is: the fixed ones, then a window per subject, newest first.
  *
  * Takes the subjects rather than reading them, so that it is pure and a component can memoise it against
  * exactly what it depends on.

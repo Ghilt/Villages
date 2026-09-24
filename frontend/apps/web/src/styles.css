@@ -474,6 +474,7 @@ body,
 
 /* A pane sharing a tabbed tile gives its top edge to the strip of tabs above it. */
 .bay[data-tabbed] .hud__panel,
+.bay[data-tabbed] .figures,
 .bay[data-tabbed] .navigate {
   border-width: 0 1px 0 0;
   border-radius: 0;
@@ -2061,6 +2062,83 @@ body,
   text-overflow: ellipsis;
 }
 
+/*
+ * **Key figures**: the house's few named people, the corner's middle tab.
+ *
+ * The same sheet as the two panes it shares the corner with, because the three of them are sides of one
+ * piece of furniture. Its heading is navigation's, small capitals in the soft ink, so the corner's three
+ * tabs read as one family whichever is up.
+ */
+.figures {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--parchment);
+  border: 1px solid var(--parchment-edge);
+  border-width: 1px 1px 0 0;
+  border-radius: 0 6px 0 0;
+  box-shadow: 0 -2px 18px var(--shadow);
+  pointer-events: auto;
+}
+
+.figures__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: none;
+  padding: 0.35rem 0.4rem 0.2rem 0.75rem;
+}
+
+.figures__head {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: normal;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+/* Nobody yet, said in the words Adam gave it, where the portraits will stand. */
+.figures__empty {
+  margin: auto;
+  padding: 0 1.25rem calc(1.25rem + var(--corner-bottom, 0px));
+  max-width: 24ch;
+  font-size: 0.95rem;
+  font-style: italic;
+  line-height: 1.4;
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+.figures__names {
+  margin: 0;
+  padding: 0.2rem 0.75rem 0.75rem 2rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Put away: its name and the way back, and nothing else - the same strip the house card has. */
+.figures--strip {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.6rem;
+  /* The compass is standing in the far end of this strip, so whatever the strip put there - the marks
+     on four of them, the word on the map's - steps in from the right rather than sitting under it. */
+  padding: 0 calc(0.3rem + var(--corner-right, 0px)) 0 0.75rem;
+}
+
+.figures__kind {
+  flex: 1;
+  min-width: 0;
+  font-size: 1.05rem;
+  font-variant: small-caps;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Put away: the kind it is and the way back, and nothing else. */
 .inspect--strip {
   display: flex;
@@ -2447,6 +2525,7 @@ body,
  */
 @container (max-width: 6rem) {
   .hud__panel--strip,
+  .figures--strip,
   .inspect--strip,
   .navigate--strip,
   .choice--strip,
@@ -2463,6 +2542,7 @@ body,
   }
 
   .hud__panel--strip .hud__name,
+  .figures--strip .figures__kind,
   .inspect--strip .inspect__kind,
   .navigate--strip .navigate__kind,
   .choice--strip .choice__aside,

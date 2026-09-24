@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
-import { STRIP, TAB_BAR } from './bayBox';
+import { bayLayout, FOLDS_UNDER, STRIP, TAB_BAR } from './bayBox';
 import type { BayName } from './bayBox';
 import {
   CHOICE_PANE,
   cramps,
+  heightAsked,
   HOUSE_PANE,
+  KEY_FIGURES_PANE,
   MAP_PANE,
   NAVIGATION_PANE,
   type Pane,
@@ -28,6 +30,7 @@ describe('panesIn', () => {
   it('gathers the panes that declared themselves into one tile, in the order they were declared', () => {
     expect(panesIn(panesFor([], false), 'bottomLeft').map((pane) => pane.id)).toEqual([
       HOUSE_PANE.id,
+      KEY_FIGURES_PANE.id,
       NAVIGATION_PANE.id,
     ]);
   });
@@ -166,5 +169,44 @@ describe('the choice roll', () => {
   // folds it to the carousel and back.
   it('asks for the same tile whichever of its two drawings is in it', () => {
     expect(tallOf(CHOICE_PANE).small).toBe(tallOf(CHOICE_PANE).full);
+  });
+});
+
+/**
+ * The key figures, the corner's middle tab, which is the one pane that does not open at its full size.
+ *
+ * Its normal size is the house card's full height, so pressing between the two tabs moves nothing and the
+ * rail above them stays where it was; opening it out is the player's doing. See decision record 0055.
+ */
+describe('the key figures', () => {
+  const panes = panesFor([], false);
+
+  it('opens at its normal size until the player asks for another, where every other pane opens full', () => {
+    expect(heightAsked(KEY_FIGURES_PANE, NOTHING_ASKED)).toBe('small');
+    expect(heightAsked(KEY_FIGURES_PANE, { [KEY_FIGURES_PANE.id]: 'full' })).toBe('full');
+    expect(heightAsked(HOUSE_PANE, NOTHING_ASKED)).toBe('full');
+  });
+
+  it('holds the corner still between its tab and the house status', () => {
+    expect(spreadWants(panes, NOTHING_ASKED, shows(KEY_FIGURES_PANE.id)).bottomLeft).toBe(
+      spreadWants(panes, NOTHING_ASKED, shows(HOUSE_PANE.id)).bottomLeft,
+    );
+  });
+
+  /*
+   * Opened out it is as tall as the corner can be and still leave a window room in the rail above it, on
+   * the shortest stage the spread is ever drawn on. A hundred and fifty pixels is a window's head and a
+   * line or two of it, which is the least a rail is worth keeping.
+   */
+  it('leaves the rail room for a window when it is opened out on the shortest spread', () => {
+    const opened = spreadWants(
+      panesFor([{ kind: 'house', id: 'abc' }], false),
+      { [KEY_FIGURES_PANE.id]: 'full' },
+      shows(KEY_FIGURES_PANE.id),
+    );
+    const layout = bayLayout({ w: 1000, h: FOLDS_UNDER + 1 }, ['big', 'big'], opened, 'spread');
+
+    expect(layout.form).toBe('spread');
+    expect(layout.bays.left?.h).toBeGreaterThanOrEqual(150);
   });
 });
