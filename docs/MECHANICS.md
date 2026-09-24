@@ -501,5 +501,5 @@ character is let through or refused. When a character dies the mourning writes t
 that held them. A player is sent their living key figures, in the order they joined, on arriving and
 whenever one of them changes, and the commands that take one in, change a stat, age one, give another
 portrait and kill one are on the wire from version 6. Decision record 0055 is the shape.
-`docs/plans/characters-and-key-figures.md` has the rest in order, one commit a step, and the corner that
-opens out wider than the column will get decision record 0056 when it is built.
+`docs/plans/characters-and-key-figures.md` has the rest in order, one commit a step. Opened out, the
+corner already reaches along the bottom to 560, wider than the column, which is decision record 0056.

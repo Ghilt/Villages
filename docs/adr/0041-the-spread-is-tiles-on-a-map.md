@@ -2,6 +2,8 @@
 
 - Status: accepted
 - Date: 2026-09-19
+- Amended 2026-09-24: a pane still declares a height, and one may also declare how wide its tile wants to be
+  opened out. Only the corner may reach, along the bottom, and the rail keeps the column's width. See 0056.
 
 ## Context
 

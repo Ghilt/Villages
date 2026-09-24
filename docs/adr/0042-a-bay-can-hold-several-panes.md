@@ -2,6 +2,8 @@
 
 - Status: accepted
 - Date: 2026-09-19
+- Amended 2026-09-24: opened out, the corner is as tall **and as wide** as the pane that is up, for a pane
+  that asks. See 0056.
 
 ## Context
 

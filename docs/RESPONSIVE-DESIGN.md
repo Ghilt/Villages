@@ -116,6 +116,13 @@ gutter off them. Its two tiles share a width and one gutter between them, so the
 as two cards that happen to be near each other. It wants the width the house card was drawn at and gives
 that up to a third of the stage before it gives up anything else.
 
+**The corner opened out may reach along the bottom**, the one tile whose width is not the column's. The
+key figures ask for it, for the portrait beside the name and the stats: the corner grows along the bottom
+edge to 560, the rail above keeps the column's width, and a letter along the bottom moves over and never
+goes below 281, which is what it came to on the narrowest spread before the corner could reach. The cap is
+the same with a letter there or not, so a letter arriving never resizes the corner. See decision record
+0056.
+
 **An empty tile takes no room.** Nothing in the corner and the column runs to the bottom; no choice pending
 and the map keeps the whole bottom of the stage. A tile is never reserved against a future.
 

@@ -12,6 +12,7 @@ import {
   GUTTER,
   inside,
   isTabbed,
+  MIDDLE_LEAST,
   overlap,
   type Rect,
   sharedBy,
@@ -32,6 +33,9 @@ const STRIP: Asking = { small: 44 };
 
 /** What the spread looks like with everything in it: a rail, a house in the corner, a choice pending. */
 const EVERYTHING: SpreadWants = { left: true, bottomLeft: 200, bottomMiddle: 132 };
+
+/** The same, with the corner opened out on a pane that asks to reach along the bottom. */
+const REACHING: SpreadWants = { ...EVERYTHING, bottomLeft: 370, bottomLeftWide: 560 };
 
 const tilesOf = (box: { bays: Readonly<Record<string, Rect | null>> }): Rect[] =>
   TILES.map((name) => box.bays[name]).filter((rect): rect is Rect => rect != null);
@@ -283,6 +287,50 @@ describe('the spread', () => {
     });
   });
 
+  /*
+   * The corner opened out, on a pane that asks to be wider than the column: the one tile whose width is
+   * not the column's. It grows along the bottom edge, the rail above keeps the column's width, and a letter
+   * along the bottom moves over. See decision record 0056.
+   */
+  describe('the corner reaching along the bottom', () => {
+    it('takes the width it asked for and leaves the rail the column', () => {
+      const box = spread(SPREAD, REACHING);
+
+      expect(box.bays.bottomLeft?.w).toBe(560);
+      expect(box.bays.left?.w).toBe(COLUMN_WANTS);
+      expect(box.bays.bottomLeft?.x).toBe(0);
+    });
+
+    it('moves the bottom middle over, rather than lying on it', () => {
+      const box = spread(SPREAD, REACHING);
+
+      expect(box.bays.bottomMiddle?.x ?? 0).toBeGreaterThanOrEqual(560 + GUTTER);
+    });
+
+    it('is never narrower than the column, whatever it asked for', () => {
+      expect(spread(SPREAD, { ...REACHING, bottomLeftWide: 100 }).bays.bottomLeft?.w).toBe(COLUMN_WANTS);
+    });
+
+    // 800 wide: the most the corner can take and leave the letter what it could always be read at.
+    it('stops where the bottom middle would go below the least it is ever left', () => {
+      const stage = { w: 800, h: 900 };
+      const box = spread(stage, { ...REACHING, bottomLeftWide: 5000 });
+
+      expect(box.bays.bottomLeft?.w).toBe(stage.w - GUTTER * 2 - MIDDLE_LEAST);
+      expect(box.bays.bottomMiddle?.w).toBe(MIDDLE_LEAST);
+    });
+
+    // Capped against the letter whether or not the letter is there, so one arriving never resizes it.
+    it('is the same width with a letter along the bottom and without one', () => {
+      for (const w of [700, 800, 1000, 1568]) {
+        const stage = { w, h: 900 };
+        expect(spread(stage, { ...REACHING, bottomMiddle: null }).bays.bottomLeft?.w).toBe(
+          spread(stage, REACHING).bays.bottomLeft?.w,
+        );
+      }
+    });
+  });
+
   describe('the tile along the bottom middle', () => {
     it('starts clear of the column, with air between them', () => {
       const box = spread(SPREAD);
@@ -314,12 +362,16 @@ describe('the spread', () => {
       let narrowest = Infinity;
       for (let w = 601; w <= 2400; w += 7) {
         for (const h of [601, 700, 900, 1080, 1440]) {
-          const box = spread({ w, h });
-          narrowest = Math.min(narrowest, box.bays.bottomMiddle?.w ?? Infinity);
+          // With the corner as it always was, and opened out reaching along the bottom as far as it can
+          // be asked to: the floor is the same either way, which is what the corner's cap is for.
+          for (const wants of [EVERYTHING, REACHING, { ...REACHING, bottomLeftWide: 5000 }]) {
+            const box = spread({ w, h }, wants);
+            narrowest = Math.min(narrowest, box.bays.bottomMiddle?.w ?? Infinity);
+          }
         }
       }
 
-      expect(narrowest).toBeGreaterThanOrEqual(260);
+      expect(narrowest).toBeGreaterThanOrEqual(MIDDLE_LEAST);
     });
 
     it('sits a gutter off the bottom, because it has no edge of its own to be cut into', () => {
@@ -352,7 +404,10 @@ describe('the tiles never overlap, and none leaves the stage', () => {
   for (const left of [true, false]) {
     for (const bottomLeft of [null, 44, 200, 5000]) {
       for (const bottomMiddle of [null, 132, 400]) {
-        everyWant.push({ left, bottomLeft, bottomMiddle });
+        // And the corner opened out, reaching along the bottom by as much as it can be asked to.
+        for (const bottomLeftWide of [null, 560, 5000]) {
+          everyWant.push({ left, bottomLeft, bottomLeftWide, bottomMiddle });
+        }
       }
     }
   }

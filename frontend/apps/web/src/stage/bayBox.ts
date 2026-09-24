@@ -90,6 +90,16 @@ export const COLUMN_LEAST = 288;
 export const MIDDLE_WANTS = 736;
 
 /**
+ * The least the tile along the bottom middle is ever left, which is what the corner may not take from it.
+ *
+ * Not picked: it is what the bottom middle already came to on the narrowest spread there is, a 601-wide
+ * stage with the column squeezed to its least, and the carousel reads at it. When the corner reaches along
+ * the bottom it stops here, so a letter along the bottom moves over and never goes narrower than it could
+ * be read at before the corner learnt to reach. See decision record 0056.
+ */
+export const MIDDLE_LEAST = 281;
+
+/**
  * What a bay is asking for, in the bays form.
  *
  * Two cases and not three: `big` is "as much as is going", and a number is "this many pixels and no more".
@@ -170,6 +180,11 @@ export interface SpreadWants {
   left: boolean;
   /** How tall the corner tile is, or null when nothing is in it. */
   bottomLeft: number | null;
+  /**
+   * How wide the corner wants to be, when the pane up in it asks to reach along the bottom; absent or null,
+   * and it is the column's width. Only a pane opened out asks. See decision record 0056.
+   */
+  bottomLeftWide?: number | null;
   /** How tall the tile along the bottom middle is, or null when nothing is in it. */
   bottomMiddle: number | null;
 }
@@ -297,6 +312,10 @@ function columnWidth(stage: Box): number {
  *
  * **An empty tile takes no room.** No pane in the corner and the column runs to the bottom; no choice
  * pending and the map keeps the whole bottom of the stage.
+ *
+ * **The corner can reach along the bottom**, and it is the one tile whose width is not the column's: a
+ * pane opened out in it may ask to be wider, and the corner grows to the right along the bottom edge while
+ * the rail above keeps the column's width. The bottom middle then starts after the corner. See 0056.
  */
 function tilesOnAMap(stage: Box, wants: SpreadWants): BayLayout {
   const floor = { x: 0, y: 0, w: stage.w, h: stage.h };
@@ -307,7 +326,12 @@ function tilesOnAMap(stage: Box, wants: SpreadWants): BayLayout {
   let columnFloor = stage.h;
   if (wants.bottomLeft !== null) {
     const tall = clamp(Math.round(wants.bottomLeft), BAY_LEAST, stage.h - GUTTER - BAY_LEAST);
-    bays.bottomLeft = { x: 0, y: stage.h - tall, w: column, h: tall };
+    // Opened out on a pane that asks for it, the corner reaches along the bottom: never narrower than the
+    // column, and never so wide that it leaves the bottom middle less than it could be read at. Capped
+    // whether or not a letter is there, so a letter arriving never resizes the corner. See 0056.
+    const most = Math.max(column, stage.w - GUTTER * 2 - MIDDLE_LEAST);
+    const wide = clamp(Math.round(wants.bottomLeftWide ?? column), column, most);
+    bays.bottomLeft = { x: 0, y: stage.h - tall, w: wide, h: tall };
     columnFloor = stage.h - tall - GUTTER;
   }
 
@@ -319,7 +343,9 @@ function tilesOnAMap(stage: Box, wants: SpreadWants): BayLayout {
   }
 
   if (wants.bottomMiddle !== null) {
-    const clear = bays.left !== null || bays.bottomLeft !== null ? column + GUTTER : GUTTER;
+    // Clear of whatever stands at the left of the bottom edge: the column, or the corner reaching past it.
+    const beside = Math.max(bays.left?.w ?? 0, bays.bottomLeft?.w ?? 0);
+    const clear = beside > 0 ? beside + GUTTER : GUTTER;
     const room = stage.w - clear - GUTTER;
     const tall = clamp(Math.round(wants.bottomMiddle), BAY_LEAST, stage.h - GUTTER * 2);
     // Centred in what the column left, capped at a width three options still read as sentences across.

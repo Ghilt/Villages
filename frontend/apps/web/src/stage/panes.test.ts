@@ -198,6 +198,33 @@ describe('the key figures', () => {
    * the shortest stage the spread is ever drawn on. A hundred and fifty pixels is a window's head and a
    * line or two of it, which is the least a rail is worth keeping.
    */
+  // Only opened out, and only while its tab is up: the corner is the column's width the rest of the time.
+  it('asks the corner to reach along the bottom when it is opened out, and at no other time', () => {
+    const opened = { [KEY_FIGURES_PANE.id]: 'full' as const };
+
+    expect(spreadWants(panes, opened, shows(KEY_FIGURES_PANE.id)).bottomLeftWide).toBe(
+      KEY_FIGURES_PANE.openWide,
+    );
+    expect(spreadWants(panes, NOTHING_ASKED, shows(KEY_FIGURES_PANE.id)).bottomLeftWide).toBeNull();
+    expect(spreadWants(panes, opened, shows(HOUSE_PANE.id)).bottomLeftWide).toBeNull();
+  });
+
+  /*
+   * The first time one tile's size changes another's form. On a 1000-wide stage the letter lays its
+   * options out beside the corner as it always has; with the key figures opened out the corner reaches
+   * along the bottom and the letter, moved over, has room for its carousel instead. See 0056.
+   */
+  it('folds a letter to its carousel on a 1000-wide stage, while the corner reaches along the bottom', () => {
+    const stage = { w: 1000, h: 900 };
+    const asking = panesFor([], true);
+    const laidOut = (heights: Readonly<Partial<Record<string, PaneSize>>>) =>
+      bayLayout(stage, ['big', 'big'], spreadWants(asking, heights, shows(KEY_FIGURES_PANE.id)), 'spread')
+        .bays.bottomMiddle;
+
+    expect(cramps(CHOICE_PANE, laidOut(NOTHING_ASKED))).toBe(false);
+    expect(cramps(CHOICE_PANE, laidOut({ [KEY_FIGURES_PANE.id]: 'full' }))).toBe(true);
+  });
+
   it('leaves the rail room for a window when it is opened out on the shortest spread', () => {
     const opened = spreadWants(
       panesFor([{ kind: 'house', id: 'abc' }], false),

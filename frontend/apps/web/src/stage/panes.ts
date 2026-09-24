@@ -46,7 +46,7 @@ export interface Pane {
    * The strip is not among them, because a strip is one thickness for every pane and it is {@link STRIP}.
    *
    * A height and not a box: the column's width is shared by everything in it, so no pane in it can be the
-   * one that decides it.
+   * one that decides it. The one exception is the corner opened out, which is {@link openWide}.
    */
   tall: { full: number; small: number } | null;
   /** The mark it is known by where there is no room for its name, which is a tab. */
@@ -73,6 +73,15 @@ export interface Pane {
    * nothing, and opening it out is the player's own doing. See `KEY_FIGURES_PANE`.
    */
   startsAt?: PaneSize;
+  /**
+   * How wide its tile wants to be when it is **opened out** in the spread, if wider than the column. The
+   * column's width when it is not said, which is every pane but one.
+   *
+   * The corner is the only tile that may reach along the bottom, and only for the pane up in it opened
+   * out: the rail above keeps the column's width, and a letter along the bottom moves over. It amends the
+   * rule that a height and not a box is what a pane declares. See decision record 0056.
+   */
+  openWide?: number;
 }
 
 export const MAP_PANE: Pane = {
@@ -118,6 +127,8 @@ export const KEY_FIGURES_PANE: Pane = {
   icon: 'figure',
   needs: null,
   startsAt: 'small',
+  // Opened out, the portrait beside the name and five lines of stats, which the column is too narrow for.
+  openWide: 560,
 };
 
 /**
@@ -241,9 +252,20 @@ export function spreadWants(
     return tall + (isTabbed(where, sharing.length) ? TAB_BAR : 0);
   };
 
+  // How wide the corner wants to be: the pane up in it, opened out, if it asks to reach along the bottom.
+  const cornerWide = (): number | null => {
+    const sharing = panesIn(panes, 'bottomLeft');
+    if (sharing.length === 0) {
+      return null;
+    }
+    const pane = showing('bottomLeft', sharing);
+    return heightAsked(pane, heights) === 'full' ? (pane.openWide ?? null) : null;
+  };
+
   return {
     left: panes.some((pane) => pane.spread === 'left'),
     bottomLeft: tallOf('bottomLeft'),
+    bottomLeftWide: cornerWide(),
     bottomMiddle: tallOf('bottomMiddle'),
   };
 }
