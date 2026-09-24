@@ -3,6 +3,7 @@ import type { Connection, HousesState } from '@villages/client-core';
 import {
   NO_HOUSES,
   cellsHeld,
+  charactersInView,
   forgetCells,
   holdCells,
   reduceHouses,
@@ -22,7 +23,7 @@ import type {
 
 import { note, shortId } from '../debug/log';
 import { STAT_WORDS, fullName, whatChanged } from '../figures/describe';
-import { NOTHING_ARRIVED, alsoArrived, describeArrival } from './arrivals';
+import { NOTHING_ARRIVED, alsoArrived, describeArrival, describeBatch } from './arrivals';
 import type { Arrival } from './arrivals';
 import { browserSocket } from './browserSocket';
 
@@ -206,10 +207,19 @@ function heard(frame: ServerFrame): void {
       }
       gather(frame);
       return;
-    case 'batch':
+    case 'batch': {
+      // Who was standing where before the batch, so that somebody gone can be named in the line.
+      const known = new Map(charactersInView(state.houses).map((one) => [one.id, one]));
       update({ houses: reduceHouses(state.houses, frame) });
-      note('cells', `${frame.deltas.length} delta${frame.deltas.length === 1 ? '' : 's'} in one batch`);
+      note(
+        'cells',
+        describeBatch(frame.deltas, (id) => {
+          const one = known.get(id);
+          return one === undefined ? undefined : `${one.givenName} ${one.familyName}`;
+        }),
+      );
       return;
+    }
     case 'resync':
       update({ houses: reduceHouses(state.houses, frame) });
       note('cells', `fell behind; asking again for ${frame.cells.length} cells`);

@@ -414,6 +414,8 @@ data class CharacterRow(
     val diedOn: WorldTime?,
     /** Every house holding them as a key figure, in the order they were taken in. */
     val keyFigureOf: List<Holder>,
+    /** Where they stand on the map today, or null while they are on none - which includes the dead. */
+    val place: Location? = null,
     /**
      * The read model's own count, which rises whenever this row changes. Not the character's stream version,
      * because a tie on a house's stream changes the row without touching the character's stream, and a client

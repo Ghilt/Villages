@@ -50,6 +50,9 @@ import villages.projections.ChoicesProjection
 import villages.projections.HousesProjection
 import villages.projections.RecentEventsProjection
 import villages.protocol.Batch
+import villages.protocol.CharacterArrived
+import villages.protocol.CharacterChanged
+import villages.protocol.CharacterGone
 import villages.protocol.CommandAccepted
 import villages.protocol.CommandRejected
 import villages.protocol.PROTOCOL_VERSION
@@ -264,6 +267,14 @@ private fun killing(characterId: String, commandId: String) =
     """{"type":"command","commandId":"$commandId","command":{"type":"killCharacter",""" +
         """"characterId":"$characterId","cause":"struck down from the debug panel"}}"""
 
+private fun moving(characterId: String, lat: Double, lon: Double, commandId: String) =
+    """{"type":"command","commandId":"$commandId","command":{"type":"moveCharacter",""" +
+        """"characterId":"$characterId","place":{"lat":$lat,"lon":$lon}}}"""
+
+private fun takingOff(characterId: String, commandId: String) =
+    """{"type":"command","commandId":"$commandId","command":{"type":"takeOffTheMap",""" +
+        """"characterId":"$characterId"}}"""
+
 /** A command id of its own for every command a test sends, since a key figure's id is worked out from one. */
 private fun commandNumber(n: Int) = "c0000000-0000-4000-8000-%012d".format(n)
 
@@ -322,6 +333,7 @@ private class Rig {
             portraits = { listOf("woman-01", "man-01") },
         ),
         figures = characters,
+        onTheMap = characters,
         later = later,
     )
 
@@ -448,6 +460,112 @@ class GatewaySpec : StringSpec({
 
         sent.filterIsInstance<CommandAccepted>().last().commandId shouldBe commandNumber(2)
         sent.filterIsInstance<YourKeyFigures>().last().keyFigures.shouldBeEmpty()
+    }
+
+    "a key figure moved onto the map arrives for whoever holds their cell, and their player is told where" {
+        val rig = Rig()
+        val (mine, sent) = rig.introduced()
+        mine.receive(founding())
+        mine.receive(addingAKeyFigure(commandNumber(1)))
+        val agnes = sent.filterIsInstance<YourKeyFigures>().last().keyFigures.single().id
+        val (looker, seen) = rig.someoneElse()
+        looker.receive(subscribe(STOCKHOLM_Z10))
+        val (far, farSeen) = rig.someoneElse()
+        // Zoom 8 is coarser than a key figure's significance is drawn at, which is zoom 9.
+        far.receive(subscribe(STOCKHOLM_Z8))
+        rig.later.tick()
+        seen.clear()
+        farSeen.clear()
+
+        mine.receive(moving(agnes, 59.34, 18.06, commandNumber(2)))
+        rig.later.tick()
+
+        sent.filterIsInstance<CommandAccepted>().last().commandId shouldBe commandNumber(2)
+        sent.filterIsInstance<YourKeyFigures>().last().keyFigures.single().place shouldBe Point(59.34, 18.06)
+        val arrived = seen.filterIsInstance<Batch>().single().deltas.single().shouldBeInstanceOf<CharacterArrived>()
+        arrived.character.givenName shouldBe "Agnes"
+        arrived.character.cell shouldBe STOCKHOLM_Z10
+        arrived.character.keyFigureOf.single().name shouldBe "Ravenscar"
+        farSeen.filterIsInstance<Batch>().flatMap { it.deltas }.shouldBeEmpty()
+    }
+
+    // A house never moves, so a client never had to drop one; a character does, and has to be told.
+    "a character moving within the cells held is changed, and moving out of them is gone" {
+        val rig = Rig()
+        val (mine, sent) = rig.introduced()
+        mine.receive(founding())
+        mine.receive(addingAKeyFigure(commandNumber(1)))
+        val agnes = sent.filterIsInstance<YourKeyFigures>().last().keyFigures.single().id
+        val (looker, seen) = rig.someoneElse()
+        looker.receive(subscribe(STOCKHOLM_Z10))
+        mine.receive(moving(agnes, 59.34, 18.06, commandNumber(2)))
+        rig.later.tick()
+        seen.clear()
+
+        mine.receive(moving(agnes, 59.335, 18.065, commandNumber(3)))
+        rig.later.tick()
+        seen.filterIsInstance<Batch>().single().deltas.single().shouldBeInstanceOf<CharacterChanged>()
+        seen.clear()
+
+        mine.receive(moving(agnes, 60.17, 24.94, commandNumber(4)))
+        rig.later.tick()
+        seen.filterIsInstance<Batch>().single().deltas.single().shouldBeInstanceOf<CharacterGone>().id shouldBe agnes
+    }
+
+    "taking a key figure off the map is gone for whoever held them, and a stat change tells the map nothing" {
+        val rig = Rig()
+        val (mine, sent) = rig.introduced()
+        mine.receive(founding())
+        mine.receive(addingAKeyFigure(commandNumber(1)))
+        val agnes = sent.filterIsInstance<YourKeyFigures>().last().keyFigures.single().id
+        val (looker, seen) = rig.someoneElse()
+        looker.receive(subscribe(STOCKHOLM_Z10))
+        mine.receive(moving(agnes, 59.34, 18.06, commandNumber(2)))
+        rig.later.tick()
+        seen.clear()
+
+        mine.receive(changingStat(agnes, "piety", 2, commandNumber(3)))
+        rig.later.tick()
+        seen.shouldBeEmpty()
+
+        mine.receive(takingOff(agnes, commandNumber(4)))
+        rig.later.tick()
+        seen.filterIsInstance<Batch>().single().deltas.single().shouldBeInstanceOf<CharacterGone>()
+        sent.filterIsInstance<YourKeyFigures>().last().keyFigures.single().place shouldBe null
+    }
+
+    "a cell's snapshot carries the characters standing in it" {
+        val rig = Rig()
+        val (mine, sent) = rig.introduced()
+        mine.receive(founding())
+        mine.receive(addingAKeyFigure(commandNumber(1)))
+        val agnes = sent.filterIsInstance<YourKeyFigures>().last().keyFigures.single().id
+        mine.receive(moving(agnes, 59.34, 18.06, commandNumber(2)))
+        val (looker, seen) = rig.someoneElse()
+
+        looker.receive(subscribe(STOCKHOLM_Z10))
+
+        val snapshot = seen.filterIsInstance<Snapshot>().single()
+        snapshot.characters.single().id shouldBe agnes
+        snapshot.characters.single().place shouldBe Point(59.34, 18.06)
+        snapshot.omittedCharacters shouldBe 0
+    }
+
+    "moving somebody else's key figure is refused, and so is a place off the world" {
+        val rig = Rig()
+        val (mine, sent) = rig.introduced()
+        mine.receive(founding())
+        mine.receive(addingAKeyFigure(commandNumber(1)))
+        val agnes = sent.filterIsInstance<YourKeyFigures>().last().keyFigures.single().id
+        val (theirs, told) = rig.someoneElse()
+        theirs.receive(founding(name = "Hollin"))
+
+        theirs.receive(moving(agnes, 59.34, 18.06, commandNumber(2)))
+        mine.receive(moving(agnes, 95.0, 18.06, commandNumber(3)))
+        mine.receive(takingOff(agnes, commandNumber(4)))
+
+        told.filterIsInstance<CommandRejected>().single().reason shouldBe "noSuchKeyFigure"
+        sent.filterIsInstance<CommandRejected>().map { it.reason } shouldBe listOf("invalidLocation", "notOnTheMap")
     }
 
     "a tenth key figure is refused, because a house holds nine" {

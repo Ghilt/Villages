@@ -5,7 +5,7 @@
  */
 
 /** Sent on the handshake so that the gateway can refuse a client it cannot speak to. */
-export const PROTOCOL_VERSION = 6;
+export const PROTOCOL_VERSION = 7;
 
 export {
   MAX_ZOOM,
@@ -48,6 +48,7 @@ export {
   deltaSchema,
   divisionSchema,
   frameTypesOf,
+  characterOnMapViewSchema,
   holderViewSchema,
   houseViewSchema,
   keyFigureViewSchema,
@@ -64,6 +65,7 @@ export {
 } from './frames';
 export type {
   BannerSpec,
+  CharacterOnMapView,
   Charge,
   ChoiceView,
   ClientFrame,

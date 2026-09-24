@@ -10,6 +10,8 @@
  * Pure, so the counting and the wording can be tested without a socket. See decision record 0023.
  */
 
+import type { Delta } from '@villages/protocol';
+
 export interface Arrival {
   /** How many cells answered in this burst. */
   cells: number;
@@ -21,29 +23,60 @@ export interface Arrival {
   houses: number;
   /** How many more the cells held than they sent, which is the snapshot cap speaking. */
   omitted: number;
+  /** The characters standing in those cells, counted apart from the houses. */
+  characters: number;
 }
 
-export const NOTHING_ARRIVED: Arrival = { cells: 0, zoom: 0, houses: 0, omitted: 0 };
+export const NOTHING_ARRIVED: Arrival = { cells: 0, zoom: 0, houses: 0, omitted: 0, characters: 0 };
 
 /** One more snapshot in the burst. Only the parts of the frame this counts are asked for. */
 export function alsoArrived(
   soFar: Arrival,
-  snapshot: { cell: string; houses: readonly unknown[]; omitted?: number },
+  snapshot: { cell: string; houses: readonly unknown[]; omitted?: number; characters?: readonly unknown[] },
 ): Arrival {
   return {
     cells: soFar.cells + 1,
     zoom: snapshot.cell.length,
     houses: soFar.houses + snapshot.houses.length,
     omitted: soFar.omitted + (snapshot.omitted ?? 0),
+    characters: soFar.characters + (snapshot.characters?.length ?? 0),
   };
 }
 
-/** What to say about the burst, or null when it is not worth a line. */
+/**
+ * What to say about the burst, or null when it is not worth a line. The characters are said only when
+ * there are some, so a world with nobody on its map reads the way it always did.
+ */
 export function describeArrival(arrival: Arrival): string | null {
-  if (arrival.houses === 0 && arrival.omitted === 0) {
+  if (arrival.houses === 0 && arrival.omitted === 0 && arrival.characters === 0) {
     return null;
   }
   const cells = `${arrival.cells} cell${arrival.cells === 1 ? '' : 's'} at z${arrival.zoom}`;
   const houses = `${arrival.houses} house${arrival.houses === 1 ? '' : 's'}`;
-  return `${cells}: ${houses}${arrival.omitted > 0 ? `, ${arrival.omitted} more not sent` : ''}`;
+  const characters =
+    arrival.characters === 0 ? '' : `, ${arrival.characters} character${arrival.characters === 1 ? '' : 's'}`;
+  return `${cells}: ${houses}${characters}${arrival.omitted > 0 ? `, ${arrival.omitted} more not sent` : ''}`;
+}
+
+/**
+ * What to say about one batch of deltas: how many, and by name every character in it who arrived, moved
+ * or went, because a person moving on the map is rare enough to be news and a house changing is not.
+ * `nameOf` is who a character is by id, from what was held before the batch, since a character who is
+ * gone arrives as nothing but an id.
+ */
+export function describeBatch(deltas: readonly Delta[], nameOf: (id: string) => string | undefined): string {
+  const count = `${deltas.length} delta${deltas.length === 1 ? '' : 's'} in one batch`;
+  const people = deltas.flatMap((delta) => {
+    switch (delta.type) {
+      case 'characterArrived':
+        return [`${delta.character.givenName} ${delta.character.familyName} arrived`];
+      case 'characterChanged':
+        return [`${delta.character.givenName} ${delta.character.familyName} moved`];
+      case 'characterGone':
+        return [`${nameOf(delta.id) ?? delta.id.slice(0, 8)} went`];
+      default:
+        return [];
+    }
+  });
+  return people.length === 0 ? count : `${count}: ${people.join(', ')}`;
 }

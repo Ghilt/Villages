@@ -23,9 +23,11 @@ import tools.jackson.databind.JsonNode
  * without a new number is a failing build. Version 2 is the first gameplay loop, which added
  * `takeAction`, `yourChoice`, `wipeWorld` and `worldWiped`, and gave every event its provenance.
  * Version 3 added `seeAll`, the eye that sets significance aside. Version 6 added the key figures:
- * `yourKeyFigures`, and the commands that bring one in and act through one. See decision record 0055.
+ * `yourKeyFigures`, and the commands that bring one in and act through one. Version 7 put them on the map:
+ * the characters in a cell ride its snapshot beside the houses, three deltas say one arrived, changed or
+ * went, and two commands move one and take one off the map. See decision record 0055.
  */
-const val PROTOCOL_VERSION = 6
+const val PROTOCOL_VERSION = 7
 
 data class Point(val lat: Double, val lon: Double)
 
@@ -147,6 +149,32 @@ data class KeyFigureView(
     val portrait: String? = null,
     /** Every house holding them, in the order they were taken in: the first is whose colours they wear. */
     val keyFigureOf: List<HolderView>,
+    /** Where they stand on the map today; absent while they are on none. */
+    val place: Point? = null,
+    val version: Long,
+)
+
+/**
+ * A character standing on the map, as everyone holding the cell sees them.
+ *
+ * Less than a key figure's view on purpose: a stranger sees who somebody is, whose they are and where they
+ * stand, and not their stats or their birthday, which are the house's own. `cell` is the deepest cell the
+ * place falls in, as a house's is; `since` is the world-day they came to stand there; `version` is the read
+ * model's revision, so of two copies the newer wins. See decision record 0055.
+ */
+@JsonInclude(JsonInclude.Include.NON_NULL)
+data class CharacterOnMapView(
+    val id: String,
+    val givenName: String,
+    val familyName: String,
+    val sex: String,
+    val species: String,
+    val portrait: String? = null,
+    val place: Point,
+    val cell: String,
+    /** Every house holding them, in the order they were taken in: the first is whose colours they wear. */
+    val keyFigureOf: List<HolderView>,
+    val since: Long,
     val version: Long,
 )
 
@@ -223,10 +251,12 @@ class WipeWorld : ClientFrame {
     JsonSubTypes.Type(FoundHousePayload::class, name = "foundHouse"),
     JsonSubTypes.Type(GrantResourcePayload::class, name = "grantResource"),
     JsonSubTypes.Type(KillCharacterPayload::class, name = "killCharacter"),
+    JsonSubTypes.Type(MoveCharacterPayload::class, name = "moveCharacter"),
     JsonSubTypes.Type(PledgeResourcePayload::class, name = "pledgeResource"),
     JsonSubTypes.Type(ReleasePledgePayload::class, name = "releasePledge"),
     JsonSubTypes.Type(SpendResourcePayload::class, name = "spendResource"),
     JsonSubTypes.Type(TakeActionPayload::class, name = "takeAction"),
+    JsonSubTypes.Type(TakeOffTheMapPayload::class, name = "takeOffTheMap"),
 )
 sealed interface CommandPayload
 
@@ -302,6 +332,14 @@ data class ChangePortraitPayload(val characterId: String, val portrait: String? 
 
 data class KillCharacterPayload(val characterId: String, val cause: String) : CommandPayload
 
+/**
+ * Put one of the player's key figures somewhere on the map. The place and nothing else: how much they matter
+ * there is the world's to say, not the client's. See decision record 0026.
+ */
+data class MoveCharacterPayload(val characterId: String, val place: Point) : CommandPayload
+
+data class TakeOffTheMapPayload(val characterId: String) : CommandPayload
+
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes(
     JsonSubTypes.Type(Welcome::class, name = "welcome"),
@@ -326,13 +364,17 @@ data class Welcome(val serverTime: Long, val playerId: String, val world: WorldN
 
 /**
  * What a cell holds, sent on subscribing to it, before any deltas. `omitted` is how many more houses the
- * cell had than a snapshot carries, so a screen never claims to show all of what it shows most of.
+ * cell had than a snapshot carries, so a screen never claims to show all of what it shows most of, and
+ * `omittedCharacters` the same for the characters standing in it. A cell with nobody standing in it
+ * carries no `characters` at all.
  */
 data class Snapshot(
     val cell: String,
     val houses: List<HouseView>,
     val asOfVersion: Long,
     @get:JsonInclude(JsonInclude.Include.NON_DEFAULT) val omitted: Int = 0,
+    @get:JsonInclude(JsonInclude.Include.NON_EMPTY) val characters: List<CharacterOnMapView> = emptyList(),
+    @get:JsonInclude(JsonInclude.Include.NON_DEFAULT) val omittedCharacters: Int = 0,
 ) : ServerFrame
 
 /** Deltas coalesced over a short window into one frame. */
@@ -421,9 +463,26 @@ data class EventFrame(
 @JsonSubTypes(
     JsonSubTypes.Type(HouseAppeared::class, name = "houseAppeared"),
     JsonSubTypes.Type(HouseChanged::class, name = "houseChanged"),
+    JsonSubTypes.Type(CharacterArrived::class, name = "characterArrived"),
+    JsonSubTypes.Type(CharacterChanged::class, name = "characterChanged"),
+    JsonSubTypes.Type(CharacterGone::class, name = "characterGone"),
 )
 sealed interface Delta
 
 data class HouseAppeared(val house: HouseView) : Delta
 
 data class HouseChanged(val house: HouseView) : Delta
+
+/**
+ * A character came to stand in a cell this connection holds, from nowhere or from a cell it did not hold.
+ * Houses never move, so a client never had to drop anything; a character does, which is why there are three
+ * of these where a house has two. The client keeps them in the held cells their `cell` falls in, and no
+ * other.
+ */
+data class CharacterArrived(val character: CharacterOnMapView) : Delta
+
+/** A character already drawn here moved within what this connection holds, or changed how they are drawn. */
+data class CharacterChanged(val character: CharacterOnMapView) : Delta
+
+/** A character left every cell this connection holds: moved away, taken off the map, or dead. */
+data class CharacterGone(val id: String, val version: Long) : Delta

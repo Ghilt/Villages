@@ -15,6 +15,7 @@ export type { Connection, ConnectionOptions, ConnectionState, SocketLike } from 
 export {
   NO_HOUSES,
   cellsHeld,
+  charactersInView,
   forgetCells,
   holdCells,
   housesInView,

@@ -219,5 +219,6 @@ class WorldConfig {
         emptyTheWorld = worldWipe,
         keyFigures = keyFigures,
         figures = characters,
+        onTheMap = characters,
     )
 }

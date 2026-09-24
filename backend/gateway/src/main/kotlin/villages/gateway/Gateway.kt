@@ -6,6 +6,9 @@ import villages.application.ChoiceRow
 import villages.application.ChoicesByPlayer
 import villages.application.EventFeed
 import villages.application.FoundHouseService
+import villages.application.CharacterMapChange
+import villages.application.CharacterSpan
+import villages.application.CharactersByCell
 import villages.application.HouseChange
 import villages.application.HouseRow
 import villages.application.HousesByCell
@@ -64,8 +67,14 @@ import villages.protocol.FoundHousePayload
 import villages.protocol.GrantResourcePayload
 import villages.protocol.Hello
 import villages.protocol.HolderView
+import villages.protocol.CharacterArrived
+import villages.protocol.CharacterChanged
+import villages.protocol.CharacterGone
+import villages.protocol.CharacterOnMapView
 import villages.protocol.HouseAppeared
 import villages.protocol.HouseChanged
+import villages.protocol.MoveCharacterPayload
+import villages.protocol.TakeOffTheMapPayload
 import villages.protocol.HouseView
 import villages.protocol.KeyFigureView
 import villages.protocol.KillCharacterPayload
@@ -155,6 +164,7 @@ class Gateway(
     private val emptyTheWorld: WorldWipe,
     private val keyFigures: KeyFigureService,
     private val figures: KeyFiguresByHouse,
+    private val onTheMap: CharactersByCell,
     private val later: Later = ScheduledLater(),
 ) : AutoCloseable {
     private val watching = ConcurrentHashMap<Connection, Unit>()
@@ -188,6 +198,9 @@ class Gateway(
     private val figuresChanged: AutoCloseable = figures.watch { change ->
         sessions[change.player]?.out?.send(YourKeyFigures(change.keyFigures.map { it.toView() }))
     }
+
+    /** A character who moves, leaves the map or dies on it reaches whoever holds the cells either side. */
+    private val moves: AutoCloseable = onTheMap.watchTheMap { change -> fanOutMove(change) }
 
     fun connect(out: Outbound): Connection = Connection(out).also { live += it }
 
@@ -236,11 +249,61 @@ class Gateway(
         }
     }
 
+    /**
+     * A character's move, told to each connection as the one delta that fits it.
+     *
+     * A house never moves, so its fan-out only ever adds; a character leaves cells as well as entering
+     * them, and a connection that is not told so goes on drawing them where they were. So who was shown
+     * them before is worked out as well as who is shown them now: a connection in both is told they
+     * changed, one only in the second that they arrived, one only in the first that they are gone. Only
+     * connections looking at the live world: a move today changes no earlier day's map.
+     */
+    private fun fanOutMove(change: CharacterMapChange) {
+        val before = heldAt(change.was)
+        val after = heldAt(change.now)
+        val view = change.now?.let { change.row.toMapView(it) }
+        if (view != null) {
+            for (connection in after) {
+                if (connection.isLive) {
+                    connection.enqueue(if (connection in before) CharacterChanged(view) else CharacterArrived(view))
+                }
+            }
+        }
+        for (connection in before - after) {
+            if (connection.isLive) {
+                connection.enqueue(CharacterGone(change.row.id.value.toString(), change.row.revision))
+            }
+        }
+    }
+
+    /**
+     * The connections a character standing in this span is drawn for: every one holding a cell their place
+     * falls in, from the zoom their significance is worth drawing at, or at any zoom with the eye open.
+     */
+    private fun heldAt(span: CharacterSpan?): Set<Connection> {
+        if (span == null) {
+            return emptySet()
+        }
+        val deepest = Cell.of(span.place.lat, span.place.lon)
+        val coarsest = coarsestZoom(span.significance.value)
+        val found = mutableSetOf<Connection>()
+        for (zoom in 0..Cell.MAX_ZOOM) {
+            val holders = holding[deepest.at(zoom).quadkey] ?: continue
+            for (connection in holders) {
+                if (zoom >= coarsest || connection.seesEverything) {
+                    found += connection
+                }
+            }
+        }
+        return found
+    }
+
     override fun close() {
         feed.close()
         changes.close()
         asked.close()
         figuresChanged.close()
+        moves.close()
         (later as? AutoCloseable)?.close()
     }
 
@@ -296,6 +359,9 @@ class Gateway(
 
         /** Whether a change is on this connection's day. Live sees everything; the past sees what existed then. */
         internal fun sees(row: HouseRow): Boolean = viewingAt?.let { row.existsAt(it) } ?: true
+
+        /** Whether this connection is looking at the world as it is today, rather than at an earlier day. */
+        internal val isLive: Boolean get() = viewingAt == null
 
         /** The cells this connection holds, for the tests and the panel. */
         fun cells(): Set<String> = synchronized(lock) { cells.toSet() }
@@ -505,6 +571,20 @@ class Gateway(
                         cause = payload.cause,
                         provenance = Provenance.startedBy(commandId),
                     )
+
+                    // A place off the world is refused by the place itself, as `invalidLocation`.
+                    is MoveCharacterPayload -> keyFigures.move(
+                        player = who,
+                        characterId = CharacterId(asUuid(payload.characterId, "a character id")),
+                        place = Location(payload.place.lat, payload.place.lon),
+                        provenance = Provenance.startedBy(commandId),
+                    )
+
+                    is TakeOffTheMapPayload -> keyFigures.takeOffTheMap(
+                        player = who,
+                        characterId = CharacterId(asUuid(payload.characterId, "a character id")),
+                        provenance = Provenance.startedBy(commandId),
+                    )
                 }
                 out.send(CommandAccepted(frame.commandId))
             } catch (refused: DomainError) {
@@ -547,12 +627,15 @@ class Gateway(
         /** What the cell holds on the day this connection is looking at. */
         private fun snapshot(cell: String) {
             val contents = houses.inCell(cell, viewing(), MOST_IN_A_CELL, seesEverything)
+            val standing = onTheMap.inCell(cell, viewing(), MOST_IN_A_CELL, seesEverything)
             out.send(
                 Snapshot(
                     cell = cell,
                     houses = contents.houses.map { it.toView() },
                     asOfVersion = contents.asOf,
                     omitted = contents.omitted,
+                    characters = standing.characters.map { it.row.toMapView(it.span) },
+                    omittedCharacters = standing.omitted,
                 ),
             )
         }
@@ -630,7 +713,7 @@ class Gateway(
         private fun flush() {
             val batch = synchronized(lock) {
                 flushPlanned = false
-                val distinct = waiting.distinctBy { it.house.id to it.house.version }
+                val distinct = waiting.distinctBy { it.key }
                 waiting.clear()
                 distinct
             }
@@ -695,6 +778,25 @@ internal fun CharacterRow.toView(): KeyFigureView = KeyFigureView(
     ),
     portrait = portrait,
     keyFigureOf = keyFigureOf.map { HolderView(it.house.value.toString(), it.name.value, it.banner.toWire()) },
+    place = place?.let { Point(it.lat, it.lon) },
+    version = revision,
+)
+
+/**
+ * A character standing on the map as everyone holding the cell sees them: who and whose, and where, and not
+ * the stats, which are their house's own. The span is where they stood on the day the map was asked about.
+ */
+internal fun CharacterRow.toMapView(span: CharacterSpan): CharacterOnMapView = CharacterOnMapView(
+    id = id.value.toString(),
+    givenName = name.given,
+    familyName = name.family,
+    sex = sex.name.lowercase(),
+    species = species.name.lowercase(),
+    portrait = portrait,
+    place = Point(span.place.lat, span.place.lon),
+    cell = Cell.of(span.place.lat, span.place.lon).quadkey,
+    keyFigureOf = keyFigureOf.map { HolderView(it.house.value.toString(), it.name.value, it.banner.toWire()) },
+    since = span.since.day,
     version = revision,
 )
 
@@ -720,10 +822,14 @@ internal fun Effect.toView(): EffectView = when (this) {
     )
 }
 
-private val Delta.house: HouseView
+/** What makes two deltas the same one: the thing they are about and its version. */
+private val Delta.key: Pair<String, Long>
     get() = when (this) {
-        is HouseAppeared -> house
-        is HouseChanged -> house
+        is HouseAppeared -> house.id to house.version
+        is HouseChanged -> house.id to house.version
+        is CharacterArrived -> "character:${character.id}" to character.version
+        is CharacterChanged -> "character:${character.id}" to character.version
+        is CharacterGone -> "character:$id" to version
     }
 
 /** A domain refusal as the short code the protocol carries, which the interface turns into words. */

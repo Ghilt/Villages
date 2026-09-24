@@ -123,19 +123,28 @@ class CharactersProjection(feed: EventFeed) : KeyFiguresByHouse, CharactersByCel
             }
 
             is CharacterDied -> {
-                changed(event.characterId) { it.copy(diedOn = event.worldTime) }
-                tellHoldersOf(event.characterId)
                 // They are on no map from the day they die, and no `leftTheMap` is written to say so.
+                changed(event.characterId) { it.copy(diedOn = event.worldTime, place = null) }
                 moveOnTheMap(event.characterId, to = null, on = event.worldTime)
+                tellHoldersOf(event.characterId)
             }
 
-            is CharacterMoved -> moveOnTheMap(
-                event.characterId,
-                to = CharacterSpan(event.place, event.significance, since = event.worldTime, until = null),
-                on = event.worldTime,
-            )
+            // The row first, at a new revision, so what the map is told is the newest copy of them.
+            is CharacterMoved -> {
+                changed(event.characterId) { it.copy(place = event.place) }
+                moveOnTheMap(
+                    event.characterId,
+                    to = CharacterSpan(event.place, event.significance, since = event.worldTime, until = null),
+                    on = event.worldTime,
+                )
+                tellHoldersOf(event.characterId)
+            }
 
-            is CharacterLeftTheMap -> moveOnTheMap(event.characterId, to = null, on = event.worldTime)
+            is CharacterLeftTheMap -> {
+                changed(event.characterId) { it.copy(place = null) }
+                moveOnTheMap(event.characterId, to = null, on = event.worldTime)
+                tellHoldersOf(event.characterId)
+            }
 
             // What a house has, and what it is asked, are other read models' business.
             else -> Unit

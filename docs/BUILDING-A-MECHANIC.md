@@ -40,7 +40,10 @@ Answer these before touching code, in a paragraph Adam can read back. The answer
 3. **What does the player see?** Which frame carries it, and from where: a view read from a projection
    (`snapshot`, `batch`, `yourHouse`, `yourChoice`, `yourKeyFigures`) for the interface, and the
    stored event itself on the `event` frame for the debug panel. Then which panel line says it happened,
-   in words. A behaviour the panel cannot show is one Adam cannot verify (decision 0023).
+   in words. A behaviour the panel cannot show is one Adam cannot verify (decision 0023). **A thing on the
+   map that can move or end needs a way to leave a cell** as well as to arrive in one: a house only ever
+   appears or changes, and a character is also `characterGone`, or the client goes on drawing them where
+   they were.
 4. **What can the player do about it?** A command, its payload, and its refusals. The payload never
    carries what the server can work out: not the house's id, not the player, not the instant, not the
    story a command continues. Each way it can be refused is a `DomainError` named for the rule, under

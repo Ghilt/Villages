@@ -119,6 +119,27 @@ export const keyFigureViewSchema = z.object({
   portrait: z.string().optional(),
   /** Every house holding them, in the order they were taken in: the first is whose colours they wear. */
   keyFigureOf: z.array(holderViewSchema),
+  /** Where they stand on the map today. Absent while they are on none. */
+  place: pointSchema.optional(),
+  version: z.number().int(),
+});
+
+/**
+ * A character standing on the map, as everyone holding the cell sees them: who and whose, and where. Not
+ * their stats or their birthday, which are their house's own. `cell` is the deepest cell the place falls
+ * in, as a house's is; `since` the world-day they came to stand there; `version` the read model's revision.
+ */
+export const characterOnMapViewSchema = z.object({
+  id: z.string(),
+  givenName: z.string(),
+  familyName: z.string(),
+  sex: sexSchema,
+  species: speciesSchema,
+  portrait: z.string().optional(),
+  place: pointSchema,
+  cell: cellSchema,
+  keyFigureOf: z.array(holderViewSchema),
+  since: worldDaySchema,
   version: z.number().int(),
 });
 
@@ -192,6 +213,9 @@ export const commandPayloadSchema = z.discriminatedUnion('type', [
   /** Another portrait by its key, or none when `portrait` is absent. */
   z.object({ type: z.literal('changePortrait'), characterId: z.string(), portrait: z.string().optional() }),
   z.object({ type: z.literal('killCharacter'), characterId: z.string(), cause: z.string() }),
+  /** Put a key figure somewhere on the map. The place and nothing else: how much it matters is the world's. */
+  z.object({ type: z.literal('moveCharacter'), characterId: z.string(), place: pointSchema }),
+  z.object({ type: z.literal('takeOffTheMap'), characterId: z.string() }),
 ]);
 
 export const clientFrameSchema = z.discriminatedUnion('type', [
@@ -210,9 +234,16 @@ export const clientFrameSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('wipeWorld') }),
 ]);
 
+/**
+ * A change in a held cell. A house never moves, so it only ever appears or changes; a character moves, so a
+ * character can also be **gone** from every cell a connection holds, and the client drops them.
+ */
 export const deltaSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('houseAppeared'), house: houseViewSchema }),
   z.object({ type: z.literal('houseChanged'), house: houseViewSchema }),
+  z.object({ type: z.literal('characterArrived'), character: characterOnMapViewSchema }),
+  z.object({ type: z.literal('characterChanged'), character: characterOnMapViewSchema }),
+  z.object({ type: z.literal('characterGone'), id: z.string(), version: z.number().int() }),
 ]);
 
 export const serverFrameSchema = z.discriminatedUnion('type', [
@@ -240,6 +271,10 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
     asOfVersion: z.number().int(),
     /** How many more the cell held than the snapshot carries. Absent means none. */
     omitted: z.number().int().nonnegative().optional(),
+    /** The characters standing in the cell. Absent means nobody. */
+    characters: z.array(characterOnMapViewSchema).optional(),
+    /** How many more characters stood there than the snapshot carries. Absent means none. */
+    omittedCharacters: z.number().int().nonnegative().optional(),
   }),
   z.object({ type: z.literal('batch'), deltas: z.array(deltaSchema) }),
   z.object({ type: z.literal('commandAccepted'), commandId: z.string() }),
@@ -278,6 +313,7 @@ export type StatName = z.infer<typeof statNameSchema>;
 export type Sex = z.infer<typeof sexSchema>;
 export type HolderView = z.infer<typeof holderViewSchema>;
 export type KeyFigureView = z.infer<typeof keyFigureViewSchema>;
+export type CharacterOnMapView = z.infer<typeof characterOnMapViewSchema>;
 export type CommandPayload = z.infer<typeof commandPayloadSchema>;
 export type ClientFrame = z.infer<typeof clientFrameSchema>;
 export type Delta = z.infer<typeof deltaSchema>;
