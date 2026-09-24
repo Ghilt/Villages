@@ -357,6 +357,13 @@ Commands are added here as the increments land:
   silhouettes**: the shapes are drawn in Pixi and this is the generator's answer, not the map's. `-- --at
   lng,lat` looks anywhere, `-- --view alps` at one of them, `-- --zoom 10.4` closer, `-- --style flat`
   without the paint. This is what a change to `world/biomes.json` is argued from.
+- Portraits: `world/portraits/` is Adam's folder, committed as the master is. Upright PNGs, three by
+  four and at least 768 wide, each named for whom it suits, `woman-01.png` or `man-01.png`; the name
+  without `.png` is the key a character keeps for life. **Saving over a placeholder replaces it and
+  saving a new name adds one**, with no list to edit. `npm run world:portraits --prefix frontend` draws
+  the cut-paper placeholders, two seconds, and **never overwrites a file that is there**: delete one to
+  have its placeholder back. A test holds the folder to these rules. See
+  `docs/plans/characters-and-key-figures.md`.
 - The styles live in `world/painterly.json`. A group in one may carry a `handOver`, which is where its
   treatment gives way to the scenery standing on the same ground: whole far out, mostly gone by the zoom
   the trees are all in, keeping a third of itself so a wood is not bare between them. It is the far end

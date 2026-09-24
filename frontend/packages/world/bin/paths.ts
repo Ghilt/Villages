@@ -19,6 +19,11 @@ export const MASTER_CONFIG = resolve(REPO, 'world', 'master.json');
 export const PAINTERLY = resolve(REPO, 'world', 'painterly.json');
 /** Where the painterly renderer writes its views. Not committed: they are output, and they are large. */
 export const PAINTERLY_DIR = resolve(REPO, 'world', 'painterly');
+/**
+ * Adam's portraits: upright PNGs named for whom they suit, `woman-01.png`, and committed, as the master is.
+ * Placeholders are drawn into it, never over anything already there.
+ */
+export const PORTRAITS_DIR = resolve(REPO, 'world', 'portraits');
 /** The master image a human edits, and the palette strip to pick its colours from. */
 export const MASTER_DIR = resolve(REPO, 'world', 'master');
 /** Downloaded Natural Earth files. Not committed: they are raw material, not our world. */
