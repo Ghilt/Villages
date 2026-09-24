@@ -3,7 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { PaintQueue, leastLoaded } from './paintQueue';
 import type { QueuedJob } from './paintQueue';
 
-const job = (key: string): QueuedJob => ({ key, state: 'waiting', wantedBy: 1 });
+/** A tile somebody wants. Every one is the same zoom unless a test says otherwise. */
+const job = (key: string, zoom = 8): QueuedJob => ({ key, zoom, state: 'waiting', wantedBy: 1 });
 
 /** Everything the queue will start, given painters that never finish, as `key@painter`. */
 function drain(queue: PaintQueue<QueuedJob>, loads: number[]): string[] {
@@ -16,7 +17,21 @@ function drain(queue: PaintQueue<QueuedJob>, loads: number[]): string[] {
 }
 
 describe('which tile is painted next', () => {
-  it('is the newest asked for, because on a zoom out that is the level being stopped at', () => {
+  it('is the coarsest waiting, because one coarse tile stands in for a whole screen of fine ones', () => {
+    const queue = new PaintQueue(1);
+    queue.enqueue(job('sharp', 9));
+    queue.enqueue(job('coarse', 5));
+    queue.enqueue(job('sharper', 10));
+    queue.enqueue(job('middling', 7));
+    expect(drain(queue, [0, 0, 0, 0]).map((started) => started.split('@')[0])).toEqual([
+      'coarse',
+      'middling',
+      'sharp',
+      'sharper',
+    ]);
+  });
+
+  it('is the newest of the same zoom, because on a zoom out that is the level being stopped at', () => {
     const queue = new PaintQueue(1);
     for (const key of ['z9', 'z8', 'z7', 'z6']) {
       queue.enqueue(job(key));

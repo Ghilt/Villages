@@ -4,13 +4,14 @@
  * Kept apart from the workers, the promises and MapLibre so that the rules can be tested without any of
  * them, because the rules are the part that breaks quietly. A tile two requests share has to survive one
  * of them giving up. A tile already with a painter must never be dropped, because it is going to be
- * painted whatever happens and throwing away its answer would waste the paint. And the newest request
- * goes first, because on a zoom out the newest is the level being stopped at and the oldest are the
- * levels passed through on the way. See experiment 0008.
+ * painted whatever happens and throwing away its answer would waste the paint. And the coarsest waiting
+ * tile goes first, the newest of those when several are level. See `next` for why. See experiment 0008.
  */
 
 export interface QueuedJob {
   key: string;
+  /** The tile's zoom. Lower is coarser, and a coarser tile is painted first. */
+  zoom: number;
   /** Waiting for a painter, or with one. Only a waiting job can be given up. */
   state: 'waiting' | 'painting';
   /** How many requests are waiting on this tile. At none, and still waiting, it is dropped. */
@@ -93,8 +94,17 @@ export class PaintQueue<J extends QueuedJob> {
   }
 
   /**
-   * The next wanted tile to start, and the painter to give it to: the newest waiting, to whichever
-   * painter has least in hand, if that one has room. Null when nothing waits or every painter is full.
+   * The next wanted tile to start, and the painter to give it to, if the painter with least in hand has
+   * room. Null when nothing waits or every painter is full.
+   *
+   * **The coarsest waiting tile goes first.** Under the sharp painted layer lies a coarse copy of it, two
+   * zooms down, so that somewhere not yet painted shows rough ground rather than nothing; see
+   * `renderers.ts`. One of its tiles stands in for sixteen sharp ones at the price of one, and painting it
+   * first is what fills the screen at once with something that then sharpens. Painted in the order they
+   * were asked for, the coarse tiles would arrive with the sharp ones they were meant to stand in for.
+   *
+   * Among tiles of the same zoom the newest goes first, because on a zoom out the newest is the level
+   * being stopped at and the oldest are the levels passed through on the way.
    */
   next(loads: readonly number[]): { job: J; painter: number } | null {
     if (this.waiting.length === 0) {
@@ -104,8 +114,14 @@ export class PaintQueue<J extends QueuedJob> {
     if ((loads[painter] ?? 0) >= this.depth) {
       return null;
     }
-    const job = this.waiting.pop()!;
-    job.state = 'painting';
-    return { job, painter };
+    let chosen = this.waiting.length - 1;
+    for (let index = chosen - 1; index >= 0; index -= 1) {
+      if (this.waiting[index]!.zoom < this.waiting[chosen]!.zoom) {
+        chosen = index;
+      }
+    }
+    const [job] = this.waiting.splice(chosen, 1);
+    job!.state = 'painting';
+    return { job: job!, painter };
   }
 }

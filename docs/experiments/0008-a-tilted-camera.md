@@ -333,6 +333,54 @@ The 512-pixel tile was tried once more with the new scheduling: 16 painted and 4
 paint against 998 at 256. Fewer tiles, more pixels; the overhang still loses. **The painted tile stays at
 256**, with the rest of that change kept because it is correct at either size and tested at both.
 
+### Something rough instead of nothing, and a fade
+
+Adam, once the painting was cheaper: "right now it's just empty and things pop in - even a fade in
+would look good". Both halves turned out to be one question about how MapLibre fades, and the first
+answer to it was wrong in the same way as the one about `raw`.
+
+**The first answer**: MapLibre already asks for the chain of coarser tiles above any tile it is waiting
+for and draws the best one in its place, so paint the coarsest waiting tile first and the placeholders
+arrive before the tiles they stand in for. The queue got that rule. Then a probe recorded the zoom of
+every tile MapLibre asked for on a zoom out: **nothing coarser than the destination, ever.** Reading its
+source again, it walks up to coarser tiles only for a tile whose request has *finished* - its
+`wasRequested` means loaded, errored or reloading, not asked for - which is how it fills the hole a failed
+tile leaves. For a tile still loading it uses a coarser tile it already has and never fetches one.
+
+And it fades by rules, not by default. A tile fades in over a tile of its own source already loaded
+above or below it, or on its own when it lies on the outer edge of the view. A tile landing anywhere else
+with nothing of its own under it is drawn at full strength at once. On a zoom out to somewhere new that
+is most of the screen - which is the pop.
+
+**What went in**: a coarse copy of the painted ground, drawn underneath it. It is a second source serving
+the same painted tiles from the same store under the same addresses, declaring them four times wider
+than they are - and since MapLibre chooses the zoom to ask for from the tile size, that alone makes it
+ask two zooms coarser than the sharp layer at every zoom. A sixteenth of the tiles, painted first
+because the queue now paints the coarsest first, stretched under the sharp ones. It has so few tiles
+that nearly all of them are on the view's edge, so they fade in; the fade is 150 ms on both layers,
+against MapLibre's 300.
+
+Measured on the stepped zoom out, the share of the screen covered by any loaded tile at each moment
+after the zoom lands:
+
+| | 0 ms | 50 ms | 100 ms |
+| --- | --- | --- | --- |
+| without the coarse copy | 70% | 93% | 100% |
+| **with it** | **100%** | 100% | 100% |
+
+The frame taken off the canvas at the instant the zoom lands shows what the 70% was: the lower third bare
+background behind a jagged edge, a continent missing, where with the coarse copy it is all there. The
+harness steps more slowly than a hand on a wheel, so the painters catch up in between; a real fast zoom
+leaves more of the screen bare and for longer without it, and none with it. It costs about three per cent
+more painting - 143 tiles and 3526 ms against 139 and 3409 - because a coarse tile is mostly one the
+looking-ahead was painting anyway.
+
+What it does not do is fade a sharp tile in over the coarse copy: they are two sources, and MapLibre
+fades only within one. So a sharp tile arriving somewhere new still arrives at once - but over a blurred
+copy of itself, which reads as the ground coming into focus rather than appearing. Everywhere the sharp
+layer has a tile of its own to fade from, which is a zoom in, a pan, and the part of a zoom out that was
+already on screen, it fades.
+
 ### What is inherent
 
 Adam went to MapLibre's own site to see whether its maps do this too, and found the same behaviour, much

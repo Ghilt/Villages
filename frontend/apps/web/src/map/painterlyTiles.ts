@@ -234,7 +234,7 @@ function newJob(request: PaintRequest, key: string): Job {
   });
   // Nobody may be listening by the time a dropped or failed job says so, and that is not an error.
   pixels.catch(() => undefined);
-  return { request, key, state: 'waiting', wantedBy: 0, pixels, settle, fail };
+  return { request, key, zoom: request.zoom, state: 'waiting', wantedBy: 0, pixels, settle, fail };
 }
 
 /** Posts a job to a painter. From here it will be painted whatever happens. */

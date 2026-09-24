@@ -36,8 +36,43 @@ export const RENDERERS: readonly RendererChoice[] = [
 
 export const DEFAULT_RENDERER = 'painted';
 
+/**
+ * How long a painted tile takes to fade in, in milliseconds.
+ *
+ * MapLibre's own is three hundred, which reads as a dissolve. Adam asked for a really short one: long
+ * enough that a tile arriving is not a pop, short enough that it is over before the eye has decided it
+ * is watching something happen.
+ *
+ * MapLibre is particular about when it fades. A tile fades in over a tile of its own source already
+ * loaded above or below it, or on its own when it is on the outer edge of the view; a tile arriving
+ * anywhere else with nothing of its own under it is drawn at full strength the moment it lands. So on the
+ * coarse copy below, which is a handful of tiles and nearly all of them edges, this is a fade in; on the
+ * sharp layer it is a fade wherever that layer has a tile of its own to fade from, and otherwise the sharp
+ * tile lands on the coarse copy of itself, which reads as the ground coming into focus. See experiment 0008.
+ */
+const FADE_MS = 150;
+
 const SOURCE = 'painterly';
 const LAYER = 'painterly';
+
+/**
+ * A coarse copy of the painted ground, drawn underneath it, so that a place the map has not painted yet is
+ * never empty.
+ *
+ * MapLibre draws a coarser tile in place of one it is still waiting for, but only one it already has: it
+ * never asks for one on a loading tile's behalf. So on a zoom out to somewhere new there was nothing to
+ * stand in, the screen was the desk until each tile landed, and every one of them popped. This source
+ * asks for the coarse tiles itself. It serves the same painted tiles from the same store under the same
+ * addresses, and declares them `COARSE_STRETCH` times wider than they are - and since MapLibre picks the
+ * zoom to ask for from the tile size, that is enough to make it always ask two zooms coarser than the
+ * sharp layer does. A sixteenth of the tiles, painted first because the queue paints the coarsest first,
+ * stretched four times under the sharp ones. See `paintQueue.ts` and experiment 0008.
+ */
+const COARSE_SOURCE = 'painterly-coarse';
+const COARSE_LAYER = 'painterly-coarse';
+
+/** How much wider the coarse copy's tiles are declared than they are: four, which is two zooms. */
+const COARSE_STRETCH = 4;
 /** Drawn as vectors over the flat tiles. A painted renderer draws its own shore and does not want them. */
 const INK_LAYERS = ['lake-shore', 'coast'];
 
@@ -47,19 +82,22 @@ const INK_LAYERS = ['lake-shore', 'coast'];
  * Leaving them visible seems kinder, because a tile still being painted then shows terrain rather than
  * nothing. It is worse to watch. Land you are already looking at changes its colour and texture a
  * fraction of a second later, and a thing that changes draws the eye far harder than a thing that
- * merely arrives. With them hidden, MapLibre falls back the way it does for any raster source, by stretching
- * the painted tile from a zoom further out, so the worst case is a moment of soft paint rather than a
- * moment of the wrong paint.
+ * merely arrives. With them hidden, what shows through is the coarse copy of the paint itself, so the worst
+ * case is a moment of soft paint rather than a moment of the wrong paint.
  */
 const FLAT_LAYER = 'terrain';
 
 export function applyRenderer(map: maplibregl.Map, name: string, lattice: Lattice): void {
-  // Swapping style means a different tile URL, so the source goes and comes back rather than mutating.
-  if (map.getLayer(LAYER) !== undefined) {
-    map.removeLayer(LAYER);
+  // Swapping style means a different tile URL, so the sources go and come back rather than mutating.
+  for (const layer of [LAYER, COARSE_LAYER]) {
+    if (map.getLayer(layer) !== undefined) {
+      map.removeLayer(layer);
+    }
   }
-  if (map.getSource(SOURCE) !== undefined) {
-    map.removeSource(SOURCE);
+  for (const source of [SOURCE, COARSE_SOURCE]) {
+    if (map.getSource(source) !== undefined) {
+      map.removeSource(source);
+    }
   }
 
   const painted = name !== 'raw';
@@ -88,8 +126,25 @@ export function applyRenderer(map: maplibregl.Map, name: string, lattice: Lattic
       id: LAYER,
       type: 'raster',
       source: SOURCE,
-      paint: { 'raster-opacity': 1, 'raster-resampling': 'linear' },
+      paint: { 'raster-opacity': 1, 'raster-resampling': 'linear', 'raster-fade-duration': FADE_MS },
     },
     map.getLayer(INK_LAYERS[0]!) === undefined ? undefined : INK_LAYERS[0],
+  );
+
+  map.addSource(COARSE_SOURCE, {
+    type: 'raster',
+    tiles: [painterlyTiles(name, lattice)],
+    tileSize: PAINTED_TILE * COARSE_STRETCH,
+    minzoom: 0,
+    maxzoom: PAINTED_MAX_ZOOM,
+  });
+  map.addLayer(
+    {
+      id: COARSE_LAYER,
+      type: 'raster',
+      source: COARSE_SOURCE,
+      paint: { 'raster-opacity': 1, 'raster-resampling': 'linear', 'raster-fade-duration': FADE_MS },
+    },
+    LAYER,
   );
 }
