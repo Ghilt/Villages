@@ -51,7 +51,7 @@ violation when the rule was introduced.
 
 | Module | Holds |
 |---|---|
-| `domain` | The house aggregate: commands, events, state, the decide and evolve functions, value types, domain errors |
+| `domain` | The house and character aggregates: commands, events, state, the decide and evolve functions, value types, domain errors |
 | `application` | Use cases and the ports they need: command execution, read model queries, the clock, player tokens |
 | `protocol` | The client and server message types, shared with the frontend through checked-in JSON fixtures, and the version of the wire, whose shape is recorded in `contracts/protocol-v<n>.txt` (0037) |
 | `infrastructure-occurrent` | CloudEvent conversion and type mapping, the MongoDB event store, the application service, durable subscriptions |

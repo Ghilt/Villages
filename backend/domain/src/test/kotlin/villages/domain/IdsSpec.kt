@@ -42,4 +42,33 @@ class IdsSpec : StringSpec({
 
         house.stream shouldBe "house:6d5b0a2e-1c3f-4d7e-9a8b-0f1e2d3c4b5a"
     }
+
+    "the same command bringing a character into the same house brings the same character" {
+        checkAll(Arb.uuid(), Arb.uuid()) { house, command ->
+            CharacterId.broughtIn(HouseId(house), command) shouldBe CharacterId.broughtIn(HouseId(house), command)
+        }
+    }
+
+    /** A command id is public, so the same one copied into another house must not reach the first's people. */
+    "the same command in another house brings another character" {
+        checkAll(Arb.uuid(), Arb.uuid(), Arb.uuid()) { one, another, command ->
+            if (one != another) {
+                CharacterId.broughtIn(HouseId(one), command) shouldNotBe CharacterId.broughtIn(HouseId(another), command)
+            }
+        }
+    }
+
+    /** Pinned as the house's is, and computed by the same second implementation. */
+    "a known house and command bring in a known character, and always will" {
+        val house = HouseId(UUID.fromString("49d14206-e7b6-3cff-b12c-0fa929182509"))
+        val command = UUID.fromString("5e0f5d1c-2a4b-4c6d-8e9f-0a1b2c3d4e5f")
+
+        CharacterId.broughtIn(house, command).value shouldBe UUID.fromString("cb732500-39bd-3b39-a838-bb89f719578f")
+    }
+
+    "a character names their own stream" {
+        val agnes = CharacterId(UUID.fromString("cb732500-39bd-3b39-a838-bb89f719578f"))
+
+        agnes.stream shouldBe "character:cb732500-39bd-3b39-a838-bb89f719578f"
+    }
 })

@@ -14,6 +14,10 @@ import villages.application.Start
 import villages.application.StoredEvent
 import villages.application.WriteConflict
 import villages.domain.Banner
+import villages.domain.CharacterAppeared
+import villages.domain.CharacterError
+import villages.domain.CharacterId
+import villages.domain.CharacterName
 import villages.domain.Charge
 import villages.domain.Division
 import villages.domain.FoundHouse
@@ -21,8 +25,12 @@ import villages.domain.HouseError
 import villages.domain.HouseFounded
 import villages.domain.HouseId
 import villages.domain.HouseName
+import villages.domain.IntroduceCharacter
 import villages.domain.Location
 import villages.domain.PlayerId
+import villages.domain.Sex
+import villages.domain.Species
+import villages.domain.Stat
 import villages.domain.Tincture
 import villages.domain.WorldTime
 import java.time.Instant
@@ -67,6 +75,44 @@ class InMemoryWorldSpec : StringSpec({
                 stored.event.shouldBeInstanceOf<HouseFounded>().name shouldBe HouseName("Ravenscar")
                 stored.data.contains("\"significance\":20.0") shouldBe true
             }
+        }
+    }
+
+    val agnes = IntroduceCharacter(
+        characterId = CharacterId(UUID.fromString("cb732500-39bd-3b39-a838-bb89f719578f")),
+        name = CharacterName("Agnes", "Hollin"),
+        sex = Sex.WOMAN,
+        species = Species.PERSON,
+        bornOn = WorldTime(642_700),
+        stats = mapOf(Stat.PIETY to 13, Stat.REASON to 9, Stat.KINDNESS to 11, Stat.PHYSICAL to 7),
+        portrait = null,
+        worldTime = WorldTime(653_705),
+        recordedAt = noon,
+    )
+
+    "a character is kept on their own stream, and comes back through the same feed as a house" {
+        InMemoryWorld().use { world ->
+            val delivered = mutableListOf<StoredEvent>()
+            val arrived = CountDownLatch(1)
+            world.feed.subscribe(Start.FROM_NOW) { delivered += it; arrived.countDown() }.use {
+                world.characterExecutor.execute(agnes, sent)
+
+                arrived.await(5, TimeUnit.SECONDS) shouldBe true
+                val stored = delivered.single()
+                stored.type shouldBe "villages.character.appeared.v1"
+                stored.stream shouldBe "character:cb732500-39bd-3b39-a838-bb89f719578f"
+                stored.streamVersion shouldBe 1
+                stored.event.shouldBeInstanceOf<CharacterAppeared>().name shouldBe CharacterName("Agnes", "Hollin")
+            }
+        }
+    }
+
+    "introducing the same character twice is refused, and the stream still holds one of them" {
+        InMemoryWorld().use { world ->
+            world.characterExecutor.execute(agnes, sent)
+
+            shouldThrow<CharacterError.AlreadyAppeared> { world.characterExecutor.execute(agnes, sent) }
+            world.store.read("character:cb732500-39bd-3b39-a838-bb89f719578f").eventList() shouldHaveSize 1
         }
     }
 

@@ -5,6 +5,7 @@ import villages.application.ChoicesByPlayer
 import villages.application.EventFeed
 import villages.application.Start
 import villages.application.StoredEvent
+import villages.domain.CharacterEvent
 import villages.domain.HouseFounded
 import villages.domain.HouseResourceSpent
 import villages.domain.HouseResourceReleased
@@ -59,6 +60,9 @@ class ChoicesProjection(feed: EventFeed) : ChoicesByPlayer, AutoCloseable {
                 return
 
             is HouseFounded -> forget(event.player)
+
+            // A choice is put to a house, never to a character.
+            is CharacterEvent -> return
         }
     }
 

@@ -22,6 +22,7 @@ import villages.application.WorldClock
 import villages.application.WorldWipe
 import villages.application.WriteConflict
 import villages.domain.Banner
+import villages.domain.CharacterError
 import villages.domain.Choice
 import villages.domain.ChoiceId
 import villages.domain.Effect
@@ -656,6 +657,15 @@ internal fun DomainError.reasonCode(): String = when (this) {
     is HouseError.InvalidAmount -> "invalidAmount"
     is HouseError.InvalidPledge -> "invalidPledge"
     is HouseError.NotEnoughFree -> "notEnoughFree"
+    CharacterError.AlreadyAppeared -> "alreadyAppeared"
+    CharacterError.NoSuchCharacter -> "noSuchCharacter"
+    CharacterError.AlreadyDead -> "alreadyDead"
+    // The same words as a house's refusal of the same rule, because the interface says them the same way.
+    is CharacterError.InvalidName -> "invalidName"
+    is CharacterError.InvalidStat -> "invalidStat"
+    is CharacterError.InvalidAge -> "invalidAge"
+    is CharacterError.InvalidPortrait -> "invalidPortrait"
+    is CharacterError.InvalidCause -> "invalidCause"
 }
 
 internal fun StoredEvent.toFrame(): EventFrame = EventFrame(

@@ -410,8 +410,11 @@ rather than a different sort of thing. See decision record 0055.
 
 ### Where it stands
 
-Nothing of it exists. Decision record 0055 says what a character is to the program, and
-`docs/plans/characters-and-key-figures.md` is the order it gets built in, one commit a step.
+The record exists on the server and nothing makes one yet. A character appears with a name, a sex, a
+species, a birthday, four stats and a portrait's key, is kept on a stream of their own, and dies; the
+refusals are named for their rules, and the stored form is pinned by a fixture. Decision record 0055 says
+what a character is to the program, and `docs/plans/characters-and-key-figures.md` is the order the rest
+gets built in, one commit a step.
 
 ---
 

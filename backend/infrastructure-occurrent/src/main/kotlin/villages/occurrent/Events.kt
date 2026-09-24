@@ -9,9 +9,13 @@ import org.occurrent.eventstore.api.WriteConditionNotFulfilledException
 import org.occurrent.eventstore.api.blocking.EventStore
 import tools.jackson.databind.json.JsonMapper
 import tools.jackson.module.kotlin.KotlinModule
+import villages.application.CharacterCommandExecutor
 import villages.application.HouseCommandExecutor
 import villages.application.Provenance
 import villages.application.WriteConflict
+import villages.domain.CharacterCommand
+import villages.domain.CharacterDecider
+import villages.domain.CharacterEvent
 import villages.domain.Decider
 import villages.domain.Effect
 import villages.domain.Event
@@ -56,6 +60,7 @@ object Events {
     /** The id of the thing whose stream an event is on, which is what a CloudEvent's subject is. */
     private fun subjectOf(event: Event): String = when (event) {
         is HouseEvent -> event.houseId.value.toString()
+        is CharacterEvent -> event.characterId.value.toString()
     }
 }
 
@@ -132,4 +137,15 @@ class OccurrentHouseCommandExecutor(
 
     override fun execute(command: HouseCommand, provenance: Provenance) =
         loop.execute(command.houseId.stream, command, provenance)
+}
+
+/** The character command executor port: the same loop, over a character's stream and a character's rules. */
+class OccurrentCharacterCommandExecutor(
+    store: EventStore,
+    converter: CloudEventConverter<Event>,
+) : CharacterCommandExecutor {
+    private val loop = StreamExecutor(store, converter, CharacterDecider, CharacterEvent::class.java)
+
+    override fun execute(command: CharacterCommand, provenance: Provenance) =
+        loop.execute(command.characterId.stream, command, provenance)
 }

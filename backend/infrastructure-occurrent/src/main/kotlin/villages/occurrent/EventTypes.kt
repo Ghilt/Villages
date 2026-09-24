@@ -1,6 +1,8 @@
 package villages.occurrent
 
 import org.occurrent.application.converter.typemapper.CloudEventTypeMapper
+import villages.domain.CharacterAppeared
+import villages.domain.CharacterDied
 import villages.domain.Event
 import villages.domain.HouseFounded
 import villages.domain.HouseResourceGranted
@@ -21,6 +23,8 @@ import kotlin.reflect.KClass
  */
 object EventTypes : CloudEventTypeMapper<Event> {
     val rows: Map<KClass<out Event>, String> = mapOf(
+        CharacterAppeared::class to "villages.character.appeared.v1",
+        CharacterDied::class to "villages.character.died.v1",
         HouseFounded::class to "villages.house.founded.v1",
         HouseResourceGranted::class to "villages.house.resourceGranted.v1",
         HouseResourcePledged::class to "villages.house.resourcePledged.v1",

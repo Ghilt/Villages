@@ -8,6 +8,7 @@ import villages.application.HousesByCell
 import villages.application.HousesByPlayer
 import villages.application.Start
 import villages.application.StoredEvent
+import villages.domain.CharacterEvent
 import villages.domain.HouseFounded
 import villages.domain.Pledge
 import villages.domain.HouseResourceSpent
@@ -100,6 +101,10 @@ class HousesProjection(feed: EventFeed) : HousesByCell, HousesByPlayer, AutoClos
             // Nothing is on the map until a house is founded. Being asked something and answering it are
             // the choices projection's business; this one draws the map and has nothing to say about them.
             is PlayerGivenChoice, is PlayerTookAction -> return
+
+            // A person is not a house, and what one is to a house is the house's own history: nothing a
+            // character's stream says moves a house's row. See decision record 0055.
+            is CharacterEvent -> return
         }
         // Whether this house was already on the map is the read model's to say. A stream version cannot:
         // a house founded from a choice arrives at version three, behind the choice and the action.

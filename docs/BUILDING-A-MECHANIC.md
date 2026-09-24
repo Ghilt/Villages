@@ -13,8 +13,9 @@ is, `GLOSSARY.md` the words, `EVENTS.md` the catalogue every event must be in, `
 layers a change must respect, and the decision records the reasons. This says how to get from a
 described mechanic to all of those.
 
-State of the source at this writing: one aggregate, the `House`, with three events, provenance on every
-envelope, and the whole choice pattern below running end to end, from arrival to a founded house. What it
+State of the source at this writing: two aggregates, the `House` and the `Character`, on one store, one
+feed and one executor loop; provenance on every envelope; and the whole choice pattern below running end
+to end, from arrival to a founded house. What it
 is not yet is the choice roll `MECHANICS.md` describes: there is no fate engine behind the choice, no
 rarity on an option, and no expiry.
 

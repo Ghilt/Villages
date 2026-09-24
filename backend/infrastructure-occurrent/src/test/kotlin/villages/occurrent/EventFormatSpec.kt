@@ -7,6 +7,10 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldMatch
 import tools.jackson.databind.JsonNode
 import villages.domain.Banner
+import villages.domain.CharacterAppeared
+import villages.domain.CharacterDied
+import villages.domain.CharacterId
+import villages.domain.CharacterName
 import villages.domain.Charge
 import villages.domain.Choice
 import villages.domain.ChoiceId
@@ -28,7 +32,10 @@ import villages.domain.Location
 import villages.domain.Option
 import villages.domain.OptionId
 import villages.domain.PlayerId
+import villages.domain.Sex
 import villages.domain.Significance
+import villages.domain.Species
+import villages.domain.Stat
 import villages.domain.Tincture
 import villages.domain.emptyStocks
 import villages.domain.WorldTime
@@ -146,7 +153,23 @@ class EventFormatSpec : StringSpec({
         recordedAt = noon,
     )
 
+    val agnes = CharacterId(UUID.fromString("cb732500-39bd-3b39-a838-bb89f719578f"))
+    val agnesAppeared = CharacterAppeared(
+        characterId = agnes,
+        name = CharacterName("Agnes", "Hollin"),
+        sex = Sex.WOMAN,
+        species = Species.PERSON,
+        bornOn = WorldTime(642_700),
+        stats = mapOf(Stat.PIETY to 13, Stat.REASON to 9, Stat.KINDNESS to 11, Stat.PHYSICAL to 7),
+        portrait = "woman-03",
+        worldTime = WorldTime(653_705),
+        recordedAt = noon,
+    )
+    val agnesDied = CharacterDied(agnes, "a fever that did not break", WorldTime(653_705), noon)
+
     val samples: Map<String, Event> = mapOf(
+        "villages.character.appeared.v1" to agnesAppeared,
+        "villages.character.died.v1" to agnesDied,
         "villages.house.founded.v1" to ravenscar,
         "villages.house.resourceGranted.v1" to givenGold,
         "villages.house.resourcePledged.v1" to pledgedReason,

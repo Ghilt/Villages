@@ -1,6 +1,7 @@
 package villages.application
 
 import villages.domain.Banner
+import villages.domain.CharacterCommand
 import villages.domain.Choice
 import villages.domain.Event
 import villages.domain.HouseCommand
@@ -43,6 +44,14 @@ data class Provenance(
 /** Runs a command against its house's stream: load, decide, append. Throws a HouseError when refused. */
 fun interface HouseCommandExecutor {
     fun execute(command: HouseCommand, provenance: Provenance)
+}
+
+/**
+ * Runs a command against its character's stream: load, decide, append. Throws a CharacterError when refused.
+ * A port of its own rather than one generic one, so that a test's fake can be both. See decision 0055.
+ */
+fun interface CharacterCommandExecutor {
+    fun execute(command: CharacterCommand, provenance: Provenance)
 }
 
 /**

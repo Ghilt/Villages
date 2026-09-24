@@ -15,6 +15,14 @@ class ValueTypesSpec : StringSpec({
         HouseName("R".repeat(32)).value.length shouldBe 32
     }
 
+    "a character's name is two parts, each trimmed and between one and thirty-two characters" {
+        CharacterName("Agnes", "Hollin").family shouldBe "Hollin"
+        CharacterName("A", "B".repeat(32)).given shouldBe "A"
+        shouldThrow<CharacterError.InvalidName> { CharacterName("", "Hollin") }
+        shouldThrow<CharacterError.InvalidName> { CharacterName("Agnes", " Hollin") }
+        shouldThrow<CharacterError.InvalidName> { CharacterName("A".repeat(33), "Hollin") }
+    }
+
     "a location is held to the world" {
         Location(59.33, 18.07).lat shouldBe 59.33
         shouldThrow<DomainError.InvalidLocation> { Location(90.1, 0.0) }

@@ -57,8 +57,8 @@ Every event is one of two things, and the difference is worth keeping in sight.
 **The world's events** are things that happened in the world: something came to be, moved, changed or
 ended. They are what the chronicle is made of and what the map is drawn from. **This half grows**, and
 goes on growing: every feature that puts something in the world adds to it. Their types read
-`villages.house.<verb>.v<n>`, after the thing whose history they are, and in the code they implement
-`WorldEvent`.
+`villages.<whose>.<verb>.v<n>`, after the thing whose history they are - `villages.house.` for a
+house's, `villages.character.` for a character's - and in the code they implement `WorldEvent`.
 
 **The player's events** are things a player did, by which the world was reached into. Being asked
 something and answering it are the mechanics of play rather than happenings in the world, and a
@@ -72,6 +72,10 @@ is taken inside: the action answering a choice and the thing that action does ar
 appended together, and two streams would mean two writes with a gap between them. The stream says where
 the events are kept; the type says what kind of thing happened. See decision record 0034.
 
+A character's stream, `character:<uuid>`, holds the world's half only: a player reaches into the world
+through their house and never through a character. What a character is to a house is the house's
+history, on the house's stream. See decision record 0055.
+
 ## The world's events
 
 One stream per house, addressed as house followed by its identifier.
@@ -83,6 +87,16 @@ One stream per house, addressed as house followed by its identifier.
 | `villages.house.resourcePledged.v1` | `houseId`, `pledgeId`, `resource`, `amount`, `until`, `purpose`, `worldTime`, `recordedAt` | Some of a house's resource was tied to an undertaking until a world-day. It is not spent: it is not free for anything else until the pledge is released, and then it comes back whole. The day is worked out from a span in months before the command is made. | `PledgeResource` | The map projection, which holds the live pledges | 
 | `villages.house.resourceReleased.v1` | `houseId`, `pledgeId`, `worldTime`, `recordedAt` | A pledge ended and what it held is free again, whether its span ran out or somebody ended it early. Only the id is here: which resource and how much is on the event that made the pledge. | `ReleasePledge` | The map projection, which drops the pledge | 
 | `villages.house.resourceSpent.v1` | `houseId`, `resource`, `amount`, `worldTime`, `recordedAt` | Some of a house's resource was used up and is gone. Refused unless that much of it was free, so what is pledged cannot be spent out from under a pledge. | `SpendResource` | The map projection, which holds what a house has | 
+
+## A character's events
+
+One stream per character, addressed as character followed by its identifier. Every one of them is the
+world's.
+
+| Type | Payload | Meaning | Produced by | Consumers |
+|---|---|---|---|---|
+| `villages.character.appeared.v1` | `characterId`, `name`, `sex`, `species`, `bornOn`, `stats`, `portrait`, `worldTime`, `recordedAt` | A character came into the world's story: a given and a family name, a sex, a species, the day they were born, which can be long before this one, all four stats, and a portrait's key or none. They are on no map until something moves them onto one, so it carries no place. | `IntroduceCharacter` | The event list |
+| `villages.character.died.v1` | `characterId`, `cause`, `worldTime`, `recordedAt` | A character died, for a cause said in a line. Their history ends here; each house that held them as a key figure loses them in its own. | `KillCharacter` | The event list |
 
 ## The player's events
 

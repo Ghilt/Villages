@@ -8,6 +8,7 @@ import org.occurrent.eventstore.inmemory.InMemoryEventStore
 import org.occurrent.subscription.StartAt
 import org.occurrent.subscription.api.blocking.SubscriptionModel
 import org.occurrent.subscription.inmemory.InMemorySubscriptionModel
+import villages.application.CharacterCommandExecutor
 import villages.application.EventFeed
 import villages.application.HouseCommandExecutor
 import villages.application.Start
@@ -85,7 +86,7 @@ internal fun CloudEvent.toStored(converter: CloudEventConverter<Event>): StoredE
 )
 
 /**
- * A whole world in memory: store, subscriptions, application service, and the two ports over them.
+ * A whole world in memory: store, subscriptions, and the ports over them, one executor for each kind of stream.
  * Nothing survives a restart, on purpose, until MongoDB exists. Used by the app when there is no database
  * and by every test that wants the real machinery without one.
  */
@@ -95,6 +96,7 @@ class InMemoryWorld : AutoCloseable {
     val converter = Events.converter()
 
     val executor: HouseCommandExecutor = OccurrentHouseCommandExecutor(store, converter)
+    val characterExecutor: CharacterCommandExecutor = OccurrentCharacterCommandExecutor(store, converter)
     val feed: EventFeed = OccurrentEventFeed(subscriptions, store, converter)
 
     /**

@@ -29,6 +29,30 @@ value class HouseId(val value: UUID) {
     }
 }
 
+/** The identity of a character, and the name of their stream: `character:<uuid>`. */
+@JvmInline
+value class CharacterId(val value: UUID) {
+    /** The stream this character's events live in. */
+    val stream: String get() = "character:$value"
+
+    companion object {
+        /** What a character is named after, so the derivation cannot collide with anything else. */
+        private const val NAMED_AFTER = "villages:character:"
+
+        /**
+         * The character a command brings into a house. Worked out rather than minted, as a house's identity
+         * is, so that the same command sent twice writes to one stream and the decider refuses the second
+         * appearance rather than letting a twin appear.
+         *
+         * The house is in the name as well as the command, because a command's id is public - it is the
+         * causation of every event it wrote - and one copied off somebody else's event must not reach into
+         * their house. See decision record 0055.
+         */
+        fun broughtIn(house: HouseId, commandId: UUID): CharacterId =
+            CharacterId(UUID.nameUUIDFromBytes("$NAMED_AFTER${house.value}:$commandId".toByteArray(Charsets.UTF_8)))
+    }
+}
+
 /** The identity of one pledge, so that the release can name which one came back. */
 @JvmInline
 value class PledgeId(val value: UUID)

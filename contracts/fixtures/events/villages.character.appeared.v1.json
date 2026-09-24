@@ -1,0 +1,25 @@
+{
+  "type": "villages.character.appeared.v1",
+  "source": "urn:villages",
+  "subject": "cb732500-39bd-3b39-a838-bb89f719578f",
+  "time": "2026-09-04T12:00:00Z",
+  "data": {
+    "characterId": "cb732500-39bd-3b39-a838-bb89f719578f",
+    "name": {
+      "given": "Agnes",
+      "family": "Hollin"
+    },
+    "sex": "WOMAN",
+    "species": "PERSON",
+    "bornOn": 642700,
+    "stats": {
+      "PIETY": 13,
+      "REASON": 9,
+      "KINDNESS": 11,
+      "PHYSICAL": 7
+    },
+    "portrait": "woman-03",
+    "worldTime": 653705,
+    "recordedAt": "2026-09-04T12:00:00Z"
+  }
+}
