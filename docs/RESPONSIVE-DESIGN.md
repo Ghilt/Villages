@@ -212,7 +212,8 @@ share one control, in its tab bar. See decision records 0045, 0046 and 0057 and 
 **Where things open differs between the forms, and nothing else does.** In the spread everything is on the
 screen, so a way on from a pane is a plain click and there is nothing to choose between; in the bays it
 goes into the other bay, so the pane it came from stays beside it. Tabs are the spread's; the compass is the
-bays'.
+bays'. **On a phone no pane has a close: a pane leaves its bay when the player navigates something else into
+it.**
 
 ## The way between panes
 

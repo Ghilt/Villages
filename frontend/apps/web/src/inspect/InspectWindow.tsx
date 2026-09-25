@@ -42,16 +42,21 @@ interface WindowBarProps {
   /** Which one: the name, where one is known. */
   name: string;
   room: Room;
+  /** How the stage is cut, or null in the spread: the one form a window can be closed in. */
+  along: 'rows' | 'columns' | null;
 }
 
 /**
- * A window's first row: its mark, its name, its size control and its close.
+ * A window's first row: its mark, its name, its size control and, on a desktop, its close.
  *
  * **Put away, this row is the whole window**, which is why it is its own piece: a strip says which house
- * rather than that it is a house, and can be shut without being opened first. The kind is the mark and no
- * longer a word above the name, the mark each kind is known by everywhere else. See `MECHANICS.md`.
+ * rather than that it is a house, and on a desktop can be shut without being opened first. The kind is
+ * the mark and no longer a word above the name, the mark each kind is known by everywhere else.
+ *
+ * **On a phone there is no close.** A window there is one of two bays, and it is replaced by navigating
+ * to something else, which is how every pane on a phone leaves its bay. See `MECHANICS.md`.
  */
-export function WindowBar({ subject, kind, name, room }: WindowBarProps) {
+export function WindowBar({ subject, kind, name, room, along }: WindowBarProps) {
   return (
     <>
       <span className="inspect__mark" role="img" aria-label={kind} title={kind}>
@@ -61,15 +66,17 @@ export function WindowBar({ subject, kind, name, room }: WindowBarProps) {
         {name}
       </h2>
       <PaneSizeControl room={room} />
-      <button
-        type="button"
-        className="inspect__close"
-        aria-label={`close ${name}`}
-        title={`close ${name}`}
-        onClick={() => stopInspecting(subject)}
-      >
-        <Icon name="close" />
-      </button>
+      {along === null && (
+        <button
+          type="button"
+          className="inspect__close"
+          aria-label={`close ${name}`}
+          title={`close ${name}`}
+          onClick={() => stopInspecting(subject)}
+        >
+          <Icon name="close" />
+        </button>
+      )}
     </>
   );
 }
@@ -121,7 +128,7 @@ export function InspectWindow({ subject, said, along, room }: InspectWindowProps
   return (
     <section className="inspect" aria-live="polite">
       <header className="inspect__bar">
-        <WindowBar subject={subject} kind={said.kind} name={said.name} room={room} />
+        <WindowBar subject={subject} kind={said.kind} name={said.name} room={room} along={along} />
       </header>
 
       {said.likeness !== undefined && (

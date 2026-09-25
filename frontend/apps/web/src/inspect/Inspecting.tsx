@@ -96,13 +96,13 @@ export function Inspecting({ subject, room: given, along, grid }: InspectingProp
   if (room.size === 'strip') {
     return (
       <section className="inspect inspect--strip" aria-label={name}>
-        <WindowBar subject={subject} kind={kind} name={name} room={room} />
+        <WindowBar subject={subject} kind={kind} name={name} room={room} along={along} />
       </section>
     );
   }
 
   if (said === null) {
-    return <OutOfView subject={subject} kind={kind} name={name} room={room} />;
+    return <OutOfView subject={subject} kind={kind} name={name} room={room} along={along} />;
   }
   return <InspectWindow subject={subject} said={said} along={along} room={room} />;
 }
@@ -119,17 +119,18 @@ interface OutOfViewProps {
   kind: string;
   name: string;
   room: Room;
+  along: 'rows' | 'columns' | null;
 }
 
 /**
  * A house or a person who has left the held cells. Not gone from the world, only from what this page can
  * see: a stranger's key figure the camera has left, or a house panned away from.
  */
-function OutOfView({ subject, kind, name, room }: OutOfViewProps) {
+function OutOfView({ subject, kind, name, room, along }: OutOfViewProps) {
   return (
     <section className="inspect">
       <header className="inspect__bar">
-        <WindowBar subject={subject} kind={kind} name={name} room={room} />
+        <WindowBar subject={subject} kind={kind} name={name} room={room} along={along} />
       </header>
       <p className="inspect__gone">Out of view. Pan back to it, or pick something else.</p>
     </section>

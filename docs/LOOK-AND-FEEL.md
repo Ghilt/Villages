@@ -124,7 +124,7 @@ pane, so that putting anything away looks like putting anything else away, and t
 otherwise and say why: the **map** carries no control and is itself the way back, and **navigation**
 carries the marks of what it could put in the other bay, because that is the strip a player arrives in by
 pressing the compass. An inspect window's strip is its first row - the mark of its kind, the name of the
-thing, the control and the close - so it says which house rather than that it is one. See
+thing, the control and, on a desktop, the close - so it says which house rather than that it is one. See
 `RESPONSIVE-DESIGN.md`, `MECHANICS.md` and decision records 0046 and 0047.
 
 **The tab bar.** Several **panes** sharing one **bay**, and a strip of marks across its top saying which is
