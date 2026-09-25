@@ -15,6 +15,23 @@
   box-sizing: border-box;
 }
 
+/*
+ * Scrollbars, wherever something scrolls: thin, in the soft ink of the interface, on no track of their own,
+ * so a list that scrolls reads as parchment with a mark in its margin rather than as a window of the
+ * operating system. Everything that scrolls sits on parchment, the debug panel and the event viewer
+ * included, so one drawing does for all of them, and both properties inherit, so it is said once here.
+ *
+ * The standard two and nothing else. The `::-webkit-scrollbar` pseudo-elements draw a nicer thumb, but a
+ * browser that sees either of these ignores them, and splitting the two by `@supports` is a guess about
+ * which browser is which: Adam's drew its own scrollbars under that split. There is no gold under the
+ * pointer, because a colour that inherits cannot follow the pointer onto one thumb without turning every
+ * scrollbar on the page at once.
+ */
+:root {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(93, 79, 63, 0.45) transparent;
+}
+
 html,
 body,
 #root {
@@ -1876,8 +1893,19 @@ body,
   height: auto;
   flex: 0 1 auto;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
   container-type: normal;
   pointer-events: auto;
+}
+
+/*
+ * A window alone on a rail too short for it scrolls rather than losing its links off the bottom: out of
+ * room, the rail puts the others away first, so this is only ever the one left open. See 0058.
+ */
+.stage[data-form='spread'] .rail .inspect {
+  flex: 0 1 auto;
+  min-height: 0;
 }
 
 .stage[data-form='bays'] .rail {

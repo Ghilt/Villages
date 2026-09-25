@@ -2,6 +2,8 @@
 
 - Status: accepted
 - Date: 2026-09-25
+- Amended 2026-09-25: the one pane left open on a rail too short for it **scrolls** rather than being cut
+  off, and the rail measures it at its whole height, not the height it is squeezed to.
 
 ## Context
 
@@ -44,8 +46,8 @@ open it asks for nothing more, so a measurement that follows its own answer sett
 declared numbers with a test; here the numbers come from the page and only the decision has the test. It is
 the one bay whose panes are sized by their content, so it is the one place that has to look.
 
-**A single pane taller than the whole rail is still cut off at the bottom**, because there is nothing left
-to put away for it. Whether it scrolls instead is the next step.
+**A single pane taller than the whole rail has nothing left to put away for it**, so it scrolls: it was
+cut off at the bottom when this was first written, and scrolls since the amendment above.
 
 **The log says what the rail did**, one line each time it puts anything away, so the instrument shows it.
 

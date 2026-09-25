@@ -296,7 +296,7 @@ function useRoomOnTheRail(
       return;
     }
     const drawn = [...held.children].map((bay) => bay.firstElementChild as HTMLElement | null);
-    const measured = stacked.map((one, at) => ({ ...one, tall: drawn[at]?.offsetHeight ?? 0 }));
+    const measured = stacked.map((one, at) => ({ ...one, tall: wholeHeight(drawn[at]) }));
     const gap = Number.parseFloat(getComputedStyle(held).rowGap) || 0;
     putAwayForRoom(outOfRoom(measured, held.clientHeight, gap));
   };
@@ -307,12 +307,32 @@ function useRoomOnTheRail(
     if (!on || held === null) {
       return;
     }
-    const watching = new ResizeObserver(() => check.current());
+    // A pane squeezed into a scroll keeps its box when what it says grows, so watching the pane alone
+    // misses exactly the case that matters. Its children keep their own heights, so they are watched
+    // too, and anything added to or taken out of the rail's tree asks again.
+    const resized = new ResizeObserver(() => check.current());
     for (const bay of held.children) {
-      if (bay.firstElementChild !== null) {
-        watching.observe(bay.firstElementChild);
+      const pane = bay.firstElementChild;
+      if (pane !== null) {
+        resized.observe(pane);
+        for (const part of pane.children) {
+          resized.observe(part);
+        }
       }
     }
-    return () => watching.disconnect();
+    const changed = new MutationObserver(() => check.current());
+    changed.observe(held, { childList: true, subtree: true, characterData: true });
+    return () => {
+      resized.disconnect();
+      changed.disconnect();
+    };
   });
+}
+
+/**
+ * How tall a pane is drawn whole: what it says plus its edges, whether or not a short rail is squeezing it
+ * into a scroll. A pane that is not squeezed has as much to scroll as it shows, so this is its own height.
+ */
+function wholeHeight(drawn: HTMLElement | null | undefined): number {
+  return drawn == null ? 0 : drawn.scrollHeight + (drawn.offsetHeight - drawn.clientHeight);
 }

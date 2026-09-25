@@ -137,6 +137,11 @@ tile is one size whichever tab is up: pressing a tab changes what is drawn and n
 the spread — a phone reaches the same panes through the compass, because a row of tabs on a 390-wide stage
 is a row of things too small to hit. See decision records 0042 and 0057.
 
+**Scrollbars.** Wherever something scrolls - a list, a window taller than its room, the debug panel, the
+event viewer - the scrollbar is thin, its thumb in the soft ink and on no track of its own, so a list that
+scrolls reads as parchment with a mark in its margin rather than as a window of the operating system. Said
+once, on the root, with the two standard properties every browser follows; the browser draws the shape.
+
 **Two forms on the map.** Anything standing in the world is drawn two ways, and which one you see is how
 far away you are. Its **ground form** is what it is, sized in world units, so it grows with the terrain
 and keeps its size against the ground the way a building on a map does. Its **icon** is what it means,
