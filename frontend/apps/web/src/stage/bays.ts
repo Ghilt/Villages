@@ -358,6 +358,27 @@ export function askFor(id: string, size: PaneSize): void {
 }
 
 /**
+ * Put away the panes on a rail that has run out of room, so that the one above them stays open.
+ *
+ * Written into what each asked for, in the spread, rather than drawn put away while the room is short: a
+ * pane the rail put away stays put away until the player opens it, because a pane that reopened by itself
+ * whenever the room changed would be the rail second-guessing whoever put the others away. Which ones is
+ * `outOfRoom`'s business; see `rail.ts` and decision record 0058.
+ */
+export function putAwayForRoom(ids: readonly string[]): void {
+  const now = ids.filter((id) => state.heights[id] !== 'strip' && paneById(id) !== undefined);
+  if (form !== 'spread' || now.length === 0) {
+    return;
+  }
+  const heights = { ...state.heights };
+  for (const id of now) {
+    heights[id] = 'strip';
+  }
+  settle({ ...state, heights });
+  note('bay', `the rail is out of room: ${now.map(titleOf).join(' and ')} put away, the one above kept open`);
+}
+
+/**
  * Open a bay to at least half, because something has arrived in it that is not worth arriving as a strip.
  *
  * The only thing besides the control that moves the seam, and it is deliberately **not** part of putting a

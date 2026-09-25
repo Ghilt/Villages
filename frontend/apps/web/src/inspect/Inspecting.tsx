@@ -9,6 +9,7 @@ import { gatewayState, watchGateway } from '../net/gateway';
 import type { Room } from '../stage/panes';
 import { type Description, describeArea, describeCharacter, describeHouse, type Legend } from './describe';
 import { InspectWindow, WindowBar } from './InspectWindow';
+import { sizeWindow } from './opening';
 import { forgetSubject, type Subject } from './subjects';
 import { forget, lastNamed, trailNow, watchTrail } from './trail';
 
@@ -33,7 +34,9 @@ interface InspectingProps {
   grid: MasterGrid | null;
 }
 
-export function Inspecting({ subject, room, along, grid }: InspectingProps) {
+export function Inspecting({ subject, room: given, along, grid }: InspectingProps) {
+  // Its own size control opens a put-away window at the top of the rail rather than where it stood.
+  const room: Room = { ...given, ask: (size) => sizeWindow(subject, size) };
   const heard = useSyncExternalStore(watchGateway, gatewayState);
   const areas = useSyncExternalStore(watchAreas, areasNow);
   const trail = useSyncExternalStore(watchTrail, trailNow);

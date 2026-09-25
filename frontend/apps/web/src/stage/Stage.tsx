@@ -1,5 +1,5 @@
-import type { CSSProperties, ReactNode } from 'react';
-import { useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
+import type { CSSProperties, ReactNode, RefObject } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useSyncExternalStore } from 'react';
 
 import { note } from '../debug/log';
 import { subjectsNow, watchSubjects } from '../inspect/subjects';
@@ -13,6 +13,7 @@ import {
   askingNow,
   baysNow,
   formNow,
+  putAwayForRoom,
   show,
   showingIn,
   stageIs,
@@ -31,6 +32,7 @@ import {
   spreadWants,
   standingPanes,
 } from './panes';
+import { outOfRoom } from './rail';
 import { TabBar } from './TabBar';
 
 /**
@@ -181,6 +183,12 @@ export function Stage({ stage, contents, overlays }: StageProps) {
 
   const rail = box.form === 'spread' ? box.bays.left : null;
 
+  // Out of room, the rail keeps one pane open and puts the rest away. What each is drawn at depends on
+  // what it says, so the stage measures the rail after every layout rather than working it out. See 0058.
+  const railRef = useRef<HTMLDivElement | null>(null);
+  const stacked = panes.filter(isWindow).map((pane) => ({ id: pane.id, asked: sizeAsked(pane, bays) }));
+  useRoomOnTheRail(railRef, rail !== null, stacked);
+
   // A tile that more than one pane declared itself into gets a strip of tabs across its top. There is one
   // such tile today - the corner, holding the house status, the key figures and navigation - and the
   // layout learns only that the tile is `TAB_BAR` taller than its own size. The strip carries the tile's
@@ -214,6 +222,7 @@ export function Stage({ stage, contents, overlays }: StageProps) {
        */}
       <div
         className="rail"
+        ref={railRef}
         hidden={box.form === 'spread' && rail === null}
         style={rail === null ? undefined : place(rail)}
       >
@@ -264,4 +273,46 @@ const isWindow = (pane: { id: string }) => pane.id.startsWith('inspect:');
 /** The class a bay gets from what is in it: every inspect window is styled the same way. */
 function kindOf(id: string): string {
   return id.startsWith('inspect:') ? 'inspect' : id;
+}
+
+/**
+ * Measure the rail and put away what it has no room for.
+ *
+ * After every layout, and whenever a pane on it changes height without the stage laying out again - a
+ * window whose subject changed, a census that finished counting. Each pane is measured at the height it is
+ * drawn at rather than the height it is squeezed to, which is what the rail would need to show it whole.
+ * `outOfRoom` says which to put away; once one is open there is nothing more to say, so a measurement that
+ * follows its own answer asks for nothing and it settles. See `rail.ts`.
+ */
+function useRoomOnTheRail(
+  rail: RefObject<HTMLDivElement | null>,
+  on: boolean,
+  stacked: readonly { id: string; asked: PaneSize }[],
+): void {
+  const check = useRef(() => {});
+  check.current = () => {
+    const held = rail.current;
+    if (!on || held === null) {
+      return;
+    }
+    const drawn = [...held.children].map((bay) => bay.firstElementChild as HTMLElement | null);
+    const measured = stacked.map((one, at) => ({ ...one, tall: drawn[at]?.offsetHeight ?? 0 }));
+    const gap = Number.parseFloat(getComputedStyle(held).rowGap) || 0;
+    putAwayForRoom(outOfRoom(measured, held.clientHeight, gap));
+  };
+
+  useLayoutEffect(() => {
+    check.current();
+    const held = rail.current;
+    if (!on || held === null) {
+      return;
+    }
+    const watching = new ResizeObserver(() => check.current());
+    for (const bay of held.children) {
+      if (bay.firstElementChild !== null) {
+        watching.observe(bay.firstElementChild);
+      }
+    }
+    return () => watching.disconnect();
+  });
 }

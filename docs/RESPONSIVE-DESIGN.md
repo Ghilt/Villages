@@ -116,7 +116,8 @@ be three things to aim at where the only useful one is the thing itself.
 
 **Left** is the upper tile of the column. **Its panes stack**: one under another on a **rail**, all of
 them drawn, up to three, because they are about different things and comparing two of them should not mean
-remembering one. It never grows tabs.
+remembering one. It never grows tabs. **When the panes on the rail no longer all fit, every one but one is
+put away, and opening another puts the rest away. Nothing reopens by itself.** See decision record 0058.
 
 **Bottom left** is the corner, the lower tile of the column. **It takes tabs when more than one pane is put
 there**: the panes take turns, and a strip of marks across its top says which is up. The panes declare that
