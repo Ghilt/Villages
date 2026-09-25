@@ -475,7 +475,9 @@ On a desktop it opens at the normal size, so changing tabs moves nothing.
   pane opens straight on them.
 - **The details**: one key figure's portrait and name, and where there is room their stats, one to a line,
   each a mark, a word and a number: Age, Piety (the house card's cross), Reason (its dividers), Kindness,
-  Physical. The way back to the grid is a mark of **nine small squares**.
+  Physical. The way back to the grid is a mark of **nine small squares**, twice the size of the marks
+  beside it. While they stand on the map, **the map's mark** is beside their name and shows the camera
+  where, as it does in an inspect window; on no map, there is none.
 
 **What each size shows**, the pane owning all three:
 
@@ -506,9 +508,10 @@ The tie exists on the server and on the wire, and the debug panel's Characters s
 figures in and changes them. The pane is in the corner, the middle tab, and in *Go to* on a phone, at its
 three sizes: with nobody in it, it says key figures will be shown here; with one it opens on them; with
 more it is a grid of their portraits in the order they joined, three by three, and one pressed opens on
-them with nine small squares to go back by. Their details are the portrait and the name, and the age and
-four stats as a mark, a word and a number wherever there is room: opened out in the spread, below a scroll
-at half a phone, and in view opened out on one. A house gains and loses key figures in
+them with nine small squares to go back by. Their details are the portrait and the name, with the map's
+mark beside it while they stand on the map, and the age and four stats as a mark, a word and a number
+wherever there is room: opened out in the spread, below a scroll at half a phone, and in view opened out
+on one. A house gains and loses key figures in
 its own history, holds nine at most and never the same character twice, and says
 whether a character is one of its own without writing anything, which is how every lever naming a
 character is let through or refused. When a character dies the mourning writes the loss into every house

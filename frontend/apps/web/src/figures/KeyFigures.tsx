@@ -1,13 +1,15 @@
 import { useState, useSyncExternalStore } from 'react';
 
 import { ageOn } from '@villages/client-core';
-import type { KeyFigureView } from '@villages/protocol';
+import type { KeyFigureView, Point } from '@villages/protocol';
 
 import { note } from '../debug/log';
+import { focusOn } from '../map/focus';
 import { Mark } from '../marks/Mark';
 import { gatewayState, watchGateway } from '../net/gateway';
+import { baysNow, put, watchBays, type Which } from '../stage/bays';
 import { Icon } from '../stage/Icons';
-import type { Room } from '../stage/panes';
+import { KEY_FIGURES_PANE, MAP_PANE, type Room } from '../stage/panes';
 import { PaneSizeControl } from '../stage/PaneSizeControl';
 import { STATS_IN_ORDER, STAT_WORDS, fullName } from './describe';
 import { Portrait } from './Portrait';
@@ -24,9 +26,19 @@ import { stillOpen, viewOf } from './view';
  *
  * A house starts with none, and a house with none is told so in the words Adam gave it rather than shown
  * an empty frame. See `MECHANICS.md` and decision record 0055.
+ *
+ * A figure standing on the map has the map's mark beside their name, the inspect window's own *show it on
+ * the map*, and one who is on no map has none: a mark that could only ever say "nowhere" is not a way on.
  */
-export function KeyFigures({ room }: { room: Room }) {
+interface KeyFiguresProps {
+  room: Room;
+  /** How the stage is cut, or null in the spread, where the map is the floor and always in view. */
+  along: 'rows' | 'columns' | null;
+}
+
+export function KeyFigures({ room, along }: KeyFiguresProps) {
   const heard = useSyncExternalStore(watchGateway, gatewayState);
+  const bays = useSyncExternalStore(watchBays, baysNow);
   const figures = heard.yourKeyFigures ?? [];
   const today = heard.world?.today ?? null;
   const [open, setOpen] = useState<string | null>(null);
@@ -49,6 +61,18 @@ export function KeyFigures({ room }: { room: Room }) {
     note('figures', `back to all ${figures.length} of them`);
   };
 
+  /**
+   * The camera on where they stand, and on a phone the map in the bay this pane is not in, so the pane
+   * stays beside it - what an inspect window's map link does, for the same reasons. See decision 0049.
+   */
+  const showOnTheMap = (place: Point) => {
+    focusOn(place);
+    if (along !== null) {
+      const there: Which = bays.holding.indexOf(KEY_FIGURES_PANE.id) === 0 ? 1 : 0;
+      put(there, MAP_PANE.id);
+    }
+  };
+
   if (room.size === 'strip') {
     return (
       <section className="figures figures--strip" aria-label="Key figures">
@@ -61,7 +85,10 @@ export function KeyFigures({ room }: { room: Room }) {
   }
 
   return (
-    <section className={`figures figures--${room.size} figures--${view.kind}`} aria-label="Key figures">
+    <section
+      className={`figures figures--${room.size} figures--${view.kind}${view.kind === 'details' && view.back ? ' figures--back' : ''}`}
+      aria-label="Key figures"
+    >
       <header className="figures__bar">
         {view.kind === 'details' && view.back && (
           <button
@@ -104,11 +131,31 @@ export function KeyFigures({ room }: { room: Room }) {
       {view.kind === 'details' && (
         <article className="figures__one">
           <Portrait portrait={view.figure.portrait} name={fullName(view.figure)} />
-          <h3 className="figures__name">{fullName(view.figure)}</h3>
+          <div className="figures__who">
+            <h3 className="figures__name">{fullName(view.figure)}</h3>
+            {view.figure.place !== undefined && (
+              <MapLink name={fullName(view.figure)} place={view.figure.place} onShow={showOnTheMap} />
+            )}
+          </div>
           <Stats figure={view.figure} today={today} />
         </article>
       )}
     </section>
+  );
+}
+
+/** The map's mark, and pressing it shows where they stand. The inspect window's link, beside a name. */
+function MapLink({ name, place, onShow }: { name: string; place: Point; onShow: (place: Point) => void }) {
+  return (
+    <button
+      type="button"
+      className="figures__map"
+      aria-label={`show ${name} on the map`}
+      title={`show ${name} on the map`}
+      onClick={() => onShow(place)}
+    >
+      <Icon name="map" />
+    </button>
   );
 }
 

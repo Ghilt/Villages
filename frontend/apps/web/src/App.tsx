@@ -290,7 +290,7 @@ export function App({ master }: AppProps) {
             return <HouseStatus room={room} />;
           }
           if (id === KEY_FIGURES_PANE.id) {
-            return <KeyFigures room={room} />;
+            return <KeyFigures room={room} along={along} />;
           }
           if (id === NAVIGATION_PANE.id) {
             return <Navigating room={room} along={along} />;

@@ -2071,6 +2071,8 @@ body,
  * tabs read as one family whichever is up.
  */
 .figures {
+  /* How tall the bar across the top is, which the grid and a figure's details both measure from. */
+  --bar: 2rem;
   position: absolute;
   inset: 0;
   display: flex;
@@ -2090,20 +2092,31 @@ body,
   gap: 0.4rem;
   flex: none;
   box-sizing: border-box;
-  height: 2rem;
+  height: var(--bar);
   padding: 0.2rem 0.4rem 0 0.75rem;
+}
+
+/* Taller while the way back is in it, because the nine squares are drawn at twice a mark's size there. */
+.figures--back {
+  --bar: 2.7rem;
 }
 
 .figures__bar .pane-size {
   margin-left: auto;
 }
 
-/* The way back from one figure to all of them: nine small squares, the grid it goes back to. */
+/*
+ * The way back from one figure to all of them: nine small squares, the grid it goes back to.
+ *
+ * Twice the size of the marks beside it, Adam's word: at the size of the size control the nine were a
+ * speck, and this is the one way back from where the pane has got to.
+ */
 .figures__back {
-  width: 1.5rem;
-  height: 1.5rem;
-  margin-left: -0.35rem;
-  padding: 0.2rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: none;
+  margin-left: -0.5rem;
+  padding: 0.15rem;
   border: none;
   background: none;
   cursor: pointer;
@@ -2146,7 +2159,7 @@ body,
 .figures__grid {
   --gap: 0.4rem;
   --caption: 0rem;
-  --row: calc((100cqh - 2rem - 0.7rem - var(--corner-bottom, 0px) - 2 * var(--gap)) / 3);
+  --row: calc((100cqh - var(--bar) - 0.7rem - var(--corner-bottom, 0px) - 2 * var(--gap)) / 3);
   --across: calc((100cqw - 1.5rem - 2 * var(--gap)) / 3);
   --tall: min(calc(var(--row) - var(--caption)), calc(var(--across) * 4 / 3));
   flex: 1;
@@ -2222,7 +2235,7 @@ body,
  * bar, the padding and the compass's corner are taken, in the bay's own container units.
  */
 .figures__one {
-  --room-h: calc(100cqh - 2rem - 1.1rem - var(--corner-bottom, 0px));
+  --room-h: calc(100cqh - var(--bar) - 1.1rem - var(--corner-bottom, 0px));
   --room-w: calc(100cqw - 1.8rem);
   flex: 1;
   min-height: 0;
@@ -2242,8 +2255,34 @@ body,
   height: min(var(--room-h), 24rem, calc(var(--room-w) * 0.5 * 4 / 3));
 }
 
-.figures__name {
+/* The name, and beside it the way to where they stand when they stand anywhere. */
+.figures__who {
   grid-area: name;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+/* The inspect window's own map link: the same mark, the same size, a finger's width. See 0049. */
+.figures__map {
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  margin-top: -0.25rem;
+  padding: 0.3rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.figures__map:hover .icon {
+  color: var(--gold);
+}
+
+.figures__name {
+  flex: 1;
+  min-width: 0;
   margin: 0;
   font-size: 1.35rem;
   font-weight: normal;

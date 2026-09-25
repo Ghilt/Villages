@@ -161,8 +161,12 @@ tab, in a list and wherever a pane is named later cannot drift apart. **The comp
 ring**, deliberately: the needle says which bay a thing goes to and the compass opens the pane that lists
 the bays, so they read as one family rather than two unrelated drawings. A **link** out of an inspect
 window is one button rather than a pair of needles, and *show it on the map* is the map's own mark; see
-decision record 0049. **The way back from one key figure to all of them is nine small squares**, the grid
-it goes back to, filled rather than outlined because nine outlines at the size of a mark are a blur.
+decision record 0049. A key figure's details carry the same map mark beside their name while they stand
+on the map, and none while they are on no map, doing what the window's does: the camera to them, and on a
+phone the map into the other bay. **The way back from one key figure to all of them is nine small
+squares**, the grid it goes back to, filled rather than outlined because nine outlines at the size of a
+mark are a blur, and drawn at **twice a mark's size**, Adam's word, because it is the one way back from
+where the pane has got to.
 
 ## Not decided
 
