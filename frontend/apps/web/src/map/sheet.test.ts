@@ -1,13 +1,16 @@
 import { describe, expect, it } from 'vitest';
 
-import { MAX_MERCATOR_LATITUDE } from '../sprites/cameraMath';
+import { MAX_MERCATOR_LATITUDE, fromMercator, toScreen } from '../sprites/cameraMath';
 
 import { CAMERA } from './mapConfig';
 import {
   clampAxis,
   clampBoundsToWorld,
   constrainCamera,
+  drawnAt,
   fitZoom,
+  flatPoint,
+  flatWindow,
   floorZoom,
   sheetCoversView,
   sheetOnScreen,
@@ -135,5 +138,63 @@ describe('clamping a view to the world', () => {
     const denmark = { north: 58, south: 54, east: 13, west: 8 };
 
     expect(clampBoundsToWorld(denmark)).toEqual(denmark);
+  });
+});
+
+describe('a camera tipped back and north-up', () => {
+  const window = { width: 1000, height: 700 };
+
+  it('changes nothing when it is not tipped', () => {
+    expect(flatWindow(window, 0)).toEqual(window);
+    expect(drawnAt({ left: 3, top: 40, width: 10, height: 20 }, 0)).toEqual({
+      left: 3,
+      top: 40,
+      width: 10,
+      height: 20,
+    });
+    expect(flatPoint({ x: 5, y: 9 }, 0)).toEqual({ x: 5, y: 9 });
+  });
+
+  it('draws the sheet laid out flat exactly where the tipped map draws the world', () => {
+    // The desk is laid out as if the camera looked straight down and squashed as it is drawn; the map and
+    // the marks are projected tipped. If the two ever disagree, the parchment slides off its own tiles.
+    for (const pitch of [30, 45, 60]) {
+      for (const zoom of [-0.5, 0.3, 1]) {
+        const centre = { lng: 12, lat: 20 };
+        const lying = sheetOnScreen({ center: centre, zoom, ...flatWindow(window, pitch) });
+        const drawn = drawnAt(
+          { left: lying.left, top: lying.top, width: lying.size, height: lying.size },
+          pitch,
+        );
+        const tipped = { center: centre, zoom, ...window, pitch, bearing: 0 };
+        const northWest = toScreen({ lng: -180, lat: MAX_MERCATOR_LATITUDE }, tipped);
+        const southEast = toScreen({ lng: 180, lat: -MAX_MERCATOR_LATITUDE }, tipped);
+        // To a thousandth of a pixel: the world's edge is a latitude written to six places, so the far
+        // corner projects a few millionths of a pixel short of a whole world width.
+        expect(drawn.left).toBeCloseTo(northWest.x, 3);
+        expect(drawn.top).toBeCloseTo(northWest.y, 3);
+        expect(drawn.left + drawn.width).toBeCloseTo(southEast.x, 3);
+        expect(drawn.top + drawn.height).toBeCloseTo(southEast.y, 3);
+      }
+    }
+  });
+
+  it('keeps the whole tipped window on the world at its northern edge, not only the part a flat one sees', () => {
+    const pitch = 45;
+    const zoom = 3;
+    const kept = constrainCamera(
+      { centre: { x: 0.5, y: 0 }, zoom },
+      flatWindow(window, pitch),
+      CAMERA.maxZoom,
+    );
+    const tipped = { center: fromMercator(kept.centre), zoom: kept.zoom, ...window, pitch, bearing: 0 };
+    // The top of the world lies exactly along the top of the window: no sky above it.
+    expect(toScreen({ lng: 0, lat: MAX_MERCATOR_LATITUDE }, tipped).y).toBeCloseTo(0, 3);
+  });
+
+  it('carries a point from the real window into the flat one and back', () => {
+    const flat = flatPoint({ x: 120, y: 300 }, 45);
+    expect(flat.y).toBeCloseTo(300 / Math.cos(Math.PI / 4), 9);
+    expect(drawnAt({ top: flat.y, height: 0 }, 45).top).toBeCloseTo(300, 9);
   });
 });

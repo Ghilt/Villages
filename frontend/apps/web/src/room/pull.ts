@@ -3,7 +3,7 @@ import type * as maplibregl from 'maplibre-gl';
 import { note } from '../debug/log';
 import { deskOnScreen } from '../desk/deskTop';
 import { CAMERA } from '../map/mapConfig';
-import { floorZoom, sheetOnScreen } from '../map/sheet';
+import { flatPoint, flatWindow, floorZoom, sheetOnScreen } from '../map/sheet';
 import type { Viewport } from '../map/sheet';
 import { easeTowards } from '../sprites/twoForms';
 
@@ -96,7 +96,10 @@ interface Hooks {
  */
 export function attachPull({ map, surface, seatNow, stripNow }: Hooks): () => void {
   const container = map.getContainer();
-  const viewport = (): Viewport => ({ width: container.clientWidth, height: container.clientHeight });
+  // The window as the flat world sees it, like everything else about the desk and the room: the camera
+  // is tipped, and the room's rules are the flat ones in a window taller by one over the lean. See 0058.
+  const viewport = (): Viewport =>
+    flatWindow({ width: container.clientWidth, height: container.clientHeight }, map.getPitch());
 
   /** How far the pull is, in zoom levels, which is what a wheel notch is measured against. */
   const span = (): number => {
@@ -177,7 +180,9 @@ export function attachPull({ map, surface, seatNow, stripNow }: Hooks): () => vo
     const started: Dive = {
       going,
       progress: going === 'in' ? 0 : 1,
-      keep: keepAbove({ x: foot.x, y: foot.y }, CAMERA.maxZoom),
+      // Worked out on the real window, where the castle stands upright, and then carried into the flat
+      // one, where the dive's arithmetic is done.
+      keep: flatPoint(keepAbove({ x: foot.x, y: foot.y }, CAMERA.maxZoom), map.getPitch()),
       span: spanTo(end),
       end,
     };
@@ -283,7 +288,7 @@ export function attachPull({ map, surface, seatNow, stripNow }: Hooks): () => vo
         // The way in is through your own house, so it is only there when that is what you are looking at.
         const seat = seatNow();
         const foot = seat === null ? null : map.project([seat.lon, seat.lat]);
-        if (seat === null || foot === null || !overTheHolding({ x: foot.x, y: foot.y }, view)) {
+        if (seat === null || foot === null || !overTheHolding(flatPoint(foot, map.getPitch()), view)) {
           return;
         }
         event.preventDefault();
@@ -345,7 +350,7 @@ export function attachPull({ map, surface, seatNow, stripNow }: Hooks): () => vo
   };
 }
 
-/** The camera as `sheetOnScreen` wants it. */
+/** The camera as `sheetOnScreen` wants it: looking straight down, in the flat window. */
 function seen(map: maplibregl.Map): {
   center: { lng: number; lat: number };
   zoom: number;
@@ -357,7 +362,6 @@ function seen(map: maplibregl.Map): {
   return {
     center: { lng: centre.lng, lat: centre.lat },
     zoom: map.getZoom(),
-    width: container.clientWidth,
-    height: container.clientHeight,
+    ...flatWindow({ width: container.clientWidth, height: container.clientHeight }, map.getPitch()),
   };
 }

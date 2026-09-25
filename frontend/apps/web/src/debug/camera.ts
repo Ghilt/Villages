@@ -1,11 +1,15 @@
+import { CAMERA, lensFor } from '../map/mapConfig';
+
 import { note } from './log';
+
+export { PARALLEL_FOV, WIDE_FOV } from '../map/mapConfig';
 
 /**
  * Where the camera is standing: how far it has tipped and which way is up.
  *
  * The same shape as `scenery.ts` and every other switch in the panel: a module with a set of listeners,
- * read through `useSyncExternalStore`. Adam's, not a player's. A player's map is flat and north-up and
- * these all start at the numbers that mean exactly that; see decision record 0014.
+ * read through `useSyncExternalStore`. Adam's, not a player's. These all start at the player's camera,
+ * `CAMERA` in `map/mapConfig.ts`, tipped back and north-up on a diamond lattice; see decision record 0058.
  *
  * How wide the camera sees is not a setting: it follows from the tilt, `lensOf`. A camera with a wide
  * field of view stands close to what it looks at, so the far side of the window is further away than the
@@ -16,9 +20,9 @@ import { note } from './log';
  */
 
 export interface CameraSettings {
-  /** How far the camera has tipped from straight down, in degrees. Zero is the flat map a player gets. */
+  /** How far the camera has tipped from straight down, in degrees. A player's is `CAMERA.pitch`. */
   pitch: number;
-  /** Which way is up, in degrees clockwise from north. Zero is north-up, which a player also gets. */
+  /** Which way is up, in degrees clockwise from north. Zero is north-up, which a player gets. */
   bearing: number;
   /**
    * How far the grid the ground's colour is decided on is turned from the world's own axes, in degrees.
@@ -33,31 +37,9 @@ export interface CameraSettings {
   latticeSize: number;
 }
 
-/** MapLibre's own field of view, which is what a camera standing in the world looks like. */
-export const WIDE_FOV = 36.86989764584402;
-
-/**
- * How far the field of view closes when the camera tips, which is MapLibre's own clamp.
- *
- * It goes all the way to the clamp because anything short of it is measurably not parallel, and the
- * overlay's projection is the fov-nothing limit exactly. Measured at sixty degrees of tilt, the worst
- * disagreement anywhere on the screen between where the map draws the ground and where the overlay
- * draws a thing standing on it is about **ten pixels for every degree** of field of view: ten at one
- * degree, one at a tenth. See experiment 0008.
- */
-export const PARALLEL_FOV = 0.1;
-
-/**
- * How wide the camera sees, which follows from how far it has tipped and is nobody's to set.
- *
- * Tipped, it is parallel, always. The marks and the scenery are placed by a projection that is exact for
- * a parallel camera and hundreds of pixels wrong for a wide one, so a tipped camera with a wide lens
- * would slide every tree off its ground - and a combination of sliders that can do that is a glitch hunt
- * waiting for somebody to reach it by accident. So there is no such combination. Flat, it is MapLibre's
- * own, which looks exactly the same straight down and leaves the map a player gets untouched.
- */
+/** How wide the camera sees for these settings: `lensFor` in `map/mapConfig.ts`, parallel whenever tipped. */
 export function lensOf(how: Pick<CameraSettings, 'pitch'>): number {
-  return how.pitch > 0 ? PARALLEL_FOV : WIDE_FOV;
+  return lensFor(how.pitch);
 }
 
 /**
@@ -121,12 +103,15 @@ export const DIAMOND_LATTICE_TURN = 45;
  */
 export const DIAMOND_LATTICE_SIZE = 4;
 
-const START: CameraSettings = {
-  pitch: 0,
-  bearing: 0,
-  latticeTurn: 0,
-  latticeSize: 1,
+/** Where a player's camera is, which is where the panel starts and where its `player` button goes back to. */
+export const PLAYERS: CameraSettings = {
+  pitch: CAMERA.pitch,
+  bearing: CAMERA.bearing,
+  latticeTurn: CAMERA.lattice.turn,
+  latticeSize: CAMERA.lattice.size,
 };
+
+const START: CameraSettings = PLAYERS;
 
 let settings: CameraSettings = { ...START };
 const listeners = new Set<() => void>();
@@ -142,9 +127,14 @@ export function watchCamera(listener: () => void): () => void {
   };
 }
 
-/** Whether this camera is flat and north-up, which is the only one a player is ever shown. */
-export function isFlat(how: CameraSettings): boolean {
-  return how.pitch === 0 && how.bearing === 0;
+/** Whether this is the camera a player is shown, turn, tip and lattice alike. */
+export function isPlayers(how: CameraSettings): boolean {
+  return (
+    how.pitch === PLAYERS.pitch &&
+    how.bearing === PLAYERS.bearing &&
+    how.latticeTurn === PLAYERS.latticeTurn &&
+    how.latticeSize === PLAYERS.latticeSize
+  );
 }
 
 /** Whether the ground is painted on the grid it is stored on, which is what it was before 0008. */
@@ -164,8 +154,8 @@ export function setCamera(change: Partial<CameraSettings>): void {
   }
 
   // Said as the thing that is seen rather than as the numbers behind it. See decision record 0023.
-  if (isFlat(next) && !isFlat(settings)) {
-    note('camera', 'flat and north-up, the way a player gets it');
+  if (isPlayers(next) && !isPlayers(settings)) {
+    note('camera', 'back where a player has it');
   } else if (next.pitch !== settings.pitch || next.bearing !== settings.bearing) {
     note(
       'camera',

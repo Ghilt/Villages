@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
-import { sheetCoversView, sheetOnScreen } from '../map/sheet';
+import { drawnAt, flatWindow, sheetCoversView, sheetOnScreen } from '../map/sheet';
 import { SEA } from '../map/worldStyle';
 
 import { deskOnScreen } from './deskTop';
@@ -28,6 +28,10 @@ const GRAINS_ACROSS_THE_SHEET = 4;
  * with the sheet anywhere near the middle, so nothing about the floor has changed; shove the sheet hard
  * against one side of the window and the far edge comes into view, which is the desk being an object.
  * See `deskTop.ts` and experiment 0009.
+ *
+ * It lies on the same tipped ground the world does. Everything is laid out as if the camera looked
+ * straight down, in the flat window `flatWindow` gives, and squashed by the tip only as it is drawn, so the
+ * sheet, its shadow and the grain are foreshortened exactly as the tiles are. See decision record 0058.
  */
 export function Desk({ map }: DeskProps) {
   const deskRef = useRef<HTMLDivElement | null>(null);
@@ -44,7 +48,8 @@ export function Desk({ map }: DeskProps) {
 
     const place = () => {
       const container = map.getContainer();
-      const viewport = { width: container.clientWidth, height: container.clientHeight };
+      const pitch = map.getPitch();
+      const viewport = flatWindow({ width: container.clientWidth, height: container.clientHeight }, pitch);
       const centre = map.getCenter();
       const lying = sheetOnScreen({
         center: { lng: centre.lng, lat: centre.lat },
@@ -56,23 +61,30 @@ export function Desk({ map }: DeskProps) {
       if (covered) {
         return;
       }
-      const standing = deskOnScreen(lying, viewport);
+      const standing = drawnAt(deskOnScreen(lying, viewport), pitch);
+      const paper = drawnAt(
+        { left: lying.left, top: lying.top, width: lying.size, height: lying.size },
+        pitch,
+      );
+      const grain = drawnAt({ top: 0, height: lying.size / GRAINS_ACROSS_THE_SHEET }, pitch).height;
       top.style.transform = `translate(${standing.left}px, ${standing.top}px)`;
       top.style.width = `${standing.width}px`;
       top.style.height = `${standing.height}px`;
-      top.style.backgroundSize = `${lying.size / GRAINS_ACROSS_THE_SHEET}px`;
-      top.style.backgroundPosition = `${lying.left - standing.left}px ${lying.top - standing.top}px`;
-      sheet.style.transform = `translate(${lying.left}px, ${lying.top}px)`;
-      sheet.style.width = `${lying.size}px`;
-      sheet.style.height = `${lying.size}px`;
+      top.style.backgroundSize = `${lying.size / GRAINS_ACROSS_THE_SHEET}px ${grain}px`;
+      top.style.backgroundPosition = `${paper.left - standing.left}px ${paper.top - standing.top}px`;
+      sheet.style.transform = `translate(${paper.left}px, ${paper.top}px)`;
+      sheet.style.width = `${paper.width}px`;
+      sheet.style.height = `${paper.height}px`;
     };
 
     place();
     map.on('move', place);
     map.on('resize', place);
+    map.on('pitch', place);
     return () => {
       map.off('move', place);
       map.off('resize', place);
+      map.off('pitch', place);
     };
   }, [map]);
 

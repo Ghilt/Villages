@@ -3,8 +3,8 @@ import * as maplibregl from 'maplibre-gl';
 
 import { fromMercator, toMercatorExact } from '../sprites/cameraMath';
 
-import { CAMERA, resolveStyle } from './mapConfig';
-import { constrainCamera, floorZoom } from './sheet';
+import { CAMERA, lensFor, resolveStyle } from './mapConfig';
+import { constrainCamera, flatWindow, floorZoom } from './sheet';
 
 import 'maplibre-gl/dist/maplibre-gl.css';
 
@@ -30,7 +30,16 @@ export function MapView({ worldRoot, onReady }: MapViewProps) {
       return;
     }
 
-    const viewport = () => ({ width: container.clientWidth, height: container.clientHeight });
+    // The window as the flat world sees it, because the camera is tipped: the rules for how far it may
+    // go and how far back it may pull are the flat rules in a window taller by one over the lean. The
+    // tip is read off the map once there is one, so the debug panel's slider moves the edges with it;
+    // inside the constructor there is not, and the tip it is being built with is the player's.
+    let built: maplibregl.Map | null = null;
+    const viewport = () =>
+      flatWindow(
+        { width: container.clientWidth, height: container.clientHeight },
+        built?.getPitch() ?? CAMERA.pitch,
+      );
 
     // MapLibre asks this from inside its constructor, before `map` exists, so it may reach for the
     // container and nothing else. It replaces MapLibre's rule that the world must fill the window with
@@ -49,11 +58,13 @@ export function MapView({ worldRoot, onReady }: MapViewProps) {
       minZoom: CAMERA.minZoom,
       maxZoom: CAMERA.maxZoom,
       transformConstrain: keepOnTheSheet,
-      // The ceiling, not the camera. A player still gets a flat, north-up world, because nothing turns
-      // the handlers on and the camera starts and stays at zero; what this opens is the debug panel's
-      // Camera section, which is the instrument for experiment 0008. Eighty-five rather than the sixty
-      // MapLibre defaults to, so the lever can be pushed past the angles worth looking at rather than
-      // stopping exactly on one of them.
+      // Tipped back and north-up, which is the player's camera and decision record 0058. The lens that
+      // goes with it is set just below, because it is not a constructor option.
+      pitch: CAMERA.pitch,
+      bearing: CAMERA.bearing,
+      // The ceiling, not the camera: what this opens is the debug panel's Camera section, the instrument
+      // for experiment 0008. Eighty-five rather than the sixty MapLibre defaults to, so the lever can be
+      // pushed past the angles worth looking at rather than stopping exactly on one of them.
       maxPitch: 85,
       renderWorldCopies: false,
       // No attribution control, and no controls at all: the map is the world rather than a map of it, and
@@ -65,11 +76,17 @@ export function MapView({ worldRoot, onReady }: MapViewProps) {
       attributionControl: false,
     });
 
-    // Every way a player could turn the world by hand stays closed. The camera can now be tilted, but
-    // only by the debug panel setting it, which is Adam's lever and not a player's control: 0014 says
-    // the map is flat and north-up and that is still what anybody playing gets. See experiment 0008.
+    built = map;
+    // Parallel, because it is tipped: the overlay is placed by a projection that is exact only for a
+    // parallel camera, and a wide lens would slide every mark and tree off its ground. See `lensFor`.
+    map.setVerticalFieldOfView(lensFor(CAMERA.pitch));
+
+    // Every way a player could turn or tip the world by hand stays closed. The camera's angle is the
+    // world's, not a player's control; only the debug panel moves it, which is Adam's lever. Two fingers
+    // dragged up a touch screen tip a MapLibre map by default, and that one was open until 0058.
     map.dragRotate.disable();
     map.touchZoomRotate.disableRotation();
+    map.touchPitch.disable();
     map.keyboard.disableRotation();
 
     // The wheel asks the rule below directly. There were two buttons here until 0049, in the corner the
@@ -83,6 +100,8 @@ export function MapView({ worldRoot, onReady }: MapViewProps) {
     };
     settleFloor();
     map.on('resize', settleFloor);
+    // The floor is measured in the flat window, which grows as the camera tips.
+    map.on('pitch', settleFloor);
 
     if (import.meta.env.DEV) {
       // A handle for the browser console and for the end-to-end tests, which assert on the camera.

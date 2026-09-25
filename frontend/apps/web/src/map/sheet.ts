@@ -38,6 +38,42 @@ export interface Bounds {
 }
 
 /**
+ * The window as the flat world sees it: as wide as the real one, and taller by one over the lean.
+ *
+ * The player's camera is tipped back and north-up, and a parallel camera tipped north-up does exactly one
+ * thing to what lies flat: it squashes its height by the cosine of the tip, measured from the top of the
+ * window. So every rule here - the sheet, the desk, the room, how far the camera may go - is worked out as
+ * if the map were flat, in a window that much taller, and each rectangle is squashed back only as it is
+ * drawn, with `drawnAt`. One conversion at each end, rather than a tip threaded through every rule, and at
+ * no tip at all both are the identity. A turned camera is not this: north-up is what makes it exact.
+ * See docs/adr/0058.
+ */
+export function flatWindow(viewport: Viewport, pitch: number): Viewport {
+  return { width: viewport.width, height: viewport.height / leanOf(pitch) };
+}
+
+/** Where a rectangle laid out in the flat window is drawn on the real one. */
+export function drawnAt<T extends { top: number; height: number }>(rect: T, pitch: number): T {
+  const lean = leanOf(pitch);
+  return { ...rect, top: rect.top * lean, height: rect.height * lean };
+}
+
+/** Where a point in the flat window is drawn on the real one. */
+export function drawnPoint(point: { x: number; y: number }, pitch: number): { x: number; y: number } {
+  return { x: point.x, y: point.y * leanOf(pitch) };
+}
+
+/** Where a point on the real window lies in the flat one: a mark's foot, say, which MapLibre gave tipped. */
+export function flatPoint(point: { x: number; y: number }, pitch: number): { x: number; y: number } {
+  return { x: point.x, y: point.y / leanOf(pitch) };
+}
+
+/** How much the tip squashes what lies flat: its cosine, and never quite nothing. */
+function leanOf(pitch: number): number {
+  return Math.max(1e-6, Math.cos((pitch * Math.PI) / 180));
+}
+
+/**
  * How far past the world the camera's centre may stray, in worlds. It has to leave the world for the sheet
  * to reach the corner of a wide window, and past about four the round trip through a latitude loses pixels.
  */

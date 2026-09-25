@@ -3,7 +3,7 @@ import type * as maplibregl from 'maplibre-gl';
 
 import { FLAT_MAX_ZOOM, TILE } from '../map/painterlyMessages';
 import { forgetPaintedTally } from '../map/painterlyTiles';
-import { sheetCoversView, sheetOnScreen } from '../map/sheet';
+import { flatWindow, sheetCoversView, sheetOnScreen } from '../map/sheet';
 import { WORLD_MASTER_WIDTH } from '../map/worldStyle';
 import { AreasView } from '../areas/AreasView';
 import { BuildBadge } from '../version/BuildBadge';
@@ -78,7 +78,10 @@ export function DebugPanel({ map, worldRoot, master, renderer, onRenderer }: Deb
       const tileZoom = Math.max(0, Math.min(Math.round(map.getZoom()), map.getMaxZoom()));
 
       const container = map.getContainer();
-      const viewport = { width: container.clientWidth, height: container.clientHeight };
+      const viewport = flatWindow(
+        { width: container.clientWidth, height: container.clientHeight },
+        map.getPitch(),
+      );
       const sheet = sheetOnScreen({
         center: { lng: centre.lng, lat: centre.lat },
         zoom: map.getZoom(),
@@ -90,7 +93,7 @@ export function DebugPanel({ map, worldRoot, master, renderer, onRenderer }: Deb
           'camera',
           covered
             ? 'the sheet covers the view again'
-            : `the sheet no longer covers the view: ${Math.round(sheet.size)} px on ${viewport.width} by ${viewport.height}`,
+            : `the sheet no longer covers the view: ${Math.round(sheet.size)} px on ${container.clientWidth} by ${container.clientHeight}`,
         );
       }
       coveredWas.current = covered;

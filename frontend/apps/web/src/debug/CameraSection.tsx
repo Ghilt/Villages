@@ -11,9 +11,10 @@ import {
   TRIMETRIC_BEARING,
   TRIMETRIC_PITCH,
   cameraNow,
-  isFlat,
+  isPlayers,
   isSquareGround,
   lensOf,
+  PLAYERS,
   setCamera,
   watchCamera,
 } from './camera';
@@ -22,16 +23,16 @@ import { Section } from './Section';
 /**
  * Where the camera stands, and what the world looks like from there.
  *
- * **The lever of experiment 0008, not a part of the game.** A player's map is flat and north-up, which
- * is decision record 0014 and is still true: nothing here is reachable by anybody playing, and every
- * control starts at the number that means flat. This is the instrument for one question - whether a
- * world drawn at an angle is a world worth having - and that question is answered by looking, which is
- * why it is a slider and not a proposal. See decision record 0023.
+ * **The lever of experiment 0008, not a part of the game.** Nothing here is reachable by anybody
+ * playing. Every control starts at the player's camera, tipped back forty-five degrees and north-up on a
+ * diamond lattice, which is what the experiment settled and decision record 0058 records, and `player`
+ * puts it back there. Everything else is for looking at a world from another angle, which is answered by
+ * looking and is why it is a slider and not a proposal. See decision record 0023.
  *
- * What the map does under it is honest and what everything else does is not, on purpose. The terrain,
- * the coast, the areas, the marks and the scenery all follow the camera, the marks and the scenery
- * standing upright on the ground as it tips. The desk does not, because it is a square of CSS and a
- * tilted world is not a square. That is a finding, not a bug. The experiment record says so.
+ * The terrain, the coast, the areas, the marks and the scenery all follow the camera, the marks and the
+ * scenery standing upright on the ground as it tips. North-up, the desk and the room follow it too: a
+ * tip north-up only squashes the height of what lies flat, and they are squashed with it. Turned, they
+ * do not, because a turned desk is not a rectangle of CSS any more. The experiment record says so.
  *
  * There is no lever for how wide the camera sees: tipped it is always parallel, because the overlay is
  * only right for a parallel camera. See `lensOf`.
@@ -58,18 +59,18 @@ export function CameraSection({ map }: CameraSectionProps) {
     map.jumpTo({ pitch: how.pitch, bearing: how.bearing });
   }, [map, how]);
 
-  const flat = isFlat(how);
+  const players = isPlayers(how);
   const wide = (1 / Math.cos((how.pitch * Math.PI) / 180)).toFixed(2);
 
   const tools = (
     <button
       type="button"
-      className={flat ? 'debug__button debug__button--on' : 'debug__button'}
-      onClick={() => setCamera({ pitch: 0, bearing: 0 })}
-      aria-pressed={flat}
-      title="put the camera back where a player has it"
+      className={players ? 'debug__button debug__button--on' : 'debug__button'}
+      onClick={() => setCamera(PLAYERS)}
+      aria-pressed={players}
+      title="put the camera back where a player has it: tipped, north-up, on diamonds"
     >
-      flat
+      player
     </button>
   );
 
@@ -90,7 +91,7 @@ export function CameraSection({ map }: CameraSectionProps) {
       />
       <p className="debug-map__note">
         {how.pitch === 0
-          ? 'Straight down, which is the map a player gets'
+          ? 'Straight down, a map rather than a world'
           : `${how.pitch.toFixed(1)} degrees, so a square of ground is drawn ${wide} times as wide as it is tall, and seen parallel, with no horizon`}
         {how.pitch === STEEPEST_PARALLEL_PITCH &&
           '. This is as far as it tips: past here a parallel camera asks for no tiles and the screen goes one colour'}

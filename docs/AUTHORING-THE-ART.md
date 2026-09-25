@@ -42,7 +42,7 @@ Anything an image tool gives you, untouched:
 
 ## What it should look like
 
-- **Drawn from the camera's angle.** The player's camera is moving to look north and down at 45 degrees. A round tree
+- **Drawn from the camera's angle.** The player's camera looks north and down at 45 degrees (decision record 0058). A round tree
   hides a different angle, but a building does not: draw buildings front-on and seen from that height, not
   as isometric diamonds.
 - **Light from the upper right**, because the first picture has it there and every picture has to agree.

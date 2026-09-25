@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { CAMERA, EARTH_STYLE_URL, resolveStyle } from './mapConfig';
+import { STEEPEST_PARALLEL_PITCH } from '../debug/camera';
+
+import { CAMERA, EARTH_STYLE_URL, PARALLEL_FOV, lensFor, resolveStyle } from './mapConfig';
 
 /** Where a master's world is served from. One directory each; see packages/world/src/masters.ts. */
 const ROOT = '/world/masters/terrain';
@@ -83,6 +85,26 @@ describe('the camera', () => {
   it('leaves the sheet a real size at the floor, and no bigger than the window', () => {
     expect(CAMERA.sheetAtFloor).toBeGreaterThan(0);
     expect(CAMERA.sheetAtFloor).toBeLessThanOrEqual(1);
+  });
+
+  it('is tipped, but no further than a parallel camera still draws the world', () => {
+    expect(CAMERA.pitch).toBeGreaterThan(0);
+    expect(CAMERA.pitch).toBeLessThanOrEqual(STEEPEST_PARALLEL_PITCH);
+  });
+
+  it('sees parallel, because a tipped camera with a wide lens slides every mark off its ground', () => {
+    expect(lensFor(CAMERA.pitch)).toBe(PARALLEL_FOV);
+  });
+
+  it('is north-up, which is what lets the desk and the room follow the tip by squashing its height', () => {
+    expect(CAMERA.bearing).toBe(0);
+  });
+
+  it('reads the ground on a turned lattice of whole world units', () => {
+    expect(CAMERA.lattice.turn).toBeGreaterThanOrEqual(0);
+    expect(CAMERA.lattice.turn).toBeLessThanOrEqual(45);
+    expect(Number.isInteger(CAMERA.lattice.size)).toBe(true);
+    expect(CAMERA.lattice.size).toBeGreaterThanOrEqual(1);
   });
 
   it('starts somewhere on the map', () => {

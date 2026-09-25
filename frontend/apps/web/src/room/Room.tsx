@@ -5,7 +5,7 @@ import type * as maplibregl from 'maplibre-gl';
 import { note } from '../debug/log';
 import { deskCoversView, deskOnScreen } from '../desk/deskTop';
 import type { DeskTop } from '../desk/deskTop';
-import { floorZoom, sheetOnScreen } from '../map/sheet';
+import { drawnAt, drawnPoint, flatWindow, floorZoom, sheetOnScreen } from '../map/sheet';
 
 import { lightAt, roomAt, sceneAt, solidAt } from './dive';
 import { attachPull, pullNow, watchPull } from './pull';
@@ -42,6 +42,11 @@ const lay = (element: HTMLElement, rect: DeskTop): void => {
  * house until the mark is all there is, and the room is inside it.
  *
  * This element is also the pointer surface; see the note on the two of them below. Experiment 0009.
+ *
+ * Like the desk, it is laid out as if the camera looked straight down, in the flat window, and each
+ * rectangle and point is squashed by the tip only as it is written to the page. A scale about the middle
+ * of the flat window is a scale about the middle of the real one, so the pull's own numbers do not change
+ * at all. See decision record 0058.
  */
 export function Room({ map, seat, strip, children }: RoomProps) {
   const surfaceRef = useRef<HTMLDivElement | null>(null);
@@ -80,10 +85,14 @@ export function Room({ map, seat, strip, children }: RoomProps) {
       return;
     }
     const container = map.getContainer();
-    const viewport = { width: container.clientWidth, height: container.clientHeight };
+    const pitch = map.getPitch();
+    const viewport = flatWindow({ width: container.clientWidth, height: container.clientHeight }, pitch);
 
     if (pull.dive !== null) {
-      const { origin, slide, scale } = sceneAt(pull.dive, viewport, pull.dive.progress);
+      const flat = sceneAt(pull.dive, viewport, pull.dive.progress);
+      const origin = drawnPoint(flat.origin, pitch);
+      const slide = drawnPoint(flat.slide, pitch);
+      const scale = flat.scale;
       scene.style.transformOrigin = `${origin.x}px ${origin.y}px`;
       scene.style.transform = `translate(${slide.x}px, ${slide.y}px) scale(${scale})`;
       scene.style.willChange = 'transform';
@@ -92,7 +101,7 @@ export function Room({ map, seat, strip, children }: RoomProps) {
       walls.hidden = true;
       openWas.current = undefined;
       still.hidden = false;
-      lay(still, roomAt(pull.dive, viewport, pull.dive.progress));
+      lay(still, drawnAt(roomAt(pull.dive, viewport, pull.dive.progress), pitch));
       still.style.opacity = `${solidAt(pull.dive.progress)}`;
       return;
     }
@@ -116,7 +125,7 @@ export function Room({ map, seat, strip, children }: RoomProps) {
     const open = pulled && !deskCoversView(desk, viewport, scale);
     walls.hidden = !open;
     if (open) {
-      lay(walls, roomOnScreen(desk));
+      lay(walls, drawnAt(roomOnScreen(desk), pitch));
     }
     // Only while the pull is on and the camera is still pinned at its floor. A dive moves the camera, and
     // the move it fires runs this before React has heard, so without the second half of the guard leaving

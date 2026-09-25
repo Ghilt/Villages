@@ -2,9 +2,10 @@
  * The projection that keeps a sprite standing on its place while the map moves underneath it.
  *
  * Everything here is a pure function of the camera, so the overlay can be trusted without a browser and
- * tested without pixels. It assumes a camera showing the world once, and carries the turn and the tilt of
- * that camera rather than assuming there is none: see experiment 0008. Flat and north-up is still what a
- * player gets, and is still the arithmetic below when pitch and bearing are zero. See docs/adr/0014.
+ * tested without pixels. It assumes a camera showing the world once, parallel whenever it is tipped, and
+ * carries the turn and the tip of that camera rather than assuming there is none: see experiment 0008. A
+ * player's is tipped back forty-five degrees and north-up (docs/adr/0058); at no tip and no turn this is
+ * the flat arithmetic of 0014 exactly.
  */
 
 import { WORLD_MASTER_WIDTH } from '../map/worldStyle';
@@ -38,7 +39,7 @@ export interface CameraView {
   width: number;
   height: number;
   /**
-   * How far the camera has tipped from straight down, in degrees. Zero is the flat map a player gets.
+   * How far the camera has tipped from straight down, in degrees. A player's is `CAMERA.pitch`, forty-five.
    *
    * It only ever squashes: an orthographic camera foreshortens the axis it leans along and does nothing
    * else, so sixty degrees is a half and the classic two-to-one of an isometric game. See 0008.
