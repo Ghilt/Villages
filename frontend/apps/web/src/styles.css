@@ -2456,21 +2456,27 @@ body,
   text-overflow: ellipsis;
 }
 
-/* Put away: the kind it is and the way back, and nothing else. */
+/*
+ * Put away: the window's first row and nothing else - its mark, which one it is, its size and its close -
+ * so a strip says which house rather than that it is a house, and can be shut without being opened.
+ */
 .inspect--strip {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.5rem;
   /* The compass is standing in the far end of this strip, so whatever the strip put there - the marks
      on four of them, the word on the map's - steps in from the right rather than sitting under it. */
   padding: 0 calc(0.3rem + var(--corner-right, 0px)) 0 0.75rem;
   overflow: hidden;
 }
 
-.inspect--strip .inspect__kind {
-  flex: 1;
+/* In the rail a strip is as tall as the row it is, so putting a window away folds it up to its first row. */
+.stage[data-form='spread'] .rail .inspect--strip {
+  padding-top: 0.45rem;
+  padding-bottom: 0.4rem;
 }
 
+/* The first row: the mark, the name, the size control and the close, in that order. */
 .inspect__bar {
   display: flex;
   align-items: center;
@@ -2479,12 +2485,12 @@ body,
   border-bottom: 1px solid var(--parchment-edge);
 }
 
-.inspect__kind {
-  flex: 1;
-  font-size: 0.62rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
+/* What kind of thing it is, as the mark that kind is known by everywhere else. */
+.inspect__mark {
+  display: inline-flex;
+  flex: none;
+  width: 1.3rem;
+  height: 1.3rem;
 }
 
 /*
@@ -2528,16 +2534,23 @@ body,
   margin: 0.7rem 0 0.4rem 0.8rem;
 }
 
+/* Which one it is, on the first row: one line, trimmed rather than wrapped, so the row is one height. */
 .inspect__name {
-  margin: 0.7rem 0 0;
-  font-size: 1.25rem;
-  line-height: 1.15;
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: normal;
+  line-height: 1.2;
   font-variant: small-caps;
   letter-spacing: 0.03em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .inspect__blazon {
-  margin: 0.15rem 0 0;
+  margin: 0.55rem 0 0;
   font-size: 0.8rem;
   line-height: 1.35;
   font-style: italic;
@@ -2870,7 +2883,7 @@ body,
 
   .hud__panel--strip .hud__name,
   .figures--strip .figures__kind,
-  .inspect--strip .inspect__kind,
+  .inspect--strip .inspect__name,
   .navigate--strip .navigate__kind,
   .choice--strip .choice__aside,
   .map-strip .map-strip__name {

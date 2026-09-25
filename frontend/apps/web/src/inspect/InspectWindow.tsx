@@ -7,7 +7,7 @@ import { focusOn } from '../map/focus';
 import { Icon } from '../stage/Icons';
 import { PaneSizeControl } from '../stage/PaneSizeControl';
 import { baysNow, put, watchBays, type Which } from '../stage/bays';
-import { MAP_PANE, type Room } from '../stage/panes';
+import { MAP_PANE, type Room, SUBJECT_MARKS } from '../stage/panes';
 import type { Description, Link } from './describe';
 import { inspect, stopInspecting } from './opening';
 import { paneIdOf, type Subject } from './subjects';
@@ -34,6 +34,45 @@ import { remember } from './trail';
  * **Show it on the map is its mark rather than its words**, in both forms: it is the only link that does
  * not open a window, and the map is the one thing on the stage a player already knows the mark for.
  */
+
+interface WindowBarProps {
+  subject: Subject;
+  /** What kind of thing it is, in words: what the mark says to anyone hovering it or reading the page. */
+  kind: string;
+  /** Which one: the name, where one is known. */
+  name: string;
+  room: Room;
+}
+
+/**
+ * A window's first row: its mark, its name, its size control and its close.
+ *
+ * **Put away, this row is the whole window**, which is why it is its own piece: a strip says which house
+ * rather than that it is a house, and can be shut without being opened first. The kind is the mark and no
+ * longer a word above the name, the mark each kind is known by everywhere else. See `MECHANICS.md`.
+ */
+export function WindowBar({ subject, kind, name, room }: WindowBarProps) {
+  return (
+    <>
+      <span className="inspect__mark" role="img" aria-label={kind} title={kind}>
+        <Icon name={SUBJECT_MARKS[subject.kind]} />
+      </span>
+      <h2 className="inspect__name" title={name}>
+        {name}
+      </h2>
+      <PaneSizeControl room={room} />
+      <button
+        type="button"
+        className="inspect__close"
+        aria-label={`close ${name}`}
+        title={`close ${name}`}
+        onClick={() => stopInspecting(subject)}
+      >
+        <Icon name="close" />
+      </button>
+    </>
+  );
+}
 
 interface InspectWindowProps {
   subject: Subject;
@@ -82,17 +121,7 @@ export function InspectWindow({ subject, said, along, room }: InspectWindowProps
   return (
     <section className="inspect" aria-live="polite">
       <header className="inspect__bar">
-        <span className="inspect__kind">{said.kind}</span>
-        <PaneSizeControl room={room} />
-        <button
-          type="button"
-          className="inspect__close"
-          aria-label={`close ${said.name}`}
-          title={`close ${said.name}`}
-          onClick={() => stopInspecting(subject)}
-        >
-          <Icon name="close" />
-        </button>
+        <WindowBar subject={subject} kind={said.kind} name={said.name} room={room} />
       </header>
 
       {said.likeness !== undefined && (
@@ -100,7 +129,6 @@ export function InspectWindow({ subject, said, along, room }: InspectWindowProps
           <Portrait portrait={said.likeness.portrait} name={said.name} />
         </div>
       )}
-      <h2 className="inspect__name">{said.name}</h2>
       {said.under !== undefined && <p className="inspect__blazon">{said.under}</p>}
 
       {/* Bare `dt`/`dd`, not wrapped in a row each: the list is a two-column grid and a wrapper would

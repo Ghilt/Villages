@@ -132,6 +132,14 @@ export function clearTrail(): void {
   }
 }
 
+/**
+ * The name a thing was last seen under, if it was ever seen: what a window put away or out of view says,
+ * so its strip names which one rather than what kind.
+ */
+export function lastNamed(steps: readonly Step[], subject: Subject): string | undefined {
+  return steps.find((step) => sameSubject(step.subject, subject))?.name;
+}
+
 /** What a step is keyed by in a list. */
 export function stepKey(step: Step): string {
   return keyOf(step.subject);

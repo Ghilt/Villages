@@ -151,3 +151,22 @@ describe('the trail', () => {
     });
   });
 });
+
+/*
+ * What a window put away or out of view is called: the name it was last seen under, so a strip says which
+ * house rather than that it is a house. Nothing to go on, and the window falls back to the kind's word.
+ */
+describe('the name a thing was last seen under', () => {
+  it('is the latest name the trail has for it, and nothing for a thing never seen', async () => {
+    stubStorage();
+    const { lastNamed, remember, trailNow } = await freshTrail();
+
+    remember(HOUSE, 'Ravenscar');
+    remember(AREA, 'the marsh');
+    remember(HOUSE, 'Ravenscar the Younger');
+
+    expect(lastNamed(trailNow(), HOUSE)).toBe('Ravenscar the Younger');
+    expect(lastNamed(trailNow(), AREA)).toBe('the marsh');
+    expect(lastNamed(trailNow(), { kind: 'character', id: 'nobody' })).toBeUndefined();
+  });
+});

@@ -123,7 +123,9 @@ word across 44 pixels and eight hundred pixels of room along one. One shape and 
 pane, so that putting anything away looks like putting anything else away, and two panes that say
 otherwise and say why: the **map** carries no control and is itself the way back, and **navigation**
 carries the marks of what it could put in the other bay, because that is the strip a player arrives in by
-pressing the compass. See `RESPONSIVE-DESIGN.md` and decision records 0046 and 0047.
+pressing the compass. An inspect window's strip is its first row - the mark of its kind, the name of the
+thing, the control and the close - so it says which house rather than that it is one. See
+`RESPONSIVE-DESIGN.md`, `MECHANICS.md` and decision records 0046 and 0047.
 
 **The tab bar.** Several **panes** sharing one **bay**, and a strip of marks across its top saying which is
 up. Marks and no words: a column is 26rem at its widest and two words on a tab is a tab that wraps. Its

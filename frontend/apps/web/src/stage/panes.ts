@@ -227,10 +227,22 @@ export function inspectPane(subject: Subject): Pane {
     // many, so a window asks the column for no height of its own.
     spread: 'left',
     tall: null,
-    icon: 'window',
+    icon: SUBJECT_MARKS[subject.kind],
     needs: null,
   };
 }
+
+/**
+ * The mark each kind of subject is known by, at the head of its window where the word for it used to be.
+ *
+ * The same marks the corner's tabs carry, so a house is a shield and a person a bust wherever either is
+ * named; an area is a fence stepping along square corners, which no tab has.
+ */
+export const SUBJECT_MARKS: Readonly<Record<Subject['kind'], IconName>> = {
+  house: 'shield',
+  character: 'figure',
+  area: 'area',
+};
 
 /** The panes that share one tile of the spread, in the order they were declared. */
 export function panesIn(panes: readonly Pane[], where: BayName): readonly Pane[] {

@@ -224,12 +224,24 @@ bottom. That is a description of what is there rather than a decision: the diege
 `LOOK-AND-FEEL.md` says what the player is shown should be part of the world, and a card is not, so this
 is the shape most likely to change.
 
+**Its first row is its mark, its name, its size control and its close.** What kind of thing it is, is the
+mark that kind is known by everywhere else rather than a word above the name: a **shield** for a house and
+a **bust** for a person, the corner's own tabs, and for an area a **fence** stepping along square corners,
+because an area is fenced between painted pixels. The words - *Your house*, *Key figure*, *Area* - are the
+mark's label, for a player who hovers it or a screen reader.
+
 A link is **one button**, and *show it on the map* is the map's own mark rather than words. It carried a
 pair of needles saying which bay to open into until 0049, which is one decision per link too many.
 
 ### UI
 
 A **pane** per subject, opened on a click and closed by the player.
+
+**Put away, a window is its first row**: its mark, which one it is, its size control and its close. The
+strip says *Kettleby* rather than *House*, because a rail of three strips that all said *House* would say
+nothing, and it keeps its close so a window can be shut without being opened first. A subject that has
+left what this page can see keeps the name the **trail** last saw it under, and only one nothing has ever
+named falls back to the word for its kind.
 
 **In the spread** the windows take **left** and stack on its rail, newest at the top, up to three; a fourth
 pushes the oldest off rather than being refused. **On a phone** a window takes the bay that is not the
