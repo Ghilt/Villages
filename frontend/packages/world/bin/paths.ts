@@ -24,6 +24,14 @@ export const PAINTERLY_DIR = resolve(REPO, 'world', 'painterly');
  * Placeholders are drawn into it, never over anything already there.
  */
 export const PORTRAITS_DIR = resolve(REPO, 'world', 'portraits');
+/**
+ * Adam's sprites: a picture per scenery kind in `scenery/` and per mark in `marks/`, any format, any size,
+ * on a flat background or a transparent one, and committed as the portraits are. Placeholders are drawn
+ * into it, never over anything already there.
+ */
+export const SPRITES_DIR = resolve(REPO, 'world', 'sprites');
+/** Where the cut sprites go: an atlas and its frames, served statically. Output, not committed. */
+export const ART_DIR = resolve(REPO, 'frontend', 'apps', 'web', 'public', 'art');
 /** The master image a human edits, and the palette strip to pick its colours from. */
 export const MASTER_DIR = resolve(REPO, 'world', 'master');
 /** Downloaded Natural Earth files. Not committed: they are raw material, not our world. */

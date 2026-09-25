@@ -48,6 +48,8 @@ export type {
   SwayField,
   Where,
 } from './biome.ts';
+export { backgroundOf, crop, footOf, hasOwnAlpha, keyOut, opaqueBox, packShelves } from './art.ts';
+export type { ArtAtlasFile, ArtFrame, Box, Keyed, Placed, Rgba } from './art.ts';
 export { noiseAt } from './noise.ts';
 export type { NoiseField } from './noise.ts';
 export { MAX_MERCATOR_LATITUDE, angularDistance, rotate, toLngLat, toVector } from './sphere.ts';

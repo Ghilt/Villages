@@ -210,7 +210,8 @@ own purpose line, and saying so is part of presenting the step.
 ```
 CLAUDE.md  README.md  debug-quick-start.{ps1,cmd}  .claude/settings.json  scripts/check.{ps1,sh}
 docs/       VISION SETTING MECHANICS LOOK-AND-FEEL RESPONSIVE-DESIGN GLOSSARY ARCHITECTURE ROADMAP
-            TESTING EVENTS BUILDING-A-MECHANIC AUTHORING-THE-WORLD, adr/, experiments/, plans/
+            TESTING EVENTS BUILDING-A-MECHANIC AUTHORING-THE-WORLD AUTHORING-THE-ART, adr/, experiments/,
+            plans/
 contracts/  fixtures/*.json shared by the Kotlin and TypeScript protocol tests
 infra/      docker-compose.yml (MongoDB replica set, RabbitMQ)
 backend/    Gradle multi-module: domain, application, protocol, infrastructure-occurrent, infrastructure-rabbit,
@@ -364,6 +365,17 @@ Commands are added here as the increments land:
   silhouettes**: the shapes are drawn in Pixi and this is the generator's answer, not the map's. `-- --at
   lng,lat` looks anywhere, `-- --view alps` at one of them, `-- --zoom 10.4` closer, `-- --style flat`
   without the paint. This is what a change to `world/biomes.json` is argued from.
+- Sprites: `world/sprites/` is Adam's folder, committed as the master is: `scenery/<kind>` for every
+  kind in `world/biomes.json` and `marks/<name>` for every mark. Any PNG, WebP or JPEG, any size, on a
+  flat background or a transparent one. **Saving over a placeholder replaces it**, and with the dev server
+  running the picture is on the map about a second later with no reload, because the server cuts the
+  folder again whenever a picture in it is saved and tells the page. By hand that is
+  `npm run world:art --prefix frontend`, two seconds: it keys, trims, stands and shrinks every picture into
+  one atlas in `public/art/`, prints a line a sprite, and writes a contact sheet of them at the sizes they
+  are drawn to `world/painterly/art-sheet.png`. `-- --placeholders` draws a placeholder for every sprite
+  that has none and never draws over a file that is there. **No art, no scenery**, and the dev server cuts
+  it on start in a tree that has none. Only the scenery is drawn from the folder so far; the marks are
+  placeholders waiting on a decision about house colours. See `docs/AUTHORING-THE-ART.md` and `docs/adr/0057`.
 - Portraits: `world/portraits/` is Adam's folder, committed as the master is. Upright PNGs, three by
   four and at least 768 wide, each named for whom it suits, `woman-01.png` or `man-01.png`; the name
   without `.png` is the key a character keeps for life. **Saving over a placeholder replaces it and

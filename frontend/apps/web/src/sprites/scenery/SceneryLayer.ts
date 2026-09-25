@@ -1,14 +1,13 @@
-import { Matrix, Particle, ParticleContainer, Rectangle, RenderTexture, Texture } from 'pixi.js';
-import type { Renderer } from 'pixi.js';
+import { ImageSource, Matrix, Particle, ParticleContainer, Rectangle, Texture } from 'pixi.js';
 
+import { note } from '../../debug/log';
 import { WORLD_MASTER_WIDTH } from '../../map/worldStyle';
 import { toMercatorExact, worldSize } from '../cameraMath';
 import type { CameraView } from '../cameraMath';
 import { LONGEST_STEP_MS, PRESENCE_MS, easeTowards, midTrade } from '../twoForms';
 import { CELL, biomeAt, cellOf } from '@villages/world';
-import type { Kind, ScatteredPoint } from '@villages/world';
+import type { ArtAtlasFile, Kind, ScatteredPoint } from '@villages/world';
 import { noteDrawn, pointsOf, sceneryMap, sceneryTally } from './sceneryCells';
-import { colourFor, shapeFor } from './shapes';
 import { MOST_CUT_AT_ONCE, groupCount, groupOf, thresholdOf, wantedAt, worthDrawing } from './showing';
 
 /**
@@ -39,8 +38,11 @@ import { MOST_CUT_AT_ONCE, groupCount, groupOf, thresholdOf, wantedAt, worthDraw
 /** How deep a ring of cells around the view to hold, so a pan finds them already cut. */
 const RING = 1;
 
-/** What each kind is drawn in. Bigger than it is shown, and padded so neighbours cannot bleed. */
-const SLOT = { width: 64, height: 72, pad: 8 } as const;
+/**
+ * Where the art is: the atlas `npm run world:art` cuts from `world/sprites/scenery/`, and its frames.
+ * Generated and per-worktree, like the tiles, and served from the page's own origin. See decision 0057.
+ */
+const ART = '/art/scenery';
 
 export interface SceneryDrawn {
   /** Particles in the container. Every one of them is showing, because the others are not made. */
@@ -58,7 +60,7 @@ interface Held {
   made: Map<number, Particle[]>;
 }
 
-export function createSceneryLayer(renderer: Renderer) {
+export function createSceneryLayer() {
   const container = new ParticleContainer({
     // Only the colour moves. The positions and the sizes are in world units and never change, so the
     // vertex buffer is written once a group rather than once a frame.
@@ -66,8 +68,14 @@ export function createSceneryLayer(renderer: Renderer) {
   });
   const shown = new Map<string, Held>();
   let frames: Texture[] = [];
-  let tints: number[] = [];
-  let atlas: RenderTexture | null = null;
+  /** Where each kind stands in its own frame, as a fraction of it: the anchor. */
+  let feet: { x: number; y: number }[] = [];
+  let atlas: ImageSource | null = null;
+  let artFile: ArtAtlasFile | null = null;
+  /** Asked for and not yet here, so it is asked for once. */
+  let loadingArt = false;
+  /** Asked for and not there, so the layer draws nothing rather than asking every frame. */
+  let noArt = false;
 
   /** How much of each group is on the screen, nought to one, moved by the clock and not by the zoom. */
   let alphaOf = new Float32Array(0);
@@ -75,39 +83,77 @@ export function createSceneryLayer(renderer: Renderer) {
   let lastAt = 0;
 
   /**
-   * One texture a kind, baked once into one atlas.
+   * The art, fetched once: the frames first, then the atlas they point into, by its version.
    *
-   * Built from the sprite map's kinds rather than from a table in code, so adding a kind to
-   * world/biomes.json and regenerating is the whole of adding a kind. A kind with no shape drawn for it
-   * falls back to the bush, which is visibly wrong rather than invisible - a missing kind should be
-   * noticed and not silently skipped.
+   * One texture for every kind, because a particle layer draws from one texture. The browser builds the
+   * mipmaps itself, which is what lets one picture 160 pixels tall be drawn at twenty without sparkling.
+   * Nothing is drawn until it is here, and nothing at all if it was never cut: a master without a
+   * sprite map draws no scenery either, and this is the same rule.
    */
-  function buildAtlas(kinds: readonly Kind[]): void {
-    tints = kinds.map((kind) => colourFor(kind.name));
-    const { width: w, height: h, pad } = SLOT;
-    atlas = RenderTexture.create({
-      width: Math.max(1, kinds.length) * (w + pad * 2),
-      height: h + pad * 2,
-      antialias: true,
-      resolution: 1,
-    });
+  async function loadArt(askForAFrame: () => void): Promise<void> {
+    loadingArt = true;
+    try {
+      const listed = await fetch(`${ART}.json`, { cache: 'no-store' });
+      if (!listed.ok) {
+        noArt = true;
+        note('scenery', 'no art has been cut, so nothing grows. Run npm run world:art --prefix frontend');
+        return;
+      }
+      const file = (await listed.json()) as ArtAtlasFile;
+      const picture = await fetch(`${ART}.webp?v=${file.version}`);
+      // Premultiplied by the browser as it decodes, and said to be, so that nothing multiplies it twice
+      // or not at all. Left straight, the see-through pixels keep a colour, and a colour blended as if it
+      // were premultiplied draws every sprite on a faint box of whatever its transparent pixels held.
+      const bitmap = await createImageBitmap(await picture.blob(), { premultiplyAlpha: 'premultiply' });
+      atlas?.destroy();
+      atlas = new ImageSource({
+        resource: bitmap,
+        alphaMode: 'premultiplied-alpha',
+        autoGenerateMipmaps: true,
+        scaleMode: 'linear',
+      });
+      artFile = file;
+      frames = [];
+      noArt = false;
+      askForAFrame();
+    } catch (cause) {
+      noArt = true;
+      note('scenery', `the art could not be read: ${(cause as Error).message}`);
+    } finally {
+      loadingArt = false;
+    }
+  }
 
-    const move = new Matrix();
-    frames = kinds.map((kind, index) => {
-      const shape = shapeFor(kind.name, w, h);
-      const x = index * (w + pad * 2) + pad;
-      renderer.render({
-        container: shape,
-        target: atlas as RenderTexture,
-        transform: move.identity().translate(x, pad),
-        clear: index === 0,
-      });
-      shape.destroy();
-      return new Texture({
-        source: (atlas as RenderTexture).source,
-        frame: new Rectangle(x, pad, w, h),
-      });
+  /**
+   * A frame and a foot for each of the sprite map's kinds, in its order.
+   *
+   * A kind the atlas has no frame for - one added to world/biomes.json since the art was last cut - is
+   * drawn as the first frame and said once, which is visibly wrong rather than silently missing.
+   */
+  function frameKinds(kinds: readonly Kind[], file: ArtAtlasFile, source: ImageSource): void {
+    const missing: string[] = [];
+    const cut = kinds.map((kind) => {
+      const own = file.frames[kind.name];
+      if (own === undefined) {
+        missing.push(kind.name);
+      }
+      const frame = own ?? Object.values(file.frames)[0];
+      if (frame === undefined) {
+        return { texture: Texture.EMPTY, foot: { x: 0.5, y: 1 } };
+      }
+      return {
+        texture: new Texture({ source, frame: new Rectangle(frame.x, frame.y, frame.width, frame.height) }),
+        foot: { x: frame.footX / frame.width, y: frame.footY / frame.height },
+      };
     });
+    frames = cut.map((one) => one.texture);
+    feet = cut.map((one) => one.foot);
+    if (missing.length > 0) {
+      note(
+        'scenery',
+        `the art has no picture for ${missing.join(', ')}; run npm run world:art --prefix frontend`,
+      );
+    }
     // Named rather than left to be latched from the first particle: the container takes its texture
     // from children[0] once and never looks again, so a container told nothing would keep whichever
     // kind happened to be added first even after that one was taken away.
@@ -128,7 +174,8 @@ export function createSceneryLayer(renderer: Renderer) {
     const first = [...shown.values()][0];
     const firstMade = first === undefined ? undefined : [...first.made.values()][0]?.[0];
     return {
-      atlas: atlas === null ? null : { width: atlas.width, height: atlas.height },
+      atlas:
+        artFile === null ? null : { width: artFile.width, height: artFile.height, version: artFile.version },
       frames: frames.length,
       groups: {
         of: alphaOf.length,
@@ -179,15 +226,15 @@ export function createSceneryLayer(renderer: Renderer) {
     }
     const made = points.map((point) => {
       const texture = frames[point.kind] ?? frames[0]!;
+      const foot = feet[point.kind] ?? { x: 0.5, y: 1 };
+      // The art carries its own colour, so nothing tints it; only the fade's alpha moves after this.
       const particle = new Particle({ texture });
-      // The shapes are drawn white so that one tint colours the whole of one. Set once, here, because
-      // the vertex buffer is static and only the fade's alpha moves after this.
-      particle.tint = tints[point.kind] ?? 0xffffff;
       particle.x = point.x;
       particle.y = point.y;
-      // The foot stands on the place, the same anchor a castle's forms share.
-      particle.anchorX = 0.5;
-      particle.anchorY = 1;
+      // The foot stands on the place, the same anchor a castle's forms share, and it is where the
+      // picture itself stands - measured when the art was cut - rather than the middle of its box.
+      particle.anchorX = foot.x;
+      particle.anchorY = foot.y;
       // Sized in world units, so the container's one transform turns it into pixels.
       particle.scaleY = point.height / texture.height;
       particle.scaleX = particle.scaleY;
@@ -225,7 +272,19 @@ export function createSceneryLayer(renderer: Renderer) {
     },
 
     ready(): boolean {
-      return atlas !== null;
+      return frames.length > 0;
+    },
+
+    /**
+     * The art was cut again while the page was open. Everything drawn is let go of and gathers again
+     * from the new atlas, so a picture saved over a placeholder is on the map without a reload.
+     */
+    artChanged(askForAFrame: () => void): void {
+      if (loadingArt) {
+        return;
+      }
+      takeEverythingOut();
+      void loadArt(askForAFrame);
     },
 
     /**
@@ -256,8 +315,14 @@ export function createSceneryLayer(renderer: Renderer) {
         );
         return { particles: 0, showing: 0, cells: 0, waiting: sceneryTally().waiting, moving: 0 };
       }
-      if (atlas === null) {
-        buildAtlas(map.kinds);
+      if (atlas === null || artFile === null) {
+        if (!loadingArt && !noArt) {
+          void loadArt(askForAFrame);
+        }
+        return { particles: 0, showing: 0, cells: 0, waiting: sceneryTally().waiting, moving: 0 };
+      }
+      if (frames.length === 0) {
+        frameKinds(map.kinds, artFile, atlas);
       }
       if (alphaOf.length !== groupCount(map.kinds)) {
         alphaOf = new Float32Array(groupCount(map.kinds));
@@ -433,7 +498,7 @@ export function createSceneryLayer(renderer: Renderer) {
 
     destroy(): void {
       container.destroy();
-      atlas?.destroy(true);
+      atlas?.destroy();
       atlas = null;
       frames = [];
     },

@@ -78,6 +78,10 @@ change of mind.
 > `masterPerPixel`, which is the one thing the paint is ever told about the view. See decision record
 > 0054 and experiment 0007.
 
+> **Amended, 2026-09-25.** What a kind *looks like* is now authored: a picture in `world/sprites/scenery/`,
+> cut into one atlas by `npm run world:art`. Where every piece stands is still worked out from the ground
+> and stored nowhere, exactly as above. See decision record 0057.
+
 Three kinds of the ten are drawn, and drawn crudely. **What this record settles is how scenery is
 worked out, not what it looks like or how much of it there should be.** Those are the
 **world-generator**'s, in `docs/plans/world-generator.md`, and the measurements behind them are in

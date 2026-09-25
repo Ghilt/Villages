@@ -69,3 +69,6 @@ Thumbs.db
 # merge conflict it exists to prevent. The convention itself is committed.
 .sessions/*
 !.sessions/README.md
+
+# The cut sprites: an atlas and its frames, rebuilt from world/sprites/ by npm run world:art. Output.
+frontend/apps/web/public/art/

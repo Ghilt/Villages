@@ -26,6 +26,9 @@ import type { CameraSource, MapSprite, SceneryHow, SpriteRenderer } from './Spri
  * These are not the sizes the textures come out at: `generateTexture` crops to the ink. What a sprite
  * is scaled against is its own texture's height, in `show`.
  */
+/** What the dev server says when it has cut the art again, `vite/artApi.ts`. */
+const ART_CUT = 'villages:art-cut';
+
 const TEXTURE = {
   castleHeight: 160,
   castleWidth: 150,
@@ -374,6 +377,10 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
    * trade to its end. It stops of its own accord the moment nothing is mid-trade, so a still map with
    * nothing changing on it still draws nothing.
    */
+  function artCut(): void {
+    scenery?.artChanged(keepTrading);
+  }
+
   function keepTrading(): void {
     if (owed !== null || disposed) {
       return;
@@ -551,8 +558,11 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
 
       textures = buildTextures();
       // Under everything, because it is the ground the rest stands on.
-      scenery = createSceneryLayer(app.renderer);
+      scenery = createSceneryLayer();
       stage.addChild(scenery.container);
+      // The dev server cuts the art again whenever a picture in world/sprites/ is saved, and says so
+      // here, so the new picture is on the map without a reload. See decision record 0057.
+      import.meta.hot?.on(ART_CUT, artCut);
       // Under every sprite, because it marks the ground a house stands on rather than the house.
       ring = new Sprite(textures.ring);
       ring.anchor.set(0.5, 0.5);
@@ -685,6 +695,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
     destroy(): void {
       disposed = true;
       scenery?.destroy();
+      import.meta.hot?.off(ART_CUT, artCut);
       scenery = null;
       unwatch?.();
       unwatch = null;

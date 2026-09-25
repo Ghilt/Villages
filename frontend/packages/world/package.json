@@ -19,11 +19,15 @@
     "paint": "node --max-old-space-size=8192 bin/renderPainterly.ts",
     "fetch-world": "node --max-old-space-size=4096 bin/fetchWorld.ts",
     "scenery": "node --max-old-space-size=8192 bin/renderScenery.ts",
-    "portraits": "node bin/drawPortraits.ts"
+    "portraits": "node bin/drawPortraits.ts",
+    "art": "node bin/cutArt.ts"
   },
   "dependencies": {
     "fflate": "^0.8.3",
     "pngjs": "^7.0.0",
     "shapefile": "^0.6.6"
+  },
+  "devDependencies": {
+    "sharp": "^0.34.5"
   }
 }

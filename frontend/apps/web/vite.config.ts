@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
+import { artApi } from './vite/artApi.ts';
 import { buildApi } from './vite/build.ts';
 import { portraitsApi } from './vite/portraitsApi.ts';
 import { worldApi } from './vite/worldApi.ts';
@@ -17,8 +18,9 @@ const tree = worktreeHere(REPO);
 
 export default defineConfig({
   // worldApi is the dev server's own answer to "what masters are there, and cut me that one", and
-  // portraitsApi serves Adam's portraits folder without a cache, so a picture saved over another shows.
-  plugins: [react(), worldApi(), portraitsApi(), worktreeApi(), buildApi()],
+  // portraitsApi serves Adam's portraits folder without a cache, so a picture saved over another shows,
+  // and artApi cuts world/sprites again whenever a picture in it is saved.
+  plugins: [react(), worldApi(), portraitsApi(), artApi(), worktreeApi(), buildApi()],
   define: {
     // Which world this page belongs to. Every tree runs its own game server now, so a page that
     // assumed 8080 would be putting its events into whichever tree happened to own that port. An

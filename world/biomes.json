@@ -30,7 +30,7 @@
     { "name": "pine", "groundHeight": 3.0, "vary": 0.25, "order": 8, "gather": 0.95, "apart": 0.8, "underCanopy": false },
     { "name": "spruce", "groundHeight": 3.4, "vary": 0.22, "order": 9, "gather": 0.96, "apart": 0.9, "underCanopy": false },
     { "name": "birch", "groundHeight": 2.6, "vary": 0.3, "order": 6, "gather": 0.88, "apart": 0.7, "underCanopy": false },
-    { "name": "oak", "groundHeight": 3.8, "vary": 0.2, "order": 9, "gather": 0.92, "apart": 1.1, "underCanopy": false },
+    { "name": "oak", "groundHeight": 4.8, "vary": 0.2, "order": 9, "gather": 0.92, "apart": 1.1, "underCanopy": false },
     { "name": "beech", "groundHeight": 3.6, "vary": 0.2, "order": 9, "gather": 0.94, "apart": 1.0, "underCanopy": false },
     { "name": "palm", "groundHeight": 3.2, "vary": 0.25, "order": 7, "gather": 0.85, "apart": 0.9, "underCanopy": false },
     { "name": "jungle", "groundHeight": 4.2, "vary": 0.18, "order": 10, "gather": 0.96, "apart": 1.2, "underCanopy": false },

@@ -182,6 +182,10 @@ own readings.
 - ~~A `biome` renderer~~ and ~~a generate button~~: both built, and both immediately found a fault.
 - ~~**Offline stills**~~, done 2026-09-23: `npm run world:scenery` paints a place and stamps every point
   the scatter yields onto it. Marks rather than silhouettes, and the script says so in its own output.
+- ~~**One definition of a pine.**~~ Done 2026-09-25 by decision record 0057: the sixteen silhouettes are
+  SVG path data in `packages/world/src/placeholderArt.ts`, drawn with no browser, and they are now the
+  placeholders Adam's pictures replace. The stills still stamp marks, because what the map draws is now a
+  picture and no longer a shape.
 - **One definition of a pine.** The still draws a mark because the sixteen shapes are Pixi `Graphics`
   calls and nothing offline can run them. Expressing each silhouette as path data in `packages/world`
   would let both draw the same outline - but it would redraw all sixteen, and the look was approved as

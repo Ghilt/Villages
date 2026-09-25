@@ -105,6 +105,17 @@ with no picture is still somebody**: a character with no portrait, or one whose 
 load, is a bust in soft ink, never an empty frame and never the browser's broken-image mark. `Portrait`,
 in `figures/Portrait.tsx`.
 
+**A picture on the map.** Every sprite on the map is a picture Adam hands over, and every one of them has
+to agree with the others on three things, or it looks pasted on. **The light comes from the upper right**,
+because the first picture has it there. **The eye looks north and down at 45 degrees**, the player's camera,
+so a building is drawn front-on from that height and not as an isometric diamond, while a round tree
+hides the difference. **The picture stands on its foot**, the lowest thing in it and the anchor both of a
+thing's forms share. It carries its own colour and is never tinted. A sprite is between twenty and about
+ninety pixels tall wherever it is drawn, so **its outline is what reads**: what tells one kind from another has to
+be its shape. The first picture has no outline and no shadow, and whether it disappears into the painted
+forest is a question for the eye. How to hand one over is `AUTHORING-THE-ART.md`; why it works this way is
+decision record 0057.
+
 **The seam.** The join between the two **bays**, drawn as a moulding lying over it: three gold rules
 running the length of the stage — a heavy one on the join and a lighter one either side — with a fixed
 **knot** of **ornament** at the middle. The knot is one size whatever the length, because an ornament that
