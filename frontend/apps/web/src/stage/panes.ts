@@ -35,7 +35,8 @@ export interface Pane {
   spread: BayName;
   /**
    * How tall its tile is in the spread, at each size it is drawn at. Null for a pane with no tile of its
-   * own, which is the map on the floor and a window in the rail.
+   * own: the map on the floor, a window in the rail, and a pane that takes turns in a tile with others,
+   * whose tile is one size whichever of them is up - see {@link SHARED_TILES}.
    *
    * **The spread's numbers, and only the spread's.** A bay on a phone is one end of a stage two panes are
    * sharing, and how much of it each gets is the fold's business rather than either pane's - see
@@ -46,7 +47,8 @@ export interface Pane {
    * The strip is not among them, because a strip is one thickness for every pane and it is {@link STRIP}.
    *
    * A height and not a box: the column's width is shared by everything in it, so no pane in it can be the
-   * one that decides it. The one exception is the corner opened out, which is {@link openWide}.
+   * one that decides it. The one exception is the corner opened out, which is the corner's own and not a
+   * pane's: see {@link SharedTile}.
    */
   tall: { full: number; small: number } | null;
   /** The mark it is known by where there is no room for its name, which is a tab. */
@@ -64,25 +66,47 @@ export interface Pane {
    * scrollbar. See decision record 0044.
    */
   needs: { wide: number; tall: number } | null;
+}
+
+/**
+ * A tile that several panes take turns in, and the sizes it has **whichever of them is up**.
+ *
+ * The tile's and not the tab's, which is the whole point: pressing a tab never resizes anything, because
+ * the layout never learns which tab is up. It is the desktop's form of the rule the fold keeps on a phone -
+ * how big the corner is belongs to the corner, not to whatever is standing in it - and it replaced a
+ * height per pane that the tabs had to be kept agreeing about by hand. See decision record 0057.
+ */
+export interface SharedTile {
+  /** How tall it is at the normal size and opened out. Put away it is a strip like any pane's, `STRIP`. */
+  tall: { full: number; small: number };
   /**
-   * The size its tile opens at in the spread, before the player has asked for any. Full when it is not
-   * said, which is every pane but one.
-   *
-   * The one is the **key figures** pane, which shares the corner with the house status and opens at its
-   * normal size because that is the house card's full height: so pressing between their two tabs moves
-   * nothing, and opening it out is the player's own doing. See `KEY_FIGURES_PANE`.
-   */
-  startsAt?: PaneSize;
-  /**
-   * How wide its tile wants to be when it is **opened out** in the spread, if wider than the column. The
-   * column's width when it is not said, which is every pane but one.
-   *
-   * The corner is the only tile that may reach along the bottom, and only for the pane up in it opened
-   * out: the rail above keeps the column's width, and a letter along the bottom moves over. It amends the
-   * rule that a height and not a box is what a pane declares. See decision record 0056.
+   * How wide it wants to be opened out, if wider than the column: the corner reaching along the bottom,
+   * where the rail above keeps the column's width and a letter along the bottom moves over. Absent, and
+   * it is the column's width at every size. See decision record 0056.
    */
   openWide?: number;
+  /** The size it opens at, before the player has asked for any. */
+  startsAt: PaneSize;
 }
+
+/**
+ * **The corner**, bottom left: one size whichever of its panes is up.
+ *
+ * The bay's sizes, sized for what is meant to live there rather than after whichever pane is standing in
+ * it; a pane with nothing to fill the biggest with is given flavour later, and the corner does not shrink
+ * to it. The numbers came from the two that needed the most. Normal is the house card's whole height -
+ * the shield, the blazon, the row of five resources wrapping to two, and the bar of levers - and it is
+ * what the corner opens at. Opened out is the key figures' details, the portrait beside the name and five
+ * lines of stats: as tall as the corner can be and still leave the rail room for a window on the shortest
+ * stage the spread is drawn on, and reaching along the bottom to 560. A test holds all of it.
+ */
+export const CORNER: SharedTile = { tall: { full: 340, small: 232 }, openWide: 560, startsAt: 'small' };
+
+/**
+ * The tiles whose panes take turns, and the sizes each has. A tile that two panes declare themselves into
+ * and that is missing here fails a test, because its size would otherwise follow whichever tab was up.
+ */
+export const SHARED_TILES: Readonly<Partial<Record<BayName, SharedTile>>> = { bottomLeft: CORNER };
 
 export const MAP_PANE: Pane = {
   id: 'map',
@@ -100,10 +124,9 @@ export const HOUSE_PANE: Pane = {
   title: 'your house',
   // Into the bottom-left corner, cut off by two of the stage's own edges, as the card always was.
   spread: 'bottomLeft',
-  // Full is what the card measures with the shield, the blazon, the row of five resources and the bar of
-  // levers in it; small is one line of the house, that row, and the bar beneath, of which the bar is
-  // 2.6rem. Both allow for the row wrapping to two, which it does in a bay too narrow for five marks.
-  tall: { full: 232, small: 168 },
+  // The corner's size rather than the card's own, and the corner's normal height is this card's full one.
+  // See `CORNER`.
+  tall: null,
   icon: 'shield',
   needs: null,
 };
@@ -112,23 +135,18 @@ export const HOUSE_PANE: Pane = {
  * **Key figures**: the few named people the house acts through, as a grid of their portraits.
  *
  * The corner's middle tab, between the house status and navigation, because it is the house's own and a
- * player reaches it the way they reach the house. It opens at its **normal size**, the house card's full
- * height, so the column holds still as the tabs are pressed; opened out, it is taller and - once the
- * corner can reach along the bottom - wider than the column, for the stats beside the portrait. See
- * `MECHANICS.md` and decision record 0055.
+ * player reaches it the way they reach the house. The corner is one size whichever tab is up, so pressing
+ * between them moves nothing; opened out it is taller and wider than the column, and that size is the
+ * one this pane's details need, the portrait beside the name and the stats. See `CORNER`, `MECHANICS.md`
+ * and decision records 0055 and 0057.
  */
 export const KEY_FIGURES_PANE: Pane = {
   id: 'key-figures',
   title: 'key figures',
   spread: 'bottomLeft',
-  // Small is the house card's full height, on purpose; full is as tall as the corner can be and still
-  // leave the rail room for a window on the shortest stage the spread is ever drawn on. A test holds both.
-  tall: { full: 340, small: 232 },
+  tall: null,
   icon: 'figure',
   needs: null,
-  startsAt: 'small',
-  // Opened out, the portrait beside the name and five lines of stats, which the column is too narrow for.
-  openWide: 560,
 };
 
 /**
@@ -144,11 +162,9 @@ export const NAVIGATION_PANE: Pane = {
   // What it is *for* rather than what is in it. A player who pressed a compass is going somewhere;
   // "where you have been" is the trail, which is only the lower half of what it offers.
   title: 'go to',
-  // Beside the house, in the corner. The two of them are what makes the corner a tabbed tile at all.
+  // Beside the house, in the corner, and the corner's size whichever of its tabs is up. See `CORNER`.
   spread: 'bottomLeft',
-  // The same height as the card it shares the tile with, and the same at both sizes, so the column does
-  // not jump as the tab changes or as the trail is opened out.
-  tall: { full: 200, small: 200 },
+  tall: null,
   icon: 'compass',
   needs: null,
 };
@@ -230,36 +246,33 @@ export function panesIn(panes: readonly Pane[], where: BayName): readonly Pane[]
  *
  * A tile nobody declared is `null` and is not laid out at all. That is the difference between an empty
  * tile and a small one: with no choice pending, the map runs clean to the bottom edge of the stage.
+ *
+ * **It is not told which tab is up**, and that is what makes pressing one move nothing: a tile its panes
+ * take turns in has sizes of its own, so there is nothing about the tab that the answer could depend on.
+ * It used to be handed the tab and size the tile by it, and every tab then had to be kept the same height
+ * by hand. See decision record 0057.
  */
-export function spreadWants(
-  panes: readonly Pane[],
-  heights: Readonly<Partial<Record<string, PaneSize>>>,
-  showing: (where: BayName, sharing: readonly Pane[]) => Pane,
-): SpreadWants {
+export function spreadWants(panes: readonly Pane[], asked: Asked): SpreadWants {
   const tallOf = (where: BayName): number | null => {
     const sharing = panesIn(panes, where);
-    if (sharing.length === 0) {
+    const first = sharing[0];
+    if (first === undefined) {
       return null;
     }
-    // The tile is as tall as the pane that is up, not as the tallest of them: a tab that is not showing is
-    // not taking any room, and the tile would otherwise be sized by something nobody can see.
-    const pane = showing(where, sharing);
-    // A tile's three heights, which is what the control means on a desktop: put away, the normal card, and
-    // opened out. Full is the default here, because a tile is the size the pane asked for rather than a
-    // share of a stage it is dividing with somebody - unless the pane said it opens at another.
-    const size = heightAsked(pane, heights);
-    const tall = size === 'strip' ? STRIP : (pane.tall?.[size] ?? 0);
+    // A tile's three heights, which is what the control means on a desktop: put away, the normal size, and
+    // opened out. The first pane speaks for the tile, because in a tile its panes take turns in every one
+    // of them answers with the tile's own size.
+    const size = sizeAsked(first, asked);
+    const tall = size === 'strip' ? STRIP : ((SHARED_TILES[where]?.tall ?? first.tall)?.[size] ?? 0);
     return tall + (isTabbed(where, sharing.length) ? TAB_BAR : 0);
   };
 
-  // How wide the corner wants to be: the pane up in it, opened out, if it asks to reach along the bottom.
+  // How wide the corner wants to be: its own width opened out, when it is one that reaches along the bottom.
   const cornerWide = (): number | null => {
-    const sharing = panesIn(panes, 'bottomLeft');
-    if (sharing.length === 0) {
-      return null;
-    }
-    const pane = showing('bottomLeft', sharing);
-    return heightAsked(pane, heights) === 'full' ? (pane.openWide ?? null) : null;
+    const first = panesIn(panes, 'bottomLeft')[0];
+    return first !== undefined && sizeAsked(first, asked) === 'full'
+      ? (SHARED_TILES.bottomLeft?.openWide ?? null)
+      : null;
   };
 
   return {
@@ -271,12 +284,27 @@ export function spreadWants(
 }
 
 /**
- * The size a pane's tile was asked to be in the spread: what the player asked for, or what the pane opens
- * at until they have. One function, because the layout sizes the tile from it and the control marks it,
- * and the two disagreeing is a mark on a size the tile is not.
+ * What the player has asked the spread's tiles to be, which is two records and not one: a pane with a
+ * tile of its own asks for itself, and a tile its panes take turns in is asked once, for all of them.
  */
-export function heightAsked(pane: Pane, heights: Readonly<Partial<Record<string, PaneSize>>>): PaneSize {
-  return heights[pane.id] ?? pane.startsAt ?? 'full';
+export interface Asked {
+  readonly heights: Readonly<Partial<Record<string, PaneSize>>>;
+  readonly tiles: Readonly<Partial<Record<BayName, PaneSize>>>;
+}
+
+/**
+ * The size a pane was asked to be in the spread: its tile's, if it takes turns in one with others, and
+ * otherwise its own - what the player asked for, or full until they have, because a tile is the size its
+ * pane asked for rather than a share of a stage it is dividing with somebody.
+ *
+ * One function, because the layout sizes the tile from it and the control marks it, and the two
+ * disagreeing is a mark on a size the tile is not.
+ */
+export function sizeAsked(pane: Pane, asked: Asked): PaneSize {
+  const tile = SHARED_TILES[pane.spread];
+  return tile === undefined
+    ? (asked.heights[pane.id] ?? 'full')
+    : (asked.tiles[pane.spread] ?? tile.startsAt);
 }
 
 /**
@@ -334,6 +362,11 @@ export interface Room {
   asked: PaneSize;
   /** Ask to be drawn at one of them. */
   ask: (size: PaneSize) => void;
+  /**
+   * Whether the pane draws its own size control. Not in a tile its panes take turns in, in the spread:
+   * one tile, one size, and one control for it at the end of the tab bar. See decision record 0057.
+   */
+  ownControl: boolean;
 }
 
 /**

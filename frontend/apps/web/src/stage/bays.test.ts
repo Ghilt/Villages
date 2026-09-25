@@ -2,7 +2,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { STRIP } from './bayBox';
 import { arrangementFor, askedIn, type Arrangement, type Which } from './bays';
-import { HOUSE_PANE, MAP_PANE, NAVIGATION_PANE } from './panes';
+import {
+  HOUSE_PANE,
+  KEY_FIGURES_PANE,
+  MAP_PANE,
+  NAVIGATION_PANE,
+  panesFor,
+  sizeAsked,
+  spreadWants,
+} from './panes';
 import type { Subject } from '../inspect/subjects';
 
 /**
@@ -232,20 +240,21 @@ describe('asking for a size', () => {
   });
 
   /*
-   * In the spread a tile's height is its own, so the two forms write to two different places and neither
+   * In the spread a tile's size is its own, so the two forms write to two different places and neither
    * can be reached from the other. One record for both meant a size chosen on a phone came back on the
    * desktop, which is half of what 0046 separated.
    */
-  it('writes the tile height in the spread and the arrangement in the bays, never both', async () => {
+  it('writes the tile size in the spread and the arrangement in the bays, never both', async () => {
     const { baysNow, askFor, stageIs } = await fresh();
 
     askFor(MAP_PANE.id, 'strip');
     expect(baysNow().arrangement).toBe('firstAway');
     expect(baysNow().heights).toEqual({});
+    expect(baysNow().tiles).toEqual({});
 
     stageIs('spread', 'rows');
-    askFor(HOUSE_PANE.id, 'small');
-    expect(baysNow().heights).toEqual({ [HOUSE_PANE.id]: 'small' });
+    askFor(HOUSE_PANE.id, 'strip');
+    expect(baysNow().tiles).toEqual({ bottomLeft: 'strip' });
     expect(baysNow().arrangement).toBe('firstAway');
   });
 
@@ -254,11 +263,47 @@ describe('asking for a size', () => {
 
     askFor(MAP_PANE.id, 'strip');
     stageIs('spread', 'rows');
-    askFor(HOUSE_PANE.id, 'small');
+    askFor(HOUSE_PANE.id, 'strip');
     stageIs('bays', 'rows');
 
     expect(baysNow().arrangement).toBe('firstAway');
-    expect(baysNow().heights).toEqual({ [HOUSE_PANE.id]: 'small' });
+    expect(baysNow().tiles).toEqual({ bottomLeft: 'strip' });
+  });
+});
+
+/*
+ * The corner in the spread: one size whichever of its tabs is up, which is decision record 0057.
+ *
+ * The control is in the tab bar and asks through whichever pane is up, and any of the three asking is the
+ * corner asking; pressing a tab changes which of them is drawn and nothing else.
+ */
+describe('the corner, in the spread', () => {
+  it('is the size any of its panes asked for, whichever of them asked', async () => {
+    const { baysNow, askFor, stageIs } = await fresh();
+    stageIs('spread', 'rows');
+
+    askFor(KEY_FIGURES_PANE.id, 'full');
+
+    for (const pane of [HOUSE_PANE, KEY_FIGURES_PANE, NAVIGATION_PANE]) {
+      expect(sizeAsked(pane, baysNow())).toBe('full');
+    }
+    expect(baysNow().heights).toEqual({});
+  });
+
+  it('changes nothing about its size when a tab is pressed', async () => {
+    const { baysNow, askFor, show, stageIs } = await fresh();
+    stageIs('spread', 'rows');
+    askFor(HOUSE_PANE.id, 'full');
+    const panes = panesFor([], false);
+    const before = baysNow();
+
+    show('bottomLeft', NAVIGATION_PANE.id);
+    show('bottomLeft', KEY_FIGURES_PANE.id);
+
+    expect(baysNow().showing).toEqual({ bottomLeft: KEY_FIGURES_PANE.id });
+    expect(baysNow().tiles).toBe(before.tiles);
+    expect(baysNow().heights).toBe(before.heights);
+    expect(spreadWants(panes, baysNow())).toEqual(spreadWants(panes, before));
   });
 });
 

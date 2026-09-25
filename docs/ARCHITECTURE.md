@@ -291,7 +291,9 @@ for the room there. See decision record 0046.
 panes declare it rather than the layout deciding it when they stop fitting, so a tab cannot appear and
 vanish as a window is dragged. **Whether they take turns or stack is the bay's property** - the rail stacks
 its windows, everywhere else the panes are alternatives behind a tab bar - and the arithmetic learns only
-that a tabbed bay is a strip taller than whichever pane is up in it. See decision record 0042.
+that a tabbed bay is a strip taller than its own size. That size is the tile's rather than the tab's, and
+the layout is not told which tab is up, so pressing one resizes nothing. See decision records 0042 and
+0057.
 
 **Nothing is unmounted to move it.** A pane changes bays by changing which cell of a grid its wrapper sits
 in, not by being torn down and rebuilt elsewhere. That matters for exactly one pane and it matters a lot:

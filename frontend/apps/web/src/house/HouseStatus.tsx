@@ -59,6 +59,10 @@ const TINCTURE: Record<string, string> = {
  * the bar, for when it is sharing a phone with something else. **Strip** is the name and no more, so the
  * player who put it away knows where it went.
  *
+ * In the spread the corner is one size whichever of its tabs is up, and its normal size is this card's
+ * whole height, so there small is the whole card and opened out is the whole card with room to spare. The
+ * one-line form is a phone's. See decision record 0057.
+ *
  * What it says is thin because a house is thin: a name, a banner, a seat and one resource. `MECHANICS.md`
  * says what it is waiting on, and it is mostly the resource system.
  *
@@ -120,14 +124,14 @@ export function HouseStatus({ room }: { room: Room }) {
 
           <div className="hud__house">
             <p className="hud__name">{house === null ? 'No house yet' : house.name}</p>
-            {/* The line that goes first when the room runs out: it is the most words and the least news. */}
-            {!small && (
-              <p className="hud__hint">
-                {house === null
-                  ? 'The map is the world. Your seat is somewhere on it.'
-                  : `${blazon(house)}. Founded ${describeDay(house.since)}.`}
-              </p>
-            )}
+            {/* The line that goes first when the room runs out: it is the most words and the least news.
+                Always written, and left out by the stylesheet where there is no room - the one-line form
+                on a phone, a squeezed column - because the corner's normal size has room for it. */}
+            <p className="hud__hint">
+              {house === null
+                ? 'The map is the world. Your seat is somewhere on it.'
+                : `${blazon(house)}. Founded ${describeDay(house.since)}.`}
+            </p>
             <ul className="hud__resources">
               {RESOURCES_IN_ORDER.map((name) => (
                 <li className="hud__resource" key={name} title={RESOURCE_WORDS[name]}>

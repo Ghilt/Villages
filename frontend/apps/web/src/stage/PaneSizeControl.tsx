@@ -12,7 +12,8 @@ import { SIZES, type PaneSize, type Room } from './panes';
  * player reads it as a slider they can hit the ends of. See decision record 0045.
  *
  * It sits in the pane's top corner, out of the way of whatever the pane draws, and steps clear of the
- * compass when the compass is standing in that corner.
+ * compass when the compass is standing in that corner. A pane taking turns in a tile draws none: the tab
+ * bar above it carries one for the tile, and this draws nothing when it is handed a room that says so.
  */
 
 /** How much of the mark's box is filled, at each size. The box is 14 tall inside its outline. */
@@ -29,6 +30,9 @@ const SAID: Record<PaneSize, string> = {
 };
 
 export function PaneSizeControl({ room }: { room: Room }) {
+  if (!room.ownControl) {
+    return null;
+  }
   return (
     <span className="pane-size" role="group" aria-label="how much room this takes">
       {SIZES.map((size) => {

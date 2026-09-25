@@ -181,8 +181,9 @@ export interface SpreadWants {
   /** How tall the corner tile is, or null when nothing is in it. */
   bottomLeft: number | null;
   /**
-   * How wide the corner wants to be, when the pane up in it asks to reach along the bottom; absent or null,
-   * and it is the column's width. Only a pane opened out asks. See decision record 0056.
+   * How wide the corner wants to be, when it is opened out and reaches along the bottom; absent or null,
+   * and it is the column's width. The corner's width and not a tab's, so it is the same whichever of its
+   * panes is up. See decision records 0056 and 0057.
    */
   bottomLeftWide?: number | null;
   /** How tall the tile along the bottom middle is, or null when nothing is in it. */
@@ -313,9 +314,9 @@ function columnWidth(stage: Box): number {
  * **An empty tile takes no room.** No pane in the corner and the column runs to the bottom; no choice
  * pending and the map keeps the whole bottom of the stage.
  *
- * **The corner can reach along the bottom**, and it is the one tile whose width is not the column's: a
- * pane opened out in it may ask to be wider, and the corner grows to the right along the bottom edge while
- * the rail above keeps the column's width. The bottom middle then starts after the corner. See 0056.
+ * **The corner can reach along the bottom**, and it is the one tile whose width is not the column's:
+ * opened out it may be wider, and it grows to the right along the bottom edge while the rail above keeps
+ * the column's width. The bottom middle then starts after the corner. See 0056 and 0057.
  */
 function tilesOnAMap(stage: Box, wants: SpreadWants): BayLayout {
   const floor = { x: 0, y: 0, w: stage.w, h: stage.h };

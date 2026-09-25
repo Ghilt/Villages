@@ -3,7 +3,7 @@ import { watchSubjects } from '../inspect/subjects';
 import { watchGateway } from '../net/gateway';
 import type { Asking, BayName } from './bayBox';
 import { STRIP } from './bayBox';
-import { HOUSE_PANE, MAP_PANE, type Pane, paneById, type PaneSize } from './panes';
+import { HOUSE_PANE, MAP_PANE, type Pane, paneById, type PaneSize, SHARED_TILES, sizeAsked } from './panes';
 
 /**
  * The bay manager: which pane is in each bay, and which are collapsed to a strip.
@@ -49,8 +49,19 @@ export interface BaysState {
    * business; a bay is one end of a split and belongs to neither of the two panes dividing it. One record
    * for both meant a size chosen on a phone came back on the desktop - and meant the split was recomputed
    * from whoever had just been moved into a bay, which is the defect 0046 exists to remove.
+   *
+   * A pane that takes turns in a tile with others has no entry here: its size is the tile's, below.
    */
   readonly heights: Readonly<Partial<Record<string, PaneSize>>>;
+  /**
+   * How big each tile its panes take turns in was asked to be, in the spread: one size for the tile,
+   * whichever tab is up, by bay name. The corner is the only one.
+   *
+   * Per tile rather than per pane for the reason the arrangement is per fold and not per bay: how big the
+   * corner is belongs to the corner, not to whatever is standing in it, so pressing a tab has nothing to
+   * change. See decision record 0057.
+   */
+  readonly tiles: Readonly<Partial<Record<BayName, PaneSize>>>;
   /**
    * What each bay was showing before something took it over, so that closing the thing puts it back.
    *
@@ -80,6 +91,7 @@ const OPENS_ON: BaysState = {
   displaced: [null, null],
   showing: {},
   heights: {},
+  tiles: {},
 };
 
 let state: BaysState = OPENS_ON;
@@ -245,7 +257,10 @@ export function showingIn(where: BayName, sharing: readonly Pane[]): Pane {
   return sharing.find((pane) => pane.id === chosen) ?? sharing[0]!;
 }
 
-/** Bring a pane to the front of the tile it shares. What pressing a tab does. */
+/**
+ * Bring a pane to the front of the tile it shares. What pressing a tab does, and all it does: the tile's
+ * size is the tile's own, so nothing here could resize it. See decision record 0057.
+ */
 export function show(where: BayName, id: string): void {
   if (state.showing[where] === id) {
     return;
@@ -297,14 +312,26 @@ export function put(which: Which, id: string): void {
  * there is nothing else for it to read.
  *
  * **In the spread a tile's height is its own**: there is nobody for it to speak for, because the map
- * behind it takes whatever is left over without being asked.
+ * behind it takes whatever is left over without being asked. And a pane that takes turns in a tile with
+ * others speaks for the tile, which is one size whichever of them is up: asking from any of them, or from
+ * the control in the tab bar, asks the same one thing. See decision record 0057.
  */
 export function askFor(id: string, size: PaneSize): void {
-  if (paneById(id) === undefined) {
+  const pane = paneById(id);
+  if (pane === undefined) {
     return;
   }
 
   if (form !== 'bays') {
+    const shared = SHARED_TILES[pane.spread] !== undefined;
+    if (shared) {
+      if (sizeAsked(pane, state) === size) {
+        return;
+      }
+      settle({ ...state, tiles: { ...state.tiles, [pane.spread]: size } });
+      note('bay', `${pane.spread === 'bottomLeft' ? 'the corner' : pane.spread} ${SAID[size]}`);
+      return;
+    }
     if (state.heights[id] === size) {
       return;
     }

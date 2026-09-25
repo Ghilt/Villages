@@ -216,10 +216,10 @@ body,
  * different numbers written into its wrapper. The map holds a camera, a style and a WebGL context, and
  * `MapView` throws all three away when it unmounts.
  *
- * A bay clips rather than scrolls. A pane too big for its bay is a bug in the pane, and a scrollbar is how
- * that bug gets hidden. The one stated exception is a key figure at half a phone, whose stats are below
- * the fold on purpose; see `RESPONSIVE-DESIGN.md`. `container-type` is what lets what is inside react to
- * the room it got, because a media query cannot see the stage, let alone one tile of it.
+ * A bay clips rather than scrolls: what is in it draws itself smaller, and a pane whose length is its own
+ * business - a list, a key figure's stats at half a phone - scrolls inside itself rather than the bay
+ * scrolling. `container-type` is what lets what is inside react to the room it got, because a media
+ * query cannot see the stage, let alone one tile of it.
  */
 .bay {
   position: absolute;
@@ -435,19 +435,32 @@ body,
  * It sits on the tile's own top edge and is part of the same piece of furniture, so it carries the border
  * and the rounded corner that the pane beneath it gives up. Marks and no words, because the column is 26rem
  * at its widest and two words on a tab is a tab that wraps. See decision record 0042.
+ *
+ * The tile's one size control stands at the far end, because the tile is one size whichever tab is up
+ * and the control is the tile's rather than a tab's. See decision record 0057.
  */
 .tabs {
   position: absolute;
   z-index: 3;
   display: flex;
   align-items: stretch;
-  gap: 1px;
-  padding-left: 0.35rem;
+  justify-content: space-between;
+  padding: 0 0.3rem 0 0.35rem;
   background: var(--parchment-edge);
   border: 1px solid var(--parchment-edge);
   border-width: 1px 1px 0 0;
   border-radius: 0 6px 0 0;
   box-shadow: 0 -2px 18px var(--shadow);
+}
+
+.tabs__all {
+  display: flex;
+  align-items: stretch;
+  gap: 1px;
+}
+
+.tabs > .pane-size {
+  align-self: center;
 }
 
 .tabs__one {
@@ -522,8 +535,11 @@ body,
 }
 
 /* The shield and what is written beside it. The padding is here rather than on the card, so the bar
-   below can run edge to edge. */
+   below can run edge to edge. It takes whatever height the card has over its own, so the bar stays on the
+   bottom edge however tall the tile is: the corner opened out is taller than the card, and the shield and
+   the name stand in the middle of what is left. */
 .hud__achievement {
+  flex: 1 1 auto;
   display: flex;
   gap: 1.25rem;
   align-items: center;
@@ -755,6 +771,12 @@ body,
 
 .stage[data-form='bays'] .hud--small .hud__banner {
   width: 2.5rem;
+}
+
+/* The one-line form has no line to spare for the blazon. In the spread the corner's normal size is the
+   whole card, so there the line stays until the column is squeezed. */
+.stage[data-form='bays'] .hud--small .hud__hint {
+  display: none;
 }
 
 /* One line: the name, then the treasury pushed to the far end where the eye will read it as a number. */

@@ -4,6 +4,8 @@
 - Date: 2026-09-19
 - Amended 2026-09-24: opened out, the corner is as tall **and as wide** as the pane that is up, for a pane
   that asks. See 0056.
+- Amended 2026-09-25: the tile is **one size whichever pane is up**, its sizes are the tile's rather than
+  its panes', and its one size control is in the tab bar. See 0057.
 
 ## Context
 

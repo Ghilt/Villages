@@ -54,7 +54,19 @@ export function Navigating({ room, along }: { room: Room; along: 'rows' | 'colum
    *
    * Marks and no words, the tab bar's argument: there is no room for a name in 44 pixels, and these are
    * the same marks the same panes carry everywhere else. See decision records 0046 and 0047.
+   *
+   * In the spread there are no bays for them to send anything to, so it is the name and nothing else,
+   * like every other strip in the corner; the tab bar above it is already the way to the other panes.
    */
+  if (room.size === 'strip' && along === null) {
+    return (
+      <section className="navigate navigate--strip" aria-label="Go to">
+        <span className="navigate__kind">Go to</span>
+        <PaneSizeControl room={room} />
+      </section>
+    );
+  }
+
   if (room.size === 'strip') {
     const mine = bays.holding.indexOf(NAVIGATION_PANE.id);
     const beside: Which = mine === 0 ? 1 : 0;
