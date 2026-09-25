@@ -1,14 +1,32 @@
 import { useEffect, useRef } from 'react';
 import * as maplibregl from 'maplibre-gl';
 
+import { note } from '../debug/log';
 import { fromMercator, toMercatorExact } from '../sprites/cameraMath';
 
 import { CAMERA, lensFor, resolveStyle } from './mapConfig';
 import { constrainCamera, flatWindow, floorZoom } from './sheet';
+import { tiltAt, tiltRamp, tippedAbout } from './tilt';
 
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 type Constrain = NonNullable<maplibregl.MapOptions['transformConstrain']>;
+
+/**
+ * The part of MapLibre that is not ours to touch, named so that touching it is visible.
+ *
+ * Its gesture handlers keep their own copy of the camera for the length of a gesture, the "requested"
+ * state, and `transformCameraUpdate` only changes the camera that is drawn. A wheel zoom that began flat
+ * would go on anchoring the ground under the pointer with a flat copy while the drawn camera tipped, and
+ * the ground would slide out from under the pointer. So the copy's tilt is kept in step with the drawn
+ * one. It is private, so it is reached for carefully: if a MapLibre ever renames it, the tilt is still
+ * right and only the anchoring loses its precision, and the log says so once.
+ */
+interface HandlersCamera {
+  _camera?: {
+    _requestedCameraState?: { setPitch(pitch: number): void; setCenter(center: maplibregl.LngLat): void };
+  };
+}
 
 interface MapViewProps {
   /** Where the world this page is drawing was cut to, as the root of a URL. See map/masters.ts. */
@@ -30,24 +48,79 @@ export function MapView({ worldRoot, onReady }: MapViewProps) {
       return;
     }
 
-    // The window as the flat world sees it, because the camera is tipped: the rules for how far it may
-    // go and how far back it may pull are the flat rules in a window taller by one over the lean. The
-    // tip is read off the map once there is one, so the debug panel's slider moves the edges with it;
-    // inside the constructor there is not, and the tip it is being built with is the player's.
-    let built: maplibregl.Map | null = null;
-    const viewport = () =>
-      flatWindow(
-        { width: container.clientWidth, height: container.clientHeight },
-        built?.getPitch() ?? CAMERA.pitch,
-      );
+    // The window as the flat world sees it at a zoom: the rules for how far the camera may go and how far
+    // back it may pull are the flat rules in a window taller by one over the lean at that zoom. The tilt
+    // is worked out from the zoom rather than read off the map, because the edge rule is asked about a
+    // zoom MapLibre is about to take, and a tilt read off the map would be the last frame's.
+    const real = () => ({ width: container.clientWidth, height: container.clientHeight });
+    const flatAt = (zoom: number) => flatWindow(real(), tiltAt(zoom));
 
     // MapLibre asks this from inside its constructor, before `map` exists, so it may reach for the
     // container and nothing else. It replaces MapLibre's rule that the world must fill the window with
     // ours, under which the world may shrink to a sheet on the desk. See docs/adr/0033.
     const keepOnTheSheet: Constrain = (lngLat, zoom) => {
-      const kept = constrainCamera({ centre: toMercatorExact(lngLat), zoom }, viewport(), CAMERA.maxZoom);
+      const kept = constrainCamera({ centre: toMercatorExact(lngLat), zoom }, flatAt(zoom), CAMERA.maxZoom);
       const centre = fromMercator(kept.centre);
       return { center: new maplibregl.LngLat(centre.lng, centre.lat), zoom: kept.zoom };
+    };
+
+    // Where the pointer is, for a zoom about it: the wheel's, or the middle of two fingers. MapLibre zooms
+    // about exactly these points, so the tip is taken about them too while one of its zooms is running.
+    let pointer: { x: number; y: number } | null = null;
+    const onWheel = (event: WheelEvent) => {
+      const box = container.getBoundingClientRect();
+      pointer = { x: event.clientX - box.left, y: event.clientY - box.top };
+    };
+    const onTouch = (event: TouchEvent) => {
+      const [one, two] = [event.touches[0], event.touches[1]];
+      if (one === undefined || two === undefined) {
+        return;
+      }
+      const box = container.getBoundingClientRect();
+      pointer = {
+        x: (one.clientX + two.clientX) / 2 - box.left,
+        y: (one.clientY + two.clientY) / 2 - box.top,
+      };
+    };
+    container.addEventListener('wheel', onWheel, { capture: true, passive: true });
+    container.addEventListener('touchmove', onTouch, { capture: true, passive: true });
+
+    // Tipped by the zoom, on every move whatever made it: a wheel, a pinch, a flight, a jump. MapLibre's own
+    // hook for adjusting the camera before it is drawn, so no gesture and no flight is interrupted to do it.
+    // A flight or a jump is tipped about the middle of the window, which the tilt leaves where it is; a zoom
+    // about the pointer is tipped about the pointer. See experiment 0011.
+    let built: maplibregl.Map | null = null;
+    let saidPrivate = false;
+    const tipByZoom: NonNullable<maplibregl.MapOptions['transformCameraUpdate']> = (next) => {
+      const pitch = tiltAt(next.zoom);
+      const requested = (built as unknown as HandlersCamera | null)?._camera;
+      if (built !== null && requested === undefined && !saidPrivate) {
+        saidPrivate = true;
+        note(
+          'camera',
+          'MapLibre keeps its camera somewhere new, so zooming about the pointer is no longer exact while it tips',
+        );
+      }
+      const zoomingAbout =
+        pointer !== null &&
+        built !== null &&
+        (built.scrollZoom.isActive() || built.touchZoomRotate.isActive());
+      if (!zoomingAbout || pointer === null || pitch === next.pitch) {
+        requested?._requestedCameraState?.setPitch(pitch);
+        return { pitch };
+      }
+      const moved = tippedAbout(
+        next.center,
+        next.zoom,
+        pointer,
+        real(),
+        { pitch: next.pitch, bearing: next.bearing },
+        { pitch, bearing: next.bearing },
+      );
+      const center = new maplibregl.LngLat(moved.lng, moved.lat);
+      requested?._requestedCameraState?.setPitch(pitch);
+      requested?._requestedCameraState?.setCenter(center);
+      return { pitch, center };
     };
 
     const map = new maplibregl.Map({
@@ -58,9 +131,11 @@ export function MapView({ worldRoot, onReady }: MapViewProps) {
       minZoom: CAMERA.minZoom,
       maxZoom: CAMERA.maxZoom,
       transformConstrain: keepOnTheSheet,
-      // Tipped back and north-up, which is the player's camera and decision record 0058. The lens that
-      // goes with it is set just below, because it is not a constructor option.
-      pitch: CAMERA.pitch,
+      transformCameraUpdate: tipByZoom,
+      // North-up and tipped by the zoom, which is the player's camera: decision record 0058 as amended by
+      // experiment 0011. The lens that goes with it is set just below, because it is not a constructor
+      // option.
+      pitch: tiltAt(CAMERA.initialZoom),
       bearing: CAMERA.bearing,
       // The ceiling, not the camera: what this opens is the debug panel's Camera section, the instrument
       // for experiment 0008. Eighty-five rather than the sixty MapLibre defaults to, so the lever can be
@@ -77,9 +152,9 @@ export function MapView({ worldRoot, onReady }: MapViewProps) {
     });
 
     built = map;
-    // Parallel, because it is tipped: the overlay is placed by a projection that is exact only for a
-    // parallel camera, and a wide lens would slide every mark and tree off its ground. See `lensFor`.
-    map.setVerticalFieldOfView(lensFor(CAMERA.pitch));
+    // Parallel, because it tips: the overlay is placed by a projection that is exact only for a parallel
+    // camera, and a wide lens would slide every mark and tree off its ground. See `lensFor`.
+    map.setVerticalFieldOfView(lensFor(tiltRamp().most));
 
     // Every way a player could turn or tip the world by hand stays closed. The camera's angle is the
     // world's, not a player's control; only the debug panel moves it, which is Adam's lever. Two fingers
@@ -93,15 +168,15 @@ export function MapView({ worldRoot, onReady }: MapViewProps) {
     // compass now stands in; the floor still moves with the window, because the wheel and the pinch both
     // read it.
     const settleFloor = () => {
-      const floor = floorZoom(viewport());
+      // The floor is measured in the flat window at the floor's own tilt, which is none unless the ramp
+      // has been pulled out past it.
+      const floor = floorZoom(flatAt(floorZoom(real())));
       if (map.getMinZoom() !== floor) {
         map.setMinZoom(floor);
       }
     };
     settleFloor();
     map.on('resize', settleFloor);
-    // The floor is measured in the flat window, which grows as the camera tips.
-    map.on('pitch', settleFloor);
 
     if (import.meta.env.DEV) {
       // A handle for the browser console and for the end-to-end tests, which assert on the camera.
@@ -116,6 +191,8 @@ export function MapView({ worldRoot, onReady }: MapViewProps) {
     }
 
     return () => {
+      container.removeEventListener('wheel', onWheel, { capture: true });
+      container.removeEventListener('touchmove', onTouch, { capture: true });
       map.remove();
     };
   }, [worldRoot, onReady]);

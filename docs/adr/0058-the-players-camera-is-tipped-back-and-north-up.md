@@ -24,6 +24,11 @@ ground's grid turned twenty-six degrees as diamonds.**
 
 ## Decision
 
+> **Amended, 2026-09-25, pending experiment 0011.** The 45 degrees is now the most the camera tips, at the
+> closest zoom: it is straight down from zoom 7 out and eases up to 45 at zoom 10, the tilt a function of
+> the zoom (`tiltAt` in `map/tilt.ts`, `CAMERA.tilt`). Everything below that follows the tilt of the moment
+> still holds at every point on that ramp; the lens is parallel at every zoom. See experiment 0011.
+
 **The player's camera is tipped back 45 degrees, north-up, and parallel.** It is `CAMERA` in
 `map/mapConfig.ts`: pitch 45, bearing 0, and a lattice turned 26 degrees at four world units a cell.
 

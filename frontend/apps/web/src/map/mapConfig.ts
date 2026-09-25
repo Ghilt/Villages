@@ -11,8 +11,9 @@ import { WORLD_MAX_ZOOM, warpedWorldStyle } from './worldStyle';
 export const EARTH_STYLE_URL = 'https://tiles.openfreemap.org/styles/positron';
 
 /**
- * The player's camera: tipped back and north-up, parallel, and showing the world once. Tipped north-up
- * with no perspective, the ground is foreshortened by the cosine of the tip and nothing else, which keeps
+ * The player's camera: north-up, parallel, showing the world once, and tipped back more the closer it
+ * comes. Tipped north-up with no perspective, the ground is foreshortened by the cosine of the tip and
+ * nothing else, which keeps
  * the sprite overlay a handful of multiplies against the map centre and lets everything laid out as if
  * the map were flat be drawn right by squashing its height. See docs/adr/0058, which superseded the flat
  * camera of 0014. Pulled back far enough, the world is a sheet lying on a desk; the rule for that is in
@@ -31,11 +32,13 @@ export const CAMERA = {
   /** At the floor the sheet is this much of the window's shorter side: half, so the desk shows around it. */
   sheetAtFloor: 0.5,
   /**
-   * How far the camera is tipped back from straight down, in degrees. A square of ground is drawn 1.41
-   * times as wide as it is tall, and the scenery and the marks stand up on it. Adam's choice, from the
-   * Camera section of the debug panel, where it can still be pulled either way.
+   * How the camera tips as it comes in: straight down from zoom `from` outwards, tipped back `most`
+   * degrees at the closest zoom, and eased between, so zooming in tips the world up to meet you. At the
+   * closest zoom a square of ground is drawn 1.41 times as wide as it is tall, and the scenery and the
+   * marks stand up on it. Adam's numbers, from the Camera section of the debug panel, where they can still
+   * be pulled either way. `tiltAt` in `map/tilt.ts` is the rule; see experiment 0011.
    */
-  pitch: 45,
+  tilt: { from: 7, most: 45 },
   /** Which way is up. North, so the tip only ever squashes the height of the ground, never turns it. */
   bearing: 0,
   /**
@@ -60,16 +63,18 @@ export const WIDE_FOV = 36.86989764584402;
 export const PARALLEL_FOV = 0.1;
 
 /**
- * How wide the camera sees, which follows from how far it has tipped and is nobody's to set.
+ * How wide the camera sees, which follows from how far it can tip and is nobody's to set.
  *
- * Tipped, it is parallel, always. The marks and the scenery are placed by a projection that is exact for
- * a parallel camera and hundreds of pixels wrong for a wide one, so a tipped camera with a wide lens
- * would slide every tree off its ground - and a combination of settings that can do that is a glitch hunt
- * waiting for somebody to reach it by accident. So there is no such combination. Flat, it is MapLibre's
- * own, which looks exactly the same straight down.
+ * A camera that tips at all is parallel, always, at every zoom and not only where it is tipped. The marks
+ * and the scenery are placed by a projection that is exact for a parallel camera and hundreds of pixels
+ * wrong for a wide one, so a tipped camera with a wide lens would slide every tree off its ground - and a
+ * combination of settings that can do that is a glitch hunt waiting for somebody to reach it by accident.
+ * It is decided by the most the camera ever tips rather than by the tip of the moment, so the lens never
+ * changes in the middle of a zoom; straight down the two lenses draw the same picture anyway. A camera
+ * that never tips gets MapLibre's own.
  */
-export function lensFor(pitch: number): number {
-  return pitch > 0 ? PARALLEL_FOV : WIDE_FOV;
+export function lensFor(mostTilt: number): number {
+  return mostTilt > 0 ? PARALLEL_FOV : WIDE_FOV;
 }
 
 /**

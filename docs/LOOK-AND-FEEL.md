@@ -107,8 +107,9 @@ in `figures/Portrait.tsx`.
 
 **A picture on the map.** Every sprite on the map is a picture Adam hands over, and every one of them has
 to agree with the others on three things, or it looks pasted on. **The light comes from the upper right**,
-because the first picture has it there. **The eye looks north and down at 45 degrees**, the player's camera,
-so a building is drawn front-on from that height and not as an isometric diamond, while a round tree
+because the first picture has it there. **The eye looks north and down at 45 degrees** at the closest zoom,
+where the sprites are seen - the player's camera tips up to that from straight down at zoom 7 - so a
+building is drawn front-on from that height and not as an isometric diamond, while a round tree
 hides the difference. **The picture stands on its foot**, the lowest thing in it and the anchor both of a
 thing's forms share. It carries its own colour and is never tinted. A sprite is between twenty and about
 ninety pixels tall wherever it is drawn, so **its outline is what reads**: what tells one kind from another has to

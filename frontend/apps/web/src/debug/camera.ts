@@ -1,17 +1,19 @@
 import { CAMERA, lensFor } from '../map/mapConfig';
+import { PLAYERS_TILT } from '../map/tilt';
 
 import { note } from './log';
 
 export { PARALLEL_FOV, WIDE_FOV } from '../map/mapConfig';
 
 /**
- * Where the camera is standing: how far it has tipped and which way is up.
+ * Where the camera is standing: how far it tips as it comes in, from where, and which way is up.
  *
  * The same shape as `scenery.ts` and every other switch in the panel: a module with a set of listeners,
  * read through `useSyncExternalStore`. Adam's, not a player's. These all start at the player's camera,
- * `CAMERA` in `map/mapConfig.ts`, tipped back and north-up on a diamond lattice; see decision record 0058.
+ * `CAMERA` in `map/mapConfig.ts`: north-up on a diamond lattice, flat from zoom 7 out and tipped back 45
+ * degrees at the closest zoom, eased between. See decision record 0058 and experiment 0011.
  *
- * How wide the camera sees is not a setting: it follows from the tilt, `lensOf`. A camera with a wide
+ * How wide the camera sees is not a setting: it follows from whether the camera tips at all, `lensOf`. A camera with a wide
  * field of view stands close to what it looks at, so the far side of the window is further away than the
  * near side and the world converges to a horizon - a tilted map. Narrow the field of view and the camera
  * has to retreat to keep the same amount in frame, until at a fraction of a degree it is so far back that
@@ -20,8 +22,13 @@ export { PARALLEL_FOV, WIDE_FOV } from '../map/mapConfig';
  */
 
 export interface CameraSettings {
-  /** How far the camera has tipped from straight down, in degrees. A player's is `CAMERA.pitch`. */
-  pitch: number;
+  /**
+   * How far the camera is tipped from straight down at the closest zoom, in degrees. It tips less the
+   * further out it is, down to none at `tiltFrom`; see `tiltAt` in `map/tilt.ts`. A player's is 45.
+   */
+  tilt: number;
+  /** The zoom at which the camera starts to tip as it comes in. Straight down from here out. A player's is 7. */
+  tiltFrom: number;
   /** Which way is up, in degrees clockwise from north. Zero is north-up, which a player gets. */
   bearing: number;
   /**
@@ -37,9 +44,9 @@ export interface CameraSettings {
   latticeSize: number;
 }
 
-/** How wide the camera sees for these settings: `lensFor` in `map/mapConfig.ts`, parallel whenever tipped. */
-export function lensOf(how: Pick<CameraSettings, 'pitch'>): number {
-  return lensFor(how.pitch);
+/** How wide the camera sees for these settings: `lensFor` in `map/mapConfig.ts`, parallel if it tips at all. */
+export function lensOf(how: Pick<CameraSettings, 'tilt'>): number {
+  return lensFor(how.tilt);
 }
 
 /**
@@ -105,7 +112,8 @@ export const DIAMOND_LATTICE_SIZE = 4;
 
 /** Where a player's camera is, which is where the panel starts and where its `player` button goes back to. */
 export const PLAYERS: CameraSettings = {
-  pitch: CAMERA.pitch,
+  tilt: PLAYERS_TILT.most,
+  tiltFrom: PLAYERS_TILT.from,
   bearing: CAMERA.bearing,
   latticeTurn: CAMERA.lattice.turn,
   latticeSize: CAMERA.lattice.size,
@@ -130,7 +138,8 @@ export function watchCamera(listener: () => void): () => void {
 /** Whether this is the camera a player is shown, turn, tip and lattice alike. */
 export function isPlayers(how: CameraSettings): boolean {
   return (
-    how.pitch === PLAYERS.pitch &&
+    how.tilt === PLAYERS.tilt &&
+    how.tiltFrom === PLAYERS.tiltFrom &&
     how.bearing === PLAYERS.bearing &&
     how.latticeTurn === PLAYERS.latticeTurn &&
     how.latticeSize === PLAYERS.latticeSize
@@ -145,7 +154,8 @@ export function isSquareGround(how: CameraSettings): boolean {
 export function setCamera(change: Partial<CameraSettings>): void {
   const next = { ...settings, ...change };
   if (
-    next.pitch === settings.pitch &&
+    next.tilt === settings.tilt &&
+    next.tiltFrom === settings.tiltFrom &&
     next.bearing === settings.bearing &&
     next.latticeTurn === settings.latticeTurn &&
     next.latticeSize === settings.latticeSize
@@ -156,12 +166,17 @@ export function setCamera(change: Partial<CameraSettings>): void {
   // Said as the thing that is seen rather than as the numbers behind it. See decision record 0023.
   if (isPlayers(next) && !isPlayers(settings)) {
     note('camera', 'back where a player has it');
-  } else if (next.pitch !== settings.pitch || next.bearing !== settings.bearing) {
+  } else if (
+    next.tilt !== settings.tilt ||
+    next.tiltFrom !== settings.tiltFrom ||
+    next.bearing !== settings.bearing
+  ) {
     note(
       'camera',
-      `tipped ${next.pitch.toFixed(1)} degrees, turned ${next.bearing.toFixed(0)}, ` +
-        `so a square of ground is drawn ${(1 / Math.cos((next.pitch * Math.PI) / 180)).toFixed(2)} times ` +
-        'as wide as it is tall, seen parallel',
+      next.tilt === 0
+        ? `straight down at every zoom, turned ${next.bearing.toFixed(0)}`
+        : `flat from zoom ${next.tiltFrom.toFixed(2)} out, tipping to ${next.tilt.toFixed(1)} degrees at the ` +
+            `closest zoom, turned ${next.bearing.toFixed(0)}, seen parallel`,
     );
   }
 

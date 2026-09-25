@@ -17,6 +17,12 @@ interface SectionProps {
   name: string;
   /** Buttons that belong to this section, sitting in its bar to the right of the title. */
   tools?: ReactNode;
+  /**
+   * A reading in the header that is there whether the section is open or folded, for the one number worth
+   * glancing at without opening it. The tools are only there open, because a folded section's buttons are
+   * targets for a hand that meant to unfold it.
+   */
+  reading?: ReactNode;
   /** Folded to begin with, for a section that is more often in the way than wanted. */
   shutToStart?: boolean;
   children: ReactNode;
@@ -26,7 +32,7 @@ function rememberedAs(name: string): string {
   return `villages.debug.fold.${name.toLowerCase().replace(/\s+/g, '-')}`;
 }
 
-export function Section({ name, tools, shutToStart = false, children }: SectionProps) {
+export function Section({ name, tools, reading, shutToStart = false, children }: SectionProps) {
   const [open, setOpen] = useState(() => {
     try {
       const kept = localStorage.getItem(rememberedAs(name));
@@ -64,6 +70,7 @@ export function Section({ name, tools, shutToStart = false, children }: SectionP
           </span>
           <span className="debug__title">{name}</span>
         </button>
+        {reading}
         {open && tools}
       </header>
 

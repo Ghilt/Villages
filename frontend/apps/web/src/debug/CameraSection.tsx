@@ -1,5 +1,9 @@
-import { useEffect, useSyncExternalStore } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import type * as maplibregl from 'maplibre-gl';
+
+import { CAMERA } from '../map/mapConfig';
+import { setTiltRamp } from '../map/tilt';
+import { pullNow, watchPull } from '../room/pull';
 
 import {
   DIAMOND_BEARING,
@@ -24,9 +28,9 @@ import { Section } from './Section';
  * Where the camera stands, and what the world looks like from there.
  *
  * **The lever of experiment 0008, not a part of the game.** Nothing here is reachable by anybody
- * playing. Every control starts at the player's camera, tipped back forty-five degrees and north-up on a
- * diamond lattice, which is what the experiment settled and decision record 0058 records, and `player`
- * puts it back there. Everything else is for looking at a world from another angle, which is answered by
+ * playing. Every control starts at the player's camera: north-up on a diamond lattice, flat from zoom 7
+ * out and tipped back forty-five degrees at the closest zoom, which is decision record 0058 as amended by
+ * experiment 0011, and `player` puts it back there. Everything else is for looking at a world from another angle, which is answered by
  * looking and is why it is a slider and not a proposal. See decision record 0023.
  *
  * The terrain, the coast, the areas, the marks and the scenery all follow the camera, the marks and the
@@ -42,6 +46,33 @@ interface CameraSectionProps {
   map: maplibregl.Map | null;
 }
 
+/**
+ * The zoom, always, in the section's header whether it is open or folded, because the camera now tips by
+ * the zoom and the number that says where it is on the ramp is the one worth a glance. In the room it is a
+ * dash: the camera is pinned at its floor there and the pull, not the zoom, is what is moving.
+ */
+function ZoomReading({ map }: CameraSectionProps) {
+  const [zoom, setZoom] = useState<number | null>(() => map?.getZoom() ?? null);
+  const pull = useSyncExternalStore(watchPull, pullNow);
+  useEffect(() => {
+    if (map === null) {
+      return;
+    }
+    const read = () => setZoom(map.getZoom());
+    read();
+    map.on('move', read);
+    return () => {
+      map.off('move', read);
+    };
+  }, [map]);
+  const inTheRoom = pull.amount > 0 || pull.dive !== null;
+  return (
+    <span className="debug__quiet" title="the camera's zoom, or a dash in the room">
+      {inTheRoom || zoom === null ? '–' : `z${zoom.toFixed(2)}`}
+    </span>
+  );
+}
+
 export function CameraSection({ map }: CameraSectionProps) {
   const how = useSyncExternalStore(watchCamera, cameraNow);
 
@@ -52,15 +83,19 @@ export function CameraSection({ map }: CameraSectionProps) {
     if (map === null) {
       return;
     }
+    // The tilt is the zoom's now, so the panel moves the ramp and not the camera, and then asks for a camera
+    // update, which is what runs the ramp: MapLibre's hook tips the camera on every one. See experiment 0011.
+    setTiltRamp({ from: how.tiltFrom, to: CAMERA.maxZoom, most: how.tilt });
     const lens = lensOf(how);
     if (map.getVerticalFieldOfView() !== lens) {
       map.setVerticalFieldOfView(lens);
     }
-    map.jumpTo({ pitch: how.pitch, bearing: how.bearing });
+    map.jumpTo({ bearing: how.bearing });
+    map.triggerRepaint();
   }, [map, how]);
 
   const players = isPlayers(how);
-  const wide = (1 / Math.cos((how.pitch * Math.PI) / 180)).toFixed(2);
+  const wide = (1 / Math.cos((how.tilt * Math.PI) / 180)).toFixed(2);
 
   const tools = (
     <button
@@ -68,33 +103,50 @@ export function CameraSection({ map }: CameraSectionProps) {
       className={players ? 'debug__button debug__button--on' : 'debug__button'}
       onClick={() => setCamera(PLAYERS)}
       aria-pressed={players}
-      title="put the camera back where a player has it: tipped, north-up, on diamonds"
+      title="put the camera back where a player has it: north-up, on diamonds, tipping as it comes in"
     >
       player
     </button>
   );
 
   return (
-    <Section name="Camera" tools={tools} shutToStart>
-      <label className="debug-map__label" htmlFor="camera-pitch">
-        How far it has tipped
+    <Section name="Camera" tools={tools} reading={<ZoomReading map={map} />} shutToStart>
+      <label className="debug-map__label" htmlFor="camera-tilt">
+        How far it tips at the closest zoom
       </label>
       <input
-        id="camera-pitch"
+        id="camera-tilt"
         className="debug__slider"
         type="range"
         min={0}
         max={STEEPEST_PARALLEL_PITCH}
         step={0.5}
-        value={how.pitch}
-        onChange={(event) => setCamera({ pitch: Number(event.target.value) })}
+        value={how.tilt}
+        onChange={(event) => setCamera({ tilt: Number(event.target.value) })}
       />
       <p className="debug-map__note">
-        {how.pitch === 0
-          ? 'Straight down, a map rather than a world'
-          : `${how.pitch.toFixed(1)} degrees, so a square of ground is drawn ${wide} times as wide as it is tall, and seen parallel, with no horizon`}
-        {how.pitch === STEEPEST_PARALLEL_PITCH &&
+        {how.tilt === 0
+          ? 'Straight down at every zoom, a map rather than a world'
+          : `${how.tilt.toFixed(1)} degrees at zoom ${CAMERA.maxZoom}, where a square of ground is drawn ${wide} times as wide as it is tall, seen parallel, with no horizon`}
+        {how.tilt === STEEPEST_PARALLEL_PITCH &&
           '. This is as far as it tips: past here a parallel camera asks for no tiles and the screen goes one colour'}
+      </p>
+
+      <label className="debug-map__label" htmlFor="camera-tilt-from">
+        Where it starts to tip
+      </label>
+      <input
+        id="camera-tilt-from"
+        className="debug__slider"
+        type="range"
+        min={3}
+        max={CAMERA.maxZoom - 0.25}
+        step={0.25}
+        value={how.tiltFrom}
+        onChange={(event) => setCamera({ tiltFrom: Number(event.target.value) })}
+      />
+      <p className="debug-map__note">
+        {`Straight down from zoom ${how.tiltFrom.toFixed(2)} out, tipping up to the full tilt at zoom ${CAMERA.maxZoom}, eased at both ends`}
       </p>
 
       <label className="debug-map__label" htmlFor="camera-bearing">
@@ -182,7 +234,7 @@ export function CameraSection({ map }: CameraSectionProps) {
         <button
           type="button"
           className="debug__button"
-          onClick={() => setCamera({ pitch: ISOMETRIC_PITCH, bearing: DIAMOND_BEARING })}
+          onClick={() => setCamera({ tilt: ISOMETRIC_PITCH, bearing: DIAMOND_BEARING })}
           title="all three axes foreshortened equally"
         >
           isometric
@@ -190,7 +242,7 @@ export function CameraSection({ map }: CameraSectionProps) {
         <button
           type="button"
           className="debug__button"
-          onClick={() => setCamera({ pitch: DIMETRIC_PITCH, bearing: DIAMOND_BEARING })}
+          onClick={() => setCamera({ tilt: DIMETRIC_PITCH, bearing: DIAMOND_BEARING })}
           title="the two-to-one every isometric game actually draws"
         >
           dimetric
@@ -198,7 +250,7 @@ export function CameraSection({ map }: CameraSectionProps) {
         <button
           type="button"
           className="debug__button"
-          onClick={() => setCamera({ pitch: TRIMETRIC_PITCH, bearing: TRIMETRIC_BEARING })}
+          onClick={() => setCamera({ tilt: TRIMETRIC_PITCH, bearing: TRIMETRIC_BEARING })}
           title="no two axes alike, so a square of ground reads as a lopsided diamond"
         >
           trimetric

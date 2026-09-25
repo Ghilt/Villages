@@ -87,13 +87,14 @@ describe('the camera', () => {
     expect(CAMERA.sheetAtFloor).toBeLessThanOrEqual(1);
   });
 
-  it('is tipped, but no further than a parallel camera still draws the world', () => {
-    expect(CAMERA.pitch).toBeGreaterThan(0);
-    expect(CAMERA.pitch).toBeLessThanOrEqual(STEEPEST_PARALLEL_PITCH);
+  it('tips as it comes in, but no further than a parallel camera still draws the world', () => {
+    expect(CAMERA.tilt.most).toBeGreaterThan(0);
+    expect(CAMERA.tilt.most).toBeLessThanOrEqual(STEEPEST_PARALLEL_PITCH);
+    expect(CAMERA.tilt.from).toBeLessThan(CAMERA.maxZoom);
   });
 
   it('sees parallel, because a tipped camera with a wide lens slides every mark off its ground', () => {
-    expect(lensFor(CAMERA.pitch)).toBe(PARALLEL_FOV);
+    expect(lensFor(CAMERA.tilt.most)).toBe(PARALLEL_FOV);
   });
 
   it('is north-up, which is what lets the desk and the room follow the tip by squashing its height', () => {

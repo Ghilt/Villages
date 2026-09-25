@@ -365,9 +365,9 @@ describe('things standing on tipped ground', () => {
     expect(reversed).toEqual(once);
   });
 
-  it('sees parallel whenever it is tipped, so no lever can slide a tree off its ground', () => {
-    expect(lensOf({ pitch: 0.5 })).toBe(PARALLEL_FOV);
-    expect(lensOf({ pitch: DIMETRIC_PITCH })).toBe(PARALLEL_FOV);
-    expect(lensOf({ pitch: 0 })).toBeGreaterThan(30);
+  it('sees parallel whenever it tips at all, so no lever can slide a tree off its ground', () => {
+    expect(lensOf({ tilt: 0.5 })).toBe(PARALLEL_FOV);
+    expect(lensOf({ tilt: DIMETRIC_PITCH })).toBe(PARALLEL_FOV);
+    expect(lensOf({ tilt: 0 })).toBeGreaterThan(30);
   });
 });

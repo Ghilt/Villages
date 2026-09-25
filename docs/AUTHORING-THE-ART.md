@@ -42,9 +42,10 @@ Anything an image tool gives you, untouched:
 
 ## What it should look like
 
-- **Drawn from the camera's angle.** The player's camera looks north and down at 45 degrees (decision record 0058). A round tree
-  hides a different angle, but a building does not: draw buildings front-on and seen from that height, not
-  as isometric diamonds.
+- **Drawn from the camera's angle.** The player's camera looks north and down at 45 degrees at the closest
+  zoom, and less further out: from straight down at zoom 7 it tips up as it comes in (decision record 0058,
+  experiment 0011). A round tree hides a different angle, but a building does not: draw buildings front-on
+  and seen from that height, not as isometric diamonds.
 - **Light from the upper right**, because the first picture has it there and every picture has to agree.
 - **Standing on its foot.** The tool finds the foot as the middle of whatever is in the lowest few rows, so
   a trunk and its roots should be the lowest thing in the picture. Nothing should hang below them, such as
