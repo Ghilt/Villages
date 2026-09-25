@@ -1,13 +1,13 @@
 import { note } from './log';
 
 /**
- * Where the camera is standing: how far it has tipped, which way is up, and how wide it sees.
+ * Where the camera is standing: how far it has tipped and which way is up.
  *
  * The same shape as `scenery.ts` and every other switch in the panel: a module with a set of listeners,
  * read through `useSyncExternalStore`. Adam's, not a player's. A player's map is flat and north-up and
  * these all start at the numbers that mean exactly that; see decision record 0014.
  *
- * The third number is the one that does the work, and it is the one nobody expects. A camera with a wide
+ * How wide the camera sees is not a setting: it follows from the tilt, `lensOf`. A camera with a wide
  * field of view stands close to what it looks at, so the far side of the window is further away than the
  * near side and the world converges to a horizon - a tilted map. Narrow the field of view and the camera
  * has to retreat to keep the same amount in frame, until at a fraction of a degree it is so far back that
@@ -20,12 +20,6 @@ export interface CameraSettings {
   pitch: number;
   /** Which way is up, in degrees clockwise from north. Zero is north-up, which a player also gets. */
   bearing: number;
-  /**
-   * How wide the camera sees, in degrees. MapLibre's own default is the one below, and it clamps at a
-   * tenth of a degree; a couple of degrees is already parallel to the eye and much kinder to the depth
-   * buffer than the floor is, which is why the slider stops where it does rather than at the clamp.
-   */
-  fov: number;
   /**
    * How far the grid the ground's colour is decided on is turned from the world's own axes, in degrees.
    *
@@ -41,6 +35,30 @@ export interface CameraSettings {
 
 /** MapLibre's own field of view, which is what a camera standing in the world looks like. */
 export const WIDE_FOV = 36.86989764584402;
+
+/**
+ * How far the field of view closes when the camera tips, which is MapLibre's own clamp.
+ *
+ * It goes all the way to the clamp because anything short of it is measurably not parallel, and the
+ * overlay's projection is the fov-nothing limit exactly. Measured at sixty degrees of tilt, the worst
+ * disagreement anywhere on the screen between where the map draws the ground and where the overlay
+ * draws a thing standing on it is about **ten pixels for every degree** of field of view: ten at one
+ * degree, one at a tenth. See experiment 0008.
+ */
+export const PARALLEL_FOV = 0.1;
+
+/**
+ * How wide the camera sees, which follows from how far it has tipped and is nobody's to set.
+ *
+ * Tipped, it is parallel, always. The marks and the scenery are placed by a projection that is exact for
+ * a parallel camera and hundreds of pixels wrong for a wide one, so a tipped camera with a wide lens
+ * would slide every tree off its ground - and a combination of sliders that can do that is a glitch hunt
+ * waiting for somebody to reach it by accident. So there is no such combination. Flat, it is MapLibre's
+ * own, which looks exactly the same straight down and leaves the map a player gets untouched.
+ */
+export function lensOf(how: Pick<CameraSettings, 'pitch'>): number {
+  return how.pitch > 0 ? PARALLEL_FOV : WIDE_FOV;
+}
 
 /**
  * The angles worth pressing a button for.
@@ -75,9 +93,6 @@ export const TRIMETRIC_BEARING = 22.5;
 /** The turn that puts the compass between two screen axes, which is what makes a square read as a diamond. */
 export const DIAMOND_BEARING = 45;
 
-/** Below this the projection is parallel to the eye, and the note under the slider says so. */
-export const PARALLEL_BELOW = 2;
-
 /**
  * How far the camera can tip before a parallel field of view stops drawing the world at all.
  *
@@ -109,7 +124,6 @@ export const DIAMOND_LATTICE_SIZE = 4;
 const START: CameraSettings = {
   pitch: 0,
   bearing: 0,
-  fov: WIDE_FOV,
   latticeTurn: 0,
   latticeSize: 1,
 };
@@ -143,16 +157,13 @@ export function setCamera(change: Partial<CameraSettings>): void {
   if (
     next.pitch === settings.pitch &&
     next.bearing === settings.bearing &&
-    next.fov === settings.fov &&
     next.latticeTurn === settings.latticeTurn &&
     next.latticeSize === settings.latticeSize
   ) {
     return;
   }
 
-  // Said as the thing that is seen rather than as the three numbers behind it, because the three only
-  // mean anything together: a tilt with a wide field of view is a different picture from the same tilt
-  // without one. See decision record 0023.
+  // Said as the thing that is seen rather than as the numbers behind it. See decision record 0023.
   if (isFlat(next) && !isFlat(settings)) {
     note('camera', 'flat and north-up, the way a player gets it');
   } else if (next.pitch !== settings.pitch || next.bearing !== settings.bearing) {
@@ -160,15 +171,7 @@ export function setCamera(change: Partial<CameraSettings>): void {
       'camera',
       `tipped ${next.pitch.toFixed(1)} degrees, turned ${next.bearing.toFixed(0)}, ` +
         `so a square of ground is drawn ${(1 / Math.cos((next.pitch * Math.PI) / 180)).toFixed(2)} times ` +
-        'as wide as it is tall',
-    );
-  }
-  if (next.fov !== settings.fov) {
-    note(
-      'camera',
-      next.fov <= PARALLEL_BELOW
-        ? `seeing ${next.fov.toFixed(1)} degrees wide, which is parallel: no horizon, one scale everywhere`
-        : `seeing ${next.fov.toFixed(1)} degrees wide, which is a camera standing in the world`,
+        'as wide as it is tall, seen parallel',
     );
   }
 

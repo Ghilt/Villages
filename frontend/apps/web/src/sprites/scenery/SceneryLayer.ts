@@ -2,8 +2,8 @@ import { ImageSource, Matrix, Particle, ParticleContainer, Rectangle, Texture } 
 
 import { note } from '../../debug/log';
 import { WORLD_MASTER_WIDTH } from '../../map/worldStyle';
-import { toMercatorExact, worldSize } from '../cameraMath';
-import type { CameraView } from '../cameraMath';
+import { fartherFirst, standingLayer, tiltGround, toMercatorExact, untiltGround } from '../cameraMath';
+import type { CameraView, GroundTilt } from '../cameraMath';
 import { LONGEST_STEP_MS, PRESENCE_MS, easeTowards, midTrade } from '../twoForms';
 import { CELL, biomeAt, cellOf } from '@villages/world';
 import type { ArtAtlasFile, Kind, ScatteredPoint } from '@villages/world';
@@ -14,10 +14,17 @@ import { MOST_CUT_AT_ONCE, groupCount, groupOf, thresholdOf, wantedAt, worthDraw
  * The world's furniture, drawn as particles under the marks.
  *
  * Every point is placed in **world units** and the whole layer is scaled and shifted once a frame, so a
- * pine grows with the ground exactly and not one of its twenty thousand positions is ever rewritten.
- * That is the shape Pixi wants: there is no per-particle scale attribute, only a vertex buffer that
- * carries the size, and touching it per particle per frame would re-upload the lot. Only the colour is
- * dynamic, because the fade lives in its alpha.
+ * pine grows with the ground exactly and not one of its twenty thousand positions is rewritten while the
+ * camera pans or zooms. That is the shape Pixi wants: there is no per-particle scale attribute, only a
+ * vertex buffer that carries the size, and touching it per particle per frame would re-upload the lot.
+ * Only the colour is dynamic, because the fade lives in its alpha.
+ *
+ * **Tipped, the trees stand up.** Each foot is stored already turned and squashed by the camera's tilt,
+ * so it lands on its tipped ground, and the layer itself is only ever scaled and shifted, so the picture
+ * on the foot is never squashed with it. Turning or tipping the camera rewrites every foot, once; it is
+ * the one thing that does, and it is rare. And they are drawn **farthest first**, the whole layer sorted
+ * by where each foot lands on the screen, because the order the cells and the groups happened to arrive
+ * in is no order at all. See `standingLayer` in `cameraMath.ts` and experiment 0008.
  *
  * **A group is the unit of everything.** A group is one kind at one step of its arrival; the zoom says
  * whether a group belongs on the screen and time carries it there, which is the rule `twoForms.ts`
@@ -76,6 +83,12 @@ export function createSceneryLayer() {
   let loadingArt = false;
   /** Asked for and not there, so the layer draws nothing rather than asking every frame. */
   let noArt = false;
+
+  /** The camera's turn and tip every foot was placed for, and a key that says when they are stale. */
+  let tilt: GroundTilt = { cos: 1, sin: 0, lean: 1 };
+  let tiltKey = '0/0';
+  /** Particles were added or moved, so the layer is sorted again before it is drawn. */
+  let unsorted = false;
 
   /** How much of each group is on the screen, nought to one, moved by the clock and not by the zoom. */
   let alphaOf = new Float32Array(0);
@@ -189,6 +202,12 @@ export function createSceneryLayer() {
         (sum, cell) => sum + [...cell.made.values()].reduce((n, made) => n + made.length, 0),
         0,
       ),
+      // Whether the layer is drawn farthest first, which is the thing an eye catches as a tree standing
+      // in front of one it should be behind, and cannot tell from a single wrong frame.
+      ordered: container.particleChildren.every(
+        (particle, index, all) => index === 0 || fartherFirst(all[index - 1]!, particle) <= 0,
+      ),
+      tilt: tiltKey,
       first:
         firstMade === undefined
           ? null
@@ -229,8 +248,7 @@ export function createSceneryLayer() {
       const foot = feet[point.kind] ?? { x: 0.5, y: 1 };
       // The art carries its own colour, so nothing tints it; only the fade's alpha moves after this.
       const particle = new Particle({ texture });
-      particle.x = point.x;
-      particle.y = point.y;
+      place(particle, point);
       // The foot stands on the place, the same anchor a castle's forms share, and it is where the
       // picture itself stands - measured when the art was cut - rather than the middle of its box.
       particle.anchorX = foot.x;
@@ -243,6 +261,29 @@ export function createSceneryLayer() {
     });
     cell.made.set(group, made);
     container.addParticle(...made);
+    unsorted = true;
+  }
+
+  /**
+   * Where a particle's foot is stored: its place on the ground, turned and squashed by the camera, in
+   * world units. The one place that is worked out, for a new particle and for every particle when the
+   * camera turns, so there is never a second formula to drift from the first.
+   */
+  function place(particle: Particle, point: ScatteredPoint): void {
+    const at = tiltGround(point.x, point.y, tilt);
+    particle.x = at.x;
+    particle.y = at.y;
+  }
+
+  /** The camera turned or tipped, so every foot is placed again for it. */
+  function placeEverythingAgain(): void {
+    for (const cell of shown.values()) {
+      for (const [group, made] of cell.made) {
+        const points = cell.points.get(group)!;
+        made.forEach((particle, index) => place(particle, points[index]!));
+      }
+    }
+    unsorted = true;
   }
 
   function dropGroup(cell: Held, group: number): void {
@@ -334,32 +375,18 @@ export function createSceneryLayer() {
         takeEverythingOut();
       }
 
-      const size = worldSize(view.zoom);
       const centre = toMercatorExact(view.center);
-      const perUnit = size / WORLD_MASTER_WIDTH;
-
+      const layer = standingLayer(view);
+      const key = `${view.pitch ?? 0}/${view.bearing ?? 0}`;
+      if (key !== tiltKey) {
+        tiltKey = key;
+        tilt = layer.tilt;
+        placeEverythingAgain();
+      }
       // The whole layer is placed by one matrix, which is what makes twenty thousand pines cost one
-      // multiply rather than twenty thousand. Turning and tilting the camera does not change that: an
-      // orthographic camera is affine, so the turn and the squash fold into the same matrix and the
-      // particles' own buffer is still never touched. See decision record 0052 and experiment 0008.
-      //
-      // What it does not buy is a tree that stands up. The matrix squashes every particle along with the
-      // ground it stands on, so tilted the scatter lies down. Standing it up needs a per-particle scale,
-      // which is the one thing the static vertex buffer exists to avoid.
-      const turn = ((view.bearing ?? 0) * Math.PI) / 180;
-      const lean = Math.cos(((view.pitch ?? 0) * Math.PI) / 180);
-      const sin = Math.sin(turn);
-      const cos = Math.cos(turn);
-      container.setFromMatrix(
-        new Matrix(
-          perUnit * cos,
-          -perUnit * sin * lean,
-          perUnit * sin,
-          perUnit * cos * lean,
-          view.width / 2 - (centre.x * cos + centre.y * sin) * size,
-          view.height / 2 + (centre.x * sin - centre.y * cos) * size * lean,
-        ),
-      );
+      // multiply rather than twenty thousand. It only scales and shifts: the turn and the tip are already
+      // in every foot, and leaving them out of here is what keeps the pictures upright. See 0052 and 0008.
+      container.setFromMatrix(new Matrix(layer.scale, 0, 0, layer.scale, layer.x, layer.y));
       // Which biome the camera is over, for the panel. One array read a frame, and it is the one reading
       // that turns "the world looks different over there" into a name Adam can argue with.
       noteDrawn({
@@ -369,21 +396,18 @@ export function createSceneryLayer() {
       // Which cells the view stands on, in world units, with a ring so a pan finds them cut.
       //
       // Tilted, the ground under the window is a turned rectangle stretched along the lean, so the
-      // axis-aligned box that used to be the window's own corners would leave the far corners bare.
-      // These are the same four corners carried back through the projection above, which is exact at
-      // any angle and is the old arithmetic exactly when the camera is flat and north-up.
-      const halfWide = view.width / 2;
-      const halfHigh = view.height / 2 / (lean === 0 ? 1 : lean);
-      const eastsAndSouths = [
+      // window's four corners are carried back onto the ground through the same tilt that placed the feet,
+      // which is exact at any angle and the old arithmetic exactly when the camera is flat and north-up.
+      const halfWide = view.width / 2 / layer.scale;
+      const halfHigh = view.height / 2 / layer.scale;
+      const corners = [
         [-halfWide, -halfHigh],
         [halfWide, -halfHigh],
         [-halfWide, halfHigh],
         [halfWide, halfHigh],
-      ].map(([sx = 0, sy = 0]) => [sx * cos - sy * sin, sx * sin + sy * cos] as const);
-      const centreUnitX = (centre.x * size) / perUnit;
-      const centreUnitY = (centre.y * size) / perUnit;
-      const eastUnits = eastsAndSouths.map(([east]) => centreUnitX + east / perUnit);
-      const southUnits = eastsAndSouths.map(([, south]) => centreUnitY + south / perUnit);
+      ].map(([x = 0, y = 0]) => untiltGround(x, y, tilt));
+      const eastUnits = corners.map(({ east }) => centre.x * WORLD_MASTER_WIDTH + east);
+      const southUnits = corners.map(({ south }) => centre.y * WORLD_MASTER_WIDTH + south);
       const fromX = cellOf(Math.min(...eastUnits)) - RING;
       const toX = cellOf(Math.max(...eastUnits)) + RING;
       const fromY = cellOf(Math.min(...southUnits)) - RING;
@@ -480,6 +504,15 @@ export function createSceneryLayer() {
             particle.alpha = alpha;
           }
         }
+      }
+
+      // Farthest first, over the whole layer rather than a cell at a time: a cell that arrives later is
+      // not nearer. Sorted in place and handed back once, which is one upload and only on a frame that
+      // added a particle or turned the camera.
+      if (unsorted) {
+        container.particleChildren.sort(fartherFirst);
+        container.update();
+        unsorted = false;
       }
 
       let particles = 0;

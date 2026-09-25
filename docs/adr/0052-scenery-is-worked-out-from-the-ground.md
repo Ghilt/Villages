@@ -50,6 +50,9 @@ is stored, nothing is sent, and nothing is authored.
   `2 ** (zoom - 6)` and shifted once a frame moves twenty thousand pines for the cost of one matrix.
   Only the colour is dynamic, because the fade lives in its alpha. Particles come and go a cell at a
   time.
+  > **Amended, 2026-09-25.** Still one transform, but it only scales and shifts now: a tipped camera's
+  > turn and squash are stored in each particle's position, so the pictures stand up instead of lying
+  > down with the ground, and the layer is drawn farthest first. See experiment 0008.
 - Scenery is **not a `MapSprite`**. There are tens of thousands, none is a thing the game knows about,
   and none can be clicked — `ParticleContainer` has no bounds at all, so a click on a tree falls
   through to the map, which is what we want.

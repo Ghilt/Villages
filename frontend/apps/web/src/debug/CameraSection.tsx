@@ -7,14 +7,13 @@ import {
   DIAMOND_LATTICE_TURN,
   DIMETRIC_PITCH,
   ISOMETRIC_PITCH,
-  PARALLEL_BELOW,
   STEEPEST_PARALLEL_PITCH,
   TRIMETRIC_BEARING,
   TRIMETRIC_PITCH,
-  WIDE_FOV,
   cameraNow,
   isFlat,
   isSquareGround,
+  lensOf,
   setCamera,
   watchCamera,
 } from './camera';
@@ -30,32 +29,13 @@ import { Section } from './Section';
  * why it is a slider and not a proposal. See decision record 0023.
  *
  * What the map does under it is honest and what everything else does is not, on purpose. The terrain,
- * the coast, the areas and the marks all follow the camera. The desk does not, because it is a square
- * of CSS and a tilted world is not a square; the scenery lies down, because one matrix cannot both
- * place a tree and stand it up. Those are the findings, not the bugs. The experiment record says so.
- */
-
-/**
- * How far the field of view closes, which is MapLibre's own clamp.
+ * the coast, the areas, the marks and the scenery all follow the camera, the marks and the scenery
+ * standing upright on the ground as it tips. The desk does not, because it is a square of CSS and a
+ * tilted world is not a square. That is a finding, not a bug. The experiment record says so.
  *
- * It goes all the way to the clamp because anything short of it is measurably not parallel, and the
- * overlay's projection is the fov-nothing limit exactly. Measured at sixty degrees of tilt, the worst
- * disagreement anywhere on the screen between where the map draws the ground and where the overlay
- * draws a mark standing on it is about **ten pixels for every degree** of field of view: ten at one
- * degree, one at a tenth. A tenth is where a mark stands on its own ground to within a pixel, so that
- * is where the presets put it. See experiment 0008.
+ * There is no lever for how wide the camera sees: tipped it is always parallel, because the overlay is
+ * only right for a parallel camera. See `lensOf`.
  */
-const NARROWEST_FOV = 0.1;
-
-/**
- * The field of view slider steps by ratio rather than by degrees.
- *
- * Everything worth looking at is in the bottom tenth of the range - the difference between a tenth of a
- * degree and two degrees is the difference between parallel and not, and on a linear slider it would be
- * three pixels of travel at one end while twenty degrees of nothing-much filled the rest.
- */
-const fovAt = (t: number): number => NARROWEST_FOV * (WIDE_FOV / NARROWEST_FOV) ** t;
-const fovSlider = (fov: number): number => Math.log(fov / NARROWEST_FOV) / Math.log(WIDE_FOV / NARROWEST_FOV);
 
 interface CameraSectionProps {
   map: maplibregl.Map | null;
@@ -71,8 +51,9 @@ export function CameraSection({ map }: CameraSectionProps) {
     if (map === null) {
       return;
     }
-    if (map.getVerticalFieldOfView() !== how.fov) {
-      map.setVerticalFieldOfView(how.fov);
+    const lens = lensOf(how);
+    if (map.getVerticalFieldOfView() !== lens) {
+      map.setVerticalFieldOfView(lens);
     }
     map.jumpTo({ pitch: how.pitch, bearing: how.bearing });
   }, [map, how]);
@@ -84,7 +65,7 @@ export function CameraSection({ map }: CameraSectionProps) {
     <button
       type="button"
       className={flat ? 'debug__button debug__button--on' : 'debug__button'}
-      onClick={() => setCamera({ pitch: 0, bearing: 0, fov: WIDE_FOV })}
+      onClick={() => setCamera({ pitch: 0, bearing: 0 })}
       aria-pressed={flat}
       title="put the camera back where a player has it"
     >
@@ -110,7 +91,7 @@ export function CameraSection({ map }: CameraSectionProps) {
       <p className="debug-map__note">
         {how.pitch === 0
           ? 'Straight down, which is the map a player gets'
-          : `${how.pitch.toFixed(1)} degrees, so a square of ground is drawn ${wide} times as wide as it is tall`}
+          : `${how.pitch.toFixed(1)} degrees, so a square of ground is drawn ${wide} times as wide as it is tall, and seen parallel, with no horizon`}
         {how.pitch === STEEPEST_PARALLEL_PITCH &&
           '. This is as far as it tips: past here a parallel camera asks for no tiles and the screen goes one colour'}
       </p>
@@ -134,25 +115,6 @@ export function CameraSection({ map }: CameraSectionProps) {
           : how.bearing === DIAMOND_BEARING
             ? `Turned ${DIAMOND_BEARING} degrees, so the two ground axes are the same length and a square reads as an even diamond`
             : `Turned ${how.bearing.toFixed(1)} degrees, so no two axes are alike and a square reads as a lopsided diamond`}
-      </p>
-
-      <label className="debug-map__label" htmlFor="camera-fov">
-        How wide it sees
-      </label>
-      <input
-        id="camera-fov"
-        className="debug__slider"
-        type="range"
-        min={0}
-        max={1}
-        step={0.005}
-        value={fovSlider(how.fov)}
-        onChange={(event) => setCamera({ fov: fovAt(Number(event.target.value)) })}
-      />
-      <p className="debug-map__note">
-        {how.fov <= PARALLEL_BELOW
-          ? `Parallel: no horizon, one scale everywhere, and a mark stands on its own ground to within ${(how.fov * 10).toFixed(1)} pixels`
-          : `${how.fov.toFixed(1)} degrees, so the camera stands in the world and the ground runs to a horizon`}
       </p>
 
       <hr className="debug__rule" />
@@ -219,7 +181,7 @@ export function CameraSection({ map }: CameraSectionProps) {
         <button
           type="button"
           className="debug__button"
-          onClick={() => setCamera({ pitch: ISOMETRIC_PITCH, bearing: DIAMOND_BEARING, fov: NARROWEST_FOV })}
+          onClick={() => setCamera({ pitch: ISOMETRIC_PITCH, bearing: DIAMOND_BEARING })}
           title="all three axes foreshortened equally"
         >
           isometric
@@ -227,7 +189,7 @@ export function CameraSection({ map }: CameraSectionProps) {
         <button
           type="button"
           className="debug__button"
-          onClick={() => setCamera({ pitch: DIMETRIC_PITCH, bearing: DIAMOND_BEARING, fov: NARROWEST_FOV })}
+          onClick={() => setCamera({ pitch: DIMETRIC_PITCH, bearing: DIAMOND_BEARING })}
           title="the two-to-one every isometric game actually draws"
         >
           dimetric
@@ -235,9 +197,7 @@ export function CameraSection({ map }: CameraSectionProps) {
         <button
           type="button"
           className="debug__button"
-          onClick={() =>
-            setCamera({ pitch: TRIMETRIC_PITCH, bearing: TRIMETRIC_BEARING, fov: NARROWEST_FOV })
-          }
+          onClick={() => setCamera({ pitch: TRIMETRIC_PITCH, bearing: TRIMETRIC_BEARING })}
           title="no two axes alike, so a square of ground reads as a lopsided diamond"
         >
           trimetric

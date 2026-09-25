@@ -4,19 +4,27 @@ import {
   DIAMOND_BEARING,
   DIMETRIC_PITCH,
   ISOMETRIC_PITCH,
+  PARALLEL_FOV,
   TRIMETRIC_BEARING,
   TRIMETRIC_PITCH,
+  lensOf,
 } from '../debug/camera';
+import { WORLD_MASTER_WIDTH } from '../map/worldStyle';
 
 import {
   MAX_MERCATOR_LATITUDE,
   WORLD_UNIT_ZOOM,
+  fartherFirst,
   fromMercator,
+  groundTilt,
   isWithinView,
   pixelsPerWorldUnit,
+  standingLayer,
+  tiltGround,
   toMercator,
   toMercatorExact,
   toScreen,
+  untiltGround,
   worldSize,
 } from './cameraMath';
 import type { CameraView } from './cameraMath';
@@ -275,3 +283,91 @@ function cornersOfSquare(pitch: number, bearing: number) {
     north: Math.hypot(north.x - middle.x, north.y - middle.y),
   };
 }
+
+describe('things standing on tipped ground', () => {
+  const cameras = [
+    [0, 0],
+    [45, 0],
+    [DIMETRIC_PITCH, DIAMOND_BEARING],
+    [ISOMETRIC_PITCH, DIAMOND_BEARING],
+    [TRIMETRIC_PITCH, TRIMETRIC_BEARING],
+    [30, 200],
+  ] as const;
+  const places = [
+    { lng: 10.5, lat: 47.2 },
+    { lng: 10.9, lat: 46.8 },
+    { lng: 9.7, lat: 47.6 },
+  ];
+
+  it('lands a foot placed by the standing layer exactly where toScreen puts the same place', () => {
+    // The scenery and the marks are placed by two routes, and this is what keeps them one projection: a
+    // tree two pixels off the place a castle beside it stands on is a fault nobody can see the cause of.
+    for (const [pitch, bearing] of cameras) {
+      for (const zoom of [7, 9.8, 10]) {
+        const camera: CameraView = {
+          center: { lng: 10.4, lat: 47.1 },
+          zoom,
+          width: 1024,
+          height: 768,
+          pitch,
+          bearing,
+        };
+        const layer = standingLayer(camera);
+        for (const place of places) {
+          const unit = toMercator(place);
+          const tilted = tiltGround(unit.x * WORLD_MASTER_WIDTH, unit.y * WORLD_MASTER_WIDTH, layer.tilt);
+          const mark = toScreen(place, camera);
+          expect(
+            Math.abs(layer.scale * tilted.x + layer.x - mark.x),
+            `${pitch}/${bearing}/${zoom}`,
+          ).toBeLessThan(1e-6);
+          expect(
+            Math.abs(layer.scale * tilted.y + layer.y - mark.y),
+            `${pitch}/${bearing}/${zoom}`,
+          ).toBeLessThan(1e-6);
+        }
+      }
+    }
+  });
+
+  it('carries a screen offset back onto the ground it came from', () => {
+    for (const [pitch, bearing] of cameras) {
+      const tilt = groundTilt({ pitch, bearing });
+      const on = tiltGround(123.4, -56.7, tilt);
+      const back = untiltGround(on.x, on.y, tilt);
+      expect(back.east).toBeCloseTo(123.4, 9);
+      expect(back.south).toBeCloseTo(-56.7, 9);
+    }
+  });
+
+  it('never scales a layer differently across and down, which is what keeps a picture upright and whole', () => {
+    const layer = standingLayer({ ...view, pitch: DIMETRIC_PITCH, bearing: DIAMOND_BEARING });
+    // One number: the layer only grows and moves. The tip is in where each foot is, not in the picture.
+    expect(layer.scale).toBe(pixelsPerWorldUnit(view.zoom));
+  });
+
+  it('draws the farther of two things first, whichever order they arrived in', () => {
+    const feet = [
+      { x: 5, y: 40 },
+      { x: 1, y: 10 },
+      { x: 9, y: 10 },
+      { x: 3, y: 25 },
+    ];
+    const once = [...feet].sort(fartherFirst);
+    const reversed = [...feet].reverse().sort(fartherFirst);
+    expect(once).toEqual([
+      { x: 1, y: 10 },
+      { x: 9, y: 10 },
+      { x: 3, y: 25 },
+      { x: 5, y: 40 },
+    ]);
+    // The same feet in any order give the same picture, so nothing swaps places between frames.
+    expect(reversed).toEqual(once);
+  });
+
+  it('sees parallel whenever it is tipped, so no lever can slide a tree off its ground', () => {
+    expect(lensOf({ pitch: 0.5 })).toBe(PARALLEL_FOV);
+    expect(lensOf({ pitch: DIMETRIC_PITCH })).toBe(PARALLEL_FOV);
+    expect(lensOf({ pitch: 0 })).toBeGreaterThan(30);
+  });
+});

@@ -122,7 +122,12 @@ async function readBiomes(url: string, file: SpriteMapFile): Promise<Uint8Array 
 }
 
 const chunks = new Map<string, StandChunk>();
-const asking = new Set<string>();
+/**
+ * Every caller waiting on a chunk still coming, by chunk. All of them, not the first: a zoom 7 tile holds
+ * sixty-four cells, several are cut in one frame, and a cell told nothing stays *not yet* for ever - a
+ * patch of bare ground that never sprouts, which is what this was until 2026-09-25.
+ */
+const asking = new Map<string, (() => void)[]>();
 /**
  * How many stand chunks to keep. One a zoom 7 tile, a few hundred stands each, which is a few kilobytes
  * held per entry - so this is cheap next to the four hundred decoded terrain tiles beside it.
@@ -154,11 +159,13 @@ export function standsOfTile(
   if (held !== undefined) {
     return held;
   }
-  if (asking.has(key)) {
+  const waiting = asking.get(key);
+  if (waiting !== undefined) {
+    waiting.push(whenReady);
     return null;
   }
 
-  asking.add(key);
+  asking.set(key, [whenReady]);
   void (async () => {
     let chunk: StandChunk = NO_STANDS;
     try {
@@ -176,8 +183,11 @@ export function standsOfTile(
       }
     }
     chunks.set(key, chunk);
+    const told = asking.get(key) ?? [];
     asking.delete(key);
-    whenReady();
+    for (const ready of told) {
+      ready();
+    }
   })();
   return null;
 }

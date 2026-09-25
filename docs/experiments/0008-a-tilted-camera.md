@@ -14,7 +14,7 @@ The second half, which is the one that matters: doing so makes a world worth loo
 ## Setup
 
 A **Camera** section in the debug panel, holding three sliders - how far the camera has tipped, which way
-is up, how wide it sees - and three presets, one for each of isometric, dimetric and trimetric. Default flat and north-up, so a player's map is untouched and
+is up, how wide it sees (since taken away, see *The scenery stands up*) - and three presets, one for each of isometric, dimetric and trimetric. Default flat and north-up, so a player's map is untouched and
 decision record 0014 still describes what anybody playing gets.
 
 The unlock is five lines in `map/MapView.tsx`: `maxPitch` from 0 to 85, and `dragRotate` disabled
@@ -397,6 +397,56 @@ there, which was the wrong direction for this step.
 
 The painters now say how long they spend, split into terrain and paint, in `window.villagesPainterly()`.
 
+### The scenery stands up, and is drawn farthest first
+
+2026-09-25, once the first real picture was on the map. Adam, tipping the camera: the tree *"gets
+stretched along with the world"*, where *"the thing we are chasing here is to tip the world, and then these
+trees pop out along another axis than the ground."* And in the same look, the order was wrong: an oak
+standing in front of one it should have been behind, and the reverse, depending on nothing visible.
+
+Both had one cause, which is the one matrix above. **The turn and the tip moved out of the layer and into
+every foot.** Each particle's position is stored already turned and squashed, in world units, so its foot
+lands on its tipped ground; the layer itself is only ever scaled and shifted, so the picture on the foot is
+never squashed with it. Zooming and panning still cost one matrix and touch no particle. Turning or tipping
+rewrites every foot once, which is rare - a few thousand numbers a frame while the slider is dragged, and
+nothing after. `standingLayer` in `sprites/cameraMath.ts` is the arithmetic.
+
+**Depth is where the foot lands.** The whole layer is sorted by it, farthest first, whenever a particle
+arrives or the camera turns: one sort and one upload, only on those frames. The order had been whatever
+order the cells and the groups arrived in, which the flat code-drawn silhouettes hid and a picture drawn in
+perspective does not. Ties go to the one further left, so the same feet always make the same picture: an
+unstable sort would swap two trees at one depth from frame to frame, and read as a flicker.
+
+The design was chosen to close off the glitch hunts rather than to be short, and each of them is shut by
+something that can be checked:
+
+- **One projection.** The marks, the scenery and the walk over the cells in view each had their own copy of
+  the turn and the squash. They now share `groundTilt`, `tiltGround` and `untiltGround`, and a test holds a
+  foot placed by the scenery to where `toScreen` puts a castle's foot on the same place, to a millionth of
+  a pixel, at six cameras and three zooms. Broken on purpose once, it fails.
+- **No lens that the overlay is wrong for.** The field of view slider is gone. Tipped, the camera is
+  parallel, always; flat, it is MapLibre's own, which looks the same straight down. The one combination
+  that slid every tree hundreds of pixels off its ground - a tip with a wide lens, measured above - can no
+  longer be reached. `lensOf` in `debug/camera.ts`.
+- **One place a foot is placed**, for a new particle and for every particle when the camera turns.
+- **An instrument for the order.** `window.villagesScenery()` says `ordered`, whether the layer is sorted
+  farthest first right now. It was true at flat, at 45 north-up and at 60 turned 70, panning across cells
+  arriving and leaving.
+
+**Found on the way: patches of ground that never sprouted.** Every look this session had a band of the
+view with no scenery in it, flat or tipped, and the panel said *13 waiting on the ground* for ever. A
+cell asks for its tile's stands, and a tile holds sixty-four cells; when two cells asked while the chunk
+was still coming, only the first was told it had come, and the second stayed *not yet* for good. Now every
+caller waiting on a chunk is told, with a test that fails without it. Over the Alps at z9.8 the same view
+went from 615 trees and 13 cells waiting to 1,331 and none. It was older than the tilt, but a tipped view
+cuts more cells at once and would have made it worse.
+
+Two things are deliberate and are not faults. **A tree keeps its full height tipped**: a true camera would
+draw it at the sine of the pitch, 71% at 45 degrees, and keeping it whole is what makes it stand out of the
+ground rather than lie on it, as the marks already do. **The marks are still a layer above the scenery**, so
+a castle behind a tree is drawn in front of it. Game pieces stay readable; mixing them into the scenery's
+depth is its own question.
+
 ## Result
 
 The first half of the hypothesis is **confirmed, and more cheaply than expected**: the projection is
@@ -423,7 +473,8 @@ The findings above are the menu, and none of them is small:
 - **The desk, and what the world lies on.** A tilted world is not a sheet on a desk, and the workbench on
   the roadmap is built on the desk. This is the fiction question, not the rendering one.
 - **Brush space under an anisotropy.** One factor in the painterly worker, if the look survives it.
-- **Standing the scenery up**, which is a different scenery layer.
+- ~~**Standing the scenery up**~~, done 2026-09-25 without a different layer: the tip went into the feet
+  and out of the matrix. See *The scenery stands up* above.
 - **The thing no camera fixes.** 0051: the world is 1.2 km to a world unit and a surveyed castle is 1.4
   pixels at the closest the camera comes, and 0051 refuses to draw it larger and call it a measurement.
   An isometric game is a game about looking at buildings. **There is no zoom in this world at which a
