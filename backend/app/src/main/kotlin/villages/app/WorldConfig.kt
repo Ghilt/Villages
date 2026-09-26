@@ -1,5 +1,6 @@
 package villages.app
 
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -36,6 +37,8 @@ import java.time.Instant
 import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom
 
+private val feedLog = LoggerFactory.getLogger("villages.feed")
+
 /**
  * The wiring. Everything the world is made of, chosen here and nowhere else: today the in-memory world,
  * because there is no MongoDB on this machine yet; from increment 0.8 a profile chooses between this and
@@ -43,8 +46,14 @@ import java.util.concurrent.ThreadLocalRandom
  */
 @Configuration
 class WorldConfig {
+    /**
+     * The world, and where the server's log hears of anything that throws while the feed hands it an event:
+     * the stack is written here, and the gateway tells every window the one line of it. See decision 0029.
+     */
     @Bean(destroyMethod = "close")
-    fun world(): InMemoryWorld = InMemoryWorld()
+    fun world(): InMemoryWorld = InMemoryWorld().also { world ->
+        world.feed.watchFaults { fault -> feedLog.error(fault.describe(), fault.thrown) }
+    }
 
     @Bean
     fun clock(): Clock = Clock.systemUTC()

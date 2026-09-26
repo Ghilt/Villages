@@ -53,6 +53,17 @@ the overlap costs a duplicate instead, and a subscriber drops it by the event's 
 therefore at least once, which is what a log reader is supposed to have, and folding the same event twice
 has to be harmless - which for a read model keyed by identity it already was, now with a test that says so.
 
+*Amended 2026-09-26:* a relay also owes saying so when a subscriber fails. One that threw used to be lost
+without a word: Occurrent tried it again two hundred milliseconds later, the feed dropped the retry as
+already seen, and the read model was missing the event with nothing anywhere to say so. That is how a
+closing socket once cost the windows holding a cell some of the houses seeded into it, and it took a flight
+recording to find out why. The feed now catches what a subscriber throws, tells whoever watches for faults,
+and goes on to the next event, during the replay as well as live. The app writes the stack to the server's
+log under `villages.feed`, and the gateway tells every window the one line of it, as an `error` frame with
+the code `fault`, which the debug panel logs. The event is still not handed to that subscriber again: a
+fold that throws on an event would throw on the retry too, and a retry that never succeeds would stop the
+read model for good rather than leave it missing one event.
+
 ## Consequences
 
 `EventFeed` is a plain interface rather than a `fun interface`, and every caller states its intent at the

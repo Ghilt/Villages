@@ -228,6 +228,18 @@ class Gateway(
         sessions[change.player]?.sightChanged(change.sight)
     }
 
+    /**
+     * A subscriber that threw on an event is told to every window, because the debug panel in each is where
+     * it is seen, and a read model missing an event is otherwise only a map that is quietly wrong. The stack
+     * is in the server's log; this is the one line of it. See decision records 0023 and 0029.
+     */
+    private val faults: AutoCloseable = events.watchFaults { fault ->
+        val told = ErrorFrame("fault", fault.describe())
+        for (connection in live) {
+            connection.out.send(told)
+        }
+    }
+
     fun connect(out: Outbound): Connection = Connection(out).also { live += it }
 
     /**
@@ -333,6 +345,7 @@ class Gateway(
         figuresChanged.close()
         moves.close()
         seen.close()
+        faults.close()
         (later as? AutoCloseable)?.close()
     }
 

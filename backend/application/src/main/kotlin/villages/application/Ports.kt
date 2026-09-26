@@ -271,6 +271,22 @@ enum class Start {
 interface EventFeed {
     /** Delivers events until the returned handle is closed. */
     fun subscribe(from: Start, subscriber: (StoredEvent) -> Unit): AutoCloseable
+
+    /**
+     * Hears of every subscriber that throws on an event, until the returned handle is closed. The feed says
+     * so and goes on without handing that event to that subscriber again, so the read model is missing it
+     * and this is how anybody finds out. A feed that delivers on the caller's thread, as the tests' fakes
+     * do, lets the throw reach the caller instead, so by default there is nothing to hear.
+     */
+    fun watchFaults(listener: (FeedFault) -> Unit): AutoCloseable = AutoCloseable {}
+}
+
+/** A subscriber to the feed that threw on an event: which one, on what, and what it threw. */
+data class FeedFault(val subscriber: String, val event: StoredEvent, val thrown: Exception) {
+    /** The fault in one line, said the same in the server's log and in the debug panel. */
+    fun describe(): String =
+        "$subscriber threw on ${event.type} (${event.stream}, version ${event.streamVersion}): " +
+            thrown.javaClass.simpleName + (thrown.message?.let { ": $it" } ?: "")
 }
 
 /**

@@ -317,7 +317,9 @@ Commands are added here as the increments land:
   It is the log and the buttons; the block of state above them went on 2026-09-16
   because Adam never read it, and what it used to say every four hundred milliseconds is now said once,
   when it changes, as a line of the log. Its copy button puts the log on the clipboard, which is the
-  shortest way to tell a session what the program is doing. So a change that wants to be seen there says
+  shortest way to tell a session what the program is doing. A read model that throws is said there too, as
+  `gateway: error fault: …`, with its stack in the server's log under `villages.feed`, which the quick-start
+  writes to `.logs/backend.log`; see decision record 0029. So a change that wants to be seen there says
   so with `note(area, message)` rather than by adding a row. **Everything in it is in a folding section,
   and a step that puts something there says which section - and asks when that is not obvious from what
   Adam said, rather than picking one.** Today they are Worktrees, Debug map, Scenery, Camera, Areas, World, Resources, Characters and Log. The events themselves are not in the

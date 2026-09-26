@@ -14,6 +14,7 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import villages.application.AnonymousTokens
 import villages.application.Arrival
 import villages.application.EventFeed
+import villages.application.FeedFault
 import villages.application.CharacterCommandExecutor
 import villages.application.FoundHouseService
 import villages.application.HouseCommandExecutor
@@ -187,6 +188,16 @@ private class TinyWorld : HouseCommandExecutor, CharacterCommandExecutor, EventF
         subscribers += subscriber
         return AutoCloseable { subscribers -= subscriber }
     }
+
+    private val faultWatchers = mutableListOf<(FeedFault) -> Unit>()
+
+    override fun watchFaults(listener: (FeedFault) -> Unit): AutoCloseable {
+        faultWatchers += listener
+        return AutoCloseable { faultWatchers -= listener }
+    }
+
+    /** What the real feed says when a subscriber throws, said on purpose. */
+    fun fault(fault: FeedFault) = faultWatchers.toList().forEach { it(fault) }
 }
 
 /** Later is whenever the test says. */
@@ -1457,6 +1468,27 @@ class GatewaySpec : StringSpec({
         rig.aHouseIsFounded()
 
         watcher.filterIsInstance<EventFrame>().map { it.eventType } shouldContain "villages.house.founded.v1"
+    }
+
+    // The stack is in the server's log; the debug panel in every window is told the one line of it.
+    "a subscriber that threw on an event is told to every window as a fault" {
+        val rig = Rig()
+        val (mine, one) = rig.introduced()
+        val (_, two) = rig.someoneElse()
+        mine.receive(founding())
+        val founded = rig.recent.latest(1).single()
+        one.clear()
+        two.clear()
+
+        rig.world.fault(FeedFault("HousesProjection", founded, IllegalStateException("a fold that is wrong")))
+
+        val told = ErrorFrame(
+            "fault",
+            "HousesProjection threw on villages.house.founded.v1 (${founded.stream}, version 2): " +
+                "IllegalStateException: a fold that is wrong",
+        )
+        one.single() shouldBe told
+        two.single() shouldBe told
     }
 
     "more cells than a connection may hold is refused, and none of them taken" {
