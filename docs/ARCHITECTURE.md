@@ -148,6 +148,13 @@ through all of its prefixes, sending to the holders at the zooms its significanc
 anyone who is seeing everything at the rest. A cell is a quadkey at any zoom, so a client asks for data on
 the same grid, at the same zoom, as the terrain tiles it draws; see decision record 0026.
 
+The fan-out runs inside the read model's watchers, and a throw there is lost: it leaves the fan-out before
+the connections after it are told, and the feed has already counted the event as seen, so nothing hands it
+over again. A send therefore never throws into the gateway. A frame for a socket that is going is simply not
+delivered, and the close on its way lets the connection go. Tomcat says a session is open while it is
+closing, and a seeding connection closes the moment its command is accepted, which is while its house is
+still being fanned out.
+
 Seeing everything is a connection's, not a house's: `seeAll` sets significance aside for whoever sent it, so
 the same house is in a coarse cell for one session and not for another. It is a way of looking rather than a
 fact about the world, which is why nothing about it is stored or recorded. The player's eye is a different

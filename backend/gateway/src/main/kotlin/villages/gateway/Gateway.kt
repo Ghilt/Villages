@@ -307,7 +307,20 @@ class Gateway(
         (later as? AutoCloseable)?.close()
     }
 
-    inner class Connection(internal val out: Outbound) {
+    inner class Connection(private val transport: Outbound) {
+        /**
+         * Every frame to this connection goes out through here, and nothing a send throws gets past it. The
+         * fan-outs send from inside the read models' watchers, where a throw skips every connection after
+         * this one and is never tried again. A frame for a socket that is going is simply not delivered.
+         */
+        internal val out = Outbound { frame ->
+            try {
+                transport.send(frame)
+            } catch (@Suppress("TooGenericExceptionCaught", "SwallowedException") undelivered: Exception) {
+                // The close already on its way lets this connection go.
+            }
+        }
+
         var player: PlayerId? = null
             private set
 
