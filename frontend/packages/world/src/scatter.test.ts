@@ -4,7 +4,7 @@ import { growingTable } from './biome.ts';
 import { EXAMPLE_BIOMES as biomesFile } from './fixture.ts';
 import type { Palette } from './palette.ts';
 import { CELL, cellOf, scatterCell } from './scatter.ts';
-import type { ScatteredPoint } from './scatter.ts';
+import type { ClassAt, Ground, ScatteredPoint } from './scatter.ts';
 import type { SpriteMap, SpriteMapFile } from './spriteMap.ts';
 import { NO_FAVOURITE } from './stands.ts';
 import type { StandChunk } from './stands.ts';
@@ -88,39 +88,49 @@ function oneStand(x: number, y: number, reach: number, dominant: number, thickne
 }
 
 const map = makeMap();
+
+/** The same ground on every tile, which is what a test about the rule rather than the tiles wants. */
+const on = (classAt: ClassAt, stands: StandChunk): Ground => ({ classAt, standsOf: () => stands });
 const allTaiga = () => TAIGA;
 const at = (point: ScatteredPoint): string => `${point.x.toFixed(6)},${point.y.toFixed(6)}`;
 
 describe('where scenery stands', () => {
   it('grows nothing at all on ground the biome has no mix for', () => {
-    expect(scatterCell(4, 4, 1, () => OCEAN, map, NO_STANDS)).toEqual([]);
+    expect(
+      scatterCell(
+        4,
+        4,
+        1,
+        on(() => OCEAN, NO_STANDS),
+        map,
+      ),
+    ).toEqual([]);
   });
 
   it('puts the same pine on the same ground however the cache is cut', () => {
     // A point's identity is its place on the world grid, so a cell is a cache and nothing else. If this
     // ever stopped being true, panning would redraw the world slightly differently as cells were reused.
-    const together = scatterCell(10, 10, 1, allTaiga, map, NO_STANDS);
-    const again = scatterCell(10, 10, 1, allTaiga, map, NO_STANDS);
+    const together = scatterCell(10, 10, 1, on(allTaiga, NO_STANDS), map);
+    const again = scatterCell(10, 10, 1, on(allTaiga, NO_STANDS), map);
     expect(again.map(at)).toEqual(together.map(at));
 
     // And a neighbouring cell never repeats one of its points.
-    const beside = scatterCell(11, 10, 1, allTaiga, map, NO_STANDS);
+    const beside = scatterCell(11, 10, 1, on(allTaiga, NO_STANDS), map);
     const shared = new Set(together.map(at));
     expect(beside.filter((point) => shared.has(at(point)))).toEqual([]);
   });
 
   it('stays inside the cell it was asked for', () => {
-    for (const point of scatterCell(10, 10, 1, allTaiga, map, NO_STANDS)) {
+    for (const point of scatterCell(10, 10, 1, on(allTaiga, NO_STANDS), map)) {
       expect(cellOf(point.x)).toBe(10);
       expect(cellOf(point.y)).toBe(10);
     }
   });
 
-  it('cuts cells that a zoom 7 tile divides exactly, so one cell wants one chunk', () => {
-    // `scatterCell` is handed one stand chunk, and both callers pick it by dividing the cell's address
-    // by the cells to a tile: the browser against what it has fetched, the still renderer against what
-    // it has read off the disk. A CELL that did not divide TILE_SIZE would put some cells across two
-    // tiles, and those cells would quietly lose the stands belonging to the other one.
+  it("cuts cells that a zoom 7 tile divides exactly, so a cell's own points want one chunk", () => {
+    // A cell's own points all stand on one tile, and only the margin it spaces them against reaches the
+    // next one. A CELL that did not divide TILE_SIZE would put some cells' own points across two tiles,
+    // and every rule that reads the ground by tile would have to be told about the split.
     expect(TILE_SIZE % CELL).toBe(0);
     const perTile = TILE_SIZE / CELL;
     for (const cell of [0, 1, perTile - 1, perTile, perTile * 3 + 2]) {
@@ -138,14 +148,13 @@ describe('what a stand does', () => {
   const middleY = 10 * CELL + CELL / 2;
 
   it('thickens the ground under it', () => {
-    const bare = scatterCell(10, 10, 1, allTaiga, map, NO_STANDS);
+    const bare = scatterCell(10, 10, 1, on(allTaiga, NO_STANDS), map);
     const wooded = scatterCell(
       10,
       10,
       1,
-      allTaiga,
+      on(allTaiga, oneStand(middleX, middleY, CELL, spruce, biomesFile.most)),
       map,
-      oneStand(middleX, middleY, CELL, spruce, biomesFile.most),
     );
     expect(wooded.length).toBeGreaterThan(bare.length * 2);
   });
@@ -154,7 +163,7 @@ describe('what a stand does', () => {
     // The whole point of a kernel over a flat disc: a wood has to have a ragged inside, or it is the
     // even carpet this replaced with extra steps.
     const stand = oneStand(middleX, middleY, CELL, spruce, biomesFile.most);
-    const points = scatterCell(10, 10, 1, allTaiga, map, stand);
+    const points = scatterCell(10, 10, 1, on(allTaiga, stand), map);
     const near = points.filter((point) => Math.hypot(point.x - middleX, point.y - middleY) < CELL / 3);
     const far = points.filter((point) => {
       const away = Math.hypot(point.x - middleX, point.y - middleY);
@@ -168,8 +177,8 @@ describe('what a stand does', () => {
 
   it('leans the mix towards its own favourite', () => {
     const stand = oneStand(middleX, middleY, CELL * 2, spruce, biomesFile.most);
-    const inside = scatterCell(10, 10, 1, allTaiga, map, stand);
-    const outside = scatterCell(10, 10, 1, allTaiga, map, NO_STANDS);
+    const inside = scatterCell(10, 10, 1, on(allTaiga, stand), map);
+    const outside = scatterCell(10, 10, 1, on(allTaiga, NO_STANDS), map);
 
     const share = (points: ScatteredPoint[]) =>
       points.filter((point) => point.kind === spruce).length / Math.max(1, points.length);
@@ -187,7 +196,7 @@ describe('what a stand does', () => {
       const all: ScatteredPoint[] = [];
       for (let cellY = 2; cellY < 20; cellY += 1) {
         for (let cellX = 2; cellX < 20; cellX += 1) {
-          all.push(...scatterCell(cellX, cellY, 1, allTaiga, map, stands));
+          all.push(...scatterCell(cellX, cellY, 1, on(allTaiga, stands), map));
         }
       }
       return all;
@@ -212,8 +221,8 @@ describe('the density dial', () => {
   it('lets points in and out without ever moving one', () => {
     // This is what makes turning the dial watchable rather than a reshuffle: a thinner world is a strict
     // subset of a fuller one, so nothing jumps.
-    const full = scatterCell(10, 10, 1, allTaiga, map, NO_STANDS);
-    const half = scatterCell(10, 10, 0.5, allTaiga, map, NO_STANDS);
+    const full = scatterCell(10, 10, 1, on(allTaiga, NO_STANDS), map);
+    const half = scatterCell(10, 10, 0.5, on(allTaiga, NO_STANDS), map);
 
     expect(half.length).toBeLessThan(full.length);
     const fullAt = new Set(full.map(at));
@@ -229,9 +238,8 @@ describe('the order things arrive in', () => {
       10,
       10,
       1,
-      allTaiga,
+      on(allTaiga, oneStand(10 * CELL + CELL / 2, 10 * CELL + CELL / 2, CELL, NO_FAVOURITE, biomesFile.most)),
       map,
-      oneStand(10 * CELL + CELL / 2, 10 * CELL + CELL / 2, CELL, NO_FAVOURITE, biomesFile.most),
     );
     const mean = (kind: number) => {
       const of = points.filter((point) => point.kind === kind);
@@ -245,9 +253,114 @@ describe('the order things arrive in', () => {
   });
 
   it('sorts by rank, so drawing a prefix is drawing the earliest', () => {
-    const points = scatterCell(10, 10, 1, allTaiga, map, NO_STANDS);
+    const points = scatterCell(10, 10, 1, on(allTaiga, NO_STANDS), map);
     for (let index = 1; index < points.length; index += 1) {
       expect(points[index]!.rank).toBeGreaterThanOrEqual(points[index - 1]!.rank);
     }
+  });
+});
+
+describe('spacing, which keeps trees from standing on each other', () => {
+  const apartOf = (kind: number): number => biomesFile.kinds[kind]!.apart;
+  const perTile = TILE_SIZE / CELL;
+
+  /** Every point over a block of cells, with the stands different on either side of a tile edge. */
+  const block = (spacing: number): ScatteredPoint[] => {
+    // Thick wood on tile 1 and open ground on tile 0, so the edge between them is the hard case: a cell
+    // near it has to work its neighbours' candidates out from the other tile's stands.
+    const thick = oneStand(perTile * CELL + CELL * 2, 10 * CELL, CELL * 4, NO_FAVOURITE, biomesFile.most);
+    const ground: Ground = {
+      classAt: allTaiga,
+      standsOf: (tileX) => (tileX === 1 ? thick : NO_STANDS),
+    };
+    const all: ScatteredPoint[] = [];
+    for (let cellY = 8; cellY <= 11; cellY += 1) {
+      for (let cellX = perTile - 2; cellX <= perTile + 1; cellX += 1) {
+        all.push(...scatterCell(cellX, cellY, 1, ground, map, spacing));
+      }
+    }
+    return all;
+  };
+
+  /** The pairs nearer than their two kinds allow, found through buckets rather than every pair. */
+  const crowdedPairs = (points: ScatteredPoint[], spacing: number): number => {
+    const size = 2;
+    const buckets = new Map<string, ScatteredPoint[]>();
+    for (const point of points) {
+      const key = `${Math.floor(point.x / size)}/${Math.floor(point.y / size)}`;
+      buckets.set(key, [...(buckets.get(key) ?? []), point]);
+    }
+    let crowded = 0;
+    for (const point of points) {
+      const bx = Math.floor(point.x / size);
+      const by = Math.floor(point.y / size);
+      for (let dy = -1; dy <= 1; dy += 1) {
+        for (let dx = -1; dx <= 1; dx += 1) {
+          for (const other of buckets.get(`${bx + dx}/${by + dy}`) ?? []) {
+            if (other === point) {
+              continue;
+            }
+            const apart = ((apartOf(point.kind) + apartOf(other.kind)) / 2) * spacing;
+            if (Math.hypot(other.x - point.x, other.y - point.y) < apart) {
+              crowded += 1;
+            }
+          }
+        }
+      }
+    }
+    return crowded / 2;
+  };
+
+  it('never lets two points stand nearer than their kinds allow, across the edges of cells and tiles', () => {
+    const spaced = block(1);
+    expect(spaced.length).toBeGreaterThan(200);
+    expect(crowdedPairs(spaced, 1)).toBe(0);
+  });
+
+  it('is exactly the old scatter at nought, where trees did stand on each other', () => {
+    const unspaced = block(0);
+    // The fault this exists for, shown to be real rather than assumed.
+    expect(crowdedPairs(unspaced, 1)).toBeGreaterThan(20);
+    // And spacing only ever takes points out: every spaced point is one of the unspaced ones.
+    const was = new Set(unspaced.map(at));
+    for (const point of block(1)) {
+      expect(was.has(at(point))).toBe(true);
+    }
+  });
+
+  it('takes out more where the wood is thick than on the open ground', () => {
+    // How much it takes is the file's business - density and `apart` - and is measured on the real world
+    // in the stills. What the rule itself promises is that crowding is what it answers to.
+    const thickSide = (points: ScatteredPoint[]) =>
+      points.filter((point) => point.x >= perTile * CELL).length;
+    const openSide = (points: ScatteredPoint[]) => points.filter((point) => point.x < perTile * CELL).length;
+    const before = block(0);
+    const after = block(1);
+    const thickLoss = 1 - thickSide(after) / thickSide(before);
+    const openLoss = 1 - openSide(after) / Math.max(1, openSide(before));
+    expect(thickLoss).toBeGreaterThan(0);
+    expect(openLoss).toBeLessThan(thickLoss);
+  });
+
+  it('lets a tree clear the floor around its foot, rather than a fern clearing a tree', () => {
+    // Earlier wins and the big kinds arrive earlier, so where a tree and a heather crowd each other it is
+    // the tree that is left standing. Two spruces must stand further apart than two heathers, so the
+    // share of each kind kept overall says nothing about this; the pairs that crowd each other do.
+    const before = block(0);
+    const after = new Set(block(1).map(at));
+    const spruce = kindOf('spruce');
+    const heather = kindOf('heather');
+    let treeLeft = 0;
+    let fernLeft = 0;
+    for (const tree of before.filter((point) => point.kind === spruce)) {
+      for (const fern of before.filter((point) => point.kind === heather)) {
+        if (Math.hypot(tree.x - fern.x, tree.y - fern.y) < (apartOf(spruce) + apartOf(heather)) / 2) {
+          treeLeft += after.has(at(tree)) ? 1 : 0;
+          fernLeft += after.has(at(fern)) ? 1 : 0;
+        }
+      }
+    }
+    expect(treeLeft + fernLeft).toBeGreaterThan(0);
+    expect(treeLeft).toBeGreaterThan(fernLeft);
   });
 });

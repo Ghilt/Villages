@@ -145,7 +145,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
   /** A frame owed to a trade still running. The camera is not moving, so nobody else will ask. */
   let owed: number | null = null;
   let scenery: ReturnType<typeof createSceneryLayer> | null = null;
-  let how: SceneryHow = { on: false, dial: 1, laterBy: 0, tilesRoot: '' };
+  let how: SceneryHow = { on: false, dial: 1, spacing: 1, laterBy: 0, tilesRoot: '' };
   /** The worst gap between two frames of a moving map, which is what a stutter is. */
   let worstGapMs = 0;
   /** When the last frame was actually drawn, which is what a frame gap is measured between. */
@@ -492,7 +492,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
     if (scenery !== null) {
       scenery.container.visible = how.on;
       const drew = how.on
-        ? scenery.update(view, how.tilesRoot, how.dial, how.laterBy, keepTrading)
+        ? scenery.update(view, how.tilesRoot, how.dial, how.spacing, how.laterBy, keepTrading)
         : { particles: 0, showing: 0, cells: 0, waiting: 0 };
       // Only gaps short enough to be a moving map are counted. A still map draws nothing, so the gap
       // since its last frame is seconds, and reporting that as a frame gap would be the panel lying
@@ -652,7 +652,8 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
     setScenery(next: SceneryHow): void {
       // A different scattering is a different world's worth of points, so what was cut is thrown away
       // rather than left to be a denser world's sparse half.
-      const recut = next.dial !== how.dial || next.tilesRoot !== how.tilesRoot;
+      const recut =
+        next.dial !== how.dial || next.spacing !== how.spacing || next.tilesRoot !== how.tilesRoot;
       how = next;
       if (recut) {
         scenery?.clear();

@@ -68,8 +68,10 @@ export interface SpriteRenderer {
 /** What the renderer needs in order to furnish the world. */
 export interface SceneryHow {
   on: boolean;
-  /** How far apart the points of the scattering are, in world units. Smaller is denser. */
+  /** A multiplier on what the sprite map asked for: one is exactly that, a half is half of it. */
   dial: number;
+  /** A multiplier on every kind's `apart`: one is what the file says, nought spaces nothing. */
+  spacing: number;
   /** How much later than its natural zoom each kind arrives, in zoom levels. */
   laterBy: number;
   /** Where this page's flat tiles live, which is what the terrain is read from. */

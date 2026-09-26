@@ -1,8 +1,8 @@
 import { TILE } from '../../map/painterlyMessages';
 import { classesOfTile, terrainPalette } from '../../map/terrainClasses';
 import type { TerrainPalette } from '../../map/terrainClasses';
-import { CELL, scatterCell } from '@villages/world';
-import type { ScatteredPoint, SpriteMap } from '@villages/world';
+import { CELL, NO_STANDS, reachBeyond, scatterCell } from '@villages/world';
+import type { ScatteredPoint, SpriteMap, StandChunk } from '@villages/world';
 
 import { spriteMap, standsHeld, standsOfTile } from './spriteMap';
 
@@ -46,7 +46,8 @@ let waiting = 0;
 let map: SpriteMap | null = null;
 let noMap = false;
 
-const keyOf = (dial: number, cellX: number, cellY: number): string => `${dial}/${cellX}/${cellY}`;
+const keyOf = (dial: number, spacing: number, cellX: number, cellY: number): string =>
+  `${dial}/${spacing}/${cellX}/${cellY}`;
 
 /** Everything cut so far is thrown away. For a change that makes every cell wrong: a new master. */
 export function forgetScenery(): void {
@@ -119,9 +120,10 @@ export function pointsOf(
   cellX: number,
   cellY: number,
   dial: number,
+  spacing: number,
   whenReady: () => void,
 ): ScatteredPoint[] | null {
-  const key = keyOf(dial, cellX, cellY);
+  const key = keyOf(dial, spacing, cellX, cellY);
   const already = held.get(key);
   if (already !== undefined) {
     return already;
@@ -132,7 +134,7 @@ export function pointsOf(
 
   asking.add(key);
   waiting += 1;
-  void cut(tilesRoot, cellX, cellY, dial, key).then(() => {
+  void cut(tilesRoot, cellX, cellY, dial, spacing, key).then(() => {
     asking.delete(key);
     waiting -= 1;
     whenReady();
@@ -145,6 +147,7 @@ async function cut(
   cellX: number,
   cellY: number,
   dial: number,
+  spacing: number,
   key: string,
 ): Promise<void> {
   palette ??= await terrainPalette();
@@ -157,35 +160,58 @@ async function cut(
     held.set(key, []);
     return;
   }
+  const known = map;
+  const colours = palette;
 
-  // One cell needs exactly one tile and one chunk, because a cell is 32 world units and both are 256.
-  const tileX = Math.floor((cellX * CELL) / TILE_UNITS);
-  const tileY = Math.floor((cellY * CELL) / TILE_UNITS);
-  const classes = await classesOfTile(tilesRoot, FLAT, tileX, tileY, palette);
+  // A cell spaces its points against its neighbours' candidates, so it reads the ground a little way past
+  // its own edge, and near a tile's edge that is the next tile over: one, two or four tiles, each with its
+  // terrain and its stands. Every candidate is then worked out from the tile it stands on, exactly as the
+  // cell that owns it would, which is what keeps the spacing seamless. See experiment 0012.
+  const reach = reachBeyond(known, spacing);
+  const tileOf = (world: number): number => Math.floor(world / TILE_UNITS);
+  const firstTileX = tileOf(cellX * CELL - reach);
+  const lastTileX = tileOf((cellX + 1) * CELL + reach - 1e-6);
+  const firstTileY = tileOf(cellY * CELL - reach);
+  const lastTileY = tileOf((cellY + 1) * CELL + reach - 1e-6);
+
+  const ground = new Map<string, { classes: Uint8Array | null; stands: StandChunk }>();
+  const reads: Promise<void>[] = [];
+  for (let tileY = firstTileY; tileY <= lastTileY; tileY += 1) {
+    for (let tileX = firstTileX; tileX <= lastTileX; tileX += 1) {
+      reads.push(
+        (async () => {
+          const classes = await classesOfTile(tilesRoot, FLAT, tileX, tileY, colours);
+          const stands = await new Promise<StandChunk>((settle) => {
+            const ask = () => {
+              const chunk = standsOfTile(tilesRoot, LAYER, tileX, tileY, 2 ** FLAT, ask);
+              if (chunk !== null) {
+                settle(chunk);
+              }
+            };
+            ask();
+          });
+          ground.set(`${tileX}/${tileY}`, { classes, stands });
+        })(),
+      );
+    }
+  }
+  await Promise.all(reads);
 
   // A tile that is not there is ocean, which is what the painter reads where a tile is missing. So a
   // cell past the edge of the world is empty rather than absent, and is not asked for again.
-  const classAt =
-    classes === null
-      ? () => 0
-      : (worldX: number, worldY: number) => {
-          const intoX = Math.floor(worldX) - tileX * TILE_UNITS;
-          const intoY = Math.floor(worldY) - tileY * TILE_UNITS;
-          return classes[intoY * TILE + intoX] ?? 0;
-        };
-
-  const stands = await new Promise<ReturnType<typeof standsOfTile>>((settle) => {
-    const ask = () => {
-      const chunk = standsOfTile(tilesRoot, LAYER, tileX, tileY, 2 ** FLAT, ask);
-      if (chunk !== null) {
-        settle(chunk);
-      }
-    };
-    ask();
-  });
-  if (stands === null) {
-    return;
-  }
+  const classAt = (worldX: number, worldY: number): number => {
+    const tileX = tileOf(worldX);
+    const tileY = tileOf(worldY);
+    const classes = ground.get(`${tileX}/${tileY}`)?.classes;
+    if (classes === null || classes === undefined) {
+      return 0;
+    }
+    const intoX = Math.floor(worldX) - tileX * TILE_UNITS;
+    const intoY = Math.floor(worldY) - tileY * TILE_UNITS;
+    return classes[intoY * TILE + intoX] ?? 0;
+  };
+  const standsOf = (tileX: number, tileY: number): StandChunk =>
+    ground.get(`${tileX}/${tileY}`)?.stands ?? NO_STANDS;
 
   if (held.size >= REMEMBER) {
     const oldest = held.keys().next();
@@ -193,5 +219,5 @@ async function cut(
       held.delete(oldest.value);
     }
   }
-  held.set(key, scatterCell(cellX, cellY, dial, classAt, map, stands));
+  held.set(key, scatterCell(cellX, cellY, dial, { classAt, standsOf }, known, spacing));
 }

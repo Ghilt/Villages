@@ -364,7 +364,8 @@ Commands are added here as the increments land:
   marks, its density against the ceiling, and its biome and kind mix. **They are marks, not
   silhouettes**: the shapes are drawn in Pixi and this is the generator's answer, not the map's. `-- --at
   lng,lat` looks anywhere, `-- --view alps` at one of them, `-- --zoom 10.4` closer, `-- --style flat`
-  without the paint. This is what a change to `world/biomes.json` is argued from.
+  without the paint, `-- --spacing 0` without the spacing that keeps trees off each other (two, three to
+  see more of it). This is what a change to `world/biomes.json` is argued from.
 - Sprites: `world/sprites/` is Adam's folder, committed as the master is: `scenery/<kind>` for every
   kind in `world/biomes.json` and `marks/<name>` for every mark. Any PNG, WebP or JPEG, any size, on a
   flat background or a transparent one. **Saving over a placeholder replaces it**, and with the dev server

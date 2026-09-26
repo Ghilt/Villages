@@ -45,7 +45,10 @@ import { OUTPUT_DIR, PAINTERLY, PAINTERLY_DIR, PALETTE, RENDER, masterAt } from 
  * thinned itself the same way would be arguing about the renderer when the subject is the generator.
  *
  *   node bin/renderScenery.ts [master] [--view name] [--style painted] [--zoom 9.6]
- *                             [--at lng,lat] [--width 1200] [--dial 1] [--out dir]
+ *                             [--at lng,lat] [--width 1200] [--dial 1] [--spacing 1] [--out dir]
+ *
+ * `--spacing` is the multiplier on every kind's `apart`, as the debug panel's is: nought is the scatter as
+ * it was before experiment 0012, which is how to see what the spacing took out.
  */
 
 const args = process.argv.slice(2);
@@ -66,6 +69,7 @@ const zoom = Number(flag('zoom') ?? 9.6);
 const width = Math.round(Number(flag('width') ?? 1200));
 const height = Math.round(width * 0.75);
 const dial = Number(flag('dial') ?? 1);
+const spacing = Number(flag('spacing') ?? 1);
 
 /** World units to one output pixel. A world unit is one pixel at zoom 7, and every zoom halves it. */
 const perPixel = 2 ** (7 - zoom);
@@ -346,13 +350,14 @@ function renderPlace(
   const toCell = cellOf(left + width * perPixel) + spare;
   const topCell = cellOf(top) - spare;
   const bottomCell = cellOf(top + height * perPixel) + spare;
-  const perTile = map.file.world.tileUnits / CELL;
 
   const drawn: [number, number, ScatteredPoint][] = [];
   for (let cellY = topCell; cellY <= bottomCell; cellY += 1) {
     for (let cellX = fromCell; cellX <= toCell; cellX += 1) {
-      const stands = standsOfTile(map, Math.floor(cellX / perTile), Math.floor(cellY / perTile));
-      for (const point of scatterCell(cellX, cellY, dial, classAt, map, stands)) {
+      // The ground the whole world over, so a cell can space its points against its neighbours' on any
+      // tile its margin reaches. See experiment 0012.
+      const ground = { classAt, standsOf: (tileX: number, tileY: number) => standsOfTile(map, tileX, tileY) };
+      for (const point of scatterCell(cellX, cellY, dial, ground, map, spacing)) {
         points += 1;
         const name = map.kinds[point.kind]?.name ?? '?';
         kindCount.set(name, (kindCount.get(name) ?? 0) + 1);
@@ -399,7 +404,7 @@ const chosen = places();
 
 console.log(
   `\n${chosen.length} place(s) in ${styleName}, ${width} by ${height} at zoom ${zoom.toFixed(1)}, ` +
-    `${perPixel.toFixed(3)} world units a pixel, dial ${dial}\n` +
+    `${perPixel.toFixed(3)} world units a pixel, dial ${dial}, spacing ${spacing}\n` +
     `sprite map of ${map.file.master}, ${map.file.stands.toLocaleString()} stands, ` +
     `worked out ${map.file.at}\n`,
 );

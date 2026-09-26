@@ -18,9 +18,14 @@ export interface ScenerySettings {
   dial: number;
   /** How much later than its natural zoom each kind arrives, in zoom levels. */
   laterBy: number;
+  /**
+   * A multiplier on every kind's `apart`: one is what `world/biomes.json` says, nought is the scatter as it
+   * was before experiment 0012, where two trees could land on the same spot.
+   */
+  spacing: number;
 }
 
-const START: ScenerySettings = { on: true, dial: 1, laterBy: 0 };
+const START: ScenerySettings = { on: true, dial: 1, laterBy: 0, spacing: 1 };
 
 let settings: ScenerySettings = { ...START };
 const listeners = new Set<() => void>();
@@ -38,7 +43,12 @@ export function watchScenery(listener: () => void): () => void {
 
 export function setScenery(change: Partial<ScenerySettings>): void {
   const next = { ...settings, ...change };
-  if (next.on === settings.on && next.dial === settings.dial && next.laterBy === settings.laterBy) {
+  if (
+    next.on === settings.on &&
+    next.dial === settings.dial &&
+    next.laterBy === settings.laterBy &&
+    next.spacing === settings.spacing
+  ) {
     return;
   }
   if (next.on !== settings.on) {
@@ -50,6 +60,16 @@ export function setScenery(change: Partial<ScenerySettings>): void {
       next.dial === 1
         ? 'as thick as the sprite map asked for'
         : `${next.dial} times what the sprite map asked for`,
+    );
+  }
+  if (next.spacing !== settings.spacing) {
+    note(
+      'scenery',
+      next.spacing === 0
+        ? 'spaced by nothing: trees may stand on top of each other, as before experiment 0012'
+        : next.spacing === 1
+          ? 'spaced as world/biomes.json says'
+          : `spaced ${next.spacing} times as far apart as world/biomes.json says`,
     );
   }
   if (next.laterBy !== settings.laterBy) {

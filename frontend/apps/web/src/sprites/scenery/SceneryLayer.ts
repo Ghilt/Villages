@@ -340,6 +340,7 @@ export function createSceneryLayer() {
       view: CameraView,
       tilesRoot: string,
       dial: number,
+      spacing: number,
       laterBy: number,
       askForAFrame: () => void,
     ): SceneryDrawn {
@@ -352,6 +353,7 @@ export function createSceneryLayer() {
           cellOf(toMercatorExact(view.center).x * WORLD_MASTER_WIDTH),
           0,
           dial,
+          spacing,
           askForAFrame,
         );
         return { particles: 0, showing: 0, cells: 0, waiting: sceneryTally().waiting, moving: 0 };
@@ -462,7 +464,7 @@ export function createSceneryLayer() {
               askForAFrame();
               continue;
             }
-            const points = pointsOf(tilesRoot, cellX, cellY, dial, askForAFrame);
+            const points = pointsOf(tilesRoot, cellX, cellY, dial, spacing, askForAFrame);
             if (points === null) {
               continue;
             }

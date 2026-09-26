@@ -23,6 +23,9 @@ const EVERY_MS = 250;
 /** What the dial steps through, as a multiple of what the sprite map asked for. */
 const DIALS = [0, 0.25, 0.5, 0.75, 1, 1.5, 2, 3];
 
+/** What the spacing steps through, as a multiple of every kind's `apart`. Nought is the old scatter. */
+const SPACINGS = [0, 0.5, 1, 1.5, 2, 3];
+
 function useDrawn(): SceneryDrawnTally {
   const [drawn, setDrawn] = useState(sceneryDrawn);
   useEffect(() => {
@@ -47,6 +50,7 @@ export function ScenerySection() {
   const drawn = useDrawn();
   const map = useSpriteMap();
   const step = Math.max(0, DIALS.indexOf(how.dial));
+  const spaced = Math.max(0, SPACINGS.indexOf(how.spacing));
 
   const tools = (
     <button
@@ -110,6 +114,27 @@ export function ScenerySection() {
           : how.dial === 0
             ? 'None of it, so the stands can be seen against bare ground'
             : `${how.dial} times what the sprite map asked for`}
+      </p>
+
+      <label className="debug-map__label" htmlFor="scenery-spacing">
+        How far apart they stand
+      </label>
+      <input
+        id="scenery-spacing"
+        className="debug__slider"
+        type="range"
+        min={0}
+        max={SPACINGS.length - 1}
+        step={1}
+        value={spaced}
+        onChange={(event) => setScenery({ spacing: SPACINGS[Number(event.target.value)] ?? 1 })}
+      />
+      <p className="debug-map__note">
+        {how.spacing === 1
+          ? 'As far apart as each kind’s apart in world/biomes.json: nothing stands on top of anything'
+          : how.spacing === 0
+            ? 'Not spaced at all, as before experiment 0012: trees may stand on top of each other'
+            : `${how.spacing} times each kind’s apart`}
       </p>
 
       <label className="debug-map__label" htmlFor="scenery-later">

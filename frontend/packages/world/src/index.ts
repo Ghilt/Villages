@@ -142,8 +142,8 @@ export type {
   TreatmentKind,
 } from './painterly.ts';
 
-export { CELL, cellOf, scatterCell, thickestOf } from './scatter.ts';
-export type { ClassAt, ScatteredPoint } from './scatter.ts';
+export { CELL, cellOf, reachBeyond, scatterCell, thickestOf } from './scatter.ts';
+export type { ClassAt, Ground, ScatteredPoint } from './scatter.ts';
 export { biomeAt, biomesByColour } from './spriteMap.ts';
 export type { SpriteMap, SpriteMapFile } from './spriteMap.ts';
 

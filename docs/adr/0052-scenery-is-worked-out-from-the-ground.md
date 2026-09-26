@@ -53,6 +53,12 @@ is stored, nothing is sent, and nothing is authored.
   > **Amended, 2026-09-25.** Still one transform, but it only scales and shifts now: a tipped camera's
   > turn and squash are stored in each particle's position, so the pictures stand up instead of lying
   > down with the ground, and the layer is drawn farthest first. See experiment 0008.
+  > **Amended, 2026-09-25.** Points are also **spaced**: a candidate is dropped if one that arrives
+  > earlier stands nearer than the mean of the two kinds' `apart`, a Matérn type II thinning. It asks
+  > about candidates rather than survivors, so it stays a pure function of the ground near a point, and
+  > a cell scatters a margin of its neighbours' candidates - off whatever tile they stand on - so the
+  > spacing has no seam. The dial is decided after the competition, so a thinner scattering is still a
+  > subset. See experiment 0012.
 - Scenery is **not a `MapSprite`**. There are tens of thousands, none is a thing the game knows about,
   and none can be clicked — `ParticleContainer` has no bounds at all, so a click on a tree falls
   through to the map, which is what we want.
