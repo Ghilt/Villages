@@ -336,7 +336,9 @@ Commands are added here as the increments land:
   the log says what gives vision under `sight`. `give vision here`, under the switch, gives the house a circle
   where the camera is looking until its `take it away` is pressed; both are real commands. The fog covers the
   world and not the signs: every icon, the offered seats and whatever stands in vision are drawn over it. Unknown ground is under a dark haze, revealed ground is washed
-  grey, vision is clear. With no house the whole world is hazed. See `docs/adr/0061`, `0062`, `0063` and
+  grey, vision is clear. With no house the whole world is hazed. The server holds back what the fog hides:
+  a player is sent the houses on revealed ground and the people in vision, and their own wherever they are,
+  and `fog of war: off` lifts that too, for that window. See `docs/adr/0061`, `0062`, `0063` and
   `docs/plans/fog-of-war.md`.
 - Looking at a whole world at once: `see everything`, in the debug panel's World bar beside `seed 20`.
   A house is founded at significance 20, so it reaches a page only from zoom 8 in, and pulling back past

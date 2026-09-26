@@ -8,6 +8,7 @@ import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.ints.shouldBeLessThan
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import villages.application.AnonymousTokens
@@ -54,6 +55,7 @@ import villages.projections.HousesProjection
 import villages.projections.RecentEventsProjection
 import villages.projections.SightProjection
 import villages.protocol.Batch
+import villages.protocol.Cell
 import villages.protocol.CharacterArrived
 import villages.protocol.CharacterChanged
 import villages.protocol.CharacterGone
@@ -233,9 +235,19 @@ private const val STOCKHOLM_Z10 = "1200312213"
 private const val STOCKHOLM_Z8 = "12003122"
 private const val STOCKHOLM_Z4 = "1200"
 
-private fun founding(commandId: String = COMMAND_ONE, name: String = "Ravenscar") =
+/** Four hundred kilometres east of Stockholm, and the cell it falls in: far outside a seat there's 34 km. */
+private const val HELSINKI_LAT = 60.17
+private const val HELSINKI_LON = 24.94
+private val HELSINKI_Z10 = Cell.of(HELSINKI_LAT, HELSINKI_LON).quadkey
+
+private fun founding(
+    commandId: String = COMMAND_ONE,
+    name: String = "Ravenscar",
+    lat: Double = 59.33,
+    lon: Double = 18.07,
+) =
     """{"type":"command","commandId":"$commandId","command":{"type":"foundHouse",""" +
-        """"name":"$name","seat":{"lat":59.33,"lon":18.07},""" +
+        """"name":"$name","seat":{"lat":$lat,"lon":$lon},""" +
         """"banner":{"field":"sable","division":"plain","charge":"stag","chargeTincture":"argent"}}}"""
 
 private fun takingAction(choiceId: String, optionId: String, commandId: String = COMMAND_ONE) =
@@ -265,6 +277,8 @@ private fun unsubscribe(vararg cells: String) =
     """{"type":"unsubscribeCells","cells":[${cells.joinToString { "\"$it\"" }}]}"""
 
 private fun seeAll(on: Boolean) = """{"type":"seeAll","on":$on}"""
+
+private fun fogOfWar(on: Boolean) = """{"type":"fogOfWar","on":$on}"""
 
 private fun addingAKeyFigure(commandId: String) =
     """{"type":"command","commandId":"$commandId","command":{"type":"addKeyFigure"}}"""
@@ -371,18 +385,25 @@ private class Rig {
      * A connection that has said hello, and everything it has been sent since. Every call uses the same
      * token unless told otherwise, so two of these are two windows of one player - which is exactly the
      * case worth testing, and now the case that ends in a takeover.
+     *
+     * `fogLifted` is Adam's switch pressed straight after. Most of what this spec asks is about cells and
+     * deltas rather than the fog, and a window watching somebody else's house from nowhere near it would be
+     * sent nothing, so those windows lift it; the fog has tests of its own.
      */
-    fun introduced(token: String = TOKEN): Pair<Gateway.Connection, MutableList<ServerFrame>> {
+    fun introduced(token: String = TOKEN, fogLifted: Boolean = false): Pair<Gateway.Connection, MutableList<ServerFrame>> {
         val sent = mutableListOf<ServerFrame>()
         val connection = gateway.connect { sent += it }
         connection.receive("""{"type":"hello","playerToken":"$token","protocolVersion":$PROTOCOL_VERSION}""")
+        if (fogLifted) {
+            connection.receive(fogOfWar(false))
+        }
         sent.clear()
         return connection to sent
     }
 
     /** Somebody else entirely: a fresh token, so this is another player rather than a takeover. */
-    fun someoneElse(): Pair<Gateway.Connection, MutableList<ServerFrame>> =
-        introduced(UUID.randomUUID().toString())
+    fun someoneElse(fogLifted: Boolean = false): Pair<Gateway.Connection, MutableList<ServerFrame>> =
+        introduced(UUID.randomUUID().toString(), fogLifted)
 
     /** A fresh player founds a house. Many houses means many players, one each; see decision 0028. */
     fun aHouseIsFounded(name: String = "Ravenscar") {
@@ -490,6 +511,143 @@ class GatewaySpec : StringSpec({
         looker.cells().shouldBeEmpty()
     }
 
+    "the fog holds back a house on ground the player's house has never seen, and lifting it sends it" {
+        val rig = Rig()
+        val (theirs, _) = rig.someoneElse()
+        theirs.receive(founding(name = "Kestrel", lat = HELSINKI_LAT, lon = HELSINKI_LON))
+        val (mine, sent) = rig.introduced()
+        mine.receive(founding())
+        sent.clear()
+
+        mine.receive(subscribe(HELSINKI_Z10, STOCKHOLM_Z10))
+
+        val fogged = sent.filterIsInstance<Snapshot>().associateBy { it.cell }
+        fogged.getValue(HELSINKI_Z10).houses.shouldBeEmpty()
+        // What is hidden is not counted either, because how much is hidden is itself something learnt.
+        fogged.getValue(HELSINKI_Z10).omitted shouldBe 0
+        fogged.getValue(STOCKHOLM_Z10).houses.single().name shouldBe "Ravenscar"
+        sent.clear()
+
+        mine.receive(fogOfWar(false))
+        sent.filterIsInstance<Snapshot>().single { it.cell == HELSINKI_Z10 }.houses.single().name shouldBe "Kestrel"
+        sent.clear()
+
+        mine.receive(fogOfWar(false))
+        sent.shouldBeEmpty()
+
+        mine.receive(fogOfWar(true))
+        sent.filterIsInstance<Snapshot>().single { it.cell == HELSINKI_Z10 }.houses.shouldBeEmpty()
+    }
+
+    "a house arrives with the vision given over it, before which the page is told the new sight, and stays once it is taken away" {
+        val rig = Rig()
+        val (theirs, _) = rig.someoneElse()
+        theirs.receive(founding(name = "Kestrel", lat = HELSINKI_LAT, lon = HELSINKI_LON))
+        val (mine, sent) = rig.introduced()
+        mine.receive(founding())
+        mine.receive(subscribe(HELSINKI_Z10))
+        sent.clear()
+
+        mine.receive(givingVision(HELSINKI_LAT, HELSINKI_LON, commandNumber(1)))
+
+        sent.filterIsInstance<Snapshot>().single().houses.single().name shouldBe "Kestrel"
+        sent.indexOfFirst { it is YourSight } shouldBeLessThan sent.indexOfFirst { it is Snapshot }
+        val given = sent.filterIsInstance<YourSight>().last().points.last().of!!
+        sent.clear()
+
+        mine.receive(takingVision(given, commandNumber(2)))
+
+        // Revealed ground keeps its buildings: what stands still is still known.
+        sent.filterIsInstance<Snapshot>().single().houses.single().name shouldBe "Kestrel"
+    }
+
+    "somebody is sent only while they stand in vision, and not on ground that is only revealed" {
+        val rig = Rig()
+        val (theirs, told) = rig.someoneElse()
+        theirs.receive(founding(name = "Kestrel", lat = HELSINKI_LAT, lon = HELSINKI_LON))
+        theirs.receive(addingAKeyFigure(commandNumber(1)))
+        val agnes = told.filterIsInstance<YourKeyFigures>().last().keyFigures.single().id
+        theirs.receive(moving(agnes, HELSINKI_LAT, HELSINKI_LON, commandNumber(2)))
+        val (mine, sent) = rig.introduced()
+        mine.receive(founding())
+        mine.receive(givingVision(HELSINKI_LAT, HELSINKI_LON, commandNumber(3)))
+        val given = sent.filterIsInstance<YourSight>().last().points.last().of!!
+        sent.clear()
+
+        mine.receive(subscribe(HELSINKI_Z10))
+        sent.filterIsInstance<Snapshot>().single().characters.single().id shouldBe agnes
+        sent.clear()
+
+        mine.receive(takingVision(given, commandNumber(4)))
+
+        val revealed = sent.filterIsInstance<Snapshot>().single()
+        revealed.houses.single().name shouldBe "Kestrel"
+        revealed.characters.shouldBeEmpty()
+        revealed.omittedCharacters shouldBe 0
+    }
+
+    "a founding on ground the player has never seen is not told to them, and one in their vision is" {
+        val rig = Rig()
+        val (mine, sent) = rig.introduced()
+        mine.receive(founding())
+        mine.receive(subscribe(HELSINKI_Z10, STOCKHOLM_Z10))
+        rig.later.tick()
+        sent.clear()
+
+        rig.someoneElse().first.receive(founding(name = "Kestrel", lat = HELSINKI_LAT, lon = HELSINKI_LON))
+        rig.someoneElse().first.receive(founding(name = "Wren", lat = 59.34, lon = 18.06))
+        rig.later.tick()
+
+        sent.filterIsInstance<Batch>().flatMap { it.deltas }
+            .map { it.shouldBeInstanceOf<HouseAppeared>().house.name } shouldBe listOf("Wren")
+    }
+
+    "somebody walking into the house's vision arrives, and walking out of it is gone" {
+        val rig = Rig()
+        val (theirs, told) = rig.someoneElse()
+        theirs.receive(founding(name = "Kestrel", lat = HELSINKI_LAT, lon = HELSINKI_LON))
+        theirs.receive(addingAKeyFigure(commandNumber(1)))
+        val agnes = told.filterIsInstance<YourKeyFigures>().last().keyFigures.single().id
+        val (mine, sent) = rig.introduced()
+        mine.receive(founding())
+        mine.receive(subscribe(STOCKHOLM_Z10, HELSINKI_Z10))
+        rig.later.tick()
+        sent.clear()
+
+        // Standing in a cell the player holds, on ground their house has never seen.
+        theirs.receive(moving(agnes, HELSINKI_LAT, HELSINKI_LON, commandNumber(2)))
+        rig.later.tick()
+        sent.filterIsInstance<Batch>().flatMap { it.deltas }.shouldBeEmpty()
+
+        theirs.receive(moving(agnes, 59.34, 18.06, commandNumber(3)))
+        rig.later.tick()
+        sent.filterIsInstance<Batch>().single().deltas.single()
+            .shouldBeInstanceOf<CharacterArrived>().character.id shouldBe agnes
+        sent.clear()
+
+        theirs.receive(moving(agnes, HELSINKI_LAT, HELSINKI_LON, commandNumber(4)))
+        rig.later.tick()
+        sent.filterIsInstance<Batch>().single().deltas.single().shouldBeInstanceOf<CharacterGone>().id shouldBe agnes
+    }
+
+    "a player's own key figure reaches them wherever they walk, without waiting for the sight to follow" {
+        val rig = Rig()
+        val (mine, sent) = rig.introduced()
+        mine.receive(founding())
+        mine.receive(addingAKeyFigure(commandNumber(1)))
+        val agnes = sent.filterIsInstance<YourKeyFigures>().last().keyFigures.single().id
+        mine.receive(subscribe(HELSINKI_Z10))
+        rig.later.tick()
+        sent.clear()
+
+        mine.receive(moving(agnes, HELSINKI_LAT, HELSINKI_LON, commandNumber(2)))
+        rig.later.tick()
+
+        // As a delta, and not only in the cell answered again once the sight has caught up with her.
+        sent.filterIsInstance<Batch>().single().deltas.single()
+            .shouldBeInstanceOf<CharacterArrived>().character.id shouldBe agnes
+    }
+
     "a house takes a key figure in, and its player is told who they are, stats and all" {
         val rig = Rig()
         val (mine, sent) = rig.introduced()
@@ -568,9 +726,9 @@ class GatewaySpec : StringSpec({
         mine.receive(founding())
         mine.receive(addingAKeyFigure(commandNumber(1)))
         val agnes = sent.filterIsInstance<YourKeyFigures>().last().keyFigures.single().id
-        val (looker, seen) = rig.someoneElse()
+        val (looker, seen) = rig.someoneElse(fogLifted = true)
         looker.receive(subscribe(STOCKHOLM_Z10))
-        val (far, farSeen) = rig.someoneElse()
+        val (far, farSeen) = rig.someoneElse(fogLifted = true)
         // Zoom 8 is coarser than a key figure's significance is drawn at, which is zoom 9.
         far.receive(subscribe(STOCKHOLM_Z8))
         rig.later.tick()
@@ -596,7 +754,7 @@ class GatewaySpec : StringSpec({
         mine.receive(founding())
         mine.receive(addingAKeyFigure(commandNumber(1)))
         val agnes = sent.filterIsInstance<YourKeyFigures>().last().keyFigures.single().id
-        val (looker, seen) = rig.someoneElse()
+        val (looker, seen) = rig.someoneElse(fogLifted = true)
         looker.receive(subscribe(STOCKHOLM_Z10))
         mine.receive(moving(agnes, 59.34, 18.06, commandNumber(2)))
         rig.later.tick()
@@ -618,7 +776,7 @@ class GatewaySpec : StringSpec({
         mine.receive(founding())
         mine.receive(addingAKeyFigure(commandNumber(1)))
         val agnes = sent.filterIsInstance<YourKeyFigures>().last().keyFigures.single().id
-        val (looker, seen) = rig.someoneElse()
+        val (looker, seen) = rig.someoneElse(fogLifted = true)
         looker.receive(subscribe(STOCKHOLM_Z10))
         mine.receive(moving(agnes, 59.34, 18.06, commandNumber(2)))
         rig.later.tick()
@@ -641,7 +799,7 @@ class GatewaySpec : StringSpec({
         mine.receive(addingAKeyFigure(commandNumber(1)))
         val agnes = sent.filterIsInstance<YourKeyFigures>().last().keyFigures.single().id
         mine.receive(moving(agnes, 59.34, 18.06, commandNumber(2)))
-        val (looker, seen) = rig.someoneElse()
+        val (looker, seen) = rig.someoneElse(fogLifted = true)
 
         looker.receive(subscribe(STOCKHOLM_Z10))
 
@@ -721,7 +879,7 @@ class GatewaySpec : StringSpec({
     "what a house has reaches its owner, and reaches nobody else" {
         val rig = Rig()
         val (founder, mine) = rig.introduced()
-        val (neighbour, theirs) = rig.someoneElse()
+        val (neighbour, theirs) = rig.someoneElse(fogLifted = true)
         neighbour.receive(subscribe(STOCKHOLM_Z10))
         theirs.clear()
 
@@ -818,7 +976,7 @@ class GatewaySpec : StringSpec({
         val rig = Rig()
         val (founder, _) = rig.someoneElse()
         founder.receive(founding())
-        val (looker, sent) = rig.introduced()
+        val (looker, sent) = rig.introduced(fogLifted = true)
         looker.receive(subscribe(STOCKHOLM_Z8))
         sent.single().shouldBeInstanceOf<Snapshot>().houses shouldHaveSize 1
         sent.clear()
@@ -1096,7 +1254,7 @@ class GatewaySpec : StringSpec({
         val rig = Rig()
         val (founder, _) = rig.someoneElse()
         founder.receive(founding())
-        val (looker, sent) = rig.introduced()
+        val (looker, sent) = rig.introduced(fogLifted = true)
 
         looker.receive(subscribe(STOCKHOLM_Z10, STOCKHOLM_Z8, STOCKHOLM_Z4))
 
@@ -1112,7 +1270,7 @@ class GatewaySpec : StringSpec({
 
     "a house founded after subscribing arrives as a delta, once the batch closes" {
         val rig = Rig()
-        val (looker, sent) = rig.introduced()
+        val (looker, sent) = rig.introduced(fogLifted = true)
         looker.receive(subscribe(STOCKHOLM_Z8))
         sent.clear()
         val (founder, _) = rig.someoneElse()
@@ -1131,7 +1289,7 @@ class GatewaySpec : StringSpec({
 
     "a house that reaches a connection through two of its cells is sent once" {
         val rig = Rig()
-        val (looker, sent) = rig.introduced()
+        val (looker, sent) = rig.introduced(fogLifted = true)
         looker.receive(subscribe(STOCKHOLM_Z10, STOCKHOLM_Z8))
         sent.clear()
         val (founder, _) = rig.someoneElse()
@@ -1144,7 +1302,7 @@ class GatewaySpec : StringSpec({
 
     "a house too ordinary for a coarse cell does not reach a connection holding only that cell" {
         val rig = Rig()
-        val (looker, sent) = rig.introduced()
+        val (looker, sent) = rig.introduced(fogLifted = true)
         looker.receive(subscribe(STOCKHOLM_Z4))
         sent.clear()
         val (founder, _) = rig.someoneElse()
@@ -1158,7 +1316,7 @@ class GatewaySpec : StringSpec({
     "with the eye open a house too ordinary for a coarse cell is in its snapshot after all" {
         val rig = Rig()
         rig.aHouseIsFounded("Ravenscar")
-        val (looker, sent) = rig.introduced()
+        val (looker, sent) = rig.introduced(fogLifted = true)
 
         looker.receive(subscribe(STOCKHOLM_Z4))
         sent.filterIsInstance<Snapshot>().single().houses.shouldBeEmpty()
@@ -1174,7 +1332,7 @@ class GatewaySpec : StringSpec({
 
     "with the eye open a founding reaches a connection holding only a coarse cell" {
         val rig = Rig()
-        val (looker, sent) = rig.introduced()
+        val (looker, sent) = rig.introduced(fogLifted = true)
         looker.receive(subscribe(STOCKHOLM_Z4))
         looker.receive(seeAll(true))
         sent.clear()
@@ -1190,7 +1348,7 @@ class GatewaySpec : StringSpec({
     "closing the eye answers the held cells again, and they are empty once more" {
         val rig = Rig()
         rig.aHouseIsFounded("Ravenscar")
-        val (looker, sent) = rig.introduced()
+        val (looker, sent) = rig.introduced(fogLifted = true)
         looker.receive(subscribe(STOCKHOLM_Z4))
         looker.receive(seeAll(true))
         sent.clear()
@@ -1214,7 +1372,7 @@ class GatewaySpec : StringSpec({
 
     "several foundings in a quarter second are one batch" {
         val rig = Rig()
-        val (looker, sent) = rig.introduced()
+        val (looker, sent) = rig.introduced(fogLifted = true)
         looker.receive(subscribe(STOCKHOLM_Z8))
         sent.clear()
 
@@ -1229,7 +1387,7 @@ class GatewaySpec : StringSpec({
 
     "a connection that unsubscribed hears nothing more about the cell" {
         val rig = Rig()
-        val (looker, sent) = rig.introduced()
+        val (looker, sent) = rig.introduced(fogLifted = true)
         looker.receive(subscribe(STOCKHOLM_Z8))
         looker.receive(unsubscribe(STOCKHOLM_Z8))
         sent.clear()
@@ -1244,7 +1402,7 @@ class GatewaySpec : StringSpec({
 
     "a connection that went away is forgotten by every cell it held" {
         val rig = Rig()
-        val (looker, sent) = rig.introduced()
+        val (looker, sent) = rig.introduced(fogLifted = true)
         looker.receive(subscribe(STOCKHOLM_Z8))
         looker.disconnected()
         sent.clear()
@@ -1278,7 +1436,7 @@ class GatewaySpec : StringSpec({
 
     "a connection that falls too far behind is told to ask for its cells again, and the backlog is dropped" {
         val rig = Rig()
-        val (looker, sent) = rig.introduced()
+        val (looker, sent) = rig.introduced(fogLifted = true)
         looker.receive(subscribe(STOCKHOLM_Z8))
         sent.clear()
 

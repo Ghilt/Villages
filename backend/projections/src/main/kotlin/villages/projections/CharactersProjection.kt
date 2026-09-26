@@ -204,14 +204,20 @@ class CharactersProjection(feed: EventFeed) : KeyFiguresByHouse, CharactersByCel
         return AutoCloseable { listeners -= listener }
     }
 
-    override fun inCell(cell: String, at: WorldTime, most: Int, everything: Boolean): CharactersInCell {
+    override fun inCell(
+        cell: String,
+        at: WorldTime,
+        most: Int,
+        everything: Boolean,
+        seen: (PlacedCharacter) -> Boolean,
+    ): CharactersInCell {
         val zoom = cell.length
         val standing = spans.entries
             .mapNotNull { (id, stood) ->
                 val here = stood.firstOrNull { it.span.covers(at) } ?: return@mapNotNull null
                 val row = characters[id] ?: return@mapNotNull null
                 if (here.quadkey.startsWith(cell) && (everything || here.coarsestZoom <= zoom)) {
-                    PlacedCharacter(row, here.span)
+                    PlacedCharacter(row, here.span).takeIf(seen)
                 } else {
                     null
                 }

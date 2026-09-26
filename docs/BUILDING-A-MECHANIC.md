@@ -43,7 +43,9 @@ Answer these before touching code, in a paragraph Adam can read back. The answer
    in words. A behaviour the panel cannot show is one Adam cannot verify (decision 0023). **A thing on the
    map that can move or end needs a way to leave a cell** as well as to arrive in one: a house only ever
    appears or changes, and a character is also `characterGone`, or the client goes on drawing them where
-   they were.
+   they were. **And everything on the map passes the fog of war** before it reaches anyone (0061): what stands
+   still is sent on ground the house has revealed, what moves only in its vision, and the gateway's `Fog` is
+   where a new kind of thing says which it is.
 4. **What can the player do about it?** A command, its payload, and its refusals. The payload never
    carries what the server can work out: not the house's id, not the player, not the instant, not the
    story a command continues. Each way it can be refused is a `DomainError` named for the rule, under

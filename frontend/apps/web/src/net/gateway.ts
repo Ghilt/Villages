@@ -82,6 +82,8 @@ let connection: Connection | null = null;
 let wanted: string[] = [];
 /** Whether the switch is on, so a reconnection sets significance aside again before asking for a cell. */
 let everything = false;
+/** Whether the fog of war holds back what the house cannot see, so a reconnection lifts it again if not. */
+let fogged = true;
 /**
  * Which part of the log each command in flight was asked from, so its answer is filed beside the line that
  * asked. Forgotten when it is answered, and all of it when the connection closes.
@@ -203,8 +205,9 @@ function heard(frame: ServerFrame): void {
         'world',
         `today is ${describeDay(frame.world.today)}; the earliest thing is from ${describeDay(frame.world.earliest)}`,
       );
-      // The eye first, because it decides what a snapshot carries and the cells are asked for next.
+      // The eye and the fog first, because they decide what a snapshot carries and the cells are asked for next.
       sendEye();
+      sendFog();
       // Anything the camera wanted before the gateway was listening is asked for now.
       sendFollowing(wanted);
       return;
@@ -341,6 +344,26 @@ function sendEye(): void {
     return;
   }
   connection.send({ type: 'seeAll', on: true });
+}
+
+function sendFog(): void {
+  if (connection === null || state.connection !== 'open' || fogged) {
+    return;
+  }
+  connection.send({ type: 'fogOfWar', on: false });
+}
+
+/**
+ * Lifts the fog of war on this connection or lets it fall again: lifted, the gateway sends what the house
+ * cannot see as well as what it can, and answers every held cell again. Safe before the gateway has answered
+ * hello; the welcome lifts it. On at every load, as the drawing is. See decision record 0061.
+ */
+export function fogOfWar(on: boolean): void {
+  fogged = on;
+  if (connection === null || state.connection !== 'open') {
+    return;
+  }
+  connection.send({ type: 'fogOfWar', on });
 }
 
 /**

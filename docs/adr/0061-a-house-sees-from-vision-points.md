@@ -5,6 +5,13 @@
 - Amended 2026-09-26: vision given outright is built, as the decision said it would be: `house.gainedVision`
   carries the place and the size, `house.lostVision` ends it, and the size has moved into the domain as
   `Vision.MALLORCA` because an event now carries it. See step 3 of `docs/plans/fog-of-war.md`.
+- Amended 2026-09-26: the gateway holds back what the fog hides, as the decision said it would, and building it
+  decided three things (step 4 of the plan). A player's own house and own key figures are always sent, so a
+  key figure's move is never told as a departure while the sight that follows them catches up. Vision is asked
+  of the day being looked at and revealed of every point there has been. And whether a place is inside a point
+  is `Reach`, the map's circle at the point's latitude and not the globe's, computed identically at both ends
+  and held to `contracts/fixtures/reach.json`, so what is sent and what is drawn clear cannot disagree. The
+  switch reaches the gateway as `fogOfWar`, and the wire moves to version 11.
 
 ## Context
 

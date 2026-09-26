@@ -8,6 +8,7 @@ import villages.application.EventFeed
 import villages.application.FoundHouseService
 import villages.application.CharacterMapChange
 import villages.application.CharacterSpan
+import villages.application.PlacedCharacter
 import villages.application.CharactersByCell
 import villages.application.HouseChange
 import villages.application.HouseRow
@@ -67,6 +68,7 @@ import villages.protocol.Division
 import villages.protocol.EffectView
 import villages.protocol.ErrorFrame
 import villages.protocol.EventFrame
+import villages.protocol.FogOfWar
 import villages.protocol.FoundAtView
 import villages.protocol.FoundHousePayload
 import villages.protocol.GiveVisionPayload
@@ -156,6 +158,9 @@ const val MOST_RECENT_EVENTS = 100
  * The fan-out is decision 0026 on the write side: a changed house has one deepest cell, and every
  * connection that should hear of it holds one of that cell's prefixes, from the zoom the house's
  * significance is first worth drawing at down to the deepest. That is at most eleven lookups a change.
+ *
+ * Nothing reaches a connection that its house's fog of war holds back, a snapshot or a delta: `Fog` is
+ * asked of everything before it goes. See decision record 0061.
  */
 class Gateway(
     private val tokens: PlayerTokens,
@@ -215,10 +220,11 @@ class Gateway(
 
     /**
      * What a house sees reaches its player wherever they are looking, like the house does: the fog of war is
-     * the player's own, and needs no cell. See decision record 0061.
+     * the player's own, and needs no cell. It also changes what the player may be sent, so every cell they
+     * hold is answered again. See decision record 0061.
      */
     private val seen: AutoCloseable = sights.watch { change ->
-        sessions[change.player]?.out?.send(YourSight(change.sight.toView()))
+        sessions[change.player]?.sightChanged(change.sight)
     }
 
     fun connect(out: Outbound): Connection = Connection(out).also { live += it }
@@ -261,7 +267,7 @@ class Gateway(
         for (zoom in 0..Cell.MAX_ZOOM) {
             val holders = holding[deepest.at(zoom).quadkey] ?: continue
             for (connection in holders) {
-                if ((zoom >= coarsest || connection.seesEverything) && connection.sees(row)) {
+                if ((zoom >= coarsest || connection.seesEverything) && connection.sees(row) && connection.letsSee(row)) {
                     connection.enqueue(delta)
                 }
             }
@@ -275,11 +281,12 @@ class Gateway(
      * them, and a connection that is not told so goes on drawing them where they were. So who was shown
      * them before is worked out as well as who is shown them now: a connection in both is told they
      * changed, one only in the second that they arrived, one only in the first that they are gone. Only
-     * connections looking at the live world: a move today changes no earlier day's map.
+     * connections looking at the live world: a move today changes no earlier day's map. Walking into a
+     * house's vision is arriving and walking out of it is going, by the same arithmetic.
      */
     private fun fanOutMove(change: CharacterMapChange) {
-        val before = heldAt(change.was)
-        val after = heldAt(change.now)
+        val before = heldAt(change.row, change.was)
+        val after = heldAt(change.row, change.now)
         val view = change.now?.let { change.row.toMapView(it) }
         if (view != null) {
             for (connection in after) {
@@ -297,9 +304,10 @@ class Gateway(
 
     /**
      * The connections a character standing in this span is drawn for: every one holding a cell their place
-     * falls in, from the zoom their significance is worth drawing at, or at any zoom with the eye open.
+     * falls in, from the zoom their significance is worth drawing at, or at any zoom with the eye open, and
+     * whose fog lets them through there.
      */
-    private fun heldAt(span: CharacterSpan?): Set<Connection> {
+    private fun heldAt(row: CharacterRow, span: CharacterSpan?): Set<Connection> {
         if (span == null) {
             return emptySet()
         }
@@ -309,7 +317,7 @@ class Gateway(
         for (zoom in 0..Cell.MAX_ZOOM) {
             val holders = holding[deepest.at(zoom).quadkey] ?: continue
             for (connection in holders) {
-                if (zoom >= coarsest || connection.seesEverything) {
+                if ((zoom >= coarsest || connection.seesEverything) && connection.letsSee(row, span)) {
                     found += connection
                 }
             }
@@ -348,6 +356,17 @@ class Gateway(
         internal var seesEverything: Boolean = false
             private set
 
+        /**
+         * Whether the fog of war holds back what this connection's house cannot see: on, unless Adam's
+         * switch has lifted it for this window. Read by the fan-out on another thread. See decision 0061.
+         */
+        @Volatile
+        private var fogged: Boolean = true
+
+        /** What the fog lets through, from the house's vision points: next to nothing until hello says whose. */
+        @Volatile
+        private var fog: Fog = Fog.NOBODY
+
         /** Set when this session is over, by a takeover or by the socket going away. It then does nothing. */
         @Volatile
         private var finished = false
@@ -383,6 +402,26 @@ class Gateway(
         /** Whether this connection is looking at the world as it is today, rather than at an earlier day. */
         internal val isLive: Boolean get() = viewingAt == null
 
+        /** Whether the fog lets this house through to this connection. */
+        internal fun letsSee(row: HouseRow): Boolean = !fogged || fog.letsThrough(row)
+
+        /** Whether the fog lets this character, standing here, through to this connection on its day. */
+        internal fun letsSee(row: CharacterRow, span: CharacterSpan): Boolean =
+            !fogged || fog.letsThrough(row, span, viewing())
+
+        /**
+         * Takes the house's new sight: tells the player, and answers every held cell again, because what they
+         * may be sent has changed with it - a house on ground newly revealed, somebody newly in vision or out
+         * of it. The sight first, so the page is drawing the new fog when what it lets through arrives.
+         */
+        internal fun sightChanged(sight: Sight) {
+            fog = Fog(player, sight.points)
+            out.send(YourSight(sight.toView()))
+            if (fogged) {
+                answerAgain()
+            }
+        }
+
         /** The cells this connection holds, for the tests and the panel. */
         fun cells(): Set<String> = synchronized(lock) { cells.toSet() }
 
@@ -409,6 +448,7 @@ class Gateway(
                 is UnsubscribeCells -> unsubscribe(frame.cells)
                 is ViewTime -> viewTime(frame.at)
                 is SeeAll -> seeAll(frame.on)
+                is FogOfWar -> fogOfWar(frame.on)
                 is WipeWorld -> wipeTheWorld()
             }
         }
@@ -442,6 +482,8 @@ class Gateway(
                 return
             }
             player = who
+            // Before anything is sent, so that the first cell this connection holds is already fogged.
+            fog = Fog(who, sights.of(HouseId.of(who)).points)
 
             // A player plays from one place. Whoever arrives last is the session; the one before is done.
             sessions.put(who, this)?.takeIf { it !== this }?.standDown()
@@ -658,10 +700,12 @@ class Gateway(
             }
         }
 
-        /** What the cell holds on the day this connection is looking at. */
+        /** What the cell holds on the day this connection is looking at, and of that what its fog lets through. */
         private fun snapshot(cell: String) {
-            val contents = houses.inCell(cell, viewing(), MOST_IN_A_CELL, seesEverything)
-            val standing = onTheMap.inCell(cell, viewing(), MOST_IN_A_CELL, seesEverything)
+            val contents = houses.inCell(cell, viewing(), MOST_IN_A_CELL, seesEverything) { letsSee(it) }
+            val standing = onTheMap.inCell(cell, viewing(), MOST_IN_A_CELL, seesEverything) { placed: PlacedCharacter ->
+                letsSee(placed.row, placed.span)
+            }
             out.send(
                 Snapshot(
                     cell = cell,
@@ -684,9 +728,7 @@ class Gateway(
                 return
             }
             viewingAt = at?.let { WorldTime(it) }
-            for (cell in cells()) {
-                snapshot(cell)
-            }
+            answerAgain()
         }
 
         /**
@@ -698,6 +740,23 @@ class Gateway(
                 return
             }
             seesEverything = on
+            answerAgain()
+        }
+
+        /**
+         * Lifts the fog for this connection or lets it fall again, and answers every held cell again, as the
+         * eye does: both change what is shown, not what is held. See decision record 0061.
+         */
+        private fun fogOfWar(on: Boolean) {
+            if (on == fogged) {
+                return
+            }
+            fogged = on
+            answerAgain()
+        }
+
+        /** Every held cell answered again, for a connection whose way of looking has changed. */
+        private fun answerAgain() {
             for (cell in cells()) {
                 snapshot(cell)
             }

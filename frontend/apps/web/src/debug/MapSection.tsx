@@ -162,8 +162,8 @@ export function MapSection({ map, master, renderer, onRenderer }: MapSectionProp
       {rendererChoice !== undefined && <p className="debug-map__note">{rendererChoice.note}</p>}
 
       {/*
-          Adam's switch for the fog of war, in words, as he asked. On at every load; off, nothing is drawn
-          over the map in this window. See decision record 0061.
+          Adam's switch for the fog of war, in words, as he asked. On at every load; off lifts all of it for
+          this window, the drawing and what the gateway holds back. See decision record 0061.
         */}
       <button
         type="button"

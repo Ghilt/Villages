@@ -57,9 +57,15 @@ A player's own house and own key figures are always theirs to see: every one of 
    under the fog switch in the Debug map section, as Adam chose. `GiveVision` and `TakeVision` record
    `house.gainedVision` with the place and the size, and `house.lostVision`; the sight projection reads them
    straight off the events. Open-ended: the span a vision is given for is step 9. Wire version 10.
-4. **The fog holds back.** The gateway sends a house only the buildings on its revealed ground and only the
-   people in its vision, answers every held cell again when the sight changes, and tells a player whose sight
-   moved. The switch now tells the gateway too, as `seeAll` does. Wire version 10.
+4. **The fog holds back.** Done. The gateway asks `Fog`, the table above in code, of everything before it
+   goes: a snapshot carries the houses on revealed ground and the people in vision, the player's own
+   wherever they are, and anything of significance 80 from anywhere. The read models ask it before a cell's
+   cap, and what it refuses is not counted as omitted, because how much is hidden is itself something learnt.
+   The fan-out asks it of every delta, so somebody walking into vision arrives and walking out of it is gone.
+   A change to the house's sight answers every held cell again, after `yourSight`. Whether a place is inside
+   a point is `Reach`, the map's circle, computed identically at both ends against
+   `contracts/fixtures/reach.json`. The switch tells the gateway as `fogOfWar`, on until it says otherwise.
+   Wire version 11.
 5. **No trees in unknown ground.** The scatter grows nothing on ground the house has not revealed, so the
    haze has no wood standing in it.
 6. **Colourless revealed ground.** The wash becomes the colour taken out, with a blend mode over the map and the

@@ -351,8 +351,18 @@ interface HousesByCell {
      * `everything` sets significance aside: the cell hands back all it holds, however slight, rather than
      * only what is worth drawing at its zoom. That is the eye, and it is a way of looking rather than a
      * different question, which is why it is a parameter and not a port of its own. See 0038.
+     *
+     * `seen` says which houses the asker may be sent at all, which is the fog of war (0061). It is asked
+     * before the cap, so a cell full of houses the asker cannot see does not crowd out one it can, and what
+     * it refuses is not counted as omitted, because how many houses are hidden is itself something learnt.
      */
-    fun inCell(cell: String, at: WorldTime, most: Int, everything: Boolean = false): CellContents
+    fun inCell(
+        cell: String,
+        at: WorldTime,
+        most: Int,
+        everything: Boolean = false,
+        seen: (HouseRow) -> Boolean = { true },
+    ): CellContents
 
     /** The earliest world-time anything is known to exist from, or null while nothing is. The scrubber's left end. */
     fun earliest(): WorldTime?
@@ -481,8 +491,17 @@ data class CharacterMapChange(val row: CharacterRow, val was: CharacterSpan?, va
  * significance is drawn at, and the day asked about is inside the span.
  */
 interface CharactersByCell {
-    /** The characters in `cell` on day `at`, most significant first, at most `most` of them. */
-    fun inCell(cell: String, at: WorldTime, most: Int, everything: Boolean = false): CharactersInCell
+    /**
+     * The characters in `cell` on day `at`, most significant first, at most `most` of them, and of those only
+     * the ones `seen` lets through, asked before the cap and never counted as omitted, as for houses.
+     */
+    fun inCell(
+        cell: String,
+        at: WorldTime,
+        most: Int,
+        everything: Boolean = false,
+        seen: (PlacedCharacter) -> Boolean = { true },
+    ): CharactersInCell
 
     /** Every move, departure and death on the map from now on, in the order applied, until closed. */
     fun watchTheMap(listener: (CharacterMapChange) -> Unit): AutoCloseable

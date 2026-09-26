@@ -254,6 +254,11 @@ export const clientFrameSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('viewTime'), at: worldDaySchema.nullable() }),
   /** Set significance aside: every house in a held cell, however far back the camera is. See 0038. */
   z.object({ type: z.literal('seeAll'), on: z.boolean() }),
+  /**
+   * Lift the fog of war for this connection, or let it fall again: lifted, the gateway sends what the house
+   * cannot see as well. On until this says otherwise. Adam's switch and a debug frame, never a player's. See 0061.
+   */
+  z.object({ type: z.literal('fogOfWar'), on: z.boolean() }),
   /** Empty the development world, for everyone. A debug frame, never a player's. See 0036. */
   z.object({ type: z.literal('wipeWorld') }),
 ]);

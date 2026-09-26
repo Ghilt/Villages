@@ -146,13 +146,20 @@ class HousesProjection(feed: EventFeed) : HousesByCell, HousesByPlayer, AutoClos
         return change(was).copy(version = stored.streamVersion)
     }
 
-    override fun inCell(cell: String, at: WorldTime, most: Int, everything: Boolean): CellContents {
+    override fun inCell(
+        cell: String,
+        at: WorldTime,
+        most: Int,
+        everything: Boolean,
+        seen: (HouseRow) -> Boolean,
+    ): CellContents {
         val zoom = cell.length
         val worthDrawing = rows.values
             .filter {
                 it.quadkey.startsWith(cell) &&
                     (everything || it.coarsestZoom <= zoom) &&
-                    it.row.existsAt(at)
+                    it.row.existsAt(at) &&
+                    seen(it.row)
             }
             .sortedWith(compareByDescending<Indexed> { it.row.significance.value }.thenBy { it.row.id.value })
         return CellContents(

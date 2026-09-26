@@ -29,9 +29,10 @@ import tools.jackson.databind.JsonNode
  * birthday and the years an age is counted from, so a window on them can say how old they are. See
  * decision record 0055. Version 9 added `yourSight`, the vision points a house sees from, which the fog of
  * war is drawn from. Version 10 added `giveVision` and `takeVision`, a house given vision of a place outright
- * and having it taken away. See decision record 0061.
+ * and having it taken away. See decision record 0061. Version 11 added `fogOfWar`, Adam's switch, because the
+ * gateway now holds back what a house cannot see.
  */
-const val PROTOCOL_VERSION = 10
+const val PROTOCOL_VERSION = 11
 
 data class Point(val lat: Double, val lon: Double)
 
@@ -195,6 +196,7 @@ data class CharacterOnMapView(
     JsonSubTypes.Type(WatchEvents::class, name = "watchEvents"),
     JsonSubTypes.Type(ViewTime::class, name = "viewTime"),
     JsonSubTypes.Type(SeeAll::class, name = "seeAll"),
+    JsonSubTypes.Type(FogOfWar::class, name = "fogOfWar"),
     JsonSubTypes.Type(WipeWorld::class, name = "wipeWorld"),
 )
 sealed interface ClientFrame
@@ -236,6 +238,17 @@ data class ViewTime(val at: Long?) : ClientFrame
  * holds, so every held cell is answered again as soon as it is sent. See decision record 0038.
  */
 data class SeeAll(val on: Boolean) : ClientFrame
+
+/**
+ * Lifts the fog of war for this connection, or lets it fall again: with it lifted the gateway sends what the
+ * house cannot see as well as what it can. On unless this says otherwise, so a connection that never sends it
+ * is held to its house's sight.
+ *
+ * Adam's switch and a debug frame, like `wipeWorld`: a player's interface has no business lifting its own
+ * fog, and this goes, or gains a guard, before there is anything worth hiding. Like `seeAll`, every held cell
+ * is answered again as soon as it is sent. See decision record 0061.
+ */
+data class FogOfWar(val on: Boolean) : ClientFrame
 
 /**
  * Empties the development world, for everyone. A debug frame, like `watchEvents`, and not one a player's

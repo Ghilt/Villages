@@ -164,9 +164,15 @@ it: `house.gainedVision` and `house.lostVision`, read straight off the events. T
 on hello and whenever one opens or closes, the way it sends `yourHouse`: to the session, never to a cell.
 
 The server is the one place a sight is worked out. The page draws the fog from what it is sent, and the
-gateway will ask the same sight before it sends a snapshot or a delta, so what is drawn and what is held back
-cannot disagree. A vision point's size is kilometres on the ground; how big that is on the map is worked out
-where it is drawn. See decision record 0061, and `docs/plans/fog-of-war.md` for what is built.
+gateway asks the same sight before it sends anything, so what is drawn and what is held back cannot disagree.
+`Fog`, in the gateway, is decision 0061's table: a house on revealed ground, a person in vision, a player's own
+house and key figures always, and anything of significance 80 from anywhere. The read models ask it before a
+cell's cap, so hidden houses never crowd out one that may be sent and are never counted, and the fan-out asks
+it before every delta; a change to a house's sight answers every cell its player holds again. A vision
+point's size is kilometres on the ground, and how far that reaches on the map is `Reach`, beside the cells in
+`protocol` and in the TypeScript package for the reason the cells are there: both ends compute it
+identically, against `contracts/fixtures/reach.json`. See decision record 0061, and
+`docs/plans/fog-of-war.md` for what is built.
 
 **The fog is a layer of the sprite canvas**, `sprites/FogLayer.ts`, drawn between the world and the signs for
 the things in it: the scenery and whatever stands outside vision under it, every icon and whatever stands in

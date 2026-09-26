@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import type { VisionPointView } from '@villages/protocol';
 
+import reach from '../../../../../contracts/fixtures/reach.json?raw';
 import { WORLD_MASTER_WIDTH } from '../map/worldStyle';
 
-import { EQUATOR_KM, circleOf, kilometresPerUnit, standsInVision } from './circles';
+import { circleOf, standsInVision } from './circles';
 
 const at = (lat: number, lon: number, until?: number): VisionPointView => ({
   kind: 'seat',
@@ -15,7 +16,6 @@ const at = (lat: number, lon: number, until?: number): VisionPointView => ({
 
 describe('a vision point as the fog draws it', () => {
   it('is 34 km of ground, which is 28 world units on the equator and twice that at sixty north', () => {
-    expect(kilometresPerUnit(0)).toBeCloseTo(EQUATOR_KM / WORLD_MASTER_WIDTH, 9);
     expect(circleOf(at(0, 0), 100).radius).toBeCloseTo(27.8, 1);
     expect(circleOf(at(60, 0), 100).radius).toBeCloseTo(55.6, 1);
   });
@@ -52,5 +52,18 @@ describe('whether a place stands in vision', () => {
     expect(standsInVision([seat], { lng: 18.07, lat: 59.33 + 40 / 111 })).toBe(false);
     expect(standsInVision([seat, ended], { lng: 18.3, lat: 57.64 })).toBe(false);
     expect(standsInVision([], { lng: 18.07, lat: 59.33 })).toBe(false);
+  });
+
+  it('agrees with every shared vector, which is the arithmetic the gateway holds back by', () => {
+    type Place = { lat: number; lon: number };
+    const fixture = JSON.parse(reach) as {
+      vectors: { name: string; centre: Place; kilometres: number; place: Place; within: boolean }[];
+    };
+
+    for (const vector of fixture.vectors) {
+      const circle = circleOf({ kind: 'seat', place: vector.centre, radius: vector.kilometres, since: 0 }, 0);
+      const place = { lng: vector.place.lon, lat: vector.place.lat };
+      expect(standsInVision([circle], place), vector.name).toBe(vector.within);
+    }
   });
 });
