@@ -3,7 +3,7 @@ import type { VisionPointView } from '@villages/protocol';
 
 import { WORLD_MASTER_WIDTH } from '../map/worldStyle';
 
-import { EQUATOR_KM, circleOf, kilometresPerUnit } from './circles';
+import { EQUATOR_KM, circleOf, kilometresPerUnit, standsInVision } from './circles';
 
 const at = (lat: number, lon: number, until?: number): VisionPointView => ({
   kind: 'seat',
@@ -35,5 +35,22 @@ describe('a vision point as the fog draws it', () => {
   it('lasts while it has no end, and has only revealed once it has ended', () => {
     expect(circleOf(at(59.33, 18.07), 100).lasting).toBe(true);
     expect(circleOf(at(59.33, 18.07, 100), 100).lasting).toBe(false);
+  });
+});
+
+describe('whether a place stands in vision', () => {
+  const seat = circleOf(at(59.33, 18.07), 100);
+  const ended = circleOf(at(57.64, 18.3, 100), 100);
+
+  it('is inside a circle that still gives vision', () => {
+    expect(standsInVision([seat], { lng: 18.07, lat: 59.33 })).toBe(true);
+    // A little under the 34 km the circle reaches, north of the seat.
+    expect(standsInVision([seat], { lng: 18.07, lat: 59.33 + 30 / 111 })).toBe(true);
+  });
+
+  it('is not outside it, nor inside a circle that has ended and only revealed', () => {
+    expect(standsInVision([seat], { lng: 18.07, lat: 59.33 + 40 / 111 })).toBe(false);
+    expect(standsInVision([seat, ended], { lng: 18.3, lat: 57.64 })).toBe(false);
+    expect(standsInVision([], { lng: 18.07, lat: 59.33 })).toBe(false);
   });
 });

@@ -17,7 +17,11 @@ import {
 import type { Form, TwoForms } from './twoForms';
 import { createSceneryLayer } from './scenery/SceneryLayer';
 import { noteDrawn } from './scenery/sceneryCells';
-import type { CameraSource, MapSprite, SceneryHow, SpriteRenderer } from './SpriteRenderer';
+import type { CameraSource, FogHow, MapSprite, SceneryHow, SpriteRenderer } from './SpriteRenderer';
+import { standsInVision } from '../fog/circles';
+import type { FogCircle } from '../fog/circles';
+import { createFogLayer } from './FogLayer';
+import { overTheFog } from './fogLayering';
 
 /**
  * What each shape is laid out in. Every one is drawn far larger than it is ever shown and scaled
@@ -81,6 +85,8 @@ export interface DrawnSprite {
   height: number;
   /** How much of it is here: nought on its way out, one arrived. */
   presence: number;
+  /** Whether its ground form is drawn over the fog, which it is in vision. Its icon always is. */
+  groundOverTheFog: boolean;
 }
 
 interface Entry {
@@ -102,6 +108,11 @@ interface Entry {
   presence: number;
   /** No longer among the marks to draw. It fades out and is let go of when it reaches nothing. */
   leaving: boolean;
+  /**
+   * Whether it stands in vision, which puts its ground form over the fog rather than under it. Worked out
+   * when the mark or the house's vision changes, never a frame. See `fogLayering.ts`.
+   */
+  inVision: boolean;
 }
 
 interface Textures {
@@ -130,6 +141,16 @@ interface Textures {
 export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
   const app = new Application();
   const stage = new Container();
+  /**
+   * The two sides of the fog of war. Under it, the ground forms of whatever stands outside vision; over it,
+   * every icon and whatever stands in vision. The scenery lies under both, and the fog between them, so it
+   * covers the world and never the signs for the things in it. See `fogLayering.ts` and decision 0062.
+   */
+  const underTheFog = new Container();
+  const overIt = new Container();
+  const fog = createFogLayer();
+  /** The circles of the house's vision points, for asking whether a mark stands in vision. */
+  let circles: readonly FogCircle[] = [];
   const entries = new Map<string, Entry>();
 
   let textures: Textures | null = null;
@@ -312,6 +333,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       blend: showing === 'ground' ? 1 : 0,
       presence: 0,
       leaving: false,
+      inVision: standsInVision(circles, spec.at),
     };
     if (textures === null) {
       return entry;
@@ -324,7 +346,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       sprite.anchor.set(0.5, 1);
       sprite.tint = spec.tint;
       sprite.visible = false;
-      stage.addChild(sprite);
+      (overTheFog('ground', entry.inVision) ? overIt : underTheFog).addChild(sprite);
       entry.ground = sprite;
     }
     if (forms.iconHeight !== undefined) {
@@ -342,7 +364,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       sprite.anchor.set(spec.kind === 'candidate' ? 0 : 0.5, 1);
       sprite.tint = spec.tint;
       sprite.visible = false;
-      stage.addChild(sprite);
+      overIt.addChild(sprite);
       entry.icon = sprite;
     }
     return entry;
@@ -389,6 +411,18 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       owed = null;
       frame();
     });
+  }
+
+  /**
+   * Puts a mark's ground form on the side of the fog it now belongs on: over it in vision, under it outside.
+   * Moving a sprite between two containers keeps it; nothing is made again.
+   */
+  function sideOfTheFog(entry: Entry): void {
+    entry.inVision = standsInVision(circles, entry.spec.at);
+    const belongs = overTheFog('ground', entry.inVision) ? overIt : underTheFog;
+    if (entry.ground !== null && entry.ground.parent !== belongs) {
+      belongs.addChild(entry.ground);
+    }
   }
 
   function hide(entry: Entry): void {
@@ -488,6 +522,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
     }
 
     dressTheRing(zoom);
+    fog.follow(view);
 
     if (scenery !== null) {
       scenery.container.visible = how.on;
@@ -557,9 +592,20 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       }
 
       textures = buildTextures();
+      // Marks handed over before the canvas was ready were kept with no pictures, because there were no
+      // textures to draw them with; the seats a founding choice offers always are, since they arrive with the
+      // first frames. Given their pictures now, or they would be kept and never drawn.
+      for (const [id, entry] of entries) {
+        if (entry.ground === null && entry.icon === null) {
+          entries.set(id, { ...sproutFor(entry.spec), leaving: entry.leaving });
+        }
+      }
       // Under everything, because it is the ground the rest stands on.
       scenery = createSceneryLayer();
       stage.addChild(scenery.container);
+      // The world outside vision, then the fog over it, and everything the fog must not cover above that.
+      stage.addChild(underTheFog);
+      stage.addChild(fog.mesh);
       // The dev server cuts the art again whenever a picture in world/sprites/ is saved, and says so
       // here, so the new picture is on the map without a reload. See decision record 0059.
       import.meta.hot?.on(ART_CUT, artCut);
@@ -569,6 +615,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       ring.tint = SELECTED;
       ring.visible = false;
       stage.addChild(ring);
+      stage.addChild(overIt);
       app.stage.addChild(stage);
       container.appendChild(app.canvas);
 
@@ -582,6 +629,18 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       frame();
 
       if (import.meta.env.DEV) {
+        (window as unknown as { villagesFog?: () => unknown }).villagesFog = () => {
+          const { drawing, field } = fog.report();
+          return {
+            drawing,
+            field:
+              field === null
+                ? null
+                : { width: field.width, height: field.height, unitsPerTexel: field.unitsPerTexel },
+            circles: circles.length,
+            marksInVision: [...entries.values()].filter((entry) => entry.inVision).length,
+          };
+        };
         // Where every sprite actually ended up, for the console and for the end-to-end test, which has
         // no other way to ask a canvas what it drew.
         (window as unknown as { villagesSprites?: () => Record<string, DrawnSprite> }).villagesSprites = () =>
@@ -599,6 +658,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
                   form: onGround && asIcon ? 'both' : onGround ? 'ground' : asIcon ? 'icon' : 'none',
                   height: above === null || above === undefined ? 0 : above.height,
                   presence: entry.presence,
+                  groundOverTheFog: entry.ground !== null && entry.ground.parent === overIt,
                 } satisfies DrawnSprite,
               ];
             }),
@@ -649,6 +709,15 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       frame();
     },
 
+    setFog(next: FogHow | null): void {
+      fog.show(next === null ? null : { field: next.field });
+      circles = next?.circles ?? [];
+      for (const entry of entries.values()) {
+        sideOfTheFog(entry);
+      }
+      frame();
+    },
+
     setScenery(next: SceneryHow): void {
       // A different scattering is a different world's worth of points, so what was cut is thrown away
       // rather than left to be a denser world's sparse half.
@@ -673,6 +742,8 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
           // Back again before it finished going. It fades up from wherever it had got to.
           existing.leaving = false;
           existing.spec = spec;
+          // A person who moved may have walked into vision or out of it.
+          sideOfTheFog(existing);
           if (existing.ground !== null) {
             existing.ground.tint = spec.tint;
           }
@@ -695,6 +766,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
 
     destroy(): void {
       disposed = true;
+      fog.destroy();
       scenery?.destroy();
       import.meta.hot?.off(ART_CUT, artCut);
       scenery = null;

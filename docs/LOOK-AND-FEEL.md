@@ -169,6 +169,11 @@ they trade at zoom 9.4, just in from where a key figure is first drawn, and both
 the house they serve, the first that took them in. What has only an icon is a thing the world is saying
 rather than a thing standing in it, like the seat a choice is offering.
 
+**The fog of war covers ground forms and never icons.** An icon is the sign for a thing rather than the
+thing, so it is drawn over the fog wherever it stands; a ground form is part of the world, and is under the
+fog unless it stands in the house's vision. A new kind of thing on the map gets this for nothing by having the
+two forms. See decision record 0063.
+
 **Nothing on the map pops.** A thing arriving fades up, a thing gone fades out and is only then let go
 of, and a thing changing form crosses over rather than swapping. All of it is a fifth of a second or
 less, so it reads as the world settling rather than as an animation. See decision record 0051.

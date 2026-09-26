@@ -334,8 +334,9 @@ Commands are added here as the increments land:
   the fog off for that window. A house sees from **vision points** - its seat, and each key figure standing
   on the map, a circle of 34 km around each - and the server works them out and sends them as `yourSight`;
   the log says what gives vision under `sight`. `give vision here`, under the switch, gives the house a circle
-  where the camera is looking until its `take it away` is pressed; both are real commands. Unknown ground is under a dark haze, revealed ground is washed
-  grey, vision is clear. With no house the whole world is hazed. See `docs/adr/0061`, `0062` and
+  where the camera is looking until its `take it away` is pressed; both are real commands. The fog covers the
+  world and not the signs: every icon, the offered seats and whatever stands in vision are drawn over it. Unknown ground is under a dark haze, revealed ground is washed
+  grey, vision is clear. With no house the whole world is hazed. See `docs/adr/0061`, `0062`, `0063` and
   `docs/plans/fog-of-war.md`.
 - Looking at a whole world at once: `see everything`, in the debug panel's World bar beside `seed 20`.
   A house is founded at significance 20, so it reaches a page only from zoom 8 in, and pulling back past

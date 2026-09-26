@@ -49,6 +49,10 @@ A player's own house and own key figures are always theirs to see: every one of 
    over revealed ground, nothing over vision, all read off a distance field worked out once for each change
    to the vision points. The switch is in the Debug map section, in words, on at every load; off only stops
    the drawing, because nothing is held back yet. Decision record 0062.
+
+   Then Adam zoomed out and found the fog over the icons, his own house's included. It is a layer inside the
+   sprite canvas now, between the world and the signs: every icon, the seats a choice offers and anything
+   standing in vision over it, the scenery and whatever stands outside vision under it. Decision record 0063.
 3. **Vision given outright.** Done. `give vision here` and, for each vision given, `take it away`, in words
    under the fog switch in the Debug map section, as Adam chose. `GiveVision` and `TakeVision` record
    `house.gainedVision` with the place and the size, and `house.lostVision`; the sight projection reads them

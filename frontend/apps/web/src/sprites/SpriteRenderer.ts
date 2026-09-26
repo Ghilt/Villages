@@ -1,3 +1,6 @@
+import type { FogCircle } from '../fog/circles';
+import type { FogField } from '../fog/fogField';
+
 import type { LngLat } from './cameraMath';
 
 /**
@@ -61,8 +64,23 @@ export interface SpriteRenderer {
    * marks from the terrain alone. See decision record 0051.
    */
   setScenery(how: SceneryHow): void;
+  /**
+   * The fog of war to draw, or null for none: the switch off, or nothing heard yet about what the house
+   * sees. It is drawn inside this renderer rather than over it, because it has to lie between the world and
+   * the signs for the things in it. See decision record 0062.
+   */
+  setFog(fog: FogHow | null): void;
   /** Stop following, release the canvas and the textures. */
   destroy(): void;
+}
+
+/**
+ * The fog of a house: the distance field it is drawn from, null for a house that sees nothing, and the circles
+ * of its vision points, which say which marks stand in vision and so go over it. See decision record 0061.
+ */
+export interface FogHow {
+  field: FogField | null;
+  circles: readonly FogCircle[];
 }
 
 /** What the renderer needs in order to furnish the world. */

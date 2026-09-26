@@ -204,17 +204,6 @@ body,
   pointer-events: none;
 }
 
-/* The fog of war lies over the map and the sprites alike, and never intercepts a drag either. See 0061. */
-.fog {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.fog canvas {
-  display: block;
-}
-
 /*
  * The interface floats over the world and never steals a drag from it.
  *

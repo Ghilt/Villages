@@ -622,6 +622,12 @@ scenery of unknown ground is not sent until the house has revealed it.
 - **Unknown** is a dark haze, slowly undulating when zoomed in. It is not completely opaque, and the contours
   of the map always show through it. The undulating can come last, and only if it can be made cheap.
 
+**The fog covers the world, not the signs for the things in it.** In Adam's words, it "should only cover 'the
+world' not representations of important things when zoomed out", and a thing in sight is never under it. So
+every icon, the seats a choice offers and anything standing in vision are drawn over the fog, and what stands
+outside vision close in - a castle, a person, the trees - is under it. How a thing's significance should enter
+that, so that something seen from far out is never covered, waits on significance being worked out.
+
 The switch for it is Adam's, in the debug panel's Debug map section: *fog of war: on* or *off*, in words. Off
 lifts the whole of it for that window, drawn and held back alike, and every page load starts with it on.
 
@@ -656,5 +662,6 @@ coast and the lie of the land show through, thickening and thinning a little in 
 ground washed with grey at half strength, which is the faded stand-in until the colour is taken out
 properly; and nothing at all over vision, whose edge is soft close in and wanders a little. With no house the
 whole world is under the haze. The switch is in the Debug map section. Nothing is held back by the server
-yet, so turning the fog off only stops the drawing, and the haze does not move. Decision record 0061 is the
-shape and 0062 is how it is drawn.
+yet, so turning the fog off only stops the drawing, and the haze does not move. Every icon and anything in
+vision is drawn over the fog. Decision record 0061 is the shape, 0062 how the fog is drawn, and 0063 which
+side of it each thing is on.

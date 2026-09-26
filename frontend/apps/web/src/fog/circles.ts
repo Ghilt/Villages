@@ -43,3 +43,14 @@ export function circleOf(point: VisionPointView, today: number | null): FogCircl
     lasting: lastingOn(point, today),
   };
 }
+
+/**
+ * Whether a place stands in vision: inside a circle that still gives vision, by the same arithmetic the fog is
+ * drawn with. What decides whether a thing standing there is drawn over the fog rather than under it.
+ */
+export function standsInVision(circles: readonly FogCircle[], place: { lng: number; lat: number }): boolean {
+  const at = toMercator(place);
+  const x = at.x * WORLD_MASTER_WIDTH;
+  const y = at.y * WORLD_MASTER_WIDTH;
+  return circles.some((circle) => circle.lasting && Math.hypot(x - circle.x, y - circle.y) <= circle.radius);
+}

@@ -1,7 +1,11 @@
-import { useEffect, useRef, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
 import { sceneryNow, watchScenery } from '../debug/scenery';
+import { circleOf } from '../fog/circles';
+import { fieldOf } from '../fog/fogField';
+import { fogIsOn, watchFog } from '../fog/fogOfWar';
+import { gatewayState, watchGateway } from '../net/gateway';
 import { seeingEverything, watchSeeingEverything } from '../debug/seeEverything';
 import { inspect } from '../inspect/opening';
 import { subjectsNow, watchSubjects } from '../inspect/subjects';
@@ -11,6 +15,9 @@ import type { MapSprite } from './SpriteRenderer';
 
 /** How a person's mark is told from a house's: its id is theirs with this in front. See App.tsx. */
 const CHARACTER = 'character:';
+
+const sightNow = () => gatewayState().yourSight;
+const todayNow = () => gatewayState().world?.today ?? null;
 
 interface SpriteOverlayProps {
   map: maplibregl.Map;
@@ -29,6 +36,14 @@ export function SpriteOverlay({ map, sprites, worldRoot }: SpriteOverlayProps) {
   const top = useSyncExternalStore(watchSubjects, subjectsNow).open[0];
   const everything = useSyncExternalStore(watchSeeingEverything, seeingEverything);
   const scenery = useSyncExternalStore(watchScenery, sceneryNow);
+  const sight = useSyncExternalStore(watchGateway, sightNow);
+  const today = useSyncExternalStore(watchGateway, todayNow);
+  const fogOn = useSyncExternalStore(watchFog, fogIsOn);
+
+  // The house's vision points as circles, and the distance field the fog is drawn from, worked out once for
+  // each change to what the house has seen from and never while the camera moves. See decision 0061.
+  const circles = useMemo(() => (sight ?? []).map((point) => circleOf(point, today)), [sight, today]);
+  const field = useMemo(() => fieldOf(circles), [circles]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -58,6 +73,13 @@ export function SpriteOverlay({ map, sprites, worldRoot }: SpriteOverlayProps) {
   useEffect(() => {
     rendererRef.current?.setScenery({ ...scenery, tilesRoot: worldRoot });
   }, [scenery, worldRoot, sprites]);
+
+  // Nothing is drawn until the gateway has said what the house sees, so a page still connecting is not a world
+  // under haze for a moment; nothing either with the switch off. Also on the sprites, because a renderer made
+  // after the switch was thrown starts with no fog.
+  useEffect(() => {
+    rendererRef.current?.setFog(fogOn && sight !== null ? { field, circles } : null);
+  }, [fogOn, sight, field, circles, sprites]);
 
   // The ring follows whatever was opened last. With three windows up the map can still only mark one, and
   // the newest is the one the player is looking at.

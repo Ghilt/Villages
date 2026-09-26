@@ -1,8 +1,11 @@
 # 0062. The fog of war is a canvas of its own, over the map and the sprites
 
-- Status: accepted
+- Status: accepted, its placement superseded by 0063
 - Date: 2026-09-26
 - Builds on 0061, which says what a house sees and where that is worked out
+- Superseded in part 2026-09-26: the fog is no longer a canvas over every sprite but a layer inside the sprite
+  canvas, between the world and the signs for the things in it, because it covered the icons. The distance
+  field, the camera and the look below stand. See decision record 0063.
 
 ## Context
 
