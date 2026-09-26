@@ -13,7 +13,7 @@ import type { Plugin, ViteDevServer } from 'vite';
  * placeholder, look at the map. And a tree that has never been cut is cut when the server starts, so a
  * fresh worktree draws scenery without anybody having to remember a command.
  *
- * Development only, like `worldApi.ts`. See decision record 0057.
+ * Development only, like `worldApi.ts`. See decision record 0059.
  */
 
 const here = dirname(fileURLToPath(import.meta.url));

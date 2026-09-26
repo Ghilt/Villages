@@ -1,4 +1,4 @@
-# 0058. The player's camera is tipped back, north-up, parallel, and the ground is read on diamonds
+# 0060. The player's camera is tipped back, north-up, parallel, and the ground is read on diamonds
 
 - Status: accepted
 - Date: 2026-09-25

@@ -47,7 +47,7 @@ const RING = 1;
 
 /**
  * Where the art is: the atlas `npm run world:art` cuts from `world/sprites/scenery/`, and its frames.
- * Generated and per-worktree, like the tiles, and served from the page's own origin. See decision 0057.
+ * Generated and per-worktree, like the tiles, and served from the page's own origin. See decision 0059.
  */
 const ART = '/art/scenery';
 

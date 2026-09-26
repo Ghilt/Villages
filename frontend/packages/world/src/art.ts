@@ -9,7 +9,7 @@
  * into a sprite. The background is keyed out, the picture is trimmed to what is left, and its **foot** is
  * found - the point that stands on the ground, which is the anchor every thing on the map shares
  * (decision 0051). Then sprites are packed into one atlas, because the scenery is one particle layer and a
- * particle layer draws from one texture. See decision record 0057.
+ * particle layer draws from one texture. See decision record 0059.
  */
 
 export interface Rgba {

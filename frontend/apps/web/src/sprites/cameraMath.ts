@@ -4,7 +4,7 @@
  * Everything here is a pure function of the camera, so the overlay can be trusted without a browser and
  * tested without pixels. It assumes a camera showing the world once, parallel whenever it is tipped, and
  * carries the turn and the tip of that camera rather than assuming there is none: see experiment 0008. A
- * player's is tipped back forty-five degrees and north-up (docs/adr/0058); at no tip and no turn this is
+ * player's is tipped back forty-five degrees and north-up (docs/adr/0060); at no tip and no turn this is
  * the flat arithmetic of 0014 exactly.
  */
 

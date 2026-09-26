@@ -4,7 +4,7 @@
 - Date: 2026-09-10
 - Extends 0014: the camera stays flat, north-up and single-world, and its edge rule now has a second half
   below the fit zoom
-- Extended by 0058: the camera is tipped back and north-up, and every rule here is worked out in a flat
+- Extended by 0060: the camera is tipped back and north-up, and every rule here is worked out in a flat
   window and squashed by the tip as it is drawn, so the desk lies on the same tipped ground as the world
 
 ## Context

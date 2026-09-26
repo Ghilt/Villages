@@ -561,7 +561,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       scenery = createSceneryLayer();
       stage.addChild(scenery.container);
       // The dev server cuts the art again whenever a picture in world/sprites/ is saved, and says so
-      // here, so the new picture is on the map without a reload. See decision record 0057.
+      // here, so the new picture is on the map without a reload. See decision record 0059.
       import.meta.hot?.on(ART_CUT, artCut);
       // Under every sprite, because it marks the ground a house stands on rather than the house.
       ring = new Sprite(textures.ring);

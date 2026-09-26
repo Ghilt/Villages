@@ -132,7 +132,7 @@ export function MapView({ worldRoot, onReady }: MapViewProps) {
       maxZoom: CAMERA.maxZoom,
       transformConstrain: keepOnTheSheet,
       transformCameraUpdate: tipByZoom,
-      // North-up and tipped by the zoom, which is the player's camera: decision record 0058 as amended by
+      // North-up and tipped by the zoom, which is the player's camera: decision record 0060 as amended by
       // experiment 0011. The lens that goes with it is set just below, because it is not a constructor
       // option.
       pitch: tiltAt(CAMERA.initialZoom),
@@ -158,7 +158,7 @@ export function MapView({ worldRoot, onReady }: MapViewProps) {
 
     // Every way a player could turn or tip the world by hand stays closed. The camera's angle is the
     // world's, not a player's control; only the debug panel moves it, which is Adam's lever. Two fingers
-    // dragged up a touch screen tip a MapLibre map by default, and that one was open until 0058.
+    // dragged up a touch screen tip a MapLibre map by default, and that one was open until 0060.
     map.dragRotate.disable();
     map.touchZoomRotate.disableRotation();
     map.touchPitch.disable();

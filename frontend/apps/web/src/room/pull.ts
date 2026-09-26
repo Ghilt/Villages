@@ -97,7 +97,7 @@ interface Hooks {
 export function attachPull({ map, surface, seatNow, stripNow }: Hooks): () => void {
   const container = map.getContainer();
   // The window as the flat world sees it, like everything else about the desk and the room: the camera
-  // is tipped, and the room's rules are the flat ones in a window taller by one over the lean. See 0058.
+  // is tipped, and the room's rules are the flat ones in a window taller by one over the lean. See 0060.
   const viewport = (): Viewport =>
     flatWindow({ width: container.clientWidth, height: container.clientHeight }, map.getPitch());
 

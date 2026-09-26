@@ -28,7 +28,7 @@ zoom.
 - **The lens is parallel at every zoom**, not only where the camera is tipped, so it never changes in the
   middle of a zoom. Straight down the two lenses draw the same picture.
 - **Everything downstream already followed the tilt of the moment.** The marks and the scenery stand up
-  (0008), the desk and the room are worked out in the flat window (0058), and the edge rule works the tilt
+  (0008), the desk and the room are worked out in the flat window (0060), and the edge rule works the tilt
   out from the zoom it is asked about rather than reading it off the map a frame late.
 - **The debug panel's Camera section** holds the two numbers as levers: how far it tips at the closest
   zoom, and where it starts to tip. Its header shows the zoom whether the section is open or folded, and a
@@ -84,8 +84,8 @@ Pending Adam's eye. The half that can be measured holds: nothing slides, nothing
 
 ## Decision
 
-Pending. Built as the player's camera so that it can be judged as one, with decision record 0058 noting
-that its fixed 45 degrees became the most of a ramp. If it is kept, 0058 is amended in words; if not,
+Pending. Built as the player's camera so that it can be judged as one, with decision record 0060 noting
+that its fixed 45 degrees became the most of a ramp. If it is kept, 0060 is amended in words; if not,
 `CAMERA.tilt.from` pulled down to the floor and the ramp is a fixed tilt again in all but name.
 
 ## Follow-ups

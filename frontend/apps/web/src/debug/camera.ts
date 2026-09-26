@@ -11,7 +11,7 @@ export { PARALLEL_FOV, WIDE_FOV } from '../map/mapConfig';
  * The same shape as `scenery.ts` and every other switch in the panel: a module with a set of listeners,
  * read through `useSyncExternalStore`. Adam's, not a player's. These all start at the player's camera,
  * `CAMERA` in `map/mapConfig.ts`: north-up on a diamond lattice, flat from zoom 7 out and tipped back 45
- * degrees at the closest zoom, eased between. See decision record 0058 and experiment 0011.
+ * degrees at the closest zoom, eased between. See decision record 0060 and experiment 0011.
  *
  * How wide the camera sees is not a setting: it follows from whether the camera tips at all, `lensOf`. A camera with a wide
  * field of view stands close to what it looks at, so the far side of the window is further away than the

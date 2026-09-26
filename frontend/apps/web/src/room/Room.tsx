@@ -46,7 +46,7 @@ const lay = (element: HTMLElement, rect: DeskTop): void => {
  * Like the desk, it is laid out as if the camera looked straight down, in the flat window, and each
  * rectangle and point is squashed by the tip only as it is written to the page. A scale about the middle
  * of the flat window is a scale about the middle of the real one, so the pull's own numbers do not change
- * at all. See decision record 0058.
+ * at all. See decision record 0060.
  */
 export function Room({ map, seat, strip, children }: RoomProps) {
   const surfaceRef = useRef<HTMLDivElement | null>(null);

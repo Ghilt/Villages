@@ -15,7 +15,7 @@ export const EARTH_STYLE_URL = 'https://tiles.openfreemap.org/styles/positron';
  * comes. Tipped north-up with no perspective, the ground is foreshortened by the cosine of the tip and
  * nothing else, which keeps
  * the sprite overlay a handful of multiplies against the map centre and lets everything laid out as if
- * the map were flat be drawn right by squashing its height. See docs/adr/0058, which superseded the flat
+ * the map were flat be drawn right by squashing its height. See docs/adr/0060, which superseded the flat
  * camera of 0014. Pulled back far enough, the world is a sheet lying on a desk; the rule for that is in
  * map/sheet.ts. See docs/adr/0033.
  */

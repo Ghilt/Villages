@@ -117,7 +117,7 @@ thing's forms share. It carries its own colour and is never tinted. A sprite is 
 ninety pixels tall wherever it is drawn, so **its outline is what reads**: what tells one kind from another has to
 be its shape. The first picture has no outline and no shadow, and whether it disappears into the painted
 forest is a question for the eye. How to hand one over is `AUTHORING-THE-ART.md`; why it works this way is
-decision record 0057.
+decision record 0059.
 
 **The seam.** The join between the two **bays**, drawn as a moulding lying over it: three gold rules
 running the length of the stage — a heavy one on the join and a lighter one either side — with a fixed

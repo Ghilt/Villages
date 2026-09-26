@@ -10,7 +10,7 @@
  *
  * `--placeholders` first draws a placeholder for every sprite that has no picture, and **never draws over
  * a file that is there**: delete one to have its placeholder back. The dev server runs this by itself
- * whenever something in the folder is saved. See decision record 0057.
+ * whenever something in the folder is saved. See decision record 0059.
  */
 
 import { createHash } from 'node:crypto';

@@ -31,7 +31,7 @@ const GRAINS_ACROSS_THE_SHEET = 4;
  *
  * It lies on the same tipped ground the world does. Everything is laid out as if the camera looked
  * straight down, in the flat window `flatWindow` gives, and squashed by the tip only as it is drawn, so the
- * sheet, its shadow and the grain are foreshortened exactly as the tiles are. See decision record 0058.
+ * sheet, its shadow and the grain are foreshortened exactly as the tiles are. See decision record 0060.
  */
 export function Desk({ map }: DeskProps) {
   const deskRef = useRef<HTMLDivElement | null>(null);

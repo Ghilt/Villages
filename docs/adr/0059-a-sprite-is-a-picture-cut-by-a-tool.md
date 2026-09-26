@@ -1,4 +1,4 @@
-# 0057. A sprite is a picture Adam hands over, and a tool cuts it for the map
+# 0059. A sprite is a picture Adam hands over, and a tool cuts it for the map
 
 - Status: accepted
 - Date: 2026-09-25

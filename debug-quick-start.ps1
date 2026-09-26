@@ -516,7 +516,7 @@ if (-not (Test-Path $SpriteMap)) {
 
 # What the scenery is drawn as: Adam's pictures in world/sprites, cut into one atlas. The dev server cuts
 # it on start when it is missing too, but cutting it here says so where everything else is said, and
-# fails before a server is started rather than into its log. Two seconds. See decision record 0057.
+# fails before a server is started rather than into its log. Two seconds. See decision record 0059.
 $ArtAtlas = Join-Path $Frontend 'apps/web/public/art/scenery.json'
 if (-not (Test-Path $ArtAtlas)) {
     Run 'cutting the sprites into an atlas (two seconds)' $Npm @('run', 'world:art') $Frontend

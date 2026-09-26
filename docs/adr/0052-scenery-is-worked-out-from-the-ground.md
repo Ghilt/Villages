@@ -89,7 +89,7 @@ change of mind.
 
 > **Amended, 2026-09-25.** What a kind *looks like* is now authored: a picture in `world/sprites/scenery/`,
 > cut into one atlas by `npm run world:art`. Where every piece stands is still worked out from the ground
-> and stored nowhere, exactly as above. See decision record 0057.
+> and stored nowhere, exactly as above. See decision record 0059.
 
 Three kinds of the ten are drawn, and drawn crudely. **What this record settles is how scenery is
 worked out, not what it looks like or how much of it there should be.** Those are the

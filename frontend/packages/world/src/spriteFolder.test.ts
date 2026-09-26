@@ -10,7 +10,7 @@ import { MARK_NAMES, placeholderKinds } from './placeholderArt.ts';
 /**
  * The rules `world/sprites/` is held to, by reading the folder itself. It is Adam's: he saves pictures
  * over the placeholders by hand, and `npm run world:art` refuses to cut a folder that breaks these, so a
- * broken folder is said here rather than by a map with no trees on it. See decision record 0057.
+ * broken folder is said here rather than by a map with no trees on it. See decision record 0059.
  */
 const SPRITES = new URL('../../../../world/sprites/', import.meta.url);
 const BIOMES = new URL('../../../../world/biomes.json', import.meta.url);

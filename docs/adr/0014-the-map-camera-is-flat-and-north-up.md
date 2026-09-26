@@ -1,6 +1,6 @@
 # 0014. The map camera is flat, north-up and single-world
 
-- Status: superseded in part by 0058, which tips the camera back; single-world and Mercator stand, and its
+- Status: superseded in part by 0060, which tips the camera back; single-world and Mercator stand, and its
   edge rule below the fit zoom was extended by 0033
 - Date: 2026-09-01
 
@@ -23,7 +23,7 @@ of the three means the sync must handle a full camera transform, and the rendere
 lands.
 
 > **Superseded in part, 2026-09-25.** The revisit this asked for happened in experiment 0008, and the
-> camera is now tipped back forty-five degrees, north-up and parallel: decision record 0058. The sync did
+> camera is now tipped back forty-five degrees, north-up and parallel: decision record 0060. The sync did
 > have to handle the tip, and it landed where this said it would. The world is still rendered once, in
 > Mercator, and a player still cannot turn or tip it.
 

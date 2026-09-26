@@ -29,7 +29,7 @@ import { Section } from './Section';
  *
  * **The lever of experiment 0008, not a part of the game.** Nothing here is reachable by anybody
  * playing. Every control starts at the player's camera: north-up on a diamond lattice, flat from zoom 7
- * out and tipped back forty-five degrees at the closest zoom, which is decision record 0058 as amended by
+ * out and tipped back forty-five degrees at the closest zoom, which is decision record 0060 as amended by
  * experiment 0011, and `player` puts it back there. Everything else is for looking at a world from another angle, which is answered by
  * looking and is why it is a slider and not a proposal. See decision record 0023.
  *

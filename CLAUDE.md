@@ -376,7 +376,7 @@ Commands are added here as the increments land:
   are drawn to `world/painterly/art-sheet.png`. `-- --placeholders` draws a placeholder for every sprite
   that has none and never draws over a file that is there. **No art, no scenery**, and the dev server cuts
   it on start in a tree that has none. Only the scenery is drawn from the folder so far; the marks are
-  placeholders waiting on a decision about house colours. See `docs/AUTHORING-THE-ART.md` and `docs/adr/0057`.
+  placeholders waiting on a decision about house colours. See `docs/AUTHORING-THE-ART.md` and `docs/adr/0059`.
 - Portraits: `world/portraits/` is Adam's folder, committed as the master is. Upright PNGs, three by
   four and at least 768 wide, each named for whom it suits, `woman-01.png` or `man-01.png`; the name
   without `.png` is the key a character keeps for life. **Saving over a placeholder replaces it and

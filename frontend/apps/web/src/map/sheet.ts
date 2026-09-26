@@ -46,7 +46,7 @@ export interface Bounds {
  * if the map were flat, in a window that much taller, and each rectangle is squashed back only as it is
  * drawn, with `drawnAt`. One conversion at each end, rather than a tip threaded through every rule, and at
  * no tip at all both are the identity. A turned camera is not this: north-up is what makes it exact.
- * See docs/adr/0058.
+ * See docs/adr/0060.
  */
 export function flatWindow(viewport: Viewport, pitch: number): Viewport {
   return { width: viewport.width, height: viewport.height / leanOf(pitch) };

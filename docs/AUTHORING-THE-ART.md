@@ -1,7 +1,7 @@
 # Authoring the art
 
 > **What belongs here:** how to make a picture for the map and hand it over, and what the tool does with
-> it. **What does not:** why sprites are pictures cut by a tool (decision record 0057), the rules every
+> it. **What does not:** why sprites are pictures cut by a tool (decision record 0059), the rules every
 > picture on the map has to agree on (`LOOK-AND-FEEL.md`), where the scenery stands (decision records 0052
 > and 0054), and the master (`AUTHORING-THE-WORLD.md`).
 
@@ -13,7 +13,7 @@
   oak, beech, palm, jungle, acacia, mangrove, snag, scrub, heather, grass, reed, boulder, cactus.
 - `world/sprites/marks/<name>.png`, one for every mark the map places: castle, castle-icon, candidate,
   figure, figure-icon, selection-ring. These are placeholders only for now: the map still draws the marks
-  in code, because they take a house's colours. See 0057.
+  in code, because they take a house's colours. See 0059.
 
 **Save your picture over the placeholder**, as `oak.webp` or `oak.png` or `oak.jpg`. Delete the placeholder if
 the extension differs, because two files that are both `oak` are refused. With the dev server running, the
@@ -43,7 +43,7 @@ Anything an image tool gives you, untouched:
 ## What it should look like
 
 - **Drawn from the camera's angle.** The player's camera looks north and down at 45 degrees at the closest
-  zoom, and less further out: from straight down at zoom 7 it tips up as it comes in (decision record 0058,
+  zoom, and less further out: from straight down at zoom 7 it tips up as it comes in (decision record 0060,
   experiment 0011). A round tree hides a different angle, but a building does not: draw buildings front-on
   and seen from that height, not as isometric diamonds.
 - **Light from the upper right**, because the first picture has it there and every picture has to agree.

@@ -4,7 +4,7 @@
  * These are the silhouettes that lived as Pixi `Graphics` calls in the web app, written out as path data
  * so that a tool with no browser can draw them. Scenery is drawn in its own colour, because a picture in
  * the folder carries its colour and is no longer tinted at runtime; the marks stay white, because they
- * are still tinted in a house's colours and are not drawn from files yet. See decision record 0057.
+ * are still tinted in a house's colours and are not drawn from files yet. See decision record 0059.
  *
  * Every drawing is laid out on a box `w` by `h` with its foot on the bottom edge, as it was in code.
  */

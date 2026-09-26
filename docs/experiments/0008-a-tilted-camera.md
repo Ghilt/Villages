@@ -463,7 +463,7 @@ The second half is Adam's, and is not answered here.
 
 **Keep, and make it the player's.** Adam looked, pulled the sliders, and chose: tipped back forty-five
 degrees, north-up, parallel, with the ground read on a lattice turned twenty-six degrees as diamonds.
-Decision record 0058, which supersedes the flat half of 0014 - "worth revisiting once the sprite path is
+Decision record 0060, which supersedes the flat half of 0014 - "worth revisiting once the sprite path is
 proven. Enabling any of the three means the sync must handle a full camera transform, and the renderer
 interface is where that change lands." That is what happened, and it landed where 0014 said it would.
 
@@ -478,7 +478,7 @@ The findings above are the menu, and none of them is small:
 
 - **The desk, and what the world lies on.** A tilted world is not a sheet on a desk, and the workbench on
   the roadmap is built on the desk. This is the fiction question, not the rendering one. The rendering
-  half is done for a north-up camera (0058): the desk and the room are foreshortened with the world.
+  half is done for a north-up camera (0060): the desk and the room are foreshortened with the world.
 - **Brush space under an anisotropy.** One factor in the painterly worker, if the look survives it.
 - ~~**Standing the scenery up**~~, done 2026-09-25 without a different layer: the tip went into the feet
   and out of the matrix. See *The scenery stands up* above.
