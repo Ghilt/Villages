@@ -12,6 +12,9 @@
     A port already held by another tree, or by a server older than the code it serves, is taken rather
     than adopted: launching this from a checkout means "show me this checkout". See decision record 0037.
 
+    The packages are held to the same rule: when package-lock.json has changed since they were last
+    installed - a merge that brought a new one - they are installed again before anything starts.
+
     Switches:
         -WebOnly     just the map. No game server, so no houses and no events.
         -NoBrowser   do not open the browser.
@@ -180,6 +183,31 @@ function Get-NewestWebConfigChange {
         Select-Object -First 1)
     if ($newest.Count -eq 0) { return $null }
     return $newest[0]
+}
+
+<#
+    Why the installed packages are older than the ones this checkout asks for, or nothing when they are not.
+
+    npm writes node_modules/.package-lock.json as the last thing an install does, after package-lock.json
+    itself, so a lock file newer than it has changed since: a merge, a pull or a checkout brought packages
+    that were never installed here. Found on 2026-09-26: main's checkout was installed on the 4th, a merge
+    on the 26th brought the art cut, and the art cut needs sharp, which main had never installed. This
+    script would have stopped at cutting the sprites, under Node's complaint that it cannot find sharp,
+    which says what is missing and not what to do about it.
+
+    Asked of the two files' times rather than their contents, which keeps it instant, and wrong only the
+    cheap way: a checkout that rewrote the lock without changing it gets an install with nothing to do,
+    which takes seconds. Asked of .NET rather than Get-Item, which will not see a hidden file.
+#>
+function Get-StaleInstallReason {
+    $frontend = Join-Path $Root 'frontend'
+    $installed = Join-Path $frontend 'node_modules\.package-lock.json'
+    if (-not (Test-Path $installed)) { return 'there is no record of what was last installed' }
+    $lock = Join-Path $frontend 'package-lock.json'
+    if ([System.IO.File]::GetLastWriteTimeUtc($lock) -gt [System.IO.File]::GetLastWriteTimeUtc($installed)) {
+        return 'package-lock.json has changed since the packages were installed'
+    }
+    return $null
 }
 
 <#
@@ -352,6 +380,23 @@ function Remember([string] $Name, $Process) {
     $all | ConvertTo-Json | Set-Content -Path $StartedFile -Encoding UTF8
 }
 
+<#
+    End a process and every process it started, and say whether it is gone.
+
+    Through cmd, which keeps taskkill's complaints to itself. taskkill writes to stderr when part of what
+    it was asked to end is already on its way out, and Windows PowerShell turns a line on stderr into an
+    error that stops this whole script. That is the normal case, not the odd one: stopping a server's
+    wrapper takes the server with it, the port table goes on naming the server until it has finished
+    dying, and asking for the port a moment later asks taskkill for a process that is already going. It
+    stopped this script dead on 2026-09-26, halfway through stopping a dev server.
+#>
+function End-Process([int] $Id) {
+    & cmd.exe /d /c "taskkill /T /F /PID $Id >nul 2>&1"
+    $left = Get-Process -Id $Id -ErrorAction SilentlyContinue
+    if ($null -eq $left) { return $true }
+    try { return $left.WaitForExit(5000) } catch { return $false }
+}
+
 function Stop-Remembered([string] $Name, [string] $What) {
     if (-not (Test-Path $StartedFile)) { return }
     $entry = (Get-Content -Raw -Path $StartedFile | ConvertFrom-Json).$Name
@@ -359,9 +404,12 @@ function Stop-Remembered([string] $Name, [string] $What) {
     $process = Get-Process -Id $entry.pid -ErrorAction SilentlyContinue
     if ($null -eq $process) { return }
     if ($process.StartTime.ToString('o') -ne $entry.born) { return }
-    & taskkill.exe /T /F /PID $entry.pid 2>&1 | Out-Null
-    Good "stopped $What, and the processes it started (pid $($entry.pid))"
-    $script:Stopped = $true
+    if (End-Process $entry.pid) {
+        Good "stopped $What, and the processes it started (pid $($entry.pid))"
+        $script:Stopped = $true
+    } else {
+        Warn "could not stop $What (pid $($entry.pid))"
+    }
 }
 
 <# Whatever holds the port, whoever started it: an IDE, the launch config, an older run of this. #>
@@ -369,10 +417,17 @@ function Stop-Port([int] $Port, [string] $What) {
     $owners = @(Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue |
         Select-Object -ExpandProperty OwningProcess -Unique)
     foreach ($owner in $owners) {
-        $name = (Get-Process -Id $owner -ErrorAction SilentlyContinue).ProcessName
-        & taskkill.exe /T /F /PID $owner 2>&1 | Out-Null
-        Good "stopped $What on $Port ($name, pid $owner)"
-        $script:Stopped = $true
+        $process = Get-Process -Id $owner -ErrorAction SilentlyContinue
+        # Already gone, and the port table has not caught up with it.
+        if ($null -eq $process) { continue }
+        # Asked before it is ended, because an ended process has no name to give.
+        $name = $process.ProcessName
+        if (End-Process $owner) {
+            Good "stopped $What on $Port ($name, pid $owner)"
+            $script:Stopped = $true
+        } else {
+            Warn "could not stop $What on $Port ($name, pid $owner)"
+        }
     }
 }
 
@@ -464,14 +519,37 @@ if ($WebOnly) {
 
 Head 'the browser app'
 
-if (-not (Test-Path (Join-Path $Root 'frontend\node_modules'))) {
-    Run 'installing dependencies (a minute, once)' $Npm @('install') (Join-Path $Root 'frontend')
+$Frontend = Join-Path $Root 'frontend'
+if (-not (Test-Path (Join-Path $Frontend 'node_modules'))) {
+    Run 'installing dependencies (a minute, once)' $Npm @('install') $Frontend
 } else {
-    Good 'dependencies are installed'
+    $stale = Get-StaleInstallReason
+    if ($null -eq $stale) {
+        Good 'dependencies are installed, and package-lock.json has not changed since'
+    } else {
+        Warn $stale
+        # This checkout's own dev server is running on the packages about to be replaced. Windows will
+        # not let npm overwrite a program that is running, and Vite reads its packages once, when it
+        # starts, so it goes first and the start below brings it back on the new ones. Another tree's is
+        # left to the rule that takes ports back, further down, because its packages are its own.
+        $holder = Get-PortHolder $WebPort
+        if ($null -ne $holder -and (Get-TreeOf $holder) -eq $Here) {
+            Warn 'the dev server is running on them, so it stops first and starts again below'
+            Stop-Remembered 'web' 'the dev server'
+            Stop-Port $WebPort 'the dev server'
+            Wait-Free $WebPort | Out-Null
+        }
+        try {
+            Run 'installing them again (seconds, or a minute if a lot changed)' $Npm @('install') $Frontend
+        } catch {
+            # Offline, say. What was installed before is still there, and most of the program runs on it.
+            Bad "$($_.Exception.Message)."
+            Warn 'starting on what was installed before, which may be missing a package the code now uses'
+        }
+    }
 }
 
 $WorldDir = Join-Path $Root 'frontend\apps\web\public\world'
-$Frontend = Join-Path $Root 'frontend'
 $Master = Join-Path $Root 'world\master\terrain.png'
 # One directory per hand-painted master, so the debug map panel can hold more than one world at once.
 # This is the one the two world commands write when given no arguments.

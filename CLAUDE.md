@@ -158,7 +158,8 @@ What follows from that, and bites in practice:
   and per-worktree.** They are gitignored, they do not travel with a branch, and a worktree that has
   never cut them cannot serve a map. Junctioning the main checkout's tiles into the worktree is the cheap
   way to get a map up without a five-minute recut. So is `frontend/node_modules`: a fresh tree needs
-  `npm install --prefix frontend` once before anything in it runs.
+  `npm install --prefix frontend` once before anything in it runs, and again after any merge that
+  changes `frontend/package-lock.json`.
 - **Each tree serves on its own pair of ports**, a hash of its directory name, so several can run at once
   and a tree's address never moves. The main checkout keeps 5173 and 8080; a worktree's game server sits
   three thousand above its dev server, so 5548 serves the page and 8548 serves the world, and the page
@@ -259,7 +260,9 @@ part is what points npm at the frontend workspace, so running them from inside `
 Commands are added here as the increments land:
 
 - Everything, from a cold machine: `.\debug-quick-start.ps1` from the repository root, or
-  `debug-quick-start.cmd` on a double click from Explorer. It checks the tools, generates whatever part
+  `debug-quick-start.cmd` on a double click from Explorer. It checks the tools, installs the packages
+  again when `package-lock.json` has changed since they were installed (stopping this checkout's dev
+  server first, because Windows will not replace a running program), generates whatever part
   of the world is missing, starts the game server and the dev server hidden with their output in
   `.logs/`, waits until both ports answer, and prints the address. `-Stop` stops both, `-Logs` prints
   their tails, `-WebOnly` skips the game server, `-NoBrowser` leaves the browser alone. **A port held by
@@ -271,7 +274,9 @@ Commands are added here as the increments land:
   leaves them running. This is how
   Adam runs the program without an agent in the loop, so it stays true: a step that adds a server, a
   generated file or a prerequisite adds it there in the same commit.
-- Frontend, once: `npm install --prefix frontend`
+- Frontend, once, and again whenever `frontend/package-lock.json` changes: `npm install --prefix frontend`.
+  The quick-start does it itself when the lock is newer than `frontend/node_modules/.package-lock.json`,
+  which npm writes last on every install. See the 2026-09-26 amendment to decision record 0037.
 - The world: `npm run world:import --prefix frontend` traces the coast and the large lakes, and
   `npm run world:tile --prefix frontend` cuts the terrain into map tiles. Both read the hand-painted
   master in `world/master/` and take another as their first argument; each master's world is written to

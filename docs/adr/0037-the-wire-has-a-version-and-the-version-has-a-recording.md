@@ -107,6 +107,34 @@ the short commit with a `+` when there are tracked changes, and the version of t
 every load rather than baked in at startup, because a dev server outlives a merge. A built page with no
 dev server to ask still says what it speaks.
 
+### Amended 2026-09-26: the packages are this checkout's too
+
+The same standard, one layer down. A merge on the 26th brought the art cut to main, and the art cut
+needs sharp, which main's checkout had never installed: its packages dated from the 4th, and the launcher
+only installed when `frontend/node_modules` was missing altogether. A double click on main would have
+stopped at cutting the sprites, under Node's complaint that it cannot find sharp, which names what is
+missing and not what to do about it. Started any other way, the page would have said no art had been cut
+and to cut it, and cutting it would have failed the same way. It was found by looking, before it bit.
+
+**The launcher installs again when `package-lock.json` has changed since the packages were installed.**
+npm writes `node_modules/.package-lock.json` as the last thing every install does, after the lock itself,
+so a lock newer than it has moved on - a merge, a pull, a checkout - and `npm install` runs before
+anything starts. It compares the two files' times rather than their contents, so it costs nothing to ask,
+and it errs the cheap way: a lock rewritten without changing costs an install with nothing to do, about
+nine seconds.
+
+**This checkout's own dev server stops first**, because Windows will not let npm replace a program that
+is running, and Vite reads its packages once, when it starts; the start that follows brings it back on
+the new ones. Another tree's server is left to the rule above, because its packages are its own. An
+install that fails, offline say, is said in red, and the servers start on what was installed before.
+
+**Stopping is safe against a process that is already going.** Built, this stopped the launcher dead: a
+server's wrapper was stopped, the port table went on naming the dying server for a moment, and asking
+taskkill for it again put a line on stderr, which Windows PowerShell turns into an error that ends the
+script. `-Stop` and `q` stop the same two ways one after the other, so they could hit it too. taskkill
+runs through cmd now, which keeps its complaints to itself, and whether the process has gone is asked
+afterwards rather than read off what taskkill said.
+
 ## Consequences
 
 The version is now a thing that moves, so a stale server is refused at the handshake with "this gateway
