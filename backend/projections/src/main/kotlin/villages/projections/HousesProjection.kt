@@ -11,7 +11,9 @@ import villages.application.StoredEvent
 import villages.domain.CharacterEvent
 import villages.domain.HouseFounded
 import villages.domain.HouseGainedKeyFigure
+import villages.domain.HouseGainedVision
 import villages.domain.HouseLostKeyFigure
+import villages.domain.HouseLostVision
 import villages.domain.Pledge
 import villages.domain.HouseResourceSpent
 import villages.domain.HouseResourceReleased
@@ -106,6 +108,9 @@ class HousesProjection(feed: EventFeed) : HousesByCell, HousesByPlayer, AutoClos
 
             // Whom a house holds is the characters projection's business; the map's row of a house is unchanged.
             is HouseGainedKeyFigure, is HouseLostKeyFigure -> return
+
+            // What a house sees is the sight projection's, and nobody else is shown it. See decision 0061.
+            is HouseGainedVision, is HouseLostVision -> return
 
             // A person is not a house, and what one is to a house is the house's own history: nothing a
             // character's stream says moves a house's row. See decision record 0055.

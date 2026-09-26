@@ -17,6 +17,7 @@ import villages.application.Portraits
 import villages.application.ResourceService
 import villages.application.ScheduledLater
 import villages.application.TakeActionService
+import villages.application.VisionService
 import villages.application.WorldCalendar
 import villages.application.WorldClock
 import villages.application.WorldWipe
@@ -108,6 +109,11 @@ class WorldConfig {
         clock: Clock,
         ids: FreshIds,
     ): Pledges = Pledges(world.feed, later, resources, worldClock, clock = { clock.instant() }, ids = ids)
+
+    /** Giving a house vision of a place outright, and taking it away. See decision record 0061. */
+    @Bean
+    fun visions(world: InMemoryWorld, clock: Clock, worldClock: WorldClock, ids: FreshIds): VisionService =
+        VisionService(world.executor, clock = { clock.instant() }, world = worldClock, ids = ids)
 
     @Bean
     fun takeAction(world: InMemoryWorld, clock: Clock, worldClock: WorldClock): TakeActionService =
@@ -211,6 +217,7 @@ class WorldConfig {
         keyFigures: KeyFigureService,
         characters: CharactersProjection,
         sights: SightProjection,
+        visions: VisionService,
     ): Gateway = Gateway(
         tokens = AnonymousTokens,
         foundHouse = foundHouse,
@@ -229,5 +236,6 @@ class WorldConfig {
         figures = characters,
         onTheMap = characters,
         sights = sights,
+        visions = visions,
     )
 }

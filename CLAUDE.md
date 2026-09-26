@@ -333,7 +333,8 @@ Commands are added here as the increments land:
 - The fog of war: `fog of war: on` in the Debug map section, on at every page load, and pressing it turns
   the fog off for that window. A house sees from **vision points** - its seat, and each key figure standing
   on the map, a circle of 34 km around each - and the server works them out and sends them as `yourSight`;
-  the log says what gives vision under `sight`. Unknown ground is under a dark haze, revealed ground is washed
+  the log says what gives vision under `sight`. `give vision here`, under the switch, gives the house a circle
+  where the camera is looking until its `take it away` is pressed; both are real commands. Unknown ground is under a dark haze, revealed ground is washed
   grey, vision is clear. With no house the whole world is hazed. See `docs/adr/0061`, `0062` and
   `docs/plans/fog-of-war.md`.
 - Looking at a whole world at once: `see everything`, in the debug panel's World bar beside `seed 20`.

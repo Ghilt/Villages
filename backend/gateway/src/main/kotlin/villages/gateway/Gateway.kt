@@ -26,6 +26,7 @@ import villages.application.ResourceService
 import villages.application.Start
 import villages.application.StoredEvent
 import villages.application.TakeActionService
+import villages.application.VisionService
 import villages.application.VisionSource
 import villages.application.WorldClock
 import villages.application.WorldWipe
@@ -46,6 +47,7 @@ import villages.domain.PlayerId
 import villages.domain.PledgeId
 import villages.domain.Resource
 import villages.domain.Stat
+import villages.domain.VisionId
 import villages.domain.WorldTime
 import villages.protocol.AddKeyFigurePayload
 import villages.protocol.AgeCharacterPayload
@@ -67,6 +69,7 @@ import villages.protocol.ErrorFrame
 import villages.protocol.EventFrame
 import villages.protocol.FoundAtView
 import villages.protocol.FoundHousePayload
+import villages.protocol.GiveVisionPayload
 import villages.protocol.GrantResourcePayload
 import villages.protocol.Hello
 import villages.protocol.HolderView
@@ -78,6 +81,7 @@ import villages.protocol.HouseAppeared
 import villages.protocol.HouseChanged
 import villages.protocol.MoveCharacterPayload
 import villages.protocol.TakeOffTheMapPayload
+import villages.protocol.TakeVisionPayload
 import villages.protocol.HouseView
 import villages.protocol.KeyFigureView
 import villages.protocol.KillCharacterPayload
@@ -171,6 +175,7 @@ class Gateway(
     private val figures: KeyFiguresByHouse,
     private val onTheMap: CharactersByCell,
     private val sights: SightsByHouse,
+    private val visions: VisionService,
     private val later: Later = ScheduledLater(),
 ) : AutoCloseable {
     private val watching = ConcurrentHashMap<Connection, Unit>()
@@ -601,6 +606,19 @@ class Gateway(
                         characterId = CharacterId(asUuid(payload.characterId, "a character id")),
                         provenance = Provenance.startedBy(commandId),
                     )
+
+                    // A place off the world is refused by the place itself, as `invalidLocation`.
+                    is GiveVisionPayload -> visions.give(
+                        player = who,
+                        place = Location(payload.place.lat, payload.place.lon),
+                        provenance = Provenance.startedBy(commandId),
+                    )
+
+                    is TakeVisionPayload -> visions.take(
+                        player = who,
+                        visionId = VisionId(asUuid(payload.visionId, "a vision id")),
+                        provenance = Provenance.startedBy(commandId),
+                    )
                 }
                 out.send(CommandAccepted(frame.commandId))
             } catch (refused: DomainError) {
@@ -827,8 +845,13 @@ internal fun Sight.toView(): List<VisionPointView> = points.map { point ->
         kind = when (point.source) {
             VisionSource.Seat -> "seat"
             is VisionSource.KeyFigure -> "keyFigure"
+            is VisionSource.Given -> "given"
         },
-        of = (point.source as? VisionSource.KeyFigure)?.character?.value?.toString(),
+        of = when (val source = point.source) {
+            VisionSource.Seat -> null
+            is VisionSource.KeyFigure -> source.character.value.toString()
+            is VisionSource.Given -> source.vision.value.toString()
+        },
         place = Point(point.place.lat, point.place.lon),
         radius = point.radius,
         since = point.since.day,
@@ -884,6 +907,8 @@ internal fun DomainError.reasonCode(): String = when (this) {
     HouseError.TooManyKeyFigures -> "tooManyKeyFigures"
     HouseError.AlreadyAKeyFigure -> "alreadyAKeyFigure"
     HouseError.NoSuchKeyFigure -> "noSuchKeyFigure"
+    HouseError.NoSuchVision -> "noSuchVision"
+    is HouseError.InvalidVision -> "invalidVision"
     is HouseError.InvalidAmount -> "invalidAmount"
     is HouseError.InvalidPledge -> "invalidPledge"
     is HouseError.NotEnoughFree -> "notEnoughFree"

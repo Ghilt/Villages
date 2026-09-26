@@ -49,9 +49,10 @@ A player's own house and own key figures are always theirs to see: every one of 
    over revealed ground, nothing over vision, all read off a distance field worked out once for each change
    to the vision points. The switch is in the Debug map section, in words, on at every load; off only stops
    the drawing, because nothing is held back yet. Decision record 0062.
-3. **Vision given outright.** A debug button that gives vision where the camera is looking and one that takes
-   it away, each a real command, recorded as events of their own on the house's stream with the place, the
-   circle and the span. Which section they go in, and whether they are words, is asked before they are drawn.
+3. **Vision given outright.** Done. `give vision here` and, for each vision given, `take it away`, in words
+   under the fog switch in the Debug map section, as Adam chose. `GiveVision` and `TakeVision` record
+   `house.gainedVision` with the place and the size, and `house.lostVision`; the sight projection reads them
+   straight off the events. Open-ended: the span a vision is given for is step 9. Wire version 10.
 4. **The fog holds back.** The gateway sends a house only the buildings on its revealed ground and only the
    people in its vision, answers every held cell again when the sight changes, and tells a player whose sight
    moved. The switch now tells the gateway too, as `seeAll` does. Wire version 10.

@@ -596,6 +596,29 @@ export function moveCharacter(figure: KeyFigureView, place: Point): void {
   });
 }
 
+/*
+ * Giving the house vision of a place outright, and taking it away. Adam's levers, in the Debug map section
+ * under the fog switch; a storyline that gives a house sight of a far coast will send the same command. The
+ * answers and the sight that follows are said in the same part of the log. See decision record 0061.
+ */
+
+export function giveVision(place: Point): void {
+  act('sight', `giving your house vision at ${place.lat.toFixed(3)}, ${place.lon.toFixed(3)}`, {
+    type: 'giveVision',
+    place,
+  });
+}
+
+export function takeVision(point: VisionPointView): void {
+  if (point.kind !== 'given' || point.of === undefined) {
+    return;
+  }
+  act('sight', `taking away the vision at ${point.place.lat.toFixed(3)}, ${point.place.lon.toFixed(3)}`, {
+    type: 'takeVision',
+    visionId: point.of,
+  });
+}
+
 export function takeOffTheMap(figure: KeyFigureView): void {
   act('characters', `taking ${fullName(figure)} off the map`, {
     type: 'takeOffTheMap',

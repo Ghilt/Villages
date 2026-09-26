@@ -147,13 +147,13 @@ export const characterOnMapViewSchema = z.object({
 });
 
 /**
- * Somewhere the player's house sees from. `kind` says what gives it and `of` is the key figure's id, absent
- * for the seat. `radius` is how far it sees around `place`, in **kilometres** on the ground; how big that is
+ * Somewhere the player's house sees from. `kind` says what gives it and `of` is the key figure's id or the
+ * given vision's, absent for the seat. `radius` is how far it sees around `place`, in **kilometres** on the ground; how big that is
  * on the map is worked out at the place's latitude. `since` and `until` are world-days, and `until` is
  * absent while it still gives vision. See decision record 0061.
  */
 export const visionPointViewSchema = z.object({
-  kind: z.enum(['seat', 'keyFigure']),
+  kind: z.enum(['seat', 'keyFigure', 'given']),
   of: z.string().optional(),
   place: pointSchema,
   radius: z.number().positive(),
@@ -234,6 +234,12 @@ export const commandPayloadSchema = z.discriminatedUnion('type', [
   /** Put a key figure somewhere on the map. The place and nothing else: how much it matters is the world's. */
   z.object({ type: z.literal('moveCharacter'), characterId: z.string(), place: pointSchema }),
   z.object({ type: z.literal('takeOffTheMap'), characterId: z.string() }),
+  /**
+   * Give the house vision of a place outright, until it is taken away; how far it sees is the world's to say.
+   * Take one away by the id `yourSight` names it under. Adam's levers. See decision record 0061.
+   */
+  z.object({ type: z.literal('giveVision'), place: pointSchema }),
+  z.object({ type: z.literal('takeVision'), visionId: z.string() }),
 ]);
 
 export const clientFrameSchema = z.discriminatedUnion('type', [

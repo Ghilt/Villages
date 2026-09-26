@@ -158,6 +158,31 @@ object HouseDecider : Decider<HouseCommand, House, HouseEvent> {
             listOf(HouseLostKeyFigure(command.houseId, command.characterId, command.worldTime, command.recordedAt))
         }
 
+        // How far a house sees is the world's to say rather than the command's, so the size goes on the event
+        // from here, and a later change to it leaves what was given as it was. See decision record 0061.
+        is GiveVision -> {
+            if (command.visionId in founded(state).visions) {
+                throw HouseError.InvalidVision("this house was already given vision under that name")
+            }
+            listOf(
+                HouseGainedVision(
+                    houseId = command.houseId,
+                    visionId = command.visionId,
+                    place = command.place,
+                    radius = Vision.MALLORCA,
+                    worldTime = command.worldTime,
+                    recordedAt = command.recordedAt,
+                ),
+            )
+        }
+
+        is TakeVision -> {
+            if (command.visionId !in founded(state).visions) {
+                throw HouseError.NoSuchVision
+            }
+            listOf(HouseLostVision(command.houseId, command.visionId, command.worldTime, command.recordedAt))
+        }
+
         // The two commands that can only be refused. Nothing happens to the house either way, so nothing is
         // written, and the refusal is the whole of the answer. See decision record 0055.
         is ActThrough -> {
@@ -292,6 +317,16 @@ object HouseDecider : Decider<HouseCommand, House, HouseEvent> {
         is HouseLostKeyFigure -> when (state) {
             is House.NotFounded -> state
             is House.Founded -> state.copy(keyFigures = state.keyFigures - event.characterId)
+        }
+
+        is HouseGainedVision -> when (state) {
+            is House.NotFounded -> state
+            is House.Founded -> state.copy(visions = state.visions + event.visionId)
+        }
+
+        is HouseLostVision -> when (state) {
+            is House.NotFounded -> state
+            is House.Founded -> state.copy(visions = state.visions - event.visionId)
         }
     }
 }

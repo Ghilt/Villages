@@ -1,0 +1,11 @@
+{
+  "type": "command",
+  "commandId": "1c000009-0000-4000-8000-000000000009",
+  "command": {
+    "type": "giveVision",
+    "place": {
+      "lat": 57.64,
+      "lon": 18.3
+    }
+  }
+}

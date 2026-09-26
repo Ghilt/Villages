@@ -1,0 +1,8 @@
+{
+  "type": "command",
+  "commandId": "1c00000a-0000-4000-8000-00000000000a",
+  "command": {
+    "type": "takeVision",
+    "visionId": "dd000000-0000-4000-8000-000000000001"
+  }
+}

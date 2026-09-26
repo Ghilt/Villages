@@ -18,6 +18,7 @@ import villages.domain.Sex
 import villages.domain.Species
 import villages.domain.Stat
 import villages.domain.Stock
+import villages.domain.VisionId
 import villages.domain.WorldTime
 import java.time.Instant
 import java.util.UUID
@@ -496,6 +497,9 @@ sealed interface VisionSource {
 
     /** One of its key figures, for as long as they stand in one place and are the house's. */
     data class KeyFigure(val character: CharacterId) : VisionSource
+
+    /** A vision given outright, from the day it was given until it is taken away. */
+    data class Given(val vision: VisionId) : VisionSource
 }
 
 /**
@@ -519,16 +523,6 @@ data class VisionPoint(
 ) {
     /** Whether it gives vision on a day: `since <= day < until`, the rule every span in the world keeps. */
     fun covers(at: WorldTime): Boolean = at >= since && (until == null || at < until)
-
-    companion object {
-        /**
-         * A circle as big as Mallorca, about 3,640 square kilometres: Adam's size, for now, for everything
-         * that gives vision. A number of the game's that lives beside the read model that uses it, as the
-         * key figures' significance lives beside the service that sets it; when the world has more to say
-         * about how far a thing sees, it moves into the domain and onto the events.
-         */
-        const val MALLORCA = 34.0
-    }
 }
 
 /**

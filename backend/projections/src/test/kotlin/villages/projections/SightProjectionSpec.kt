@@ -22,14 +22,18 @@ import villages.domain.Division
 import villages.domain.Event
 import villages.domain.HouseFounded
 import villages.domain.HouseGainedKeyFigure
+import villages.domain.HouseGainedVision
 import villages.domain.HouseId
 import villages.domain.HouseLostKeyFigure
+import villages.domain.HouseLostVision
 import villages.domain.HouseName
 import villages.domain.Location
 import villages.domain.PlayerId
 import villages.domain.Significance
 import villages.domain.Stat
 import villages.domain.Tincture
+import villages.domain.VisionId
+import villages.domain.Vision
 import villages.domain.WorldTime
 import villages.domain.emptyStocks
 import java.time.Instant
@@ -79,9 +83,9 @@ class SightProjectionSpec : StringSpec({
     )
     fun moved(n: Int, to: Location, on: WorldTime) = CharacterMoved(figure(n), to, Significance(10.0), on, noon)
     fun seat(at: Location = stockholm, since: WorldTime = founding) =
-        VisionPoint(VisionSource.Seat, at, VisionPoint.MALLORCA, since, until = null)
+        VisionPoint(VisionSource.Seat, at, Vision.MALLORCA, since, until = null)
     fun standing(n: Int, at: Location, since: WorldTime, until: WorldTime? = null) =
-        VisionPoint(VisionSource.KeyFigure(figure(n)), at, VisionPoint.MALLORCA, since, until)
+        VisionPoint(VisionSource.KeyFigure(figure(n)), at, Vision.MALLORCA, since, until)
 
     "a house that does not exist sees nothing" {
         SightProjection(HandFedSightEvents()).of(adas).points.shouldBeEmpty()
@@ -95,7 +99,7 @@ class SightProjectionSpec : StringSpec({
 
         sights.of(adas).points shouldContainExactly listOf(seat())
         sights.of(adas).visionOn(founding + 1) shouldContainExactly listOf(seat())
-        VisionPoint.MALLORCA shouldBe 34.0
+        Vision.MALLORCA shouldBe 34.0
     }
 
     "a key figure standing somewhere gives the house vision there, from the day they became its" {
@@ -204,6 +208,22 @@ class SightProjectionSpec : StringSpec({
 
         told.map { it.player } shouldContainExactly listOf(ada, ada)
         told.last().sight.points shouldContainExactly listOf(seat(), standing(1, uppsala, founding + 1))
+    }
+
+    "vision given outright is a point of its own, as big as its event says, until it is taken away" {
+        val feed = HandFedSightEvents()
+        val sights = SightProjection(feed)
+        val far = VisionId(UUID.fromString("dd000000-0000-4000-8000-000000000001"))
+        feed.deliver(founded(ada))
+
+        // Twice the size of anything today, which is what a rule changed after the giving would look like.
+        feed.deliver(HouseGainedVision(adas, far, visby, 68.0, founding + 1, noon))
+        feed.deliver(HouseLostVision(adas, far, founding + 6, noon))
+
+        sights.of(adas).points shouldContainExactly listOf(
+            seat(),
+            VisionPoint(VisionSource.Given(far), visby, 68.0, since = founding + 1, until = founding + 6),
+        )
     }
 
     "a wiped world forgets every house's sight" {

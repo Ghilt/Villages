@@ -92,6 +92,27 @@ data class TakeAction(
     val recordedAt: Instant,
 ) : HouseCommand
 
+/**
+ * Give the house vision of a place, outright: it sees a circle about the place from this world-day until the
+ * vision is taken away. The debug panel's lever today, and what a storyline giving sight of a far coast will
+ * issue. See decision record 0061.
+ */
+data class GiveVision(
+    override val houseId: HouseId,
+    val visionId: VisionId,
+    val place: Location,
+    val worldTime: WorldTime,
+    val recordedAt: Instant,
+) : HouseCommand
+
+/** Take away a vision the house was given. Refused for one it does not have. */
+data class TakeVision(
+    override val houseId: HouseId,
+    val visionId: VisionId,
+    val worldTime: WorldTime,
+    val recordedAt: Instant,
+) : HouseCommand
+
 /** Take a character in as one of the house's key figures. Refused for a tenth, or for someone already held. */
 data class TakeKeyFigure(
     override val houseId: HouseId,

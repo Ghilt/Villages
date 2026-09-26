@@ -18,8 +18,10 @@ import villages.domain.CharacterPortraitChanged
 import villages.domain.CharacterStatChanged
 import villages.domain.HouseFounded
 import villages.domain.HouseGainedKeyFigure
+import villages.domain.HouseGainedVision
 import villages.domain.HouseId
 import villages.domain.HouseLostKeyFigure
+import villages.domain.HouseLostVision
 import villages.domain.HouseResourceGranted
 import villages.domain.HouseResourcePledged
 import villages.domain.HouseResourceReleased
@@ -28,6 +30,7 @@ import villages.domain.Location
 import villages.domain.PlayerGivenChoice
 import villages.domain.PlayerId
 import villages.domain.PlayerTookAction
+import villages.domain.Vision
 import villages.domain.WorldTime
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
@@ -36,12 +39,13 @@ import java.util.concurrent.CopyOnWriteArraySet
 /**
  * Every house's vision points, folded from the feed: what each house sees now, and what it has seen.
  *
- * Two things give a house vision today, and both are worked out here rather than recorded, because the
- * world already records where they stand and a second record of the same place could come to disagree with
- * the first. Its **seat** gives a point from the day it was founded. Each of its **key figures** gives one
- * for every stretch they stood in one place while they were the house's: a move closes the point they stood
- * at and opens the next, and leaving the map, dying or being lost to the house closes it. A closed point is
- * still a point, because what it covered stays revealed. See decision record 0061.
+ * Three things give a house vision today. Two are worked out here rather than recorded, because the world
+ * already records where they stand and a second record of the same place could come to disagree with the
+ * first. Its **seat** gives a point from the day it was founded. Each of its **key figures** gives one for
+ * every stretch they stood in one place while they were the house's: a move closes the point they stood at
+ * and opens the next, and leaving the map, dying or being lost to the house closes it. The third is **vision
+ * given outright**, which nothing else records, so it is its own pair of events and is read straight off
+ * them. A closed point is still a point, because what it covered stays revealed. See decision record 0061.
  *
  * The fold is its own rather than a read of the characters projection, because two subscriptions can stand
  * at different points in the feed; where a character stands and whose they are is folded here as well.
@@ -74,8 +78,20 @@ class SightProjection(feed: EventFeed) : SightsByHouse, AutoCloseable {
         when (val event = stored.event) {
             is HouseFounded -> {
                 players[event.houseId] = event.player
-                open(event.houseId, VisionSource.Seat, event.seat, event.worldTime)
+                open(event.houseId, VisionSource.Seat, event.seat, Vision.MALLORCA, event.worldTime)
                 tell(event.houseId)
+            }
+
+            // The size is the event's own, not the rule's today: a vision given is what it was given as.
+            is HouseGainedVision -> {
+                open(event.houseId, VisionSource.Given(event.visionId), event.place, event.radius, event.worldTime)
+                tell(event.houseId)
+            }
+
+            is HouseLostVision -> {
+                if (close(event.houseId, VisionSource.Given(event.visionId), event.worldTime)) {
+                    tell(event.houseId)
+                }
             }
 
             // Taken in while standing somewhere, a key figure gives vision from the day they became the
@@ -83,7 +99,7 @@ class SightProjection(feed: EventFeed) : SightsByHouse, AutoCloseable {
             is HouseGainedKeyFigure -> {
                 holders.getOrPut(event.characterId) { CopyOnWriteArraySet() } += event.houseId
                 val place = standing[event.characterId] ?: return
-                open(event.houseId, VisionSource.KeyFigure(event.characterId), place, event.worldTime)
+                open(event.houseId, VisionSource.KeyFigure(event.characterId), place, Vision.MALLORCA, event.worldTime)
                 tell(event.houseId)
             }
 
@@ -99,7 +115,7 @@ class SightProjection(feed: EventFeed) : SightsByHouse, AutoCloseable {
                 val source = VisionSource.KeyFigure(event.characterId)
                 for (house in holders[event.characterId].orEmpty()) {
                     close(house, source, event.worldTime)
-                    open(house, source, event.place, event.worldTime)
+                    open(house, source, event.place, Vision.MALLORCA, event.worldTime)
                     tell(house)
                 }
             }
@@ -126,9 +142,9 @@ class SightProjection(feed: EventFeed) : SightsByHouse, AutoCloseable {
         }
     }
 
-    private fun open(house: HouseId, source: VisionSource, place: Location, on: WorldTime) {
+    private fun open(house: HouseId, source: VisionSource, place: Location, radius: Double, on: WorldTime) {
         points.getOrPut(house) { CopyOnWriteArrayList() } +=
-            VisionPoint(source, place, radius = VisionPoint.MALLORCA, since = on, until = null)
+            VisionPoint(source, place, radius = radius, since = on, until = null)
     }
 
     /** Ends the point this source is giving the house, if it is giving one. Says whether it was. */

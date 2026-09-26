@@ -24,7 +24,9 @@ import villages.domain.Effect
 import villages.domain.Event
 import villages.domain.HouseFounded
 import villages.domain.HouseGainedKeyFigure
+import villages.domain.HouseGainedVision
 import villages.domain.HouseLostKeyFigure
+import villages.domain.HouseLostVision
 import villages.domain.Resource
 import villages.domain.PledgeId
 import villages.domain.HouseResourceSpent
@@ -44,6 +46,7 @@ import villages.domain.Significance
 import villages.domain.Species
 import villages.domain.Stat
 import villages.domain.Tincture
+import villages.domain.VisionId
 import villages.domain.emptyStocks
 import villages.domain.WorldTime
 import java.io.File
@@ -182,6 +185,10 @@ class EventFormatSpec : StringSpec({
     val agnesMoved = CharacterMoved(agnes, Location(59.33, 18.07), Significance(10.0), WorldTime(653_705), noon)
     val agnesLeft = CharacterLeftTheMap(agnes, WorldTime(653_705), noon)
 
+    val gotland = VisionId(UUID.fromString("dd000000-0000-4000-8000-000000000001"))
+    val sawGotland = HouseGainedVision(house, gotland, Location(57.64, 18.30), 34.0, day, noon)
+    val lostGotland = HouseLostVision(house, gotland, day, noon)
+
     val samples: Map<String, Event> = mapOf(
         "villages.character.aged.v1" to agnesAged,
         "villages.character.appeared.v1" to agnesAppeared,
@@ -192,7 +199,9 @@ class EventFormatSpec : StringSpec({
         "villages.character.statChanged.v1" to agnesPiety,
         "villages.house.founded.v1" to ravenscar,
         "villages.house.gainedKeyFigure.v1" to tookAgnesIn,
+        "villages.house.gainedVision.v1" to sawGotland,
         "villages.house.lostKeyFigure.v1" to lostAgnes,
+        "villages.house.lostVision.v1" to lostGotland,
         "villages.house.resourceGranted.v1" to givenGold,
         "villages.house.resourcePledged.v1" to pledgedReason,
         "villages.house.resourceReleased.v1" to releasedReason,

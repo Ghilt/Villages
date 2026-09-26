@@ -1572,6 +1572,16 @@ body,
   border-color: var(--gold);
 }
 
+/* One vision given outright: where it is, and the way to take it away. */
+.debug-map__vision {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+}
+
 /*
  * Everything that helps while the game is being built, in one column down the right-hand side.
  *

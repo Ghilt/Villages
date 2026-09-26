@@ -38,6 +38,11 @@ sealed class HouseError(message: String) : DomainError(message) {
     /** The character is not one of this house's key figures, which is also what acting through refuses with. */
     data object NoSuchKeyFigure : HouseError("that character is not one of this house's key figures")
 
+    /** Taking away a vision the house was never given, or has already lost. */
+    data object NoSuchVision : HouseError("this house has no such vision")
+
+    class InvalidVision(reason: String) : HouseError("not a vision: $reason")
+
     /** Not enough of a resource is free, whether because there is little or because much is pledged. */
     class NotEnoughFree(resource: Resource, wanted: Long, free: Long) :
         HouseError("this house has $free ${resource.name.lowercase()} free, not $wanted")

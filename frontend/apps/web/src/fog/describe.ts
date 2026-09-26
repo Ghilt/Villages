@@ -34,7 +34,11 @@ export function describeSight(
   }
   const lasting = points.filter((point) => lastingOn(point, today));
   const givers = lasting.map((point) =>
-    point.kind === 'seat' ? 'the seat' : (nameOf(point.of ?? '') ?? 'a key figure'),
+    point.kind === 'seat'
+      ? 'the seat'
+      : point.kind === 'keyFigure'
+        ? (nameOf(point.of ?? '') ?? 'a key figure')
+        : `the vision given at ${point.place.lat.toFixed(2)}, ${point.place.lon.toFixed(2)}`,
   );
   const radii = [...new Set(lasting.map((point) => point.radius))];
   const reach = radii.length === 1 ? `, ${radii[0]} km around ${lasting.length === 1 ? 'it' : 'each'}` : '';

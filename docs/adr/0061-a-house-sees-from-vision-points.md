@@ -2,6 +2,9 @@
 
 - Status: accepted
 - Date: 2026-09-26
+- Amended 2026-09-26: vision given outright is built, as the decision said it would be: `house.gainedVision`
+  carries the place and the size, `house.lostVision` ends it, and the size has moved into the domain as
+  `Vision.MALLORCA` because an event now carries it. See step 3 of `docs/plans/fog-of-war.md`.
 
 ## Context
 

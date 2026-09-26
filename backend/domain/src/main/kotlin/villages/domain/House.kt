@@ -31,6 +31,8 @@ sealed interface House {
          * history, never in theirs. At most nine. See decision record 0055.
          */
         val keyFigures: List<CharacterId> = emptyList(),
+        /** The visions this house was given outright and still has, in the order it was given them. */
+        val visions: List<VisionId> = emptyList(),
         /** The world-day it was founded on, and the instant that was recorded. */
         val foundedOn: WorldTime,
         val foundedAt: Instant,

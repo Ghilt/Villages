@@ -48,6 +48,19 @@ describe('what the log says about what a house sees', () => {
     );
   });
 
+  it('names a vision given outright by where it is', () => {
+    const given: VisionPointView = {
+      kind: 'given',
+      of: 'dd000000-0000-4000-8000-000000000001',
+      place: { lat: 55.68, lon: 12.57 },
+      radius: 34,
+      since: TODAY,
+    };
+    expect(describeSight([seat, given], TODAY, names)).toBe(
+      'the seat and the vision given at 55.68, 12.57 give vision, 34 km around each; 2 places seen from in all',
+    );
+  });
+
   it('says so when everything has ended', () => {
     expect(describeSight([inUppsala], TODAY, names)).toBe(
       'nothing gives vision now; 1 place seen from in all',

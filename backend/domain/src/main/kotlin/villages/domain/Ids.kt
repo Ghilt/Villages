@@ -57,6 +57,10 @@ value class CharacterId(val value: UUID) {
 @JvmInline
 value class PledgeId(val value: UUID)
 
+/** The identity of one vision given outright, so that taking it away can name which. See decision 0061. */
+@JvmInline
+value class VisionId(val value: UUID)
+
 /** The human, for now an anonymous token the browser generated. */
 @JvmInline
 value class PlayerId(val value: UUID)

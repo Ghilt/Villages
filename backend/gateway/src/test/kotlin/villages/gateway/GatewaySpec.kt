@@ -23,6 +23,7 @@ import villages.application.ResourceService
 import villages.application.Start
 import villages.application.StoredEvent
 import villages.application.TakeActionService
+import villages.application.VisionService
 import villages.application.WorldCalendar
 import villages.application.WorldClock
 import villages.application.WriteConflict
@@ -35,7 +36,9 @@ import villages.domain.HouseDecider
 import villages.domain.HouseEvent
 import villages.domain.HouseFounded
 import villages.domain.HouseGainedKeyFigure
+import villages.domain.HouseGainedVision
 import villages.domain.HouseLostKeyFigure
+import villages.domain.HouseLostVision
 import villages.domain.HouseResourceSpent
 import villages.domain.HouseResourceReleased
 import villages.domain.HouseResourcePledged
@@ -91,6 +94,8 @@ private fun typeOf(event: HouseEvent): String = when (event) {
     is HouseFounded -> "villages.house.founded.v1"
     is HouseGainedKeyFigure -> "villages.house.gainedKeyFigure.v1"
     is HouseLostKeyFigure -> "villages.house.lostKeyFigure.v1"
+    is HouseGainedVision -> "villages.house.gainedVision.v1"
+    is HouseLostVision -> "villages.house.lostVision.v1"
     is HouseResourceGranted -> "villages.house.resourceGranted.v1"
     is HouseResourcePledged -> "villages.house.resourcePledged.v1"
     is HouseResourceReleased -> "villages.house.resourceReleased.v1"
@@ -104,6 +109,8 @@ private fun dataOf(event: HouseEvent): String = when (event) {
     is HouseFounded -> """{"name":"${event.name.value}","significance":${event.significance.value}}"""
     is HouseGainedKeyFigure -> """{"characterId":"${event.characterId.value}"}"""
     is HouseLostKeyFigure -> """{"characterId":"${event.characterId.value}"}"""
+    is HouseGainedVision -> """{"visionId":"${event.visionId.value}"}"""
+    is HouseLostVision -> """{"visionId":"${event.visionId.value}"}"""
     is HouseResourceGranted -> """{"resource":"${event.resource}","amount":${event.amount}}"""
     is HouseResourcePledged -> """{"resource":"${event.resource}","amount":${event.amount}}"""
     is HouseResourceReleased -> """{"pledgeId":"${event.pledgeId.value}"}"""
@@ -274,6 +281,14 @@ private fun moving(characterId: String, lat: Double, lon: Double, commandId: Str
     """{"type":"command","commandId":"$commandId","command":{"type":"moveCharacter",""" +
         """"characterId":"$characterId","place":{"lat":$lat,"lon":$lon}}}"""
 
+private fun givingVision(lat: Double, lon: Double, commandId: String) =
+    """{"type":"command","commandId":"$commandId","command":{"type":"giveVision",""" +
+        """"place":{"lat":$lat,"lon":$lon}}}"""
+
+private fun takingVision(visionId: String, commandId: String) =
+    """{"type":"command","commandId":"$commandId","command":{"type":"takeVision",""" +
+        """"visionId":"$visionId"}}"""
+
 private fun takingOff(characterId: String, commandId: String) =
     """{"type":"command","commandId":"$commandId","command":{"type":"takeOffTheMap",""" +
         """"characterId":"$characterId"}}"""
@@ -340,6 +355,12 @@ private class Rig {
         figures = characters,
         onTheMap = characters,
         sights = sights,
+        visions = VisionService(
+            world,
+            clock = { noon },
+            world = worldClock,
+            ids = { UUID.fromString("e1000000-0000-4000-8000-%012x".format(++minted)) },
+        ),
         later = later,
     )
 
@@ -429,6 +450,33 @@ class GatewaySpec : StringSpec({
             VisionPointView("keyFigure", agnes, Point(59.86, 17.64), 34.0, since = today.day, until = today.day),
             VisionPointView("keyFigure", agnes, Point(57.64, 18.30), 34.0, since = today.day),
         )
+    }
+
+    "vision given outright is a vision point of its own, and taking it away closes it" {
+        val rig = Rig()
+        val (mine, sent) = rig.introduced()
+        mine.receive(founding())
+
+        mine.receive(givingVision(57.64, 18.30, commandNumber(1)))
+        val given = sent.filterIsInstance<YourSight>().last().points.last()
+        given.kind shouldBe "given"
+        given.place shouldBe Point(57.64, 18.30)
+        given.radius shouldBe 34.0
+        given.until shouldBe null
+
+        mine.receive(takingVision(given.of!!, commandNumber(2)))
+        sent.filterIsInstance<CommandAccepted>().map { it.commandId } shouldContain commandNumber(2)
+        sent.filterIsInstance<YourSight>().last().points.last() shouldBe given.copy(until = today.day)
+    }
+
+    "a vision the house was never given cannot be taken away" {
+        val rig = Rig()
+        val (mine, sent) = rig.introduced()
+        mine.receive(founding())
+
+        mine.receive(takingVision("dd000000-0000-4000-8000-000000000099", commandNumber(1)))
+
+        sent.filterIsInstance<CommandRejected>().single() shouldBe CommandRejected(commandNumber(1), "noSuchVision")
     }
 
     "what one house sees is told to its own player and to nobody else" {

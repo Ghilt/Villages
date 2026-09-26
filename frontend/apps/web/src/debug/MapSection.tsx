@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
+import type * as maplibregl from 'maplibre-gl';
 
 import { note } from './log';
 import { Section } from './Section';
@@ -6,8 +7,12 @@ import { chooseMaster, cutMaster, describeMaster, furnishMaster, isStale, listMa
 import type { MasterOnDisk } from '../map/masters';
 import { RENDERERS } from '../map/renderers';
 import { fogIsOn, setFogOfWar, watchFog } from '../fog/fogOfWar';
+import { lastingOn } from '../fog/describe';
+import { gatewayState, giveVision, takeVision, watchGateway } from '../net/gateway';
 
 interface MapSectionProps {
+  /** The map, so vision can be given where the camera is looking. Null until it has loaded. */
+  map: maplibregl.Map | null;
   /** The master this page is drawing. Switching to another one reloads the page. */
   master: string;
   renderer: string;
@@ -28,12 +33,17 @@ interface MapSectionProps {
  * which is half a minute and is what an edit to `world/biomes.json` needs. A master that is cut but not
  * furnished draws a bare world, and the dropdown says so. See docs/adr/0054.
  */
-export function MapSection({ master, renderer, onRenderer }: MapSectionProps) {
+export function MapSection({ map, master, renderer, onRenderer }: MapSectionProps) {
   const [masters, setMasters] = useState<MasterOnDisk[]>([]);
   const [tunedAt, setTunedAt] = useState<number | null>(null);
   const [wanted, setWanted] = useState(master);
   const [working, setWorking] = useState<false | 'cut' | 'furnish'>(false);
   const fog = useSyncExternalStore(watchFog, fogIsOn);
+  const heard = useSyncExternalStore(watchGateway, gatewayState);
+  // The visions given outright that the house still has, oldest first: each one can be taken away.
+  const given = (heard.yourSight ?? []).filter(
+    (point) => point.kind === 'given' && lastingOn(point, heard.world?.today ?? null),
+  );
 
   const refresh = useCallback(() => {
     void listMasters().then((answer) => {
@@ -164,6 +174,41 @@ export function MapSection({ master, renderer, onRenderer }: MapSectionProps) {
       >
         {fog ? 'fog of war: on' : 'fog of war: off'}
       </button>
+
+      {/*
+          Vision given outright, a real command each way. Left pressable without a house, so the refusal is
+          seen in the log rather than guessed from a greyed button. See decision record 0061.
+        */}
+      <button
+        type="button"
+        className="debug-map__cut"
+        onClick={() => {
+          if (map !== null) {
+            const centre = map.getCenter();
+            giveVision({ lat: centre.lat, lon: centre.lng });
+          }
+        }}
+        disabled={map === null || heard.connection !== 'open'}
+        title="give your house vision where the camera is looking, as far as a seat sees, until it is taken away"
+      >
+        give vision here
+      </button>
+      {given.map((point) => (
+        <div key={point.of} className="debug-map__vision">
+          <span>
+            given at {point.place.lat.toFixed(2)}, {point.place.lon.toFixed(2)}
+          </span>
+          <button
+            type="button"
+            className="debug__button"
+            onClick={() => takeVision(point)}
+            disabled={heard.connection !== 'open'}
+            title="take this vision away; what it saw stays revealed"
+          >
+            take it away
+          </button>
+        </div>
+      ))}
     </Section>
   );
 }

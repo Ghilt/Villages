@@ -239,7 +239,7 @@ export function DebugPanel({ map, worldRoot, master, renderer, onRenderer }: Deb
       <div className="debug__sections">
         {import.meta.env.DEV && <WorktreesSection />}
 
-        <MapSection master={master} renderer={renderer} onRenderer={onRenderer} />
+        <MapSection map={map} master={master} renderer={renderer} onRenderer={onRenderer} />
 
         <ScenerySection />
 

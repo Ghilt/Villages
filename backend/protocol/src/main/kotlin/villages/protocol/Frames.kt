@@ -28,9 +28,10 @@ import tools.jackson.databind.JsonNode
  * went, and two commands move one and take one off the map. Version 8 gave a character on the map the
  * birthday and the years an age is counted from, so a window on them can say how old they are. See
  * decision record 0055. Version 9 added `yourSight`, the vision points a house sees from, which the fog of
- * war is drawn from. See decision record 0061.
+ * war is drawn from. Version 10 added `giveVision` and `takeVision`, a house given vision of a place outright
+ * and having it taken away. See decision record 0061.
  */
-const val PROTOCOL_VERSION = 9
+const val PROTOCOL_VERSION = 10
 
 data class Point(val lat: Double, val lon: Double)
 
@@ -263,6 +264,8 @@ class WipeWorld : ClientFrame {
     JsonSubTypes.Type(SpendResourcePayload::class, name = "spendResource"),
     JsonSubTypes.Type(TakeActionPayload::class, name = "takeAction"),
     JsonSubTypes.Type(TakeOffTheMapPayload::class, name = "takeOffTheMap"),
+    JsonSubTypes.Type(GiveVisionPayload::class, name = "giveVision"),
+    JsonSubTypes.Type(TakeVisionPayload::class, name = "takeVision"),
 )
 sealed interface CommandPayload
 
@@ -345,6 +348,15 @@ data class KillCharacterPayload(val characterId: String, val cause: String) : Co
 data class MoveCharacterPayload(val characterId: String, val place: Point) : CommandPayload
 
 data class TakeOffTheMapPayload(val characterId: String) : CommandPayload
+
+/**
+ * Give the player's house vision of a place, outright, until it is taken away: a circle of the world's size
+ * about it. The place and nothing else; how far a house sees is the world's to say. Adam's lever. See 0061.
+ */
+data class GiveVisionPayload(val place: Point) : CommandPayload
+
+/** Take away a vision the house was given, by the id `yourSight` names it under. */
+data class TakeVisionPayload(val visionId: String) : CommandPayload
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes(
@@ -433,8 +445,8 @@ data class YourKeyFigures(val keyFigures: List<KeyFigureView>) : ServerFrame
 data class YourSight(val points: List<VisionPointView>) : ServerFrame
 
 /**
- * Somewhere the house sees from. `kind` says what gives it - `seat` or `keyFigure` - and `of` is the key
- * figure's id, absent for the seat. `radius` is how far it sees around `place`, in **kilometres** on the
+ * Somewhere the house sees from. `kind` says what gives it - `seat`, `keyFigure` or `given` - and `of` is the
+ * key figure's id or the given vision's, absent for the seat. `radius` is how far it sees around `place`, in **kilometres** on the
  * ground: how big that is on the map is worked out at the place's latitude, where Mercator draws the circle
  * round. `since` and `until` are world-days; `until` is absent while it still gives vision.
  */

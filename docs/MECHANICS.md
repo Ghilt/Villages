@@ -639,10 +639,17 @@ lifts the whole of it for that window, drawn and held back alike, and every page
 
 ### Where it stands
 
-Steps 1 and 2 of `docs/plans/fog-of-war.md` are built. The server works out every house's vision points from
+Steps 1 to 3 of `docs/plans/fog-of-war.md` are built. The server works out every house's vision points from
 its seat and its key figures on the map, and sends them to the player as `yourSight` from wire version 9, on
 arriving and whenever one opens or closes; the debug log says in one line what gives vision and how many
 places the house has seen from.
+
+**Vision can be given outright**, from wire version 10: `give vision here`, under the fog switch, gives the
+house a circle where the camera is looking, as big as a seat's, and each one given is listed there with
+`take it away` beside it. Both are real commands and both are recorded, as `house.gainedVision` and
+`house.lostVision`; the size is on the event, so a later change to how far a house sees leaves what was given
+alone. What a vision saw stays revealed once it is taken away. A vision that ends by itself after a span is
+not built.
 
 **The fog is drawn**, over the ground and everything standing on it: a dark haze over unknown ground that the
 coast and the lie of the land show through, thickening and thinning a little in patches close in; revealed
