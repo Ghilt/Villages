@@ -115,8 +115,14 @@ building is drawn front-on from that height and not as an isometric diamond, whi
 hides the difference. **The picture stands on its foot**, the lowest thing in it and the anchor both of a
 thing's forms share. It carries its own colour and is never tinted. A sprite is between twenty and about
 ninety pixels tall wherever it is drawn, so **its outline is what reads**: what tells one kind from another has to
-be its shape. The first picture has no outline and no shadow, and whether it disappears into the painted
-forest is a question for the eye. How to hand one over is `AUTHORING-THE-ART.md`; why it works this way is
+be its shape. No picture has an outline, and **no sprite carries a shadow**: a picture drawn standing on a
+plinth brings one, and it goes with the plinth, because a shadow drawn into a sprite darkens whatever it is
+drawn over and doubles where two overlap. **The scenery casts its shadows in a layer of their own**, under
+every sprite: each is its sprite's outline laid on the ground by the one light, short, to the left and a
+little towards the eye, fading and softening as it goes, over a darker pool right at the foot that stands
+the thing on the ground; where two overlap the ground takes the darker and no more. How dark is a lever in
+the Scenery section, 40 per cent where a shadow is whole to begin with; experiment 0013. Whether a sprite
+disappears into the painted forest is a question for the eye. How to hand one over is `AUTHORING-THE-ART.md`; why it works this way is
 decision record 0059.
 
 **The seam.** The join between the two **bays**, drawn as a moulding lying over it: three gold rules

@@ -32,6 +32,11 @@ export const PORTRAITS_DIR = resolve(REPO, 'world', 'portraits');
 export const SPRITES_DIR = resolve(REPO, 'world', 'sprites');
 /** Where the cut sprites go: an atlas and its frames, served statically. Output, not committed. */
 export const ART_DIR = resolve(REPO, 'frontend', 'apps', 'web', 'public', 'art');
+/**
+ * Every picture the art tool has cut, by the picture's bytes and the rules' own text, so that a save
+ * re-cuts only what was saved. A cache: delete it and the next cut is slower and otherwise the same.
+ */
+export const ART_CACHE_DIR = resolve(REPO, 'frontend', 'node_modules', '.cache', 'villages-art');
 /** The master image a human edits, and the palette strip to pick its colours from. */
 export const MASTER_DIR = resolve(REPO, 'world', 'master');
 /** Downloaded Natural Earth files. Not committed: they are raw material, not our world. */

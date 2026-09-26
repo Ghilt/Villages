@@ -6,18 +6,9 @@
   "marks/figure.png": "e29576223ed612f0908040f1dcf8a291fd9046d8bd0220129df59225c40fbd1b",
   "marks/selection-ring.png": "fe9eb5f26cb5adffa31ee9f93cc2787c643218c8742549be091516d5c17c709c",
   "scenery/acacia.png": "36707286074beb8fe7a16a11f5b36b39a941337dc3f5401ddcbfb3aea87700d5",
-  "scenery/beech.png": "d75f559dc11da56e097caf08c22e83e28c1c0f37088c77ab38120a7531f0e5ce",
-  "scenery/birch.png": "7ea2d0561df17556e938dd442e5d94a3f3e28fc9f9a6d20b691e413c16189f95",
-  "scenery/boulder.png": "ec0456293f10d6be38365c3cbfac9d3c70cd341543f995c89222c4f7f88d237d",
   "scenery/cactus.png": "32afe5a30bab257cb59c71eb8a53c6f5d725e1ad3275f1ac5d25e863eeded91f",
   "scenery/grass.png": "f060b89ae9150b7662bceae40ff847988b4b0e1ff3b02b42af754d4ba7366065",
   "scenery/heather.png": "ba5388ac54876114adb1a4074e56d9a11c0b1c6eb01a038637961e3f985fe306",
   "scenery/jungle.png": "5410aa0c68abad84cfe49bff49252d5ffbe92092361be751a348fea678033a6a",
-  "scenery/mangrove.png": "d4c62ab5fface06802fee3665fde4bd20ca478744a1894dca895e2d409556116",
-  "scenery/palm.png": "c5c57000052a9c5afa106cf65b604fc25eb1acf78d0e0df411df7a8f739de3c7",
-  "scenery/pine.png": "1fd607fe69824fabb6b077c2ab16825e423e7e0a2a3479a1ebff37f1dec70e9c",
-  "scenery/reed.png": "6335d8689c4b8ab990936bc7eec94d9f18e588274f87efdf70f5bd16bea371ab",
-  "scenery/scrub.png": "fa6ed62f679f96e09ed91d7d33eb5c6f98e4c0cd618dbb371bb69488954199b4",
-  "scenery/snag.png": "83555bef0d0202456b438c64b0364ea46f5744c6da05da721781de726904303d",
-  "scenery/spruce.png": "4e4f89825da822b7815942b9786974a4856f329773567c68eaa915f49608e914"
+  "scenery/snag.png": "83555bef0d0202456b438c64b0364ea46f5744c6da05da721781de726904303d"
 }

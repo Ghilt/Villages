@@ -158,7 +158,8 @@ What follows from that, and bites in practice:
   and per-worktree.** They are gitignored, they do not travel with a branch, and a worktree that has
   never cut them cannot serve a map. Junctioning the main checkout's tiles into the worktree is the cheap
   way to get a map up without a five-minute recut. So is `frontend/node_modules`: a fresh tree needs
-  `npm install --prefix frontend` once before anything in it runs.
+  `npm install --prefix frontend` once before anything in it runs, and again after any merge that
+  changes `frontend/package-lock.json`.
 - **Each tree serves on its own pair of ports**, a hash of its directory name, so several can run at once
   and a tree's address never moves. The main checkout keeps 5173 and 8080; a worktree's game server sits
   three thousand above its dev server, so 5548 serves the page and 8548 serves the world, and the page
@@ -259,8 +260,11 @@ part is what points npm at the frontend workspace, so running them from inside `
 Commands are added here as the increments land:
 
 - Everything, from a cold machine: `.\debug-quick-start.ps1` from the repository root, or
-  `debug-quick-start.cmd` on a double click from Explorer. It checks the tools, generates whatever part
-  of the world is missing, starts the game server and the dev server hidden with their output in
+  `debug-quick-start.cmd` on a double click from Explorer. It checks the tools, installs the packages
+  again when `package-lock.json` has changed since they were installed (stopping this checkout's dev
+  server first, because Windows will not replace a running program), generates whatever part
+  of the world is missing, cuts the sprites again (seconds when nothing is new), starts the game
+  server and the dev server hidden with their output in
   `.logs/`, waits until both ports answer, and prints the address. `-Stop` stops both, `-Logs` prints
   their tails, `-WebOnly` skips the game server, `-NoBrowser` leaves the browser alone. **A port held by
   anything that is not this checkout's current server is taken**: another tree's, or one started before
@@ -271,7 +275,9 @@ Commands are added here as the increments land:
   leaves them running. This is how
   Adam runs the program without an agent in the loop, so it stays true: a step that adds a server, a
   generated file or a prerequisite adds it there in the same commit.
-- Frontend, once: `npm install --prefix frontend`
+- Frontend, once, and again whenever `frontend/package-lock.json` changes: `npm install --prefix frontend`.
+  The quick-start does it itself when the lock is newer than `frontend/node_modules/.package-lock.json`,
+  which npm writes last on every install. See the 2026-09-26 amendment to decision record 0037.
 - The world: `npm run world:import --prefix frontend` traces the coast and the large lakes, and
   `npm run world:tile --prefix frontend` cuts the terrain into map tiles. Both read the hand-painted
   master in `world/master/` and take another as their first argument; each master's world is written to
@@ -379,15 +385,20 @@ Commands are added here as the increments land:
   see more of it). This is what a change to `world/biomes.json` is argued from.
 - Sprites: `world/sprites/` is Adam's folder, committed as the master is: `scenery/<kind>` for every
   kind in `world/biomes.json` and `marks/<name>` for every mark. Any PNG, WebP or JPEG, any size, on a
-  flat background or a transparent one. **Saving over a placeholder replaces it**, and with the dev server
-  running the picture is on the map about a second later with no reload, because the server cuts the
-  folder again whenever a picture in it is saved and tells the page. By hand that is
-  `npm run world:art --prefix frontend`, two seconds: it keys, trims, stands and shrinks every picture into
-  one atlas in `public/art/`, prints a line a sprite, and writes a contact sheet of them at the sizes they
-  are drawn to `world/painterly/art-sheet.png`. `-- --placeholders` draws a placeholder for every sprite
-  that has none and never draws over a file that is there. **No art, no scenery**, and the dev server cuts
-  it on start in a tree that has none. Only the scenery is drawn from the folder so far; the marks are
-  placeholders waiting on a decision about house colours. See `docs/AUTHORING-THE-ART.md` and `docs/adr/0059`.
+  flat background or a transparent one, or standing on a **plinth** - the block of turf and soil an image
+  model draws a thing on, which is lifted off with its paper and its shadow (`src/lift.ts`). **Saving over
+  a placeholder replaces it**, and with the dev server running the picture is on the map a few seconds
+  later with no reload, because the server cuts the folder again whenever a picture in it is saved and
+  tells the page - and only the picture that changed, because every cut is kept in
+  `frontend/node_modules/.cache/villages-art`. By hand that is `npm run world:art --prefix frontend`: it
+  keys or lifts, trims, stands and shrinks every picture into one atlas in `public/art/`, prints a line a
+  sprite, and writes a contact sheet of them at the sizes they are drawn to `world/painterly/art-sheet.png`.
+  `-- --placeholders` draws a placeholder for every sprite that has none and never draws over a file that
+  is there. **No art, no scenery**, and the dev server cuts the folder again every time it starts, as
+  the quick-start does, so a picture saved while nothing was running is not missed: a couple of seconds
+  when nothing is new, and then nothing is written and the page is not told. Only the scenery is drawn
+  from the folder so far; the marks are placeholders waiting on a decision about house colours. See
+  `docs/AUTHORING-THE-ART.md` and `docs/adr/0059`.
 - Portraits: `world/portraits/` is Adam's folder, committed as the master is. Upright PNGs, three by
   four and at least 768 wide, each named for whom it suits, `woman-01.png` or `man-01.png`; the name
   without `.png` is the key a character keeps for life. **Saving over a placeholder replaces it and

@@ -382,4 +382,186 @@ export interface ArtAtlasFile {
   height: number;
   bytes: number;
   frames: Record<string, ArtFrame>;
+  /**
+   * Each kind's shadow, in the same atlas: its outline laid on the ground, black, its foot where the
+   * sprite's foot is. Absent from an atlas cut before there were shadows. See experiment 0013.
+   */
+  shadows?: Record<string, ArtFrame>;
+}
+
+/**
+ * How a sprite's shadow lies on the ground.
+ *
+ * The light comes from the upper right (`LOOK-AND-FEEL.md`), so a shadow falls to the left and a little
+ * towards the eye: every row of the picture is laid on the ground `lean` times its height to the left of
+ * the foot and `flat` times its height below it. The farther from the foot a part of it falls the lighter
+ * and the softer it is - `fade` lighter at the far end, and softened from `soft[0]` pixels at the foot to
+ * `soft[1]` at the far end - the way a real shadow's edge blurs with its distance from what casts it.
+ *
+ * Under the thing lies a **pool**: the ground its lower half shades from every side at once, darker than
+ * the shadow and right at the foot, which is what stands a tree on the ground rather than beside its own
+ * shadow. It is `pool.width` as wide as the lower half of the picture actually is, `pool.depth` as deep as
+ * it is wide, and `pool.dark` at its darkest: solid in its middle and fading to nothing past its edge. It
+ * sits `pool.toward` of its width to the left of the foot, towards where the shadow falls, so the two
+ * run into each other.
+ *
+ * One light for every sprite, which is what makes a wood's shadows agree with each other.
+ */
+export const SHADOW = {
+  lean: 0.35,
+  flat: 0.1,
+  fade: 0.6,
+  soft: [3, 8],
+  pool: { width: 0.6, depth: 0.36, dark: 1, toward: 0.2 },
+  pad: 3,
+} as const;
+
+/** A box blur along one row, in place, `passes` times, which twice over is near enough a Gaussian. */
+function blurRow(row: Float32Array, radius: number, passes: number): void {
+  if (radius <= 0) return;
+  const copy = new Float32Array(row.length);
+  for (let pass = 0; pass < passes; pass += 1) {
+    copy.set(row);
+    let sum = 0;
+    for (let x = -radius; x <= radius; x += 1) sum += x >= 0 && x < row.length ? copy[x]! : 0;
+    for (let x = 0; x < row.length; x += 1) {
+      row[x] = sum / (2 * radius + 1);
+      const leaving = x - radius;
+      const entering = x + radius + 1;
+      sum += (entering < row.length ? copy[entering]! : 0) - (leaving >= 0 ? copy[leaving]! : 0);
+    }
+  }
+}
+
+/**
+ * A sprite's shadow: its outline laid on the ground by the one light, with a pool of shade right under
+ * it, black with the shade's alpha - and where the sprite's foot falls in it.
+ *
+ * Each row of the cast shadow is the rows of the picture at that height averaged, not sampled, so a thin
+ * trunk five rows tall still lands in the one row it flattens into rather than falling between two samples.
+ */
+export function shadowOf(image: Rgba, footX: number): { image: Rgba; footX: number; footY: number } {
+  const { width, height, data } = image;
+  const empty = { image: { width: 1, height: 1, data: new Uint8Array(4) }, footX: 0, footY: 0 };
+  const rows = Math.max(2, Math.round(height * SHADOW.flat));
+  const reach = Math.ceil(height * SHADOW.lean);
+
+  // How wide the lower part of the picture actually is: between the outermost tenths of what is in it,
+  // so that a stray leaf does not widen the pool.
+  const lower = new Float32Array(width);
+  let total = 0;
+  for (let y = Math.floor(height * 0.4); y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      const alpha = data[(y * width + x) * 4 + 3]! / 255;
+      lower[x]! += alpha;
+      total += alpha;
+    }
+  }
+  if (total === 0) return empty;
+  const tenth = (share: number): number => {
+    let seen = 0;
+    for (let x = 0; x < width; x += 1) {
+      seen += lower[x]!;
+      if (seen >= total * share) return x;
+    }
+    return width - 1;
+  };
+  const across = Math.max(3, ((tenth(0.9) - tenth(0.1) + 1) / 2) * SHADOW.pool.width);
+  const deep = Math.max(2, across * SHADOW.pool.depth);
+
+  // Room enough for all of it, trimmed at the end.
+  const margin = Math.ceil(2 * SHADOW.soft[1] + 2 * deep + SHADOW.pool.toward * across + SHADOW.pad);
+  const out = { width: width + reach + 2 * margin, height: rows + 2 * margin };
+  const originX = reach + margin;
+  const originY = margin;
+
+  // Flattened: shadow row `v` holds the picture's rows between heights v/flat and (v+1)/flat above its
+  // foot, each weighted by how much of it falls in the band.
+  const flattened = new Float32Array(rows * width);
+  for (let v = 0; v < rows; v += 1) {
+    const low = (v / rows) * height;
+    const high = ((v + 1) / rows) * height;
+    for (let row = Math.floor(low); row < Math.ceil(high); row += 1) {
+      const share = Math.min(high, row + 1) - Math.max(low, row);
+      if (share <= 0) continue;
+      const y = height - 1 - row;
+      for (let x = 0; x < width; x += 1) {
+        flattened[v * width + x]! += (share * data[(y * width + x) * 4 + 3]!) / 255 / (high - low);
+      }
+    }
+  }
+  // Leaned, faded and softened: each row slides left by `lean` times its height, and grows lighter and
+  // softer the farther it falls from the foot.
+  const shade = new Float32Array(out.width * out.height);
+  const line = new Float32Array(out.width);
+  for (let v = 0; v < rows; v += 1) {
+    const along = (v + 0.5) / rows;
+    const slide = SHADOW.lean * along * height;
+    const light = 1 - SHADOW.fade * along;
+    for (let x = 0; x < out.width; x += 1) {
+      const from = x - originX + slide;
+      const left = Math.floor(from);
+      const part = from - left;
+      const at = (column: number) => (column >= 0 && column < width ? flattened[v * width + column]! : 0);
+      line[x] = (at(left) * (1 - part) + at(left + 1) * part) * light;
+    }
+    blurRow(line, Math.round(SHADOW.soft[0] + (SHADOW.soft[1] - SHADOW.soft[0]) * along), 2);
+    shade.set(line, (originY + v) * out.width);
+  }
+  // Down the columns, the softening at the foot, so that the rows run into each other.
+  const column = new Float32Array(out.height);
+  for (let x = 0; x < out.width; x += 1) {
+    for (let y = 0; y < out.height; y += 1) column[y] = shade[y * out.width + x]!;
+    blurRow(column, SHADOW.soft[0], 2);
+    for (let y = 0; y < out.height; y += 1) shade[y * out.width + x] = column[y]!;
+  }
+  // The pool, at the foot and a little towards the shadow: the darker of it and the cast shadow wherever
+  // the two meet. Solid out to a fifth of its size, gone by a third past its edge, smoothly between.
+  const centreX = footX + originX;
+  const centreY = originY;
+  const poolX = centreX - SHADOW.pool.toward * across;
+  for (let y = 0; y < out.height; y += 1) {
+    for (let x = 0; x < out.width; x += 1) {
+      const d = Math.sqrt(((x + 0.5 - poolX) / across) ** 2 + ((y + 0.5 - centreY) / deep) ** 2);
+      if (d < 1.35) {
+        const t = Math.max(0, Math.min(1, (d - 0.2) / (1.35 - 0.2)));
+        const at = y * out.width + x;
+        shade[at] = Math.max(shade[at]!, SHADOW.pool.dark * (1 - t * t * (3 - 2 * t)));
+      }
+    }
+  }
+
+  // Trimmed to what is in it, with a little room around, so the atlas carries no empty margin.
+  let left = out.width;
+  let top = out.height;
+  let right = -1;
+  let bottom = -1;
+  for (let y = 0; y < out.height; y += 1) {
+    for (let x = 0; x < out.width; x += 1) {
+      if (shade[y * out.width + x]! >= 1 / 255) {
+        left = Math.min(left, x);
+        right = Math.max(right, x);
+        top = Math.min(top, y);
+        bottom = Math.max(bottom, y);
+      }
+    }
+  }
+  if (right < 0) return empty;
+  left = Math.max(0, left - SHADOW.pad);
+  top = Math.max(0, top - SHADOW.pad);
+  right = Math.min(out.width - 1, right + SHADOW.pad);
+  bottom = Math.min(out.height - 1, bottom + SHADOW.pad);
+  const trimmed = { width: right - left + 1, height: bottom - top + 1 };
+  const pixels = new Uint8Array(trimmed.width * trimmed.height * 4);
+  for (let y = 0; y < trimmed.height; y += 1) {
+    for (let x = 0; x < trimmed.width; x += 1) {
+      const alpha = shade[(y + top) * out.width + (x + left)]!;
+      pixels[(y * trimmed.width + x) * 4 + 3] = Math.max(0, Math.min(255, Math.round(alpha * 255)));
+    }
+  }
+  return {
+    image: { width: trimmed.width, height: trimmed.height, data: pixels },
+    footX: centreX - left,
+    footY: centreY - top,
+  };
 }

@@ -82,7 +82,16 @@ export interface SceneryTally {
 }
 
 /** What the last frame actually drew, put here by the layer so the panel has one thing to read. */
-let drawn = { particles: 0, showing: 0, cells: 0, frameGapMs: 0, worstGapMs: 0, biome: '', moving: 0 };
+let drawn = {
+  particles: 0,
+  shadows: 0,
+  showing: 0,
+  cells: 0,
+  frameGapMs: 0,
+  worstGapMs: 0,
+  biome: '',
+  moving: 0,
+};
 
 export type SceneryDrawnTally = typeof drawn & SceneryTally;
 

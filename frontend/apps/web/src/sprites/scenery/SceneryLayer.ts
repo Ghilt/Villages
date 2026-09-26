@@ -1,4 +1,4 @@
-import { ImageSource, Matrix, Particle, ParticleContainer, Rectangle, Texture } from 'pixi.js';
+import { Container, ImageSource, Matrix, Particle, ParticleContainer, Rectangle, Texture } from 'pixi.js';
 
 import { note } from '../../debug/log';
 import { WORLD_MASTER_WIDTH } from '../../map/worldStyle';
@@ -40,6 +40,13 @@ import { MOST_CUT_AT_ONCE, groupCount, groupOf, thresholdOf, wantedAt, worthDraw
  *
  * Cells come and go as the view moves over them, so panning across a boundary costs one cell and not a
  * screenful.
+ *
+ * **Every sprite casts a shadow, in a layer of their own under all of them.** A shadow is its sprite's
+ * outline laid on the ground by the one light, cut into the atlas beside it, and it is a particle of its
+ * own that comes, goes, fades and is placed with its sprite. The layer is drawn first, onto the cleared
+ * canvas, **blended by the greater** rather than laid over: where two shadows overlap the ground is as
+ * dark as the darker of them and no darker, and no shadow is ever drawn over a tree, because every tree
+ * comes after every shadow. Baked into the sprites, a shadow would do both. See experiment 0013.
  */
 
 /** How deep a ring of cells around the view to hold, so a pan finds them already cut. */
@@ -54,6 +61,8 @@ const ART = '/art/scenery';
 export interface SceneryDrawn {
   /** Particles in the container. Every one of them is showing, because the others are not made. */
   particles: number;
+  /** Their shadows: one each while shadows are drawn, none at all while they are not. */
+  shadows: number;
   showing: number;
   cells: number;
   waiting: number;
@@ -61,22 +70,36 @@ export interface SceneryDrawn {
   moving: number;
 }
 
-/** One cell's points, split by group, and whichever of them are currently drawn. */
+/** One cell's points, split by group, and whichever of them are currently drawn, and their shadows. */
 interface Held {
   points: Map<number, ScatteredPoint[]>;
   made: Map<number, Particle[]>;
+  shade: Map<number, Particle[]>;
 }
 
 export function createSceneryLayer() {
-  const container = new ParticleContainer({
-    // Only the colour moves. The positions and the sizes are in world units and never change, so the
-    // vertex buffer is written once a group rather than once a frame.
-    dynamicProperties: { position: false, vertex: false, rotation: false, uvs: false, color: true },
-  });
+  // Only the colour moves. The positions and the sizes are in world units and never change, so the
+  // vertex buffer is written once a group rather than once a frame.
+  const dynamicProperties = { position: false, vertex: false, rotation: false, uvs: false, color: true };
+  const container = new ParticleContainer({ dynamicProperties });
+  // The shadows, under every sprite and blended by the greater, so that two overlapping are no darker
+  // than one. Drawn first onto the cleared canvas, which is what makes the greater safe: there is
+  // nothing under it but the transparency the map shows through.
+  const shadowLayer = new ParticleContainer({ dynamicProperties });
+  shadowLayer.blendMode = 'max';
+  shadowLayer.visible = false;
+  const layers = new Container();
+  layers.addChild(shadowLayer, container);
   const shown = new Map<string, Held>();
   let frames: Texture[] = [];
   /** Where each kind stands in its own frame, as a fraction of it: the anchor. */
   let feet: { x: number; y: number }[] = [];
+  /** Each kind's shadow, and where the kind's foot falls in it. Empty for an atlas cut without them. */
+  let shadowFrames: Texture[] = [];
+  let shadowFeet: { x: number; y: number }[] = [];
+  /** How dark the shadows are drawn, nought to one, and whether they are made at all. */
+  let shadowStrength = 0;
+  let shadowsDrawn = false;
   let atlas: ImageSource | null = null;
   let artFile: ArtAtlasFile | null = null;
   /** Asked for and not yet here, so it is asked for once. */
@@ -161,6 +184,23 @@ export function createSceneryLayer() {
     });
     frames = cut.map((one) => one.texture);
     feet = cut.map((one) => one.foot);
+    // The shadows, in the same order and from the same atlas, when it was cut with them.
+    const shadows = file.shadows;
+    const shade = shadows === undefined ? [] : kinds.map((kind) => shadows[kind.name]);
+    if (shade.length > 0 && shade.every((frame) => frame !== undefined)) {
+      shadowFrames = shade.map(
+        (frame) =>
+          new Texture({ source, frame: new Rectangle(frame!.x, frame!.y, frame!.width, frame!.height) }),
+      );
+      shadowFeet = shade.map((frame) => ({
+        x: frame!.footX / frame!.width,
+        y: frame!.footY / frame!.height,
+      }));
+      shadowLayer.texture = shadowFrames[0]!;
+    } else {
+      shadowFrames = [];
+      shadowFeet = [];
+    }
     if (missing.length > 0) {
       note(
         'scenery',
@@ -208,6 +248,13 @@ export function createSceneryLayer() {
         (particle, index, all) => index === 0 || fartherFirst(all[index - 1]!, particle) <= 0,
       ),
       tilt: tiltKey,
+      shadows: {
+        drawn: shadowsDrawn,
+        strength: shadowStrength,
+        frames: shadowFrames.length,
+        particles: shadowLayer.particleChildren.length,
+        blend: shadowLayer.blendMode,
+      },
       first:
         firstMade === undefined
           ? null
@@ -262,6 +309,48 @@ export function createSceneryLayer() {
     cell.made.set(group, made);
     container.addParticle(...made);
     unsorted = true;
+    if (shadowsDrawn) {
+      makeShadows(cell, group, alpha);
+    }
+  }
+
+  /**
+   * A group's shadows: one a sprite, on the same foot and at the same size, since the shadow was cut from
+   * the sprite at the sprite's own pixels, and as dark as the lever says times as far in as the group is.
+   */
+  function makeShadows(cell: Held, group: number, alpha: number): void {
+    const points = cell.points.get(group);
+    if (points === undefined || points.length === 0 || cell.shade.has(group)) {
+      return;
+    }
+    const shade = points.map((point) => {
+      const texture = shadowFrames[point.kind] ?? shadowFrames[0]!;
+      const foot = shadowFeet[point.kind] ?? { x: 0.5, y: 0 };
+      const standing = frames[point.kind] ?? frames[0]!;
+      const particle = new Particle({ texture });
+      place(particle, point);
+      particle.anchorX = foot.x;
+      particle.anchorY = foot.y;
+      particle.scaleY = point.height / standing.height;
+      particle.scaleX = particle.scaleY;
+      particle.alpha = alpha * shadowStrength;
+      return particle;
+    });
+    cell.shade.set(group, shade);
+    shadowLayer.addParticle(...shade);
+    unsorted = true;
+  }
+
+  function dropShadows(cell: Held, group: number): void {
+    const shade = cell.shade.get(group);
+    if (shade === undefined) {
+      return;
+    }
+    for (const particle of shade) {
+      shadowLayer.removeParticle(particle);
+    }
+    cell.shade.delete(group);
+    unsorted = true;
   }
 
   /**
@@ -282,11 +371,16 @@ export function createSceneryLayer() {
         const points = cell.points.get(group)!;
         made.forEach((particle, index) => place(particle, points[index]!));
       }
+      for (const [group, shade] of cell.shade) {
+        const points = cell.points.get(group)!;
+        shade.forEach((particle, index) => place(particle, points[index]!));
+      }
     }
     unsorted = true;
   }
 
   function dropGroup(cell: Held, group: number): void {
+    dropShadows(cell, group);
     const made = cell.made.get(group);
     if (made === undefined) {
       return;
@@ -295,6 +389,38 @@ export function createSceneryLayer() {
       container.removeParticle(particle);
     }
     cell.made.delete(group);
+  }
+
+  /**
+   * The lever moved: shadows made for every group that is in, or taken away from all of them, or only
+   * made darker or lighter. The sprites are not touched, so turning shadows on and off never makes the
+   * wood fade out and in again.
+   */
+  function shadeTo(strength: number): void {
+    const want = strength > 0 && shadowFrames.length > 0;
+    shadowStrength = strength;
+    if (want !== shadowsDrawn) {
+      shadowsDrawn = want;
+      for (const cell of shown.values()) {
+        for (const group of [...cell.made.keys()]) {
+          if (want) {
+            makeShadows(cell, group, alphaOf[group] ?? 0);
+          } else {
+            dropShadows(cell, group);
+          }
+        }
+      }
+    } else if (want) {
+      for (const cell of shown.values()) {
+        for (const [group, shade] of cell.shade) {
+          const alpha = (alphaOf[group] ?? 0) * strength;
+          for (const particle of shade) {
+            particle.alpha = alpha;
+          }
+        }
+      }
+    }
+    shadowLayer.visible = shadowsDrawn;
   }
 
   function takeEverythingOut(): void {
@@ -308,8 +434,9 @@ export function createSceneryLayer() {
   }
 
   return {
+    /** The shadows and the sprites over them, placed as one. */
     get container() {
-      return container;
+      return layers;
     },
 
     ready(): boolean {
@@ -342,6 +469,7 @@ export function createSceneryLayer() {
       dial: number,
       spacing: number,
       laterBy: number,
+      shadows: number,
       askForAFrame: () => void,
     ): SceneryDrawn {
       // The kinds come from the master's sprite map, so nothing can be drawn until it is in hand. One
@@ -356,16 +484,19 @@ export function createSceneryLayer() {
           spacing,
           askForAFrame,
         );
-        return { particles: 0, showing: 0, cells: 0, waiting: sceneryTally().waiting, moving: 0 };
+        return { particles: 0, shadows: 0, showing: 0, cells: 0, waiting: sceneryTally().waiting, moving: 0 };
       }
       if (atlas === null || artFile === null) {
         if (!loadingArt && !noArt) {
           void loadArt(askForAFrame);
         }
-        return { particles: 0, showing: 0, cells: 0, waiting: sceneryTally().waiting, moving: 0 };
+        return { particles: 0, shadows: 0, showing: 0, cells: 0, waiting: sceneryTally().waiting, moving: 0 };
       }
       if (frames.length === 0) {
         frameKinds(map.kinds, artFile, atlas);
+      }
+      if (shadows !== shadowStrength || (shadows > 0 && shadowFrames.length > 0) !== shadowsDrawn) {
+        shadeTo(shadows);
       }
       if (alphaOf.length !== groupCount(map.kinds)) {
         alphaOf = new Float32Array(groupCount(map.kinds));
@@ -388,7 +519,9 @@ export function createSceneryLayer() {
       // The whole layer is placed by one matrix, which is what makes twenty thousand pines cost one
       // multiply rather than twenty thousand. It only scales and shifts: the turn and the tip are already
       // in every foot, and leaving them out of here is what keeps the pictures upright. See 0052 and 0008.
-      container.setFromMatrix(new Matrix(layer.scale, 0, 0, layer.scale, layer.x, layer.y));
+      const placed = new Matrix(layer.scale, 0, 0, layer.scale, layer.x, layer.y);
+      container.setFromMatrix(placed);
+      shadowLayer.setFromMatrix(placed);
       // Which biome the camera is over, for the panel. One array read a frame, and it is the one reading
       // that turns "the world looks different over there" into a name Adam can argue with.
       noteDrawn({
@@ -423,7 +556,7 @@ export function createSceneryLayer() {
         if (shown.size > 0) {
           takeEverythingOut();
         }
-        return { particles: 0, showing: 0, cells: 0, waiting: sceneryTally().waiting, moving: 0 };
+        return { particles: 0, shadows: 0, showing: 0, cells: 0, waiting: sceneryTally().waiting, moving: 0 };
       }
 
       // Pass one: the clock. A frame is never allowed to be a long step, or a fade that begins after a
@@ -469,7 +602,7 @@ export function createSceneryLayer() {
               continue;
             }
             cutting += 1;
-            cell = { points: splitByGroup(points), made: new Map() };
+            cell = { points: splitByGroup(points), made: new Map(), shade: new Map() };
             shown.set(key, cell);
           }
           for (const group of cell.points.keys()) {
@@ -505,6 +638,9 @@ export function createSceneryLayer() {
           for (const particle of made) {
             particle.alpha = alpha;
           }
+          for (const particle of cell.shade.get(group) ?? []) {
+            particle.alpha = alpha * shadowStrength;
+          }
         }
       }
 
@@ -514,16 +650,29 @@ export function createSceneryLayer() {
       if (unsorted) {
         container.particleChildren.sort(fartherFirst);
         container.update();
+        // The shadows are never sorted: the greater of two is the same whichever comes first.
+        shadowLayer.update();
         unsorted = false;
       }
 
       let particles = 0;
+      let shade = 0;
       for (const cell of shown.values()) {
         for (const made of cell.made.values()) {
           particles += made.length;
         }
+        for (const cast of cell.shade.values()) {
+          shade += cast.length;
+        }
       }
-      return { particles, showing: particles, cells: shown.size, waiting: sceneryTally().waiting, moving };
+      return {
+        particles,
+        shadows: shade,
+        showing: particles,
+        cells: shown.size,
+        waiting: sceneryTally().waiting,
+        moving,
+      };
     },
 
     /** Everything drawn is taken out, for a change that makes every cell wrong. */
@@ -532,7 +681,7 @@ export function createSceneryLayer() {
     },
 
     destroy(): void {
-      container.destroy();
+      layers.destroy({ children: true });
       atlas?.destroy();
       atlas = null;
       frames = [];

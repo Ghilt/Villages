@@ -23,9 +23,14 @@ export interface ScenerySettings {
    * was before experiment 0012, where two trees could land on the same spot.
    */
   spacing: number;
+  /**
+   * How dark the scenery's shadows are, nought to one: nought draws none, and costs nothing. Each is its
+   * sprite's outline laid on the ground, all of them in one layer under the trees. Experiment 0013.
+   */
+  shadows: number;
 }
 
-const START: ScenerySettings = { on: true, dial: 1, laterBy: 0, spacing: 1 };
+const START: ScenerySettings = { on: true, dial: 1, laterBy: 0, spacing: 1, shadows: 0.4 };
 
 let settings: ScenerySettings = { ...START };
 const listeners = new Set<() => void>();
@@ -47,7 +52,8 @@ export function setScenery(change: Partial<ScenerySettings>): void {
     next.on === settings.on &&
     next.dial === settings.dial &&
     next.laterBy === settings.laterBy &&
-    next.spacing === settings.spacing
+    next.spacing === settings.spacing &&
+    next.shadows === settings.shadows
   ) {
     return;
   }
@@ -70,6 +76,14 @@ export function setScenery(change: Partial<ScenerySettings>): void {
         : next.spacing === 1
           ? 'spaced as world/biomes.json says'
           : `spaced ${next.spacing} times as far apart as world/biomes.json says`,
+    );
+  }
+  if (next.shadows !== settings.shadows) {
+    note(
+      'scenery',
+      next.shadows === 0
+        ? 'no shadows: the trees stand on bare ground'
+        : `shadows at ${Math.round(next.shadows * 100)} per cent, in one layer under the trees`,
     );
   }
   if (next.laterBy !== settings.laterBy) {

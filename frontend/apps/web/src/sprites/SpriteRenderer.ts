@@ -93,6 +93,8 @@ export interface SceneryHow {
   spacing: number;
   /** How much later than its natural zoom each kind arrives, in zoom levels. */
   laterBy: number;
+  /** How dark the scenery's shadows are, nought to one. Nought draws none at all. See experiment 0013. */
+  shadows: number;
   /** Where this page's flat tiles live, which is what the terrain is read from. */
   tilesRoot: string;
 }
