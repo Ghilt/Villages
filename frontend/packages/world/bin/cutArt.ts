@@ -29,7 +29,16 @@ import { extname, resolve } from 'node:path';
 
 import sharp from 'sharp';
 
-import { backgroundOf, crop, footOf, hasOwnAlpha, keyOut, opaqueBox, packShelves } from '../src/art.ts';
+import {
+  backgroundOf,
+  crop,
+  footOf,
+  hasOwnAlpha,
+  keyOut,
+  opaqueBox,
+  packShelves,
+  shadowOf,
+} from '../src/art.ts';
 import type { ArtAtlasFile, ArtFrame, Rgba } from '../src/art.ts';
 import type { BiomeFile } from '../src/biome.ts';
 import { findPlinth, liftOffPlinth } from '../src/lift.ts';
@@ -371,7 +380,20 @@ async function cutScenery(): Promise<void> {
     console.log(cut.said);
   }
 
-  const packed = packShelves(cuts, PAD, WIDEST);
+  // Every sprite's shadow too, from the cut sprite itself, into the same atlas: a particle layer draws
+  // from one texture, and the shadows are a particle layer of their own. See experiment 0013.
+  const shadows = cuts.map((cut) =>
+    shadowOf({ width: cut.width, height: cut.height, data: new Uint8Array(cut.pixels) }, cut.footX),
+  );
+  const pieces = [
+    ...cuts.map((cut) => ({ width: cut.width, height: cut.height, pixels: cut.pixels })),
+    ...shadows.map((shadow) => ({
+      width: shadow.image.width,
+      height: shadow.image.height,
+      pixels: Buffer.from(shadow.image.data),
+    })),
+  ];
+  const packed = packShelves(pieces, PAD, WIDEST);
   const atlas = await sharp({
     create: {
       width: packed.width,
@@ -381,9 +403,9 @@ async function cutScenery(): Promise<void> {
     },
   })
     .composite(
-      cuts.map((cut, index) => ({
-        input: cut.pixels,
-        raw: { width: cut.width, height: cut.height, channels: 4 as const },
+      pieces.map((piece, index) => ({
+        input: piece.pixels,
+        raw: { width: piece.width, height: piece.height, channels: 4 as const },
         left: packed.placed[index]!.x,
         top: packed.placed[index]!.y,
       })),
@@ -392,6 +414,7 @@ async function cutScenery(): Promise<void> {
     .toBuffer();
 
   const frames: Record<string, ArtFrame> = {};
+  const shadowFrames: Record<string, ArtFrame> = {};
   for (const [index, cut] of cuts.entries()) {
     frames[cut.name] = {
       x: packed.placed[index]!.x,
@@ -403,6 +426,18 @@ async function cutScenery(): Promise<void> {
       placeholder: cut.placeholder,
       source: cut.file,
     };
+    const shadow = shadows[index]!;
+    const at = packed.placed[cuts.length + index]!;
+    shadowFrames[cut.name] = {
+      x: at.x,
+      y: at.y,
+      width: shadow.image.width,
+      height: shadow.image.height,
+      footX: Math.round(shadow.footX * 100) / 100,
+      footY: shadow.footY,
+      placeholder: cut.placeholder,
+      source: cut.file,
+    };
   }
   const file: ArtAtlasFile = {
     version: hashOf(atlas).slice(0, 12),
@@ -411,6 +446,7 @@ async function cutScenery(): Promise<void> {
     height: packed.height,
     bytes: atlas.length,
     frames,
+    shadows: shadowFrames,
   };
   mkdirSync(ART_DIR, { recursive: true });
   writeFileSync(resolve(ART_DIR, 'scenery.webp'), atlas);

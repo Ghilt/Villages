@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { backgroundOf, footOf, keyOut, opaqueBox, packShelves } from './art.ts';
+import { SHADOW, backgroundOf, footOf, keyOut, opaqueBox, packShelves, shadowOf } from './art.ts';
 import type { Rgba } from './art.ts';
 
 const PAPER = [252, 252, 249] as const;
@@ -130,5 +130,102 @@ describe('packing the atlas', () => {
       }
     }
     expect(width).toBeLessThanOrEqual(512);
+  });
+});
+
+describe("a sprite's shadow, laid on the ground by the one light", () => {
+  /** An upright block on nothing, `wide` pixels across and the picture's full height, its foot at x = 100. */
+  function block(wide: number, height: number): Rgba {
+    const width = 200;
+    const data = new Uint8Array(width * height * 4);
+    for (let y = 0; y < height; y += 1) {
+      for (let x = 100 - wide / 2; x < 100 + wide / 2; x += 1) {
+        data[(y * width + x) * 4 + 3] = 255;
+      }
+    }
+    return { width, height, data };
+  }
+
+  /** One row of a shadow: where it is centred, how widely it spreads, and its darkest pixel. */
+  function rowOf(image: Rgba, row: number): { centre: number; spread: number; darkest: number } {
+    let weight = 0;
+    let sum = 0;
+    let squares = 0;
+    let darkest = 0;
+    for (let x = 0; x < image.width; x += 1) {
+      const alpha = image.data[(row * image.width + x) * 4 + 3]!;
+      weight += alpha;
+      sum += alpha * (x + 0.5);
+      squares += alpha * (x + 0.5) ** 2;
+      darkest = Math.max(darkest, alpha);
+    }
+    const centre = sum / weight;
+    return { centre, spread: Math.sqrt(squares / weight - centre * centre), darkest };
+  }
+
+  it('lies to the left of the foot and a little towards the eye, the higher the part the farther', () => {
+    // A trunk: thin, so that its pool is small and what is left is the shadow it casts.
+    const height = 200;
+    const shadow = shadowOf(block(4, height), 100);
+    const rows = Math.round(height * SHADOW.flat);
+    const slid = (v: number) => SHADOW.lean * ((v + 0.5) / rows) * height;
+    // Clear of the pool at the foot - which the softening down the columns carries a few rows out - and
+    // of the softening at the far end, every row of it is where the light puts that height of the trunk:
+    // to within the lean of half a row, because that softening mixes each row with its neighbours, and
+    // the nearer ones, being darker, pull the mix a third of a row towards the foot.
+    const halfARow = (SHADOW.lean * height) / rows / 2;
+    for (let v = 2 * SHADOW.soft[0] + 2; v < rows - 2 * SHADOW.soft[0]; v += 1) {
+      const { centre } = rowOf(shadow.image, shadow.footY + v);
+      expect(Math.abs(centre - (shadow.footX - slid(v))), `row ${v}`).toBeLessThan(halfARow);
+    }
+    // And from end to end it runs left: the higher the part, the farther its shadow.
+    for (let v = 2 * SHADOW.soft[0] + 3; v < rows - 2 * SHADOW.soft[0]; v += 1) {
+      expect(rowOf(shadow.image, shadow.footY + v).centre).toBeLessThan(
+        rowOf(shadow.image, shadow.footY + v - 1).centre,
+      );
+    }
+  });
+
+  it('grows lighter and softer the farther it falls from the foot', () => {
+    const height = 200;
+    const shadow = shadowOf(block(4, height), 100);
+    const rows = Math.round(height * SHADOW.flat);
+    const near = rowOf(shadow.image, shadow.footY + 2 * SHADOW.soft[0]);
+    const far = rowOf(shadow.image, shadow.footY + rows - 2 * SHADOW.soft[0] - 1);
+    expect(far.darkest).toBeLessThan(near.darkest);
+    expect(far.spread).toBeGreaterThan(near.spread);
+  });
+
+  it('pools darkest right under the foot, a little towards the shadow, and is black', () => {
+    // A bush: wide, so the pool under it is broad.
+    const shadow = shadowOf(block(60, 100), 100);
+    let darkest = 0;
+    let at = { x: 0, y: 0 };
+    for (let y = 0; y < shadow.image.height; y += 1) {
+      for (let x = 0; x < shadow.image.width; x += 1) {
+        const alpha = shadow.image.data[(y * shadow.image.width + x) * 4 + 3]!;
+        if (alpha > darkest) {
+          darkest = alpha;
+          at = { x: x + 0.5, y: y + 0.5 };
+        }
+      }
+    }
+    expect(darkest).toBeGreaterThanOrEqual(Math.floor(250 * SHADOW.pool.dark));
+    // The middle of the pool: the foot, moved `toward` of the pool's half-width to the left.
+    const across = (60 / 2) * SHADOW.pool.width;
+    expect(Math.abs(at.y - shadow.footY)).toBeLessThanOrEqual(1.5);
+    expect(Math.abs(at.x - (shadow.footX - SHADOW.pool.toward * across))).toBeLessThanOrEqual(across * 0.25);
+    // A shadow darkens; it never colours.
+    for (let i = 0; i < shadow.image.width * shadow.image.height; i += 1) {
+      expect(shadow.image.data[i * 4]! + shadow.image.data[i * 4 + 1]! + shadow.image.data[i * 4 + 2]!).toBe(
+        0,
+      );
+    }
+  });
+
+  it('is nothing at all for a picture with nothing in it', () => {
+    const empty = { width: 40, height: 60, data: new Uint8Array(40 * 60 * 4) };
+    const shadow = shadowOf(empty, 20);
+    expect(shadow.image.data.some((value) => value !== 0)).toBe(false);
   });
 });

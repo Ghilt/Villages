@@ -26,6 +26,9 @@ const DIALS = [0, 0.25, 0.5, 0.75, 1, 1.5, 2, 3];
 /** What the spacing steps through, as a multiple of every kind's `apart`. Nought is the old scatter. */
 const SPACINGS = [0, 0.5, 1, 1.5, 2, 3];
 
+/** How dark the shadows can be set: nought draws none, one is black where a shadow is whole. */
+const SHADOWS = [0, 0.15, 0.25, 0.4, 0.55, 0.7];
+
 function useDrawn(): SceneryDrawnTally {
   const [drawn, setDrawn] = useState(sceneryDrawn);
   useEffect(() => {
@@ -51,6 +54,7 @@ export function ScenerySection() {
   const map = useSpriteMap();
   const step = Math.max(0, DIALS.indexOf(how.dial));
   const spaced = Math.max(0, SPACINGS.indexOf(how.spacing));
+  const shaded = Math.max(0, SHADOWS.indexOf(how.shadows));
 
   const tools = (
     <button
@@ -137,6 +141,25 @@ export function ScenerySection() {
             : `${how.spacing} times each kind’s apart`}
       </p>
 
+      <label className="debug-map__label" htmlFor="scenery-shadows">
+        How dark their shadows
+      </label>
+      <input
+        id="scenery-shadows"
+        className="debug__slider"
+        type="range"
+        min={0}
+        max={SHADOWS.length - 1}
+        step={1}
+        value={shaded}
+        onChange={(event) => setScenery({ shadows: SHADOWS[Number(event.target.value)] ?? 0 })}
+      />
+      <p className="debug-map__note">
+        {how.shadows === 0
+          ? 'No shadows, and none of their cost: the trees stand on bare ground'
+          : `${Math.round(how.shadows * 100)} per cent where a shadow is whole, in one layer under every tree, so two overlapping are no darker than one`}
+      </p>
+
       <label className="debug-map__label" htmlFor="scenery-later">
         How far in before it arrives
       </label>
@@ -161,6 +184,7 @@ export function ScenerySection() {
           <dt>drawn</dt>
           <dd>
             {drawn.particles.toLocaleString()} particles
+            {drawn.shadows > 0 && ` and ${drawn.shadows.toLocaleString()} shadows`}
             {drawn.moving > 0 ? `, ${drawn.moving} groups still arriving` : ', settled'}
           </dd>
         </div>

@@ -60,8 +60,9 @@ that instead. A picture with its own transparency is never keyed or lifted.
   a trunk and its roots should be the lowest thing in the picture. Nothing should hang below them, such as
   a shadow that would move the foot sideways.
 - **No shadow of its own**, or one the tool takes away with the plinth. A shadow drawn into a sprite is
-  drawn with it, over whatever is already there, and where two overlap they are twice as dark. A shadow
-  that works on the map is a layer of its own, under every sprite, not part of any picture.
+  drawn with it, over whatever is already there, and where two overlap they are twice as dark. The tool
+  makes every sprite's shadow itself, from its outline, and the map draws all of them in one layer under
+  the sprites (experiment 0013).
 - **As big as it should look** is `groundHeight` in `world/biomes.json`, in world units, and not the size
   of the picture: every picture is shrunk to the same height. A change there wants the sprite map worked
   out again, `npm run world:sprites --prefix frontend`.
@@ -84,7 +85,8 @@ The dev server runs this by itself when a picture is saved. It does five things:
 3. Finds the foot.
 4. Shrinks it to 192 pixels tall.
 5. Packs every scenery sprite into one atlas, `frontend/apps/web/public/art/scenery.webp`, with
-   `scenery.json` beside it listing each frame, its foot and whether it is still a placeholder.
+   `scenery.json` beside it listing each frame, its foot and whether it is still a placeholder - and each
+   sprite's shadow beside it, cut from its outline by `shadowOf` in `packages/world/src/art.ts`.
 
 It prints one line for each sprite, saying which of the three it did:
 

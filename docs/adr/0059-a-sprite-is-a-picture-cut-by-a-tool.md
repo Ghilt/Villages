@@ -102,7 +102,7 @@ onto the paper, a block's height lower and merged with the block's own shadow, s
 shadow its thing would cast on flat ground. And a shadow in a sprite is drawn with the sprite, farthest
 first, over whatever was drawn before it, and where two overlap they are twice as dark: a wood would carry
 blotches. A shadow that works is a layer of its own, drawn from each sprite's outline under every sprite at
-once. That is a step of its own, offered rather than built.
+once. That is a step of its own, offered rather than built, and built the same day as experiment 0013.
 
 **What it cannot tell apart, it leaves.** A stone right under a foot, or a patch of mud between two roots,
 is the colour of the thing standing in it and stays. None of it shows at the sizes the map draws. A
