@@ -44,10 +44,11 @@ A player's own house and own key figures are always theirs to see: every one of 
 1. **The server works out the fog.** Done. `SightProjection` folds every house's vision points from the feed;
    the gateway sends them to the player as `yourSight` on hello and on every change; the debug log says what
    gives vision. Wire version 9.
-2. **The fog is drawn.** A see-through layer over the map and the sprites, drawn from `yourSight` in the same
-   camera the sprites use: a dark haze over unknown ground, a faded wash over revealed ground, nothing over
-   vision. The switch in the Debug map section, in words, starting on at every load; off here only stops the
-   drawing, because nothing is held back yet.
+2. **The fog is drawn.** Done. A canvas of its own over the map and the sprites, drawn from `yourSight`
+   through the sprites' own projection backwards: a dark haze over unknown ground, grey at half strength
+   over revealed ground, nothing over vision, all read off a distance field worked out once for each change
+   to the vision points. The switch is in the Debug map section, in words, on at every load; off only stops
+   the drawing, because nothing is held back yet. Decision record 0062.
 3. **Vision given outright.** A debug button that gives vision where the camera is looking and one that takes
    it away, each a real command, recorded as events of their own on the house's stream with the place, the
    circle and the span. Which section they go in, and whether they are words, is asked before they are drawn.

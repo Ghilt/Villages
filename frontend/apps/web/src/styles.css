@@ -204,6 +204,17 @@ body,
   pointer-events: none;
 }
 
+/* The fog of war lies over the map and the sprites alike, and never intercepts a drag either. See 0061. */
+.fog {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.fog canvas {
+  display: block;
+}
+
 /*
  * The interface floats over the world and never steals a drag from it.
  *
@@ -1538,6 +1549,27 @@ body,
 .debug-map__cut:disabled {
   cursor: progress;
   color: var(--ink-soft);
+}
+
+/* A switch in the section, in words: the fog of war. The same button, gold while it is on. */
+.debug-map__switch {
+  font: inherit;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.4rem;
+  cursor: pointer;
+  color: var(--ink);
+  background: #fbf7ec;
+  border: 1px solid var(--parchment-edge);
+  border-radius: 2px;
+}
+
+.debug-map__switch:hover {
+  background: rgba(157, 124, 42, 0.12);
+}
+
+.debug-map__switch--on {
+  background: rgba(157, 124, 42, 0.28);
+  border-color: var(--gold);
 }
 
 /*

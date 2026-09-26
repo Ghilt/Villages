@@ -36,8 +36,8 @@ after them wait on the same thing. Fog of war, the exception, is under way a ste
   Step twenty, looking at an earlier day, is optional and not built.
 - **Fog of war**: a house sees the map at three levels - vision, revealed, unknown - from vision points, each a
   place, a circle and a span, and the server keeps back what a house cannot see. The shape is decision record
-  0061 and the steps, one commit each, are in `docs/plans/fog-of-war.md`; step 1, the server working out every
-  house's sight and sending it to the player, is built. Adam's own mechanic, asked for on 2026-09-26.
+  0061 and the steps, one commit each, are in `docs/plans/fog-of-war.md`; the server working out every house's
+  sight and the fog drawn from it are built. Adam's own mechanic, asked for on 2026-09-26.
 - **0.4** Local infrastructure: MongoDB replica set and RabbitMQ in Compose
 - **0.8** Testcontainers smoke test on MongoDB and RabbitMQ
 - **1.6** The bridge from the store to the broker

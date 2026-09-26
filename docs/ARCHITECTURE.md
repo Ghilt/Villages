@@ -167,6 +167,12 @@ gateway will ask the same sight before it sends a snapshot or a delta, so what i
 cannot disagree. A vision point's size is kilometres on the ground; how big that is on the map is worked out
 where it is drawn. See decision record 0061, and `docs/plans/fog-of-war.md` for what is built.
 
+**The fog is a third canvas**, over MapLibre's and Pixi's, in `apps/web/src/fog/`. It draws when the map has
+drawn, as the sprites do, and asks the sprites' projection in `cameraMath.ts` backwards for the ground under
+each pixel; what it reads there is a distance field of the vision points, worked out in the browser once for
+each change to them and handed to the graphics card as one small texture. Nothing about the fog is worked out
+while the camera moves except that one pass. See decision record 0062.
+
 ## What acts on its own
 
 Two things in the program act without anybody sending a command, and they keep the same rules: one

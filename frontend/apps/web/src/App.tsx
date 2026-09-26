@@ -20,6 +20,7 @@ import { subjectOfPane } from './inspect/subjects';
 import { gateway, gatewayState, watchGateway } from './net/gateway';
 import { followMap } from './net/followMap';
 import { eyeIsOpen, watchEye } from './house/eye';
+import { FogOverlay } from './fog/FogOverlay';
 import { HouseStatus } from './house/HouseStatus';
 import { KeyFigures } from './figures/KeyFigures';
 import { HoldingOverlay } from './areas/HoldingOverlay';
@@ -276,6 +277,9 @@ export function App({ master }: AppProps) {
                   <Desk map={map} />
                   <MapView worldRoot={worldRoot} onReady={setMap} />
                   {map !== null && <SpriteOverlay map={map} sprites={sprites} worldRoot={worldRoot} />}
+                  {/* Over the sprites as well as the ground, so what stands in unknown ground is under the
+                      haze too. See decision record 0061. */}
+                  {map !== null && <FogOverlay map={map} />}
                 </Room>
                 <AreaOverlay map={map} worldRoot={worldRoot} />
                 <HoldingOverlay map={map} houses={drawn} mine={eye ? yours : null} />

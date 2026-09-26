@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 
 import { note } from './log';
 import { Section } from './Section';
 import { chooseMaster, cutMaster, describeMaster, furnishMaster, isStale, listMasters } from '../map/masters';
 import type { MasterOnDisk } from '../map/masters';
 import { RENDERERS } from '../map/renderers';
+import { fogIsOn, setFogOfWar, watchFog } from '../fog/fogOfWar';
 
 interface MapSectionProps {
   /** The master this page is drawing. Switching to another one reloads the page. */
@@ -32,6 +33,7 @@ export function MapSection({ master, renderer, onRenderer }: MapSectionProps) {
   const [tunedAt, setTunedAt] = useState<number | null>(null);
   const [wanted, setWanted] = useState(master);
   const [working, setWorking] = useState<false | 'cut' | 'furnish'>(false);
+  const fog = useSyncExternalStore(watchFog, fogIsOn);
 
   const refresh = useCallback(() => {
     void listMasters().then((answer) => {
@@ -148,6 +150,20 @@ export function MapSection({ master, renderer, onRenderer }: MapSectionProps) {
         ))}
       </select>
       {rendererChoice !== undefined && <p className="debug-map__note">{rendererChoice.note}</p>}
+
+      {/*
+          Adam's switch for the fog of war, in words, as he asked. On at every load; off, nothing is drawn
+          over the map in this window. See decision record 0061.
+        */}
+      <button
+        type="button"
+        className={fog ? 'debug-map__switch debug-map__switch--on' : 'debug-map__switch'}
+        onClick={() => setFogOfWar(!fog)}
+        aria-pressed={fog}
+        title="draw the fog of war over what your house cannot see, or lift it in this window"
+      >
+        {fog ? 'fog of war: on' : 'fog of war: off'}
+      </button>
     </Section>
   );
 }
