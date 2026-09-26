@@ -54,9 +54,10 @@ crown leans.
   it. It is output and per-worktree, like the tiles. Lossy compression would save little at this size and
   put halos on the edges.
 - **The art carries its own colour.** Nothing tints a picture any more; only the fade's alpha moves.
-- **The dev server keeps it cut.** It cuts whenever a picture in the folder is saved, and on start if the
-  tree has never been cut. It tells the page, which lets go of the old atlas and gathers again from the
-  new one, so a picture saved over a placeholder is on the map without a reload. The cut says who drew
+- **The dev server keeps it cut.** It cuts whenever a picture in the folder is saved, and every time it
+  starts (amended below: it was only a tree that had never been cut). When the atlas changed it tells the
+  page, which lets go of the old atlas and gathers again from the new one, so a picture saved over a
+  placeholder is on the map without a reload. The cut says who drew
   what in the dev server's own output; the **Debug panel** says nothing about a cut that worked, only
   about one that did not. Adam asked for that on first sight: a line a cut was noise in the log.
 - **No art, no scenery**, the same rule as a master with no sprite map. The log says which command to run.
@@ -116,6 +117,21 @@ in `frontend/node_modules/.cache/villages-art`, and only what changed is cut aga
 **A placeholder's record goes with it.** Saving a JPEG over a PNG placeholder means deleting the PNG, and its
 line in `world/sprites/placeholders.json` outlived it and failed the folder's own test. The cut forgets it,
 and a placeholder a picture was saved over, and says so.
+
+### Amended 2026-09-26: the art is cut at every start
+
+Adam found his own pictures in `world/sprites/scenery` rather than the cut ones, and asked whether the cut
+happens only once. It happened on every save, and at start only in a tree that had never been cut: an
+atlas that was there was never looked at again, so a picture saved while nothing was running, or a rule a
+merge changed - the shadows were one - stayed off the map until the next save or a cut by hand.
+
+So the dev server and the quick start both cut the folder every time they start. It is a couple of
+seconds when nothing is new, because every cut is kept. A cut whose atlas is the one already there writes
+nothing, and the dev server tells the page only about a cut that changed the atlas: the page lets go of
+every tree when it is told, and the watcher hears more than saves - at 15:46 that day it cut for a
+picture that had only been read - so each start, and each of those, would have been a blink of the whole
+map for nothing. The cut's last line ends with what came of it, `nothing new` or which sprites were newly
+cut, and that is the line the quick start shows.
 
 ## Consequences
 

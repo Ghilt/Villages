@@ -18,8 +18,10 @@
 **Save your picture over the placeholder**, as `oak.webp` or `oak.png` or `oak.jpg`. Delete the placeholder if
 the extension differs, because two files that are both `oak` are refused; the placeholder's record goes with
 it by itself. With the dev server running, the picture is on the map a few seconds later, with no reload:
-a picture already cut is never cut again, so a save costs only the picture that was saved. The dev server's
-own output says what it cut; the debug log only speaks up when a cut fails.
+a picture already cut is never cut again, so a save costs only the picture that was saved. A picture saved
+while nothing was running is cut when the dev server or the quick-start next starts, because both cut the
+folder every time they start. The dev server's own output says what it cut; the debug log only speaks up
+when a cut fails.
 
 To have a placeholder back, delete your picture and run:
 
@@ -77,7 +79,7 @@ disappears into the forest it stands in.
 
     npm run world:art --prefix frontend
 
-The dev server runs this by itself when a picture is saved. It does five things:
+The dev server runs this by itself when a picture is saved and every time it starts. It does five things:
 
 1. Takes a flat background away - or, for a picture standing on a plinth, lifts the thing off it, which is
    `packages/world/src/lift.ts`.
@@ -98,5 +100,7 @@ the picture's own bytes and the rules' own text, in `frontend/node_modules/.cach
 picture that changed, or a rule that changed, is cut again. Lifting a picture takes about a second; the
 cache is what keeps a save quick. Delete it and the next cut is slower and otherwise the same.
 
-The atlas is output: it is not committed, and every tree cuts its own, on the dev server's first start if
-nothing else.
+The atlas is output: it is not committed, and every tree cuts its own. The last line a cut prints ends with
+what came of it: `nothing new` when the atlas it made is the one already there, in which case nothing is
+written and the page is not told, and otherwise which sprites were newly cut. That is what makes a cut at
+every start cheap enough to do.

@@ -1,17 +1,20 @@
 import { spawn } from 'node:child_process';
-import { existsSync, watch } from 'node:fs';
+import { existsSync, readFileSync, watch } from 'node:fs';
 import { dirname, extname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import type { Plugin, ViteDevServer } from 'vite';
 
 /**
- * The dev server keeps the art cut: whenever a picture in `world/sprites/` is saved, it runs
- * `npm run world:art` again and tells the page, which lets go of the old atlas and draws the new one.
+ * The dev server keeps the art cut: whenever a picture in `world/sprites/` is saved, and every time the
+ * server starts, it runs `npm run world:art` again, and when that changed the atlas it tells the page,
+ * which lets go of the old atlas and draws the new one.
  *
  * So the loop for a sprite is the portraits' loop without the reload: save a picture over a
- * placeholder, look at the map. And a tree that has never been cut is cut when the server starts, so a
- * fresh worktree draws scenery without anybody having to remember a command.
+ * placeholder, look at the map. Cutting at every start, rather than only in a tree that has never been
+ * cut, is what puts a picture saved while nothing was running on the map, and a rule a merge changed:
+ * an atlas that was there used to be drawn as it was until the next save. It costs a couple of seconds
+ * when nothing is new, because every cut is kept, and then nothing is written and the page hears nothing.
  *
  * Development only, like `worldApi.ts`. See decision record 0059.
  */
@@ -59,35 +62,59 @@ function cut(server: ViteDevServer, why: string): Promise<boolean> {
   });
 }
 
+/** The atlas's frames as they stand on disk, or nothing in a tree that has never been cut. */
+function atlasNow(): string | null {
+  return existsSync(ATLAS) ? readFileSync(ATLAS, 'utf8') : null;
+}
+
+/**
+ * Cuts one at a time, and tells the page only about a cut that changed the atlas.
+ *
+ * Pictures saved while a cut is running are cut once more when it is done, however many there were. A
+ * cut that found nothing new says nothing, because the page lets go of every tree and gathers them all
+ * again when it is told: for the atlas it already has, that is a blink of the whole map for nothing, and
+ * every start of the server would be one.
+ */
+export function oneCutAtATime(
+  cutTheFolder: (why: string) => Promise<boolean>,
+  atlas: () => string | null,
+  tellThePage: () => void,
+): (why: string) => Promise<void> {
+  let running = false;
+  let again = false;
+  const cutAndSay = async (why: string): Promise<void> => {
+    if (running) {
+      again = true;
+      return;
+    }
+    running = true;
+    const before = atlas();
+    const done = await cutTheFolder(why);
+    running = false;
+    if (done && atlas() !== before) {
+      tellThePage();
+    }
+    if (again) {
+      again = false;
+      await cutAndSay('saved again while cutting');
+    }
+  };
+  return cutAndSay;
+}
+
 export function artApi(): Plugin {
   return {
     name: 'villages:art',
     apply: 'serve',
     configureServer(server) {
       let waiting: ReturnType<typeof setTimeout> | null = null;
-      let running = false;
-      let again = false;
+      const cutAndSay = oneCutAtATime(
+        (why) => cut(server, why),
+        atlasNow,
+        () => server.ws.send({ type: 'custom', event: ART_CUT }),
+      );
 
-      const cutAndSay = async (why: string): Promise<void> => {
-        if (running) {
-          again = true;
-          return;
-        }
-        running = true;
-        const done = await cut(server, why);
-        running = false;
-        if (done) {
-          server.ws.send({ type: 'custom', event: ART_CUT });
-        }
-        if (again) {
-          again = false;
-          void cutAndSay('saved again while cutting');
-        }
-      };
-
-      if (!existsSync(ATLAS)) {
-        void cutAndSay('no art cut in this tree yet');
-      }
+      void cutAndSay(existsSync(ATLAS) ? 'the server started' : 'no art cut in this tree yet');
       if (!existsSync(SPRITES_DIR)) {
         return;
       }

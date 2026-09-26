@@ -12,7 +12,8 @@
  *
  * `--placeholders` first draws a placeholder for every sprite that has no picture, and **never draws over
  * a file that is there**: delete one to have its placeholder back. The dev server runs this by itself
- * whenever something in the folder is saved. See decision record 0059.
+ * whenever something in the folder is saved and every time it starts, and so does the quick start, so a
+ * cut that finds nothing new writes nothing. See decision record 0059.
  */
 
 import { createHash } from 'node:crypto';
@@ -138,6 +139,8 @@ interface Cut {
   footX: number;
   footY: number;
   placeholder: boolean;
+  /** Cut this time, rather than read back from the cache. */
+  fresh: boolean;
   said: string;
 }
 
@@ -195,6 +198,7 @@ async function cutOne(
         ...cut,
         footY: cut.height,
         placeholder,
+        fresh: false,
         said: say(cut, ', as cut before'),
       };
     }
@@ -247,7 +251,24 @@ async function cutOne(
   mkdirSync(ART_CACHE_DIR, { recursive: true });
   writeFileSync(cachedPixels, pixels);
   writeFileSync(cachedCut, JSON.stringify(cut));
-  return { name, file, pixels, ...cut, footY: height, placeholder, said: say(cut, '') };
+  return { name, file, pixels, ...cut, footY: height, placeholder, fresh: true, said: say(cut, '') };
+}
+
+/**
+ * Whether the atlas already in `public/art/` is the one this cut makes: the same pixels, and the same
+ * frames in the same places, whenever it was cut.
+ */
+function alreadyThere(file: ArtAtlasFile, atlas: Buffer): boolean {
+  try {
+    const there = JSON.parse(readFileSync(resolve(ART_DIR, 'scenery.json'), 'utf8')) as ArtAtlasFile;
+    return (
+      readFileSync(resolve(ART_DIR, 'scenery.webp')).equals(atlas) &&
+      JSON.stringify({ ...file, cutAt: there.cutAt }) === JSON.stringify(there)
+    );
+  } catch {
+    // Not there, or not readable: either way, not this one.
+    return false;
+  }
 }
 
 /** A colour from `world/render.json`, for the ground the contact sheet stands the sprites on. */
@@ -448,16 +469,31 @@ async function cutScenery(): Promise<void> {
     frames,
     shadows: shadowFrames,
   };
-  mkdirSync(ART_DIR, { recursive: true });
-  writeFileSync(resolve(ART_DIR, 'scenery.webp'), atlas);
-  // The frames last, because the browser reads them first: a half-written cut is never announced.
-  writeFileSync(resolve(ART_DIR, 'scenery.json'), `${JSON.stringify(file, null, 2)}\n`);
+  // Nothing new is nothing written. The dev server and the quick start cut at every start, and the page
+  // lets go of every tree and gathers them all again whenever the atlas changes, so the same atlas written
+  // again would be a blink of the whole map for nothing. When it was cut stays when it was.
+  const same = alreadyThere(file, atlas);
+  if (!same) {
+    mkdirSync(ART_DIR, { recursive: true });
+    writeFileSync(resolve(ART_DIR, 'scenery.webp'), atlas);
+    // The frames last, because the browser reads them first: a half-written cut is never announced.
+    writeFileSync(resolve(ART_DIR, 'scenery.json'), `${JSON.stringify(file, null, 2)}\n`);
+  }
 
   const pictures = cuts.filter((cut) => !cut.placeholder).map((cut) => cut.name);
+  const fresh = cuts.filter((cut) => cut.fresh).map((cut) => cut.name);
+  // Last on the line, after a dash, because the quick start shows only this part of what was said.
+  const news = same
+    ? 'nothing new'
+    : fresh.length === cuts.length
+      ? 'every sprite newly cut'
+      : fresh.length > 0
+        ? `newly cut: ${fresh.join(', ')}`
+        : 'written again from the cuts kept';
   console.log(
     `\nscenery: ${pictures.length === 0 ? 'no pictures yet' : `${pictures.join(', ')} drawn by Adam`}, ` +
       `${cuts.length - pictures.length} placeholders; atlas ${packed.width}x${packed.height}, ` +
-      `${(atlas.length / 1024).toFixed(0)} kB, version ${file.version}`,
+      `${(atlas.length / 1024).toFixed(0)} kB, version ${file.version} - ${news}`,
   );
   if (extra.length > 0) {
     console.log(`not a kind in world/biomes.json, so not cut: ${extra.join(', ')}`);

@@ -13,7 +13,9 @@
     than adopted: launching this from a checkout means "show me this checkout". See decision record 0037.
 
     The packages are held to the same rule: when package-lock.json has changed since they were last
-    installed - a merge that brought a new one - they are installed again before anything starts.
+    installed - a merge that brought a new one - they are installed again before anything starts. And
+    the sprites are cut again at every start, seconds when nothing is new, so that a picture saved while
+    nothing was running is on the map.
 
     Switches:
         -WebOnly     just the map. No game server, so no houses and no events.
@@ -592,16 +594,37 @@ if (-not (Test-Path $SpriteMap)) {
     Good ("the world is furnished: {0:N0} stands in {1:N0} chunks" -f $map.stands, $map.chunks)
 }
 
-# What the scenery is drawn as: Adam's pictures in world/sprites, cut into one atlas. The dev server cuts
-# it on start when it is missing too, but cutting it here says so where everything else is said, and
-# fails before a server is started rather than into its log. About ten seconds in a tree that has cut
-# nothing yet, because pictures standing on a plinth are lifted off it. See decision record 0059.
+# What the scenery is drawn as: Adam's pictures in world/sprites, cut into one atlas. Cut at every start
+# and not only when there is none, because an atlas that was there used to be drawn as it was: a picture
+# saved while nothing was running, or a rule a merge changed, stayed off the map until the next save. A
+# couple of seconds when nothing is new, because every cut is kept, and then nothing is written; about
+# ten in a tree that has cut nothing yet, because pictures standing on a plinth are lifted off it. The
+# dev server cuts again as it starts, and finds nothing new after this; cutting here as well says so
+# where everything else is said. Only the cut's last word is shown, and all of what it said when it
+# fails - which stops nothing, because the map can draw the atlas that was there. See decision 0059.
 $ArtAtlas = Join-Path $Frontend 'apps/web/public/art/scenery.json'
-if (-not (Test-Path $ArtAtlas)) {
-    Run 'cutting the sprites into an atlas (about ten seconds)' $Npm @('run', 'world:art') $Frontend
-} else {
+Step 'the sprites are '
+Push-Location $Frontend
+try {
+    $said = @(& $Npm @('run', '--silent', 'world:art'))
+} finally {
+    Pop-Location
+}
+if ($LASTEXITCODE -eq 0 -and (Test-Path $ArtAtlas)) {
     $atlas = Get-Content $ArtAtlas -Raw | ConvertFrom-Json
-    Good ("the sprites are cut: {0} in an atlas of {1}x{2}" -f @($atlas.frames.PSObject.Properties).Count, $atlas.width, $atlas.height)
+    $report = "cut: {0} in an atlas of {1}x{2}" -f @($atlas.frames.PSObject.Properties).Count, $atlas.width, $atlas.height
+    foreach ($line in $said) {
+        if ($line -match '^scenery: .* - (.+)$') { $report = "$report, $($Matches[1])" }
+    }
+    Write-Host $report -ForegroundColor Green
+} else {
+    Write-Host 'not cut' -ForegroundColor Red
+    foreach ($line in $said) { Say "    $line" }
+    if (Test-Path $ArtAtlas) {
+        Warn 'starting anyway: the map draws the sprites as they were last cut'
+    } else {
+        Warn 'starting anyway, with no scenery until the pictures cut'
+    }
 }
 
 # --- starting the servers --------------------------------------------------------------------------

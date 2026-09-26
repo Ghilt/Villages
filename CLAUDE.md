@@ -263,7 +263,8 @@ Commands are added here as the increments land:
   `debug-quick-start.cmd` on a double click from Explorer. It checks the tools, installs the packages
   again when `package-lock.json` has changed since they were installed (stopping this checkout's dev
   server first, because Windows will not replace a running program), generates whatever part
-  of the world is missing, starts the game server and the dev server hidden with their output in
+  of the world is missing, cuts the sprites again (seconds when nothing is new), starts the game
+  server and the dev server hidden with their output in
   `.logs/`, waits until both ports answer, and prints the address. `-Stop` stops both, `-Logs` prints
   their tails, `-WebOnly` skips the game server, `-NoBrowser` leaves the browser alone. **A port held by
   anything that is not this checkout's current server is taken**: another tree's, or one started before
@@ -382,9 +383,11 @@ Commands are added here as the increments land:
   keys or lifts, trims, stands and shrinks every picture into one atlas in `public/art/`, prints a line a
   sprite, and writes a contact sheet of them at the sizes they are drawn to `world/painterly/art-sheet.png`.
   `-- --placeholders` draws a placeholder for every sprite that has none and never draws over a file that
-  is there. **No art, no scenery**, and the dev server cuts
-  it on start in a tree that has none. Only the scenery is drawn from the folder so far; the marks are
-  placeholders waiting on a decision about house colours. See `docs/AUTHORING-THE-ART.md` and `docs/adr/0059`.
+  is there. **No art, no scenery**, and the dev server cuts the folder again every time it starts, as
+  the quick-start does, so a picture saved while nothing was running is not missed: a couple of seconds
+  when nothing is new, and then nothing is written and the page is not told. Only the scenery is drawn
+  from the folder so far; the marks are placeholders waiting on a decision about house colours. See
+  `docs/AUTHORING-THE-ART.md` and `docs/adr/0059`.
 - Portraits: `world/portraits/` is Adam's folder, committed as the master is. Upright PNGs, three by
   four and at least 768 wide, each named for whom it suits, `woman-01.png` or `man-01.png`; the name
   without `.png` is the key a character keeps for life. **Saving over a placeholder replaces it and
