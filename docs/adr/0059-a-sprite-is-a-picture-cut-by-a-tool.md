@@ -65,6 +65,58 @@ crown leans.
 in code, because they are tinted in a house's colours and a picture would have to say which part of it takes
 the colour. That is its own decision.
 
+### Amended 2026-09-26: a picture standing on a plinth is lifted off it
+
+Adam's next nine pictures - pine, spruce, palm, mangrove, scrub, boulder, beech, birch and reeds - came the
+way an image model likes to draw a thing: standing on a **plinth**, a square block of turf with soil down its
+sides, seen from a corner, on pale paper with a soft shadow beside it. The map has ground of its own, so the
+block, the paper and the shadow all go and what stood on the block stays. In his words: *"Remove the ground
+and the background and probably the shadow."*
+
+**The tool lifts it off**, in `packages/world/src/lift.ts`, and a picture it finds no plinth in is keyed
+exactly as before. Three rules, each about where things are rather than a guess about what they are:
+
+- **The plinth is found by its soil**, the brown band that reaches the lowest point of the picture. Its lower
+  edges give the corner and the slope, its right end the width, and its shaded left side face, which nothing
+  ever stands in front of, gives the height up to the bright rim along the turf's front edge.
+- **Around the plinth, the paper and the shadow go.** The paper is filled from the border, but only within
+  sixteen levels of it rather than keyOut's forty-eight: the birch's sunlit bark is fourteen to twenty from
+  the paper, and the fill has to stop at the edge of it. The
+  shadow lies only on the floor beside the plinth, grows out of the paper through smooth steps, and is never
+  as dark as a rock's shaded face, which is edged; left to grow freely it ate the boulder whole. Paper seen
+  through a gap in the leaves goes when what rings it is mostly not paper - pale bark is ringed by more
+  pale bark.
+- **On the turf, the thing is told from the ground by two palettes the picture supplies**: the ground's from
+  the front strip of the turf, which nothing stands on, in shade and in sun as well; the thing's from where
+  it crosses into the plinth. A colour the thing shows joins it however it touches, which keeps the
+  mangrove's roots. A colour neither palette knows counts only hanging straight down from what stands above,
+  and only as a block: the pine's trunk, hidden under its crown, does, and the litter and the stones at a
+  trunk's foot, which touch it only along the ground, do not.
+
+Every one of those rules was found by a picture that broke the one before it, and each is held by a test
+that draws a diorama in code; each test was seen to fail with its rule broken.
+
+**The shadows are not kept.** Adam asked whether they could be, and whether they would look right stacked
+the way the map stacks sprites. As drawn they cannot: each falls partly on the turf and partly off its edge
+onto the paper, a block's height lower and merged with the block's own shadow, so no picture holds the
+shadow its thing would cast on flat ground. And a shadow in a sprite is drawn with the sprite, farthest
+first, over whatever was drawn before it, and where two overlap they are twice as dark: a wood would carry
+blotches. A shadow that works is a layer of its own, drawn from each sprite's outline under every sprite at
+once. That is a step of its own, offered rather than built.
+
+**What it cannot tell apart, it leaves.** A stone right under a foot, or a patch of mud between two roots,
+is the colour of the thing standing in it and stays. None of it shows at the sizes the map draws. A
+picture that comes out wrong can be cut onto transparency by hand, and a picture with its own transparency
+is never keyed or lifted.
+
+**A cut is kept.** Lifting a picture takes about a second where keying one takes a tenth, and the dev server
+cuts the whole folder on every save. So every cut is kept by the picture's bytes and the rules' own text,
+in `frontend/node_modules/.cache/villages-art`, and only what changed is cut again.
+
+**A placeholder's record goes with it.** Saving a JPEG over a PNG placeholder means deleting the PNG, and its
+line in `world/sprites/placeholders.json` outlived it and failed the folder's own test. The cut forgets it,
+and a placeholder a picture was saved over, and says so.
+
 ## Consequences
 
 Adam can drop a picture into a folder and see it on the map in about a second, with no command to
@@ -102,3 +154,11 @@ to draw 40-pixel ones, and the answer to "what does the map draw" would live onl
 
 **Python and Pillow**, which the castle experiment used. They are on this machine but not in the project;
 every other world tool is Node, and `npm install` has to be all a fresh tree needs.
+
+**Cut each diorama out by hand, once, and commit the cut-out** *(2026-09-26)*. Quicker for nine pictures,
+and every picture after them would need somebody to cut it, which is what the tool is for. The lift was
+worked out in Python on this machine and then written in the world package, for the reason above.
+
+**A segmentation model** *(2026-09-26)*. It would know a tree from turf without being told, and it would
+need a download of hundreds of megabytes and a runtime the project does not have, for a kind of picture
+that three rules about where things stand handle.

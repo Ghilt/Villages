@@ -1,9 +1,11 @@
 /**
  * Cuts the pictures in `world/sprites/` into what the game draws: one atlas and the frames in it.
  *
- * Any picture will do - PNG, WebP or JPEG, any size, on a flat background or a transparent one. Each is
- * keyed, trimmed to what is in it, stood on its foot, shrunk to the one size it is ever needed at, and
- * packed. What is decided about the pixels is `src/art.ts`; this reads, resizes and writes.
+ * Any picture will do - PNG, WebP or JPEG, any size, on a flat background or a transparent one, or
+ * standing on a little diorama plinth of turf and soil, which is lifted off. Each is keyed, trimmed to what
+ * is in it, stood on its foot, shrunk to the one size it is ever needed at, and packed. What is decided
+ * about the pixels is `src/art.ts` and `src/lift.ts`; this reads, resizes and writes, and remembers what
+ * it cut so that a save re-cuts only the picture that was saved.
  *
  *     npm run world:art --prefix frontend
  *     npm run world:art --prefix frontend -- --placeholders
@@ -14,16 +16,25 @@
  */
 
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  statSync,
+  unlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import { extname, resolve } from 'node:path';
 
 import sharp from 'sharp';
 
-import { crop, footOf, keyOut, opaqueBox, packShelves } from '../src/art.ts';
+import { backgroundOf, crop, footOf, hasOwnAlpha, keyOut, opaqueBox, packShelves } from '../src/art.ts';
 import type { ArtAtlasFile, ArtFrame, Rgba } from '../src/art.ts';
 import type { BiomeFile } from '../src/biome.ts';
+import { findPlinth, liftOffPlinth } from '../src/lift.ts';
 import { MARK_NAMES, markPlaceholderSvg, sceneryPlaceholderSvg } from '../src/placeholderArt.ts';
-import { ART_DIR, BIOMES, PAINTERLY_DIR, RENDER, SPRITES_DIR } from './paths.ts';
+import { ART_CACHE_DIR, ART_DIR, BIOMES, PAINTERLY_DIR, RENDER, SPRITES_DIR } from './paths.ts';
 
 /**
  * How tall every scenery sprite is cut, in pixels.
@@ -121,6 +132,31 @@ interface Cut {
   said: string;
 }
 
+/**
+ * What a cut depends on besides the picture: the rules the pixels go through, and the size they are cut
+ * to. Read from the rules' own files, so that changing a rule re-cuts every picture and nothing else does.
+ */
+const RULES = hashOf(
+  Buffer.concat([
+    readFileSync(new URL('../src/art.ts', import.meta.url)),
+    readFileSync(new URL('../src/lift.ts', import.meta.url)),
+    Buffer.from(String(SCENERY_HEIGHT)),
+  ]),
+).slice(0, 16);
+
+/** The cuts this run used, so that the cache holds nothing else when it is done. */
+const kept = new Set<string>();
+
+/** What is kept of a cut besides its pixels, so that one read back from the cache says what it said. */
+interface Remembered {
+  width: number;
+  height: number;
+  footX: number;
+  source: string;
+  trimmed: string;
+  how: string;
+}
+
 async function cutOne(
   group: string,
   name: string,
@@ -129,6 +165,32 @@ async function cutOne(
 ): Promise<Cut> {
   const path = resolve(SPRITES_DIR, group, file);
   const bytes = readFileSync(path);
+  const placeholder = known[`${group}/${file}`] === hashOf(bytes);
+  const say = (cut: Remembered, from: string) =>
+    `${placeholder ? 'placeholder' : 'PICTURE    '} ${`${group}/${file}`.padEnd(24)} ` +
+    `${cut.source} -> trimmed ${cut.trimmed} -> ${cut.width}x${cut.height}, ${cut.how}, ` +
+    `foot ${((cut.footX / cut.width) * 100).toFixed(0)}% across${from}`;
+
+  const key = `${hashOf(bytes).slice(0, 24)}-${RULES}`;
+  kept.add(key);
+  const cachedPixels = resolve(ART_CACHE_DIR, `${key}.raw`);
+  const cachedCut = resolve(ART_CACHE_DIR, `${key}.json`);
+  if (existsSync(cachedPixels) && existsSync(cachedCut)) {
+    const cut = JSON.parse(readFileSync(cachedCut, 'utf8')) as Remembered;
+    const pixels = readFileSync(cachedPixels);
+    if (pixels.length === cut.width * cut.height * 4) {
+      return {
+        name,
+        file,
+        pixels,
+        ...cut,
+        footY: cut.height,
+        placeholder,
+        said: say(cut, ', as cut before'),
+      };
+    }
+  }
+
   const { data, info } = await sharp(bytes).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   const picture: Rgba = {
     width: info.width,
@@ -136,8 +198,17 @@ async function cutOne(
     data: new Uint8Array(data.buffer, data.byteOffset, data.length),
   };
   let keyed;
+  let how;
   try {
-    keyed = keyOut(picture);
+    // A diorama is lifted off its plinth; anything else is keyed off its paper, or keeps its own alpha.
+    const plinth = hasOwnAlpha(picture) ? null : findPlinth(picture);
+    keyed = plinth === null ? keyOut(picture) : liftOffPlinth(picture, plinth, backgroundOf(picture));
+    how =
+      plinth !== null
+        ? `lifted off its plinth, paper rgb(${keyed.background!.join(',')})`
+        : keyed.background === null
+          ? 'its own alpha'
+          : `keyed rgb(${keyed.background.join(',')})`;
   } catch (cause) {
     throw new Error(`${group}/${file}: ${(cause as Error).message}`, { cause });
   }
@@ -156,23 +227,18 @@ async function cutOne(
     .resize(width, height, { kernel: 'lanczos3', fit: 'fill' })
     .raw()
     .toBuffer();
-  const placeholder = known[`${group}/${file}`] === hashOf(bytes);
-  const background = keyed.background === null ? 'its own alpha' : `keyed rgb(${keyed.background.join(',')})`;
-  const said =
-    `${placeholder ? 'placeholder' : 'PICTURE    '} ${`${group}/${file}`.padEnd(24)} ` +
-    `${info.width}x${info.height} -> trimmed ${trimmed.width}x${trimmed.height} -> ${width}x${height}, ` +
-    `${background}, foot ${((foot.x / trimmed.width) * 100).toFixed(0)}% across`;
-  return {
-    name,
-    file,
-    pixels,
+  const cut: Remembered = {
     width,
     height,
     footX: (foot.x / trimmed.width) * width,
-    footY: height,
-    placeholder,
-    said,
+    source: `${info.width}x${info.height}`,
+    trimmed: `${trimmed.width}x${trimmed.height}`,
+    how,
   };
+  mkdirSync(ART_CACHE_DIR, { recursive: true });
+  writeFileSync(cachedPixels, pixels);
+  writeFileSync(cachedCut, JSON.stringify(cut));
+  return { name, file, pixels, ...cut, footY: height, placeholder, said: say(cut, '') };
 }
 
 /** A colour from `world/render.json`, for the ground the contact sheet stands the sprites on. */
@@ -262,8 +328,32 @@ async function contactSheet(cuts: readonly Cut[]): Promise<string> {
   return out;
 }
 
-async function cutScenery(): Promise<void> {
+/**
+ * Forgets the placeholders that are no longer in the folder, and says which.
+ *
+ * A placeholder is gone when a picture was saved over it, and when `spruce.jpg` replaced `spruce.png` and
+ * the one was deleted to keep the other. Its record would otherwise outlive it - which the folder's own
+ * test calls a broken folder, for a change that was exactly the one meant.
+ */
+function forgetReplacedPlaceholders(): Record<string, string> {
   const known = readPlaceholders();
+  const gone = Object.keys(known).filter((file) => {
+    const path = resolve(SPRITES_DIR, file);
+    return !existsSync(path) || hashOf(readFileSync(path)) !== known[file];
+  });
+  if (gone.length > 0) {
+    for (const file of gone) {
+      delete known[file];
+    }
+    writeFileSync(PLACEHOLDERS, `${JSON.stringify(known, null, 2)}\n`);
+    const count = gone.length === 1 ? 'a placeholder' : `${gone.length} placeholders`;
+    console.log(`forgot ${count} no longer in the folder: ${gone.join(', ')}`);
+  }
+  return known;
+}
+
+async function cutScenery(): Promise<void> {
+  const known = forgetReplacedPlaceholders();
   const there = picturesIn('scenery');
   const missing = kinds.filter((kind) => !there.has(kind));
   if (missing.length > 0) {
@@ -351,6 +441,13 @@ async function cutScenery(): Promise<void> {
   console.log(`contact sheet: ${await contactSheet(cuts)}`);
   const newest = Math.max(...cuts.map((cut) => statSync(resolve(SPRITES_DIR, 'scenery', cut.file)).mtimeMs));
   console.log(`newest picture saved ${new Date(newest).toLocaleString()}`);
+  // The cache keeps the cuts of the pictures that are there under the rules that are there, and no more:
+  // a picture saved over, or a rule changed, leaves its old cut behind otherwise, every time.
+  for (const file of existsSync(ART_CACHE_DIR) ? readdirSync(ART_CACHE_DIR) : []) {
+    if (!kept.has(file.replace(/\.(raw|json)$/, ''))) {
+      unlinkSync(resolve(ART_CACHE_DIR, file));
+    }
+  }
 }
 
 try {

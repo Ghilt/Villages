@@ -373,13 +373,16 @@ Commands are added here as the increments land:
   see more of it). This is what a change to `world/biomes.json` is argued from.
 - Sprites: `world/sprites/` is Adam's folder, committed as the master is: `scenery/<kind>` for every
   kind in `world/biomes.json` and `marks/<name>` for every mark. Any PNG, WebP or JPEG, any size, on a
-  flat background or a transparent one. **Saving over a placeholder replaces it**, and with the dev server
-  running the picture is on the map about a second later with no reload, because the server cuts the
-  folder again whenever a picture in it is saved and tells the page. By hand that is
-  `npm run world:art --prefix frontend`, two seconds: it keys, trims, stands and shrinks every picture into
-  one atlas in `public/art/`, prints a line a sprite, and writes a contact sheet of them at the sizes they
-  are drawn to `world/painterly/art-sheet.png`. `-- --placeholders` draws a placeholder for every sprite
-  that has none and never draws over a file that is there. **No art, no scenery**, and the dev server cuts
+  flat background or a transparent one, or standing on a **plinth** - the block of turf and soil an image
+  model draws a thing on, which is lifted off with its paper and its shadow (`src/lift.ts`). **Saving over
+  a placeholder replaces it**, and with the dev server running the picture is on the map a few seconds
+  later with no reload, because the server cuts the folder again whenever a picture in it is saved and
+  tells the page - and only the picture that changed, because every cut is kept in
+  `frontend/node_modules/.cache/villages-art`. By hand that is `npm run world:art --prefix frontend`: it
+  keys or lifts, trims, stands and shrinks every picture into one atlas in `public/art/`, prints a line a
+  sprite, and writes a contact sheet of them at the sizes they are drawn to `world/painterly/art-sheet.png`.
+  `-- --placeholders` draws a placeholder for every sprite that has none and never draws over a file that
+  is there. **No art, no scenery**, and the dev server cuts
   it on start in a tree that has none. Only the scenery is drawn from the folder so far; the marks are
   placeholders waiting on a decision about house colours. See `docs/AUTHORING-THE-ART.md` and `docs/adr/0059`.
 - Portraits: `world/portraits/` is Adam's folder, committed as the master is. Upright PNGs, three by
