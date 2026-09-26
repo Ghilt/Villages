@@ -405,6 +405,22 @@ private class Rig {
     fun someoneElse(fogLifted: Boolean = false): Pair<Gateway.Connection, MutableList<ServerFrame>> =
         introduced(UUID.randomUUID().toString(), fogLifted)
 
+    /**
+     * Somebody else, whose socket starts closing once they have said hello and sent `first`: every frame sent
+     * to them after that throws, the way Tomcat's send does between the close frame going out and the close
+     * reaching the gateway. A seeding connection is one, because it closes the moment its command is accepted.
+     */
+    fun someoneLeaving(vararg first: String): Gateway.Connection {
+        var closing = false
+        val connection = gateway.connect {
+            if (closing) throw IllegalStateException("the WebSocket session has been closed")
+        }
+        connection.receive("""{"type":"hello","playerToken":"${UUID.randomUUID()}","protocolVersion":$PROTOCOL_VERSION}""")
+        first.forEach(connection::receive)
+        closing = true
+        return connection
+    }
+
     /** A fresh player founds a house. Many houses means many players, one each; see decision 0028. */
     fun aHouseIsFounded(name: String = "Ravenscar") {
         val (someone, _) = someoneElse()
@@ -1413,6 +1429,34 @@ class GatewaySpec : StringSpec({
         rig.later.tick()
 
         sent.shouldBeEmpty()
+    }
+
+    // The founder's own house is sent to them before anyone holding its cell is told, so a throw there used
+    // to leave the fan-out with nobody told. Seeding closes each connection as its command is accepted.
+    "a founder whose socket is closing does not cost whoever holds the cell the house appearing" {
+        val rig = Rig()
+        val (looker, sent) = rig.introduced(fogLifted = true)
+        looker.receive(subscribe(STOCKHOLM_Z8))
+        sent.clear()
+        val founder = rig.someoneLeaving()
+
+        founder.receive(founding())
+        rig.later.tick()
+
+        val batch = sent.single().shouldBeInstanceOf<Batch>()
+        batch.deltas.single().shouldBeInstanceOf<HouseAppeared>().house.name shouldBe "Ravenscar"
+    }
+
+    "a watcher whose socket is closing does not cost the other watchers the event" {
+        val rig = Rig()
+        val (watching, watcher) = rig.introduced()
+        watching.receive("""{"type":"watchEvents","on":true}""")
+        rig.someoneLeaving("""{"type":"watchEvents","on":true}""")
+        watcher.clear()
+
+        rig.aHouseIsFounded()
+
+        watcher.filterIsInstance<EventFrame>().map { it.eventType } shouldContain "villages.house.founded.v1"
     }
 
     "more cells than a connection may hold is refused, and none of them taken" {

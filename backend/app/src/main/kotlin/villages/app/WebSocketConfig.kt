@@ -10,6 +10,8 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 import org.springframework.web.socket.handler.TextWebSocketHandler
 import villages.gateway.Gateway
 import villages.protocol.ProtocolJson
+import villages.protocol.ServerFrame
+import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -35,11 +37,7 @@ class GatewaySocket(private val gateway: Gateway) : TextWebSocketHandler() {
     private val connections = ConcurrentHashMap<String, Gateway.Connection>()
 
     override fun afterConnectionEstablished(session: WebSocketSession) {
-        connections[session.id] = gateway.connect { frame ->
-            if (session.isOpen) {
-                synchronized(session) { session.sendMessage(TextMessage(ProtocolJson.encode(frame))) }
-            }
-        }
+        connections[session.id] = gateway.connect { frame -> session.sendUnlessGoing(frame) }
     }
 
     override fun handleTextMessage(session: WebSocketSession, message: TextMessage) {
@@ -48,5 +46,26 @@ class GatewaySocket(private val gateway: Gateway) : TextWebSocketHandler() {
 
     override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
         connections.remove(session.id)?.disconnected()
+    }
+}
+
+/**
+ * Sends a frame, or drops it when the socket is going. Open is not enough to go on: Tomcat's session says
+ * it is open while it is closing, and from the close frame going out until `afterConnectionClosed` has run,
+ * a send throws. A seeding connection closes the moment its command is accepted, which is exactly then.
+ */
+internal fun WebSocketSession.sendUnlessGoing(frame: ServerFrame) {
+    val message = TextMessage(ProtocolJson.encode(frame))
+    synchronized(this) {
+        if (!isOpen) {
+            return
+        }
+        try {
+            sendMessage(message)
+        } catch (@Suppress("SwallowedException") closed: IllegalStateException) {
+            // Not delivered: the session was closed under the send.
+        } catch (@Suppress("SwallowedException") broken: IOException) {
+            // Not delivered: the connection failed, and Tomcat closes the session behind it.
+        }
     }
 }
