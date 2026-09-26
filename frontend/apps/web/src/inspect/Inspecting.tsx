@@ -4,15 +4,14 @@ import { charactersInView, housesInView } from '@villages/client-core';
 import type { MasterGrid, TerrainClass } from '@villages/world';
 
 import { areasNow, watchAreas } from '../areas/areas';
-import { Icon } from '../stage/Icons';
-import { PaneSizeControl } from '../stage/PaneSizeControl';
 import { terrainPalette } from '../map/terrainClasses';
 import { gatewayState, watchGateway } from '../net/gateway';
 import type { Room } from '../stage/panes';
-import { describeArea, describeCharacter, describeHouse, type Legend } from './describe';
-import { InspectWindow } from './InspectWindow';
+import { type Description, describeArea, describeCharacter, describeHouse, type Legend } from './describe';
+import { InspectWindow, WindowBar } from './InspectWindow';
+import { sizeWindow } from './opening';
 import { forgetSubject, type Subject } from './subjects';
-import { forget } from './trail';
+import { forget, lastNamed, trailNow, watchTrail } from './trail';
 
 /**
  * One inspect window, fed from what the browser already knows.
@@ -35,9 +34,12 @@ interface InspectingProps {
   grid: MasterGrid | null;
 }
 
-export function Inspecting({ subject, room, along, grid }: InspectingProps) {
+export function Inspecting({ subject, room: given, along, grid }: InspectingProps) {
+  // Its own size control opens a put-away window at the top of the rail rather than where it stood.
+  const room: Room = { ...given, ask: (size) => sizeWindow(subject, size) };
   const heard = useSyncExternalStore(watchGateway, gatewayState);
   const areas = useSyncExternalStore(watchAreas, areasNow);
+  const trail = useSyncExternalStore(watchTrail, trailNow);
   const legend = useLegend();
 
   // Nothing in an inspect window moves any more. The treasury was the only ticking figure on it, and
@@ -56,82 +58,81 @@ export function Inspecting({ subject, room, along, grid }: InspectingProps) {
     }
   }, [subject, area]);
 
+  if (subject.kind === 'area' && area === null) {
+    return null;
+  }
+
+  /** What the window says, or null for a subject that has left what this page can see. */
+  const describeSubject = (): Description | null => {
+    // A character is seen standing in a held cell, or as one of this player's own key figures wherever
+    // they are; the second is how your own people stay inspectable after the camera has left them.
+    if (subject.kind === 'character') {
+      const standing = charactersInView(heard.houses).find((one) => one.id === subject.id);
+      const yours = heard.yourKeyFigures?.find((one) => one.id === subject.id);
+      const seen = standing ?? yours;
+      return seen === undefined
+        ? null
+        : describeCharacter(seen, heard.world?.today ?? null, yours !== undefined);
+    }
+
+    if (subject.kind === 'area') {
+      return area === null ? null : describeArea(area, housesInView(heard.houses), legend, grid);
+    }
+
+    const house =
+      housesInView(heard.houses).find((one) => one.id === subject.id) ??
+      (heard.yourHouse?.house.id === subject.id ? heard.yourHouse.house : undefined);
+    return house === undefined
+      ? null
+      : describeHouse(house, heard.yourHouse?.house.id === house.id, areas.areas, grid);
+  };
+
+  const said = describeSubject();
+  // Which one, even put away and even out of view: the name the trail kept when it was last seen, and
+  // the word for the kind only where nothing has ever named it.
+  const name = said?.name ?? lastNamed(trail, subject) ?? KIND_WORDS[subject.kind];
+  const kind = said?.kind ?? KIND_WORDS[subject.kind];
+
   if (room.size === 'strip') {
-    return <Strip name={KIND_WORDS[subject.kind]} room={room} />;
+    return (
+      <section className="inspect inspect--strip" aria-label={name}>
+        <WindowBar subject={subject} kind={kind} name={name} room={room} along={along} />
+      </section>
+    );
   }
 
-  // A character is seen standing in a held cell, or as one of this player's own key figures wherever they
-  // are; the second is how your own people stay inspectable after the camera has left them.
-  if (subject.kind === 'character') {
-    const standing = charactersInView(heard.houses).find((one) => one.id === subject.id);
-    const yours = heard.yourKeyFigures?.find((one) => one.id === subject.id);
-    const seen = standing ?? yours;
-    if (seen === undefined) {
-      return <OutOfView subject={subject} room={room} />;
-    }
-    const said = describeCharacter(seen, heard.world?.today ?? null, yours !== undefined);
-    return <InspectWindow subject={subject} said={said} along={along} room={room} />;
+  if (said === null) {
+    return <OutOfView subject={subject} kind={kind} name={name} room={room} along={along} />;
   }
-
-  if (subject.kind === 'area') {
-    if (area === null) {
-      return null;
-    }
-    const said = describeArea(area, housesInView(heard.houses), legend, grid);
-    return <InspectWindow subject={subject} said={said} along={along} room={room} />;
-  }
-
-  const house =
-    housesInView(heard.houses).find((one) => one.id === subject.id) ??
-    (heard.yourHouse?.house.id === subject.id ? heard.yourHouse.house : undefined);
-
-  if (house === undefined) {
-    return <OutOfView subject={subject} room={room} />;
-  }
-
-  const said = describeHouse(house, heard.yourHouse?.house.id === house.id, areas.areas, grid);
   return <InspectWindow subject={subject} said={said} along={along} room={room} />;
 }
 
-/** What each kind of subject is called above its window, and on its strip. */
+/** What each kind of subject is called where nothing more specific is known: its mark's words. */
 const KIND_WORDS: Record<Subject['kind'], string> = {
   house: 'House',
   area: 'Area',
   character: 'Key figure',
 };
 
+interface OutOfViewProps {
+  subject: Subject;
+  kind: string;
+  name: string;
+  room: Room;
+  along: 'rows' | 'columns' | null;
+}
+
 /**
  * A house or a person who has left the held cells. Not gone from the world, only from what this page can
  * see: a stranger's key figure the camera has left, or a house panned away from.
  */
-function OutOfView({ subject, room }: { subject: Subject; room: Room }) {
+function OutOfView({ subject, kind, name, room, along }: OutOfViewProps) {
   return (
     <section className="inspect">
       <header className="inspect__bar">
-        <span className="inspect__kind">{KIND_WORDS[subject.kind]}</span>
-        <PaneSizeControl room={room} />
-        <button
-          type="button"
-          className="inspect__close"
-          aria-label="close this window"
-          title="close this window"
-          onClick={() => {
-            forgetSubject(subject);
-          }}
-        >
-          <Icon name="close" />
-        </button>
+        <WindowBar subject={subject} kind={kind} name={name} room={room} along={along} />
       </header>
       <p className="inspect__gone">Out of view. Pan back to it, or pick something else.</p>
-    </section>
-  );
-}
-
-function Strip({ name, room }: { name: string; room: Room }) {
-  return (
-    <section className="inspect inspect--strip">
-      <span className="inspect__kind">{name}</span>
-      <PaneSizeControl room={room} />
     </section>
   );
 }

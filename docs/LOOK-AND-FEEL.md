@@ -87,7 +87,9 @@ for five words, and the words teach the marks. Every mark a number is known by i
 away, the normal size, opened out. The mark is **how much of a box is filled**, which is the thing being
 chosen rather than a metaphor for it - no folder, no chevron, no arrow pointing anywhere. Every **pane**
 has one, in both forms, and it replaced a chevron that could only put a pane away. A pane that cannot be
-put away offers two marks rather than three. See decision record 0045.
+put away offers two marks rather than three. The panes taking turns in the corner of the spread share
+one, at the far end of the **tab bar**, because the corner is one size whichever of them is up. See
+decision records 0045 and 0057.
 
 **The ornament.** Gold on parchment, drawn the same way wherever the interface embellishes an edge:
 **nested contours** at decreasing weight rather than one thick line, a **stud** where something is fixed,
@@ -133,15 +135,24 @@ word across 44 pixels and eight hundred pixels of room along one. One shape and 
 pane, so that putting anything away looks like putting anything else away, and two panes that say
 otherwise and say why: the **map** carries no control and is itself the way back, and **navigation**
 carries the marks of what it could put in the other bay, because that is the strip a player arrives in by
-pressing the compass. See `RESPONSIVE-DESIGN.md` and decision records 0046 and 0047.
+pressing the compass. An inspect window's strip is its first row - the mark of its kind, the name of the
+thing, the control and, on a desktop, the close - so it says which house rather than that it is one. See
+`RESPONSIVE-DESIGN.md`, `MECHANICS.md` and decision records 0046 and 0047.
 
 **The tab bar.** Several **panes** sharing one **bay**, and a strip of marks across its top saying which is
 up. Marks and no words: a column is 26rem at its widest and two words on a tab is a tab that wraps. Its
 first use is the corner of the spread, where the house status, the key figures and navigation take turns,
 in that order: the house's own two first, then the way elsewhere. The key figures' mark is **a head and
-shoulders**, a bust as a portrait is framed, and a placeholder until the marks are drawn properly. Only in
+shoulders**, a bust as a portrait is framed, and a placeholder until the marks are drawn properly. The
+tabs stand at the left of the bar and the tile's one **pane size control** at its far end, because the
+tile is one size whichever tab is up: pressing a tab changes what is drawn and never how big it is. Only in
 the spread — a phone reaches the same panes through the compass, because a row of tabs on a 390-wide stage
-is a row of things too small to hit. See decision record 0042.
+is a row of things too small to hit. See decision records 0042 and 0057.
+
+**Scrollbars.** Wherever something scrolls - a list, a window taller than its room, the debug panel, the
+event viewer - the scrollbar is thin, its thumb in the soft ink and on no track of its own, so a list that
+scrolls reads as parchment with a mark in its margin rather than as a window of the operating system. Said
+once, on the root, with the two standard properties every browser follows; the browser draws the shape.
 
 **Two forms on the map.** Anything standing in the world is drawn two ways, and which one you see is how
 far away you are. Its **ground form** is what it is, sized in world units, so it grows with the terrain

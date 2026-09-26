@@ -15,6 +15,23 @@
   box-sizing: border-box;
 }
 
+/*
+ * Scrollbars, wherever something scrolls: thin, in the soft ink of the interface, on no track of their own,
+ * so a list that scrolls reads as parchment with a mark in its margin rather than as a window of the
+ * operating system. Everything that scrolls sits on parchment, the debug panel and the event viewer
+ * included, so one drawing does for all of them, and both properties inherit, so it is said once here.
+ *
+ * The standard two and nothing else. The `::-webkit-scrollbar` pseudo-elements draw a nicer thumb, but a
+ * browser that sees either of these ignores them, and splitting the two by `@supports` is a guess about
+ * which browser is which: Adam's drew its own scrollbars under that split. There is no gold under the
+ * pointer, because a colour that inherits cannot follow the pointer onto one thumb without turning every
+ * scrollbar on the page at once.
+ */
+:root {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(93, 79, 63, 0.45) transparent;
+}
+
 html,
 body,
 #root {
@@ -216,10 +233,10 @@ body,
  * different numbers written into its wrapper. The map holds a camera, a style and a WebGL context, and
  * `MapView` throws all three away when it unmounts.
  *
- * A bay clips rather than scrolls. A pane too big for its bay is a bug in the pane, and a scrollbar is how
- * that bug gets hidden. The one stated exception is a key figure at half a phone, whose stats are below
- * the fold on purpose; see `RESPONSIVE-DESIGN.md`. `container-type` is what lets what is inside react to
- * the room it got, because a media query cannot see the stage, let alone one tile of it.
+ * A bay clips rather than scrolls: what is in it draws itself smaller, and a pane whose length is its own
+ * business - a list, a key figure's stats at half a phone - scrolls inside itself rather than the bay
+ * scrolling. `container-type` is what lets what is inside react to the room it got, because a media
+ * query cannot see the stage, let alone one tile of it.
  */
 .bay {
   position: absolute;
@@ -435,19 +452,32 @@ body,
  * It sits on the tile's own top edge and is part of the same piece of furniture, so it carries the border
  * and the rounded corner that the pane beneath it gives up. Marks and no words, because the column is 26rem
  * at its widest and two words on a tab is a tab that wraps. See decision record 0042.
+ *
+ * The tile's one size control stands at the far end, because the tile is one size whichever tab is up
+ * and the control is the tile's rather than a tab's. See decision record 0057.
  */
 .tabs {
   position: absolute;
   z-index: 3;
   display: flex;
   align-items: stretch;
-  gap: 1px;
-  padding-left: 0.35rem;
+  justify-content: space-between;
+  padding: 0 0.3rem 0 0.35rem;
   background: var(--parchment-edge);
   border: 1px solid var(--parchment-edge);
   border-width: 1px 1px 0 0;
   border-radius: 0 6px 0 0;
   box-shadow: 0 -2px 18px var(--shadow);
+}
+
+.tabs__all {
+  display: flex;
+  align-items: stretch;
+  gap: 1px;
+}
+
+.tabs > .pane-size {
+  align-self: center;
 }
 
 .tabs__one {
@@ -522,8 +552,11 @@ body,
 }
 
 /* The shield and what is written beside it. The padding is here rather than on the card, so the bar
-   below can run edge to edge. */
+   below can run edge to edge. It takes whatever height the card has over its own, so the bar stays on the
+   bottom edge however tall the tile is: the corner opened out is taller than the card, and the shield and
+   the name stand in the middle of what is left. */
 .hud__achievement {
+  flex: 1 1 auto;
   display: flex;
   gap: 1.25rem;
   align-items: center;
@@ -755,6 +788,12 @@ body,
 
 .stage[data-form='bays'] .hud--small .hud__banner {
   width: 2.5rem;
+}
+
+/* The one-line form has no line to spare for the blazon. In the spread the corner's normal size is the
+   whole card, so there the line stays until the column is squeezed. */
+.stage[data-form='bays'] .hud--small .hud__hint {
+  display: none;
 }
 
 /* One line: the name, then the treasury pushed to the far end where the eye will read it as a number. */
@@ -1854,8 +1893,19 @@ body,
   height: auto;
   flex: 0 1 auto;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
   container-type: normal;
   pointer-events: auto;
+}
+
+/*
+ * A window alone on a rail too short for it scrolls rather than losing its links off the bottom: out of
+ * room, the rail puts the others away first, so this is only ever the one left open. See 0058.
+ */
+.stage[data-form='spread'] .rail .inspect {
+  flex: 0 1 auto;
+  min-height: 0;
 }
 
 .stage[data-form='bays'] .rail {
@@ -2434,21 +2484,27 @@ body,
   text-overflow: ellipsis;
 }
 
-/* Put away: the kind it is and the way back, and nothing else. */
+/*
+ * Put away: the window's first row and nothing else - its mark, which one it is, its size and its close -
+ * so a strip says which house rather than that it is a house, and can be shut without being opened.
+ */
 .inspect--strip {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.5rem;
   /* The compass is standing in the far end of this strip, so whatever the strip put there - the marks
      on four of them, the word on the map's - steps in from the right rather than sitting under it. */
   padding: 0 calc(0.3rem + var(--corner-right, 0px)) 0 0.75rem;
   overflow: hidden;
 }
 
-.inspect--strip .inspect__kind {
-  flex: 1;
+/* In the rail a strip is as tall as the row it is, so putting a window away folds it up to its first row. */
+.stage[data-form='spread'] .rail .inspect--strip {
+  padding-top: 0.45rem;
+  padding-bottom: 0.4rem;
 }
 
+/* The first row: the mark, the name, the size control and the close, in that order. */
 .inspect__bar {
   display: flex;
   align-items: center;
@@ -2457,12 +2513,12 @@ body,
   border-bottom: 1px solid var(--parchment-edge);
 }
 
-.inspect__kind {
-  flex: 1;
-  font-size: 0.62rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
+/* What kind of thing it is, as the mark that kind is known by everywhere else. */
+.inspect__mark {
+  display: inline-flex;
+  flex: none;
+  width: 1.3rem;
+  height: 1.3rem;
 }
 
 /*
@@ -2506,16 +2562,23 @@ body,
   margin: 0.7rem 0 0.4rem 0.8rem;
 }
 
+/* Which one it is, on the first row: one line, trimmed rather than wrapped, so the row is one height. */
 .inspect__name {
-  margin: 0.7rem 0 0;
-  font-size: 1.25rem;
-  line-height: 1.15;
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: normal;
+  line-height: 1.2;
   font-variant: small-caps;
   letter-spacing: 0.03em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .inspect__blazon {
-  margin: 0.15rem 0 0;
+  margin: 0.55rem 0 0;
   font-size: 0.8rem;
   line-height: 1.35;
   font-style: italic;
@@ -2848,7 +2911,7 @@ body,
 
   .hud__panel--strip .hud__name,
   .figures--strip .figures__kind,
-  .inspect--strip .inspect__kind,
+  .inspect--strip .inspect__name,
   .navigate--strip .navigate__kind,
   .choice--strip .choice__aside,
   .map-strip .map-strip__name {

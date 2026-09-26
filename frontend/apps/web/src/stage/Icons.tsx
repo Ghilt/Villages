@@ -42,7 +42,14 @@ const BUST = {
  */
 const NINE = [4.5, 10.25, 16].flatMap((y) => [4.5, 10.25, 16].map((x) => ({ x, y })));
 
-export type IconName = 'shield' | 'compass' | 'map' | 'window' | 'letter' | 'close' | 'figure' | 'nine';
+/**
+ * An area: a fence that steps along square corners, because an area is fenced between the painted pixels
+ * of the master rather than drawn freehand. See decision record 0032.
+ */
+const FENCE = 'M4 8 H9 V4 H20 V14 H16 V20 H4 Z';
+
+export type IconName =
+  'shield' | 'compass' | 'map' | 'window' | 'letter' | 'close' | 'figure' | 'nine' | 'area';
 
 /** Which way a needle points. The four are one drawing turned, never four drawings. */
 export type Point = 'up' | 'down' | 'left' | 'right';
@@ -82,6 +89,7 @@ export function Icon({ name, title }: IconProps) {
     <svg className={`icon icon--${name}`} viewBox="0 0 24 24" role="presentation" aria-hidden="true">
       {title !== undefined && <title>{title}</title>}
       {name === 'shield' && <path d={SHIELD} className="icon__line" />}
+      {name === 'area' && <path d={FENCE} className="icon__line" />}
       {name === 'nine' &&
         NINE.map(({ x, y }) => (
           <rect key={`${x},${y}`} x={x} y={y} width="3.5" height="3.5" rx="0.5" className="icon__fill" />

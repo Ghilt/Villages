@@ -5,6 +5,8 @@
 - Amends 0041, where a pane declares "a height and not a box, because the column's width is shared by
   everything in it and no one pane in it can be the one that decides it", and 0042, where the tile is "as
   tall as the pane that is up". Opened out, the corner is as tall **and as wide** as the pane that is up.
+- Amended 2026-09-25 by 0057: the width is the **corner's**, not a pane's, and the corner reaches along
+  the bottom whichever tab is up.
 
 ## Context
 

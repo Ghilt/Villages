@@ -3,11 +3,14 @@
 > **What belongs here:** what the mechanics of the game are — what the player is offered, what they can do
 > about it, and what it is for. One entry per mechanic. **What does not:** how a mechanic is turned into
 > commands and events (`BUILDING-A-MECHANIC.md`), the shared visual language its look and feel draws on
-> (`LOOK-AND-FEEL.md`), what the world is (`SETTING.md`), when any of it gets built (`ROADMAP.md`).
+> (`LOOK-AND-FEEL.md`), how the stage and its bays work whatever is put in them (`RESPONSIVE-DESIGN.md`),
+> what the world is (`SETTING.md`), when any of it gets built (`ROADMAP.md`).
 
 **Every mechanic has a name**, and that name is the word used everywhere afterwards: in conversation, in the
 glossary, in the code and in the interface. An entry has five parts — what it is, what it is for, its look
-and feel, what is not decided about it, and where it stands in the source today.
+and feel, what is not decided about it, and where it stands in the source today — and a sixth, **UI**, for a
+mechanic that is a pane: which bay it takes, what it draws at each of its sizes in each form, and how it
+arrives. The rules every bay keeps are `RESPONSIVE-DESIGN.md`'s; what a pane does inside them is here.
 
 Where a mechanic is driven by a part of the program, the entry names that part and points at
 `ARCHITECTURE.md` rather than describing it. A mechanic is what the player meets; the engine behind it is
@@ -61,18 +64,24 @@ The options are shown as a **wooden desktop with an inkwell**, each choice a tex
 **parchment**. Hovering a parchment lifts it slightly, so it reads as something you can pick up. The shared
 language this draws on — the diegetic rule, the rarity colours — is in `LOOK-AND-FEEL.md`.
 
-It is a **pane** with three sizes, and the mechanic owns all three:
+### UI
+
+A **pane** that exists only while a question is pending, and goes when it is answered. It has three sizes,
+and the mechanic owns all three:
 
 - **Full** — the prompt and every option laid out to read through. What a question arrives at, because
-  reading it is the thing to do first. The bottom middle of the spread; on a phone it takes the big bay and
-  the pane beside it keeps the small one.
+  reading it is the thing to do first. Three across a tile wide enough, three one under another in a bay
+  tall enough, and the carousel in one that is neither.
 - **Small** — the **carousel**: one option at a time, with the way between them. For deciding rather than
   reading, because the places being offered are drawn on the map and the option you are on stays on the
   screen beside the one it means.
 - **Minimised** — set aside to a strip. Not closed: the question is still standing.
 
-**Its size is the player's**, which no other pane's is. The two forms are two ways of using it and only they
-know which they are doing. See decision record 0044 and `RESPONSIVE-DESIGN.md`.
+**In the spread** it takes **bottom middle**, one height at both of its drawings so the bottom of the stage
+does not jump as it folds to the carousel; the 281 that bay is never narrower than is what the carousel
+reads at. **On a phone** it takes the map's bay, opening it to half if it was a strip, and the pane beside
+it keeps the other; answering puts the map back. **Its size is the player's**: the two forms are two ways
+of using it and only they know which they are doing. See decision record 0044.
 
 ### Not decided
 
@@ -215,12 +224,36 @@ bottom. That is a description of what is there rather than a decision: the diege
 `LOOK-AND-FEEL.md` says what the player is shown should be part of the world, and a card is not, so this
 is the shape most likely to change.
 
-A link is **one button**, and it opens in the bay this window is not in, so the window it came from stays
-on the screen; *show it on the map* is the map's own mark rather than words. It carried a pair of needles
-saying which bay to open into until 0049, which is one decision per link too many.
+**Its first row is its mark, its name, its size control and, on a desktop, its close.** What kind of thing it is, is the
+mark that kind is known by everywhere else rather than a word above the name: a **shield** for a house and
+a **bust** for a person, the corner's own tabs, and for an area a **fence** stepping along square corners,
+because an area is fenced between painted pixels. The words - *Your house*, *Key figure*, *Area* - are the
+mark's label, for a player who hovers it or a screen reader.
 
-It is **responsive from the start**: where there is room the windows stack in a rail, up to three, and on
-a phone one of them takes a bay and its links open in the other one. See `RESPONSIVE-DESIGN.md`.
+A link is **one button**, and *show it on the map* is the map's own mark rather than words. It carried a
+pair of needles saying which bay to open into until 0049, which is one decision per link too many.
+
+### UI
+
+A **pane** per subject, opened on a click and closed by the player.
+
+**Put away, a window is its first row**: its mark, which one it is, its size control and its close. The
+strip says *Kettleby* rather than *House*, because a rail of three strips that all said *House* would say
+nothing, and on a desktop it keeps its close so a window can be shut without being opened first. A subject
+that has left what this page can see keeps the name the **trail** last saw it under, and only one nothing
+has ever named falls back to the word for its kind.
+
+**In the spread** the windows take **left** and stack on its rail, newest at the top, up to three; a fourth
+pushes the oldest off rather than being refused. **When they no longer all fit, one stays open** and the
+others are put away, and opening another - from its strip, or by asking for it again from the map - brings
+it to the top and puts the rest away, so a rail out of room has one window open and the map rings that
+one. Nothing reopens by itself when the room comes back. A window left alone on a rail too short for it
+scrolls rather than losing its links off the bottom. See decision record 0058. **On a phone** a window takes the bay that is not the
+map's, because the thing clicked is on the map, and opens it to half if it was a strip; closing it puts
+back what was there and leaves the arrangement alone. A link opens in the bay this window is not in, so the
+window it came from stays on the screen; in the spread there is one place a window goes, and a link is a
+plain click. **On a phone a window has no close**, open or put away: it is replaced by navigating to
+something else, which is how any pane there leaves its bay.
 
 ### Not decided
 
@@ -307,19 +340,34 @@ the small size of this card is one line. A mark is learnt once and then costs no
 to learn and then has to keep fitting - in a column squeezed to 18rem, and in a language nobody has thought
 about yet. The word is on the label until the mark is learnt. A resource with nothing pledged shows one
 figure; one with a pledge against it shows what is free over the total, `65/100`, because what can be used
-is the more urgent of the two. In the spread it is the lower tile of
-the column, sharing an edge with the rail above it; see decision record 0041.
+is the more urgent of the two.
 
-Three sizes, and the mechanic owns all three:
+### UI
 
-- **Full** — everything above, with the bar beneath it.
+A **pane**, never opened and never closed. Three sizes, and the mechanic owns all three:
+
+- **Full** — everything above, with the bar beneath it on the bottom edge.
 - **Small** — the shield, the name and the row of marks, with the bar under them. What it is when it is
-  sharing a screen with something else. The row wraps to two lines in a bay too narrow for five marks, and
+  sharing a phone with something else. The row wraps to two lines in a bay too narrow for five marks, and
   the pane's height allows for that rather than clipping it.
 - **Minimised** — a strip with the name on it and nothing more, so the player knows where it went.
 
+**In the spread** it is the first tab of **bottom left**, sharing an edge with the rail above it (decision
+record 0041). That bay is one size whichever tab is up and its normal size is the whole card, so on a
+desktop the card is drawn full at both of its open sizes: opened out it is the same card with room to
+spare, the shield and the name in the middle and the bar still on the bottom edge. The small form is a
+phone's. The blazon line is the first thing to go when the column is squeezed. See decision record 0057.
+
+**On a phone** it opens as a strip beneath the map opened out: the game is read off the map, and the card
+is 200 pixels of a phone's 844 that nobody has asked for yet. Pressing the strip is the first gesture there
+is, and it teaches the whole control; the middle mark gives half the stage, enough for the shield, the
+blazon, the treasury and the bar of levers with the map still up above it.
+
 It is **responsive from the start**, and it is the mechanic that proves the rule: the card has never fitted
-a phone. See `RESPONSIVE-DESIGN.md`.
+a phone. It asked for `min-width: 26rem`, 416 pixels against a phone's 390, and that was the first thing
+the phone toggle found; it fills whatever it is given now. **The bar of levers has six places**, and a
+landscape bay half a phone wide is 422 pixels: 70 a place, which is fine, and put away the bar is not drawn
+at all. The first thing to look at when the bar starts filling. See `RESPONSIVE-DESIGN.md`.
 
 ### Not decided
 
@@ -464,9 +512,7 @@ strong someone is changes what the house can do through them. Nothing does yet.
 
 ### Look and feel
 
-**A pane of its own, in the corner with the house status**: its middle tab in the spread, between the shield
-and the compass, and a row of *Go to* on a phone. Its mark is a head and shoulders in profile, a placeholder.
-On a desktop it opens at the normal size, so changing tabs moves nothing.
+Its mark is a head and shoulders in profile, a placeholder.
 
 **Two states.**
 
@@ -479,15 +525,26 @@ On a desktop it opens at the normal size, so changing tabs moves nothing.
   beside it. While they stand on the map, **the map's mark** is beside their name and shows the camera
   where, as it does in an inspect window; on no map, there is none.
 
+### UI
+
+**A pane of its own**: the middle tab of **bottom left** in the spread, between the shield and the compass,
+and a row of *Go to* on a phone. That bay is one size whichever tab is up, so changing tabs moves nothing.
+See decision record 0057.
+
 **What each size shows**, the pane owning all three:
 
-- **Phone, medium**: the portrait and the name, with the stats below a scroll.
-- **Phone, big**: the same with room; turned, the stats beside the portrait.
+- **Phone, medium**: the portrait and the name, with the stats below a scroll, on purpose and one gesture
+  off: there for a player who wants them and out of the way of one who does not, where squeezing all three
+  into half a phone would make all three too small to read.
+- **Phone, big**: the portrait, the name and the stats one under another; turned, the stats beside the
+  portrait.
 - **Desktop, medium**: the portrait and the name.
-- **Desktop, big**: the corner opens out **wider than the column**, along the bottom of the screen, with the
-  portrait beside the name and the stats. The windows above keep the column's width, and a letter along the
-  bottom moves over and never shrinks below the width it can be read at.
-- **Minimised**: the strip, with the pane's name.
+- **Desktop, big**: bottom left opened out, **wider than the column** along the bottom of the screen, with
+  the portrait beside the name and the stats.
+- **Minimised**: the strip, with the open figure's name or the pane's.
+
+The grid is three by three at every size and never scrolls; on a phone it is as big as the bay allows,
+with the given names under it where there is a line to spare.
 
 ### Not decided
 

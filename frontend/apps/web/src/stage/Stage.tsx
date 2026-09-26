@@ -1,5 +1,5 @@
-import type { CSSProperties, ReactNode } from 'react';
-import { useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
+import type { CSSProperties, ReactNode, RefObject } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useSyncExternalStore } from 'react';
 
 import { note } from '../debug/log';
 import { subjectsNow, watchSubjects } from '../inspect/subjects';
@@ -13,6 +13,7 @@ import {
   askingNow,
   baysNow,
   formNow,
+  putAwayForRoom,
   show,
   showingIn,
   stageIs,
@@ -21,16 +22,17 @@ import {
 } from './bays';
 import {
   cramps,
-  heightAsked,
   type Pane,
   panesFor,
   panesIn,
   type PaneSize,
   type Room,
+  sizeAsked,
   sizeOf,
   spreadWants,
   standingPanes,
 } from './panes';
+import { outOfRoom } from './rail';
 import { TabBar } from './TabBar';
 
 /**
@@ -81,7 +83,8 @@ export function Stage({ stage, contents, overlays }: StageProps) {
   // the one pane that comes and goes, and an empty tile takes no room.
   const pending = useSyncExternalStore(watchGateway, gatewayState).yourChoice !== null;
   const panes = useMemo(() => panesFor(subjects.open, pending), [subjects.open, pending]);
-  const wants = useMemo(() => spreadWants(panes, bays.heights, showingIn), [panes, bays]);
+  // Not told which tab is up, which is what makes pressing one move nothing. See decision record 0057.
+  const wants = useMemo(() => spreadWants(panes, bays), [panes, bays]);
 
   // `formNow()` is the form the stage was in a moment ago, which is what gives the fold its dead band. It
   // is read rather than passed because the layout is what sets it, and it only ever changes as a result of
@@ -128,15 +131,20 @@ export function Stage({ stage, contents, overlays }: StageProps) {
     const where = bayOf(id, pane);
     const whole = where === null ? null : box.bays[where];
     const at = bays.holding.indexOf(id);
+    // Panes sharing this tile behind a tab bar, if any. Only the one that is up is drawn, and it starts
+    // below the strip of tabs rather than at the tile's own top edge.
+    const sharing = where === null || box.form !== 'spread' ? [] : panesIn(panes, where);
+    const tabbed = isTabbed(where, sharing.length);
+    const up = !tabbed || showingIn(where as BayName, sharing).id === id;
     // What the player asked for, and the two forms answer it from different places. A tile in the spread
-    // has a height of its own, so it is what this pane was asked to be; a bay is one end of a split, so it
-    // is whatever the arrangement makes of the end this pane is standing at. A pane in no bay is hidden,
-    // so what it says there is never drawn.
+    // has a size of its own - this pane's, or the tile's when its panes take turns in it - and a bay is
+    // one end of a split, so it is whatever the arrangement makes of the end this pane is standing at. A
+    // pane in no bay is hidden, so what it says there is never drawn.
     const asked: PaneSize =
       box.form === 'spread'
         ? pane === undefined
           ? 'full'
-          : heightAsked(pane, bays.heights)
+          : sizeAsked(pane, bays)
         : at === -1
           ? 'small'
           : askedIn(bays.arrangement, at as Which);
@@ -145,18 +153,15 @@ export function Stage({ stage, contents, overlays }: StageProps) {
       // than leaving a pane too big for its tile to grow a scrollbar inside it.
       size: sizeOf(asked, cramps(pane, whole)),
       asked,
-      // One control on every pane, in both forms. See decision records 0045 and 0046.
+      // One control on every pane, in both forms, except that the panes taking turns in a tile share the
+      // one in its tab bar. See decision records 0045, 0046 and 0057.
       ask: (size) => askFor(id, size),
+      ownControl: !tabbed,
     };
 
     // A window in the spread stacks inside the rail, which is itself the column's upper tile, so it is a
     // flow item rather than a box of its own. Everything else is placed by its rectangle.
     const railed = box.form === 'spread' && where === 'left';
-    // Panes sharing this tile behind a tab bar, if any. Only the one that is up is drawn, and it starts
-    // below the strip of tabs rather than at the tile's own top edge.
-    const sharing = where === null || box.form !== 'spread' ? [] : panesIn(panes, where);
-    const tabbed = isTabbed(where, sharing.length);
-    const up = !tabbed || showingIn(where as BayName, sharing).id === id;
     const rect =
       whole !== null && tabbed
         ? { ...whole, y: whole.y + TAB_BAR, h: Math.max(0, whole.h - TAB_BAR) }
@@ -178,9 +183,17 @@ export function Stage({ stage, contents, overlays }: StageProps) {
 
   const rail = box.form === 'spread' ? box.bays.left : null;
 
+  // Out of room, the rail keeps one pane open and puts the rest away. What each is drawn at depends on
+  // what it says, so the stage measures the rail after every layout rather than working it out. See 0058.
+  const railRef = useRef<HTMLDivElement | null>(null);
+  const stacked = panes.filter(isWindow).map((pane) => ({ id: pane.id, asked: sizeAsked(pane, bays) }));
+  useRoomOnTheRail(railRef, rail !== null, stacked);
+
   // A tile that more than one pane declared itself into gets a strip of tabs across its top. There is one
-  // such tile today - the corner, holding the house status and navigation - and the layout learns only that
-  // the tile is `TAB_BAR` taller than whatever is up in it. See decision record 0042.
+  // such tile today - the corner, holding the house status, the key figures and navigation - and the
+  // layout learns only that the tile is `TAB_BAR` taller than its own size. The strip carries the tile's
+  // one size control at its far end, because the tile is one size whichever tab is up. See decision
+  // records 0042 and 0057.
   const tabbedTiles =
     box.form === 'spread'
       ? TILES.filter((name) => box.bays[name] !== null && isTabbed(name, panesIn(panes, name).length))
@@ -209,6 +222,7 @@ export function Stage({ stage, contents, overlays }: StageProps) {
        */}
       <div
         className="rail"
+        ref={railRef}
         hidden={box.form === 'spread' && rail === null}
         style={rail === null ? undefined : place(rail)}
       >
@@ -223,12 +237,23 @@ export function Stage({ stage, contents, overlays }: StageProps) {
       {tabbedTiles.map((name) => {
         const sharing = panesIn(panes, name);
         const tile = box.bays[name]!;
+        const up = showingIn(name, sharing);
+        // The tile's own size, which every pane in it answers with; asking through whichever is up asks
+        // the tile, because that is where `askFor` sends a pane that takes turns.
+        const asked = sizeAsked(up, bays);
+        const room: Room = {
+          size: sizeOf(asked),
+          asked,
+          ask: (size) => askFor(up.id, size),
+          ownControl: true,
+        };
         return (
           <TabBar
             key={name}
             sharing={sharing}
-            showing={showingIn(name, sharing).id}
+            showing={up.id}
             onShow={(id) => show(name, id)}
+            room={room}
             style={place({ ...tile, h: TAB_BAR })}
           />
         );
@@ -248,4 +273,66 @@ const isWindow = (pane: { id: string }) => pane.id.startsWith('inspect:');
 /** The class a bay gets from what is in it: every inspect window is styled the same way. */
 function kindOf(id: string): string {
   return id.startsWith('inspect:') ? 'inspect' : id;
+}
+
+/**
+ * Measure the rail and put away what it has no room for.
+ *
+ * After every layout, and whenever a pane on it changes height without the stage laying out again - a
+ * window whose subject changed, a census that finished counting. Each pane is measured at the height it is
+ * drawn at rather than the height it is squeezed to, which is what the rail would need to show it whole.
+ * `outOfRoom` says which to put away; once one is open there is nothing more to say, so a measurement that
+ * follows its own answer asks for nothing and it settles. See `rail.ts`.
+ */
+function useRoomOnTheRail(
+  rail: RefObject<HTMLDivElement | null>,
+  on: boolean,
+  stacked: readonly { id: string; asked: PaneSize }[],
+): void {
+  const check = useRef(() => {});
+  check.current = () => {
+    const held = rail.current;
+    if (!on || held === null) {
+      return;
+    }
+    const drawn = [...held.children].map((bay) => bay.firstElementChild as HTMLElement | null);
+    const measured = stacked.map((one, at) => ({ ...one, tall: wholeHeight(drawn[at]) }));
+    const gap = Number.parseFloat(getComputedStyle(held).rowGap) || 0;
+    putAwayForRoom(outOfRoom(measured, held.clientHeight, gap));
+  };
+
+  useLayoutEffect(() => {
+    check.current();
+    const held = rail.current;
+    if (!on || held === null) {
+      return;
+    }
+    // A pane squeezed into a scroll keeps its box when what it says grows, so watching the pane alone
+    // misses exactly the case that matters. Its children keep their own heights, so they are watched
+    // too, and anything added to or taken out of the rail's tree asks again.
+    const resized = new ResizeObserver(() => check.current());
+    for (const bay of held.children) {
+      const pane = bay.firstElementChild;
+      if (pane !== null) {
+        resized.observe(pane);
+        for (const part of pane.children) {
+          resized.observe(part);
+        }
+      }
+    }
+    const changed = new MutationObserver(() => check.current());
+    changed.observe(held, { childList: true, subtree: true, characterData: true });
+    return () => {
+      resized.disconnect();
+      changed.disconnect();
+    };
+  });
+}
+
+/**
+ * How tall a pane is drawn whole: what it says plus its edges, whether or not a short rail is squeezing it
+ * into a scroll. A pane that is not squeezed has as much to scroll as it shows, so this is its own height.
+ */
+function wholeHeight(drawn: HTMLElement | null | undefined): number {
+  return drawn == null ? 0 : drawn.scrollHeight + (drawn.offsetHeight - drawn.clientHeight);
 }

@@ -2,6 +2,8 @@
 
 - Status: accepted
 - Date: 2026-09-19
+- Amended 2026-09-25 by 0057: in the spread, the panes taking turns in the corner share **one** control,
+  at the far end of its tab bar, because the corner is one size whichever of them is up.
 
 ## Context
 
