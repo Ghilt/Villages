@@ -140,6 +140,9 @@ interface Textures {
  * or destroyed by the zoom, only faded: putting the switch on existence rather than on appearance is
  * what keeps a camera resting on the crossover from churning sprites. See docs/adr/0051.
  */
+/** Twelve frames a second: all a haze moving about a unit a second needs, and a fifth of what a display draws. */
+const UNDULATION_MS = 83;
+
 export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
   const app = new Application();
   const stage = new Container();
@@ -160,6 +163,23 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
   const fog = createFogLayer();
   /** The colour taken out of the map, beneath this canvas; nothing until the page hands over a canvas. */
   let uncolouring: ReturnType<typeof createUncolouring> | null = null;
+  /**
+   * The haze's slow clock: one frame at a time, twelve a second, while there is haze on the screen to move and
+   * none otherwise; nothing else on the map has a clock of its own. Still for anyone who has asked for less
+   * motion. See step 7 of docs/plans/fog-of-war.md.
+   */
+  let undulation: ReturnType<typeof setTimeout> | null = null;
+  const stillHaze =
+    typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const keepUndulating = (): void => {
+    if (undulation !== null || disposed) {
+      return;
+    }
+    undulation = setTimeout(() => {
+      undulation = null;
+      frame();
+    }, UNDULATION_MS);
+  };
   /** What the house has in vision, for asking whether a mark stands in it; nothing while there is no fog. */
   let vision: Coverage | null = null;
   /**
@@ -545,6 +565,12 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
 
     dressTheRing(zoom);
     fog.follow(view);
+    if (!stillHaze) {
+      fog.setTime(now / 1000);
+      if (fog.undulates(view)) {
+        keepUndulating();
+      }
+    }
     uncolouring?.follow(view);
 
     if (scenery !== null) {
@@ -668,6 +694,8 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
                 ? null
                 : { width: field.width, height: field.height, unitsPerTexel: field.unitsPerTexel },
             marksInVision: [...entries.values()].filter((entry) => entry.inVision).length,
+            // Whether the haze's slow clock is running, which it does only while there is haze to move.
+            undulating: undulation !== null,
           };
         };
         // Where every sprite actually ended up, for the console and for the end-to-end test, which has
@@ -803,6 +831,10 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
 
     destroy(): void {
       disposed = true;
+      if (undulation !== null) {
+        clearTimeout(undulation);
+        undulation = null;
+      }
       fog.destroy();
       uncolouring?.destroy();
       scenery?.destroy();

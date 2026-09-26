@@ -184,6 +184,12 @@ two forms. See decision record 0063.
 farmland stays pale and dark forest dark, and it is lifted a little towards the parchment; the trees and the
 castles standing on it lose their colour with it, and the signs over it keep theirs. See decision record 0065.
 
+**The haze is mist over a field, and its edge does not move.** It lies in bands stretched along the screen,
+four times wider than tall, never in round blotches; far out, where a band would be only a few pixels tall, it
+is a flat haze. Close in the bands swell and thin where they lie and drift slowly across, slow enough to be
+noticed rather than watched. The edge of what is seen stays still, so nothing that stands on it seems to be
+swallowed and given back. Every number of it is in `apps/web/src/fog/look.ts`.
+
 **Nothing on the map pops.** A thing arriving fades up, a thing gone fades out and is only then let go
 of, and a thing changing form crosses over rather than swapping. All of it is a fifth of a second or
 less, so it reads as the world settling rather than as an animation. See decision record 0051.

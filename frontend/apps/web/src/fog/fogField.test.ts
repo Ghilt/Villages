@@ -3,11 +3,11 @@ import type { CoverageCircle, VisionPointView } from '@villages/protocol';
 
 import coverage from '../../../../../contracts/fixtures/coverage.json?raw';
 import { WORLD_MASTER_WIDTH } from '../map/worldStyle';
-import { toMercator } from '../sprites/cameraMath';
+import { fromMercator, toMercator } from '../sprites/cameraMath';
 
 import { circleOf } from './circles';
 import type { FogCircle } from './circles';
-import { MOST_TEXELS, REACH, fieldOf, revealedAt } from './fogField';
+import { MOST_TEXELS, REACH, fieldOf, hazeInView, revealedAt } from './fogField';
 import type { FogField } from './fogField';
 
 /** The two distances of the texel a point of world space falls in: to revealed ground, and to vision. */
@@ -179,5 +179,28 @@ describe('whether ground is revealed, which is where the scenery may grow', () =
     const between = toMercator({ lng: 15 + east(50), lat: 50 });
 
     expect(revealedAt(field, between.x * WORLD_MASTER_WIDTH, between.y * WORLD_MASTER_WIDTH)).toBe(true);
+  });
+});
+
+describe('whether there is haze on the screen for its slow clock to move', () => {
+  const over = (x: number, y: number) =>
+    fromMercator({ x: x / WORLD_MASTER_WIDTH, y: y / WORLD_MASTER_WIDTH });
+
+  it('is none while the whole view stands on ground the house has revealed', () => {
+    // Zoom 12 is sixty-four pixels a world unit, so the view is a dozen units of a circle fifty across.
+    const view = { center: over(17_000, 9_000), zoom: 12, width: 800, height: 600 };
+
+    expect(hazeInView(fieldOf([seat])!, view)).toBe(false);
+  });
+
+  it('is some once unknown ground is in the view, tipped or not', () => {
+    const view = { center: over(17_000, 9_000), zoom: 9, width: 800, height: 600 };
+
+    expect(hazeInView(fieldOf([seat])!, view)).toBe(true);
+    expect(hazeInView(fieldOf([seat])!, { ...view, pitch: 45, bearing: 30 })).toBe(true);
+  });
+
+  it('is everywhere for a house that sees nothing', () => {
+    expect(hazeInView(null, { center: over(17_000, 9_000), zoom: 12, width: 800, height: 600 })).toBe(true);
   });
 });

@@ -1,7 +1,14 @@
 import { reachAcross } from '@villages/protocol';
 
 import { WORLD_MASTER_WIDTH } from '../map/worldStyle';
-import { fromMercator } from '../sprites/cameraMath';
+import {
+  fromMercator,
+  groundTilt,
+  pixelsPerWorldUnit,
+  toMercatorExact,
+  untiltGround,
+} from '../sprites/cameraMath';
+import type { CameraView } from '../sprites/cameraMath';
 
 import type { FogCircle } from './circles';
 
@@ -59,6 +66,39 @@ export function revealedAt(field: FogField, x: number, y: number): boolean {
     return false;
   }
   return field.distances[(row * field.width + column) * 2]! < 0;
+}
+
+/** How many points across the view, and as many down, are asked whether they stand on unknown ground. */
+const ASKED = 12;
+
+/**
+ * Whether any unknown ground is in this view: whether there is haze on the screen for the haze's slow clock to
+ * move (step 7). A dozen points across and a dozen down, carried back onto the ground through the camera the
+ * way the fog shader carries every pixel, is enough to find a patch of haze worth moving and costs nothing a
+ * frame. Null is a house that sees nothing, where the whole world is haze; ground off the world is none.
+ */
+export function hazeInView(field: FogField | null, view: CameraView): boolean {
+  const tilt = groundTilt(view);
+  const scale = pixelsPerWorldUnit(view.zoom);
+  const centre = toMercatorExact(view.center);
+  for (let across = 0; across < ASKED; across += 1) {
+    for (let down = 0; down < ASKED; down += 1) {
+      const ground = untiltGround(
+        ((across + 0.5) / ASKED - 0.5) * view.width,
+        ((down + 0.5) / ASKED - 0.5) * view.height,
+        tilt,
+      );
+      const x = centre.x * WORLD_MASTER_WIDTH + ground.east / scale;
+      const y = centre.y * WORLD_MASTER_WIDTH + ground.south / scale;
+      if (x < 0 || y < 0 || x > WORLD_MASTER_WIDTH || y > WORLD_MASTER_WIDTH) {
+        continue;
+      }
+      if (field === null || !revealedAt(field, x, y)) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 /** A squared distance too great to be one: "nothing outside anywhere near", to the distance transform. */

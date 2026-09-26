@@ -84,8 +84,14 @@ A player's own house and own key figures are always theirs to see: every one of 
    composited by the browser's saturation blend; the world's sprites under the fog by a filter in Pixi. Both
    from the same field, along the same edge and its wander, and the signs keep their colours. The wash is
    now a light fade. Decision record 0065.
-7. **The haze undulates**, slowly, only zoomed in and only while unknown ground is on the screen, at a frame
-   rate a slow movement needs rather than every frame.
+7. **The haze undulates.** Done. It lies in bands of mist stretched along the screen, like mist over a
+   field, which swell and thin where they lie and drift slowly across, big ones and small ones the opposite
+   way; far out they fade into a flat haze rather than breaking into blotches, which round patches did at
+   zoom 4 and 5. Its edge stays where it is, because the map's colour and the trees are cut along it. Every
+   number of the fog's look is in `apps/web/src/fog/look.ts`, for Adam's eye. The sprite canvas had no clock of its own, and has one now only while there is something for it to
+   do: twelve frames a second while the fog is drawn, the camera is at zoom 7 or closer, and a dozen points
+   across the view find unknown ground under them (`hazeInView`); none otherwise. Still for anyone who has
+   asked for less motion.
 8. **The stands come from the server.** The sprite map's stand files leave the public folder, and the gateway
    sends a page only the stands touching ground its house has revealed. The biome raster stays public: it says
    what kind of country a region is, which the terrain under the haze already says. This is also the channel

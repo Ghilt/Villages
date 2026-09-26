@@ -10,6 +10,8 @@
   they would not be; step 5 of `docs/plans/fog-of-war.md`.
 - Amended 2026-09-26: revealed ground has its colour taken out rather than washed with grey, the map's through
   a canvas of its own and the sprites' by a filter, and the wash is a light fade; see decision record 0065.
+- Amended 2026-09-26: the haze's patches drift slowly close in, on a clock of the sprite canvas's own that runs
+  only while there is haze on the screen; step 7 of `docs/plans/fog-of-war.md`.
 
 ## Context
 

@@ -1,6 +1,7 @@
 import { BufferImageSource, Filter, Geometry, GlProgram, Mesh, Shader, UniformGroup } from 'pixi.js';
 
-import { REACH } from '../fog/fogField';
+import { REACH, hazeInView } from '../fog/fogField';
+import { FOG_LOOK } from '../fog/look';
 import type { FogField } from '../fog/fogField';
 import { WORLD_MASTER_WIDTH } from '../map/worldStyle';
 
@@ -25,6 +26,12 @@ import type { CameraView } from './cameraMath';
 
 /** What the fog should draw: nothing, or the fog of a house, whose field is null when it sees nothing. */
 export type FogToDraw = { field: FogField | null } | null;
+
+/**
+ * The haze undulates only from here in (step 7). Further out its patches are too small to be seen to move, and
+ * the world is mostly its signs.
+ */
+export const UNDULATES_FROM_ZOOM = 7;
 
 /** One triangle that covers the screen, in clip space, so the fragment shader runs once for every pixel. */
 const COVER = new Float32Array([-1, -1, 3, -1, -1, 3]);
@@ -109,10 +116,15 @@ vec2 levelsAt(vec2 world) {
 }
 `;
 
+/** A number as GLSL writes a float, which always has a point in it. */
+const float = (value: number): string => (Number.isInteger(value) ? value.toFixed(1) : String(value));
+const colour = (rgb: readonly number[]): string => rgb.map(float).join(', ');
+
 /*
- * The colours and how see-through each is are Adam's to judge by eye. The haze is dark and lets the coast
- * through. Revealed ground has its colour taken out beneath this layer - the map's by `uncolouring.ts`, the
- * world's sprites by the filter below - and this only fades it a little, lifting it towards the parchment.
+ * Every number here that is a matter of taste comes from `fog/look.ts`, for Adam's eye. The haze is dark and
+ * lets the coast through, and lies in bands of mist. Revealed ground has its colour taken out beneath this
+ * layer - the map's by `uncolouring.ts`, the world's sprites by the filter below - and this only fades it a
+ * little, lifting it towards the parchment.
  */
 const FRAGMENT = `#version 300 es
 precision highp float;
@@ -121,10 +133,51 @@ precision highp int;
 in vec2 vScreen;
 out vec4 finalColor;
 ${LEVELS}
-const vec3 HAZE = vec3(0.105, 0.098, 0.125);
-const float HAZE_ALPHA = 0.62;
-const vec3 FADE = vec3(0.93, 0.91, 0.86);
-const float FADE_ALPHA = 0.24;
+// Seconds on the haze's own slow clock, which stands still whenever there is no haze worth moving.
+uniform float uTime;
+
+const vec3 HAZE = vec3(${colour(FOG_LOOK.haze.colour)});
+const float HAZE_ALPHA = ${float(FOG_LOOK.haze.opacity)};
+const float SWELL = ${float(FOG_LOOK.mist.swell)};
+const float STRETCH = ${float(FOG_LOOK.mist.stretch)};
+const float BIG = ${float(FOG_LOOK.mist.big)};
+const float SMALL = ${float(FOG_LOOK.mist.small)};
+const float DRIFT = ${float(FOG_LOOK.mist.drift)};
+const float CHURN = ${float(FOG_LOOK.mist.churn)};
+const vec3 FADE = vec3(${colour(FOG_LOOK.fade.colour)});
+const float FADE_ALPHA = ${float(FOG_LOOK.fade.opacity)};
+
+// Value noise in three dimensions, the third being time, so a band can swell and thin where it lies rather
+// than only slide along itself.
+float hash3(ivec3 cell) {
+  uvec3 u = uvec3(cell) * uvec3(1597334673u, 3812015801u, 2798796415u);
+  uint n = (u.x ^ u.y ^ u.z) * 1597334673u;
+  return float(n) / 4294967296.0;
+}
+
+float noise3(vec3 at) {
+  vec3 whole = floor(at);
+  vec3 part = at - whole;
+  vec3 w = part * part * (3.0 - 2.0 * part);
+  ivec3 c = ivec3(whole);
+  float near = mix(
+    mix(hash3(c), hash3(c + ivec3(1, 0, 0)), w.x),
+    mix(hash3(c + ivec3(0, 1, 0)), hash3(c + ivec3(1, 1, 0)), w.x),
+    w.y
+  );
+  float far = mix(
+    mix(hash3(c + ivec3(0, 0, 1)), hash3(c + ivec3(1, 0, 1)), w.x),
+    mix(hash3(c + ivec3(0, 1, 1)), hash3(c + ivec3(1, 1, 1)), w.x),
+    w.y
+  );
+  return mix(near, far, w.z);
+}
+
+// How much of a band of mist this many world units tall is worth drawing: none until it is six pixels tall and
+// all of it by two dozen, so far out the mist fades into a flat haze rather than breaking into blotches.
+float mistWorth(float units) {
+  return clamp((units * uScale - 6.0) / 18.0, 0.0, 1.0);
+}
 
 void main() {
   vec2 world = groundUnder(vScreen);
@@ -136,10 +189,22 @@ void main() {
   float revealed = levels.x;
   float vision = levels.y;
 
-  // A haze rather than a flat grey: it thickens and thins a little, in patches a couple of dozen units
-  // across, and goes flat far out where the patches would be smaller than a few pixels.
-  float cloud = mix(1.0, 0.8 + 0.4 * noise(world / 24.0), worth(24.0));
-  float haze = HAZE_ALPHA * (1.0 - revealed) * cloud;
+  // Mist over a field: the haze thickens and thins in bands stretched along the screen's width, whichever way
+  // the camera is turned, lying on the ground so that they pan with it. The bands swell and thin where they
+  // lie, and big ones and small ones drift across the screen the opposite way to each other, the small ones
+  // rising a little, so the mist undulates rather than sliding by as one sheet. Kept on the positive side of
+  // nought for the hash. The edge does not move: the map's colour and the trees are cut along it.
+  vec2 across =
+    vec2(world.x * uTilt.x + world.y * uTilt.y, world.y * uTilt.x - world.x * uTilt.y) + vec2(100000.0);
+  float drift = uTime * DRIFT;
+  float churn = uTime * CHURN;
+  float big = noise3(vec3((across.x - drift) / (STRETCH * BIG), across.y / BIG, churn));
+  float small = noise3(
+    vec3((across.x + drift * 0.7) / (STRETCH * SMALL), (across.y + drift * 0.12) / SMALL, churn * 1.6 + 7.0)
+  );
+  float swell = (big - 0.5) * 1.3 * mistWorth(BIG) + (small - 0.5) * 0.7 * mistWorth(SMALL);
+  float cloud = 1.0 + SWELL * swell;
+  float haze = min(1.0, HAZE_ALPHA * (1.0 - revealed) * cloud);
   float fade = FADE_ALPHA * revealed * (1.0 - vision);
   finalColor = vec4(HAZE * haze + FADE * fade, haze + fade);
 }
@@ -251,6 +316,7 @@ export function createFogLayer() {
     uFieldSize: { value: new Float32Array([1, 1]), type: 'vec2<f32>' },
     uHasField: { value: 0, type: 'f32' },
     uReach: { value: REACH, type: 'f32' },
+    uTime: { value: 0, type: 'f32' },
   });
   let source = emptySource();
   const shader = new Shader({
@@ -331,6 +397,20 @@ export function createFogLayer() {
     },
 
     /** Whether anything is being drawn, and from what, for the development probe. */
+    /** Moves the haze's clock on, to so many seconds; the haze drifts by it and nothing else does. */
+    setTime(seconds: number): void {
+      uniforms.uniforms.uTime = seconds;
+      uniforms.update();
+    },
+
+    /**
+     * Whether the haze has anything to move in this view: the fog drawn, the camera close enough for its patches
+     * to be seen to move, and some unknown ground on the screen.
+     */
+    undulates(view: CameraView): boolean {
+      return mesh.visible && view.zoom >= UNDULATES_FROM_ZOOM && hazeInView(shown, view);
+    },
+
     report(): { drawing: 'nothing' | 'everything unknown' | 'a field'; field: FogField | null } {
       return {
         drawing: !mesh.visible ? 'nothing' : shown === null ? 'everything unknown' : 'a field',

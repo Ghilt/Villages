@@ -197,6 +197,9 @@ fog changes, so no tree stands in the haze; the scatter itself stays a pure func
 between the map and the sprites that `fog/uncolouring.ts` lays a grey picture of the field on, blended by the
 browser's saturation blend, and the sprites under the fog by a filter on the container that holds them. The
 fog shader's code for where a pixel lies and how far inside each edge is shared by the fog and the filter.
+The sprite canvas draws when the map has drawn and has no clock of its own, except the haze's: while the fog
+is drawn close in with unknown ground on the screen, it asks for a frame twelve times a second, so the haze can
+drift, and stops asking the moment there is none.
 
 ## What acts on its own
 
