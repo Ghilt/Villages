@@ -171,7 +171,11 @@ cell's cap, so hidden houses never crowd out one that may be sent and are never 
 it before every delta; a change to a house's sight answers every cell its player holds again. A vision
 point's size is kilometres on the ground, and how far that reaches on the map is `Reach`, beside the cells in
 `protocol` and in the TypeScript package for the reason the cells are there: both ends compute it
-identically, against `contracts/fixtures/reach.json`. See decision record 0061, and
+identically, against `contracts/fixtures/reach.json`. Several points together, with the **surface tension**
+between them (0064), are `Coverage`: every circle and whatever a ball of the tension's size cannot get into,
+answered exactly for one place at a time by the gateway and the page's marks alike, against
+`contracts/fixtures/coverage.json`. The fog's distance field comes to the same edge for a whole grid at once,
+through a distance transform. See decision record 0061, and
 `docs/plans/fog-of-war.md` for what is built.
 
 **The fog is a layer of the sprite canvas**, `sprites/FogLayer.ts`, drawn between the world and the signs for

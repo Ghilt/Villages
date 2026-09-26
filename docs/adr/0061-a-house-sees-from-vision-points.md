@@ -12,6 +12,9 @@
   is `Reach`, the map's circle at the point's latitude and not the globe's, computed identically at both ends
   and held to `contracts/fixtures/reach.json`, so what is sent and what is drawn clear cannot disagree. The
   switch reaches the gateway as `fogOfWar`, and the wire moves to version 11.
+- Amended 2026-09-26: vision and revealed ground are no longer only their circles. Each is closed by a ball as
+  big as the surface tension, so a notch is rounded off and a short gap between two circles is seen across;
+  see decision record 0064.
 
 ## Context
 

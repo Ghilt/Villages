@@ -66,6 +66,12 @@ A player's own house and own key figures are always theirs to see: every one of 
    a point is `Reach`, the map's circle, computed identically at both ends against
    `contracts/fixtures/reach.json`. The switch tells the gateway as `fogOfWar`, on until it says otherwise.
    Wire version 11.
+
+   Then Adam found the circles too sharp and drew what he wanted: surface tension, circles close together
+   bleeding into each other over short distances. Vision and revealed ground are each closed by a ball of
+   40 km now, answered exactly by `Coverage` at both ends and drawn from the field through a distance
+   transform, and the server holds back by the same shape; `yourSight` carries the tension. Wire version 12,
+   decision record 0064.
 5. **No trees in unknown ground.** The scatter grows nothing on ground the house has not revealed, so the
    haze has no wood standing in it.
 6. **Colourless revealed ground.** The wash becomes the colour taken out, with a blend mode over the map and the

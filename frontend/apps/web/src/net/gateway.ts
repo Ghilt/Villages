@@ -53,10 +53,11 @@ export interface GatewayState {
    */
   yourKeyFigures: readonly KeyFigureView[] | null;
   /**
-   * Every vision point the player's house has had, oldest first, or null until the gateway has said. What
-   * the fog of war is drawn from: vision is the ones lasting today, revealed is all of them. See 0061.
+   * Every vision point the player's house has had, oldest first, and the surface tension of the edge in
+   * kilometres, or null until the gateway has said. What the fog of war is drawn from: vision is the points
+   * lasting today, revealed is all of them, each with the gaps between close circles filled. See 0061, 0064.
    */
-  yourSight: readonly VisionPointView[] | null;
+  yourSight: { points: readonly VisionPointView[]; tension: number } | null;
   /** The id of the command in flight, so the parchment can stop taking a second answer. */
   acting: string | null;
   houses: HousesState;
@@ -292,7 +293,7 @@ function heard(frame: ServerFrame): void {
         'sight',
         describeSight(frame.points, state.world?.today ?? null, (id) => figures.get(id)),
       );
-      update({ yourSight: frame.points });
+      update({ yourSight: { points: frame.points, tension: frame.tension } });
       return;
     }
     case 'worldWiped':

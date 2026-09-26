@@ -292,9 +292,14 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
   /**
    * Every vision point the player's house has had, oldest first: its vision is the ones lasting today, what it
    * has revealed is everything any of them has covered, and the rest is unknown. Always a list, empty while
-   * there is no house. The fog of war is drawn from this. See decision record 0061.
+   * there is no house. The fog of war is drawn from this. See decision record 0061. `tension` is the surface
+   * tension of the edge in kilometres, which joins circles close together: `coverageOf`, and 0064.
    */
-  z.object({ type: z.literal('yourSight'), points: z.array(visionPointViewSchema) }),
+  z.object({
+    type: z.literal('yourSight'),
+    points: z.array(visionPointViewSchema),
+    tension: z.number().nonnegative(),
+  }),
   /** Another window took this player over; this session is finished. */
   z.object({ type: z.literal('takenOver'), message: z.string() }),
   /** The world was emptied and this session is finished with it. Everyone is told. See 0036. */

@@ -622,6 +622,13 @@ scenery of unknown ground is not sent until the house has revealed it.
 - **Unknown** is a dark haze, slowly undulating when zoomed in. It is not completely opaque, and the contours
   of the map always show through it. The undulating can come last, and only if it can be made cheap.
 
+**The edge of sight has surface tension.** Adam's words and his picture: circles close together bleed into
+each other and the ground between them is seen too, but only over short distances. So vision and revealed
+ground are each their circles and every gap or notch between them that a ball of 40 km cannot get into: a
+notch where two overlap is rounded off, a gap up to about 56 km between two seat-sized circles is bridged,
+and a lone circle stays exactly its circle. What the tension joins is seen in the full sense - a house in a
+bridge is sent - and a spot seen again and again does not swell. Decision record 0064.
+
 **The fog covers the world, not the signs for the things in it.** In Adam's words, it "should only cover 'the
 world' not representations of important things when zoomed out", and a thing in sight is never under it. So
 every icon, the seats a choice offers and anything standing in vision are drawn over the fog, and what stands
@@ -671,3 +678,7 @@ and anything of significance 80 from anywhere, which nothing reaches yet. Nothin
 them, in its snapshot or its changes, and what is held back is not counted either. When the house's sight
 changes, every cell the player holds is answered again: a house on ground newly revealed appears, and
 somebody no longer in vision goes. Turning the fog off lifts this as well as the drawing.
+
+**The edge has surface tension**, from wire version 12, which carries it: the ground a ball of 40 km cannot
+get into between the circles is covered too, drawn and held back alike. It is one number,
+`Vision.SURFACE_TENSION`, and the page follows it because the server sends it.

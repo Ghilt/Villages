@@ -1,4 +1,5 @@
-import type { FogCircle } from '../fog/circles';
+import type { Coverage } from '@villages/protocol';
+
 import type { FogField } from '../fog/fogField';
 
 import type { LngLat } from './cameraMath';
@@ -75,12 +76,12 @@ export interface SpriteRenderer {
 }
 
 /**
- * The fog of a house: the distance field it is drawn from, null for a house that sees nothing, and the circles
- * of its vision points, which say which marks stand in vision and so go over it. See decision record 0061.
+ * The fog of a house: the distance field it is drawn from, null for a house that sees nothing, and what it has
+ * in vision, which says which marks stand in vision and so go over it. See decision records 0061 and 0064.
  */
 export interface FogHow {
   field: FogField | null;
-  circles: readonly FogCircle[];
+  vision: Coverage;
 }
 
 /** What the renderer needs in order to furnish the world. */

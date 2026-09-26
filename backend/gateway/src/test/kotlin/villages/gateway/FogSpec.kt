@@ -37,6 +37,11 @@ private val helsinki = Location(60.17, 24.94)
 /** Nowhere the house has ever seen. */
 private val paris = Location(48.85, 2.35)
 
+/** A hundred kilometres east of Stockholm on the map, so a gap of 32 km between two seat-sized circles. */
+private val eastOfStockholm = Location(59.33, 19.83)
+/** Halfway between the two: fifty kilometres from each, outside both circles and inside the bridge. */
+private val betweenThem = Location(59.33, 18.95)
+
 private val banner = Banner(Tincture.SABLE, Division.PLAIN, null, Charge.STAG, Tincture.ARGENT)
 
 private fun house(of: PlayerId, at: Location, significance: Double = 20.0) = HouseRow(
@@ -114,6 +119,23 @@ class FogSpec : StringSpec({
         fog.letsThrough(house(me, paris)) shouldBe true
         fog.letsThrough(person(heldBy = me), standing(paris), today) shouldBe true
         fog.letsThrough(person(heldBy = them), standing(paris), today) shouldBe false
+    }
+
+    "ground between two circles close together is seen too, because the edge of sight has surface tension" {
+        val fog = Fog(me, listOf(point(stockholm), point(eastOfStockholm)))
+
+        fog.letsThrough(house(them, betweenThem)) shouldBe true
+        fog.letsThrough(person(), standing(betweenThem), today) shouldBe true
+        Fog(me, listOf(point(stockholm), point(eastOfStockholm)), tension = 0.0)
+            .letsThrough(house(them, betweenThem)) shouldBe false
+    }
+
+    "a bridge to a point that has ended is revealed, and is not in vision" {
+        val ended = point(eastOfStockholm, since = WorldTime(today.day - 10), until = WorldTime(today.day - 1))
+        val fog = Fog(me, listOf(point(stockholm), ended))
+
+        fog.letsThrough(house(them, betweenThem)) shouldBe true
+        fog.letsThrough(person(), standing(betweenThem), today) shouldBe false
     }
 
     "a connection that has not said who it is sees only the really big" {

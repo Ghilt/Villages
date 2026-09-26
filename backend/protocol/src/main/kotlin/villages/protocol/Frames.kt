@@ -30,9 +30,10 @@ import tools.jackson.databind.JsonNode
  * decision record 0055. Version 9 added `yourSight`, the vision points a house sees from, which the fog of
  * war is drawn from. Version 10 added `giveVision` and `takeVision`, a house given vision of a place outright
  * and having it taken away. See decision record 0061. Version 11 added `fogOfWar`, Adam's switch, because the
- * gateway now holds back what a house cannot see.
+ * gateway now holds back what a house cannot see. Version 12 gave `yourSight` its `tension`, the surface
+ * tension that joins circles close together. See decision record 0064.
  */
-const val PROTOCOL_VERSION = 11
+const val PROTOCOL_VERSION = 12
 
 data class Point(val lat: Double, val lon: Double)
 
@@ -454,8 +455,12 @@ data class YourKeyFigures(val keyFigures: List<KeyFigureView>) : ServerFrame
  * or closes. Its **vision** is the points lasting today, what it has **revealed** is everything any of them
  * has ever covered, and the rest of the world is **unknown**: the fog of war is drawn from this. What a
  * house sees is its own, like what it holds. See decision record 0061.
+ *
+ * `tension` is the surface tension of the edge, in kilometres: vision and revealed ground are their circles
+ * and every gap or notch between them a ball this big cannot get into, which is `Coverage`. It is sent rather
+ * than known at both ends so that the server stays the one place a sight is worked out. See 0064.
  */
-data class YourSight(val points: List<VisionPointView>) : ServerFrame
+data class YourSight(val points: List<VisionPointView>, val tension: Double) : ServerFrame
 
 /**
  * Somewhere the house sees from. `kind` says what gives it - `seat`, `keyFigure` or `given` - and `of` is the

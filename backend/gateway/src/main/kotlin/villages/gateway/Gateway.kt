@@ -48,6 +48,7 @@ import villages.domain.PlayerId
 import villages.domain.PledgeId
 import villages.domain.Resource
 import villages.domain.Stat
+import villages.domain.Vision
 import villages.domain.VisionId
 import villages.domain.WorldTime
 import villages.protocol.AddKeyFigurePayload
@@ -416,7 +417,7 @@ class Gateway(
          */
         internal fun sightChanged(sight: Sight) {
             fog = Fog(player, sight.points)
-            out.send(YourSight(sight.toView()))
+            out.send(YourSight(sight.toView(), Vision.SURFACE_TENSION))
             if (fogged) {
                 answerAgain()
             }
@@ -498,7 +499,7 @@ class Gateway(
             )
             out.send(YourHouse(theirHouses.ofPlayer(who)?.toYours()))
             out.send(YourKeyFigures(figures.of(HouseId.of(who)).map { it.toView() }))
-            out.send(YourSight(sights.of(HouseId.of(who)).toView()))
+            out.send(YourSight(sights.of(HouseId.of(who)).toView(), Vision.SURFACE_TENSION))
 
             // Arriving with no house and nothing to decide is what the founding choice answers. The
             // choice arrive() hands back is what goes out, not a read of the projection: the projection

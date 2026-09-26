@@ -41,7 +41,7 @@ export function MapSection({ map, master, renderer, onRenderer }: MapSectionProp
   const fog = useSyncExternalStore(watchFog, fogIsOn);
   const heard = useSyncExternalStore(watchGateway, gatewayState);
   // The visions given outright that the house still has, oldest first: each one can be taken away.
-  const given = (heard.yourSight ?? []).filter(
+  const given = (heard.yourSight?.points ?? []).filter(
     (point) => point.kind === 'given' && lastingOn(point, heard.world?.today ?? null),
   );
 

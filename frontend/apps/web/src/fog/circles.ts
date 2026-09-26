@@ -1,5 +1,5 @@
-import { reachAcross } from '@villages/protocol';
-import type { VisionPointView } from '@villages/protocol';
+import { coverageOf, reachAcross } from '@villages/protocol';
+import type { Coverage, VisionPointView } from '@villages/protocol';
 
 import { WORLD_MASTER_WIDTH } from '../map/worldStyle';
 import { toMercator } from '../sprites/cameraMath';
@@ -21,27 +21,37 @@ export interface FogCircle {
   y: number;
   /** How far it sees, in world units at its own latitude. */
   radius: number;
+  /** How far it sees grown by the surface tension, in world units at its own latitude. See 0064. */
+  grown: number;
   /** Still giving vision today, rather than only having revealed what it covered. */
   lasting: boolean;
 }
 
-export function circleOf(point: VisionPointView, today: number | null): FogCircle {
+export function circleOf(point: VisionPointView, today: number | null, tension = 0): FogCircle {
   const at = toMercator({ lng: point.place.lon, lat: point.place.lat });
   return {
     x: at.x * WORLD_MASTER_WIDTH,
     y: at.y * WORLD_MASTER_WIDTH,
     radius: reachAcross(point.place.lat, point.radius) * WORLD_MASTER_WIDTH,
+    grown: reachAcross(point.place.lat, point.radius + tension) * WORLD_MASTER_WIDTH,
     lasting: lastingOn(point, today),
   };
 }
 
 /**
- * Whether a place stands in vision: inside a circle that still gives vision, by the same arithmetic the fog is
- * drawn with. What decides whether a thing standing there is drawn over the fog rather than under it.
+ * What the house has in vision on a day, with the surface tension between its circles: the answer to whether
+ * a thing standing somewhere is drawn over the fog rather than under it, by the same arithmetic the gateway
+ * decides who may be sent by. See decision records 0063 and 0064.
  */
-export function standsInVision(circles: readonly FogCircle[], place: { lng: number; lat: number }): boolean {
-  const at = toMercator(place);
-  const x = at.x * WORLD_MASTER_WIDTH;
-  const y = at.y * WORLD_MASTER_WIDTH;
-  return circles.some((circle) => circle.lasting && Math.hypot(x - circle.x, y - circle.y) <= circle.radius);
+export function visionOf(
+  points: readonly VisionPointView[],
+  today: number | null,
+  tension: number,
+): Coverage {
+  return coverageOf(
+    points
+      .filter((point) => lastingOn(point, today))
+      .map((point) => ({ lat: point.place.lat, lon: point.place.lon, kilometres: point.radius })),
+    tension,
+  );
 }

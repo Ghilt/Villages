@@ -18,8 +18,7 @@ import type { Form, TwoForms } from './twoForms';
 import { createSceneryLayer } from './scenery/SceneryLayer';
 import { noteDrawn } from './scenery/sceneryCells';
 import type { CameraSource, FogHow, MapSprite, SceneryHow, SpriteRenderer } from './SpriteRenderer';
-import { standsInVision } from '../fog/circles';
-import type { FogCircle } from '../fog/circles';
+import type { Coverage } from '@villages/protocol';
 import { createFogLayer } from './FogLayer';
 import { overTheFog } from './fogLayering';
 
@@ -149,8 +148,10 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
   const underTheFog = new Container();
   const overIt = new Container();
   const fog = createFogLayer();
-  /** The circles of the house's vision points, for asking whether a mark stands in vision. */
-  let circles: readonly FogCircle[] = [];
+  /** What the house has in vision, for asking whether a mark stands in it; nothing while there is no fog. */
+  let vision: Coverage | null = null;
+  const standsInVision = (at: { lng: number; lat: number }): boolean =>
+    vision?.covers({ lat: at.lat, lon: at.lng }) ?? false;
   const entries = new Map<string, Entry>();
 
   let textures: Textures | null = null;
@@ -333,7 +334,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       blend: showing === 'ground' ? 1 : 0,
       presence: 0,
       leaving: false,
-      inVision: standsInVision(circles, spec.at),
+      inVision: standsInVision(spec.at),
     };
     if (textures === null) {
       return entry;
@@ -418,7 +419,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
    * Moving a sprite between two containers keeps it; nothing is made again.
    */
   function sideOfTheFog(entry: Entry): void {
-    entry.inVision = standsInVision(circles, entry.spec.at);
+    entry.inVision = standsInVision(entry.spec.at);
     const belongs = overTheFog('ground', entry.inVision) ? overIt : underTheFog;
     if (entry.ground !== null && entry.ground.parent !== belongs) {
       belongs.addChild(entry.ground);
@@ -637,7 +638,6 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
               field === null
                 ? null
                 : { width: field.width, height: field.height, unitsPerTexel: field.unitsPerTexel },
-            circles: circles.length,
             marksInVision: [...entries.values()].filter((entry) => entry.inVision).length,
           };
         };
@@ -711,7 +711,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
 
     setFog(next: FogHow | null): void {
       fog.show(next === null ? null : { field: next.field });
-      circles = next?.circles ?? [];
+      vision = next?.vision ?? null;
       for (const entry of entries.values()) {
         sideOfTheFog(entry);
       }

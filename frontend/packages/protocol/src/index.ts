@@ -5,7 +5,7 @@
  */
 
 /** Sent on the handshake so that the gateway can refuse a client it cannot speak to. */
-export const PROTOCOL_VERSION = 11;
+export const PROTOCOL_VERSION = 12;
 
 export {
   MAX_ZOOM,
@@ -20,7 +20,9 @@ export {
 } from './cells';
 export type { Tile, View } from './cells';
 
-export { EQUATOR_KM, reachAcross, reaches } from './reach';
+export { EQUATOR_KM, mercatorX, mercatorY, reachAcross, reaches } from './reach';
+export { coverageOf } from './coverage';
+export type { Coverage, CoverageCircle } from './coverage';
 
 export {
   MONTHS,

@@ -5,6 +5,7 @@
  * A circle on the Mercator plane around the point's place, as many kilometres across as it sees at its own
  * latitude: the map's circle, not the globe's. The page draws the fog clear inside it and the gateway sends
  * what stands inside it, so the two must never disagree about where its edge is. See decision record 0061.
+ * Several of them together, with the surface tension between them, are `coverageOf`.
  */
 
 import { MERCATOR_EDGE } from './cells';
@@ -12,17 +13,21 @@ import { MERCATOR_EDGE } from './cells';
 /** The circumference Web Mercator is drawn from, in kilometres: the sphere the map and the tiles share. */
 export const EQUATOR_KM = 40_075.016686;
 
+const clampLatitude = (lat: number): number => Math.min(MERCATOR_EDGE, Math.max(-MERCATOR_EDGE, lat));
+
 /** How far a point seeing `kilometres` at latitude `lat` reaches, as a share of the side of the Mercator square. */
 export function reachAcross(lat: number, kilometres: number): number {
-  return kilometres / (EQUATOR_KM * Math.cos((lat * Math.PI) / 180));
+  return kilometres / (EQUATOR_KM * Math.cos((clampLatitude(lat) * Math.PI) / 180));
 }
 
-function mercatorX(lon: number): number {
+/** A longitude as a share of the side of the Mercator square, from the west. */
+export function mercatorX(lon: number): number {
   return (lon + 180) / 360;
 }
 
-function mercatorY(lat: number): number {
-  const radians = (Math.min(MERCATOR_EDGE, Math.max(-MERCATOR_EDGE, lat)) * Math.PI) / 180;
+/** A latitude as a share of the side of the Mercator square, from the north. */
+export function mercatorY(lat: number): number {
+  const radians = (clampLatitude(lat) * Math.PI) / 180;
   return 0.5 - Math.log(Math.tan(Math.PI / 4 + radians / 2)) / (2 * Math.PI);
 }
 

@@ -442,7 +442,7 @@ class GatewaySpec : StringSpec({
         val sent = mutableListOf<ServerFrame>()
         Rig().gateway.connect { sent += it }.receive(hello)
 
-        sent[3] shouldBe YourSight(emptyList())
+        sent[3] shouldBe YourSight(emptyList(), tension = 40.0)
     }
 
     "a founded house sees from its seat, as big a circle as Mallorca, and its player is told" {
@@ -453,6 +453,7 @@ class GatewaySpec : StringSpec({
 
         sent.filterIsInstance<YourSight>().last() shouldBe YourSight(
             listOf(VisionPointView(kind = "seat", place = Point(59.33, 18.07), radius = 34.0, since = today.day)),
+            tension = 40.0,
         )
     }
 

@@ -338,8 +338,9 @@ Commands are added here as the increments land:
   world and not the signs: every icon, the offered seats and whatever stands in vision are drawn over it. Unknown ground is under a dark haze, revealed ground is washed
   grey, vision is clear. With no house the whole world is hazed. The server holds back what the fog hides:
   a player is sent the houses on revealed ground and the people in vision, and their own wherever they are,
-  and `fog of war: off` lifts that too, for that window. See `docs/adr/0061`, `0062`, `0063` and
-  `docs/plans/fog-of-war.md`.
+  and `fog of war: off` lifts that too, for that window. The edge has surface tension: circles closer than
+  about 56 km are seen across and notches are rounded off, drawn and held back alike, `Vision.SURFACE_TENSION`.
+  See `docs/adr/0061`, `0062`, `0063`, `0064` and `docs/plans/fog-of-war.md`.
 - Looking at a whole world at once: `see everything`, in the debug panel's World bar beside `seed 20`.
   A house is founded at significance 20, so it reaches a page only from zoom 8 in, and pulling back past
   about z7.5 empties the map because the gateway stopped sending rather than because anything is hidden.

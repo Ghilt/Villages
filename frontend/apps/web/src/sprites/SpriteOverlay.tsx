@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
 import { sceneryNow, watchScenery } from '../debug/scenery';
-import { circleOf } from '../fog/circles';
+import { circleOf, visionOf } from '../fog/circles';
 import { fieldOf } from '../fog/fogField';
 import { fogIsOn, watchFog } from '../fog/fogOfWar';
 import { gatewayState, watchGateway } from '../net/gateway';
@@ -40,10 +40,16 @@ export function SpriteOverlay({ map, sprites, worldRoot }: SpriteOverlayProps) {
   const today = useSyncExternalStore(watchGateway, todayNow);
   const fogOn = useSyncExternalStore(watchFog, fogIsOn);
 
-  // The house's vision points as circles, and the distance field the fog is drawn from, worked out once for
-  // each change to what the house has seen from and never while the camera moves. See decision 0061.
-  const circles = useMemo(() => (sight ?? []).map((point) => circleOf(point, today)), [sight, today]);
-  const field = useMemo(() => fieldOf(circles), [circles]);
+  // The house's vision points as circles, the distance field the fog is drawn from, and what it has in vision
+  // for deciding which marks go over the fog, all with the surface tension between the circles, worked out once
+  // for each change to what the house has seen from and never while the camera moves. See 0061 and 0064.
+  const tension = sight?.tension ?? 0;
+  const circles = useMemo(
+    () => (sight?.points ?? []).map((point) => circleOf(point, today, tension)),
+    [sight, today, tension],
+  );
+  const field = useMemo(() => fieldOf(circles, tension), [circles, tension]);
+  const vision = useMemo(() => visionOf(sight?.points ?? [], today, tension), [sight, today, tension]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -78,8 +84,8 @@ export function SpriteOverlay({ map, sprites, worldRoot }: SpriteOverlayProps) {
   // under haze for a moment; nothing either with the switch off. Also on the sprites, because a renderer made
   // after the switch was thrown starts with no fog.
   useEffect(() => {
-    rendererRef.current?.setFog(fogOn && sight !== null ? { field, circles } : null);
-  }, [fogOn, sight, field, circles, sprites]);
+    rendererRef.current?.setFog(fogOn && sight !== null ? { field, vision } : null);
+  }, [fogOn, sight, field, vision, sprites]);
 
   // The ring follows whatever was opened last. With three windows up the map can still only mark one, and
   // the newest is the one the player is looking at.

@@ -13,4 +13,13 @@ object Vision {
      * event so that changing this later does not change what was given.
      */
     const val MALLORCA = 34.0
+
+    /**
+     * How tense the edge of sight is, in kilometres: the size of the ball that cannot get into whatever gap or
+     * notch it fills. Two circles closer than this is wide are seen across, a notch where two overlap is
+     * rounded off by a curve this big, and a lone circle is left exactly as it is. Adam's picture; the number
+     * is a matter of taste, and bridges gaps of up to about 56 km between two seat-sized circles. See
+     * decision record 0064.
+     */
+    const val SURFACE_TENSION = 40.0
 }

@@ -3,8 +3,9 @@ import type { VisionPointView } from '@villages/protocol';
 
 import reach from '../../../../../contracts/fixtures/reach.json?raw';
 import { WORLD_MASTER_WIDTH } from '../map/worldStyle';
+import { toMercator } from '../sprites/cameraMath';
 
-import { circleOf, standsInVision } from './circles';
+import { circleOf, visionOf } from './circles';
 
 const at = (lat: number, lon: number, until?: number): VisionPointView => ({
   kind: 'seat',
@@ -18,6 +19,11 @@ describe('a vision point as the fog draws it', () => {
   it('is 34 km of ground, which is 28 world units on the equator and twice that at sixty north', () => {
     expect(circleOf(at(0, 0), 100).radius).toBeCloseTo(27.8, 1);
     expect(circleOf(at(60, 0), 100).radius).toBeCloseTo(55.6, 1);
+  });
+
+  it('grows by the surface tension at its own latitude, and not at all without one', () => {
+    expect(circleOf(at(0, 0), 100, 40).grown).toBeCloseTo((74 / 34) * 27.8, 0);
+    expect(circleOf(at(0, 0), 100).grown).toBe(circleOf(at(0, 0), 100).radius);
   });
 
   it('stands where Mercator puts its place, in world units', () => {
@@ -36,25 +42,8 @@ describe('a vision point as the fog draws it', () => {
     expect(circleOf(at(59.33, 18.07), 100).lasting).toBe(true);
     expect(circleOf(at(59.33, 18.07, 100), 100).lasting).toBe(false);
   });
-});
 
-describe('whether a place stands in vision', () => {
-  const seat = circleOf(at(59.33, 18.07), 100);
-  const ended = circleOf(at(57.64, 18.3, 100), 100);
-
-  it('is inside a circle that still gives vision', () => {
-    expect(standsInVision([seat], { lng: 18.07, lat: 59.33 })).toBe(true);
-    // A little under the 34 km the circle reaches, north of the seat.
-    expect(standsInVision([seat], { lng: 18.07, lat: 59.33 + 30 / 111 })).toBe(true);
-  });
-
-  it('is not outside it, nor inside a circle that has ended and only revealed', () => {
-    expect(standsInVision([seat], { lng: 18.07, lat: 59.33 + 40 / 111 })).toBe(false);
-    expect(standsInVision([seat, ended], { lng: 18.3, lat: 57.64 })).toBe(false);
-    expect(standsInVision([], { lng: 18.07, lat: 59.33 })).toBe(false);
-  });
-
-  it('agrees with every shared vector, which is the arithmetic the gateway holds back by', () => {
+  it('puts every circle where the shared vectors say, which is the arithmetic the gateway holds back by', () => {
     type Place = { lat: number; lon: number };
     const fixture = JSON.parse(reach) as {
       vectors: { name: string; centre: Place; kilometres: number; place: Place; within: boolean }[];
@@ -62,8 +51,38 @@ describe('whether a place stands in vision', () => {
 
     for (const vector of fixture.vectors) {
       const circle = circleOf({ kind: 'seat', place: vector.centre, radius: vector.kilometres, since: 0 }, 0);
-      const place = { lng: vector.place.lon, lat: vector.place.lat };
-      expect(standsInVision([circle], place), vector.name).toBe(vector.within);
+      const place = toMercator({ lng: vector.place.lon, lat: vector.place.lat });
+      const apart = Math.hypot(
+        place.x * WORLD_MASTER_WIDTH - circle.x,
+        place.y * WORLD_MASTER_WIDTH - circle.y,
+      );
+      expect(apart <= circle.radius, vector.name).toBe(vector.within);
     }
+  });
+});
+
+describe('what the house has in vision, which decides what goes over the fog', () => {
+  const seat = at(59.33, 18.07);
+  const ended = at(57.64, 18.3, 100);
+  /** A hundred kilometres east of the seat on the map: a gap of 32 km between the two circles. */
+  const east = at(59.33, 19.83);
+
+  it('is inside a circle that still gives vision', () => {
+    const vision = visionOf([seat], 100, 40);
+
+    expect(vision.covers({ lat: 59.33, lon: 18.07 })).toBe(true);
+    // A little under the 34 km the circle reaches, north of the seat.
+    expect(vision.covers({ lat: 59.33 + 30 / 111, lon: 18.07 })).toBe(true);
+  });
+
+  it('is not outside it, nor inside a circle that has ended and only revealed', () => {
+    expect(visionOf([seat], 100, 40).covers({ lat: 59.33 + 40 / 111, lon: 18.07 })).toBe(false);
+    expect(visionOf([seat, ended], 100, 40).covers({ lat: 57.64, lon: 18.3 })).toBe(false);
+    expect(visionOf([], 100, 40).covers({ lat: 59.33, lon: 18.07 })).toBe(false);
+  });
+
+  it('reaches across a short gap between two circles, which is the surface tension', () => {
+    expect(visionOf([seat, east], 100, 40).covers({ lat: 59.33, lon: 18.95 })).toBe(true);
+    expect(visionOf([seat, east], 100, 0).covers({ lat: 59.33, lon: 18.95 })).toBe(false);
   });
 });
