@@ -577,3 +577,69 @@ whenever one of them changes, and the commands that take one in, change a stat, 
 portrait and kill one are on the wire from version 6. Decision record 0055 is the shape.
 `docs/plans/characters-and-key-figures.md` has the rest in order, one commit a step. Opened out, the
 corner already reaches along the bottom to 560, wider than the column, which is decision record 0056.
+
+---
+
+## Fog of war
+
+What a house knows about the world, by where it can see. In Adam's words, it "limits what info you get from
+that area of the map, it does not limit anything else".
+
+### What it is
+
+A house sees the map at three levels:
+
+- **Vision**: where the house can see right now. Everything there is shown.
+- **Revealed**: where it has seen before. It still sees certain things there: what stands still - the
+  ground, its trees and the buildings on it - and not what moves, which is people. Houses are not special
+  in this: a house is the first building rather than the definition of one.
+- **Unknown**: where it has never seen. Only the terrain, and really big events.
+
+**What gives vision is a vision point**: a place, the size of the circle seen around it, and when it starts
+and stops giving vision. Anything can give vision. Today a house's **seat** does, from the day it is founded,
+and each of its **key figures** standing on the map does, for as long as they stand in one place; both see a
+circle about the size of Mallorca. A point that has ended leaves what it covered revealed. An event could give
+vision of another continent for a couple of in-game months, which is a vision point with a start and an end.
+
+Nothing is stopped by the fog. A player can put a key figure or found a house in unknown ground; what the fog
+decides is only what they are told about it.
+
+### What it is for
+
+**Knowing is earned.** A house knows its own ground and what its people have seen, and the rest of the world
+is terrain and rumour. Sending someone somewhere is how a house comes to know a place, which gives a key figure
+standing on the map a reason to be there.
+
+**It holds in a shared world.** What a house cannot see is kept back by the server rather than hidden by the
+browser, so the fog is not a curtain a player could simply stop drawing. Ideally that includes the trees: the
+scenery of unknown ground is not sent until the house has revealed it.
+
+### Look and feel
+
+- **Vision** is completely unobscured.
+- **Revealed** is a faded, colourless filter. If taking the colour out is hard with the stack, a faded colour
+  laid over it will do.
+- **Unknown** is a dark haze, slowly undulating when zoomed in. It is not completely opaque, and the contours
+  of the map always show through it. The undulating can come last, and only if it can be made cheap.
+
+The switch for it is Adam's, in the debug panel's Debug map section: *fog of war: on* or *off*, in words. Off
+lifts the whole of it for that window, drawn and held back alike, and every page load starts with it on.
+
+### Not decided
+
+- **What else gives vision**, and how big each circle is. Everything is a Mallorca today, and a watchtower, an
+  ally or a storyline are all candidates.
+- **What a really big event is.** The number is significance 80 and up, drawn from zoom 2, and nothing in the
+  world reaches it yet.
+- **Whether revealed ground shows buildings as they were last seen** rather than as they are now. As they are
+  now, for now; remembering what each player saw is a read model of its own.
+- **What a player sees before founding.** With no house there is nothing to see from, so the whole world is
+  unknown, the seats a founding choice offers included.
+- **Whether a house ever shares its vision** with another.
+
+### Where it stands
+
+Step 1 of `docs/plans/fog-of-war.md` is built. The server works out every house's vision points from its seat
+and its key figures on the map, and sends them to the player as `yourSight` from wire version 9, on arriving
+and whenever one opens or closes; the debug log says in one line what gives vision and how many places the
+house has seen from. Nothing is drawn and nothing is held back yet. Decision record 0061 is the shape.

@@ -146,6 +146,21 @@ export const characterOnMapViewSchema = z.object({
   version: z.number().int(),
 });
 
+/**
+ * Somewhere the player's house sees from. `kind` says what gives it and `of` is the key figure's id, absent
+ * for the seat. `radius` is how far it sees around `place`, in **kilometres** on the ground; how big that is
+ * on the map is worked out at the place's latitude. `since` and `until` are world-days, and `until` is
+ * absent while it still gives vision. See decision record 0061.
+ */
+export const visionPointViewSchema = z.object({
+  kind: z.enum(['seat', 'keyFigure']),
+  of: z.string().optional(),
+  place: pointSchema,
+  radius: z.number().positive(),
+  since: worldDaySchema,
+  until: worldDaySchema.optional(),
+});
+
 /** What taking an option would do. `kind` names the case, as it does in the store. See 0034. */
 export const effectViewSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('foundAt'), seat: pointSchema, name: z.string(), banner: bannerSchema }),
@@ -263,6 +278,12 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('yourChoice'), choice: choiceViewSchema.nullable() }),
   /** The player's key figures in the order their house took them in, always a list. The pane's frame. */
   z.object({ type: z.literal('yourKeyFigures'), keyFigures: z.array(keyFigureViewSchema) }),
+  /**
+   * Every vision point the player's house has had, oldest first: its vision is the ones lasting today, what it
+   * has revealed is everything any of them has covered, and the rest is unknown. Always a list, empty while
+   * there is no house. The fog of war is drawn from this. See decision record 0061.
+   */
+  z.object({ type: z.literal('yourSight'), points: z.array(visionPointViewSchema) }),
   /** Another window took this player over; this session is finished. */
   z.object({ type: z.literal('takenOver'), message: z.string() }),
   /** The world was emptied and this session is finished with it. Everyone is told. See 0036. */
@@ -317,6 +338,7 @@ export type Sex = z.infer<typeof sexSchema>;
 export type HolderView = z.infer<typeof holderViewSchema>;
 export type KeyFigureView = z.infer<typeof keyFigureViewSchema>;
 export type CharacterOnMapView = z.infer<typeof characterOnMapViewSchema>;
+export type VisionPointView = z.infer<typeof visionPointViewSchema>;
 export type CommandPayload = z.infer<typeof commandPayloadSchema>;
 export type ClientFrame = z.infer<typeof clientFrameSchema>;
 export type Delta = z.infer<typeof deltaSchema>;

@@ -56,7 +56,7 @@ violation when the rule was introduced.
 | `protocol` | The client and server message types, shared with the frontend through checked-in JSON fixtures, and the version of the wire, whose shape is recorded in `contracts/protocol-v<n>.txt` (0037) |
 | `infrastructure-occurrent` | CloudEvent conversion and type mapping, the MongoDB event store, the application service, durable subscriptions |
 | `infrastructure-rabbit` | Broker topology, the bridge that publishes stored events, and the feed the gateway consumes |
-| `projections` | Read models. The first is houses by cell, which the map is drawn from |
+| `projections` | Read models. The first is houses by cell, which the map is drawn from; the sight is what every house can see, which the fog of war is drawn from |
 | `gateway` | Player connections, cell subscriptions, snapshots, coalesced deltas, command intake |
 | `app` | The Spring Boot bootstrap and the wiring. The only module that knows every other one |
 | `arch-tests` | The layer rules, as tests |
@@ -153,6 +153,19 @@ the same house is in a coarse cell for one session and not for another. It is a 
 fact about the world, which is why nothing about it is stored or recorded. The player's eye is a different
 thing and needs no frame at all: a player's own house reaches their session rather than a cell, so keeping
 it in sight is a page drawing what it already has. See decision record 0038.
+
+## What a house sees
+
+The fog of war is one read model and a frame. `SightProjection` folds every house's **vision points** from
+the feed - its seat from the founding, and each key figure for every stretch they stand in one place while
+they are the house's - and works them out rather than recording them, because the world already records
+where a seat is and where a person stands. The gateway sends a house's points to its player as `yourSight`,
+on hello and whenever one opens or closes, the way it sends `yourHouse`: to the session, never to a cell.
+
+The server is the one place a sight is worked out. The page draws the fog from what it is sent, and the
+gateway will ask the same sight before it sends a snapshot or a delta, so what is drawn and what is held back
+cannot disagree. A vision point's size is kilometres on the ground; how big that is on the map is worked out
+where it is drawn. See decision record 0061, and `docs/plans/fog-of-war.md` for what is built.
 
 ## What acts on its own
 

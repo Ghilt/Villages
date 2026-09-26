@@ -1,0 +1,35 @@
+{
+  "type": "yourSight",
+  "points": [
+    {
+      "kind": "seat",
+      "place": {
+        "lat": 59.33,
+        "lon": 18.07
+      },
+      "radius": 34,
+      "since": 653705
+    },
+    {
+      "kind": "keyFigure",
+      "of": "cb732500-39bd-3b39-a838-bb89f719578f",
+      "place": {
+        "lat": 59.86,
+        "lon": 17.64
+      },
+      "radius": 34,
+      "since": 653706,
+      "until": 653709
+    },
+    {
+      "kind": "keyFigure",
+      "of": "cb732500-39bd-3b39-a838-bb89f719578f",
+      "place": {
+        "lat": 57.64,
+        "lon": 18.3
+      },
+      "radius": 34,
+      "since": 653709
+    }
+  ]
+}

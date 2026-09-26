@@ -49,6 +49,7 @@ import villages.projections.CharactersProjection
 import villages.projections.ChoicesProjection
 import villages.projections.HousesProjection
 import villages.projections.RecentEventsProjection
+import villages.projections.SightProjection
 import villages.protocol.Batch
 import villages.protocol.CharacterArrived
 import villages.protocol.CharacterChanged
@@ -67,6 +68,7 @@ import villages.protocol.Resync
 import villages.protocol.ServerFrame
 import villages.protocol.Snapshot
 import villages.protocol.TakenOver
+import villages.protocol.VisionPointView
 import villages.protocol.Welcome
 import villages.protocol.WorldWiped
 import villages.protocol.WorldNow
@@ -74,6 +76,7 @@ import villages.protocol.YourChoice
 import villages.protocol.StatsView
 import villages.protocol.YourHouse
 import villages.protocol.YourKeyFigures
+import villages.protocol.YourSight
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneOffset
@@ -285,6 +288,7 @@ private class Rig {
     val choices = ChoicesProjection(world)
     val recent = RecentEventsProjection(world)
     val characters = CharactersProjection(world)
+    val sights = SightProjection(world)
     val worldClock = WorldClock { today }
     var minted = 0
     val gateway = Gateway(
@@ -320,6 +324,7 @@ private class Rig {
             choices.reset()
             recent.reset()
             characters.reset()
+            sights.reset()
             gone
         },
         // A die that always comes up one, so every newcomer is the same known woman of eighteen.
@@ -334,6 +339,7 @@ private class Rig {
         ),
         figures = characters,
         onTheMap = characters,
+        sights = sights,
         later = later,
     )
 
@@ -388,6 +394,52 @@ class GatewaySpec : StringSpec({
         Rig().gateway.connect { sent += it }.receive(hello)
 
         sent[2] shouldBe YourKeyFigures(emptyList())
+    }
+
+    "hello also says what the house sees from, which is nowhere before there is a house" {
+        val sent = mutableListOf<ServerFrame>()
+        Rig().gateway.connect { sent += it }.receive(hello)
+
+        sent[3] shouldBe YourSight(emptyList())
+    }
+
+    "a founded house sees from its seat, as big a circle as Mallorca, and its player is told" {
+        val rig = Rig()
+        val (mine, sent) = rig.introduced()
+
+        mine.receive(founding())
+
+        sent.filterIsInstance<YourSight>().last() shouldBe YourSight(
+            listOf(VisionPointView(kind = "seat", place = Point(59.33, 18.07), radius = 34.0, since = today.day)),
+        )
+    }
+
+    "a key figure put on the map gives vision there, and moving them closes that point and opens the next" {
+        val rig = Rig()
+        val (mine, sent) = rig.introduced()
+        mine.receive(founding())
+        mine.receive(addingAKeyFigure(commandNumber(1)))
+        val agnes = sent.filterIsInstance<YourKeyFigures>().last().keyFigures.single().id
+
+        mine.receive(moving(agnes, 59.86, 17.64, commandNumber(2)))
+        mine.receive(moving(agnes, 57.64, 18.30, commandNumber(3)))
+
+        sent.filterIsInstance<YourSight>().last().points shouldBe listOf(
+            VisionPointView(kind = "seat", place = Point(59.33, 18.07), radius = 34.0, since = today.day),
+            VisionPointView("keyFigure", agnes, Point(59.86, 17.64), 34.0, since = today.day, until = today.day),
+            VisionPointView("keyFigure", agnes, Point(57.64, 18.30), 34.0, since = today.day),
+        )
+    }
+
+    "what one house sees is told to its own player and to nobody else" {
+        val rig = Rig()
+        val (looker, seen) = rig.someoneElse()
+        val (mine, _) = rig.introduced()
+
+        mine.receive(founding())
+
+        seen.filterIsInstance<YourSight>().shouldBeEmpty()
+        looker.cells().shouldBeEmpty()
     }
 
     "a house takes a key figure in, and its player is told who they are, stats and all" {

@@ -26,7 +26,7 @@ is no MongoDB and no RabbitMQ on the machine yet.
 ## Now
 
 Characters and key figures are built and waiting on Adam's eye. Nothing else here is started, and the four
-after them wait on the same thing.
+after them wait on the same thing. Fog of war, the exception, is under way a step at a time.
 
 - **Characters and key figures**: the people of the world, each with a history of their own, and the
   house's tie to the few it acts through, shown in a pane in the corner beside the house status. The shape
@@ -34,6 +34,10 @@ after them wait on the same thing.
   are in `docs/plans/characters-and-key-figures.md`, and nought to nineteen are built; the hypothesis is
   experiment 0010. The portraits are Adam's own art, and placeholders stand in until he has drawn them.
   Step twenty, looking at an earlier day, is optional and not built.
+- **Fog of war**: a house sees the map at three levels - vision, revealed, unknown - from vision points, each a
+  place, a circle and a span, and the server keeps back what a house cannot see. The shape is decision record
+  0061 and the steps, one commit each, are in `docs/plans/fog-of-war.md`; step 1, the server working out every
+  house's sight and sending it to the player, is built. Adam's own mechanic, asked for on 2026-09-26.
 - **0.4** Local infrastructure: MongoDB replica set and RabbitMQ in Compose
 - **0.8** Testcontainers smoke test on MongoDB and RabbitMQ
 - **1.6** The bridge from the store to the broker

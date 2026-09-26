@@ -19,11 +19,14 @@ import villages.application.PlayerTokens
 import villages.application.Later
 import villages.application.Provenance
 import villages.application.ScheduledLater
+import villages.application.Sight
+import villages.application.SightsByHouse
 import villages.application.RecentEvents
 import villages.application.ResourceService
 import villages.application.Start
 import villages.application.StoredEvent
 import villages.application.TakeActionService
+import villages.application.VisionSource
 import villages.application.WorldClock
 import villages.application.WorldWipe
 import villages.application.WriteConflict
@@ -99,6 +102,7 @@ import villages.protocol.TakeActionPayload
 import villages.protocol.TakenOver
 import villages.protocol.Tincture
 import villages.protocol.UnsubscribeCells
+import villages.protocol.VisionPointView
 import villages.protocol.ViewTime
 import villages.protocol.WatchEvents
 import villages.protocol.Welcome
@@ -109,6 +113,7 @@ import villages.protocol.YourChoice
 import villages.protocol.YourHouse
 import villages.protocol.YourHouseView
 import villages.protocol.YourKeyFigures
+import villages.protocol.YourSight
 import villages.protocol.coarsestZoom
 import java.time.Clock
 import java.util.concurrent.ConcurrentHashMap
@@ -165,6 +170,7 @@ class Gateway(
     private val keyFigures: KeyFigureService,
     private val figures: KeyFiguresByHouse,
     private val onTheMap: CharactersByCell,
+    private val sights: SightsByHouse,
     private val later: Later = ScheduledLater(),
 ) : AutoCloseable {
     private val watching = ConcurrentHashMap<Connection, Unit>()
@@ -201,6 +207,14 @@ class Gateway(
 
     /** A character who moves, leaves the map or dies on it reaches whoever holds the cells either side. */
     private val moves: AutoCloseable = onTheMap.watchTheMap { change -> fanOutMove(change) }
+
+    /**
+     * What a house sees reaches its player wherever they are looking, like the house does: the fog of war is
+     * the player's own, and needs no cell. See decision record 0061.
+     */
+    private val seen: AutoCloseable = sights.watch { change ->
+        sessions[change.player]?.out?.send(YourSight(change.sight.toView()))
+    }
 
     fun connect(out: Outbound): Connection = Connection(out).also { live += it }
 
@@ -304,6 +318,7 @@ class Gateway(
         asked.close()
         figuresChanged.close()
         moves.close()
+        seen.close()
         (later as? AutoCloseable)?.close()
     }
 
@@ -436,6 +451,7 @@ class Gateway(
             )
             out.send(YourHouse(theirHouses.ofPlayer(who)?.toYours()))
             out.send(YourKeyFigures(figures.of(HouseId.of(who)).map { it.toView() }))
+            out.send(YourSight(sights.of(HouseId.of(who)).toView()))
 
             // Arriving with no house and nothing to decide is what the founding choice answers. The
             // choice arrive() hands back is what goes out, not a read of the projection: the projection
@@ -801,6 +817,24 @@ internal fun CharacterRow.toMapView(span: CharacterSpan): CharacterOnMapView = C
     since = span.since.day,
     version = revision,
 )
+
+/**
+ * A house's vision points as the page draws its fog from them: every one it has had, oldest first. The
+ * radius stays in kilometres; how big that is on the map is the page's to work out. See decision 0061.
+ */
+internal fun Sight.toView(): List<VisionPointView> = points.map { point ->
+    VisionPointView(
+        kind = when (point.source) {
+            VisionSource.Seat -> "seat"
+            is VisionSource.KeyFigure -> "keyFigure"
+        },
+        of = (point.source as? VisionSource.KeyFigure)?.character?.value?.toString(),
+        place = Point(point.place.lat, point.place.lon),
+        radius = point.radius,
+        since = point.since.day,
+        until = point.until?.day,
+    )
+}
 
 /** A choice as the parchment shows it. What the interface renders and the whole of what it knows. */
 internal fun Choice.toView(): ChoiceView = ChoiceView(

@@ -27,6 +27,7 @@ import villages.projections.CharactersProjection
 import villages.projections.ChoicesProjection
 import villages.projections.HousesProjection
 import villages.projections.RecentEventsProjection
+import villages.projections.SightProjection
 import villages.protocol.Calendar
 import java.nio.file.Path
 import java.time.Clock
@@ -164,6 +165,10 @@ class WorldConfig {
     @Bean(destroyMethod = "close")
     fun characters(world: InMemoryWorld): CharactersProjection = CharactersProjection(world.feed)
 
+    /** What every house sees, worked out from where its seat and its people stand. See decision 0061. */
+    @Bean(destroyMethod = "close")
+    fun sights(world: InMemoryWorld): SightProjection = SightProjection(world.feed)
+
     /**
      * Emptying the development world: the store and every read model folded from it, in one act, so that
      * no projection is left holding a house whose events are gone. See decision record 0036.
@@ -176,6 +181,7 @@ class WorldConfig {
         choices: ChoicesProjection,
         recentEvents: RecentEventsProjection,
         characters: CharactersProjection,
+        sights: SightProjection,
         mourning: Mourning,
     ): WorldWipe = WorldWipe {
         world.wipe().also {
@@ -183,6 +189,7 @@ class WorldConfig {
             choices.reset()
             recentEvents.reset()
             characters.reset()
+            sights.reset()
             mourning.reset()
         }
     }
@@ -203,6 +210,7 @@ class WorldConfig {
         worldClock: WorldClock,
         keyFigures: KeyFigureService,
         characters: CharactersProjection,
+        sights: SightProjection,
     ): Gateway = Gateway(
         tokens = AnonymousTokens,
         foundHouse = foundHouse,
@@ -220,5 +228,6 @@ class WorldConfig {
         keyFigures = keyFigures,
         figures = characters,
         onTheMap = characters,
+        sights = sights,
     )
 }

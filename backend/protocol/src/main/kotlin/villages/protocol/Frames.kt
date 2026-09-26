@@ -27,9 +27,10 @@ import tools.jackson.databind.JsonNode
  * the characters in a cell ride its snapshot beside the houses, three deltas say one arrived, changed or
  * went, and two commands move one and take one off the map. Version 8 gave a character on the map the
  * birthday and the years an age is counted from, so a window on them can say how old they are. See
- * decision record 0055.
+ * decision record 0055. Version 9 added `yourSight`, the vision points a house sees from, which the fog of
+ * war is drawn from. See decision record 0061.
  */
-const val PROTOCOL_VERSION = 8
+const val PROTOCOL_VERSION = 9
 
 data class Point(val lat: Double, val lon: Double)
 
@@ -359,6 +360,7 @@ data class TakeOffTheMapPayload(val characterId: String) : CommandPayload
     JsonSubTypes.Type(YourHouse::class, name = "yourHouse"),
     JsonSubTypes.Type(YourChoice::class, name = "yourChoice"),
     JsonSubTypes.Type(YourKeyFigures::class, name = "yourKeyFigures"),
+    JsonSubTypes.Type(YourSight::class, name = "yourSight"),
     JsonSubTypes.Type(TakenOver::class, name = "takenOver"),
     JsonSubTypes.Type(WorldWiped::class, name = "worldWiped"),
 )
@@ -420,6 +422,31 @@ data class YourChoice(val choice: ChoiceView?) : ServerFrame
  * lost or changes in their own record. What a house holds is its own, like what it has. See decision 0055.
  */
 data class YourKeyFigures(val keyFigures: List<KeyFigureView>) : ServerFrame
+
+/**
+ * Every vision point the player's house has had, oldest first, wherever they are looking. Sent after
+ * `yourKeyFigures` on hello, always a list and empty while there is no house, and again whenever one opens
+ * or closes. Its **vision** is the points lasting today, what it has **revealed** is everything any of them
+ * has ever covered, and the rest of the world is **unknown**: the fog of war is drawn from this. What a
+ * house sees is its own, like what it holds. See decision record 0061.
+ */
+data class YourSight(val points: List<VisionPointView>) : ServerFrame
+
+/**
+ * Somewhere the house sees from. `kind` says what gives it - `seat` or `keyFigure` - and `of` is the key
+ * figure's id, absent for the seat. `radius` is how far it sees around `place`, in **kilometres** on the
+ * ground: how big that is on the map is worked out at the place's latitude, where Mercator draws the circle
+ * round. `since` and `until` are world-days; `until` is absent while it still gives vision.
+ */
+@JsonInclude(JsonInclude.Include.NON_NULL)
+data class VisionPointView(
+    val kind: String,
+    val of: String? = null,
+    val place: Point,
+    val radius: Double,
+    val since: Long,
+    val until: Long? = null,
+)
 
 /**
  * The world was emptied and this session is finished with it: it holds no cells, hears nothing more and

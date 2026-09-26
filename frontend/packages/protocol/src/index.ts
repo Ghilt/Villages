@@ -5,7 +5,7 @@
  */
 
 /** Sent on the handshake so that the gateway can refuse a client it cannot speak to. */
-export const PROTOCOL_VERSION = 8;
+export const PROTOCOL_VERSION = 9;
 
 export {
   MAX_ZOOM,
@@ -62,6 +62,7 @@ export {
   yourHouseViewSchema,
   serverFrameSchema,
   tinctureSchema,
+  visionPointViewSchema,
 } from './frames';
 export type {
   BannerSpec,
@@ -87,4 +88,5 @@ export type {
   YourHouseView,
   ServerFrame,
   Tincture,
+  VisionPointView,
 } from './frames';

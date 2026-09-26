@@ -19,11 +19,13 @@ import type {
   ResourceName,
   ServerFrame,
   StatName,
+  VisionPointView,
   YourHouseView,
 } from '@villages/protocol';
 
 import { note, shortId } from '../debug/log';
 import { STAT_WORDS, fullName, whatChanged } from '../figures/describe';
+import { describeSight } from '../fog/describe';
 import { NOTHING_ARRIVED, alsoArrived, describeArrival, describeBatch } from './arrivals';
 import type { Arrival } from './arrivals';
 import { browserSocket } from './browserSocket';
@@ -50,6 +52,11 @@ export interface GatewayState {
    * said. An empty list is a house with none; null is not having heard yet. See decision record 0055.
    */
   yourKeyFigures: readonly KeyFigureView[] | null;
+  /**
+   * Every vision point the player's house has had, oldest first, or null until the gateway has said. What
+   * the fog of war is drawn from: vision is the ones lasting today, revealed is all of them. See 0061.
+   */
+  yourSight: readonly VisionPointView[] | null;
   /** The id of the command in flight, so the parchment can stop taking a second answer. */
   acting: string | null;
   houses: HousesState;
@@ -63,6 +70,7 @@ let state: GatewayState = {
   yourHouse: null,
   yourChoice: null,
   yourKeyFigures: null,
+  yourSight: null,
   acting: null,
   houses: NO_HOUSES,
   world: null,
@@ -275,6 +283,15 @@ function heard(frame: ServerFrame): void {
       }
       update({ yourKeyFigures: frame.keyFigures });
       return;
+    case 'yourSight': {
+      const figures = new Map((state.yourKeyFigures ?? []).map((one) => [one.id, fullName(one)]));
+      note(
+        'sight',
+        describeSight(frame.points, state.world?.today ?? null, (id) => figures.get(id)),
+      );
+      update({ yourSight: frame.points });
+      return;
+    }
     case 'worldWiped':
       // The world this window was looking at is gone. Arriving anew is the only honest thing to do, and
       // a reload is how a page arrives. See decision record 0036.
@@ -290,6 +307,7 @@ function heard(frame: ServerFrame): void {
         yourHouse: null,
         yourChoice: null,
         yourKeyFigures: null,
+        yourSight: null,
       });
       note('gateway', `${frame.message}; this window is no longer playing`);
       connection?.close();
