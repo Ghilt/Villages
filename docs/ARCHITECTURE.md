@@ -183,7 +183,9 @@ the things in it: the scenery and whatever stands outside vision under it, every
 vision over it (0063). It asks the sprites' projection in `cameraMath.ts` backwards for the ground under each
 pixel, and reads there a distance field of the vision points, worked out in the browser once for each change
 to them (`apps/web/src/fog/`) and handed to the graphics card as one small half-float texture. Nothing about
-the fog is worked out while the camera moves except that one pass. See decision record 0062.
+the fog is worked out while the camera moves except that one pass. See decision record 0062. The scenery
+layer asks the same field where it may grow (`revealedAt`), as a cell is taken into view and again when the
+fog changes, so no tree stands in the haze; the scatter itself stays a pure function of the ground.
 
 ## What acts on its own
 

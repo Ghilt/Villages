@@ -6,6 +6,8 @@
 - Superseded in part 2026-09-26: the fog is no longer a canvas over every sprite but a layer inside the sprite
   canvas, between the world and the signs for the things in it, because it covered the icons. The distance
   field, the camera and the look below stand. See decision record 0063.
+- Amended 2026-09-26: the trees in unknown ground are no longer grown at all, as the consequences below said
+  they would not be; step 5 of `docs/plans/fog-of-war.md`.
 
 ## Context
 

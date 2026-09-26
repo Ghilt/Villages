@@ -70,8 +70,12 @@ export interface SceneryDrawn {
   moving: number;
 }
 
-/** One cell's points, split by group, and whichever of them are currently drawn, and their shadows. */
+/**
+ * One cell's points - all of them, and those split by group that may grow where the fog allows - and
+ * whichever of them are currently drawn, and their shadows.
+ */
 interface Held {
+  all: readonly ScatteredPoint[];
   points: Map<number, ScatteredPoint[]>;
   made: Map<number, Particle[]>;
   shade: Map<number, Particle[]>;
@@ -112,6 +116,14 @@ export function createSceneryLayer() {
   let tiltKey = '0/0';
   /** Particles were added or moved, so the layer is sorted again before it is drawn. */
   let unsorted = false;
+
+  /**
+   * Where the scenery may grow: everywhere, or only where this says, which is the ground the house has
+   * revealed. The haze has no wood standing in it; step 5 of the fog of war.
+   */
+  let grows: ((x: number, y: number) => boolean) | null = null;
+  const growing = (points: readonly ScatteredPoint[]): readonly ScatteredPoint[] =>
+    grows === null ? points : points.filter((point) => grows!(point.x, point.y));
 
   /** How much of each group is on the screen, nought to one, moved by the clock and not by the zoom. */
   let alphaOf = new Float32Array(0);
@@ -602,7 +614,7 @@ export function createSceneryLayer() {
               continue;
             }
             cutting += 1;
-            cell = { points: splitByGroup(points), made: new Map(), shade: new Map() };
+            cell = { all: points, points: splitByGroup(growing(points)), made: new Map(), shade: new Map() };
             shown.set(key, cell);
           }
           for (const group of cell.points.keys()) {
@@ -673,6 +685,22 @@ export function createSceneryLayer() {
         waiting: sceneryTally().waiting,
         moving,
       };
+    },
+
+    /**
+     * Where the scenery may grow from now on: everywhere, with null, or only where this says. Every cell in
+     * view is sorted again at once and its groups are made afresh on the next frame at the fade they were
+     * at, so what stays does not flicker and what the house has newly seen stands as the haze over it lifts.
+     */
+    setGround(next: ((x: number, y: number) => boolean) | null): void {
+      grows = next;
+      for (const cell of shown.values()) {
+        for (const group of [...cell.made.keys()]) {
+          dropGroup(cell, group);
+        }
+        cell.points = splitByGroup(growing(cell.all));
+      }
+      unsorted = true;
     },
 
     /** Everything drawn is taken out, for a change that makes every cell wrong. */

@@ -19,6 +19,8 @@ import { createSceneryLayer } from './scenery/SceneryLayer';
 import { noteDrawn } from './scenery/sceneryCells';
 import type { CameraSource, FogHow, MapSprite, SceneryHow, SpriteRenderer } from './SpriteRenderer';
 import type { Coverage } from '@villages/protocol';
+import { revealedAt } from '../fog/fogField';
+import type { FogField } from '../fog/fogField';
 import { createFogLayer } from './FogLayer';
 import { overTheFog } from './fogLayering';
 
@@ -150,6 +152,14 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
   const fog = createFogLayer();
   /** What the house has in vision, for asking whether a mark stands in it; nothing while there is no fog. */
   let vision: Coverage | null = null;
+  /**
+   * The field the scenery was last told to grow by: undefined with the fog off, where everything grows, and
+   * null for a house that sees nothing, where nothing does. Kept so the wood is only sorted again when the
+   * fog changed, and not on every mark the gateway moves.
+   */
+  let groundField: FogField | null | undefined = undefined;
+  const groundOf = (field: FogField | null | undefined): ((x: number, y: number) => boolean) | null =>
+    field === undefined ? null : field === null ? () => false : (x, y) => revealedAt(field, x, y);
   const standsInVision = (at: { lng: number; lat: number }): boolean =>
     vision?.covers({ lat: at.lat, lon: at.lng }) ?? false;
   const entries = new Map<string, Entry>();
@@ -603,6 +613,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       }
       // Under everything, because it is the ground the rest stands on.
       scenery = createSceneryLayer();
+      scenery.setGround(groundOf(groundField));
       stage.addChild(scenery.container);
       // The world outside vision, then the fog over it, and everything the fog must not cover above that.
       stage.addChild(underTheFog);
@@ -712,6 +723,11 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
     setFog(next: FogHow | null): void {
       fog.show(next === null ? null : { field: next.field });
       vision = next?.vision ?? null;
+      const field = next === null ? undefined : next.field;
+      if (field !== groundField) {
+        groundField = field;
+        scenery?.setGround(groundOf(field));
+      }
       for (const entry of entries.values()) {
         sideOfTheFog(entry);
       }

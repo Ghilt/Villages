@@ -72,8 +72,13 @@ A player's own house and own key figures are always theirs to see: every one of 
    40 km now, answered exactly by `Coverage` at both ends and drawn from the field through a distance
    transform, and the server holds back by the same shape; `yourSight` carries the tension. Wire version 12,
    decision record 0064.
-5. **No trees in unknown ground.** The scatter grows nothing on ground the house has not revealed, so the
-   haze has no wood standing in it.
+5. **No trees in unknown ground.** Done. The scenery grows only where the house has revealed, asked of the
+   fog's own field (`revealedAt`), surface tension and all, so the trees stop where the haze begins and the
+   haze has no wood standing in it; the terrain under it still shows where the woods are, as the contours
+   always do. The scatter itself is untouched and still a pure function of the ground: which of its points
+   grow is decided as a cell is taken into view, and sorted again when the fog changes, keeping the fade a
+   group is at. With the fog off everything grows, and with no house nothing does. The stands are still
+   public until step 8.
 6. **Colourless revealed ground.** The wash becomes the colour taken out, with a blend mode over the map and the
    sprites. If it does not composite over the two canvases, or costs too much, the wash stays, which Adam
    allowed.

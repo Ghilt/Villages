@@ -346,6 +346,7 @@ Commands are added here as the increments land:
   a player is sent the houses on revealed ground and the people in vision, and their own wherever they are,
   and `fog of war: off` lifts that too, for that window. The edge has surface tension: circles closer than
   about 56 km are seen across and notches are rounded off, drawn and held back alike, `Vision.SURFACE_TENSION`.
+  No tree grows on unknown ground, so with the fog on and no house the world is bare under the haze.
   See `docs/adr/0061`, `0062`, `0063`, `0064` and `docs/plans/fog-of-war.md`.
 - Looking at a whole world at once: `see everything`, in the debug panel's World bar beside `seed 20`.
   A house is founded at significance 20, so it reaches a page only from zoom 8 in, and pulling back past

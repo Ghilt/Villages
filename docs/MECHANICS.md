@@ -652,7 +652,7 @@ lifts the whole of it for that window, drawn and held back alike, and every page
 
 ### Where it stands
 
-Steps 1 to 4 of `docs/plans/fog-of-war.md` are built. The server works out every house's vision points from
+Steps 1 to 5 of `docs/plans/fog-of-war.md` are built. The server works out every house's vision points from
 its seat and its key figures on the map, and sends them to the player as `yourSight` from wire version 9, on
 arriving and whenever one opens or closes; the debug log says in one line what gives vision and how many
 places the house has seen from.
@@ -682,3 +682,8 @@ somebody no longer in vision goes. Turning the fog off lifts this as well as the
 **The edge has surface tension**, from wire version 12, which carries it: the ground a ball of 40 km cannot
 get into between the circles is covered too, drawn and held back alike. It is one number,
 `Vision.SURFACE_TENSION`, and the page follows it because the server sends it.
+
+**No tree grows on unknown ground.** The scenery stands only where the house has revealed, so the trees stop
+where the haze begins; the painted ground under the haze still shows where the woods are. With no house,
+nothing grows anywhere, because nothing has been seen. The stands the trees are grown from are still a public
+file, which step 8 of the plan takes back to the server.

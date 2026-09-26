@@ -47,6 +47,20 @@ export const REACH = 64;
  */
 export const MOST_TEXELS = 1024;
 
+/**
+ * Whether a piece of ground, in world units, lies on what the house has revealed: inside the edge the fog's
+ * wash is drawn from, surface tension and all. Past the field's edge is unknown ground. What decides where
+ * the scenery grows, so that the haze has no wood standing in it; step 5 of the plan.
+ */
+export function revealedAt(field: FogField, x: number, y: number): boolean {
+  const column = Math.floor((x - field.originX) / field.unitsPerTexel);
+  const row = Math.floor((y - field.originY) / field.unitsPerTexel);
+  if (column < 0 || row < 0 || column >= field.width || row >= field.height) {
+    return false;
+  }
+  return field.distances[(row * field.width + column) * 2]! < 0;
+}
+
 /** A squared distance too great to be one: "nothing outside anywhere near", to the distance transform. */
 const FAR = 1e20;
 

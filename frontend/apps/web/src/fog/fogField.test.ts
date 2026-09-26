@@ -7,7 +7,7 @@ import { toMercator } from '../sprites/cameraMath';
 
 import { circleOf } from './circles';
 import type { FogCircle } from './circles';
-import { MOST_TEXELS, REACH, fieldOf } from './fogField';
+import { MOST_TEXELS, REACH, fieldOf, revealedAt } from './fogField';
 import type { FogField } from './fogField';
 
 /** The two distances of the texel a point of world space falls in: to revealed ground, and to vision. */
@@ -160,5 +160,24 @@ describe('the edge with surface tension', () => {
     }
     // Most of them are decided by more than the edge is soft, so this is a test and not a formality.
     expect(decided).toBeGreaterThan(10);
+  });
+});
+
+describe('whether ground is revealed, which is where the scenery may grow', () => {
+  it('is inside the edge, and not outside it nor past the field', () => {
+    const field = fieldOf([seat])!;
+
+    expect(revealedAt(field, 17_000, 9_000)).toBe(true);
+    expect(revealedAt(field, 17_000 + 49, 9_000)).toBe(true);
+    expect(revealedAt(field, 17_000 + 52, 9_000)).toBe(false);
+    expect(revealedAt(field, 1_000, 1_000)).toBe(false);
+  });
+
+  it('takes in the ground the surface tension joins, and ground revealed by a circle that has ended', () => {
+    const at = (lat: number, lon: number, until?: number) => circleOf(point(lat, lon, 34, until), 1, 40);
+    const field = fieldOf([at(50, 15), at(50, 15 + east(100), 0)], 40)!;
+    const between = toMercator({ lng: 15 + east(50), lat: 50 });
+
+    expect(revealedAt(field, between.x * WORLD_MASTER_WIDTH, between.y * WORLD_MASTER_WIDTH)).toBe(true);
   });
 });
