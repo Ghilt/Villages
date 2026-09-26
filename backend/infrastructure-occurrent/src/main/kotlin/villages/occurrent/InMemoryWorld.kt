@@ -10,6 +10,7 @@ import org.occurrent.subscription.api.blocking.SubscriptionModel
 import org.occurrent.subscription.inmemory.InMemorySubscriptionModel
 import villages.application.CharacterCommandExecutor
 import villages.application.EventFeed
+import villages.application.FeedFault
 import villages.application.HouseCommandExecutor
 import villages.application.Start
 import villages.application.StoredEvent
@@ -17,6 +18,7 @@ import villages.domain.Event
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -35,6 +37,8 @@ class OccurrentEventFeed(
     private val store: EventStoreQueries,
     private val converter: CloudEventConverter<Event>,
 ) : EventFeed {
+    private val faultWatchers = CopyOnWriteArraySet<(FeedFault) -> Unit>()
+
     override fun subscribe(from: Start, subscriber: (StoredEvent) -> Unit): AutoCloseable {
         val id = "feed-${UUID.randomUUID()}"
         val alreadySeen = ConcurrentHashMap.newKeySet<String>()
@@ -45,7 +49,15 @@ class OccurrentEventFeed(
 
         fun hand(cloudEvent: CloudEvent) {
             if (alreadySeen.add(cloudEvent.id)) {
-                subscriber(cloudEvent.toStored(converter))
+                val stored = cloudEvent.toStored(converter)
+                try {
+                    subscriber(stored)
+                } catch (@Suppress("TooGenericExceptionCaught") thrown: Exception) {
+                    // Thrown on to Occurrent it would be retried, and the retry dropped above as already
+                    // seen: lost without a word. Said instead, and the feed goes on to the next event.
+                    val fault = FeedFault(nameOf(subscriber), stored, thrown)
+                    faultWatchers.forEach { it(fault) }
+                }
             }
         }
 
@@ -65,7 +77,15 @@ class OccurrentEventFeed(
 
         return AutoCloseable { subscriptions.cancelSubscription(id) }
     }
+
+    override fun watchFaults(listener: (FeedFault) -> Unit): AutoCloseable {
+        faultWatchers += listener
+        return AutoCloseable { faultWatchers -= listener }
+    }
 }
+
+/** Who a subscriber is, for saying so: a Kotlin lambda's class is named after the class it was written in. */
+private fun nameOf(subscriber: Any): String = subscriber.javaClass.name.substringAfterLast('.').substringBefore('$')
 
 /** Occurrent's extension attributes, by the names it writes them under. */
 private const val STREAM_ID = "streamid"

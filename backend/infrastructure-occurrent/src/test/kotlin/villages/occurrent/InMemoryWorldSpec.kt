@@ -9,6 +9,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import org.occurrent.eventstore.api.blocking.EventStore
 import org.occurrent.eventstore.api.blocking.EventStream
+import villages.application.FeedFault
 import villages.application.Provenance
 import villages.application.Start
 import villages.application.StoredEvent
@@ -35,6 +36,7 @@ import villages.domain.Tincture
 import villages.domain.WorldTime
 import java.time.Instant
 import java.util.UUID
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -245,6 +247,30 @@ class InMemoryWorldSpec : StringSpec({
                 // subscriber down both paths. Identity is what makes that harmless; see decision 0029.
                 heard.map { it.id }.distinct() shouldBe heard.map { it.id }
                 heard shouldHaveSize 1
+            }
+        }
+    }
+
+    "a subscriber that throws is said as a fault, and the feed goes on to the next event" {
+        InMemoryWorld().use { world ->
+            val faults = CopyOnWriteArrayList<FeedFault>()
+            val heard = CopyOnWriteArrayList<StoredEvent>()
+            val bothHanded = CountDownLatch(2)
+            world.feed.watchFaults { faults += it }.use {
+                world.feed.subscribe(Start.FROM_NOW) { stored ->
+                    heard += stored
+                    bothHanded.countDown()
+                    check(heard.size > 1) { "a fold that is wrong" }
+                }.use {
+                    world.executor.execute(ravenscar, sent)
+                    world.executor.execute(hollin, sent)
+
+                    bothHanded.await(5, TimeUnit.SECONDS) shouldBe true
+                    heard.map { it.stream } shouldBe listOf(ravenscar.houseId.stream, hollin.houseId.stream)
+                    // Named for the class the subscriber was written in, which here is this spec.
+                    faults.single().describe() shouldBe "InMemoryWorldSpec threw on villages.house.founded.v1 " +
+                        "(${ravenscar.houseId.stream}, version 1): IllegalStateException: a fold that is wrong"
+                }
             }
         }
     }
