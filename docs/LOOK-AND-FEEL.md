@@ -180,6 +180,10 @@ thing, so it is drawn over the fog wherever it stands; a ground form is part of 
 fog unless it stands in the house's vision. A new kind of thing on the map gets this for nothing by having the
 two forms. See decision record 0063.
 
+**Revealed ground is the same country gone grey.** Its colour is taken out and its brightness kept, so pale
+farmland stays pale and dark forest dark, and it is lifted a little towards the parchment; the trees and the
+castles standing on it lose their colour with it, and the signs over it keep theirs. See decision record 0065.
+
 **Nothing on the map pops.** A thing arriving fades up, a thing gone fades out and is only then let go
 of, and a thing changing form crosses over rather than swapping. All of it is a fifth of a second or
 less, so it reads as the world settling rather than as an animation. See decision record 0051.

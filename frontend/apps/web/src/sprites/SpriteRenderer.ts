@@ -37,9 +37,11 @@ export interface MapSprite {
 export interface SpriteRenderer {
   /**
    * Attach to a container that overlays the map, and follow that map's camera from now on. Asynchronous
-   * because the renderer has to acquire a graphics context before it can draw anything.
+   * because the renderer has to acquire a graphics context before it can draw anything. `uncolouring` is a
+   * canvas between the map and this one, where the renderer takes the colour out of the map on ground the
+   * house has only revealed; see `fog/uncolouring.ts` and decision record 0065.
    */
-  mount(container: HTMLElement): Promise<void>;
+  mount(container: HTMLElement, uncolouring?: HTMLCanvasElement): Promise<void>;
   /** Replace what is on the map. The renderer works out what appeared, changed and went away. */
   setSprites(sprites: readonly MapSprite[]): void;
   /**

@@ -1,4 +1,4 @@
-import { Application, Container, Graphics, Sprite } from 'pixi.js';
+import { Application, Container, Graphics, Rectangle, Sprite } from 'pixi.js';
 import type { Texture } from 'pixi.js';
 
 import { isWithinView, toScreen } from './cameraMath';
@@ -21,6 +21,7 @@ import type { CameraSource, FogHow, MapSprite, SceneryHow, SpriteRenderer } from
 import type { Coverage } from '@villages/protocol';
 import { revealedAt } from '../fog/fogField';
 import type { FogField } from '../fog/fogField';
+import { createUncolouring } from '../fog/uncolouring';
 import { createFogLayer } from './FogLayer';
 import { overTheFog } from './fogLayering';
 
@@ -149,7 +150,16 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
    */
   const underTheFog = new Container();
   const overIt = new Container();
+  /**
+   * Everything under the fog, the scenery and the world outside vision, in one container so that one filter
+   * takes its colour out where the house has only revealed. Its area is the screen, so the filter never
+   * measures a layer of twenty thousand trees to find out how big it is. See decision record 0065.
+   */
+  const world = new Container();
+  world.filterArea = new Rectangle(0, 0, 1, 1);
   const fog = createFogLayer();
+  /** The colour taken out of the map, beneath this canvas; nothing until the page hands over a canvas. */
+  let uncolouring: ReturnType<typeof createUncolouring> | null = null;
   /** What the house has in vision, for asking whether a mark stands in it; nothing while there is no fog. */
   let vision: Coverage | null = null;
   /**
@@ -457,6 +467,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
     if (width !== canvasWas.width || height !== canvasWas.height) {
       canvasWas = { width, height };
       app.renderer.resize(width, height);
+      world.filterArea = new Rectangle(0, 0, width, height);
     }
     const view: CameraView = {
       center: camera.center(),
@@ -534,6 +545,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
 
     dressTheRing(zoom);
     fog.follow(view);
+    uncolouring?.follow(view);
 
     if (scenery !== null) {
       scenery.container.visible = how.on;
@@ -584,7 +596,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
   }
 
   return {
-    async mount(container: HTMLElement): Promise<void> {
+    async mount(container: HTMLElement, uncolourCanvas?: HTMLCanvasElement): Promise<void> {
       await app.init({
         backgroundAlpha: 0,
         antialias: true,
@@ -614,10 +626,16 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       // Under everything, because it is the ground the rest stands on.
       scenery = createSceneryLayer();
       scenery.setGround(groundOf(groundField));
-      stage.addChild(scenery.container);
-      // The world outside vision, then the fog over it, and everything the fog must not cover above that.
-      stage.addChild(underTheFog);
+      // The world outside vision over the scenery, both losing their colour on ground only revealed; then the
+      // fog over them, and everything the fog must not cover above that.
+      world.addChild(scenery.container, underTheFog);
+      stage.addChild(world);
       stage.addChild(fog.mesh);
+      if (uncolourCanvas !== undefined) {
+        uncolouring = createUncolouring(uncolourCanvas);
+        uncolouring.show(groundField ?? null);
+      }
+      world.filters = groundField === undefined || groundField === null ? null : [fog.uncolour];
       // The dev server cuts the art again whenever a picture in world/sprites/ is saved, and says so
       // here, so the new picture is on the map without a reload. See decision record 0059.
       import.meta.hot?.on(ART_CUT, artCut);
@@ -727,6 +745,9 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       if (field !== groundField) {
         groundField = field;
         scenery?.setGround(groundOf(field));
+        // Only a house with revealed ground has any colour to take out, and the filter costs a pass.
+        uncolouring?.show(field ?? null);
+        world.filters = field === undefined || field === null ? null : [fog.uncolour];
       }
       for (const entry of entries.values()) {
         sideOfTheFog(entry);
@@ -783,6 +804,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
     destroy(): void {
       disposed = true;
       fog.destroy();
+      uncolouring?.destroy();
       scenery?.destroy();
       import.meta.hot?.off(ART_CUT, artCut);
       scenery = null;

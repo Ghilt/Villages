@@ -193,6 +193,10 @@ to them (`apps/web/src/fog/`) and handed to the graphics card as one small half-
 the fog is worked out while the camera moves except that one pass. See decision record 0062. The scenery
 layer asks the same field where it may grow (`revealedAt`), as a cell is taken into view and again when the
 fog changes, so no tree stands in the haze; the scatter itself stays a pure function of the ground.
+**Revealed ground loses its colour in each canvas** (0065): the map's through `.uncolouring`, a 2D canvas
+between the map and the sprites that `fog/uncolouring.ts` lays a grey picture of the field on, blended by the
+browser's saturation blend, and the sprites under the fog by a filter on the container that holds them. The
+fog shader's code for where a pixel lies and how far inside each edge is shared by the fog and the filter.
 
 ## What acts on its own
 

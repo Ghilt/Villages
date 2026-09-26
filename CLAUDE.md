@@ -341,8 +341,8 @@ Commands are added here as the increments land:
   on the map, a circle of 34 km around each - and the server works them out and sends them as `yourSight`;
   the log says what gives vision under `sight`. `give vision here`, under the switch, gives the house a circle
   where the camera is looking until its `take it away` is pressed; both are real commands. The fog covers the
-  world and not the signs: every icon, the offered seats and whatever stands in vision are drawn over it. Unknown ground is under a dark haze, revealed ground is washed
-  grey, vision is clear. With no house the whole world is hazed. The server holds back what the fog hides:
+  world and not the signs: every icon, the offered seats and whatever stands in vision are drawn over it. Unknown ground is under a dark haze, revealed ground has its
+  colour taken out, trees and castles too, and vision is clear. With no house the whole world is hazed. The server holds back what the fog hides:
   a player is sent the houses on revealed ground and the people in vision, and their own wherever they are,
   and `fog of war: off` lifts that too, for that window. The edge has surface tension: circles closer than
   about 56 km are seen across and notches are rounded off, drawn and held back alike, `Vision.SURFACE_TENSION`.

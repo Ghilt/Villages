@@ -652,7 +652,7 @@ lifts the whole of it for that window, drawn and held back alike, and every page
 
 ### Where it stands
 
-Steps 1 to 5 of `docs/plans/fog-of-war.md` are built. The server works out every house's vision points from
+Steps 1 to 6 of `docs/plans/fog-of-war.md` are built. The server works out every house's vision points from
 its seat and its key figures on the map, and sends them to the player as `yourSight` from wire version 9, on
 arriving and whenever one opens or closes; the debug log says in one line what gives vision and how many
 places the house has seen from.
@@ -666,11 +666,12 @@ not built.
 
 **The fog is drawn**, over the ground and everything standing on it: a dark haze over unknown ground that the
 coast and the lie of the land show through, thickening and thinning a little in patches close in; revealed
-ground washed with grey at half strength, which is the faded stand-in until the colour is taken out
-properly; and nothing at all over vision, whose edge is soft close in and wanders a little. With no house the
+ground with its colour taken out and faded a little, the terrain and the trees and castles on it alike, while
+the houses' own signs keep their colours; and nothing at all over vision, whose edge is soft close in and
+wanders a little. With no house the
 whole world is under the haze. The switch is in the Debug map section. The haze does not move yet. Every
 icon and anything in vision is drawn over the fog. Decision record 0061 is the shape, 0062 how the fog is
-drawn, and 0063 which side of it each thing is on.
+drawn, 0063 which side of it each thing is on, and 0065 how revealed ground loses its colour.
 
 **The server holds back what the fog hides**, from wire version 11. A player is sent the houses on ground
 their house has revealed and the people in its vision, their own house and key figures wherever they are,

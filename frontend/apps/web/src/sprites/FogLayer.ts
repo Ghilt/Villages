@@ -1,4 +1,4 @@
-import { BufferImageSource, Geometry, GlProgram, Mesh, Shader, UniformGroup } from 'pixi.js';
+import { BufferImageSource, Filter, Geometry, GlProgram, Mesh, Shader, UniformGroup } from 'pixi.js';
 
 import { REACH } from '../fog/fogField';
 import type { FogField } from '../fog/fogField';
@@ -43,15 +43,13 @@ void main() {
 `;
 
 /*
- * The colours and how see-through each is are Adam's to judge by eye. The haze is dark and lets the coast
- * through. The wash is a middling grey at half strength, which takes colour out of whatever it lies on, pale
- * ground or dark; it stands in for the colour being taken out properly, step 6 of the plan.
+ * Where a pixel lies on the ground, and how far that ground lies inside what the house has revealed and inside
+ * what it has in vision: what the fog, its fade and the colour taken out of the world under it are all drawn
+ * from, so that the three can never disagree about where an edge is. The edge wanders a little, so that a
+ * circle reads as the limit of what can be seen rather than as a line drawn with compasses, and it is soft by a
+ * world unit and a half close in and a pixel far out. `uncolouring.ts` works the same wander out for the map.
  */
-const FRAGMENT = `#version 300 es
-precision highp float;
-precision highp int;
-
-in vec2 vScreen;
+const LEVELS = `
 uniform vec2 uSize;
 uniform vec2 uCentre;
 uniform float uScale;
@@ -62,13 +60,6 @@ uniform vec2 uFieldOrigin;
 uniform vec2 uFieldSize;
 uniform float uHasField;
 uniform float uReach;
-
-out vec4 finalColor;
-
-const vec3 HAZE = vec3(0.105, 0.098, 0.125);
-const float HAZE_ALPHA = 0.62;
-const vec3 WASH = vec3(0.62, 0.61, 0.60);
-const float WASH_ALPHA = 0.5;
 
 float hash(ivec2 cell) {
   uvec2 u = uvec2(cell) * uvec2(1597334673u, 3812015801u);
@@ -95,34 +86,110 @@ float worth(float units) {
   return clamp((units * uScale - 4.0) / 12.0, 0.0, 1.0);
 }
 
-void main() {
-  vec2 onScreen = vScreen - uSize * 0.5;
+vec2 groundUnder(vec2 screen) {
+  vec2 onScreen = screen - uSize * 0.5;
   float along = onScreen.y / max(uTilt.z, 0.0001);
   vec2 ground = vec2(onScreen.x * uTilt.x - along * uTilt.y, onScreen.x * uTilt.y + along * uTilt.x);
-  vec2 world = uCentre + ground / uScale;
-  if (world.x < 0.0 || world.y < 0.0 || world.x > uWorldSide || world.y > uWorldSide) {
-    finalColor = vec4(0.0);
-    return;
-  }
+  return uCentre + ground / uScale;
+}
 
+bool onTheWorld(vec2 world) {
+  return world.x >= 0.0 && world.y >= 0.0 && world.x <= uWorldSide && world.y <= uWorldSide;
+}
+
+// Nought to one: how far inside revealed ground, and inside vision, this piece of ground lies.
+vec2 levelsAt(vec2 world) {
   vec2 away = vec2(uReach);
   if (uHasField > 0.5) {
     away = texture(uField, (world - uFieldOrigin) / uFieldSize).rg;
   }
-
-  // The edge wanders a little, so that a circle reads as the limit of what can be seen rather than as a
-  // line drawn with compasses, and it is soft by a world unit and a half close in and a pixel far out.
   float wander = (noise(world / 9.0) - 0.5) * 2.4 * worth(9.0) + (noise(world / 3.0) - 0.5) * 0.8 * worth(3.0);
   float soft = max(1.5, 1.2 / uScale);
-  float revealed = 1.0 - smoothstep(-soft, soft, away.r + wander);
-  float vision = 1.0 - smoothstep(-soft, soft, away.g + wander);
+  return vec2(1.0 - smoothstep(-soft, soft, away.r + wander), 1.0 - smoothstep(-soft, soft, away.g + wander));
+}
+`;
+
+/*
+ * The colours and how see-through each is are Adam's to judge by eye. The haze is dark and lets the coast
+ * through. Revealed ground has its colour taken out beneath this layer - the map's by `uncolouring.ts`, the
+ * world's sprites by the filter below - and this only fades it a little, lifting it towards the parchment.
+ */
+const FRAGMENT = `#version 300 es
+precision highp float;
+precision highp int;
+
+in vec2 vScreen;
+out vec4 finalColor;
+${LEVELS}
+const vec3 HAZE = vec3(0.105, 0.098, 0.125);
+const float HAZE_ALPHA = 0.62;
+const vec3 FADE = vec3(0.93, 0.91, 0.86);
+const float FADE_ALPHA = 0.24;
+
+void main() {
+  vec2 world = groundUnder(vScreen);
+  if (!onTheWorld(world)) {
+    finalColor = vec4(0.0);
+    return;
+  }
+  vec2 levels = levelsAt(world);
+  float revealed = levels.x;
+  float vision = levels.y;
 
   // A haze rather than a flat grey: it thickens and thins a little, in patches a couple of dozen units
   // across, and goes flat far out where the patches would be smaller than a few pixels.
   float cloud = mix(1.0, 0.8 + 0.4 * noise(world / 24.0), worth(24.0));
   float haze = HAZE_ALPHA * (1.0 - revealed) * cloud;
-  float wash = WASH_ALPHA * revealed * (1.0 - vision);
-  finalColor = vec4(HAZE * haze + WASH * wash, haze + wash);
+  float fade = FADE_ALPHA * revealed * (1.0 - vision);
+  finalColor = vec4(HAZE * haze + FADE * fade, haze + fade);
+}
+`;
+
+/**
+ * The filter over the world's sprites under the fog - the scenery, and whatever stands outside vision - that
+ * takes their colour out on ground the house has only revealed, keeping each one's brightness: the same
+ * weighting the browser's saturation blend takes the map's colour out by, so a tree and the ground it stands on
+ * go grey alike. Pixi's own filter vertex, which also says where on the screen each pixel is.
+ */
+const WORLD_VERTEX = `in vec2 aPosition;
+out vec2 vTextureCoord;
+out vec2 vScreen;
+
+uniform vec4 uInputSize;
+uniform vec4 uOutputFrame;
+uniform vec4 uOutputTexture;
+
+void main(void) {
+  vec2 position = aPosition * uOutputFrame.zw + uOutputFrame.xy;
+  // In the units the interface uses, because the filter's area is the whole screen and it is drawn straight
+  // onto it.
+  vScreen = position;
+  position.x = position.x * (2.0 / uOutputTexture.x) - 1.0;
+  position.y = position.y * (2.0 * uOutputTexture.z / uOutputTexture.y) - uOutputTexture.z;
+  gl_Position = vec4(position, 0.0, 1.0);
+  vTextureCoord = aPosition * (uOutputFrame.zw * uInputSize.zw);
+}
+`;
+
+const WORLD_FRAGMENT = `#version 300 es
+precision highp float;
+precision highp int;
+
+in vec2 vTextureCoord;
+in vec2 vScreen;
+uniform sampler2D uTexture;
+out vec4 finalColor;
+${LEVELS}
+void main() {
+  vec4 colour = texture(uTexture, vTextureCoord);
+  vec2 world = groundUnder(vScreen);
+  float uncolour = 0.0;
+  if (onTheWorld(world)) {
+    vec2 levels = levelsAt(world);
+    uncolour = levels.x * (1.0 - levels.y);
+  }
+  float grey = dot(colour.rgb, vec3(0.3, 0.59, 0.11));
+  finalColor = vec4(mix(colour.rgb, vec3(grey), uncolour), colour.a);
 }
 `;
 
@@ -196,6 +263,16 @@ export function createFogLayer() {
     }),
     resources: { fogUniforms: uniforms, uField: source },
   });
+  // The world's sprites under the fog lose their colour by the same uniforms and the same field.
+  const uncolour = new Filter({
+    glProgram: GlProgram.from({
+      vertex: WORLD_VERTEX,
+      fragment: WORLD_FRAGMENT,
+      name: 'fog-of-war-uncolour',
+      preferredFragmentPrecision: 'highp',
+    }),
+    resources: { fogUniforms: uniforms, uField: source },
+  });
   const mesh = new Mesh({
     geometry: new Geometry({
       attributes: { aPosition: { buffer: COVER, format: 'float32x2', stride: 8, offset: 0 } },
@@ -210,6 +287,12 @@ export function createFogLayer() {
     /** The mesh, to be placed in the stage between what the fog covers and what it does not. */
     mesh,
 
+    /**
+     * The filter that takes the colour out of the world's sprites on ground only revealed, for the container
+     * holding everything under the fog. Worth putting on only while there is revealed ground to draw.
+     */
+    uncolour,
+
     /** What to draw from now on: nothing, a world that is all unknown, or a house's fog. */
     show(next: FogToDraw): void {
       mesh.visible = next !== null;
@@ -219,6 +302,7 @@ export function createFogLayer() {
         const previous = source;
         source = field === null ? emptySource() : sourceOf(field);
         shader.resources.uField = source;
+        uncolour.resources.uField = source;
         previous.destroy();
       }
       uniforms.uniforms.uHasField = field === null ? 0 : 1;
@@ -258,6 +342,7 @@ export function createFogLayer() {
       mesh.destroy();
       // The shader lets go of the texture before the texture goes, which is the order Pixi asks for.
       shader.destroy();
+      uncolour.destroy();
       source.destroy();
     },
   };

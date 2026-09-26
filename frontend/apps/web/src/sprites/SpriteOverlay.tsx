@@ -32,6 +32,7 @@ interface SpriteOverlayProps {
  */
 export function SpriteOverlay({ map, sprites, worldRoot }: SpriteOverlayProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const uncolouringRef = useRef<HTMLCanvasElement | null>(null);
   const rendererRef = useRef<ReturnType<typeof createPixiSpriteRenderer> | null>(null);
   const top = useSyncExternalStore(watchSubjects, subjectsNow).open[0];
   const everything = useSyncExternalStore(watchSeeingEverything, seeingEverything);
@@ -59,7 +60,7 @@ export function SpriteOverlay({ map, sprites, worldRoot }: SpriteOverlayProps) {
 
     const renderer = createPixiSpriteRenderer(cameraOf(map));
     rendererRef.current = renderer;
-    void renderer.mount(container);
+    void renderer.mount(container, uncolouringRef.current ?? undefined);
 
     return () => {
       rendererRef.current = null;
@@ -124,5 +125,12 @@ export function SpriteOverlay({ map, sprites, worldRoot }: SpriteOverlayProps) {
     };
   }, [map]);
 
-  return <div className="sprites" ref={containerRef} data-testid="sprites" />;
+  // The canvas the map's colour is taken out through comes first, so that it lies between the map and the
+  // sprites and its blend reaches the map alone. See decision record 0065.
+  return (
+    <>
+      <canvas className="uncolouring" ref={uncolouringRef} aria-hidden="true" />
+      <div className="sprites" ref={containerRef} data-testid="sprites" />
+    </>
+  );
 }

@@ -8,6 +8,8 @@
   field, the camera and the look below stand. See decision record 0063.
 - Amended 2026-09-26: the trees in unknown ground are no longer grown at all, as the consequences below said
   they would not be; step 5 of `docs/plans/fog-of-war.md`.
+- Amended 2026-09-26: revealed ground has its colour taken out rather than washed with grey, the map's through
+  a canvas of its own and the sprites' by a filter, and the wash is a light fade; see decision record 0065.
 
 ## Context
 

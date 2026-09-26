@@ -79,9 +79,11 @@ A player's own house and own key figures are always theirs to see: every one of 
    grow is decided as a cell is taken into view, and sorted again when the fog changes, keeping the fade a
    group is at. With the fog off everything grows, and with no house nothing does. The stands are still
    public until step 8.
-6. **Colourless revealed ground.** The wash becomes the colour taken out, with a blend mode over the map and the
-   sprites. If it does not composite over the two canvases, or costs too much, the wash stays, which Adam
-   allowed.
+6. **Colourless revealed ground.** Done. No one blend reaches both canvases, so each loses its colour by the
+   means it has: the map through a canvas between the two, grey where revealed ground is not in vision,
+   composited by the browser's saturation blend; the world's sprites under the fog by a filter in Pixi. Both
+   from the same field, along the same edge and its wander, and the signs keep their colours. The wash is
+   now a light fade. Decision record 0065.
 7. **The haze undulates**, slowly, only zoomed in and only while unknown ground is on the screen, at a frame
    rate a slow movement needs rather than every frame.
 8. **The stands come from the server.** The sprite map's stand files leave the public folder, and the gateway
