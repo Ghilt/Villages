@@ -280,13 +280,29 @@ and piety, one `Stock` apiece - and every rate among them is zero, because nothi
 income yet. The shape is carried anyway so that income, when it arrives, is a number changing rather than a
 frame changing. See `SETTING.md` and `GLOSSARY.md` for what each of the five is.
 
-## What showing a dialogue asks of the client
+## What a dialogue asks of the server and the client
 
-Nothing of this is built. `MECHANICS.md` describes **character dialogue**; what follows is what it would
-cost the client, recorded before anything is written so that the first increment starts from it.
+Nothing of this is built. `MECHANICS.md` describes **character dialogue**, decision record 0067 decides its
+shape, and `docs/plans/character-dialogue.md` is the order it is built in; what follows is what it costs the
+program, recorded before anything is written so that the first increment starts from it.
 
-**Where it would be drawn is an open choice, and it matters.** PixiJS is in exactly one file today,
-`sprites/PixiSpriteRenderer.ts`, and it draws the map overlay behind the `SpriteRenderer` interface. Every
+**The server walks a dialogue, and holds back what has not been reached.** A dialogue is offered whole on the
+house's stream, and where it has got to is one pure function in the domain, the walk: what has been said,
+the stretch still to read up to the next step the history records, and the options pending. The decider
+accepts a step only where the walk says there is one, and the gateway builds what the player is sent from the
+same walk - what was said and the stretch ahead, never the lines past it and never the requirements. It is
+the fog's rule (0061) applied to a conversation, and for the same reason: the setting's secret is meant to
+come out through dialogue, and a dialogue handed to the browser whole can be read ahead.
+
+**What is left to `client-core` is the reading.** Which line of the stretch is showing, who is speaking, and
+when a press has to be sent as a step rather than simply shown, is logic with no DOM in it, so it sits in
+`packages/client-core` behind the layer rule and is tested without a browser. `apps/web` draws what that
+logic says. It keeps its place while what it reads is unchanged, and reads the stretch again from its start
+after a reload. A dialogue that keeps its state in a React component is a dialogue that can only be tested by
+clicking through it.
+
+**Where it is drawn is still an open choice, and it matters.** PixiJS is only in `sprites/` today, where it
+draws the map's overlay behind the `SpriteRenderer` interface: the sprites, the scenery and the fog. Every
 other piece of interface, the parchment included, is React and the DOM. A dialogue is interface rather than
 map, so the DOM is where it would naturally go — but the mechanic exists for its feel, and characters that
 enter, leave and react are what Pixi is for. The two routes:
@@ -296,20 +312,13 @@ enter, leave and react are what Pixi is for. The two routes:
 - **A Pixi surface inside the panel.** Sprite sheets, tweens and per-character animation, at the cost of
   another WebGL surface beside the map's and a layout that has to be driven rather than declared.
 
-Whichever is picked gets a decision record, because it is hard to reverse once a dozen conversations are
-written against it.
+The DOM is the recommendation: what Adam has described - a scene, a feed of bubbles, a list - is the shape of
+a document, and the movement in the scene is fades and transforms. Whichever is picked gets a decision record
+before the pane is drawn, because it is hard to reverse once a dozen conversations are written against it.
 
-**The stepping belongs in `client-core`, not in the page.** Which line is current, who is speaking, what a
-step does and when an opportunity opens mid-conversation is logic with no DOM in it, so it sits in
-`packages/client-core` behind the layer rule and is tested without a browser. `apps/web` draws what that
-logic says. A dialogue that keeps its state in a React component is a dialogue that can only be tested by
-clicking through it.
-
-**It is responsive from the first line of it.** On a phone a dialogue is the screen; on a desktop it is a
-region of it. See `RESPONSIVE-DESIGN.md`.
-
-What the server owes a dialogue is undecided, because whether the lines themselves are events is undecided;
-`MECHANICS.md` says so under the mechanic.
+**It is responsive from the first line of it**, and a pane like any other: on a desktop it takes a column
+down the right of the stage, and on a phone it takes a bay and can be opened out. See `RESPONSIVE-DESIGN.md`,
+and the mechanic's UI in `MECHANICS.md`.
 
 ## What the bays ask of the client
 
