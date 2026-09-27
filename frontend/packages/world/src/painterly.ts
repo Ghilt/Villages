@@ -1,3 +1,5 @@
+import { SQUARE_LATTICE, alongU, alongV, frameOf, isSquareLattice, worldXOf, worldYOf } from './lattice.ts';
+import type { Lattice } from './lattice.ts';
 import { toRgb } from './palette.ts';
 import type { Palette, Rgb, TerrainClass } from './palette.ts';
 
@@ -134,32 +136,8 @@ export function treatment(kind: TreatmentKind, x: number, y: number, seed: numbe
 export type ClassSampler = (x: number, y: number) => number;
 
 /**
- * The grid the ground's colour is decided on, which need not be the grid the world is stored on.
- *
- * The terrain arrives on a square lattice lying along the world's own axes, because that is how a master
- * is painted and how a tile is cut. Nothing says it has to be drawn on that one. Turn the lattice and a
- * cell is a diamond; make it bigger and a cell is a tile of ground rather than a pixel of it. The world
- * underneath is untouched - this decides only where the colour is read, so north stays where it was and
- * a coastline stays where it was. Turning the camera instead would turn the world with it, which is the
- * whole reason this exists. See experiment 0008.
- */
-export interface Lattice {
-  /** How far the lattice is turned from the world's own axes, in degrees. */
-  turn: number;
-  /** How wide one cell is, in world-space units, where one is a master pixel. */
-  size: number;
-}
-
-/** The lattice the world is stored on, and the one everything used before there was a choice. */
-export const SQUARE_LATTICE: Lattice = { turn: 0, size: 1 };
-
-/** Whether a lattice is the plain one, in which case nothing need be done about it at all. */
-export function isSquareLattice(lattice: Lattice): boolean {
-  return lattice.turn === 0 && lattice.size === 1;
-}
-
-/**
- * The same terrain, read on a different lattice.
+ * The same terrain, read on a different lattice: the grid the ground's colour is decided on, which need
+ * not be the grid the world is stored on. See `lattice.ts`.
  *
  * A sampler in and a sampler out, so everything downstream of it is unchanged: the wander still wanders
  * before the read, the neighbours are still read at a reach, and the shore is still drawn where water
@@ -170,18 +148,13 @@ export function onLattice(read: ClassSampler, lattice: Lattice): ClassSampler {
   if (isSquareLattice(lattice)) {
     return read;
   }
-  const turn = (lattice.turn * Math.PI) / 180;
-  const sin = Math.sin(turn);
-  const cos = Math.cos(turn);
-  const { size } = lattice;
+  const frame = frameOf(lattice);
   return (x, y) => {
     // Into the lattice's own frame, down to whole cells, and back out at the middle of the one it landed
     // in. The middle rather than the corner because a cell's colour should be the ground at its heart.
-    const alongU = (x * cos + y * sin) / size;
-    const alongV = (y * cos - x * sin) / size;
-    const middleU = (Math.floor(alongU) + 0.5) * size;
-    const middleV = (Math.floor(alongV) + 0.5) * size;
-    return read(middleU * cos - middleV * sin, middleU * sin + middleV * cos);
+    const middleU = Math.floor(alongU(frame, x, y)) + 0.5;
+    const middleV = Math.floor(alongV(frame, x, y)) + 0.5;
+    return read(worldXOf(frame, middleU, middleV), worldYOf(frame, middleU, middleV));
   };
 }
 
@@ -335,8 +308,11 @@ function baseColour(
   return toRgb(style.colours === 'palette' ? terrain.colour : colours[terrain.name]!);
 }
 
-/** A stable seed per group, so every class of forest shares one canopy and not one per class. */
-function seedOf(group: string): number {
+/**
+ * A stable seed from a name: per group, so every class of forest shares one canopy and not one per class,
+ * and per house, so a holding comes out the same shape on every screen that draws it.
+ */
+export function seedOf(group: string): number {
   let seed = 0x811c9dc5;
   for (let at = 0; at < group.length; at += 1) {
     seed = Math.imul(seed ^ group.charCodeAt(at), 0x01000193) | 0;

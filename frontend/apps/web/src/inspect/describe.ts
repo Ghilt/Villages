@@ -1,8 +1,8 @@
 import { ageOn } from '@villages/client-core';
 import { describeDay } from '@villages/protocol';
 import type { HolderView, HouseView, Point, Sex } from '@villages/protocol';
-import { insideFence, toRasterPixel } from '@villages/world';
-import type { MasterGrid, TerrainClass } from '@villages/world';
+import { insideFenceAt } from '@villages/world';
+import type { TerrainClass } from '@villages/world';
 
 import type { Area } from '../areas/areas';
 import { blazon, whereabouts } from '../house/describe';
@@ -84,12 +84,7 @@ const MOST_TERRAINS = 3;
  * `yours` rather than reading the gateway here, because whose a house is belongs to the caller: this file
  * knows what a house is and not who is looking at it.
  */
-export function describeHouse(
-  house: HouseView,
-  yours: boolean,
-  areas: readonly Area[],
-  grid: MasterGrid | null,
-): Description {
+export function describeHouse(house: HouseView, yours: boolean, areas: readonly Area[]): Description {
   return {
     kind: yours ? 'Your house' : 'House',
     name: house.name,
@@ -104,9 +99,9 @@ export function describeHouse(
       // Every fenced area the seat falls inside. The only subject-to-subject link there is until the world
       // grows something else that overlaps: a house is in the ground somebody has drawn a line around.
       ...areas
-        .filter((area) => seatIsInside(area, house, grid))
+        .filter((area) => seatIsInside(area, house))
         .map((area): Link => ({
-          what: `the ground it stands in, ${area.pixels.toLocaleString()} px`,
+          what: `the ground it stands in, ${area.diamonds.toLocaleString()} diamonds`,
           to: 'subject',
           subject: { kind: 'area', id: area.id },
         })),
@@ -155,16 +150,11 @@ export function describeCharacter(
 }
 
 /** An area: what it encloses, and who is standing in it. */
-export function describeArea(
-  area: Area,
-  houses: readonly HouseView[],
-  legend: Legend | null,
-  grid: MasterGrid | null,
-): Description {
-  const inside = houses.filter((house) => seatIsInside(area, house, grid));
+export function describeArea(area: Area, houses: readonly HouseView[], legend: Legend | null): Description {
+  const inside = houses.filter((house) => seatIsInside(area, house));
 
   const facts: Fact[] = [
-    { what: 'Encloses', said: `${area.pixels.toLocaleString()} master px` },
+    { what: 'Encloses', said: `${area.diamonds.toLocaleString()} diamonds` },
     { what: 'Houses', said: inside.length === 0 ? 'none in view' : `${inside.length}` },
   ];
 
@@ -172,10 +162,10 @@ export function describeArea(
     facts.push({ what: 'Ground', said: 'counting…', ticking: true });
   } else if (area.problem !== null) {
     facts.push({ what: 'Ground', said: area.problem });
-  } else if (area.census !== null && area.census.pixels > 0) {
-    const { byClass, pixels } = area.census;
+  } else if (area.census !== null && area.census.diamonds > 0) {
+    const { byClass, diamonds } = area.census;
     for (const [id, count] of [...byClass].sort((one, other) => other[1] - one[1]).slice(0, MOST_TERRAINS)) {
-      const share = (100 * count) / pixels;
+      const share = (100 * count) / diamonds;
       facts.push({
         what: legend?.byId.get(id)?.name ?? `class ${id}`,
         said: `${share < 0.1 ? '<0.1' : share.toFixed(1)}%`,
@@ -197,18 +187,11 @@ export function describeArea(
 }
 
 /**
- * Whether a house's seat falls inside a fence.
+ * Whether a house's seat falls inside a fence: whether the diamond it stands in does.
  *
- * Through `toRasterPixel` and not by dividing the longitude, because world space is the Mercator square and
- * a master row is not a degree of latitude (decision record 0030). It is the same conversion the area
- * overlay uses to decide what a click hit, so what the window says is in an area is what the map says is.
- *
- * Without the grid there is no answer, and no answer means no link rather than a wrong one.
+ * `insideFenceAt`, the same question the area overlay asks of a click, so what the window says is in an
+ * area is what the map says is. The fence carries the grid it was drawn on, so nothing has to be handed one.
  */
-function seatIsInside(area: Area, house: HouseView, grid: MasterGrid | null): boolean {
-  if (grid === null) {
-    return false;
-  }
-  const at = toRasterPixel({ lng: house.seat.lon, lat: house.seat.lat }, grid);
-  return insideFence(area.fence, Math.floor(at.x), Math.floor(at.y));
+function seatIsInside(area: Area, house: HouseView): boolean {
+  return insideFenceAt(area.fence, { lng: house.seat.lon, lat: house.seat.lat });
 }

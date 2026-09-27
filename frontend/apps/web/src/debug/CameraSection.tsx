@@ -206,7 +206,7 @@ export function CameraSection({ map }: CameraSectionProps) {
       />
       <p className="debug-map__note">
         {how.latticeSize === 1
-          ? 'One master pixel, which is the finest the terrain goes'
+          ? 'One world unit, as wide as a master pixel: the finest the terrain goes, and what an area steps along'
           : `${how.latticeSize} world units across, about ${Math.round(how.latticeSize * 8 * Math.SQRT2)} pixels corner to corner at the closest the camera comes`}
       </p>
 

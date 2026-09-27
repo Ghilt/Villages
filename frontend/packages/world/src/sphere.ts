@@ -30,6 +30,28 @@ export interface EulerAngles {
 const toRadians = (degrees: number): number => (degrees * Math.PI) / 180;
 const toDegrees = (radians: number): number => (radians * 180) / Math.PI;
 
+/**
+ * Where a place lies in world space: the Web Mercator square the map is drawn on, `width` units on a side,
+ * where `width` is the master's, north-west first. See decision record 0030.
+ *
+ * Not clamped. A place past the Mercator limit lands off the square rather than on its edge, which is what
+ * lets anything built from it tell the world's edge from a shape that ran past it.
+ */
+export function toWorld({ lng, lat }: LngLat, width: number): { x: number; y: number } {
+  return {
+    x: ((lng + 180) / 360) * width,
+    y: (0.5 - Math.log(Math.tan(Math.PI / 4 + toRadians(lat) / 2)) / (2 * Math.PI)) * width,
+  };
+}
+
+/** The place a point of world space stands for: `toWorld` backwards. */
+export function fromWorld(x: number, y: number, width: number): LngLat {
+  return {
+    lng: (x / width) * 360 - 180,
+    lat: toDegrees(Math.atan(Math.sinh(Math.PI * (1 - (2 * y) / width)))),
+  };
+}
+
 export function toVector({ lng, lat }: LngLat): Vector3 {
   const phi = toRadians(lat);
   const lambda = toRadians(lng);

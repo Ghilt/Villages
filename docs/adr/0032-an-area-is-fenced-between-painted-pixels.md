@@ -7,6 +7,11 @@
   which named one use of it in the one place that should have named none. It is `areaAround` in
   `area.ts` now, beside the rest of the component, and what a given area *means* belongs to whatever
   draws it: a **Holding** today, a castle's influence zone later. The geometry did not change.
+- Amended 2026-09-27 by 0066: the fence and the census moved from the master's pixels to the ground's
+  **diamonds**, one world unit each and turned as the ground is turned, because the ground is painted on
+  them. Everything below about exactness holds on that grid unchanged. Where it says master pixel, read
+  diamond, and the census reads each diamond at its middle, as the painter does, rather than finding master
+  rows among the tile rows.
 
 ## Context
 

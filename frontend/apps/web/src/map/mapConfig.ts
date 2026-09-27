@@ -43,9 +43,11 @@ export const CAMERA = {
   bearing: 0,
   /**
    * The grid the ground's colour is read on: turned twenty-six degrees so a cell is a diamond while north
-   * stays up, four world units across, which is the size the diamonds button draws. See experiment 0008.
+   * stays up, and one world unit across, the finest the terrain goes. Adam's size, on 2026-09-27, after four
+   * had been the diamonds button's. An area is fenced on these same diamonds. See experiment 0008 and
+   * decision records 0060 and 0066.
    */
-  lattice: { turn: 26, size: 4 },
+  lattice: { turn: 26, size: 1 },
 } as const;
 
 /** MapLibre's own field of view, which is what a camera standing in the world looks like. */

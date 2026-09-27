@@ -34,7 +34,7 @@ function CensusRows({ census, legend }: { census: Census; legend: Legend | null 
         <div className="debug__row">
           <dt>encloses</dt>
           <dd>
-            {census.pixels.toLocaleString()} master px, from {census.tiles} tiles in {census.tookMs} ms
+            {census.diamonds.toLocaleString()} diamonds, from {census.tiles} tiles in {census.tookMs} ms
             {census.unknown > 0 && `, ${census.unknown.toLocaleString()} with no tile to read`}
           </dd>
         </div>
@@ -46,7 +46,7 @@ function CensusRows({ census, legend }: { census: Census; legend: Legend | null 
             const terrain = legend?.byId.get(id);
             const name = terrain?.name ?? `class ${id}`;
             const colour = terrain === undefined ? '#888888' : (legend?.colours[terrain.name] ?? '#888888');
-            const share = (100 * count) / census.pixels;
+            const share = (100 * count) / census.diamonds;
             return (
               <li key={id}>
                 <span className="areas__swatch" style={{ background: colour }} />
@@ -160,7 +160,7 @@ export function AreasView({ map, worldRoot }: AreasViewProps) {
               }
             >
               <span className="debug__area">{area.id}</span>
-              {area.pixels.toLocaleString()} px
+              {area.diamonds.toLocaleString()} diamonds
               {area.counting ? ', counting' : area.problem !== null ? ', uncounted' : ''}
             </button>
           </li>

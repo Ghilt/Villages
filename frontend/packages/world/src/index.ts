@@ -52,7 +52,15 @@ export { backgroundOf, crop, footOf, hasOwnAlpha, keyOut, opaqueBox, packShelves
 export type { ArtAtlasFile, ArtFrame, Box, Keyed, Placed, Rgba } from './art.ts';
 export { noiseAt } from './noise.ts';
 export type { NoiseField } from './noise.ts';
-export { MAX_MERCATOR_LATITUDE, angularDistance, rotate, toLngLat, toVector } from './sphere.ts';
+export {
+  MAX_MERCATOR_LATITUDE,
+  angularDistance,
+  fromWorld,
+  rotate,
+  toLngLat,
+  toVector,
+  toWorld,
+} from './sphere.ts';
 export type { EulerAngles, LngLat, Vector3 } from './sphere.ts';
 export { controlOffset, seamDamping, warpPoint } from './warp.ts';
 export type { WarpConfig, WarpControl, WarpOctave } from './warp.ts';
@@ -70,14 +78,7 @@ export {
 } from './palette.ts';
 export type { MasterShape, Palette, PaletteProblem, Rgb, Snap, TerrainClass } from './palette.ts';
 
-export {
-  classAt,
-  classHistogram,
-  createRaster,
-  fillPolygon,
-  strokeLine,
-  toPixel as toRasterPixel,
-} from './raster.ts';
+export { classAt, classHistogram, createRaster, fillPolygon, strokeLine } from './raster.ts';
 export type { ClassRaster, Ring } from './raster.ts';
 
 export { chunk, crc32, encodeIndexedPng, encodeRgbPng } from './png.ts';
@@ -103,6 +104,8 @@ export {
   MOST_ENCLOSED,
   areaAround,
   closePath,
+  diamondAt,
+  diamondLattice,
   enclose,
   enclosedBy,
   fenceAround,
@@ -110,9 +113,24 @@ export {
   fenceToPolygons,
   fenceWindow,
   insideFence,
+  insideFenceAt,
+  scanGrid,
   withoutCollinear,
 } from './area.ts';
-export type { EnclosedPixels, Fence, FencePart, MasterGrid, PixelSpan, PixelWindow } from './area.ts';
+export type {
+  DiamondGrid,
+  DiamondSpan,
+  DiamondWindow,
+  EnclosedDiamonds,
+  Fence,
+  FencePart,
+  GridPoint,
+  Roughness,
+  ScanBounds,
+} from './area.ts';
+
+export { SQUARE_LATTICE, alongU, alongV, frameOf, isSquareLattice, worldXOf, worldYOf } from './lattice.ts';
+export type { Lattice, LatticeFrame } from './lattice.ts';
 
 export { DEFAULT_MASTER, isSafeMasterName, masterNameOf, worldDirOf } from './masters.ts';
 
@@ -121,14 +139,13 @@ export type { FillOptions, FillReport } from './fill.ts';
 
 export {
   fbm,
-  SQUARE_LATTICE,
   hash2,
-  isSquareLattice,
   mix,
   onLattice,
   paintPixel,
   painterlyProblems,
   preparePainterly,
+  seedOf,
   smoothstep,
   treatment,
   valueNoise,
@@ -136,7 +153,6 @@ export {
 export type {
   ClassSampler,
   GroupStyle,
-  Lattice,
   PainterlyStyle,
   PreparedPainterly,
   TreatmentKind,

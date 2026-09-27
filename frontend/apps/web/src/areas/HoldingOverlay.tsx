@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
-import { areaAround, fenceToPolygons } from '@villages/world';
-import type { Fence, MasterGrid } from '@villages/world';
+import { areaAround, fenceToPolygons, seedOf } from '@villages/world';
+import type { DiamondGrid, Fence } from '@villages/world';
 import type { HouseView } from '@villages/protocol';
 
 import { note } from '../debug/log';
@@ -14,6 +14,8 @@ interface HoldingOverlayProps {
   houses: readonly HouseView[];
   /** The player's own house while the eye is open, whose ground is drawn at any zoom; null otherwise. */
   mine: HouseView | null;
+  /** How far the ground's grid is turned, in degrees, which is how far a holding's diamonds are. */
+  turn: number;
 }
 
 const SOURCE = 'holding';
@@ -29,13 +31,24 @@ const OWN_LINE = 'holding-own-line';
 const HELD = '#9d7c2a';
 
 /**
- * How far a house's ground reaches, in master pixels. About twenty-five kilometres, which is a morning's
- * ride: near enough to be a neighbourhood and far enough to see at the zoom a house is drawn from.
+ * How far a house's ground reaches, in world units, on average. Twenty-five, which is as much ground as
+ * the round holding drawn on the master had at Mordaunt's latitude: some nineteen hundred diamonds, about
+ * twenty kilometres out. Near enough to be a neighbourhood and far enough to see at the zoom a house is
+ * drawn from.
  *
- * A number of the game's, and the only one here. When the world has something to say about how far a
- * house reaches, this moves into the domain and onto the events; until then it is a look.
+ * A placeholder, Adam's word for it on 2026-09-27, and so are the two numbers below it. When the world has
+ * something to say about how far a house reaches, this moves into the domain and onto the events; until
+ * then it is a look.
  */
-const REACH = 20;
+const REACH = 25;
+
+/**
+ * How ragged the ground is: the reach wanders in and out by a quarter of itself on the way round, and every
+ * diamond's distance is jittered by a diamond and a half, so the edge is a fraying, lumpy thing rather than
+ * a circle. Always one piece with no holes, whatever these are. See `areaAround`.
+ */
+const LUMPS = 0.25;
+const JITTER = 1.5;
 
 /** Below the zoom a house is drawn as a marker, its ground is smaller than the mark and reads as dirt. */
 const MINZOOM = 7;
@@ -58,18 +71,26 @@ const NO_MINZOOM = 0;
  * it sits under; the player's own, while the eye is open, is drawn below that too, and a zoom range in
  * MapLibre belongs to a layer rather than to a feature. See decision record 0038.
  */
-export function HoldingOverlay({ map, houses, mine }: HoldingOverlayProps) {
-  const [grid, setGrid] = useState<MasterGrid | null>(null);
+export function HoldingOverlay({ map, houses, mine, turn }: HoldingOverlayProps) {
+  const [width, setWidth] = useState<number | null>(null);
+  const grid = useMemo((): DiamondGrid | null => (width === null ? null : { width, turn }), [width, turn]);
   const fences = useRef(new Map<string, Fence>());
   const everything = useSyncExternalStore(watchSeeingEverything, seeingEverything);
 
-  // Worked out from the seat rather than stored, and memoised by house, because a seat never moves and
-  // tracing a ring is not free. Both the everyone source and the own one ask through here.
-  const fenceFor = useCallback((house: HouseView, on: MasterGrid): Fence => {
-    let fence = fences.current.get(house.id);
+  // Worked out from the seat rather than stored, and memoised by house and by how far the diamonds are
+  // turned, because a seat never moves and tracing a ring is not free, and a turned ground is other
+  // diamonds. Seeded by the house, so its ground is the same shape on every screen that draws it. Both the
+  // everyone source and the own one ask through here.
+  const fenceFor = useCallback((house: HouseView, on: DiamondGrid): Fence => {
+    const key = `${house.id} ${on.turn}`;
+    let fence = fences.current.get(key);
     if (fence === undefined) {
-      fence = areaAround({ lng: house.seat.lon, lat: house.seat.lat }, on, REACH);
-      fences.current.set(house.id, fence);
+      fence = areaAround({ lng: house.seat.lon, lat: house.seat.lat }, on, REACH, {
+        seed: seedOf(house.id),
+        lumps: LUMPS,
+        jitter: JITTER,
+      });
+      fences.current.set(key, fence);
     }
     return fence;
   }, []);
@@ -79,7 +100,7 @@ export function HoldingOverlay({ map, houses, mine }: HoldingOverlayProps) {
     terrainPalette().then(
       (palette) => {
         if (looking) {
-          setGrid({ width: palette.masterWidth, height: palette.masterHeight });
+          setWidth(palette.masterWidth);
         }
       },
       (cause: unknown) => {
@@ -179,7 +200,7 @@ export function HoldingOverlay({ map, houses, mine }: HoldingOverlayProps) {
       properties: { id: house.id },
       geometry: {
         type: 'MultiPolygon' as const,
-        coordinates: fenceToPolygons(fenceFor(house, grid), grid),
+        coordinates: fenceToPolygons(fenceFor(house, grid)),
       },
     }));
 
@@ -205,7 +226,7 @@ export function HoldingOverlay({ map, houses, mine }: HoldingOverlayProps) {
               properties: { id: mine.id },
               geometry: {
                 type: 'MultiPolygon' as const,
-                coordinates: fenceToPolygons(fenceFor(mine, grid), grid),
+                coordinates: fenceToPolygons(fenceFor(mine, grid)),
               },
             },
           ];

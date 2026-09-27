@@ -1,11 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { beforeEach, describe, expect, it } from 'vitest';
 
+import { SQUARE_LATTICE, isSquareLattice } from './lattice.ts';
 import {
-  SQUARE_LATTICE,
   fbm,
   hash2,
-  isSquareLattice,
   mix,
   onLattice,
   paintPixel,

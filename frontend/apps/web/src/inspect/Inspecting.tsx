@@ -1,7 +1,7 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 
 import { charactersInView, housesInView } from '@villages/client-core';
-import type { MasterGrid, TerrainClass } from '@villages/world';
+import type { TerrainClass } from '@villages/world';
 
 import { areasNow, watchAreas } from '../areas/areas';
 import { terrainPalette } from '../map/terrainClasses';
@@ -30,11 +30,9 @@ interface InspectingProps {
   room: Room;
   /** How the stage is cut, or null in the spread, where a link needs no arrows. */
   along: 'rows' | 'columns' | null;
-  /** The master grid, for deciding which area a seat falls inside. Null until the palette has loaded. */
-  grid: MasterGrid | null;
 }
 
-export function Inspecting({ subject, room: given, along, grid }: InspectingProps) {
+export function Inspecting({ subject, room: given, along }: InspectingProps) {
   // Its own size control opens a put-away window at the top of the rail rather than where it stood.
   const room: Room = { ...given, ask: (size) => sizeWindow(subject, size) };
   const heard = useSyncExternalStore(watchGateway, gatewayState);
@@ -76,7 +74,7 @@ export function Inspecting({ subject, room: given, along, grid }: InspectingProp
     }
 
     if (subject.kind === 'area') {
-      return area === null ? null : describeArea(area, housesInView(heard.houses), legend, grid);
+      return area === null ? null : describeArea(area, housesInView(heard.houses), legend);
     }
 
     const house =
@@ -84,7 +82,7 @@ export function Inspecting({ subject, room: given, along, grid }: InspectingProp
       (heard.yourHouse?.house.id === subject.id ? heard.yourHouse.house : undefined);
     return house === undefined
       ? null
-      : describeHouse(house, heard.yourHouse?.house.id === house.id, areas.areas, grid);
+      : describeHouse(house, heard.yourHouse?.house.id === house.id, areas.areas);
   };
 
   const said = describeSubject();

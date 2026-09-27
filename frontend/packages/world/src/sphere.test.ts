@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
-import { MAX_MERCATOR_LATITUDE, angularDistance, rotate, toLngLat, toVector } from './sphere.ts';
+import {
+  MAX_MERCATOR_LATITUDE,
+  angularDistance,
+  fromWorld,
+  rotate,
+  toLngLat,
+  toVector,
+  toWorld,
+} from './sphere.ts';
 
 const NO_TURN = { yaw: 0, pitch: 0, roll: 0 };
 
@@ -68,5 +76,42 @@ describe('what Mercator can draw', () => {
     const y = Math.log(Math.tan(Math.PI / 4 + (MAX_MERCATOR_LATITUDE * Math.PI) / 360));
 
     expect(y).toBeCloseTo(Math.PI, 5);
+  });
+});
+
+describe('world space, the Mercator square the map is drawn on', () => {
+  const WIDTH = 32768;
+
+  it('puts the prime meridian and the equator in the middle, and the antimeridian on the west edge', () => {
+    const middle = toWorld({ lng: 0, lat: 0 }, WIDTH);
+
+    expect(middle.x).toBeCloseTo(WIDTH / 2, 9);
+    expect(middle.y).toBeCloseTo(WIDTH / 2, 9);
+    expect(toWorld({ lng: -180, lat: 0 }, WIDTH).x).toBe(0);
+  });
+
+  it('reaches the top edge at the Mercator limit, which is what makes it a square', () => {
+    expect(toWorld({ lng: 0, lat: MAX_MERCATOR_LATITUDE }, WIDTH).y).toBeCloseTo(0, 2);
+    expect(toWorld({ lng: 0, lat: -MAX_MERCATOR_LATITUDE }, WIDTH).y).toBeCloseTo(WIDTH, 2);
+  });
+
+  it('comes back to the place it started from', () => {
+    for (const place of [
+      { lng: 0, lat: 0 },
+      { lng: 14.695, lat: 49.871 },
+      { lng: -122.4, lat: 37.8 },
+      { lng: 179.9, lat: -84 },
+    ]) {
+      const at = toWorld(place, WIDTH);
+      const back = fromWorld(at.x, at.y, WIDTH);
+
+      expect(back.lng).toBeCloseTo(place.lng, 10);
+      expect(back.lat).toBeCloseTo(place.lat, 10);
+    }
+  });
+
+  it('is not clamped, so a place past the limit lands off the square rather than on its edge', () => {
+    expect(toWorld({ lng: 0, lat: 88 }, WIDTH).y).toBeLessThan(0);
+    expect(toWorld({ lng: 190, lat: 0 }, WIDTH).x).toBeGreaterThan(WIDTH);
   });
 });

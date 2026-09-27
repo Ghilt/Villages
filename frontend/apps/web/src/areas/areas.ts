@@ -30,8 +30,8 @@ export interface Area {
   fence: Fence;
   /** Whether the inside is shaded as well as fenced. */
   shaded: boolean;
-  /** Master pixels enclosed, which the fence knows on its own, before any terrain is read. */
-  pixels: number;
+  /** Diamonds enclosed, which the fence knows on its own, before any terrain is read. */
+  diamonds: number;
   census: Census | null;
   counting: boolean;
   /** Why the census could not be taken, if it could not. */
@@ -91,7 +91,7 @@ export function addArea(fence: Fence, tilesRoot: string): string {
   minted += 1;
   const id = `a-${Date.now().toString(36)}-${minted}`;
   const window = fenceWindow(fence);
-  const pixels = fenceSize(fence);
+  const diamonds = fenceSize(fence);
   const vertices = fence.parts.reduce(
     (sum, part) => sum + part.outer.length + part.holes.reduce((held, hole) => held + hole.length, 0),
     0,
@@ -100,13 +100,13 @@ export function addArea(fence: Fence, tilesRoot: string): string {
   note(
     'area',
     `${id}: ${fence.parts.length} part(s), ${vertices} vertices over ${window.width} by ` +
-      `${window.height} master pixels, ${pixels.toLocaleString()} enclosed`,
+      `${window.height} diamonds turned ${fence.grid.turn} degrees, ${diamonds.toLocaleString()} enclosed`,
   );
 
   update({
     areas: [
       ...state.areas,
-      { id, fence, shaded: true, pixels, census: null, counting: false, problem: null },
+      { id, fence, shaded: true, diamonds, census: null, counting: false, problem: null },
     ],
   });
   countArea(id, tilesRoot);
@@ -126,7 +126,7 @@ export function countArea(id: string, tilesRoot: string): void {
       replace(id, { census, counting: false });
       note(
         'area',
-        `${id}: ${census.pixels.toLocaleString()} pixels of ${census.byClass.size} kinds from ` +
+        `${id}: ${census.diamonds.toLocaleString()} diamonds of ${census.byClass.size} kinds from ` +
           `${census.tiles} tiles in ${census.tookMs} ms` +
           (census.unknown > 0 ? `, ${census.unknown} with no tile to read` : ''),
       );

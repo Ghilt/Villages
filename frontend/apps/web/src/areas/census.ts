@@ -1,30 +1,31 @@
-import { enclosedBy, mercatorRowOf } from '@villages/world';
+import { diamondLattice, enclosedBy, frameOf, worldXOf, worldYOf } from '@villages/world';
 import type { Fence } from '@villages/world';
 
 import { FLAT_MAX_ZOOM, TILE } from '../map/painterlyMessages';
 import { classesOfTile, terrainPalette } from '../map/terrainClasses';
 
 /**
- * What terrain an area encloses, counted in the pixels the world is painted in.
+ * What terrain an area encloses, counted in the diamonds the ground is painted on.
  *
- * The master itself is twenty-four megabytes and is not served, so the count is read out of the zoom 7
- * tiles, which carry every master pixel exactly: the master is 32768 across and a tile is 256, so a tile
- * pixel is a master pixel there. `mercatorRowOf` finds which tile row holds a master row, which is the
- * only part of the arithmetic that is not a straight scaling, because the master runs linearly in
- * latitude and the tiles run linearly in Mercator. See docs/adr/0032.
+ * Each diamond is read at its middle out of the zoom 7 tiles, which is what the painter reads a diamond's
+ * colour from once the map is in past zoom six and a half: the same middle, through the same arithmetic in
+ * `lattice.ts`, floored to the same tile pixel as the painter's own sampler floors it. So what is counted is
+ * what is painted. The master itself is twenty-four megabytes and is not served; at zoom 7 a tile pixel is
+ * one world unit, and world space is already Mercator, so nothing here has to be projected. See
+ * docs/adr/0032 and 0066.
  *
  * The terrain arrives through `classesOfTile`, the same reader the painter uses, so the census and the
  * picture cannot disagree about the same ground.
  */
 
-/** Class ids to the pixels of them, and what it cost to find out. */
+/** Class ids to the diamonds of them, and what it cost to find out. */
 export interface Census {
-  /** Master pixels enclosed, by terrain class id. Ids, because the palette is runtime data. */
+  /** Diamonds enclosed, by terrain class id. Ids, because the palette is runtime data. */
   byClass: ReadonlyMap<number, number>;
-  pixels: number;
+  diamonds: number;
   tiles: number;
   tookMs: number;
-  /** Pixels no tile could answer for: past the edge Mercator draws, or a tile that is not there. */
+  /** Diamonds no tile could answer for, because the tile they fall in is not there. */
   unknown: number;
 }
 
@@ -38,13 +39,13 @@ export interface Census {
 export const MOST_TILES = 400;
 
 /**
- * How many master pixels a fence may be built over.
+ * How many diamonds a fence may be built over.
  *
  * Set to bind at about the same size as `MOST_TILES`, so that a drag across a continent is refused while
- * it is being drawn rather than after its tiles have been counted: four hundred tiles is a Mercator box
- * of roughly five thousand pixels square, which at our latitudes is about this many of the master.
+ * it is being drawn rather than after its tiles have been counted: a round drag reaching four hundred tiles
+ * is some five thousand diamonds across, and the box the drawing guards is about this many diamonds.
  */
-export const MOST_PIXELS = 16 * 1024 * 1024;
+export const MOST_DIAMONDS = 24 * 1024 * 1024;
 
 /** How many tiles are asked for at once. The browser queues the rest anyway; this keeps it honest. */
 const AT_ONCE = 12;
@@ -53,82 +54,80 @@ export async function censusOf(fence: Fence, tilesRoot: string): Promise<Census>
   const started = performance.now();
   const palette = await terrainPalette();
   const enclosed = enclosedBy(fence);
+  const frame = frameOf(diamondLattice(fence.grid));
 
-  const across = TILE * 2 ** FLAT_MAX_ZOOM;
-  // One at the zoom the tiles were cut to, where a tile pixel is a master pixel. Written out rather than
-  // assumed, so that a master of another size still lands in the right column.
-  const columnScale = across / palette.masterWidth;
+  // How much world one tile pixel covers at the zoom the tiles were cut to: one, for a master 32768 across.
+  // Written out rather than assumed, so that a master of another size still lands in the right pixel.
+  const perPixel = fence.grid.width / (TILE * 2 ** FLAT_MAX_ZOOM);
+  const tilesAcross = 2 ** FLAT_MAX_ZOOM;
 
-  /** Which tile row holds each master row, worked out once a row rather than once a pixel. */
-  const rowOf = new Map<number, number | null>();
-  const wanted = new Set<string>();
-  for (const span of enclosed.spans) {
-    let row = rowOf.get(span.row);
-    if (row === undefined) {
-      row = mercatorRowOf(span.row, palette.masterHeight, FLAT_MAX_ZOOM);
-      rowOf.set(span.row, row);
+  /**
+   * Walks every enclosed diamond, handing over the tile pixel its middle falls in, or minus one when that
+   * is on no tile. A fence never reaches off the world, so that is only ever a fence nothing drew.
+   */
+  const eachDiamond = (visit: (tile: number, pixel: number) => void): void => {
+    for (const span of enclosed.spans) {
+      const v = span.row + 0.5;
+      for (let column = span.from; column <= span.to; column += 1) {
+        const u = column + 0.5;
+        const x = Math.floor(worldXOf(frame, u, v) / perPixel);
+        const y = Math.floor(worldYOf(frame, u, v) / perPixel);
+        const tileX = Math.floor(x / TILE);
+        const tileY = Math.floor(y / TILE);
+        if (tileX < 0 || tileY < 0 || tileX >= tilesAcross || tileY >= tilesAcross) {
+          visit(-1, 0);
+          continue;
+        }
+        visit(tileY * tilesAcross + tileX, (y - tileY * TILE) * TILE + (x - tileX * TILE));
+      }
     }
-    if (row === null) {
-      continue;
-    }
-    const tileY = Math.floor(row / TILE);
-    const first = Math.floor(Math.floor((span.from + 0.5) * columnScale) / TILE);
-    const last = Math.floor(Math.floor((span.to + 0.5) * columnScale) / TILE);
-    for (let tileX = first; tileX <= last; tileX += 1) {
-      wanted.add(`${tileX}/${tileY}`);
-    }
-  }
+  };
 
-  if (wanted.size > MOST_TILES) {
-    throw new Error(`that area covers ${wanted.size} tiles, past the ${MOST_TILES} a census reads`);
-  }
+  // Which tiles, noted only when the walk crosses into another, which along a row is rare.
+  const wanted = new Set<number>();
+  let lastTile = -1;
+  eachDiamond((tile) => {
+    if (tile >= 0 && tile !== lastTile) {
+      lastTile = tile;
+      wanted.add(tile);
+      if (wanted.size > MOST_TILES) {
+        throw new Error(`that area covers more than the ${MOST_TILES} tiles a census reads`);
+      }
+    }
+  });
 
-  const held = new Map<string, Uint8Array | null>();
+  const held = new Map<number, Uint8Array | null>();
   const addresses = [...wanted];
   for (let at = 0; at < addresses.length; at += AT_ONCE) {
     await Promise.all(
-      addresses.slice(at, at + AT_ONCE).map(async (address) => {
-        const [tileX, tileY] = address.split('/').map(Number) as [number, number];
-        held.set(address, await classesOfTile(tilesRoot, FLAT_MAX_ZOOM, tileX, tileY, palette));
+      addresses.slice(at, at + AT_ONCE).map(async (tile) => {
+        const tileX = tile % tilesAcross;
+        const tileY = (tile - tileX) / tilesAcross;
+        held.set(tile, await classesOfTile(tilesRoot, FLAT_MAX_ZOOM, tileX, tileY, palette));
       }),
     );
   }
 
   const counts = new Uint32Array(256);
-  let pixels = 0;
+  let diamonds = 0;
   let unknown = 0;
-
-  for (const span of enclosed.spans) {
-    const row = rowOf.get(span.row) ?? null;
-    if (row === null) {
-      unknown += span.to - span.from + 1;
-      continue;
+  let heldTile = -1;
+  let classes: Uint8Array | null = null;
+  eachDiamond((tile, pixel) => {
+    if (tile !== heldTile) {
+      heldTile = tile;
+      classes = tile < 0 ? null : (held.get(tile) ?? null);
     }
-    const tileY = Math.floor(row / TILE);
-    const intoRow = (row - tileY * TILE) * TILE;
-
-    // The tile is looked up only when a span crosses into the next one, which for a fence is rare.
-    let heldX = -1;
-    let classes: Uint8Array | null = null;
-
-    for (let column = span.from; column <= span.to; column += 1) {
-      const mercatorColumn = columnScale === 1 ? column : Math.floor((column + 0.5) * columnScale);
-      const tileX = Math.floor(mercatorColumn / TILE);
-      if (tileX !== heldX) {
-        heldX = tileX;
-        classes = held.get(`${tileX}/${tileY}`) ?? null;
-      }
-      if (classes === null) {
-        unknown += 1;
-        continue;
-      }
-      // A read past the end cannot happen, but the compiler checks every index, and nought is ocean:
-      // the same thing the painter reads where a tile is missing.
-      const id = classes[intoRow + (mercatorColumn - tileX * TILE)] ?? 0;
-      counts[id] = (counts[id] ?? 0) + 1;
-      pixels += 1;
+    if (classes === null) {
+      unknown += 1;
+      return;
     }
-  }
+    // A read past the end cannot happen, but the compiler checks every index, and nought is ocean: the
+    // same thing the painter reads where a tile is missing.
+    const id = classes[pixel] ?? 0;
+    counts[id] = (counts[id] ?? 0) + 1;
+    diamonds += 1;
+  });
 
   const byClass = new Map<number, number>();
   for (let id = 0; id < counts.length; id += 1) {
@@ -140,7 +139,7 @@ export async function censusOf(fence: Fence, tilesRoot: string): Promise<Census>
 
   return {
     byClass,
-    pixels,
+    diamonds,
     tiles: wanted.size,
     tookMs: Math.round(performance.now() - started),
     unknown,

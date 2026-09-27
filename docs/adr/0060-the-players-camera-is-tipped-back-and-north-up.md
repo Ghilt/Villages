@@ -30,7 +30,8 @@ ground's grid turned twenty-six degrees as diamonds.**
 > still holds at every point on that ramp; the lens is parallel at every zoom. See experiment 0011.
 
 **The player's camera is tipped back 45 degrees, north-up, and parallel.** It is `CAMERA` in
-`map/mapConfig.ts`: pitch 45, bearing 0, and a lattice turned 26 degrees at four world units a cell.
+`map/mapConfig.ts`: pitch 45, bearing 0, and a lattice turned 26 degrees at one world unit a cell (four
+until Adam settled it on 2026-09-27; see below).
 
 - **Parallel always, when tipped.** How wide the camera sees is not a setting. `lensFor` gives a tenth of a
   degree whenever the camera is tipped and MapLibre's own lens when it is flat. The overlay is exact only
@@ -51,6 +52,9 @@ ground's grid turned twenty-six degrees as diamonds.**
   section is still the lever, and its `player` button puts the camera back here.
 - **The four world units a diamond cell is wide were chosen by the diamonds button**, not by Adam. They are
   a slider in the same section, and this record is where to write the number he settles on.
+  **He settled on one, on 2026-09-27:** a diamond one world unit across, as wide as a master pixel and the
+  finest the terrain goes, and the grid an area is fenced on. `CAMERA.lattice` is `{ turn: 26, size: 1 }`.
+  See 0066.
 
 ## Consequences
 
@@ -67,7 +71,10 @@ already holds usually covers it.
 
 **Thin things break up on the diamonds.** A river is one master pixel wide, and at four world units a cell
 only the cells whose middle lands on it take its colour, so it reads as a chain of grey patches rather than
-a ribbon. That is the lattice size, which is the slider, set against how a diamond reads.
+a ribbon. That is the lattice size, which is the slider, set against how a diamond reads. At the size Adam
+settled on, one, a river is a line of diamonds again. The styles that wander their edges now wander them
+by more than a diamond, so there the diamonds soften into the medium; `vivid` and `plate`, which do not
+wander, show them crisp.
 
 **A brush mark is an ellipse**, 1.41 to 1, the same everywhere on the screen because the camera is
 parallel. 0030 chose Mercator so that round stays round; tipped, it does not, and correcting that is one

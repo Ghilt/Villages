@@ -2,19 +2,12 @@ import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 import type { FeatureCollection } from 'geojson';
 
-import {
-  closePath,
-  enclose,
-  fenceAround,
-  fenceToPolygons,
-  insideFence,
-  toRasterPixel,
-} from '@villages/world';
-import type { MasterGrid } from '@villages/world';
+import { closePath, enclose, fenceAround, fenceToPolygons, insideFenceAt } from '@villages/world';
+import type { DiamondGrid } from '@villages/world';
 
 import { note } from '../debug/log';
 import { terrainPalette } from '../map/terrainClasses';
-import { MOST_PIXELS } from './census';
+import { MOST_DIAMONDS } from './census';
 import { inspect } from '../inspect/opening';
 import { subjectsNow, watchSubjects } from '../inspect/subjects';
 import { addArea, areasNow, armDrawing, watchAreas } from './areas';
@@ -25,15 +18,19 @@ import { addArea, areasNow, armDrawing, watchAreas } from './areas';
  * This is the only part of an area that knows what a map is. The geometry is pure and lives in
  * `@villages/world`; the state is a plain store; this turns a drag into a fence and a fence into layers.
  *
- * The fence is drawn as it is counted, on the lattice between master pixels, so at a close zoom the line
- * runs along the edges of the squares the terrain is drawn as. Below zoom seven a master pixel is smaller
- * than a screen pixel and the staircase cannot be seen. See docs/adr/0032.
+ * The fence is drawn as it is counted, along the ground's own diamonds: turned as far as the ground is,
+ * one world unit each, the finest the ground is painted at. So at a close zoom the line runs along the
+ * edges of the diamonds the terrain is drawn in, and tips and turns with them. A new area takes the turn
+ * the ground has when it is drawn; one already drawn keeps the grid it was drawn on, which its fence
+ * carries. The size the ground's cells are painted at never moves it. See docs/adr/0032 and 0066.
  */
 
 interface AreaOverlayProps {
   map: maplibregl.Map | null;
   /** Where this page's tiles live, as the root of a URL, which is what a census reads. */
   worldRoot: string;
+  /** How far the ground's grid is turned, in degrees, which is how far a new area's diamonds are. */
+  turn: number;
 }
 
 const SOURCE = 'areas';
@@ -63,19 +60,19 @@ const SAMPLE_EVERY = 4;
 
 const EMPTY: FeatureCollection = { type: 'FeatureCollection', features: [] };
 
-export function AreaOverlay({ map, worldRoot }: AreaOverlayProps) {
+export function AreaOverlay({ map, worldRoot, turn }: AreaOverlayProps) {
   const state = useSyncExternalStore(watchAreas, areasNow);
   // Which area breathes: whatever was opened last, if that was an area. The map marks one thing, and with
   // three windows up the newest is the one the player is looking at.
   const top = useSyncExternalStore(watchSubjects, subjectsNow).open[0];
   const pulsing = top?.kind === 'area' ? top.id : null;
-  const [grid, setGrid] = useState<MasterGrid | null>(null);
+  const [width, setWidth] = useState<number | null>(null);
 
-  /** Read inside pointer handlers, which must see the grid without being rebuilt when it arrives. */
-  const gridRef = useRef<MasterGrid | null>(null);
+  /** Read inside pointer handlers, which must see the grid without being rebuilt when it changes. */
+  const gridRef = useRef<DiamondGrid | null>(null);
   useEffect(() => {
-    gridRef.current = grid;
-  }, [grid]);
+    gridRef.current = width === null ? null : { width, turn };
+  }, [width, turn]);
 
   const drawing = useRef(false);
   const path = useRef<[number, number][]>([]);
@@ -83,14 +80,15 @@ export function AreaOverlay({ map, worldRoot }: AreaOverlayProps) {
   /** When a drag last ended, so that the click it becomes does not also select something. */
   const drewAt = useRef(0);
 
-  // The shape of the master is what turns a place into a pixel, and it is runtime data rather than a
-  // constant, because which world is being drawn is a choice the browser makes. See docs/adr/0025.
+  // How wide world space is, which is the master's width and what turns a place into a diamond. Runtime
+  // data rather than a constant, because which world is being drawn is a choice the browser makes. See
+  // docs/adr/0025.
   useEffect(() => {
     let wanted = true;
     void terrainPalette().then(
       (palette) => {
         if (wanted) {
-          setGrid({ width: palette.masterWidth, height: palette.masterHeight });
+          setWidth(palette.masterWidth);
         }
       },
       (cause: unknown) => {
@@ -170,8 +168,9 @@ export function AreaOverlay({ map, worldRoot }: AreaOverlayProps) {
   }, [map]);
 
   // What is drawn. Every area is a feature, its fence a multipolygon, because a fence may have pieces.
+  // Each on the grid its own fence carries, so nothing here needs to know one.
   useEffect(() => {
-    if (map === null || grid === null) {
+    if (map === null) {
       return;
     }
     const source = map.getSource(SOURCE) as maplibregl.GeoJSONSource | undefined;
@@ -183,10 +182,10 @@ export function AreaOverlay({ map, worldRoot }: AreaOverlayProps) {
       features: state.areas.map((area) => ({
         type: 'Feature' as const,
         properties: { id: area.id, shaded: area.shaded },
-        geometry: { type: 'MultiPolygon' as const, coordinates: fenceToPolygons(area.fence, grid) },
+        geometry: { type: 'MultiPolygon' as const, coordinates: fenceToPolygons(area.fence) },
       })),
     });
-  }, [map, state.areas, grid]);
+  }, [map, state.areas]);
 
   useEffect(() => {
     if (map === null || map.getLayer(PULSE) === undefined) {
@@ -329,7 +328,7 @@ export function AreaOverlay({ map, worldRoot }: AreaOverlayProps) {
         return;
       }
       try {
-        const fence = fenceAround(enclose(closePath(drawn), measuredOn, MOST_PIXELS));
+        const fence = fenceAround(enclose(closePath(drawn), measuredOn, MOST_DIAMONDS));
         if (fence.parts.length === 0) {
           note('area', `${drawn.length} samples enclosed nothing`);
           return;
@@ -413,8 +412,9 @@ export function AreaOverlay({ map, worldRoot }: AreaOverlayProps) {
     };
   }, [map, worldRoot]);
 
-  // Picking one. The hit test is the same even-odd test the count uses, so what is selected is what is
-  // drawn, and the smallest is preferred, or an area inside another could never be chosen.
+  // Picking one. The hit test is the same even-odd test the count uses, on the diamond the click landed
+  // in, so what is selected is what is drawn, and the smallest is preferred, or an area inside another
+  // could never be chosen.
   useEffect(() => {
     if (map === null) {
       return;
@@ -424,16 +424,10 @@ export function AreaOverlay({ map, worldRoot }: AreaOverlayProps) {
       if (event.defaultPrevented || areasNow().armed || performance.now() - drewAt.current < 300) {
         return;
       }
-      const measuredOn = gridRef.current;
-      if (measuredOn === null) {
-        return;
-      }
-      const at = toRasterPixel({ lng: event.lngLat.lng, lat: event.lngLat.lat }, measuredOn);
-      const x = Math.floor(at.x);
-      const y = Math.floor(at.y);
+      const at = { lng: event.lngLat.lng, lat: event.lngLat.lat };
       const hit = [...areasNow().areas]
-        .sort((one, other) => one.pixels - other.pixels)
-        .find((area) => insideFence(area.fence, x, y));
+        .sort((one, other) => one.diamonds - other.diamonds)
+        .find((area) => insideFenceAt(area.fence, at));
       // Empty ground closes nothing: a window is the player's to shut. Only a hit opens one.
       if (hit !== undefined) {
         inspect({ kind: 'area', id: hit.id });

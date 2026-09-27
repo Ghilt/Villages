@@ -3,7 +3,6 @@ import type * as maplibregl from 'maplibre-gl';
 
 import { charactersInView, housesInView } from '@villages/client-core';
 import type { CharacterOnMapView, ChoiceView, HouseView } from '@villages/protocol';
-import type { MasterGrid } from '@villages/world';
 
 import { AreaOverlay } from './areas/AreaOverlay';
 import { Choosing } from './choice/Choosing';
@@ -28,7 +27,6 @@ import { flyWith } from './map/focus';
 import { MapStrip } from './map/MapStrip';
 import { MapView } from './map/MapView';
 import { Room } from './room/Room';
-import { terrainPalette } from './map/terrainClasses';
 import { Stage } from './stage/Stage';
 import { formNow, roomToRead, takeOver, theMapsBay } from './stage/bays';
 import { CHOICE_PANE, HOUSE_PANE, KEY_FIGURES_PANE, MAP_PANE, NAVIGATION_PANE } from './stage/panes';
@@ -224,22 +222,6 @@ export function App({ master }: AppProps) {
     return () => flyWith(null);
   }, [map]);
 
-  // The shape of the master, so a window can say which drawn area a seat falls inside. Runtime data rather
-  // than a constant, because which world is being drawn is a choice the browser makes; see 0025. The same
-  // one fetch the area overlay and the painter already made.
-  const [masterShape, setMasterShape] = useState<MasterGrid | null>(null);
-  useEffect(() => {
-    let looking = true;
-    void terrainPalette().then((palette) => {
-      if (looking) {
-        setMasterShape({ width: palette.masterWidth, height: palette.masterHeight });
-      }
-    });
-    return () => {
-      looking = false;
-    };
-  }, []);
-
   const worldRoot = worldRootOf(master);
 
   // The four numbers the grid is laid out from. As custom properties rather than as a style object on
@@ -277,8 +259,13 @@ export function App({ master }: AppProps) {
                   <MapView worldRoot={worldRoot} onReady={setMap} />
                   {map !== null && <SpriteOverlay map={map} sprites={sprites} worldRoot={worldRoot} />}
                 </Room>
-                <AreaOverlay map={map} worldRoot={worldRoot} />
-                <HoldingOverlay map={map} houses={drawn} mine={eye ? yours : null} />
+                <AreaOverlay map={map} worldRoot={worldRoot} turn={camera.latticeTurn} />
+                <HoldingOverlay
+                  map={map}
+                  houses={drawn}
+                  mine={eye ? yours : null}
+                  turn={camera.latticeTurn}
+                />
                 {/* Put away, and still running underneath: a lid over the map, never instead of it. The
                     guard is the form rather than the size, because what a pane was asked to be outlives
                     the fold - and the floor of the spread is never put away. See `MapStrip`. */}
@@ -299,9 +286,7 @@ export function App({ master }: AppProps) {
             return <Choosing room={room} />;
           }
           const subject = subjectOfPane(id);
-          return subject === null ? null : (
-            <Inspecting subject={subject} room={room} along={along} grid={masterShape} />
-          );
+          return subject === null ? null : <Inspecting subject={subject} room={room} along={along} />;
         }}
         overlays={<StoodDown />}
       />

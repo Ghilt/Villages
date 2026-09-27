@@ -359,10 +359,12 @@ Commands are added here as the increments land:
   Adam's switch, not a player's.
 - Areas, in the same panel: `draw an area` arms the next drag on the map, and dragging paints one. The
   ends join themselves and escape stops. Click an area to select it, which makes its line pulse and lists
-  how many master pixels of each terrain it encloses; `shade`, `recount` and `delete` are beside it. The
-  boundary runs between painted pixels rather than through them, so at z10 on the `raw` renderer it lines
-  up with the squares the terrain is drawn as. Areas live only in the browser and a reload forgets them.
-  See `docs/adr/0032` and experiment `0002`.
+  how many diamonds of each terrain it encloses; `shade`, `recount` and `delete` are beside it. The
+  boundary steps along the ground's own diamonds - one world unit each, turned as far as the ground is -
+  rather than through them, so at z10 it lies along the diamonds the terrain is drawn in and tips with
+  them; they are crisp on `vivid` and `plate`, softened by the medium on the rest. `raw` draws the tiles
+  square whatever the grid is, so press `squares` in the Camera section to line an area up with it. Areas
+  live only in the browser and a reload forgets them. See `docs/adr/0032`, `0066` and experiment `0002`.
 - Key figures, in the same panel: the **Characters** section. `add a key figure` rolls a newcomer and
   the house takes them in, nine at most, and it is the only way a character comes into the world. Each
   figure has `up` and `down` for every stat, `ten years older`, `ten years younger`, `another portrait`,
