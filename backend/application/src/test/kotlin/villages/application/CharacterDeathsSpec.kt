@@ -31,7 +31,7 @@ import java.time.Instant
 import java.util.UUID
 
 /** Both kinds of stream, folded in memory, telling their subscribers every event as it is written. */
-private class MourningWorld : HouseCommandExecutor, CharacterCommandExecutor, EventFeed {
+private class CharacterDeathsWorld : HouseCommandExecutor, CharacterCommandExecutor, EventFeed {
     private val houses = mutableMapOf<HouseId, MutableList<HouseEvent>>()
     private val characters = mutableMapOf<CharacterId, MutableList<CharacterEvent>>()
     val stored = mutableListOf<StoredEvent>()
@@ -95,7 +95,7 @@ private class HeldLater : Later {
     }
 }
 
-class MourningSpec : StringSpec({
+class CharacterDeathsSpec : StringSpec({
     val noon = Instant.parse("2026-09-04T12:00:00Z")
     val today = WorldTime(653_705)
     val calendar = object : WorldCalendar {
@@ -106,7 +106,7 @@ class MourningSpec : StringSpec({
     val bea = PlayerId(UUID.fromString("0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8e"))
     val story = UUID.fromString("57000000-0000-4000-8000-0000000000ff")
 
-    fun found(world: MourningWorld, player: PlayerId) = world.execute(
+    fun found(world: CharacterDeathsWorld, player: PlayerId) = world.execute(
         FoundHouse(
             houseId = HouseId.of(player),
             player = player,
@@ -119,15 +119,20 @@ class MourningSpec : StringSpec({
         Provenance.startedBy(UUID.randomUUID()),
     )
 
-    class Rig(val world: MourningWorld, val later: HeldLater, val keyFigures: KeyFigureService, val mourning: Mourning)
+    class Rig(
+        val world: CharacterDeathsWorld,
+        val later: HeldLater,
+        val keyFigures: KeyFigureService,
+        val characterDeaths: CharacterDeaths,
+    )
 
     fun rig(): Rig {
-        val world = MourningWorld()
+        val world = CharacterDeathsWorld()
         val later = HeldLater()
         val keyFigures = KeyFigureService(world, world, { noon }, { today }, calendar, { 1 }, { emptyList() })
         found(world, ada)
         found(world, bea)
-        return Rig(world, later, keyFigures, Mourning(world, later, keyFigures))
+        return Rig(world, later, keyFigures, CharacterDeaths(world, later, keyFigures))
     }
 
     "a death writes the loss into every house that held them, in the death's story, and caused by it" {
@@ -171,7 +176,7 @@ class MourningSpec : StringSpec({
         val before = rig.world.stored.size
 
         val again = HeldLater()
-        Mourning(rig.world, again, rig.keyFigures).use {
+        CharacterDeaths(rig.world, again, rig.keyFigures).use {
             again.tick()
         }
 
@@ -188,8 +193,8 @@ class MourningSpec : StringSpec({
             CharacterDied(agnes, "a fever", today, noon),
         )
 
-        rig.mourning.apply(tie)
-        rig.mourning.apply(death)
+        rig.characterDeaths.apply(tie)
+        rig.characterDeaths.apply(death)
         rig.later.tick()
 
         rig.world.losses().shouldBeEmpty()

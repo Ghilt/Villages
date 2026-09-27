@@ -45,7 +45,8 @@ import java.util.concurrent.atomic.AtomicLong
  *
  * A house's ties are kept apart from the rows, so a tie that arrives before its character, which a race can
  * make, is kept and filled in when they appear. A dead character leaves every house's list at once, the
- * moment they die, rather than when the mourning's loss lands: a dead key figure leaves the grid.
+ * moment they die, rather than when the listener for character deaths writes the loss: a dead key figure
+ * leaves the grid.
  *
  * **Where they stood is spans**, one for each stretch of world-time a character stood in one place, closed
  * by a move, by leaving the map or by dying. A cell at a moment is then the span that holds that day, which

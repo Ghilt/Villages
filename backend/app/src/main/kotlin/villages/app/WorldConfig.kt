@@ -6,13 +6,13 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import villages.application.AnonymousTokens
 import villages.application.Arrival
+import villages.application.CharacterDeaths
 import villages.application.Dice
 import villages.application.FoundHouseService
 import villages.application.FreshIds
 import villages.application.KeyFigureService
 import villages.application.Later
 import villages.application.MonthlyWorldClock
-import villages.application.Mourning
 import villages.application.Pledges
 import villages.application.Portraits
 import villages.application.ResourceService
@@ -161,8 +161,8 @@ class WorldConfig {
 
     /** Writes a character's death into every house that held them. See decision record 0055. */
     @Bean(destroyMethod = "close")
-    fun mourning(world: InMemoryWorld, later: ScheduledLater, keyFigures: KeyFigureService): Mourning =
-        Mourning(world.feed, later, keyFigures)
+    fun characterDeaths(world: InMemoryWorld, later: ScheduledLater, keyFigures: KeyFigureService): CharacterDeaths =
+        CharacterDeaths(world.feed, later, keyFigures)
 
     /** The map's read model, folded from the feed. In memory, so it starts empty with the store. */
     @Bean(destroyMethod = "close")
@@ -197,7 +197,7 @@ class WorldConfig {
         recentEvents: RecentEventsProjection,
         characters: CharactersProjection,
         sights: SightProjection,
-        mourning: Mourning,
+        characterDeaths: CharacterDeaths,
     ): WorldWipe = WorldWipe {
         world.wipe().also {
             houses.reset()
@@ -205,7 +205,7 @@ class WorldConfig {
             recentEvents.reset()
             characters.reset()
             sights.reset()
-            mourning.reset()
+            characterDeaths.reset()
         }
     }
 

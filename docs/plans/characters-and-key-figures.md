@@ -100,10 +100,11 @@ reaches them, and the event page shows what happened. That is the cost 0055 name
 **Every other lever names a character**, and runs `ActThrough` on the session's own house before it touches
 the character's stream. So a player's levers reach their own key figures and nobody else.
 
-## The mourning
+## The listener for character deaths
 
-`Mourning` is a reaction on the pattern of `Pledges.kt`. It follows the feed from the beginning with its own
-fold of who holds whom and who has died, and issues through `Later`, never inside the feed's own callback.
+`CharacterDeaths` is a reaction on the pattern of `Pledges.kt`. It follows the feed from the beginning with
+its own fold of who holds whom and who has died, and issues through `Later`, never inside the feed's own
+callback.
 
 - On a death, it writes `LoseKeyFigure` into every house that held them.
 - On a tie to someone already dead, it does the same, so whichever of the two arrives second heals the other.
@@ -267,7 +268,7 @@ A menu rather than a queue, one commit each.
 | **5** | the placeholder portraits in `world/portraits/`, their generator and their test | the folder, and a picture of it |
 | **6** | a newcomer is rolled: `Dice`, `Portraits`, the list of names | the spec, and the names to read |
 | **7** | a key figure is taken in and acted through: the order of the writes, and the refusal for anybody else's | the spec |
-| **8** | the mourning | the spec |
+| **8** | the listener for character deaths | the spec |
 | **9** | the characters projection: the ties, the rows, the reverse index | the spec |
 | **10** | wire version 6 and the gateway: the commands, `yourKeyFigures`, the reason codes | the contract specs |
 | **11** | the Characters section, `monthsBetween` in the browser's calendar, `ageOn`, `act()` by area | **the panel and `/admin/inspect-events`, the first thing to see** |

@@ -137,8 +137,9 @@ and `CheckRoomForKeyFigure` the second. The rule stays in `decide`, and nothing 
 house.
 
 **When such a thing ends, a reaction carries the end to every house tied to it**, because the end is on
-the thing's stream and the losses are on the houses', and no one decision writes both. The mourning is the
-first: see `ARCHITECTURE.md` on what acts on its own for the rules a reaction keeps.
+the thing's stream and the losses are on the houses', and no one decision writes both. The listener for
+character deaths is the first: see `ARCHITECTURE.md` on what acts on its own for the rules a reaction
+keeps.
 
 `ARCHITECTURE.md` describes the pattern. Characters and the tie are in the source, and
 `docs/plans/characters-and-key-figures.md` is the order the rest of them gets built in.

@@ -177,7 +177,7 @@ class AppBootsTest {
         }
         assertEquals(emptyList<KeyFigureView>(), window.last<YourKeyFigures>().keyFigures)
 
-        // The mourning's loss is part of the death's story, and caused by it.
+        // The loss the listener for character deaths writes is part of the death's story, and caused by it.
         val events = window.heard.filterIsInstance<EventFrame>()
         val died = events.single { it.eventType == "villages.character.died.v1" }
         val lost = events.single { it.eventType == "villages.house.lostKeyFigure.v1" }

@@ -61,12 +61,12 @@ favour of recording only the steps that matter. Holding back what the player has
 need more than the frame that carries it: the event page is fed every stored event whole, so gating it went
 on the roadmap, before any dialogue carries the setting's secret. And ending a dialogue when a requirement
 fails took four drafts. The first gave dialogues a listener of their own, with a flavourful name like the
-one the key figures' listener already had, and Adam found both names unnecessary for what is only a
-technical listener; the second carried a death and a day as two kinds of news, which took his two examples
-for the whole design; the third folded the key figures' listener in, which brought key figures into a
-mechanic about characters talking. A requirement is a value now, about characters and whatever else a dialogue depends on,
-and one listener carries whatever breaks one, so a building destroyed would be one more kind rather than one
-more listener.
+one the listener for character deaths had then, and Adam found both names unnecessary for what is only a
+technical listener, so that one has its plain name now; the second carried a death and a day as two kinds
+of news, which took his two examples for the whole design; the third folded the listener for character
+deaths in, which brought key figures into a mechanic about characters talking. A requirement is a value
+now, about characters and whatever else a dialogue depends on, and one listener carries whatever breaks
+one, so a building destroyed would be one more kind rather than one more listener.
 
 ## Result
 

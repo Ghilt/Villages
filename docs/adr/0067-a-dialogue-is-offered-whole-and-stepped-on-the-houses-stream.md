@@ -41,7 +41,8 @@ Four facts about the program shape the answer.
 - **What a house may not know is kept back by the server, not hidden by the page** (0061), so the fog is not
   a curtain a player could simply stop drawing.
 - **A house's decisions cannot see another stream.** A character's death is on the character's stream, and
-  only a listener on the feed can carry it to a house's, as one already does for key figures (0055).
+  only a listener on the feed can carry it to a house's, as the listener for character deaths already does
+  for key figures (0055).
 
 And one about the setting: dialogue is the only place its secret is allowed to come out, and only over a long
 time (`SETTING.md`, `MECHANICS.md`).
@@ -155,9 +156,10 @@ The costs, knowingly:
   dialogue, the failure finds nothing open and the dialogue stands finished. It is the race 0055 accepts,
   for the same reason.
 - **One death can be heard twice.** A character who is a house's key figure and speaks in one of its
-  dialogues is heard of by two listeners: the one that removes a dead key figure from its house, as it does
-  today, and the requirement listener, which lapses the dialogue, each for its own concern. Whether key
-  figures should depend on requirements too is a question about key figures, and is not asked here.
+  dialogues is heard of by two listeners: the listener for character deaths, which takes them out of the
+  house's key figures as it does today, and the requirement listener, which lapses the dialogue, each for its
+  own concern. Whether key figures should depend on requirements too is a question about key figures, and is
+  not asked here.
 - **A kind that can come true again is not remembered as failed.** A house having enough of something may
   stop being so and start again, so a kind like that would be asked at the offer rather than remembered by
   the listener, and none is built here.
@@ -193,10 +195,10 @@ The costs, knowingly:
 - **A listener that knows what it listens for**: the first draft of this record, which gave it a name of its
   own and taught it deaths and days. Every new kind of fact would have been more code in it, and the rule of
   what a failure ends would have lived in it rather than in the house's decider. Rejected on Adam's word.
-- **Key figures on the same requirements**, with the listener that removes a dead key figure folded into
-  this one as the first thing that depends on `Alive`: a later draft. It mixed a question about key figures into a mechanic about characters
-  talking, and a dialogue is between characters, whoever they are to the house. Taken out on Adam's word,
-  and left to be asked about key figures on its own.
+- **Key figures on the same requirements**, with the listener for character deaths folded into this one as
+  the first thing that depends on `Alive`: a later draft. It mixed a question about key figures into a
+  mechanic about characters talking, and a dialogue is between characters, whoever they are to the house.
+  Taken out on Adam's word, and left to be asked about key figures on its own.
 - **News for each kind of fact**: a command for a death and another for a day, each carried to the houses it
   concerns, which was the second draft. It took Adam's two examples for the whole design, so a building
   destroyed would have needed a third listener and a third command. Rejected for requirements that are

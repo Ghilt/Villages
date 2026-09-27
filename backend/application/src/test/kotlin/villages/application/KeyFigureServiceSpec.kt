@@ -179,7 +179,7 @@ class KeyFigureServiceSpec : StringSpec({
         streams.written[1].first.shouldBeInstanceOf<CharacterLeftTheMap>()
     }
 
-    "a house loses a key figure on the mourning's word, and nobody it does not hold" {
+    "a house loses a key figure on the word of the listener for character deaths, and nobody it does not hold" {
         val (streams, service) = world()
         val agnes = service.add(ada, sent(1))
         streams.written.clear()

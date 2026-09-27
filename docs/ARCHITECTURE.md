@@ -215,10 +215,10 @@ swallowed, which is what makes a replay write nothing twice.
 
 - **The pledge release**, `Pledges`, waits out a pledge's span and gives it back: one wake-up a pledge, at
   the moment it is due, and none without one. See decision record 0053.
-- **The mourning**, `Mourning`, writes a character's death into every house that held them as a key
-  figure, in the death's own story, and undoes a tie made to somebody already dead. It is how a death on a
-  character's stream reaches the houses' streams, which no one decision can write together. See decision
-  record 0055.
+- **The listener for character deaths**, `CharacterDeaths`, writes a character's death into every house
+  that held them as a key figure, in the death's own story, and undoes a tie made to somebody already dead.
+  It is how a death on a character's stream reaches the houses' streams, which no one decision can write
+  together. See decision record 0055.
 
 ## Scale principles
 

@@ -628,8 +628,8 @@ wherever there is room: opened out in the spread, below a scroll at half a phone
 on one. A house gains and loses key figures in
 its own history, holds nine at most and never the same character twice, and says
 whether a character is one of its own without writing anything, which is how every lever naming a
-character is let through or refused. When a character dies the mourning writes the loss into every house
-that held them. A player is sent their living key figures, in the order they joined, on arriving and
+character is let through or refused. When a character dies, every house that held them loses them. A player
+is sent their living key figures, in the order they joined, on arriving and
 whenever one of them changes, and the commands that take one in, change a stat, age one, give another
 portrait and kill one are on the wire from version 6. Decision record 0055 is the shape.
 `docs/plans/characters-and-key-figures.md` has the rest in order, one commit a step. Opened out, the
