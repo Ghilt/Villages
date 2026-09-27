@@ -77,8 +77,14 @@ right before deciding what the world should know about it.
 - **Whether the dive can be seen for what it is.** It should read as going inside the castle, not as the
   castle being replaced. If it fails it fails at the top: a sprite blown up sixty times is a sprite, and
   whether that is a doorway or just a big picture of a doorway is the whole question.
-- **Whether a second and three quarters is right**, and whether taking the wheel away for it is tolerable
-  or merely tolerated. It is `DIVE_MS`.
+- **Whether the passage is the right length**, and whether taking the wheel away for it is tolerable or
+  merely tolerated. It is `DIVE_MS`, and it has been halved once already: a second and three quarters was
+  long enough to be read as a journey and long enough to be waited for, and a passage that has to be sat
+  through twice is a passage nobody takes twice. It is 850 milliseconds now.
+- **Whether the hold on the way out still earns its place.** The rail waits at its far end for `idle` or
+  900 milliseconds before it starts, so that the seat's ground is painted before it can be seen - and that
+  cap is now longer than the passage it guards. Main has since given the map a coarse copy of the ground
+  so that somewhere new is never empty, which may have made the hold unnecessary rather than merely long.
 - **Whether the room is far enough.** It is a journey of 1.96 zoom levels on a 1088 by 900 pane, which is
   shorter than the map's own range by a lot. If it arrives too quickly the numbers are `ROOM_IN_DESKS` and
   `ROOM_FILLS`; if the map is an unreadable smudge before the room is in view, they are the other way.

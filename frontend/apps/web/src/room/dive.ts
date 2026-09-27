@@ -52,8 +52,15 @@ const HOUSE_GROUND_HEIGHT = 4;
 /** How wide the room is where it starts, in window pixels: a fraction of the castle, inside the keep. */
 const ROOM_IN_THE_KEEP = 18;
 
-/** How long the passage takes. Long enough to be a journey rather than a cut, short enough to sit through. */
-export const DIVE_MS = 1700;
+/**
+ * How long the passage takes.
+ *
+ * Halved from the 1700 it was first tried at. A second and three quarters was long enough to be read as a
+ * journey and long enough to be waited for, and a passage that has to be sat through twice is a passage
+ * nobody takes twice. The wheel is taken away for the whole of it, which is the thing this number really
+ * buys and the reason it wants to be as short as it can be while still being a going-somewhere.
+ */
+export const DIVE_MS = 850;
 
 /** How near the middle of the window the castle has to be for the way in to be there at all. */
 const NEAR_ENOUGH = 0.35;
