@@ -50,17 +50,33 @@ class Coverage(circles: List<Circle>, private val tension: Double) {
     private fun holds(outer: Disc, inner: Disc): Boolean =
         hypot(outer.x - inner.x, outer.y - inner.y) + inner.r <= outer.r
 
-    fun covers(lat: Double, lon: Double): Boolean {
-        val x = mercatorX(lon)
-        val y = mercatorY(lat)
-        if (plain.any { hypot(it.x - x, it.y - y) <= it.r }) {
+    fun covers(lat: Double, lon: Double): Boolean = coveredWithin(mercatorX(lon), mercatorY(lat), across(lat, tension), 0.0)
+
+    /**
+     * Whether anything covered lies within `distance` of the point `x`, `y` of the Mercator square, all three
+     * as shares of its side: whether a disc that big about the point touches what is covered. Only the gateway
+     * asks it, of a stand of the scenery.
+     *
+     * Answered by growing every circle by the distance, and the grown circles' coverage holds every point that
+     * close to the true one: a ball fitting in no gap among the true circles fits in none among the grown. So it
+     * can answer yes a little wide of the edge, where the tension bridges a gap, and never answers no to a disc
+     * that does touch. At no distance it is `covers`.
+     */
+    fun reaches(x: Double, y: Double, distance: Double): Boolean =
+        coveredWithin(x, y, across(latitudeAt(y), tension), distance)
+
+    /** Whether the point, with every circle grown by `growth`, is covered, with a ball of `ball` for the tension. */
+    private fun coveredWithin(x: Double, y: Double, ball: Double, growth: Double): Boolean {
+        if (plain.any { hypot(it.x - x, it.y - y) <= it.r + growth }) {
             return true
         }
         if (tension <= 0.0) {
             return false
         }
-        val ball = across(lat, tension)
-        val near = grown.filter { hypot(it.x - x, it.y - y) < it.r + ball }
+        // Grown alike, a circle lying wholly inside another still does, so the ones left out stay left out.
+        val near = grown
+            .filter { hypot(it.x - x, it.y - y) < it.r + growth + ball }
+            .map { if (growth == 0.0) it else Disc(it.x, it.y, it.r + growth) }
         if (near.isEmpty()) {
             return false
         }

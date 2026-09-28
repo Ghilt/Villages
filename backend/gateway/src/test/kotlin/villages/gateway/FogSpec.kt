@@ -142,4 +142,32 @@ class FogSpec : StringSpec({
         Fog.NOBODY.letsThrough(house(them, stockholm)) shouldBe false
         Fog.NOBODY.letsThrough(house(them, stockholm, significance = 90.0)) shouldBe true
     }
+
+    "a stand goes where it touches revealed ground or comes within the scatter's margin of it, and nowhere else" {
+        val fog = Fog(me, listOf(point(stockholm)))
+        val x = worldX(stockholm.lon)
+        val y = worldY(stockholm.lat)
+        // The seat's 34 km is 54.5 world units at Stockholm's latitude.
+
+        fog.letsThrough(x, y, 6.0) shouldBe true
+        // Sixty units east is five and a half outside the circle: a reach of two and the margin cover it.
+        fog.letsThrough(x + 60.0, y, 2.0) shouldBe true
+        fog.letsThrough(x + 60.0, y, 0.0) shouldBe true
+        // Seventy is fifteen and a half outside, past a reach of two and the margin's eight.
+        fog.letsThrough(x + 70.0, y, 2.0) shouldBe false
+        fog.letsThrough(x + 70.0, y, 8.0) shouldBe true
+        fog.letsThrough(x + 100.0, y, 6.0) shouldBe false
+    }
+
+    "a house that has seen nowhere is sent no stands, not even over its own seat" {
+        Fog.NOBODY.letsThrough(worldX(stockholm.lon), worldY(stockholm.lat), 6.0) shouldBe false
+        Fog(me, emptyList()).letsThrough(worldX(stockholm.lon), worldY(stockholm.lat), 6.0) shouldBe false
+    }
 })
+
+/** How far across the scenery's world a place is, in world units: the Mercator square, 32768 a side. */
+private fun worldX(lon: Double): Double = (lon + 180.0) / 360.0 * 32768.0
+
+/** How far down the scenery's world a place is, in world units. */
+private fun worldY(lat: Double): Double =
+    (0.5 - kotlin.math.ln(kotlin.math.tan(kotlin.math.PI / 4.0 + lat * kotlin.math.PI / 360.0)) / (2.0 * kotlin.math.PI)) * 32768.0

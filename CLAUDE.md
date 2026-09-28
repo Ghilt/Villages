@@ -346,7 +346,10 @@ Commands are added here as the increments land:
   world and not the signs: every icon, the offered seats and whatever stands in vision are drawn over it. Unknown ground is under a dark haze, revealed ground has its
   colour taken out, trees and castles too, and vision is clear. With no house the whole world is hazed. The server holds back what the fog hides:
   a player is sent the houses on revealed ground and the people in vision, and their own wherever they are,
-  and `fog of war: off` lifts that too, for that window. The edge has surface tension: circles closer than
+  and the scenery's stands only where they touch revealed ground, tile by tile under the held cells, which
+  the log counts under `stands` (the scenery still draws from the public files until the next step). The
+  server reads them from the page's own world folder, `villages.stands` to point it elsewhere, for the
+  master the page names in `hello`. `fog of war: off` lifts all of it, for that window. The edge has surface tension: circles closer than
   about 56 km are seen across and notches are rounded off, drawn and held back alike, `Vision.SURFACE_TENSION`.
   No tree grows on unknown ground, so with the fog on and no house the world is bare under the haze. Close
   in, the haze's bands of mist swell and drift, on a clock that runs only while some of it is on the screen.

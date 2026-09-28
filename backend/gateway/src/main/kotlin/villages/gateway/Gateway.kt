@@ -22,6 +22,7 @@ import villages.application.Provenance
 import villages.application.ScheduledLater
 import villages.application.Sight
 import villages.application.SightsByHouse
+import villages.application.Stands
 import villages.application.RecentEvents
 import villages.application.ResourceService
 import villages.application.Start
@@ -101,6 +102,8 @@ import villages.protocol.Resync
 import villages.protocol.SeeAll
 import villages.protocol.ServerFrame
 import villages.protocol.Snapshot
+import villages.protocol.StandRecords
+import villages.protocol.StandsFrame
 import villages.protocol.SpendResourcePayload
 import villages.protocol.StatsView
 import villages.protocol.Stock
@@ -123,6 +126,7 @@ import villages.protocol.YourKeyFigures
 import villages.protocol.YourSight
 import villages.protocol.coarsestZoom
 import java.time.Clock
+import java.util.Base64
 import java.util.concurrent.ConcurrentHashMap
 
 /** What the gateway needs to send a frame to a connection. The transport is Spring's; this is not. */
@@ -161,7 +165,9 @@ const val MOST_RECENT_EVENTS = 100
  * significance is first worth drawing at down to the deepest. That is at most eleven lookups a change.
  *
  * Nothing reaches a connection that its house's fog of war holds back, a snapshot or a delta: `Fog` is
- * asked of everything before it goes. See decision record 0061.
+ * asked of everything before it goes. See decision record 0061. That includes the scenery's stands, which
+ * a page is sent tile by tile under the cells it holds, only where they touch ground its house has
+ * revealed. See decision record 0067.
  */
 class Gateway(
     private val tokens: PlayerTokens,
@@ -182,6 +188,7 @@ class Gateway(
     private val onTheMap: CharactersByCell,
     private val sights: SightsByHouse,
     private val visions: VisionService,
+    private val stands: Stands = Stands { _, _, _ -> null },
     private val later: Later = ScheduledLater(),
 ) : AutoCloseable {
     private val watching = ConcurrentHashMap<Connection, Unit>()
@@ -394,6 +401,16 @@ class Gateway(
         @Volatile
         private var fog: Fog = Fog.NOBODY
 
+        /** The world this connection's page draws, from hello, whose stands it is sent. Null, and it is sent none. */
+        @Volatile
+        private var master: String? = null
+
+        /**
+         * The stand tiles a held cell is over, as `y * STAND_TILES + x`, with what was last sent of each, so that
+         * a tile is sent once while it is held and again only when what the fog lets through of it changes.
+         */
+        private val standsSent = HashMap<Int, ByteArray>()
+
         /** Set when this session is over, by a takeover or by the socket going away. It then does nothing. */
         @Volatile
         private var finished = false
@@ -446,6 +463,7 @@ class Gateway(
             out.send(YourSight(sight.toView(), Vision.SURFACE_TENSION))
             if (fogged) {
                 answerAgain()
+                standsAgain()
             }
         }
 
@@ -511,6 +529,7 @@ class Gateway(
             player = who
             // Before anything is sent, so that the first cell this connection holds is already fogged.
             fog = Fog(who, sights.of(HouseId.of(who)).points)
+            master = frame.master
 
             // A player plays from one place. Whoever arrives last is the session; the one before is done.
             sessions.put(who, this)?.takeIf { it !== this }?.standDown()
@@ -725,6 +744,52 @@ class Gateway(
                 holding.computeIfAbsent(cell) { ConcurrentHashMap.newKeySet() }.add(this)
                 snapshot(cell)
             }
+            if (master != null) {
+                val tiles = synchronized(lock) { fresh.flatMap(::standTilesUnder).distinct().filter { it !in standsSent } }
+                offerStands(tiles, again = false)
+            }
+        }
+
+        /**
+         * Sends each tile's stands as far as the fog lets them through: a tile newly under a held cell whatever
+         * it holds, empty or not, so the page knows it has all there is; a tile already held only if that has
+         * changed. What the fog holds back is left out, and nothing says how much was.
+         */
+        private fun offerStands(tiles: Collection<Int>, again: Boolean) {
+            for (tile in tiles) {
+                val x = tile % STAND_TILES
+                val y = tile / STAND_TILES
+                val through = standsOf(x, y)
+                val send = synchronized(lock) {
+                    val was = standsSent[tile]
+                    if ((again && was == null) || (was != null && was.contentEquals(through))) {
+                        false
+                    } else {
+                        standsSent[tile] = through
+                        true
+                    }
+                }
+                if (send) {
+                    out.send(StandsFrame(x, y, Base64.getEncoder().encodeToString(through)))
+                }
+            }
+        }
+
+        /** The stands of one tile of this connection's world that its fog lets through. A world it has none of has none. */
+        private fun standsOf(x: Int, y: Int): ByteArray {
+            val all = master?.let { stands.of(it, x, y) } ?: return ByteArray(0)
+            if (!fogged) {
+                return all
+            }
+            val seeing = fog
+            return StandRecords.only(all) { at ->
+                seeing.letsThrough(StandRecords.x(all, at, x), StandRecords.y(all, at, y), StandRecords.reach(all, at))
+            }
+        }
+
+        /** Every held stand tile answered again, for a connection whose fog has changed. Only what changed goes. */
+        private fun standsAgain() {
+            offerStands(synchronized(lock) { standsSent.keys.toList() }, again = true)
         }
 
         /** What the cell holds on the day this connection is looking at, and of that what its fog lets through. */
@@ -780,6 +845,7 @@ class Gateway(
             }
             fogged = on
             answerAgain()
+            standsAgain()
         }
 
         /** Every held cell answered again, for a connection whose way of looking has changed. */
@@ -790,7 +856,11 @@ class Gateway(
         }
 
         private fun unsubscribe(asked: List<String>) {
-            synchronized(lock) { cells -= asked.toSet() }
+            synchronized(lock) {
+                cells -= asked.toSet()
+                // A tile no held cell is over any more is let go, so coming back to it sends it afresh.
+                standsSent.keys.retainAll(cells.flatMap(::standTilesUnder).toSet())
+            }
             for (cell in asked) {
                 holding[cell]?.remove(this)
             }
@@ -810,6 +880,7 @@ class Gateway(
                     waiting.clear()
                     letGo = cells.toList()
                     cells.clear()
+                    standsSent.clear()
                 } else {
                     waiting.addLast(delta)
                     if (!flushPlanned) {
@@ -853,7 +924,10 @@ class Gateway(
 
         private fun letEverythingGo() {
             watching.remove(this)
-            val held = synchronized(lock) { cells.toList().also { cells.clear() } }
+            val held = synchronized(lock) {
+                standsSent.clear()
+                cells.toList().also { cells.clear() }
+            }
             for (cell in held) {
                 holding[cell]?.remove(this)
             }

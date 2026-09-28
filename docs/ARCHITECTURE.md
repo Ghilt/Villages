@@ -189,6 +189,15 @@ answered exactly for one place at a time by the gateway and the page's marks ali
 through a distance transform. See decision record 0061, and
 `docs/plans/fog-of-war.md` for what is built.
 
+The scenery's **stands** take the same road (0067). `hello` names the master the page draws; the gateway
+reads that master's stand files through the `Stands` port, whose adapter in `app` picks the master among its
+folder's own entries and keeps each tile once read, and sends every zoom 7 tile under a held cell as a `stands`
+frame of the sprite map's own eight-byte records, only those whose disc comes within the scatter's margin of
+revealed ground. `Coverage.reaches` is that question, answered by growing every circle; `StandRecords` in
+`protocol` and `decodeStands` in the world package read the records alike, against
+`contracts/fixtures/stands.json`. A sight change or the switch answers every held tile again, sending only
+what changed.
+
 **The fog is a layer of the sprite canvas**, `sprites/FogLayer.ts`, drawn between the world and the signs for
 the things in it: the scenery and whatever stands outside vision under it, every icon and whatever stands in
 vision over it (0063). It asks the sprites' projection in `cameraMath.ts` backwards for the ground under each

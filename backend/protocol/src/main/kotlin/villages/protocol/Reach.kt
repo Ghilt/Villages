@@ -1,9 +1,11 @@
 package villages.protocol
 
 import kotlin.math.PI
+import kotlin.math.atan
 import kotlin.math.cos
 import kotlin.math.hypot
 import kotlin.math.ln
+import kotlin.math.sinh
 import kotlin.math.tan
 
 /**
@@ -38,6 +40,9 @@ internal fun mercatorY(lat: Double): Double {
     val radians = lat.coerceIn(-Cell.MERCATOR_EDGE, Cell.MERCATOR_EDGE) * PI / 180.0
     return 0.5 - ln(tan(PI / 4.0 + radians / 2.0)) / (2.0 * PI)
 }
+
+/** The latitude a share `y` of the way down the Mercator square: `mercatorY` backwards. */
+internal fun latitudeAt(y: Double): Double = atan(sinh(PI * (1.0 - 2.0 * y))) * 180.0 / PI
 
 /** How far `kilometres` at latitude `lat` is on the map, as a share of the side of the Mercator square. */
 internal fun across(lat: Double, kilometres: Double): Double =

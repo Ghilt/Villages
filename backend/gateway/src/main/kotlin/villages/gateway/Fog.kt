@@ -9,6 +9,7 @@ import villages.domain.PlayerId
 import villages.domain.Vision
 import villages.domain.WorldTime
 import villages.protocol.Coverage
+import villages.protocol.StandRecords
 
 /**
  * What the fog of war lets one player be sent, worked out from their house's vision points: the table in
@@ -50,6 +51,15 @@ internal class Fog(
             span.significance.value >= SEEN_THROUGH_THE_FOG ||
             visionOn(on).covers(span.place.lat, span.place.lon)
 
+    /**
+     * Whether a stand of the scenery shapes what grows on ground this house has revealed: whether revealed ground
+     * lies within its reach of its middle, and the scatter's margin past that. The middle and the reach are in
+     * world units. A stand stands still, so revealed is enough, as it is for a house; and a house with no points
+     * reveals nothing, so it is sent no stands at all.
+     */
+    fun letsThrough(x: Double, y: Double, reach: Double): Boolean =
+        revealed.reaches(x / WORLD, y / WORLD, (reach + STAND_MARGIN) / WORLD)
+
     private fun visionOn(on: WorldTime): Coverage {
         vision?.takeIf { it.first == on }?.let { return it.second }
         return coverageOf(points.filter { it.covers(on) }).also { vision = on to it }
@@ -64,5 +74,14 @@ internal class Fog(
 
         /** The fog of a connection that has not said who it is: it sees nothing, so only the really big. */
         val NOBODY = Fog(null, emptyList())
+
+        /**
+         * How far past its own reach a stand is still worth sending, in world units. The page thins what a stand
+         * scatters by spacing it from its neighbours, a few units across, and reads revealed ground off a field a
+         * unit or so to the texel: a stand this close to revealed ground can change what grows on it, so it goes.
+         */
+        const val STAND_MARGIN = 8.0
+
+        private const val WORLD = StandRecords.WORLD_UNITS.toDouble()
     }
 }

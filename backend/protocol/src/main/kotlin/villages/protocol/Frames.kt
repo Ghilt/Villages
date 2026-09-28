@@ -31,9 +31,11 @@ import tools.jackson.databind.JsonNode
  * war is drawn from. Version 10 added `giveVision` and `takeVision`, a house given vision of a place outright
  * and having it taken away. See decision record 0061. Version 11 added `fogOfWar`, Adam's switch, because the
  * gateway now holds back what a house cannot see. Version 12 gave `yourSight` its `tension`, the surface
- * tension that joins circles close together. See decision record 0064.
+ * tension that joins circles close together. See decision record 0064. Version 13 added `stands`, the
+ * scenery's stands on ground a house has revealed, and gave `hello` the `master` the page draws, so the
+ * gateway knows whose stands to send. See decision record 0067.
  */
-const val PROTOCOL_VERSION = 12
+const val PROTOCOL_VERSION = 13
 
 data class Point(val lat: Double, val lon: Double)
 
@@ -202,7 +204,16 @@ data class CharacterOnMapView(
 )
 sealed interface ClientFrame
 
-data class Hello(val playerToken: String, val protocolVersion: Int) : ClientFrame
+/**
+ * Who is playing, and which wire they speak. `master` is the world the page draws, by its name in the Debug map
+ * section, so that the gateway sends that world's stands; left out, it sends none. The gateway checks it against
+ * the masters it has stands for rather than trusting it as a name. See decision records 0025 and 0067.
+ */
+data class Hello(
+    val playerToken: String,
+    val protocolVersion: Int,
+    @get:JsonInclude(JsonInclude.Include.NON_NULL) val master: String? = null,
+) : ClientFrame
 
 data class SubscribeCells(val cells: List<String>) : ClientFrame
 
@@ -389,6 +400,7 @@ data class TakeVisionPayload(val visionId: String) : CommandPayload
     JsonSubTypes.Type(YourSight::class, name = "yourSight"),
     JsonSubTypes.Type(TakenOver::class, name = "takenOver"),
     JsonSubTypes.Type(WorldWiped::class, name = "worldWiped"),
+    JsonSubTypes.Type(StandsFrame::class, name = "stands"),
 )
 sealed interface ServerFrame
 
@@ -409,6 +421,15 @@ data class Snapshot(
     @get:JsonInclude(JsonInclude.Include.NON_EMPTY) val characters: List<CharacterOnMapView> = emptyList(),
     @get:JsonInclude(JsonInclude.Include.NON_DEFAULT) val omittedCharacters: Int = 0,
 ) : ServerFrame
+
+/**
+ * The stands of the scenery in one zoom 7 tile, `x` across and `y` down, that touch ground the house has
+ * revealed: the sprite map's own records, eight bytes each, in base64, which `StandRecords` reads. Sent for
+ * every tile under a held cell from zoom 6 in, once while a held cell stays over it, and again when the
+ * house's sight or the fog switch changes what it lets through; empty when nothing there does. What the fog
+ * holds back is simply not in it, and nothing says how much. See decision records 0054 and 0067.
+ */
+data class StandsFrame(val x: Int, val y: Int, val stands: String) : ServerFrame
 
 /** Deltas coalesced over a short window into one frame. */
 data class Batch(val deltas: List<Delta>) : ServerFrame
