@@ -392,4 +392,73 @@ class HouseDeciderSpec : StringSpec({
             HouseDecider.decide(GiveVision(ravenscar.houseId, vision(1), gotland, day, noon), give(founded(), 1))
         }
     }
+
+    // ---- a choice that grants --------------------------------------------------------------------
+
+    val purse = OptionId(UUID.fromString("aa000000-0000-4000-8000-000000000011"))
+    val letters = OptionId(UUID.fromString("aa000000-0000-4000-8000-000000000012"))
+    val aGift = Choice(
+        id = ChoiceId(UUID.fromString("aa000000-0000-4000-8000-00000000c402")),
+        prompt = "A traveller from the south offers the house a gift.",
+        options = listOf(
+            Option(purse, "The purse", "A hundred in coin.", Effect.Grant(Resource.WEALTH, 100)),
+            Option(letters, "The letters", "Introductions at court.", Effect.Grant(Resource.INFLUENCE, 20)),
+        ),
+    )
+
+    "an option can grant, and taking it gives the house that much in the same decision as the action" {
+        val asked = after(GiveChoice(house, player, aGift, day, noon))
+
+        val events = HouseDecider.decide(TakeAction(house, player, aGift.id, purse, day, noon), asked)
+
+        events.map { it::class } shouldBe listOf(PlayerTookAction::class, HouseResourceGranted::class)
+        events[1] shouldBe HouseResourceGranted(house, Resource.WEALTH, 100, day, noon)
+        val given = events.fold(asked, HouseDecider::evolve).shouldBeInstanceOf<House.Founded>()
+        given.stockOf(Resource.WEALTH).at(noon) shouldBe 100
+        given.pending shouldBe null
+    }
+
+    "a choice that grants is refused to a house nobody has founded, as one that founds is refused to one that is" {
+        shouldThrow<HouseError.NoSuchHouse> {
+            HouseDecider.decide(GiveChoice(house, player, aGift, day, noon), HouseDecider.initial)
+        }
+    }
+
+    // ---- dialogues -------------------------------------------------------------------------------
+
+    val messenger = Speaker(SpeakerId("messenger"), party = 1, name = "A messenger", portrait = null, character = null)
+    val offeredBy = UUID.fromString("1c000007-0000-4000-8000-000000000020")
+
+    fun letter(command: UUID = offeredBy) = Dialogue(
+        id = DialogueId.offered(house, command),
+        title = "A letter from the coast",
+        scene = null,
+        speakers = listOf(messenger),
+        lines = listOf(Line(LineId("news"), messenger.id, "The harbour is ours, my lord.", then = Then.End)),
+    )
+
+    fun offering(dialogue: Dialogue = letter()) = OfferDialogue(house, dialogue, day, noon)
+
+    "a house is offered a dialogue whole, for its own player, and keeps it open" {
+        val events = HouseDecider.decide(offering(), standing)
+
+        events.single() shouldBe PlayerOfferedDialogue(house, player, letter(), day, noon)
+        val holding = events.fold(standing, HouseDecider::evolve).shouldBeInstanceOf<House.Founded>()
+        holding.openDialogues shouldBe listOf(letter())
+        holding.offeredDialogues shouldBe setOf(letter().id)
+    }
+
+    "several dialogues can be open at once, in the order they were offered" {
+        val second = letter(UUID.fromString("1c000007-0000-4000-8000-000000000021"))
+
+        after(offering(), offering(second)).openDialogues.map { it.id } shouldBe listOf(letter().id, second.id)
+    }
+
+    "the same dialogue offered twice is refused, which is what makes a resend harmless" {
+        shouldThrow<HouseError.DialogueAlreadyOffered> { HouseDecider.decide(offering(), after(offering())) }
+    }
+
+    "a dialogue is offered only to a house that exists" {
+        shouldThrow<HouseError.NoSuchHouse> { HouseDecider.decide(offering(), HouseDecider.initial) }
+    }
 })

@@ -29,7 +29,7 @@ Recorded whole on the event that offers it.
 | title | a line | what the list shows |
 | scene | a picture's key, or none | from `world/scenes/`, once step 11 has made the folder |
 | speakers | each: an id, a party, a name, a portrait's key or none, a character id or none | a speaker with no character id is somebody who is not a character, a messenger say |
-| lines | each: an id, a speaker, the words, what saying it gives, whether it is recorded, and what follows | the first line is where it opens |
+| lines | each: an id, a speaker, the words, what saying it gives, whether it is recorded, and what follows | the first line is where it opens; a line's id and a speaker's are words, so a dialogue written by hand reads |
 | what follows a line | another line, a dialogue choice of two to four option lines, or the end | a line followed by the end is always recorded |
 | requirements | any it was written to need | every speaker with a character id is also required alive, which is worked out rather than written |
 
@@ -39,8 +39,10 @@ one kind in this plan is `Alive(character)`, and how another kind is added is be
 
 A dialogue checks itself when it is made, as `Choice` does:
 
-- a title, at least one line, ids unique within it, and every speaker and line it refers to present;
-- no cycles, so every path ends. A conversation that comes back to a question it asked is refused for now;
+- a title, at least one line, ids that are words and unique within it, and every speaker and line it refers
+  to present;
+- no cycles, so every path ends, and every line reached from the first, so nothing written goes unsaid. A
+  conversation that comes back to a question it asked is refused for now;
 - every dialogue choice offering two to four options;
 - no effect a step could be refused: a `FoundAt`, or a grant of nothing.
 
@@ -80,7 +82,8 @@ A requirement is a value, and each kind answers two questions: what in the world
 event breaks it. `Alive(character)` is the one kind in this plan, and a death breaks it. The kinds are one
 sealed type in the domain, and which requirements an event breaks is one pure function beside them, so a new
 kind - a building still standing, broken when the building is destroyed - is one more case and one more line
-of that function, and nothing else in this section changes for it.
+of that function, and nothing else in this section changes for it. Like every case of a sealed field, it
+also takes its `kind` in the store and a fixture that writes it, and a test fails until it has both.
 
 - **What a dialogue depends on** is read off the event that offered it: its requirements, the speakers'
   being alive among them.
@@ -188,10 +191,12 @@ A speaker's death is tried with *kill*, in the Characters section.
 
 1. **The documents.** This plan, decision record 0067, experiment 0014, the mechanic's entry and its UI
    section, the glossary's words, the roadmap and the architecture. Nothing to run.
-2. **Offered, on the server.** The dialogue and its checks, `Requirement` with its one kind, `OfferDialogue`
-   and the house keeping its open dialogues, the grant as an `Effect` and its view on the wire, the
-   catalogue's row and the fixtures with every case. Wire version 13. Nothing to see; the decider spec is
-   the evidence.
+2. **Offered, on the server.** Done. `Dialogue` checks itself as it is made, `Requirement.Alive` is its one
+   kind, and `OfferDialogue` writes `PlayerOfferedDialogue`, refused for a house that does not exist and
+   for the same offer twice; the house keeps its open dialogues and every id it was offered. `Effect.Grant`
+   is a choice's effect as well as a line's, on the wire from version 13. Every case of every sealed field
+   has its `kind` in the store and a fixture that writes it, which a test holds. `DialogueSpec` and
+   `HouseDeciderSpec` are the evidence.
 3. **Stepped and completed, on the server.** The walk, `CompleteDialogueStep` with what it gives and the end
    from one decision, the refusals and their reason codes; `BUILDING-A-MECHANIC.md` gains the shape. Nothing
    to see; the specs are the evidence.

@@ -224,10 +224,14 @@ does.
 
 ### Where it stands
 
-Nothing of it exists in the source: no event, no frame, no component. Its shape is decided in decision
-record 0067: a dialogue offered whole on the house's stream; only its dialogue choices, and the lines that
-give something or end it, recorded; what a line gives written as the world's own event beside the step; and
-hidden requirements that end a dialogue when one fails, with the server holding back what the player has not
+The offer is in the source, on the server and nowhere else. A dialogue checks itself when it is made, so
+one that could loop, or that leads to a line it does not have, is refused before anything is written, and
+`OfferDialogue` writes it whole on the house's stream, where the house keeps every one it has open. An
+option of a choice can grant a resource too, on the wire from version 13. Nothing offers a dialogue yet,
+nothing sends one to the page and nothing steps through one. Its shape is decided in decision record 0067: a
+dialogue offered whole on the house's stream; only its dialogue choices, and the lines that give something
+or end it, recorded; what a line gives written as the world's own event beside the step; and hidden
+requirements that end a dialogue when one fails, with the server holding back what the player has not
 reached. `docs/plans/character-dialogue.md` is the order it is built in, one commit a step, and experiment
 0014 is what it is meant to show. `ARCHITECTURE.md` says what it asks of the server and the client.
 

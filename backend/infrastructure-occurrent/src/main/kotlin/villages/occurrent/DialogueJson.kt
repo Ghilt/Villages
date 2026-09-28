@@ -1,0 +1,34 @@
+package villages.occurrent
+
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
+import villages.domain.Requirement
+import villages.domain.Then
+
+/**
+ * How what follows a line of a dialogue is written: with a `kind`, as an effect is, because it is one of
+ * three things and a reader of the stored JSON must not have to guess which. See `EffectJson.kt`.
+ */
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = KIND)
+@JsonSubTypes(
+    JsonSubTypes.Type(value = Then.Say::class, name = SAY),
+    JsonSubTypes.Type(value = Then.DialogueChoice::class, name = DIALOGUE_CHOICE),
+    JsonSubTypes.Type(value = Then.End::class, name = END),
+)
+internal interface ThenJson
+
+internal const val SAY = "say"
+internal const val DIALOGUE_CHOICE = "dialogueChoice"
+internal const val END = "end"
+
+/**
+ * How a dialogue's requirement is written, the same way. A new kind of requirement is a new name here, and
+ * the test holding the names to the sealed hierarchy fails until it has one. See decision record 0067.
+ */
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = KIND)
+@JsonSubTypes(
+    JsonSubTypes.Type(value = Requirement.Alive::class, name = ALIVE),
+)
+internal interface RequirementJson
+
+internal const val ALIVE = "alive"

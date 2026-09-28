@@ -161,9 +161,13 @@ export const visionPointViewSchema = z.object({
   until: worldDaySchema.optional(),
 });
 
-/** What taking an option would do. `kind` names the case, as it does in the store. See 0034. */
+/**
+ * What taking an option would do. `kind` names the case, as it does in the store. See 0034. A `grant` is
+ * some of a resource given, which is what a line of a dialogue gives too. See 0067.
+ */
 export const effectViewSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('foundAt'), seat: pointSchema, name: z.string(), banner: bannerSchema }),
+  z.object({ kind: z.literal('grant'), resource: resourceNameSchema, amount: z.number().int().positive() }),
 ]);
 
 export const optionViewSchema = z.object({

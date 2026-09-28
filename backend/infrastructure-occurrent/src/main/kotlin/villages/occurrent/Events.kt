@@ -22,6 +22,8 @@ import villages.domain.Event
 import villages.domain.HouseCommand
 import villages.domain.HouseDecider
 import villages.domain.HouseEvent
+import villages.domain.Requirement
+import villages.domain.Then
 import java.net.URI
 import java.time.ZoneOffset
 
@@ -48,6 +50,8 @@ object Events {
         .addModule(KotlinModule.Builder().build())
         // A sealed field says which case it holds, and the domain stays free of annotations.
         .addMixIn(Effect::class.java, EffectJson::class.java)
+        .addMixIn(Then::class.java, ThenJson::class.java)
+        .addMixIn(Requirement::class.java, RequirementJson::class.java)
         .build()
 
     fun converter(): JacksonCloudEventConverter<Event> =

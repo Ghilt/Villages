@@ -1,0 +1,78 @@
+{
+  "type": "villages.player.offeredDialogue.v1",
+  "source": "urn:villages",
+  "subject": "6d5b0a2e-1c3f-4d7e-9a8b-0f1e2d3c4b5a",
+  "time": "2026-09-04T12:00:00Z",
+  "data": {
+    "houseId": "6d5b0a2e-1c3f-4d7e-9a8b-0f1e2d3c4b5a",
+    "player": "0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8d",
+    "dialogue": {
+      "id": "dd000000-0000-4000-8000-00000000a001",
+      "title": "A letter from the coast",
+      "scene": "harbour",
+      "speakers": [
+        {
+          "id": "agnes",
+          "party": 0,
+          "name": "Agnes Hollin",
+          "portrait": "woman-03",
+          "character": "cb732500-39bd-3b39-a838-bb89f719578f"
+        },
+        {
+          "id": "messenger",
+          "party": 1,
+          "name": "A messenger",
+          "portrait": null,
+          "character": null
+        }
+      ],
+      "lines": [
+        {
+          "id": "arrives",
+          "speaker": "messenger",
+          "words": "A rider from the coast, my lady, with the harbour-master's seal.",
+          "gives": [],
+          "recorded": false,
+          "then": { "kind": "say", "line": "asks" }
+        },
+        {
+          "id": "asks",
+          "speaker": "messenger",
+          "words": "He asks whether the house will stand behind the new quay.",
+          "gives": [],
+          "recorded": true,
+          "then": { "kind": "dialogueChoice", "options": ["accept", "refuse"] }
+        },
+        {
+          "id": "accept",
+          "speaker": "agnes",
+          "words": "Tell him it will, and that it expects its share of the dues.",
+          "gives": [{ "kind": "grant", "resource": "WEALTH", "amount": 100 }],
+          "recorded": false,
+          "then": { "kind": "say", "line": "thanks" }
+        },
+        {
+          "id": "refuse",
+          "speaker": "agnes",
+          "words": "Tell him the house has quays enough of its own.",
+          "gives": [],
+          "recorded": false,
+          "then": { "kind": "end" }
+        },
+        {
+          "id": "thanks",
+          "speaker": "messenger",
+          "words": "He will be glad of it. The first of the dues came with me.",
+          "gives": [],
+          "recorded": false,
+          "then": { "kind": "end" }
+        }
+      ],
+      "requirements": [
+        { "kind": "alive", "character": "cb732500-39bd-3b39-a838-bb89f7195790" }
+      ]
+    },
+    "worldTime": 454901,
+    "recordedAt": "2026-09-04T12:00:00Z"
+  }
+}

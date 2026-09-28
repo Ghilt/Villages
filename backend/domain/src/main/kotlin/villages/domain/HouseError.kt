@@ -14,6 +14,11 @@ sealed class HouseError(message: String) : DomainError(message) {
 
     class InvalidChoice(reason: String) : HouseError("not a choice: $reason")
 
+    class InvalidDialogue(reason: String) : HouseError("not a dialogue: $reason")
+
+    /** A dialogue is offered once, so the same offer sent twice is refused rather than held twice. */
+    data object DialogueAlreadyOffered : HouseError("this house has already been offered that dialogue")
+
     /** A house is asked one thing at a time, and this one has not been answered. */
     data object ChoicePending : HouseError("this house already has a choice to make")
 

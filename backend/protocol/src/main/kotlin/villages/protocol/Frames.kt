@@ -31,9 +31,10 @@ import tools.jackson.databind.JsonNode
  * war is drawn from. Version 10 added `giveVision` and `takeVision`, a house given vision of a place outright
  * and having it taken away. See decision record 0061. Version 11 added `fogOfWar`, Adam's switch, because the
  * gateway now holds back what a house cannot see. Version 12 gave `yourSight` its `tension`, the surface
- * tension that joins circles close together. See decision record 0064.
+ * tension that joins circles close together. See decision record 0064. Version 13 let an option's effect be
+ * a `grant`, some of a resource given, which is what a line of a dialogue gives too. See decision record 0067.
  */
-const val PROTOCOL_VERSION = 12
+const val PROTOCOL_VERSION = 13
 
 data class Point(val lat: Double, val lon: Double)
 
@@ -496,10 +497,14 @@ data class OptionView(val id: String, val label: String, val detail: String, val
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "kind")
 @JsonSubTypes(
     JsonSubTypes.Type(FoundAtView::class, name = "foundAt"),
+    JsonSubTypes.Type(GrantView::class, name = "grant"),
 )
 sealed interface EffectView
 
 data class FoundAtView(val seat: Point, val name: String, val banner: BannerSpec) : EffectView
+
+/** Some of a resource given to the house. `resource` is a wire name, so `naturalDomain` and not Domain. */
+data class GrantView(val resource: String, val amount: Long) : EffectView
 
 /**
  * One stored event, as stored: the envelope and the data, for a client that asked to watch. `eventType` is

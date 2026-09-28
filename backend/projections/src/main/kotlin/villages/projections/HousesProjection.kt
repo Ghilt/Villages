@@ -20,6 +20,7 @@ import villages.domain.HouseResourceReleased
 import villages.domain.HouseResourcePledged
 import villages.domain.HouseResourceGranted
 import villages.domain.PlayerGivenChoice
+import villages.domain.PlayerOfferedDialogue
 import villages.domain.HouseId
 import villages.domain.PlayerTookAction
 import villages.domain.PlayerId
@@ -105,6 +106,9 @@ class HousesProjection(feed: EventFeed) : HousesByCell, HousesByPlayer, AutoClos
             // Nothing is on the map until a house is founded. Being asked something and answering it are
             // the choices projection's business; this one draws the map and has nothing to say about them.
             is PlayerGivenChoice, is PlayerTookAction -> return
+
+            // A conversation puts nothing on the map, whatever is said in it.
+            is PlayerOfferedDialogue -> return
 
             // Whom a house holds is the characters projection's business; the map's row of a house is unchanged.
             is HouseGainedKeyFigure, is HouseLostKeyFigure -> return

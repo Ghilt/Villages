@@ -68,6 +68,13 @@ deaths in, which brought key figures into a mechanic about characters talking. A
 now, about characters and whatever else a dialogue depends on, and one listener carries whatever breaks
 one, so a building destroyed would be one more kind rather than one more listener.
 
+**2026-09-28, the offer is in the source.** A dialogue checks itself and is written whole on the house's
+stream, and a choice's option can grant. One cost the documents had not counted showed at once: a new kind of
+requirement is its case, the event that breaks it and a line of words, and also its `kind` in the store and a
+case in a fixture, because every command on a house reads the whole stream, and a case the store could write
+and not read back would break every one of them. A test demands both now. It was tried with a made-up kind,
+and refused it twice: once for having no name in the store, and once, named, for having no fixture.
+
 ## Result
 
 Open.

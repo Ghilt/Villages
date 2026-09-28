@@ -131,6 +131,22 @@ data class PlayerTookAction(
 ) : PlayerEvent
 
 /**
+ * A player was offered a dialogue. The whole of it is here - the speakers, every line and every dialogue
+ * choice, what each line gives and what it requires - so the roads not taken are history too, as a choice's
+ * are, and every later step is checked against this event alone. A house can have several open at once.
+ *
+ * Nothing happened in the world when this was written: a conversation was put to the house. See decision
+ * record 0067.
+ */
+data class PlayerOfferedDialogue(
+    override val houseId: HouseId,
+    val player: PlayerId,
+    val dialogue: Dialogue,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : PlayerEvent
+
+/**
  * A house took a character in as one of its key figures. A tie in the house's history, which the character's
  * own record never mentions: who they are is on their stream, and what they are to this house is here. See
  * decision record 0055.

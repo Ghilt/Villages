@@ -93,6 +93,18 @@ data class TakeAction(
 ) : HouseCommand
 
 /**
+ * Offer this house a dialogue, whole. Refused for a house that does not exist, and for a dialogue it was
+ * offered before: the id is worked out from the command that offered it, so the same command sent twice is
+ * refused rather than doubled. Who it reaches is the house's player. See decision record 0067.
+ */
+data class OfferDialogue(
+    override val houseId: HouseId,
+    val dialogue: Dialogue,
+    val worldTime: WorldTime,
+    val recordedAt: Instant,
+) : HouseCommand
+
+/**
  * Give the house vision of a place, outright: it sees a circle about the place from this world-day until the
  * vision is taken away. The debug panel's lever today, and what a storyline giving sight of a far coast will
  * issue. See decision record 0061.

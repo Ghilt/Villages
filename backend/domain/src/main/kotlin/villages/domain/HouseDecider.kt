@@ -34,6 +34,10 @@ object HouseDecider : Decider<HouseCommand, House, HouseEvent> {
             if (state is House.Founded && command.choice.options.any { it.effect is Effect.FoundAt }) {
                 throw HouseError.AlreadyFounded
             }
+            // And one that would give a house something is meaningless before there is a house to give it to.
+            if (state is House.NotFounded && command.choice.options.any { it.effect is Effect.Grant }) {
+                throw HouseError.NoSuchHouse
+            }
             listOf(
                 PlayerGivenChoice(
                     houseId = command.houseId,
@@ -140,6 +144,24 @@ object HouseDecider : Decider<HouseCommand, House, HouseEvent> {
             ) + follows(taken.effect, command, state)
         }
 
+        // Several can be open at once, and the dialogue has checked itself already, so what is left to the house
+        // is that it exists and has not been offered this one before. See decision record 0067.
+        is OfferDialogue -> {
+            val house = founded(state)
+            if (command.dialogue.id in house.offeredDialogues) {
+                throw HouseError.DialogueAlreadyOffered
+            }
+            listOf(
+                PlayerOfferedDialogue(
+                    houseId = command.houseId,
+                    player = house.player,
+                    dialogue = command.dialogue,
+                    worldTime = command.worldTime,
+                    recordedAt = command.recordedAt,
+                ),
+            )
+        }
+
         is TakeKeyFigure -> {
             val house = founded(state)
             if (command.characterId in house.keyFigures) {
@@ -234,6 +256,21 @@ object HouseDecider : Decider<HouseCommand, House, HouseEvent> {
                 ),
             )
         }
+
+        // A choice that grants is never given to a house that does not exist, so this refusal is not reached:
+        // it is here because what a state can be given is the decider's rule, not the giver's.
+        is Effect.Grant -> {
+            founded(state)
+            listOf(
+                HouseResourceGranted(
+                    houseId = command.houseId,
+                    resource = effect.resource,
+                    amount = effect.amount,
+                    worldTime = command.worldTime,
+                    recordedAt = command.recordedAt,
+                ),
+            )
+        }
     }
 
     private fun founding(command: FoundHouse): HouseFounded = HouseFounded(
@@ -307,6 +344,14 @@ object HouseDecider : Decider<HouseCommand, House, HouseEvent> {
         is PlayerTookAction -> when (state) {
             is House.NotFounded -> state.copy(pending = null)
             is House.Founded -> state.copy(pending = null)
+        }
+
+        is PlayerOfferedDialogue -> when (state) {
+            is House.NotFounded -> state
+            is House.Founded -> state.copy(
+                openDialogues = state.openDialogues + event.dialogue,
+                offeredDialogues = state.offeredDialogues + event.dialogue.id,
+            )
         }
 
         is HouseGainedKeyFigure -> when (state) {

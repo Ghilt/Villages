@@ -57,11 +57,12 @@ data class Option(
 )
 
 /**
- * What taking an option does, as events.
+ * What taking an option does, or reaching a line of a dialogue, as events.
  *
  * Sealed, so that the decider's branch over it is exhaustive and a new kind of effect cannot be added
  * without deciding what it records. Adding one is the whole cost of a new kind of choice: this, a branch
- * in `decide`, and a giver with the words.
+ * in `decide`, and a giver with the words. Choices and dialogues share it, so a new effect is one case for
+ * both. See decision record 0067.
  */
 sealed interface Effect {
     /** Found the house here, under this name and this banner. The first effect the world has. */
@@ -70,6 +71,18 @@ sealed interface Effect {
         val name: HouseName,
         val banner: Banner,
     ) : Effect
+
+    /**
+     * Give the house some of a resource: what a line of a dialogue gives, and what an option can. Always more
+     * than nothing, because a grant that could be refused would make a dialogue that gives it impassable.
+     */
+    data class Grant(val resource: Resource, val amount: Long) : Effect {
+        init {
+            if (amount <= 0) {
+                throw HouseError.InvalidAmount("a grant is of more than nothing, and $amount is not")
+            }
+        }
+    }
 }
 
 /** The identity of one choice, so that an action can only answer the choice it was given. */

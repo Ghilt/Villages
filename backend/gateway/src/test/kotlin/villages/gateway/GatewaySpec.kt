@@ -46,8 +46,10 @@ import villages.domain.HouseResourceReleased
 import villages.domain.HouseResourcePledged
 import villages.domain.HouseResourceGranted
 import villages.domain.PlayerGivenChoice
+import villages.domain.PlayerOfferedDialogue
 import villages.domain.HouseId
 import villages.domain.PlayerTookAction
+import villages.domain.Resource
 import villages.domain.PlayerId
 import villages.domain.WorldTime
 import villages.projections.CharactersProjection
@@ -65,6 +67,7 @@ import villages.protocol.CommandRejected
 import villages.protocol.PROTOCOL_VERSION
 import villages.protocol.ErrorFrame
 import villages.protocol.FoundAtView
+import villages.protocol.GrantView
 import villages.protocol.EventFrame
 import villages.protocol.HouseAppeared
 import villages.protocol.Point
@@ -104,6 +107,7 @@ private fun typeOf(event: HouseEvent): String = when (event) {
     is HouseResourceReleased -> "villages.house.resourceReleased.v1"
     is HouseResourceSpent -> "villages.house.resourceSpent.v1"
     is PlayerGivenChoice -> "villages.player.givenChoice.v1"
+    is PlayerOfferedDialogue -> "villages.player.offeredDialogue.v1"
     is PlayerTookAction -> "villages.player.tookAction.v1"
 }
 
@@ -119,6 +123,7 @@ private fun dataOf(event: HouseEvent): String = when (event) {
     is HouseResourceReleased -> """{"pledgeId":"${event.pledgeId.value}"}"""
     is HouseResourceSpent -> """{"resource":"${event.resource}","amount":${event.amount}}"""
     is PlayerGivenChoice -> """{"prompt":"${event.choice.prompt}","options":${event.choice.options.size}}"""
+    is PlayerOfferedDialogue -> """{"title":"${event.dialogue.title}","lines":${event.dialogue.lines.size}}"""
     is PlayerTookAction -> """{"optionId":"${event.optionId.value}"}"""
 }
 
@@ -1595,5 +1600,9 @@ class GatewaySpec : StringSpec({
         two.last() shouldBe CommandRejected(COMMAND_TWO, "alreadyFounded")
         rig.world.events.filterIsInstance<HouseFounded>() shouldHaveSize 1
         rig.houses.ofPlayer(PlayerId(UUID.fromString(TOKEN)))?.name?.value shouldBe "Ravenscar"
+    }
+
+    "an option that grants reaches the page as what it gives, under the wire's name for the resource" {
+        Effect.Grant(Resource.NATURAL_DOMAIN, 5).toView() shouldBe GrantView(resource = "naturalDomain", amount = 5)
     }
 })

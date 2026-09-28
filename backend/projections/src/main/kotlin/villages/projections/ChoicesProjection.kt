@@ -16,6 +16,7 @@ import villages.domain.HouseResourceReleased
 import villages.domain.HouseResourcePledged
 import villages.domain.HouseResourceGranted
 import villages.domain.PlayerGivenChoice
+import villages.domain.PlayerOfferedDialogue
 import villages.domain.PlayerTookAction
 import villages.domain.PlayerId
 import java.util.concurrent.ConcurrentHashMap
@@ -65,6 +66,9 @@ class ChoicesProjection(feed: EventFeed) : ChoicesByPlayer, AutoCloseable {
                 return
 
             is HouseFounded -> forget(event.player)
+
+            // A dialogue choice is not a choice put to the house, however alike the two are: nothing is pending.
+            is PlayerOfferedDialogue -> return
 
             // A choice is put to a house, never to a character.
             is CharacterEvent -> return

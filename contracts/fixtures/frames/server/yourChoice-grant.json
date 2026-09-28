@@ -1,0 +1,21 @@
+{
+  "type": "yourChoice",
+  "choice": {
+    "id": "aa000000-0000-4000-8000-00000000c402",
+    "prompt": "A traveller from the south offers the house a gift.",
+    "options": [
+      {
+        "id": "aa000000-0000-4000-8000-000000000011",
+        "label": "The purse",
+        "detail": "A hundred in coin, and no questions about where it came from.",
+        "effect": { "kind": "grant", "resource": "wealth", "amount": 100 }
+      },
+      {
+        "id": "aa000000-0000-4000-8000-000000000012",
+        "label": "The letters",
+        "detail": "Introductions at court, in a hand the court will know.",
+        "effect": { "kind": "grant", "resource": "influence", "amount": 20 }
+      }
+    ]
+  }
+}

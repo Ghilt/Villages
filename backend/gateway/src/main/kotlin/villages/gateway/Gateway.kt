@@ -71,6 +71,7 @@ import villages.protocol.ErrorFrame
 import villages.protocol.EventFrame
 import villages.protocol.FogOfWar
 import villages.protocol.FoundAtView
+import villages.protocol.GrantView
 import villages.protocol.FoundHousePayload
 import villages.protocol.GiveVisionPayload
 import villages.protocol.GrantResourcePayload
@@ -965,6 +966,8 @@ internal fun Effect.toView(): EffectView = when (this) {
         name = name.value,
         banner = banner.toWire(),
     )
+
+    is Effect.Grant -> GrantView(resource = resource.toWire(), amount = amount)
 }
 
 /** What makes two deltas the same one: the thing they are about and its version. */
@@ -984,6 +987,8 @@ internal fun DomainError.reasonCode(): String = when (this) {
     is DomainError.InvalidLocation -> "invalidLocation"
     is HouseError.InvalidBanner -> "invalidBanner"
     is HouseError.InvalidChoice -> "invalidChoice"
+    is HouseError.InvalidDialogue -> "invalidDialogue"
+    HouseError.DialogueAlreadyOffered -> "dialogueAlreadyOffered"
     HouseError.ChoicePending -> "choicePending"
     HouseError.NoChoicePending -> "noChoicePending"
     HouseError.NoSuchChoice -> "noSuchChoice"
