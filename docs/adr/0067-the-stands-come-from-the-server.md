@@ -52,15 +52,36 @@ ground its house has revealed.** A stand stands still, so revealed is enough, as
   and never makes a name into a path, as 0025 asks; a name it has none of is sent every tile empty, and a page
   that names none is sent no stands at all. The adapter keeps each tile once read and lets a master's tiles
   go when its `map.json`, written last, has been written since, so furnishing again is seen without a restart.
+- **The page keeps what it was sent, for exactly as long as the gateway thinks it was.** A tile is held while a
+  cell the page follows is over it and let go when none is, by `standTilesUnder` at both ends, which
+  `contracts/fixtures/stand-tiles.json` holds to the same tiles. Held longer, coming back would draw from what
+  the gateway said before the fog last moved; let go sooner, the gateway would never send it again and the
+  ground over it would wait for ever. A scatter cell waits for every tile it reads, as it waits for its terrain,
+  and is told when each comes.
+- **A tile sent again differently cuts its cells again, and nothing blinks.** Every cell cut from the old records
+  is stale: one coming into view waits for its new points rather than showing the old and changing a moment
+  later, and one already on the screen keeps its old points until the new are cut and then takes them, in one
+  frame, at the fade it was at. On revealed ground they are the same points, because every stand that could
+  change them was sent the first time.
 
 Wire version 13, for the frame and the field.
 
 ## Consequences
 
-**The stands of unknown ground no longer have to reach a page.** In this first step they still do, because
-the page still reads them from the public files; the log says under `stands` what the server sent, which is
-how to see that it holds back. The next step draws the scenery from what the socket brings, and the one after
-takes the files out of the public folder, after which nothing but the gateway can hand a page a stand.
+**The stands of unknown ground no longer reach a page's scenery.** From the second step, 2026-09-28, the page
+grows its trees from what the socket brings and from nothing else: with the fog on and a vision given, it held
+44 stands in the four tiles about a seat where the sprite map has 536, and on revealed ground every tree stood
+where it did with all of them, which was checked point for point, 346 of 346 inside the vision. The
+files stay in the public folder until the third step takes them out, after which nothing but the gateway can
+hand a page a stand.
+
+**No game server, no scenery.** A page with no gateway to talk to is sent no stands, so its scatter cells wait,
+and the Scenery section says how many are waiting on the game server's stands. With the fog on and no house
+nothing grew anyway; it is the fog lifted without a server that loses its trees.
+
+**Trees at the edge of a long pan arrive when it ends**, with the houses, because the gateway follows the cells
+the camera settles on. A tile reaches a long way past what is shown and a held cell's ring past that, so this
+is only seen when one drag crosses into a tile no held cell was over.
 
 **The server now reads the world's files.** Its adapter looks where the generator writes, the page's own
 world folder, which ties a running server to a checkout the way the portraits folder does: a development
@@ -84,5 +105,7 @@ circle; one far from it fails every circle's distance test at once; only those n
   need its own margin.
 - **Binary frames.** A third smaller, and a change to the socket at both ends and to every test that reads
   frames as text, for tiles that are a kilobyte or two.
+- **Keep every tile ever sent.** No rule at the page's end, and a tile the gateway had let go of would be drawn
+  from what it said before the fog last moved, while the page held more of the world the longer it was open.
 - **A server that knows its master.** One property instead of a field on `hello`, and Adam's Debug map
   switches masters in the page, so the server would send the wrong world's stands the moment he did.

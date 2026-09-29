@@ -86,6 +86,7 @@ import villages.protocol.StatsView
 import villages.protocol.YourHouse
 import villages.protocol.YourKeyFigures
 import villages.protocol.YourSight
+import villages.protocol.STAND_TILES
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneOffset

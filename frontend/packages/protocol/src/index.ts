@@ -23,6 +23,7 @@ export type { Tile, View } from './cells';
 export { EQUATOR_KM, mercatorX, mercatorY, reachAcross, reaches } from './reach';
 export { coverageOf } from './coverage';
 export type { Coverage, CoverageCircle } from './coverage';
+export { STANDS_FROM_ZOOM, STAND_TILES, STAND_TILE_MARGIN, standTilesUnder } from './standTiles';
 
 export {
   MONTHS,

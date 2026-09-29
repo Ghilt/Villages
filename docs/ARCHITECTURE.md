@@ -196,7 +196,11 @@ frame of the sprite map's own eight-byte records, only those whose disc comes wi
 revealed ground. `Coverage.reaches` is that question, answered by growing every circle; `StandRecords` in
 `protocol` and `decodeStands` in the world package read the records alike, against
 `contracts/fixtures/stands.json`. A sight change or the switch answers every held tile again, sending only
-what changed.
+what changed. The page grows its scenery from those and nothing else: `sprites/scenery/standsFromServer.ts`
+keeps a tile exactly as long as the gateway thinks it was sent, by `standTilesUnder` at both ends against
+`contracts/fixtures/stand-tiles.json`, and a scatter cell waits for every tile it reads. A tile sent again
+differently makes every cell cut from its old records stale, and one already on the screen keeps its points
+until the new ones are cut, so nothing blinks while the fog moves.
 
 **The fog is a layer of the sprite canvas**, `sprites/FogLayer.ts`, drawn between the world and the signs for
 the things in it: the scenery and whatever stands outside vision under it, every icon and whatever stands in
@@ -205,7 +209,8 @@ pixel, and reads there a distance field of the vision points, worked out in the 
 to them (`apps/web/src/fog/`) and handed to the graphics card as one small half-float texture. Nothing about
 the fog is worked out while the camera moves except that one pass. See decision record 0062. The scenery
 layer asks the same field where it may grow (`revealedAt`), as a cell is taken into view and again when the
-fog changes, so no tree stands in the haze; the scatter itself stays a pure function of the ground.
+fog changes, so no tree stands in the haze; the scatter itself stays a pure function of the ground and the
+stands it was sent, which on revealed ground are every stand that could change it.
 **Revealed ground loses its colour in each canvas** (0065): the map's through `.uncolouring`, a 2D canvas
 between the map and the sprites that `fog/uncolouring.ts` lays a grey picture of the field on, blended by the
 browser's saturation blend, and the sprites under the fog by a filter on the container that holds them. The

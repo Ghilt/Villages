@@ -11,7 +11,9 @@ import { Section } from './Section';
  * This reads the **sprite map** the master was generated with - the biomes and the stands that
  * `npm run world:sprites` wrote - and then what the browser actually did with it. So the top half says
  * what was asked for and the bottom half says what happened, and the two numbers to compare are the
- * density the generator promised and the frame gap while the map is moving.
+ * density the generator promised and the frame gap while the map is moving. The stands held are the ones the
+ * game server sent, as far as the fog let them through, so with the fog on they are far fewer than the
+ * sprite map has; see decision record 0067.
  *
  * The frame gap is only counted between frames of a *moving* map, because a still map draws nothing at
  * all and reporting that as a stall would be the panel lying. See decision record 0023.
@@ -193,12 +195,13 @@ export function ScenerySection() {
           <dd>
             {drawn.cells} on screen, {drawn.held} cut, {drawn.points.toLocaleString()} points kept
             {drawn.waiting > 0 && `, ${drawn.waiting} waiting on the ground`}
+            {drawn.waitingOnStands > 0 && `, ${drawn.waitingOnStands} waiting on the game server's stands`}
           </dd>
         </div>
         <div className="debug__row">
           <dt>stands</dt>
           <dd>
-            {drawn.stands.toLocaleString()} held, in {drawn.chunks.toLocaleString()} chunks
+            {drawn.stands.toLocaleString()} held, in {drawn.tiles.toLocaleString()} tiles the game server sent
           </dd>
         </div>
         <div className="debug__row">

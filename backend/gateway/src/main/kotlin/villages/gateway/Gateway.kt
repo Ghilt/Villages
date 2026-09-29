@@ -102,8 +102,10 @@ import villages.protocol.Resync
 import villages.protocol.SeeAll
 import villages.protocol.ServerFrame
 import villages.protocol.Snapshot
+import villages.protocol.STAND_TILES
 import villages.protocol.StandRecords
 import villages.protocol.StandsFrame
+import villages.protocol.standTilesUnder
 import villages.protocol.SpendResourcePayload
 import villages.protocol.StatsView
 import villages.protocol.Stock

@@ -7,7 +7,7 @@ import type { CameraView, GroundTilt } from '../cameraMath';
 import { LONGEST_STEP_MS, PRESENCE_MS, easeTowards, midTrade } from '../twoForms';
 import { CELL, biomeAt, cellOf } from '@villages/world';
 import type { ArtAtlasFile, Kind, ScatteredPoint } from '@villages/world';
-import { noteDrawn, pointsOf, sceneryMap, sceneryTally } from './sceneryCells';
+import { currentPointsOf, noteDrawn, pointsOf, sceneryMap, sceneryTally } from './sceneryCells';
 import { MOST_CUT_AT_ONCE, groupCount, groupOf, thresholdOf, wantedAt, worthDrawing } from './showing';
 
 /**
@@ -616,6 +616,19 @@ export function createSceneryLayer() {
             cutting += 1;
             cell = { all: points, points: splitByGroup(growing(points)), made: new Map(), shade: new Map() };
             shown.set(key, cell);
+          } else {
+            // The fog moved and the gateway sent this cell's stands again, so it has been cut again: its new
+            // points take the old ones' place at the fade they were at, in this frame, so nothing blinks. On
+            // ground already revealed they are the same points. See decision record 0067.
+            const now = currentPointsOf(tilesRoot, cellX, cellY, dial, spacing, askForAFrame);
+            if (now !== undefined && now !== cell.all) {
+              for (const group of [...cell.made.keys()]) {
+                dropGroup(cell, group);
+              }
+              cell.all = now;
+              cell.points = splitByGroup(growing(now));
+              unsorted = true;
+            }
           }
           for (const group of cell.points.keys()) {
             const alpha = alphaOf[group]!;
