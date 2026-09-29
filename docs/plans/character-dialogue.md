@@ -197,9 +197,12 @@ A speaker's death is tried with *kill*, in the Characters section.
    is a choice's effect as well as a line's, on the wire from version 13. Every case of every sealed field
    has its `kind` in the store and a fixture that writes it, which a test holds. `DialogueSpec` and
    `HouseDeciderSpec` are the evidence.
-3. **Stepped and completed, on the server.** The walk, `CompleteDialogueStep` with what it gives and the end
-   from one decision, the refusals and their reason codes; `BUILDING-A-MECHANIC.md` gains the shape. Nothing
-   to see; the specs are the evidence.
+3. **Stepped and completed, on the server**, in two commits, because together they came to the size of step
+   2. The walk is done: `Dialogue.walk`, in `Walk.kt`, works out from the steps taken what has been said,
+   the stretch still to read and the options pending, and `Dialogue.isStep` says which lines are steps;
+   `DialogueWalkSpec` walks every path, paths that meet again, and steps that are not a path. Then
+   `CompleteDialogueStep` with what it gives and the end from one decision, the refusals and their reason
+   codes; `BUILDING-A-MECHANIC.md` gains the shape. Nothing to see; the specs are the evidence.
 4. **Offered from the debug panel.** The sample, and the Dialogues section with its lever. Wire version 14.
    The log says what was offered, and the event is at `/admin/inspect-events`.
 5. **Sent to the player.** The dialogues projection, `yourDialogues` holding back what has not been reached,

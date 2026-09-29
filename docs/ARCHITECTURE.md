@@ -287,12 +287,12 @@ shape, and `docs/plans/character-dialogue.md` is the order it is built in; what 
 program, recorded before anything is written so that the first increment starts from it.
 
 **The server walks a dialogue, and holds back what has not been reached.** A dialogue is offered whole on the
-house's stream, and where it has got to is one pure function in the domain, the walk: what has been said,
-the stretch still to read up to the next step the history records, and the options pending. The decider
-accepts a step only where the walk says there is one, and the gateway builds what the player is sent from the
-same walk - what was said and the stretch ahead, never the lines past it and never the requirements. It is
-the fog's rule (0061) applied to a conversation, and for the same reason: the setting's secret is meant to
-come out through dialogue, and a dialogue handed to the browser whole can be read ahead.
+house's stream, and where it has got to is one pure function in the domain, the walk, `Dialogue.walk`: what
+has been said, the stretch still to read up to the next step the history records, and the options pending.
+The decider accepts a step only where the walk says there is one, and the gateway builds what the player is
+sent from the same walk - what was said and the stretch ahead, never the lines past it and never the
+requirements. It is the fog's rule (0061) applied to a conversation, and for the same reason: the setting's
+secret is meant to come out through dialogue, and a dialogue handed to the browser whole can be read ahead.
 
 **What is left to `client-core` is the reading.** Which line of the stretch is showing, who is speaking, and
 when a press has to be sent as a step rather than simply shown, is logic with no DOM in it, so it sits in
