@@ -115,6 +115,27 @@ Some events settle a pending choice implicitly. A house founded by other means, 
 seed, has no use for a pending founding choice, so `evolve(HouseFounded)` clears it. Write such
 settlements in `evolve`, with the reason in a comment, and nowhere else.
 
+### Something long, offered whole and stepped through: the dialogue pattern
+
+The choice pattern stretched over many moments, for a thing too long to record press by press. A
+dialogue is the first; decision record 0067 is the shape.
+
+1. **Offered whole**, on the house's own stream: `PlayerOfferedDialogue` carries every line and every
+   branch, so the roads not taken are history, as a choice's are. It checks itself when it is made,
+   so one that could loop or that names a line it lacks never reaches the store, and its id is worked
+   out from the command that offered it, so a resend is refused rather than doubled.
+2. **Only the steps that matter are recorded**: `PlayerCompletedDialogueStep` for an option taken or a
+   line reached that gives something, is marked, or ends it, with ids and nothing else. The rest is
+   rebuilt by one pure function, `Dialogue.walk`, from the offer and the steps; the decider allows a
+   step only where the walk says one is open, and what the player is sent comes from the same walk.
+3. **What a step gives is the world's own event, from the same decision**, exactly as an option's
+   effect: the step, then what it gives, then `PlayerCompletedDialogue` when the line ends it. There is
+   no command for finishing, because the end is a step.
+
+A new kind of line costs nothing but its words; a new kind of effect is one branch of `follows`, which
+choices and dialogues share, and its `kind` in the store. A rule about where a step may be taken belongs
+in the walk, so the decider and the page cannot come to disagree.
+
 ### A rate that changes
 
 A resource is a `Stock` - `{ total, ratePerSecond, asOf }` (decision 0006): an event when the rate changes,

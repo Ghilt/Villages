@@ -75,6 +75,12 @@ case in a fixture, because every command on a house reads the whole stream, and 
 and not read back would break every one of them. A test demands both now. It was tried with a made-up kind,
 and refused it twice: once for having no name in the store, and once, named, for having no fixture.
 
+**2026-09-29, a step can be taken.** The first number the hypothesis asked for: a conversation of forty lines
+with one dialogue choice and one purse, played through one branch, reads thirty lines and writes six events -
+the offer, three steps, what one of them gives, and the end. Against a line an event, that is the handful the
+design was for, and it is a test now rather than a hope. A step already passed is refused as not the next
+one, so every path through the sample pays once.
+
 ## Result
 
 Open.

@@ -147,6 +147,35 @@ data class PlayerOfferedDialogue(
 ) : PlayerEvent
 
 /**
+ * A player took a step through a dialogue: an option of a dialogue choice, or a line reached that gives
+ * something, is marked to be recorded, or ends it. Only the ids are here - the line is on the event that offered
+ * the dialogue - and the plain lines read on the way are not recorded at all: every option taken is a step, so
+ * the path can be rebuilt from the dialogue alone. What the line gives follows as the world's own events, and
+ * the end as `PlayerCompletedDialogue`, from the same decision. See decision record 0067.
+ */
+data class PlayerCompletedDialogueStep(
+    override val houseId: HouseId,
+    val player: PlayerId,
+    val dialogueId: DialogueId,
+    val lineId: LineId,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : PlayerEvent
+
+/**
+ * A player reached the end of a dialogue. Its own event, rather than a field on the last step, so that nothing
+ * waiting on a dialogue's end has to look inside a step to find it; and not the event for a dialogue lost to a
+ * requirement failing, so that nothing can take a loss for an end. See decision record 0067.
+ */
+data class PlayerCompletedDialogue(
+    override val houseId: HouseId,
+    val player: PlayerId,
+    val dialogueId: DialogueId,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : PlayerEvent
+
+/**
  * A house took a character in as one of its key figures. A tie in the house's history, which the character's
  * own record never mentions: who they are is on their stream, and what they are to this house is here. See
  * decision record 0055.

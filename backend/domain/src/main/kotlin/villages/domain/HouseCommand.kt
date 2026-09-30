@@ -105,6 +105,20 @@ data class OfferDialogue(
 ) : HouseCommand
 
 /**
+ * Take one step through a dialogue the house has open: an option of the dialogue choice pending, or the line the
+ * stretch being read ends in. Anything else is refused, which is what pays a line's reward once on every path.
+ * What the line gives, and the end when it ends the dialogue, follow from the same decision. See decision
+ * record 0067.
+ */
+data class CompleteDialogueStep(
+    override val houseId: HouseId,
+    val dialogueId: DialogueId,
+    val lineId: LineId,
+    val worldTime: WorldTime,
+    val recordedAt: Instant,
+) : HouseCommand
+
+/**
  * Give the house vision of a place, outright: it sees a circle about the place from this world-day until the
  * vision is taken away. The debug panel's lever today, and what a storyline giving sight of a far coast will
  * issue. See decision record 0061.

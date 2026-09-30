@@ -227,9 +227,11 @@ does.
 The offer is in the source, on the server and nowhere else. A dialogue checks itself when it is made, so
 one that could loop, or that leads to a line it does not have, is refused before anything is written, and
 `OfferDialogue` writes it whole on the house's stream, where the house keeps every one it has open. An
-option of a choice can grant a resource too, on the wire from version 13. Where a dialogue has got to is
-worked out from the steps taken through it, by one function, but nothing takes a step yet, nothing offers a
-dialogue and nothing sends one to the page. Its shape is decided in decision record 0067: a
+option of a choice can grant a resource too, on the wire from version 13. `CompleteDialogueStep` takes a step
+where the walk says one is open, and writes what the line gives, and the end when it ends it, from the same
+decision, so a reward is paid once on every path; a conversation of forty lines writes a handful of events.
+All of it is on the server alone: nothing offers a dialogue yet, nothing sends one to the page and no
+command on the wire takes a step. Its shape is decided in decision record 0067: a
 dialogue offered whole on the house's stream; only its dialogue choices, and the lines that give something
 or end it, recorded; what a line gives written as the world's own event beside the step; and hidden
 requirements that end a dialogue when one fails, with the server holding back what the player has not

@@ -33,6 +33,18 @@ data class Walk(
 }
 
 /**
+ * A dialogue a house has open, and the steps it has taken through it so far, in order: what the house keeps of
+ * a conversation it is in the middle of, and all it needs to know where the conversation stands.
+ */
+data class OpenDialogue(
+    val dialogue: Dialogue,
+    val taken: List<LineId> = emptyList(),
+) {
+    /** Where it has got to. */
+    fun walk(): Walk = dialogue.walk(taken)
+}
+
+/**
  * Whether reaching this line is a step: it gives something, ends the dialogue, is marked to be recorded, or is
  * an option of a dialogue choice, taking which is the step. The rest are read and never recorded.
  */

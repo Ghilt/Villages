@@ -197,12 +197,15 @@ A speaker's death is tried with *kill*, in the Characters section.
    is a choice's effect as well as a line's, on the wire from version 13. Every case of every sealed field
    has its `kind` in the store and a fixture that writes it, which a test holds. `DialogueSpec` and
    `HouseDeciderSpec` are the evidence.
-3. **Stepped and completed, on the server**, in two commits, because together they came to the size of step
-   2. The walk is done: `Dialogue.walk`, in `Walk.kt`, works out from the steps taken what has been said,
-   the stretch still to read and the options pending, and `Dialogue.isStep` says which lines are steps;
-   `DialogueWalkSpec` walks every path, paths that meet again, and steps that are not a path. Then
-   `CompleteDialogueStep` with what it gives and the end from one decision, the refusals and their reason
-   codes; `BUILDING-A-MECHANIC.md` gains the shape. Nothing to see; the specs are the evidence.
+3. **Stepped and completed, on the server.** Done, in two commits, because together they came to the size of
+   step 2. `Dialogue.walk`, in `Walk.kt`, works out from the steps taken what has been said, the stretch
+   still to read and the options pending, and `Dialogue.isStep` says which lines are steps;
+   `DialogueWalkSpec` walks every path, paths that meet again, and steps that follow no route.
+   `CompleteDialogueStep` writes `PlayerCompletedDialogueStep`, then what the line gives, then
+   `PlayerCompletedDialogue` when the line ends it, from one decision, and is refused `noSuchDialogue`,
+   `dialogueOver` or `notTheNextStep`; the house keeps the steps of each open dialogue, and a finished one
+   leaves the list. `BUILDING-A-MECHANIC.md` has the shape as the dialogue pattern. Nothing to see;
+   `HouseDeciderSpec` is the evidence, forty lines played through for six events among it.
 4. **Offered from the debug panel.** The sample, and the Dialogues section with its lever. Wire version 14.
    The log says what was offered, and the event is at `/admin/inspect-events`.
 5. **Sent to the player.** The dialogues projection, `yourDialogues` holding back what has not been reached,

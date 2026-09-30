@@ -444,14 +444,14 @@ class HouseDeciderSpec : StringSpec({
 
         events.single() shouldBe PlayerOfferedDialogue(house, player, letter(), day, noon)
         val holding = events.fold(standing, HouseDecider::evolve).shouldBeInstanceOf<House.Founded>()
-        holding.openDialogues shouldBe listOf(letter())
+        holding.openDialogues shouldBe listOf(OpenDialogue(letter()))
         holding.offeredDialogues shouldBe setOf(letter().id)
     }
 
     "several dialogues can be open at once, in the order they were offered" {
         val second = letter(UUID.fromString("1c000007-0000-4000-8000-000000000021"))
 
-        after(offering(), offering(second)).openDialogues.map { it.id } shouldBe listOf(letter().id, second.id)
+        after(offering(), offering(second)).openDialogues.map { it.dialogue.id } shouldBe listOf(letter().id, second.id)
     }
 
     "the same dialogue offered twice is refused, which is what makes a resend harmless" {
@@ -460,5 +460,110 @@ class HouseDeciderSpec : StringSpec({
 
     "a dialogue is offered only to a house that exists" {
         shouldThrow<HouseError.NoSuchHouse> { HouseDecider.decide(offering(), HouseDecider.initial) }
+    }
+
+    // ---- steps through a dialogue ----------------------------------------------------------------
+
+    val lady = Speaker(SpeakerId("agnes"), party = 0, name = "Agnes Hollin", portrait = null, character = null)
+    val coin = Effect.Grant(Resource.WEALTH, 100)
+
+    fun said(id: String, then: Then, by: Speaker = messenger, gives: List<Effect> = emptyList()) =
+        Line(LineId(id), by.id, "The words of $id.", gives, then = then)
+
+    // The messenger asks, and either answer pays: one before the messenger's thanks end it, one as it ends it.
+    val quay = Dialogue(
+        id = DialogueId.offered(house, UUID.fromString("1c000007-0000-4000-8000-000000000030")),
+        title = "A new quay",
+        scene = null,
+        speakers = listOf(lady, messenger),
+        lines = listOf(
+            said("arrives", Then.Say(LineId("asks"))),
+            said("asks", Then.DialogueChoice(listOf(LineId("accept"), LineId("refuse")))),
+            said("accept", Then.Say(LineId("thanks")), by = lady, gives = listOf(coin)),
+            said("refuse", Then.End, by = lady, gives = listOf(Effect.Grant(Resource.INFLUENCE, 5))),
+            said("thanks", Then.End),
+        ),
+    )
+    val talking = after(offering(quay))
+
+    fun stepping(line: String, dialogue: DialogueId = quay.id) =
+        CompleteDialogueStep(house, dialogue, LineId(line), day, noon)
+
+    "taking an option records the step and then what the line gives, from one decision" {
+        val events = HouseDecider.decide(stepping("accept"), talking)
+
+        events shouldBe listOf(
+            PlayerCompletedDialogueStep(house, player, quay.id, LineId("accept"), day, noon),
+            HouseResourceGranted(house, Resource.WEALTH, 100, day, noon),
+        )
+        val stepped = events.fold(talking, HouseDecider::evolve).shouldBeInstanceOf<House.Founded>()
+        stepped.stockOf(Resource.WEALTH).at(noon) shouldBe 100
+        stepped.openDialogues.single().taken shouldBe listOf(LineId("accept"))
+    }
+
+    "the line that ends a dialogue records the step, what it gives and the end, in that order, and it is not open" {
+        val events = HouseDecider.decide(stepping("refuse"), talking)
+
+        events.map { it::class } shouldBe
+            listOf(PlayerCompletedDialogueStep::class, HouseResourceGranted::class, PlayerCompletedDialogue::class)
+        events.last() shouldBe PlayerCompletedDialogue(house, player, quay.id, day, noon)
+        val over = events.fold(talking, HouseDecider::evolve).shouldBeInstanceOf<House.Founded>()
+        over.openDialogues shouldBe emptyList()
+        over.offeredDialogues shouldBe setOf(quay.id)
+    }
+
+    "a dialogue read to its end has paid each line on its path once" {
+        val paid = after(offering(quay), stepping("accept"), stepping("thanks"))
+
+        paid.stockOf(Resource.WEALTH).at(noon) shouldBe 100
+        paid.stockOf(Resource.INFLUENCE).at(noon) shouldBe 0
+        shouldThrow<HouseError.DialogueOver> { HouseDecider.decide(stepping("thanks"), paid) }
+    }
+
+    "a step already passed, one further on, the road not taken, or a line that is only read is not the next step" {
+        val accepted = after(offering(quay), stepping("accept"))
+
+        shouldThrow<HouseError.NotTheNextStep> { HouseDecider.decide(stepping("accept"), accepted) }
+        shouldThrow<HouseError.NotTheNextStep> { HouseDecider.decide(stepping("refuse"), accepted) }
+        for (never in listOf("thanks", "arrives", "asks", "nowhere")) {
+            shouldThrow<HouseError.NotTheNextStep> { HouseDecider.decide(stepping(never), talking) }
+        }
+    }
+
+    "a step through a dialogue never offered, or one that is over, is refused, and so is one in no house" {
+        shouldThrow<HouseError.NoSuchDialogue> { HouseDecider.decide(stepping("accept", letter().id), talking) }
+        shouldThrow<HouseError.DialogueOver> {
+            HouseDecider.decide(stepping("accept"), after(offering(quay), stepping("refuse")))
+        }
+        shouldThrow<HouseError.NoSuchHouse> { HouseDecider.decide(stepping("accept"), HouseDecider.initial) }
+    }
+
+    "a conversation of forty lines writes a handful of events, not one a line" {
+        val opening = (1..19).map { said("l$it", Then.Say(LineId("l${it + 1}"))) } +
+            said("l20", Then.DialogueChoice(listOf(LineId("a1"), LineId("b1"))))
+        val branches = (1..10).flatMap { n ->
+            fun next(branch: String) = if (n == 10) Then.End else Then.Say(LineId("$branch${n + 1}"))
+            listOf(said("a$n", next("a"), gives = if (n == 5) listOf(coin) else emptyList()), said("b$n", next("b")))
+        }
+        val evening = Dialogue(
+            id = DialogueId.offered(house, UUID.fromString("1c000007-0000-4000-8000-000000000031")),
+            title = "A long evening",
+            scene = null,
+            speakers = listOf(lady, messenger),
+            lines = opening + branches,
+        )
+
+        var state: House = after(offering(evening))
+        val written = mutableListOf<HouseEvent>()
+        for (step in listOf("a1", "a5", "a10")) {
+            val events = HouseDecider.decide(CompleteDialogueStep(house, evening.id, LineId(step), day, noon), state)
+            written += events
+            state = events.fold(state, HouseDecider::evolve)
+        }
+
+        // Thirty of the forty lines read: the offer, three steps, what one of them gives, and the end.
+        evening.lines.size shouldBe 40
+        1 + written.size shouldBe 6
+        state.shouldBeInstanceOf<House.Founded>().openDialogues shouldBe emptyList()
     }
 })

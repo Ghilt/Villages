@@ -47,6 +47,8 @@ import villages.domain.Location
 import villages.domain.Option
 import villages.domain.OptionId
 import villages.domain.PlayerId
+import villages.domain.PlayerCompletedDialogue
+import villages.domain.PlayerCompletedDialogueStep
 import villages.domain.PlayerOfferedDialogue
 import villages.domain.Requirement
 import villages.domain.Sex
@@ -254,6 +256,9 @@ class EventFormatSpec : StringSpec({
         recordedAt = noon,
     )
 
+    val acceptedTheQuay = PlayerCompletedDialogueStep(house, player, aLetter.dialogue.id, LineId("accept"), day, noon)
+    val theLetterRead = PlayerCompletedDialogue(house, player, aLetter.dialogue.id, day, noon)
+
     val samples: Map<String, Event> = mapOf(
         "villages.character.aged.v1" to agnesAged,
         "villages.character.appeared.v1" to agnesAppeared,
@@ -271,6 +276,8 @@ class EventFormatSpec : StringSpec({
         "villages.house.resourcePledged.v1" to pledgedReason,
         "villages.house.resourceReleased.v1" to releasedReason,
         "villages.house.resourceSpent.v1" to spentGold,
+        "villages.player.completedDialogue.v1" to theLetterRead,
+        "villages.player.completedDialogueStep.v1" to acceptedTheQuay,
         "villages.player.givenChoice.v1" to whereToSettle,
         "villages.player.offeredDialogue.v1" to aLetter,
         "villages.player.tookAction.v1" to tookNorthern,

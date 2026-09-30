@@ -28,6 +28,8 @@ import villages.domain.HouseResourceReleased
 import villages.domain.HouseResourceSpent
 import villages.domain.Location
 import villages.domain.PlayerGivenChoice
+import villages.domain.PlayerCompletedDialogue
+import villages.domain.PlayerCompletedDialogueStep
 import villages.domain.PlayerOfferedDialogue
 import villages.domain.PlayerId
 import villages.domain.PlayerTookAction
@@ -128,6 +130,7 @@ class SightProjection(feed: EventFeed) : SightsByHouse, AutoCloseable {
             // Nothing else gives vision or takes it away.
             is HouseResourceGranted, is HouseResourceSpent, is HouseResourcePledged, is HouseResourceReleased,
             is PlayerGivenChoice, is PlayerTookAction, is PlayerOfferedDialogue,
+            is PlayerCompletedDialogueStep, is PlayerCompletedDialogue,
             is CharacterAppeared, is CharacterStatChanged, is CharacterAged, is CharacterPortraitChanged,
             -> Unit
         }
