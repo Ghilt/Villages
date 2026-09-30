@@ -124,6 +124,10 @@ offer of next steps: those go above it, because the checklist is what he reads f
 diff. A checklist with one item a changed file is a checklist nobody reads, and a twenty-line change and a
 two-hundred-line one get the same three items, picked for what would be embarrassing to have got wrong.
 
+**Number the items, 1 to 3, so Adam can answer one by its number.** A question put to him is an item like
+any other, and "2" is only an answer when there is a 2 to point at. Write them as a numbered list - `1.`,
+`2.`, `3.` - with the eye inside the item, never as unnumbered checkboxes.
+
 **Mark with an eye, 👀, every item he can check by looking at the running program**, and say in the item
 where to look - which pane, which button, what should be there. An unmarked item is one he has to take on
 trust, read in a document, or accept from a test. **The marked ones go first**, because looking is cheaper
