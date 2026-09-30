@@ -106,7 +106,11 @@ A player's own house and own key figures are always theirs to see: every one of 
      (`contracts/fixtures/stand-tiles.json`). A cell waits for every tile it reads; a tile sent again differently
      cuts its cells again, the ones on the screen keeping their trees until the new are ready. On revealed
      ground the trees are the same ones, point for point. The Scenery section says how many stands the page holds.
-   - **The files leave the public folder**, and the generator writes them where only the server reads.
+   - **The files leave the public folder.** Done. The generator writes the stands into
+     `world/stands/<master>/<layer>/` with a `stands.json` written last, the game server and the scenery stills
+     read them there, and the biome raster and `map.json` stay public. The dev server refuses anything under a
+     master's `sprites/<layer>/stands/`, so stands an older generator left behind are never served, and a
+     master furnished before this says so in the Debug map section until it is furnished again.
 9. **Vision that runs out.** A vision point given for a span ends when its span does, with nothing happening
    to say so: one wake-up a point, as a pledge waits out its span (0053).
 

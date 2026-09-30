@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process';
 import { open, readFile, readdir, stat } from 'node:fs/promises';
 import type { ServerResponse } from 'node:http';
-import { dirname, resolve } from 'node:path';
+import { dirname, posix, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import type { Plugin } from 'vite';
@@ -13,6 +13,7 @@ import {
   DEFAULT_MASTER,
   isSafeMasterName,
   masterNameOf,
+  standsDirOf,
   worldDirOf,
 } from '../../../packages/world/src/masters.ts';
 
@@ -37,6 +38,8 @@ const REPO = resolve(here, '..', '..', '..', '..');
 const MASTER_DIR = resolve(REPO, 'world', 'master');
 const BIOMES = resolve(REPO, 'world', 'biomes.json');
 const WORLD_DIR = resolve(REPO, 'frontend', 'apps', 'web', 'public', 'world');
+/** Where the generator writes the stands, which nothing here serves. See `standsDirOf` and decision 0067. */
+const STANDS_DIR = resolve(REPO, 'world', 'stands');
 const WORLD_PACKAGE = resolve(REPO, 'frontend', 'packages', 'world');
 
 /** What the npm scripts give them, because both hold a whole master in memory at once. */
@@ -115,17 +118,44 @@ async function cutWhen(name: string): Promise<number | null> {
  * From the manifest the generator writes last of all, for the reason `cutWhen` gives: a directory's time
  * stops moving once its subdirectories exist, so it would claim a world that was not finished. There is
  * no older fallback, because a master with no manifest has no sprite map and grows nothing at all.
+ *
+ * **Both halves, or it is not furnished.** The stands go where only the game server reads them, and a master
+ * furnished before they moved has a manifest and no stands there: its woods are gone, and saying so is what
+ * puts the button to furnish it again in front of whoever is looking. See decision record 0067.
  */
 async function furnishedWhen(name: string): Promise<number | null> {
+  const at = async (file: string): Promise<number | null> => {
+    try {
+      const manifest = JSON.parse(await readFile(file, 'utf8')) as { at?: string };
+      const when = Date.parse(manifest.at ?? '');
+      return Number.isNaN(when) ? null : when;
+    } catch {
+      return null;
+    }
+  };
+  const [map, stands] = await Promise.all([
+    at(resolve(WORLD_DIR, worldDirOf(name), 'sprites', 'biome', 'map.json')),
+    at(resolve(STANDS_DIR, standsDirOf(name), 'stands.json')),
+  ]);
+  return map === null || stands === null ? null : Math.min(map, stands);
+}
+
+/**
+ * Whether a request is for stands under the page's world: the records in `stands/`, or the readable copy of the
+ * fullest of them. The generator writes neither there any more, but a master furnished before they moved keeps
+ * them on disk until it is furnished again, and serving them would hand any page every wood in the world, which
+ * the gateway hands out only as far as a house has seen. Read as the file system would read it, so no spelling
+ * of the same path gets past. See decision record 0067.
+ */
+export function asksForStands(url: string): boolean {
+  let path = (url.split('?')[0] ?? '').split('#')[0] ?? '';
   try {
-    const manifest = JSON.parse(
-      await readFile(resolve(WORLD_DIR, worldDirOf(name), 'sprites', 'biome', 'map.json'), 'utf8'),
-    ) as { at?: string };
-    const at = Date.parse(manifest.at ?? '');
-    return Number.isNaN(at) ? null : at;
+    path = decodeURIComponent(path);
   } catch {
-    return null;
+    // Tested as it came, which is the only way a server that cannot decode it could look it up.
   }
+  const plain = posix.normalize(path.replaceAll('\\', '/')).toLowerCase();
+  return /^\/world\/masters\/[^/]+\/sprites\/[^/]+\/(stands(\/|$)|busiest-chunk\.json$)/.test(plain);
 }
 
 /**
@@ -319,6 +349,16 @@ export function worldApi(): Plugin {
     name: 'villages:world-api',
     apply: 'serve',
     configureServer(server) {
+      // Ahead of the public folder, so that no stands left in it by an older generator are served.
+      server.middlewares.use((request, response, next) => {
+        if (asksForStands(request.url ?? '')) {
+          response.statusCode = 404;
+          response.end();
+          return;
+        }
+        next();
+      });
+
       // Connect strips the mount path, so the listing is "/" and an errand is "/<name>/cut" or
       // "/<name>/furnish".
       server.middlewares.use('/world-api/masters', (request, response, next) => {

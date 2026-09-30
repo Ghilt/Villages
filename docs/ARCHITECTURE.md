@@ -190,7 +190,8 @@ through a distance transform. See decision record 0061, and
 `docs/plans/fog-of-war.md` for what is built.
 
 The scenery's **stands** take the same road (0067). `hello` names the master the page draws; the gateway
-reads that master's stand files through the `Stands` port, whose adapter in `app` picks the master among its
+reads that master's stand files through the `Stands` port, whose adapter in `app` reads them from
+`world/stands/`, where the generator writes them and nothing serves them, picks the master among that
 folder's own entries and keeps each tile once read, and sends every zoom 7 tile under a held cell as a `stands`
 frame of the sprite map's own eight-byte records, only those whose disc comes within the scatter's margin of
 revealed ground. `Coverage.reaches` is that question, answered by growing every circle; `StandRecords` in

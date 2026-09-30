@@ -51,7 +51,15 @@ ground its house has revealed.** A stand stands still, so revealed is enough, as
   stands through a port, `Stands`, whose adapter picks the master among the folder's own entries by name
   and never makes a name into a path, as 0025 asks; a name it has none of is sent every tile empty, and a page
   that names none is sent no stands at all. The adapter keeps each tile once read and lets a master's tiles
-  go when its `map.json`, written last, has been written since, so furnishing again is seen without a restart.
+  go when its `stands.json`, written last, has been written since, so furnishing again is seen without a restart.
+- **The files where only the server reads them.** The generator writes a master's stands into
+  `world/stands/<master>/<layer>/`, `<x>/<y>.bin` a tile and a `stands.json` written last, beside the rest of
+  the world, outside the folder the page is served from and outside the frontend workspace, which is all the
+  dev server's `/@fs/` will read; the biome raster and `map.json` stay where they
+  were, because they say what kind of country a region is and the terrain under the haze says that already.
+  The game server reads the stands there, and so do the scenery stills, which say to furnish again rather than
+  draw a world with no woods in it. The dev server answers nothing under a master's `sprites/<layer>/stands/`,
+  however the path is spelt, so stands an older generator left in the public folder are never served either.
 - **The page keeps what it was sent, for exactly as long as the gateway thinks it was.** A tile is held while a
   cell the page follows is over it and let go when none is, by `standTilesUnder` at both ends, which
   `contracts/fixtures/stand-tiles.json` holds to the same tiles. Held longer, coming back would draw from what
@@ -71,9 +79,16 @@ Wire version 13, for the frame and the field.
 **The stands of unknown ground no longer reach a page's scenery.** From the second step, 2026-09-28, the page
 grows its trees from what the socket brings and from nothing else: with the fog on and a vision given, it held
 44 stands in the four tiles about a seat where the sprite map has 536, and on revealed ground every tree stood
-where it did with all of them, which was checked point for point, 346 of 346 inside the vision. The
-files stay in the public folder until the third step takes them out, after which nothing but the gateway can
-hand a page a stand.
+where it did with all of them, which was checked point for point, 346 of 346 inside the vision. From the
+third, 2026-09-29, the files are out of the public folder, and nothing but the gateway can hand a page a
+stand: for the default master the generator writes the same 3,900 tiles as before, byte for byte, only
+somewhere else.
+
+**A checkout furnished before the third step has its woods back only when it is furnished again.** Its sprite
+map still has a manifest and no stands where they are read now, so the Debug map section says it is not
+furnished and offers the button; the quick-start furnishes the default master itself when its `stands.json`
+is missing. Furnishing also clears the stands the old generator left in the public folder. Half a minute a
+master.
 
 **No game server, no scenery.** A page with no gateway to talk to is sent no stands, so its scatter cells wait,
 and the Scenery section says how many are waiting on the game server's stands. With the fog on and no house
@@ -83,10 +98,14 @@ nothing grew anyway; it is the fog lifted without a server that loses its trees.
 the camera settles on. A tile reaches a long way past what is shown and a held cell's ring past that, so this
 is only seen when one drag crosses into a tile no held cell was over.
 
-**The server now reads the world's files.** Its adapter looks where the generator writes, the page's own
-world folder, which ties a running server to a checkout the way the portraits folder does: a development
+**The server now reads the world's files.** Its adapter looks where the generator writes the stands,
+`world/stands/`, which ties a running server to a checkout the way the portraits folder does: a development
 coupling, named as one. `villages.stands` points it elsewhere, which is how a worktree without a sprite map
 of its own can borrow another's.
+
+**A build copies the public folder as it is.** Only the dev server refuses the old stand paths, so a folder
+still holding them would ship them; the world is cut and furnished before a deployment, which there is not
+yet, and furnishing clears them.
 
 **It costs a little on the wire and nothing to speak of on the server.** A tile is 1.3 KB of records on
 average and a view holds a handful, sent once. A stand deep inside revealed ground is let through at its first

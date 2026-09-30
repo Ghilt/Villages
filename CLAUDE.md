@@ -154,12 +154,13 @@ What follows from that, and bites in practice:
 - **Run everything from the worktree root**, never from the main checkout, and never `cd` out of it.
 - **`world/master/*.png` is per-worktree.** A master Adam saves in the main checkout is not in the
   worktree until the worktree is refreshed from it. Say which one was read when it matters.
-- **`world/painterly/`, the cut tiles under `frontend/apps/web/public/world/`, and `.logs/` are output
-  and per-worktree.** They are gitignored, they do not travel with a branch, and a worktree that has
-  never cut them cannot serve a map. Junctioning the main checkout's tiles into the worktree is the cheap
-  way to get a map up without a five-minute recut. So is `frontend/node_modules`: a fresh tree needs
-  `npm install --prefix frontend` once before anything in it runs, and again after any merge that
-  changes `frontend/package-lock.json`.
+- **`world/painterly/`, `world/stands/`, the cut tiles under `frontend/apps/web/public/world/`, and
+  `.logs/` are output and per-worktree.** They are gitignored, they do not travel with a branch, and a
+  worktree that has never cut them cannot serve a map. Junctioning the main checkout's tiles into the
+  worktree is the cheap way to get a map up without a five-minute recut. So is `frontend/node_modules`: a
+  fresh tree needs `npm install --prefix frontend` once before anything in it runs, and again after any
+  merge that changes `frontend/package-lock.json`. Junction each master's `tiles` rather than the whole
+  `public/world`, though: a sprite map furnished through that junction is written into the main checkout's.
 - **Each tree serves on its own pair of ports**, a hash of its directory name, so several can run at once
   and a tree's address never moves. The main checkout keeps 5173 and 8080; a worktree's game server sits
   three thousand above its dev server, so 5548 serves the page and 8548 serves the world, and the page
@@ -348,8 +349,8 @@ Commands are added here as the increments land:
   a player is sent the houses on revealed ground and the people in vision, and their own wherever they are,
   and the scenery's stands only where they touch revealed ground, tile by tile under the held cells, which
   the log counts under `stands`; the trees are grown from those and nothing else, so without the game server
-  nothing grows. The server reads them from the page's own world folder, `villages.stands` to point it elsewhere, for the
-  master the page names in `hello`. `fog of war: off` lifts all of it, for that window. The edge has surface tension: circles closer than
+  nothing grows. The server reads them from `world/stands/`, where the generator writes them and nothing serves
+  them, `villages.stands` to point it elsewhere, for the master the page names in `hello`. `fog of war: off` lifts all of it, for that window. The edge has surface tension: circles closer than
   about 56 km are seen across and notches are rounded off, drawn and held back alike, `Vision.SURFACE_TENSION`.
   No tree grows on unknown ground, so with the fog on and no house the world is bare under the haze. Close
   in, the haze's bands of mist swell and drift, on a clock that runs only while some of it is on the screen.
@@ -377,8 +378,10 @@ Commands are added here as the increments land:
   refusal is seen rather than guessed. The events are at `/admin/inspect-events`. See `docs/adr/0055`.
 - What grows where: `world/biomes.json`, hand-edited, one entry a kind and one a biome. What reads it is
   `npm run world:sprites --prefix frontend`, which works out a biome for every sixteen world units and
-  where the scenery clumps, and writes a **sprite map** beside the cut tiles - about five megabytes and
-  half a minute a master. It takes a master's name as its first argument (`-- terrain2`). **A master
+  where the scenery clumps, and writes a **sprite map**: the biomes beside the cut tiles, the stands into
+  `world/stands/<master>/`, where only the game server and the stills read them - about five megabytes and
+  half a minute a master. A master furnished before 2026-09-29 has its stands in the old place and no woods
+  until it is furnished again, which the Debug map section says. It takes a master's name as its first argument (`-- terrain2`). **A master
   with no sprite map draws no scenery**, which is the rule rather than a fault. The Scenery section of
   the debug panel says what the sprite map asked for and what the browser did with it. The **Debug map**
   section has a `furnish it again` button beside `cut it`, and `cut it` furnishes too - a repaint makes

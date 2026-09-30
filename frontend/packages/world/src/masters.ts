@@ -46,3 +46,13 @@ export function isSafeMasterName(name: string): boolean {
 export function worldDirOf(name: string): string {
   return `masters/${name}`;
 }
+
+/**
+ * Where a master's stands go, under the directory only the game server and the scenery stills read, one
+ * directory a layer of its sprite map. Never under the one the app serves: the gateway hands a page the stands
+ * its fog lets through, and a page that could fetch them for itself would see every wood in the world. See
+ * decision record 0067.
+ */
+export function standsDirOf(name: string, layer = 'biome'): string {
+  return `${name}/${layer}`;
+}

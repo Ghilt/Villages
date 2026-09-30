@@ -26,7 +26,7 @@ painted pixels; and a fern should be **numerous in one kind of place and rare in
 | --- | --- | --- | --- |
 | **Terrain class** | 1 world unit | already cut, `tiles/7/x/y.png` | — |
 | **Biome** | 16 world units, about 20 km | `sprites/biome/biomes.png`, one indexed PNG in world space | under a megabyte |
-| **Stand** | a disc, 4 to 40 units across | `sprites/biome/stands/<x>/<y>.bin`, one chunk per zoom 7 tile | 4 to 16 MB a master |
+| **Stand** | a disc, 4 to 40 units across | `world/stands/<name>/biome/<x>/<y>.bin`, one chunk per zoom 7 tile, read by the game server alone since 0067 | 4 to 16 MB a master |
 | **A sprite** | — | `hash2`, in the browser, stored nowhere | nothing |
 
 **A stand says where the texture is. The master says where the forest is.** A stand is a disc, but a
@@ -150,7 +150,7 @@ never needs a neighbour's chunk**.
 | 1 | `thickness`, points to the square unit, times 255 |
 | 1 | `seed`, so two stands of the same mix are not the same stand |
 
-`--readable` writes one named chunk beside it as JSON, so the truth can be opened and read.
+`--readable` writes one named chunk as JSON beside the stands, so the truth can be opened and read.
 
 **No sprite map, no sprites.** A master whose `sprites/biome/` does not exist draws nothing at all, which
 is the whole of the rule. A later layer — settlements, ruins, whatever comes — is another directory
