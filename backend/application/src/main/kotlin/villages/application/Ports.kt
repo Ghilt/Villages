@@ -15,6 +15,7 @@ import villages.domain.Location
 import villages.domain.PlayerId
 import villages.domain.Significance
 import villages.domain.Pledge
+import villages.domain.Requirement
 import villages.domain.Resource
 import villages.domain.Sex
 import villages.domain.Species
@@ -443,11 +444,14 @@ data class DialogueRow(
     val revision: Long,
 )
 
-/** How a dialogue stands: open, or finished by reaching its end. */
+/** How a dialogue stands: open, finished by reaching its end, or lost because a requirement failed. */
 sealed interface DialogueEnding {
     data object Open : DialogueEnding
 
     data object Completed : DialogueEnding
+
+    /** Ended unfinished, because this requirement failed. See decision record 0067. */
+    data class Lost(val because: Requirement) : DialogueEnding
 }
 
 /** A house's dialogues as they now stand, for the player whose house it is. */

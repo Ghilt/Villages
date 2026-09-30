@@ -23,6 +23,7 @@ import villages.domain.PlayerCompletedDialogue
 import villages.domain.PlayerCompletedDialogueStep
 import villages.domain.PlayerGivenChoice
 import villages.domain.PlayerId
+import villages.domain.PlayerLostDialogue
 import villages.domain.PlayerOfferedDialogue
 import villages.domain.PlayerTookAction
 import java.util.concurrent.ConcurrentHashMap
@@ -66,6 +67,10 @@ class DialoguesProjection(feed: EventFeed) : DialoguesByHouse, AutoCloseable {
 
             is PlayerCompletedDialogue -> change(event.houseId, event.player) { rows ->
                 rows.changing(event.dialogueId) { it.copy(ending = DialogueEnding.Completed) }
+            }
+
+            is PlayerLostDialogue -> change(event.houseId, event.player) { rows ->
+                rows.changing(event.dialogueId) { it.copy(ending = DialogueEnding.Lost(event.because)) }
             }
 
             // What a house has, what it was asked, whom it holds and what it sees are other read models'.

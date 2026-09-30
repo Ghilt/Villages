@@ -1051,9 +1051,10 @@ internal fun DialogueRow.toView(requirementsShown: Boolean): DialogueView {
         said = walk.said.map { SaidLineView(it.id.value, it.speaker.value, it.words, it.effects.map(Effect::toView)) },
         next = walk.next.map { it.toView() },
         options = walk.options.map { it.asOption() },
-        ending = when (ending) {
+        ending = when (val stands = ending) {
             DialogueEnding.Open -> EndingView.Open
             DialogueEnding.Completed -> EndingView.Completed
+            is DialogueEnding.Lost -> EndingView.Lost(stands.because.toView())
         },
         requirements = if (requirementsShown) dialogue.needs().map { it.toView() } else null,
     )

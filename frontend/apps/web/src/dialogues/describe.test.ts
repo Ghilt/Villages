@@ -46,7 +46,7 @@ describe('where a dialogue stands', () => {
           ending: { kind: 'lost', because: { kind: 'alive', character: 'x' } },
         }),
       ),
-    ).toBe('lost, 1 line said');
+    ).toBe('lost, 1 line said: character x died');
   });
 });
 

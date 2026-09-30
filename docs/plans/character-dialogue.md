@@ -226,11 +226,14 @@ A speaker's death is tried with *kill*, in the Characters section.
    impact, version 17, with the sample carrying spends and gives to verify both. The third is done:
    the Dialogues section lists every dialogue as the player may know it - where it stands, and a waiting
    choice's options with their reveal impact in words - beside the `requirements` switch. Step 5 is done.
-6. **Dialogues lapse.** The pure function of which requirements an event breaks, the listener that carries
-   a failure, and `FailRequirement` in the house's rules; `PlayerLostDialogue` joins the catalogue, and
-   `ARCHITECTURE.md`'s "What acts on its own" gains the listener. *Kill* a speaker and the Dialogues section
-   says the dialogue was lost, and why. The listener's spec also tries it with a made-up rule of what breaks
-   what, to show that it knows no kinds.
+6. **Dialogues lapse**, in two commits. The first is done: `requirementsBrokenBy`, the pure function of
+   which requirements an event breaks, beside `Requirement`; `FailRequirement` in the house's rules, which
+   lapses every open dialogue that needed the requirement as `PlayerLostDialogue`, in the catalogue, and
+   writes nothing when it touches none; the read model's `Lost` ending, and the Dialogues section saying who
+   died. The wire already carried the lost ending. Then the listener that carries a failure, and
+   `ARCHITECTURE.md`'s "What acts on its own" gains it. *Kill* a speaker and the Dialogues section says the
+   dialogue was lost, and why. The listener's spec also tries it with a made-up rule of what breaks what, to
+   show that it knows no kinds.
 7. **The right bay**, and the pane standing in it, opening when a dialogue arrives. The decision records for
    the bay and for drawing a dialogue in the DOM rather than in Pixi, and `RESPONSIVE-DESIGN.md`. The column,
    its three sizes, and a phone.

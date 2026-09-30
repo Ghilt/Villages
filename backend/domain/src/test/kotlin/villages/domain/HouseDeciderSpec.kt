@@ -587,6 +587,51 @@ class HouseDeciderSpec : StringSpec({
         paidFor.stockOf(Resource.WEALTH).at(noon) shouldBe 20
     }
 
+    // ---- a requirement failing ----------------------------------------------------------------------
+
+    val agnes = CharacterId(UUID.fromString("cb732500-39bd-3b39-a838-bb89f719578f"))
+    val her = Speaker(SpeakerId("agnes"), party = 0, name = "Agnes Hollin", portrait = null, character = agnes)
+
+    fun spokenBy(speaker: Speaker, command: String) = Dialogue(
+        id = DialogueId.offered(house, UUID.fromString(command)),
+        title = "Spoken by ${speaker.name}",
+        scene = null,
+        speakers = listOf(speaker, messenger).distinct(),
+        lines = listOf(Line(LineId("only"), speaker.id, "A word.", then = Then.End)),
+    )
+    val herFirst = spokenBy(her, "1c000007-0000-4000-8000-000000000050")
+    val herSecond = spokenBy(her, "1c000007-0000-4000-8000-000000000051")
+    val theMessengers = spokenBy(messenger, "1c000007-0000-4000-8000-000000000052")
+    val herDeath = FailRequirement(house, Requirement.Alive(agnes), day, noon)
+
+    "a requirement failing lapses every open dialogue that needed it, from one decision, and they are not open" {
+        val talking = after(offering(herFirst), offering(theMessengers), offering(herSecond))
+
+        val events = HouseDecider.decide(herDeath, talking)
+
+        events shouldBe listOf(
+            PlayerLostDialogue(house, player, herFirst.id, Requirement.Alive(agnes), day, noon),
+            PlayerLostDialogue(house, player, herSecond.id, Requirement.Alive(agnes), day, noon),
+        )
+        val lost = events.fold(talking, HouseDecider::evolve).shouldBeInstanceOf<House.Founded>()
+        lost.openDialogues.map { it.dialogue.id } shouldBe listOf(theMessengers.id)
+        shouldThrow<HouseError.DialogueOver> { HouseDecider.decide(stepping("only", herFirst.id), lost) }
+    }
+
+    "a failure that touches no open dialogue writes nothing, so a replay of it does no harm" {
+        val lost = after(offering(herFirst), herDeath)
+
+        HouseDecider.decide(herDeath, lost) shouldBe emptyList()
+        HouseDecider.decide(herDeath, after(offering(theMessengers))) shouldBe emptyList()
+        shouldThrow<HouseError.NoSuchHouse> { HouseDecider.decide(herDeath, HouseDecider.initial) }
+    }
+
+    "a dialogue finished before its speaker died is finished, and stays so" {
+        val finished = after(offering(herFirst), stepping("only", herFirst.id))
+
+        HouseDecider.decide(herDeath, finished) shouldBe emptyList()
+    }
+
     "a conversation of forty lines writes a handful of events, not one a line" {
         val opening = (1..19).map { said("l$it", Then.Say(LineId("l${it + 1}"))) } +
             said("l20", Then.DialogueChoice(listOf(LineId("a1"), LineId("b1"))))

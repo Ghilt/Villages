@@ -175,6 +175,15 @@ class DialogueSpec : StringSpec({
             "only an option"
     }
 
+    "a death breaks that character's being alive, and nothing else breaks a requirement yet" {
+        val noon = java.time.Instant.parse("2026-09-04T12:00:00Z")
+
+        requirementsBrokenBy(CharacterDied(agnes, "a fever", WorldTime(653_705), noon)) shouldBe
+            setOf(Requirement.Alive(agnes))
+        requirementsBrokenBy(CharacterAged(agnes, 10, WorldTime(653_705), noon)) shouldBe emptySet()
+        requirementsBrokenBy(HouseLostKeyFigure(house, agnes, WorldTime(653_705), noon)) shouldBe emptySet()
+    }
+
     "an impact shown shows something, and never nothing of a resource" {
         shouldThrow<HouseError.InvalidDialogue> { RevealImpact.Shown(emptyList()) }
         shouldThrow<HouseError.InvalidAmount> { Impact(Resource.WEALTH, 0) }

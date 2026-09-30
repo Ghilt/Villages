@@ -235,6 +235,17 @@ sealed interface Requirement {
     data class Alive(val character: CharacterId) : Requirement
 }
 
+/**
+ * Which requirements an event breaks: the one place a kind of requirement says which event ends it. A death
+ * breaks a character's being alive, and nothing else yet breaks anything. A new kind is a case of
+ * [Requirement] and a branch here - a building still standing, broken when it is destroyed - and whatever
+ * carries a failure to the houses never changes for it. See decision record 0067.
+ */
+fun requirementsBrokenBy(event: Event): Set<Requirement> = when (event) {
+    is CharacterDied -> setOf(Requirement.Alive(event.characterId))
+    else -> emptySet()
+}
+
 /** The identity of one dialogue, so a step can only answer a dialogue the house was offered. */
 @JvmInline
 value class DialogueId(val value: UUID) {

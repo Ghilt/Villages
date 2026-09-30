@@ -52,6 +52,7 @@ import villages.domain.HouseResourceGranted
 import villages.domain.PlayerGivenChoice
 import villages.domain.PlayerCompletedDialogue
 import villages.domain.PlayerCompletedDialogueStep
+import villages.domain.PlayerLostDialogue
 import villages.domain.PlayerOfferedDialogue
 import villages.domain.HouseId
 import villages.domain.PlayerTookAction
@@ -123,6 +124,7 @@ private fun typeOf(event: HouseEvent): String = when (event) {
     is PlayerOfferedDialogue -> "villages.player.offeredDialogue.v1"
     is PlayerCompletedDialogueStep -> "villages.player.completedDialogueStep.v1"
     is PlayerCompletedDialogue -> "villages.player.completedDialogue.v1"
+    is PlayerLostDialogue -> "villages.player.lostDialogue.v1"
     is PlayerTookAction -> "villages.player.tookAction.v1"
 }
 
@@ -141,6 +143,7 @@ private fun dataOf(event: HouseEvent): String = when (event) {
     is PlayerOfferedDialogue -> """{"title":"${event.dialogue.title}","lines":${event.dialogue.lines.size}}"""
     is PlayerCompletedDialogueStep -> """{"lineId":"${event.lineId.value}"}"""
     is PlayerCompletedDialogue -> """{"dialogueId":"${event.dialogueId.value}"}"""
+    is PlayerLostDialogue -> """{"dialogueId":"${event.dialogueId.value}"}"""
     is PlayerTookAction -> """{"optionId":"${event.optionId.value}"}"""
 }
 

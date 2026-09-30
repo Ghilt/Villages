@@ -21,6 +21,7 @@ import villages.domain.HouseResourceSpent
 import villages.domain.PlayerCompletedDialogue
 import villages.domain.PlayerCompletedDialogueStep
 import villages.domain.PlayerGivenChoice
+import villages.domain.PlayerLostDialogue
 import villages.domain.PlayerOfferedDialogue
 import villages.domain.PlayerTookAction
 import kotlin.reflect.KClass
@@ -54,6 +55,7 @@ object EventTypes : CloudEventTypeMapper<Event> {
         PlayerCompletedDialogue::class to "villages.player.completedDialogue.v1",
         PlayerCompletedDialogueStep::class to "villages.player.completedDialogueStep.v1",
         PlayerGivenChoice::class to "villages.player.givenChoice.v1",
+        PlayerLostDialogue::class to "villages.player.lostDialogue.v1",
         PlayerOfferedDialogue::class to "villages.player.offeredDialogue.v1",
         PlayerTookAction::class to "villages.player.tookAction.v1",
     )

@@ -201,6 +201,22 @@ object HouseDecider : Decider<HouseCommand, House, HouseEvent> {
             ) + consequences + ends
         }
 
+        // What a failed requirement ends is the house's own rule: every open dialogue that needed it lapses,
+        // all in one decision, and a failure that touches none writes nothing. See decision record 0067.
+        is FailRequirement -> {
+            val house = founded(state)
+            house.openDialogues.filter { command.requirement in it.dialogue.needs() }.map { open ->
+                PlayerLostDialogue(
+                    houseId = command.houseId,
+                    player = house.player,
+                    dialogueId = open.dialogue.id,
+                    because = command.requirement,
+                    worldTime = command.worldTime,
+                    recordedAt = command.recordedAt,
+                )
+            }
+        }
+
         is TakeKeyFigure -> {
             val house = founded(state)
             if (command.characterId in house.keyFigures) {
@@ -413,9 +429,16 @@ object HouseDecider : Decider<HouseCommand, House, HouseEvent> {
             )
         }
 
-        // A dialogue that has ended is no longer open, and its id stays among those offered, so a step on it
-        // is refused as over rather than as unknown.
+        // A dialogue that has ended, finished or lost, is no longer open, and its id stays among those offered,
+        // so a step on it is refused as over rather than as unknown.
         is PlayerCompletedDialogue -> when (state) {
+            is House.NotFounded -> state
+            is House.Founded -> state.copy(
+                openDialogues = state.openDialogues.filterNot { it.dialogue.id == event.dialogueId },
+            )
+        }
+
+        is PlayerLostDialogue -> when (state) {
             is House.NotFounded -> state
             is House.Founded -> state.copy(
                 openDialogues = state.openDialogues.filterNot { it.dialogue.id == event.dialogueId },

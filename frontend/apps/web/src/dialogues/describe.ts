@@ -28,11 +28,22 @@ export function impactWords(impact: RevealImpactView | undefined): string | null
 /** A requirement in words, naming a character by the speaker they are when they speak in the dialogue. */
 export function requirementWords(requirement: RequirementView, speakers: readonly SpeakerView[]): string {
   switch (requirement.kind) {
-    case 'alive': {
-      const speaker = speakers.find((one) => one.character === requirement.character);
-      return `${speaker?.name ?? `character ${requirement.character.slice(0, 8)}`} alive`;
-    }
+    case 'alive':
+      return `${nameOf(requirement.character, speakers)} alive`;
   }
+}
+
+/** Why a dialogue was lost, in words: what became of the requirement that failed. See decision record 0067. */
+export function whyLost(requirement: RequirementView, speakers: readonly SpeakerView[]): string {
+  switch (requirement.kind) {
+    case 'alive':
+      return `${nameOf(requirement.character, speakers)} died`;
+  }
+}
+
+/** A character by the name they speak under in the dialogue, or by their id when they do not speak in it. */
+function nameOf(character: string, speakers: readonly SpeakerView[]): string {
+  return speakers.find((one) => one.character === character)?.name ?? `character ${character.slice(0, 8)}`;
 }
 
 /** Where a dialogue stands, in the log's words: what is left to read, and whether a dialogue choice waits. */
@@ -41,7 +52,7 @@ export function standing(dialogue: DialogueView): string {
     case 'completed':
       return `finished, ${lines(dialogue.said.length)} said`;
     case 'lost':
-      return `lost, ${lines(dialogue.said.length)} said`;
+      return `lost, ${lines(dialogue.said.length)} said: ${whyLost(dialogue.ending.because, dialogue.speakers)}`;
     case 'open':
       if (dialogue.options.length === 0) {
         return `${lines(dialogue.next.length)} to read, up to the next step`;

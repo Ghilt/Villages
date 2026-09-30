@@ -119,6 +119,18 @@ data class CompleteDialogueStep(
 ) : HouseCommand
 
 /**
+ * A requirement has failed for good: every open dialogue of this house that needed it lapses, in one decision,
+ * and a failure that touches none of them writes nothing, so a replay does no harm. Sent by whatever heard the
+ * event that broke it; what the failure ends is the house's own rule. See decision record 0067.
+ */
+data class FailRequirement(
+    override val houseId: HouseId,
+    val requirement: Requirement,
+    val worldTime: WorldTime,
+    val recordedAt: Instant,
+) : HouseCommand
+
+/**
  * Give the house vision of a place, outright: it sees a circle about the place from this world-day until the
  * vision is taken away. The debug panel's lever today, and what a storyline giving sight of a far coast will
  * issue. See decision record 0061.

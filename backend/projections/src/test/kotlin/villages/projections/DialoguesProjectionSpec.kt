@@ -8,6 +8,7 @@ import villages.application.DialoguesChange
 import villages.application.EventFeed
 import villages.application.Start
 import villages.application.StoredEvent
+import villages.domain.CharacterId
 import villages.domain.Dialogue
 import villages.domain.DialogueId
 import villages.domain.HouseEvent
@@ -17,7 +18,9 @@ import villages.domain.LineId
 import villages.domain.PlayerCompletedDialogue
 import villages.domain.PlayerCompletedDialogueStep
 import villages.domain.PlayerId
+import villages.domain.PlayerLostDialogue
 import villages.domain.PlayerOfferedDialogue
+import villages.domain.Requirement
 import villages.domain.Speaker
 import villages.domain.SpeakerId
 import villages.domain.Then
@@ -151,6 +154,20 @@ class DialoguesProjectionSpec : StringSpec({
         feed.deliver(finished(1))
 
         DialoguesProjection(feed).of(house) shouldBe watching.of(house)
+    }
+
+    "a dialogue lost says which of its requirements failed, and moves its revision on like any change" {
+        val feed = DialoguesFed()
+        val dialogues = DialoguesProjection(feed)
+        val agnes = CharacterId(UUID.fromString("cb732500-39bd-3b39-a838-bb89f719578f"))
+
+        feed.deliver(offered(1))
+        feed.deliver(PlayerLostDialogue(house, ada, dialogue(1).id, Requirement.Alive(agnes), day, noon))
+
+        dialogues.of(house).single().let {
+            it.ending shouldBe DialogueEnding.Lost(Requirement.Alive(agnes))
+            it.revision shouldBe 2
+        }
     }
 
     "a wipe forgets every dialogue" {

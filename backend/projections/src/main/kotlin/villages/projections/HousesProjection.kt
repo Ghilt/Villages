@@ -22,6 +22,7 @@ import villages.domain.HouseResourceGranted
 import villages.domain.PlayerGivenChoice
 import villages.domain.PlayerCompletedDialogue
 import villages.domain.PlayerCompletedDialogueStep
+import villages.domain.PlayerLostDialogue
 import villages.domain.PlayerOfferedDialogue
 import villages.domain.HouseId
 import villages.domain.PlayerTookAction
@@ -110,7 +111,8 @@ class HousesProjection(feed: EventFeed) : HousesByCell, HousesByPlayer, AutoClos
             is PlayerGivenChoice, is PlayerTookAction -> return
 
             // A conversation puts nothing on the map, whatever is said in it.
-            is PlayerOfferedDialogue, is PlayerCompletedDialogueStep, is PlayerCompletedDialogue -> return
+            is PlayerOfferedDialogue, is PlayerCompletedDialogueStep, is PlayerCompletedDialogue, is PlayerLostDialogue,
+            -> return
 
             // Whom a house holds is the characters projection's business; the map's row of a house is unchanged.
             is HouseGainedKeyFigure, is HouseLostKeyFigure -> return
