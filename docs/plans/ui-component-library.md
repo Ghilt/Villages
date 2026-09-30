@@ -82,10 +82,12 @@ A **container** is four layers, each its own component, and a **recipe** names a
 A recipe is one typed entry:
 
 ```ts
-'pane.house-status': {
-  border: 'gilt-baroque',
+'pane.cherub-corner': {
+  border: 'gilt-simple',
   fill: 'parchment',
-  embellishments: [{ art: 'cherub-seated', anchor: 'top-right', overhang: [24, 18], keepOut: [0, 40] }],
+  embellishments: [
+    { art: 'cherub-standing', anchor: 'top-right', overhang: { x: 26, y: 30 }, keepOut: { right: 30 } },
+  ],
 }
 ```
 
@@ -169,13 +171,17 @@ and the page takes up the new picture without a reload, as `artApi.ts` does for 
 ## Where the code goes
 
 ```
-frontend/apps/web/src/ui/                  the library: a folder a component, each a .tsx and a .css
-frontend/apps/web/src/ui/recipes.ts        the named containers
-frontend/apps/web/src/ui/ui.css            the tokens, in a cascade layer of its own, every class ui-
-frontend/apps/web/src/admin/UiComponents.tsx   the page
-frontend/apps/web/src/main.tsx             one more branch, /admin/inspect-ui-components
-frontend/packages/world/bin/cutUi.ts       the cut, borrowing the keying and shrinking in src/art.ts
-frontend/apps/web/vite/uiArtApi.ts         watches world/ui/, cuts it, tells the page
+frontend/apps/web/src/ui/ui.css                the tokens and the type, in a cascade layer of its own
+frontend/apps/web/src/ui/tokens.ts             the tokens by name and what each is for
+frontend/apps/web/src/ui/art/pictures.ts       the cut pictures, kept current, and their image-sets
+frontend/apps/web/src/ui/border/               the border and fill layers, and their arithmetic
+frontend/apps/web/src/ui/container/            the container, its layout, and the recipes
+frontend/apps/web/src/ui/<component>/          each component to come, a folder of its own
+frontend/apps/web/src/admin/UiComponents.tsx   the page, and admin/showcase/ its sections
+frontend/apps/web/src/main.tsx                 one more branch, /admin/inspect-ui-components
+frontend/packages/world/bin/cutUi.ts           the cut, borrowing the keying in src/art.ts
+frontend/packages/world/src/ui*.ts             the cut's rules, the fills, and the placeholders
+frontend/apps/web/vite/uiArtApi.ts             watches world/ui/, cuts it, tells the page
 ```
 
 The library imports nothing from the game, and the game nothing from the library until a later session
@@ -200,9 +206,10 @@ One commit each. After the fourth, the order is a menu.
 | 9 | Carousel and its dots, grid, card, list | the page |
 | 10 | Dialog, toast, text field, dropdown, medallion | the page |
 
-**Where it stands, 2026-09-30: nought to three are built.** The page is at `/admin/inspect-ui-components`
-with the foundations, every picture, and the borders and fills on it; the rest of its sections say which
-step brings them. Step
+**Where it stands, 2026-09-30: nought to four are built**, which is the page able to be used for
+verification: the foundations, every picture, borders and fills at any size, and containers with their
+recipes, embellishments and keep-outs, all at desktop and phone width and on night and parchment. The rest
+of its sections say which step brings them, and from here the order is a menu. Step
 two cut the top row of the moodboard's sample borders, not both: the second row is the same frames' corner
 pieces. The marks and the controls have no placeholders yet, and get them with steps five and six, which
 draw them. The page's Pictures section is the sheet of every placeholder.

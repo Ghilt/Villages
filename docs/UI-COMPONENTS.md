@@ -9,7 +9,8 @@
 
 **Being built.** This is the method as agreed on 2026-09-30, written before most of the library so that the
 library is built to it. Each step of the plan fills in its part, and a line that still says *to come* is a
-part nobody has built. The page, the foundations, the pictures, and borders and fills are built.
+part nobody has built. The page, the foundations, the pictures, borders and fills, and the container
+are built.
 
 ## The page
 
@@ -60,15 +61,38 @@ under it. A border whose picture has a middle of its own draws it only when no f
 
 ## A recipe names a container
 
-A **recipe** is one named, typed combination of the four layers, in `frontend/apps/web/src/ui/recipes.ts`:
+A **recipe** is one named, typed combination of the four layers, in
+`frontend/apps/web/src/ui/container/recipes.ts`:
 
 ```ts
-'pane.house-status': {
-  border: 'gilt-baroque',
+'pane.cherub-corner': {
+  border: 'gilt-simple',
   fill: 'parchment',
-  embellishments: [{ art: 'cherub-seated', anchor: 'top-right', overhang: [24, 18], keepOut: [0, 40] }],
+  text: 'ink',
+  padding: 8,
+  embellishments: [
+    { art: 'cherub-standing', anchor: 'top-right', overhang: { x: 26, y: 30 }, keepOut: { right: 30 } },
+  ],
 }
 ```
+
+- `border` and `fill` are pictures by name; either can be left out. A border whose picture has a middle of
+  its own draws it only when there is no fill.
+- `text` is what the content is written in, `ink` on a light fill or `cream`, the default, on a dark one.
+- `padding` is room between the border's inner edge and the content, beyond the border's own inset.
+- An **embellishment** is a picture by name, pinned to an `anchor` - a corner, or `top`, `right`, `bottom`
+  or `left` for the middle of an edge. `overhang` is how far it stands out past the box, `x` sideways and
+  `y` up or down, away from it; a negative one sits inside. `keepOut` is how much room it takes from the
+  content, a side at a time. `behind` hangs it under the whole container, the fill too, as a drape hangs
+  behind a panel; `height` draws it at another size than its picture's, in proportion; `mirrored` turns it
+  left to right, so one cherub does for both corners.
+- A container keeps a **margin as wide as its overhangs**, so nothing beside it runs under a cherub;
+  `roomForOverhangs: false` for one whose room is known to be clear.
+
+**A keep-out takes a whole side.** A cherub in the top right corner that keeps out forty pixels on the
+right keeps the words clear of the right all the way down, not only beside itself. It is the simplest rule
+that never lets a word under a cherub, and the page's *layers* switch draws exactly what it takes. A
+keep-out that is only a corner, with the words running round it, is possible and not built.
 
 Recipes are named for what they are used for, `pane.<which>`, `card.<which>`, `dialog.<which>`, so that a
 recipe changed is a known set of places changed. A pane uses a recipe and never sets a border of its own.
@@ -148,3 +172,12 @@ A line each: what it is for, its variants, and where on the page it is.
   each edge; `fillInsetOf` the border round it says how far. *Borders and fills*.
 - **`borderImageOf`, `fillImageOf`, `fillInsetOf`, `contentInsetOf`**, `ui/border/borderStyle.ts`: the
   arithmetic under both, for a component that lays a border itself.
+- **`Container`**, `ui/container/Container.tsx`: a recipe, by name or given whole, laid round what it
+  holds - as wide as whatever holds it and as tall as its content. `layoutOf` in `ui/container/layout.ts`
+  is its arithmetic: the padding, the margin and every embellishment's place. *Containers*, where every
+  recipe is shown holding what it is for, with the recipe written out beside it; the page's *layers*
+  switch strips the room each keep-out takes and dashes each embellishment's box, and does the same
+  wherever a container is inside something marked `data-ui-layers="shown"`.
+- **`RECIPES`**, `ui/container/recipes.ts`: the named containers. The first are made from the moodboard -
+  Adam's own sentence as `pane.cherub-corner`, the cathedral panel as `pane.cathedral`, its framed panes
+  and its cards - and the game's own come as each surface is redone.

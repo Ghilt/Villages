@@ -5,7 +5,7 @@ import { useDensity } from './showcase/density';
 import { SECTIONS } from './showcase/sections';
 import type { Section } from './showcase/sections';
 import { useSettings } from './showcase/settings';
-import type { Ground, Width } from './showcase/settings';
+import type { Ground, Layers, Width } from './showcase/settings';
 
 /**
  * The component library, shown: every part the interface is built from, in every variant and state.
@@ -21,7 +21,12 @@ export function UiComponents() {
   const density = useDensity();
 
   return (
-    <div className="showcase ui-root" data-width={settings.width} data-ground={settings.ground}>
+    <div
+      className="showcase ui-root"
+      data-width={settings.width}
+      data-ground={settings.ground}
+      data-ui-layers={settings.layers}
+    >
       <header className="showcase__bar">
         <div className="showcase__heading">
           <h1 className="ui-title">Components</h1>
@@ -39,6 +44,12 @@ export function UiComponents() {
             options={['night', 'parchment']}
             chosen={settings.ground}
             choose={(ground) => change({ ground })}
+          />
+          <Choice<Layers>
+            label="layers"
+            options={['hidden', 'shown']}
+            chosen={settings.layers}
+            choose={(layers) => change({ layers })}
           />
           <span className="showcase__density" title="screen pixels to a CSS pixel, which the seams depend on">
             screen {Number(density.toFixed(2))}x

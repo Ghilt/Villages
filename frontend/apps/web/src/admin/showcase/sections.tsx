@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react';
 
 import { BordersAndFills } from './BordersAndFills';
+import { Containers } from './Containers';
 import { Foundations } from './Foundations';
 import { Pictures } from './Pictures';
 
@@ -45,7 +46,7 @@ export const SECTIONS: readonly Section[] = [
     id: 'containers',
     title: 'Containers',
     says: 'A border, a fill and its embellishments, named by a recipe, and a card inside a pane.',
-    arrives: 4,
+    Body: Containers,
   },
   {
     id: 'buttons',

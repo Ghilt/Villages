@@ -9,17 +9,20 @@ import { useCallback, useState } from 'react';
 
 export type Width = 'desktop' | 'phone';
 export type Ground = 'night' | 'parchment';
+export type Layers = 'hidden' | 'shown';
 
 export interface Settings {
   /** How wide the sheet the components stand on is: the whole window, or a phone's 390 pixels. */
   readonly width: Width;
   /** What the components stand on. */
   readonly ground: Ground;
+  /** Whether a container's layers are drawn: the room its keep-outs take, and its embellishments' boxes. */
+  readonly layers: Layers;
 }
 
 const KEY = 'villages.showcase';
 
-const OPENS_AS: Settings = { width: 'desktop', ground: 'night' };
+const OPENS_AS: Settings = { width: 'desktop', ground: 'night', layers: 'hidden' };
 
 function remembered(): Settings {
   try {
@@ -27,6 +30,7 @@ function remembered(): Settings {
     return {
       width: kept?.width === 'phone' ? 'phone' : OPENS_AS.width,
       ground: kept?.ground === 'parchment' ? 'parchment' : OPENS_AS.ground,
+      layers: kept?.layers === 'shown' ? 'shown' : OPENS_AS.layers,
     };
   } catch {
     return OPENS_AS;

@@ -1,0 +1,59 @@
+import type { Recipe } from './layout';
+
+/**
+ * The named containers: what a pane, a card or a dialog is drawn as, one entry each.
+ *
+ * A pane uses a recipe and never sets a border of its own, so a recipe changed is a known set of places
+ * changed, and a new pane is a new entry here and perhaps a new picture in `world/ui/` - never new CSS.
+ * Named for what they are used for, `pane.<which>`, `card.<which>`, `dialog.<which>`. These are the
+ * first, made from the moodboard to show what the layers can do; the game's own come as each surface is
+ * redone. Every one is on the page at /admin/inspect-ui-components, under Containers. See
+ * docs/UI-COMPONENTS.md.
+ */
+export const RECIPES = {
+  /**
+   * Adam's own sentence: a pane with a gilt border and a cherub in the top right corner, where the cherub
+   * takes some room and is no part of the nine-slice.
+   */
+  'pane.cherub-corner': {
+    border: 'gilt-simple',
+    fill: 'parchment',
+    text: 'ink',
+    padding: 8,
+    embellishments: [
+      { art: 'cherub-standing', anchor: 'top-right', overhang: { x: 26, y: 30 }, keepOut: { right: 30 } },
+    ],
+  },
+
+  /**
+   * The moodboard's cathedral panel: a cross standing on its crown, a drape hanging behind its right side
+   * and a cherub at its foot, stepping out past the frame.
+   */
+  'pane.cathedral': {
+    border: 'gilt-simple',
+    fill: 'parchment',
+    text: 'ink',
+    padding: 8,
+    embellishments: [
+      { art: 'drape-velvet', anchor: 'top-right', behind: true, overhang: { x: 44, y: -12 }, height: 170 },
+      { art: 'cross-gilt', anchor: 'top', overhang: { y: 46 }, height: 62 },
+      { art: 'cherub-standing', anchor: 'bottom-right', overhang: { x: 30, y: 20 }, keepOut: { right: 34 } },
+    ],
+  },
+
+  /** The moodboard's own framed pane, with its drape and its cherub painted into the corners. */
+  'pane.drape': { border: 'gilt-drape', padding: 4 },
+
+  /** A stone arch on two columns, its own middle showing. */
+  'pane.arch': { border: 'stone-arch', padding: 4 },
+
+  /** A key figure in a grid: a narrow gilt frame on parchment. */
+  'card.figure': { border: 'gilt-thin', fill: 'parchment', text: 'ink', padding: 4 },
+
+  /** Something that happened, as the moodboard's Reformation card has it: a narrow gilt frame on night. */
+  'card.event': { border: 'gilt-thin', fill: 'night', padding: 6 },
+} as const satisfies Record<string, Recipe>;
+
+export type RecipeName = keyof typeof RECIPES;
+
+export const RECIPE_NAMES = Object.keys(RECIPES) as RecipeName[];

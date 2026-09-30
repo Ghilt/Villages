@@ -239,6 +239,8 @@
 
 .showcase__stage {
   display: grid;
+  /* One column no wider than the stage, so a thing on show that is too wide shrinks rather than spills. */
+  grid-template-columns: minmax(0, 1fr);
   place-items: center;
   min-height: 4.5rem;
   padding: var(--ui-space-3);
@@ -531,4 +533,58 @@
   align-items: flex-end;
   gap: var(--ui-space-3);
   margin-bottom: var(--ui-space-4);
+}
+
+/* Containers on show, each with its recipe written out beside it. */
+
+.showcase__recipe-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--ui-space-4);
+  width: 100%;
+}
+
+.showcase__pane-width {
+  flex: 1 1 20rem;
+  min-width: 0;
+  max-width: 32rem;
+}
+
+.showcase__card-width {
+  width: 13rem;
+  max-width: 100%;
+}
+
+.showcase__recipe {
+  flex: 1 1 16rem;
+  min-width: 0;
+  margin: 0;
+  padding: var(--ui-space-2) var(--ui-space-3);
+  overflow-x: auto;
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  font-size: 0.74rem;
+  line-height: 1.45;
+  color: var(--ui-cream-soft);
+  background: rgba(0, 0, 0, 0.25);
+  border-left: 2px solid var(--ui-gilt-deep);
+}
+
+.showcase[data-ground='parchment'] .showcase__recipe {
+  color: var(--ui-ink-soft);
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Dragged across only: a container is as tall as what it holds. */
+.showcase__resizable--across {
+  resize: horizontal;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.showcase__cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: var(--ui-space-3);
+  margin-top: var(--ui-space-3);
 }
