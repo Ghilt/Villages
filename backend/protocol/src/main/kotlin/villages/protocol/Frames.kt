@@ -33,8 +33,9 @@ import tools.jackson.databind.JsonNode
  * gateway now holds back what a house cannot see. Version 12 gave `yourSight` its `tension`, the surface
  * tension that joins circles close together. See decision record 0064. Version 13 let an option's effect be
  * a `grant`, some of a resource given, which is what a line of a dialogue gives too. See decision record 0067.
+ * Version 14 added `offerDialogue`, the debug panel's offer of a sample dialogue by name.
  */
-const val PROTOCOL_VERSION = 13
+const val PROTOCOL_VERSION = 14
 
 data class Point(val lat: Double, val lon: Double)
 
@@ -281,6 +282,7 @@ class WipeWorld : ClientFrame {
     JsonSubTypes.Type(TakeOffTheMapPayload::class, name = "takeOffTheMap"),
     JsonSubTypes.Type(GiveVisionPayload::class, name = "giveVision"),
     JsonSubTypes.Type(TakeVisionPayload::class, name = "takeVision"),
+    JsonSubTypes.Type(OfferDialoguePayload::class, name = "offerDialogue"),
 )
 sealed interface CommandPayload
 
@@ -372,6 +374,13 @@ data class GiveVisionPayload(val place: Point) : CommandPayload
 
 /** Take away a vision the house was given, by the id `yourSight` names it under. */
 data class TakeVisionPayload(val visionId: String) : CommandPayload
+
+/**
+ * Offer the player's house one of the sample dialogues, by its name, spoken by the house's first key figure.
+ * The name and none of the words: a client that could write a dialogue could write itself a reward. Adam's
+ * lever. See decision record 0067.
+ */
+data class OfferDialoguePayload(val sample: String) : CommandPayload
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes(

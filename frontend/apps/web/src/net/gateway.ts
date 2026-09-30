@@ -658,6 +658,15 @@ export function killCharacter(figure: KeyFigureView, cause: string): void {
   });
 }
 
+/*
+ * Offering the house a dialogue. Adam's lever, in the Dialogues section: nothing in the world offers one
+ * yet. It names one of the server's samples and sends none of its words. See decision record 0067.
+ */
+
+export function offerDialogue(sample: string, described: string): void {
+  act('dialogues', `offering ${described}`, { type: 'offerDialogue', sample });
+}
+
 /**
  * Starts over as a new player: forgets who this browser was and reloads.
  *

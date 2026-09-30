@@ -244,6 +244,11 @@ export const commandPayloadSchema = z.discriminatedUnion('type', [
    */
   z.object({ type: z.literal('giveVision'), place: pointSchema }),
   z.object({ type: z.literal('takeVision'), visionId: z.string() }),
+  /**
+   * A sample dialogue, by its name, spoken by the house's first key figure: the name and none of the words,
+   * because a client that could write a dialogue could write itself a reward. Adam's lever. See 0067.
+   */
+  z.object({ type: z.literal('offerDialogue'), sample: z.string() }),
 ]);
 
 export const clientFrameSchema = z.discriminatedUnion('type', [

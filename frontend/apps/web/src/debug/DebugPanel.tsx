@@ -9,6 +9,7 @@ import { AreasView } from '../areas/AreasView';
 import { BuildBadge } from '../version/BuildBadge';
 import { CameraSection } from './CameraSection';
 import { CharactersSection } from './CharactersSection';
+import { DialoguesSection } from './DialoguesSection';
 import { MapSection } from './MapSection';
 import { ScenerySection } from './ScenerySection';
 import { Section } from './Section';
@@ -250,6 +251,7 @@ export function DebugPanel({ map, worldRoot, master, renderer, onRenderer }: Deb
         <WorldSection map={map} />
         <ResourcesSection />
         <CharactersSection map={map} />
+        <DialoguesSection />
 
         <Section name="Log" tools={logTools}>
           <ol className="debug__log">

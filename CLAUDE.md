@@ -322,7 +322,7 @@ Commands are added here as the increments land:
   writes to `.logs/backend.log`; see decision record 0029. So a change that wants to be seen there says
   so with `note(area, message)` rather than by adding a row. **Everything in it is in a folding section,
   and a step that puts something there says which section - and asks when that is not obvious from what
-  Adam said, rather than picking one.** Today they are Worktrees, Debug map, Scenery, Camera, Areas, World, Resources, Characters and Log. The events themselves are not in the
+  Adam said, rather than picking one.** Today they are Worktrees, Debug map, Scenery, Camera, Areas, World, Resources, Characters, Dialogues and Log. The events themselves are not in the
   panel: they are at **`/admin/inspect-events`**, a page of their own that watches the world without
   playing in it, one line an event opening to the whole thing as the store holds it. The `found a house here` button in it sends a
   real command and is how to make an event happen on purpose. The `restart` button beside `copy` forgets
@@ -372,6 +372,12 @@ Commands are added here as the increments land:
   map` and `kill`, every one a real command: the asking and the answer are lines of the log under
   `characters`, and what changed is a third; a move is a fourth, under `cells`, naming who arrived. The stat levers stay pressable at one and at twenty, so a
   refusal is seen rather than guessed. The events are at `/admin/inspect-events`. See `docs/adr/0055`.
+- Dialogues, in the same panel: the **Dialogues** section, below Characters. `offer a dialogue` offers the
+  house the server's sample, a letter from the coast spoken by the house's first key figure and a
+  messenger, with one dialogue choice and one purse; it is off, saying why on hover, while the house has
+  no key figure. The page names the sample and sends none of its words. The asking and the answer are lines
+  of the log under `dialogues`, and the dialogue itself, whole, is at `/admin/inspect-events`. Nothing
+  shows a dialogue in the game yet. See `docs/adr/0067` and `docs/plans/character-dialogue.md`.
 - What grows where: `world/biomes.json`, hand-edited, one entry a kind and one a biome. What reads it is
   `npm run world:sprites --prefix frontend`, which works out a biome for every sixteen world units and
   where the scenery clumps, and writes a **sprite map** beside the cut tiles - about five megabytes and

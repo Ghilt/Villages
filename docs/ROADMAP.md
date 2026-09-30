@@ -44,8 +44,8 @@ dialogue, the newest, is planned and nothing of it is built.
   pane of its own down the right of the spread, paying the house as it goes, and lapsing when a requirement
   the player never sees fails. The shape is decision record 0067 and the steps, one commit each, are in
   `docs/plans/character-dialogue.md`; the hypothesis is experiment 0014. Planned on 2026-09-27 from Adam's
-  own description. The offer, the walk and the step are built on the server, and nothing yet offers one or
-  shows it.
+  own description. The offer, the walk and the step are built on the server, and the debug panel offers a
+  sample; nothing in the world offers one yet, and nothing shows one.
 - **0.4** Local infrastructure: MongoDB replica set and RabbitMQ in Compose
 - **0.8** Testcontainers smoke test on MongoDB and RabbitMQ
 - **1.6** The bridge from the store to the broker

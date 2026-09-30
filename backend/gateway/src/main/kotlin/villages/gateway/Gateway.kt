@@ -27,6 +27,7 @@ import villages.application.ResourceService
 import villages.application.Start
 import villages.application.StoredEvent
 import villages.application.TakeActionService
+import villages.application.DialogueService
 import villages.application.VisionService
 import villages.application.VisionSource
 import villages.application.WorldClock
@@ -84,6 +85,7 @@ import villages.protocol.CharacterOnMapView
 import villages.protocol.HouseAppeared
 import villages.protocol.HouseChanged
 import villages.protocol.MoveCharacterPayload
+import villages.protocol.OfferDialoguePayload
 import villages.protocol.TakeOffTheMapPayload
 import villages.protocol.TakeVisionPayload
 import villages.protocol.HouseView
@@ -183,6 +185,7 @@ class Gateway(
     private val onTheMap: CharactersByCell,
     private val sights: SightsByHouse,
     private val visions: VisionService,
+    private val dialogues: DialogueService,
     private val later: Later = ScheduledLater(),
 ) : AutoCloseable {
     private val watching = ConcurrentHashMap<Connection, Unit>()
@@ -687,6 +690,14 @@ class Gateway(
                     is TakeVisionPayload -> visions.take(
                         player = who,
                         visionId = VisionId(asUuid(payload.visionId, "a vision id")),
+                        provenance = Provenance.startedBy(commandId),
+                    )
+
+                    // A sample by its name. A name that is not a sample is refused as malformed, and a house with
+                    // no key figure to speak it as `noSuchKeyFigure`. See decision record 0067.
+                    is OfferDialoguePayload -> dialogues.offerSample(
+                        player = who,
+                        sample = payload.sample,
                         provenance = Provenance.startedBy(commandId),
                     )
                 }

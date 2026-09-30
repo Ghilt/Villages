@@ -206,8 +206,12 @@ A speaker's death is tried with *kill*, in the Characters section.
    `dialogueOver` or `notTheNextStep`; the house keeps the steps of each open dialogue, and a finished one
    leaves the list. `BUILDING-A-MECHANIC.md` has the shape as the dialogue pattern. Nothing to see;
    `HouseDeciderSpec` is the evidence, forty lines played through for six events among it.
-4. **Offered from the debug panel.** The sample, and the Dialogues section with its lever. Wire version 14.
-   The log says what was offered, and the event is at `/admin/inspect-events`.
+4. **Offered from the debug panel.** Done. `SampleDialogues.kt` holds the letter from the coast, spoken by the
+   house's first key figure and a messenger, and `DialogueService` offers it after asking the house with
+   `ActThrough`, since the key figure is read from a read model a moment behind. The panel's Dialogues
+   section has `offer a dialogue`, off with the reason on hover while the house has no key figure, and sends
+   `offerDialogue { sample }`, wire version 14. The log says what was offered and the answer, and the event
+   is at `/admin/inspect-events`.
 5. **Sent to the player.** The dialogues projection, `yourDialogues` holding back what has not been reached,
    the revisions, and the requirements switch. Wire version 15. The Dialogues section lists them.
 6. **Dialogues lapse.** The pure function of which requirements an event breaks, the listener that carries

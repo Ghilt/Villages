@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration
 import villages.application.AnonymousTokens
 import villages.application.Arrival
 import villages.application.CharacterDeaths
+import villages.application.DialogueService
 import villages.application.Dice
 import villages.application.FoundHouseService
 import villages.application.FreshIds
@@ -124,6 +125,15 @@ class WorldConfig {
     fun visions(world: InMemoryWorld, clock: Clock, worldClock: WorldClock, ids: FreshIds): VisionService =
         VisionService(world.executor, clock = { clock.instant() }, world = worldClock, ids = ids)
 
+    /** Offering a house a dialogue, spoken by its key figures as the read model has them. See decision 0067. */
+    @Bean
+    fun dialogues(
+        world: InMemoryWorld,
+        characters: CharactersProjection,
+        clock: Clock,
+        worldClock: WorldClock,
+    ): DialogueService = DialogueService(world.executor, characters, clock = { clock.instant() }, world = worldClock)
+
     @Bean
     fun takeAction(world: InMemoryWorld, clock: Clock, worldClock: WorldClock): TakeActionService =
         TakeActionService(world.executor, clock = { clock.instant() }, world = worldClock)
@@ -227,6 +237,7 @@ class WorldConfig {
         characters: CharactersProjection,
         sights: SightProjection,
         visions: VisionService,
+        dialogues: DialogueService,
     ): Gateway = Gateway(
         tokens = AnonymousTokens,
         foundHouse = foundHouse,
@@ -246,5 +257,6 @@ class WorldConfig {
         onTheMap = characters,
         sights = sights,
         visions = visions,
+        dialogues = dialogues,
     )
 }

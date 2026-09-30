@@ -25,6 +25,7 @@ import villages.application.ResourceService
 import villages.application.Start
 import villages.application.StoredEvent
 import villages.application.TakeActionService
+import villages.application.DialogueService
 import villages.application.VisionService
 import villages.application.WorldCalendar
 import villages.application.WorldClock
@@ -302,6 +303,9 @@ private fun seeAll(on: Boolean) = """{"type":"seeAll","on":$on}"""
 
 private fun fogOfWar(on: Boolean) = """{"type":"fogOfWar","on":$on}"""
 
+private fun offering(sample: String, commandId: String) =
+    """{"type":"command","commandId":"$commandId","command":{"type":"offerDialogue","sample":"$sample"}}"""
+
 private fun addingAKeyFigure(commandId: String) =
     """{"type":"command","commandId":"$commandId","command":{"type":"addKeyFigure"}}"""
 
@@ -397,6 +401,7 @@ private class Rig {
             world = worldClock,
             ids = { UUID.fromString("e1000000-0000-4000-8000-%012x".format(++minted)) },
         ),
+        dialogues = DialogueService(world, characters, clock = { noon }, world = worldClock),
         later = later,
     )
 
@@ -1606,6 +1611,37 @@ class GatewaySpec : StringSpec({
         two.last() shouldBe CommandRejected(COMMAND_TWO, "alreadyFounded")
         rig.world.events.filterIsInstance<HouseFounded>() shouldHaveSize 1
         rig.houses.ofPlayer(PlayerId(UUID.fromString(TOKEN)))?.name?.value shouldBe "Ravenscar"
+    }
+
+    "the debug panel's letter is offered, spoken by the house's first key figure, and refused while it has none" {
+        val rig = Rig()
+        val (mine, sent) = rig.introduced()
+        mine.receive(founding())
+        mine.receive(offering("letter", commandNumber(1)))
+        sent.last() shouldBe CommandRejected(commandNumber(1), "noSuchKeyFigure")
+
+        mine.receive(addingAKeyFigure(commandNumber(2)))
+        val figure = sent.filterIsInstance<YourKeyFigures>().last().keyFigures.single().id
+        mine.receive(offering("letter", commandNumber(3)))
+
+        sent.last() shouldBe CommandAccepted(commandNumber(3))
+        val offered = rig.world.events.filterIsInstance<PlayerOfferedDialogue>().single()
+        offered.dialogue.speakers.mapNotNull { it.character?.value?.toString() } shouldBe listOf(figure)
+    }
+
+    "a sample that is not one is malformed, and the same offer sent twice is refused as already made" {
+        val rig = Rig()
+        val (mine, sent) = rig.introduced()
+        mine.receive(founding())
+        mine.receive(addingAKeyFigure(commandNumber(1)))
+
+        mine.receive(offering("a song", commandNumber(2)))
+        (sent.last() as CommandRejected).reason shouldStartWith "malformed"
+
+        mine.receive(offering("letter", commandNumber(3)))
+        mine.receive(offering("letter", commandNumber(3)))
+        sent.last() shouldBe CommandRejected(commandNumber(3), "dialogueAlreadyOffered")
+        rig.world.events.filterIsInstance<PlayerOfferedDialogue>() shouldHaveSize 1
     }
 
     "an option that grants reaches the page as what it gives, under the wire's name for the resource" {
