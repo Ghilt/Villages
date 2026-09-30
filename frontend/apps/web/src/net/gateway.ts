@@ -13,6 +13,7 @@ import { PROTOCOL_VERSION, describeDay } from '@villages/protocol';
 import type {
   ChoiceView,
   CommandPayload,
+  DialogueView,
   KeyFigureView,
   OptionView,
   Point,
@@ -25,6 +26,7 @@ import type {
 
 import { note, shortId } from '../debug/log';
 import { STAT_WORDS, fullName, whatChanged } from '../figures/describe';
+import { whatChangedIn } from '../dialogues/describe';
 import { describeSight } from '../fog/describe';
 import { NOTHING_ARRIVED, alsoArrived, describeArrival, describeBatch } from './arrivals';
 import type { Arrival } from './arrivals';
@@ -58,6 +60,11 @@ export interface GatewayState {
    * lasting today, revealed is all of them, each with the gaps between close circles filled. See 0061, 0064.
    */
   yourSight: { points: readonly VisionPointView[]; tension: number } | null;
+  /**
+   * The player's dialogues, open and finished, as the gateway lets them be known, or null until it has said.
+   * What has not been reached is never here, and a requirement only while the switch asks. See 0067.
+   */
+  yourDialogues: readonly DialogueView[] | null;
   /** The id of the command in flight, so the parchment can stop taking a second answer. */
   acting: string | null;
   houses: HousesState;
@@ -72,6 +79,7 @@ let state: GatewayState = {
   yourChoice: null,
   yourKeyFigures: null,
   yourSight: null,
+  yourDialogues: null,
   acting: null,
   houses: NO_HOUSES,
   world: null,
@@ -296,6 +304,13 @@ function heard(frame: ServerFrame): void {
       update({ yourSight: { points: frame.points, tension: frame.tension } });
       return;
     }
+    case 'yourDialogues':
+      // Said before the state moves, because what is worth saying is the difference from what was held.
+      for (const line of whatChangedIn(state.yourDialogues, frame.dialogues)) {
+        note('dialogues', line);
+      }
+      update({ yourDialogues: frame.dialogues });
+      return;
     case 'worldWiped':
       // The world this window was looking at is gone. Arriving anew is the only honest thing to do, and
       // a reload is how a page arrives. See decision record 0036.
@@ -312,6 +327,7 @@ function heard(frame: ServerFrame): void {
         yourChoice: null,
         yourKeyFigures: null,
         yourSight: null,
+        yourDialogues: null,
       });
       note('gateway', `${frame.message}; this window is no longer playing`);
       connection?.close();

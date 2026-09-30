@@ -33,9 +33,11 @@ import tools.jackson.databind.JsonNode
  * gateway now holds back what a house cannot see. Version 12 gave `yourSight` its `tension`, the surface
  * tension that joins circles close together. See decision record 0064. Version 13 let an option's effect be
  * a `grant`, some of a resource given, which is what a line of a dialogue gives too. See decision record 0067.
- * Version 14 added `offerDialogue`, the debug panel's offer of a sample dialogue by name.
+ * Version 14 added `offerDialogue`, the debug panel's offer of a sample dialogue by name. Version 15 added
+ * `yourDialogues`, the player's dialogues with what has not been reached held back, and `showRequirements`,
+ * Adam's switch that sends one window their requirements.
  */
-const val PROTOCOL_VERSION = 14
+const val PROTOCOL_VERSION = 15
 
 data class Point(val lat: Double, val lon: Double)
 
@@ -201,6 +203,7 @@ data class CharacterOnMapView(
     JsonSubTypes.Type(SeeAll::class, name = "seeAll"),
     JsonSubTypes.Type(FogOfWar::class, name = "fogOfWar"),
     JsonSubTypes.Type(WipeWorld::class, name = "wipeWorld"),
+    JsonSubTypes.Type(ShowRequirements::class, name = "showRequirements"),
 )
 sealed interface ClientFrame
 
@@ -252,6 +255,13 @@ data class SeeAll(val on: Boolean) : ClientFrame
  * is answered again as soon as it is sent. See decision record 0061.
  */
 data class FogOfWar(val on: Boolean) : ClientFrame
+
+/**
+ * Adam's switch: sends this window every dialogue's requirements, which the player is never sent, for as long
+ * as it is on. Off at every connection, and for that one connection only, as the fog's switch is; the
+ * dialogues are sent again as soon as it is pressed. See decision record 0067.
+ */
+data class ShowRequirements(val on: Boolean) : ClientFrame
 
 /**
  * Empties the development world, for everyone. A debug frame, like `watchEvents`, and not one a player's
@@ -397,6 +407,7 @@ data class OfferDialoguePayload(val sample: String) : CommandPayload
     JsonSubTypes.Type(YourChoice::class, name = "yourChoice"),
     JsonSubTypes.Type(YourKeyFigures::class, name = "yourKeyFigures"),
     JsonSubTypes.Type(YourSight::class, name = "yourSight"),
+    JsonSubTypes.Type(YourDialogues::class, name = "yourDialogues"),
     JsonSubTypes.Type(TakenOver::class, name = "takenOver"),
     JsonSubTypes.Type(WorldWiped::class, name = "worldWiped"),
 )
@@ -487,6 +498,78 @@ data class VisionPointView(
     val since: Long,
     val until: Long? = null,
 )
+
+/**
+ * The player's dialogues, open and finished, in the order the house was offered them, wherever they are
+ * looking. Sent after `yourSight` on hello, always a list, and again whenever one of them changes. What the
+ * player has not reached stays on the server: each carries what has been said, the stretch still to read up
+ * to and including the next step, and the options pending - never a line past that, and never what a line
+ * will give until it has given it. See decision record 0067.
+ */
+data class YourDialogues(val dialogues: List<DialogueView>) : ServerFrame
+
+/**
+ * One dialogue as the player may know it. `revision` rises with every change to it, so a page holds its
+ * reading place while it holds. `next` ends in the step to send when there are no `options`, and in the line
+ * the dialogue choice follows when there are. `requirements` is absent unless this window's debug panel has
+ * asked for them.
+ */
+@JsonInclude(JsonInclude.Include.NON_NULL)
+data class DialogueView(
+    val id: String,
+    val revision: Long,
+    val title: String,
+    /** The picture's key, absent for none. */
+    val scene: String? = null,
+    val speakers: List<SpeakerView>,
+    val said: List<SaidLineView>,
+    val next: List<LineView>,
+    val options: List<LineView>,
+    val ending: EndingView,
+    val requirements: List<RequirementView>? = null,
+)
+
+/** Who speaks: which party, what they are called, their portrait's key and the character they are, if any. */
+@JsonInclude(JsonInclude.Include.NON_NULL)
+data class SpeakerView(
+    val id: String,
+    val party: Int,
+    val name: String,
+    val portrait: String? = null,
+    val character: String? = null,
+)
+
+/** A line still to be read: who says it and the words, and nothing about what it will give. */
+data class LineView(val id: String, val speaker: String, val words: String)
+
+/** A line said, with what saying it gave the house. */
+data class SaidLineView(val id: String, val speaker: String, val words: String, val gave: List<EffectView>)
+
+/** How a dialogue stands. `kind` names the case, as it does for an effect. */
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "kind")
+@JsonSubTypes(
+    JsonSubTypes.Type(EndingView.Open::class, name = "open"),
+    JsonSubTypes.Type(EndingView.Completed::class, name = "completed"),
+    JsonSubTypes.Type(EndingView.Lost::class, name = "lost"),
+)
+sealed interface EndingView {
+    data object Open : EndingView
+
+    data object Completed : EndingView
+
+    /** Ended unfinished, because one of its requirements failed; which one is the one the player learns of. */
+    data class Lost(val because: RequirementView) : EndingView
+}
+
+/** Something a dialogue needs to stay true. `kind` names the case. */
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "kind")
+@JsonSubTypes(
+    JsonSubTypes.Type(RequirementView.Alive::class, name = "alive"),
+)
+sealed interface RequirementView {
+    /** That this character, by id, is still alive. */
+    data class Alive(val character: String) : RequirementView
+}
 
 /**
  * The world was emptied and this session is finished with it: it holds no cells, hears nothing more and

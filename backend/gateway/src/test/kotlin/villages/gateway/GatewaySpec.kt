@@ -30,7 +30,9 @@ import villages.application.VisionService
 import villages.application.WorldCalendar
 import villages.application.WorldClock
 import villages.application.WriteConflict
+import villages.domain.CompleteDialogueStep
 import villages.domain.Effect
+import villages.domain.LineId
 import villages.domain.CharacterCommand
 import villages.domain.CharacterDecider
 import villages.domain.CharacterEvent
@@ -57,6 +59,7 @@ import villages.domain.PlayerId
 import villages.domain.WorldTime
 import villages.projections.CharactersProjection
 import villages.projections.ChoicesProjection
+import villages.projections.DialoguesProjection
 import villages.projections.HousesProjection
 import villages.projections.RecentEventsProjection
 import villages.projections.SightProjection
@@ -70,6 +73,8 @@ import villages.protocol.CommandRejected
 import villages.protocol.PROTOCOL_VERSION
 import villages.protocol.ErrorFrame
 import villages.protocol.FoundAtView
+import villages.protocol.RequirementView
+import villages.protocol.EndingView
 import villages.protocol.GrantView
 import villages.protocol.EventFrame
 import villages.protocol.HouseAppeared
@@ -87,6 +92,7 @@ import villages.protocol.WorldNow
 import villages.protocol.YourChoice
 import villages.protocol.StatsView
 import villages.protocol.YourHouse
+import villages.protocol.YourDialogues
 import villages.protocol.YourKeyFigures
 import villages.protocol.YourSight
 import java.time.Clock
@@ -303,6 +309,8 @@ private fun seeAll(on: Boolean) = """{"type":"seeAll","on":$on}"""
 
 private fun fogOfWar(on: Boolean) = """{"type":"fogOfWar","on":$on}"""
 
+private fun showingRequirements(on: Boolean) = """{"type":"showRequirements","on":$on}"""
+
 private fun offering(sample: String, commandId: String) =
     """{"type":"command","commandId":"$commandId","command":{"type":"offerDialogue","sample":"$sample"}}"""
 
@@ -344,6 +352,7 @@ private class Rig {
     val recent = RecentEventsProjection(world)
     val characters = CharactersProjection(world)
     val sights = SightProjection(world)
+    val dialogueRows = DialoguesProjection(world)
     val worldClock = WorldClock { today }
     var minted = 0
     val gateway = Gateway(
@@ -380,6 +389,7 @@ private class Rig {
             recent.reset()
             characters.reset()
             sights.reset()
+            dialogueRows.reset()
             gone
         },
         // A die that always comes up one, so every newcomer is the same known woman of eighteen.
@@ -402,6 +412,7 @@ private class Rig {
             ids = { UUID.fromString("e1000000-0000-4000-8000-%012x".format(++minted)) },
         ),
         dialogues = DialogueService(world, characters, clock = { noon }, world = worldClock),
+        dialogueRows = dialogueRows,
         later = later,
     )
 
@@ -1642,6 +1653,77 @@ class GatewaySpec : StringSpec({
         mine.receive(offering("letter", commandNumber(3)))
         sent.last() shouldBe CommandRejected(commandNumber(3), "dialogueAlreadyOffered")
         rig.world.events.filterIsInstance<PlayerOfferedDialogue>() shouldHaveSize 1
+    }
+
+    "hello also says which dialogues the house has, after what it sees, which is none before it is offered any" {
+        val sent = mutableListOf<ServerFrame>()
+        Rig().gateway.connect { sent += it }.receive(hello)
+
+        sent[4] shouldBe YourDialogues(emptyList())
+    }
+
+    "an offer reaches its player as far as the dialogue choice, and not a line past it" {
+        val rig = Rig()
+        val (mine, sent) = rig.introduced()
+        mine.receive(founding())
+        mine.receive(addingAKeyFigure(commandNumber(1)))
+        mine.receive(offering("letter", commandNumber(2)))
+
+        val told = sent.filterIsInstance<YourDialogues>().last()
+        val letter = told.dialogues.single()
+        letter.title shouldBe "A letter from the coast"
+        letter.said shouldBe emptyList()
+        letter.next.map { it.id } shouldBe listOf("arrives", "reads")
+        letter.options.map { it.id } shouldBe listOf("accept", "refuse")
+        letter.ending shouldBe EndingView.Open
+        letter.requirements shouldBe null
+        // Both answers' replies, and the purse, are the server's until a step reaches them.
+        val onTheWire = ProtocolJson.encode(told)
+        onTheWire.contains("He thought you might") shouldBe false
+        onTheWire.contains("grant") shouldBe false
+    }
+
+    "each step reaches its player with what the line gave, and the end with nothing left to read" {
+        val rig = Rig()
+        val (mine, sent) = rig.introduced()
+        mine.receive(founding())
+        mine.receive(addingAKeyFigure(commandNumber(1)))
+        mine.receive(offering("letter", commandNumber(2)))
+        val offered = rig.world.events.filterIsInstance<PlayerOfferedDialogue>().single()
+        fun step(line: String) = rig.world.execute(
+            CompleteDialogueStep(offered.houseId, offered.dialogue.id, LineId(line), today, noon),
+            Provenance.startedBy(UUID.randomUUID()),
+        )
+
+        step("accept")
+        val accepted = sent.filterIsInstance<YourDialogues>().last().dialogues.single()
+        accepted.said.map { it.id } shouldBe listOf("arrives", "reads", "accept")
+        accepted.next.map { it.id } shouldBe listOf("paid")
+        accepted.next.single().words shouldBe "He thought you might say so. The first of the dues came with me."
+
+        step("paid")
+        val paid = sent.filterIsInstance<YourDialogues>().last().dialogues.single()
+        paid.said.last().gave shouldBe listOf(GrantView(resource = "wealth", amount = 100))
+        paid.next shouldBe emptyList()
+        paid.options shouldBe emptyList()
+        paid.ending shouldBe EndingView.Completed
+        paid.revision shouldBe accepted.revision + 2
+    }
+
+    "the requirements go only to a window whose switch has asked for them" {
+        val rig = Rig()
+        val (mine, sent) = rig.introduced()
+        mine.receive(founding())
+        mine.receive(addingAKeyFigure(commandNumber(1)))
+        mine.receive(offering("letter", commandNumber(2)))
+        val figure = sent.filterIsInstance<YourKeyFigures>().last().keyFigures.single().id
+
+        mine.receive(showingRequirements(true))
+        sent.filterIsInstance<YourDialogues>().last().dialogues.single().requirements shouldBe
+            listOf(RequirementView.Alive(figure))
+
+        mine.receive(showingRequirements(false))
+        sent.filterIsInstance<YourDialogues>().last().dialogues.single().requirements shouldBe null
     }
 
     "an option that grants reaches the page as what it gives, under the wire's name for the resource" {

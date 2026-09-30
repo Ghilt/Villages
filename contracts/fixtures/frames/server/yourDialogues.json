@@ -1,0 +1,103 @@
+{
+  "type": "yourDialogues",
+  "dialogues": [
+    {
+      "id": "dd000000-0000-4000-8000-00000000a001",
+      "revision": 2,
+      "title": "A letter from the coast",
+      "scene": "harbour",
+      "speakers": [
+        {
+          "id": "figure",
+          "party": 0,
+          "name": "Agnes Hollin",
+          "portrait": "woman-03",
+          "character": "cb732500-39bd-3b39-a838-bb89f719578f"
+        },
+        { "id": "messenger", "party": 1, "name": "A messenger" }
+      ],
+      "said": [
+        {
+          "id": "arrives",
+          "speaker": "messenger",
+          "words": "Agnes, a rider has come in from the coast with a letter under the harbour-master's seal.",
+          "gave": []
+        },
+        {
+          "id": "reads",
+          "speaker": "messenger",
+          "words": "The harbour-master is building a new quay, and asks whether the house will stand behind it.",
+          "gave": []
+        },
+        {
+          "id": "accept",
+          "speaker": "figure",
+          "words": "Tell him the house will, and that it expects its share of the dues.",
+          "gave": []
+        }
+      ],
+      "next": [
+        {
+          "id": "paid",
+          "speaker": "messenger",
+          "words": "He thought you might say so. The first of the dues came with me."
+        }
+      ],
+      "options": [],
+      "ending": { "kind": "open" },
+      "requirements": [{ "kind": "alive", "character": "cb732500-39bd-3b39-a838-bb89f719578f" }]
+    },
+    {
+      "id": "dd000000-0000-4000-8000-00000000a002",
+      "revision": 1,
+      "title": "A second letter",
+      "speakers": [{ "id": "messenger", "party": 1, "name": "A messenger" }],
+      "said": [],
+      "next": [
+        { "id": "asks", "speaker": "messenger", "words": "Another rider, with another question." }
+      ],
+      "options": [
+        { "id": "yes", "speaker": "messenger", "words": "Yes." },
+        { "id": "no", "speaker": "messenger", "words": "No." }
+      ],
+      "ending": { "kind": "open" }
+    },
+    {
+      "id": "dd000000-0000-4000-8000-00000000a003",
+      "revision": 4,
+      "title": "The dues",
+      "speakers": [{ "id": "messenger", "party": 1, "name": "A messenger" }],
+      "said": [
+        {
+          "id": "paid",
+          "speaker": "messenger",
+          "words": "The first of the dues came with me.",
+          "gave": [{ "kind": "grant", "resource": "wealth", "amount": 100 }]
+        }
+      ],
+      "next": [],
+      "options": [],
+      "ending": { "kind": "completed" }
+    },
+    {
+      "id": "dd000000-0000-4000-8000-00000000a004",
+      "revision": 2,
+      "title": "A letter never answered",
+      "speakers": [
+        {
+          "id": "figure",
+          "party": 0,
+          "name": "Agnes Hollin",
+          "character": "cb732500-39bd-3b39-a838-bb89f719578f"
+        }
+      ],
+      "said": [],
+      "next": [],
+      "options": [],
+      "ending": {
+        "kind": "lost",
+        "because": { "kind": "alive", "character": "cb732500-39bd-3b39-a838-bb89f719578f" }
+      }
+    }
+  ]
+}

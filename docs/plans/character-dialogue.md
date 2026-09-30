@@ -214,8 +214,11 @@ A speaker's death is tried with *kill*, in the Characters section.
    is at `/admin/inspect-events`.
 5. **Sent to the player**, in three commits. The first is done: `DialoguesProjection` folds every dialogue
    each house was offered, with the steps taken, how it stands and a revision that rises with each change,
-   behind the `DialoguesByHouse` port, and the wipe resets it. Then `yourDialogues`, holding back what has
-   not been reached, and the requirements switch, wire version 15; then the Dialogues section lists them.
+   behind the `DialoguesByHouse` port, and the wipe resets it. The second is done: `yourDialogues`, on hello
+   and on every change, walks each row and sends what has been said with what it gave, the stretch to the
+   next step and the options, and never a line past them or what a line will give; `showRequirements` adds
+   the requirements for one window. Wire version 15, and the page keeps them and says in the log what
+   changed. Then the Dialogues section lists them.
 6. **Dialogues lapse.** The pure function of which requirements an event breaks, the listener that carries
    a failure, and `FailRequirement` in the house's rules; `PlayerLostDialogue` joins the catalogue, and
    `ARCHITECTURE.md`'s "What acts on its own" gains the listener. *Kill* a speaker and the Dialogues section

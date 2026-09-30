@@ -27,7 +27,10 @@ import villages.application.ResourceService
 import villages.application.Start
 import villages.application.StoredEvent
 import villages.application.TakeActionService
+import villages.application.DialogueEnding
+import villages.application.DialogueRow
 import villages.application.DialogueService
+import villages.application.DialoguesByHouse
 import villages.application.VisionService
 import villages.application.VisionSource
 import villages.application.WorldClock
@@ -39,6 +42,9 @@ import villages.domain.CharacterId
 import villages.domain.Choice
 import villages.domain.ChoiceId
 import villages.domain.Effect
+import villages.domain.Line
+import villages.domain.Requirement
+import villages.domain.walk
 import villages.domain.DomainError
 import villages.domain.HouseError
 import villages.domain.HouseId
@@ -71,8 +77,15 @@ import villages.protocol.EffectView
 import villages.protocol.ErrorFrame
 import villages.protocol.EventFrame
 import villages.protocol.FogOfWar
+import villages.protocol.DialogueView
+import villages.protocol.EndingView
 import villages.protocol.FoundAtView
 import villages.protocol.GrantView
+import villages.protocol.LineView
+import villages.protocol.RequirementView
+import villages.protocol.SaidLineView
+import villages.protocol.ShowRequirements
+import villages.protocol.SpeakerView
 import villages.protocol.FoundHousePayload
 import villages.protocol.GiveVisionPayload
 import villages.protocol.GrantResourcePayload
@@ -122,6 +135,7 @@ import villages.protocol.WorldWiped
 import villages.protocol.YourChoice
 import villages.protocol.YourHouse
 import villages.protocol.YourHouseView
+import villages.protocol.YourDialogues
 import villages.protocol.YourKeyFigures
 import villages.protocol.YourSight
 import villages.protocol.coarsestZoom
@@ -186,6 +200,7 @@ class Gateway(
     private val sights: SightsByHouse,
     private val visions: VisionService,
     private val dialogues: DialogueService,
+    private val dialogueRows: DialoguesByHouse,
     private val later: Later = ScheduledLater(),
 ) : AutoCloseable {
     private val watching = ConcurrentHashMap<Connection, Unit>()
@@ -218,6 +233,14 @@ class Gateway(
      */
     private val figuresChanged: AutoCloseable = figures.watch { change ->
         sessions[change.player]?.out?.send(YourKeyFigures(change.keyFigures.map { it.toView() }))
+    }
+
+    /**
+     * A house's dialogues reach its player wherever they are looking, like its key figures: what a house was
+     * offered is its own, and needs no cell. Each window is sent what it may know of them. See decision 0067.
+     */
+    private val dialoguesChanged: AutoCloseable = dialogueRows.watch { change ->
+        sessions[change.player]?.tellDialogues(change.dialogues)
     }
 
     /** A character who moves, leaves the map or dies on it reaches whoever holds the cells either side. */
@@ -347,6 +370,7 @@ class Gateway(
         changes.close()
         asked.close()
         figuresChanged.close()
+        dialoguesChanged.close()
         moves.close()
         seen.close()
         faults.close()
@@ -398,6 +422,10 @@ class Gateway(
         @Volatile
         private var fog: Fog = Fog.NOBODY
 
+        /** Whether Adam's switch has asked for this window to be sent every dialogue's requirements. See 0067. */
+        @Volatile
+        private var requirementsShown: Boolean = false
+
         /** Set when this session is over, by a takeover or by the socket going away. It then does nothing. */
         @Volatile
         private var finished = false
@@ -416,6 +444,22 @@ class Gateway(
          * arriving. The first call always sends, even with nothing pending, so the answer to hello is
          * definite in the way `yourHouse` is.
          */
+        /**
+         * Sends this player their dialogues as this window may know them: what has been said and the stretch
+         * ahead, and each one's requirements only if the switch has asked for them. See decision record 0067.
+         */
+        internal fun tellDialogues(rows: List<DialogueRow>) {
+            out.send(YourDialogues(rows.map { it.toView(requirementsShown) }))
+        }
+
+        private fun showRequirements(on: Boolean) {
+            if (on == requirementsShown) {
+                return
+            }
+            requirementsShown = on
+            player?.let { who -> tellDialogues(dialogueRows.of(HouseId.of(who))) }
+        }
+
         internal fun tellChoice(choice: ChoiceView?) {
             synchronized(lock) {
                 if (finished || (everToldChoice && choice?.id == toldChoice)) {
@@ -480,6 +524,7 @@ class Gateway(
                 is ViewTime -> viewTime(frame.at)
                 is SeeAll -> seeAll(frame.on)
                 is FogOfWar -> fogOfWar(frame.on)
+                is ShowRequirements -> showRequirements(frame.on)
                 is WipeWorld -> wipeTheWorld()
             }
         }
@@ -530,6 +575,7 @@ class Gateway(
             out.send(YourHouse(theirHouses.ofPlayer(who)?.toYours()))
             out.send(YourKeyFigures(figures.of(HouseId.of(who)).map { it.toView() }))
             out.send(YourSight(sights.of(HouseId.of(who)).toView(), Vision.SURFACE_TENSION))
+            tellDialogues(dialogueRows.of(HouseId.of(who)))
 
             // Arriving with no house and nothing to decide is what the founding choice answers. The
             // choice arrive() hands back is what goes out, not a read of the projection: the projection
@@ -979,6 +1025,39 @@ internal fun Effect.toView(): EffectView = when (this) {
     )
 
     is Effect.Grant -> GrantView(resource = resource.toWire(), amount = amount)
+}
+
+/**
+ * A dialogue as its player may know it, walked from the steps taken: what has been said and what it gave, the
+ * stretch still to read and the options pending, and nothing past them. Its requirements go only to a window
+ * that asked. The walk is the decider's own, so the page and the house's rules cannot disagree. See 0067.
+ */
+internal fun DialogueRow.toView(requirementsShown: Boolean): DialogueView {
+    val walk = dialogue.walk(taken)
+    return DialogueView(
+        id = dialogue.id.value.toString(),
+        revision = revision,
+        title = dialogue.title,
+        scene = dialogue.scene,
+        speakers = dialogue.speakers.map {
+            SpeakerView(it.id.value, it.party, it.name, it.portrait, it.character?.value?.toString())
+        },
+        said = walk.said.map { SaidLineView(it.id.value, it.speaker.value, it.words, it.gives.map(Effect::toView)) },
+        next = walk.next.map { it.toView() },
+        options = walk.options.map { it.toView() },
+        ending = when (ending) {
+            DialogueEnding.Open -> EndingView.Open
+            DialogueEnding.Completed -> EndingView.Completed
+        },
+        requirements = if (requirementsShown) dialogue.needs().map { it.toView() } else null,
+    )
+}
+
+/** A line still to be read: the words and who says them, and not what it will give. */
+private fun Line.toView(): LineView = LineView(id.value, speaker.value, words)
+
+private fun Requirement.toView(): RequirementView = when (this) {
+    is Requirement.Alive -> RequirementView.Alive(character.value.toString())
 }
 
 /** What makes two deltas the same one: the thing they are about and its version. */

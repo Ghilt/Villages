@@ -245,6 +245,7 @@ class WorldConfig {
         sights: SightProjection,
         visions: VisionService,
         dialogues: DialogueService,
+        dialogueRows: DialoguesProjection,
     ): Gateway = Gateway(
         tokens = AnonymousTokens,
         foundHouse = foundHouse,
@@ -265,5 +266,6 @@ class WorldConfig {
         sights = sights,
         visions = visions,
         dialogues = dialogues,
+        dialogueRows = dialogueRows,
     )
 }

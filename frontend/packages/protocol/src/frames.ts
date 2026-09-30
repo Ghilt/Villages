@@ -177,6 +177,51 @@ export const optionViewSchema = z.object({
   effect: effectViewSchema,
 });
 
+/** Something a dialogue needs to stay true. `kind` names the case: `alive`, a character by id. See 0067. */
+export const requirementViewSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('alive'), character: z.string() }),
+]);
+
+/** How a dialogue stands: open, finished, or lost because one of its requirements failed. */
+export const endingViewSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('open') }),
+  z.object({ kind: z.literal('completed') }),
+  z.object({ kind: z.literal('lost'), because: requirementViewSchema }),
+]);
+
+/** Who speaks in a dialogue: the party says which side, and nothing about a screen. */
+export const speakerViewSchema = z.object({
+  id: z.string(),
+  party: z.number().int(),
+  name: z.string(),
+  portrait: z.string().optional(),
+  character: z.string().optional(),
+});
+
+/** A line still to be read: who says it and the words, and nothing about what it will give. */
+export const lineViewSchema = z.object({ id: z.string(), speaker: z.string(), words: z.string() });
+
+/** A line said, with what saying it gave the house. */
+export const saidLineViewSchema = lineViewSchema.extend({ gave: z.array(effectViewSchema) });
+
+/**
+ * One dialogue as the player may know it. `revision` rises with every change to it. `next` ends in the step
+ * to send when there are no `options`, and in the line the dialogue choice follows when there are. Nothing
+ * past it is ever sent, and `requirements` only to a window that asked. See decision record 0067.
+ */
+export const dialogueViewSchema = z.object({
+  id: z.string(),
+  revision: z.number().int(),
+  title: z.string(),
+  scene: z.string().optional(),
+  speakers: z.array(speakerViewSchema),
+  said: z.array(saidLineViewSchema),
+  next: z.array(lineViewSchema),
+  options: z.array(lineViewSchema),
+  ending: endingViewSchema,
+  requirements: z.array(requirementViewSchema).optional(),
+});
+
 /**
  * A choice as the parchment shows it. The interface renders this and nothing else, so a new kind of
  * choice needs no new frame and no new component. See decision record 0034.
@@ -270,6 +315,11 @@ export const clientFrameSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('fogOfWar'), on: z.boolean() }),
   /** Empty the development world, for everyone. A debug frame, never a player's. See 0036. */
   z.object({ type: z.literal('wipeWorld') }),
+  /**
+   * Send this window every dialogue's requirements, which a player is never sent, or stop. Off until this says
+   * otherwise, and for this connection only. Adam's switch and a debug frame, never a player's. See 0067.
+   */
+  z.object({ type: z.literal('showRequirements'), on: z.boolean() }),
 ]);
 
 /**
@@ -309,6 +359,11 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
     points: z.array(visionPointViewSchema),
     tension: z.number().nonnegative(),
   }),
+  /**
+   * The player's dialogues, open and finished, in the order the house was offered them. Always a list, sent
+   * after `yourSight` on hello and again whenever one changes, holding back what has not been reached. See 0067.
+   */
+  z.object({ type: z.literal('yourDialogues'), dialogues: z.array(dialogueViewSchema) }),
   /** Another window took this player over; this session is finished. */
   z.object({ type: z.literal('takenOver'), message: z.string() }),
   /** The world was emptied and this session is finished with it. Everyone is told. See 0036. */
@@ -358,6 +413,12 @@ export type HouseView = z.infer<typeof houseViewSchema>;
 export type EffectView = z.infer<typeof effectViewSchema>;
 export type OptionView = z.infer<typeof optionViewSchema>;
 export type ChoiceView = z.infer<typeof choiceViewSchema>;
+export type RequirementView = z.infer<typeof requirementViewSchema>;
+export type EndingView = z.infer<typeof endingViewSchema>;
+export type SpeakerView = z.infer<typeof speakerViewSchema>;
+export type LineView = z.infer<typeof lineViewSchema>;
+export type SaidLineView = z.infer<typeof saidLineViewSchema>;
+export type DialogueView = z.infer<typeof dialogueViewSchema>;
 export type StatName = z.infer<typeof statNameSchema>;
 export type Sex = z.infer<typeof sexSchema>;
 export type HolderView = z.infer<typeof holderViewSchema>;
