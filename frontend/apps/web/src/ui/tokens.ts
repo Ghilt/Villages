@@ -69,6 +69,10 @@ export const COLOURS: readonly TokenGroup[] = [
     ],
   },
   {
+    name: 'Focus',
+    tokens: [{ name: 'ui-focus', for: 'the ring round whatever the keyboard is on' }],
+  },
+  {
     name: 'Rarity',
     tokens: [
       { name: 'ui-rarity-common', for: 'common' },

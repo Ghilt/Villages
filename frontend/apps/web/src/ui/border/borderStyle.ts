@@ -15,6 +15,17 @@ import { imageSetOf } from '../art/pictures';
 
 const px = (sides: Sides): string => sides.map((side) => `${side}px`).join(' ');
 
+/** Four lengths drawn at a scale, to the hundredth of a pixel. */
+const scaled = (sides: Sides, by: number): Sides =>
+  by === 1
+    ? sides
+    : [
+        Math.round(sides[0] * by * 100) / 100,
+        Math.round(sides[1] * by * 100) / 100,
+        Math.round(sides[2] * by * 100) / 100,
+        Math.round(sides[3] * by * 100) / 100,
+      ];
+
 /** A share of a length, as CSS writes one, to enough places that nothing is lost at any density. */
 const share = (part: number, whole: number): string => `${Number(((part / whole) * 100).toFixed(6))}%`;
 
@@ -33,6 +44,11 @@ export interface BorderOptions {
   readonly middle?: boolean;
   /** Lay the edges this way, whatever the file says: for looking at what each way does. */
   readonly repeat?: readonly [Repeat, Repeat];
+  /**
+   * Draw it this many times the size its picture is shown, a button's face smaller than a pane's frame. The
+   * cuts are shares of the picture, so they fall in the same places at any size.
+   */
+  readonly scale?: number;
 }
 
 /** The style that draws a border picture round whatever box it is given. */
@@ -43,16 +59,18 @@ export function borderImageOf(
 ): BorderImage {
   const [top, right, bottom, left] = border.slice;
   const middle = options.middle ?? border.middle;
+  const scale = options.scale ?? 1;
+  const widths = px(scaled(border.slice, scale));
   return {
     borderStyle: 'solid',
-    borderWidth: px(border.slice),
+    borderWidth: widths,
     borderImageSource: imageSetOf(picture),
     borderImageSlice:
       `${share(top, picture.height)} ${share(right, picture.width)} ` +
       `${share(bottom, picture.height)} ${share(left, picture.width)}${middle ? ' fill' : ''}`,
-    borderImageWidth: px(border.slice),
+    borderImageWidth: widths,
     borderImageRepeat: (options.repeat ?? border.repeat).join(' '),
-    borderImageOutset: px(border.outset),
+    borderImageOutset: px(scaled(border.outset, scale)),
   };
 }
 

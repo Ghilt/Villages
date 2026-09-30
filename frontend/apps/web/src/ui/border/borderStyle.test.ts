@@ -58,6 +58,14 @@ describe('a border as CSS draws it', () => {
     expect(borderImageOf(picture(100, 80), middled, { middle: false }).borderImageSlice).not.toMatch(/fill/);
   });
 
+  it('draws smaller or larger at a scale, its cuts falling in the same places', () => {
+    const style = borderImageOf(picture(100, 80), border, { scale: 0.5 });
+    expect(style.borderWidth).toBe('12px 11.5px 12.5px 11px');
+    expect(style.borderImageWidth).toBe(style.borderWidth);
+    expect(style.borderImageOutset).toBe('1px 0px 0px 0px');
+    expect(style.borderImageSlice).toBe(borderImageOf(picture(100, 80), border).borderImageSlice);
+  });
+
   it('offers every density it was cut at', () => {
     expect(borderImageOf(picture(100, 80), border).borderImageSource).toBe(
       'image-set(url("/ui/borders/gilt.x@1x.webp") 1x, url("/ui/borders/gilt.x@2x.webp") 2x)',

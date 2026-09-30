@@ -135,7 +135,8 @@ world/ui/
   embellishments/<name>.png         transparent, any shape: cherub, drape, cross, sunburst
   medallions/<name>.png             a round or oval frame, transparent where the picture shows through
   marks/<name>.png                  only the marks chosen to be painted; the rest are drawn in code
-  controls/<name>-<state>.png       a button's face at rest, hovered, pressed and disabled
+  controls/<name>.webp + .json      a button's face at rest, and where it stretches to fit its words
+  controls/<name>-<state>.webp      the face hovered, pressed or disabled, when painted rather than lit
 ```
 
 - **Painted at four times the size it is shown.** A border's corner shown 48 pixels across is painted 192.
@@ -205,14 +206,16 @@ One commit each. After the fourth, the order is a menu.
 | 9 | Carousel and its dots, grid, card, list | the page |
 | 10 | Dialog, toast, text field, dropdown, medallion | the page |
 
-**Where it stands, 2026-09-30: nought to four are built**, which is the page able to be used for
+**Where it stands, 2026-09-30: nought to five are built.** Four made the page able to be used for
 verification: the foundations, every picture, borders and fills at any size, and containers with their
-recipes and embellishments, all at desktop and phone width and on night and parchment. The rest of its
-sections say which step brings them, and from here the order is a menu. Step four was built with a
-keep-out, room kept clear among the words for an embellishment, and Adam took it out the same day: see
-decision record 0068. Step two cut the top row of the moodboard's sample borders, not both: the second row
-is the same frames' corner pieces. The marks and the controls have no placeholders yet, and get them with
-steps five and six, which draw them. The page's Pictures section is the sheet of every placeholder.
+recipes and embellishments, all at desktop and phone width and on night and parchment. Five is the
+buttons: text, mark and state buttons and the window controls, in every state, on faces cut from the
+moodboard's buttons, with the library's first drawn marks. The rest of the page's sections say which step
+brings them, and from here the order is a menu. Step four was built with a keep-out, room kept clear among
+the words for an embellishment, and Adam took it out the same day: see decision record 0068. Step two cut
+the top row of the moodboard's sample borders, not both: the second row is the same frames' corner pieces.
+The marks have no placeholders: every one is drawn in code until one is painted. The page's Pictures
+section is the sheet of every placeholder.
 
 ## What Adam is asked for, and when
 

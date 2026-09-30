@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react';
 
 import { BordersAndFills } from './BordersAndFills';
+import { Buttons } from './Buttons';
 import { Containers } from './Containers';
 import { Foundations } from './Foundations';
 import { Pictures } from './Pictures';
@@ -52,7 +53,7 @@ export const SECTIONS: readonly Section[] = [
     id: 'buttons',
     title: 'Buttons',
     says: 'Text, mark and state buttons, and the window controls, in every state.',
-    arrives: 5,
+    Body: Buttons,
   },
   {
     id: 'readouts',

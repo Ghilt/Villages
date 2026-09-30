@@ -145,6 +145,52 @@ function giltFrame(size: number, moulding: number, rosette: boolean): string {
   );
 }
 
+/**
+ * A round face for a mark button: a gilt ring round dark stone, lit from the upper right, with nothing on
+ * it, so a drawn mark can stand in the middle. The moodboard's round buttons all have their mark painted
+ * in, which is one way; this is the other.
+ */
+function roundFace(size: number): string {
+  const c = size / 2;
+  const r = size / 2;
+  return (
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">` +
+    '<defs>' +
+    '<linearGradient id="ring" x1="1" y1="0" x2="0" y2="1">' +
+    '<stop offset="0" stop-color="#f6e0a4"/><stop offset="0.3" stop-color="#d0a960"/>' +
+    '<stop offset="0.65" stop-color="#86622f"/><stop offset="1" stop-color="#3f2c12"/></linearGradient>' +
+    '<radialGradient id="stone" cx="0.5" cy="0.5" r="0.5" fx="0.62" fy="0.36">' +
+    '<stop offset="0" stop-color="#5b5246"/><stop offset="0.6" stop-color="#3a332a"/>' +
+    '<stop offset="1" stop-color="#1f1a14"/></radialGradient>' +
+    '</defs>' +
+    `<circle cx="${c}" cy="${c}" r="${r * 0.97}" fill="#2a1d0d"/>` +
+    `<circle cx="${c}" cy="${c}" r="${r * 0.93}" fill="url(#ring)"/>` +
+    `<circle cx="${c}" cy="${c}" r="${r * 0.8}" fill="#34260f"/>` +
+    `<circle cx="${c}" cy="${c}" r="${r * 0.77}" fill="url(#stone)"/>` +
+    `<circle cx="${c}" cy="${c}" r="${r * 0.77}" fill="none" stroke="rgba(255,240,205,0.22)" stroke-width="${size / 90}"/>` +
+    '</svg>'
+  );
+}
+
+/** An outline round a box with its short ends made half circles, as an oval button is, in eight steps a half. */
+function stadium(left: number, top: number, width: number, height: number): Point[] {
+  const r = height / 2;
+  const cy = top + r;
+  const ends = [
+    { cx: left + width - r, from: -Math.PI / 2 },
+    { cx: left + r, from: Math.PI / 2 },
+  ];
+  return ends.flatMap(({ cx, from }) =>
+    Array.from({ length: 9 }, (_, at) => {
+      const turn = from + (Math.PI * at) / 8;
+      return [
+        Math.round((cx + r * Math.cos(turn)) * 10) / 10,
+        Math.round((cy + r * Math.sin(turn)) * 10) / 10,
+      ] as const;
+    }),
+  );
+}
+
 /** The width of a moulding in shown pixels, and so of the drawn frames' cuts. */
 const GILT = { size: 96, moulding: 18, cut: 24 };
 const THIN = { size: 48, moulding: 8, cut: 12 };
@@ -360,6 +406,99 @@ export const UI_PLACEHOLDERS: readonly UiPlaceholder[] = [
       [1370, 420],
       [1378, 404],
     ],
+  },
+
+  // Controls: a button's face at rest, keyed off the moodboard's dark ground. The two drapes and the oval
+  // are cut like a border, so a button stretches to its words; the round ones are one size, their marks
+  // painted in, and the drawn round face has none, for a drawn mark to stand on.
+  {
+    kind: 'controls',
+    name: 'primary',
+    about: 'the moodboard’s primary button, a red drape over a gilt bar',
+    from: [916, 73, 138, 65],
+    // Along an outline rather than keyed: the drape's darkest folds are as dark as the ground it lies on.
+    outline: [
+      [923, 78],
+      [946, 76],
+      [1028, 75],
+      [1050, 77],
+      [1053, 95],
+      [1053, 118],
+      [1046, 124],
+      [1041, 133],
+      [1030, 133],
+      [1000, 135],
+      [986, 137],
+      [970, 134],
+      [940, 133],
+      [926, 136],
+      [922, 128],
+      [919, 108],
+      [919, 92],
+    ],
+    border: { slice: [32, 42, 33, 42], repeat: 'stretch' },
+  },
+  {
+    kind: 'controls',
+    name: 'secondary',
+    about: 'the moodboard’s secondary button, a blue drape in a gilt frame',
+    from: [1059, 78, 98, 57],
+    outline: [
+      [1061, 80],
+      [1155, 80],
+      [1155, 134],
+      [1061, 134],
+    ],
+    border: { slice: [28, 30, 29, 30], repeat: 'stretch' },
+  },
+  {
+    kind: 'controls',
+    name: 'oval',
+    about: 'the moodboard’s oval, stone in a gilt rim',
+    from: [1162, 75, 101, 61],
+    outline: stadium(1163, 76, 99, 59),
+    border: { slice: [30, 34, 31, 34], repeat: 'stretch' },
+  },
+  {
+    kind: 'controls',
+    name: 'close',
+    about: 'the moodboard’s close, a cross on red in a gilt ring',
+    from: [1261, 276, 65, 68],
+    key: true,
+  },
+  {
+    kind: 'controls',
+    name: 'minimise',
+    about: 'the moodboard’s minimise, a bar in a gilt ring',
+    from: [1351, 284, 59, 57],
+    key: true,
+  },
+  {
+    kind: 'controls',
+    name: 'maximise',
+    about: 'the moodboard’s maximise, a square in a gilt ring',
+    from: [1445, 278, 59, 63],
+    key: true,
+  },
+  {
+    kind: 'controls',
+    name: 'previous',
+    about: 'the moodboard’s carousel arrow, pointing back',
+    from: [1272, 180, 67, 72],
+    key: true,
+  },
+  {
+    kind: 'controls',
+    name: 'next',
+    about: 'the moodboard’s carousel arrow, pointing on',
+    from: [1441, 174, 65, 70],
+    key: true,
+  },
+  {
+    kind: 'controls',
+    name: 'round-plain',
+    about: 'drawn: a gilt ring round dark stone, for a drawn mark to stand on',
+    svg: roundFace(painted(64)),
   },
 
   // Medallions, keyed off the dark ground they stand on.

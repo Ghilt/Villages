@@ -86,9 +86,12 @@ function writePlaceholders(known: Record<string, string>): void {
   writeFileSync(PLACEHOLDERS, `${JSON.stringify(sorted, null, 2)}\n`);
 }
 
+/** The kinds whose pictures can have a `.json` of cuts beside them: a border, and a control's face. */
+const SLICED: ReadonlySet<UiKind> = new Set(['borders', 'controls']);
+
 /**
  * The pictures in one kind's folder, by name, refusing a file whose name a recipe could not call it by
- * and two files that would both be the same picture. A border's `.json` is not a picture.
+ * and two files that would both be the same picture. A border's or a face's `.json` is not a picture.
  */
 function picturesIn(kind: UiKind): Map<string, string> {
   const folder = resolve(UI_DIR, kind);
@@ -98,7 +101,7 @@ function picturesIn(kind: UiKind): Map<string, string> {
   }
   for (const file of readdirSync(folder).sort()) {
     const extension = extname(file).toLowerCase();
-    if (extension === '.json' && kind === 'borders') {
+    if (extension === '.json' && SLICED.has(kind)) {
       continue;
     }
     if (!UI_PICTURES.has(extension) && extension !== '') {
@@ -322,7 +325,7 @@ async function placeholders(): Promise<void> {
       made += 1;
       console.log(`made  ${placeholder.kind}/${file}`);
     }
-    if (placeholder.kind === 'borders' && 'border' in placeholder && placeholder.border !== undefined) {
+    if ('border' in placeholder && placeholder.border !== undefined) {
       const json = resolve(UI_DIR, placeholder.kind, `${placeholder.name}.json`);
       if (!existsSync(json)) {
         writeFileSync(json, borderFileOf(placeholder, placeholder.border));
@@ -493,9 +496,14 @@ async function cutOne(kind: UiKind, name: string, file: string, known: Record<st
     return { density, url: `/ui/${kind}/${named}`, width, height, bytes: out.length };
   });
 
+  // A border has to say where its cuts go; a control's face may, and is then stretched to its words.
   let border;
+  const json = resolve(UI_DIR, kind, `${name}.json`);
+  if (kind === 'controls' && existsSync(json)) {
+    const where = `world/ui/${kind}/${name}.json`;
+    border = borderAsShown(readBorderFile(readFileSync(json, 'utf8'), where), remembered, where);
+  }
   if (kind === 'borders') {
-    const json = resolve(UI_DIR, kind, `${name}.json`);
     if (!existsSync(json)) {
       throw new Error(
         `world/ui/${source} has no ${name}.json beside it, saying where its four cuts go: ` +

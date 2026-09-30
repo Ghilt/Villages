@@ -1,0 +1,180 @@
+/*
+ * A button: its face under it, its words or its mark over the face, and its states, the same for every
+ * face. Light and shade over the one picture unless a state has been painted, in which case that picture
+ * is drawn instead and the light and shade are not. A fifth of a second or less for any change, because
+ * nothing in the interface pops (LOOK-AND-FEEL.md).
+ */
+
+@layer ui {
+  .ui-button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: var(--ui-cream);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.08s ease;
+  }
+
+  .ui-button__face {
+    position: absolute;
+    inset: 0;
+    box-sizing: border-box;
+    pointer-events: none;
+    transition: filter 0.12s ease;
+  }
+
+  .ui-button__face--whole {
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+  }
+
+  .ui-button__face--missing {
+    border: 2px dashed var(--ui-rarity-legendary);
+    border-radius: 6px;
+  }
+
+  .ui-button__label,
+  .ui-button__mark {
+    position: relative;
+    z-index: 1;
+  }
+
+  .ui-button__label {
+    white-space: nowrap;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.75),
+      0 0 6px rgba(0, 0, 0, 0.4);
+  }
+
+  .ui-button--small .ui-button__label {
+    font-size: 0.82rem;
+  }
+
+  .ui-button--regular .ui-button__label {
+    font-size: 0.98rem;
+  }
+
+  .ui-button--large .ui-button__label {
+    font-size: 1.2rem;
+  }
+
+  .ui-button__mark {
+    display: grid;
+    place-items: center;
+    color: var(--ui-cream);
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.6));
+  }
+
+  /* Under the pointer. */
+  .ui-button:hover:not(:disabled) .ui-button__face,
+  .ui-button[data-showing='hover'] .ui-button__face {
+    filter: brightness(1.15) saturate(1.08);
+  }
+
+  /* Pressed: darker, and a pixel lower, as a thing pushed in. */
+  .ui-button:active:not(:disabled),
+  .ui-button[data-showing='pressed'] {
+    transform: translateY(1px);
+  }
+
+  .ui-button:active:not(:disabled) .ui-button__face,
+  .ui-button[data-showing='pressed'] .ui-button__face {
+    filter: brightness(0.84);
+  }
+
+  /* Focused from the keyboard: a gilt ring, round for a round button. */
+  .ui-button:focus-visible,
+  .ui-button[data-showing='focus'] {
+    outline: 2px solid var(--ui-focus);
+    outline-offset: 3px;
+    border-radius: 8px;
+  }
+
+  .ui-button--mark:focus-visible,
+  .ui-button--mark[data-showing='focus'] {
+    border-radius: 50%;
+  }
+
+  /* Chosen, a state button that is on: a gilt glow round the face, and the mark in gilt. */
+  .ui-button[aria-pressed='true'] .ui-button__face {
+    filter: drop-shadow(0 0 5px color-mix(in srgb, var(--ui-gilt-light) 75%, transparent)) brightness(1.06);
+  }
+
+  .ui-button[aria-pressed='true'] .ui-button__mark {
+    color: var(--ui-gilt-light);
+  }
+
+  /* Chosen and under the pointer at once keeps the glow, and is lighter. */
+  .ui-button[aria-pressed='true']:hover:not(:disabled) .ui-button__face,
+  .ui-button[aria-pressed='true'][data-showing='hover'] .ui-button__face {
+    filter: drop-shadow(0 0 5px color-mix(in srgb, var(--ui-gilt-light) 75%, transparent)) brightness(1.18);
+  }
+
+  /* Disabled: grey and dim, and nothing under the pointer changes it. */
+  .ui-button:disabled {
+    cursor: not-allowed;
+  }
+
+  .ui-button:disabled .ui-button__face {
+    filter: grayscale(0.75) brightness(0.7);
+  }
+
+  .ui-button:disabled .ui-button__label,
+  .ui-button:disabled .ui-button__mark {
+    opacity: 0.5;
+  }
+
+  /* A state Adam has painted is drawn instead of the light and shade. */
+  .ui-button:hover:not(:disabled) .ui-button__face[data-painted~='hover'],
+  .ui-button[data-showing='hover'] .ui-button__face[data-painted~='hover'],
+  .ui-button:active:not(:disabled) .ui-button__face[data-painted~='pressed'],
+  .ui-button[data-showing='pressed'] .ui-button__face[data-painted~='pressed'],
+  .ui-button:disabled .ui-button__face[data-painted~='disabled'] {
+    filter: none;
+  }
+
+  .ui-button:hover:not(:disabled) .ui-button__face--sliced[data-painted~='hover'],
+  .ui-button[data-showing='hover'] .ui-button__face--sliced[data-painted~='hover'] {
+    border-image-source: var(--ui-face-hover);
+  }
+
+  .ui-button:active:not(:disabled) .ui-button__face--sliced[data-painted~='pressed'],
+  .ui-button[data-showing='pressed'] .ui-button__face--sliced[data-painted~='pressed'] {
+    border-image-source: var(--ui-face-pressed);
+  }
+
+  .ui-button:disabled .ui-button__face--sliced[data-painted~='disabled'] {
+    border-image-source: var(--ui-face-disabled);
+  }
+
+  .ui-button:hover:not(:disabled) .ui-button__face--whole[data-painted~='hover'],
+  .ui-button[data-showing='hover'] .ui-button__face--whole[data-painted~='hover'] {
+    background-image: var(--ui-face-hover);
+  }
+
+  .ui-button:active:not(:disabled) .ui-button__face--whole[data-painted~='pressed'],
+  .ui-button[data-showing='pressed'] .ui-button__face--whole[data-painted~='pressed'] {
+    background-image: var(--ui-face-pressed);
+  }
+
+  .ui-button:disabled .ui-button__face--whole[data-painted~='disabled'] {
+    background-image: var(--ui-face-disabled);
+  }
+
+  .ui-window-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ui-space-1);
+  }
+}

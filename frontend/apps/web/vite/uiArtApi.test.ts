@@ -9,8 +9,9 @@ describe('the dev server keeping the interface pictures cut', () => {
     expect(isUiSource('fills/parchment.jpg')).toBe(true);
   });
 
-  it('cuts again when a border’s cuts are moved', () => {
+  it('cuts again when a border’s cuts are moved, or a face’s', () => {
     expect(isUiSource('borders/gilt-simple.json')).toBe(true);
+    expect(isUiSource('controls/primary.json')).toBe(true);
   });
 
   it('is not set off by what no cut reads', () => {

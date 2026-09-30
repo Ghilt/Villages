@@ -47,6 +47,9 @@
     --ui-lapis: #34465a;
     --ui-lapis-light: #58697c;
 
+    /* The ring round whatever the keyboard is on: the brightest gilt, so it reads on night and parchment. */
+    --ui-focus: #f3d99b;
+
     /* Rarity, the four bands of LOOK-AND-FEEL.md, in values that sit on night and on parchment alike. */
     --ui-rarity-common: #9b958b;
     --ui-rarity-uncommon: #6f9a55;

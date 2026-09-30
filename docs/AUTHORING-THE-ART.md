@@ -115,13 +115,13 @@ every start cheap enough to do.
     world/ui/embellishments/<name>.webp          a cherub, a drape, a cross: anything pinned to a box
     world/ui/medallions/<name>.webp              a round or oval frame, one fixed picture
     world/ui/marks/<name>.png                    a mark chosen to be painted rather than drawn
-    world/ui/controls/<name>-<state>.png         a button's face: rest, hover, pressed, disabled
+    world/ui/controls/<name>.webp + <name>.json  a button's face at rest, and where it stretches
+    world/ui/controls/<name>-<state>.webp        the same face hovered, pressed or disabled, if painted
     world/ui/moodboard.webp                      the moodboard the placeholders are cut from
     world/ui/placeholders.json                   which files are still placeholders, by their bytes
 
 A name is lowercase words joined by hyphens, `gilt-simple`, because it is what a recipe calls the picture
-by. PNG, WebP or JPEG. Marks and controls have no placeholders yet; they arrive with the steps that build
-the components that draw them.
+by. PNG, WebP or JPEG. Marks have no placeholders: every mark is drawn in code until one is painted.
 
 **Every picture has a placeholder**, and **saving over a placeholder replaces it**, as it does for the
 sprites: delete the placeholder first if your extension differs, because two files that are both
@@ -176,8 +176,18 @@ what that does to them.
 save it on one flat colour and the tool keys the colour away, as it does a sprite's. One on a busy
 background is refused, with a message saying so.
 
+**A button's face is painted at rest**, whole, the way the moodboard's buttons are. One that should
+stretch to fit its words - a drape, an oval - has a `<name>.json` of cuts beside it, as a border has, with
+its top and bottom cuts together as tall as the face, so that it stretches across and never up. The end
+caps outside the side cuts are where the words stop. A round face has no file and is drawn one size. Its
+states are light and shade over the one picture - lighter under the pointer, darker pressed, grey disabled
+- unless you paint one: `primary-hover`, `primary-pressed` or `primary-disabled` beside `primary` is drawn in
+that state instead, and the others stay light and shade. A round face can have its mark painted in, as the
+moodboard's close and minimise do, or be plain, `round-plain`, for a drawn mark to stand on.
+
 **A painted mark has to read at seventeen pixels**, the size a resource's mark is drawn at, and a mark
-that does not survive it is drawn in code instead.
+that does not survive it is drawn in code instead. `world/ui/marks/close.webp` is drawn wherever the mark
+called `close` is; delete it and the drawn one is back.
 
 ### What the tool does
 

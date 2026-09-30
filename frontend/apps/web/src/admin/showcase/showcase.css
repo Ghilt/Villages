@@ -588,3 +588,20 @@
   gap: var(--ui-space-3);
   margin-top: var(--ui-space-3);
 }
+
+/* Buttons to press for real, in a row, and what the last press did. */
+
+.showcase__try {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ui-space-3);
+}
+
+.showcase__said {
+  margin-left: var(--ui-space-2);
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  font-size: 0.76rem;
+  font-style: normal;
+  color: var(--ui-gilt-light);
+}

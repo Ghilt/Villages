@@ -455,7 +455,9 @@ Commands are added here as the increments land:
 - Interface art: `world/ui/` is Adam's folder, committed as the master is, a folder a kind - `borders`,
   `fills`, `embellishments`, `medallions`, `marks`, `controls` - and **every picture in it is painted at
   four times the size it is shown**. A border is a whole framed box with a `<name>.json` beside it saying
-  where its four cuts go, in the picture's own pixels. **Saving over a placeholder replaces it**, and with
+  where its four cuts go, in the picture's own pixels, and so is a button's face that stretches to its
+  words; a face's hovered, pressed and disabled states are light and shade over it unless painted as
+  `<name>-hover` and the like. **Saving over a placeholder replaces it**, and with
   the dev server running the picture is in the Pictures section of `/admin/inspect-ui-components` a
   moment later, with no reload, because the server cuts the folder again whenever a picture or a border's
   file in it is saved, and at every start. By hand that is `npm run world:ui --prefix frontend`: it keys,

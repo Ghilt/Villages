@@ -8,8 +8,8 @@ import type { Plugin, ViteDevServer } from 'vite';
 import { oneCutAtATime } from './artApi.ts';
 
 /**
- * The dev server keeps the interface's pictures cut: whenever a picture in `world/ui/` is saved, or a
- * border's `.json` beside it, and every time the server starts, it runs `npm run world:ui` again, and when
+ * The dev server keeps the interface's pictures cut: whenever a picture in `world/ui/` is saved, or the
+ * `.json` of cuts beside a border or a face, and every time the server starts, it runs `npm run world:ui` again, and when
  * that changed what is cut it tells the page, which reads the list again and draws the new pictures.
  *
  * So the loop for an interface picture is the sprites' loop: save a picture over a placeholder, look at
@@ -33,8 +33,9 @@ const SETTLE_MS = 300;
 const PICTURES = new Set(['.png', '.webp', '.jpg', '.jpeg']);
 
 /**
- * Whether a changed file is one the cut reads: a picture in a kind's folder, or a border's file. The
- * moodboard is not read by a cut, and `placeholders.json` is written by one, so neither sets it off.
+ * Whether a changed file is one the cut reads: a picture in a kind's folder, or the file of cuts beside a
+ * border or a control's face. The moodboard is not read by a cut, and `placeholders.json` is written by
+ * one, so neither sets it off.
  */
 export function isUiSource(file: string): boolean {
   const path = file.replaceAll('\\', '/');
@@ -42,7 +43,10 @@ export function isUiSource(file: string): boolean {
     return false;
   }
   const extension = extname(path).toLowerCase();
-  return PICTURES.has(extension) || (extension === '.json' && path.startsWith('borders/'));
+  return (
+    PICTURES.has(extension) ||
+    (extension === '.json' && (path.startsWith('borders/') || path.startsWith('controls/')))
+  );
 }
 
 function cut(server: ViteDevServer, why: string): Promise<boolean> {

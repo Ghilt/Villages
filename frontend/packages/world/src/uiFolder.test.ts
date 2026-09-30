@@ -24,6 +24,9 @@ const picturesIn = (kind: string): string[] =>
 
 const stem = (file: string) => file.slice(0, -extname(file).length);
 
+/** The kinds whose pictures can have a file of cuts beside them: a border must, a control's face may. */
+const SLICED = ['borders', 'controls'];
+
 describe("the interface's pictures folder, which is Adam's", () => {
   it('holds a folder a kind of picture, the moodboard, the placeholders’ record, and nothing else', () => {
     const allowed = new Set<string>([...UI_KINDS, 'moodboard.webp', 'placeholders.json', 'README.md']);
@@ -34,7 +37,7 @@ describe("the interface's pictures folder, which is Adam's", () => {
   it('names every picture so a recipe can call it by its name', () => {
     for (const kind of UI_KINDS) {
       for (const file of filesIn(kind)) {
-        if (kind === 'borders' && file.endsWith('.json')) {
+        if (SLICED.includes(kind) && file.endsWith('.json')) {
           continue;
         }
         expect(nameProblem(file), `${kind}/${file}`).toBeNull();
@@ -69,10 +72,23 @@ describe("the interface's pictures folder, which is Adam's", () => {
     ).toEqual([]);
   });
 
-  it('has border files the tool can read', () => {
-    for (const file of filesIn('borders').filter((one) => one.endsWith('.json'))) {
-      const text = readFileSync(new URL(`borders/${file}`, UI), 'utf8');
-      expect(() => readBorderFile(text, file), file).not.toThrow();
+  it('gives every control’s file of cuts a face to cut', () => {
+    const faces = new Set(picturesIn('controls').map(stem));
+    const files = filesIn('controls')
+      .filter((file) => file.endsWith('.json'))
+      .map(stem);
+    expect(
+      files.filter((name) => !faces.has(name)),
+      'files of cuts with no face',
+    ).toEqual([]);
+  });
+
+  it('has files of cuts the tool can read', () => {
+    for (const kind of SLICED) {
+      for (const file of filesIn(kind).filter((one) => one.endsWith('.json'))) {
+        const text = readFileSync(new URL(`${kind}/${file}`, UI), 'utf8');
+        expect(() => readBorderFile(text, file), `${kind}/${file}`).not.toThrow();
+      }
     }
   });
 
