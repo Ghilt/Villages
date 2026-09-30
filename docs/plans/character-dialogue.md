@@ -29,12 +29,13 @@ Recorded whole on the event that offers it.
 | title | a line | what the list shows |
 | scene | a picture's key, or none | from `world/scenes/`, once step 11 has made the folder |
 | speakers | each: an id, a party, a name, a portrait's key or none, a character id or none | a speaker with no character id is somebody who is not a character, a messenger say |
-| lines | each: an id, a speaker, the words, what saying it gives, whether it is recorded, and what follows | the first line is where it opens; a line's id and a speaker's are words, so a dialogue written by hand reads |
+| lines | each: an id, a speaker, the words, what saying it does, whether it is recorded, and what follows | the first line is where it opens; a line's id and a speaker's are words, so a dialogue written by hand reads |
 | what follows a line | another line, a dialogue choice of two to four option lines, or the end | a line followed by the end is always recorded |
 | requirements | any it was written to need | every speaker with a character id is also required alive, which is worked out rather than written |
 
-What a line gives is the existing `Effect`, with a new case: `Effect.Grant(resource, amount)` beside
-`FoundAt`. A requirement is one sealed type, `Requirement`, which is also what a loss names as its cause; its
+What a line does is its `effects`, the existing `Effect` with two new cases beside `FoundAt`:
+`Effect.Grant(resource, amount)`, and `Effect.Spend(resource, amount)`, which a house that has not that much
+free refuses. A requirement is one sealed type, `Requirement`, which is also what a loss names as its cause; its
 one kind in this plan is `Alive(character)`, and how another kind is added is below.
 
 A dialogue checks itself when it is made, as `Choice` does:
@@ -44,7 +45,9 @@ A dialogue checks itself when it is made, as `Choice` does:
 - no cycles, so every path ends, and every line reached from the first, so nothing written goes unsaid. A
   conversation that comes back to a question it asked is refused for now;
 - every dialogue choice offering two to four options;
-- no effect a step could be refused: a `FoundAt`, or a grant of nothing.
+- no effect a step could be refused: a `FoundAt`, or a grant of nothing; and since a spend can be refused,
+  only an option may spend, and every dialogue choice keeps an option that costs nothing, so a house that
+  cannot pay answers otherwise.
 
 ## The commands and events
 
@@ -123,8 +126,8 @@ them with its switch, which the gateway keeps for that one connection as it keep
 
 Two commands. The debug panel's offer names which sample it wants and none of its words, because a client
 that could write a dialogue could write itself a reward. The step is `completeDialogueStep { dialogueId,
-lineId }`. The wire moves four times: version 13 lets a choice's effect be a grant, 14 carries the debug
-offer, 15 the dialogues and the switch, and 16 the step.
+lineId }`. The wire has moved: version 13 lets a choice's effect be a grant, 14 carries the debug offer,
+15 the dialogues and the switch, and 16 a spend; 17 is an option's reveal impact, and 18 the step.
 
 ## The pane
 
@@ -218,7 +221,10 @@ A speaker's death is tried with *kill*, in the Characters section.
    and on every change, walks each row and sends what has been said with what it gave, the stretch to the
    next step and the options, and never a line past them or what a line will give; `showRequirements` adds
    the requirements for one window. Wire version 15, and the page keeps them and says in the log what
-   changed. Then the Dialogues section lists them.
+   changed. Between the second and the third, on Adam's word of 2026-09-30: a line can spend, only on an
+   option and never on every option of a dialogue choice, wire version 16; and an option shows its reveal
+   impact, version 17, with the sample carrying spends and gives to verify both. Then the Dialogues section
+   lists them.
 6. **Dialogues lapse.** The pure function of which requirements an event breaks, the listener that carries
    a failure, and `FailRequirement` in the house's rules; `PlayerLostDialogue` joins the catalogue, and
    `ARCHITECTURE.md`'s "What acts on its own" gains the listener. *Kill* a speaker and the Dialogues section

@@ -112,18 +112,19 @@ class DialogueServiceSpec : StringSpec({
         provenance.correlationId shouldBe sent
     }
 
-    "one answer pays a purse and the other pays nothing" {
+    "accepting costs the masons' forty and is paid the dues, asking is paid in influence, and refusing does nothing" {
         val (houses, service) = rig(agnes)
         service.offerSample(ada, SampleDialogues.LETTER, Provenance.startedBy(sent))
         val letter = (houses.written.single().first as PlayerOfferedDialogue).dialogue
+        fun effectsOf(vararg steps: String) =
+            letter.walk(steps.map(::LineId)).also { it.over shouldBe true }.said.flatMap { it.effects }
 
-        val paid = letter.walk(listOf(LineId("accept"), LineId("paid")))
-        val unpaid = letter.walk(listOf(LineId("refuse"), LineId("shrugs")))
-
-        paid.over shouldBe true
-        paid.said.flatMap { it.gives } shouldBe listOf(Effect.Grant(Resource.WEALTH, SampleDialogues.DUES))
-        unpaid.over shouldBe true
-        unpaid.said.flatMap { it.gives } shouldBe emptyList()
+        effectsOf("accept", "paid") shouldBe listOf(
+            Effect.Spend(Resource.WEALTH, SampleDialogues.MASONS),
+            Effect.Grant(Resource.WEALTH, SampleDialogues.DUES),
+        )
+        effectsOf("ask", "answer") shouldBe listOf(Effect.Grant(Resource.INFLUENCE, SampleDialogues.GOOD_WORD))
+        effectsOf("refuse", "shrugs") shouldBe emptyList()
     }
 
     "a house with no key figure is refused, because the letter is theirs to answer" {

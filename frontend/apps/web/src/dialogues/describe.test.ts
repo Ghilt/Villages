@@ -32,7 +32,7 @@ describe('where a dialogue stands', () => {
   });
 
   it('says how it ended, and how much was said', () => {
-    const said = [{ ...line('arrives'), gave: [] }];
+    const said = [{ ...line('arrives'), effects: [] }];
 
     expect(standing(letter({ said, next: [], options: [], ending: { kind: 'completed' } }))).toBe(
       'finished, 1 line said',

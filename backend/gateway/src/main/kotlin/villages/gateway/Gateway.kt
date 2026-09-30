@@ -86,6 +86,7 @@ import villages.protocol.RequirementView
 import villages.protocol.SaidLineView
 import villages.protocol.ShowRequirements
 import villages.protocol.SpeakerView
+import villages.protocol.SpendView
 import villages.protocol.FoundHousePayload
 import villages.protocol.GiveVisionPayload
 import villages.protocol.GrantResourcePayload
@@ -1025,10 +1026,12 @@ internal fun Effect.toView(): EffectView = when (this) {
     )
 
     is Effect.Grant -> GrantView(resource = resource.toWire(), amount = amount)
+
+    is Effect.Spend -> SpendView(resource = resource.toWire(), amount = amount)
 }
 
 /**
- * A dialogue as its player may know it, walked from the steps taken: what has been said and what it gave, the
+ * A dialogue as its player may know it, walked from the steps taken: what has been said and what it did, the
  * stretch still to read and the options pending, and nothing past them. Its requirements go only to a window
  * that asked. The walk is the decider's own, so the page and the house's rules cannot disagree. See 0067.
  */
@@ -1042,7 +1045,7 @@ internal fun DialogueRow.toView(requirementsShown: Boolean): DialogueView {
         speakers = dialogue.speakers.map {
             SpeakerView(it.id.value, it.party, it.name, it.portrait, it.character?.value?.toString())
         },
-        said = walk.said.map { SaidLineView(it.id.value, it.speaker.value, it.words, it.gives.map(Effect::toView)) },
+        said = walk.said.map { SaidLineView(it.id.value, it.speaker.value, it.words, it.effects.map(Effect::toView)) },
         next = walk.next.map { it.toView() },
         options = walk.options.map { it.toView() },
         ending = when (ending) {

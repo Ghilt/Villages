@@ -16,9 +16,9 @@ class DialogueWalkSpec : StringSpec({
         id: String,
         then: Then,
         by: Speaker = messenger,
-        gives: List<Effect> = emptyList(),
+        effects: List<Effect> = emptyList(),
         recorded: Boolean = false,
-    ) = Line(LineId(id), by.id, "The words of $id.", gives, recorded, then)
+    ) = Line(LineId(id), by.id, "The words of $id.", effects, recorded, then)
 
     fun dialogue(vararg lines: Line) = Dialogue(
         id = DialogueId(UUID.fromString("dd000000-0000-4000-8000-00000000a001")),
@@ -33,7 +33,7 @@ class DialogueWalkSpec : StringSpec({
     // The messenger speaks, the lady chooses, and one of the two paths pays before it ends.
     val arrives = line("arrives", Then.Say(LineId("asks")))
     val asks = line("asks", Then.DialogueChoice(ids("accept", "refuse")))
-    val accept = line("accept", Then.Say(LineId("thanks")), by = lady, gives = listOf(purse))
+    val accept = line("accept", Then.Say(LineId("thanks")), by = lady, effects = listOf(purse))
     val refuse = line("refuse", Then.End, by = lady)
     val thanks = line("thanks", Then.End)
     val letter = dialogue(arrives, asks, accept, refuse, thanks)
@@ -74,7 +74,7 @@ class DialogueWalkSpec : StringSpec({
         letter.walk(ids("accept", "thanks")).allows(LineId("thanks")).shouldBeFalse()
     }
 
-    "a line is a step when it gives, ends the dialogue, is marked, or is an option, and the rest are only read" {
+    "a line is a step when it has an effect, ends the dialogue, is marked, or is an option, and the rest are only read" {
         letter.lines.filter(letter::isStep) shouldBe listOf(accept, refuse, thanks)
 
         val marked = line("marked", Then.Say(LineId("end")), recorded = true)
@@ -93,7 +93,7 @@ class DialogueWalkSpec : StringSpec({
     }
 
     "a step followed by a dialogue choice leaves nothing to read but the options" {
-        val gift = line("gift", Then.DialogueChoice(ids("yes", "no")), gives = listOf(purse))
+        val gift = line("gift", Then.DialogueChoice(ids("yes", "no")), effects = listOf(purse))
         val yes = line("yes", Then.End, by = lady)
         val no = line("no", Then.End, by = lady)
         val talk = dialogue(gift, yes, no)
@@ -105,7 +105,7 @@ class DialogueWalkSpec : StringSpec({
     "paths that meet again pay the line where they meet once, whichever way they came" {
         val kindly = line("kindly", Then.Say(LineId("paid")), by = lady)
         val coldly = line("coldly", Then.Say(LineId("paid")), by = lady)
-        val paid = line("paid", Then.Say(LineId("gone")), gives = listOf(purse))
+        val paid = line("paid", Then.Say(LineId("gone")), effects = listOf(purse))
         val gone = line("gone", Then.End)
         val talk = dialogue(line("asks", Then.DialogueChoice(ids("kindly", "coldly"))), kindly, coldly, paid, gone)
 

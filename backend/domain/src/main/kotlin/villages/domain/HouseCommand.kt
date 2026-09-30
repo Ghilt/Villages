@@ -107,7 +107,7 @@ data class OfferDialogue(
 /**
  * Take one step through a dialogue the house has open: an option of the dialogue choice pending, or the line the
  * stretch being read ends in. Anything else is refused, which is what pays a line's reward once on every path.
- * What the line gives, and the end when it ends the dialogue, follow from the same decision. See decision
+ * What the line does, and the end when it ends the dialogue, follow from the same decision. See decision
  * record 0067.
  */
 data class CompleteDialogueStep(

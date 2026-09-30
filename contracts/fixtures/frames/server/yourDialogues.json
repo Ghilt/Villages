@@ -21,19 +21,19 @@
           "id": "arrives",
           "speaker": "messenger",
           "words": "Agnes, a rider has come in from the coast with a letter under the harbour-master's seal.",
-          "gave": []
+          "effects": []
         },
         {
           "id": "reads",
           "speaker": "messenger",
           "words": "The harbour-master is building a new quay, and asks whether the house will stand behind it.",
-          "gave": []
+          "effects": []
         },
         {
           "id": "accept",
           "speaker": "figure",
-          "words": "Tell him the house will, and that it expects its share of the dues.",
-          "gave": []
+          "words": "Tell him the house will, and send forty for the masons.",
+          "effects": [{ "kind": "spend", "resource": "wealth", "amount": 40 }]
         }
       ],
       "next": [
@@ -72,7 +72,7 @@
           "id": "paid",
           "speaker": "messenger",
           "words": "The first of the dues came with me.",
-          "gave": [{ "kind": "grant", "resource": "wealth", "amount": 100 }]
+          "effects": [{ "kind": "grant", "resource": "wealth", "amount": 100 }]
         }
       ],
       "next": [],

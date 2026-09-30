@@ -35,9 +35,10 @@ import tools.jackson.databind.JsonNode
  * a `grant`, some of a resource given, which is what a line of a dialogue gives too. See decision record 0067.
  * Version 14 added `offerDialogue`, the debug panel's offer of a sample dialogue by name. Version 15 added
  * `yourDialogues`, the player's dialogues with what has not been reached held back, and `showRequirements`,
- * Adam's switch that sends one window their requirements.
+ * Adam's switch that sends one window their requirements. Version 16 let an effect be a `spend`, what an option
+ * costs, and named what a said line did its `effects`.
  */
-const val PROTOCOL_VERSION = 15
+const val PROTOCOL_VERSION = 16
 
 data class Point(val lat: Double, val lon: Double)
 
@@ -542,8 +543,8 @@ data class SpeakerView(
 /** A line still to be read: who says it and the words, and nothing about what it will give. */
 data class LineView(val id: String, val speaker: String, val words: String)
 
-/** A line said, with what saying it gave the house. */
-data class SaidLineView(val id: String, val speaker: String, val words: String, val gave: List<EffectView>)
+/** A line said, with what saying it did to the house: what it gave, and what it took. */
+data class SaidLineView(val id: String, val speaker: String, val words: String, val effects: List<EffectView>)
 
 /** How a dialogue stands. `kind` names the case, as it does for an effect. */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "kind")
@@ -590,6 +591,7 @@ data class OptionView(val id: String, val label: String, val detail: String, val
 @JsonSubTypes(
     JsonSubTypes.Type(FoundAtView::class, name = "foundAt"),
     JsonSubTypes.Type(GrantView::class, name = "grant"),
+    JsonSubTypes.Type(SpendView::class, name = "spend"),
 )
 sealed interface EffectView
 
@@ -597,6 +599,9 @@ data class FoundAtView(val seat: Point, val name: String, val banner: BannerSpec
 
 /** Some of a resource given to the house. `resource` is a wire name, so `naturalDomain` and not Domain. */
 data class GrantView(val resource: String, val amount: Long) : EffectView
+
+/** Some of a resource taken from the house: what an option costs. A wire name, as a grant's is. */
+data class SpendView(val resource: String, val amount: Long) : EffectView
 
 /**
  * One stored event, as stored: the envelope and the data, for a client that asked to watch. `eventType` is

@@ -32,6 +32,7 @@ import villages.application.WorldClock
 import villages.application.WriteConflict
 import villages.domain.CompleteDialogueStep
 import villages.domain.Effect
+import villages.domain.GrantResource
 import villages.domain.LineId
 import villages.domain.CharacterCommand
 import villages.domain.CharacterDecider
@@ -76,6 +77,7 @@ import villages.protocol.FoundAtView
 import villages.protocol.RequirementView
 import villages.protocol.EndingView
 import villages.protocol.GrantView
+import villages.protocol.SpendView
 import villages.protocol.EventFrame
 import villages.protocol.HouseAppeared
 import villages.protocol.Point
@@ -1674,7 +1676,7 @@ class GatewaySpec : StringSpec({
         letter.title shouldBe "A letter from the coast"
         letter.said shouldBe emptyList()
         letter.next.map { it.id } shouldBe listOf("arrives", "reads")
-        letter.options.map { it.id } shouldBe listOf("accept", "refuse")
+        letter.options.map { it.id } shouldBe listOf("accept", "ask", "refuse")
         letter.ending shouldBe EndingView.Open
         letter.requirements shouldBe null
         // Both answers' replies, and the purse, are the server's until a step reaches them.
@@ -1695,15 +1697,21 @@ class GatewaySpec : StringSpec({
             Provenance.startedBy(UUID.randomUUID()),
         )
 
+        // Standing behind the quay costs forty, so the house is given it first.
+        rig.world.execute(
+            GrantResource(offered.houseId, Resource.WEALTH, 50, today, noon),
+            Provenance.startedBy(UUID.randomUUID()),
+        )
         step("accept")
         val accepted = sent.filterIsInstance<YourDialogues>().last().dialogues.single()
         accepted.said.map { it.id } shouldBe listOf("arrives", "reads", "accept")
+        accepted.said.last().effects shouldBe listOf(SpendView(resource = "wealth", amount = 40))
         accepted.next.map { it.id } shouldBe listOf("paid")
         accepted.next.single().words shouldBe "He thought you might say so. The first of the dues came with me."
 
         step("paid")
         val paid = sent.filterIsInstance<YourDialogues>().last().dialogues.single()
-        paid.said.last().gave shouldBe listOf(GrantView(resource = "wealth", amount = 100))
+        paid.said.last().effects shouldBe listOf(GrantView(resource = "wealth", amount = 100))
         paid.next shouldBe emptyList()
         paid.options shouldBe emptyList()
         paid.ending shouldBe EndingView.Completed
@@ -1726,7 +1734,8 @@ class GatewaySpec : StringSpec({
         sent.filterIsInstance<YourDialogues>().last().dialogues.single().requirements shouldBe null
     }
 
-    "an option that grants reaches the page as what it gives, under the wire's name for the resource" {
+    "an option that grants or spends reaches the page as what it does, under the wire's name for the resource" {
         Effect.Grant(Resource.NATURAL_DOMAIN, 5).toView() shouldBe GrantView(resource = "naturalDomain", amount = 5)
+        Effect.Spend(Resource.WEALTH, 30).toView() shouldBe SpendView(resource = "wealth", amount = 30)
     }
 })

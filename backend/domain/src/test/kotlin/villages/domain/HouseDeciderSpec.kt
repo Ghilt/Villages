@@ -418,6 +418,30 @@ class HouseDeciderSpec : StringSpec({
         given.pending shouldBe null
     }
 
+    "an option can cost, and taking it spends that much from one decision, or is refused while the house cannot pay" {
+        val toll = OptionId(UUID.fromString("aa000000-0000-4000-8000-000000000013"))
+        val bridge = Choice(
+            id = ChoiceId(UUID.fromString("aa000000-0000-4000-8000-00000000c403")),
+            prompt = "The bridge-keeper asks a toll.",
+            options = listOf(
+                Option(toll, "Pay it", "Thirty in coin.", Effect.Spend(Resource.WEALTH, 30)),
+                Option(letters, "Show him the letters", "Introductions at court.", Effect.Grant(Resource.INFLUENCE, 20)),
+            ),
+        )
+        fun paying(state: House) = HouseDecider.decide(TakeAction(house, player, bridge.id, toll, day, noon), state)
+
+        shouldThrow<HouseError.NotEnoughFree> { paying(after(GiveChoice(house, player, bridge, day, noon))) }
+        shouldThrow<HouseError.NoSuchHouse> {
+            HouseDecider.decide(GiveChoice(house, player, bridge, day, noon), HouseDecider.initial)
+        }
+
+        val rich = after(granting(amount = 50), GiveChoice(house, player, bridge, day, noon))
+        val events = paying(rich)
+        events.map { it::class } shouldBe listOf(PlayerTookAction::class, HouseResourceSpent::class)
+        val paidFor = events.fold(rich, HouseDecider::evolve).shouldBeInstanceOf<House.Founded>()
+        paidFor.stockOf(Resource.WEALTH).at(noon) shouldBe 20
+    }
+
     "a choice that grants is refused to a house nobody has founded, as one that founds is refused to one that is" {
         shouldThrow<HouseError.NoSuchHouse> {
             HouseDecider.decide(GiveChoice(house, player, aGift, day, noon), HouseDecider.initial)
@@ -467,8 +491,8 @@ class HouseDeciderSpec : StringSpec({
     val lady = Speaker(SpeakerId("agnes"), party = 0, name = "Agnes Hollin", portrait = null, character = null)
     val coin = Effect.Grant(Resource.WEALTH, 100)
 
-    fun said(id: String, then: Then, by: Speaker = messenger, gives: List<Effect> = emptyList()) =
-        Line(LineId(id), by.id, "The words of $id.", gives, then = then)
+    fun said(id: String, then: Then, by: Speaker = messenger, effects: List<Effect> = emptyList()) =
+        Line(LineId(id), by.id, "The words of $id.", effects, then = then)
 
     // The messenger asks, and either answer pays: one before the messenger's thanks end it, one as it ends it.
     val quay = Dialogue(
@@ -479,8 +503,8 @@ class HouseDeciderSpec : StringSpec({
         lines = listOf(
             said("arrives", Then.Say(LineId("asks"))),
             said("asks", Then.DialogueChoice(listOf(LineId("accept"), LineId("refuse")))),
-            said("accept", Then.Say(LineId("thanks")), by = lady, gives = listOf(coin)),
-            said("refuse", Then.End, by = lady, gives = listOf(Effect.Grant(Resource.INFLUENCE, 5))),
+            said("accept", Then.Say(LineId("thanks")), by = lady, effects = listOf(coin)),
+            said("refuse", Then.End, by = lady, effects = listOf(Effect.Grant(Resource.INFLUENCE, 5))),
             said("thanks", Then.End),
         ),
     )
@@ -538,12 +562,37 @@ class HouseDeciderSpec : StringSpec({
         shouldThrow<HouseError.NoSuchHouse> { HouseDecider.decide(stepping("accept"), HouseDecider.initial) }
     }
 
+    "an option that spends is paid as the step is taken, or refused while the house cannot pay, the dialogue open" {
+        val toll = Dialogue(
+            id = DialogueId.offered(house, UUID.fromString("1c000007-0000-4000-8000-000000000032")),
+            title = "A toll",
+            scene = null,
+            speakers = listOf(lady, messenger),
+            lines = listOf(
+                said("asks", Then.DialogueChoice(listOf(LineId("pay"), LineId("decline")))),
+                said("pay", Then.End, by = lady, effects = listOf(Effect.Spend(Resource.WEALTH, 30))),
+                said("decline", Then.End, by = lady),
+            ),
+        )
+
+        val poor = after(offering(toll))
+        shouldThrow<HouseError.NotEnoughFree> { HouseDecider.decide(stepping("pay", toll.id), poor) }
+        poor.openDialogues.single().walk().allows(LineId("decline")) shouldBe true
+
+        val rich = after(granting(amount = 50), offering(toll))
+        val events = HouseDecider.decide(stepping("pay", toll.id), rich)
+        events.map { it::class } shouldBe
+            listOf(PlayerCompletedDialogueStep::class, HouseResourceSpent::class, PlayerCompletedDialogue::class)
+        val paidFor = events.fold(rich, HouseDecider::evolve).shouldBeInstanceOf<House.Founded>()
+        paidFor.stockOf(Resource.WEALTH).at(noon) shouldBe 20
+    }
+
     "a conversation of forty lines writes a handful of events, not one a line" {
         val opening = (1..19).map { said("l$it", Then.Say(LineId("l${it + 1}"))) } +
             said("l20", Then.DialogueChoice(listOf(LineId("a1"), LineId("b1"))))
         val branches = (1..10).flatMap { n ->
             fun next(branch: String) = if (n == 10) Then.End else Then.Say(LineId("$branch${n + 1}"))
-            listOf(said("a$n", next("a"), gives = if (n == 5) listOf(coin) else emptyList()), said("b$n", next("b")))
+            listOf(said("a$n", next("a"), effects = if (n == 5) listOf(coin) else emptyList()), said("b$n", next("b")))
         }
         val evening = Dialogue(
             id = DialogueId.offered(house, UUID.fromString("1c000007-0000-4000-8000-000000000031")),

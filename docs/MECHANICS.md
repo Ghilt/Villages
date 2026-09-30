@@ -156,8 +156,8 @@ interface may say so**, and a mechanic that gives it away early spends the only 
 holding. Dialogue, over a long time, is how it is meant to be found.
 
 **Holding other mechanics inside it.** A dialogue is a place other mechanics happen, not only a thing to
-read. A line can pay the house as it is said, and a dialogue choice can carry the gamble of a roll, its
-options coming back into the conversation.
+read. A line can pay the house as it is said, an option can cost it something, and a dialogue choice can
+carry the gamble of a roll, its options coming back into the conversation.
 
 **Paying off what the house has built.** What a character says and what they will do for you depends on
 what they are to your house. A character loyal to the house can offer a reward inside the conversation
@@ -234,7 +234,8 @@ The debug panel's Dialogues section offers a sample, a letter from the coast spo
 figure and a messenger, from wire version 14, and the event page shows what was offered whole. A read model
 keeps every dialogue a house was offered and how far each has got, and the player is sent each one as far as
 it has reached, from wire version 15: the lines past the next step, what a line will give and the
-requirements stay on the server. Nothing in the world offers one yet, nothing but the debug panel's log
+requirements stay on the server. An option can spend, from version 16, and is refused while the house cannot
+pay. Nothing in the world offers one yet, nothing but the debug panel's log
 shows one, and no command on the wire takes a step. Its shape
 is decided in decision record 0067: a
 dialogue offered whole on the house's stream; only its dialogue choices, and the lines that give something

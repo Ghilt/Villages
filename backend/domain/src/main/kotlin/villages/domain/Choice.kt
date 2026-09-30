@@ -83,6 +83,20 @@ sealed interface Effect {
             }
         }
     }
+
+    /**
+     * Take some of a resource from the house: what an option can cost, in a choice or in a dialogue. Refused,
+     * as spending is, when the house has not that much free. A dialogue lets only an option spend and keeps an
+     * option that costs nothing in every dialogue choice, so a house that cannot pay answers otherwise and is
+     * never stuck in one. See decision record 0067.
+     */
+    data class Spend(val resource: Resource, val amount: Long) : Effect {
+        init {
+            if (amount <= 0) {
+                throw HouseError.InvalidAmount("a spend is of more than nothing, and $amount is not")
+            }
+        }
+    }
 }
 
 /** The identity of one choice, so that an action can only answer the choice it was given. */

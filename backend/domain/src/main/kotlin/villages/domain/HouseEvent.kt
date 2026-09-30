@@ -132,7 +132,7 @@ data class PlayerTookAction(
 
 /**
  * A player was offered a dialogue. The whole of it is here - the speakers, every line and every dialogue
- * choice, what each line gives and what it requires - so the roads not taken are history too, as a choice's
+ * choice, what each line does and what it requires - so the roads not taken are history too, as a choice's
  * are, and every later step is checked against this event alone. A house can have several open at once.
  *
  * Nothing happened in the world when this was written: a conversation was put to the house. See decision
@@ -147,10 +147,10 @@ data class PlayerOfferedDialogue(
 ) : PlayerEvent
 
 /**
- * A player took a step through a dialogue: an option of a dialogue choice, or a line reached that gives
- * something, is marked to be recorded, or ends it. Only the ids are here - the line is on the event that offered
+ * A player took a step through a dialogue: an option of a dialogue choice, or a line reached that has
+ * an effect, is marked to be recorded, or ends it. Only the ids are here - the line is on the event that offered
  * the dialogue - and the plain lines read on the way are not recorded at all: every option taken is a step, so
- * the path can be rebuilt from the dialogue alone. What the line gives follows as the world's own events, and
+ * the path can be rebuilt from the dialogue alone. What the line does follows as the world's own events, and
  * the end as `PlayerCompletedDialogue`, from the same decision. See decision record 0067.
  */
 data class PlayerCompletedDialogueStep(

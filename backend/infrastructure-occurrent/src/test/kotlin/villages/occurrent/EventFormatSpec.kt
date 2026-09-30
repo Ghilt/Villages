@@ -233,8 +233,8 @@ class EventFormatSpec : StringSpec({
                 Line(
                     id = LineId("accept"),
                     speaker = theLady.id,
-                    words = "Tell him it will, and that it expects its share of the dues.",
-                    gives = listOf(Effect.Grant(Resource.WEALTH, 100)),
+                    words = "Tell him it will, and send forty for the masons.",
+                    effects = listOf(Effect.Spend(Resource.WEALTH, 40)),
                     then = Then.Say(LineId("thanks")),
                 ),
                 Line(
@@ -247,6 +247,7 @@ class EventFormatSpec : StringSpec({
                     id = LineId("thanks"),
                     speaker = theRider.id,
                     words = "He will be glad of it. The first of the dues came with me.",
+                    effects = listOf(Effect.Grant(Resource.WEALTH, 100)),
                     then = Then.End,
                 ),
             ),
@@ -333,7 +334,8 @@ class EventFormatSpec : StringSpec({
         val lines = dialogue["lines"]
         lines[0]["then"][KIND].asString() shouldBe SAY
         lines[1]["then"][KIND].asString() shouldBe DIALOGUE_CHOICE
-        lines[2]["gives"][0][KIND].asString() shouldBe GRANT
+        lines[2]["effects"][0][KIND].asString() shouldBe SPEND
+        lines[4]["effects"][0][KIND].asString() shouldBe GRANT
         lines[3]["then"][KIND].asString() shouldBe END
         dialogue["requirements"][0][KIND].asString() shouldBe ALIVE
     }

@@ -2,7 +2,7 @@
   "type": "yourChoice",
   "choice": {
     "id": "aa000000-0000-4000-8000-00000000c402",
-    "prompt": "A traveller from the south offers the house a gift.",
+    "prompt": "A traveller from the south offers the house a gift, or a map of the passes for a price.",
     "options": [
       {
         "id": "aa000000-0000-4000-8000-000000000011",
@@ -15,6 +15,12 @@
         "label": "The letters",
         "detail": "Introductions at court, in a hand the court will know.",
         "effect": { "kind": "grant", "resource": "influence", "amount": 20 }
+      },
+      {
+        "id": "aa000000-0000-4000-8000-000000000013",
+        "label": "The map",
+        "detail": "Every pass through the mountains, for thirty in coin.",
+        "effect": { "kind": "spend", "resource": "wealth", "amount": 30 }
       }
     ]
   }

@@ -45,7 +45,7 @@ data class OpenDialogue(
 }
 
 /**
- * Whether reaching this line is a step: it gives something, ends the dialogue, is marked to be recorded, or is
+ * Whether reaching this line is a step: it has an effect, ends the dialogue, is marked to be recorded, or is
  * an option of a dialogue choice, taking which is the step. The rest are read and never recorded.
  */
 fun Dialogue.isStep(line: Line): Boolean = isStep(line, optionLines())
@@ -114,7 +114,7 @@ fun Dialogue.walk(taken: List<LineId>): Walk {
 }
 
 private fun isStep(line: Line, options: Set<LineId>): Boolean =
-    line.gives.isNotEmpty() || line.recorded || line.then == Then.End || line.id in options
+    line.effects.isNotEmpty() || line.recorded || line.then == Then.End || line.id in options
 
 /** Every line that is an option of some dialogue choice in this dialogue. */
 private fun Dialogue.optionLines(): Set<LineId> =

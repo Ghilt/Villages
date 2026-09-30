@@ -31,7 +31,7 @@
           "id": "arrives",
           "speaker": "messenger",
           "words": "A rider from the coast, my lady, with the harbour-master's seal.",
-          "gives": [],
+          "effects": [],
           "recorded": false,
           "then": { "kind": "say", "line": "asks" }
         },
@@ -39,15 +39,15 @@
           "id": "asks",
           "speaker": "messenger",
           "words": "He asks whether the house will stand behind the new quay.",
-          "gives": [],
+          "effects": [],
           "recorded": true,
           "then": { "kind": "dialogueChoice", "options": ["accept", "refuse"] }
         },
         {
           "id": "accept",
           "speaker": "agnes",
-          "words": "Tell him it will, and that it expects its share of the dues.",
-          "gives": [{ "kind": "grant", "resource": "WEALTH", "amount": 100 }],
+          "words": "Tell him it will, and send forty for the masons.",
+          "effects": [{ "kind": "spend", "resource": "WEALTH", "amount": 40 }],
           "recorded": false,
           "then": { "kind": "say", "line": "thanks" }
         },
@@ -55,7 +55,7 @@
           "id": "refuse",
           "speaker": "agnes",
           "words": "Tell him the house has quays enough of its own.",
-          "gives": [],
+          "effects": [],
           "recorded": false,
           "then": { "kind": "end" }
         },
@@ -63,7 +63,7 @@
           "id": "thanks",
           "speaker": "messenger",
           "words": "He will be glad of it. The first of the dues came with me.",
-          "gives": [],
+          "effects": [{ "kind": "grant", "resource": "WEALTH", "amount": 100 }],
           "recorded": false,
           "then": { "kind": "end" }
         }

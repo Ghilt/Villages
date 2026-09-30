@@ -163,11 +163,12 @@ export const visionPointViewSchema = z.object({
 
 /**
  * What taking an option would do. `kind` names the case, as it does in the store. See 0034. A `grant` is
- * some of a resource given, which is what a line of a dialogue gives too. See 0067.
+ * some of a resource given, and a `spend` some taken: what an option can cost, in a choice or a dialogue. See 0067.
  */
 export const effectViewSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('foundAt'), seat: pointSchema, name: z.string(), banner: bannerSchema }),
   z.object({ kind: z.literal('grant'), resource: resourceNameSchema, amount: z.number().int().positive() }),
+  z.object({ kind: z.literal('spend'), resource: resourceNameSchema, amount: z.number().int().positive() }),
 ]);
 
 export const optionViewSchema = z.object({
@@ -201,8 +202,8 @@ export const speakerViewSchema = z.object({
 /** A line still to be read: who says it and the words, and nothing about what it will give. */
 export const lineViewSchema = z.object({ id: z.string(), speaker: z.string(), words: z.string() });
 
-/** A line said, with what saying it gave the house. */
-export const saidLineViewSchema = lineViewSchema.extend({ gave: z.array(effectViewSchema) });
+/** A line said, with what saying it did to the house: what it gave, and what it took. */
+export const saidLineViewSchema = lineViewSchema.extend({ effects: z.array(effectViewSchema) });
 
 /**
  * One dialogue as the player may know it. `revision` rises with every change to it. `next` ends in the step

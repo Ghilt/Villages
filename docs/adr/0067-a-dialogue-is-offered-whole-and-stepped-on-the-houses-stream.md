@@ -2,6 +2,11 @@
 
 - Status: accepted
 - Date: 2026-09-27
+- Amended 2026-09-30: a line can **spend** as well as grant, on Adam's word, and what a line does is its
+  `effects`. A spend is refused when the house has not that much free, which would make a dialogue
+  impassable at that line, so the rule below about effects a step could be refused is kept by two more:
+  only an option may spend, and every dialogue choice keeps an option that costs nothing. A house that
+  cannot pay answers otherwise, and is never stuck.
 
 ## Context
 

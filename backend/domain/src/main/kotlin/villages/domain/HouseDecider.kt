@@ -34,8 +34,10 @@ object HouseDecider : Decider<HouseCommand, House, HouseEvent> {
             if (state is House.Founded && command.choice.options.any { it.effect is Effect.FoundAt }) {
                 throw HouseError.AlreadyFounded
             }
-            // And one that would give a house something is meaningless before there is a house to give it to.
-            if (state is House.NotFounded && command.choice.options.any { it.effect is Effect.Grant }) {
+            // And one that would give a house something, or take something from it, is meaningless before there
+            // is a house to do it to.
+            val givesOrTakes = command.choice.options.any { it.effect is Effect.Grant || it.effect is Effect.Spend }
+            if (state is House.NotFounded && givesOrTakes) {
                 throw HouseError.NoSuchHouse
             }
             listOf(
@@ -164,7 +166,7 @@ object HouseDecider : Decider<HouseCommand, House, HouseEvent> {
             )
         }
 
-        // The step, what the line gives and the end come out of one decision, as an action and its effect do,
+        // The step, what the line does and the end come out of one decision, as an action and its effect do,
         // so they are appended together and never seen apart. The walk says where a step may be taken, and
         // nothing else is, which is what pays each line once on every path. See decision record 0067.
         is CompleteDialogueStep -> {
@@ -178,7 +180,7 @@ object HouseDecider : Decider<HouseCommand, House, HouseEvent> {
                 throw HouseError.NotTheNextStep
             }
             val line = checkNotNull(open.dialogue.line(command.lineId)) { "the walk allowed a line the dialogue lacks" }
-            val gives = line.gives.flatMap {
+            val consequences = line.effects.flatMap {
                 follows(it, state, command.houseId, house.player, command.worldTime, command.recordedAt)
             }
             val ends = when (line.then) {
@@ -196,7 +198,7 @@ object HouseDecider : Decider<HouseCommand, House, HouseEvent> {
                     worldTime = command.worldTime,
                     recordedAt = command.recordedAt,
                 ),
-            ) + gives + ends
+            ) + consequences + ends
         }
 
         is TakeKeyFigure -> {
@@ -311,6 +313,13 @@ object HouseDecider : Decider<HouseCommand, House, HouseEvent> {
         is Effect.Grant -> {
             founded(state)
             listOf(HouseResourceGranted(houseId, effect.resource, effect.amount, worldTime, recordedAt))
+        }
+
+        // What an option costs is refused when the house has not that much free, as spending is, and then the
+        // action or the step is refused with it: the player answers otherwise. See decision record 0067.
+        is Effect.Spend -> {
+            enough(founded(state), effect.resource, effect.amount, recordedAt)
+            listOf(HouseResourceSpent(houseId, effect.resource, effect.amount, worldTime, recordedAt))
         }
     }
 

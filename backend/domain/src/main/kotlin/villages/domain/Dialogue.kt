@@ -4,7 +4,7 @@ import java.util.UUID
 
 /**
  * One conversation offered to a house, whole: who speaks, every line, every dialogue choice, what each line
- * gives the house, and what the dialogue requires.
+ * does to the house, and what the dialogue requires.
  *
  * Recorded whole on the event that offers it, as a choice is, so the roads not taken are history too and every
  * step can be checked against the house's own history alone. It checks itself when it is made, and a dialogue
@@ -58,15 +58,20 @@ data class Dialogue(
 
     private fun refuseUnlessSaidProperly() {
         val speaking = speakers.map { it.id }.toSet()
-        val said = lines.map { it.id }.toSet()
+        val said = lines.associateBy { it.id }
+        val options = lines.flatMap { (it.then as? Then.DialogueChoice)?.options.orEmpty() }.toSet()
         speakers.firstOrNull { it.name.isBlank() }?.let { refuse("speaker ${it.id.value} has no name") }
         for (line in lines) {
             val which = "line ${line.id.value}"
             if (line.speaker !in speaking) refuse("$which is said by ${line.speaker.value}, who is not speaking")
             if (line.words.isBlank()) refuse("$which says nothing")
-            if (line.gives.any { it is Effect.FoundAt }) {
-                // A step whose effect could be refused would make the dialogue impassable at that line.
+            // A step whose effect could be refused would make the dialogue impassable at that line, so a founding
+            // is refused outright, and a spend - which a house that cannot pay refuses - only an option may make.
+            if (line.effects.any { it is Effect.FoundAt }) {
                 refuse("$which founds a house, and a dialogue is offered to a house that is founded already")
+            }
+            if (line.effects.any { it is Effect.Spend } && line.id !in options) {
+                refuse("$which spends, and only an option may, so that a house that cannot pay can answer otherwise")
             }
             line.then.following().firstOrNull { it !in said }?.let {
                 refuse("$which leads to line ${it.value}, which the dialogue does not have")
@@ -79,6 +84,9 @@ data class Dialogue(
                 }
                 if (then.options.distinct().size != then.options.size) {
                     refuse("$which leads to a dialogue choice offering one line twice")
+                }
+                if (then.options.all { option -> said.getValue(option).effects.any { it is Effect.Spend } }) {
+                    refuse("$which leads to a dialogue choice whose every option spends: a house that cannot pay is stuck")
                 }
             }
         }
@@ -141,18 +149,21 @@ data class Speaker(
 )
 
 /**
- * One thing said in a dialogue: who says it, the words, what saying it gives the house, and what follows it.
+ * One thing said in a dialogue: who says it, the words, what saying it does to the house, and what follows it.
  *
- * A line that gives something, that ends the dialogue, or that is marked [recorded], is a step when it is
+ * A line with an effect, one that ends the dialogue, or one marked [recorded], is a step when it is
  * reached, and so is every option of a dialogue choice when it is taken; the rest are read and not recorded.
  */
 data class Line(
     val id: LineId,
     val speaker: SpeakerId,
     val words: String,
-    /** What saying it gives the house, the same thing an option carries, written as the world's own events. */
-    val gives: List<Effect> = emptyList(),
-    /** Whether reaching it is recorded even when it gives nothing and ends nothing. */
+    /**
+     * What saying it does to the house, the same thing an option of a choice carries, written as the world's own
+     * events when it is reached: a grant, or on an option a spend.
+     */
+    val effects: List<Effect> = emptyList(),
+    /** Whether reaching it is recorded even when it does nothing and ends nothing. */
     val recorded: Boolean = false,
     val then: Then,
 )

@@ -13,8 +13,8 @@ class DialogueSpec : StringSpec({
     val lady = Speaker(SpeakerId("agnes"), party = 0, name = "Agnes Hollin", portrait = "woman-03", character = agnes)
     val messenger = Speaker(SpeakerId("messenger"), party = 1, name = "A messenger", portrait = null, character = null)
 
-    fun line(id: String, then: Then, by: Speaker = messenger, gives: List<Effect> = emptyList()) =
-        Line(id = LineId(id), speaker = by.id, words = "The words of $id.", gives = gives, then = then)
+    fun line(id: String, then: Then, by: Speaker = messenger, effects: List<Effect> = emptyList()) =
+        Line(id = LineId(id), speaker = by.id, words = "The words of $id.", effects = effects, then = then)
 
     fun dialogue(
         vararg lines: Line,
@@ -36,7 +36,7 @@ class DialogueSpec : StringSpec({
     val arrives = line("arrives", Then.Say(LineId("asks")))
     val asks = line("asks", Then.DialogueChoice(listOf(LineId("accept"), LineId("refuse"))))
     val purse = Effect.Grant(Resource.WEALTH, 100)
-    val accept = line("accept", Then.Say(LineId("thanks")), by = lady, gives = listOf(purse))
+    val accept = line("accept", Then.Say(LineId("thanks")), by = lady, effects = listOf(purse))
     val refuse = line("refuse", Then.End, by = lady)
     val thanks = line("thanks", Then.End)
 
@@ -118,7 +118,7 @@ class DialogueSpec : StringSpec({
             Banner(Tincture.SABLE, Division.PLAIN, null, Charge.STAG, Tincture.ARGENT),
         )
 
-        refusal { dialogue(line("only", Then.End, gives = listOf(founding))) } shouldContain "founds a house"
+        refusal { dialogue(line("only", Then.End, effects = listOf(founding))) } shouldContain "founds a house"
         shouldThrow<HouseError.InvalidAmount> { Effect.Grant(Resource.WEALTH, 0) }
         shouldThrow<HouseError.InvalidAmount> { Effect.Grant(Resource.PIETY, -5) }
     }
@@ -140,5 +140,22 @@ class DialogueSpec : StringSpec({
         DialogueId.offered(house, command) shouldBe DialogueId.offered(house, command)
         DialogueId.offered(house, command) shouldNotBe DialogueId.offered(other, command)
         DialogueId.offered(house, command) shouldNotBe DialogueId.offered(house, UUID.randomUUID())
+    }
+
+    "only an option may spend, so a house that cannot pay can always answer otherwise" {
+        val toll = Effect.Spend(Resource.WEALTH, 30)
+        val paying = line("accept", Then.Say(LineId("thanks")), by = lady, effects = listOf(toll))
+
+        dialogue(arrives, asks, paying, refuse, thanks).lines.size shouldBe 5
+        refusal { dialogue(line("toll", Then.End, effects = listOf(toll))) } shouldContain "only an option may"
+        shouldThrow<HouseError.InvalidAmount> { Effect.Spend(Resource.WEALTH, 0) }
+    }
+
+    "every dialogue choice keeps an option that costs nothing, where a house that cannot pay can answer" {
+        val toll = Effect.Spend(Resource.WEALTH, 30)
+        val paying = line("accept", Then.Say(LineId("thanks")), by = lady, effects = listOf(toll))
+        val payingToo = line("refuse", Then.End, by = lady, effects = listOf(toll))
+
+        refusal { dialogue(arrives, asks, paying, payingToo, thanks) } shouldContain "every option spends"
     }
 })

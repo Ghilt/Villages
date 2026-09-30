@@ -16,11 +16,20 @@ import villages.domain.Then
  * dialogue could write itself a reward. See decision record 0067.
  */
 object SampleDialogues {
-    /** A messenger brings the house's first key figure a letter, and one of the two answers pays. */
+    /**
+     * A messenger brings the house's first key figure a letter, and it can be answered three ways: one that costs
+     * the house and pays it back more, one that pays in another coin, and one that does nothing at all.
+     */
     const val LETTER = "letter"
 
-    /** What the letter pays a house that stands behind the quay. */
+    /** What standing behind the quay costs the house: forty in wealth, for the masons. */
+    const val MASONS = 40L
+
+    /** What the harbour-master pays a house that stood behind the quay. */
     const val DUES = 100L
+
+    /** What asking him earns instead: his good word at court. */
+    const val GOOD_WORD = 5L
 
     /** Every sample there is, by the name the panel sends. */
     val names: Set<String> = setOf(LETTER)
@@ -44,8 +53,8 @@ object SampleDialogues {
         )
         val messenger =
             Speaker(SpeakerId("messenger"), party = 1, name = "A messenger", portrait = null, character = null)
-        fun line(line: String, by: Speaker, words: String, then: Then, gives: List<Effect> = emptyList()) =
-            Line(LineId(line), by.id, words, gives, then = then)
+        fun line(line: String, by: Speaker, words: String, then: Then, effects: List<Effect> = emptyList()) =
+            Line(LineId(line), by.id, words, effects, then = then)
 
         return Dialogue(
             id = id,
@@ -64,22 +73,31 @@ object SampleDialogues {
                     "reads",
                     messenger,
                     "The harbour-master is building a new quay, and asks whether the house will stand behind it.",
-                    Then.DialogueChoice(listOf(LineId("accept"), LineId("refuse"))),
+                    Then.DialogueChoice(listOf(LineId("accept"), LineId("ask"), LineId("refuse"))),
                 ),
                 line(
                     "accept",
                     you,
-                    "Tell him the house will, and that it expects its share of the dues.",
+                    "Tell him the house will, and send forty for the masons.",
                     Then.Say(LineId("paid")),
+                    effects = listOf(Effect.Spend(Resource.WEALTH, MASONS)),
                 ),
-                line("refuse", you, "Tell him the house has quays enough of its own.", Then.Say(LineId("shrugs"))),
                 line(
                     "paid",
                     messenger,
                     "He thought you might say so. The first of the dues came with me.",
                     Then.End,
-                    gives = listOf(Effect.Grant(Resource.WEALTH, DUES)),
+                    effects = listOf(Effect.Grant(Resource.WEALTH, DUES)),
                 ),
+                line("ask", you, "Ask him what the house would have for it.", Then.Say(LineId("answer"))),
+                line(
+                    "answer",
+                    messenger,
+                    "His good word at court, he says, and he gives it now, whatever you decide.",
+                    Then.End,
+                    effects = listOf(Effect.Grant(Resource.INFLUENCE, GOOD_WORD)),
+                ),
+                line("refuse", you, "Tell him the house has quays enough of its own.", Then.Say(LineId("shrugs"))),
                 line("shrugs", messenger, "He thought you might say that too. I will tell him.", Then.End),
             ),
         )
