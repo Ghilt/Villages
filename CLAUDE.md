@@ -54,6 +54,15 @@ has to be learnt once and then costs nothing, and a word costs nothing to learn 
 fitting - in a 44-pixel strip, in a column squeezed to 18rem, in a language nobody has thought about yet.
 Guessing wrong is cheap to fix and it is still drawing it twice. The same question, once, is not.
 
+**A component is seen at `/admin/inspect-ui-components` before it is used.** Whatever the player is shown
+is built from the component library in `frontend/apps/web/src/ui/`: a pane is a **container** named by a
+**recipe** - a border, a fill, its embellishments - and never a stylesheet of its own. A component the
+library lacks is added to it first, in its own commit, and shown on that page in every variant and state;
+only then is it used. A step that adds or changes one points its verify checklist at that page, and says
+which pictures in `world/ui/` it reads, the size to paint each at, and which are still placeholders. The
+placeholders are the agent's to make, copied from the moodboard; Adam replaces them when he chooses and
+nothing waits on him. See `docs/UI-COMPONENTS.md` and decision record 0068.
+
 Never choose the next increment alone, and never chain increments together to save a round trip. The roadmap is a
 menu, not a queue: its order is a suggestion, and Adam reorders it freely. When an option is not on the roadmap
 but is clearly better, offer it anyway and say why.
@@ -195,7 +204,8 @@ stand.
 Before adding or changing a mechanic, read `docs/MECHANICS.md`, which says what the mechanics are, one
 entry per named mechanic, and then `docs/BUILDING-A-MECHANIC.md`, which says how a mechanic Adam describes
 becomes commands, events, frames, projections and panel lines, so that he does not have to say it each
-time.
+time. Before making or changing anything the player is shown, read `docs/UI-COMPONENTS.md` and open the
+page it names.
 
 ## Every document has one purpose, and only what fits it goes in
 
@@ -212,8 +222,8 @@ own purpose line, and saying so is part of presenting the step.
 ```
 CLAUDE.md  README.md  debug-quick-start.{ps1,cmd}  .claude/settings.json  scripts/check.{ps1,sh}
 docs/       VISION SETTING MECHANICS LOOK-AND-FEEL RESPONSIVE-DESIGN GLOSSARY ARCHITECTURE ROADMAP
-            TESTING EVENTS BUILDING-A-MECHANIC AUTHORING-THE-WORLD AUTHORING-THE-ART, adr/, experiments/,
-            plans/
+            TESTING EVENTS BUILDING-A-MECHANIC UI-COMPONENTS AUTHORING-THE-WORLD AUTHORING-THE-ART, adr/,
+            experiments/, plans/
 contracts/  fixtures/*.json shared by the Kotlin and TypeScript protocol tests
 infra/      docker-compose.yml (MongoDB replica set, RabbitMQ)
 backend/    Gradle multi-module: domain, application, protocol, infrastructure-occurrent, infrastructure-rabbit,
@@ -445,11 +455,15 @@ Commands are added here as the increments land:
   `build.gradle.kts` declares only its allowed dependency edges, and `buildSrc` holds the one convention
   they share. Versions live in `backend/gradle/libs.versions.toml`.
 
-The two below do not exist yet. They arrive with the increments named, and `infra/` and `scripts/` in the
+The ones below do not exist yet. They arrive with the increments named, and `infra/` and `scripts/` in the
 layout above are where they will go rather than where they are.
 
 - Infra: `docker compose -f infra/docker-compose.yml up -d` (increment 0.4)
 - Everything: `scripts/check.ps1` or `scripts/check.sh` (0.14)
+- The component library, shown: `/admin/inspect-ui-components` on this tree's dev server, with no game
+  server needed (step 1 of `docs/plans/ui-component-library.md`)
+- Interface art: `world/ui/`, Adam's folder, cut by `npm run world:ui --prefix frontend` and again by the
+  dev server whenever a picture in it is saved (step 2). What goes where is `docs/AUTHORING-THE-ART.md`.
 
 The dev server is also registered in `.claude/launch.json` under the name `web`, so the preview tooling can start
 it directly. Restart it rather than trusting hot reload after a file has been rewritten wholesale: Vite reports a

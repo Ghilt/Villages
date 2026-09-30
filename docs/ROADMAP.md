@@ -26,7 +26,8 @@ is no MongoDB and no RabbitMQ on the machine yet.
 ## Now
 
 Characters and key figures are built and waiting on Adam's eye. Nothing else here is started, and the four
-after them wait on the same thing. Fog of war, the exception, is under way a step at a time.
+after them wait on the same thing. Fog of war, the exception, is under way a step at a time, and the UI
+component library has its plan and nothing built.
 
 - **Characters and key figures**: the people of the world, each with a history of their own, and the
   house's tie to the few it acts through, shown in a pane in the corner beside the house status. The shape
@@ -40,6 +41,11 @@ after them wait on the same thing. Fog of war, the exception, is under way a ste
   sight, the fog drawn from it over the world and under the signs, vision given outright, the server
   holding back what the fog hides, and the surface tension that joins circles close together are built, and
   the scenery is grown from the stands the gateway sends, only those on revealed ground, which a page cannot fetch for itself: all of step 8. Adam's own mechanic, asked for on 2026-09-26.
+- **The UI component library**: every component the interface is built from, painted art placed by CSS,
+  shown at `/admin/inspect-ui-components` before it is used, with placeholders copied from Adam's
+  moodboard. The shape is decision record 0068, the method `UI-COMPONENTS.md`, and the steps, one commit
+  each, are in `docs/plans/ui-component-library.md`. It touches none of the game; bringing it into the
+  panes is later work, a surface at a time. Adam's own, asked for on 2026-09-30.
 - **0.4** Local infrastructure: MongoDB replica set and RabbitMQ in Compose
 - **0.8** Testcontainers smoke test on MongoDB and RabbitMQ
 - **1.6** The bridge from the store to the broker

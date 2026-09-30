@@ -22,6 +22,13 @@ builds it, never in a later pass. See `RESPONSIVE-DESIGN.md`.
 the player, it uses the same component and this document gains an entry, rather than each mechanic growing
 its own version of a parchment.
 
+**Painted, and placed by CSS.** The look is in pictures - gilt borders, velvet, parchment, cherubs, stone -
+and the stylesheet only puts them where they go. The moodboard in `world/ui/moodboard.webp` is the target
+for every surface, and what is drawn in code today, **the ornament** above all, stays until its surface is
+redone from the library. Every boxed thing is a **container** of four layers - border, fill,
+embellishments, content - and a pane is asked for in those words. The parts are in `UI-COMPONENTS.md` and
+on the page at `/admin/inspect-ui-components`; why it is pictures is decision record 0068.
+
 ## Rarity
 
 Four bands, used wherever a rolled thing is shown, with the standard colours:
@@ -215,8 +222,8 @@ where the pane has got to.
 ## Not decided
 
 - Theme and tone as a whole. See `VISION.md`.
-- The exact colours, the type, the grain of the desk, and whether the map's own look leads the rest of the
-  interface or stands apart from it. Two forms settles one corner of this: what stands in the world is
+- The exact colours and the type, which the library's first step proposes and Adam chooses; the grain of
+  the desk; and whether the map's own look leads the rest of the interface or stands apart from it. Two forms settles one corner of this: what stands in the world is
   drawn by distance, which is the map's rule and not the interface's.
 - What the **room** the desk stands in is made of, and whether it is a place with anything in it or only
   the far end of a zoom. It is simple shapes today, deliberately, so that the motion of pulling back into

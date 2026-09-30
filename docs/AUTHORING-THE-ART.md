@@ -1,9 +1,10 @@
 # Authoring the art
 
-> **What belongs here:** how to make a picture for the map and hand it over, and what the tool does with
-> it. **What does not:** why sprites are pictures cut by a tool (decision record 0059), the rules every
-> picture on the map has to agree on (`LOOK-AND-FEEL.md`), where the scenery stands (decision records 0052
-> and 0054), and the master (`AUTHORING-THE-WORLD.md`).
+> **What belongs here:** how to make a picture for the map or the interface and hand it over, and what the
+> tool does with it. **What does not:** why sprites are pictures cut by a tool (decision record 0059) and
+> why the interface is painted (0068), the rules every picture has to agree on (`LOOK-AND-FEEL.md`), where
+> the scenery stands (decision records 0052 and 0054), how a pane is composed from the pictures
+> (`UI-COMPONENTS.md`), and the master (`AUTHORING-THE-WORLD.md`).
 
 ## Where a picture goes
 
@@ -104,3 +105,34 @@ The atlas is output: it is not committed, and every tree cuts its own. The last 
 what came of it: `nothing new` when the atlas it made is the one already there, in which case nothing is
 written and the page is not told, and otherwise which sprites were newly cut. That is what makes a cut at
 every start cheap enough to do.
+
+## Interface art
+
+**Not built yet**: this is the folder as agreed, and the tool arrives with step 2 of
+`docs/plans/ui-component-library.md`. Until then there is nothing to save over.
+
+`world/ui/` is yours, and it is committed, beside `world/sprites/` and `world/portraits/`:
+
+    world/ui/moodboard.webp                  the moodboard the placeholders are copied from
+    world/ui/borders/<name>.png + <name>.json one whole framed box, and where its four cuts go
+    world/ui/fills/<name>.png                a picture that repeats without a seam
+    world/ui/embellishments/<name>.png       a cherub, a drape, a cross, any shape
+    world/ui/medallions/<name>.png           a round or oval frame, see-through where the picture goes
+    world/ui/marks/<name>.png                only the marks chosen to be painted
+    world/ui/controls/<name>-<state>.png     a button's face: rest, hover, pressed, disabled
+
+**Every picture has a placeholder**, cut from the moodboard or drawn by the tool, so the page works before
+you have painted anything, and **saving over a placeholder replaces it**, as it does for the sprites.
+
+**Paint at four times the size it is shown.** A border's corner shown 48 pixels across is painted 192. The
+tool writes each picture at 1x, 2x and 3x; bigger than four times is wasted, smaller is soft on a sharp
+screen. Any format, and a flat background is keyed out as it is for a sprite.
+
+**A border is one whole box**, painted as it should look at some middling size, with a file beside it
+naming the four cuts in the picture's own pixels, how the edges repeat, and how far in the content starts.
+The corners are drawn once and the edges between them repeated, so **an edge has to repeat without a seam**:
+whatever is on its left end has to meet its right. Anything that must not repeat - a cross at the top, a
+cherub - is not part of the border but an embellishment of its own.
+
+**A painted mark has to read at seventeen pixels.** The page shows every mark at 17, 24 and 48 side by
+side, and a mark that does not survive the smallest is drawn in code instead.
