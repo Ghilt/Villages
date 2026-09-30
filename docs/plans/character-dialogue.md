@@ -223,8 +223,9 @@ A speaker's death is tried with *kill*, in the Characters section.
    the requirements for one window. Wire version 15, and the page keeps them and says in the log what
    changed. Between the second and the third, on Adam's word of 2026-09-30: a line can spend, only on an
    option and never on every option of a dialogue choice, wire version 16; and an option shows its reveal
-   impact, version 17, with the sample carrying spends and gives to verify both. Then the Dialogues section
-   lists them.
+   impact, version 17, with the sample carrying spends and gives to verify both. The third is done:
+   the Dialogues section lists every dialogue as the player may know it - where it stands, and a waiting
+   choice's options with their reveal impact in words - beside the `requirements` switch. Step 5 is done.
 6. **Dialogues lapse.** The pure function of which requirements an event breaks, the listener that carries
    a failure, and `FailRequirement` in the house's rules; `PlayerLostDialogue` joins the catalogue, and
    `ARCHITECTURE.md`'s "What acts on its own" gains the listener. *Kill* a speaker and the Dialogues section

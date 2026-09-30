@@ -65,6 +65,8 @@ export interface GatewayState {
    * What has not been reached is never here, and a requirement only while the switch asks. See 0067.
    */
   yourDialogues: readonly DialogueView[] | null;
+  /** Whether Adam's switch has asked the gateway for every dialogue's requirements in this window. See 0067. */
+  requirementsShown: boolean;
   /** The id of the command in flight, so the parchment can stop taking a second answer. */
   acting: string | null;
   houses: HousesState;
@@ -80,6 +82,7 @@ let state: GatewayState = {
   yourKeyFigures: null,
   yourSight: null,
   yourDialogues: null,
+  requirementsShown: false,
   acting: null,
   houses: NO_HOUSES,
   world: null,
@@ -217,6 +220,7 @@ function heard(frame: ServerFrame): void {
       // The eye and the fog first, because they decide what a snapshot carries and the cells are asked for next.
       sendEye();
       sendFog();
+      sendRequirements();
       // Anything the camera wanted before the gateway was listening is asked for now.
       sendFollowing(wanted);
       return;
@@ -368,6 +372,30 @@ function sendFog(): void {
     return;
   }
   connection.send({ type: 'fogOfWar', on: false });
+}
+
+function sendRequirements(): void {
+  if (connection === null || state.connection !== 'open' || !state.requirementsShown) {
+    return;
+  }
+  connection.send({ type: 'showRequirements', on: true });
+}
+
+/**
+ * Adam's switch: asks the gateway for every dialogue's requirements in this window, which a player is never
+ * sent, or stops. Off at every load, and asked again after a reconnect while it is on. The dialogues come
+ * back with them, and the log says nothing about that, because nothing about the dialogues changed. See 0067.
+ */
+export function showRequirements(on: boolean): void {
+  update({ requirementsShown: on });
+  note(
+    'dialogues',
+    on ? "showing every dialogue's requirements in this window" : 'requirements hidden again',
+  );
+  if (connection === null || state.connection !== 'open') {
+    return;
+  }
+  connection.send({ type: 'showRequirements', on });
 }
 
 /**

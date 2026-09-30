@@ -380,7 +380,11 @@ Commands are added here as the increments land:
   house the server's sample, a letter from the coast spoken by the house's first key figure and a
   messenger, ending in a dialogue choice of three: *accept* spends forty wealth and is paid a hundred,
   *ask* is paid in influence, and *refuse* does nothing, each option showing what it will do a different
-  way - whole, hidden, or not at all. It is off, saying why on hover, while the house has no key figure. The page names the sample and sends none of its words. The asking and the answer are lines
+  way - whole, hidden, or not at all. It is off, saying why on hover, while the house has no key figure.
+  Below it the section lists the house's dialogues as the player may know them: each one's title, where it
+  stands, and a waiting dialogue choice's options with what each shows it will do (*-40 wealth, +100 wealth*,
+  *???*, or nothing). `requirements: hidden`, the switch beside it, asks the gateway for every dialogue's
+  requirements in this window only, which a player is never sent. The page names the sample and sends none of its words. The asking and the answer are lines
   of the log under `dialogues`, and so is where each dialogue stands whenever one changes, as far as the
   player may know it; the dialogue itself, whole, is at `/admin/inspect-events`. Nothing shows a dialogue in
   the game yet. See `docs/adr/0067` and `docs/plans/character-dialogue.md`.

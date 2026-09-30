@@ -1,7 +1,38 @@
-import type { DialogueView } from '@villages/protocol';
+import type { DialogueView, RequirementView, RevealImpactView, SpeakerView } from '@villages/protocol';
+
+import { RESOURCE_WORDS } from '../house/describe';
 
 function lines(count: number): string {
   return count === 1 ? '1 line' : `${count} lines`;
+}
+
+/**
+ * How an option shows what taking it will do, in words, as whoever wrote it chose: what it gains and costs,
+ * `−40 wealth, +100 wealth`; `???` when it is hidden; and nothing at all when it shows nothing. See 0067.
+ */
+export function impactWords(impact: RevealImpactView | undefined): string | null {
+  if (impact === undefined) {
+    return null;
+  }
+  if (impact.kind === 'hidden') {
+    return '???';
+  }
+  return impact.impacts
+    .map(
+      ({ resource, amount }) =>
+        `${amount > 0 ? '+' : '−'}${Math.abs(amount)} ${RESOURCE_WORDS[resource].toLowerCase()}`,
+    )
+    .join(', ');
+}
+
+/** A requirement in words, naming a character by the speaker they are when they speak in the dialogue. */
+export function requirementWords(requirement: RequirementView, speakers: readonly SpeakerView[]): string {
+  switch (requirement.kind) {
+    case 'alive': {
+      const speaker = speakers.find((one) => one.character === requirement.character);
+      return `${speaker?.name ?? `character ${requirement.character.slice(0, 8)}`} alive`;
+    }
+  }
 }
 
 /** Where a dialogue stands, in the log's words: what is left to read, and whether a dialogue choice waits. */

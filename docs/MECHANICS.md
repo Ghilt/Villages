@@ -238,8 +238,8 @@ keeps every dialogue a house was offered and how far each has got, and the playe
 it has reached, from wire version 15: the lines past the next step, what a line will give and the
 requirements stay on the server. An option can spend, from version 16, and is refused while the house cannot
 pay, and from version 17 each option carries its reveal impact. Nothing in the world offers one yet, nothing
-but the debug panel's log
-shows one, and no command on the wire takes a step. Its shape
+but the debug panel's Dialogues section, which lists every dialogue as the player may know it and can show
+its requirements, shows one, and no command on the wire takes a step. Its shape
 is decided in decision record 0067: a
 dialogue offered whole on the house's stream; only its dialogue choices, and the lines that give something
 or end it, recorded; what a line gives written as the world's own event beside the step; and hidden

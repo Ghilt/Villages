@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { DialogueView, LineView } from '@villages/protocol';
 
-import { standing, whatChangedIn } from './describe';
+import { impactWords, requirementWords, standing, whatChangedIn } from './describe';
 
 function line(id: string): LineView {
   return { id, speaker: 'messenger', words: `The words of ${id}.` };
@@ -74,5 +74,37 @@ describe('what changed in the dialogues', () => {
     const shown = letter({ requirements: [{ kind: 'alive', character: 'x' }] });
 
     expect(whatChangedIn([letter()], [shown])).toEqual([]);
+  });
+});
+
+describe('what an option shows it will do', () => {
+  it('says what it gains and costs, in the words a player knows the resources by', () => {
+    expect(
+      impactWords({
+        kind: 'shown',
+        impacts: [
+          { resource: 'wealth', amount: -40 },
+          { resource: 'naturalDomain', amount: 100 },
+        ],
+      }),
+    ).toBe('−40 wealth, +100 domain');
+  });
+
+  it('is unknown when hidden, and nothing when it shows nothing', () => {
+    expect(impactWords({ kind: 'hidden' })).toBe('???');
+    expect(impactWords(undefined)).toBeNull();
+  });
+});
+
+describe('a requirement in words', () => {
+  it('names a character by the speaker they are, and by their id when they do not speak', () => {
+    const speakers = [{ id: 'figure', party: 0, name: 'Agnes Hollin', character: 'cb732500-39bd' }];
+
+    expect(requirementWords({ kind: 'alive', character: 'cb732500-39bd' }, speakers)).toBe(
+      'Agnes Hollin alive',
+    );
+    expect(requirementWords({ kind: 'alive', character: '2b0e34d7-8041' }, speakers)).toBe(
+      'character 2b0e34d7 alive',
+    );
   });
 });
