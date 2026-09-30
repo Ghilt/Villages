@@ -9,7 +9,7 @@
 
 **Being built.** This is the method as agreed on 2026-09-30, written before most of the library so that the
 library is built to it. Each step of the plan fills in its part, and a line that still says *to come* is a
-part nobody has built. The page and the foundations are built.
+part nobody has built. The page, the foundations and the pictures are built.
 
 ## The page
 
@@ -94,6 +94,16 @@ Garamond as proposed, served with the page rather than taken from the machine.
 layer, so wherever the two meet the game's wins: a pane can place what the library gave it without the
 library fighting back, and the library cannot reach into anything that is not its own.
 
+## Pictures
+
+A component draws a picture by **its kind and its name**, and never by a file of its own: `usePictures()`
+in `ui/art/pictures.ts` is the list `npm run world:ui` cut, kept current, `pictureIn(list, kind, name)`
+finds one in it, and `imageSetOf` or `sourcesOf` give CSS or an `<img>` every density it was cut at, for
+the browser to pick from. So a picture Adam saves over another is drawn everywhere it is used, at once.
+A picture's size as shown is in the list, a quarter of its size as painted; a component lays it at that
+size, or scales it on purpose and says so. What the pictures are and where they go is
+`AUTHORING-THE-ART.md`.
+
 ## Adding a component
 
 1. **Its folder**, `frontend/apps/web/src/ui/<component>/`: the component, its stylesheet in the `ui`
@@ -111,7 +121,7 @@ library fighting back, and the library cannot reach into anything that is not it
    its room answers to the switch exactly as it will to a phone. A component is not done until it reads
    at both.
 5. **Nothing from the game.** `boundary.test.ts` fails on any import in `src/ui/` that leaves it, bar
-   React and the fonts.
+   React, the fonts, and the world package's pure rules and types.
 
 ## Marks
 

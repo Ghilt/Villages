@@ -241,8 +241,9 @@ and ESLint restricted imports on the frontend.
   owns the ports. Only `app` has `@SpringBootApplication`.
 - Frontend: `packages/protocol` <- `packages/client-core` <- `apps/web`. `client-core` never imports React, the DOM,
   MapLibre or Pixi; the socket is an injected interface.
-- Inside `apps/web`, the component library in `src/ui/` imports nothing from the rest of the app, only React and
-  its fonts, so every component can be shown with nothing running; `src/ui/boundary.test.ts` holds it.
+- Inside `apps/web`, the component library in `src/ui/` imports nothing from the rest of the app, only React, its
+  fonts and the world package, so every component can be shown with nothing running; `src/ui/boundary.test.ts`
+  holds it.
 - The WebSocket protocol is a shared contract: Kotlin types and TypeScript (zod) schemas, both tested against the same
   fixtures in `contracts/fixtures/`. It also has a version, and the version has a recording: change a frame or a field
   and `PROTOCOL_VERSION` goes up at both ends and `contracts/protocol-v<n>.txt` is written beside the old ones, or two
@@ -276,7 +277,7 @@ Commands are added here as the increments land:
   `debug-quick-start.cmd` on a double click from Explorer. It checks the tools, installs the packages
   again when `package-lock.json` has changed since they were installed (stopping this checkout's dev
   server first, because Windows will not replace a running program), generates whatever part
-  of the world is missing, cuts the sprites again (seconds when nothing is new), starts the game
+  of the world is missing, cuts the sprites and the interface pictures again (seconds when nothing is new), starts the game
   server and the dev server hidden with their output in
   `.logs/`, waits until both ports answer, and prints the address. `-Stop` stops both, `-Logs` prints
   their tails, `-WebOnly` skips the game server, `-NoBrowser` leaves the browser alone. **A port held by
@@ -450,6 +451,17 @@ Commands are added here as the increments land:
   pixels, and the screen's density beside them. A section not built yet says which step of
   `docs/plans/ui-component-library.md` brings it. What a component is made of and how to add one is
   `docs/UI-COMPONENTS.md`; see decision record 0068.
+- Interface art: `world/ui/` is Adam's folder, committed as the master is, a folder a kind - `borders`,
+  `fills`, `embellishments`, `medallions`, `marks`, `controls` - and **every picture in it is painted at
+  four times the size it is shown**. A border is a whole framed box with a `<name>.json` beside it saying
+  where its four cuts go, in the picture's own pixels. **Saving over a placeholder replaces it**, and with
+  the dev server running the picture is in the Pictures section of `/admin/inspect-ui-components` a
+  moment later, with no reload, because the server cuts the folder again whenever a picture or a border's
+  file in it is saved, and at every start. By hand that is `npm run world:ui --prefix frontend`: it keys,
+  cuts every picture at 1x, 2x and 3x into `public/ui/` with a list beside them, prints a line a picture
+  with what each weighs, and ends with the whole against a budget of two megabytes at 2x. `-- --placeholders`
+  makes the agent's placeholders for whatever is missing, cut from `world/ui/moodboard.webp` or drawn, and
+  never writes over a file that is there. See `docs/AUTHORING-THE-ART.md` and decision record 0068.
 - Frontend, look at it: `npm run dev --prefix frontend`, then open the address it prints. That is
   http://localhost:5173 in the main checkout and a port of its own in each worktree; see decision 0031.
 - Frontend, checks: `npm run check --prefix frontend` (typecheck, lint, format, unit tests)
@@ -463,13 +475,11 @@ Commands are added here as the increments land:
   `build.gradle.kts` declares only its allowed dependency edges, and `buildSrc` holds the one convention
   they share. Versions live in `backend/gradle/libs.versions.toml`.
 
-The ones below do not exist yet. They arrive with the increments named, and `infra/` and `scripts/` in the
+The two below do not exist yet. They arrive with the increments named, and `infra/` and `scripts/` in the
 layout above are where they will go rather than where they are.
 
 - Infra: `docker compose -f infra/docker-compose.yml up -d` (increment 0.4)
 - Everything: `scripts/check.ps1` or `scripts/check.sh` (0.14)
-- Interface art: `world/ui/`, Adam's folder, cut by `npm run world:ui --prefix frontend` and again by the
-  dev server whenever a picture in it is saved (step 2). What goes where is `docs/AUTHORING-THE-ART.md`.
 
 The dev server is also registered in `.claude/launch.json` under the name `web`, so the preview tooling can start
 it directly. Restart it rather than trusting hot reload after a file has been rewritten wholesale: Vite reports a

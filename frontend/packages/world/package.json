@@ -20,7 +20,8 @@
     "fetch-world": "node --max-old-space-size=4096 bin/fetchWorld.ts",
     "scenery": "node --max-old-space-size=8192 bin/renderScenery.ts",
     "portraits": "node bin/drawPortraits.ts",
-    "art": "node bin/cutArt.ts"
+    "art": "node bin/cutArt.ts",
+    "ui": "node bin/cutUi.ts"
   },
   "dependencies": {
     "fflate": "^0.8.3",

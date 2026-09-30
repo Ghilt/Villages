@@ -108,31 +108,90 @@ every start cheap enough to do.
 
 ## Interface art
 
-**Not built yet**: this is the folder as agreed, and the tool arrives with step 2 of
-`docs/plans/ui-component-library.md`. Until then there is nothing to save over.
+`world/ui/` is yours, and it is committed, beside `world/sprites/` and `world/portraits/`. A folder a kind:
 
-`world/ui/` is yours, and it is committed, beside `world/sprites/` and `world/portraits/`:
+    world/ui/borders/<name>.webp + <name>.json   a whole framed box, and where its four cuts go
+    world/ui/fills/<name>.webp                   a picture that repeats without a seam
+    world/ui/embellishments/<name>.webp          a cherub, a drape, a cross: anything pinned to a box
+    world/ui/medallions/<name>.webp              a round or oval frame, one fixed picture
+    world/ui/marks/<name>.png                    a mark chosen to be painted rather than drawn
+    world/ui/controls/<name>-<state>.png         a button's face: rest, hover, pressed, disabled
+    world/ui/moodboard.webp                      the moodboard the placeholders are cut from
+    world/ui/placeholders.json                   which files are still placeholders, by their bytes
 
-    world/ui/moodboard.webp                  the moodboard the placeholders are copied from
-    world/ui/borders/<name>.png + <name>.json one whole framed box, and where its four cuts go
-    world/ui/fills/<name>.png                a picture that repeats without a seam
-    world/ui/embellishments/<name>.png       a cherub, a drape, a cross, any shape
-    world/ui/medallions/<name>.png           a round or oval frame, see-through where the picture goes
-    world/ui/marks/<name>.png                only the marks chosen to be painted
-    world/ui/controls/<name>-<state>.png     a button's face: rest, hover, pressed, disabled
+A name is lowercase words joined by hyphens, `gilt-simple`, because it is what a recipe calls the picture
+by. PNG, WebP or JPEG. Marks and controls have no placeholders yet; they arrive with the steps that build
+the components that draw them.
 
-**Every picture has a placeholder**, cut from the moodboard or drawn by the tool, so the page works before
-you have painted anything, and **saving over a placeholder replaces it**, as it does for the sprites.
+**Every picture has a placeholder**, and **saving over a placeholder replaces it**, as it does for the
+sprites: delete the placeholder first if your extension differs, because two files that are both
+`gilt-simple` are refused. With the dev server running, the picture is on the page at
+`/admin/inspect-ui-components#pictures` a moment later, with no reload. To have a placeholder back, delete
+your picture and run:
 
-**Paint at four times the size it is shown.** A border's corner shown 48 pixels across is painted 192. The
-tool writes each picture at 1x, 2x and 3x; bigger than four times is wasted, smaller is soft on a sharp
-screen. Any format, and a flat background is keyed out as it is for a sprite.
+    npm run world:ui --prefix frontend -- --placeholders
 
-**A border is one whole box**, painted as it should look at some middling size, with a file beside it
-naming the four cuts in the picture's own pixels, how the edges repeat, and how far in the content starts.
-The corners are drawn once and the edges between them repeated, so **an edge has to repeat without a seam**:
-whatever is on its left end has to meet its right. Anything that must not repeat - a cross at the top, a
-cherub - is not part of the border but an embellishment of its own.
+It never writes over a file that is there. The placeholders are the agent's, copied from the moodboard:
+most are **cut out of it** - the fourteen sample borders' top row, the cathedral panel's cherub, cross and
+drape, the four medallions - and made four times the size, so they are soft; the rest are **drawn**, a
+gilt frame that slices cleanly and the fills, which have to repeat. Where each is cut from is
+`frontend/packages/world/src/uiPlaceholders.ts`.
 
-**A painted mark has to read at seventeen pixels.** The page shows every mark at 17, 24 and 48 side by
-side, and a mark that does not survive the smallest is drawn in code instead.
+### Painting one
+
+**Paint at four times the size it is shown.** A picture's size as shown is its own divided by four, so a
+border's corner shown 24 pixels across is painted 96, and a cherub meant to stand 120 pixels tall on the
+page is painted 480. The tool cuts each at 1x, 2x and 3x from that, and a picture painted smaller than
+four times is soft on a sharp screen. The page says, under every picture, the size it is shown and the
+size it was painted.
+
+**A border is one whole box**, painted as it should look at some middling size, with `<name>.json` beside
+it:
+
+    {
+      "slice": [96, 96, 96, 96],
+      "repeat": "stretch",
+      "inset": [8, 8, 8, 8],
+      "outset": [0, 0, 0, 0],
+      "middle": false,
+      "fillUnder": [48, 48, 48, 48]
+    }
+
+**Every length in it is in the picture's own pixels**, the ones a paint program shows, one number or four,
+top, right, bottom, left. `slice` is where the four cuts go, each measured in from its own edge: the
+corners are drawn once and the edges between them laid along the box. `repeat` is how - `stretch`,
+`repeat`, `round` or `space`, or two of them, across and then down. `inset` is how much further in than
+the cuts the content starts; `outset` how far the border stands out past the box; `middle` whether the
+picture's own middle is drawn, rather than left for a fill; `fillUnder` how far a fill reaches under the
+border, half of each cut if it is not said. Only `slice` has to be there.
+
+So **an edge has to repeat without a seam**: whatever is at its left end has to meet its right, or be
+stretched. Anything that must not repeat - a cross on the crown, a cherub - is not part of the border but
+an embellishment of its own. The moodboard's own borders were not drawn to be sliced, and the page shows
+what that does to them.
+
+**A fill repeats without a seam**, both ways: its left edge meets its right and its top its bottom.
+
+**An embellishment, a medallion, a mark or a control stands on nothing**: cut it out onto transparency, or
+save it on one flat colour and the tool keys the colour away, as it does a sprite's. One on a busy
+background is refused, with a message saying so.
+
+**A painted mark has to read at seventeen pixels**, the size a resource's mark is drawn at, and a mark
+that does not survive it is drawn in code instead.
+
+### What the tool does
+
+    npm run world:ui --prefix frontend
+
+The dev server runs it by itself when a picture or a border's file is saved and every time it starts, and
+so does the quick start. For each picture it keys a flat background away, cuts it at 1x, 2x and 3x as
+WebP, each file named for its own bytes so a browser can keep it forever, and writes the list the page
+reads, `frontend/apps/web/public/ui/ui.json`. A fill is cut three by three and its middle taken, so it
+still repeats at every density. It prints a line a picture, with what each density weighs:
+
+    placeholder borders/gilt-simple.webp           384x384 -> shown 96x96, its own alpha: 1x 1.4 KB, 2x 2.8 KB, 3x 4.2 KB
+
+and ends with the whole: how many pictures, how many still placeholders, and what they weigh at 2x against
+the budget of two megabytes, which is what keeps the page quick to open. Every cut is kept, in
+`frontend/node_modules/.cache/villages-ui`, so a start that finds nothing new is a second or two and writes
+nothing. The cut pictures are output: not committed, and every tree cuts its own.

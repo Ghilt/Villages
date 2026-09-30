@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react';
 
 import { Foundations } from './Foundations';
+import { Pictures } from './Pictures';
 
 /**
  * What the page shows, section by section, in the order it shows them.
@@ -30,8 +31,8 @@ export const SECTIONS: readonly Section[] = [
   {
     id: 'pictures',
     title: 'Pictures',
-    says: 'Every picture in world/ui/, at the sizes it is cut to, what it weighs, and whether it is still a placeholder.',
-    arrives: 2,
+    says: 'Every picture in world/ui/ as it is cut, what it weighs, and whether it is still a placeholder.',
+    Body: Pictures,
   },
   {
     id: 'borders',

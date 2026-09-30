@@ -26,6 +26,7 @@
     "world:scenery": "npm run scenery --workspace @villages/world --",
     "world:portraits": "npm run portraits --workspace @villages/world --",
     "world:art": "npm run art --workspace @villages/world --",
+    "world:ui": "npm run ui --workspace @villages/world --",
     "world:paint": "npm run paint --workspace @villages/world --",
     "world:fetch-all": "npm run fetch-world --workspace @villages/world --"
   },

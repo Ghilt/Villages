@@ -50,6 +50,8 @@ export type {
 } from './biome.ts';
 export { backgroundOf, crop, footOf, hasOwnAlpha, keyOut, opaqueBox, packShelves } from './art.ts';
 export type { ArtAtlasFile, ArtFrame, Box, Keyed, Placed, Rgba } from './art.ts';
+export { CUT_AT, PAINTED_AT, UI_BUDGET, UI_KINDS, asShown, weightAt } from './uiArt.ts';
+export type { Repeat, Sides, UiArtFile, UiBorder, UiCut, UiKind, UiPicture } from './uiArt.ts';
 export { noiseAt } from './noise.ts';
 export type { NoiseField } from './noise.ts';
 export {

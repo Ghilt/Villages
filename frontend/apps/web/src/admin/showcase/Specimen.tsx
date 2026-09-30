@@ -4,7 +4,8 @@ import type { ReactNode } from 'react';
  * One thing on show, with its caption underneath, as the moodboard captions each of its pieces.
  *
  * The caption is the component's name as it is written in code, so that what Adam points at on the page
- * is what a session searches for. `note` is anything worth knowing that the thing cannot say itself.
+ * is what a session searches for. `note` is anything worth knowing that the thing cannot say itself, a
+ * line or several.
  */
 export function Specimen({
   name,
@@ -13,7 +14,7 @@ export function Specimen({
   children,
 }: {
   name: string;
-  note?: string;
+  note?: string | readonly string[];
   /** Take the whole row rather than a cell of it. */
   wide?: boolean;
   children: ReactNode;
@@ -23,7 +24,11 @@ export function Specimen({
       <div className="showcase__stage">{children}</div>
       <figcaption className="showcase__caption">
         <span className="showcase__name">{name}</span>
-        {note !== undefined && <span className="showcase__note">{note}</span>}
+        {(typeof note === 'string' ? [note] : (note ?? [])).map((line) => (
+          <span key={line} className="showcase__note">
+            {line}
+          </span>
+        ))}
       </figcaption>
     </figure>
   );

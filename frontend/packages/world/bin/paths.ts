@@ -30,6 +30,16 @@ export const PORTRAITS_DIR = resolve(REPO, 'world', 'portraits');
  * into it, never over anything already there.
  */
 export const SPRITES_DIR = resolve(REPO, 'world', 'sprites');
+/**
+ * Adam's interface pictures: a folder a kind - borders, fills, embellishments, medallions, marks,
+ * controls - every picture painted at four times the size it is shown, and committed as the sprites are.
+ * The moodboard the placeholders are cut from is here too. See decision record 0068.
+ */
+export const UI_DIR = resolve(REPO, 'world', 'ui');
+/** Where the cut interface pictures go, each at 1x, 2x and 3x with a list beside them. Output, not committed. */
+export const UI_OUT_DIR = resolve(REPO, 'frontend', 'apps', 'web', 'public', 'ui');
+/** Every interface picture the tool has cut, by its bytes and the rules', as `ART_CACHE_DIR` is for sprites. */
+export const UI_CACHE_DIR = resolve(REPO, 'frontend', 'node_modules', '.cache', 'villages-ui');
 /** Where the cut sprites go: an atlas and its frames, served statically. Output, not committed. */
 export const ART_DIR = resolve(REPO, 'frontend', 'apps', 'web', 'public', 'art');
 /**

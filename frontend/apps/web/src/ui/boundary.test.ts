@@ -6,9 +6,16 @@ import { describe, expect, it } from 'vitest';
  * It knows no house, no event and no gateway: a pane hands it words, numbers and callbacks. That is what
  * lets /admin/inspect-ui-components show every component with nothing running, and what lets a pane take
  * a component up without taking the rest of the game with it. So every import in `src/ui/` either stays
- * inside `src/ui/` or names one of the few packages below. See docs/UI-COMPONENTS.md.
+ * inside `src/ui/` or names one of the few packages below: React, the fonts, and the world package, whose
+ * rules are pure and whose types are what the art tool and the page agree on. See docs/UI-COMPONENTS.md.
  */
-const PACKAGES_ALLOWED = [/^react$/, /^react\/jsx-runtime$/, /^react-dom$/, /^@fontsource-variable\/[a-z-]+/];
+const PACKAGES_ALLOWED = [
+  /^react$/,
+  /^react\/jsx-runtime$/,
+  /^react-dom$/,
+  /^@fontsource-variable\/[a-z-]+/,
+  /^@villages\/world$/,
+];
 
 /** A test may also import its runner. */
 const PACKAGES_ALLOWED_IN_TESTS = [/^vitest$/];

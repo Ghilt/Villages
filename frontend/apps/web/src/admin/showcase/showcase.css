@@ -32,7 +32,7 @@
   justify-content: space-between;
   gap: var(--ui-space-3);
   padding: var(--ui-space-4) var(--ui-space-5) var(--ui-space-3);
-  background: rgba(28, 24, 19, 0.94);
+  background: var(--ui-night);
   border-bottom: 1px solid var(--ui-gilt-deep);
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
 }
@@ -419,4 +419,17 @@
   list-style: none;
   font-size: 0.95rem;
   line-height: 1.5;
+}
+
+/* The pictures, each at the size it is shown, and the browser choosing the density. */
+
+.showcase__picture {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.showcase__over {
+  color: var(--ui-rarity-legendary);
+  font-weight: 600;
 }

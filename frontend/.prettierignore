@@ -7,3 +7,6 @@ package-lock.json
 
 # The generated world: machine written, and megabytes of it
 apps/web/public/world
+
+# The cut interface pictures and their list: machine written, by npm run world:ui
+apps/web/public/ui

@@ -127,7 +127,7 @@ A folder beside `world/sprites/` and `world/portraits/`, committed, and Adam's:
 ```
 world/ui/
   moodboard.webp                    the moodboard, which the placeholders are cut from
-  placeholders.json                 a rectangle of the moodboard per placeholder, and every placeholder's hash
+  placeholders.json                 which files are still placeholders, by their bytes, as for the sprites
   borders/<name>.png + <name>.json  one whole framed box; the json names the four cuts, how the edges
                                     repeat, and how far in the content starts
   fills/<name>.png                  a picture that repeats without a seam
@@ -151,8 +151,9 @@ world/ui/
 
 So the page looks like the moodboard from the first day, and not like grey boxes. They come from two places:
 
-- **Cut from the moodboard itself.** `world/ui/placeholders.json` names a rectangle of it per placeholder.
-  The fourteen sample borders become borders - gilt, arch, drape, cloud, gothic, sunburst, column; the
+- **Cut from the moodboard itself.** `frontend/packages/world/src/uiPlaceholders.ts` names a rectangle of
+  it per placeholder, and an outline to cut along for one standing on the busy map. The agent measures
+  them, so they are code rather than a file of Adam's. The fourteen sample borders become borders - gilt, arch, drape, cloud, gothic, sunburst, column; the
   cherubs, the cross and the drapes become embellishments, their background keyed out; the compass, the
   portrait, the shields and the eagle become medallions; the buttons and the slider become the faces of
   controls. A moodboard border is about a hundred pixels, so they are soft at 2x, and the page labels each
@@ -199,8 +200,11 @@ One commit each. After the fourth, the order is a menu.
 | 9 | Carousel and its dots, grid, card, list | the page |
 | 10 | Dialog, toast, text field, dropdown, medallion | the page |
 
-**Where it stands, 2026-09-30: nought and one are built.** The page is at `/admin/inspect-ui-components`
-with the foundations on it; the rest of its sections say which step brings them.
+**Where it stands, 2026-09-30: nought to two are built.** The page is at `/admin/inspect-ui-components`
+with the foundations and every picture on it; the rest of its sections say which step brings them. Step
+two cut the top row of the moodboard's sample borders, not both: the second row is the same frames' corner
+pieces. The marks and the controls have no placeholders yet, and get them with steps five and six, which
+draw them. The page's Pictures section is the sheet of every placeholder.
 
 ## What Adam is asked for, and when
 

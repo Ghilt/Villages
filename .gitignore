@@ -76,3 +76,6 @@ Thumbs.db
 
 # The cut sprites: an atlas and its frames, rebuilt from world/sprites/ by npm run world:art. Output.
 frontend/apps/web/public/art/
+
+# The cut interface pictures, each at 1x, 2x and 3x, rebuilt from world/ui/ by npm run world:ui. Output.
+frontend/apps/web/public/ui/
