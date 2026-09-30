@@ -132,6 +132,11 @@ dialogue is the first; decision record 0067 is the shape.
    effect: the step, then what it gives, then `PlayerCompletedDialogue` when the line ends it. There is
    no command for finishing, because the end is a step.
 
+4. **What it depends on fails in the house's own rules**, carried by one listener. A requirement is a
+   value, `requirementsBrokenBy` says which an event breaks, and the listener for broken requirements sends
+   each house that depends on one `FailRequirement`; the house lapses what it ends, as
+   `PlayerLostDialogue`. A new kind of requirement is a case and a branch, and the listener never changes.
+
 A new kind of line costs nothing but its words; a new kind of effect is one branch of `follows`, which
 choices and dialogues share, and its `kind` in the store. A rule about where a step may be taken belongs
 in the walk, so the decider and the page cannot come to disagree.

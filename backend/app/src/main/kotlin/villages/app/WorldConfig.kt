@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import villages.application.AnonymousTokens
 import villages.application.Arrival
+import villages.application.BrokenRequirements
 import villages.application.CharacterDeaths
 import villages.application.DialogueService
 import villages.application.Dice
@@ -175,6 +176,15 @@ class WorldConfig {
     fun characterDeaths(world: InMemoryWorld, later: ScheduledLater, keyFigures: KeyFigureService): CharacterDeaths =
         CharacterDeaths(world.feed, later, keyFigures)
 
+    /** Carries a broken requirement to every house with a dialogue that needs it. See decision record 0067. */
+    @Bean(destroyMethod = "close")
+    fun brokenRequirements(
+        world: InMemoryWorld,
+        later: ScheduledLater,
+        clock: Clock,
+        worldClock: WorldClock,
+    ): BrokenRequirements = BrokenRequirements(world.feed, later, world.executor, { clock.instant() }, worldClock)
+
     /** The map's read model, folded from the feed. In memory, so it starts empty with the store. */
     @Bean(destroyMethod = "close")
     fun houses(world: InMemoryWorld): HousesProjection = HousesProjection(world.feed)
@@ -214,6 +224,7 @@ class WorldConfig {
         sights: SightProjection,
         dialogueRows: DialoguesProjection,
         characterDeaths: CharacterDeaths,
+        brokenRequirements: BrokenRequirements,
     ): WorldWipe = WorldWipe {
         world.wipe().also {
             houses.reset()
@@ -223,6 +234,7 @@ class WorldConfig {
             sights.reset()
             dialogueRows.reset()
             characterDeaths.reset()
+            brokenRequirements.reset()
         }
     }
 

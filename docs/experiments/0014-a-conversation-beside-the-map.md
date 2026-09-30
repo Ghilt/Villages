@@ -81,6 +81,14 @@ the offer, three steps, what one of them gives, and the end. Against a line an e
 design was for, and it is a test now rather than a hope. A step already passed is refused as not the next
 one, so every path through the sample pays once.
 
+**2026-09-30, a speaker's death ends the dialogue.** The listener for broken requirements was tried with a
+made-up rule of what breaks what - losing a key figure breaking their being alive - and carried it exactly as
+it carries a death, so the claim that a second kind costs only its case and its branch holds of the listener:
+nothing in it knows a kind. Killing the letter's speaker on a running server ends it as lost, naming the
+requirement, within the death's own story. One thing it showed was not about dialogues at all: the booted
+server's tests share one world, and a window that watches events is shown the recent ones on arriving, so a
+test waiting for "a loss" took another test's loss for its own. It waits for its own story's now.
+
 ## Result
 
 Open.

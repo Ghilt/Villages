@@ -207,7 +207,7 @@ drift, and stops asking the moment there is none.
 
 ## What acts on its own
 
-Two things in the program act without anybody sending a command, and they keep the same rules: one
+Three things in the program act without anybody sending a command, and they keep the same rules: one
 subscription to the feed from the beginning, with a fold of their own rather than a read of a read model,
 because two subscriptions can stand at different points in the feed; commands issued through `Later`,
 never inside the feed's own callback; no cancellation table; and every refusal that means "already done"
@@ -219,6 +219,11 @@ swallowed, which is what makes a replay write nothing twice.
   that held them as a key figure, in the death's own story, and undoes a tie made to somebody already dead.
   It is how a death on a character's stream reaches the houses' streams, which no one decision can write
   together. See decision record 0055.
+- **The listener for broken requirements**, `BrokenRequirements`, asks the domain which requirements each
+  event breaks - `requirementsBrokenBy`, handed in, so it knows no kinds - and sends `FailRequirement` to
+  every house with an open dialogue that needs one, in the story of the event that broke it; a dialogue
+  offered with a requirement already broken lapses at once. What a failure ends is the house's own rule. A
+  death is heard by both listeners, each for its own concern. See decision record 0067.
 
 ## Scale principles
 

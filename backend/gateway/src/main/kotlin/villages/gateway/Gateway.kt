@@ -1040,6 +1040,8 @@ internal fun Effect.toView(): EffectView = when (this) {
  */
 internal fun DialogueRow.toView(requirementsShown: Boolean): DialogueView {
     val walk = dialogue.walk(taken)
+    // A dialogue that has ended ends where it stood: a lost one has nothing left to read and nothing to choose.
+    val ended = ending != DialogueEnding.Open
     return DialogueView(
         id = dialogue.id.value.toString(),
         revision = revision,
@@ -1049,8 +1051,8 @@ internal fun DialogueRow.toView(requirementsShown: Boolean): DialogueView {
             SpeakerView(it.id.value, it.party, it.name, it.portrait, it.character?.value?.toString())
         },
         said = walk.said.map { SaidLineView(it.id.value, it.speaker.value, it.words, it.effects.map(Effect::toView)) },
-        next = walk.next.map { it.toView() },
-        options = walk.options.map { it.asOption() },
+        next = if (ended) emptyList() else walk.next.map { it.toView() },
+        options = if (ended) emptyList() else walk.options.map { it.asOption() },
         ending = when (val stands = ending) {
             DialogueEnding.Open -> EndingView.Open
             DialogueEnding.Completed -> EndingView.Completed

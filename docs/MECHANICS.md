@@ -237,7 +237,8 @@ figure and a messenger, from wire version 14, and the event page shows what was 
 keeps every dialogue a house was offered and how far each has got, and the player is sent each one as far as
 it has reached, from wire version 15: the lines past the next step, what a line will give and the
 requirements stay on the server. An option can spend, from version 16, and is refused while the house cannot
-pay, and from version 17 each option carries its reveal impact. Nothing in the world offers one yet, nothing
+pay, and from version 17 each option carries its reveal impact. A speaker's death ends every open dialogue they
+speak in, as lost, naming who died. Nothing in the world offers one yet, nothing
 but the debug panel's Dialogues section, which lists every dialogue as the player may know it and can show
 its requirements, shows one, and no command on the wire takes a step. Its shape
 is decided in decision record 0067: a

@@ -12,8 +12,10 @@ import org.springframework.web.socket.WebSocketSession
 import org.springframework.web.socket.client.standard.StandardWebSocketClient
 import org.springframework.web.socket.handler.TextWebSocketHandler
 import villages.protocol.CommandRejected
+import villages.protocol.EndingView
 import villages.protocol.EventFrame
 import villages.protocol.ProtocolJson
+import villages.protocol.RequirementView
 import villages.protocol.ServerFrame
 import villages.protocol.Snapshot
 import villages.protocol.TakenOver
@@ -23,6 +25,7 @@ import villages.protocol.Welcome
 import villages.protocol.PROTOCOL_VERSION
 import villages.protocol.WorldWiped
 import villages.protocol.YourChoice
+import villages.protocol.YourDialogues
 import villages.protocol.YourHouse
 import villages.protocol.YourKeyFigures
 import java.util.concurrent.CopyOnWriteArrayList
@@ -172,17 +175,62 @@ class AppBootsTest {
             """{"type":"command","commandId":"$killing","command":{"type":"killCharacter",""" +
                 """"characterId":"${figure.id}","cause":"struck down from the debug panel"}}""",
         )
+        // Only this death's story: the window watches every event, and was shown the recent ones on arriving,
+        // which can hold another test's death in the same world.
         window.until("the loss") { frames ->
-            frames.filterIsInstance<EventFrame>().any { it.eventType == "villages.house.lostKeyFigure.v1" }
+            frames.filterIsInstance<EventFrame>().any {
+                it.eventType == "villages.house.lostKeyFigure.v1" && it.correlationId == killing
+            }
         }
         assertEquals(emptyList<KeyFigureView>(), window.last<YourKeyFigures>().keyFigures)
 
         // The loss the listener for character deaths writes is part of the death's story, and caused by it.
-        val events = window.heard.filterIsInstance<EventFrame>()
+        val events = window.heard.filterIsInstance<EventFrame>().filter { it.correlationId == killing }
         val died = events.single { it.eventType == "villages.character.died.v1" }
         val lost = events.single { it.eventType == "villages.house.lostKeyFigure.v1" }
         assertEquals(died.correlationId, lost.correlationId)
         assertEquals(died.id, lost.causationId)
+
+        window.close()
+    }
+
+    @Test
+    fun `a speaker's death ends the dialogue they speak in, and the player is told it was lost, and why`() {
+        val teller = "7d2e5f10-3c4b-4a8d-9e6f-1a2b3c4d5e70"
+        val window = Window(port)
+        window.say("""{"type":"hello","playerToken":"$teller","protocolVersion":$PROTOCOL_VERSION}""")
+        window.until("the dialogues") { frames -> frames.any { it is YourDialogues } }
+
+        // Far from every other test's house, because they share one world and some of them count a cell.
+        window.say(
+            """{"type":"command","commandId":"1c000008-0000-4000-8000-000000000011","command":{"type":"foundHouse",""" +
+                """"name":"Tellwater","seat":{"lat":-45.0,"lon":170.5},""" +
+                """"banner":{"field":"azure","division":"plain","charge":"tower","chargeTincture":"argent"}}}""",
+        )
+        window.until("the house") { frames -> frames.filterIsInstance<YourHouse>().last().yours != null }
+        window.say("""{"type":"command","commandId":"1c000008-0000-4000-8000-000000000012","command":{"type":"addKeyFigure"}}""")
+        window.until("a key figure") { frames -> frames.filterIsInstance<YourKeyFigures>().last().keyFigures.size == 1 }
+        val figure = window.last<YourKeyFigures>().keyFigures.single()
+
+        window.say(
+            """{"type":"command","commandId":"1c000008-0000-4000-8000-000000000013",""" +
+                """"command":{"type":"offerDialogue","sample":"letter"}}""",
+        )
+        window.until("the letter") { frames -> frames.filterIsInstance<YourDialogues>().last().dialogues.size == 1 }
+        assertEquals(EndingView.Open, window.last<YourDialogues>().dialogues.single().ending)
+
+        window.say(
+            """{"type":"command","commandId":"1c000008-0000-4000-8000-000000000014","command":{"type":"killCharacter",""" +
+                """"characterId":"${figure.id}","cause":"struck down before the letter was answered"}}""",
+        )
+        window.until("the loss") { frames ->
+            frames.filterIsInstance<YourDialogues>().last().dialogues.single().ending is EndingView.Lost
+        }
+        // The one requirement the player ever learns of: the speaker who had to stay alive, and did not.
+        assertEquals(
+            EndingView.Lost(RequirementView.Alive(figure.id)),
+            window.last<YourDialogues>().dialogues.single().ending,
+        )
 
         window.close()
     }

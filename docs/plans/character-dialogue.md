@@ -230,10 +230,12 @@ A speaker's death is tried with *kill*, in the Characters section.
    which requirements an event breaks, beside `Requirement`; `FailRequirement` in the house's rules, which
    lapses every open dialogue that needed the requirement as `PlayerLostDialogue`, in the catalogue, and
    writes nothing when it touches none; the read model's `Lost` ending, and the Dialogues section saying who
-   died. The wire already carried the lost ending. Then the listener that carries a failure, and
-   `ARCHITECTURE.md`'s "What acts on its own" gains it. *Kill* a speaker and the Dialogues section says the
-   dialogue was lost, and why. The listener's spec also tries it with a made-up rule of what breaks what, to
-   show that it knows no kinds.
+   died. The wire already carried the lost ending. The second is done: `BrokenRequirements`, the listener
+   for broken requirements, carries a failure to every house with a dialogue that needs it, in the story of
+   the event that broke it, and lapses a dialogue offered with one already broken at once; `ARCHITECTURE.md`'s
+   "What acts on its own" has it. *Kill* a speaker and the Dialogues section says the dialogue was lost, and
+   why. The listener's spec also tries it with a made-up rule of what breaks what, to show that it knows no
+   kinds. Step 6 is done.
 7. **The right bay**, and the pane standing in it, opening when a dialogue arrives. The decision records for
    the bay and for drawing a dialogue in the DOM rather than in Pixi, and `RESPONSIVE-DESIGN.md`. The column,
    its three sizes, and a phone.

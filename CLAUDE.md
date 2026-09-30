@@ -384,10 +384,12 @@ Commands are added here as the increments land:
   Below it the section lists the house's dialogues as the player may know them: each one's title, where it
   stands, and a waiting dialogue choice's options with what each shows it will do (*-40 wealth, +100 wealth*,
   *???*, or nothing). `requirements: hidden`, the switch beside it, asks the gateway for every dialogue's
-  requirements in this window only, which a player is never sent. The page names the sample and sends none of its words. The asking and the answer are lines
-  of the log under `dialogues`, and so is where each dialogue stands whenever one changes, as far as the
-  player may know it; the dialogue itself, whole, is at `/admin/inspect-events`. Nothing shows a dialogue in
-  the game yet. See `docs/adr/0067` and `docs/plans/character-dialogue.md`.
+  requirements in this window only, which a player is never sent. `kill` the speaker in Characters and
+  every open dialogue they speak in is lost, the section saying who died. The page names the sample and
+  sends none of its words. The asking and the answer are lines of the log under `dialogues`, and so is where
+  each dialogue stands whenever one changes, as far as the player may know it; the dialogue itself, whole,
+  is at `/admin/inspect-events`. Nothing shows a dialogue in the game yet. See `docs/adr/0067` and
+  `docs/plans/character-dialogue.md`.
 - What grows where: `world/biomes.json`, hand-edited, one entry a kind and one a biome. What reads it is
   `npm run world:sprites --prefix frontend`, which works out a biome for every sixteen world units and
   where the scenery clumps, and writes a **sprite map** beside the cut tiles - about five megabytes and

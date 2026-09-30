@@ -31,6 +31,9 @@ import villages.application.WorldCalendar
 import villages.application.WorldClock
 import villages.application.WriteConflict
 import villages.domain.CompleteDialogueStep
+import villages.domain.FailRequirement
+import villages.domain.Requirement
+import villages.domain.CharacterId
 import villages.domain.Effect
 import villages.domain.GrantResource
 import villages.domain.LineId
@@ -1728,6 +1731,26 @@ class GatewaySpec : StringSpec({
         paid.options shouldBe emptyList()
         paid.ending shouldBe EndingView.Completed
         paid.revision shouldBe accepted.revision + 2
+    }
+
+    "a lost dialogue reaches its player lost, and why, ended where it stood with nothing to read or choose" {
+        val rig = Rig()
+        val (mine, sent) = rig.introduced()
+        mine.receive(founding())
+        mine.receive(addingAKeyFigure(commandNumber(1)))
+        mine.receive(offering("letter", commandNumber(2)))
+        val figure = sent.filterIsInstance<YourKeyFigures>().last().keyFigures.single().id
+        val offered = rig.world.events.filterIsInstance<PlayerOfferedDialogue>().single()
+
+        rig.world.execute(
+            FailRequirement(offered.houseId, Requirement.Alive(CharacterId(UUID.fromString(figure))), today, noon),
+            Provenance.startedBy(UUID.randomUUID()),
+        )
+
+        val lost = sent.filterIsInstance<YourDialogues>().last().dialogues.single()
+        lost.ending shouldBe EndingView.Lost(RequirementView.Alive(figure))
+        lost.next shouldBe emptyList()
+        lost.options shouldBe emptyList()
     }
 
     "the requirements go only to a window whose switch has asked for them" {
