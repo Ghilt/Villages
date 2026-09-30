@@ -3,6 +3,7 @@ package villages.occurrent
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import villages.domain.Requirement
+import villages.domain.RevealImpact
 import villages.domain.Then
 
 /**
@@ -32,3 +33,17 @@ internal const val END = "end"
 internal interface RequirementJson
 
 internal const val ALIVE = "alive"
+
+/**
+ * How an option's reveal impact is written, the same way: `shown`, with what it will do, or `hidden`. An option
+ * with none is written with a null, as every absent field is. See decision record 0067.
+ */
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = KIND)
+@JsonSubTypes(
+    JsonSubTypes.Type(value = RevealImpact.Shown::class, name = SHOWN),
+    JsonSubTypes.Type(value = RevealImpact.Hidden::class, name = HIDDEN),
+)
+internal interface RevealImpactJson
+
+internal const val SHOWN = "shown"
+internal const val HIDDEN = "hidden"

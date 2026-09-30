@@ -112,7 +112,9 @@ making the world feel alive and personal.
 
 Two or more characters in conversation, shown as a back and forth of **speech bubbles** the player steps
 through: *next* for the next line, and where the conversation branches, a **dialogue choice** in its place,
-whose options are what can be said or done next. What has already been said stays above, scrollable, so
+whose options are what can be said or done next. An option can show what taking it will do before it is
+taken, as whoever wrote the dialogue chose: what it gains and costs, that something will come of it but not
+what, or nothing until it is done. What has already been said stays above, scrollable, so
 that it can be read back.
 
 The same shape covers three cases, and they are one mechanic rather than three:
@@ -235,7 +237,8 @@ figure and a messenger, from wire version 14, and the event page shows what was 
 keeps every dialogue a house was offered and how far each has got, and the player is sent each one as far as
 it has reached, from wire version 15: the lines past the next step, what a line will give and the
 requirements stay on the server. An option can spend, from version 16, and is refused while the house cannot
-pay. Nothing in the world offers one yet, nothing but the debug panel's log
+pay, and from version 17 each option carries its reveal impact. Nothing in the world offers one yet, nothing
+but the debug panel's log
 shows one, and no command on the wire takes a step. Its shape
 is decided in decision record 0067: a
 dialogue offered whole on the house's stream; only its dialogue choices, and the lines that give something

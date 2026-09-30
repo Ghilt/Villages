@@ -3,9 +3,11 @@ package villages.application
 import villages.domain.Dialogue
 import villages.domain.DialogueId
 import villages.domain.Effect
+import villages.domain.Impact
 import villages.domain.Line
 import villages.domain.LineId
 import villages.domain.Resource
+import villages.domain.RevealImpact
 import villages.domain.Speaker
 import villages.domain.SpeakerId
 import villages.domain.Then
@@ -53,8 +55,15 @@ object SampleDialogues {
         )
         val messenger =
             Speaker(SpeakerId("messenger"), party = 1, name = "A messenger", portrait = null, character = null)
-        fun line(line: String, by: Speaker, words: String, then: Then, effects: List<Effect> = emptyList()) =
-            Line(LineId(line), by.id, words, effects, then = then)
+        fun line(
+            line: String,
+            by: Speaker,
+            words: String,
+            then: Then,
+            effects: List<Effect> = emptyList(),
+            revealImpact: RevealImpact? = null,
+        ) =
+            Line(LineId(line), by.id, words, effects, then = then, revealImpact = revealImpact)
 
         return Dialogue(
             id = id,
@@ -81,6 +90,10 @@ object SampleDialogues {
                     "Tell him the house will, and send forty for the masons.",
                     Then.Say(LineId("paid")),
                     effects = listOf(Effect.Spend(Resource.WEALTH, MASONS)),
+                    // Shown whole: what it costs now and what it will be paid, so the house can weigh the two.
+                    revealImpact = RevealImpact.Shown(
+                        listOf(Impact(Resource.WEALTH, -MASONS), Impact(Resource.WEALTH, DUES)),
+                    ),
                 ),
                 line(
                     "paid",
@@ -89,7 +102,14 @@ object SampleDialogues {
                     Then.End,
                     effects = listOf(Effect.Grant(Resource.WEALTH, DUES)),
                 ),
-                line("ask", you, "Ask him what the house would have for it.", Then.Say(LineId("answer"))),
+                // Hidden: something will come of asking, and nobody says what.
+                line(
+                    "ask",
+                    you,
+                    "Ask him what the house would have for it.",
+                    Then.Say(LineId("answer")),
+                    revealImpact = RevealImpact.Hidden,
+                ),
                 line(
                     "answer",
                     messenger,

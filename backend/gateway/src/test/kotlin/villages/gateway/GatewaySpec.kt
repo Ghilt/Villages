@@ -75,8 +75,10 @@ import villages.protocol.PROTOCOL_VERSION
 import villages.protocol.ErrorFrame
 import villages.protocol.FoundAtView
 import villages.protocol.RequirementView
+import villages.protocol.RevealImpactView
 import villages.protocol.EndingView
 import villages.protocol.GrantView
+import villages.protocol.ImpactView
 import villages.protocol.SpendView
 import villages.protocol.EventFrame
 import villages.protocol.HouseAppeared
@@ -1677,6 +1679,13 @@ class GatewaySpec : StringSpec({
         letter.said shouldBe emptyList()
         letter.next.map { it.id } shouldBe listOf("arrives", "reads")
         letter.options.map { it.id } shouldBe listOf("accept", "ask", "refuse")
+        // Each option shows what taking it will do as the letter was written: whole, hidden, or not at all.
+        letter.options.map { it.revealImpact } shouldBe listOf(
+            RevealImpactView.Shown(listOf(ImpactView("wealth", -40), ImpactView("wealth", 100))),
+            RevealImpactView.Hidden,
+            null,
+        )
+        letter.next.map { it.revealImpact } shouldBe listOf(null, null)
         letter.ending shouldBe EndingView.Open
         letter.requirements shouldBe null
         // Both answers' replies, and the purse, are the server's until a step reaches them.

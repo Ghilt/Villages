@@ -63,6 +63,16 @@ class FramesContractSpec : StringSpec({
 
         kinds shouldContainExactlyInAnyOrder namesDeclaredOn(EffectView::class.java)
     }
+
+    "the dialogue fixtures show every kind of reveal impact on an option between them, so a new kind needs one too" {
+        val dialogues = serverFixtures.filter { it.name.startsWith("yourDialogues") }
+            .flatMap { (ProtocolJson.decodeServer(it.readText()) as YourDialogues).dialogues }
+        val kinds = dialogues.flatMap { it.options }.mapNotNull { it.revealImpact }
+            .map { it::class.simpleName!!.replaceFirstChar(Char::lowercase) }
+            .distinct()
+
+        kinds shouldContainExactlyInAnyOrder namesDeclaredOn(RevealImpactView::class.java)
+    }
 })
 
 /**

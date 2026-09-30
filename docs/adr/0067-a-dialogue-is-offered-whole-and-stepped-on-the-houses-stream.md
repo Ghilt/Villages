@@ -7,6 +7,12 @@
   impassable at that line, so the rule below about effects a step could be refused is kept by two more:
   only an option may spend, and every dialogue choice keeps an option that costs nothing. A house that
   cannot pay answers otherwise, and is never stuck.
+- Amended 2026-09-30: an option shows what taking it will do by its **reveal impact**, on Adam's word,
+  written by hand on the option rather than worked out by reading ahead down its path: *shown*, a resource
+  and an amount each and a cost below nothing, so *-40 wealth, +100 wealth*; *hidden*, drawn as unknown; or
+  none, and what it does is seen when it is done. It is sent with the options before the choice, which is
+  its point, and it promises nothing: what the house is given or spends is still the lines' effects, and
+  keeping the two in step is the writer's. Only an option may carry one.
 
 ## Context
 

@@ -18,11 +18,13 @@ import villages.domain.HouseError
 import villages.domain.HouseEvent
 import villages.domain.HouseId
 import villages.domain.HouseName
+import villages.domain.Impact
 import villages.domain.LineId
 import villages.domain.Location
 import villages.domain.PlayerId
 import villages.domain.PlayerOfferedDialogue
 import villages.domain.Requirement
+import villages.domain.RevealImpact
 import villages.domain.Resource
 import villages.domain.Sex
 import villages.domain.Species
@@ -125,6 +127,18 @@ class DialogueServiceSpec : StringSpec({
         )
         effectsOf("ask", "answer") shouldBe listOf(Effect.Grant(Resource.INFLUENCE, SampleDialogues.GOOD_WORD))
         effectsOf("refuse", "shrugs") shouldBe emptyList()
+    }
+
+    "the letter's options show what they will do all three ways: accepting whole, asking hidden, refusing not at all" {
+        val (houses, service) = rig(agnes)
+        service.offerSample(ada, SampleDialogues.LETTER, Provenance.startedBy(sent))
+        val letter = (houses.written.single().first as PlayerOfferedDialogue).dialogue
+
+        letter.line(LineId("accept"))?.revealImpact shouldBe RevealImpact.Shown(
+            listOf(Impact(Resource.WEALTH, -SampleDialogues.MASONS), Impact(Resource.WEALTH, SampleDialogues.DUES)),
+        )
+        letter.line(LineId("ask"))?.revealImpact shouldBe RevealImpact.Hidden
+        letter.line(LineId("refuse"))?.revealImpact shouldBe null
     }
 
     "a house with no key figure is refused, because the letter is theirs to answer" {

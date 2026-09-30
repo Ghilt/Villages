@@ -33,7 +33,8 @@
           "words": "A rider from the coast, my lady, with the harbour-master's seal.",
           "effects": [],
           "recorded": false,
-          "then": { "kind": "say", "line": "asks" }
+          "then": { "kind": "say", "line": "asks" },
+          "revealImpact": null
         },
         {
           "id": "asks",
@@ -41,7 +42,8 @@
           "words": "He asks whether the house will stand behind the new quay.",
           "effects": [],
           "recorded": true,
-          "then": { "kind": "dialogueChoice", "options": ["accept", "refuse"] }
+          "then": { "kind": "dialogueChoice", "options": ["accept", "refuse"] },
+          "revealImpact": null
         },
         {
           "id": "accept",
@@ -49,7 +51,14 @@
           "words": "Tell him it will, and send forty for the masons.",
           "effects": [{ "kind": "spend", "resource": "WEALTH", "amount": 40 }],
           "recorded": false,
-          "then": { "kind": "say", "line": "thanks" }
+          "then": { "kind": "say", "line": "thanks" },
+          "revealImpact": {
+            "kind": "shown",
+            "impacts": [
+              { "resource": "WEALTH", "amount": -40 },
+              { "resource": "WEALTH", "amount": 100 }
+            ]
+          }
         },
         {
           "id": "refuse",
@@ -57,7 +66,8 @@
           "words": "Tell him the house has quays enough of its own.",
           "effects": [],
           "recorded": false,
-          "then": { "kind": "end" }
+          "then": { "kind": "end" },
+          "revealImpact": { "kind": "hidden" }
         },
         {
           "id": "thanks",
@@ -65,7 +75,8 @@
           "words": "He will be glad of it. The first of the dues came with me.",
           "effects": [{ "kind": "grant", "resource": "WEALTH", "amount": 100 }],
           "recorded": false,
-          "then": { "kind": "end" }
+          "then": { "kind": "end" },
+          "revealImpact": null
         }
       ],
       "requirements": [

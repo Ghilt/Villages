@@ -199,11 +199,36 @@ export const speakerViewSchema = z.object({
   character: z.string().optional(),
 });
 
-/** A line still to be read: who says it and the words, and nothing about what it will give. */
-export const lineViewSchema = z.object({ id: z.string(), speaker: z.string(), words: z.string() });
+/** Some of one resource, gained or, below nothing, lost. */
+export const impactViewSchema = z.object({ resource: resourceNameSchema, amount: z.number().int() });
+
+/**
+ * How an option shows what taking it will do, as whoever wrote it chose: `shown`, with what, or `hidden`,
+ * drawn as unknown. An option without one shows nothing until it is done. See decision record 0067.
+ */
+export const revealImpactViewSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('shown'), impacts: z.array(impactViewSchema).min(1) }),
+  z.object({ kind: z.literal('hidden') }),
+]);
+
+/**
+ * A line still to be read, or an option to pick: who says it and the words, and nothing about what it will do
+ * but, on an option, its reveal impact.
+ */
+export const lineViewSchema = z.object({
+  id: z.string(),
+  speaker: z.string(),
+  words: z.string(),
+  revealImpact: revealImpactViewSchema.optional(),
+});
 
 /** A line said, with what saying it did to the house: what it gave, and what it took. */
-export const saidLineViewSchema = lineViewSchema.extend({ effects: z.array(effectViewSchema) });
+export const saidLineViewSchema = z.object({
+  id: z.string(),
+  speaker: z.string(),
+  words: z.string(),
+  effects: z.array(effectViewSchema),
+});
 
 /**
  * One dialogue as the player may know it. `revision` rises with every change to it. `next` ends in the step
@@ -417,6 +442,8 @@ export type ChoiceView = z.infer<typeof choiceViewSchema>;
 export type RequirementView = z.infer<typeof requirementViewSchema>;
 export type EndingView = z.infer<typeof endingViewSchema>;
 export type SpeakerView = z.infer<typeof speakerViewSchema>;
+export type ImpactView = z.infer<typeof impactViewSchema>;
+export type RevealImpactView = z.infer<typeof revealImpactViewSchema>;
 export type LineView = z.infer<typeof lineViewSchema>;
 export type SaidLineView = z.infer<typeof saidLineViewSchema>;
 export type DialogueView = z.infer<typeof dialogueViewSchema>;

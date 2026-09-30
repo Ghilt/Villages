@@ -73,6 +73,9 @@ data class Dialogue(
             if (line.effects.any { it is Effect.Spend } && line.id !in options) {
                 refuse("$which spends, and only an option may, so that a house that cannot pay can answer otherwise")
             }
+            if (line.revealImpact != null && line.id !in options) {
+                refuse("$which shows its impact, and only an option is shown before it is taken")
+            }
             line.then.following().firstOrNull { it !in said }?.let {
                 refuse("$which leads to line ${it.value}, which the dialogue does not have")
             }
@@ -166,7 +169,38 @@ data class Line(
     /** Whether reaching it is recorded even when it does nothing and ends nothing. */
     val recorded: Boolean = false,
     val then: Then,
+    /** On an option, how it shows what taking it will do before it is taken; none shows nothing. */
+    val revealImpact: RevealImpact? = null,
 )
+
+/**
+ * How an option shows what taking it will do, before it is taken: written by hand on the option by whoever wrote
+ * the dialogue, so the page draws it and nothing reads ahead down the path. It promises nothing - what the house
+ * is given or spends is still the lines' effects - and keeping the two in step is the writer's. An option with
+ * none shows nothing, and what it does is seen when it is done. See decision record 0067.
+ */
+sealed interface RevealImpact {
+    /** What it will do, shown: a resource and an amount each, and a cost as an amount below nothing. */
+    data class Shown(val impacts: List<Impact>) : RevealImpact {
+        init {
+            if (impacts.isEmpty()) {
+                throw HouseError.InvalidDialogue("an impact shown shows something")
+            }
+        }
+    }
+
+    /** That it will do something, and not what: the page shows it as unknown. */
+    data object Hidden : RevealImpact
+}
+
+/** Some of one resource, gained or, below nothing, lost: `+100` wealth, or `-40`. Never nothing. */
+data class Impact(val resource: Resource, val amount: Long) {
+    init {
+        if (amount == 0L) {
+            throw HouseError.InvalidAmount("an impact is of more or less than nothing, and 0 is neither")
+        }
+    }
+}
 
 /** What follows a line: another line, a dialogue choice, or the end. */
 sealed interface Then {

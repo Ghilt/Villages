@@ -29,7 +29,7 @@ Recorded whole on the event that offers it.
 | title | a line | what the list shows |
 | scene | a picture's key, or none | from `world/scenes/`, once step 11 has made the folder |
 | speakers | each: an id, a party, a name, a portrait's key or none, a character id or none | a speaker with no character id is somebody who is not a character, a messenger say |
-| lines | each: an id, a speaker, the words, what saying it does, whether it is recorded, and what follows | the first line is where it opens; a line's id and a speaker's are words, so a dialogue written by hand reads |
+| lines | each: an id, a speaker, the words, what saying it does, whether it is recorded, what follows, and on an option its reveal impact | the first line is where it opens; a line's id and a speaker's are words, so a dialogue written by hand reads |
 | what follows a line | another line, a dialogue choice of two to four option lines, or the end | a line followed by the end is always recorded |
 | requirements | any it was written to need | every speaker with a character id is also required alive, which is worked out rather than written |
 

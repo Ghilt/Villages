@@ -158,4 +158,25 @@ class DialogueSpec : StringSpec({
 
         refusal { dialogue(arrives, asks, paying, payingToo, thanks) } shouldContain "every option spends"
     }
+
+    "an option shows what taking it will do as it was written: shown, hidden, or not at all" {
+        val shown = RevealImpact.Shown(listOf(Impact(Resource.WEALTH, -40), Impact(Resource.WEALTH, 100)))
+        val showing = accept.copy(revealImpact = shown)
+        val hiding = refuse.copy(revealImpact = RevealImpact.Hidden)
+        val letter = dialogue(arrives, asks, showing, hiding, thanks)
+
+        letter.line(LineId("accept"))?.revealImpact shouldBe shown
+        letter.line(LineId("refuse"))?.revealImpact shouldBe RevealImpact.Hidden
+        dialogue(arrives, asks, accept, refuse, thanks).line(LineId("accept"))?.revealImpact shouldBe null
+    }
+
+    "only an option shows an impact, because nothing else is chosen" {
+        refusal { dialogue(arrives.copy(revealImpact = RevealImpact.Hidden), asks, accept, refuse, thanks) } shouldContain
+            "only an option"
+    }
+
+    "an impact shown shows something, and never nothing of a resource" {
+        shouldThrow<HouseError.InvalidDialogue> { RevealImpact.Shown(emptyList()) }
+        shouldThrow<HouseError.InvalidAmount> { Impact(Resource.WEALTH, 0) }
+    }
 })

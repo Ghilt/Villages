@@ -36,9 +36,10 @@ import tools.jackson.databind.JsonNode
  * Version 14 added `offerDialogue`, the debug panel's offer of a sample dialogue by name. Version 15 added
  * `yourDialogues`, the player's dialogues with what has not been reached held back, and `showRequirements`,
  * Adam's switch that sends one window their requirements. Version 16 let an effect be a `spend`, what an option
- * costs, and named what a said line did its `effects`.
+ * costs, and named what a said line did its `effects`. Version 17 gave an option its `revealImpact`, how it shows
+ * what taking it will do.
  */
-const val PROTOCOL_VERSION = 16
+const val PROTOCOL_VERSION = 17
 
 data class Point(val lat: Double, val lon: Double)
 
@@ -540,8 +541,33 @@ data class SpeakerView(
     val character: String? = null,
 )
 
-/** A line still to be read: who says it and the words, and nothing about what it will give. */
-data class LineView(val id: String, val speaker: String, val words: String)
+/**
+ * A line still to be read, or an option to pick: who says it and the words, and nothing about what it will do
+ * but, on an option, its `revealImpact` - how whoever wrote it chose to show what taking it will do. Absent, the
+ * option shows nothing until it is done. See decision record 0067.
+ */
+@JsonInclude(JsonInclude.Include.NON_NULL)
+data class LineView(
+    val id: String,
+    val speaker: String,
+    val words: String,
+    val revealImpact: RevealImpactView? = null,
+)
+
+/** How an option shows what taking it will do: `shown`, with what, or `hidden`, drawn as unknown. */
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "kind")
+@JsonSubTypes(
+    JsonSubTypes.Type(RevealImpactView.Shown::class, name = "shown"),
+    JsonSubTypes.Type(RevealImpactView.Hidden::class, name = "hidden"),
+)
+sealed interface RevealImpactView {
+    data class Shown(val impacts: List<ImpactView>) : RevealImpactView
+
+    data object Hidden : RevealImpactView
+}
+
+/** Some of one resource, gained or, below nothing, lost. `resource` is a wire name, so `naturalDomain`. */
+data class ImpactView(val resource: String, val amount: Long)
 
 /** A line said, with what saying it did to the house: what it gave, and what it took. */
 data class SaidLineView(val id: String, val speaker: String, val words: String, val effects: List<EffectView>)

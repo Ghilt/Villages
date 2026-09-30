@@ -44,6 +44,7 @@ import villages.domain.ChoiceId
 import villages.domain.Effect
 import villages.domain.Line
 import villages.domain.Requirement
+import villages.domain.RevealImpact
 import villages.domain.walk
 import villages.domain.DomainError
 import villages.domain.HouseError
@@ -81,8 +82,10 @@ import villages.protocol.DialogueView
 import villages.protocol.EndingView
 import villages.protocol.FoundAtView
 import villages.protocol.GrantView
+import villages.protocol.ImpactView
 import villages.protocol.LineView
 import villages.protocol.RequirementView
+import villages.protocol.RevealImpactView
 import villages.protocol.SaidLineView
 import villages.protocol.ShowRequirements
 import villages.protocol.SpeakerView
@@ -1047,7 +1050,7 @@ internal fun DialogueRow.toView(requirementsShown: Boolean): DialogueView {
         },
         said = walk.said.map { SaidLineView(it.id.value, it.speaker.value, it.words, it.effects.map(Effect::toView)) },
         next = walk.next.map { it.toView() },
-        options = walk.options.map { it.toView() },
+        options = walk.options.map { it.asOption() },
         ending = when (ending) {
             DialogueEnding.Open -> EndingView.Open
             DialogueEnding.Completed -> EndingView.Completed
@@ -1058,6 +1061,14 @@ internal fun DialogueRow.toView(requirementsShown: Boolean): DialogueView {
 
 /** A line still to be read: the words and who says them, and not what it will give. */
 private fun Line.toView(): LineView = LineView(id.value, speaker.value, words)
+
+/** An option to pick, with how whoever wrote it chose to show what taking it will do. */
+private fun Line.asOption(): LineView = LineView(id.value, speaker.value, words, revealImpact?.toView())
+
+private fun RevealImpact.toView(): RevealImpactView = when (this) {
+    is RevealImpact.Shown -> RevealImpactView.Shown(impacts.map { ImpactView(it.resource.toWire(), it.amount) })
+    RevealImpact.Hidden -> RevealImpactView.Hidden
+}
 
 private fun Requirement.toView(): RequirementView = when (this) {
     is Requirement.Alive -> RequirementView.Alive(character.value.toString())

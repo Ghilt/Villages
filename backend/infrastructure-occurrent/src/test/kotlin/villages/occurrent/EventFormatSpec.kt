@@ -40,6 +40,7 @@ import villages.domain.HouseResourceGranted
 import villages.domain.PlayerGivenChoice
 import villages.domain.HouseId
 import villages.domain.HouseName
+import villages.domain.Impact
 import villages.domain.PlayerTookAction
 import villages.domain.Line
 import villages.domain.LineId
@@ -51,6 +52,7 @@ import villages.domain.PlayerCompletedDialogue
 import villages.domain.PlayerCompletedDialogueStep
 import villages.domain.PlayerOfferedDialogue
 import villages.domain.Requirement
+import villages.domain.RevealImpact
 import villages.domain.Sex
 import villages.domain.Significance
 import villages.domain.Speaker
@@ -235,6 +237,9 @@ class EventFormatSpec : StringSpec({
                     speaker = theLady.id,
                     words = "Tell him it will, and send forty for the masons.",
                     effects = listOf(Effect.Spend(Resource.WEALTH, 40)),
+                    revealImpact = RevealImpact.Shown(
+                        listOf(Impact(Resource.WEALTH, -40), Impact(Resource.WEALTH, 100)),
+                    ),
                     then = Then.Say(LineId("thanks")),
                 ),
                 Line(
@@ -242,6 +247,7 @@ class EventFormatSpec : StringSpec({
                     speaker = theLady.id,
                     words = "Tell him the house has quays enough of its own.",
                     then = Then.End,
+                    revealImpact = RevealImpact.Hidden,
                 ),
                 Line(
                     id = LineId("thanks"),
@@ -336,6 +342,8 @@ class EventFormatSpec : StringSpec({
         lines[1]["then"][KIND].asString() shouldBe DIALOGUE_CHOICE
         lines[2]["effects"][0][KIND].asString() shouldBe SPEND
         lines[4]["effects"][0][KIND].asString() shouldBe GRANT
+        lines[2]["revealImpact"][KIND].asString() shouldBe SHOWN
+        lines[3]["revealImpact"][KIND].asString() shouldBe HIDDEN
         lines[3]["then"][KIND].asString() shouldBe END
         dialogue["requirements"][0][KIND].asString() shouldBe ALIVE
     }
@@ -350,6 +358,7 @@ class EventFormatSpec : StringSpec({
             Effect::class to EffectJson::class,
             Then::class to ThenJson::class,
             Requirement::class to RequirementJson::class,
+            RevealImpact::class to RevealImpactJson::class,
         )
         val named = mixIns.mapValues { (_, mixIn) -> mixIn.java.getAnnotation(JsonSubTypes::class.java).value.toList() }
 

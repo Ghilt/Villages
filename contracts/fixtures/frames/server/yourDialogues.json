@@ -57,7 +57,19 @@
         { "id": "asks", "speaker": "messenger", "words": "Another rider, with another question." }
       ],
       "options": [
-        { "id": "yes", "speaker": "messenger", "words": "Yes." },
+        {
+          "id": "yes",
+          "speaker": "messenger",
+          "words": "Yes.",
+          "revealImpact": {
+            "kind": "shown",
+            "impacts": [
+              { "resource": "wealth", "amount": -40 },
+              { "resource": "wealth", "amount": 100 }
+            ]
+          }
+        },
+        { "id": "maybe", "speaker": "messenger", "words": "Perhaps.", "revealImpact": { "kind": "hidden" } },
         { "id": "no", "speaker": "messenger", "words": "No." }
       ],
       "ending": { "kind": "open" }

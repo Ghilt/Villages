@@ -378,8 +378,9 @@ Commands are added here as the increments land:
   refusal is seen rather than guessed. The events are at `/admin/inspect-events`. See `docs/adr/0055`.
 - Dialogues, in the same panel: the **Dialogues** section, below Characters. `offer a dialogue` offers the
   house the server's sample, a letter from the coast spoken by the house's first key figure and a
-  messenger, with one dialogue choice and one purse; it is off, saying why on hover, while the house has
-  no key figure. The page names the sample and sends none of its words. The asking and the answer are lines
+  messenger, ending in a dialogue choice of three: *accept* spends forty wealth and is paid a hundred,
+  *ask* is paid in influence, and *refuse* does nothing, each option showing what it will do a different
+  way - whole, hidden, or not at all. It is off, saying why on hover, while the house has no key figure. The page names the sample and sends none of its words. The asking and the answer are lines
   of the log under `dialogues`, and so is where each dialogue stands whenever one changes, as far as the
   player may know it; the dialogue itself, whole, is at `/admin/inspect-events`. Nothing shows a dialogue in
   the game yet. See `docs/adr/0067` and `docs/plans/character-dialogue.md`.

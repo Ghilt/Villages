@@ -222,7 +222,7 @@ What one new event costs, and the check that fails until each part exists.
 | The type row | `EventTypes` in `backend/infrastructure-occurrent` | `EventTypeCatalogueSpec` |
 | The catalogue row: type, payload in constructor order, meaning, producer, consumers | `docs/EVENTS.md` | `EventCatalogueSpec`, in both directions |
 | The stored form | `contracts/fixtures/events/<type>.json` | `EventFormatSpec` |
-| Each case of a sealed field - an effect, what follows a line, a requirement - named by its `kind`, and written by some fixture | `EffectJson.kt` or `DialogueJson.kt` in `backend/infrastructure-occurrent`, and a fixture; an effect also has its view, and a `yourChoice` fixture carrying it | `EventFormatSpec` and `FramesContractSpec`, which want every case named and written |
+| Each case of a sealed field - an effect, what follows a line, a requirement, an option's reveal impact - named by its `kind`, and written by some fixture | `EffectJson.kt` or `DialogueJson.kt` in `backend/infrastructure-occurrent`, and a fixture; an effect also has its view, and a `yourChoice` fixture carrying it | `EventFormatSpec` and `FramesContractSpec`, which want every case named and written |
 | Every projection's fold | `backend/projections` | the compiler: each `when` is exhaustive |
 | A frame, when the interface sees it directly | Kotlin `Frames.kt`, zod `frames.ts`, one fixture under `contracts/fixtures/frames` | both contract tests |
 | The wire moved, so its version does: `PROTOCOL_VERSION` up at both ends, and `contracts/protocol-v<n>.txt` recorded with `./gradlew :protocol:test -Dprotocol.record=true` | `backend/protocol`, `frontend/packages/protocol`, `contracts/` | `ProtocolShapeSpec` and `protocol.shape.test.ts`, which fail with the instructions (0037) |
