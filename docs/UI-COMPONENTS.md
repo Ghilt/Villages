@@ -7,9 +7,9 @@
 > `AUTHORING-THE-ART.md`; why it is painted art placed by CSS, which is decision record 0068; and the order
 > it is being built in, which is `docs/plans/ui-component-library.md`.
 
-**Not built yet.** This is the method as agreed on 2026-09-30, written before the library so that the
+**Being built.** This is the method as agreed on 2026-09-30, written before most of the library so that the
 library is built to it. Each step of the plan fills in its part, and a line that still says *to come* is a
-part nobody has built.
+part nobody has built. The page and the foundations are built.
 
 ## The page
 
@@ -72,10 +72,46 @@ sentence is a recipe, and at most one new picture in `world/ui/`, which starts a
 What the agent says back, before building: the recipe as written, the pictures it reads, which of them are
 new and the size to paint each at.
 
+## The foundations
+
+**Colours and spaces are tokens**, custom properties on `:root` named `--ui-…`, declared in
+`frontend/apps/web/src/ui/ui.css` and nowhere else. `ui/tokens.ts` lists each by name and by what it is
+for, and the page draws its swatches from that list and reads the values back from the stylesheet. A
+component uses a token and never a colour of its own; a colour a component needs that is not a token
+becomes one, in both places, and `tokens.test.ts` fails until it is in both.
+
+**Text colour is a role, not a colour.** Inside `.ui-root` the text is `--ui-text` and what is said about
+it `--ui-text-soft`, cream on night; `.ui-on-parchment` turns both to ink. A component sets its text in
+the two roles and reads on either ground without knowing which it is on.
+
+**Type is set by role**, a class a role, each named for what the words are doing rather than how big they
+are: `ui-title`, `ui-epigraph`, `ui-heading`, `ui-caps`, `ui-label`, `ui-body`, `ui-quote`, and
+`ui-numeral` for a number read as a number, lining and tabular so that a count does not jitter. Sizes are
+in `em`, so a role inside a small card is small because the card is. The face is `--ui-font-text`, EB
+Garamond as proposed, served with the page rather than taken from the machine.
+
+**All of it is in the `ui` cascade layer**, and every class is `ui-`. The game's own stylesheet is in no
+layer, so wherever the two meet the game's wins: a pane can place what the library gave it without the
+library fighting back, and the library cannot reach into anything that is not its own.
+
 ## Adding a component
 
-To come, with step 1 of the plan: the shape of a component's folder, what the page shows for each, and
-the states every control is shown in.
+1. **Its folder**, `frontend/apps/web/src/ui/<component>/`: the component, its stylesheet in the `ui`
+   layer, and its arithmetic - anything that can be worked out without a browser, a padding, a position,
+   a step - in a plain module beside it with a test. There is no React Testing Library here, and the web
+   tests run without a browser; what a component looks like is checked on the page, by eye.
+2. **Its place on the page**, in `frontend/apps/web/src/admin/showcase/`: a section in `sections.tsx`,
+   or a part of one, drawn with `Specimen`, `Specimens` and `Part`. **A specimen's caption is the name the
+   thing has in code**, so what Adam points at on the page is what a session searches for.
+3. **Every variant, every state and more than one size.** A control is shown at rest, hovered, pressed,
+   focused, chosen and disabled, side by side, rather than left for the pointer to find. A container is
+   shown small, middling and large.
+4. **Both grounds and both widths.** The page's switches put everything on night or on parchment and
+   narrow the sheet to a phone's 390 pixels, and the sheet is a container, so a component that answers to
+   its room answers to the switch exactly as it will to a phone. A component is not done until it reads
+   at both.
+5. **Nothing from the game.** `boundary.test.ts` fails on any import in `src/ui/` that leaves it, bar
+   React and the fonts.
 
 ## Marks
 

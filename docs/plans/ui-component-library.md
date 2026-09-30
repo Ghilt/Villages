@@ -199,6 +199,9 @@ One commit each. After the fourth, the order is a menu.
 | 9 | Carousel and its dots, grid, card, list | the page |
 | 10 | Dialog, toast, text field, dropdown, medallion | the page |
 
+**Where it stands, 2026-09-30: nought and one are built.** The page is at `/admin/inspect-ui-components`
+with the foundations on it; the rest of its sections say which step brings them.
+
 ## What Adam is asked for, and when
 
 **Nothing that anything waits on**, because the agent makes the placeholders. From step 2 every picture
@@ -209,8 +212,10 @@ mark or a control's face.
 
 ## How each step is checked
 
-- `npm run check --prefix frontend`, green. The behaviour of a component is tested with React Testing
-  Library: a stepper refuses past its ends, a tab bar picks one, a keep-out sets the content in.
+- `npm run check --prefix frontend`, green. A component's arithmetic is tested without a browser, in a
+  plain module beside it, as the stage's is in `bayBox.test.ts`: a keep-out sets the content in, a stepper
+  refuses past its ends. The repository has no React Testing Library and its web tests run in Node, so
+  what a component looks like is checked on the page, by eye, and that is the check that matters.
 - The folder's rules are a test, as `spriteFolder.test.ts` is for the sprites.
 - The page, open from this tree's `web` server, looked at on a desktop, narrowed to a phone, and at a
   device-pixel ratio of 1.25 for anything sliced.

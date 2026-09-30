@@ -241,6 +241,8 @@ and ESLint restricted imports on the frontend.
   owns the ports. Only `app` has `@SpringBootApplication`.
 - Frontend: `packages/protocol` <- `packages/client-core` <- `apps/web`. `client-core` never imports React, the DOM,
   MapLibre or Pixi; the socket is an injected interface.
+- Inside `apps/web`, the component library in `src/ui/` imports nothing from the rest of the app, only React and
+  its fonts, so every component can be shown with nothing running; `src/ui/boundary.test.ts` holds it.
 - The WebSocket protocol is a shared contract: Kotlin types and TypeScript (zod) schemas, both tested against the same
   fixtures in `contracts/fixtures/`. It also has a version, and the version has a recording: change a frame or a field
   and `PROTOCOL_VERSION` goes up at both ends and `contracts/protocol-v<n>.txt` is written beside the old ones, or two
@@ -442,6 +444,12 @@ Commands are added here as the increments land:
   every style into `world/painterly/`, flat once and then once per style, and writes the runtime copy the
   app reads. `-- --view alps`, `-- --style woodblock` for one of them; `-- --config-only` writes just the
   runtime copy, in a second, which is all the app needs after a style edit.
+- The component library, shown: **`/admin/inspect-ui-components`** on this tree's dev server, and nothing
+  else needs to be running - no game server, no map. Every component in every variant and state, with
+  switches along the top to put them on night or on parchment and to narrow the sheet to a phone's 390
+  pixels, and the screen's density beside them. A section not built yet says which step of
+  `docs/plans/ui-component-library.md` brings it. What a component is made of and how to add one is
+  `docs/UI-COMPONENTS.md`; see decision record 0068.
 - Frontend, look at it: `npm run dev --prefix frontend`, then open the address it prints. That is
   http://localhost:5173 in the main checkout and a port of its own in each worktree; see decision 0031.
 - Frontend, checks: `npm run check --prefix frontend` (typecheck, lint, format, unit tests)
@@ -460,8 +468,6 @@ layout above are where they will go rather than where they are.
 
 - Infra: `docker compose -f infra/docker-compose.yml up -d` (increment 0.4)
 - Everything: `scripts/check.ps1` or `scripts/check.sh` (0.14)
-- The component library, shown: `/admin/inspect-ui-components` on this tree's dev server, with no game
-  server needed (step 1 of `docs/plans/ui-component-library.md`)
 - Interface art: `world/ui/`, Adam's folder, cut by `npm run world:ui --prefix frontend` and again by the
   dev server whenever a picture in it is saved (step 2). What goes where is `docs/AUTHORING-THE-ART.md`.
 

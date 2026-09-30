@@ -1,0 +1,422 @@
+/*
+ * The page at /admin/inspect-ui-components: the furniture the components stand on, and nothing a
+ * component itself is drawn with. What a component looks like is in `src/ui/`; this is only the page.
+ *
+ * Laid out like the moodboard, a dark sheet with each thing captioned in italics beneath it. The sheet is
+ * a container, so a component that answers to the room it is given answers to the phone switch exactly
+ * as it will to a phone.
+ */
+
+.showcase {
+  container-type: inline-size;
+  container-name: showcase;
+  min-height: 100%;
+  background: radial-gradient(ellipse at 30% 0%, rgba(255, 236, 200, 0.05), transparent 60%), var(--ui-night);
+}
+
+.showcase code {
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  font-size: 0.82em;
+  color: var(--ui-gilt-light);
+}
+
+/* The bar across the top, which stays while the page scrolls, because the switches are used mid-way down. */
+
+.showcase__bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--ui-space-3);
+  padding: var(--ui-space-4) var(--ui-space-5) var(--ui-space-3);
+  background: rgba(28, 24, 19, 0.94);
+  border-bottom: 1px solid var(--ui-gilt-deep);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
+}
+
+.showcase__heading {
+  display: grid;
+  gap: var(--ui-space-1);
+}
+
+.showcase__switches {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ui-space-3);
+}
+
+.showcase__choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+}
+
+.showcase__choice-label {
+  margin-right: var(--ui-space-2);
+  font-style: italic;
+  color: var(--ui-cream-soft);
+}
+
+.showcase__choice-option {
+  padding: 0.2rem 0.7rem;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--ui-cream);
+  background: transparent;
+  border: 1px solid var(--ui-gilt-deep);
+  cursor: pointer;
+}
+
+.showcase__choice-option + .showcase__choice-option {
+  border-left: none;
+}
+
+.showcase__choice-option:first-of-type {
+  border-radius: 3px 0 0 3px;
+}
+
+.showcase__choice-option:last-of-type {
+  border-radius: 0 3px 3px 0;
+}
+
+.showcase__choice-option:hover {
+  background: rgba(223, 189, 138, 0.1);
+}
+
+.showcase__choice-option[aria-pressed='true'] {
+  color: var(--ui-night);
+  background: var(--ui-gilt);
+}
+
+.showcase__choice-option:focus-visible {
+  outline: 2px solid var(--ui-gilt-light);
+  outline-offset: 2px;
+}
+
+.showcase__density {
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  font-size: 0.78rem;
+  color: var(--ui-cream-soft);
+}
+
+/* The index down the side, and the sheet beside it. */
+
+.showcase__body {
+  display: grid;
+  grid-template-columns: 12rem minmax(0, 1fr);
+  gap: var(--ui-space-5);
+  padding: var(--ui-space-5);
+}
+
+@container showcase (max-width: 44rem) {
+  .showcase__body {
+    grid-template-columns: minmax(0, 1fr);
+    padding: var(--ui-space-3);
+  }
+
+  .showcase__index {
+    display: none;
+  }
+}
+
+.showcase__index {
+  position: sticky;
+  top: 7rem;
+  align-self: start;
+}
+
+.showcase__index ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--ui-space-2);
+}
+
+.showcase__index a {
+  color: var(--ui-cream);
+  text-decoration: none;
+}
+
+.showcase__index a:hover {
+  color: var(--ui-gilt-light);
+}
+
+.showcase__index--to-come a {
+  color: var(--ui-cream-soft);
+  font-style: italic;
+  opacity: 0.6;
+}
+
+.showcase__sheet {
+  container-type: inline-size;
+  container-name: sheet;
+  min-width: 0;
+}
+
+/*
+ * A phone's width, 390 pixels, which is the stage's own phone shape. The whole of it is the sheet's, with
+ * the edges drawn just outside it so it is seen where a phone would stop.
+ */
+.showcase[data-width='phone'] .showcase__sheet {
+  justify-self: center;
+  width: 390px;
+  max-width: 100%;
+  outline: 1px dashed var(--ui-night-edge);
+  outline-offset: var(--ui-space-2);
+}
+
+/* A section, headed as the moodboard heads its parts: small spaced capitals and a gold rule to the edge. */
+
+.showcase__section {
+  margin-bottom: var(--ui-space-6);
+  scroll-margin-top: 8rem;
+}
+
+.showcase__section-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-3);
+  color: var(--ui-gilt-light);
+}
+
+.showcase__rule {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--ui-gilt-deep), transparent);
+}
+
+.showcase__says {
+  display: block;
+  margin: var(--ui-space-1) 0 var(--ui-space-4);
+}
+
+.showcase__to-come {
+  margin: 0;
+  padding: var(--ui-space-4);
+  font-style: italic;
+  color: var(--ui-cream-soft);
+  border: 1px dashed var(--ui-night-edge);
+  text-align: center;
+}
+
+.showcase__part {
+  margin-bottom: var(--ui-space-5);
+}
+
+.showcase__part-title {
+  margin-bottom: var(--ui-space-3);
+  color: var(--ui-cream-soft);
+}
+
+.showcase__lead {
+  display: block;
+  margin: 0 0 var(--ui-space-3);
+}
+
+/* Things on show, and the ground they stand on. */
+
+.showcase__specimens {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+  gap: var(--ui-space-4) var(--ui-space-3);
+}
+
+.showcase__specimen {
+  margin: 0;
+  display: grid;
+  gap: var(--ui-space-2);
+  min-width: 0;
+}
+
+.showcase__specimen--wide {
+  grid-column: 1 / -1;
+}
+
+.showcase__stage {
+  display: grid;
+  place-items: center;
+  min-height: 4.5rem;
+  padding: var(--ui-space-3);
+  background: var(--ui-night-raised);
+  border: 1px solid var(--ui-night-edge);
+  min-width: 0;
+  overflow: visible;
+}
+
+.showcase__specimen--wide .showcase__stage {
+  justify-items: start;
+}
+
+.showcase__caption {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  gap: 0.1rem;
+}
+
+.showcase__name {
+  font-style: italic;
+  color: var(--ui-cream);
+}
+
+.showcase__note {
+  font-size: 0.82rem;
+  font-style: italic;
+  color: var(--ui-cream-soft);
+}
+
+/* On parchment: the same things on the sheet a player will mostly read them on. */
+.showcase[data-ground='parchment'] .showcase__stage,
+.showcase[data-ground='parchment'] .showcase__face {
+  --ui-text: var(--ui-ink);
+  --ui-text-soft: var(--ui-ink-soft);
+  color: var(--ui-text);
+  background: var(--ui-parchment);
+  border-color: var(--ui-parchment-deep);
+}
+
+/* The colours. */
+
+.showcase__palette {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: var(--ui-space-4);
+}
+
+.showcase__swatches {
+  display: grid;
+  gap: var(--ui-space-2);
+  align-content: start;
+}
+
+.showcase__swatch-group {
+  margin: 0;
+  font-weight: 500;
+  color: var(--ui-gilt-light);
+}
+
+.showcase__swatch,
+.showcase__space {
+  display: grid;
+  grid-template-columns: 2.2rem minmax(0, 1fr) auto;
+  grid-template-areas:
+    'chip name value'
+    'chip for for';
+  column-gap: var(--ui-space-2);
+  align-items: baseline;
+}
+
+.showcase__chip {
+  grid-area: chip;
+  align-self: stretch;
+  min-height: 2.2rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 2px;
+}
+
+.showcase__swatch-name {
+  grid-area: name;
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  font-size: 0.76rem;
+  overflow-wrap: anywhere;
+}
+
+.showcase__swatch-value {
+  grid-area: value;
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  font-size: 0.76rem;
+  color: var(--ui-cream-soft);
+}
+
+.showcase__swatch-for {
+  grid-area: for;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--ui-cream-soft);
+}
+
+.showcase__spaces {
+  display: grid;
+  gap: var(--ui-space-3);
+  max-width: 34rem;
+}
+
+.showcase__space {
+  grid-template-columns: 3.2rem minmax(0, 1fr) auto;
+  grid-template-areas:
+    'bar name value'
+    'bar for for';
+}
+
+.showcase__space-bar {
+  grid-area: bar;
+  align-self: center;
+  height: 0.9rem;
+  background: var(--ui-gilt);
+}
+
+/* The faces, side by side. */
+
+.showcase__numerals {
+  font-size: 1.2rem;
+}
+
+.showcase__faces {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  gap: var(--ui-space-3);
+}
+
+.showcase__face {
+  padding: var(--ui-space-3) var(--ui-space-4);
+  background: var(--ui-night-raised);
+  border: 1px solid var(--ui-night-edge);
+}
+
+.showcase__face p {
+  margin: 0 0 var(--ui-space-2);
+}
+
+.showcase__face-name {
+  display: grid;
+  font-family: var(--ui-font-text);
+  color: var(--ui-gilt-light);
+}
+
+.showcase[data-ground='parchment'] .showcase__face-name {
+  color: var(--ui-gilt-deep);
+}
+
+.showcase__face-note {
+  font-size: 0.8rem;
+  font-style: italic;
+  color: var(--ui-text-soft);
+}
+
+.showcase__face-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.showcase__face-italic {
+  font-style: italic;
+  color: var(--ui-text-soft);
+}
+
+.showcase__face-numerals {
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.showcase__face-elsewhere {
+  margin: var(--ui-space-2) 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
