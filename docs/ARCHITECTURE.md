@@ -96,6 +96,12 @@ Increment 0.7 compiled and ran the plan's riskiest assumption, on Occurrent 0.33
   `villages.house.founded.v1` rather than a class name.
 - Occurrent pins `jackson-databind` 3.1.4 and Spring Boot 4.1.1 manages 3.1.5; Gradle resolves to 3.1.5 and
   the round trip works on it. CloudEvents is 4.0.1. The in-memory store is `InMemoryEventStore()`.
+- The in-memory subscription model's `cancelSubscription` forgets a subscription without stopping it: its thread
+  polls for as long as the process runs, and the model's `shutdown()` waits five seconds for it and gives up.
+  Occurrent's master stops the subscription on cancel, and no release has that yet. Until one does,
+  `InMemoryWorld` stops a cancelled subscription itself and wakes the threads when it shuts down, so a world
+  closes at once, the server stops without the wait, and no test that closes a world waits five seconds for it.
+  Both go when a release has the fix.
 
 ## How a change travels
 

@@ -206,6 +206,15 @@ class InMemoryWorldSpec : StringSpec({
         }
     }
 
+    "a closed world leaves none of its threads running, not even the one a closed feed ran on" {
+        val world = InMemoryWorld()
+        world.feed.subscribe(Start.FROM_NOW) {}.close()
+
+        world.close()
+
+        world.dispatcher.isTerminated shouldBe true
+    }
+
     "a feed from the beginning hands over what the store already holds, then what follows" {
         InMemoryWorld().use { world ->
             world.executor.execute(ravenscar, sent)
