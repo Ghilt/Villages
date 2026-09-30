@@ -9,7 +9,7 @@
 
 **Being built.** This is the method as agreed on 2026-09-30, written before most of the library so that the
 library is built to it. Each step of the plan fills in its part, and a line that still says *to come* is a
-part nobody has built. The page, the foundations and the pictures are built.
+part nobody has built. The page, the foundations, the pictures, and borders and fills are built.
 
 ## The page
 
@@ -47,6 +47,16 @@ tooltip:
    moves aside for a cherub by itself.
 
 A container inside a container is two containers. There is no nesting rule beyond that.
+
+**The border is `border-image`**, which is nine-slice and nothing else: the browser draws the corners once
+and lays the edges between them, stretched or repeated as the border's file says, so one picture frames a
+box of any size. Its cuts are given to CSS as shares of the picture rather than pixels, because the browser
+picks one of three files for the screen it is on and a share falls on the same line in all three; the tool
+put every cut on a whole pixel as shown, so it falls between two pixels in each. **An edge that is
+stretched cannot seam**; one that is repeated can, at Windows' 125 and 150 per cent, where its pixels fall
+between the screen's, and the page shows each border at those scalings for that reason. **The fill is a
+layer under the border**, standing in from each edge by the cut less what the border's file says reaches
+under it. A border whose picture has a middle of its own draws it only when no fill is laid under it.
 
 ## A recipe names a container
 
@@ -129,4 +139,12 @@ A mark is drawn in code or painted, one mark at a time, behind the one component
 
 ## The components
 
-To come, a line each as they are built: what it is for, its variants, and where on the page it is.
+A line each: what it is for, its variants, and where on the page it is.
+
+- **`BorderLayer`**, `ui/border/Border.tsx`: a border picture laid round whatever positioned box it is in,
+  by name. `middle` and `repeat` say otherwise than its file, for looking. A name with no picture is drawn
+  as a dashed outline, so a missing border is seen missing. *Borders and fills*, on the page.
+- **`FillLayer`**, the same file: a fill picture repeated at the size it is shown, standing `inset` in from
+  each edge; `fillInsetOf` the border round it says how far. *Borders and fills*.
+- **`borderImageOf`, `fillImageOf`, `fillInsetOf`, `contentInsetOf`**, `ui/border/borderStyle.ts`: the
+  arithmetic under both, for a component that lays a border itself.

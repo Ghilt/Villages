@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react';
 
+import { BordersAndFills } from './BordersAndFills';
 import { Foundations } from './Foundations';
 import { Pictures } from './Pictures';
 
@@ -38,7 +39,7 @@ export const SECTIONS: readonly Section[] = [
     id: 'borders',
     title: 'Borders and fills',
     says: 'Nine-slice borders at any size, the fills inside them, and the seams at fractional scaling.',
-    arrives: 3,
+    Body: BordersAndFills,
   },
   {
     id: 'containers',

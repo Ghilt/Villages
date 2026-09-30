@@ -1,0 +1,101 @@
+import type { Repeat, Sides, UiBorder, UiPicture } from '@villages/world';
+
+import { imageSetOf } from '../art/pictures';
+
+/**
+ * A border and a fill as CSS lays them: the arithmetic between a cut picture and the style that draws it,
+ * worked out here so that it is a test rather than something read off the screen.
+ *
+ * A border is `border-image`, which is nine-slice: the corners drawn once, the edges laid between them,
+ * the middle drawn or left. Its cuts are written as shares of the picture rather than as pixels, because
+ * the browser picks one of three files for the screen it is on and a share lands on the same line in all
+ * three; the tool took every cut to a whole pixel as shown, so it lands between two pixels in each. See
+ * decision record 0068.
+ */
+
+const px = (sides: Sides): string => sides.map((side) => `${side}px`).join(' ');
+
+/** A share of a length, as CSS writes one, to enough places that nothing is lost at any density. */
+const share = (part: number, whole: number): string => `${Number(((part / whole) * 100).toFixed(6))}%`;
+
+export interface BorderImage {
+  readonly borderStyle: 'solid';
+  readonly borderWidth: string;
+  readonly borderImageSource: string;
+  readonly borderImageSlice: string;
+  readonly borderImageWidth: string;
+  readonly borderImageRepeat: string;
+  readonly borderImageOutset: string;
+}
+
+export interface BorderOptions {
+  /** Draw the picture's own middle, whatever its file says: false when a fill is laid under it. */
+  readonly middle?: boolean;
+  /** Lay the edges this way, whatever the file says: for looking at what each way does. */
+  readonly repeat?: readonly [Repeat, Repeat];
+}
+
+/** The style that draws a border picture round whatever box it is given. */
+export function borderImageOf(
+  picture: UiPicture,
+  border: UiBorder,
+  options: BorderOptions = {},
+): BorderImage {
+  const [top, right, bottom, left] = border.slice;
+  const middle = options.middle ?? border.middle;
+  return {
+    borderStyle: 'solid',
+    borderWidth: px(border.slice),
+    borderImageSource: imageSetOf(picture),
+    borderImageSlice:
+      `${share(top, picture.height)} ${share(right, picture.width)} ` +
+      `${share(bottom, picture.height)} ${share(left, picture.width)}${middle ? ' fill' : ''}`,
+    borderImageWidth: px(border.slice),
+    borderImageRepeat: (options.repeat ?? border.repeat).join(' '),
+    borderImageOutset: px(border.outset),
+  };
+}
+
+export interface FillImage {
+  readonly backgroundImage: string;
+  readonly backgroundSize: string;
+  readonly backgroundRepeat: 'repeat';
+}
+
+/** The style that fills a box with a fill picture, laid at the size it is shown and repeated. */
+export function fillImageOf(picture: UiPicture): FillImage {
+  return {
+    backgroundImage: imageSetOf(picture),
+    backgroundSize: `${picture.width}px ${picture.height}px`,
+    backgroundRepeat: 'repeat',
+  };
+}
+
+/**
+ * Where a fill stands inside a box with this border: in from each edge by the border's cut, less as much
+ * as the border says a fill reaches under it, so no gap shows between an uneven inner edge and the fill.
+ */
+export function fillInsetOf(border: UiBorder | undefined): Sides {
+  if (border === undefined) {
+    return [0, 0, 0, 0];
+  }
+  const { slice, fillUnder } = border;
+  return [
+    Math.max(0, slice[0] - fillUnder[0]),
+    Math.max(0, slice[1] - fillUnder[1]),
+    Math.max(0, slice[2] - fillUnder[2]),
+    Math.max(0, slice[3] - fillUnder[3]),
+  ];
+}
+
+/** Where the content starts inside a box with this border: past the cut, and then the border's inset. */
+export function contentInsetOf(border: UiBorder | undefined): Sides {
+  if (border === undefined) {
+    return [0, 0, 0, 0];
+  }
+  const { slice, inset } = border;
+  return [slice[0] + inset[0], slice[1] + inset[1], slice[2] + inset[2], slice[3] + inset[3]];
+}
+
+/** Four lengths as CSS writes them, for a padding or an inset. */
+export const sidesInPixels = px;

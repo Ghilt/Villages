@@ -433,3 +433,102 @@
   color: var(--ui-rarity-legendary);
   font-weight: 600;
 }
+
+/* A border on show: a box of a size, where its content would start dotted, its cuts dashed. */
+
+.showcase__box {
+  position: relative;
+  flex: none;
+  max-width: 100%;
+}
+
+.showcase__box-content {
+  position: absolute;
+  display: flex;
+  align-items: flex-start;
+  overflow: hidden;
+  outline: 1px dotted rgba(120, 200, 240, 0.45);
+}
+
+/* On a small dark tag, so it reads on whatever fill or middle it lands on. */
+.showcase__box-label {
+  padding: 0.05rem 0.35rem;
+  font-size: 0.75rem;
+  font-style: italic;
+  color: var(--ui-cream);
+  background: rgba(20, 16, 12, 0.7);
+}
+
+.showcase__cuts {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.showcase__cut {
+  position: absolute;
+}
+
+.showcase__cut--across {
+  left: -8px;
+  right: -8px;
+  border-top: 1px dashed #5fd4ff;
+}
+
+.showcase__cut--down {
+  top: -8px;
+  bottom: -8px;
+  border-left: 1px dashed #5fd4ff;
+}
+
+.showcase__stretcher {
+  display: grid;
+  gap: var(--ui-space-2);
+  padding: var(--ui-space-3);
+  background: var(--ui-night-raised);
+  border: 1px solid var(--ui-night-edge);
+}
+
+.showcase__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ui-space-2) var(--ui-space-3);
+  font-style: italic;
+  color: var(--ui-cream-soft);
+}
+
+.showcase__controls select {
+  font: inherit;
+  font-style: normal;
+  font-size: 0.9rem;
+  color: var(--ui-cream);
+  background: var(--ui-night);
+  border: 1px solid var(--ui-gilt-deep);
+  padding: 0.1rem 0.3rem;
+}
+
+/* Dragged by its corner, which the browser draws; the box inside it takes whatever size it is given. */
+.showcase__resizable {
+  position: relative;
+  resize: both;
+  overflow: hidden;
+  min-width: 40px;
+  min-height: 40px;
+  max-width: 100%;
+  margin: var(--ui-space-3) 0;
+}
+
+.showcase__fill-sample {
+  position: relative;
+  width: 100%;
+  height: 170px;
+}
+
+.showcase__scalings {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--ui-space-3);
+  margin-bottom: var(--ui-space-4);
+}

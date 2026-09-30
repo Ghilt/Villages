@@ -200,8 +200,9 @@ One commit each. After the fourth, the order is a menu.
 | 9 | Carousel and its dots, grid, card, list | the page |
 | 10 | Dialog, toast, text field, dropdown, medallion | the page |
 
-**Where it stands, 2026-09-30: nought to two are built.** The page is at `/admin/inspect-ui-components`
-with the foundations and every picture on it; the rest of its sections say which step brings them. Step
+**Where it stands, 2026-09-30: nought to three are built.** The page is at `/admin/inspect-ui-components`
+with the foundations, every picture, and the borders and fills on it; the rest of its sections say which
+step brings them. Step
 two cut the top row of the moodboard's sample borders, not both: the second row is the same frames' corner
 pieces. The marks and the controls have no placeholders yet, and get them with steps five and six, which
 draw them. The page's Pictures section is the sheet of every placeholder.

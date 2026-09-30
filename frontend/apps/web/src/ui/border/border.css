@@ -1,0 +1,29 @@
+/*
+ * A container's border and fill, each a layer placed over the whole of the box it is in. The border's
+ * picture, cuts and repeat are set by `border.ts` as a style; what is here is only how the layers sit.
+ */
+
+@layer ui {
+  .ui-border,
+  .ui-fill {
+    position: absolute;
+    pointer-events: none;
+  }
+
+  .ui-border {
+    inset: 0;
+    box-sizing: border-box;
+  }
+
+  .ui-border--missing {
+    border: 2px dashed var(--ui-rarity-legendary);
+  }
+
+  .ui-fill--missing {
+    background: repeating-linear-gradient(
+      45deg,
+      transparent 0 6px,
+      color-mix(in srgb, var(--ui-rarity-legendary) 35%, transparent) 6px 8px
+    );
+  }
+}
