@@ -13,16 +13,16 @@ import java.nio.file.attribute.FileTime
 class FolderStandsTest {
     private val someStands = ByteArray(16) { it.toByte() }
 
-    /** Writes a master's sprite map as the generator does: the tiles, then `map.json` last. */
+    /** Writes a master's stands as the generator does: the tiles, then `stands.json` last. */
     private fun furnish(masters: Path, master: String, tiles: Map<Pair<Int, Int>, ByteArray>): Path {
-        val layer = masters.resolve(master).resolve("sprites").resolve("biome")
+        val layer = masters.resolve(master).resolve("biome")
         for ((at, bytes) in tiles) {
-            val file = layer.resolve("stands").resolve(at.first.toString()).resolve("${at.second}.bin")
+            val file = layer.resolve(at.first.toString()).resolve("${at.second}.bin")
             Files.createDirectories(file.parent)
             Files.write(file, bytes)
         }
         Files.createDirectories(layer)
-        return Files.writeString(layer.resolve("map.json"), "{}")
+        return Files.writeString(layer.resolve("stands.json"), "{}")
     }
 
     @Test
@@ -36,15 +36,26 @@ class FolderStandsTest {
     }
 
     @Test
-    fun `a master with no sprite map has no stands, and neither has a name that is not the folder's own`(@TempDir masters: Path) {
+    fun `a master with no stands has none, and neither has a name that is not the folder's own`(@TempDir masters: Path) {
         furnish(masters, "terrain", mapOf((70 to 37) to someStands))
         Files.createDirectories(masters.resolve("terrain_og"))
         val stands = FolderStands(masters)
 
         assertNull(stands.of("terrain_og", 70, 37))
         assertNull(stands.of("nowhere", 70, 37))
-        assertNull(stands.of("../masters/terrain", 70, 37))
-        assertNull(stands.of("terrain/sprites/..", 70, 37))
+        assertNull(stands.of("../stands/terrain", 70, 37))
+        assertNull(stands.of("terrain/biome/..", 70, 37))
+    }
+
+    @Test
+    fun `a sprite map from before the stands left the page's folder is no master's stands`(@TempDir world: Path) {
+        // The old place: beside the biome raster, under the folder the page is served from.
+        val old = world.resolve("terrain").resolve("sprites").resolve("biome")
+        Files.createDirectories(old.resolve("stands").resolve("70"))
+        Files.write(old.resolve("stands").resolve("70").resolve("37.bin"), someStands)
+        Files.writeString(old.resolve("map.json"), "{}")
+
+        assertNull(FolderStands(world).of("terrain", 70, 37))
     }
 
     @Test

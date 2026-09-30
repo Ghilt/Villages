@@ -37,6 +37,10 @@ world/source/
 # Views the painterly renderer paints. Output, reproducible, and tens of megabytes of it.
 world/painterly/
 
+# The scenery's stands, which the game server reads and hands a page only as far as its fog lets it see.
+# Output, reproducible, and kept out of the page's public folder on purpose. See decision record 0067.
+world/stands/
+
 # world/master/ is deliberately NOT ignored: the master image is the authored source of truth for
 # the shape of the world, and it travels with the repository. See docs/AUTHORING-THE-WORLD.md.
 #

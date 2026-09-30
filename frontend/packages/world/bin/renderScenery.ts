@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { basename, resolve } from 'node:path';
 import { deflateSync } from 'node:zlib';
@@ -6,7 +6,7 @@ import { deflateSync } from 'node:zlib';
 import { PNG } from 'pngjs';
 
 import { growingTable } from '../src/biome.ts';
-import { DEFAULT_MASTER, masterNameOf, worldDirOf } from '../src/masters.ts';
+import { DEFAULT_MASTER, masterNameOf, standsDirOf, worldDirOf } from '../src/masters.ts';
 import { paintPixel, preparePainterly } from '../src/painterly.ts';
 import type { ClassSampler, PainterlyStyle, PreparedPainterly } from '../src/painterly.ts';
 import { preparePalette, snapPrepared, toRgb } from '../src/palette.ts';
@@ -23,7 +23,7 @@ import { NO_STANDS, decodeStands } from '../src/stands.ts';
 import type { StandChunk } from '../src/stands.ts';
 import { masterRowsAt } from '../src/tiles.ts';
 
-import { OUTPUT_DIR, PAINTERLY, PAINTERLY_DIR, PALETTE, RENDER, masterAt } from './paths.ts';
+import { OUTPUT_DIR, PAINTERLY, PAINTERLY_DIR, PALETTE, RENDER, STANDS_DIR, masterAt } from './paths.ts';
 
 /**
  * Stills of what the sprite map put on the ground, painted onto the ground it put it on.
@@ -173,6 +173,8 @@ function readMaster(): ClassRaster {
 }
 
 const spriteDir = resolve(OUTPUT_DIR, worldDirOf(master), 'sprites', layer);
+/** The stands are not beside the rest of the sprite map: only the game server and this read them. See 0067. */
+const standsDir = resolve(STANDS_DIR, standsDirOf(master, layer));
 
 /**
  * The whole sprite map, off the disk.
@@ -188,6 +190,13 @@ async function readSpriteMap(): Promise<SpriteMap> {
     throw new Error(
       `${master} has no sprite map, so it grows nothing. ` +
         `Run npm run world:sprites --prefix frontend -- ${master}`,
+    );
+  }
+  // A sprite map from before its stands moved out of the public folder has none where they are read now, and a
+  // still with no stands in it looks like a world that grows less rather than one that needs furnishing again.
+  if (!existsSync(resolve(standsDir, 'stands.json'))) {
+    throw new Error(
+      `${master}'s stands are not in ${standsDir}. Run npm run world:sprites --prefix frontend -- ${master}`,
     );
   }
 
@@ -228,7 +237,7 @@ function standsOfTile(map: SpriteMap, tileX: number, tileY: number): StandChunk 
   // Most tiles are sea and have no file at all, which is not a failure: they have no stands.
   let chunk: StandChunk;
   try {
-    const bytes = readFileSync(resolve(spriteDir, 'stands', String(wrapped), `${tileY}.bin`));
+    const bytes = readFileSync(resolve(standsDir, String(wrapped), `${tileY}.bin`));
     chunk = decodeStands(
       new Uint8Array(bytes.buffer, bytes.byteOffset, bytes.byteLength),
       wrapped,

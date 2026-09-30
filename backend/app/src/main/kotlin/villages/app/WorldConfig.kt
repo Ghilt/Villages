@@ -142,11 +142,12 @@ class WorldConfig {
         FolderPortraits(Path.of(folder))
 
     /**
-     * The scenery's stands, from the sprite maps the world generator writes beside the page's world, two
-     * directories above the one Gradle runs the server in. `villages.stands` points it somewhere else.
+     * The scenery's stands, from the folder the world generator writes them to and nothing serves, two
+     * directories above the one Gradle runs the server in, as the portraits are. `villages.stands` points it
+     * somewhere else. See decision record 0067.
      */
     @Bean
-    fun stands(@Value("\${villages.stands:../../frontend/apps/web/public/world/masters}") folder: String): Stands =
+    fun stands(@Value("\${villages.stands:../../world/stands}") folder: String): Stands =
         FolderStands(Path.of(folder))
 
     @Bean

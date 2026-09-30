@@ -39,7 +39,7 @@ after them wait on the same thing. Fog of war, the exception, is under way a ste
   0061 and the steps, one commit each, are in `docs/plans/fog-of-war.md`; the server working out every house's
   sight, the fog drawn from it over the world and under the signs, vision given outright, the server
   holding back what the fog hides, and the surface tension that joins circles close together are built, and
-  the scenery is grown from the stands the gateway sends, only those on revealed ground, two of step 8's three commits. Adam's own mechanic, asked for on 2026-09-26.
+  the scenery is grown from the stands the gateway sends, only those on revealed ground, which a page cannot fetch for itself: all of step 8. Adam's own mechanic, asked for on 2026-09-26.
 - **0.4** Local infrastructure: MongoDB replica set and RabbitMQ in Compose
 - **0.8** Testcontainers smoke test on MongoDB and RabbitMQ
 - **1.6** The bridge from the store to the broker

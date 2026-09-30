@@ -30,17 +30,20 @@ import {
   standWeight,
 } from '../src/stands.ts';
 import type { Stand } from '../src/stands.ts';
-import { DEFAULT_MASTER, masterNameOf, worldDirOf } from '../src/masters.ts';
+import { DEFAULT_MASTER, masterNameOf, standsDirOf, worldDirOf } from '../src/masters.ts';
 
-import { BIOMES, OUTPUT_DIR, PAINTERLY, PALETTE, masterAt } from './paths.ts';
+import { BIOMES, OUTPUT_DIR, PAINTERLY, PALETTE, STANDS_DIR, masterAt } from './paths.ts';
 
 /**
  * Works out what kind of place every part of the world is, and where the scenery clumps.
  *
  *   node bin/generateSpriteMap.ts [master.png] [--layer biome] [--readable] [--out directory]
+ *                                 [--stands directory]
  *
- * Writes a sprite map beside the cut tiles: a biome raster in world space, a list of stands chunked by
- * zoom 7 tile, and a manifest. The individual pieces of scenery are not in it and never will be - there
+ * Writes a sprite map beside the cut tiles: a biome raster in world space and a manifest, which the page
+ * reads, and a list of stands chunked by zoom 7 tile into `world/stands/`, which only the game server and
+ * the scenery stills read, because the gateway hands a page only the stands its fog lets through (0067).
+ * The individual pieces of scenery are not in it and never will be - there
  * are seventy million of them at experiment 0006's ceiling - they come from `hash2` in the browser,
  * which is decision record 0052 and has not changed. What this decides is what they are standing in.
  *
@@ -61,6 +64,7 @@ const masterPath = masterAt(named[0]);
 const master = masterNameOf(basename(masterPath)) ?? DEFAULT_MASTER;
 const layer = flag('layer') ?? 'biome';
 const outputDir = flag('out') ?? resolve(OUTPUT_DIR, worldDirOf(master), 'sprites', layer);
+const standsDir = flag('stands') ?? resolve(STANDS_DIR, standsDirOf(master, layer));
 const readable = args.includes('--readable');
 
 /** The biome raster's side, in cells. One cell is sixteen world units, about twenty kilometres. */
@@ -325,8 +329,12 @@ for (let gridY = 0; gridY < parents; gridY += 1) {
 }
 console.log(`placed ${placed.toLocaleString()} stands (${since()})`);
 
+// Both halves go, the public one with any stands an older generator left in it, so neither can outlive the
+// other and nothing the page could fetch is left behind.
 await rm(outputDir, { recursive: true, force: true });
-await mkdir(resolve(outputDir, 'stands'), { recursive: true });
+await rm(standsDir, { recursive: true, force: true });
+await mkdir(outputDir, { recursive: true });
+await mkdir(standsDir, { recursive: true });
 
 let chunks = 0;
 let standBytes = 0;
@@ -341,7 +349,7 @@ for (let tileY = 0; tileY < across; tileY += 1) {
       widest = Math.max(widest, here.length);
     }
     const bytes = encodeStands(here, tileX, tileY, TILE_UNITS);
-    const columnDir = resolve(outputDir, 'stands', String(tileX));
+    const columnDir = resolve(standsDir, String(tileX));
     await mkdir(columnDir, { recursive: true });
     await writeFile(resolve(columnDir, `${tileY}.bin`), bytes);
     chunks += 1;
@@ -459,10 +467,10 @@ if (readable) {
   const tileX = busiest % across;
   const tileY = Math.floor(busiest / across);
   await writeFile(
-    resolve(outputDir, 'busiest-chunk.json'),
+    resolve(standsDir, 'busiest-chunk.json'),
     `${JSON.stringify(
       {
-        $comment: `The fullest chunk, ${tileX}/${tileY}, as JSON. What the browser reads is the .bin.`,
+        $comment: `The fullest chunk, ${tileX}/${tileY}, as JSON. What the game server reads is the .bin.`,
         tile: { x: tileX, y: tileY, units: TILE_UNITS },
         stands: byTile[busiest]!.map((stand) => ({
           ...stand,
@@ -475,6 +483,14 @@ if (readable) {
   );
 }
 
+const at = new Date().toISOString();
+
+/** Written last of the stands, so that the game server never takes a half-written folder for a finished one. */
+await writeFile(
+  resolve(standsDir, 'stands.json'),
+  `${JSON.stringify({ master, layer, at, stands: placed, chunks, bytes: standBytes }, null, 2)}\n`,
+);
+
 /** Written last of all, so that a manifest never claims a world that is not finished. See tiles/cut.json. */
 await writeFile(
   resolve(outputDir, 'map.json'),
@@ -482,7 +498,7 @@ await writeFile(
     {
       master,
       layer,
-      at: new Date().toISOString(),
+      at,
       world: { side: WORLD_SIDE, tileUnits: TILE_UNITS, biomeSide: BIOME_SIDE },
       boundary: file.boundary,
       biomes: file.biomes.map((biome) => ({
@@ -512,4 +528,4 @@ console.log(
     `${(standBytes / 1048576).toFixed(1)} MB, fullest ${widest.toLocaleString()} in one tile`,
 );
 console.log(`biomes.png ${(rasterPng.length / 1024).toFixed(0)} kB, ${BIOME_SIDE} square`);
-console.log(`into ${outputDir} (${since()})`);
+console.log(`into ${outputDir}, and the stands into ${standsDir} (${since()})`);

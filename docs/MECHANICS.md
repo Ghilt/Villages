@@ -652,7 +652,7 @@ lifts the whole of it for that window, drawn and held back alike, and every page
 
 ### Where it stands
 
-Steps 1 to 7 of `docs/plans/fog-of-war.md` are built, and two of step 8's three commits. The server works out every house's vision points from
+Steps 1 to 7 of `docs/plans/fog-of-war.md` are built, and step 8's three commits. The server works out every house's vision points from
 its seat and its key figures on the map, and sends them to the player as `yourSight` from wire version 9, on
 arriving and whenever one opens or closes; the debug log says in one line what gives vision and how many
 places the house has seen from.
@@ -692,5 +692,5 @@ nothing grows anywhere, because nothing has been seen. **The trees are grown fro
 wire version 13: the stands of the scenery that touch the house's revealed ground and nothing else, which the
 log counts under `stands` and the Scenery section says how many it holds. Every tree on revealed ground is
 where it would be with every stand in the world, and when the house sees further the trees there grow as the
-haze lifts. Without the game server nothing grows at all. The stand files are still in the public folder until
-the last of step 8's commits.
+haze lifts. Without the game server nothing grows at all. The stand files are where only the game server reads
+them, so a page cannot fetch one for itself.
