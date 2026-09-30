@@ -11,3 +11,6 @@ dependencies {
     // on the standard library.
     testImplementation(kotlin("reflect"))
 }
+
+// The catalogue test holds the events to the table in docs/EVENTS.md.
+testsRead("docs/EVENTS.md")

@@ -442,8 +442,9 @@ Commands are added here as the increments land:
   nothing survives a restart, on purpose.
 - Backend, checks: `cd backend` then `./gradlew check`. Gradle fetches the JDK 21 the toolchain asks for, so
   `JAVA_HOME` may stay on the Temurin 17 that is installed; the first run downloads it. Every module's
-  `build.gradle.kts` declares only its allowed dependency edges, and `buildSrc` holds the one convention
-  they share. Versions live in `backend/gradle/libs.versions.toml`.
+  `build.gradle.kts` declares only its allowed dependency edges and, with `testsRead`, the files outside
+  it that its tests read, and `check` fails when one is missing; `buildSrc` holds the one convention they
+  share. Versions live in `backend/gradle/libs.versions.toml`.
 
 The two below do not exist yet. They arrive with the increments named, and `infra/` and `scripts/` in the
 layout above are where they will go rather than where they are.

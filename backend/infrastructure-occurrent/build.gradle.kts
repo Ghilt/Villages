@@ -27,3 +27,6 @@ dependencies {
     testImplementation(libs.occurrent.application.service)
     testImplementation(libs.occurrent.decider)
 }
+
+// One stored event for every catalogued type, and the catalogue that lists the types.
+testsRead("contracts/fixtures/events", "docs/EVENTS.md")

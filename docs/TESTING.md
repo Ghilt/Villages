@@ -26,6 +26,11 @@ Every increment lands with the test that proves it. The tests are the reason we 
 - The fold of a stream gets property tests: replaying twice yields the same state, and no ordering throws.
 - Infrastructure adapters are tested against the real thing in a container, never against a mock of a driver.
 - The event catalogue is parsed by a test, so code and documentation cannot drift apart.
+- A test that reads a file outside its module - a shared fixture, a recording of the wire, the event catalogue,
+  the portraits - is named in that module's build file with `testsRead`, from the repository root:
+  `testsRead("contracts")`. Gradle runs a module's tests again only when something it knows they read has changed,
+  so a file it was never told about can change under them while `check` reports the last run's green. `check` also
+  fails when a test reads a `../../` path that its build file does not name.
 - MapLibre and Pixi are never instantiated in unit tests. Their maths is pure and tested directly; their pixels get
   one end-to-end smoke test.
 - A test that needs Docker says so in its name, and is skipped with a clear message when Docker is absent.
