@@ -447,8 +447,9 @@ Commands are added here as the increments land:
   runtime copy, in a second, which is all the app needs after a style edit.
 - The component library, shown: **`/admin/inspect-ui-components`** on this tree's dev server, and nothing
   else needs to be running - no game server, no map. Every component in every variant and state, with
-  switches along the top to put them on night or on parchment and to narrow the sheet to a phone's 390
-  pixels, and the screen's density beside them. A section not built yet says which step of
+  switches along the top to put them on night or on parchment, to narrow the sheet to a phone's 390
+  pixels, and to show a container's layers - each embellishment's box dashed, where its words start
+  dotted - and the screen's density beside them. A section not built yet says which step of
   `docs/plans/ui-component-library.md` brings it. What a component is made of and how to add one is
   `docs/UI-COMPONENTS.md`; see decision record 0068.
 - Interface art: `world/ui/` is Adam's folder, committed as the master is, a folder a kind - `borders`,

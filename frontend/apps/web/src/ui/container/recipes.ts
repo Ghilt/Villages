@@ -12,17 +12,16 @@ import type { Recipe } from './layout';
  */
 export const RECIPES = {
   /**
-   * Adam's own sentence: a pane with a gilt border and a cherub in the top right corner, where the cherub
-   * takes some room and is no part of the nine-slice.
+   * Adam's own sentence: a pane with a gilt border and a cherub in the top right corner, which is no part
+   * of the nine-slice. It stands on the corner, over the moulding and out past it, and the words keep the
+   * whole width.
    */
   'pane.cherub-corner': {
     border: 'gilt-simple',
     fill: 'parchment',
     text: 'ink',
     padding: 8,
-    embellishments: [
-      { art: 'cherub-standing', anchor: 'top-right', overhang: { x: 26, y: 30 }, keepOut: { right: 30 } },
-    ],
+    embellishments: [{ art: 'cherub-standing', anchor: 'top-right', overhang: { x: 30, y: 30 } }],
   },
 
   /**
@@ -37,7 +36,7 @@ export const RECIPES = {
     embellishments: [
       { art: 'drape-velvet', anchor: 'top-right', behind: true, overhang: { x: 44, y: -12 }, height: 170 },
       { art: 'cross-gilt', anchor: 'top', overhang: { y: 46 }, height: 62 },
-      { art: 'cherub-standing', anchor: 'bottom-right', overhang: { x: 30, y: 20 }, keepOut: { right: 34 } },
+      { art: 'cherub-standing', anchor: 'bottom-right', overhang: { x: 34, y: 20 } },
     ],
   },
 

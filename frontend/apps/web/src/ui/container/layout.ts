@@ -4,8 +4,8 @@ import { contentInsetOf, fillInsetOf } from '../border/borderStyle';
 
 /**
  * Where everything in a container goes: the arithmetic from a recipe to the padding its content is set in
- * by, the margin its overhangs are given, and the place of every embellishment. Worked out here so that a
- * keep-out is a test rather than a hope. See docs/UI-COMPONENTS.md and decision record 0068.
+ * by, the margin its overhangs are given, and the place of every embellishment. Worked out here so that
+ * where a cherub stands is a test rather than a hope. See docs/UI-COMPONENTS.md and decision record 0068.
  */
 
 /** Where on a container an embellishment is pinned: a corner, or the middle of an edge. */
@@ -25,7 +25,11 @@ export const ANCHORS: readonly Anchor[] = [
 
 export type Side = 'top' | 'right' | 'bottom' | 'left';
 
-/** A picture pinned to a container that is not part of its border: a cherub, a cross, a drape. */
+/**
+ * A picture pinned to a container that is not part of its border: a cherub, a cross, a drape. It takes no
+ * room from the content. It stands where it is pinned, over the border or out past it, and the room it
+ * needs is outside the box: the margin its overhang is given.
+ */
 export interface Embellishment {
   /** A picture in `world/ui/embellishments/`, by its name. */
   readonly art: string;
@@ -35,8 +39,6 @@ export interface Embellishment {
    * box, and `y` up or down, away from it. Nothing, and its own corner sits on the container's.
    */
   readonly overhang?: { readonly x?: number; readonly y?: number };
-  /** How much room it takes from the content, a side at a time: the content is set in by it. */
-  readonly keepOut?: Partial<Record<Side, number>>;
   /** Drawn under the whole container rather than over it, the fill too, like a drape behind a panel. */
   readonly behind?: boolean;
   /** How tall it is drawn, when not at the size its picture is shown. */
@@ -79,10 +81,8 @@ export interface Placed {
 }
 
 export interface Layout {
-  /** The content's padding: the border's cut and inset, the recipe's padding, and every keep-out. */
+  /** The content's padding: the border's cut and inset, and the recipe's padding. */
   readonly padding: Sides;
-  /** The part of the padding that is keep-out, a side at a time, for drawing where it is. */
-  readonly keepOut: Sides;
   /** The container's margin, as wide as its overhangs on each side, or nothing. */
   readonly margin: Sides;
   /** Where its fill stands, in from each edge. */
@@ -135,7 +135,8 @@ export function placeOf(embellishment: Embellishment, width: number, height: num
 
 /**
  * A recipe laid out, given the border its file says and the size each embellishment's picture is shown at.
- * An embellishment whose picture is not there is left out, so a missing picture takes no room.
+ * An embellishment whose picture is not there is not drawn, and its margin is kept all the same, so the
+ * container does not move when the picture arrives.
  */
 export function layoutOf(
   recipe: Recipe,
@@ -144,13 +145,9 @@ export function layoutOf(
 ): Layout {
   const inset = contentInsetOf(border);
   const padding = sidesOf(recipe.padding);
-  const keepOut: [number, number, number, number] = [0, 0, 0, 0];
   const overhang: [number, number, number, number] = [0, 0, 0, 0];
   const placed: Placed[] = [];
   for (const embellishment of recipe.embellishments ?? []) {
-    for (const [at, side] of SIDES.entries()) {
-      keepOut[at] = Math.max(keepOut[at]!, embellishment.keepOut?.[side] ?? 0);
-    }
     const { across, along } = sidesOfAnchor(embellishment.anchor);
     if (across !== null) {
       const at = SIDES.indexOf(across);
@@ -170,13 +167,7 @@ export function layoutOf(
   }
   const room = recipe.roomForOverhangs ?? true;
   return {
-    padding: [
-      inset[0] + padding[0] + keepOut[0],
-      inset[1] + padding[1] + keepOut[1],
-      inset[2] + padding[2] + keepOut[2],
-      inset[3] + padding[3] + keepOut[3],
-    ],
-    keepOut,
+    padding: [inset[0] + padding[0], inset[1] + padding[1], inset[2] + padding[2], inset[3] + padding[3]],
     margin: room ? overhang : [0, 0, 0, 0],
     fillInset: fillInsetOf(border),
     placed,

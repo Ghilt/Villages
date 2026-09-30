@@ -38,23 +38,7 @@
     min-width: 0;
   }
 
-  /* Where the room a keep-out takes is, and where each embellishment's box is: seen only when asked. */
-  .ui-container__keep-out {
-    display: none;
-  }
-
-  [data-ui-layers='shown'] .ui-container__keep-out {
-    display: block;
-    position: absolute;
-    z-index: 5;
-    pointer-events: none;
-    background: repeating-linear-gradient(
-      -45deg,
-      rgba(255, 95, 212, 0.28) 0 5px,
-      rgba(255, 95, 212, 0.08) 5px 10px
-    );
-  }
-
+  /* Where each embellishment's box is and where the content starts: seen only inside something that asks. */
   [data-ui-layers='shown'] .ui-embellishment {
     outline: 1px dashed #ff5fd4;
   }

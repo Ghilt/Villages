@@ -4,6 +4,10 @@
 - Date: 2026-09-30
 - Amends 0048 on how the interface is embellished: its drawn **ornament** stays where it is until each
   surface is redone in painted art, and the seam's own rules are unchanged until then
+- Amended 2026-09-30: **an embellishment takes none of the content's room.** It had a keep-out, room kept
+  clear among the words a side at a time, and Adam took it out on seeing it drawn: a cherub standing on the
+  corner reserved a strip down the whole of the words, and the room was room no picture needed. See
+  *Alternatives considered*.
 
 ## Context
 
@@ -31,8 +35,8 @@ cuts, corners drawn once and edges repeated. It is handed over whole, one framed
 four cuts, rather than as corners and edges to be put together.
 
 **A container is four layers, and a recipe names them.** A **border**; a **fill**, which repeats on its
-own; none or several **embellishments**, each pinned to an anchor with an **overhang** past the border and
-a **keep-out** that the content is set in by; and the content. A **recipe** is one named, typed
+own; none or several **embellishments**, each pinned to an anchor with an **overhang** past the box, and
+taking none of the content's room; and the content. A **recipe** is one named, typed
 combination of them, so a new pane is a new recipe and perhaps a new picture, and never new CSS. A card is
 a container too, and a card in a pane is one container in another.
 
@@ -54,8 +58,9 @@ touches nothing in the game.
   those on purpose, and a border whose seams show is fixed in the picture or in its cuts.
 - For a while the game will have two looks, the drawn one on every surface not yet redone and the painted
   one on the page. That is accepted, because redoing a surface is a step of its own and should be.
-- An embellishment's keep-out is a number somebody has to choose. The page draws it, so a wrong one is
-  seen.
+- An embellishment is placed to stand clear of the words, on the corner and over the moulding or out
+  past the box, because nothing keeps room for it among them. The page draws each one's box, so one that
+  strays into the words is seen.
 
 ## Alternatives considered
 
@@ -67,3 +72,8 @@ touches nothing in the game.
   construction, but every border symmetric, and a drape on one side only impossible. Adam chose whole.
 - **One container component with an option for everything.** It becomes forty options that each pane uses
   three of. Layers and recipes keep each part small, and the sentence Adam says maps onto them one to one.
+- **A keep-out**: room kept clear inside the content for an embellishment, a whole side of it at a time,
+  so the words moved aside for a cherub by themselves. Built, and taken out the same day at Adam's word:
+  drawn, it was a strip down the whole of the words for a cherub standing on the corner, and it was room no
+  picture needed. If an embellishment ever has to stand over words, the way back is room the shape of its
+  own footprint, with the words running round it, rather than a side.

@@ -54,7 +54,7 @@ them in place. Where `border-image` stops, the library has a layer:
 | What is wanted | `border-image` | What the library adds |
 |---|---|---|
 | Corners, repeating edges, a box of any size | yes | - |
-| A cherub, a drape, a cross that stands out past the border or into the content | no | an **embellishment**, pinned to an anchor, saying how much room it takes |
+| A cherub, a drape, a cross that stands out past the border | no | an **embellishment**, pinned to an anchor, saying how far it stands out |
 | An ornament in the middle of an edge, the knot on the seam | no | an embellishment pinned to `top-center` and the like |
 | A filling that repeats on its own, parchment or velvet | clumsy | a **fill**, a picture of its own |
 | A round or oval frame, a portrait or the compass | no | a **medallion**, one fixed picture, not sliced |
@@ -74,10 +74,9 @@ A **container** is four layers, each its own component, and a **recipe** names a
 1. **Border** - the nine-slice picture: `gilt-baroque`, `gilt-simple`, `stone-arch`, `velvet-drape`.
 2. **Fill** - what is inside it: `parchment`, `dark-wood`, `night`, or nothing.
 3. **Embellishments** - none or several pictures, each pinned to an anchor (`top-left` to `bottom-right`,
-   `top-center` and the rest), each with an **overhang**, how far it stands outside the border, and a
-   **keep-out**, how much room it takes from the content, so that the content moves aside for a cherub by
-   itself.
-4. **Content** - set in by the border's own inset and by every keep-out.
+   `top` and the rest), each with an **overhang**, how far it stands outside the box. An embellishment
+   takes none of the content's room: it stands on the border or past it.
+4. **Content** - set in by the border's own cut and inset, and the recipe's padding.
 
 A recipe is one typed entry:
 
@@ -86,7 +85,7 @@ A recipe is one typed entry:
   border: 'gilt-simple',
   fill: 'parchment',
   embellishments: [
-    { art: 'cherub-standing', anchor: 'top-right', overhang: { x: 26, y: 30 }, keepOut: { right: 30 } },
+    { art: 'cherub-standing', anchor: 'top-right', overhang: { x: 30, y: 30 } },
   ],
 }
 ```
@@ -198,7 +197,7 @@ One commit each. After the fourth, the order is a menu.
 | 1 | The page: its address, empty sections, the phone-width switch, the tokens and the type | the page |
 | 2 | The art: the rest of `world/ui/`, placeholders cut from the moodboard and drawn, `npm run world:ui`, 1x, 2x and 3x, the weights on the page, cut again on a save | the page, and a sheet of every placeholder |
 | 3 | Border and fill: nine-slice, a box to drag to any size, the cuts drawn over it, the scaling rows | the page |
-| 4 | Embellishments, recipes and the container: the cherub, the keep-out, the overhang, a card inside a pane | the page |
+| 4 | Embellishments, recipes and the container: the cherub, the overhang, a card inside a pane | the page |
 | 5 | Buttons: text, mark, state, window controls, every state | the page |
 | 6 | Marks, the resource readout, the badge, the tooltip | the page |
 | 7 | Slider, meter, stepper, switch, choice of a few, hold to confirm | the page |
@@ -208,16 +207,17 @@ One commit each. After the fourth, the order is a menu.
 
 **Where it stands, 2026-09-30: nought to four are built**, which is the page able to be used for
 verification: the foundations, every picture, borders and fills at any size, and containers with their
-recipes, embellishments and keep-outs, all at desktop and phone width and on night and parchment. The rest
-of its sections say which step brings them, and from here the order is a menu. Step
-two cut the top row of the moodboard's sample borders, not both: the second row is the same frames' corner
-pieces. The marks and the controls have no placeholders yet, and get them with steps five and six, which
-draw them. The page's Pictures section is the sheet of every placeholder.
+recipes and embellishments, all at desktop and phone width and on night and parchment. The rest of its
+sections say which step brings them, and from here the order is a menu. Step four was built with a
+keep-out, room kept clear among the words for an embellishment, and Adam took it out the same day: see
+decision record 0068. Step two cut the top row of the moodboard's sample borders, not both: the second row
+is the same frames' corner pieces. The marks and the controls have no placeholders yet, and get them with
+steps five and six, which draw them. The page's Pictures section is the sheet of every placeholder.
 
 ## What Adam is asked for, and when
 
 **Nothing that anything waits on**, because the agent makes the placeholders. From step 2 every picture
-has a placeholder and a file name, so replacing one is always *save over `world/ui/borders/gilt-baroque.png`*
+has a placeholder and a file name, so replacing one is always *save over `world/ui/borders/gilt-simple.webp`*
 and never *we need some art*. Every step that adds a component says, when it is presented, which files it
 reads, the size to paint each at, and whether each is a border, a fill, an embellishment, a medallion, a
 mark or a control's face.
@@ -225,8 +225,8 @@ mark or a control's face.
 ## How each step is checked
 
 - `npm run check --prefix frontend`, green. A component's arithmetic is tested without a browser, in a
-  plain module beside it, as the stage's is in `bayBox.test.ts`: a keep-out sets the content in, a stepper
-  refuses past its ends. The repository has no React Testing Library and its web tests run in Node, so
+  plain module beside it, as the stage's is in `bayBox.test.ts`: a cherub stands where it is pinned, a
+  stepper refuses past its ends. The repository has no React Testing Library and its web tests run in Node, so
   what a component looks like is checked on the page, by eye, and that is the check that matters.
 - The folder's rules are a test, as `spriteFolder.test.ts` is for the sprites.
 - The page, open from this tree's `web` server, looked at on a desktop, narrowed to a phone, and at a

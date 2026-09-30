@@ -41,11 +41,11 @@ tooltip:
 1. **Border** - a nine-slice picture: the corners drawn once, the edges repeated or stretched along the
    box.
 2. **Fill** - what is inside the border, a picture that repeats on its own, or nothing.
-3. **Embellishments** - none or several pictures pinned to an anchor, a corner or the middle of an edge.
-   Each says its **overhang**, how far it stands out past the border, and its **keep-out**, how much room
-   it takes from the content. Neither is part of the nine-slice.
-4. **Content** - set in from the border by the border's own inset and by every keep-out, so the content
-   moves aside for a cherub by itself.
+3. **Embellishments** - none or several pictures pinned to an anchor, a corner or the middle of an edge,
+   none of them part of the nine-slice. Each says its **overhang**, how far it stands out past the box.
+   **An embellishment takes none of the content's room**: it stands where it is pinned, over the border or
+   out past it, and what room it needs is outside the box.
+4. **Content** - set in from the border by the border's own cut and inset, and the recipe's padding.
 
 A container inside a container is two containers. There is no nesting rule beyond that.
 
@@ -71,7 +71,7 @@ A **recipe** is one named, typed combination of the four layers, in
   text: 'ink',
   padding: 8,
   embellishments: [
-    { art: 'cherub-standing', anchor: 'top-right', overhang: { x: 26, y: 30 }, keepOut: { right: 30 } },
+    { art: 'cherub-standing', anchor: 'top-right', overhang: { x: 30, y: 30 } },
   ],
 }
 ```
@@ -82,17 +82,16 @@ A **recipe** is one named, typed combination of the four layers, in
 - `padding` is room between the border's inner edge and the content, beyond the border's own inset.
 - An **embellishment** is a picture by name, pinned to an `anchor` - a corner, or `top`, `right`, `bottom`
   or `left` for the middle of an edge. `overhang` is how far it stands out past the box, `x` sideways and
-  `y` up or down, away from it; a negative one sits inside. `keepOut` is how much room it takes from the
-  content, a side at a time. `behind` hangs it under the whole container, the fill too, as a drape hangs
-  behind a panel; `height` draws it at another size than its picture's, in proportion; `mirrored` turns it
-  left to right, so one cherub does for both corners.
+  `y` up or down, away from it; a negative one sits inside. `behind` hangs it under the whole container,
+  the fill too, as a drape hangs behind a panel; `height` draws it at another size than its picture's, in
+  proportion; `mirrored` turns it left to right, so one cherub does for both corners.
 - A container keeps a **margin as wide as its overhangs**, so nothing beside it runs under a cherub;
   `roomForOverhangs: false` for one whose room is known to be clear.
 
-**A keep-out takes a whole side.** A cherub in the top right corner that keeps out forty pixels on the
-right keeps the words clear of the right all the way down, not only beside itself. It is the simplest rule
-that never lets a word under a cherub, and the page's *layers* switch draws exactly what it takes. A
-keep-out that is only a corner, with the words running round it, is possible and not built.
+**So an embellishment is placed to stand clear of the words**: on the corner, over the moulding, out past
+the box. The page's *layers* switch dashes each one's box and dots where the words start, so a cherub that
+strays into them is seen. Why nothing keeps room inside the words for one, and the way back if one ever
+has to stand over them, is decision record 0068.
 
 Recipes are named for what they are used for, `pane.<which>`, `card.<which>`, `dialog.<which>`, so that a
 recipe changed is a known set of places changed. A pane uses a recipe and never sets a border of its own.
@@ -100,8 +99,8 @@ recipe changed is a known set of places changed. A pane uses a recipe and never 
 ## Asking for a pane
 
 The words to use are the layers. *A container for the pane that lists the holdings: the gilt border, a
-parchment fill, a cherub in the top right corner that takes forty pixels from the top of the content.* That
-sentence is a recipe, and at most one new picture in `world/ui/`, which starts as a placeholder.
+parchment fill, a cherub standing on the top right corner, well out past the frame.* That sentence is a
+recipe, and at most one new picture in `world/ui/`, which starts as a placeholder.
 
 What the agent says back, before building: the recipe as written, the pictures it reads, which of them are
 new and the size to paint each at.
@@ -176,8 +175,8 @@ A line each: what it is for, its variants, and where on the page it is.
   holds - as wide as whatever holds it and as tall as its content. `layoutOf` in `ui/container/layout.ts`
   is its arithmetic: the padding, the margin and every embellishment's place. *Containers*, where every
   recipe is shown holding what it is for, with the recipe written out beside it; the page's *layers*
-  switch strips the room each keep-out takes and dashes each embellishment's box, and does the same
-  wherever a container is inside something marked `data-ui-layers="shown"`.
+  switch dashes each embellishment's box and dots where the content starts, and does the same wherever a
+  container is inside something marked `data-ui-layers="shown"`.
 - **`RECIPES`**, `ui/container/recipes.ts`: the named containers. The first are made from the moodboard -
   Adam's own sentence as `pane.cherub-corner`, the cathedral panel as `pane.cathedral`, its framed panes
   and its cards - and the game's own come as each surface is redone.

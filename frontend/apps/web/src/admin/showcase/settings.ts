@@ -16,7 +16,7 @@ export interface Settings {
   readonly width: Width;
   /** What the components stand on. */
   readonly ground: Ground;
-  /** Whether a container's layers are drawn: the room its keep-outs take, and its embellishments' boxes. */
+  /** Whether a container's layers are drawn: its embellishments' boxes, and where its content starts. */
   readonly layers: Layers;
 }
 

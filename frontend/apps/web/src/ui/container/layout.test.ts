@@ -26,24 +26,16 @@ describe('a container laid out', () => {
     expect(layout.padding).toEqual([36, 36, 36, 36]);
   });
 
-  it('sets its content in further by a keep-out, on the side it is said for and no other', () => {
+  it('gives an embellishment none of the content’s room, wherever it is pinned', () => {
     const recipe: Recipe = {
       border: 'gilt-simple',
-      embellishments: [{ art: 'cherub-standing', anchor: 'top-right', keepOut: { right: 40 } }],
-    };
-    const layout = layoutOf(recipe, gilt, sizeOf);
-    expect(layout.padding).toEqual([28, 68, 28, 28]);
-    expect(layout.keepOut).toEqual([0, 40, 0, 0]);
-  });
-
-  it('takes the widest keep-out on a side, where two embellishments ask for room on it', () => {
-    const recipe: Recipe = {
+      padding: 8,
       embellishments: [
-        { art: 'cherub-standing', anchor: 'top-right', keepOut: { top: 20 } },
-        { art: 'cross-gilt', anchor: 'top', keepOut: { top: 30 } },
+        { art: 'cherub-standing', anchor: 'top-right', overhang: { x: 30, y: 30 } },
+        { art: 'cross-gilt', anchor: 'top', overhang: { y: 46 } },
       ],
     };
-    expect(layoutOf(recipe, undefined, sizeOf).keepOut).toEqual([30, 0, 0, 0]);
+    expect(layoutOf(recipe, gilt, sizeOf).padding).toEqual([36, 36, 36, 36]);
   });
 
   it('keeps a margin as wide as its overhangs, so nothing beside it runs under them', () => {
@@ -76,9 +68,15 @@ describe('a container laid out', () => {
     expect([told.placed[0]!.width, told.placed[0]!.height]).toEqual([40, 82]);
   });
 
-  it('leaves out an embellishment whose picture is not there, which then takes no room', () => {
-    const layout = layoutOf({ embellishments: [{ art: 'nobody', anchor: 'top' }] }, undefined, sizeOf);
+  it('draws nothing for an embellishment whose picture is not there, and keeps its margin all the same', () => {
+    const layout = layoutOf(
+      { embellishments: [{ art: 'nobody', anchor: 'top', overhang: { y: 40 } }] },
+      undefined,
+      sizeOf,
+    );
     expect(layout.placed).toEqual([]);
+    // So the container does not move when the picture arrives.
+    expect(layout.margin).toEqual([40, 0, 0, 0]);
   });
 });
 
@@ -111,17 +109,17 @@ describe('an embellishment placed', () => {
 });
 
 describe('the sentence Adam says, as a recipe', () => {
-  it('a gilt border and a cherub in the top right corner that takes forty pixels from the content', () => {
+  it('a gilt border, and a cherub standing on the top right corner, out past the frame', () => {
     const recipe: Recipe = {
       border: 'gilt-simple',
       fill: 'parchment',
-      embellishments: [
-        { art: 'cherub-standing', anchor: 'top-right', overhang: { x: 20, y: 30 }, keepOut: { right: 40 } },
-      ],
+      padding: 8,
+      embellishments: [{ art: 'cherub-standing', anchor: 'top-right', overhang: { x: 30, y: 30 } }],
     };
     const layout = layoutOf(recipe, gilt, sizeOf);
-    expect(layout.padding[1]).toBe(24 + 4 + 40);
-    expect(layout.margin).toEqual([30, 20, 0, 0]);
-    expect(layout.placed[0]!.place).toEqual({ right: '-20px', top: '-30px' });
+    expect(layout.placed[0]!.place).toEqual({ right: '-30px', top: '-30px' });
+    expect(layout.margin).toEqual([30, 30, 0, 0]);
+    // The words keep the whole width: the cherub stands on the corner, not in them.
+    expect(layout.padding).toEqual([36, 36, 36, 36]);
   });
 });

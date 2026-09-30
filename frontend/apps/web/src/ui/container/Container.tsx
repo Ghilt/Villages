@@ -15,9 +15,10 @@ import type { RecipeName } from './recipes';
  * a **fill**, none or several **embellishments**, and the content. Named by a **recipe**, so a pane says
  * which it is rather than how it is drawn, and a container inside a container is two of them.
  *
- * It is as wide as whatever holds it and as tall as its content, which is set in by the border and by
- * every embellishment's keep-out, so the content moves aside for a cherub by itself. Overhangs stand out
- * past the box, and a margin as wide as them keeps its neighbours clear. See docs/UI-COMPONENTS.md.
+ * It is as wide as whatever holds it and as tall as its content, which is set in by the border's cut and
+ * inset and the recipe's padding. An embellishment takes none of the content's room: it stands where it
+ * is pinned, over the border or out past the box, and a margin as wide as its overhang keeps the
+ * container's neighbours clear of it. See docs/UI-COMPONENTS.md.
  */
 export function Container({
   recipe,
@@ -55,7 +56,6 @@ export function Container({
       <div className="ui-container__content" style={{ padding: sidesInPixels(layout.padding) }}>
         {children}
       </div>
-      <KeepOuts padding={layout.padding} keepOut={layout.keepOut} />
       {layout.placed
         .filter((placed) => placed.embellishment.behind !== true)
         .map((placed, at) => (
@@ -83,34 +83,5 @@ function EmbellishmentLayer({ placed }: { placed: Placed }) {
       alt=""
       draggable={false}
     />
-  );
-}
-
-/**
- * The room each keep-out takes, as strips inside the content's padding. Drawn only inside something marked
- * `data-ui-layers="shown"`, which is how the page shows where a cherub's room is; otherwise nothing.
- */
-function KeepOuts({ padding, keepOut }: { padding: readonly number[]; keepOut: readonly number[] }) {
-  const [top = 0, right = 0, bottom = 0, left = 0] = keepOut;
-  const [padTop = 0, padRight = 0, padBottom = 0, padLeft = 0] = padding;
-  const strips: CSSProperties[] = [];
-  if (top > 0) strips.push({ top: padTop - top, height: top, left: padLeft - left, right: padRight - right });
-  if (bottom > 0)
-    strips.push({
-      bottom: padBottom - bottom,
-      height: bottom,
-      left: padLeft - left,
-      right: padRight - right,
-    });
-  if (left > 0)
-    strips.push({ left: padLeft - left, width: left, top: padTop - top, bottom: padBottom - bottom });
-  if (right > 0)
-    strips.push({ right: padRight - right, width: right, top: padTop - top, bottom: padBottom - bottom });
-  return (
-    <>
-      {strips.map((strip, at) => (
-        <span key={at} className="ui-container__keep-out" style={strip} aria-hidden />
-      ))}
-    </>
   );
 }

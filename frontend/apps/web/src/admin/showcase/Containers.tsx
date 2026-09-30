@@ -39,7 +39,7 @@ function Pane({ title }: { title: string }) {
       <p className="ui-label">A pane, as a recipe draws it</p>
       <p className="ui-body">
         The house keeps a ledger of what it holds and what it owes, and the ledger is read here. The words run
-        to whatever width the pane is given, and stand clear of the room a cherub takes.
+        to whatever width the pane is given, and a cherub stands on the corner rather than in them.
       </p>
     </>
   );
@@ -81,9 +81,9 @@ export function Containers() {
     <>
       <Part title="The sentence">
         <p className="ui-label showcase__lead">
-          “A container for this pane: a border, and an embellished cherub in one corner, and the cherub takes
-          up some room.” As a recipe, at three widths. Put <em>layers</em> on, in the bar, to see the room it
-          takes.
+          “A container for this pane: a border, and an embellished cherub in one corner.” As a recipe, at
+          three widths. The cherub stands on the corner, over the moulding and out past it, and the words keep
+          the whole width. Put <em>layers</em> on, in the bar, to see its box and where the words start.
         </p>
         <Specimens>
           {[260, 380, '100%'].map((width) => (
@@ -124,7 +124,7 @@ export function Containers() {
       <Part title="Any size">
         <p className="ui-label showcase__lead">
           Drag the corner. The border stretches, the cross stays on the crown, the cherub stays at the foot,
-          and the words keep clear of it.
+          and the drape hangs behind the whole of it.
         </p>
         <div className="showcase__resizable showcase__resizable--across" style={{ width: 460 }}>
           <Container recipe="pane.cathedral">
