@@ -231,8 +231,9 @@ option of a choice can grant a resource too, on the wire from version 13. `Compl
 where the walk says one is open, and writes what the line gives, and the end when it ends it, from the same
 decision, so a reward is paid once on every path; a conversation of forty lines writes a handful of events.
 The debug panel's Dialogues section offers a sample, a letter from the coast spoken by the house's first key
-figure and a messenger, from wire version 14, and the event page shows what was offered whole. Nothing in
-the world offers one yet, nothing sends one to the player and no command on the wire takes a step. Its shape
+figure and a messenger, from wire version 14, and the event page shows what was offered whole. A read model
+keeps every dialogue a house was offered and how far each has got. Nothing in the world offers one yet,
+nothing sends one to the player and no command on the wire takes a step. Its shape
 is decided in decision record 0067: a
 dialogue offered whole on the house's stream; only its dialogue choices, and the lines that give something
 or end it, recorded; what a line gives written as the world's own event beside the step; and hidden

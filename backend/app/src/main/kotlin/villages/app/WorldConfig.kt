@@ -28,6 +28,7 @@ import villages.gateway.Gateway
 import villages.occurrent.InMemoryWorld
 import villages.projections.CharactersProjection
 import villages.projections.ChoicesProjection
+import villages.projections.DialoguesProjection
 import villages.projections.HousesProjection
 import villages.projections.RecentEventsProjection
 import villages.projections.SightProjection
@@ -194,6 +195,10 @@ class WorldConfig {
     @Bean(destroyMethod = "close")
     fun sights(world: InMemoryWorld): SightProjection = SightProjection(world.feed)
 
+    /** Every dialogue each house was offered, and how far each has got, folded from the same feed. See 0067. */
+    @Bean(destroyMethod = "close")
+    fun dialogueRows(world: InMemoryWorld): DialoguesProjection = DialoguesProjection(world.feed)
+
     /**
      * Emptying the development world: the store and every read model folded from it, in one act, so that
      * no projection is left holding a house whose events are gone. See decision record 0036.
@@ -207,6 +212,7 @@ class WorldConfig {
         recentEvents: RecentEventsProjection,
         characters: CharactersProjection,
         sights: SightProjection,
+        dialogueRows: DialoguesProjection,
         characterDeaths: CharacterDeaths,
     ): WorldWipe = WorldWipe {
         world.wipe().also {
@@ -215,6 +221,7 @@ class WorldConfig {
             recentEvents.reset()
             characters.reset()
             sights.reset()
+            dialogueRows.reset()
             characterDeaths.reset()
         }
     }
