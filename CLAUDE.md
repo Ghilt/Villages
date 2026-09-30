@@ -322,7 +322,10 @@ Commands are added here as the increments land:
   writes to `.logs/backend.log`; see decision record 0029. So a change that wants to be seen there says
   so with `note(area, message)` rather than by adding a row. **Everything in it is in a folding section,
   and a step that puts something there says which section - and asks when that is not obvious from what
-  Adam said, rather than picking one.** Today they are Worktrees, Debug map, Scenery, Camera, Areas, World, Resources, Characters and Log. The events themselves are not in the
+  Adam said, rather than picking one.** Today they are Worktrees, Debug map, Scenery, Camera, Areas, World, Resources and Characters.
+  **The log is not a section but a column of its own**, the whole height of the panel on its outer side,
+  so what a button did is in view while the button is. It begins folded: the `log` toggle in the panel's
+  header, beside `landscape`, opens it and `hide` in its own bar folds it away again. The events themselves are not in the
   panel: they are at **`/admin/inspect-events`**, a page of their own that watches the world without
   playing in it, one line an event opening to the whole thing as the store holds it. The `found a house here` button in it sends a
   real command and is how to make an event happen on purpose. The `restart` button beside `copy` forgets

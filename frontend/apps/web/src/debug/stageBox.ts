@@ -8,8 +8,24 @@
  * Pure arithmetic, no DOM, so the one thing the whole feel rests on can be checked by a test.
  */
 
-/** What the debug panel is wide when nobody has dragged it: enough for its sections and no more. */
+/** What the debug panel's controls are wide when nobody has dragged it: enough for its sections and no more. */
 export const PANEL_WANTS = 352;
+
+/**
+ * What the log column beside the controls adds to that, when it is open.
+ *
+ * A column of its own rather than a section, so that it is in view whatever the controls are scrolled
+ * to. Wider than the controls because a log line is worth a long row; a matter of taste.
+ */
+export const LOG_WANTS = 400;
+
+/**
+ * The width the whole panel wants: the controls, the log beside them if it is open, and nothing at all
+ * once the panel is a badge. The one number the arithmetic below needs to know about the panel.
+ */
+export function panelWants(panelShut: boolean, logOpen: boolean): number {
+  return panelShut ? 0 : PANEL_WANTS + (logOpen ? LOG_WANTS : 0);
+}
 
 /** A typical phone in portrait, in the pixels a phone's own browser would report. A matter of taste. */
 export const PHONE = { w: 390, h: 844 };
@@ -66,29 +82,29 @@ function clamp(value: number, least: number, most: number): number {
  * The panel that goes with a stage of this width.
  *
  * The rule Adam asked for: the panel has a width it wants, and every pixel it is dragged past that is
- * mirrored as blank on the other side of the stage. So `blank = panel - PANEL_WANTS`, and since
+ * mirrored as blank on the other side of the stage. So `blank = panel - wants`, and since
  * `blank + stage + panel = width`, the panel is half of what is left once the wanted width is put back.
  *
- * The mirror is what makes it usable. The stage's centre works out to `(width - PANEL_WANTS) / 2`
- * whatever the panel is, so dragging narrows the stage in place rather than sliding it sideways, and a
- * layout can be watched as it gives way instead of being chased across the screen.
+ * The mirror is what makes it usable. The stage's centre works out to `(width - wants) / 2` whatever
+ * the panel is, so dragging narrows the stage in place rather than sliding it sideways, and a layout can
+ * be watched as it gives way instead of being chased across the screen.
  */
-function panelFor(width: number, stage: number): number {
+function panelFor(width: number, stage: number, wants: number): number {
   const roomy = width - stage;
-  return roomy >= PANEL_WANTS ? (roomy + PANEL_WANTS) / 2 : roomy;
+  return roomy >= wants ? (roomy + wants) / 2 : roomy;
 }
 
 /**
- * Where everything sits, given the window, what the stage is being asked to be, and whether the panel
- * is minimised to its badge.
+ * Where everything sits, given the window, what the stage is being asked to be, and how wide the panel
+ * wants to be - {@link panelWants}, which is nothing once it is minimised to its badge.
  *
  * A shut panel takes no room, so in `fill` the stage gets the whole window. At any other size it keeps
  * that size and the leftover splits evenly either side, the way the inset already splits above and
  * below: with nothing beside it to be pushed away from, a stage jammed against one edge would read as a
- * mistake. That is the case Adam minimises for - a phone-shaped stage with nothing at all over it.
+ * mistake. That is the case Adam minimises for - a phone-shaped stage with nothing at all over it. It
+ * falls out of the mirror with a wanted width of nothing, so it is not a case of its own.
  */
-export function stageBox(window: Window, mode: StageMode, panelShut: boolean): StageBox {
-  const wants = panelShut ? 0 : PANEL_WANTS;
+export function stageBox(window: Window, mode: StageMode, wants: number): StageBox {
   const widest = Math.max(0, window.width - wants);
 
   const asked = mode === 'fill' ? { w: widest, h: window.height } : isShape(mode) ? SHAPES[mode] : mode;
@@ -98,7 +114,7 @@ export function stageBox(window: Window, mode: StageMode, panelShut: boolean): S
     h: clamp(asked.h, Math.min(STAGE_LEAST.h, window.height), window.height),
   };
 
-  const panel = panelShut ? (window.width - stage.w) / 2 : panelFor(window.width, stage.w);
+  const panel = panelFor(window.width, stage.w, wants);
 
   return {
     blank: window.width - stage.w - panel,
@@ -119,10 +135,15 @@ export function stageBox(window: Window, mode: StageMode, panelShut: boolean): S
  * It only ever takes room away. Dragged the other way it stops once the panel is the width it wants,
  * because that is what wanting a width means; the badge is how the stage is given the whole window.
  */
-export function stageFromSideGrip(window: Window, at: number, height: number): { w: number; h: number } {
+export function stageFromSideGrip(
+  window: Window,
+  at: number,
+  height: number,
+  wants: number,
+): { w: number; h: number } {
   const panel = Math.max(0, window.width - at);
-  const stage = panel >= PANEL_WANTS ? window.width - panel * 2 + PANEL_WANTS : at;
-  return { w: clamp(stage, STAGE_LEAST.w, Math.max(STAGE_LEAST.w, window.width - PANEL_WANTS)), h: height };
+  const stage = panel >= wants ? window.width - panel * 2 + wants : at;
+  return { w: clamp(stage, STAGE_LEAST.w, Math.max(STAGE_LEAST.w, window.width - wants)), h: height };
 }
 
 /**

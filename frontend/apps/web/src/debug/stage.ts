@@ -11,6 +11,7 @@ import { isShape, type StageMode } from './stageBox';
 
 const REMEMBERED = 'villages.debug.stage';
 const OPEN_KEY = 'villages.debug.open';
+const LOG_KEY = 'villages.debug.log';
 
 function readBack(): StageMode {
   try {
@@ -35,8 +36,18 @@ function shutToBegin(): boolean {
   }
 }
 
+function logToBegin(): boolean {
+  try {
+    return localStorage.getItem(LOG_KEY) === 'yes';
+  } catch {
+    // Folded, as it begins for everyone: it is 400 pixels the stage keeps until the log is asked for.
+    return false;
+  }
+}
+
 let mode: StageMode = readBack();
 let shut = shutToBegin();
+let log = logToBegin();
 let listeners: Array<() => void> = [];
 
 export function stageMode(): StageMode {
@@ -45,6 +56,11 @@ export function stageMode(): StageMode {
 
 export function panelIsShut(): boolean {
   return shut;
+}
+
+/** Whether the log column is open beside the controls, which is room the stage does not have. */
+export function logIsOpen(): boolean {
+  return log;
 }
 
 export function watchStage(listener: () => void): () => void {
@@ -86,6 +102,22 @@ export function setPanelShut(next: boolean): void {
     localStorage.setItem(OPEN_KEY, next ? 'no' : 'yes');
   } catch {
     // A browser that will not remember the choice is not a reason to fail.
+  }
+  tellThem();
+}
+
+/**
+ * Fold the log column away, or open it again.
+ *
+ * Here rather than in the panel for the same reason as `shut`: the column is room taken from the stage,
+ * so the stage has to know. Folded, it is the `log` toggle in the panel's header and nothing else.
+ */
+export function setLogOpen(next: boolean): void {
+  log = next;
+  try {
+    localStorage.setItem(LOG_KEY, next ? 'yes' : 'no');
+  } catch {
+    // As above.
   }
   tellThem();
 }

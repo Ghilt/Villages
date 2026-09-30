@@ -10,6 +10,8 @@ const NUDGE = 16;
 interface GripsProps {
   /** Where the stage is now, so a drag starts from the edge rather than from wherever it was last. */
   box: StageBox;
+  /** How wide the panel wants to be, which is where the side grip stops when it is dragged outward. */
+  wants: number;
 }
 
 /**
@@ -22,7 +24,7 @@ interface GripsProps {
  * expensive and is not: the grid is four custom properties and the map redraws from its own observer
  * either way. See decision record 0039.
  */
-export function Grips({ box }: GripsProps) {
+export function Grips({ box, wants }: GripsProps) {
   const startedAt = useRef<{ w: number; h: number } | null>(null);
 
   const holdOn = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -61,7 +63,7 @@ export function Grips({ box }: GripsProps) {
         onPointerCancel={letGo}
         onPointerMove={(event) => {
           if (startedAt.current !== null) {
-            setStage(stageFromSideGrip(window, event.clientX, box.stage.h));
+            setStage(stageFromSideGrip(window, event.clientX, box.stage.h, wants));
           }
         }}
         onDoubleClick={() => setStage('fill')}
