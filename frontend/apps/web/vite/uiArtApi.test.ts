@@ -20,5 +20,6 @@ describe('the dev server keeping the interface pictures cut', () => {
     expect(isUiSource('placeholders.json')).toBe(false);
     expect(isUiSource('fills/notes.txt')).toBe(false);
     expect(isUiSource('medallions/compass.json')).toBe(false);
+    expect(isUiSource('sources/gilt-cherubs.webp')).toBe(false);
   });
 });

@@ -1,0 +1,7 @@
+{
+  "picture": "gilt-acanthus.webp",
+  "background": { "warmth": 30 },
+  "columns": [[0, 382], [393, 778], [788, 1182]],
+  "rows": [[0, 396], [405, 780], [788, 1187]],
+  "repeat": "round"
+}

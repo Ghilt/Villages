@@ -52,6 +52,12 @@ export const RECIPES = {
    */
   'pane.cherubs': { border: 'gilt-cherubs', fill: 'dark-felt', padding: 4 },
 
+  /**
+   * Adam's second: gilt mouldings, a column down each side, acanthus in the corners, on a dark stone
+   * painted to stand in for the one it came on.
+   */
+  'pane.acanthus': { border: 'gilt-acanthus', fill: 'stone', padding: 4 },
+
   /** A plain gilt pane on parchment, with nothing standing out past it: what a tab bar tucks under. */
   'pane.plain': { border: 'gilt-simple', fill: 'parchment', text: 'ink', padding: 8 },
 

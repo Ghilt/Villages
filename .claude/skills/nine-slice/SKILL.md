@@ -1,0 +1,108 @@
+---
+name: nine-slice
+description: Make a nine-slice border for world/ui/borders/ out of a frame picture that was not painted as one - an image model's nine tiles with gaps between them, a framed box standing on stone or on black, a box of white pasted over its middle - keeping only the frame, cutting where its tiles meet, and giving it a fill. Use whenever Adam hands over a frame, a border or a "nine slice", or asks for a picture to be nine-sliced.
+---
+
+# Nine slice
+
+A nine-slice job turns a picture Adam gives into a border the component library can lay round a box of
+any size: `world/ui/borders/<name>.webp` and its file of cuts, and a fill for inside it. **Only the frame
+is kept.** What it stands on, outside it and inside it, is cleared, and the inside is given a fill.
+
+The tool does the cutting: `npm run world:nine-slice --prefix frontend`, which is
+`frontend/packages/world/bin/nineSlice.ts`, its rules tested in `src/nineSlice.ts`. This file is how a job
+is done. Where the pictures go and what a border's file says is `docs/AUTHORING-THE-ART.md`; what a
+container does with them is `docs/UI-COMPONENTS.md`.
+
+The two done so far are the worked examples: `world/ui/sources/gilt-cherubs.json`, nine tiles on white
+gaps, clear round the frame, its middle tile a clean felt made into the fill; and
+`world/ui/sources/gilt-acanthus.json`, nine tiles on dark seams, standing on stone with a white box laid
+over its middle, which hid the seams, so its tiles are written out and its fill is painted.
+
+## 1. Keep the source
+
+Save the picture **as Adam gave it, untouched**, to `world/ui/sources/<name>.<ext>`, named for what the
+frame is, `gilt-<what>`. It is his, and committed; the border is made from it and can always be made
+again, so nothing is ever done to the source by hand.
+
+## 2. Look at it
+
+    npm run world:nine-slice --prefix frontend -- --look <name>.webp
+
+says its size and how much of it is clear, the lines between tiles it finds from end to end, the dark
+lines that run a fifth of a column or a row (a gap hidden in places), and the warmth - red less blue - and
+brightness of its outer edge and its middle. Look at the picture as well, and at a corner and each seam up
+close, cropped large with a grid over it.
+
+Then decide four things:
+
+- **Where the tiles are.** An image model draws nine tiles with lines between them, white or black, a few
+  to twenty pixels wide, which leave a pale or dark edge a pixel or two wide on the tiles beside them. When
+  `--look` finds two lines each way, the tool finds them by itself and cuts their edges out too. When
+  something hides them - a box pasted over the middle hides the middle of every seam - measure each seam:
+  the mean brightness of each column (or row) across it, over a stretch of frame and a stretch of what it
+  stands on, and the tile ends where the brightness is back to its neighbours'. Write the tiles in the
+  recipe, `"columns"` and `"rows"`, three spans of `[first, last]` each, both counted, gap and edge left out.
+- **What the frame stands on.** `"alpha"` when the picture is clear round its frame already. Otherwise
+  `{ "warmth": 30 }` for a gilt frame on anything cooler - stone, black, white, felt: gilt keeps its red
+  well above its blue even in its darkest groove (42 to 107 in the acanthus frame) and the stone it stood
+  on did not (13 to 24). Choose the number between the frame's lowest and the ground's highest. Whatever
+  the picture's edge or its middle can reach through anything cooler is cleared; a dark crevice inside the
+  frame that neither reaches is kept, as the frame's own shadow; a fleck left standing on its own, under a
+  fiftieth the size of the frame, is cleared too.
+- **The middle.** The middle tile is a fill, never the border's own middle: a frame's edges are clear
+  inside their moulding, and a middle drawn only between the cuts would leave a clear band all round.
+  When it is a clean texture, `"fill": "<name>"` makes it the fill, mirrored into a square twice its size
+  so it repeats without a seam. When it is a white box, a picture, or a texture that darkens towards the
+  frame - mirrored, that bands - leave it out and lay a painted fill instead: a look in
+  `src/uiFills.ts` in the ground's colours and a placeholder for it in `src/uiPlaceholders.ts`, as `stone`
+  is for the acanthus frame.
+- **The edges.** `"repeat": "round"` unless there is a reason: an image model's edge tile is a segment
+  with capped ends - an acanthus joint, a column's ring - and `round` lays a whole number of them, so none
+  is cut off at a corner. `stretch` for a plain moulding with nothing on it.
+
+## 3. Write the recipe, and make it
+
+`world/ui/sources/<name>.json`, beside the picture:
+
+```json
+{
+  "picture": "gilt-acanthus.webp",
+  "background": { "warmth": 30 },
+  "columns": [[0, 382], [393, 778], [788, 1182]],
+  "rows": [[0, 396], [405, 780], [788, 1187]],
+  "repeat": "round"
+}
+```
+
+    npm run world:nine-slice --prefix frontend -- <name>
+
+writes `world/ui/borders/<name>.webp` and `<name>.json` - its cuts where the tiles met, where its words
+start, and a fill reaching four pixels under the frame's inner edge, measured half way along each side -
+and the fill, when the recipe makes one. It prints the tiles, the cuts, how deep the frame is on each
+side, where the fill begins and where the words start. The dev server cuts the border at once, as it does any picture saved in the folder.
+
+## 4. Look at what it made
+
+- **A contact sheet on white and on black**, from its 3x cut in `frontend/apps/web/public/ui/ui.json`:
+  whatever is left of the ground shows on one or the other. A pale or a dark line where the tiles were
+  joined is a gap's edge reaching further than was cut: take a row more off that tile. A hole in the
+  moulding is too high a warmth. Specks of the ground still standing are too low a one.
+- **The page**, `/admin/inspect-ui-components` on this tree's port. *Borders and fills* shows the new
+  border at three sizes with no code changed. Give it a recipe, `pane.<what>`, with its fill, in
+  `frontend/apps/web/src/ui/container/recipes.ts`, and what it holds in `admin/showcase/Containers.tsx`, and
+  look at it as a pane on night and on parchment, at desktop width and at a phone's.
+- **Where its words start.** The tool works it out - past each edge at its deepest, a column's ring and
+  not only its shaft, because an edge is laid along the box again and again, and clear of each corner's
+  ornament by whichever of the corner's two sides costs the words less room - and writes it as
+  `content` in the border's file, so the words start inside the cuts of a frame with deep corners and
+  thin edges. The page's drag box draws the cuts dashed and labels where the content starts: look at it
+  there and in a pane. When it is not where it should be, say it in the recipe, `"content": [top, right,
+  bottom, left]` in the joined picture's own pixels, which the tool writes instead, so a remake keeps it.
+
+## 5. Hand it over
+
+Say which source it is made from, its tiles and cuts, what it stood on and how that was cleared, the fill
+and whether it is a placeholder, the recipe it is shown in, and what the pictures weigh. The source, its
+recipe, the border and its file, the fill, and the container recipe go into the folder together; the
+folder's own test holds every source to a recipe and every recipe to its picture and its border.

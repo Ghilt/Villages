@@ -601,7 +601,12 @@ async function cut(): Promise<void> {
   const known = forgetReplacedPlaceholders();
   const strays = existsSync(UI_DIR)
     ? readdirSync(UI_DIR, { withFileTypes: true })
-        .filter((entry) => entry.isDirectory() && !(UI_KINDS as readonly string[]).includes(entry.name))
+        .filter(
+          (entry) =>
+            entry.isDirectory() &&
+            entry.name !== 'sources' &&
+            !(UI_KINDS as readonly string[]).includes(entry.name),
+        )
         .map((entry) => entry.name)
     : [];
   if (strays.length > 0) {

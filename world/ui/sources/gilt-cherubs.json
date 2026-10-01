@@ -1,0 +1,8 @@
+{
+  "picture": "gilt-cherubs.webp",
+  "background": "alpha",
+  "columns": [[0, 402], [422, 831], [851, 1253]],
+  "rows": [[0, 400], [420, 830], [849, 1253]],
+  "repeat": "round",
+  "fill": "dark-felt"
+}

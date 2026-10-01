@@ -484,6 +484,13 @@ export const UI_PLACEHOLDERS: readonly UiPlaceholder[] = [
     fill: 'velvet',
     size: painted(128),
   },
+  {
+    kind: 'fills',
+    name: 'stone',
+    about: 'painted: the dark stone Adam’s frame of acanthus stood on, which repeated would band',
+    fill: 'stone',
+    size: painted(128),
+  },
 
   // Embellishments, cut along an outline because each stands over the busy map in the moodboard.
   {

@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
+import { readNineSliceRecipe } from './nineSlice.ts';
 import { UI_KINDS, UI_PICTURES, nameProblem, readBorderFile } from './uiArt.ts';
 import { UI_PLACEHOLDERS } from './uiPlaceholders.ts';
 
@@ -28,8 +29,14 @@ const stem = (file: string) => file.slice(0, -extname(file).length);
 const SLICED = ['borders', 'controls', 'dividers'];
 
 describe("the interface's pictures folder, which is Adam's", () => {
-  it('holds a folder a kind of picture, the moodboard, the placeholders’ record, and nothing else', () => {
-    const allowed = new Set<string>([...UI_KINDS, 'moodboard.webp', 'placeholders.json', 'README.md']);
+  it('holds a folder a kind of picture, the sources, the moodboard, the placeholders’ record, and nothing else', () => {
+    const allowed = new Set<string>([
+      ...UI_KINDS,
+      'sources',
+      'moodboard.webp',
+      'placeholders.json',
+      'README.md',
+    ]);
     const strays = readdirSync(fileURLToPath(UI)).filter((entry) => !allowed.has(entry));
     expect(strays).toEqual([]);
   });
@@ -103,6 +110,27 @@ describe("the interface's pictures folder, which is Adam's", () => {
     for (const file of Object.keys(recorded)) {
       expect(there.has(file), file).toBe(true);
     }
+  });
+
+  it('keeps every source with its recipe, every recipe with its picture and its border, and nothing else', () => {
+    const files = filesIn('sources');
+    const pictures = new Set(files.filter((file) => UI_PICTURES.has(extname(file).toLowerCase())));
+    const borders = new Set(picturesIn('borders').map(stem));
+    const made = new Set<string>();
+    for (const file of files.filter((one) => one.endsWith('.json'))) {
+      const recipe = readNineSliceRecipe(readFileSync(new URL(`sources/${file}`, UI), 'utf8'), file);
+      expect(pictures.has(recipe.picture), `sources/${file} is made from ${recipe.picture}`).toBe(true);
+      expect(borders.has(stem(file)), `sources/${file} has been made into a border`).toBe(true);
+      made.add(recipe.picture);
+    }
+    expect(
+      [...pictures].filter((picture) => !made.has(picture)),
+      'sources no recipe makes a border of',
+    ).toEqual([]);
+    expect(
+      files.filter((file) => !file.endsWith('.json') && !pictures.has(file)),
+      'files in sources that are neither a picture nor a recipe',
+    ).toEqual([]);
   });
 
   it('names each placeholder once', () => {

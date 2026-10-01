@@ -39,7 +39,8 @@ const PICTURES = new Set(['.png', '.webp', '.jpg', '.jpeg']);
  */
 export function isUiSource(file: string): boolean {
   const path = file.replaceAll('\\', '/');
-  if (!path.includes('/')) {
+  // A border's source is made into a border by the nine-slice tool, and is not cut itself.
+  if (!path.includes('/') || path.startsWith('sources/')) {
     return false;
   }
   const extension = extname(path).toLowerCase();

@@ -118,6 +118,7 @@ every start cheap enough to do.
     world/ui/controls/<name>.webp + <name>.json  a button's face at rest, and where it stretches
     world/ui/controls/<name>-<state>.webp        the same face hovered, pressed or disabled, if painted
     world/ui/dividers/<name>.webp + <name>.json  a rule between two things, and where its two ends are cut
+    world/ui/sources/<name>.webp + <name>.json   a picture a border is made from, as you gave it, and how
     world/ui/moodboard.webp                      the moodboard the placeholders are cut from
     world/ui/placeholders.json                   which files are still placeholders, by their bytes
 
@@ -180,12 +181,26 @@ The page's drag box draws the cuts dashed and labels where the content starts, s
 The title plate is a border too, `plate`, whose own middle is its parchment, so its file says
 `"middle": true` and a recipe lays no fill under it.
 
-**A frame that comes as nine tiles with gaps between them**, as an image model draws one, is not a border
-yet: the gaps are cut out, with the pale edge they leave on the tiles beside them, and the tiles joined
-into one box, its cuts where the tiles met. The middle tile is not the border's middle but a fill of its
-own, because a frame's edges are clear inside their moulding and a middle drawn only between the cuts
-would leave a clear band all round. `borders/gilt-cherubs` and `fills/dark-felt`, the first pictures of
-yours in the folder, were made that way; the agent does it, until the tool does.
+**A frame that was not painted as a border** - an image model's nine tiles with lines between them, a
+framed box standing on stone or black, with a box of white over its middle - is kept as you gave it in
+`world/ui/sources/`, and made into one by the nine-slice tool from a recipe beside it:
+
+    npm run world:nine-slice --prefix frontend -- gilt-acanthus
+
+It cuts the lines between the tiles out, with the pale or dark edge they leave on the tiles beside them,
+and joins the tiles into one box, its cuts where they met; it clears what the frame stood on, outside it
+and inside it - by its own transparency, or by warmth, because gilt keeps its red above its blue and stone,
+black and white do not; and it makes the middle tile a fill of its own, mirrored so it repeats, or leaves it
+out for a painted one. The middle is never the border's own, because a frame's edges are clear inside their
+moulding and a middle drawn only between the cuts would leave a clear band all round. It also works out
+where the frame's words start - past each edge at its deepest, a column's ring and not only its shaft, and
+clear of each corner's ornament by whichever side costs the words less room - and writes it as `content`;
+a recipe that says `"content"` itself is written instead, so making the border again never loses it. The
+recipe says
+which, and the agent writes it, by the nine-slice skill in `.claude/skills/nine-slice/`: hand over the
+picture and say it is a frame. `borders/gilt-cherubs` with `fills/dark-felt`, and `borders/gilt-acanthus`
+on the painted `fills/stone`, were made that way, and are made again from their sources by the same
+command.
 
 So **an edge has to repeat without a seam**: whatever is at its left end has to meet its right, or be
 stretched. Anything that must not repeat - a cross on the crown, a cherub - is not part of the border but

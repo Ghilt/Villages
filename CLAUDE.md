@@ -464,7 +464,11 @@ Commands are added here as the increments land:
   cuts every picture at 1x, 2x and 3x into `public/ui/` with a list beside them, prints a line a picture
   with what each weighs, and ends with the whole against a budget of two megabytes at 2x. `-- --placeholders`
   makes the agent's placeholders for whatever is missing, cut from `world/ui/moodboard.webp` or drawn, and
-  never writes over a file that is there. See `docs/AUTHORING-THE-ART.md` and decision record 0068.
+  never writes over a file that is there. A frame that was not painted as a border - an image model's nine
+  tiles with lines between them, a framed box on stone - is kept as it was given in `world/ui/sources/`
+  with a recipe beside it, and `npm run world:nine-slice --prefix frontend` makes the border, and its fill,
+  from it; `-- --look <picture>` says what a picture is first. The nine-slice skill is how a job is done.
+  See `docs/AUTHORING-THE-ART.md` and decision record 0068.
 - Frontend, look at it: `npm run dev --prefix frontend`, then open the address it prints. That is
   http://localhost:5173 in the main checkout and a port of its own in each worktree; see decision 0031.
 - Frontend, checks: `npm run check --prefix frontend` (typecheck, lint, format, unit tests)

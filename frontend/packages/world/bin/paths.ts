@@ -37,6 +37,11 @@ export const SPRITES_DIR = resolve(REPO, 'world', 'sprites');
  * The moodboard the placeholders are cut from is here too. See decision record 0068.
  */
 export const UI_DIR = resolve(REPO, 'world', 'ui');
+/**
+ * Pictures a border is made from rather than painted as, kept as Adam gave them - an image model's nine
+ * tiles, a framed box on stone - each with the recipe `npm run world:nine-slice` makes it by. Not cut.
+ */
+export const UI_SOURCES_DIR = resolve(UI_DIR, 'sources');
 /** Where the cut interface pictures go, each at 1x, 2x and 3x with a list beside them. Output, not committed. */
 export const UI_OUT_DIR = resolve(REPO, 'frontend', 'apps', 'web', 'public', 'ui');
 /** Every interface picture the tool has cut, by its bytes and the rules', as `ART_CACHE_DIR` is for sprites. */

@@ -1,6 +1,6 @@
 /**
- * The placeholder fills: parchment, night, dark wood and velvet, painted as pixels that repeat without a
- * seam, so a pane of any size can be filled with one small picture.
+ * The placeholder fills: parchment, night, dark wood, velvet and stone, painted as pixels that repeat
+ * without a seam, so a pane of any size can be filled with one small picture.
  *
  * Painted here rather than drawn as SVG because the SVG renderer's own noise does not quite repeat: its
  * tiles meet in a faint line, which is the one thing a fill must never show. The noise here wraps by
@@ -65,7 +65,7 @@ export function wrappingFbm(
   return sum / weight;
 }
 
-export const FILL_NAMES = ['parchment', 'night', 'dark-wood', 'velvet'] as const;
+export const FILL_NAMES = ['parchment', 'night', 'dark-wood', 'velvet', 'stone'] as const;
 export type FillName = (typeof FILL_NAMES)[number];
 
 type Rgb = readonly [number, number, number];
@@ -116,6 +116,14 @@ function fillPixel(name: FillName, x: number, y: number, size: number): Rgb {
       const fold = Math.sin(((x / size) * 5 + spread(sway, 2) * 0.12) * Math.PI * 2);
       const pile = spread(wrappingNoise(x, y, size, 128, 128, 67), 1);
       return shade([104, 40, 32], fold * 0.8 + pile * 0.12, 28);
+    }
+    case 'stone': {
+      // Dark stone, as the frame of acanthus stands on: broad cloudy patches, a closer mottle over them,
+      // and a fine grit.
+      const cloud = spread(wrappingFbm(x, y, size, [3, 3], 4, 71), 2.2);
+      const mottle = spread(wrappingFbm(x, y, size, [12, 12], 3, 79), 1.8);
+      const grit = spread(wrappingNoise(x, y, size, 160, 160, 73), 1);
+      return shade([48, 41, 31], cloud * 0.45 + mottle * 0.3 + grit * 0.35, 15);
     }
   }
 }
