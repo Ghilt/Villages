@@ -267,8 +267,13 @@ A speaker's death is tried with *kill*, in the Characters section.
    dialogue through, which went again before they were committed, on Adam's word: the debug panel only
    offers. The trying showed the read model telling the page of a dialogue open with nothing left in it, for
    the moment between the last step and the end; it tells the two together now. The same commit took away
-   the switch that showed requirements, and the section's list. The second part is the conversation in the
-   pane.
+   the switch that showed requirements, and the section's list. The second part is done: the reading place,
+   `reading.ts` in `client-core`, and the conversation in the pane - a row opens it, the bubbles say who
+   speaks and come from the left or the right by party, *next* (a chevron) shows the stretch a line at a time
+   and takes the step past its last line, the options are words at the end of the feed with what each shows
+   it will do, and the list mark goes back. Its first drawing put the options in a foot, which at half a
+   phone left a sliver for the lines they answer, so they are the end of the feed now. The third part is the
+   portraits beside the bubbles.
 10. **What it gives and how it ends.** A gain in the feed, and the house card's wealth going up with it; a
     lost dialogue's closing line; a finished one read back.
 11. **The scene.** The folder, its placeholders, serving it, its test, and the speakers standing in it at

@@ -210,7 +210,10 @@ on the map, and none while they are on no map, doing what the window's does: the
 phone the map into the other bay. **The way back from one key figure to all of them is nine small
 squares**, the grid it goes back to, filled rather than outlined because nine outlines at the size of a
 mark are a blur, and drawn at **twice a mark's size**, Adam's word, because it is the one way back from
-where the pane has got to.
+where the pane has got to. **The way back from a conversation to all of them is the list it goes back to**,
+three rows each with its point, by the same rule: a way back is drawn as where it goes. ***Next*, in a
+conversation, is a chevron**, the same "the one after" as the letter's carousel. Both are marks rather than
+words, Adam's call.
 
 ## Not decided
 

@@ -188,8 +188,12 @@ A **pane**, there from the first dialogue a house is offered and never closed af
   Newest first in both, each with its title and who speaks in it, every name standing alone as it would on
   a bubble, and one waiting is marked *new* until a step has been taken in it and *begun* after.
 - **A conversation**: pressing a dialogue opens it, from its start or from where it was left. The scene at
-  the top, the feed under it, scrolling, and at its foot *next* or the dialogue choice's options. A finished
-  one opens to be read back.
+  the top, the feed under it, scrolling, and the stretch ahead shown a line at a time by *next* at its foot.
+  Moving past the last line of a stretch takes the step it ends in. A dialogue choice's options are the end
+  of the feed and scroll with it, because a foot of options at half a phone leaves no room for what they
+  answer. A finished one opens to be read back. *Next* is a mark, a chevron, and so is the way back to the
+  list, drawn as the list it goes back to; both Adam's call. The options are what can be said, so they are
+  words, each with what it shows taking it will do.
 
 **In the spread** it takes a column down the right edge of the stage, set into it as the column on the left
 is set into the left edge, and top to bottom, because a conversation is long:
@@ -226,7 +230,6 @@ never opens it twice: a step taken, a reconnect or the list sent again is not a 
   not yet come are the examples. Each is one more kind rather than new machinery, though a day also needs
   something to wake for it, because nothing writes that a day has come.
 - **A conversation that comes back to a question** it has already asked, which the first ones cannot do.
-- **Whether *next* is a mark or a word.**
 
 ### Where it stands
 
@@ -245,9 +248,11 @@ pay, and from version 17 each option carries its reveal impact. A speaker's deat
 speak in, as lost, naming who died. Nothing in the world offers one yet. The pane stands in the column
 down the right from the house's first dialogue, at its three sizes, and on a phone navigation lists it;
 it lists the dialogues waiting and finished, a lapsed one saying why, and a dialogue offered opens it;
-pressing one in the list opens nothing yet. A step can be sent from a page, from wire version 18, and the
-pane is what will send it; the debug panel's Dialogues section offers a dialogue and does nothing else, and a
-requirement is never sent to a page. Its shape is decided in decision record 0067: a dialogue offered whole
+pressing one opens the conversation, which is played through in the pane: the stretch a line at a time,
+the options at the end of the feed, and each step sent from there, on the wire from version 18. The
+speakers have their names on their bubbles and no faces yet, there is no scene, and what a line gives
+shows on the house card and not yet in the feed. The debug panel's Dialogues section offers a dialogue and
+does nothing else, and a requirement is never sent to a page. Its shape is decided in decision record 0067: a dialogue offered whole
 on the house's stream; only its dialogue choices, and the lines that give something or end it, recorded;
 what a line gives written as the world's own event beside the step; and hidden requirements that end a
 dialogue when one fails, with the server holding back what the player has not reached.

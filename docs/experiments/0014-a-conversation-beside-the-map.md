@@ -111,6 +111,13 @@ before they were committed, on Adam's word that the debug panel only offers a di
 pane's, and with them the switch that sent one window the requirements: a page is never sent one now, which
 answers the question above about requirements outright.
 
+Played in its pane, the letter read as a back and forth even with names and no faces: the messenger from the
+right, the house's figure from the left, and the option taken becoming the figure's own line. Two things
+showed. The options first stood in a foot under the feed, and at half a phone three of them took 266 of the
+bay's 400 pixels and left a sliver for what they answer, so they are the end of the feed now and scroll
+with it. And an option the house cannot pay for is refused only in the log: the pane says nothing, and the
+press seems to do nothing.
+
 ## Result
 
 Open.

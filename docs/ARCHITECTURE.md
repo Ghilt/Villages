@@ -289,7 +289,7 @@ frame changing. See `SETTING.md` and `GLOSSARY.md` for what each of the five is.
 
 `MECHANICS.md` describes **character dialogue**, decision record 0067 decides its shape, and
 `docs/plans/character-dialogue.md` is the order it is built in; what follows is what it costs the program.
-The server's half is built, and the pane stands in its column; the reading is not written yet.
+The server's half is built, the pane stands in its column, and a dialogue is read and played in it.
 
 **The server walks a dialogue, and holds back what has not been reached.** A dialogue is offered whole on the
 house's stream, and where it has got to is one pure function in the domain, the walk, `Dialogue.walk`: what
@@ -307,7 +307,9 @@ when a press has to be sent as a step rather than simply shown, is logic with no
 `packages/client-core` behind the layer rule and is tested without a browser. `apps/web` draws what that
 logic says. It keeps its place while what it reads is unchanged, and reads the stretch again from its start
 after a reload. A dialogue that keeps its state in a React component is a dialogue that can only be tested by
-clicking through it.
+clicking through it. It is the **reading place**, `reading.ts` in `client-core`: what shows at a place, what
+*next* does there - another line, or the step the stretch ends in - and when an option can be taken, with
+nothing to press while a step is out; the pane holds the place as state and draws what it says.
 
 **It is drawn in the page, not in Pixi.** PixiJS is only in `sprites/`, where it draws the map's overlay
 behind the `SpriteRenderer` interface: the sprites, the scenery and the fog. Every other piece of interface,

@@ -2983,19 +2983,36 @@ body,
   list-style: none;
 }
 
-/* A dialogue: its title, with whether it is new or begun beside it, and who speaks in it under it. */
 .dialogues__row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: baseline;
-  column-gap: 0.6rem;
-  row-gap: 0.1rem;
-  padding: 0.5rem 0.75rem;
   border-top: 1px solid var(--parchment-edge);
 }
 
 .dialogues__row:last-child {
   border-bottom: 1px solid var(--parchment-edge);
+}
+
+/*
+ * A dialogue: its title, with whether it is new or begun beside it, and who speaks in it under it. The whole
+ * row is the press that opens it, as a row of navigation is the press that goes there.
+ */
+.dialogues__open {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  column-gap: 0.6rem;
+  row-gap: 0.1rem;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  background: none;
+  font: inherit;
+  text-align: left;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.dialogues__open:hover {
+  background: rgba(157, 124, 42, 0.12);
 }
 
 .dialogues__title {
@@ -3021,6 +3038,148 @@ body,
 /* Lapsed: it ended where it stood, and the line under the title is why, said quietly. */
 .dialogues__row--lapsed .dialogues__line {
   font-style: italic;
+}
+
+/*
+ * A conversation: the way back and its title at the top, the feed scrolling under them, and *next* or the
+ * options at its foot. The two marks are Adam's call; the options are what can be said, so they are words.
+ */
+.dialogues__back {
+  flex: none;
+  width: 1.7rem;
+  height: 1.7rem;
+  padding: 0.2rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.dialogues__back .icon {
+  opacity: 0.7;
+}
+
+.dialogues__back:hover .icon {
+  opacity: 1;
+}
+
+/* Padded at its foot clear of the compass, on a phone, so the last option scrolls out from under it. */
+.dialogues__feed {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 0.75rem 0.75rem calc(0.75rem + var(--corner-bottom, 0px));
+  list-style: none;
+  overflow-y: auto;
+}
+
+/* A line said: who says it and the words, from the left or the right by the speaker's party. */
+.dialogues__bubble {
+  max-width: 85%;
+  padding: 0.45rem 0.7rem 0.5rem;
+  border: 1px solid var(--parchment-edge);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.dialogues__bubble--left {
+  align-self: flex-start;
+  border-bottom-left-radius: 2px;
+}
+
+.dialogues__bubble--right {
+  align-self: flex-end;
+  border-bottom-right-radius: 2px;
+  background: rgba(157, 124, 42, 0.08);
+}
+
+.dialogues__speaker {
+  display: block;
+  font-size: 0.72rem;
+  font-variant: small-caps;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+}
+
+.dialogues__words {
+  margin: 0.1rem 0 0;
+  font-size: 0.98rem;
+  line-height: 1.35;
+}
+
+/*
+ * The foot, while there is *next* to press: a row along the bottom, so it steps in from the right clear of
+ * the compass when the compass is standing in this corner, on a phone, rather than growing a compass tall.
+ */
+.dialogues__foot {
+  display: flex;
+  justify-content: flex-end;
+  flex: none;
+  padding: 0.45rem calc(0.75rem + var(--corner-right, 0px)) 0.45rem 0.75rem;
+  border-top: 1px solid var(--parchment-edge);
+}
+
+/* The dialogue choice, at the end of the feed: the options one under another, across its whole width. */
+.dialogues__choosing {
+  align-self: stretch;
+  margin-top: 0.2rem;
+}
+
+.dialogues__options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dialogues__option {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  width: 100%;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid var(--parchment-edge);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.4);
+  font: inherit;
+  text-align: left;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.dialogues__option:hover:not(:disabled) {
+  background: rgba(157, 124, 42, 0.12);
+}
+
+.dialogues__impact {
+  font-size: 0.78rem;
+  color: var(--gold);
+}
+
+.dialogues__next {
+  flex: none;
+  width: 2.3rem;
+  height: 2.3rem;
+  padding: 0.4rem;
+  border: 1px solid var(--parchment-edge);
+  border-radius: 50%;
+  background: var(--parchment);
+  cursor: pointer;
+}
+
+.dialogues__next:hover:not(:disabled) {
+  background: rgba(157, 124, 42, 0.12);
+}
+
+/* A step is out: nothing is pressed until it is answered. */
+.dialogues__next:disabled,
+.dialogues__option:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 /* Put away: its name, how many there are, and the way back, as a strip across the top of the column. */

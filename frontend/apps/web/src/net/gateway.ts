@@ -684,12 +684,26 @@ export function offerDialogue(sample: string, described: string): void {
 }
 
 /**
- * Takes a step through one of the house's dialogues: an option of a dialogue choice, or the line the stretch
- * read ends on, by its id. Whether it is the next step is the house's to say, and a refusal comes back as one,
- * so nothing here checks. See decision record 0067.
+ * Takes a step through one of the house's dialogues, from its pane: an option of a dialogue choice, or the line
+ * the stretch read ends on, by its id.
+ *
+ * A player's command, as taking an option of a choice is, so nothing else is sent until it is answered and
+ * the pane presses nothing meanwhile. Whether it is the next step is the house's to say, and a refusal comes
+ * back as one, so nothing here checks. See decision record 0067.
  */
 export function completeDialogueStep(dialogueId: string, lineId: string, described: string): void {
-  act('dialogues', `taking ${described}`, { type: 'completeDialogueStep', dialogueId, lineId });
+  if (connection === null || state.connection !== 'open' || state.acting !== null) {
+    return;
+  }
+  const commandId = crypto.randomUUID();
+  update({ acting: commandId });
+  askedFrom.set(commandId, 'dialogues');
+  note('dialogues', `taking ${described} as ${shortId(commandId)}`);
+  connection.send({
+    type: 'command',
+    commandId,
+    command: { type: 'completeDialogueStep', dialogueId, lineId },
+  });
 }
 
 /**

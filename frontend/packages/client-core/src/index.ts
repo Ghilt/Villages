@@ -30,3 +30,6 @@ export { ageOn } from './ages';
 
 export { whatToFollow } from './following';
 export type { Following } from './following';
+
+export { choose, keepReading, pressNext, showing, startReading } from './reading';
+export type { Press, Reading, Showing } from './reading';
