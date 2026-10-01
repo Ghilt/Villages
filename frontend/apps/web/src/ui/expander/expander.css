@@ -1,0 +1,101 @@
+/*
+ * An expandable section: its heading a whole-width button, the mark, the name, the rule and what it says
+ * at the end in a row; its body a grid row that grows from nothing to its content's height and back, which
+ * is how a height that nobody knows in advance is moved smoothly rather than jumped to.
+ */
+
+@layer ui {
+  .ui-expander {
+    min-width: 0;
+  }
+
+  .ui-expander__head {
+    display: flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+    width: 100%;
+    margin: 0;
+    padding: var(--ui-space-1) 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: var(--ui-text-soft);
+    text-align: start;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.12s ease;
+  }
+
+  .ui-expander__head:hover,
+  .ui-expander__head[data-showing='hover'] {
+    color: var(--ui-text);
+  }
+
+  .ui-expander__head:focus-visible,
+  .ui-expander__head[data-showing='focus'] {
+    outline: 2px solid var(--ui-focus);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  .ui-expander__fold {
+    display: grid;
+    flex: none;
+    place-items: center;
+    transition: transform 0.2s ease;
+  }
+
+  .ui-expander[data-open='true'] > .ui-expander__head .ui-expander__fold {
+    transform: rotate(90deg);
+  }
+
+  .ui-expander__title {
+    flex: none;
+    max-width: 60%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ui-expander__rule {
+    display: flex;
+    flex: 1 1 0;
+    min-width: 2.5rem;
+  }
+
+  .ui-expander__aside {
+    flex: none;
+    font-size: 0.88em;
+    font-style: italic;
+  }
+
+  .ui-expander__body {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition:
+      grid-template-rows 0.2s ease,
+      opacity 0.2s ease;
+  }
+
+  .ui-expander[data-open='true'] > .ui-expander__body {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+
+  .ui-expander__inner {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .ui-expander__content {
+    padding: var(--ui-space-2) 0 var(--ui-space-3) calc(16px + var(--ui-space-2));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-expander__fold,
+    .ui-expander__body {
+      transition: none;
+    }
+  }
+}

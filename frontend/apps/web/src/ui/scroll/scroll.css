@@ -1,0 +1,75 @@
+/*
+ * A scroll area: it scrolls one way, keeps its scrolling to itself, draws a thin gilt bar, and fades at an
+ * edge with more beyond it. The fade is a mask over the content and not over the bar, which stays whole:
+ * the mask has two layers, the fading one the width of the content and a solid one the width of the bar.
+ */
+
+@layer ui {
+  .ui-scroll {
+    --ui-scroll-fade: 1.75rem;
+    --ui-fade-before: 0px;
+    --ui-fade-after: 0px;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--ui-gilt) 85%, transparent) transparent;
+    mask-repeat: no-repeat;
+  }
+
+  .ui-scroll[data-more~='before'] {
+    --ui-fade-before: var(--ui-scroll-fade);
+  }
+
+  .ui-scroll[data-more~='after'] {
+    --ui-fade-after: var(--ui-scroll-fade);
+  }
+
+  .ui-scroll--down {
+    overflow-x: hidden;
+    overflow-y: auto;
+    mask-image:
+      linear-gradient(
+        to bottom,
+        transparent 0,
+        #000 var(--ui-fade-before),
+        #000 calc(100% - var(--ui-fade-after)),
+        transparent 100%
+      ),
+      linear-gradient(#000, #000);
+    mask-position:
+      0 0,
+      100% 0;
+    mask-size:
+      calc(100% - var(--ui-scroll-bar, 0px)) 100%,
+      var(--ui-scroll-bar, 0px) 100%;
+  }
+
+  .ui-scroll--across {
+    overflow-x: auto;
+    overflow-y: hidden;
+    mask-image:
+      linear-gradient(
+        to right,
+        transparent 0,
+        #000 var(--ui-fade-before),
+        #000 calc(100% - var(--ui-fade-after)),
+        transparent 100%
+      ),
+      linear-gradient(#000, #000);
+    mask-position:
+      0 0,
+      0 100%;
+    mask-size:
+      100% calc(100% - var(--ui-scroll-bar, 0px)),
+      100% var(--ui-scroll-bar, 0px);
+  }
+
+  .ui-scroll--across > .ui-scroll__content {
+    width: max-content;
+    min-width: 100%;
+  }
+
+  .ui-scroll:focus-visible {
+    outline: 2px solid var(--ui-focus);
+    outline-offset: -2px;
+  }
+}

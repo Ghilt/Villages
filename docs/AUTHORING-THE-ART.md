@@ -117,6 +117,7 @@ every start cheap enough to do.
     world/ui/marks/<name>.png                    a mark chosen to be painted rather than drawn
     world/ui/controls/<name>.webp + <name>.json  a button's face at rest, and where it stretches
     world/ui/controls/<name>-<state>.webp        the same face hovered, pressed or disabled, if painted
+    world/ui/dividers/<name>.webp + <name>.json  a rule between two things, and where its two ends are cut
     world/ui/moodboard.webp                      the moodboard the placeholders are cut from
     world/ui/placeholders.json                   which files are still placeholders, by their bytes
 
@@ -133,8 +134,10 @@ your picture and run:
 
 It never writes over a file that is there. The placeholders are the agent's, copied from the moodboard:
 most are **cut out of it** - the fourteen sample borders' top row, the cathedral panel's cherub, cross and
-drape, the four medallions - and made four times the size, so they are soft; the rest are **drawn**, a
-gilt frame that slices cleanly and the fills, which have to repeat. Where each is cut from is
+drape, the four medallions, the knots on its dividers, and the Paris plate, its two ends and a strip of
+its middle joined with the words left out - and made four times the size, so they are soft; the rest are
+**drawn**, a gilt frame that slices cleanly, the fills, which have to repeat, the divider's rule and the
+tabs' faces. Where each is cut from is
 `frontend/packages/world/src/uiPlaceholders.ts`.
 
 ### Painting one
@@ -165,6 +168,9 @@ the cuts the content starts; `outset` how far the border stands out past the box
 picture's own middle is drawn, rather than left for a fill; `fillUnder` how far a fill reaches under the
 border, half of each cut if it is not said. Only `slice` has to be there.
 
+The title plate is a border too, `plate`, whose own middle is its parchment, so its file says
+`"middle": true` and a recipe lays no fill under it.
+
 So **an edge has to repeat without a seam**: whatever is at its left end has to meet its right, or be
 stretched. Anything that must not repeat - a cross on the crown, a cherub - is not part of the border but
 an embellishment of its own. The moodboard's own borders were not drawn to be sliced, and the page shows
@@ -183,7 +189,20 @@ caps outside the side cuts are where the words stop. A round face has no file an
 states are light and shade over the one picture - lighter under the pointer, darker pressed, grey disabled
 - unless you paint one: `primary-hover`, `primary-pressed` or `primary-disabled` beside `primary` is drawn in
 that state instead, and the others stay light and shade. A round face can have its mark painted in, as the
-moodboard's close and minimise do, or be plain, `round-plain`, for a drawn mark to stand on.
+moodboard's close and minimise do, or be plain, `round-plain`, for a drawn mark to stand on. **A tab has two
+faces**, `tab` at rest and `tab-chosen` for the one that is up, each cut like a drape and open at the
+bottom, where it tucks under the pane it opens; the bottom fifth of it is out of sight under the pane's
+border.
+
+**A divider is a rule with two ends**, painted at some middling length, with a `<name>.json` beside it
+whose top and bottom cuts are nought, so it is cut only at its ends:
+
+    { "slice": [0, 56, 0, 56], "repeat": "stretch", "middle": true }
+
+The ends outside the two cuts are drawn once and the line between them is stretched, so the line has to
+be the same the whole way along. Without the file the whole rule is stretched, its ends with it. A knot
+for its middle is an embellishment - `knot-fleur`, `knot-boss`, the `sunburst` - because any knot goes on
+any rule: paint it on nothing, about twice as tall as the rule, which is 36 pixels painted and 9 shown.
 
 **A painted mark has to read at seventeen pixels**, the size a resource's mark is drawn at, and a mark
 that does not survive it is drawn in code instead. The page's *Marks and readouts* section shows every mark

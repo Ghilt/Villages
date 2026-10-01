@@ -453,7 +453,7 @@ Commands are added here as the increments land:
   `docs/plans/ui-component-library.md` brings it. What a component is made of and how to add one is
   `docs/UI-COMPONENTS.md`; see decision record 0068.
 - Interface art: `world/ui/` is Adam's folder, committed as the master is, a folder a kind - `borders`,
-  `fills`, `embellishments`, `medallions`, `marks`, `controls` - and **every picture in it is painted at
+  `fills`, `embellishments`, `medallions`, `marks`, `controls`, `dividers` - and **every picture in it is painted at
   four times the size it is shown**. A border is a whole framed box with a `<name>.json` beside it saying
   where its four cuts go, in the picture's own pixels, and so is a button's face that stretches to its
   words; a face's hovered, pressed and disabled states are light and shade over it unless painted as

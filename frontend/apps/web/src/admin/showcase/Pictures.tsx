@@ -18,6 +18,10 @@ const KINDS: Record<UiKind, { title: string; says: string }> = {
   medallions: { title: 'Medallions', says: 'A round or oval frame, one fixed picture, never sliced.' },
   marks: { title: 'Marks', says: 'Only the marks chosen to be painted; the rest are drawn in code.' },
   controls: { title: 'Controls', says: 'A button’s face at rest, hovered, pressed and disabled.' },
+  dividers: {
+    title: 'Dividers',
+    says: 'A rule laid between its two ends, and a file beside it of where they are cut. Its knots are embellishments.',
+  },
 };
 
 const kilobytes = (bytes: number) => `${(bytes / 1024).toFixed(1)} KB`;

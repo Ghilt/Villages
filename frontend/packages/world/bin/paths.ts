@@ -32,7 +32,8 @@ export const PORTRAITS_DIR = resolve(REPO, 'world', 'portraits');
 export const SPRITES_DIR = resolve(REPO, 'world', 'sprites');
 /**
  * Adam's interface pictures: a folder a kind - borders, fills, embellishments, medallions, marks,
- * controls - every picture painted at four times the size it is shown, and committed as the sprites are.
+ * controls, dividers - every picture painted at four times the size it is shown, and committed as the
+ * sprites are.
  * The moodboard the placeholders are cut from is here too. See decision record 0068.
  */
 export const UI_DIR = resolve(REPO, 'world', 'ui');

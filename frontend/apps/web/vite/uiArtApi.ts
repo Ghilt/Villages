@@ -45,7 +45,8 @@ export function isUiSource(file: string): boolean {
   const extension = extname(path).toLowerCase();
   return (
     PICTURES.has(extension) ||
-    (extension === '.json' && (path.startsWith('borders/') || path.startsWith('controls/')))
+    (extension === '.json' &&
+      (path.startsWith('borders/') || path.startsWith('controls/') || path.startsWith('dividers/')))
   );
 }
 

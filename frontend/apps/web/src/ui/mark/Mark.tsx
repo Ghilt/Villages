@@ -86,6 +86,9 @@ const DRAWN = {
   // A step back and a step on: what a carousel's arrows do, which is not what the needle means.
   previous: <path d="M14.5 5.5 L8 12 L14.5 18.5" className="ui-mark__line" />,
   next: <path d="M9.5 5.5 L16 12 L9.5 18.5" className="ui-mark__line" />,
+  // A section folded shut, pointing at what it holds; turned down when it is open. Solid, and smaller
+  // than the steps, so it is not read as one.
+  fold: <path d="M8.5 6 L16.5 12 L8.5 18 Z" className="ui-mark__fill" />,
   'eye-open': (
     <>
       <path d={EYE.almond} className="ui-mark__line" />

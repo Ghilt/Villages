@@ -6,6 +6,7 @@ import { Containers } from './Containers';
 import { Foundations } from './Foundations';
 import { MarksAndReadouts } from './MarksAndReadouts';
 import { Pictures } from './Pictures';
+import { TabsAndSections } from './TabsAndSections';
 
 /**
  * What the page shows, section by section, in the order it shows them.
@@ -72,7 +73,7 @@ export const SECTIONS: readonly Section[] = [
     id: 'sections',
     title: 'Tabs and sections',
     says: 'The tab bar, the expandable section, the scroll area, the divider and the title plate.',
-    arrives: 8,
+    Body: TabsAndSections,
   },
   {
     id: 'collections',

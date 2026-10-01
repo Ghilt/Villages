@@ -42,7 +42,7 @@ import {
 import type { BorderFile, Sides, UiArtFile, UiCut, UiKind, UiPicture } from '../src/uiArt.ts';
 import { paintFill } from '../src/uiFills.ts';
 import { MOODBOARD_SIZE, UI_PLACEHOLDERS, placeholderAbout } from '../src/uiPlaceholders.ts';
-import type { CutPlaceholder, UiPlaceholder } from '../src/uiPlaceholders.ts';
+import type { CutPlaceholder, Rect, UiPlaceholder } from '../src/uiPlaceholders.ts';
 import { UI_CACHE_DIR, UI_DIR, UI_OUT_DIR } from './paths.ts';
 
 /** Where the tool keeps the hash of every placeholder it made, so a picture can be told from one. */
@@ -51,7 +51,13 @@ const PLACEHOLDERS = resolve(UI_DIR, 'placeholders.json');
 const MOODBOARD = resolve(UI_DIR, 'moodboard.webp');
 
 /** The kinds a picture has to be cut out for: a thing standing on something, rather than a box or a fill. */
-const CUT_OUT: ReadonlySet<UiKind> = new Set(['embellishments', 'medallions', 'marks', 'controls']);
+const CUT_OUT: ReadonlySet<UiKind> = new Set([
+  'embellishments',
+  'medallions',
+  'marks',
+  'controls',
+  'dividers',
+]);
 
 /** How each density is written. Lossy is fine at these sizes, and its alpha is kept nearly whole. */
 const WEBP = { quality: 88, alphaQuality: 92, effort: 5 } as const;
@@ -86,8 +92,8 @@ function writePlaceholders(known: Record<string, string>): void {
   writeFileSync(PLACEHOLDERS, `${JSON.stringify(sorted, null, 2)}\n`);
 }
 
-/** The kinds whose pictures can have a `.json` of cuts beside them: a border, and a control's face. */
-const SLICED: ReadonlySet<UiKind> = new Set(['borders', 'controls']);
+/** The kinds whose pictures can have a `.json` of cuts beside them: a border, a control's face, a divider. */
+const SLICED: ReadonlySet<UiKind> = new Set(['borders', 'controls', 'dividers']);
 
 /**
  * The pictures in one kind's folder, by name, refusing a file whose name a recipe could not call it by
@@ -234,9 +240,55 @@ function mainPieceOf(image: Rgba): Rgba {
   return { width, height, data };
 }
 
+/** The rectangles a placeholder is cut from: one, or several to be joined side by side. */
+function rectsOf(placeholder: CutPlaceholder): readonly Rect[] {
+  const { from } = placeholder;
+  return typeof from[0] === 'number' ? [from as Rect] : (from as readonly Rect[]);
+}
+
+/** A picture turned left to right. */
+function turnedOf(image: Rgba): Rgba {
+  const data = new Uint8Array(image.data.length);
+  for (let y = 0; y < image.height; y += 1) {
+    for (let x = 0; x < image.width; x += 1) {
+      const from = (y * image.width + x) * 4;
+      data.set(image.data.subarray(from, from + 4), (y * image.width + (image.width - 1 - x)) * 4);
+    }
+  }
+  return { width: image.width, height: image.height, data };
+}
+
+/** Pieces of a picture as tall as each other, laid side by side, left to right, into one. */
+function joined(pieces: readonly Rgba[]): Rgba {
+  const height = pieces[0]!.height;
+  const width = pieces.reduce((sum, piece) => sum + piece.width, 0);
+  const data = new Uint8Array(width * height * 4);
+  let left = 0;
+  for (const piece of pieces) {
+    for (let y = 0; y < height; y += 1) {
+      data.set(piece.data.subarray(y * piece.width * 4, (y + 1) * piece.width * 4), (y * width + left) * 4);
+    }
+    left += piece.width;
+  }
+  return { width, height, data };
+}
+
 async function cutFromMoodboard(placeholder: CutPlaceholder, board: Rgba): Promise<Buffer> {
-  const [left, top, width, height] = placeholder.from;
-  let piece = cropOf(board, left, top, width, height);
+  const rects = rectsOf(placeholder);
+  if (rects.some((rect) => rect[3] !== rects[0]![3])) {
+    throw new Error(
+      `${placeholder.kind}/${placeholder.name} is joined from pieces that are not as tall as each other`,
+    );
+  }
+  // An outline is in the moodboard's pixels for one rectangle, and in the joined picture's for several.
+  const [left, top] = rects.length === 1 ? [rects[0]![0], rects[0]![1]] : [0, 0];
+  let piece = joined(
+    rects.map(([x, y, w, h, turned]) => {
+      const cropped = cropOf(board, x, y, w, h);
+      return turned === 'turned' ? turnedOf(cropped) : cropped;
+    }),
+  );
+  const { width, height } = piece;
   if (placeholder.key === true) {
     piece = keyOffItsGround(piece);
   }
@@ -496,10 +548,11 @@ async function cutOne(kind: UiKind, name: string, file: string, known: Record<st
     return { density, url: `/ui/${kind}/${named}`, width, height, bytes: out.length };
   });
 
-  // A border has to say where its cuts go; a control's face may, and is then stretched to its words.
+  // A border has to say where its cuts go; a control's face may, and is then stretched to its words, and a
+  // divider may, and is then laid between its two ends rather than stretched whole.
   let border;
   const json = resolve(UI_DIR, kind, `${name}.json`);
-  if (kind === 'controls' && existsSync(json)) {
+  if ((kind === 'controls' || kind === 'dividers') && existsSync(json)) {
     const where = `world/ui/${kind}/${name}.json`;
     border = borderAsShown(readBorderFile(readFileSync(json, 'utf8'), where), remembered, where);
   }

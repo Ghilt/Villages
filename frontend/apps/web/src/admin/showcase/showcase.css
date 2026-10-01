@@ -633,3 +633,34 @@
   border-bottom: 1px dotted var(--ui-text-soft);
   cursor: help;
 }
+
+/* Tabs over their panes, lists to scroll, and rows held narrower than they would like. */
+
+.showcase__tabbed {
+  width: 100%;
+  max-width: 34rem;
+}
+
+.showcase__narrow {
+  width: 300px;
+  max-width: 100%;
+}
+
+.showcase__card-wide {
+  width: 18rem;
+  max-width: 100%;
+}
+
+.showcase__letters {
+  margin: 0;
+  padding-left: 1.4rem;
+}
+
+.showcase__letters li + li {
+  margin-top: 0.2rem;
+}
+
+.showcase__readouts--row {
+  flex-wrap: nowrap;
+  padding: var(--ui-space-1) 0;
+}

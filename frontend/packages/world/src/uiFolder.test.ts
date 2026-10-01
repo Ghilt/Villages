@@ -24,8 +24,8 @@ const picturesIn = (kind: string): string[] =>
 
 const stem = (file: string) => file.slice(0, -extname(file).length);
 
-/** The kinds whose pictures can have a file of cuts beside them: a border must, a control's face may. */
-const SLICED = ['borders', 'controls'];
+/** The kinds whose pictures can have a file of cuts beside them: a border must; a face and a divider may. */
+const SLICED = ['borders', 'controls', 'dividers'];
 
 describe("the interface's pictures folder, which is Adam's", () => {
   it('holds a folder a kind of picture, the moodboard, the placeholders’ record, and nothing else', () => {
@@ -72,15 +72,17 @@ describe("the interface's pictures folder, which is Adam's", () => {
     ).toEqual([]);
   });
 
-  it('gives every control’s file of cuts a face to cut', () => {
-    const faces = new Set(picturesIn('controls').map(stem));
-    const files = filesIn('controls')
-      .filter((file) => file.endsWith('.json'))
-      .map(stem);
-    expect(
-      files.filter((name) => !faces.has(name)),
-      'files of cuts with no face',
-    ).toEqual([]);
+  it('gives every control’s and every divider’s file of cuts a picture to cut', () => {
+    for (const kind of ['controls', 'dividers']) {
+      const pictures = new Set(picturesIn(kind).map(stem));
+      const files = filesIn(kind)
+        .filter((file) => file.endsWith('.json'))
+        .map(stem);
+      expect(
+        files.filter((name) => !pictures.has(name)),
+        `${kind}: files of cuts with no picture`,
+      ).toEqual([]);
+    }
   });
 
   it('has files of cuts the tool can read', () => {

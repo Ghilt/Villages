@@ -29,7 +29,8 @@ interface Common {
   showing?: Showing;
 }
 
-function FaceLayer({ name, height }: { name: string; height: number }) {
+/** A button's face, under its words or its mark: for a component of the library's that is drawn as one. */
+export function FaceLayer({ name, height }: { name: string; height: number }) {
   const { list } = usePictures();
   const face = faceOf(list, name, height);
   if (face === undefined) {

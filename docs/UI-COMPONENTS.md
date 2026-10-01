@@ -10,7 +10,7 @@
 **Being built.** This is the method as agreed on 2026-09-30, written before most of the library so that the
 library is built to it. Each step of the plan fills in its part, and a line that still says *to come* is a
 part nobody has built. The page, the foundations, the pictures, borders and fills, the container, the
-buttons, and the marks and readouts are built.
+buttons, the marks and readouts, and the tabs and sections are built.
 
 ## The page
 
@@ -94,8 +94,9 @@ the box. The page's *layers* switch dashes each one's box and dots where the wor
 strays into them is seen. Why nothing keeps room inside the words for one, and the way back if one ever
 has to stand over them, is decision record 0068.
 
-Recipes are named for what they are used for, `pane.<which>`, `card.<which>`, `dialog.<which>`, so that a
-recipe changed is a known set of places changed. A pane uses a recipe and never sets a border of its own.
+Recipes are named for what they are used for, `pane.<which>`, `card.<which>`, `plate.<which>`,
+`tooltip.<which>`, `dialog.<which>`, so that a recipe changed is a known set of places changed. A pane uses
+a recipe and never sets a border of its own.
 
 ## Asking for a pane
 
@@ -202,12 +203,13 @@ A line each: what it is for, its variants, and where on the page it is.
   switch dashes each embellishment's box and dots where the content starts, and does the same wherever a
   container is inside something marked `data-ui-layers="shown"`.
 - **`RECIPES`**, `ui/container/recipes.ts`: the named containers. The first are made from the moodboard -
-  Adam's own sentence as `pane.cherub-corner`, the cathedral panel as `pane.cathedral`, its framed panes
-  and its cards - and the game's own come as each surface is redone.
+  Adam's own sentence as `pane.cherub-corner`, the cathedral panel as `pane.cathedral`, its framed panes,
+  its cards and its Paris plate - with `pane.plain` for a tab bar to tuck under, and the game's own come
+  as each surface is redone.
 - **`Mark`**, `ui/mark/Mark.tsx`: a mark by name, drawn, or painted when `world/ui/marks/` has it: the
   five resources, `wealth`, `domain`, `influence`, `reason` and `piety`; a figure's `kindness`, `physical`
-  and `age`; and `close`, `minimise`, `maximise`, `previous`, `next`, `eye-open` and `eye-shut`. *Marks and
-  readouts*.
+  and `age`; and `close`, `minimise`, `maximise`, `previous`, `next`, `fold`, `eye-open` and `eye-shut`.
+  *Marks and readouts*.
 - **`TextButton`**, `ui/button/Button.tsx`: words on a face that stretches between its end caps to fit
   them. `face` is a picture in `world/ui/controls/`, `primary` unless it says otherwise; `size` is `small`,
   `regular` or `large`, 32, 44 or 60 pixels tall. *Buttons*.
@@ -231,3 +233,32 @@ A line each: what it is for, its variants, and where on the page it is.
   holds a thing down on a phone; gone at Escape. It is drawn over the whole page rather than inside what it
   is about, so a pane that clips cannot clip it, and `placeTooltip` in `ui/tooltip/place.ts` keeps it above
   what it is about unless there is only room below, and inside the window. *Marks and readouts*.
+- **`TabBar`** and **`Tabbed`**, `ui/tabs/TabBar.tsx`: several things taking turns in one place, and a row
+  of tabs saying which is up. **A tab is a mark or words, as a button is**, and which is Adam's call: the
+  game's own bar is marks. `small` is 30 pixels, the game's strip, and `regular` 40. The arrow keys go
+  along the tabs and choose as they go, Home and End go to the ends, and a tab that cannot be chosen is
+  passed over - `stepTo` in `ui/tabs/tabs.ts`; a row too long for its room scrolls across and fades rather
+  than wrapping. `end` stands something at the far end of the bar, the tile's size control. `Tabbed`
+  tucks the bar under the top of a pane's border, `pane.plain` unless it says otherwise, so the tabs stand
+  out of the pane. *Tabs and sections*.
+- **`Expander`**, `ui/expander/Expander.tsx`: an expandable section, a heading that folds what is under it
+  open and shut in a fifth of a second - its name on a rule, the `fold` mark turned down when it is open,
+  and an `aside` at the far end said either way, a count or a total. Held by whoever uses it with `open`,
+  or by itself from `startOpen`; shut, nothing in it can be reached by the keyboard. *Tabs and sections*.
+- **`ScrollArea`**, `ui/scroll/ScrollArea.tsx`: a box whose content scrolls inside it, down or `across`,
+  with a thin gilt bar where the screen draws bars, fading at an edge with more beyond it - `edgesOf` in
+  `ui/scroll/scroll.ts` says when. Scrolling it never scrolls what is under it, so a list in a pane does not
+  drag the map. When there is more than fits the keyboard can stop on it to scroll it, unless it is
+  `focusable={false}` because everything in it is a stop already, as a tab bar's tabs are. *Tabs and
+  sections*.
+- **`Divider`**, `ui/divider/Divider.tsx`: a painted rule between two things, as the moodboard draws them
+  between its sections, laid between its two ends at any width. `knot` stands an embellishment in its
+  middle and `title` puts a section's name at its start, or in its middle with `align="middle"`; the line
+  runs up to either rather than stopping at an end of its own. The rule is a picture in
+  `world/ui/dividers/`, `gilt` unless it says otherwise. `Rule` is the rule alone, for a component that
+  puts one beside something of its own, as `Expander` does, and `ruleStyleOf` in `ui/divider/rule.ts` is
+  its arithmetic. *Tabs and sections*.
+- **`TitlePlate`**, `ui/plate/TitlePlate.tsx`: the cartouche a place's name and its figure sit on, as wide
+  as its words: `title`, then the `figure` and what it `says`, and an `emblem` before them. `plate.place`,
+  or `plate.heading` for a pane's name, the same plate a little over half the size. Held narrower than
+  its words, the name gives way first. *Tabs and sections*.

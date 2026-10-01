@@ -8,7 +8,15 @@
  */
 
 /** The folders of `world/ui/`, one a kind of picture. */
-export const UI_KINDS = ['borders', 'fills', 'embellishments', 'medallions', 'marks', 'controls'] as const;
+export const UI_KINDS = [
+  'borders',
+  'fills',
+  'embellishments',
+  'medallions',
+  'marks',
+  'controls',
+  'dividers',
+] as const;
 export type UiKind = (typeof UI_KINDS)[number];
 
 /**

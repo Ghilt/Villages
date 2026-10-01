@@ -1,0 +1,53 @@
+/*
+ * A title plate: as wide as its words and no wider than what holds it, its emblem before them, its name
+ * over its figure. The plate itself is the recipe's border; this is only how the words sit on it.
+ */
+
+@layer ui {
+  .ui-plate {
+    width: fit-content;
+    max-width: 100%;
+  }
+
+  .ui-plate__inner {
+    display: flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+    min-width: 0;
+  }
+
+  .ui-plate__emblem {
+    display: grid;
+    flex: none;
+    place-items: center;
+    color: var(--ui-text-soft);
+  }
+
+  .ui-plate__words {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .ui-plate__title {
+    overflow: hidden;
+    font-family: var(--ui-font-display);
+    font-size: 1.2em;
+    font-weight: 600;
+    line-height: 1.15;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ui-plate__detail {
+    display: flex;
+    gap: 0.4em;
+    font-size: 0.95em;
+    line-height: 1.25;
+    white-space: nowrap;
+  }
+
+  .ui-plate__says {
+    font-style: italic;
+  }
+}

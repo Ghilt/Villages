@@ -1,0 +1,5 @@
+{
+  "slice": [96, 128, 96, 128],
+  "repeat": "stretch",
+  "middle": true
+}

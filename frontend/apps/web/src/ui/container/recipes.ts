@@ -46,11 +46,20 @@ export const RECIPES = {
   /** A stone arch on two columns, its own middle showing. */
   'pane.arch': { border: 'stone-arch', padding: 4 },
 
+  /** A plain gilt pane on parchment, with nothing standing out past it: what a tab bar tucks under. */
+  'pane.plain': { border: 'gilt-simple', fill: 'parchment', text: 'ink', padding: 8 },
+
   /** A key figure in a grid: a narrow gilt frame on parchment. */
   'card.figure': { border: 'gilt-thin', fill: 'parchment', text: 'ink', padding: 4 },
 
   /** Something that happened, as the moodboard's Reformation card has it: a narrow gilt frame on night. */
   'card.event': { border: 'gilt-thin', fill: 'night', padding: 6 },
+
+  /** A place's name and its figure, on the moodboard's Paris plate: its own parchment, and as wide as its words. */
+  'plate.place': { border: 'plate', text: 'ink', padding: [0, 4, 0, 0] },
+
+  /** A pane's name on the same plate, a little over half its size. */
+  'plate.heading': { border: 'plate', scale: 0.6, text: 'ink', padding: [0, 4, 0, 2] },
 
   /** A few words about what is under the pointer: the card's frame at half its size, on parchment. */
   'tooltip.plain': { border: 'gilt-thin', scale: 0.5, fill: 'parchment', text: 'ink', padding: [1, 5, 1, 5] },

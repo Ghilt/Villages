@@ -18,6 +18,9 @@ import type { FillName } from './uiFills.ts';
 
 export type Point = readonly [number, number];
 
+/** A rectangle of the moodboard, in its own pixels, and `turned` left to right when it is one end made the other. */
+export type Rect = readonly [left: number, top: number, width: number, height: number, turned?: 'turned'];
+
 interface Named {
   readonly kind: UiKind;
   readonly name: string;
@@ -27,8 +30,16 @@ interface Named {
 
 /** A piece of the moodboard, in the moodboard's own pixels. */
 export interface CutPlaceholder extends Named {
-  readonly from: readonly [left: number, top: number, width: number, height: number];
-  /** An outline to cut along, for a thing standing on something busy, in the moodboard's pixels. */
+  /**
+   * Where it is on the moodboard. Several rectangles, all as tall as each other, are laid side by side,
+   * left to right, into one picture: a piece with something in its middle that must not be stretched -
+   * the words painted on a plate - is cut either side of it and joined.
+   */
+  readonly from: Rect | readonly Rect[];
+  /**
+   * An outline to cut along, for a thing standing on something busy: in the moodboard's pixels, or, for a
+   * picture joined from several rectangles, in the joined picture's, from its top left corner.
+   */
   readonly outline?: readonly Point[];
   /** Whether to key the moodboard's dark ground away, for a thing standing on it. */
   readonly key?: boolean;
@@ -172,6 +183,69 @@ function roundFace(size: number): string {
   );
 }
 
+/**
+ * A gilt rule for a divider, drawn to be laid between its two ends: a line lit along its top, and at each
+ * end a lozenge and a bead, so that everything which cannot stretch is outside its two cuts.
+ */
+function giltRule(width: number, height: number, end: number): string {
+  const cy = height / 2;
+  const line = height * 0.22;
+  const lozenge = (cx: number) =>
+    `<polygon points="${cx - end * 0.3},${cy} ${cx},${cy - height * 0.44} ${cx + end * 0.3},${cy} ${cx},${cy + height * 0.44}" ` +
+    `fill="url(#boss)" stroke="#2f2210" stroke-width="${height / 18}"/>`;
+  const bead = (cx: number) =>
+    `<circle cx="${cx}" cy="${cy}" r="${height * 0.15}" fill="url(#boss)" stroke="#2f2210" stroke-width="${height / 24}"/>`;
+  return (
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">` +
+    '<defs>' +
+    `<linearGradient id="rule" gradientUnits="userSpaceOnUse" x1="0" y1="${cy - line / 2}" x2="0" y2="${cy + line / 2}">` +
+    '<stop offset="0" stop-color="#5b4120"/><stop offset="0.2" stop-color="#f1d596"/>' +
+    '<stop offset="0.45" stop-color="#d2ab66"/><stop offset="0.75" stop-color="#8c6832"/>' +
+    '<stop offset="1" stop-color="#3a2a14"/></linearGradient>' +
+    '<radialGradient id="boss" cx="0.5" cy="0.5" r="0.5" fx="0.66" fy="0.34">' +
+    '<stop offset="0" stop-color="#fbe6b0"/><stop offset="0.45" stop-color="#d2ab66"/>' +
+    '<stop offset="0.8" stop-color="#8a6630"/><stop offset="1" stop-color="#4a3418"/></radialGradient>' +
+    '</defs>' +
+    `<rect x="${end * 0.5}" y="${cy + line / 2}" width="${width - end}" height="${line * 0.3}" fill="rgba(0,0,0,0.35)"/>` +
+    `<rect x="${end * 0.5}" y="${cy - line / 2}" width="${width - end}" height="${line}" fill="url(#rule)"/>` +
+    lozenge(end * 0.32) +
+    bead(end * 0.8) +
+    lozenge(width - end * 0.32) +
+    bead(width - end * 0.8) +
+    '</svg>'
+  );
+}
+
+/**
+ * A tab's face: a gilt rim round its top and its sides, open at the bottom where it tucks under the pane
+ * it opens, on dark wood at rest and on parchment when it is the one chosen, which is the pane's own sheet.
+ */
+function tabFace(width: number, height: number, chosen: boolean): string {
+  const w = width;
+  const h = height;
+  const rim = h * 0.075;
+  const r = h * 0.2;
+  const body = chosen
+    ? '<stop offset="0" stop-color="#ecdfc6"/><stop offset="0.55" stop-color="#d9c4a0"/><stop offset="1" stop-color="#c9b089"/>'
+    : '<stop offset="0" stop-color="#4a3e2f"/><stop offset="0.5" stop-color="#342b20"/><stop offset="1" stop-color="#241e16"/>';
+  return (
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">` +
+    '<defs>' +
+    '<linearGradient id="gilt" x1="0" y1="0" x2="0" y2="1">' +
+    '<stop offset="0" stop-color="#f6e0a4"/><stop offset="0.25" stop-color="#d0a960"/>' +
+    '<stop offset="0.7" stop-color="#8a6630"/><stop offset="1" stop-color="#5b4120"/></linearGradient>' +
+    `<linearGradient id="body" x1="0" y1="0" x2="0" y2="1">${body}</linearGradient>` +
+    '</defs>' +
+    `<path d="M0 ${h} V${r} Q0 0 ${r} 0 H${w - r} Q${w} 0 ${w} ${r} V${h} Z" fill="#2a1d0d"/>` +
+    `<path d="M${rim * 0.35} ${h} V${r} Q${rim * 0.35} ${rim * 0.35} ${r} ${rim * 0.35} H${w - r} ` +
+    `Q${w - rim * 0.35} ${rim * 0.35} ${w - rim * 0.35} ${r} V${h} Z" fill="url(#gilt)"/>` +
+    `<path d="M${rim} ${h} V${r + rim * 0.4} Q${rim} ${rim} ${r} ${rim} H${w - r} ` +
+    `Q${w - rim} ${rim} ${w - rim} ${r + rim * 0.4} V${h} Z" fill="url(#body)"/>` +
+    `<path d="M${r} ${rim * 1.6} H${w - r}" stroke="rgba(255,240,205,${chosen ? 0.5 : 0.18})" stroke-width="${rim * 0.4}"/>` +
+    '</svg>'
+  );
+}
+
 /** An outline round a box with its short ends made half circles, as an oval button is, in eight steps a half. */
 function stadium(left: number, top: number, width: number, height: number): Point[] {
   const r = height / 2;
@@ -196,6 +270,12 @@ const GILT = { size: 96, moulding: 18, cut: 24 };
 const THIN = { size: 48, moulding: 8, cut: 12 };
 
 const painted = (shown: number) => shown * PAINTED_AT;
+
+/** A divider's rule as shown: as long as it is painted at, as tall as its lozenges, and its two ends. */
+const RULE = { width: 160, height: 9, end: 14 };
+
+/** A tab's face as shown: tall, and wide enough to stretch, with its rounded corners outside its cuts. */
+const TAB = { width: 64, height: 40, end: 12 };
 
 /** Every placeholder there is, in the order the page shows them. */
 export const UI_PLACEHOLDERS: readonly UiPlaceholder[] = [
@@ -268,6 +348,66 @@ export const UI_PLACEHOLDERS: readonly UiPlaceholder[] = [
     about: 'the moodboard’s columns, with a flask, a wheel and a cherub',
     from: [764, 656, 112, 112],
     border: { slice: [30, 40, 34, 34], repeat: 'stretch', middle: true },
+  },
+  {
+    kind: 'borders',
+    name: 'plate',
+    about:
+      'the moodboard’s Paris plate: its left end, a strip of its middle, and the same end turned for the ' +
+      'right, leaving out the words and the emblem painted on it',
+    // A strip from anywhere else on the plate is lighter or darker than its end, and the join shows; one
+    // from right beside the end and the end turned round for the other side are all the one sheet.
+    from: [
+      [233, 480, 32, 92],
+      [265, 480, 3, 92],
+      [233, 480, 32, 92, 'turned'],
+    ],
+    // In the joined picture's pixels: it stands on the map, so it is cut along its rim and its leaves.
+    outline: [
+      [35, 15],
+      [36, 11],
+      [39, 4],
+      [42, 10],
+      [46, 20],
+      [50, 29],
+      [54, 35],
+      [62, 37],
+      [64, 40],
+      [60, 42],
+      [55, 43],
+      [54, 47],
+      [57, 51],
+      [56, 55],
+      [52, 59],
+      [50, 65],
+      [47, 71],
+      [46, 77],
+      [43, 83],
+      [39, 81],
+      [35, 77],
+      [32, 77],
+      [28, 81],
+      [24, 83],
+      [21, 77],
+      [20, 71],
+      [17, 65],
+      [15, 59],
+      [11, 55],
+      [10, 51],
+      [13, 47],
+      [12, 43],
+      [7, 42],
+      [3, 40],
+      [5, 37],
+      [13, 35],
+      [17, 29],
+      [21, 20],
+      [25, 10],
+      [28, 4],
+      [31, 11],
+      [32, 15],
+    ],
+    border: { slice: [24, 32, 24, 32], repeat: 'stretch', middle: true },
   },
 
   // Fills: painted to repeat without a seam, 128 pixels square as shown.
@@ -408,6 +548,21 @@ export const UI_PLACEHOLDERS: readonly UiPlaceholder[] = [
     ],
   },
 
+  {
+    kind: 'embellishments',
+    name: 'knot-boss',
+    about: 'the round knot in the middle of one of the moodboard’s dividers',
+    from: [1201, 384, 20, 21],
+    key: true,
+  },
+  {
+    kind: 'embellishments',
+    name: 'knot-fleur',
+    about: 'the fleur-de-lis in the middle of one of the moodboard’s dividers',
+    from: [1068, 410, 21, 23],
+    key: true,
+  },
+
   // Controls: a button's face at rest, keyed off the moodboard's dark ground. The two drapes and the oval
   // are cut like a border, so a button stretches to its words; the round ones are one size, their marks
   // painted in, and the drawn round face has none, for a drawn mark to stand on.
@@ -500,6 +655,26 @@ export const UI_PLACEHOLDERS: readonly UiPlaceholder[] = [
     about: 'drawn: a gilt ring round dark stone, for a drawn mark to stand on',
     svg: roundFace(painted(64)),
   },
+  {
+    kind: 'controls',
+    name: 'tab',
+    about: 'drawn: a tab at rest, dark wood in a gilt rim, open at the bottom where it tucks under its pane',
+    svg: tabFace(painted(TAB.width), painted(TAB.height), false),
+    border: {
+      slice: [painted(TAB.height / 2), painted(TAB.end), painted(TAB.height / 2), painted(TAB.end)],
+      repeat: 'stretch',
+    },
+  },
+  {
+    kind: 'controls',
+    name: 'tab-chosen',
+    about: 'drawn: the tab that is chosen, on the parchment of the pane it opens',
+    svg: tabFace(painted(TAB.width), painted(TAB.height), true),
+    border: {
+      slice: [painted(TAB.height / 2), painted(TAB.end), painted(TAB.height / 2), painted(TAB.end)],
+      repeat: 'stretch',
+    },
+  },
 
   // Medallions, keyed off the dark ground they stand on.
   {
@@ -529,6 +704,16 @@ export const UI_PLACEHOLDERS: readonly UiPlaceholder[] = [
     about: 'the moodboard’s house sigil, an eagle crowned',
     from: [1386, 446, 126, 150],
     key: true,
+  },
+
+  // Dividers: a rule laid between its two ends. The knots that stand in the middle of one are
+  // embellishments, above, because any knot goes on any rule.
+  {
+    kind: 'dividers',
+    name: 'gilt',
+    about: 'drawn: the moodboard’s gilt rule, a lozenge and a bead at each end',
+    svg: giltRule(painted(RULE.width), painted(RULE.height), painted(RULE.end)),
+    border: { slice: [0, painted(RULE.end), 0, painted(RULE.end)], repeat: 'stretch', middle: true },
   },
 ];
 

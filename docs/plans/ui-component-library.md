@@ -137,6 +137,8 @@ world/ui/
   marks/<name>.png                  only the marks chosen to be painted; the rest are drawn in code
   controls/<name>.webp + .json      a button's face at rest, and where it stretches to fit its words
   controls/<name>-<state>.webp      the face hovered, pressed or disabled, when painted rather than lit
+  dividers/<name>.webp + .json      a rule between two things, cut at its two ends; its knots are
+                                    embellishments
 ```
 
 - **Painted at four times the size it is shown.** A border's corner shown 48 pixels across is painted 192.
@@ -206,14 +208,17 @@ One commit each. After the fourth, the order is a menu.
 | 9 | Carousel and its dots, grid, card, list | the page |
 | 10 | Dialog, toast, text field, dropdown, medallion | the page |
 
-**Where it stands, 2026-09-30: nought to six are built.** Four made the page able to be used for
+**Where it stands, 2026-10-01: nought to six, and eight, are built.** Four made the page able to be used for
 verification: the foundations, every picture, borders and fills at any size, and containers with their
 recipes and embellishments, all at desktop and phone width and on night and parchment. Five is the
 buttons: text, mark and state buttons and the window controls, in every state, on faces cut from the
 moodboard's buttons, with the library's first drawn marks. Six is the marks - the game's own number
 marks, copied and held to it by a test - the resource readout that counts between events, the badge and
-the tooltip. The rest of the page's sections say which step brings them, and from here the order is a
-menu. Step four was built with a keep-out, room kept clear among
+the tooltip. Eight is the tab bar, the expandable section, the scroll area, the divider and the title
+plate, with a seventh folder of pictures, `dividers/`, for the rule, and the first placeholder joined from
+several pieces of the moodboard: the Paris plate, its left end, a strip beside it and the same end turned
+for the right, because a strip from its middle was a lighter parchment and the join showed. The rest of
+the page's sections say which step brings them, and from here the order is a menu. Step four was built with a keep-out, room kept clear among
 the words for an embellishment, and Adam took it out the same day: see decision record 0068. Step two cut
 the top row of the moodboard's sample borders, not both: the second row is the same frames' corner pieces.
 The marks have no placeholders: every one is drawn in code until one is painted. The page's Pictures
