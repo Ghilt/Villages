@@ -10,7 +10,7 @@
 **Being built.** This is the method as agreed on 2026-09-30, written before most of the library so that the
 library is built to it. Each step of the plan fills in its part, and a line that still says *to come* is a
 part nobody has built. The page, the foundations, the pictures, borders and fills, the container, the
-buttons, the marks and readouts, the tabs and sections, and the controls are built.
+buttons, the marks and readouts, the tabs and sections, the controls, and the card and the grid are built.
 
 ## The page
 
@@ -293,3 +293,19 @@ A line each: what it is for, its variants, and where on the page it is.
   as its words: `title`, then the `figure` and what it `says`, and an `emblem` before them. `plate.place`,
   or `plate.heading` for a pane's name, the same plate a little over half the size. Held narrower than
   its words, the name gives way first. *Tabs and sections*.
+- **`Card`**, `ui/card/Card.tsx`: a container small enough to be one of many - a key figure, something
+  that happened - in its recipe, `card.figure` unless it says otherwise: a `picture` at its head, or down
+  its left with `across`, keeping its `shape`, three by four for a portrait, and covering it; its `title`,
+  a `line` under it saying what it is, and whatever else it holds. Given `onPress` the whole card is one
+  button, its name stretched over all of it, so a screen reader hears the name once - or `label`, when the
+  name on the card is not the whole of it - and a pointer can press it anywhere. It lifts under the
+  pointer, goes back down pressed, has a gilt ring focused, a gilt glow chosen that is a dark edge on
+  parchment, and greys disabled. *Collections*.
+- **`Grid`**, `ui/grid/Grid.tsx`: things of one kind in rows and columns, every cell the same width -
+  `columns` across, or as many as fit at `least` pixels - and a card as tall as the tallest in its row.
+  With `rows` as well it **never scrolls**: every cell is sized so all of them fit the room it is given,
+  whichever of its width and its height is the tighter, keeping the cell's `shape`, and is that size
+  however many things there are, so a fourth never moves the first three - the key figures' three by
+  three. That grid has to be given a height. It is worked out in container units, as the game's key
+  figures are, so nothing is measured; its words are as big as its cells allow, and a name in it is one
+  line, cut short where it has to be. *Collections*.

@@ -706,3 +706,43 @@
   min-width: 5.5rem;
   font-style: italic;
 }
+
+/* Collections on show: a key figure's stats on a card, the cards at their widths, the grid's count. */
+
+.showcase__figure-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15em 0.7em;
+}
+
+.showcase__figure-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
+}
+
+.showcase__card-small {
+  width: 9rem;
+  max-width: 100%;
+}
+
+.showcase__card-across {
+  width: 22rem;
+  max-width: 100%;
+}
+
+.showcase__grid-count {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-2);
+}
+
+.showcase__grid-demo {
+  width: 100%;
+}
+
+/* The room a grid that fits is given, its edge dashed so that where to drag it from is plain. */
+.showcase__room {
+  outline: 1px dashed var(--ui-night-edge);
+  outline-offset: 2px;
+}

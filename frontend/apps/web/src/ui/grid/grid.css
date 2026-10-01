@@ -1,0 +1,63 @@
+/*
+ * A grid: a list laid out in rows and columns, a card in a cell as tall as its row. One that fits works
+ * out its cell from the room it is in, as the game's key figures do: the room's width shared among the
+ * columns, its height among the rows times the cell's shape, and whichever is smaller is the cell. The
+ * room is a container of its own, so the units are its and not the page's.
+ */
+
+@layer ui {
+  .ui-grid {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .ui-grid__cell {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .ui-grid__cell > * {
+    flex: 1 1 auto;
+  }
+
+  .ui-grid-room {
+    container-type: size;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+  }
+
+  .ui-grid--fit {
+    --ui-grid-across: calc(
+      (100cqw - (var(--ui-grid-columns) - 1) * var(--ui-grid-gap)) / var(--ui-grid-columns)
+    );
+    --ui-grid-down: calc((100cqh - (var(--ui-grid-rows) - 1) * var(--ui-grid-gap)) / var(--ui-grid-rows));
+    --ui-grid-cell: min(var(--ui-grid-across), calc(var(--ui-grid-down) * var(--ui-grid-shape)));
+    grid-template-columns: repeat(var(--ui-grid-columns), var(--ui-grid-cell));
+    grid-auto-rows: calc(var(--ui-grid-cell) / var(--ui-grid-shape));
+    gap: var(--ui-grid-gap);
+    justify-content: center;
+    align-content: start;
+    /* The words are as big as the cells allow: a ninth of a cell, and never smaller than a label. */
+    font-size: clamp(0.72rem, calc(var(--ui-grid-cell) * 0.11), 1rem);
+  }
+
+  /* In a cell of a fixed size the picture takes what the words leave, and still covers it. */
+  .ui-grid--fit .ui-card__picture {
+    flex: 1 1 0;
+    min-height: 0;
+    aspect-ratio: auto;
+  }
+
+  /* And a name is one line, cut short where it has to be: its whole is the card's label. */
+  .ui-grid--fit .ui-card__title,
+  .ui-grid--fit .ui-card__press {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}

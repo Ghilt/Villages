@@ -2,6 +2,7 @@ import type { ComponentType } from 'react';
 
 import { BordersAndFills } from './BordersAndFills';
 import { Buttons } from './Buttons';
+import { Collections } from './Collections';
 import { Containers } from './Containers';
 import { Controls } from './Controls';
 import { Foundations } from './Foundations';
@@ -79,8 +80,8 @@ export const SECTIONS: readonly Section[] = [
   {
     id: 'collections',
     title: 'Collections',
-    says: 'The carousel and its dots, the grid, the card and the list.',
-    arrives: 9,
+    says: 'The card and the grid; the carousel and its dots, and the list, to come.',
+    Body: Collections,
   },
   {
     id: 'dialogs',

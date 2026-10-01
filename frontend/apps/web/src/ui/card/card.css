@@ -1,0 +1,168 @@
+/*
+ * A card: its picture and its words inside whatever container its recipe draws. The picture keeps its
+ * shape and covers the room it is given, and the words run under it or beside it. Pressable, the name's
+ * button is stretched over the whole card, and the states are drawn on the card rather than the button,
+ * because it is the card that is picked up. A fifth of a second or less for any change (LOOK-AND-FEEL.md).
+ */
+
+@layer ui {
+  .ui-card > .ui-container__content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45em;
+    box-sizing: border-box;
+    height: 100%;
+  }
+
+  /* The picture down the left, two parts in five of the width, and the words beside it. */
+  .ui-card--across > .ui-container__content {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    align-items: start;
+    column-gap: 0.75em;
+  }
+
+  .ui-card__picture {
+    position: relative;
+    flex: none;
+    aspect-ratio: var(--ui-card-shape, 0.75);
+    overflow: hidden;
+    background: var(--ui-night-raised);
+  }
+
+  .ui-card__picture > * {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 30%;
+  }
+
+  /* A dark rule round the picture, drawn over it, so it sits in the card rather than on it. */
+  .ui-card__picture::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, var(--ui-gilt-deep) 85%, transparent),
+      inset 0 0 8px rgba(0, 0, 0, 0.45);
+    pointer-events: none;
+  }
+
+  .ui-card__words {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15em;
+    min-width: 0;
+  }
+
+  .ui-card__title {
+    overflow-wrap: break-word;
+  }
+
+  .ui-card__line {
+    margin: 0;
+  }
+
+  /* The name, as a button that looks like the name, and whose press reaches over the whole card. */
+  .ui-card__press {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: inherit;
+    letter-spacing: inherit;
+    text-align: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .ui-card__press::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+  }
+
+  .ui-card__press:focus-visible {
+    outline: none;
+  }
+
+  .ui-card__press:disabled {
+    cursor: default;
+  }
+
+  .ui-card--press {
+    transition:
+      transform 0.15s ease,
+      filter 0.15s ease;
+  }
+
+  /* Under the pointer it lifts, as a thing that can be picked up; a finger has no pointer to lift it. */
+  @media (hover: hover) {
+    .ui-card--press:not(.ui-card--disabled):hover {
+      transform: translateY(-2px);
+      filter: brightness(1.06) drop-shadow(0 6px 6px rgba(0, 0, 0, 0.45));
+    }
+  }
+
+  .ui-card--showing-hover {
+    transform: translateY(-2px);
+    filter: brightness(1.06) drop-shadow(0 6px 6px rgba(0, 0, 0, 0.45));
+  }
+
+  /* Pressed, it is put back down: darker, and the shadow gone in under it. */
+  .ui-card--press:not(.ui-card--disabled):has(.ui-card__press:active),
+  .ui-card--showing-pressed {
+    transform: translateY(0);
+    filter: brightness(0.9) drop-shadow(0 1px 1px rgba(0, 0, 0, 0.5));
+  }
+
+  .ui-card:has(.ui-card__press:focus-visible),
+  .ui-card--showing-focus {
+    outline: 2px solid var(--ui-focus);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  /*
+   * Chosen: a gilt glow round the whole card, as a chosen button has round its face, and inside the glow a
+   * dark edge drawn twice. On night the edge is lost and the glow shows; on parchment, which is nearly the
+   * gilt's own colour, the glow is lost and the edge shows. One state that reads on either ground.
+   */
+  .ui-card--chosen,
+  .ui-card--chosen.ui-card--showing-hover {
+    filter: var(--ui-card-chosen) brightness(1.06);
+  }
+
+  @media (hover: hover) {
+    .ui-card--chosen.ui-card--press:not(.ui-card--disabled):hover {
+      filter: var(--ui-card-chosen) drop-shadow(0 6px 6px rgba(0, 0, 0, 0.45)) brightness(1.1);
+    }
+  }
+
+  .ui-card {
+    --ui-card-chosen: drop-shadow(0 0 1.5px rgba(30, 20, 10, 0.95))
+      drop-shadow(0 0 1.5px rgba(30, 20, 10, 0.95))
+      drop-shadow(0 0 6px color-mix(in srgb, var(--ui-gilt-light) 85%, transparent));
+  }
+
+  .ui-card--disabled {
+    opacity: 0.45;
+    filter: saturate(0.4);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-card--press {
+      transition: none;
+    }
+
+    .ui-card--press:hover,
+    .ui-card--showing-hover {
+      transform: none;
+    }
+  }
+}
