@@ -73,6 +73,9 @@ export const RECIPES = {
   /** A pane's name on the same plate, a little over half its size. */
   'plate.heading': { border: 'plate', scale: 0.6, text: 'ink', padding: [0, 4, 0, 2] },
 
+  /** What a choice of a few stands its options in: the card's frame at half its size, on night. */
+  'choice.frame': { border: 'gilt-thin', scale: 0.5, fill: 'night', padding: 1 },
+
   /** A few words about what is under the pointer: the card's frame at half its size, on parchment. */
   'tooltip.plain': { border: 'gilt-thin', scale: 0.5, fill: 'parchment', text: 'ink', padding: [1, 5, 1, 5] },
 } as const satisfies Record<string, Recipe>;

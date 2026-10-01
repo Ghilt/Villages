@@ -2,6 +2,9 @@ import { useState } from 'react';
 
 import { usePictures } from '../../ui/art/pictures';
 import type { Showing } from '../../ui/button/Button';
+import { Choice } from '../../ui/choice/Choice';
+import type { Option } from '../../ui/choice/Choice';
+import { HoldButton } from '../../ui/hold/HoldButton';
 import { Mark } from '../../ui/mark/Mark';
 import type { MarkName } from '../../ui/mark/Mark';
 import { Meter } from '../../ui/meter/Meter';
@@ -9,6 +12,8 @@ import { Slider } from '../../ui/slider/Slider';
 import { SLIDER_HEIGHTS } from '../../ui/slider/range';
 import type { SliderSize } from '../../ui/slider/range';
 import { Stepper } from '../../ui/stepper/Stepper';
+import { Switch, SWITCH_HEIGHTS } from '../../ui/switch/Switch';
+import type { SwitchSize } from '../../ui/switch/Switch';
 import { Part, Specimen, Specimens } from './Specimen';
 
 /** Every state a slider is shown in, side by side. */
@@ -23,6 +28,32 @@ const STATES: readonly { readonly name: string; readonly showing?: Showing; read
 
 const SIZES = Object.keys(SLIDER_HEIGHTS) as SliderSize[];
 
+const SWITCH_SIZES = Object.keys(SWITCH_HEIGHTS) as SwitchSize[];
+
+/** How fast the world runs, as a choice of three in words. */
+const PACES: readonly Option[] = [
+  { id: 'slow', label: 'Slow' },
+  { id: 'steady', label: 'Steady' },
+  { id: 'fast', label: 'Fast' },
+];
+
+/** Which of the house's five a readout follows, as a choice in marks. */
+const FOLLOWED: readonly Option[] = [
+  { id: 'wealth', label: 'Wealth', mark: 'wealth' },
+  { id: 'influence', label: 'Influence', mark: 'influence' },
+  { id: 'reason', label: 'Reason', mark: 'reason' },
+  { id: 'piety', label: 'Piety', mark: 'piety' },
+];
+
+/** Every state an option is shown in, beside the chosen one. */
+const OPTION_STATES: readonly Option[] = [
+  { id: 'chosen', label: 'Chosen' },
+  { id: 'rest', label: 'At rest' },
+  { id: 'hover', label: 'Hovered', showing: 'hover' },
+  { id: 'focus', label: 'Focused', showing: 'focus' },
+  { id: 'disabled', label: 'Disabled', disabled: true },
+];
+
 /** A key figure's four stats, as the Characters section of the debug panel moves them. */
 const STATS: readonly { readonly mark: MarkName; readonly word: string; readonly start: number }[] = [
   { mark: 'piety', word: 'Piety', start: 12 },
@@ -35,6 +66,10 @@ export function Controls() {
   const { list, problem } = usePictures();
   const [taxes, setTaxes] = useState(20);
   const [stats, setStats] = useState(() => STATS.map((stat) => stat.start));
+  const [fog, setFog] = useState(true);
+  const [pace, setPace] = useState('steady');
+  const [followed, setFollowed] = useState('wealth');
+  const [kills, setKills] = useState(0);
   if (list === null) {
     return <p className="showcase__to-come">{problem ?? 'Reading the pictures…'}</p>;
   }
@@ -164,9 +199,104 @@ export function Controls() {
         </Specimens>
       </Part>
 
-      <p className="showcase__to-come">
-        The switch, a choice of a few, and hold to confirm arrive with the second half of step 7.
-      </p>
+      <Part title="Switches">
+        <p className="ui-label showcase__lead">
+          On or off, said in words beside it, the knob at one end of its slot or the other.{' '}
+          <span className="showcase__said">fog of war {fog ? 'on' : 'off'}</span>
+        </p>
+        <Specimens>
+          <Specimen name="Switch" note="press it, or tab to it and press Space">
+            <Switch label="Fog of war" on={fog} onChange={setFog} />
+          </Specimen>
+          {[false, true].flatMap((on) =>
+            STATES.map((state) => (
+              <Specimen key={`${on}-${state.name}`} name={`Switch on={${on}}`} note={state.name}>
+                <Switch
+                  label="Fog of war"
+                  on={on}
+                  onChange={() => undefined}
+                  disabled={state.disabled === true}
+                  {...(state.showing === undefined ? {} : { showing: state.showing })}
+                />
+              </Specimen>
+            )),
+          )}
+          {SWITCH_SIZES.map((size) => (
+            <Specimen key={size} name={`size="${size}"`} note={`${SWITCH_HEIGHTS[size]} pixels tall`}>
+              <Switch label="Fog of war" on onChange={() => undefined} size={size} />
+            </Specimen>
+          ))}
+          <Specimen name="Switch say={null}" note="saying nothing after it">
+            <Switch label="Keep your holdings in sight" on={false} onChange={() => undefined} say={null} />
+          </Specimen>
+        </Specimens>
+      </Part>
+
+      <Part title="Choices">
+        <p className="ui-label showcase__lead">
+          One of a few, side by side. Press one, or tab to the chosen one and go along with the arrows.{' '}
+          <span className="showcase__said">
+            {pace}, following {followed}
+          </span>
+        </p>
+        <Specimens>
+          <Specimen name="Choice" note="in words">
+            <Choice options={PACES} chosen={pace} onChoose={setPace} label="How fast the world runs" />
+          </Specimen>
+          <Specimen name="Choice" note="in marks">
+            <Choice
+              options={FOLLOWED}
+              chosen={followed}
+              onChoose={setFollowed}
+              label="What the readout follows"
+            />
+          </Specimen>
+          <Specimen name="Choice" note="every state an option has" wide>
+            <Choice options={OPTION_STATES} chosen="chosen" onChoose={() => undefined} label="Every state" />
+          </Specimen>
+          <Specimen name={'Choice size="small"'} note="24 pixels tall">
+            <Choice options={PACES} chosen="steady" onChoose={() => undefined} label="Small" size="small" />
+          </Specimen>
+        </Specimens>
+      </Part>
+
+      <Part title="Hold to confirm">
+        <p className="ui-label showcase__lead">
+          For what cannot be undone: it does it only when held down for a second and a little more, and a fuse
+          burns along under its words while it is. Let go sooner and nothing happens.{' '}
+          <span className="showcase__said">
+            {kills === 0 ? 'nobody killed yet' : `killed ${kills} ${kills === 1 ? 'time' : 'times'}`}
+          </span>
+        </p>
+        <Specimens>
+          <Specimen name="HoldButton" note="hold it, or tab to it and hold Space">
+            <HoldButton onConfirm={() => setKills((was) => was + 1)}>Kill the Count</HoldButton>
+          </Specimen>
+          {(
+            [
+              ['at rest', undefined],
+              ['held a third of the way', 0.33],
+              ['held nearly to the end', 0.9],
+            ] as const
+          ).map(([name, showing]) => (
+            <Specimen key={name} name="HoldButton" note={name}>
+              <HoldButton onConfirm={() => undefined} {...(showing === undefined ? {} : { showing })}>
+                Kill
+              </HoldButton>
+            </Specimen>
+          ))}
+          <Specimen name={'HoldButton face="secondary"'} note="on another face">
+            <HoldButton onConfirm={() => undefined} face="secondary" showing={0.6}>
+              Dismiss the steward
+            </HoldButton>
+          </Specimen>
+          <Specimen name="HoldButton" note="disabled">
+            <HoldButton onConfirm={() => undefined} disabled>
+              Kill
+            </HoldButton>
+          </Specimen>
+        </Specimens>
+      </Part>
     </>
   );
 }

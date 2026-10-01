@@ -208,7 +208,7 @@ One commit each. After the fourth, the order is a menu.
 | 9 | Carousel and its dots, grid, card, list | the page |
 | 10 | Dialog, toast, text field, dropdown, medallion | the page |
 
-**Where it stands, 2026-10-01: nought to six, eight, and the first half of seven are built.** Four made the page able to be used for
+**Where it stands, 2026-10-01: nought to eight are built.** Four made the page able to be used for
 verification: the foundations, every picture, borders and fills at any size, and containers with their
 recipes and embellishments, all at desktop and phone width and on night and parchment. Five is the
 buttons: text, mark and state buttons and the window controls, in every state, on faces cut from the
@@ -220,7 +220,8 @@ several pieces of the moodboard: the Paris plate, its left end, a strip beside i
 for the right, because a strip from its middle was a lighter parchment and the join showed. Seven was
 six controls, too many for one step, so it is two: the first is the slider, cut from the moodboard's in
 three pictures and worked by the browser's own slider under the painting, the meter and the stepper; the
-second is the switch, the choice of a few and hold to confirm. Adam's first frame of his own,
+second is the switch, the choice of a few and hold to confirm, drawn from pictures already in the folder:
+the oval face and the slider's knob, the card's frame, the drape's face. Adam's first frame of his own,
 `gilt-cherubs`, came in during it as an image model's nine tiles with gaps between them, and went into the
 folder joined, with its middle as a fill, `dark-felt`, and a recipe, `pane.cherubs`; his second,
 `gilt-acanthus`, came on stone with a box of white over its middle, and with it the nine-slice tool and

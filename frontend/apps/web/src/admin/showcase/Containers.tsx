@@ -66,6 +66,7 @@ const HOLDS: Record<RecipeName, () => ReactNode> = {
   'pane.acanthus': () => <Pane title="The house of Montreuil" />,
   'card.figure': () => <Figure name="Count de Montreuil" what="Noble · Rationalist" stats="12 · 8 · 4" />,
   'tooltip.plain': () => <span className="ui-body">Keep your holdings in sight</span>,
+  'choice.frame': () => <span className="ui-body">One of a few, side by side</span>,
   'plate.place': () => <span className="ui-heading">Paris</span>,
   'plate.heading': () => <span className="ui-heading">St. Vitus Cathedral</span>,
   'card.event': () => (

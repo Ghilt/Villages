@@ -1,0 +1,104 @@
+/*
+ * A switch: its name, the slot with its knob, and the word for which it is. Off, the slot is dim and the
+ * knob at its left; on, the slot glows and the knob has slid to its right, in a fifth of a second.
+ */
+
+@layer ui {
+  .ui-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+    margin: 0;
+    padding: 2px 4px;
+    border: 0;
+    border-radius: 6px;
+    background: none;
+    font: inherit;
+    color: var(--ui-text);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .ui-switch__slot {
+    position: relative;
+    display: inline-block;
+    flex: none;
+  }
+
+  .ui-switch__slot > .ui-button__face {
+    filter: brightness(0.78) saturate(0.85);
+    transition: filter 0.15s ease;
+  }
+
+  .ui-switch[aria-checked='true'] .ui-switch__slot > .ui-button__face {
+    filter: drop-shadow(0 0 4px color-mix(in srgb, var(--ui-gilt-light) 70%, transparent)) brightness(1.08);
+  }
+
+  .ui-switch__knob {
+    position: absolute;
+    top: 50%;
+    left: calc(var(--ui-knob) * 0.1);
+    max-width: none;
+    translate: 0 -50%;
+    pointer-events: none;
+    user-select: none;
+    transition:
+      left 0.2s ease,
+      filter 0.12s ease;
+  }
+
+  .ui-switch__knob--missing {
+    width: var(--ui-knob);
+    height: var(--ui-knob);
+    box-sizing: border-box;
+    border: 2px dashed var(--ui-rarity-legendary);
+    border-radius: 50%;
+  }
+
+  .ui-switch[aria-checked='true'] .ui-switch__knob {
+    left: calc(100% - var(--ui-knob) * 1.1);
+  }
+
+  .ui-switch__say {
+    min-width: 1.8em;
+    font-style: italic;
+    color: var(--ui-text-soft);
+  }
+
+  .ui-switch[aria-checked='true'] .ui-switch__say {
+    color: var(--ui-text);
+  }
+
+  .ui-switch--small {
+    font-size: 0.88rem;
+  }
+
+  .ui-switch:hover:not(:disabled) .ui-switch__knob,
+  .ui-switch[data-showing='hover'] .ui-switch__knob {
+    filter: brightness(1.18) saturate(1.08);
+  }
+
+  .ui-switch:active:not(:disabled) .ui-switch__knob,
+  .ui-switch[data-showing='pressed'] .ui-switch__knob {
+    filter: brightness(0.84);
+  }
+
+  .ui-switch:focus-visible,
+  .ui-switch[data-showing='focus'] {
+    outline: 2px solid var(--ui-focus);
+    outline-offset: 2px;
+  }
+
+  .ui-switch:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+    filter: grayscale(0.7);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-switch__knob,
+    .ui-switch__slot > .ui-button__face {
+      transition: none;
+    }
+  }
+}

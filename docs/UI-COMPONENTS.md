@@ -10,7 +10,7 @@
 **Being built.** This is the method as agreed on 2026-09-30, written before most of the library so that the
 library is built to it. Each step of the plan fills in its part, and a line that still says *to come* is a
 part nobody has built. The page, the foundations, the pictures, borders and fills, the container, the
-buttons, the marks and readouts, the tabs and sections, and half of the controls are built.
+buttons, the marks and readouts, the tabs and sections, and the controls are built.
 
 ## The page
 
@@ -251,6 +251,19 @@ A line each: what it is for, its variants, and where on the page it is.
   figure's stats are moved; the mark that would go past either end is disabled there, so the end is seen
   rather than found, and the count is said again to a screen reader when it changes. `stepped` in
   `ui/slider/range.ts`. *Controls*.
+- **`Switch`**, `ui/switch/Switch.tsx`: a thing on or off, its name in words before it and its state after
+  it - fog of war, on - and a knob at one end of the oval face's slot or the other, the slot glowing when
+  it is on; `say` puts other words after it, or with `null` none. A real button that says it is a switch,
+  so a screen reader hears its name and whether it is on. `small` and `regular`, 20 and 26 pixels tall.
+  *Controls*.
+- **`Choice`**, `ui/choice/Choice.tsx`: a choice of a few, side by side in the `choice.frame` recipe, the
+  chosen one on parchment; an option is words or a mark, as a button is. A group of radio buttons: only the
+  chosen one is a stop for Tab, and the arrows go along and choose as they go. *Controls*.
+- **`HoldButton`**, `ui/hold/HoldButton.tsx`: hold to confirm, for what cannot be undone - killing a key
+  figure: it does it only when held down for the whole of `holdMs`, a second and a fifth unless it says
+  otherwise, by a pointer, a finger, or Space or Enter, while a fuse burns along under its words; let go
+  sooner and nothing happens. A screen reader is told to hold it. `holdOf` in `ui/hold/hold.ts` is the rule,
+  on a clock that can be stood in for. *Controls*.
 - **`TabBar`** and **`Tabbed`**, `ui/tabs/TabBar.tsx`: several things taking turns in one place, and a row
   of tabs saying which is up. **A tab is a mark or words, as a button is**, and which is Adam's call: the
   game's own bar is marks. `small` is 30 pixels, the game's strip, and `regular` 40. The arrow keys go

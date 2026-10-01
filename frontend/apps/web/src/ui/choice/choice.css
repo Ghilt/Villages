@@ -1,0 +1,86 @@
+/*
+ * A choice of a few: its options in a row in their frame, as wide as they are; the chosen one on the
+ * parchment that is laid under it, its words in ink, and the rest in cream on night. The ring is drawn
+ * inside the option, where the frame cannot cover it.
+ */
+
+@layer ui {
+  .ui-choice {
+    width: fit-content;
+    max-width: 100%;
+  }
+
+  .ui-choice__options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+  }
+
+  .ui-choice__option {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.2em;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0 0.85em;
+    border: 0;
+    border-radius: 3px;
+    background: none;
+    font: inherit;
+    color: var(--ui-cream-soft);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.12s ease;
+  }
+
+  .ui-choice--small .ui-choice__option {
+    padding: 0 0.65em;
+    font-size: 0.86rem;
+  }
+
+  .ui-choice__option--mark {
+    padding: 0 0.45em;
+  }
+
+  .ui-choice__option > .ui-fill {
+    border-radius: 3px;
+  }
+
+  .ui-choice__words {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+  }
+
+  .ui-choice__option[aria-checked='true'] {
+    color: var(--ui-ink);
+    font-weight: 600;
+    cursor: default;
+  }
+
+  .ui-choice__option:hover:not(:disabled):not([aria-checked='true']),
+  .ui-choice__option[data-showing='hover']:not([aria-checked='true']) {
+    color: var(--ui-cream);
+  }
+
+  .ui-choice__option:active:not(:disabled),
+  .ui-choice__option[data-showing='pressed'] {
+    transform: translateY(1px);
+  }
+
+  .ui-choice__option:focus-visible,
+  .ui-choice__option[data-showing='focus'] {
+    outline: 2px solid var(--ui-focus);
+    outline-offset: -3px;
+    box-shadow: inset 0 0 0 4px rgba(43, 29, 16, 0.55);
+  }
+
+  .ui-choice__option:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
+}
