@@ -89,6 +89,15 @@ requirement, within the death's own story. One thing it showed was not about dia
 server's tests share one world, and a window that watches events is shown the recent ones on arriving, so a
 test waiting for "a loss" took another test's loss for its own. It waits for its own story's now.
 
+**2026-10-01, the pane stands in a column of its own, and opens when a dialogue is offered.** Fitting the
+column to the spread changed one thing the plan had: as planned it took everything up to a gutter from the
+left column, which on a stage 768 wide left 16 pixels of map, and for good, since the pane is never closed.
+It is squeezed to a third first now, as the left one is, which leaves 192 there (0069). One case cannot be
+looked at yet: the letter and a dialogue together, because the only letter is the founding one, so the tests
+hold it. What opens the pane is a dialogue waiting that the page has not been shown before, so a step, a
+reconnect or the list sent again never reopens a pane the player put away; a test proves it by making the
+page forget. Its count of waiting and finished is all it says until the list.
+
 ## Result
 
 Open.

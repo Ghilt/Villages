@@ -7,6 +7,7 @@ import type { CharacterOnMapView, ChoiceView, HouseView } from '@villages/protoc
 import { AreaOverlay } from './areas/AreaOverlay';
 import { Choosing } from './choice/Choosing';
 import { Dialogues } from './dialogues/Dialogues';
+import { openOnArrival } from './dialogues/opening';
 import { DebugPanel } from './debug/DebugPanel';
 import { Desk } from './desk/Desk';
 import { Grips } from './debug/Grips';
@@ -208,6 +209,18 @@ export function App({ master }: AppProps) {
       roomToRead(bay);
     }
   }, [asking]);
+
+  /*
+   * A dialogue arriving opens the pane: from its strip in the spread, and on a phone into the bay that is
+   * not the map's, as a window does, because the map is where the player was looking. What has arrived is
+   * the opening's to say: a dialogue waiting that this page has not been shown before. See `MECHANICS.md`.
+   */
+  const offered = heard.yourDialogues;
+  useEffect(() => {
+    if (offered !== null) {
+      openOnArrival(offered);
+    }
+  }, [offered]);
 
   useEffect(() => {
     if (map !== null) {

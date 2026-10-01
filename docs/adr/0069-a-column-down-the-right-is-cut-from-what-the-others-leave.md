@@ -51,9 +51,10 @@ beside the debug panel, the left column is 416 and the right 480, and the map be
 letter goes between them at 640. Opened out the right column is 784, and the letter still fits between at
 336. It is 480 on any stage from 1472 wide.
 
-**On a narrow stage both columns are a third**, and the map between them is the middle third. At 928 wide,
-the browser pane this was looked at in, they are 299 each and the map between is 330. At 768, a tablet
-upright, they are 288 and it is 192.
+**On a narrow stage both columns are a third**, and the map between them is the middle third: at 928 wide,
+the browser pane this was looked at in, they are 299 each and the map between is 330. **Below 896 both are
+at their least, 288, and the map between them is what is left**: 192 at 768, a tablet upright; 96 at 672;
+and 25 at 601, the narrowest the spread is ever drawn. Putting the column away gives the map back.
 
 **Where the letter goes changes at a width, not smoothly.** Below 889 wide the letter keeps its place
 under the column, as wide as 568; from 889 it is between the columns at 281, its carousel. With the corner

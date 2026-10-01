@@ -205,7 +205,9 @@ it out when they want the whole screen for it.
 
 **It arrives the usual way.** A dialogue offered opens the pane: in the spread it appears on the right, or
 opens from its strip, and on a phone it takes the bay that is not the map's, at half, as an inspect window
-does.
+does. A pane already open stays as the player left it. What arrives is a dialogue waiting that the page has
+not been shown before, so the ones waiting when a page loads open it, as a letter does, and the same one
+never opens it twice: a step taken, a reconnect or the list sent again is not a dialogue offered.
 
 ### Not decided
 
@@ -240,7 +242,7 @@ requirements stay on the server. An option can spend, from version 16, and is re
 pay, and from version 17 each option carries its reveal impact. A speaker's death ends every open dialogue they
 speak in, as lost, naming who died. Nothing in the world offers one yet. The pane stands in the column
 down the right from the house's first dialogue, at its three sizes, and on a phone navigation lists it;
-it says only how many are waiting and finished so far, and does not yet open when one arrives. The debug
+it says only how many are waiting and finished so far, and a dialogue offered opens it. The debug
 panel's Dialogues section lists every dialogue as the player may know it and can show its requirements,
 and no command on the wire takes a step. Its shape is decided in decision record 0067: a dialogue offered
 whole on the house's stream; only its dialogue choices, and the lines that give something or end it,

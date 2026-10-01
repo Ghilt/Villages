@@ -244,8 +244,10 @@ A speaker's death is tried with *kill*, in the Characters section.
    `DIALOGUE_PANE` standing in it from the house's first dialogue and opening at its normal width, a speech
    mark, the pane drawing its name and how many are waiting and finished, `standingPanes` taking what is
    present, decision record 0069 for the column and 0070 for drawing it in the page, written before the
-   pane was drawn as `ARCHITECTURE.md` asked, and `RESPONSIVE-DESIGN.md`. The second makes a dialogue
-   arriving open the pane.
+   pane was drawn as `ARCHITECTURE.md` asked, and `RESPONSIVE-DESIGN.md`. The second is done: a dialogue
+   arriving opens the pane, from its strip in the spread and on a phone into the bay that is not the map's,
+   at half, through `dialogues/opening.ts`; what arrives is a dialogue waiting that the page has not been
+   shown before. Step 7 is done.
 8. **The list**: waiting and finished, scrolling.
 9. **A conversation you can play.** The reading place in `client-core`, the step on the wire (version 16),
    the bubbles with a portrait and a name beside each, from the left and the right by party, *next*, a
