@@ -9,8 +9,8 @@
 
 **Being built.** This is the method as agreed on 2026-09-30, written before most of the library so that the
 library is built to it. Each step of the plan fills in its part, and a line that still says *to come* is a
-part nobody has built. The page, the foundations, the pictures, borders and fills, the container and
-the buttons are built.
+part nobody has built. The page, the foundations, the pictures, borders and fills, the container, the
+buttons, and the marks and readouts are built.
 
 ## The page
 
@@ -77,7 +77,8 @@ A **recipe** is one named, typed combination of the four layers, in
 ```
 
 - `border` and `fill` are pictures by name; either can be left out. A border whose picture has a middle of
-  its own draws it only when there is no fill.
+  its own draws it only when there is no fill. `scale` draws the border finer or heavier than its picture
+  is shown, a tooltip's at half a card's, with its cuts in the same places.
 - `text` is what the content is written in, `ink` on a light fill or `cream`, the default, on a dark one.
 - `padding` is room between the border's inner edge and the content, beyond the border's own inset.
 - An **embellishment** is a picture by name, pinned to an `anchor` - a corner, or `top`, `right`, `bottom`
@@ -162,8 +163,14 @@ A mark is drawn in code or painted, one mark at a time, behind the one component
 `ui/mark/Mark.tsx`. Every mark has a drawing there, on a square of 24, stroked at the weight every mark in
 the interface is drawn at and in whatever colour the words around it are; a picture in `world/ui/marks/`
 by the same name is drawn instead wherever there is one. A mark is named for what it means, not what it
-looks like: `previous` and `next` are a carousel's steps and not the needle, which means *there*. The
-resource and stat marks, and the page's side-by-side of each at 17, 24 and 48 pixels, come with step 6.
+looks like: `previous` and `next` are a carousel's steps and not the needle, which means *there*. The page
+shows every mark at 17, 24 and 48 pixels side by side, because whether one reads small is a thing to see.
+
+**The marks the game already draws are the game's drawings**: the five resources', a key figure's stats,
+the close and the eye, copied stroke for stroke because the library cannot import them, and named as the
+library names them - `domain`, where the protocol says `naturalDomain`. A copy is a drawing that can drift,
+so `admin/showcase/marks.test.ts`, which is the page's and may read the game's files, fails the moment one
+does. When the game draws its marks from the library there is one copy again and the test goes.
 
 ## Buttons
 
@@ -197,16 +204,30 @@ A line each: what it is for, its variants, and where on the page it is.
 - **`RECIPES`**, `ui/container/recipes.ts`: the named containers. The first are made from the moodboard -
   Adam's own sentence as `pane.cherub-corner`, the cathedral panel as `pane.cathedral`, its framed panes
   and its cards - and the game's own come as each surface is redone.
-- **`Mark`**, `ui/mark/Mark.tsx`: a mark by name, drawn, or painted when `world/ui/marks/` has it. `close`,
-  `minimise`, `maximise`, `previous`, `next`, `eye-open` and `eye-shut` so far. *Buttons*, for now.
+- **`Mark`**, `ui/mark/Mark.tsx`: a mark by name, drawn, or painted when `world/ui/marks/` has it: the
+  five resources, `wealth`, `domain`, `influence`, `reason` and `piety`; a figure's `kindness`, `physical`
+  and `age`; and `close`, `minimise`, `maximise`, `previous`, `next`, `eye-open` and `eye-shut`. *Marks and
+  readouts*.
 - **`TextButton`**, `ui/button/Button.tsx`: words on a face that stretches between its end caps to fit
   them. `face` is a picture in `world/ui/controls/`, `primary` unless it says otherwise; `size` is `small`,
   `regular` or `large`, 32, 44 or 60 pixels tall. *Buttons*.
 - **`MarkButton`**, the same file: a mark on a face, one size whatever it says; `label` is what it does, in
-  words. A face with its mark painted in needs no `mark`. *Buttons*.
+  words, and is its tooltip. A face with its mark painted in needs no `mark`. *Buttons*.
 - **`StateButton`**, the same file: a mark that is on or off, like the eye, with a mark and words for
   each. *Buttons*.
 - **`WindowControls`**, the same file: the window's three, put away, opened out and shut, in that order.
   *Buttons*.
 - **`faceOf`**, `ui/button/face.ts`: the arithmetic under all four - how a face is laid at a height, where
   its words stop, and which of its states are painted.
+- **`ResourceReadout`**, `ui/readout/ResourceReadout.tsx`: a resource as it is read - its mark, what it
+  stands at, and how fast it moves when there is room. It does not know what a stock is: the game hands it
+  `amountAt`, what it stands at at a moment, and `ratePerSecond`, and it asks again four times a second
+  while the amount moves, so it counts up between events. The word is its tooltip, beside it with
+  `showWord`, and always there for a screen reader. *Marks and readouts*.
+- **`Badge`** and **`Badged`**, `ui/badge/Badge.tsx`: a count on the corner of a mark or a button, nothing
+  at nought, `99+` past ninety-nine. A drawn velvet pip until one is painted. *Marks and readouts*.
+- **`Tooltip`**, `ui/tooltip/Tooltip.tsx`: a few words about what is under the pointer, in the
+  `tooltip.plain` recipe - a moment after the pointer arrives, at once from the keyboard, and when a finger
+  holds a thing down on a phone; gone at Escape. It is drawn over the whole page rather than inside what it
+  is about, so a pane that clips cannot clip it, and `placeTooltip` in `ui/tooltip/place.ts` keeps it above
+  what it is about unless there is only room below, and inside the window. *Marks and readouts*.

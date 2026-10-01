@@ -51,7 +51,11 @@ export function Container({
           <EmbellishmentLayer key={`behind-${at}`} placed={placed} />
         ))}
       {given.border !== undefined && (
-        <BorderLayer name={given.border} {...(given.fill === undefined ? {} : { middle: false })} />
+        <BorderLayer
+          name={given.border}
+          {...(given.fill === undefined ? {} : { middle: false })}
+          {...(given.scale === undefined ? {} : { scale: given.scale })}
+        />
       )}
       <div className="ui-container__content" style={{ padding: sidesInPixels(layout.padding) }}>
         {children}

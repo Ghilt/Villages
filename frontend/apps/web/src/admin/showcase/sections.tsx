@@ -4,6 +4,7 @@ import { BordersAndFills } from './BordersAndFills';
 import { Buttons } from './Buttons';
 import { Containers } from './Containers';
 import { Foundations } from './Foundations';
+import { MarksAndReadouts } from './MarksAndReadouts';
 import { Pictures } from './Pictures';
 
 /**
@@ -59,7 +60,7 @@ export const SECTIONS: readonly Section[] = [
     id: 'readouts',
     title: 'Marks and readouts',
     says: 'Marks drawn and painted, the resource readout, the badge and the tooltip.',
-    arrives: 6,
+    Body: MarksAndReadouts,
   },
   {
     id: 'controls',

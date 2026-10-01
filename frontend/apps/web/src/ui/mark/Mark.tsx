@@ -20,8 +20,65 @@ const EYE = {
   lashes: ['M5.2 13.9 L3.5 16.6', 'M9.2 15.6 L8.4 18.6', 'M14.8 15.6 L15.6 18.6', 'M18.8 13.9 L20.5 16.6'],
 } as const;
 
+/**
+ * The marks a number is known by, the same drawings as the game's own in `marks/Mark.tsx`, which the
+ * library cannot import: each a different silhouette before it is a different picture, because five of
+ * them have to be told apart at seventeen pixels. See `LOOK-AND-FEEL.md`.
+ */
+const NUMBERS = {
+  /** A coin, with a boss struck in the middle of it. */
+  wealth: ['M12 5 A7 7 0 1 1 11.99 5', 'M12 10 A2 2 0 1 1 11.99 10'],
+  /** The ridge of land a house holds, and the ground it stands on. */
+  domain: ['M3 16 L8 8 L12.5 13.5 L16 9.5 L21 16', 'M3 19.5 H21'],
+  /** Two rings that overlap, which is what reach over people amounts to. */
+  influence: ['M9.5 7 A5 5 0 1 1 9.49 7', 'M14.5 7 A5 5 0 1 1 14.49 7'],
+  /** A pair of dividers over the arc they have scribed, hinged and with no crossbar, so it is not an A. */
+  reason: [
+    'M12 7 L7 18.5',
+    'M12 7 L17 18.5',
+    'M6.6 19.6 Q12 22.4 17.4 19.6',
+    'M12 4.2 A1.6 1.6 0 1 1 11.99 4.2',
+  ],
+  /** A cross. */
+  piety: ['M12 4 V20', 'M7.5 9.5 H16.5'],
+  /** A heart; the game's placeholder too. */
+  kindness: [
+    'M12 19.4 C7.2 16 4 13 4 9.6 C4 7.2 5.8 5.4 8.1 5.4 C9.8 5.4 11.2 6.4 12 7.8 C12.8 6.4 14.2 5.4 15.9 5.4 C18.2 5.4 20 7.2 20 9.6 C20 13 16.8 16 12 19.4 Z',
+  ],
+  /** An arm bent at the elbow, the fist up; a placeholder. */
+  physical: [
+    'M3.5 19 H14.2 C16.9 19 18.6 17.2 18.2 14.6 L17.3 8',
+    'M13.3 8.2 L13.8 12.6 C11.8 11.4 8.6 11.5 6.6 13.3 L3.5 13.8',
+    'M15.4 3.4 A2.4 2.4 0 1 1 15.39 3.4',
+  ],
+  /** An hourglass, the sand run mostly through; a placeholder. */
+  age: [
+    'M6.5 3.5 H17.5',
+    'M6.5 20.5 H17.5',
+    'M8 3.5 C8 8.4 11.6 10.2 11.6 12 C11.6 13.8 8 15.6 8 20.5',
+    'M16 3.5 C16 8.4 12.4 10.2 12.4 12 C12.4 13.8 16 15.6 16 20.5',
+    'M9.6 20.2 C10 18.4 11 17.4 12 17.4 C13 17.4 14 18.4 14.4 20.2',
+  ],
+} as const;
+
+const stroked = (paths: readonly string[]) => (
+  <>
+    {paths.map((d) => (
+      <path key={d} d={d} className="ui-mark__line" />
+    ))}
+  </>
+);
+
 /** Every mark the library draws itself, on a square of 24. */
 const DRAWN = {
+  wealth: stroked(NUMBERS.wealth),
+  domain: stroked(NUMBERS.domain),
+  influence: stroked(NUMBERS.influence),
+  reason: stroked(NUMBERS.reason),
+  piety: stroked(NUMBERS.piety),
+  kindness: stroked(NUMBERS.kindness),
+  physical: stroked(NUMBERS.physical),
+  age: stroked(NUMBERS.age),
   // Two strokes crossed, shorter than the box, because corner to corner reads as a deletion.
   close: <path d="M7 7 L17 17 M17 7 L7 17" className="ui-mark__line" />,
   minimise: <path d="M6 12 H18" className="ui-mark__line" />,

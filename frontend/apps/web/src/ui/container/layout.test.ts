@@ -49,6 +49,12 @@ describe('a container laid out', () => {
     expect(layoutOf({ ...recipe, roomForOverhangs: false }, undefined, sizeOf).margin).toEqual([0, 0, 0, 0]);
   });
 
+  it('draws its border at a scale, and sets its content and fill in by as much less', () => {
+    const layout = layoutOf({ border: 'gilt-thin', scale: 0.5, padding: 2 }, gilt, sizeOf);
+    expect(layout.padding).toEqual([16, 16, 16, 16]);
+    expect(layout.fillInset).toEqual([6, 6, 6, 6]);
+  });
+
   it('stands its fill in by the border’s cut, less what reaches under it', () => {
     expect(layoutOf({ border: 'gilt-simple' }, gilt, sizeOf).fillInset).toEqual([12, 12, 12, 12]);
   });

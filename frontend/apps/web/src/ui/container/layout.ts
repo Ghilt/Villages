@@ -51,6 +51,8 @@ export interface Embellishment {
 export interface Recipe {
   /** A picture in `world/ui/borders/`, by its name; nothing, and the container has no border. */
   readonly border?: string;
+  /** Draw the border this many times the size its picture is shown: a tooltip's finer than a pane's. */
+  readonly scale?: number;
   /** A picture in `world/ui/fills/`, by its name; nothing, and the border's own middle shows, if it has one. */
   readonly fill?: string;
   readonly embellishments?: readonly Embellishment[];
@@ -91,6 +93,15 @@ export interface Layout {
 }
 
 const SIDES: readonly Side[] = ['top', 'right', 'bottom', 'left'];
+
+/** Four lengths at a scale, to the hundredth of a pixel. */
+function times(sides: Sides, by: number): Sides {
+  if (by === 1) {
+    return sides;
+  }
+  const scaled = (length: number) => Math.round(length * by * 100) / 100;
+  return [scaled(sides[0]), scaled(sides[1]), scaled(sides[2]), scaled(sides[3])];
+}
 
 const sidesOf = (value: number | Sides | undefined): Sides =>
   value === undefined ? [0, 0, 0, 0] : typeof value === 'number' ? [value, value, value, value] : value;
@@ -143,7 +154,8 @@ export function layoutOf(
   border: UiBorder | undefined,
   sizeOf: (art: string) => { width: number; height: number } | undefined,
 ): Layout {
-  const inset = contentInsetOf(border);
+  const scale = recipe.scale ?? 1;
+  const inset = times(contentInsetOf(border), scale);
   const padding = sidesOf(recipe.padding);
   const overhang: [number, number, number, number] = [0, 0, 0, 0];
   const placed: Placed[] = [];
@@ -169,7 +181,7 @@ export function layoutOf(
   return {
     padding: [inset[0] + padding[0], inset[1] + padding[1], inset[2] + padding[2], inset[3] + padding[3]],
     margin: room ? overhang : [0, 0, 0, 0],
-    fillInset: fillInsetOf(border),
+    fillInset: times(fillInsetOf(border), scale),
     placed,
   };
 }

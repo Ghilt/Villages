@@ -605,3 +605,31 @@
   font-style: normal;
   color: var(--ui-gilt-light);
 }
+
+/* Marks at their three sizes, readouts in a row as the house card lays them, and things to point at. */
+
+.showcase__marks {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--ui-space-3);
+  color: var(--ui-text);
+}
+
+.showcase__readouts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ui-space-2) var(--ui-space-4);
+}
+
+.showcase__readouts--column {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.showcase__tip-target {
+  padding: 0.15rem 0.4rem;
+  font-style: italic;
+  border-bottom: 1px dotted var(--ui-text-soft);
+  cursor: help;
+}

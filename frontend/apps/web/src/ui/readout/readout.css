@@ -1,0 +1,43 @@
+/*
+ * A resource readout: the mark, the word when there is room for it, the amount in lining and tabular
+ * figures so it does not jitter as it counts, and the rate, softer, after it.
+ */
+
+@layer ui {
+  .ui-readout {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ui-space-1);
+    white-space: nowrap;
+  }
+
+  .ui-readout__mark {
+    display: grid;
+    color: var(--ui-text-soft);
+  }
+
+  .ui-readout__word {
+    font-style: italic;
+    color: var(--ui-text-soft);
+  }
+
+  /* The word for a screen reader when it is not shown: there, and out of sight. */
+  .ui-readout__unseen {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .ui-readout__amount {
+    font-weight: 600;
+  }
+
+  .ui-readout__rate {
+    font-size: 0.82em;
+    color: var(--ui-text-soft);
+  }
+}

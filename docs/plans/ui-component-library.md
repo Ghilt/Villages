@@ -206,12 +206,14 @@ One commit each. After the fourth, the order is a menu.
 | 9 | Carousel and its dots, grid, card, list | the page |
 | 10 | Dialog, toast, text field, dropdown, medallion | the page |
 
-**Where it stands, 2026-09-30: nought to five are built.** Four made the page able to be used for
+**Where it stands, 2026-09-30: nought to six are built.** Four made the page able to be used for
 verification: the foundations, every picture, borders and fills at any size, and containers with their
 recipes and embellishments, all at desktop and phone width and on night and parchment. Five is the
 buttons: text, mark and state buttons and the window controls, in every state, on faces cut from the
-moodboard's buttons, with the library's first drawn marks. The rest of the page's sections say which step
-brings them, and from here the order is a menu. Step four was built with a keep-out, room kept clear among
+moodboard's buttons, with the library's first drawn marks. Six is the marks - the game's own number
+marks, copied and held to it by a test - the resource readout that counts between events, the badge and
+the tooltip. The rest of the page's sections say which step brings them, and from here the order is a
+menu. Step four was built with a keep-out, room kept clear among
 the words for an embellishment, and Adam took it out the same day: see decision record 0068. Step two cut
 the top row of the moodboard's sample borders, not both: the second row is the same frames' corner pieces.
 The marks have no placeholders: every one is drawn in code until one is painted. The page's Pictures

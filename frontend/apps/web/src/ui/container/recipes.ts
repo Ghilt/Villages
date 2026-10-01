@@ -51,6 +51,9 @@ export const RECIPES = {
 
   /** Something that happened, as the moodboard's Reformation card has it: a narrow gilt frame on night. */
   'card.event': { border: 'gilt-thin', fill: 'night', padding: 6 },
+
+  /** A few words about what is under the pointer: the card's frame at half its size, on parchment. */
+  'tooltip.plain': { border: 'gilt-thin', scale: 0.5, fill: 'parchment', text: 'ink', padding: [1, 5, 1, 5] },
 } as const satisfies Record<string, Recipe>;
 
 export type RecipeName = keyof typeof RECIPES;

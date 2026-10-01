@@ -186,7 +186,8 @@ that state instead, and the others stay light and shade. A round face can have i
 moodboard's close and minimise do, or be plain, `round-plain`, for a drawn mark to stand on.
 
 **A painted mark has to read at seventeen pixels**, the size a resource's mark is drawn at, and a mark
-that does not survive it is drawn in code instead. `world/ui/marks/close.webp` is drawn wherever the mark
+that does not survive it is drawn in code instead. The page's *Marks and readouts* section shows every mark
+at 17, 24 and 48 pixels side by side, so how one reads small is seen. `world/ui/marks/close.webp` is drawn wherever the mark
 called `close` is; delete it and the drawn one is back.
 
 ### What the tool does

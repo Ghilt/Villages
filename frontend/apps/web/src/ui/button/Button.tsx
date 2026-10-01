@@ -5,6 +5,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import { usePictures } from '../art/pictures';
 import { Mark } from '../mark/Mark';
 import type { MarkName } from '../mark/Mark';
+import { Tooltip } from '../tooltip/Tooltip';
 import { BUTTON_HEIGHTS, faceOf } from './face';
 import type { ButtonSize } from './face';
 
@@ -78,9 +79,9 @@ export function TextButton({
 }
 
 /**
- * A mark on a face, one size whatever it says. `label` is what it does, in words, for the pointer's
- * tooltip and for a screen reader, because a mark is learnt and words are not. Leave `mark` out for a face
- * that has its mark painted in, as the moodboard's close and minimise have.
+ * A mark on a face, one size whatever it says. `label` is what it does, in words, for its tooltip and for a
+ * screen reader, because a mark is learnt and words are not. Leave `mark` out for a face that has its mark
+ * painted in, as the moodboard's close and minimise have.
  */
 export function MarkButton({
   label,
@@ -96,24 +97,25 @@ export function MarkButton({
   const height = BUTTON_HEIGHTS[size];
   const width = faceOf(list, face, height)?.width ?? height;
   return (
-    <button
-      type="button"
-      className={`ui-button ui-button--mark ui-button--${size}`}
-      style={{ width, height }}
-      onClick={onClick}
-      disabled={disabled}
-      aria-label={label}
-      title={label}
-      data-showing={showing}
-      {...(pressed === undefined ? {} : { 'aria-pressed': pressed })}
-    >
-      <FaceLayer name={face} height={height} />
-      {mark !== undefined && (
-        <span className="ui-button__mark">
-          <Mark name={mark} size={Math.round(height * 0.5)} />
-        </span>
-      )}
-    </button>
+    <Tooltip text={label} describes={false}>
+      <button
+        type="button"
+        className={`ui-button ui-button--mark ui-button--${size}`}
+        style={{ width, height }}
+        onClick={onClick}
+        disabled={disabled}
+        aria-label={label}
+        data-showing={showing}
+        {...(pressed === undefined ? {} : { 'aria-pressed': pressed })}
+      >
+        <FaceLayer name={face} height={height} />
+        {mark !== undefined && (
+          <span className="ui-button__mark">
+            <Mark name={mark} size={Math.round(height * 0.5)} />
+          </span>
+        )}
+      </button>
+    </Tooltip>
   );
 }
 

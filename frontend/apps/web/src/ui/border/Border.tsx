@@ -20,6 +20,7 @@ export function BorderLayer({
   name,
   middle,
   repeat,
+  scale,
 }: {
   /** A picture in `world/ui/borders/`, by its name. */
   name: string;
@@ -27,6 +28,8 @@ export function BorderLayer({
   middle?: boolean;
   /** Lay its edges this way, whatever its file says. */
   repeat?: readonly [Repeat, Repeat];
+  /** Draw it this many times the size its picture is shown. */
+  scale?: number;
 }) {
   const { list } = usePictures();
   const picture = pictureIn(list, 'borders', name);
@@ -36,6 +39,7 @@ export function BorderLayer({
   const options = {
     ...(middle === undefined ? {} : { middle }),
     ...(repeat === undefined ? {} : { repeat }),
+    ...(scale === undefined ? {} : { scale }),
   };
   return <div className="ui-border" style={borderImageOf(picture, picture.border, options)} aria-hidden />;
 }
