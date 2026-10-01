@@ -243,7 +243,9 @@ painted, its ring in the picture's middle. The knob travels from the inner edge 
 inner edge of the other, so an end is as wide as the knob should never cross. **A meter is two**:
 `meter`, a tube of empty glass, and `meter-full`, the same tube full, cut alike, 480 by 56 painted; the
 full one is shown as far as the level reaches. A meter of another colour is another pair,
-`<look>` and `<look>-full`.
+`<look>` and `<look>-full`. **A carousel's dots are two**: `dot`, a ring for each thing, and `dot-at`, the
+one being shown, both laid whole and drawn 12 pixels across, so 48 painted; the placeholders are a ring
+from between the moodboard's carousel arrows and its slider's gilt knob.
 
 **A divider is a rule with two ends**, painted at some middling length, with a `<name>.json` beside it
 whose top and bottom cuts are nought, so it is cut only at its ends:

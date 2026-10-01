@@ -707,6 +707,21 @@ export const UI_PLACEHOLDERS: readonly UiPlaceholder[] = [
     from: [1441, 174, 65, 70],
     key: true,
   },
+  // A carousel's dots: one a thing, and the one it is showing lit.
+  {
+    kind: 'controls',
+    name: 'dot',
+    about: 'a gilt ring from between the moodboard’s carousel arrows, one for each thing',
+    from: [1389, 207, 14, 14],
+    outline: circle(1396, 213.8, 6.6),
+  },
+  {
+    kind: 'controls',
+    name: 'dot-at',
+    about: 'the gilt knob on the moodboard’s slider, for the thing a carousel is showing',
+    from: [1079, 196, 37, 37],
+    outline: circle(1097.5, 214, 16.5),
+  },
   {
     kind: 'controls',
     name: 'round-plain',

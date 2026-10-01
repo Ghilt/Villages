@@ -208,7 +208,7 @@ One commit each. After the fourth, the order is a menu.
 | 9 | Carousel and its dots, grid, card, list | the page |
 | 10 | Dialog, toast, text field, dropdown, medallion | the page |
 
-**Where it stands, 2026-10-01: nought to eight, and the first half of nine, are built.** Four made the page able to be used for
+**Where it stands, 2026-10-01: nought to nine are built.** Four made the page able to be used for
 verification: the foundations, every picture, borders and fills at any size, and containers with their
 recipes and embellishments, all at desktop and phone width and on night and parchment. Five is the
 buttons: text, mark and state buttons and the window controls, in every state, on faces cut from the
@@ -226,7 +226,10 @@ is two halves as well: the first is the card and the grid, what the key figures 
 carousel and its dots, and the list. Between the two, Adam saw dark words on dark panes: a container with a
 dark fill had been taking the ink of a parchment page it stood on. Every container now sets its words from
 its recipe, a test measures every recipe's fill against both its inks, and the page has a contrast switch
-that marks any word too faint to read; see `UI-COMPONENTS.md`. Adam's first frame of his own,
+that marks any word too faint to read; see `UI-COMPONENTS.md`. The second half was built with that switch
+on, and it found the list's own first states wanting: a row lit by a wash of its words' colour lost
+contrast on parchment, so a row is lit with cream instead. The dots are two new placeholders, a ring
+from between the moodboard's carousel arrows and its slider's gilt knob. Adam's first frame of his own,
 `gilt-cherubs`, came in during it as an image model's nine tiles with gaps between them, and went into the
 folder joined, with its middle as a fill, `dark-felt`, and a recipe, `pane.cherubs`; his second,
 `gilt-acanthus`, came on stone with a box of white over its middle, and with it the nine-slice tool and

@@ -1,0 +1,78 @@
+/*
+ * A carousel: its two steps either side of the one thing shown, its dots under it. The thing shown takes
+ * every pixel the steps leave, and a vertical drag over it is still the page's to scroll; only a drag
+ * across is the carousel's. What comes in slides a little way in from the side it came from, in a fifth
+ * of a second, and only fades in for whoever has asked for less movement.
+ */
+
+@layer ui {
+  .ui-carousel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--ui-space-1);
+    min-width: 0;
+    width: 100%;
+  }
+
+  .ui-carousel__row {
+    display: flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* Every thing in the one cell, so the view is as tall as the tallest and only the one shown is seen. */
+  .ui-carousel__view {
+    display: grid;
+    flex: 1 1 auto;
+    align-items: center;
+    min-width: 0;
+    overflow: hidden;
+    touch-action: pan-y;
+  }
+
+  .ui-carousel__slide {
+    grid-area: 1 / 1;
+    min-width: 0;
+  }
+
+  .ui-carousel__slide[data-away] {
+    visibility: hidden;
+  }
+
+  .ui-carousel__slide[data-from='after'] {
+    animation: ui-carousel-from-after 0.2s ease-out;
+  }
+
+  .ui-carousel__slide[data-from='before'] {
+    animation: ui-carousel-from-before 0.2s ease-out;
+  }
+
+  @keyframes ui-carousel-from-after {
+    from {
+      opacity: 0;
+      transform: translateX(14%);
+    }
+  }
+
+  @keyframes ui-carousel-from-before {
+    from {
+      opacity: 0;
+      transform: translateX(-14%);
+    }
+  }
+
+  @keyframes ui-carousel-fade {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-carousel__slide[data-from] {
+      animation: ui-carousel-fade 0.12s ease-out;
+    }
+  }
+}

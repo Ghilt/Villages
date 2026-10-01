@@ -25,8 +25,8 @@ export interface Unreadable {
   readonly needed: number;
 }
 
-/** Disabled, which asks nothing of contrast, or put out of reach. */
-const PASSED_OVER = ':disabled, [aria-disabled="true"], [inert], .ui-card--disabled';
+/** Disabled, which asks nothing of contrast - a control, or a card or a row drawn as one - or out of reach. */
+const PASSED_OVER = ':disabled, [aria-disabled="true"], [inert], [class*="--disabled"]';
 
 const WHITE: Rgba = [255, 255, 255, 1];
 const NOTHING: Rgba = [0, 0, 0, 0];

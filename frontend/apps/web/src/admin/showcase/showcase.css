@@ -779,3 +779,15 @@
   border-radius: 3px;
   cursor: pointer;
 }
+
+/* A carousel at the width a strip beside the map gives it. */
+.showcase__carousel {
+  width: 26rem;
+  max-width: 100%;
+}
+
+/* A list at the width of a pane's column. */
+.showcase__list-width {
+  width: 24rem;
+  max-width: 100%;
+}

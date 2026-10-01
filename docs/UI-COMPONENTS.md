@@ -10,7 +10,7 @@
 **Being built.** This is the method as agreed on 2026-09-30, written before most of the library so that the
 library is built to it. Each step of the plan fills in its part, and a line that still says *to come* is a
 part nobody has built. The page, the foundations, the pictures, borders and fills, the container, the
-buttons, the marks and readouts, the tabs and sections, the controls, and the card and the grid are built.
+buttons, the marks and readouts, the tabs and sections, the controls and the collections are built.
 
 ## The page
 
@@ -339,3 +339,21 @@ A line each: what it is for, its variants, and where on the page it is.
   three. That grid has to be given a height. It is worked out in container units, as the game's key
   figures are, so nothing is measured; its words are as big as its cells allow, and a name in it is one
   line, cut short where it has to be. *Collections*.
+- **`Carousel`**, `ui/carousel/Carousel.tsx`: one thing at a time, the moodboard's round arrows either
+  side and its dots beneath - the small form of a list, the choice roll's options in a strip beside the
+  map. Stepped by the arrows, the dots, the arrow keys and Home and End, and a swipe; round from the last to
+  the first unless `wrap={false}`, when the arrow that would go past an end is disabled there. What comes
+  in slides in from the side it came from. Every thing is laid in the same place and only the one shown is
+  seen, so it is as tall as the tallest and nothing jumps; a swipe that ends on a card is not a press of
+  it. Held with `at` or by itself from `startAt`. `stepOf`, `keyStepOf` and `swipeOf` in
+  `ui/carousel/step.ts` are its arithmetic. *Collections*.
+- **`Dots`**, `ui/dots/Dots.tsx`: a dot for each of a few things, a gilt ring each and a gilt ball for the
+  one shown. Given `onAt`, each is a button that goes to its thing, in room enough for a finger, saying
+  "2 of 5"; without, the row is a picture of where in the run the one shown is. *Collections*.
+- **`List`** and **`ListRow`**, `ui/list/List.tsx`: things one under another with a fine rule of the
+  words' own colour between them, each a row: a `lead` at its start, a mark or a small portrait; its
+  `title` and a `line` under it; a `trail` at its end, a figure or a button of its own, which stays a thing
+  to press by itself. Given `onPress` the whole row is one button, its name stretched over it, as a card's
+  is. Its states are a light of cream over it rather than a shade, because shade takes from the ink's
+  contrast on parchment; chosen is a bar down its start as well. A list too long for its room goes in a
+  `ScrollArea`. *Collections*.

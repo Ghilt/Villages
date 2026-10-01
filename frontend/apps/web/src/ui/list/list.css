@@ -1,0 +1,141 @@
+/*
+ * A list and its rows: a fine rule of the words' own colour between rows, so it reads on night and on
+ * parchment alike, and a row at least as tall as a finger. Pressable, the name's button is stretched over
+ * the row and its states are the row's: a light of cream over it, more of it pressed. Light rather than shade,
+ * because shade on parchment takes from the ink's contrast and light gives to it, and on night the cream
+ * has contrast to spare. Whatever stands at its end stands above the stretch and is pressed by itself.
+ * A fifth of a second or less for any change.
+ */
+
+@layer ui {
+  .ui-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .ui-list__item + .ui-list__item {
+    border-top: 1px solid color-mix(in srgb, var(--ui-text) 18%, transparent);
+  }
+
+  .ui-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--ui-space-3);
+    box-sizing: border-box;
+    min-height: 44px;
+    padding: var(--ui-space-2) var(--ui-space-3);
+    transition: background-color 0.12s ease;
+  }
+
+  .ui-row__lead {
+    display: grid;
+    flex: none;
+    place-items: center;
+    color: var(--ui-text-soft);
+  }
+
+  /* A small picture at a row's start: a portrait, upright, in a fine dark rule. */
+  .ui-row__lead > img {
+    display: block;
+    width: 1.9rem;
+    height: 2.5rem;
+    object-fit: cover;
+    object-position: 50% 30%;
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--ui-gilt-deep) 85%, transparent);
+  }
+
+  .ui-row__words {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .ui-row__title {
+    overflow: hidden;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ui-row__line {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ui-row__trail {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: var(--ui-space-2);
+    margin-left: auto;
+  }
+
+  .ui-row__press {
+    display: block;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: inherit;
+    text-align: inherit;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .ui-row__press::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .ui-row__press:focus-visible {
+    outline: none;
+  }
+
+  .ui-row__press:disabled {
+    cursor: default;
+  }
+
+  .ui-row--press:not(.ui-row--disabled):hover,
+  .ui-row--showing-hover {
+    background-color: color-mix(in srgb, var(--ui-cream) 7%, transparent);
+  }
+
+  .ui-row--press:not(.ui-row--disabled):has(.ui-row__press:active),
+  .ui-row--showing-pressed {
+    background-color: color-mix(in srgb, var(--ui-cream) 14%, transparent);
+  }
+
+  .ui-row:has(.ui-row__press:focus-visible),
+  .ui-row--showing-focus {
+    outline: 2px solid var(--ui-focus);
+    outline-offset: -2px;
+  }
+
+  /* Chosen: a bar of the softer words' colour down its start, which reads on either ground, and the light. */
+  .ui-row--chosen {
+    background-color: color-mix(in srgb, var(--ui-cream) 10%, transparent);
+    box-shadow: inset 3px 0 0 var(--ui-text-soft);
+  }
+
+  .ui-row--disabled {
+    opacity: 0.45;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-row {
+      transition: none;
+    }
+  }
+}
