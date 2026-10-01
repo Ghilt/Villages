@@ -118,6 +118,10 @@ bay's 400 pixels and left a sliver for what they answer, so they are the end of 
 with it. And an option the house cannot pay for is refused only in the log: the pane says nothing, and the
 press seems to do nothing.
 
+With a portrait beside every bubble, on its outer side, the two parties face each other down the feed: the
+house's figure in his cut-paper frame from the left, the messenger as the frame's bust from the right. That
+is half of the hypothesis's "a portrait on every bubble"; the scene above the feed is the other half.
+
 ## Result
 
 Open.

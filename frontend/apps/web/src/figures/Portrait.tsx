@@ -5,8 +5,8 @@ import { portraitUrl } from './portraits';
 /**
  * **A portrait in its frame**: one upright three-by-four picture of a character, in the ornament's gold.
  *
- * One component for every place a face is shown - the key figures pane now, the inspect window and
- * dialogue later - so a portrait is framed the same way wherever it hangs. The frame is two contours, a
+ * One component for every place a face is shown - the key figures pane and every bubble of a dialogue now,
+ * the inspect window later - so a portrait is framed the same way wherever it hangs. The frame is two contours, a
  * gold edge and a fainter rule inside it, which is how the house's achievement draws its shield rather
  * than with one thick line. See `LOOK-AND-FEEL.md`.
  *

@@ -3075,22 +3075,45 @@ body,
   overflow-y: auto;
 }
 
-/* A line said: who says it and the words, from the left or the right by the speaker's party. */
+/*
+ * A line said: the speaker's portrait, and beside it the bubble with who says it and the words, from the left
+ * or the right by the speaker's party. The portrait stands on the outer side and at the foot of the bubble,
+ * where its corner is squared off towards the face it comes from.
+ */
+.dialogues__said {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  max-width: 92%;
+}
+
+.dialogues__said--left {
+  align-self: flex-start;
+}
+
+.dialogues__said--right {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.dialogues__said .portrait {
+  flex: none;
+  width: 2.4rem;
+}
+
 .dialogues__bubble {
-  max-width: 85%;
+  min-width: 0;
   padding: 0.45rem 0.7rem 0.5rem;
   border: 1px solid var(--parchment-edge);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.35);
 }
 
-.dialogues__bubble--left {
-  align-self: flex-start;
+.dialogues__said--left .dialogues__bubble {
   border-bottom-left-radius: 2px;
 }
 
-.dialogues__bubble--right {
-  align-self: flex-end;
+.dialogues__said--right .dialogues__bubble {
   border-bottom-right-radius: 2px;
   background: rgba(157, 124, 42, 0.08);
 }

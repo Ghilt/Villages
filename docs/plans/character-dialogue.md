@@ -272,8 +272,9 @@ A speaker's death is tried with *kill*, in the Characters section.
    speaks and come from the left or the right by party, *next* (a chevron) shows the stretch a line at a time
    and takes the step past its last line, the options are words at the end of the feed with what each shows
    it will do, and the list mark goes back. Its first drawing put the options in a foot, which at half a
-   phone left a sliver for the lines they answer, so they are the end of the feed now. The third part is the
-   portraits beside the bubbles.
+   phone left a sliver for the lines they answer, so they are the end of the feed now. The third part is
+   done: a portrait beside every bubble, on its outer side and at its foot, the key figures' own
+   `figures/Portrait.tsx`, so somebody with no likeness is its bust. Step 9 is done.
 10. **What it gives and how it ends.** A gain in the feed, and the house card's wealth going up with it; a
     lost dialogue's closing line; a finished one read back.
 11. **The scene.** The folder, its placeholders, serving it, its test, and the speakers standing in it at

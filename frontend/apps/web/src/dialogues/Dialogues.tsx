@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'reac
 import { choose, keepReading, type Press, pressNext, type Reading, showing } from '@villages/client-core';
 import type { DialogueView, LineView, SpeakerView } from '@villages/protocol';
 
+import { Portrait } from '../figures/Portrait';
 import { completeDialogueStep, gatewayState, watchGateway } from '../net/gateway';
 import { Icon } from '../stage/Icons';
 import { PaneSizeControl } from '../stage/PaneSizeControl';
@@ -200,8 +201,10 @@ function Conversation({ dialogue, room, stepOut, onBack }: ConversationProps) {
 }
 
 /**
- * One line said, or showing: who says it and the words, from the left or the right by the speaker's party,
- * so the two sides of a conversation face each other down the feed.
+ * One line said, or showing: the speaker's portrait, and beside it a bubble with their name and the words,
+ * from the left or the right by the speaker's party, so the two sides of a conversation face each other down
+ * the feed. The portrait is the key figures' own frame, and somebody with no likeness - a messenger - is its
+ * bust in soft ink, never an empty frame.
  */
 function Bubble({
   line,
@@ -211,12 +214,16 @@ function Bubble({
   speakers: readonly SpeakerView[];
 }) {
   const speaker = speakers.find((one) => one.id === line.speaker);
+  const name = speaker?.name ?? line.speaker;
   // One party on one side and the next on the other, whatever numbers the dialogue gave them.
   const side = (speaker?.party ?? 0) % 2 === 0 ? 'left' : 'right';
   return (
-    <li className={`dialogues__bubble dialogues__bubble--${side}`}>
-      <span className="dialogues__speaker">{speaker?.name ?? line.speaker}</span>
-      <p className="dialogues__words">{line.words}</p>
+    <li className={`dialogues__said dialogues__said--${side}`}>
+      <Portrait portrait={speaker?.portrait} name={name} />
+      <div className="dialogues__bubble">
+        <span className="dialogues__speaker">{name}</span>
+        <p className="dialogues__words">{line.words}</p>
+      </div>
     </li>
   );
 }
@@ -226,7 +233,7 @@ function Option({ option, disabled, onTake }: { option: LineView; disabled: bool
   const impact = impactWords(option.revealImpact);
   return (
     <button type="button" className="dialogues__option" disabled={disabled} onClick={onTake}>
-      <span className="dialogues__said">{option.words}</span>
+      <span className="dialogues__saying">{option.words}</span>
       {impact !== null && <span className="dialogues__impact">{impact}</span>}
     </button>
   );

@@ -250,8 +250,8 @@ down the right from the house's first dialogue, at its three sizes, and on a pho
 it lists the dialogues waiting and finished, a lapsed one saying why, and a dialogue offered opens it;
 pressing one opens the conversation, which is played through in the pane: the stretch a line at a time,
 the options at the end of the feed, and each step sent from there, on the wire from version 18. The
-speakers have their names on their bubbles and no faces yet, there is no scene, and what a line gives
-shows on the house card and not yet in the feed. The debug panel's Dialogues section offers a dialogue and
+speakers have a portrait and a name on every bubble, the key figures' own frame, and a messenger the
+frame's bust; there is no scene yet, and what a line gives shows on the house card and not yet in the feed. The debug panel's Dialogues section offers a dialogue and
 does nothing else, and a requirement is never sent to a page. Its shape is decided in decision record 0067: a dialogue offered whole
 on the house's stream; only its dialogue choices, and the lines that give something or end it, recorded;
 what a line gives written as the world's own event beside the step; and hidden requirements that end a

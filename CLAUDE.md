@@ -13,6 +13,9 @@ thousands of concurrent players in one shared world.
 - One commit per increment. Conventional Commits with these scopes: `domain`, `application`, `occurrent`, `rabbit`,
   `projections`, `gateway`, `protocol`, `web`, `client-core`, `docs`, `infra`, `build`. End every commit message with
   the `Co-Authored-By` trailer.
+- **"Looks good, continue" is the word too**, and so is "good, continue": Adam's standing answer of
+  2026-10-01. Either means commit the change set he has just reviewed, then go on to the next step. Anything
+  else without "commit" - "looks good" alone, a question - is not approval.
 - **His word is the whole of the approval, and it is given once.** When Adam says commit, commit: do not ask
   again, do not restate the change set for a second confirmation, and do not wait for anything else. Saying it
   twice is not a safeguard, it is a tax, and the safeguard is that nothing is committed until he has said it at
