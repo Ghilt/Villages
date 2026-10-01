@@ -10,6 +10,7 @@ import { useCallback, useState } from 'react';
 export type Width = 'desktop' | 'phone';
 export type Ground = 'night' | 'parchment';
 export type Layers = 'hidden' | 'shown';
+export type Contrast = 'hidden' | 'shown';
 
 export interface Settings {
   /** How wide the sheet the components stand on is: the whole window, or a phone's 390 pixels. */
@@ -18,11 +19,13 @@ export interface Settings {
   readonly ground: Ground;
   /** Whether a container's layers are drawn: its embellishments' boxes, and where its content starts. */
   readonly layers: Layers;
+  /** Whether every word too faint to read against what is behind it is marked, and counted at the top. */
+  readonly contrast: Contrast;
 }
 
 const KEY = 'villages.showcase';
 
-const OPENS_AS: Settings = { width: 'desktop', ground: 'night', layers: 'hidden' };
+const OPENS_AS: Settings = { width: 'desktop', ground: 'night', layers: 'hidden', contrast: 'hidden' };
 
 function remembered(): Settings {
   try {
@@ -31,6 +34,7 @@ function remembered(): Settings {
       width: kept?.width === 'phone' ? 'phone' : OPENS_AS.width,
       ground: kept?.ground === 'parchment' ? 'parchment' : OPENS_AS.ground,
       layers: kept?.layers === 'shown' ? 'shown' : OPENS_AS.layers,
+      contrast: kept?.contrast === 'shown' ? 'shown' : OPENS_AS.contrast,
     };
   } catch {
     return OPENS_AS;

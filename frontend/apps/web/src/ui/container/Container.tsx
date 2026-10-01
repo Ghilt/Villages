@@ -35,7 +35,14 @@ export function Container({
   const { list } = usePictures();
   const border = given.border === undefined ? undefined : pictureIn(list, 'borders', given.border)?.border;
   const layout = layoutOf(given, border, (art) => pictureIn(list, 'embellishments', art));
-  const classes = ['ui-container', given.text === 'ink' ? 'ui-on-parchment' : '', className ?? '']
+  // Its words are the recipe's, ink or cream, and never whatever the container stands on: a dark pane on
+  // parchment is still a dark pane, and its words are still cream.
+  const classes = [
+    'ui-container',
+    given.text === 'ink' ? 'ui-on-parchment' : 'ui-on-night',
+    given.soft === false ? 'ui-container--one-ink' : '',
+    className ?? '',
+  ]
     .filter((one) => one !== '')
     .join(' ');
   return (

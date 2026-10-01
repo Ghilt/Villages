@@ -1,11 +1,14 @@
 import '../ui/ui.css';
 import './showcase/showcase.css';
 
+import { useRef } from 'react';
+
+import { ContrastSummary, useUnreadable } from './showcase/ContrastCheck';
 import { useDensity } from './showcase/density';
 import { SECTIONS } from './showcase/sections';
 import type { Section } from './showcase/sections';
 import { useSettings } from './showcase/settings';
-import type { Ground, Layers, Width } from './showcase/settings';
+import type { Contrast, Ground, Layers, Width } from './showcase/settings';
 
 /**
  * The component library, shown: every part the interface is built from, in every variant and state.
@@ -13,12 +16,19 @@ import type { Ground, Layers, Width } from './showcase/settings';
  * Its own page, like the event log, and needing nothing else: no game server, no map, no house. A
  * component is looked at here before the game uses it, which makes this the instrument for the interface
  * that the debug panel is for the world. The sheet the components stand on can be narrowed to a phone's
- * width and put on night or on parchment, because a component has to read on both and at both. See
- * docs/UI-COMPONENTS.md and decision record 0068.
+ * width and put on night or on parchment, because a component has to read on both and at both, and every
+ * word on it too faint to read against what is behind it can be marked. See docs/UI-COMPONENTS.md and
+ * decision record 0068.
  */
 export function UiComponents() {
   const [settings, change] = useSettings();
   const density = useDensity();
+  const sheet = useRef<HTMLElement>(null);
+  const unreadable = useUnreadable(
+    sheet,
+    settings.contrast === 'shown',
+    `${settings.ground} ${settings.width}`,
+  );
 
   return (
     <div
@@ -51,6 +61,13 @@ export function UiComponents() {
             chosen={settings.layers}
             choose={(layers) => change({ layers })}
           />
+          <Choice<Contrast>
+            label="contrast"
+            options={['hidden', 'shown']}
+            chosen={settings.contrast}
+            choose={(contrast) => change({ contrast })}
+          />
+          {settings.contrast === 'shown' && <ContrastSummary found={unreadable} />}
           <span className="showcase__density" title="screen pixels to a CSS pixel, which the seams depend on">
             screen {Number(density.toFixed(2))}x
           </span>
@@ -67,7 +84,7 @@ export function UiComponents() {
             ))}
           </ol>
         </nav>
-        <main className="showcase__sheet">
+        <main className="showcase__sheet" ref={sheet}>
           {SECTIONS.map((section) => (
             <SectionOnShow key={section.id} section={section} />
           ))}

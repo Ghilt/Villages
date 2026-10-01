@@ -209,6 +209,15 @@ what that does to them.
 
 **A fill repeats without a seam**, both ways: its left edge meets its right and its top its bottom.
 
+**A fill is light enough for ink or dark enough for cream**, and not in between: words want 4.5 to 1
+against it, the softer ink as well as the main one. Parchment is a fill for ink, night, velvet, wood and
+stone for cream, and a stone between the two is a fill neither can be read on. One the main ink reads on
+and the softer does not - the moodboard's arch, the plate's darker parchment - can still be used, by a
+recipe that says it has no softer ink. `npm run check` measures
+every recipe's fill, and the middle of every border drawn with its own, against the ink its words are in,
+and says which falls short and by how much; the page's contrast switch shows the words themselves. See
+`UI-COMPONENTS.md`.
+
 **An embellishment, a medallion, a mark or a control stands on nothing**: cut it out onto transparency, or
 save it on one flat colour and the tool keys the colour away, as it does a sprite's. One on a busy
 background is refused, with a message saying so.

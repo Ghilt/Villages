@@ -17,7 +17,9 @@ buttons, the marks and readouts, the tabs and sections, the controls, and the ca
 **`/admin/inspect-ui-components`** is the library, shown. Every component in every variant, every state
 and at more than one size, on a desktop and narrowed to a phone. It needs no game server and no map, and
 its demonstrations are live: a container can be dragged to any size, a button pressed. It is the page a
-component is looked at before it is used anywhere, and the page to read before making a pane.
+component is looked at before it is used anywhere, and the page to read before making a pane. Its
+*contrast* switch marks every word on it too faint to read against what is behind it, and counts them at
+the top: see *Words that can be read*, below.
 
 The page is the catalogue. This document is the method, and does not list what the page already shows.
 
@@ -82,6 +84,10 @@ A **recipe** is one named, typed combination of the four layers, in
   its own draws it only when there is no fill. `scale` draws the border finer or heavier than its picture
   is shown, a tooltip's at half a card's, with its cuts in the same places.
 - `text` is what the content is written in, `ink` on a light fill or `cream`, the default, on a dark one.
+  The container sets its words from it, both ways, and never takes the colour of what it stands on: a dark
+  pane on a parchment page keeps its cream. `soft: false` is for a recipe whose fill is too dark or too
+  light for the softer ink, and whatever would be softer in it is in its main ink - the title plate's
+  parchment, which is darker than a sheet, and the arch's own stone.
 - `padding` is room between the border's inner edge and the content, beyond the border's own inset.
 - An **embellishment** is a picture by name, pinned to an `anchor` - a corner, or `top`, `right`, `bottom`
   or `left` for the middle of an edge. `overhang` is how far it stands out past the box, `x` sideways and
@@ -118,8 +124,32 @@ component uses a token and never a colour of its own; a colour a component needs
 becomes one, in both places, and `tokens.test.ts` fails until it is in both.
 
 **Text colour is a role, not a colour.** Inside `.ui-root` the text is `--ui-text` and what is said about
-it `--ui-text-soft`, cream on night; `.ui-on-parchment` turns both to ink. A component sets its text in
-the two roles and reads on either ground without knowing which it is on.
+it `--ui-text-soft`, cream on night; `.ui-on-parchment` turns both to ink and `.ui-on-night` back to
+cream. A component sets its text in the two roles and reads on either ground without knowing which it is
+on, and a container says which of the two it is from its recipe.
+
+## Words that can be read
+
+**Every word wants 4.5 to 1 against what is behind it**, and large words - 24 pixels, or 18.66 and bold -
+want 3: the Web Content Accessibility Guidelines' AA. A disabled control asks nothing, as the guidelines
+have it. Each ink is chosen to reach it on what it is for: `--ui-ink` and `--ui-ink-soft` on parchment,
+`--ui-cream` and `--ui-cream-soft` on night and the dark fills. Ink on a dark fill, or cream on parchment,
+is about 1 to 1.
+
+Two checks hold it, and between them they see what either alone would not:
+
+- **`readable.test.ts`**, beside the recipes, measures what is behind every recipe's words - its fill, or
+  its border's own middle - from the picture in `world/ui/` itself, and holds both of the recipe's inks to
+  it. A fill painted too light for cream words, or a recipe that says ink on a dark fill, fails the check
+  with the recipe, the ink and the figure.
+- **The page's contrast switch** measures every word on the page against what is painted behind it, the
+  way it was drawn: up through the boxes it is in, and at each the layers under it - a fill, a border's
+  middle, a button's face, a colour - with a picture taken at its average colour. Each word that falls
+  short is dashed in red, and pressing the count at the top goes to each in turn with what it measures and
+  what it needs. It is what catches a word on a ground nobody thought of, and it is measured again
+  whenever the page changes. `admin/showcase/unreadable.ts`.
+
+`contrastOf`, `colourOf`, `over` and `contrastNeeded`, in `ui/contrast.ts`, are the arithmetic both use.
 
 **Type is set by role**, a class a role, each named for what the words are doing rather than how big they
 are: `ui-title`, `ui-epigraph`, `ui-heading`, `ui-caps`, `ui-label`, `ui-body`, `ui-quote`, and

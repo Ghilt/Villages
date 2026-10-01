@@ -58,6 +58,12 @@ export interface Recipe {
   readonly embellishments?: readonly Embellishment[];
   /** What the content is written in: ink on a light fill, cream on a dark one, which is the default. */
   readonly text?: 'ink' | 'cream';
+  /**
+   * Whether it has a softer ink as well, for what is said about a thing - a label, an aside - which it
+   * does unless it says not. One whose fill is too dark or too light for the softer ink to be read on
+   * says false, and whatever would be softer in it is in its main ink: the title plate's parchment.
+   */
+  readonly soft?: boolean;
   /** Room between the border's inner edge and the content, beyond the border's own inset. */
   readonly padding?: number | Sides;
   /**

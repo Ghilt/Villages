@@ -35,7 +35,7 @@
 
     /* Ink on parchment, and cream on night. */
     --ui-ink: #2b1d10;
-    --ui-ink-soft: #5c4832;
+    --ui-ink-soft: #503d29;
     --ui-cream: #ebe3d1;
     --ui-cream-soft: #b8b0a0;
 
@@ -159,10 +159,20 @@
     font-feature-settings: 'lnum', 'tnum';
   }
 
-  /* On parchment the ink is the text. */
+  /*
+   * On parchment the ink is the text, and on night the cream, whatever is round it: a container says which
+   * it is from its recipe, so a dark pane on a parchment page keeps its cream words rather than taking the
+   * page's ink. Each pair is 4.5 to 1 or more on the fills it is for, which the recipes' test holds.
+   */
   .ui-on-parchment {
     --ui-text: var(--ui-ink);
     --ui-text-soft: var(--ui-ink-soft);
+    color: var(--ui-text);
+  }
+
+  .ui-on-night {
+    --ui-text: var(--ui-cream);
+    --ui-text-soft: var(--ui-cream-soft);
     color: var(--ui-text);
   }
 }

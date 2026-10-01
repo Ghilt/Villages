@@ -223,7 +223,10 @@ three pictures and worked by the browser's own slider under the painting, the me
 second is the switch, the choice of a few and hold to confirm, drawn from pictures already in the folder:
 the oval face and the slider's knob, the card's frame, the drape's face. Nine was four components, so it
 is two halves as well: the first is the card and the grid, what the key figures need, and the second the
-carousel and its dots, and the list. Adam's first frame of his own,
+carousel and its dots, and the list. Between the two, Adam saw dark words on dark panes: a container with a
+dark fill had been taking the ink of a parchment page it stood on. Every container now sets its words from
+its recipe, a test measures every recipe's fill against both its inks, and the page has a contrast switch
+that marks any word too faint to read; see `UI-COMPONENTS.md`. Adam's first frame of his own,
 `gilt-cherubs`, came in during it as an image model's nine tiles with gaps between them, and went into the
 folder joined, with its middle as a fill, `dark-felt`, and a recipe, `pane.cherubs`; his second,
 `gilt-acanthus`, came on stone with a box of white over its middle, and with it the nine-slice tool and

@@ -38,6 +38,11 @@
     min-width: 0;
   }
 
+  /* A recipe with no softer ink says everything in its main one. */
+  .ui-container.ui-container--one-ink {
+    --ui-text-soft: var(--ui-text);
+  }
+
   /* Where each embellishment's box is and where the content starts: seen only inside something that asks. */
   [data-ui-layers='shown'] .ui-embellishment {
     outline: 1px dashed #ff5fd4;

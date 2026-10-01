@@ -43,8 +43,11 @@ export const RECIPES = {
   /** The moodboard's own framed pane, with its drape and its cherub painted into the corners. */
   'pane.drape': { border: 'gilt-drape', padding: 4 },
 
-  /** A stone arch on two columns, its own middle showing. */
-  'pane.arch': { border: 'stone-arch', padding: 4 },
+  /**
+   * A stone arch on two columns, its own middle showing: the moodboard's stone, which cream is read on and
+   * the softer cream is not, so it has no softer ink.
+   */
+  'pane.arch': { border: 'stone-arch', soft: false, padding: 4 },
 
   /**
    * Adam's first frame: drapes in all four corners and cherubs in three, the moulding repeated between
@@ -67,11 +70,14 @@ export const RECIPES = {
   /** Something that happened, as the moodboard's Reformation card has it: a narrow gilt frame on night. */
   'card.event': { border: 'gilt-thin', fill: 'night', padding: 6 },
 
-  /** A place's name and its figure, on the moodboard's Paris plate: its own parchment, and as wide as its words. */
-  'plate.place': { border: 'plate', text: 'ink', padding: [0, 4, 0, 0] },
+  /**
+   * A place's name and its figure, on the moodboard's Paris plate: its own parchment, and as wide as its
+   * words. That parchment is darker than a sheet, too dark for the softer ink, so it has none.
+   */
+  'plate.place': { border: 'plate', text: 'ink', soft: false, padding: [0, 4, 0, 0] },
 
   /** A pane's name on the same plate, a little over half its size. */
-  'plate.heading': { border: 'plate', scale: 0.6, text: 'ink', padding: [0, 4, 0, 2] },
+  'plate.heading': { border: 'plate', scale: 0.6, text: 'ink', soft: false, padding: [0, 4, 0, 2] },
 
   /** What a choice of a few stands its options in: the card's frame at half its size, on night. */
   'choice.frame': { border: 'gilt-thin', scale: 0.5, fill: 'night', padding: 1 },

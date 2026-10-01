@@ -17,8 +17,11 @@ const PACKAGES_ALLOWED = [
   /^@villages\/world$/,
 ];
 
-/** A test may also import its runner. */
-const PACKAGES_ALLOWED_IN_TESTS = [/^vitest$/];
+/**
+ * A test may also import its runner, and Node and sharp: a test that measures the pictures in `world/ui/`
+ * themselves, as the recipes' readability does, reads them from the disk. Nothing a test imports is shown.
+ */
+const PACKAGES_ALLOWED_IN_TESTS = [/^vitest$/, /^node:/, /^sharp$/];
 
 const SOURCES = import.meta.glob<string>('./**/*.{ts,tsx,css}', {
   query: '?raw',

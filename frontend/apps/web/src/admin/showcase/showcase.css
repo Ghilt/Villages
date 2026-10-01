@@ -391,7 +391,7 @@
 }
 
 .showcase[data-ground='parchment'] .showcase__face-name {
-  color: var(--ui-gilt-deep);
+  color: var(--ui-ink-soft);
 }
 
 .showcase__face-note {
@@ -570,7 +570,7 @@
   border-left: 2px solid var(--ui-gilt-deep);
 }
 
-.showcase[data-ground='parchment'] .showcase__recipe {
+.showcase[data-ground='parchment'] .showcase__stage .showcase__recipe {
   color: var(--ui-ink-soft);
   background: rgba(255, 255, 255, 0.25);
 }
@@ -745,4 +745,37 @@
 .showcase__room {
   outline: 1px dashed var(--ui-night-edge);
   outline-offset: 2px;
+}
+
+/*
+ * The contrast check: every word too faint to read against what is behind it, dashed in red over whatever
+ * else it is drawn with, and what was found beside the switch.
+ */
+.showcase [data-ui-unreadable] {
+  outline: 2px dashed #ff4d4d !important;
+  outline-offset: 1px !important;
+}
+
+.showcase__contrast {
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  font-size: 0.76rem;
+  color: var(--ui-cream-soft);
+}
+
+.showcase__contrast--fine {
+  color: #9ccc7a;
+}
+
+.showcase__contrast--faint {
+  max-width: 34rem;
+  padding: 0.15rem 0.45rem;
+  overflow: hidden;
+  color: #ff8a80;
+  text-align: start;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: none;
+  border: 1px solid #ff8a80;
+  border-radius: 3px;
+  cursor: pointer;
 }
