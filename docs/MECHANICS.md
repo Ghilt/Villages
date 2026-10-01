@@ -185,6 +185,8 @@ the aliveness it exists for.
 A **pane**, there from the first dialogue a house is offered and never closed after that, in two states:
 
 - **The list**: the dialogues waiting, and under them the ones finished, a lapsed one with why. It scrolls.
+  Newest first in both, each with its title and who speaks in it, every name standing alone as it would on
+  a bubble, and one waiting is marked *new* until a step has been taken in it and *begun* after.
 - **A conversation**: pressing a dialogue opens it, from its start or from where it was left. The scene at
   the top, the feed under it, scrolling, and at its foot *next* or the dialogue choice's options. A finished
   one opens to be read back.
@@ -242,7 +244,8 @@ requirements stay on the server. An option can spend, from version 16, and is re
 pay, and from version 17 each option carries its reveal impact. A speaker's death ends every open dialogue they
 speak in, as lost, naming who died. Nothing in the world offers one yet. The pane stands in the column
 down the right from the house's first dialogue, at its three sizes, and on a phone navigation lists it;
-it says only how many are waiting and finished so far, and a dialogue offered opens it. The debug
+it lists the dialogues waiting and finished, a lapsed one saying why, and a dialogue offered opens it;
+pressing one in the list opens nothing yet. The debug
 panel's Dialogues section lists every dialogue as the player may know it and can show its requirements,
 and no command on the wire takes a step. Its shape is decided in decision record 0067: a dialogue offered
 whole on the house's stream; only its dialogue choices, and the lines that give something or end it,

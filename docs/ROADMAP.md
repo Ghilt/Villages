@@ -47,7 +47,8 @@ character dialogue, the newest.
   own description. The offer, the walk and the step are built on the server, and the debug panel offers a
   sample and lists what the house was offered, and a speaker's death ends their dialogues as lost. The pane
   stands in a column down the right of the spread, 0069, drawn in the page, 0070, opens when a dialogue is
-  offered, and says so far only how many are waiting; nothing in the world offers one yet.
+  offered, and lists them, waiting and finished; pressing one opens nothing yet, and nothing in the world
+  offers one.
 - **0.4** Local infrastructure: MongoDB replica set and RabbitMQ in Compose
 - **0.8** Testcontainers smoke test on MongoDB and RabbitMQ
 - **1.6** The bridge from the store to the broker

@@ -248,7 +248,10 @@ A speaker's death is tried with *kill*, in the Characters section.
    arriving opens the pane, from its strip in the spread and on a phone into the bay that is not the map's,
    at half, through `dialogues/opening.ts`; what arrives is a dialogue waiting that the page has not been
    shown before. Step 7 is done.
-8. **The list**: waiting and finished, scrolling.
+8. **The list**: waiting and finished, scrolling. Done: `listOf` in `dialogues/describe.ts` says what each
+   row is - the title, who speaks in it or, for one that lapsed, why it ended, and *new* or *begun* for one
+   waiting - newest first in both groups, and the pane draws it in place of its count, which only its strip
+   keeps. Pressing a row opens nothing until step 9.
 9. **A conversation you can play.** The reading place in `client-core`, the step on the wire (version 16),
    the bubbles with a portrait and a name beside each, from the left and the right by party, *next*, a
    dialogue choice's options, and picking up where it was left. **Before drawing it, ask Adam whether *next*

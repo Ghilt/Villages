@@ -96,7 +96,11 @@ It is squeezed to a third first now, as the left one is, which leaves 192 there 
 looked at yet: the letter and a dialogue together, because the only letter is the founding one, so the tests
 hold it. What opens the pane is a dialogue waiting that the page has not been shown before, so a step, a
 reconnect or the list sent again never reopens a pane the player put away; a test proves it by making the
-page forget. Its count of waiting and finished is all it says until the list.
+page forget.
+
+The list showed one thing about words: a speaker's name is written to stand alone, as it will on a bubble -
+*A messenger* - and is wrong inside a sentence, *Frederick Falk and A messenger*. So the list names each
+alone, *Frederick Falk · A messenger*, rather than mending capitals in a language that may not be English.
 
 ## Result
 

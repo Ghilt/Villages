@@ -47,12 +47,60 @@ function nameOf(character: string, speakers: readonly SpeakerView[]): string {
 }
 
 /**
- * How many of the house's dialogues are waiting and how many are finished, in the pane's words, until the
- * pane lists them. A lost one is finished: it ended where it stood. See decision record 0067.
+ * How many of the house's dialogues are waiting and how many are finished, in the pane's words, which is
+ * what its strip says. A lapsed one is finished: it ended where it stood. See decision record 0067.
  */
 export function howMany(dialogues: readonly DialogueView[]): string {
   const waiting = dialogues.filter((one) => one.ending.kind === 'open').length;
   return `${waiting} waiting, ${dialogues.length - waiting} finished`;
+}
+
+/** One dialogue as the pane lists it. */
+export interface ListedDialogue {
+  readonly id: string;
+  readonly title: string;
+  /**
+   * Who speaks in it, each name standing alone as it does on a bubble, because a name like "A messenger"
+   * is right on its own and wrong inside a sentence; or, for one that lapsed, why it ended.
+   */
+  readonly line: string;
+  /** For one waiting, whether a step has been taken in it yet; nothing for one finished. */
+  readonly progress: 'new' | 'begun' | null;
+  readonly lapsed: boolean;
+}
+
+/** The pane's list, in its two groups. */
+export interface DialogueList {
+  readonly waiting: readonly ListedDialogue[];
+  readonly finished: readonly ListedDialogue[];
+}
+
+/**
+ * The pane's list: the dialogues waiting, and under them the ones finished, a lapsed one saying why.
+ *
+ * Newest first in both, because the server sends them in the order they were offered and the one a player
+ * looks for is the one that has just arrived. A dialogue is begun once a step has been taken in it, which is
+ * what the server knows; lines read and not yet stepped past are the browser's and are read again after a
+ * reload. See `MECHANICS.md`.
+ */
+export function listOf(dialogues: readonly DialogueView[]): DialogueList {
+  const listed = [...dialogues].reverse().map((one): ListedDialogue => {
+    const lapse =
+      one.ending.kind === 'lost'
+        ? `${whyLost(one.ending.because, one.speakers)} before it was finished`
+        : null;
+    return {
+      id: one.id,
+      title: one.title,
+      line: lapse ?? one.speakers.map((speaker) => speaker.name).join(' · '),
+      progress: one.ending.kind === 'open' ? (one.said.length === 0 ? 'new' : 'begun') : null,
+      lapsed: lapse !== null,
+    };
+  });
+  return {
+    waiting: listed.filter((one) => one.progress !== null),
+    finished: listed.filter((one) => one.progress === null),
+  };
 }
 
 /** Where a dialogue stands, in the log's words: what is left to read, and whether a dialogue choice waits. */

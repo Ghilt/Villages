@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { DialogueView, LineView } from '@villages/protocol';
 
-import { howMany, impactWords, requirementWords, standing, whatChangedIn } from './describe';
+import { howMany, impactWords, listOf, requirementWords, standing, whatChangedIn } from './describe';
 
 function line(id: string): LineView {
   return { id, speaker: 'messenger', words: `The words of ${id}.` };
@@ -30,6 +30,54 @@ describe('how many there are', () => {
     expect(howMany([letter(), letter({ ending: { kind: 'completed' } }), lost])).toBe(
       '1 waiting, 2 finished',
     );
+  });
+});
+
+describe("the pane's list", () => {
+  const frederick = { id: 'falk', party: 0, name: 'Frederick Falk', character: 'c-falk' };
+  const messenger = { id: 'messenger', party: 1, name: 'A messenger' };
+  const offered = (id: string, over: Partial<DialogueView> = {}) =>
+    letter({ id, speakers: [frederick, messenger], ...over });
+
+  it('puts the dialogues waiting above the ones finished, newest first in both', () => {
+    const list = listOf([
+      offered('first', { ending: { kind: 'completed' } }),
+      offered('second'),
+      offered('third', { ending: { kind: 'completed' } }),
+      offered('fourth'),
+    ]);
+
+    expect(list.waiting.map((one) => one.id)).toEqual(['fourth', 'second']);
+    expect(list.finished.map((one) => one.id)).toEqual(['third', 'first']);
+  });
+
+  // Each name stands alone, as on a bubble: "A messenger" is right there and wrong inside a sentence.
+  it('names who speaks in one, each name standing alone', () => {
+    const three = [frederick, messenger, { id: 'clerk', party: 1, name: 'A clerk' }];
+
+    expect(listOf([offered('a')]).waiting[0]?.line).toBe('Frederick Falk · A messenger');
+    expect(listOf([offered('a', { speakers: [messenger] })]).waiting[0]?.line).toBe('A messenger');
+    expect(listOf([offered('a', { speakers: three })]).waiting[0]?.line).toBe(
+      'Frederick Falk · A messenger · A clerk',
+    );
+  });
+
+  // Begun is what the server knows: a step taken. Lines read and not stepped past are the browser's.
+  it('says whether one waiting is new or begun', () => {
+    const said = [{ ...line('arrives'), effects: [] }];
+
+    expect(listOf([offered('a')]).waiting[0]?.progress).toBe('new');
+    expect(listOf([offered('a', { said })]).waiting[0]?.progress).toBe('begun');
+  });
+
+  it('lists a lapsed one as finished, saying why in place of who', () => {
+    const lapsed = listOf([
+      offered('a', { ending: { kind: 'lost', because: { kind: 'alive', character: 'c-falk' } } }),
+    ]).finished[0];
+
+    expect(lapsed?.line).toBe('Frederick Falk died before it was finished');
+    expect(lapsed?.lapsed).toBe(true);
+    expect(lapsed?.progress).toBeNull();
   });
 });
 
