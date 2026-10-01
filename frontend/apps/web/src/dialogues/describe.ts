@@ -46,6 +46,15 @@ function nameOf(character: string, speakers: readonly SpeakerView[]): string {
   return speakers.find((one) => one.character === character)?.name ?? `character ${character.slice(0, 8)}`;
 }
 
+/**
+ * How many of the house's dialogues are waiting and how many are finished, in the pane's words, until the
+ * pane lists them. A lost one is finished: it ended where it stood. See decision record 0067.
+ */
+export function howMany(dialogues: readonly DialogueView[]): string {
+  const waiting = dialogues.filter((one) => one.ending.kind === 'open').length;
+  return `${waiting} waiting, ${dialogues.length - waiting} finished`;
+}
+
 /** Where a dialogue stands, in the log's words: what is left to read, and whether a dialogue choice waits. */
 export function standing(dialogue: DialogueView): string {
   switch (dialogue.ending.kind) {

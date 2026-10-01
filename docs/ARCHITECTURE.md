@@ -287,9 +287,9 @@ frame changing. See `SETTING.md` and `GLOSSARY.md` for what each of the five is.
 
 ## What a dialogue asks of the server and the client
 
-Nothing of this is built. `MECHANICS.md` describes **character dialogue**, decision record 0067 decides its
-shape, and `docs/plans/character-dialogue.md` is the order it is built in; what follows is what it costs the
-program, recorded before anything is written so that the first increment starts from it.
+`MECHANICS.md` describes **character dialogue**, decision record 0067 decides its shape, and
+`docs/plans/character-dialogue.md` is the order it is built in; what follows is what it costs the program.
+The server's half is built, and the pane stands in its column; the reading is not written yet.
 
 **The server walks a dialogue, and holds back what has not been reached.** A dialogue is offered whole on the
 house's stream, and where it has got to is one pure function in the domain, the walk, `Dialogue.walk`: what
@@ -306,24 +306,18 @@ logic says. It keeps its place while what it reads is unchanged, and reads the s
 after a reload. A dialogue that keeps its state in a React component is a dialogue that can only be tested by
 clicking through it.
 
-**Where it is drawn is still an open choice, and it matters.** PixiJS is only in `sprites/` today, where it
-draws the map's overlay behind the `SpriteRenderer` interface: the sprites, the scenery and the fog. Every
-other piece of interface, the parchment included, is React and the DOM. A dialogue is interface rather than
-map, so the DOM is where it would naturally go — but the mechanic exists for its feel, and characters that
-enter, leave and react are what Pixi is for. The two routes:
-
-- **DOM and CSS.** Simplest, responsive for free, animation limited to what CSS transitions and transforms
-  give. Nothing new in the stack.
-- **A Pixi surface inside the panel.** Sprite sheets, tweens and per-character animation, at the cost of
-  another WebGL surface beside the map's and a layout that has to be driven rather than declared.
-
-The DOM is the recommendation: what Adam has described - a scene, a feed of bubbles, a list - is the shape of
-a document, and the movement in the scene is fades and transforms. Whichever is picked gets a decision record
-before the pane is drawn, because it is hard to reverse once a dozen conversations are written against it.
+**It is drawn in the page, not in Pixi.** PixiJS is only in `sprites/`, where it draws the map's overlay
+behind the `SpriteRenderer` interface: the sprites, the scenery and the fog. Every other piece of interface,
+the parchment included, is React and the DOM, and a dialogue is interface rather than map. What Adam has
+described - a scene, a feed of bubbles, a list - is the shape of a document, and the movement in it is fades
+and transforms, which CSS does; a Pixi surface in the pane would have been a second WebGL context, a layout
+driven by hand at every size, and text drawn into a canvas. Decision record 0070, written before the pane
+was drawn, because it is hard to reverse once a dozen conversations are written against it.
 
 **It is responsive from the first line of it**, and a pane like any other: on a desktop it takes a column
-down the right of the stage, and on a phone it takes a bay and can be opened out. See `RESPONSIVE-DESIGN.md`,
-and the mechanic's UI in `MECHANICS.md`.
+down the right of the stage, the `right` tile, which is cut last from what the other tiles leave (0069), and
+on a phone it takes a bay and can be opened out. See `RESPONSIVE-DESIGN.md`, and the mechanic's UI in
+`MECHANICS.md`.
 
 ## What the bays ask of the client
 

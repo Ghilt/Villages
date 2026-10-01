@@ -2941,6 +2941,85 @@ body,
 }
 
 /*
+ * **Character dialogue**, standing in the column down the right edge.
+ *
+ * The parchment every pane is drawn on, set into the stage's right, top and bottom edges as the column on
+ * the left is set into the left, so the only edges it draws are the one facing the map and the foot it has
+ * when it stops above a letter or is put away. See decision record 0069.
+ */
+.dialogues {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--parchment);
+  border: 1px solid var(--parchment-edge);
+  border-width: 0 0 1px 1px;
+  box-shadow: -2px 0 18px var(--shadow);
+  pointer-events: auto;
+}
+
+.dialogues__head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: none;
+  padding: 0.45rem calc(0.4rem + var(--corner-right, 0px)) 0.4rem 0.75rem;
+  border-bottom: 1px solid var(--parchment-edge);
+}
+
+.dialogues__name {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: normal;
+  font-variant: small-caps;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* How many are waiting and finished, until the pane lists them. */
+.dialogues__count {
+  margin: 0.75rem;
+  font-size: 0.95rem;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+/* Put away: its name, how many there are, and the way back, as a strip across the top of the column. */
+.dialogues--strip {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.6rem;
+  /* The compass is standing in the far end of this strip, so whatever the strip put there - the marks
+     on four of them, the word on the map's - steps in from the right rather than sitting under it. */
+  padding: 0 calc(0.3rem + var(--corner-right, 0px)) 0 0.75rem;
+}
+
+.dialogues--strip .dialogues__name {
+  flex: none;
+}
+
+.dialogues--strip .dialogues__count {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* In a bay it fills it edge to edge, as a window does, because a bay has no edge of the stage to sit into. */
+.stage[data-form='bays'] .bay--dialogues .dialogues {
+  border-width: 1px 0 0;
+  box-shadow: none;
+}
+
+/*
  * A strip that is a narrow upright sliver rather than a low wide band.
  *
  * Cut into columns - a phone in landscape - a put-away pane is 44 pixels **wide** and the whole height,
@@ -2974,6 +3053,7 @@ body,
   .inspect--strip,
   .navigate--strip,
   .choice--strip,
+  .dialogues--strip,
   .map-strip {
     /*
      * Reversed, so the marks are at the top and the name reads down from under them - the strip is 44
@@ -2991,6 +3071,7 @@ body,
   .inspect--strip .inspect__name,
   .navigate--strip .navigate__kind,
   .choice--strip .choice__aside,
+  .dialogues--strip .dialogues__name,
   .map-strip .map-strip__name {
     writing-mode: vertical-rl;
     /* The strip is the whole height of the stage, so the name has all of it to be trimmed against. */
@@ -3001,6 +3082,11 @@ body,
   .pane-size,
   .navigate__ways {
     flex-direction: column;
+  }
+
+  /* Turned, there is room down the strip for one name and it is the pane's. */
+  .dialogues--strip .dialogues__count {
+    display: none;
   }
 }
 

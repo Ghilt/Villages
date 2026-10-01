@@ -388,7 +388,9 @@ Commands are added here as the increments land:
   every open dialogue they speak in is lost, the section saying who died. The page names the sample and
   sends none of its words. The asking and the answer are lines of the log under `dialogues`, and so is where
   each dialogue stands whenever one changes, as far as the player may know it; the dialogue itself, whole,
-  is at `/admin/inspect-events`. Nothing shows a dialogue in the game yet. See `docs/adr/0067` and
+  is at `/admin/inspect-events`. In the game, the house's first dialogue puts up the **dialogues** pane, a
+  column down the right of the spread with its three sizes, and a pane navigation lists on a phone; it says
+  only how many are waiting and finished so far. See `docs/adr/0067`, `0069` and `0070`, and
   `docs/plans/character-dialogue.md`.
 - What grows where: `world/biomes.json`, hand-edited, one entry a kind and one a biome. What reads it is
   `npm run world:sprites --prefix frontend`, which works out a biome for every sixteen world units and

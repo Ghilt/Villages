@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { DialogueView, LineView } from '@villages/protocol';
 
-import { impactWords, requirementWords, standing, whatChangedIn } from './describe';
+import { howMany, impactWords, requirementWords, standing, whatChangedIn } from './describe';
 
 function line(id: string): LineView {
   return { id, speaker: 'messenger', words: `The words of ${id}.` };
@@ -21,6 +21,17 @@ function letter(over: Partial<DialogueView> = {}): DialogueView {
     ...over,
   };
 }
+
+describe('how many there are', () => {
+  it('counts the open ones as waiting, and the completed and the lost as finished', () => {
+    const lost = letter({ ending: { kind: 'lost', because: { kind: 'alive', character: 'c' } } });
+
+    expect(howMany([])).toBe('0 waiting, 0 finished');
+    expect(howMany([letter(), letter({ ending: { kind: 'completed' } }), lost])).toBe(
+      '1 waiting, 2 finished',
+    );
+  });
+});
 
 describe('where a dialogue stands', () => {
   it('says what is left to read, and the dialogue choice it ends in', () => {

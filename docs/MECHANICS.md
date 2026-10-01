@@ -192,13 +192,13 @@ A **pane**, there from the first dialogue a house is offered and never closed af
 **In the spread** it takes a column down the right edge of the stage, set into it as the column on the left
 is set into the left edge, and top to bottom, because a conversation is long:
 
-- **Normal**: about 480 wide, wider than the column on the left, so there is room for a picture in the scene.
+- **Normal**: 480 wide, wider than the column on the left, so there is room for a picture in the scene. On a
+  narrow stage it is squeezed to a third, as the column on the left is.
 - **Opened out**: the right half of the stage.
 - **Put away**: a strip at the top right, with its name.
 
-The layout has no tile on the right yet: it gets one, with a decision record of its own, when this pane is
-built. Where the column would meet the letter along the bottom on a narrow desktop, the letter keeps its
-room and the column stops above it.
+It opens at the normal size. Where the column would meet the letter along the bottom on a narrow desktop,
+the letter keeps its room and the column stops above it. The column is decision record 0069's.
 
 **On a phone** it is a pane like any other, with no special treatment: it takes a bay, and the player opens
 it out when they want the whole screen for it.
@@ -226,7 +226,7 @@ does.
 
 ### Where it stands
 
-The offer is in the source, on the server and nowhere else. A dialogue checks itself when it is made, so
+The offer is in the source. A dialogue checks itself when it is made, so
 one that could loop, or that leads to a line it does not have, is refused before anything is written, and
 `OfferDialogue` writes it whole on the house's stream, where the house keeps every one it has open. An
 option of a choice can grant a resource too, on the wire from version 13. `CompleteDialogueStep` takes a step
@@ -238,14 +238,14 @@ keeps every dialogue a house was offered and how far each has got, and the playe
 it has reached, from wire version 15: the lines past the next step, what a line will give and the
 requirements stay on the server. An option can spend, from version 16, and is refused while the house cannot
 pay, and from version 17 each option carries its reveal impact. A speaker's death ends every open dialogue they
-speak in, as lost, naming who died. Nothing in the world offers one yet, nothing
-but the debug panel's Dialogues section, which lists every dialogue as the player may know it and can show
-its requirements, shows one, and no command on the wire takes a step. Its shape
-is decided in decision record 0067: a
-dialogue offered whole on the house's stream; only its dialogue choices, and the lines that give something
-or end it, recorded; what a line gives written as the world's own event beside the step; and hidden
-requirements that end a dialogue when one fails, with the server holding back what the player has not
-reached. `docs/plans/character-dialogue.md` is the order it is built in, one commit a step, and experiment
+speak in, as lost, naming who died. Nothing in the world offers one yet. The pane stands in the column
+down the right from the house's first dialogue, at its three sizes, and on a phone navigation lists it;
+it says only how many are waiting and finished so far, and does not yet open when one arrives. The debug
+panel's Dialogues section lists every dialogue as the player may know it and can show its requirements,
+and no command on the wire takes a step. Its shape is decided in decision record 0067: a dialogue offered
+whole on the house's stream; only its dialogue choices, and the lines that give something or end it,
+recorded; what a line gives written as the world's own event beside the step; and hidden requirements that
+end a dialogue when one fails, with the server holding back what the player has not reached. `docs/plans/character-dialogue.md` is the order it is built in, one commit a step, and experiment
 0014 is what it is meant to show. `ARCHITECTURE.md` says what it asks of the server and the client.
 
 ---

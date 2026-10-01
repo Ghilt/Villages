@@ -6,6 +6,7 @@ import type { CharacterOnMapView, ChoiceView, HouseView } from '@villages/protoc
 
 import { AreaOverlay } from './areas/AreaOverlay';
 import { Choosing } from './choice/Choosing';
+import { Dialogues } from './dialogues/Dialogues';
 import { DebugPanel } from './debug/DebugPanel';
 import { Desk } from './desk/Desk';
 import { Grips } from './debug/Grips';
@@ -29,7 +30,14 @@ import { MapView } from './map/MapView';
 import { Room } from './room/Room';
 import { Stage } from './stage/Stage';
 import { formNow, roomToRead, takeOver, theMapsBay } from './stage/bays';
-import { CHOICE_PANE, HOUSE_PANE, KEY_FIGURES_PANE, MAP_PANE, NAVIGATION_PANE } from './stage/panes';
+import {
+  CHOICE_PANE,
+  DIALOGUE_PANE,
+  HOUSE_PANE,
+  KEY_FIGURES_PANE,
+  MAP_PANE,
+  NAVIGATION_PANE,
+} from './stage/panes';
 import { worldRootOf } from './map/masters';
 import { cameraNow, watchCamera } from './debug/camera';
 import { DEFAULT_RENDERER, RENDERERS, applyRenderer } from './map/renderers';
@@ -284,6 +292,9 @@ export function App({ master }: AppProps) {
           }
           if (id === CHOICE_PANE.id) {
             return <Choosing room={room} />;
+          }
+          if (id === DIALOGUE_PANE.id) {
+            return <Dialogues room={room} />;
           }
           const subject = subjectOfPane(id);
           return subject === null ? null : <Inspecting subject={subject} room={room} along={along} />;

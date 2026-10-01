@@ -26,8 +26,8 @@ is no MongoDB and no RabbitMQ on the machine yet.
 ## Now
 
 Characters and key figures are built and waiting on Adam's eye. Nothing else here is started, and the four
-after them wait on the same thing. Fog of war, the exception, is under way a step at a time. Character
-dialogue, the newest, is planned and nothing of it is built.
+after them wait on the same thing. Fog of war, the exception, is under way a step at a time, and so is
+character dialogue, the newest.
 
 - **Characters and key figures**: the people of the world, each with a history of their own, and the
   house's tie to the few it acts through, shown in a pane in the corner beside the house status. The shape
@@ -45,8 +45,9 @@ dialogue, the newest, is planned and nothing of it is built.
   the player never sees fails. The shape is decision record 0067 and the steps, one commit each, are in
   `docs/plans/character-dialogue.md`; the hypothesis is experiment 0014. Planned on 2026-09-27 from Adam's
   own description. The offer, the walk and the step are built on the server, and the debug panel offers a
-  sample and lists what the house was offered, and a speaker's death ends their dialogues as lost; nothing in
-  the world offers one yet, and no pane shows one.
+  sample and lists what the house was offered, and a speaker's death ends their dialogues as lost. The pane
+  stands in a column down the right of the spread, 0069, drawn in the page, 0070, and says so far only how
+  many are waiting; nothing in the world offers one yet.
 - **0.4** Local infrastructure: MongoDB replica set and RabbitMQ in Compose
 - **0.8** Testcontainers smoke test on MongoDB and RabbitMQ
 - **1.6** The bridge from the store to the broker

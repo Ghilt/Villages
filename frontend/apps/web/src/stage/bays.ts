@@ -332,7 +332,9 @@ export function askFor(id: string, size: PaneSize): void {
       note('bay', `${pane.spread === 'bottomLeft' ? 'the corner' : pane.spread} ${SAID[size]}`);
       return;
     }
-    if (state.heights[id] === size) {
+    // What it is at, which is what it opens at until it has been asked for anything: asking a pane that
+    // opens at its normal size for its normal size changes nothing, and says nothing.
+    if (sizeAsked(pane, state) === size) {
       return;
     }
     settle({ ...state, heights: { ...state.heights, [id]: size } });

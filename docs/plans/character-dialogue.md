@@ -154,17 +154,19 @@ What it draws at each size is `MECHANICS.md`'s; this is what it needs.
 A new tile, `right`, in `stage/bayBox.ts`, set into the stage's right edge as the column is set into the
 left. The rule to build and test in step 7:
 
-- 480 wide at the normal size, half the stage opened out and never less than the normal size, and a strip
-  at the top when it is put away.
+- 480 wide at the normal size, squeezed to a third of a narrow stage first as the left column is, and never
+  below 288; half the stage opened out and never less than the normal size; and a strip at the top when it
+  is put away.
 - Never within a gutter of the wider of the rail and the corner, so the corner opened out is counted too.
 - The letter along the bottom is centred between the two columns while it has its 281 there; otherwise it
   keeps the place it has today and the right column stops a gutter above it.
 - The sweep in `bayBox.test.ts` gains a loop over the right tile, and the letter's floor test gains its cases.
 
-What the arithmetic already says, to be judged by eye in step 7's decision record: below about 784 wide the
-open column leaves no map; the letter moves from under the column to between the two columns at about 1172;
-and the debug panel's badge and the map's controls in the bottom right corner sit under the column's top and
-foot.
+The squeeze is the one change from what was first planned. Without it the column took everything up to a
+gutter from the left one, which left 16 pixels of map on a 768-wide stage, and a dialogue stands there for
+good. What was judged by eye, and what it costs, is decision record 0069: the letter moves from under the
+column to between the two columns at 889 wide, and the debug panel's badge sits over the column's size
+control while the panel is minimised.
 
 ## The scenes
 
@@ -238,7 +240,12 @@ A speaker's death is tried with *kill*, in the Characters section.
    kinds. Step 6 is done.
 7. **The right bay**, and the pane standing in it, opening when a dialogue arrives. The decision records for
    the bay and for drawing a dialogue in the DOM rather than in Pixi, and `RESPONSIVE-DESIGN.md`. The column,
-   its three sizes, and a phone.
+   its three sizes, and a phone. In two commits. The first is done: the `right` tile in `stage/bayBox.ts`,
+   `DIALOGUE_PANE` standing in it from the house's first dialogue and opening at its normal width, a speech
+   mark, the pane drawing its name and how many are waiting and finished, `standingPanes` taking what is
+   present, decision record 0069 for the column and 0070 for drawing it in the page, written before the
+   pane was drawn as `ARCHITECTURE.md` asked, and `RESPONSIVE-DESIGN.md`. The second makes a dialogue
+   arriving open the pane.
 8. **The list**: waiting and finished, scrolling.
 9. **A conversation you can play.** The reading place in `client-core`, the step on the wire (version 16),
    the bubbles with a portrait and a name beside each, from the left and the right by party, *next*, a
