@@ -168,6 +168,15 @@ the cuts the content starts; `outset` how far the border stands out past the box
 picture's own middle is drawn, rather than left for a fill; `fillUnder` how far a fill reaches under the
 border, half of each cut if it is not said. Only `slice` has to be there.
 
+**Where the content starts need not be the cuts.** `content`, said instead of `inset`, is how far in from
+each edge of the box the content starts, whatever the cuts are: a frame whose corners are deep - a drape,
+a cherub, a leaf - and whose edges are thin says it, so that its words start just inside the moulding and
+clear of the corners, rather than past the cuts:
+
+    { "slice": [397, 395, 400, 383], "repeat": "round", "content": [140, 135, 173, 124] }
+
+The page's drag box draws the cuts dashed and labels where the content starts, so the two are seen apart.
+
 The title plate is a border too, `plate`, whose own middle is its parchment, so its file says
 `"middle": true` and a recipe lays no fill under it.
 

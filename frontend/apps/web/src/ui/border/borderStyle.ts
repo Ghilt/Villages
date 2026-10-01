@@ -106,13 +106,17 @@ export function fillInsetOf(border: UiBorder | undefined): Sides {
   ];
 }
 
-/** Where the content starts inside a box with this border: past the cut, and then the border's inset. */
+/**
+ * Where the content starts inside a box with this border: past the cut and then the border's inset, or
+ * wherever its file says, which for a frame with deep corners is inside the cuts.
+ */
 export function contentInsetOf(border: UiBorder | undefined): Sides {
   if (border === undefined) {
     return [0, 0, 0, 0];
   }
-  const { slice, inset } = border;
-  return [slice[0] + inset[0], slice[1] + inset[1], slice[2] + inset[2], slice[3] + inset[3]];
+  // A list cut before borders said where their content starts has none, for the moment until the dev
+  // server cuts it again; the cuts are where it started then.
+  return (border.content as Sides | undefined) ?? border.slice;
 }
 
 /** Four lengths as CSS writes them, for a padding or an inset. */

@@ -61,6 +61,42 @@ describe("a border's file", () => {
   });
 });
 
+describe('where a border’s content starts', () => {
+  it('is past its cuts and its inset, unless it says where', () => {
+    const shown = { width: 100, height: 100 };
+    expect(
+      borderAsShown(readBorderFile('{"slice": 96, "inset": 8}', 'a.json'), shown, 'a.json').content,
+    ).toEqual([26, 26, 26, 26]);
+    expect(
+      borderAsShown(readBorderFile('{"slice": 160, "content": [40, 60, 40, 60]}', 'a.json'), shown, 'a.json')
+        .content,
+    ).toEqual([10, 15, 10, 15]);
+  });
+
+  it('can start inside the cuts, for a frame with deep corners and thin edges', () => {
+    const border = borderAsShown(
+      readBorderFile('{"slice": 160, "content": 60}', 'a.json'),
+      { width: 100, height: 100 },
+      'a.json',
+    );
+    expect(border.content[0]).toBeLessThan(border.slice[0]);
+  });
+
+  it('is said one way, never both', () => {
+    expect(() => readBorderFile('{"slice": 96, "inset": 8, "content": 40}', 'a.json')).toThrow(/say one/);
+  });
+
+  it('leaves the content some room', () => {
+    expect(() =>
+      borderAsShown(
+        readBorderFile('{"slice": 96, "content": 200}', 'a.json'),
+        { width: 100, height: 100 },
+        'a.json',
+      ),
+    ).toThrow(/no room/);
+  });
+});
+
 describe('a border as shown', () => {
   it('has every length a quarter of the picture’s, to whole pixels', () => {
     const border = borderAsShown(
@@ -69,7 +105,7 @@ describe('a border as shown', () => {
       'a.json',
     );
     expect(border.slice).toEqual([24, 23, 25, 25]);
-    expect(border.inset).toEqual([3, 3, 3, 3]);
+    expect(border.content).toEqual([27, 26, 28, 28]);
     expect(border.outset).toEqual([1, 1, 1, 1]);
   });
 

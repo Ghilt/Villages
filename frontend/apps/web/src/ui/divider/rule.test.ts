@@ -7,7 +7,7 @@ import { ruleStyleOf } from './rule';
 const border: UiBorder = {
   slice: [0, 14, 0, 14],
   repeat: ['stretch', 'stretch'],
-  inset: [0, 0, 0, 0],
+  content: [0, 14, 0, 14],
   outset: [0, 0, 0, 0],
   middle: true,
   fillUnder: [0, 7, 0, 7],

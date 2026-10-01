@@ -8,7 +8,7 @@ import type { Recipe } from './layout';
 const gilt: UiBorder = {
   slice: [24, 24, 24, 24],
   repeat: ['stretch', 'stretch'],
-  inset: [4, 4, 4, 4],
+  content: [28, 28, 28, 28],
   outset: [0, 0, 0, 0],
   middle: false,
   fillUnder: [12, 12, 12, 12],
@@ -24,6 +24,11 @@ describe('a container laid out', () => {
   it('sets its content in by the border’s cut and inset, and the recipe’s padding', () => {
     const layout = layoutOf({ border: 'gilt-simple', padding: 8 }, gilt, sizeOf);
     expect(layout.padding).toEqual([36, 36, 36, 36]);
+  });
+
+  it('starts its content inside the cuts when the border says so, clear of a deep corner', () => {
+    const deep: UiBorder = { ...gilt, slice: [100, 100, 100, 100], content: [16, 60, 22, 60] };
+    expect(layoutOf({ border: 'gilt-acanthus', padding: 4 }, deep, sizeOf).padding).toEqual([20, 64, 26, 64]);
   });
 
   it('gives an embellishment none of the content’s room, wherever it is pinned', () => {

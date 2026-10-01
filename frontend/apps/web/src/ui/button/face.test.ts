@@ -7,7 +7,7 @@ import { faceOf } from './face';
 const cuts: UiBorder = {
   slice: [32, 42, 33, 42],
   repeat: ['stretch', 'stretch'],
-  inset: [0, 0, 0, 0],
+  content: [32, 42, 33, 42],
   outset: [0, 0, 0, 0],
   middle: false,
   fillUnder: [16, 21, 17, 21],

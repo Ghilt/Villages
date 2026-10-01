@@ -53,6 +53,12 @@ export interface BorderFile {
   readonly repeat?: Repeat | readonly [Repeat, Repeat];
   /** How much further in than the cuts the content starts. */
   readonly inset?: Sides;
+  /**
+   * Where the content starts, measured in from each edge of the box rather than from the cuts: for a
+   * frame whose corners are deep and whose edges are thin, so that its words can start inside the cuts,
+   * clear of its corners' ornaments. Said instead of `inset`, never with it.
+   */
+  readonly content?: Sides;
   /** How far the border stands out past the box it frames. */
   readonly outset?: Sides;
   /** Whether the picture's own middle is drawn inside the border, rather than left for a fill. */
@@ -65,7 +71,11 @@ export interface BorderFile {
 export interface UiBorder {
   readonly slice: Sides;
   readonly repeat: readonly [Repeat, Repeat];
-  readonly inset: Sides;
+  /**
+   * Where the content starts, in from each edge of the box: past the cuts and then the file's inset, or
+   * wherever the file's `content` says, which may be inside the cuts.
+   */
+  readonly content: Sides;
   readonly outset: Sides;
   readonly middle: boolean;
   readonly fillUnder: Sides;
@@ -186,7 +196,7 @@ export function readBorderFile(text: string, where: string): BorderFile {
   if (given === null || typeof given !== 'object' || Array.isArray(given)) {
     throw new Error(`${where} is an object, with a slice in it`);
   }
-  const known = new Set(['slice', 'repeat', 'inset', 'outset', 'middle', 'fillUnder']);
+  const known = new Set(['slice', 'repeat', 'inset', 'content', 'outset', 'middle', 'fillUnder']);
   const stray = Object.keys(given).filter((key) => !known.has(key));
   if (stray.length > 0) {
     throw new Error(
@@ -202,12 +212,20 @@ export function readBorderFile(text: string, where: string): BorderFile {
   }
   const repeat = repeatOf(given.repeat, where);
   const inset = sidesOf(given.inset, 'inset', where);
+  const content = sidesOf(given.content, 'content', where);
+  if (inset !== undefined && content !== undefined) {
+    throw new Error(
+      `${where} says both inset and content; say one: inset, how far past the cuts the content starts, ` +
+        'or content, how far in from the edges',
+    );
+  }
   const outset = sidesOf(given.outset, 'outset', where);
   const fillUnder = sidesOf(given.fillUnder, 'fillUnder', where);
   return {
     slice,
     repeat,
     ...(inset === undefined ? {} : { inset }),
+    ...(content === undefined ? {} : { content }),
     ...(outset === undefined ? {} : { outset }),
     ...(given.middle === undefined ? {} : { middle: given.middle as boolean }),
     ...(fillUnder === undefined ? {} : { fillUnder }),
@@ -242,10 +260,24 @@ export function borderAsShown(
     );
   }
   const repeat = file.repeat === undefined ? (['round', 'round'] as const) : repeatOf(file.repeat, where);
+  const inset = quarter(file.inset ?? [0, 0, 0, 0]);
+  const content: Sides =
+    file.content === undefined
+      ? [slice[0] + inset[0], slice[1] + inset[1], slice[2] + inset[2], slice[3] + inset[3]]
+      : quarter(file.content);
+  if (
+    file.content !== undefined &&
+    (content[0] + content[2] >= shown.height || content[1] + content[3] >= shown.width)
+  ) {
+    throw new Error(
+      `${where}: its content starts so far in - top and bottom, or left and right - that a box as big as ` +
+        'the picture would have no room left for it',
+    );
+  }
   return {
     slice,
     repeat,
-    inset: quarter(file.inset ?? [0, 0, 0, 0]),
+    content,
     outset: quarter(file.outset ?? [0, 0, 0, 0]),
     middle: file.middle ?? false,
     fillUnder:

@@ -45,7 +45,9 @@ tooltip:
    none of them part of the nine-slice. Each says its **overhang**, how far it stands out past the box.
    **An embellishment takes none of the content's room**: it stands where it is pinned, over the border or
    out past it, and what room it needs is outside the box.
-4. **Content** - set in from the border by the border's own cut and inset, and the recipe's padding.
+4. **Content** - set in from the box's edges where the border's file says - past its cuts and inset, or
+   inside them, for a frame with deep corners and thin edges that says its content starts there - and
+   then the recipe's padding.
 
 A container inside a container is two containers. There is no nesting rule beyond that.
 

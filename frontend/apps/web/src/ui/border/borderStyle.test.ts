@@ -7,7 +7,7 @@ import { borderImageOf, contentInsetOf, fillImageOf, fillInsetOf } from './borde
 const border: UiBorder = {
   slice: [24, 23, 25, 22],
   repeat: ['round', 'stretch'],
-  inset: [4, 4, 4, 4],
+  content: [28, 27, 29, 26],
   outset: [2, 0, 0, 0],
   middle: false,
   fillUnder: [12, 11, 12, 11],
@@ -103,7 +103,7 @@ describe('a fill', () => {
 });
 
 describe('the content in a bordered box', () => {
-  it('starts past the cut and then the inset', () => {
+  it('starts where the border says, past the cut and its inset unless it says otherwise', () => {
     expect(contentInsetOf(border)).toEqual([28, 27, 29, 26]);
     expect(contentInsetOf(undefined)).toEqual([0, 0, 0, 0]);
   });
