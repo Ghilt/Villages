@@ -381,19 +381,18 @@ Commands are added here as the increments land:
   messenger, ending in a dialogue choice of three: *accept* spends forty wealth and is paid a hundred,
   *ask* is paid in influence, and *refuse* does nothing, each option showing what it will do a different
   way - whole, hidden, or not at all. It is off, saying why on hover, while the house has no key figure.
-  Below it the section lists the house's dialogues as the player may know them: each one's title, where it
-  stands, and a waiting dialogue choice's options with what each shows it will do (*-40 wealth, +100 wealth*,
-  *???*, or nothing). `requirements: hidden`, the switch beside it, asks the gateway for every dialogue's
-  requirements in this window only, which a player is never sent. `kill` the speaker in Characters and
-  every open dialogue they speak in is lost, the section saying who died. The page names the sample and
-  sends none of its words. The asking and the answer are lines of the log under `dialogues`, and so is where
-  each dialogue stands whenever one changes, as far as the player may know it; the dialogue itself, whole,
-  is at `/admin/inspect-events`. In the game, the house's first dialogue puts up the **dialogues** pane, a
-  column down the right of the spread with its three sizes, and a pane navigation lists on a phone; it lists
-  the dialogues waiting and finished, a lapsed one saying why, and pressing one opens nothing yet. `offer a
-  dialogue` opens it: from its strip in the spread,
-  and on a phone into the bay the map is not in, at half. See `docs/adr/0067`, `0069` and `0070`, and
-  `docs/plans/character-dialogue.md`.
+  **That one lever is all the debug panel does for dialogues**, Adam's word on 2026-10-01: it stands in for
+  the world, which offers none yet, and reading, answering and seeing how one ended are the player's, in the
+  pane - never levers in the panel. The first option costs forty wealth, which the Resources section's `give`
+  puts there, and `kill` on the speaker in Characters loses every open dialogue they speak in. The page names
+  the sample and sends none of its words, and a requirement is never sent to a page. The asking and the
+  answer are lines of the log under `dialogues`, and so is where each dialogue stands whenever one changes,
+  as far as the player may know it; the dialogue itself, whole, is at `/admin/inspect-events`. In the game,
+  the house's first dialogue puts up the **dialogues** pane, a column down the right of the spread with its
+  three sizes, and a pane navigation lists on a phone; it lists the dialogues waiting and finished, a lapsed
+  one saying why, and pressing one opens nothing yet. `offer a dialogue` opens it: from its strip in the
+  spread, and on a phone into the bay the map is not in, at half. See `docs/adr/0067`, `0069` and `0070`,
+  and `docs/plans/character-dialogue.md`.
 - What grows where: `world/biomes.json`, hand-edited, one entry a kind and one a biome. What reads it is
   `npm run world:sprites --prefix frontend`, which works out a biome for every sixteen world units and
   where the scenery clumps, and writes a **sprite map** beside the cut tiles - about five megabytes and

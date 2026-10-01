@@ -319,10 +319,12 @@ private fun seeAll(on: Boolean) = """{"type":"seeAll","on":$on}"""
 
 private fun fogOfWar(on: Boolean) = """{"type":"fogOfWar","on":$on}"""
 
-private fun showingRequirements(on: Boolean) = """{"type":"showRequirements","on":$on}"""
-
 private fun offering(sample: String, commandId: String) =
     """{"type":"command","commandId":"$commandId","command":{"type":"offerDialogue","sample":"$sample"}}"""
+
+private fun stepping(dialogueId: String, lineId: String, commandId: String) =
+    """{"type":"command","commandId":"$commandId",""" +
+        """"command":{"type":"completeDialogueStep","dialogueId":"$dialogueId","lineId":"$lineId"}}"""
 
 private fun addingAKeyFigure(commandId: String) =
     """{"type":"command","commandId":"$commandId","command":{"type":"addKeyFigure"}}"""
@@ -1693,11 +1695,12 @@ class GatewaySpec : StringSpec({
         )
         letter.next.map { it.revealImpact } shouldBe listOf(null, null)
         letter.ending shouldBe EndingView.Open
-        letter.requirements shouldBe null
-        // Both answers' replies, and the purse, are the server's until a step reaches them.
+        // Both answers' replies, and the purse, are the server's until a step reaches them, and what the letter
+        // needs to stay open is the server's for good: a player learns of a requirement only when it fails.
         val onTheWire = ProtocolJson.encode(told)
         onTheWire.contains("He thought you might") shouldBe false
         onTheWire.contains("grant") shouldBe false
+        onTheWire.contains("alive") shouldBe false
     }
 
     "each step reaches its player with what the line gave, and the end with nothing left to read" {
@@ -1733,6 +1736,58 @@ class GatewaySpec : StringSpec({
         paid.revision shouldBe accepted.revision + 2
     }
 
+    "a step sent from the page continues the offer's story, and what the line does comes with it" {
+        val rig = Rig()
+        val (mine, sent) = rig.introduced()
+        mine.receive(founding())
+        mine.receive(addingAKeyFigure(commandNumber(1)))
+        mine.receive(offering("letter", commandNumber(2)))
+        val offered = rig.world.events.filterIsInstance<PlayerOfferedDialogue>().single()
+        val (watching, watcher) = rig.someoneElse()
+        watching.receive("""{"type":"watchEvents","on":true}""")
+        // A watcher is handed what it missed first. What this is about is what comes after it.
+        watcher.clear()
+
+        mine.receive(stepping(offered.dialogue.id.value.toString(), "ask", commandNumber(3)))
+        mine.receive(stepping(offered.dialogue.id.value.toString(), "answer", commandNumber(4)))
+
+        sent.last() shouldBe CommandAccepted(commandNumber(4))
+        val events = watcher.filterIsInstance<EventFrame>()
+        events.map { it.eventType } shouldBe listOf(
+            "villages.player.completedDialogueStep.v1",
+            "villages.player.completedDialogueStep.v1",
+            "villages.house.resourceGranted.v1",
+            "villages.player.completedDialogue.v1",
+        )
+        // One story, and it began with the offer: each step is caused by its own command.
+        events.map { it.correlationId }.distinct() shouldBe listOf(commandNumber(2))
+        events.map { it.causationId } shouldBe listOf(commandNumber(3), commandNumber(4), commandNumber(4), commandNumber(4))
+        sent.filterIsInstance<YourDialogues>().last().dialogues.single().ending shouldBe EndingView.Completed
+    }
+
+    "a step the house will not take is refused under its own name, and a dialogue id that is not one as malformed" {
+        val rig = Rig()
+        val (mine, sent) = rig.introduced()
+        mine.receive(founding())
+        mine.receive(addingAKeyFigure(commandNumber(1)))
+        mine.receive(offering("letter", commandNumber(2)))
+        val letter = rig.world.events.filterIsInstance<PlayerOfferedDialogue>().single().dialogue.id.value.toString()
+
+        mine.receive(stepping(letter, "paid", commandNumber(3)))
+        sent.last() shouldBe CommandRejected(commandNumber(3), "notTheNextStep")
+
+        mine.receive(stepping(UUID.randomUUID().toString(), "accept", commandNumber(4)))
+        sent.last() shouldBe CommandRejected(commandNumber(4), "noSuchDialogue")
+
+        mine.receive(stepping("the letter", "accept", commandNumber(5)))
+        (sent.last() as CommandRejected).reason shouldStartWith "malformed"
+
+        mine.receive(stepping(letter, "refuse", commandNumber(6)))
+        mine.receive(stepping(letter, "shrugs", commandNumber(7)))
+        mine.receive(stepping(letter, "shrugs", commandNumber(8)))
+        sent.last() shouldBe CommandRejected(commandNumber(8), "dialogueOver")
+    }
+
     "a lost dialogue reaches its player lost, and why, ended where it stood with nothing to read or choose" {
         val rig = Rig()
         val (mine, sent) = rig.introduced()
@@ -1751,22 +1806,6 @@ class GatewaySpec : StringSpec({
         lost.ending shouldBe EndingView.Lost(RequirementView.Alive(figure))
         lost.next shouldBe emptyList()
         lost.options shouldBe emptyList()
-    }
-
-    "the requirements go only to a window whose switch has asked for them" {
-        val rig = Rig()
-        val (mine, sent) = rig.introduced()
-        mine.receive(founding())
-        mine.receive(addingAKeyFigure(commandNumber(1)))
-        mine.receive(offering("letter", commandNumber(2)))
-        val figure = sent.filterIsInstance<YourKeyFigures>().last().keyFigures.single().id
-
-        mine.receive(showingRequirements(true))
-        sent.filterIsInstance<YourDialogues>().last().dialogues.single().requirements shouldBe
-            listOf(RequirementView.Alive(figure))
-
-        mine.receive(showingRequirements(false))
-        sent.filterIsInstance<YourDialogues>().last().dialogues.single().requirements shouldBe null
     }
 
     "an option that grants or spends reaches the page as what it does, under the wire's name for the resource" {

@@ -26,6 +26,7 @@ import villages.domain.PlayerId
 import villages.domain.PlayerLostDialogue
 import villages.domain.PlayerOfferedDialogue
 import villages.domain.PlayerTookAction
+import villages.domain.walk
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArraySet
 
@@ -87,6 +88,12 @@ class DialoguesProjection(feed: EventFeed) : DialoguesByHouse, AutoCloseable {
     private fun change(house: HouseId, player: PlayerId, how: (List<DialogueRow>) -> List<DialogueRow>) {
         val now = how(byHouse[house].orEmpty())
         byHouse[house] = now
+        // The step on the line that ends a dialogue and the end are two events of one decision, and between them
+        // the row is a dialogue still open with nothing left to read or choose, which the house's rules say
+        // cannot be. Nobody is told until the end is written, which follows in the same decision. See 0067.
+        if (now.any { it.ending == DialogueEnding.Open && it.dialogue.walk(it.taken).over }) {
+            return
+        }
         for (listener in listeners) {
             listener(DialoguesChange(house, player, now))
         }

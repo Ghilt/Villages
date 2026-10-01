@@ -41,8 +41,10 @@ import villages.domain.CharacterError
 import villages.domain.CharacterId
 import villages.domain.Choice
 import villages.domain.ChoiceId
+import villages.domain.DialogueId
 import villages.domain.Effect
 import villages.domain.Line
+import villages.domain.LineId
 import villages.domain.Requirement
 import villages.domain.RevealImpact
 import villages.domain.walk
@@ -72,6 +74,7 @@ import villages.protocol.ClientFrame
 import villages.protocol.Command
 import villages.protocol.CommandAccepted
 import villages.protocol.CommandRejected
+import villages.protocol.CompleteDialogueStepPayload
 import villages.protocol.Delta
 import villages.protocol.Division
 import villages.protocol.EffectView
@@ -87,7 +90,6 @@ import villages.protocol.LineView
 import villages.protocol.RequirementView
 import villages.protocol.RevealImpactView
 import villages.protocol.SaidLineView
-import villages.protocol.ShowRequirements
 import villages.protocol.SpeakerView
 import villages.protocol.SpendView
 import villages.protocol.FoundHousePayload
@@ -426,10 +428,6 @@ class Gateway(
         @Volatile
         private var fog: Fog = Fog.NOBODY
 
-        /** Whether Adam's switch has asked for this window to be sent every dialogue's requirements. See 0067. */
-        @Volatile
-        private var requirementsShown: Boolean = false
-
         /** Set when this session is over, by a takeover or by the socket going away. It then does nothing. */
         @Volatile
         private var finished = false
@@ -449,19 +447,11 @@ class Gateway(
          * definite in the way `yourHouse` is.
          */
         /**
-         * Sends this player their dialogues as this window may know them: what has been said and the stretch
-         * ahead, and each one's requirements only if the switch has asked for them. See decision record 0067.
+         * Sends this player their dialogues as they may know them: what has been said and the stretch ahead,
+         * and never a requirement. See decision record 0067.
          */
         internal fun tellDialogues(rows: List<DialogueRow>) {
-            out.send(YourDialogues(rows.map { it.toView(requirementsShown) }))
-        }
-
-        private fun showRequirements(on: Boolean) {
-            if (on == requirementsShown) {
-                return
-            }
-            requirementsShown = on
-            player?.let { who -> tellDialogues(dialogueRows.of(HouseId.of(who))) }
+            out.send(YourDialogues(rows.map { it.toView() }))
         }
 
         internal fun tellChoice(choice: ChoiceView?) {
@@ -528,7 +518,6 @@ class Gateway(
                 is ViewTime -> viewTime(frame.at)
                 is SeeAll -> seeAll(frame.on)
                 is FogOfWar -> fogOfWar(frame.on)
-                is ShowRequirements -> showRequirements(frame.on)
                 is WipeWorld -> wipeTheWorld()
             }
         }
@@ -617,6 +606,11 @@ class Gateway(
         /** The story the pending choice began, so an action answering it belongs to that story. */
         private fun pendingStory(who: PlayerId): java.util.UUID? =
             choices.pendingOf(who)?.let { row -> runCatching { java.util.UUID.fromString(row.correlationId) }.getOrNull() }
+
+        /** The story a dialogue was offered in, so a step through it belongs to that story. */
+        private fun dialogueStory(who: PlayerId, dialogue: DialogueId): java.util.UUID? =
+            dialogueRows.of(HouseId.of(who)).firstOrNull { it.dialogue.id == dialogue }
+                ?.let { row -> runCatching { java.util.UUID.fromString(row.correlationId) }.getOrNull() }
 
         private fun command(frame: Command) {
             val who = player
@@ -750,6 +744,22 @@ class Gateway(
                         sample = payload.sample,
                         provenance = Provenance.startedBy(commandId),
                     )
+
+                    is CompleteDialogueStepPayload -> {
+                        val dialogue = DialogueId(asUuid(payload.dialogueId, "a dialogue id"))
+                        dialogues.step(
+                            player = who,
+                            dialogueId = dialogue,
+                            lineId = LineId(payload.lineId),
+                            // A step continues the story the offer began, as an action continues its choice's,
+                            // so the step and what it pays wear the offer's correlation. The server decides
+                            // this, not the client. See decision records 0035 and 0067.
+                            provenance = Provenance(
+                                commandId = commandId,
+                                correlationId = dialogueStory(who, dialogue) ?: commandId,
+                            ),
+                        )
+                    }
                 }
                 out.send(CommandAccepted(frame.commandId))
             } catch (refused: DomainError) {
@@ -1035,10 +1045,10 @@ internal fun Effect.toView(): EffectView = when (this) {
 
 /**
  * A dialogue as its player may know it, walked from the steps taken: what has been said and what it did, the
- * stretch still to read and the options pending, and nothing past them. Its requirements go only to a window
- * that asked. The walk is the decider's own, so the page and the house's rules cannot disagree. See 0067.
+ * stretch still to read and the options pending, and nothing past them, and never its requirements. The walk
+ * is the decider's own, so the page and the house's rules cannot disagree. See 0067.
  */
-internal fun DialogueRow.toView(requirementsShown: Boolean): DialogueView {
+internal fun DialogueRow.toView(): DialogueView {
     val walk = dialogue.walk(taken)
     // A dialogue that has ended ends where it stood: a lost one has nothing left to read and nothing to choose.
     val ended = ending != DialogueEnding.Open
@@ -1058,7 +1068,6 @@ internal fun DialogueRow.toView(requirementsShown: Boolean): DialogueView {
             DialogueEnding.Completed -> EndingView.Completed
             is DialogueEnding.Lost -> EndingView.Lost(stands.because.toView())
         },
-        requirements = if (requirementsShown) dialogue.needs().map { it.toView() } else null,
     )
 }
 

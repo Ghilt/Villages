@@ -44,8 +44,7 @@
         }
       ],
       "options": [],
-      "ending": { "kind": "open" },
-      "requirements": [{ "kind": "alive", "character": "cb732500-39bd-3b39-a838-bb89f719578f" }]
+      "ending": { "kind": "open" }
     },
     {
       "id": "dd000000-0000-4000-8000-00000000a002",

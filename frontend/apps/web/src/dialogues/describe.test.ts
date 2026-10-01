@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { DialogueView, LineView } from '@villages/protocol';
 
-import { howMany, impactWords, listOf, requirementWords, standing, whatChangedIn } from './describe';
+import { howMany, impactWords, listOf, standing, whatChangedIn, whyLost } from './describe';
 
 function line(id: string): LineView {
   return { id, speaker: 'messenger', words: `The words of ${id}.` };
@@ -129,10 +129,9 @@ describe('what changed in the dialogues', () => {
     ]);
   });
 
-  it('says nothing when the same dialogues come again, as the requirements switch sends them', () => {
-    const shown = letter({ requirements: [{ kind: 'alive', character: 'x' }] });
-
-    expect(whatChangedIn([letter()], [shown])).toEqual([]);
+  // A reconnect sends the list again, and nothing in it has moved.
+  it('says nothing when the same dialogues come again', () => {
+    expect(whatChangedIn([letter()], [letter()])).toEqual([]);
   });
 });
 
@@ -155,15 +154,11 @@ describe('what an option shows it will do', () => {
   });
 });
 
-describe('a requirement in words', () => {
+describe('why a dialogue was lost', () => {
   it('names a character by the speaker they are, and by their id when they do not speak', () => {
     const speakers = [{ id: 'figure', party: 0, name: 'Agnes Hollin', character: 'cb732500-39bd' }];
 
-    expect(requirementWords({ kind: 'alive', character: 'cb732500-39bd' }, speakers)).toBe(
-      'Agnes Hollin alive',
-    );
-    expect(requirementWords({ kind: 'alive', character: '2b0e34d7-8041' }, speakers)).toBe(
-      'character 2b0e34d7 alive',
-    );
+    expect(whyLost({ kind: 'alive', character: 'cb732500-39bd' }, speakers)).toBe('Agnes Hollin died');
+    expect(whyLost({ kind: 'alive', character: '2b0e34d7-8041' }, speakers)).toBe('character 2b0e34d7 died');
   });
 });

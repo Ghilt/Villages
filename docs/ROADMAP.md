@@ -86,10 +86,10 @@ Wanted, not started, and each needs a hypothesis in `docs/experiments/` before a
   credit is in `AUTHORING-THE-WORLD.md` and there is nowhere in the game a player could find it. An about
   or credits surface, before anything is released.
 - **Closing the instruments.** The event page and the debug panel's switches are open to anybody's socket:
-  the event page is fed every stored event whole, and the frame that lifts the fog, like the one that will
-  show a dialogue's hidden requirements, is a frame any connection can send. Harmless in a pre-alpha, and it
-  has to be closed before any dialogue carries the setting's secret, which the server otherwise holds back
-  (0067).
+  the event page is fed every stored event whole, dialogues and their requirements included, and the frame
+  that lifts the fog is a frame any connection can send. Harmless in a pre-alpha, and it has to be closed
+  before any dialogue carries the setting's secret, which the server otherwise holds back (0067). The frame
+  that showed a dialogue's requirements went on 2026-10-01, with the switch that sent it.
 - **The inspect window**, beyond a house and an area: what it says about a subject once there is more than
   a name and a treasury to say, where its links come from, and whether it is a card or a paper on the desk.
   See `MECHANICS.md`.

@@ -13,6 +13,10 @@
   none, and what it does is seen when it is done. It is sent with the options before the choice, which is
   its point, and it promises nothing: what the house is given or spends is still the lines' effects, and
   keeping the two in step is the writer's. Only an option may carry one.
+- Amended 2026-10-01: **a requirement is never sent to a page**, on Adam's word. The debug panel's switch that
+  asked the gateway for them is gone with its frame, because all the debug panel does for dialogues is offer
+  one; reading, answering and seeing how one ended are the player's, in the pane. A player learns of a
+  requirement only when it fails, as why the dialogue was lost.
 
 ## Context
 
@@ -124,8 +128,8 @@ come: a requirement about time needs a wake-up, as the pledge release has, and i
 **The server holds back what the player has not reached.** The player is sent, for each dialogue, what has
 been said, the stretch still to read and the options pending: never a line past the next step, and never a
 requirement. It is the fog's rule applied to a conversation, and it is for the setting's sake, because a
-dialogue handed to the browser whole can be read ahead. The debug panel can ask for the requirements for one
-window, the way *fog of war: off* lifts the fog for one.
+dialogue handed to the browser whole can be read ahead. (The debug panel could once ask for the requirements
+for one window, the way *fog of war: off* lifts the fog for one; see the amendment of 2026-10-01.)
 
 **Four events, all of them the player's.** Being told something and answering it is play rather than a
 happening in the world - the line 0034 drew - so the offer, the step, the end and the loss are
@@ -175,9 +179,9 @@ The costs, knowingly:
   stop being so and start again, so a kind like that would be asked at the offer rather than remembered by
   the listener, and none is built here.
 - **The hold-back is only as good as the rest of the wire.** The event page is fed every stored event whole,
-  dialogues and requirements included, and any socket can ask for that feed; the switch that shows the
-  requirements is a frame any socket can send, as the fog's is. Both are instruments of a pre-alpha, and both
-  have to be gated before any dialogue carries the setting's secret; the roadmap says so. Holding back also
+  dialogues and requirements included, and any socket can ask for that feed. It is an instrument of a
+  pre-alpha, and has to be gated before any dialogue carries the setting's secret; the roadmap says so. (The
+  switch that showed the requirements was a second such frame, and went on 2026-10-01.) Holding back also
   works only at a step: the plain lines of the stretch being read are in the browser, so a line that must
   stay unseen until it is read needs a step before it.
 - **A conversation cannot come back to a question it asked** until the walk learns to loop. Such a dialogue

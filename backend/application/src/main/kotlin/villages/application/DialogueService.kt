@@ -1,9 +1,11 @@
 package villages.application
 
 import villages.domain.ActThrough
+import villages.domain.CompleteDialogueStep
 import villages.domain.DialogueId
 import villages.domain.HouseError
 import villages.domain.HouseId
+import villages.domain.LineId
 import villages.domain.OfferDialogue
 import villages.domain.PlayerId
 
@@ -39,5 +41,18 @@ class DialogueService(
         val dialogue = SampleDialogues.named(sample, DialogueId.offered(house, provenance.commandId), figure)
         executor.execute(OfferDialogue(house, dialogue, world.today(), clock.now()), provenance)
         return dialogue.id
+    }
+
+    /**
+     * Takes a step through one of the player's dialogues: an option of a dialogue choice, or the line a stretch
+     * read ends on. Whether the line is a step, and the next one, is the house's rule, so anything else is refused
+     * there: `NotTheNextStep`, `DialogueOver` for one that has ended, `NoSuchDialogue` for one never offered.
+     * Which story the step belongs to is the caller's to say, because it continues the offer's.
+     */
+    fun step(player: PlayerId, dialogueId: DialogueId, lineId: LineId, provenance: Provenance) {
+        executor.execute(
+            CompleteDialogueStep(HouseId.of(player), dialogueId, lineId, world.today(), clock.now()),
+            provenance,
+        )
     }
 }

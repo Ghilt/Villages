@@ -18,9 +18,12 @@ import villages.domain.HouseError
 import villages.domain.HouseEvent
 import villages.domain.HouseId
 import villages.domain.HouseName
+import villages.domain.HouseResourceGranted
 import villages.domain.Impact
 import villages.domain.LineId
 import villages.domain.Location
+import villages.domain.PlayerCompletedDialogue
+import villages.domain.PlayerCompletedDialogueStep
 import villages.domain.PlayerId
 import villages.domain.PlayerOfferedDialogue
 import villages.domain.Requirement
@@ -158,6 +161,38 @@ class DialogueServiceSpec : StringSpec({
             service.offerSample(ada, SampleDialogues.LETTER, Provenance.startedBy(sent))
         }
         houses.written.count { it.first is PlayerOfferedDialogue } shouldBe 1
+    }
+
+    "a step is taken through the player's dialogue in the story it is given, with what its line does" {
+        val (houses, service) = rig(agnes)
+        val id = service.offerSample(ada, SampleDialogues.LETTER, Provenance.startedBy(sent))
+        houses.written.clear()
+        val stepping = Provenance(commandId = UUID.randomUUID(), correlationId = sent)
+
+        service.step(ada, id, LineId("ask"), stepping)
+        service.step(ada, id, LineId("answer"), stepping)
+
+        houses.written.map { it.first::class } shouldBe listOf(
+            PlayerCompletedDialogueStep::class,
+            PlayerCompletedDialogueStep::class,
+            HouseResourceGranted::class,
+            PlayerCompletedDialogue::class,
+        )
+        houses.written.map { it.second }.distinct() shouldBe listOf(stepping)
+    }
+
+    "a step the walk does not allow is the house's to refuse" {
+        val (houses, service) = rig(agnes)
+        val id = service.offerSample(ada, SampleDialogues.LETTER, Provenance.startedBy(sent))
+        houses.written.clear()
+
+        shouldThrow<HouseError.NotTheNextStep> {
+            service.step(ada, id, LineId("paid"), Provenance.startedBy(UUID.randomUUID()))
+        }
+        shouldThrow<HouseError.NoSuchDialogue> {
+            service.step(ada, DialogueId(UUID.randomUUID()), LineId("accept"), Provenance.startedBy(UUID.randomUUID()))
+        }
+        houses.written shouldBe emptyList()
     }
 
     "a sample that does not exist is not asked of the house at all" {

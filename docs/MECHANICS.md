@@ -245,13 +245,14 @@ pay, and from version 17 each option carries its reveal impact. A speaker's deat
 speak in, as lost, naming who died. Nothing in the world offers one yet. The pane stands in the column
 down the right from the house's first dialogue, at its three sizes, and on a phone navigation lists it;
 it lists the dialogues waiting and finished, a lapsed one saying why, and a dialogue offered opens it;
-pressing one in the list opens nothing yet. The debug
-panel's Dialogues section lists every dialogue as the player may know it and can show its requirements,
-and no command on the wire takes a step. Its shape is decided in decision record 0067: a dialogue offered
-whole on the house's stream; only its dialogue choices, and the lines that give something or end it,
-recorded; what a line gives written as the world's own event beside the step; and hidden requirements that
-end a dialogue when one fails, with the server holding back what the player has not reached. `docs/plans/character-dialogue.md` is the order it is built in, one commit a step, and experiment
-0014 is what it is meant to show. `ARCHITECTURE.md` says what it asks of the server and the client.
+pressing one in the list opens nothing yet. A step can be sent from a page, from wire version 18, and the
+pane is what will send it; the debug panel's Dialogues section offers a dialogue and does nothing else, and a
+requirement is never sent to a page. Its shape is decided in decision record 0067: a dialogue offered whole
+on the house's stream; only its dialogue choices, and the lines that give something or end it, recorded;
+what a line gives written as the world's own event beside the step; and hidden requirements that end a
+dialogue when one fails, with the server holding back what the player has not reached.
+`docs/plans/character-dialogue.md` is the order it is built in, one commit a step, and experiment 0014 is
+what it is meant to show. `ARCHITECTURE.md` says what it asks of the server and the client.
 
 ---
 

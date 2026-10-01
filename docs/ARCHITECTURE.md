@@ -298,6 +298,9 @@ The decider accepts a step only where the walk says there is one, and the gatewa
 sent from the same walk - what was said and the stretch ahead, never the lines past it and never the
 requirements. It is the fog's rule (0061) applied to a conversation, and for the same reason: the setting's
 secret is meant to come out through dialogue, and a dialogue handed to the browser whole can be read ahead.
+A step continues the offer's story, which the gateway reads from the read model as it reads a choice's for
+an action; and the step on the line that ends a dialogue and the end itself are told to the page together,
+because between the two events of that one decision the dialogue is open with nothing left in it.
 
 **What is left to `client-core` is the reading.** Which line of the stretch is showing, who is speaking, and
 when a press has to be sent as a step rather than simply shown, is logic with no DOM in it, so it sits in

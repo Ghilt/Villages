@@ -25,15 +25,10 @@ export function impactWords(impact: RevealImpactView | undefined): string | null
     .join(', ');
 }
 
-/** A requirement in words, naming a character by the speaker they are when they speak in the dialogue. */
-export function requirementWords(requirement: RequirementView, speakers: readonly SpeakerView[]): string {
-  switch (requirement.kind) {
-    case 'alive':
-      return `${nameOf(requirement.character, speakers)} alive`;
-  }
-}
-
-/** Why a dialogue was lost, in words: what became of the requirement that failed. See decision record 0067. */
+/**
+ * Why a dialogue was lost, in words: what became of the requirement that failed, naming a character by the
+ * speaker they are in it. The one thing a player ever learns of a requirement. See decision record 0067.
+ */
 export function whyLost(requirement: RequirementView, speakers: readonly SpeakerView[]): string {
   switch (requirement.kind) {
     case 'alive':
@@ -124,8 +119,8 @@ export function standing(dialogue: DialogueView): string {
  * The log lines a new list of the player's dialogues is worth, against the list heard before it.
  *
  * The first list a connection hears is said whole, a line a dialogue, because it is what the player arrived
- * to; after that only the dialogues offered or moved on since, which a changed revision says. The switch that
- * shows requirements sends the list again unchanged, and so says nothing. See decision record 0067.
+ * to; after that only the dialogues offered or moved on since, which a changed revision says, so a list sent
+ * again unchanged says nothing. See decision record 0067.
  */
 export function whatChangedIn(
   before: readonly DialogueView[] | null,

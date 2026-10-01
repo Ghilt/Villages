@@ -1795,38 +1795,6 @@ body,
   align-items: baseline;
 }
 
-/*
- * A house's dialogues, in the panel: a block a dialogue, in the order it was offered them, laid out as the key
- * figures are. Its title and where it stands, a waiting dialogue choice's options with what each shows it will
- * do, and its requirements while the switch asks for them, with a rule between one dialogue and the next.
- */
-.debug__dialogues {
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-  margin: 0.4rem 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.debug__dialogue {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  padding-top: 0.4rem;
-  border-top: 1px solid var(--parchment-edge);
-}
-
-.debug__dialogue:first-child {
-  padding-top: 0;
-  border-top: 0;
-}
-
-.debug__dialogue-options {
-  margin: 0;
-  padding-left: 1rem;
-}
-
 .debug__sectionbody {
   display: flex;
   flex-direction: column;

@@ -37,9 +37,11 @@ import tools.jackson.databind.JsonNode
  * `yourDialogues`, the player's dialogues with what has not been reached held back, and `showRequirements`,
  * Adam's switch that sends one window their requirements. Version 16 let an effect be a `spend`, what an option
  * costs, and named what a said line did its `effects`. Version 17 gave an option its `revealImpact`, how it shows
- * what taking it will do.
+ * what taking it will do. Version 18 added `completeDialogueStep`, a step taken through one of the house's
+ * dialogues, and took away `showRequirements` and a dialogue's `requirements`: the debug panel only offers a
+ * dialogue now, so nothing asks for them, and a page is never sent them.
  */
-const val PROTOCOL_VERSION = 17
+const val PROTOCOL_VERSION = 18
 
 data class Point(val lat: Double, val lon: Double)
 
@@ -205,7 +207,6 @@ data class CharacterOnMapView(
     JsonSubTypes.Type(SeeAll::class, name = "seeAll"),
     JsonSubTypes.Type(FogOfWar::class, name = "fogOfWar"),
     JsonSubTypes.Type(WipeWorld::class, name = "wipeWorld"),
-    JsonSubTypes.Type(ShowRequirements::class, name = "showRequirements"),
 )
 sealed interface ClientFrame
 
@@ -259,13 +260,6 @@ data class SeeAll(val on: Boolean) : ClientFrame
 data class FogOfWar(val on: Boolean) : ClientFrame
 
 /**
- * Adam's switch: sends this window every dialogue's requirements, which the player is never sent, for as long
- * as it is on. Off at every connection, and for that one connection only, as the fog's switch is; the
- * dialogues are sent again as soon as it is pressed. See decision record 0067.
- */
-data class ShowRequirements(val on: Boolean) : ClientFrame
-
-/**
  * Empties the development world, for everyone. A debug frame, like `watchEvents`, and not one a player's
  * interface ever sends. It goes, or gains a guard, before there is anything worth keeping. See 0036.
  */
@@ -295,6 +289,7 @@ class WipeWorld : ClientFrame {
     JsonSubTypes.Type(GiveVisionPayload::class, name = "giveVision"),
     JsonSubTypes.Type(TakeVisionPayload::class, name = "takeVision"),
     JsonSubTypes.Type(OfferDialoguePayload::class, name = "offerDialogue"),
+    JsonSubTypes.Type(CompleteDialogueStepPayload::class, name = "completeDialogueStep"),
 )
 sealed interface CommandPayload
 
@@ -393,6 +388,13 @@ data class TakeVisionPayload(val visionId: String) : CommandPayload
  * lever. See decision record 0067.
  */
 data class OfferDialoguePayload(val sample: String) : CommandPayload
+
+/**
+ * Take a step through one of the house's dialogues: the line that is the step, by its id within the dialogue -
+ * an option of a dialogue choice, or the line the stretch read ends on. Which lines are steps, and whether this
+ * one is the next, is the house's to say, so the client names a line and nothing else. See decision record 0067.
+ */
+data class CompleteDialogueStepPayload(val dialogueId: String, val lineId: String) : CommandPayload
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes(
@@ -513,8 +515,8 @@ data class YourDialogues(val dialogues: List<DialogueView>) : ServerFrame
 /**
  * One dialogue as the player may know it. `revision` rises with every change to it, so a page holds its
  * reading place while it holds. `next` ends in the step to send when there are no `options`, and in the line
- * the dialogue choice follows when there are. `requirements` is absent unless this window's debug panel has
- * asked for them.
+ * the dialogue choice follows when there are. Its requirements are never sent: a player learns of one only
+ * when it fails, as why the dialogue was lost.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class DialogueView(
@@ -528,7 +530,6 @@ data class DialogueView(
     val next: List<LineView>,
     val options: List<LineView>,
     val ending: EndingView,
-    val requirements: List<RequirementView>? = null,
 )
 
 /** Who speaks: which party, what they are called, their portrait's key and the character they are, if any. */

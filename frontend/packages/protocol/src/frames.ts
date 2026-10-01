@@ -233,7 +233,7 @@ export const saidLineViewSchema = z.object({
 /**
  * One dialogue as the player may know it. `revision` rises with every change to it. `next` ends in the step
  * to send when there are no `options`, and in the line the dialogue choice follows when there are. Nothing
- * past it is ever sent, and `requirements` only to a window that asked. See decision record 0067.
+ * past it is ever sent, and no requirement: a player learns of one only when it fails. See decision record 0067.
  */
 export const dialogueViewSchema = z.object({
   id: z.string(),
@@ -245,7 +245,6 @@ export const dialogueViewSchema = z.object({
   next: z.array(lineViewSchema),
   options: z.array(lineViewSchema),
   ending: endingViewSchema,
-  requirements: z.array(requirementViewSchema).optional(),
 });
 
 /**
@@ -320,6 +319,12 @@ export const commandPayloadSchema = z.discriminatedUnion('type', [
    * because a client that could write a dialogue could write itself a reward. Adam's lever. See 0067.
    */
   z.object({ type: z.literal('offerDialogue'), sample: z.string() }),
+  /**
+   * A step through one of the house's dialogues: the line that is the step, by its id within the dialogue - an
+   * option of a dialogue choice, or the line the stretch read ends on. Whether it is the next step is the
+   * house's to say, so the client names a line and nothing else. See decision record 0067.
+   */
+  z.object({ type: z.literal('completeDialogueStep'), dialogueId: z.string(), lineId: z.string() }),
 ]);
 
 export const clientFrameSchema = z.discriminatedUnion('type', [
@@ -341,11 +346,6 @@ export const clientFrameSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('fogOfWar'), on: z.boolean() }),
   /** Empty the development world, for everyone. A debug frame, never a player's. See 0036. */
   z.object({ type: z.literal('wipeWorld') }),
-  /**
-   * Send this window every dialogue's requirements, which a player is never sent, or stop. Off until this says
-   * otherwise, and for this connection only. Adam's switch and a debug frame, never a player's. See 0067.
-   */
-  z.object({ type: z.literal('showRequirements'), on: z.boolean() }),
 ]);
 
 /**

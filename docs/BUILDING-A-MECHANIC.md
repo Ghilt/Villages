@@ -242,6 +242,12 @@ make the mechanic happen from the parchment or from the debug panel without an a
 can read what happened in the panel's event list, one line per event, the correlation tag joining what
 belongs together, and open any line to the whole event as stored.
 
+**The debug panel stands in for the world, never for the player.** A lever there makes happen what the world
+will one day do and nothing does yet - offering a dialogue, taking a key figure in - and what the player does
+with it is done in the player's own interface, however unfinished that is, and never in a lever beside it.
+Adam's word, 2026-10-01, when a dialogue's steps had been made levers in the panel: all the panel does for a
+dialogue is offer one, and playing it is the pane's.
+
 ## What this does not decide
 
 Which mechanics exist, or what they say. That is `MECHANICS.md`, and it is Adam's, in his words; the

@@ -121,13 +121,15 @@ dialogue:
 | options | the dialogue choice's options, when the stretch ends in one |
 | ending | open, completed, or lost with the requirement that failed |
 
-Nothing past the stretch is sent, and no requirement, unless the window's Dialogues section has asked for
-them with its switch, which the gateway keeps for that one connection as it keeps `fogOfWar`.
+Nothing past the stretch is sent, and no requirement, ever: a player learns of one only when it fails. There
+was a switch in the Dialogues section that asked for them for one window, and it went on 2026-10-01 with its
+frame.
 
 Two commands. The debug panel's offer names which sample it wants and none of its words, because a client
 that could write a dialogue could write itself a reward. The step is `completeDialogueStep { dialogueId,
-lineId }`. The wire has moved: version 13 lets a choice's effect be a grant, 14 carries the debug offer,
-15 the dialogues and the switch, and 16 a spend; 17 is an option's reveal impact, and 18 the step.
+lineId }`, which the pane sends. The wire has moved: version 13 lets a choice's effect be a grant, 14 carries
+the debug offer, 15 the dialogues and the switch, and 16 a spend; 17 is an option's reveal impact, and 18
+the step, and the switch gone.
 
 ## The pane
 
@@ -187,8 +189,11 @@ A new folding section of the debug panel, between Characters and Log.
   (`FoundingChoices.kt`), between a character and a messenger, with one dialogue choice and one purse of
   wealth. The character is the house's first key figure, because *add a key figure* is the only way a
   character comes into the world yet, so the lever is off, saying why on hover, while the house has none.
-- Every dialogue the house has, where it has got to and how it ended, and its requirements while the switch
-  shows them.
+
+**That is all it holds**, on Adam's word of 2026-10-01. It stands in for the world, which offers no dialogue
+yet; reading one, answering it and seeing how it ended are the player's, in the pane, and are never levers
+in the panel. It listed every dialogue, showed their requirements on a switch, and for a while played one
+through a step at a time; all three are gone. What happens is said in the log under `dialogues`.
 
 A speaker's death is tried with *kill*, in the Characters section.
 
@@ -228,6 +233,7 @@ A speaker's death is tried with *kill*, in the Characters section.
    impact, version 17, with the sample carrying spends and gives to verify both. The third is done:
    the Dialogues section lists every dialogue as the player may know it - where it stands, and a waiting
    choice's options with their reveal impact in words - beside the `requirements` switch. Step 5 is done.
+   The list and the switch went again on 2026-10-01; see step 9.
 6. **Dialogues lapse**, in two commits. The first is done: `requirementsBrokenBy`, the pure function of
    which requirements an event breaks, beside `Requirement`; `FailRequirement` in the house's rules, which
    lapses every open dialogue that needed the requirement as `PlayerLostDialogue`, in the catalogue, and
@@ -252,10 +258,17 @@ A speaker's death is tried with *kill*, in the Characters section.
    row is - the title, who speaks in it or, for one that lapsed, why it ended, and *new* or *begun* for one
    waiting - newest first in both groups, and the pane draws it in place of its count, which only its strip
    keeps. Pressing a row opens nothing until step 9.
-9. **A conversation you can play.** The reading place in `client-core`, the step on the wire (version 16),
+9. **A conversation you can play.** The reading place in `client-core`, the step on the wire (version 18),
    the bubbles with a portrait and a name beside each, from the left and the right by party, *next*, a
    dialogue choice's options, and picking up where it was left. **Before drawing it, ask Adam whether *next*
-   is a mark or a word.**
+   is a mark or a word.** Adam's answer: *next* is a mark, and so is the way back to the list. In parts. The
+   first is done: the step on the wire, `completeDialogueStep`, which the gateway sends in the offer's story
+   as an action is sent in its choice's. It was tried with levers in the Dialogues section that played a
+   dialogue through, which went again before they were committed, on Adam's word: the debug panel only
+   offers. The trying showed the read model telling the page of a dialogue open with nothing left in it, for
+   the moment between the last step and the end; it tells the two together now. The same commit took away
+   the switch that showed requirements, and the section's list. The second part is the conversation in the
+   pane.
 10. **What it gives and how it ends.** A gain in the feed, and the house card's wealth going up with it; a
     lost dialogue's closing line; a finished one read back.
 11. **The scene.** The folder, its placeholders, serving it, its test, and the speakers standing in it at

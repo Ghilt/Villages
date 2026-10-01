@@ -140,10 +140,28 @@ class DialoguesProjectionSpec : StringSpec({
 
         feed.deliver(offered(1))
         feed.deliver(stepped(1, "end"))
+        feed.deliver(finished(1))
 
         told shouldHaveSize 2
         told.last().player shouldBe ada
         told.last().dialogues.single().taken shouldBe listOf(LineId("end"))
+    }
+
+    // Between the two events of the decision the dialogue is open with nothing left in it, which cannot be.
+    "the step on the line that ends a dialogue is told with the end, and never as a dialogue open with nothing in it" {
+        val feed = DialoguesFed()
+        val dialogues = DialoguesProjection(feed)
+        val told = mutableListOf<DialoguesChange>()
+        dialogues.watch { told += it }
+        feed.deliver(offered(1))
+
+        feed.deliver(stepped(1, "end"))
+        told shouldHaveSize 1
+        dialogues.of(house).single().taken shouldBe listOf(LineId("end"))
+
+        feed.deliver(finished(1))
+        told shouldHaveSize 2
+        told.last().dialogues.single().ending shouldBe DialogueEnding.Completed
     }
 
     "a read model built from the beginning holds what one that watched it all holds" {

@@ -102,6 +102,15 @@ The list showed one thing about words: a speaker's name is written to stand alon
 *A messenger* - and is wrong inside a sentence, *Frederick Falk and A messenger*. So the list names each
 alone, *Frederick Falk · A messenger*, rather than mending capitals in a language that may not be English.
 
+Played through by the command a page sends, from levers in the debug panel, the letter wrote six events from
+offer to end - the offer, two steps, the forty spent, the hundred paid and the end - all in the story it was
+offered in, and a reload between the steps landed on the path it was left on. It also showed the page being
+told of the letter open with nothing left to read or choose, for the moment between the last step and the
+end, which are two events of one decision; the read model tells the two together now. The levers went again
+before they were committed, on Adam's word that the debug panel only offers a dialogue and the playing is the
+pane's, and with them the switch that sent one window the requirements: a page is never sent one now, which
+answers the question above about requirements outright.
+
 ## Result
 
 Open.
