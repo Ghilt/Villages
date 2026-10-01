@@ -10,7 +10,7 @@
 **Being built.** This is the method as agreed on 2026-09-30, written before most of the library so that the
 library is built to it. Each step of the plan fills in its part, and a line that still says *to come* is a
 part nobody has built. The page, the foundations, the pictures, borders and fills, the container, the
-buttons, the marks and readouts, and the tabs and sections are built.
+buttons, the marks and readouts, the tabs and sections, and half of the controls are built.
 
 ## The page
 
@@ -208,8 +208,8 @@ A line each: what it is for, its variants, and where on the page it is.
   as each surface is redone.
 - **`Mark`**, `ui/mark/Mark.tsx`: a mark by name, drawn, or painted when `world/ui/marks/` has it: the
   five resources, `wealth`, `domain`, `influence`, `reason` and `piety`; a figure's `kindness`, `physical`
-  and `age`; and `close`, `minimise`, `maximise`, `previous`, `next`, `fold`, `eye-open` and `eye-shut`.
-  *Marks and readouts*.
+  and `age`; and `close`, `minimise`, `maximise`, `previous`, `next`, `fold`, `less`, `more`, `eye-open`
+  and `eye-shut`. *Marks and readouts*.
 - **`TextButton`**, `ui/button/Button.tsx`: words on a face that stretches between its end caps to fit
   them. `face` is a picture in `world/ui/controls/`, `primary` unless it says otherwise; `size` is `small`,
   `regular` or `large`, 32, 44 or 60 pixels tall. *Buttons*.
@@ -232,7 +232,23 @@ A line each: what it is for, its variants, and where on the page it is.
   `tooltip.plain` recipe - a moment after the pointer arrives, at once from the keyboard, and when a finger
   holds a thing down on a phone; gone at Escape. It is drawn over the whole page rather than inside what it
   is about, so a pane that clips cannot clip it, and `placeTooltip` in `ui/tooltip/place.ts` keeps it above
-  what it is about unless there is only room below, and inside the window. *Marks and readouts*.
+  what it is about unless there is only room below, and inside the window. While what it is about is out
+  of sight - scrolled away, under a bar that stays at the top of a page, clipped by its pane - it is not
+  drawn at all. *Marks and readouts*.
+- **`Slider`**, `ui/slider/Slider.tsx`: a value set by dragging a knob along a tube, the moodboard's - the
+  tube lit from its left end as far as the knob. Under the painting is the browser's own slider, unseen,
+  its thumb as wide as the knob and laid so the two travel together, so the pointer, a finger, the arrow
+  keys, Page Up and Down, Home and End and a screen reader all work it as any slider; `valueText` is the
+  value in words when a number is not how it is said. `small`, `regular` and `large`, 32, 44 and 65 pixels
+  tall, as a button of the same size is; the knob is centred on the track's middle, where its tube is. `shareOf` and `travelOf` in `ui/slider/range.ts` are its arithmetic. *Controls*.
+- **`Meter`**, `ui/meter/Meter.tsx`: a level shown and not set, a slider without a knob - the cathedral's
+  faith - in a tube, and the same tube full shown as far as the level, which glides when it changes. Its
+  `look` is the pair of pictures it is drawn in, `meter` and `meter-full` unless it says otherwise, so a
+  meter of another colour is another pair. *Controls*.
+- **`Stepper`**, `ui/stepper/Stepper.tsx`: a count with `less` and `more` either side of it, as a key
+  figure's stats are moved; the mark that would go past either end is disabled there, so the end is seen
+  rather than found, and the count is said again to a screen reader when it changes. `stepped` in
+  `ui/slider/range.ts`. *Controls*.
 - **`TabBar`** and **`Tabbed`**, `ui/tabs/TabBar.tsx`: several things taking turns in one place, and a row
   of tabs saying which is up. **A tab is a mark or words, as a button is**, and which is Adam's call: the
   game's own bar is marks. `small` is 30 pixels, the game's strip, and `regular` 40. The arrow keys go

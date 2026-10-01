@@ -89,6 +89,9 @@ const DRAWN = {
   // A section folded shut, pointing at what it holds; turned down when it is open. Solid, and smaller
   // than the steps, so it is not read as one.
   fold: <path d="M8.5 6 L16.5 12 L8.5 18 Z" className="ui-mark__fill" />,
+  // One less and one more, a stepper's two; the less is a hair shorter than the window's bar.
+  less: <path d="M6.5 12 H17.5" className="ui-mark__line" />,
+  more: <path d="M6.5 12 H17.5 M12 6.5 V17.5" className="ui-mark__line" />,
   'eye-open': (
     <>
       <path d={EYE.almond} className="ui-mark__line" />

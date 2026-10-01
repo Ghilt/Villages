@@ -5,7 +5,7 @@ import type { ReactElement, ReactNode, RefObject } from 'react';
 import { createPortal } from 'react-dom';
 
 import { Container } from '../container/Container';
-import { placeTooltip } from './place';
+import { inWindow, placeTooltip } from './place';
 import type { Side } from './place';
 
 /**
@@ -120,6 +120,16 @@ export function Tooltip({
   );
 }
 
+/**
+ * Whether what a tooltip is about can be seen at its middle: not under a bar that stays at the top of a
+ * page, and not scrolled out of a pane that clips it, both of which leave it inside the window. What is
+ * drawn at that point is it, or something in it, or the box it stands in.
+ */
+function inSight(anchor: HTMLElement, about: DOMRect): boolean {
+  const there = document.elementFromPoint(about.left + about.width / 2, about.top + about.height / 2);
+  return there !== null && (anchor.contains(there) || there.contains(anchor));
+}
+
 function TooltipBox({
   id,
   anchor,
@@ -138,15 +148,15 @@ function TooltipBox({
     const measure = () => {
       const about = anchor.current?.getBoundingClientRect();
       const self = box.current?.getBoundingClientRect();
-      if (about === undefined || self === undefined) {
+      if (anchor.current === null || about === undefined || self === undefined) {
         return;
       }
-      const next = placeTooltip(
-        about,
-        self,
-        { width: window.innerWidth, height: window.innerHeight },
-        prefer,
-      );
+      const room = { width: window.innerWidth, height: window.innerHeight };
+      if (!inWindow(about, room) || !inSight(anchor.current, about)) {
+        setPlace(null);
+        return;
+      }
+      const next = placeTooltip(about, self, room, prefer);
       setPlace((was) =>
         was !== null && was.left === next.left && was.top === next.top && was.side === next.side ? was : next,
       );

@@ -664,3 +664,45 @@
   flex-wrap: nowrap;
   padding: var(--ui-space-1) 0;
 }
+
+/* Controls on show: a slider or a meter as wide as it would be in a pane, and a figure's stats in a column. */
+
+.showcase__control {
+  width: 15rem;
+  max-width: 100%;
+}
+
+.showcase__control--stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2);
+}
+
+.showcase__control-row {
+  width: 100%;
+  max-width: 28rem;
+}
+
+.showcase__meter-row {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-2);
+  width: 100%;
+}
+
+.showcase__stats {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2);
+}
+
+.showcase__stat {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-2);
+}
+
+.showcase__stat-word {
+  min-width: 5.5rem;
+  font-style: italic;
+}

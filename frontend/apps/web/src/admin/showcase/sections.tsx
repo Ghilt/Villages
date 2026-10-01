@@ -3,6 +3,7 @@ import type { ComponentType } from 'react';
 import { BordersAndFills } from './BordersAndFills';
 import { Buttons } from './Buttons';
 import { Containers } from './Containers';
+import { Controls } from './Controls';
 import { Foundations } from './Foundations';
 import { MarksAndReadouts } from './MarksAndReadouts';
 import { Pictures } from './Pictures';
@@ -67,7 +68,7 @@ export const SECTIONS: readonly Section[] = [
     id: 'controls',
     title: 'Controls',
     says: 'The slider, the meter, the stepper, the switch, a choice of a few, and hold to confirm.',
-    arrives: 7,
+    Body: Controls,
   },
   {
     id: 'sections',

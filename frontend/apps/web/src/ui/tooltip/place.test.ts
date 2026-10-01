@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { placeTooltip } from './place';
+import { inWindow, placeTooltip } from './place';
 
 const window = { width: 800, height: 600 };
 const box = { width: 120, height: 30 };
@@ -35,6 +35,12 @@ describe('a tooltip placed', () => {
     expect(placeTooltip({ left: 340, top: 550, width: 40, height: 40 }, box, window, 'below').side).toBe(
       'above',
     );
+  });
+
+  it('is not drawn at all for something scrolled out of the window', () => {
+    expect(inWindow({ left: 340, top: -60, width: 40, height: 40 }, window)).toBe(false);
+    expect(inWindow({ left: 340, top: 640, width: 40, height: 40 }, window)).toBe(false);
+    expect(inWindow({ left: 340, top: -20, width: 40, height: 40 }, window)).toBe(true);
   });
 
   it('never runs past the window’s edge', () => {

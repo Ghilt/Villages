@@ -134,10 +134,10 @@ your picture and run:
 
 It never writes over a file that is there. The placeholders are the agent's, copied from the moodboard:
 most are **cut out of it** - the fourteen sample borders' top row, the cathedral panel's cherub, cross and
-drape, the four medallions, the knots on its dividers, and the Paris plate, its two ends and a strip of
-its middle joined with the words left out - and made four times the size, so they are soft; the rest are
-**drawn**, a gilt frame that slices cleanly, the fills, which have to repeat, the divider's rule and the
-tabs' faces. Where each is cut from is
+drape, the four medallions, the knots on its dividers, the Paris plate, its two ends and a strip of its
+middle joined with the words left out, and the slider, its drape, its knob and its tube - and made four
+times the size, so they are soft; the rest are **drawn**, a gilt frame that slices cleanly, the fills,
+which have to repeat, the divider's rule, the tabs' faces and the meter. Where each is cut from is
 `frontend/packages/world/src/uiPlaceholders.ts`.
 
 ### Painting one
@@ -193,6 +193,17 @@ moodboard's close and minimise do, or be plain, `round-plain`, for a drawn mark 
 faces**, `tab` at rest and `tab-chosen` for the one that is up, each cut like a drape and open at the
 bottom, where it tucks under the pane it opens; the bottom fifth of it is out of sight under the pane's
 border.
+
+**A slider is three pictures**: `slider`, its track - the two ends and the empty tube between them, cut
+like a drape at the inner edges of its ends, 520 by 260 painted, **with the tube along the picture's
+middle**, because the knob is centred on it: whatever hangs below the tube, a drape, is matched by as
+much room above it; `slider-fill`, a strip of the same tube lit, as tall as the track and with the tube in
+the same rows, which is stretched from the left end to the knob; and `slider-knob`, laid whole, 148
+painted, its ring in the picture's middle. The knob travels from the inner edge of one end to the
+inner edge of the other, so an end is as wide as the knob should never cross. **A meter is two**:
+`meter`, a tube of empty glass, and `meter-full`, the same tube full, cut alike, 480 by 56 painted; the
+full one is shown as far as the level reaches. A meter of another colour is another pair,
+`<look>` and `<look>-full`.
 
 **A divider is a rule with two ends**, painted at some middling length, with a `<name>.json` beside it
 whose top and bottom cuts are nought, so it is cut only at its ends:

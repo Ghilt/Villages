@@ -246,6 +246,54 @@ function tabFace(width: number, height: number, chosen: boolean): string {
   );
 }
 
+/**
+ * A meter's tube: a gilt rim round glass, its ends rounded, drawn to be cut at its two ends so that it lays
+ * at any length. Empty, the glass is dark; full, it is lit green, as the moodboard's faith bar is.
+ */
+function meterTube(width: number, height: number, full: boolean): string {
+  const w = width;
+  const h = height;
+  const rim = h * 0.18;
+  const glass = full
+    ? '<stop offset="0" stop-color="#2e4520"/><stop offset="0.28" stop-color="#9cc069"/>' +
+      '<stop offset="0.5" stop-color="#6c9a43"/><stop offset="1" stop-color="#2a3f1c"/>'
+    : '<stop offset="0" stop-color="#121719"/><stop offset="0.3" stop-color="#34434a"/>' +
+      '<stop offset="0.6" stop-color="#232d32"/><stop offset="1" stop-color="#0f1315"/>';
+  const stadium = (inset: number) => {
+    const r = h / 2 - inset;
+    return (
+      `M${h / 2} ${inset} H${w - h / 2} A${r} ${r} 0 0 1 ${w - h / 2} ${h - inset} ` +
+      `H${h / 2} A${r} ${r} 0 0 1 ${h / 2} ${inset} Z`
+    );
+  };
+  return (
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">` +
+    '<defs>' +
+    '<linearGradient id="rim" x1="0" y1="0" x2="0" y2="1">' +
+    '<stop offset="0" stop-color="#f6e0a4"/><stop offset="0.35" stop-color="#c79f5c"/>' +
+    '<stop offset="0.7" stop-color="#7e5d2c"/><stop offset="1" stop-color="#4a3418"/></linearGradient>' +
+    `<linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">${glass}</linearGradient>` +
+    '</defs>' +
+    `<path d="${stadium(0)}" fill="#2a1d0d"/>` +
+    `<path d="${stadium(h * 0.04)}" fill="url(#rim)"/>` +
+    `<path d="${stadium(rim)}" fill="url(#glass)"/>` +
+    `<path d="M${h / 2} ${rim + h * 0.1} H${w - h / 2}" stroke="rgba(255,250,235,${full ? 0.45 : 0.16})" ` +
+    `stroke-width="${h * 0.07}" stroke-linecap="round"/>` +
+    '</svg>'
+  );
+}
+
+/** An outline round a circle, in `steps` straight pieces: the knob on a slider, standing on a tube. */
+function circle(cx: number, cy: number, r: number, steps = 24): Point[] {
+  return Array.from({ length: steps }, (_, at) => {
+    const turn = (2 * Math.PI * at) / steps;
+    return [
+      Math.round((cx + r * Math.cos(turn)) * 10) / 10,
+      Math.round((cy + r * Math.sin(turn)) * 10) / 10,
+    ] as const;
+  });
+}
+
 /** An outline round a box with its short ends made half circles, as an oval button is, in eight steps a half. */
 function stadium(left: number, top: number, width: number, height: number): Point[] {
   const r = height / 2;
@@ -276,6 +324,9 @@ const RULE = { width: 160, height: 9, end: 14 };
 
 /** A tab's face as shown: tall, and wide enough to stretch, with its rounded corners outside its cuts. */
 const TAB = { width: 64, height: 40, end: 12 };
+
+/** A meter's tube as shown: long enough to stretch, as tall as the moodboard's faith bar, its rounded ends. */
+const METER = { width: 120, height: 14, end: 10 };
 
 /** Every placeholder there is, in the order the page shows them. */
 export const UI_PLACEHOLDERS: readonly UiPlaceholder[] = [
@@ -704,6 +755,133 @@ export const UI_PLACEHOLDERS: readonly UiPlaceholder[] = [
     about: 'the moodboard’s house sigil, an eagle crowned',
     from: [1386, 446, 126, 150],
     key: true,
+  },
+
+  // The slider, the moodboard's, in three pictures: its track, joined from its two ends and a strip of the
+  // empty tube; a strip of the lit tube, which is laid from the left end to the knob; and the knob, cut
+  // round, because it stands on the tube.
+  {
+    kind: 'controls',
+    name: 'slider',
+    about:
+      'the moodboard’s slider, its drape and its ornament joined by a strip of its empty tube, for a ' +
+      'knob to travel along',
+    from: [
+      [931, 183, 94, 65],
+      [1150, 183, 6, 65],
+      [1205, 183, 30, 65],
+    ],
+    // Its tube along the picture's middle, which is where the knob is centred, so it reaches as far above the
+    // tube as the drape hangs below. Along an outline rather than keyed: the drape's folds and the empty
+    // glass are as dark as the ground.
+    outline: [
+      [0, 32],
+      [4.5, 25],
+      [9.5, 20],
+      [12.6, 13.75],
+      [17, 10],
+      [21.4, 10.6],
+      [27, 13.75],
+      [34.5, 14.4],
+      [40.75, 15],
+      [45.75, 15.6],
+      [52, 18.75],
+      [59.5, 21.25],
+      [72, 21.25],
+      [82, 20],
+      [92, 20.6],
+      [94, 21.3],
+      [100, 21.3],
+      [106, 22],
+      [110.5, 24],
+      [115, 21.5],
+      [116, 20.5],
+      [118, 19.5],
+      [121.5, 20],
+      [123, 22],
+      [123, 25.5],
+      [125.5, 27],
+      [127.5, 29.5],
+      [129.2, 32],
+      [127.5, 35],
+      [125, 36],
+      [123, 37.5],
+      [122.5, 41],
+      [122, 44],
+      [120, 45.5],
+      [117.5, 44.5],
+      [116, 42],
+      [112, 41],
+      [108, 41],
+      [105.5, 43],
+      [100, 43.8],
+      [94, 43.8],
+      [92, 46.25],
+      [84.5, 45],
+      [82, 50],
+      [77, 55],
+      [74.5, 63.75],
+      [70.75, 63.75],
+      [69.5, 57.5],
+      [67, 55],
+      [62, 50],
+      [57, 49.4],
+      [52, 48.75],
+      [42, 48.75],
+      [34.5, 47.5],
+      [28.25, 51.25],
+      [27, 56.25],
+      [21.4, 56.25],
+      [19.5, 51.25],
+      [13.25, 47.5],
+      [9.5, 43.75],
+      [5.75, 38.75],
+      [2, 34.4],
+    ],
+    border: { slice: [32, 30, 33, 94], repeat: 'stretch' },
+  },
+  {
+    kind: 'controls',
+    name: 'slider-fill',
+    about: 'a strip of the moodboard’s slider where its tube is lit, laid from the left end to the knob',
+    from: [1035, 183, 6, 65],
+    // Past the strip's own sides, so that its ends stay whole when it is stretched along the tube.
+    outline: [
+      [1032, 204.2],
+      [1044, 204.2],
+      [1044, 226.6],
+      [1032, 226.6],
+    ],
+  },
+  {
+    kind: 'controls',
+    name: 'slider-knob',
+    about: 'the gilt knob on the moodboard’s slider',
+    // Its ring in the middle of the picture, which is the point laid on the tube's middle.
+    from: [1079, 196, 37, 37],
+    outline: circle(1097.5, 214, 16.5),
+  },
+
+  // The meter: a tube to show a level in, drawn, and the same tube full.
+  {
+    kind: 'controls',
+    name: 'meter',
+    about: 'drawn: a gilt tube of dark glass, for a level to be shown in',
+    svg: meterTube(painted(METER.width), painted(METER.height), false),
+    border: {
+      slice: [painted(METER.height / 2), painted(METER.end), painted(METER.height / 2), painted(METER.end)],
+      repeat: 'stretch',
+    },
+  },
+  {
+    kind: 'controls',
+    name: 'meter-full',
+    about: 'drawn: the same tube full, lit green as the moodboard’s faith bar is, shown as far as the level',
+    svg: meterTube(painted(METER.width), painted(METER.height), true),
+    border: {
+      slice: [painted(METER.height / 2), painted(METER.end), painted(METER.height / 2), painted(METER.end)],
+      repeat: 'stretch',
+    },
   },
 
   // Dividers: a rule laid between its two ends. The knots that stand in the middle of one are

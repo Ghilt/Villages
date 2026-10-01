@@ -16,6 +16,19 @@ export type Side = 'above' | 'below';
 export const TOOLTIP_GAP = 8;
 export const TOOLTIP_MARGIN = 8;
 
+/**
+ * Whether any of what a tooltip is about is in the window. One about something scrolled out of sight is not
+ * drawn, rather than turned to whichever side has room, which would bring it back into sight about nothing.
+ */
+export function inWindow(anchor: Rect, window: { readonly width: number; readonly height: number }): boolean {
+  return (
+    anchor.top + anchor.height > 0 &&
+    anchor.top < window.height &&
+    anchor.left + anchor.width > 0 &&
+    anchor.left < window.width
+  );
+}
+
 export function placeTooltip(
   anchor: Rect,
   box: { readonly width: number; readonly height: number },
