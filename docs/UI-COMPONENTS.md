@@ -204,8 +204,8 @@ A line each: what it is for, its variants, and where on the page it is.
   container is inside something marked `data-ui-layers="shown"`.
 - **`RECIPES`**, `ui/container/recipes.ts`: the named containers. The first are made from the moodboard -
   Adam's own sentence as `pane.cherub-corner`, the cathedral panel as `pane.cathedral`, its framed panes,
-  its cards and its Paris plate - with `pane.plain` for a tab bar to tuck under, and the game's own come
-  as each surface is redone.
+  its cards and its Paris plate - with `pane.plain` for a tab bar to tuck under and `pane.cherubs`, Adam's
+  first frame, and the game's own come as each surface is redone.
 - **`Mark`**, `ui/mark/Mark.tsx`: a mark by name, drawn, or painted when `world/ui/marks/` has it: the
   five resources, `wealth`, `domain`, `influence`, `reason` and `piety`; a figure's `kindness`, `physical`
   and `age`; and `close`, `minimise`, `maximise`, `previous`, `next`, `fold`, `less`, `more`, `eye-open`

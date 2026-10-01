@@ -46,6 +46,12 @@ export const RECIPES = {
   /** A stone arch on two columns, its own middle showing. */
   'pane.arch': { border: 'stone-arch', padding: 4 },
 
+  /**
+   * Adam's first frame: drapes in all four corners and cherubs in three, the moulding repeated between
+   * them, on the dark felt that came with it. Its corners are deep, so its words start well in.
+   */
+  'pane.cherubs': { border: 'gilt-cherubs', fill: 'dark-felt', padding: 4 },
+
   /** A plain gilt pane on parchment, with nothing standing out past it: what a tab bar tucks under. */
   'pane.plain': { border: 'gilt-simple', fill: 'parchment', text: 'ink', padding: 8 },
 

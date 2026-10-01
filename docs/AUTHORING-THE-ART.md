@@ -171,6 +171,13 @@ border, half of each cut if it is not said. Only `slice` has to be there.
 The title plate is a border too, `plate`, whose own middle is its parchment, so its file says
 `"middle": true` and a recipe lays no fill under it.
 
+**A frame that comes as nine tiles with gaps between them**, as an image model draws one, is not a border
+yet: the gaps are cut out, with the pale edge they leave on the tiles beside them, and the tiles joined
+into one box, its cuts where the tiles met. The middle tile is not the border's middle but a fill of its
+own, because a frame's edges are clear inside their moulding and a middle drawn only between the cuts
+would leave a clear band all round. `borders/gilt-cherubs` and `fills/dark-felt`, the first pictures of
+yours in the folder, were made that way; the agent does it, until the tool does.
+
 So **an edge has to repeat without a seam**: whatever is at its left end has to meet its right, or be
 stretched. Anything that must not repeat - a cross on the crown, a cherub - is not part of the border but
 an embellishment of its own. The moodboard's own borders were not drawn to be sliced, and the page shows

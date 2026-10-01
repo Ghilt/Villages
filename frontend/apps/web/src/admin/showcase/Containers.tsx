@@ -62,6 +62,7 @@ const HOLDS: Record<RecipeName, () => ReactNode> = {
   'pane.drape': () => <Pane title="A drape and a cherub, painted in" />,
   'pane.arch': () => <Pane title="Under the arch" />,
   'pane.plain': () => <Pane title="A plain pane, for a tab bar to tuck under" />,
+  'pane.cherubs': () => <Pane title="The house of Montreuil" />,
   'card.figure': () => <Figure name="Count de Montreuil" what="Noble · Rationalist" stats="12 · 8 · 4" />,
   'tooltip.plain': () => <span className="ui-body">Keep your holdings in sight</span>,
   'plate.place': () => <span className="ui-heading">Paris</span>,

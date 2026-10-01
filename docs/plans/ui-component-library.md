@@ -220,7 +220,9 @@ several pieces of the moodboard: the Paris plate, its left end, a strip beside i
 for the right, because a strip from its middle was a lighter parchment and the join showed. Seven was
 six controls, too many for one step, so it is two: the first is the slider, cut from the moodboard's in
 three pictures and worked by the browser's own slider under the painting, the meter and the stepper; the
-second is the switch, the choice of a few and hold to confirm. The rest of the
+second is the switch, the choice of a few and hold to confirm. Adam's first frame of his own,
+`gilt-cherubs`, came in during it as an image model's nine tiles with gaps between them, and went into the
+folder joined, with its middle as a fill, `dark-felt`, and a recipe, `pane.cherubs`. The rest of the
 page's sections say which step brings them, and from here the order is a menu. Step four was built with a keep-out, room kept clear among
 the words for an embellishment, and Adam took it out the same day: see decision record 0068. Step two cut
 the top row of the moodboard's sample borders, not both: the second row is the same frames' corner pieces.
