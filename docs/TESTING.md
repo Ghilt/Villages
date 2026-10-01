@@ -31,6 +31,10 @@ Every increment lands with the test that proves it. The tests are the reason we 
   `testsRead("contracts")`. Gradle runs a module's tests again only when something it knows they read has changed,
   so a file it was never told about can change under them while `check` reports the last run's green. `check` also
   fails when a test reads a `../../` path that its build file does not name.
+- The backend's modules run their tests at the same time, each in a JVM of its own. So a test that needs a port takes
+  a random one, a test that writes a file writes it into a temporary folder of its own, and a container, when there
+  are containers, is started for the test rather than shared by name. Two modules that shared any of those would
+  fail only now and then, and nothing but this rule stops them.
 - MapLibre and Pixi are never instantiated in unit tests. Their maths is pure and tested directly; their pixels get
   one end-to-end smoke test.
 - A test that needs Docker says so in its name, and is skipped with a clear message when Docker is absent.
@@ -40,7 +44,9 @@ Every increment lands with the test that proves it. The tests are the reason we 
 Commands are filled in here as the increments land.
 
 - Everything: `scripts/check.ps1` or `scripts/check.sh`, from increment 0.14
-- Backend: `cd backend` then `./gradlew check`, from 0.5
+- Backend: `cd backend` then `./gradlew check`, from 0.5. Modules that do not depend on each other build and test side
+  by side (`backend/gradle.properties`), so their lines interleave in the output; `--no-parallel` runs them one at a
+  time.
 - Frontend: `cd frontend` then `npm run check`, from 0.10
 - End to end: `cd frontend` then `npm run e2e`, from 0.13
 

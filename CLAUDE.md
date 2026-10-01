@@ -444,7 +444,9 @@ Commands are added here as the increments land:
   `JAVA_HOME` may stay on the Temurin 17 that is installed; the first run downloads it. Every module's
   `build.gradle.kts` declares only its allowed dependency edges and, with `testsRead`, the files outside
   it that its tests read, and `check` fails when one is missing; `buildSrc` holds the one convention they
-  share. Versions live in `backend/gradle/libs.versions.toml`.
+  share. Versions live in `backend/gradle/libs.versions.toml`. Modules that do not depend on each other
+  build and test side by side (`backend/gradle.properties`), so their output interleaves; `--no-parallel`
+  runs them one at a time.
 
 The two below do not exist yet. They arrive with the increments named, and `infra/` and `scripts/` in the
 layout above are where they will go rather than where they are.
