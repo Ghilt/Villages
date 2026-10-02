@@ -24,6 +24,11 @@
   reaching it records nothing a plain line would not. A line read back shows nothing, his call too, and
   that is how. The page shows each line's thing once in its life, and an option's once the house has taken
   it, since the house can refuse one.
+- Amended 2026-10-02: **a line's effects are taken in order**, each decided against the house the ones before
+  it left. Every cost used to be checked against the house before the step, so two a house could pay apart but
+  not together both passed, and folding the second took a stock below nothing and threw: every later command on
+  that house failed with it. Now they are refused together, a grant before a cost can pay for it, and a stock
+  asked for more than it holds is left as it was, because a fold never throws. Found by the review of that day.
 
 ## Context
 

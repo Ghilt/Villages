@@ -143,8 +143,8 @@ object HouseDecider : Decider<HouseCommand, House, HouseEvent> {
                     worldTime = command.worldTime,
                     recordedAt = command.recordedAt,
                 ),
-            ) + follows(
-                taken.effect, state, command.houseId, command.player, command.worldTime, command.recordedAt,
+            ) + followAll(
+                listOf(taken.effect), state, command.houseId, command.player, command.worldTime, command.recordedAt,
             )
         }
 
@@ -180,9 +180,8 @@ object HouseDecider : Decider<HouseCommand, House, HouseEvent> {
                 throw HouseError.NotTheNextStep
             }
             val line = checkNotNull(open.dialogue.line(command.lineId)) { "the walk allowed a line the dialogue lacks" }
-            val consequences = line.effects.flatMap {
-                follows(it, state, command.houseId, house.player, command.worldTime, command.recordedAt)
-            }
+            val consequences =
+                followAll(line.effects, state, command.houseId, house.player, command.worldTime, command.recordedAt)
             val ends = when (line.then) {
                 Then.End -> listOf(
                     PlayerCompletedDialogue(command.houseId, house.player, open.dialogue.id, command.worldTime, command.recordedAt),
@@ -278,7 +277,7 @@ object HouseDecider : Decider<HouseCommand, House, HouseEvent> {
     }
 
     /** A house that exists, or the refusal. Everything a resource is done to needs one. */
-    private fun founded(state: House): House.Founded =
+    internal fun founded(state: House): House.Founded =
         state as? House.Founded ?: throw HouseError.NoSuchHouse
 
     private fun anAmount(amount: Long) {
@@ -287,55 +286,9 @@ object HouseDecider : Decider<HouseCommand, House, HouseEvent> {
         }
     }
 
-    private fun enough(house: House.Founded, resource: Resource, wanted: Long, now: Instant) {
+    internal fun enough(house: House.Founded, resource: Resource, wanted: Long, now: Instant) {
         if (!house.has(resource, wanted, now)) {
             throw HouseError.NotEnoughFree(resource, wanted, house.freeOf(resource, now))
-        }
-    }
-
-    /**
-     * What an effect records, beyond the action or the step that set it off, for this house and its player at the
-     * command's two times. Choices and dialogues share it, so a new effect is one branch here for both.
-     */
-    @Suppress("LongParameterList")
-    private fun follows(
-        effect: Effect,
-        state: House,
-        houseId: HouseId,
-        player: PlayerId,
-        worldTime: WorldTime,
-        recordedAt: Instant,
-    ): List<HouseEvent> = when (effect) {
-        is Effect.FoundAt -> when (state) {
-            is House.Founded -> throw HouseError.AlreadyFounded
-            is House.NotFounded -> listOf(
-                HouseFounded(
-                    houseId = houseId,
-                    player = player,
-                    name = effect.name,
-                    seat = effect.seat,
-                    significance = FOUNDING_SIGNIFICANCE,
-                    banner = effect.banner,
-                    resources = emptyStocks(recordedAt),
-                    worldTime = worldTime,
-                    recordedAt = recordedAt,
-                ),
-            )
-        }
-
-        // Nothing gives to a house that does not exist - a choice that grants is never given to one, and a
-        // dialogue is only offered to a founded house - so this refusal is not reached. It is here because what
-        // a state can be given is the decider's rule, not the giver's.
-        is Effect.Grant -> {
-            founded(state)
-            listOf(HouseResourceGranted(houseId, effect.resource, effect.amount, worldTime, recordedAt))
-        }
-
-        // What an option costs is refused when the house has not that much free, as spending is, and then the
-        // action or the step is refused with it: the player answers otherwise. See decision record 0071.
-        is Effect.Spend -> {
-            enough(founded(state), effect.resource, effect.amount, recordedAt)
-            listOf(HouseResourceSpent(houseId, effect.resource, effect.amount, worldTime, recordedAt))
         }
     }
 

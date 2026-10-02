@@ -106,6 +106,49 @@ class HouseDialoguesSpec : StringSpec({
         paidFor.stockOf(Resource.WEALTH).at(noon) shouldBe 20
     }
 
+    "two costs on one option are paid out of what the first leaves, so each affordable but not both is refused" {
+        val levy = Dialogue(
+            id = DialogueId.offered(house, UUID.fromString("1c000007-0000-4000-8000-000000000033")),
+            title = "A double levy",
+            scene = null,
+            speakers = listOf(lady, messenger),
+            lines = listOf(
+                said("asks", Then.DialogueChoice(listOf(LineId("pay"), LineId("decline")))),
+                said("pay", Then.End, by = lady, effects = List(2) { Effect.Spend(Resource.WEALTH, 40) }),
+                said("decline", Then.End, by = lady),
+            ),
+        )
+
+        val short = after(granting(amount = 50), offering(levy))
+        shouldThrow<HouseError.NotEnoughFree> { HouseDecider.decide(stepping("pay", levy.id), short) }
+        short.openDialogues.single().walk().allows(LineId("decline")) shouldBe true
+
+        val enough = after(granting(amount = 80), offering(levy))
+        val paid = HouseDecider.decide(stepping("pay", levy.id), enough).fold(enough, HouseDecider::evolve)
+        paid.shouldBeInstanceOf<House.Founded>().stockOf(Resource.WEALTH).at(noon) shouldBe 0
+    }
+
+    "a grant before a cost on one option can pay for it, because the effects are taken in order" {
+        val fee = Dialogue(
+            id = DialogueId.offered(house, UUID.fromString("1c000007-0000-4000-8000-000000000034")),
+            title = "A fee, advanced",
+            scene = null,
+            speakers = listOf(lady, messenger),
+            lines = listOf(
+                said("asks", Then.DialogueChoice(listOf(LineId("pay"), LineId("decline")))),
+                said(
+                    "pay", Then.End, by = lady,
+                    effects = listOf(Effect.Grant(Resource.WEALTH, 60), Effect.Spend(Resource.WEALTH, 100)),
+                ),
+                said("decline", Then.End, by = lady),
+            ),
+        )
+
+        val house = after(granting(amount = 50), offering(fee))
+        val paid = HouseDecider.decide(stepping("pay", fee.id), house).fold(house, HouseDecider::evolve)
+        paid.shouldBeInstanceOf<House.Founded>().stockOf(Resource.WEALTH).at(noon) shouldBe 10
+    }
+
     "a requirement failing lapses every open dialogue that needed it, from one decision, and they are not open" {
         val talking = after(offering(herFirst), offering(theMessengers), offering(herSecond))
 

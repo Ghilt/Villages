@@ -137,9 +137,11 @@ dialogue is the first; decision record 0071 is the shape.
    each house that depends on one `FailRequirement`; the house lapses what it ends, as
    `PlayerLostDialogue`. A new kind of requirement is a case and a branch, and the listener never changes.
 
-A new kind of line costs nothing but its words; a new kind of effect is one branch of `follows`, which
-choices and dialogues share, and its `kind` in the store. A rule about where a step may be taken belongs
-in the walk, so the decider and the page cannot come to disagree.
+A new kind of line costs nothing but its words; a new kind of effect is one branch of `follows` in
+`Effects.kt`, which choices and dialogues share, and its `kind` in the store. A line's effects are taken in
+order, each decided against what the ones before it left, so two costs the house could pay apart but not
+together are refused together, and a grant before a cost can pay for it. A rule about where a step may be
+taken belongs in the walk, so the decider and the page cannot come to disagree.
 
 ### A rate that changes
 

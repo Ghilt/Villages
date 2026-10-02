@@ -28,6 +28,13 @@ class StockSpec : StringSpec({
         Stock(120, 0.0, noon).at(noon.plusSeconds(100_000)) shouldBe 120
     }
 
+    "a stock asked for more than it holds is left as it was, because a fold never throws" {
+        val stock = Stock(30, 0.0, noon)
+
+        stock.minus(40, noon.plusSeconds(5)) shouldBe stock
+        stock.minus(30, noon.plusSeconds(5)) shouldBe Stock(0, 0.0, noon.plusSeconds(5))
+    }
+
     "a house is founded with one stock of every resource, all of it nothing and none of it growing" {
         val stocks = emptyStocks(noon)
 

@@ -55,8 +55,15 @@ data class Stock(val total: Long, val ratePerSecond: Double, val asOf: Instant) 
     /** The stock after gaining an amount: brought up to date first, so a running rate is not lost. */
     fun plus(amount: Long, now: Instant): Stock = Stock(at(now) + amount, ratePerSecond, now)
 
-    /** The stock after losing an amount. The caller has already checked that there is enough free. */
-    fun minus(amount: Long, now: Instant): Stock = Stock(at(now) - amount, ratePerSecond, now)
+    /**
+     * The stock after losing an amount, or as it was when it has not that much. A fold must never throw, and the
+     * decider refuses a spend there is not enough for, so a stock asked for more than it holds is a history the
+     * decider did not write, and is left as it was rather than turned into a number below nothing.
+     */
+    fun minus(amount: Long, now: Instant): Stock {
+        val left = at(now) - amount
+        return if (left < 0) this else Stock(left, ratePerSecond, now)
+    }
 
     /** The total at a later instant, the rate having run on. Before `asOf` it is what it was. */
     fun at(now: Instant): Long {
