@@ -56,12 +56,6 @@ const SPEECH =
   'M5 4.5 H19 A2 2 0 0 1 21 6.5 V14 A2 2 0 0 1 19 16 H10.5 L6 20 V16 H5 A2 2 0 0 1 3 14 V6.5 A2 2 0 0 1 5 4.5 Z';
 
 /**
- * *Next*, in a conversation: a chevron, the same "the one after" as the letter's carousel, and Adam's call
- * that it is a mark rather than a word. One press shows the next line, or takes the step the lines end in.
- */
-const NEXT = 'M9.5 5.5 L16 12 L9.5 18.5';
-
-/**
  * The way back from a conversation to all of them, drawn as the list it goes back to - three rows, each with
  * its point - as the way back from one key figure is drawn as the grid it goes back to. Adam's call: a mark.
  */
@@ -78,7 +72,6 @@ export type IconName =
   | 'nine'
   | 'area'
   | 'speech'
-  | 'next'
   | 'list';
 
 /** Which way a needle points. The four are one drawing turned, never four drawings. */
@@ -121,7 +114,6 @@ export function Icon({ name, title }: IconProps) {
       {name === 'shield' && <path d={SHIELD} className="icon__line" />}
       {name === 'area' && <path d={FENCE} className="icon__line" />}
       {name === 'speech' && <path d={SPEECH} className="icon__line" />}
-      {name === 'next' && <path d={NEXT} className="icon__line" />}
       {name === 'list' && (
         <>
           <path d={LIST.rows} className="icon__line" />

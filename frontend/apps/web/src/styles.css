@@ -3041,8 +3041,8 @@ body,
 }
 
 /*
- * A conversation: the way back and its title at the top, the feed scrolling under them, and *next* or the
- * options at its foot. The two marks are Adam's call; the options are what can be said, so they are words.
+ * A conversation: the way back and its title at the top, the feed scrolling under them with the options at
+ * its end, and *continue* at its foot. The way back is a mark and *continue* a word, both Adam's call.
  */
 .dialogues__back {
   flex: none;
@@ -3073,6 +3073,12 @@ body,
   padding: 0.75rem 0.75rem calc(0.75rem + var(--corner-bottom, 0px));
   list-style: none;
   overflow-y: auto;
+}
+
+/* With *continue* under it the compass stands over the foot rather than the feed, so the last line read sits
+   just above the foot instead of a compass's height up from it. */
+.dialogues__feed--above-foot {
+  padding-bottom: 0.75rem;
 }
 
 /*
@@ -3133,14 +3139,16 @@ body,
 }
 
 /*
- * The foot, while there is *next* to press: a row along the bottom, so it steps in from the right clear of
- * the compass when the compass is standing in this corner, on a phone, rather than growing a compass tall.
+ * The foot, while there is a line to read: *continue* in the middle of it, the one thing to press while a
+ * conversation is being read, and in the same place every time so a thumb can stay on it. It steps in from
+ * both sides as far as the compass reaches into one of them on a phone, so it stays in the middle of the
+ * pane and clear of the compass, rather than growing a compass tall.
  */
 .dialogues__foot {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   flex: none;
-  padding: 0.45rem calc(0.75rem + var(--corner-right, 0px)) 0.45rem 0.75rem;
+  padding: 0.55rem calc(0.75rem + var(--corner-right, 0px));
   border-top: 1px solid var(--parchment-edge);
 }
 
@@ -3183,26 +3191,89 @@ body,
   color: var(--gold);
 }
 
-.dialogues__next {
-  flex: none;
-  width: 2.3rem;
-  height: 2.3rem;
-  padding: 0.4rem;
-  border: 1px solid var(--parchment-edge);
-  border-radius: 50%;
-  background: var(--parchment);
+/* Drawn in gold where the options are drawn in the parchment's edge, because it is the press to find. */
+.dialogues__continue {
+  min-width: 9.5rem;
+  padding: 0.4rem 1.5rem 0.5rem;
+  border: 1px solid var(--gold);
+  border-radius: 4px;
+  background: rgba(157, 124, 42, 0.16);
+  font: inherit;
+  font-size: 1.08rem;
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  color: var(--ink);
   cursor: pointer;
 }
 
-.dialogues__next:hover:not(:disabled) {
-  background: rgba(157, 124, 42, 0.12);
+.dialogues__continue:hover:not(:disabled) {
+  background: rgba(157, 124, 42, 0.3);
 }
 
 /* A step is out: nothing is pressed until it is answered. */
-.dialogues__next:disabled,
+.dialogues__continue:disabled,
 .dialogues__option:disabled {
   opacity: 0.5;
   cursor: default;
+}
+
+/*
+ * What a line did to the house, under it and between the two sides: the resource's own mark from the house
+ * card and the amount, in gold for what was paid and soft ink for what was spent.
+ */
+.dialogues__gains {
+  display: flex;
+  justify-content: center;
+  gap: 0.9rem;
+  align-self: center;
+  margin-top: -0.2rem;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.dialogues__gain {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--gold);
+}
+
+.dialogues__gain--spent {
+  color: var(--ink-soft);
+}
+
+.dialogues__mark {
+  flex: none;
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+/* The house card's marks are stroked, never filled, at the weight every mark is drawn at. */
+.dialogues__mark path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* A lapsed dialogue's closing line: the world moving on, said quietly at the end of the feed. */
+.dialogues__closing {
+  align-self: center;
+  max-width: 90%;
+  margin-top: 0.3rem;
+  font-size: 0.92rem;
+  font-style: italic;
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+/* A step the house would not take, said under the options it answers. */
+.dialogues__refused {
+  align-self: stretch;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: #8a3b2a;
 }
 
 /* Put away: its name, how many there are, and the way back, as a strip across the top of the column. */

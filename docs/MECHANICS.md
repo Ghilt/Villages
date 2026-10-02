@@ -111,11 +111,11 @@ making the world feel alive and personal.
 ### What it is
 
 Two or more characters in conversation, shown as a back and forth of **speech bubbles** the player steps
-through: *next* for the next line, and where the conversation branches, a **dialogue choice** in its place,
-whose options are what can be said or done next. An option can show what taking it will do before it is
-taken, as whoever wrote the dialogue chose: what it gains and costs, that something will come of it but not
-what, or nothing until it is done. What has already been said stays above, scrollable, so
-that it can be read back.
+through: *continue* for the next line, and where the conversation branches, a **dialogue choice** in its
+place, whose options are what can be said or done next. An option can show what taking it will do before it
+is taken, as whoever wrote the dialogue chose: what it gains and costs, that something will come of it but
+not what, or nothing until it is done. What has already been said stays above, scrollable, so that it can
+be read back.
 
 The same shape covers three cases, and they are one mechanic rather than three:
 
@@ -188,12 +188,14 @@ A **pane**, there from the first dialogue a house is offered and never closed af
   Newest first in both, each with its title and who speaks in it, every name standing alone as it would on
   a bubble, and one waiting is marked *new* until a step has been taken in it and *begun* after.
 - **A conversation**: pressing a dialogue opens it, from its start or from where it was left. The scene at
-  the top, the feed under it, scrolling, and the stretch ahead shown a line at a time by *next* at its foot.
-  Moving past the last line of a stretch takes the step it ends in. A dialogue choice's options are the end
-  of the feed and scroll with it, because a foot of options at half a phone leaves no room for what they
-  answer. A finished one opens to be read back. *Next* is a mark, a chevron, and so is the way back to the
-  list, drawn as the list it goes back to; both Adam's call. The options are what can be said, so they are
-  words, each with what it shows taking it will do.
+  the top, the feed under it, scrolling, and the stretch ahead shown a line at a time by *continue* at its
+  foot. Moving past the last line of a stretch takes the step it ends in. A dialogue choice's options are the
+  end of the feed and scroll with it, because a foot of options at half a phone leaves no room for what they
+  answer. A finished one opens to be read back. *Continue* is a word, in the middle of the foot and in the
+  same place every time, because it is the one thing to press while a conversation is read; it was a chevron
+  in the corner first, and was too easily missed. The way back to the list is a mark, drawn as the list it
+  goes back to. Both Adam's call. The options are what can be said, so they are words, each with what it
+  shows taking it will do.
 
 **In the spread** it takes a column down the right edge of the stage, set into it as the column on the left
 is set into the left edge, and top to bottom, because a conversation is long:
@@ -214,6 +216,13 @@ opens from its strip, and on a phone it takes the bay that is not the map's, at 
 does. A pane already open stays as the player left it. What arrives is a dialogue waiting that the page has
 not been shown before, so the ones waiting when a page loads open it, as a letter does, and the same one
 never opens it twice: a step taken, a reconnect or the list sent again is not a dialogue offered.
+
+**A line can show something.** Shown, a line can take the camera to a place, or open an inspect window on
+what it names - the house, a key figure, a place - so a conversation about the quay can show the quay. In
+the spread the map moves beside the column and the window opens in the rail, as a click would open it. On a
+phone the conversation goes to half in its bay and the other bay shows what the line names, the map or the
+window. It is the page's, never the house's history, and the conversation is never what gives way to it.
+Adam's idea, from the camera going home by accident when a line paid.
 
 ### Not decided
 
@@ -251,11 +260,15 @@ it lists the dialogues waiting and finished, a lapsed one saying why, and a dial
 pressing one opens the conversation, which is played through in the pane: the stretch a line at a time,
 the options at the end of the feed, and each step sent from there, on the wire from version 18. The
 speakers have a portrait and a name on every bubble, the key figures' own frame, and a messenger the
-frame's bust; there is no scene yet, and what a line gives shows on the house card and not yet in the feed. The debug panel's Dialogues section offers a dialogue and
-does nothing else, and a requirement is never sent to a page. Its shape is decided in decision record 0067: a dialogue offered whole
-on the house's stream; only its dialogue choices, and the lines that give something or end it, recorded;
-what a line gives written as the world's own event beside the step; and hidden requirements that end a
-dialogue when one fails, with the server holding back what the player has not reached.
+frame's bust. What a line gives or costs is written under it in the feed, the resource's mark and the
+amount, as the house card moves with it; a lapsed dialogue ends on its closing line, *Sadly, X died before
+this could be finished*, in the interface's words; and an option the house cannot pay for is refused in the
+pane, under the options, as well as in the log. There is no scene yet, and no line shows anything. The
+debug panel's Dialogues section offers a dialogue and does nothing else, and a requirement is never sent to
+a page. Its shape is decided in decision record 0067: a dialogue offered whole on the house's stream; only
+its dialogue choices, and the lines that give something or end it, recorded; what a line gives written as the
+world's own event beside the step; and hidden requirements that end a dialogue when one fails, with the
+server holding back what the player has not reached.
 `docs/plans/character-dialogue.md` is the order it is built in, one commit a step, and experiment 0014 is
 what it is meant to show. `ARCHITECTURE.md` says what it asks of the server and the client.
 

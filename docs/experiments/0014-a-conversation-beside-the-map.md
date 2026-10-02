@@ -122,6 +122,22 @@ With a portrait beside every bubble, on its outer side, the two parties face eac
 house's figure in his cut-paper frame from the left, the messenger as the frame's bust from the right. That
 is half of the hypothesis's "a portrait on every bubble"; the scene above the feed is the other half.
 
+What a line did is written under it now - the coin and −40 in soft ink under the option that spent it, the
+coin and +100 in gold under the reply that paid it - and the house card moves with it, so the reward reads
+where it happened. A letter lapsed before anybody spoke shows nothing but its closing line, *Sadly, Johanna
+Morell died before this could be finished*: it ended where it stood, which was at the start. Whether that
+reads as the world moving on rather than as an error is the question above, and Adam's eye.
+
+On a phone, the option that spends took the conversation away: the house's window came up in the bay it
+was being read in, and on a desktop the camera flew home. None of it was the dialogue's. The camera goes to
+the house when it is founded, and was told to again whenever the house was sent again, which it is
+whenever anything in it changes, a purse paid included; it goes once in the life of a page now, as a
+dialogue opens the pane once. Adam liked what the accident did, which is the first thing this experiment
+has turned up about a conversation *beside* the map: a line could show what it is about, the map moving or
+a window opening beside the conversation, and on a phone the conversation going to half to make room for
+it. That is a step of the plan now. And *next*, a chevron in the corner, was missed beside the compass on a
+phone; it is the word *continue*, in the middle of the foot.
+
 ## Result
 
 Open.

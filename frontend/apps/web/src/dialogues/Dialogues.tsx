@@ -1,14 +1,26 @@
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 
 import { choose, keepReading, type Press, pressNext, type Reading, showing } from '@villages/client-core';
 import type { DialogueView, LineView, SpeakerView } from '@villages/protocol';
 
 import { Portrait } from '../figures/Portrait';
+import { Mark } from '../marks/Mark';
 import { completeDialogueStep, gatewayState, watchGateway } from '../net/gateway';
 import { Icon } from '../stage/Icons';
 import { PaneSizeControl } from '../stage/PaneSizeControl';
 import type { Room } from '../stage/panes';
-import { howMany, impactWords, type ListedDialogue, listOf } from './describe';
+import {
+  closingLine,
+  type Gain,
+  gainsOf,
+  gainWords,
+  howMany,
+  impactWords,
+  type ListedDialogue,
+  listOf,
+  refusalWords,
+  signed,
+} from './describe';
 
 /**
  * **Character dialogue**: the conversations the house has been offered, and the one being read.
@@ -41,11 +53,13 @@ export function Dialogues({ room }: { room: Room }) {
   }
 
   if (reading !== null) {
+    const refused = heard.stepRefused;
     return (
       <Conversation
         dialogue={reading}
         room={room}
         stepOut={heard.acting !== null}
+        refused={refused !== null && refused.dialogueId === reading.id ? refused : null}
         onBack={() => setOpen(null)}
       />
     );
@@ -100,23 +114,34 @@ interface ConversationProps {
   room: Room;
   /** Whether a step is out: nothing can be pressed until it is answered. */
   stepOut: boolean;
+  /** The step through this dialogue the house last refused, and why, if one was. */
+  refused: { lineId: string; reason: string } | null;
   onBack: () => void;
 }
 
 /**
- * **A conversation**: what has been said, the stretch ahead shown a line at a time, and at its foot *next* or
- * the dialogue choice's options.
+ * **A conversation**: what has been said, the stretch ahead shown a line at a time by *continue* at its foot,
+ * and at the end of the feed the dialogue choice's options.
  *
  * Where the reading is, is `client-core`'s reading place, kept here only as state: it holds while the
  * dialogue's revision holds and starts the new stretch when a step is answered. A press either shows a line or
  * sends the step the house writes down, and the step's answer arrives as the dialogue moved on, which is what
- * moves the reading on. The bubbles are keyed by their lines, so a line said stays where it was. *Next* and the
- * way back are marks, Adam's call; the options are what can be said, so they are words.
+ * moves the reading on. The bubbles are keyed by their lines, so a line said stays where it was. *Continue* is
+ * a word, in the middle of the foot, because it is the one thing to press while a conversation is read and a
+ * mark in the corner was too easily missed; the way back is a mark. Both Adam's call. The options are what
+ * can be said, so they are words too.
  */
-function Conversation({ dialogue, room, stepOut, onBack }: ConversationProps) {
+function Conversation({ dialogue, room, stepOut, refused, onBack }: ConversationProps) {
   const [held, setHeld] = useState<Reading | null>(null);
   const reading = keepReading(held, dialogue);
   const now = showing(reading, dialogue);
+  // A refusal is said while the line it refused can still be pressed: once the dialogue has moved on,
+  // here or in another window, it is no longer about anything on the screen.
+  const stillThere =
+    refused !== null &&
+    (now.options.some((option) => option.id === refused.lineId) ||
+      (now.next && dialogue.next[dialogue.next.length - 1]?.id === refused.lineId));
+  const refusal = stillThere && refused !== null ? refusalWords(refused.reason) : null;
 
   const press = (pressed: Press | null, what: string) => {
     if (pressed === null) {
@@ -138,7 +163,7 @@ function Conversation({ dialogue, room, stepOut, onBack }: ConversationProps) {
     if (scroller !== null) {
       scroller.scrollTop = scroller.scrollHeight;
     }
-  }, [dialogue.revision, reading.shown]);
+  }, [dialogue.revision, reading.shown, refusal]);
 
   return (
     <section className={`dialogues dialogues--${room.size} dialogues--reading`} aria-label={dialogue.title}>
@@ -156,13 +181,21 @@ function Conversation({ dialogue, room, stepOut, onBack }: ConversationProps) {
         <PaneSizeControl room={room} />
       </header>
 
-      <ol ref={feed} className="dialogues__feed">
+      <ol ref={feed} className={now.next ? 'dialogues__feed dialogues__feed--above-foot' : 'dialogues__feed'}>
+        {/* What a line did to the house is written under it, where it happened: the coin, +100. */}
         {dialogue.said.map((line) => (
-          <Bubble key={line.id} line={line} speakers={dialogue.speakers} />
+          <Fragment key={line.id}>
+            <Bubble line={line} speakers={dialogue.speakers} />
+            <Gains gains={gainsOf(line.effects)} />
+          </Fragment>
         ))}
         {now.lines.map((line) => (
           <Bubble key={line.id} line={line} speakers={dialogue.speakers} />
         ))}
+        {/* A lapsed one ends where it stood, on its closing line in the interface's own words. */}
+        {dialogue.ending.kind === 'lost' && (
+          <li className="dialogues__closing">{closingLine(dialogue.ending.because, dialogue.speakers)}</li>
+        )}
         {/* The options are the end of the conversation so far, so they scroll with it rather than standing
             under it: at half a phone, a foot of three options left no room for what they answer. */}
         {now.options.length > 0 && (
@@ -180,19 +213,22 @@ function Conversation({ dialogue, room, stepOut, onBack }: ConversationProps) {
             </ol>
           </li>
         )}
+        {refusal !== null && (
+          <li className="dialogues__refused" role="status">
+            {refusal}
+          </li>
+        )}
       </ol>
 
       {now.next && (
         <footer className="dialogues__foot">
           <button
             type="button"
-            className="dialogues__next"
-            aria-label="next"
-            title="next"
+            className="dialogues__continue"
             disabled={stepOut}
             onClick={() => press(pressNext(reading, dialogue, stepOut), 'the step')}
           >
-            <Icon name="next" />
+            continue
           </button>
         </footer>
       )}
@@ -224,6 +260,30 @@ function Bubble({
         <span className="dialogues__speaker">{name}</span>
         <p className="dialogues__words">{line.words}</p>
       </div>
+    </li>
+  );
+}
+
+/**
+ * What a line said did to the house, under it in the feed: each resource's own mark from the house card,
+ * and the amount - the coin, +100 - so that what the house was paid is read where it was paid, and the card
+ * moves with it. Nothing at all for a line that did nothing.
+ */
+function Gains({ gains }: { gains: readonly Gain[] }) {
+  if (gains.length === 0) {
+    return null;
+  }
+  return (
+    <li className="dialogues__gains" aria-label={gains.map(gainWords).join(', ')}>
+      {gains.map((gain) => (
+        <span
+          key={`${gain.resource}${gain.amount}`}
+          className={gain.amount > 0 ? 'dialogues__gain' : 'dialogues__gain dialogues__gain--spent'}
+        >
+          <Mark name={gain.resource} className="dialogues__mark" />
+          {signed(gain.amount)}
+        </span>
+      ))}
     </li>
   );
 }

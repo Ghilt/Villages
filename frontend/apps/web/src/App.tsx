@@ -20,6 +20,7 @@ import { Navigating } from './inspect/Navigating';
 import { subjectOfPane } from './inspect/subjects';
 import { gateway, gatewayState, watchGateway } from './net/gateway';
 import { followMap } from './net/followMap';
+import { arriving } from './house/arrival';
 import { eyeIsOpen, watchEye } from './house/eye';
 import { HouseStatus } from './house/HouseStatus';
 import { KeyFigures } from './figures/KeyFigures';
@@ -179,18 +180,17 @@ export function App({ master }: AppProps) {
   // The gateway follows the camera: the cells covering the view, at the view's own zoom.
   useEffect(() => (map === null ? undefined : followMap(map)), [map]);
 
-  // When the house comes to be, the camera goes to it. It is the one moment in the whole world so far
-  // that is worth being taken to, and the seat was chosen from a parchment rather than from the map.
-  const seat = heard.yourHouse?.house.seat;
-  const mine = heard.yourHouse?.house.id;
+  // When the house arrives, the camera goes to it and its window opens: founded a moment ago, or standing
+  // when the page loads, and never because it was sent again, which it is whenever anything in it changes.
+  // Asked once the map is there, so a house heard before the map was ready still arrives. See `arrival.ts`.
   useEffect(() => {
-    if (map !== null && seat !== undefined && mine !== undefined) {
+    if (map !== null && yours !== null && arriving(yours)) {
+      const { seat } = yours;
       note('camera', `flying to the seat at ${seat.lat.toFixed(3)}, ${seat.lon.toFixed(3)}`);
       map.flyTo({ center: [seat.lon, seat.lat], zoom: Math.max(map.getZoom(), FOUNDING_ZOOM) });
-      // Arriving at your own house with a window already open on it: that is what the flight is for.
-      inspect({ kind: 'house', id: mine });
+      inspect({ kind: 'house', id: yours.id });
     }
-  }, [map, seat, mine]);
+  }, [map, yours]);
 
   /*
    * A question arriving takes the big bay, and the small one keeps whatever was in it.

@@ -1,9 +1,32 @@
-import type { DialogueView, RequirementView, RevealImpactView, SpeakerView } from '@villages/protocol';
+import type {
+  DialogueView,
+  EffectView,
+  RequirementView,
+  ResourceName,
+  RevealImpactView,
+  SpeakerView,
+} from '@villages/protocol';
 
 import { RESOURCE_WORDS } from '../house/describe';
 
 function lines(count: number): string {
   return count === 1 ? '1 line' : `${count} lines`;
+}
+
+/** Some of one resource, gained or, below nothing, lost. */
+export interface Gain {
+  readonly resource: ResourceName;
+  readonly amount: number;
+}
+
+/** An amount as the feed and an option say it: `+100`, or `−40` with a true minus. */
+export function signed(amount: number): string {
+  return `${amount > 0 ? '+' : '−'}${Math.abs(amount)}`;
+}
+
+/** A gain in words: `+100 wealth`, `−40 wealth`. */
+export function gainWords({ resource, amount }: Gain): string {
+  return `${signed(amount)} ${RESOURCE_WORDS[resource].toLowerCase()}`;
 }
 
 /**
@@ -17,12 +40,53 @@ export function impactWords(impact: RevealImpactView | undefined): string | null
   if (impact.kind === 'hidden') {
     return '???';
   }
-  return impact.impacts
-    .map(
-      ({ resource, amount }) =>
-        `${amount > 0 ? '+' : '−'}${Math.abs(amount)} ${RESOURCE_WORDS[resource].toLowerCase()}`,
-    )
-    .join(', ');
+  return impact.impacts.map(gainWords).join(', ');
+}
+
+/**
+ * What a line said did to the house, as the feed writes it under the line: each resource and how much,
+ * given or, below nothing, taken. A founding has no place in a dialogue, so it is not one of them.
+ */
+export function gainsOf(effects: readonly EffectView[]): readonly Gain[] {
+  return effects.flatMap((effect): Gain[] => {
+    switch (effect.kind) {
+      case 'grant':
+        return [{ resource: effect.resource, amount: effect.amount }];
+      case 'spend':
+        return [{ resource: effect.resource, amount: -effect.amount }];
+      case 'foundAt':
+        return [];
+    }
+  });
+}
+
+/**
+ * How a lapsed dialogue closes, in the interface's words: one line at the end of the feed, saying what became
+ * of the requirement that failed. One line for each kind of requirement, kept here and nowhere else, and a
+ * placeholder for Adam's own words. See `MECHANICS.md` and decision record 0067.
+ */
+export function closingLine(requirement: RequirementView, speakers: readonly SpeakerView[]): string {
+  switch (requirement.kind) {
+    case 'alive':
+      return `Sadly, ${nameOf(requirement.character, speakers)} died before this could be finished.`;
+  }
+}
+
+/**
+ * Why the house would not take a step, in the words the pane says under the options rather than only in
+ * the log. The one a player meets is a purse too light; the rest are the world moving on underneath.
+ */
+export function refusalWords(reason: string): string {
+  switch (reason) {
+    case 'notEnoughFree':
+      return 'You lack the resources to pay for that.';
+    case 'dialogueOver':
+      return 'This conversation is over.';
+    case 'conflict':
+      return 'Something else happened at the same moment. Try again.';
+    default:
+      return 'That could not be done.';
+  }
 }
 
 /**

@@ -393,10 +393,12 @@ Commands are added here as the increments land:
   as far as the player may know it; the dialogue itself, whole, is at `/admin/inspect-events`. In the game,
   the house's first dialogue puts up the **dialogues** pane, a column down the right of the spread with its
   three sizes, and a pane navigation lists on a phone; it lists the dialogues waiting and finished, a lapsed
-  one saying why, and pressing one opens it to be read and played: *next*, a chevron, shows a line at a
-  time and takes the step past the last, the options are at the end of the feed, and the list mark goes
-  back. `offer a dialogue` opens the pane: from its strip in the spread, and on a phone into the bay the map
-  is not in, at half. See `docs/adr/0067`, `0069` and `0070`, and `docs/plans/character-dialogue.md`.
+  one saying why, and pressing one opens it to be read and played: *continue*, a word in the middle of its
+  foot, shows a line at a time and takes the step past the last, the options are at the end of the feed, and
+  the list mark goes back. What a line gave or cost is written under it, a lapsed one ends on its closing
+  line, and an option the house cannot pay for says so under the options. `offer a dialogue` opens the pane:
+  from its strip in the spread, and on a phone into the bay the map is not in, at half. See `docs/adr/0067`,
+  `0069` and `0070`, and `docs/plans/character-dialogue.md`.
 - What grows where: `world/biomes.json`, hand-edited, one entry a kind and one a biome. What reads it is
   `npm run world:sprites --prefix frontend`, which works out a biome for every sixteen world units and
   where the scenery clumps, and writes a **sprite map** beside the cut tiles - about five megabytes and

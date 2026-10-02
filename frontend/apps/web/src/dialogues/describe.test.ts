@@ -2,7 +2,19 @@ import { describe, expect, it } from 'vitest';
 
 import type { DialogueView, LineView } from '@villages/protocol';
 
-import { howMany, impactWords, listOf, standing, whatChangedIn, whyLost } from './describe';
+import {
+  closingLine,
+  gainsOf,
+  gainWords,
+  howMany,
+  impactWords,
+  listOf,
+  refusalWords,
+  signed,
+  standing,
+  whatChangedIn,
+  whyLost,
+} from './describe';
 
 function line(id: string): LineView {
   return { id, speaker: 'messenger', words: `The words of ${id}.` };
@@ -151,6 +163,44 @@ describe('what an option shows it will do', () => {
   it('is unknown when hidden, and nothing when it shows nothing', () => {
     expect(impactWords({ kind: 'hidden' })).toBe('???');
     expect(impactWords(undefined)).toBeNull();
+  });
+});
+
+describe('what a line did to the house', () => {
+  it('is a gain for a grant and a loss for a spend, each with its resource', () => {
+    expect(
+      gainsOf([
+        { kind: 'spend', resource: 'wealth', amount: 40 },
+        { kind: 'grant', resource: 'influence', amount: 5 },
+      ]),
+    ).toEqual([
+      { resource: 'wealth', amount: -40 },
+      { resource: 'influence', amount: 5 },
+    ]);
+    expect(gainsOf([])).toEqual([]);
+  });
+
+  it('is said with its sign, a true minus for a loss', () => {
+    expect(signed(100)).toBe('+100');
+    expect(signed(-40)).toBe('−40');
+    expect(gainWords({ resource: 'wealth', amount: -40 })).toBe('−40 wealth');
+  });
+});
+
+describe('how a lapsed dialogue closes', () => {
+  it('says who died, by the name they speak under', () => {
+    const speakers = [{ id: 'figure', party: 0, name: 'Agnes Hollin', character: 'cb732500-39bd' }];
+
+    expect(closingLine({ kind: 'alive', character: 'cb732500-39bd' }, speakers)).toBe(
+      'Sadly, Agnes Hollin died before this could be finished.',
+    );
+  });
+});
+
+describe('why a step was refused', () => {
+  it('says a purse too light plainly, and anything else as not done', () => {
+    expect(refusalWords('notEnoughFree')).toBe('You lack the resources to pay for that.');
+    expect(refusalWords('somethingNobodyWrote')).toBe('That could not be done.');
   });
 });
 

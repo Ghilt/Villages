@@ -65,6 +65,11 @@ export interface GatewayState {
    * What has not been reached is never here, and nor is any requirement. See decision record 0067.
    */
   yourDialogues: readonly DialogueView[] | null;
+  /**
+   * The last step through a dialogue the house refused, and why, until another is sent: which the pane says
+   * under the options, because a press that seems to do nothing is a press the player cannot read.
+   */
+  stepRefused: { dialogueId: string; lineId: string; reason: string } | null;
   /** The id of the command in flight, so the parchment can stop taking a second answer. */
   acting: string | null;
   houses: HousesState;
@@ -80,6 +85,7 @@ let state: GatewayState = {
   yourKeyFigures: null,
   yourSight: null,
   yourDialogues: null,
+  stepRefused: null,
   acting: null,
   houses: NO_HOUSES,
   world: null,
@@ -98,6 +104,9 @@ let fogged = true;
  * asked. Forgotten when it is answered, and all of it when the connection closes.
  */
 const askedFrom = new Map<string, string>();
+
+/** The steps through a dialogue in flight, by command, so a refusal can say which line it refused. */
+const stepsOut = new Map<string, { dialogueId: string; lineId: string }>();
 
 /** The part of the log a command's answer goes in: where it was asked from, or the gateway's own. */
 function answerArea(commandId: string): string {
@@ -248,13 +257,21 @@ function heard(frame: ServerFrame): void {
       connection?.send({ type: 'subscribeCells', cells: frame.cells });
       return;
     case 'commandAccepted':
+      stepsOut.delete(frame.commandId);
       if (state.acting === frame.commandId) update({ acting: null });
       note(answerArea(frame.commandId), `command ${shortId(frame.commandId)} accepted`);
       return;
-    case 'commandRejected':
+    case 'commandRejected': {
+      // A step the house would not take is said in its pane, under the options, as well as in the log.
+      const step = stepsOut.get(frame.commandId);
+      stepsOut.delete(frame.commandId);
+      if (step !== undefined) {
+        update({ stepRefused: { ...step, reason: frame.reason } });
+      }
       if (state.acting === frame.commandId) update({ acting: null });
       note(answerArea(frame.commandId), `command ${shortId(frame.commandId)} rejected: ${frame.reason}`);
       return;
+    }
     case 'error':
       note('gateway', `error ${frame.code}: ${frame.message}`);
       if (frame.code === 'tooManyCells' || frame.code === 'badCell') {
@@ -493,6 +510,7 @@ export function gateway(): Connection {
     }
     forgetTheHold();
     askedFrom.clear();
+    stepsOut.clear();
     update({ connection: 'closed', houses: NO_HOUSES });
     note('gateway', 'the connection closed; is the backend running? cd backend then ./gradlew :app:bootRun');
   });
@@ -696,8 +714,10 @@ export function completeDialogueStep(dialogueId: string, lineId: string, describ
     return;
   }
   const commandId = crypto.randomUUID();
-  update({ acting: commandId });
+  // A new step is a new answer to wait for, so the last refusal is no longer the thing to say.
+  update({ acting: commandId, stepRefused: null });
   askedFrom.set(commandId, 'dialogues');
+  stepsOut.set(commandId, { dialogueId, lineId });
   note('dialogues', `taking ${described} as ${shortId(commandId)}`);
   connection.send({
     type: 'command',

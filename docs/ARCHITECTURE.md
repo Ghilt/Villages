@@ -308,8 +308,8 @@ when a press has to be sent as a step rather than simply shown, is logic with no
 logic says. It keeps its place while what it reads is unchanged, and reads the stretch again from its start
 after a reload. A dialogue that keeps its state in a React component is a dialogue that can only be tested by
 clicking through it. It is the **reading place**, `reading.ts` in `client-core`: what shows at a place, what
-*next* does there - another line, or the step the stretch ends in - and when an option can be taken, with
-nothing to press while a step is out; the pane holds the place as state and draws what it says.
+pressing *continue* does there - another line, or the step the stretch ends in - and when an option can be
+taken, with nothing to press while a step is out; the pane holds the place as state and draws what it says.
 
 **It is drawn in the page, not in Pixi.** PixiJS is only in `sprites/`, where it draws the map's overlay
 behind the `SpriteRenderer` interface: the sprites, the scenery and the fog. Every other piece of interface,

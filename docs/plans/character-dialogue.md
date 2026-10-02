@@ -276,14 +276,32 @@ A speaker's death is tried with *kill*, in the Characters section.
    done: a portrait beside every bubble, on its outer side and at its foot, the key figures' own
    `figures/Portrait.tsx`, so somebody with no likeness is its bust. Step 9 is done.
 10. **What it gives and how it ends.** A gain in the feed, and the house card's wealth going up with it; a
-    lost dialogue's closing line; a finished one read back.
+    lost dialogue's closing line; a finished one read back. Done: under a line that gave or cost something,
+    its resource's mark from the house card and the amount, gold for what was paid and soft ink for what was
+    spent (`gainsOf` in `dialogues/describe.ts`); a lapsed one ends on `closingLine`, the interface's words
+    in one place; and, on Adam's go-ahead, a step the house refuses is said under the options in
+    `refusalWords`, the gateway remembering which line it refused until the next step is sent. A finished
+    one reads back as it was played, since the conversation was built. Adam's review moved three things. The
+    refusal says *You lack the resources to pay for that.* *Next* is the word *continue*, in the middle of
+    the foot, because the chevron in the corner was missed. And an option that spent no longer takes the
+    conversation away on a phone: that was the camera going to the house whenever the house was sent again,
+    flying to the seat and opening the house's window, which on a phone took the bay the conversation was
+    in. The house arrives once in the life of a page now, as a dialogue does, in `house/arrival.ts`.
 11. **The scene.** The folder, its placeholders, serving it, its test, and the speakers standing in it at
     the top of the pane.
 12. **The feel.** Fades, speakers entering and leaving, the one speaking reacting, and less of all of it for
     anybody who has asked for less motion.
+13. **A line that shows something.** Shown, a line takes the camera to a place, or opens an inspect window
+    on what it names - the house, a key figure, a place. In the spread the map moves beside the column and
+    the window opens in the rail; on a phone the conversation goes to half in its bay and the other bay shows
+    what the line names. Adam's idea of 2026-10-01, from the accident step 10 mended. What a line shows is a
+    field of the line, sent with it and the page's alone, so nothing of it is recorded; and the policy that
+    joins it to the bays stands beside `dialogues/opening.ts` and `inspect/opening.ts`. One question comes
+    first: whether a line shows again when a finished dialogue is read back.
 
-The order is a suggestion, as every order here is. Every step stands on the one before it except two:
-dialogues lapsing (6) needs only step 5, and the scene needs only the conversation.
+The order is a suggestion, as every order here is. Every step stands on the one before it except three:
+dialogues lapsing (6) needs only step 5, and the scene and a line that shows something need only the
+conversation.
 
 ## Not in this plan
 
