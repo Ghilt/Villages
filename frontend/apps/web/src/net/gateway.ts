@@ -1,14 +1,6 @@
-import { connect, ensurePlayerToken, forgetPlayerToken } from '@villages/client-core';
+import { connect, ensurePlayerToken, follower, forgetPlayerToken } from '@villages/client-core';
 import type { Connection, HousesState } from '@villages/client-core';
-import {
-  NO_HOUSES,
-  cellsHeld,
-  charactersInView,
-  forgetCells,
-  holdCells,
-  reduceHouses,
-  whatToFollow,
-} from '@villages/client-core';
+import { NO_HOUSES, charactersInView, reduceHouses } from '@villages/client-core';
 import { PROTOCOL_VERSION, describeDay } from '@villages/protocol';
 import type {
   ChoiceView,
@@ -100,8 +92,6 @@ let state: GatewayState = {
 };
 const listeners = new Set<() => void>();
 let connection: Connection | null = null;
-/** What the camera last asked for, so it can be asked for again once the gateway is listening. */
-let wanted: string[] = [];
 /** Whether the switch is on, so a reconnection sets significance aside again before asking for a cell. */
 let everything = false;
 /** Whether the fog of war holds back what the house cannot see, so a reconnection lifts it again if not. */
@@ -136,96 +126,21 @@ let gathering: ReturnType<typeof setTimeout> | null = null;
 let standing: StandsArrival = NO_STANDS_ARRIVED;
 let gatheringStands: ReturnType<typeof setTimeout> | null = null;
 
-/**
- * How long what is on the screen is kept after the gateway has been told to stop sending it.
- *
- * Only reached when a snapshot never comes. The cells are normally let go the moment the ones that
- * replace them have answered, which is a round trip rather than this.
- */
-const HOLD_MS = 2000;
-
-/**
- * Cells the gateway has been told to stop sending, whose houses are still drawn.
- *
- * Cell ids carry their zoom, so a step from one zoom to the next wants a different cell for the same
- * ground. Letting the old one go before the new one has answered empties the map for a round trip:
- * every house vanishes and every sprite with it. So what is held is let go late, and until then these
- * cells are held but no longer followed - drawn, and not asked about.
- */
-let released = new Set<string>();
-/** The cells of the last subscription, so that a refusal knows which ones are not coming. */
-let askedFor: string[] = [];
-/** The cells whose snapshots the release is waiting for. Empty means nothing is waiting. */
-let awaiting = new Set<string>();
-let holding: ReturnType<typeof setTimeout> | null = null;
-
-/** Lets go of everything the gateway has stopped sending, and stops waiting for anything. */
-function letGoNow(why: string): void {
-  if (holding !== null) {
-    clearTimeout(holding);
-    holding = null;
-  }
-  awaiting = new Set();
-  if (released.size === 0) {
-    return;
-  }
-  const cells = [...released];
-  released = new Set();
-  note('cells', `let go of ${cells.length} cell${cells.length === 1 ? '' : 's'} ${why}`);
-  update({ houses: forgetCells(state.houses, cells) });
-}
-
-/**
- * Puts back what a refused subscription undid.
- *
- * The gateway refuses a subscription whole, so not one of the cells asked for is coming. Held and never
- * sent, they would be held for ever: `whatToFollow` compares against what is held, so it would never
- * ask for them again and the map could not recover by being moved back. So they are forgotten.
- *
- * And what was let go to make room for them is asked for again, because the gateway was told to stop
- * sending it a moment ago and the thing meant to replace it never arrived. Without that the map keeps
- * drawing houses nobody is updating until the release timer empties it.
- */
-function askAgainAfterARefusal(why: string): void {
-  if (holding !== null) {
-    clearTimeout(holding);
-    holding = null;
-  }
-  awaiting = new Set();
-
-  const refused = askedFor;
-  askedFor = [];
-  const back = [...released];
-  released = new Set();
-
-  if (refused.length > 0) {
-    update({ houses: forgetCells(state.houses, refused) });
-  }
-  followStands();
-  note('cells', `${why}: forgot ${refused.length} that never came, asking again for ${back.length}`);
-  if (back.length > 0 && connection !== null && state.connection === 'open') {
-    connection.send({ type: 'subscribeCells', cells: back });
-  }
-}
-
-/**
- * Tells the scenery's stands which cells the gateway is following now, so that a tile it has let go of is let go
- * here too and coming back waits for it to be sent again. The cells held late are not followed: the gateway was
- * told to stop sending them. See decision record 0067.
- */
-function followStands(): void {
-  followStandsUnder(cellsHeld(state.houses).filter((cell) => !released.has(cell)));
-}
-
-/** Forgets that anything was being held late. For a connection that is starting or ending. */
-function forgetTheHold(): void {
-  if (holding !== null) {
-    clearTimeout(holding);
-    holding = null;
-  }
-  released = new Set();
-  awaiting = new Set();
-}
+/** The cells the camera wants, followed and let go of late: see `follower` in the client core. */
+const following = follower({
+  send: (frame) => connection?.send(frame),
+  canSend: () => connection !== null && state.connection === 'open',
+  houses: () => state.houses,
+  setHouses: (houses) => update({ houses }),
+  followStands: followStandsUnder,
+  note,
+  schedule: {
+    after: (ms, run) => {
+      const timer = setTimeout(run, ms);
+      return () => clearTimeout(timer);
+    },
+  },
+});
 
 function update(change: Partial<GatewayState>): void {
   state = { ...state, ...change };
@@ -248,14 +163,11 @@ function heard(frame: ServerFrame): void {
       sendEye();
       sendFog();
       // Anything the camera wanted before the gateway was listening is asked for now.
-      sendFollowing(wanted);
+      following.welcomed();
       return;
     case 'snapshot':
       update({ houses: reduceHouses(state.houses, frame) });
-      // What replaces the released cells has arrived, so they can go now rather than on the timer.
-      if (awaiting.delete(frame.cell) && awaiting.size === 0) {
-        letGoNow('now that what replaces them has arrived');
-      }
+      following.answered(frame.cell);
       gather(frame);
       return;
     case 'stands':
@@ -302,8 +214,8 @@ function heard(frame: ServerFrame): void {
       note('gateway', `error ${frame.code}: ${frame.message}`);
       if (frame.code === 'tooManyCells' || frame.code === 'badCell') {
         // The whole subscription was refused. Put the connection back the way it was, or the map goes
-        // blank and stays blank however far it is panned. See the note on `askAgainAfterARefusal`.
-        askAgainAfterARefusal(`the gateway refused ${frame.code}`);
+        // blank and stays blank however far it is panned. See the follower's `refused`.
+        following.refused(`the gateway refused ${frame.code}`);
       }
       if (frame.code === 'protocolVersion') {
         // The one error whose cause is never in the code: a server left running from an older build.
@@ -362,7 +274,7 @@ function heard(frame: ServerFrame): void {
       return;
     case 'takenOver':
       // A player plays from one place. This window is finished; the socket goes with it. See 0028.
-      forgetTheHold();
+      following.forget();
       update({
         connection: 'takenOver',
         houses: NO_HOUSES,
@@ -463,83 +375,11 @@ export function seeAll(on: boolean): void {
 }
 
 /**
- * Asks for the cells not yet followed, and lets go of the ones no longer wanted - but lets go late.
- *
- * The asking goes first and the forgetting waits. A zoom step wants a different cell for the same
- * ground, so letting the old one go first empties the map until the new one answers: every house is
- * dropped, every sprite is destroyed, and they come back a round trip later. That blink was the whole
- * of it. Now what is on the screen stays on the screen until what replaces it has arrived.
- *
- * The gateway is told to stop sending at once, because there is no reason for it to keep paying for
- * cells nobody is looking at. It is only this end that waits.
- */
-function sendFollowing(cells: string[]): void {
-  if (connection === null || state.connection !== 'open') {
-    return;
-  }
-  // What is actually being followed. A released cell is still held - its houses are still drawn - but
-  // the gateway has stopped answering for it, so wanting it again means asking for it again.
-  const followed = cellsHeld(state.houses).filter((cell) => !released.has(cell));
-  const { ask, letGo } = whatToFollow(followed, cells);
-
-  // The gateway is told to stop sending **before** it is asked for more, because it holds at most
-  // sixty-four cells and refuses a subscription that would take it past that - whole, not in part.
-  // Asking first made it hold the old view and the new one at once, which at a wide zoom is ninety
-  // cells for a view of forty-five, and every pan out there was refused. Only the *forgetting* was
-  // ever meant to wait; the order on the wire is the one it always was.
-  if (letGo.length > 0) {
-    connection.send({ type: 'unsubscribeCells', cells: letGo });
-    for (const cell of letGo) {
-      released.add(cell);
-    }
-  }
-
-  if (ask.length > 0) {
-    for (const cell of ask) {
-      released.delete(cell);
-    }
-    askedFor = ask;
-    update({ houses: holdCells(state.houses, ask) });
-    connection.send({ type: 'subscribeCells', cells: ask });
-  }
-  if (letGo.length > 0 || ask.length > 0) {
-    followStands();
-  }
-
-  if (released.size === 0) {
-    return;
-  }
-  if (ask.length > 0) {
-    // Wait for what was just asked for. A later call replaces this rather than adding to it: both
-    // batches are in flight at once, so the later one answers at about the same moment, and the
-    // timer is underneath either way.
-    awaiting = new Set(ask);
-    if (holding !== null) {
-      clearTimeout(holding);
-    }
-    holding = setTimeout(() => letGoNow('after waiting for what should have replaced them'), HOLD_MS);
-  } else if (awaiting.size === 0) {
-    // Nothing outstanding and nothing new asked for, so nothing is coming to replace them: a pan off
-    // the edge of the world, or a view that shrank. Waiting would leave stale houses drawn.
-    //
-    // The `awaiting` test is what makes this safe to call twice. A map movement fires `moveend` and
-    // `zoomend` both, so this runs twice for one step; the second time there is nothing left to ask
-    // for, and without the test that second call would let go of everything a round trip early -
-    // which is the very blink this exists to stop.
-    letGoNow('with nothing asked for to replace them');
-  }
-
-  // Nothing is said about the asking. What the camera is following changes on every pan, and the answer
-  // says the same thing better: the cells that came back, at what depth, and what was in them.
-}
-
-/**
  * Follows the camera: the cells covering the view, at the view's own zoom, are what the map draws. Safe to
  * call before the gateway has answered hello; the request waits for the welcome.
  */
 export function follow(cells: string[]): void {
-  wanted = cells;
-  sendFollowing(cells);
+  following.follow(cells);
 }
 
 /** Connects once, the first time anything asks. */
@@ -560,7 +400,7 @@ export function gateway(): Connection {
     if (state.connection === 'takenOver') {
       return;
     }
-    forgetTheHold();
+    following.forget();
     askedFrom.clear();
     stepsOut.clear();
     update({ connection: 'closed', houses: NO_HOUSES });

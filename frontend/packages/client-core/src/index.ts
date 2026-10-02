@@ -31,5 +31,8 @@ export { ageOn } from './ages';
 export { whatToFollow } from './following';
 export type { Following } from './following';
 
+export { HOLD_MS, follower } from './follower';
+export type { Follower, FollowerPorts, Schedule } from './follower';
+
 export { choose, keepReading, pressNext, showing, startReading } from './reading';
 export type { Press, Reading, Showing } from './reading';

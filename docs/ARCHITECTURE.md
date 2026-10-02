@@ -42,6 +42,12 @@ packages/protocol  <-  packages/client-core  <-  apps/web
 - `client-core` is compiled without DOM type definitions, so a stray `window`, `WebSocket` or `document` fails to
   typecheck. The socket arrives as an injected interface.
 - Restricted imports forbid React, MapLibre and Pixi inside `client-core` and `protocol`.
+- The session - what the page asks of the gateway and what it makes of the answers - is moving into
+  `client-core` a piece at a time, so that it is tested without a browser, and whatever it needs from the outside
+  is handed in. The follower is the first: `follower.ts` asks for the cells the camera wants and lets go of the old
+  ones late, only once what replaces them has answered, with its clock handed in as a `Schedule`. The page's
+  `net/gateway.ts` wires it to the socket, the log and the timers, and `net/gateway.test.ts` holds the page to the
+  same conversation as before.
 - Inside `apps/web`, the component library in `src/ui/` imports nothing from the rest of the app: the game hands it
   words, numbers and callbacks. A test reads every import in the folder and fails on one that leaves it, bar React,
   the fonts and the world package's pure rules and types, which is what lets `/admin/inspect-ui-components` show every component with nothing running. See
