@@ -106,6 +106,21 @@ const DRAWN = {
       ))}
     </>
   ),
+  // Something wrong with what was given, as the moodboard marks its rising tensions: a stroke in a ring.
+  warning: (
+    <>
+      <circle cx="12" cy="12" r="8.6" className="ui-mark__line" />
+      <path d="M12 7.4 V13.2" className="ui-mark__line" />
+      <circle cx="12" cy="16.5" r="1.15" className="ui-mark__fill" />
+    </>
+  ),
+  // A glass and its handle, the moodboard's search: the handle to the bottom right, as it is held.
+  search: (
+    <>
+      <circle cx="10.5" cy="10.5" r="5.25" className="ui-mark__line" />
+      <path d="M14.4 14.4 L19 19" className="ui-mark__line" />
+    </>
+  ),
 } satisfies Record<string, ReactNode>;
 
 export type MarkName = keyof typeof DRAWN;

@@ -232,7 +232,11 @@ that state instead, and the others stay light and shade. A round face can have i
 moodboard's close and minimise do, or be plain, `round-plain`, for a drawn mark to stand on. **A tab has two
 faces**, `tab` at rest and `tab-chosen` for the one that is up, each cut like a drape and open at the
 bottom, where it tucks under the pane it opens; the bottom fifth of it is out of sight under the pane's
-border.
+border. **A text field is a face** too, `field`, parchment in a gilt rim cut like a drape at its two ends,
+384 by 176 painted, and the dropdown is drawn on it as well; its words are written on its middle in ink, so
+the middle has to be a parchment light enough for ink, which `npm run check` measures. The placeholder is
+drawn: the moodboard's own field has its words painted on it with an ornament over them, so it could not be
+cut without one or the other.
 
 **A slider is three pictures**: `slider`, its track - the two ends and the empty tube between them, cut
 like a drape at the inner edges of its ends, 520 by 260 painted, **with the tube along the picture's

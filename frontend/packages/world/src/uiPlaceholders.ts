@@ -247,6 +247,45 @@ function tabFace(width: number, height: number, chosen: boolean): string {
 }
 
 /**
+ * A text field's face: parchment in a gilt rim, shaded at its top and bottom and not along it, so that it
+ * stretches to any length without a seam, and a gilt clasp at each end inside the cuts.
+ */
+function fieldFace(width: number, height: number, end: number): string {
+  const w = width;
+  const h = height;
+  const rim = h * 0.09;
+  const r = h * 0.14;
+  const clasp = (x: number) => {
+    const bar = h * 0.07;
+    const lozenge = h * 0.19;
+    return (
+      `<rect x="${x - bar / 2}" y="${rim * 1.7}" width="${bar}" height="${h - rim * 3.4}" rx="${bar / 2}" fill="url(#gilt)"/>` +
+      `<path d="M${x} ${h / 2 - lozenge} L${x + lozenge * 0.55} ${h / 2} L${x} ${h / 2 + lozenge} ` +
+      `L${x - lozenge * 0.55} ${h / 2} Z" fill="url(#gilt)" stroke="#5b4120" stroke-width="${h * 0.014}"/>`
+    );
+  };
+  return (
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">` +
+    '<defs>' +
+    '<linearGradient id="gilt" x1="0" y1="0" x2="0" y2="1">' +
+    '<stop offset="0" stop-color="#f6e0a4"/><stop offset="0.25" stop-color="#d0a960"/>' +
+    '<stop offset="0.7" stop-color="#8a6630"/><stop offset="1" stop-color="#5b4120"/></linearGradient>' +
+    '<linearGradient id="sheet" x1="0" y1="0" x2="0" y2="1">' +
+    '<stop offset="0" stop-color="#b79a73"/><stop offset="0.2" stop-color="#d8c4a1"/>' +
+    '<stop offset="0.5" stop-color="#e3d2b1"/><stop offset="0.8" stop-color="#d4bd98"/>' +
+    '<stop offset="1" stop-color="#b39570"/></linearGradient>' +
+    '</defs>' +
+    `<rect x="0" y="0" width="${w}" height="${h}" rx="${r}" fill="#2a1d0d"/>` +
+    `<rect x="${rim * 0.35}" y="${rim * 0.35}" width="${w - rim * 0.7}" height="${h - rim * 0.7}" rx="${r * 0.9}" fill="url(#gilt)"/>` +
+    `<rect x="${rim}" y="${rim}" width="${w - rim * 2}" height="${h - rim * 2}" rx="${r * 0.7}" fill="url(#sheet)"/>` +
+    `<path d="M${rim + r} ${rim * 1.45} H${w - rim - r}" stroke="rgba(43,29,16,0.3)" stroke-width="${rim * 0.55}"/>` +
+    clasp(end * 0.5) +
+    clasp(w - end * 0.5) +
+    '</svg>'
+  );
+}
+
+/**
  * A meter's tube: a gilt rim round glass, its ends rounded, drawn to be cut at its two ends so that it lays
  * at any length. Empty, the glass is dark; full, it is lit green, as the moodboard's faith bar is.
  */
@@ -324,6 +363,9 @@ const RULE = { width: 160, height: 9, end: 14 };
 
 /** A tab's face as shown: tall, and wide enough to stretch, with its rounded corners outside its cuts. */
 const TAB = { width: 64, height: 40, end: 12 };
+
+/** A text field as shown: as tall as a button, its clasps in its ends, and a stretch of parchment between. */
+const FIELD = { width: 96, height: 44, end: 16 };
 
 /** A meter's tube as shown: long enough to stretch, as tall as the moodboard's faith bar, its rounded ends. */
 const METER = { width: 120, height: 14, end: 10 };
@@ -706,6 +748,18 @@ export const UI_PLACEHOLDERS: readonly UiPlaceholder[] = [
     about: 'the moodboard’s carousel arrow, pointing on',
     from: [1441, 174, 65, 70],
     key: true,
+  },
+  {
+    kind: 'controls',
+    name: 'field',
+    about:
+      'drawn: parchment in a gilt rim with a clasp at each end, for words to be written in; the moodboard’s ' +
+      'own has its words painted on it and an ornament over them, so it cannot be cut without either',
+    svg: fieldFace(painted(FIELD.width), painted(FIELD.height), painted(FIELD.end)),
+    border: {
+      slice: [painted(FIELD.height / 2), painted(FIELD.end), painted(FIELD.height / 2), painted(FIELD.end)],
+      repeat: 'stretch',
+    },
   },
   // A carousel's dots: one a thing, and the one it is showing lit.
   {

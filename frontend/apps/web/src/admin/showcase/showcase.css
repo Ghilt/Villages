@@ -806,3 +806,14 @@
   box-sizing: border-box;
   outline: 1px dashed var(--ui-night-edge);
 }
+
+/* A field at the width of a form's column, and at the width of a state beside others. */
+.showcase__field-width {
+  width: 24rem;
+  max-width: 100%;
+}
+
+.showcase__field-small {
+  width: 15rem;
+  max-width: 100%;
+}

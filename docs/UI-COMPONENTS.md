@@ -10,8 +10,8 @@
 **Being built.** This is the method as agreed on 2026-09-30, written before most of the library so that the
 library is built to it. Each step of the plan fills in its part, and a line that still says *to come* is a
 part nobody has built. The page, the foundations, the pictures, borders and fills, the container, the
-buttons, the marks and readouts, the tabs and sections, the controls, the collections, and the dialog and
-the toast are built.
+buttons, the marks and readouts, the tabs and sections, the controls, the collections, and the dialog, the
+toast, the text field and the dropdown are built.
 
 ## The page
 
@@ -241,8 +241,8 @@ A line each: what it is for, its variants, and where on the page it is.
   `pane.cherubs` and `pane.acanthus`; the game's own come as each surface is redone.
 - **`Mark`**, `ui/mark/Mark.tsx`: a mark by name, drawn, or painted when `world/ui/marks/` has it: the
   five resources, `wealth`, `domain`, `influence`, `reason` and `piety`; a figure's `kindness`, `physical`
-  and `age`; and `close`, `minimise`, `maximise`, `previous`, `next`, `fold`, `less`, `more`, `eye-open`
-  and `eye-shut`. *Marks and readouts*.
+  and `age`; and `close`, `minimise`, `maximise`, `previous`, `next`, `fold`, `less`, `more`, `eye-open`,
+  `eye-shut`, `warning` and `search`. *Marks and readouts*.
 - **`TextButton`**, `ui/button/Button.tsx`: words on a face that stretches between its end caps to fit
   them. `face` is a picture in `world/ui/controls/`, `primary` unless it says otherwise; `size` is `small`,
   `regular` or `large`, 32, 44 or 60 pixels tall. *Buttons*.
@@ -374,3 +374,16 @@ A line each: what it is for, its variants, and where on the page it is.
   comes. Whoever uses it holds the `items` and takes one away at `onGone`; what they said is the event
   log's to keep. `place="flow"` lays them where they are. In the `toast.plain` recipe. *Dialogs and
   fields*.
+- **`TextField`**, `ui/field/TextField.tsx`: words typed on a strip of parchment in a gilt rim, the
+  moodboard's "Enter a name…", on the `field` face. Its `label` over it - said only to a screen reader with
+  `hideLabel` - and a line under it: its `hint`, or in place of the hint a `problem`, what is wrong with what
+  is in it, after the `warning` mark, which a screen reader is told as well and the rim shows with a glow
+  of velvet. Given `onSearch` it is a search, its `search` mark at its end, and Enter searches too. Its words
+  are ink whatever it stands on, because the parchment is its own; they are drawn by the browser, which the
+  page's contrast switch cannot see, so `readable.test.ts` holds them to it instead. Held with `value` and
+  `onChange`. `small` and `regular`, as tall as a button. *Dialogs and fields*.
+- **`Dropdown`**, `ui/field/Dropdown.tsx`: one of many picked, on the same face, the one picked written on
+  it and the `fold` mark at its end turned down. The browser's own list is under the painting, so a pointer,
+  a finger, the arrow keys and typing the first letters pick, a phone opens its own picker, and an option
+  can be `disabled`; where the browser lets its list be drawn, it is drawn on night with a gilt edge, and
+  elsewhere it is the browser's. Held with `chosen` and `onChoose`. *Dialogs and fields*.

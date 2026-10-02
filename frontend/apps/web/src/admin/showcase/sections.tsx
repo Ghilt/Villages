@@ -87,7 +87,7 @@ export const SECTIONS: readonly Section[] = [
   {
     id: 'dialogs',
     title: 'Dialogs and fields',
-    says: 'The dialog and the toast; the text field, the dropdown and the medallion to come.',
+    says: 'The dialog, the toast, the text field and the dropdown; the medallion to come.',
     Body: DialogsAndFields,
   },
 ];

@@ -12,7 +12,7 @@ import { RECIPE_NAMES, RECIPES } from './recipes';
 
 /**
  * Every recipe's words can be read on what is behind them - its fill, or its border's own middle - measured
- * from the picture in `world/ui/` itself. So a fill painted too light for cream words, or a recipe that says
+ * from the picture in `world/ui/` itself, and so can a field's on its face. So a fill painted too light for cream words, or a recipe that says
  * ink on a dark fill, is a failing check rather than a pane nobody can read. Both of a recipe's inks are
  * held to it, the softer as much as the other, because the softer is every label's. The page's contrast
  * switch measures everything on the page the same way, in the browser. See docs/UI-COMPONENTS.md.
@@ -113,6 +113,22 @@ describe('the recipes', () => {
       expect(unreadable).toEqual([]);
     },
   );
+});
+
+describe('a field', () => {
+  // A field's words and what it says while empty are drawn by the browser, which the page's contrast switch
+  // cannot see, so they are held to it here: ink, and the softer ink, on the middle of its face.
+  it('has its words, and what it says while empty, readable on its parchment', async () => {
+    const cuts = JSON.parse(readFileSync(`${UI}controls/field.json`, 'utf8')) as { slice: Sides };
+    const [, right, , left] = cuts.slice;
+    // A face is cut across only, so its middle is between its two ends, the whole of its height.
+    const middle = await averageOf(fileOf('controls', 'field'), [0, right, 0, left]);
+    const unreadable = ['ui-ink', 'ui-ink-soft']
+      .map((ink) => [ink, contrastOf(token(ink), middle)] as const)
+      .filter(([, contrast]) => contrast < READABLE)
+      .map(([ink, contrast]) => `--${ink} on the field's parchment is ${contrast.toFixed(2)} to 1`);
+    expect(unreadable).toEqual([]);
+  });
 });
 
 describe('the inks', () => {
