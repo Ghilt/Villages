@@ -19,3 +19,6 @@ dependencies {
     implementation(project(":gateway"))
     testImplementation(libs.spring.boot.starter.test)
 }
+
+// The server reads the portraits from the repository, and its tests check that it finds them there.
+testsRead("world/portraits")

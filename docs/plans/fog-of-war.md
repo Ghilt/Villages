@@ -95,7 +95,22 @@ A player's own house and own key figures are always theirs to see: every one of 
 8. **The stands come from the server.** The sprite map's stand files leave the public folder, and the gateway
    sends a page only the stands touching ground its house has revealed. The biome raster stays public: it says
    what kind of country a region is, which the terrain under the haze already says. This is also the channel
-   settlements and ruins will come through, when they are a layer of the sprite map.
+   settlements and ruins will come through, when they are a layer of the sprite map. Three commits, decision
+   record 0067:
+   - **The gateway sends them.** Done. `hello` names the master the page draws, and the gateway sends the
+     `stands` of every zoom 7 tile under a held cell from zoom 6 in, as far as they touch revealed ground with
+     the scatter's margin (`Coverage.reaches`), again when the sight or the switch changes one, from the files
+     through the `Stands` port. The log says under `stands` what arrived. Wire version 13.
+   - **The page draws from them.** Done. The scenery grows from the socket's stands and nothing else, and the
+     page keeps a tile exactly as long as the gateway thinks it sent it, by `standTilesUnder` at both ends
+     (`contracts/fixtures/stand-tiles.json`). A cell waits for every tile it reads; a tile sent again differently
+     cuts its cells again, the ones on the screen keeping their trees until the new are ready. On revealed
+     ground the trees are the same ones, point for point. The Scenery section says how many stands the page holds.
+   - **The files leave the public folder.** Done. The generator writes the stands into
+     `world/stands/<master>/<layer>/` with a `stands.json` written last, the game server and the scenery stills
+     read them there, and the biome raster and `map.json` stay public. The dev server refuses anything under a
+     master's `sprites/<layer>/stands/`, so stands an older generator left behind are never served, and a
+     master furnished before this says so in the Debug map section until it is furnished again.
 9. **Vision that runs out.** A vision point given for a span ends when its span does, with nothing happening
    to say so: one wake-up a point, as a pledge waits out its span (0053).
 

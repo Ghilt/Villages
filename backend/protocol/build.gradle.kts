@@ -18,6 +18,9 @@ dependencies {
     testImplementation(kotlin("reflect"))
 }
 
+// Every fixture, and the recording of the wire that each version of the protocol is held to.
+testsRead("contracts")
+
 tasks.test {
     // Recording the wire is a deliberate act, and the switch has to reach the test's own JVM to do it.
     systemProperty("protocol.record", providers.systemProperty("protocol.record").getOrElse("false"))

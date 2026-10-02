@@ -12,10 +12,18 @@ import { CharactersSection } from './CharactersSection';
 import { DialoguesSection } from './DialoguesSection';
 import { MapSection } from './MapSection';
 import { ScenerySection } from './ScenerySection';
-import { Section } from './Section';
 import { WorktreesSection } from './WorktreesSection';
 import { atToClock, note, notesNow, watchNotes } from './log';
-import { panelIsShut, setPanelShut, stageMode, toggleShape, watchStage } from './stage';
+import {
+  logIsOpen,
+  panelIsShut,
+  setLogOpen,
+  setPanelShut,
+  stageMode,
+  toggleShape,
+  watchStage,
+} from './stage';
+import { PANEL_WANTS } from './stageBox';
 import { describeTerrainStep } from './terrainDepth';
 import { ResourcesSection } from './ResourcesSection';
 import { WorldSection } from './WorldSection';
@@ -52,6 +60,11 @@ const SETTLE_MS = 250;
  * is said as it happens, in a line of the log, and what he wants to change is a button. The copy button
  * puts the log on the clipboard so it can be pasted into a conversation.
  *
+ * The buttons are one column and the log is a second beside it, the whole height of the panel, so that
+ * what a button did is in view while the button is: as the last section it was scrolled away from by
+ * every section above it. It folds away to the `log` toggle in the header, and gives its room back to
+ * the stage when it does.
+ *
  * The camera still says the two things about itself that are worth knowing - that the sheet stopped
  * covering the view, and where the terrain came from and went - but it says them to the log when they
  * happen rather than to a row that is always there, and a run of zoom steps is one line rather than
@@ -61,6 +74,7 @@ export function DebugPanel({ map, worldRoot, master, renderer, onRenderer }: Deb
   const notes = useSyncExternalStore(watchNotes, notesNow);
   const shut = useSyncExternalStore(watchStage, panelIsShut);
   const mode = useSyncExternalStore(watchStage, stageMode);
+  const logOpen = useSyncExternalStore(watchStage, logIsOpen);
   const [copied, setCopied] = useState<'no' | 'yes' | 'failed'>('no');
   const tileZoomWas = useRef<number | undefined>(undefined);
   /** Where a run of zoom steps began, and the timer that will say it once the camera stops moving. */
@@ -161,24 +175,6 @@ export function DebugPanel({ map, worldRoot, master, renderer, onRenderer }: Deb
     }
   };
 
-  const logTools = (
-    <>
-      <button type="button" className="debug__button" onClick={copy}>
-        {copied === 'yes' ? 'copied' : copied === 'failed' ? 'select it' : 'copy'}
-      </button>
-      <button
-        type="button"
-        className="debug__button"
-        onClick={() => {
-          forgetPaintedTally();
-          setCopied('no');
-        }}
-      >
-        reset
-      </button>
-    </>
-  );
-
   // Minimised, it is a badge over the corner of the stage and nothing else. The stage keeps whatever
   // size it had, so a phone-shaped stage with this alone over it is the interface undisturbed.
   if (shut) {
@@ -196,64 +192,111 @@ export function DebugPanel({ map, worldRoot, master, renderer, onRenderer }: Deb
   }
 
   return (
-    <section className="debug">
-      <header className="debug__bar">
-        <span className="debug__title">Debug</span>
-        <button
-          type="button"
-          className="debug__button"
-          onClick={() => setPanelShut(true)}
-          title="minimise to a badge"
-        >
-          hide
-        </button>
-        {/*
+    <section
+      className={`debug${logOpen ? ' debug--log' : ''}`}
+      style={{ '--controls': `${PANEL_WANTS}px` } as React.CSSProperties}
+    >
+      <div className="debug__controls">
+        <header className="debug__bar">
+          <span className="debug__title">Debug</span>
+          <button
+            type="button"
+            className="debug__button"
+            onClick={() => setPanelShut(true)}
+            title="minimise to a badge"
+          >
+            hide
+          </button>
+          {/*
           The very top right, because that is where Adam asked for it. Two shapes and not one: a phone
           upright and the same phone in landscape, which is the only way to see the stage cut into a left and a
           right rather than a top and a bottom - and the only shape short enough to find out whether a pane
           can live in 390 pixels of height.
         */}
-        <button
-          type="button"
-          className={`debug__button${mode === 'phone' ? ' debug__button--on' : ''}`}
-          onClick={() => toggleShape('phone')}
-          aria-pressed={mode === 'phone'}
-          title="confine the stage to a phone, and back"
-        >
-          phone
-        </button>
-        <button
-          type="button"
-          className={`debug__button${mode === 'landscape' ? ' debug__button--on' : ''}`}
-          onClick={() => toggleShape('landscape')}
-          aria-pressed={mode === 'landscape'}
-          title="confine the stage to a phone in landscape, and back"
-        >
-          landscape
-        </button>
-      </header>
+          <button
+            type="button"
+            className={`debug__button${mode === 'phone' ? ' debug__button--on' : ''}`}
+            onClick={() => toggleShape('phone')}
+            aria-pressed={mode === 'phone'}
+            title="confine the stage to a phone, and back"
+          >
+            phone
+          </button>
+          <button
+            type="button"
+            className={`debug__button${mode === 'landscape' ? ' debug__button--on' : ''}`}
+            onClick={() => toggleShape('landscape')}
+            aria-pressed={mode === 'landscape'}
+            title="confine the stage to a phone in landscape, and back"
+          >
+            landscape
+          </button>
+          <button
+            type="button"
+            className={`debug__button${logOpen ? ' debug__button--on' : ''}`}
+            onClick={() => setLogOpen(!logOpen)}
+            aria-pressed={logOpen}
+            title={logOpen ? 'fold the log away' : 'open the log beside the controls'}
+          >
+            log
+          </button>
+        </header>
 
-      {/*
+        {/*
         The sections scroll and the bar above them does not, so the way out is reachable however many
         there are. The panel is expected to gain sections rather than stay this size.
       */}
-      <div className="debug__sections">
-        {import.meta.env.DEV && <WorktreesSection />}
+        <div className="debug__sections">
+          {import.meta.env.DEV && <WorktreesSection />}
 
-        <MapSection map={map} master={master} renderer={renderer} onRenderer={onRenderer} />
+          <MapSection map={map} master={master} renderer={renderer} onRenderer={onRenderer} />
 
-        <ScenerySection />
+          <ScenerySection />
 
-        <CameraSection map={map} />
+          <CameraSection map={map} />
 
-        <AreasView map={map} worldRoot={worldRoot} />
+          <AreasView map={map} worldRoot={worldRoot} />
 
-        <WorldSection map={map} />
-        <ResourcesSection />
-        <CharactersSection map={map} />
-        <DialoguesSection />
+          <WorldSection map={map} />
+          <ResourcesSection />
+          <CharactersSection map={map} />
+          <DialoguesSection />
 
-        <Section name="Log" tools={logTools}>
+          <BuildBadge />
+        </div>
+      </div>
+
+      {/*
+        On the outside, at the window's edge, so folding it away takes a column off the far side and the
+        controls stay where the hand already is. Its bar lines up with the header's, and nothing in it
+        scrolls but the lines.
+      */}
+      {logOpen && (
+        <section className="debug__logcolumn" aria-label="Log">
+          <header className="debug__bar">
+            <span className="debug__title">Log</span>
+            <button type="button" className="debug__button" onClick={copy}>
+              {copied === 'yes' ? 'copied' : copied === 'failed' ? 'select it' : 'copy'}
+            </button>
+            <button
+              type="button"
+              className="debug__button"
+              onClick={() => {
+                forgetPaintedTally();
+                setCopied('no');
+              }}
+            >
+              reset
+            </button>
+            <button
+              type="button"
+              className="debug__button"
+              onClick={() => setLogOpen(false)}
+              title="fold the log away; the log button in the header brings it back"
+            >
+              hide
+            </button>
+          </header>
           <ol className="debug__log">
             {notes.length === 0 && <li className="debug__quiet">nothing logged yet</li>}
             {[...notes].reverse().map((entry, index) => (
@@ -264,10 +307,8 @@ export function DebugPanel({ map, worldRoot, master, renderer, onRenderer }: Deb
               </li>
             ))}
           </ol>
-        </Section>
-
-        <BuildBadge />
-      </div>
+        </section>
+      )}
     </section>
   );
 }

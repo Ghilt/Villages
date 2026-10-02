@@ -10,6 +10,9 @@ import io.kotest.property.arbitrary.numericDouble
 import io.kotest.property.checkAll
 import tools.jackson.databind.json.JsonMapper
 import java.io.File
+import kotlin.math.PI
+import kotlin.math.atan
+import kotlin.math.sinh
 
 class CellsSpec : StringSpec({
 
@@ -62,6 +65,35 @@ class CellsSpec : StringSpec({
                 cell.isInside(cell.at(zoom)) shouldBe true
             }
             cell.isInside(Cell("")) shouldBe true
+        }
+    }
+
+    "knows which column and row it is, counted from the north-west corner at its own zoom" {
+        Cell("").column shouldBe 0
+        Cell("").row shouldBe 0
+        // The equator on the prime meridian is the corner four tiles share, and falls in the south-east one.
+        Cell("30").column shouldBe 2
+        Cell("30").row shouldBe 2
+        Cell("3000000000").column shouldBe 512
+        Cell("3000000000").row shouldBe 512
+        Cell("0000000").column shouldBe 0
+        Cell("3333333").row shouldBe 127
+        Cell("1111111").column shouldBe 127
+        Cell("1111111").row shouldBe 0
+    }
+
+    "is the tile a place in the middle of that tile falls in, at every zoom" {
+        checkAll(Arb.int(0, Cell.MAX_ZOOM), Arb.int(0, (1 shl Cell.MAX_ZOOM) - 1), Arb.int(0, (1 shl Cell.MAX_ZOOM) - 1)) {
+                zoom, across, down ->
+            val tiles = 1 shl zoom
+            val column = across % tiles
+            val row = down % tiles
+            val lon = (column + 0.5) / tiles * 360.0 - 180.0
+            val lat = atan(sinh(PI * (1.0 - 2.0 * (row + 0.5) / tiles))) * 180.0 / PI
+
+            val cell = Cell.of(lat, lon, zoom)
+            cell.column shouldBe column
+            cell.row shouldBe row
         }
     }
 

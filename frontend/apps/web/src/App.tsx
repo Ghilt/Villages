@@ -11,8 +11,8 @@ import { openOnArrival } from './dialogues/opening';
 import { DebugPanel } from './debug/DebugPanel';
 import { Desk } from './desk/Desk';
 import { Grips } from './debug/Grips';
-import { panelIsShut, stageMode, watchStage } from './debug/stage';
-import { stageBox } from './debug/stageBox';
+import { logIsOpen, panelIsShut, stageMode, watchStage } from './debug/stage';
+import { panelWants, stageBox } from './debug/stageBox';
 import { note } from './debug/log';
 import { inspect } from './inspect/opening';
 import { Inspecting } from './inspect/Inspecting';
@@ -149,8 +149,10 @@ export function App({ master }: AppProps) {
   const eye = useSyncExternalStore(watchEye, eyeIsOpen);
   const mode = useSyncExternalStore(watchStage, stageMode);
   const shut = useSyncExternalStore(watchStage, panelIsShut);
+  const log = useSyncExternalStore(watchStage, logIsOpen);
   const window = useWindow();
-  const box = useMemo(() => stageBox(window, mode, shut), [window, mode, shut]);
+  const wants = panelWants(shut, log);
+  const box = useMemo(() => stageBox(window, mode, wants), [window, mode, wants]);
   const inView = useMemo(() => housesInView(heard.houses), [heard.houses]);
   const standing = useMemo(() => charactersInView(heard.houses), [heard.houses]);
   // The public half of your own house: what the map draws is the same view everyone else's house is
@@ -323,7 +325,7 @@ export function App({ master }: AppProps) {
         onRenderer={setRenderer}
       />
 
-      <Grips box={box} />
+      <Grips box={box} wants={wants} />
     </main>
   );
 }

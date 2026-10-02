@@ -43,6 +43,12 @@ export const MASTER_DIR = resolve(REPO, 'world', 'master');
 export const SOURCE_DIR = resolve(REPO, 'world', 'source');
 /** Where the world the game plays on goes, served statically by the dev server and the build. */
 export const OUTPUT_DIR = resolve(REPO, 'frontend', 'apps', 'web', 'public', 'world');
+/**
+ * Where the scenery's stands go, beside the rest of the world and never inside `OUTPUT_DIR`: read by the game
+ * server, which hands a page only the stands its fog lets through, and by the scenery stills. Output, not
+ * committed. See `standsDirOf` and decision record 0067.
+ */
+export const STANDS_DIR = resolve(REPO, 'world', 'stands');
 /** Where a warped copy of Earth goes: raw material for a new master, never read by the game. */
 export const WARPED_DIR = resolve(REPO, 'world', 'warped');
 

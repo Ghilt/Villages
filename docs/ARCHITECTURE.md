@@ -96,6 +96,12 @@ Increment 0.7 compiled and ran the plan's riskiest assumption, on Occurrent 0.33
   `villages.house.founded.v1` rather than a class name.
 - Occurrent pins `jackson-databind` 3.1.4 and Spring Boot 4.1.1 manages 3.1.5; Gradle resolves to 3.1.5 and
   the round trip works on it. CloudEvents is 4.0.1. The in-memory store is `InMemoryEventStore()`.
+- The in-memory subscription model's `cancelSubscription` forgets a subscription without stopping it: its thread
+  polls for as long as the process runs, and the model's `shutdown()` waits five seconds for it and gives up.
+  Occurrent's master stops the subscription on cancel, and no release has that yet. Until one does,
+  `InMemoryWorld` stops a cancelled subscription itself and wakes the threads when it shuts down, so a world
+  closes at once, the server stops without the wait, and no test that closes a world waits five seconds for it.
+  Both go when a release has the fix.
 
 ## How a change travels
 
@@ -189,6 +195,20 @@ answered exactly for one place at a time by the gateway and the page's marks ali
 through a distance transform. See decision record 0061, and
 `docs/plans/fog-of-war.md` for what is built.
 
+The scenery's **stands** take the same road (0067). `hello` names the master the page draws; the gateway
+reads that master's stand files through the `Stands` port, whose adapter in `app` reads them from
+`world/stands/`, where the generator writes them and nothing serves them, picks the master among that
+folder's own entries and keeps each tile once read, and sends every zoom 7 tile under a held cell as a `stands`
+frame of the sprite map's own eight-byte records, only those whose disc comes within the scatter's margin of
+revealed ground. `Coverage.reaches` is that question, answered by growing every circle; `StandRecords` in
+`protocol` and `decodeStands` in the world package read the records alike, against
+`contracts/fixtures/stands.json`. A sight change or the switch answers every held tile again, sending only
+what changed. The page grows its scenery from those and nothing else: `sprites/scenery/standsFromServer.ts`
+keeps a tile exactly as long as the gateway thinks it was sent, by `standTilesUnder` at both ends against
+`contracts/fixtures/stand-tiles.json`, and a scatter cell waits for every tile it reads. A tile sent again
+differently makes every cell cut from its old records stale, and one already on the screen keeps its points
+until the new ones are cut, so nothing blinks while the fog moves.
+
 **The fog is a layer of the sprite canvas**, `sprites/FogLayer.ts`, drawn between the world and the signs for
 the things in it: the scenery and whatever stands outside vision under it, every icon and whatever stands in
 vision over it (0063). It asks the sprites' projection in `cameraMath.ts` backwards for the ground under each
@@ -196,7 +216,8 @@ pixel, and reads there a distance field of the vision points, worked out in the 
 to them (`apps/web/src/fog/`) and handed to the graphics card as one small half-float texture. Nothing about
 the fog is worked out while the camera moves except that one pass. See decision record 0062. The scenery
 layer asks the same field where it may grow (`revealedAt`), as a cell is taken into view and again when the
-fog changes, so no tree stands in the haze; the scatter itself stays a pure function of the ground.
+fog changes, so no tree stands in the haze; the scatter itself stays a pure function of the ground and the
+stands it was sent, which on revealed ground are every stand that could change it.
 **Revealed ground loses its colour in each canvas** (0065): the map's through `.uncolouring`, a 2D canvas
 between the map and the sprites that `fog/uncolouring.ts` lays a grey picture of the field on, blended by the
 browser's saturation blend, and the sprites under the fog by a filter on the container that holds them. The

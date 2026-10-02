@@ -28,8 +28,18 @@ import { note, shortId } from '../debug/log';
 import { STAT_WORDS, fullName, whatChanged } from '../figures/describe';
 import { whatChangedIn } from '../dialogues/describe';
 import { describeSight } from '../fog/describe';
-import { NOTHING_ARRIVED, alsoArrived, describeArrival, describeBatch } from './arrivals';
-import type { Arrival } from './arrivals';
+import { chosenMaster } from '../map/masters';
+import { followStandsUnder, standsArrived } from '../sprites/scenery/standsFromServer';
+import {
+  NOTHING_ARRIVED,
+  NO_STANDS_ARRIVED,
+  alsoArrived,
+  alsoStood,
+  describeArrival,
+  describeBatch,
+  describeStands,
+} from './arrivals';
+import type { Arrival, StandsArrival } from './arrivals';
 import { browserSocket } from './browserSocket';
 
 /**
@@ -125,6 +135,10 @@ const GATHER_MS = 250;
 let arriving: Arrival = NOTHING_ARRIVED;
 let gathering: ReturnType<typeof setTimeout> | null = null;
 
+/** The stands of one burst, gathered as the snapshots are and said once. See decision record 0067. */
+let standing: StandsArrival = NO_STANDS_ARRIVED;
+let gatheringStands: ReturnType<typeof setTimeout> | null = null;
+
 /**
  * How long what is on the screen is kept after the gateway has been told to stop sending it.
  *
@@ -190,10 +204,20 @@ function askAgainAfterARefusal(why: string): void {
   if (refused.length > 0) {
     update({ houses: forgetCells(state.houses, refused) });
   }
+  followStands();
   note('cells', `${why}: forgot ${refused.length} that never came, asking again for ${back.length}`);
   if (back.length > 0 && connection !== null && state.connection === 'open') {
     connection.send({ type: 'subscribeCells', cells: back });
   }
+}
+
+/**
+ * Tells the scenery's stands which cells the gateway is following now, so that a tile it has let go of is let go
+ * here too and coming back waits for it to be sent again. The cells held late are not followed: the gateway was
+ * told to stop sending them. See decision record 0067.
+ */
+function followStands(): void {
+  followStandsUnder(cellsHeld(state.houses).filter((cell) => !released.has(cell)));
 }
 
 /** Forgets that anything was being held late. For a connection that is starting or ending. */
@@ -236,6 +260,11 @@ function heard(frame: ServerFrame): void {
         letGoNow('now that what replaces them has arrived');
       }
       gather(frame);
+      return;
+    case 'stands':
+      // What the scenery grows from, as far as the fog lets it through. See decision record 0067.
+      standsArrived(frame.x, frame.y, frame.stands);
+      gatherStands(frame);
       return;
     case 'batch': {
       // Who was standing where before the batch, so that somebody gone can be named in the line.
@@ -358,6 +387,26 @@ function heard(frame: ServerFrame): void {
  * A burst that brought nothing is not said at all: panning over empty world is not news, and a line a
  * cell buried everything else in the panel once the panel was the log. See decision record 0023.
  */
+/**
+ * Counts one tile of stands into the burst, and says what the burst brought once it stops arriving, as the
+ * snapshots are said. A burst of tiles with no stands in them is not said: the gateway holding back what the
+ * fog hides looks exactly like ground nothing grows on, which is the point. See decision record 0067.
+ */
+function gatherStands(frame: Extract<ServerFrame, { type: 'stands' }>): void {
+  standing = alsoStood(standing, frame);
+  if (gatheringStands !== null) {
+    clearTimeout(gatheringStands);
+  }
+  gatheringStands = setTimeout(() => {
+    gatheringStands = null;
+    const said = describeStands(standing);
+    standing = NO_STANDS_ARRIVED;
+    if (said !== null) {
+      note('stands', said);
+    }
+  }, GATHER_MS);
+}
+
 function gather(frame: Extract<ServerFrame, { type: 'snapshot' }>): void {
   arriving = alsoArrived(arriving, frame);
   if (gathering !== null) {
@@ -453,6 +502,9 @@ function sendFollowing(cells: string[]): void {
     update({ houses: holdCells(state.houses, ask) });
     connection.send({ type: 'subscribeCells', cells: ask });
   }
+  if (letGo.length > 0 || ask.length > 0) {
+    followStands();
+  }
 
   if (released.size === 0) {
     return;
@@ -515,7 +567,8 @@ export function gateway(): Connection {
     note('gateway', 'the connection closed; is the backend running? cd backend then ./gradlew :app:bootRun');
   });
   // Not watching events: those are read on their own page, which watches without playing. See 0023.
-  connection = connect({ socket, playerToken, protocolVersion: PROTOCOL_VERSION });
+  // The master the page draws, so the gateway sends that world's stands and no other. See 0067.
+  connection = connect({ socket, playerToken, protocolVersion: PROTOCOL_VERSION, master: chosenMaster() });
   connection.onFrame(heard);
   connection.onProblem((problem) => note('gateway', problem));
   return connection;

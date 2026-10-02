@@ -2,6 +2,15 @@
 
 - Status: accepted
 - Date: 2026-09-19
+- Amended 2026-09-30: **the log is a column of its own**, the whole height of the panel on its outer
+  side, rather than the last section. As a section it was scrolled out of view by every section above
+  it, which is exactly when a button has just been pressed and its answer is wanted. The controls keep
+  the width they want, 352 pixels, and the log wants 400 beside them; when the panel balloons the log
+  takes the extra, because a log line is what wants a long row. It folds away with `hide` in its own
+  bar and comes back with the `log` toggle in the panel's header beside `landscape`, and folded it
+  gives its 400 pixels back to the stage. It begins folded, Adam's call, and remembers which it was. So the panel's wanted width is one number that depends on
+  whether the log is open and is nothing once the panel is a badge, `panelWants` in `stageBox.ts`,
+  and the mirror below is taken about that number. The sections listed below lose **Log**.
 
 ## Context
 

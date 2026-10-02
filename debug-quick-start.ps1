@@ -586,8 +586,13 @@ if (-not (Test-Path (Join-Path $WorldDir 'paint.json'))) {
 # What kind of place every part of the world is, and where the scenery clumps. Without it the map draws
 # no scenery at all - which is the rule rather than a fault, but it is not what anyone starting from
 # nothing is expecting to see. Half a minute, once per master. See decision record 0054.
+#
+# Two halves: the biomes beside the page's world, and the stands in world/stands, where only the game
+# server reads them (0067). A sprite map from before the stands moved has the first and not the second,
+# and its woods are gone until it is worked out again.
 $SpriteMap = Join-Path $DefaultWorld 'sprites/biome/map.json'
-if (-not (Test-Path $SpriteMap)) {
+$Stands = Join-Path $Root 'world/stands/terrain/biome/stands.json'
+if (-not (Test-Path $SpriteMap) -or -not (Test-Path $Stands)) {
     Run 'working out the biomes and the stands (about half a minute, once)' $Npm @('run', 'world:sprites') $Frontend
 } else {
     $map = Get-Content $SpriteMap -Raw | ConvertFrom-Json

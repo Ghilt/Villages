@@ -17,6 +17,7 @@ import villages.application.Later
 import villages.application.MonthlyWorldClock
 import villages.application.Pledges
 import villages.application.Portraits
+import villages.application.Stands
 import villages.application.ResourceService
 import villages.application.ScheduledLater
 import villages.application.TakeActionService
@@ -152,6 +153,15 @@ class WorldConfig {
     fun portraits(@Value("\${villages.portraits:../../world/portraits}") folder: String): Portraits =
         FolderPortraits(Path.of(folder))
 
+    /**
+     * The scenery's stands, from the folder the world generator writes them to and nothing serves, two
+     * directories above the one Gradle runs the server in, as the portraits are. `villages.stands` points it
+     * somewhere else. See decision record 0067.
+     */
+    @Bean
+    fun stands(@Value("\${villages.stands:../../world/stands}") folder: String): Stands =
+        FolderStands(Path.of(folder))
+
     @Bean
     @Suppress("LongParameterList")
     fun keyFigures(
@@ -258,6 +268,7 @@ class WorldConfig {
         visions: VisionService,
         dialogues: DialogueService,
         dialogueRows: DialoguesProjection,
+        stands: Stands,
     ): Gateway = Gateway(
         tokens = AnonymousTokens,
         foundHouse = foundHouse,
@@ -279,5 +290,6 @@ class WorldConfig {
         visions = visions,
         dialogues = dialogues,
         dialogueRows = dialogueRows,
+        stands = stands,
     )
 }

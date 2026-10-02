@@ -41,6 +41,16 @@ describe('the connection', () => {
     ]);
   });
 
+  it('says in hello which master the page draws, when it draws one, so the gateway sends its stands', () => {
+    const fake = fakeSocket();
+    connect({ socket: fake.socket, playerToken: token, protocolVersion: 1, master: 'terrain2' });
+
+    fake.gatewayOpens();
+    expect(fake.sent).toEqual([
+      { type: 'hello', playerToken: token, protocolVersion: 1, master: 'terrain2' },
+    ]);
+  });
+
   it('says nothing about a player when there is none, so a viewer takes nobody over', () => {
     const fake = fakeSocket();
 

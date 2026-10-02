@@ -161,12 +161,13 @@ What follows from that, and bites in practice:
 - **Run everything from the worktree root**, never from the main checkout, and never `cd` out of it.
 - **`world/master/*.png` is per-worktree.** A master Adam saves in the main checkout is not in the
   worktree until the worktree is refreshed from it. Say which one was read when it matters.
-- **`world/painterly/`, the cut tiles under `frontend/apps/web/public/world/`, and `.logs/` are output
-  and per-worktree.** They are gitignored, they do not travel with a branch, and a worktree that has
-  never cut them cannot serve a map. Junctioning the main checkout's tiles into the worktree is the cheap
-  way to get a map up without a five-minute recut. So is `frontend/node_modules`: a fresh tree needs
-  `npm install --prefix frontend` once before anything in it runs, and again after any merge that
-  changes `frontend/package-lock.json`.
+- **`world/painterly/`, `world/stands/`, the cut tiles under `frontend/apps/web/public/world/`, and
+  `.logs/` are output and per-worktree.** They are gitignored, they do not travel with a branch, and a
+  worktree that has never cut them cannot serve a map. Junctioning the main checkout's tiles into the
+  worktree is the cheap way to get a map up without a five-minute recut. So is `frontend/node_modules`: a
+  fresh tree needs `npm install --prefix frontend` once before anything in it runs, and again after any
+  merge that changes `frontend/package-lock.json`. Junction each master's `tiles` rather than the whole
+  `public/world`, though: a sprite map furnished through that junction is written into the main checkout's.
 - **Each tree serves on its own pair of ports**, a hash of its directory name, so several can run at once
   and a tree's address never moves. The main checkout keeps 5173 and 8080; a worktree's game server sits
   three thousand above its dev server, so 5548 serves the page and 8548 serves the world, and the page
@@ -329,7 +330,10 @@ Commands are added here as the increments land:
   writes to `.logs/backend.log`; see decision record 0029. So a change that wants to be seen there says
   so with `note(area, message)` rather than by adding a row. **Everything in it is in a folding section,
   and a step that puts something there says which section - and asks when that is not obvious from what
-  Adam said, rather than picking one.** Today they are Worktrees, Debug map, Scenery, Camera, Areas, World, Resources, Characters, Dialogues and Log. The events themselves are not in the
+  Adam said, rather than picking one.** Today they are Worktrees, Debug map, Scenery, Camera, Areas, World, Resources, Characters and Dialogues.
+  **The log is not a section but a column of its own**, the whole height of the panel on its outer side,
+  so what a button did is in view while the button is. It begins folded: the `log` toggle in the panel's
+  header, beside `landscape`, opens it and `hide` in its own bar folds it away again. The events themselves are not in the
   panel: they are at **`/admin/inspect-events`**, a page of their own that watches the world without
   playing in it, one line an event opening to the whole thing as the store holds it. The `found a house here` button in it sends a
   real command and is how to make an event happen on purpose. The `restart` button beside `copy` forgets
@@ -353,7 +357,10 @@ Commands are added here as the increments land:
   world and not the signs: every icon, the offered seats and whatever stands in vision are drawn over it. Unknown ground is under a dark haze, revealed ground has its
   colour taken out, trees and castles too, and vision is clear. With no house the whole world is hazed. The server holds back what the fog hides:
   a player is sent the houses on revealed ground and the people in vision, and their own wherever they are,
-  and `fog of war: off` lifts that too, for that window. The edge has surface tension: circles closer than
+  and the scenery's stands only where they touch revealed ground, tile by tile under the held cells, which
+  the log counts under `stands`; the trees are grown from those and nothing else, so without the game server
+  nothing grows. The server reads them from `world/stands/`, where the generator writes them and nothing serves
+  them, `villages.stands` to point it elsewhere, for the master the page names in `hello`. `fog of war: off` lifts all of it, for that window. The edge has surface tension: circles closer than
   about 56 km are seen across and notches are rounded off, drawn and held back alike, `Vision.SURFACE_TENSION`.
   No tree grows on unknown ground, so with the fog on and no house the world is bare under the haze. Close
   in, the haze's bands of mist swell and drift, on a clock that runs only while some of it is on the screen.
@@ -401,8 +408,10 @@ Commands are added here as the increments land:
   `0069` and `0070`, and `docs/plans/character-dialogue.md`.
 - What grows where: `world/biomes.json`, hand-edited, one entry a kind and one a biome. What reads it is
   `npm run world:sprites --prefix frontend`, which works out a biome for every sixteen world units and
-  where the scenery clumps, and writes a **sprite map** beside the cut tiles - about five megabytes and
-  half a minute a master. It takes a master's name as its first argument (`-- terrain2`). **A master
+  where the scenery clumps, and writes a **sprite map**: the biomes beside the cut tiles, the stands into
+  `world/stands/<master>/`, where only the game server and the stills read them - about five megabytes and
+  half a minute a master. A master furnished before 2026-09-29 has its stands in the old place and no woods
+  until it is furnished again, which the Debug map section says. It takes a master's name as its first argument (`-- terrain2`). **A master
   with no sprite map draws no scenery**, which is the rule rather than a fault. The Scenery section of
   the debug panel says what the sprite map asked for and what the browser did with it. The **Debug map**
   section has a `furnish it again` button beside `cut it`, and `cut it` furnishes too - a repaint makes
@@ -460,8 +469,11 @@ Commands are added here as the increments land:
   nothing survives a restart, on purpose.
 - Backend, checks: `cd backend` then `./gradlew check`. Gradle fetches the JDK 21 the toolchain asks for, so
   `JAVA_HOME` may stay on the Temurin 17 that is installed; the first run downloads it. Every module's
-  `build.gradle.kts` declares only its allowed dependency edges, and `buildSrc` holds the one convention
-  they share. Versions live in `backend/gradle/libs.versions.toml`.
+  `build.gradle.kts` declares only its allowed dependency edges and, with `testsRead`, the files outside
+  it that its tests read, and `check` fails when one is missing; `buildSrc` holds the one convention they
+  share. Versions live in `backend/gradle/libs.versions.toml`. Modules that do not depend on each other
+  build and test side by side (`backend/gradle.properties`), so their output interleaves; `--no-parallel`
+  runs them one at a time.
 
 The two below do not exist yet. They arrive with the increments named, and `infra/` and `scripts/` in the
 layout above are where they will go rather than where they are.

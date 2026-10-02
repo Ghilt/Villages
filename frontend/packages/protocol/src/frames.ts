@@ -328,7 +328,16 @@ export const commandPayloadSchema = z.discriminatedUnion('type', [
 ]);
 
 export const clientFrameSchema = z.discriminatedUnion('type', [
-  z.object({ type: z.literal('hello'), playerToken: z.string(), protocolVersion: z.number().int() }),
+  /**
+   * Who is playing and which wire they speak, and the master the page draws, by its name, so the gateway sends
+   * that world's stands. Absent, it sends none. See decision records 0025 and 0067.
+   */
+  z.object({
+    type: z.literal('hello'),
+    playerToken: z.string(),
+    protocolVersion: z.number().int(),
+    master: z.string().optional(),
+  }),
   z.object({ type: z.literal('subscribeCells'), cells: z.array(cellSchema) }),
   z.object({ type: z.literal('unsubscribeCells'), cells: z.array(cellSchema) }),
   /** The command id is a UUID: it becomes the causation id of every event the command writes. See 0035. */
@@ -394,6 +403,13 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('takenOver'), message: z.string() }),
   /** The world was emptied and this session is finished with it. Everyone is told. See 0036. */
   z.object({ type: z.literal('worldWiped'), message: z.string() }),
+  /**
+   * The scenery's stands in one zoom 7 tile, `x` across and `y` down, that touch ground the house has revealed:
+   * the sprite map's own records, eight bytes a stand, in base64, which `decodeStands` reads. Sent for every tile
+   * under a held cell from zoom 6 in, and again when the house's sight or the fog switch changes what it lets
+   * through; empty when nothing there does. What the fog holds back is left out. See decision record 0067.
+   */
+  z.object({ type: z.literal('stands'), x: z.number().int(), y: z.number().int(), stands: z.base64() }),
   z.object({
     type: z.literal('snapshot'),
     cell: cellSchema,

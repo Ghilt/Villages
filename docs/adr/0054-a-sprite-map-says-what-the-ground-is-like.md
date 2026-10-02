@@ -3,6 +3,9 @@
 - Status: accepted
 - Date: 2026-09-21
 - Builds on 0052, which settled that scenery is a pure function of the ground and is never stored
+- Amended 2026-09-29 by 0067: a layer's stands are no longer in its directory beside the page's world but in
+  `world/stands/<name>/<layer>/`, with a `stands.json` written last, where only the game server and the
+  scenery stills read them. `biomes.png` and `map.json` stay where they were.
 
 ## Context
 

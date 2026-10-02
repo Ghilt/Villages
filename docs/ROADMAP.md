@@ -39,16 +39,17 @@ character dialogue, the newest.
   place, a circle and a span, and the server keeps back what a house cannot see. The shape is decision record
   0061 and the steps, one commit each, are in `docs/plans/fog-of-war.md`; the server working out every house's
   sight, the fog drawn from it over the world and under the signs, vision given outright, the server
-  holding back what the fog hides, and the surface tension that joins circles close together are built. Adam's own mechanic, asked for on 2026-09-26.
+  holding back what the fog hides, and the surface tension that joins circles close together are built, and
+  the scenery is grown from the stands the gateway sends, only those on revealed ground, which a page cannot fetch for itself: all of step 8. Adam's own mechanic, asked for on 2026-09-26.
 - **Character dialogue**: people talking to each other, offered to a house whole and stepped through in a
   pane of its own down the right of the spread, paying the house as it goes, and lapsing when a requirement
   the player never sees fails. The shape is decision record 0071 and the steps, one commit each, are in
   `docs/plans/character-dialogue.md`; the hypothesis is experiment 0014. Planned on 2026-09-27 from Adam's
-  own description. The offer, the walk and the step are built on the server, and the debug panel offers a
-  sample and lists what the house was offered, and a speaker's death ends their dialogues as lost. The pane
-  stands in a column down the right of the spread, 0069, drawn in the page, 0070, opens when a dialogue is
-  offered, and lists them, waiting and finished, and a dialogue is played through in it; nothing in the world
-  offers one.
+  own description. The offer, the walk and the step are built on the server, the debug panel offers a
+  sample and does nothing else, and a speaker's death ends their dialogues as lost. The pane stands in a
+  column down the right of the spread, 0069, drawn in the page, 0070, opens when a dialogue is offered, and
+  lists them, waiting and finished; a dialogue is played through in it, with a portrait beside every line and
+  what a line gave under it; nothing in the world offers one.
 - **0.4** Local infrastructure: MongoDB replica set and RabbitMQ in Compose
 - **0.8** Testcontainers smoke test on MongoDB and RabbitMQ
 - **1.6** The bridge from the store to the broker

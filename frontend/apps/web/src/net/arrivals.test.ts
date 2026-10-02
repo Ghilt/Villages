@@ -2,7 +2,15 @@ import { describe, expect, it } from 'vitest';
 
 import type { CharacterOnMapView } from '@villages/protocol';
 
-import { NOTHING_ARRIVED, alsoArrived, describeArrival, describeBatch } from './arrivals';
+import {
+  NOTHING_ARRIVED,
+  NO_STANDS_ARRIVED,
+  alsoArrived,
+  alsoStood,
+  describeArrival,
+  describeBatch,
+  describeStands,
+} from './arrivals';
 
 const snapshot = (cell: string, houses: number, omitted?: number, characters = 0) => ({
   cell,
@@ -114,5 +122,25 @@ describe('saying what a batch brought', () => {
     expect(describeBatch([{ type: 'characterGone', id: agnes.id, version: 11 }], nobody)).toBe(
       '1 delta in one batch: cb732500 went',
     );
+  });
+});
+
+describe('saying what stands arrived', () => {
+  // Three stands, as the shared fixture writes them, and a tile with none.
+  const three = { stands: 'OADd/xoNXyr/BwQE//+w/57/YAkBAAEA' };
+  const none = { stands: '' };
+
+  it('counts the tiles and the stands in them, off the length of the base64', () => {
+    expect(alsoStood(alsoStood(NO_STANDS_ARRIVED, three), none)).toEqual({ tiles: 2, stands: 3 });
+    expect(alsoStood(NO_STANDS_ARRIVED, { stands: 'AAAAAAAAAAA=' })).toEqual({ tiles: 1, stands: 1 });
+  });
+
+  it('says nothing about tiles that brought no stands, because empty or unseen ground is not news', () => {
+    expect(describeStands(alsoStood(NO_STANDS_ARRIVED, none))).toBeNull();
+  });
+
+  it('says how many tiles answered and how many stands the fog let through', () => {
+    expect(describeStands({ tiles: 4, stands: 612 })).toBe('4 tiles from the server: 612 stands');
+    expect(describeStands({ tiles: 1, stands: 1 })).toBe('1 tile from the server: 1 stand');
   });
 });

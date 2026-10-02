@@ -1586,20 +1586,24 @@ body,
 }
 
 /*
- * Everything that helps while the game is being built, in one column down the right-hand side.
+ * Everything that helps while the game is being built, down the right-hand side.
  *
  * Docked rather than floating: the grid gives it a column, so its width is room the stage does not
  * have. No radius and only the one border, the edge it faces the world with, because it is part of
  * the window now in the way the house card is part of its corner. Development scaffolding, and it
  * still looks like it on purpose. See docs/adr/0039.
+ *
+ * Two columns of its own when the log is open: the controls at the width they want, and the log
+ * beside them taking the rest, because when the panel balloons it is a log line that wants the room.
  */
 .debug {
   grid-column: 3;
   grid-row: 1 / -1;
   min-height: 0;
+  min-width: 0;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
   font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace;
   font-size: 0.68rem;
   line-height: 1.45;
@@ -1613,6 +1617,22 @@ body,
  * undisturbed. Out of the grid's flow entirely, because a shut panel is a panel of no width and the
  * stage has already been given the room.
  */
+.debug--log {
+  grid-template-columns: minmax(0, var(--controls, 22rem)) minmax(0, 1fr);
+}
+
+.debug__controls,
+.debug__logcolumn {
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.debug__logcolumn {
+  border-left: 1px solid var(--parchment-edge);
+}
+
 .debug__badge {
   position: absolute;
   top: 0.5rem;
@@ -1854,14 +1874,14 @@ body,
   overflow-wrap: anywhere;
 }
 
-/* Bounded rather than greedy: it used to take whatever height was left, which cannot work once the
-   panel scrolls and there are sections below it. Two hundred notes are kept, so it scrolls itself. */
+/* The whole height of its column, under its bar. Two hundred notes are kept, so it scrolls itself. */
 .debug__log {
+  flex: 1;
+  min-height: 0;
   margin: 0;
-  padding: 0;
+  padding: 0.4rem 0.5rem;
   list-style: none;
   overflow-y: auto;
-  max-height: 22rem;
 }
 
 .debug__log li {

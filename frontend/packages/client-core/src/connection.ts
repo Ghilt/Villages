@@ -26,6 +26,8 @@ export interface ConnectionOptions {
    */
   playerToken?: string;
   protocolVersion: number;
+  /** The master the page draws, said in hello so the gateway sends that world's stands. See 0067. */
+  master?: string;
   /** Whether to ask for every stored event, which a viewer wants and a player does not. */
   watchEvents?: boolean;
 }
@@ -67,7 +69,8 @@ export function connect(options: ConnectionOptions): Connection {
     state = 'open';
     const playing = options.playerToken;
     if (playing !== undefined) {
-      send({ type: 'hello', playerToken: playing, protocolVersion: options.protocolVersion });
+      const drawing = options.master === undefined ? {} : { master: options.master };
+      send({ type: 'hello', playerToken: playing, protocolVersion: options.protocolVersion, ...drawing });
     }
     if (options.watchEvents === true) send({ type: 'watchEvents', on: true });
   });

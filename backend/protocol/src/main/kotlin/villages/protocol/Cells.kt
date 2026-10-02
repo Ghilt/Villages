@@ -44,6 +44,12 @@ value class Cell(val quadkey: String) {
     /** Whether this cell lies within the given one, at any depth. The whole of the spatial query. */
     fun isInside(tile: Cell): Boolean = quadkey.startsWith(tile.quadkey)
 
+    /** Which column of the grid at its own zoom this cell is, counted from the west: its digits' x bits. */
+    val column: Int get() = quadkey.fold(0) { x, digit -> (x shl 1) or ((digit - '0') and 1) }
+
+    /** Which row of the grid at its own zoom this cell is, counted from the north: its digits' y bits. */
+    val row: Int get() = quadkey.fold(0) { y, digit -> (y shl 1) or ((digit - '0') shr 1) }
+
     companion object {
         /** How deep the grid goes, which is where the world's own painted detail runs out. */
         const val MAX_ZOOM = 10

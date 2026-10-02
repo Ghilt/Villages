@@ -80,3 +80,33 @@ export function describeBatch(deltas: readonly Delta[], nameOf: (id: string) => 
   });
   return people.length === 0 ? count : `${count}: ${people.join(', ')}`;
 }
+
+/** What a burst of stands brought: how many tiles answered, and how many stands the fog let through in them. */
+export interface StandsArrival {
+  tiles: number;
+  stands: number;
+}
+
+export const NO_STANDS_ARRIVED: StandsArrival = { tiles: 0, stands: 0 };
+
+/** Eight bytes a stand, as the sprite map writes them. */
+const STAND_BYTES = 8;
+
+/** One more tile of stands in the burst, counted off the length of its base64 rather than decoded. */
+export function alsoStood(soFar: StandsArrival, frame: { stands: string }): StandsArrival {
+  const padding = frame.stands.endsWith('==') ? 2 : frame.stands.endsWith('=') ? 1 : 0;
+  const bytes = (frame.stands.length / 4) * 3 - padding;
+  return { tiles: soFar.tiles + 1, stands: soFar.stands + Math.floor(bytes / STAND_BYTES) };
+}
+
+/**
+ * What to say about a burst of stands, or null when it brought none: tiles of empty or unseen ground arriving
+ * as the camera moves are not news, and the gateway holding the rest back is what an empty tile is.
+ */
+export function describeStands(arrival: StandsArrival): string | null {
+  if (arrival.stands === 0) {
+    return null;
+  }
+  const tiles = `${arrival.tiles} tile${arrival.tiles === 1 ? '' : 's'}`;
+  return `${tiles} from the server: ${arrival.stands} stand${arrival.stands === 1 ? '' : 's'}`;
+}

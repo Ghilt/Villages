@@ -1,0 +1,51 @@
+{
+  "$comment": "Which zoom 7 tiles' stands a held cell brings: the tiles the cell lies in, and any that sixteen world units past its edges reach into, from zoom 6 in and none coarser. Across wraps round the world and down stops at its edges; each tile is [x, y]. The gateway sends a tile once while a held cell is over it and lets it go when none is, and the page keeps a tile exactly as long, so both ends must agree on every row. Read by the Kotlin protocol test and by the browser's. Worked out by hand from that arithmetic, with the world 32768 units across and a tile 256: change it on one side and see the other fail.",
+  "tiles": 128,
+  "margin": 16,
+  "fromZoom": 6,
+  "vectors": [
+    { "name": "a zoom 10 cell well inside a tile, at Stockholm", "cell": "1200312213", "tiles": [[70, 37]] },
+    {
+      "name": "a zoom 10 cell near the bottom of a tile, which reaches into the one below",
+      "cell": "1200312233",
+      "tiles": [[70, 37], [70, 38]]
+    },
+    {
+      "name": "a zoom 10 cell in the north-west corner of a tile, which reaches into three more",
+      "cell": "1200312000",
+      "tiles": [[69, 36], [70, 36], [69, 37], [70, 37]]
+    },
+    {
+      "name": "a zoom 7 cell is a tile, and brings the ring about it",
+      "cell": "1200312",
+      "tiles": [[69, 36], [70, 36], [71, 36], [69, 37], [70, 37], [71, 37], [69, 38], [70, 38], [71, 38]]
+    },
+    {
+      "name": "the north-west corner of the world wraps across and stops at the top",
+      "cell": "0000000",
+      "tiles": [[127, 0], [0, 0], [1, 0], [127, 1], [0, 1], [1, 1]]
+    },
+    {
+      "name": "the south-east corner of the world wraps across and stops at the bottom",
+      "cell": "3333333",
+      "tiles": [[126, 126], [127, 126], [0, 126], [126, 127], [127, 127], [0, 127]]
+    },
+    {
+      "name": "a zoom 10 cell on the eastern edge reaches across the antimeridian",
+      "cell": "1311313311",
+      "tiles": [[127, 37], [0, 37]]
+    },
+    {
+      "name": "a zoom 6 cell is four tiles, and brings the ring about them",
+      "cell": "120031",
+      "tiles": [
+        [69, 35], [70, 35], [71, 35], [72, 35],
+        [69, 36], [70, 36], [71, 36], [72, 36],
+        [69, 37], [70, 37], [71, 37], [72, 37],
+        [69, 38], [70, 38], [71, 38], [72, 38]
+      ]
+    },
+    { "name": "a zoom 5 cell brings none, because the scenery is never drawn that far out", "cell": "12003", "tiles": [] },
+    { "name": "the whole world brings none", "cell": "", "tiles": [] }
+  ]
+}
