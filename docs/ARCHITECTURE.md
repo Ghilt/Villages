@@ -46,6 +46,12 @@ packages/protocol  <-  packages/client-core  <-  apps/web
   words, numbers and callbacks. A test reads every import in the folder and fails on one that leaves it, bar React,
   the fonts and the world package's pure rules and types, which is what lets `/admin/inspect-ui-components` show every component with nothing running. See
   decision record 0068.
+- The rest of `apps/web` stands in rows, and a folder imports only the rows above it, and in its own row only what
+  the rule names: `ui`, `version`, `marks` and `log`, which lean on nothing in the page; `net` and `stage`; the
+  ground drawn, `map`, `fog` and `desk`; what stands on it, `sprites` and `room`; the game's own surfaces, `house`,
+  `figures`, `choice`, `dialogues`, `areas` and `inspect`; and what puts it all together, the root, `debug` and
+  `admin`. No two files import each other, however far round. `src/layers.test.ts` holds it, with the imports that
+  break it today listed one by one, each ended by a step of the plan under way. See decision record 0073.
 
 Enforcement: Gradle module edges plus architecture tests on the backend; workspace dependencies, a DOM-free compiler
 configuration and lint rules on the frontend. A violation fails the build, in both cases proven by a deliberate

@@ -1,0 +1,260 @@
+import { describe, expect, it } from 'vitest';
+
+/**
+ * Which folder of the page may import which.
+ *
+ * The page's folders had come to import each other in one ring, thirteen of them, so that nothing could be
+ * moved, tested or understood without the rest. These rows say what may lean on what: a folder may import the
+ * rows above it, and in its own row only what `SIDEWAYS` names. What breaks the rows today is listed in
+ * `EXCUSED`, one import at a time, and each is taken off the list by the step that ends it - a listed import
+ * that no longer happens fails until it is taken off, so the list can only get shorter. No two files may
+ * import each other, however far round. Tests may import what they need. See docs/ARCHITECTURE.md.
+ */
+
+const ROWS: readonly (readonly string[])[] = [
+  // What everything leans on, and which leans on nothing in the page. The component library is the
+  // showcase's alone until the game takes it up, a surface at a time.
+  ['ui', 'version', 'marks', 'log'],
+  // The connection to the game server, and the stage the panes are laid out in.
+  ['net', 'stage'],
+  // The ground, drawn: the map and its paint, the fog over it, the desk under it.
+  ['map', 'fog', 'desk'],
+  // What stands on the ground, and the room around the desk.
+  ['sprites', 'room'],
+  // The game's own surfaces: the panes and windows a player reads and presses.
+  ['house', 'figures', 'choice', 'dialogues', 'areas', 'inspect'],
+  // What puts it all together, and the instruments beside it.
+  ['(root)', 'debug', 'admin'],
+];
+
+/** A folder that may import another in its own row. */
+const SIDEWAYS: readonly (readonly [string, string])[] = [
+  ['desk', 'map'],
+  ['room', 'sprites'],
+  ['dialogues', 'figures'],
+  ['dialogues', 'house'],
+  ['inspect', 'figures'],
+  ['inspect', 'house'],
+  ['inspect', 'areas'],
+];
+
+/**
+ * Imports that break the rows today, each to be ended by a step of the plan under way, grouped by the step.
+ * The plan is `docs/ROADMAP.md`'s "A place for every mechanic".
+ */
+const EXCUSED: readonly string[] = [
+  // The log listens to the session instead of being written inside it.
+  'net/gateway.ts -> dialogues/describe.ts',
+  'net/gateway.ts -> figures/describe.ts',
+  'net/gateway.ts -> fog/describe.ts',
+  // The session is handed the master it draws.
+  'net/gateway.ts -> map/masters.ts',
+  // The ground's geometry gets a folder below the map, the sprites and the fog.
+  'fog/circles.ts -> map/worldStyle.ts',
+  'fog/circles.ts -> sprites/cameraMath.ts',
+  'fog/fogField.ts -> map/worldStyle.ts',
+  'fog/fogField.ts -> sprites/cameraMath.ts',
+  'fog/uncolouring.ts -> map/worldStyle.ts',
+  'fog/uncolouring.ts -> sprites/cameraMath.ts',
+  'map/MapView.tsx -> sprites/cameraMath.ts',
+  'map/sheet.ts -> sprites/cameraMath.ts',
+  'map/tilt.ts -> sprites/cameraMath.ts',
+  // What configures the game leaves the debug folder, and the stands move into the connection's.
+  'areas/AreasView.tsx -> debug/Section.tsx',
+  'areas/AreasView.tsx -> inspect/opening.ts',
+  'areas/AreasView.tsx -> inspect/subjects.ts',
+  'net/gateway.ts -> sprites/scenery/standsFromServer.ts',
+  'sprites/SpriteOverlay.tsx -> debug/scenery.ts',
+  // Each switch has one owner.
+  'areas/HoldingOverlay.tsx -> debug/seeEverything.ts',
+  'sprites/SpriteOverlay.tsx -> debug/seeEverything.ts',
+  // The stage is handed its panes rather than reading the game for them.
+  'stage/Stage.tsx -> inspect/subjects.ts',
+  'stage/Stage.tsx -> net/gateway.ts',
+  'stage/bays.ts -> inspect/subjects.ts',
+  'stage/bays.ts -> net/gateway.ts',
+  'stage/panes.ts -> inspect/subjects.ts',
+  'stage/panes.ts -> net/gateway.ts',
+  // Opening a window, and picking a thing on the map, are handed down rather than reached for.
+  'areas/AreaOverlay.tsx -> inspect/opening.ts',
+  'areas/AreaOverlay.tsx -> inspect/subjects.ts',
+  'areas/areas.ts -> inspect/subjects.ts',
+  'dialogues/showing.ts -> inspect/opening.ts',
+  'sprites/SpriteOverlay.tsx -> inspect/opening.ts',
+  'sprites/SpriteOverlay.tsx -> inspect/subjects.ts',
+];
+
+const SOURCES = import.meta.glob<string>('./**/*.{ts,tsx,css}', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+});
+
+/** Every module a source names: `import`, `export … from`, `import()`, and a stylesheet's `@import`. */
+export function importsOf(source: string): string[] {
+  const patterns = [
+    /\b(?:import|export)\s[^'";]*?\sfrom\s*['"]([^'"]+)['"]/g,
+    /\bimport\s*['"]([^'"]+)['"]/g,
+    /\bimport\(\s*['"]([^'"]+)['"]\s*\)/g,
+    /@import\s+(?:url\(\s*)?['"]([^'"]+)['"]/g,
+  ];
+  return [...new Set(patterns.flatMap((pattern) => [...source.matchAll(pattern)].map((match) => match[1]!)))];
+}
+
+/** The source a relative import lands on, as a key of `files`, or null when it leaves the page's sources. */
+export function resolve(from: string, named: string, files: ReadonlySet<string>): string | null {
+  if (!named.startsWith('.')) {
+    return null;
+  }
+  const bare = named.split('?')[0]!;
+  const landed = `.${new URL(bare, `file:///src${from.slice(1)}`).pathname.slice('/src'.length)}`;
+  const tried = [landed, `${landed}.ts`, `${landed}.tsx`, `${landed}/index.ts`, `${landed}/index.tsx`];
+  return tried.find((candidate) => files.has(candidate)) ?? null;
+}
+
+/** The folder a source belongs to: the first under `src`, or the root for the files beside them. */
+export function folderOf(file: string): string {
+  const parts = file.slice(2).split('/');
+  return parts.length === 1 ? '(root)' : parts[0]!;
+}
+
+function rowOf(folder: string): number {
+  return ROWS.findIndex((row) => row.includes(folder));
+}
+
+/** Whether the rows let one folder import another. */
+export function mayImport(from: string, to: string): boolean {
+  if (from === to) {
+    return true;
+  }
+  if (to === 'ui') {
+    return from === 'admin';
+  }
+  if (rowOf(from) === ROWS.length - 1) {
+    return true;
+  }
+  if (rowOf(to) < rowOf(from)) {
+    return true;
+  }
+  return SIDEWAYS.some(([one, other]) => one === from && other === to);
+}
+
+const isTest = (file: string): boolean => /\.test\.tsx?$/.test(file);
+
+/** Every import between two of the page's sources, tests left out, as from-file to to-file. */
+function graph(): Map<string, string[]> {
+  const files = new Set(Object.keys(SOURCES));
+  const edges = new Map<string, string[]>();
+  for (const [file, source] of Object.entries(SOURCES)) {
+    if (isTest(file)) {
+      continue;
+    }
+    const to = importsOf(source)
+      .map((named) => resolve(file, named, files))
+      .filter((landed): landed is string => landed !== null && landed !== file && !isTest(landed));
+    edges.set(file, [...new Set(to)]);
+  }
+  return edges;
+}
+
+/** Every set of files that import each other round a ring, however long the ring. */
+function rings(edges: ReadonlyMap<string, readonly string[]>): string[][] {
+  let next = 0;
+  const index = new Map<string, number>();
+  const low = new Map<string, number>();
+  const stack: string[] = [];
+  const onStack = new Set<string>();
+  const found: string[][] = [];
+  const visit = (file: string): void => {
+    index.set(file, next);
+    low.set(file, next);
+    next++;
+    stack.push(file);
+    onStack.add(file);
+    for (const to of edges.get(file) ?? []) {
+      if (!index.has(to)) {
+        visit(to);
+        low.set(file, Math.min(low.get(file)!, low.get(to)!));
+      } else if (onStack.has(to)) {
+        low.set(file, Math.min(low.get(file)!, index.get(to)!));
+      }
+    }
+    if (low.get(file) === index.get(file)) {
+      const ring: string[] = [];
+      let one: string;
+      do {
+        one = stack.pop()!;
+        onStack.delete(one);
+        ring.push(one);
+      } while (one !== file);
+      if (ring.length > 1) {
+        found.push(ring.sort());
+      }
+    }
+  };
+  for (const file of edges.keys()) {
+    if (!index.has(file)) {
+      visit(file);
+    }
+  }
+  return found;
+}
+
+const pair = (from: string, to: string): string => `${from.slice(2)} -> ${to.slice(2)}`;
+
+describe('the folders of the page', () => {
+  const edges = graph();
+
+  it('each stand in a row', () => {
+    const folders = new Set([...edges.keys()].map(folderOf));
+    expect([...folders].filter((folder) => rowOf(folder) === -1)).toEqual([]);
+  });
+
+  it('import only the rows above them, and what is excused', () => {
+    const breaking = [...edges].flatMap(([from, tos]) =>
+      tos.filter((to) => !mayImport(folderOf(from), folderOf(to))).map((to) => pair(from, to)),
+    );
+    expect(breaking.filter((one) => !EXCUSED.includes(one)).sort()).toEqual([]);
+    expect(EXCUSED.filter((one) => !breaking.includes(one))).toEqual([]);
+  });
+
+  it('never import each other round a ring', () => {
+    expect(rings(edges)).toEqual([]);
+  });
+});
+
+describe('the rows', () => {
+  it('see every kind of import', () => {
+    const source = [
+      `import { a } from './a';`,
+      `import type { B } from '../stage/panes';`,
+      `export { c } from './c';`,
+      `import './d.css';`,
+      `const e = await import('./e');`,
+      `@import './f.css';`,
+    ].join('\n');
+    expect(importsOf(source)).toEqual(
+      expect.arrayContaining(['./a', '../stage/panes', './c', './d.css', './e', './f.css']),
+    );
+  });
+
+  it('find the file an import lands on', () => {
+    const files = new Set(['./net/gateway.ts', './stage/Stage.tsx', './ui/index.ts', './styles.css']);
+    expect(resolve('./stage/Stage.tsx', '../net/gateway', files)).toBe('./net/gateway.ts');
+    expect(resolve('./net/gateway.ts', '../stage/Stage', files)).toBe('./stage/Stage.tsx');
+    expect(resolve('./App.tsx', './ui', files)).toBe('./ui/index.ts');
+    expect(resolve('./main.tsx', './styles.css?raw', files)).toBe('./styles.css');
+    expect(resolve('./main.tsx', 'react', files)).toBeNull();
+  });
+
+  it('say which folder may lean on which', () => {
+    expect(mayImport('stage', 'log')).toBe(true);
+    expect(mayImport('log', 'stage')).toBe(false);
+    expect(mayImport('net', 'stage')).toBe(false);
+    expect(mayImport('dialogues', 'figures')).toBe(true);
+    expect(mayImport('figures', 'dialogues')).toBe(false);
+    expect(mayImport('(root)', 'debug')).toBe(true);
+    expect(mayImport('(root)', 'ui')).toBe(false);
+    expect(mayImport('admin', 'ui')).toBe(true);
+  });
+});
