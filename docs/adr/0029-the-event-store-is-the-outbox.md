@@ -2,6 +2,12 @@
 
 - Status: accepted
 - Date: 2026-09-05
+- Amended 2026-10-02: **a fault is anything acting on its own that throws**, not only a subscriber to the feed.
+  The listeners scheduled their work on a timer whose future nobody read, so a release that failed, or a write
+  that lost its race three times, vanished without a word. Now the feed, the timer and the listeners report to
+  one `Faults` port, which the server's log and the gateway watch as they watched the feed; a feed's fault is
+  said word for word as before. A pledge whose house went in a wipe is as settled as one already released, so a
+  wipe is not a fault in every window.
 
 ## Context
 

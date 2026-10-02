@@ -14,7 +14,9 @@ import org.occurrent.subscription.inmemory.InMemorySubscription
 import org.occurrent.subscription.inmemory.InMemorySubscriptionModel
 import villages.application.CharacterCommandExecutor
 import villages.application.EventFeed
-import villages.application.FeedFault
+import villages.application.Fault
+import villages.application.FaultBoard
+import villages.application.Faults
 import villages.application.HouseCommandExecutor
 import villages.application.Start
 import villages.application.StoredEvent
@@ -23,7 +25,6 @@ import java.lang.reflect.Method
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
@@ -44,8 +45,8 @@ class OccurrentEventFeed(
     private val subscriptions: SubscriptionModel,
     private val store: EventStoreQueries,
     private val converter: CloudEventConverter<Event>,
+    private val faults: Faults,
 ) : EventFeed {
-    private val faultWatchers = CopyOnWriteArraySet<(FeedFault) -> Unit>()
 
     override fun subscribe(from: Start, subscriber: (StoredEvent) -> Unit): AutoCloseable {
         val id = "feed-${UUID.randomUUID()}"
@@ -63,8 +64,7 @@ class OccurrentEventFeed(
                 } catch (@Suppress("TooGenericExceptionCaught") thrown: Exception) {
                     // Thrown on to Occurrent it would be retried, and the retry dropped above as already
                     // seen: lost without a word. Said instead, and the feed goes on to the next event.
-                    val fault = FeedFault(nameOf(subscriber), stored, thrown)
-                    faultWatchers.forEach { it(fault) }
+                    faults.report(Fault.onEvent(nameOf(subscriber), stored, thrown))
                 }
             }
         }
@@ -84,11 +84,6 @@ class OccurrentEventFeed(
         }
 
         return AutoCloseable { subscriptions.cancelSubscription(id) }
-    }
-
-    override fun watchFaults(listener: (FeedFault) -> Unit): AutoCloseable {
-        faultWatchers += listener
-        return AutoCloseable { faultWatchers -= listener }
     }
 }
 
@@ -118,7 +113,8 @@ internal fun CloudEvent.toStored(converter: CloudEventConverter<Event>): StoredE
  * Nothing survives a restart, on purpose, until MongoDB exists. Used by the app when there is no database
  * and by every test that wants the real machinery without one.
  */
-class InMemoryWorld : AutoCloseable {
+/** The world in memory. Whatever acts on it and throws is said on `faults`, which the server's log and the gateway watch. */
+class InMemoryWorld(val faults: Faults = FaultBoard()) : AutoCloseable {
     /**
      * The threads the subscriptions run on. A stopped subscription notices only when its half-second poll comes
      * back, and the model's shutdown waits for that, so shutting this down wakes them rather than waiting.
@@ -136,7 +132,7 @@ class InMemoryWorld : AutoCloseable {
 
     val executor: HouseCommandExecutor = OccurrentHouseCommandExecutor(store, converter)
     val characterExecutor: CharacterCommandExecutor = OccurrentCharacterCommandExecutor(store, converter)
-    val feed: EventFeed = OccurrentEventFeed(StopOnCancel(subscriptions), store, converter)
+    val feed: EventFeed = OccurrentEventFeed(StopOnCancel(subscriptions), store, converter, faults)
 
     /**
      * Empties the store, stream by stream, and says how many events went.

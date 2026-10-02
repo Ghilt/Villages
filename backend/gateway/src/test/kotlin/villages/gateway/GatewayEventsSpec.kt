@@ -4,7 +4,7 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
-import villages.application.FeedFault
+import villages.application.Fault
 import villages.projections.HousesProjection
 import villages.protocol.ErrorFrame
 import villages.protocol.EventFrame
@@ -73,7 +73,7 @@ class GatewayEventsSpec : StringSpec({
         one.clear()
         two.clear()
 
-        rig.world.fault(FeedFault("HousesProjection", founded, IllegalStateException("a fold that is wrong")))
+        rig.faults.report(Fault.onEvent("HousesProjection", founded, IllegalStateException("a fold that is wrong")))
 
         val told = ErrorFrame(
             "fault",

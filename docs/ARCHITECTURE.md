@@ -173,7 +173,9 @@ its house is still being fanned out.
 Anything else a subscriber throws is a **fault**, and the feed says so rather than losing it: the server's
 log gets the stack under `villages.feed`, every window's debug panel gets the one line as `error fault`,
 and the feed goes on to the next event without handing that one to that subscriber again. The read model
-is then missing the event, which is why the fault has to be seen. See decision record 0029.
+is then missing the event, which is why the fault has to be seen. Whatever else acts on its own says so the
+same way: a listener's work, and anything scheduled for later, which used to throw into a future nobody
+read. They all report to one board, `Faults`, which the log and the gateway watch. See decision record 0029.
 
 Seeing everything is a connection's, not a house's: `seeAll` sets significance aside for whoever sent it, so
 the same house is in a coarse cell for one session and not for another. It is a way of looking rather than a

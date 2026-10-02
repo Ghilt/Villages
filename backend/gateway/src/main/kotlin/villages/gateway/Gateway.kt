@@ -5,6 +5,7 @@ import villages.application.CharacterRow
 import villages.application.ChoiceRow
 import villages.application.ChoicesByPlayer
 import villages.application.EventFeed
+import villages.application.Faults
 import villages.application.FoundHouseService
 import villages.application.CharacterMapChange
 import villages.application.CharacterSpan
@@ -19,7 +20,6 @@ import villages.application.KeyFiguresByHouse
 import villages.application.PlayerTokens
 import villages.application.Later
 import villages.application.Provenance
-import villages.application.ScheduledLater
 import villages.application.Sight
 import villages.application.SightsByHouse
 import villages.application.Stands
@@ -200,6 +200,7 @@ class Gateway(
     private val tokens: PlayerTokens,
     private val foundHouse: FoundHouseService,
     events: EventFeed,
+    faults: Faults,
     private val houses: HousesByCell,
     private val theirHouses: HousesByPlayer,
     private val clock: Clock,
@@ -218,7 +219,7 @@ class Gateway(
     private val dialogues: DialogueService,
     private val dialogueRows: DialoguesByHouse,
     private val stands: Stands = Stands { _, _, _ -> null },
-    private val later: Later = ScheduledLater(),
+    private val later: Later,
 ) : AutoCloseable {
     private val watching = ConcurrentHashMap<Connection, Unit>()
 
@@ -273,11 +274,11 @@ class Gateway(
     }
 
     /**
-     * A subscriber that threw on an event is told to every window, because the debug panel in each is where
+     * Anything acting on its own that threw is told to every window, because the debug panel in each is where
      * it is seen, and a read model missing an event is otherwise only a map that is quietly wrong. The stack
      * is in the server's log; this is the one line of it. See decision records 0023 and 0029.
      */
-    private val faults: AutoCloseable = events.watchFaults { fault ->
+    private val faulted: AutoCloseable = faults.watch { fault ->
         val told = ErrorFrame("fault", fault.describe())
         for (connection in live) {
             connection.out.send(told)
@@ -390,8 +391,7 @@ class Gateway(
         dialoguesChanged.close()
         moves.close()
         seen.close()
-        faults.close()
-        (later as? AutoCloseable)?.close()
+        faulted.close()
     }
 
     inner class Connection(private val transport: Outbound) {

@@ -1,13 +1,31 @@
 package villages.application
 
-/** A `Later` on a timer thread. One thread, because nothing here is heavy and order does not matter. */
-class ScheduledLater : Later, AutoCloseable {
-    private val timer = java.util.concurrent.Executors.newSingleThreadScheduledExecutor { runnable ->
-        Thread(runnable, "villages-later").apply { isDaemon = true }
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+
+/**
+ * A `Later` on a timer thread. One thread, because nothing here is heavy and order does not matter.
+ *
+ * Whatever an action throws is said to `faults`, as the thread's name, because the timer would otherwise keep it
+ * in a future nobody reads: a pledge that never came back, and not a word about why.
+ */
+class ScheduledLater(private val faults: Faults, private val name: String = "villages-later") : Later, AutoCloseable {
+    private val timer = Executors.newSingleThreadScheduledExecutor { runnable ->
+        Thread(runnable, name).apply { isDaemon = true }
     }
 
     override fun schedule(delayMs: Long, action: Runnable) {
-        timer.schedule(action, delayMs.coerceAtLeast(0), java.util.concurrent.TimeUnit.MILLISECONDS)
+        timer.schedule(
+            {
+                try {
+                    action.run()
+                } catch (@Suppress("TooGenericExceptionCaught") thrown: Exception) {
+                    faults.report(Fault(name, null, thrown))
+                }
+            },
+            delayMs.coerceAtLeast(0),
+            TimeUnit.MILLISECONDS,
+        )
     }
 
     override fun close() {

@@ -174,4 +174,15 @@ class PledgesSpec : StringSpec({
 
         later.waits.shouldBeEmpty()
     }
+
+    "a pledge whose house went in a wipe before it came back is settled, and nothing is wrong" {
+        val (world, later, resources) = rig()
+        resources.pledge(player, Resource.REASON, 35, 10, "clearer glass", Provenance.startedBy(UUID.randomUUID()))
+        world.events.clear()
+
+        // The release finds no house, which is as settled as a pledge already given back, and says nothing.
+        later.tick()
+
+        world.events.shouldBeEmpty()
+    }
 })

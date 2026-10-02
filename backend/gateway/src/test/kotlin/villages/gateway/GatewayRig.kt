@@ -3,7 +3,7 @@ package villages.gateway
 import villages.application.AnonymousTokens
 import villages.application.Arrival
 import villages.application.EventFeed
-import villages.application.FeedFault
+import villages.application.FaultBoard
 import villages.application.CharacterCommandExecutor
 import villages.application.FoundHouseService
 import villages.application.HouseCommandExecutor
@@ -170,15 +170,6 @@ internal class TinyWorld : HouseCommandExecutor, CharacterCommandExecutor, Event
         return AutoCloseable { subscribers -= subscriber }
     }
 
-    private val faultWatchers = mutableListOf<(FeedFault) -> Unit>()
-
-    override fun watchFaults(listener: (FeedFault) -> Unit): AutoCloseable {
-        faultWatchers += listener
-        return AutoCloseable { faultWatchers -= listener }
-    }
-
-    /** What the real feed says when a subscriber throws, said on purpose. */
-    fun fault(fault: FeedFault) = faultWatchers.toList().forEach { it(fault) }
 }
 
 /**
@@ -223,10 +214,13 @@ internal class Rig {
     /** The one master's stands, tile by tile, as the sprite map's folder would hold them. */
     val standsOnDisk = mutableMapOf<Int, ByteArray>()
 
+    /** Where the gateway hears that something acting on its own threw, said on purpose by a test. */
+    val faults = FaultBoard()
     val gateway = Gateway(
         tokens = AnonymousTokens,
         foundHouse = FoundHouseService(world, clock = { noon }, world = worldClock),
         events = world,
+        faults = faults,
         houses = houses,
         theirHouses = houses,
         clock = Clock.fixed(noon, ZoneOffset.UTC),

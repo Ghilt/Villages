@@ -9,7 +9,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import org.occurrent.eventstore.api.blocking.EventStore
 import org.occurrent.eventstore.api.blocking.EventStream
-import villages.application.FeedFault
+import villages.application.Fault
 import villages.application.Provenance
 import villages.application.Start
 import villages.application.StoredEvent
@@ -262,10 +262,10 @@ class InMemoryWorldSpec : StringSpec({
 
     "a subscriber that throws is said as a fault, and the feed goes on to the next event" {
         InMemoryWorld().use { world ->
-            val faults = CopyOnWriteArrayList<FeedFault>()
+            val faults = CopyOnWriteArrayList<Fault>()
             val heard = CopyOnWriteArrayList<StoredEvent>()
             val bothHanded = CountDownLatch(2)
-            world.feed.watchFaults { faults += it }.use {
+            world.faults.watch { faults += it }.use {
                 world.feed.subscribe(Start.FROM_NOW) { stored ->
                     heard += stored
                     bothHanded.countDown()

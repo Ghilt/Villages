@@ -55,6 +55,9 @@ class Pledges(
                 // Already released, by its owner or by an earlier wake-up: nothing to do, nothing wrong.
             } catch (@Suppress("SwallowedException") alreadyBack: HouseError.NoSuchPledge) {
                 Unit
+                // Gone with its house in a wipe: as settled, and as nothing wrong.
+            } catch (@Suppress("SwallowedException") wiped: HouseError.NoSuchHouse) {
+                Unit
             }
         }
     }

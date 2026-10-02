@@ -13,6 +13,8 @@ import villages.application.Dice
 import villages.application.FoundHouseService
 import villages.application.FreshIds
 import villages.application.KeyFigureService
+import villages.application.FaultBoard
+import villages.application.Faults
 import villages.application.Later
 import villages.application.MonthlyWorldClock
 import villages.application.Pledges
@@ -51,13 +53,18 @@ private val feedLog = LoggerFactory.getLogger("villages.feed")
 @Configuration
 class WorldConfig {
     /**
-     * The world, and where the server's log hears of anything that throws while the feed hands it an event:
-     * the stack is written here, and the gateway tells every window the one line of it. See decision 0029.
+     * Where anything acting on its own says it threw - a subscriber to the feed, a listener, something
+     * scheduled for later - and where the server's log hears of it: the stack is written here, and the gateway
+     * tells every window the one line of it. See decision 0029.
      */
-    @Bean(destroyMethod = "close")
-    fun world(): InMemoryWorld = InMemoryWorld().also { world ->
-        world.feed.watchFaults { fault -> feedLog.error(fault.describe(), fault.thrown) }
+    @Bean
+    fun faults(): FaultBoard = FaultBoard().also { board ->
+        board.watch { fault -> feedLog.error(fault.describe(), fault.thrown) }
     }
+
+    /** The world, whose feed says on `faults` what its subscribers throw. */
+    @Bean(destroyMethod = "close")
+    fun world(faults: Faults): InMemoryWorld = InMemoryWorld(faults)
 
     @Bean
     fun clock(): Clock = Clock.systemUTC()
@@ -108,9 +115,16 @@ class WorldConfig {
     ): ResourceService =
         ResourceService(world.executor, clock = { clock.instant() }, world = worldClock, calendar = calendar, ids = ids)
 
-    /** One `Later` for the whole app: the gateway coalesces with it and a pledge waits out its span on it. */
+    /** The `Later` of what acts on its own: a pledge waits out its span on it, and a listener acts on it. */
     @Bean(destroyMethod = "close")
-    fun later(): ScheduledLater = ScheduledLater()
+    fun later(faults: Faults): ScheduledLater = ScheduledLater(faults)
+
+    /**
+     * The gateway's own `Later`, which it coalesces its frames on. Its own on purpose: a flush writes to sockets,
+     * and a slow one must never hold up a pledge coming back.
+     */
+    @Bean(destroyMethod = "close")
+    fun gatewayLater(faults: Faults): ScheduledLater = ScheduledLater(faults, "villages-gateway")
 
     /** Gives a pledge back when its span is up. One wake-up a pledge, and none at all without one. */
     @Bean(destroyMethod = "close")
@@ -274,10 +288,13 @@ class WorldConfig {
         dialogues: DialogueService,
         dialogueRows: DialoguesProjection,
         stands: Stands,
+        faults: Faults,
+        gatewayLater: ScheduledLater,
     ): Gateway = Gateway(
         tokens = AnonymousTokens,
         foundHouse = foundHouse,
         events = world.feed,
+        faults = faults,
         houses = houses,
         theirHouses = houses,
         clock = clock,
@@ -296,5 +313,6 @@ class WorldConfig {
         dialogues = dialogues,
         dialogueRows = dialogueRows,
         stands = stands,
+        later = gatewayLater,
     )
 }
