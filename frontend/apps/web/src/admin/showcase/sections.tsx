@@ -5,6 +5,7 @@ import { Buttons } from './Buttons';
 import { Collections } from './Collections';
 import { Containers } from './Containers';
 import { Controls } from './Controls';
+import { DialogsAndFields } from './DialogsAndFields';
 import { Foundations } from './Foundations';
 import { MarksAndReadouts } from './MarksAndReadouts';
 import { Pictures } from './Pictures';
@@ -86,7 +87,7 @@ export const SECTIONS: readonly Section[] = [
   {
     id: 'dialogs',
     title: 'Dialogs and fields',
-    says: 'The dialog, the toast, the text field, the dropdown and the medallion.',
-    arrives: 10,
+    says: 'The dialog and the toast; the text field, the dropdown and the medallion to come.',
+    Body: DialogsAndFields,
   },
 ];

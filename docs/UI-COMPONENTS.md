@@ -10,7 +10,8 @@
 **Being built.** This is the method as agreed on 2026-09-30, written before most of the library so that the
 library is built to it. Each step of the plan fills in its part, and a line that still says *to come* is a
 part nobody has built. The page, the foundations, the pictures, borders and fills, the container, the
-buttons, the marks and readouts, the tabs and sections, the controls and the collections are built.
+buttons, the marks and readouts, the tabs and sections, the controls, the collections, and the dialog and
+the toast are built.
 
 ## The page
 
@@ -357,3 +358,19 @@ A line each: what it is for, its variants, and where on the page it is.
   is. Its states are a light of cream over it rather than a shade, because shade takes from the ink's
   contrast on parchment; chosen is a bar down its start as well. A list too long for its room goes in a
   `ScrollArea`. *Collections*.
+- **`Dialog`** and **`DialogBox`**, `ui/dialog/Dialog.tsx`: a question that has to be answered before
+  anything else - kill this key figure? - over the whole page, the page behind dimmed with night and out of
+  reach. The browser's own modal dialog is under it, so it is drawn over everything, the keyboard stays in
+  it, and when it goes the keyboard goes back to whatever opened it; Escape, its close mark and a press on
+  the dimmed page put it away, `onClose`, unless it is not `dismissable`. Whoever uses it holds whether it
+  is `open`. Its `title` is the question, its children what there is to know, in a scroll area when there
+  is more than the window holds, and its `actions` the answers, the one the question is about last - a
+  `HoldButton`, for what cannot be undone. The page behind does not scroll while it is open. In the
+  `dialog.plain` recipe unless it says otherwise; `DialogBox` is its frame alone. *Dialogs and fields*.
+- **`Toasts`**, `ui/toast/Toasts.tsx`: things that happened, said in the bottom right corner of whatever
+  holds them and gone once read - from five seconds to twelve, longer for more words, `stayOf` in
+  `ui/toast/life.ts` - and never while the pointer or the keyboard is on one; or put away by its close
+  mark, or kept with `stays`. The newest is nearest the corner, and a screen reader is told each as it
+  comes. Whoever uses it holds the `items` and takes one away at `onGone`; what they said is the event
+  log's to keep. `place="flow"` lays them where they are. In the `toast.plain` recipe. *Dialogs and
+  fields*.

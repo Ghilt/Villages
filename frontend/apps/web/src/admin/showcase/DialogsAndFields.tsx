@@ -1,0 +1,165 @@
+import { useCallback, useRef, useState } from 'react';
+
+import { usePictures } from '../../ui/art/pictures';
+import { TextButton } from '../../ui/button/Button';
+import { Dialog, DialogBox } from '../../ui/dialog/Dialog';
+import { HoldButton } from '../../ui/hold/HoldButton';
+import { Toasts } from '../../ui/toast/Toasts';
+import type { Toast } from '../../ui/toast/Toasts';
+import { Part, Specimen, Specimens } from './Specimen';
+
+/** Things that happen, one after another, each time the page is asked for one. */
+const HAPPENINGS: readonly Omit<Toast, 'id'>[] = [
+  { title: 'Sister Agathe joined the house', text: 'She is the second of its key figures.', mark: 'piety' },
+  {
+    title: 'The Reformation spreads',
+    text: 'New doctrines challenge the Church in the capital.',
+    mark: 'reason',
+  },
+  { title: 'A letter from Vienna', mark: 'influence' },
+  {
+    title: 'Paris grew',
+    text: 'It holds 3,245 souls, and on Thursdays the market fills the square before the abbey.',
+    mark: 'domain',
+  },
+];
+
+/** A toast that stays until it is put away, to be looked at. */
+const STAYING: readonly Toast[] = [
+  {
+    id: 'staying',
+    title: 'Lyon is short of grain',
+    text: 'It stays until it is put away.',
+    mark: 'wealth',
+    stays: true,
+  },
+];
+
+/** A letter too long for the dialog it is read in, so that its words scroll. */
+const LETTER = [
+  'To the house of Montreuil, from the court at Vienna, by the hand of its secretary.',
+  'The court has heard of the mill on the river and of the market that fills the square on Thursdays, and it is glad of both.',
+  'It asks after the health of the house, and after its debts, which are spoken of in the antechambers more than the house might like.',
+  'It asks, too, whether the house would send a son or a daughter to be educated at the court, as a pledge of its friendship.',
+  'An answer is expected before the snows close the passes.',
+];
+
+const KILL = {
+  title: 'Kill Count Henri de Montreuil?',
+  said: 'He will be gone from the house for good, and whatever he held goes with him. This cannot be undone.',
+};
+
+export function DialogsAndFields() {
+  const { list, problem } = usePictures();
+  const [asking, setAsking] = useState(false);
+  const [reading, setReading] = useState(false);
+  const [answer, setAnswer] = useState('nothing asked yet');
+  const [toasts, setToasts] = useState<readonly Toast[]>([]);
+  const told = useRef(0);
+  const gone = useCallback((id: string) => setToasts((was) => was.filter((one) => one.id !== id)), []);
+  if (list === null) {
+    return <p className="showcase__to-come">{problem ?? 'Reading the pictures…'}</p>;
+  }
+  const happen = () => {
+    const next = HAPPENINGS[told.current % HAPPENINGS.length]!;
+    told.current += 1;
+    setToasts((was) => [...was, { ...next, id: `told-${told.current}` }]);
+  };
+  const answered = (said: string) => {
+    setAsking(false);
+    setAnswer(said);
+  };
+  return (
+    <>
+      <Part title="Dialogs">
+        <p className="ui-label showcase__lead">
+          A question that has to be answered before anything else, over the whole page and the page dimmed
+          behind it. Escape, the close mark or a press on the dimmed page puts it away unanswered.{' '}
+          <span className="showcase__said">{answer}</span>
+        </p>
+        <Specimens>
+          <Specimen name="Dialog" note={['killing a key figure, held to confirm', 'press to ask it']}>
+            <TextButton onClick={() => setAsking(true)}>Kill the Count…</TextButton>
+            <Dialog
+              open={asking}
+              onClose={() => answered('put away, nobody killed')}
+              title={KILL.title}
+              actions={
+                <>
+                  <TextButton face="secondary" onClick={() => answered('spared')}>
+                    Spare him
+                  </TextButton>
+                  <HoldButton onConfirm={() => answered('killed')}>Kill</HoldButton>
+                </>
+              }
+            >
+              <p className="ui-body">{KILL.said}</p>
+            </Dialog>
+          </Specimen>
+          <Specimen name="Dialog" note={['a letter, longer than the window', 'its words scroll inside it']}>
+            <TextButton face="secondary" onClick={() => setReading(true)}>
+              Read the letter…
+            </TextButton>
+            <Dialog
+              open={reading}
+              onClose={() => setReading(false)}
+              title="A letter from Vienna"
+              actions={<TextButton onClick={() => setReading(false)}>Put it down</TextButton>}
+            >
+              {LETTER.map((said) => (
+                <p key={said} className="ui-body">
+                  {said}
+                </p>
+              ))}
+            </Dialog>
+          </Specimen>
+          <Specimen name="DialogBox" note="its frame alone, standing still" wide>
+            <div className="showcase__dialog-width">
+              <DialogBox
+                title={KILL.title}
+                onClose={() => undefined}
+                actions={
+                  <>
+                    <TextButton face="secondary">Spare him</TextButton>
+                    <HoldButton onConfirm={() => undefined}>Kill</HoldButton>
+                  </>
+                }
+              >
+                <p className="ui-body">{KILL.said}</p>
+              </DialogBox>
+            </div>
+          </Specimen>
+        </Specimens>
+      </Part>
+
+      <Part title="Toasts">
+        <p className="ui-label showcase__lead">
+          Something happened, said in a corner and gone once it has been read: longer for more words, and
+          never while the pointer or the keyboard is on it.{' '}
+          <span className="showcase__said">
+            {toasts.length === 0 ? 'nothing to say' : `${toasts.length} showing`}
+          </span>
+        </p>
+        <Specimens>
+          <Specimen
+            name="Toasts"
+            note={['in the corner of whatever holds them', 'point at one to keep it']}
+            wide
+          >
+            <div className="showcase__toast-room">
+              <TextButton onClick={happen}>Something happens</TextButton>
+              <Toasts items={toasts} onGone={gone} />
+            </div>
+          </Specimen>
+          <Specimen name={'Toasts place="flow"'} note="one that stays until it is put away">
+            <Toasts items={STAYING} onGone={() => undefined} place="flow" />
+          </Specimen>
+        </Specimens>
+      </Part>
+
+      <p className="showcase__to-come">
+        The text field and the dropdown, and then the medallion, arrive with the rest of step 10.
+      </p>
+    </>
+  );
+}

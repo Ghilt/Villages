@@ -82,6 +82,12 @@ export const RECIPES = {
   /** What a choice of a few stands its options in: the card's frame at half its size, on night. */
   'choice.frame': { border: 'gilt-thin', scale: 0.5, fill: 'night', padding: 1 },
 
+  /** A question asked over the whole page: the plain gilt border on parchment, like a letter held up. */
+  'dialog.plain': { border: 'gilt-simple', fill: 'parchment', text: 'ink', padding: 10 },
+
+  /** Something that happened, said in a corner: the card's frame on night, to stand out over the map. */
+  'toast.plain': { border: 'gilt-thin', fill: 'night', padding: [2, 4, 2, 6] },
+
   /** A few words about what is under the pointer: the card's frame at half its size, on parchment. */
   'tooltip.plain': { border: 'gilt-thin', scale: 0.5, fill: 'parchment', text: 'ink', padding: [1, 5, 1, 5] },
 } as const satisfies Record<string, Recipe>;

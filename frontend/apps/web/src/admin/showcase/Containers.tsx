@@ -67,6 +67,13 @@ const HOLDS: Record<RecipeName, () => ReactNode> = {
   'card.figure': () => <Figure name="Count de Montreuil" what="Noble · Rationalist" stats="12 · 8 · 4" />,
   'tooltip.plain': () => <span className="ui-body">Keep your holdings in sight</span>,
   'choice.frame': () => <span className="ui-body">One of a few, side by side</span>,
+  'dialog.plain': () => (
+    <>
+      <h3 className="ui-heading">Kill Count Henri de Montreuil?</h3>
+      <p className="ui-body">He will be gone from the house for good. This cannot be undone.</p>
+    </>
+  ),
+  'toast.plain': () => <span className="ui-body">Sister Agathe joined the house</span>,
   'plate.place': () => <span className="ui-heading">Paris</span>,
   'plate.heading': () => <span className="ui-heading">St. Vitus Cathedral</span>,
   'card.event': () => (
