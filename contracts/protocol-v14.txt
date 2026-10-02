@@ -26,7 +26,6 @@ command giveVision place
 command grantResource amount resource
 command killCharacter cause characterId
 command moveCharacter characterId place
-command offerDialogue sample
 command pledgeResource amount months purpose resource
 command releasePledge pledgeId
 command spendResource amount resource

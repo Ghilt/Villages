@@ -245,20 +245,20 @@ Adam's idea, from the camera going home by accident when a line paid.
 The offer is in the source. A dialogue checks itself when it is made, so
 one that could loop, or that leads to a line it does not have, is refused before anything is written, and
 `OfferDialogue` writes it whole on the house's stream, where the house keeps every one it has open. An
-option of a choice can grant a resource too, on the wire from version 13. `CompleteDialogueStep` takes a step
+option of a choice can grant a resource too, on the wire from version 14. `CompleteDialogueStep` takes a step
 where the walk says one is open, and writes what the line gives, and the end when it ends it, from the same
 decision, so a reward is paid once on every path; a conversation of forty lines writes a handful of events.
 The debug panel's Dialogues section offers a sample, a letter from the coast spoken by the house's first key
-figure and a messenger, from wire version 14, and the event page shows what was offered whole. A read model
+figure and a messenger, from wire version 15, and the event page shows what was offered whole. A read model
 keeps every dialogue a house was offered and how far each has got, and the player is sent each one as far as
-it has reached, from wire version 15: the lines past the next step, what a line will give and the
-requirements stay on the server. An option can spend, from version 16, and is refused while the house cannot
-pay, and from version 17 each option carries its reveal impact. A speaker's death ends every open dialogue they
+it has reached, from wire version 16: the lines past the next step, what a line will give and the
+requirements stay on the server. An option can spend, from version 17, and is refused while the house cannot
+pay, and from version 18 each option carries its reveal impact. A speaker's death ends every open dialogue they
 speak in, as lost, naming who died. Nothing in the world offers one yet. The pane stands in the column
 down the right from the house's first dialogue, at its three sizes, and on a phone navigation lists it;
 it lists the dialogues waiting and finished, a lapsed one saying why, and a dialogue offered opens it;
 pressing one opens the conversation, which is played through in the pane: the stretch a line at a time,
-the options at the end of the feed, and each step sent from there, on the wire from version 18. The
+the options at the end of the feed, and each step sent from there, on the wire from version 19. The
 speakers have a portrait and a name on every bubble, the key figures' own frame, and a messenger the
 frame's bust. What a line gives or costs is written under it in the feed, the resource's mark and the
 amount, as the house card moves with it; a lapsed dialogue ends on its closing line, *Sadly, X died before

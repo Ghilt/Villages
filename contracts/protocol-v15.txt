@@ -12,7 +12,6 @@ client fogOfWar on
 client hello playerToken protocolVersion
 client ping t0
 client seeAll on
-client showRequirements on
 client subscribeCells cells
 client unsubscribeCells cells
 client viewTime at
@@ -53,7 +52,6 @@ server takenOver message
 server welcome playerId serverTime world
 server worldWiped message
 server yourChoice choice
-server yourDialogues dialogues
 server yourHouse yours
 server yourKeyFigures keyFigures
 server yourSight points tension

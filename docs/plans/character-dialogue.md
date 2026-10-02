@@ -127,9 +127,9 @@ frame.
 
 Two commands. The debug panel's offer names which sample it wants and none of its words, because a client
 that could write a dialogue could write itself a reward. The step is `completeDialogueStep { dialogueId,
-lineId }`, which the pane sends. The wire has moved: version 13 lets a choice's effect be a grant, 14 carries
-the debug offer, 15 the dialogues and the switch, and 16 a spend; 17 is an option's reveal impact, and 18
-the step, and the switch gone.
+lineId }`, which the pane sends. The wire has moved: version 14 lets a choice's effect be a grant, 15 carries
+the debug offer, 16 the dialogues and the switch, and 17 a spend; 18 is an option's reveal impact, and 19
+the step, and the switch gone. They were 13 to 18 until main's own 13 landed first, the stands.
 
 ## The pane
 
@@ -204,7 +204,7 @@ A speaker's death is tried with *kill*, in the Characters section.
 2. **Offered, on the server.** Done. `Dialogue` checks itself as it is made, `Requirement.Alive` is its one
    kind, and `OfferDialogue` writes `PlayerOfferedDialogue`, refused for a house that does not exist and
    for the same offer twice; the house keeps its open dialogues and every id it was offered. `Effect.Grant`
-   is a choice's effect as well as a line's, on the wire from version 13. Every case of every sealed field
+   is a choice's effect as well as a line's, on the wire from version 14. Every case of every sealed field
    has its `kind` in the store and a fixture that writes it, which a test holds. `DialogueSpec` and
    `HouseDeciderSpec` are the evidence.
 3. **Stepped and completed, on the server.** Done, in two commits, because together they came to the size of
@@ -220,17 +220,17 @@ A speaker's death is tried with *kill*, in the Characters section.
    house's first key figure and a messenger, and `DialogueService` offers it after asking the house with
    `ActThrough`, since the key figure is read from a read model a moment behind. The panel's Dialogues
    section has `offer a dialogue`, off with the reason on hover while the house has no key figure, and sends
-   `offerDialogue { sample }`, wire version 14. The log says what was offered and the answer, and the event
+   `offerDialogue { sample }`, wire version 15. The log says what was offered and the answer, and the event
    is at `/admin/inspect-events`.
 5. **Sent to the player**, in three commits. The first is done: `DialoguesProjection` folds every dialogue
    each house was offered, with the steps taken, how it stands and a revision that rises with each change,
    behind the `DialoguesByHouse` port, and the wipe resets it. The second is done: `yourDialogues`, on hello
    and on every change, walks each row and sends what has been said with what it gave, the stretch to the
    next step and the options, and never a line past them or what a line will give; `showRequirements` adds
-   the requirements for one window. Wire version 15, and the page keeps them and says in the log what
+   the requirements for one window. Wire version 16, and the page keeps them and says in the log what
    changed. Between the second and the third, on Adam's word of 2026-09-30: a line can spend, only on an
-   option and never on every option of a dialogue choice, wire version 16; and an option shows its reveal
-   impact, version 17, with the sample carrying spends and gives to verify both. The third is done:
+   option and never on every option of a dialogue choice, wire version 17; and an option shows its reveal
+   impact, version 18, with the sample carrying spends and gives to verify both. The third is done:
    the Dialogues section lists every dialogue as the player may know it - where it stands, and a waiting
    choice's options with their reveal impact in words - beside the `requirements` switch. Step 5 is done.
    The list and the switch went again on 2026-10-01; see step 9.
@@ -258,7 +258,7 @@ A speaker's death is tried with *kill*, in the Characters section.
    row is - the title, who speaks in it or, for one that lapsed, why it ended, and *new* or *begun* for one
    waiting - newest first in both groups, and the pane draws it in place of its count, which only its strip
    keeps. Pressing a row opens nothing until step 9.
-9. **A conversation you can play.** The reading place in `client-core`, the step on the wire (version 18),
+9. **A conversation you can play.** The reading place in `client-core`, the step on the wire (version 19),
    the bubbles with a portrait and a name beside each, from the left and the right by party, *next*, a
    dialogue choice's options, and picking up where it was left. **Before drawing it, ask Adam whether *next*
    is a mark or a word.** Adam's answer: *next* is a mark, and so is the way back to the list. In parts. The

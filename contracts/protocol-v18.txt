@@ -12,6 +12,7 @@ client fogOfWar on
 client hello playerToken protocolVersion
 client ping t0
 client seeAll on
+client showRequirements on
 client subscribeCells cells
 client unsubscribeCells cells
 client viewTime at
@@ -21,7 +22,6 @@ command addKeyFigure
 command ageCharacter characterId years
 command changePortrait characterId portrait
 command changeStat by characterId stat
-command completeDialogueStep dialogueId lineId
 command foundHouse banner name seat
 command giveVision place
 command grantResource amount resource

@@ -31,17 +31,20 @@ import tools.jackson.databind.JsonNode
  * war is drawn from. Version 10 added `giveVision` and `takeVision`, a house given vision of a place outright
  * and having it taken away. See decision record 0061. Version 11 added `fogOfWar`, Adam's switch, because the
  * gateway now holds back what a house cannot see. Version 12 gave `yourSight` its `tension`, the surface
- * tension that joins circles close together. See decision record 0064. Version 13 let an option's effect be
- * a `grant`, some of a resource given, which is what a line of a dialogue gives too. See decision record 0071.
- * Version 14 added `offerDialogue`, the debug panel's offer of a sample dialogue by name. Version 15 added
- * `yourDialogues`, the player's dialogues with what has not been reached held back, and `showRequirements`,
- * Adam's switch that sends one window their requirements. Version 16 let an effect be a `spend`, what an option
- * costs, and named what a said line did its `effects`. Version 17 gave an option its `revealImpact`, how it shows
- * what taking it will do. Version 18 added `completeDialogueStep`, a step taken through one of the house's
- * dialogues, and took away `showRequirements` and a dialogue's `requirements`: the debug panel only offers a
- * dialogue now, so nothing asks for them, and a page is never sent them.
+ * tension that joins circles close together. See decision record 0064. Version 13 is main's, which landed
+ * first: the dialogue's versions were 13 to 18 on their own branch, and are 14 to 19 since.
+ *
+ * Version 14 let an option's effect be a `grant`, some of a resource given, which is what a line of a dialogue
+ * gives too. See decision record 0071. Version 15 added `offerDialogue`, the debug panel's offer of a sample
+ * dialogue by name. Version 16 added `yourDialogues`, the player's dialogues with what has not been reached
+ * held back, and `showRequirements`, Adam's switch that sends one window their requirements. Version 17 let
+ * an effect be a `spend`, what an option costs, and named what a said line did its `effects`. Version 18 gave
+ * an option its `revealImpact`, how it shows what taking it will do. Version 19 added `completeDialogueStep`,
+ * a step taken through one of the house's dialogues, and took away `showRequirements` and a dialogue's
+ * `requirements`: the debug panel only offers a dialogue now, so nothing asks for them, and a page is never
+ * sent them.
  */
-const val PROTOCOL_VERSION = 18
+const val PROTOCOL_VERSION = 19
 
 data class Point(val lat: Double, val lon: Double)
 

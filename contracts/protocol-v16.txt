@@ -41,7 +41,6 @@ delta houseAppeared house
 delta houseChanged house
 effect foundAt banner name seat
 effect grant amount resource
-effect spend amount resource
 server batch deltas
 server commandAccepted commandId
 server commandRejected commandId reason
