@@ -34,7 +34,7 @@ import { cameraStore } from './map/camera';
 import { DEFAULT_RENDERER, RENDERERS, applyRenderer } from './map/renderers';
 import { SpriteOverlay } from './sprites/SpriteOverlay';
 import { placeWater } from './water/WaterLayer';
-import { waterStore } from './water/waterMode';
+import { setFlowView, waterStore } from './water/waterMode';
 import type { MapSprite } from './sprites/SpriteRenderer';
 import { tinctureColour } from './sprites/tinctures';
 import { useStore } from './store/useStore';
@@ -233,7 +233,9 @@ export function App({ master, devTools }: AppProps) {
     if (map !== null) {
       applyRenderer(map, renderer, { turn: camera.latticeTurn, size: camera.latticeSize });
       // WIP spike: the water, over whichever renderer this is.
+      setFlowView(renderer === 'flow');
       placeWater(map, worldRootOf(master));
+      map.triggerRepaint();
       const chosen = RENDERERS.find((candidate) => candidate.name === renderer);
       note('renderer', `${renderer}${chosen === undefined ? '' : `, ${chosen.note.toLowerCase()}`}`);
     }

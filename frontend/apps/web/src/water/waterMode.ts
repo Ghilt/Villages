@@ -18,9 +18,24 @@ const SAID: Record<WaterMode, string> = {
   still: 'still: the water is as painted',
 };
 
-const water = createStore<{ mode: WaterMode }>({ mode: 'realistic' });
+interface WaterState {
+  mode: WaterMode;
+  /**
+   * Whether the map is showing the Flow renderer, which the water layer draws in place of the water: which way
+   * every river runs. Set by the renderer dropdown rather than by this switch.
+   */
+  flowView: boolean;
+}
 
-export const waterStore: Readable<{ mode: WaterMode }> = water;
+const water = createStore<WaterState>({ mode: 'realistic', flowView: false });
+
+export const waterStore: Readable<WaterState> = water;
+
+export function setFlowView(on: boolean): void {
+  if (on !== water.get().flowView) {
+    water.set({ flowView: on });
+  }
+}
 
 /** The next way of drawing it, round again after the last. */
 export function nextWaterMode(): void {

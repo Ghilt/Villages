@@ -41,6 +41,11 @@ export const RENDERERS: readonly RendererChoice[] = [
   { name: 'vivid', title: 'Vivid', note: "The master's own colours, pushed, with no medium over them" },
   { name: 'plate', title: 'Plate', note: "Raw's quieter colours, pushed the way vivid pushes the master's" },
   { name: 'biome', title: 'Biome', note: 'Not the terrain: what kind of place the sprite map thinks it is' },
+  {
+    name: 'flow',
+    title: 'Flow',
+    note: 'WIP spike: which way the rivers run, a colour for each way, arrows marching downstream from zoom 8, and black where a river has no way to the sea',
+  },
 ];
 
 export const DEFAULT_RENDERER = 'painted';
@@ -128,6 +133,14 @@ export function applyRenderer(map: maplibregl.Map, name: string, lattice: Lattic
     }
   }
 
+  // The flow view is the flat tiles with most of their colour taken out, so the rivers' colours are the only
+  // ones; every other look has the flat tiles as they were cut, whether it shows them or not.
+  const flowing = name === 'flow';
+  if (map.getLayer(FLAT_LAYER) !== undefined) {
+    map.setPaintProperty(FLAT_LAYER, 'raster-saturation', flowing ? -0.9 : 0);
+    map.setPaintProperty(FLAT_LAYER, 'raster-brightness-min', flowing ? 0.35 : 0);
+  }
+
   if (name === 'biome') {
     // The flat terrain stays hidden under it: this is a different question about the same ground, and
     // showing both at once would only make the biome's own edges hard to find.
@@ -152,7 +165,7 @@ export function applyRenderer(map: maplibregl.Map, name: string, lattice: Lattic
     return;
   }
 
-  const painted = name !== 'raw';
+  const painted = name !== 'raw' && !flowing;
   for (const layer of [...INK_LAYERS, FLAT_LAYER]) {
     if (map.getLayer(layer) !== undefined) {
       map.setLayoutProperty(layer, 'visibility', painted ? 'none' : 'visible');

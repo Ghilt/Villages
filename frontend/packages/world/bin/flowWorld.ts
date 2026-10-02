@@ -23,7 +23,9 @@ import { OUTPUT_DIR, PAINTERLY_DIR, PALETTE, RENDER, masterAt } from './lib/path
  * Reads the master, works out the flow with `src/flow.ts`, and writes a tile at zoom 7 for every tile a river
  * runs through into `public/world/masters/<master>/flow/`, with `flow.json` listing them. A tile is RGB: red
  * and green are the way the water runs, on the map rather than on the master, from nought to 255 about 128;
- * blue is how big a river it is, by how much drains through it, and nought where nothing flows.
+ * blue is how big a river it is, by how much drains through it, and nought where nothing flows. A stranded
+ * river, with no way to any sea or lake, is all three nought, which no flowing one can be, so the flow view in
+ * the Debug map can show where the master's rivers are broken.
  *
  * Then it says how much of the river reaches the sea, how many gaps it jumped and what it left stranded, and
  * paints a few places with arrows on their rivers into `world/painterly/<place>-flow.png`.
@@ -160,12 +162,12 @@ for (const piece of stranded.slice(0, 8)) {
   console.log(`  ${piece.size.toLocaleString().padStart(8)}  at ${where(piece.pixel)}`);
 }
 
-// The tiles: every zoom 7 tile a flowing river pixel lies in, and the tile rows either side, because towards
-// the poles one master row is several rows of the map.
+// The tiles: every zoom 7 tile a river pixel lies in, flowing or stranded, and the tile rows either side,
+// because towards the poles one master row is several rows of the map.
 const across = 2 ** ZOOM;
 const wanted = new Set<number>();
 for (let node = 0; node < flow.pixels.length; node += 1) {
-  if (flow.isRiver[node] === 0 || flow.reached[node] === STRANDED) continue;
+  if (flow.isRiver[node] === 0) continue;
   const pixel = flow.pixels[node]!;
   const row = mercatorRowOf(Math.floor(pixel / world.width), world.height, ZOOM);
   if (row === null) continue;
@@ -199,6 +201,12 @@ for (const key of [...wanted].sort((a, b) => a - b)) {
       if (!classes.river.has(world.cells[pixel]!)) continue;
       const node = flow.nodeAt(pixel);
       if (node < 0) continue;
+      if (flow.reached[node] === STRANDED) {
+        pixels[at] = 0;
+        pixels[at + 1] = 0;
+        flowing += 1;
+        continue;
+      }
       const east = flow.east[node]!;
       const south = flow.south[node]! * stretch;
       const length = Math.hypot(east, south);

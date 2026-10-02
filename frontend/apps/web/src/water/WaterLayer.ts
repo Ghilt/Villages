@@ -38,6 +38,14 @@ const UPLOADS_PER_FRAME = 4;
 /** How many zooms up a tile may borrow an ancestor's mask while its own is on its way. */
 const BORROW = 4;
 
+/**
+ * The Flow renderer draws from this zoom in, over at most so many of the flow tiles, which are all zoom 7; an
+ * arrow's cell is about so many pixels across.
+ */
+const FLOW_FROM_ZOOM = 6;
+const FLOW_MOST_TILES = 400;
+const FLOW_CELL_PIXELS = 26;
+
 const R = WATER_LOOK.realistic;
 const W = WATER_LOOK.wavelets;
 
@@ -275,7 +283,8 @@ void main() {
 
   // A river's current: which way it runs and how fast, nought off the rivers and where no flow is worked out.
   vec2 towards = (current.rg - 0.5) * 2.0;
-  float flowing = clamp(length(towards) * 1.4 - 0.2, 0.0, 1.0) * river;
+  // A stranded river is marked with no size at all, and stands still.
+  float flowing = clamp(length(towards) * 1.4 - 0.2, 0.0, 1.0) * river * step(0.002, current.b);
   vec2 downstream = flowing > 0.0 ? normalize(towards) : vec2(0.0);
   vec2 drift = downstream * mix(RIVER_SLOWEST, RIVER_FASTEST, current.b) * RIVER_CYCLE;
   // Two copies of the surface slide downstream, each starting over once a cycle and faded out as it does, half
@@ -421,6 +430,80 @@ void main() {
 }
 `;
 
+/*
+ * The Flow renderer, in place of the water: which way every river runs, read straight from the flow tiles and
+ * nearest, so a texel is a square and nothing is smoothed over. A colour for each way - east red, south
+ * yellow-green, west cyan, north violet - and close enough in, a white arrow in every cell that marches
+ * downstream at the river's own speed and starts again at the back. Black is a stranded river, with no way to
+ * any sea or lake: a break in the master's rivers to mend.
+ */
+const FLOW = `#version 300 es
+precision highp float;
+precision highp int;
+
+in vec2 vTex;
+in vec2 vWorld;
+uniform sampler2D uFlow;
+uniform float uTime;
+uniform float uScale;
+// How big a cell of arrows is, in world units, and how much of the arrows to draw at this zoom.
+uniform float uCell;
+uniform float uMarch;
+out vec4 fragColor;
+
+const float TAU = 6.2831853;
+const float SLOWEST = ${float(R.rivers.slowest)};
+const float FASTEST = ${float(R.rivers.fastest)};
+
+float hash(ivec2 cell) {
+  uvec2 u = uvec2(cell) * uvec2(1597334673u, 3812015801u);
+  uint n = (u.x ^ u.y) * 1597334673u;
+  n ^= n >> 16u;
+  return float(n) / 4294967296.0;
+}
+
+vec3 hueOf(float turn) {
+  return clamp(abs(mod(turn * 6.0 + vec3(0.0, 4.0, 2.0), 6.0) - 3.0) - 1.0, 0.0, 1.0);
+}
+
+float segment(vec2 p, vec2 a, vec2 b) {
+  vec2 pa = p - a;
+  vec2 ba = b - a;
+  return length(pa - ba * clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0));
+}
+
+void main() {
+  vec4 current = texelFetch(uFlow, ivec2(clamp(vTex * ${float(SIDE)}, 0.0, ${float(SIDE - 1)})), 0);
+  vec2 towards = (current.rg - 0.5) * 2.0;
+  float size = current.b;
+  bool stranded = size < 0.002 && length(towards) > 1.2;
+  bool flowing = size >= 0.002 && length(towards) > 0.3;
+  if (!stranded && !flowing) {
+    discard;
+  }
+  if (stranded) {
+    fragColor = vec4(0.05, 0.05, 0.06, 1.0);
+    return;
+  }
+  vec2 downstream = normalize(towards);
+  vec3 colour = hueOf(fract(atan(downstream.y, downstream.x) / TAU)) * 0.85 + 0.1;
+  if (uMarch > 0.0) {
+    // Pixels from the middle of this pixel's cell, turned so x runs downstream; the arrow slides along x.
+    vec2 cell = floor(vWorld / uCell);
+    vec2 local = (vWorld - (cell + 0.5) * uCell) * uScale;
+    float across = uCell * uScale;
+    float march = fract(uTime * mix(SLOWEST, FASTEST, size) * uScale / across + hash(ivec2(cell)));
+    vec2 q = vec2(dot(local, downstream), dot(local, vec2(-downstream.y, downstream.x)));
+    q.x -= (march - 0.5) * across * 0.8;
+    float arrow = min(segment(q, vec2(5.0, 0.0), vec2(-2.0, 5.0)), segment(q, vec2(5.0, 0.0), vec2(-2.0, -5.0)));
+    arrow = min(arrow, segment(q, vec2(5.0, 0.0), vec2(-7.0, 0.0)));
+    float ink = (1.0 - smoothstep(0.9, 1.9, arrow)) * (1.0 - smoothstep(0.32, 0.46, abs(march - 0.5)));
+    colour = mix(colour, vec3(1.0), ink * uMarch);
+  }
+  fragColor = vec4(colour, 1.0);
+}
+`;
+
 interface MaskTile {
   /** Null while it is being worked out, or once it is known to hold no water. */
   texture: WebGLTexture | null;
@@ -484,6 +567,7 @@ export function createWaterLayer(worldRoot: string): maplibregl.CustomLayerInter
   let gl: WebGL2RenderingContext | null = null;
   let realistic: Program | null = null;
   let wavelets: Program | null = null;
+  let flowProgram: Program | null = null;
   let vao: WebGLVertexArrayObject | null = null;
   let buffer: WebGLBuffer | null = null;
   const tiles = new Map<string, MaskTile>();
@@ -505,6 +589,7 @@ export function createWaterLayer(worldRoot: string): maplibregl.CustomLayerInter
     map?.triggerRepaint();
   });
 
+  let flowSet: Set<string> | null = null;
   // Which tiles have their rivers' flow worked out. A master never run through `npm run world:flow` has none,
   // and its rivers stand still, which the log says once.
   const flowTiles = fetch(`${worldRoot}/flow/flow.json`)
@@ -517,30 +602,44 @@ export function createWaterLayer(worldRoot: string): maplibregl.CustomLayerInter
           ? 'no river flow worked out for this master, so its rivers stand still: npm run world:flow --prefix frontend'
           : `rivers run downstream: their flow is worked out over ${file.tiles.length} tiles`,
       );
-      return new Set(file?.tiles ?? []);
+      flowSet = new Set(file?.tiles ?? []);
+      return flowSet;
     });
 
-  const flowOf = async (z: number, x: number, y: number, tile: MaskTile) => {
-    if (z !== FLAT_MAX_ZOOM || !(await flowTiles).has(`${x}/${y}`)) {
-      return;
-    }
+  /** One tile of flow as RGBA, or null if it will not come. */
+  const flowPixels = async (x: number, y: number): Promise<Uint8Array | null> => {
     try {
-      const response = await fetch(`${worldRoot}/flow/${z}/${x}/${y}.png`);
+      const response = await fetch(`${worldRoot}/flow/${FLAT_MAX_ZOOM}/${x}/${y}.png`);
       if (!response.ok) {
-        return;
+        return null;
       }
       const bitmap = await createImageBitmap(await response.blob());
       const canvas = new OffscreenCanvas(SIDE, SIDE);
       const drawing = canvas.getContext('2d', { willReadFrequently: true });
       if (drawing === null) {
-        return;
+        return null;
       }
       drawing.drawImage(bitmap, 0, 0);
       bitmap.close();
-      tile.flowPending = new Uint8Array(drawing.getImageData(0, 0, SIDE, SIDE).data.buffer);
-      map?.triggerRepaint();
+      return new Uint8Array(drawing.getImageData(0, 0, SIDE, SIDE).data.buffer);
     } catch {
-      // A tile of flow that will not come is a tile whose rivers stand still.
+      return null;
+    }
+  };
+  /** The Flow renderer's tiles, apart from the water's, because it needs no mask and reaches further out. */
+  const viewTiles = new Map<
+    string,
+    { texture: WebGLTexture | null; pending: Uint8Array | null; used: number }
+  >();
+
+  const flowOf = async (z: number, x: number, y: number, tile: MaskTile) => {
+    if (z !== FLAT_MAX_ZOOM || !(await flowTiles).has(`${x}/${y}`)) {
+      return;
+    }
+    const pixels = await flowPixels(x, y);
+    if (pixels !== null) {
+      tile.flowPending = pixels;
+      map?.triggerRepaint();
     }
   };
 
@@ -651,6 +750,126 @@ export function createWaterLayer(worldRoot: string): maplibregl.CustomLayerInter
     }
   };
 
+  /** The tiles of a zoom the view covers, from its four corners, which a tipped camera needs. */
+  const tilesInView = (level: number) => {
+    const across = 2 ** level;
+    const canvas = map!.getCanvas();
+    let west = 1;
+    let north = 1;
+    let east = 0;
+    let south = 0;
+    for (const [x, y] of [
+      [0, 0],
+      [canvas.clientWidth, 0],
+      [0, canvas.clientHeight],
+      [canvas.clientWidth, canvas.clientHeight],
+    ] as const) {
+      const ground = MercatorCoordinate.fromLngLat(map!.unproject([x, y]));
+      west = Math.min(west, ground.x);
+      east = Math.max(east, ground.x);
+      north = Math.min(north, ground.y);
+      south = Math.max(south, ground.y);
+    }
+    return {
+      across,
+      fromX: Math.max(0, Math.floor(west * across)),
+      toX: Math.min(across - 1, Math.floor(east * across)),
+      fromY: Math.max(0, Math.floor(north * across)),
+      toY: Math.min(across - 1, Math.floor(south * across)),
+    };
+  };
+
+  /** Keeps the water moving at its own frame rate while something of it is on the screen. */
+  const keepMoving = () => {
+    if (nextFrame === null) {
+      nextFrame = setTimeout(() => {
+        nextFrame = null;
+        map?.triggerRepaint();
+      }, 1000 / WATER_LOOK.framesPerSecond);
+    }
+  };
+
+  /** The Flow renderer: every river in view coloured by which way it runs, from the flow tiles alone. */
+  const drawFlow = (context: WebGL2RenderingContext, options: maplibregl.CustomRenderMethodInput) => {
+    const zoom = map!.getZoom();
+    if (flowProgram === null || flowSet === null || zoom < FLOW_FROM_ZOOM) {
+      return;
+    }
+    const { across, fromX, toX, fromY, toY } = tilesInView(FLAT_MAX_ZOOM);
+    if ((toX - fromX + 1) * (toY - fromY + 1) > FLOW_MOST_TILES) {
+      return;
+    }
+    const scale = pixelsPerWorldUnit(zoom);
+    const { program, where } = flowProgram;
+    context.useProgram(program);
+    context.bindVertexArray(vao);
+    context.disable(context.DEPTH_TEST);
+    context.disable(context.STENCIL_TEST);
+    context.enable(context.BLEND);
+    context.blendFunc(context.ONE, context.ONE_MINUS_SRC_ALPHA);
+    context.activeTexture(context.TEXTURE0);
+    context.uniformMatrix4fv(where.uMatrix!, false, options.defaultProjectionData.mainMatrix);
+    context.uniform1i(where.uFlow!, 0);
+    context.uniform1f(where.uTime!, ((performance.now() - started) / 1000) % 3600);
+    context.uniform1f(where.uScale!, scale);
+    context.uniform1f(where.uCell!, FLOW_CELL_PIXELS / scale);
+    context.uniform1f(where.uMarch!, smoothstep(2.5, 4, scale));
+    context.uniform4f(where.uTexRect!, 0, 0, 1, 1);
+    let uploads = 0;
+    let drawn = 0;
+    for (let y = fromY; y <= toY; y += 1) {
+      for (let x = fromX; x <= toX; x += 1) {
+        const key = `${x}/${y}`;
+        if (!flowSet.has(key)) {
+          continue;
+        }
+        let tile = viewTiles.get(key);
+        if (tile === undefined) {
+          const fresh = { texture: null, pending: null, used: frame } as {
+            texture: WebGLTexture | null;
+            pending: Uint8Array | null;
+            used: number;
+          };
+          viewTiles.set(key, fresh);
+          void flowPixels(x, y).then((pixels) => {
+            fresh.pending = pixels;
+            map?.triggerRepaint();
+          });
+          tile = fresh;
+        }
+        tile.used = frame;
+        if (tile.pending !== null && uploads < UPLOADS_PER_FRAME) {
+          tile.texture = textureOf(tile.pending, SIDE);
+          tile.pending = null;
+          uploads += 1;
+        }
+        if (tile.texture === null) {
+          continue;
+        }
+        context.bindTexture(context.TEXTURE_2D, tile.texture);
+        context.uniform3f(where.uTile!, x / across, y / across, 1 / across);
+        context.drawArrays(context.TRIANGLE_STRIP, 0, 4);
+        drawn += 1;
+      }
+    }
+    context.bindVertexArray(null);
+    if (viewTiles.size > FLOW_MOST_TILES) {
+      const oldest = [...viewTiles.entries()].sort((a, b) => a[1].used - b[1].used);
+      for (const [key, tile] of oldest.slice(0, viewTiles.size - FLOW_MOST_TILES)) {
+        if (tile.used === frame) {
+          break;
+        }
+        if (tile.texture !== null) {
+          gl!.deleteTexture(tile.texture);
+        }
+        viewTiles.delete(key);
+      }
+    }
+    if (drawn > 0) {
+      keepMoving();
+    }
+  };
+
   return {
     id: WATER_LAYER,
     type: 'custom',
@@ -662,6 +881,7 @@ export function createWaterLayer(worldRoot: string): maplibregl.CustomLayerInter
       realistic = link(gl, REALISTIC, ['uWaves', 'uCaustics', 'uFlow']);
       still = textureOf(new Uint8Array([128, 128, 0, 255]), 1);
       wavelets = link(gl, WAVELETS, ['uWeights']);
+      flowProgram = link(gl, FLOW, ['uFlow', 'uCell', 'uMarch']);
       vao = gl.createVertexArray();
       gl.bindVertexArray(vao);
       buffer = gl.createBuffer();
@@ -674,7 +894,11 @@ export function createWaterLayer(worldRoot: string): maplibregl.CustomLayerInter
 
     render(context, options) {
       frame += 1;
-      const mode = waterStore.get().mode;
+      const { mode, flowView } = waterStore.get();
+      if (flowView) {
+        drawFlow(context, options);
+        return;
+      }
       const zoom = map!.getZoom();
       const fade = smoothstep(WATER_LOOK.fromZoom - 0.5, WATER_LOOK.fromZoom + 0.5, zoom);
       const drawing = mode === 'realistic' ? realistic : wavelets;
@@ -685,28 +909,7 @@ export function createWaterLayer(worldRoot: string): maplibregl.CustomLayerInter
       // Which mask tiles the view needs: the flat tiles a zoom coarser than the camera, so a mask texel is
       // a couple of pixels until the master's own pixels run out at the flat tiles' deepest zoom.
       const level = Math.max(0, Math.min(FLAT_MAX_ZOOM, Math.floor(zoom)));
-      const across = 2 ** level;
-      const canvas = map!.getCanvas();
-      let west = 1;
-      let north = 1;
-      let east = 0;
-      let south = 0;
-      for (const [x, y] of [
-        [0, 0],
-        [canvas.clientWidth, 0],
-        [0, canvas.clientHeight],
-        [canvas.clientWidth, canvas.clientHeight],
-      ] as const) {
-        const ground = MercatorCoordinate.fromLngLat(map!.unproject([x, y]));
-        west = Math.min(west, ground.x);
-        east = Math.max(east, ground.x);
-        north = Math.min(north, ground.y);
-        south = Math.max(south, ground.y);
-      }
-      const fromX = Math.max(0, Math.floor(west * across));
-      const toX = Math.min(across - 1, Math.floor(east * across));
-      const fromY = Math.max(0, Math.floor(north * across));
-      const toY = Math.min(across - 1, Math.floor(south * across));
+      const { across, fromX, toX, fromY, toY } = tilesInView(level);
 
       const scale = pixelsPerWorldUnit(zoom);
       const { program, where } = drawing;
@@ -788,11 +991,8 @@ export function createWaterLayer(worldRoot: string): maplibregl.CustomLayerInter
 
       // The water moves at its own frame rate, and only while some of it is on the screen: this is the one
       // thing keeping the map redrawing while nothing else changes.
-      if (drawn > 0 && nextFrame === null) {
-        nextFrame = setTimeout(() => {
-          nextFrame = null;
-          map?.triggerRepaint();
-        }, 1000 / WATER_LOOK.framesPerSecond);
+      if (drawn > 0) {
+        keepMoving();
       }
     },
 
@@ -812,6 +1012,13 @@ export function createWaterLayer(worldRoot: string): maplibregl.CustomLayerInter
       gl?.deleteTexture(still);
       gl?.deleteProgram(realistic?.program ?? null);
       gl?.deleteProgram(wavelets?.program ?? null);
+      gl?.deleteProgram(flowProgram?.program ?? null);
+      for (const tile of viewTiles.values()) {
+        if (tile.texture !== null) {
+          gl?.deleteTexture(tile.texture);
+        }
+      }
+      viewTiles.clear();
       gl?.deleteBuffer(buffer);
       gl?.deleteVertexArray(vao);
       map = null;
