@@ -163,7 +163,7 @@ export const visionPointViewSchema = z.object({
 
 /**
  * What taking an option would do. `kind` names the case, as it does in the store. See 0034. A `grant` is
- * some of a resource given, and a `spend` some taken: what an option can cost, in a choice or a dialogue. See 0067.
+ * some of a resource given, and a `spend` some taken: what an option can cost, in a choice or a dialogue. See 0071.
  */
 export const effectViewSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('foundAt'), seat: pointSchema, name: z.string(), banner: bannerSchema }),
@@ -178,7 +178,7 @@ export const optionViewSchema = z.object({
   effect: effectViewSchema,
 });
 
-/** Something a dialogue needs to stay true. `kind` names the case: `alive`, a character by id. See 0067. */
+/** Something a dialogue needs to stay true. `kind` names the case: `alive`, a character by id. See 0071. */
 export const requirementViewSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('alive'), character: z.string() }),
 ]);
@@ -204,7 +204,7 @@ export const impactViewSchema = z.object({ resource: resourceNameSchema, amount:
 
 /**
  * How an option shows what taking it will do, as whoever wrote it chose: `shown`, with what, or `hidden`,
- * drawn as unknown. An option without one shows nothing until it is done. See decision record 0067.
+ * drawn as unknown. An option without one shows nothing until it is done. See decision record 0071.
  */
 export const revealImpactViewSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('shown'), impacts: z.array(impactViewSchema).min(1) }),
@@ -233,7 +233,7 @@ export const saidLineViewSchema = z.object({
 /**
  * One dialogue as the player may know it. `revision` rises with every change to it. `next` ends in the step
  * to send when there are no `options`, and in the line the dialogue choice follows when there are. Nothing
- * past it is ever sent, and no requirement: a player learns of one only when it fails. See decision record 0067.
+ * past it is ever sent, and no requirement: a player learns of one only when it fails. See decision record 0071.
  */
 export const dialogueViewSchema = z.object({
   id: z.string(),
@@ -316,13 +316,13 @@ export const commandPayloadSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('takeVision'), visionId: z.string() }),
   /**
    * A sample dialogue, by its name, spoken by the house's first key figure: the name and none of the words,
-   * because a client that could write a dialogue could write itself a reward. Adam's lever. See 0067.
+   * because a client that could write a dialogue could write itself a reward. Adam's lever. See 0071.
    */
   z.object({ type: z.literal('offerDialogue'), sample: z.string() }),
   /**
    * A step through one of the house's dialogues: the line that is the step, by its id within the dialogue - an
    * option of a dialogue choice, or the line the stretch read ends on. Whether it is the next step is the
-   * house's to say, so the client names a line and nothing else. See decision record 0067.
+   * house's to say, so the client names a line and nothing else. See decision record 0071.
    */
   z.object({ type: z.literal('completeDialogueStep'), dialogueId: z.string(), lineId: z.string() }),
 ]);
@@ -387,7 +387,7 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
   }),
   /**
    * The player's dialogues, open and finished, in the order the house was offered them. Always a list, sent
-   * after `yourSight` on hello and again whenever one changes, holding back what has not been reached. See 0067.
+   * after `yourSight` on hello and again whenever one changes, holding back what has not been reached. See 0071.
    */
   z.object({ type: z.literal('yourDialogues'), dialogues: z.array(dialogueViewSchema) }),
   /** Another window took this player over; this session is finished. */

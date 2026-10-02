@@ -31,7 +31,7 @@ export function gainWords({ resource, amount }: Gain): string {
 
 /**
  * How an option shows what taking it will do, in words, as whoever wrote it chose: what it gains and costs,
- * `−40 wealth, +100 wealth`; `???` when it is hidden; and nothing at all when it shows nothing. See 0067.
+ * `−40 wealth, +100 wealth`; `???` when it is hidden; and nothing at all when it shows nothing. See 0071.
  */
 export function impactWords(impact: RevealImpactView | undefined): string | null {
   if (impact === undefined) {
@@ -63,7 +63,7 @@ export function gainsOf(effects: readonly EffectView[]): readonly Gain[] {
 /**
  * How a lapsed dialogue closes, in the interface's words: one line at the end of the feed, saying what became
  * of the requirement that failed. One line for each kind of requirement, kept here and nowhere else, and a
- * placeholder for Adam's own words. See `MECHANICS.md` and decision record 0067.
+ * placeholder for Adam's own words. See `MECHANICS.md` and decision record 0071.
  */
 export function closingLine(requirement: RequirementView, speakers: readonly SpeakerView[]): string {
   switch (requirement.kind) {
@@ -91,7 +91,7 @@ export function refusalWords(reason: string): string {
 
 /**
  * Why a dialogue was lost, in words: what became of the requirement that failed, naming a character by the
- * speaker they are in it. The one thing a player ever learns of a requirement. See decision record 0067.
+ * speaker they are in it. The one thing a player ever learns of a requirement. See decision record 0071.
  */
 export function whyLost(requirement: RequirementView, speakers: readonly SpeakerView[]): string {
   switch (requirement.kind) {
@@ -107,7 +107,7 @@ function nameOf(character: string, speakers: readonly SpeakerView[]): string {
 
 /**
  * How many of the house's dialogues are waiting and how many are finished, in the pane's words, which is
- * what its strip says. A lapsed one is finished: it ended where it stood. See decision record 0067.
+ * what its strip says. A lapsed one is finished: it ended where it stood. See decision record 0071.
  */
 export function howMany(dialogues: readonly DialogueView[]): string {
   const waiting = dialogues.filter((one) => one.ending.kind === 'open').length;
@@ -184,7 +184,7 @@ export function standing(dialogue: DialogueView): string {
  *
  * The first list a connection hears is said whole, a line a dialogue, because it is what the player arrived
  * to; after that only the dialogues offered or moved on since, which a changed revision says, so a list sent
- * again unchanged says nothing. See decision record 0067.
+ * again unchanged says nothing. See decision record 0071.
  */
 export function whatChangedIn(
   before: readonly DialogueView[] | null,

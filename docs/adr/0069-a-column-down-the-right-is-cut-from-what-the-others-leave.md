@@ -8,7 +8,7 @@
 
 ## Context
 
-**Character dialogue** needs a pane of its own, and Adam placed it when the mechanic was agreed (0067): a
+**Character dialogue** needs a pane of its own, and Adam placed it when the mechanic was agreed (0071): a
 column down the right of the stage, top to bottom, because a conversation is long; about 480 wide, wider
 than the column on the left, so that a picture of where the conversation is happening fits at the top of
 it; the right half of the stage opened out; and a strip at the top right put away.

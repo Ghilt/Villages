@@ -243,7 +243,7 @@ class Gateway(
 
     /**
      * A house's dialogues reach its player wherever they are looking, like its key figures: what a house was
-     * offered is its own, and needs no cell. Each window is sent what it may know of them. See decision 0067.
+     * offered is its own, and needs no cell. Each window is sent what it may know of them. See decision 0071.
      */
     private val dialoguesChanged: AutoCloseable = dialogueRows.watch { change ->
         sessions[change.player]?.tellDialogues(change.dialogues)
@@ -448,7 +448,7 @@ class Gateway(
          */
         /**
          * Sends this player their dialogues as they may know them: what has been said and the stretch ahead,
-         * and never a requirement. See decision record 0067.
+         * and never a requirement. See decision record 0071.
          */
         internal fun tellDialogues(rows: List<DialogueRow>) {
             out.send(YourDialogues(rows.map { it.toView() }))
@@ -738,7 +738,7 @@ class Gateway(
                     )
 
                     // A sample by its name. A name that is not a sample is refused as malformed, and a house with
-                    // no key figure to speak it as `noSuchKeyFigure`. See decision record 0067.
+                    // no key figure to speak it as `noSuchKeyFigure`. See decision record 0071.
                     is OfferDialoguePayload -> dialogues.offerSample(
                         player = who,
                         sample = payload.sample,
@@ -753,7 +753,7 @@ class Gateway(
                             lineId = LineId(payload.lineId),
                             // A step continues the story the offer began, as an action continues its choice's,
                             // so the step and what it pays wear the offer's correlation. The server decides
-                            // this, not the client. See decision records 0035 and 0067.
+                            // this, not the client. See decision records 0035 and 0071.
                             provenance = Provenance(
                                 commandId = commandId,
                                 correlationId = dialogueStory(who, dialogue) ?: commandId,
@@ -1046,7 +1046,7 @@ internal fun Effect.toView(): EffectView = when (this) {
 /**
  * A dialogue as its player may know it, walked from the steps taken: what has been said and what it did, the
  * stretch still to read and the options pending, and nothing past them, and never its requirements. The walk
- * is the decider's own, so the page and the house's rules cannot disagree. See 0067.
+ * is the decider's own, so the page and the house's rules cannot disagree. See 0071.
  */
 internal fun DialogueRow.toView(): DialogueView {
     val walk = dialogue.walk(taken)

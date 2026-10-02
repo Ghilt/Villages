@@ -1,4 +1,4 @@
-# 0067. A dialogue is offered whole, and stepped where it matters, on the house's stream
+# 0071. A dialogue is offered whole, and stepped where it matters, on the house's stream
 
 - Status: accepted
 - Date: 2026-09-27

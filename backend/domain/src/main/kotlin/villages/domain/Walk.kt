@@ -8,7 +8,7 @@ package villages.domain
  * Only the steps are recorded, and the plain lines between them are not, so this is how the rest is rebuilt:
  * every option taken is a step, which is what fixes the path. The decider allows a step only where this says
  * one is open, and what the player is sent is read off the same walk, so the two cannot disagree about where
- * a conversation stands. See decision record 0067.
+ * a conversation stands. See decision record 0071.
  */
 data class Walk(
     /** Every line along the path so far, in the order they were said, up to and including the last step. */

@@ -15,7 +15,7 @@ import villages.domain.Then
 /**
  * The dialogues the debug panel can offer, written here as the founding choice's words are, because nothing in
  * the world offers a dialogue yet. The panel names one and sends none of its words: a client that could write a
- * dialogue could write itself a reward. See decision record 0067.
+ * dialogue could write itself a reward. See decision record 0071.
  */
 object SampleDialogues {
     /**

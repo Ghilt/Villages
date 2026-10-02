@@ -223,7 +223,7 @@ swallowed, which is what makes a replay write nothing twice.
   event breaks - `requirementsBrokenBy`, handed in, so it knows no kinds - and sends `FailRequirement` to
   every house with an open dialogue that needs one, in the story of the event that broke it; a dialogue
   offered with a requirement already broken lapses at once. What a failure ends is the house's own rule. A
-  death is heard by both listeners, each for its own concern. See decision record 0067.
+  death is heard by both listeners, each for its own concern. See decision record 0071.
 
 ## Scale principles
 
@@ -287,7 +287,7 @@ frame changing. See `SETTING.md` and `GLOSSARY.md` for what each of the five is.
 
 ## What a dialogue asks of the server and the client
 
-`MECHANICS.md` describes **character dialogue**, decision record 0067 decides its shape, and
+`MECHANICS.md` describes **character dialogue**, decision record 0071 decides its shape, and
 `docs/plans/character-dialogue.md` is the order it is built in; what follows is what it costs the program.
 The server's half is built, the pane stands in its column, and a dialogue is read and played in it.
 

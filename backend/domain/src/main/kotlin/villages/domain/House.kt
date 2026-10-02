@@ -35,7 +35,7 @@ sealed interface House {
         val visions: List<VisionId> = emptyList(),
         /**
          * The dialogues this house was offered and has not finished, in the order it was offered them, each with
-         * the steps it has taken through it. A finished one leaves the list. See decision record 0067.
+         * the steps it has taken through it. A finished one leaves the list. See decision record 0071.
          */
         val openDialogues: List<OpenDialogue> = emptyList(),
         /** Every dialogue it was ever offered, open or over, so that the same offer twice is refused. */

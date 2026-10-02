@@ -212,7 +212,7 @@ export const CHOICE_PANE: Pane = {
  * finished are kept to be read back. In the spread it takes the column down the right edge, which is
  * wider than the one on the left so that a picture of where a conversation is happening fits at its top,
  * and it opens at its normal width rather than at half the stage. On a phone it is a pane like any other.
- * See `MECHANICS.md` and decision records 0067 and 0069.
+ * See `MECHANICS.md` and decision records 0071 and 0069.
  */
 export const DIALOGUE_PANE: Pane = {
   id: 'dialogues',

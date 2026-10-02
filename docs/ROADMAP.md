@@ -42,7 +42,7 @@ character dialogue, the newest.
   holding back what the fog hides, and the surface tension that joins circles close together are built. Adam's own mechanic, asked for on 2026-09-26.
 - **Character dialogue**: people talking to each other, offered to a house whole and stepped through in a
   pane of its own down the right of the spread, paying the house as it goes, and lapsing when a requirement
-  the player never sees fails. The shape is decision record 0067 and the steps, one commit each, are in
+  the player never sees fails. The shape is decision record 0071 and the steps, one commit each, are in
   `docs/plans/character-dialogue.md`; the hypothesis is experiment 0014. Planned on 2026-09-27 from Adam's
   own description. The offer, the walk and the step are built on the server, and the debug panel offers a
   sample and lists what the house was offered, and a speaker's death ends their dialogues as lost. The pane
@@ -88,7 +88,7 @@ Wanted, not started, and each needs a hypothesis in `docs/experiments/` before a
 - **Closing the instruments.** The event page and the debug panel's switches are open to anybody's socket:
   the event page is fed every stored event whole, dialogues and their requirements included, and the frame
   that lifts the fog is a frame any connection can send. Harmless in a pre-alpha, and it has to be closed
-  before any dialogue carries the setting's secret, which the server otherwise holds back (0067). The frame
+  before any dialogue carries the setting's secret, which the server otherwise holds back (0071). The frame
   that showed a dialogue's requirements went on 2026-10-01, with the switch that sent it.
 - **The inspect window**, beyond a house and an area: what it says about a subject once there is more than
   a name and a treasury to say, where its links come from, and whether it is a card or a paper on the desk.

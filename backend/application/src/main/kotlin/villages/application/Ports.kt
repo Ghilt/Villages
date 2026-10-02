@@ -426,7 +426,7 @@ interface ChoicesByPlayer {
 /**
  * A dialogue as the read model holds it, for the player it was offered to: the whole of it, the steps taken
  * through it, how it stands, and the story it was offered in. Where it has got to is the walk's to say, from
- * the dialogue and the steps, so nothing here can come to disagree with the decider. See decision record 0067.
+ * the dialogue and the steps, so nothing here can come to disagree with the decider. See decision record 0071.
  */
 data class DialogueRow(
     val house: HouseId,
@@ -450,7 +450,7 @@ sealed interface DialogueEnding {
 
     data object Completed : DialogueEnding
 
-    /** Ended unfinished, because this requirement failed. See decision record 0067. */
+    /** Ended unfinished, because this requirement failed. See decision record 0071. */
     data class Lost(val because: Requirement) : DialogueEnding
 }
 
@@ -459,7 +459,7 @@ data class DialoguesChange(val house: HouseId, val player: PlayerId, val dialogu
 
 /**
  * Every dialogue each house has been offered, open and finished, in the order it was offered them. What a
- * player is sent of each is the gateway's to decide, and it holds back what has not been reached. See 0067.
+ * player is sent of each is the gateway's to decide, and it holds back what has not been reached. See 0071.
  */
 interface DialoguesByHouse {
     fun of(house: HouseId): List<DialogueRow>

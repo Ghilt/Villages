@@ -3,7 +3,7 @@
 **What belongs here:** how character dialogue gets built - what a dialogue holds, its commands and events,
 its requirements and what carries their failures, what crosses the wire, what the pane and its new bay
 need, and the order it all gets built in. **What does not:** why it is shaped this way, which is decision
-record 0067; what the mechanic is for and what its pane does, which is `MECHANICS.md`; the words, which are
+record 0071; what the mechanic is for and what its pane does, which is `MECHANICS.md`; the words, which are
 `GLOSSARY.md`; the hypothesis, which is experiment 0014. When a part of it is decided, that part becomes a
 decision record and leaves.
 
@@ -103,7 +103,7 @@ also takes its `kind` in the store and a fixture that writes it, and a test fail
   swallowed, and a place on the wipe's reset list in `WorldConfig.kt`. It never changes for a new kind of
   requirement.
 
-A step landing between a death and its failure reaching the house is accepted and pays; decision record 0067
+A step landing between a death and its failure reaching the house is accepted and pays; decision record 0071
 records that, as 0055 records its own race.
 
 ## What crosses the wire
@@ -199,7 +199,7 @@ A speaker's death is tried with *kill*, in the Characters section.
 
 ## The steps, one commit each
 
-1. **The documents.** This plan, decision record 0067, experiment 0014, the mechanic's entry and its UI
+1. **The documents.** This plan, decision record 0071, experiment 0014, the mechanic's entry and its UI
    section, the glossary's words, the roadmap and the architecture. Nothing to run.
 2. **Offered, on the server.** Done. `Dialogue` checks itself as it is made, `Requirement.Alive` is its one
    kind, and `OfferDialogue` writes `PlayerOfferedDialogue`, refused for a house that does not exist and

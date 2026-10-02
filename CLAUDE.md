@@ -397,7 +397,7 @@ Commands are added here as the increments land:
   foot, shows a line at a time and takes the step past the last, the options are at the end of the feed, and
   the list mark goes back. What a line gave or cost is written under it, a lapsed one ends on its closing
   line, and an option the house cannot pay for says so under the options. `offer a dialogue` opens the pane:
-  from its strip in the spread, and on a phone into the bay the map is not in, at half. See `docs/adr/0067`,
+  from its strip in the spread, and on a phone into the bay the map is not in, at half. See `docs/adr/0071`,
   `0069` and `0070`, and `docs/plans/character-dialogue.md`.
 - What grows where: `world/biomes.json`, hand-edited, one entry a kind and one a biome. What reads it is
   `npm run world:sprites --prefix frontend`, which works out a biome for every sixteen world units and

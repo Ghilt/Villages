@@ -62,7 +62,7 @@ export interface GatewayState {
   yourSight: { points: readonly VisionPointView[]; tension: number } | null;
   /**
    * The player's dialogues, open and finished, as the gateway lets them be known, or null until it has said.
-   * What has not been reached is never here, and nor is any requirement. See decision record 0067.
+   * What has not been reached is never here, and nor is any requirement. See decision record 0071.
    */
   yourDialogues: readonly DialogueView[] | null;
   /**
@@ -694,7 +694,7 @@ export function killCharacter(figure: KeyFigureView, cause: string): void {
 
 /*
  * Offering the house a dialogue. Adam's lever, in the Dialogues section: nothing in the world offers one
- * yet. It names one of the server's samples and sends none of its words. See decision record 0067.
+ * yet. It names one of the server's samples and sends none of its words. See decision record 0071.
  */
 
 export function offerDialogue(sample: string, described: string): void {
@@ -707,7 +707,7 @@ export function offerDialogue(sample: string, described: string): void {
  *
  * A player's command, as taking an option of a choice is, so nothing else is sent until it is answered and
  * the pane presses nothing meanwhile. Whether it is the next step is the house's to say, and a refusal comes
- * back as one, so nothing here checks. See decision record 0067.
+ * back as one, so nothing here checks. See decision record 0071.
  */
 export function completeDialogueStep(dialogueId: string, lineId: string, described: string): void {
   if (connection === null || state.connection !== 'open' || state.acting !== null) {

@@ -62,7 +62,7 @@ data class Option(
  * Sealed, so that the decider's branch over it is exhaustive and a new kind of effect cannot be added
  * without deciding what it records. Adding one is the whole cost of a new kind of choice: this, a branch
  * in `decide`, and a giver with the words. Choices and dialogues share it, so a new effect is one case for
- * both. See decision record 0067.
+ * both. See decision record 0071.
  */
 sealed interface Effect {
     /** Found the house here, under this name and this banner. The first effect the world has. */
@@ -88,7 +88,7 @@ sealed interface Effect {
      * Take some of a resource from the house: what an option can cost, in a choice or in a dialogue. Refused,
      * as spending is, when the house has not that much free. A dialogue lets only an option spend and keeps an
      * option that costs nothing in every dialogue choice, so a house that cannot pay answers otherwise and is
-     * never stuck in one. See decision record 0067.
+     * never stuck in one. See decision record 0071.
      */
     data class Spend(val resource: Resource, val amount: Long) : Effect {
         init {

@@ -10,7 +10,7 @@ import java.util.UUID
  * step can be checked against the house's own history alone. It checks itself when it is made, and a dialogue
  * that could loop, or that names somebody or something it does not hold, is refused before anything is
  * written. Anything about the house that shapes it is settled when it is written, and from then on it is
- * fixed. See decision record 0067.
+ * fixed. See decision record 0071.
  */
 data class Dialogue(
     val id: DialogueId,
@@ -177,7 +177,7 @@ data class Line(
  * How an option shows what taking it will do, before it is taken: written by hand on the option by whoever wrote
  * the dialogue, so the page draws it and nothing reads ahead down the path. It promises nothing - what the house
  * is given or spends is still the lines' effects - and keeping the two in step is the writer's. An option with
- * none shows nothing, and what it does is seen when it is done. See decision record 0067.
+ * none shows nothing, and what it does is seen when it is done. See decision record 0071.
  */
 sealed interface RevealImpact {
     /** What it will do, shown: a resource and an amount each, and a cost as an amount below nothing. */
@@ -228,7 +228,7 @@ internal fun Then.following(): List<LineId> = when (this) {
  * Something a dialogue needs to stay true until it is finished. Each kind says what in the world it depends on,
  * and which event breaks it, so a new kind - a building still standing, broken when it is destroyed - is one
  * more case here rather than new machinery. Hidden from the player, who learns of one only when it fails and
- * the dialogue lapses. See decision record 0067.
+ * the dialogue lapses. See decision record 0071.
  */
 sealed interface Requirement {
     /** That a character is still alive. Every speaker who is a character needs this of the dialogue. */
@@ -239,7 +239,7 @@ sealed interface Requirement {
  * Which requirements an event breaks: the one place a kind of requirement says which event ends it. A death
  * breaks a character's being alive, and nothing else yet breaks anything. A new kind is a case of
  * [Requirement] and a branch here - a building still standing, broken when it is destroyed - and whatever
- * carries a failure to the houses never changes for it. See decision record 0067.
+ * carries a failure to the houses never changes for it. See decision record 0071.
  */
 fun requirementsBrokenBy(event: Event): Set<Requirement> = when (event) {
     is CharacterDied -> setOf(Requirement.Alive(event.characterId))

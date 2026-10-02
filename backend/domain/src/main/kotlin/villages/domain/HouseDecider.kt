@@ -149,7 +149,7 @@ object HouseDecider : Decider<HouseCommand, House, HouseEvent> {
         }
 
         // Several can be open at once, and the dialogue has checked itself already, so what is left to the house
-        // is that it exists and has not been offered this one before. See decision record 0067.
+        // is that it exists and has not been offered this one before. See decision record 0071.
         is OfferDialogue -> {
             val house = founded(state)
             if (command.dialogue.id in house.offeredDialogues) {
@@ -168,7 +168,7 @@ object HouseDecider : Decider<HouseCommand, House, HouseEvent> {
 
         // The step, what the line does and the end come out of one decision, as an action and its effect do,
         // so they are appended together and never seen apart. The walk says where a step may be taken, and
-        // nothing else is, which is what pays each line once on every path. See decision record 0067.
+        // nothing else is, which is what pays each line once on every path. See decision record 0071.
         is CompleteDialogueStep -> {
             val house = founded(state)
             val open = house.openDialogues.firstOrNull { it.dialogue.id == command.dialogueId }
@@ -202,7 +202,7 @@ object HouseDecider : Decider<HouseCommand, House, HouseEvent> {
         }
 
         // What a failed requirement ends is the house's own rule: every open dialogue that needed it lapses,
-        // all in one decision, and a failure that touches none writes nothing. See decision record 0067.
+        // all in one decision, and a failure that touches none writes nothing. See decision record 0071.
         is FailRequirement -> {
             val house = founded(state)
             house.openDialogues.filter { command.requirement in it.dialogue.needs() }.map { open ->
@@ -332,7 +332,7 @@ object HouseDecider : Decider<HouseCommand, House, HouseEvent> {
         }
 
         // What an option costs is refused when the house has not that much free, as spending is, and then the
-        // action or the step is refused with it: the player answers otherwise. See decision record 0067.
+        // action or the step is refused with it: the player answers otherwise. See decision record 0071.
         is Effect.Spend -> {
             enough(founded(state), effect.resource, effect.amount, recordedAt)
             listOf(HouseResourceSpent(houseId, effect.resource, effect.amount, worldTime, recordedAt))

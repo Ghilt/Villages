@@ -7,7 +7,7 @@
 
 ## Context
 
-**Character dialogue** is a pane of its own (0067, 0069), and what Adam described is a scene at its top,
+**Character dialogue** is a pane of its own (0071, 0069), and what Adam described is a scene at its top,
 with the speakers standing in it and facing each other from the two sides; a feed of bubbles under it,
 each with its speaker's portrait and name, coming from the left or the right by party; what the house gains
 written into the feed; and feel as the point of it - characters entering, leaving and reacting, and fading

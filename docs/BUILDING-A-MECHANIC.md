@@ -118,7 +118,7 @@ settlements in `evolve`, with the reason in a comment, and nowhere else.
 ### Something long, offered whole and stepped through: the dialogue pattern
 
 The choice pattern stretched over many moments, for a thing too long to record press by press. A
-dialogue is the first; decision record 0067 is the shape.
+dialogue is the first; decision record 0071 is the shape.
 
 1. **Offered whole**, on the house's own stream: `PlayerOfferedDialogue` carries every line and every
    branch, so the roads not taken are history, as a choice's are. It checks itself when it is made,

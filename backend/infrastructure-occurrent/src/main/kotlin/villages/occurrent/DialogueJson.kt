@@ -24,7 +24,7 @@ internal const val END = "end"
 
 /**
  * How a dialogue's requirement is written, the same way. A new kind of requirement is a new name here, and
- * the test holding the names to the sealed hierarchy fails until it has one. See decision record 0067.
+ * the test holding the names to the sealed hierarchy fails until it has one. See decision record 0071.
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = KIND)
 @JsonSubTypes(
@@ -36,7 +36,7 @@ internal const val ALIVE = "alive"
 
 /**
  * How an option's reveal impact is written, the same way: `shown`, with what it will do, or `hidden`. An option
- * with none is written with a null, as every absent field is. See decision record 0067.
+ * with none is written with a null, as every absent field is. See decision record 0071.
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = KIND)
 @JsonSubTypes(

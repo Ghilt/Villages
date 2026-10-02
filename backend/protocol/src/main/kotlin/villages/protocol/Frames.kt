@@ -32,7 +32,7 @@ import tools.jackson.databind.JsonNode
  * and having it taken away. See decision record 0061. Version 11 added `fogOfWar`, Adam's switch, because the
  * gateway now holds back what a house cannot see. Version 12 gave `yourSight` its `tension`, the surface
  * tension that joins circles close together. See decision record 0064. Version 13 let an option's effect be
- * a `grant`, some of a resource given, which is what a line of a dialogue gives too. See decision record 0067.
+ * a `grant`, some of a resource given, which is what a line of a dialogue gives too. See decision record 0071.
  * Version 14 added `offerDialogue`, the debug panel's offer of a sample dialogue by name. Version 15 added
  * `yourDialogues`, the player's dialogues with what has not been reached held back, and `showRequirements`,
  * Adam's switch that sends one window their requirements. Version 16 let an effect be a `spend`, what an option
@@ -385,14 +385,14 @@ data class TakeVisionPayload(val visionId: String) : CommandPayload
 /**
  * Offer the player's house one of the sample dialogues, by its name, spoken by the house's first key figure.
  * The name and none of the words: a client that could write a dialogue could write itself a reward. Adam's
- * lever. See decision record 0067.
+ * lever. See decision record 0071.
  */
 data class OfferDialoguePayload(val sample: String) : CommandPayload
 
 /**
  * Take a step through one of the house's dialogues: the line that is the step, by its id within the dialogue -
  * an option of a dialogue choice, or the line the stretch read ends on. Which lines are steps, and whether this
- * one is the next, is the house's to say, so the client names a line and nothing else. See decision record 0067.
+ * one is the next, is the house's to say, so the client names a line and nothing else. See decision record 0071.
  */
 data class CompleteDialogueStepPayload(val dialogueId: String, val lineId: String) : CommandPayload
 
@@ -508,7 +508,7 @@ data class VisionPointView(
  * looking. Sent after `yourSight` on hello, always a list, and again whenever one of them changes. What the
  * player has not reached stays on the server: each carries what has been said, the stretch still to read up
  * to and including the next step, and the options pending - never a line past that, and never what a line
- * will give until it has given it. See decision record 0067.
+ * will give until it has given it. See decision record 0071.
  */
 data class YourDialogues(val dialogues: List<DialogueView>) : ServerFrame
 
@@ -545,7 +545,7 @@ data class SpeakerView(
 /**
  * A line still to be read, or an option to pick: who says it and the words, and nothing about what it will do
  * but, on an option, its `revealImpact` - how whoever wrote it chose to show what taking it will do. Absent, the
- * option shows nothing until it is done. See decision record 0067.
+ * option shows nothing until it is done. See decision record 0071.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class LineView(

@@ -7,7 +7,7 @@ import type { DialogueView, LineView } from '@villages/protocol';
  * page's place in it, and nothing the server knows or records. It holds while the dialogue's revision holds,
  * and a new revision - a step taken, in this window or another - starts the new stretch from its first line,
  * which is also what a reload does. Pure, so the rules of reading have a test and no component keeps them.
- * See decision record 0067.
+ * See decision record 0071.
  */
 export interface Reading {
   readonly dialogueId: string;

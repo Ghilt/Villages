@@ -127,7 +127,7 @@ class WorldConfig {
     fun visions(world: InMemoryWorld, clock: Clock, worldClock: WorldClock, ids: FreshIds): VisionService =
         VisionService(world.executor, clock = { clock.instant() }, world = worldClock, ids = ids)
 
-    /** Offering a house a dialogue, spoken by its key figures as the read model has them. See decision 0067. */
+    /** Offering a house a dialogue, spoken by its key figures as the read model has them. See decision 0071. */
     @Bean
     fun dialogues(
         world: InMemoryWorld,
@@ -176,7 +176,7 @@ class WorldConfig {
     fun characterDeaths(world: InMemoryWorld, later: ScheduledLater, keyFigures: KeyFigureService): CharacterDeaths =
         CharacterDeaths(world.feed, later, keyFigures)
 
-    /** Carries a broken requirement to every house with a dialogue that needs it. See decision record 0067. */
+    /** Carries a broken requirement to every house with a dialogue that needs it. See decision record 0071. */
     @Bean(destroyMethod = "close")
     fun brokenRequirements(
         world: InMemoryWorld,
@@ -205,7 +205,7 @@ class WorldConfig {
     @Bean(destroyMethod = "close")
     fun sights(world: InMemoryWorld): SightProjection = SightProjection(world.feed)
 
-    /** Every dialogue each house was offered, and how far each has got, folded from the same feed. See 0067. */
+    /** Every dialogue each house was offered, and how far each has got, folded from the same feed. See 0071. */
     @Bean(destroyMethod = "close")
     fun dialogueRows(world: InMemoryWorld): DialoguesProjection = DialoguesProjection(world.feed)
 

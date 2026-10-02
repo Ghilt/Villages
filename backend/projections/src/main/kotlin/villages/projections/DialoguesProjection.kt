@@ -36,7 +36,7 @@ import java.util.concurrent.CopyOnWriteArraySet
  * A row holds the dialogue whole and the steps taken through it, and nothing worked out from them: where a
  * dialogue has got to is the walk's to say, and the gateway walks it when it builds what the player is sent,
  * holding back what has not been reached. So this can never be a moment ahead of the house's rules, only a
- * moment behind them, which a revision on each row lets a page tell apart. See decision record 0067.
+ * moment behind them, which a revision on each row lets a page tell apart. See decision record 0071.
  *
  * Disposable, like every read model: delete it, replay the feed, get it back.
  */
@@ -90,7 +90,7 @@ class DialoguesProjection(feed: EventFeed) : DialoguesByHouse, AutoCloseable {
         byHouse[house] = now
         // The step on the line that ends a dialogue and the end are two events of one decision, and between them
         // the row is a dialogue still open with nothing left to read or choose, which the house's rules say
-        // cannot be. Nobody is told until the end is written, which follows in the same decision. See 0067.
+        // cannot be. Nobody is told until the end is written, which follows in the same decision. See 0071.
         if (now.any { it.ending == DialogueEnding.Open && it.dialogue.walk(it.taken).over }) {
             return
         }

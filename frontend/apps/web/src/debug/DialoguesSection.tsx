@@ -14,7 +14,7 @@ const LETTER = 'letter';
  * dialogue yet, so this offers the server's sample, a letter from the coast, spoken by the house's first key
  * figure and a messenger. Reading it, answering it and seeing how it ended are the player's, in the
  * dialogues pane, and what happens is said in the log under `dialogues`. Adam's word, 2026-10-01: all the
- * debug panel does for dialogues is offer one. See decision records 0023 and 0067.
+ * debug panel does for dialogues is offer one. See decision records 0023 and 0071.
  */
 export function DialoguesSection() {
   const heard = useSyncExternalStore(watchGateway, gatewayState);

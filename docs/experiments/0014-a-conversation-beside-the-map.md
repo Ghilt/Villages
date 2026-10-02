@@ -19,7 +19,7 @@ column reads as a chat log rather than as people talking.
 
 ## Setup
 
-The build in `docs/plans/character-dialogue.md`, shaped by decision record 0067: a dialogue offered whole on
+The build in `docs/plans/character-dialogue.md`, shaped by decision record 0071: a dialogue offered whole on
 the house's stream, only its dialogue choices and the lines that give something or end it recorded, what a
 line gives written as the world's own event from the same decision, hidden requirements whose failures one
 listener carries to every house that depends on them, the server holding back what the player has not

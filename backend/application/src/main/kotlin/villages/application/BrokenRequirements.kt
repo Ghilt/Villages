@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap
  * [requirementsBrokenBy], handed in here so a test can hand it another; a new kind of requirement is a case
  * there and never a change here. It follows the feed from the beginning with a fold of its own, as every
  * listener that acts on its own does: which open dialogues need which requirements, from the offers and their
- * ends, and every requirement that has failed for good, with the event that broke it. See decision record 0067.
+ * ends, and every requirement that has failed for good, with the event that broke it. See decision record 0071.
  *
  * **Either order ends it.** A requirement broken finds the dialogues that need it; a dialogue offered with one
  * already broken - somebody already dead - finds the failure, and lapses at once.

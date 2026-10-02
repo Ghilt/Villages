@@ -15,7 +15,7 @@ import villages.domain.PlayerId
  * A thin seam, like every use case here: it works out which house from the player, stamps the two times, and
  * hands the command to the decider, where the rules are. The debug panel's lever today, offering one of the
  * samples; a storyline, an arrival or a choice's outcome will offer through the same door. See decision record
- * 0067.
+ * 0071.
  */
 class DialogueService(
     private val executor: HouseCommandExecutor,
