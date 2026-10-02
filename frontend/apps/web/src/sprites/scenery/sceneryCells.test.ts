@@ -5,7 +5,7 @@ import { encodeStands } from '@villages/world';
 import type { Palette, Stand } from '@villages/world';
 
 import { currentPointsOf, forgetScenery, pointsOf, sceneryTally } from './sceneryCells';
-import { followStandsUnder, forgetStands, standsArrived } from './standsFromServer';
+import { followStandsUnder, forgetStands, standsArrived } from '../../net/stands';
 
 /** Taiga everywhere, which the example biome grows a wood on, so only the stands decide anything. */
 const { TAIGA } = vi.hoisted(() => ({ TAIGA: 7 }));

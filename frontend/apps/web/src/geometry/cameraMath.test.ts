@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
+import { lensOf } from '../map/camera';
+import { PARALLEL_FOV } from '../map/mapConfig';
 import {
   DIAMOND_BEARING,
   DIMETRIC_PITCH,
   ISOMETRIC_PITCH,
-  PARALLEL_FOV,
   TRIMETRIC_BEARING,
   TRIMETRIC_PITCH,
-  lensOf,
-} from '../debug/camera';
+} from '../debug/cameraPresets';
 import { WORLD_MASTER_WIDTH } from './world';
 
 import {

@@ -1,8 +1,8 @@
 import { useRef } from 'react';
 
 import { setStage } from './stage';
-import { STAGE_LEAST, stageFromSideGrip, stageFromTopGrip } from './stageBox';
-import type { StageBox } from './stageBox';
+import { STAGE_LEAST, stageFromSideGrip, stageFromTopGrip } from '../stage/stageBox';
+import type { StageBox } from '../stage/stageBox';
 
 /** How far an arrow key moves a grip. Big enough to be felt, small enough to land on a number. */
 const NUDGE = 16;

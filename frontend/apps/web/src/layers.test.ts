@@ -44,12 +44,6 @@ const SIDEWAYS: readonly (readonly [string, string])[] = [
  * The plan is `docs/ROADMAP.md`'s "A place for every mechanic".
  */
 const EXCUSED: readonly string[] = [
-  // What configures the game leaves the debug folder, and the stands move into the connection's.
-  'areas/AreasView.tsx -> debug/Section.tsx',
-  'areas/AreasView.tsx -> inspect/opening.ts',
-  'areas/AreasView.tsx -> inspect/subjects.ts',
-  'net/gateway.ts -> sprites/scenery/standsFromServer.ts',
-  'sprites/SpriteOverlay.tsx -> debug/scenery.ts',
   // Each switch has one owner.
   'areas/HoldingOverlay.tsx -> debug/seeEverything.ts',
   'sprites/SpriteOverlay.tsx -> debug/seeEverything.ts',

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { STEEPEST_PARALLEL_PITCH } from '../debug/camera';
+import { STEEPEST_PARALLEL_PITCH } from './camera';
 
 import { CAMERA, EARTH_STYLE_URL, PARALLEL_FOV, lensFor, resolveStyle } from './mapConfig';
 

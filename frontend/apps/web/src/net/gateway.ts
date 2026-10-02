@@ -4,7 +4,7 @@ import { PROTOCOL_VERSION } from '@villages/protocol';
 import type { ChoiceView, CommandPayload, OptionView } from '@villages/protocol';
 
 import { note } from '../log/log';
-import { followStandsUnder, standsArrived } from '../sprites/scenery/standsFromServer';
+import { followStandsUnder, standsArrived } from './stands';
 import { GATEWAY_URL } from './address';
 import { browserSocket } from './browserSocket';
 

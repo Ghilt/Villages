@@ -6,14 +6,7 @@ import { setTiltRamp } from '../map/tilt';
 import { pullNow, watchPull } from '../room/pull';
 
 import {
-  DIAMOND_BEARING,
-  DIAMOND_LATTICE_SIZE,
-  DIAMOND_LATTICE_TURN,
-  DIMETRIC_PITCH,
-  ISOMETRIC_PITCH,
   STEEPEST_PARALLEL_PITCH,
-  TRIMETRIC_BEARING,
-  TRIMETRIC_PITCH,
   cameraNow,
   isPlayers,
   isSquareGround,
@@ -21,7 +14,16 @@ import {
   PLAYERS,
   setCamera,
   watchCamera,
-} from './camera';
+} from '../map/camera';
+import {
+  DIAMOND_BEARING,
+  DIAMOND_LATTICE_SIZE,
+  DIAMOND_LATTICE_TURN,
+  DIMETRIC_PITCH,
+  ISOMETRIC_PITCH,
+  TRIMETRIC_BEARING,
+  TRIMETRIC_PITCH,
+} from './cameraPresets';
 import { Section } from './Section';
 
 /**

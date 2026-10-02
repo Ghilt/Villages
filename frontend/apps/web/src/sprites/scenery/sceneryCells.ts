@@ -12,7 +12,7 @@ import {
   standsComing,
   standsHeld,
   tileKey,
-} from './standsFromServer';
+} from '../../net/stands';
 import { Waiting } from './waiting';
 
 /**

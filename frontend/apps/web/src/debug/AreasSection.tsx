@@ -3,20 +3,28 @@ import type * as maplibregl from 'maplibre-gl';
 
 import type { TerrainClass } from '@villages/world';
 
-import { Section } from '../debug/Section';
+import { Section } from './Section';
 import { inspect, stopInspecting } from '../inspect/opening';
 import { subjectsNow, watchSubjects } from '../inspect/subjects';
 import { terrainPalette } from '../geometry/terrainClasses';
-import type { Census } from './census';
-import { areasNow, armDrawing, countArea, deleteArea, forgetAreas, shadeArea, watchAreas } from './areas';
-import type { Area } from './areas';
+import type { Census } from '../areas/census';
+import {
+  areasNow,
+  armDrawing,
+  countArea,
+  deleteArea,
+  forgetAreas,
+  shadeArea,
+  watchAreas,
+} from '../areas/areas';
+import type { Area } from '../areas/areas';
 
 /**
  * The areas, and what the selected one holds. This is where an area is verified, per decision 0023: the
  * button that makes one, and the numbers that say what it turned out to be.
  */
 
-interface AreasViewProps {
+interface AreasSectionProps {
   map: maplibregl.Map | null;
   worldRoot: string;
 }
@@ -89,7 +97,7 @@ function Selected({ area, legend, worldRoot }: { area: Area; legend: Legend | nu
   );
 }
 
-export function AreasView({ map, worldRoot }: AreasViewProps) {
+export function AreasSection({ map, worldRoot }: AreasSectionProps) {
   const state = useSyncExternalStore(watchAreas, areasNow);
   const [legend, setLegend] = useState<Legend | null>(null);
 

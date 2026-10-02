@@ -1,4 +1,4 @@
-import { isShape, type StageMode } from './stageBox';
+import { isShape, type StageMode } from '../stage/stageBox';
 
 /**
  * How the debug panel and the stage are arranged, remembered between reloads.

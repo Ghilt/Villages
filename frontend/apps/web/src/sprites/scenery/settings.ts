@@ -1,10 +1,11 @@
-import { note } from '../log/log';
+import { note } from '../../log/log';
 
 /**
  * Whether the world is furnished, and how thickly.
  *
- * The same shape as `seeEverything.ts` and every other switch in the panel: a module with a set of
- * listeners, read through `useSyncExternalStore`. Adam's, not a player's. See decision record 0023.
+ * A module with a set of listeners, read through `useSyncExternalStore`, as every switch is. The Scenery
+ * section of the debug panel sets it and the sprites read it, and nothing a player does moves it: without the
+ * panel the world is furnished as `world/biomes.json` asks. See decision record 0023.
  *
  * The density here is a **multiplier on what the sprite map asked for**, not a spacing. That is the
  * change experiment 0006's levers did not survive: how thick a wood is is now the generator's answer,

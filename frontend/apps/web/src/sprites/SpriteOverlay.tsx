@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
-import { sceneryNow, watchScenery } from '../debug/scenery';
+import { sceneryNow, watchScenery } from './scenery/settings';
 import { circleOf, visionOf } from '../fog/circles';
 import { fieldOf } from '../fog/fogField';
 import { fogIsOn, watchFog } from '../fog/fogOfWar';

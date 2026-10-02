@@ -2,7 +2,7 @@ import { useEffect, useState, useSyncExternalStore } from 'react';
 
 import { forgetWorstGap, hasNoSpriteMap, sceneryDrawn, sceneryMap } from '../sprites/scenery/sceneryCells';
 import type { SceneryDrawnTally } from '../sprites/scenery/sceneryCells';
-import { sceneryNow, setScenery, watchScenery } from './scenery';
+import { sceneryNow, setScenery, watchScenery } from '../sprites/scenery/settings';
 import { Section } from './Section';
 
 /**

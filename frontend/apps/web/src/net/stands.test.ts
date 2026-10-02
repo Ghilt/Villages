@@ -12,7 +12,7 @@ import {
   standsArrived,
   standsHeld,
   tileKey,
-} from './standsFromServer';
+} from './stands';
 
 /** A zoom 10 cell well inside the zoom 7 tile at x and y, so it brings that tile and no other. */
 const cellInside = (x: number, y: number): string => quadkeyOf({ zoom: 10, x: x * 8 + 3, y: y * 8 + 3 });

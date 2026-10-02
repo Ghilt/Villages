@@ -12,7 +12,7 @@ import { DebugPanel } from './debug/DebugPanel';
 import { Desk } from './desk/Desk';
 import { Grips } from './debug/Grips';
 import { logIsOpen, panelIsShut, stageMode, watchStage } from './debug/stage';
-import { panelWants, stageBox } from './debug/stageBox';
+import { panelWants, stageBox } from './stage/stageBox';
 import { note } from './log/log';
 import { inspect } from './inspect/opening';
 import { Inspecting } from './inspect/Inspecting';
@@ -41,7 +41,7 @@ import {
   NAVIGATION_PANE,
 } from './stage/panes';
 import { worldRootOf } from './map/masters';
-import { cameraNow, watchCamera } from './debug/camera';
+import { cameraNow, watchCamera } from './map/camera';
 import { DEFAULT_RENDERER, RENDERERS, applyRenderer } from './map/renderers';
 import { SpriteOverlay } from './sprites/SpriteOverlay';
 import type { MapSprite } from './sprites/SpriteRenderer';

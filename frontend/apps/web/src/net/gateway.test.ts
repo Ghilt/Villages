@@ -16,7 +16,7 @@ import { PROTOCOL_VERSION } from '@villages/protocol';
 const fake = vi.hoisted(() => ({ current: undefined as FakeSocket | undefined }));
 const stands = vi.hoisted(() => ({ followed: [] as string[][] }));
 vi.mock('./browserSocket', () => ({ browserSocket: () => fake.current!.socket }));
-vi.mock('../sprites/scenery/standsFromServer', () => ({
+vi.mock('./stands', () => ({
   followStandsUnder: (cells: string[]) => stands.followed.push(cells),
   standsArrived: () => undefined,
 }));

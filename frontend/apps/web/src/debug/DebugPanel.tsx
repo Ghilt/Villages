@@ -5,7 +5,7 @@ import { FLAT_MAX_ZOOM, TILE } from '../geometry/world';
 import { forgetPaintedTally } from '../map/painterlyTiles';
 import { flatWindow, sheetCoversView, sheetOnScreen } from '../map/sheet';
 import { WORLD_MASTER_WIDTH } from '../geometry/world';
-import { AreasView } from '../areas/AreasView';
+import { AreasSection } from './AreasSection';
 import { BuildBadge } from '../version/BuildBadge';
 import { CameraSection } from './CameraSection';
 import { CharactersSection } from './CharactersSection';
@@ -23,7 +23,7 @@ import {
   toggleShape,
   watchStage,
 } from './stage';
-import { PANEL_WANTS } from './stageBox';
+import { PANEL_WANTS } from '../stage/stageBox';
 import { describeTerrainStep } from './terrainDepth';
 import { ResourcesSection } from './ResourcesSection';
 import { WorldSection } from './WorldSection';
@@ -255,7 +255,7 @@ export function DebugPanel({ map, worldRoot, master, renderer, onRenderer }: Deb
 
           <CameraSection map={map} />
 
-          <AreasView map={map} worldRoot={worldRoot} />
+          <AreasSection map={map} worldRoot={worldRoot} />
 
           <WorldSection map={map} />
           <ResourcesSection />

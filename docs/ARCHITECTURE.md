@@ -69,6 +69,10 @@ packages/protocol  <-  packages/client-core  <-  apps/web
   `room`; the game's own surfaces, `house`, `figures`, `choice`, `dialogues`, `areas` and `inspect`; and what puts
   it all together, the root, `debug` and `admin`. No two files import each other, however far round. `src/layers.test.ts` holds it, with the imports that
   break it today listed one by one, each ended by a step of the plan under way. See decision record 0073.
+- Nothing in the game leans on `debug`. A setting the panel changes and the game reads lives beside what reads
+  it - the camera in `map/camera.ts`, the scenery's dial in `sprites/scenery/settings.ts`, the stage's
+  arithmetic in `stage/stageBox.ts` - and the panel only sets it, so without the panel each stays where a player
+  has it.
 
 Enforcement: Gradle module edges plus architecture tests on the backend; workspace dependencies, a DOM-free compiler
 configuration and lint rules on the frontend. A violation fails the build, in both cases proven by a deliberate
@@ -246,7 +250,7 @@ frame of the sprite map's own eight-byte records, only those whose disc comes wi
 revealed ground. `Coverage.reaches` is that question, answered by growing every circle; `StandRecords` in
 `protocol` and `decodeStands` in the world package read the records alike, against
 `contracts/fixtures/stands.json`. A sight change or the switch answers every held tile again, sending only
-what changed. The page grows its scenery from those and nothing else: `sprites/scenery/standsFromServer.ts`
+what changed. The page grows its scenery from those and nothing else: `net/stands.ts`
 keeps a tile exactly as long as the gateway thinks it was sent, by `standTilesUnder` at both ends against
 `contracts/fixtures/stand-tiles.json`, and a scatter cell waits for every tile it reads. A tile sent again
 differently makes every cell cut from its old records stale, and one already on the screen keeps its points

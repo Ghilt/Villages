@@ -1,15 +1,14 @@
-import { CAMERA, lensFor } from '../map/mapConfig';
-import { PLAYERS_TILT } from '../map/tilt';
+import { CAMERA, lensFor } from './mapConfig';
+import { PLAYERS_TILT } from './tilt';
 
 import { note } from '../log/log';
-
-export { PARALLEL_FOV, WIDE_FOV } from '../map/mapConfig';
 
 /**
  * Where the camera is standing: how far it tips as it comes in, from where, and which way is up.
  *
- * The same shape as `scenery.ts` and every other switch in the panel: a module with a set of listeners,
- * read through `useSyncExternalStore`. Adam's, not a player's. These all start at the player's camera,
+ * A module with a set of listeners, read through `useSyncExternalStore`, as every switch is. The Camera
+ * section of the debug panel sets it and the map reads it, and nothing a player does moves it: without the
+ * panel it is the player's camera for good. These all start at the player's camera,
  * `CAMERA` in `map/mapConfig.ts`: north-up on a diamond lattice, flat from zoom 7 out and tipped back 45
  * degrees at the closest zoom, eased between. See decision record 0060 and experiment 0011.
  *
@@ -50,39 +49,6 @@ export function lensOf(how: Pick<CameraSettings, 'tilt'>): number {
 }
 
 /**
- * The angles worth pressing a button for.
- *
- * True isometric is the one where all three axes are foreshortened equally, and it falls at a tilt whose
- * cosine is one over root three. Dimetric is the one games actually draw, because at sixty degrees the
- * cosine is exactly a half and a square of ground is twice as wide as it is tall - which is a whole
- * number of pixels either way, and the reason every isometric tile ever cut is 2:1.
- */
-export const ISOMETRIC_PITCH = (Math.acos(1 / Math.sqrt(3)) * 180) / Math.PI;
-export const DIMETRIC_PITCH = 60;
-
-/**
- * And the third of the family, which is every angle that is neither of the other two.
- *
- * The three names count how many of the three axes are foreshortened the same amount: all three for
- * isometric, two for dimetric, none for trimetric. On this map the turn is what decides it. At
- * forty-five degrees the two ground axes are the same length by symmetry, so a square of ground reads
- * as an even diamond; at any other turn they are different and it reads as a lopsided one, which is
- * the whole of what trimetric looks like.
- *
- * The turn is a starting point rather than a rule - there is no canonical trimetric, that being the
- * point of it - and it keeps the same tilt as dimetric so that the two buttons differ in one thing only.
- * The ratios come out clearly apart: the east axis drawn at 0.94, the north at 0.60, the upright at 0.87.
- *
- * The tilt is not free to choose anyway. Above sixty degrees at a parallel field of view the map draws
- * nothing at all - see `STEEPEST_PARALLEL_PITCH`.
- */
-export const TRIMETRIC_PITCH = 60;
-export const TRIMETRIC_BEARING = 22.5;
-
-/** The turn that puts the compass between two screen axes, which is what makes a square read as a diamond. */
-export const DIAMOND_BEARING = 45;
-
-/**
  * How far the camera can tip before a parallel field of view stops drawing the world at all.
  *
  * Found by looking: at sixty degrees the terrain is there and at sixty-one the screen is one flat
@@ -92,23 +58,11 @@ export const DIAMOND_BEARING = 45;
  * goes from about minus one to about thirty, so past sixty degrees it asks for no detail at all and the
  * whole screen is one stretched tile.
  *
- * Sixty is exactly the dimetric angle, so the whole of what this section is for fits underneath it. A
+ * Sixty is exactly the dimetric angle, so all the Camera section is for fits underneath it. A
  * steeper tilt is still possible with a field of view wide enough to have a horizon; it is the pairing
  * of a steep tilt and a parallel camera that MapLibre will not draw. See experiment 0008.
  */
 export const STEEPEST_PARALLEL_PITCH = 60;
-
-/** The turn that makes a square cell a diamond, which is the same forty-five the camera uses. */
-export const DIAMOND_LATTICE_TURN = 45;
-
-/**
- * How big a diamond is when the button is pressed, in world units.
- *
- * Four, because one is a master pixel and a master pixel is eight screen pixels at the closest the
- * camera comes - a diamond that small reads as noise rather than as a tile. Four is a diamond about
- * forty-five pixels across at that zoom, which is the size an isometric game would cut one at.
- */
-export const DIAMOND_LATTICE_SIZE = 4;
 
 /** Where a player's camera is, which is where the panel starts and where its `player` button goes back to. */
 export const PLAYERS: CameraSettings = {
