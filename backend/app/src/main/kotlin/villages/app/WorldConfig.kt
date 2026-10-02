@@ -42,7 +42,10 @@ import java.nio.file.Path
 import java.time.Clock
 import java.time.Instant
 import java.util.UUID
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 import java.util.concurrent.ThreadLocalRandom
+import java.util.concurrent.atomic.AtomicInteger
 
 private val feedLog = LoggerFactory.getLogger("villages.feed")
 
@@ -121,11 +124,25 @@ class WorldConfig {
     fun later(faults: Faults): ScheduledLater = ScheduledLater(faults)
 
     /**
-     * The gateway's own `Later`, which it coalesces its frames on. Its own on purpose: a flush writes to sockets,
-     * and a slow one must never hold up a pledge coming back.
+     * The gateway's own `Later`, which it coalesces its frames on. Its own on purpose, so that batching for every
+     * connection never holds up a pledge coming back; a batch is only queued here, and sent on `gatewaySending`.
      */
     @Bean(destroyMethod = "close")
     fun gatewayLater(faults: Faults): ScheduledLater = ScheduledLater(faults, "villages-gateway")
+
+    /**
+     * The threads the gateway sends frames on, so that a slow socket holds up its own connection and nobody else's,
+     * and a read model's watcher only ever queues. A thread a socket that is sending, made as wanted and let go when
+     * idle; a send that never finishes is ended by Tomcat's own timeout. Without this bean's line in the gateway's
+     * wiring, frames are sent on whatever thread queued them, as they were before. See decision record 0077.
+     */
+    @Bean(destroyMethod = "shutdownNow")
+    fun gatewaySending(): ExecutorService {
+        val made = AtomicInteger()
+        return Executors.newCachedThreadPool { runnable ->
+            Thread(runnable, "villages-sending-${made.incrementAndGet()}").apply { isDaemon = true }
+        }
+    }
 
     /** Gives a pledge back when its span is up. One wake-up a pledge, and none at all without one. */
     @Bean(initMethod = "start", destroyMethod = "close")
@@ -279,6 +296,7 @@ class WorldConfig {
         stands: Stands,
         faults: Faults,
         gatewayLater: ScheduledLater,
+        gatewaySending: ExecutorService,
         @Value("\${villages.instruments:true}") instruments: Boolean,
     ): Gateway = Gateway(
         tokens = AnonymousTokens,
@@ -305,5 +323,6 @@ class WorldConfig {
         stands = stands,
         later = gatewayLater,
         instrumentsOpen = instruments,
+        sendOn = gatewaySending,
     )
 }

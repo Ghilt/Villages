@@ -23,14 +23,10 @@ import villages.application.DialoguesByHouse
 import villages.application.VisionService
 import villages.application.WorldClock
 import villages.application.WorldWipe
-import villages.application.WriteConflict
-import villages.domain.DomainError
 import villages.domain.PlayerId
 import villages.protocol.Batch
 import villages.protocol.ClientFrame
 import villages.protocol.Command
-import villages.protocol.CommandAccepted
-import villages.protocol.CommandRejected
 import villages.protocol.Delta
 import villages.protocol.ErrorFrame
 import villages.protocol.Hello
@@ -112,7 +108,10 @@ class Gateway(
     stands: Stands = Stands { _, _, _ -> null },
     private val later: Later,
     instrumentsOpen: Boolean = true,
-    /** What a connection's frames are sent on: the thread that queued them, unless the gateway is given its own. */
+    /**
+     * What a connection's frames are sent on, and its cells answered again on: the thread that queued them, unless
+     * the gateway is given threads of its own, as the app gives it. See decision record 0077.
+     */
     private val sendOn: Executor = Executor { it.run() },
 ) : AutoCloseable {
     /** Which connections hold each cell: the whole of the fan-out index. */
@@ -233,14 +232,29 @@ class Gateway(
         /** Changes how this connection is looking, and hands back how it looked before. */
         internal fun look(change: (Looking) -> Looking): Looking = synchronized(lock) { looking.also { looking = change(it) } }
 
+        /** How this connection looked before the first change not yet answered, while an answer is planned. */
+        private var unanswered: Looking? = null
+
         /**
          * Every held cell answered again, and every part told, for a connection whose way of looking has changed
-         * from [was]: a snapshot of each as it now looks, and whatever a part sends again of its own.
+         * from [was]: a snapshot of each as it now looks, and whatever a part sends again of its own. Planned on
+         * the threads frames are sent on, and once: a change made while an answer is still to come is answered by
+         * it, so a house whose sight moves ten times in a breath is not sent every cell ten times, and the read
+         * model's thread a new sight arrives on works out none of it.
          */
         internal fun lookedAgain(was: Looking) {
-            answerAgain()
-            val now = looking
-            parts.forEach { it.lookingChanged(this, was, now) }
+            synchronized(lock) {
+                if (unanswered != null) {
+                    return
+                }
+                unanswered = was
+            }
+            sendOn.execute {
+                val from = synchronized(lock) { unanswered.also { unanswered = null } } ?: return@execute
+                answerAgain()
+                val now = looking
+                parts.forEach { it.lookingChanged(this, from, now) }
+            }
         }
 
         /** The cells this connection holds, for the tests and the panel. */
@@ -263,7 +277,7 @@ class Gateway(
             when (frame) {
                 is Hello -> hello(frame)
                 is Ping -> out.send(Pong(frame.t0, clock.millis()))
-                is Command -> command(frame)
+                is Command -> commands.answer(frame, player, out)
                 is SubscribeCells -> subscribe(frame.cells)
                 is UnsubscribeCells -> unsubscribe(frame.cells)
                 // The core answers the kinds in CORE_FRAMES above, and a part every other.
@@ -322,35 +336,6 @@ class Gateway(
             letEverythingGo()
             live -= this
             out.send(why)
-        }
-
-        private fun command(frame: Command) {
-            val who = player
-            if (who == null) {
-                out.send(CommandRejected(frame.commandId, "notIntroduced"))
-                return
-            }
-            // The id becomes the causation of every event this command writes, so it has to be an
-            // identity rather than whatever the client felt like sending. See decision record 0035.
-            val commandId = runCatching { java.util.UUID.fromString(frame.commandId) }.getOrNull()
-            if (commandId == null) {
-                out.send(CommandRejected(frame.commandId, "malformed: a command id is a UUID"))
-                return
-            }
-
-            try {
-                commands.handle(Asking(who, commandId), frame.command)
-                out.send(CommandAccepted(frame.commandId))
-            } catch (@Suppress("SwallowedException") closed: InstrumentsClosed) {
-                out.send(CommandRejected(frame.commandId, "instrumentsClosed"))
-            } catch (refused: DomainError) {
-                out.send(CommandRejected(frame.commandId, refused.reasonCode()))
-            } catch (@Suppress("SwallowedException") busy: WriteConflict) {
-                // Not a refusal: the stream moved under us. Trying again may well be accepted.
-                out.send(CommandRejected(frame.commandId, "conflict"))
-            } catch (malformed: IllegalArgumentException) {
-                out.send(CommandRejected(frame.commandId, "malformed: ${malformed.message}"))
-            }
         }
 
         /**

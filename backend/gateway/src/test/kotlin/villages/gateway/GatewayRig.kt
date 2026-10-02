@@ -56,6 +56,7 @@ import villages.protocol.STAND_TILES
 import java.time.Clock
 import java.time.ZoneOffset
 import java.util.UUID
+import java.util.concurrent.Executor
 
 /*
  * What the gateway's specs stand on: a world small enough to hold in a test, a later that is whenever the
@@ -200,8 +201,11 @@ internal class ManualLater : Later {
     val pending: Int get() = planned.size
 }
 
-/** The whole gateway on a tiny world. `instrumentsOpen` is the setting, `villages.instruments`. */
-internal class Rig(instrumentsOpen: Boolean = true) {
+/**
+ * The whole gateway on a tiny world. `instrumentsOpen` is the setting, `villages.instruments`, and `sendOn` what
+ * frames are sent on: the calling thread, unless a spec hands it threads, as the app does.
+ */
+internal class Rig(instrumentsOpen: Boolean = true, sendOn: Executor = Executor { it.run() }) {
     val world = TinyWorld()
     val later = ManualLater()
     val houses = HousesProjection(world).started()
@@ -280,6 +284,7 @@ internal class Rig(instrumentsOpen: Boolean = true) {
         stands = Stands { master, x, y -> if (master == "terrain") standsOnDisk[y * STAND_TILES + x] ?: ByteArray(0) else null },
         later = later,
         instrumentsOpen = instrumentsOpen,
+        sendOn = sendOn,
     )
 
     /** The choice a player is holding, as the gateway would send it. */

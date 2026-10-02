@@ -11,7 +11,10 @@ import org.springframework.web.socket.TextMessage
 import org.springframework.web.socket.WebSocketSession
 import org.springframework.web.socket.client.standard.StandardWebSocketClient
 import org.springframework.web.socket.handler.TextWebSocketHandler
+import villages.protocol.Batch
+import villages.protocol.Cell
 import villages.protocol.CommandRejected
+import villages.protocol.HouseAppeared
 import villages.protocol.EndingView
 import villages.protocol.EventFrame
 import villages.protocol.ProtocolJson
@@ -28,6 +31,7 @@ import villages.protocol.YourChoice
 import villages.protocol.YourDialogues
 import villages.protocol.YourHouse
 import villages.protocol.YourKeyFigures
+import java.util.UUID
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
 
@@ -324,5 +328,36 @@ class AppBootsTest {
 
         first.close()
         second.close()
+    }
+    @Test
+    fun `two players are each sent what reaches them, one founding a house where the other is looking`() {
+        // Sent on the gateway's own threads, as the app wires it: see decision record 0077. In Helsinki, where no
+        // other test looks, because the world is one for every test here.
+        val helsinki = Cell.of(60.17, 24.94).at(8).quadkey
+        val looking = Window(port)
+        looking.say("""{"type":"hello","playerToken":"${UUID.randomUUID()}","protocolVersion":$PROTOCOL_VERSION}""")
+        looking.until("a welcome") { frames -> frames.any { it is Welcome } }
+        looking.say("""{"type":"fogOfWar","on":false}""")
+        looking.say("""{"type":"subscribeCells","cells":["$helsinki"]}""")
+        looking.until("a snapshot") { frames -> frames.any { it is Snapshot } }
+
+        val founding = Window(port)
+        founding.say("""{"type":"hello","playerToken":"${UUID.randomUUID()}","protocolVersion":$PROTOCOL_VERSION}""")
+        founding.until("a welcome") { frames -> frames.any { it is Welcome } }
+        founding.say(
+            """{"type":"command","commandId":"${UUID.randomUUID()}","command":{"type":"foundHouse","name":"Hollin",""" +
+                """"seat":{"lat":60.17,"lon":24.94},""" +
+                """"banner":{"field":"vert","division":"plain","charge":"tower","chargeTincture":"or"}}}""",
+        )
+        founding.until("its own house") { frames -> frames.filterIsInstance<YourHouse>().lastOrNull()?.yours != null }
+
+        looking.until("the house appearing where it looks") { frames ->
+            frames.filterIsInstance<Batch>().any { batch ->
+                batch.deltas.any { it is HouseAppeared && it.house.name == "Hollin" }
+            }
+        }
+
+        looking.close()
+        founding.close()
     }
 }

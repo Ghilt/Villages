@@ -29,8 +29,7 @@ const val MOST_EVENTS_WAITING = 1_000
  *
  * Whoever finds the outbox idle sends what is in it, on [sendOn]: on the thread that queued it, unless the gateway
  * is handed threads of its own to send on. Nothing a send throws gets past it, so a frame for a socket that is
- * going is simply not delivered and the frames after it are still sent. See the scale principles in
- * `ARCHITECTURE.md`.
+ * going is simply not delivered and the frames after it are still sent. See decision record 0077.
  */
 internal class Outbox(private val transport: Outbound, private val sendOn: Executor) : Outbound {
     private val lock = Any()
