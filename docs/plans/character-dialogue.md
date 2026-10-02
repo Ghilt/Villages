@@ -302,7 +302,10 @@ A speaker's death is tried with *kill*, in the Characters section.
     `house` or `character` in the store, and on the wire from version 21 on a line still ahead and never on
     one said, which is how reading back shows nothing; the sample shows each kind once - the rider arriving
     the seat, which the dialogue service reads from the map's read model, the purse paid the house, and the
-    good word at court the figure. The second is the page acting on it.
+    good word at court the figure. The second is done: `dialogues/showing.ts`, which shows each line's thing
+    once in the life of the page as the reading place reaches it, and an option's once the house has taken
+    it, since the house can refuse; the camera through `focusOn`, a window through `inspect`, and on a phone
+    the bay the conversation is not in, the two at half each. Step 13 is done.
 
 The order is a suggestion, as every order here is. Every step stands on the one before it except three:
 dialogues lapsing (6) needs only step 5, and the scene and a line that shows something need only the

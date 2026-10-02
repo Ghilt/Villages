@@ -225,6 +225,14 @@ goes into the other bay, so the pane it came from stays beside it. Tabs are the 
 bays'. **On a phone no pane has a close: a pane leaves its bay when the player navigates something else into
 it.**
 
+**A line of a dialogue that shows something is a way on the conversation takes rather than the player**, and
+it follows the same rule: in the spread the camera moves beside the column or the window opens in the rail,
+and in the bays the map or the window goes into the bay the conversation is not in. One thing more, Adam's
+word: **the two go to half each** when the conversation had the stage opened out, because a thing shown in a
+strip is not shown and the conversation is what the player was reading. It is the third thing that moves the
+seam without being asked, after a letter and a window arriving, and for their reason: the world put it
+there.
+
 ## The way between panes
 
 **The compass in the corner is the way to everything else.** It stands in the stage's bottom right corner

@@ -138,6 +138,16 @@ a window opening beside the conversation, and on a phone the conversation going 
 it. That is a step of the plan now. And *next*, a chevron in the corner, was missed beside the compass on a
 phone; it is the word *continue*, in the middle of the foot.
 
+**2026-10-02, a line shows what it is about.** On a desktop the rider's line sent the camera to the seat and
+the purse paid opened the house's window in the column on the left, with nothing pressed for either, and
+the log says each as it happens. On a phone the letter, opened out to the whole stage, went back to half as
+the rider arrived, the map in the other bay; and the good word at court put the figure's window there in
+the map's place, the conversation still beside it. It is the first thing in the game that moves the layout
+for a line of dialogue rather than for a press, so whether it reads as the conversation pointing at the
+world or as the interface taking the wheel is Adam's eye. Read back, a finished letter shows nothing,
+because once a line has been said the game server no longer tells the page what it shows; and a camera
+flight cannot be watched in the hidden browser pane, so the log is what says it went.
+
 ## Result
 
 Open.

@@ -19,9 +19,11 @@
   requirement only when it fails, as why the dialogue was lost.
 - Amended 2026-10-02: a line can **show** something as it is reached while playing, on Adam's word: a place,
   which the camera is taken to, or a house or a character, which a window is opened on. It is written with the
-  line, so it is offered whole with it, and sent only with a line still ahead, so it reaches the page no
-  earlier than the line it belongs to; reaching it records nothing a plain line would not. A line read back
-  shows nothing, his call too, and a line said is sent without it.
+  line, so it is offered whole with it, and the game server tells the page what a line shows only while the
+  line is still ahead, so the page learns it no earlier than the line and never after the line is said;
+  reaching it records nothing a plain line would not. A line read back shows nothing, his call too, and
+  that is how. The page shows each line's thing once in its life, and an option's once the house has taken
+  it, since the house can refuse one.
 
 ## Context
 

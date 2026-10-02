@@ -4,6 +4,7 @@ import type {
   RequirementView,
   ResourceName,
   RevealImpactView,
+  ShowsView,
   SpeakerView,
 } from '@villages/protocol';
 
@@ -103,6 +104,26 @@ export function whyLost(requirement: RequirementView, speakers: readonly Speaker
 /** A character by the name they speak under in the dialogue, or by their id when they do not speak in it. */
 function nameOf(character: string, speakers: readonly SpeakerView[]): string {
   return speakers.find((one) => one.character === character)?.name ?? `character ${character.slice(0, 8)}`;
+}
+
+/**
+ * What a line shows, in the log's words: a place by where it is, a house by its name when it is the player's
+ * own, and a character by the name they speak under in the dialogue. A line shows its thing and never says
+ * so to the player, so these are the debug log's and nobody else's.
+ */
+export function showsWords(
+  shows: ShowsView,
+  dialogue: Pick<DialogueView, 'speakers'>,
+  yours: { readonly id: string; readonly name: string } | null,
+): string {
+  switch (shows.kind) {
+    case 'place':
+      return `the place at ${shows.at.lat.toFixed(3)}, ${shows.at.lon.toFixed(3)}`;
+    case 'house':
+      return shows.id === yours?.id ? `the house ${yours.name}` : `house ${shows.id.slice(0, 8)}`;
+    case 'character':
+      return nameOf(shows.id, dialogue.speakers);
+  }
 }
 
 /**

@@ -10,6 +10,7 @@ import {
   impactWords,
   listOf,
   refusalWords,
+  showsWords,
   signed,
   standing,
   whatChangedIn,
@@ -194,6 +195,27 @@ describe('how a lapsed dialogue closes', () => {
     expect(closingLine({ kind: 'alive', character: 'cb732500-39bd' }, speakers)).toBe(
       'Sadly, Agnes Hollin died before this could be finished.',
     );
+  });
+});
+
+describe('what a line shows, in the log', () => {
+  const speakers = [{ id: 'figure', party: 0, name: 'Philip Carrow', character: 'philip' }];
+
+  it('says a place by where it is', () => {
+    expect(showsWords({ kind: 'place', at: { lat: 60.7763, lon: 14.9267 } }, { speakers }, null)).toBe(
+      'the place at 60.776, 14.927',
+    );
+  });
+
+  it("names the player's own house, and any other by its id", () => {
+    const yours = { id: 'fenwold-0000', name: 'Fenwold' };
+
+    expect(showsWords({ kind: 'house', id: 'fenwold-0000' }, { speakers }, yours)).toBe('the house Fenwold');
+    expect(showsWords({ kind: 'house', id: 'ravenscar' }, { speakers }, yours)).toBe('house ravensca');
+  });
+
+  it('names a character by the name they speak under in the dialogue', () => {
+    expect(showsWords({ kind: 'character', id: 'philip' }, { speakers }, null)).toBe('Philip Carrow');
   });
 });
 

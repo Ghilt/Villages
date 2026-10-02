@@ -21,6 +21,7 @@ import {
   refusalWords,
   signed,
 } from './describe';
+import { showWhatIsReached, taking } from './showing';
 
 /**
  * **Character dialogue**: the conversations the house has been offered, and the one being read.
@@ -134,7 +135,7 @@ interface ConversationProps {
 function Conversation({ dialogue, room, stepOut, refused, onBack }: ConversationProps) {
   const [held, setHeld] = useState<Reading | null>(null);
   const reading = keepReading(held, dialogue);
-  const now = showing(reading, dialogue);
+  const now = useMemo(() => showing(reading, dialogue), [reading, dialogue]);
   // A refusal is said while the line it refused can still be pressed: once the dialogue has moved on,
   // here or in another window, it is no longer about anything on the screen.
   const stillThere =
@@ -152,8 +153,15 @@ function Conversation({ dialogue, room, stepOut, refused, onBack }: Conversation
       return;
     }
     setHeld(reading);
+    taking(dialogue.id, pressed.line);
     completeDialogueStep(dialogue.id, pressed.line.id, `${what} "${pressed.line.id}" in "${dialogue.title}"`);
   };
+
+  // What a line shows, as it is reached while playing: a line of the stretch as it shows, an option once the
+  // house has taken it. Each line once in the life of the page, whatever renders it again. See `showing.ts`.
+  useEffect(() => {
+    showWhatIsReached(dialogue, now.lines);
+  }, [dialogue, now.lines]);
 
   // The newest line is the one to read, so the feed follows it down as lines are shown and steps answered -
   // to its very end, padding and all, which is what keeps the last option clear of the compass on a phone.
