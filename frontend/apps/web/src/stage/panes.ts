@@ -1,6 +1,5 @@
-import { sessionStore, type GatewayState } from '../net/gateway';
-import { subjectsStore, paneIdOf, subjectOfPane } from '../inspect/subjects';
-import type { Subject } from '../inspect/subjects';
+import type { ReactNode } from 'react';
+
 import type { BayName, RightWants, SpreadWants } from './bayBox';
 import { isTabbed, STRIP, TAB_BAR } from './bayBox';
 import type { IconName } from './Icons';
@@ -8,9 +7,11 @@ import type { IconName } from './Icons';
 /**
  * What can occupy a bay, and what each one asks for.
  *
- * A pane is declared here and placed by the layout. Nothing in the layout knows what a map is, and no pane
- * learns which bay it is in beyond the room it was given - which is what lets a mechanic be written once
- * and drawn at three sizes. See decision records 0040 and 0041.
+ * A pane is declared by its feature, in the feature's own folder, and placed by the layout; the root's
+ * `panes.tsx` says which stand, in which order, and what draws them, and the stage is handed the list. Two
+ * are the stage's own: the map, which is its floor, and navigation, which its compass opens. Nothing in the
+ * layout knows what a map is, and no pane learns which bay it is in beyond the room it was given - which is
+ * what lets a mechanic be written once and drawn at three sizes. See decision records 0040 and 0041.
  *
  * **What a pane declares is the spread's business only.** On a phone the three sizes are a strip, half the
  * stage and the rest, the same three for every pane, and which of the three arrangements the stage is in
@@ -21,6 +22,14 @@ import type { IconName } from './Icons';
  * grows as the player opens them, the **choice roll** stands while a question does, and **character
  * dialogue** from the house's first dialogue on.
  */
+
+/** What a pane draws, given the room it got and how the stage is cut: null in the spread, where there are no bays. */
+export type Along = 'rows' | 'columns' | null;
+
+/** A pane as the stage is handed it: what it is, and what draws it in the room it was given. */
+export interface PaneDef extends Pane {
+  draw(room: Room, along: Along): ReactNode;
+}
 
 export interface Pane {
   /** What the bay manager addresses it by, and what the debug log says. */
@@ -126,36 +135,6 @@ export const MAP_PANE: Pane = {
   needs: null,
 };
 
-export const HOUSE_PANE: Pane = {
-  id: 'house',
-  title: 'your house',
-  // Into the bottom-left corner, cut off by two of the stage's own edges, as the card always was.
-  spread: 'bottomLeft',
-  // The corner's size rather than the card's own, and the corner's normal height is this card's full one.
-  // See `CORNER`.
-  tall: null,
-  icon: 'shield',
-  needs: null,
-};
-
-/**
- * **Key figures**: the few named people the house acts through, as a grid of their portraits.
- *
- * The corner's middle tab, between the house status and navigation, because it is the house's own and a
- * player reaches it the way they reach the house. The corner is one size whichever tab is up, so pressing
- * between them moves nothing; opened out it is taller and wider than the column, and that size is the
- * one this pane's details need, the portrait beside the name and the stats. See `CORNER`, `MECHANICS.md`
- * and decision records 0055 and 0057.
- */
-export const KEY_FIGURES_PANE: Pane = {
-  id: 'key-figures',
-  title: 'key figures',
-  spread: 'bottomLeft',
-  tall: null,
-  icon: 'figure',
-  needs: null,
-};
-
 /**
  * **Navigation**: the ways from here, and the ways back.
  *
@@ -174,120 +153,6 @@ export const NAVIGATION_PANE: Pane = {
   tall: null,
   icon: 'compass',
   needs: null,
-};
-
-/**
- * **The choice roll**: what the world is asking, and the options it is offering.
- *
- * The one pane that is not always there. It arrives when the world asks something and goes when the
- * question is answered, which is why it is not one of the fixed ones - and why an empty `bottomMiddle` tile
- * takes no room at all, so with nothing pending the map runs clean to the bottom of the stage.
- *
- * Full is the options laid out to read through; small is the **carousel**, one option at a time, for
- * glancing at them while looking at the map they are about; minimised is the letter set aside. It was the
- * one pane whose size was the **player's** rather than the layout's, and since 0046 every pane's is: a
- * phone's three arrangements are the player's to pick and nobody's to derive. See `MECHANICS.md` and
- * decision records 0044 and 0046.
- */
-export const CHOICE_PANE: Pane = {
-  id: 'choice',
-  title: 'a letter',
-  spread: 'bottomMiddle',
-  // The same at both sizes, because a tile too narrow for three across draws the carousel in it and the
-  // tile's height does not change when that happens. Measured against the founding choice's wordiest
-  // option rather than picked, because an option that does not fit grows a scrollbar inside a sheet of
-  // parchment, which is not what parchment does.
-  tall: { full: 224, small: 224 },
-  icon: 'letter',
-  // Three options across a wide tile, or three down a tall bay. A bay that is neither - the bottom middle
-  // of a small spread - gets the carousel, which is the whole answer to a row that has run out of room:
-  // the pane draws itself smaller, and the form does not change because a tile got tight.
-  needs: { wide: 544, tall: 460 },
-};
-
-/**
- * **Character dialogue**: the conversations the house has been offered, and the one being read.
- *
- * It stands from the first dialogue a house is offered, and is never closed after that, because the ones
- * finished are kept to be read back. In the spread it takes the column down the right edge, which is
- * wider than the one on the left so that a picture of where a conversation is happening fits at its top,
- * and it opens at its normal width rather than at half the stage. On a phone it is a pane like any other.
- * See `MECHANICS.md` and decision records 0071 and 0069.
- */
-export const DIALOGUE_PANE: Pane = {
-  id: 'dialogues',
-  title: 'dialogues',
-  spread: 'right',
-  // The column's width is the layout's, as the left column's is, so the pane asks for no height of its own.
-  tall: null,
-  icon: 'speech',
-  needs: null,
-  startsAt: 'small',
-};
-
-/** In the order their tabs stand in the corner, which is the order they are declared in. */
-export const FIXED_PANES: readonly Pane[] = [MAP_PANE, HOUSE_PANE, KEY_FIGURES_PANE, NAVIGATION_PANE];
-
-/**
- * Which of the panes that come and go are there: the choice roll while a question stands, and character
- * dialogue once the house has been offered any.
- */
-export interface Present {
-  readonly choice: boolean;
-  readonly dialogues: boolean;
-}
-
-/** What is present, read off what the gateway has heard. */
-export function presentIn(heard: Pick<GatewayState, 'yourChoice' | 'yourDialogues'>): Present {
-  return { choice: heard.yourChoice !== null, dialogues: (heard.yourDialogues?.length ?? 0) > 0 };
-}
-
-/**
- * The panes that are not a window on a subject: the fixed four, the choice roll while one is pending, and
- * character dialogue once there is any.
- *
- * What **navigation** lists under *Go to*, and what the layout places besides the rail. A window is not
- * here because a window is in the **trail** instead, under its own name rather than as "a house".
- */
-export function standingPanes(present: Present): readonly Pane[] {
-  return [
-    ...FIXED_PANES,
-    ...(present.choice ? [CHOICE_PANE] : []),
-    ...(present.dialogues ? [DIALOGUE_PANE] : []),
-  ];
-}
-
-/**
- * The pane that holds a window on one subject.
- *
- * On a phone it arrives at **half the stage**, which is what makes Adam's example come out right: the
- * thing that was clicked is still on the map above it. That is the arrival's doing rather than the pane's
- * - see `roomToRead` in `bays.ts` - because since 0046 a pane has nothing to say about how much of a bay
- * it gets.
- */
-export function inspectPane(subject: Subject): Pane {
-  return {
-    id: paneIdOf(subject),
-    title: subject.kind === 'house' ? 'a house' : subject.kind === 'area' ? 'an area' : 'a key figure',
-    // Down the column, where up to three of them stack. The rail inside that one tile is what limits how
-    // many, so a window asks the column for no height of its own.
-    spread: 'left',
-    tall: null,
-    icon: SUBJECT_MARKS[subject.kind],
-    needs: null,
-  };
-}
-
-/**
- * The mark each kind of subject is known by, at the head of its window where the word for it used to be.
- *
- * The same marks the corner's tabs carry, so a house is a shield and a person a bust wherever either is
- * named; an area is a fence stepping along square corners, which no tab has.
- */
-export const SUBJECT_MARKS: Readonly<Record<Subject['kind'], IconName>> = {
-  house: 'shield',
-  character: 'figure',
-  area: 'area',
 };
 
 /** The panes that share one tile of the spread, in the order they were declared. */
@@ -376,34 +241,6 @@ export function sizeAsked(pane: Pane, asked: Asked): PaneSize {
   return tile === undefined
     ? (asked.heights[pane.id] ?? pane.startsAt ?? 'full')
     : (asked.tiles[pane.spread] ?? tile.startsAt);
-}
-
-/**
- * Every pane there is: the fixed ones, then a window per subject, newest first.
- *
- * Takes the subjects rather than reading them, so that it is pure and a component can memoise it against
- * exactly what it depends on.
- */
-export function panesFor(open: readonly Subject[], present: Present): readonly Pane[] {
-  return [...standingPanes(present), ...open.map(inspectPane)];
-}
-
-/** The same, for callers outside a render, which read the two stores themselves. */
-export function panesNow(): readonly Pane[] {
-  return panesFor(subjectsStore.get().open, presentIn(sessionStore.get()));
-}
-
-export function paneById(id: string): Pane | undefined {
-  const standing = panesNow().find((pane) => pane.id === id && !pane.id.startsWith('inspect:'));
-  if (standing !== undefined) {
-    return standing;
-  }
-  const subject = subjectOfPane(id);
-  // Built rather than looked up: a window's pane is a description of its subject, and the subject store is
-  // the only place that knows whether it is still open.
-  return subject !== null && subjectsStore.get().open.some((one) => paneIdOf(one) === id)
-    ? inspectPane(subject)
-    : undefined;
 }
 
 /**

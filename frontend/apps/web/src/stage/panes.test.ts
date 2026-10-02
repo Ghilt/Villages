@@ -1,34 +1,39 @@
 import { describe, expect, it } from 'vitest';
 
+import type { SessionState } from '@villages/client-core';
+
 import { bayLayout, FOLDS_UNDER, isTabbed, STRIP, TAB_BAR, TILES } from './bayBox';
 import {
   type Asked,
-  CHOICE_PANE,
   CORNER,
   cramps,
-  DIALOGUE_PANE,
-  HOUSE_PANE,
-  KEY_FIGURES_PANE,
   MAP_PANE,
   NAVIGATION_PANE,
   type Pane,
-  panesFor,
   panesIn,
   type PaneSize,
-  type Present,
-  presentIn,
   SHARED_TILES,
   SIZES,
   sizeAsked,
   sizeOf,
   spreadWants,
-  standingPanes,
 } from './panes';
+import type { Subject } from '../inspect/subjects';
+import { panesOn, standingIn } from '../panes';
+import { DIALOGUE_PANE } from '../dialogues/pane';
+import { CHOICE_PANE } from '../choice/pane';
+import { KEY_FIGURES_PANE } from '../figures/pane';
+import { HOUSE_PANE } from '../house/pane';
 
 /** None of the panes that come and go; a question standing; a house that has been offered a dialogue. */
-const NONE: Present = { choice: false, dialogues: false };
-const ASKING: Present = { choice: true, dialogues: false };
-const TALKING: Present = { choice: false, dialogues: true };
+const NONE = { yourChoice: null, yourDialogues: null } as unknown as SessionState;
+const ASKING = { ...NONE, yourChoice: {} } as unknown as SessionState;
+const TALKING = { ...NONE, yourDialogues: [{}] } as unknown as SessionState;
+
+/** Every pane on the stage for what the gateway has said and the subjects open, as the stage is handed them. */
+const panesFor = (open: readonly Subject[], session: SessionState) =>
+  panesOn(standingIn(session), open, () => null);
+const idsOf = (panes: readonly Pane[]) => panes.map((pane) => pane.id);
 
 const NOTHING_ASKED: Asked = { heights: {}, tiles: {} };
 /** The corner asked to be one of its three sizes, which is the one thing about it a player can ask. */
@@ -126,7 +131,10 @@ describe('spreadWants', () => {
   // A tile whose panes take turns, and that had no sizes of its own, would be sized by whichever tab came
   // first; this is what stops the next tabbed tile from quietly doing that.
   it('has sizes of its own for every tile whose panes take turns', () => {
-    const everything = panesFor([{ kind: 'house', id: 'abc' }], { choice: true, dialogues: true });
+    const everything = panesFor([{ kind: 'house', id: 'abc' }], {
+      ...ASKING,
+      yourDialogues: [{}],
+    } as unknown as SessionState);
 
     for (const where of TILES) {
       if (isTabbed(where, panesIn(everything, where).length)) {
@@ -159,8 +167,8 @@ describe('spreadWants', () => {
  */
 describe('the choice roll', () => {
   it('is not a pane at all until the world asks something', () => {
-    expect(standingPanes(NONE).map((pane) => pane.id)).not.toContain(CHOICE_PANE.id);
-    expect(standingPanes(ASKING).map((pane) => pane.id)).toContain(CHOICE_PANE.id);
+    expect(idsOf(panesFor([], NONE))).not.toContain(CHOICE_PANE.id);
+    expect(idsOf(panesFor([], ASKING))).toContain(CHOICE_PANE.id);
   });
 
   it('takes the bottom middle, and asks for nothing when there is no question', () => {
@@ -193,14 +201,15 @@ describe('the choice roll', () => {
  */
 describe('character dialogue', () => {
   it('is not a pane at all until the house has been offered a dialogue', () => {
-    expect(standingPanes(NONE).map((pane) => pane.id)).not.toContain(DIALOGUE_PANE.id);
-    expect(standingPanes(TALKING).map((pane) => pane.id)).toContain(DIALOGUE_PANE.id);
+    expect(idsOf(panesFor([], NONE))).not.toContain(DIALOGUE_PANE.id);
+    expect(idsOf(panesFor([], TALKING))).toContain(DIALOGUE_PANE.id);
   });
 
   // Finished ones are kept to be read back, so a house that has had one keeps the pane.
   it('is there for any dialogue the house has, and for none before the first frame', () => {
-    expect(presentIn({ yourChoice: null, yourDialogues: null }).dialogues).toBe(false);
-    expect(presentIn({ yourChoice: null, yourDialogues: [] }).dialogues).toBe(false);
+    expect(idsOf(panesFor([], NONE))).not.toContain(DIALOGUE_PANE.id);
+    const none = { ...NONE, yourDialogues: [] } as unknown as SessionState;
+    expect(idsOf(panesFor([], none))).not.toContain(DIALOGUE_PANE.id);
   });
 
   it('takes the column down the right edge, and asks for nothing when there is none', () => {

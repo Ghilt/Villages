@@ -44,13 +44,6 @@ const SIDEWAYS: readonly (readonly [string, string])[] = [
  * The plan is `docs/ROADMAP.md`'s "A place for every mechanic".
  */
 const EXCUSED: readonly string[] = [
-  // The stage is handed its panes rather than reading the game for them.
-  'stage/Stage.tsx -> inspect/subjects.ts',
-  'stage/Stage.tsx -> net/gateway.ts',
-  'stage/bays.ts -> inspect/subjects.ts',
-  'stage/bays.ts -> net/gateway.ts',
-  'stage/panes.ts -> inspect/subjects.ts',
-  'stage/panes.ts -> net/gateway.ts',
   // Opening a window, and picking a thing on the map, are handed down rather than reached for.
   'areas/AreaOverlay.tsx -> inspect/opening.ts',
   'areas/AreaOverlay.tsx -> inspect/subjects.ts',

@@ -2,7 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { DialogueView, LineView } from '@villages/protocol';
 
-import { DIALOGUE_PANE, MAP_PANE } from '../stage/panes';
+import { MAP_PANE } from '../stage/panes';
+import { DIALOGUE_PANE } from './pane';
 import { newlyReached } from './showing';
 
 /**
@@ -39,12 +40,15 @@ function letter(
 /** The bays, the windows and the map's camera, fresh for each test, from one graph with what shows. */
 async function fresh() {
   vi.resetModules();
-  const [bays, subjects, focus, showing] = await Promise.all([
+  const [bays, subjects, focus, showing, panes] = await Promise.all([
     import('../stage/bays'),
     import('../inspect/subjects'),
     import('../map/focus'),
     import('./showing'),
+    import('../panes'),
   ]);
+  // Configured as `main.tsx` configures it, from the same graph as the subjects.
+  bays.configureBays(panes.STAGE_PANES);
   const flights: { lat: number; lon: number }[] = [];
   focus.flyWith((place) => flights.push(place));
   return { ...bays, ...subjects, ...showing, flights };

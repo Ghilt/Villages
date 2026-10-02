@@ -2,11 +2,9 @@ import { createStore } from '@villages/client-core';
 import type { Readable } from '@villages/client-core';
 
 import { note } from '../log/log';
-import { subjectsStore } from '../inspect/subjects';
-import { sessionStore } from '../net/gateway';
-import type { Asking, BayName } from './bayBox';
-import { STRIP } from './bayBox';
-import { HOUSE_PANE, MAP_PANE, type Pane, paneById, type PaneSize, SHARED_TILES, sizeAsked } from './panes';
+import type { BayName } from './bayBox';
+import { MAP_PANE, NAVIGATION_PANE, type Pane, type PaneSize, SHARED_TILES, sizeAsked } from './panes';
+import { type Arrangement, arrangementFor, askedIn, type Which } from './arrangement';
 
 /**
  * The bay manager: which pane is in each bay, and which are collapsed to a strip.
@@ -21,22 +19,6 @@ import { HOUSE_PANE, MAP_PANE, type Pane, paneById, type PaneSize, SHARED_TILES,
  * set; the areas make the same choice for the same reason. What does persist - the phone toggle, the folded
  * sections - is Adam's and lives in `debug/stage.ts`.
  */
-
-/** Which of the two. `0` is the top or the left, `1` is the bottom or the right. */
-export type Which = 0 | 1;
-
-/**
- * How the two bays divide the stage between them. Three settings, and there is no fourth.
- *
- * **A property of the fold, not of the panes in it.** A bay is not a pane's own room: it is one end of a
- * stage two things are sharing, and what happens to be standing in it has nothing to say about how much of
- * it there is. That is what makes moving a pane free - the compass puts navigation where the house status
- * was and the seam does not move, because the seam was never the house's.
- *
- * It is also what makes the three sizes mean the same thing on every pane, which they did not while each
- * declared its own pixel count: **a strip, half the stage, or the rest**. See decision record 0046.
- */
-export type Arrangement = 'firstAway' | 'halfEach' | 'secondAway';
 
 export interface BaysState {
   /** The pane in each bay, by id. */
@@ -82,13 +64,14 @@ export interface BaysState {
 }
 
 /**
- * The map opened out with the house status a strip beneath it: the shape the bays open on.
+ * The map opened out with a strip beneath it: the shape the bays open on, holding what `configureBays` says -
+ * the house status, in the game.
  *
  * The game is read off the map, and the house card is 200 pixels of a phone's 844 that the player has not
  * asked for yet. Pressing the strip is the first gesture there is, and it teaches the whole control.
  */
 const OPENS_ON: BaysState = {
-  holding: [MAP_PANE.id, HOUSE_PANE.id],
+  holding: [MAP_PANE.id, NAVIGATION_PANE.id],
   arrangement: 'secondAway',
   displaced: [null, null],
   showing: {},
@@ -98,55 +81,36 @@ const OPENS_ON: BaysState = {
 
 const store = createStore<BaysState>(OPENS_ON);
 
-/** What each bay holds and how they share the stage. */
-export const baysStore: Readable<BaysState> = store;
-
 /**
- * What each bay asks the layout for, in each of the three arrangements.
- *
- * Three constants and not a derivation, which is the point. React compares what `useStore` picks from a store
- * hands back by identity, so this returns the **same object** across every change that is not an
- * arrangement change - and the stage does not so much as recompute its layout when the compass swaps a
- * pane. "Moving a pane does not resize the bays" stops being a behaviour to be careful about and becomes
- * an identity. It also retires the cache that used to sit here for the same identity reason.
- *
- * `bayBox` is untouched by any of it: `['big', 'big']` already meant half each and `[{ small }, 'big']`
- * already meant a strip and the rest, floor, cap and all. The arithmetic was never what was wrong.
+ * What the manager is told by whatever puts the game on the stage, once, from `main.tsx`: the panes there are,
+ * which it checks a pane against before it puts it anywhere; being told when that may have changed; and what
+ * the two bays hold when the page opens. The stage reads nothing of the game itself. See `panes.tsx`.
  */
-const ASKING: Readonly<Record<Arrangement, readonly [Asking, Asking]>> = {
-  firstAway: [{ small: STRIP }, 'big'],
-  halfEach: ['big', 'big'],
-  secondAway: ['big', { small: STRIP }],
+export interface BaysConfig {
+  panes(): readonly Pane[];
+  watch(listener: () => void): () => void;
+  opensOn: readonly [string, string];
+}
+
+let config: BaysConfig = {
+  panes: () => [MAP_PANE, NAVIGATION_PANE],
+  watch: () => () => undefined,
+  opensOn: [MAP_PANE.id, NAVIGATION_PANE.id],
 };
 
-/**
- * Which size the control marks on the pane in this bay.
- *
- * The two bays are always a mirrored pair and can never disagree, because there is one value under both of
- * them. **Both put away is not reachable**, which decision 0045 wanted and had to enforce with a rule;
- * here there is no rule, because there is no arrangement that says it.
- */
-export function askedIn(how: Arrangement, which: Which): PaneSize {
-  if (how === 'halfEach') {
-    return 'small';
-  }
-  return (how === 'firstAway' ? 0 : 1) === which ? 'strip' : 'full';
+/** Configures the manager, and starts it tidying up after panes that stop existing. Returns what stops it. */
+export function configureBays(given: BaysConfig): () => void {
+  config = given;
+  settle({ ...store.get(), holding: [...given.opensOn] });
+  return given.watch(tidyUp);
 }
 
-/**
- * What a bay asking for one of the three sizes means for the arrangement.
- *
- * The other bay follows by reading the same value rather than by having one written into it, which is what
- * 0045 had to do while the size was a pane's own. Asking for half *is* the arrangement; asking to be
- * opened out puts the other one away; asking to be put away opens the other one out.
- */
-export function arrangementFor(which: Which, size: PaneSize): Arrangement {
-  if (size === 'small') {
-    return 'halfEach';
-  }
-  const away = size === 'strip' ? which : which === 0 ? 1 : 0;
-  return away === 0 ? 'firstAway' : 'secondAway';
+function paneById(id: string): Pane | undefined {
+  return config.panes().find((pane) => pane.id === id);
 }
+
+/** What each bay holds and how they share the stage. */
+export const baysStore: Readable<BaysState> = store;
 
 /**
  * What each of the three arrangements is called in the log.
@@ -228,11 +192,6 @@ function settle(next: BaysState): void {
 
 function titleOf(id: string): string {
   return paneById(id)?.title ?? id;
-}
-
-/** What each bay is asking the layout for, which is the arrangement and nothing else. */
-export function askingOf(bays: BaysState): readonly [Asking, Asking] {
-  return ASKING[bays.arrangement];
 }
 
 /**
@@ -422,8 +381,8 @@ export function takeOver(which: Which, id: string): void {
 /**
  * What goes back into a bay when whatever is in it leaves.
  *
- * What it displaced, or - if that has since gone, or it displaced nothing - whichever of the two fixed
- * panes is not already up. A bay is never empty.
+ * What it displaced, or - if that has since gone, or it displaced nothing - whichever of the two panes the
+ * bays open on is not already up: the map and the house status, in the game. A bay is never empty.
  */
 function whatGoesBack(which: Which): string {
   const other: Which = which === 0 ? 1 : 0;
@@ -432,9 +391,9 @@ function whatGoesBack(which: Which): string {
     remembered !== store.get().holding[other] &&
     paneById(remembered) !== undefined
     ? remembered
-    : store.get().holding[other] === MAP_PANE.id
-      ? HOUSE_PANE.id
-      : MAP_PANE.id;
+    : store.get().holding[other] === config.opensOn[0]
+      ? config.opensOn[1]
+      : config.opensOn[0];
 }
 
 /**
@@ -470,11 +429,11 @@ export function giveBack(id: string): void {
  * roll** goes the moment the question is answered, which is the road that mattered: the letter had taken
  * the map's bay, so without this the map never came back and the top of the stage was left empty.
  *
- * Rather than making every one of those roads remember to tidy up, the manager watches the two stores that
- * say what exists and tidies up after all of them. It asks whether the pane still exists rather than what
+ * Rather than making every one of those roads remember to tidy up, the manager is told whenever what exists
+ * may have changed and tidies up after all of them. It asks whether the pane still exists rather than what
  * kind it is, which is what stops the next pane that comes and goes from needing a line here.
  *
- * Subscribed once, at load, and never unsubscribed: there is one bay manager for the life of the page.
+ * Started by `configureBays`, once: there is one bay manager for the life of the page.
  */
 function tidyUp(): void {
   for (const which of [0, 1] as const) {
@@ -483,6 +442,3 @@ function tidyUp(): void {
     }
   }
 }
-
-subjectsStore.watch(tidyUp);
-sessionStore.watch(tidyUp);

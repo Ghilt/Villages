@@ -1,10 +1,8 @@
-import { useMemo } from 'react';
-
-import { baysStore, put, type Which, where } from '../stage/bays';
+import { baysStore, put, where } from '../stage/bays';
+import { type Which } from '../stage/arrangement';
 import { Icon, Needle, pointAt } from '../stage/Icons';
 import { PaneSizeControl } from '../stage/PaneSizeControl';
-import { sessionStore } from '../net/gateway';
-import { NAVIGATION_PANE, type Pane, presentIn, type Room, standingPanes } from '../stage/panes';
+import { NAVIGATION_PANE, type Pane, type Room } from '../stage/panes';
 import { inspect } from './opening';
 import { paneIdOf } from './subjects';
 import { trailStore, clearTrail, stepKey } from './trail';
@@ -37,12 +35,16 @@ import { useStore } from '../store/useStore';
  * a strip without resizing anything. See the strip below, and decision record 0047.
  */
 
-export function Navigating({ room, along }: { room: Room; along: 'rows' | 'columns' | null }) {
+interface NavigatingProps {
+  room: Room;
+  along: 'rows' | 'columns' | null;
+  /** The panes standing, the map first, which are the places there are to go to. Handed in; see `panes.tsx`. */
+  going: readonly Pane[];
+}
+
+export function Navigating({ room, along, going }: NavigatingProps) {
   const trail = useStore(trailStore, (state) => state.steps);
   const bays = useStore(baysStore);
-  const choice = useStore(sessionStore, (state) => presentIn(state).choice);
-  const dialogues = useStore(sessionStore, (state) => presentIn(state).dialogues);
-  const present = useMemo(() => ({ choice, dialogues }), [choice, dialogues]);
 
   /*
    * Put away, and still a way somewhere.
@@ -78,7 +80,7 @@ export function Navigating({ room, along }: { room: Room; along: 'rows' | 'colum
       <section className="navigate navigate--strip" aria-label="Go to">
         <span className="navigate__kind">Go to</span>
         <span className="navigate__ways">
-          {standingPanes(present)
+          {going
             .filter((pane) => pane.id !== NAVIGATION_PANE.id)
             .map((pane) => {
               const already = bays.holding[beside] === pane.id;
@@ -123,7 +125,7 @@ export function Navigating({ room, along }: { room: Room; along: 'rows' | 'colum
             <PaneSizeControl room={room} />
           </header>
           <ul className="navigate__list navigate__list--panes">
-            {standingPanes(present).map((pane) => (
+            {going.map((pane) => (
               <Row
                 key={pane.id}
                 icon={pane.icon}

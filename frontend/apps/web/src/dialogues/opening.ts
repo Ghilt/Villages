@@ -1,7 +1,8 @@
 import type { DialogueView } from '@villages/protocol';
 
 import { baysStore, askFor, awayFromTheMap, formNow, roomToRead, takeOver } from '../stage/bays';
-import { DIALOGUE_PANE, sizeAsked } from '../stage/panes';
+import { sizeAsked } from '../stage/panes';
+import { DIALOGUE_PANE } from './pane';
 
 /**
  * A dialogue arriving, and the pane opening for it.

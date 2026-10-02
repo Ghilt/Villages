@@ -7,7 +7,9 @@ import { note } from './log/log';
 import { chosenMaster, worldRootOf } from './map/masters';
 import { registerPainterlyTiles } from './map/painterlyTiles';
 import { observeGateway } from './net/gateway';
+import { STAGE_PANES } from './panes';
 import { sessionLog } from './sessionLog';
+import { configureBays } from './stage/bays';
 
 import './styles.css';
 
@@ -54,6 +56,8 @@ if (window.location.pathname.startsWith(INSPECT_EVENTS)) {
 } else {
   // The log listens to the conversation from before it begins.
   observeGateway(sessionLog);
+  // The stage is told which panes the game puts on it, and the bays what they open on.
+  configureBays(STAGE_PANES);
   const master = chosenMaster();
 
   // Before any map exists, because a style may ask for a painted tile as soon as one does.

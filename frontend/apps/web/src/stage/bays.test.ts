@@ -1,16 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { STRIP } from './bayBox';
-import { arrangementFor, askedIn, type Arrangement, type Which } from './bays';
-import {
-  HOUSE_PANE,
-  KEY_FIGURES_PANE,
-  MAP_PANE,
-  NAVIGATION_PANE,
-  panesFor,
-  sizeAsked,
-  spreadWants,
-} from './panes';
+import { arrangementFor, askedIn, askingOf, type Arrangement, type Which } from './arrangement';
+import { MAP_PANE, NAVIGATION_PANE, sizeAsked, spreadWants } from './panes';
+import { KEY_FIGURES_PANE } from '../figures/pane';
+import { HOUSE_PANE } from '../house/pane';
 import type { Subject } from '../inspect/subjects';
 
 /**
@@ -21,19 +15,20 @@ import type { Subject } from '../inspect/subjects';
  * the control and an arrival moves the seam.** Pressing the compass does not, navigating a row does not,
  * a window closing does not, and a pane ceasing to exist does not.
  *
- * The module keeps its state at the top level, so each test takes a fresh copy of it the way
- * `inspect/trail.test.ts` does. Two things about that are worth knowing before adding a case:
- *
- * - `bays.ts` subscribes `tidyUp` to the subject and gateway stores **at import**, so a test that wants to
- *   drive either of them has to import it from the *same* fresh graph. {@link fresh} returns all of them
- *   together for that reason; importing `subjects` at the top of the file would hand back a different copy
- *   of the store from the one the manager is watching, and nothing would happen.
- * - the two pure helpers are imported normally at the top, because they hold no state.
+ * The module keeps its state at the top level, so each test takes a fresh copy of it, configured as `main.tsx`
+ * configures it and from the same fresh graph as the subjects it drives: importing `subjects` at the top
+ * would hand back a different store from the one the manager is told about, and nothing would happen. The
+ * pure helpers are imported normally at the top, because they hold no state.
  */
 async function fresh() {
   vi.resetModules();
-  const [bays, subjects] = await Promise.all([import('./bays'), import('../inspect/subjects')]);
-  // The layout tells the manager what it made of itself, and every test here is about a phone.
+  const [bays, subjects, panes] = await Promise.all([
+    import('./bays'),
+    import('../inspect/subjects'),
+    import('../panes'),
+  ]);
+  // What the game puts on the stage; and the layout tells the manager what it made of itself: a phone.
+  bays.configureBays(panes.STAGE_PANES);
   bays.stageIs('bays', 'rows');
   return { ...bays, ...subjects };
 }
@@ -93,7 +88,7 @@ describe('the three arrangements', () => {
 
 describe('what each bay asks the layout for', () => {
   it('is the arrangement and nothing else', async () => {
-    const { askingOf, baysStore, askFor } = await fresh();
+    const { baysStore, askFor } = await fresh();
 
     askFor(MAP_PANE.id, 'full');
     expect(askingOf(baysStore.get())).toEqual(['big', { small: STRIP }]);
@@ -108,7 +103,7 @@ describe('what each bay asks the layout for', () => {
   // The stage compares what the store hands back by identity, so this is not a nicety: a fresh array per
   // read is an infinite render, and an unchanged one means the layout is not even recomputed.
   it('hands back the same object while the arrangement has not changed', async () => {
-    const { askingOf, baysStore, put } = await fresh();
+    const { baysStore, put } = await fresh();
     const before = askingOf(baysStore.get());
 
     put(1, NAVIGATION_PANE.id);
@@ -117,7 +112,7 @@ describe('what each bay asks the layout for', () => {
   });
 
   it('opens on the map opened out, with the house status a strip beneath it', async () => {
-    const { baysStore, askingOf } = await fresh();
+    const { baysStore } = await fresh();
 
     expect(baysStore.get().holding).toEqual([MAP_PANE.id, HOUSE_PANE.id]);
     expect(baysStore.get().arrangement).toBe('secondAway');
@@ -294,7 +289,7 @@ describe('the corner, in the spread', () => {
     const { baysStore, askFor, show, stageIs } = await fresh();
     stageIs('spread', 'rows');
     askFor(HOUSE_PANE.id, 'full');
-    const panes = panesFor([], { choice: false, dialogues: false });
+    const panes = [MAP_PANE, HOUSE_PANE, KEY_FIGURES_PANE, NAVIGATION_PANE];
     const before = baysStore.get();
 
     show('bottomLeft', NAVIGATION_PANE.id);

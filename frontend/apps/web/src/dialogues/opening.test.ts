@@ -2,7 +2,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { DialogueView } from '@villages/protocol';
 
-import { DIALOGUE_PANE, HOUSE_PANE, MAP_PANE } from '../stage/panes';
+import { MAP_PANE } from '../stage/panes';
+import { DIALOGUE_PANE } from './pane';
+import { HOUSE_PANE } from '../house/pane';
 import { arrivals } from './opening';
 
 function dialogue(id: string, ending: DialogueView['ending'] = { kind: 'open' }): DialogueView {
@@ -21,12 +23,18 @@ function dialogue(id: string, ending: DialogueView['ending'] = { kind: 'open' })
 const ids = (some: readonly DialogueView[]) => some.map((one) => one.id);
 
 /**
- * The bay manager keeps its state at the top level, so each test takes a fresh copy of it, with the
- * opening from the same graph so that the two are talking about the same bays. See `stage/bays.test.ts`.
+ * The bay manager keeps its state at the top level, so each test takes a fresh copy of it, configured as
+ * `main.tsx` configures it, with the opening from the same graph so that the two are talking about the same
+ * bays. See `stage/bays.test.ts`.
  */
 async function fresh() {
   vi.resetModules();
-  const [bays, opening] = await Promise.all([import('../stage/bays'), import('./opening')]);
+  const [bays, opening, panes] = await Promise.all([
+    import('../stage/bays'),
+    import('./opening'),
+    import('../panes'),
+  ]);
+  bays.configureBays(panes.STAGE_PANES);
   return { ...bays, ...opening };
 }
 

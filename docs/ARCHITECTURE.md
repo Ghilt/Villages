@@ -439,6 +439,14 @@ full form needs before it has to draw itself smaller. The layout places it. Noth
 what a map is, and no pane learns where it is beyond the room it was given, which is what lets a ui
 mechanic be written once and drawn at every size.
 
+**The stage is handed its panes.** Each feature declares its pane in its own folder - `house/pane.ts`,
+`choice/pane.ts`, `inspect/pane.ts` for a window on a subject - and the root's `panes.tsx` names them once,
+in order, with when each stands and what draws it; App supplies only the map's contents, because App holds
+the map. The stage is handed that list, and the bay manager is configured with it from `main.tsx`
+(`configureBays`), so neither reads the game, and a new mechanic's pane is a declaration in its folder and a
+line in `panes.tsx`. Two panes are the stage's own: the map, which is its floor, and navigation, which its
+compass opens.
+
 **A pane declares nothing about a phone.** How the two bays divide the stage is one value with three
 settings, held by the fold: a strip and the rest, half each, or the rest and a strip. A bay is one end of a
 stage two panes are sharing, so what is standing in it has nothing to say about how much of it there is -

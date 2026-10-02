@@ -2,35 +2,21 @@ import type { CSSProperties, ReactNode, RefObject } from 'react';
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 
 import { note } from '../log/log';
-import { subjectsStore } from '../inspect/subjects';
-import { sessionStore } from '../net/gateway';
 import { Compass } from './Compass';
 import { Seam } from './Seam';
 import { bayLayout, type BayName, type Box, isTabbed, type Rect, TAB_BAR, TILES } from './bayBox';
-import {
-  baysStore,
-  askedIn,
-  askFor,
-  askingOf,
-  formNow,
-  putAwayForRoom,
-  show,
-  showingIn,
-  stageIs,
-  type Which,
-} from './bays';
+import { baysStore, askFor, formNow, putAwayForRoom, show, showingIn, stageIs } from './bays';
+import { askedIn, askingOf, type Which } from './arrangement';
 import {
   cramps,
   type Pane,
-  panesFor,
+  type PaneDef,
   panesIn,
   type PaneSize,
-  presentIn,
   type Room,
   sizeAsked,
   sizeOf,
   spreadWants,
-  standingPanes,
 } from './panes';
 import { outOfRoom } from './rail';
 import { TabBar } from './TabBar';
@@ -62,11 +48,11 @@ interface StageProps {
   /** How big the stage is, from `stageBox`. */
   stage: Box;
   /**
-   * What each pane draws, given the room it got and how the stage is cut.
-   *
-   * `along` is null in the spread, where there are no bays to choose between and a link is a plain click.
+   * Every pane there is, in order, each with what it draws given the room it got and how the stage is cut:
+   * the ones standing, then a window per subject. Handed in, so that the stage reads nothing of the game. See
+   * `panes.tsx` at the root.
    */
-  contents: (id: string, room: Room, along: 'rows' | 'columns' | null) => ReactNode;
+  panes: readonly PaneDef[];
   /** Over the top of everything and in no bay: the parchment, and the notice that you were stood down. */
   overlays?: ReactNode;
 }
@@ -76,16 +62,9 @@ function place(rect: Rect): CSSProperties {
   return { left: `${rect.x}px`, top: `${rect.y}px`, width: `${rect.w}px`, height: `${rect.h}px` };
 }
 
-export function Stage({ stage, contents, overlays }: StageProps) {
+export function Stage({ stage, panes, overlays }: StageProps) {
   const bays = useStore(baysStore);
   const asking = useStore(baysStore, askingOf);
-  const subjects = useStore(subjectsStore);
-  // The one thing the layout asks the world: which of the panes that come and go are there, because an
-  // empty tile takes no room. The choice roll while a question stands, and dialogue once there is any.
-  const choice = useStore(sessionStore, (state) => presentIn(state).choice);
-  const dialogues = useStore(sessionStore, (state) => presentIn(state).dialogues);
-  const present = useMemo(() => ({ choice, dialogues }), [choice, dialogues]);
-  const panes = useMemo(() => panesFor(subjects.open, present), [subjects.open, present]);
   // Not told which tab is up, which is what makes pressing one move nothing. See decision record 0057.
   const wants = useMemo(() => spreadWants(panes, bays), [panes, bays]);
 
@@ -95,8 +74,8 @@ export function Stage({ stage, contents, overlays }: StageProps) {
   const box = useMemo(() => bayLayout(stage, asking, wants, formNow()), [stage, asking, wants]);
 
   // The manager asks this when it needs to know whether putting a window somewhere means anything, and to
-  // say "top" rather than "the first bay" in the log.
-  stageIs(box.form, box.along);
+  // say "top" rather than "the first bay" in the log. Before any effect of the game's asks it.
+  useLayoutEffect(() => stageIs(box.form, box.along), [box.form, box.along]);
 
   // One line when the stage crosses the fold or turns on its side, and none while it is merely being
   // resized: a drag that changes nothing is not news. See decision record 0023.
@@ -179,7 +158,7 @@ export function Stage({ stage, contents, overlays }: StageProps) {
         hidden={!railed && (rect === null || !up)}
         style={railed || rect === null ? undefined : place(rect)}
       >
-        {contents(id, room, box.form === 'bays' ? box.along : null)}
+        {pane?.draw(room, box.form === 'bays' ? box.along : null)}
       </div>
     );
   };
@@ -213,7 +192,7 @@ export function Stage({ stage, contents, overlays }: StageProps) {
       data-along={box.along}
       style={{ '--bay-first': seam } as CSSProperties}
     >
-      {standingPanes(present).map((pane) => bayFor(pane.id))}
+      {panes.filter((pane) => !isWindow(pane)).map((pane) => bayFor(pane.id))}
 
       {/*
        * The rail: where inspect windows stack in the spread, up to three, newest at the top.

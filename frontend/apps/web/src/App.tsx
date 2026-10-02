@@ -1,12 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
 import { charactersInView, housesInView } from '@villages/client-core';
 import type { CharacterOnMapView, ChoiceView, HouseView } from '@villages/protocol';
 
 import { AreaOverlay } from './areas/AreaOverlay';
-import { Choosing } from './choice/Choosing';
-import { Dialogues } from './dialogues/Dialogues';
 import { openOnArrival } from './dialogues/opening';
 import { DebugPanel } from './debug/DebugPanel';
 import { Desk } from './desk/Desk';
@@ -15,15 +13,10 @@ import { stageStore } from './debug/stage';
 import { panelWants, stageBox } from './stage/stageBox';
 import { note } from './log/log';
 import { inspect } from './inspect/opening';
-import { Inspecting } from './inspect/Inspecting';
-import { Navigating } from './inspect/Navigating';
-import { subjectOfPane } from './inspect/subjects';
 import { sessionStore, gateway } from './net/gateway';
 import { followMap } from './net/followMap';
 import { arriving } from './house/arrival';
 import { eyeStore } from './house/eye';
-import { HouseStatus } from './house/HouseStatus';
-import { KeyFigures } from './figures/KeyFigures';
 import { HoldingOverlay } from './areas/HoldingOverlay';
 import { StoodDown } from './net/StoodDown';
 import { flyWith } from './map/focus';
@@ -31,15 +24,11 @@ import { MapStrip } from './map/MapStrip';
 import { MapView } from './map/MapView';
 import { Room } from './room/Room';
 import { Stage } from './stage/Stage';
+import type { PaneDef } from './stage/panes';
+import { panesOn, standingIn } from './panes';
+import { subjectsStore } from './inspect/subjects';
 import { formNow, roomToRead, takeOver, theMapsBay } from './stage/bays';
-import {
-  CHOICE_PANE,
-  DIALOGUE_PANE,
-  HOUSE_PANE,
-  KEY_FIGURES_PANE,
-  MAP_PANE,
-  NAVIGATION_PANE,
-} from './stage/panes';
+import { CHOICE_PANE } from './choice/pane';
 import { worldRootOf } from './map/masters';
 import { cameraStore } from './map/camera';
 import { DEFAULT_RENDERER, RENDERERS, applyRenderer } from './map/renderers';
@@ -251,6 +240,33 @@ export function App({ master }: AppProps) {
 
   const worldRoot = worldRootOf(master);
 
+  // The map's own pane, App's because App holds the map; every other pane is drawn by its feature, and which
+  // stand and in what order is `panes.tsx`'s.
+  const drawMap = useCallback<PaneDef['draw']>(
+    (room, along) => (
+      <>
+        {/* The map, the desk it lies on and the room the desk stands in, which is the one thing
+              that can scale them all together once the camera has run out of zoom. The overlays
+              below draw nothing of their own and stay outside it. See experiment 0009. */}
+        <Room map={map} seat={yours?.seat ?? null} strip={along !== null && room.size === 'strip'}>
+          <Desk map={map} />
+          <MapView worldRoot={worldRoot} onReady={setMap} />
+          {map !== null && <SpriteOverlay map={map} sprites={sprites} worldRoot={worldRoot} />}
+        </Room>
+        <AreaOverlay map={map} worldRoot={worldRoot} turn={camera.latticeTurn} />
+        <HoldingOverlay map={map} houses={drawn} mine={eye ? yours : null} turn={camera.latticeTurn} />
+        {/* Put away, and still running underneath: a lid over the map, never instead of it. The
+              guard is the form rather than the size, because what a pane was asked to be outlives
+              the fold - and the floor of the spread is never put away. See `MapStrip`. */}
+        {along !== null && room.size === 'strip' && <MapStrip room={room} />}
+      </>
+    ),
+    [map, yours, worldRoot, sprites, camera.latticeTurn, drawn, eye],
+  );
+  const up = useStore(sessionStore, standingIn);
+  const open = useStore(subjectsStore, (subjects) => subjects.open);
+  const panes = useMemo(() => panesOn(up, open, drawMap), [up, open, drawMap]);
+
   // The four numbers the grid is laid out from. As custom properties rather than as a style object on
   // each child, so that a drag moves one declaration and the browser does the rest.
   const grid = {
@@ -272,54 +288,7 @@ export function App({ master }: AppProps) {
        * everything at once. A pane is handed the room it got and draws itself at that size; nothing here
        * knows which bay anything is in. See decision record 0040.
        */}
-      <Stage
-        stage={box.stage}
-        contents={(id, room, along) => {
-          if (id === MAP_PANE.id) {
-            return (
-              <>
-                {/* The map, the desk it lies on and the room the desk stands in, which is the one thing
-                    that can scale them all together once the camera has run out of zoom. The overlays
-                    below draw nothing of their own and stay outside it. See experiment 0009. */}
-                <Room map={map} seat={yours?.seat ?? null} strip={along !== null && room.size === 'strip'}>
-                  <Desk map={map} />
-                  <MapView worldRoot={worldRoot} onReady={setMap} />
-                  {map !== null && <SpriteOverlay map={map} sprites={sprites} worldRoot={worldRoot} />}
-                </Room>
-                <AreaOverlay map={map} worldRoot={worldRoot} turn={camera.latticeTurn} />
-                <HoldingOverlay
-                  map={map}
-                  houses={drawn}
-                  mine={eye ? yours : null}
-                  turn={camera.latticeTurn}
-                />
-                {/* Put away, and still running underneath: a lid over the map, never instead of it. The
-                    guard is the form rather than the size, because what a pane was asked to be outlives
-                    the fold - and the floor of the spread is never put away. See `MapStrip`. */}
-                {along !== null && room.size === 'strip' && <MapStrip room={room} />}
-              </>
-            );
-          }
-          if (id === HOUSE_PANE.id) {
-            return <HouseStatus room={room} />;
-          }
-          if (id === KEY_FIGURES_PANE.id) {
-            return <KeyFigures room={room} along={along} />;
-          }
-          if (id === NAVIGATION_PANE.id) {
-            return <Navigating room={room} along={along} />;
-          }
-          if (id === CHOICE_PANE.id) {
-            return <Choosing room={room} />;
-          }
-          if (id === DIALOGUE_PANE.id) {
-            return <Dialogues room={room} />;
-          }
-          const subject = subjectOfPane(id);
-          return subject === null ? null : <Inspecting subject={subject} room={room} along={along} />;
-        }}
-        overlays={<StoodDown />}
-      />
+      <Stage stage={box.stage} panes={panes} overlays={<StoodDown />} />
 
       <DebugPanel
         map={map}

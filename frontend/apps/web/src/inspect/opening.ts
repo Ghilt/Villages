@@ -1,13 +1,5 @@
-import {
-  baysStore,
-  askFor,
-  awayFromTheMap,
-  formNow,
-  giveBack,
-  roomToRead,
-  takeOver,
-  type Which,
-} from '../stage/bays';
+import { baysStore, askFor, awayFromTheMap, formNow, giveBack, roomToRead, takeOver } from '../stage/bays';
+import { type Which } from '../stage/arrangement';
 import type { PaneSize } from '../stage/panes';
 import { closeOne, openOn, paneIdOf, type Subject } from './subjects';
 

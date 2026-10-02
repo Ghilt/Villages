@@ -4,8 +4,10 @@ import { note } from '../log/log';
 import { inspect } from '../inspect/opening';
 import { focusOn } from '../map/focus';
 import { sessionStore } from '../net/gateway';
-import { baysStore, formNow, put, roomToRead, type Which } from '../stage/bays';
-import { DIALOGUE_PANE, MAP_PANE } from '../stage/panes';
+import { baysStore, formNow, put, roomToRead } from '../stage/bays';
+import { type Which } from '../stage/arrangement';
+import { MAP_PANE } from '../stage/panes';
+import { DIALOGUE_PANE } from './pane';
 import { showsWords } from './describe';
 
 /**
