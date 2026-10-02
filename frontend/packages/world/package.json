@@ -18,6 +18,7 @@
     "merge": "node --max-old-space-size=8192 bin/mergeMaster.ts",
     "tile": "node --max-old-space-size=8192 bin/tileWorld.ts",
     "sprites": "node --max-old-space-size=8192 bin/generateSpriteMap.ts",
+    "flow": "node --max-old-space-size=8192 bin/flowWorld.ts",
     "paint": "node --max-old-space-size=8192 bin/renderPainterly.ts",
     "fetch-world": "node --max-old-space-size=4096 bin/fetchWorld.ts",
     "scenery": "node --max-old-space-size=8192 bin/renderScenery.ts",
