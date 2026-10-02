@@ -275,7 +275,7 @@ function closed(plain: Float32Array, grown: Float32Array, grid: Grid, tension: n
  * Every texel's squared distance, in texels, to the nearest texel whose value is nought, in place: the exact
  * Euclidean distance transform of Felzenszwalb and Huttenlocher, down every column and then along every row.
  */
-function squaredDistances(values: Float64Array, width: number, height: number): void {
+export function squaredDistances(values: Float64Array, width: number, height: number): void {
   const longest = Math.max(width, height);
   const line = new Float64Array(longest);
   const done = new Float64Array(longest);
