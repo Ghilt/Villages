@@ -7,21 +7,13 @@ import villages.application.Start
 import villages.application.StoredEvent
 import villages.domain.CharacterEvent
 import villages.domain.HouseFounded
-import villages.domain.HouseGainedKeyFigure
-import villages.domain.HouseGainedVision
-import villages.domain.HouseLostKeyFigure
-import villages.domain.HouseLostVision
-import villages.domain.HouseResourceSpent
-import villages.domain.HouseResourceReleased
-import villages.domain.HouseResourcePledged
-import villages.domain.HouseResourceGranted
 import villages.domain.PlayerGivenChoice
-import villages.domain.PlayerCompletedDialogue
-import villages.domain.PlayerCompletedDialogueStep
-import villages.domain.PlayerLostDialogue
-import villages.domain.PlayerOfferedDialogue
 import villages.domain.PlayerTookAction
 import villages.domain.PlayerId
+import villages.domain.ResourceEvent
+import villages.domain.DialogueEvent
+import villages.domain.KeyFigureEvent
+import villages.domain.VisionEvent
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArraySet
 
@@ -59,20 +51,16 @@ class ChoicesProjection(feed: EventFeed) : ChoicesByPlayer, AutoCloseable {
 
             is PlayerTookAction -> forget(event.player)
 
+            // What a house has, whom it holds and what it sees are other read models' business. This one only
+            // tracks what is pending.
+            is ResourceEvent, is KeyFigureEvent, is VisionEvent -> return
+
             // Founding by any means settles the question of where to found, so whatever was pending goes.
             // The domain says the same thing in `evolve`; this is that rule read off the events.
-            is HouseResourceGranted, is HouseResourcePledged, is HouseResourceReleased,
-            is HouseResourceSpent, is HouseGainedKeyFigure, is HouseLostKeyFigure,
-            is HouseGainedVision, is HouseLostVision,
-            ->
-                // What a house has is the map projection's business. This one only tracks what is pending.
-                return
-
             is HouseFounded -> forget(event.player)
 
             // A dialogue choice is not a choice put to the house, however alike the two are: nothing is pending.
-            is PlayerOfferedDialogue, is PlayerCompletedDialogueStep, is PlayerCompletedDialogue, is PlayerLostDialogue,
-            -> return
+            is DialogueEvent -> return
 
             // A choice is put to a house, never to a character.
             is CharacterEvent -> return

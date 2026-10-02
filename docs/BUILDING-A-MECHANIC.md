@@ -231,12 +231,12 @@ long file goes into a file of its own.
 
 | Part | Where | Held by |
 |---|---|---|
-| The class, the `decide` branch, the `evolve` branch | `backend/domain` | the house spec of its mechanic, `House<Mechanic>Spec` over `HouseFixtures.kt`: given, when, then over events |
+| The class, in its mechanic's family (a new mechanic adds one beside `ResourceEvent`), the `decide` branch, the `evolve` branch | `backend/domain` | the house spec of its mechanic, `House<Mechanic>Spec` over `HouseFixtures.kt`: given, when, then over events |
 | The type row | `EventTypes` in `backend/infrastructure-occurrent` | `EventTypeCatalogueSpec` |
 | The catalogue row: type, payload in constructor order, meaning, producer, consumers | `docs/EVENTS.md` | `EventCatalogueSpec`, in both directions |
 | The stored form | `contracts/fixtures/events/<type>.json` | `EventFormatSpec` |
 | Each case of a sealed field - an effect, what follows a line, a requirement, an option's reveal impact - named by its `kind`, and written by some fixture | `EffectJson.kt` or `DialogueJson.kt` in `backend/infrastructure-occurrent`, and a fixture; an effect also has its view, and a `yourChoice` fixture carrying it | `EventFormatSpec` and `FramesContractSpec`, which want every case named and written |
-| Every projection's fold | `backend/projections` | the compiler: each `when` is exhaustive |
+| Every projection's fold: a branch where it cares, and its family passed where it does not | `backend/projections` | the compiler: each `when` is exhaustive, and none has an `else` |
 | A frame, when the interface sees it directly | Kotlin `Frames.kt`, zod `frames.ts`, one fixture under `contracts/fixtures/frames` | both contract tests |
 | What the frame says: the `toView` from a read model's row or a domain value, in a file of the mechanic's own beside `Gateway.kt` (`HouseViews.kt`, `DialogueViews.kt`, ...); a new refusal's code in `Refusals.kt`; a name off the wire in `WireValues.kt` | `backend/gateway` | the compiler: `reasonCode` and every view's `when` are exhaustive |
 | The wire moved, a frame or a field however deep, so its version does: `PROTOCOL_VERSION` up at both ends, a line for it in `contracts/README.md`, and `contracts/protocol-v<n>.txt` recorded with `./gradlew :protocol:test -Dprotocol.record=true`, which never records over a version | `backend/protocol`, `frontend/packages/protocol`, `contracts/` | `ProtocolShapeSpec` and `protocol.shape.test.ts`, which fail with the instructions (0037) |

@@ -77,6 +77,12 @@ Packages are shorter than module names: `villages.domain`, `villages.application
 `villages.bots`. The two infrastructure modules take the name of the thing they wrap, which is also their
 commit scope.
 
+**A mechanic has one place in each layer**, and a file that serves every mechanic routes to those places
+rather than holding them (0075). In the domain, a mechanic's events are a family, `ResourceEvent` and its
+siblings, which a fold with nothing to say about it passes in one branch; in the read models, its own
+projection; in the gateway, a file of its own for what its frames say, `HouseViews.kt` and the rest. What goes
+where, for a new one, is the checklist in `BUILDING-A-MECHANIC.md`.
+
 Deployment starts as one process. The gateway is written as though it were already separate, so extracting it later is
 a configuration change rather than a rewrite.
 

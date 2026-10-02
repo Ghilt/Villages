@@ -29,6 +29,10 @@ import villages.domain.HouseName
 import villages.domain.PlayerId
 import villages.domain.WorldTime
 import villages.domain.everyStat
+import villages.domain.ResourceEvent
+import villages.domain.ChoiceEvent
+import villages.domain.DialogueEvent
+import villages.domain.VisionEvent
 import villages.protocol.Cell
 import villages.protocol.coarsestZoom
 import java.util.concurrent.ConcurrentHashMap
@@ -148,8 +152,8 @@ class CharactersProjection(feed: EventFeed) : KeyFiguresByHouse, CharactersByCel
                 tellHoldersOf(event.characterId)
             }
 
-            // What a house has, and what it is asked, are other read models' business.
-            else -> Unit
+            // What a house has, what it is asked and told, and what it sees are other read models' business.
+            is ResourceEvent, is ChoiceEvent, is DialogueEvent, is VisionEvent -> Unit
         }
     }
 

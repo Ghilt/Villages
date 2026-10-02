@@ -80,6 +80,14 @@ A character's stream, `character:<uuid>`, holds the world's half only: a player 
 through their house and never through a character. What a character is to a house is the house's
 history, on the house's stream. See decision record 0055.
 
+A house's events also come in **families**, one a mechanic, which is the third thing the code says about
+each of them: `ResourceEvent` for what a house has (granted, spent, pledged, released), `ChoiceEvent` for
+what it is asked (given a choice, took an action), `DialogueEvent` for what it is told (offered a dialogue,
+completed a step, completed it, lost it), `KeyFigureEvent` for whom it holds (gained, lost) and
+`VisionEvent` for what it is given to see (gained, lost). The founding is in none, because every mechanic
+reads it. A family changes nothing that is stored; it is how a read model with nothing to say about a
+mechanic passes the whole of it in one branch. See decision record 0075.
+
 ## The world's events
 
 One stream per house, addressed as house followed by its identifier.

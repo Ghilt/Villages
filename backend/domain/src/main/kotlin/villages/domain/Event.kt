@@ -10,7 +10,9 @@ import java.time.Instant
  * is the stream it belongs to, the consistency boundary a decision is taken inside: a house's are
  * [HouseEvent]s. **What kind of thing happened** is the two halves, [WorldEvent] and [PlayerEvent]. So an
  * event of the world on a house's stream is both a [HouseEvent] and a [WorldEvent], and a new kind of stream
- * adds a sibling to [HouseEvent] without touching either half. See decision records 0034 and 0055.
+ * adds a sibling to [HouseEvent] without touching either half. See decision records 0034 and 0055. A third
+ * question is asked of a house's: **which mechanic it belongs to**, which is its family, [ResourceEvent] and its
+ * siblings, so that a fold can pass a whole mechanic in one branch. See decision record 0075.
  *
  * Every event carries two times, because they can differ: when it happened in the world's own calendar,
  * and when it was written down by the clock on the wall. See decision record 0027.

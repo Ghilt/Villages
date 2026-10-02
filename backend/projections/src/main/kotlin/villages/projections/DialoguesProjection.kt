@@ -10,23 +10,17 @@ import villages.application.StoredEvent
 import villages.domain.CharacterEvent
 import villages.domain.DialogueId
 import villages.domain.HouseFounded
-import villages.domain.HouseGainedKeyFigure
-import villages.domain.HouseGainedVision
 import villages.domain.HouseId
-import villages.domain.HouseLostKeyFigure
-import villages.domain.HouseLostVision
-import villages.domain.HouseResourceGranted
-import villages.domain.HouseResourcePledged
-import villages.domain.HouseResourceReleased
-import villages.domain.HouseResourceSpent
 import villages.domain.PlayerCompletedDialogue
 import villages.domain.PlayerCompletedDialogueStep
-import villages.domain.PlayerGivenChoice
 import villages.domain.PlayerId
 import villages.domain.PlayerLostDialogue
 import villages.domain.PlayerOfferedDialogue
-import villages.domain.PlayerTookAction
 import villages.domain.walk
+import villages.domain.ResourceEvent
+import villages.domain.ChoiceEvent
+import villages.domain.KeyFigureEvent
+import villages.domain.VisionEvent
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArraySet
 
@@ -75,10 +69,7 @@ class DialoguesProjection(feed: EventFeed) : DialoguesByHouse, AutoCloseable {
             }
 
             // What a house has, what it was asked, whom it holds and what it sees are other read models'.
-            is HouseFounded, is HouseResourceGranted, is HouseResourceSpent, is HouseResourcePledged,
-            is HouseResourceReleased, is PlayerGivenChoice, is PlayerTookAction, is HouseGainedKeyFigure,
-            is HouseLostKeyFigure, is HouseGainedVision, is HouseLostVision,
-            -> return
+            is HouseFounded, is ResourceEvent, is ChoiceEvent, is KeyFigureEvent, is VisionEvent -> return
 
             // A dialogue is offered to a house; a character's own history says nothing about one.
             is CharacterEvent -> return

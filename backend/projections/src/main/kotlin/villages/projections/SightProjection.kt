@@ -22,20 +22,13 @@ import villages.domain.HouseGainedVision
 import villages.domain.HouseId
 import villages.domain.HouseLostKeyFigure
 import villages.domain.HouseLostVision
-import villages.domain.HouseResourceGranted
-import villages.domain.HouseResourcePledged
-import villages.domain.HouseResourceReleased
-import villages.domain.HouseResourceSpent
 import villages.domain.Location
-import villages.domain.PlayerGivenChoice
-import villages.domain.PlayerCompletedDialogue
-import villages.domain.PlayerCompletedDialogueStep
-import villages.domain.PlayerLostDialogue
-import villages.domain.PlayerOfferedDialogue
 import villages.domain.PlayerId
-import villages.domain.PlayerTookAction
 import villages.domain.Vision
 import villages.domain.WorldTime
+import villages.domain.ResourceEvent
+import villages.domain.ChoiceEvent
+import villages.domain.DialogueEvent
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CopyOnWriteArraySet
@@ -129,9 +122,7 @@ class SightProjection(feed: EventFeed) : SightsByHouse, AutoCloseable {
             is CharacterDied -> offTheMap(event.characterId, event.worldTime)
 
             // Nothing else gives vision or takes it away.
-            is HouseResourceGranted, is HouseResourceSpent, is HouseResourcePledged, is HouseResourceReleased,
-            is PlayerGivenChoice, is PlayerTookAction, is PlayerOfferedDialogue,
-            is PlayerCompletedDialogueStep, is PlayerCompletedDialogue, is PlayerLostDialogue,
+            is ResourceEvent, is ChoiceEvent, is DialogueEvent,
             is CharacterAppeared, is CharacterStatChanged, is CharacterAged, is CharacterPortraitChanged,
             -> Unit
         }

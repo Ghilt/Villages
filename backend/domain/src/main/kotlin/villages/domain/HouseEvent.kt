@@ -27,6 +27,27 @@ sealed interface HouseEvent : Event {
 sealed interface PlayerEvent : HouseEvent
 
 /**
+ * A house's events come in families, one a mechanic: what it has, what it is asked, what it is told, whom it
+ * holds, and what it sees. A family has nothing of its own. It is there so that a fold with nothing to say about
+ * a mechanic passes the whole of it in one branch and stays exhaustive when the mechanic gains an event, and so
+ * that a mechanic's events are in one place to be read. The founding is in none of them, because every mechanic
+ * reads it. A new mechanic adds a family, and its events name it beside their half. See decision record 0075.
+ */
+sealed interface ResourceEvent : HouseEvent
+
+/** A choice put to the house, and the option taken. See [ResourceEvent] for what a family is. */
+sealed interface ChoiceEvent : HouseEvent
+
+/** A dialogue offered, played, ended and lost. See [ResourceEvent] for what a family is. */
+sealed interface DialogueEvent : HouseEvent
+
+/** Whom the house holds. See [ResourceEvent] for what a family is. */
+sealed interface KeyFigureEvent : HouseEvent
+
+/** What the house is given to see, beyond its seat and its key figures. See [ResourceEvent] for what a family is. */
+sealed interface VisionEvent : HouseEvent
+
+/**
  * A house was founded. It carries where, and how much that matters: those two are what put a thing on the
  * map, and which tile it falls in is worked out downstream from the first. It carries a stock of every
  * resource there was when it was written, all of them empty and none of them growing, because nothing
@@ -52,7 +73,7 @@ data class HouseResourceGranted(
     val amount: Long,
     override val worldTime: WorldTime,
     override val recordedAt: Instant,
-) : HouseEvent, WorldEvent
+) : ResourceEvent, WorldEvent
 
 /** Some of a house's resource was used up, and is gone. */
 data class HouseResourceSpent(
@@ -61,7 +82,7 @@ data class HouseResourceSpent(
     val amount: Long,
     override val worldTime: WorldTime,
     override val recordedAt: Instant,
-) : HouseEvent, WorldEvent
+) : ResourceEvent, WorldEvent
 
 /**
  * Some of a house's resource was tied to an undertaking until a world-day. It is not spent: it comes back
@@ -76,7 +97,7 @@ data class HouseResourcePledged(
     val purpose: String,
     override val worldTime: WorldTime,
     override val recordedAt: Instant,
-) : HouseEvent, WorldEvent
+) : ResourceEvent, WorldEvent
 
 /**
  * A pledge ended and what it held is free again.
@@ -90,7 +111,7 @@ data class HouseResourceReleased(
     val pledgeId: PledgeId,
     override val worldTime: WorldTime,
     override val recordedAt: Instant,
-) : HouseEvent, WorldEvent
+) : ResourceEvent, WorldEvent
 
 /**
  * A player was given a choice to make. The whole choice is here, options and effects and all, so the
@@ -105,7 +126,7 @@ data class PlayerGivenChoice(
     val choice: Choice,
     override val worldTime: WorldTime,
     override val recordedAt: Instant,
-) : PlayerEvent
+) : ChoiceEvent, PlayerEvent
 
 /**
  * A player took one option of the choice they were given. What the option does follows from the same
@@ -121,7 +142,7 @@ data class PlayerTookAction(
     val optionId: OptionId,
     override val worldTime: WorldTime,
     override val recordedAt: Instant,
-) : PlayerEvent
+) : ChoiceEvent, PlayerEvent
 
 /**
  * A player was offered a dialogue. The whole of it is here - the speakers, every line and every dialogue
@@ -137,7 +158,7 @@ data class PlayerOfferedDialogue(
     val dialogue: Dialogue,
     override val worldTime: WorldTime,
     override val recordedAt: Instant,
-) : PlayerEvent
+) : DialogueEvent, PlayerEvent
 
 /**
  * A player took a step through a dialogue: an option of a dialogue choice, or a line reached that has
@@ -153,7 +174,7 @@ data class PlayerCompletedDialogueStep(
     val lineId: LineId,
     override val worldTime: WorldTime,
     override val recordedAt: Instant,
-) : PlayerEvent
+) : DialogueEvent, PlayerEvent
 
 /**
  * A player reached the end of a dialogue. Its own event, rather than a field on the last step, so that nothing
@@ -166,7 +187,7 @@ data class PlayerCompletedDialogue(
     val dialogueId: DialogueId,
     override val worldTime: WorldTime,
     override val recordedAt: Instant,
-) : PlayerEvent
+) : DialogueEvent, PlayerEvent
 
 /**
  * A dialogue lapsed before it was finished, because one of its requirements failed: a speaker died, say.
@@ -181,7 +202,7 @@ data class PlayerLostDialogue(
     val because: Requirement,
     override val worldTime: WorldTime,
     override val recordedAt: Instant,
-) : PlayerEvent
+) : DialogueEvent, PlayerEvent
 
 /**
  * A house took a character in as one of its key figures. A tie in the house's history, which the character's
@@ -193,7 +214,7 @@ data class HouseGainedKeyFigure(
     val characterId: CharacterId,
     override val worldTime: WorldTime,
     override val recordedAt: Instant,
-) : HouseEvent, WorldEvent
+) : KeyFigureEvent, WorldEvent
 
 /**
  * A house lost one of its key figures. Why is the story it belongs to rather than a field on it: a loss that
@@ -204,7 +225,7 @@ data class HouseLostKeyFigure(
     val characterId: CharacterId,
     override val worldTime: WorldTime,
     override val recordedAt: Instant,
-) : HouseEvent, WorldEvent
+) : KeyFigureEvent, WorldEvent
 
 /**
  * A house was given vision of a place: it sees a circle about it, `radius` kilometres on the ground, from this
@@ -220,7 +241,7 @@ data class HouseGainedVision(
     val radius: Double,
     override val worldTime: WorldTime,
     override val recordedAt: Instant,
-) : HouseEvent, WorldEvent
+) : VisionEvent, WorldEvent
 
 /** A house lost a vision it had been given. What the vision covered stays revealed. */
 data class HouseLostVision(
@@ -228,4 +249,4 @@ data class HouseLostVision(
     val visionId: VisionId,
     override val worldTime: WorldTime,
     override val recordedAt: Instant,
-) : HouseEvent, WorldEvent
+) : VisionEvent, WorldEvent
