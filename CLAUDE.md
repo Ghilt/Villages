@@ -520,7 +520,9 @@ Commands are added here as the increments land:
   `cd backend` then `./gradlew :app:bootRun --args=--server.port=<this tree's game port>`. The gateway is a
   WebSocket at `ws://localhost:<that port>/ws`, 8080 in the main checkout; the web app connects to its own
   tree's on load, or to `VITE_GATEWAY_URL` when that is set. Everything is in memory until MongoDB exists, so
-  nothing survives a restart, on purpose.
+  nothing survives a restart, on purpose. `--villages.instruments=false` closes Adam's instruments: every lever
+  of the debug panel and the event page, seeing everything, the fog's switch and the wipe are refused
+  `instrumentsClosed`, and the player's own commands go on. See decision record 0076.
 - Backend, checks: `cd backend` then `./gradlew check`. Gradle fetches the JDK 21 the toolchain asks for, so
   `JAVA_HOME` may stay on the Temurin 17 that is installed; the first run downloads it. Every module's
   `build.gradle.kts` declares only its allowed dependency edges and, with `testsRead`, the files outside

@@ -279,6 +279,7 @@ class WorldConfig {
         stands: Stands,
         faults: Faults,
         gatewayLater: ScheduledLater,
+        @Value("\${villages.instruments:true}") instruments: Boolean,
     ): Gateway = Gateway(
         tokens = AnonymousTokens,
         foundHouse = foundHouse,
@@ -303,5 +304,6 @@ class WorldConfig {
         dialogueRows = dialogueRows,
         stands = stands,
         later = gatewayLater,
+        instrumentsOpen = instruments,
     )
 }

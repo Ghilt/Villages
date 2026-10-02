@@ -67,7 +67,7 @@ violation when the rule was introduced.
 | `infrastructure-occurrent` | CloudEvent conversion and type mapping, the MongoDB event store, the application service, durable subscriptions |
 | `infrastructure-rabbit` | Broker topology, the bridge that publishes stored events, and the feed the gateway consumes |
 | `projections` | Read models. The first is houses by cell, which the map is drawn from; the sight is what every house can see, which the fog of war is drawn from |
-| `gateway` | Player connections, cell subscriptions, snapshots, coalesced deltas, command intake |
+| `gateway` | Player connections, cell subscriptions, snapshots, coalesced deltas, command intake through one registry, `Commands`, and Adam's instruments as a part of their own, `Instruments`, which `villages.instruments` closes (0076) |
 | `app` | The Spring Boot bootstrap and the wiring. The only module that knows every other one |
 | `arch-tests` | The layer rules, as tests |
 | `load-bots` | The swarm that proves the scale numbers |

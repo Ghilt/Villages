@@ -18,14 +18,11 @@ import villages.application.KeyFigureService
 import villages.application.KeyFiguresByHouse
 import villages.application.PlayerTokens
 import villages.application.Later
-import villages.application.Provenance
 import villages.application.Sight
 import villages.application.SightsByHouse
 import villages.application.Stands
 import villages.application.RecentEvents
 import villages.application.ResourceService
-import villages.application.Start
-import villages.application.StoredEvent
 import villages.application.TakeActionService
 import villages.application.DialogueRow
 import villages.application.DialogueService
@@ -34,55 +31,31 @@ import villages.application.VisionService
 import villages.application.WorldClock
 import villages.application.WorldWipe
 import villages.application.WriteConflict
-import villages.domain.CharacterId
-import villages.domain.ChoiceId
-import villages.domain.DialogueId
-import villages.domain.LineId
 import villages.domain.DomainError
 import villages.domain.HouseId
-import villages.domain.HouseName
-import villages.domain.Location
-import villages.domain.OptionId
 import villages.domain.PlayerId
-import villages.domain.PledgeId
 import villages.domain.Vision
-import villages.domain.VisionId
 import villages.domain.WorldTime
-import villages.protocol.AddKeyFigurePayload
-import villages.protocol.AgeCharacterPayload
 import villages.protocol.Batch
 import villages.protocol.Cell
-import villages.protocol.ChangePortraitPayload
-import villages.protocol.ChangeStatPayload
 import villages.protocol.ChoiceView
 import villages.protocol.ClientFrame
 import villages.protocol.Command
 import villages.protocol.CommandAccepted
 import villages.protocol.CommandRejected
-import villages.protocol.CompleteDialogueStepPayload
 import villages.protocol.Delta
 import villages.protocol.ErrorFrame
 import villages.protocol.FogOfWar
-import villages.protocol.FoundHousePayload
-import villages.protocol.GiveVisionPayload
-import villages.protocol.GrantResourcePayload
 import villages.protocol.Hello
 import villages.protocol.CharacterArrived
 import villages.protocol.CharacterChanged
 import villages.protocol.CharacterGone
 import villages.protocol.HouseAppeared
 import villages.protocol.HouseChanged
-import villages.protocol.MoveCharacterPayload
-import villages.protocol.OfferDialoguePayload
-import villages.protocol.TakeOffTheMapPayload
-import villages.protocol.TakeVisionPayload
-import villages.protocol.KillCharacterPayload
 import villages.protocol.PROTOCOL_VERSION
 import villages.protocol.Ping
-import villages.protocol.PledgeResourcePayload
 import villages.protocol.Pong
 import villages.protocol.ProtocolJson
-import villages.protocol.ReleasePledgePayload
 import villages.protocol.Resync
 import villages.protocol.SeeAll
 import villages.protocol.ServerFrame
@@ -91,9 +64,7 @@ import villages.protocol.STAND_TILES
 import villages.protocol.StandRecords
 import villages.protocol.StandsFrame
 import villages.protocol.standTilesUnder
-import villages.protocol.SpendResourcePayload
 import villages.protocol.SubscribeCells
-import villages.protocol.TakeActionPayload
 import villages.protocol.TakenOver
 import villages.protocol.UnsubscribeCells
 import villages.protocol.ViewTime
@@ -130,14 +101,6 @@ const val COALESCE_MS = 250L
 const val MOST_WAITING = 500
 
 /**
- * How much of the end of the chronicle a watcher is given when it starts watching.
- *
- * A viewer that has just been opened has missed everything, and the world did not begin when it did.
- * What is served is whatever the read model still holds, so asking for more than it keeps is harmless.
- */
-const val MOST_RECENT_EVENTS = 100
-
-/**
  * The edge, without the transport: one instance per process, one `Connection` per socket. It speaks the
  * protocol, translates it to the application's terms and back, serves a cell's snapshot from the read
  * model on subscribing, and fans every change out to whoever holds a cell containing it. Nothing in here
@@ -154,7 +117,7 @@ const val MOST_RECENT_EVENTS = 100
  */
 class Gateway(
     private val tokens: PlayerTokens,
-    private val foundHouse: FoundHouseService,
+    foundHouse: FoundHouseService,
     events: EventFeed,
     faults: Faults,
     private val houses: HousesByCell,
@@ -162,22 +125,32 @@ class Gateway(
     private val clock: Clock,
     private val world: WorldClock,
     private val arrival: Arrival,
-    private val takeAction: TakeActionService,
-    private val resources: ResourceService,
+    takeAction: TakeActionService,
+    resources: ResourceService,
     private val choices: ChoicesByPlayer,
-    private val recent: RecentEvents,
-    private val emptyTheWorld: WorldWipe,
-    private val keyFigures: KeyFigureService,
+    recent: RecentEvents,
+    emptyTheWorld: WorldWipe,
+    keyFigures: KeyFigureService,
     private val figures: KeyFiguresByHouse,
     private val onTheMap: CharactersByCell,
     private val sights: SightsByHouse,
-    private val visions: VisionService,
-    private val dialogues: DialogueService,
+    visions: VisionService,
+    dialogues: DialogueService,
     private val dialogueRows: DialoguesByHouse,
     private val stands: Stands = Stands { _, _, _ -> null },
     private val later: Later,
+    instrumentsOpen: Boolean = true,
 ) : AutoCloseable {
-    private val watching = ConcurrentHashMap<Connection, Unit>()
+    /** Adam's instruments, which one setting closes. See decision record 0076. */
+    private val instruments = Instruments(
+        instrumentsOpen, events, recent, emptyTheWorld, foundHouse, resources, keyFigures, visions, dialogues,
+    )
+
+    /** Every command the gateway takes, each with the one part that handles it. See decision record 0076. */
+    private val commands = Commands().apply {
+        instruments.register(this)
+        play(takeAction, dialogues, choices, dialogueRows)
+    }
 
     /** Which connections hold each cell: the whole of the fan-out index. */
     private val holding = CellIndex<Connection>()
@@ -191,9 +164,6 @@ class Gateway(
     /** Every live connection, so that a wipe can tell all of them and not only the introduced ones. */
     private val live = ConcurrentHashMap.newKeySet<Connection>()
 
-    // From now: the debug panel watches the world happening, and would not thank us for the whole
-    // chronicle replayed at it on every connect.
-    private val feed: AutoCloseable = events.subscribe(Start.FROM_NOW) { stored -> fanOutEvent(stored) }
     private val changes: AutoCloseable = houses.watch { change -> fanOutChange(change) }
 
     /** What a player has to decide reaches them wherever they are looking, like their house does. */
@@ -246,24 +216,14 @@ class Gateway(
     /** How many cells somebody holds, for the tests that hold the index to letting go. */
     internal val cellsHeld: Int get() = holding.size
 
-    /**
-     * Empties the world and finishes every session with it.
-     *
-     * Everybody is told, because a wipe is everybody's: a window left holding a house that no longer
-     * exists would be showing a world that is not there. Each one reloads and arrives anew. See 0036.
-     */
-    private fun wipeTheWorld() {
-        val gone = emptyTheWorld.wipe()
+    /** The kinds of command something here takes, for the test that every kind has its one handler. */
+    internal val commandKinds get() = commands.kinds
+
+    /** Finishes every session there is and forgets whose they were, which is what a wipe does to them. */
+    private fun endEverySession(why: WorldWiped) {
         sessions.clear()
         for (connection in live) {
-            connection.finish(WorldWiped("the world was emptied; $gone event${if (gone == 1) "" else "s"} went"))
-        }
-    }
-
-    private fun fanOutEvent(stored: StoredEvent) {
-        val frame = stored.toFrame()
-        for (connection in watching.keys) {
-            connection.out.send(frame)
+            connection.finish(why)
         }
     }
 
@@ -343,7 +303,7 @@ class Gateway(
     }
 
     override fun close() {
-        feed.close()
+        instruments.close()
         changes.close()
         asked.close()
         figuresChanged.close()
@@ -492,27 +452,14 @@ class Gateway(
             when (frame) {
                 is Hello -> hello(frame)
                 is Ping -> out.send(Pong(frame.t0, clock.millis()))
-                is WatchEvents -> if (frame.on) watchEvents() else watching.remove(this)
+                is WatchEvents -> instruments.watchEvents(this, frame.on)
                 is Command -> command(frame)
                 is SubscribeCells -> subscribe(frame.cells)
                 is UnsubscribeCells -> unsubscribe(frame.cells)
                 is ViewTime -> viewTime(frame.at)
-                is SeeAll -> seeAll(frame.on)
-                is FogOfWar -> fogOfWar(frame.on)
-                is WipeWorld -> wipeTheWorld()
-            }
-        }
-
-        /**
-         * Starts sending this connection every event, beginning with what it missed.
-         *
-         * Watching first and replaying after, so that nothing appended in between is lost. The cost is
-         * that something can arrive twice, which is the feed's own bargain and the reader's to absorb.
-         */
-        private fun watchEvents() {
-            watching[this] = Unit
-            for (stored in recent.latest(MOST_RECENT_EVENTS)) {
-                out.send(stored.toFrame())
+                is SeeAll -> instruments.seeAll(this, frame.on)
+                is FogOfWar -> instruments.fogOfWar(this, frame.on)
+                is WipeWorld -> instruments.wipe(this, ::endEverySession)
             }
         }
 
@@ -585,15 +532,6 @@ class Gateway(
             out.send(why)
         }
 
-        /** The story the pending choice began, so an action answering it belongs to that story. */
-        private fun pendingStory(who: PlayerId): java.util.UUID? =
-            choices.pendingOf(who)?.let { row -> runCatching { java.util.UUID.fromString(row.correlationId) }.getOrNull() }
-
-        /** The story a dialogue was offered in, so a step through it belongs to that story. */
-        private fun dialogueStory(who: PlayerId, dialogue: DialogueId): java.util.UUID? =
-            dialogueRows.of(HouseId.of(who)).firstOrNull { it.dialogue.id == dialogue }
-                ?.let { row -> runCatching { java.util.UUID.fromString(row.correlationId) }.getOrNull() }
-
         private fun command(frame: Command) {
             val who = player
             if (who == null) {
@@ -609,141 +547,10 @@ class Gateway(
             }
 
             try {
-                when (val payload = frame.command) {
-                    is FoundHousePayload -> foundHouse.found(
-                        houseId = HouseId.of(who),
-                        player = who,
-                        name = HouseName.of(payload.name),
-                        seat = Location(payload.seat.lat, payload.seat.lon),
-                        banner = payload.banner.toDomain(),
-                        provenance = Provenance.startedBy(commandId),
-                    )
-
-                    is GrantResourcePayload -> resources.grant(
-                        player = who,
-                        resource = asResource(payload.resource),
-                        amount = payload.amount,
-                        provenance = Provenance.startedBy(commandId),
-                    )
-
-                    is SpendResourcePayload -> resources.spend(
-                        player = who,
-                        resource = asResource(payload.resource),
-                        amount = payload.amount,
-                        provenance = Provenance.startedBy(commandId),
-                    )
-
-                    is PledgeResourcePayload -> resources.pledge(
-                        player = who,
-                        resource = asResource(payload.resource),
-                        amount = payload.amount,
-                        months = payload.months,
-                        purpose = payload.purpose,
-                        provenance = Provenance.startedBy(commandId),
-                    )
-
-                    is ReleasePledgePayload -> resources.release(
-                        player = who,
-                        pledgeId = PledgeId(asUuid(payload.pledgeId, "a pledge id")),
-                        provenance = Provenance.startedBy(commandId),
-                    )
-
-                    is TakeActionPayload -> takeAction.take(
-                        player = who,
-                        choiceId = ChoiceId(asUuid(payload.choiceId, "a choice id")),
-                        optionId = OptionId(asUuid(payload.optionId, "an option id")),
-                        // An action continues the story the choice began, so the action and what it does
-                        // wear the same correlation as the question. The server decides this, not the
-                        // client: nothing about correlation crosses the wire. See decision record 0035.
-                        provenance = Provenance(
-                            commandId = commandId,
-                            correlationId = pendingStory(who) ?: commandId,
-                        ),
-                    )
-
-                    is AddKeyFigurePayload -> keyFigures.add(who, Provenance.startedBy(commandId))
-
-                    is ChangeStatPayload -> keyFigures.changeStat(
-                        player = who,
-                        characterId = CharacterId(asUuid(payload.characterId, "a character id")),
-                        stat = asStat(payload.stat),
-                        by = payload.by,
-                        provenance = Provenance.startedBy(commandId),
-                    )
-
-                    is AgeCharacterPayload -> keyFigures.age(
-                        player = who,
-                        characterId = CharacterId(asUuid(payload.characterId, "a character id")),
-                        years = payload.years,
-                        provenance = Provenance.startedBy(commandId),
-                    )
-
-                    is ChangePortraitPayload -> keyFigures.changePortrait(
-                        player = who,
-                        characterId = CharacterId(asUuid(payload.characterId, "a character id")),
-                        portrait = payload.portrait,
-                        provenance = Provenance.startedBy(commandId),
-                    )
-
-                    is KillCharacterPayload -> keyFigures.kill(
-                        player = who,
-                        characterId = CharacterId(asUuid(payload.characterId, "a character id")),
-                        cause = payload.cause,
-                        provenance = Provenance.startedBy(commandId),
-                    )
-
-                    // A place off the world is refused by the place itself, as `invalidLocation`.
-                    is MoveCharacterPayload -> keyFigures.move(
-                        player = who,
-                        characterId = CharacterId(asUuid(payload.characterId, "a character id")),
-                        place = Location(payload.place.lat, payload.place.lon),
-                        provenance = Provenance.startedBy(commandId),
-                    )
-
-                    is TakeOffTheMapPayload -> keyFigures.takeOffTheMap(
-                        player = who,
-                        characterId = CharacterId(asUuid(payload.characterId, "a character id")),
-                        provenance = Provenance.startedBy(commandId),
-                    )
-
-                    // A place off the world is refused by the place itself, as `invalidLocation`.
-                    is GiveVisionPayload -> visions.give(
-                        player = who,
-                        place = Location(payload.place.lat, payload.place.lon),
-                        provenance = Provenance.startedBy(commandId),
-                    )
-
-                    is TakeVisionPayload -> visions.take(
-                        player = who,
-                        visionId = VisionId(asUuid(payload.visionId, "a vision id")),
-                        provenance = Provenance.startedBy(commandId),
-                    )
-
-                    // A sample by its name. A name that is not a sample is refused as malformed, and a house with
-                    // no key figure to speak it as `noSuchKeyFigure`. See decision record 0071.
-                    is OfferDialoguePayload -> dialogues.offerSample(
-                        player = who,
-                        sample = payload.sample,
-                        provenance = Provenance.startedBy(commandId),
-                    )
-
-                    is CompleteDialogueStepPayload -> {
-                        val dialogue = DialogueId(asUuid(payload.dialogueId, "a dialogue id"))
-                        dialogues.step(
-                            player = who,
-                            dialogueId = dialogue,
-                            lineId = LineId(payload.lineId),
-                            // A step continues the story the offer began, as an action continues its choice's,
-                            // so the step and what it pays wear the offer's correlation. The server decides
-                            // this, not the client. See decision records 0035 and 0071.
-                            provenance = Provenance(
-                                commandId = commandId,
-                                correlationId = dialogueStory(who, dialogue) ?: commandId,
-                            ),
-                        )
-                    }
-                }
+                commands.handle(Asking(who, commandId), frame.command)
                 out.send(CommandAccepted(frame.commandId))
+            } catch (@Suppress("SwallowedException") closed: InstrumentsClosed) {
+                out.send(CommandRejected(frame.commandId, "instrumentsClosed"))
             } catch (refused: DomainError) {
                 out.send(CommandRejected(frame.commandId, refused.reasonCode()))
             } catch (@Suppress("SwallowedException") busy: WriteConflict) {
@@ -862,7 +669,7 @@ class Gateway(
          * Opens or closes the eye, and answers every held cell again so the map redraws at once rather
          * than at the next pan. Modelled on `viewTime`: both change what is shown, not what is held.
          */
-        private fun seeAll(on: Boolean) {
+        internal fun seeAll(on: Boolean) {
             if (on == seesEverything) {
                 return
             }
@@ -874,7 +681,7 @@ class Gateway(
          * Lifts the fog for this connection or lets it fall again, and answers every held cell again, as the
          * eye does: both change what is shown, not what is held. See decision record 0061.
          */
-        private fun fogOfWar(on: Boolean) {
+        internal fun fogOfWar(on: Boolean) {
             if (on == fogged) {
                 return
             }
@@ -954,7 +761,7 @@ class Gateway(
         }
 
         private fun letEverythingGo() {
-            watching.remove(this)
+            instruments.forget(this)
             synchronized(lock) {
                 standsSent.clear()
                 cells.forEach { holding.letGo(it, this) }

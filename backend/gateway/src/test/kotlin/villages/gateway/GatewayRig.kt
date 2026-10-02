@@ -200,7 +200,8 @@ internal class ManualLater : Later {
     val pending: Int get() = planned.size
 }
 
-internal class Rig {
+/** The whole gateway on a tiny world. `instrumentsOpen` is the setting, `villages.instruments`. */
+internal class Rig(instrumentsOpen: Boolean = true) {
     val world = TinyWorld()
     val later = ManualLater()
     val houses = HousesProjection(world).started()
@@ -278,6 +279,7 @@ internal class Rig {
         dialogueRows = dialogueRows,
         stands = Stands { master, x, y -> if (master == "terrain") standsOnDisk[y * STAND_TILES + x] ?: ByteArray(0) else null },
         later = later,
+        instrumentsOpen = instrumentsOpen,
     )
 
     /** The choice a player is holding, as the gateway would send it. */

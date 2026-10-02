@@ -10,7 +10,7 @@
 # editor numbers them: every line break, and the last line when it has none.
 
 411 backend/domain/src/main/kotlin/villages/domain/HouseDecider.kt
-965 backend/gateway/src/main/kotlin/villages/gateway/Gateway.kt
+772 backend/gateway/src/main/kotlin/villages/gateway/Gateway.kt
 696 backend/protocol/src/main/kotlin/villages/protocol/Frames.kt
 788 debug-quick-start.ps1
 819 frontend/apps/web/src/admin/showcase/showcase.css
