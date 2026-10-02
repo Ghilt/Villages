@@ -2,7 +2,6 @@ package villages.gateway
 
 import villages.application.Arrival
 import villages.application.CharacterRow
-import villages.application.ChoiceRow
 import villages.application.ChoicesByPlayer
 import villages.application.EventFeed
 import villages.application.Faults
@@ -28,49 +27,33 @@ import villages.application.ResourceService
 import villages.application.Start
 import villages.application.StoredEvent
 import villages.application.TakeActionService
-import villages.application.DialogueEnding
 import villages.application.DialogueRow
 import villages.application.DialogueService
 import villages.application.DialoguesByHouse
 import villages.application.VisionService
-import villages.application.VisionSource
 import villages.application.WorldClock
 import villages.application.WorldWipe
 import villages.application.WriteConflict
-import villages.domain.Banner
-import villages.domain.CharacterError
 import villages.domain.CharacterId
-import villages.domain.Choice
 import villages.domain.ChoiceId
 import villages.domain.DialogueId
-import villages.domain.Effect
-import villages.domain.Line
 import villages.domain.LineId
-import villages.domain.Requirement
-import villages.domain.RevealImpact
-import villages.domain.Shows
-import villages.domain.walk
 import villages.domain.DomainError
-import villages.domain.HouseError
 import villages.domain.HouseId
 import villages.domain.HouseName
 import villages.domain.Location
 import villages.domain.OptionId
 import villages.domain.PlayerId
 import villages.domain.PledgeId
-import villages.domain.Resource
-import villages.domain.Stat
 import villages.domain.Vision
 import villages.domain.VisionId
 import villages.domain.WorldTime
 import villages.protocol.AddKeyFigurePayload
 import villages.protocol.AgeCharacterPayload
-import villages.protocol.BannerSpec
 import villages.protocol.Batch
 import villages.protocol.Cell
 import villages.protocol.ChangePortraitPayload
 import villages.protocol.ChangeStatPayload
-import villages.protocol.Charge
 import villages.protocol.ChoiceView
 import villages.protocol.ClientFrame
 import villages.protocol.Command
@@ -78,47 +61,25 @@ import villages.protocol.CommandAccepted
 import villages.protocol.CommandRejected
 import villages.protocol.CompleteDialogueStepPayload
 import villages.protocol.Delta
-import villages.protocol.Division
-import villages.protocol.EffectView
 import villages.protocol.ErrorFrame
-import villages.protocol.EventFrame
 import villages.protocol.FogOfWar
-import villages.protocol.DialogueView
-import villages.protocol.EndingView
-import villages.protocol.FoundAtView
-import villages.protocol.GrantView
-import villages.protocol.ImpactView
-import villages.protocol.LineView
-import villages.protocol.RequirementView
-import villages.protocol.RevealImpactView
-import villages.protocol.SaidLineView
-import villages.protocol.ShowsView
-import villages.protocol.SpeakerView
-import villages.protocol.SpendView
 import villages.protocol.FoundHousePayload
 import villages.protocol.GiveVisionPayload
 import villages.protocol.GrantResourcePayload
 import villages.protocol.Hello
-import villages.protocol.HolderView
 import villages.protocol.CharacterArrived
 import villages.protocol.CharacterChanged
 import villages.protocol.CharacterGone
-import villages.protocol.CharacterOnMapView
 import villages.protocol.HouseAppeared
 import villages.protocol.HouseChanged
 import villages.protocol.MoveCharacterPayload
 import villages.protocol.OfferDialoguePayload
 import villages.protocol.TakeOffTheMapPayload
 import villages.protocol.TakeVisionPayload
-import villages.protocol.HouseView
-import villages.protocol.KeyFigureView
 import villages.protocol.KillCharacterPayload
-import villages.protocol.OptionView
 import villages.protocol.PROTOCOL_VERSION
 import villages.protocol.Ping
 import villages.protocol.PledgeResourcePayload
-import villages.protocol.PledgeView
-import villages.protocol.Point
 import villages.protocol.Pong
 import villages.protocol.ProtocolJson
 import villages.protocol.ReleasePledgePayload
@@ -131,14 +92,10 @@ import villages.protocol.StandRecords
 import villages.protocol.StandsFrame
 import villages.protocol.standTilesUnder
 import villages.protocol.SpendResourcePayload
-import villages.protocol.StatsView
-import villages.protocol.Stock
 import villages.protocol.SubscribeCells
 import villages.protocol.TakeActionPayload
 import villages.protocol.TakenOver
-import villages.protocol.Tincture
 import villages.protocol.UnsubscribeCells
-import villages.protocol.VisionPointView
 import villages.protocol.ViewTime
 import villages.protocol.WatchEvents
 import villages.protocol.Welcome
@@ -147,7 +104,6 @@ import villages.protocol.WorldNow
 import villages.protocol.WorldWiped
 import villages.protocol.YourChoice
 import villages.protocol.YourHouse
-import villages.protocol.YourHouseView
 import villages.protocol.YourDialogues
 import villages.protocol.YourKeyFigures
 import villages.protocol.YourSight
@@ -463,14 +419,6 @@ class Gateway(
         private fun viewing(): WorldTime = viewingAt ?: world.today()
 
         /**
-         * Says what this player has to decide, unless they have already been told of that same choice.
-         *
-         * Two paths lead here and either may run first: the hello that gave the choice, and the watch on
-         * the read model that folded it. Without the guard a player would be told the same thing twice on
-         * arriving. The first call always sends, even with nothing pending, so the answer to hello is
-         * definite in the way `yourHouse` is.
-         */
-        /**
          * Sends this player their dialogues as they may know them: what has been said and the stretch ahead,
          * and never a requirement. See decision record 0071.
          */
@@ -478,6 +426,14 @@ class Gateway(
             out.send(YourDialogues(rows.map { it.toView() }))
         }
 
+        /**
+         * Says what this player has to decide, unless they have already been told of that same choice.
+         *
+         * Two paths lead here and either may run first: the hello that gave the choice, and the watch on
+         * the read model that folded it. Without the guard a player would be told the same thing twice on
+         * arriving. The first call always sends, even with nothing pending, so the answer to hello is
+         * definite in the way `yourHouse` is.
+         */
         internal fun tellChoice(choice: ChoiceView?) {
             synchronized(lock) {
                 if (finished || (everToldChoice && choice?.id == toldChoice)) {
@@ -1007,304 +963,3 @@ class Gateway(
         }
     }
 }
-
-private fun isCell(candidate: String): Boolean = runCatching { Cell(candidate) }.isSuccess
-
-/** An identifier off the wire, or a refusal saying which one was not one. */
-/** A resource named on the wire, or the refusal. The wire's names are the code's; see 0053 and the naming rule. */
-private fun asResource(name: String): Resource =
-    Resource.entries.firstOrNull { it.toWire() == name }
-        ?: throw IllegalArgumentException("not a resource: $name")
-
-private fun asUuid(value: String, what: String): java.util.UUID =
-    runCatching { java.util.UUID.fromString(value) }
-        .getOrElse { throw IllegalArgumentException("$what is a UUID, not $value") }
-
-/** A stat named on the wire, which is its name in lower case, or the refusal. */
-private fun asStat(name: String): Stat =
-    Stat.entries.firstOrNull { it.name.lowercase() == name }
-        ?: throw IllegalArgumentException("not a stat: $name")
-
-/**
- * A key figure as the pane shows them: the whole row, with the stats, because this goes to the session of a
- * house that holds them and to nobody else. See decision record 0055.
- */
-internal fun CharacterRow.toView(): KeyFigureView = KeyFigureView(
-    id = id.value.toString(),
-    givenName = name.given,
-    familyName = name.family,
-    sex = sex.name.lowercase(),
-    species = species.name.lowercase(),
-    bornOn = bornOn.day,
-    agedYears = agedYears,
-    stats = StatsView(
-        piety = stats.getValue(Stat.PIETY),
-        reason = stats.getValue(Stat.REASON),
-        kindness = stats.getValue(Stat.KINDNESS),
-        physical = stats.getValue(Stat.PHYSICAL),
-    ),
-    portrait = portrait,
-    keyFigureOf = keyFigureOf.map { HolderView(it.house.value.toString(), it.name.value, it.banner.toWire()) },
-    place = place?.let { Point(it.lat, it.lon) },
-    version = revision,
-)
-
-/**
- * A character standing on the map as everyone holding the cell sees them: who and whose, how old and
- * where, and not the stats, which are their house's own. The span is where they stood on the day the map was asked about.
- */
-internal fun CharacterRow.toMapView(span: CharacterSpan): CharacterOnMapView = CharacterOnMapView(
-    id = id.value.toString(),
-    givenName = name.given,
-    familyName = name.family,
-    sex = sex.name.lowercase(),
-    species = species.name.lowercase(),
-    bornOn = bornOn.day,
-    agedYears = agedYears,
-    portrait = portrait,
-    place = Point(span.place.lat, span.place.lon),
-    cell = Cell.of(span.place.lat, span.place.lon).quadkey,
-    keyFigureOf = keyFigureOf.map { HolderView(it.house.value.toString(), it.name.value, it.banner.toWire()) },
-    since = span.since.day,
-    version = revision,
-)
-
-/**
- * A house's vision points as the page draws its fog from them: every one it has had, oldest first. The
- * radius stays in kilometres; how big that is on the map is the page's to work out. See decision 0061.
- */
-internal fun Sight.toView(): List<VisionPointView> = points.map { point ->
-    VisionPointView(
-        kind = when (point.source) {
-            VisionSource.Seat -> "seat"
-            is VisionSource.KeyFigure -> "keyFigure"
-            is VisionSource.Given -> "given"
-        },
-        of = when (val source = point.source) {
-            VisionSource.Seat -> null
-            is VisionSource.KeyFigure -> source.character.value.toString()
-            is VisionSource.Given -> source.vision.value.toString()
-        },
-        place = Point(point.place.lat, point.place.lon),
-        radius = point.radius,
-        since = point.since.day,
-        until = point.until?.day,
-    )
-}
-
-/** A choice as the parchment shows it. What the interface renders and the whole of what it knows. */
-internal fun Choice.toView(): ChoiceView = ChoiceView(
-    id = id.value.toString(),
-    prompt = prompt,
-    options = options.map { option ->
-        OptionView(
-            id = option.id.value.toString(),
-            label = option.label,
-            detail = option.detail,
-            effect = option.effect.toView(),
-        )
-    },
-)
-
-internal fun Effect.toView(): EffectView = when (this) {
-    is Effect.FoundAt -> FoundAtView(
-        seat = Point(seat.lat, seat.lon),
-        name = name.value,
-        banner = banner.toWire(),
-    )
-
-    is Effect.Grant -> GrantView(resource = resource.toWire(), amount = amount)
-
-    is Effect.Spend -> SpendView(resource = resource.toWire(), amount = amount)
-}
-
-/**
- * A dialogue as its player may know it, walked from the steps taken: what has been said and what it did, the
- * stretch still to read and the options pending, and nothing past them, and never its requirements. The walk
- * is the decider's own, so the page and the house's rules cannot disagree. See 0071.
- */
-internal fun DialogueRow.toView(): DialogueView {
-    val walk = dialogue.walk(taken)
-    // A dialogue that has ended ends where it stood: a lost one has nothing left to read and nothing to choose.
-    val ended = ending != DialogueEnding.Open
-    return DialogueView(
-        id = dialogue.id.value.toString(),
-        revision = revision,
-        title = dialogue.title,
-        scene = dialogue.scene,
-        speakers = dialogue.speakers.map {
-            SpeakerView(it.id.value, it.party, it.name, it.portrait, it.character?.value?.toString())
-        },
-        said = walk.said.map { SaidLineView(it.id.value, it.speaker.value, it.words, it.effects.map(Effect::toView)) },
-        next = if (ended) emptyList() else walk.next.map { it.toView() },
-        options = if (ended) emptyList() else walk.options.map { it.asOption() },
-        ending = when (val stands = ending) {
-            DialogueEnding.Open -> EndingView.Open
-            DialogueEnding.Completed -> EndingView.Completed
-            is DialogueEnding.Lost -> EndingView.Lost(stands.because.toView())
-        },
-    )
-}
-
-/** A line still to be read: the words, who says them and what the line shows, and not what it will give. */
-private fun Line.toView(): LineView = LineView(id.value, speaker.value, words, shows = shows?.toView())
-
-/** An option to pick, with how whoever wrote it chose to show what taking it will do, and what it shows. */
-private fun Line.asOption(): LineView =
-    LineView(id.value, speaker.value, words, revealImpact?.toView(), shows?.toView())
-
-private fun Shows.toView(): ShowsView = when (this) {
-    is Shows.Place -> ShowsView.Place(Point(at.lat, at.lon))
-    is Shows.House -> ShowsView.House(house.value.toString())
-    is Shows.Character -> ShowsView.Character(character.value.toString())
-}
-
-private fun RevealImpact.toView(): RevealImpactView = when (this) {
-    is RevealImpact.Shown -> RevealImpactView.Shown(impacts.map { ImpactView(it.resource.toWire(), it.amount) })
-    RevealImpact.Hidden -> RevealImpactView.Hidden
-}
-
-private fun Requirement.toView(): RequirementView = when (this) {
-    is Requirement.Alive -> RequirementView.Alive(character.value.toString())
-}
-
-/** What makes two deltas the same one: the thing they are about and its version. */
-private val Delta.key: Pair<String, Long>
-    get() = when (this) {
-        is HouseAppeared -> house.id to house.version
-        is HouseChanged -> house.id to house.version
-        is CharacterArrived -> "character:${character.id}" to character.version
-        is CharacterChanged -> "character:${character.id}" to character.version
-        is CharacterGone -> "character:$id" to version
-    }
-
-/** A domain refusal as the short code the protocol carries, which the interface turns into words. */
-internal fun DomainError.reasonCode(): String = when (this) {
-    HouseError.AlreadyFounded -> "alreadyFounded"
-    is HouseError.InvalidName -> "invalidName"
-    is DomainError.InvalidLocation -> "invalidLocation"
-    is HouseError.InvalidBanner -> "invalidBanner"
-    is HouseError.InvalidChoice -> "invalidChoice"
-    is HouseError.InvalidDialogue -> "invalidDialogue"
-    HouseError.DialogueAlreadyOffered -> "dialogueAlreadyOffered"
-    HouseError.NoSuchDialogue -> "noSuchDialogue"
-    HouseError.DialogueOver -> "dialogueOver"
-    HouseError.NotTheNextStep -> "notTheNextStep"
-    HouseError.ChoicePending -> "choicePending"
-    HouseError.NoChoicePending -> "noChoicePending"
-    HouseError.NoSuchChoice -> "noSuchChoice"
-    HouseError.NoSuchOption -> "noSuchOption"
-    HouseError.NoSuchHouse -> "noSuchHouse"
-    HouseError.NoSuchPledge -> "noSuchPledge"
-    HouseError.TooManyKeyFigures -> "tooManyKeyFigures"
-    HouseError.AlreadyAKeyFigure -> "alreadyAKeyFigure"
-    HouseError.NoSuchKeyFigure -> "noSuchKeyFigure"
-    HouseError.NoSuchVision -> "noSuchVision"
-    is HouseError.InvalidVision -> "invalidVision"
-    is HouseError.InvalidAmount -> "invalidAmount"
-    is HouseError.InvalidPledge -> "invalidPledge"
-    is HouseError.NotEnoughFree -> "notEnoughFree"
-    CharacterError.AlreadyAppeared -> "alreadyAppeared"
-    CharacterError.NoSuchCharacter -> "noSuchCharacter"
-    CharacterError.AlreadyDead -> "alreadyDead"
-    // The same words as a house's refusal of the same rule, because the interface says them the same way.
-    is CharacterError.InvalidName -> "invalidName"
-    is CharacterError.InvalidStat -> "invalidStat"
-    is CharacterError.InvalidAge -> "invalidAge"
-    is CharacterError.InvalidPortrait -> "invalidPortrait"
-    is CharacterError.InvalidCause -> "invalidCause"
-    CharacterError.NotOnTheMap -> "notOnTheMap"
-}
-
-internal fun StoredEvent.toFrame(): EventFrame = EventFrame(
-    id = id,
-    eventType = type,
-    stream = stream,
-    streamVersion = streamVersion,
-    time = time.toEpochMilli(),
-    correlationId = correlationId,
-    causationId = causationId,
-    data = ProtocolJson.tree(data),
-)
-
-/** A row of the read model as the map shows it. The cell on the wire is the house's deepest. */
-internal fun HouseRow.toView(deepest: Cell = Cell.of(seat.lat, seat.lon)): HouseView = HouseView(
-    id = id.value.toString(),
-    name = name.value,
-    cell = deepest.quadkey,
-    seat = Point(seat.lat, seat.lon),
-    banner = banner.toWire(),
-    since = since.day,
-    version = version,
-)
-
-/**
- * The player's own house: the public view, and what only its owner is told.
- *
- * `pledged` is summed here rather than sent as a list for the browser to add up, and the resources go on
- * this view rather than on `HouseView` so that what a house has reaches one session and not every
- * neighbour holding its cell.
- */
-internal fun HouseRow.toYours(deepest: Cell = Cell.of(seat.lat, seat.lon)): YourHouseView = YourHouseView(
-    house = toView(deepest),
-    resources = Resource.entries.associate { resource ->
-        val stock = stockOf(resource)
-        resource.toWire() to Stock(
-            total = stock.total,
-            pledged = pledgedOf(resource),
-            ratePerSecond = stock.ratePerSecond,
-            asOf = stock.asOf.toEpochMilli(),
-        )
-    },
-    pledges = pledges.map {
-        PledgeView(
-            id = it.id.value.toString(),
-            resource = it.resource.toWire(),
-            amount = it.amount,
-            until = it.until.day,
-            purpose = it.purpose,
-        )
-    },
-)
-
-/**
- * A resource's name on the wire: the code's name and not the player's, because the wire is code talking
- * to code and what a player is shown is the interface's to decide. Exhaustive, so a sixth resource cannot
- * reach the wire without somebody naming it. See the naming rule in `BUILDING-A-MECHANIC.md`.
- */
-internal fun Resource.toWire(): String = when (this) {
-    Resource.WEALTH -> "wealth"
-    Resource.NATURAL_DOMAIN -> "naturalDomain"
-    Resource.INFLUENCE -> "influence"
-    Resource.REASON -> "reason"
-    Resource.PIETY -> "piety"
-}
-
-/** The domain's heraldry, spelled for the interface. The two enums share their names on purpose. */
-internal fun Banner.toWire(): BannerSpec = BannerSpec(
-    field = Tincture.valueOf(field.name),
-    division = Division.valueOf(division.name),
-    second = second?.let { Tincture.valueOf(it.name) },
-    charge = Charge.valueOf(charge.name),
-    chargeTincture = Tincture.valueOf(chargeTincture.name),
-)
-
-/** The wire's heraldry, spelled for the interface, into the domain's. */
-internal fun BannerSpec.toDomain(): Banner = Banner(
-    field = field.toDomain(),
-    division = when (division) {
-        Division.PLAIN -> villages.domain.Division.PLAIN
-        Division.PER_PALE -> villages.domain.Division.PER_PALE
-        Division.PER_FESS -> villages.domain.Division.PER_FESS
-        Division.QUARTERLY -> villages.domain.Division.QUARTERLY
-    },
-    second = second?.toDomain(),
-    charge = when (charge) {
-        Charge.TOWER -> villages.domain.Charge.TOWER
-        Charge.STAG -> villages.domain.Charge.STAG
-        Charge.STAR -> villages.domain.Charge.STAR
-    },
-    chargeTincture = chargeTincture.toDomain(),
-)
-
-internal fun Tincture.toDomain(): villages.domain.Tincture = villages.domain.Tincture.valueOf(name)
