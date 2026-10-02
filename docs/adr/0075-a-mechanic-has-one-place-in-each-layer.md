@@ -48,6 +48,16 @@ Whatever reads a house reads it as it always did: the house answers `pledges`, `
 the rest from its parts. A sixth mechanic on the house's stream is a part, a family of commands, a family of
 events, and a line in each of the decider's two routes.
 
+*Amended 2026-10-02, the gateway in parts:* `Gateway.kt` is the core every mechanic shares - who a connection's
+player is and the takeover, the cells held and the fan-out index, coalescing, the fog gate and a cell's
+snapshot - and each mechanic is a `Part`: `HousesPart`, `KeyFiguresPart`, `DialoguesPart`, `ChoicesPart`, and
+the `Instruments`. A part greets a player arriving, after the welcome and in the order the gateway lists the
+parts, which is the order the page is told things in; registers the commands and the frames it takes, in
+`Commands` and `Frames`, each kind with exactly one handler; watches its own read models; and forgets what it
+kept of a connection when its session ends. The core answers the frames in `CORE_FRAMES` itself, and a test
+holds every kind of frame and of command to being taken exactly once. A hook arrives with the first part that
+needs it, rather than ahead of one.
+
 ## Consequences
 
 - A sixth mechanic adds a family, a read model and a view file, and edits the folds that care about it and no

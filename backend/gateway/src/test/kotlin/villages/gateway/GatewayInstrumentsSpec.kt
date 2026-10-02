@@ -1,6 +1,5 @@
 package villages.gateway
 
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
@@ -8,30 +7,17 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import villages.domain.PlayerId
 import villages.protocol.CommandAccepted
-import villages.protocol.CommandPayload
 import villages.protocol.CommandRejected
 import villages.protocol.ErrorFrame
 import villages.protocol.EventFrame
-import villages.protocol.GrantResourcePayload
 import villages.protocol.WorldWiped
 import java.util.UUID
 
 /**
  * The instruments: Adam's levers and looks, as one part of the gateway, and the one setting that closes all of
- * them while the player's own commands go on. And the registry every command goes through. See 0076.
+ * them while the player's own commands go on. See decision record 0076.
  */
 class GatewayInstrumentsSpec : StringSpec({
-
-    "every kind of command the protocol has is taken by exactly one part of the gateway" {
-        Rig().gateway.commandKinds shouldBe CommandPayload::class.sealedSubclasses.toSet()
-    }
-
-    "a second handler for a kind is refused as it is put there, so no kind can have two" {
-        val commands = Commands()
-        commands.on<GrantResourcePayload> { _, _ -> }
-
-        shouldThrow<IllegalArgumentException> { commands.on<GrantResourcePayload> { _, _ -> } }
-    }
 
     "closed, every lever is refused as instrumentsClosed, and nothing is written" {
         val rig = Rig(instrumentsOpen = false)

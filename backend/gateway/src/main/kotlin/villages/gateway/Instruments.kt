@@ -22,6 +22,7 @@ import villages.protocol.ChangePortraitPayload
 import villages.protocol.ChangeStatPayload
 import villages.protocol.CommandPayload
 import villages.protocol.ErrorFrame
+import villages.protocol.FogOfWar
 import villages.protocol.FoundHousePayload
 import villages.protocol.GiveVisionPayload
 import villages.protocol.GrantResourcePayload
@@ -30,9 +31,12 @@ import villages.protocol.MoveCharacterPayload
 import villages.protocol.OfferDialoguePayload
 import villages.protocol.PledgeResourcePayload
 import villages.protocol.ReleasePledgePayload
+import villages.protocol.SeeAll
 import villages.protocol.SpendResourcePayload
 import villages.protocol.TakeOffTheMapPayload
 import villages.protocol.TakeVisionPayload
+import villages.protocol.WatchEvents
+import villages.protocol.WipeWorld
 import villages.protocol.WorldWiped
 import java.util.concurrent.ConcurrentHashMap
 
@@ -61,6 +65,7 @@ internal class InstrumentsClosed : RuntimeException("the instruments are closed 
 @Suppress("LongParameterList")
 internal class Instruments(
     val open: Boolean,
+    private val core: Core,
     events: EventFeed,
     private val recent: RecentEvents,
     private val emptyTheWorld: WorldWipe,
@@ -69,15 +74,26 @@ internal class Instruments(
     private val keyFigures: KeyFigureService,
     private val visions: VisionService,
     private val dialogues: DialogueService,
-) : AutoCloseable {
+) : Part {
     private val watching = ConcurrentHashMap.newKeySet<Gateway.Connection>()
 
     // From now: the debug panel watches the world happening, and would not thank us for the whole
     // chronicle replayed at it on every connect.
     private val feed: AutoCloseable = events.subscribe(Start.FROM_NOW) { stored -> tellWatchers(stored) }
 
-    /** The levers, each a command like any other, and each refused while the instruments are closed. */
-    fun register(commands: Commands) {
+    /**
+     * The levers, each a command like any other, and the four looks, each a frame: every one of them refused
+     * while the instruments are closed.
+     */
+    override fun register(commands: Commands, frames: Frames) {
+        frames.on<WatchEvents> { connection, frame -> watchEvents(connection, frame.on) }
+        frames.on<SeeAll> { connection, frame -> seeAll(connection, frame.on) }
+        frames.on<FogOfWar> { connection, frame -> fogOfWar(connection, frame.on) }
+        frames.on<WipeWorld> { connection, _ -> wipe(connection) }
+        levers(commands)
+    }
+
+    private fun levers(commands: Commands) {
         lever<FoundHousePayload>(commands) { asking, payload ->
             foundHouse.found(
                 houseId = HouseId.of(asking.who),
@@ -214,7 +230,7 @@ internal class Instruments(
      * Watching first and replaying after, so that nothing appended in between is lost. The cost is that
      * something can arrive twice, which is the feed's own bargain and the reader's to absorb.
      */
-    fun watchEvents(connection: Gateway.Connection, on: Boolean) = looking(connection, "watchEvents") {
+    private fun watchEvents(connection: Gateway.Connection, on: Boolean) = looking(connection, "watchEvents") {
         if (on) {
             watching += connection
             for (stored in recent.latest(MOST_RECENT_EVENTS)) {
@@ -226,23 +242,24 @@ internal class Instruments(
     }
 
     /** The eye: significance set aside for this connection, or taken up again. See decision record 0038. */
-    fun seeAll(connection: Gateway.Connection, on: Boolean) = looking(connection, "seeAll") { connection.seeAll(on) }
+    private fun seeAll(connection: Gateway.Connection, on: Boolean) = looking(connection, "seeAll") { connection.seeAll(on) }
 
     /** The fog of war lifted for this connection, or let fall again. See decision record 0061. */
-    fun fogOfWar(connection: Gateway.Connection, on: Boolean) = looking(connection, "fogOfWar") { connection.fogOfWar(on) }
+    private fun fogOfWar(connection: Gateway.Connection, on: Boolean) =
+        looking(connection, "fogOfWar") { connection.fogOfWar(on) }
 
     /**
-     * Empties the world and finishes every session with it, which [endEverySession] does. Everybody is told,
-     * because a wipe is everybody's: a window left holding a house that no longer exists would be showing a
-     * world that is not there. Each one reloads and arrives anew. See decision record 0036.
+     * Empties the world and finishes every session with it. Everybody is told, because a wipe is everybody's: a
+     * window left holding a house that no longer exists would be showing a world that is not there. Each one
+     * reloads and arrives anew. See decision record 0036.
      */
-    fun wipe(connection: Gateway.Connection, endEverySession: (WorldWiped) -> Unit) = looking(connection, "wipeWorld") {
+    private fun wipe(connection: Gateway.Connection) = looking(connection, "wipeWorld") {
         val gone = emptyTheWorld.wipe()
-        endEverySession(WorldWiped("the world was emptied; $gone event${if (gone == 1) "" else "s"} went"))
+        core.endEverySession(WorldWiped("the world was emptied; $gone event${if (gone == 1) "" else "s"} went"))
     }
 
     /** A connection that is going hears nothing more. */
-    fun forget(connection: Gateway.Connection) {
+    override fun ended(connection: Gateway.Connection) {
         watching -= connection
     }
 

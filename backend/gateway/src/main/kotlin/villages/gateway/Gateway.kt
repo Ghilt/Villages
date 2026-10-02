@@ -6,11 +6,9 @@ import villages.application.ChoicesByPlayer
 import villages.application.EventFeed
 import villages.application.Faults
 import villages.application.FoundHouseService
-import villages.application.CharacterMapChange
 import villages.application.CharacterSpan
 import villages.application.PlacedCharacter
 import villages.application.CharactersByCell
-import villages.application.HouseChange
 import villages.application.HouseRow
 import villages.application.HousesByCell
 import villages.application.HousesByPlayer
@@ -24,7 +22,6 @@ import villages.application.Stands
 import villages.application.RecentEvents
 import villages.application.ResourceService
 import villages.application.TakeActionService
-import villages.application.DialogueRow
 import villages.application.DialogueService
 import villages.application.DialoguesByHouse
 import villages.application.VisionService
@@ -37,27 +34,18 @@ import villages.domain.PlayerId
 import villages.domain.Vision
 import villages.domain.WorldTime
 import villages.protocol.Batch
-import villages.protocol.Cell
-import villages.protocol.ChoiceView
 import villages.protocol.ClientFrame
 import villages.protocol.Command
 import villages.protocol.CommandAccepted
 import villages.protocol.CommandRejected
 import villages.protocol.Delta
 import villages.protocol.ErrorFrame
-import villages.protocol.FogOfWar
 import villages.protocol.Hello
-import villages.protocol.CharacterArrived
-import villages.protocol.CharacterChanged
-import villages.protocol.CharacterGone
-import villages.protocol.HouseAppeared
-import villages.protocol.HouseChanged
 import villages.protocol.PROTOCOL_VERSION
 import villages.protocol.Ping
 import villages.protocol.Pong
 import villages.protocol.ProtocolJson
 import villages.protocol.Resync
-import villages.protocol.SeeAll
 import villages.protocol.ServerFrame
 import villages.protocol.Snapshot
 import villages.protocol.STAND_TILES
@@ -68,17 +56,10 @@ import villages.protocol.SubscribeCells
 import villages.protocol.TakenOver
 import villages.protocol.UnsubscribeCells
 import villages.protocol.ViewTime
-import villages.protocol.WatchEvents
 import villages.protocol.Welcome
-import villages.protocol.WipeWorld
 import villages.protocol.WorldNow
 import villages.protocol.WorldWiped
-import villages.protocol.YourChoice
-import villages.protocol.YourHouse
-import villages.protocol.YourDialogues
-import villages.protocol.YourKeyFigures
 import villages.protocol.YourSight
-import villages.protocol.coarsestZoom
 import java.time.Clock
 import java.util.Base64
 import java.util.concurrent.ConcurrentHashMap
@@ -106,6 +87,10 @@ const val MOST_WAITING = 500
  * model on subscribing, and fans every change out to whoever holds a cell containing it. Nothing in here
  * knows what a WebSocket is, so it is tested by calling it.
  *
+ * This is the core, which every mechanic shares: who a connection's player is and the takeover, the cells
+ * held, the fan-out index, coalescing, the fog gate and a cell's snapshot. What a mechanic says and takes is
+ * a [Part] of its own, and the core hands each its turn. See decision record 0075.
+ *
  * The fan-out is decision 0026 on the write side: a changed house has one deepest cell, and every
  * connection that should hear of it holds one of that cell's prefixes, from the zoom the house's
  * significance is first worth drawing at down to the deepest. That is at most eleven lookups a change.
@@ -121,37 +106,26 @@ class Gateway(
     events: EventFeed,
     faults: Faults,
     private val houses: HousesByCell,
-    private val theirHouses: HousesByPlayer,
+    theirHouses: HousesByPlayer,
     private val clock: Clock,
     private val world: WorldClock,
-    private val arrival: Arrival,
+    arrival: Arrival,
     takeAction: TakeActionService,
     resources: ResourceService,
-    private val choices: ChoicesByPlayer,
+    choices: ChoicesByPlayer,
     recent: RecentEvents,
     emptyTheWorld: WorldWipe,
     keyFigures: KeyFigureService,
-    private val figures: KeyFiguresByHouse,
+    figures: KeyFiguresByHouse,
     private val onTheMap: CharactersByCell,
     private val sights: SightsByHouse,
     visions: VisionService,
     dialogues: DialogueService,
-    private val dialogueRows: DialoguesByHouse,
+    dialogueRows: DialoguesByHouse,
     private val stands: Stands = Stands { _, _, _ -> null },
     private val later: Later,
     instrumentsOpen: Boolean = true,
 ) : AutoCloseable {
-    /** Adam's instruments, which one setting closes. See decision record 0076. */
-    private val instruments = Instruments(
-        instrumentsOpen, events, recent, emptyTheWorld, foundHouse, resources, keyFigures, visions, dialogues,
-    )
-
-    /** Every command the gateway takes, each with the one part that handles it. See decision record 0076. */
-    private val commands = Commands().apply {
-        instruments.register(this)
-        play(takeAction, dialogues, choices, dialogueRows)
-    }
-
     /** Which connections hold each cell: the whole of the fan-out index. */
     private val holding = CellIndex<Connection>()
 
@@ -164,31 +138,52 @@ class Gateway(
     /** Every live connection, so that a wipe can tell all of them and not only the introduced ones. */
     private val live = ConcurrentHashMap.newKeySet<Connection>()
 
-    private val changes: AutoCloseable = houses.watch { change -> fanOutChange(change) }
+    /** What the parts may ask of the core. */
+    private val core = object : Core {
+        override fun sessionOf(player: PlayerId): Connection? = sessions[player]
 
-    /** What a player has to decide reaches them wherever they are looking, like their house does. */
-    private val asked: AutoCloseable = choices.watch { player, row ->
-        sessions[player]?.tellChoice(row?.choice?.toView())
+        override fun holders(cell: String): Set<Connection>? = holding.holders(cell)
+
+        override fun endEverySession(why: WorldWiped) {
+            sessions.clear()
+            for (connection in live) {
+                connection.finish(why)
+            }
+        }
     }
 
     /**
-     * A house's key figures reach its player wherever they are looking, like the house does: whom a house
-     * holds is its own, and needs no cell. See decision record 0055.
+     * What a house sees, said to a player arriving in its place among the parts. The sight itself is still the
+     * core's, with the fog it gates.
      */
-    private val figuresChanged: AutoCloseable = figures.watch { change ->
-        sessions[change.player]?.out?.send(YourKeyFigures(change.keyFigures.map { it.toView() }))
+    private val sightGreeting = object : Part {
+        override fun greet(connection: Connection, who: PlayerId) {
+            connection.out.send(YourSight(sights.of(HouseId.of(who)).toView(), Vision.SURFACE_TENSION))
+        }
     }
 
     /**
-     * A house's dialogues reach its player wherever they are looking, like its key figures: what a house was
-     * offered is its own, and needs no cell. Each window is sent what it may know of them. See decision 0071.
+     * A part for each mechanic, in the order a player arriving is told things: the house, whom it holds, what it
+     * sees, what it was told, what it is asked; and Adam's instruments, which one setting closes (0076). Made
+     * after the index and the sessions, because a part watches its read models from the moment it is made.
+     * See decision record 0075.
      */
-    private val dialoguesChanged: AutoCloseable = dialogueRows.watch { change ->
-        sessions[change.player]?.tellDialogues(change.dialogues)
-    }
+    private val parts: List<Part> = listOf(
+        HousesPart(core, houses, theirHouses),
+        KeyFiguresPart(core, figures, onTheMap),
+        sightGreeting,
+        DialoguesPart(core, dialogues, dialogueRows),
+        ChoicesPart(core, arrival, takeAction, choices),
+        Instruments(instrumentsOpen, core, events, recent, emptyTheWorld, foundHouse, resources, keyFigures, visions, dialogues),
+    )
 
-    /** A character who moves, leaves the map or dies on it reaches whoever holds the cells either side. */
-    private val moves: AutoCloseable = onTheMap.watchTheMap { change -> fanOutMove(change) }
+    /** Every command the gateway takes, and every frame a part answers, each with the one part that handles it. */
+    private val commands = Commands()
+    private val frames = Frames()
+
+    init {
+        parts.forEach { it.register(commands, frames) }
+    }
 
     /**
      * What a house sees reaches its player wherever they are looking, like the house does: the fog of war is
@@ -219,96 +214,11 @@ class Gateway(
     /** The kinds of command something here takes, for the test that every kind has its one handler. */
     internal val commandKinds get() = commands.kinds
 
-    /** Finishes every session there is and forgets whose they were, which is what a wipe does to them. */
-    private fun endEverySession(why: WorldWiped) {
-        sessions.clear()
-        for (connection in live) {
-            connection.finish(why)
-        }
-    }
-
-    private fun fanOutChange(change: HouseChange) {
-        val row = change.row
-        val deepest = Cell.of(row.seat.lat, row.seat.lon)
-        val view = row.toView(deepest)
-
-        // Your own house reaches you wherever you are looking, not only when you hold its cell.
-        sessions[row.player]?.out?.send(YourHouse(row.toYours(deepest)))
-
-        // Whether it is new is the read model's answer, not the stream version's: a house founded from a
-        // choice arrives at version three, behind the choice it was given and the action that took it.
-        val delta: Delta = if (change.appeared) HouseAppeared(view) else HouseChanged(view)
-        val coarsest = coarsestZoom(row.significance.value)
-        // Every zoom, not only the ones this house is significant enough for: a connection with the eye
-        // open holds shallower cells and is owed the change in them too. Still eleven lookups. See 0038.
-        for (zoom in 0..Cell.MAX_ZOOM) {
-            val holders = holding.holders(deepest.at(zoom).quadkey) ?: continue
-            for (connection in holders) {
-                if ((zoom >= coarsest || connection.seesEverything) && connection.sees(row) && connection.letsSee(row)) {
-                    connection.enqueue(delta)
-                }
-            }
-        }
-    }
-
-    /**
-     * A character's move, told to each connection as the one delta that fits it.
-     *
-     * A house never moves, so its fan-out only ever adds; a character leaves cells as well as entering
-     * them, and a connection that is not told so goes on drawing them where they were. So who was shown
-     * them before is worked out as well as who is shown them now: a connection in both is told they
-     * changed, one only in the second that they arrived, one only in the first that they are gone. Only
-     * connections looking at the live world: a move today changes no earlier day's map. Walking into a
-     * house's vision is arriving and walking out of it is going, by the same arithmetic.
-     */
-    private fun fanOutMove(change: CharacterMapChange) {
-        val before = heldAt(change.row, change.was)
-        val after = heldAt(change.row, change.now)
-        val view = change.now?.let { change.row.toMapView(it) }
-        if (view != null) {
-            for (connection in after) {
-                if (connection.isLive) {
-                    connection.enqueue(if (connection in before) CharacterChanged(view) else CharacterArrived(view))
-                }
-            }
-        }
-        for (connection in before - after) {
-            if (connection.isLive) {
-                connection.enqueue(CharacterGone(change.row.id.value.toString(), change.row.revision))
-            }
-        }
-    }
-
-    /**
-     * The connections a character standing in this span is drawn for: every one holding a cell their place
-     * falls in, from the zoom their significance is worth drawing at, or at any zoom with the eye open, and
-     * whose fog lets them through there.
-     */
-    private fun heldAt(row: CharacterRow, span: CharacterSpan?): Set<Connection> {
-        if (span == null) {
-            return emptySet()
-        }
-        val deepest = Cell.of(span.place.lat, span.place.lon)
-        val coarsest = coarsestZoom(span.significance.value)
-        val found = mutableSetOf<Connection>()
-        for (zoom in 0..Cell.MAX_ZOOM) {
-            val holders = holding.holders(deepest.at(zoom).quadkey) ?: continue
-            for (connection in holders) {
-                if ((zoom >= coarsest || connection.seesEverything) && connection.letsSee(row, span)) {
-                    found += connection
-                }
-            }
-        }
-        return found
-    }
+    /** The kinds of frame a part answers, for the test that every kind is answered once. */
+    internal val frameKinds get() = frames.kinds
 
     override fun close() {
-        instruments.close()
-        changes.close()
-        asked.close()
-        figuresChanged.close()
-        dialoguesChanged.close()
-        moves.close()
+        parts.forEach(Part::close)
         seen.close()
         faulted.close()
     }
@@ -372,38 +282,17 @@ class Gateway(
         @Volatile
         private var finished = false
 
-        /** Which choice this connection has been told of, and whether it has been told anything at all. */
-        private var toldChoice: String? = null
-        private var everToldChoice = false
+        /** What each part keeps of this connection, made the first time the part asks and gone with it. */
+        private val kept = ConcurrentHashMap<Part, Any>()
+
+        /** What [part] keeps of this connection, made by [make] the first time it is asked for. */
+        @Suppress("UNCHECKED_CAST")
+        internal fun <T : Any> keptBy(part: Part, make: () -> T): T = kept.computeIfAbsent(part) { make() } as T
+
+        /** Whether this session is over, by a takeover or by the socket going away. */
+        internal val isFinished: Boolean get() = finished
 
         private fun viewing(): WorldTime = viewingAt ?: world.today()
-
-        /**
-         * Sends this player their dialogues as they may know them: what has been said and the stretch ahead,
-         * and never a requirement. See decision record 0071.
-         */
-        internal fun tellDialogues(rows: List<DialogueRow>) {
-            out.send(YourDialogues(rows.map { it.toView() }))
-        }
-
-        /**
-         * Says what this player has to decide, unless they have already been told of that same choice.
-         *
-         * Two paths lead here and either may run first: the hello that gave the choice, and the watch on
-         * the read model that folded it. Without the guard a player would be told the same thing twice on
-         * arriving. The first call always sends, even with nothing pending, so the answer to hello is
-         * definite in the way `yourHouse` is.
-         */
-        internal fun tellChoice(choice: ChoiceView?) {
-            synchronized(lock) {
-                if (finished || (everToldChoice && choice?.id == toldChoice)) {
-                    return
-                }
-                everToldChoice = true
-                toldChoice = choice?.id
-            }
-            out.send(YourChoice(choice))
-        }
 
         /** Whether a change is on this connection's day. Live sees everything; the past sees what existed then. */
         internal fun sees(row: HouseRow): Boolean = viewingAt?.let { row.existsAt(it) } ?: true
@@ -452,14 +341,12 @@ class Gateway(
             when (frame) {
                 is Hello -> hello(frame)
                 is Ping -> out.send(Pong(frame.t0, clock.millis()))
-                is WatchEvents -> instruments.watchEvents(this, frame.on)
                 is Command -> command(frame)
                 is SubscribeCells -> subscribe(frame.cells)
                 is UnsubscribeCells -> unsubscribe(frame.cells)
                 is ViewTime -> viewTime(frame.at)
-                is SeeAll -> instruments.seeAll(this, frame.on)
-                is FogOfWar -> instruments.fogOfWar(this, frame.on)
-                is WipeWorld -> instruments.wipe(this, ::endEverySession)
+                // The core answers the kinds in CORE_FRAMES above, and a part every other.
+                else -> frames.handle(this, frame)
             }
         }
 
@@ -494,21 +381,7 @@ class Gateway(
                     world = WorldNow(today = today.day, earliest = (houses.earliest() ?: today).day),
                 ),
             )
-            out.send(YourHouse(theirHouses.ofPlayer(who)?.toYours()))
-            out.send(YourKeyFigures(figures.of(HouseId.of(who)).map { it.toView() }))
-            out.send(YourSight(sights.of(HouseId.of(who)).toView(), Vision.SURFACE_TENSION))
-            tellDialogues(dialogueRows.of(HouseId.of(who)))
-
-            // Arriving with no house and nothing to decide is what the founding choice answers. The
-            // choice arrive() hands back is what goes out, not a read of the projection: the projection
-            // folds on another thread and would sometimes say "nothing" about a choice just written.
-            val given = try {
-                arrival.arrive(who)
-            } catch (@Suppress("TooGenericExceptionCaught") wrong: RuntimeException) {
-                out.send(ErrorFrame("arrival", wrong.message ?: "could not be given a choice"))
-                null
-            }
-            tellChoice((given ?: choices.pendingOf(who)?.choice)?.toView())
+            parts.forEach { it.greet(this, who) }
         }
 
         /**
@@ -761,7 +634,7 @@ class Gateway(
         }
 
         private fun letEverythingGo() {
-            instruments.forget(this)
+            parts.forEach { it.ended(this) }
             synchronized(lock) {
                 standsSent.clear()
                 cells.forEach { holding.letGo(it, this) }

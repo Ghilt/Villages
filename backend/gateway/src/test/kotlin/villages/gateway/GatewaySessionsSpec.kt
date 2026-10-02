@@ -25,6 +25,21 @@ import java.util.UUID
 /** The gateway: arriving, being taken over, and the frames that answer before anything is looked at. The rig is GatewayRig.kt. */
 class GatewaySessionsSpec : StringSpec({
 
+    "hello's frames come in one order: the welcome, then the house's own, then what it is asked" {
+        val rig = Rig()
+        val (founder, _) = rig.introduced()
+        founder.receive(founding())
+        founder.receive(addingAKeyFigure(commandNumber(7)))
+
+        // Arriving again, as a second window of the same player: everything the house has is said to it.
+        val sent = mutableListOf<ServerFrame>()
+        rig.gateway.connect { sent += it }.receive(hello)
+
+        sent.map { it::class.simpleName }.take(6) shouldBe listOf(
+            "Welcome", "YourHouse", "YourKeyFigures", "YourSight", "YourDialogues", "YourChoice",
+        )
+    }
+
     "hello is answered with welcome, the house this player has, and the choice they have to make" {
         val sent = mutableListOf<ServerFrame>()
         Rig().gateway.connect { sent += it }.receive(hello)

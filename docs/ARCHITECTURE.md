@@ -83,7 +83,9 @@ siblings, which a fold with nothing to say about it passes in one branch, and it
 which `HouseDecider` hands to the part of the house that decides them - the `Treasury`, `KeyFigures`,
 `Visions`, `Dialogues` - and that part alone folds its events; a part reaches another only through the
 effects it asks of the house, `Follow`; in the read models, its own
-projection; in the gateway, a file of its own for what its frames say, `HouseViews.kt` and the rest. What goes
+projection; in the gateway, a part of its own, `HousesPart` and the rest beside the core in `Gateway.kt`, which
+greets a player arriving, takes its commands and frames and watches its read models, and a file for what its
+frames say, `HouseViews.kt` and the rest. What goes
 where, for a new one, is the checklist in `BUILDING-A-MECHANIC.md`.
 
 Deployment starts as one process. The gateway is written as though it were already separate, so extracting it later is
