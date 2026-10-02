@@ -43,6 +43,10 @@ and how far out it stays drawn is worked out from the significance. See decision
   whose event it is and the same words in PascalCase, `PlayerGivenChoice`, and a test holds the two to
   each other and to the half they belong in.
 - Adding an optional field keeps the version.
+- A stored event is read as it was written, and never refused for what the code has learned since. A resource
+  added after a founding is read as an empty stock the house never had, and a stat added after an appearance as
+  the middle of the scale, 10, until somebody decides otherwise when the stat arrives. So growing an enum the
+  events carry a map of is not a change to those events. See decision record 0074.
 - Any other change creates the next version. The old type stays in this catalogue forever, and stays handled when
   folding a stream.
 - Pre-alpha exception, in force until the world-persistence milestone in the roadmap: the event store may be wiped

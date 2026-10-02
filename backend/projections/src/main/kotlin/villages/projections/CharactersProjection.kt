@@ -28,6 +28,7 @@ import villages.domain.HouseLostKeyFigure
 import villages.domain.HouseName
 import villages.domain.PlayerId
 import villages.domain.WorldTime
+import villages.domain.everyStat
 import villages.protocol.Cell
 import villages.protocol.coarsestZoom
 import java.util.concurrent.ConcurrentHashMap
@@ -98,7 +99,7 @@ class CharactersProjection(feed: EventFeed) : KeyFiguresByHouse, CharactersByCel
                     species = event.species,
                     bornOn = event.bornOn,
                     agedYears = 0,
-                    stats = event.stats,
+                    stats = everyStat(event.stats),
                     portrait = event.portrait,
                     appearedOn = event.worldTime,
                     diedOn = null,

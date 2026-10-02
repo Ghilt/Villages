@@ -40,6 +40,7 @@ import villages.domain.emptyStocks
 import villages.protocol.Cell
 import java.time.Instant
 import java.util.UUID
+import villages.domain.UNRECORDED_STAT
 
 /** A feed that delivers whatever it is handed, of either kind of stream, the moment it is handed it. */
 private class HandFedEvents : EventFeed {
@@ -274,5 +275,14 @@ class CharactersProjectionSpec : StringSpec({
         moves[1].now?.place shouldBe stockholm
         moves[2].was?.place shouldBe stockholm
         moves[2].now shouldBe null
+    }
+
+    "an appearance written before a stat existed is read with the middle of the scale of it" {
+        val (feed, projection, _) = rig()
+        val agnes = appeared(1)
+        feed.deliver(agnes.copy(stats = agnes.stats - Stat.KINDNESS))
+        feed.deliver(HouseGainedKeyFigure(adas, figure(1), today, noon))
+
+        projection.of(adas).single().stats[Stat.KINDNESS] shouldBe UNRECORDED_STAT
     }
 })

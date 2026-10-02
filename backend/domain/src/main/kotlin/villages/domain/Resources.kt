@@ -82,3 +82,10 @@ data class Stock(val total: Long, val ratePerSecond: Double, val asOf: Instant) 
  */
 fun emptyStocks(asOf: Instant): Map<Resource, Stock> =
     Resource.entries.associateWith { Stock(total = 0, ratePerSecond = 0.0, asOf = asOf) }
+
+/**
+ * Every resource's stock as a stored founding wrote it, and an empty one standing still for any resource added
+ * since, which the house never had. A stored event is read as it was written: it is never refused for what the
+ * code has learned since, so a sixth resource is a resource and not a wipe. See decision record 0074.
+ */
+fun everyStock(written: Map<Resource, Stock>, asOf: Instant): Map<Resource, Stock> = emptyStocks(asOf) + written

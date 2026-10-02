@@ -76,3 +76,15 @@ sealed interface Character {
 
 /** When a character died, and why, in words until the world has causes of its own. */
 data class Death(val on: WorldTime, val cause: String)
+
+/**
+ * What a character has of a stat their appearance never recorded, because it was added after them: the middle
+ * of the scale, until somebody decides otherwise when the stat arrives. See decision record 0074.
+ */
+val UNRECORDED_STAT: Int = (CharacterDecider.STAT_RANGE.first + CharacterDecider.STAT_RANGE.last) / 2
+
+/**
+ * Every stat as a stored appearance wrote it, and the middle of the scale for any stat added since. A stored
+ * event is read as it was written: it is never refused for what the code has learned since.
+ */
+fun everyStat(written: Map<Stat, Int>): Map<Stat, Int> = Stat.entries.associateWith { written[it] ?: UNRECORDED_STAT }

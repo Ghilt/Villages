@@ -136,7 +136,7 @@ object CharacterDecider : Decider<CharacterCommand, Character, CharacterEvent> {
             sex = event.sex,
             species = event.species,
             bornOn = event.bornOn,
-            stats = event.stats,
+            stats = everyStat(event.stats),
             portrait = event.portrait,
             appearedOn = event.worldTime,
         )

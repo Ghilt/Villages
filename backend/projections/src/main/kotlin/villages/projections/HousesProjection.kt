@@ -28,6 +28,7 @@ import villages.domain.HouseId
 import villages.domain.PlayerTookAction
 import villages.domain.PlayerId
 import villages.domain.WorldTime
+import villages.domain.everyStock
 import villages.protocol.Cell
 import villages.protocol.coarsestZoom
 import java.util.concurrent.ConcurrentHashMap
@@ -71,7 +72,7 @@ class HousesProjection(feed: EventFeed) : HousesByCell, HousesByPlayer, AutoClos
                 seat = event.seat,
                 significance = event.significance,
                 banner = event.banner,
-                resources = event.resources,
+                resources = everyStock(event.resources, event.recordedAt),
                 pledges = emptyList(),
                 since = event.worldTime,
                 until = null,

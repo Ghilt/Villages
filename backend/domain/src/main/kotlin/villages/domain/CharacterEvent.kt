@@ -14,8 +14,9 @@ sealed interface CharacterEvent : Event {
 
 /**
  * A character came into the world's story: their name, sex and species, the day they were born, which can
- * be long before the day they appeared, their four stats, and their portrait or none. They are on no map
- * until something moves them onto one.
+ * be long before the day they appeared, their stats, and their portrait or none. They are on no map until
+ * something moves them onto one. A stat added since it was written is read as the middle of the scale,
+ * `everyStat`. See decision record 0074.
  */
 data class CharacterAppeared(
     override val characterId: CharacterId,
@@ -27,13 +28,7 @@ data class CharacterAppeared(
     val portrait: String?,
     override val worldTime: WorldTime,
     override val recordedAt: Instant,
-) : CharacterEvent, WorldEvent {
-    init {
-        // A character has all four from the moment they exist, as a house has all five resources. A stored
-        // event missing one is malformed and says so here.
-        require(stats.keys == Stat.entries.toSet()) { "a character appears with every stat, not ${stats.keys}" }
-    }
-}
+) : CharacterEvent, WorldEvent
 
 /**
  * A character died. Their history ends here. The houses that held them as a key figure lose them in their

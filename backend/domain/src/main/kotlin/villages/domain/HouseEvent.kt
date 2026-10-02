@@ -29,8 +29,9 @@ sealed interface PlayerEvent : HouseEvent
 /**
  * A house was founded. It carries where, and how much that matters: those two are what put a thing on the
  * map, and which tile it falls in is worked out downstream from the first. It carries a stock of every
- * resource, all of them empty and none of them growing, because nothing generates income yet. See
- * decision records 0026 and 0006.
+ * resource there was when it was written, all of them empty and none of them growing, because nothing
+ * generates income yet; a resource added since is read as an empty one, `everyStock`. See decision records
+ * 0026, 0006 and 0074.
  */
 data class HouseFounded(
     override val houseId: HouseId,
@@ -42,15 +43,7 @@ data class HouseFounded(
     val resources: Map<Resource, Stock>,
     override val worldTime: WorldTime,
     override val recordedAt: Instant,
-) : HouseEvent, WorldEvent {
-    init {
-        // A house has all five from the moment it exists, so nothing downstream has to ask whether it
-        // happens to have one. A stored event that is missing one is malformed and says so here.
-        require(resources.keys == Resource.entries.toSet()) {
-            "a house is founded with a stock of every resource, not ${resources.keys}"
-        }
-    }
-}
+) : HouseEvent, WorldEvent
 
 /** A house was given some of a resource. What gave it is the story around it, not a field on it. */
 data class HouseResourceGranted(

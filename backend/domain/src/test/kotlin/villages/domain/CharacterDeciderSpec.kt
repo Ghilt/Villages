@@ -228,4 +228,13 @@ class CharacterDeciderSpec : StringSpec({
 
         CharacterDecider.evolve(CharacterDecider.initial, stray) shouldBe Character.NotAppeared
     }
+
+    "an appearance written before a stat existed is read with the middle of the scale of it" {
+        val came = CharacterDecider.decide(introducing(), CharacterDecider.initial).single() as CharacterAppeared
+        val writtenBefore = came.copy(stats = came.stats - Stat.KINDNESS)
+
+        val character = CharacterDecider.fold(listOf(writtenBefore)).shouldBeInstanceOf<Character.Appeared>()
+        character.stats[Stat.KINDNESS] shouldBe UNRECORDED_STAT
+        character.stats[Stat.PIETY] shouldBe 13
+    }
 })

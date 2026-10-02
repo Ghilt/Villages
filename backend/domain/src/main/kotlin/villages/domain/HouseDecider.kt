@@ -302,7 +302,7 @@ object HouseDecider : Decider<HouseCommand, House, HouseEvent> {
             seat = event.seat,
             significance = event.significance,
             banner = event.banner,
-            resources = event.resources,
+            resources = everyStock(event.resources, event.recordedAt),
             foundedOn = event.worldTime,
             foundedAt = event.recordedAt,
             // Founding by any means settles a choice that was about founding: a house founded from the

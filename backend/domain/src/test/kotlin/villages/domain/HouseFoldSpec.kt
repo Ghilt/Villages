@@ -47,4 +47,13 @@ class HouseFoldSpec : StringSpec({
     "folding a house's events in any order never throws" {
         checkAll(Arb.shuffle(life)) { shuffled -> HouseDecider.fold(shuffled) }
     }
+
+    "a founding written before a resource existed is read with an empty stock of it" {
+        val founding = life.first() as HouseFounded
+        val writtenBefore = founding.copy(resources = founding.resources - Resource.PIETY)
+
+        val house = HouseDecider.fold(listOf(writtenBefore)) as House.Founded
+        house.stockOf(Resource.PIETY) shouldBe Stock(0, 0.0, founding.recordedAt)
+        house.stockOf(Resource.WEALTH) shouldBe founding.resources.getValue(Resource.WEALTH)
+    }
 })

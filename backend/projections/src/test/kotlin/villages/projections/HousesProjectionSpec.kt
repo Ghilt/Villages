@@ -29,6 +29,7 @@ import villages.domain.emptyStocks
 import villages.domain.WorldTime
 import java.time.Instant
 import java.util.UUID
+import villages.domain.Stock
 
 /** A feed that delivers what it is handed, when it is handed it, and can hand over what came before. */
 private class HandFed : EventFeed {
@@ -312,5 +313,15 @@ class HousesProjectionSpec : StringSpec({
 
         // Told, and told that it is not a new house: an appearance would redraw it on every map.
         heard shouldBe listOf(false)
+    }
+
+    "a founding written before a resource existed is read with an empty stock of it" {
+        val feed = HandFed()
+        val houses = HousesProjection(feed)
+        val founding = founded("Ravenscar", 59.33, 18.07)
+        feed.deliver(founding.copy(resources = founding.resources - Resource.PIETY))
+
+        val row = houses.inCell(STOCKHOLM_Z10, someDay, 10).houses.single()
+        row.stockOf(Resource.PIETY) shouldBe Stock(0, 0.0, founding.recordedAt)
     }
 })
