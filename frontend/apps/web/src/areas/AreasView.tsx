@@ -6,7 +6,7 @@ import type { TerrainClass } from '@villages/world';
 import { Section } from '../debug/Section';
 import { inspect, stopInspecting } from '../inspect/opening';
 import { subjectsNow, watchSubjects } from '../inspect/subjects';
-import { terrainPalette } from '../map/terrainClasses';
+import { terrainPalette } from '../geometry/terrainClasses';
 import type { Census } from './census';
 import { areasNow, armDrawing, countArea, deleteArea, forgetAreas, shadeArea, watchAreas } from './areas';
 import type { Area } from './areas';

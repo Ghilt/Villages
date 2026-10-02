@@ -1,6 +1,6 @@
-import { TILE } from '../../map/painterlyMessages';
-import { classesOfTile, terrainPalette } from '../../map/terrainClasses';
-import type { TerrainPalette } from '../../map/terrainClasses';
+import { TILE } from '../../geometry/world';
+import { classesOfTile, terrainPalette } from '../../geometry/terrainClasses';
+import type { TerrainPalette } from '../../geometry/terrainClasses';
 import { CELL, NO_STANDS, reachBeyond, scatterCell } from '@villages/world';
 import type { ScatteredPoint, SpriteMap, StandChunk } from '@villages/world';
 

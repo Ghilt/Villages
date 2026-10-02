@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { deskOnScreen } from '../desk/deskTop';
 import { floorZoom } from '../map/sheet';
 import type { Viewport } from '../map/sheet';
-import { worldSize } from '../sprites/cameraMath';
+import { worldSize } from '../geometry/cameraMath';
 
 import { roomAtTurn, roomOnScreen, scaleFor, sheetAtFloor, spanOf, turnsAt, wheelZooms } from './roomBox';
 

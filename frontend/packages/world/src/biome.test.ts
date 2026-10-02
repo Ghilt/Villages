@@ -224,7 +224,7 @@ describe('the file the world is actually furnished from', () => {
    * cameras. So the arithmetic is written out, with where each number comes from.
    */
   it('has no kind too short for the camera to ever show whole', () => {
-    const WORLD_UNIT_ZOOM = 6; // log2(master width / tile size), apps/web/src/sprites/cameraMath.ts
+    const WORLD_UNIT_ZOOM = 6; // log2(master width / tile size), apps/web/src/geometry/cameraMath.ts
     const READABLE = 20; // apps/web/src/sprites/scenery/showing.ts
     const MAX_ZOOM = 10; // WORLD_MAX_ZOOM, apps/web/src/map/worldStyle.ts
     const shortest = READABLE / 2 ** (MAX_ZOOM - WORLD_UNIT_ZOOM);

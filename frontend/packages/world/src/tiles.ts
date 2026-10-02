@@ -1,4 +1,5 @@
 import type { ClassRaster } from './raster.ts';
+import { MAX_MERCATOR_LATITUDE } from './sphere.ts';
 
 /**
  * Cutting the world into map tiles.
@@ -14,9 +15,6 @@ import type { ClassRaster } from './raster.ts';
  */
 
 export const TILE_SIZE = 256;
-
-/** The greatest latitude Mercator can draw, as the fraction of the way down the source image it sits. */
-const MERCATOR_EDGE = 85.051129;
 
 export interface TileAddress {
   zoom: number;
@@ -34,7 +32,7 @@ export interface TileAddress {
  */
 function rowDown(down: number, height: number): number {
   const latitude = (Math.atan(Math.sinh(Math.PI * (1 - 2 * down))) * 180) / Math.PI;
-  const clamped = Math.min(MERCATOR_EDGE, Math.max(-MERCATOR_EDGE, latitude));
+  const clamped = Math.min(MAX_MERCATOR_LATITUDE, Math.max(-MAX_MERCATOR_LATITUDE, latitude));
   const row = ((90 - clamped) / 180) * height;
   return Math.min(height - 1, Math.max(0, Math.floor(row)));
 }
@@ -52,7 +50,7 @@ export function sourceRowFor(tileY: number, rowInTile: number, zoom: number, hei
  */
 function downOfRow(masterRow: number, height: number): number | null {
   const latitude = 90 - ((masterRow + 0.5) / height) * 180;
-  if (latitude > MERCATOR_EDGE || latitude < -MERCATOR_EDGE) {
+  if (latitude > MAX_MERCATOR_LATITUDE || latitude < -MAX_MERCATOR_LATITUDE) {
     return null;
   }
   const radians = (latitude * Math.PI) / 180;

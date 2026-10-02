@@ -1,8 +1,8 @@
 import { addProtocol } from 'maplibre-gl';
 import type { Lattice } from '@villages/world';
 import { note } from '../log/log';
-import { PAINTED_MAX_ZOOM, PAINTED_TILE, TILE } from './painterlyMessages';
-import type { PaintReply, PaintRequest } from './painterlyMessages';
+import { TILE } from '../geometry/world';
+import { PAINTED_MAX_ZOOM, PAINTED_TILE, type PaintReply, type PaintRequest } from './painterlyMessages';
 import { PaintQueue } from './paintQueue';
 import type { QueuedJob } from './paintQueue';
 

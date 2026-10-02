@@ -10,7 +10,7 @@ import { followStandsUnder, forgetStands, standsArrived } from './standsFromServ
 /** Taiga everywhere, which the example biome grows a wood on, so only the stands decide anything. */
 const { TAIGA } = vi.hoisted(() => ({ TAIGA: 7 }));
 
-vi.mock('../../map/terrainClasses', () => ({
+vi.mock('../../geometry/terrainClasses', () => ({
   terrainPalette: () => Promise.resolve({}),
   classesOfTile: () => Promise.resolve(new Uint8Array(256 * 256).fill(TAIGA)),
 }));

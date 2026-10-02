@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { toScreen } from '../sprites/cameraMath';
+import { toScreen } from '../geometry/cameraMath';
 
 import { CAMERA } from './mapConfig';
 import { PLAYERS_TILT, tiltAt, tippedAbout } from './tilt';

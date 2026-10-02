@@ -4,7 +4,7 @@ import { charactersInView, housesInView } from '@villages/client-core';
 import type { TerrainClass } from '@villages/world';
 
 import { areasNow, watchAreas } from '../areas/areas';
-import { terrainPalette } from '../map/terrainClasses';
+import { terrainPalette } from '../geometry/terrainClasses';
 import { gatewayState, watchGateway } from '../net/gateway';
 import type { Room } from '../stage/panes';
 import { type Description, describeArea, describeCharacter, describeHouse, type Legend } from './describe';

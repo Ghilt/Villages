@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { WORLD_MASTER_WIDTH } from '../map/worldStyle';
-import { pixelsPerWorldUnit, toMercatorExact } from '../sprites/cameraMath';
-import type { CameraView } from '../sprites/cameraMath';
+import { WORLD_MASTER_WIDTH } from '../geometry/world';
+import { pixelsPerWorldUnit, toMercatorExact } from '../geometry/cameraMath';
+import type { CameraView } from '../geometry/cameraMath';
 
 import type { FogCircle } from './circles';
 import { fieldOf } from './fogField';

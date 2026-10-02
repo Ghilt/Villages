@@ -1,8 +1,8 @@
 import { coverageOf, reachAcross } from '@villages/protocol';
 import type { Coverage, VisionPointView } from '@villages/protocol';
 
-import { WORLD_MASTER_WIDTH } from '../map/worldStyle';
-import { toMercator } from '../sprites/cameraMath';
+import { WORLD_MASTER_WIDTH } from '../geometry/world';
+import { toMercator } from '../geometry/cameraMath';
 
 import { lastingOn } from './describe';
 

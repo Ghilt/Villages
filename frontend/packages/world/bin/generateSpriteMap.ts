@@ -17,6 +17,7 @@ import type { BiomeFile } from '../src/biome.ts';
 import { preparePalette, snapPrepared, toRgb } from '../src/palette.ts';
 import type { Palette, Rgb } from '../src/palette.ts';
 import { createRaster } from '../src/raster.ts';
+import { MAX_MERCATOR_LATITUDE, toWorld } from '../src/sphere.ts';
 import type { ClassRaster } from '../src/raster.ts';
 import { encodeIndexedPng } from '../src/png.ts';
 import { TILE_SIZE, masterRowsAt } from '../src/tiles.ts';
@@ -421,10 +422,9 @@ const views = (
     views: { name: string; lng: [number, number]; lat: [number, number] }[];
   }
 ).views;
-const worldYOf = (lat: number): number => {
-  const clamped = Math.max(-85.05, Math.min(85.05, lat)) * (Math.PI / 180);
-  return ((1 - Math.log(Math.tan(clamped) + 1 / Math.cos(clamped)) / Math.PI) / 2) * WORLD_SIDE;
-};
+const worldYOf = (lat: number): number =>
+  toWorld({ lng: 0, lat: Math.max(-MAX_MERCATOR_LATITUDE, Math.min(MAX_MERCATOR_LATITUDE, lat)) }, WORLD_SIDE)
+    .y;
 
 /** A screenful at the closest the camera comes, on Adam's own stage. The unit the budget is felt in. */
 const SCREENFUL = 67 * 52;

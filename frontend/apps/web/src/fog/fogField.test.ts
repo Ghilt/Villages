@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import type { CoverageCircle, VisionPointView } from '@villages/protocol';
 
 import coverage from '../../../../../contracts/fixtures/coverage.json?raw';
-import { WORLD_MASTER_WIDTH } from '../map/worldStyle';
-import { fromMercator, toMercator } from '../sprites/cameraMath';
+import { WORLD_MASTER_WIDTH } from '../geometry/world';
+import { fromMercator, toMercator } from '../geometry/cameraMath';
 
 import { circleOf } from './circles';
 import type { FogCircle } from './circles';

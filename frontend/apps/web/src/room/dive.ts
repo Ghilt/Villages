@@ -1,6 +1,6 @@
 import type { DeskTop } from '../desk/deskTop';
 import type { Viewport } from '../map/sheet';
-import { pixelsPerWorldUnit } from '../sprites/cameraMath';
+import { pixelsPerWorldUnit } from '../geometry/cameraMath';
 
 /**
  * The dive: going into your own castle, and coming back out of it.

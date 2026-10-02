@@ -2,7 +2,8 @@ import type { StyleSpecification } from 'maplibre-gl';
 
 import { GROUND_LATTICE } from '@villages/world';
 
-import { WORLD_MAX_ZOOM, warpedWorldStyle } from './worldStyle';
+import { warpedWorldStyle } from './worldStyle';
+import { WORLD_MAX_ZOOM } from '../geometry/world';
 
 /**
  * Everything about the map that can be decided without a map instance, kept pure so that it is testable

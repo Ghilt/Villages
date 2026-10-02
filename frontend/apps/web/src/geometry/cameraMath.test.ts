@@ -9,7 +9,7 @@ import {
   TRIMETRIC_PITCH,
   lensOf,
 } from '../debug/camera';
-import { WORLD_MASTER_WIDTH } from '../map/worldStyle';
+import { WORLD_MASTER_WIDTH } from './world';
 
 import {
   MAX_MERCATOR_LATITUDE,

@@ -12,9 +12,10 @@ import { describe, expect, it } from 'vitest';
  */
 
 const ROWS: readonly (readonly string[])[] = [
-  // What everything leans on, and which leans on nothing in the page. The component library is the
-  // showcase's alone until the game takes it up, a surface at a time.
-  ['ui', 'version', 'marks', 'log'],
+  // What everything leans on, and which leans on nothing in the page: the ground's own measures and the
+  // camera's arithmetic among them. The component library is the showcase's alone until the game takes it
+  // up, a surface at a time.
+  ['ui', 'version', 'marks', 'log', 'geometry'],
   // The connection to the game server, and the stage the panes are laid out in.
   ['net', 'stage'],
   // The ground, drawn: the map and its paint, the fog over it, the desk under it.
@@ -43,16 +44,6 @@ const SIDEWAYS: readonly (readonly [string, string])[] = [
  * The plan is `docs/ROADMAP.md`'s "A place for every mechanic".
  */
 const EXCUSED: readonly string[] = [
-  // The ground's geometry gets a folder below the map, the sprites and the fog.
-  'fog/circles.ts -> map/worldStyle.ts',
-  'fog/circles.ts -> sprites/cameraMath.ts',
-  'fog/fogField.ts -> map/worldStyle.ts',
-  'fog/fogField.ts -> sprites/cameraMath.ts',
-  'fog/uncolouring.ts -> map/worldStyle.ts',
-  'fog/uncolouring.ts -> sprites/cameraMath.ts',
-  'map/MapView.tsx -> sprites/cameraMath.ts',
-  'map/sheet.ts -> sprites/cameraMath.ts',
-  'map/tilt.ts -> sprites/cameraMath.ts',
   // What configures the game leaves the debug folder, and the stands move into the connection's.
   'areas/AreasView.tsx -> debug/Section.tsx',
   'areas/AreasView.tsx -> inspect/opening.ts',

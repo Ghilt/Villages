@@ -2,7 +2,7 @@ import { deskOnScreen } from '../desk/deskTop';
 import type { DeskTop } from '../desk/deskTop';
 import { floorZoom } from '../map/sheet';
 import type { Sheet, Viewport } from '../map/sheet';
-import { worldSize } from '../sprites/cameraMath';
+import { worldSize } from '../geometry/cameraMath';
 
 /**
  * The room the desk stands in, and the arithmetic of pulling back into it.

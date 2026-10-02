@@ -64,10 +64,10 @@ packages/protocol  <-  packages/client-core  <-  apps/web
   the fonts and the world package's pure rules and types, which is what lets `/admin/inspect-ui-components` show every component with nothing running. See
   decision record 0068.
 - The rest of `apps/web` stands in rows, and a folder imports only the rows above it, and in its own row only what
-  the rule names: `ui`, `version`, `marks` and `log`, which lean on nothing in the page; `net` and `stage`; the
-  ground drawn, `map`, `fog` and `desk`; what stands on it, `sprites` and `room`; the game's own surfaces, `house`,
-  `figures`, `choice`, `dialogues`, `areas` and `inspect`; and what puts it all together, the root, `debug` and
-  `admin`. No two files import each other, however far round. `src/layers.test.ts` holds it, with the imports that
+  the rule names: `ui`, `version`, `marks`, `log` and `geometry`, the ground's own measures, which lean on nothing
+  in the page; `net` and `stage`; the ground drawn, `map`, `fog` and `desk`; what stands on it, `sprites` and
+  `room`; the game's own surfaces, `house`, `figures`, `choice`, `dialogues`, `areas` and `inspect`; and what puts
+  it all together, the root, `debug` and `admin`. No two files import each other, however far round. `src/layers.test.ts` holds it, with the imports that
   break it today listed one by one, each ended by a step of the plan under way. See decision record 0073.
 
 Enforcement: Gradle module edges plus architecture tests on the backend; workspace dependencies, a DOM-free compiler
@@ -254,7 +254,7 @@ until the new ones are cut, so nothing blinks while the fog moves.
 
 **The fog is a layer of the sprite canvas**, `sprites/FogLayer.ts`, drawn between the world and the signs for
 the things in it: the scenery and whatever stands outside vision under it, every icon and whatever stands in
-vision over it (0063). It asks the sprites' projection in `cameraMath.ts` backwards for the ground under each
+vision over it (0063). It asks the projection in `geometry/cameraMath.ts` backwards for the ground under each
 pixel, and reads there a distance field of the vision points, worked out in the browser once for each change
 to them (`apps/web/src/fog/`) and handed to the graphics card as one small half-float texture. Nothing about
 the fog is worked out while the camera moves except that one pass. See decision record 0062. The scenery

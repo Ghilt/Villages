@@ -1,4 +1,5 @@
 import type * as maplibregl from 'maplibre-gl';
+import { MAX_MERCATOR_LATITUDE } from '@villages/world';
 import type { Lattice } from '@villages/world';
 
 import { chosenMaster, worldRootOf } from './masters';
@@ -92,12 +93,11 @@ const BIOME_LAYER = 'biome-raster';
  * square's corners: the whole of longitude, and latitude out to the Mercator limit. Anything less exact
  * and the biome under the camera would disagree with the biome the scenery is reading.
  */
-const MERCATOR_LIMIT = 85.051129;
 const WORLD_CORNERS: [[number, number], [number, number], [number, number], [number, number]] = [
-  [-180, MERCATOR_LIMIT],
-  [180, MERCATOR_LIMIT],
-  [180, -MERCATOR_LIMIT],
-  [-180, -MERCATOR_LIMIT],
+  [-180, MAX_MERCATOR_LATITUDE],
+  [180, MAX_MERCATOR_LATITUDE],
+  [180, -MAX_MERCATOR_LATITUDE],
+  [-180, -MAX_MERCATOR_LATITUDE],
 ];
 /** Drawn as vectors over the flat tiles. A painted renderer draws its own shore and does not want them. */
 const INK_LAYERS = ['lake-shore', 'coast'];

@@ -1,14 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  FLAT_MAX_ZOOM,
-  PAINTED_MAX_ZOOM,
-  PAINTED_STEP,
-  PAINTED_TILE,
-  TILE,
-  footprintOf,
-} from './painterlyMessages';
-import { WORLD_MAX_ZOOM } from './worldStyle';
+import { PAINTED_MAX_ZOOM, PAINTED_STEP, PAINTED_TILE, footprintOf } from './painterlyMessages';
+import { FLAT_MAX_ZOOM, TILE } from '../geometry/world';
+import { WORLD_MAX_ZOOM } from '../geometry/world';
 
 /** MapLibre's own rule for which tile zoom a raster source is asked for, from its covering-tiles code. */
 const askedFor = (mapZoom: number, tileSize: number, maxZoom: number) =>

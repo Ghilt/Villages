@@ -1,4 +1,4 @@
-import { WORLD_UNIT_ZOOM, pixelsPerWorldUnit } from '../cameraMath';
+import { WORLD_UNIT_ZOOM, pixelsPerWorldUnit } from '../../geometry/cameraMath';
 import { CROSSOVER_STICK } from '../twoForms';
 
 /** All this needs of a kind is how tall it stands. The rest comes from the sprite map. */

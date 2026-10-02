@@ -2,7 +2,7 @@ import { STAND_TILES, standTilesUnder } from '@villages/protocol';
 import { NO_STANDS, decodeStands } from '@villages/world';
 import type { StandChunk } from '@villages/world';
 
-import { TILE } from '../../map/painterlyMessages';
+import { TILE } from '../../geometry/world';
 
 /**
  * The stands the gateway has sent this page, a zoom 7 tile at a time, and nothing else.

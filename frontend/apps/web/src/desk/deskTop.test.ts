@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { floorZoom } from '../map/sheet';
 import type { Viewport } from '../map/sheet';
-import { worldSize } from '../sprites/cameraMath';
+import { worldSize } from '../geometry/cameraMath';
 
 import { deskCoversView, deskOnScreen } from './deskTop';
 

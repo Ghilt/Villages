@@ -1,6 +1,6 @@
-import { WORLD_MASTER_WIDTH } from '../map/worldStyle';
-import { groundTilt, pixelsPerWorldUnit, tiltGround, toMercatorExact } from '../sprites/cameraMath';
-import type { CameraView } from '../sprites/cameraMath';
+import { WORLD_MASTER_WIDTH } from '../geometry/world';
+import { groundTilt, pixelsPerWorldUnit, tiltGround, toMercatorExact } from '../geometry/cameraMath';
+import type { CameraView } from '../geometry/cameraMath';
 
 import type { FogField } from './fogField';
 

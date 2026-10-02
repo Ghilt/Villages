@@ -1,8 +1,8 @@
 import { Application, Container, Graphics, Rectangle, Sprite } from 'pixi.js';
 import type { Texture } from 'pixi.js';
 
-import { isWithinView, toScreen } from './cameraMath';
-import type { CameraView } from './cameraMath';
+import { isWithinView, toScreen } from '../geometry/cameraMath';
+import type { CameraView } from '../geometry/cameraMath';
 import {
   LONGEST_STEP_MS,
   PRESENCE_MS,

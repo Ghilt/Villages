@@ -7,7 +7,7 @@ import type { HouseView } from '@villages/protocol';
 
 import { note } from '../log/log';
 import { seeingEverything, watchSeeingEverything } from '../debug/seeEverything';
-import { terrainPalette } from '../map/terrainClasses';
+import { terrainPalette } from '../geometry/terrainClasses';
 
 interface HoldingOverlayProps {
   map: maplibregl.Map | null;

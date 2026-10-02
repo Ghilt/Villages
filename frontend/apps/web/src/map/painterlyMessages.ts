@@ -5,14 +5,7 @@
  * painter itself, which would put a worker's worth of code in the page's bundle.
  */
 
-/**
- * How wide a flat tile is, which is what the terrain is cut into and read back from. The areas, the
- * scenery and the terrain log all mean this one.
- */
-export const TILE = 256;
-
-/** Beyond this there are no flat tiles, because a tile pixel is already a master pixel at seven. */
-export const FLAT_MAX_ZOOM = 7;
+import { FLAT_MAX_ZOOM, TILE } from '../geometry/world';
 
 /**
  * How wide a painted tile is, which is not the same number and used to be.

@@ -1,4 +1,4 @@
-import { fromMercator, groundTilt, toMercatorExact, untiltGround, worldSize } from '../sprites/cameraMath';
+import { fromMercator, groundTilt, toMercatorExact, untiltGround, worldSize } from '../geometry/cameraMath';
 
 import { CAMERA } from './mapConfig';
 

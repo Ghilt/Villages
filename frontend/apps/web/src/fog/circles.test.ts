@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import type { VisionPointView } from '@villages/protocol';
 
 import reach from '../../../../../contracts/fixtures/reach.json?raw';
-import { WORLD_MASTER_WIDTH } from '../map/worldStyle';
-import { toMercator } from '../sprites/cameraMath';
+import { WORLD_MASTER_WIDTH } from '../geometry/world';
+import { toMercator } from '../geometry/cameraMath';
 
 import { circleOf, visionOf } from './circles';
 

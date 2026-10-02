@@ -1,7 +1,7 @@
 import { DEFAULT_MASTER, worldDirOf } from '@villages/world';
 
 import { note } from '../log/log';
-import { WORLD_MASTER_WIDTH } from './worldStyle';
+import { WORLD_MASTER_WIDTH } from '../geometry/world';
 
 /**
  * Which hand-painted master the app is drawing, and how to get at the others.

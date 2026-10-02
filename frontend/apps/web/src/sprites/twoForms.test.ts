@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { WORLD_UNIT_ZOOM, pixelsPerWorldUnit } from './cameraMath';
+import { WORLD_UNIT_ZOOM, pixelsPerWorldUnit } from '../geometry/cameraMath';
 import {
   CROSSFADE_MS,
   CROSSOVER_STICK,

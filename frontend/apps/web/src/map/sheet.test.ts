@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { MAX_MERCATOR_LATITUDE, fromMercator, toScreen } from '../sprites/cameraMath';
+import { MAX_MERCATOR_LATITUDE, fromMercator, toScreen } from '../geometry/cameraMath';
 
 import { CAMERA } from './mapConfig';
 import {

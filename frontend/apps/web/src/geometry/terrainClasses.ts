@@ -1,6 +1,6 @@
 import type { PainterlyStyle, Palette, TerrainClass } from '@villages/world';
 
-import { TILE } from './painterlyMessages';
+import { TILE } from './world';
 
 /**
  * Reading the terrain back out of the tiles, which is the only copy of the master a browser has.

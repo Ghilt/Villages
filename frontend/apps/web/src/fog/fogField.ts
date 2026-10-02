@@ -1,14 +1,14 @@
 import { reachAcross } from '@villages/protocol';
 
-import { WORLD_MASTER_WIDTH } from '../map/worldStyle';
+import { WORLD_MASTER_WIDTH } from '../geometry/world';
 import {
   fromMercator,
   groundTilt,
   pixelsPerWorldUnit,
   toMercatorExact,
   untiltGround,
-} from '../sprites/cameraMath';
-import type { CameraView } from '../sprites/cameraMath';
+} from '../geometry/cameraMath';
+import type { CameraView } from '../geometry/cameraMath';
 
 import type { FogCircle } from './circles';
 

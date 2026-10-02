@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import * as maplibregl from 'maplibre-gl';
 
 import { note } from '../log/log';
-import { fromMercator, toMercatorExact } from '../sprites/cameraMath';
+import { fromMercator, toMercatorExact } from '../geometry/cameraMath';
 
 import { CAMERA, lensFor, resolveStyle } from './mapConfig';
 import { constrainCamera, flatWindow, floorZoom } from './sheet';

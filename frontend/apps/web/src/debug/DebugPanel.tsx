@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
-import { FLAT_MAX_ZOOM, TILE } from '../map/painterlyMessages';
+import { FLAT_MAX_ZOOM, TILE } from '../geometry/world';
 import { forgetPaintedTally } from '../map/painterlyTiles';
 import { flatWindow, sheetCoversView, sheetOnScreen } from '../map/sheet';
-import { WORLD_MASTER_WIDTH } from '../map/worldStyle';
+import { WORLD_MASTER_WIDTH } from '../geometry/world';
 import { AreasView } from '../areas/AreasView';
 import { BuildBadge } from '../version/BuildBadge';
 import { CameraSection } from './CameraSection';

@@ -1,10 +1,11 @@
 import { onLattice, paintPixel, preparePainterly } from '@villages/world';
 import type { ClassSampler, Lattice, PreparedPainterly } from '@villages/world';
 
-import { PAINTED_TILE, TILE, footprintOf } from './painterlyMessages';
+import { PAINTED_TILE, footprintOf } from './painterlyMessages';
+import { TILE } from '../geometry/world';
 import type { Footprint, PaintReply, PaintRequest } from './painterlyMessages';
-import { classesOfTile, paintFile, terrainOf } from './terrainClasses';
-import type { TerrainPalette } from './terrainClasses';
+import { classesOfTile, paintFile, terrainOf } from '../geometry/terrainClasses';
+import type { TerrainPalette } from '../geometry/terrainClasses';
 
 /**
  * Painting one map tile, off the main thread.

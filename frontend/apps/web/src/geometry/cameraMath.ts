@@ -8,10 +8,12 @@
  * the flat arithmetic of 0014 exactly.
  */
 
-import { WORLD_MASTER_WIDTH } from '../map/worldStyle';
+import { MAX_MERCATOR_LATITUDE } from '@villages/world';
 
-/** Beyond this latitude the Mercator projection runs away to infinity, so the poles are clamped. */
-export const MAX_MERCATOR_LATITUDE = 85.051129;
+import { WORLD_MASTER_WIDTH } from './world';
+
+/** Beyond this latitude the Mercator projection runs away to infinity, so the poles are clamped. The world's. */
+export { MAX_MERCATOR_LATITUDE };
 
 /** The map's tile size, and therefore the width of the whole world at zoom zero. */
 export const TILE_SIZE = 512;

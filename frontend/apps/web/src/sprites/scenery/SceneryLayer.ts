@@ -1,12 +1,10 @@
 import { Container, ImageSource, Matrix, Particle, ParticleContainer, Rectangle, Texture } from 'pixi.js';
 
 import { note } from '../../log/log';
-import { WORLD_MASTER_WIDTH } from '../../map/worldStyle';
-import { fartherFirst, standingLayer, tiltGround, toMercatorExact, untiltGround } from '../cameraMath';
-import type { CameraView, GroundTilt } from '../cameraMath';
+import { WORLD_MASTER_WIDTH } from '../../geometry/world';
+import * as camera from '../../geometry/cameraMath';
 import { LONGEST_STEP_MS, PRESENCE_MS, easeTowards, midTrade } from '../twoForms';
-import { CELL, biomeAt, cellOf } from '@villages/world';
-import type { ArtAtlasFile, Kind, ScatteredPoint } from '@villages/world';
+import { CELL, biomeAt, cellOf, type ArtAtlasFile, type Kind, type ScatteredPoint } from '@villages/world';
 import { currentPointsOf, noteDrawn, pointsOf, sceneryMap, sceneryTally } from './sceneryCells';
 import { MOST_CUT_AT_ONCE, groupCount, groupOf, thresholdOf, wantedAt, worthDrawing } from './showing';
 
@@ -24,7 +22,7 @@ import { MOST_CUT_AT_ONCE, groupCount, groupOf, thresholdOf, wantedAt, worthDraw
  * on the foot is never squashed with it. Turning or tipping the camera rewrites every foot, once; it is
  * the one thing that does, and it is rare. And they are drawn **farthest first**, the whole layer sorted
  * by where each foot lands on the screen, because the order the cells and the groups happened to arrive
- * in is no order at all. See `standingLayer` in `cameraMath.ts` and experiment 0008.
+ * in is no order at all. See `camera.standingLayer` in `cameraMath.ts` and experiment 0008.
  *
  * **A group is the unit of everything.** A group is one kind at one step of its arrival; the zoom says
  * whether a group belongs on the screen and time carries it there, which is the rule `twoForms.ts`
@@ -112,7 +110,7 @@ export function createSceneryLayer() {
   let noArt = false;
 
   /** The camera's turn and tip every foot was placed for, and a key that says when they are stale. */
-  let tilt: GroundTilt = { cos: 1, sin: 0, lean: 1 };
+  let tilt: camera.GroundTilt = { cos: 1, sin: 0, lean: 1 };
   let tiltKey = '0/0';
   /** Particles were added or moved, so the layer is sorted again before it is drawn. */
   let unsorted = false;
@@ -257,7 +255,7 @@ export function createSceneryLayer() {
       // Whether the layer is drawn farthest first, which is the thing an eye catches as a tree standing
       // in front of one it should be behind, and cannot tell from a single wrong frame.
       ordered: container.particleChildren.every(
-        (particle, index, all) => index === 0 || fartherFirst(all[index - 1]!, particle) <= 0,
+        (particle, index, all) => index === 0 || camera.fartherFirst(all[index - 1]!, particle) <= 0,
       ),
       tilt: tiltKey,
       shadows: {
@@ -371,7 +369,7 @@ export function createSceneryLayer() {
    * camera turns, so there is never a second formula to drift from the first.
    */
   function place(particle: Particle, point: ScatteredPoint): void {
-    const at = tiltGround(point.x, point.y, tilt);
+    const at = camera.tiltGround(point.x, point.y, tilt);
     particle.x = at.x;
     particle.y = at.y;
   }
@@ -476,7 +474,7 @@ export function createSceneryLayer() {
      * frame a master changes.
      */
     update(
-      view: CameraView,
+      view: camera.CameraView,
       tilesRoot: string,
       dial: number,
       spacing: number,
@@ -490,7 +488,7 @@ export function createSceneryLayer() {
       if (map === null) {
         pointsOf(
           tilesRoot,
-          cellOf(toMercatorExact(view.center).x * WORLD_MASTER_WIDTH),
+          cellOf(camera.toMercatorExact(view.center).x * WORLD_MASTER_WIDTH),
           0,
           dial,
           spacing,
@@ -520,8 +518,8 @@ export function createSceneryLayer() {
         takeEverythingOut();
       }
 
-      const centre = toMercatorExact(view.center);
-      const layer = standingLayer(view);
+      const centre = camera.toMercatorExact(view.center);
+      const layer = camera.standingLayer(view);
       const key = `${view.pitch ?? 0}/${view.bearing ?? 0}`;
       if (key !== tiltKey) {
         tiltKey = key;
@@ -552,7 +550,7 @@ export function createSceneryLayer() {
         [halfWide, -halfHigh],
         [-halfWide, halfHigh],
         [halfWide, halfHigh],
-      ].map(([x = 0, y = 0]) => untiltGround(x, y, tilt));
+      ].map(([x = 0, y = 0]) => camera.untiltGround(x, y, tilt));
       const eastUnits = corners.map(({ east }) => centre.x * WORLD_MASTER_WIDTH + east);
       const southUnits = corners.map(({ south }) => centre.y * WORLD_MASTER_WIDTH + south);
       const fromX = cellOf(Math.min(...eastUnits)) - RING;
@@ -673,7 +671,7 @@ export function createSceneryLayer() {
       // not nearer. Sorted in place and handed back once, which is one upload and only on a frame that
       // added a particle or turned the camera.
       if (unsorted) {
-        container.particleChildren.sort(fartherFirst);
+        container.particleChildren.sort(camera.fartherFirst);
         container.update();
         // The shadows are never sorted: the greater of two is the same whichever comes first.
         shadowLayer.update();

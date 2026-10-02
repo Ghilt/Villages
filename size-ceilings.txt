@@ -17,7 +17,7 @@
 490 frontend/apps/web/src/map/painterlyTiles.ts
 429 frontend/apps/web/src/sprites/FogLayer.ts
 855 frontend/apps/web/src/sprites/PixiSpriteRenderer.ts
-733 frontend/apps/web/src/sprites/scenery/SceneryLayer.ts
+731 frontend/apps/web/src/sprites/scenery/SceneryLayer.ts
 603 frontend/apps/web/src/stage/bayBox.test.ts
 459 frontend/apps/web/src/stage/bayBox.ts
 444 frontend/apps/web/src/stage/bays.test.ts

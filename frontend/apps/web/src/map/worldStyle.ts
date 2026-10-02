@@ -1,6 +1,6 @@
 import type { StyleSpecification } from 'maplibre-gl';
 
-import { FLAT_MAX_ZOOM } from './painterlyMessages';
+import { FLAT_MAX_ZOOM, WORLD_MAX_ZOOM } from '../geometry/world';
 
 /**
  * The look of our world, and the whole of it: terrain, a coastline, lake shores, and not one word of text.
@@ -16,11 +16,6 @@ import { FLAT_MAX_ZOOM } from './painterlyMessages';
  * Which master all of that was cut from is the `root` every function here is given: one directory per
  * master, so the debug map panel can draw any of them. See `map/masters.ts`.
  */
-
-export const WORLD_MAX_ZOOM = 10;
-
-/** How wide the master is, which is what sets how much ground a tile pixel covers at each zoom. */
-export const WORLD_MASTER_WIDTH = 32768;
 
 /** What the sea is drawn in, and so what the sheet is under the tiles. The desk's sheet reuses it. */
 export const SEA = '#93aebc';

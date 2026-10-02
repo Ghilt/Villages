@@ -6,7 +6,7 @@ import { closePath, enclose, fenceAround, fenceToPolygons, insideFenceAt } from 
 import type { DiamondGrid } from '@villages/world';
 
 import { note } from '../log/log';
-import { terrainPalette } from '../map/terrainClasses';
+import { terrainPalette } from '../geometry/terrainClasses';
 import { MOST_DIAMONDS } from './census';
 import { inspect } from '../inspect/opening';
 import { subjectsNow, watchSubjects } from '../inspect/subjects';

@@ -22,8 +22,10 @@ to import was always in it.
 import only what the rule names, and no two files may import each other, however far round. The rows, from
 the top:
 
-1. `ui`, `version`, `marks`, `log` - what everything leans on, and which leans on nothing in the page. The
-   component library is the showcase's alone until the game takes it up.
+1. `ui`, `version`, `marks`, `log`, `geometry` - what everything leans on, and which leans on nothing in the
+   page. The component library is the showcase's alone until the game takes it up; `geometry` is the ground's
+   own measures, the projection, the tile and the master's width, which the map, the sprites, the fog and the
+   areas all mean the same thing by.
 2. `net`, `stage` - the connection to the game server, and the stage the panes are laid out in.
 3. `map`, `fog`, `desk` - the ground, drawn.
 4. `sprites`, `room` - what stands on the ground, and the room around the desk.

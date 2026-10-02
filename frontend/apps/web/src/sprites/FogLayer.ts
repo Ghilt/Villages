@@ -3,10 +3,10 @@ import { BufferImageSource, Filter, Geometry, GlProgram, Mesh, Shader, UniformGr
 import { REACH, hazeInView } from '../fog/fogField';
 import { FOG_LOOK } from '../fog/look';
 import type { FogField } from '../fog/fogField';
-import { WORLD_MASTER_WIDTH } from '../map/worldStyle';
+import { WORLD_MASTER_WIDTH } from '../geometry/world';
 
-import { groundTilt, pixelsPerWorldUnit, toMercatorExact } from './cameraMath';
-import type { CameraView } from './cameraMath';
+import { groundTilt, pixelsPerWorldUnit, toMercatorExact } from '../geometry/cameraMath';
+import type { CameraView } from '../geometry/cameraMath';
 
 /**
  * The fog of war, as one layer of the sprite canvas: a mesh that covers the screen, drawn **between the world

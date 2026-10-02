@@ -2,7 +2,7 @@ import type { Coverage } from '@villages/protocol';
 
 import type { FogField } from '../fog/fogField';
 
-import type { LngLat } from './cameraMath';
+import type { LngLat } from '../geometry/cameraMath';
 
 /**
  * What the renderer needs to know about a thing on the map. Deliberately not a house: the renderer draws

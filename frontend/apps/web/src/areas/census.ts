@@ -1,8 +1,8 @@
 import { diamondLattice, enclosedBy, frameOf, worldXOf, worldYOf } from '@villages/world';
 import type { Fence } from '@villages/world';
 
-import { FLAT_MAX_ZOOM, TILE } from '../map/painterlyMessages';
-import { classesOfTile, terrainPalette } from '../map/terrainClasses';
+import { FLAT_MAX_ZOOM, TILE } from '../geometry/world';
+import { classesOfTile, terrainPalette } from '../geometry/terrainClasses';
 
 /**
  * What terrain an area encloses, counted in the diamonds the ground is painted on.

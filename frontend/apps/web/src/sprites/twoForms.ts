@@ -1,4 +1,4 @@
-import { WORLD_UNIT_ZOOM, pixelsPerWorldUnit } from './cameraMath';
+import { WORLD_UNIT_ZOOM, pixelsPerWorldUnit } from '../geometry/cameraMath';
 
 /**
  * The two ways the map has of showing a thing, and which of them is drawn at a given zoom.

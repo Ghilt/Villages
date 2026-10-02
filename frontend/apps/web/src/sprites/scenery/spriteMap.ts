@@ -1,7 +1,7 @@
 import { biomesByColour, growingTable } from '@villages/world';
 import type { SpriteMap, SpriteMapFile } from '@villages/world';
 
-import { paintFile } from '../../map/terrainClasses';
+import { paintFile } from '../../geometry/terrainClasses';
 
 /**
  * Fetching the sprite map a master was generated with.

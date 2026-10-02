@@ -1,5 +1,5 @@
-import { MAX_MERCATOR_LATITUDE, TILE_SIZE, toScreen, worldSize } from '../sprites/cameraMath';
-import type { CameraView, MercatorPoint } from '../sprites/cameraMath';
+import { MAX_MERCATOR_LATITUDE, TILE_SIZE, toScreen, worldSize } from '../geometry/cameraMath';
+import type { CameraView, MercatorPoint } from '../geometry/cameraMath';
 
 import { CAMERA } from './mapConfig';
 
