@@ -284,10 +284,15 @@ stands it was sent, which on revealed ground are every stand that could change i
 between the map and the sprites that `fog/uncolouring.ts` lays a grey picture of the field on, blended by the
 browser's saturation blend, and the sprites under the fog by a filter on the container that holds them. The
 fog shader's code for where a pixel lies and how far inside each edge is shared by the fog and the filter.
-The sprite canvas draws when the map has drawn and has no clock of its own, except the haze's: while the fog
-is drawn close in with unknown ground on the screen, it asks for a frame twelve times a second, so the haze can
-drift, and stops asking the moment there is none. A change handed to it - the marks, the ring, the fog, the
-scenery - asks for one frame rather than drawing one, so however many change together, it draws once.
+**The sprite canvas is a stack of layers**, each a `Layer` (`sprites/layer.ts`): the scenery, the marks under
+the fog and over it (`MarksLayer.ts`), the fog with the haze's clock, the selection ring (`RingLayer.ts`), and
+the colour taken out of the map on its own canvas. Each draws its part of a frame from the same camera and says
+how soon it wants the next - the next frame, a time, or never - and the renderer asks for the soonest. So the
+canvas draws when the map has drawn and has no clock of its own, except the haze's: while the fog is drawn close
+in with unknown ground on the screen, it asks for a frame twelve times a second, so the haze can drift, and stops
+asking the moment there is none. The page hands it the whole scene at once (`setScene`) and it works out what
+changed and asks for one frame, so however much changes together, it draws once. A new thing on the map is a
+layer of its own and a line in the renderer's stack, where it goes in the drawing's order.
 
 ## What acts on its own
 

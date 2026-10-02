@@ -1,133 +1,33 @@
-import { Application, Container, Graphics, Rectangle, Sprite } from 'pixi.js';
-import type { Texture } from 'pixi.js';
+import { Application, Container, Rectangle } from 'pixi.js';
 
-import { isWithinView, toScreen } from '../geometry/cameraMath';
 import type { CameraView } from '../geometry/cameraMath';
-import {
-  LONGEST_STEP_MS,
-  PRESENCE_MS,
-  alphasFor,
-  easeTowards,
-  formForHit,
-  isDrawn,
-  midTrade,
-  sizesAt,
-  wantedForm,
-} from './twoForms';
-import type { Form, TwoForms } from './twoForms';
-import { createSceneryLayer } from './scenery/SceneryLayer';
-import { noteDrawn } from './scenery/sceneryCells';
-import type { CameraSource, FogHow, MapSprite, SceneryHow, SpriteRenderer } from './SpriteRenderer';
-import type { Coverage } from '@villages/protocol';
 import { revealedAt } from '../fog/fogField';
 import type { FogField } from '../fog/fogField';
 import { createUncolouring } from '../fog/uncolouring';
 import { createFogLayer } from './FogLayer';
-import { overTheFog } from './fogLayering';
+import { soonest, type Layer } from './layer';
+import { buildMarkTextures } from './markTextures';
+import { createMarksLayer, type MarksLayer } from './MarksLayer';
+import { createRingLayer, type RingLayer } from './RingLayer';
+import { createSceneryLayer } from './scenery/SceneryLayer';
+import { noteDrawn } from './scenery/sceneryCells';
+import type { CameraSource, DrawnSprite, FogHow, Scene, SpriteRenderer } from './SpriteRenderer';
+import { LONGEST_STEP_MS } from './twoForms';
 
 /** What the dev server says when it has cut the art again, `vite/artApi.ts`. */
 const ART_CUT = 'villages:art-cut';
 
-/**
- * What each shape is laid out in. Every one is drawn far larger than it is ever shown and scaled
- * down, so that coming close finds detail rather than a smear.
- *
- * These are not the sizes the textures come out at: `generateTexture` crops to the ink. What a sprite
- * is scaled against is its own texture's height, in `show`.
- */
-const TEXTURE = {
-  castleHeight: 160,
-  castleWidth: 150,
-  markHeight: 64,
-  markWidth: 48,
-  candidateHeight: 64,
-  candidateWidth: 44,
-  figureHeight: 160,
-  figureWidth: 80,
-  bustHeight: 64,
-  bustWidth: 60,
-  ringDiameter: 128,
-} as const;
-
-/**
- * What each kind of mark looks like, in world units on the ground and in screen pixels as a sign.
- *
- * A house crosses over at zoom 8.46, where both forms are 22 pixels, and by zoom 10 its castle stands
- * 64. The four world units are a map convention and not a measurement: a surveyed castle is about a
- * tenth of a unit here, and would cross over at zoom fourteen, four levels past where the camera stops.
- *
- * A candidate has no ground form at all. It is a question the world is asking rather than a thing
- * standing in the world, so it is the same size wherever the camera is.
- *
- * A character is a person, smaller than a house on the ground and as a sign: a figure a unit and a half
- * tall, and a bust of sixteen pixels. They cross over at zoom 9.4, just in from zoom 9 where a key
- * figure's significance first has them drawn, so they arrive as the sign and stand up as the camera comes
- * in; by zoom 10 the figure is 24 pixels beside a castle's 64.
- */
-const KINDS: Record<MapSprite['kind'], TwoForms> = {
-  house: { groundHeight: 4, iconHeight: 22 },
-  candidate: { iconHeight: 26 },
-  character: { groundHeight: 1.5, iconHeight: 16 },
-};
-
-/**
- * What marks the selected house. The interface's own ink rather than its gold: the ground a house holds
- * is drawn in gold already, and a gold ring on a gold field is a ring nobody can see.
- */
-const SELECTED = 0x241c14;
-
-/** What the development probe reports about one sprite. */
-export interface DrawnSprite {
-  x: number;
-  y: number;
-  visible: boolean;
-  /** Which form is drawn, or `both` while they are trading places. */
-  form: 'ground' | 'icon' | 'both' | 'none';
-  /** How tall it is on the screen right now, which is what a ground-anchored size is checked by. */
-  height: number;
-  /** How much of it is here: nought on its way out, one arrived. */
-  presence: number;
-  /** Whether its ground form is drawn over the fog, which it is in vision. Its icon always is. */
-  groundOverTheFog: boolean;
-}
-
-interface Entry {
-  spec: MapSprite;
-  /** The thing itself, standing on its ground. Null for a kind that has no ground form. */
-  ground: Sprite | null;
-  /** The sign for it. Null for a kind that is only ever itself. */
-  icon: Sprite | null;
-  /** Which form the camera says this should be showing. Changes at the crossover, not gradually. */
-  showing: Form;
-  /** Where the trade between them has got to: nought the icon, one the ground form. */
-  blend: number;
-  /**
-   * How much of this mark is here at all: nought gone, one arrived.
-   *
-   * Apart from the blend, because they answer different questions and can run at once: a house may
-   * arrive at a zoom that also wants it to change form. Multiplied together at the end.
-   */
-  presence: number;
-  /** No longer among the marks to draw. It fades out and is let go of when it reaches nothing. */
-  leaving: boolean;
-  /**
-   * Whether it stands in vision, which puts its ground form over the fog rather than under it. Worked out
-   * when the mark or the house's vision changes, never a frame. See `fogLayering.ts`.
-   */
-  inVision: boolean;
-}
-
-interface Textures {
-  castle: Texture;
-  mark: Texture;
-  candidate: Texture;
-  figure: Texture;
-  bust: Texture;
-  ring: Texture;
-}
-
 /** Twelve frames a second: all a haze moving about a unit a second needs, and a fifth of what a display draws. */
 const UNDULATION_MS = 83;
+
+/** Nothing on the map yet: what the renderer holds until the first scene is handed it. */
+const NOTHING: Scene = {
+  sprites: [],
+  selected: null,
+  everything: false,
+  fog: null,
+  scenery: { on: false, dial: 1, spacing: 1, laterBy: 0, shadows: 0, tilesRoot: '' },
+};
 
 /**
  * Sprites drawn on a transparent canvas above the map, moved to follow the camera whenever it moves.
@@ -139,20 +39,15 @@ const UNDULATION_MS = 83;
  * That is what keeps the two canvases agreeing: one camera, read once, into one browser frame. A still
  * map draws nothing at all.
  *
- * Each mark holds both of its forms at once and trades between them with alpha. They are never created
- * or destroyed by the zoom, only faded: putting the switch on existence rather than on appearance is
- * what keeps a camera resting on the crossover from churning sprites. See docs/adr/0051.
+ * **A stack of layers.** The scenery, the marks under the fog and over it, the fog with its haze's clock, the
+ * ring, and the colour taken out of the map on a canvas of its own, each a \`Layer\` that draws its part of a
+ * frame and says when it wants the next. The stack's order is the drawing's, bottom to top: the scenery and
+ * the world outside vision, which lose their colour together on ground only revealed; the fog over them; the
+ * ring; and every sign the fog must not cover. See \`layer.ts\` and decision 0062.
  */
 export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
   const app = new Application();
   const stage = new Container();
-  /**
-   * The two sides of the fog of war. Under it, the ground forms of whatever stands outside vision; over it,
-   * every icon and whatever stands in vision. The scenery lies under both, and the fog between them, so it
-   * covers the world and never the signs for the things in it. See `fogLayering.ts` and decision 0062.
-   */
-  const underTheFog = new Container();
-  const overIt = new Container();
   /**
    * Everything under the fog, the scenery and the world outside vision, in one container so that one filter
    * takes its colour out where the house has only revealed. Its area is the screen, so the filter never
@@ -163,25 +58,11 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
   const fog = createFogLayer();
   /** The colour taken out of the map, beneath this canvas; nothing until the page hands over a canvas. */
   let uncolouring: ReturnType<typeof createUncolouring> | null = null;
-  /**
-   * The haze's slow clock: one frame at a time, twelve a second, while there is haze on the screen to move and
-   * none otherwise; nothing else on the map has a clock of its own. Still for anyone who has asked for less
-   * motion. See step 7 of docs/plans/fog-of-war.md.
-   */
-  let undulation: ReturnType<typeof setTimeout> | null = null;
-  const stillHaze =
-    typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const keepUndulating = (): void => {
-    if (undulation !== null || disposed) {
-      return;
-    }
-    undulation = setTimeout(() => {
-      undulation = null;
-      frame();
-    }, UNDULATION_MS);
-  };
-  /** What the house has in vision, for asking whether a mark stands in it; nothing while there is no fog. */
-  let vision: Coverage | null = null;
+  let scenery: ReturnType<typeof createSceneryLayer> | null = null;
+  /** The marks and the ring, once there is a canvas to draw them on; the scene waits for them until then. */
+  let layers: { marks: MarksLayer; ring: RingLayer; drawn: readonly Layer[] } | null = null;
+  /** What is on the map: the last scene handed in, which a renderer mounted late is given whole. */
+  let scene: Scene = NOTHING;
   /**
    * The field the scenery was last told to grow by: undefined with the fog off, where everything grows, and
    * null for a house that sees nothing, where nothing does. Kept so the wood is only sorted again when the
@@ -190,257 +71,32 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
   let groundField: FogField | null | undefined = undefined;
   const groundOf = (field: FogField | null | undefined): ((x: number, y: number) => boolean) | null =>
     field === undefined ? null : field === null ? () => false : (x, y) => revealedAt(field, x, y);
-  const standsInVision = (at: { lng: number; lat: number }): boolean =>
-    vision?.covers({ lat: at.lat, lon: at.lng }) ?? false;
-  const entries = new Map<string, Entry>();
 
-  let textures: Textures | null = null;
-  let selected: string | null = null;
-  let everything = false;
-  let ring: Sprite | null = null;
   let disposed = false;
   let unwatch: (() => void) | null = null;
   /** What the canvas was last sized to, so it is only resized when the map's box actually changed. */
   let canvasWas = { width: 0, height: 0 };
   /** When the last frame was drawn, so a trade moves on by real time rather than by frames. */
   let lastFrameAt = 0;
-  /** A frame owed to a trade still running. The camera is not moving, so nobody else will ask. */
+  /** A frame owed: asked for, and not yet drawn. The camera may not be moving, so nobody else will ask. */
   let owed: number | null = null;
-  let scenery: ReturnType<typeof createSceneryLayer> | null = null;
-  let how: SceneryHow = { on: false, dial: 1, spacing: 1, laterBy: 0, shadows: 0, tilesRoot: '' };
+  /**
+   * The haze's slow clock: one frame at a time, twelve a second, while there is haze on the screen to move and
+   * none otherwise; nothing else on the map has a clock of its own. Still for anyone who has asked for less
+   * motion. See step 7 of docs/plans/fog-of-war.md.
+   */
+  let undulation: ReturnType<typeof setTimeout> | null = null;
+  const stillHaze =
+    typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   /** The worst gap between two frames of a moving map, which is what a stutter is. */
   let worstGapMs = 0;
   /** When the last frame was actually drawn, which is what a frame gap is measured between. */
   let lastDrawnAt = 0;
 
   /**
-   * One shape, rasterised once, with the smaller copies of itself that a downscale needs.
-   *
-   * Every shape here is drawn far larger than it is shown, and without mipmaps that samples about one
-   * texel in twenty. The outline then sparkles whenever the sprite lands on a different fraction of a
-   * pixel, which is every frame the map moves, and on a display at 125 or 150 per cent it never lands
-   * on a whole one at all. The levels are built once, here.
-   */
-  function rasterise(shape: Graphics): Texture {
-    return app.renderer.generateTexture({
-      target: shape,
-      textureSourceOptions: { autoGenerateMipmaps: true, scaleMode: 'linear' },
-    });
-  }
-
-  function buildTextures(): Textures {
-    const { castleWidth: w, castleHeight: h } = TEXTURE;
-
-    // The ground form: a castle, two towers with a battlemented wall between them, drawn in white so
-    // that a tint can colour it per house. One outline, because a tinted sprite with seams shows them.
-    // Everything is a fraction of the texture, so the drawing survives being given a different size.
-    const tower = w * 0.267;
-    const towerTop = h * 0.3;
-    const wallTop = h * 0.56;
-    const crenel = h * 0.094;
-    const gap = w * 0.089;
-    const castle = new Graphics()
-      .moveTo(3, h - 3)
-      .lineTo(3, towerTop)
-      .lineTo(3 + tower / 3, towerTop)
-      .lineTo(3 + tower / 3, towerTop - crenel)
-      .lineTo(3 + (tower * 2) / 3, towerTop - crenel)
-      .lineTo(3 + (tower * 2) / 3, towerTop)
-      .lineTo(3 + tower, towerTop)
-      .lineTo(3 + tower, wallTop)
-      .lineTo(w / 2 - gap, wallTop)
-      .lineTo(w / 2 - gap, wallTop - crenel)
-      .lineTo(w / 2 + gap, wallTop - crenel)
-      .lineTo(w / 2 + gap, wallTop)
-      .lineTo(w - 3 - tower, wallTop)
-      .lineTo(w - 3 - tower, towerTop)
-      .lineTo(w - 3 - (tower * 2) / 3, towerTop)
-      .lineTo(w - 3 - (tower * 2) / 3, towerTop - crenel)
-      .lineTo(w - 3 - tower / 3, towerTop - crenel)
-      .lineTo(w - 3 - tower / 3, towerTop)
-      .lineTo(w - 3, towerTop)
-      .lineTo(w - 3, h - 3)
-      .closePath()
-      .fill(0xffffff)
-      .stroke({ width: 6, color: 0x4a4034, alpha: 0.85 });
-
-    // The icon: the same castle said in three strokes. The detailed one is unreadable at 22 pixels -
-    // its crenellations come to two pixels and its outline eats the fill - so the sign is a keep with
-    // three merlons and nothing else. What it has to do is read as a castle at the size of a word.
-    const { markWidth: mw, markHeight: mh } = TEXTURE;
-    const top = mh * 0.16;
-    const shoulder = mh * 0.34;
-    const mark = new Graphics()
-      .moveTo(4, mh - 3)
-      .lineTo(4, top)
-      .lineTo(mw * 0.3, top)
-      .lineTo(mw * 0.3, shoulder)
-      .lineTo(mw * 0.42, shoulder)
-      .lineTo(mw * 0.42, top)
-      .lineTo(mw * 0.58, top)
-      .lineTo(mw * 0.58, shoulder)
-      .lineTo(mw * 0.7, shoulder)
-      .lineTo(mw * 0.7, top)
-      .lineTo(mw - 4, top)
-      .lineTo(mw - 4, mh - 3)
-      .closePath()
-      .fill(0xffffff)
-      .stroke({ width: 5, color: 0x4a4034, alpha: 0.9 });
-
-    // A pennant on a staff: a place the world is offering, rather than a house that stands there.
-    const { candidateWidth: cw, candidateHeight: ch } = TEXTURE;
-    const candidate = new Graphics()
-      .moveTo(4, 2)
-      .lineTo(cw - 2, 12)
-      .lineTo(4, 22)
-      .closePath()
-      .fill(0xffffff)
-      .rect(0, 0, 5, ch)
-      .fill(0xffffff)
-      .stroke({ width: 3, color: 0x4a4034, alpha: 0.85 });
-
-    // A person standing on their place: a head over a cloak that widens to the hem, drawn in white so
-    // a tint gives them the colours of the house they serve. The ground form, so it is what they are.
-    const { figureWidth: fw, figureHeight: fh } = TEXTURE;
-    const head = fw * 0.2;
-    const figure = new Graphics()
-      .moveTo(fw / 2 - fw * 0.14, head * 2.55)
-      .lineTo(fw * 0.2, head * 3.5)
-      .lineTo(4, fh - 3)
-      .lineTo(fw - 4, fh - 3)
-      .lineTo(fw * 0.8, head * 3.5)
-      .lineTo(fw / 2 + fw * 0.14, head * 2.55)
-      .closePath()
-      .fill(0xffffff)
-      .stroke({ width: 5, color: 0x4a4034, alpha: 0.85 })
-      .circle(fw / 2, head + 4, head)
-      .fill(0xffffff)
-      .stroke({ width: 5, color: 0x4a4034, alpha: 0.85 });
-
-    // The sign for a person: a head and shoulders, the key figures' own mark, said at the size of a word.
-    const { bustWidth: bw, bustHeight: bh } = TEXTURE;
-    const bust = new Graphics()
-      .moveTo(3, bh - 3)
-      .bezierCurveTo(3, bh * 0.62, bw * 0.24, bh * 0.52, bw / 2, bh * 0.52)
-      .bezierCurveTo(bw * 0.76, bh * 0.52, bw - 3, bh * 0.62, bw - 3, bh - 3)
-      .closePath()
-      .fill(0xffffff)
-      .stroke({ width: 5, color: 0x4a4034, alpha: 0.9 })
-      .circle(bw / 2, bh * 0.28, bh * 0.2)
-      .fill(0xffffff)
-      .stroke({ width: 5, color: 0x4a4034, alpha: 0.9 });
-
-    // What marks the selected house: a ring on the ground under it rather than a change to the mark
-    // itself, so that what is selected is still drawn as what it is.
-    const r = TEXTURE.ringDiameter;
-    const ringOf = new Graphics()
-      .ellipse(r / 2, r / 2, r / 2 - 4, r / 4 - 4)
-      .stroke({ width: 6, color: 0xffffff, alpha: 1 });
-
-    const built = {
-      castle: rasterise(castle),
-      mark: rasterise(mark),
-      candidate: rasterise(candidate),
-      figure: rasterise(figure),
-      bust: rasterise(bust),
-      ring: rasterise(ringOf),
-    };
-    castle.destroy();
-    mark.destroy();
-    candidate.destroy();
-    figure.destroy();
-    bust.destroy();
-    ringOf.destroy();
-    return built;
-  }
-
-  /**
-   * Makes the sprites a kind needs, dressed once and never dressed again.
-   *
-   * The texture, the anchor and the tint are all settled here because none of them depends on the zoom
-   * any more. Only the height and the alpha change as the camera moves, which is two numbers a frame.
-   */
-  function sproutFor(spec: MapSprite): Entry {
-    const forms = KINDS[spec.kind];
-    // Settled, not mid-trade: a house arriving while the camera is still should already be whichever
-    // form this zoom calls for, rather than fading in from the other one.
-    const showing = wantedForm(camera.zoom(), forms, 'icon');
-    // Settled in its form, but not yet present: a mark fades up rather than appearing whole.
-    const entry: Entry = {
-      spec,
-      ground: null,
-      icon: null,
-      showing,
-      blend: showing === 'ground' ? 1 : 0,
-      presence: 0,
-      leaving: false,
-      inVision: standsInVision(spec.at),
-    };
-    if (textures === null) {
-      return entry;
-    }
-
-    if (forms.groundHeight !== undefined) {
-      const sprite = new Sprite(spec.kind === 'character' ? textures.figure : textures.castle);
-      // The castle stands on the seat, and a person on their place, so the sprite hangs from its own
-      // bottom edge.
-      sprite.anchor.set(0.5, 1);
-      sprite.tint = spec.tint;
-      sprite.visible = false;
-      (overTheFog('ground', entry.inVision) ? overIt : underTheFog).addChild(sprite);
-      entry.ground = sprite;
-    }
-    if (forms.iconHeight !== undefined) {
-      const sprite = new Sprite(
-        spec.kind === 'candidate'
-          ? textures.candidate
-          : spec.kind === 'character'
-            ? textures.bust
-            : textures.mark,
-      );
-      // The same anchor as the ground form, because the two forms of one thing stand on one point: a
-      // crossfade between two shapes hung from different places trades a jump in size for a jump in
-      // position, and the eye catches a translation far harder than a scale. A candidate has only this
-      // form, so it keeps its own: the staff's foot is the place, and the pennant flies above it.
-      sprite.anchor.set(spec.kind === 'candidate' ? 0 : 0.5, 1);
-      sprite.tint = spec.tint;
-      sprite.visible = false;
-      overIt.addChild(sprite);
-      entry.icon = sprite;
-    }
-    return entry;
-  }
-
-  /**
-   * Draws one form at the height and the alpha the rule asked for.
-   *
-   * The scale is taken against the texture's own height rather than against the size the shape was
-   * laid out in, because `generateTexture` crops to what was actually drawn: the castle is laid out in
-   * 160 pixels and its ink covers about 132 of them. Dividing by the layout made a height of 45 pixels
-   * come out as 37, which would have made "four world units" a polite fiction and the crossover land
-   * somewhere other than where the arithmetic says.
-   */
-  function show(sprite: Sprite | null, height: number, alpha: number): void {
-    if (sprite === null) {
-      return;
-    }
-    if (alpha <= 0) {
-      sprite.visible = false;
-      return;
-    }
-    sprite.visible = true;
-    sprite.alpha = alpha;
-    sprite.scale.set(height / sprite.texture.height);
-  }
-
-  function artCut(): void {
-    scenery?.artChanged(drawSoon);
-  }
-
-  /**
    * Asks for one frame, however often it is asked before the frame comes: what every change here does - a
    * mark, the ring, the fog, the scenery - and a trade still running. The map may not be moving, so its
-   * `render` may not be coming. A still map with nothing changing on it still draws nothing, and thirty
+   * \`render\` may not be coming. A still map with nothing changing on it still draws nothing, and thirty
    * cells answered in one burst draw once rather than a frame a setter a cell.
    */
   function drawSoon(): void {
@@ -453,126 +109,50 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
     });
   }
 
-  /**
-   * Puts a mark's ground form on the side of the fog it now belongs on: over it in vision, under it outside.
-   * Moving a sprite between two containers keeps it; nothing is made again.
-   */
-  function sideOfTheFog(entry: Entry): void {
-    entry.inVision = standsInVision(entry.spec.at);
-    const belongs = overTheFog('ground', entry.inVision) ? overIt : underTheFog;
-    if (entry.ground !== null && entry.ground.parent !== belongs) {
-      belongs.addChild(entry.ground);
-    }
-  }
-
-  function hide(entry: Entry): void {
-    if (entry.ground !== null) {
-      entry.ground.visible = false;
-    }
-    if (entry.icon !== null) {
-      entry.icon.visible = false;
-    }
-  }
-
-  function frame(): void {
-    if (textures === null || disposed) {
+  /** Asks for a frame this many milliseconds from now: the haze's twelve a second. */
+  function drawIn(ms: number): void {
+    if (undulation !== null || disposed) {
       return;
     }
-    const zoom = camera.zoom();
-    const { width, height } = camera.size();
-    // The map's box can change without the window changing, and Pixi's own `resizeTo` listens to the
-    // window alone. So the canvas is sized from the box the projection is about to use, not from a
-    // resize event that may never come.
-    if (width !== canvasWas.width || height !== canvasWas.height) {
-      canvasWas = { width, height };
-      app.renderer.resize(width, height);
-      world.filterArea = new Rectangle(0, 0, width, height);
-    }
-    const view: CameraView = {
-      center: camera.center(),
-      zoom,
-      width,
-      height,
-      pitch: camera.pitch(),
-      bearing: camera.bearing(),
-    };
+    undulation = setTimeout(() => {
+      undulation = null;
+      frame();
+    }, ms);
+  }
 
-    const now = performance.now();
-    // Capped, because a still map draws nothing and the gap since the last frame is then seconds. A
-    // house arriving on a still map would otherwise be handed the whole of its fade in one step.
-    const elapsed = Math.min(now - lastFrameAt, LONGEST_STEP_MS);
-    lastFrameAt = now;
-    let trading = false;
+  function artCut(): void {
+    scenery?.artChanged(drawSoon);
+  }
 
-    const gone: string[] = [];
-
-    for (const [id, entry] of entries) {
-      const forms = KINDS[entry.spec.kind];
-      // The camera decides which form, once and hard; time decides how long it takes to get there.
-      // Advanced for every mark, on screen or not, so one that comes back into view is not stale.
-      entry.showing = wantedForm(zoom, forms, entry.showing);
-      entry.blend = easeTowards(entry.blend, entry.showing === 'ground' ? 1 : 0, elapsed);
-
-      // A candidate is what the player is being asked about, so it is drawn however far back the
-      // camera is; so is a house the player has asked to keep in sight. Everything else goes with the
-      // rest of the world's furniture. Distance, not size: see 0038.
-      const spared = entry.spec.kind === 'candidate' || entry.spec.always === true;
-      const here = !entry.leaving && isDrawn(zoom, { everything, spared });
-      entry.presence = easeTowards(entry.presence, here ? 1 : 0, elapsed, PRESENCE_MS);
-      trading = trading || midTrade(entry.blend) || midTrade(entry.presence);
-
-      // Gone, and now faded out, so it can be let go of. Collected rather than deleted here, because
-      // this is walking the very map it would be deleted from.
-      if (entry.leaving && entry.presence === 0) {
-        gone.push(id);
-        hide(entry);
-        continue;
+  /** The fog, and the haze's clock with it. */
+  const hazeLayer: Layer = {
+    draw(view: CameraView, now: number): number | null {
+      fog.follow(view);
+      if (stillHaze) {
+        return null;
       }
-
-      const sizes = sizesAt(zoom, forms);
-      // The margin is the mark's own height rather than a constant, because a ground form at the
-      // closest zoom is taller than any fixed margin worth writing down.
-      const reach = Math.max(sizes.ground, sizes.icon) + 8;
-      const point = toScreen(entry.spec.at, view);
-
-      // Being off the screen is not the same as being gone, so it hides without touching the presence
-      // above. A mark panned back into view was there all along and arrives whole, rather than fading
-      // up at the edge as though it had just been founded.
-      if (entry.presence === 0 || !isWithinView(point, view, reach)) {
-        hide(entry);
-        continue;
-      }
-
-      const alphas = alphasFor(entry.blend);
-      show(entry.ground, sizes.ground, alphas.ground * entry.presence);
-      show(entry.icon, sizes.icon, alphas.icon * entry.presence);
-
-      for (const sprite of [entry.ground, entry.icon]) {
-        if (sprite !== null && sprite.visible) {
-          sprite.x = point.x;
-          sprite.y = point.y;
-        }
-      }
-    }
-
-    for (const id of gone) {
-      const entry = entries.get(id);
-      entry?.ground?.destroy();
-      entry?.icon?.destroy();
-      entries.delete(id);
-    }
-
-    dressTheRing(zoom);
-    fog.follow(view);
-    if (!stillHaze) {
       fog.setTime(now / 1000);
-      if (fog.undulates(view)) {
-        keepUndulating();
-      }
-    }
-    uncolouring?.follow(view);
+      return fog.undulates(view) ? UNDULATION_MS : null;
+    },
+    destroy: () => fog.destroy(),
+  };
 
-    if (scenery !== null) {
+  /** The colour taken out of the map, on the canvas beneath this one. */
+  const uncolouringLayer: Layer = {
+    draw(view: CameraView): number | null {
+      uncolouring?.follow(view);
+      return null;
+    },
+    destroy: () => uncolouring?.destroy(),
+  };
+
+  /** The world's furniture, which asks for its own frames as the cells it cuts land. */
+  const sceneryLayer: Layer = {
+    draw(view: CameraView, now: number): number | null {
+      if (scenery === null) {
+        return null;
+      }
+      const how = scene.scenery;
       scenery.container.visible = how.on;
       const drew = how.on
         ? scenery.update(view, how.tilesRoot, how.dial, how.spacing, how.laterBy, how.shadows, drawSoon)
@@ -588,36 +168,94 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       } else {
         noteDrawn(drew);
       }
-    }
+      return null;
+    },
+    destroy: () => scenery?.destroy(),
+  };
 
+  function frame(): void {
+    if (layers === null || disposed) {
+      return;
+    }
+    const { width, height } = camera.size();
+    // The map's box can change without the window changing, and Pixi's own `resizeTo` listens to the
+    // window alone. So the canvas is sized from the box the projection is about to use, not from a
+    // resize event that may never come.
+    if (width !== canvasWas.width || height !== canvasWas.height) {
+      canvasWas = { width, height };
+      app.renderer.resize(width, height);
+      world.filterArea = new Rectangle(0, 0, width, height);
+    }
+    const view: CameraView = {
+      center: camera.center(),
+      zoom: camera.zoom(),
+      width,
+      height,
+      pitch: camera.pitch(),
+      bearing: camera.bearing(),
+    };
+
+    const now = performance.now();
+    // Capped, because a still map draws nothing and the gap since the last frame is then seconds. A
+    // house arriving on a still map would otherwise be handed the whole of its fade in one step.
+    const elapsed = Math.min(now - lastFrameAt, LONGEST_STEP_MS);
+    lastFrameAt = now;
+
+    let wants: number | null = null;
+    for (const layer of layers.drawn) {
+      wants = soonest(wants, layer.draw(view, now, elapsed));
+    }
     app.render();
 
-    if (trading) {
+    if (wants === 0) {
       drawSoon();
+    } else if (wants !== null) {
+      drawIn(wants);
     }
   }
 
-  /** The ring sits on the ground under the selected house, marking what it stands on rather than it. */
-  function dressTheRing(zoom: number): void {
-    if (ring === null) {
+  /** The fog of war, and everything that follows from it: the scenery's ground, the colour out, the marks' sides. */
+  function showFog(next: FogHow | null): void {
+    fog.show(next === null ? null : { field: next.field });
+    layers?.marks.setVision(next?.vision ?? null);
+    const field = next === null ? undefined : next.field;
+    if (field !== groundField) {
+      groundField = field;
+      scenery?.setGround(groundOf(field));
+      // Only a house with revealed ground has any colour to take out, and the filter costs a pass.
+      uncolouring?.show(field ?? null);
+      world.filters = field === undefined || field === null ? null : [fog.uncolour];
+    }
+  }
+
+  /** Hands the layers what changed between two scenes, or the whole of one to layers just made. */
+  function apply(was: Scene | null, next: Scene): void {
+    if (layers === null) {
       return;
     }
-    const on = selected === null ? undefined : entries.get(selected);
-    const above = on?.ground?.visible === true ? on.ground : on?.icon;
-    if (on === undefined || above === null || above === undefined || !above.visible) {
-      ring.visible = false;
-      return;
+    // The fog first, so that a mark arriving with it is put on the right side of it.
+    if (was === null || next.fog !== was.fog) {
+      showFog(next.fog);
     }
-    // Sized off the blend rather than off one form, because during the trade neither answers on its
-    // own. At the crossover the two heights are equal, so this is a no-op exactly where it matters.
-    const sizes = sizesAt(zoom, KINDS[on.spec.kind]);
-    const alphas = alphasFor(on.blend);
-    const tall = sizes.ground * alphas.ground + sizes.icon * alphas.icon;
-    // Wider than the mark it is under, or it would be a ring nobody can see behind a castle.
-    ring.visible = true;
-    ring.scale.set((tall * 1.7) / TEXTURE.ringDiameter);
-    ring.x = above.x;
-    ring.y = above.y;
+    // A different scattering is a different world's worth of points, so what was cut is thrown away
+    // rather than left to be a denser world's sparse half.
+    if (
+      was !== null &&
+      (next.scenery.dial !== was.scenery.dial ||
+        next.scenery.spacing !== was.scenery.spacing ||
+        next.scenery.tilesRoot !== was.scenery.tilesRoot)
+    ) {
+      scenery?.clear();
+    }
+    if (was === null || next.sprites !== was.sprites) {
+      layers.marks.setSprites(next.sprites);
+    }
+    if (was === null || next.everything !== was.everything) {
+      layers.marks.setEverything(next.everything);
+    }
+    if (was === null || next.selected !== was.selected) {
+      layers.ring.setSelected(next.selected);
+    }
   }
 
   return {
@@ -639,21 +277,20 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
         return;
       }
 
-      textures = buildTextures();
-      // Marks handed over before the canvas was ready were kept with no pictures, because there were no
-      // textures to draw them with; the seats a founding choice offers always are, since they arrive with the
-      // first frames. Given their pictures now, or they would be kept and never drawn.
-      for (const [id, entry] of entries) {
-        if (entry.ground === null && entry.icon === null) {
-          entries.set(id, { ...sproutFor(entry.spec), leaving: entry.leaving });
-        }
-      }
+      const textures = buildMarkTextures((shape) =>
+        app.renderer.generateTexture({
+          target: shape,
+          textureSourceOptions: { autoGenerateMipmaps: true, scaleMode: 'linear' },
+        }),
+      );
+      const marks = createMarksLayer(camera, textures);
+      const ring = createRingLayer(textures, marks);
       // Under everything, because it is the ground the rest stands on.
       scenery = createSceneryLayer();
       scenery.setGround(groundOf(groundField));
       // The world outside vision over the scenery, both losing their colour on ground only revealed; then the
       // fog over them, and everything the fog must not cover above that.
-      world.addChild(scenery.container, underTheFog);
+      world.addChild(scenery.container, marks.underTheFog);
       stage.addChild(world);
       stage.addChild(fog.mesh);
       if (uncolourCanvas !== undefined) {
@@ -664,15 +301,17 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       // The dev server cuts the art again whenever a picture in world/sprites/ is saved, and says so
       // here, so the new picture is on the map without a reload. See decision record 0059.
       import.meta.hot?.on(ART_CUT, artCut);
-      // Under every sprite, because it marks the ground a house stands on rather than the house.
-      ring = new Sprite(textures.ring);
-      ring.anchor.set(0.5, 0.5);
-      ring.tint = SELECTED;
-      ring.visible = false;
-      stage.addChild(ring);
-      stage.addChild(overIt);
+      stage.addChild(ring.ring);
+      stage.addChild(marks.overIt);
       app.stage.addChild(stage);
       container.appendChild(app.canvas);
+
+      // Drawn in the order the old frame drew them: the marks, the ring put where they were just drawn, the
+      // fog, the colour taken out, and the scenery.
+      layers = { marks, ring, drawn: [marks, ring, hazeLayer, uncolouringLayer, sceneryLayer] };
+      // Whatever was handed over before the canvas was ready - the seats a founding choice offers always are,
+      // since they arrive with the first frames - is given now, whole.
+      apply(null, scene);
 
       // One clock. The map draws, then this draws, from the camera the map just used, into the same
       // browser frame. Drawing on an animation frame of its own read the camera at a different instant,
@@ -692,7 +331,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
               field === null
                 ? null
                 : { width: field.width, height: field.height, unitsPerTexel: field.unitsPerTexel },
-            marksInVision: [...entries.values()].filter((entry) => entry.inVision).length,
+            marksInVision: layers?.marks.inVision() ?? 0,
             // Whether the haze's slow clock is running, which it does only while there is haze to move.
             undulating: undulation !== null,
           };
@@ -700,131 +339,19 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
         // Where every sprite actually ended up, for the console and for the end-to-end test, which has
         // no other way to ask a canvas what it drew.
         (window as unknown as { villagesSprites?: () => Record<string, DrawnSprite> }).villagesSprites = () =>
-          Object.fromEntries(
-            [...entries].map(([id, entry]) => {
-              const onGround = entry.ground?.visible === true;
-              const asIcon = entry.icon?.visible === true;
-              const above = onGround ? entry.ground : entry.icon;
-              return [
-                id,
-                {
-                  x: above?.x ?? 0,
-                  y: above?.y ?? 0,
-                  visible: onGround || asIcon,
-                  form: onGround && asIcon ? 'both' : onGround ? 'ground' : asIcon ? 'icon' : 'none',
-                  height: above === null || above === undefined ? 0 : above.height,
-                  presence: entry.presence,
-                  groundOverTheFog: entry.ground !== null && entry.ground.parent === overIt,
-                } satisfies DrawnSprite,
-              ];
-            }),
-          );
+          layers?.marks.report() ?? {};
       }
     },
 
     hitTest(point: { x: number; y: number }): string | null {
-      let nearest: { id: string; away: number } | null = null;
-
-      for (const [id, entry] of entries) {
-        // A mark on its way out takes no clicks: it is not a thing on the map any more, it is the
-        // last of a picture of one.
-        // A candidate is a place being offered rather than a thing standing in the world, so it is not
-        // one; a house and a person are.
-        if (entry.spec.kind === 'candidate' || entry.leaving) {
-          continue;
-        }
-        // One form answers, and the switch is at the crossover where the two are the same size, so the
-        // thing you can hit never changes size either. Hitting whichever is more opaque would move the
-        // target about mid-fade; hitting both would let an all-but-invisible ghost take a click.
-        const which = formForHit(entry.blend);
-        const sprite = which === 'ground' ? entry.ground : entry.icon;
-        if (sprite === null || !sprite.visible) {
-          continue;
-        }
-        const box = sprite.getBounds();
-        if (point.x < box.minX || point.x > box.maxX || point.y < box.minY || point.y > box.maxY) {
-          continue;
-        }
-        // Two marks can overlap where two houses are close. The nearer one is the one meant.
-        const away = Math.hypot(point.x - sprite.x, point.y - sprite.y);
-        if (nearest === null || away < nearest.away) {
-          nearest = { id, away };
-        }
-      }
-
-      return nearest?.id ?? null;
+      return layers?.marks.hitTest(point) ?? null;
     },
 
-    setSelected(id: string | null): void {
-      selected = id;
-      drawSoon();
-    },
-
-    setEverything(on: boolean): void {
-      everything = on;
-      drawSoon();
-    },
-
-    setFog(next: FogHow | null): void {
-      fog.show(next === null ? null : { field: next.field });
-      vision = next?.vision ?? null;
-      const field = next === null ? undefined : next.field;
-      if (field !== groundField) {
-        groundField = field;
-        scenery?.setGround(groundOf(field));
-        // Only a house with revealed ground has any colour to take out, and the filter costs a pass.
-        uncolouring?.show(field ?? null);
-        world.filters = field === undefined || field === null ? null : [fog.uncolour];
-      }
-      for (const entry of entries.values()) {
-        sideOfTheFog(entry);
-      }
-      drawSoon();
-    },
-
-    setScenery(next: SceneryHow): void {
-      // A different scattering is a different world's worth of points, so what was cut is thrown away
-      // rather than left to be a denser world's sparse half.
-      const recut =
-        next.dial !== how.dial || next.spacing !== how.spacing || next.tilesRoot !== how.tilesRoot;
-      how = next;
-      if (recut) {
-        scenery?.clear();
-      }
-      drawSoon();
-    },
-
-    setSprites(sprites: readonly MapSprite[]): void {
-      const seen = new Set<string>();
-
-      for (const spec of sprites) {
-        seen.add(spec.id);
-        const existing = entries.get(spec.id);
-        if (existing === undefined) {
-          entries.set(spec.id, sproutFor(spec));
-        } else {
-          // Back again before it finished going. It fades up from wherever it had got to.
-          existing.leaving = false;
-          existing.spec = spec;
-          // A person who moved may have walked into vision or out of it.
-          sideOfTheFog(existing);
-          if (existing.ground !== null) {
-            existing.ground.tint = spec.tint;
-          }
-          if (existing.icon !== null) {
-            existing.icon.tint = spec.tint;
-          }
-        }
-      }
-
-      // A mark that has gone is not destroyed here. It is marked as leaving, fades out over the next
-      // frames, and is let go of once there is nothing left of it to see. Nothing on the map vanishes
-      // between one frame and the next.
-      for (const [id, entry] of entries) {
-        entry.leaving = !seen.has(id);
-      }
-
-      // A house can arrive while the map is perfectly still, and a still map draws no frames of its own.
+    setScene(next: Scene): void {
+      const was = scene;
+      scene = next;
+      // Before the canvas is ready this only keeps it: the layers are given the whole of it when they are made.
+      apply(was, next);
       drawSoon();
     },
 
@@ -834,9 +361,9 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
         clearTimeout(undulation);
         undulation = null;
       }
-      fog.destroy();
-      uncolouring?.destroy();
-      scenery?.destroy();
+      for (const layer of layers?.drawn ?? [hazeLayer]) {
+        layer.destroy();
+      }
       import.meta.hot?.off(ART_CUT, artCut);
       scenery = null;
       unwatch?.();
@@ -845,7 +372,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
         cancelAnimationFrame(owed);
         owed = null;
       }
-      entries.clear();
+      layers = null;
       if (app.renderer !== null && app.renderer !== undefined) {
         app.destroy(true, { children: true });
       }

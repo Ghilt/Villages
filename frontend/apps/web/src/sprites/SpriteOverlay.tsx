@@ -69,32 +69,26 @@ export function SpriteOverlay({ map, sprites, worldRoot, picked: top, onPick }: 
     };
   }, [map]);
 
-  // Each hands the renderer one thing when it changes, and the renderer draws once for however many changed.
-  useEffect(() => {
-    renderer?.setSprites(sprites);
-  }, [renderer, sprites]);
-
-  useEffect(() => {
-    renderer?.setEverything(everything);
-  }, [renderer, everything]);
-
-  useEffect(() => {
-    renderer?.setScenery({ ...scenery, tilesRoot: worldRoot });
-  }, [renderer, scenery, worldRoot]);
-
   // Nothing is drawn until the gateway has said what the house sees, so a page still connecting is not a world
   // under haze for a moment; nothing either with the switch off.
-  useEffect(() => {
-    renderer?.setFog(fogOn && sight !== null ? { field, vision } : null);
-  }, [renderer, fogOn, sight, field, vision]);
-
+  const fog = useMemo(
+    () => (fogOn && sight !== null ? { field, vision } : null),
+    [fogOn, sight, field, vision],
+  );
+  const how = useMemo(() => ({ ...scenery, tilesRoot: worldRoot }), [scenery, worldRoot]);
   // The ring follows whatever was opened last. With three windows up the map can still only mark one, and
   // the newest is the one the player is looking at.
+  const selected =
+    top?.kind === 'house' ? top.id : top?.kind === 'character' ? `${CHARACTER}${top.id}` : null;
+  const scene = useMemo(
+    () => ({ sprites, selected, everything, fog, scenery: how }),
+    [sprites, selected, everything, fog, how],
+  );
+
+  // The whole scene at once: the renderer works out what changed, and draws once for however much did.
   useEffect(() => {
-    renderer?.setSelected(
-      top?.kind === 'house' ? top.id : top?.kind === 'character' ? `${CHARACTER}${top.id}` : null,
-    );
-  }, [renderer, top]);
+    renderer?.setScene(scene);
+  }, [renderer, scene]);
 
   /**
    * Picking a house or a person, which opens an **inspect window** on them.

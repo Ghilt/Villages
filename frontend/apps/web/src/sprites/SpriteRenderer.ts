@@ -32,8 +32,8 @@ export interface MapSprite {
  * The seam behind which the renderer lives. Pixi is one implementation; a custom map layer or a
  * data-driven overlay could be another, and nothing outside this folder would notice. See docs/adr/0005.
  *
- * Each setter hands the renderer one thing and asks for a frame; it draws once, at the next one, for however
- * many it was handed, and the map moving draws it in the map's own frame.
+ * It is handed the whole scene at once, and works out what changed; it asks for a frame and draws once, at the
+ * next one, however much changed, and the map moving draws it in the map's own frame.
  */
 export interface SpriteRenderer {
   /**
@@ -43,8 +43,8 @@ export interface SpriteRenderer {
    * house has only revealed; see `fog/uncolouring.ts` and decision record 0065.
    */
   mount(container: HTMLElement, uncolouring?: HTMLCanvasElement): Promise<void>;
-  /** Replace what is on the map. The renderer works out what appeared, changed and went away. */
-  setSprites(sprites: readonly MapSprite[]): void;
+  /** What is on the map now. The renderer works out what changed since the last, and draws once. */
+  setScene(scene: Scene): void;
   /**
    * Which house or person is at this point on the screen, by the id they were drawn under, or null.
    *
@@ -53,13 +53,27 @@ export interface SpriteRenderer {
    * being offered rather than a thing standing in the world.
    */
   hitTest(point: { x: number; y: number }): string | null;
-  /** Marks one sprite as the selected one, or nothing when null. */
-  setSelected(id: string | null): void;
+  /** Stop following, release the canvas and the textures. */
+  destroy(): void;
+}
+
+/** Everything the renderer draws, handed over whole. Each part keeps its identity while it has not changed. */
+export interface Scene {
+  /** What is on the map. The renderer works out what appeared, changed and went away. */
+  sprites: readonly MapSprite[];
+  /** The one sprite marked as selected, or nothing when null. */
+  selected: string | null;
   /**
    * Whether this window is showing everything: the debug switch, which takes the distance floor off
    * every mark rather than one. A player's own eye is `always` on the sprite instead. See 0038.
    */
-  setEverything(on: boolean): void;
+  everything: boolean;
+  /**
+   * The fog of war to draw, or null for none: the switch off, or nothing heard yet about what the house
+   * sees. It is drawn inside this renderer rather than over it, because it has to lie between the world and
+   * the signs for the things in it. See decision record 0062.
+   */
+  fog: FogHow | null;
   /**
    * How the world is furnished, and where the terrain it is scattered from is served.
    *
@@ -67,15 +81,7 @@ export interface SpriteRenderer {
    * game knows about, and none of them can be clicked. They are a carpet the renderer lays under the
    * marks from the terrain alone. See decision record 0051.
    */
-  setScenery(how: SceneryHow): void;
-  /**
-   * The fog of war to draw, or null for none: the switch off, or nothing heard yet about what the house
-   * sees. It is drawn inside this renderer rather than over it, because it has to lie between the world and
-   * the signs for the things in it. See decision record 0062.
-   */
-  setFog(fog: FogHow | null): void;
-  /** Stop following, release the canvas and the textures. */
-  destroy(): void;
+  scenery: SceneryHow;
 }
 
 /**
@@ -128,4 +134,19 @@ export interface CameraSource {
   bearing(): number;
   /** Calls back whenever the map has drawn. Returns what stops it. */
   watch(drawn: () => void): () => void;
+}
+
+/** What the development probe reports about one sprite. */
+export interface DrawnSprite {
+  x: number;
+  y: number;
+  visible: boolean;
+  /** Which form is drawn, or `both` while they are trading places. */
+  form: 'ground' | 'icon' | 'both' | 'none';
+  /** How tall it is on the screen right now, which is what a ground-anchored size is checked by. */
+  height: number;
+  /** How much of it is here: nought on its way out, one arrived. */
+  presence: number;
+  /** Whether its ground form is drawn over the fog, which it is in vision. Its icon always is. */
+  groundOverTheFog: boolean;
 }
