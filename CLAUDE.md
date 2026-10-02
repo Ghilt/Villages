@@ -57,6 +57,15 @@ has to be learnt once and then costs nothing, and a word costs nothing to learn 
 fitting - in a 44-pixel strip, in a column squeezed to 18rem, in a language nobody has thought about yet.
 Guessing wrong is cheap to fix and it is still drawing it twice. The same question, once, is not.
 
+**A component is seen at `/admin/inspect-ui-components` before it is used.** Whatever the player is shown
+is built from the component library in `frontend/apps/web/src/ui/`: a pane is a **container** named by a
+**recipe** - a border, a fill, its embellishments - and never a stylesheet of its own. A component the
+library lacks is added to it first, in its own commit, and shown on that page in every variant and state;
+only then is it used. A step that adds or changes one points its verify checklist at that page, and says
+which pictures in `world/ui/` it reads, the size to paint each at, and which are still placeholders. The
+placeholders are the agent's to make, copied from the moodboard; Adam replaces them when he chooses and
+nothing waits on him. See `docs/UI-COMPONENTS.md` and decision record 0068.
+
 Never choose the next increment alone, and never chain increments together to save a round trip. The roadmap is a
 menu, not a queue: its order is a suggestion, and Adam reorders it freely. When an option is not on the roadmap
 but is clearly better, offer it anyway and say why.
@@ -202,7 +211,8 @@ stand.
 Before adding or changing a mechanic, read `docs/MECHANICS.md`, which says what the mechanics are, one
 entry per named mechanic, and then `docs/BUILDING-A-MECHANIC.md`, which says how a mechanic Adam describes
 becomes commands, events, frames, projections and panel lines, so that he does not have to say it each
-time.
+time. Before making or changing anything the player is shown, read `docs/UI-COMPONENTS.md` and open the
+page it names.
 
 ## Every document has one purpose, and only what fits it goes in
 
@@ -219,8 +229,8 @@ own purpose line, and saying so is part of presenting the step.
 ```
 CLAUDE.md  README.md  debug-quick-start.{ps1,cmd}  .claude/settings.json  scripts/check.{ps1,sh}
 docs/       VISION SETTING MECHANICS LOOK-AND-FEEL RESPONSIVE-DESIGN GLOSSARY ARCHITECTURE ROADMAP
-            TESTING EVENTS BUILDING-A-MECHANIC AUTHORING-THE-WORLD AUTHORING-THE-ART, adr/, experiments/,
-            plans/
+            TESTING EVENTS BUILDING-A-MECHANIC UI-COMPONENTS AUTHORING-THE-WORLD AUTHORING-THE-ART, adr/,
+            experiments/, plans/
 contracts/  fixtures/*.json shared by the Kotlin and TypeScript protocol tests
 infra/      docker-compose.yml (MongoDB replica set, RabbitMQ)
 backend/    Gradle multi-module: domain, application, protocol, infrastructure-occurrent, infrastructure-rabbit,
@@ -238,6 +248,9 @@ and ESLint restricted imports on the frontend.
   owns the ports. Only `app` has `@SpringBootApplication`.
 - Frontend: `packages/protocol` <- `packages/client-core` <- `apps/web`. `client-core` never imports React, the DOM,
   MapLibre or Pixi; the socket is an injected interface.
+- Inside `apps/web`, the component library in `src/ui/` imports nothing from the rest of the app, only React, its
+  fonts and the world package, so every component can be shown with nothing running; `src/ui/boundary.test.ts`
+  holds it.
 - The WebSocket protocol is a shared contract: Kotlin types and TypeScript (zod) schemas, both tested against the same
   fixtures in `contracts/fixtures/`. It also has a version, and the version has a recording: change a frame or a field
   and `PROTOCOL_VERSION` goes up at both ends and `contracts/protocol-v<n>.txt` is written beside the old ones, or two
@@ -271,7 +284,7 @@ Commands are added here as the increments land:
   `debug-quick-start.cmd` on a double click from Explorer. It checks the tools, installs the packages
   again when `package-lock.json` has changed since they were installed (stopping this checkout's dev
   server first, because Windows will not replace a running program), generates whatever part
-  of the world is missing, cuts the sprites again (seconds when nothing is new), starts the game
+  of the world is missing, cuts the sprites and the interface pictures again (seconds when nothing is new), starts the game
   server and the dev server hidden with their output in
   `.logs/`, waits until both ports answer, and prints the address. `-Stop` stops both, `-Logs` prints
   their tails, `-WebOnly` skips the game server, `-NoBrowser` leaves the browser alone. **A port held by
@@ -471,6 +484,31 @@ Commands are added here as the increments land:
   every style into `world/painterly/`, flat once and then once per style, and writes the runtime copy the
   app reads. `-- --view alps`, `-- --style woodblock` for one of them; `-- --config-only` writes just the
   runtime copy, in a second, which is all the app needs after a style edit.
+- The component library, shown: **`/admin/inspect-ui-components`** on this tree's dev server, and nothing
+  else needs to be running - no game server, no map. Every component in every variant and state, with
+  switches along the top to put them on night or on parchment, to narrow the sheet to a phone's 390
+  pixels, to show a container's layers - each embellishment's box dashed, where its words start
+  dotted - and to mark every word too faint to read against what is behind it, counted at the top, and
+  the screen's density beside them. A section not built yet says which step of
+  `docs/plans/ui-component-library.md` brings it. What a component is made of and how to add one is
+  `docs/UI-COMPONENTS.md`; see decision record 0068.
+- Interface art: `world/ui/` is Adam's folder, committed as the master is, a folder a kind - `borders`,
+  `fills`, `embellishments`, `medallions`, `marks`, `controls`, `dividers` - and **every picture in it is painted at
+  four times the size it is shown**. A border is a whole framed box with a `<name>.json` beside it saying
+  where its four cuts go, in the picture's own pixels, and so is a button's face that stretches to its
+  words; a face's hovered, pressed and disabled states are light and shade over it unless painted as
+  `<name>-hover` and the like. **Saving over a placeholder replaces it**, and with
+  the dev server running the picture is in the Pictures section of `/admin/inspect-ui-components` a
+  moment later, with no reload, because the server cuts the folder again whenever a picture or a border's
+  file in it is saved, and at every start. By hand that is `npm run world:ui --prefix frontend`: it keys,
+  cuts every picture at 1x, 2x and 3x into `public/ui/` with a list beside them, prints a line a picture
+  with what each weighs, and ends with the whole against a budget of two megabytes at 2x. `-- --placeholders`
+  makes the agent's placeholders for whatever is missing, cut from `world/ui/moodboard.webp` or drawn, and
+  never writes over a file that is there. A frame that was not painted as a border - an image model's nine
+  tiles with lines between them, a framed box on stone - is kept as it was given in `world/ui/sources/`
+  with a recipe beside it, and `npm run world:nine-slice --prefix frontend` makes the border, and its fill,
+  from it; `-- --look <picture>` says what a picture is first. The nine-slice skill is how a job is done.
+  See `docs/AUTHORING-THE-ART.md` and decision record 0068.
 - Frontend, look at it: `npm run dev --prefix frontend`, then open the address it prints. That is
   http://localhost:5173 in the main checkout and a port of its own in each worktree; see decision 0031.
 - Frontend, checks: `npm run check --prefix frontend` (typecheck, lint, format, unit tests)

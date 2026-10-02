@@ -1,0 +1,55 @@
+/*
+ * A container: its layers stacked in the one order they always have. What hangs behind it at the bottom,
+ * behind the fill as well as the border, the way a drape hangs behind a whole panel; then the fill, the
+ * border, the content, and what stands over all of it. Only the content is in the flow; everything else
+ * is placed over the box and takes no pointer.
+ */
+
+@layer ui {
+  .ui-container {
+    position: relative;
+    isolation: isolate;
+    min-width: 0;
+  }
+
+  .ui-container > .ui-fill {
+    z-index: 1;
+  }
+
+  .ui-embellishment {
+    position: absolute;
+    z-index: 4;
+    max-width: none;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .ui-embellishment--behind {
+    z-index: 0;
+  }
+
+  .ui-container > .ui-border {
+    z-index: 2;
+  }
+
+  .ui-container__content {
+    position: relative;
+    z-index: 3;
+    min-width: 0;
+  }
+
+  /* A recipe with no softer ink says everything in its main one. */
+  .ui-container.ui-container--one-ink {
+    --ui-text-soft: var(--ui-text);
+  }
+
+  /* Where each embellishment's box is and where the content starts: seen only inside something that asks. */
+  [data-ui-layers='shown'] .ui-embellishment {
+    outline: 1px dashed #ff5fd4;
+  }
+
+  [data-ui-layers='shown'] .ui-container__content {
+    outline: 1px dotted rgba(95, 212, 255, 0.7);
+    outline-offset: -1px;
+  }
+}

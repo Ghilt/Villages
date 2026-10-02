@@ -9,6 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource-variable/cormorant-garamond": "^5.3.0",
+    "@fontsource-variable/eb-garamond": "^5.3.0",
     "@villages/client-core": "*",
     "@villages/protocol": "*",
     "@villages/world": "*",
@@ -16,5 +18,8 @@
     "pixi.js": "^8.20.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "sharp": "^0.34.5"
   }
 }

@@ -1,0 +1,97 @@
+/*
+ * Toasts: a column of them in the bottom right corner of whatever holds them, the newest nearest it, and
+ * nothing of the column but the toasts themselves taking the pointer, so the map under the corner can still
+ * be dragged. Each slides a little way in from the side, and fades as it goes, in a fifth of a second.
+ */
+
+@layer ui {
+  .ui-toasts--corner {
+    position: absolute;
+    right: var(--ui-space-3);
+    bottom: var(--ui-space-3);
+    z-index: 20;
+    width: min(22rem, calc(100% - 2 * var(--ui-space-3)));
+    pointer-events: none;
+  }
+
+  .ui-toasts--flow {
+    width: min(22rem, 100%);
+  }
+
+  .ui-toasts__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .ui-toasts__item {
+    pointer-events: auto;
+    animation: ui-toast-in 0.2s ease-out;
+  }
+
+  .ui-toasts__item[data-leaving] {
+    animation: ui-toast-out 0.2s ease-in forwards;
+  }
+
+  @keyframes ui-toast-in {
+    from {
+      opacity: 0;
+      transform: translateX(16px);
+    }
+  }
+
+  @keyframes ui-toast-out {
+    to {
+      opacity: 0;
+      transform: translateX(16px);
+    }
+  }
+
+  .ui-toast__row {
+    display: flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+  }
+
+  .ui-toast__mark {
+    display: grid;
+    flex: none;
+    place-items: center;
+    color: var(--ui-gilt-light);
+  }
+
+  .ui-toast__words {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .ui-toast__title {
+    margin: 0;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  .ui-toast__text {
+    display: block;
+    margin: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-toasts__item {
+      animation: none;
+    }
+
+    .ui-toasts__item[data-leaving] {
+      animation: ui-toast-fade 0.12s ease-in forwards;
+    }
+
+    @keyframes ui-toast-fade {
+      to {
+        opacity: 0;
+      }
+    }
+  }
+}

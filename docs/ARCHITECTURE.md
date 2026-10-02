@@ -42,6 +42,10 @@ packages/protocol  <-  packages/client-core  <-  apps/web
 - `client-core` is compiled without DOM type definitions, so a stray `window`, `WebSocket` or `document` fails to
   typecheck. The socket arrives as an injected interface.
 - Restricted imports forbid React, MapLibre and Pixi inside `client-core` and `protocol`.
+- Inside `apps/web`, the component library in `src/ui/` imports nothing from the rest of the app: the game hands it
+  words, numbers and callbacks. A test reads every import in the folder and fails on one that leaves it, bar React,
+  the fonts and the world package's pure rules and types, which is what lets `/admin/inspect-ui-components` show every component with nothing running. See
+  decision record 0068.
 
 Enforcement: Gradle module edges plus architecture tests on the backend; workspace dependencies, a DOM-free compiler
 configuration and lint rules on the frontend. A violation fails the build, in both cases proven by a deliberate

@@ -1,0 +1,15 @@
+/* A stepper: the two marks either side of the count, the count in figures that keep their width. */
+
+@layer ui {
+  .ui-stepper {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+  }
+
+  .ui-stepper__count {
+    font-size: 1.15em;
+    font-weight: 600;
+    text-align: center;
+  }
+}

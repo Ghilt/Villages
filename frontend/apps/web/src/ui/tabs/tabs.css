@@ -1,0 +1,119 @@
+/*
+ * A tab bar: its tabs in a row that scrolls across when it is longer than its room, and whatever stands at
+ * its far end. A tab is a button on a face - `.ui-button` gives it every state a button has - and this is
+ * only what is a tab's own: its words in ink on the chosen tab's parchment, and its ring drawn inside it,
+ * over its face, where the row's edges cannot cut it off. What overrides a button's own is written
+ * `.ui-button.ui-tab`, so it wins whichever stylesheet the page happened to load first.
+ *
+ * In `Tabbed` the bar is tucked under the pane's border, the pane drawn over the tabs' open bottoms, so
+ * the tabs stand out of the pane's top edge rather than on it.
+ */
+
+@layer ui {
+  /* As wide as what holds it and no wider, so a row too long scrolls rather than pushing out its holder. */
+  .ui-tabs {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--ui-space-2);
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .ui-tabs__scroll {
+    flex: 1 1 auto;
+    min-width: 0;
+    scrollbar-width: none;
+  }
+
+  .ui-tabs__list {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+  }
+
+  .ui-tabs__end {
+    display: flex;
+    flex: none;
+    align-items: center;
+    align-self: center;
+  }
+
+  .ui-button.ui-tab .ui-button__label {
+    font-size: 0.9rem;
+  }
+
+  .ui-button.ui-tab--small .ui-button__label {
+    font-size: 0.8rem;
+  }
+
+  .ui-tab[aria-selected='true'] .ui-button__label,
+  .ui-tab[aria-selected='true'] .ui-button__mark {
+    color: var(--ui-ink);
+    text-shadow: 0 1px 0 rgba(255, 248, 230, 0.45);
+    filter: none;
+  }
+
+  .ui-tab[aria-selected='true'] {
+    cursor: default;
+  }
+
+  .ui-button.ui-tab:focus-visible,
+  .ui-button.ui-tab[data-showing='focus'] {
+    outline: none;
+  }
+
+  .ui-button.ui-tab:focus-visible::after,
+  .ui-button.ui-tab[data-showing='focus']::after {
+    content: '';
+    position: absolute;
+    inset: 4px 4px 3px;
+    z-index: 2;
+    border: 2px solid var(--ui-focus);
+    border-radius: 5px;
+    /* A dark edge either side of the gilt, because the chosen tab's parchment is as light as the gilt is. */
+    box-shadow:
+      0 0 0 1px rgba(43, 29, 16, 0.8),
+      inset 0 0 0 1px rgba(43, 29, 16, 0.8);
+    pointer-events: none;
+  }
+
+  .ui-tabbed {
+    --ui-tab-tuck: 8px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    isolation: isolate;
+    min-width: 0;
+  }
+
+  .ui-tabbed > .ui-tabs {
+    position: relative;
+    z-index: 0;
+    margin-bottom: calc(-1 * var(--ui-tab-tuck));
+    padding-inline: 1.6rem 0.9rem;
+  }
+
+  .ui-tabbed > .ui-tabs > .ui-tabs__end {
+    margin-bottom: var(--ui-tab-tuck);
+  }
+
+  /* What is on a tab sits in the part of it that stands out of the pane, not the part tucked under. */
+  .ui-tabbed .ui-button.ui-tab {
+    padding-bottom: var(--ui-tab-tuck);
+  }
+
+  .ui-tabbed .ui-button.ui-tab:focus-visible::after,
+  .ui-tabbed .ui-button.ui-tab[data-showing='focus']::after {
+    bottom: calc(var(--ui-tab-tuck) + 2px);
+  }
+
+  .ui-tabbed__pane {
+    z-index: 1;
+  }
+
+  .ui-tabbed__panel:focus-visible {
+    outline: 2px solid var(--ui-focus);
+    outline-offset: 2px;
+  }
+}

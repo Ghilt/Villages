@@ -1,0 +1,178 @@
+/*
+ * The component library's foundations: the colours, the type and the spacing every component is drawn in.
+ *
+ * All of it sits in the `ui` cascade layer, so the game's own stylesheet, which is not in a layer, wins over
+ * anything here wherever the two meet. The library can be laid into a pane without re-styling the pane
+ * around it, and a pane can still place what it was given. Every class is `ui-` and every custom property
+ * `--ui-`, so neither collides with the game's.
+ *
+ * The colours are sampled from the moodboard, `world/ui/moodboard.webp`, and are a proposal: the exact
+ * values are Adam's to choose, on the page at /admin/inspect-ui-components. `tokens.ts` lists them, and a
+ * test holds the two together. See docs/UI-COMPONENTS.md and decision record 0068.
+ */
+
+/* EB Garamond, upright and italic, as variable fonts: every weight in one file per script, and a script's
+   file is fetched only when a page uses it. Latin, Cyrillic, Greek and Vietnamese. */
+@import '@fontsource-variable/eb-garamond';
+@import '@fontsource-variable/eb-garamond/wght-italic.css';
+
+@layer ui {
+  :root {
+    /* Night: the dark the moodboard's pieces lie on, and what a pane is cut out of. */
+    --ui-night: #1c1813;
+    --ui-night-raised: #27211a;
+    --ui-night-edge: #3d3427;
+
+    /* Gilt: every border's gold, from the shadow in a moulding to the light on its crest. */
+    --ui-gilt-deep: #7e6038;
+    --ui-gilt: #af8966;
+    --ui-gilt-light: #dfbd8a;
+
+    /* Parchment: the sheet a thing is written on. Sepia, as the moodboard has it, rather than white. */
+    --ui-parchment-deep: #b89a72;
+    --ui-parchment: #d0b995;
+    --ui-parchment-light: #e7d8bd;
+
+    /* Ink on parchment, and cream on night. */
+    --ui-ink: #2b1d10;
+    --ui-ink-soft: #503d29;
+    --ui-cream: #ebe3d1;
+    --ui-cream-soft: #b8b0a0;
+
+    /* Velvet and lapis: the two cloths, the drape of a primary button and of a secondary one. */
+    --ui-velvet-deep: #3e1a14;
+    --ui-velvet: #6b2b22;
+    --ui-velvet-light: #93473a;
+    --ui-lapis-deep: #252f3a;
+    --ui-lapis: #34465a;
+    --ui-lapis-light: #58697c;
+
+    /* The ring round whatever the keyboard is on: the brightest gilt, so it reads on night and parchment. */
+    --ui-focus: #f3d99b;
+
+    /* Rarity, the four bands of LOOK-AND-FEEL.md, in values that sit on night and on parchment alike. */
+    --ui-rarity-common: #9b958b;
+    --ui-rarity-uncommon: #6f9a55;
+    --ui-rarity-rare: #4f7fb6;
+    --ui-rarity-legendary: #d0822f;
+
+    /* Space, in steps that double, so that two things are either together or apart and never nearly. */
+    --ui-space-1: 0.25rem;
+    --ui-space-2: 0.5rem;
+    --ui-space-3: 1rem;
+    --ui-space-4: 1.5rem;
+    --ui-space-5: 2rem;
+    --ui-space-6: 3rem;
+
+    /* Type. One family for now, and the display face is the text face until a reason for two turns up. */
+    --ui-font-text: 'EB Garamond Variable', 'Palatino Linotype', Palatino, Georgia, serif;
+    --ui-font-display: var(--ui-font-text);
+  }
+
+  /*
+   * Where the library begins: whatever is inside it is set in the library's type, on its colours. The text
+   * colour is said once, as what it is for rather than what it is, so the same label is cream on night and
+   * ink on parchment without knowing which it is on.
+   */
+  .ui-root {
+    --ui-text: var(--ui-cream);
+    --ui-text-soft: var(--ui-cream-soft);
+    font-family: var(--ui-font-text);
+    font-size: 1rem;
+    line-height: 1.4;
+    color: var(--ui-text);
+    font-kerning: normal;
+    font-variant-ligatures: common-ligatures;
+  }
+
+  /*
+   * The roles type plays, each named for what it is doing rather than how big it is, so that a heading
+   * that has to be smaller in a column is still a heading. The sizes are in `em`: a role inside a small
+   * card is small because the card is.
+   */
+
+  /* A page's or a pane's name, in spaced capitals: UI MOODBOARD. */
+  .ui-title {
+    margin: 0;
+    font-family: var(--ui-font-display);
+    font-size: 1.6em;
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  /* The italic line under a title: Enlightenment, Faith, Science, Power. */
+  .ui-epigraph {
+    margin: 0;
+    font-size: 1.1em;
+    font-style: italic;
+    letter-spacing: 0.03em;
+    color: var(--ui-text-soft);
+  }
+
+  /* A thing's name, in a card or at the top of a window: Count de Montreuil. */
+  .ui-heading {
+    margin: 0;
+    font-family: var(--ui-font-display);
+    font-size: 1.2em;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  /* A section's name, small and spaced: 9 TILE BORDERS & CORNERS. */
+  .ui-caps {
+    margin: 0;
+    font-size: 0.8em;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  /* What a thing is, under its name: Noble, Rationalist. */
+  .ui-label {
+    font-size: 0.88em;
+    font-style: italic;
+    color: var(--ui-text-soft);
+  }
+
+  .ui-body {
+    margin: 0;
+    font-size: 1em;
+    line-height: 1.45;
+  }
+
+  /* Somebody speaking: Reason must be our highest authority. The marks are the text's own. */
+  .ui-quote {
+    margin: 0;
+    font-size: 1em;
+    font-style: italic;
+    line-height: 1.4;
+  }
+
+  /*
+   * A number that is read as a number: an amount, a count, a year. Lining and tabular, so a figure that
+   * counts up as the player watches does not jitter sideways as its digits change width.
+   */
+  .ui-numeral {
+    font-variant-numeric: lining-nums tabular-nums;
+    font-feature-settings: 'lnum', 'tnum';
+  }
+
+  /*
+   * On parchment the ink is the text, and on night the cream, whatever is round it: a container says which
+   * it is from its recipe, so a dark pane on a parchment page keeps its cream words rather than taking the
+   * page's ink. Each pair is 4.5 to 1 or more on the fills it is for, which the recipes' test holds.
+   */
+  .ui-on-parchment {
+    --ui-text: var(--ui-ink);
+    --ui-text-soft: var(--ui-ink-soft);
+    color: var(--ui-text);
+  }
+
+  .ui-on-night {
+    --ui-text: var(--ui-cream);
+    --ui-text-soft: var(--ui-cream-soft);
+    color: var(--ui-text);
+  }
+}

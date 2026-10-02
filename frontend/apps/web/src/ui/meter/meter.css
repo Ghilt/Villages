@@ -1,0 +1,25 @@
+/*
+ * A meter: the empty tube across its whole width, and the full one over it, clipped at the level. The clip
+ * moves rather than the picture, so the tube's rounded ends are always whole.
+ */
+
+@layer ui {
+  .ui-meter {
+    position: relative;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .ui-meter__full {
+    position: absolute;
+    inset: 0;
+    transition: clip-path 0.3s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-meter__full {
+      transition: none;
+    }
+  }
+}

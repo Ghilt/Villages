@@ -1,0 +1,109 @@
+/*
+ * A slider: the track a face laid across its whole width, the lit tube from the left end to the knob, the
+ * knob, and over all of them the browser's own slider, unseen, which is what the pointer, the finger and
+ * the keyboard work. The knob shows that slider's states - lighter under the pointer, darker held, a gilt
+ * ring focused - as a button's face does.
+ */
+
+@layer ui {
+  .ui-slider {
+    position: relative;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .ui-slider__fill {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    pointer-events: none;
+    transition: width 0.12s ease;
+  }
+
+  .ui-slider__knob {
+    position: absolute;
+    top: 50%;
+    z-index: 2;
+    max-width: none;
+    translate: 0 -50%;
+    pointer-events: none;
+    user-select: none;
+    transition:
+      left 0.12s ease,
+      filter 0.12s ease;
+  }
+
+  .ui-slider__knob--missing {
+    box-sizing: border-box;
+    border: 2px dashed var(--ui-rarity-legendary);
+    border-radius: 50%;
+  }
+
+  .ui-slider__input {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 1;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    opacity: 0;
+    background: none;
+    cursor: pointer;
+    appearance: none;
+  }
+
+  .ui-slider__input::-webkit-slider-thumb {
+    width: var(--ui-knob);
+    height: var(--ui-knob);
+    appearance: none;
+  }
+
+  .ui-slider__input::-moz-range-thumb {
+    width: var(--ui-knob);
+    height: var(--ui-knob);
+    border: 0;
+  }
+
+  .ui-slider__input:hover:not(:disabled) ~ .ui-slider__knob,
+  .ui-slider[data-showing='hover'] .ui-slider__knob {
+    filter: brightness(1.18) saturate(1.08);
+  }
+
+  .ui-slider__input:active:not(:disabled) ~ .ui-slider__knob,
+  .ui-slider[data-showing='pressed'] .ui-slider__knob {
+    filter: brightness(0.84);
+  }
+
+  .ui-slider__input:focus-visible ~ .ui-slider__knob,
+  .ui-slider[data-showing='focus'] .ui-slider__knob {
+    border-radius: 50%;
+    outline: 2px solid var(--ui-focus);
+    outline-offset: 1px;
+  }
+
+  .ui-slider[data-disabled='true'] {
+    filter: grayscale(0.75) brightness(0.7);
+  }
+
+  .ui-slider__input:disabled {
+    cursor: not-allowed;
+  }
+
+  /* While it is dragged the knob keeps up with the pointer rather than gliding after it. */
+  .ui-slider__input:active ~ .ui-slider__knob,
+  .ui-slider:has(.ui-slider__input:active) .ui-slider__fill {
+    transition: filter 0.12s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-slider__fill,
+    .ui-slider__knob {
+      transition: none;
+    }
+  }
+}

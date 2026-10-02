@@ -1,0 +1,98 @@
+/*
+ * A dialog: the browser's modal dialog with nothing of its own drawn, so that all of it is the container
+ * inside, and the page behind it dimmed with night. It rises a little way in as it opens, in a fifth of a
+ * second, and only fades for whoever has asked for less movement. Its words scroll inside it when there
+ * are more than the window has room for, and the page behind does not scroll while it is open.
+ */
+
+@layer ui {
+  .ui-dialog {
+    width: min(30rem, calc(100vw - 2rem));
+    max-width: none;
+    max-height: calc(100dvh - 2rem);
+    margin: auto;
+    padding: 0;
+    overflow: visible;
+    border: 0;
+    background: none;
+    color: inherit;
+  }
+
+  .ui-dialog::backdrop {
+    background: color-mix(in srgb, var(--ui-night, #1c1813) 72%, transparent);
+    backdrop-filter: blur(2px);
+  }
+
+  .ui-dialog[open] {
+    animation: ui-dialog-in 0.18s ease-out;
+  }
+
+  .ui-dialog[open]::backdrop {
+    animation: ui-dialog-dim 0.18s ease-out;
+  }
+
+  @keyframes ui-dialog-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px) scale(0.98);
+    }
+  }
+
+  @keyframes ui-dialog-dim {
+    from {
+      opacity: 0;
+    }
+  }
+
+  /* No taller than the window, and what is to be read scrolls inside it rather than the dialog growing. */
+  .ui-dialog__box > .ui-container__content {
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    max-height: calc(100dvh - 2rem);
+  }
+
+  .ui-dialog__head {
+    display: flex;
+    flex: none;
+    align-items: flex-start;
+    gap: var(--ui-space-3);
+  }
+
+  .ui-dialog__title {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-top: 0.15em;
+  }
+
+  .ui-dialog__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    margin-top: var(--ui-space-2);
+  }
+
+  .ui-dialog__body > .ui-scroll__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-space-2);
+  }
+
+  .ui-dialog__actions {
+    display: flex;
+    flex: none;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--ui-space-2);
+    margin-top: var(--ui-space-4);
+  }
+
+  :root:has(.ui-dialog[open]) {
+    overflow: hidden;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-dialog[open] {
+      animation: ui-dialog-dim 0.12s ease-out;
+    }
+  }
+}

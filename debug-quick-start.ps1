@@ -632,6 +632,31 @@ if ($LASTEXITCODE -eq 0 -and (Test-Path $ArtAtlas)) {
     }
 }
 
+# What the interface is drawn with: Adam's pictures in world/ui, each cut at 1x, 2x and 3x for the page
+# at /admin/inspect-ui-components. Cut at every start for the reason the sprites are, and cheap for the
+# same one: every cut is kept, so a start that finds nothing new writes nothing. Only the last word is
+# shown, and all of what it said when it fails, which stops nothing: the page draws what was cut before,
+# or says there is nothing cut yet. See decision 0068.
+$UiList = Join-Path $Frontend 'apps/web/public/ui/ui.json'
+Step 'the interface pictures are '
+Push-Location $Frontend
+try {
+    $said = @(& $Npm @('run', '--silent', 'world:ui'))
+} finally {
+    Pop-Location
+}
+if ($LASTEXITCODE -eq 0 -and (Test-Path $UiList)) {
+    $report = 'cut'
+    foreach ($line in $said) {
+        if ($line -match '^ui: (.+)$') { $report = "cut: $($Matches[1])" }
+    }
+    Write-Host $report -ForegroundColor Green
+} else {
+    Write-Host 'not cut' -ForegroundColor Red
+    foreach ($line in $said) { Say "    $line" }
+    Warn 'starting anyway: the component page draws the interface pictures as they were last cut, if ever'
+}
+
 # --- starting the servers --------------------------------------------------------------------------
 
 Head 'starting'

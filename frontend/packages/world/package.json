@@ -21,7 +21,9 @@
     "scenery": "node --max-old-space-size=8192 bin/renderScenery.ts",
     "portraits": "node bin/drawPortraits.ts",
     "scenes": "node bin/drawScenes.ts",
-    "art": "node bin/cutArt.ts"
+    "art": "node bin/cutArt.ts",
+    "ui": "node bin/cutUi.ts",
+    "nine-slice": "node bin/nineSlice.ts"
   },
   "dependencies": {
     "fflate": "^0.8.3",

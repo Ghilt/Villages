@@ -1,0 +1,36 @@
+/*
+ * A tooltip, over everything, fading up in a tenth of a second or so, because nothing in the interface
+ * pops (LOOK-AND-FEEL.md). It takes no pointer, so it never stands between the pointer and the thing.
+ */
+
+@layer ui {
+  .ui-tooltip-anchor {
+    display: inline-flex;
+    max-width: 100%;
+  }
+
+  .ui-tooltip {
+    position: fixed;
+    z-index: 1000;
+    max-width: 18rem;
+    pointer-events: none;
+    animation: ui-tooltip-in 0.12s ease-out;
+  }
+
+  .ui-tooltip__text {
+    display: block;
+    font-size: 0.85rem;
+    line-height: 1.3;
+    white-space: normal;
+  }
+
+  @keyframes ui-tooltip-in {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+}

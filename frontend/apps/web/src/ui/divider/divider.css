@@ -1,0 +1,51 @@
+/*
+ * A divider: its rule, stretched between its ends to the width it is given, and whatever stands in it, a
+ * knot or a title, at the size it is drawn. A line rather than a box, so it takes the width of whatever
+ * holds it and the height of the tallest thing on it.
+ */
+
+@layer ui {
+  .ui-divider {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .ui-divider--titled {
+    gap: var(--ui-space-2);
+  }
+
+  .ui-divider__rule {
+    display: block;
+    flex: 1 1 0;
+    min-width: 1.25rem;
+    box-sizing: border-box;
+  }
+
+  .ui-divider__rule--missing {
+    height: 0;
+    border-top: 2px dashed var(--ui-rarity-legendary);
+  }
+
+  .ui-divider__knot {
+    display: block;
+    flex: none;
+    margin-inline: 1px;
+  }
+
+  .ui-divider__knot--missing {
+    width: 1rem;
+    height: 1rem;
+    border: 2px dashed var(--ui-rarity-legendary);
+    border-radius: 50%;
+  }
+
+  .ui-divider__title {
+    flex: none;
+    max-width: 70%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

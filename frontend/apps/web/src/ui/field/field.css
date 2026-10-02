@@ -1,0 +1,219 @@
+/*
+ * A field and a dropdown: a name over them, a line under them, and between the two the field's face with
+ * the words written on its parchment in ink - always ink, because the parchment is the field's own, on
+ * night or on parchment alike. Lighter under the pointer, a gilt ring while it is being typed in, a glow of
+ * velvet round its rim when what is in it is wrong, dim disabled. A fifth of a second or less for any change.
+ */
+
+@layer ui {
+  .ui-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-space-1);
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* The name for a screen reader when it is not shown: there, and out of sight. */
+  .ui-field__label--unseen {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .ui-field__said {
+    display: block;
+    margin: 0;
+  }
+
+  .ui-field__said--problem {
+    display: flex;
+    align-items: center;
+    gap: var(--ui-space-1);
+    font-size: 0.88em;
+    font-style: italic;
+    color: var(--ui-text);
+  }
+
+  /* The mark before what is wrong: velvet, drawn towards the words' own colour so it reads on either ground. */
+  .ui-field__warn {
+    display: grid;
+    flex: none;
+    color: color-mix(in srgb, var(--ui-velvet-light) 60%, var(--ui-text));
+  }
+
+  .ui-field__box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  .ui-field__box > .ui-button__face {
+    transition: filter 0.12s ease;
+  }
+
+  .ui-field__input {
+    position: relative;
+    z-index: 1;
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 100%;
+    margin: 0;
+    padding: 0 0.15em;
+    border: 0;
+    outline: none;
+    background: none;
+    font: inherit;
+    color: var(--ui-ink);
+  }
+
+  .ui-field__box--small .ui-field__input,
+  .ui-field__box--small .ui-dropdown__select {
+    font-size: 0.9em;
+  }
+
+  .ui-field__input::placeholder {
+    font-style: italic;
+    color: var(--ui-ink-soft);
+    opacity: 1;
+  }
+
+  /* The browser's own little cross in a search: Escape empties it, and the cross is not the interface's. */
+  .ui-field__input::-webkit-search-cancel-button {
+    appearance: none;
+  }
+
+  .ui-field__box:not([data-disabled]):hover > .ui-button__face,
+  .ui-field__box[data-showing='hover'] > .ui-button__face {
+    filter: brightness(1.06);
+  }
+
+  .ui-field__box:has(.ui-field__input:focus),
+  .ui-field__box:has(.ui-dropdown__select:focus-visible),
+  .ui-field__box[data-showing='focus'] {
+    outline: 2px solid var(--ui-focus);
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+
+  .ui-field__box[data-problem] > .ui-button__face {
+    filter: drop-shadow(0 0 1px var(--ui-velvet)) drop-shadow(0 0 4px var(--ui-velvet-light));
+  }
+
+  .ui-field__box[data-disabled] {
+    opacity: 0.5;
+  }
+
+  .ui-field__box[data-disabled] .ui-field__input,
+  .ui-field__box[data-disabled] .ui-dropdown__select {
+    cursor: default;
+  }
+
+  .ui-field__search {
+    position: absolute;
+    top: 50%;
+    z-index: 2;
+    display: grid;
+    transform: translateY(-50%);
+  }
+
+  /*
+   * A dropdown: the browser's own list laid over the whole face, its words between the face's ends and the
+   * fold, and the fold at its end turned down. Where the browser lets its list be drawn, it is drawn here.
+   */
+  .ui-dropdown__select {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0 var(--ui-field-end) 0 var(--ui-field-start);
+    border: 0;
+    outline: none;
+    background: none;
+    font: inherit;
+    color: var(--ui-ink);
+    appearance: none;
+    cursor: pointer;
+  }
+
+  .ui-dropdown__select option {
+    color: var(--ui-ink);
+    background-color: var(--ui-parchment-light);
+  }
+
+  .ui-dropdown__fold {
+    position: absolute;
+    top: 50%;
+    z-index: 2;
+    display: grid;
+    color: var(--ui-ink-soft);
+    transform: translateY(-50%) rotate(90deg);
+    pointer-events: none;
+  }
+
+  @supports (appearance: base-select) {
+    .ui-dropdown__select,
+    .ui-dropdown__select::picker(select) {
+      appearance: base-select;
+    }
+
+    .ui-dropdown__select {
+      display: flex;
+      align-items: center;
+      border: 0;
+      background: none;
+    }
+
+    .ui-dropdown__select::picker-icon {
+      display: none;
+    }
+
+    .ui-dropdown__select::picker(select) {
+      margin-top: 4px;
+      padding: 4px;
+      border: 1px solid var(--ui-gilt-deep);
+      border-radius: 6px;
+      background: var(--ui-night);
+      color: var(--ui-cream);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+
+    .ui-dropdown__select option {
+      padding: 0.35em 0.75em;
+      border-radius: 4px;
+      color: var(--ui-cream);
+      background: none;
+    }
+
+    .ui-dropdown__select option:hover,
+    .ui-dropdown__select option:focus-visible {
+      background: color-mix(in srgb, var(--ui-cream) 12%, transparent);
+    }
+
+    .ui-dropdown__select option:checked {
+      font-weight: 600;
+    }
+
+    .ui-dropdown__select option::checkmark {
+      color: var(--ui-gilt-light);
+    }
+
+    .ui-dropdown__select option:disabled {
+      opacity: 0.45;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-field__box > .ui-button__face {
+      transition: none;
+    }
+  }
+}

@@ -2,6 +2,9 @@
 
 - Status: accepted
 - Date: 2026-09-20
+- Amended 2026-09-30 by 0068: **the interface is to be painted**, surface by surface. The ornament drawn
+  here stays on the seam and the shield until each is redone from the component library, and is then
+  replaced by painted borders and embellishments rather than drawn again.
 
 ## Context
 
