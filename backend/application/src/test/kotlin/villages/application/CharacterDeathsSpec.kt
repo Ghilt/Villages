@@ -5,18 +5,11 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import villages.domain.Banner
-import villages.domain.CharacterCommand
-import villages.domain.CharacterDecider
 import villages.domain.CharacterDied
-import villages.domain.CharacterEvent
 import villages.domain.CharacterId
 import villages.domain.Charge
 import villages.domain.Division
-import villages.domain.Event
 import villages.domain.FoundHouse
-import villages.domain.HouseCommand
-import villages.domain.HouseDecider
-import villages.domain.HouseEvent
 import villages.domain.HouseGainedKeyFigure
 import villages.domain.HouseId
 import villages.domain.HouseLostKeyFigure
@@ -30,70 +23,8 @@ import villages.domain.WorldTime
 import java.time.Instant
 import java.util.UUID
 
-/** Both kinds of stream, folded in memory, telling their subscribers every event as it is written. */
-private class CharacterDeathsWorld : HouseCommandExecutor, CharacterCommandExecutor, EventFeed {
-    private val houses = mutableMapOf<HouseId, MutableList<HouseEvent>>()
-    private val characters = mutableMapOf<CharacterId, MutableList<CharacterEvent>>()
-    val stored = mutableListOf<StoredEvent>()
-    private val subscribers = mutableListOf<(StoredEvent) -> Unit>()
-
-    override fun execute(command: HouseCommand, provenance: Provenance) {
-        val held = houses.getOrPut(command.houseId) { mutableListOf() }
-        HouseDecider.decide(command, HouseDecider.fold(held)).forEach { event ->
-            held += event
-            tell(event, "house:${command.houseId.value}", held.size, provenance)
-        }
-    }
-
-    override fun execute(command: CharacterCommand, provenance: Provenance) {
-        val held = characters.getOrPut(command.characterId) { mutableListOf() }
-        CharacterDecider.decide(command, CharacterDecider.fold(held)).forEach { event ->
-            held += event
-            tell(event, command.characterId.stream, held.size, provenance)
-        }
-    }
-
-    private fun tell(event: Event, stream: String, version: Int, provenance: Provenance) {
-        val written = StoredEvent(
-            id = UUID.randomUUID().toString(),
-            type = event::class.simpleName!!,
-            stream = stream,
-            streamVersion = version.toLong(),
-            time = event.recordedAt,
-            data = "{}",
-            correlationId = provenance.correlationId.toString(),
-            causationId = provenance.commandId.toString(),
-            event = event,
-        )
-        stored += written
-        subscribers.toList().forEach { it(written) }
-    }
-
-    override fun subscribe(from: Start, subscriber: (StoredEvent) -> Unit): AutoCloseable {
-        if (from == Start.FROM_THE_BEGINNING) {
-            stored.toList().forEach(subscriber)
-        }
-        subscribers += subscriber
-        return AutoCloseable { subscribers -= subscriber }
-    }
-
-    fun losses(): List<StoredEvent> = stored.filter { it.event is HouseLostKeyFigure }
-}
-
-/** A `Later` that runs nothing until a test says so. */
-private class HeldLater : Later {
-    private val planned = mutableListOf<Runnable>()
-
-    override fun schedule(delayMs: Long, action: Runnable) {
-        planned += action
-    }
-
-    fun tick() {
-        val due = planned.toList()
-        planned.clear()
-        due.forEach { it.run() }
-    }
-}
+/** The losses written, which is what the listener is for. */
+private fun TinyWorld.losses(): List<StoredEvent> = stored.filter { it.event is HouseLostKeyFigure }
 
 class CharacterDeathsSpec : StringSpec({
     val noon = Instant.parse("2026-09-04T12:00:00Z")
@@ -106,7 +37,7 @@ class CharacterDeathsSpec : StringSpec({
     val bea = PlayerId(UUID.fromString("0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8e"))
     val story = UUID.fromString("57000000-0000-4000-8000-0000000000ff")
 
-    fun found(world: CharacterDeathsWorld, player: PlayerId) = world.execute(
+    fun found(world: TinyWorld, player: PlayerId) = world.execute(
         FoundHouse(
             houseId = HouseId.of(player),
             player = player,
@@ -120,19 +51,21 @@ class CharacterDeathsSpec : StringSpec({
     )
 
     class Rig(
-        val world: CharacterDeathsWorld,
-        val later: HeldLater,
+        val world: TinyWorld,
+        val later: ManualLater,
         val keyFigures: KeyFigureService,
         val characterDeaths: CharacterDeaths,
+        val faults: KeptFaults,
     )
 
     fun rig(): Rig {
-        val world = CharacterDeathsWorld()
-        val later = HeldLater()
+        val world = TinyWorld()
+        val later = ManualLater()
         val keyFigures = KeyFigureService(world, world, { noon }, { today }, calendar, { 1 }, { emptyList() })
         found(world, ada)
         found(world, bea)
-        return Rig(world, later, keyFigures, CharacterDeaths(world, later, keyFigures).started())
+        val faults = KeptFaults()
+        return Rig(world, later, keyFigures, CharacterDeaths(world, later, faults, keyFigures).started(), faults)
     }
 
     "a death writes the loss into every house that held them, in the death's story, and caused by it" {
@@ -175,8 +108,8 @@ class CharacterDeathsSpec : StringSpec({
         rig.later.tick()
         val before = rig.world.stored.size
 
-        val again = HeldLater()
-        CharacterDeaths(rig.world, again, rig.keyFigures).started().use {
+        val again = ManualLater()
+        CharacterDeaths(rig.world, again, rig.faults, rig.keyFigures).started().use {
             again.tick()
         }
 

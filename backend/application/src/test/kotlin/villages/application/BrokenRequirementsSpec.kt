@@ -12,9 +12,6 @@ import villages.domain.DialogueId
 import villages.domain.Division
 import villages.domain.Event
 import villages.domain.FoundHouse
-import villages.domain.HouseCommand
-import villages.domain.HouseDecider
-import villages.domain.HouseEvent
 import villages.domain.HouseId
 import villages.domain.HouseLostKeyFigure
 import villages.domain.HouseName
@@ -34,68 +31,8 @@ import villages.domain.WorldTime
 import java.time.Instant
 import java.util.UUID
 
-/**
- * Houses folded in memory with their real decider, telling their subscribers every event as it is written, and
- * able to be told of any other event, as a character's death, as though another stream had written it.
- */
-private class LapsingWorld : HouseCommandExecutor, EventFeed {
-    private val houses = mutableMapOf<HouseId, MutableList<HouseEvent>>()
-    val stored = mutableListOf<StoredEvent>()
-    private val subscribers = mutableListOf<(StoredEvent) -> Unit>()
-
-    override fun execute(command: HouseCommand, provenance: Provenance) {
-        val held = houses.getOrPut(command.houseId) { mutableListOf() }
-        HouseDecider.decide(command, HouseDecider.fold(held)).forEach { event ->
-            held += event
-            tell(event, command.houseId.stream, provenance)
-        }
-    }
-
-    /** An event from some other stream, arriving on the feed in the story given. */
-    fun hear(event: Event, story: UUID): StoredEvent = tell(event, "elsewhere", Provenance(UUID.randomUUID(), story))
-
-    private fun tell(event: Event, stream: String, provenance: Provenance): StoredEvent {
-        val written = StoredEvent(
-            id = UUID.randomUUID().toString(),
-            type = event::class.simpleName!!,
-            stream = stream,
-            streamVersion = stored.size + 1L,
-            time = event.recordedAt,
-            data = "{}",
-            correlationId = provenance.correlationId.toString(),
-            causationId = provenance.commandId.toString(),
-            event = event,
-        )
-        stored += written
-        subscribers.toList().forEach { it(written) }
-        return written
-    }
-
-    override fun subscribe(from: Start, subscriber: (StoredEvent) -> Unit): AutoCloseable {
-        if (from == Start.FROM_THE_BEGINNING) {
-            stored.toList().forEach(subscriber)
-        }
-        subscribers += subscriber
-        return AutoCloseable { subscribers -= subscriber }
-    }
-
-    fun losses(): List<StoredEvent> = stored.filter { it.event is PlayerLostDialogue }
-}
-
-/** A `Later` that runs nothing until a test says so. */
-private class WaitingLater : Later {
-    private val planned = mutableListOf<Runnable>()
-
-    override fun schedule(delayMs: Long, action: Runnable) {
-        planned += action
-    }
-
-    fun tick() {
-        val due = planned.toList()
-        planned.clear()
-        due.forEach { it.run() }
-    }
-}
+/** The dialogues lost, which is what the listener is for. */
+private fun TinyWorld.losses(): List<StoredEvent> = stored.filter { it.event is PlayerLostDialogue }
 
 class BrokenRequirementsSpec : StringSpec({
     val noon = Instant.parse("2026-09-04T12:00:00Z")
@@ -115,11 +52,12 @@ class BrokenRequirementsSpec : StringSpec({
         lines = listOf(Line(LineId("only"), speaker.id, "A word.", then = Then.End)),
     )
 
-    class Rig(val world: LapsingWorld, val later: WaitingLater, val listener: BrokenRequirements)
+    class Rig(val world: TinyWorld, val later: ManualLater, val listener: BrokenRequirements, val faults: KeptFaults)
 
     fun rig(breaks: ((Event) -> Set<Requirement>?)? = null): Rig {
-        val world = LapsingWorld()
-        val later = WaitingLater()
+        val world = TinyWorld()
+        val later = ManualLater()
+        val faults = KeptFaults()
         for (player in listOf(ada, bea)) {
             world.execute(
                 FoundHouse(
@@ -135,11 +73,11 @@ class BrokenRequirementsSpec : StringSpec({
             )
         }
         val listener = if (breaks == null) {
-            BrokenRequirements(world, later, world, { noon }, { today }).started()
+            BrokenRequirements(world, later, faults, world, { noon }, { today }).started()
         } else {
-            BrokenRequirements(world, later, world, { noon }, { today }, { event -> breaks(event).orEmpty() }).started()
+            BrokenRequirements(world, later, faults, world, { noon }, { today }, { event -> breaks(event).orEmpty() }).started()
         }
-        return Rig(world, later, listener)
+        return Rig(world, later, listener, faults)
     }
 
     fun Rig.offer(player: PlayerId, speaker: Speaker, n: Int): Dialogue {
@@ -205,8 +143,8 @@ class BrokenRequirementsSpec : StringSpec({
         rig.later.tick()
         val before = rig.world.stored.size
 
-        val again = WaitingLater()
-        BrokenRequirements(rig.world, again, rig.world, { noon }, { today }).started().use {
+        val again = ManualLater()
+        BrokenRequirements(rig.world, again, rig.faults, rig.world, { noon }, { today }).started().use {
             again.tick()
         }
 

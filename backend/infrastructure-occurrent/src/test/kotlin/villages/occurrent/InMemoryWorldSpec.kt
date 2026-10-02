@@ -11,11 +11,14 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import org.occurrent.eventstore.api.blocking.EventStore
 import org.occurrent.eventstore.api.blocking.EventStream
+import villages.application.EventFeed
 import villages.application.Fault
+import villages.application.Follower
 import villages.application.Provenance
 import villages.application.Start
 import villages.application.StoredEvent
 import villages.application.WriteConflict
+import villages.application.started
 import villages.domain.Banner
 import villages.domain.CharacterAppeared
 import villages.domain.CharacterError
@@ -288,6 +291,22 @@ class InMemoryWorldSpec : StringSpec({
         }
     }
 
+    "a follower that throws is said under its own name, and not as the class it subscribes from" {
+        InMemoryWorld().use { world ->
+            val faults = CopyOnWriteArrayList<Fault>()
+            val said = CountDownLatch(1)
+            world.faults.watch { faults += it; said.countDown() }.use {
+                WrongFold(world.feed).started().use {
+                    world.executor.execute(ravenscar, sent)
+
+                    said.await(5, TimeUnit.SECONDS) shouldBe true
+                    faults.single().describe() shouldBe "WrongFold threw on villages.house.founded.v1 " +
+                        "(${ravenscar.houseId.stream}, version 1): IllegalStateException: a fold that is wrong"
+                }
+            }
+        }
+    }
+
     "an event that cannot be read is said once as a fault, and the feed goes on to the next one" {
         InMemoryWorld().use { world ->
             val faults = CopyOnWriteArrayList<Fault>()
@@ -318,3 +337,10 @@ class InMemoryWorldSpec : StringSpec({
         }
     }
 })
+
+/** A read model whose fold is wrong about everything, to be said under its own name. */
+private class WrongFold(feed: EventFeed) : Follower(feed) {
+    override fun apply(stored: StoredEvent) = check(false) { "a fold that is wrong" }
+
+    override fun reset() = Unit
+}

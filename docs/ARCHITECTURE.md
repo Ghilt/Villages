@@ -254,12 +254,19 @@ because two subscriptions can stand at different points in the feed; commands is
 never inside the feed's own callback; no cancellation table; and every refusal that means "already done"
 swallowed, which is what makes a replay write nothing twice.
 
+Those rules are kept once, in **`Reaction`**, which each of the three is: `issueLater(what, settled)`
+plans a command on `Later`, swallows the refusals the caller names as meaning "already done" and the want
+of a house a wipe took, and reports anything else - a write conflict the executor could not get past
+included - as a fault under the reaction's name and what it was doing. What it writes continues the story
+of what it heard, `Provenance.continuing`.
+
 They and the read models are all a **`Follower`**: it subscribes from the beginning when it is started and
 not when it is made, so that it has finished being made before the history reaches it, and the app starts
 each one as its bean is made, `initMethod = "start"`, which `FollowersTest` holds every one of them to. A
 follower is `Resettable`, and the development world's wipe empties every `Resettable` there is rather than a
-list of names, which is how the pledge release had been left out of it: a wake-up planned before a wipe now
-does nothing at all (0036).
+list of names, which is how the pledge release had been left out of it: whatever a reaction planned before a
+wipe now does nothing at all (0036). A follower subscribes under its own name, `NamedSubscriber`, so that a
+fault in its fold says which one it was.
 
 - **The pledge release**, `Pledges`, waits out a pledge's span and gives it back: one wake-up a pledge, at
   the moment it is due, and none without one. See decision record 0053.

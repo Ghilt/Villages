@@ -129,14 +129,16 @@ class WorldConfig {
 
     /** Gives a pledge back when its span is up. One wake-up a pledge, and none at all without one. */
     @Bean(initMethod = "start", destroyMethod = "close")
+    @Suppress("LongParameterList")
     fun pledges(
         world: InMemoryWorld,
         later: ScheduledLater,
+        faults: Faults,
         resources: ResourceService,
         worldClock: MonthlyWorldClock,
         clock: Clock,
         ids: FreshIds,
-    ): Pledges = Pledges(world.feed, later, resources, worldClock, clock = { clock.instant() }, ids = ids)
+    ): Pledges = Pledges(world.feed, later, faults, resources, worldClock, clock = { clock.instant() }, ids = ids)
 
     /** Giving a house vision of a place outright, and taking it away. See decision record 0061. */
     @Bean
@@ -203,17 +205,22 @@ class WorldConfig {
 
     /** Writes a character's death into every house that held them. See decision record 0055. */
     @Bean(initMethod = "start", destroyMethod = "close")
-    fun characterDeaths(world: InMemoryWorld, later: ScheduledLater, keyFigures: KeyFigureService): CharacterDeaths =
-        CharacterDeaths(world.feed, later, keyFigures)
+    fun characterDeaths(
+        world: InMemoryWorld,
+        later: ScheduledLater,
+        faults: Faults,
+        keyFigures: KeyFigureService,
+    ): CharacterDeaths = CharacterDeaths(world.feed, later, faults, keyFigures)
 
     /** Carries a broken requirement to every house with a dialogue that needs it. See decision record 0071. */
     @Bean(initMethod = "start", destroyMethod = "close")
     fun brokenRequirements(
         world: InMemoryWorld,
         later: ScheduledLater,
+        faults: Faults,
         clock: Clock,
         worldClock: WorldClock,
-    ): BrokenRequirements = BrokenRequirements(world.feed, later, world.executor, { clock.instant() }, worldClock)
+    ): BrokenRequirements = BrokenRequirements(world.feed, later, faults, world.executor, { clock.instant() }, worldClock)
 
     /** The map's read model, folded from the feed. In memory, so it starts empty with the store. */
     @Bean(initMethod = "start", destroyMethod = "close")

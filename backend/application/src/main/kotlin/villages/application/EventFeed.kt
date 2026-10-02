@@ -57,3 +57,11 @@ interface EventFeed {
     /** Delivers events until the returned handle is closed. */
     fun subscribe(from: Start, subscriber: (StoredEvent) -> Unit): AutoCloseable
 }
+
+/**
+ * A subscriber with a name of its own, which a feed says its faults under. Without one a feed can only name the
+ * class the subscribing was written in, which for every follower is `Follower`.
+ */
+class NamedSubscriber(val name: String, private val subscriber: (StoredEvent) -> Unit) : (StoredEvent) -> Unit {
+    override fun invoke(stored: StoredEvent) = subscriber(stored)
+}

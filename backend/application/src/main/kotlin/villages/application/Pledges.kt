@@ -2,8 +2,6 @@ package villages.application
 
 import villages.domain.HouseResourcePledged
 import villages.domain.HouseError
-import java.util.UUID
-import java.util.concurrent.atomic.AtomicLong
 
 /**
  * The thing that gives a pledge back when its span is up.
@@ -27,53 +25,39 @@ import java.util.concurrent.atomic.AtomicLong
  *
  * A wipe empties the world the wake-ups were planned in, so a wake-up planned before one does nothing at all,
  * rather than asking a house that is no longer there, or a new one founded since by the same player, for a
- * pledge it never made. See decision record 0036.
+ * pledge it never made. Those are the rules of every [Reaction]. See decision record 0036.
  */
+@Suppress("LongParameterList")
 class Pledges(
     feed: EventFeed,
-    private val later: Later,
+    later: Later,
+    faults: Faults,
     private val resources: ResourceService,
     private val schedule: WorldSchedule,
     private val clock: Clock,
     private val ids: FreshIds,
-) : Follower(feed) {
-    /** Which world the wake-ups belong to: one more for every wipe. */
-    private val world = AtomicLong()
-
+) : Reaction("the pledge release", feed, later, faults) {
     override fun apply(stored: StoredEvent) {
         val event = stored.event as? HouseResourcePledged ?: return
         val due = schedule.whenIsDay(event.until)
         val waiting = java.time.Duration.between(clock.now(), due).toMillis()
-        val plannedIn = world.get()
 
-        later.schedule(waiting.coerceAtLeast(0)) {
-            if (world.get() != plannedIn) {
-                return@schedule
-            }
-            try {
-                resources.releaseHeldBy(
-                    houseId = event.houseId,
-                    pledgeId = event.pledgeId,
-                    // The release continues the story the pledge began, so the two read as one thing in
-                    // the event list. See decision record 0035.
-                    provenance = Provenance(
-                        commandId = ids.fresh(),
-                        correlationId = runCatching { UUID.fromString(stored.correlationId) }
-                            .getOrDefault(ids.fresh()),
-                    ),
-                )
-                // Already released, by its owner or by an earlier wake-up: nothing to do, nothing wrong.
-            } catch (@Suppress("SwallowedException") alreadyBack: HouseError.NoSuchPledge) {
-                Unit
-                // Gone with its house in a wipe: as settled, and as nothing wrong.
-            } catch (@Suppress("SwallowedException") wiped: HouseError.NoSuchHouse) {
-                Unit
-            }
+        issueLater(
+            "giving back pledge ${event.pledgeId.value} of ${event.houseId.stream}",
+            // Already released, by its owner or by an earlier wake-up: nothing to do, nothing wrong.
+            settled = setOf(HouseError.NoSuchPledge::class),
+            afterMs = waiting,
+        ) {
+            resources.releaseHeldBy(
+                houseId = event.houseId,
+                pledgeId = event.pledgeId,
+                // The release continues the story the pledge began, so the two read as one thing in the event
+                // list; with a command id of its own, as it always had. See decision record 0035.
+                provenance = Provenance(commandId = ids.fresh(), correlationId = Provenance.storyOf(stored) ?: ids.fresh()),
+            )
         }
     }
 
-    /** Forgets the wake-ups it has planned, because the world they were planned in has been emptied. */
-    override fun reset() {
-        world.incrementAndGet()
-    }
+    /** It folds nothing: the wake-ups it plans are all it has, and a wipe forgets those for it. */
+    override fun forget() = Unit
 }

@@ -18,5 +18,18 @@ data class Provenance(
     companion object {
         /** A command that starts a story of its own. */
         fun startedBy(commandId: UUID): Provenance = Provenance(commandId, commandId)
+
+        /**
+         * A command issued on hearing [cause], continuing the story of [story]: one event, unless what set it off
+         * is not what began it, as a tie made to somebody already dead is not their death. What a listener acting
+         * on its own writes with, so the event list reads what it heard and what it did as one thing.
+         */
+        fun continuing(story: StoredEvent, cause: StoredEvent = story): Provenance = Provenance(
+            commandId = UUID.fromString(cause.id),
+            correlationId = storyOf(story) ?: UUID.fromString(story.id),
+        )
+
+        /** The story an event belongs to, when its correlation is one this server could have written. */
+        fun storyOf(event: StoredEvent): UUID? = runCatching { UUID.fromString(event.correlationId) }.getOrNull()
     }
 }

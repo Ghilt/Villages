@@ -3,14 +3,12 @@ package villages.application
 import villages.domain.DialogueId
 import villages.domain.Event
 import villages.domain.FailRequirement
-import villages.domain.HouseError
 import villages.domain.HouseId
 import villages.domain.PlayerCompletedDialogue
 import villages.domain.PlayerLostDialogue
 import villages.domain.PlayerOfferedDialogue
 import villages.domain.Requirement
 import villages.domain.requirementsBrokenBy
-import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -33,12 +31,13 @@ import java.util.concurrent.ConcurrentHashMap
  */
 class BrokenRequirements(
     feed: EventFeed,
-    private val later: Later,
+    later: Later,
+    faults: Faults,
     private val houses: HouseCommandExecutor,
     private val clock: Clock,
     private val world: WorldClock,
     private val breaks: (Event) -> Set<Requirement> = ::requirementsBrokenBy,
-) : Follower(feed) {
+) : Reaction("the listener for broken requirements", feed, later, faults) {
     /** What each open dialogue needs, by the house it is open in. */
     private val needs = ConcurrentHashMap<Pair<HouseId, DialogueId>, Set<Requirement>>()
 
@@ -78,22 +77,14 @@ class BrokenRequirements(
     }
 
     private fun fail(house: HouseId, requirement: Requirement, because: StoredEvent, broke: StoredEvent) {
-        val provenance = Provenance(
-            commandId = UUID.fromString(because.id),
-            correlationId = runCatching { UUID.fromString(broke.correlationId) }.getOrDefault(UUID.fromString(broke.id)),
-        )
-        later.schedule(0) {
-            try {
-                houses.execute(FailRequirement(house, requirement, world.today(), clock.now()), provenance)
-            } catch (@Suppress("SwallowedException") wiped: HouseError.NoSuchHouse) {
-                // The world was emptied in between, and the house with it.
-                Unit
-            }
+        val provenance = Provenance.continuing(story = broke, cause = because)
+        issueLater("failing a requirement of the dialogues of ${house.stream}") {
+            houses.execute(FailRequirement(house, requirement, world.today(), clock.now()), provenance)
         }
     }
 
     /** Forgets what it knew of, because the world it was in has been emptied. See decision 0036. */
-    override fun reset() {
+    override fun forget() {
         needs.clear()
         needing.clear()
         failed.clear()

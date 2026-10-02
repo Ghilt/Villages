@@ -3,10 +3,6 @@ package villages.application
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
-import villages.domain.House
-import villages.domain.HouseCommand
-import villages.domain.HouseDecider
-import villages.domain.HouseEvent
 import villages.domain.HouseId
 import villages.domain.PlayerId
 import villages.domain.Resource
@@ -14,73 +10,20 @@ import villages.domain.WorldTime
 import java.time.Instant
 import java.util.UUID
 
-/**
- * One stream, folded in memory, that tells its subscribers as it goes: enough to watch a pledge come back
- * without a store, a broker or a clock thread.
- */
-private class TinyWorld : HouseCommandExecutor, EventFeed {
-    val events = mutableListOf<HouseEvent>()
-    var commands = 0
-    private val stored = mutableListOf<StoredEvent>()
-    private val subscribers = mutableListOf<(StoredEvent) -> Unit>()
-
-    override fun execute(command: HouseCommand, provenance: Provenance) {
-        commands++
-        val decided = HouseDecider.decide(command, HouseDecider.fold(events))
-        for (event in decided) {
-            events += event
-            val written = StoredEvent(
-                id = UUID.randomUUID().toString(),
-                type = "villages.house.${event::class.simpleName}",
-                stream = event.houseId.stream,
-                streamVersion = events.size.toLong(),
-                time = event.recordedAt,
-                data = "{}",
-                correlationId = provenance.correlationId.toString(),
-                causationId = provenance.commandId.toString(),
-                event = event,
-            )
-            stored += written
-            subscribers.toList().forEach { it(written) }
-        }
-    }
-
-    override fun subscribe(from: Start, subscriber: (StoredEvent) -> Unit): AutoCloseable {
-        if (from == Start.FROM_THE_BEGINNING) {
-            stored.toList().forEach(subscriber)
-        }
-        subscribers += subscriber
-        return AutoCloseable { subscribers -= subscriber }
-    }
-
-    fun house(): House.Founded = HouseDecider.fold(events) as House.Founded
-}
-
-/** A `Later` that runs nothing until a test says so, and says how long it was asked to wait. */
-private class ManualLater : Later {
-    val waits = mutableListOf<Long>()
-    private val planned = mutableListOf<Runnable>()
-
-    override fun schedule(delayMs: Long, action: Runnable) {
-        waits += delayMs
-        planned += action
-    }
-
-    fun tick() {
-        val due = planned.toList()
-        planned.clear()
-        due.forEach { it.run() }
-    }
-}
-
 private val thirtyDayMonths = object : WorldCalendar {
     override fun plusMonths(day: WorldTime, months: Long) = WorldTime(day.day + months * 30)
 
     override fun monthsBetween(from: WorldTime, to: WorldTime) = (to.day - from.day) / 30
 }
 
-/** What a test is handed: the world, its clock for later, the service to pledge with, and the follower. */
-private data class Rig(val world: TinyWorld, val later: ManualLater, val resources: ResourceService, val pledges: Pledges)
+/** What a test is handed: the world, its clock for later, the service to pledge with, the follower and its faults. */
+private data class Rig(
+    val world: TinyWorld,
+    val later: ManualLater,
+    val resources: ResourceService,
+    val pledges: Pledges,
+    val faults: KeptFaults,
+)
 
 class PledgesSpec : StringSpec({
     val opened = Instant.parse("2026-09-01T00:00:00Z")
@@ -108,11 +51,12 @@ class PledgesSpec : StringSpec({
         val later = ManualLater()
         val clock = MonthlyWorldClock({ now }, thirtyDayMonths, opened, openingDay)
         val resources = ResourceService(world, { now }, clock, thirtyDayMonths, { UUID.randomUUID() })
-        val pledges = Pledges(world, later, resources, clock, { now }, { UUID.randomUUID() }).started()
+        val faults = KeptFaults()
+        val pledges = Pledges(world, later, faults, resources, clock, { now }, { UUID.randomUUID() }).started()
         // A house to pledge from, and something to pledge.
         found(world, clock.today(), now)
         resources.grant(player, Resource.REASON, 100, Provenance.startedBy(UUID.randomUUID()))
-        return Rig(world, later, resources, pledges)
+        return Rig(world, later, resources, pledges, faults)
     }
 
     "a pledge is waited out for as many real days as it has months, because a day is a month" {
@@ -128,13 +72,13 @@ class PledgesSpec : StringSpec({
     "when the wait is over the pledge comes back, and what it held is free again" {
         val (world, later, resources) = rig()
         resources.pledge(player, Resource.REASON, 35, 10, "clearer glass", Provenance.startedBy(UUID.randomUUID()))
-        world.house().pledgedOf(Resource.REASON) shouldBe 35
+        world.founded(house).pledgedOf(Resource.REASON) shouldBe 35
 
         later.tick()
 
-        world.house().pledges.shouldBeEmpty()
-        world.house().pledgedOf(Resource.REASON) shouldBe 0
-        world.house().stockOf(Resource.REASON).at(opened) shouldBe 100
+        world.founded(house).pledges.shouldBeEmpty()
+        world.founded(house).pledgedOf(Resource.REASON) shouldBe 0
+        world.founded(house).stockOf(Resource.REASON).at(opened) shouldBe 100
     }
 
     "a pledge whose day the world has already passed is given back at once, which is what a restart does" {
@@ -149,6 +93,7 @@ class PledgesSpec : StringSpec({
         Pledges(
             world,
             restarted,
+            KeptFaults(),
             ResourceService(world, { muchLater }, clock, thirtyDayMonths, { UUID.randomUUID() }),
             clock,
             { muchLater },
@@ -158,7 +103,7 @@ class PledgesSpec : StringSpec({
         restarted.waits.single() shouldBe 0
         restarted.tick()
 
-        world.house().pledges.shouldBeEmpty()
+        world.founded(house).pledges.shouldBeEmpty()
     }
 
     "a pledge its owner released early is not released twice when the wait comes round" {
@@ -167,13 +112,13 @@ class PledgesSpec : StringSpec({
             player, Resource.REASON, 35, 10, "clearer glass", Provenance.startedBy(UUID.randomUUID()),
         )
         resources.release(player, pledgeId, Provenance.startedBy(UUID.randomUUID()))
-        val released = world.events.size
+        val released = world.stored.size
 
         // The wake-up still comes; the decider refuses it and the refusal is swallowed rather than thrown.
         later.tick()
 
-        world.events.size shouldBe released
-        world.house().pledgedOf(Resource.REASON) shouldBe 0
+        world.stored.size shouldBe released
+        world.founded(house).pledgedOf(Resource.REASON) shouldBe 0
     }
 
     "a house with no pledges is waited on not at all, which is what makes this not a tick" {
@@ -183,21 +128,22 @@ class PledgesSpec : StringSpec({
     }
 
     "a pledge whose house went in a wipe before it came back is settled, and nothing is wrong" {
-        val (world, later, resources) = rig()
+        val (world, later, resources, _, faults) = rig()
         resources.pledge(player, Resource.REASON, 35, 10, "clearer glass", Provenance.startedBy(UUID.randomUUID()))
-        world.events.clear()
+        world.wipe()
 
         // The release finds no house, which is as settled as a pledge already given back, and says nothing.
         later.tick()
 
-        world.events.shouldBeEmpty()
+        world.stored.shouldBeEmpty()
+        faults.reported.shouldBeEmpty()
     }
 
     "a wake-up planned before a wipe asks nothing of the world, though the player has founded again since" {
         val (world, later, resources, pledges) = rig()
         resources.pledge(player, Resource.REASON, 35, 10, "clearer glass", Provenance.startedBy(UUID.randomUUID()))
         // The world is emptied, everything folded from it with it, and the same player founds the same house.
-        world.events.clear()
+        world.wipe()
         pledges.reset()
         found(world, WorldTime(1600), opened.plusMillis(20 * day))
         val asked = world.commands

@@ -170,8 +170,10 @@ house.
 
 **When such a thing ends, a reaction carries the end to every house tied to it**, because the end is on
 the thing's stream and the losses are on the houses', and no one decision writes both. The listener for
-character deaths is the first: see `ARCHITECTURE.md` on what acts on its own for the rules a reaction
-keeps.
+character deaths is the first. A new one is a `Reaction`, which keeps the rules for it - never inside the
+feed's callback, "already done" swallowed and anything else said, nothing planned before a wipe issued
+after it - so it says only what it folds and which refusals of its command mean "already done": see
+`ARCHITECTURE.md` on what acts on its own.
 
 `ARCHITECTURE.md` describes the pattern. Characters and the tie are in the source, and
 `docs/plans/characters-and-key-figures.md` is the order the rest of them gets built in.

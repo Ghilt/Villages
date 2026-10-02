@@ -6,7 +6,6 @@ import villages.domain.HouseError
 import villages.domain.HouseGainedKeyFigure
 import villages.domain.HouseId
 import villages.domain.HouseLostKeyFigure
-import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -32,9 +31,10 @@ import java.util.concurrent.ConcurrentHashMap
  */
 class CharacterDeaths(
     feed: EventFeed,
-    private val later: Later,
+    later: Later,
+    faults: Faults,
     private val keyFigures: KeyFigureService,
-) : Follower(feed) {
+) : Reaction("the listener for character deaths", feed, later, faults) {
     private val holders = ConcurrentHashMap<CharacterId, MutableSet<HouseId>>()
     private val deaths = ConcurrentHashMap<CharacterId, StoredEvent>()
 
@@ -61,25 +61,18 @@ class CharacterDeaths(
     }
 
     private fun writeLoss(house: HouseId, character: CharacterId, because: StoredEvent, death: StoredEvent) {
-        val provenance = Provenance(
-            commandId = UUID.fromString(because.id),
-            correlationId = runCatching { UUID.fromString(death.correlationId) }.getOrDefault(UUID.fromString(death.id)),
-        )
-        later.schedule(0) {
-            try {
-                keyFigures.loseHeldBy(house, character, provenance)
-            } catch (@Suppress("SwallowedException") alreadyLost: HouseError.NoSuchKeyFigure) {
-                // Lost already: by an earlier wake-up, or on a replay that has met this death before.
-                Unit
-            } catch (@Suppress("SwallowedException") wiped: HouseError.NoSuchHouse) {
-                // The world was emptied in between, and the house with it.
-                Unit
-            }
+        val provenance = Provenance.continuing(story = death, cause = because)
+        issueLater(
+            "losing ${character.stream} from ${house.stream}",
+            // Lost already: by an earlier wake-up, or on a replay that has met this death before.
+            settled = setOf(HouseError.NoSuchKeyFigure::class),
+        ) {
+            keyFigures.loseHeldBy(house, character, provenance)
         }
     }
 
     /** Forgets whom it knew of, because the world they were in has been emptied. See decision 0036. */
-    override fun reset() {
+    override fun forget() {
         holders.clear()
         deaths.clear()
     }

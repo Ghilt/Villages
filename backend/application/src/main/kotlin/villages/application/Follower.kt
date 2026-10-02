@@ -23,7 +23,7 @@ abstract class Follower(private val feed: EventFeed) : Resettable, AutoCloseable
         synchronized(lock) {
             check(!started) { "${javaClass.simpleName} is started already" }
             started = true
-            subscription = feed.subscribe(Start.FROM_THE_BEGINNING, ::apply)
+            subscription = feed.subscribe(Start.FROM_THE_BEGINNING, NamedSubscriber(javaClass.simpleName, ::apply))
         }
     }
 

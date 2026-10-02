@@ -17,6 +17,7 @@ import villages.application.EventFeed
 import villages.application.Fault
 import villages.application.FaultBoard
 import villages.application.Faults
+import villages.application.NamedSubscriber
 import villages.application.HouseCommandExecutor
 import villages.application.Start
 import villages.application.StoredEvent
@@ -87,8 +88,12 @@ class OccurrentEventFeed(
     }
 }
 
-/** Who a subscriber is, for saying so: a Kotlin lambda's class is named after the class it was written in. */
-private fun nameOf(subscriber: Any): String = subscriber.javaClass.name.substringAfterLast('.').substringBefore('$')
+/**
+ * Who a subscriber is, for saying so: its own name when it has one, and otherwise its class, which for a Kotlin
+ * lambda is named after the class it was written in.
+ */
+private fun nameOf(subscriber: Any): String =
+    (subscriber as? NamedSubscriber)?.name ?: subscriber.javaClass.name.substringAfterLast('.').substringBefore('$')
 
 /** Occurrent's extension attributes, by the names it writes them under. */
 private const val STREAM_ID = "streamid"
