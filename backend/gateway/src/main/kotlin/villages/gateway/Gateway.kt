@@ -224,7 +224,7 @@ class Gateway(
     private val watching = ConcurrentHashMap<Connection, Unit>()
 
     /** Which connections hold each cell: the whole of the fan-out index. */
-    private val holding = ConcurrentHashMap<String, MutableSet<Connection>>()
+    private val holding = CellIndex<Connection>()
 
     /**
      * The one session a player has. A player plays from one place: a second hello takes the player over
@@ -287,6 +287,9 @@ class Gateway(
 
     fun connect(out: Outbound): Connection = Connection(out).also { live += it }
 
+    /** How many cells somebody holds, for the tests that hold the index to letting go. */
+    internal val cellsHeld: Int get() = holding.size
+
     /**
      * Empties the world and finishes every session with it.
      *
@@ -323,7 +326,7 @@ class Gateway(
         // Every zoom, not only the ones this house is significant enough for: a connection with the eye
         // open holds shallower cells and is owed the change in them too. Still eleven lookups. See 0038.
         for (zoom in 0..Cell.MAX_ZOOM) {
-            val holders = holding[deepest.at(zoom).quadkey] ?: continue
+            val holders = holding.holders(deepest.at(zoom).quadkey) ?: continue
             for (connection in holders) {
                 if ((zoom >= coarsest || connection.seesEverything) && connection.sees(row) && connection.letsSee(row)) {
                     connection.enqueue(delta)
@@ -373,7 +376,7 @@ class Gateway(
         val coarsest = coarsestZoom(span.significance.value)
         val found = mutableSetOf<Connection>()
         for (zoom in 0..Cell.MAX_ZOOM) {
-            val holders = holding[deepest.at(zoom).quadkey] ?: continue
+            val holders = holding.holders(deepest.at(zoom).quadkey) ?: continue
             for (connection in holders) {
                 if ((zoom >= coarsest || connection.seesEverything) && connection.letsSee(row, span)) {
                     found += connection
@@ -617,10 +620,10 @@ class Gateway(
          * the client is told and closes its own.
          */
         internal fun finish(why: ServerFrame) {
-            if (finished) {
-                return
+            synchronized(lock) {
+                if (finished) return
+                finished = true
             }
-            finished = true
             letEverythingGo()
             live -= this
             out.send(why)
@@ -808,18 +811,18 @@ class Gateway(
                 return
             }
             val fresh: List<String> = synchronized(lock) {
+                // Taken up under the lock that letting go is done under, so a connection finished meanwhile holds nothing.
+                if (finished) return
                 val new = asked.distinct().filter { it !in cells }
                 if (cells.size + new.size > MOST_CELLS) {
                     out.send(ErrorFrame("tooManyCells", "a connection holds at most $MOST_CELLS cells; zoom in"))
                     return
                 }
                 cells += new
+                new.forEach { holding.hold(it, this) }
                 new
             }
-            for (cell in fresh) {
-                holding.computeIfAbsent(cell) { ConcurrentHashMap.newKeySet() }.add(this)
-                snapshot(cell)
-            }
+            fresh.forEach(::snapshot)
             if (master != null) {
                 val tiles = synchronized(lock) { fresh.flatMap(::standTilesUnder).distinct().filter { it !in standsSent } }
                 offerStands(tiles, again = false)
@@ -937,9 +940,7 @@ class Gateway(
                 // A tile no held cell is over any more is let go, so coming back to it sends it afresh.
                 standsSent.keys.retainAll(cells.flatMap(::standTilesUnder).toSet())
             }
-            for (cell in asked) {
-                holding[cell]?.remove(this)
-            }
+            asked.forEach { holding.letGo(it, this) }
         }
 
         /**
@@ -966,9 +967,7 @@ class Gateway(
                 }
             }
             letGo?.let { gone ->
-                for (cell in gone) {
-                    holding[cell]?.remove(this)
-                }
+                gone.forEach { holding.letGo(it, this) }
                 out.send(Resync(gone))
             }
             if (plan) {
@@ -991,7 +990,7 @@ class Gateway(
 
         fun disconnected() {
             live -= this
-            finished = true
+            synchronized(lock) { finished = true }
             letEverythingGo()
             // Only if this is still the session: the loser of a takeover often closes afterwards, and
             // removing by key alone would evict the window that just won.
@@ -1000,12 +999,10 @@ class Gateway(
 
         private fun letEverythingGo() {
             watching.remove(this)
-            val held = synchronized(lock) {
+            synchronized(lock) {
                 standsSent.clear()
-                cells.toList().also { cells.clear() }
-            }
-            for (cell in held) {
-                holding[cell]?.remove(this)
+                cells.forEach { holding.letGo(it, this) }
+                cells.clear()
             }
         }
     }

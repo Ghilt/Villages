@@ -10,7 +10,9 @@ import villages.protocol.Batch
 import villages.protocol.ErrorFrame
 import villages.protocol.HouseAppeared
 import villages.protocol.Resync
+import villages.protocol.ServerFrame
 import villages.protocol.Snapshot
+import villages.protocol.TakenOver
 
 /** The gateway: holding cells: snapshots, deltas, the eye, and a connection that falls behind or goes away. The rig is GatewayRig.kt. */
 class GatewayCellsSpec : StringSpec({
@@ -231,5 +233,38 @@ class GatewayCellsSpec : StringSpec({
         looker.cells().shouldBeEmpty()
         looker.receive(subscribe(STOCKHOLM_Z8))
         sent.last().shouldBeInstanceOf<Snapshot>().houses shouldHaveSize MOST_IN_A_CELL
+    }
+
+    "a connection taken over while it is answered for its cells holds none of them after, and hears of nothing" {
+        val rig = Rig()
+        val sent = mutableListOf<ServerFrame>()
+        var tookOver = false
+        val first = rig.gateway.connect { frame ->
+            sent += frame
+            // The player's other window says hello while this one is still being answered for what it asked.
+            if (frame is Snapshot && !tookOver) {
+                tookOver = true
+                rig.introduced()
+            }
+        }
+        first.receive(hello)
+        first.receive(fogOfWar(false))
+        first.receive(subscribe(STOCKHOLM_Z4, STOCKHOLM_Z8, STOCKHOLM_Z10))
+        sent.filterIsInstance<TakenOver>() shouldHaveSize 1
+        sent.clear()
+
+        rig.aHouseIsFounded()
+        rig.later.tick()
+
+        sent.shouldBeEmpty()
+    }
+
+    "a cell nobody holds any more leaves the index" {
+        val rig = Rig()
+        val (looker, _) = rig.introduced()
+        looker.receive(subscribe(STOCKHOLM_Z8, STOCKHOLM_Z10))
+        looker.receive(unsubscribe(STOCKHOLM_Z8, STOCKHOLM_Z10))
+
+        rig.gateway.cellsHeld shouldBe 0
     }
 })
