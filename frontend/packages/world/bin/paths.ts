@@ -25,7 +25,7 @@ export const PAINTERLY_DIR = resolve(REPO, 'world', 'painterly');
  */
 export const PORTRAITS_DIR = resolve(REPO, 'world', 'portraits');
 /**
- * Adam's scenes: landscape PNGs named for the scene a dialogue names, `harbour.png`, and committed as the
+ * Adam's scenes: PNGs named for the scene a dialogue names, `harbour.png`, and committed as the
  * portraits are. Placeholders are drawn into it, never over anything already there.
  */
 export const SCENES_DIR = resolve(REPO, 'world', 'scenes');

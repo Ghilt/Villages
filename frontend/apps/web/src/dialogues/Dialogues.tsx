@@ -19,8 +19,10 @@ import {
   type ListedDialogue,
   listOf,
   refusalWords,
+  sideOf,
   signed,
 } from './describe';
+import { Scene } from './Scene';
 import { showWhatIsReached, taking } from './showing';
 
 /**
@@ -122,7 +124,7 @@ interface ConversationProps {
 
 /**
  * **A conversation**: what has been said, the stretch ahead shown a line at a time by *continue* at its foot,
- * and at the end of the feed the dialogue choice's options.
+ * and at the end of the feed the dialogue choice's options, all of it drawn over the scene it happens in.
  *
  * Where the reading is, is `client-core`'s reading place, kept here only as state: it holds while the
  * dialogue's revision holds and starts the new stretch when a step is answered. A press either shows a line or
@@ -175,6 +177,9 @@ function Conversation({ dialogue, room, stepOut, refused, onBack }: Conversation
 
   return (
     <section className={`dialogues dialogues--${room.size} dialogues--reading`} aria-label={dialogue.title}>
+      {/* Where it is happening, behind the whole of it: the conversation is drawn over its scene. */}
+      {dialogue.scene !== undefined && <Scene scene={dialogue.scene} />}
+
       <header className="dialogues__head">
         <button
           type="button"
@@ -260,7 +265,7 @@ function Bubble({
   const speaker = speakers.find((one) => one.id === line.speaker);
   const name = speaker?.name ?? line.speaker;
   // One party on one side and the next on the other, whatever numbers the dialogue gave them.
-  const side = (speaker?.party ?? 0) % 2 === 0 ? 'left' : 'right';
+  const side = sideOf(speaker?.party ?? 0);
   return (
     <li className={`dialogues__said dialogues__said--${side}`}>
       <Portrait portrait={speaker?.portrait} name={name} />

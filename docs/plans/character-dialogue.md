@@ -181,9 +181,12 @@ control while the panel is minimised.
 - a test holding the folder to its rules, like `packages/world/src/portraitFolder.test.ts`.
 
 How big a scene is, and how the speakers stand in it, is decided in step 11. Its first part settled the
-picture: **any landscape PNG at least 1536 wide**, because the pane shows a band across it rather than the
-whole, so a picture an image model hands back at three by two goes in as it is. The placeholders are drawn at
-1536 by 1024.
+picture: any landscape PNG at least 1536 wide, for a band across the top of the pane. Its second part
+changed that, on Adam's word of 2026-10-02: **the scene is the entire pane and the bubbles are over it**. So a
+scene is any PNG at least 1024 on its shorter side, cropped to the pane's own shape - a tall slice of it in
+the column on a desktop - and a picture an image model hands back goes in as it is. The placeholders are
+drawn at 1536 by 1024. The speakers stand in the scene in their bubbles; a first drawing that stood their
+portraits at the foot of a band went with the band.
 
 ## The Dialogues section
 
@@ -296,7 +299,10 @@ A speaker's death is tried with *kill*, in the Characters section.
     drawn by `npm run world:scenes` from `packages/world/src/scene.ts`, which never draws over a picture that
     is there; the shapes it is cut in are the portraits' own, moved into `cutPaper.ts`; the dev server
     serves the folder at `/scenes/`, by the code the portraits' serving became, `picturesApi.ts`; and
-    `sceneFolder.test.ts` holds the folder to its rules. The second is the scene in the pane.
+    `sceneFolder.test.ts` holds the folder to its rules. The second is done: `dialogues/Scene.tsx`, the
+    picture behind the whole of a conversation, with the head, the feed and the foot over it, and everything
+    in the feed on paper of its own; plain paper when the picture is missing. It was first a band across the
+    top with the speakers standing at its foot, and Adam moved it behind the whole pane. Step 11 is done.
 12. **The feel.** Fades, speakers entering and leaving, the one speaking reacting, and less of all of it for
     anybody who has asked for less motion.
 13. **A line that shows something.** Shown, a line takes the camera to a place, or opens an inspect window

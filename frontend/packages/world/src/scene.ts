@@ -1,5 +1,5 @@
 /**
- * A placeholder scene: where a conversation is happening, in cut paper, for the top of the dialogues pane.
+ * A placeholder scene: where a conversation is happening, in cut paper, for behind a conversation.
  *
  * Plainly a placeholder, as the portraits are. The scenes a player sees are Adam's own pictures, saved over
  * these in `world/scenes/`, and until he has made them this is what stands in: a few layers of coloured
@@ -16,7 +16,7 @@ export type SceneKey = (typeof SCENES)[number];
 
 /**
  * Three wide by two tall, the shape an image model hands back, so a picture made with one needs no cropping:
- * the pane shows a band across it. Wide enough for a column opened out to half a desktop at twice its density.
+ * the pane crops whatever it is given to its own shape, a tall slice of it in the column on a desktop.
  */
 export const SCENE_WIDTH = 1536;
 export const SCENE_HEIGHT = 1024;
@@ -46,8 +46,8 @@ function box(left: number, top: number, right: number, bottom: number): Point[] 
 
 /**
  * The harbour: a far shore with a light on it, the sea, a ship at anchor with her sails furled, and the stone
- * of the quay in front, where whoever is talking stands. The horizon is just above the middle, so the band
- * the pane shows across the middle of it keeps the shore, the ship and the quay.
+ * of the quay in front, where whoever is talking stands. The horizon is just above the middle and the quay's
+ * end and the ship either side of the middle, so a tall slice of it still has the quay and the water.
  */
 function harbour(random: () => number): Layer[] {
   const vary = (spread: number): number => (random() * 2 - 1) * spread;

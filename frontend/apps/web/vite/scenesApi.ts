@@ -9,7 +9,7 @@ import { pictureKeys, picturesApi } from './picturesApi.ts';
  * The dev server's scenes: what is in `world/scenes/`, and each picture in it.
  *
  * Adam's folder, which he saves pictures into by hand; a dialogue names its scene, and the page draws the
- * picture of that name across the top of the conversation, without a cache, as `picturesApi.ts` serves any
+ * picture of that name behind the whole of the conversation, without a cache, as `picturesApi.ts` serves any
  * folder of his. See `docs/plans/character-dialogue.md`.
  */
 

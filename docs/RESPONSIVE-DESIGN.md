@@ -225,6 +225,10 @@ goes into the other bay, so the pane it came from stays beside it. Tabs are the 
 bays'. **On a phone no pane has a close: a pane leaves its bay when the player navigates something else into
 it.**
 
+**A conversation's scene is the whole of its pane, in every state**, cropped to the pane's shape: a narrow
+slice of the picture in the tall column on a desktop, most of it at half a phone. The conversation is drawn
+over it, so the scene takes none of the room the lines are read in.
+
 **A line of a dialogue that shows something is a way on the conversation takes rather than the player**, and
 it follows the same rule: in the spread the camera moves beside the column or the window opens in the rail,
 and in the bays the map or the window goes into the bay the conversation is not in. One thing more, Adam's

@@ -101,6 +101,14 @@ export function whyLost(requirement: RequirementView, speakers: readonly Speaker
   }
 }
 
+/** Which side of the pane a party is drawn on: one party on one side and the next on the other. */
+export type Side = 'left' | 'right';
+
+/** The side a party speaks from, whatever numbers the dialogue gave its parties. */
+export function sideOf(party: number): Side {
+  return party % 2 === 0 ? 'left' : 'right';
+}
+
 /** A character by the name they speak under in the dialogue, or by their id when they do not speak in it. */
 function nameOf(character: string, speakers: readonly SpeakerView[]): string {
   return speakers.find((one) => one.character === character)?.name ?? `character ${character.slice(0, 8)}`;

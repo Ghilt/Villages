@@ -400,8 +400,9 @@ Commands are added here as the increments land:
   as far as the player may know it; the dialogue itself, whole, is at `/admin/inspect-events`. In the game,
   the house's first dialogue puts up the **dialogues** pane, a column down the right of the spread with its
   three sizes, and a pane navigation lists on a phone; it lists the dialogues waiting and finished, a lapsed
-  one saying why, and pressing one opens it to be read and played: *continue*, a word in the middle of its
-  foot, shows a line at a time and takes the step past the last, the options are at the end of the feed, and
+  one saying why, and pressing one opens it to be read and played, over its scene, the picture from
+  `world/scenes/` filling the pane: *continue*, a word in the middle of its foot, shows a line at a time
+  and takes the step past the last, the options are at the end of the feed, and
   the list mark goes back. What a line gave or cost is written under it, a lapsed one ends on its closing
   line, and an option the house cannot pay for says so under the options. A line can show something as it
   is reached while playing, once in the life of the page: the sample's rider takes the camera to the seat,
@@ -454,13 +455,14 @@ Commands are added here as the increments land:
   at `/portraits/` with no cache, so a picture saved over another is the one drawn on the next reload,
   and the Characters section's `another portrait` picks one from whatever is there. See
   `docs/plans/characters-and-key-figures.md`.
-- Scenes: `world/scenes/` is Adam's folder, committed as the portraits are. Any landscape PNG at least 1536
-  wide, named for the scene a dialogue names, `harbour.png`: the pane shows a band across it, so a picture
-  an image model hands back at three by two needs no cropping. **Saving over a placeholder replaces it and
-  saving a new name adds one.** `npm run world:scenes --prefix frontend` draws a cut-paper placeholder for
-  every scene the server's sample dialogues name, in a second, and **never overwrites a file that is
-  there**. A test holds the folder to these rules, and the dev server serves it at `/scenes/` with no
-  cache, by the same code that serves the portraits. See `docs/plans/character-dialogue.md`.
+- Scenes: `world/scenes/` is Adam's folder, committed as the portraits are. Any PNG at least 1024 on its
+  shorter side, named for the scene a dialogue names, `harbour.png`: it fills the conversation's pane,
+  cropped to the pane's shape - a tall slice of it in the column on a desktop - so what matters in a picture
+  is best near its middle, and one an image model hands back needs no cropping. **Saving over a placeholder
+  replaces it and saving a new name adds one.** `npm run world:scenes --prefix frontend` draws a cut-paper
+  placeholder for every scene the server's sample dialogues name, in a second, and **never overwrites a file
+  that is there**. A test holds the folder to these rules, and the dev server serves it at `/scenes/` with
+  no cache, by the same code that serves the portraits. See `docs/plans/character-dialogue.md`.
 - The styles live in `world/painterly.json`. A group in one may carry a `handOver`, which is where its
   treatment gives way to the scenery standing on the same ground: whole far out, mostly gone by the zoom
   the trees are all in, keeping a third of itself so a wood is not bare between them. It is the far end

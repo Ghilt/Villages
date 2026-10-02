@@ -19,8 +19,8 @@ const NAMED = /^[a-z0-9]+(-[a-z0-9]+)*\.png$/;
 /** The longest key the dev server serves, `scenesApi.ts`. */
 const LONGEST_KEY = 40;
 
-/** Wide enough for the column opened out to half a desktop, at twice its density. */
-const NARROWEST = 1536;
+/** Large enough to fill a pane on a phone at twice its density, whichever way the picture is cut. */
+const SHORTEST_SIDE = 1024;
 
 const SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
 
@@ -47,14 +47,15 @@ describe("the scenes folder, which is Adam's", () => {
     }
   });
 
-  // Any landscape picture will do, because the pane shows a band across it and crops the rest away.
-  it('holds PNGs, wider than they are tall, and at least 1536 wide', () => {
+  // Any shape will do, because the pane crops a scene to its own shape, a tall slice of it on a desktop.
+  it('holds PNGs at least 1024 on their shorter side', () => {
     for (const file of files) {
       const bytes = new Uint8Array(readFileSync(new URL(file, FOLDER)));
       expect([...bytes.subarray(0, 8)], file).toEqual(SIGNATURE);
       const { width, height } = shapeOf(bytes);
-      expect(width, `${file} is ${width} by ${height}`).toBeGreaterThan(height);
-      expect(width, file).toBeGreaterThanOrEqual(NARROWEST);
+      expect(Math.min(width, height), `${file} is ${width} by ${height}`).toBeGreaterThanOrEqual(
+        SHORTEST_SIDE,
+      );
     }
   });
 });

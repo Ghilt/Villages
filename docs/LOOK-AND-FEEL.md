@@ -99,13 +99,21 @@ edge worth marking since. **None of it carries meaning** — the heraldry is the
 this is the frame they hang in — so there is never anything in it for the player to read. A curl is drawn
 once and mirrored rather than drawn four times, which is the **needle**'s rule. See decision record 0048.
 
-**The portrait frame.** One upright picture of a character, three by four, wherever a face is shown: the
-key figures and the inspect window now, dialogue later. In a window it hangs at the top right, beside the
-name and the facts, so a window on a person is no taller than one on a house. The frame is the ornament's two contours, a gold
-edge and a fainter rule inside it drawn over the picture, so a dark picture keeps its frame. **Somebody
-with no picture is still somebody**: a character with no portrait, or one whose file is missing or will not
-load, is a bust in soft ink, never an empty frame and never the browser's broken-image mark. `Portrait`,
-in `figures/Portrait.tsx`.
+**The portrait frame.** One upright picture of a character, three by four, wherever a face is shown: the key
+figures, the inspect window, and a dialogue's bubbles and scene. In a window it hangs at the top right,
+beside the name and the facts, so a window on a person is no taller than one on a house. The frame is the
+ornament's two contours, a gold edge and a fainter rule inside it drawn over the picture, so a dark picture
+keeps its frame. **Somebody with no picture is still somebody**: a character with no portrait, or one whose
+file is missing or will not load, is a bust in soft ink, never an empty frame and never the browser's
+broken-image mark. `Portrait`, in `figures/Portrait.tsx`.
+
+**The scene.** Behind the whole of a conversation, one of Adam's pictures of where it is happening, filling
+the pane, Adam's word of 2026-10-02: cropped to the pane's own shape rather than squeezed into it, a little
+below the picture's middle, so what matters in a picture is best near its middle. A light wash of the
+pane's paper lies over it. The conversation is drawn over the scene: the bubbles, the options, what a line
+gave and the closing line each on paper of their own, with a soft shadow, so they read on any picture, and
+the head and the foot are paper bars across it. The speakers stand in the scene in their bubbles, facing
+each other from the two sides. With no picture the pane is its own paper. `Scene`, in `dialogues/Scene.tsx`.
 
 **A picture on the map.** Every sprite on the map is a picture Adam hands over, and every one of them has
 to agree with the others on three things, or it looks pasted on. **The light comes from the upper right**,

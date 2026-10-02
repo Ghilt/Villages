@@ -169,12 +169,12 @@ grows are inputs to a dialogue, the way the house's state is an input to a roll.
 ### Look and feel
 
 A column of the interface is given over to dialogue, taking screen space rather than floating in a corner.
-At its top is a **scene**: thematic imagery of where the conversation is happening, with the speakers
-standing in it and facing each other from the two sides, stacked evenly on both sides in a group
-discussion. The graphics so far are dry, and this is the place for the game to be rich. Under the scene is
-the **feed**: the bubbles, each with its speaker's portrait and name beside it, coming from the left or from
-the right by their party. What the house gains is a line in the same feed, the resource's own mark and the
-amount - the coin, +100 - and a lapsed dialogue ends there on its closing line.
+Behind the whole of a conversation is a **scene**: thematic imagery of where it is happening, filling the
+pane, Adam's word of 2026-10-02. The graphics so far are dry, and this is the place for the game to be rich.
+Over the scene is the **feed**: the bubbles, each with its speaker's portrait and name beside it, coming
+from the left or from the right by their party, so the speakers stand in the scene facing each other from
+the two sides. What the house gains is a line in the same feed, the resource's own mark and the amount - the
+coin, +100 - and a lapsed dialogue ends there on its closing line.
 
 **Feel is the point of this one.** Characters should move — entering, leaving, reacting — and fade in
 rather than appear. A dialogue that pops between static portraits would deliver the same words and none of
@@ -187,9 +187,9 @@ A **pane**, there from the first dialogue a house is offered and never closed af
 - **The list**: the dialogues waiting, and under them the ones finished, a lapsed one with why. It scrolls.
   Newest first in both, each with its title and who speaks in it, every name standing alone as it would on
   a bubble, and one waiting is marked *new* until a step has been taken in it and *begun* after.
-- **A conversation**: pressing a dialogue opens it, from its start or from where it was left. The scene at
-  the top, the feed under it, scrolling, and the stretch ahead shown a line at a time by *continue* at its
-  foot. Moving past the last line of a stretch takes the step it ends in. A dialogue choice's options are the
+- **A conversation**: pressing a dialogue opens it, from its start or from where it was left. The scene
+  behind all of it, the feed over the scene, scrolling, and the stretch ahead shown a line at a time by
+  *continue* at its foot. Moving past the last line of a stretch takes the step it ends in. A dialogue choice's options are the
   end of the feed and scroll with it, because a foot of options at half a phone leaves no room for what they
   answer. A finished one opens to be read back. *Continue* is a word, in the middle of the foot and in the
   same place every time, because it is the one thing to press while a conversation is read; it was a chevron
@@ -264,17 +264,17 @@ speakers have a portrait and a name on every bubble, the key figures' own frame,
 frame's bust. What a line gives or costs is written under it in the feed, the resource's mark and the
 amount, as the house card moves with it; a lapsed dialogue ends on its closing line, *Sadly, X died before
 this could be finished*, in the interface's words; and an option the house cannot pay for is refused in the
-pane, under the options, as well as in the log. There is no scene in the pane yet; the scenes are a folder
-of Adam's, `world/scenes/`, with a cut-paper harbour standing in. A line can show something, on the
-wire from version 21 and only while it is still ahead, and the sample's show the seat, the house and the
-figure: reached while playing, a line takes the camera to its place or opens its window, beside the
-conversation on a desktop and in the other bay on a phone, where the two go to half each; once in the life of
-the page, and an option only once the house has taken it. The debug panel's Dialogues section offers a
-dialogue and does nothing else, and a requirement is never sent to a page. Its shape is decided in decision
-record 0071: a dialogue offered whole on the house's stream; only its dialogue choices, and the lines that
-give something or end it, recorded; what a line gives written as the world's own event beside the step; and
-hidden requirements that end a dialogue when one fails, with the server holding back what the player has
-not reached.
+pane, under the options, as well as in the log. A conversation opens over its scene: the picture the
+dialogue names, from `world/scenes/`, a cut-paper harbour for now, filling the pane, with the bubbles over
+it on paper of their own. A line can show something, on the wire from version 21 and only while it is still
+ahead, and the sample's show the seat, the house and the figure: reached while playing, a line takes the
+camera to its place or opens its window, beside the conversation on a desktop and in the other bay on a
+phone, where the two go to half each; once in the life of the page, and an option only once the house has
+taken it. The debug panel's Dialogues section offers a dialogue and does nothing else, and a requirement is
+never sent to a page. Its shape is decided in decision record 0071: a dialogue offered whole on the house's
+stream; only its dialogue choices, and the lines that give something or end it, recorded; what a line gives
+written as the world's own event beside the step; and hidden requirements that end a dialogue when one
+fails, with the server holding back what the player has not reached.
 `docs/plans/character-dialogue.md` is the order it is built in, one commit a step, and experiment 0014 is
 what it is meant to show. `ARCHITECTURE.md` says what it asks of the server and the client.
 

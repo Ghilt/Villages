@@ -11,6 +11,7 @@ import {
   listOf,
   refusalWords,
   showsWords,
+  sideOf,
   signed,
   standing,
   whatChangedIn,
@@ -195,6 +196,12 @@ describe('how a lapsed dialogue closes', () => {
     expect(closingLine({ kind: 'alive', character: 'cb732500-39bd' }, speakers)).toBe(
       'Sadly, Agnes Hollin died before this could be finished.',
     );
+  });
+});
+
+describe('which side a speaker speaks from', () => {
+  it('is one party on the left and the next on the right, whatever the numbers', () => {
+    expect([0, 1, 2, 3, -1].map(sideOf)).toEqual(['left', 'right', 'left', 'right', 'right']);
   });
 });
 

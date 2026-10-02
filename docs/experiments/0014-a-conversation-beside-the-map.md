@@ -148,6 +148,15 @@ world or as the interface taking the wheel is Adam's eye. Read back, a finished 
 because once a line has been said the game server no longer tells the page what it shows; and a camera
 flight cannot be watched in the hidden browser pane, so the log is what says it went.
 
+**2026-10-02, the scene is in the pane.** It was first a band of the harbour across the top of the
+conversation, the two speakers standing at its ends above the bubbles, capped at a third of the pane's
+height, which at half a phone left the lines 178 of 422 pixels. Adam moved it: the scene is the entire pane
+and the bubbles are over it. So the conversation is read over the harbour itself, every bubble on paper of
+its own, and the speakers stand in the place in their bubbles rather than in a strip above them; the scene
+costs the lines no room at all. In the tall column on a desktop that is a slice of the picture, the quay's
+steps and the sea, and at half a phone most of it. Whether two speakers now read as two people facing each
+other in a place, rather than as a chat log with a wallpaper, is Adam's eye.
+
 ## Result
 
 Open.
