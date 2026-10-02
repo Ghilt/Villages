@@ -32,7 +32,7 @@ import {
   tilesBetween,
 } from '../src/nineSlice.ts';
 import type { BorderFile, Sides } from '../src/uiArt.ts';
-import { UI_DIR, UI_SOURCES_DIR } from './paths.ts';
+import { UI_DIR, UI_SOURCES_DIR } from './lib/paths.ts';
 
 /** How far past the frame and its ornaments the words start, when the recipe does not say: two shown. */
 const CONTENT_MARGIN = 8;

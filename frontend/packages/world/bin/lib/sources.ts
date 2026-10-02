@@ -5,7 +5,7 @@ import { resolve } from 'node:path';
 import { unzipSync } from 'fflate';
 import { open } from 'shapefile';
 
-import type { Feature, FeatureCollection } from '../src/geometry.ts';
+import type { Feature, FeatureCollection } from '../../src/geometry.ts';
 import { SOURCE_DIR } from './paths.ts';
 
 /**

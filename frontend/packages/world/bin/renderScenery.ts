@@ -5,27 +5,25 @@ import { deflateSync } from 'node:zlib';
 
 import { PNG } from 'pngjs';
 
-import { growingTable } from '../src/biome.ts';
 import { DEFAULT_MASTER, masterNameOf, standsDirOf, worldDirOf } from '../src/masters.ts';
 import { GROUND_LATTICE } from '../src/lattice.ts';
 import { onLattice, paintPixel, preparePainterly } from '../src/painterly.ts';
 import type { ClassSampler, PainterlyStyle, PreparedPainterly } from '../src/painterly.ts';
-import { preparePalette, snapPrepared, toRgb } from '../src/palette.ts';
 import type { Palette, Rgb } from '../src/palette.ts';
 import { encodeRgbPng } from '../src/png.ts';
 import type { RgbImage } from '../src/png.ts';
-import { createRaster } from '../src/raster.ts';
 import type { ClassRaster } from '../src/raster.ts';
 import { CELL, cellOf, scatterCell } from '../src/scatter.ts';
 import type { ScatteredPoint } from '../src/scatter.ts';
-import { biomeAt, biomesByColour } from '../src/spriteMap.ts';
+import { biomeAt, spriteMapOf } from '../src/spriteMap.ts';
 import type { SpriteMap, SpriteMapFile } from '../src/spriteMap.ts';
 import { NO_STANDS, decodeStands } from '../src/stands.ts';
 import type { StandChunk } from '../src/stands.ts';
-import { masterRowsAt } from '../src/tiles.ts';
 
-import { flag, named } from './flags.ts';
-import { OUTPUT_DIR, PAINTERLY, PAINTERLY_DIR, PALETTE, RENDER, STANDS_DIR, masterAt } from './paths.ts';
+import { flag, named } from './lib/flags.ts';
+import { classSamplerOf, readMaster } from './lib/master.ts';
+import { OUTPUT_DIR, PAINTERLY, PAINTERLY_DIR, PALETTE, RENDER, STANDS_DIR, masterAt } from './lib/paths.ts';
+import { flatColoursOf, mercatorY } from './lib/stills.ts';
 
 /**
  * Stills of what the sprite map put on the ground, painted onto the ground it put it on.
@@ -67,9 +65,6 @@ const spacing = Number(flag('spacing') ?? 1);
 /** World units to one output pixel. A world unit is one pixel at zoom 7, and every zoom halves it. */
 const perPixel = 2 ** (7 - zoom);
 
-const RADIANS = Math.PI / 180;
-const mercatorY = (latitude: number): number => Math.log(Math.tan(Math.PI / 4 + (latitude * RADIANS) / 2));
-
 interface Place {
   name: string;
   lng: number;
@@ -98,11 +93,7 @@ const style: PreparedPainterly | undefined =
       );
 
 /** The flat look, for `--style flat`: the colour of the class, and nothing else. */
-const flatColours: Rgb[] = [];
-for (let id = 0; id <= Math.max(...palette.classes.map((terrain) => terrain.id)); id += 1) {
-  const terrain = palette.classes.find((candidate) => candidate.id === id);
-  flatColours.push(toRgb(terrain === undefined ? '#000000' : render.colours[terrain.name]!));
-}
+const flatColours = flatColoursOf(palette, render.colours);
 
 /**
  * Where to look.
@@ -134,37 +125,6 @@ function places(): Place[] {
   return chosen;
 }
 
-/**
- * The master, as one class per pixel. Read inside a function so the two gigabytes of RGBA that pngjs
- * hands back can be collected before any painting starts.
- */
-function readMaster(): ClassRaster {
-  const started = Date.now();
-  const decoded = PNG.sync.read(readFileSync(masterPath));
-  const world = createRaster(decoded.width, decoded.height);
-  const memo = new Int16Array(1 << 24).fill(-1);
-  const prepared = preparePalette(palette);
-
-  for (let index = 0; index < world.cells.length; index += 1) {
-    const at = index * 4;
-    const red = decoded.data[at]!;
-    const green = decoded.data[at + 1]!;
-    const blue = decoded.data[at + 2]!;
-    const colour = (red << 16) | (green << 8) | blue;
-    let id = memo[colour]!;
-    if (id < 0) {
-      id = snapPrepared([red, green, blue], prepared).id;
-      memo[colour] = id;
-    }
-    world.cells[index] = id;
-  }
-  console.log(
-    `master ${basename(masterPath)}, ${world.width} by ${world.height}, read in ` +
-      `${((Date.now() - started) / 1000).toFixed(1)}s`,
-  );
-  return world;
-}
-
 const spriteDir = resolve(OUTPUT_DIR, worldDirOf(master), 'sprites', layer);
 /** The stands are not beside the rest of the sprite map: only the game server and this read them. See 0067. */
 const standsDir = resolve(STANDS_DIR, standsDirOf(master, layer));
@@ -193,25 +153,8 @@ async function readSpriteMap(): Promise<SpriteMap> {
     );
   }
 
-  const side = file.world.biomeSide;
   const decoded = PNG.sync.read(readFileSync(resolve(spriteDir, 'biomes.png')));
-  const { byColour, fallback } = biomesByColour(file);
-  const biomeOf = new Uint8Array(side * side);
-  for (let at = 0; at < biomeOf.length; at += 1) {
-    const packed =
-      (decoded.data[at * 4]! << 16) | (decoded.data[at * 4 + 1]! << 8) | decoded.data[at * 4 + 2]!;
-    biomeOf[at] = byColour.get(packed) ?? fallback;
-  }
-
-  return {
-    file,
-    biomeOf,
-    cellUnits: side === 0 ? 1 : file.world.side / side,
-    growing: growingTable(file.kinds, file.grows, palette),
-    kinds: file.kinds,
-    colours: file.biomes.map((biome) => biome.colour),
-    names: file.biomes.map((biome) => biome.name),
-  };
+  return spriteMapOf(file, decoded.data, palette);
 }
 
 /** One tile's stands, read once and kept. */
@@ -394,13 +337,13 @@ function renderPlace(
 }
 
 const map = await readSpriteMap();
-const world = readMaster();
-const masterRowOf = masterRowsAt(world.width, world.height);
-const classAt: ClassSampler = (x, y) => {
-  const column = ((Math.floor(x) % world.width) + world.width) % world.width;
-  const down = Math.min(world.width - 1, Math.max(0, Math.floor(y)));
-  return world.cells[masterRowOf[down]! * world.width + column]!;
-};
+const reading = Date.now();
+const world = readMaster(masterPath, palette);
+console.log(
+  `master ${basename(masterPath)}, ${world.width} by ${world.height}, read in ` +
+    `${((Date.now() - reading) / 1000).toFixed(1)}s`,
+);
+const classAt = classSamplerOf(world);
 
 await mkdir(outputDir, { recursive: true });
 const deflate = (data: Uint8Array) => new Uint8Array(deflateSync(data, { level: 6 }));

@@ -198,7 +198,7 @@ each one contributes and how it is licensed, without downloading anything.
 **Three of the sources are CC-BY and must be credited**: the **Copernicus Global Land Service** land cover,
 **RESOLVE Ecoregions 2017**, and **HydroSHEDS** (HydroLAKES and HydroRIVERS). **Natural Earth** is public
 domain and needs nothing. Each one's exact credit line is on its entry in
-`frontend/packages/world/bin/worldSources.ts`, which is what `--list` prints.
+`frontend/packages/world/bin/lib/worldSources.ts`, which is what `--list` prints.
 
 The map used to carry them in its attribution control, and **that was not working**: MapLibre credits the
 sources whose layers are showing, and a painted renderer hides the flat tiles, so the line appeared on

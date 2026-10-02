@@ -16,7 +16,8 @@ import type { Ring } from '../src/trace.ts';
 
 import { DEFAULT_MASTER, masterNameOf, worldDirOf } from '../src/masters.ts';
 
-import { MASTER_DIR, OUTPUT_DIR, PALETTE } from './paths.ts';
+import { flag, named } from './lib/flags.ts';
+import { MASTER_DIR, OUTPUT_DIR, PALETTE } from './lib/paths.ts';
 
 /**
  * Reads the hand-edited master and gives the game its world.
@@ -55,14 +56,6 @@ const SUSPICIOUS_DISTANCE = 18;
  * Each master gets its own directory, named after it, so several can exist at once and the debug map
  * panel can load any of them. The preview is named after it too, for the same reason.
  */
-const args = process.argv.slice(2);
-const flag = (name: string): string | undefined => {
-  const at = args.indexOf(`--${name}`);
-  return at < 0 ? undefined : args[at + 1];
-};
-const named = args.filter(
-  (value, index) => !value.startsWith('--') && args[index - 1]?.startsWith('--') !== true,
-);
 
 const masterPath = named[0] === undefined ? resolve(MASTER_DIR, `${DEFAULT_MASTER}.png`) : resolve(named[0]);
 const master = masterNameOf(basename(masterPath)) ?? DEFAULT_MASTER;

@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { quadkeyOf } from '@villages/protocol';
-import { encodeStands } from '@villages/world';
-import type { Stand } from '@villages/world';
+import { encodeStands } from '@villages/world/build';
+import type { Stand } from '@villages/world/build';
 
 import {
   followStandsUnder,

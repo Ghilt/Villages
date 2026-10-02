@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { quadkeyOf } from '@villages/protocol';
-import { encodeStands } from '@villages/world';
-import type { Palette, Stand } from '@villages/world';
+import type { Palette } from '@villages/world';
+import { encodeStands } from '@villages/world/build';
+import type { Stand } from '@villages/world/build';
 
 import { currentPointsOf, forgetScenery, pointsOf, sceneryTally } from './sceneryCells';
 import { followStandsUnder, forgetStands, standsArrived } from '../../net/stands';
@@ -16,8 +17,8 @@ vi.mock('../../geometry/terrainClasses', () => ({
 }));
 
 vi.mock('./spriteMap', async () => {
-  const world = await import('@villages/world');
-  const biomes = world.EXAMPLE_BIOMES;
+  const world = await import('@villages/world/build');
+  const biomes = (await import('@villages/world/testing')).EXAMPLE_BIOMES;
   const palette: Palette = {
     master: { width: 32768, height: 16384, projection: 'equirectangular' },
     classes: [

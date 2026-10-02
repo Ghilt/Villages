@@ -45,7 +45,7 @@ import { MOODBOARD_SIZE, UI_PLACEHOLDERS, placeholderAbout } from '../src/uiPlac
 import { punchedOf, windowOf } from '../src/uiWindow.ts';
 import type { UiWindow } from '../src/uiWindow.ts';
 import type { CutPlaceholder, Rect, UiPlaceholder } from '../src/uiPlaceholders.ts';
-import { UI_CACHE_DIR, UI_DIR, UI_OUT_DIR } from './paths.ts';
+import { UI_CACHE_DIR, UI_DIR, UI_OUT_DIR } from './lib/paths.ts';
 
 /** Where the tool keeps the hash of every placeholder it made, so a picture can be told from one. */
 const PLACEHOLDERS = resolve(UI_DIR, 'placeholders.json');

@@ -1,4 +1,6 @@
+import { growingTable } from './biome.ts';
 import type { BoundaryRule, Growing, Kind } from './biome.ts';
+import type { Palette } from './palette.ts';
 
 /**
  * What a sprite map is, once it has been read: what kind of place the ground is, and where the scenery
@@ -48,10 +50,46 @@ export interface SpriteMap {
 
 /** Which biome a point of world space is in. The wander that keeps the edge off the grid is the caller's. */
 export function biomeAt(map: SpriteMap, worldX: number, worldY: number): number {
-  const side = map.file.world.biomeSide;
-  const cellX = ((Math.floor(worldX / map.cellUnits) % side) + side) % side;
-  const cellY = Math.min(side - 1, Math.max(0, Math.floor(worldY / map.cellUnits)));
-  return map.biomeOf[cellY * side + cellX]!;
+  return map.biomeOf[biomeCellOf(map.file.world.biomeSide, map.cellUnits, worldX, worldY)]!;
+}
+
+/**
+ * Which cell of a biome raster `side` cells square a point of world space falls in, each cell `cellUnits` world
+ * units across: across wraps, as the world does, and down clamps. The generator writes the raster by it and
+ * everything that reads one reads by it, so a stand and the biome it was placed for agree on where it is.
+ */
+export function biomeCellOf(side: number, cellUnits: number, worldX: number, worldY: number): number {
+  const cellX = ((Math.floor(worldX / cellUnits) % side) + side) % side;
+  const cellY = Math.min(side - 1, Math.max(0, Math.floor(worldY / cellUnits)));
+  return cellY * side + cellX;
+}
+
+/**
+ * A sprite map, from its manifest and its biome raster's pixels as RGBA, however they were decoded: the browser
+ * through a canvas and the still renderer through pngjs. The palette is the one the terrain classes are named
+ * in, because the manifest says what grows on each class by its name.
+ */
+export function spriteMapOf(
+  file: SpriteMapFile,
+  rgba: Uint8Array | Uint8ClampedArray,
+  palette: Palette,
+): SpriteMap {
+  const side = file.world.biomeSide;
+  const { byColour, fallback } = biomesByColour(file);
+  const biomeOf = new Uint8Array(side * side);
+  for (let at = 0; at < biomeOf.length; at += 1) {
+    const packed = (rgba[at * 4]! << 16) | (rgba[at * 4 + 1]! << 8) | rgba[at * 4 + 2]!;
+    biomeOf[at] = byColour.get(packed) ?? fallback;
+  }
+  return {
+    file,
+    biomeOf,
+    cellUnits: side === 0 ? 1 : file.world.side / side,
+    growing: growingTable(file.kinds, file.grows, palette),
+    kinds: file.kinds,
+    colours: file.biomes.map((biome) => biome.colour),
+    names: file.biomes.map((biome) => biome.name),
+  };
 }
 
 /**

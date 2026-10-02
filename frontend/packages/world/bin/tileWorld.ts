@@ -2,18 +2,16 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { deflateSync } from 'node:zlib';
 import { basename, resolve } from 'node:path';
 
-import { PNG } from 'pngjs';
-
-import { preparePalette, snapPrepared, toRgb } from '../src/palette.ts';
+import { toRgb } from '../src/palette.ts';
 import type { Palette, Rgb } from '../src/palette.ts';
-import { createRaster } from '../src/raster.ts';
-import type { ClassRaster } from '../src/raster.ts';
 import { encodeIndexedPng } from '../src/png.ts';
 import { TILE_SIZE, cutTile, tileAddresses, tileCount } from '../src/tiles.ts';
 
 import { DEFAULT_MASTER, masterNameOf, worldDirOf } from '../src/masters.ts';
 
-import { MASTER_DIR, OUTPUT_DIR, PALETTE, RENDER } from './paths.ts';
+import { flag, named } from './lib/flags.ts';
+import { readMaster } from './lib/master.ts';
+import { MASTER_DIR, OUTPUT_DIR, PALETTE, RENDER } from './lib/paths.ts';
 
 /**
  * Cuts the world into map tiles, in the colours it is drawn in.
@@ -27,15 +25,6 @@ import { MASTER_DIR, OUTPUT_DIR, PALETTE, RENDER } from './paths.ts';
  * Each master is cut into its own directory, named after it, so several worlds can exist at once and
  * the debug map panel can load any of them.
  */
-
-const args = process.argv.slice(2);
-const flag = (name: string): string | undefined => {
-  const at = args.indexOf(`--${name}`);
-  return at < 0 ? undefined : args[at + 1];
-};
-const named = args.filter(
-  (value, index) => !value.startsWith('--') && args[index - 1]?.startsWith('--') !== true,
-);
 
 const masterPath = named[0] === undefined ? resolve(MASTER_DIR, `${DEFAULT_MASTER}.png`) : resolve(named[0]);
 const master = masterNameOf(basename(masterPath)) ?? DEFAULT_MASTER;
@@ -59,35 +48,18 @@ for (let id = 0; id <= Math.max(...palette.classes.map((terrain) => terrain.id))
   drawnAs.push(toRgb(terrain === undefined ? render.sea : render.colours[terrain.name]!));
 }
 
-const prepared = preparePalette(palette);
-const decoded = PNG.sync.read(await readFile(masterPath));
-const world: ClassRaster = createRaster(decoded.width, decoded.height);
-const remembered = new Int16Array(1 << 24).fill(-1);
-
-for (let index = 0; index < world.cells.length; index += 1) {
-  const at = index * 4;
-  const red = decoded.data[at]!;
-  const green = decoded.data[at + 1]!;
-  const blue = decoded.data[at + 2]!;
-  const colour = (red << 16) | (green << 8) | blue;
-  let id = remembered[colour]!;
-  if (id < 0) {
-    id = snapPrepared([red, green, blue], prepared).id;
-    remembered[colour] = id;
-  }
-  world.cells[index] = id;
-}
+const world = readMaster(masterPath, palette);
 
 /**
  * The zoom at which a tile pixel is a master pixel, taken from the master itself rather than written
  * down: 256 tile pixels times two to the zoom is the width of the world. Cutting further would only
  * stretch what is already there; cutting less would throw away detail somebody painted.
  */
-const nativeZoom = Math.round(Math.log2(decoded.width / TILE_SIZE));
+const nativeZoom = Math.round(Math.log2(world.width / TILE_SIZE));
 const maxZoom = flag('zoom') === undefined ? nativeZoom : Number(flag('zoom'));
 
 console.log(
-  `read ${master}, ${decoded.width} by ${decoded.height}, detail running out at zoom ` +
+  `read ${master}, ${world.width} by ${world.height}, detail running out at zoom ` +
     `${nativeZoom}; cutting ${tileCount(maxZoom)} tiles`,
 );
 

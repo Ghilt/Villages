@@ -6,9 +6,9 @@ import { pipeline } from 'node:stream/promises';
 
 import { Unzip, UnzipInflate } from 'fflate';
 
-import { SOURCE_DIR } from './paths.ts';
-import { WORLD_SOURCES } from './worldSources.ts';
-import type { WorldSource } from './worldSources.ts';
+import { SOURCE_DIR } from './lib/paths.ts';
+import { WORLD_SOURCES } from './lib/worldSources.ts';
+import type { WorldSource } from './lib/worldSources.ts';
 
 /**
  * Downloads everything the world is built from, unattended.

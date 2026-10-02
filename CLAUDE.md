@@ -248,7 +248,8 @@ and ESLint restricted imports on the frontend.
   `gateway`} <- `app`. `domain` depends on nothing but the Kotlin stdlib. `application` depends only on `domain` and
   owns the ports. Only `app` has `@SpringBootApplication`.
 - Frontend: `packages/protocol` <- `packages/client-core` <- `apps/web`. `client-core` never imports React, the DOM,
-  MapLibre or Pixi; the socket is an injected interface.
+  MapLibre or Pixi; the socket is an injected interface. The page takes from the world package only
+  `@villages/world`; `/build` and `/testing` are for its tools and the tests, and ESLint holds that.
 - Inside `apps/web`, the component library in `src/ui/` imports nothing from the rest of the app, only React, its
   fonts and the world package, so every component can be shown with nothing running; `src/ui/boundary.test.ts`
   holds it.

@@ -1,12 +1,12 @@
 import { dirname, isAbsolute, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { DEFAULT_MASTER } from '../src/masters.ts';
+import { DEFAULT_MASTER } from '../../src/masters.ts';
 
 const here = dirname(fileURLToPath(import.meta.url));
 
-/** The repository root, three levels above this package's bin directory. */
-export const REPO = resolve(here, '..', '..', '..', '..');
+/** The repository root: this is `frontend/packages/world/bin/lib`, five levels below it. */
+export const REPO = resolve(here, '..', '..', '..', '..', '..');
 
 export const WARP_CONFIG = resolve(REPO, 'world', 'warp.json');
 export const PALETTE = resolve(REPO, 'world', 'palette.json');

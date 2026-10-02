@@ -5,7 +5,7 @@ import { warpCollection } from '../src/geometry.ts';
 import type { FeatureCollection } from '../src/geometry.ts';
 import type { WarpConfig } from '../src/warp.ts';
 
-import { SOURCE_DIR, WARP_CONFIG, WARPED_DIR } from './paths.ts';
+import { SOURCE_DIR, WARP_CONFIG, WARPED_DIR } from './lib/paths.ts';
 
 /**
  * Warps the real Earth, and writes the result as raw material.

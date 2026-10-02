@@ -1,14 +1,12 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { deflateSync } from 'node:zlib';
 
-import { PNG } from 'pngjs';
-
-import { byId, preparePalette, snapPrepared, toRgb } from '../src/palette.ts';
+import { byId, toRgb } from '../src/palette.ts';
 import type { Palette, Rgb } from '../src/palette.ts';
-import { createRaster } from '../src/raster.ts';
 import { encodeIndexedPng } from '../src/png.ts';
 
-import { PALETTE } from './paths.ts';
+import { readMaster } from './lib/master.ts';
+import { PALETTE } from './lib/paths.ts';
 
 /**
  * Replays hand edits onto a freshly built master.
@@ -31,35 +29,17 @@ if (original === undefined || edited === undefined || fresh === undefined || out
 }
 
 const palette = JSON.parse(await readFile(PALETTE, 'utf8')) as Palette;
-const prepared = preparePalette(palette);
 const names = byId(palette);
 
-async function classesOf(path: string) {
-  const png = PNG.sync.read(await readFile(path));
-  const raster = createRaster(png.width, png.height);
-  const remembered = new Int16Array(1 << 24).fill(-1);
-
-  for (let index = 0; index < raster.cells.length; index += 1) {
-    const at = index * 4;
-    const red = png.data[at]!;
-    const green = png.data[at + 1]!;
-    const blue = png.data[at + 2]!;
-    const colour = (red << 16) | (green << 8) | blue;
-    let id = remembered[colour]!;
-    if (id < 0) {
-      id = snapPrepared([red, green, blue], prepared).id;
-      remembered[colour] = id;
-    }
-    raster.cells[index] = id;
-  }
-
-  console.log(`read ${png.width} by ${png.height} from ${path}`);
+function classesOf(path: string) {
+  const raster = readMaster(path, palette);
+  console.log(`read ${raster.width} by ${raster.height} from ${path}`);
   return raster;
 }
 
-const before = await classesOf(original);
-const after = await classesOf(edited);
-const target = await classesOf(fresh);
+const before = classesOf(original);
+const after = classesOf(edited);
+const target = classesOf(fresh);
 
 if (before.cells.length !== after.cells.length || after.cells.length !== target.cells.length) {
   throw new Error('the three masters are not the same size, so their pixels cannot be compared');

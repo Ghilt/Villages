@@ -2,8 +2,6 @@ import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { deflateSync } from 'node:zlib';
 import { basename, resolve } from 'node:path';
 
-import { PNG } from 'pngjs';
-
 import {
   biomeProblems,
   chooseBiome,
@@ -14,7 +12,7 @@ import {
   wetnessOfDistance,
 } from '../src/biome.ts';
 import type { BiomeFile } from '../src/biome.ts';
-import { preparePalette, snapPrepared, toRgb } from '../src/palette.ts';
+import { toRgb } from '../src/palette.ts';
 import type { Palette, Rgb } from '../src/palette.ts';
 import { createRaster } from '../src/raster.ts';
 import { MAX_MERCATOR_LATITUDE, toWorld } from '../src/sphere.ts';
@@ -32,8 +30,11 @@ import {
 } from '../src/stands.ts';
 import type { Stand } from '../src/stands.ts';
 import { DEFAULT_MASTER, masterNameOf, standsDirOf, worldDirOf } from '../src/masters.ts';
+import { biomeCellOf } from '../src/spriteMap.ts';
 
-import { BIOMES, OUTPUT_DIR, PAINTERLY, PALETTE, STANDS_DIR, masterAt } from './paths.ts';
+import { args, flag, named } from './lib/flags.ts';
+import { classSamplerOf, readMaster } from './lib/master.ts';
+import { BIOMES, OUTPUT_DIR, PAINTERLY, PALETTE, STANDS_DIR, masterAt } from './lib/paths.ts';
 
 /**
  * Works out what kind of place every part of the world is, and where the scenery clumps.
@@ -51,15 +52,6 @@ import { BIOMES, OUTPUT_DIR, PAINTERLY, PALETTE, STANDS_DIR, masterAt } from './
  * A master with no sprite map draws no scenery at all, which is the rule rather than a failure mode.
  * See docs/plans/biome-sprite-map.md.
  */
-
-const args = process.argv.slice(2);
-const flag = (name: string): string | undefined => {
-  const at = args.indexOf(`--${name}`);
-  return at < 0 ? undefined : args[at + 1];
-};
-const named = args.filter(
-  (value, index) => !value.startsWith('--') && args[index - 1]?.startsWith('--') !== true,
-);
 
 const masterPath = masterAt(named[0]);
 const master = masterNameOf(basename(masterPath)) ?? DEFAULT_MASTER;
@@ -107,30 +99,7 @@ const water = new Set(
   palette.classes.filter((terrain) => terrain.water === true).map((terrain) => terrain.id),
 );
 
-/** Read inside a function so the two gigabytes of RGBA pngjs hands back go before anything else starts. */
-function readMaster(): ClassRaster {
-  const prepared = preparePalette(palette);
-  const decoded = PNG.sync.read(masterBytes);
-  const world = createRaster(decoded.width, decoded.height);
-  const remembered = new Int16Array(1 << 24).fill(-1);
-  for (let index = 0; index < world.cells.length; index += 1) {
-    const at = index * 4;
-    const red = decoded.data[at]!;
-    const green = decoded.data[at + 1]!;
-    const blue = decoded.data[at + 2]!;
-    const colour = (red << 16) | (green << 8) | blue;
-    let id = remembered[colour]!;
-    if (id < 0) {
-      id = snapPrepared([red, green, blue], prepared).id;
-      remembered[colour] = id;
-    }
-    world.cells[index] = id;
-  }
-  return world;
-}
-
-const masterBytes = await readFile(masterPath);
-const world = readMaster();
+const world = readMaster(masterPath, palette);
 const WORLD_SIDE = world.width;
 console.log(`read ${master}, ${world.width} by ${world.height} (${since()})`);
 
@@ -203,12 +172,9 @@ const waterWide = Math.ceil(world.width / WATER_EVERY);
 const CHAMFER_TO_PIXELS = WATER_EVERY / 5;
 console.log(`measured the distance to water (${since()})`);
 
+/** Which master row each row of world space reads, for the latitude of a biome's cell. */
 const masterRowOf = masterRowsAt(WORLD_SIDE, world.height);
-const classAt = (worldX: number, worldY: number): number => {
-  const column = ((Math.floor(worldX) % world.width) + world.width) % world.width;
-  const down = Math.min(WORLD_SIDE - 1, Math.max(0, Math.floor(worldY)));
-  return world.cells[masterRowOf[down]! * world.width + column]!;
-};
+const classAt = classSamplerOf(world);
 
 /**
  * The biome of every sixteen world units, in world space rather than in the master's, so that the
@@ -269,11 +235,8 @@ for (let cellY = 0; cellY < BIOME_SIDE; cellY += 1) {
 }
 console.log(`chose a biome for every ${cellUnits} world units (${since()})`);
 
-const biomeAt = (worldX: number, worldY: number): number => {
-  const cellX = ((Math.floor(worldX / cellUnits) % BIOME_SIDE) + BIOME_SIDE) % BIOME_SIDE;
-  const cellY = Math.min(BIOME_SIDE - 1, Math.max(0, Math.floor(worldY / cellUnits)));
-  return biomes.cells[cellY * BIOME_SIDE + cellX]!;
-};
+const biomeAt = (worldX: number, worldY: number): number =>
+  biomes.cells[biomeCellOf(BIOME_SIDE, cellUnits, worldX, worldY)]!;
 
 /**
  * The stands. Middles from a jittered grid, taken or left by the biome's own rate, and dropped where the

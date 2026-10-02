@@ -14,7 +14,7 @@ import { deflateSync } from 'node:zlib';
 
 import { encodeRgbPng } from '../src/png.ts';
 import { drawScene, SCENES } from '../src/scene.ts';
-import { SCENES_DIR } from './paths.ts';
+import { SCENES_DIR } from './lib/paths.ts';
 
 const deflate = (data: Uint8Array) => new Uint8Array(deflateSync(data, { level: 9 }));
 

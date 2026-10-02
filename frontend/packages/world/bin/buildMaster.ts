@@ -11,8 +11,8 @@ import { fillUnassigned } from '../src/fill.ts';
 import type { Palette, Rgb } from '../src/palette.ts';
 import type { Feature } from '../src/geometry.ts';
 
-import { MASTER_CONFIG, MASTER_DIR, PALETTE } from './paths.ts';
-import { streamFeatures } from './sources.ts';
+import { MASTER_CONFIG, MASTER_DIR, PALETTE } from './lib/paths.ts';
+import { streamFeatures } from './lib/sources.ts';
 
 /**
  * Paints a master image: the world as one terrain class per pixel, from real Earth data.

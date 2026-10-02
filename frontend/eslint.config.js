@@ -19,6 +19,27 @@ export default tseslint.config(
     },
   },
   {
+    // The page draws a world with what `@villages/world` hands it and nothing the world was made with: the
+    // generator is `/build` and the worked examples are `/testing`, for the tools and the tests. See the
+    // package's index.
+    files: ['apps/web/src/**/*.ts', 'apps/web/src/**/*.tsx'],
+    ignores: ['**/*.test.ts', '**/*.test.tsx'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['@villages/world/*'],
+              message:
+                'The page takes only what @villages/world hands it: /build and /testing are for tools and tests.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     files: ['**/*.test.ts', '**/*.test.tsx'],
     rules: {
       '@typescript-eslint/no-non-null-assertion': 'off',

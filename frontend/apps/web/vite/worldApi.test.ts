@@ -2,7 +2,7 @@ import { relative } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { OUTPUT_DIR, STANDS_DIR } from '../../../packages/world/bin/paths.ts';
+import { OUTPUT_DIR, STANDS_DIR } from '../../../packages/world/bin/lib/paths.ts';
 import { asksForStands } from './worldApi.ts';
 
 describe('the stands, which only the game server hands out', () => {

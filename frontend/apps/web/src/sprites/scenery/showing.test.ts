@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import { CAMERA } from '../../map/mapConfig';
 import { CROSSOVER_STICK, LONGEST_STEP_MS, PRESENCE_MS, easeTowards } from '../twoForms';
-import { CELL, EXAMPLE_KINDS as KINDS } from '@villages/world';
+import { CELL } from '@villages/world';
+import { EXAMPLE_KINDS as KINDS } from '@villages/world/testing';
 import {
   MOST_CELLS,
   SPREAD,

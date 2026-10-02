@@ -1,5 +1,5 @@
-import { SOURCES, ensureSource } from './sources.ts';
-import { SOURCE_DIR } from './paths.ts';
+import { SOURCES, ensureSource } from './lib/sources.ts';
+import { SOURCE_DIR } from './lib/paths.ts';
 
 /**
  * Downloads the raw material for the world: coastlines, lakes, rivers and ice from Natural Earth, and

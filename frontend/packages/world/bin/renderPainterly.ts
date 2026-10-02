@@ -1,23 +1,19 @@
-import { readFileSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { deflateSync } from 'node:zlib';
 import { resolve } from 'node:path';
 
-import { PNG } from 'pngjs';
-
-import { preparePalette, snapPrepared, toRgb } from '../src/palette.ts';
-import type { Palette, Rgb } from '../src/palette.ts';
-import { createRaster } from '../src/raster.ts';
+import type { Palette } from '../src/palette.ts';
 import type { ClassRaster } from '../src/raster.ts';
 import { encodeRgbPng } from '../src/png.ts';
 import type { RgbImage } from '../src/png.ts';
 import { GROUND_LATTICE } from '../src/lattice.ts';
 import { onLattice, paintPixel, preparePainterly } from '../src/painterly.ts';
-import { masterRowsAt } from '../src/tiles.ts';
 import type { ClassSampler, PainterlyStyle, PreparedPainterly } from '../src/painterly.ts';
 
-import { args, flag } from './flags.ts';
-import { MASTER_DIR, OUTPUT_DIR, PAINTERLY, PAINTERLY_DIR, PALETTE, RENDER } from './paths.ts';
+import { args, flag } from './lib/flags.ts';
+import { classSamplerOf, readMaster } from './lib/master.ts';
+import { OUTPUT_DIR, PAINTERLY, PAINTERLY_DIR, PALETTE, RENDER, masterAt } from './lib/paths.ts';
+import { RADIANS, flatColoursOf, mercatorY } from './lib/stills.ts';
 
 /**
  * Paints views of the world, in every style, to settle what the world looks like.
@@ -88,11 +84,7 @@ if (args.includes('--config-only')) {
 }
 
 /** The flat look, for the comparison: the colour of the class, and nothing else. */
-const flatColours: Rgb[] = [];
-for (let id = 0; id <= Math.max(...palette.classes.map((terrain) => terrain.id)); id += 1) {
-  const terrain = palette.classes.find((candidate) => candidate.id === id);
-  flatColours.push(toRgb(terrain === undefined ? '#000000' : render.colours[terrain.name]!));
-}
+const flatColours = flatColoursOf(palette, render.colours);
 
 const oneView = flag('view');
 const views = oneView === undefined ? file.views : file.views.filter((view) => view.name === oneView);
@@ -105,44 +97,6 @@ const styles =
   oneStyle === undefined ? [...prepared.keys()] : [...prepared.keys()].filter((n) => n === oneStyle);
 if (styles.length === 0) {
   throw new Error(`no style called ${oneStyle}; there is ${[...prepared.keys()].join(', ')}`);
-}
-
-/**
- * The master, as one class per pixel. Read inside a function so the two gigabytes of RGBA that pngjs
- * hands back can be collected before any painting starts.
- */
-function readMaster(): ClassRaster {
-  const started = Date.now();
-  const decoded = PNG.sync.read(readFileSync(resolve(MASTER_DIR, 'terrain.png')));
-  const world = createRaster(decoded.width, decoded.height);
-  const memo = new Int16Array(1 << 24).fill(-1);
-  const preparedPalette = preparePalette(palette);
-
-  for (let index = 0; index < world.cells.length; index += 1) {
-    const at = index * 4;
-    const red = decoded.data[at]!;
-    const green = decoded.data[at + 1]!;
-    const blue = decoded.data[at + 2]!;
-    const colour = (red << 16) | (green << 8) | blue;
-    let id = memo[colour]!;
-    if (id < 0) {
-      id = snapPrepared([red, green, blue], preparedPalette).id;
-      memo[colour] = id;
-    }
-    world.cells[index] = id;
-  }
-
-  console.log(
-    `master ${world.width} by ${world.height}, read in ${((Date.now() - started) / 1000).toFixed(1)}s`,
-  );
-  return world;
-}
-
-const RADIANS = Math.PI / 180;
-
-/** Web Mercator's vertical coordinate, running to plus or minus pi. World space is a scaling of it. */
-function mercatorY(latitude: number): number {
-  return Math.log(Math.tan(Math.PI / 4 + (latitude * RADIANS) / 2));
 }
 
 /**
@@ -201,20 +155,13 @@ function renderView(
   return { width, height, pixels };
 }
 
-const world = readMaster();
-
-/** World space is Mercator and the master is not, so every row of it is projected once, up front. */
-const masterRowOf = masterRowsAt(world.width, world.height);
-
-/**
- * Nearest, always: the average of two terrains is a third terrain. Longitude wraps, because the world
- * does; latitude clamps, because it does not.
- */
-const classAt: ClassSampler = (x, y) => {
-  const column = ((Math.floor(x) % world.width) + world.width) % world.width;
-  const down = Math.min(world.width - 1, Math.max(0, Math.floor(y)));
-  return world.cells[masterRowOf[down]! * world.width + column]!;
-};
+// The default master, always: the stills are named for the view and the style, not the master.
+const reading = Date.now();
+const world = readMaster(masterAt(undefined), palette);
+console.log(
+  `master ${world.width} by ${world.height}, read in ${((Date.now() - reading) / 1000).toFixed(1)}s`,
+);
+const classAt = classSamplerOf(world);
 
 await mkdir(outputDir, { recursive: true });
 const deflate = (data: Uint8Array) => new Uint8Array(deflateSync(data, { level: 6 }));

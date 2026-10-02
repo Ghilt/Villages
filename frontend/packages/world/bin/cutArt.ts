@@ -44,7 +44,7 @@ import type { ArtAtlasFile, ArtFrame, Rgba } from '../src/art.ts';
 import type { BiomeFile } from '../src/biome.ts';
 import { findPlinth, liftOffPlinth } from '../src/lift.ts';
 import { MARK_NAMES, markPlaceholderSvg, sceneryPlaceholderSvg } from '../src/placeholderArt.ts';
-import { ART_CACHE_DIR, ART_DIR, BIOMES, PAINTERLY_DIR, RENDER, SPRITES_DIR } from './paths.ts';
+import { ART_CACHE_DIR, ART_DIR, BIOMES, PAINTERLY_DIR, RENDER, SPRITES_DIR } from './lib/paths.ts';
 
 /**
  * How tall every scenery sprite is cut, in pixels.

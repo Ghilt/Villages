@@ -160,12 +160,13 @@ to admit it.
 ## The generator
 
 `npm run world:sprites --prefix frontend -- [master.png] [--layer biome] [--readable] [--out dir]`,
-following the same six-line argument convention every other bin script uses, with its paths in
-`bin/paths.ts`. The algorithm lives in `packages/world/src/biome.ts` and `src/stands.ts` as pure
+reading its arguments with `bin/lib/flags.ts`, as every other bin script does, with its paths in
+`bin/lib/paths.ts`. The algorithm lives in `packages/world/src/biome.ts` and `src/stands.ts` as pure
 functions, because `packages/world/src/**` may not touch `node:` — only `bin/` does file IO.
 
-1. **Read the master.** The standard loop, inside a function so that the two gigabytes of RGBA pngjs
-   hands back can be collected before anything else starts. About eight seconds.
+1. **Read the master.** `readMaster` in `bin/lib/master.ts`, the one every tool shares, inside a function
+   so that the two gigabytes of RGBA pngjs hands back can be collected before anything else starts. About
+   eight seconds.
 2. **Two fields**, at master resolution, a chamfer pass each. `depth`, the distance to the nearest pixel
    of a *different* palette group, which is how far into this kind of ground you are; and `toWater`, the
    distance to any water class. The first is what puts scrub at a wood's margin and spruce in its middle;

@@ -24,8 +24,7 @@
 497 frontend/packages/protocol/src/frames.ts
 533 frontend/packages/world/bin/cutArt.ts
 723 frontend/packages/world/bin/cutUi.ts
-531 frontend/packages/world/bin/generateSpriteMap.ts
-443 frontend/packages/world/bin/renderScenery.ts
+494 frontend/packages/world/bin/generateSpriteMap.ts
 606 frontend/packages/world/src/area.test.ts
 791 frontend/packages/world/src/area.ts
 567 frontend/packages/world/src/art.ts

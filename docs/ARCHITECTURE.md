@@ -37,11 +37,19 @@ Frontend:
 
 ```
 packages/protocol  <-  packages/client-core  <-  apps/web
+packages/world                               <-  apps/web
 ```
 
 - `client-core` is compiled without DOM type definitions, so a stray `window`, `WebSocket` or `document` fails to
   typecheck. The socket arrives as an injected interface.
 - Restricted imports forbid React, MapLibre and Pixi inside `client-core` and `protocol`.
+- The world package is the generator, and it has three doors: `@villages/world`, what the page reads and draws
+  a world with; `@villages/world/build`, everything the world is made with besides, for the tools in its `bin`
+  and the tests that build a world; and `@villages/world/testing`, its worked examples. A page file that takes
+  from either of the last two is a lint error. Its `src` is pure and typechecked without Node. Its tools share
+  their readers in `bin/lib/` - one of a master, `master.ts`, so that a colour is the same class to the tiles,
+  the sprite map and the stills, and one of their arguments, `flags.ts` - and the libraries only they use,
+  pngjs, fflate, shapefile and sharp, are its development dependencies.
 - The session - what the page knows of the world and of its own house, and what it asks of the gateway - is
   `client-core`'s, `createSession`, so it is tested without a browser, and whatever it needs from the outside is
   handed in (0078). Its state is folded from **slices**, one a mechanic, in `slices.ts`: the connection, the cells,

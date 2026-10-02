@@ -15,7 +15,7 @@ import { deflateSync } from 'node:zlib';
 import { encodeRgbPng } from '../src/png.ts';
 import { drawSilhouette } from '../src/portrait.ts';
 import type { Sitter } from '../src/portrait.ts';
-import { PORTRAITS_DIR } from './paths.ts';
+import { PORTRAITS_DIR } from './lib/paths.ts';
 
 /** How many of each are drawn: enough that a full house of nine does not look like one family of twins. */
 const EACH = 6;
