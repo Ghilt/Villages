@@ -1,7 +1,7 @@
-import { gatewayState } from '../net/gateway';
+import { gatewayState, type GatewayState } from '../net/gateway';
 import { paneIdOf, subjectOfPane, subjectsNow } from '../inspect/subjects';
 import type { Subject } from '../inspect/subjects';
-import type { BayName, SpreadWants } from './bayBox';
+import type { BayName, RightWants, SpreadWants } from './bayBox';
 import { isTabbed, STRIP, TAB_BAR } from './bayBox';
 import type { IconName } from './Icons';
 
@@ -18,7 +18,8 @@ import type { IconName } from './Icons';
  * nothing else. See decision record 0046.
  *
  * Four of them are fixed and the rest come and go: an **inspect window** is a pane per subject, so the list
- * grows as the player opens them. Character dialogue will be another fixed one.
+ * grows as the player opens them, the **choice roll** stands while a question does, and **character
+ * dialogue** from the house's first dialogue on.
  */
 
 export interface Pane {
@@ -66,6 +67,12 @@ export interface Pane {
    * scrollbar. See decision record 0044.
    */
   needs: { wide: number; tall: number } | null;
+  /**
+   * The size its tile opens at in the spread, before the player has asked for any; opened out when absent,
+   * because a tile is the size its pane asked for rather than a share of anything. A pane whose tile opened
+   * out is half the stage says otherwise. A tile its panes take turns in has its own, on {@link SharedTile}.
+   */
+  startsAt?: PaneSize;
 }
 
 /**
@@ -198,17 +205,56 @@ export const CHOICE_PANE: Pane = {
   needs: { wide: 544, tall: 460 },
 };
 
+/**
+ * **Character dialogue**: the conversations the house has been offered, and the one being read.
+ *
+ * It stands from the first dialogue a house is offered, and is never closed after that, because the ones
+ * finished are kept to be read back. In the spread it takes the column down the right edge, which is
+ * wider than the one on the left so that a picture of where a conversation is happening fits at its top,
+ * and it opens at its normal width rather than at half the stage. On a phone it is a pane like any other.
+ * See `MECHANICS.md` and decision records 0071 and 0069.
+ */
+export const DIALOGUE_PANE: Pane = {
+  id: 'dialogues',
+  title: 'dialogues',
+  spread: 'right',
+  // The column's width is the layout's, as the left column's is, so the pane asks for no height of its own.
+  tall: null,
+  icon: 'speech',
+  needs: null,
+  startsAt: 'small',
+};
+
 /** In the order their tabs stand in the corner, which is the order they are declared in. */
 export const FIXED_PANES: readonly Pane[] = [MAP_PANE, HOUSE_PANE, KEY_FIGURES_PANE, NAVIGATION_PANE];
 
 /**
- * The panes that are not a window on a subject: the fixed four, and the choice roll while one is pending.
+ * Which of the panes that come and go are there: the choice roll while a question stands, and character
+ * dialogue once the house has been offered any.
+ */
+export interface Present {
+  readonly choice: boolean;
+  readonly dialogues: boolean;
+}
+
+/** What is present, read off what the gateway has heard. */
+export function presentIn(heard: Pick<GatewayState, 'yourChoice' | 'yourDialogues'>): Present {
+  return { choice: heard.yourChoice !== null, dialogues: (heard.yourDialogues?.length ?? 0) > 0 };
+}
+
+/**
+ * The panes that are not a window on a subject: the fixed four, the choice roll while one is pending, and
+ * character dialogue once there is any.
  *
  * What **navigation** lists under *Go to*, and what the layout places besides the rail. A window is not
  * here because a window is in the **trail** instead, under its own name rather than as "a house".
  */
-export function standingPanes(pending: boolean): readonly Pane[] {
-  return pending ? [...FIXED_PANES, CHOICE_PANE] : FIXED_PANES;
+export function standingPanes(present: Present): readonly Pane[] {
+  return [
+    ...FIXED_PANES,
+    ...(present.choice ? [CHOICE_PANE] : []),
+    ...(present.dialogues ? [DIALOGUE_PANE] : []),
+  ];
 }
 
 /**
@@ -287,11 +333,23 @@ export function spreadWants(panes: readonly Pane[], asked: Asked): SpreadWants {
       : null;
   };
 
+  // How the column down the right edge is asked to be. Its widths are the layout's, so what it is asked
+  // for is which of its three sizes, and the layout says what half of this stage is.
+  const rightOf = (): RightWants | null => {
+    const first = panesIn(panes, 'right')[0];
+    if (first === undefined) {
+      return null;
+    }
+    const size = sizeAsked(first, asked);
+    return size === 'strip' ? 'strip' : size === 'full' ? 'half' : 'normal';
+  };
+
   return {
     left: panes.some((pane) => pane.spread === 'left'),
     bottomLeft: tallOf('bottomLeft'),
     bottomLeftWide: cornerWide(),
     bottomMiddle: tallOf('bottomMiddle'),
+    right: rightOf(),
   };
 }
 
@@ -306,8 +364,9 @@ export interface Asked {
 
 /**
  * The size a pane was asked to be in the spread: its tile's, if it takes turns in one with others, and
- * otherwise its own - what the player asked for, or full until they have, because a tile is the size its
- * pane asked for rather than a share of a stage it is dividing with somebody.
+ * otherwise its own - what the player asked for, or what it opens at until they have, which is full unless
+ * the pane says otherwise, because a tile is the size its pane asked for rather than a share of a stage it
+ * is dividing with somebody.
  *
  * One function, because the layout sizes the tile from it and the control marks it, and the two
  * disagreeing is a mark on a size the tile is not.
@@ -315,7 +374,7 @@ export interface Asked {
 export function sizeAsked(pane: Pane, asked: Asked): PaneSize {
   const tile = SHARED_TILES[pane.spread];
   return tile === undefined
-    ? (asked.heights[pane.id] ?? 'full')
+    ? (asked.heights[pane.id] ?? pane.startsAt ?? 'full')
     : (asked.tiles[pane.spread] ?? tile.startsAt);
 }
 
@@ -325,13 +384,13 @@ export function sizeAsked(pane: Pane, asked: Asked): PaneSize {
  * Takes the subjects rather than reading them, so that it is pure and a component can memoise it against
  * exactly what it depends on.
  */
-export function panesFor(open: readonly Subject[], pending: boolean): readonly Pane[] {
-  return [...standingPanes(pending), ...open.map(inspectPane)];
+export function panesFor(open: readonly Subject[], present: Present): readonly Pane[] {
+  return [...standingPanes(present), ...open.map(inspectPane)];
 }
 
 /** The same, for callers outside a render, which read the two stores themselves. */
 export function panesNow(): readonly Pane[] {
-  return panesFor(subjectsNow().open, gatewayState().yourChoice !== null);
+  return panesFor(subjectsNow().open, presentIn(gatewayState()));
 }
 
 export function paneById(id: string): Pane | undefined {

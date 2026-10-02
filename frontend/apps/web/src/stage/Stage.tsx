@@ -26,6 +26,7 @@ import {
   panesFor,
   panesIn,
   type PaneSize,
+  presentIn,
   type Room,
   sizeAsked,
   sizeOf,
@@ -79,10 +80,11 @@ export function Stage({ stage, contents, overlays }: StageProps) {
   const bays = useSyncExternalStore(watchBays, baysNow);
   const asking = useSyncExternalStore(watchBays, askingNow);
   const subjects = useSyncExternalStore(watchSubjects, subjectsNow);
-  // The one thing the layout asks the world: whether there is a choice pending, because the choice roll is
-  // the one pane that comes and goes, and an empty tile takes no room.
-  const pending = useSyncExternalStore(watchGateway, gatewayState).yourChoice !== null;
-  const panes = useMemo(() => panesFor(subjects.open, pending), [subjects.open, pending]);
+  // The one thing the layout asks the world: which of the panes that come and go are there, because an
+  // empty tile takes no room. The choice roll while a question stands, and dialogue once there is any.
+  const { choice, dialogues } = presentIn(useSyncExternalStore(watchGateway, gatewayState));
+  const present = useMemo(() => ({ choice, dialogues }), [choice, dialogues]);
+  const panes = useMemo(() => panesFor(subjects.open, present), [subjects.open, present]);
   // Not told which tab is up, which is what makes pressing one move nothing. See decision record 0057.
   const wants = useMemo(() => spreadWants(panes, bays), [panes, bays]);
 
@@ -210,7 +212,7 @@ export function Stage({ stage, contents, overlays }: StageProps) {
       data-along={box.along}
       style={{ '--bay-first': seam } as CSSProperties}
     >
-      {standingPanes(pending).map((pane) => bayFor(pane.id))}
+      {standingPanes(present).map((pane) => bayFor(pane.id))}
 
       {/*
        * The rail: where inspect windows stack in the spread, up to three, newest at the top.

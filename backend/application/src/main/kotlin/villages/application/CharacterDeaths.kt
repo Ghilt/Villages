@@ -10,7 +10,7 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * What carries a death across: when a character dies, every house that held them as a key figure loses them.
+ * The listener for character deaths: when a character dies, every house that held them as a key figure loses them.
  *
  * The death is on the character's stream and the losses belong on the houses', and no one decision can
  * write both, so a reaction carries it, on the pattern of the pledge release. It follows the feed from the
@@ -30,7 +30,7 @@ import java.util.concurrent.ConcurrentHashMap
  * No successor rises when a house loses its last key figure. The setting says somebody does; that waits for
  * a mechanic of its own.
  */
-class Mourning(
+class CharacterDeaths(
     feed: EventFeed,
     private val later: Later,
     private val keyFigures: KeyFigureService,
@@ -45,14 +45,14 @@ class Mourning(
             is CharacterDied -> {
                 deaths[event.characterId] = stored
                 holders[event.characterId].orEmpty().toList().forEach { house ->
-                    mourn(house, event.characterId, because = stored, death = stored)
+                    writeLoss(house, event.characterId, because = stored, death = stored)
                 }
             }
 
             is HouseGainedKeyFigure -> {
                 holders.getOrPut(event.characterId) { ConcurrentHashMap.newKeySet() } += event.houseId
                 deaths[event.characterId]?.let { death ->
-                    mourn(event.houseId, event.characterId, because = stored, death = death)
+                    writeLoss(event.houseId, event.characterId, because = stored, death = death)
                 }
             }
 
@@ -62,7 +62,7 @@ class Mourning(
         }
     }
 
-    private fun mourn(house: HouseId, character: CharacterId, because: StoredEvent, death: StoredEvent) {
+    private fun writeLoss(house: HouseId, character: CharacterId, because: StoredEvent, death: StoredEvent) {
         val provenance = Provenance(
             commandId = UUID.fromString(because.id),
             correlationId = runCatching { UUID.fromString(death.correlationId) }.getOrDefault(UUID.fromString(death.id)),

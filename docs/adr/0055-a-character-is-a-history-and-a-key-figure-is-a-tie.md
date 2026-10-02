@@ -4,6 +4,11 @@
 - Date: 2026-09-24
 - Amends what `ARCHITECTURE.md`, `SETTING.md` and `BUILDING-A-MECHANIC.md` said a key figure would be: an
   aggregate of its own. The person is the aggregate; being a key figure is not.
+- Amended 2026-09-27: the reaction that carries a death into the houses is **the listener for character
+  deaths**, `CharacterDeaths` in the code, on Adam's word. It is a technical listener and takes a plain
+  name, named for what it hears, a character dying, because being a key figure is only a state that
+  character is in. The name it was accepted under has left the documents and the code; what it does did
+  not change.
 
 ## Context
 
@@ -78,12 +83,12 @@ neither needs a port for reading a house.
 **Adding a key figure** asks for room, then the character appears, then the house takes them in, all in the
 command's story, so the chronicle reads in the order it happened.
 
-**The mourning.** A death is on the character's stream and the losses belong on the houses', so a reaction
-carries it across. `Mourning` follows the feed on the pattern of the pledge release: on a death it writes
-the loss into every house holding them, in the death's own story, and on a tie made to someone already dead
-it does the same, so either order of arrival heals. Refusals are swallowed, so a replay writes nothing
-twice. **No successor rises.** The setting says "if every key figure dies, someone rises to the task"; that
-is deferred, and `MECHANICS.md` says so.
+**The listener for character deaths.** A death is on the character's stream and the losses belong on the
+houses', so a reaction carries it across. `CharacterDeaths` follows the feed on the pattern of the pledge
+release: on a death it writes the loss into every house holding them, in the death's own story, and on a
+tie made to someone already dead it does the same, so either order of arrival heals. Refusals are
+swallowed, so a replay writes nothing twice. **No successor rises.** The setting says "if every key figure
+dies, someone rises to the task"; that is deferred, and `MECHANICS.md` says so.
 
 **On the map only when placed.** A character is on no map until moved onto one. `moved` carries a place and
 a significance and never a cell (0026). The significance is the character's own, because how far out a

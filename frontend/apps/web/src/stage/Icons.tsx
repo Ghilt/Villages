@@ -48,8 +48,31 @@ const NINE = [4.5, 10.25, 16].flatMap((y) => [4.5, 10.25, 16].map((x) => ({ x, y
  */
 const FENCE = 'M4 8 H9 V4 H20 V14 H16 V20 H4 Z';
 
+/**
+ * Character dialogue: a speech bubble, its tail down to the left where somebody is speaking from. One
+ * bubble and not two, because two at the size of a mark are one blot. A placeholder, like the bust.
+ */
+const SPEECH =
+  'M5 4.5 H19 A2 2 0 0 1 21 6.5 V14 A2 2 0 0 1 19 16 H10.5 L6 20 V16 H5 A2 2 0 0 1 3 14 V6.5 A2 2 0 0 1 5 4.5 Z';
+
+/**
+ * The way back from a conversation to all of them, drawn as the list it goes back to - three rows, each with
+ * its point - as the way back from one key figure is drawn as the grid it goes back to. Adam's call: a mark.
+ */
+const LIST = { rows: 'M9.5 7 H19.5 M9.5 12 H19.5 M9.5 17 H19.5', points: [7, 12, 17] } as const;
+
 export type IconName =
-  'shield' | 'compass' | 'map' | 'window' | 'letter' | 'close' | 'figure' | 'nine' | 'area';
+  | 'shield'
+  | 'compass'
+  | 'map'
+  | 'window'
+  | 'letter'
+  | 'close'
+  | 'figure'
+  | 'nine'
+  | 'area'
+  | 'speech'
+  | 'list';
 
 /** Which way a needle points. The four are one drawing turned, never four drawings. */
 export type Point = 'up' | 'down' | 'left' | 'right';
@@ -90,6 +113,15 @@ export function Icon({ name, title }: IconProps) {
       {title !== undefined && <title>{title}</title>}
       {name === 'shield' && <path d={SHIELD} className="icon__line" />}
       {name === 'area' && <path d={FENCE} className="icon__line" />}
+      {name === 'speech' && <path d={SPEECH} className="icon__line" />}
+      {name === 'list' && (
+        <>
+          <path d={LIST.rows} className="icon__line" />
+          {LIST.points.map((y) => (
+            <circle key={y} cx="5.5" cy={y} r="1.4" className="icon__fill" />
+          ))}
+        </>
+      )}
       {name === 'nine' &&
         NINE.map(({ x, y }) => (
           <rect key={`${x},${y}`} x={x} y={y} width="3.5" height="3.5" rx="0.5" className="icon__fill" />

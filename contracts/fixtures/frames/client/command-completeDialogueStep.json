@@ -1,0 +1,9 @@
+{
+  "type": "command",
+  "commandId": "1c000007-0000-4000-8000-000000000041",
+  "command": {
+    "type": "completeDialogueStep",
+    "dialogueId": "dd000000-0000-4000-8000-00000000a001",
+    "lineId": "accept"
+  }
+}

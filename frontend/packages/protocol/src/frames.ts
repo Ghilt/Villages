@@ -161,9 +161,14 @@ export const visionPointViewSchema = z.object({
   until: worldDaySchema.optional(),
 });
 
-/** What taking an option would do. `kind` names the case, as it does in the store. See 0034. */
+/**
+ * What taking an option would do. `kind` names the case, as it does in the store. See 0034. A `grant` is
+ * some of a resource given, and a `spend` some taken: what an option can cost, in a choice or a dialogue. See 0071.
+ */
 export const effectViewSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('foundAt'), seat: pointSchema, name: z.string(), banner: bannerSchema }),
+  z.object({ kind: z.literal('grant'), resource: resourceNameSchema, amount: z.number().int().positive() }),
+  z.object({ kind: z.literal('spend'), resource: resourceNameSchema, amount: z.number().int().positive() }),
 ]);
 
 export const optionViewSchema = z.object({
@@ -171,6 +176,75 @@ export const optionViewSchema = z.object({
   label: z.string(),
   detail: z.string(),
   effect: effectViewSchema,
+});
+
+/** Something a dialogue needs to stay true. `kind` names the case: `alive`, a character by id. See 0071. */
+export const requirementViewSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('alive'), character: z.string() }),
+]);
+
+/** How a dialogue stands: open, finished, or lost because one of its requirements failed. */
+export const endingViewSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('open') }),
+  z.object({ kind: z.literal('completed') }),
+  z.object({ kind: z.literal('lost'), because: requirementViewSchema }),
+]);
+
+/** Who speaks in a dialogue: the party says which side, and nothing about a screen. */
+export const speakerViewSchema = z.object({
+  id: z.string(),
+  party: z.number().int(),
+  name: z.string(),
+  portrait: z.string().optional(),
+  character: z.string().optional(),
+});
+
+/** Some of one resource, gained or, below nothing, lost. */
+export const impactViewSchema = z.object({ resource: resourceNameSchema, amount: z.number().int() });
+
+/**
+ * How an option shows what taking it will do, as whoever wrote it chose: `shown`, with what, or `hidden`,
+ * drawn as unknown. An option without one shows nothing until it is done. See decision record 0071.
+ */
+export const revealImpactViewSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('shown'), impacts: z.array(impactViewSchema).min(1) }),
+  z.object({ kind: z.literal('hidden') }),
+]);
+
+/**
+ * A line still to be read, or an option to pick: who says it and the words, and nothing about what it will do
+ * but, on an option, its reveal impact.
+ */
+export const lineViewSchema = z.object({
+  id: z.string(),
+  speaker: z.string(),
+  words: z.string(),
+  revealImpact: revealImpactViewSchema.optional(),
+});
+
+/** A line said, with what saying it did to the house: what it gave, and what it took. */
+export const saidLineViewSchema = z.object({
+  id: z.string(),
+  speaker: z.string(),
+  words: z.string(),
+  effects: z.array(effectViewSchema),
+});
+
+/**
+ * One dialogue as the player may know it. `revision` rises with every change to it. `next` ends in the step
+ * to send when there are no `options`, and in the line the dialogue choice follows when there are. Nothing
+ * past it is ever sent, and no requirement: a player learns of one only when it fails. See decision record 0071.
+ */
+export const dialogueViewSchema = z.object({
+  id: z.string(),
+  revision: z.number().int(),
+  title: z.string(),
+  scene: z.string().optional(),
+  speakers: z.array(speakerViewSchema),
+  said: z.array(saidLineViewSchema),
+  next: z.array(lineViewSchema),
+  options: z.array(lineViewSchema),
+  ending: endingViewSchema,
 });
 
 /**
@@ -240,6 +314,17 @@ export const commandPayloadSchema = z.discriminatedUnion('type', [
    */
   z.object({ type: z.literal('giveVision'), place: pointSchema }),
   z.object({ type: z.literal('takeVision'), visionId: z.string() }),
+  /**
+   * A sample dialogue, by its name, spoken by the house's first key figure: the name and none of the words,
+   * because a client that could write a dialogue could write itself a reward. Adam's lever. See 0071.
+   */
+  z.object({ type: z.literal('offerDialogue'), sample: z.string() }),
+  /**
+   * A step through one of the house's dialogues: the line that is the step, by its id within the dialogue - an
+   * option of a dialogue choice, or the line the stretch read ends on. Whether it is the next step is the
+   * house's to say, so the client names a line and nothing else. See decision record 0071.
+   */
+  z.object({ type: z.literal('completeDialogueStep'), dialogueId: z.string(), lineId: z.string() }),
 ]);
 
 export const clientFrameSchema = z.discriminatedUnion('type', [
@@ -309,6 +394,11 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
     points: z.array(visionPointViewSchema),
     tension: z.number().nonnegative(),
   }),
+  /**
+   * The player's dialogues, open and finished, in the order the house was offered them. Always a list, sent
+   * after `yourSight` on hello and again whenever one changes, holding back what has not been reached. See 0071.
+   */
+  z.object({ type: z.literal('yourDialogues'), dialogues: z.array(dialogueViewSchema) }),
   /** Another window took this player over; this session is finished. */
   z.object({ type: z.literal('takenOver'), message: z.string() }),
   /** The world was emptied and this session is finished with it. Everyone is told. See 0036. */
@@ -365,6 +455,14 @@ export type HouseView = z.infer<typeof houseViewSchema>;
 export type EffectView = z.infer<typeof effectViewSchema>;
 export type OptionView = z.infer<typeof optionViewSchema>;
 export type ChoiceView = z.infer<typeof choiceViewSchema>;
+export type RequirementView = z.infer<typeof requirementViewSchema>;
+export type EndingView = z.infer<typeof endingViewSchema>;
+export type SpeakerView = z.infer<typeof speakerViewSchema>;
+export type ImpactView = z.infer<typeof impactViewSchema>;
+export type RevealImpactView = z.infer<typeof revealImpactViewSchema>;
+export type LineView = z.infer<typeof lineViewSchema>;
+export type SaidLineView = z.infer<typeof saidLineViewSchema>;
+export type DialogueView = z.infer<typeof dialogueViewSchema>;
 export type StatName = z.infer<typeof statNameSchema>;
 export type Sex = z.infer<typeof sexSchema>;
 export type HolderView = z.infer<typeof holderViewSchema>;

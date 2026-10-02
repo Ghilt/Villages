@@ -6,6 +6,8 @@ import type { CharacterOnMapView, ChoiceView, HouseView } from '@villages/protoc
 
 import { AreaOverlay } from './areas/AreaOverlay';
 import { Choosing } from './choice/Choosing';
+import { Dialogues } from './dialogues/Dialogues';
+import { openOnArrival } from './dialogues/opening';
 import { DebugPanel } from './debug/DebugPanel';
 import { Desk } from './desk/Desk';
 import { Grips } from './debug/Grips';
@@ -18,6 +20,7 @@ import { Navigating } from './inspect/Navigating';
 import { subjectOfPane } from './inspect/subjects';
 import { gateway, gatewayState, watchGateway } from './net/gateway';
 import { followMap } from './net/followMap';
+import { arriving } from './house/arrival';
 import { eyeIsOpen, watchEye } from './house/eye';
 import { HouseStatus } from './house/HouseStatus';
 import { KeyFigures } from './figures/KeyFigures';
@@ -29,7 +32,14 @@ import { MapView } from './map/MapView';
 import { Room } from './room/Room';
 import { Stage } from './stage/Stage';
 import { formNow, roomToRead, takeOver, theMapsBay } from './stage/bays';
-import { CHOICE_PANE, HOUSE_PANE, KEY_FIGURES_PANE, MAP_PANE, NAVIGATION_PANE } from './stage/panes';
+import {
+  CHOICE_PANE,
+  DIALOGUE_PANE,
+  HOUSE_PANE,
+  KEY_FIGURES_PANE,
+  MAP_PANE,
+  NAVIGATION_PANE,
+} from './stage/panes';
 import { worldRootOf } from './map/masters';
 import { cameraNow, watchCamera } from './debug/camera';
 import { DEFAULT_RENDERER, RENDERERS, applyRenderer } from './map/renderers';
@@ -172,18 +182,17 @@ export function App({ master }: AppProps) {
   // The gateway follows the camera: the cells covering the view, at the view's own zoom.
   useEffect(() => (map === null ? undefined : followMap(map)), [map]);
 
-  // When the house comes to be, the camera goes to it. It is the one moment in the whole world so far
-  // that is worth being taken to, and the seat was chosen from a parchment rather than from the map.
-  const seat = heard.yourHouse?.house.seat;
-  const mine = heard.yourHouse?.house.id;
+  // When the house arrives, the camera goes to it and its window opens: founded a moment ago, or standing
+  // when the page loads, and never because it was sent again, which it is whenever anything in it changes.
+  // Asked once the map is there, so a house heard before the map was ready still arrives. See `arrival.ts`.
   useEffect(() => {
-    if (map !== null && seat !== undefined && mine !== undefined) {
+    if (map !== null && yours !== null && arriving(yours)) {
+      const { seat } = yours;
       note('camera', `flying to the seat at ${seat.lat.toFixed(3)}, ${seat.lon.toFixed(3)}`);
       map.flyTo({ center: [seat.lon, seat.lat], zoom: Math.max(map.getZoom(), FOUNDING_ZOOM) });
-      // Arriving at your own house with a window already open on it: that is what the flight is for.
-      inspect({ kind: 'house', id: mine });
+      inspect({ kind: 'house', id: yours.id });
     }
-  }, [map, seat, mine]);
+  }, [map, yours]);
 
   /*
    * A question arriving takes the big bay, and the small one keeps whatever was in it.
@@ -202,6 +211,18 @@ export function App({ master }: AppProps) {
       roomToRead(bay);
     }
   }, [asking]);
+
+  /*
+   * A dialogue arriving opens the pane: from its strip in the spread, and on a phone into the bay that is
+   * not the map's, as a window does, because the map is where the player was looking. What has arrived is
+   * the opening's to say: a dialogue waiting that this page has not been shown before. See `MECHANICS.md`.
+   */
+  const offered = heard.yourDialogues;
+  useEffect(() => {
+    if (offered !== null) {
+      openOnArrival(offered);
+    }
+  }, [offered]);
 
   useEffect(() => {
     if (map !== null) {
@@ -286,6 +307,9 @@ export function App({ master }: AppProps) {
           }
           if (id === CHOICE_PANE.id) {
             return <Choosing room={room} />;
+          }
+          if (id === DIALOGUE_PANE.id) {
+            return <Dialogues room={room} />;
           }
           const subject = subjectOfPane(id);
           return subject === null ? null : <Inspecting subject={subject} room={room} along={along} />;

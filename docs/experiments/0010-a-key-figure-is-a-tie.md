@@ -17,9 +17,9 @@ machinery the first one runs on.
 ## Setup
 
 The groundwork in `docs/plans/characters-and-key-figures.md`, shaped by decision record 0055: characters as
-streams of their own, the tie in the house's history, the mourning to carry a death across, and the key
-figures pane in the corner. No mechanic gives a house a key figure. The debug panel's Characters section
-does, and it is the only way to make one.
+streams of their own, the tie in the house's history, the listener for character deaths to carry a death
+across, and the key figures pane in the corner. No mechanic gives a house a key figure. The debug panel's
+Characters section does, and it is the only way to make one.
 
 As little as possible: no succession, no old age, no key figures from choices, no second tie of any kind.
 
@@ -31,7 +31,8 @@ As little as possible: no succession, no old age, no key figures from choices, n
   stack beside the house's.
 - Whether the nine and acting through are decided against the house's own stream alone, without reading the
   character's.
-- Whether the mourning stays the only thing that carries a character's history into a house's.
+- Whether the listener for character deaths stays the only thing that carries a character's history into a
+  house's.
 - Whether two houses tied to one character, and a death reaching both, pass as tests without either house
   knowing the other exists.
 
@@ -57,10 +58,10 @@ matters here because at a month a real day a key figure ages a year every twelve
 - **The nine and acting through are decided on the house's stream alone.** `TooManyKeyFigures`,
   `ActThrough` and the room check read the house's own ties and never the character's record, and a lever
   on somebody else's key figure is refused before the character's stream is touched.
-- **The mourning is the only thing that writes a character's history into a house's.** The characters
-  projection reads both kinds of stream, and writes nothing.
-- **Two houses tied to one person, and a death reaching both, pass as tests** (the mourning's and the
-  projection's specs) without either house's history mentioning the other.
+- **The listener for character deaths is the only thing that writes a character's history into a house's.**
+  The characters projection reads both kinds of stream, and writes nothing.
+- **Two houses tied to one person, and a death reaching both, pass as tests** (the specs of the listener
+  for character deaths and of the projection) without either house's history mentioning the other.
 
 No field appeared on the character that only a key figure uses. What a key figure has that a character
 does not - the stats on the owner's view - is a view, not the record. Two things bent. A character is the

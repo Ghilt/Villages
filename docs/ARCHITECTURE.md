@@ -100,6 +100,12 @@ Increment 0.7 compiled and ran the plan's riskiest assumption, on Occurrent 0.33
   `villages.house.founded.v1` rather than a class name.
 - Occurrent pins `jackson-databind` 3.1.4 and Spring Boot 4.1.1 manages 3.1.5; Gradle resolves to 3.1.5 and
   the round trip works on it. CloudEvents is 4.0.1. The in-memory store is `InMemoryEventStore()`.
+- The in-memory subscription model's `cancelSubscription` forgets a subscription without stopping it: its thread
+  polls for as long as the process runs, and the model's `shutdown()` waits five seconds for it and gives up.
+  Occurrent's master stops the subscription on cancel, and no release has that yet. Until one does,
+  `InMemoryWorld` stops a cancelled subscription itself and wakes the threads when it shuts down, so a world
+  closes at once, the server stops without the wait, and no test that closes a world waits five seconds for it.
+  Both go when a release has the fix.
 
 ## How a change travels
 
@@ -226,7 +232,7 @@ drift, and stops asking the moment there is none.
 
 ## What acts on its own
 
-Two things in the program act without anybody sending a command, and they keep the same rules: one
+Three things in the program act without anybody sending a command, and they keep the same rules: one
 subscription to the feed from the beginning, with a fold of their own rather than a read of a read model,
 because two subscriptions can stand at different points in the feed; commands issued through `Later`,
 never inside the feed's own callback; no cancellation table; and every refusal that means "already done"
@@ -234,10 +240,15 @@ swallowed, which is what makes a replay write nothing twice.
 
 - **The pledge release**, `Pledges`, waits out a pledge's span and gives it back: one wake-up a pledge, at
   the moment it is due, and none without one. See decision record 0053.
-- **The mourning**, `Mourning`, writes a character's death into every house that held them as a key
-  figure, in the death's own story, and undoes a tie made to somebody already dead. It is how a death on a
-  character's stream reaches the houses' streams, which no one decision can write together. See decision
-  record 0055.
+- **The listener for character deaths**, `CharacterDeaths`, writes a character's death into every house
+  that held them as a key figure, in the death's own story, and undoes a tie made to somebody already dead.
+  It is how a death on a character's stream reaches the houses' streams, which no one decision can write
+  together. See decision record 0055.
+- **The listener for broken requirements**, `BrokenRequirements`, asks the domain which requirements each
+  event breaks - `requirementsBrokenBy`, handed in, so it knows no kinds - and sends `FailRequirement` to
+  every house with an open dialogue that needs one, in the story of the event that broke it; a dialogue
+  offered with a requirement already broken lapses at once. What a failure ends is the house's own rule. A
+  death is heard by both listeners, each for its own concern. See decision record 0071.
 
 ## Scale principles
 
@@ -299,36 +310,44 @@ and piety, one `Stock` apiece - and every rate among them is zero, because nothi
 income yet. The shape is carried anyway so that income, when it arrives, is a number changing rather than a
 frame changing. See `SETTING.md` and `GLOSSARY.md` for what each of the five is.
 
-## What showing a dialogue asks of the client
+## What a dialogue asks of the server and the client
 
-Nothing of this is built. `MECHANICS.md` describes **character dialogue**; what follows is what it would
-cost the client, recorded before anything is written so that the first increment starts from it.
+`MECHANICS.md` describes **character dialogue**, decision record 0071 decides its shape, and
+`docs/plans/character-dialogue.md` is the order it is built in; what follows is what it costs the program.
+The server's half is built, the pane stands in its column, and a dialogue is read and played in it.
 
-**Where it would be drawn is an open choice, and it matters.** PixiJS is in exactly one file today,
-`sprites/PixiSpriteRenderer.ts`, and it draws the map overlay behind the `SpriteRenderer` interface. Every
-other piece of interface, the parchment included, is React and the DOM. A dialogue is interface rather than
-map, so the DOM is where it would naturally go — but the mechanic exists for its feel, and characters that
-enter, leave and react are what Pixi is for. The two routes:
+**The server walks a dialogue, and holds back what has not been reached.** A dialogue is offered whole on the
+house's stream, and where it has got to is one pure function in the domain, the walk, `Dialogue.walk`: what
+has been said, the stretch still to read up to the next step the history records, and the options pending.
+The decider accepts a step only where the walk says there is one, and the gateway builds what the player is
+sent from the same walk - what was said and the stretch ahead, never the lines past it and never the
+requirements. It is the fog's rule (0061) applied to a conversation, and for the same reason: the setting's
+secret is meant to come out through dialogue, and a dialogue handed to the browser whole can be read ahead.
+A step continues the offer's story, which the gateway reads from the read model as it reads a choice's for
+an action; and the step on the line that ends a dialogue and the end itself are told to the page together,
+because between the two events of that one decision the dialogue is open with nothing left in it.
 
-- **DOM and CSS.** Simplest, responsive for free, animation limited to what CSS transitions and transforms
-  give. Nothing new in the stack.
-- **A Pixi surface inside the panel.** Sprite sheets, tweens and per-character animation, at the cost of
-  another WebGL surface beside the map's and a layout that has to be driven rather than declared.
-
-Whichever is picked gets a decision record, because it is hard to reverse once a dozen conversations are
-written against it.
-
-**The stepping belongs in `client-core`, not in the page.** Which line is current, who is speaking, what a
-step does and when an opportunity opens mid-conversation is logic with no DOM in it, so it sits in
+**What is left to `client-core` is the reading.** Which line of the stretch is showing, who is speaking, and
+when a press has to be sent as a step rather than simply shown, is logic with no DOM in it, so it sits in
 `packages/client-core` behind the layer rule and is tested without a browser. `apps/web` draws what that
-logic says. A dialogue that keeps its state in a React component is a dialogue that can only be tested by
-clicking through it.
+logic says. It keeps its place while what it reads is unchanged, and reads the stretch again from its start
+after a reload. A dialogue that keeps its state in a React component is a dialogue that can only be tested by
+clicking through it. It is the **reading place**, `reading.ts` in `client-core`: what shows at a place, what
+pressing *continue* does there - another line, or the step the stretch ends in - and when an option can be
+taken, with nothing to press while a step is out; the pane holds the place as state and draws what it says.
 
-**It is responsive from the first line of it.** On a phone a dialogue is the screen; on a desktop it is a
-region of it. See `RESPONSIVE-DESIGN.md`.
+**It is drawn in the page, not in Pixi.** PixiJS is only in `sprites/`, where it draws the map's overlay
+behind the `SpriteRenderer` interface: the sprites, the scenery and the fog. Every other piece of interface,
+the parchment included, is React and the DOM, and a dialogue is interface rather than map. What Adam has
+described - a scene, a feed of bubbles, a list - is the shape of a document, and the movement in it is fades
+and transforms, which CSS does; a Pixi surface in the pane would have been a second WebGL context, a layout
+driven by hand at every size, and text drawn into a canvas. Decision record 0070, written before the pane
+was drawn, because it is hard to reverse once a dozen conversations are written against it.
 
-What the server owes a dialogue is undecided, because whether the lines themselves are events is undecided;
-`MECHANICS.md` says so under the mechanic.
+**It is responsive from the first line of it**, and a pane like any other: on a desktop it takes a column
+down the right of the stage, the `right` tile, which is cut last from what the other tiles leave (0069), and
+on a phone it takes a bay and can be opened out. See `RESPONSIVE-DESIGN.md`, and the mechanic's UI in
+`MECHANICS.md`.
 
 ## What the bays ask of the client
 

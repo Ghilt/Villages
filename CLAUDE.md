@@ -13,6 +13,9 @@ thousands of concurrent players in one shared world.
 - One commit per increment. Conventional Commits with these scopes: `domain`, `application`, `occurrent`, `rabbit`,
   `projections`, `gateway`, `protocol`, `web`, `client-core`, `docs`, `infra`, `build`. End every commit message with
   the `Co-Authored-By` trailer.
+- **"Looks good, continue" is the word too**, and so is "good, continue": Adam's standing answer of
+  2026-10-01. Either means commit the change set he has just reviewed, then go on to the next step. Anything
+  else without "commit" - "looks good" alone, a question - is not approval.
 - **His word is the whole of the approval, and it is given once.** When Adam says commit, commit: do not ask
   again, do not restate the change set for a second confirmation, and do not wait for anything else. Saying it
   twice is not a safeguard, it is a tax, and the safeguard is that nothing is committed until he has said it at
@@ -132,6 +135,10 @@ offer of next steps: those go above it, because the checklist is what he reads f
 **Three at most, whatever the size of the commit.** It is there to refresh a memory, not to enumerate a
 diff. A checklist with one item a changed file is a checklist nobody reads, and a twenty-line change and a
 two-hundred-line one get the same three items, picked for what would be embarrassing to have got wrong.
+
+**Number the items, 1 to 3, so Adam can answer one by its number.** A question put to him is an item like
+any other, and "2" is only an answer when there is a 2 to point at. Write them as a numbered list - `1.`,
+`2.`, `3.` - with the eye inside the item, never as unnumbered checkboxes.
 
 **Mark with an eye, 👀, every item he can check by looking at the running program**, and say in the item
 where to look - which pane, which button, what should be there. An unmarked item is one he has to take on
@@ -336,7 +343,7 @@ Commands are added here as the increments land:
   writes to `.logs/backend.log`; see decision record 0029. So a change that wants to be seen there says
   so with `note(area, message)` rather than by adding a row. **Everything in it is in a folding section,
   and a step that puts something there says which section - and asks when that is not obvious from what
-  Adam said, rather than picking one.** Today they are Worktrees, Debug map, Scenery, Camera, Areas, World, Resources and Characters.
+  Adam said, rather than picking one.** Today they are Worktrees, Debug map, Scenery, Camera, Areas, World, Resources, Characters and Dialogues.
   **The log is not a section but a column of its own**, the whole height of the panel on its outer side,
   so what a button did is in view while the button is. It begins folded: the `log` toggle in the panel's
   header, beside `landscape`, opens it and `hide` in its own bar folds it away again. The events themselves are not in the
@@ -392,6 +399,26 @@ Commands are added here as the increments land:
   map` and `kill`, every one a real command: the asking and the answer are lines of the log under
   `characters`, and what changed is a third; a move is a fourth, under `cells`, naming who arrived. The stat levers stay pressable at one and at twenty, so a
   refusal is seen rather than guessed. The events are at `/admin/inspect-events`. See `docs/adr/0055`.
+- Dialogues, in the same panel: the **Dialogues** section, below Characters. `offer a dialogue` offers the
+  house the server's sample, a letter from the coast spoken by the house's first key figure and a
+  messenger, ending in a dialogue choice of three: *accept* spends forty wealth and is paid a hundred,
+  *ask* is paid in influence, and *refuse* does nothing, each option showing what it will do a different
+  way - whole, hidden, or not at all. It is off, saying why on hover, while the house has no key figure.
+  **That one lever is all the debug panel does for dialogues**, Adam's word on 2026-10-01: it stands in for
+  the world, which offers none yet, and reading, answering and seeing how one ended are the player's, in the
+  pane - never levers in the panel. The first option costs forty wealth, which the Resources section's `give`
+  puts there, and `kill` on the speaker in Characters loses every open dialogue they speak in. The page names
+  the sample and sends none of its words, and a requirement is never sent to a page. The asking and the
+  answer are lines of the log under `dialogues`, and so is where each dialogue stands whenever one changes,
+  as far as the player may know it; the dialogue itself, whole, is at `/admin/inspect-events`. In the game,
+  the house's first dialogue puts up the **dialogues** pane, a column down the right of the spread with its
+  three sizes, and a pane navigation lists on a phone; it lists the dialogues waiting and finished, a lapsed
+  one saying why, and pressing one opens it to be read and played: *continue*, a word in the middle of its
+  foot, shows a line at a time and takes the step past the last, the options are at the end of the feed, and
+  the list mark goes back. What a line gave or cost is written under it, a lapsed one ends on its closing
+  line, and an option the house cannot pay for says so under the options. `offer a dialogue` opens the pane:
+  from its strip in the spread, and on a phone into the bay the map is not in, at half. See `docs/adr/0071`,
+  `0069` and `0070`, and `docs/plans/character-dialogue.md`.
 - What grows where: `world/biomes.json`, hand-edited, one entry a kind and one a biome. What reads it is
   `npm run world:sprites --prefix frontend`, which works out a biome for every sixteen world units and
   where the scenery clumps, and writes a **sprite map**: the biomes beside the cut tiles, the stands into
@@ -480,8 +507,11 @@ Commands are added here as the increments land:
   nothing survives a restart, on purpose.
 - Backend, checks: `cd backend` then `./gradlew check`. Gradle fetches the JDK 21 the toolchain asks for, so
   `JAVA_HOME` may stay on the Temurin 17 that is installed; the first run downloads it. Every module's
-  `build.gradle.kts` declares only its allowed dependency edges, and `buildSrc` holds the one convention
-  they share. Versions live in `backend/gradle/libs.versions.toml`.
+  `build.gradle.kts` declares only its allowed dependency edges and, with `testsRead`, the files outside
+  it that its tests read, and `check` fails when one is missing; `buildSrc` holds the one convention they
+  share. Versions live in `backend/gradle/libs.versions.toml`. Modules that do not depend on each other
+  build and test side by side (`backend/gradle.properties`), so their output interleaves; `--no-parallel`
+  runs them one at a time.
 
 The two below do not exist yet. They arrive with the increments named, and `infra/` and `scripts/` in the
 layout above are where they will go rather than where they are.

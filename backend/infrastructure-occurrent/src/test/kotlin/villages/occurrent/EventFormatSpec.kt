@@ -2,6 +2,8 @@ package villages.occurrent
 
 import io.kotest.assertions.withClue
 import io.kotest.core.spec.style.StringSpec
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldMatch
@@ -19,6 +21,8 @@ import villages.domain.CharacterStatChanged
 import villages.domain.Charge
 import villages.domain.Choice
 import villages.domain.ChoiceId
+import villages.domain.Dialogue
+import villages.domain.DialogueId
 import villages.domain.Division
 import villages.domain.Effect
 import villages.domain.Event
@@ -36,15 +40,27 @@ import villages.domain.HouseResourceGranted
 import villages.domain.PlayerGivenChoice
 import villages.domain.HouseId
 import villages.domain.HouseName
+import villages.domain.Impact
 import villages.domain.PlayerTookAction
+import villages.domain.Line
+import villages.domain.LineId
 import villages.domain.Location
 import villages.domain.Option
 import villages.domain.OptionId
 import villages.domain.PlayerId
+import villages.domain.PlayerLostDialogue
+import villages.domain.PlayerCompletedDialogue
+import villages.domain.PlayerCompletedDialogueStep
+import villages.domain.PlayerOfferedDialogue
+import villages.domain.Requirement
+import villages.domain.RevealImpact
 import villages.domain.Sex
 import villages.domain.Significance
+import villages.domain.Speaker
+import villages.domain.SpeakerId
 import villages.domain.Species
 import villages.domain.Stat
+import villages.domain.Then
 import villages.domain.Tincture
 import villages.domain.VisionId
 import villages.domain.emptyStocks
@@ -52,6 +68,7 @@ import villages.domain.WorldTime
 import java.io.File
 import java.time.Instant
 import java.util.UUID
+import kotlin.reflect.KClass
 
 /**
  * The stored form of an event is a contract with every future version of the code, so it is pinned to
@@ -189,6 +206,68 @@ class EventFormatSpec : StringSpec({
     val sawGotland = HouseGainedVision(house, gotland, Location(57.64, 18.30), 34.0, day, noon)
     val lostGotland = HouseLostVision(house, gotland, day, noon)
 
+    // A dialogue with every case of every sealed field in it: each thing that can follow a line, a grant, a
+    // requirement written into it, and a speaker who is a character beside one who is not.
+    val harbourMaster = CharacterId(UUID.fromString("cb732500-39bd-3b39-a838-bb89f7195790"))
+    val theLady = Speaker(SpeakerId("agnes"), party = 0, name = "Agnes Hollin", portrait = "woman-03", character = agnes)
+    val theRider = Speaker(SpeakerId("messenger"), party = 1, name = "A messenger", portrait = null, character = null)
+    val aLetter = PlayerOfferedDialogue(
+        houseId = house,
+        player = player,
+        dialogue = Dialogue(
+            id = DialogueId(UUID.fromString("dd000000-0000-4000-8000-00000000a001")),
+            title = "A letter from the coast",
+            scene = "harbour",
+            speakers = listOf(theLady, theRider),
+            lines = listOf(
+                Line(
+                    id = LineId("arrives"),
+                    speaker = theRider.id,
+                    words = "A rider from the coast, my lady, with the harbour-master's seal.",
+                    then = Then.Say(LineId("asks")),
+                ),
+                Line(
+                    id = LineId("asks"),
+                    speaker = theRider.id,
+                    words = "He asks whether the house will stand behind the new quay.",
+                    recorded = true,
+                    then = Then.DialogueChoice(listOf(LineId("accept"), LineId("refuse"))),
+                ),
+                Line(
+                    id = LineId("accept"),
+                    speaker = theLady.id,
+                    words = "Tell him it will, and send forty for the masons.",
+                    effects = listOf(Effect.Spend(Resource.WEALTH, 40)),
+                    revealImpact = RevealImpact.Shown(
+                        listOf(Impact(Resource.WEALTH, -40), Impact(Resource.WEALTH, 100)),
+                    ),
+                    then = Then.Say(LineId("thanks")),
+                ),
+                Line(
+                    id = LineId("refuse"),
+                    speaker = theLady.id,
+                    words = "Tell him the house has quays enough of its own.",
+                    then = Then.End,
+                    revealImpact = RevealImpact.Hidden,
+                ),
+                Line(
+                    id = LineId("thanks"),
+                    speaker = theRider.id,
+                    words = "He will be glad of it. The first of the dues came with me.",
+                    effects = listOf(Effect.Grant(Resource.WEALTH, 100)),
+                    then = Then.End,
+                ),
+            ),
+            requirements = listOf(Requirement.Alive(harbourMaster)),
+        ),
+        worldTime = day,
+        recordedAt = noon,
+    )
+
+    val acceptedTheQuay = PlayerCompletedDialogueStep(house, player, aLetter.dialogue.id, LineId("accept"), day, noon)
+    val theLetterRead = PlayerCompletedDialogue(house, player, aLetter.dialogue.id, day, noon)
+    val theLetterLost = PlayerLostDialogue(house, player, aLetter.dialogue.id, Requirement.Alive(agnes), day, noon)
+
     val samples: Map<String, Event> = mapOf(
         "villages.character.aged.v1" to agnesAged,
         "villages.character.appeared.v1" to agnesAppeared,
@@ -206,7 +285,11 @@ class EventFormatSpec : StringSpec({
         "villages.house.resourcePledged.v1" to pledgedReason,
         "villages.house.resourceReleased.v1" to releasedReason,
         "villages.house.resourceSpent.v1" to spentGold,
+        "villages.player.completedDialogue.v1" to theLetterRead,
+        "villages.player.completedDialogueStep.v1" to acceptedTheQuay,
         "villages.player.givenChoice.v1" to whereToSettle,
+        "villages.player.lostDialogue.v1" to theLetterLost,
+        "villages.player.offeredDialogue.v1" to aLetter,
         "villages.player.tookAction.v1" to tookNorthern,
     )
 
@@ -254,6 +337,43 @@ class EventFormatSpec : StringSpec({
     "a sealed field says which case it holds, so a reader never has to guess" {
         val written = Events.json.readTree(converter.toCloudEvent(whereToSettle).data!!.toBytes())
 
-        written["choice"]["options"][0]["effect"][EFFECT_KIND].asString() shouldBe FOUND_AT
+        written["choice"]["options"][0]["effect"][KIND].asString() shouldBe FOUND_AT
+
+        val dialogue = Events.json.readTree(converter.toCloudEvent(aLetter).data!!.toBytes())["dialogue"]
+        val lines = dialogue["lines"]
+        lines[0]["then"][KIND].asString() shouldBe SAY
+        lines[1]["then"][KIND].asString() shouldBe DIALOGUE_CHOICE
+        lines[2]["effects"][0][KIND].asString() shouldBe SPEND
+        lines[4]["effects"][0][KIND].asString() shouldBe GRANT
+        lines[2]["revealImpact"][KIND].asString() shouldBe SHOWN
+        lines[3]["revealImpact"][KIND].asString() shouldBe HIDDEN
+        lines[3]["then"][KIND].asString() shouldBe END
+        dialogue["requirements"][0][KIND].asString() shouldBe ALIVE
+    }
+
+    /**
+     * A case Jackson writes and cannot read back would make every later command on that house throw, because
+     * every command reads the whole stream. So every case of every sealed field has a name in the store, and
+     * some fixture writes each one. A new sealed field of an event is a new row in this map.
+     */
+    "every case of every sealed field has a name in the store, and a fixture that writes it" {
+        val mixIns: Map<KClass<*>, KClass<*>> = mapOf(
+            Effect::class to EffectJson::class,
+            Then::class to ThenJson::class,
+            Requirement::class to RequirementJson::class,
+            RevealImpact::class to RevealImpactJson::class,
+        )
+        val named = mixIns.mapValues { (_, mixIn) -> mixIn.java.getAnnotation(JsonSubTypes::class.java).value.toList() }
+
+        for ((sealed, types) in named) {
+            withClue(sealed.simpleName) {
+                types.map { it.value } shouldContainExactlyInAnyOrder sealed.sealedSubclasses
+            }
+        }
+        samples.keys.flatMap { kindsIn(fixture(it)) }.toSet() shouldContainAll named.values.flatten().map { it.name }
     }
 })
+
+/** Every `kind` written anywhere in a stored event, which is every case of a sealed field it holds. */
+private fun kindsIn(node: JsonNode): List<String> =
+    listOfNotNull(node.get(KIND)?.asString()) + node.flatMap(::kindsIn)

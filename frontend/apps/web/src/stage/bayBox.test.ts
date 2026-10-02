@@ -15,8 +15,12 @@ import {
   MIDDLE_LEAST,
   overlap,
   type Rect,
+  RIGHT_LEAST,
+  RIGHT_WANTS,
+  type RightWants,
   sharedBy,
   type SpreadWants,
+  STRIP as STRIP_THICK,
   TILES,
   UNFOLDS_OVER,
   WANTS_NOTHING,
@@ -37,8 +41,15 @@ const EVERYTHING: SpreadWants = { left: true, bottomLeft: 200, bottomMiddle: 132
 /** The same, with the corner opened out on a pane that asks to reach along the bottom. */
 const REACHING: SpreadWants = { ...EVERYTHING, bottomLeft: 370, bottomLeftWide: 560 };
 
+/** The same, with a dialogue standing down the right edge at its normal width. */
+const TALKING: SpreadWants = { ...EVERYTHING, right: 'normal' };
+
 const tilesOf = (box: { bays: Readonly<Record<string, Rect | null>> }): Rect[] =>
   TILES.map((name) => box.bays[name]).filter((rect): rect is Rect => rect != null);
+
+/** Whether two rectangles are at least this far apart, which is the gutter's promise. */
+const apart = (one: Rect, other: Rect, by: number): boolean =>
+  !overlap({ x: one.x - by, y: one.y - by, w: one.w + by * 2, h: one.h + by * 2 }, other);
 
 describe('formFor', () => {
   it('is the spread while the shorter side has room to spare', () => {
@@ -363,10 +374,14 @@ describe('the spread', () => {
       for (let w = 601; w <= 2400; w += 7) {
         for (const h of [601, 700, 900, 1080, 1440]) {
           // With the corner as it always was, and opened out reaching along the bottom as far as it can
-          // be asked to: the floor is the same either way, which is what the corner's cap is for.
+          // be asked to: the floor is the same either way, which is what the corner's cap is for. And with
+          // a column down the right at each of its sizes, which the letter goes between only when it keeps
+          // this much there.
           for (const wants of [EVERYTHING, REACHING, { ...REACHING, bottomLeftWide: 5000 }]) {
-            const box = spread({ w, h }, wants);
-            narrowest = Math.min(narrowest, box.bays.bottomMiddle?.w ?? Infinity);
+            for (const right of [null, 'normal', 'half', 'strip'] as const) {
+              const box = spread({ w, h }, { ...wants, right });
+              narrowest = Math.min(narrowest, box.bays.bottomMiddle?.w ?? Infinity);
+            }
           }
         }
       }
@@ -378,6 +393,114 @@ describe('the spread', () => {
       const box = spread(SPREAD);
 
       expect((box.bays.bottomMiddle?.y ?? 0) + (box.bays.bottomMiddle?.h ?? 0)).toBe(SPREAD.h - GUTTER);
+    });
+  });
+
+  /*
+   * The column down the right edge, where a dialogue stands: set into the right, top and bottom edges as
+   * the first column is set into the left, and cut last, from what everything else leaves. See decision
+   * record 0069.
+   */
+  describe('the column down the right edge', () => {
+    it('is set into the right, top and bottom edges, at its own width where there is room for it', () => {
+      const right = spread(SPREAD, TALKING).bays.right;
+
+      expect(right).toEqual({ x: SPREAD.w - RIGHT_WANTS, y: 0, w: RIGHT_WANTS, h: SPREAD.h });
+    });
+
+    it('is wider than the column on the left, for the picture at the top of a conversation', () => {
+      const box = spread(SPREAD, TALKING);
+
+      expect(box.bays.right?.w ?? 0).toBeGreaterThan(box.bays.left?.w ?? Infinity);
+    });
+
+    // As the left column is, and for its reason: two columns at their own widths on a 768-wide stage
+    // would leave the map between them a gutter.
+    it('is squeezed to a third of a narrow stage, and never below the least', () => {
+      expect(spread({ w: 1200, h: 900 }, TALKING).bays.right?.w).toBe(389);
+      expect(spread({ w: 768, h: 1024 }, TALKING).bays.right?.w).toBe(RIGHT_LEAST);
+    });
+
+    it('never closes over the map between the two columns, at any stage the spread can be', () => {
+      for (let w = 601; w <= 2400; w += 7) {
+        const box = spread({ w, h: 1080 }, { ...TALKING, bottomMiddle: null });
+        const between = (box.bays.right?.x ?? 0) - (box.bays.left?.w ?? 0);
+
+        expect(between).toBeGreaterThanOrEqual(GUTTER);
+      }
+    });
+
+    it('opens out to half the stage', () => {
+      expect(spread(SPREAD, { ...TALKING, right: 'half' }).bays.right?.w).toBe(SPREAD.w / 2);
+    });
+
+    // 700 wide: half is 350, which is more than the normal size and still clear of the rail.
+    it('is never smaller opened out than at its normal size', () => {
+      for (const w of [620, 700, 900, 1200, 1568, 2400]) {
+        const stage = { w, h: 900 };
+        expect(spread(stage, { ...TALKING, right: 'half' }).bays.right?.w ?? 0).toBeGreaterThanOrEqual(
+          spread(stage, TALKING).bays.right?.w ?? Infinity,
+        );
+      }
+    });
+
+    it('is put away to a strip across its top, at its normal width', () => {
+      const right = spread(SPREAD, { ...TALKING, right: 'strip' }).bays.right;
+
+      expect(right).toEqual({ x: SPREAD.w - RIGHT_WANTS, y: 0, w: RIGHT_WANTS, h: STRIP_THICK });
+    });
+
+    it('never comes within a gutter of the corner reaching along the bottom', () => {
+      for (const w of [700, 800, 1000, 1568]) {
+        const box = spread({ w, h: 900 }, { ...REACHING, right: 'half', bottomLeftWide: 5000 });
+        const corner = box.bays.bottomLeft!;
+
+        expect(box.bays.right?.x ?? 0).toBeGreaterThanOrEqual(corner.x + corner.w + GUTTER);
+      }
+    });
+
+    // Cut last, from what the others leave: a dialogue arriving moves nothing on the left.
+    it('never resizes the rail or the corner by arriving', () => {
+      for (const w of [620, 800, 1200, 1568]) {
+        for (const right of ['normal', 'half', 'strip'] as const) {
+          const stage = { w, h: 900 };
+          const without = spread(stage, REACHING);
+          const with_ = spread(stage, { ...REACHING, right });
+
+          expect(with_.bays.left).toEqual(without.bays.left);
+          expect(with_.bays.bottomLeft).toEqual(without.bays.bottomLeft);
+        }
+      }
+    });
+
+    describe('and the letter along the bottom', () => {
+      it('goes between the two columns, centred, while it has room to be read there', () => {
+        const box = spread(SPREAD, TALKING);
+        const letter = box.bays.bottomMiddle!;
+        const right = box.bays.right!;
+        const left = box.bays.left!;
+
+        expect(letter.x - (left.x + left.w)).toBe(right.x - (letter.x + letter.w));
+        expect(right.h).toBe(SPREAD.h);
+      });
+
+      // 800 wide: both columns at their least leave 192 between them, less than the carousel reads at.
+      it('keeps the place it has without the column where it has not, and the column stops above it', () => {
+        const stage = { w: 800, h: 900 };
+        const box = spread(stage, TALKING);
+        const letter = box.bays.bottomMiddle!;
+
+        expect(letter).toEqual(spread(stage, EVERYTHING).bays.bottomMiddle);
+        expect(box.bays.right?.h).toBe(letter.y - GUTTER);
+      });
+
+      it('keeps its place under a column put away, which stops at the top', () => {
+        const stage = { w: 800, h: 900 };
+        const box = spread(stage, { ...TALKING, right: 'strip' });
+
+        expect(box.bays.bottomMiddle).toEqual(spread(stage, EVERYTHING).bays.bottomMiddle);
+        expect(box.bays.right?.h).toBe(STRIP_THICK);
+      });
     });
   });
 });
@@ -406,34 +529,57 @@ describe('the tiles never overlap, and none leaves the stage', () => {
       for (const bottomMiddle of [null, 132, 400]) {
         // And the corner opened out, reaching along the bottom by as much as it can be asked to.
         for (const bottomLeftWide of [null, 560, 5000]) {
-          everyWant.push({ left, bottomLeft, bottomLeftWide, bottomMiddle });
+          // And the column down the right edge, at each of its three sizes or not there at all.
+          for (const right of [null, 'normal', 'half', 'strip'] as (RightWants | null)[]) {
+            everyWant.push({ left, bottomLeft, bottomLeftWide, bottomMiddle, right });
+          }
         }
       }
     }
   }
 
+  // Thirty thousand layouts, so what is wrong is gathered and asserted once: an `expect` a check, with its
+  // message written out whether or not it failed, took longer than the test is given.
   it('holds across every stage the spread can be, and every tile being in or out', () => {
+    const wrong: string[] = [];
+    const say = (what: string, about: object) => wrong.push(`${what}: ${JSON.stringify(about)}`);
+
     for (const stage of stages) {
       for (const wants of everyWant) {
         const box = bayLayout(stage, [BIG, BIG], wants, 'spread');
         const tiles = tilesOf(box);
 
         for (const tile of tiles) {
-          expect(tile.w).toBeGreaterThan(0);
-          expect(tile.h).toBeGreaterThan(0);
-          expect(inside(tile, stage), `${JSON.stringify({ stage, wants, tile })} left the stage`).toBe(true);
+          if (tile.w <= 0 || tile.h <= 0) {
+            say('empty', { stage, wants, tile });
+          }
+          if (!inside(tile, stage)) {
+            say('left the stage', { stage, wants, tile });
+          }
         }
 
         for (let one = 0; one < tiles.length; one += 1) {
           for (let other = one + 1; other < tiles.length; other += 1) {
-            expect(
-              overlap(tiles[one]!, tiles[other]!),
-              `${JSON.stringify({ stage, wants, a: tiles[one], b: tiles[other] })} overlap`,
-            ).toBe(false);
+            if (overlap(tiles[one]!, tiles[other]!)) {
+              say('overlap', { stage, wants, a: tiles[one], b: tiles[other] });
+            }
+          }
+        }
+
+        // The column down the right edge is the one cut from what the others leave, so it is the one
+        // that has to keep the air: a gutter from every other tile, whichever of them it met.
+        const right = box.bays.right;
+        if (right != null) {
+          for (const tile of tiles.filter((one) => one !== right)) {
+            if (!apart(right, tile, GUTTER)) {
+              say('too close to the right column', { stage, wants, right, tile });
+            }
           }
         }
       }
     }
+
+    expect(wrong.slice(0, 5)).toEqual([]);
   });
 
   it('holds in the folded form too, whatever the two bays asked for', () => {

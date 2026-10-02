@@ -34,8 +34,20 @@ import tools.jackson.databind.JsonNode
  * tension that joins circles close together. See decision record 0064. Version 13 added `stands`, the
  * scenery's stands on ground a house has revealed, and gave `hello` the `master` the page draws, so the
  * gateway knows whose stands to send. See decision record 0067.
+ *
+ * Versions 14 to 19 are the dialogue's, built on a branch that had not met 13: they were 13 to 18 there,
+ * moved up one when main's landed first, so their recordings have no `stands`. Version 14 let an option's
+ * effect be a `grant`, some of a resource given, which is what a line of a dialogue gives too. See decision
+ * record 0071. Version 15 added `offerDialogue`, the debug panel's offer of a sample dialogue by name.
+ * Version 16 added `yourDialogues`, the player's dialogues with what has not been reached held back, and
+ * `showRequirements`, Adam's switch that sends one window their requirements. Version 17 let an effect be a
+ * `spend`, what an option costs, and named what a said line did its `effects`. Version 18 gave an option its
+ * `revealImpact`, how it shows what taking it will do. Version 19 added `completeDialogueStep`, a step taken
+ * through one of the house's dialogues, and took away `showRequirements` and a dialogue's `requirements`:
+ * the debug panel only offers a dialogue now, so nothing asks for them, and a page is never sent them.
+ * Version 20 is the two together, the stands and the dialogue, as they met on main.
  */
-const val PROTOCOL_VERSION = 13
+const val PROTOCOL_VERSION = 20
 
 data class Point(val lat: Double, val lon: Double)
 
@@ -291,6 +303,8 @@ class WipeWorld : ClientFrame {
     JsonSubTypes.Type(TakeOffTheMapPayload::class, name = "takeOffTheMap"),
     JsonSubTypes.Type(GiveVisionPayload::class, name = "giveVision"),
     JsonSubTypes.Type(TakeVisionPayload::class, name = "takeVision"),
+    JsonSubTypes.Type(OfferDialoguePayload::class, name = "offerDialogue"),
+    JsonSubTypes.Type(CompleteDialogueStepPayload::class, name = "completeDialogueStep"),
 )
 sealed interface CommandPayload
 
@@ -383,6 +397,20 @@ data class GiveVisionPayload(val place: Point) : CommandPayload
 /** Take away a vision the house was given, by the id `yourSight` names it under. */
 data class TakeVisionPayload(val visionId: String) : CommandPayload
 
+/**
+ * Offer the player's house one of the sample dialogues, by its name, spoken by the house's first key figure.
+ * The name and none of the words: a client that could write a dialogue could write itself a reward. Adam's
+ * lever. See decision record 0071.
+ */
+data class OfferDialoguePayload(val sample: String) : CommandPayload
+
+/**
+ * Take a step through one of the house's dialogues: the line that is the step, by its id within the dialogue -
+ * an option of a dialogue choice, or the line the stretch read ends on. Which lines are steps, and whether this
+ * one is the next, is the house's to say, so the client names a line and nothing else. See decision record 0071.
+ */
+data class CompleteDialogueStepPayload(val dialogueId: String, val lineId: String) : CommandPayload
+
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes(
     JsonSubTypes.Type(Welcome::class, name = "welcome"),
@@ -398,6 +426,7 @@ data class TakeVisionPayload(val visionId: String) : CommandPayload
     JsonSubTypes.Type(YourChoice::class, name = "yourChoice"),
     JsonSubTypes.Type(YourKeyFigures::class, name = "yourKeyFigures"),
     JsonSubTypes.Type(YourSight::class, name = "yourSight"),
+    JsonSubTypes.Type(YourDialogues::class, name = "yourDialogues"),
     JsonSubTypes.Type(TakenOver::class, name = "takenOver"),
     JsonSubTypes.Type(WorldWiped::class, name = "worldWiped"),
     JsonSubTypes.Type(StandsFrame::class, name = "stands"),
@@ -500,6 +529,102 @@ data class VisionPointView(
 )
 
 /**
+ * The player's dialogues, open and finished, in the order the house was offered them, wherever they are
+ * looking. Sent after `yourSight` on hello, always a list, and again whenever one of them changes. What the
+ * player has not reached stays on the server: each carries what has been said, the stretch still to read up
+ * to and including the next step, and the options pending - never a line past that, and never what a line
+ * will give until it has given it. See decision record 0071.
+ */
+data class YourDialogues(val dialogues: List<DialogueView>) : ServerFrame
+
+/**
+ * One dialogue as the player may know it. `revision` rises with every change to it, so a page holds its
+ * reading place while it holds. `next` ends in the step to send when there are no `options`, and in the line
+ * the dialogue choice follows when there are. Its requirements are never sent: a player learns of one only
+ * when it fails, as why the dialogue was lost.
+ */
+@JsonInclude(JsonInclude.Include.NON_NULL)
+data class DialogueView(
+    val id: String,
+    val revision: Long,
+    val title: String,
+    /** The picture's key, absent for none. */
+    val scene: String? = null,
+    val speakers: List<SpeakerView>,
+    val said: List<SaidLineView>,
+    val next: List<LineView>,
+    val options: List<LineView>,
+    val ending: EndingView,
+)
+
+/** Who speaks: which party, what they are called, their portrait's key and the character they are, if any. */
+@JsonInclude(JsonInclude.Include.NON_NULL)
+data class SpeakerView(
+    val id: String,
+    val party: Int,
+    val name: String,
+    val portrait: String? = null,
+    val character: String? = null,
+)
+
+/**
+ * A line still to be read, or an option to pick: who says it and the words, and nothing about what it will do
+ * but, on an option, its `revealImpact` - how whoever wrote it chose to show what taking it will do. Absent, the
+ * option shows nothing until it is done. See decision record 0071.
+ */
+@JsonInclude(JsonInclude.Include.NON_NULL)
+data class LineView(
+    val id: String,
+    val speaker: String,
+    val words: String,
+    val revealImpact: RevealImpactView? = null,
+)
+
+/** How an option shows what taking it will do: `shown`, with what, or `hidden`, drawn as unknown. */
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "kind")
+@JsonSubTypes(
+    JsonSubTypes.Type(RevealImpactView.Shown::class, name = "shown"),
+    JsonSubTypes.Type(RevealImpactView.Hidden::class, name = "hidden"),
+)
+sealed interface RevealImpactView {
+    data class Shown(val impacts: List<ImpactView>) : RevealImpactView
+
+    data object Hidden : RevealImpactView
+}
+
+/** Some of one resource, gained or, below nothing, lost. `resource` is a wire name, so `naturalDomain`. */
+data class ImpactView(val resource: String, val amount: Long)
+
+/** A line said, with what saying it did to the house: what it gave, and what it took. */
+data class SaidLineView(val id: String, val speaker: String, val words: String, val effects: List<EffectView>)
+
+/** How a dialogue stands. `kind` names the case, as it does for an effect. */
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "kind")
+@JsonSubTypes(
+    JsonSubTypes.Type(EndingView.Open::class, name = "open"),
+    JsonSubTypes.Type(EndingView.Completed::class, name = "completed"),
+    JsonSubTypes.Type(EndingView.Lost::class, name = "lost"),
+)
+sealed interface EndingView {
+    data object Open : EndingView
+
+    data object Completed : EndingView
+
+    /** Ended unfinished, because one of its requirements failed; which one is the one the player learns of. */
+    data class Lost(val because: RequirementView) : EndingView
+}
+
+/** Something a dialogue needs to stay true. `kind` names the case. */
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "kind")
+@JsonSubTypes(
+    JsonSubTypes.Type(RequirementView.Alive::class, name = "alive"),
+)
+sealed interface RequirementView {
+    /** That this character, by id, is still alive. */
+    data class Alive(val character: String) : RequirementView
+}
+
+/**
  * The world was emptied and this session is finished with it: it holds no cells, hears nothing more and
  * accepts nothing more. Every session is told, because a wipe is everybody's. See decision record 0036.
  */
@@ -517,10 +642,18 @@ data class OptionView(val id: String, val label: String, val detail: String, val
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "kind")
 @JsonSubTypes(
     JsonSubTypes.Type(FoundAtView::class, name = "foundAt"),
+    JsonSubTypes.Type(GrantView::class, name = "grant"),
+    JsonSubTypes.Type(SpendView::class, name = "spend"),
 )
 sealed interface EffectView
 
 data class FoundAtView(val seat: Point, val name: String, val banner: BannerSpec) : EffectView
+
+/** Some of a resource given to the house. `resource` is a wire name, so `naturalDomain` and not Domain. */
+data class GrantView(val resource: String, val amount: Long) : EffectView
+
+/** Some of a resource taken from the house: what an option costs. A wire name, as a grant's is. */
+data class SpendView(val resource: String, val amount: Long) : EffectView
 
 /**
  * One stored event, as stored: the envelope and the data, for a client that asked to watch. `eventType` is

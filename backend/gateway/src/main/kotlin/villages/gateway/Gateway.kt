@@ -28,6 +28,10 @@ import villages.application.ResourceService
 import villages.application.Start
 import villages.application.StoredEvent
 import villages.application.TakeActionService
+import villages.application.DialogueEnding
+import villages.application.DialogueRow
+import villages.application.DialogueService
+import villages.application.DialoguesByHouse
 import villages.application.VisionService
 import villages.application.VisionSource
 import villages.application.WorldClock
@@ -38,7 +42,13 @@ import villages.domain.CharacterError
 import villages.domain.CharacterId
 import villages.domain.Choice
 import villages.domain.ChoiceId
+import villages.domain.DialogueId
 import villages.domain.Effect
+import villages.domain.Line
+import villages.domain.LineId
+import villages.domain.Requirement
+import villages.domain.RevealImpact
+import villages.domain.walk
 import villages.domain.DomainError
 import villages.domain.HouseError
 import villages.domain.HouseId
@@ -65,13 +75,24 @@ import villages.protocol.ClientFrame
 import villages.protocol.Command
 import villages.protocol.CommandAccepted
 import villages.protocol.CommandRejected
+import villages.protocol.CompleteDialogueStepPayload
 import villages.protocol.Delta
 import villages.protocol.Division
 import villages.protocol.EffectView
 import villages.protocol.ErrorFrame
 import villages.protocol.EventFrame
 import villages.protocol.FogOfWar
+import villages.protocol.DialogueView
+import villages.protocol.EndingView
 import villages.protocol.FoundAtView
+import villages.protocol.GrantView
+import villages.protocol.ImpactView
+import villages.protocol.LineView
+import villages.protocol.RequirementView
+import villages.protocol.RevealImpactView
+import villages.protocol.SaidLineView
+import villages.protocol.SpeakerView
+import villages.protocol.SpendView
 import villages.protocol.FoundHousePayload
 import villages.protocol.GiveVisionPayload
 import villages.protocol.GrantResourcePayload
@@ -84,6 +105,7 @@ import villages.protocol.CharacterOnMapView
 import villages.protocol.HouseAppeared
 import villages.protocol.HouseChanged
 import villages.protocol.MoveCharacterPayload
+import villages.protocol.OfferDialoguePayload
 import villages.protocol.TakeOffTheMapPayload
 import villages.protocol.TakeVisionPayload
 import villages.protocol.HouseView
@@ -124,6 +146,7 @@ import villages.protocol.WorldWiped
 import villages.protocol.YourChoice
 import villages.protocol.YourHouse
 import villages.protocol.YourHouseView
+import villages.protocol.YourDialogues
 import villages.protocol.YourKeyFigures
 import villages.protocol.YourSight
 import villages.protocol.coarsestZoom
@@ -190,6 +213,8 @@ class Gateway(
     private val onTheMap: CharactersByCell,
     private val sights: SightsByHouse,
     private val visions: VisionService,
+    private val dialogues: DialogueService,
+    private val dialogueRows: DialoguesByHouse,
     private val stands: Stands = Stands { _, _, _ -> null },
     private val later: Later = ScheduledLater(),
 ) : AutoCloseable {
@@ -223,6 +248,14 @@ class Gateway(
      */
     private val figuresChanged: AutoCloseable = figures.watch { change ->
         sessions[change.player]?.out?.send(YourKeyFigures(change.keyFigures.map { it.toView() }))
+    }
+
+    /**
+     * A house's dialogues reach its player wherever they are looking, like its key figures: what a house was
+     * offered is its own, and needs no cell. Each window is sent what it may know of them. See decision 0071.
+     */
+    private val dialoguesChanged: AutoCloseable = dialogueRows.watch { change ->
+        sessions[change.player]?.tellDialogues(change.dialogues)
     }
 
     /** A character who moves, leaves the map or dies on it reaches whoever holds the cells either side. */
@@ -352,6 +385,7 @@ class Gateway(
         changes.close()
         asked.close()
         figuresChanged.close()
+        dialoguesChanged.close()
         moves.close()
         seen.close()
         faults.close()
@@ -431,6 +465,14 @@ class Gateway(
          * arriving. The first call always sends, even with nothing pending, so the answer to hello is
          * definite in the way `yourHouse` is.
          */
+        /**
+         * Sends this player their dialogues as they may know them: what has been said and the stretch ahead,
+         * and never a requirement. See decision record 0071.
+         */
+        internal fun tellDialogues(rows: List<DialogueRow>) {
+            out.send(YourDialogues(rows.map { it.toView() }))
+        }
+
         internal fun tellChoice(choice: ChoiceView?) {
             synchronized(lock) {
                 if (finished || (everToldChoice && choice?.id == toldChoice)) {
@@ -547,6 +589,7 @@ class Gateway(
             out.send(YourHouse(theirHouses.ofPlayer(who)?.toYours()))
             out.send(YourKeyFigures(figures.of(HouseId.of(who)).map { it.toView() }))
             out.send(YourSight(sights.of(HouseId.of(who)).toView(), Vision.SURFACE_TENSION))
+            tellDialogues(dialogueRows.of(HouseId.of(who)))
 
             // Arriving with no house and nothing to decide is what the founding choice answers. The
             // choice arrive() hands back is what goes out, not a read of the projection: the projection
@@ -584,6 +627,11 @@ class Gateway(
         /** The story the pending choice began, so an action answering it belongs to that story. */
         private fun pendingStory(who: PlayerId): java.util.UUID? =
             choices.pendingOf(who)?.let { row -> runCatching { java.util.UUID.fromString(row.correlationId) }.getOrNull() }
+
+        /** The story a dialogue was offered in, so a step through it belongs to that story. */
+        private fun dialogueStory(who: PlayerId, dialogue: DialogueId): java.util.UUID? =
+            dialogueRows.of(HouseId.of(who)).firstOrNull { it.dialogue.id == dialogue }
+                ?.let { row -> runCatching { java.util.UUID.fromString(row.correlationId) }.getOrNull() }
 
         private fun command(frame: Command) {
             val who = player
@@ -709,6 +757,30 @@ class Gateway(
                         visionId = VisionId(asUuid(payload.visionId, "a vision id")),
                         provenance = Provenance.startedBy(commandId),
                     )
+
+                    // A sample by its name. A name that is not a sample is refused as malformed, and a house with
+                    // no key figure to speak it as `noSuchKeyFigure`. See decision record 0071.
+                    is OfferDialoguePayload -> dialogues.offerSample(
+                        player = who,
+                        sample = payload.sample,
+                        provenance = Provenance.startedBy(commandId),
+                    )
+
+                    is CompleteDialogueStepPayload -> {
+                        val dialogue = DialogueId(asUuid(payload.dialogueId, "a dialogue id"))
+                        dialogues.step(
+                            player = who,
+                            dialogueId = dialogue,
+                            lineId = LineId(payload.lineId),
+                            // A step continues the story the offer began, as an action continues its choice's,
+                            // so the step and what it pays wear the offer's correlation. The server decides
+                            // this, not the client. See decision records 0035 and 0071.
+                            provenance = Provenance(
+                                commandId = commandId,
+                                correlationId = dialogueStory(who, dialogue) ?: commandId,
+                            ),
+                        )
+                    }
                 }
                 out.send(CommandAccepted(frame.commandId))
             } catch (refused: DomainError) {
@@ -1041,6 +1113,53 @@ internal fun Effect.toView(): EffectView = when (this) {
         name = name.value,
         banner = banner.toWire(),
     )
+
+    is Effect.Grant -> GrantView(resource = resource.toWire(), amount = amount)
+
+    is Effect.Spend -> SpendView(resource = resource.toWire(), amount = amount)
+}
+
+/**
+ * A dialogue as its player may know it, walked from the steps taken: what has been said and what it did, the
+ * stretch still to read and the options pending, and nothing past them, and never its requirements. The walk
+ * is the decider's own, so the page and the house's rules cannot disagree. See 0071.
+ */
+internal fun DialogueRow.toView(): DialogueView {
+    val walk = dialogue.walk(taken)
+    // A dialogue that has ended ends where it stood: a lost one has nothing left to read and nothing to choose.
+    val ended = ending != DialogueEnding.Open
+    return DialogueView(
+        id = dialogue.id.value.toString(),
+        revision = revision,
+        title = dialogue.title,
+        scene = dialogue.scene,
+        speakers = dialogue.speakers.map {
+            SpeakerView(it.id.value, it.party, it.name, it.portrait, it.character?.value?.toString())
+        },
+        said = walk.said.map { SaidLineView(it.id.value, it.speaker.value, it.words, it.effects.map(Effect::toView)) },
+        next = if (ended) emptyList() else walk.next.map { it.toView() },
+        options = if (ended) emptyList() else walk.options.map { it.asOption() },
+        ending = when (val stands = ending) {
+            DialogueEnding.Open -> EndingView.Open
+            DialogueEnding.Completed -> EndingView.Completed
+            is DialogueEnding.Lost -> EndingView.Lost(stands.because.toView())
+        },
+    )
+}
+
+/** A line still to be read: the words and who says them, and not what it will give. */
+private fun Line.toView(): LineView = LineView(id.value, speaker.value, words)
+
+/** An option to pick, with how whoever wrote it chose to show what taking it will do. */
+private fun Line.asOption(): LineView = LineView(id.value, speaker.value, words, revealImpact?.toView())
+
+private fun RevealImpact.toView(): RevealImpactView = when (this) {
+    is RevealImpact.Shown -> RevealImpactView.Shown(impacts.map { ImpactView(it.resource.toWire(), it.amount) })
+    RevealImpact.Hidden -> RevealImpactView.Hidden
+}
+
+private fun Requirement.toView(): RequirementView = when (this) {
+    is Requirement.Alive -> RequirementView.Alive(character.value.toString())
 }
 
 /** What makes two deltas the same one: the thing they are about and its version. */
@@ -1060,6 +1179,11 @@ internal fun DomainError.reasonCode(): String = when (this) {
     is DomainError.InvalidLocation -> "invalidLocation"
     is HouseError.InvalidBanner -> "invalidBanner"
     is HouseError.InvalidChoice -> "invalidChoice"
+    is HouseError.InvalidDialogue -> "invalidDialogue"
+    HouseError.DialogueAlreadyOffered -> "dialogueAlreadyOffered"
+    HouseError.NoSuchDialogue -> "noSuchDialogue"
+    HouseError.DialogueOver -> "dialogueOver"
+    HouseError.NotTheNextStep -> "notTheNextStep"
     HouseError.ChoicePending -> "choicePending"
     HouseError.NoChoicePending -> "noChoicePending"
     HouseError.NoSuchChoice -> "noSuchChoice"

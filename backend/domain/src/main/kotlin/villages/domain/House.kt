@@ -33,6 +33,13 @@ sealed interface House {
         val keyFigures: List<CharacterId> = emptyList(),
         /** The visions this house was given outright and still has, in the order it was given them. */
         val visions: List<VisionId> = emptyList(),
+        /**
+         * The dialogues this house was offered and has not finished, in the order it was offered them, each with
+         * the steps it has taken through it. A finished one leaves the list. See decision record 0071.
+         */
+        val openDialogues: List<OpenDialogue> = emptyList(),
+        /** Every dialogue it was ever offered, open or over, so that the same offer twice is refused. */
+        val offeredDialogues: Set<DialogueId> = emptySet(),
         /** The world-day it was founded on, and the instant that was recorded. */
         val foundedOn: WorldTime,
         val foundedAt: Instant,

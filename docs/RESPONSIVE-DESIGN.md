@@ -89,23 +89,23 @@ mechanic's UI section in `MECHANICS.md`.
 ## The bays
 
 **A bay is named for where it is, not for what goes in it**, and a pane says which one it takes. Nothing in
-the layout knows what any pane is for. There are four in the spread and two in the bays.
+the layout knows what any pane is for. There are five in the spread and two in the bays.
 
 ### In the spread
 
 ```
-┌──────────────────────────────────────────────┐
-│ VILLAGES                                     │
-│ ┌───────────┐                                │
-│ │           │                                │
-│ │   left:   │                                │
-│ │  the rail │           the floor            │
-│ │           │                                │
-│ ├───────────┤                                │
-│ │  bottom   │   ┌──────────────────────┐     │
-│ │   left    │   │    bottom middle     │     │
-│ └───────────┘   └──────────────────────┘     │
-└──────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────┐
+│ VILLAGES                             ┌─────────────┤
+│ ┌───────────┐                        │             │
+│ │           │                        │             │
+│ │   left:   │                        │   right     │
+│ │  the rail │      the floor         │             │
+│ │           │                        │             │
+│ ├───────────┤                        │             │
+│ │  bottom   │  ┌─────────────────┐   │             │
+│ │   left    │  │  bottom middle  │   │             │
+│ └───────────┘  └─────────────────┘   └─────────────┤
+└────────────────────────────────────────────────────┘
 ```
 
 **The floor** is the whole stage, under everything, and the one bay exempt from the rule that nothing
@@ -142,6 +142,16 @@ centred in what the column leaves, never wider than 736 and **never narrower tha
 capped at a third of the stage and the spread only exists above 600 on the shorter side, so that floor
 holds on every stage the spread can be; a test sweeps them all, so if the column is ever widened the thing
 that breaks says so. See decision record 0044.
+
+**Right** is a second column, set into the stage's right, top and bottom edges as the first is set into the
+left, top to bottom. **It is cut last, from what the others leave**: never
+within a gutter of the wider of the rail and the corner, the corner reaching along the bottom included, so
+its coming and going resizes nothing on the left. Its three sizes are the layout's, as the left column's
+width is: normal, 480, squeezed to a third of a narrow stage first and never below 288; opened out, half
+the stage and never less than normal; put away, a strip 44 high across its top. **Bottom middle goes between
+the two columns while it has its 281 there**; where it has not, it keeps its place and the right column
+stops a gutter above it. On a desktop both columns are at their own widths, and on a narrow stage both are a
+third and the map is the middle one. See decision record 0069.
 
 **The column is one piece of furniture**, set into the stage's left and bottom edges rather than floating a
 gutter off them. Its two tiles share a width and one gutter between them, so they read as a column and not

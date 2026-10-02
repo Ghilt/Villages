@@ -14,6 +14,20 @@ sealed class HouseError(message: String) : DomainError(message) {
 
     class InvalidChoice(reason: String) : HouseError("not a choice: $reason")
 
+    class InvalidDialogue(reason: String) : HouseError("not a dialogue: $reason")
+
+    /** A dialogue is offered once, so the same offer sent twice is refused rather than held twice. */
+    data object DialogueAlreadyOffered : HouseError("this house has already been offered that dialogue")
+
+    /** A step through a dialogue this house was never offered. */
+    data object NoSuchDialogue : HouseError("this house was never offered that dialogue")
+
+    /** A step through a dialogue that has ended: finished, or one day lost. */
+    data object DialogueOver : HouseError("that dialogue is over")
+
+    /** A step that is not where the dialogue goes next: a line already passed, one further on, or no option. */
+    data object NotTheNextStep : HouseError("that is not the next step of the dialogue")
+
     /** A house is asked one thing at a time, and this one has not been answered. */
     data object ChoicePending : HouseError("this house already has a choice to make")
 

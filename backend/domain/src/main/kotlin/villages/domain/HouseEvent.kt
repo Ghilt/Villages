@@ -131,6 +131,66 @@ data class PlayerTookAction(
 ) : PlayerEvent
 
 /**
+ * A player was offered a dialogue. The whole of it is here - the speakers, every line and every dialogue
+ * choice, what each line does and what it requires - so the roads not taken are history too, as a choice's
+ * are, and every later step is checked against this event alone. A house can have several open at once.
+ *
+ * Nothing happened in the world when this was written: a conversation was put to the house. See decision
+ * record 0071.
+ */
+data class PlayerOfferedDialogue(
+    override val houseId: HouseId,
+    val player: PlayerId,
+    val dialogue: Dialogue,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : PlayerEvent
+
+/**
+ * A player took a step through a dialogue: an option of a dialogue choice, or a line reached that has
+ * an effect, is marked to be recorded, or ends it. Only the ids are here - the line is on the event that offered
+ * the dialogue - and the plain lines read on the way are not recorded at all: every option taken is a step, so
+ * the path can be rebuilt from the dialogue alone. What the line does follows as the world's own events, and
+ * the end as `PlayerCompletedDialogue`, from the same decision. See decision record 0071.
+ */
+data class PlayerCompletedDialogueStep(
+    override val houseId: HouseId,
+    val player: PlayerId,
+    val dialogueId: DialogueId,
+    val lineId: LineId,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : PlayerEvent
+
+/**
+ * A player reached the end of a dialogue. Its own event, rather than a field on the last step, so that nothing
+ * waiting on a dialogue's end has to look inside a step to find it; and not the event for a dialogue lost to a
+ * requirement failing, so that nothing can take a loss for an end. See decision record 0071.
+ */
+data class PlayerCompletedDialogue(
+    override val houseId: HouseId,
+    val player: PlayerId,
+    val dialogueId: DialogueId,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : PlayerEvent
+
+/**
+ * A dialogue lapsed before it was finished, because one of its requirements failed: a speaker died, say.
+ * Its own event rather than an end with a reason, so that nothing waiting on a dialogue's end takes a loss for
+ * one; `because` is the requirement, which is the one thing about them the player ever learns. It ends where
+ * it stood, and it is no longer open. See decision record 0071.
+ */
+data class PlayerLostDialogue(
+    override val houseId: HouseId,
+    val player: PlayerId,
+    val dialogueId: DialogueId,
+    val because: Requirement,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : PlayerEvent
+
+/**
  * A house took a character in as one of its key figures. A tie in the house's history, which the character's
  * own record never mentions: who they are is on their stream, and what they are to this house is here. See
  * decision record 0055.

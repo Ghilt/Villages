@@ -111,9 +111,11 @@ making the world feel alive and personal.
 ### What it is
 
 Two or more characters in conversation, shown as a back and forth of **speech bubbles** the player steps
-through. One character stands on the left, another on the right, and the bubbles run between them,
-scrollable so that what has already been said can be read back. In a discussion of more than two, each
-bubble carries a small tag saying who said it.
+through: *continue* for the next line, and where the conversation branches, a **dialogue choice** in its
+place, whose options are what can be said or done next. An option can show what taking it will do before it
+is taken, as whoever wrote the dialogue chose: what it gains and costs, that something will come of it but
+not what, or nothing until it is done. What has already been said stays above, scrollable, so that it can
+be read back.
 
 The same shape covers three cases, and they are one mechanic rather than three:
 
@@ -121,8 +123,26 @@ The same shape covers three cases, and they are one mechanic rather than three:
 - A **monologue**, which is the same thing with one speaker.
 - A **group discussion**, where more than one character stands on each side.
 
-A dialogue can be triggered by anything: a storyline reaching a beat, a place the player has gone, another
-house acting, a choice roll's outcome.
+Who stands with whom is each speaker's **party**, a number given when the dialogue is written: the people
+in one party are on one side of the conversation, and the people in the next are on the other.
+
+**A dialogue is offered to the house** and waits until the player opens it. A house can have several
+waiting at once, and keeps every one it has finished, to be read back. A dialogue can be triggered by
+anything: a storyline reaching a beat, a place the player has gone, another house acting, a choice roll's
+outcome.
+
+**Saying something can pay.** A line can give the house something as it is said - a purse of wealth, say -
+and the gain is written into the conversation where it happened.
+
+**A dialogue is meant to be carried through at once.** One left half-way is picked up where it was left, but
+the world goes on meanwhile. Every dialogue has **requirements** the player is never shown: that every speaker
+who is a character stays alive, and whatever else it was written to depend on - a building still standing,
+say. When one fails, the dialogue **lapses**: it ends where it stood, with a line saying why - *sadly, X died
+before this could be finished*.
+
+**A dialogue choice is not a choice roll**, though the two are alike. Some dialogue choices are plain choices
+of what to say, some will one day have a roll's gamble in them, and what one offers can be shaped by the
+rest of the world.
 
 ### What it is for
 
@@ -137,9 +157,9 @@ actually happening to the world and states plainly that no player begins knowing
 interface may say so**, and a mechanic that gives it away early spends the only card the setting is
 holding. Dialogue, over a long time, is how it is meant to be found.
 
-**Holding other mechanics inside it.** Stepping through a dialogue can open an opportunity to take a
-**choice roll**, and the roll's options come back into the conversation. A dialogue is a place other
-mechanics happen, not only a thing to read.
+**Holding other mechanics inside it.** A dialogue is a place other mechanics happen, not only a thing to
+read. A line can pay the house as it is said, an option can cost it something, and a dialogue choice can
+carry the gamble of a roll, its options coming back into the conversation.
 
 **Paying off what the house has built.** What a character says and what they will do for you depends on
 what they are to your house. A character loyal to the house can offer a reward inside the conversation
@@ -148,31 +168,109 @@ grows are inputs to a dialogue, the way the house's state is an input to a roll.
 
 ### Look and feel
 
-A section of the interface is given over to the dialogue while it runs, taking screen space rather than
-floating in a corner. Characters face each other from the two sides; in a group discussion they stack
-evenly on both sides. Behind them, preferably, a **background scene** rather than a flat panel.
+A column of the interface is given over to dialogue, taking screen space rather than floating in a corner.
+At its top is a **scene**: thematic imagery of where the conversation is happening, with the speakers
+standing in it and facing each other from the two sides, stacked evenly on both sides in a group
+discussion. The graphics so far are dry, and this is the place for the game to be rich. Under the scene is
+the **feed**: the bubbles, each with its speaker's portrait and name beside it, coming from the left or from
+the right by their party. What the house gains is a line in the same feed, the resource's own mark and the
+amount - the coin, +100 - and a lapsed dialogue ends there on its closing line.
 
 **Feel is the point of this one.** Characters should move — entering, leaving, reacting — and fade in
 rather than appear. A dialogue that pops between static portraits would deliver the same words and none of
 the aliveness it exists for.
 
-It is **responsive from the start**: on a desktop the dialogue sits beside what else is on screen, and on
-a phone it is what is on screen. See `RESPONSIVE-DESIGN.md`.
+### UI
+
+A **pane**, there from the first dialogue a house is offered and never closed after that, in two states:
+
+- **The list**: the dialogues waiting, and under them the ones finished, a lapsed one with why. It scrolls.
+  Newest first in both, each with its title and who speaks in it, every name standing alone as it would on
+  a bubble, and one waiting is marked *new* until a step has been taken in it and *begun* after.
+- **A conversation**: pressing a dialogue opens it, from its start or from where it was left. The scene at
+  the top, the feed under it, scrolling, and the stretch ahead shown a line at a time by *continue* at its
+  foot. Moving past the last line of a stretch takes the step it ends in. A dialogue choice's options are the
+  end of the feed and scroll with it, because a foot of options at half a phone leaves no room for what they
+  answer. A finished one opens to be read back. *Continue* is a word, in the middle of the foot and in the
+  same place every time, because it is the one thing to press while a conversation is read; it was a chevron
+  in the corner first, and was too easily missed. The way back to the list is a mark, drawn as the list it
+  goes back to. Both Adam's call. The options are what can be said, so they are words, each with what it
+  shows taking it will do.
+
+**In the spread** it takes a column down the right edge of the stage, set into it as the column on the left
+is set into the left edge, and top to bottom, because a conversation is long:
+
+- **Normal**: 480 wide, wider than the column on the left, so there is room for a picture in the scene. On a
+  narrow stage it is squeezed to a third, as the column on the left is.
+- **Opened out**: the right half of the stage.
+- **Put away**: a strip at the top right, with its name.
+
+It opens at the normal size. Where the column would meet the letter along the bottom on a narrow desktop,
+the letter keeps its room and the column stops above it. The column is decision record 0069's.
+
+**On a phone** it is a pane like any other, with no special treatment: it takes a bay, and the player opens
+it out when they want the whole screen for it.
+
+**It arrives the usual way.** A dialogue offered opens the pane: in the spread it appears on the right, or
+opens from its strip, and on a phone it takes the bay that is not the map's, at half, as an inspect window
+does. A pane already open stays as the player left it. What arrives is a dialogue waiting that the page has
+not been shown before, so the ones waiting when a page loads open it, as a letter does, and the same one
+never opens it twice: a step taken, a reconnect or the list sent again is not a dialogue offered.
+
+**A line can show something.** Shown, a line can take the camera to a place, or open an inspect window on
+what it names - the house, a key figure, a place - so a conversation about the quay can show the quay. In
+the spread the map moves beside the column and the window opens in the rail, as a click would open it. On a
+phone the conversation goes to half in its bay and the other bay shows what the line names, the map or the
+window. It is the page's, never the house's history, and the conversation is never what gives way to it.
+Adam's idea, from the camera going home by accident when a line paid.
 
 ### Not decided
 
-- **Who the characters are.** Key figures of a house, NPCs from the warped history, and whether another
-  player's house ever appears as a speaker.
-- **What the world remembers of a dialogue.** Whether lines are events, or only their outcomes are, and
-  what a reader of a house's stream sees of a conversation afterwards.
-- **What triggers one**, beyond "anything". The triggers are a list nobody has written.
-- **Where the art comes from** — the characters, their expressions, and the background scenes.
-- **Whether a dialogue can be left and returned to**, and what happens to one the player walks away from.
+- **Who the characters are.** Any character can speak, whoever they are to the house, and so can somebody
+  who is not a character at all, a messenger say. NPCs from the warped history, and whether another player's
+  house ever appears as a speaker, are open.
+- **What triggers one**, beyond "anything". The triggers are a list nobody has written, and so is where the
+  dialogues themselves are written: the first is a sample in the server, offered from the debug panel.
+- **Where the art comes from.** The scenes are to be a folder of Adam's own pictures, as the portraits are,
+  with placeholders until there are pictures; the characters' expressions are open.
+- **How the world shapes a dialogue choice** at the moment it is reached, rather than when the dialogue is
+  written, and which dialogue choices carry a roll's gamble.
+- **Which other kinds of requirement there are**, and when they come. A building still standing and a day
+  not yet come are the examples. Each is one more kind rather than new machinery, though a day also needs
+  something to wake for it, because nothing writes that a day has come.
+- **A conversation that comes back to a question** it has already asked, which the first ones cannot do.
 
 ### Where it stands
 
-Nothing of it exists. No event, no frame, no component. `ARCHITECTURE.md` records what showing one would
-ask of the client, and it is on the roadmap under Later.
+The offer is in the source. A dialogue checks itself when it is made, so
+one that could loop, or that leads to a line it does not have, is refused before anything is written, and
+`OfferDialogue` writes it whole on the house's stream, where the house keeps every one it has open. An
+option of a choice can grant a resource too, on the wire from version 14. `CompleteDialogueStep` takes a step
+where the walk says one is open, and writes what the line gives, and the end when it ends it, from the same
+decision, so a reward is paid once on every path; a conversation of forty lines writes a handful of events.
+The debug panel's Dialogues section offers a sample, a letter from the coast spoken by the house's first key
+figure and a messenger, from wire version 15, and the event page shows what was offered whole. A read model
+keeps every dialogue a house was offered and how far each has got, and the player is sent each one as far as
+it has reached, from wire version 16: the lines past the next step, what a line will give and the
+requirements stay on the server. An option can spend, from version 17, and is refused while the house cannot
+pay, and from version 18 each option carries its reveal impact. A speaker's death ends every open dialogue they
+speak in, as lost, naming who died. Nothing in the world offers one yet. The pane stands in the column
+down the right from the house's first dialogue, at its three sizes, and on a phone navigation lists it;
+it lists the dialogues waiting and finished, a lapsed one saying why, and a dialogue offered opens it;
+pressing one opens the conversation, which is played through in the pane: the stretch a line at a time,
+the options at the end of the feed, and each step sent from there, on the wire from version 19. The
+speakers have a portrait and a name on every bubble, the key figures' own frame, and a messenger the
+frame's bust. What a line gives or costs is written under it in the feed, the resource's mark and the
+amount, as the house card moves with it; a lapsed dialogue ends on its closing line, *Sadly, X died before
+this could be finished*, in the interface's words; and an option the house cannot pay for is refused in the
+pane, under the options, as well as in the log. There is no scene yet, and no line shows anything. The
+debug panel's Dialogues section offers a dialogue and does nothing else, and a requirement is never sent to
+a page. Its shape is decided in decision record 0071: a dialogue offered whole on the house's stream; only
+its dialogue choices, and the lines that give something or end it, recorded; what a line gives written as the
+world's own event beside the step; and hidden requirements that end a dialogue when one fails, with the
+server holding back what the player has not reached.
+`docs/plans/character-dialogue.md` is the order it is built in, one commit a step, and experiment 0014 is
+what it is meant to show. `ARCHITECTURE.md` says what it asks of the server and the client.
 
 ---
 
@@ -571,8 +669,8 @@ wherever there is room: opened out in the spread, below a scroll at half a phone
 on one. A house gains and loses key figures in
 its own history, holds nine at most and never the same character twice, and says
 whether a character is one of its own without writing anything, which is how every lever naming a
-character is let through or refused. When a character dies the mourning writes the loss into every house
-that held them. A player is sent their living key figures, in the order they joined, on arriving and
+character is let through or refused. When a character dies, every house that held them loses them. A player
+is sent their living key figures, in the order they joined, on arriving and
 whenever one of them changes, and the commands that take one in, change a stat, age one, give another
 portrait and kill one are on the wire from version 6. Decision record 0055 is the shape.
 `docs/plans/characters-and-key-figures.md` has the rest in order, one commit a step. Opened out, the

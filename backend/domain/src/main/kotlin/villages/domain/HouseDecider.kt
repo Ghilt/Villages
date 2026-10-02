@@ -34,6 +34,12 @@ object HouseDecider : Decider<HouseCommand, House, HouseEvent> {
             if (state is House.Founded && command.choice.options.any { it.effect is Effect.FoundAt }) {
                 throw HouseError.AlreadyFounded
             }
+            // And one that would give a house something, or take something from it, is meaningless before there
+            // is a house to do it to.
+            val givesOrTakes = command.choice.options.any { it.effect is Effect.Grant || it.effect is Effect.Spend }
+            if (state is House.NotFounded && givesOrTakes) {
+                throw HouseError.NoSuchHouse
+            }
             listOf(
                 PlayerGivenChoice(
                     houseId = command.houseId,
@@ -137,7 +143,78 @@ object HouseDecider : Decider<HouseCommand, House, HouseEvent> {
                     worldTime = command.worldTime,
                     recordedAt = command.recordedAt,
                 ),
-            ) + follows(taken.effect, command, state)
+            ) + follows(
+                taken.effect, state, command.houseId, command.player, command.worldTime, command.recordedAt,
+            )
+        }
+
+        // Several can be open at once, and the dialogue has checked itself already, so what is left to the house
+        // is that it exists and has not been offered this one before. See decision record 0071.
+        is OfferDialogue -> {
+            val house = founded(state)
+            if (command.dialogue.id in house.offeredDialogues) {
+                throw HouseError.DialogueAlreadyOffered
+            }
+            listOf(
+                PlayerOfferedDialogue(
+                    houseId = command.houseId,
+                    player = house.player,
+                    dialogue = command.dialogue,
+                    worldTime = command.worldTime,
+                    recordedAt = command.recordedAt,
+                ),
+            )
+        }
+
+        // The step, what the line does and the end come out of one decision, as an action and its effect do,
+        // so they are appended together and never seen apart. The walk says where a step may be taken, and
+        // nothing else is, which is what pays each line once on every path. See decision record 0071.
+        is CompleteDialogueStep -> {
+            val house = founded(state)
+            val open = house.openDialogues.firstOrNull { it.dialogue.id == command.dialogueId }
+                ?: throw when (command.dialogueId) {
+                    in house.offeredDialogues -> HouseError.DialogueOver
+                    else -> HouseError.NoSuchDialogue
+                }
+            if (!open.walk().allows(command.lineId)) {
+                throw HouseError.NotTheNextStep
+            }
+            val line = checkNotNull(open.dialogue.line(command.lineId)) { "the walk allowed a line the dialogue lacks" }
+            val consequences = line.effects.flatMap {
+                follows(it, state, command.houseId, house.player, command.worldTime, command.recordedAt)
+            }
+            val ends = when (line.then) {
+                Then.End -> listOf(
+                    PlayerCompletedDialogue(command.houseId, house.player, open.dialogue.id, command.worldTime, command.recordedAt),
+                )
+                else -> emptyList()
+            }
+            listOf(
+                PlayerCompletedDialogueStep(
+                    houseId = command.houseId,
+                    player = house.player,
+                    dialogueId = open.dialogue.id,
+                    lineId = command.lineId,
+                    worldTime = command.worldTime,
+                    recordedAt = command.recordedAt,
+                ),
+            ) + consequences + ends
+        }
+
+        // What a failed requirement ends is the house's own rule: every open dialogue that needed it lapses,
+        // all in one decision, and a failure that touches none writes nothing. See decision record 0071.
+        is FailRequirement -> {
+            val house = founded(state)
+            house.openDialogues.filter { command.requirement in it.dialogue.needs() }.map { open ->
+                PlayerLostDialogue(
+                    houseId = command.houseId,
+                    player = house.player,
+                    dialogueId = open.dialogue.id,
+                    because = command.requirement,
+                    worldTime = command.worldTime,
+                    recordedAt = command.recordedAt,
+                )
+            }
         }
 
         is TakeKeyFigure -> {
@@ -216,23 +293,49 @@ object HouseDecider : Decider<HouseCommand, House, HouseEvent> {
         }
     }
 
-    /** What an option's effect records, beyond the action itself. */
-    private fun follows(effect: Effect, command: TakeAction, state: House): List<HouseEvent> = when (effect) {
+    /**
+     * What an effect records, beyond the action or the step that set it off, for this house and its player at the
+     * command's two times. Choices and dialogues share it, so a new effect is one branch here for both.
+     */
+    @Suppress("LongParameterList")
+    private fun follows(
+        effect: Effect,
+        state: House,
+        houseId: HouseId,
+        player: PlayerId,
+        worldTime: WorldTime,
+        recordedAt: Instant,
+    ): List<HouseEvent> = when (effect) {
         is Effect.FoundAt -> when (state) {
             is House.Founded -> throw HouseError.AlreadyFounded
             is House.NotFounded -> listOf(
                 HouseFounded(
-                    houseId = command.houseId,
-                    player = command.player,
+                    houseId = houseId,
+                    player = player,
                     name = effect.name,
                     seat = effect.seat,
                     significance = FOUNDING_SIGNIFICANCE,
                     banner = effect.banner,
-                    resources = emptyStocks(command.recordedAt),
-                    worldTime = command.worldTime,
-                    recordedAt = command.recordedAt,
+                    resources = emptyStocks(recordedAt),
+                    worldTime = worldTime,
+                    recordedAt = recordedAt,
                 ),
             )
+        }
+
+        // Nothing gives to a house that does not exist - a choice that grants is never given to one, and a
+        // dialogue is only offered to a founded house - so this refusal is not reached. It is here because what
+        // a state can be given is the decider's rule, not the giver's.
+        is Effect.Grant -> {
+            founded(state)
+            listOf(HouseResourceGranted(houseId, effect.resource, effect.amount, worldTime, recordedAt))
+        }
+
+        // What an option costs is refused when the house has not that much free, as spending is, and then the
+        // action or the step is refused with it: the player answers otherwise. See decision record 0071.
+        is Effect.Spend -> {
+            enough(founded(state), effect.resource, effect.amount, recordedAt)
+            listOf(HouseResourceSpent(houseId, effect.resource, effect.amount, worldTime, recordedAt))
         }
     }
 
@@ -307,6 +410,39 @@ object HouseDecider : Decider<HouseCommand, House, HouseEvent> {
         is PlayerTookAction -> when (state) {
             is House.NotFounded -> state.copy(pending = null)
             is House.Founded -> state.copy(pending = null)
+        }
+
+        is PlayerOfferedDialogue -> when (state) {
+            is House.NotFounded -> state
+            is House.Founded -> state.copy(
+                openDialogues = state.openDialogues + OpenDialogue(event.dialogue),
+                offeredDialogues = state.offeredDialogues + event.dialogue.id,
+            )
+        }
+
+        is PlayerCompletedDialogueStep -> when (state) {
+            is House.NotFounded -> state
+            is House.Founded -> state.copy(
+                openDialogues = state.openDialogues.map { open ->
+                    if (open.dialogue.id == event.dialogueId) open.copy(taken = open.taken + event.lineId) else open
+                },
+            )
+        }
+
+        // A dialogue that has ended, finished or lost, is no longer open, and its id stays among those offered,
+        // so a step on it is refused as over rather than as unknown.
+        is PlayerCompletedDialogue -> when (state) {
+            is House.NotFounded -> state
+            is House.Founded -> state.copy(
+                openDialogues = state.openDialogues.filterNot { it.dialogue.id == event.dialogueId },
+            )
+        }
+
+        is PlayerLostDialogue -> when (state) {
+            is House.NotFounded -> state
+            is House.Founded -> state.copy(
+                openDialogues = state.openDialogues.filterNot { it.dialogue.id == event.dialogueId },
+            )
         }
 
         is HouseGainedKeyFigure -> when (state) {

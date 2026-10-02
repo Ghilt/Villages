@@ -1,0 +1,60 @@
+# The shape of the wire at version 17: every frame that may cross it, and the
+# fields it carries. Recorded rather than derived so that changing the wire is a deliberate
+# act with a version number on it. Both ends check themselves against this file, which is
+# also what pins the Kotlin constant and the TypeScript one to each other. See ADR 0037.
+#
+# <side> <name on the wire> <field>...   fields sorted; the discriminator is not a field.
+
+version 17
+
+client command command commandId
+client fogOfWar on
+client hello playerToken protocolVersion
+client ping t0
+client seeAll on
+client showRequirements on
+client subscribeCells cells
+client unsubscribeCells cells
+client viewTime at
+client watchEvents on
+client wipeWorld
+command addKeyFigure
+command ageCharacter characterId years
+command changePortrait characterId portrait
+command changeStat by characterId stat
+command foundHouse banner name seat
+command giveVision place
+command grantResource amount resource
+command killCharacter cause characterId
+command moveCharacter characterId place
+command offerDialogue sample
+command pledgeResource amount months purpose resource
+command releasePledge pledgeId
+command spendResource amount resource
+command takeAction choiceId optionId
+command takeOffTheMap characterId
+command takeVision visionId
+delta characterArrived character
+delta characterChanged character
+delta characterGone id version
+delta houseAppeared house
+delta houseChanged house
+effect foundAt banner name seat
+effect grant amount resource
+effect spend amount resource
+server batch deltas
+server commandAccepted commandId
+server commandRejected commandId reason
+server error code message
+server event causationId correlationId data eventType id stream streamVersion time
+server pong serverTime t0
+server resync cells
+server snapshot asOfVersion cell characters houses omitted omittedCharacters
+server takenOver message
+server welcome playerId serverTime world
+server worldWiped message
+server yourChoice choice
+server yourDialogues dialogues
+server yourHouse yours
+server yourKeyFigures keyFigures
+server yourSight points tension

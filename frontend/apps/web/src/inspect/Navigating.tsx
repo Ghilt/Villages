@@ -4,7 +4,7 @@ import { baysNow, put, type Which, watchBays, where } from '../stage/bays';
 import { Icon, Needle, pointAt } from '../stage/Icons';
 import { PaneSizeControl } from '../stage/PaneSizeControl';
 import { gatewayState, watchGateway } from '../net/gateway';
-import { NAVIGATION_PANE, type Pane, type Room, standingPanes } from '../stage/panes';
+import { NAVIGATION_PANE, type Pane, presentIn, type Room, standingPanes } from '../stage/panes';
 import { inspect } from './opening';
 import { paneIdOf } from './subjects';
 import { clearTrail, stepKey, trailNow, watchTrail } from './trail';
@@ -39,7 +39,7 @@ import { clearTrail, stepKey, trailNow, watchTrail } from './trail';
 export function Navigating({ room, along }: { room: Room; along: 'rows' | 'columns' | null }) {
   const trail = useSyncExternalStore(watchTrail, trailNow);
   const bays = useSyncExternalStore(watchBays, baysNow);
-  const pending = useSyncExternalStore(watchGateway, gatewayState).yourChoice !== null;
+  const present = presentIn(useSyncExternalStore(watchGateway, gatewayState));
 
   /*
    * Put away, and still a way somewhere.
@@ -48,9 +48,9 @@ export function Navigating({ room, along }: { room: Room; along: 'rows' | 'colum
    * the bay under the thumb without resizing anything, so it lands in a strip whenever the player left one
    * there - and a strip that could only offer the way back out of itself would make the compass a button
    * that does nothing useful half the time. So it carries the standing panes as marks: the map, your
-   * house, and the letter while a question stands. Pressing one sends that pane to the **other** bay,
-   * which is the only bay a 44-pixel list can usefully change - the player is looking at what is beside
-   * this, not at this.
+   * house, the letter while a question stands, and dialogue once there is any. Pressing one sends that
+   * pane to the **other** bay, which is the only bay a 44-pixel list can usefully change - the player is
+   * looking at what is beside this, not at this.
    *
    * Marks and no words, the tab bar's argument: there is no room for a name in 44 pixels, and these are
    * the same marks the same panes carry everywhere else. See decision records 0046 and 0047.
@@ -75,7 +75,7 @@ export function Navigating({ room, along }: { room: Room; along: 'rows' | 'colum
       <section className="navigate navigate--strip" aria-label="Go to">
         <span className="navigate__kind">Go to</span>
         <span className="navigate__ways">
-          {standingPanes(pending)
+          {standingPanes(present)
             .filter((pane) => pane.id !== NAVIGATION_PANE.id)
             .map((pane) => {
               const already = bays.holding[beside] === pane.id;
@@ -120,7 +120,7 @@ export function Navigating({ room, along }: { room: Room; along: 'rows' | 'colum
             <PaneSizeControl room={room} />
           </header>
           <ul className="navigate__list navigate__list--panes">
-            {standingPanes(pending).map((pane) => (
+            {standingPanes(present).map((pane) => (
               <Row
                 key={pane.id}
                 icon={pane.icon}

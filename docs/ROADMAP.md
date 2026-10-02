@@ -26,8 +26,8 @@ is no MongoDB and no RabbitMQ on the machine yet.
 ## Now
 
 Characters and key figures are built and waiting on Adam's eye. Nothing else here is started, and the four
-after them wait on the same thing. Fog of war, the exception, is under way a step at a time, and the UI
-component library is built and waiting on Adam's eye.
+after them wait on the same thing. Fog of war, the exception, is under way a step at a time, and so is
+character dialogue, the newest; the UI component library is built and waiting on Adam's eye.
 
 - **Characters and key figures**: the people of the world, each with a history of their own, and the
   house's tie to the few it acts through, shown in a pane in the corner beside the house status. The shape
@@ -41,6 +41,15 @@ component library is built and waiting on Adam's eye.
   sight, the fog drawn from it over the world and under the signs, vision given outright, the server
   holding back what the fog hides, and the surface tension that joins circles close together are built, and
   the scenery is grown from the stands the gateway sends, only those on revealed ground, which a page cannot fetch for itself: all of step 8. Adam's own mechanic, asked for on 2026-09-26.
+- **Character dialogue**: people talking to each other, offered to a house whole and stepped through in a
+  pane of its own down the right of the spread, paying the house as it goes, and lapsing when a requirement
+  the player never sees fails. The shape is decision record 0071 and the steps, one commit each, are in
+  `docs/plans/character-dialogue.md`; the hypothesis is experiment 0014. Planned on 2026-09-27 from Adam's
+  own description. The offer, the walk and the step are built on the server, the debug panel offers a
+  sample and does nothing else, and a speaker's death ends their dialogues as lost. The pane stands in a
+  column down the right of the spread, 0069, drawn in the page, 0070, opens when a dialogue is offered, and
+  lists them, waiting and finished; a dialogue is played through in it, with a portrait beside every line and
+  what a line gave under it; nothing in the world offers one.
 - **The UI component library**: every component the interface is built from, painted art placed by CSS,
   shown at `/admin/inspect-ui-components` before it is used, with placeholders copied from Adam's
   moodboard. The shape is decision record 0068, the method `UI-COMPONENTS.md`, and the steps, one commit
@@ -63,9 +72,6 @@ Wanted, not started, and each needs a hypothesis in `docs/experiments/` before a
 
 - **The fate engine**, and the choice roll built on it: a real roll from the house's state rather than a
   founding choice handed out on arrival. See `MECHANICS.md` and `ARCHITECTURE.md`.
-- **Character dialogue**: people talking to each other, and the mechanic storylines are carried in. See
-  `MECHANICS.md`; what it asks of the client is in `ARCHITECTURE.md`, and one of its questions - the DOM or
-  a Pixi surface - wants deciding before much of it is written.
 - **A responsive interface.** Both forms have a layout now: the stage folds into two bays below 600 on its
   shorter side and unfolds at 660 (0040), and the spread is tiles on a map that never overlap (0041). What
   goes in them is settled too. The corner tabs between the house status and **navigation** (0042); the
@@ -86,6 +92,11 @@ Wanted, not started, and each needs a hypothesis in `docs/experiments/` before a
   credited. The map used to do it and did it on one renderer of six, so it does not any more (0050); the
   credit is in `AUTHORING-THE-WORLD.md` and there is nowhere in the game a player could find it. An about
   or credits surface, before anything is released.
+- **Closing the instruments.** The event page and the debug panel's switches are open to anybody's socket:
+  the event page is fed every stored event whole, dialogues and their requirements included, and the frame
+  that lifts the fog is a frame any connection can send. Harmless in a pre-alpha, and it has to be closed
+  before any dialogue carries the setting's secret, which the server otherwise holds back (0071). The frame
+  that showed a dialogue's requirements went on 2026-10-01, with the switch that sent it.
 - **The inspect window**, beyond a house and an area: what it says about a subject once there is more than
   a name and a treasury to say, where its links come from, and whether it is a card or a paper on the desk.
   See `MECHANICS.md`.

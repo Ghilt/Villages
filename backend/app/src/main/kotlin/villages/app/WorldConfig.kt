@@ -6,13 +6,15 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import villages.application.AnonymousTokens
 import villages.application.Arrival
+import villages.application.BrokenRequirements
+import villages.application.CharacterDeaths
+import villages.application.DialogueService
 import villages.application.Dice
 import villages.application.FoundHouseService
 import villages.application.FreshIds
 import villages.application.KeyFigureService
 import villages.application.Later
 import villages.application.MonthlyWorldClock
-import villages.application.Mourning
 import villages.application.Pledges
 import villages.application.Portraits
 import villages.application.Stands
@@ -28,6 +30,7 @@ import villages.gateway.Gateway
 import villages.occurrent.InMemoryWorld
 import villages.projections.CharactersProjection
 import villages.projections.ChoicesProjection
+import villages.projections.DialoguesProjection
 import villages.projections.HousesProjection
 import villages.projections.RecentEventsProjection
 import villages.projections.SightProjection
@@ -125,6 +128,15 @@ class WorldConfig {
     fun visions(world: InMemoryWorld, clock: Clock, worldClock: WorldClock, ids: FreshIds): VisionService =
         VisionService(world.executor, clock = { clock.instant() }, world = worldClock, ids = ids)
 
+    /** Offering a house a dialogue, spoken by its key figures as the read model has them. See decision 0071. */
+    @Bean
+    fun dialogues(
+        world: InMemoryWorld,
+        characters: CharactersProjection,
+        clock: Clock,
+        worldClock: WorldClock,
+    ): DialogueService = DialogueService(world.executor, characters, clock = { clock.instant() }, world = worldClock)
+
     @Bean
     fun takeAction(world: InMemoryWorld, clock: Clock, worldClock: WorldClock): TakeActionService =
         TakeActionService(world.executor, clock = { clock.instant() }, world = worldClock)
@@ -171,8 +183,17 @@ class WorldConfig {
 
     /** Writes a character's death into every house that held them. See decision record 0055. */
     @Bean(destroyMethod = "close")
-    fun mourning(world: InMemoryWorld, later: ScheduledLater, keyFigures: KeyFigureService): Mourning =
-        Mourning(world.feed, later, keyFigures)
+    fun characterDeaths(world: InMemoryWorld, later: ScheduledLater, keyFigures: KeyFigureService): CharacterDeaths =
+        CharacterDeaths(world.feed, later, keyFigures)
+
+    /** Carries a broken requirement to every house with a dialogue that needs it. See decision record 0071. */
+    @Bean(destroyMethod = "close")
+    fun brokenRequirements(
+        world: InMemoryWorld,
+        later: ScheduledLater,
+        clock: Clock,
+        worldClock: WorldClock,
+    ): BrokenRequirements = BrokenRequirements(world.feed, later, world.executor, { clock.instant() }, worldClock)
 
     /** The map's read model, folded from the feed. In memory, so it starts empty with the store. */
     @Bean(destroyMethod = "close")
@@ -194,6 +215,10 @@ class WorldConfig {
     @Bean(destroyMethod = "close")
     fun sights(world: InMemoryWorld): SightProjection = SightProjection(world.feed)
 
+    /** Every dialogue each house was offered, and how far each has got, folded from the same feed. See 0071. */
+    @Bean(destroyMethod = "close")
+    fun dialogueRows(world: InMemoryWorld): DialoguesProjection = DialoguesProjection(world.feed)
+
     /**
      * Emptying the development world: the store and every read model folded from it, in one act, so that
      * no projection is left holding a house whose events are gone. See decision record 0036.
@@ -207,7 +232,9 @@ class WorldConfig {
         recentEvents: RecentEventsProjection,
         characters: CharactersProjection,
         sights: SightProjection,
-        mourning: Mourning,
+        dialogueRows: DialoguesProjection,
+        characterDeaths: CharacterDeaths,
+        brokenRequirements: BrokenRequirements,
     ): WorldWipe = WorldWipe {
         world.wipe().also {
             houses.reset()
@@ -215,7 +242,9 @@ class WorldConfig {
             recentEvents.reset()
             characters.reset()
             sights.reset()
-            mourning.reset()
+            dialogueRows.reset()
+            characterDeaths.reset()
+            brokenRequirements.reset()
         }
     }
 
@@ -237,6 +266,8 @@ class WorldConfig {
         characters: CharactersProjection,
         sights: SightProjection,
         visions: VisionService,
+        dialogues: DialogueService,
+        dialogueRows: DialoguesProjection,
         stands: Stands,
     ): Gateway = Gateway(
         tokens = AnonymousTokens,
@@ -257,6 +288,8 @@ class WorldConfig {
         onTheMap = characters,
         sights = sights,
         visions = visions,
+        dialogues = dialogues,
+        dialogueRows = dialogueRows,
         stands = stands,
     )
 }

@@ -93,6 +93,44 @@ data class TakeAction(
 ) : HouseCommand
 
 /**
+ * Offer this house a dialogue, whole. Refused for a house that does not exist, and for a dialogue it was
+ * offered before: the id is worked out from the command that offered it, so the same command sent twice is
+ * refused rather than doubled. Who it reaches is the house's player. See decision record 0071.
+ */
+data class OfferDialogue(
+    override val houseId: HouseId,
+    val dialogue: Dialogue,
+    val worldTime: WorldTime,
+    val recordedAt: Instant,
+) : HouseCommand
+
+/**
+ * Take one step through a dialogue the house has open: an option of the dialogue choice pending, or the line the
+ * stretch being read ends in. Anything else is refused, which is what pays a line's reward once on every path.
+ * What the line does, and the end when it ends the dialogue, follow from the same decision. See decision
+ * record 0071.
+ */
+data class CompleteDialogueStep(
+    override val houseId: HouseId,
+    val dialogueId: DialogueId,
+    val lineId: LineId,
+    val worldTime: WorldTime,
+    val recordedAt: Instant,
+) : HouseCommand
+
+/**
+ * A requirement has failed for good: every open dialogue of this house that needed it lapses, in one decision,
+ * and a failure that touches none of them writes nothing, so a replay does no harm. Sent by whatever heard the
+ * event that broke it; what the failure ends is the house's own rule. See decision record 0071.
+ */
+data class FailRequirement(
+    override val houseId: HouseId,
+    val requirement: Requirement,
+    val worldTime: WorldTime,
+    val recordedAt: Instant,
+) : HouseCommand
+
+/**
  * Give the house vision of a place, outright: it sees a circle about the place from this world-day until the
  * vision is taken away. The debug panel's lever today, and what a storyline giving sight of a far coast will
  * issue. See decision record 0061.

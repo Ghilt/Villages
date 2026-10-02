@@ -115,6 +115,32 @@ Some events settle a pending choice implicitly. A house founded by other means, 
 seed, has no use for a pending founding choice, so `evolve(HouseFounded)` clears it. Write such
 settlements in `evolve`, with the reason in a comment, and nowhere else.
 
+### Something long, offered whole and stepped through: the dialogue pattern
+
+The choice pattern stretched over many moments, for a thing too long to record press by press. A
+dialogue is the first; decision record 0071 is the shape.
+
+1. **Offered whole**, on the house's own stream: `PlayerOfferedDialogue` carries every line and every
+   branch, so the roads not taken are history, as a choice's are. It checks itself when it is made,
+   so one that could loop or that names a line it lacks never reaches the store, and its id is worked
+   out from the command that offered it, so a resend is refused rather than doubled.
+2. **Only the steps that matter are recorded**: `PlayerCompletedDialogueStep` for an option taken or a
+   line reached that gives something, is marked, or ends it, with ids and nothing else. The rest is
+   rebuilt by one pure function, `Dialogue.walk`, from the offer and the steps; the decider allows a
+   step only where the walk says one is open, and what the player is sent comes from the same walk.
+3. **What a step gives is the world's own event, from the same decision**, exactly as an option's
+   effect: the step, then what it gives, then `PlayerCompletedDialogue` when the line ends it. There is
+   no command for finishing, because the end is a step.
+
+4. **What it depends on fails in the house's own rules**, carried by one listener. A requirement is a
+   value, `requirementsBrokenBy` says which an event breaks, and the listener for broken requirements sends
+   each house that depends on one `FailRequirement`; the house lapses what it ends, as
+   `PlayerLostDialogue`. A new kind of requirement is a case and a branch, and the listener never changes.
+
+A new kind of line costs nothing but its words; a new kind of effect is one branch of `follows`, which
+choices and dialogues share, and its `kind` in the store. A rule about where a step may be taken belongs
+in the walk, so the decider and the page cannot come to disagree.
+
 ### A rate that changes
 
 A resource is a `Stock` - `{ total, ratePerSecond, asOf }` (decision 0006): an event when the rate changes,
@@ -137,8 +163,9 @@ and `CheckRoomForKeyFigure` the second. The rule stays in `decide`, and nothing 
 house.
 
 **When such a thing ends, a reaction carries the end to every house tied to it**, because the end is on
-the thing's stream and the losses are on the houses', and no one decision writes both. The mourning is the
-first: see `ARCHITECTURE.md` on what acts on its own for the rules a reaction keeps.
+the thing's stream and the losses are on the houses', and no one decision writes both. The listener for
+character deaths is the first: see `ARCHITECTURE.md` on what acts on its own for the rules a reaction
+keeps.
 
 `ARCHITECTURE.md` describes the pattern. Characters and the tie are in the source, and
 `docs/plans/characters-and-key-figures.md` is the order the rest of them gets built in.
@@ -200,6 +227,7 @@ What one new event costs, and the check that fails until each part exists.
 | The type row | `EventTypes` in `backend/infrastructure-occurrent` | `EventTypeCatalogueSpec` |
 | The catalogue row: type, payload in constructor order, meaning, producer, consumers | `docs/EVENTS.md` | `EventCatalogueSpec`, in both directions |
 | The stored form | `contracts/fixtures/events/<type>.json` | `EventFormatSpec` |
+| Each case of a sealed field - an effect, what follows a line, a requirement, an option's reveal impact - named by its `kind`, and written by some fixture | `EffectJson.kt` or `DialogueJson.kt` in `backend/infrastructure-occurrent`, and a fixture; an effect also has its view, and a `yourChoice` fixture carrying it | `EventFormatSpec` and `FramesContractSpec`, which want every case named and written |
 | Every projection's fold | `backend/projections` | the compiler: each `when` is exhaustive |
 | A frame, when the interface sees it directly | Kotlin `Frames.kt`, zod `frames.ts`, one fixture under `contracts/fixtures/frames` | both contract tests |
 | The wire moved, so its version does: `PROTOCOL_VERSION` up at both ends, and `contracts/protocol-v<n>.txt` recorded with `./gradlew :protocol:test -Dprotocol.record=true` | `backend/protocol`, `frontend/packages/protocol`, `contracts/` | `ProtocolShapeSpec` and `protocol.shape.test.ts`, which fail with the instructions (0037) |
@@ -214,6 +242,12 @@ Everything in `TESTING.md`'s definition, and then: the program is running on the
 make the mechanic happen from the parchment or from the debug panel without an agent in the loop; he
 can read what happened in the panel's event list, one line per event, the correlation tag joining what
 belongs together, and open any line to the whole event as stored.
+
+**The debug panel stands in for the world, never for the player.** A lever there makes happen what the world
+will one day do and nothing does yet - offering a dialogue, taking a key figure in - and what the player does
+with it is done in the player's own interface, however unfinished that is, and never in a lever beside it.
+Adam's word, 2026-10-01, when a dialogue's steps had been made levers in the panel: all the panel does for a
+dialogue is offer one, and playing it is the pane's.
 
 ## What this does not decide
 

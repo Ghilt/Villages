@@ -13,6 +13,7 @@ import { PROTOCOL_VERSION, describeDay } from '@villages/protocol';
 import type {
   ChoiceView,
   CommandPayload,
+  DialogueView,
   KeyFigureView,
   OptionView,
   Point,
@@ -25,6 +26,7 @@ import type {
 
 import { note, shortId } from '../debug/log';
 import { STAT_WORDS, fullName, whatChanged } from '../figures/describe';
+import { whatChangedIn } from '../dialogues/describe';
 import { describeSight } from '../fog/describe';
 import { chosenMaster } from '../map/masters';
 import { followStandsUnder, standsArrived } from '../sprites/scenery/standsFromServer';
@@ -68,6 +70,16 @@ export interface GatewayState {
    * lasting today, revealed is all of them, each with the gaps between close circles filled. See 0061, 0064.
    */
   yourSight: { points: readonly VisionPointView[]; tension: number } | null;
+  /**
+   * The player's dialogues, open and finished, as the gateway lets them be known, or null until it has said.
+   * What has not been reached is never here, and nor is any requirement. See decision record 0071.
+   */
+  yourDialogues: readonly DialogueView[] | null;
+  /**
+   * The last step through a dialogue the house refused, and why, until another is sent: which the pane says
+   * under the options, because a press that seems to do nothing is a press the player cannot read.
+   */
+  stepRefused: { dialogueId: string; lineId: string; reason: string } | null;
   /** The id of the command in flight, so the parchment can stop taking a second answer. */
   acting: string | null;
   houses: HousesState;
@@ -82,6 +94,8 @@ let state: GatewayState = {
   yourChoice: null,
   yourKeyFigures: null,
   yourSight: null,
+  yourDialogues: null,
+  stepRefused: null,
   acting: null,
   houses: NO_HOUSES,
   world: null,
@@ -100,6 +114,9 @@ let fogged = true;
  * asked. Forgotten when it is answered, and all of it when the connection closes.
  */
 const askedFrom = new Map<string, string>();
+
+/** The steps through a dialogue in flight, by command, so a refusal can say which line it refused. */
+const stepsOut = new Map<string, { dialogueId: string; lineId: string }>();
 
 /** The part of the log a command's answer goes in: where it was asked from, or the gateway's own. */
 function answerArea(commandId: string): string {
@@ -269,13 +286,21 @@ function heard(frame: ServerFrame): void {
       connection?.send({ type: 'subscribeCells', cells: frame.cells });
       return;
     case 'commandAccepted':
+      stepsOut.delete(frame.commandId);
       if (state.acting === frame.commandId) update({ acting: null });
       note(answerArea(frame.commandId), `command ${shortId(frame.commandId)} accepted`);
       return;
-    case 'commandRejected':
+    case 'commandRejected': {
+      // A step the house would not take is said in its pane, under the options, as well as in the log.
+      const step = stepsOut.get(frame.commandId);
+      stepsOut.delete(frame.commandId);
+      if (step !== undefined) {
+        update({ stepRefused: { ...step, reason: frame.reason } });
+      }
       if (state.acting === frame.commandId) update({ acting: null });
       note(answerArea(frame.commandId), `command ${shortId(frame.commandId)} rejected: ${frame.reason}`);
       return;
+    }
     case 'error':
       note('gateway', `error ${frame.code}: ${frame.message}`);
       if (frame.code === 'tooManyCells' || frame.code === 'badCell') {
@@ -325,6 +350,13 @@ function heard(frame: ServerFrame): void {
       update({ yourSight: { points: frame.points, tension: frame.tension } });
       return;
     }
+    case 'yourDialogues':
+      // Said before the state moves, because what is worth saying is the difference from what was held.
+      for (const line of whatChangedIn(state.yourDialogues, frame.dialogues)) {
+        note('dialogues', line);
+      }
+      update({ yourDialogues: frame.dialogues });
+      return;
     case 'worldWiped':
       // The world this window was looking at is gone. Arriving anew is the only honest thing to do, and
       // a reload is how a page arrives. See decision record 0036.
@@ -341,6 +373,7 @@ function heard(frame: ServerFrame): void {
         yourChoice: null,
         yourKeyFigures: null,
         yourSight: null,
+        yourDialogues: null,
       });
       note('gateway', `${frame.message}; this window is no longer playing`);
       connection?.close();
@@ -529,6 +562,7 @@ export function gateway(): Connection {
     }
     forgetTheHold();
     askedFrom.clear();
+    stepsOut.clear();
     update({ connection: 'closed', houses: NO_HOUSES });
     note('gateway', 'the connection closed; is the backend running? cd backend then ./gradlew :app:bootRun');
   });
@@ -708,6 +742,40 @@ export function killCharacter(figure: KeyFigureView, cause: string): void {
     type: 'killCharacter',
     characterId: figure.id,
     cause,
+  });
+}
+
+/*
+ * Offering the house a dialogue. Adam's lever, in the Dialogues section: nothing in the world offers one
+ * yet. It names one of the server's samples and sends none of its words. See decision record 0071.
+ */
+
+export function offerDialogue(sample: string, described: string): void {
+  act('dialogues', `offering ${described}`, { type: 'offerDialogue', sample });
+}
+
+/**
+ * Takes a step through one of the house's dialogues, from its pane: an option of a dialogue choice, or the line
+ * the stretch read ends on, by its id.
+ *
+ * A player's command, as taking an option of a choice is, so nothing else is sent until it is answered and
+ * the pane presses nothing meanwhile. Whether it is the next step is the house's to say, and a refusal comes
+ * back as one, so nothing here checks. See decision record 0071.
+ */
+export function completeDialogueStep(dialogueId: string, lineId: string, described: string): void {
+  if (connection === null || state.connection !== 'open' || state.acting !== null) {
+    return;
+  }
+  const commandId = crypto.randomUUID();
+  // A new step is a new answer to wait for, so the last refusal is no longer the thing to say.
+  update({ acting: commandId, stepRefused: null });
+  askedFrom.set(commandId, 'dialogues');
+  stepsOut.set(commandId, { dialogueId, lineId });
+  note('dialogues', `taking ${described} as ${shortId(commandId)}`);
+  connection.send({
+    type: 'command',
+    commandId,
+    command: { type: 'completeDialogueStep', dialogueId, lineId },
   });
 }
 

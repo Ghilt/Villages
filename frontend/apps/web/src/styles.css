@@ -2929,6 +2929,405 @@ body,
 }
 
 /*
+ * **Character dialogue**, standing in the column down the right edge.
+ *
+ * The parchment every pane is drawn on, set into the stage's right, top and bottom edges as the column on
+ * the left is set into the left, so the only edges it draws are the one facing the map and the foot it has
+ * when it stops above a letter or is put away. See decision record 0069.
+ */
+.dialogues {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--parchment);
+  border: 1px solid var(--parchment-edge);
+  border-width: 0 0 1px 1px;
+  box-shadow: -2px 0 18px var(--shadow);
+  pointer-events: auto;
+}
+
+.dialogues__head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: none;
+  padding: 0.45rem calc(0.4rem + var(--corner-right, 0px)) 0.4rem 0.75rem;
+  border-bottom: 1px solid var(--parchment-edge);
+}
+
+.dialogues__name {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: normal;
+  font-variant: small-caps;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/*
+ * The list: the dialogues waiting, and under them the ones finished. It scrolls, and the padding is on the
+ * scroller rather than a shorter list, so the last row scrolls out from under the compass on a phone.
+ */
+.dialogues__list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 0 calc(0.6rem + var(--corner-bottom, 0px));
+}
+
+/* Waiting, and Finished: the same small capitals the key figures and navigation head their lists with. */
+.dialogues__group {
+  margin: 0.75rem 0.75rem 0.3rem;
+  font-size: 0.72rem;
+  font-weight: normal;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.dialogues__none {
+  margin: 0 0.75rem;
+  font-size: 0.9rem;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.dialogues__rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dialogues__row {
+  border-top: 1px solid var(--parchment-edge);
+}
+
+.dialogues__row:last-child {
+  border-bottom: 1px solid var(--parchment-edge);
+}
+
+/*
+ * A dialogue: its title, with whether it is new or begun beside it, and who speaks in it under it. The whole
+ * row is the press that opens it, as a row of navigation is the press that goes there.
+ */
+.dialogues__open {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  column-gap: 0.6rem;
+  row-gap: 0.1rem;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  background: none;
+  font: inherit;
+  text-align: left;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.dialogues__open:hover {
+  background: rgba(157, 124, 42, 0.12);
+}
+
+.dialogues__title {
+  grid-column: 1;
+  font-size: 1.02rem;
+}
+
+.dialogues__progress {
+  grid-column: 2;
+  grid-row: 1;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.dialogues__line {
+  grid-column: 1 / -1;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+/* Lapsed: it ended where it stood, and the line under the title is why, said quietly. */
+.dialogues__row--lapsed .dialogues__line {
+  font-style: italic;
+}
+
+/*
+ * A conversation: the way back and its title at the top, the feed scrolling under them with the options at
+ * its end, and *continue* at its foot. The way back is a mark and *continue* a word, both Adam's call.
+ */
+.dialogues__back {
+  flex: none;
+  width: 1.7rem;
+  height: 1.7rem;
+  padding: 0.2rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.dialogues__back .icon {
+  opacity: 0.7;
+}
+
+.dialogues__back:hover .icon {
+  opacity: 1;
+}
+
+/* Padded at its foot clear of the compass, on a phone, so the last option scrolls out from under it. */
+.dialogues__feed {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 0.75rem 0.75rem calc(0.75rem + var(--corner-bottom, 0px));
+  list-style: none;
+  overflow-y: auto;
+}
+
+/* With *continue* under it the compass stands over the foot rather than the feed, so the last line read sits
+   just above the foot instead of a compass's height up from it. */
+.dialogues__feed--above-foot {
+  padding-bottom: 0.75rem;
+}
+
+/*
+ * A line said: the speaker's portrait, and beside it the bubble with who says it and the words, from the left
+ * or the right by the speaker's party. The portrait stands on the outer side and at the foot of the bubble,
+ * where its corner is squared off towards the face it comes from.
+ */
+.dialogues__said {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  max-width: 92%;
+}
+
+.dialogues__said--left {
+  align-self: flex-start;
+}
+
+.dialogues__said--right {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.dialogues__said .portrait {
+  flex: none;
+  width: 2.4rem;
+}
+
+.dialogues__bubble {
+  min-width: 0;
+  padding: 0.45rem 0.7rem 0.5rem;
+  border: 1px solid var(--parchment-edge);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.dialogues__said--left .dialogues__bubble {
+  border-bottom-left-radius: 2px;
+}
+
+.dialogues__said--right .dialogues__bubble {
+  border-bottom-right-radius: 2px;
+  background: rgba(157, 124, 42, 0.08);
+}
+
+.dialogues__speaker {
+  display: block;
+  font-size: 0.72rem;
+  font-variant: small-caps;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+}
+
+.dialogues__words {
+  margin: 0.1rem 0 0;
+  font-size: 0.98rem;
+  line-height: 1.35;
+}
+
+/*
+ * The foot, while there is a line to read: *continue* in the middle of it, the one thing to press while a
+ * conversation is being read, and in the same place every time so a thumb can stay on it. It steps in from
+ * both sides as far as the compass reaches into one of them on a phone, so it stays in the middle of the
+ * pane and clear of the compass, rather than growing a compass tall.
+ */
+.dialogues__foot {
+  display: flex;
+  justify-content: center;
+  flex: none;
+  padding: 0.55rem calc(0.75rem + var(--corner-right, 0px));
+  border-top: 1px solid var(--parchment-edge);
+}
+
+/* The dialogue choice, at the end of the feed: the options one under another, across its whole width. */
+.dialogues__choosing {
+  align-self: stretch;
+  margin-top: 0.2rem;
+}
+
+.dialogues__options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dialogues__option {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  width: 100%;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid var(--parchment-edge);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.4);
+  font: inherit;
+  text-align: left;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.dialogues__option:hover:not(:disabled) {
+  background: rgba(157, 124, 42, 0.12);
+}
+
+.dialogues__impact {
+  font-size: 0.78rem;
+  color: var(--gold);
+}
+
+/* Drawn in gold where the options are drawn in the parchment's edge, because it is the press to find. */
+.dialogues__continue {
+  min-width: 9.5rem;
+  padding: 0.4rem 1.5rem 0.5rem;
+  border: 1px solid var(--gold);
+  border-radius: 4px;
+  background: rgba(157, 124, 42, 0.16);
+  font: inherit;
+  font-size: 1.08rem;
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.dialogues__continue:hover:not(:disabled) {
+  background: rgba(157, 124, 42, 0.3);
+}
+
+/* A step is out: nothing is pressed until it is answered. */
+.dialogues__continue:disabled,
+.dialogues__option:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/*
+ * What a line did to the house, under it and between the two sides: the resource's own mark from the house
+ * card and the amount, in gold for what was paid and soft ink for what was spent.
+ */
+.dialogues__gains {
+  display: flex;
+  justify-content: center;
+  gap: 0.9rem;
+  align-self: center;
+  margin-top: -0.2rem;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.dialogues__gain {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--gold);
+}
+
+.dialogues__gain--spent {
+  color: var(--ink-soft);
+}
+
+.dialogues__mark {
+  flex: none;
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+/* The house card's marks are stroked, never filled, at the weight every mark is drawn at. */
+.dialogues__mark path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* A lapsed dialogue's closing line: the world moving on, said quietly at the end of the feed. */
+.dialogues__closing {
+  align-self: center;
+  max-width: 90%;
+  margin-top: 0.3rem;
+  font-size: 0.92rem;
+  font-style: italic;
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+/* A step the house would not take, said under the options it answers. */
+.dialogues__refused {
+  align-self: stretch;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: #8a3b2a;
+}
+
+/* Put away: its name, how many there are, and the way back, as a strip across the top of the column. */
+.dialogues--strip {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.6rem;
+  /* The compass is standing in the far end of this strip, so whatever the strip put there - the marks
+     on four of them, the word on the map's - steps in from the right rather than sitting under it. */
+  padding: 0 calc(0.3rem + var(--corner-right, 0px)) 0 0.75rem;
+}
+
+.dialogues--strip .dialogues__name {
+  flex: none;
+}
+
+.dialogues--strip .dialogues__count {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* In a bay it fills it edge to edge, as a window does, because a bay has no edge of the stage to sit into. */
+.stage[data-form='bays'] .bay--dialogues .dialogues {
+  border-width: 1px 0 0;
+  box-shadow: none;
+}
+
+/*
  * A strip that is a narrow upright sliver rather than a low wide band.
  *
  * Cut into columns - a phone in landscape - a put-away pane is 44 pixels **wide** and the whole height,
@@ -2962,6 +3361,7 @@ body,
   .inspect--strip,
   .navigate--strip,
   .choice--strip,
+  .dialogues--strip,
   .map-strip {
     /*
      * Reversed, so the marks are at the top and the name reads down from under them - the strip is 44
@@ -2979,6 +3379,7 @@ body,
   .inspect--strip .inspect__name,
   .navigate--strip .navigate__kind,
   .choice--strip .choice__aside,
+  .dialogues--strip .dialogues__name,
   .map-strip .map-strip__name {
     writing-mode: vertical-rl;
     /* The strip is the whole height of the stage, so the name has all of it to be trimmed against. */
@@ -2989,6 +3390,11 @@ body,
   .pane-size,
   .navigate__ways {
     flex-direction: column;
+  }
+
+  /* Turned, there is room down the strip for one name and it is the pane's. */
+  .dialogues--strip .dialogues__count {
+    display: none;
   }
 }
 

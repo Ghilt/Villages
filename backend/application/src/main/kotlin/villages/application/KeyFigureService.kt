@@ -105,8 +105,9 @@ class KeyFigureService(
     }
 
     /**
-     * A house loses one of its key figures, whoever's house it is. Not a lever: the mourning calls it when a
-     * character dies, and the house's own rule refuses a loss of somebody it does not hold.
+     * A house loses one of its key figures, whoever's house it is. Not a lever: the listener for character
+     * deaths calls it when a character dies, and the house's own rule refuses a loss of somebody it does not
+     * hold.
      */
     fun loseHeldBy(house: HouseId, characterId: CharacterId, provenance: Provenance) {
         houses.execute(LoseKeyFigure(house, characterId, world.today(), clock.now()), provenance)

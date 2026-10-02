@@ -6,6 +6,7 @@ import {
   CHOICE_PANE,
   CORNER,
   cramps,
+  DIALOGUE_PANE,
   HOUSE_PANE,
   KEY_FIGURES_PANE,
   MAP_PANE,
@@ -14,6 +15,8 @@ import {
   panesFor,
   panesIn,
   type PaneSize,
+  type Present,
+  presentIn,
   SHARED_TILES,
   SIZES,
   sizeAsked,
@@ -21,6 +24,11 @@ import {
   spreadWants,
   standingPanes,
 } from './panes';
+
+/** None of the panes that come and go; a question standing; a house that has been offered a dialogue. */
+const NONE: Present = { choice: false, dialogues: false };
+const ASKING: Present = { choice: true, dialogues: false };
+const TALKING: Present = { choice: false, dialogues: true };
 
 const NOTHING_ASKED: Asked = { heights: {}, tiles: {} };
 /** The corner asked to be one of its three sizes, which is the one thing about it a player can ask. */
@@ -30,7 +38,7 @@ const tallOf = (pane: Pane) => pane.tall!;
 
 describe('panesIn', () => {
   it('gathers the panes that declared themselves into one tile, in the order they were declared', () => {
-    expect(panesIn(panesFor([], false), 'bottomLeft').map((pane) => pane.id)).toEqual([
+    expect(panesIn(panesFor([], NONE), 'bottomLeft').map((pane) => pane.id)).toEqual([
       HOUSE_PANE.id,
       KEY_FIGURES_PANE.id,
       NAVIGATION_PANE.id,
@@ -38,7 +46,7 @@ describe('panesIn', () => {
   });
 
   it('puts a window in the column and the map in no tile at all', () => {
-    const panes = panesFor([{ kind: 'house', id: 'abc' }], false);
+    const panes = panesFor([{ kind: 'house', id: 'abc' }], NONE);
 
     expect(panesIn(panes, 'left')).toHaveLength(1);
     expect(panesIn(panes, 'floor').map((pane) => pane.id)).toEqual(['map']);
@@ -82,7 +90,7 @@ describe('the three sizes', () => {
 });
 
 describe('spreadWants', () => {
-  const panes = panesFor([], false);
+  const panes = panesFor([], NONE);
 
   it('makes a shared tile its own size, plus the strip of tabs', () => {
     expect(spreadWants(panes, NOTHING_ASKED).bottomLeft).toBe(CORNER.tall.small + TAB_BAR);
@@ -118,7 +126,7 @@ describe('spreadWants', () => {
   // A tile whose panes take turns, and that had no sizes of its own, would be sized by whichever tab came
   // first; this is what stops the next tabbed tile from quietly doing that.
   it('has sizes of its own for every tile whose panes take turns', () => {
-    const everything = panesFor([{ kind: 'house', id: 'abc' }], true);
+    const everything = panesFor([{ kind: 'house', id: 'abc' }], { choice: true, dialogues: true });
 
     for (const where of TILES) {
       if (isTabbed(where, panesIn(everything, where).length)) {
@@ -139,7 +147,7 @@ describe('spreadWants', () => {
 
   it('says whether anything is in the column above the corner', () => {
     expect(spreadWants(panes, NOTHING_ASKED).left).toBe(false);
-    expect(spreadWants(panesFor([{ kind: 'area', id: 'x' }], false), NOTHING_ASKED).left).toBe(true);
+    expect(spreadWants(panesFor([{ kind: 'area', id: 'x' }], NONE), NOTHING_ASKED).left).toBe(true);
   });
 });
 
@@ -151,18 +159,18 @@ describe('spreadWants', () => {
  */
 describe('the choice roll', () => {
   it('is not a pane at all until the world asks something', () => {
-    expect(standingPanes(false).map((pane) => pane.id)).not.toContain(CHOICE_PANE.id);
-    expect(standingPanes(true).map((pane) => pane.id)).toContain(CHOICE_PANE.id);
+    expect(standingPanes(NONE).map((pane) => pane.id)).not.toContain(CHOICE_PANE.id);
+    expect(standingPanes(ASKING).map((pane) => pane.id)).toContain(CHOICE_PANE.id);
   });
 
   it('takes the bottom middle, and asks for nothing when there is no question', () => {
-    expect(spreadWants(panesFor([], false), NOTHING_ASKED).bottomMiddle).toBeNull();
-    expect(spreadWants(panesFor([], true), NOTHING_ASKED).bottomMiddle).toBe(tallOf(CHOICE_PANE).full);
+    expect(spreadWants(panesFor([], NONE), NOTHING_ASKED).bottomMiddle).toBeNull();
+    expect(spreadWants(panesFor([], ASKING), NOTHING_ASKED).bottomMiddle).toBe(tallOf(CHOICE_PANE).full);
   });
 
   // It has the tile to itself, so there is no strip of tabs to pay for.
   it('does not share its tile, so it costs no tab bar', () => {
-    expect(panesIn(panesFor([], true), 'bottomMiddle')).toHaveLength(1);
+    expect(panesIn(panesFor([], ASKING), 'bottomMiddle')).toHaveLength(1);
   });
 
   // The one whose small form is a different drawing rather than less of the same thing.
@@ -178,6 +186,39 @@ describe('the choice roll', () => {
 });
 
 /**
+ * Character dialogue, which stands from the house's first dialogue on, in the column down the right edge.
+ *
+ * It opens at its normal width, where a tile of its own would open full, because opened out it is half the
+ * stage and a conversation arriving should not take half the map with it. See decision record 0069.
+ */
+describe('character dialogue', () => {
+  it('is not a pane at all until the house has been offered a dialogue', () => {
+    expect(standingPanes(NONE).map((pane) => pane.id)).not.toContain(DIALOGUE_PANE.id);
+    expect(standingPanes(TALKING).map((pane) => pane.id)).toContain(DIALOGUE_PANE.id);
+  });
+
+  // Finished ones are kept to be read back, so a house that has had one keeps the pane.
+  it('is there for any dialogue the house has, and for none before the first frame', () => {
+    expect(presentIn({ yourChoice: null, yourDialogues: null }).dialogues).toBe(false);
+    expect(presentIn({ yourChoice: null, yourDialogues: [] }).dialogues).toBe(false);
+  });
+
+  it('takes the column down the right edge, and asks for nothing when there is none', () => {
+    expect(spreadWants(panesFor([], NONE), NOTHING_ASKED).right).toBeNull();
+    expect(spreadWants(panesFor([], TALKING), NOTHING_ASKED).right).toBe('normal');
+  });
+
+  it('opens at its normal width, and asks for half the stage opened out and a strip put away', () => {
+    const at = (size: PaneSize): Asked => ({ heights: { [DIALOGUE_PANE.id]: size }, tiles: {} });
+    const panes = panesFor([], TALKING);
+
+    expect(sizeAsked(DIALOGUE_PANE, NOTHING_ASKED)).toBe('small');
+    expect(spreadWants(panes, at('full')).right).toBe('half');
+    expect(spreadWants(panes, at('strip')).right).toBe('strip');
+  });
+});
+
+/**
  * The corner: the house status, the key figures and navigation, one size whichever of them is up.
  *
  * Its normal size is the house card's whole height and it opens there; opened out, it is what the key
@@ -185,7 +226,7 @@ describe('the choice roll', () => {
  * change. See decision records 0055, 0056 and 0057.
  */
 describe('the corner', () => {
-  const panes = panesFor([], false);
+  const panes = panesFor([], NONE);
 
   it('opens at its normal size until the player asks for another, where a tile of its own opens full', () => {
     expect(sizeAsked(KEY_FIGURES_PANE, NOTHING_ASKED)).toBe('small');
@@ -208,7 +249,7 @@ describe('the corner', () => {
    */
   it('folds a letter to its carousel on a 1000-wide stage, while the corner reaches along the bottom', () => {
     const stage = { w: 1000, h: 900 };
-    const asking = panesFor([], true);
+    const asking = panesFor([], ASKING);
     const laidOut = (asked: Asked) =>
       bayLayout(stage, ['big', 'big'], spreadWants(asking, asked), 'spread').bays.bottomMiddle;
 
@@ -222,7 +263,7 @@ describe('the corner', () => {
    * line or two of it, which is the least a rail is worth keeping.
    */
   it('leaves the rail room for a window when it is opened out on the shortest spread', () => {
-    const opened = spreadWants(panesFor([{ kind: 'house', id: 'abc' }], false), cornerAt('full'));
+    const opened = spreadWants(panesFor([{ kind: 'house', id: 'abc' }], NONE), cornerAt('full'));
     const layout = bayLayout({ w: 1000, h: FOLDS_UNDER + 1 }, ['big', 'big'], opened, 'spread');
 
     expect(layout.form).toBe('spread');

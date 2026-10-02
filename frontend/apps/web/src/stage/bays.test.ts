@@ -294,7 +294,7 @@ describe('the corner, in the spread', () => {
     const { baysNow, askFor, show, stageIs } = await fresh();
     stageIs('spread', 'rows');
     askFor(HOUSE_PANE.id, 'full');
-    const panes = panesFor([], false);
+    const panes = panesFor([], { choice: false, dialogues: false });
     const before = baysNow();
 
     show('bottomLeft', NAVIGATION_PANE.id);
