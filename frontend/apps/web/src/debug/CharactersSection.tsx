@@ -1,4 +1,3 @@
-import { useSyncExternalStore } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
 import { ageOn } from '@villages/client-core';
@@ -6,7 +5,7 @@ import type { KeyFigureView, StatName } from '@villages/protocol';
 
 import { STATS_IN_ORDER, STAT_WORDS, fullName } from '../figures/describe';
 import { anotherPortrait, portraitsNow } from '../figures/portraits';
-import { gatewayState, watchGateway } from '../net/gateway';
+import { sessionStore } from '../net/gateway';
 import { note } from '../log/log';
 import { Section } from './Section';
 import {
@@ -18,6 +17,7 @@ import {
   moveCharacter,
   takeOffTheMap,
 } from './levers';
+import { useStore } from '../store/useStore';
 
 /** As many as a house may hold. The server refuses a tenth; the lever says so before it is pressed. */
 const MOST_KEY_FIGURES = 9;
@@ -65,15 +65,15 @@ interface CharactersSectionProps {
 }
 
 export function CharactersSection({ map }: CharactersSectionProps) {
-  const heard = useSyncExternalStore(watchGateway, gatewayState);
-  const yours = heard.yourHouse;
-  const figures = heard.yourKeyFigures ?? [];
-  const today = heard.world?.today ?? null;
-  const idle = heard.connection !== 'open' || yours === null;
+  const connection = useStore(sessionStore, (state) => state.connection);
+  const yours = useStore(sessionStore, (state) => state.yourHouse);
+  const figures = useStore(sessionStore, (state) => state.yourKeyFigures) ?? [];
+  const today = useStore(sessionStore, (state) => state.world?.today ?? null);
+  const idle = connection !== 'open' || yours === null;
   const full = figures.length >= MOST_KEY_FIGURES;
 
   const whyNot =
-    heard.connection !== 'open'
+    connection !== 'open'
       ? 'not connected to the world'
       : yours === null
         ? 'no house yet; found one in World first'

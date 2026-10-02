@@ -1,9 +1,10 @@
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useEffect, useState } from 'react';
 
 import { forgetWorstGap, hasNoSpriteMap, sceneryDrawn, sceneryMap } from '../sprites/scenery/sceneryCells';
 import type { SceneryDrawnTally } from '../sprites/scenery/sceneryCells';
-import { sceneryNow, setScenery, watchScenery } from '../sprites/scenery/settings';
+import { sceneryStore, setScenery } from '../sprites/scenery/settings';
 import { Section } from './Section';
+import { useStore } from '../store/useStore';
 
 /**
  * What the world is furnished with, how thickly, and what it costs.
@@ -51,7 +52,7 @@ function useSpriteMap(): ReturnType<typeof sceneryMap> {
 }
 
 export function ScenerySection() {
-  const how = useSyncExternalStore(watchScenery, sceneryNow);
+  const how = useStore(sceneryStore);
   const drawn = useDrawn();
   const map = useSpriteMap();
   const step = Math.max(0, DIALS.indexOf(how.dial));

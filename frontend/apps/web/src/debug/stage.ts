@@ -1,10 +1,13 @@
+import { createStore } from '@villages/client-core';
+import type { Readable } from '@villages/client-core';
+
 import { isShape, type StageMode } from '../stage/stageBox';
 
 /**
  * How the debug panel and the stage are arranged, remembered between reloads.
  *
- * A module store in the same shape as the eye, the log and the selection, so that the panel's header
- * can set it and the app can read it without either knowing about the other. Whether the panel is
+ * A store, the shape of the eye, the log and the selection, so that the panel's header can set it and the
+ * app can read it without either knowing about the other. Whether the panel is
  * shut lives here rather than inside the panel because the stage's size depends on it: a panel
  * minimised to its badge is a panel of no width, and the room has to go somewhere.
  */
@@ -45,39 +48,20 @@ function logToBegin(): boolean {
   }
 }
 
-let mode: StageMode = readBack();
-let shut = shutToBegin();
-let log = logToBegin();
-let listeners: Array<() => void> = [];
-
-export function stageMode(): StageMode {
-  return mode;
+export interface StageArrangement {
+  /** What the stage is asked to be: the whole of what is left, a shape, or a size dragged to. */
+  mode: StageMode;
+  /** Whether the panel is minimised to its badge, which is a panel of no width. */
+  shut: boolean;
+  /** Whether the log column is open beside the controls, which is room the stage does not have. */
+  log: boolean;
 }
 
-export function panelIsShut(): boolean {
-  return shut;
-}
+const stage = createStore<StageArrangement>({ mode: readBack(), shut: shutToBegin(), log: logToBegin() });
 
-/** Whether the log column is open beside the controls, which is room the stage does not have. */
-export function logIsOpen(): boolean {
-  return log;
-}
-
-export function watchStage(listener: () => void): () => void {
-  listeners = [...listeners, listener];
-  return () => {
-    listeners = listeners.filter((kept) => kept !== listener);
-  };
-}
-
-function tellThem(): void {
-  for (const listener of listeners) {
-    listener();
-  }
-}
+export const stageStore: Readable<StageArrangement> = stage;
 
 export function setStage(next: StageMode): void {
-  mode = next;
   try {
     localStorage.setItem(
       REMEMBERED,
@@ -86,7 +70,7 @@ export function setStage(next: StageMode): void {
   } catch {
     // As above: the size not surviving a reload is a smaller loss than not being able to set it.
   }
-  tellThem();
+  stage.set({ mode: next });
 }
 
 /**
@@ -97,13 +81,12 @@ export function setStage(next: StageMode): void {
  * phone-shaped stage with nothing whatever over it.
  */
 export function setPanelShut(next: boolean): void {
-  shut = next;
   try {
     localStorage.setItem(OPEN_KEY, next ? 'no' : 'yes');
   } catch {
     // A browser that will not remember the choice is not a reason to fail.
   }
-  tellThem();
+  stage.set({ shut: next });
 }
 
 /**
@@ -113,13 +96,12 @@ export function setPanelShut(next: boolean): void {
  * so the stage has to know. Folded, it is the `log` toggle in the panel's header and nothing else.
  */
 export function setLogOpen(next: boolean): void {
-  log = next;
   try {
     localStorage.setItem(LOG_KEY, next ? 'yes' : 'no');
   } catch {
     // As above.
   }
-  tellThem();
+  stage.set({ log: next });
 }
 
 /**
@@ -131,5 +113,5 @@ export function setLogOpen(next: boolean): void {
  * and a third remembered one would make it read as three.
  */
 export function toggleShape(shape: 'phone' | 'landscape'): void {
-  setStage(mode === shape ? 'fill' : shape);
+  setStage(stage.get().mode === shape ? 'fill' : shape);
 }

@@ -1,17 +1,16 @@
 import { Fragment, useEffect } from 'react';
 
-import { useSyncExternalStore } from 'react';
-
 import { Portrait } from '../figures/Portrait';
 import { focusOn } from '../map/focus';
 import { Icon } from '../stage/Icons';
 import { PaneSizeControl } from '../stage/PaneSizeControl';
-import { baysNow, put, watchBays, type Which } from '../stage/bays';
+import { baysStore, put, type Which } from '../stage/bays';
 import { MAP_PANE, type Room, SUBJECT_MARKS } from '../stage/panes';
 import type { Description, Link } from './describe';
 import { inspect, stopInspecting } from './opening';
 import { paneIdOf, type Subject } from './subjects';
 import { remember } from './trail';
+import { useStore } from '../store/useStore';
 
 /**
  * **Inspect window**: what one thing in the world is, and the ways on from it.
@@ -94,7 +93,7 @@ interface InspectWindowProps {
 }
 
 export function InspectWindow({ subject, said, along, room }: InspectWindowProps) {
-  const bays = useSyncExternalStore(watchBays, baysNow);
+  const bays = useStore(baysStore);
 
   /*
    * The bay this window is not in, which is where everything it offers opens.

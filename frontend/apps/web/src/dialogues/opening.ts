@@ -1,6 +1,6 @@
 import type { DialogueView } from '@villages/protocol';
 
-import { askFor, awayFromTheMap, baysNow, formNow, roomToRead, takeOver } from '../stage/bays';
+import { baysStore, askFor, awayFromTheMap, formNow, roomToRead, takeOver } from '../stage/bays';
 import { DIALOGUE_PANE, sizeAsked } from '../stage/panes';
 
 /**
@@ -41,7 +41,7 @@ export function openOnArrival(dialogues: readonly DialogueView[]): void {
     return;
   }
   if (formNow() !== 'bays') {
-    if (sizeAsked(DIALOGUE_PANE, baysNow()) === 'strip') {
+    if (sizeAsked(DIALOGUE_PANE, baysStore.get()) === 'strip') {
       askFor(DIALOGUE_PANE.id, 'small');
     }
     return;

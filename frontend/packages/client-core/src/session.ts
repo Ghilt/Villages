@@ -56,9 +56,12 @@ export interface Session {
   connect(options: ConnectOptions): Connection;
   /** Follows the camera: see the follower. Safe before the welcome; the request waits for it. */
   follow(cells: string[]): void;
-  /** Opens or closes the eye on this connection. Safe before the welcome, which opens it. See 0038. */
+  /**
+   * Sets significance aside on this connection, or takes it back: see everything, which is not the player's eye.
+   * Held in the state, and safe before the welcome, which says it again. See 0038.
+   */
   seeAll(on: boolean): void;
-  /** Lifts the fog on this connection or lets it fall. Safe before the welcome, which lifts it. See 0061. */
+  /** Lets the fog fall on this connection, or lifts it. Held in the state, and said again at the welcome. See 0061. */
   fogOfWar(on: boolean): void;
   /** Empties the development world, for everyone connected to it. See 0036. */
   wipeWorld(): void;
@@ -72,7 +75,7 @@ export interface Session {
 
 /**
  * The page's side of the conversation with the gateway: its state, folded from what each mechanic folds; the
- * cells the camera follows; the commands; and the two switches, the eye and the fog. It sends through the
+ * cells the camera follows; the commands; and the two switches, see everything and the fog. It sends through the
  * connection it opens, waits on the clock it is handed, and says nothing itself but the follower's and the
  * commands' own lines: whatever listens is told the rest. See decision record 0078.
  */
@@ -80,10 +83,6 @@ export function createSession(ports: SessionPorts): Session {
   const store = createStore<SessionState>(INITIAL_SESSION);
   const listening = new Set<SessionListener>();
   let connection: Connection | null = null;
-  /** Whether the eye is open, so a welcome opens it again before a cell is asked for. */
-  let everything = false;
-  /** Whether the fog holds back what the house cannot see, so a welcome lifts it again if not. */
-  let fogged = true;
   /** The commands waiting on their answers, and where each was asked from. See `goingOut`. */
   let inFlight: InFlight = NOTHING_IN_FLIGHT;
 
@@ -134,9 +133,10 @@ export function createSession(ports: SessionPorts): Session {
   /** What each kind of frame makes the session do, once its parts have folded it: every kind named. */
   const ROUTES: { [T in FrameType]: (frame: FrameOf<T>) => void } = {
     welcome: () => {
-      // The eye and the fog first, because they decide what a snapshot carries and the cells are asked for next.
-      if (everything) connection?.send({ type: 'seeAll', on: true });
-      if (!fogged) connection?.send({ type: 'fogOfWar', on: false });
+      // The two switches first, because they decide what a snapshot carries and the cells are asked for next.
+      const { seeAll, fogOfWar } = store.get();
+      if (seeAll) connection?.send({ type: 'seeAll', on: true });
+      if (!fogOfWar) connection?.send({ type: 'fogOfWar', on: false });
       // Anything the camera wanted before the gateway was listening is asked for now.
       following.welcomed();
     },
@@ -227,13 +227,13 @@ export function createSession(ports: SessionPorts): Session {
     follow: (cells) => following.follow(cells),
 
     seeAll: (on) => {
-      everything = on;
       if (open()) connection?.send({ type: 'seeAll', on });
+      store.set({ seeAll: on });
     },
 
     fogOfWar: (on) => {
-      fogged = on;
       if (open()) connection?.send({ type: 'fogOfWar', on });
+      store.set({ fogOfWar: on });
     },
 
     wipeWorld: () => {

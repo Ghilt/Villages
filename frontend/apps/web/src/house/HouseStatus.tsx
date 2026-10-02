@@ -1,15 +1,16 @@
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useEffect, useState } from 'react';
 
 import { describeDay } from '@villages/protocol';
 import type { ResourceName } from '@villages/protocol';
 import { TICK_MS } from '@villages/client-core';
 
-import { gatewayState, watchGateway } from '../net/gateway';
+import { sessionStore } from '../net/gateway';
 import type { Room } from '../stage/panes';
 import { RESOURCES_IN_ORDER, RESOURCE_WORDS, blazon, saysStock } from './describe';
 import { Mark } from '../marks/Mark';
 import { PaneSizeControl } from '../stage/PaneSizeControl';
 import { HouseBar } from './HouseBar';
+import { useStore } from '../store/useStore';
 
 /**
  * The achievement, drawn in one viewBox so the ornament and the shield cannot drift apart.
@@ -70,9 +71,8 @@ const TINCTURE: Record<string, string> = {
  * has to handle: the frame is drawn either way, and the field inside it is empty.
  */
 export function HouseStatus({ room }: { room: Room }) {
-  const heard = useSyncExternalStore(watchGateway, gatewayState);
   const [now, setNow] = useState(() => Date.now());
-  const yours = heard.yourHouse;
+  const yours = useStore(sessionStore, (state) => state.yourHouse);
   const house = yours === null ? null : yours.house;
 
   useEffect(() => {

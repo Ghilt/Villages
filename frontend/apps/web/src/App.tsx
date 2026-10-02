@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
 import { charactersInView, housesInView } from '@villages/client-core';
@@ -11,17 +11,17 @@ import { openOnArrival } from './dialogues/opening';
 import { DebugPanel } from './debug/DebugPanel';
 import { Desk } from './desk/Desk';
 import { Grips } from './debug/Grips';
-import { logIsOpen, panelIsShut, stageMode, watchStage } from './debug/stage';
+import { stageStore } from './debug/stage';
 import { panelWants, stageBox } from './stage/stageBox';
 import { note } from './log/log';
 import { inspect } from './inspect/opening';
 import { Inspecting } from './inspect/Inspecting';
 import { Navigating } from './inspect/Navigating';
 import { subjectOfPane } from './inspect/subjects';
-import { gateway, gatewayState, watchGateway } from './net/gateway';
+import { sessionStore, gateway } from './net/gateway';
 import { followMap } from './net/followMap';
 import { arriving } from './house/arrival';
-import { eyeIsOpen, watchEye } from './house/eye';
+import { eyeStore } from './house/eye';
 import { HouseStatus } from './house/HouseStatus';
 import { KeyFigures } from './figures/KeyFigures';
 import { HoldingOverlay } from './areas/HoldingOverlay';
@@ -41,11 +41,12 @@ import {
   NAVIGATION_PANE,
 } from './stage/panes';
 import { worldRootOf } from './map/masters';
-import { cameraNow, watchCamera } from './map/camera';
+import { cameraStore } from './map/camera';
 import { DEFAULT_RENDERER, RENDERERS, applyRenderer } from './map/renderers';
 import { SpriteOverlay } from './sprites/SpriteOverlay';
 import type { MapSprite } from './sprites/SpriteRenderer';
 import { tinctureColour } from './sprites/tinctures';
+import { useStore } from './store/useStore';
 
 /**
  * A house as the renderer draws it: a mark at its seat, in its field's tincture.
@@ -144,20 +145,23 @@ export function App({ master }: AppProps) {
   const [map, setMap] = useState<maplibregl.Map | null>(null);
   const [renderer, setRenderer] = useState(DEFAULT_RENDERER);
   // The lattice the ground is painted on, which is Adam's lever rather than a player's. See 0008.
-  const camera = useSyncExternalStore(watchCamera, cameraNow);
-  const heard = useSyncExternalStore(watchGateway, gatewayState);
-  const eye = useSyncExternalStore(watchEye, eyeIsOpen);
-  const mode = useSyncExternalStore(watchStage, stageMode);
-  const shut = useSyncExternalStore(watchStage, panelIsShut);
-  const log = useSyncExternalStore(watchStage, logIsOpen);
+  const camera = useStore(cameraStore);
+  const houses = useStore(sessionStore, (state) => state.houses);
+  const yourHouse = useStore(sessionStore, (state) => state.yourHouse);
+  const yourChoice = useStore(sessionStore, (state) => state.yourChoice);
+  const yourDialogues = useStore(sessionStore, (state) => state.yourDialogues);
+  const eye = useStore(eyeStore, (state) => state.open);
+  const mode = useStore(stageStore, (state) => state.mode);
+  const shut = useStore(stageStore, (state) => state.shut);
+  const log = useStore(stageStore, (state) => state.log);
   const window = useWindow();
   const wants = panelWants(shut, log);
   const box = useMemo(() => stageBox(window, mode, wants), [window, mode, wants]);
-  const inView = useMemo(() => housesInView(heard.houses), [heard.houses]);
-  const standing = useMemo(() => charactersInView(heard.houses), [heard.houses]);
+  const inView = useMemo(() => housesInView(houses), [houses]);
+  const standing = useMemo(() => charactersInView(houses), [houses]);
   // The public half of your own house: what the map draws is the same view everyone else's house is
   // drawn from, and what only you can see hangs off it.
-  const yours = heard.yourHouse?.house ?? null;
+  const yours = yourHouse?.house ?? null;
   // With the eye open your own house is drawn whether or not a held cell carries it. It can be missing
   // from one and still be known, because the gateway sends it to the session rather than to a cell.
   const drawn = useMemo(
@@ -169,9 +173,9 @@ export function App({ master }: AppProps) {
     () => [
       ...drawn.map((house) => toSprite(house, eye && house.id === yours?.id)),
       ...standing.map(toCharacterSprite),
-      ...candidatesOf(heard.yourChoice),
+      ...candidatesOf(yourChoice),
     ],
-    [drawn, standing, eye, yours, heard.yourChoice],
+    [drawn, standing, eye, yours, yourChoice],
   );
 
   // The one connection to the gateway, opened as the app mounts.
@@ -202,7 +206,7 @@ export function App({ master }: AppProps) {
    * bay rather than the other one - and the carousel is how a player puts the map back beside it. The
    * takeover remembers, so answering gives the bay back. See decision record 0044.
    */
-  const asking = heard.yourChoice?.id;
+  const asking = yourChoice?.id;
   useEffect(() => {
     if (asking !== undefined && formNow() === 'bays') {
       const bay = theMapsBay();
@@ -217,7 +221,7 @@ export function App({ master }: AppProps) {
    * not the map's, as a window does, because the map is where the player was looking. What has arrived is
    * the opening's to say: a dialogue waiting that this page has not been shown before. See `MECHANICS.md`.
    */
-  const offered = heard.yourDialogues;
+  const offered = yourDialogues;
   useEffect(() => {
     if (offered !== null) {
       openOnArrival(offered);

@@ -1,5 +1,5 @@
 import { createSession, ensurePlayerToken, forgetPlayerToken } from '@villages/client-core';
-import type { Connection, SessionListener, SessionState } from '@villages/client-core';
+import type { Connection, Readable, SessionListener, SessionState } from '@villages/client-core';
 import { PROTOCOL_VERSION } from '@villages/protocol';
 import type { ChoiceView, CommandPayload, OptionView } from '@villages/protocol';
 
@@ -32,6 +32,9 @@ const session = createSession({
   arriveAnew: () => window.location.reload(),
   note,
 });
+
+/** What the page knows of the world, for whatever draws it: read in a component through `useStore`. */
+export const sessionStore: Readable<SessionState> = { get: session.state, watch: session.watch };
 
 let connection: Connection | null = null;
 
@@ -67,18 +70,20 @@ export function follow(cells: string[]): void {
 }
 
 /**
- * Lifts the fog of war on this connection or lets it fall again: lifted, the gateway sends what the house
- * cannot see as well as what it can, and answers every held cell again. Safe before the gateway has answered
- * hello; the welcome lifts it. On at every load, as the drawing is. See decision record 0061.
+ * Lets the fog of war fall on this connection or lifts it: lifted, the gateway sends what the house cannot see
+ * as well as what it can, and answers every held cell again, and nothing is drawn over the map. Held once, in
+ * the session, which the drawing reads. Safe before the gateway has answered hello; the welcome says it again.
+ * On at every load. See decision record 0061.
  */
 export function fogOfWar(on: boolean): void {
   session.fogOfWar(on);
 }
 
 /**
- * Opens or closes the eye on this connection: with it open the gateway sets significance aside and every
- * house in a held cell is sent, however far back the camera is. Safe before the gateway has answered
- * hello; the welcome opens it. See decision record 0038.
+ * Sees everything on this connection, or stops: the gateway sets significance aside and every house in a held
+ * cell is sent, however far back the camera is, and the renderer's floor comes off with it. Adam's switch, not
+ * the player's eye. Held once, in the session. Safe before the gateway has answered hello; the welcome says it
+ * again. See decision record 0038.
  */
 export function seeAll(on: boolean): void {
   session.seeAll(on);
@@ -133,14 +138,6 @@ export function restart(): void {
   forgetPlayerToken(tokens);
   note('player', 'starting over as somebody new');
   window.location.reload();
-}
-
-export function gatewayState(): GatewayState {
-  return session.state();
-}
-
-export function watchGateway(listener: () => void): () => void {
-  return session.watch(listener);
 }
 
 /** Listens to the conversation from now on, until the function it hands back is called. See `SessionListener`. */

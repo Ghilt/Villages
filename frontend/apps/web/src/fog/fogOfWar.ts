@@ -1,5 +1,5 @@
 import { note } from '../log/log';
-import { fogOfWar } from '../net/gateway';
+import { fogOfWar, sessionStore } from '../net/gateway';
 
 /**
  * Whether this window draws the fog of war: Adam's switch, in the Debug map section.
@@ -10,28 +10,14 @@ import { fogOfWar } from '../net/gateway';
  * everything` sets significance aside. It is a way of looking, so it is neither stored nor recorded. See
  * decision record 0061.
  *
- * A module with a listener set rather than a context, the shape of the eye and of `see everything`.
+ * Held once, in the session, as `fogOfWar`: what the map draws reads it there, and the gateway is told it
+ * again at every welcome. This is the switch, and the words it is said in.
  */
 
-let on = true;
-const listeners = new Set<() => void>();
-
-export function fogIsOn(): boolean {
-  return on;
-}
-
-export function watchFog(listener: () => void): () => void {
-  listeners.add(listener);
-  return () => {
-    listeners.delete(listener);
-  };
-}
-
 export function setFogOfWar(next: boolean): void {
-  if (next === on) {
+  if (next === sessionStore.get().fogOfWar) {
     return;
   }
-  on = next;
   note(
     'fog',
     next
@@ -39,7 +25,4 @@ export function setFogOfWar(next: boolean): void {
       : 'the fog of war is lifted in this window: nothing is drawn over the map, and the gateway sends everything',
   );
   fogOfWar(next);
-  for (const listener of listeners) {
-    listener();
-  }
 }

@@ -1,6 +1,5 @@
-import { useSyncExternalStore } from 'react';
-
-import { eyeIsOpen, toggleEye, watchEye } from './eye';
+import { eyeStore, toggleEye } from './eye';
+import { useStore } from '../store/useStore';
 
 /**
  * The eye, open and shut. Two states of one mark rather than two marks: the almond is the same curve in
@@ -28,7 +27,7 @@ interface HouseBarProps {
  * the bar is the shape it will be when it is full and nothing moves as it fills.
  */
 export function HouseBar({ borne }: HouseBarProps) {
-  const open = useSyncExternalStore(watchEye, eyeIsOpen);
+  const open = useStore(eyeStore, (state) => state.open);
   const empties = Array.from({ length: SLOTS - 1 }, (_, index) => index);
 
   return (

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useSyncExternalStore } from 'react';
+import { useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
@@ -8,9 +8,10 @@ import type { DeskTop } from '../desk/deskTop';
 import { drawnAt, drawnPoint, flatWindow, floorZoom, sheetOnScreen } from '../map/sheet';
 
 import { lightAt, roomAt, sceneAt, solidAt } from './dive';
-import { attachPull, pullNow, watchPull } from './pull';
+import { pullStore, attachPull } from './pull';
 import { BEYOND, roomFloor } from './roomArt';
 import { roomOnScreen, scaleFor, turnsAt } from './roomBox';
+import { useStore } from '../store/useStore';
 
 interface RoomProps {
   map: maplibregl.Map | null;
@@ -53,7 +54,7 @@ export function Room({ map, seat, strip, children }: RoomProps) {
   const sceneRef = useRef<HTMLDivElement | null>(null);
   const wallsRef = useRef<HTMLDivElement | null>(null);
   const stillRef = useRef<HTMLDivElement | null>(null);
-  const pull = useSyncExternalStore(watchPull, pullNow);
+  const pull = useStore(pullStore);
 
   // Read through refs so that the pull can ask about them at any moment without being rebuilt when they
   // change; rebuilding it would drop the wheel listener mid-scroll.

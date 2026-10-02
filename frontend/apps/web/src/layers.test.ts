@@ -13,9 +13,9 @@ import { describe, expect, it } from 'vitest';
 
 const ROWS: readonly (readonly string[])[] = [
   // What everything leans on, and which leans on nothing in the page: the ground's own measures and the
-  // camera's arithmetic among them. The component library is the showcase's alone until the game takes it
+  // camera's arithmetic among them, and the one way a component reads a store. The component library is the showcase's alone until the game takes it
   // up, a surface at a time.
-  ['ui', 'version', 'marks', 'log', 'geometry'],
+  ['ui', 'version', 'marks', 'log', 'geometry', 'store'],
   // The connection to the game server, and the stage the panes are laid out in.
   ['net', 'stage'],
   // The ground, drawn: the map and its paint, the fog over it, the desk under it.
@@ -44,9 +44,6 @@ const SIDEWAYS: readonly (readonly [string, string])[] = [
  * The plan is `docs/ROADMAP.md`'s "A place for every mechanic".
  */
 const EXCUSED: readonly string[] = [
-  // Each switch has one owner.
-  'areas/HoldingOverlay.tsx -> debug/seeEverything.ts',
-  'sprites/SpriteOverlay.tsx -> debug/seeEverything.ts',
   // The stage is handed its panes rather than reading the game for them.
   'stage/Stage.tsx -> inspect/subjects.ts',
   'stage/Stage.tsx -> net/gateway.ts',

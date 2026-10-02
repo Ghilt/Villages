@@ -1,19 +1,18 @@
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useEffect, useState } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
 import { CAMERA } from '../map/mapConfig';
 import { setTiltRamp } from '../map/tilt';
-import { pullNow, watchPull } from '../room/pull';
+import { pullStore } from '../room/pull';
 
 import {
+  cameraStore,
   STEEPEST_PARALLEL_PITCH,
-  cameraNow,
   isPlayers,
   isSquareGround,
   lensOf,
   PLAYERS,
   setCamera,
-  watchCamera,
 } from '../map/camera';
 import {
   DIAMOND_BEARING,
@@ -25,6 +24,7 @@ import {
   TRIMETRIC_PITCH,
 } from './cameraPresets';
 import { Section } from './Section';
+import { useStore } from '../store/useStore';
 
 /**
  * Where the camera stands, and what the world looks like from there.
@@ -55,7 +55,7 @@ interface CameraSectionProps {
  */
 function ZoomReading({ map }: CameraSectionProps) {
   const [zoom, setZoom] = useState<number | null>(() => map?.getZoom() ?? null);
-  const pull = useSyncExternalStore(watchPull, pullNow);
+  const pull = useStore(pullStore);
   useEffect(() => {
     if (map === null) {
       return;
@@ -76,7 +76,7 @@ function ZoomReading({ map }: CameraSectionProps) {
 }
 
 export function CameraSection({ map }: CameraSectionProps) {
-  const how = useSyncExternalStore(watchCamera, cameraNow);
+  const how = useStore(cameraStore);
 
   // The panel holds the intent and the map holds the camera, so this is the one place they meet. It runs
   // on every change rather than being called from each control, which is what keeps a preset and a slider

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 import type { FeatureCollection } from 'geojson';
 
@@ -9,8 +9,9 @@ import { note } from '../log/log';
 import { terrainPalette } from '../geometry/terrainClasses';
 import { MOST_DIAMONDS } from './census';
 import { inspect } from '../inspect/opening';
-import { subjectsNow, watchSubjects } from '../inspect/subjects';
-import { addArea, areasNow, armDrawing, watchAreas } from './areas';
+import { subjectsStore } from '../inspect/subjects';
+import { areasStore, addArea, armDrawing } from './areas';
+import { useStore } from '../store/useStore';
 
 /**
  * Areas on the map: the line, the shade, the pulse, and the drag that draws one.
@@ -61,10 +62,9 @@ const SAMPLE_EVERY = 4;
 const EMPTY: FeatureCollection = { type: 'FeatureCollection', features: [] };
 
 export function AreaOverlay({ map, worldRoot, turn }: AreaOverlayProps) {
-  const state = useSyncExternalStore(watchAreas, areasNow);
-  // Which area breathes: whatever was opened last, if that was an area. The map marks one thing, and with
-  // three windows up the newest is the one the player is looking at.
-  const top = useSyncExternalStore(watchSubjects, subjectsNow).open[0];
+  const state = useStore(areasStore);
+  // Which area breathes: the newest thing opened, if it is an area. The map marks the one being looked at.
+  const top = useStore(subjectsStore, (subjects) => subjects.open[0]);
   const pulsing = top?.kind === 'area' ? top.id : null;
   const [width, setWidth] = useState<number | null>(null);
 
@@ -341,7 +341,7 @@ export function AreaOverlay({ map, worldRoot, turn }: AreaOverlayProps) {
     };
 
     const onDown = (event: PointerEvent) => {
-      if (!areasNow().armed || event.button !== 0) {
+      if (!areasStore.get().armed || event.button !== 0) {
         return;
       }
       event.stopPropagation();
@@ -390,7 +390,7 @@ export function AreaOverlay({ map, worldRoot, turn }: AreaOverlayProps) {
     };
 
     const onKey = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape' || !areasNow().armed) {
+      if (event.key !== 'Escape' || !areasStore.get().armed) {
         return;
       }
       abandon();
@@ -421,11 +421,11 @@ export function AreaOverlay({ map, worldRoot, turn }: AreaOverlayProps) {
     }
     const onClick = (event: maplibregl.MapMouseEvent) => {
       // A click that hit a house is that house's. The sprite overlay registers first and says so.
-      if (event.defaultPrevented || areasNow().armed || performance.now() - drewAt.current < 300) {
+      if (event.defaultPrevented || areasStore.get().armed || performance.now() - drewAt.current < 300) {
         return;
       }
       const at = { lng: event.lngLat.lng, lat: event.lngLat.lat };
-      const hit = [...areasNow().areas]
+      const hit = [...areasStore.get().areas]
         .sort((one, other) => one.diamonds - other.diamonds)
         .find((area) => insideFenceAt(area.fence, at));
       // Empty ground closes nothing: a window is the player's to shut. Only a hit opens one.

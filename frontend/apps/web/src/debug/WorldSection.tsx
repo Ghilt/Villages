@@ -1,15 +1,15 @@
-import { useSyncExternalStore } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
 import type { BannerSpec } from '@villages/protocol';
 
 import { clampBoundsToWorld } from '../map/sheet';
-import { gatewayState, restart, watchGateway, wipeWorld } from '../net/gateway';
+import { sessionStore, restart, wipeWorld } from '../net/gateway';
 import { seedHouses } from '../net/seed';
 import { note } from '../log/log';
 import { Section } from './Section';
-import { seeEverything, seeingEverything, watchSeeingEverything } from './seeEverything';
+import { seeEverything } from './seeEverything';
 import { foundHouseHere } from './levers';
+import { useStore } from '../store/useStore';
 
 interface WorldSectionProps {
   map: maplibregl.Map | null;
@@ -56,8 +56,8 @@ function aName(): string {
  * shape for a log, and the game window no longer asks the gateway for them at all. See decision 0023.
  */
 export function WorldSection({ map }: WorldSectionProps) {
-  const state = useSyncExternalStore(watchGateway, gatewayState);
-  const everything = useSyncExternalStore(watchSeeingEverything, seeingEverything);
+  const connection = useStore(sessionStore, (state) => state.connection);
+  const everything = useStore(sessionStore, (state) => state.seeAll);
 
   /** Founds this player's one house, here. Pressed twice, the second is refused: you have a house. */
   const foundHere = () => {
@@ -95,24 +95,14 @@ export function WorldSection({ map }: WorldSectionProps) {
 
   // Only the connection goes in the bar. A bar holds a status or a button or two; five of them at the
   // panel's width wrapped into a column of slivers, and the body is the place with room.
-  const tools = <span className={`events__link events__link--${state.connection}`}>{state.connection}</span>;
+  const tools = <span className={`events__link events__link--${connection}`}>{connection}</span>;
 
   const levers = (
     <div className="debug__levers">
-      <button
-        type="button"
-        className="debug__button"
-        onClick={foundHere}
-        disabled={state.connection !== 'open'}
-      >
+      <button type="button" className="debug__button" onClick={foundHere} disabled={connection !== 'open'}>
         found a house here
       </button>
-      <button
-        type="button"
-        className="debug__button"
-        onClick={seedHere}
-        disabled={state.connection !== 'open'}
-      >
+      <button type="button" className="debug__button" onClick={seedHere} disabled={connection !== 'open'}>
         seed {SEED}
       </button>
       {/*
@@ -124,7 +114,7 @@ export function WorldSection({ map }: WorldSectionProps) {
         type="button"
         className={everything ? 'debug__button debug__button--on' : 'debug__button'}
         onClick={() => seeEverything(!everything)}
-        disabled={state.connection !== 'open'}
+        disabled={connection !== 'open'}
         aria-pressed={everything}
         title="show every house in the held cells, however slight, at any zoom"
       >

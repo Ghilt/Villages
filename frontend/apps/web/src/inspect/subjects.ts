@@ -1,3 +1,6 @@
+import { createStore } from '@villages/client-core';
+import type { Readable } from '@villages/client-core';
+
 import { note, shortId } from '../log/log';
 
 /**
@@ -11,7 +14,7 @@ import { note, shortId } from '../log/log';
  * `state.selected` in `areas/areas.ts` for an area - which is what the first one's own docstring said the
  * second selectable thing would cost. One store now, and whatever is newest in it is what the map marks.
  *
- * A module with a listener set, like the gateway, the areas and the bays. Nothing here survives a reload.
+ * A store, like the session, the areas and the bays, read through `useStore`. Nothing here survives a reload.
  */
 
 export type Subject =
@@ -32,19 +35,10 @@ export interface SubjectsState {
 
 const NOTHING: SubjectsState = { open: [] };
 
-let state: SubjectsState = NOTHING;
-const listeners = new Set<() => void>();
+const store = createStore<SubjectsState>(NOTHING);
 
-export function subjectsNow(): SubjectsState {
-  return state;
-}
-
-export function watchSubjects(listener: () => void): () => void {
-  listeners.add(listener);
-  return () => {
-    listeners.delete(listener);
-  };
-}
+/** What is open, newest first. */
+export const subjectsStore: Readable<SubjectsState> = store;
 
 /** The same two things, or the same thing twice. */
 export function sameSubject(one: Subject | null, other: Subject | null): boolean {
@@ -72,14 +66,11 @@ export function subjectOfPane(id: string): Subject | null {
 
 /** What the map marks: the newest thing opened, because that is what the player is looking at. */
 export function highlighted(): Subject | null {
-  return state.open[0] ?? null;
+  return store.get().open[0] ?? null;
 }
 
 function settle(open: readonly Subject[]): void {
-  state = { open };
-  for (const listener of listeners) {
-    listener();
-  }
+  store.set({ open });
 }
 
 function saying(subject: Subject): string {
@@ -93,20 +84,20 @@ function saying(subject: Subject): string {
  * same thing is a bug the player would have to tidy up, and the thing they meant was "look at this one".
  */
 export function openOn(subject: Subject): void {
-  const already = state.open.findIndex((one) => sameSubject(one, subject));
+  const already = store.get().open.findIndex((one) => sameSubject(one, subject));
   if (already === 0) {
     return;
   }
 
   if (already > 0) {
-    const raised = [subject, ...state.open.filter((one) => !sameSubject(one, subject))];
+    const raised = [subject, ...store.get().open.filter((one) => !sameSubject(one, subject))];
     settle(raised);
     note('inspect', `${saying(subject)} raised`);
     return;
   }
 
-  const open = [subject, ...state.open].slice(0, MOST_OPEN);
-  const pushedOff = state.open.length >= MOST_OPEN ? (state.open[MOST_OPEN - 1] ?? null) : null;
+  const open = [subject, ...store.get().open].slice(0, MOST_OPEN);
+  const pushedOff = store.get().open.length >= MOST_OPEN ? (store.get().open[MOST_OPEN - 1] ?? null) : null;
   settle(open);
   note(
     'inspect',
@@ -115,18 +106,18 @@ export function openOn(subject: Subject): void {
 }
 
 export function closeOne(subject: Subject): void {
-  if (!state.open.some((one) => sameSubject(one, subject))) {
+  if (!store.get().open.some((one) => sameSubject(one, subject))) {
     return;
   }
-  settle(state.open.filter((one) => !sameSubject(one, subject)));
+  settle(store.get().open.filter((one) => !sameSubject(one, subject)));
   note('inspect', `${saying(subject)} closed`);
 }
 
 export function closeAll(): void {
-  if (state.open.length === 0) {
+  if (store.get().open.length === 0) {
     return;
   }
-  const had = state.open.length;
+  const had = store.get().open.length;
   settle([]);
   note('inspect', `all ${had} closed`);
 }
@@ -137,7 +128,7 @@ export function closeAll(): void {
  * An area the player deleted is not a window they shut; leaving it open would show a window about nothing.
  */
 export function forgetSubject(subject: Subject): void {
-  if (state.open.some((one) => sameSubject(one, subject))) {
-    settle(state.open.filter((one) => !sameSubject(one, subject)));
+  if (store.get().open.some((one) => sameSubject(one, subject))) {
+    settle(store.get().open.filter((one) => !sameSubject(one, subject)));
   }
 }

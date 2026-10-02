@@ -3,8 +3,8 @@ import type { DialogueView, LineView, ShowsView } from '@villages/protocol';
 import { note } from '../log/log';
 import { inspect } from '../inspect/opening';
 import { focusOn } from '../map/focus';
-import { gatewayState } from '../net/gateway';
-import { baysNow, formNow, put, roomToRead, type Which } from '../stage/bays';
+import { sessionStore } from '../net/gateway';
+import { baysStore, formNow, put, roomToRead, type Which } from '../stage/bays';
 import { DIALOGUE_PANE, MAP_PANE } from '../stage/panes';
 import { showsWords } from './describe';
 
@@ -90,13 +90,13 @@ export function showWhatIsReached(dialogue: DialogueView, showingLines: readonly
  * to the map leaves the window beside the map.
  */
 function show(reached: Reached, dialogue: DialogueView): void {
-  const yours = gatewayState().yourHouse?.house ?? null;
+  const yours = sessionStore.get().yourHouse?.house ?? null;
   note(
     'dialogues',
     `"${dialogue.title}": "${reached.line}" shows ${showsWords(reached.shows, dialogue, yours)}`,
   );
 
-  const mine = formNow() === 'bays' ? baysNow().holding.indexOf(DIALOGUE_PANE.id) : -1;
+  const mine = formNow() === 'bays' ? baysStore.get().holding.indexOf(DIALOGUE_PANE.id) : -1;
   const there: Which | null = mine === -1 ? null : mine === 0 ? 1 : 0;
   const { shows } = reached;
   if (shows.kind === 'place') {

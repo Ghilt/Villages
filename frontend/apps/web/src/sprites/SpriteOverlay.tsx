@@ -1,23 +1,19 @@
-import { useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
-import { sceneryNow, watchScenery } from './scenery/settings';
+import { sceneryStore } from './scenery/settings';
 import { circleOf, visionOf } from '../fog/circles';
 import { fieldOf } from '../fog/fogField';
-import { fogIsOn, watchFog } from '../fog/fogOfWar';
-import { gatewayState, watchGateway } from '../net/gateway';
-import { seeingEverything, watchSeeingEverything } from '../debug/seeEverything';
+import { sessionStore } from '../net/gateway';
 import { inspect } from '../inspect/opening';
-import { subjectsNow, watchSubjects } from '../inspect/subjects';
+import { subjectsStore } from '../inspect/subjects';
 import { cameraOf } from './mapCamera';
 import { createPixiSpriteRenderer } from './PixiSpriteRenderer';
 import type { MapSprite } from './SpriteRenderer';
+import { useStore } from '../store/useStore';
 
 /** How a person's mark is told from a house's: its id is theirs with this in front. See App.tsx. */
 const CHARACTER = 'character:';
-
-const sightNow = () => gatewayState().yourSight;
-const todayNow = () => gatewayState().world?.today ?? null;
 
 interface SpriteOverlayProps {
   map: maplibregl.Map;
@@ -34,12 +30,12 @@ export function SpriteOverlay({ map, sprites, worldRoot }: SpriteOverlayProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const uncolouringRef = useRef<HTMLCanvasElement | null>(null);
   const rendererRef = useRef<ReturnType<typeof createPixiSpriteRenderer> | null>(null);
-  const top = useSyncExternalStore(watchSubjects, subjectsNow).open[0];
-  const everything = useSyncExternalStore(watchSeeingEverything, seeingEverything);
-  const scenery = useSyncExternalStore(watchScenery, sceneryNow);
-  const sight = useSyncExternalStore(watchGateway, sightNow);
-  const today = useSyncExternalStore(watchGateway, todayNow);
-  const fogOn = useSyncExternalStore(watchFog, fogIsOn);
+  const top = useStore(subjectsStore, (subjects) => subjects.open[0]);
+  const everything = useStore(sessionStore, (state) => state.seeAll);
+  const scenery = useStore(sceneryStore);
+  const sight = useStore(sessionStore, (state) => state.yourSight);
+  const today = useStore(sessionStore, (state) => state.world?.today ?? null);
+  const fogOn = useStore(sessionStore, (state) => state.fogOfWar);
 
   // The house's vision points as circles, the distance field the fog is drawn from, and what it has in vision
   // for deciding which marks go over the fog, all with the surface tension between the circles, worked out once

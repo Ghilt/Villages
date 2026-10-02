@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
 import { note } from '../log/log';
@@ -7,9 +7,10 @@ import { giveVision, takeVision } from './levers';
 import { chooseMaster, cutMaster, describeMaster, furnishMaster, isStale, listMasters } from '../map/masters';
 import type { MasterOnDisk } from '../map/masters';
 import { RENDERERS } from '../map/renderers';
-import { fogIsOn, setFogOfWar, watchFog } from '../fog/fogOfWar';
+import { setFogOfWar } from '../fog/fogOfWar';
 import { lastingOn } from '../fog/describe';
-import { gatewayState, watchGateway } from '../net/gateway';
+import { sessionStore } from '../net/gateway';
+import { useStore } from '../store/useStore';
 
 interface MapSectionProps {
   /** The map, so vision can be given where the camera is looking. Null until it has loaded. */
@@ -39,12 +40,12 @@ export function MapSection({ map, master, renderer, onRenderer }: MapSectionProp
   const [tunedAt, setTunedAt] = useState<number | null>(null);
   const [wanted, setWanted] = useState(master);
   const [working, setWorking] = useState<false | 'cut' | 'furnish'>(false);
-  const fog = useSyncExternalStore(watchFog, fogIsOn);
-  const heard = useSyncExternalStore(watchGateway, gatewayState);
+  const fog = useStore(sessionStore, (state) => state.fogOfWar);
+  const connection = useStore(sessionStore, (state) => state.connection);
+  const sight = useStore(sessionStore, (state) => state.yourSight);
+  const today = useStore(sessionStore, (state) => state.world?.today ?? null);
   // The visions given outright that the house still has, oldest first: each one can be taken away.
-  const given = (heard.yourSight?.points ?? []).filter(
-    (point) => point.kind === 'given' && lastingOn(point, heard.world?.today ?? null),
-  );
+  const given = (sight?.points ?? []).filter((point) => point.kind === 'given' && lastingOn(point, today));
 
   const refresh = useCallback(() => {
     void listMasters().then((answer) => {
@@ -189,7 +190,7 @@ export function MapSection({ map, master, renderer, onRenderer }: MapSectionProp
             giveVision({ lat: centre.lat, lon: centre.lng });
           }
         }}
-        disabled={map === null || heard.connection !== 'open'}
+        disabled={map === null || connection !== 'open'}
         title="give your house vision where the camera is looking, as far as a seat sees, until it is taken away"
       >
         give vision here
@@ -203,7 +204,7 @@ export function MapSection({ map, master, renderer, onRenderer }: MapSectionProp
             type="button"
             className="debug__button"
             onClick={() => takeVision(point)}
-            disabled={heard.connection !== 'open'}
+            disabled={connection !== 'open'}
             title="take this vision away; what it saw stays revealed"
           >
             take it away

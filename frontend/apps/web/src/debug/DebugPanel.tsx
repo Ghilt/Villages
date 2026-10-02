@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
 import { FLAT_MAX_ZOOM, TILE } from '../geometry/world';
@@ -13,20 +13,13 @@ import { DialoguesSection } from './DialoguesSection';
 import { MapSection } from './MapSection';
 import { ScenerySection } from './ScenerySection';
 import { WorktreesSection } from './WorktreesSection';
-import { atToClock, note, notesNow, watchNotes } from '../log/log';
-import {
-  logIsOpen,
-  panelIsShut,
-  setLogOpen,
-  setPanelShut,
-  stageMode,
-  toggleShape,
-  watchStage,
-} from './stage';
+import { logStore, atToClock, note } from '../log/log';
+import { stageStore, setLogOpen, setPanelShut, toggleShape } from './stage';
 import { PANEL_WANTS } from '../stage/stageBox';
 import { describeTerrainStep } from './terrainDepth';
 import { ResourcesSection } from './ResourcesSection';
 import { WorldSection } from './WorldSection';
+import { useStore } from '../store/useStore';
 
 interface DebugPanelProps {
   map: maplibregl.Map | null;
@@ -71,10 +64,10 @@ const SETTLE_MS = 250;
  * six. See decision records 0023 and 0039.
  */
 export function DebugPanel({ map, worldRoot, master, renderer, onRenderer }: DebugPanelProps) {
-  const notes = useSyncExternalStore(watchNotes, notesNow);
-  const shut = useSyncExternalStore(watchStage, panelIsShut);
-  const mode = useSyncExternalStore(watchStage, stageMode);
-  const logOpen = useSyncExternalStore(watchStage, logIsOpen);
+  const notes = useStore(logStore, (state) => state.notes);
+  const shut = useStore(stageStore, (state) => state.shut);
+  const mode = useStore(stageStore, (state) => state.mode);
+  const logOpen = useStore(stageStore, (state) => state.log);
   const [copied, setCopied] = useState<'no' | 'yes' | 'failed'>('no');
   const tileZoomWas = useRef<number | undefined>(undefined);
   /** Where a run of zoom steps began, and the timer that will say it once the camera stops moving. */

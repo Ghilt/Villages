@@ -1,3 +1,6 @@
+import { createStore } from '@villages/client-core';
+import type { Readable } from '@villages/client-core';
+
 import { note } from '../log/log';
 
 /**
@@ -13,35 +16,21 @@ import { note } from '../log/log';
  * what it already knows. Adam's `see everything` in the debug panel is the other switch and a different
  * one: every house, from the gateway. See decision record 0038.
  *
- * A module with a listener set rather than a context, the same shape as the selection, the debug log and
- * the gateway, because that is what `useSyncExternalStore` wants and it keeps the state out of the tree.
+ * A store, the one shape every piece of state the page watches takes, read in a component through `useStore`.
  */
 
-let open = false;
-const listeners = new Set<() => void>();
+const eye = createStore({ open: false });
 
-export function eyeIsOpen(): boolean {
-  return open;
-}
-
-export function watchEye(listener: () => void): () => void {
-  listeners.add(listener);
-  return () => {
-    listeners.delete(listener);
-  };
-}
+export const eyeStore: Readable<{ open: boolean }> = eye;
 
 export function openEye(next: boolean): void {
-  if (next === open) {
+  if (next === eye.get().open) {
     return;
   }
-  open = next;
   note('eye', next ? 'your holdings stay drawn at any zoom' : 'your holdings thin out with the rest');
-  for (const listener of listeners) {
-    listener();
-  }
+  eye.set({ open: next });
 }
 
 export function toggleEye(): void {
-  openEye(!open);
+  openEye(!eye.get().open);
 }

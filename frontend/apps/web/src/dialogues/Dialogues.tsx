@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   canAct,
@@ -13,7 +13,7 @@ import type { DialogueView, LineView, SpeakerView } from '@villages/protocol';
 
 import { Portrait } from '../figures/Portrait';
 import { Mark } from '../marks/Mark';
-import { completeDialogueStep, gatewayState, watchGateway } from '../net/gateway';
+import { sessionStore, completeDialogueStep } from '../net/gateway';
 import { Icon } from '../stage/Icons';
 import { PaneSizeControl } from '../stage/PaneSizeControl';
 import type { Room } from '../stage/panes';
@@ -32,6 +32,7 @@ import {
 } from './describe';
 import { Scene } from './Scene';
 import { showWhatIsReached, taking } from './showing';
+import { useStore } from '../store/useStore';
 
 /**
  * **Character dialogue**: the conversations the house has been offered, and the one being read.
@@ -46,8 +47,9 @@ import { showWhatIsReached, taking } from './showing';
  * Put away it is its name and how many there are.
  */
 export function Dialogues({ room }: { room: Room }) {
-  const heard = useSyncExternalStore(watchGateway, gatewayState);
-  const dialogues = heard.yourDialogues;
+  const dialogues = useStore(sessionStore, (state) => state.yourDialogues);
+  const refused = useStore(sessionStore, (state) => state.stepRefused);
+  const acting = useStore(sessionStore, canAct);
   const list = useMemo(() => listOf(dialogues ?? []), [dialogues]);
   const [open, setOpen] = useState<string | null>(null);
   // A dialogue that has gone - a wipe, another player - leaves the list behind it rather than nothing.
@@ -64,12 +66,11 @@ export function Dialogues({ room }: { room: Room }) {
   }
 
   if (reading !== null) {
-    const refused = heard.stepRefused;
     return (
       <Conversation
         dialogue={reading}
         room={room}
-        stepOut={!canAct(heard)}
+        stepOut={!acting}
         refused={refused !== null && refused.dialogueId === reading.id ? refused : null}
         onBack={() => setOpen(null)}
       />

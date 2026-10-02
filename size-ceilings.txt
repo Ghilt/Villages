@@ -21,7 +21,7 @@
 603 frontend/apps/web/src/stage/bayBox.test.ts
 459 frontend/apps/web/src/stage/bayBox.ts
 444 frontend/apps/web/src/stage/bays.test.ts
-489 frontend/apps/web/src/stage/bays.ts
+488 frontend/apps/web/src/stage/bays.ts
 464 frontend/apps/web/src/stage/panes.ts
 3430 frontend/apps/web/src/styles.css
 497 frontend/packages/protocol/src/frames.ts

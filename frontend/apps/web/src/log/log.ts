@@ -1,3 +1,6 @@
+import { createStore } from '@villages/client-core';
+import type { Readable } from '@villages/client-core';
+
 /**
  * A log the running program can write to and a human can read off the screen.
  *
@@ -18,31 +21,19 @@ export interface Note {
 /** Enough to cover what just happened, not so much that copying it is unreadable. */
 const MOST = 200;
 
-let notes: readonly Note[] = [];
-const listeners = new Set<() => void>();
+const log = createStore<{ notes: readonly Note[] }>({ notes: [] });
+
+/** The notes so far. One array a change, so that whatever reads them can tell whether anything happened. */
+export const logStore: Readable<{ notes: readonly Note[] }> = log;
 
 /**
  * Records something that happened. `area` groups the lines, so a run reads as a story from one part of
  * the program rather than as noise from all of them.
  */
 export function note(area: string, message: string): void {
+  const { notes } = log.get();
   const next = notes.length >= MOST ? notes.slice(notes.length - MOST + 1) : notes;
-  notes = [...next, { at: Date.now(), area, message }];
-  for (const listener of listeners) {
-    listener();
-  }
-}
-
-/** The notes so far. One array per change, so React can tell whether anything happened. */
-export function notesNow(): readonly Note[] {
-  return notes;
-}
-
-export function watchNotes(listener: () => void): () => void {
-  listeners.add(listener);
-  return () => {
-    listeners.delete(listener);
-  };
+  log.set({ notes: [...next, { at: Date.now(), area, message }] });
 }
 
 /**

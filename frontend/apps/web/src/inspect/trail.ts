@@ -1,3 +1,6 @@
+import { createStore } from '@villages/client-core';
+import type { Readable } from '@villages/client-core';
+
 import { note } from '../log/log';
 import { keyOf, sameSubject, type Subject } from './subjects';
 
@@ -13,7 +16,7 @@ import { keyOf, sameSubject, type Subject } from './subjects';
  * is, and coming back to the same place is what a layout should not remember; where the player has *been* is
  * the opposite, and losing it on every refresh would make the Recent section a list of one thing.
  *
- * A module with a listener set, like the gateway, the areas, the subjects and the bays.
+ * A store, like the session, the areas, the subjects and the bays, read through `useStore`.
  */
 
 /** A thing that was looked at, and what the window on it called it at the time. */
@@ -65,7 +68,7 @@ function readStored(): readonly Step[] {
   }
 }
 
-function store(steps: readonly Step[]): void {
+function keep(steps: readonly Step[]): void {
   try {
     localStorage.setItem(KEY, JSON.stringify(steps));
   } catch {
@@ -73,26 +76,14 @@ function store(steps: readonly Step[]): void {
   }
 }
 
-let state: readonly Step[] = readStored();
-const listeners = new Set<() => void>();
+const store = createStore<{ steps: readonly Step[] }>({ steps: readStored() });
 
-export function trailNow(): readonly Step[] {
-  return state;
-}
-
-export function watchTrail(listener: () => void): () => void {
-  listeners.add(listener);
-  return () => {
-    listeners.delete(listener);
-  };
-}
+/** The steps, newest first. */
+export const trailStore: Readable<{ steps: readonly Step[] }> = store;
 
 function settle(steps: readonly Step[]): void {
-  state = steps;
-  store(steps);
-  for (const listener of listeners) {
-    listener();
-  }
+  keep(steps);
+  store.set({ steps });
 }
 
 /**
@@ -103,12 +94,12 @@ function settle(steps: readonly Step[]): void {
  * twice is one step, not two - a trail that repeats itself is a trail with less in it.
  */
 export function remember(subject: Subject, name: string): void {
-  const already = state.find((step) => sameSubject(step.subject, subject));
-  if (already !== undefined && already.name === name && state[0] === already) {
+  const already = store.get().steps.find((step) => sameSubject(step.subject, subject));
+  if (already !== undefined && already.name === name && store.get().steps[0] === already) {
     return;
   }
 
-  const rest = state.filter((step) => !sameSubject(step.subject, subject));
+  const rest = store.get().steps.filter((step) => !sameSubject(step.subject, subject));
   const steps = [{ subject, name, at: Date.now() }, ...rest].slice(0, TRAIL_KEEPS);
   settle(steps);
 
@@ -119,15 +110,15 @@ export function remember(subject: Subject, name: string): void {
 
 /** Drop a thing from the trail, for when it has stopped existing rather than merely gone out of view. */
 export function forget(subject: Subject): void {
-  if (state.some((step) => sameSubject(step.subject, subject))) {
-    settle(state.filter((step) => !sameSubject(step.subject, subject)));
+  if (store.get().steps.some((step) => sameSubject(step.subject, subject))) {
+    settle(store.get().steps.filter((step) => !sameSubject(step.subject, subject)));
   }
 }
 
 /** Empty it. The player's own, so it says so in the log. */
 export function clearTrail(): void {
-  if (state.length > 0) {
-    note('trail', `all ${state.length} forgotten`);
+  if (store.get().steps.length > 0) {
+    note('trail', `all ${store.get().steps.length} forgotten`);
     settle([]);
   }
 }

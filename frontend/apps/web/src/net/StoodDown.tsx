@@ -1,6 +1,5 @@
-import { useSyncExternalStore } from 'react';
-
-import { gatewayState, watchGateway } from '../net/gateway';
+import { sessionStore } from '../net/gateway';
+import { useStore } from '../store/useStore';
 
 /**
  * What a window says once another one has taken the player over.
@@ -14,9 +13,9 @@ import { gatewayState, watchGateway } from '../net/gateway';
  * the player back.
  */
 export function StoodDown() {
-  const heard = useSyncExternalStore(watchGateway, gatewayState);
+  const connection = useStore(sessionStore, (state) => state.connection);
 
-  if (heard.connection !== 'takenOver') {
+  if (connection !== 'takenOver') {
     return null;
   }
 

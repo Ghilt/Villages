@@ -46,3 +46,13 @@ kept in, a reload, and the master, which `main.tsx` decides and App hands it. It
 - **One reducer over the whole state.** It is what there was, with a `switch` every mechanic edits.
 - **A slice a frame rather than a mechanic.** A frame is a fact on the wire, and several mechanics hear some of
   them; it is the mechanic whose state it is that should say what the frame does to it.
+
+## Amendment, 2026-10-02: one store shape, and the switches held once
+
+The session keeps its two switches in its state, a slice of their own, `seeAll` and `fogOfWar`: they were held
+twice, once in the session to say again at a welcome and once in the page to draw by, and the page's copies are
+gone. (The two are see everything and the fog. See everything is Adam's switch and not the player's eye, which
+the paragraph above calls it.) `gatewayState` and `watchGateway` went with every store's own pair of functions:
+the page reads the session as `sessionStore`, a `Readable`, through `useStore(store, select)`, as it reads every
+other store, and each component picks the part it uses. See ARCHITECTURE's "Every piece of state the page
+watches is one shape".

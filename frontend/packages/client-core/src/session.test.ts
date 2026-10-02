@@ -124,4 +124,37 @@ describe('the session, folded from what each mechanic folds', () => {
     ]);
     expect(session.state().connection).toBe('closed');
   });
+
+  it('holds the two switches once, says them again at the welcome, and keeps them through an end', () => {
+    const socket = fakeSocket();
+    const session = createSession({
+      schedule: { after: () => () => undefined },
+      newId: () => 'c-1',
+      standsArrived: () => undefined,
+      followStands: () => undefined,
+      arriveAnew: () => undefined,
+      note: () => undefined,
+    });
+    expect(session.state()).toMatchObject({ seeAll: false, fogOfWar: true });
+
+    let told = 0;
+    session.watch(() => (told += 1));
+    session.seeAll(true);
+    session.fogOfWar(false);
+    expect(session.state()).toMatchObject({ seeAll: true, fogOfWar: false });
+    expect(told).toBe(2);
+
+    session.connect({ socket: socket.socket, playerToken: 't', protocolVersion: 1, address: 'ws://here' });
+    socket.opens();
+    socket.says(welcome);
+    expect(socket.sent.slice(1)).toEqual([
+      { type: 'seeAll', on: true },
+      { type: 'fogOfWar', on: false },
+    ]);
+
+    session.fogOfWar(true);
+    expect(socket.sent.at(-1)).toEqual({ type: 'fogOfWar', on: true });
+    socket.closes();
+    expect(session.state()).toMatchObject({ connection: 'closed', seeAll: true, fogOfWar: true });
+  });
 });

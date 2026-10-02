@@ -1,23 +1,16 @@
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useEffect, useState } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
 import type { TerrainClass } from '@villages/world';
 
 import { Section } from './Section';
 import { inspect, stopInspecting } from '../inspect/opening';
-import { subjectsNow, watchSubjects } from '../inspect/subjects';
+import { subjectsStore } from '../inspect/subjects';
 import { terrainPalette } from '../geometry/terrainClasses';
 import type { Census } from '../areas/census';
-import {
-  areasNow,
-  armDrawing,
-  countArea,
-  deleteArea,
-  forgetAreas,
-  shadeArea,
-  watchAreas,
-} from '../areas/areas';
+import { areasStore, armDrawing, countArea, deleteArea, forgetAreas, shadeArea } from '../areas/areas';
 import type { Area } from '../areas/areas';
+import { useStore } from '../store/useStore';
 
 /**
  * The areas, and what the selected one holds. This is where an area is verified, per decision 0023: the
@@ -98,7 +91,7 @@ function Selected({ area, legend, worldRoot }: { area: Area; legend: Legend | nu
 }
 
 export function AreasSection({ map, worldRoot }: AreasSectionProps) {
-  const state = useSyncExternalStore(watchAreas, areasNow);
+  const state = useStore(areasStore);
   const [legend, setLegend] = useState<Legend | null>(null);
 
   useEffect(() => {
@@ -123,7 +116,7 @@ export function AreasSection({ map, worldRoot }: AreasSectionProps) {
 
   // Which area this section shows the census of is the same question as which one has an inspect window
   // open on it, so it is the same answer: the newest subject, if that is an area. One store, one truth.
-  const top = useSyncExternalStore(watchSubjects, subjectsNow).open[0];
+  const top = useStore(subjectsStore, (subjects) => subjects.open[0]);
   const looking = top?.kind === 'area' ? top.id : null;
   const selected = state.areas.find((area) => area.id === looking) ?? null;
 

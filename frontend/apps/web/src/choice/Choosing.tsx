@@ -1,11 +1,12 @@
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useEffect, useState } from 'react';
 
 import { canAct } from '@villages/client-core';
 import type { ChoiceView, OptionView } from '@villages/protocol';
 
-import { gatewayState, takeOption, watchGateway } from '../net/gateway';
+import { sessionStore, takeOption } from '../net/gateway';
 import { PaneSizeControl } from '../stage/PaneSizeControl';
 import type { Room } from '../stage/panes';
+import { useStore } from '../store/useStore';
 
 /**
  * **The choice roll**: what the world is asking, and the options it is offering.
@@ -38,8 +39,8 @@ import type { Room } from '../stage/panes';
  */
 
 export function Choosing({ room }: { room: Room }) {
-  const heard = useSyncExternalStore(watchGateway, gatewayState);
-  const choice = heard.yourChoice;
+  const choice = useStore(sessionStore, (state) => state.yourChoice);
+  const answering = !useStore(sessionStore, canAct);
   const [at, setAt] = useState(0);
   const asked = choice?.id;
 
@@ -61,7 +62,6 @@ export function Choosing({ room }: { room: Room }) {
     );
   }
 
-  const answering = !canAct(heard);
   const carousel = room.size === 'small';
   const shown = Math.min(at, choice.options.length - 1);
 

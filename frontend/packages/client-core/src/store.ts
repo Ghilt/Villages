@@ -11,6 +11,12 @@ export interface Store<S extends object> {
   watch(listener: () => void): () => void;
 }
 
+/**
+ * All a reader of a store is handed: the value, and being told when it changes, and no way to change it. Whatever
+ * owns a store keeps it, and hands out this; what changes it is the owner's own functions, which say why.
+ */
+export type Readable<S extends object> = Pick<Store<S>, 'get' | 'watch'>;
+
 export function createStore<S extends object>(initial: S): Store<S> {
   let value = initial;
   const listeners = new Set<() => void>();

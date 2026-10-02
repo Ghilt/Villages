@@ -1,9 +1,8 @@
-import { useSyncExternalStore } from 'react';
-
 import { fullName } from '../figures/describe';
-import { gatewayState, watchGateway } from '../net/gateway';
+import { sessionStore } from '../net/gateway';
 import { Section } from './Section';
 import { offerDialogue } from './levers';
+import { useStore } from '../store/useStore';
 
 /** The server's sample, by the name it knows it by. The page sends the name and none of the words. */
 const LETTER = 'letter';
@@ -18,14 +17,15 @@ const LETTER = 'letter';
  * debug panel does for dialogues is offer one. See decision records 0023 and 0071.
  */
 export function DialoguesSection() {
-  const heard = useSyncExternalStore(watchGateway, gatewayState);
-  const first = heard.yourKeyFigures?.[0] ?? null;
-  const off = heard.connection !== 'open' || heard.yourHouse === null || first === null;
+  const connection = useStore(sessionStore, (state) => state.connection);
+  const yourHouse = useStore(sessionStore, (state) => state.yourHouse);
+  const first = useStore(sessionStore, (state) => state.yourKeyFigures?.[0] ?? null);
+  const off = connection !== 'open' || yourHouse === null || first === null;
 
   const whyNot =
-    heard.connection !== 'open'
+    connection !== 'open'
       ? 'not connected to the world'
-      : heard.yourHouse === null
+      : yourHouse === null
         ? 'no house yet; found one in World first'
         : first === null
           ? "the letter is spoken by the house's first key figure; add one in Characters first"

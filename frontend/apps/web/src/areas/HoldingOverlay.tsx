@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
 import { areaAround, fenceToPolygons, seedOf } from '@villages/world';
@@ -6,7 +6,8 @@ import type { DiamondGrid, Fence } from '@villages/world';
 import type { HouseView } from '@villages/protocol';
 
 import { note } from '../log/log';
-import { seeingEverything, watchSeeingEverything } from '../debug/seeEverything';
+import { sessionStore } from '../net/gateway';
+import { useStore } from '../store/useStore';
 import { terrainPalette } from '../geometry/terrainClasses';
 
 interface HoldingOverlayProps {
@@ -75,7 +76,7 @@ export function HoldingOverlay({ map, houses, mine, turn }: HoldingOverlayProps)
   const [width, setWidth] = useState<number | null>(null);
   const grid = useMemo((): DiamondGrid | null => (width === null ? null : { width, turn }), [width, turn]);
   const fences = useRef(new Map<string, Fence>());
-  const everything = useSyncExternalStore(watchSeeingEverything, seeingEverything);
+  const everything = useStore(sessionStore, (state) => state.seeAll);
 
   // Worked out from the seat rather than stored, and memoised by house and by how far the diamonds are
   // turned, because a seat never moves and tracing a ring is not free, and a turned ground is other

@@ -47,6 +47,13 @@ export interface SessionState {
   /** Where the world's clock stands, as welcome said, or null until it has. */
   world: { today: number; earliest: number } | null;
   playerToken: string;
+  /**
+   * Whether this window has asked to see everything: every house in the cells it holds, whatever its
+   * significance, which is Adam's switch and not the player's eye. Off at every load. See decision record 0038.
+   */
+  seeAll: boolean;
+  /** Whether the fog of war is on in this window, drawn and held back alike. On at every load. See 0061. */
+  fogOfWar: boolean;
 }
 
 /**
@@ -159,6 +166,17 @@ const SLICES = {
     },
     onReset: (state, cause) => (cause === 'closed' ? { ...state, stepping: null } : state),
   } satisfies Slice<'acting' | 'stepRefused' | 'stepping'>,
+
+  /**
+   * The two ways of looking the window has asked for, held here and nowhere else: what the map draws reads them,
+   * and the gateway is told them again at every welcome. A way of looking rather than a fact of the world, so no
+   * frame changes them and no end forgets them.
+   */
+  switches: {
+    initial: { seeAll: false, fogOfWar: true },
+    onFrame: {},
+    onReset: (state) => state,
+  } satisfies Slice<'seeAll' | 'fogOfWar'>,
 };
 
 const PARTS: readonly Slice<keyof SessionState>[] = Object.values(SLICES) as unknown as Slice<

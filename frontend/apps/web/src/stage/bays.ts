@@ -1,6 +1,9 @@
+import { createStore } from '@villages/client-core';
+import type { Readable } from '@villages/client-core';
+
 import { note } from '../log/log';
-import { watchSubjects } from '../inspect/subjects';
-import { watchGateway } from '../net/gateway';
+import { subjectsStore } from '../inspect/subjects';
+import { sessionStore } from '../net/gateway';
 import type { Asking, BayName } from './bayBox';
 import { STRIP } from './bayBox';
 import { HOUSE_PANE, MAP_PANE, type Pane, paneById, type PaneSize, SHARED_TILES, sizeAsked } from './panes';
@@ -8,9 +11,8 @@ import { HOUSE_PANE, MAP_PANE, type Pane, paneById, type PaneSize, SHARED_TILES,
 /**
  * The bay manager: which pane is in each bay, and which are collapsed to a strip.
  *
- * A module with a listener set rather than a context, the same shape as the gateway, the selection, the
- * areas and the debug log, because that is what `useSyncExternalStore` wants and it keeps the state out of
- * the tree.
+ * A store, the one shape every piece of state the page watches takes, read in a component through
+ * `useStore`, which keeps the state out of the tree.
  *
  * It holds what is where and calls the arithmetic rather than keeping the answer, so there is exactly one
  * place that knows how the room is divided and it is a pure function with a test. See decision record 0040.
@@ -94,13 +96,15 @@ const OPENS_ON: BaysState = {
   tiles: {},
 };
 
-let state: BaysState = OPENS_ON;
-const listeners = new Set<() => void>();
+const store = createStore<BaysState>(OPENS_ON);
+
+/** What each bay holds and how they share the stage. */
+export const baysStore: Readable<BaysState> = store;
 
 /**
  * What each bay asks the layout for, in each of the three arrangements.
  *
- * Three constants and not a derivation, which is the point. `useSyncExternalStore` compares what a store
+ * Three constants and not a derivation, which is the point. React compares what `useStore` picks from a store
  * hands back by identity, so this returns the **same object** across every change that is not an
  * arrangement change - and the stage does not so much as recompute its layout when the compass swaps a
  * pane. "Moving a pane does not resize the bays" stops being a behaviour to be careful about and becomes
@@ -174,17 +178,6 @@ const SAID: Record<PaneSize, string> = {
 let cutAlong: 'rows' | 'columns' = 'rows';
 let form: 'spread' | 'bays' = 'spread';
 
-export function baysNow(): BaysState {
-  return state;
-}
-
-export function watchBays(listener: () => void): () => void {
-  listeners.add(listener);
-  return () => {
-    listeners.delete(listener);
-  };
-}
-
 /** The stage telling the manager what it made of itself. */
 export function stageIs(which: 'spread' | 'bays', along: 'rows' | 'columns'): void {
   form = which;
@@ -207,7 +200,7 @@ export const NEAR_BAY: Which = 1;
 
 /** The bay that is not the map's, which is the one a thing clicked on the map goes into. */
 export function awayFromTheMap(): Which {
-  return state.holding[0] === MAP_PANE.id ? 1 : 0;
+  return store.get().holding[0] === MAP_PANE.id ? 1 : 0;
 }
 
 /**
@@ -230,10 +223,7 @@ export function where(which: Which): string {
 }
 
 function settle(next: BaysState): void {
-  state = next;
-  for (const listener of listeners) {
-    listener();
-  }
+  store.set(next);
 }
 
 function titleOf(id: string): string {
@@ -241,8 +231,8 @@ function titleOf(id: string): string {
 }
 
 /** What each bay is asking the layout for, which is the arrangement and nothing else. */
-export function askingNow(): readonly [Asking, Asking] {
-  return ASKING[state.arrangement];
+export function askingOf(bays: BaysState): readonly [Asking, Asking] {
+  return ASKING[bays.arrangement];
 }
 
 /**
@@ -253,7 +243,7 @@ export function askingNow(): readonly [Asking, Asking] {
  * the nowhere they have been.
  */
 export function showingIn(where: BayName, sharing: readonly Pane[]): Pane {
-  const chosen = state.showing[where];
+  const chosen = store.get().showing[where];
   return sharing.find((pane) => pane.id === chosen) ?? sharing[0]!;
 }
 
@@ -262,10 +252,10 @@ export function showingIn(where: BayName, sharing: readonly Pane[]): Pane {
  * size is the tile's own, so nothing here could resize it. See decision record 0057.
  */
 export function show(where: BayName, id: string): void {
-  if (state.showing[where] === id) {
+  if (store.get().showing[where] === id) {
     return;
   }
-  settle({ ...state, showing: { ...state.showing, [where]: id } });
+  settle({ ...store.get(), showing: { ...store.get().showing, [where]: id } });
   note('bay', `${where === 'bottomLeft' ? 'the corner' : where} shows ${titleOf(id)}`);
 }
 
@@ -278,19 +268,19 @@ export function show(where: BayName, id: string): void {
  * remembered to be put back afterwards.
  */
 export function put(which: Which, id: string): void {
-  if (paneById(id) === undefined || state.holding[which] === id) {
+  if (paneById(id) === undefined || store.get().holding[which] === id) {
     return;
   }
 
   const other: Which = which === 0 ? 1 : 0;
-  const displaced = state.holding[which];
-  const swapping = state.holding[other] === id;
-  const holding: [string, string] = which === 0 ? [id, state.holding[1]] : [state.holding[0], id];
+  const displaced = store.get().holding[which];
+  const swapping = store.get().holding[other] === id;
+  const holding: [string, string] = which === 0 ? [id, store.get().holding[1]] : [store.get().holding[0], id];
   if (swapping) {
     holding[other] = displaced;
   }
 
-  settle({ ...state, holding });
+  settle({ ...store.get(), holding });
   note(
     'bay',
     swapping
@@ -325,35 +315,35 @@ export function askFor(id: string, size: PaneSize): void {
   if (form !== 'bays') {
     const shared = SHARED_TILES[pane.spread] !== undefined;
     if (shared) {
-      if (sizeAsked(pane, state) === size) {
+      if (sizeAsked(pane, store.get()) === size) {
         return;
       }
-      settle({ ...state, tiles: { ...state.tiles, [pane.spread]: size } });
+      settle({ ...store.get(), tiles: { ...store.get().tiles, [pane.spread]: size } });
       note('bay', `${pane.spread === 'bottomLeft' ? 'the corner' : pane.spread} ${SAID[size]}`);
       return;
     }
     // What it is at, which is what it opens at until it has been asked for anything: asking a pane that
     // opens at its normal size for its normal size changes nothing, and says nothing.
-    if (sizeAsked(pane, state) === size) {
+    if (sizeAsked(pane, store.get()) === size) {
       return;
     }
-    settle({ ...state, heights: { ...state.heights, [id]: size } });
+    settle({ ...store.get(), heights: { ...store.get().heights, [id]: size } });
     note('bay', `${titleOf(id)} ${SAID[size]}`);
     return;
   }
 
   // A pane the player has not got up is in no bay, so there is no arrangement for it to name.
-  const which = state.holding.indexOf(id) as Which | -1;
+  const which = store.get().holding.indexOf(id) as Which | -1;
   if (which === -1) {
     return;
   }
 
   const how = arrangementFor(which, size);
-  if (how === state.arrangement) {
+  if (how === store.get().arrangement) {
     return;
   }
 
-  settle({ ...state, arrangement: how });
+  settle({ ...store.get(), arrangement: how });
   // The whole arrangement in one line, because it is one arrangement rather than two panes that happen to
   // agree, and because the log is the instrument Adam reads. See decision record 0023.
   note('bay', ARRANGED[how]());
@@ -368,15 +358,15 @@ export function askFor(id: string, size: PaneSize): void {
  * `outOfRoom`'s business; see `rail.ts` and decision record 0058.
  */
 export function putAwayForRoom(ids: readonly string[]): void {
-  const now = ids.filter((id) => state.heights[id] !== 'strip' && paneById(id) !== undefined);
+  const now = ids.filter((id) => store.get().heights[id] !== 'strip' && paneById(id) !== undefined);
   if (form !== 'spread' || now.length === 0) {
     return;
   }
-  const heights = { ...state.heights };
+  const heights = { ...store.get().heights };
   for (const id of now) {
     heights[id] = 'strip';
   }
-  settle({ ...state, heights });
+  settle({ ...store.get(), heights });
   note('bay', `the rail is out of room: ${now.map(titleOf).join(' and ')} put away, the one above kept open`);
 }
 
@@ -389,10 +379,10 @@ export function putAwayForRoom(ids: readonly string[]): void {
  * belongs where that is known rather than in here. So the arrival calls this and the compass does not.
  */
 export function roomToRead(which: Which): void {
-  if (askedIn(state.arrangement, which) !== 'strip') {
+  if (askedIn(store.get().arrangement, which) !== 'strip') {
     return;
   }
-  settle({ ...state, arrangement: 'halfEach' });
+  settle({ ...store.get(), arrangement: 'halfEach' });
   note('bay', `${where(which)} opened to half, for something that arrived in it`);
 }
 
@@ -405,24 +395,27 @@ export function roomToRead(which: Which): void {
  * undone afterwards.
  */
 export function takeOver(which: Which, id: string): void {
-  if (state.holding[which] === id) {
+  if (store.get().holding[which] === id) {
     return;
   }
 
   const other: Which = which === 0 ? 1 : 0;
-  const was = state.holding[which];
-  const holding: [string, string] = which === 0 ? [id, state.holding[1]] : [state.holding[0], id];
+  const was = store.get().holding[which];
+  const holding: [string, string] = which === 0 ? [id, store.get().holding[1]] : [store.get().holding[0], id];
   // Taking over a bay with something that is standing in the *other* one is a swap, as putting it there
   // by hand is: with two bays there is nowhere else for the displaced pane to go, and without this both
   // bays end up holding the same pane. Reachable from one gesture - put navigation top from its own list,
   // then press the compass, which opens it at the bottom.
-  if (state.holding[other] === id) {
+  if (store.get().holding[other] === id) {
     holding[other] = was;
   }
-  const displaced: [string | null, string | null] = [...state.displaced] as [string | null, string | null];
+  const displaced: [string | null, string | null] = [...store.get().displaced] as [
+    string | null,
+    string | null,
+  ];
   displaced[which] = was;
 
-  settle({ ...state, holding, displaced });
+  settle({ ...store.get(), holding, displaced });
   note('bay', `${where(which)}: ${titleOf(id)}, over ${titleOf(was)}`);
 }
 
@@ -434,10 +427,12 @@ export function takeOver(which: Which, id: string): void {
  */
 function whatGoesBack(which: Which): string {
   const other: Which = which === 0 ? 1 : 0;
-  const remembered = state.displaced[which];
-  return remembered !== null && remembered !== state.holding[other] && paneById(remembered) !== undefined
+  const remembered = store.get().displaced[which];
+  return remembered !== null &&
+    remembered !== store.get().holding[other] &&
+    paneById(remembered) !== undefined
     ? remembered
-    : state.holding[other] === MAP_PANE.id
+    : store.get().holding[other] === MAP_PANE.id
       ? HOUSE_PANE.id
       : MAP_PANE.id;
 }
@@ -449,17 +444,21 @@ function whatGoesBack(which: Which): string {
  * nothing to put back and this does nothing.
  */
 export function giveBack(id: string): void {
-  const which = state.holding.indexOf(id) as Which | -1;
+  const which = store.get().holding.indexOf(id) as Which | -1;
   if (which === -1) {
     return;
   }
 
   const back = whatGoesBack(which);
-  const holding: [string, string] = which === 0 ? [back, state.holding[1]] : [state.holding[0], back];
-  const displaced: [string | null, string | null] = [...state.displaced] as [string | null, string | null];
+  const holding: [string, string] =
+    which === 0 ? [back, store.get().holding[1]] : [store.get().holding[0], back];
+  const displaced: [string | null, string | null] = [...store.get().displaced] as [
+    string | null,
+    string | null,
+  ];
   displaced[which] = null;
 
-  settle({ ...state, holding, displaced });
+  settle({ ...store.get(), holding, displaced });
   note('bay', `${where(which)}: ${titleOf(back)} back`);
 }
 
@@ -479,11 +478,11 @@ export function giveBack(id: string): void {
  */
 function tidyUp(): void {
   for (const which of [0, 1] as const) {
-    if (paneById(state.holding[which]) === undefined) {
-      giveBack(state.holding[which]);
+    if (paneById(store.get().holding[which]) === undefined) {
+      giveBack(store.get().holding[which]);
     }
   }
 }
 
-watchSubjects(tidyUp);
-watchGateway(tidyUp);
+subjectsStore.watch(tidyUp);
+sessionStore.watch(tidyUp);

@@ -1,7 +1,7 @@
 import {
+  baysStore,
   askFor,
   awayFromTheMap,
-  baysNow,
   formNow,
   giveBack,
   roomToRead,
@@ -66,7 +66,7 @@ export function sizeWindow(subject: Subject, size: PaneSize): void {
 
 /** Whether a window is put away in the spread, where each window's size is its own. */
 function isPutAway(subject: Subject): boolean {
-  return baysNow().heights[paneIdOf(subject)] === 'strip';
+  return baysStore.get().heights[paneIdOf(subject)] === 'strip';
 }
 
 /** Close a window, and give its bay back to whatever it took over. */

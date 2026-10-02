@@ -66,38 +66,38 @@ describe('what has arrived', () => {
 
 describe('on a phone, a dialogue arriving', () => {
   it('takes the bay the map is not in, and opens it to half', async () => {
-    const { baysNow, openOnArrival, stageIs } = await fresh();
+    const { baysStore, openOnArrival, stageIs } = await fresh();
     stageIs('bays', 'rows');
 
     openOnArrival([dialogue('a')]);
 
-    expect(baysNow().holding).toEqual([MAP_PANE.id, DIALOGUE_PANE.id]);
-    expect(baysNow().arrangement).toBe('halfEach');
+    expect(baysStore.get().holding).toEqual([MAP_PANE.id, DIALOGUE_PANE.id]);
+    expect(baysStore.get().arrangement).toBe('halfEach');
     // Taken over rather than put there, so what it displaced is remembered.
-    expect(baysNow().displaced[1]).toBe(HOUSE_PANE.id);
+    expect(baysStore.get().displaced[1]).toBe(HOUSE_PANE.id);
   });
 
   // The player opened the map out over it since, which put it away; a step taken is not an arrival.
   it('leaves it put away when the same list comes again', async () => {
-    const { askFor, baysNow, openOnArrival, stageIs } = await fresh();
+    const { askFor, baysStore, openOnArrival, stageIs } = await fresh();
     stageIs('bays', 'rows');
     openOnArrival([dialogue('a')]);
     askFor(MAP_PANE.id, 'full');
-    const before = baysNow();
+    const before = baysStore.get();
 
     openOnArrival([{ ...dialogue('a'), revision: 2 }]);
 
-    expect(baysNow()).toBe(before);
-    expect(baysNow().arrangement).toBe('secondAway');
+    expect(baysStore.get()).toBe(before);
+    expect(baysStore.get().arrangement).toBe('secondAway');
   });
 
   it('moves nothing for a list with nothing waiting in it', async () => {
-    const { baysNow, openOnArrival, stageIs } = await fresh();
+    const { baysStore, openOnArrival, stageIs } = await fresh();
     stageIs('bays', 'rows');
-    const before = baysNow();
+    const before = baysStore.get();
 
     openOnArrival([dialogue('a', { kind: 'completed' })]);
 
-    expect(baysNow()).toBe(before);
+    expect(baysStore.get()).toBe(before);
   });
 });

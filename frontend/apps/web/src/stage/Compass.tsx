@@ -1,8 +1,7 @@
-import { useSyncExternalStore } from 'react';
-
 import { Icon } from './Icons';
-import { baysNow, giveBack, NEAR_BAY, takeOver, watchBays, where } from './bays';
+import { baysStore, giveBack, NEAR_BAY, takeOver, where } from './bays';
 import { NAVIGATION_PANE } from './panes';
+import { useStore } from '../store/useStore';
 
 /**
  * The compass, standing in the stage's bottom right corner: the way to everything not on the screen.
@@ -29,7 +28,7 @@ import { NAVIGATION_PANE } from './panes';
  */
 
 export function Compass() {
-  const bays = useSyncExternalStore(watchBays, baysNow);
+  const bays = useStore(baysStore);
   const at = bays.holding.indexOf(NAVIGATION_PANE.id);
   const open = at !== -1;
 

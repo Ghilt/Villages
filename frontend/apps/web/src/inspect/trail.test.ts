@@ -34,64 +34,64 @@ beforeEach(() => {
 describe('the trail', () => {
   it('starts empty when nothing was ever remembered', async () => {
     stubStorage();
-    const { trailNow } = await freshTrail();
+    const { trailStore } = await freshTrail();
 
-    expect(trailNow()).toEqual([]);
+    expect(trailStore.get().steps).toEqual([]);
   });
 
   it('puts what was just looked at at the front', async () => {
     stubStorage();
-    const { remember, trailNow } = await freshTrail();
+    const { remember, trailStore } = await freshTrail();
 
     remember(HOUSE, 'Ravenscar');
     remember(AREA, 'the vale');
 
-    expect(trailNow().map((step) => step.name)).toEqual(['the vale', 'Ravenscar']);
+    expect(trailStore.get().steps.map((step) => step.name)).toEqual(['the vale', 'Ravenscar']);
   });
 
   // A trail that repeats itself is a trail with less in it.
   it('moves a thing looked at again rather than listing it twice', async () => {
     stubStorage();
-    const { remember, trailNow } = await freshTrail();
+    const { remember, trailStore } = await freshTrail();
 
     remember(HOUSE, 'Ravenscar');
     remember(AREA, 'the vale');
     remember(HOUSE, 'Ravenscar');
 
-    expect(trailNow().map((step) => step.name)).toEqual(['Ravenscar', 'the vale']);
+    expect(trailStore.get().steps.map((step) => step.name)).toEqual(['Ravenscar', 'the vale']);
   });
 
   it('keeps a thing renamed under its new name, still once', async () => {
     stubStorage();
-    const { remember, trailNow } = await freshTrail();
+    const { remember, trailStore } = await freshTrail();
 
     remember(HOUSE, 'Ravenscar');
     remember(HOUSE, 'Ravenscar the Greater');
 
-    expect(trailNow().map((step) => step.name)).toEqual(['Ravenscar the Greater']);
+    expect(trailStore.get().steps.map((step) => step.name)).toEqual(['Ravenscar the Greater']);
   });
 
   it('goes only so far back', async () => {
     stubStorage();
-    const { remember, trailNow, TRAIL_KEEPS } = await freshTrail();
+    const { remember, trailStore, TRAIL_KEEPS } = await freshTrail();
 
     for (let step = 0; step < TRAIL_KEEPS + 5; step += 1) {
       remember({ kind: 'house', id: `house-${step}` }, `House ${step}`);
     }
 
-    expect(trailNow()).toHaveLength(TRAIL_KEEPS);
-    expect(trailNow()[0]?.name).toBe(`House ${TRAIL_KEEPS + 4}`);
+    expect(trailStore.get().steps).toHaveLength(TRAIL_KEEPS);
+    expect(trailStore.get().steps[0]?.name).toBe(`House ${TRAIL_KEEPS + 4}`);
   });
 
   it('forgets one thing without forgetting the rest', async () => {
     stubStorage();
-    const { forget, remember, trailNow } = await freshTrail();
+    const { forget, remember, trailStore } = await freshTrail();
 
     remember(HOUSE, 'Ravenscar');
     remember(AREA, 'the vale');
     forget(HOUSE);
 
-    expect(trailNow().map((step) => step.name)).toEqual(['the vale']);
+    expect(trailStore.get().steps.map((step) => step.name)).toEqual(['the vale']);
   });
 
   // The one thing on the stage that comes back from a previous page load; ARCHITECTURE.md says why.
@@ -107,7 +107,7 @@ describe('the trail', () => {
     });
     const again = await freshTrail();
 
-    expect(again.trailNow().map((step) => step.name)).toEqual(['Ravenscar']);
+    expect(again.trailStore.get().steps.map((step) => step.name)).toEqual(['Ravenscar']);
   });
 
   describe('what comes back is not trusted', () => {
@@ -121,16 +121,16 @@ describe('the trail', () => {
           null,
         ]),
       });
-      const { trailNow } = await freshTrail();
+      const { trailStore } = await freshTrail();
 
-      expect(trailNow().map((step) => step.name)).toEqual(['Kept']);
+      expect(trailStore.get().steps.map((step) => step.name)).toEqual(['Kept']);
     });
 
     it('survives rubbish in the slot', async () => {
       stubStorage({ 'villages.trail': 'not json at all' });
-      const { trailNow } = await freshTrail();
+      const { trailStore } = await freshTrail();
 
-      expect(trailNow()).toEqual([]);
+      expect(trailStore.get().steps).toEqual([]);
     });
 
     // A browser that will not remember is not a failure: the trail is a convenience, not state.
@@ -143,11 +143,11 @@ describe('the trail', () => {
           throw new Error('denied');
         },
       });
-      const { remember, trailNow } = await freshTrail();
+      const { remember, trailStore } = await freshTrail();
 
-      expect(trailNow()).toEqual([]);
+      expect(trailStore.get().steps).toEqual([]);
       expect(() => remember(HOUSE, 'Ravenscar')).not.toThrow();
-      expect(trailNow().map((step) => step.name)).toEqual(['Ravenscar']);
+      expect(trailStore.get().steps.map((step) => step.name)).toEqual(['Ravenscar']);
     });
   });
 });
@@ -159,14 +159,14 @@ describe('the trail', () => {
 describe('the name a thing was last seen under', () => {
   it('is the latest name the trail has for it, and nothing for a thing never seen', async () => {
     stubStorage();
-    const { lastNamed, remember, trailNow } = await freshTrail();
+    const { lastNamed, remember, trailStore } = await freshTrail();
 
     remember(HOUSE, 'Ravenscar');
     remember(AREA, 'the marsh');
     remember(HOUSE, 'Ravenscar the Younger');
 
-    expect(lastNamed(trailNow(), HOUSE)).toBe('Ravenscar the Younger');
-    expect(lastNamed(trailNow(), AREA)).toBe('the marsh');
-    expect(lastNamed(trailNow(), { kind: 'character', id: 'nobody' })).toBeUndefined();
+    expect(lastNamed(trailStore.get().steps, HOUSE)).toBe('Ravenscar the Younger');
+    expect(lastNamed(trailStore.get().steps, AREA)).toBe('the marsh');
+    expect(lastNamed(trailStore.get().steps, { kind: 'character', id: 'nobody' })).toBeUndefined();
   });
 });

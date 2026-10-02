@@ -11,7 +11,7 @@ export type { TokenStore } from './identity';
 
 export { connect } from './connection';
 export { createStore } from './store';
-export type { Store } from './store';
+export type { Readable, Store } from './store';
 export { INITIAL_SESSION, endState, foldFrame } from './slices';
 export type { EndCause, FrameOf, FrameType, SessionState, Slice } from './slices';
 export { createSession } from './session';

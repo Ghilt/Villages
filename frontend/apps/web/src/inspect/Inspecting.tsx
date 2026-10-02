@@ -1,17 +1,18 @@
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useEffect, useState } from 'react';
 
 import { charactersInView, housesInView } from '@villages/client-core';
 import type { TerrainClass } from '@villages/world';
 
-import { areasNow, watchAreas } from '../areas/areas';
+import { areasStore } from '../areas/areas';
 import { terrainPalette } from '../geometry/terrainClasses';
-import { gatewayState, watchGateway } from '../net/gateway';
+import { sessionStore } from '../net/gateway';
 import type { Room } from '../stage/panes';
 import { type Description, describeArea, describeCharacter, describeHouse, type Legend } from './describe';
 import { InspectWindow, WindowBar } from './InspectWindow';
 import { sizeWindow } from './opening';
 import { forgetSubject, type Subject } from './subjects';
-import { forget, lastNamed, trailNow, watchTrail } from './trail';
+import { trailStore, forget, lastNamed } from './trail';
+import { useStore } from '../store/useStore';
 
 /**
  * One inspect window, fed from what the browser already knows.
@@ -35,9 +36,12 @@ interface InspectingProps {
 export function Inspecting({ subject, room: given, along }: InspectingProps) {
   // Its own size control opens a put-away window at the top of the rail rather than where it stood.
   const room: Room = { ...given, ask: (size) => sizeWindow(subject, size) };
-  const heard = useSyncExternalStore(watchGateway, gatewayState);
-  const areas = useSyncExternalStore(watchAreas, areasNow);
-  const trail = useSyncExternalStore(watchTrail, trailNow);
+  const houses = useStore(sessionStore, (state) => state.houses);
+  const yourKeyFigures = useStore(sessionStore, (state) => state.yourKeyFigures);
+  const today = useStore(sessionStore, (state) => state.world?.today ?? null);
+  const yourHouse = useStore(sessionStore, (state) => state.yourHouse);
+  const areas = useStore(areasStore);
+  const trail = useStore(trailStore, (state) => state.steps);
   const legend = useLegend();
 
   // An area the player deleted is not a window they shut, so the window goes rather than saying nothing -
@@ -60,24 +64,20 @@ export function Inspecting({ subject, room: given, along }: InspectingProps) {
     // A character is seen standing in a held cell, or as one of this player's own key figures wherever
     // they are; the second is how your own people stay inspectable after the camera has left them.
     if (subject.kind === 'character') {
-      const standing = charactersInView(heard.houses).find((one) => one.id === subject.id);
-      const yours = heard.yourKeyFigures?.find((one) => one.id === subject.id);
+      const standing = charactersInView(houses).find((one) => one.id === subject.id);
+      const yours = yourKeyFigures?.find((one) => one.id === subject.id);
       const seen = standing ?? yours;
-      return seen === undefined
-        ? null
-        : describeCharacter(seen, heard.world?.today ?? null, yours !== undefined);
+      return seen === undefined ? null : describeCharacter(seen, today, yours !== undefined);
     }
 
     if (subject.kind === 'area') {
-      return area === null ? null : describeArea(area, housesInView(heard.houses), legend);
+      return area === null ? null : describeArea(area, housesInView(houses), legend);
     }
 
     const house =
-      housesInView(heard.houses).find((one) => one.id === subject.id) ??
-      (heard.yourHouse?.house.id === subject.id ? heard.yourHouse.house : undefined);
-    return house === undefined
-      ? null
-      : describeHouse(house, heard.yourHouse?.house.id === house.id, areas.areas);
+      housesInView(houses).find((one) => one.id === subject.id) ??
+      (yourHouse?.house.id === subject.id ? yourHouse.house : undefined);
+    return house === undefined ? null : describeHouse(house, yourHouse?.house.id === house.id, areas.areas);
   };
 
   const said = describeSubject();

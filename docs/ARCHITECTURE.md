@@ -45,8 +45,9 @@ packages/protocol  <-  packages/client-core  <-  apps/web
 - The session - what the page knows of the world and of its own house, and what it asks of the gateway - is
   `client-core`'s, `createSession`, so it is tested without a browser, and whatever it needs from the outside is
   handed in (0078). Its state is folded from **slices**, one a mechanic, in `slices.ts`: the connection, the cells,
-  the house, the choice, the key figures, the sight, the dialogues and the commands, each with what it starts as,
-  how a frame changes it, and what an end does to it - a close keeps the cards and a takeover forgets them. What a
+  the house, the choice, the key figures, the sight, the dialogues, the commands and the two switches - see
+  everything and the fog, held there once and said again at every welcome - each with what it starts as, how a
+  frame changes it, and what an end does to it - a close keeps the cards and a takeover forgets them. What a
   frame makes the session do goes through one table in `session.ts` that names every kind of frame. The follower
   is its part that asks for the cells the camera wants and lets go of the old ones late, only once what replaces
   them has answered, with its clock handed in as a `Schedule`. `commands.ts` is the one way a command goes out,
@@ -59,6 +60,11 @@ packages/protocol  <-  packages/client-core  <-  apps/web
   frame once the state has taken it in, with the state as it was, before what the frame makes the session do and
   after it, and of the connection opening and closing. `sessionLog.ts`, at the root of `apps/web`, is that
   listener, and holds every word the frames are said in.
+- Every piece of state the page watches is one shape: a store from the core's `createStore`, kept by the module
+  that owns it and handed out read-only as a `Readable` - `sessionStore`, `baysStore`, `cameraStore` and the
+  rest - and changed only through that module's own functions, which say why. A component reads one through
+  `useStore(store, select)`, in `src/store/`, and picks what it uses, so a frame that changed something else does
+  not draw it again. The component library keeps its one store of its own, because it leans on nothing.
 - Inside `apps/web`, the component library in `src/ui/` imports nothing from the rest of the app: the game hands it
   words, numbers and callbacks. A test reads every import in the folder and fails on one that leaves it, bar React,
   the fonts and the world package's pure rules and types, which is what lets `/admin/inspect-ui-components` show every component with nothing running. See
@@ -459,8 +465,8 @@ only ever needed a positioned box around it, and the stage was already that box.
 so the map's visible middle is not its geometric middle. Whatever flies the camera reads the layout's answer
 for that, in one place, rather than every caller guessing.
 
-**Which bay holds what is where the player is, not a preference.** It is a module store with a listener
-set, like the gateway and the selection and the areas, and a reload forgets it. **The trail does survive a
+**Which bay holds what is where the player is, not a preference.** It is a store, like the session and the
+selection and the areas, and a reload forgets it. **The trail does survive a
 reload**, because a trail that empties itself is not a trail, and it is the only thing on the stage that
 does; what comes back from storage is checked rather than trusted, because a previous version of the code
 wrote it. What persists besides that - the phone toggle, the folded sections - is Adam's and lives in

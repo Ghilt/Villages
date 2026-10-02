@@ -1,11 +1,12 @@
-import { useState, useSyncExternalStore } from 'react';
+import { useState } from 'react';
 
 import type { ResourceName } from '@villages/protocol';
 
 import { RESOURCES_IN_ORDER, RESOURCE_WORDS, saysStock } from '../house/describe';
-import { gatewayState, watchGateway } from '../net/gateway';
+import { sessionStore } from '../net/gateway';
 import { Section } from './Section';
 import { grantResource, pledgeResource, releasePledge, spendResource } from './levers';
+import { useStore } from '../store/useStore';
 
 /** How much a press is worth. Four, spanning the sizes a resource plausibly comes in. */
 const STEPS = [1, 10, 100, 1000] as const;
@@ -27,11 +28,11 @@ const SPANS = [1, 6, 40] as const;
  * to it anyway.
  */
 export function ResourcesSection() {
-  const heard = useSyncExternalStore(watchGateway, gatewayState);
+  const connection = useStore(sessionStore, (state) => state.connection);
   const [step, setStep] = useState<number>(100);
   const [span, setSpan] = useState<number>(1);
-  const yours = heard.yourHouse;
-  const idle = heard.connection !== 'open' || yours === null;
+  const yours = useStore(sessionStore, (state) => state.yourHouse);
+  const idle = connection !== 'open' || yours === null;
 
   return (
     <Section name="Resources">

@@ -1,4 +1,4 @@
-import { useState, useSyncExternalStore } from 'react';
+import { useState } from 'react';
 
 import { ageOn } from '@villages/client-core';
 import type { KeyFigureView, Point } from '@villages/protocol';
@@ -6,14 +6,15 @@ import type { KeyFigureView, Point } from '@villages/protocol';
 import { note } from '../log/log';
 import { focusOn } from '../map/focus';
 import { Mark } from '../marks/Mark';
-import { gatewayState, watchGateway } from '../net/gateway';
-import { baysNow, put, watchBays, type Which } from '../stage/bays';
+import { sessionStore } from '../net/gateway';
+import { baysStore, put, type Which } from '../stage/bays';
 import { Icon } from '../stage/Icons';
 import { KEY_FIGURES_PANE, MAP_PANE, type Room } from '../stage/panes';
 import { PaneSizeControl } from '../stage/PaneSizeControl';
 import { STATS_IN_ORDER, STAT_WORDS, fullName } from './describe';
 import { Portrait } from './Portrait';
 import { stillOpen, viewOf } from './view';
+import { useStore } from '../store/useStore';
 
 /**
  * **Key figures**: the few named people the house acts through.
@@ -37,10 +38,9 @@ interface KeyFiguresProps {
 }
 
 export function KeyFigures({ room, along }: KeyFiguresProps) {
-  const heard = useSyncExternalStore(watchGateway, gatewayState);
-  const bays = useSyncExternalStore(watchBays, baysNow);
-  const figures = heard.yourKeyFigures ?? [];
-  const today = heard.world?.today ?? null;
+  const bays = useStore(baysStore);
+  const figures = useStore(sessionStore, (state) => state.yourKeyFigures) ?? [];
+  const today = useStore(sessionStore, (state) => state.world?.today ?? null);
   const [open, setOpen] = useState<string | null>(null);
 
   // A lone figure is open whether or not anybody pressed them, and is kept open, so that a second

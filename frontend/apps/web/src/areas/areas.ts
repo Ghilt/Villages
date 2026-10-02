@@ -1,3 +1,6 @@
+import { createStore } from '@villages/client-core';
+import type { Readable } from '@villages/client-core';
+
 import { fenceSize, fenceWindow } from '@villages/world';
 import type { Fence } from '@villages/world';
 
@@ -13,8 +16,8 @@ import type { Census } from './census';
  * is one store for every kind of thing (`inspect/subjects.ts`). This used to keep a selection of its own
  * beside the houses' one, which is exactly the split that made two clicks mean two different things.
  *
- * A module with a listener set rather than a context, the same shape as the debug log and the gateway,
- * because that is what `useSyncExternalStore` wants and it keeps the state out of the component tree.
+ * A store, the one shape every piece of state the page watches takes, read in a component through
+ * `useStore`, which keeps the state out of the component tree.
  *
  * Local to the browser, deliberately. An area is not an event yet: nothing here reaches the gateway, and
  * a reload forgets them. When areas become something the world remembers, this becomes a reducer over
@@ -46,38 +49,26 @@ export interface AreasState {
 
 const NO_AREAS: AreasState = { areas: [], armed: false };
 
-let state: AreasState = NO_AREAS;
-const listeners = new Set<() => void>();
+const store = createStore<AreasState>(NO_AREAS);
+
+/** The areas, and whether the next drag draws one. */
+export const areasStore: Readable<AreasState> = store;
 
 function update(change: Partial<AreasState>): void {
-  state = { ...state, ...change };
-  for (const listener of listeners) {
-    listener();
-  }
+  store.set(change);
 }
 
 /** One array per change, so React can tell whether anything happened. */
-export function areasNow(): AreasState {
-  return state;
-}
-
-export function watchAreas(listener: () => void): () => void {
-  listeners.add(listener);
-  return () => {
-    listeners.delete(listener);
-  };
-}
-
 /** Replaces one area, if it is still there. A census that comes back late must not raise the dead. */
 function replace(id: string, change: Partial<Area>): void {
-  if (!state.areas.some((area) => area.id === id)) {
+  if (!store.get().areas.some((area) => area.id === id)) {
     return;
   }
-  update({ areas: state.areas.map((area) => (area.id === id ? { ...area, ...change } : area)) });
+  update({ areas: store.get().areas.map((area) => (area.id === id ? { ...area, ...change } : area)) });
 }
 
 export function armDrawing(armed: boolean): void {
-  if (state.armed === armed) {
+  if (store.get().armed === armed) {
     return;
   }
   note('area', armed ? 'armed: drag on the map to paint an area' : 'no longer drawing');
@@ -105,7 +96,7 @@ export function addArea(fence: Fence, tilesRoot: string): string {
 
   update({
     areas: [
-      ...state.areas,
+      ...store.get().areas,
       { id, fence, shaded: true, diamonds, census: null, counting: false, problem: null },
     ],
   });
@@ -115,7 +106,7 @@ export function addArea(fence: Fence, tilesRoot: string): string {
 
 /** Reads the terrain under an area again. The fence is the truth, so this may be asked at any time. */
 export function countArea(id: string, tilesRoot: string): void {
-  const area = state.areas.find((candidate) => candidate.id === id);
+  const area = store.get().areas.find((candidate) => candidate.id === id);
   if (area === undefined || area.counting) {
     return;
   }
@@ -144,20 +135,20 @@ export function shadeArea(id: string, shaded: boolean): void {
 }
 
 export function deleteArea(id: string): void {
-  if (!state.areas.some((area) => area.id === id)) {
+  if (!store.get().areas.some((area) => area.id === id)) {
     return;
   }
   note('area', `${id} deleted`);
-  update({ areas: state.areas.filter((area) => area.id !== id) });
+  update({ areas: store.get().areas.filter((area) => area.id !== id) });
   // A window open on it is now a window about nothing, and the player did not close it.
   forgetSubject({ kind: 'area', id });
 }
 
 export function forgetAreas(): void {
-  if (state.areas.length === 0) {
+  if (store.get().areas.length === 0) {
     return;
   }
-  const had = state.areas;
+  const had = store.get().areas;
   note('area', `${had.length} deleted`);
   update({ areas: [] });
   for (const area of had) {

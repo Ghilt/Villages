@@ -1,9 +1,12 @@
+import { createStore } from '@villages/client-core';
+import type { Readable } from '@villages/client-core';
+
 import { note } from '../../log/log';
 
 /**
  * Whether the world is furnished, and how thickly.
  *
- * A module with a set of listeners, read through `useSyncExternalStore`, as every switch is. The Scenery
+ * A store, read through `useStore`, as every switch is. The Scenery
  * section of the debug panel sets it and the sprites read it, and nothing a player does moves it: without the
  * panel the world is furnished as `world/biomes.json` asks. See decision record 0023.
  *
@@ -33,21 +36,12 @@ export interface ScenerySettings {
 
 const START: ScenerySettings = { on: true, dial: 1, laterBy: 0, spacing: 1, shadows: 0.4 };
 
-let settings: ScenerySettings = { ...START };
-const listeners = new Set<() => void>();
+const scenery = createStore<ScenerySettings>({ ...START });
 
-export function sceneryNow(): ScenerySettings {
-  return settings;
-}
-
-export function watchScenery(listener: () => void): () => void {
-  listeners.add(listener);
-  return () => {
-    listeners.delete(listener);
-  };
-}
+export const sceneryStore: Readable<ScenerySettings> = scenery;
 
 export function setScenery(change: Partial<ScenerySettings>): void {
+  const settings = scenery.get();
   const next = { ...settings, ...change };
   if (
     next.on === settings.on &&
@@ -90,8 +84,5 @@ export function setScenery(change: Partial<ScenerySettings>): void {
   if (next.laterBy !== settings.laterBy) {
     note('scenery', `arriving ${next.laterBy.toFixed(1)} zoom levels later`);
   }
-  settings = next;
-  for (const listener of listeners) {
-    listener();
-  }
+  scenery.set(next);
 }

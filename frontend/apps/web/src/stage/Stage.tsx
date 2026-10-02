@@ -1,23 +1,22 @@
 import type { CSSProperties, ReactNode, RefObject } from 'react';
-import { useEffect, useLayoutEffect, useMemo, useRef, useSyncExternalStore } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 
 import { note } from '../log/log';
-import { subjectsNow, watchSubjects } from '../inspect/subjects';
-import { gatewayState, watchGateway } from '../net/gateway';
+import { subjectsStore } from '../inspect/subjects';
+import { sessionStore } from '../net/gateway';
 import { Compass } from './Compass';
 import { Seam } from './Seam';
 import { bayLayout, type BayName, type Box, isTabbed, type Rect, TAB_BAR, TILES } from './bayBox';
 import {
+  baysStore,
   askedIn,
   askFor,
-  askingNow,
-  baysNow,
+  askingOf,
   formNow,
   putAwayForRoom,
   show,
   showingIn,
   stageIs,
-  watchBays,
   type Which,
 } from './bays';
 import {
@@ -35,6 +34,7 @@ import {
 } from './panes';
 import { outOfRoom } from './rail';
 import { TabBar } from './TabBar';
+import { useStore } from '../store/useStore';
 
 /**
  * The stage, and how it divides itself.
@@ -77,12 +77,13 @@ function place(rect: Rect): CSSProperties {
 }
 
 export function Stage({ stage, contents, overlays }: StageProps) {
-  const bays = useSyncExternalStore(watchBays, baysNow);
-  const asking = useSyncExternalStore(watchBays, askingNow);
-  const subjects = useSyncExternalStore(watchSubjects, subjectsNow);
+  const bays = useStore(baysStore);
+  const asking = useStore(baysStore, askingOf);
+  const subjects = useStore(subjectsStore);
   // The one thing the layout asks the world: which of the panes that come and go are there, because an
   // empty tile takes no room. The choice roll while a question stands, and dialogue once there is any.
-  const { choice, dialogues } = presentIn(useSyncExternalStore(watchGateway, gatewayState));
+  const choice = useStore(sessionStore, (state) => presentIn(state).choice);
+  const dialogues = useStore(sessionStore, (state) => presentIn(state).dialogues);
   const present = useMemo(() => ({ choice, dialogues }), [choice, dialogues]);
   const panes = useMemo(() => panesFor(subjects.open, present), [subjects.open, present]);
   // Not told which tab is up, which is what makes pressing one move nothing. See decision record 0057.

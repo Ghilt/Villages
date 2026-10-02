@@ -1,3 +1,6 @@
+import { createStore } from '@villages/client-core';
+import type { Readable } from '@villages/client-core';
+
 import { CAMERA, lensFor } from './mapConfig';
 import { PLAYERS_TILT } from './tilt';
 
@@ -6,7 +9,7 @@ import { note } from '../log/log';
 /**
  * Where the camera is standing: how far it tips as it comes in, from where, and which way is up.
  *
- * A module with a set of listeners, read through `useSyncExternalStore`, as every switch is. The Camera
+ * A store, read through `useStore`, as every switch is. The Camera
  * section of the debug panel sets it and the map reads it, and nothing a player does moves it: without the
  * panel it is the player's camera for good. These all start at the player's camera,
  * `CAMERA` in `map/mapConfig.ts`: north-up on a diamond lattice, flat from zoom 7 out and tipped back 45
@@ -75,19 +78,9 @@ export const PLAYERS: CameraSettings = {
 
 const START: CameraSettings = PLAYERS;
 
-let settings: CameraSettings = { ...START };
-const listeners = new Set<() => void>();
+const camera = createStore<CameraSettings>({ ...START });
 
-export function cameraNow(): CameraSettings {
-  return settings;
-}
-
-export function watchCamera(listener: () => void): () => void {
-  listeners.add(listener);
-  return () => {
-    listeners.delete(listener);
-  };
-}
+export const cameraStore: Readable<CameraSettings> = camera;
 
 /** Whether this is the camera a player is shown, turn, tip and lattice alike. */
 export function isPlayers(how: CameraSettings): boolean {
@@ -106,6 +99,7 @@ export function isSquareGround(how: CameraSettings): boolean {
 }
 
 export function setCamera(change: Partial<CameraSettings>): void {
+  const settings = camera.get();
   const next = { ...settings, ...change };
   if (
     next.tilt === settings.tilt &&
@@ -143,8 +137,5 @@ export function setCamera(change: Partial<CameraSettings>): void {
     );
   }
 
-  settings = next;
-  for (const listener of listeners) {
-    listener();
-  }
+  camera.set(next);
 }

@@ -93,35 +93,35 @@ describe('the three arrangements', () => {
 
 describe('what each bay asks the layout for', () => {
   it('is the arrangement and nothing else', async () => {
-    const { askingNow, askFor } = await fresh();
+    const { askingOf, baysStore, askFor } = await fresh();
 
     askFor(MAP_PANE.id, 'full');
-    expect(askingNow()).toEqual(['big', { small: STRIP }]);
+    expect(askingOf(baysStore.get())).toEqual(['big', { small: STRIP }]);
 
     askFor(MAP_PANE.id, 'small');
-    expect(askingNow()).toEqual(['big', 'big']);
+    expect(askingOf(baysStore.get())).toEqual(['big', 'big']);
 
     askFor(MAP_PANE.id, 'strip');
-    expect(askingNow()).toEqual([{ small: STRIP }, 'big']);
+    expect(askingOf(baysStore.get())).toEqual([{ small: STRIP }, 'big']);
   });
 
   // The stage compares what the store hands back by identity, so this is not a nicety: a fresh array per
   // read is an infinite render, and an unchanged one means the layout is not even recomputed.
   it('hands back the same object while the arrangement has not changed', async () => {
-    const { askingNow, put } = await fresh();
-    const before = askingNow();
+    const { askingOf, baysStore, put } = await fresh();
+    const before = askingOf(baysStore.get());
 
     put(1, NAVIGATION_PANE.id);
 
-    expect(askingNow()).toBe(before);
+    expect(askingOf(baysStore.get())).toBe(before);
   });
 
   it('opens on the map opened out, with the house status a strip beneath it', async () => {
-    const { baysNow, askingNow } = await fresh();
+    const { baysStore, askingOf } = await fresh();
 
-    expect(baysNow().holding).toEqual([MAP_PANE.id, HOUSE_PANE.id]);
-    expect(baysNow().arrangement).toBe('secondAway');
-    expect(askingNow()).toEqual(['big', { small: STRIP }]);
+    expect(baysStore.get().holding).toEqual([MAP_PANE.id, HOUSE_PANE.id]);
+    expect(baysStore.get().arrangement).toBe('secondAway');
+    expect(askingOf(baysStore.get())).toEqual(['big', { small: STRIP }]);
   });
 });
 
@@ -134,29 +134,29 @@ describe('what each bay asks the layout for', () => {
  */
 describe('the seam does not move', () => {
   it('when the compass puts navigation in a bay, or takes it away again', async () => {
-    const { baysNow, takeOver, giveBack } = await fresh();
-    const before = baysNow().arrangement;
+    const { baysStore, takeOver, giveBack } = await fresh();
+    const before = baysStore.get().arrangement;
 
     takeOver(1, NAVIGATION_PANE.id);
-    expect(baysNow().holding[1]).toBe(NAVIGATION_PANE.id);
-    expect(baysNow().arrangement).toBe(before);
+    expect(baysStore.get().holding[1]).toBe(NAVIGATION_PANE.id);
+    expect(baysStore.get().arrangement).toBe(before);
 
     giveBack(NAVIGATION_PANE.id);
-    expect(baysNow().holding[1]).toBe(HOUSE_PANE.id);
-    expect(baysNow().arrangement).toBe(before);
+    expect(baysStore.get().holding[1]).toBe(HOUSE_PANE.id);
+    expect(baysStore.get().arrangement).toBe(before);
   });
 
   it('when a navigation row puts a pane somewhere, or swaps the two', async () => {
-    const { baysNow, put } = await fresh();
-    const before = baysNow().arrangement;
+    const { baysStore, put } = await fresh();
+    const before = baysStore.get().arrangement;
 
     put(1, NAVIGATION_PANE.id);
-    expect(baysNow().arrangement).toBe(before);
+    expect(baysStore.get().arrangement).toBe(before);
 
     // A swap: the map is already up, so putting it in the other bay exchanges the two.
     put(1, MAP_PANE.id);
-    expect(baysNow().holding).toEqual([NAVIGATION_PANE.id, MAP_PANE.id]);
-    expect(baysNow().arrangement).toBe(before);
+    expect(baysStore.get().holding).toEqual([NAVIGATION_PANE.id, MAP_PANE.id]);
+    expect(baysStore.get().arrangement).toBe(before);
   });
 
   /*
@@ -164,40 +164,40 @@ describe('the seam does not move', () => {
    * across with the pane. The bay is what is put away, not the pane in it.
    */
   it('when the two bays are swapped: the same bay is the strip, not the same pane', async () => {
-    const { baysNow, askFor, put } = await fresh();
+    const { baysStore, askFor, put } = await fresh();
 
     askFor(MAP_PANE.id, 'strip');
-    expect(askedIn(baysNow().arrangement, 0)).toBe('strip');
+    expect(askedIn(baysStore.get().arrangement, 0)).toBe('strip');
 
     put(1, MAP_PANE.id);
 
-    expect(baysNow().holding).toEqual([HOUSE_PANE.id, MAP_PANE.id]);
-    expect(askedIn(baysNow().arrangement, 0)).toBe('strip');
+    expect(baysStore.get().holding).toEqual([HOUSE_PANE.id, MAP_PANE.id]);
+    expect(askedIn(baysStore.get().arrangement, 0)).toBe('strip');
   });
 
   it('when a window closes and the bay goes back to what it displaced', async () => {
-    const { baysNow, askFor, takeOver, giveBack } = await fresh();
+    const { baysStore, askFor, takeOver, giveBack } = await fresh();
     const windowId = 'inspect:house:abc-123';
 
     askFor(MAP_PANE.id, 'small');
     takeOver(1, windowId);
     giveBack(windowId);
 
-    expect(baysNow().arrangement).toBe('halfEach');
+    expect(baysStore.get().arrangement).toBe('halfEach');
   });
 
   // The manager watches the stores that say what exists and tidies up after all of them, which used to be
   // one more road to a resize.
   it('when a pane stops existing out from under the bay holding it', async () => {
-    const { baysNow, askFor, takeOver, openOn, closeOne } = await fresh();
+    const { baysStore, askFor, takeOver, openOn, closeOne } = await fresh();
 
     openOn(A_HOUSE);
     askFor(MAP_PANE.id, 'small');
     takeOver(1, 'inspect:house:abc-123');
     closeOne(A_HOUSE);
 
-    expect(baysNow().holding[1]).toBe(HOUSE_PANE.id);
-    expect(baysNow().arrangement).toBe('halfEach');
+    expect(baysStore.get().holding[1]).toBe(HOUSE_PANE.id);
+    expect(baysStore.get().arrangement).toBe('halfEach');
   });
 });
 
@@ -208,35 +208,35 @@ describe('the seam does not move', () => {
  */
 describe('room to read', () => {
   it('opens a bay that is a strip to half', async () => {
-    const { baysNow, askFor, roomToRead } = await fresh();
+    const { baysStore, askFor, roomToRead } = await fresh();
 
     askFor(HOUSE_PANE.id, 'strip');
     roomToRead(1);
 
-    expect(baysNow().arrangement).toBe('halfEach');
+    expect(baysStore.get().arrangement).toBe('halfEach');
   });
 
   it('leaves a bay that is already half or opened out exactly as it is', async () => {
-    const { baysNow, askFor, roomToRead } = await fresh();
+    const { baysStore, askFor, roomToRead } = await fresh();
 
     askFor(HOUSE_PANE.id, 'full');
     roomToRead(1);
-    expect(baysNow().arrangement).toBe('firstAway');
+    expect(baysStore.get().arrangement).toBe('firstAway');
 
     askFor(HOUSE_PANE.id, 'small');
     roomToRead(1);
-    expect(baysNow().arrangement).toBe('halfEach');
+    expect(baysStore.get().arrangement).toBe('halfEach');
   });
 });
 
 describe('asking for a size', () => {
   it('does nothing for a pane the player has not got up', async () => {
-    const { baysNow, askFor } = await fresh();
-    const before = baysNow().arrangement;
+    const { baysStore, askFor } = await fresh();
+    const before = baysStore.get().arrangement;
 
     askFor('inspect:house:not-open', 'strip');
 
-    expect(baysNow().arrangement).toBe(before);
+    expect(baysStore.get().arrangement).toBe(before);
   });
 
   /*
@@ -245,29 +245,29 @@ describe('asking for a size', () => {
    * desktop, which is half of what 0046 separated.
    */
   it('writes the tile size in the spread and the arrangement in the bays, never both', async () => {
-    const { baysNow, askFor, stageIs } = await fresh();
+    const { baysStore, askFor, stageIs } = await fresh();
 
     askFor(MAP_PANE.id, 'strip');
-    expect(baysNow().arrangement).toBe('firstAway');
-    expect(baysNow().heights).toEqual({});
-    expect(baysNow().tiles).toEqual({});
+    expect(baysStore.get().arrangement).toBe('firstAway');
+    expect(baysStore.get().heights).toEqual({});
+    expect(baysStore.get().tiles).toEqual({});
 
     stageIs('spread', 'rows');
     askFor(HOUSE_PANE.id, 'strip');
-    expect(baysNow().tiles).toEqual({ bottomLeft: 'strip' });
-    expect(baysNow().arrangement).toBe('firstAway');
+    expect(baysStore.get().tiles).toEqual({ bottomLeft: 'strip' });
+    expect(baysStore.get().arrangement).toBe('firstAway');
   });
 
   it('crossing the fold and back leaves both of them where they were', async () => {
-    const { baysNow, askFor, stageIs } = await fresh();
+    const { baysStore, askFor, stageIs } = await fresh();
 
     askFor(MAP_PANE.id, 'strip');
     stageIs('spread', 'rows');
     askFor(HOUSE_PANE.id, 'strip');
     stageIs('bays', 'rows');
 
-    expect(baysNow().arrangement).toBe('firstAway');
-    expect(baysNow().tiles).toEqual({ bottomLeft: 'strip' });
+    expect(baysStore.get().arrangement).toBe('firstAway');
+    expect(baysStore.get().tiles).toEqual({ bottomLeft: 'strip' });
   });
 });
 
@@ -279,42 +279,42 @@ describe('asking for a size', () => {
  */
 describe('the corner, in the spread', () => {
   it('is the size any of its panes asked for, whichever of them asked', async () => {
-    const { baysNow, askFor, stageIs } = await fresh();
+    const { baysStore, askFor, stageIs } = await fresh();
     stageIs('spread', 'rows');
 
     askFor(KEY_FIGURES_PANE.id, 'full');
 
     for (const pane of [HOUSE_PANE, KEY_FIGURES_PANE, NAVIGATION_PANE]) {
-      expect(sizeAsked(pane, baysNow())).toBe('full');
+      expect(sizeAsked(pane, baysStore.get())).toBe('full');
     }
-    expect(baysNow().heights).toEqual({});
+    expect(baysStore.get().heights).toEqual({});
   });
 
   it('changes nothing about its size when a tab is pressed', async () => {
-    const { baysNow, askFor, show, stageIs } = await fresh();
+    const { baysStore, askFor, show, stageIs } = await fresh();
     stageIs('spread', 'rows');
     askFor(HOUSE_PANE.id, 'full');
     const panes = panesFor([], { choice: false, dialogues: false });
-    const before = baysNow();
+    const before = baysStore.get();
 
     show('bottomLeft', NAVIGATION_PANE.id);
     show('bottomLeft', KEY_FIGURES_PANE.id);
 
-    expect(baysNow().showing).toEqual({ bottomLeft: KEY_FIGURES_PANE.id });
-    expect(baysNow().tiles).toBe(before.tiles);
-    expect(baysNow().heights).toBe(before.heights);
-    expect(spreadWants(panes, baysNow())).toEqual(spreadWants(panes, before));
+    expect(baysStore.get().showing).toEqual({ bottomLeft: KEY_FIGURES_PANE.id });
+    expect(baysStore.get().tiles).toBe(before.tiles);
+    expect(baysStore.get().heights).toBe(before.heights);
+    expect(spreadWants(panes, baysStore.get())).toEqual(spreadWants(panes, before));
   });
 });
 
 describe('what is in each bay', () => {
   // With two bays there is nowhere else for the displaced one to go, and dropping it leaves a bay empty.
   it('swaps rather than dropping, when a pane already up is put in the other bay', async () => {
-    const { baysNow, put } = await fresh();
+    const { baysStore, put } = await fresh();
 
     put(0, HOUSE_PANE.id);
 
-    expect(baysNow().holding).toEqual([HOUSE_PANE.id, MAP_PANE.id]);
+    expect(baysStore.get().holding).toEqual([HOUSE_PANE.id, MAP_PANE.id]);
   });
 
   /*
@@ -322,44 +322,44 @@ describe('what is in each bay', () => {
    * which opens it at the bottom. Both bays held navigation and the map was nowhere.
    */
   it('never holds the same pane twice, even when a takeover wants one already up', async () => {
-    const { baysNow, put, takeOver } = await fresh();
+    const { baysStore, put, takeOver } = await fresh();
 
     // Putting navigation top drops the map, which is what a row in its own list does; the takeover then
     // has to swap rather than write navigation into the bottom bay as well.
     put(0, NAVIGATION_PANE.id);
     takeOver(1, NAVIGATION_PANE.id);
 
-    expect(baysNow().holding).toEqual([HOUSE_PANE.id, NAVIGATION_PANE.id]);
+    expect(baysStore.get().holding).toEqual([HOUSE_PANE.id, NAVIGATION_PANE.id]);
   });
 
   // A takeover is the world answering a click, so it is undone; a pane the player chose is not.
   it('remembers what a takeover displaced and puts it back', async () => {
-    const { baysNow, takeOver, giveBack } = await fresh();
+    const { baysStore, takeOver, giveBack } = await fresh();
 
     takeOver(1, NAVIGATION_PANE.id);
     giveBack(NAVIGATION_PANE.id);
 
-    expect(baysNow().holding[1]).toBe(HOUSE_PANE.id);
+    expect(baysStore.get().holding[1]).toBe(HOUSE_PANE.id);
   });
 
   // What it displaced has since been put in the other bay, so putting it back would hold it twice.
   it('falls back to whichever fixed pane is not up, when what it displaced has gone elsewhere', async () => {
-    const { baysNow, takeOver, put, giveBack } = await fresh();
+    const { baysStore, takeOver, put, giveBack } = await fresh();
 
     takeOver(1, NAVIGATION_PANE.id);
     put(0, HOUSE_PANE.id);
     giveBack(NAVIGATION_PANE.id);
 
-    expect(baysNow().holding).toEqual([HOUSE_PANE.id, MAP_PANE.id]);
+    expect(baysStore.get().holding).toEqual([HOUSE_PANE.id, MAP_PANE.id]);
   });
 
   it('does nothing when asked to give back a pane that is in no bay', async () => {
-    const { baysNow, giveBack } = await fresh();
-    const before = baysNow().holding;
+    const { baysStore, giveBack } = await fresh();
+    const before = baysStore.get().holding;
 
     giveBack(NAVIGATION_PANE.id);
 
-    expect(baysNow().holding).toBe(before);
+    expect(baysStore.get().holding).toBe(before);
   });
 });
 
@@ -369,7 +369,7 @@ describe('where the compass opens navigation', () => {
    * put the door somewhere else depending on what the player had been looking at.
    */
   it('is the second bay, whatever the player has swapped into it', async () => {
-    const { NEAR_BAY, baysNow, put, takeOver } = await fresh();
+    const { NEAR_BAY, baysStore, put, takeOver } = await fresh();
 
     expect(NEAR_BAY).toBe(1);
 
@@ -377,18 +377,18 @@ describe('where the compass opens navigation', () => {
     put(1, MAP_PANE.id);
     takeOver(NEAR_BAY, NAVIGATION_PANE.id);
 
-    expect(baysNow().holding[1]).toBe(NAVIGATION_PANE.id);
+    expect(baysStore.get().holding[1]).toBe(NAVIGATION_PANE.id);
   });
 
   it('lands in a strip without opening it, because a strip of it is still a list of ways on', async () => {
-    const { baysNow, askFor, takeOver } = await fresh();
+    const { baysStore, askFor, takeOver } = await fresh();
 
     // The bottom bay put away, then the compass.
     askFor(MAP_PANE.id, 'full');
     takeOver(1, NAVIGATION_PANE.id);
 
-    expect(baysNow().arrangement).toBe('secondAway');
-    expect(askedIn(baysNow().arrangement, 1)).toBe('strip');
+    expect(baysStore.get().arrangement).toBe('secondAway');
+    expect(askedIn(baysStore.get().arrangement, 1)).toBe('strip');
   });
 });
 
@@ -429,9 +429,9 @@ describe('who is up in a shared tile', () => {
 
 describe('the listeners', () => {
   it('are told once per change, and not at all when nothing changed', async () => {
-    const { askFor, put, watchBays } = await fresh();
+    const { askFor, put, baysStore } = await fresh();
     const heard = vi.fn();
-    watchBays(heard);
+    baysStore.watch(heard);
 
     askFor(HOUSE_PANE.id, 'small');
     expect(heard).toHaveBeenCalledTimes(1);

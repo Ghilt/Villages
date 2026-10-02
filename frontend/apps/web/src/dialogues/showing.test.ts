@@ -10,7 +10,7 @@ import { newlyReached } from './showing';
  * back the moment what it holds stops standing - so the page's gateway is one that has heard of one.
  */
 const heard = vi.hoisted(() => ({ yourChoice: null, yourDialogues: [{}], yourHouse: null }));
-vi.mock('../net/gateway', () => ({ gatewayState: () => heard, watchGateway: () => () => undefined }));
+vi.mock('../net/gateway', () => ({ sessionStore: { get: () => heard, watch: () => () => undefined } }));
 
 const THE_SEAT = { lat: 60.776, lon: 14.927 };
 
@@ -83,21 +83,21 @@ describe('what the lines reached show', () => {
 
 describe('in the spread, a line reached', () => {
   it('takes the camera to the place it shows, and moves no bay', async () => {
-    const { baysNow, flights, showWhatIsReached } = await fresh();
-    const before = baysNow();
+    const { baysStore, flights, showWhatIsReached } = await fresh();
+    const before = baysStore.get();
 
     showWhatIsReached(letter(), [line('arrives', { kind: 'place', at: THE_SEAT })]);
 
     expect(flights).toEqual([THE_SEAT]);
-    expect(baysNow()).toBe(before);
+    expect(baysStore.get()).toBe(before);
   });
 
   it('opens a window on the house it shows', async () => {
-    const { showWhatIsReached, subjectsNow } = await fresh();
+    const { showWhatIsReached, subjectsStore } = await fresh();
 
     showWhatIsReached(letter(), [line('paid', { kind: 'house', id: 'fenwold' })]);
 
-    expect(subjectsNow().open).toEqual([{ kind: 'house', id: 'fenwold' }]);
+    expect(subjectsStore.get().open).toEqual([{ kind: 'house', id: 'fenwold' }]);
   });
 
   it('shows it once, however often the conversation is drawn or opened again', async () => {
@@ -112,32 +112,32 @@ describe('in the spread, a line reached', () => {
 
   // The house can refuse a step - a purse too light - and then nothing was said.
   it('shows what an option shows once the house has taken it, and not as it is pressed', async () => {
-    const { showWhatIsReached, subjectsNow, taking } = await fresh();
+    const { showWhatIsReached, subjectsStore, taking } = await fresh();
     taking('letter', line('accept', { kind: 'character', id: 'philip' }));
 
     showWhatIsReached(letter(), []);
-    expect(subjectsNow().open).toEqual([]);
+    expect(subjectsStore.get().open).toEqual([]);
 
     showWhatIsReached(letter(['accept']), []);
-    expect(subjectsNow().open).toEqual([{ kind: 'character', id: 'philip' }]);
+    expect(subjectsStore.get().open).toEqual([{ kind: 'character', id: 'philip' }]);
   });
 
   // Read back, every line is among what has been said, and a line said is sent without what it shows.
   it('shows nothing for a dialogue read back', async () => {
-    const { baysNow, flights, showWhatIsReached, subjectsNow } = await fresh();
-    const before = baysNow();
+    const { baysStore, flights, showWhatIsReached, subjectsStore } = await fresh();
+    const before = baysStore.get();
 
     showWhatIsReached(letter(['arrives', 'reads', 'accept', 'paid'], { kind: 'completed' }), []);
 
     expect(flights).toEqual([]);
-    expect(subjectsNow().open).toEqual([]);
-    expect(baysNow()).toBe(before);
+    expect(subjectsStore.get().open).toEqual([]);
+    expect(baysStore.get()).toBe(before);
   });
 });
 
 describe('on a phone, a line reached', () => {
   it('shows the place in the bay the conversation is not in, and the two go to half each', async () => {
-    const { askFor, baysNow, flights, put, showWhatIsReached, stageIs } = await fresh();
+    const { askFor, baysStore, flights, put, showWhatIsReached, stageIs } = await fresh();
     stageIs('bays', 'rows');
     put(0, DIALOGUE_PANE.id);
     askFor(DIALOGUE_PANE.id, 'full');
@@ -145,19 +145,22 @@ describe('on a phone, a line reached', () => {
     showWhatIsReached(letter(), [line('arrives', { kind: 'place', at: THE_SEAT })]);
 
     expect(flights).toEqual([THE_SEAT]);
-    expect(baysNow().holding).toEqual([DIALOGUE_PANE.id, MAP_PANE.id]);
-    expect(baysNow().arrangement).toBe('halfEach');
+    expect(baysStore.get().holding).toEqual([DIALOGUE_PANE.id, MAP_PANE.id]);
+    expect(baysStore.get().arrangement).toBe('halfEach');
   });
 
   it('opens the window on the character it shows in the other bay, and the conversation stays', async () => {
-    const { askFor, baysNow, paneIdOf, showWhatIsReached, stageIs, takeOver } = await fresh();
+    const { askFor, baysStore, paneIdOf, showWhatIsReached, stageIs, takeOver } = await fresh();
     stageIs('bays', 'rows');
     takeOver(1, DIALOGUE_PANE.id);
     askFor(DIALOGUE_PANE.id, 'full');
 
     showWhatIsReached(letter(), [line('answer', { kind: 'character', id: 'philip' })]);
 
-    expect(baysNow().holding).toEqual([paneIdOf({ kind: 'character', id: 'philip' }), DIALOGUE_PANE.id]);
-    expect(baysNow().arrangement).toBe('halfEach');
+    expect(baysStore.get().holding).toEqual([
+      paneIdOf({ kind: 'character', id: 'philip' }),
+      DIALOGUE_PANE.id,
+    ]);
+    expect(baysStore.get().arrangement).toBe('halfEach');
   });
 });

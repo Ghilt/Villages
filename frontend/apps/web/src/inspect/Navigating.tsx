@@ -1,13 +1,14 @@
-import { useSyncExternalStore } from 'react';
+import { useMemo } from 'react';
 
-import { baysNow, put, type Which, watchBays, where } from '../stage/bays';
+import { baysStore, put, type Which, where } from '../stage/bays';
 import { Icon, Needle, pointAt } from '../stage/Icons';
 import { PaneSizeControl } from '../stage/PaneSizeControl';
-import { gatewayState, watchGateway } from '../net/gateway';
+import { sessionStore } from '../net/gateway';
 import { NAVIGATION_PANE, type Pane, presentIn, type Room, standingPanes } from '../stage/panes';
 import { inspect } from './opening';
 import { paneIdOf } from './subjects';
-import { clearTrail, stepKey, trailNow, watchTrail } from './trail';
+import { trailStore, clearTrail, stepKey } from './trail';
+import { useStore } from '../store/useStore';
 
 /**
  * **Navigation**: the ways from here, and the ways back.
@@ -37,9 +38,11 @@ import { clearTrail, stepKey, trailNow, watchTrail } from './trail';
  */
 
 export function Navigating({ room, along }: { room: Room; along: 'rows' | 'columns' | null }) {
-  const trail = useSyncExternalStore(watchTrail, trailNow);
-  const bays = useSyncExternalStore(watchBays, baysNow);
-  const present = presentIn(useSyncExternalStore(watchGateway, gatewayState));
+  const trail = useStore(trailStore, (state) => state.steps);
+  const bays = useStore(baysStore);
+  const choice = useStore(sessionStore, (state) => presentIn(state).choice);
+  const dialogues = useStore(sessionStore, (state) => presentIn(state).dialogues);
+  const present = useMemo(() => ({ choice, dialogues }), [choice, dialogues]);
 
   /*
    * Put away, and still a way somewhere.

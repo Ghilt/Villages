@@ -64,11 +64,11 @@ async function load() {
     socket,
     /** The log, as area and line, from the first line after [from]. */
     said: (from = 0) =>
-      log
-        .notesNow()
-        .slice(from)
+      log.logStore
+        .get()
+        .notes.slice(from)
         .map((n) => `${n.area}: ${n.message}`),
-    lines: () => log.notesNow().length,
+    lines: () => log.logStore.get().notes.length,
     /** What the page has sent, from the first frame after [from]. */
     sent: (from = 0) => socket.sent.slice(from),
   };
@@ -95,15 +95,15 @@ describe("the page's conversation with the gateway", () => {
 
     expect(page.sent()).toEqual([]);
     page.socket.opens();
-    const token = page.gateway.gatewayState().playerToken;
+    const token = page.gateway.sessionStore.get().playerToken;
     expect(page.sent()).toEqual([
       { type: 'hello', playerToken: token, protocolVersion: PROTOCOL_VERSION, master: 'terrain' },
     ]);
 
     page.socket.says(fixture('welcome'));
     expect(page.sent(1)).toEqual([{ type: 'subscribeCells', cells: Z8 }]);
-    expect(page.gateway.gatewayState().connection).toBe('open');
-    expect(page.gateway.gatewayState().world).toEqual({ today: 454901, earliest: 437635 });
+    expect(page.gateway.sessionStore.get().connection).toBe('open');
+    expect(page.gateway.sessionStore.get().world).toEqual({ today: 454901, earliest: 437635 });
     expect(page.said()).toEqual([
       'gateway: connecting to ws://localhost:8080/ws',
       'gateway: welcome: player a1b2c3d4, server time 2026-09-05T12:00:00.200Z',
@@ -141,7 +141,7 @@ describe("the page's conversation with the gateway", () => {
     vi.advanceTimersByTime(300);
 
     expect(page.said(before)).toEqual(['cells: 2 cells at z8: 2 houses']);
-    expect(page.gateway.gatewayState().houses).not.toBe(undefined);
+    expect(page.gateway.sessionStore.get().houses).not.toBe(undefined);
   });
 
   it('on a zoom step, asks for the new cells, and lets the old go only once every new one has answered', async () => {
@@ -227,7 +227,7 @@ describe("the page's conversation with the gateway", () => {
   it("takes one option at a time, and files each command's answer beside the line that asked", async () => {
     const page = await arrived();
     page.socket.says(fixture('yourChoice'));
-    const choice = page.gateway.gatewayState().yourChoice!;
+    const choice = page.gateway.sessionStore.get().yourChoice!;
     const sent = page.socket.sent.length;
     const before = page.lines();
 
@@ -241,10 +241,10 @@ describe("the page's conversation with the gateway", () => {
         command: { type: 'takeAction', choiceId: choice.id, optionId: choice.options[0]!.id },
       },
     ]);
-    expect(page.gateway.gatewayState().acting).toBe(taking!.commandId);
+    expect(page.gateway.sessionStore.get().acting).toBe(taking!.commandId);
 
     page.socket.says({ type: 'commandAccepted', commandId: taking!.commandId });
-    expect(page.gateway.gatewayState().acting).toBe(null);
+    expect(page.gateway.sessionStore.get().acting).toBe(null);
 
     page.gateway.pull('resources', 'granting 100 wealth', {
       type: 'grantResource',
@@ -277,12 +277,12 @@ describe("the page's conversation with the gateway", () => {
 
     page.socket.says({ type: 'commandRejected', commandId: stepping, reason: 'notEnoughFree' });
 
-    expect(page.gateway.gatewayState().stepRefused).toEqual({
+    expect(page.gateway.sessionStore.get().stepRefused).toEqual({
       dialogueId: dialogue,
       lineId: 'accept',
       reason: 'notEnoughFree',
     });
-    expect(page.gateway.gatewayState().acting).toBe(null);
+    expect(page.gateway.sessionStore.get().acting).toBe(null);
     expect(page.said(before)).toEqual([
       `dialogues: taking the option "accept" as ${stepping.slice(0, 8)}`,
       `dialogues: command ${stepping.slice(0, 8)} rejected: notEnoughFree`,
@@ -314,7 +314,7 @@ describe("the page's conversation with the gateway", () => {
       'dialogues: "A letter never answered": lost, 0 lines said: Agnes Hollin died',
       'house: your house is Ravenscar',
     ]);
-    const state = page.gateway.gatewayState();
+    const state = page.gateway.sessionStore.get();
     expect(state.yourKeyFigures?.[0]?.stats.piety).toBe(14);
     expect(state.yourSight?.points).toHaveLength(4);
     expect(state.yourDialogues).toHaveLength(4);
@@ -329,7 +329,7 @@ describe("the page's conversation with the gateway", () => {
     page.socket.says(fixture('takenOver'));
 
     expect(page.socket.closedByClient()).toBe(true);
-    const state = page.gateway.gatewayState();
+    const state = page.gateway.sessionStore.get();
     expect(state.connection).toBe('takenOver');
     expect([
       state.yourHouse,
@@ -350,7 +350,7 @@ describe("the page's conversation with the gateway", () => {
 
     page.socket.closes();
 
-    const state = page.gateway.gatewayState();
+    const state = page.gateway.sessionStore.get();
     expect(state.connection).toBe('closed');
     expect(state.yourHouse?.house.name).toBe('Ravenscar');
     expect(page.said(before)).toEqual([

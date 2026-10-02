@@ -1,3 +1,6 @@
+import { createStore } from '@villages/client-core';
+import type { Readable } from '@villages/client-core';
+
 import type * as maplibregl from 'maplibre-gl';
 
 import { note } from '../log/log';
@@ -23,7 +26,7 @@ import { roomAtTurn, roomOnScreen, sheetAtFloor, spanOf, turnsAt, wheelZooms } f
  * a rail rather than on the wheel, because a passage is a thing that finishes and half a passage is a
  * place nobody should be able to stand.
  *
- * A module with a listener set, the same shape as the eye and the debug log. See experiment 0009.
+ * A store, the same shape as the eye and the debug log, read through `useStore`. See experiment 0009.
  */
 
 export interface PullState {
@@ -47,28 +50,16 @@ const WAIT_MS = 900;
 
 const still: PullState = { amount: 0, dive: null };
 
-let state: PullState = still;
+const store = createStore<PullState>(still);
+
+/** How far the eye has drawn back, and the passage running, as drawn. */
+export const pullStore: Readable<PullState> = store;
 let wanted = 0;
 let lastFrameAt = 0;
 let owed: number | null = null;
-const listeners = new Set<() => void>();
-
-export function pullNow(): PullState {
-  return state;
-}
-
-export function watchPull(listener: () => void): () => void {
-  listeners.add(listener);
-  return () => {
-    listeners.delete(listener);
-  };
-}
 
 function settle(next: PullState): void {
-  state = next;
-  for (const listener of listeners) {
-    listener();
-  }
+  store.set(next);
 }
 
 function calm(): boolean {
@@ -111,11 +102,11 @@ export function attachPull({ map, surface, seatNow, stripNow }: Hooks): () => vo
   let said = false;
 
   const release = (why: string | null): void => {
-    if (wanted === 0 && state.amount === 0) {
+    if (wanted === 0 && store.get().amount === 0) {
       return;
     }
     wanted = 0;
-    settle({ ...state, amount: 0 });
+    settle({ ...store.get(), amount: 0 });
     if (why !== null) {
       note('room', why);
     }
@@ -144,11 +135,11 @@ export function attachPull({ map, surface, seatNow, stripNow }: Hooks): () => vo
     const now = performance.now();
     const gone = (now - at) / DIVE_MS;
     const progress = going === 'in' ? Math.min(1, from + gone) : Math.max(0, from - gone);
-    const dive = state.dive;
+    const dive = store.get().dive;
     if (dive === null) {
       return;
     }
-    settle({ ...state, dive: { ...dive, progress } });
+    settle({ ...store.get(), dive: { ...dive, progress } });
     if (going === 'in' ? progress >= 1 : progress <= 0) {
       land(going);
       return;
@@ -196,7 +187,7 @@ export function attachPull({ map, surface, seatNow, stripNow }: Hooks): () => vo
     );
 
     const go = () => {
-      if (state.dive === null || railing !== null) {
+      if (store.get().dive === null || railing !== null) {
         return;
       }
       railing = requestAnimationFrame(() => rail(going, started.progress, performance.now()));
@@ -223,9 +214,9 @@ export function attachPull({ map, surface, seatNow, stripNow }: Hooks): () => vo
     const now = performance.now();
     const elapsed = Math.min(now - lastFrameAt, LONGEST_STEP_MS);
     lastFrameAt = now;
-    const amount = calm() ? wanted : easeTowards(state.amount, wanted, elapsed, SETTLE_MS);
-    if (amount !== state.amount) {
-      settle({ ...state, amount });
+    const amount = calm() ? wanted : easeTowards(store.get().amount, wanted, elapsed, SETTLE_MS);
+    if (amount !== store.get().amount) {
+      settle({ ...store.get(), amount });
     }
     if (amount >= 1 && wanted >= 1) {
       const seat = seatNow();
@@ -268,7 +259,7 @@ export function attachPull({ map, surface, seatNow, stripNow }: Hooks): () => vo
 
     // On the rail the wheel has nothing to say. It is swallowed rather than handed back, because handing
     // it back would zoom a map that is under a picture of itself.
-    if (state.dive !== null) {
+    if (store.get().dive !== null) {
       event.preventDefault();
       event.stopPropagation();
       return;
@@ -278,7 +269,7 @@ export function attachPull({ map, surface, seatNow, stripNow }: Hooks): () => vo
     const zoom = map.getZoom();
     const view = viewport();
 
-    if (state.amount === 0 && wanted === 0) {
+    if (store.get().amount === 0 && wanted === 0) {
       if (out && zoom <= floorZoom(view) + AT_THE_END) {
         // One wheel is spent settling MapLibre's own ease on to the floor before the next one starts the
         // pull, which is the one seam in this and is felt as a tick of hesitation rather than as a stop.
@@ -308,7 +299,7 @@ export function attachPull({ map, surface, seatNow, stripNow }: Hooks): () => vo
   // A wheel is not the only way to be here and it is the only way out, so a click puts it back. Without
   // it a touch or a keyboard leaves the room with no door.
   const onClick = (): void => {
-    if (state.dive === null) {
+    if (store.get().dive === null) {
       release('back on the desk');
     }
   };
@@ -316,16 +307,17 @@ export function attachPull({ map, surface, seatNow, stripNow }: Hooks): () => vo
   // The floor moves with the window, so a pull measured against the old one is a lie; and a dive is
   // anchored to a castle that is no longer where it was, so it is landed rather than carried over.
   const onResize = (): void => {
-    if (state.dive !== null) {
+    const { dive } = store.get();
+    if (dive !== null) {
       stopRail();
-      land(state.dive.going);
+      land(dive.going);
       return;
     }
     release(null);
   };
 
   const onMoveStart = (): void => {
-    if (!ours && state.dive === null) {
+    if (!ours && store.get().dive === null) {
       release(null);
     }
   };
@@ -346,7 +338,7 @@ export function attachPull({ map, surface, seatNow, stripNow }: Hooks): () => vo
       owed = null;
     }
     wanted = 0;
-    state = still;
+    settle(still);
   };
 }
 

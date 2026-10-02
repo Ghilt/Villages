@@ -1,5 +1,5 @@
-import { gatewayState, type GatewayState } from '../net/gateway';
-import { paneIdOf, subjectOfPane, subjectsNow } from '../inspect/subjects';
+import { sessionStore, type GatewayState } from '../net/gateway';
+import { subjectsStore, paneIdOf, subjectOfPane } from '../inspect/subjects';
 import type { Subject } from '../inspect/subjects';
 import type { BayName, RightWants, SpreadWants } from './bayBox';
 import { isTabbed, STRIP, TAB_BAR } from './bayBox';
@@ -390,7 +390,7 @@ export function panesFor(open: readonly Subject[], present: Present): readonly P
 
 /** The same, for callers outside a render, which read the two stores themselves. */
 export function panesNow(): readonly Pane[] {
-  return panesFor(subjectsNow().open, presentIn(gatewayState()));
+  return panesFor(subjectsStore.get().open, presentIn(sessionStore.get()));
 }
 
 export function paneById(id: string): Pane | undefined {
@@ -401,7 +401,7 @@ export function paneById(id: string): Pane | undefined {
   const subject = subjectOfPane(id);
   // Built rather than looked up: a window's pane is a description of its subject, and the subject store is
   // the only place that knows whether it is still open.
-  return subject !== null && subjectsNow().open.some((one) => paneIdOf(one) === id)
+  return subject !== null && subjectsStore.get().open.some((one) => paneIdOf(one) === id)
     ? inspectPane(subject)
     : undefined;
 }
