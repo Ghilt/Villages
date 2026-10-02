@@ -2,6 +2,11 @@
 
 - Status: accepted
 - Date: 2026-09-05
+- Amended 2026-10-02: **the hand-over from the history to what arrives live holds one lock.** The live side
+  read "still replaying" and then queued, and the replay could empty the queue for the last time in between, so
+  an event was handed to nobody; once the replay was done, the live side and the last of the queue could hand a
+  subscriber two events at once, out of order. `Handoff` does all three under one lock now, and an event that
+  cannot be read is said once as a fault rather than retried and dropped as already seen.
 - Amended 2026-10-02: **a fault is anything acting on its own that throws**, not only a subscriber to the feed.
   The listeners scheduled their work on a timer whose future nobody read, so a release that failed, or a write
   that lost its race three times, vanished without a word. Now the feed, the timer and the listeners report to

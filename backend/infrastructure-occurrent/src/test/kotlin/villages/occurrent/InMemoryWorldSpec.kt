@@ -1,6 +1,8 @@
 package villages.occurrent
 
 import io.cloudevents.CloudEvent
+import io.kotest.matchers.string.shouldStartWith
+import io.cloudevents.core.builder.CloudEventBuilder
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldHaveSize
@@ -34,7 +36,9 @@ import villages.domain.Species
 import villages.domain.Stat
 import villages.domain.Tincture
 import villages.domain.WorldTime
+import java.net.URI
 import java.time.Instant
+import java.time.OffsetDateTime
 import java.util.UUID
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CountDownLatch
@@ -279,6 +283,36 @@ class InMemoryWorldSpec : StringSpec({
                     // Named for the class the subscriber was written in, which here is this spec.
                     faults.single().describe() shouldBe "InMemoryWorldSpec threw on villages.house.founded.v1 " +
                         "(${ravenscar.houseId.stream}, version 1): IllegalStateException: a fold that is wrong"
+                }
+            }
+        }
+    }
+
+    "an event that cannot be read is said once as a fault, and the feed goes on to the next one" {
+        InMemoryWorld().use { world ->
+            val faults = CopyOnWriteArrayList<Fault>()
+            val heard = CopyOnWriteArrayList<StoredEvent>()
+            val arrived = CountDownLatch(1)
+            world.faults.watch { faults += it }.use {
+                world.feed.subscribe(Start.FROM_NOW) { stored ->
+                    heard += stored
+                    arrived.countDown()
+                }.use {
+                    // An event of a type this code has never heard of, written to the store as a stranger would.
+                    val stranger = CloudEventBuilder.v1()
+                        .withId("00000000-0000-4000-8000-0000000000ff")
+                        .withSource(URI.create("urn:villages"))
+                        .withType("villages.nothing.happened.v1")
+                        .withTime(OffsetDateTime.parse("2026-10-02T12:00:00Z"))
+                        .withData("application/json", "{}".toByteArray())
+                        .build()
+                    world.store.write("stranger", stranger)
+                    world.executor.execute(ravenscar, sent)
+
+                    arrived.await(5, TimeUnit.SECONDS) shouldBe true
+                    heard.map { it.stream } shouldBe listOf(ravenscar.houseId.stream)
+                    faults.single().describe() shouldStartWith "InMemoryWorldSpec threw on villages.nothing.happened.v1 " +
+                        "00000000-0000-4000-8000-0000000000ff, which could not be read"
                 }
             }
         }

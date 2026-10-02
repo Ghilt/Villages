@@ -148,7 +148,9 @@ event is the change rather than a notification about one, so the store *is* the 
 is the relay. What a relay owes is delivery: a feed says where it begins - everything, for a read model that
 is the fold of every event, or only what follows, for a watcher - and one that begins at the beginning
 subscribes before it replays, so an event appended in between arrives twice rather than not at all. Folding
-an event twice is harmless. See decision record 0029.
+an event twice is harmless. The hand-over from the history to what arrives live is one lock, `Handoff`, so
+nothing that arrives meanwhile is lost, it follows the history in the order it came, and a subscriber is never
+handed two events at once; an event that cannot be read is said once as a fault. See decision record 0029.
 
 A player has one session. The gateway keeps one connection per player, and a second hello takes the player
 over: the newcomer becomes the session and the one before is stood down, told so, and dropped from every
