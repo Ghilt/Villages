@@ -5,7 +5,7 @@ import { PROTOCOL_VERSION } from '@villages/protocol';
 import type { EventFrame } from '@villages/protocol';
 
 import { browserSocket } from '../net/browserSocket';
-import { GATEWAY_URL } from '../net/gateway';
+import { GATEWAY_URL } from '../net/address';
 
 /** Enough to hold a session's worth of play. Past this the oldest go, as in any log. */
 const MOST = 2000;

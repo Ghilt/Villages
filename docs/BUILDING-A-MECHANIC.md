@@ -233,7 +233,7 @@ long file goes into a file of its own.
 | Every projection's fold | `backend/projections` | the compiler: each `when` is exhaustive |
 | A frame, when the interface sees it directly | Kotlin `Frames.kt`, zod `frames.ts`, one fixture under `contracts/fixtures/frames` | both contract tests |
 | The wire moved, so its version does: `PROTOCOL_VERSION` up at both ends, and `contracts/protocol-v<n>.txt` recorded with `./gradlew :protocol:test -Dprotocol.record=true` | `backend/protocol`, `frontend/packages/protocol`, `contracts/` | `ProtocolShapeSpec` and `protocol.shape.test.ts`, which fail with the instructions (0037) |
-| What the browser does with the frame | `heard()` in `apps/web/src/net/gateway.ts`, with a `note` | reading the log |
+| What the browser does with the frame | `heard()` in `apps/web/src/net/gateway.ts`, with a `note` | the compiler, which refuses a frame `heard()` has no case for; reading the log |
 | The panel line | the debug panel's state, or its event list | Adam, by looking (0023) |
 | What the player is shown: containers and controls from the library, and a component it lacks added to the library first, in a commit of its own | `apps/web/src/ui/`, a recipe in `ui/container/recipes.ts`, the page at `/admin/inspect-ui-components` | Adam, by looking at the page and then at the pane (`UI-COMPONENTS.md`) |
 | The words | `docs/GLOSSARY.md`; a decision record if a decision was taken; the roadmap tick | review |

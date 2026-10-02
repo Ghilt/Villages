@@ -4,7 +4,7 @@ import type { BannerSpec, Point } from '@villages/protocol';
 
 import { note } from '../log/log';
 import { browserSocket } from './browserSocket';
-import { GATEWAY_URL } from './gateway';
+import { GATEWAY_URL } from './address';
 
 /**
  * Founding houses as other players, one house each.

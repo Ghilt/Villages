@@ -30,6 +30,7 @@ import { whatChangedIn } from '../dialogues/describe';
 import { describeSight } from '../fog/describe';
 import { chosenMaster } from '../map/masters';
 import { followStandsUnder, standsArrived } from '../sprites/scenery/standsFromServer';
+import { GATEWAY_URL } from './address';
 import {
   NOTHING_ARRIVED,
   NO_STANDS_ARRIVED,
@@ -47,10 +48,6 @@ import { browserSocket } from './browserSocket';
  * houses in the cells being followed, for the map. Frames go to the debug log as they happen. See
  * decision records 0023, 0024 and 0026.
  */
-
-export const GATEWAY_URL =
-  (import.meta.env.VITE_GATEWAY_URL as string | undefined) ??
-  `ws://localhost:${(import.meta.env.VITE_GAME_PORT as string | undefined) ?? '8080'}/ws`;
 
 export interface GatewayState {
   connection: 'connecting' | 'open' | 'closed' | 'takenOver';
@@ -378,7 +375,10 @@ function heard(frame: ServerFrame): void {
       note('gateway', `${frame.message}; this window is no longer playing`);
       connection?.close();
       return;
+    case 'event': // A player's window never asks for stored events; they have a page of their own (0023).
+      return;
   }
+  return frame satisfies never; // Every frame has a case above, so a new one does not compile until it has.
 }
 
 /**
