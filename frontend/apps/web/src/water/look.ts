@@ -59,6 +59,12 @@ export const WATER_LOOK = {
       /** No caustics below this depth, nought to one. */
       deepest: 0.75,
     },
+    /**
+     * The rivers' current, from the flow `npm run world:flow` works out: how fast the water runs downstream, in
+     * world units a second, the smallest river and the greatest; and how long one of the two copies of the
+     * surface slides before it starts over, which is all that keeps a bend from stretching the pattern.
+     */
+    rivers: { slowest: 0.5, fastest: 2, cycle: 1.6 },
     surf: {
       colour: [0.97, 0.99, 1.0],
       /** The foam along the very edge, in world units wide, and how solid. */
