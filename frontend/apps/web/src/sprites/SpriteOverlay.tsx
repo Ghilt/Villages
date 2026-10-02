@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
 import { sceneryStore } from './scenery/settings';
@@ -34,7 +34,8 @@ interface SpriteOverlayProps {
 export function SpriteOverlay({ map, sprites, worldRoot, picked: top, onPick }: SpriteOverlayProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const uncolouringRef = useRef<HTMLCanvasElement | null>(null);
-  const rendererRef = useRef<ReturnType<typeof createPixiSpriteRenderer> | null>(null);
+  // Held in state, so that a renderer made after a switch was thrown is handed it the moment it exists.
+  const [renderer, setRenderer] = useState<ReturnType<typeof createPixiSpriteRenderer> | null>(null);
   const everything = useStore(sessionStore, (state) => state.seeAll);
   const scenery = useStore(sceneryStore);
   const sight = useStore(sessionStore, (state) => state.yourSight);
@@ -58,43 +59,42 @@ export function SpriteOverlay({ map, sprites, worldRoot, picked: top, onPick }: 
       return;
     }
 
-    const renderer = createPixiSpriteRenderer(cameraOf(map));
-    rendererRef.current = renderer;
-    void renderer.mount(container, uncolouringRef.current ?? undefined);
+    const made = createPixiSpriteRenderer(cameraOf(map));
+    setRenderer(made);
+    void made.mount(container, uncolouringRef.current ?? undefined);
 
     return () => {
-      rendererRef.current = null;
-      renderer.destroy();
+      setRenderer(null);
+      made.destroy();
     };
   }, [map]);
 
+  // Each hands the renderer one thing when it changes, and the renderer draws once for however many changed.
   useEffect(() => {
-    rendererRef.current?.setSprites(sprites);
-  }, [sprites]);
-
-  // Also on the sprites, because a renderer made after the switch was thrown starts with it off.
-  useEffect(() => {
-    rendererRef.current?.setEverything(everything);
-  }, [everything, sprites]);
+    renderer?.setSprites(sprites);
+  }, [renderer, sprites]);
 
   useEffect(() => {
-    rendererRef.current?.setScenery({ ...scenery, tilesRoot: worldRoot });
-  }, [scenery, worldRoot, sprites]);
+    renderer?.setEverything(everything);
+  }, [renderer, everything]);
+
+  useEffect(() => {
+    renderer?.setScenery({ ...scenery, tilesRoot: worldRoot });
+  }, [renderer, scenery, worldRoot]);
 
   // Nothing is drawn until the gateway has said what the house sees, so a page still connecting is not a world
-  // under haze for a moment; nothing either with the switch off. Also on the sprites, because a renderer made
-  // after the switch was thrown starts with no fog.
+  // under haze for a moment; nothing either with the switch off.
   useEffect(() => {
-    rendererRef.current?.setFog(fogOn && sight !== null ? { field, vision } : null);
-  }, [fogOn, sight, field, vision, sprites]);
+    renderer?.setFog(fogOn && sight !== null ? { field, vision } : null);
+  }, [renderer, fogOn, sight, field, vision]);
 
   // The ring follows whatever was opened last. With three windows up the map can still only mark one, and
   // the newest is the one the player is looking at.
   useEffect(() => {
-    rendererRef.current?.setSelected(
+    renderer?.setSelected(
       top?.kind === 'house' ? top.id : top?.kind === 'character' ? `${CHARACTER}${top.id}` : null,
     );
-  }, [top, sprites]);
+  }, [renderer, top]);
 
   /**
    * Picking a house or a person, which opens an **inspect window** on them.
@@ -110,7 +110,7 @@ export function SpriteOverlay({ map, sprites, worldRoot, picked: top, onPick }: 
   pick.current = onPick;
   useEffect(() => {
     const onClick = (event: maplibregl.MapMouseEvent) => {
-      const hit = rendererRef.current?.hitTest(event.point) ?? null;
+      const hit = renderer?.hitTest(event.point) ?? null;
       if (hit !== null) {
         event.preventDefault();
         pick.current(
@@ -125,7 +125,7 @@ export function SpriteOverlay({ map, sprites, worldRoot, picked: top, onPick }: 
     return () => {
       map.off('click', onClick);
     };
-  }, [map]);
+  }, [map, renderer]);
 
   // The canvas the map's colour is taken out through comes first, so that it lies between the map and the
   // sprites and its blend reaches the map alone. See decision record 0065.

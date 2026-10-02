@@ -286,7 +286,8 @@ browser's saturation blend, and the sprites under the fog by a filter on the con
 fog shader's code for where a pixel lies and how far inside each edge is shared by the fog and the filter.
 The sprite canvas draws when the map has drawn and has no clock of its own, except the haze's: while the fog
 is drawn close in with unknown ground on the screen, it asks for a frame twelve times a second, so the haze can
-drift, and stops asking the moment there is none.
+drift, and stops asking the moment there is none. A change handed to it - the marks, the ring, the fog, the
+scenery - asks for one frame rather than drawing one, so however many change together, it draws once.
 
 ## What acts on its own
 

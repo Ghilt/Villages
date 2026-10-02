@@ -32,7 +32,8 @@ export interface MapSprite {
  * The seam behind which the renderer lives. Pixi is one implementation; a custom map layer or a
  * data-driven overlay could be another, and nothing outside this folder would notice. See docs/adr/0005.
  *
- * Selection and hit testing join this interface when the house inspector needs them.
+ * Each setter hands the renderer one thing and asks for a frame; it draws once, at the next one, for however
+ * many it was handed, and the map moving draws it in the map's own frame.
  */
 export interface SpriteRenderer {
   /**

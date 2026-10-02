@@ -434,17 +434,16 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
   }
 
   function artCut(): void {
-    scenery?.artChanged(keepTrading);
+    scenery?.artChanged(drawSoon);
   }
 
   /**
-   * Asks for one more frame, because a trade is still running.
-   *
-   * The map is not moving, so its `render` is not coming: this is the only thing that will carry a
-   * trade to its end. It stops of its own accord the moment nothing is mid-trade, so a still map with
-   * nothing changing on it still draws nothing.
+   * Asks for one frame, however often it is asked before the frame comes: what every change here does - a
+   * mark, the ring, the fog, the scenery - and a trade still running. The map may not be moving, so its
+   * `render` may not be coming. A still map with nothing changing on it still draws nothing, and thirty
+   * cells answered in one burst draw once rather than a frame a setter a cell.
    */
-  function keepTrading(): void {
+  function drawSoon(): void {
     if (owed !== null || disposed) {
       return;
     }
@@ -576,7 +575,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
     if (scenery !== null) {
       scenery.container.visible = how.on;
       const drew = how.on
-        ? scenery.update(view, how.tilesRoot, how.dial, how.spacing, how.laterBy, how.shadows, keepTrading)
+        ? scenery.update(view, how.tilesRoot, how.dial, how.spacing, how.laterBy, how.shadows, drawSoon)
         : { particles: 0, shadows: 0, showing: 0, cells: 0, waiting: 0 };
       // Only gaps short enough to be a moving map are counted. A still map draws nothing, so the gap
       // since its last frame is seconds, and reporting that as a frame gap would be the panel lying
@@ -594,7 +593,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
     app.render();
 
     if (trading) {
-      keepTrading();
+      drawSoon();
     }
   }
 
@@ -758,12 +757,12 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
 
     setSelected(id: string | null): void {
       selected = id;
-      frame();
+      drawSoon();
     },
 
     setEverything(on: boolean): void {
       everything = on;
-      frame();
+      drawSoon();
     },
 
     setFog(next: FogHow | null): void {
@@ -780,7 +779,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       for (const entry of entries.values()) {
         sideOfTheFog(entry);
       }
-      frame();
+      drawSoon();
     },
 
     setScenery(next: SceneryHow): void {
@@ -792,7 +791,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       if (recut) {
         scenery?.clear();
       }
-      frame();
+      drawSoon();
     },
 
     setSprites(sprites: readonly MapSprite[]): void {
@@ -825,8 +824,8 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
         entry.leaving = !seen.has(id);
       }
 
-      // A house can arrive while the map is perfectly still, and a still map draws no frames.
-      frame();
+      // A house can arrive while the map is perfectly still, and a still map draws no frames of its own.
+      drawSoon();
     },
 
     destroy(): void {
