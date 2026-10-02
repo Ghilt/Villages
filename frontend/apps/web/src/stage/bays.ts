@@ -427,12 +427,6 @@ export function takeOver(which: Which, id: string): void {
 }
 
 /**
- * Put back whatever a pane took the place of, if it took anyone's place.
- *
- * Called as a window closes. A pane that is in no bay, or that the player put there themselves, leaves
- * nothing to put back and this does nothing.
- */
-/**
  * What goes back into a bay when whatever is in it leaves.
  *
  * What it displaced, or - if that has since gone, or it displaced nothing - whichever of the two fixed
@@ -448,6 +442,12 @@ function whatGoesBack(which: Which): string {
       : MAP_PANE.id;
 }
 
+/**
+ * Put back whatever a pane took the place of, if it took anyone's place.
+ *
+ * Called as a window closes. A pane that is in no bay, or that the player put there themselves, leaves
+ * nothing to put back and this does nothing.
+ */
 export function giveBack(id: string): void {
   const which = state.holding.indexOf(id) as Which | -1;
   if (which === -1) {

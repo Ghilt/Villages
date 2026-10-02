@@ -25,6 +25,9 @@ import { createUncolouring } from '../fog/uncolouring';
 import { createFogLayer } from './FogLayer';
 import { overTheFog } from './fogLayering';
 
+/** What the dev server says when it has cut the art again, `vite/artApi.ts`. */
+const ART_CUT = 'villages:art-cut';
+
 /**
  * What each shape is laid out in. Every one is drawn far larger than it is ever shown and scaled
  * down, so that coming close finds detail rather than a smear.
@@ -32,9 +35,6 @@ import { overTheFog } from './fogLayering';
  * These are not the sizes the textures come out at: `generateTexture` crops to the ink. What a sprite
  * is scaled against is its own texture's height, in `show`.
  */
-/** What the dev server says when it has cut the art again, `vite/artApi.ts`. */
-const ART_CUT = 'villages:art-cut';
-
 const TEXTURE = {
   castleHeight: 160,
   castleWidth: 150,
@@ -126,6 +126,9 @@ interface Textures {
   ring: Texture;
 }
 
+/** Twelve frames a second: all a haze moving about a unit a second needs, and a fifth of what a display draws. */
+const UNDULATION_MS = 83;
+
 /**
  * Sprites drawn on a transparent canvas above the map, moved to follow the camera whenever it moves.
  *
@@ -140,9 +143,6 @@ interface Textures {
  * or destroyed by the zoom, only faded: putting the switch on existence rather than on appearance is
  * what keeps a camera resting on the crossover from churning sprites. See docs/adr/0051.
  */
-/** Twelve frames a second: all a haze moving about a unit a second needs, and a fifth of what a display draws. */
-const UNDULATION_MS = 83;
-
 export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
   const app = new Application();
   const stage = new Container();
@@ -433,6 +433,10 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
     sprite.scale.set(height / sprite.texture.height);
   }
 
+  function artCut(): void {
+    scenery?.artChanged(keepTrading);
+  }
+
   /**
    * Asks for one more frame, because a trade is still running.
    *
@@ -440,10 +444,6 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
    * trade to its end. It stops of its own accord the moment nothing is mid-trade, so a still map with
    * nothing changing on it still draws nothing.
    */
-  function artCut(): void {
-    scenery?.artChanged(keepTrading);
-  }
-
   function keepTrading(): void {
     if (owed !== null || disposed) {
       return;

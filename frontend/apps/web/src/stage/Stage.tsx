@@ -171,7 +171,7 @@ export function Stage({ stage, contents, overlays }: StageProps) {
 
     return (
       <div
-        className={`bay bay--${kindOf(id)} bay--${room.size}`}
+        className={`bay bay--${kindOf(id)}`}
         key={id}
         data-at={where ?? 'nowhere'}
         data-tabbed={tabbed ? 'yes' : undefined}

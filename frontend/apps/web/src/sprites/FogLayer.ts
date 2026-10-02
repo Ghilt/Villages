@@ -396,7 +396,6 @@ export function createFogLayer() {
       uniforms.update();
     },
 
-    /** Whether anything is being drawn, and from what, for the development probe. */
     /** Moves the haze's clock on, to so many seconds; the haze drifts by it and nothing else does. */
     setTime(seconds: number): void {
       uniforms.uniforms.uTime = seconds;
@@ -411,6 +410,7 @@ export function createFogLayer() {
       return mesh.visible && view.zoom >= UNDULATES_FROM_ZOOM && hazeInView(shown, view);
     },
 
+    /** Whether anything is being drawn, and from what, for the development probe. */
     report(): { drawing: 'nothing' | 'everything unknown' | 'a field'; field: FogField | null } {
       return {
         drawing: !mesh.visible ? 'nothing' : shown === null ? 'everything unknown' : 'a field',

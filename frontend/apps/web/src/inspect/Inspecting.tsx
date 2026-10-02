@@ -40,11 +40,6 @@ export function Inspecting({ subject, room: given, along }: InspectingProps) {
   const trail = useSyncExternalStore(watchTrail, trailNow);
   const legend = useLegend();
 
-  // Nothing in an inspect window moves any more. The treasury was the only ticking figure on it, and
-  // what a house has is its owner's to see now, so redrawing four times a second would redraw the same
-  // thing. The house card still ticks, because that one is yours.
-  useEffect(() => {}, []);
-
   // An area the player deleted is not a window they shut, so the window goes rather than saying nothing -
   // and it leaves the trail with it, because a thing that has stopped existing is not a way back to
   // anything. A house merely out of view is a different case: it still exists, so the trail keeps it.

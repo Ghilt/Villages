@@ -851,13 +851,6 @@ body,
 }
 
 /*
- * The chevron that puts the house away and brings it back.
- *
- * Window chrome and not one of the house's levers, so it is up here on the card's own corner rather than
- * in the bar along the bottom: those six places are the house's doing, and decision 0038 reserved the five
- * empty ones for more of the same.
- */
-/*
  * **The pane size control**: how much of the stage a pane is taking, on every pane and in both forms.
  *
  * Three marks, the one you are on filled in, and the mark is how much of a box is full - which is the
@@ -1266,13 +1259,6 @@ body,
   font-size: 1.05rem;
   font-weight: normal;
   letter-spacing: 0.02em;
-}
-
-.choice__chrome {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex: none;
 }
 
 .choice__aside {
@@ -2829,43 +2815,6 @@ body,
 
 .events__link--closed {
   color: #9b3a2f;
-}
-
-.events__list {
-  margin: 0;
-  padding: 0.3rem 0.5rem;
-  list-style: none;
-  overflow-y: auto;
-  max-height: 14rem;
-}
-
-.events__event summary {
-  cursor: pointer;
-  overflow-wrap: anywhere;
-}
-
-.events__stream {
-  color: var(--ink-soft);
-}
-
-/* The story an event belongs to. Two events of one command wear the same tag, which is the whole
-   point of it: a founding taken from a choice reads as one thing. See docs/adr/0035. */
-.events__story {
-  margin-right: 0.35rem;
-  padding: 0 0.25rem;
-  border-radius: 2px;
-  color: var(--ink-soft);
-  background: rgba(157, 124, 42, 0.16);
-}
-
-.events__json {
-  margin: 0.25rem 0 0.4rem;
-  padding: 0.4rem;
-  font-size: 0.62rem;
-  line-height: 1.35;
-  background: rgba(157, 124, 42, 0.07);
-  border-radius: 2px;
-  overflow-x: auto;
 }
 
 /*
