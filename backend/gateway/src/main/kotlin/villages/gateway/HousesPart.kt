@@ -44,7 +44,8 @@ internal class HousesPart(
         for (zoom in 0..Cell.MAX_ZOOM) {
             val holders = core.holders(deepest.at(zoom).quadkey) ?: continue
             for (connection in holders) {
-                if ((zoom >= coarsest || connection.seesEverything) && connection.sees(row) && connection.letsSee(row)) {
+                val looking = connection.looking
+                if ((zoom >= coarsest || looking.everything) && looking.sees(row) && looking.letsSee(row)) {
                     connection.enqueue(delta)
                 }
             }

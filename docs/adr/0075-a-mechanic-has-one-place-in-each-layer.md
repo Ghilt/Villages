@@ -58,6 +58,15 @@ kept of a connection when its session ends. The core answers the frames in `CORE
 holds every kind of frame and of command to being taken exactly once. A hook arrives with the first part that
 needs it, rather than ahead of one.
 
+*Amended 2026-10-02, the way of looking:* how a connection looks at the world - the day, the eye, the fog's
+switch and the fog itself - is one value, `Looking`, replaced whole behind one reference, so that a fan-out on a
+read model's thread reads one way of looking and never half of a change to it. The sight, the stands and the
+timeline are parts: `SightPart` sets the fog before the welcome and says what the house sees, `StandsPart`
+keeps what each page draws and has been sent, and `TimelinePart` answers the scrubber. A change to the way of
+looking answers every held cell again and tells the parts, which is how the stands are sent again when the fog
+moves. The core keeps the fog gate - every snapshot and delta asks `Looking` before it goes - and the parts
+say what the fog is.
+
 ## Consequences
 
 - A sixth mechanic adds a family, a read model and a view file, and edits the folds that care about it and no

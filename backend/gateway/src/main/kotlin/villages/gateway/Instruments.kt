@@ -242,11 +242,18 @@ internal class Instruments(
     }
 
     /** The eye: significance set aside for this connection, or taken up again. See decision record 0038. */
-    private fun seeAll(connection: Gateway.Connection, on: Boolean) = looking(connection, "seeAll") { connection.seeAll(on) }
+    private fun seeAll(connection: Gateway.Connection, on: Boolean) = looking(connection, "seeAll") {
+        if (connection.looking.everything != on) {
+            connection.lookedAgain(connection.look { it.copy(everything = on) })
+        }
+    }
 
     /** The fog of war lifted for this connection, or let fall again. See decision record 0061. */
-    private fun fogOfWar(connection: Gateway.Connection, on: Boolean) =
-        looking(connection, "fogOfWar") { connection.fogOfWar(on) }
+    private fun fogOfWar(connection: Gateway.Connection, on: Boolean) = looking(connection, "fogOfWar") {
+        if (connection.looking.fogged != on) {
+            connection.lookedAgain(connection.look { it.copy(fogged = on) })
+        }
+    }
 
     /**
      * Empties the world and finishes every session with it. Everybody is told, because a wipe is everybody's: a

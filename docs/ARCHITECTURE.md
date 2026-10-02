@@ -192,7 +192,8 @@ read. They all report to one board, `Faults`, which the log and the gateway watc
 
 Seeing everything is a connection's, not a house's: `seeAll` sets significance aside for whoever sent it, so
 the same house is in a coarse cell for one session and not for another. It is a way of looking rather than a
-fact about the world, which is why nothing about it is stored or recorded. The player's eye is a different
+fact about the world, which is why nothing about it is stored or recorded: with the day the scrubber is on and
+the fog, one value a connection, `Looking`, replaced whole so that no fan-out reads half of a change (0075). The player's eye is a different
 thing and needs no frame at all: a player's own house reaches their session rather than a cell, so keeping
 it in sight is a page drawing what it already has. See decision record 0038.
 

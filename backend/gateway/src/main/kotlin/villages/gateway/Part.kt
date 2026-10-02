@@ -7,7 +7,6 @@ import villages.protocol.Hello
 import villages.protocol.Ping
 import villages.protocol.SubscribeCells
 import villages.protocol.UnsubscribeCells
-import villages.protocol.ViewTime
 import villages.protocol.WorldWiped
 import kotlin.reflect.KClass
 
@@ -16,18 +15,32 @@ import kotlin.reflect.KClass
  * the takeover, the cells held and the fan-out to them, coalescing, the fog gate, and a cell's snapshot - and
  * hands each part what is its own, in the order the gateway lists the parts:
  *
+ * - [arrive], before the welcome, for what a connection must know before its first frame goes, as the fog does;
  * - [greet], after the welcome, for what the mechanic tells a player arriving, so that the order of the parts is
  *   the order a page is told things in;
  * - [register], for the commands and the frames it takes;
+ * - [cellsTaken] and [cellsLetGo], for what it sends under the cells a connection holds, as the stands are;
+ * - [lookingChanged], for what it sends again when the way a connection looks has changed;
  * - [ended], for whatever it keeps of a connection whose session is over;
  * - and its own watchers of its own read models, which it closes with [close].
  *
  * A new mechanic is a part of its own and a line in the gateway's list. See decision record 0075.
  */
 internal interface Part : AutoCloseable {
+    fun arrive(connection: Gateway.Connection, hello: Hello, who: PlayerId) {}
+
     fun greet(connection: Gateway.Connection, who: PlayerId) {}
 
     fun register(commands: Commands, frames: Frames) {}
+
+    /** Cells newly held, once each one's snapshot has gone. */
+    fun cellsTaken(connection: Gateway.Connection, cells: List<String>) {}
+
+    /** Cells let go, with the ones still held. */
+    fun cellsLetGo(connection: Gateway.Connection, still: Set<String>) {}
+
+    /** The way the connection looks has changed from [was] to [now], and every held cell has been answered again. */
+    fun lookingChanged(connection: Gateway.Connection, was: Looking, now: Looking) {}
 
     fun ended(connection: Gateway.Connection) {}
 
@@ -48,7 +61,7 @@ internal interface Core {
 
 /** The frames the core answers itself. Every other kind of frame is a part's, registered in [Frames]. */
 internal val CORE_FRAMES: Set<KClass<out ClientFrame>> = setOf(
-    Hello::class, Ping::class, Command::class, SubscribeCells::class, UnsubscribeCells::class, ViewTime::class,
+    Hello::class, Ping::class, Command::class, SubscribeCells::class, UnsubscribeCells::class,
 )
 
 /**

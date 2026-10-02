@@ -5,6 +5,7 @@ import villages.application.CharacterRow
 import villages.application.CharacterSpan
 import villages.application.CharactersByCell
 import villages.application.KeyFiguresByHouse
+import villages.application.WorldClock
 import villages.domain.HouseId
 import villages.domain.PlayerId
 import villages.protocol.Cell
@@ -23,6 +24,7 @@ internal class KeyFiguresPart(
     private val core: Core,
     private val figures: KeyFiguresByHouse,
     onTheMap: CharactersByCell,
+    private val world: WorldClock,
 ) : Part {
     /** Whom a house holds is its own, and needs no cell. See decision record 0055. */
     private val changed: AutoCloseable = figures.watch { change ->
@@ -52,13 +54,13 @@ internal class KeyFiguresPart(
         val view = change.now?.let { change.row.toMapView(it) }
         if (view != null) {
             for (connection in after) {
-                if (connection.isLive) {
+                if (connection.looking.isLive) {
                     connection.enqueue(if (connection in before) CharacterChanged(view) else CharacterArrived(view))
                 }
             }
         }
         for (connection in before - after) {
-            if (connection.isLive) {
+            if (connection.looking.isLive) {
                 connection.enqueue(CharacterGone(change.row.id.value.toString(), change.row.revision))
             }
         }
@@ -79,7 +81,8 @@ internal class KeyFiguresPart(
         for (zoom in 0..Cell.MAX_ZOOM) {
             val holders = core.holders(deepest.at(zoom).quadkey) ?: continue
             for (connection in holders) {
-                if ((zoom >= coarsest || connection.seesEverything) && connection.letsSee(row, span)) {
+                val looking = connection.looking
+                if ((zoom >= coarsest || looking.everything) && looking.letsSee(row, span, looking.day(world::today))) {
                     found += connection
                 }
             }
