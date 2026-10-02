@@ -1,8 +1,9 @@
 import { useSyncExternalStore } from 'react';
 
 import { fullName } from '../figures/describe';
-import { gatewayState, offerDialogue, watchGateway } from '../net/gateway';
+import { gatewayState, watchGateway } from '../net/gateway';
 import { Section } from './Section';
+import { offerDialogue } from './levers';
 
 /** The server's sample, by the name it knows it by. The page sends the name and none of the words. */
 const LETTER = 'letter';

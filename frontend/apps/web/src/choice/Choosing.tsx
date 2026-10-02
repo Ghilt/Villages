@@ -1,5 +1,6 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 
+import { canAct } from '@villages/client-core';
 import type { ChoiceView, OptionView } from '@villages/protocol';
 
 import { gatewayState, takeOption, watchGateway } from '../net/gateway';
@@ -60,7 +61,7 @@ export function Choosing({ room }: { room: Room }) {
     );
   }
 
-  const answering = heard.acting !== null || heard.connection !== 'open';
+  const answering = !canAct(heard);
   const carousel = room.size === 'small';
   const shown = Math.min(at, choice.options.length - 1);
 

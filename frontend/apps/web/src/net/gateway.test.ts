@@ -245,7 +245,11 @@ describe("the page's conversation with the gateway", () => {
     page.socket.says({ type: 'commandAccepted', commandId: taking!.commandId });
     expect(page.gateway.gatewayState().acting).toBe(null);
 
-    page.gateway.grantResource('wealth', 100);
+    page.gateway.pull('resources', 'granting 100 wealth', {
+      type: 'grantResource',
+      resource: 'wealth',
+      amount: 100,
+    });
     const granting = (page.socket.sent.at(-1) as { commandId: string }).commandId;
     page.socket.says({ type: 'commandRejected', commandId: granting, reason: 'noSuchHouse' });
     page.socket.says({ type: 'commandAccepted', commandId: '00000000-0000-4000-8000-000000000000' });

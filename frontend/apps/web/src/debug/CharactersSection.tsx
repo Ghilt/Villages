@@ -6,19 +6,18 @@ import type { KeyFigureView, StatName } from '@villages/protocol';
 
 import { STATS_IN_ORDER, STAT_WORDS, fullName } from '../figures/describe';
 import { anotherPortrait, portraitsNow } from '../figures/portraits';
+import { gatewayState, watchGateway } from '../net/gateway';
+import { note } from '../log/log';
+import { Section } from './Section';
 import {
   addKeyFigure,
   ageCharacter,
   changePortrait,
   changeStat,
-  gatewayState,
   killCharacter,
   moveCharacter,
   takeOffTheMap,
-  watchGateway,
-} from '../net/gateway';
-import { note } from '../log/log';
-import { Section } from './Section';
+} from './levers';
 
 /** As many as a house may hold. The server refuses a tenth; the lever says so before it is pressed. */
 const MOST_KEY_FIGURES = 9;

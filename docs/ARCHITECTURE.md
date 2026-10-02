@@ -47,7 +47,10 @@ packages/protocol  <-  packages/client-core  <-  apps/web
   is handed in. The follower is the first: `follower.ts` asks for the cells the camera wants and lets go of the old
   ones late, only once what replaces them has answered, with its clock handed in as a `Schedule`. The page's
   `net/gateway.ts` wires it to the socket, the log and the timers, and `net/gateway.test.ts` holds the page to the
-  same conversation as before.
+  same conversation as before. Commands are the second: `commands.ts` is the one way a command goes out, in two
+  lanes - the player's, one at a time, and the levers', which the debug panel's `debug/levers.ts` pulls - each
+  filed under the part of the log it was asked from, with its answer beside it; and `canAct`, which the choice's
+  pane and the dialogue's both ask before they let anything be pressed.
 - Inside `apps/web`, the component library in `src/ui/` imports nothing from the rest of the app: the game hands it
   words, numbers and callbacks. A test reads every import in the folder and fails on one that leaves it, bar React,
   the fonts and the world package's pure rules and types, which is what lets `/admin/inspect-ui-components` show every component with nothing running. See

@@ -3,15 +3,9 @@ import { useState, useSyncExternalStore } from 'react';
 import type { ResourceName } from '@villages/protocol';
 
 import { RESOURCES_IN_ORDER, RESOURCE_WORDS, saysStock } from '../house/describe';
-import {
-  gatewayState,
-  grantResource,
-  pledgeResource,
-  releasePledge,
-  spendResource,
-  watchGateway,
-} from '../net/gateway';
+import { gatewayState, watchGateway } from '../net/gateway';
 import { Section } from './Section';
+import { grantResource, pledgeResource, releasePledge, spendResource } from './levers';
 
 /** How much a press is worth. Four, spanning the sizes a resource plausibly comes in. */
 const STEPS = [1, 10, 100, 1000] as const;

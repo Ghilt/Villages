@@ -4,11 +4,12 @@ import type * as maplibregl from 'maplibre-gl';
 import type { BannerSpec } from '@villages/protocol';
 
 import { clampBoundsToWorld } from '../map/sheet';
-import { gateway, gatewayState, restart, watchGateway, wipeWorld } from '../net/gateway';
+import { gatewayState, restart, watchGateway, wipeWorld } from '../net/gateway';
 import { seedHouses } from '../net/seed';
-import { note, shortId } from '../log/log';
+import { note } from '../log/log';
 import { Section } from './Section';
 import { seeEverything, seeingEverything, watchSeeingEverything } from './seeEverything';
+import { foundHouseHere } from './levers';
 
 interface WorldSectionProps {
   map: maplibregl.Map | null;
@@ -62,22 +63,7 @@ export function WorldSection({ map }: WorldSectionProps) {
   const foundHere = () => {
     if (map === null) return;
     const centre = map.getCenter();
-    // A UUID, because this id becomes the causation of the events the command writes. See 0035.
-    const commandId = crypto.randomUUID();
-    note(
-      'command',
-      `founding a house at ${centre.lat.toFixed(3)}, ${centre.lng.toFixed(3)} as ${shortId(commandId)}`,
-    );
-    gateway().send({
-      type: 'command',
-      commandId,
-      command: {
-        type: 'foundHouse',
-        name: aName(),
-        seat: { lat: centre.lat, lon: centre.lng },
-        banner: randomBanner(),
-      },
-    });
+    foundHouseHere({ lat: centre.lat, lon: centre.lng }, aName(), randomBanner());
   };
 
   /**

@@ -31,6 +31,9 @@ export { ageOn } from './ages';
 export { whatToFollow } from './following';
 export type { Following } from './following';
 
+export { NOTHING_IN_FLIGHT, answered, canAct, goingOut } from './commands';
+export type { Going, InFlight, Lane, Outgoing } from './commands';
+
 export { HOLD_MS, follower } from './follower';
 export type { Follower, FollowerPorts, Schedule } from './follower';
 

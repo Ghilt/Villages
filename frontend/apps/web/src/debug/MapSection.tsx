@@ -3,12 +3,13 @@ import type * as maplibregl from 'maplibre-gl';
 
 import { note } from '../log/log';
 import { Section } from './Section';
+import { giveVision, takeVision } from './levers';
 import { chooseMaster, cutMaster, describeMaster, furnishMaster, isStale, listMasters } from '../map/masters';
 import type { MasterOnDisk } from '../map/masters';
 import { RENDERERS } from '../map/renderers';
 import { fogIsOn, setFogOfWar, watchFog } from '../fog/fogOfWar';
 import { lastingOn } from '../fog/describe';
-import { gatewayState, giveVision, takeVision, watchGateway } from '../net/gateway';
+import { gatewayState, watchGateway } from '../net/gateway';
 
 interface MapSectionProps {
   /** The map, so vision can be given where the camera is looking. Null until it has loaded. */

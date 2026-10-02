@@ -1,6 +1,14 @@
 import { Fragment, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 
-import { choose, keepReading, type Press, pressNext, type Reading, showing } from '@villages/client-core';
+import {
+  canAct,
+  choose,
+  keepReading,
+  type Press,
+  pressNext,
+  type Reading,
+  showing,
+} from '@villages/client-core';
 import type { DialogueView, LineView, SpeakerView } from '@villages/protocol';
 
 import { Portrait } from '../figures/Portrait';
@@ -61,7 +69,7 @@ export function Dialogues({ room }: { room: Room }) {
       <Conversation
         dialogue={reading}
         room={room}
-        stepOut={heard.acting !== null}
+        stepOut={!canAct(heard)}
         refused={refused !== null && refused.dialogueId === reading.id ? refused : null}
         onBack={() => setOpen(null)}
       />

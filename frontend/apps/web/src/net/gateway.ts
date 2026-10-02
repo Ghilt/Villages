@@ -1,5 +1,13 @@
-import { connect, ensurePlayerToken, follower, forgetPlayerToken } from '@villages/client-core';
-import type { Connection, HousesState } from '@villages/client-core';
+import {
+  NOTHING_IN_FLIGHT,
+  answered,
+  connect,
+  ensurePlayerToken,
+  follower,
+  forgetPlayerToken,
+  goingOut,
+} from '@villages/client-core';
+import type { Connection, HousesState, InFlight, Outgoing } from '@villages/client-core';
 import { NO_HOUSES, charactersInView, reduceHouses } from '@villages/client-core';
 import { PROTOCOL_VERSION, describeDay } from '@villages/protocol';
 import type {
@@ -8,16 +16,13 @@ import type {
   DialogueView,
   KeyFigureView,
   OptionView,
-  Point,
-  ResourceName,
   ServerFrame,
-  StatName,
   VisionPointView,
   YourHouseView,
 } from '@villages/protocol';
 
 import { note, shortId } from '../log/log';
-import { STAT_WORDS, fullName, whatChanged } from '../figures/describe';
+import { fullName, whatChanged } from '../figures/describe';
 import { whatChangedIn } from '../dialogues/describe';
 import { describeSight } from '../fog/describe';
 import { chosenMaster } from '../map/masters';
@@ -97,19 +102,32 @@ let everything = false;
 /** Whether the fog of war holds back what the house cannot see, so a reconnection lifts it again if not. */
 let fogged = true;
 /**
- * Which part of the log each command in flight was asked from, so its answer is filed beside the line that
- * asked. Forgotten when it is answered, and all of it when the connection closes.
+ * The commands waiting on their answers: the player's one, and where each was asked from, so its answer is filed
+ * beside the line that asked. See `goingOut` in the client core.
  */
-const askedFrom = new Map<string, string>();
+let inFlight: InFlight = NOTHING_IN_FLIGHT;
 
 /** The steps through a dialogue in flight, by command, so a refusal can say which line it refused. */
 const stepsOut = new Map<string, { dialogueId: string; lineId: string }>();
 
-/** The part of the log a command's answer goes in: where it was asked from, or the gateway's own. */
-function answerArea(commandId: string): string {
-  const area = askedFrom.get(commandId) ?? 'gateway';
-  askedFrom.delete(commandId);
-  return area;
+/**
+ * Sends a command the one way commands go, minting its id, and says so in the part of the log it was asked from.
+ * A player's command waits for the one before it to be answered; a lever does not. The id, or null when it may
+ * not go. `alsoNow` is what changes with a player's command going, beside `acting`.
+ */
+function issue(out: Outgoing, alsoNow: Partial<GatewayState> = {}): string | null {
+  const commandId = crypto.randomUUID();
+  const going = goingOut(inFlight, connection !== null && state.connection === 'open', commandId, out);
+  if (going === null || connection === null) {
+    return null;
+  }
+  inFlight = going.inFlight;
+  if (out.lane === 'player') {
+    update({ acting: commandId, ...alsoNow });
+  }
+  note(going.area, going.line);
+  connection.send(going.frame);
+  return commandId;
 }
 
 /**
@@ -194,12 +212,17 @@ function heard(frame: ServerFrame): void {
       // The gateway let these go. Asking again is what gets fresh snapshots.
       connection?.send({ type: 'subscribeCells', cells: frame.cells });
       return;
-    case 'commandAccepted':
+    case 'commandAccepted': {
+      const answer = answered(inFlight, frame.commandId);
+      inFlight = answer.inFlight;
       stepsOut.delete(frame.commandId);
       if (state.acting === frame.commandId) update({ acting: null });
-      note(answerArea(frame.commandId), `command ${shortId(frame.commandId)} accepted`);
+      note(answer.area, `command ${shortId(frame.commandId)} accepted`);
       return;
+    }
     case 'commandRejected': {
+      const answer = answered(inFlight, frame.commandId);
+      inFlight = answer.inFlight;
       // A step the house would not take is said in its pane, under the options, as well as in the log.
       const step = stepsOut.get(frame.commandId);
       stepsOut.delete(frame.commandId);
@@ -207,7 +230,7 @@ function heard(frame: ServerFrame): void {
         update({ stepRefused: { ...step, reason: frame.reason } });
       }
       if (state.acting === frame.commandId) update({ acting: null });
-      note(answerArea(frame.commandId), `command ${shortId(frame.commandId)} rejected: ${frame.reason}`);
+      note(answer.area, `command ${shortId(frame.commandId)} rejected: ${frame.reason}`);
       return;
     }
     case 'error':
@@ -401,7 +424,8 @@ export function gateway(): Connection {
       return;
     }
     following.forget();
-    askedFrom.clear();
+    // No answer to anything in flight is coming now, so nothing is filed for one.
+    inFlight = { ...inFlight, areas: new Map() };
     stepsOut.clear();
     update({ connection: 'closed', houses: NO_HOUSES });
     note('gateway', 'the connection closed; is the backend running? cd backend then ./gradlew :app:bootRun');
@@ -430,16 +454,10 @@ export function wipeWorld(): void {
  * name a story that is not its own. See decision record 0035.
  */
 export function takeOption(choice: ChoiceView, option: OptionView): void {
-  if (connection === null || state.connection !== 'open' || state.acting !== null) {
-    return;
-  }
-  const commandId = crypto.randomUUID();
-  update({ acting: commandId });
-  askedFrom.set(commandId, 'command');
-  note('command', `taking "${option.label}" as ${shortId(commandId)}`);
-  connection.send({
-    type: 'command',
-    commandId,
+  issue({
+    lane: 'player',
+    area: 'command',
+    what: `taking "${option.label}"`,
     command: { type: 'takeAction', choiceId: choice.id, optionId: option.id },
   });
 }
@@ -451,147 +469,8 @@ export function takeOption(choice: ChoiceView, option: OptionView): void {
  * same part of the log as the asking, and then the thing itself coming back changed. Nothing is assumed
  * here - the number on the card moves when the world says it did.
  */
-function act(area: string, what: string, command: CommandPayload): void {
-  if (connection === null || state.connection !== 'open') {
-    return;
-  }
-  const commandId = crypto.randomUUID();
-  askedFrom.set(commandId, area);
-  note(area, `${what} as ${shortId(commandId)}`);
-  connection.send({ type: 'command', commandId, command });
-}
-
-/*
- * Doing something to what your house has.
- *
- * Granting and spending are **Adam's levers** for now rather than a player's: nothing in the game gives a
- * house anything yet. They are here so that what the domain can do can be made to happen and watched.
- */
-
-export function grantResource(resource: ResourceName, amount: number): void {
-  act('resources', `granting ${amount} ${resource}`, { type: 'grantResource', resource, amount });
-}
-
-export function spendResource(resource: ResourceName, amount: number): void {
-  act('resources', `spending ${amount} ${resource}`, { type: 'spendResource', resource, amount });
-}
-
-export function pledgeResource(
-  resource: ResourceName,
-  amount: number,
-  months: number,
-  purpose: string,
-): void {
-  act('resources', `pledging ${amount} ${resource} for ${months} ${months === 1 ? 'month' : 'months'}`, {
-    type: 'pledgeResource',
-    resource,
-    amount,
-    months,
-    purpose,
-  });
-}
-
-export function releasePledge(pledgeId: string): void {
-  act('resources', `releasing pledge ${shortId(pledgeId)}`, { type: 'releasePledge', pledgeId });
-}
-
-/*
- * Doing something to your house's key figures.
- *
- * **Adam's levers**, like the resources': a house takes key figures in only from the debug panel, and
- * nothing in the game changes a stat or kills anyone yet. Every one that names a character is refused
- * `noSuchKeyFigure` unless the character is this house's own. See decision record 0055.
- */
-
-export function addKeyFigure(): void {
-  act('characters', 'taking a key figure in', { type: 'addKeyFigure' });
-}
-
-export function changeStat(figure: KeyFigureView, stat: StatName, by: number): void {
-  const way = by > 0 ? 'raising' : 'lowering';
-  act('characters', `${way} ${fullName(figure)}'s ${STAT_WORDS[stat].toLowerCase()} by ${Math.abs(by)}`, {
-    type: 'changeStat',
-    characterId: figure.id,
-    stat,
-    by,
-  });
-}
-
-export function ageCharacter(figure: KeyFigureView, years: number): void {
-  const said =
-    years > 0
-      ? `ageing ${fullName(figure)} by ${years} years`
-      : `making ${fullName(figure)} ${-years} years younger`;
-  act('characters', said, { type: 'ageCharacter', characterId: figure.id, years });
-}
-
-/** Gives somebody another portrait, or none, which is theirs from then on. */
-export function changePortrait(figure: KeyFigureView, portrait: string | undefined): void {
-  act(
-    'characters',
-    portrait === undefined
-      ? `taking ${fullName(figure)}'s portrait away`
-      : `giving ${fullName(figure)} another portrait, ${portrait}`,
-    portrait === undefined
-      ? { type: 'changePortrait', characterId: figure.id }
-      : { type: 'changePortrait', characterId: figure.id, portrait },
-  );
-}
-
-/** Puts one of the house's key figures somewhere on the map; how much they matter there is the world's. */
-export function moveCharacter(figure: KeyFigureView, place: Point): void {
-  act('characters', `putting ${fullName(figure)} at ${place.lat.toFixed(3)}, ${place.lon.toFixed(3)}`, {
-    type: 'moveCharacter',
-    characterId: figure.id,
-    place,
-  });
-}
-
-/*
- * Giving the house vision of a place outright, and taking it away. Adam's levers, in the Debug map section
- * under the fog switch; a storyline that gives a house sight of a far coast will send the same command. The
- * answers and the sight that follows are said in the same part of the log. See decision record 0061.
- */
-
-export function giveVision(place: Point): void {
-  act('sight', `giving your house vision at ${place.lat.toFixed(3)}, ${place.lon.toFixed(3)}`, {
-    type: 'giveVision',
-    place,
-  });
-}
-
-export function takeVision(point: VisionPointView): void {
-  if (point.kind !== 'given' || point.of === undefined) {
-    return;
-  }
-  act('sight', `taking away the vision at ${point.place.lat.toFixed(3)}, ${point.place.lon.toFixed(3)}`, {
-    type: 'takeVision',
-    visionId: point.of,
-  });
-}
-
-export function takeOffTheMap(figure: KeyFigureView): void {
-  act('characters', `taking ${fullName(figure)} off the map`, {
-    type: 'takeOffTheMap',
-    characterId: figure.id,
-  });
-}
-
-export function killCharacter(figure: KeyFigureView, cause: string): void {
-  act('characters', `killing ${fullName(figure)}, ${cause}`, {
-    type: 'killCharacter',
-    characterId: figure.id,
-    cause,
-  });
-}
-
-/*
- * Offering the house a dialogue. Adam's lever, in the Dialogues section: nothing in the world offers one
- * yet. It names one of the server's samples and sends none of its words. See decision record 0071.
- */
-
-export function offerDialogue(sample: string, described: string): void {
-  act('dialogues', `offering ${described}`, { type: 'offerDialogue', sample });
+export function pull(area: string, what: string, command: CommandPayload): void {
+  issue({ lane: 'lever', area, what, command });
 }
 
 /**
@@ -603,20 +482,19 @@ export function offerDialogue(sample: string, described: string): void {
  * back as one, so nothing here checks. See decision record 0071.
  */
 export function completeDialogueStep(dialogueId: string, lineId: string, described: string): void {
-  if (connection === null || state.connection !== 'open' || state.acting !== null) {
-    return;
-  }
-  const commandId = crypto.randomUUID();
   // A new step is a new answer to wait for, so the last refusal is no longer the thing to say.
-  update({ acting: commandId, stepRefused: null });
-  askedFrom.set(commandId, 'dialogues');
-  stepsOut.set(commandId, { dialogueId, lineId });
-  note('dialogues', `taking ${described} as ${shortId(commandId)}`);
-  connection.send({
-    type: 'command',
-    commandId,
-    command: { type: 'completeDialogueStep', dialogueId, lineId },
-  });
+  const commandId = issue(
+    {
+      lane: 'player',
+      area: 'dialogues',
+      what: `taking ${described}`,
+      command: { type: 'completeDialogueStep', dialogueId, lineId },
+    },
+    { stepRefused: null },
+  );
+  if (commandId !== null) {
+    stepsOut.set(commandId, { dialogueId, lineId });
+  }
 }
 
 /**
