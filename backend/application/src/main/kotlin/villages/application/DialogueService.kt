@@ -20,6 +20,7 @@ import villages.domain.PlayerId
 class DialogueService(
     private val executor: HouseCommandExecutor,
     private val keyFigures: KeyFiguresByHouse,
+    private val houses: HousesByPlayer,
     private val clock: Clock,
     private val world: WorldClock,
 ) {
@@ -30,7 +31,9 @@ class DialogueService(
      * The key figure is read from the read model, which can be a moment behind, so the house is asked with
      * `ActThrough` before anything is written, as every lever that names a character asks it: refused
      * `NoSuchKeyFigure` for a house that holds nobody, or no longer holds them. The dialogue's id is worked out
-     * from the command, so the same command sent twice is refused as already offered rather than doubled.
+     * from the command, so the same command sent twice is refused as already offered rather than doubled. The
+     * seat is read from the map's read model, for the line that shows it, and a house it does not hold yet is
+     * offered the letter with that line showing nothing.
      */
     fun offerSample(player: PlayerId, sample: String, provenance: Provenance): DialogueId {
         require(sample in SampleDialogues.names) { "there is no sample dialogue called \"$sample\"" }
@@ -38,7 +41,9 @@ class DialogueService(
         val figure = keyFigures.of(house).firstOrNull() ?: throw HouseError.NoSuchKeyFigure
         executor.execute(ActThrough(house, figure.id), provenance)
 
-        val dialogue = SampleDialogues.named(sample, DialogueId.offered(house, provenance.commandId), figure)
+        val seat = houses.ofPlayer(player)?.seat
+        val id = DialogueId.offered(house, provenance.commandId)
+        val dialogue = SampleDialogues.named(sample, id, house, seat, figure)
         executor.execute(OfferDialogue(house, dialogue, world.today(), clock.now()), provenance)
         return dialogue.id
     }

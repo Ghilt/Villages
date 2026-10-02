@@ -34,7 +34,8 @@
           "effects": [],
           "recorded": false,
           "then": { "kind": "say", "line": "asks" },
-          "revealImpact": null
+          "revealImpact": null,
+          "shows": { "kind": "place", "at": { "lat": 59.33, "lon": 18.07 } }
         },
         {
           "id": "asks",
@@ -43,7 +44,8 @@
           "effects": [],
           "recorded": true,
           "then": { "kind": "dialogueChoice", "options": ["accept", "refuse"] },
-          "revealImpact": null
+          "revealImpact": null,
+          "shows": { "kind": "house", "house": "6d5b0a2e-1c3f-4d7e-9a8b-0f1e2d3c4b5a" }
         },
         {
           "id": "accept",
@@ -58,7 +60,8 @@
               { "resource": "WEALTH", "amount": -40 },
               { "resource": "WEALTH", "amount": 100 }
             ]
-          }
+          },
+          "shows": null
         },
         {
           "id": "refuse",
@@ -67,7 +70,8 @@
           "effects": [],
           "recorded": false,
           "then": { "kind": "end" },
-          "revealImpact": { "kind": "hidden" }
+          "revealImpact": { "kind": "hidden" },
+          "shows": null
         },
         {
           "id": "thanks",
@@ -76,7 +80,8 @@
           "effects": [{ "kind": "grant", "resource": "WEALTH", "amount": 100 }],
           "recorded": false,
           "then": { "kind": "end" },
-          "revealImpact": null
+          "revealImpact": null,
+          "shows": { "kind": "character", "character": "cb732500-39bd-3b39-a838-bb89f7195790" }
         }
       ],
       "requirements": [

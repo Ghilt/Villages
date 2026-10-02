@@ -45,9 +45,10 @@ import tools.jackson.databind.JsonNode
  * `revealImpact`, how it shows what taking it will do. Version 19 added `completeDialogueStep`, a step taken
  * through one of the house's dialogues, and took away `showRequirements` and a dialogue's `requirements`:
  * the debug panel only offers a dialogue now, so nothing asks for them, and a page is never sent them.
- * Version 20 is the two together, the stands and the dialogue, as they met on main.
+ * Version 20 is the two together, the stands and the dialogue, as they met on main. Version 21 gave a line still
+ * ahead its `shows`, what it shows as it is reached while playing: a place, a house or a character.
  */
-const val PROTOCOL_VERSION = 20
+const val PROTOCOL_VERSION = 21
 
 data class Point(val lat: Double, val lon: Double)
 
@@ -570,7 +571,8 @@ data class SpeakerView(
 /**
  * A line still to be read, or an option to pick: who says it and the words, and nothing about what it will do
  * but, on an option, its `revealImpact` - how whoever wrote it chose to show what taking it will do. Absent, the
- * option shows nothing until it is done. See decision record 0071.
+ * option shows nothing until it is done. And `shows`, what the line shows as it is reached while playing, which
+ * a line already said never carries, so a dialogue read back shows nothing. See decision record 0071.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class LineView(
@@ -578,7 +580,23 @@ data class LineView(
     val speaker: String,
     val words: String,
     val revealImpact: RevealImpactView? = null,
+    val shows: ShowsView? = null,
 )
+
+/** What a line shows: a `place`, the camera taken to it, or a `house` or a `character` by id, a window opened. */
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "kind")
+@JsonSubTypes(
+    JsonSubTypes.Type(ShowsView.Place::class, name = "place"),
+    JsonSubTypes.Type(ShowsView.House::class, name = "house"),
+    JsonSubTypes.Type(ShowsView.Character::class, name = "character"),
+)
+sealed interface ShowsView {
+    data class Place(val at: Point) : ShowsView
+
+    data class House(val id: String) : ShowsView
+
+    data class Character(val id: String) : ShowsView
+}
 
 /** How an option shows what taking it will do: `shown`, with what, or `hidden`, drawn as unknown. */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "kind")

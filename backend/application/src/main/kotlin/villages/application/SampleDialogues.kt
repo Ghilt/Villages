@@ -3,11 +3,14 @@ package villages.application
 import villages.domain.Dialogue
 import villages.domain.DialogueId
 import villages.domain.Effect
+import villages.domain.HouseId
 import villages.domain.Impact
 import villages.domain.Line
 import villages.domain.LineId
+import villages.domain.Location
 import villages.domain.Resource
 import villages.domain.RevealImpact
+import villages.domain.Shows
 import villages.domain.Speaker
 import villages.domain.SpeakerId
 import villages.domain.Then
@@ -20,7 +23,9 @@ import villages.domain.Then
 object SampleDialogues {
     /**
      * A messenger brings the house's first key figure a letter, and it can be answered three ways: one that costs
-     * the house and pays it back more, one that pays in another coin, and one that does nothing at all.
+     * the house and pays it back more, one that pays in another coin, and one that does nothing at all. And it
+     * shows each thing a line can show once: the rider arriving the seat, the purse paid the house, and the good
+     * word at court the figure who asked for it.
      */
     const val LETTER = "letter"
 
@@ -37,15 +42,17 @@ object SampleDialogues {
     val names: Set<String> = setOf(LETTER)
 
     /**
-     * The sample of this name, offered under [id] and spoken by [figure] and a messenger. A name that is not a
-     * sample is refused as a malformed request rather than a refusal of the rules, because no rule was asked.
+     * The sample of this name, offered under [id] to [house], whose seat is [seat] if it is known, and spoken by
+     * [figure] and a messenger. A name that is not a sample is refused as a malformed request rather than a
+     * refusal of the rules, because no rule was asked.
      */
-    fun named(name: String, id: DialogueId, figure: CharacterRow): Dialogue = when (name) {
-        LETTER -> letterFromTheCoast(id, figure)
-        else -> throw IllegalArgumentException("there is no sample dialogue called \"$name\"")
-    }
+    fun named(name: String, id: DialogueId, house: HouseId, seat: Location?, figure: CharacterRow): Dialogue =
+        when (name) {
+            LETTER -> letterFromTheCoast(id, house, seat, figure)
+            else -> throw IllegalArgumentException("there is no sample dialogue called \"$name\"")
+        }
 
-    private fun letterFromTheCoast(id: DialogueId, figure: CharacterRow): Dialogue {
+    private fun letterFromTheCoast(id: DialogueId, house: HouseId, seat: Location?, figure: CharacterRow): Dialogue {
         val you = Speaker(
             id = SpeakerId("figure"),
             party = 0,
@@ -62,8 +69,9 @@ object SampleDialogues {
             then: Then,
             effects: List<Effect> = emptyList(),
             revealImpact: RevealImpact? = null,
+            shows: Shows? = null,
         ) =
-            Line(LineId(line), by.id, words, effects, then = then, revealImpact = revealImpact)
+            Line(LineId(line), by.id, words, effects, then = then, revealImpact = revealImpact, shows = shows)
 
         return Dialogue(
             id = id,
@@ -77,6 +85,7 @@ object SampleDialogues {
                     "${figure.name.given}, a rider has come in from the coast " +
                         "with a letter under the harbour-master's seal.",
                     Then.Say(LineId("reads")),
+                    shows = seat?.let(Shows::Place),
                 ),
                 line(
                     "reads",
@@ -101,6 +110,7 @@ object SampleDialogues {
                     "He thought you might say so. The first of the dues came with me.",
                     Then.End,
                     effects = listOf(Effect.Grant(Resource.WEALTH, DUES)),
+                    shows = Shows.House(house),
                 ),
                 // Hidden: something will come of asking, and nobody says what.
                 line(
@@ -116,6 +126,7 @@ object SampleDialogues {
                     "His good word at court, he says, and he gives it now, whatever you decide.",
                     Then.End,
                     effects = listOf(Effect.Grant(Resource.INFLUENCE, GOOD_WORD)),
+                    shows = Shows.Character(figure.id),
                 ),
                 line("refuse", you, "Tell him the house has quays enough of its own.", Then.Say(LineId("shrugs"))),
                 line("shrugs", messenger, "He thought you might say that too. I will tell him.", Then.End),

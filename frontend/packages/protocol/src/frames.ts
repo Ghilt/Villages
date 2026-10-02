@@ -212,14 +212,26 @@ export const revealImpactViewSchema = z.discriminatedUnion('kind', [
 ]);
 
 /**
+ * What a line shows as it is reached while playing: a `place`, which the camera is taken to, or a `house` or a
+ * `character` by id, which a window is opened on. See decision record 0071.
+ */
+export const showsViewSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('place'), at: pointSchema }),
+  z.object({ kind: z.literal('house'), id: z.string() }),
+  z.object({ kind: z.literal('character'), id: z.string() }),
+]);
+
+/**
  * A line still to be read, or an option to pick: who says it and the words, and nothing about what it will do
- * but, on an option, its reveal impact.
+ * but, on an option, its reveal impact. And what it shows, which only a line still ahead carries, so a
+ * dialogue read back shows nothing.
  */
 export const lineViewSchema = z.object({
   id: z.string(),
   speaker: z.string(),
   words: z.string(),
   revealImpact: revealImpactViewSchema.optional(),
+  shows: showsViewSchema.optional(),
 });
 
 /** A line said, with what saying it did to the house: what it gave, and what it took. */
@@ -460,6 +472,7 @@ export type EndingView = z.infer<typeof endingViewSchema>;
 export type SpeakerView = z.infer<typeof speakerViewSchema>;
 export type ImpactView = z.infer<typeof impactViewSchema>;
 export type RevealImpactView = z.infer<typeof revealImpactViewSchema>;
+export type ShowsView = z.infer<typeof showsViewSchema>;
 export type LineView = z.infer<typeof lineViewSchema>;
 export type SaidLineView = z.infer<typeof saidLineViewSchema>;
 export type DialogueView = z.infer<typeof dialogueViewSchema>;

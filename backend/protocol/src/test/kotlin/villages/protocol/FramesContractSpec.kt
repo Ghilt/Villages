@@ -73,6 +73,16 @@ class FramesContractSpec : StringSpec({
 
         kinds shouldContainExactlyInAnyOrder namesDeclaredOn(RevealImpactView::class.java)
     }
+
+    "the dialogue fixtures show every kind of thing a line can show between them, so a new kind needs one too" {
+        val dialogues = serverFixtures.filter { it.name.startsWith("yourDialogues") }
+            .flatMap { (ProtocolJson.decodeServer(it.readText()) as YourDialogues).dialogues }
+        val kinds = dialogues.flatMap { it.next + it.options }.mapNotNull { it.shows }
+            .map { it::class.simpleName!!.replaceFirstChar(Char::lowercase) }
+            .distinct()
+
+        kinds shouldContainExactlyInAnyOrder namesDeclaredOn(ShowsView::class.java)
+    }
 })
 
 /**

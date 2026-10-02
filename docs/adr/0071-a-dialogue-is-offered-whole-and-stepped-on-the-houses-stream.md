@@ -17,6 +17,11 @@
   asked the gateway for them is gone with its frame, because all the debug panel does for dialogues is offer
   one; reading, answering and seeing how one ended are the player's, in the pane. A player learns of a
   requirement only when it fails, as why the dialogue was lost.
+- Amended 2026-10-02: a line can **show** something as it is reached while playing, on Adam's word: a place,
+  which the camera is taken to, or a house or a character, which a window is opened on. It is written with the
+  line, so it is offered whole with it, and sent only with a line still ahead, so it reaches the page no
+  earlier than the line it belongs to; reaching it records nothing a plain line would not. A line read back
+  shows nothing, his call too, and a line said is sent without it.
 
 ## Context
 

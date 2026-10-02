@@ -24,6 +24,7 @@ import villages.domain.HouseDecider
 import villages.domain.HouseEvent
 import villages.domain.Requirement
 import villages.domain.RevealImpact
+import villages.domain.Shows
 import villages.domain.Then
 import java.net.URI
 import java.time.ZoneOffset
@@ -54,6 +55,7 @@ object Events {
         .addMixIn(Then::class.java, ThenJson::class.java)
         .addMixIn(Requirement::class.java, RequirementJson::class.java)
         .addMixIn(RevealImpact::class.java, RevealImpactJson::class.java)
+        .addMixIn(Shows::class.java, ShowsJson::class.java)
         .build()
 
     fun converter(): JacksonCloudEventConverter<Event> =

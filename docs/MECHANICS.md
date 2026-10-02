@@ -263,9 +263,10 @@ speakers have a portrait and a name on every bubble, the key figures' own frame,
 frame's bust. What a line gives or costs is written under it in the feed, the resource's mark and the
 amount, as the house card moves with it; a lapsed dialogue ends on its closing line, *Sadly, X died before
 this could be finished*, in the interface's words; and an option the house cannot pay for is refused in the
-pane, under the options, as well as in the log. There is no scene yet, and no line shows anything. The
-debug panel's Dialogues section offers a dialogue and does nothing else, and a requirement is never sent to
-a page. Its shape is decided in decision record 0071: a dialogue offered whole on the house's stream; only
+pane, under the options, as well as in the log. There is no scene yet. A line can carry what it shows, on the
+wire from version 21 and only while it is still ahead, and the sample's show the seat, the house and the
+figure, but nothing on the page acts on it yet. The debug panel's Dialogues section offers a dialogue and
+does nothing else, and a requirement is never sent to a page. Its shape is decided in decision record 0071: a dialogue offered whole on the house's stream; only
 its dialogue choices, and the lines that give something or end it, recorded; what a line gives written as the
 world's own event beside the step; and hidden requirements that end a dialogue when one fails, with the
 server holding back what the player has not reached.

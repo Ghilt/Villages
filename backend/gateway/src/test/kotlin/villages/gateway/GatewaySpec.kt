@@ -92,6 +92,7 @@ import villages.protocol.Pong
 import villages.protocol.ProtocolJson
 import villages.protocol.Resync
 import villages.protocol.ServerFrame
+import villages.protocol.ShowsView
 import villages.protocol.Snapshot
 import villages.protocol.StandRecords
 import villages.protocol.StandsFrame
@@ -462,7 +463,7 @@ private class Rig {
             world = worldClock,
             ids = { UUID.fromString("e1000000-0000-4000-8000-%012x".format(++minted)) },
         ),
-        dialogues = DialogueService(world, characters, clock = { noon }, world = worldClock),
+        dialogues = DialogueService(world, characters, houses, clock = { noon }, world = worldClock),
         dialogueRows = dialogueRows,
         stands = Stands { master, x, y -> if (master == "terrain") standsOnDisk[y * STAND_TILES + x] ?: ByteArray(0) else null },
         later = later,
@@ -1851,6 +1852,25 @@ class GatewaySpec : StringSpec({
         lost.ending shouldBe EndingView.Lost(RequirementView.Alive(figure))
         lost.next shouldBe emptyList()
         lost.options shouldBe emptyList()
+    }
+
+    "a line still ahead carries what it shows, and a line said carries nothing, so one read back shows nothing" {
+        val rig = Rig()
+        val (mine, sent) = rig.introduced()
+        mine.receive(founding())
+        mine.receive(addingAKeyFigure(commandNumber(1)))
+        val figure = sent.filterIsInstance<YourKeyFigures>().last().keyFigures.single().id
+        mine.receive(offering("letter", commandNumber(2)))
+        val seat = sent.filterIsInstance<YourHouse>().last().yours!!.house.seat
+
+        val offered = sent.filterIsInstance<YourDialogues>().last().dialogues.single()
+        offered.next.map { it.shows } shouldBe listOf(ShowsView.Place(seat), null)
+
+        mine.receive(stepping(offered.id, "ask", commandNumber(3)))
+        val asked = sent.filterIsInstance<YourDialogues>().last()
+        asked.dialogues.single().next.single().shows shouldBe ShowsView.Character(figure)
+        // The rider's line that showed the seat is said now, and on the wire only the line ahead shows anything.
+        ProtocolJson.encode(asked).split("\"shows\"").size - 1 shouldBe 1
     }
 
     "an option that grants or spends reaches the page as what it does, under the wire's name for the resource" {

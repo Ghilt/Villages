@@ -55,6 +55,7 @@ import villages.domain.PlayerOfferedDialogue
 import villages.domain.Requirement
 import villages.domain.RevealImpact
 import villages.domain.Sex
+import villages.domain.Shows
 import villages.domain.Significance
 import villages.domain.Speaker
 import villages.domain.SpeakerId
@@ -207,7 +208,8 @@ class EventFormatSpec : StringSpec({
     val lostGotland = HouseLostVision(house, gotland, day, noon)
 
     // A dialogue with every case of every sealed field in it: each thing that can follow a line, a grant, a
-    // requirement written into it, and a speaker who is a character beside one who is not.
+    // requirement written into it, each thing a line can show, and a speaker who is a character beside one who
+    // is not.
     val harbourMaster = CharacterId(UUID.fromString("cb732500-39bd-3b39-a838-bb89f7195790"))
     val theLady = Speaker(SpeakerId("agnes"), party = 0, name = "Agnes Hollin", portrait = "woman-03", character = agnes)
     val theRider = Speaker(SpeakerId("messenger"), party = 1, name = "A messenger", portrait = null, character = null)
@@ -225,6 +227,7 @@ class EventFormatSpec : StringSpec({
                     speaker = theRider.id,
                     words = "A rider from the coast, my lady, with the harbour-master's seal.",
                     then = Then.Say(LineId("asks")),
+                    shows = Shows.Place(Location(59.33, 18.07)),
                 ),
                 Line(
                     id = LineId("asks"),
@@ -232,6 +235,7 @@ class EventFormatSpec : StringSpec({
                     words = "He asks whether the house will stand behind the new quay.",
                     recorded = true,
                     then = Then.DialogueChoice(listOf(LineId("accept"), LineId("refuse"))),
+                    shows = Shows.House(house),
                 ),
                 Line(
                     id = LineId("accept"),
@@ -256,6 +260,7 @@ class EventFormatSpec : StringSpec({
                     words = "He will be glad of it. The first of the dues came with me.",
                     effects = listOf(Effect.Grant(Resource.WEALTH, 100)),
                     then = Then.End,
+                    shows = Shows.Character(harbourMaster),
                 ),
             ),
             requirements = listOf(Requirement.Alive(harbourMaster)),
@@ -348,6 +353,9 @@ class EventFormatSpec : StringSpec({
         lines[2]["revealImpact"][KIND].asString() shouldBe SHOWN
         lines[3]["revealImpact"][KIND].asString() shouldBe HIDDEN
         lines[3]["then"][KIND].asString() shouldBe END
+        lines[0]["shows"][KIND].asString() shouldBe PLACE
+        lines[1]["shows"][KIND].asString() shouldBe HOUSE
+        lines[4]["shows"][KIND].asString() shouldBe CHARACTER
         dialogue["requirements"][0][KIND].asString() shouldBe ALIVE
     }
 
@@ -362,6 +370,7 @@ class EventFormatSpec : StringSpec({
             Then::class to ThenJson::class,
             Requirement::class to RequirementJson::class,
             RevealImpact::class to RevealImpactJson::class,
+            Shows::class to ShowsJson::class,
         )
         val named = mixIns.mapValues { (_, mixIn) -> mixIn.java.getAnnotation(JsonSubTypes::class.java).value.toList() }
 

@@ -40,7 +40,8 @@
         {
           "id": "paid",
           "speaker": "messenger",
-          "words": "He thought you might say so. The first of the dues came with me."
+          "words": "He thought you might say so. The first of the dues came with me.",
+          "shows": { "kind": "house", "id": "6d5b0a2e-1c3f-4d7e-9a8b-0f1e2d3c4b5a" }
         }
       ],
       "options": [],
@@ -53,7 +54,12 @@
       "speakers": [{ "id": "messenger", "party": 1, "name": "A messenger" }],
       "said": [],
       "next": [
-        { "id": "asks", "speaker": "messenger", "words": "Another rider, with another question." }
+        {
+          "id": "asks",
+          "speaker": "messenger",
+          "words": "Another rider, with another question.",
+          "shows": { "kind": "place", "at": { "lat": 59.33, "lon": 18.07 } }
+        }
       ],
       "options": [
         {
@@ -69,7 +75,12 @@
           }
         },
         { "id": "maybe", "speaker": "messenger", "words": "Perhaps.", "revealImpact": { "kind": "hidden" } },
-        { "id": "no", "speaker": "messenger", "words": "No." }
+        {
+          "id": "no",
+          "speaker": "messenger",
+          "words": "No.",
+          "shows": { "kind": "character", "id": "cb732500-39bd-3b39-a838-bb89f719578f" }
+        }
       ],
       "ending": { "kind": "open" }
     },

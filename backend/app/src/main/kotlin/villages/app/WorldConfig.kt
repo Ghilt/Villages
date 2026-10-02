@@ -128,14 +128,19 @@ class WorldConfig {
     fun visions(world: InMemoryWorld, clock: Clock, worldClock: WorldClock, ids: FreshIds): VisionService =
         VisionService(world.executor, clock = { clock.instant() }, world = worldClock, ids = ids)
 
-    /** Offering a house a dialogue, spoken by its key figures as the read model has them. See decision 0071. */
+    /**
+     * Offering a house a dialogue, spoken by its key figures and showing its seat as the read models have them.
+     * See decision 0071.
+     */
     @Bean
     fun dialogues(
         world: InMemoryWorld,
         characters: CharactersProjection,
+        houses: HousesProjection,
         clock: Clock,
         worldClock: WorldClock,
-    ): DialogueService = DialogueService(world.executor, characters, clock = { clock.instant() }, world = worldClock)
+    ): DialogueService =
+        DialogueService(world.executor, characters, houses, clock = { clock.instant() }, world = worldClock)
 
     @Bean
     fun takeAction(world: InMemoryWorld, clock: Clock, worldClock: WorldClock): TakeActionService =

@@ -5,7 +5,7 @@
  */
 
 /** Sent on the handshake so that the gateway can refuse a client it cannot speak to. */
-export const PROTOCOL_VERSION = 20;
+export const PROTOCOL_VERSION = 21;
 
 export {
   MAX_ZOOM,
@@ -94,6 +94,7 @@ export type {
   RevealImpactView,
   ResourceName,
   SaidLineView,
+  ShowsView,
   Sex,
   SpeakerView,
   StatName,

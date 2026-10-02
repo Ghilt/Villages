@@ -30,6 +30,8 @@ import villages.domain.Requirement
 import villages.domain.RevealImpact
 import villages.domain.Resource
 import villages.domain.Sex
+import villages.domain.Shows
+import villages.domain.Significance
 import villages.domain.Species
 import villages.domain.Stat
 import villages.domain.TakeKeyFigure
@@ -73,16 +75,22 @@ class DialogueServiceSpec : StringSpec({
     )
     val sent = UUID.fromString("1c000007-0000-4000-8000-000000000040")
 
-    /** A founded house, holding [held] as key figures in its own history, and a read model that says so. */
-    fun rig(vararg held: CharacterRow): Pair<Houses, DialogueService> {
+    val seat = Location(59.33, 18.07)
+    val banner = Banner(Tincture.SABLE, Division.PLAIN, null, Charge.STAG, Tincture.ARGENT)
+
+    /**
+     * A founded house, holding [held] as key figures in its own history, and read models that say so - the map's
+     * one only once [mapped], because it can be a moment behind the house it is about.
+     */
+    fun rig(vararg held: CharacterRow, mapped: Boolean = true): Pair<Houses, DialogueService> {
         val houses = Houses()
         houses.execute(
             FoundHouse(
                 houseId = house,
                 player = ada,
                 name = HouseName("Ravenscar"),
-                seat = Location(59.33, 18.07),
-                banner = Banner(Tincture.SABLE, Division.PLAIN, null, Charge.STAG, Tincture.ARGENT),
+                seat = seat,
+                banner = banner,
                 worldTime = today,
                 recordedAt = noon,
             ),
@@ -96,7 +104,13 @@ class DialogueServiceSpec : StringSpec({
             override fun of(house: HouseId) = held.toList()
             override fun watch(listener: (KeyFiguresChange) -> Unit) = AutoCloseable {}
         }
-        return houses to DialogueService(houses, readModel, { noon }, { today })
+        val onTheMap = HousesByPlayer { player ->
+            HouseRow(
+                house, player, HouseName("Ravenscar"), seat, Significance(20.0), banner,
+                resources = emptyMap(), pledges = emptyList(), since = today, until = null, version = 1,
+            ).takeIf { mapped && player == ada }
+        }
+        return houses to DialogueService(houses, readModel, onTheMap, { noon }, { today })
     }
 
     "the letter is offered to the player's house, spoken by its first key figure, in the command's story" {
@@ -200,5 +214,27 @@ class DialogueServiceSpec : StringSpec({
 
         shouldThrow<IllegalArgumentException> { service.offerSample(ada, "a song", Provenance.startedBy(sent)) }
         houses.written shouldBe emptyList()
+    }
+
+    "the letter shows each thing a line can show once: the seat as the rider arrives, the house, and the figure" {
+        val (houses, service) = rig(agnes)
+        service.offerSample(ada, SampleDialogues.LETTER, Provenance.startedBy(sent))
+        val letter = (houses.written.single().first as PlayerOfferedDialogue).dialogue
+
+        letter.lines.filter { it.shows != null }.associate { it.id.value to it.shows } shouldBe mapOf(
+            "arrives" to Shows.Place(seat),
+            "paid" to Shows.House(house),
+            "answer" to Shows.Character(agnes.id),
+        )
+    }
+
+    // The map's read model can be a moment behind a house just founded: the letter is offered all the same.
+    "a house the map does not hold yet is offered the letter with the rider's line showing nothing" {
+        val (houses, service) = rig(agnes, mapped = false)
+        service.offerSample(ada, SampleDialogues.LETTER, Provenance.startedBy(sent))
+        val letter = (houses.written.single().first as PlayerOfferedDialogue).dialogue
+
+        letter.line(LineId("arrives"))?.shows shouldBe null
+        letter.line(LineId("paid"))?.shows shouldBe Shows.House(house)
     }
 })

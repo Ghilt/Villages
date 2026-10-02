@@ -48,6 +48,7 @@ import villages.domain.Line
 import villages.domain.LineId
 import villages.domain.Requirement
 import villages.domain.RevealImpact
+import villages.domain.Shows
 import villages.domain.walk
 import villages.domain.DomainError
 import villages.domain.HouseError
@@ -91,6 +92,7 @@ import villages.protocol.LineView
 import villages.protocol.RequirementView
 import villages.protocol.RevealImpactView
 import villages.protocol.SaidLineView
+import villages.protocol.ShowsView
 import villages.protocol.SpeakerView
 import villages.protocol.SpendView
 import villages.protocol.FoundHousePayload
@@ -1147,11 +1149,18 @@ internal fun DialogueRow.toView(): DialogueView {
     )
 }
 
-/** A line still to be read: the words and who says them, and not what it will give. */
-private fun Line.toView(): LineView = LineView(id.value, speaker.value, words)
+/** A line still to be read: the words, who says them and what the line shows, and not what it will give. */
+private fun Line.toView(): LineView = LineView(id.value, speaker.value, words, shows = shows?.toView())
 
-/** An option to pick, with how whoever wrote it chose to show what taking it will do. */
-private fun Line.asOption(): LineView = LineView(id.value, speaker.value, words, revealImpact?.toView())
+/** An option to pick, with how whoever wrote it chose to show what taking it will do, and what it shows. */
+private fun Line.asOption(): LineView =
+    LineView(id.value, speaker.value, words, revealImpact?.toView(), shows?.toView())
+
+private fun Shows.toView(): ShowsView = when (this) {
+    is Shows.Place -> ShowsView.Place(Point(at.lat, at.lon))
+    is Shows.House -> ShowsView.House(house.value.toString())
+    is Shows.Character -> ShowsView.Character(character.value.toString())
+}
 
 private fun RevealImpact.toView(): RevealImpactView = when (this) {
     is RevealImpact.Shown -> RevealImpactView.Shown(impacts.map { ImpactView(it.resource.toWire(), it.amount) })

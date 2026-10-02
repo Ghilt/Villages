@@ -297,7 +297,12 @@ A speaker's death is tried with *kill*, in the Characters section.
     what the line names. Adam's idea of 2026-10-01, from the accident step 10 mended. What a line shows is a
     field of the line, sent with it and the page's alone, so nothing of it is recorded; and the policy that
     joins it to the bays stands beside `dialogues/opening.ts` and `inspect/opening.ts`. One question comes
-    first: whether a line shows again when a finished dialogue is read back.
+    first: whether a line shows again when a finished dialogue is read back. Adam's answer: only while
+    playing, so a line read back shows nothing. In two parts. The first is done: `Shows` on a line, `place`,
+    `house` or `character` in the store, and on the wire from version 21 on a line still ahead and never on
+    one said, which is how reading back shows nothing; the sample shows each kind once - the rider arriving
+    the seat, which the dialogue service reads from the map's read model, the purse paid the house, and the
+    good word at court the figure. The second is the page acting on it.
 
 The order is a suggestion, as every order here is. Every step stands on the one before it except three:
 dialogues lapsing (6) needs only step 5, and the scene and a line that shows something need only the

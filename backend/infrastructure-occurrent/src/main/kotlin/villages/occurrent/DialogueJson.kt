@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import villages.domain.Requirement
 import villages.domain.RevealImpact
+import villages.domain.Shows
 import villages.domain.Then
 
 /**
@@ -47,3 +48,19 @@ internal interface RevealImpactJson
 
 internal const val SHOWN = "shown"
 internal const val HIDDEN = "hidden"
+
+/**
+ * How what a line shows is written, the same way: `place`, `house` or `character`. A line that shows nothing is
+ * written with a null, as every absent field is. See decision record 0071.
+ */
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = KIND)
+@JsonSubTypes(
+    JsonSubTypes.Type(value = Shows.Place::class, name = PLACE),
+    JsonSubTypes.Type(value = Shows.House::class, name = HOUSE),
+    JsonSubTypes.Type(value = Shows.Character::class, name = CHARACTER),
+)
+internal interface ShowsJson
+
+internal const val PLACE = "place"
+internal const val HOUSE = "house"
+internal const val CHARACTER = "character"

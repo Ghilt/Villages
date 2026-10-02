@@ -171,7 +171,27 @@ data class Line(
     val then: Then,
     /** On an option, how it shows what taking it will do before it is taken; none shows nothing. */
     val revealImpact: RevealImpact? = null,
+    /** What the line shows as it is reached while playing - a place, a house, a character - or nothing. */
+    val shows: Shows? = null,
 )
+
+/**
+ * What a line shows as it is reached while playing, so a conversation about somewhere can show it: a place on
+ * the map, which the camera is taken to, or a house or a character, which a window is opened on. Written with
+ * the line and sent to the page only with it, so nothing is shown ahead of the line it belongs to, and the
+ * page's to act on: reaching a line that shows something records no more than reaching any other. A line read
+ * back shows nothing, Adam's call of 2026-10-02. See decision record 0071.
+ */
+sealed interface Shows {
+    /** A place, which the camera is taken to. */
+    data class Place(val at: Location) : Shows
+
+    /** A house, which a window is opened on. */
+    data class House(val house: HouseId) : Shows
+
+    /** A character, which a window is opened on. */
+    data class Character(val character: CharacterId) : Shows
+}
 
 /**
  * How an option shows what taking it will do, before it is taken: written by hand on the option by whoever wrote
