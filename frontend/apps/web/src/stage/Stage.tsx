@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactNode, RefObject } from 'react';
 import { useEffect, useLayoutEffect, useMemo, useRef, useSyncExternalStore } from 'react';
 
-import { note } from '../debug/log';
+import { note } from '../log/log';
 import { subjectsNow, watchSubjects } from '../inspect/subjects';
 import { gatewayState, watchGateway } from '../net/gateway';
 import { Compass } from './Compass';

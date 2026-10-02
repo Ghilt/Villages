@@ -2,7 +2,7 @@ import { connect } from '@villages/client-core';
 import { PROTOCOL_VERSION } from '@villages/protocol';
 import type { BannerSpec, Point } from '@villages/protocol';
 
-import { note } from '../debug/log';
+import { note } from '../log/log';
 import { browserSocket } from './browserSocket';
 import { GATEWAY_URL } from './gateway';
 

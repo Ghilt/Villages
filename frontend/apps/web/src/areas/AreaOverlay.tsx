@@ -5,7 +5,7 @@ import type { FeatureCollection } from 'geojson';
 import { closePath, enclose, fenceAround, fenceToPolygons, insideFenceAt } from '@villages/world';
 import type { DiamondGrid } from '@villages/world';
 
-import { note } from '../debug/log';
+import { note } from '../log/log';
 import { terrainPalette } from '../map/terrainClasses';
 import { MOST_DIAMONDS } from './census';
 import { inspect } from '../inspect/opening';

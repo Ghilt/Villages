@@ -1,4 +1,4 @@
-import { note } from './log';
+import { note } from '../log/log';
 import { seeAll } from '../net/gateway';
 
 /**

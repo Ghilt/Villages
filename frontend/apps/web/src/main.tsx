@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 
 import { EventLog } from './admin/EventLog';
 import { App } from './App';
-import { note } from './debug/log';
+import { note } from './log/log';
 import { chosenMaster, worldRootOf } from './map/masters';
 import { registerPainterlyTiles } from './map/painterlyTiles';
 

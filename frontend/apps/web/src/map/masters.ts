@@ -1,6 +1,6 @@
 import { DEFAULT_MASTER, worldDirOf } from '@villages/world';
 
-import { note } from '../debug/log';
+import { note } from '../log/log';
 import { WORLD_MASTER_WIDTH } from './worldStyle';
 
 /**

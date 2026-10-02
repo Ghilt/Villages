@@ -354,7 +354,7 @@ Commands are added here as the increments land:
   player founded stays in the world, because events are never deleted. `wipe` beside it empties the world
   for everyone connected to it, and every window reloads and arrives anew. See `docs/adr/0036`.
   Anything worth saying
-  goes through `note(area, message)` in `apps/web/src/debug/log.ts`, and worth saying is the bar: moving
+  goes through `note(area, message)` in `apps/web/src/log/log.ts`, and worth saying is the bar: moving
   the camera about writes nothing, and the cells a move brought back are counted and said in one line
   only when they carried something. `window.villagesPainterly()` gives the paint counters from a console.
 - The player's own levers: the bar along the bottom of the house card, in the corner. The eye is the

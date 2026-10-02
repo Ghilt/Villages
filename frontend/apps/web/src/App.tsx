@@ -13,7 +13,7 @@ import { Desk } from './desk/Desk';
 import { Grips } from './debug/Grips';
 import { logIsOpen, panelIsShut, stageMode, watchStage } from './debug/stage';
 import { panelWants, stageBox } from './debug/stageBox';
-import { note } from './debug/log';
+import { note } from './log/log';
 import { inspect } from './inspect/opening';
 import { Inspecting } from './inspect/Inspecting';
 import { Navigating } from './inspect/Navigating';

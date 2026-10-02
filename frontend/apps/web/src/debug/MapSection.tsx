@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
-import { note } from './log';
+import { note } from '../log/log';
 import { Section } from './Section';
 import { chooseMaster, cutMaster, describeMaster, furnishMaster, isStale, listMasters } from '../map/masters';
 import type { MasterOnDisk } from '../map/masters';

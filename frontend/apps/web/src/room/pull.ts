@@ -1,6 +1,6 @@
 import type * as maplibregl from 'maplibre-gl';
 
-import { note } from '../debug/log';
+import { note } from '../log/log';
 import { deskOnScreen } from '../desk/deskTop';
 import { CAMERA } from '../map/mapConfig';
 import { flatPoint, flatWindow, floorZoom, sheetOnScreen } from '../map/sheet';

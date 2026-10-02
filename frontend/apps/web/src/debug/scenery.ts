@@ -1,4 +1,4 @@
-import { note } from './log';
+import { note } from '../log/log';
 
 /**
  * Whether the world is furnished, and how thickly.

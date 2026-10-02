@@ -1,7 +1,7 @@
 import { CAMERA, lensFor } from '../map/mapConfig';
 import { PLAYERS_TILT } from '../map/tilt';
 
-import { note } from './log';
+import { note } from '../log/log';
 
 export { PARALLEL_FOV, WIDE_FOV } from '../map/mapConfig';
 

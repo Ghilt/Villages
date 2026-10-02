@@ -1,4 +1,4 @@
-import { note } from '../debug/log';
+import { note } from '../log/log';
 import { fogOfWar } from '../net/gateway';
 
 /**

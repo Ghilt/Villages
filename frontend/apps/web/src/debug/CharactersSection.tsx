@@ -17,7 +17,7 @@ import {
   takeOffTheMap,
   watchGateway,
 } from '../net/gateway';
-import { note } from './log';
+import { note } from '../log/log';
 import { Section } from './Section';
 
 /** As many as a house may hold. The server refuses a tenth; the lever says so before it is pressed. */

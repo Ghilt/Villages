@@ -6,7 +6,7 @@ import type { BannerSpec } from '@villages/protocol';
 import { clampBoundsToWorld } from '../map/sheet';
 import { gateway, gatewayState, restart, watchGateway, wipeWorld } from '../net/gateway';
 import { seedHouses } from '../net/seed';
-import { note, shortId } from './log';
+import { note, shortId } from '../log/log';
 import { Section } from './Section';
 import { seeEverything, seeingEverything, watchSeeingEverything } from './seeEverything';
 

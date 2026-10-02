@@ -2,7 +2,7 @@ import { useEffect, useRef, useSyncExternalStore } from 'react';
 import type { ReactNode } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
-import { note } from '../debug/log';
+import { note } from '../log/log';
 import { deskCoversView, deskOnScreen } from '../desk/deskTop';
 import type { DeskTop } from '../desk/deskTop';
 import { drawnAt, drawnPoint, flatWindow, floorZoom, sheetOnScreen } from '../map/sheet';

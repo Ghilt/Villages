@@ -1,4 +1,4 @@
-import { note } from '../debug/log';
+import { note } from '../log/log';
 
 /**
  * The eye: whether the player's own holdings stay drawn wherever the camera goes.

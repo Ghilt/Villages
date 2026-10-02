@@ -1,4 +1,4 @@
-import { note, shortId } from '../debug/log';
+import { note, shortId } from '../log/log';
 
 /**
  * What is being inspected, and in what order it was opened.

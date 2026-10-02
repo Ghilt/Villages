@@ -24,7 +24,7 @@ import type {
   YourHouseView,
 } from '@villages/protocol';
 
-import { note, shortId } from '../debug/log';
+import { note, shortId } from '../log/log';
 import { STAT_WORDS, fullName, whatChanged } from '../figures/describe';
 import { whatChangedIn } from '../dialogues/describe';
 import { describeSight } from '../fog/describe';

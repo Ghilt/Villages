@@ -1,4 +1,4 @@
-import { note } from '../debug/log';
+import { note } from '../log/log';
 
 /**
  * Taking the camera somewhere, from a part of the interface that has no business holding a map.

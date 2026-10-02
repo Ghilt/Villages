@@ -1,6 +1,6 @@
 import type { DialogueView, LineView, ShowsView } from '@villages/protocol';
 
-import { note } from '../debug/log';
+import { note } from '../log/log';
 import { inspect } from '../inspect/opening';
 import { focusOn } from '../map/focus';
 import { gatewayState } from '../net/gateway';

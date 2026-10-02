@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import * as maplibregl from 'maplibre-gl';
 
-import { note } from '../debug/log';
+import { note } from '../log/log';
 import { fromMercator, toMercatorExact } from '../sprites/cameraMath';
 
 import { CAMERA, lensFor, resolveStyle } from './mapConfig';

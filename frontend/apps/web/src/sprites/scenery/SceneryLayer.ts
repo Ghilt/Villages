@@ -1,6 +1,6 @@
 import { Container, ImageSource, Matrix, Particle, ParticleContainer, Rectangle, Texture } from 'pixi.js';
 
-import { note } from '../../debug/log';
+import { note } from '../../log/log';
 import { WORLD_MASTER_WIDTH } from '../../map/worldStyle';
 import { fartherFirst, standingLayer, tiltGround, toMercatorExact, untiltGround } from '../cameraMath';
 import type { CameraView, GroundTilt } from '../cameraMath';

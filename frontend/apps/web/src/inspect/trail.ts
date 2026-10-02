@@ -1,4 +1,4 @@
-import { note } from '../debug/log';
+import { note } from '../log/log';
 import { keyOf, sameSubject, type Subject } from './subjects';
 
 /**

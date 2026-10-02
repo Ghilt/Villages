@@ -1,4 +1,4 @@
-import { note } from '../debug/log';
+import { note } from '../log/log';
 import { watchSubjects } from '../inspect/subjects';
 import { watchGateway } from '../net/gateway';
 import type { Asking, BayName } from './bayBox';

@@ -5,7 +5,7 @@ import { areaAround, fenceToPolygons, seedOf } from '@villages/world';
 import type { DiamondGrid, Fence } from '@villages/world';
 import type { HouseView } from '@villages/protocol';
 
-import { note } from '../debug/log';
+import { note } from '../log/log';
 import { seeingEverything, watchSeeingEverything } from '../debug/seeEverything';
 import { terrainPalette } from '../map/terrainClasses';
 

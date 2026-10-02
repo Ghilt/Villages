@@ -13,7 +13,7 @@ import { DialoguesSection } from './DialoguesSection';
 import { MapSection } from './MapSection';
 import { ScenerySection } from './ScenerySection';
 import { WorktreesSection } from './WorktreesSection';
-import { atToClock, note, notesNow, watchNotes } from './log';
+import { atToClock, note, notesNow, watchNotes } from '../log/log';
 import {
   logIsOpen,
   panelIsShut,

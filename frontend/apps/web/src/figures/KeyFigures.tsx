@@ -3,7 +3,7 @@ import { useState, useSyncExternalStore } from 'react';
 import { ageOn } from '@villages/client-core';
 import type { KeyFigureView, Point } from '@villages/protocol';
 
-import { note } from '../debug/log';
+import { note } from '../log/log';
 import { focusOn } from '../map/focus';
 import { Mark } from '../marks/Mark';
 import { gatewayState, watchGateway } from '../net/gateway';

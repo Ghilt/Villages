@@ -1,7 +1,7 @@
 import { fenceSize, fenceWindow } from '@villages/world';
 import type { Fence } from '@villages/world';
 
-import { note } from '../debug/log';
+import { note } from '../log/log';
 import { forgetSubject } from '../inspect/subjects';
 import { censusOf } from './census';
 import type { Census } from './census';
