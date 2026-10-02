@@ -105,7 +105,7 @@ export function configureBays(given: BaysConfig): () => void {
   return given.watch(tidyUp);
 }
 
-function paneById(id: string): Pane | undefined {
+export function paneById(id: string): Pane | undefined {
   return config.panes().find((pane) => pane.id === id);
 }
 

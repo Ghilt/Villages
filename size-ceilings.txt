@@ -13,7 +13,7 @@
 696 backend/protocol/src/main/kotlin/villages/protocol/Frames.kt
 788 debug-quick-start.ps1
 819 frontend/apps/web/src/admin/showcase/showcase.css
-444 frontend/apps/web/src/areas/AreaOverlay.tsx
+436 frontend/apps/web/src/areas/AreaOverlay.tsx
 490 frontend/apps/web/src/map/painterlyTiles.ts
 429 frontend/apps/web/src/sprites/FogLayer.ts
 855 frontend/apps/web/src/sprites/PixiSpriteRenderer.ts

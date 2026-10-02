@@ -5,8 +5,6 @@ import { sceneryStore } from './scenery/settings';
 import { circleOf, visionOf } from '../fog/circles';
 import { fieldOf } from '../fog/fogField';
 import { sessionStore } from '../net/gateway';
-import { inspect } from '../inspect/opening';
-import { subjectsStore } from '../inspect/subjects';
 import { cameraOf } from './mapCamera';
 import { createPixiSpriteRenderer } from './PixiSpriteRenderer';
 import type { MapSprite } from './SpriteRenderer';
@@ -20,17 +18,23 @@ interface SpriteOverlayProps {
   sprites: readonly MapSprite[];
   /** Where this page's flat tiles live, which is the terrain the scenery is scattered from. */
   worldRoot: string;
+  /**
+   * What the map marks: the newest thing a window is open on, if any. Handed in, as picking is, so that the
+   * overlay knows nothing of windows. See `App.tsx`.
+   */
+  picked: { kind: 'house' | 'area' | 'character'; id: string } | undefined;
+  /** A house or a person clicked on the map, which opens a window on them. */
+  onPick: (thing: { kind: 'house' | 'character'; id: string }) => void;
 }
 
 /**
  * Holds the renderer for as long as the map lives, and hands it whatever should be on the map. The
  * renderer type is the only thing this file knows about Pixi, so swapping it is a one-line change here.
  */
-export function SpriteOverlay({ map, sprites, worldRoot }: SpriteOverlayProps) {
+export function SpriteOverlay({ map, sprites, worldRoot, picked: top, onPick }: SpriteOverlayProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const uncolouringRef = useRef<HTMLCanvasElement | null>(null);
   const rendererRef = useRef<ReturnType<typeof createPixiSpriteRenderer> | null>(null);
-  const top = useStore(subjectsStore, (subjects) => subjects.open[0]);
   const everything = useStore(sessionStore, (state) => state.seeAll);
   const scenery = useStore(sceneryStore);
   const sight = useStore(sessionStore, (state) => state.yourSight);
@@ -102,12 +106,14 @@ export function SpriteOverlay({ map, sprites, worldRoot }: SpriteOverlayProps) {
    * A click on empty ground closes nothing. A window is a thing the player opened and it is theirs to
    * shut; the old inspector vanished on every stray click, which made it useless for reading.
    */
+  const pick = useRef(onPick);
+  pick.current = onPick;
   useEffect(() => {
     const onClick = (event: maplibregl.MapMouseEvent) => {
       const hit = rendererRef.current?.hitTest(event.point) ?? null;
       if (hit !== null) {
         event.preventDefault();
-        inspect(
+        pick.current(
           hit.startsWith(CHARACTER)
             ? { kind: 'character', id: hit.slice(CHARACTER.length) }
             : { kind: 'house', id: hit },

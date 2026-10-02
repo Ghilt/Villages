@@ -31,7 +31,7 @@ import {
   signed,
 } from './describe';
 import { Scene } from './Scene';
-import { showWhatIsReached, taking } from './showing';
+import { type Beside, showWhatIsReached, taking } from './showing';
 import { useStore } from '../store/useStore';
 
 /**
@@ -46,7 +46,13 @@ import { useStore } from '../store/useStore';
  * head. Which is open is the pane's own state, and outlives its sizes because a pane is never unmounted.
  * Put away it is its name and how many there are.
  */
-export function Dialogues({ room }: { room: Room }) {
+interface DialoguesProps {
+  room: Room;
+  /** Opens a window on a house or a person a line shows, beside this pane. Handed down; see `panes.tsx`. */
+  inspect: Beside['window'];
+}
+
+export function Dialogues({ room, inspect }: DialoguesProps) {
   const dialogues = useStore(sessionStore, (state) => state.yourDialogues);
   const refused = useStore(sessionStore, (state) => state.stepRefused);
   const acting = useStore(sessionStore, canAct);
@@ -70,6 +76,7 @@ export function Dialogues({ room }: { room: Room }) {
       <Conversation
         dialogue={reading}
         room={room}
+        beside={{ showMap: room.showMap, window: inspect }}
         stepOut={!acting}
         refused={refused !== null && refused.dialogueId === reading.id ? refused : null}
         onBack={() => setOpen(null)}
@@ -124,6 +131,8 @@ function Rows({ dialogues, onOpen }: { dialogues: readonly ListedDialogue[]; onO
 interface ConversationProps {
   dialogue: DialogueView;
   room: Room;
+  /** What a line reached shows beside the pane: the map, or a window. */
+  beside: Beside;
   /** Whether a step is out: nothing can be pressed until it is answered. */
   stepOut: boolean;
   /** The step through this dialogue the house last refused, and why, if one was. */
@@ -143,7 +152,7 @@ interface ConversationProps {
  * mark in the corner was too easily missed; the way back is a mark. Both Adam's call. The options are what
  * can be said, so they are words too.
  */
-function Conversation({ dialogue, room, stepOut, refused, onBack }: ConversationProps) {
+function Conversation({ dialogue, room, beside, stepOut, refused, onBack }: ConversationProps) {
   const [held, setHeld] = useState<Reading | null>(null);
   const reading = keepReading(held, dialogue);
   const now = useMemo(() => showing(reading, dialogue), [reading, dialogue]);
@@ -171,7 +180,8 @@ function Conversation({ dialogue, room, stepOut, refused, onBack }: Conversation
   // What a line shows, as it is reached while playing: a line of the stretch as it shows, an option once the
   // house has taken it. Each line once in the life of the page, whatever renders it again. See `showing.ts`.
   useEffect(() => {
-    showWhatIsReached(dialogue, now.lines);
+    showWhatIsReached(dialogue, now.lines, beside);
+    // Read when a line is reached, not a reason to look again: each line shows once in the life of the page.
   }, [dialogue, now.lines]);
 
   // The newest line is the one to read, so the feed follows it down as lines are shown and steps answered -

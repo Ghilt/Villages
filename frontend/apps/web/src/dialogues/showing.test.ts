@@ -4,7 +4,8 @@ import type { DialogueView, LineView } from '@villages/protocol';
 
 import { MAP_PANE } from '../stage/panes';
 import { DIALOGUE_PANE } from './pane';
-import { newlyReached } from './showing';
+import type { Room } from '../stage/panes';
+import { type Beside, newlyReached } from './showing';
 
 /**
  * The dialogues pane stands only while the house has been offered a dialogue, and the bay manager gives a bay
@@ -40,18 +41,28 @@ function letter(
 /** The bays, the windows and the map's camera, fresh for each test, from one graph with what shows. */
 async function fresh() {
   vi.resetModules();
-  const [bays, subjects, focus, showing, panes] = await Promise.all([
+  const [bays, subjects, focus, showing, panes, arrive, opening] = await Promise.all([
     import('../stage/bays'),
     import('../inspect/subjects'),
     import('../map/focus'),
     import('./showing'),
     import('../panes'),
+    import('../stage/arrive'),
+    import('../inspect/opening'),
   ]);
   // Configured as `main.tsx` configures it, from the same graph as the subjects.
   bays.configureBays(panes.STAGE_PANES);
   const flights: { lat: number; lon: number }[] = [];
   focus.flyWith((place) => flights.push(place));
-  return { ...bays, ...subjects, ...showing, flights };
+  // What the dialogue pane is handed, as the stage and `panes.tsx` hand it: the map and a window beside it.
+  const room = { openBeside: (id: string) => arrive.openBeside(DIALOGUE_PANE.id, id) } as Room;
+  const beside: Beside = {
+    showMap: () => arrive.showMapBeside(DIALOGUE_PANE.id),
+    window: (thing) => opening.inspectBeside(thing, room),
+  };
+  const showWhatIsReached = (dialogue: DialogueView, lines: readonly LineView[]) =>
+    showing.showWhatIsReached(dialogue, lines, beside);
+  return { ...bays, ...subjects, ...showing, showWhatIsReached, flights };
 }
 
 beforeEach(() => {

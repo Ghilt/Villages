@@ -4,15 +4,12 @@ import { Portrait } from '../figures/Portrait';
 import { focusOn } from '../map/focus';
 import { Icon } from '../stage/Icons';
 import { PaneSizeControl } from '../stage/PaneSizeControl';
-import { baysStore, put } from '../stage/bays';
-import { type Which } from '../stage/arrangement';
-import { MAP_PANE, type Room } from '../stage/panes';
+import { type Room } from '../stage/panes';
 import { SUBJECT_MARKS } from './pane';
 import type { Description, Link } from './describe';
-import { inspect, stopInspecting } from './opening';
-import { paneIdOf, type Subject } from './subjects';
+import { inspectBeside, stopInspecting } from './opening';
+import { type Subject } from './subjects';
 import { remember } from './trail';
-import { useStore } from '../store/useStore';
 
 /**
  * **Inspect window**: what one thing in the world is, and the ways on from it.
@@ -95,17 +92,6 @@ interface InspectWindowProps {
 }
 
 export function InspectWindow({ subject, said, along, room }: InspectWindowProps) {
-  const bays = useStore(baysStore);
-
-  /*
-   * The bay this window is not in, which is where everything it offers opens.
-   *
-   * A window nobody can see is not an answer to a click, and following a link from a window that then
-   * covers itself is the same mistake the compass was making. A window in no bay - which is every window
-   * in the spread - has nowhere to send anything, and `follow` is handed null there anyway.
-   */
-  const mine = bays.holding.indexOf(paneIdOf(subject));
-  const there: Which = mine === 0 ? 1 : 0;
   // The trail learns a thing's name here because here is the only place that knows one: a name is the
   // description's, and the trail outlives the window - and a house that has left view has no name to look
   // up later. See `trail.ts`.
@@ -113,18 +99,19 @@ export function InspectWindow({ subject, said, along, room }: InspectWindowProps
     remember(subject, said.name);
   }, [subject, said.name]);
 
-  const follow = (link: Link, into: Which | null) => {
+  /*
+   * Everything a window offers opens beside it, in the bay it is not in: a window nobody can see is not an
+   * answer to a click, and following a link from a window that then covers itself is the same mistake the
+   * compass was making. The room knows which bay that is; in the spread there is none to choose.
+   */
+  const follow = (link: Link) => {
     if (link.to === 'map') {
       focusOn(link.at);
-      if (into !== null) {
-        put(into, MAP_PANE.id);
-      }
+      room.showMap();
       return;
     }
-    inspect(link.subject, into);
+    inspectBeside(link.subject, room);
   };
-
-  const opens = along === null ? null : there;
 
   return (
     <section className="inspect" aria-live="polite">
@@ -161,7 +148,7 @@ export function InspectWindow({ subject, said, along, room }: InspectWindowProps
                   className={link.to === 'map' ? 'inspect__go inspect__go--map' : 'inspect__go'}
                   aria-label={link.what}
                   title={link.what}
-                  onClick={() => follow(link, opens)}
+                  onClick={() => follow(link)}
                 >
                   {link.to === 'map' ? <Icon name="map" /> : link.what}
                 </button>

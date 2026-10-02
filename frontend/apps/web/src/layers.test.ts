@@ -40,18 +40,11 @@ const SIDEWAYS: readonly (readonly [string, string])[] = [
 ];
 
 /**
- * Imports that break the rows today, each to be ended by a step of the plan under way, grouped by the step.
- * The plan is `docs/ROADMAP.md`'s "A place for every mechanic".
+ * Imports that break the rows, each excused by name until the step that ends it. There were thirty-two on the
+ * day the rule began, and the plan that ended them is done: the list is empty, and an import the rows refuse
+ * is a sign the code is in the wrong folder rather than a line to add here. See decision record 0073.
  */
-const EXCUSED: readonly string[] = [
-  // Opening a window, and picking a thing on the map, are handed down rather than reached for.
-  'areas/AreaOverlay.tsx -> inspect/opening.ts',
-  'areas/AreaOverlay.tsx -> inspect/subjects.ts',
-  'areas/areas.ts -> inspect/subjects.ts',
-  'dialogues/showing.ts -> inspect/opening.ts',
-  'sprites/SpriteOverlay.tsx -> inspect/opening.ts',
-  'sprites/SpriteOverlay.tsx -> inspect/subjects.ts',
-];
+const EXCUSED: readonly string[] = [];
 
 const SOURCES = import.meta.glob<string>('./**/*.{ts,tsx,css}', {
   query: '?raw',

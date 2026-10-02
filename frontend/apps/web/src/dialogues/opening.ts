@@ -1,7 +1,6 @@
 import type { DialogueView } from '@villages/protocol';
 
-import { baysStore, askFor, awayFromTheMap, formNow, roomToRead, takeOver } from '../stage/bays';
-import { sizeAsked } from '../stage/panes';
+import { arrive } from '../stage/arrive';
 import { DIALOGUE_PANE } from './pane';
 
 /**
@@ -41,13 +40,5 @@ export function openOnArrival(dialogues: readonly DialogueView[]): void {
   if (arrivals(shown, dialogues).length === 0) {
     return;
   }
-  if (formNow() !== 'bays') {
-    if (sizeAsked(DIALOGUE_PANE, baysStore.get()) === 'strip') {
-      askFor(DIALOGUE_PANE.id, 'small');
-    }
-    return;
-  }
-  const bay = awayFromTheMap();
-  takeOver(bay, DIALOGUE_PANE.id);
-  roomToRead(bay);
+  arrive(DIALOGUE_PANE.id, { inTheSpread: 'small' });
 }

@@ -5,7 +5,6 @@ import { fenceSize, fenceWindow } from '@villages/world';
 import type { Fence } from '@villages/world';
 
 import { note } from '../log/log';
-import { forgetSubject } from '../inspect/subjects';
 import { censusOf } from './census';
 import type { Census } from './census';
 
@@ -139,9 +138,9 @@ export function deleteArea(id: string): void {
     return;
   }
   note('area', `${id} deleted`);
+  // A window open on it is now a window about nothing, and the player did not close it: the window sees
+  // its area gone and closes itself, and leaves the trail. See `inspect/Inspecting.tsx`.
   update({ areas: store.get().areas.filter((area) => area.id !== id) });
-  // A window open on it is now a window about nothing, and the player did not close it.
-  forgetSubject({ kind: 'area', id });
 }
 
 export function forgetAreas(): void {
@@ -151,7 +150,4 @@ export function forgetAreas(): void {
   const had = store.get().areas;
   note('area', `${had.length} deleted`);
   update({ areas: [] });
-  for (const area of had) {
-    forgetSubject({ kind: 'area', id: area.id });
-  }
 }

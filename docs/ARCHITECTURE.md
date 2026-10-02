@@ -73,8 +73,11 @@ packages/protocol  <-  packages/client-core  <-  apps/web
   the rule names: `ui`, `version`, `marks`, `log` and `geometry`, the ground's own measures, which lean on nothing
   in the page; `net` and `stage`; the ground drawn, `map`, `fog` and `desk`; what stands on it, `sprites` and
   `room`; the game's own surfaces, `house`, `figures`, `choice`, `dialogues`, `areas` and `inspect`; and what puts
-  it all together, the root, `debug` and `admin`. No two files import each other, however far round. `src/layers.test.ts` holds it, with the imports that
-  break it today listed one by one, each ended by a step of the plan under way. See decision record 0073.
+  it all together, the root, `debug` and `admin`. No two files import each other, however far round.
+  `src/layers.test.ts` holds it. The imports that broke it on the first day were listed one by one and each
+  ended by a step of the plan; none is left. What a surface needs from another surface is handed down: an
+  overlay on the map is handed what the map marks and what a pick does, and a pane what it shows beside
+  itself. See decision record 0073.
 - Nothing in the game leans on `debug`. A setting the panel changes and the game reads lives beside what reads
   it - the camera in `map/camera.ts`, the scenery's dial in `sprites/scenery/settings.ts`, the stage's
   arithmetic in `stage/stageBox.ts` - and the panel only sets it, so without the panel each stays where a player
@@ -453,6 +456,13 @@ stage two panes are sharing, so what is standing in it has nothing to say about 
 which is what makes moving a pane between bays free, and what makes the three sizes mean the same thing on
 every pane. A tile in the spread is the other case and keeps its own heights, because nothing is competing
 for the room there. See decision record 0046.
+
+**A thing arrives one way, and a pane's room knows what is beside it.** A window asked for, a dialogue
+offered and a question asked all go through `stage/arrive.ts`: on a phone it takes the bay the map is not
+in, or the map's own for a question, and opens it to at least half, because a thing that arrives as a strip
+is a thing nobody can read; in the spread nothing is placed and a thing put away comes back. A pane is
+handed a room that can show the map beside it and bring another pane beside it, so no pane works out which
+bay is the other one, and the map shown beside a pane always opens to be read.
 
 **Two panes naming the same bay share it**, and that is the whole of how a bay holds more than one. The
 panes declare it rather than the layout deciding it when they stop fitting, so a tab cannot appear and

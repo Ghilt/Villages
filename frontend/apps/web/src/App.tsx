@@ -27,7 +27,7 @@ import { Stage } from './stage/Stage';
 import type { PaneDef } from './stage/panes';
 import { panesOn, standingIn } from './panes';
 import { subjectsStore } from './inspect/subjects';
-import { formNow, roomToRead, takeOver, theMapsBay } from './stage/bays';
+import { arrive } from './stage/arrive';
 import { CHOICE_PANE } from './choice/pane';
 import { worldRootOf } from './map/masters';
 import { cameraStore } from './map/camera';
@@ -197,11 +197,8 @@ export function App({ master }: AppProps) {
    */
   const asking = yourChoice?.id;
   useEffect(() => {
-    if (asking !== undefined && formNow() === 'bays') {
-      const bay = theMapsBay();
-      takeOver(bay, CHOICE_PANE.id);
-      // A letter that arrived as a strip is a question the player cannot read. See decision record 0046.
-      roomToRead(bay);
+    if (asking !== undefined) {
+      arrive(CHOICE_PANE.id, { into: 'theMapsBay' });
     }
   }, [asking]);
 
@@ -239,6 +236,9 @@ export function App({ master }: AppProps) {
   }, [map]);
 
   const worldRoot = worldRootOf(master);
+  const up = useStore(sessionStore, standingIn);
+  // What is open, the newest first: the windows on the stage, and what the map marks.
+  const open = useStore(subjectsStore, (subjects) => subjects.open);
 
   // The map's own pane, App's because App holds the map; every other pane is drawn by its feature, and which
   // stand and in what order is `panes.tsx`'s.
@@ -251,9 +251,23 @@ export function App({ master }: AppProps) {
         <Room map={map} seat={yours?.seat ?? null} strip={along !== null && room.size === 'strip'}>
           <Desk map={map} />
           <MapView worldRoot={worldRoot} onReady={setMap} />
-          {map !== null && <SpriteOverlay map={map} sprites={sprites} worldRoot={worldRoot} />}
+          {map !== null && (
+            <SpriteOverlay
+              map={map}
+              sprites={sprites}
+              worldRoot={worldRoot}
+              picked={open[0]}
+              onPick={inspect}
+            />
+          )}
         </Room>
-        <AreaOverlay map={map} worldRoot={worldRoot} turn={camera.latticeTurn} />
+        <AreaOverlay
+          map={map}
+          worldRoot={worldRoot}
+          turn={camera.latticeTurn}
+          picked={open[0]}
+          onPick={inspect}
+        />
         <HoldingOverlay map={map} houses={drawn} mine={eye ? yours : null} turn={camera.latticeTurn} />
         {/* Put away, and still running underneath: a lid over the map, never instead of it. The
               guard is the form rather than the size, because what a pane was asked to be outlives
@@ -261,10 +275,8 @@ export function App({ master }: AppProps) {
         {along !== null && room.size === 'strip' && <MapStrip room={room} />}
       </>
     ),
-    [map, yours, worldRoot, sprites, camera.latticeTurn, drawn, eye],
+    [map, yours, worldRoot, sprites, camera.latticeTurn, drawn, eye, open],
   );
-  const up = useStore(sessionStore, standingIn);
-  const open = useStore(subjectsStore, (subjects) => subjects.open);
   const panes = useMemo(() => panesOn(up, open, drawMap), [up, open, drawMap]);
 
   // The four numbers the grid is laid out from. As custom properties rather than as a style object on

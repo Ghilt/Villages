@@ -6,6 +6,7 @@ import { Compass } from './Compass';
 import { Seam } from './Seam';
 import { bayLayout, type BayName, type Box, isTabbed, type Rect, TAB_BAR, TILES } from './bayBox';
 import { baysStore, askFor, formNow, putAwayForRoom, show, showingIn, stageIs } from './bays';
+import { openBeside, showMapBeside } from './arrive';
 import { askedIn, askingOf, type Which } from './arrangement';
 import {
   cramps,
@@ -139,6 +140,8 @@ export function Stage({ stage, panes, overlays }: StageProps) {
       // one in its tab bar. See decision records 0045, 0046 and 0057.
       ask: (size) => askFor(id, size),
       ownControl: !tabbed,
+      showMap: () => showMapBeside(id),
+      openBeside: (other) => openBeside(id, other),
     };
 
     // A window in the spread stacks inside the rail, which is itself the column's upper tile, so it is a
@@ -228,6 +231,8 @@ export function Stage({ stage, panes, overlays }: StageProps) {
           asked,
           ask: (size) => askFor(up.id, size),
           ownControl: true,
+          showMap: () => showMapBeside(up.id),
+          openBeside: (other) => openBeside(up.id, other),
         };
         return (
           <TabBar

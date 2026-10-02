@@ -55,3 +55,13 @@ fails until it is taken off. So the list can only get shorter. Tests may import 
 - **dependency-cruiser.** A good tool, and a new one to learn and keep; the rule fits in one test beside the
   component library's own boundary test, with the same way of reading imports.
 - **No rule, and care.** That is what made the ring.
+
+## Amendment, 2026-10-02: none left
+
+The plan that ended the exceptions is done, and the list is empty. The last six were one surface reaching
+into another - an overlay on the map into the windows to open one and to know which to ring, a dialogue's
+line into them to open one, the areas into them to close one - and each is now handed down from the root
+instead: the overlays are handed what the map marks and what a pick does, a pane what it shows beside
+itself, and a window closes itself when its area goes. Navigation and the trail stayed in `inspect/` rather
+than moving into the stage as the plan had it: the trail is a list of subjects, and the stage would have
+had to learn what a subject is to hold one.

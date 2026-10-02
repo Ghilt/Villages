@@ -1,6 +1,7 @@
-import { baysStore, askFor, awayFromTheMap, formNow, giveBack, roomToRead, takeOver } from '../stage/bays';
+import { arrive } from '../stage/arrive';
+import { baysStore, askFor, formNow, giveBack } from '../stage/bays';
 import { type Which } from '../stage/arrangement';
-import type { PaneSize } from '../stage/panes';
+import type { PaneSize, Room } from '../stage/panes';
 import { closeOne, openOn, paneIdOf, type Subject } from './subjects';
 
 /**
@@ -27,18 +28,18 @@ import { closeOne, openOn, paneIdOf, type Subject } from './subjects';
  */
 export function inspect(subject: Subject, into: Which | null = null): void {
   openOn(subject);
+  // In the spread a window asked for again comes to the top of the rail, and one that was put away opens,
+  // because a thing nobody can read is not an answer to a click. See decision record 0058.
+  arrive(paneIdOf(subject), { into: into ?? undefined, inTheSpread: 'full' });
+}
 
-  if (formNow() !== 'bays') {
-    // In the spread a window asked for again comes to the top of the rail, and one that was put away opens,
-    // because a thing nobody can read is not an answer to a click. See decision record 0058.
-    if (isPutAway(subject)) {
-      askFor(paneIdOf(subject), 'full');
-    }
-    return;
-  }
-  const bay = into ?? awayFromTheMap();
-  takeOver(bay, paneIdOf(subject));
-  roomToRead(bay);
+/**
+ * Open a window on something from a pane: beside it, so that the two stay side by side - what a window's links
+ * do, and a line of a dialogue that shows a house or a person.
+ */
+export function inspectBeside(subject: Subject, from: Room): void {
+  openOn(subject);
+  from.openBeside(paneIdOf(subject));
 }
 
 /**

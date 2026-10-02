@@ -7,11 +7,8 @@ import { note } from '../log/log';
 import { focusOn } from '../map/focus';
 import { Mark } from '../marks/Mark';
 import { sessionStore } from '../net/gateway';
-import { baysStore, put } from '../stage/bays';
-import { type Which } from '../stage/arrangement';
 import { Icon } from '../stage/Icons';
-import { MAP_PANE, type Room } from '../stage/panes';
-import { KEY_FIGURES_PANE } from './pane';
+import { type Room } from '../stage/panes';
 import { PaneSizeControl } from '../stage/PaneSizeControl';
 import { STATS_IN_ORDER, STAT_WORDS, fullName } from './describe';
 import { Portrait } from './Portrait';
@@ -35,12 +32,9 @@ import { useStore } from '../store/useStore';
  */
 interface KeyFiguresProps {
   room: Room;
-  /** How the stage is cut, or null in the spread, where the map is the floor and always in view. */
-  along: 'rows' | 'columns' | null;
 }
 
-export function KeyFigures({ room, along }: KeyFiguresProps) {
-  const bays = useStore(baysStore);
+export function KeyFigures({ room }: KeyFiguresProps) {
   const figures = useStore(sessionStore, (state) => state.yourKeyFigures) ?? [];
   const today = useStore(sessionStore, (state) => state.world?.today ?? null);
   const [open, setOpen] = useState<string | null>(null);
@@ -69,10 +63,7 @@ export function KeyFigures({ room, along }: KeyFiguresProps) {
    */
   const showOnTheMap = (place: Point) => {
     focusOn(place);
-    if (along !== null) {
-      const there: Which = bays.holding.indexOf(KEY_FIGURES_PANE.id) === 0 ? 1 : 0;
-      put(there, MAP_PANE.id);
-    }
+    room.showMap();
   };
 
   if (room.size === 'strip') {

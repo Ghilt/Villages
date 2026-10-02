@@ -11,6 +11,7 @@ import { KeyFigures } from './figures/KeyFigures';
 import { HOUSE_PANE } from './house/pane';
 import { HouseStatus } from './house/HouseStatus';
 import { Inspecting } from './inspect/Inspecting';
+import { inspectBeside } from './inspect/opening';
 import { Navigating } from './inspect/Navigating';
 import { inspectPane } from './inspect/pane';
 import { subjectsStore, type Subject } from './inspect/subjects';
@@ -39,7 +40,7 @@ interface Standing {
 
 const STANDING: readonly Standing[] = [
   { pane: HOUSE_PANE, draw: (room) => <HouseStatus room={room} /> },
-  { pane: KEY_FIGURES_PANE, draw: (room, along) => <KeyFigures room={room} along={along} /> },
+  { pane: KEY_FIGURES_PANE, draw: (room) => <KeyFigures room={room} /> },
   {
     pane: NAVIGATION_PANE,
     draw: (room, along, going) => <Navigating room={room} along={along} going={going} />,
@@ -52,7 +53,7 @@ const STANDING: readonly Standing[] = [
   {
     pane: DIALOGUE_PANE,
     stands: (session) => (session.yourDialogues?.length ?? 0) > 0,
-    draw: (room) => <Dialogues room={room} />,
+    draw: (room) => <Dialogues room={room} inspect={(thing) => inspectBeside(thing, room)} />,
   },
 ];
 

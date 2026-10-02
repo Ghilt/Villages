@@ -253,8 +253,9 @@ and ESLint restricted imports on the frontend.
   fonts and the world package, so every component can be shown with nothing running; `src/ui/boundary.test.ts`
   holds it.
 - The rest of `apps/web` stands in rows, and a folder imports only the rows above it: `src/layers.test.ts` names
-  the rows, the few sideways imports allowed, and the ones that break it today, which may only go away. A new
-  folder gets a row; an import the rows refuse is a sign the code is in the wrong folder. See decision 0073.
+  the rows and the few sideways imports allowed, and excuses none. A new folder gets a row; an import the rows
+  refuse is a sign the code is in the wrong folder, and what one surface needs from another is handed down
+  from the root. See decision 0073.
 - The WebSocket protocol is a shared contract: Kotlin types and TypeScript (zod) schemas, both tested against the same
   fixtures in `contracts/fixtures/`. It also has a version, and the version has a recording: change a frame or a field
   and `PROTOCOL_VERSION` goes up at both ends and `contracts/protocol-v<n>.txt` is written beside the old ones, or two

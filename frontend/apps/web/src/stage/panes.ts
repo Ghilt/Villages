@@ -270,6 +270,10 @@ export interface Room {
   asked: PaneSize;
   /** Ask to be drawn at one of them. */
   ask: (size: PaneSize) => void;
+  /** Shows the map beside this pane, opened to be read, on a phone; in the spread the map is the floor. */
+  showMap: () => void;
+  /** Brings a pane beside this one: the other bay on a phone; in the spread, opened if it was put away. */
+  openBeside: (id: string) => void;
   /**
    * Whether the pane draws its own size control. Not in a tile its panes take turns in, in the spread:
    * one tile, one size, and one control for it at the end of the tab bar. See decision record 0057.

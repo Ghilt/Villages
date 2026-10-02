@@ -8,10 +8,21 @@ import type { DiamondGrid } from '@villages/world';
 import { note } from '../log/log';
 import { terrainPalette } from '../geometry/terrainClasses';
 import { MOST_DIAMONDS } from './census';
-import { inspect } from '../inspect/opening';
-import { subjectsStore } from '../inspect/subjects';
 import { areasStore, addArea, armDrawing } from './areas';
 import { useStore } from '../store/useStore';
+import {
+  DRAFT,
+  DRAFT_CLOSE,
+  DRAFT_LINE,
+  EMPTY,
+  FENCE,
+  LINE,
+  PERIOD_MS,
+  PULSE,
+  SAMPLE_EVERY,
+  SHADE,
+  SOURCE,
+} from './areaLayers';
 
 /**
  * Areas on the map: the line, the shade, the pulse, and the drag that draws one.
@@ -32,39 +43,18 @@ interface AreaOverlayProps {
   worldRoot: string;
   /** How far the ground's grid is turned, in degrees, which is how far a new area's diamonds are. */
   turn: number;
+  /**
+   * What the map marks: the newest thing a window is open on, if any. Handed in, as picking is, so that the
+   * overlay knows nothing of windows. See `App.tsx`.
+   */
+  picked: { kind: 'house' | 'area' | 'character'; id: string } | undefined;
+  /** An area clicked on the map, which opens a window on it. */
+  onPick: (thing: { kind: 'area'; id: string }) => void;
 }
 
-const SOURCE = 'areas';
-const SHADE = 'areas-shade';
-const LINE = 'areas-line';
-const PULSE = 'areas-pulse';
-
-/**
- * The line as it is being drawn, before there is a fence to draw instead.
- *
- * Kept apart from the areas source because it is a different kind of thing: the raw drag, in longitude
- * and latitude, exactly where the hand went and snapped to nothing. Snapping is what makes a fence exact
- * and it is worth nothing while the hand is still moving, so it waits for the mouse to come up.
- */
-const DRAFT = 'areas-draft';
-const DRAFT_LINE = 'areas-draft-line';
-const DRAFT_CLOSE = 'areas-draft-close';
-
-/** Not a terrain colour and not the map's ink: an area is a thing a player drew, and says so. */
-const FENCE = '#8f1d2f';
-
-/** Slow enough to read as breathing rather than blinking. */
-const PERIOD_MS = 2400;
-
-/** How far the pointer must move before another point is taken. Screen pixels, so any zoom is the same. */
-const SAMPLE_EVERY = 4;
-
-const EMPTY: FeatureCollection = { type: 'FeatureCollection', features: [] };
-
-export function AreaOverlay({ map, worldRoot, turn }: AreaOverlayProps) {
+export function AreaOverlay({ map, worldRoot, turn, picked: top, onPick }: AreaOverlayProps) {
   const state = useStore(areasStore);
   // Which area breathes: the newest thing opened, if it is an area. The map marks the one being looked at.
-  const top = useStore(subjectsStore, (subjects) => subjects.open[0]);
   const pulsing = top?.kind === 'area' ? top.id : null;
   const [width, setWidth] = useState<number | null>(null);
 
@@ -415,6 +405,8 @@ export function AreaOverlay({ map, worldRoot, turn }: AreaOverlayProps) {
   // Picking one. The hit test is the same even-odd test the count uses, on the diamond the click landed
   // in, so what is selected is what is drawn, and the smallest is preferred, or an area inside another
   // could never be chosen.
+  const pick = useRef(onPick);
+  pick.current = onPick;
   useEffect(() => {
     if (map === null) {
       return;
@@ -430,7 +422,7 @@ export function AreaOverlay({ map, worldRoot, turn }: AreaOverlayProps) {
         .find((area) => insideFenceAt(area.fence, at));
       // Empty ground closes nothing: a window is the player's to shut. Only a hit opens one.
       if (hit !== undefined) {
-        inspect({ kind: 'area', id: hit.id });
+        pick.current({ kind: 'area', id: hit.id });
       }
     };
 

@@ -1,14 +1,18 @@
 import type { DialogueView, LineView, ShowsView } from '@villages/protocol';
 
 import { note } from '../log/log';
-import { inspect } from '../inspect/opening';
 import { focusOn } from '../map/focus';
 import { sessionStore } from '../net/gateway';
-import { baysStore, formNow, put, roomToRead } from '../stage/bays';
-import { type Which } from '../stage/arrangement';
-import { MAP_PANE } from '../stage/panes';
-import { DIALOGUE_PANE } from './pane';
 import { showsWords } from './describe';
+
+/**
+ * What a dialogue shows beside itself: the map, and a window on a house or a person. Handed down from the pane,
+ * whose room knows which bay is beside it, rather than reached for. See `panes.tsx`.
+ */
+export interface Beside {
+  showMap(): void;
+  window(thing: { kind: 'house' | 'character'; id: string }): void;
+}
 
 /**
  * A line that shows something, as it is reached while playing: the camera taken to a place, or a window
@@ -70,7 +74,11 @@ export function taking(dialogueId: string, line: LineView): void {
  * among what has been said. A line said before the page was playing shows nothing, because a line said is
  * sent without what it shows, which is how a dialogue read back shows nothing, Adam's call.
  */
-export function showWhatIsReached(dialogue: DialogueView, showingLines: readonly LineView[]): void {
+export function showWhatIsReached(
+  dialogue: DialogueView,
+  showingLines: readonly LineView[],
+  beside: Beside,
+): void {
   const said = new Set(dialogue.said.map((line) => line.id));
   const answered: LineView[] = [];
   for (const [key, one] of taken) {
@@ -80,7 +88,7 @@ export function showWhatIsReached(dialogue: DialogueView, showingLines: readonly
     }
   }
   for (const reached of newlyReached(shown, dialogue.id, [...answered, ...showingLines])) {
-    show(reached, dialogue);
+    show(reached, dialogue, beside);
   }
 }
 
@@ -91,23 +99,18 @@ export function showWhatIsReached(dialogue: DialogueView, showingLines: readonly
  * conversation had the stage, Adam's word: the conversation stays beside what it is about, as a window's link
  * to the map leaves the window beside the map.
  */
-function show(reached: Reached, dialogue: DialogueView): void {
+function show(reached: Reached, dialogue: DialogueView, beside: Beside): void {
   const yours = sessionStore.get().yourHouse?.house ?? null;
   note(
     'dialogues',
     `"${dialogue.title}": "${reached.line}" shows ${showsWords(reached.shows, dialogue, yours)}`,
   );
 
-  const mine = formNow() === 'bays' ? baysStore.get().holding.indexOf(DIALOGUE_PANE.id) : -1;
-  const there: Which | null = mine === -1 ? null : mine === 0 ? 1 : 0;
   const { shows } = reached;
   if (shows.kind === 'place') {
     focusOn(shows.at);
-    if (there !== null) {
-      put(there, MAP_PANE.id);
-      roomToRead(there);
-    }
+    beside.showMap();
     return;
   }
-  inspect({ kind: shows.kind, id: shows.id }, there);
+  beside.window({ kind: shows.kind, id: shows.id });
 }
