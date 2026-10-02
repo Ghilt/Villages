@@ -233,7 +233,7 @@ long file goes into a file of its own.
 
 | Part | Where | Held by |
 |---|---|---|
-| The class, in its mechanic's family (a new mechanic adds one beside `ResourceEvent`), the `decide` branch, the `evolve` branch | `backend/domain` | the house spec of its mechanic, `House<Mechanic>Spec` over `HouseFixtures.kt`: given, when, then over events |
+| The class, in its mechanic's family (a new mechanic adds one beside `ResourceEvent`), and its command in the family beside it, `ResourceCommand` and the rest; the `decide` and `evolve` branches in the mechanic's part of the house, `Treasury.kt`, `Dialogues.kt` and the others, where a new mechanic adds a part to `House.Founded` and a line to each of `HouseDecider`'s two routes. What it does to another mechanic is an `Effect`, asked of the house through `Follow` | `backend/domain` | the house spec of its mechanic, `House<Mechanic>Spec` over `HouseFixtures.kt`: given, when, then over events |
 | The type row | `EventTypes` in `backend/infrastructure-occurrent` | `EventTypeCatalogueSpec` |
 | The catalogue row: type, payload in constructor order, meaning, producer, consumers | `docs/EVENTS.md` | `EventCatalogueSpec`, in both directions |
 | The stored form | `contracts/fixtures/events/<type>.json` | `EventFormatSpec` |

@@ -36,6 +36,18 @@ The rest follows in the steps that build it, each amending this record: the hous
 mechanic, with `HouseDecider` routing between them; the gateway's connection made of parts in the same way; and
 the client's session folded from one slice a mechanic.
 
+*Amended 2026-10-02, the house in parts:* a founded house is who it is and a part for each mechanic, and
+`HouseDecider` decides the founding and routes the rest. A house's commands come in the same families as its
+events - `ResourceCommand`, `ChoiceCommand`, `DialogueCommand`, `KeyFigureCommand`, `VisionCommand` - and
+each family goes to the part that decides it and folds its events: the `Treasury` what the house has,
+`KeyFigures` whom it holds, `Visions` what it was given to see, `Dialogues` what it was told. The choice
+pending stays on the house, because an unfounded house is asked things too, so `Choices` keeps its rules over
+the house whole. A part that asks something of the rest of the house - an option or a line that grants, spends
+or founds - is handed a `Follow` by the decider and asks it, which is the only way one part reaches another.
+Whatever reads a house reads it as it always did: the house answers `pledges`, `keyFigures`, `freeOf` and
+the rest from its parts. A sixth mechanic on the house's stream is a part, a family of commands, a family of
+events, and a line in each of the decider's two routes.
+
 ## Consequences
 
 - A sixth mechanic adds a family, a read model and a view file, and edits the folds that care about it and no

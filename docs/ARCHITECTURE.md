@@ -79,7 +79,10 @@ commit scope.
 
 **A mechanic has one place in each layer**, and a file that serves every mechanic routes to those places
 rather than holding them (0075). In the domain, a mechanic's events are a family, `ResourceEvent` and its
-siblings, which a fold with nothing to say about it passes in one branch; in the read models, its own
+siblings, which a fold with nothing to say about it passes in one branch, and its commands a family beside them,
+which `HouseDecider` hands to the part of the house that decides them - the `Treasury`, `KeyFigures`,
+`Visions`, `Dialogues` - and that part alone folds its events; a part reaches another only through the
+effects it asks of the house, `Follow`; in the read models, its own
 projection; in the gateway, a file of its own for what its frames say, `HouseViews.kt` and the rest. What goes
 where, for a new one, is the checklist in `BUILDING-A-MECHANIC.md`.
 

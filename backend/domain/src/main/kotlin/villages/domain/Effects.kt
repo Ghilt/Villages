@@ -11,6 +11,15 @@ import java.time.Instant
  * house could each afford but not both are refused together, so a decision never writes what its own fold could
  * not apply. See decision record 0071.
  */
+/**
+ * How a part of a house asks the rest of it for what a list of effects records, for a player at two times. The
+ * decider hands one to the part that decides a command, so that the part never touches another: an effect is the
+ * only way from one part of a house to another. See decision record 0075.
+ */
+internal fun interface Follow {
+    fun follow(effects: List<Effect>, player: PlayerId, worldTime: WorldTime, recordedAt: Instant): List<HouseEvent>
+}
+
 @Suppress("LongParameterList")
 internal fun followAll(
     effects: List<Effect>,
@@ -65,7 +74,7 @@ private fun follows(
     // What an option costs is refused when the house has not that much free, as spending is, and then the
     // action or the step is refused with it: the player answers otherwise. See decision record 0071.
     is Effect.Spend -> {
-        HouseDecider.enough(HouseDecider.founded(state), effect.resource, effect.amount, recordedAt)
+        HouseDecider.founded(state).treasury.enough(effect.resource, effect.amount, recordedAt)
         listOf(HouseResourceSpent(houseId, effect.resource, effect.amount, worldTime, recordedAt))
     }
 }

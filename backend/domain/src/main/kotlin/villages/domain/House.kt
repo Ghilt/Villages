@@ -15,6 +15,11 @@ sealed interface House {
     /** Nothing founded yet: the state every stream starts in, and a house can be asked things in it. */
     data class NotFounded(override val pending: Choice? = null) : House
 
+    /**
+     * A house that stands: who it is, and a part for each mechanic on its stream, each deciding its own family
+     * of commands and folding its own family of events. The choice pending stays on the house, because an
+     * unfounded house has one too. See decision record 0075.
+     */
     data class Founded(
         val id: HouseId,
         val player: PlayerId,
@@ -22,52 +27,49 @@ sealed interface House {
         val seat: Location,
         val significance: Significance,
         val banner: Banner,
-        /** One stock of every resource. A house always has all five, even when they are nothing. */
-        val resources: Map<Resource, Stock>,
-        /** What is spoken for, and the only record of it. See `Pledge`. */
-        val pledges: List<Pledge> = emptyList(),
-        /**
-         * The characters this house acts through, in the order it took them in: a tie in the house's own
-         * history, never in theirs. At most nine. See decision record 0055.
-         */
-        val keyFigures: List<CharacterId> = emptyList(),
-        /** The visions this house was given outright and still has, in the order it was given them. */
-        val visions: List<VisionId> = emptyList(),
-        /**
-         * The dialogues this house was offered and has not finished, in the order it was offered them, each with
-         * the steps it has taken through it. A finished one leaves the list. See decision record 0071.
-         */
-        val openDialogues: List<OpenDialogue> = emptyList(),
-        /** Every dialogue it was ever offered, open or over, so that the same offer twice is refused. */
-        val offeredDialogues: Set<DialogueId> = emptySet(),
+        /** What it has. */
+        val treasury: Treasury,
+        /** Whom it holds. */
+        val figures: KeyFigures = KeyFigures(),
+        /** What it was given to see outright. */
+        val vision: Visions = Visions(),
+        /** What it was told. */
+        val dialogues: Dialogues = Dialogues(),
         /** The world-day it was founded on, and the instant that was recorded. */
         val foundedOn: WorldTime,
         val foundedAt: Instant,
         override val pending: Choice? = null,
     ) : House {
-        /** What this house has of one resource. A founded house has all five, so this never misses. */
-        fun stockOf(resource: Resource): Stock = resources.getValue(resource)
+        // What the parts hold, asked of the house: whatever reads a house asks the house, never its parts.
 
-        /** How much of one resource is spoken for: the sum of the live pledges against it, and nothing stored. */
-        fun pledgedOf(resource: Resource): Long =
-            pledges.filter { it.resource == resource }.sumOf { it.amount }
+        /** One stock of every resource. A house always has all five, even when they are nothing. */
+        val resources: Map<Resource, Stock> get() = treasury.resources
 
-        /**
-         * How much of one resource the house may actually do something with: what it has now, less what is
-         * pledged. Every rule that asks whether a house can afford or attempt a thing asks this.
-         */
-        fun freeOf(resource: Resource, now: Instant): Long = stockOf(resource).at(now) - pledgedOf(resource)
+        /** What is spoken for, and the only record of it. See `Pledge`. */
+        val pledges: List<Pledge> get() = treasury.pledges
 
-        /**
-         * Whether the house has enough of a resource free to be allowed something. **The gate**, which is
-         * what domain and influence are for: it reads, and takes nothing. Nothing calls it yet, because
-         * there is nothing to build; it is here because a gate that is a question and not a subtraction is
-         * the whole distinction between those two resources and wealth.
-         */
-        fun has(resource: Resource, wanted: Long, now: Instant): Boolean = freeOf(resource, now) >= wanted
+        /** The characters this house acts through, in the order it took them in. At most nine. See 0055. */
+        val keyFigures: List<CharacterId> get() = figures.held
 
-        /** The house with one of its stocks changed. */
-        internal fun withStock(resource: Resource, change: (Stock) -> Stock): Founded =
-            copy(resources = resources + (resource to change(stockOf(resource))))
+        /** The visions this house was given outright and still has, in the order it was given them. */
+        val visions: List<VisionId> get() = vision.given
+
+        /** The dialogues this house was offered and has not finished, each with the steps taken. See 0071. */
+        val openDialogues: List<OpenDialogue> get() = dialogues.open
+
+        /** Every dialogue it was ever offered, open or over. */
+        val offeredDialogues: Set<DialogueId> get() = dialogues.offered
+
+        /** What this house has of one resource. See [Treasury.stockOf]. */
+        fun stockOf(resource: Resource): Stock = treasury.stockOf(resource)
+
+        /** How much of one resource is spoken for. See [Treasury.pledgedOf]. */
+        fun pledgedOf(resource: Resource): Long = treasury.pledgedOf(resource)
+
+        /** How much of one resource the house may do something with. See [Treasury.freeOf]. */
+        fun freeOf(resource: Resource, now: Instant): Long = treasury.freeOf(resource, now)
+
+        /** Whether the house has enough of a resource free to be allowed something. See [Treasury.has]. */
+        fun has(resource: Resource, wanted: Long, now: Instant): Boolean = treasury.has(resource, wanted, now)
     }
 }

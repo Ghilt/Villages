@@ -7,7 +7,25 @@ sealed interface HouseCommand {
     val houseId: HouseId
 }
 
-/** Found a house: give it a name, a seat on the map and a banner, on this world-day, recorded now. */
+/**
+ * A house's commands come in the same families as its events, one a mechanic, so that the decider hands a whole
+ * family to the part of the house that decides it: what it has, what it is asked, what it is told, whom it holds,
+ * and what it sees. The founding is in none, as its event is in none. See decision record 0075.
+ */
+sealed interface ResourceCommand : HouseCommand
+
+/** A choice put to the house, and an option of it taken. See [ResourceCommand] for what a family is. */
+sealed interface ChoiceCommand : HouseCommand
+
+/** A dialogue offered, a step taken through it, and a requirement it needed failing. See [ResourceCommand]. */
+sealed interface DialogueCommand : HouseCommand
+
+/** Whom the house holds, and the two questions that can only be refused. See [ResourceCommand]. */
+sealed interface KeyFigureCommand : HouseCommand
+
+/** A vision given outright, and taken away. See [ResourceCommand] for what a family is. */
+sealed interface VisionCommand : HouseCommand
+
 /** A house was given some of a resource, from wherever the world gives things from. */
 data class GrantResource(
     override val houseId: HouseId,
@@ -15,7 +33,7 @@ data class GrantResource(
     val amount: Long,
     val worldTime: WorldTime,
     val recordedAt: Instant,
-) : HouseCommand
+) : ResourceCommand
 
 /** Some of a resource is used up. Refused unless that much of it is free. */
 data class SpendResource(
@@ -24,7 +42,7 @@ data class SpendResource(
     val amount: Long,
     val worldTime: WorldTime,
     val recordedAt: Instant,
-) : HouseCommand
+) : ResourceCommand
 
 /**
  * Some of a resource is tied to an undertaking until a world-day.
@@ -41,7 +59,7 @@ data class PledgeResource(
     val purpose: String,
     val worldTime: WorldTime,
     val recordedAt: Instant,
-) : HouseCommand
+) : ResourceCommand
 
 /**
  * A pledge ends and what it held comes back.
@@ -55,8 +73,9 @@ data class ReleasePledge(
     val pledgeId: PledgeId,
     val worldTime: WorldTime,
     val recordedAt: Instant,
-) : HouseCommand
+) : ResourceCommand
 
+/** Found a house: give it a name, a seat on the map and a banner, on this world-day, recorded now. */
 data class FoundHouse(
     override val houseId: HouseId,
     val player: PlayerId,
@@ -77,7 +96,7 @@ data class GiveChoice(
     val choice: Choice,
     val worldTime: WorldTime,
     val recordedAt: Instant,
-) : HouseCommand
+) : ChoiceCommand
 
 /**
  * Take one option of the choice this house was given. It names the choice as well as the option, so that
@@ -90,7 +109,7 @@ data class TakeAction(
     val optionId: OptionId,
     val worldTime: WorldTime,
     val recordedAt: Instant,
-) : HouseCommand
+) : ChoiceCommand
 
 /**
  * Offer this house a dialogue, whole. Refused for a house that does not exist, and for a dialogue it was
@@ -102,7 +121,7 @@ data class OfferDialogue(
     val dialogue: Dialogue,
     val worldTime: WorldTime,
     val recordedAt: Instant,
-) : HouseCommand
+) : DialogueCommand
 
 /**
  * Take one step through a dialogue the house has open: an option of the dialogue choice pending, or the line the
@@ -116,7 +135,7 @@ data class CompleteDialogueStep(
     val lineId: LineId,
     val worldTime: WorldTime,
     val recordedAt: Instant,
-) : HouseCommand
+) : DialogueCommand
 
 /**
  * A requirement has failed for good: every open dialogue of this house that needed it lapses, in one decision,
@@ -128,7 +147,7 @@ data class FailRequirement(
     val requirement: Requirement,
     val worldTime: WorldTime,
     val recordedAt: Instant,
-) : HouseCommand
+) : DialogueCommand
 
 /**
  * Give the house vision of a place, outright: it sees a circle about the place from this world-day until the
@@ -141,7 +160,7 @@ data class GiveVision(
     val place: Location,
     val worldTime: WorldTime,
     val recordedAt: Instant,
-) : HouseCommand
+) : VisionCommand
 
 /** Take away a vision the house was given. Refused for one it does not have. */
 data class TakeVision(
@@ -149,7 +168,7 @@ data class TakeVision(
     val visionId: VisionId,
     val worldTime: WorldTime,
     val recordedAt: Instant,
-) : HouseCommand
+) : VisionCommand
 
 /** Take a character in as one of the house's key figures. Refused for a tenth, or for someone already held. */
 data class TakeKeyFigure(
@@ -157,7 +176,7 @@ data class TakeKeyFigure(
     val characterId: CharacterId,
     val worldTime: WorldTime,
     val recordedAt: Instant,
-) : HouseCommand
+) : KeyFigureCommand
 
 /** Lose one of the house's key figures. Refused for anybody the house does not hold. */
 data class LoseKeyFigure(
@@ -165,7 +184,7 @@ data class LoseKeyFigure(
     val characterId: CharacterId,
     val worldTime: WorldTime,
     val recordedAt: Instant,
-) : HouseCommand
+) : KeyFigureCommand
 
 /**
  * Act through one of the house's key figures: a command that can only be refused. Nothing happens to the
@@ -176,7 +195,7 @@ data class LoseKeyFigure(
 data class ActThrough(
     override val houseId: HouseId,
     val characterId: CharacterId,
-) : HouseCommand
+) : KeyFigureCommand
 
 /**
  * Ask whether the house has room for another key figure before anybody is brought in to fill it: a command
@@ -184,4 +203,4 @@ data class ActThrough(
  */
 data class CheckRoomForKeyFigure(
     override val houseId: HouseId,
-) : HouseCommand
+) : KeyFigureCommand
