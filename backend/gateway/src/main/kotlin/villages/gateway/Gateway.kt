@@ -49,6 +49,7 @@ import villages.protocol.WorldNow
 import villages.protocol.WorldWiped
 import java.time.Clock
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Executor
 
 /** What the gateway needs to send a frame to a connection. The transport is Spring's; this is not. */
 fun interface Outbound {
@@ -111,6 +112,8 @@ class Gateway(
     stands: Stands = Stands { _, _, _ -> null },
     private val later: Later,
     instrumentsOpen: Boolean = true,
+    /** What a connection's frames are sent on: the thread that queued them, unless the gateway is given its own. */
+    private val sendOn: Executor = Executor { it.run() },
 ) : AutoCloseable {
     /** Which connections hold each cell: the whole of the fan-out index. */
     private val holding = CellIndex<Connection>()
@@ -194,17 +197,11 @@ class Gateway(
 
     inner class Connection(private val transport: Outbound) {
         /**
-         * Every frame to this connection goes out through here, and nothing a send throws gets past it. The
-         * fan-outs send from inside the read models' watchers, where a throw skips every connection after
-         * this one and is never tried again. A frame for a socket that is going is simply not delivered.
+         * Every frame to this connection goes out through here, queued and sent one at a time, and nothing a send
+         * throws gets past it. The fan-outs send from inside the read models' watchers, where a throw would skip
+         * every connection after this one and never be tried again. See [Outbox].
          */
-        internal val out = Outbound { frame ->
-            try {
-                transport.send(frame)
-            } catch (@Suppress("TooGenericExceptionCaught", "SwallowedException") undelivered: Exception) {
-                // The close already on its way lets this connection go.
-            }
-        }
+        internal val out: Outbound = Outbox(transport, sendOn)
 
         var player: PlayerId? = null
             private set

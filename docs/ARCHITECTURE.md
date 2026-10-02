@@ -298,7 +298,10 @@ fault in its fold says which one it was.
 4. Gateway nodes are stateless apart from their live connections: one broker consumer per node, an in-memory index
    from cell to sessions, and no stickiness required from a load balancer.
 5. Pushes are coalesced per session on a short timer, and outbound queues are bounded. A client that cannot keep up is
-   told to resynchronise rather than being allowed to grow a queue.
+   told to resynchronise rather than being allowed to grow a queue. Every frame to a connection leaves through one
+   queue, its `Outbox`, one at a time: a snapshot, a tile of stands or a `your…` frame still waiting is replaced
+   by a newer one of its kind, a watcher's events are capped and it is told when some are left out, and a
+   command's answer always goes.
 6. The map is drawn from read models. The event store is never queried to render anything.
 7. Every principle above is checked by the bot swarm, not assumed. Ten thousand connections on one development
    machine is the number to prove, and proving it is on the roadmap under Later rather than next.
