@@ -8,8 +8,8 @@ import {
   goingOut,
 } from '@villages/client-core';
 import type { Connection, HousesState, InFlight, Outgoing } from '@villages/client-core';
-import { NO_HOUSES, charactersInView, reduceHouses } from '@villages/client-core';
-import { PROTOCOL_VERSION, describeDay } from '@villages/protocol';
+import { NO_HOUSES, reduceHouses } from '@villages/client-core';
+import { PROTOCOL_VERSION } from '@villages/protocol';
 import type {
   ChoiceView,
   CommandPayload,
@@ -21,23 +21,10 @@ import type {
   YourHouseView,
 } from '@villages/protocol';
 
-import { note, shortId } from '../log/log';
-import { fullName, whatChanged } from '../figures/describe';
-import { whatChangedIn } from '../dialogues/describe';
-import { describeSight } from '../fog/describe';
+import { note } from '../log/log';
 import { chosenMaster } from '../map/masters';
 import { followStandsUnder, standsArrived } from '../sprites/scenery/standsFromServer';
 import { GATEWAY_URL } from './address';
-import {
-  NOTHING_ARRIVED,
-  NO_STANDS_ARRIVED,
-  alsoArrived,
-  alsoStood,
-  describeArrival,
-  describeBatch,
-  describeStands,
-} from './arrivals';
-import type { Arrival, StandsArrival } from './arrivals';
 import { browserSocket } from './browserSocket';
 
 /**
@@ -130,20 +117,6 @@ function issue(out: Outgoing, alsoNow: Partial<GatewayState> = {}): string | nul
   return commandId;
 }
 
-/**
- * How long the snapshots of one burst are gathered before they are said in a line.
- *
- * The same quarter second the gateway coalesces its deltas over, and for the same reason: a view is a
- * few dozen cells and each answers separately, so what is worth reading is the burst and not the frame.
- */
-const GATHER_MS = 250;
-let arriving: Arrival = NOTHING_ARRIVED;
-let gathering: ReturnType<typeof setTimeout> | null = null;
-
-/** The stands of one burst, gathered as the snapshots are and said once. See decision record 0067. */
-let standing: StandsArrival = NO_STANDS_ARRIVED;
-let gatheringStands: ReturnType<typeof setTimeout> | null = null;
-
 /** The cells the camera wants, followed and let go of late: see `follower` in the client core. */
 const following = follower({
   send: (frame) => connection?.send(frame),
@@ -165,136 +138,118 @@ function update(change: Partial<GatewayState>): void {
   for (const listener of listeners) listener();
 }
 
+/**
+ * What listens to the conversation without taking part in it: the log, `sessionLog.ts` at the root. It is told
+ * when the page connects, when the connection closes, and of a problem with a frame; and of every frame once the
+ * state has taken it in, with the state as it was before, but before whatever the frame makes the page do, and
+ * again once that is done. A command's answer comes with the part of the log its asking was filed in.
+ */
+export interface GatewayListener {
+  connecting?(url: string): void;
+  closed?(): void;
+  problem?(problem: string): void;
+  heard?(frame: ServerFrame, was: GatewayState, now: GatewayState, answeredIn: string | null): void;
+  done?(frame: ServerFrame): void;
+}
+
+const listening = new Set<GatewayListener>();
+
+/** Listens to the conversation from now on, until the function it hands back is called. */
+export function observeGateway(listener: GatewayListener): () => void {
+  listening.add(listener);
+  return () => {
+    listening.delete(listener);
+  };
+}
+
+function tell(frame: ServerFrame, was: GatewayState, answeredIn: string | null = null): void {
+  for (const listener of listening) listener.heard?.(frame, was, state, answeredIn);
+}
+
+/** Takes a frame in: the state first, then the listeners are told, then what the frame makes the page do. */
 function heard(frame: ServerFrame): void {
+  const was = state;
   switch (frame.type) {
     case 'welcome':
       update({ connection: 'open', playerId: frame.playerId, world: frame.world });
-      note(
-        'gateway',
-        `welcome: player ${frame.playerId.slice(0, 8)}, server time ${new Date(frame.serverTime).toISOString()}`,
-      );
-      note(
-        'world',
-        `today is ${describeDay(frame.world.today)}; the earliest thing is from ${describeDay(frame.world.earliest)}`,
-      );
+      tell(frame, was);
       // The eye and the fog first, because they decide what a snapshot carries and the cells are asked for next.
       sendEye();
       sendFog();
       // Anything the camera wanted before the gateway was listening is asked for now.
       following.welcomed();
-      return;
+      break;
     case 'snapshot':
       update({ houses: reduceHouses(state.houses, frame) });
+      tell(frame, was);
       following.answered(frame.cell);
-      gather(frame);
-      return;
+      break;
     case 'stands':
       // What the scenery grows from, as far as the fog lets it through. See decision record 0067.
       standsArrived(frame.x, frame.y, frame.stands);
-      gatherStands(frame);
-      return;
-    case 'batch': {
-      // Who was standing where before the batch, so that somebody gone can be named in the line.
-      const known = new Map(charactersInView(state.houses).map((one) => [one.id, one]));
+      tell(frame, was);
+      break;
+    case 'batch':
       update({ houses: reduceHouses(state.houses, frame) });
-      note(
-        'cells',
-        describeBatch(frame.deltas, (id) => {
-          const one = known.get(id);
-          return one === undefined ? undefined : `${one.givenName} ${one.familyName}`;
-        }),
-      );
-      return;
-    }
+      tell(frame, was);
+      break;
     case 'resync':
       update({ houses: reduceHouses(state.houses, frame) });
-      note('cells', `fell behind; asking again for ${frame.cells.length} cells`);
+      tell(frame, was);
       // The gateway let these go. Asking again is what gets fresh snapshots.
       connection?.send({ type: 'subscribeCells', cells: frame.cells });
-      return;
-    case 'commandAccepted': {
-      const answer = answered(inFlight, frame.commandId);
-      inFlight = answer.inFlight;
-      stepsOut.delete(frame.commandId);
-      if (state.acting === frame.commandId) update({ acting: null });
-      note(answer.area, `command ${shortId(frame.commandId)} accepted`);
-      return;
-    }
+      break;
+    case 'commandAccepted':
     case 'commandRejected': {
       const answer = answered(inFlight, frame.commandId);
       inFlight = answer.inFlight;
       // A step the house would not take is said in its pane, under the options, as well as in the log.
       const step = stepsOut.get(frame.commandId);
       stepsOut.delete(frame.commandId);
-      if (step !== undefined) {
+      if (frame.type === 'commandRejected' && step !== undefined) {
         update({ stepRefused: { ...step, reason: frame.reason } });
       }
       if (state.acting === frame.commandId) update({ acting: null });
-      note(answer.area, `command ${shortId(frame.commandId)} rejected: ${frame.reason}`);
-      return;
+      tell(frame, was, answer.area);
+      break;
     }
     case 'error':
-      note('gateway', `error ${frame.code}: ${frame.message}`);
+      tell(frame, was);
       if (frame.code === 'tooManyCells' || frame.code === 'badCell') {
         // The whole subscription was refused. Put the connection back the way it was, or the map goes
         // blank and stays blank however far it is panned. See the follower's `refused`.
         following.refused(`the gateway refused ${frame.code}`);
       }
-      if (frame.code === 'protocolVersion') {
-        // The one error whose cause is never in the code: a server left running from an older build.
-        // Saying what to do here saves reading the message and guessing. See decision record 0037.
-        note(
-          'gateway',
-          `this page speaks version ${PROTOCOL_VERSION}, so the server on the other end is a different ` +
-            'build of the program. Stop it and start it again from this tree with debug-quick-start.ps1 -Stop.',
-        );
-      }
-      return;
+      break;
     case 'pong':
-      note('gateway', `pong, round trip ${Date.now() - frame.t0} ms`);
-      return;
+      tell(frame, was);
+      break;
     case 'yourHouse':
       update({ yourHouse: frame.yours });
-      note('house', frame.yours === null ? 'no house yet' : `your house is ${frame.yours.house.name}`);
-      return;
+      tell(frame, was);
+      break;
     case 'yourChoice':
       update({ yourChoice: frame.choice });
-      note(
-        'choice',
-        frame.choice === null
-          ? 'nothing to decide'
-          : `"${frame.choice.prompt}", ${frame.choice.options.length} options`,
-      );
-      return;
+      tell(frame, was);
+      break;
     case 'yourKeyFigures':
-      // Said before the state moves, because what is worth saying is the difference from what was held.
-      for (const line of whatChanged(state.yourKeyFigures, frame.keyFigures, state.world?.today ?? null)) {
-        note('characters', line);
-      }
       update({ yourKeyFigures: frame.keyFigures });
-      return;
-    case 'yourSight': {
-      const figures = new Map((state.yourKeyFigures ?? []).map((one) => [one.id, fullName(one)]));
-      note(
-        'sight',
-        describeSight(frame.points, state.world?.today ?? null, (id) => figures.get(id)),
-      );
+      tell(frame, was);
+      break;
+    case 'yourSight':
       update({ yourSight: { points: frame.points, tension: frame.tension } });
-      return;
-    }
+      tell(frame, was);
+      break;
     case 'yourDialogues':
-      // Said before the state moves, because what is worth saying is the difference from what was held.
-      for (const line of whatChangedIn(state.yourDialogues, frame.dialogues)) {
-        note('dialogues', line);
-      }
       update({ yourDialogues: frame.dialogues });
-      return;
+      tell(frame, was);
+      break;
     case 'worldWiped':
+      tell(frame, was);
       // The world this window was looking at is gone. Arriving anew is the only honest thing to do, and
       // a reload is how a page arrives. See decision record 0036.
-      note('world', `${frame.message}; arriving anew`);
       window.location.reload();
-      return;
+      break;
     case 'takenOver':
       // A player plays from one place. This window is finished; the socket goes with it. See 0028.
       following.forget();
@@ -307,54 +262,15 @@ function heard(frame: ServerFrame): void {
         yourSight: null,
         yourDialogues: null,
       });
-      note('gateway', `${frame.message}; this window is no longer playing`);
+      tell(frame, was);
       connection?.close();
-      return;
+      break;
     case 'event': // A player's window never asks for stored events; they have a page of their own (0023).
       return;
+    default:
+      return frame satisfies never; // Every frame has a case above, so a new one does not compile until it has.
   }
-  return frame satisfies never; // Every frame has a case above, so a new one does not compile until it has.
-}
-
-/**
- * Counts one snapshot into the burst, and says what the burst brought once it stops arriving.
- *
- * A burst that brought nothing is not said at all: panning over empty world is not news, and a line a
- * cell buried everything else in the panel once the panel was the log. See decision record 0023.
- */
-/**
- * Counts one tile of stands into the burst, and says what the burst brought once it stops arriving, as the
- * snapshots are said. A burst of tiles with no stands in them is not said: the gateway holding back what the
- * fog hides looks exactly like ground nothing grows on, which is the point. See decision record 0067.
- */
-function gatherStands(frame: Extract<ServerFrame, { type: 'stands' }>): void {
-  standing = alsoStood(standing, frame);
-  if (gatheringStands !== null) {
-    clearTimeout(gatheringStands);
-  }
-  gatheringStands = setTimeout(() => {
-    gatheringStands = null;
-    const said = describeStands(standing);
-    standing = NO_STANDS_ARRIVED;
-    if (said !== null) {
-      note('stands', said);
-    }
-  }, GATHER_MS);
-}
-
-function gather(frame: Extract<ServerFrame, { type: 'snapshot' }>): void {
-  arriving = alsoArrived(arriving, frame);
-  if (gathering !== null) {
-    clearTimeout(gathering);
-  }
-  gathering = setTimeout(() => {
-    gathering = null;
-    const said = describeArrival(arriving);
-    arriving = NOTHING_ARRIVED;
-    if (said !== null) {
-      note('cells', said);
-    }
-  }, GATHER_MS);
+  for (const listener of listening) listener.done?.(frame);
 }
 
 function sendEye(): void {
@@ -414,7 +330,7 @@ export function gateway(): Connection {
     () => crypto.randomUUID(),
   );
   update({ playerToken });
-  note('gateway', `connecting to ${GATEWAY_URL}`);
+  for (const listener of listening) listener.connecting?.(GATEWAY_URL);
 
   const socket = browserSocket(GATEWAY_URL);
   socket.onClose(() => {
@@ -428,13 +344,15 @@ export function gateway(): Connection {
     inFlight = { ...inFlight, areas: new Map() };
     stepsOut.clear();
     update({ connection: 'closed', houses: NO_HOUSES });
-    note('gateway', 'the connection closed; is the backend running? cd backend then ./gradlew :app:bootRun');
+    for (const listener of listening) listener.closed?.();
   });
   // Not watching events: those are read on their own page, which watches without playing. See 0023.
   // The master the page draws, so the gateway sends that world's stands and no other. See 0067.
   connection = connect({ socket, playerToken, protocolVersion: PROTOCOL_VERSION, master: chosenMaster() });
   connection.onFrame(heard);
-  connection.onProblem((problem) => note('gateway', problem));
+  connection.onProblem((problem) => {
+    for (const listener of listening) listener.problem?.(problem);
+  });
   return connection;
 }
 

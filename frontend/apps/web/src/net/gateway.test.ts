@@ -57,6 +57,8 @@ async function load() {
   fake.current = fakeSocket();
   const log = await import('../log/log');
   const gateway = await import('./gateway');
+  // The log listens to the conversation as the page's start makes it.
+  gateway.observeGateway((await import('../sessionLog')).sessionLog);
   const socket = fake.current;
   return {
     gateway,
