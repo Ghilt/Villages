@@ -1,0 +1,315 @@
+/* The bays and the tiles of the spread, the seam, the compass, the marks and the tab bar. */
+
+/*
+ * The bays: where everything on the stage is, as four numbers each.
+ *
+ * Both forms work the same way. Every bay is absolutely positioned and its rectangle is written into its
+ * style by the component from `bayBox.ts`, so which cell of which grid a thing is in stopped being a
+ * question the stylesheet answers. That is what makes **no two tiles overlap** provable - it is arithmetic
+ * with a test rather than a stylesheet nobody can assert about. See decision records 0040 and 0041.
+ *
+ * **Nothing is unmounted to move it, and nothing moves in the tree**: a pane changes bays by having four
+ * different numbers written into its wrapper. The map holds a camera, a style and a WebGL context, and
+ * `MapView` throws all three away when it unmounts.
+ *
+ * A bay clips rather than scrolls: what is in it draws itself smaller, and a pane whose length is its own
+ * business - a list, a key figure's stats at half a phone - scrolls inside itself rather than the bay
+ * scrolling. `container-type` is what lets what is inside react to the room it got, because a media
+ * query cannot see the stage, let alone one tile of it.
+ */
+.bay {
+  position: absolute;
+  overflow: hidden;
+  min-width: 0;
+  min-height: 0;
+  container-type: size;
+  z-index: 2;
+  /*
+   * How much of this bay's **bottom right** corner something standing on the stage has taken.
+   *
+   * Two numbers and not one, because a pane steps clear in the direction it happens to lay itself out
+   * in - a row along the bottom moves in from the right, a column down the side moves up from the
+   * bottom - and which of those a pane is doing is its own business rather than something it reads off
+   * how the stage was cut.
+   */
+  --corner-right: 0px;
+  --corner-bottom: 0px;
+}
+
+/*
+ * The floor: the map, filling the stage with every tile lying on it.
+ *
+ * The one bay exempt from the no-overlap rule, because everything overlaps it on purpose. In the bays form
+ * it is an ordinary tile like the rest and the z-index costs nothing, since there nothing overlaps at all.
+ */
+.bay--map {
+  z-index: 0;
+}
+
+/* A pane the player has not got up. Hidden rather than unmounted, for the reason above. */
+.bay[hidden],
+.rail[hidden] {
+  display: none;
+}
+
+/*
+ * The seam between the two bays: a moulding lying over the join, not room cut out of either side.
+ *
+ * Three rules and a knot. The rules are this element's own background, in pixels rather than rems so that
+ * they land on exactly the lines the knot's viewBox draws at one unit to one pixel - the two have to
+ * agree to the pixel or the moulding has a step in the middle of it. The heavy rule is two pixels centred
+ * on the join and covers outright the parchment edge the lower pane draws on the same line, so there is
+ * no doubled hairline to find.
+ *
+ * `z-index: 4` puts it over both bays and under the compass, which stands on it: the seam is furniture
+ * and the compass is the one thing that stands on the furniture. `pointer-events: none` because a
+ * moulding that eats a drag meant for the map is a moulding that has to be explained.
+ */
+.seam {
+  position: absolute;
+  z-index: 4;
+  pointer-events: none;
+}
+
+/*
+ * The knot, centred on the band by its own transform rather than by alignment.
+ *
+ * Turned, the band is twenty pixels across and the knot is seventy-two long, so the knot is **wider than
+ * what it sits in** - and an item bigger than the box aligning it is not reliably centred by
+ * `place-items`, which left it twenty-six pixels down the seam. Half the difference between its two
+ * sides, exactly, which is how it was found. Nothing about a translate cares how big the box is.
+ *
+ * `translate` then `rotate` reads right to left: the knot is turned about its own middle first, and the
+ * turned drawing is then pulled back by half its own box to land on the join.
+ */
+.seam__knot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.seam--rows {
+  left: 0;
+  right: 0;
+  top: var(--bay-first, 50%);
+  height: 20px;
+  transform: translateY(-50%);
+  background: linear-gradient(
+    to bottom,
+    transparent 0 4px,
+    rgba(157, 124, 42, 0.42) 4px 5px,
+    rgba(157, 124, 42, 0.07) 5px 9px,
+    var(--gold) 9px 11px,
+    rgba(157, 124, 42, 0.07) 11px 15px,
+    rgba(157, 124, 42, 0.42) 15px 16px,
+    transparent 16px 20px
+  );
+}
+
+.seam--columns {
+  top: 0;
+  bottom: 0;
+  left: var(--bay-first, 50%);
+  width: 20px;
+  transform: translateX(-50%);
+  background: linear-gradient(
+    to right,
+    transparent 0 4px,
+    rgba(157, 124, 42, 0.42) 4px 5px,
+    rgba(157, 124, 42, 0.07) 5px 9px,
+    var(--gold) 9px 11px,
+    rgba(157, 124, 42, 0.07) 11px 15px,
+    rgba(157, 124, 42, 0.42) 15px 16px,
+    transparent 16px 20px
+  );
+}
+
+/* Turned, it is the same drawing on its side rather than a second one. */
+.seam--columns .seam__knot {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+/*
+ * The compass, standing in the stage's bottom right corner: the way to everything not on the screen.
+ *
+ * One tap that puts **navigation** in a bay, where a kebab used to open a menu over the world. Only in the
+ * bays - the spread reaches the same pane through the compass tab in the corner. See decision record 0043.
+ *
+ * **It rode the seam until 0047**, which is the one place on the stage that moves: the seam is somewhere
+ * else every time a pane is resized, a window opens or a letter is answered, and a control that has moved
+ * because you used something else is a control you have to find twice. The corner never moves, and one
+ * rule places it in both cuts rather than two rules chasing a number.
+ *
+ * It is the one thing on the stage that lies over a bay rather than sitting in one, and what is under it
+ * steps clear rather than being covered: see `--corner-right` and `--corner-bottom` on `.bay`.
+ */
+.compass {
+  position: absolute;
+  z-index: 5;
+  /* Clear of `.grip--side`, which is seven pixels of the stage's right edge and takes the pointer. */
+  right: 0.9rem;
+  bottom: 0.9rem;
+}
+
+/*
+ * A thumb's width, which is what a strip is, because it is the same thumb.
+ *
+ * Drawn as a seal pressed into the corner of the sheet rather than as a button laid on top of one:
+ * parchment, a rim, and a fainter gold ring nested inside it the way the achievement nests its contours
+ * instead of drawing one thick line.
+ */
+.compass__open {
+  display: block;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0.5rem;
+  border: 1px solid var(--parchment-edge);
+  border-radius: 50%;
+  background: var(--parchment);
+  box-shadow:
+    0 2px 8px var(--shadow),
+    inset 0 0 0 1px rgba(157, 124, 42, 0.25);
+  cursor: pointer;
+}
+
+.compass__open:hover {
+  background: #fbf7ec;
+}
+
+/* Open: the gold the interface says "this is the one you are on" in, the same as a tab that is up, and
+   pressed into the parchment rather than standing off it. */
+.compass__open--up {
+  border-color: var(--gold);
+  background: rgba(157, 124, 42, 0.16);
+  box-shadow: inset 0 1px 3px var(--shadow);
+}
+
+.compass__open--up .icon {
+  color: var(--gold);
+}
+
+/*
+ * How much of a bay's bottom right corner the compass is standing in.
+ *
+ * The stage's own corner is always the second bay's - the bottom one cut into rows, the right-hand one
+ * cut into columns - so **one rule says it for both**, where before it said it for one and the landscape
+ * case was never covered at all. What reads it is the pane, and each reads whichever of the two numbers
+ * matches how it lays itself out.
+ */
+.stage[data-form='bays'] .bay[data-at='second'] {
+  --corner-right: 3.75rem;
+  --corner-bottom: 3.75rem;
+}
+
+/*
+ * The marks a pane is known by where there is no room for its name. One drawing, used on a tab and in the
+ * navigation list, so the same thing is never drawn twice and cannot drift.
+ */
+.icon {
+  width: 100%;
+  height: 100%;
+  color: var(--ink-soft);
+}
+
+.icon__line {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.icon__fill {
+  fill: currentColor;
+  stroke: none;
+}
+
+/*
+ * The tab bar: several panes sharing one tile, and a strip of marks saying which is up.
+ *
+ * It sits on the tile's own top edge and is part of the same piece of furniture, so it carries the border
+ * and the rounded corner that the pane beneath it gives up. Marks and no words, because the column is 26rem
+ * at its widest and two words on a tab is a tab that wraps. See decision record 0042.
+ *
+ * The tile's one size control stands at the far end, because the tile is one size whichever tab is up
+ * and the control is the tile's rather than a tab's. See decision record 0057.
+ */
+.tabs {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  padding: 0 0.3rem 0 0.35rem;
+  background: var(--parchment-edge);
+  border: 1px solid var(--parchment-edge);
+  border-width: 1px 1px 0 0;
+  border-radius: 0 6px 0 0;
+  box-shadow: 0 -2px 18px var(--shadow);
+}
+
+.tabs__all {
+  display: flex;
+  align-items: stretch;
+  gap: 1px;
+}
+
+.tabs > .pane-size {
+  align-self: center;
+}
+
+.tabs__one {
+  width: 2.1rem;
+  padding: 0.28rem 0.42rem;
+  border: none;
+  border-radius: 3px 3px 0 0;
+  background: rgba(239, 230, 211, 0.45);
+  cursor: pointer;
+}
+
+.tabs__one:hover {
+  background: rgba(239, 230, 211, 0.78);
+}
+
+/* The one that is up: the same parchment as the pane below it, so the two read as one sheet. */
+.tabs__one--up {
+  background: var(--parchment);
+  cursor: default;
+}
+
+.tabs__one--up .icon {
+  color: var(--gold);
+}
+
+/* A pane sharing a tabbed tile gives its top edge to the strip of tabs above it. */
+.bay[data-tabbed] .hud__panel,
+.bay[data-tabbed] .figures,
+.bay[data-tabbed] .navigate {
+  border-width: 0 1px 0 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/*
+ * The game's own name, over the floor and in no bay.
+ *
+ * It was in the house card only because that card used to be the whole stage. Now every pixel is either
+ * the floor or a tile, so it is chrome on the floor - and the column keeps `TITLE_ROOM` clear at the top
+ * for it, which is the one thing in the layout that exists for a decoration.
+ */
+.stage__title {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1;
+  pointer-events: none;
+  margin: 1rem;
+  font-size: 0.95rem;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  background: linear-gradient(to right, rgba(239, 230, 211, 0.92), rgba(239, 230, 211, 0));
+  padding: 0.4rem 2.5rem 0.4rem 0.6rem;
+  border-radius: 2px;
+}

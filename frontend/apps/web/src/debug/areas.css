@@ -1,0 +1,86 @@
+/* The debug panel's Areas and World sections. */
+
+/* The areas, inside the debug panel. Its bar is the Section's now. */
+.areas__hint {
+  margin: 0 0 0.3rem;
+  color: var(--ink-soft);
+}
+
+.areas__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+  max-height: 7rem;
+}
+
+.areas__pick {
+  display: block;
+  width: 100%;
+  padding: 0.1rem 0.15rem;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  background: none;
+  border: 0;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.areas__pick:hover {
+  background: rgba(157, 124, 42, 0.12);
+}
+
+.areas__pick--on {
+  background: rgba(143, 29, 47, 0.14);
+}
+
+.areas__census {
+  border-top: 1px solid var(--parchment-edge);
+}
+
+.areas__classes {
+  margin: 0;
+  padding: 0.3rem 0.5rem;
+  list-style: none;
+  overflow-y: auto;
+  max-height: 11rem;
+}
+
+.areas__classes li {
+  display: grid;
+  grid-template-columns: 0.55rem 1fr auto 2.6rem;
+  align-items: center;
+  gap: 0 0.4rem;
+}
+
+.areas__swatch {
+  width: 0.55rem;
+  height: 0.55rem;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  border-radius: 1px;
+}
+
+.areas__count {
+  font-variant-numeric: tabular-nums;
+}
+
+.areas__share {
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* The world, inside the debug panel. Its bar is the Section's now. */
+.events__link {
+  font-size: 0.62rem;
+  color: var(--ink-soft);
+}
+
+.events__link--open {
+  color: #3f7d4e;
+}
+
+.events__link--closed {
+  color: #9b3a2f;
+}

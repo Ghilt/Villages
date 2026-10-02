@@ -1,0 +1,19 @@
+/* The build badge. */
+
+/*
+ * Which build this window is, in the corner, in the smallest type on the screen. Not part of the
+ * fiction: a dozen checkouts of this repository can serve and they all look alike. See 0037.
+ */
+.build {
+  flex: 0 0 auto;
+  align-self: flex-end;
+  padding: 0.15rem 0.5rem 0.3rem;
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.01em;
+  color: var(--ink-soft);
+  background: rgba(239, 230, 211, 0.72);
+  border-radius: 2px;
+  pointer-events: none;
+  user-select: none;
+}

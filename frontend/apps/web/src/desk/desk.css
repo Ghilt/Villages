@@ -1,0 +1,39 @@
+/* The desk the map lies on. */
+
+/*
+ * The desk the map lies on: behind the map, never in the way of a drag, and seen only once the camera is
+ * pulled back past the point where the world covers the window. The Desk component sizes and places the
+ * grain as the map moves, and hides the whole thing while the map covers it. See docs/adr/0033.
+ */
+.desk {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/*
+ * The desk itself, with edges, because pulled back far enough it stands in a room and a surface with no
+ * end would be a backdrop. Sized and placed from the sheet by `deskTop.ts`; off the screen on every side
+ * with the sheet anywhere near the middle, so the floor looks as it always did.
+ */
+.desk__top {
+  position: absolute;
+  left: 0;
+  top: 0;
+  background-color: #5c3f28;
+  background-repeat: repeat;
+  box-shadow:
+    0 6px 14px rgba(0, 0, 0, 0.4),
+    0 28px 70px rgba(0, 0, 0, 0.5);
+}
+
+/* The sheet under the transparent canvas, with a shadow so the map reads as lying on the surface. */
+.desk__sheet {
+  position: absolute;
+  left: 0;
+  top: 0;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 12px 32px rgba(0, 0, 0, 0.35);
+}

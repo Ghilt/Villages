@@ -1,0 +1,153 @@
+/* The debug panel's Worktrees and Debug map sections. */
+
+/*
+ * Which worktree is on the screen, and what else is up. One tree a row: its name, the branch it is on
+ * and whether anything is answering on its port. See docs/adr/0031.
+ */
+.trees {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+  max-height: 11rem;
+}
+
+.trees__tree {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0 0.5rem;
+  padding: 0.18rem 0.25rem;
+  border-radius: 2px;
+  color: var(--ink-soft);
+}
+
+.trees__open {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  color: inherit;
+  text-decoration: none;
+}
+
+.trees__tree:has(.trees__open):hover {
+  background: rgba(157, 124, 42, 0.12);
+  color: var(--ink);
+}
+
+.trees__name {
+  /* The names are a slug and a hex suffix and run long. One line each, cut at the row's own width. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trees__branch {
+  grid-column: 1;
+  font-size: 0.62rem;
+  opacity: 0.75;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trees__port {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  font-size: 0.62rem;
+  white-space: nowrap;
+}
+
+/* The one you are looking at: darker, and marked down the edge it shares with the panel. */
+.trees__tree--here {
+  color: var(--ink);
+  background: rgba(157, 124, 42, 0.14);
+  box-shadow: inset 2px 0 0 var(--gold);
+}
+
+.trees__tree--here .trees__name {
+  font-weight: 600;
+}
+
+/* On disk, nothing serving it. Shown so the tree is known to exist, not offered as a link. */
+.trees__tree--down {
+  opacity: 0.45;
+  font-style: italic;
+}
+
+/* Which world is on the screen, and what draws it: the Debug map section's own bits. */
+.debug-map__label {
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.debug-map__select {
+  font: inherit;
+  font-size: 0.95rem;
+  color: var(--ink);
+  background: #fbf7ec;
+  border: 1px solid var(--parchment-edge);
+  border-radius: 2px;
+  padding: 0.25rem 0.35rem;
+  max-width: 100%;
+}
+
+.debug-map__note {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: var(--ink-soft);
+}
+
+.debug-map__cut {
+  font: inherit;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.4rem;
+  cursor: pointer;
+  color: var(--ink);
+  background: #fbf7ec;
+  border: 1px solid var(--parchment-edge);
+  border-radius: 2px;
+}
+
+.debug-map__cut:hover:enabled {
+  background: rgba(157, 124, 42, 0.12);
+}
+
+.debug-map__cut:disabled {
+  cursor: progress;
+  color: var(--ink-soft);
+}
+
+/* A switch in the section, in words: the fog of war. The same button, gold while it is on. */
+.debug-map__switch {
+  font: inherit;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.4rem;
+  cursor: pointer;
+  color: var(--ink);
+  background: #fbf7ec;
+  border: 1px solid var(--parchment-edge);
+  border-radius: 2px;
+}
+
+.debug-map__switch:hover {
+  background: rgba(157, 124, 42, 0.12);
+}
+
+.debug-map__switch--on {
+  background: rgba(157, 124, 42, 0.28);
+  border-color: var(--gold);
+}
+
+/* One vision given outright: where it is, and the way to take it away. */
+.debug-map__vision {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+}

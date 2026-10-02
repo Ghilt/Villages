@@ -1,0 +1,41 @@
+/* A pane's size control. */
+
+/*
+ * **The pane size control**: how much of the stage a pane is taking, on every pane and in both forms.
+ *
+ * Three marks, the one you are on filled in, and the mark is how much of a box is full - which is the
+ * thing being chosen rather than a metaphor for it. It replaced a chevron that could only put a pane away
+ * and a second button on one pane that swapped between two sizes. See decision record 0045.
+ */
+.pane-size {
+  display: inline-flex;
+  flex: none;
+  gap: 1px;
+}
+
+.pane-size__one {
+  width: 1.4rem;
+  height: 1.4rem;
+  padding: 0.18rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.pane-size__one .icon {
+  opacity: 0.45;
+}
+
+.pane-size__one:hover .icon {
+  opacity: 0.9;
+}
+
+/* The one you are on. Gold, as everywhere else the interface says "this is where you are". */
+.pane-size__one--on {
+  cursor: default;
+}
+
+.pane-size__one--on .icon {
+  color: var(--gold);
+  opacity: 1;
+}

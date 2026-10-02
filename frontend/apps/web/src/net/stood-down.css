@@ -1,0 +1,60 @@
+/* The notice a window shows when another has taken its player over. */
+
+/*
+ * A window whose player is being played elsewhere. Over everything, because the window has stopped and
+ * a map that still pans under a stopped window is a lie. See decision record 0028.
+ */
+.stood-down {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  background: rgba(36, 28, 20, 0.55);
+  backdrop-filter: blur(2px);
+}
+
+.stood-down__card {
+  width: min(24rem, calc(100% - 3rem));
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1.4rem 1.6rem;
+  text-align: center;
+  background: var(--parchment);
+  border: 1px solid var(--parchment-edge);
+  border-radius: 3px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+}
+
+.stood-down__title {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.stood-down__words {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+.stood-down__back {
+  align-self: center;
+  margin-top: 0.35rem;
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.35rem 0.9rem;
+  cursor: pointer;
+  color: var(--ink);
+  background: #fbf7ec;
+  border: 1px solid var(--parchment-edge);
+  border-radius: 2px;
+}
+
+.stood-down__back:hover {
+  background: rgba(157, 124, 42, 0.14);
+}

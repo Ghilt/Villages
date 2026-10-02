@@ -1,0 +1,72 @@
+/* Every pane put away and turned on its side: the strips, last, over what each pane says of itself. */
+
+/*
+ * A strip that is a narrow upright sliver rather than a low wide band.
+ *
+ * Cut into columns - a phone in landscape - a put-away pane is 44 pixels **wide** and the whole height,
+ * so the row of name-then-marks that a wide strip is becomes a column of name-over-marks.
+ *
+ * **The name is turned, not dropped.** There is no room for a word across 44 pixels and there is eight
+ * hundred pixels of room along one, so it reads down the strip instead of across it: the same strip a
+ * quarter turn round rather than a second drawing, which is what the whole stage does when the phone
+ * turns. It used to be hidden, which left a put-away pane saying nothing about what it was - and left the
+ * map, whose strip is its own way back and carries no marks, as a blank bar. See decision record 0046.
+ *
+ * **The marks go to the far end from the compass, and the name follows them.** Upright the strip runs
+ * along the bottom and the disc stands at the right of it, so the marks move in from the right and the
+ * name keeps the rest; turned, the strip runs down the side and the disc stands at the **bottom** of it,
+ * so the whole order flips - marks at the top, name under them, and the bottom of the strip left to the
+ * disc. A put-away pane's controls are the one thing on it that has to be hittable, so they go where
+ * nothing is standing. See decision record 0047.
+ *
+ * `writing-mode` and not a transform, because a transform turns what is drawn and leaves the box it was
+ * drawn in where it was, which would put the marks a screen away from where they look. This way the
+ * inline axis is simply vertical, so the name still gives up its room first and still trims itself.
+ *
+ * A container query, because the question is how wide this bay is and nothing else can see that - and it
+ * is **at the end of the file** because a container query carries no extra specificity. Three of the four
+ * strips it overrides are declared further down than it was, and simply won. That is the second time this
+ * has caught us; see decision record 0044.
+ */
+@container (max-width: 6rem) {
+  .hud__panel--strip,
+  .figures--strip,
+  .inspect--strip,
+  .navigate--strip,
+  .choice--strip,
+  .dialogues--strip,
+  .map-strip {
+    /*
+     * Reversed, so the marks are at the top and the name reads down from under them - the strip is 44
+     * wide and the whole height here, and the corner the disc stands in is the bottom of it rather than
+     * the far end. `flex-end` is the top in a reversed column, which is where everything packs.
+     */
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    gap: 0.3rem;
+    padding: 0.4rem 0 calc(0.4rem + var(--corner-bottom, 0px));
+  }
+
+  .hud__panel--strip .hud__name,
+  .figures--strip .figures__kind,
+  .inspect--strip .inspect__name,
+  .navigate--strip .navigate__kind,
+  .choice--strip .choice__aside,
+  .dialogues--strip .dialogues__name,
+  .map-strip .map-strip__name {
+    writing-mode: vertical-rl;
+    /* The strip is the whole height of the stage, so the name has all of it to be trimmed against. */
+    max-height: 100%;
+    text-align: left;
+  }
+
+  .pane-size,
+  .navigate__ways {
+    flex-direction: column;
+  }
+
+  /* Turned, there is room down the strip for one name and it is the pane's. */
+  .dialogues--strip .dialogues__count {
+    display: none;
+  }
+}

@@ -1,0 +1,73 @@
+/* The rail windows stack in, and how a pane sits in it and in a bay. */
+
+/*
+ * The rail: where inspect windows stack in the spread, up to three, newest at the top.
+ *
+ * `display: contents` in the bays, so the windows become grid items in their own right and crossing the
+ * fold moves nothing in the tree. The rail lets clicks through in the gaps between windows - it covers the
+ * whole left of the stage and most of that is map.
+ */
+.stage[data-form='spread'] .rail {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.6rem;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/*
+ * Set into the left edge, like the house card below it, rather than floating a gutter off it. The column
+ * is one piece of furniture and its two tiles share an edge, so they share how they meet the stage too.
+ */
+.stage[data-form='spread'] .rail .inspect {
+  border-width: 1px 1px 1px 0;
+  border-radius: 0 6px 6px 0;
+}
+
+/*
+ * A window in the rail is a flow item sharing the column's one rectangle, not a box of its own. That is
+ * what stops three of them pushing past the house in the corner: there is nowhere past to push to.
+ */
+.stage[data-form='spread'] .rail .bay {
+  position: relative;
+  left: auto;
+  top: auto;
+  width: auto;
+  height: auto;
+  flex: 0 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  container-type: normal;
+  pointer-events: auto;
+}
+
+/*
+ * A window alone on a rail too short for it scrolls rather than losing its links off the bottom: out of
+ * room, the rail puts the others away first, so this is only ever the one left open. See 0058.
+ */
+.stage[data-form='spread'] .rail .inspect {
+  flex: 0 1 auto;
+  min-height: 0;
+}
+
+.stage[data-form='bays'] .rail {
+  display: contents;
+}
+
+/* In a bay the choice roll fills it, edge to edge, the way everything in a bay does. */
+.stage[data-form='bays'] .bay--choice .choice {
+  border-width: 1px 0 0;
+  border-radius: 0;
+}
+
+/* In a bay a window fills it, the way the house does, because a bay has no corner to sit into. */
+.stage[data-form='bays'] .bay--inspect .inspect {
+  position: absolute;
+  inset: 0;
+  border-width: 1px 0 0;
+  border-radius: 0;
+}

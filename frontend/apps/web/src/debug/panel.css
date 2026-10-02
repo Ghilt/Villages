@@ -1,0 +1,318 @@
+/* The debug panel: its column, its sections, its levers and its log. */
+
+/*
+ * Everything that helps while the game is being built, down the right-hand side.
+ *
+ * Docked rather than floating: the grid gives it a column, so its width is room the stage does not
+ * have. No radius and only the one border, the edge it faces the world with, because it is part of
+ * the window now in the way the house card is part of its corner. Development scaffolding, and it
+ * still looks like it on purpose. See docs/adr/0039.
+ *
+ * Two columns of its own when the log is open: the controls at the width they want, and the log
+ * beside them taking the rest, because when the panel balloons it is a log line that wants the room.
+ */
+.debug {
+  grid-column: 3;
+  grid-row: 1 / -1;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace;
+  font-size: 0.68rem;
+  line-height: 1.45;
+  color: var(--ink);
+  background: rgba(251, 247, 236, 0.94);
+  border-left: 1px solid var(--parchment-edge);
+}
+
+/*
+ * Minimised: a badge over the corner of the stage and nothing else, so the interface can be looked at
+ * undisturbed. Out of the grid's flow entirely, because a shut panel is a panel of no width and the
+ * stage has already been given the room.
+ */
+.debug--log {
+  grid-template-columns: minmax(0, var(--controls, 22rem)) minmax(0, 1fr);
+}
+
+.debug__controls,
+.debug__logcolumn {
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.debug__logcolumn {
+  border-left: 1px solid var(--parchment-edge);
+}
+
+.debug__badge {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 6;
+  font: inherit;
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.45rem;
+  cursor: pointer;
+  color: var(--ink-soft);
+  background: rgba(251, 247, 236, 0.72);
+  border: 1px solid var(--parchment-edge);
+  border-radius: 2px;
+  opacity: 0.55;
+}
+
+.debug__badge:hover {
+  opacity: 1;
+  color: var(--ink);
+}
+
+.debug__bar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid var(--parchment-edge);
+  background: rgba(251, 247, 236, 0.94);
+}
+
+/*
+ * Everything below the top bar, and the only thing that scrolls.
+ *
+ * The panel is expected to gain sections rather than stay the size it is, so the sections scroll and
+ * `hide` and `phone` stay put above them: a way out that scrolls off the top is not a way out.
+ */
+.debug__sections {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding-bottom: 0.4rem;
+}
+
+/*
+ * One folding part of the panel. The rule with a section is that every feature is in one, and a new
+ * thing is told which. See docs/adr/0039.
+ */
+.debug__section {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.debug__sectionbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0.3rem 0.5rem;
+  border-top: 1px solid var(--parchment-edge);
+  border-bottom: 1px solid var(--parchment-edge);
+  background: rgba(157, 124, 42, 0.05);
+}
+
+/* Folded, the bar is the whole section, so it keeps both its edges and needs no second line. */
+.debug__section--shut .debug__sectionbar {
+  border-bottom-color: transparent;
+}
+
+/* The whole empty width of the bar folds, not only the chevron: this is pressed often. */
+.debug__fold {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font: inherit;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  text-align: left;
+  background: none;
+  border: 0;
+}
+
+.debug__fold:hover .debug__title {
+  color: var(--ink);
+}
+
+.debug__chevron {
+  width: 0.7rem;
+  color: var(--gold);
+  font-size: 0.7rem;
+  line-height: 1;
+}
+
+/* A row of buttons that wraps, for a section with more levers than a bar can hold. */
+.debug__levers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+/*
+ * What a house has, in the panel: a row per resource, its figure, and the levers that move it.
+ *
+ * A grid rather than a flex row, so the five figures line up under each other and the buttons after them
+ * do too. The name column takes what it needs, the figure is right-aligned against the buttons, and the
+ * buttons are whatever they are - three of them, the same width every row.
+ */
+.debug__stocks {
+  display: grid;
+  grid-template-columns: auto 1fr repeat(3, auto);
+  gap: 0.25rem 0.4rem;
+  align-items: center;
+  margin: 0.2rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.debug__stock {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-items: center;
+}
+
+.debug__stock-name {
+  color: var(--ink-soft);
+}
+
+.debug__stock-figure {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The same grid with two levers a row rather than three: a stat goes up and down, and that is all. */
+.debug__stocks--two {
+  grid-template-columns: auto 1fr repeat(2, auto);
+}
+
+/*
+ * A house's key figures, in the panel: a block a figure, in the order they joined. Who they are on one
+ * line, their stats in the resources' grid, and the levers for the whole of them under that, with a rule
+ * between one figure and the next so nine of them still read as nine.
+ */
+.debug__figures {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.debug__figure {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid var(--parchment-edge);
+}
+
+.debug__figure:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.debug__figure-who {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.4rem;
+  align-items: baseline;
+}
+
+.debug__sectionbody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-height: 0;
+  padding: 0.4rem 0.5rem 0.1rem;
+}
+
+.debug__title {
+  flex: 1;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-size: 0.62rem;
+  color: var(--ink-soft);
+}
+
+.debug__button {
+  font: inherit;
+  font-size: 0.62rem;
+  padding: 0.1rem 0.4rem;
+  cursor: pointer;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--parchment-edge);
+  border-radius: 2px;
+}
+
+.debug__button:hover {
+  background: rgba(157, 124, 42, 0.12);
+}
+
+/* A toggle that is on. Applied by `see everything` since it was written, and never drawn until now. */
+.debug__button--on {
+  color: var(--ink);
+  background: rgba(157, 124, 42, 0.28);
+  border-color: var(--gold);
+}
+
+.debug__state {
+  margin: 0;
+  padding: 0.4rem 0.5rem;
+  border-bottom: 1px solid var(--parchment-edge);
+}
+
+.debug__row {
+  display: grid;
+  grid-template-columns: 5.6rem 1fr;
+  gap: 0 0.4rem;
+}
+
+.debug__row dt {
+  color: var(--ink-soft);
+}
+
+.debug__row dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+/* The whole height of its column, under its bar. Two hundred notes are kept, so it scrolls itself. */
+.debug__log {
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 0.4rem 0.5rem;
+  list-style: none;
+  overflow-y: auto;
+}
+
+.debug__log li {
+  overflow-wrap: anywhere;
+}
+
+.debug__quiet {
+  color: var(--ink-soft);
+}
+
+.debug__when {
+  color: var(--ink-soft);
+  margin-right: 0.35rem;
+}
+
+.debug__area {
+  color: var(--gold);
+  margin-right: 0.35rem;
+}

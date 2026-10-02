@@ -1,0 +1,62 @@
+/* The ground every part of the page stands on: the tokens, the box, the scrollbars and the window. */
+
+:root {
+  --ink: #241c14;
+  --ink-soft: #5d4f3f;
+  --parchment: #efe6d3;
+  --parchment-edge: #cfbf9f;
+  --gold: #9d7c2a;
+  --shadow: rgba(36, 28, 20, 0.22);
+
+  color-scheme: light;
+  font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif;
+  color: var(--ink);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/*
+ * Scrollbars, wherever something scrolls: thin, in the soft ink of the interface, on no track of their own,
+ * so a list that scrolls reads as parchment with a mark in its margin rather than as a window of the
+ * operating system. Everything that scrolls sits on parchment, the debug panel and the event viewer
+ * included, so one drawing does for all of them, and both properties inherit, so it is said once here.
+ *
+ * The standard two and nothing else. The `::-webkit-scrollbar` pseudo-elements draw a nicer thumb, but a
+ * browser that sees either of these ignores them, and splitting the two by `@supports` is a guess about
+ * which browser is which: Adam's drew its own scrollbars under that split. There is no gold under the
+ * pointer, because a colour that inherits cannot follow the pointer onto one thumb without turning every
+ * scrollbar on the page at once.
+ */
+:root {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(93, 79, 63, 0.45) transparent;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+/*
+ * The window is a stage with the debug panel beside it, not a map with panels floating over it.
+ *
+ * Three columns and three rows, all four numbers set as custom properties from stageBox.ts: the blank,
+ * the stage, the panel, and the inset above and below. The panel takes room from the stage rather than
+ * covering it, so narrowing it restricts the play area exactly as a smaller screen would, and the phone
+ * toggle is a shape Adam has no monitor for. See docs/adr/0039.
+ */
+.app {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: var(--blank, 0px) var(--stage-w, 1fr) var(--panel, 0px);
+  grid-template-rows: var(--inset, 0px) var(--stage-h, 1fr) var(--inset, 0px);
+  /* What is not the stage and not the panel. Darker than the desk, so the stage reads as a screen set
+     into a surface rather than as more world. */
+  background: #1a1410;
+}

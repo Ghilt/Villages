@@ -1,0 +1,188 @@
+/* Navigation: the ways to go, and the trail. */
+
+/*
+ * **Navigation**: the ways back, which in the spread is the trail and nothing else.
+ *
+ * The same sheet as the house card it shares the corner with - it is the other side of one piece of
+ * furniture, not a panel of its own - and it scrolls, because a list of where you have been is the one
+ * thing on the stage whose length is the player's business rather than the layout's.
+ */
+.navigate {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--parchment);
+  border: 1px solid var(--parchment-edge);
+  border-width: 1px 1px 0 0;
+  border-radius: 0 6px 0 0;
+  box-shadow: 0 -2px 18px var(--shadow);
+  pointer-events: auto;
+}
+
+.navigate__bar {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex: none;
+  padding: 0.5rem 0.75rem 0.35rem;
+}
+
+.navigate__head {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: normal;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.navigate__clear {
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.navigate__clear:hover {
+  color: var(--ink);
+}
+
+.navigate__empty {
+  margin: 0;
+  padding: 0.2rem 0.75rem 0.75rem;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.navigate__list {
+  flex: 1;
+  margin: 0;
+  /* Padding on the scroller and not a shorter list: the last row scrolls out from under the compass
+     rather than being permanently half-covered by it. */
+  padding: 0 0 calc(0.4rem + var(--corner-bottom, 0px));
+  list-style: none;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.navigate__go {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  padding: 0.3rem 0.75rem;
+  border: none;
+  background: none;
+  font-family: inherit;
+  text-align: left;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.navigate__go:hover:not(:disabled) {
+  background: rgba(157, 124, 42, 0.12);
+}
+
+/*
+ * A row in the bays: the row itself is where it goes, and one needle sends it the other way instead.
+ *
+ * Pressing the row puts the thing in the bay navigation is standing in, which is what a player means nine
+ * times in ten - they came to this list in order to leave it. The needle at the far end is the other bay.
+ * Every row is this row, and every pane can reach both. See decision record 0043.
+ */
+.navigate__step--picked {
+  display: flex;
+  align-items: center;
+  padding-right: 0.35rem;
+}
+
+.navigate__step--picked .navigate__go {
+  flex: 1;
+  min-width: 0;
+}
+
+/* A finger is not a mouse: the needle in a list is a row tall rather than a glyph tall. */
+.navigate__there {
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  padding: 0.35rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.navigate__there .icon {
+  opacity: 0.55;
+}
+
+.navigate__there:hover .icon {
+  opacity: 1;
+}
+
+/* Where it already is: the needle you are standing on rather than a place to go. */
+.navigate__there--here {
+  cursor: default;
+}
+
+.navigate__there--here .icon {
+  color: var(--gold);
+  opacity: 1;
+}
+
+/* The panes, above the divider that the trail sits under. */
+.navigate__list--panes {
+  flex: none;
+  border-bottom: 1px solid var(--parchment-edge);
+  padding-bottom: 0.35rem;
+}
+
+.navigate__go .icon {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+}
+
+.navigate__name {
+  flex: 1;
+  font-size: 0.95rem;
+  font-variant: small-caps;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.navigate__what {
+  flex: none;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+}
+
+/* Put away: what it is and the way back, and nothing else - the same strip the house card has. */
+.navigate--strip {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.6rem;
+  /* The compass is standing in the far end of this strip, so whatever the strip put there - the marks
+     on four of them, the word on the map's - steps in from the right rather than sitting under it. */
+  padding: 0 calc(0.3rem + var(--corner-right, 0px)) 0 0.75rem;
+}
+
+.navigate__kind {
+  flex: 1;
+  font-size: 0.78rem;
+  font-variant: small-caps;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

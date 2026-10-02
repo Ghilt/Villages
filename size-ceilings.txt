@@ -22,7 +22,6 @@
 459 frontend/apps/web/src/stage/bayBox.ts
 439 frontend/apps/web/src/stage/bays.test.ts
 444 frontend/apps/web/src/stage/bays.ts
-3430 frontend/apps/web/src/styles.css
 497 frontend/packages/protocol/src/frames.ts
 533 frontend/packages/world/bin/cutArt.ts
 723 frontend/packages/world/bin/cutUi.ts

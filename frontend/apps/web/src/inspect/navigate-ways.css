@@ -1,0 +1,14 @@
+/* The ways out of a put-away navigation. */
+
+/*
+ * The ways out of a put-away navigation: one mark a pane, and pressing one sends it to the other bay.
+ *
+ * Tighter than the strip's own gap, so that a row of the name, three marks and three more marks reads as
+ * two groups rather than as one row of six things. The marks themselves are the needle's own control,
+ * because that is exactly the job it already does. See decision record 0047.
+ */
+.navigate__ways {
+  display: flex;
+  flex: none;
+  gap: 0.15rem;
+}

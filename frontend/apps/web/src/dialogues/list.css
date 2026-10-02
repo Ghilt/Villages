@@ -1,0 +1,155 @@
+/* The dialogues pane: the list of dialogues, waiting and finished. */
+
+/*
+ * **Character dialogue**, standing in the column down the right edge.
+ *
+ * The parchment every pane is drawn on, set into the stage's right, top and bottom edges as the column on
+ * the left is set into the left, so the only edges it draws are the one facing the map and the foot it has
+ * when it stops above a letter or is put away. See decision record 0069.
+ */
+.dialogues {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--parchment);
+  border: 1px solid var(--parchment-edge);
+  border-width: 0 0 1px 1px;
+  box-shadow: -2px 0 18px var(--shadow);
+  pointer-events: auto;
+}
+
+.dialogues__head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: none;
+  padding: 0.45rem calc(0.4rem + var(--corner-right, 0px)) 0.4rem 0.75rem;
+  border-bottom: 1px solid var(--parchment-edge);
+}
+
+.dialogues__name {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: normal;
+  font-variant: small-caps;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/*
+ * The list: the dialogues waiting, and under them the ones finished. It scrolls, and the padding is on the
+ * scroller rather than a shorter list, so the last row scrolls out from under the compass on a phone.
+ */
+.dialogues__list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 0 calc(0.6rem + var(--corner-bottom, 0px));
+}
+
+/* Waiting, and Finished: the same small capitals the key figures and navigation head their lists with. */
+.dialogues__group {
+  margin: 0.75rem 0.75rem 0.3rem;
+  font-size: 0.72rem;
+  font-weight: normal;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.dialogues__none {
+  margin: 0 0.75rem;
+  font-size: 0.9rem;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.dialogues__rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dialogues__row {
+  border-top: 1px solid var(--parchment-edge);
+}
+
+.dialogues__row:last-child {
+  border-bottom: 1px solid var(--parchment-edge);
+}
+
+/*
+ * A dialogue: its title, with whether it is new or begun beside it, and who speaks in it under it. The whole
+ * row is the press that opens it, as a row of navigation is the press that goes there.
+ */
+.dialogues__open {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  column-gap: 0.6rem;
+  row-gap: 0.1rem;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  background: none;
+  font: inherit;
+  text-align: left;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.dialogues__open:hover {
+  background: rgba(157, 124, 42, 0.12);
+}
+
+.dialogues__title {
+  grid-column: 1;
+  font-size: 1.02rem;
+}
+
+.dialogues__progress {
+  grid-column: 2;
+  grid-row: 1;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.dialogues__line {
+  grid-column: 1 / -1;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+/* Lapsed: it ended where it stood, and the line under the title is why, said quietly. */
+.dialogues__row--lapsed .dialogues__line {
+  font-style: italic;
+}
+
+/*
+ * A conversation: the way back and its title at the top, the feed scrolling under them with the options at
+ * its end, and *continue* at its foot. The way back is a mark and *continue* a word, both Adam's call.
+ */
+.dialogues__back {
+  flex: none;
+  width: 1.7rem;
+  height: 1.7rem;
+  padding: 0.2rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.dialogues__back .icon {
+  opacity: 0.7;
+}
+
+.dialogues__back:hover .icon {
+  opacity: 1;
+}

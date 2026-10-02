@@ -1,0 +1,18 @@
+/* An inspect window's card. */
+
+/*
+ * What is selected, down the left-hand side of the stage.
+ *
+ * Its markup was written on 2026-09-05 and never got a rule of its own, so it was the one element on
+ * the page still in normal flow - which put it behind the map, where a positioned element paints over
+ * an unpositioned one, and nobody ever saw it. This is the card its own docstring describes and no
+ * more than that; what it should look like is still Adam's to say.
+ */
+.inspect {
+  padding: 0 0.85rem calc(0.85rem + var(--corner-bottom, 0px));
+  background: var(--parchment);
+  border: 1px solid var(--parchment-edge);
+  border-radius: 3px;
+  box-shadow: 0 2px 14px var(--shadow);
+  overflow-y: auto;
+}

@@ -1,0 +1,198 @@
+/* An inspect window: its rows, its facts and its links. */
+
+/*
+ * Put away: the window's first row and nothing else - its mark, which one it is, its size and its close -
+ * so a strip says which house rather than that it is a house, and can be shut without being opened.
+ */
+.inspect--strip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  /* The compass is standing in the far end of this strip, so whatever the strip put there - the marks
+     on four of them, the word on the map's - steps in from the right rather than sitting under it. */
+  padding: 0 calc(0.3rem + var(--corner-right, 0px)) 0 0.75rem;
+  overflow: hidden;
+}
+
+/* In the rail a strip is as tall as the row it is, so putting a window away folds it up to its first row. */
+.stage[data-form='spread'] .rail .inspect--strip {
+  padding-top: 0.45rem;
+  padding-bottom: 0.4rem;
+}
+
+/* The first row: the mark, the name, the size control and the close, in that order. */
+.inspect__bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0 0.4rem;
+  border-bottom: 1px solid var(--parchment-edge);
+}
+
+/* What kind of thing it is, as the mark that kind is known by everywhere else. */
+.inspect__mark {
+  display: inline-flex;
+  flex: none;
+  width: 1.3rem;
+  height: 1.3rem;
+}
+
+/*
+ * A mark and not the word, drawn as every other icon button on the stage is: bare, and dimmed until it
+ * is wanted. It sits in a bar beside the size control, which is three marks, and a word among marks is
+ * the thing the eye goes to first - which *close* should not be.
+ */
+.inspect__close {
+  width: 1.4rem;
+  height: 1.4rem;
+  flex: none;
+  padding: 0.18rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.inspect__close .icon {
+  opacity: 0.45;
+}
+
+.inspect__close:hover .icon {
+  color: var(--ink);
+  opacity: 1;
+}
+
+.inspect__gone {
+  margin: 0.7rem 0 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+/*
+ * A person's face in their window: the portrait frame, hung at the top right beside the name and the
+ * facts rather than above them, so a window on a person is no taller than a window on a house.
+ */
+.inspect__likeness {
+  float: right;
+  width: 4.6rem;
+  margin: 0.7rem 0 0.4rem 0.8rem;
+}
+
+/* Which one it is, on the first row: one line, trimmed rather than wrapped, so the row is one height. */
+.inspect__name {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: normal;
+  line-height: 1.2;
+  font-variant: small-caps;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.inspect__blazon {
+  margin: 0.55rem 0 0;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.inspect__facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.15rem 0.7rem;
+  margin: 0.7rem 0 0;
+  font-size: 0.85rem;
+}
+
+.inspect__facts dt {
+  color: var(--ink-soft);
+  font-variant: small-caps;
+  letter-spacing: 0.06em;
+}
+
+.inspect__facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+/* A resource is a rate, so this number is never still. Tabular figures keep it from jittering. */
+.inspect__ticking {
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+ * The links: the ways on from a window.
+ *
+ * The point of the mechanic rather than a footnote to it, so they are a list with a heading and not a row
+ * of small print. In the bays each carries **the arrows**, because there the player says which bay as
+ * well as what; in the spread there is one place a window goes and one map, so the whole row is the button.
+ */
+.inspect__onward {
+  margin: 0.9rem 0 0.3rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--parchment-edge);
+  font-size: 0.72rem;
+  font-weight: normal;
+  font-variant: small-caps;
+  letter-spacing: 0.1em;
+  color: var(--ink-soft);
+}
+
+.inspect__links {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.inspect__link {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 1.6rem;
+}
+
+.inspect__go {
+  flex: 1;
+  padding: 0.15rem 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 0.85rem;
+  text-align: left;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+/* A way on reads as one: underlined on the hover, the way a link in a book's margin would be a pointing. */
+.inspect__go:hover {
+  color: var(--gold);
+  text-decoration: underline;
+}
+
+/*
+ * Show it on the map: the mark rather than the words, in both forms.
+ *
+ * The one link that does not open a window, and the one thing on the stage a player already knows the
+ * mark for - it is on the map's own tab, in navigation's list and in navigation's strip. A row tall
+ * rather than a glyph tall, because a finger is not a mouse; the arrows in a list were made 32 pixels
+ * for the same reason before they were taken away. See decision record 0049.
+ */
+.inspect__go--map {
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  padding: 0.3rem;
+}
+
+.inspect__go--map:hover {
+  text-decoration: none;
+}
+
+.inspect__go--map:hover .icon {
+  color: var(--gold);
+}

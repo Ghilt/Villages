@@ -1,0 +1,18 @@
+/* Where the house card stands on the stage. */
+
+/*
+ * The interface floats over the world and never steals a drag from it.
+ *
+ * No padding of its own: the house sits into the bottom-left corner with two of the window's own edges
+ * for its own, so whatever needs a margin takes one.
+ */
+.hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 0;
+}

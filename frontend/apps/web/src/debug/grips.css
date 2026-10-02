@@ -1,0 +1,39 @@
+/* The two grips on the stage's edges that resize it. */
+
+/*
+ * The two handles on the stage's edges.
+ *
+ * On the boundary rather than inside the stage, so the map keeps every pixel of itself, and wider than
+ * they look so that they can be caught without aiming. They are the only things over the stage that
+ * take a pointer.
+ */
+.grip {
+  z-index: 5;
+  background: transparent;
+  touch-action: none;
+}
+
+.grip:hover,
+.grip:focus-visible {
+  background: rgba(157, 124, 42, 0.45);
+  outline: none;
+}
+
+.grip--side {
+  grid-column: 2;
+  grid-row: 1 / -1;
+  justify-self: end;
+  width: 7px;
+  margin-right: -3px;
+  cursor: col-resize;
+}
+
+.grip--top {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: start;
+  width: 100%;
+  height: 7px;
+  margin-top: -3px;
+  cursor: row-resize;
+}

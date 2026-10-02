@@ -1,0 +1,302 @@
+/* The house card: the shield, the name, the treasury and its sizes. */
+
+/*
+ * The house, in the corner and cut off by it: bordered and rounded on the two edges that face the map,
+ * flush against the two that are the window's. A card floating a rem away from the corner at this size
+ * would read as a dialogue over the world rather than as part of the furniture.
+ */
+.hud__panel {
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  background: var(--parchment);
+  border: 1px solid var(--parchment-edge);
+  border-width: 1px 1px 0 0;
+  border-radius: 0 6px 0 0;
+  box-shadow: 0 -2px 18px var(--shadow);
+}
+
+/* The shield and what is written beside it. The padding is here rather than on the card, so the bar
+   below can run edge to edge. It takes whatever height the card has over its own, so the bar stays on the
+   bottom edge however tall the tile is: the corner opened out is taller than the card, and the shield and
+   the name stand in the middle of what is left. */
+.hud__achievement {
+  flex: 1 1 auto;
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+  padding: 1.15rem 1.9rem 1.1rem 1.35rem;
+}
+
+/* Nothing borne yet, so the whole card stands back rather than only the shield inside it. */
+.hud__panel--vacant {
+  background: rgba(239, 230, 211, 0.86);
+}
+
+.hud__banner {
+  width: 6.5rem;
+  flex: none;
+  display: flex;
+  align-items: center;
+}
+
+.hud__banner svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* The frame the shield hangs in: the heavy contour, the light rule inside it, and the ornament. */
+.hud__frame {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 2.2;
+  stroke-linejoin: round;
+}
+
+.hud__rule {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 0.8;
+  stroke-linejoin: round;
+  opacity: 0.75;
+}
+
+/*
+ * The ornament: gold on parchment, drawn the same way wherever the interface embellishes an edge.
+ *
+ * An **open curl** that springs away from a line and turns back without closing, and a **stud** where
+ * something is fixed - a boss, a lozenge, a rivet. Drawn once for the achievement the shield hangs in and
+ * shared with the seam between the bays since 0048, because a second user is exactly when a look becomes
+ * a component. None of it carries meaning: the heraldry is the field and the charge, and this is the
+ * frame they hang in. See `LOOK-AND-FEEL.md`.
+ */
+.ornament {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+.ornament__stud {
+  fill: var(--gold);
+  stroke: none;
+}
+
+/* The field: dotted while nothing is borne on it, so an empty frame reads as empty rather than as sable. */
+.hud__shield {
+  fill: rgba(157, 124, 42, 0.07);
+  stroke: var(--gold);
+  stroke-width: 1.4;
+  stroke-dasharray: 3 3;
+}
+
+/* A shield that is actually borne: filled in the field's tincture, and no longer a dotted outline. */
+.hud__shield--borne {
+  stroke: var(--ink-soft);
+  stroke-width: 1.2;
+  stroke-dasharray: none;
+}
+
+.hud__house {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.35rem;
+  /* A flex child's floor is its content, so without this a long name widens the card instead of being
+     cut down to it - and the card is a tile now, with a width that is not its own to decide. */
+  min-width: 0;
+}
+
+.hud__name {
+  margin: 0;
+  font-size: 1.7rem;
+  line-height: 1.1;
+  font-variant: small-caps;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hud__hint {
+  margin: 0;
+  max-width: 28ch;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+/*
+ * What the house has: five marks in a row, each with its figure beside it.
+ *
+ * A row rather than a column of labelled lines, because five words will not sit on one line of a phone and
+ * the small size of this card is one line. It wraps rather than clipping if a bay is narrower than five of
+ * them; the pane's height allows for two rows for that reason.
+ */
+.hud__resources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.9rem;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 1rem;
+}
+
+.hud__resource {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  /* The figures move, so they are tabular: a number that shifts its own digits about reads as noise. */
+  font-variant-numeric: tabular-nums;
+}
+
+.hud__mark {
+  flex: none;
+  width: 1.05rem;
+  height: 1.05rem;
+  color: var(--ink-soft);
+}
+
+/* Stroked rather than filled, at the weight the other marks in the interface are drawn at. */
+.hud__mark path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/*
+ * The house at its other two sizes.
+ *
+ * **Small** is what it is when it is sharing a phone with something else: one line of the house and the bar
+ * beneath it, filling its bay edge to edge rather than sitting into a corner, because in a bay there is
+ * no corner to sit into. The blazon and the founding day are what go, being the most words and the least
+ * news. **Strip** is the name and the chevron, so a player who put the house away knows where it went.
+ *
+ * The card asked for `min-width: 26rem` until now, which is 416 pixels against a phone's 390 - the first
+ * thing decision 0039's instrument found, and the reason this mechanic was written down. It asks for
+ * nothing now and takes the room it is given.
+ */
+/*
+ * In a bay the card fills it, edge to edge, because a bay has no corner to sit into: it *is* the corner.
+ *
+ * Scoped to the bays and not written flat, because in the spread a bay is the whole stage - a card told
+ * to fill one there would be a sheet laid over the world, which is both wrong to look at and an invisible
+ * lid over every click meant for the map.
+ */
+.stage[data-form='bays'] .hud--small,
+.stage[data-form='bays'] .hud--strip {
+  display: block;
+}
+
+.stage[data-form='bays'] .hud--small .hud__panel,
+.stage[data-form='bays'] .hud--strip .hud__panel {
+  position: absolute;
+  inset: 0;
+  min-width: 0;
+  max-width: none;
+  border-width: 1px 0 0;
+  border-radius: 0;
+  box-shadow: 0 -2px 10px var(--shadow);
+}
+
+/*
+ * The card fills the tile it was given, at every size and in both forms.
+ *
+ * It used to demand `min-width: 26rem` - 416 pixels against a phone's 390, which is the defect decision
+ * 0039's instrument was built to find. It no longer asks for anything: the column is 26rem where there is
+ * room for it, and where there is not the card is whatever the tile is.
+ */
+.hud__panel {
+  width: 100%;
+  height: 100%;
+}
+
+/*
+ * The column squeezed below the width the card was drawn at: the line with the most words and the least
+ * news goes first, exactly as it does on a phone. A container query, because a media query cannot see one
+ * tile of a stage.
+ */
+@container (max-width: 23rem) {
+  .hud__hint {
+    display: none;
+  }
+
+  /*
+   * The card was drawn for a 26rem column and the column is squeezed to 18 on a narrow stage. The padding,
+   * the gap and the shield all give a little so that the name keeps the room: a house called Ravenscar fits
+   * with nothing to spare at the old numbers, which means the next house over does not.
+   */
+  .hud__achievement {
+    gap: 0.7rem;
+    padding: 0.9rem 0.8rem 0.85rem 0.8rem;
+  }
+
+  .hud__banner {
+    width: 4.6rem;
+  }
+
+  .hud__name {
+    font-size: 1.45rem;
+  }
+}
+
+.stage[data-form='bays'] .hud--small .hud__achievement {
+  flex: 1;
+  min-height: 0;
+  gap: 0.75rem;
+  padding: 0.4rem 0.75rem 0.3rem 0.6rem;
+}
+
+.stage[data-form='bays'] .hud--small .hud__banner {
+  width: 2.5rem;
+}
+
+/* The one-line form has no line to spare for the blazon. In the spread the corner's normal size is the
+   whole card, so there the line stays until the column is squeezed. */
+.stage[data-form='bays'] .hud--small .hud__hint {
+  display: none;
+}
+
+/* One line: the name, then the treasury pushed to the far end where the eye will read it as a number. */
+.stage[data-form='bays'] .hud--small .hud__house {
+  flex: 1;
+  min-width: 0;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.stage[data-form='bays'] .hud--small .hud__name {
+  font-size: 1.25rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stage[data-form='bays'] .hud--small .hud__resources {
+  margin: 0 0 0 auto;
+  gap: 0 0.4rem;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+.hud__panel--strip {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.6rem;
+  /* The compass is standing in the far end of this strip, so whatever the strip put there - the marks
+     on four of them, the word on the map's - steps in from the right rather than sitting under it. */
+  padding: 0 calc(0.3rem + var(--corner-right, 0px)) 0 0.75rem;
+}
+
+.hud__panel--strip .hud__name {
+  flex: 1;
+  font-size: 1.05rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

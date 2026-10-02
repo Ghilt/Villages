@@ -10,7 +10,7 @@ import type { FogField } from './fogField';
  *
  * The map is a canvas of its own under the sprites' canvas, so nothing drawn in Pixi can reach its colours.
  * What can is the browser: a canvas between the two, grey where revealed ground is not in vision and clear
- * everywhere else, composited over the map by the **saturation** blend (`.uncolouring` in `styles.css`). The
+ * everywhere else, composited over the map by the **saturation** blend (`.uncolouring` in `sprites/sprites.css`). The
  * saturation of grey is none, so wherever the grey is opaque the map keeps its brightness and loses its
  * colour, and partly where the grey is partly opaque. The sprites under the fog lose theirs inside their own
  * canvas, by the fog layer's filter, from the same field and with the same edge; the signs over the fog, in

@@ -1,0 +1,19 @@
+/* The stage: the box the player's interface is laid out in. */
+
+/*
+ * Everything a player would ever see, and nothing else.
+ *
+ * It is the containing block for the map, the desk, the overlays and the house card, all of which are
+ * still `position: absolute; inset: 0` and did not have to change: the stage took the role the window
+ * used to play. `overflow: hidden` is what stops the house card and the parchment spilling into the
+ * blank when the stage is small.
+ */
+.stage {
+  grid-column: 2;
+  grid-row: 2;
+  position: relative;
+  overflow: hidden;
+  /* So the stage reads as a screen with an edge, once there is anything around it to have an edge
+     against. Invisible at full size, because there is nothing beside it then. */
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5);
+}

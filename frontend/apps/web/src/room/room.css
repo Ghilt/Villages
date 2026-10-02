@@ -1,0 +1,40 @@
+/* The room around the desk, and the pull that draws back into it. */
+
+/*
+ * The room the desk stands in, reached by pulling back past the end of the map's zoom. Not a zoom: the
+ * camera is pinned and this is a scale on what is already drawn. See experiment 0009.
+ */
+.room {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+/* Everything that lies on the desk, and the room's floor behind it. The scale is taken about the middle. */
+.room__scene {
+  position: absolute;
+  inset: 0;
+}
+
+/* The room's floor, behind the desk and the map, shrinking away from the window as the pull grows. */
+.room__walls {
+  position: absolute;
+  left: 0;
+  top: 0;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+/*
+ * The one thing ever drawn in front of the map: the room coming in through the ceiling, and the room
+ * getting out of the way once the camera has jumped underneath it.
+ */
+.room__still {
+  position: absolute;
+  left: 0;
+  top: 0;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}

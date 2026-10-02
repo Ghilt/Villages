@@ -78,6 +78,10 @@ packages/protocol  <-  packages/client-core  <-  apps/web
   ended by a step of the plan; none is left. What a surface needs from another surface is handed down: an
   overlay on the map is handed what the map marks and what a pick does, and a pane what it shows beside
   itself. See decision record 0073.
+- The page's stylesheet, `styles.css`, is an ordered list of the parts each folder keeps of it -
+  `stage/bays.css`, `house/house.css`, `dialogues/conversation.css` and the rest - and the order is the cascade:
+  a part later in the list wins over an earlier one for a rule of the same weight, and the strips come last. A
+  new rule goes in its folder's part, and a new part where it cascades. The size cap holds each part to 400 lines.
 - Nothing in the game leans on `debug`. A setting the panel changes and the game reads lives beside what reads
   it - the camera in `map/camera.ts`, the scenery's dial in `sprites/scenery/settings.ts`, the stage's
   arithmetic in `stage/stageBox.ts` - and the panel only sets it, so without the panel each stays where a player

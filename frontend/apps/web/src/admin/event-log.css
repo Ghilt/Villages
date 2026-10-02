@@ -1,0 +1,152 @@
+/* The events page, at /admin/inspect-events. */
+
+/*
+ * The event log at /admin/inspect-events: every event the world stores, for reading.
+ *
+ * Its own page rather than a panel, so it is a document rather than an instrument: a full-width column
+ * of monospace lines, each opening to the event exactly as the store holds it.
+ */
+.log {
+  min-height: 100%;
+  padding: 1.5rem 2rem 3rem;
+  background: #fbf7ec;
+}
+
+.log__bar {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  padding-bottom: 0.7rem;
+  margin-bottom: 0.9rem;
+  border-bottom: 1px solid var(--parchment-edge);
+}
+
+.log__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: normal;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.log__link,
+.log__count {
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace;
+  font-size: 0.7rem;
+  color: var(--ink-soft);
+}
+
+.log__link--open {
+  color: #2e6b4f;
+}
+
+.log__link--closed {
+  color: #8f1d2f;
+}
+
+.log__count {
+  flex: 1;
+}
+
+.log__button {
+  font-family: inherit;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  background: none;
+  border: 1px solid var(--parchment-edge);
+  border-radius: 2px;
+  padding: 0.25rem 0.7rem;
+  cursor: pointer;
+}
+
+.log__problem {
+  margin: 0 0 0.8rem;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.78rem;
+  color: #8f1d2f;
+  background: rgba(143, 29, 47, 0.08);
+  border-radius: 2px;
+}
+
+.log__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace;
+  font-size: 0.74rem;
+  line-height: 1.6;
+}
+
+.log__quiet {
+  padding: 1.2rem 0;
+  font-family: inherit;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.log__entry {
+  border-bottom: 1px solid rgba(207, 191, 159, 0.5);
+}
+
+.log__line {
+  display: flex;
+  gap: 0.75rem;
+  align-items: baseline;
+  padding: 0.3rem 0;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.log__when {
+  color: var(--ink-soft);
+}
+
+/* Whose event it is: the world's, or the player's. The two halves of docs/adr/0034. */
+.log__whose {
+  min-width: 3.5rem;
+  font-size: 0.64rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.log__whose--world {
+  color: #2e6b4f;
+}
+
+.log__whose--player {
+  color: #5b3a86;
+}
+
+.log__what {
+  min-width: 10rem;
+}
+
+/* The story an event belongs to. One command's events wear one tag. See docs/adr/0035. */
+.log__story {
+  padding: 0 0.3rem;
+  border-radius: 2px;
+  color: var(--ink-soft);
+  background: rgba(157, 124, 42, 0.18);
+}
+
+.log__stream {
+  flex: 1;
+  text-align: right;
+  color: var(--ink-soft);
+}
+
+.log__version {
+  color: var(--ink);
+}
+
+.log__json {
+  margin: 0.2rem 0 0.7rem;
+  padding: 0.7rem 0.9rem;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  background: rgba(157, 124, 42, 0.07);
+  border-radius: 2px;
+  overflow-x: auto;
+}

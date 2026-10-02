@@ -1,0 +1,197 @@
+/* The choice roll: the parchment, the options and the carousel. */
+
+/*
+ * The choice roll: what the world is asking, in a bay of its own.
+ *
+ * It was a sheet at `z-index: 4` lying over everything, with one media query that asked the window - 1280
+ * while the stage is 390 - and so had never once fired. It is a pane now, in the bottom middle of the
+ * spread or in a bay on a phone, and three options across is all it ever draws here: a bay too narrow for
+ * that gets the carousel instead, decided by the layout from the bay's own width. **There is no `@media`
+ * rule left anywhere in this file.** See decision record 0044.
+ */
+.choice {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0.7rem 0.9rem 0.9rem;
+  background: var(--parchment);
+  border: 1px solid var(--parchment-edge);
+  border-radius: 3px;
+  box-shadow: 0 2px 18px var(--shadow);
+  pointer-events: auto;
+}
+
+.choice__head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.8rem;
+  flex: none;
+  margin-bottom: 0.6rem;
+}
+
+.choice__prompt {
+  flex: 1;
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: normal;
+  letter-spacing: 0.02em;
+}
+
+.choice__aside {
+  font-family: inherit;
+  border: none;
+  background: none;
+  color: var(--ink-soft);
+}
+
+/* Set aside: the question is still standing, and this is the way back to it. */
+.choice--strip {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.6rem;
+  /* The compass is standing in the far end of this strip, so whatever the strip put there - the marks
+     on four of them, the word on the map's - steps in from the right rather than sitting under it. */
+  padding: 0 calc(0.3rem + var(--corner-right, 0px)) 0 0.75rem;
+}
+
+.choice__aside {
+  flex: 1;
+  font-size: 0.85rem;
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.choice__options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/*
+ * One under the other once three across would make each a column of single words.
+ *
+ * A **container** query, asking the bay this is in - the thing that actually ran out of width. The media
+ * query it replaces asked the window, which is 1280 while the stage is 390, and so never fired. Whether
+ * the list fits at all is the layout's answer and not this one's: a bay too small for either arrangement
+ * is handed the carousel before it ever gets here.
+ *
+ * **After the rule it overrides, not before**: a container query carries no extra specificity, so placed
+ * above it the base rule simply wins and the query does nothing at all.
+ */
+@container (max-width: 34rem) {
+  .choice__options {
+    grid-template-columns: 1fr;
+  }
+}
+
+/*
+ * The carousel: one option at a time, and the way between them.
+ *
+ * The small form, for deciding rather than for reading - the option you are on stays on the screen beside
+ * the place on the map it means.
+ */
+.carousel {
+  display: flex;
+  align-items: stretch;
+  gap: 0.35rem;
+  flex: 1;
+  min-height: 0;
+}
+
+.carousel__step {
+  flex: none;
+  width: 2rem;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 1.4rem;
+  line-height: 1;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.carousel__step:hover {
+  color: var(--ink);
+}
+
+.carousel__sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.carousel__dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.3rem;
+  flex: none;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.carousel__dot {
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 50%;
+  background: var(--ink-soft);
+  opacity: 0.35;
+}
+
+.carousel__dot--at {
+  background: var(--gold);
+  opacity: 1;
+}
+
+/*
+ * One option, on a sheet of parchment. The shared component; see `LOOK-AND-FEEL.md`.
+ *
+ * The class named the whole choice until now, and the options were `parchment__option` on it - which had
+ * it backwards: one parchment carries one option, and what they lie on is the choice roll.
+ */
+.parchment {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  width: 100%;
+  height: 100%;
+  padding: 0.7rem 0.8rem;
+  text-align: left;
+  font-family: inherit;
+  color: var(--ink);
+  border: 1px solid var(--parchment-edge);
+  border-radius: 2px;
+  background: rgba(157, 124, 42, 0.05);
+  cursor: pointer;
+  overflow-y: auto;
+}
+
+.parchment:hover:not(:disabled) {
+  border-color: var(--gold);
+  background: rgba(157, 124, 42, 0.12);
+}
+
+.parchment:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.parchment__label {
+  font-size: 0.95rem;
+}
+
+.parchment__detail {
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}

@@ -1,0 +1,372 @@
+/* The key figures: the grid of portraits, one figure's details, and the portrait. */
+
+/*
+ * **Key figures**: the house's few named people, the corner's middle tab.
+ *
+ * The same sheet as the two panes it shares the corner with, because the three of them are sides of one
+ * piece of furniture. Its heading is navigation's, small capitals in the soft ink, so the corner's three
+ * tabs read as one family whichever is up.
+ */
+.figures {
+  /* How tall the bar across the top is, which the grid and a figure's details both measure from. */
+  --bar: 2rem;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--parchment);
+  border: 1px solid var(--parchment-edge);
+  border-width: 1px 1px 0 0;
+  border-radius: 0 6px 0 0;
+  box-shadow: 0 -2px 18px var(--shadow);
+  pointer-events: auto;
+}
+
+/* A fixed height, because the grid below works out how big a portrait can be from what is left. */
+.figures__bar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: none;
+  box-sizing: border-box;
+  height: var(--bar);
+  padding: 0.2rem 0.4rem 0 0.75rem;
+}
+
+/* Taller while the way back is in it, because the nine squares are drawn at twice a mark's size there. */
+.figures--back {
+  --bar: 2.7rem;
+}
+
+.figures__bar .pane-size {
+  margin-left: auto;
+}
+
+/*
+ * The way back from one figure to all of them: nine small squares, the grid it goes back to.
+ *
+ * Twice the size of the marks beside it, Adam's word: at the size of the size control the nine were a
+ * speck, and this is the one way back from where the pane has got to.
+ */
+.figures__back {
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: none;
+  margin-left: -0.5rem;
+  padding: 0.15rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.figures__back:hover .icon {
+  color: var(--gold);
+}
+
+.figures__head {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: normal;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+/* Nobody yet, said in the words Adam gave it, where the portraits will stand. */
+.figures__empty {
+  margin: auto;
+  padding: 0 1.25rem calc(1.25rem + var(--corner-bottom, 0px));
+  max-width: 24ch;
+  font-size: 0.95rem;
+  font-style: italic;
+  line-height: 1.4;
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+/*
+ * The grid: three by three, in the order they joined, and never a scrollbar.
+ *
+ * Every portrait is the same size however many there are, so a tenth never arrives and a third never
+ * rearranges the first two. How big is worked out from the room the bay has - three rows down what is left
+ * under the bar, three across its width, whichever is tighter - in container units, which the bay's own
+ * `container-type` is what makes possible. Measuring it this way rather than letting the grid find it is
+ * what keeps an upright picture's width from being asked of a height that is itself being worked out.
+ */
+.figures__grid {
+  --gap: 0.4rem;
+  --caption: 0rem;
+  --row: calc((100cqh - var(--bar) - 0.7rem - var(--corner-bottom, 0px) - 2 * var(--gap)) / 3);
+  --across: calc((100cqw - 1.5rem - 2 * var(--gap)) / 3);
+  --tall: min(calc(var(--row) - var(--caption)), calc(var(--across) * 4 / 3));
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(3, calc(var(--tall) * 3 / 4));
+  grid-auto-rows: var(--row);
+  justify-content: center;
+  align-content: start;
+  gap: var(--gap);
+  margin: 0;
+  padding: 0.2rem 0.75rem 0;
+  list-style: none;
+}
+
+.figures__cell {
+  min-width: 0;
+  min-height: 0;
+}
+
+.figures__thumb {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.figures__thumb .portrait {
+  height: var(--tall);
+}
+
+.figures__thumb:hover .portrait,
+.figures__thumb:focus-visible .portrait {
+  border-color: var(--ink-soft);
+}
+
+/* The given name under each, where the rows are tall enough to spare a line for it. */
+.figures__caption {
+  display: none;
+  max-width: 100%;
+  font-size: 0.78rem;
+  line-height: 1.1rem;
+  font-variant: small-caps;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@container (min-height: 20rem) {
+  .figures__grid {
+    --caption: 1.1rem;
+  }
+
+  .figures__caption {
+    display: block;
+  }
+}
+
+/*
+ * One figure: the portrait, their name, and their stats, laid out for the room and the shape it has.
+ *
+ * Three areas of one grid, so each size and each cut is a different arrangement of the same three things
+ * rather than a different drawing. **Beside** is the default: the portrait as tall as the room under the
+ * bar, and the name above the stats to its right - the spread opened out, and a phone opened out on its
+ * side. The rest are below, one rule each. `--room-h` and `--room-w` are what is left of the bay once the
+ * bar, the padding and the compass's corner are taken, in the bay's own container units.
+ */
+.figures__one {
+  --room-h: calc(100cqh - var(--bar) - 1.1rem - var(--corner-bottom, 0px));
+  --room-w: calc(100cqw - 1.8rem);
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-areas:
+    'portrait name'
+    'portrait stats';
+  align-content: start;
+  gap: 0.45rem 0.9rem;
+  padding: 0.3rem 0.9rem calc(0.8rem + var(--corner-bottom, 0px));
+}
+
+.figures__one > .portrait {
+  grid-area: portrait;
+  height: min(var(--room-h), 24rem, calc(var(--room-w) * 0.5 * 4 / 3));
+}
+
+/* The name, and beside it the way to where they stand when they stand anywhere. */
+.figures__who {
+  grid-area: name;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+/* The inspect window's own map link: the same mark, the same size, a finger's width. See 0049. */
+.figures__map {
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  margin-top: -0.25rem;
+  padding: 0.3rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.figures__map:hover .icon {
+  color: var(--gold);
+}
+
+.figures__name {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: normal;
+  line-height: 1.15;
+  font-variant: small-caps;
+  letter-spacing: 0.03em;
+  overflow-wrap: anywhere;
+}
+
+/* The stats: a mark, a word and a number a line, the numbers in a column of their own. */
+.figures__stats {
+  grid-area: stats;
+  display: grid;
+  grid-template-columns: 1.1rem auto 2ch;
+  justify-content: start;
+  align-content: start;
+  align-items: center;
+  gap: 0.45rem 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.95rem;
+}
+
+.figures__stat {
+  display: contents;
+}
+
+.figures__mark {
+  width: 1.1rem;
+  height: 1.1rem;
+  color: var(--ink-soft);
+}
+
+/* Stroked at the weight the house card's marks are, because they are the same drawings. */
+.figures__mark path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.figures__word {
+  color: var(--ink-soft);
+}
+
+.figures__figure {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The spread at its normal size: the portrait beside the name, and the stats wait for it opened out. */
+.stage[data-form='spread'] .figures--small .figures__stats {
+  display: none;
+}
+
+/*
+ * Half a phone, either way up: the portrait and the name fill what is in view, and the stats are **below
+ * the fold, on purpose**. The first pane to scroll, and the one exception to a bay never growing a
+ * scrollbar: the stats are there for a player who wants them and in the way of one who does not, so they
+ * are one gesture off rather than squeezed in. See `RESPONSIVE-DESIGN.md`.
+ */
+.stage[data-form='bays'] .figures--small .figures__one {
+  overflow-y: auto;
+  grid-template-rows: var(--room-h) auto;
+  grid-template-areas:
+    'portrait name'
+    'stats stats';
+  row-gap: 1rem;
+}
+
+/*
+ * A phone opened out and upright: everything in view, one thing under another - the portrait as wide as
+ * the bay will let it be and still leave the name and the five lines room below it.
+ */
+.stage[data-form='bays'][data-along='rows'] .figures--full .figures__one {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto auto;
+  grid-template-areas:
+    'portrait'
+    'name'
+    'stats';
+  justify-items: center;
+}
+
+.stage[data-form='bays'][data-along='rows'] .figures--full .figures__one > .portrait {
+  height: min(calc(var(--room-h) - 12rem), calc(var(--room-w) * 4 / 3), 30rem);
+}
+
+/*
+ * **A portrait in its frame**, wherever a face is shown: three by four, a gold edge and a fainter rule
+ * inside it, the achievement's way of drawing a frame rather than one thick line. The rule is drawn over
+ * the picture, so a dark picture keeps its frame.
+ */
+.portrait {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: #e6dcc8;
+  border: 1px solid var(--gold);
+  border-radius: 2px;
+  box-shadow: 0 1px 3px var(--shadow);
+}
+
+.portrait::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border: 1px solid rgba(157, 124, 42, 0.45);
+  pointer-events: none;
+}
+
+.portrait__picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Nobody's likeness yet: a bust in soft ink, never an empty frame and never a broken image. */
+.portrait__bust {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: rgba(36, 28, 20, 0.3);
+}
+
+/* Put away: its name and the way back, and nothing else - the same strip the house card has. */
+.figures--strip {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.6rem;
+  /* The compass is standing in the far end of this strip, so whatever the strip put there - the marks
+     on four of them, the word on the map's - steps in from the right rather than sitting under it. */
+  padding: 0 calc(0.3rem + var(--corner-right, 0px)) 0 0.75rem;
+}
+
+.figures__kind {
+  flex: 1;
+  min-width: 0;
+  font-size: 1.05rem;
+  font-variant: small-caps;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

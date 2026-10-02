@@ -1,0 +1,14 @@
+/* MapLibre's own furniture, brought closer to the parchment. */
+
+/* MapLibre's own furniture, brought closer to the parchment. */
+.maplibregl-ctrl-attrib {
+  font-family: system-ui, sans-serif;
+  font-size: 0.68rem;
+}
+
+/* Lifted clear of the build label, which owns the very corner. */
+/* Lifted clear of the build badge, and of the compass where that is standing in the same corner. */
+.maplibregl-ctrl-bottom-right {
+  padding-right: var(--corner-right, 0px);
+  padding-bottom: calc(0.9rem + var(--corner-bottom, 0px));
+}
