@@ -132,7 +132,16 @@ export type {
   ScanBounds,
 } from './area.ts';
 
-export { SQUARE_LATTICE, alongU, alongV, frameOf, isSquareLattice, worldXOf, worldYOf } from './lattice.ts';
+export {
+  GROUND_LATTICE,
+  SQUARE_LATTICE,
+  alongU,
+  alongV,
+  frameOf,
+  isSquareLattice,
+  worldXOf,
+  worldYOf,
+} from './lattice.ts';
 export type { Lattice, LatticeFrame } from './lattice.ts';
 
 export { DEFAULT_MASTER, isSafeMasterName, masterNameOf, worldDirOf } from './masters.ts';

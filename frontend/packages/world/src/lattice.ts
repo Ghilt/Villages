@@ -26,6 +26,15 @@ export interface Lattice {
 /** The lattice the world is stored on, and the one everything used before there was a choice. */
 export const SQUARE_LATTICE: Lattice = { turn: 0, size: 1 };
 
+/**
+ * The grid the ground's colour is read on in the game: turned twenty-six degrees so a cell is a diamond while
+ * north stays up, and one world unit across, the finest the terrain goes. Adam's size, on 2026-09-27, after four
+ * had been the diamonds button's. The map paints on it, an area is fenced on it, and the stills a look is judged
+ * from are painted on it too, which is why it lives here rather than in the page. See experiment 0008 and
+ * decision records 0060 and 0066.
+ */
+export const GROUND_LATTICE: Lattice = { turn: 26, size: 1 };
+
 /** Whether a lattice is the plain one, in which case nothing need be done about it at all. */
 export function isSquareLattice(lattice: Lattice): boolean {
   return lattice.turn === 0 && lattice.size === 1;

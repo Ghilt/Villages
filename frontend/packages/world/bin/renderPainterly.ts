@@ -11,30 +11,27 @@ import { createRaster } from '../src/raster.ts';
 import type { ClassRaster } from '../src/raster.ts';
 import { encodeRgbPng } from '../src/png.ts';
 import type { RgbImage } from '../src/png.ts';
-import { paintPixel, preparePainterly } from '../src/painterly.ts';
+import { GROUND_LATTICE } from '../src/lattice.ts';
+import { onLattice, paintPixel, preparePainterly } from '../src/painterly.ts';
 import { masterRowsAt } from '../src/tiles.ts';
 import type { ClassSampler, PainterlyStyle, PreparedPainterly } from '../src/painterly.ts';
 
+import { args, flag } from './flags.ts';
 import { MASTER_DIR, OUTPUT_DIR, PAINTERLY, PAINTERLY_DIR, PALETTE, RENDER } from './paths.ts';
 
 /**
  * Paints views of the world, in every style, to settle what the world looks like.
  *
  * Stills rather than the live map, because a still can be any size and arrives in a second, and because
- * the same functions paint both: the app draws tiles with `paintPixel` through a custom protocol, so
- * there is one implementation of the look and this is the place it is judged. See docs/adr/0021 and 0022.
+ * the same functions paint both, on the same lattice: the app draws tiles with `paintPixel` through a
+ * custom protocol, so there is one implementation of the look and this is the place it is judged. See
+ * docs/adr/0021, 0022 and 0066.
  *
  * Every view is written flat once and then once per style, because the only useful judgement is the
  * comparison. It also writes the runtime copy of the styles that the app fetches.
  *
  *   node bin/renderPainterly.ts [--view name] [--style name] [--out dir] [--width px] [--config-only]
  */
-
-const args = process.argv.slice(2);
-const flag = (name: string): string | undefined => {
-  const at = args.indexOf(`--${name}`);
-  return at < 0 ? undefined : args[at + 1];
-};
 
 interface View {
   name: string;
@@ -178,6 +175,9 @@ function renderView(
   const height = Math.max(1, Math.round((width * (top - bottom)) / ((east - west) * RADIANS)));
   const masterPerPixel = groundPerPixel(view, world, width);
 
+  // The painted styles read the ground on the game's own lattice, as the map does; flat stands for `raw`,
+  // which draws the tiles square. See decision record 0066.
+  const onTheGround = onLattice(classAt, GROUND_LATTICE);
   const pixels = new Uint8Array(width * height * 3);
   let at = 0;
 
@@ -190,7 +190,7 @@ function renderView(
       const colour =
         style === undefined
           ? (flatColours[classAt(worldX, worldY)] ?? flatColours[0]!)
-          : paintPixel(style, classAt, worldX, worldY, masterPerPixel);
+          : paintPixel(style, onTheGround, worldX, worldY, masterPerPixel, GROUND_LATTICE);
       pixels[at] = colour[0];
       pixels[at + 1] = colour[1];
       pixels[at + 2] = colour[2];

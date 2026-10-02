@@ -2,6 +2,11 @@
 
 - Status: accepted
 - Date: 2026-09-27
+- Amended 2026-10-02: **the stills are painted on the same diamonds.** `world:paint` and `world:scenery`
+  called the painter without a lattice, so every still since this was decided had been painted on the square
+  one while the map was painted turned: the pictures a look is judged from were not the map. The lattice is
+  `GROUND_LATTICE` in the world package now, which the camera and both tools read; the flat stills stay
+  square, as `raw` draws. Found by the review of that day.
 - Amends 0032: the fence and the census move from the master's pixels to the ground's diamonds, and
   everything else 0032 decided stands on the new grid
 - Follows 0060, whose cell size this settles at one world unit

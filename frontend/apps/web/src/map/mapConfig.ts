@@ -1,5 +1,7 @@
 import type { StyleSpecification } from 'maplibre-gl';
 
+import { GROUND_LATTICE } from '@villages/world';
+
 import { WORLD_MAX_ZOOM, warpedWorldStyle } from './worldStyle';
 
 /**
@@ -41,13 +43,8 @@ export const CAMERA = {
   tilt: { from: 7, most: 45 },
   /** Which way is up. North, so the tip only ever squashes the height of the ground, never turns it. */
   bearing: 0,
-  /**
-   * The grid the ground's colour is read on: turned twenty-six degrees so a cell is a diamond while north
-   * stays up, and one world unit across, the finest the terrain goes. Adam's size, on 2026-09-27, after four
-   * had been the diamonds button's. An area is fenced on these same diamonds. See experiment 0008 and
-   * decision records 0060 and 0066.
-   */
-  lattice: { turn: 26, size: 1 },
+  /** The grid the ground's colour is read on, which the stills are painted on too: `GROUND_LATTICE`. */
+  lattice: GROUND_LATTICE,
 } as const;
 
 /** MapLibre's own field of view, which is what a camera standing in the world looks like. */

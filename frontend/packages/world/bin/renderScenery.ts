@@ -7,7 +7,8 @@ import { PNG } from 'pngjs';
 
 import { growingTable } from '../src/biome.ts';
 import { DEFAULT_MASTER, masterNameOf, standsDirOf, worldDirOf } from '../src/masters.ts';
-import { paintPixel, preparePainterly } from '../src/painterly.ts';
+import { GROUND_LATTICE } from '../src/lattice.ts';
+import { onLattice, paintPixel, preparePainterly } from '../src/painterly.ts';
 import type { ClassSampler, PainterlyStyle, PreparedPainterly } from '../src/painterly.ts';
 import { preparePalette, snapPrepared, toRgb } from '../src/palette.ts';
 import type { Palette, Rgb } from '../src/palette.ts';
@@ -23,6 +24,7 @@ import { NO_STANDS, decodeStands } from '../src/stands.ts';
 import type { StandChunk } from '../src/stands.ts';
 import { masterRowsAt } from '../src/tiles.ts';
 
+import { flag, named } from './flags.ts';
 import { OUTPUT_DIR, PAINTERLY, PAINTERLY_DIR, PALETTE, RENDER, STANDS_DIR, masterAt } from './paths.ts';
 
 /**
@@ -50,15 +52,6 @@ import { OUTPUT_DIR, PAINTERLY, PAINTERLY_DIR, PALETTE, RENDER, STANDS_DIR, mast
  * `--spacing` is the multiplier on every kind's `apart`, as the debug panel's is: nought is the scatter as
  * it was before experiment 0012, which is how to see what the spacing took out.
  */
-
-const args = process.argv.slice(2);
-const flag = (name: string): string | undefined => {
-  const at = args.indexOf(`--${name}`);
-  return at < 0 ? undefined : args[at + 1];
-};
-const named = args.filter(
-  (value, index) => !value.startsWith('--') && args[index - 1]?.startsWith('--') !== true,
-);
 
 const masterPath = masterAt(named[0]);
 const master = masterNameOf(basename(masterPath)) ?? DEFAULT_MASTER;
@@ -331,6 +324,8 @@ function renderPlace(
   const left = centreX - (width / 2) * perPixel;
   const top = centreY - (height / 2) * perPixel;
 
+  // Painted on the game's own lattice, as the map is; flat stands for `raw`, which draws the tiles square.
+  const onTheGround = onLattice(classAt, GROUND_LATTICE);
   const pixels = new Uint8Array(width * height * 3);
   let at = 0;
   for (let row = 0; row < height; row += 1) {
@@ -340,7 +335,7 @@ function renderPlace(
       const colour =
         style === undefined
           ? (flatColours[classAt(worldX, worldY)] ?? flatColours[0]!)
-          : paintPixel(style, classAt, worldX, worldY, perPixel);
+          : paintPixel(style, onTheGround, worldX, worldY, perPixel, GROUND_LATTICE);
       pixels[at] = colour[0];
       pixels[at + 1] = colour[1];
       pixels[at + 2] = colour[2];
