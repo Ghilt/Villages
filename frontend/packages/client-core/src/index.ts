@@ -10,6 +10,12 @@ export { PLAYER_TOKEN_KEY, ensurePlayerToken, forgetPlayerToken } from './identi
 export type { TokenStore } from './identity';
 
 export { connect } from './connection';
+export { createStore } from './store';
+export type { Store } from './store';
+export { INITIAL_SESSION, endState, foldFrame } from './slices';
+export type { EndCause, FrameOf, FrameType, SessionState, Slice } from './slices';
+export { createSession } from './session';
+export type { ConnectOptions, Session, SessionListener, SessionPorts } from './session';
 export type { Connection, ConnectionOptions, ConnectionState, SocketLike } from './connection';
 
 export {

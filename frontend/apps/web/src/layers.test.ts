@@ -43,8 +43,6 @@ const SIDEWAYS: readonly (readonly [string, string])[] = [
  * The plan is `docs/ROADMAP.md`'s "A place for every mechanic".
  */
 const EXCUSED: readonly string[] = [
-  // The session is handed the master it draws.
-  'net/gateway.ts -> map/masters.ts',
   // The ground's geometry gets a folder below the map, the sprites and the fog.
   'fog/circles.ts -> map/worldStyle.ts',
   'fog/circles.ts -> sprites/cameraMath.ts',

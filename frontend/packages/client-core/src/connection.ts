@@ -37,6 +37,8 @@ export interface Connection {
   /** Every frame the gateway sends, decoded and checked. A frame that fails the schema is reported, not thrown. */
   onFrame(handler: (frame: ServerFrame) => void): () => void;
   onProblem(handler: (problem: string) => void): () => void;
+  /** The connection has gone, from either end. */
+  onClose(handler: () => void): () => void;
   send(frame: ClientFrame): void;
   close(): void;
 }
@@ -50,6 +52,7 @@ export function connect(options: ConnectionOptions): Connection {
   let state: ConnectionState = 'connecting';
   const frameHandlers = new Set<(frame: ServerFrame) => void>();
   const problemHandlers = new Set<(problem: string) => void>();
+  const closeHandlers = new Set<() => void>();
 
   const problem = (text: string) => {
     for (const handler of problemHandlers) handler(text);
@@ -93,6 +96,7 @@ export function connect(options: ConnectionOptions): Connection {
 
   socket.onClose(() => {
     state = 'closed';
+    for (const handler of closeHandlers) handler();
   });
 
   return {
@@ -104,6 +108,10 @@ export function connect(options: ConnectionOptions): Connection {
     onProblem: (handler) => {
       problemHandlers.add(handler);
       return () => problemHandlers.delete(handler);
+    },
+    onClose: (handler) => {
+      closeHandlers.add(handler);
+      return () => closeHandlers.delete(handler);
     },
     send,
     close: () => socket.close(),

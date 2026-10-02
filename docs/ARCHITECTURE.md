@@ -42,20 +42,23 @@ packages/protocol  <-  packages/client-core  <-  apps/web
 - `client-core` is compiled without DOM type definitions, so a stray `window`, `WebSocket` or `document` fails to
   typecheck. The socket arrives as an injected interface.
 - Restricted imports forbid React, MapLibre and Pixi inside `client-core` and `protocol`.
-- The session - what the page asks of the gateway and what it makes of the answers - is moving into
-  `client-core` a piece at a time, so that it is tested without a browser, and whatever it needs from the outside
-  is handed in. The follower is the first: `follower.ts` asks for the cells the camera wants and lets go of the old
-  ones late, only once what replaces them has answered, with its clock handed in as a `Schedule`. The page's
-  `net/gateway.ts` wires it to the socket, the log and the timers, and `net/gateway.test.ts` holds the page to the
-  same conversation as before. Commands are the second: `commands.ts` is the one way a command goes out, in two
-  lanes - the player's, one at a time, and the levers', which the debug panel's `debug/levers.ts` pulls - each
-  filed under the part of the log it was asked from, with its answer beside it; and `canAct`, which the choice's
-  pane and the dialogue's both ask before they let anything be pressed.
+- The session - what the page knows of the world and of its own house, and what it asks of the gateway - is
+  `client-core`'s, `createSession`, so it is tested without a browser, and whatever it needs from the outside is
+  handed in (0078). Its state is folded from **slices**, one a mechanic, in `slices.ts`: the connection, the cells,
+  the house, the choice, the key figures, the sight, the dialogues and the commands, each with what it starts as,
+  how a frame changes it, and what an end does to it - a close keeps the cards and a takeover forgets them. What a
+  frame makes the session do goes through one table in `session.ts` that names every kind of frame. The follower
+  is its part that asks for the cells the camera wants and lets go of the old ones late, only once what replaces
+  them has answered, with its clock handed in as a `Schedule`. `commands.ts` is the one way a command goes out,
+  in two lanes - the player's, one at a time, and the levers', which the debug panel's `debug/levers.ts` pulls -
+  each filed under the part of the log it was asked from, with its answer beside it; and `canAct`, which the
+  choice's pane and the dialogue's both ask before they let anything be pressed. The page's `net/gateway.ts` is
+  only the browser's wiring - the socket, the timers, the storage, the reload and the master - and
+  `net/gateway.test.ts` holds the page to the same conversation as before.
 - The log listens to the session rather than being written inside it: `observeGateway` tells a listener of every
-  frame once the state has taken it in, with the state as it was, before what the frame makes the page do and
+  frame once the state has taken it in, with the state as it was, before what the frame makes the session do and
   after it, and of the connection opening and closing. `sessionLog.ts`, at the root of `apps/web`, is that
-  listener, and holds every word the frames are said in, so the page's gateway module imports nothing of how a
-  key figure, a dialogue or a sight is described.
+  listener, and holds every word the frames are said in.
 - Inside `apps/web`, the component library in `src/ui/` imports nothing from the rest of the app: the game hands it
   words, numbers and callbacks. A test reads every import in the folder and fails on one that leaves it, bar React,
   the fonts and the world package's pure rules and types, which is what lets `/admin/inspect-ui-components` show every component with nothing running. See

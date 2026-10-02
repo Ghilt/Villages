@@ -176,8 +176,8 @@ export function App({ master }: AppProps) {
 
   // The one connection to the gateway, opened as the app mounts.
   useEffect(() => {
-    gateway();
-  }, []);
+    gateway(master);
+  }, [master]);
 
   // The gateway follows the camera: the cells covering the view, at the view's own zoom.
   useEffect(() => (map === null ? undefined : followMap(map)), [map]);

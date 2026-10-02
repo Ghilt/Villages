@@ -15,7 +15,6 @@
 819 frontend/apps/web/src/admin/showcase/showcase.css
 444 frontend/apps/web/src/areas/AreaOverlay.tsx
 490 frontend/apps/web/src/map/painterlyTiles.ts
-443 frontend/apps/web/src/net/gateway.ts
 429 frontend/apps/web/src/sprites/FogLayer.ts
 855 frontend/apps/web/src/sprites/PixiSpriteRenderer.ts
 733 frontend/apps/web/src/sprites/scenery/SceneryLayer.ts

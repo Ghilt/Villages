@@ -1,0 +1,127 @@
+import { describe, expect, it } from 'vitest';
+
+import type { ServerFrame } from '@villages/protocol';
+
+import { NO_HOUSES, cellsHeld, holdCells } from './houses';
+import { createSession } from './session';
+import { INITIAL_SESSION, endState, foldFrame } from './slices';
+import type { SessionState } from './slices';
+import { fakeSocket } from './testing';
+
+/*
+ * The frames, as small as a fold needs them: a part keeps what it is sent, so what is in it is not the question.
+ * The package is checked without Node or a browser, so the shared fixtures are read by the page's own test.
+ */
+const welcome: ServerFrame = {
+  type: 'welcome',
+  serverTime: 0,
+  playerId: 'a1b2c3d4-0000-4000-8000-000000000001',
+  world: { today: 454901, earliest: 437635 },
+};
+const HOUSE_FRAMES = [
+  { type: 'yourHouse', yours: { house: { name: 'Ravenscar' } } },
+  { type: 'yourChoice', choice: { prompt: 'Where shall the house raise its seat?' } },
+  { type: 'yourKeyFigures', keyFigures: [{ id: 'agnes' }, { id: 'wilhelm' }] },
+  { type: 'yourSight', points: [{}, {}, {}, {}], tension: 40 },
+  { type: 'yourDialogues', dialogues: [{}, {}, {}, {}] },
+] as unknown as ServerFrame[];
+
+/** A session that has heard the house's every frame, holding a cell. */
+function heardEverything(): SessionState {
+  let state: SessionState = { ...INITIAL_SESSION, houses: holdCells(NO_HOUSES, ['12003122']) };
+  for (const frame of [welcome, ...HOUSE_FRAMES]) {
+    state = foldFrame(state, frame);
+  }
+  return state;
+}
+
+describe('the session, folded from what each mechanic folds', () => {
+  it("takes each of the house's frames into its own part", () => {
+    const state = heardEverything();
+
+    expect(state.connection).toBe('open');
+    expect(state.yourHouse?.house.name).toBe('Ravenscar');
+    expect(state.yourChoice?.prompt).toBe('Where shall the house raise its seat?');
+    expect(state.yourKeyFigures).toHaveLength(2);
+    expect(state.yourSight?.points).toHaveLength(4);
+    expect(state.yourDialogues).toHaveLength(4);
+  });
+
+  it('closed, keeps what the house had on its cards and forgets the cells nobody is updating', () => {
+    const was = heardEverything();
+
+    const closed = endState(was, 'closed');
+
+    expect(closed.connection).toBe('closed');
+    expect(cellsHeld(closed.houses)).toEqual([]);
+    expect([
+      closed.yourHouse,
+      closed.yourChoice,
+      closed.yourKeyFigures,
+      closed.yourSight,
+      closed.yourDialogues,
+    ]).toEqual([was.yourHouse, was.yourChoice, was.yourKeyFigures, was.yourSight, was.yourDialogues]);
+  });
+
+  it('taken over, forgets the house too, because somebody else is playing it now', () => {
+    const takenOver = endState(heardEverything(), 'takenOver');
+
+    expect(takenOver.connection).toBe('takenOver');
+    expect(cellsHeld(takenOver.houses)).toEqual([]);
+    expect([
+      takenOver.yourHouse,
+      takenOver.yourChoice,
+      takenOver.yourKeyFigures,
+      takenOver.yourSight,
+      takenOver.yourDialogues,
+    ]).toEqual([null, null, null, null, null]);
+  });
+
+  it('a step refused is said under its dialogue, and an answer to anything else leaves it be', () => {
+    const stepping = { commandId: 'c-1', dialogueId: 'd-1', lineId: 'accept' };
+    const out: SessionState = { ...INITIAL_SESSION, acting: 'c-1', stepping };
+
+    const refused = foldFrame(out, { type: 'commandRejected', commandId: 'c-1', reason: 'notEnoughFree' });
+    expect([refused.acting, refused.stepping]).toEqual([null, null]);
+    expect(refused.stepRefused).toEqual({ dialogueId: 'd-1', lineId: 'accept', reason: 'notEnoughFree' });
+
+    const other = foldFrame(out, { type: 'commandAccepted', commandId: 'c-2' });
+    expect([other.acting, other.stepping, other.stepRefused]).toEqual(['c-1', stepping, null]);
+  });
+
+  it('lets its listeners hear a frame with the state before and after, before and after what it does', () => {
+    const heard: string[] = [];
+    const socket = fakeSocket();
+    const session = createSession({
+      schedule: { after: () => () => undefined },
+      newId: () => 'c-1',
+      standsArrived: () => undefined,
+      followStands: () => undefined,
+      arriveAnew: () => heard.push('arrive anew'),
+      note: (area, message) => heard.push(`${area}: ${message}`),
+    });
+    session.observe({
+      connecting: (address) => heard.push(`connecting to ${address}`),
+      heard: (frame, was, now) => heard.push(`heard ${frame.type}: ${was.connection} -> ${now.connection}`),
+      done: (frame) => heard.push(`done ${frame.type}`),
+      closed: () => heard.push('closed'),
+    });
+
+    session.connect({ socket: socket.socket, playerToken: 't', protocolVersion: 1, address: 'ws://here' });
+    socket.opens();
+    socket.says(welcome);
+    socket.says({ type: 'worldWiped', message: 'the world was emptied' });
+    socket.closes();
+
+    expect(heard).toEqual([
+      'connecting to ws://here',
+      'heard welcome: connecting -> open',
+      'done welcome',
+      'heard worldWiped: open -> open',
+      'arrive anew',
+      'done worldWiped',
+      'closed',
+    ]);
+    expect(session.state().connection).toBe('closed');
+  });
+});

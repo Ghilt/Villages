@@ -16,7 +16,6 @@ import { PROTOCOL_VERSION } from '@villages/protocol';
 const fake = vi.hoisted(() => ({ current: undefined as FakeSocket | undefined }));
 const stands = vi.hoisted(() => ({ followed: [] as string[][] }));
 vi.mock('./browserSocket', () => ({ browserSocket: () => fake.current!.socket }));
-vi.mock('../map/masters', () => ({ chosenMaster: () => 'terrain' }));
 vi.mock('../sprites/scenery/standsFromServer', () => ({
   followStandsUnder: (cells: string[]) => stands.followed.push(cells),
   standsArrived: () => undefined,
@@ -79,7 +78,7 @@ async function load() {
 async function arrived() {
   const page = await load();
   page.gateway.follow(Z8);
-  page.gateway.gateway();
+  page.gateway.gateway('terrain');
   page.socket.opens();
   page.socket.says(fixture('welcome'));
   page.socket.says(empty(Z8[0]!));
@@ -92,7 +91,7 @@ describe("the page's conversation with the gateway", () => {
   it('says hello as the socket opens, and asks for what the camera wanted only once it is welcomed', async () => {
     const page = await load();
     page.gateway.follow(Z8);
-    page.gateway.gateway();
+    page.gateway.gateway('terrain');
 
     expect(page.sent()).toEqual([]);
     page.socket.opens();
@@ -117,7 +116,7 @@ describe("the page's conversation with the gateway", () => {
     page.gateway.seeAll(true);
     page.gateway.fogOfWar(false);
     page.gateway.follow(Z8);
-    page.gateway.gateway();
+    page.gateway.gateway('terrain');
     page.socket.opens();
     page.socket.says(fixture('welcome'));
 
@@ -131,7 +130,7 @@ describe("the page's conversation with the gateway", () => {
   it('says what a burst of snapshots brought once it stops, and nothing for a burst that brought nothing', async () => {
     const page = await load();
     page.gateway.follow(Z8);
-    page.gateway.gateway();
+    page.gateway.gateway('terrain');
     page.socket.opens();
     page.socket.says(fixture('welcome'));
     const before = page.lines();
