@@ -9,6 +9,7 @@ const vectors = JSON.parse(
   maxZoom: number;
   zooms: number[];
   vectors: { name: string; lat: number; lon: number; quadkeys: Record<string, string> }[];
+  coarsestZoom: { cases: { significance: number; zoom: number }[] };
 };
 
 describe('the shared vectors, which the Kotlin side is held to as well', () => {
@@ -21,6 +22,13 @@ describe('the shared vectors, which the Kotlin side is held to as well', () => {
       expect(cellAt(vector.lat, vector.lon, zoom)).toBe(vector.quadkeys[String(zoom)]);
     }
   });
+
+  it.each(vectors.coarsestZoom.cases)(
+    'draws a thing of significance $significance from zoom $zoom',
+    (one) => {
+      expect(coarsestZoom(one.significance)).toBe(one.zoom);
+    },
+  );
 
   it.each(vectors.vectors)('rolls $name up to the same cells it would be asked for', (vector) => {
     const deepest = cellAt(vector.lat, vector.lon);

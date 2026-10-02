@@ -35,6 +35,13 @@ class CellsSpec : StringSpec({
         }
     }
 
+    "says the coarsest zoom a significance is drawn from, as the shared cases the browser is held to say" {
+        val cases = fixture["coarsestZoom"]["cases"]
+        (0 until cases.size()).map { cases[it] }.forEach { case ->
+            coarsestZoom(case["significance"].asDouble()) shouldBe case["zoom"].asInt()
+        }
+    }
+
     "gives a place the same cell whether asked directly or by rolling up from deeper" {
         for (vector in vectors) {
             val deepest = Cell.of(vector["lat"].asDouble(), vector["lon"].asDouble())
