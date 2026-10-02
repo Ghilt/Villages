@@ -263,7 +263,7 @@ A menu rather than a queue, one commit each.
 | **0** | this document, decision record 0055, experiment 0010, the mechanics entries, the glossary | read |
 | **1** | one root for events and one for refusals, the executor behind two ports, the catalogue's third *whose*; no change in behaviour | the checks, and a founding still showing its three events |
 | **2** | a character appears and dies: the values, the id, `CharacterError`, the decider, fixtures, a second table in `EVENTS.md` | the decider's spec and the fixtures |
-| **3** | a house gains and loses key figures: the nine, `ActThrough`, the room check | `HouseDeciderSpec` |
+| **3** | a house gains and loses key figures: the nine, `ActThrough`, the room check | `HouseKeyFiguresSpec` |
 | **4** | a character's record changes: `statChanged`, `aged`, `portraitChanged` | the decider's spec |
 | **5** | the placeholder portraits in `world/portraits/`, their generator and their test | the folder, and a picture of it |
 | **6** | a newcomer is rolled: `Dice`, `Portraits`, the list of names | the spec, and the names to read |

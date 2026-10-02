@@ -11,9 +11,7 @@
 
 646 backend/application/src/main/kotlin/villages/application/Ports.kt
 468 backend/domain/src/main/kotlin/villages/domain/HouseDecider.kt
-663 backend/domain/src/test/kotlin/villages/domain/HouseDeciderSpec.kt
 1313 backend/gateway/src/main/kotlin/villages/gateway/Gateway.kt
-1991 backend/gateway/src/test/kotlin/villages/gateway/GatewaySpec.kt
 722 backend/protocol/src/main/kotlin/villages/protocol/Frames.kt
 788 debug-quick-start.ps1
 819 frontend/apps/web/src/admin/showcase/showcase.css

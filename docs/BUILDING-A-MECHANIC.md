@@ -225,7 +225,7 @@ long file goes into a file of its own.
 
 | Part | Where | Held by |
 |---|---|---|
-| The class, the `decide` branch, the `evolve` branch | `backend/domain` | `HouseDeciderSpec`: given, when, then over events |
+| The class, the `decide` branch, the `evolve` branch | `backend/domain` | the house spec of its mechanic, `House<Mechanic>Spec` over `HouseFixtures.kt`: given, when, then over events |
 | The type row | `EventTypes` in `backend/infrastructure-occurrent` | `EventTypeCatalogueSpec` |
 | The catalogue row: type, payload in constructor order, meaning, producer, consumers | `docs/EVENTS.md` | `EventCatalogueSpec`, in both directions |
 | The stored form | `contracts/fixtures/events/<type>.json` | `EventFormatSpec` |

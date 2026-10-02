@@ -213,7 +213,7 @@ A speaker's death is tried with *kill*, in the Characters section.
    for the same offer twice; the house keeps its open dialogues and every id it was offered. `Effect.Grant`
    is a choice's effect as well as a line's, on the wire from version 14. Every case of every sealed field
    has its `kind` in the store and a fixture that writes it, which a test holds. `DialogueSpec` and
-   `HouseDeciderSpec` are the evidence.
+   `HouseDialoguesSpec` are the evidence.
 3. **Stepped and completed, on the server.** Done, in two commits, because together they came to the size of
    step 2. `Dialogue.walk`, in `Walk.kt`, works out from the steps taken what has been said, the stretch
    still to read and the options pending, and `Dialogue.isStep` says which lines are steps;
@@ -222,7 +222,7 @@ A speaker's death is tried with *kill*, in the Characters section.
    `PlayerCompletedDialogue` when the line ends it, from one decision, and is refused `noSuchDialogue`,
    `dialogueOver` or `notTheNextStep`; the house keeps the steps of each open dialogue, and a finished one
    leaves the list. `BUILDING-A-MECHANIC.md` has the shape as the dialogue pattern. Nothing to see;
-   `HouseDeciderSpec` is the evidence, forty lines played through for six events among it.
+   `HouseDialoguesSpec` is the evidence, forty lines played through for six events among it.
 4. **Offered from the debug panel.** Done. `SampleDialogues.kt` holds the letter from the coast, spoken by the
    house's first key figure and a messenger, and `DialogueService` offers it after asking the house with
    `ActThrough`, since the key figure is read from a read model a moment behind. The panel's Dialogues

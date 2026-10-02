@@ -27,7 +27,6 @@ import java.util.UUID
 
 private val me = PlayerId(UUID.fromString("0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8d"))
 private val them = PlayerId(UUID.fromString("6d5b0a2e-1c3f-4d7e-9a8b-0f1e2d3c4b5a"))
-private val today = WorldTime(454901)
 
 private val stockholm = Location(59.33, 18.07)
 /** A kilometre or so from the seat at Stockholm, well inside its 34. */
