@@ -2,6 +2,14 @@
 
 - Status: accepted
 - Date: 2026-09-16
+- Amended 2026-10-02: **the recording names every field however deep**, by its path from the frame -
+  `.dialogues[].lines[].revealImpact:shown` - rather than a frame's own fields alone. The review of that day
+  found versions 17 and 18 recorded the same but for their number, because what changed was inside a dialogue's
+  lines, where the recording did not look; the version was raised only because somebody remembered. Both ends
+  walk their own description of the wire, the Kotlin classes and the zod schemas, and arriving at the same lines
+  is a check of its own. And **a recorded version is never recorded over**: recording refuses to write a file that
+  is there already. Version 22 is the first in the new form, and changed no frame; the history of every version
+  is in `contracts/README.md` now rather than in a comment in `Frames.kt`.
 
 ## Context
 

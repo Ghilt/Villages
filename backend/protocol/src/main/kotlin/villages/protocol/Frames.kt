@@ -20,35 +20,9 @@ import tools.jackson.databind.JsonNode
  *
  * It goes up whenever a frame or a field below changes, and `ProtocolShapeSpec` is what makes sure of
  * that: the shape of every frame is recorded in contracts/protocol-v<n>.txt, and a wire that has moved
- * without a new number is a failing build. Version 2 is the first gameplay loop, which added
- * `takeAction`, `yourChoice`, `wipeWorld` and `worldWiped`, and gave every event its provenance.
- * Version 3 added `seeAll`, the eye that sets significance aside. Version 6 added the key figures:
- * `yourKeyFigures`, and the commands that bring one in and act through one. Version 7 put them on the map:
- * the characters in a cell ride its snapshot beside the houses, three deltas say one arrived, changed or
- * went, and two commands move one and take one off the map. Version 8 gave a character on the map the
- * birthday and the years an age is counted from, so a window on them can say how old they are. See
- * decision record 0055. Version 9 added `yourSight`, the vision points a house sees from, which the fog of
- * war is drawn from. Version 10 added `giveVision` and `takeVision`, a house given vision of a place outright
- * and having it taken away. See decision record 0061. Version 11 added `fogOfWar`, Adam's switch, because the
- * gateway now holds back what a house cannot see. Version 12 gave `yourSight` its `tension`, the surface
- * tension that joins circles close together. See decision record 0064. Version 13 added `stands`, the
- * scenery's stands on ground a house has revealed, and gave `hello` the `master` the page draws, so the
- * gateway knows whose stands to send. See decision record 0067.
- *
- * Versions 14 to 19 are the dialogue's, built on a branch that had not met 13: they were 13 to 18 there,
- * moved up one when main's landed first, so their recordings have no `stands`. Version 14 let an option's
- * effect be a `grant`, some of a resource given, which is what a line of a dialogue gives too. See decision
- * record 0071. Version 15 added `offerDialogue`, the debug panel's offer of a sample dialogue by name.
- * Version 16 added `yourDialogues`, the player's dialogues with what has not been reached held back, and
- * `showRequirements`, Adam's switch that sends one window their requirements. Version 17 let an effect be a
- * `spend`, what an option costs, and named what a said line did its `effects`. Version 18 gave an option its
- * `revealImpact`, how it shows what taking it will do. Version 19 added `completeDialogueStep`, a step taken
- * through one of the house's dialogues, and took away `showRequirements` and a dialogue's `requirements`:
- * the debug panel only offers a dialogue now, so nothing asks for them, and a page is never sent them.
- * Version 20 is the two together, the stands and the dialogue, as they met on main. Version 21 gave a line still
- * ahead its `shows`, what it shows as it is reached while playing: a place, a house or a character.
+ * without a new number is a failing build. What each version changed is in contracts/README.md.
  */
-const val PROTOCOL_VERSION = 21
+const val PROTOCOL_VERSION = 22
 
 data class Point(val lat: Double, val lon: Double)
 
