@@ -43,6 +43,11 @@ export interface CutPlaceholder extends Named {
   readonly outline?: readonly Point[];
   /** Whether to key the moodboard's dark ground away, for a thing standing on it. */
   readonly key?: boolean;
+  /**
+   * A medallion's window, made clear: an ellipse, its middle and how far it reaches across and down, in
+   * the moodboard's pixels as an outline is - for a medallion cut with a portrait painted in its window.
+   */
+  readonly window?: readonly [cx: number, cy: number, rx: number, ry: number];
   /** For a border, where its cuts go, in the moodboard's pixels. */
   readonly border?: BorderFile;
 }
@@ -814,9 +819,13 @@ export const UI_PLACEHOLDERS: readonly UiPlaceholder[] = [
   {
     kind: 'medallions',
     name: 'portrait-oval',
-    about: 'the moodboard’s character icon, a portrait in an oval with a drape',
+    about:
+      'the moodboard’s character icon, an oval with a drape, its portrait cut out to leave a window for ' +
+      'whoever it holds',
     from: [1068, 440, 146, 156],
     key: true,
+    // Just inside the gilt ring's inner edge, so that the ring keeps its shadow.
+    window: [1143.5, 527, 45.5, 52],
   },
   {
     kind: 'medallions',

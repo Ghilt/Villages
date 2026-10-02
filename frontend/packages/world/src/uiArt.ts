@@ -7,6 +7,8 @@
  * cannot disagree about what a cut picture is. See decision record 0068 and `AUTHORING-THE-ART.md`.
  */
 
+import type { UiWindow } from './uiWindow.ts';
+
 /** The folders of `world/ui/`, one a kind of picture. */
 export const UI_KINDS = [
   'borders',
@@ -110,6 +112,8 @@ export interface UiPicture {
   readonly how: string;
   readonly cuts: readonly UiCut[];
   readonly border?: UiBorder;
+  /** For a medallion, where it is clear inside its frame, which is where the picture it holds shows. */
+  readonly window?: UiWindow;
 }
 
 /**

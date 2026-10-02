@@ -113,7 +113,7 @@ every start cheap enough to do.
     world/ui/borders/<name>.webp + <name>.json   a whole framed box, and where its four cuts go
     world/ui/fills/<name>.webp                   a picture that repeats without a seam
     world/ui/embellishments/<name>.webp          a cherub, a drape, a cross: anything pinned to a box
-    world/ui/medallions/<name>.webp              a round or oval frame, one fixed picture
+    world/ui/medallions/<name>.webp              a round or oval frame, one fixed picture; clear inside, a window
     world/ui/marks/<name>.png                    a mark chosen to be painted rather than drawn
     world/ui/controls/<name>.webp + <name>.json  a button's face at rest, and where it stretches
     world/ui/controls/<name>-<state>.webp        the same face hovered, pressed or disabled, if painted
@@ -217,6 +217,12 @@ recipe that says it has no softer ink. `npm run check` measures
 every recipe's fill, and the middle of every border drawn with its own, against the ink its words are in,
 and says which falls short and by how much; the page's contrast switch shows the words themselves. See
 `UI-COMPONENTS.md`.
+
+**A medallion that holds a portrait is painted with a clear middle**, and the clear middle is its window:
+the tool finds it - whatever is clear and shut in by the frame, the largest of it - and the page lays the
+portrait behind the frame there, so the frame's own inner edge is the portrait's edge. No file goes beside
+it. One painted whole, the compass or a shield, is an emblem and holds nothing. The placeholder for the
+portrait's oval is the moodboard's, its painted portrait punched out.
 
 **An embellishment, a medallion, a mark or a control stands on nothing**: cut it out onto transparency, or
 save it on one flat colour and the tool keys the colour away, as it does a sprite's. One on a busy

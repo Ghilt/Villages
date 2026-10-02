@@ -42,6 +42,8 @@ import {
 import type { BorderFile, Sides, UiArtFile, UiCut, UiKind, UiPicture } from '../src/uiArt.ts';
 import { paintFill } from '../src/uiFills.ts';
 import { MOODBOARD_SIZE, UI_PLACEHOLDERS, placeholderAbout } from '../src/uiPlaceholders.ts';
+import { punchedOf, windowOf } from '../src/uiWindow.ts';
+import type { UiWindow } from '../src/uiWindow.ts';
 import type { CutPlaceholder, Rect, UiPlaceholder } from '../src/uiPlaceholders.ts';
 import { UI_CACHE_DIR, UI_DIR, UI_OUT_DIR } from './paths.ts';
 
@@ -77,6 +79,7 @@ const RULES = hashOf(
   Buffer.concat([
     readFileSync(new URL('../src/art.ts', import.meta.url)),
     readFileSync(new URL('../src/uiArt.ts', import.meta.url)),
+    readFileSync(new URL('../src/uiWindow.ts', import.meta.url)),
     Buffer.from(JSON.stringify(WEBP)),
   ]),
 ).slice(0, 16);
@@ -292,6 +295,11 @@ async function cutFromMoodboard(placeholder: CutPlaceholder, board: Rgba): Promi
   if (placeholder.key === true) {
     piece = keyOffItsGround(piece);
   }
+  // A medallion cut with a portrait painted where its window should be has the window made clear.
+  if (placeholder.window !== undefined) {
+    const [cx, cy, rx, ry] = placeholder.window;
+    piece = punchedOf(piece, { cx: cx - left, cy: cy - top, rx, ry });
+  }
   // Four times the size, which is what every picture in world/ui is painted at. Soft, and honest about it.
   const bigWidth = width * PAINTED_AT;
   const bigHeight = height * PAINTED_AT;
@@ -419,6 +427,8 @@ interface Remembered {
   readonly height: number;
   readonly painted: { readonly width: number; readonly height: number };
   readonly how: string;
+  /** A medallion's window, worked out from its picture. */
+  readonly window?: UiWindow;
   readonly densities: readonly {
     readonly density: number;
     readonly width: number;
@@ -536,7 +546,16 @@ async function cutOne(kind: UiKind, name: string, file: string, known: Record<st
       writeFileSync(resolve(UI_CACHE_DIR, `${key}@${density}x.webp`), out);
       densities.push({ density, width: width * density, height: height * density });
     }
-    remembered = { width, height, painted: { width: image.width, height: image.height }, how, densities };
+    // A medallion that is clear inside its frame holds a picture there; one painted whole is an emblem.
+    const window = kind === 'medallions' ? windowOf(image) : null;
+    remembered = {
+      width,
+      height,
+      painted: { width: image.width, height: image.height },
+      how,
+      ...(window === null ? {} : { window }),
+      densities,
+    };
     writeFileSync(cachedCut, JSON.stringify(remembered));
   }
 
@@ -583,6 +602,7 @@ async function cutOne(kind: UiKind, name: string, file: string, known: Record<st
     how: remembered.how,
     cuts,
     ...(border === undefined ? {} : { border }),
+    ...(remembered.window === undefined ? {} : { window: remembered.window }),
   };
   return { picture, files, fresh };
 }

@@ -27,7 +27,7 @@ is no MongoDB and no RabbitMQ on the machine yet.
 
 Characters and key figures are built and waiting on Adam's eye. Nothing else here is started, and the four
 after them wait on the same thing. Fog of war, the exception, is under way a step at a time, and the UI
-component library has its plan and nothing built.
+component library is built and waiting on Adam's eye.
 
 - **Characters and key figures**: the people of the world, each with a history of their own, and the
   house's tie to the few it acts through, shown in a pane in the corner beside the house status. The shape
@@ -44,8 +44,9 @@ component library has its plan and nothing built.
 - **The UI component library**: every component the interface is built from, painted art placed by CSS,
   shown at `/admin/inspect-ui-components` before it is used, with placeholders copied from Adam's
   moodboard. The shape is decision record 0068, the method `UI-COMPONENTS.md`, and the steps, one commit
-  each, are in `docs/plans/ui-component-library.md`. It touches none of the game; bringing it into the
-  panes is later work, a surface at a time. Adam's own, asked for on 2026-09-30.
+  each, are in `docs/plans/ui-component-library.md`: all eleven are built, the larger ones in parts, with a
+  contrast check that holds every word to what it needs. It touches none of the game; bringing it into the
+  panes is the next work, a surface at a time and a plan each. Adam's own, asked for on 2026-09-30.
 - **0.4** Local infrastructure: MongoDB replica set and RabbitMQ in Compose
 - **0.8** Testcontainers smoke test on MongoDB and RabbitMQ
 - **1.6** The bridge from the store to the broker

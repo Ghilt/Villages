@@ -1,0 +1,43 @@
+/*
+ * A medallion: what it holds in its window first, cut to the window's round and covering it, and its frame
+ * over that, so the frame's own edge is the window's edge. An empty window is dark glass.
+ */
+
+@layer ui {
+  .ui-medallion {
+    position: relative;
+    display: inline-block;
+    flex: none;
+    vertical-align: middle;
+  }
+
+  .ui-medallion__window {
+    position: absolute;
+    overflow: hidden;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at 40% 35%, var(--ui-night-raised), var(--ui-night));
+  }
+
+  .ui-medallion__window > * {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 25%;
+  }
+
+  .ui-medallion__frame {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .ui-medallion--missing {
+    box-sizing: border-box;
+    border: 2px dashed var(--ui-rarity-legendary);
+    border-radius: 50%;
+  }
+}

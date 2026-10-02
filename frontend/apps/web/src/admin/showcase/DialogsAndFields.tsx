@@ -7,8 +7,10 @@ import { Dropdown } from '../../ui/field/Dropdown';
 import type { DropdownOption } from '../../ui/field/Dropdown';
 import { TextField } from '../../ui/field/TextField';
 import { HoldButton } from '../../ui/hold/HoldButton';
+import { Medallion } from '../../ui/medallion/Medallion';
 import { Toasts } from '../../ui/toast/Toasts';
 import type { Toast } from '../../ui/toast/Toasts';
+import { FIGURES, Portrait } from './sampleFigures';
 import { Part, Specimen, Specimens } from './Specimen';
 
 /** Things that happen, one after another, each time the page is asked for one. */
@@ -306,7 +308,39 @@ export function DialogsAndFields() {
         </Specimens>
       </Part>
 
-      <p className="showcase__to-come">The medallion arrives with the last part of step 10.</p>
+      <Part title="Medallions">
+        <p className="ui-label showcase__lead">
+          A round or oval frame, one picture never sliced. Where it is clear inside, it is a window, and a
+          portrait shows through it; painted whole, it is an emblem. The oval is the moodboard&rsquo;s, its
+          own portrait cut out to leave the window; the portraits are the game&rsquo;s.
+        </p>
+        <Specimens>
+          {FIGURES.slice(0, 3).map((figure, at) => (
+            <Specimen key={figure.portrait} name={`Medallion size={${[72, 96, 128][at]}}`} note={figure.full}>
+              <Medallion
+                name="portrait-oval"
+                size={[72, 96, 128][at]}
+                picture={<Portrait figure={figure} />}
+                label={figure.full}
+              />
+            </Specimen>
+          ))}
+          <Specimen name="Medallion" note="its window empty: dark glass">
+            <Medallion name="portrait-oval" size={96} />
+          </Specimen>
+          {(
+            [
+              ['compass', 'the compass, the way to everything not on the screen'],
+              ['shield', 'a house’s shield'],
+              ['sigil', 'a house’s sigil'],
+            ] as const
+          ).map(([name, note]) => (
+            <Specimen key={name} name={`Medallion name="${name}"`} note={['an emblem, painted whole', note]}>
+              <Medallion name={name} size={96} label={note} />
+            </Specimen>
+          ))}
+        </Specimens>
+      </Part>
     </>
   );
 }

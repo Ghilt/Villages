@@ -7,11 +7,12 @@
 > `AUTHORING-THE-ART.md`; why it is painted art placed by CSS, which is decision record 0068; and the order
 > it is being built in, which is `docs/plans/ui-component-library.md`.
 
-**Being built.** This is the method as agreed on 2026-09-30, written before most of the library so that the
-library is built to it. Each step of the plan fills in its part, and a line that still says *to come* is a
-part nobody has built. The page, the foundations, the pictures, borders and fills, the container, the
-buttons, the marks and readouts, the tabs and sections, the controls, the collections, and the dialog, the
-toast, the text field and the dropdown are built.
+**Built.** This is the method as agreed on 2026-09-30, written before the library so that the library was
+built to it, and every part the plan named is now on the page: the foundations, the pictures, borders and
+fills, the container, the buttons, the marks and readouts, the tabs and sections, the controls, the
+collections, the dialog, the toast, the fields and the medallion. What comes next is the game's own
+surfaces taken up into it, a plan each; a component one of them needs that is not here is added here
+first, by the rule below.
 
 ## The page
 
@@ -387,3 +388,9 @@ A line each: what it is for, its variants, and where on the page it is.
   a finger, the arrow keys and typing the first letters pick, a phone opens its own picker, and an option
   can be `disabled`; where the browser lets its list be drawn, it is drawn on night with a gilt edge, and
   elsewhere it is the browser's. Held with `chosen` and `onChoose`. *Dialogs and fields*.
+- **`Medallion`**, `ui/medallion/Medallion.tsx`: a round or oval frame, one fixed picture and never sliced,
+  drawn `size` pixels tall. Where its frame is clear inside itself it has a window, and the `picture` it is
+  given - a key figure's portrait - shows through it, covering it and cut to its round; the window is found
+  from the picture by `npm run world:ui`, `windowOf` in the world package's `uiWindow.ts`, so a frame
+  painted with a clear middle needs no file beside it. Painted whole - the compass, a house's shield - it
+  is an emblem and holds nothing. Its `label` is what it is for a screen reader. *Dialogs and fields*.
