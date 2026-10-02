@@ -23,6 +23,7 @@ thousands of concurrent players.
 - `docs/ROADMAP.md` - now / later / future ideas
 - `docs/EVENTS.md` - catalogue of every domain event
 - `docs/TESTING.md` - the test pyramid and how to run it
+- `docs/RUNNING.md` - what each part of the running program does, and where to find it
 
 ## Five-minute start
 
