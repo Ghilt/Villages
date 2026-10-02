@@ -70,7 +70,7 @@ data class Dialogue(
             if (line.effects.any { it is Effect.FoundAt }) {
                 refuse("$which founds a house, and a dialogue is offered to a house that is founded already")
             }
-            if (line.effects.any { it is Effect.Spend } && line.id !in options) {
+            if (costsSomething(line.effects) && line.id !in options) {
                 refuse("$which spends, and only an option may, so that a house that cannot pay can answer otherwise")
             }
             if (line.revealImpact != null && line.id !in options) {
@@ -88,7 +88,7 @@ data class Dialogue(
                 if (then.options.distinct().size != then.options.size) {
                     refuse("$which leads to a dialogue choice offering one line twice")
                 }
-                if (then.options.all { option -> said.getValue(option).effects.any { it is Effect.Spend } }) {
+                if (then.options.all { option -> costsSomething(said.getValue(option).effects) }) {
                     refuse("$which leads to a dialogue choice whose every option spends: a house that cannot pay is stuck")
                 }
             }

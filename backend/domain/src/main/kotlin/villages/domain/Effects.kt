@@ -69,3 +69,9 @@ private fun follows(
         listOf(HouseResourceSpent(houseId, effect.resource, effect.amount, worldTime, recordedAt))
     }
 }
+
+/**
+ * Whether taking an option or reaching a line with these effects costs the house anything: what a house that
+ * cannot pay has to be able to answer otherwise than, in a choice as in a dialogue.
+ */
+internal fun costsSomething(effects: List<Effect>): Boolean = effects.any { it is Effect.Spend }

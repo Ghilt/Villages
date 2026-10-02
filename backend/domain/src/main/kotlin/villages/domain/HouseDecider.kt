@@ -29,17 +29,7 @@ object HouseDecider : Decider<HouseCommand, House, HouseEvent> {
             if (state.pending != null) {
                 throw HouseError.ChoicePending
             }
-            // A choice that would found the house is meaningless once it is founded. Which effects a
-            // state can be offered is the decider's business, not the giver's.
-            if (state is House.Founded && command.choice.options.any { it.effect is Effect.FoundAt }) {
-                throw HouseError.AlreadyFounded
-            }
-            // And one that would give a house something, or take something from it, is meaningless before there
-            // is a house to do it to.
-            val givesOrTakes = command.choice.options.any { it.effect is Effect.Grant || it.effect is Effect.Spend }
-            if (state is House.NotFounded && givesOrTakes) {
-                throw HouseError.NoSuchHouse
-            }
+            command.choice.refuseUnlessGivableTo(state)
             listOf(
                 PlayerGivenChoice(
                     houseId = command.houseId,

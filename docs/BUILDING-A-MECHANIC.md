@@ -109,7 +109,11 @@ taken option's effect into events; catalogue rows and fixtures for any consequen
 new; a giver, with the words for the prompt and the options; and a decider spec for the rule. No new
 frame and no new interface, because the parchment is generic. A rule about when a choice may be
 given belongs in `decide`, not in a read of a projection: the decider is the truth and a projection
-is a moment behind it.
+is a moment behind it. Those rules are `Choice.refuseUnlessGivableTo`, which `decide` asks as a choice is
+given: nothing founds a house already founded, nothing gives or takes before there is a house, and a
+choice whose every option costs something is refused, because a house that cannot pay could never answer
+it and a pending choice holds back every other. A dialogue keeps the same rule for its choices, through
+the same `costsSomething`.
 
 Some events settle a pending choice implicitly. A house founded by other means, the debug button or a
 seed, has no use for a pending founding choice, so `evolve(HouseFounded)` clears it. Write such

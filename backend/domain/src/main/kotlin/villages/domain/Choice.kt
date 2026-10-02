@@ -44,6 +44,26 @@ data class Choice(
 }
 
 /**
+ * Refuses a choice this house cannot be given. One that would found the house once it is founded, or give it
+ * something or take something from it before there is a house to do it to, is meaningless; and one whose every
+ * option costs something could never be answered by a house that cannot pay, and a pending choice holds back
+ * every other. Which effects a state can be offered is the decider's business, not the giver's, so `decide`
+ * asks this as a choice is given. The constructor does not, because it also runs when a stored choice is read
+ * back.
+ */
+internal fun Choice.refuseUnlessGivableTo(state: House) {
+    if (state is House.Founded && options.any { it.effect is Effect.FoundAt }) {
+        throw HouseError.AlreadyFounded
+    }
+    if (state is House.NotFounded && options.any { it.effect is Effect.Grant || it.effect is Effect.Spend }) {
+        throw HouseError.NoSuchHouse
+    }
+    if (options.all { costsSomething(listOf(it.effect)) }) {
+        throw HouseError.InvalidChoice("every option costs something, so a house that cannot pay could never answer it")
+    }
+}
+
+/**
  * One thing a choice offers: what it is called, a line saying more, and what taking it does.
  *
  * The label and the detail are content, written by whoever gave the choice. The effect is the part the

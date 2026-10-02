@@ -195,4 +195,21 @@ class HouseChoicesSpec : StringSpec({
             HouseDecider.decide(GiveChoice(house, player, aGift, day, noon), HouseDecider.initial)
         }
     }
+
+    "a choice whose every option costs is refused as it is given, since a house that cannot pay could never answer" {
+        val dues = Choice(
+            id = ChoiceId(UUID.fromString("aa000000-0000-4000-8000-00000000c403")),
+            prompt = "The bishop asks for his dues.",
+            options = listOf(
+                Option(purse, "In coin", "Forty pieces.", Effect.Spend(Resource.WEALTH, 40)),
+                Option(letters, "In kind", "Twenty of reason, for a season.", Effect.Spend(Resource.REASON, 20)),
+            ),
+        )
+        shouldThrow<HouseError.InvalidChoice> { HouseDecider.decide(GiveChoice(house, player, dues, day, noon), standing) }
+
+        val later = OptionId(UUID.fromString("aa000000-0000-4000-8000-000000000013"))
+        val withAWayOut = dues.copy(options = dues.options + Option(later, "Not yet", "He can wait.", Effect.Grant(Resource.PIETY, 1)))
+        HouseDecider.decide(GiveChoice(house, player, withAWayOut, day, noon), standing).single()
+            .shouldBeInstanceOf<PlayerGivenChoice>()
+    }
 })
