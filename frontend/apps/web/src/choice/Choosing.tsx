@@ -55,7 +55,7 @@ export function Choosing({ room }: { room: Room }) {
 
   if (room.size === 'strip') {
     return (
-      <section className="choice choice--strip">
+      <section className="choice choice--strip pane-strip">
         <span className="choice__aside">A letter awaits</span>
         <PaneSizeControl room={room} />
       </section>

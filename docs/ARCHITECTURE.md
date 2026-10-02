@@ -82,6 +82,8 @@ packages/protocol  <-  packages/client-core  <-  apps/web
   `stage/bays.css`, `house/house.css`, `dialogues/conversation.css` and the rest - and the order is the cascade:
   a part later in the list wins over an earlier one for a rule of the same weight, and the strips come last. A
   new rule goes in its folder's part, and a new part where it cascades. The size cap holds each part to 400 lines.
+  The stage's rules name no pane: a pane put away draws the one strip, `.pane-strip`, the element that is its
+  card in a tabbed tile is marked `.pane-card`, and how a pane fills a bay is said in its own part.
 - Nothing in the game leans on `debug`. A setting the panel changes and the game reads lives beside what reads
   it - the camera in `map/camera.ts`, the scenery's dial in `sprites/scenery/settings.ts`, the stage's
   arithmetic in `stage/stageBox.ts` - and the panel only sets it, so without the panel each stays where a player

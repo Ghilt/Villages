@@ -16,3 +16,11 @@
   box-shadow: 0 2px 14px var(--shadow);
   overflow-y: auto;
 }
+
+/* In a bay a window fills it, the way the house does, because a bay has no corner to sit into. */
+.stage[data-form='bays'] .bay > .inspect {
+  position: absolute;
+  inset: 0;
+  border-width: 1px 0 0;
+  border-radius: 0;
+}

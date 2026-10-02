@@ -65,7 +65,7 @@ export function Navigating({ room, along, going }: NavigatingProps) {
    */
   if (room.size === 'strip' && along === null) {
     return (
-      <section className="navigate navigate--strip" aria-label="Go to">
+      <section className="navigate navigate--strip pane-card pane-strip" aria-label="Go to">
         <span className="navigate__kind">Go to</span>
         <PaneSizeControl room={room} />
       </section>
@@ -77,7 +77,7 @@ export function Navigating({ room, along, going }: NavigatingProps) {
     const beside: Which = mine === 0 ? 1 : 0;
 
     return (
-      <section className="navigate navigate--strip" aria-label="Go to">
+      <section className="navigate navigate--strip pane-card pane-strip" aria-label="Go to">
         <span className="navigate__kind">Go to</span>
         <span className="navigate__ways">
           {going
@@ -117,7 +117,7 @@ export function Navigating({ room, along, going }: NavigatingProps) {
   const there: Which = mine === 0 ? 1 : 0;
 
   return (
-    <section className="navigate" aria-label="Go to">
+    <section className="navigate pane-card" aria-label="Go to">
       {along !== null && (
         <>
           <header className="navigate__bar">

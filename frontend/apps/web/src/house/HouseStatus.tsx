@@ -86,7 +86,7 @@ export function HouseStatus({ room }: { room: Room }) {
   if (room.size === 'strip') {
     return (
       <div className="hud hud--strip">
-        <section className="hud__panel hud__panel--strip">
+        <section className="hud__panel hud__panel--strip pane-card pane-strip">
           <span className="hud__name">{house === null ? 'No house yet' : house.name}</span>
           <PaneSizeControl room={room} />
         </section>
@@ -99,7 +99,9 @@ export function HouseStatus({ room }: { room: Room }) {
 
   return (
     <div className={small ? 'hud hud--small' : 'hud'} aria-live="polite">
-      <section className={house === null ? 'hud__panel hud__panel--vacant' : 'hud__panel'}>
+      <section
+        className={house === null ? 'hud__panel hud__panel--vacant pane-card' : 'hud__panel pane-card'}
+      >
         <PaneSizeControl room={room} />
 
         <div className="hud__achievement">

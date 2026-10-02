@@ -45,16 +45,6 @@
   color: var(--ink-soft);
 }
 
-/* Set aside: the question is still standing, and this is the way back to it. */
-.choice--strip {
-  flex-direction: row;
-  align-items: center;
-  gap: 0.6rem;
-  /* The compass is standing in the far end of this strip, so whatever the strip put there - the marks
-     on four of them, the word on the map's - steps in from the right rather than sitting under it. */
-  padding: 0 calc(0.3rem + var(--corner-right, 0px)) 0 0.75rem;
-}
-
 .choice__aside {
   flex: 1;
   font-size: 0.85rem;
@@ -194,4 +184,10 @@
   font-size: 0.78rem;
   line-height: 1.4;
   color: var(--ink-soft);
+}
+
+/* In a bay the choice roll fills it, edge to edge, the way everything in a bay does. */
+.stage[data-form='bays'] .bay > .choice {
+  border-width: 1px 0 0;
+  border-radius: 0;
 }

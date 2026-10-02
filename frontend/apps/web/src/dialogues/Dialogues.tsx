@@ -63,7 +63,7 @@ export function Dialogues({ room, inspect }: DialoguesProps) {
 
   if (room.size === 'strip') {
     return (
-      <section className="dialogues dialogues--strip" aria-label="Dialogues">
+      <section className="dialogues dialogues--strip pane-strip" aria-label="Dialogues">
         <span className="dialogues__name">Dialogues</span>
         <span className="dialogues__count">{howMany(dialogues ?? [])}</span>
         <PaneSizeControl room={room} />

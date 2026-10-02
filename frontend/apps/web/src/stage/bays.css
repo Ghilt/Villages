@@ -282,10 +282,11 @@
   color: var(--gold);
 }
 
-/* A pane sharing a tabbed tile gives its top edge to the strip of tabs above it. */
-.bay[data-tabbed] .hud__panel,
-.bay[data-tabbed] .figures,
-.bay[data-tabbed] .navigate {
+/*
+ * A pane sharing a tabbed tile gives its top edge to the strip of tabs above it. Its card is whichever element
+ * the pane marks `pane-card`, so the stage names no pane here.
+ */
+.bay[data-tabbed] .pane-card {
   border-width: 0 1px 0 0;
   border-radius: 0;
   box-shadow: none;

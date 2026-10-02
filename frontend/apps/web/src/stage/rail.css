@@ -57,17 +57,3 @@
 .stage[data-form='bays'] .rail {
   display: contents;
 }
-
-/* In a bay the choice roll fills it, edge to edge, the way everything in a bay does. */
-.stage[data-form='bays'] .bay--choice .choice {
-  border-width: 1px 0 0;
-  border-radius: 0;
-}
-
-/* In a bay a window fills it, the way the house does, because a bay has no corner to sit into. */
-.stage[data-form='bays'] .bay--inspect .inspect {
-  position: absolute;
-  inset: 0;
-  border-width: 1px 0 0;
-  border-radius: 0;
-}

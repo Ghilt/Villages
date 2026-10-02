@@ -1,4 +1,18 @@
-/* Every pane put away and turned on its side: the strips, last, over what each pane says of itself. */
+/* Every pane put away: the strip it is, and the same turned on its side. Last, over what each pane says of itself. */
+
+/*
+ * A pane put away, as a strip across its bay: what it is and the way back, in a row. One rule for every pane
+ * whose strip is the plain one - the house, the key figures, navigation, the choice roll and the dialogues;
+ * a window and the map draw their own. After every pane's own rules, which is what lets it be one class.
+ */
+.pane-strip {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.6rem;
+  /* The compass is standing in the far end of this strip, so whatever the strip put there - the marks
+     on four of them, the word on the map's - steps in from the right rather than sitting under it. */
+  padding: 0 calc(0.3rem + var(--corner-right, 0px)) 0 0.75rem;
+}
 
 /*
  * A strip that is a narrow upright sliver rather than a low wide band.

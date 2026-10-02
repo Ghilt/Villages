@@ -166,16 +166,6 @@
   color: var(--ink-soft);
 }
 
-/* Put away: what it is and the way back, and nothing else - the same strip the house card has. */
-.navigate--strip {
-  flex-direction: row;
-  align-items: center;
-  gap: 0.6rem;
-  /* The compass is standing in the far end of this strip, so whatever the strip put there - the marks
-     on four of them, the word on the map's - steps in from the right rather than sitting under it. */
-  padding: 0 calc(0.3rem + var(--corner-right, 0px)) 0 0.75rem;
-}
-
 .navigate__kind {
   flex: 1;
   font-size: 0.78rem;

@@ -68,7 +68,7 @@ export function KeyFigures({ room }: KeyFiguresProps) {
 
   if (room.size === 'strip') {
     return (
-      <section className="figures figures--strip" aria-label="Key figures">
+      <section className="figures figures--strip pane-card pane-strip" aria-label="Key figures">
         <span className="figures__kind">
           {view.kind === 'details' ? fullName(view.figure) : 'Key figures'}
         </span>
@@ -79,7 +79,7 @@ export function KeyFigures({ room }: KeyFiguresProps) {
 
   return (
     <section
-      className={`figures figures--${room.size} figures--${view.kind}${view.kind === 'details' && view.back ? ' figures--back' : ''}`}
+      className={`figures pane-card figures--${room.size} figures--${view.kind}${view.kind === 'details' && view.back ? ' figures--back' : ''}`}
       aria-label="Key figures"
     >
       <header className="figures__bar">
