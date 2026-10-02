@@ -219,7 +219,9 @@ client, because a client cannot name a story that is not its own.
 
 ## The checklist
 
-What one new event costs, and the check that fails until each part exists.
+What one new event costs, and the check that fails until each part exists. One rule binds every row: a file
+past 400 lines may not grow (`size-ceilings.txt`, decision record 0072), so a part that would have gone into a
+long file goes into a file of its own.
 
 | Part | Where | Held by |
 |---|---|---|

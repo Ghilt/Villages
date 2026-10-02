@@ -228,6 +228,7 @@ own purpose line, and saying so is part of presenting the step.
 
 ```
 CLAUDE.md  README.md  debug-quick-start.{ps1,cmd}  .claude/settings.json  scripts/check.{ps1,sh}
+size-ceilings.txt   every source file over 400 lines, which may only get shorter (decision 0072)
 docs/       VISION SETTING MECHANICS LOOK-AND-FEEL RESPONSIVE-DESIGN GLOSSARY ARCHITECTURE ROADMAP
             TESTING EVENTS BUILDING-A-MECHANIC UI-COMPONENTS AUTHORING-THE-WORLD AUTHORING-THE-ART, adr/,
             experiments/, plans/
@@ -235,7 +236,7 @@ contracts/  fixtures/*.json shared by the Kotlin and TypeScript protocol tests
 infra/      docker-compose.yml (MongoDB replica set, RabbitMQ)
 backend/    Gradle multi-module: domain, application, protocol, infrastructure-occurrent, infrastructure-rabbit,
             projections, gateway, app, arch-tests, load-bots
-frontend/   npm workspaces: packages/protocol, packages/client-core, apps/web
+frontend/   npm workspaces: packages/protocol, packages/client-core, apps/web; tools/ the repository's own checks
 ```
 
 ## Layer rules

@@ -57,6 +57,12 @@ character dialogue, the newest; the UI component library is built and waiting on
   each, are in `docs/plans/ui-component-library.md`: all eleven are built, the larger ones in parts, with a
   contrast check that holds every word to what it needs. It touches none of the game; bringing it into the
   panes is the next work, a surface at a time and a plan each. Adam's own, asked for on 2026-09-30.
+- **A place for every mechanic**: the review of 2026-10-02 found each mechanic threaded by hand through the
+  same thirteen shared files, and those files growing with every one. The fix is a plan of 43 steps over eleven
+  checkpoints that Adam smoke-tests: two checks that stop the growth - the size ceilings (0072) and a rule for
+  which folder of the web app may import which - then the bugs the review found, then a part per mechanic on
+  the server and a session built from slices in `client-core`, then the folders, the panes, the stylesheet and
+  the sprite canvas. Each checkpoint lands on main when it passes. Asked for by Adam on 2026-10-02.
 - **0.4** Local infrastructure: MongoDB replica set and RabbitMQ in Compose
 - **0.8** Testcontainers smoke test on MongoDB and RabbitMQ
 - **1.6** The bridge from the store to the broker

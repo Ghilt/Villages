@@ -40,6 +40,15 @@ export default defineConfig({
           include: ['src/**/*.test.{ts,tsx}', 'vite/**/*.test.ts'],
         },
       },
+      {
+        test: {
+          // The repository's own rules, which read the whole tree: the size ceilings. See docs/adr/0072.
+          name: 'tools',
+          root: 'tools',
+          environment: 'node',
+          include: ['**/*.test.ts'],
+        },
+      },
     ],
   },
 });

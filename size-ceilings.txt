@@ -1,0 +1,46 @@
+# Every source file over 400 lines, and its length today. See docs/adr/0072.
+#
+# A file on this list may only get shorter, and when it does, its number here comes down with it in the same
+# change; one that comes down to 400 lines or fewer leaves the list. A file that is not on it may not pass 400.
+# So a change that needs room in a long file moves something out of it first, and the files every mechanic used
+# to grow by a few dozen lines stop growing.
+#
+# Held by backend/arch-tests (SizeCeilingsSpec, for the Kotlin files) and frontend/tools/sizes.test.ts (for the
+# rest). One line a file: its length, a space, and its path from the repository root. A line is counted as an
+# editor numbers them: every line break, and the last line when it has none.
+
+646 backend/application/src/main/kotlin/villages/application/Ports.kt
+468 backend/domain/src/main/kotlin/villages/domain/HouseDecider.kt
+663 backend/domain/src/test/kotlin/villages/domain/HouseDeciderSpec.kt
+1313 backend/gateway/src/main/kotlin/villages/gateway/Gateway.kt
+1991 backend/gateway/src/test/kotlin/villages/gateway/GatewaySpec.kt
+722 backend/protocol/src/main/kotlin/villages/protocol/Frames.kt
+788 debug-quick-start.ps1
+819 frontend/apps/web/src/admin/showcase/showcase.css
+444 frontend/apps/web/src/areas/AreaOverlay.tsx
+490 frontend/apps/web/src/map/painterlyTiles.ts
+807 frontend/apps/web/src/net/gateway.ts
+429 frontend/apps/web/src/sprites/FogLayer.ts
+855 frontend/apps/web/src/sprites/PixiSpriteRenderer.ts
+733 frontend/apps/web/src/sprites/scenery/SceneryLayer.ts
+603 frontend/apps/web/src/stage/bayBox.test.ts
+459 frontend/apps/web/src/stage/bayBox.ts
+444 frontend/apps/web/src/stage/bays.test.ts
+489 frontend/apps/web/src/stage/bays.ts
+464 frontend/apps/web/src/stage/panes.ts
+3430 frontend/apps/web/src/styles.css
+497 frontend/packages/protocol/src/frames.ts
+533 frontend/packages/world/bin/cutArt.ts
+723 frontend/packages/world/bin/cutUi.ts
+531 frontend/packages/world/bin/generateSpriteMap.ts
+448 frontend/packages/world/bin/renderScenery.ts
+606 frontend/packages/world/src/area.test.ts
+791 frontend/packages/world/src/area.ts
+567 frontend/packages/world/src/art.ts
+467 frontend/packages/world/src/biome.ts
+737 frontend/packages/world/src/lift.ts
+554 frontend/packages/world/src/nineSlice.ts
+723 frontend/packages/world/src/painterly.test.ts
+574 frontend/packages/world/src/painterly.ts
+986 frontend/packages/world/src/uiPlaceholders.ts
+905 world/master/experiment/tools/build.mjs

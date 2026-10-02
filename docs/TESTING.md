@@ -35,6 +35,11 @@ Every increment lands with the test that proves it. The tests are the reason we 
   a random one, a test that writes a file writes it into a temporary folder of its own, and a container, when there
   are containers, is started for the test rather than shared by name. Two modules that shared any of those would
   fail only now and then, and nothing but this rule stops them.
+- No source file may pass 400 lines, and one already past it may only get shorter: `size-ceilings.txt` at the
+  repository root lists each with its length, and `SizeCeilingsSpec` (the Kotlin files) and
+  `frontend/tools/sizes.test.ts` (the rest) fail when a listed file grows, shrinks without its number coming down,
+  or an unlisted one passes the limit. Tests count. So a change that needs room in a long file moves something out
+  of it first. See decision record 0072.
 - MapLibre and Pixi are never instantiated in unit tests. Their maths is pure and tested directly; their pixels get
   one end-to-end smoke test.
 - A test that needs Docker says so in its name, and is skipped with a clear message when Docker is absent.
