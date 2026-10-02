@@ -40,6 +40,12 @@ Every increment lands with the test that proves it. The tests are the reason we 
   `frontend/tools/sizes.test.ts` (the rest) fail when a listed file grows, shrinks without its number coming down,
   or an unlisted one passes the limit. Tests count. So a change that needs room in a long file moves something out
   of it first. See decision record 0072.
+- The page's conversation with the gateway is written down whole in `apps/web/src/net/gateway.test.ts`: what is
+  sent, what the log says in what order, and the state, for every turn it takes - hello, following, a zoom step and
+  its fallback, a refusal, a resync, commands, the house's own frames, a takeover and a close. It drives the page's
+  gateway module over `fakeSocket()` from `@villages/client-core/testing`, which keeps every handler it is given
+  as a browser's socket does, and it does not change when the code under it moves: a move that changes it has
+  changed the conversation.
 - MapLibre and Pixi are never instantiated in unit tests. Their maths is pure and tested directly; their pixels get
   one end-to-end smoke test.
 - A test that needs Docker says so in its name, and is skipped with a clear message when Docker is absent.
