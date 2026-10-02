@@ -135,9 +135,9 @@ class BrokenRequirementsSpec : StringSpec({
             )
         }
         val listener = if (breaks == null) {
-            BrokenRequirements(world, later, world, { noon }, { today })
+            BrokenRequirements(world, later, world, { noon }, { today }).started()
         } else {
-            BrokenRequirements(world, later, world, { noon }, { today }, { event -> breaks(event).orEmpty() })
+            BrokenRequirements(world, later, world, { noon }, { today }, { event -> breaks(event).orEmpty() }).started()
         }
         return Rig(world, later, listener)
     }
@@ -206,7 +206,7 @@ class BrokenRequirementsSpec : StringSpec({
         val before = rig.world.stored.size
 
         val again = WaitingLater()
-        BrokenRequirements(rig.world, again, rig.world, { noon }, { today }).use {
+        BrokenRequirements(rig.world, again, rig.world, { noon }, { today }).started().use {
             again.tick()
         }
 
@@ -236,7 +236,7 @@ class BrokenRequirementsSpec : StringSpec({
             villages.domain.PlayerOfferedDialogue(nowhere, ada, spokenBy(nowhere, her, 1), today, noon),
         )
 
-        rig.listener.apply(offered)
+        rig.listener.hear(offered)
         rig.kill()
         rig.later.tick()
 

@@ -3,6 +3,7 @@ package villages.application
 import villages.domain.HouseResourcePledged
 import villages.domain.HouseError
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicLong
 
 /**
  * The thing that gives a pledge back when its span is up.
@@ -23,6 +24,10 @@ import java.util.UUID
  * Replaying the stream from the beginning schedules a wake-up for every pledge that ever existed. The ones
  * already released fire once, find nothing and stop; the ones overdue fire immediately, which is correct,
  * because the world has passed the day they were waiting for.
+ *
+ * A wipe empties the world the wake-ups were planned in, so a wake-up planned before one does nothing at all,
+ * rather than asking a house that is no longer there, or a new one founded since by the same player, for a
+ * pledge it never made. See decision record 0036.
  */
 class Pledges(
     feed: EventFeed,
@@ -31,15 +36,20 @@ class Pledges(
     private val schedule: WorldSchedule,
     private val clock: Clock,
     private val ids: FreshIds,
-) : AutoCloseable {
-    private val subscription: AutoCloseable = feed.subscribe(Start.FROM_THE_BEGINNING, ::apply)
+) : Follower(feed) {
+    /** Which world the wake-ups belong to: one more for every wipe. */
+    private val world = AtomicLong()
 
-    internal fun apply(stored: StoredEvent) {
+    override fun apply(stored: StoredEvent) {
         val event = stored.event as? HouseResourcePledged ?: return
         val due = schedule.whenIsDay(event.until)
         val waiting = java.time.Duration.between(clock.now(), due).toMillis()
+        val plannedIn = world.get()
 
         later.schedule(waiting.coerceAtLeast(0)) {
+            if (world.get() != plannedIn) {
+                return@schedule
+            }
             try {
                 resources.releaseHeldBy(
                     houseId = event.houseId,
@@ -62,7 +72,8 @@ class Pledges(
         }
     }
 
-    override fun close() {
-        subscription.close()
+    /** Forgets the wake-ups it has planned, because the world they were planned in has been emptied. */
+    override fun reset() {
+        world.incrementAndGet()
     }
 }

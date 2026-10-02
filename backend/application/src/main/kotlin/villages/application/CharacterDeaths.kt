@@ -34,13 +34,11 @@ class CharacterDeaths(
     feed: EventFeed,
     private val later: Later,
     private val keyFigures: KeyFigureService,
-) : AutoCloseable {
+) : Follower(feed) {
     private val holders = ConcurrentHashMap<CharacterId, MutableSet<HouseId>>()
     private val deaths = ConcurrentHashMap<CharacterId, StoredEvent>()
 
-    private val subscription: AutoCloseable = feed.subscribe(Start.FROM_THE_BEGINNING, ::apply)
-
-    internal fun apply(stored: StoredEvent) {
+    override fun apply(stored: StoredEvent) {
         when (val event = stored.event) {
             is CharacterDied -> {
                 deaths[event.characterId] = stored
@@ -81,12 +79,8 @@ class CharacterDeaths(
     }
 
     /** Forgets whom it knew of, because the world they were in has been emptied. See decision 0036. */
-    fun reset() {
+    override fun reset() {
         holders.clear()
         deaths.clear()
-    }
-
-    override fun close() {
-        subscription.close()
     }
 }

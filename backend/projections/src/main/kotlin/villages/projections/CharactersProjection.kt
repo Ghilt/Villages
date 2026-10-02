@@ -10,8 +10,8 @@ import villages.application.Holder
 import villages.application.KeyFiguresByHouse
 import villages.application.KeyFiguresChange
 import villages.application.PlacedCharacter
-import villages.application.Start
 import villages.application.StoredEvent
+import villages.application.Follower
 import villages.domain.Banner
 import villages.domain.CharacterAged
 import villages.domain.CharacterAppeared
@@ -59,7 +59,7 @@ import java.util.concurrent.atomic.AtomicLong
  *
  * Disposable, like every read model: delete it, replay the feed, get it back.
  */
-class CharactersProjection(feed: EventFeed) : KeyFiguresByHouse, CharactersByCell, AutoCloseable {
+class CharactersProjection(feed: EventFeed) : Follower(feed), KeyFiguresByHouse, CharactersByCell {
     private class HouseFacts(val player: PlayerId, val name: HouseName, val banner: Banner)
 
     /** A span with the deepest cell its place falls in and the coarsest zoom it is drawn at, worked out once. */
@@ -74,10 +74,7 @@ class CharactersProjection(feed: EventFeed) : KeyFiguresByHouse, CharactersByCel
     private val mapListeners = CopyOnWriteArraySet<(CharacterMapChange) -> Unit>()
     private val revisions = AtomicLong()
 
-    // From the beginning: a read model is its fold of every event. See decision record 0029.
-    private val subscription: AutoCloseable = feed.subscribe(Start.FROM_THE_BEGINNING, ::apply)
-
-    internal fun apply(stored: StoredEvent) {
+    override fun apply(stored: StoredEvent) {
         when (val event = stored.event) {
             is HouseFounded -> houses[event.houseId] = HouseFacts(event.player, event.name, event.banner)
 
@@ -246,15 +243,11 @@ class CharactersProjection(feed: EventFeed) : KeyFiguresByHouse, CharactersByCel
      * Forgets everyone, because the world they were in has been emptied. The revision keeps climbing, so a
      * client that held a row from before cannot mistake a new one for it. See decision record 0036.
      */
-    fun reset() {
+    override fun reset() {
         characters.clear()
         ties.clear()
         holders.clear()
         houses.clear()
         spans.clear()
-    }
-
-    override fun close() {
-        subscription.close()
     }
 }

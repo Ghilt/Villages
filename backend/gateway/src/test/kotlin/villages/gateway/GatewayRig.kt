@@ -20,6 +20,7 @@ import villages.application.VisionService
 import villages.application.WorldCalendar
 import villages.application.WorldClock
 import villages.application.WriteConflict
+import villages.application.started
 import villages.domain.CharacterCommand
 import villages.domain.CharacterDecider
 import villages.domain.CharacterEvent
@@ -202,12 +203,12 @@ internal class ManualLater : Later {
 internal class Rig {
     val world = TinyWorld()
     val later = ManualLater()
-    val houses = HousesProjection(world)
-    val choices = ChoicesProjection(world)
-    val recent = RecentEventsProjection(world)
-    val characters = CharactersProjection(world)
-    val sights = SightProjection(world)
-    val dialogueRows = DialoguesProjection(world)
+    val houses = HousesProjection(world).started()
+    val choices = ChoicesProjection(world).started()
+    val recent = RecentEventsProjection(world).started()
+    val characters = CharactersProjection(world).started()
+    val sights = SightProjection(world).started()
+    val dialogueRows = DialoguesProjection(world).started()
     val worldClock = WorldClock { today }
     var minted = 0
 

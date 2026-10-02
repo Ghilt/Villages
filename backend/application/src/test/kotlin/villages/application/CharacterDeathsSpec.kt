@@ -132,7 +132,7 @@ class CharacterDeathsSpec : StringSpec({
         val keyFigures = KeyFigureService(world, world, { noon }, { today }, calendar, { 1 }, { emptyList() })
         found(world, ada)
         found(world, bea)
-        return Rig(world, later, keyFigures, CharacterDeaths(world, later, keyFigures))
+        return Rig(world, later, keyFigures, CharacterDeaths(world, later, keyFigures).started())
     }
 
     "a death writes the loss into every house that held them, in the death's story, and caused by it" {
@@ -176,7 +176,7 @@ class CharacterDeathsSpec : StringSpec({
         val before = rig.world.stored.size
 
         val again = HeldLater()
-        CharacterDeaths(rig.world, again, rig.keyFigures).use {
+        CharacterDeaths(rig.world, again, rig.keyFigures).started().use {
             again.tick()
         }
 
@@ -193,8 +193,8 @@ class CharacterDeathsSpec : StringSpec({
             CharacterDied(agnes, "a fever", today, noon),
         )
 
-        rig.characterDeaths.apply(tie)
-        rig.characterDeaths.apply(death)
+        rig.characterDeaths.hear(tie)
+        rig.characterDeaths.hear(death)
         rig.later.tick()
 
         rig.world.losses().shouldBeEmpty()

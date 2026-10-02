@@ -3,8 +3,8 @@ package villages.projections
 import villages.application.ChoiceRow
 import villages.application.ChoicesByPlayer
 import villages.application.EventFeed
-import villages.application.Start
 import villages.application.StoredEvent
+import villages.application.Follower
 import villages.domain.CharacterEvent
 import villages.domain.HouseFounded
 import villages.domain.PlayerGivenChoice
@@ -26,15 +26,12 @@ import java.util.concurrent.CopyOnWriteArraySet
  *
  * Disposable, like every read model: delete it, replay the feed, get it back.
  */
-class ChoicesProjection(feed: EventFeed) : ChoicesByPlayer, AutoCloseable {
+class ChoicesProjection(feed: EventFeed) : Follower(feed), ChoicesByPlayer {
     private val pending = ConcurrentHashMap<PlayerId, ChoiceRow>()
     private val listeners = CopyOnWriteArraySet<(PlayerId, ChoiceRow?) -> Unit>()
 
-    // From the beginning: a read model is its fold of every event. See decision record 0029.
-    private val subscription: AutoCloseable = feed.subscribe(Start.FROM_THE_BEGINNING, ::apply)
-
     /** Folds one stored event. Exhaustive over the event types, so a new one has to be placed. */
-    internal fun apply(stored: StoredEvent) {
+    override fun apply(stored: StoredEvent) {
         when (val event = stored.event) {
             is PlayerGivenChoice -> {
                 val row = ChoiceRow(
@@ -95,11 +92,7 @@ class ChoicesProjection(feed: EventFeed) : ChoicesByPlayer, AutoCloseable {
      * Watchers are not told. Every session is being finished in the same breath and will arrive anew;
      * a last word about a parchment in a world that no longer exists would be noise. See 0036.
      */
-    fun reset() {
+    override fun reset() {
         pending.clear()
-    }
-
-    override fun close() {
-        subscription.close()
     }
 }

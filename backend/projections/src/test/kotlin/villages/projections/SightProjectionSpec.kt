@@ -11,6 +11,7 @@ import villages.application.Start
 import villages.application.StoredEvent
 import villages.application.VisionPoint
 import villages.application.VisionSource
+import villages.application.started
 import villages.domain.Banner
 import villages.domain.CharacterDied
 import villages.domain.CharacterId
@@ -88,12 +89,12 @@ class SightProjectionSpec : StringSpec({
         VisionPoint(VisionSource.KeyFigure(figure(n)), at, Vision.MALLORCA, since, until)
 
     "a house that does not exist sees nothing" {
-        SightProjection(HandFedSightEvents()).of(adas).points.shouldBeEmpty()
+        SightProjection(HandFedSightEvents()).started().of(adas).points.shouldBeEmpty()
     }
 
     "a founded house sees from its seat, from the day it was founded, for as big a circle as Mallorca" {
         val feed = HandFedSightEvents()
-        val sights = SightProjection(feed)
+        val sights = SightProjection(feed).started()
 
         feed.deliver(founded(ada))
 
@@ -104,7 +105,7 @@ class SightProjectionSpec : StringSpec({
 
     "a key figure standing somewhere gives the house vision there, from the day they became its" {
         val feed = HandFedSightEvents()
-        val sights = SightProjection(feed)
+        val sights = SightProjection(feed).started()
         feed.deliver(founded(ada))
 
         // Standing in Uppsala before anyone took them in: what they saw then was nobody's.
@@ -116,7 +117,7 @@ class SightProjectionSpec : StringSpec({
 
     "a key figure on no map gives no vision until they are put somewhere" {
         val feed = HandFedSightEvents()
-        val sights = SightProjection(feed)
+        val sights = SightProjection(feed).started()
         feed.deliver(founded(ada))
         feed.deliver(HouseGainedKeyFigure(adas, figure(1), founding + 1, noon))
 
@@ -129,7 +130,7 @@ class SightProjectionSpec : StringSpec({
 
     "a move closes the point a key figure stood at and opens the next, and the closed one is still revealed" {
         val feed = HandFedSightEvents()
-        val sights = SightProjection(feed)
+        val sights = SightProjection(feed).started()
         feed.deliver(founded(ada))
         feed.deliver(HouseGainedKeyFigure(adas, figure(1), founding, noon))
         feed.deliver(moved(1, uppsala, founding + 1))
@@ -148,7 +149,7 @@ class SightProjectionSpec : StringSpec({
 
     "two moves on one day still reveal the place stood at in between, for no time at all" {
         val feed = HandFedSightEvents()
-        val sights = SightProjection(feed)
+        val sights = SightProjection(feed).started()
         feed.deliver(founded(ada))
         feed.deliver(HouseGainedKeyFigure(adas, figure(1), founding, noon))
 
@@ -162,7 +163,7 @@ class SightProjectionSpec : StringSpec({
 
     "leaving the map, dying and being lost to the house each close the point a key figure gives" {
         val feed = HandFedSightEvents()
-        val sights = SightProjection(feed)
+        val sights = SightProjection(feed).started()
         feed.deliver(founded(ada))
         for (n in 1..3) {
             feed.deliver(HouseGainedKeyFigure(adas, figure(n), founding, noon))
@@ -184,7 +185,7 @@ class SightProjectionSpec : StringSpec({
 
     "one person serving two houses gives both of them vision, each from the day they took them in" {
         val feed = HandFedSightEvents()
-        val sights = SightProjection(feed)
+        val sights = SightProjection(feed).started()
         feed.deliver(founded(ada))
         feed.deliver(founded(bea, seat = visby))
         feed.deliver(moved(1, uppsala, founding))
@@ -197,7 +198,7 @@ class SightProjectionSpec : StringSpec({
 
     "every change is told to the player whose house it is, and what changes nothing is not told" {
         val feed = HandFedSightEvents()
-        val sights = SightProjection(feed)
+        val sights = SightProjection(feed).started()
         val told = mutableListOf<SightChange>()
         sights.watch { told += it }
 
@@ -212,7 +213,7 @@ class SightProjectionSpec : StringSpec({
 
     "vision given outright is a point of its own, as big as its event says, until it is taken away" {
         val feed = HandFedSightEvents()
-        val sights = SightProjection(feed)
+        val sights = SightProjection(feed).started()
         val far = VisionId(UUID.fromString("dd000000-0000-4000-8000-000000000001"))
         feed.deliver(founded(ada))
 
@@ -228,7 +229,7 @@ class SightProjectionSpec : StringSpec({
 
     "a wiped world forgets every house's sight" {
         val feed = HandFedSightEvents()
-        val sights = SightProjection(feed)
+        val sights = SightProjection(feed).started()
         feed.deliver(founded(ada))
 
         sights.reset()

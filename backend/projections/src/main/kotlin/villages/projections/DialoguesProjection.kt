@@ -5,8 +5,8 @@ import villages.application.DialogueRow
 import villages.application.DialoguesByHouse
 import villages.application.DialoguesChange
 import villages.application.EventFeed
-import villages.application.Start
 import villages.application.StoredEvent
+import villages.application.Follower
 import villages.domain.CharacterEvent
 import villages.domain.DialogueId
 import villages.domain.HouseFounded
@@ -34,15 +34,12 @@ import java.util.concurrent.CopyOnWriteArraySet
  *
  * Disposable, like every read model: delete it, replay the feed, get it back.
  */
-class DialoguesProjection(feed: EventFeed) : DialoguesByHouse, AutoCloseable {
+class DialoguesProjection(feed: EventFeed) : Follower(feed), DialoguesByHouse {
     private val byHouse = ConcurrentHashMap<HouseId, List<DialogueRow>>()
     private val listeners = CopyOnWriteArraySet<(DialoguesChange) -> Unit>()
 
-    // From the beginning: a read model is its fold of every event. See decision record 0029.
-    private val subscription: AutoCloseable = feed.subscribe(Start.FROM_THE_BEGINNING, ::apply)
-
     /** Folds one stored event. Exhaustive over the event types, so a new one has to be placed. */
-    internal fun apply(stored: StoredEvent) {
+    override fun apply(stored: StoredEvent) {
         when (val event = stored.event) {
             is PlayerOfferedDialogue -> change(event.houseId, event.player) { rows ->
                 rows + DialogueRow(
@@ -105,11 +102,7 @@ class DialoguesProjection(feed: EventFeed) : DialoguesByHouse, AutoCloseable {
      * Forgets every dialogue, because the world they were offered in has been emptied. Watchers are not told:
      * every session is being finished in the same breath and will arrive anew. See decision record 0036.
      */
-    fun reset() {
+    override fun reset() {
         byHouse.clear()
-    }
-
-    override fun close() {
-        subscription.close()
     }
 }

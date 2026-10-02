@@ -2,8 +2,8 @@ package villages.projections
 
 import villages.application.EventFeed
 import villages.application.RecentEvents
-import villages.application.Start
 import villages.application.StoredEvent
+import villages.application.Follower
 
 /**
  * The end of the chronicle, kept so that it can be read.
@@ -15,14 +15,11 @@ import villages.application.StoredEvent
  *
  * Disposable, like every read model: delete it, replay the feed, get it back.
  */
-class RecentEventsProjection(feed: EventFeed, private val most: Int = RECENT) : RecentEvents, AutoCloseable {
+class RecentEventsProjection(feed: EventFeed, private val most: Int = RECENT) : Follower(feed), RecentEvents {
     private val lock = Any()
     private val held = ArrayDeque<StoredEvent>()
 
-    // From the beginning, because the point of this one is what came before the reader did.
-    private val subscription: AutoCloseable = feed.subscribe(Start.FROM_THE_BEGINNING, ::apply)
-
-    internal fun apply(stored: StoredEvent) {
+    override fun apply(stored: StoredEvent) {
         synchronized(lock) {
             held.addLast(stored)
             while (held.size > most) {
@@ -39,12 +36,8 @@ class RecentEventsProjection(feed: EventFeed, private val most: Int = RECENT) : 
     val size: Int get() = synchronized(lock) { held.size }
 
     /** Forgets them, because the world they happened in has been emptied. See decision record 0036. */
-    fun reset() {
+    override fun reset() {
         synchronized(lock) { held.clear() }
-    }
-
-    override fun close() {
-        subscription.close()
     }
 
     companion object {

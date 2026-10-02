@@ -6,8 +6,8 @@ import villages.application.HouseChange
 import villages.application.HouseRow
 import villages.application.HousesByCell
 import villages.application.HousesByPlayer
-import villages.application.Start
 import villages.application.StoredEvent
+import villages.application.Follower
 import villages.domain.CharacterEvent
 import villages.domain.HouseFounded
 import villages.domain.Pledge
@@ -43,7 +43,7 @@ import java.util.concurrent.atomic.AtomicLong
  *
  * Disposable, like every read model: delete it, replay the feed, get it back.
  */
-class HousesProjection(feed: EventFeed) : HousesByCell, HousesByPlayer, AutoCloseable {
+class HousesProjection(feed: EventFeed) : Follower(feed), HousesByCell, HousesByPlayer {
     private class Indexed(val row: HouseRow, val quadkey: String, val coarsestZoom: Int)
 
     private val rows = ConcurrentHashMap<HouseId, Indexed>()
@@ -52,12 +52,9 @@ class HousesProjection(feed: EventFeed) : HousesByCell, HousesByPlayer, AutoClos
     private val byPlayer = ConcurrentHashMap<PlayerId, HouseId>()
     private val listeners = CopyOnWriteArraySet<(HouseChange) -> Unit>()
     private val applied = AtomicLong()
-    // From the beginning: a read model is its fold of every event, so one it never saw is one it is
-    // permanently wrong about. See decision record 0029.
-    private val subscription: AutoCloseable = feed.subscribe(Start.FROM_THE_BEGINNING, ::apply)
 
     /** Folds one stored event into its row. Exhaustive over the event types, so a new one has to be placed. */
-    internal fun apply(stored: StoredEvent) {
+    override fun apply(stored: StoredEvent) {
         val row = when (val event = stored.event) {
             is HouseFounded -> HouseRow(
                 id = event.houseId,
@@ -190,13 +187,9 @@ class HousesProjection(feed: EventFeed) : HousesByCell, HousesByPlayer, AutoClos
      * decide whether what it holds is stale, and a number that went backwards would tell it the opposite
      * of the truth.
      */
-    fun reset() {
+    override fun reset() {
         rows.clear()
         byPlayer.clear()
         applied.incrementAndGet()
-    }
-
-    override fun close() {
-        subscription.close()
     }
 }

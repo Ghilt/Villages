@@ -8,6 +8,7 @@ import villages.application.DialoguesChange
 import villages.application.EventFeed
 import villages.application.Start
 import villages.application.StoredEvent
+import villages.application.started
 import villages.domain.CharacterId
 import villages.domain.Dialogue
 import villages.domain.DialogueId
@@ -82,7 +83,7 @@ class DialoguesProjectionSpec : StringSpec({
 
     "a dialogue offered is held for its house, open, at revision one, in the story it was offered in" {
         val feed = DialoguesFed()
-        val dialogues = DialoguesProjection(feed)
+        val dialogues = DialoguesProjection(feed).started()
 
         feed.deliver(offered(1), story = "the-letter")
 
@@ -97,7 +98,7 @@ class DialoguesProjectionSpec : StringSpec({
 
     "each step and the end raise the revision, and the steps are kept in the order they were taken" {
         val feed = DialoguesFed()
-        val dialogues = DialoguesProjection(feed)
+        val dialogues = DialoguesProjection(feed).started()
 
         feed.deliver(offered(1))
         feed.deliver(stepped(1, "end"))
@@ -116,7 +117,7 @@ class DialoguesProjectionSpec : StringSpec({
 
     "a house keeps every dialogue in the order it was offered them, open and finished alike" {
         val feed = DialoguesFed()
-        val dialogues = DialoguesProjection(feed)
+        val dialogues = DialoguesProjection(feed).started()
 
         feed.deliver(offered(1))
         feed.deliver(offered(2))
@@ -134,7 +135,7 @@ class DialoguesProjectionSpec : StringSpec({
 
     "whoever watches is told the house's dialogues whenever one of them changes" {
         val feed = DialoguesFed()
-        val dialogues = DialoguesProjection(feed)
+        val dialogues = DialoguesProjection(feed).started()
         val told = mutableListOf<DialoguesChange>()
         dialogues.watch { told += it }
 
@@ -150,7 +151,7 @@ class DialoguesProjectionSpec : StringSpec({
     // Between the two events of the decision the dialogue is open with nothing left in it, which cannot be.
     "the step on the line that ends a dialogue is told with the end, and never as a dialogue open with nothing in it" {
         val feed = DialoguesFed()
-        val dialogues = DialoguesProjection(feed)
+        val dialogues = DialoguesProjection(feed).started()
         val told = mutableListOf<DialoguesChange>()
         dialogues.watch { told += it }
         feed.deliver(offered(1))
@@ -166,17 +167,17 @@ class DialoguesProjectionSpec : StringSpec({
 
     "a read model built from the beginning holds what one that watched it all holds" {
         val feed = DialoguesFed()
-        val watching = DialoguesProjection(feed)
+        val watching = DialoguesProjection(feed).started()
         feed.deliver(offered(1))
         feed.deliver(stepped(1, "end"))
         feed.deliver(finished(1))
 
-        DialoguesProjection(feed).of(house) shouldBe watching.of(house)
+        DialoguesProjection(feed).started().of(house) shouldBe watching.of(house)
     }
 
     "a dialogue lost says which of its requirements failed, and moves its revision on like any change" {
         val feed = DialoguesFed()
-        val dialogues = DialoguesProjection(feed)
+        val dialogues = DialoguesProjection(feed).started()
         val agnes = CharacterId(UUID.fromString("cb732500-39bd-3b39-a838-bb89f719578f"))
 
         feed.deliver(offered(1))
@@ -190,7 +191,7 @@ class DialoguesProjectionSpec : StringSpec({
 
     "a wipe forgets every dialogue" {
         val feed = DialoguesFed()
-        val dialogues = DialoguesProjection(feed)
+        val dialogues = DialoguesProjection(feed).started()
         feed.deliver(offered(1))
 
         dialogues.reset()

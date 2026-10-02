@@ -7,6 +7,7 @@ import io.kotest.matchers.shouldBe
 import villages.application.EventFeed
 import villages.application.Start
 import villages.application.StoredEvent
+import villages.application.started
 import villages.domain.Banner
 import villages.domain.Charge
 import villages.domain.Division
@@ -72,14 +73,14 @@ class RecentEventsProjectionSpec : StringSpec({
         feed.deliver(1)
         feed.deliver(2)
 
-        val recent = RecentEventsProjection(feed)
+        val recent = RecentEventsProjection(feed).started()
 
         recent.latest(10).map { it.id } shouldBe listOf("e-1", "e-2")
     }
 
     "and what happens after it arrived is added to the end" {
         val feed = Chronicle()
-        val recent = RecentEventsProjection(feed)
+        val recent = RecentEventsProjection(feed).started()
 
         feed.deliver(1)
         feed.deliver(2)
@@ -89,7 +90,7 @@ class RecentEventsProjectionSpec : StringSpec({
 
     "oldest first, so a reader is handed them in the order they happened" {
         val feed = Chronicle()
-        val recent = RecentEventsProjection(feed)
+        val recent = RecentEventsProjection(feed).started()
         (1..5).forEach(feed::deliver)
 
         recent.latest(3).map { it.id } shouldBe listOf("e-3", "e-4", "e-5")
@@ -97,7 +98,7 @@ class RecentEventsProjectionSpec : StringSpec({
 
     "only the end of the chronicle is kept, because a read model that grows with the world is a leak" {
         val feed = Chronicle()
-        val recent = RecentEventsProjection(feed, most = 4)
+        val recent = RecentEventsProjection(feed, most = 4).started()
 
         (1..10).forEach(feed::deliver)
 
@@ -107,7 +108,7 @@ class RecentEventsProjectionSpec : StringSpec({
 
     "asking for more than is held is answered with what is held" {
         val feed = Chronicle()
-        val recent = RecentEventsProjection(feed)
+        val recent = RecentEventsProjection(feed).started()
         feed.deliver(1)
 
         recent.latest(100) shouldHaveSize 1
@@ -115,7 +116,7 @@ class RecentEventsProjectionSpec : StringSpec({
 
     "asking for none, or for less than none, is answered with none" {
         val feed = Chronicle()
-        val recent = RecentEventsProjection(feed)
+        val recent = RecentEventsProjection(feed).started()
         feed.deliver(1)
 
         recent.latest(0).shouldBeEmpty()
@@ -124,7 +125,7 @@ class RecentEventsProjectionSpec : StringSpec({
 
     "a reset one has forgotten them, because the world they happened in has been emptied" {
         val feed = Chronicle()
-        val recent = RecentEventsProjection(feed)
+        val recent = RecentEventsProjection(feed).started()
         feed.deliver(1)
 
         recent.reset()
@@ -135,7 +136,7 @@ class RecentEventsProjectionSpec : StringSpec({
 
     "one that has stopped hears nothing more" {
         val feed = Chronicle()
-        val recent = RecentEventsProjection(feed)
+        val recent = RecentEventsProjection(feed).started()
         recent.close()
 
         feed.deliver(1)

@@ -4,10 +4,10 @@ import villages.application.EventFeed
 import villages.application.Sight
 import villages.application.SightChange
 import villages.application.SightsByHouse
-import villages.application.Start
 import villages.application.StoredEvent
 import villages.application.VisionPoint
 import villages.application.VisionSource
+import villages.application.Follower
 import villages.domain.CharacterAged
 import villages.domain.CharacterAppeared
 import villages.domain.CharacterDied
@@ -53,7 +53,7 @@ import java.util.concurrent.CopyOnWriteArraySet
  *
  * Disposable, like every read model: delete it, replay the feed, get it back.
  */
-class SightProjection(feed: EventFeed) : SightsByHouse, AutoCloseable {
+class SightProjection(feed: EventFeed) : Follower(feed), SightsByHouse {
     /** Whose each house is, so that a change reaches the right player. */
     private val players = ConcurrentHashMap<HouseId, PlayerId>()
 
@@ -68,10 +68,7 @@ class SightProjection(feed: EventFeed) : SightsByHouse, AutoCloseable {
 
     private val listeners = CopyOnWriteArraySet<(SightChange) -> Unit>()
 
-    // From the beginning: a read model is its fold of every event. See decision record 0029.
-    private val subscription: AutoCloseable = feed.subscribe(Start.FROM_THE_BEGINNING, ::apply)
-
-    internal fun apply(stored: StoredEvent) {
+    override fun apply(stored: StoredEvent) {
         when (val event = stored.event) {
             is HouseFounded -> {
                 players[event.houseId] = event.player
@@ -170,14 +167,10 @@ class SightProjection(feed: EventFeed) : SightsByHouse, AutoCloseable {
     }
 
     /** Forgets every house's sight, because the world they saw has been emptied. See decision record 0036. */
-    fun reset() {
+    override fun reset() {
         players.clear()
         points.clear()
         holders.clear()
         standing.clear()
-    }
-
-    override fun close() {
-        subscription.close()
     }
 }

@@ -38,7 +38,7 @@ class BrokenRequirements(
     private val clock: Clock,
     private val world: WorldClock,
     private val breaks: (Event) -> Set<Requirement> = ::requirementsBrokenBy,
-) : AutoCloseable {
+) : Follower(feed) {
     /** What each open dialogue needs, by the house it is open in. */
     private val needs = ConcurrentHashMap<Pair<HouseId, DialogueId>, Set<Requirement>>()
 
@@ -48,9 +48,7 @@ class BrokenRequirements(
     /** Every requirement that has failed for good, with the event that broke it. */
     private val failed = ConcurrentHashMap<Requirement, StoredEvent>()
 
-    private val subscription: AutoCloseable = feed.subscribe(Start.FROM_THE_BEGINNING, ::apply)
-
-    internal fun apply(stored: StoredEvent) {
+    override fun apply(stored: StoredEvent) {
         when (val event = stored.event) {
             is PlayerOfferedDialogue -> {
                 val open = event.houseId to event.dialogue.id
@@ -95,13 +93,9 @@ class BrokenRequirements(
     }
 
     /** Forgets what it knew of, because the world it was in has been emptied. See decision 0036. */
-    fun reset() {
+    override fun reset() {
         needs.clear()
         needing.clear()
         failed.clear()
-    }
-
-    override fun close() {
-        subscription.close()
     }
 }

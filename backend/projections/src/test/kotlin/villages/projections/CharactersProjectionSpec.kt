@@ -11,6 +11,7 @@ import villages.application.EventFeed
 import villages.application.KeyFiguresChange
 import villages.application.Start
 import villages.application.StoredEvent
+import villages.application.started
 import villages.domain.Banner
 import villages.domain.CharacterAged
 import villages.domain.CharacterAppeared
@@ -95,7 +96,7 @@ class CharactersProjectionSpec : StringSpec({
 
     fun rig(): Triple<HandFedEvents, CharactersProjection, MutableList<KeyFiguresChange>> {
         val feed = HandFedEvents()
-        val projection = CharactersProjection(feed)
+        val projection = CharactersProjection(feed).started()
         val told = mutableListOf<KeyFiguresChange>()
         projection.watch { told += it }
         feed.deliver(founded(ada, "Ravenscar"))

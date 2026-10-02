@@ -19,6 +19,7 @@ import villages.application.Later
 import villages.application.MonthlyWorldClock
 import villages.application.Pledges
 import villages.application.Portraits
+import villages.application.Resettable
 import villages.application.Stands
 import villages.application.ResourceService
 import villages.application.ScheduledLater
@@ -127,7 +128,7 @@ class WorldConfig {
     fun gatewayLater(faults: Faults): ScheduledLater = ScheduledLater(faults, "villages-gateway")
 
     /** Gives a pledge back when its span is up. One wake-up a pledge, and none at all without one. */
-    @Bean(destroyMethod = "close")
+    @Bean(initMethod = "start", destroyMethod = "close")
     fun pledges(
         world: InMemoryWorld,
         later: ScheduledLater,
@@ -201,12 +202,12 @@ class WorldConfig {
     )
 
     /** Writes a character's death into every house that held them. See decision record 0055. */
-    @Bean(destroyMethod = "close")
+    @Bean(initMethod = "start", destroyMethod = "close")
     fun characterDeaths(world: InMemoryWorld, later: ScheduledLater, keyFigures: KeyFigureService): CharacterDeaths =
         CharacterDeaths(world.feed, later, keyFigures)
 
     /** Carries a broken requirement to every house with a dialogue that needs it. See decision record 0071. */
-    @Bean(destroyMethod = "close")
+    @Bean(initMethod = "start", destroyMethod = "close")
     fun brokenRequirements(
         world: InMemoryWorld,
         later: ScheduledLater,
@@ -215,56 +216,37 @@ class WorldConfig {
     ): BrokenRequirements = BrokenRequirements(world.feed, later, world.executor, { clock.instant() }, worldClock)
 
     /** The map's read model, folded from the feed. In memory, so it starts empty with the store. */
-    @Bean(destroyMethod = "close")
+    @Bean(initMethod = "start", destroyMethod = "close")
     fun houses(world: InMemoryWorld): HousesProjection = HousesProjection(world.feed)
 
     /** What each player has been asked and has not answered, folded from the same feed. */
-    @Bean(destroyMethod = "close")
+    @Bean(initMethod = "start", destroyMethod = "close")
     fun choices(world: InMemoryWorld): ChoicesProjection = ChoicesProjection(world.feed)
 
     /** The end of the chronicle, kept so the event viewer can show what happened before it opened. */
-    @Bean(destroyMethod = "close")
+    @Bean(initMethod = "start", destroyMethod = "close")
     fun recentEvents(world: InMemoryWorld): RecentEventsProjection = RecentEventsProjection(world.feed)
 
     /** The characters, and which of them each house holds, folded from the same feed. See decision 0055. */
-    @Bean(destroyMethod = "close")
+    @Bean(initMethod = "start", destroyMethod = "close")
     fun characters(world: InMemoryWorld): CharactersProjection = CharactersProjection(world.feed)
 
     /** What every house sees, worked out from where its seat and its people stand. See decision 0061. */
-    @Bean(destroyMethod = "close")
+    @Bean(initMethod = "start", destroyMethod = "close")
     fun sights(world: InMemoryWorld): SightProjection = SightProjection(world.feed)
 
     /** Every dialogue each house was offered, and how far each has got, folded from the same feed. See 0071. */
-    @Bean(destroyMethod = "close")
+    @Bean(initMethod = "start", destroyMethod = "close")
     fun dialogueRows(world: InMemoryWorld): DialoguesProjection = DialoguesProjection(world.feed)
 
     /**
-     * Emptying the development world: the store and every read model folded from it, in one act, so that
-     * no projection is left holding a house whose events are gone. See decision record 0036.
+     * Emptying the development world: the store and everything folded from it, in one act, so that nothing is
+     * left holding a house whose events are gone. Everything is every `Resettable` there is, so a read model or a
+     * listener added later is emptied without being named here. See decision record 0036.
      */
     @Bean
-    @Suppress("LongParameterList")
-    fun worldWipe(
-        world: InMemoryWorld,
-        houses: HousesProjection,
-        choices: ChoicesProjection,
-        recentEvents: RecentEventsProjection,
-        characters: CharactersProjection,
-        sights: SightProjection,
-        dialogueRows: DialoguesProjection,
-        characterDeaths: CharacterDeaths,
-        brokenRequirements: BrokenRequirements,
-    ): WorldWipe = WorldWipe {
-        world.wipe().also {
-            houses.reset()
-            choices.reset()
-            recentEvents.reset()
-            characters.reset()
-            sights.reset()
-            dialogueRows.reset()
-            characterDeaths.reset()
-            brokenRequirements.reset()
-        }
+    fun worldWipe(world: InMemoryWorld, folded: List<Resettable>): WorldWipe = WorldWipe {
+        world.wipe().also { folded.forEach(Resettable::reset) }
     }
 
     @Bean(destroyMethod = "close")

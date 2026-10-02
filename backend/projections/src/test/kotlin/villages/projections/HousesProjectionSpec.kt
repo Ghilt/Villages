@@ -9,6 +9,7 @@ import villages.application.HouseChange
 import villages.application.HouseRow
 import villages.application.Start
 import villages.application.StoredEvent
+import villages.application.started
 import villages.domain.Banner
 import villages.domain.Charge
 import villages.domain.Division
@@ -95,7 +96,7 @@ class HousesProjectionSpec : StringSpec({
 
     "a founded house is in its own cell, and in every cell above it down to where its significance runs out" {
         val feed = HandFed()
-        val houses = HousesProjection(feed)
+        val houses = HousesProjection(feed).started()
         feed.deliver(founded("Ravenscar", 59.33, 18.07, significance = 20.0))
 
         // Twenty is worth drawing from zoom eight in, and not from further out.
@@ -108,7 +109,7 @@ class HousesProjectionSpec : StringSpec({
 
     "everything sets significance aside, and nothing else about the query" {
         val feed = HandFed()
-        val houses = HousesProjection(feed)
+        val houses = HousesProjection(feed).started()
         feed.deliver(founded("Ravenscar", 59.33, 18.07, significance = 20.0, on = someDay))
 
         // The whole world, however slight the thing in it: that is the eye. See decision record 0038.
@@ -122,7 +123,7 @@ class HousesProjectionSpec : StringSpec({
 
     "a legendary thing is drawn from the whole world" {
         val feed = HandFed()
-        val houses = HousesProjection(feed)
+        val houses = HousesProjection(feed).started()
         feed.deliver(founded("St John's", 59.33, 18.07, significance = 100.0))
 
         houses.inCell("", someDay, 10).houses shouldHaveSize 1
@@ -131,7 +132,7 @@ class HousesProjectionSpec : StringSpec({
 
     "a house is not in a cell its seat does not fall in" {
         val feed = HandFed()
-        val houses = HousesProjection(feed)
+        val houses = HousesProjection(feed).started()
         feed.deliver(founded("Ravenscar", 59.33, 18.07))
 
         // Cape Town's cell, at the same zoom.
@@ -140,7 +141,7 @@ class HousesProjectionSpec : StringSpec({
 
     "a house exists from its founding world-day onward, and not the day before, whenever it was recorded" {
         val feed = HandFed()
-        val houses = HousesProjection(feed)
+        val houses = HousesProjection(feed).started()
         feed.deliver(founded("Ravenscar", 59.33, 18.07, on = someDay, at = noon))
 
         houses.inCell(STOCKHOLM_Z8, someDay - 1, 10).houses.shouldBeEmpty()
@@ -150,7 +151,7 @@ class HousesProjectionSpec : StringSpec({
 
     "the earliest world-day anything exists from is the scrubber's left end, and nothing means nothing" {
         val feed = HandFed()
-        val houses = HousesProjection(feed)
+        val houses = HousesProjection(feed).started()
         houses.earliest() shouldBe null
 
         feed.deliver(founded("Later", 59.33, 18.07, on = someDay))
@@ -161,7 +162,7 @@ class HousesProjectionSpec : StringSpec({
 
     "the most significant come first, and what will not fit is counted rather than lost" {
         val feed = HandFed()
-        val houses = HousesProjection(feed)
+        val houses = HousesProjection(feed).started()
         feed.deliver(founded("Lesser", 59.33, 18.07, significance = 30.0))
         feed.deliver(founded("Greatest", 59.331, 18.071, significance = 90.0))
         feed.deliver(founded("Middling", 59.332, 18.072, significance = 60.0))
@@ -174,7 +175,7 @@ class HousesProjectionSpec : StringSpec({
 
     "a watcher hears each change as it is applied, and the read model counts what it applied" {
         val feed = HandFed()
-        val houses = HousesProjection(feed)
+        val houses = HousesProjection(feed).started()
         val heard = mutableListOf<HouseChange>()
         houses.watch { heard += it }
 
@@ -189,7 +190,7 @@ class HousesProjectionSpec : StringSpec({
 
     "and says which of them put a house on the map that was not there before" {
         val feed = HandFed()
-        val houses = HousesProjection(feed)
+        val houses = HousesProjection(feed).started()
         val heard = mutableListOf<HouseChange>()
         houses.watch { heard += it }
 
@@ -204,7 +205,7 @@ class HousesProjectionSpec : StringSpec({
 
     "a reset read model has forgotten every house, and still counts forward" {
         val feed = HandFed()
-        val houses = HousesProjection(feed)
+        val houses = HousesProjection(feed).started()
         feed.deliver(founded("Ravenscar", 59.33, 18.07))
         val before = houses.inCell(STOCKHOLM_Z8, someDay, 10).asOf
 
@@ -218,7 +219,7 @@ class HousesProjectionSpec : StringSpec({
 
     "a watcher that stopped hears nothing more" {
         val feed = HandFed()
-        val houses = HousesProjection(feed)
+        val houses = HousesProjection(feed).started()
         val heard = mutableListOf<HouseChange>()
         houses.watch { heard += it }.close()
 
@@ -229,7 +230,7 @@ class HousesProjectionSpec : StringSpec({
 
     "a player's own house can be found, and a player without one has none" {
         val feed = HandFed()
-        val houses = HousesProjection(feed)
+        val houses = HousesProjection(feed).started()
         val adam = PlayerId(UUID.fromString("0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8d"))
         val nobody = PlayerId(UUID.randomUUID())
 
@@ -247,7 +248,7 @@ class HousesProjectionSpec : StringSpec({
         feed.deliver(founded("Ravenscar", 59.33, 18.07))
         feed.deliver(founded("Hollin", 59.34, 18.08))
 
-        val houses = HousesProjection(feed)
+        val houses = HousesProjection(feed).started()
 
         houses.size shouldBe 2
         houses.inCell(STOCKHOLM_Z8, someDay, 10).houses.map { it.name.value }.sorted() shouldBe
@@ -256,7 +257,7 @@ class HousesProjectionSpec : StringSpec({
 
     "folding the same event twice leaves one house, because a feed delivers at least once" {
         val feed = HandFed()
-        val houses = HousesProjection(feed)
+        val houses = HousesProjection(feed).started()
         val twice = founded("Ravenscar", 59.33, 18.07)
 
         feed.deliver(twice)
@@ -268,7 +269,7 @@ class HousesProjectionSpec : StringSpec({
 
     "what a house is given reaches its row, so the owner is told wherever they are looking" {
         val feed = HandFed()
-        val houses = HousesProjection(feed)
+        val houses = HousesProjection(feed).started()
         val ravenscar = founded("Ravenscar", 59.33, 18.07)
         feed.deliver(ravenscar)
 
@@ -281,7 +282,7 @@ class HousesProjectionSpec : StringSpec({
 
     "a pledge reaches the row as a pledge, and releasing it takes it off again" {
         val feed = HandFed()
-        val houses = HousesProjection(feed)
+        val houses = HousesProjection(feed).started()
         val ravenscar = founded("Ravenscar", 59.33, 18.07)
         val glass = PledgeId(UUID.randomUUID())
         feed.deliver(ravenscar)
@@ -303,7 +304,7 @@ class HousesProjectionSpec : StringSpec({
 
     "a change to what a house has tells the watchers, so the fan-out carries it without new plumbing" {
         val feed = HandFed()
-        val houses = HousesProjection(feed)
+        val houses = HousesProjection(feed).started()
         val ravenscar = founded("Ravenscar", 59.33, 18.07)
         feed.deliver(ravenscar)
         val heard = mutableListOf<Boolean>()
@@ -317,7 +318,7 @@ class HousesProjectionSpec : StringSpec({
 
     "a founding written before a resource existed is read with an empty stock of it" {
         val feed = HandFed()
-        val houses = HousesProjection(feed)
+        val houses = HousesProjection(feed).started()
         val founding = founded("Ravenscar", 59.33, 18.07)
         feed.deliver(founding.copy(resources = founding.resources - Resource.PIETY))
 

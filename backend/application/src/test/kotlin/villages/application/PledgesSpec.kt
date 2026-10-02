@@ -20,10 +20,12 @@ import java.util.UUID
  */
 private class TinyWorld : HouseCommandExecutor, EventFeed {
     val events = mutableListOf<HouseEvent>()
+    var commands = 0
     private val stored = mutableListOf<StoredEvent>()
     private val subscribers = mutableListOf<(StoredEvent) -> Unit>()
 
     override fun execute(command: HouseCommand, provenance: Provenance) {
+        commands++
         val decided = HouseDecider.decide(command, HouseDecider.fold(events))
         for (event in decided) {
             events += event
@@ -77,6 +79,9 @@ private val thirtyDayMonths = object : WorldCalendar {
     override fun monthsBetween(from: WorldTime, to: WorldTime) = (to.day - from.day) / 30
 }
 
+/** What a test is handed: the world, its clock for later, the service to pledge with, and the follower. */
+private data class Rig(val world: TinyWorld, val later: ManualLater, val resources: ResourceService, val pledges: Pledges)
+
 class PledgesSpec : StringSpec({
     val opened = Instant.parse("2026-09-01T00:00:00Z")
     val day = 24 * 60 * 60 * 1000L
@@ -84,28 +89,30 @@ class PledgesSpec : StringSpec({
     val house = HouseId.of(player)
     val openingDay = WorldTime(1000)
 
+    fun found(world: TinyWorld, on: WorldTime, at: Instant) = world.execute(
+        villages.domain.FoundHouse(
+            house, player, villages.domain.HouseName("Ravenscar"),
+            villages.domain.Location(59.33, 18.07),
+            villages.domain.Banner(
+                villages.domain.Tincture.SABLE, villages.domain.Division.PLAIN, null,
+                villages.domain.Charge.STAG, villages.domain.Tincture.ARGENT,
+            ),
+            on, at,
+        ),
+        Provenance.startedBy(UUID.randomUUID()),
+    )
+
     /** The world twenty days in: twenty months on, and the clock able to read a day back to an instant. */
-    fun rig(now: Instant = opened.plusMillis(20 * day)): Triple<TinyWorld, ManualLater, ResourceService> {
+    fun rig(now: Instant = opened.plusMillis(20 * day)): Rig {
         val world = TinyWorld()
         val later = ManualLater()
         val clock = MonthlyWorldClock({ now }, thirtyDayMonths, opened, openingDay)
         val resources = ResourceService(world, { now }, clock, thirtyDayMonths, { UUID.randomUUID() })
-        Pledges(world, later, resources, clock, { now }, { UUID.randomUUID() })
+        val pledges = Pledges(world, later, resources, clock, { now }, { UUID.randomUUID() }).started()
         // A house to pledge from, and something to pledge.
-        world.execute(
-            villages.domain.FoundHouse(
-                house, player, villages.domain.HouseName("Ravenscar"),
-                villages.domain.Location(59.33, 18.07),
-                villages.domain.Banner(
-                    villages.domain.Tincture.SABLE, villages.domain.Division.PLAIN, null,
-                    villages.domain.Charge.STAG, villages.domain.Tincture.ARGENT,
-                ),
-                clock.today(), now,
-            ),
-            Provenance.startedBy(UUID.randomUUID()),
-        )
+        found(world, clock.today(), now)
         resources.grant(player, Resource.REASON, 100, Provenance.startedBy(UUID.randomUUID()))
-        return Triple(world, later, resources)
+        return Rig(world, later, resources, pledges)
     }
 
     "a pledge is waited out for as many real days as it has months, because a day is a month" {
@@ -146,7 +153,7 @@ class PledgesSpec : StringSpec({
             clock,
             { muchLater },
             { UUID.randomUUID() },
-        )
+        ).started()
 
         restarted.waits.single() shouldBe 0
         restarted.tick()
@@ -184,5 +191,19 @@ class PledgesSpec : StringSpec({
         later.tick()
 
         world.events.shouldBeEmpty()
+    }
+
+    "a wake-up planned before a wipe asks nothing of the world, though the player has founded again since" {
+        val (world, later, resources, pledges) = rig()
+        resources.pledge(player, Resource.REASON, 35, 10, "clearer glass", Provenance.startedBy(UUID.randomUUID()))
+        // The world is emptied, everything folded from it with it, and the same player founds the same house.
+        world.events.clear()
+        pledges.reset()
+        found(world, WorldTime(1600), opened.plusMillis(20 * day))
+        val asked = world.commands
+
+        later.tick()
+
+        world.commands shouldBe asked
     }
 })

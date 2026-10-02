@@ -8,6 +8,7 @@ import villages.application.ChoiceRow
 import villages.application.EventFeed
 import villages.application.Start
 import villages.application.StoredEvent
+import villages.application.started
 import villages.domain.Banner
 import villages.domain.Charge
 import villages.domain.Choice
@@ -99,7 +100,7 @@ class ChoicesProjectionSpec : StringSpec({
 
     "a player who has been given a choice has one pending, with the story it began" {
         val feed = ChoicesFed()
-        val choices = ChoicesProjection(feed)
+        val choices = ChoicesProjection(feed).started()
         val (event, story) = given("the-founding-story")
 
         feed.deliver(event, story)
@@ -109,12 +110,12 @@ class ChoicesProjectionSpec : StringSpec({
     }
 
     "a player who has been given nothing has nothing" {
-        ChoicesProjection(ChoicesFed()).pendingOf(adam).shouldBeNull()
+        ChoicesProjection(ChoicesFed()).started().pendingOf(adam).shouldBeNull()
     }
 
     "answering it takes it away" {
         val feed = ChoicesFed()
-        val choices = ChoicesProjection(feed)
+        val choices = ChoicesProjection(feed).started()
         feed.deliver(given().first)
 
         feed.deliver(tookAction(), version = 2)
@@ -125,7 +126,7 @@ class ChoicesProjectionSpec : StringSpec({
 
     "and so does founding by other means, because a house standing is not asked where to stand" {
         val feed = ChoicesFed()
-        val choices = ChoicesProjection(feed)
+        val choices = ChoicesProjection(feed).started()
         feed.deliver(given().first)
 
         feed.deliver(aFounding(), version = 2)
@@ -135,7 +136,7 @@ class ChoicesProjectionSpec : StringSpec({
 
     "a watcher hears what each player has to decide, and hears when they no longer do" {
         val feed = ChoicesFed()
-        val choices = ChoicesProjection(feed)
+        val choices = ChoicesProjection(feed).started()
         val heard = mutableListOf<Pair<PlayerId, ChoiceRow?>>()
         choices.watch { player, row -> heard += player to row }
 
@@ -147,7 +148,7 @@ class ChoicesProjectionSpec : StringSpec({
 
     "an answer to nothing tells nobody anything, so a replay does not raise a parchment twice" {
         val feed = ChoicesFed()
-        val choices = ChoicesProjection(feed)
+        val choices = ChoicesProjection(feed).started()
         val heard = mutableListOf<Pair<PlayerId, ChoiceRow?>>()
         choices.watch { player, row -> heard += player to row }
 
@@ -160,12 +161,12 @@ class ChoicesProjectionSpec : StringSpec({
         val feed = ChoicesFed()
         feed.deliver(given().first)
 
-        ChoicesProjection(feed).pendingOf(adam)?.choice shouldBe whereToSettle
+        ChoicesProjection(feed).started().pendingOf(adam)?.choice shouldBe whereToSettle
     }
 
     "a reset projection has forgotten everyone, because the world they were asked in is gone" {
         val feed = ChoicesFed()
-        val choices = ChoicesProjection(feed)
+        val choices = ChoicesProjection(feed).started()
         feed.deliver(given().first)
 
         choices.reset()
@@ -176,7 +177,7 @@ class ChoicesProjectionSpec : StringSpec({
 
     "a watcher that stopped hears nothing more" {
         val feed = ChoicesFed()
-        val choices = ChoicesProjection(feed)
+        val choices = ChoicesProjection(feed).started()
         val heard = mutableListOf<Pair<PlayerId, ChoiceRow?>>()
         choices.watch { player, row -> heard += player to row }.close()
 

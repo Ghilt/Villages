@@ -40,6 +40,11 @@ beside `copy` and `reset`, which are the log's. Where they sat was where the but
 both of these are about the world or the player beginning again. Still no confirmation on either, and
 still the log line as the record. See decision record 0039.
 
+*Amended 2026-10-02:* the wipe empties every `Resettable` there is, which every read model and every
+listener acting on its own is, rather than the list of them it was handed. The list had left out the pledge
+release, whose wake-ups planned before a wipe then asked a house that was gone, or a new one founded by the
+same player, for a pledge it never made. Such a wake-up now does nothing. See `Follower` in `ARCHITECTURE.md`.
+
 ## Consequences
 
 The loop can be tried from nothing in one click, and a second browser can watch the first arrive.
