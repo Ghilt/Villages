@@ -231,8 +231,9 @@ Adam's idea, from the camera going home by accident when a line paid.
   house ever appears as a speaker, are open.
 - **What triggers one**, beyond "anything". The triggers are a list nobody has written, and so is where the
   dialogues themselves are written: the first is a sample in the server, offered from the debug panel.
-- **Where the art comes from.** The scenes are to be a folder of Adam's own pictures, as the portraits are,
-  with placeholders until there are pictures; the characters' expressions are open.
+- **The characters' expressions**: whether a speaker's picture changes with what they say. The scenes are
+  a folder of Adam's own pictures now, `world/scenes/`, as the portraits are, with placeholders until there
+  are pictures.
 - **How the world shapes a dialogue choice** at the moment it is reached, rather than when the dialogue is
   written, and which dialogue choices carry a roll's gamble.
 - **Which other kinds of requirement there are**, and when they come. A building still standing and a day
@@ -263,7 +264,8 @@ speakers have a portrait and a name on every bubble, the key figures' own frame,
 frame's bust. What a line gives or costs is written under it in the feed, the resource's mark and the
 amount, as the house card moves with it; a lapsed dialogue ends on its closing line, *Sadly, X died before
 this could be finished*, in the interface's words; and an option the house cannot pay for is refused in the
-pane, under the options, as well as in the log. There is no scene yet. A line can show something, on the
+pane, under the options, as well as in the log. There is no scene in the pane yet; the scenes are a folder
+of Adam's, `world/scenes/`, with a cut-paper harbour standing in. A line can show something, on the
 wire from version 21 and only while it is still ahead, and the sample's show the seat, the house and the
 figure: reached while playing, a line takes the camera to its place or opens its window, beside the
 conversation on a desktop and in the other bay on a phone, where the two go to half each; once in the life of

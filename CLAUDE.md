@@ -454,6 +454,13 @@ Commands are added here as the increments land:
   at `/portraits/` with no cache, so a picture saved over another is the one drawn on the next reload,
   and the Characters section's `another portrait` picks one from whatever is there. See
   `docs/plans/characters-and-key-figures.md`.
+- Scenes: `world/scenes/` is Adam's folder, committed as the portraits are. Any landscape PNG at least 1536
+  wide, named for the scene a dialogue names, `harbour.png`: the pane shows a band across it, so a picture
+  an image model hands back at three by two needs no cropping. **Saving over a placeholder replaces it and
+  saving a new name adds one.** `npm run world:scenes --prefix frontend` draws a cut-paper placeholder for
+  every scene the server's sample dialogues name, in a second, and **never overwrites a file that is
+  there**. A test holds the folder to these rules, and the dev server serves it at `/scenes/` with no
+  cache, by the same code that serves the portraits. See `docs/plans/character-dialogue.md`.
 - The styles live in `world/painterly.json`. A group in one may carry a `handOver`, which is where its
   treatment gives way to the scenery standing on the same ground: whole far out, mostly gone by the zoom
   the trees are all in, keeping a third of itself so a wood is not bare between them. It is the far end

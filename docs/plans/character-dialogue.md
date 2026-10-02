@@ -176,10 +176,14 @@ control while the panel is minimised.
 
 - a script that draws placeholders and never writes over a file that is there, like
   `packages/world/bin/drawPortraits.ts`;
-- the dev server serving `/scenes/` with no cache, like `apps/web/vite/portraitsApi.ts`;
+- the dev server serving `/scenes/` with no cache, by the same code that serves the portraits,
+  `apps/web/vite/picturesApi.ts`;
 - a test holding the folder to its rules, like `packages/world/src/portraitFolder.test.ts`.
 
-How big a scene is, and how the speakers stand in it, is decided in step 11.
+How big a scene is, and how the speakers stand in it, is decided in step 11. Its first part settled the
+picture: **any landscape PNG at least 1536 wide**, because the pane shows a band across it rather than the
+whole, so a picture an image model hands back at three by two goes in as it is. The placeholders are drawn at
+1536 by 1024.
 
 ## The Dialogues section
 
@@ -288,7 +292,11 @@ A speaker's death is tried with *kill*, in the Characters section.
     flying to the seat and opening the house's window, which on a phone took the bay the conversation was
     in. The house arrives once in the life of a page now, as a dialogue does, in `house/arrival.ts`.
 11. **The scene.** The folder, its placeholders, serving it, its test, and the speakers standing in it at
-    the top of the pane.
+    the top of the pane. In two parts. The first is done: `world/scenes/` with a cut-paper harbour in it,
+    drawn by `npm run world:scenes` from `packages/world/src/scene.ts`, which never draws over a picture that
+    is there; the shapes it is cut in are the portraits' own, moved into `cutPaper.ts`; the dev server
+    serves the folder at `/scenes/`, by the code the portraits' serving became, `picturesApi.ts`; and
+    `sceneFolder.test.ts` holds the folder to its rules. The second is the scene in the pane.
 12. **The feel.** Fades, speakers entering and leaving, the one speaking reacting, and less of all of it for
     anybody who has asked for less motion.
 13. **A line that shows something.** Shown, a line takes the camera to a place, or opens an inspect window
