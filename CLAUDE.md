@@ -336,7 +336,8 @@ Commands are added here as the increments land:
   around the view are painted during the pauses so that moving the map finds them done. See
   `docs/adr/0021` and `0022`.
 - What the program thinks is happening: the debug panel, one space docked down the right-hand side
-  holding everything that helps during development, which minimises to a badge and remembers that.
+  holding everything that helps during development, which minimises to a badge and remembers that,
+  and is only in a development build: a production build leaves it out whole (0079).
   **It takes room from the game rather than floating over it.** What is left is the **stage**, the box
   the player's interface is laid out in and the only thing a player would ever see; two grips resize it,
   and the toggle in the very top right confines it to a phone, which is how to check that a mechanic

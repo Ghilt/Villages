@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 
 import { EventLog } from './admin/EventLog';
 import { App } from './App';
+import type { DevTools } from './App';
 import { note } from './log/log';
 import { chosenMaster, worldRootOf } from './map/masters';
 import { registerPainterlyTiles } from './map/painterlyTiles';
@@ -68,9 +69,17 @@ if (window.location.pathname.startsWith(INSPECT_EVENTS)) {
     `${navigator.hardwareConcurrency ?? '?'} cores reported, so painting is spread over half of them`,
   );
 
-  root.render(
-    <StrictMode>
-      <App master={master} />
-    </StrictMode>,
-  );
+  const play = (devTools: DevTools | null): void =>
+    root.render(
+      <StrictMode>
+        <App master={master} devTools={devTools} />
+      </StrictMode>,
+    );
+  // The debug panel is a development build's alone. A production build has `false` here, so the bundler leaves
+  // the panel out whole - its code, its words and its stylesheet - and a player's page is the stage. See 0079.
+  if (import.meta.env.DEV) {
+    void import('./debug/devTools').then(play);
+  } else {
+    play(null);
+  }
 }

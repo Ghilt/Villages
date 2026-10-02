@@ -95,7 +95,9 @@ packages/world                               <-  apps/web
 - Nothing in the game leans on `debug`. A setting the panel changes and the game reads lives beside what reads
   it - the camera in `map/camera.ts`, the scenery's dial in `sprites/scenery/settings.ts`, the stage's
   arithmetic in `stage/stageBox.ts` - and the panel only sets it, so without the panel each stays where a player
-  has it.
+  has it. **And a player's build has no panel**: `main.tsx` asks for `debug/devTools.ts` - the panel, its grips,
+  their arrangement and their stylesheet - only in a development build, so a production build leaves all of it
+  out, and `App.tsx`, handed nothing, lays the stage out over the whole window (0079).
 
 Enforcement: Gradle module edges plus architecture tests on the backend; workspace dependencies, a DOM-free compiler
 configuration and lint rules on the frontend. A violation fails the build, in both cases proven by a deliberate

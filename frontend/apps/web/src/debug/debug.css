@@ -1,0 +1,11 @@
+/*
+ * The debug panel's stylesheet, a development build's alone: `devTools.ts` brings it in with the panel, so a
+ * player's build has none of it. The parts are in the order they had in `styles.css`, and they now come after
+ * the whole of it, which moves nothing: every rule in them is the panel's own. See decision record 0079.
+ */
+
+@import './grips.css';
+@import './sections.css';
+@import './panel.css';
+@import './areas.css';
+@import './controls.css';

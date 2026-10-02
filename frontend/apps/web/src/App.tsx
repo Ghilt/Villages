@@ -2,14 +2,14 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
 import { charactersInView, housesInView } from '@villages/client-core';
+import type { Readable } from '@villages/client-core';
 import type { CharacterOnMapView, ChoiceView, HouseView } from '@villages/protocol';
 
 import { AreaOverlay } from './areas/AreaOverlay';
 import { openOnArrival } from './dialogues/opening';
-import { DebugPanel } from './debug/DebugPanel';
+import type * as DevToolsModule from './debug/devTools';
+import type { StageArrangement } from './debug/stage';
 import { Desk } from './desk/Desk';
-import { Grips } from './debug/Grips';
-import { stageStore } from './debug/stage';
 import { panelWants, stageBox } from './stage/stageBox';
 import { note } from './log/log';
 import { inspect } from './inspect/opening';
@@ -106,9 +106,21 @@ function candidatesOf(choice: ChoiceView | null): MapSprite[] {
  */
 const FOUNDING_ZOOM = 8.5;
 
+/** What a development build adds to the page: the debug panel, its grips, and how the two are arranged. */
+export type DevTools = typeof DevToolsModule;
+
+/** The stage in a player's build, which has no panel: the whole window, as a panel shut to its badge leaves it. */
+const WHOLE_WINDOW: StageArrangement = { mode: 'fill', shut: true, log: false };
+const NO_PANEL: Readable<StageArrangement> = {
+  get: () => WHOLE_WINDOW,
+  watch: () => () => undefined,
+};
+
 interface AppProps {
   /** Which hand-painted master this page load is drawing. Decided once, in main.tsx. */
   master: string;
+  /** The debug panel and its grips in a development build, and null in a player's. See decision record 0079. */
+  devTools: DevTools | null;
 }
 
 /**
@@ -130,7 +142,7 @@ function useWindow(): { width: number; height: number } {
   return size;
 }
 
-export function App({ master }: AppProps) {
+export function App({ master, devTools }: AppProps) {
   const [map, setMap] = useState<maplibregl.Map | null>(null);
   const [renderer, setRenderer] = useState(DEFAULT_RENDERER);
   // The lattice the ground is painted on, which is Adam's lever rather than a player's. See 0008.
@@ -140,9 +152,10 @@ export function App({ master }: AppProps) {
   const yourChoice = useStore(sessionStore, (state) => state.yourChoice);
   const yourDialogues = useStore(sessionStore, (state) => state.yourDialogues);
   const eye = useStore(eyeStore, (state) => state.open);
-  const mode = useStore(stageStore, (state) => state.mode);
-  const shut = useStore(stageStore, (state) => state.shut);
-  const log = useStore(stageStore, (state) => state.log);
+  const arrangement = devTools?.stageStore ?? NO_PANEL;
+  const mode = useStore(arrangement, (state) => state.mode);
+  const shut = useStore(arrangement, (state) => state.shut);
+  const log = useStore(arrangement, (state) => state.log);
   const window = useWindow();
   const wants = panelWants(shut, log);
   const box = useMemo(() => stageBox(window, mode, wants), [window, mode, wants]);
@@ -302,15 +315,18 @@ export function App({ master }: AppProps) {
        */}
       <Stage stage={box.stage} panes={panes} overlays={<StoodDown />} />
 
-      <DebugPanel
-        map={map}
-        worldRoot={worldRoot}
-        master={master}
-        renderer={renderer}
-        onRenderer={setRenderer}
-      />
-
-      <Grips box={box} wants={wants} />
+      {devTools !== null && (
+        <>
+          <devTools.DebugPanel
+            map={map}
+            worldRoot={worldRoot}
+            master={master}
+            renderer={renderer}
+            onRenderer={setRenderer}
+          />
+          <devTools.Grips box={box} wants={wants} />
+        </>
+      )}
     </main>
   );
 }

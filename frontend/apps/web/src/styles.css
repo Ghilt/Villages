@@ -4,11 +4,13 @@
  * The order is the cascade: a part later in the list wins over one earlier for a rule of the same weight, and
  * the strips come last because a pane put away is drawn over whatever the pane says of itself. A part sits in
  * the folder it styles; a new rule goes in its folder's part, and a new part goes where it cascades.
+ *
+ * The debug panel's parts are not here. They are `debug/debug.css`, which comes with the panel in a development
+ * build and not in a player's. See decision record 0079.
  */
 
 @import './base.css';
 @import './stage/stage.css';
-@import './debug/grips.css';
 @import './desk/desk.css';
 @import './room/room.css';
 @import './map/map.css';
@@ -23,17 +25,13 @@
 @import './net/stood-down.css';
 @import './admin/event-log.css';
 @import './choice/choice.css';
-@import './debug/sections.css';
-@import './debug/panel.css';
 @import './inspect/card.css';
 @import './stage/rail.css';
 @import './inspect/navigate.css';
 @import './figures/figures.css';
 @import './inspect/window.css';
-@import './debug/areas.css';
 @import './map/map-strip.css';
 @import './inspect/navigate-ways.css';
 @import './dialogues/list.css';
 @import './dialogues/conversation.css';
 @import './stage/strips.css';
-@import './debug/controls.css';
