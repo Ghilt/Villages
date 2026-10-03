@@ -44,6 +44,9 @@ nothing, because every rule in it is the panel's own; that was measured, element
   MapLibre's worker is not in the build, so the map never finishes loading and nothing stands on it, though the
   terrain draws. It was so before this decision and is left to a step of its own.
 
+*Amended 2026-10-03:* that step is decision record 0080. A build puts MapLibre's worker beside the chunk
+MapLibre is bundled into, and a served build founds a house from the parchment and draws its castle.
+
 ## Alternatives considered
 
 - **A setting that hides the panel.** The code and the words would still ship, and a player could turn it back
