@@ -79,9 +79,9 @@ packages/world                               <-  apps/web
   decision record 0068.
 - The rest of `apps/web` stands in rows, and a folder imports only the rows above it, and in its own row only what
   the rule names: `ui`, `version`, `marks`, `log` and `geometry`, the ground's own measures, which lean on nothing
-  in the page; `net` and `stage`; the ground drawn, `map`, `fog` and `desk`; what stands on it, `sprites` and
-  `room`; the game's own surfaces, `house`, `figures`, `choice`, `dialogues`, `areas` and `inspect`; and what puts
-  it all together, the root, `debug` and `admin`. No two files import each other, however far round.
+  in the page; `net` and `stage`; the ground drawn, `map`, `fog`, `desk` and `water`; what stands on it,
+  `sprites` and `room`; the game's own surfaces, `house`, `figures`, `choice`, `dialogues`, `areas` and `inspect`;
+  and what puts it all together, the root, `debug` and `admin`. No two files import each other, however far round.
   `src/layers.test.ts` holds it. The imports that broke it on the first day were listed one by one and each
   ended by a step of the plan; none is left. What a surface needs from another surface is handed down: an
   overlay on the map is handed what the map marks and what a pick does, and a pane what it shows beside

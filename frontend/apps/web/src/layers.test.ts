@@ -18,8 +18,8 @@ const ROWS: readonly (readonly string[])[] = [
   ['ui', 'version', 'marks', 'log', 'geometry', 'store'],
   // The connection to the game server, and the stage the panes are laid out in.
   ['net', 'stage'],
-  // The ground, drawn: the map and its paint, the fog over it, the desk under it.
-  ['map', 'fog', 'desk'],
+  // The ground, drawn: the map and its paint, the fog over it, the desk under it, and the water moving on it.
+  ['map', 'fog', 'desk', 'water'],
   // What stands on the ground, and the room around the desk.
   ['sprites', 'room'],
   // The game's own surfaces: the panes and windows a player reads and presses.
@@ -31,6 +31,8 @@ const ROWS: readonly (readonly string[])[] = [
 /** A folder that may import another in its own row. */
 const SIDEWAYS: readonly (readonly [string, string])[] = [
   ['desk', 'map'],
+  // The water's mask measures distance from the shore with the fog's distance transform.
+  ['water', 'fog'],
   ['room', 'sprites'],
   ['dialogues', 'figures'],
   ['dialogues', 'house'],
