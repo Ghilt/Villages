@@ -4,13 +4,13 @@ import { describe, it } from 'node:test';
 import type { Rgba } from '../lib/border.ts';
 import { cutsFromEdges, linesIn, tilesAt } from '../lib/nineSlice/cuts.ts';
 import {
-  borderFileFor,
   clearBackground,
   isClearRound,
   opaque,
-  scaledFile,
   standsOnChecks,
-} from '../lib/nineSlice/frame.ts';
+  standsOnDarkGround,
+} from '../lib/nineSlice/background.ts';
+import { borderFileFor, scaledFile } from '../lib/nineSlice/frame.ts';
 import { readNineSliceRecipe, recipeText } from '../lib/nineSlice/recipe.ts';
 
 type Rgba4 = readonly [number, number, number, number];
@@ -130,6 +130,33 @@ describe('what a frame stands on', () => {
     assert.equal(alphaAt(cleared, 40, 40), 255);
   });
 
+  // Gilt round a night sky with pale clouds standing in from its left edge, on a dark margin: as cool as the
+  // sky, the clouds are told from it by being lighter.
+  const GILT = (x: number, y: number): Rgba4 => [190 + noise(x, y), 140, 70, 255];
+  const onNight = picture(80, 80, (x, y) => {
+    const inward = Math.min(x, y, 79 - x, 79 - y);
+    if (inward < 3) return FELT(x, y);
+    if (inward < 8) return GILT(x, y);
+    if (x < 30 && y > 20 && y < 60) return CLOUD(x, y);
+    return FELT(x, y);
+  });
+
+  it('tells a dark, cool ground round a frame from a frame that runs to the edge', () => {
+    assert.equal(standsOnDarkGround(onNight), true);
+    assert.equal(standsOnDarkGround(onChecks), false);
+    assert.equal(standsOnDarkGround(picture(80, 80, (x, y) => GILT(x, y))), false);
+  });
+
+  it('clears a night sky and the margin round it, and keeps the gilt and the clouds as cool as the sky', () => {
+    const cleared = clearBackground(onNight, { warmth: 30, darker: 90 });
+    assert.equal(alphaAt(cleared, 1, 40), 0);
+    assert.equal(alphaAt(cleared, 50, 40), 0);
+    assert.equal(alphaAt(cleared, 5, 40), 255);
+    assert.equal(alphaAt(cleared, 20, 40), 255);
+    // Told by warmth alone, the clouds go with the sky.
+    assert.equal(alphaAt(clearBackground(onNight, { warmth: 30 }), 20, 40), 0);
+  });
+
   it('keeps everything of a frame that stands on nothing', () => {
     assert.equal(clearBackground(onChecks, 'none'), onChecks);
   });
@@ -172,6 +199,20 @@ describe('a recipe the tool writes', () => {
     assert.equal(
       readNineSliceRecipe('{ "picture": "a.png", "background": "checker" }', 'a').background,
       'checker',
+    );
+  });
+
+  it('can say how dark the ground is as well as how cool, and reads it back', () => {
+    const recipe = {
+      picture: 'cloud.webp',
+      background: { warmth: 30, darker: 90 },
+      repeat: 'round' as const,
+      fill: 'cloud-sky',
+    };
+    assert.deepEqual(readNineSliceRecipe(recipeText(recipe), 'cloud.recipe.json'), recipe);
+    assert.throws(
+      () => readNineSliceRecipe('{ "picture": "a.png", "background": { "warmth": 30, "darker": 0 } }', 'a'),
+      /darker/,
     );
   });
 

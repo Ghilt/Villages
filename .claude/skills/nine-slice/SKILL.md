@@ -43,20 +43,30 @@ Then decide four things, each an option of the tool:
   bottom,left`; tiles with gaps between them, written out, go into the recipe's `"columns"` and `"rows"`,
   three spans of `[first, last]` each, both counted, gap and edge left out, and the border is made from the
   recipe.
-- **What the frame stands on.** `--background` is `auto` unless there is a reason: `alpha` when it is
-  clear round the frame, `checker` on painted checks, `none` when the frame runs to the edge. A number for a
-  gilt frame on anything cooler - stone, black, white, felt: gilt keeps its red well above its blue even in
-  its darkest groove (42 to 107 in the acanthus frame) and the stone it stood on did not (13 to 24). Choose
-  the number between the frame's lowest and the ground's highest. Whatever the picture's edge or its middle
-  can reach through anything cooler is cleared; a dark crevice inside the frame that neither reaches is
-  kept, as the frame's own shadow; a fleck left standing on its own, under a fiftieth the size of the
-  frame, is cleared too.
-- **The middle.** Kept as the border's own by default, which suits a frame whose middle is a clean texture
-  running under its edges. `--fill <name>` makes the middle tile a fill instead, mirrored into a square
-  twice its size so it repeats without a seam. When it is a white box, a picture, or a texture that darkens
-  towards the frame - mirrored, that bands - `--clear-middle` drops it and a painted fill is laid instead:
-  a look in `frontend/packages/world/src/uiFills.ts` in the ground's colours and a placeholder for it in
-  `frontend/packages/world/src/uiPlaceholders.ts`, as `stone` is for the acanthus frame.
+- **What the frame stands on.** `--background` is `auto` unless there is a reason. `alpha` when it is
+  clear round the frame, and what is nearly clear - alpha under 16, the film a saving leaves - is cleared
+  outright. `checker` on painted checks, `none` only when the frame really runs to the edge. A number for
+  a gilt frame on anything cooler - stone, black, white, felt: gilt keeps its red well above its blue even
+  in its darkest groove (42 to 107 in the acanthus frame) and the stone it stood on did not (13 to 24).
+  Choose the number between the frame's lowest and the ground's highest. Where the frame holds something
+  as cool as its ground but lighter - pale clouds on a night sky - say how dark the ground is as well,
+  `30,dark:110`, and only what is both cooler and darker than that is cleared. `auto` chooses that itself
+  for a picture whose edge is a dark, cool ground, and says so. Whatever the picture's edge or its middle
+  can reach through the ground is cleared; a dark crevice inside the frame that neither reaches is kept, as
+  the frame's own shadow; a fleck left standing on its own, under a fiftieth the size of the frame, is
+  cleared too. **A border holds its frame and nothing else**: what it stood on, outside it and inside
+  it, is a fill's to give, so that a pane's ground can be changed - for a light look and a dark one -
+  without painting the frame again.
+- **The middle.** Made a fill with `--fill <name>`, mirrored into a square twice its size so it repeats
+  without a seam: the border keeps only its frame, and the recipe lays the fill under it. Keep the middle
+  as the border's own only when it is part of the frame rather than what the frame stands on - the
+  default, so say `--fill` or `--clear-middle`. When the middle is a white box, a picture, or a texture
+  that darkens towards the frame - mirrored, that bands - `--clear-middle` drops it and a painted fill is
+  laid instead: a look in `frontend/packages/world/src/uiFills.ts` in the ground's colours and a
+  placeholder for it in `frontend/packages/world/src/uiPlaceholders.ts`, as `stone` is for the acanthus
+  frame. `cloud-border`, `cloud-2-border` and `science-border` came in whole, their skies and panel
+  painted in; they were made again from themselves as sources, their middles made `cloud-sky`,
+  `cloud-2-sky` and `science-panel`.
 - **The edges.** `--repeat round`, the default, unless there is a reason: an image model's edge tile is a
   segment with capped ends - an acanthus joint, a column's ring - and `round` lays a whole number of them,
   so none is cut off at a corner. `stretch` for a plain moulding with nothing on it. An edge tile with a
@@ -71,8 +81,8 @@ Then decide four things, each an option of the tool:
     node nine-slice.ts ../world/ui/sources/<name>.webp --name <name> --out <a folder of its own>
 
 writes `<name>.webp` and `<name>.json` - its cuts where the tiles met, where its words start, and, when the
-middle is not kept, a fill reaching four pixels under the frame's inner edge, measured half way along each
-side - and `<name>.recipe.json`, and the fill when there is one. Move the border and its file into
+middle is not kept, a fill reaching four pixels under the frame's inner edge, measured all along each side
+and set by its moulding, not by a cloud or a ray standing in from it - and `<name>.recipe.json`, and the fill when there is one. Move the border and its file into
 `world/ui/borders/`, the recipe into `world/ui/sources/` beside the picture, and a fill into
 `world/ui/fills/`; a recipe in `world/ui/borders/` would be taken for a file of cuts. Made again, it is
 `node nine-slice.ts ../world/ui/sources/<name>.recipe.json --out <a folder>`. The dev server cuts the border

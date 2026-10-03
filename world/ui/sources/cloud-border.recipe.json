@@ -1,0 +1,8 @@
+{
+  "picture": "cloud-border.webp",
+  "background": { "warmth": 30, "darker": 110 },
+  "columns": [[0, 150], [151, 295], [296, 447]],
+  "rows": [[0, 148], [149, 294], [295, 447]],
+  "repeat": "round",
+  "fill": "cloud-sky"
+}

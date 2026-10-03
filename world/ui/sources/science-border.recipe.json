@@ -1,0 +1,8 @@
+{
+  "picture": "science-border.webp",
+  "background": { "warmth": 30, "darker": 110 },
+  "columns": [[0, 136], [137, 313], [314, 447]],
+  "rows": [[0, 145], [146, 302], [303, 447]],
+  "repeat": "round",
+  "fill": "science-panel"
+}

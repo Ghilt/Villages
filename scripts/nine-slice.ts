@@ -6,17 +6,16 @@ import { REPEATS } from './lib/border.ts';
 import type { BorderFile, Repeat, Rgba, Sides } from './lib/border.ts';
 import { cutsFromEdges, linesIn, tilesAt } from './lib/nineSlice/cuts.ts';
 import {
-  borderFileFor,
+  backgroundText,
   clearBackground,
-  scaledFile,
-  contentOf,
-  innerDepths,
+  DARK_GROUND,
   isClearRound,
-  mirroredSquare,
   opaque,
   standsOnChecks,
-} from './lib/nineSlice/frame.ts';
-import type { Background } from './lib/nineSlice/frame.ts';
+  standsOnDarkGround,
+} from './lib/nineSlice/background.ts';
+import type { Background } from './lib/nineSlice/background.ts';
+import { borderFileFor, contentOf, innerDepths, mirroredSquare, scaledFile } from './lib/nineSlice/frame.ts';
 import { readNineSliceRecipe, recipeText } from './lib/nineSlice/recipe.ts';
 import type { NineSliceRecipe } from './lib/nineSlice/recipe.ts';
 import { gapsIn, joined, spanLength, tilesBetween } from './lib/nineSlice/tiles.ts';
@@ -55,8 +54,11 @@ Options:
                        pixels, for a picture with no lines between its tiles
   --background <what>  what the frame stands on, cleared away: auto (the default), none (it runs
                        to the edge and all of it is kept), alpha (it is transparent round the
-                       frame), checker (painted grey and white checks), or a number, for a gilt
-                       frame on stone: anything less warm than that is cleared, 30 is a start
+                       frame; what is nearly so is cleared), checker (painted grey and white
+                       checks), or a number, for a gilt frame on stone: anything less warm than
+                       that is cleared, 30 is a start. 30,dark:110 clears only what is darker
+                       than 110 as well, for pale clouds on a night sky. auto takes a dark, cool
+                       edge for 30,dark:110 and anything else it cannot tell for none
   --fill <name>        make the middle a fill of its own, <name>.webp, instead of keeping it
   --clear-middle       drop the middle, for a fill the game lays under the border
   --width <px>         how wide to make the border, its height and cuts scaled with it. The game
@@ -140,6 +142,12 @@ function backgroundFrom(text: string | undefined, image: Rgba): { background: Ba
   if (text === undefined || text === 'auto') {
     if (isClearRound(image)) return { background: 'alpha', why: 'it is transparent round the frame' };
     if (standsOnChecks(image)) return { background: 'checker', why: 'its edge is painted checks' };
+    if (standsOnDarkGround(image)) {
+      return {
+        background: { ...DARK_GROUND },
+        why: 'its edge is a dark, cool ground, like night or black stone',
+      };
+    }
     return {
       background: 'none',
       why: 'it stands on nothing that could be told from it, so all of it is kept',
@@ -148,11 +156,20 @@ function backgroundFrom(text: string | undefined, image: Rgba): { background: Ba
   if (text === 'none' || text === 'alpha' || text === 'checker') {
     return { background: text, why: 'as --background says' };
   }
-  const warmth = Number(text);
-  if (!Number.isInteger(warmth) || warmth <= 0 || warmth >= 255) {
-    fail('--background is auto, none, alpha, checker, or a warmth from 1 to 254, like 30');
+  const [warmthText, darkText, ...more] = text.split(',');
+  const warmth = Number(warmthText);
+  const darker = darkText?.startsWith('dark:') ? Number(darkText.slice('dark:'.length)) : undefined;
+  const badDark = darkText !== undefined && !(Number.isInteger(darker) && darker! > 0 && darker! <= 255);
+  if (more.length > 0 || badDark || !Number.isInteger(warmth) || warmth <= 0 || warmth >= 255) {
+    fail(
+      '--background is auto, none, alpha, checker, or a warmth from 1 to 254, like 30, and perhaps how dark\n' +
+        'too, like 30,dark:110: only what is both cooler and darker than that is cleared',
+    );
   }
-  return { background: { warmth }, why: 'as --background says' };
+  return {
+    background: darker === undefined ? { warmth } : { warmth, darker },
+    why: 'as --background says',
+  };
 }
 
 interface Tiles {
@@ -274,7 +291,7 @@ async function make(name: string, picture: string, recipe: NineSliceRecipe, out:
   console.log(`\n${name}, from ${picture}, ${given.width} by ${given.height}:`);
   console.log(`  ${how}: columns ${spans(columns)}, rows ${spans(rows)}`);
   console.log(
-    `  ${typeof recipe.background === 'string' ? recipe.background : `warmth ${recipe.background.warmth}`} background, edges laid ${recipe.repeat}, middle ${middle ? 'kept' : recipe.fill ? `made the fill ${recipe.fill}` : 'dropped'}`,
+    `  ${backgroundText(recipe.background)} background, edges laid ${recipe.repeat}, middle ${middle ? 'kept' : recipe.fill ? `made the fill ${recipe.fill}` : 'dropped'}`,
   );
   console.log(`\nWrote ${written.length} files:\n`);
   for (const [path, what] of written) {
@@ -354,6 +371,6 @@ if (input!.endsWith('.json')) {
     ...(values.width === undefined ? {} : { width: widthFrom(values.width) }),
     ...(values.content === undefined ? {} : { content: sidesFrom(values.content, '--content') }),
   };
-  console.log(`background ${typeof background === 'string' ? background : background.warmth}: ${why}`);
+  console.log(`background ${backgroundText(background)}: ${why}`);
   await make(name, picture, recipe, out, tiles.how);
 }

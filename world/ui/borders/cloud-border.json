@@ -1,6 +1,6 @@
 {
   "slice": [149, 152, 153, 151],
   "repeat": "round",
-  "content": [152, 155, 156, 154],
-  "middle": true
+  "content": [100, 145, 99, 147],
+  "fillUnder": [135, 101, 130, 99]
 }

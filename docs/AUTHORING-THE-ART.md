@@ -198,18 +198,25 @@ It finds the cuts itself: between white or black gaps, between thin or engraved 
 no lines, where each edge starts to repeat; `--cuts top,right,bottom,left` says them when it cannot, and
 `--look` says how it would cut a picture without writing anything. It cuts the lines out with the soft edge
 they leave and joins the tiles into one box, its cuts where they met. It clears what the frame stood on -
-nothing, when the frame runs to the picture's edge; its own transparency; painted checks; or, with
-`--background 30`, whatever is cooler than gilt, because gilt keeps its red above its blue and stone, black
-and white do not. It keeps the picture's own middle as the border's, or with `--fill` makes the middle tile
-a fill of its own, mirrored so it repeats, or with `--clear-middle` drops it for a painted one. Its edges are
+nothing, when the frame runs to the picture's edge; its own transparency, and whatever is nearly clear;
+painted checks; or, with `--background 30`, whatever is cooler than gilt, because gilt keeps its red above
+its blue and stone, black and white do not, and with `30,dark:110` only what is darker as well, so that pale
+clouds as cool as the night sky round them stay. A picture whose edge is a dark, cool ground is taken for
+that by itself. **A border holds its frame and nothing else**: with `--fill` the middle tile becomes a fill
+of its own, mirrored so it repeats, or with `--clear-middle` it is dropped for a painted one, and the fill
+reaches under the frame as far as its moulding, measured all along each side. So a pane's ground is the
+fill's, and can be changed without the frame, which is what a light look and a dark one need. The picture's
+own middle is kept as the border's only for a frame whose middle is part of it, like the title plate. Its edges are
 laid `round` unless `--repeat` says otherwise. **How thick it looks is its size**: the game shows a border at a
 quarter of its pixels, so an image model's 1254-pixel frame comes out with corners a hundred pixels across,
 and `--width 448` makes it the size of the moodboard's frames, corners thirty to forty across. The recipe
 remembers it. It also works out where the frame's words start - past each
 edge at its deepest, and clear of each corner's ornament by whichever side costs the words less room - and
 writes it as `content`; `--content` says it instead. `borders/gilt-cherubs` with `fills/dark-felt`, and
-`borders/gilt-acanthus` on the painted `fills/stone`, were made that way, and their pictures and recipes
-are kept in `world/ui/sources/`. Run with nothing, it prints its help.
+`borders/gilt-acanthus` on the painted `fills/stone`, were made that way, and so were `cloud-border`,
+`cloud-2-border` and `science-border`, from the whole frames Adam first gave, with their skies and panel made
+`fills/cloud-sky`, `cloud-2-sky` and `science-panel`; their pictures and recipes are kept in
+`world/ui/sources/`. Run with nothing, it prints its help.
 
 So **an edge has to repeat without a seam**: whatever is at its left end has to meet its right, or be
 stretched. Anything that must not repeat - a cross on the crown, a cherub - is not part of the border but

@@ -2,13 +2,8 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import type { Rgba } from '../lib/border.ts';
-import {
-  borderFileFor,
-  clearBackground,
-  contentOf,
-  innerDepths,
-  mirroredSquare,
-} from '../lib/nineSlice/frame.ts';
+import { clearBackground } from '../lib/nineSlice/background.ts';
+import { borderFileFor, contentOf, innerDepths, mirroredSquare } from '../lib/nineSlice/frame.ts';
 import { readNineSliceRecipe } from '../lib/nineSlice/recipe.ts';
 import { gapsIn, joined, tilesBetween } from '../lib/nineSlice/tiles.ts';
 
@@ -146,8 +141,12 @@ describe('what a frame stands on, cleared', () => {
     assert.deepEqual(pixel(cleared, 9, 3), [...GROOVE]);
   });
 
-  it('leaves a picture that is clear round its frame as it is', () => {
-    assert.equal(clearBackground(framed, 'alpha'), framed);
+  it('leaves a picture that is clear round its frame as it is, but for what is nearly clear', () => {
+    const filmed = picture(20, 20, (x, y) => (x === 0 ? [250, 250, 250, 2] : y === 0 ? [9, 9, 9, 40] : GILT));
+    const cleared = clearBackground(filmed, 'alpha');
+    assert.equal(pixel(cleared, 0, 5)[3], 0);
+    assert.deepEqual(pixel(cleared, 5, 0), [9, 9, 9, 40]);
+    assert.deepEqual(pixel(cleared, 5, 5), [...GILT]);
   });
 
   it('says how deep the frame is on each side, for a fill to begin under it', () => {
@@ -159,6 +158,19 @@ describe('what a frame stands on, cleared', () => {
       content: [5, 5, 5, 5],
       fillUnder: [5, 5, 5, 5],
     });
+  });
+});
+
+describe('how deep a frame is, for a fill to begin under it', () => {
+  // A moulding two deep round a clear middle, and in the middle of its top edge an ornament hanging six
+  // deep, as a sunburst does from a cloud border's crown.
+  const hung = picture(30, 30, (x, y) => {
+    const edge = Math.min(x, y, 29 - x, 29 - y);
+    return edge < 2 || (y < 8 && x >= 13 && x <= 16) ? GILT : CLEAR;
+  });
+
+  it('is the moulding’s, not an ornament’s standing in from it half way along', () => {
+    assert.deepEqual(innerDepths(hung, [6, 6, 6, 6]), [2, 2, 2, 2]);
   });
 });
 

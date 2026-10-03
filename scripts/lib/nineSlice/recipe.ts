@@ -5,7 +5,7 @@
 
 import { REPEATS } from '../border.ts';
 import type { Repeat, Sides } from '../border.ts';
-import type { Background } from './frame.ts';
+import type { Background } from './background.ts';
 import type { Span } from './tiles.ts';
 
 /** What a recipe says: how a picture is made into a border. */
@@ -71,11 +71,15 @@ export function readNineSliceRecipe(text: string, where: string): NineSliceRecip
   }
   const background = given.background;
   const warmth = (background as { warmth?: unknown } | null)?.warmth;
+  const darker = (background as { darker?: unknown } | null)?.darker;
   const named = background === 'alpha' || background === 'none' || background === 'checker';
-  if (!named && !(typeof warmth === 'number' && warmth > 0 && warmth < 255)) {
+  const lengthUpTo = (value: unknown, most: number) =>
+    typeof value === 'number' && Number.isInteger(value) && value > 0 && value <= most;
+  if (!named && !(lengthUpTo(warmth, 254) && (darker === undefined || lengthUpTo(darker, 255)))) {
     throw new Error(
       `${where}: background is "alpha", for a picture clear round its frame, "none", for one that stands on ` +
-        'nothing, "checker", for one on painted checks, or { "warmth": 30 }, for a gilt frame on anything cooler',
+        'nothing, "checker", for one on painted checks, or { "warmth": 30 }, for a gilt frame on anything cooler, ' +
+        'with "darker": 90 for only what is darker as well',
     );
   }
   if (given.middle !== undefined && typeof given.middle !== 'boolean') {
@@ -104,7 +108,11 @@ export function readNineSliceRecipe(text: string, where: string): NineSliceRecip
   }
   return {
     picture: given.picture,
-    background: named ? (background as 'alpha' | 'none' | 'checker') : { warmth: warmth as number },
+    background: named
+      ? (background as 'alpha' | 'none' | 'checker')
+      : darker === undefined
+        ? { warmth: warmth as number }
+        : { warmth: warmth as number, darker: darker as number },
     ...(given.columns === undefined ? {} : { columns: given.columns as [Span, Span, Span] }),
     ...(given.rows === undefined ? {} : { rows: given.rows as [Span, Span, Span] }),
     repeat: repeat as Repeat,
@@ -145,6 +153,10 @@ export function recipeText(recipe: NineSliceRecipe): string {
   const oneLine = (_: string, inside: string) => `[${inside.replace(/\s+/g, ' ')}]`;
   const text = JSON.stringify(ordered, null, 2)
     .replace(/\[\s+([^[\]]*?)\s+\]/g, oneLine)
-    .replace(/\[\s+(\[[^\]]*\](?:,\s+\[[^\]]*\])*)\s+\]/g, oneLine);
+    .replace(/\[\s+(\[[^\]]*\](?:,\s+\[[^\]]*\])*)\s+\]/g, oneLine)
+    .replace(
+      /"background": \{\s+([^{}]*?)\s+\}/,
+      (_, inside: string) => `"background": { ${inside.replace(/\s+/g, ' ')} }`,
+    );
   return `${text}\n`;
 }
