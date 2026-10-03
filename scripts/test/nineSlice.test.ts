@@ -1,17 +1,16 @@
-import { describe, expect, it } from 'vitest';
+import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
 
-import type { Rgba } from './art.ts';
+import type { Rgba } from '../lib/border.ts';
 import {
   borderFileFor,
   clearBackground,
   contentOf,
-  gapsIn,
   innerDepths,
-  joined,
   mirroredSquare,
-  readNineSliceRecipe,
-  tilesBetween,
-} from './nineSlice.ts';
+} from '../lib/nineSlice/frame.ts';
+import { readNineSliceRecipe } from '../lib/nineSlice/recipe.ts';
+import { gapsIn, joined, tilesBetween } from '../lib/nineSlice/tiles.ts';
 
 type Rgba4 = readonly [number, number, number, number];
 
@@ -48,7 +47,7 @@ describe('the lines an image model leaves between its tiles', () => {
   });
 
   it('are found, white, across and down', () => {
-    expect(gapsIn(sheet)).toEqual({
+    assert.deepEqual(gapsIn(sheet), {
       columns: [
         [8, 9],
         [18, 19],
@@ -69,7 +68,7 @@ describe('the lines an image model leaves between its tiles', () => {
       }
       return x === 7 ? [200, 196, 192, 120] : CLEAR;
     });
-    expect(gapsIn(fringed).columns).toEqual([
+    assert.deepEqual(gapsIn(fringed).columns, [
       [7, 9],
       [18, 19],
     ]);
@@ -82,37 +81,39 @@ describe('the lines an image model leaves between its tiles', () => {
       }
       return x === 10 || x === 20 || y === 10 || y === 20 ? BLACK : STONE;
     });
-    expect(gapsIn(dark)).toMatchObject({
-      columns: [
-        [10, 10],
-        [20, 20],
-      ],
-      shade: 'dark',
-    });
+    const found = gapsIn(dark);
+    assert.deepEqual(found.columns, [
+      [10, 10],
+      [20, 20],
+    ]);
+    assert.equal(found.shade, 'dark');
   });
 
   it('leave three tiles, which join edge to edge', () => {
     const columns = tilesBetween(gapsIn(sheet).columns, 28);
-    expect(columns).toEqual([
+    assert.deepEqual(columns, [
       [0, 7],
       [10, 17],
       [20, 27],
     ]);
     const whole = joined(sheet, columns, columns, false);
-    expect([whole.width, whole.height]).toEqual([24, 24]);
+    assert.deepEqual([whole.width, whole.height], [24, 24]);
     // The middle tile's gilt pixel, from (14, 14), now at (12, 12): nothing white is left.
-    expect(pixel(whole, 12, 12)).toEqual([...GILT]);
-    expect(pixel(whole, 8, 8)).toEqual([...CLEAR]);
-    expect([...whole.data].some((value, at) => at % 4 === 0 && value === 253)).toBe(false);
+    assert.deepEqual(pixel(whole, 12, 12), [...GILT]);
+    assert.deepEqual(pixel(whole, 8, 8), [...CLEAR]);
+    assert.equal(
+      [...whole.data].some((value, at) => at % 4 === 0 && value === 253),
+      false,
+    );
   });
 
   it('can leave the middle tile out, for a fill to take its place', () => {
     const columns = tilesBetween(gapsIn(sheet).columns, 28);
-    expect(pixel(joined(sheet, columns, columns, true), 12, 12)).toEqual([...CLEAR]);
+    assert.deepEqual(pixel(joined(sheet, columns, columns, true), 12, 12), [...CLEAR]);
   });
 
   it('refuse to be guessed at when there are not two of them', () => {
-    expect(() => tilesBetween([[3, 4]], 20)).toThrow(/two/);
+    assert.throws(() => tilesBetween([[3, 4]], 20), /two/);
   });
 });
 
@@ -132,27 +133,27 @@ describe('what a frame stands on, cleared', () => {
   const cleared = clearBackground(framed, { warmth: 30 });
 
   it('is clear outside the frame and inside it', () => {
-    expect(pixel(cleared, 0, 0)[3]).toBe(0);
-    expect(pixel(cleared, 10, 10)[3]).toBe(0);
+    assert.equal(pixel(cleared, 0, 0)[3], 0);
+    assert.equal(pixel(cleared, 10, 10)[3], 0);
   });
 
   it('takes away a fleck of what it stood on as warm as the frame, which is no part of it', () => {
-    expect(pixel(cleared, 9, 9)[3]).toBe(0);
+    assert.equal(pixel(cleared, 9, 9)[3], 0);
   });
 
   it('leaves the frame whole, its own dark groove too', () => {
-    expect(pixel(cleared, 3, 10)[3]).toBe(255);
-    expect(pixel(cleared, 9, 3)).toEqual([...GROOVE]);
+    assert.equal(pixel(cleared, 3, 10)[3], 255);
+    assert.deepEqual(pixel(cleared, 9, 3), [...GROOVE]);
   });
 
   it('leaves a picture that is clear round its frame as it is', () => {
-    expect(clearBackground(framed, 'alpha')).toBe(framed);
+    assert.equal(clearBackground(framed, 'alpha'), framed);
   });
 
   it('says how deep the frame is on each side, for a fill to begin under it', () => {
     const depths = innerDepths(cleared, [6, 6, 6, 6]);
-    expect(depths).toEqual([5, 5, 5, 5]);
-    expect(borderFileFor([6, 6, 6, 6], depths, 'round', [5, 5, 5, 5])).toEqual({
+    assert.deepEqual(depths, [5, 5, 5, 5]);
+    assert.deepEqual(borderFileFor([6, 6, 6, 6], depths, 'round', [5, 5, 5, 5]), {
       slice: [6, 6, 6, 6],
       repeat: 'round',
       content: [5, 5, 5, 5],
@@ -179,16 +180,16 @@ describe('where a frame’s words start', () => {
   });
 
   it('is past the deepest of each edge, its ring and not only its shaft', () => {
-    expect(contentOf(frame, [12, 12, 12, 12], 0)[3]).toBe(5);
+    assert.equal(contentOf(frame, [12, 12, 12, 12], 0)[3], 5);
   });
 
   it('is clear of a corner’s ornament, by whichever side costs the words less room', () => {
     // Clearing the ornament across would take the left side to ten; down, the top only to seven.
-    expect(contentOf(frame, [12, 12, 12, 12], 0)).toEqual([7, 3, 3, 5]);
+    assert.deepEqual(contentOf(frame, [12, 12, 12, 12], 0), [7, 3, 3, 5]);
   });
 
   it('is inside the cuts for a frame with deep corners and thin edges, and then a margin', () => {
-    expect(contentOf(frame, [12, 12, 12, 12], 2)).toEqual([9, 5, 5, 7]);
+    assert.deepEqual(contentOf(frame, [12, 12, 12, 12], 2), [9, 5, 5, 7]);
   });
 });
 
@@ -196,40 +197,46 @@ describe('a fill made of the middle tile', () => {
   it('is mirrored into a square twice its size, so that every edge meets itself', () => {
     const tile = picture(5, 4, (x, y) => [x * 40, y * 50, 7, 255]);
     const fill = mirroredSquare(tile, [0, 4], [0, 3]);
-    expect([fill.width, fill.height]).toEqual([8, 8]);
+    assert.deepEqual([fill.width, fill.height], [8, 8]);
     for (let at = 0; at < 8; at += 1) {
-      expect(pixel(fill, 0, at)).toEqual(pixel(fill, 7, at));
-      expect(pixel(fill, at, 0)).toEqual(pixel(fill, at, 7));
+      assert.deepEqual(pixel(fill, 0, at), pixel(fill, 7, at));
+      assert.deepEqual(pixel(fill, at, 0), pixel(fill, at, 7));
     }
   });
 });
 
 describe('a recipe for one', () => {
   it('says what the picture is and how its frame is told from what it stands on', () => {
-    expect(
+    assert.deepEqual(
       readNineSliceRecipe('{ "picture": "frame.webp", "background": { "warmth": 30 } }', 'frame.json'),
-    ).toEqual({ picture: 'frame.webp', background: { warmth: 30 }, repeat: 'round' });
+      { picture: 'frame.webp', background: { warmth: 30 }, repeat: 'round' },
+    );
   });
 
   it('can say where the words start, rather than leave it to be worked out', () => {
-    expect(
+    assert.deepEqual(
       readNineSliceRecipe(
         '{ "picture": "f.webp", "background": "alpha", "content": [60, 160, 60, 160] }',
         'f.json',
       ).content,
-    ).toEqual([60, 160, 60, 160]);
-    expect(() =>
-      readNineSliceRecipe('{ "picture": "f.webp", "background": "alpha", "content": [60, 160] }', 'f.json'),
-    ).toThrow(/one length or four/);
+      [60, 160, 60, 160],
+    );
+    assert.throws(
+      () =>
+        readNineSliceRecipe('{ "picture": "f.webp", "background": "alpha", "content": [60, 160] }', 'f.json'),
+      /one length or four/,
+    );
   });
 
   it('refuses what it would have to guess at, saying what to write', () => {
-    expect(() => readNineSliceRecipe('{ "picture": "a.webp" }', 'a.json')).toThrow(/background/);
-    expect(() =>
-      readNineSliceRecipe('{ "picture": "a.webp", "background": "alpha", "rows": [[0, 4]] }', 'a.json'),
-    ).toThrow(/three spans/);
-    expect(() =>
-      readNineSliceRecipe('{ "picture": "a.webp", "background": "alpha", "tiles": 9 }', 'a.json'),
-    ).toThrow(/not something a recipe says/);
+    assert.throws(() => readNineSliceRecipe('{ "picture": "a.webp" }', 'a.json'), /background/);
+    assert.throws(
+      () => readNineSliceRecipe('{ "picture": "a.webp", "background": "alpha", "rows": [[0, 4]] }', 'a.json'),
+      /three spans/,
+    );
+    assert.throws(
+      () => readNineSliceRecipe('{ "picture": "a.webp", "background": "alpha", "tiles": 9 }', 'a.json'),
+      /not something a recipe says/,
+    );
   });
 });

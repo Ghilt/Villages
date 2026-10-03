@@ -182,25 +182,34 @@ The title plate is a border too, `plate`, whose own middle is its parchment, so 
 `"middle": true` and a recipe lays no fill under it.
 
 **A frame that was not painted as a border** - an image model's nine tiles with lines between them, a
-framed box standing on stone or black, with a box of white over its middle - is kept as you gave it in
-`world/ui/sources/`, and made into one by the nine-slice tool from a recipe beside it:
+frame painted whole with no lines at all, a framed box standing on stone, black or painted checks - is made
+into one by the nine-slice tool, one of your tools in `scripts/`. Give it the picture, wherever it is, and a
+name:
 
-    npm run world:nine-slice --prefix frontend -- gilt-acanthus
+    node nine-slice.ts "E:/Hämtade filer/frame.png" --name cloud-sunburst
 
-It cuts the lines between the tiles out, with the pale or dark edge they leave on the tiles beside them,
-and joins the tiles into one box, its cuts where they met; it clears what the frame stood on, outside it
-and inside it - by its own transparency, or by warmth, because gilt keeps its red above its blue and stone,
-black and white do not; and it makes the middle tile a fill of its own, mirrored so it repeats, or leaves it
-out for a painted one. The middle is never the border's own, because a frame's edges are clear inside their
-moulding and a middle drawn only between the cuts would leave a clear band all round. It also works out
-where the frame's words start - past each edge at its deepest, a column's ring and not only its shaft, and
-clear of each corner's ornament by whichever side costs the words less room - and writes it as `content`;
-a recipe that says `"content"` itself is written instead, so making the border again never loses it. The
-recipe says
-which, and the agent writes it, by the nine-slice skill in `.claude/skills/nine-slice/`: hand over the
-picture and say it is a frame. `borders/gilt-cherubs` with `fills/dark-felt`, and `borders/gilt-acanthus`
-on the painted `fills/stone`, were made that way, and are made again from their sources by the same
-command.
+and it writes three files into the folder you ran it in, or `--out`, and ends by saying what each is and
+where: `cloud-sunburst.webp` and `cloud-sunburst.json`, the border and its file of cuts, which go into
+`world/ui/borders/`; and `cloud-sunburst.recipe.json`, how it was made, so that
+`node nine-slice.ts cloud-sunburst.recipe.json` makes it again the same way. The recipe stays with the
+picture and never goes into `world/ui/borders/`, where it would be taken for a file of cuts.
+
+It finds the cuts itself: between white or black gaps, between thin or engraved lines, and in a frame with
+no lines, where each edge starts to repeat; `--cuts top,right,bottom,left` says them when it cannot, and
+`--look` says how it would cut a picture without writing anything. It cuts the lines out with the soft edge
+they leave and joins the tiles into one box, its cuts where they met. It clears what the frame stood on -
+nothing, when the frame runs to the picture's edge; its own transparency; painted checks; or, with
+`--background 30`, whatever is cooler than gilt, because gilt keeps its red above its blue and stone, black
+and white do not. It keeps the picture's own middle as the border's, or with `--fill` makes the middle tile
+a fill of its own, mirrored so it repeats, or with `--clear-middle` drops it for a painted one. Its edges are
+laid `round` unless `--repeat` says otherwise. **How thick it looks is its size**: the game shows a border at a
+quarter of its pixels, so an image model's 1254-pixel frame comes out with corners a hundred pixels across,
+and `--width 448` makes it the size of the moodboard's frames, corners thirty to forty across. The recipe
+remembers it. It also works out where the frame's words start - past each
+edge at its deepest, and clear of each corner's ornament by whichever side costs the words less room - and
+writes it as `content`; `--content` says it instead. `borders/gilt-cherubs` with `fills/dark-felt`, and
+`borders/gilt-acanthus` on the painted `fills/stone`, were made that way, and their pictures and recipes
+are kept in `world/ui/sources/`. Run with nothing, it prints its help.
 
 So **an edge has to repeat without a seam**: whatever is at its left end has to meet its right, or be
 stretched. Anything that must not repeat - a cross on the crown, a cherub - is not part of the border but

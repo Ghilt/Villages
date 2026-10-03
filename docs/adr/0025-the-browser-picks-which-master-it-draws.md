@@ -26,6 +26,11 @@ Every master in `world/master` is a world the browser can ask for, and the dev s
   default included. `world:import` and `world:tile` with no arguments write `masters/terrain/`, and each
   takes a master as its first argument. There is no special case for the default: loading `terrain` and
   loading `terrain2` are the same operation.
+
+  *Amended 2026-10-03:* the default is now `terrain3_mended_2026-10-03`, terrain3 with its rivers mended
+  by `scripts/mend-rivers.ts`, so the commands with no arguments write `masters/terrain3_mended_2026-10-03/`.
+  It is named once, `DEFAULT_MASTER` in `packages/world/src/masters.ts`, and once more in
+  `debug-quick-start.ps1`, which cannot import it. A browser that has picked a master keeps it.
 - **What counts as a master is one rule in one place**, `packages/world/src/masters.ts`, because three
   things ask: the importer, the tiler, and the dev server listing them for the browser. Any PNG in the
   folder is a master except the palette strip and the previews the importer writes.

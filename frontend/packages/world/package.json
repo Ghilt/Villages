@@ -25,8 +25,7 @@
     "portraits": "node bin/drawPortraits.ts",
     "scenes": "node bin/drawScenes.ts",
     "art": "node bin/cutArt.ts",
-    "ui": "node bin/cutUi.ts",
-    "nine-slice": "node bin/nineSlice.ts"
+    "ui": "node bin/cutUi.ts"
   },
   "devDependencies": {
     "fflate": "^0.8.3",

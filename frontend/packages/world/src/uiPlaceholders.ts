@@ -414,38 +414,10 @@ export const UI_PLACEHOLDERS: readonly UiPlaceholder[] = [
   },
   {
     kind: 'borders',
-    name: 'lapis-drape',
-    about: 'the moodboard’s frame with a blue drape and a laurel',
-    from: [266, 658, 106, 111],
-    border: { slice: [38, 34, 30, 34], repeat: 'stretch', middle: true },
-  },
-  {
-    kind: 'borders',
-    name: 'cloud-scroll',
-    about: 'the moodboard’s frame of clouds and a scroll',
-    from: [391, 658, 104, 111],
-    border: { slice: [36, 34, 36, 34], repeat: 'stretch', middle: true },
-  },
-  {
-    kind: 'borders',
-    name: 'gothic-cross',
-    about: 'the moodboard’s gothic arch with a cross at its crown',
-    from: [514, 658, 107, 111],
-    border: { slice: [46, 24, 24, 24], repeat: 'stretch', middle: true },
-  },
-  {
-    kind: 'borders',
     name: 'sunburst-clouds',
     about: 'the moodboard’s frame with a sun breaking through clouds',
     from: [640, 658, 107, 111],
     border: { slice: [42, 36, 30, 30], repeat: 'stretch', middle: true },
-  },
-  {
-    kind: 'borders',
-    name: 'column-science',
-    about: 'the moodboard’s columns, with a flask, a wheel and a cherub',
-    from: [764, 656, 112, 112],
-    border: { slice: [30, 40, 34, 34], repeat: 'stretch', middle: true },
   },
   {
     kind: 'borders',

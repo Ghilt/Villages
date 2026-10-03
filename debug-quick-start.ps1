@@ -552,10 +552,10 @@ if (-not (Test-Path (Join-Path $Frontend 'node_modules'))) {
 }
 
 $WorldDir = Join-Path $Root 'frontend\apps\web\public\world'
-$Master = Join-Path $Root 'world\master\terrain.png'
-# One directory per hand-painted master, so the debug map panel can hold more than one world at once.
-# This is the one the two world commands write when given no arguments.
-$DefaultWorld = Join-Path $WorldDir 'masters\terrain'
+$DefaultMaster = 'terrain3_mended_2026-10-03' # DEFAULT_MASTER in packages/world/src/masters.ts
+$Master = Join-Path $Root "world\master\$DefaultMaster.png"
+# A directory a master, so the panel holds several worlds; the world commands write this one by default.
+$DefaultWorld = Join-Path $WorldDir "masters\$DefaultMaster"
 
 if (-not (Test-Path $Master)) {
     Bad "the hand-painted world is missing: $Master"
@@ -590,7 +590,7 @@ Ensure 'flow\flow.json' 'working out which way rivers run' @('run', 'world:flow'
 # server reads them (0067). A sprite map from before the stands moved has the first and not the second,
 # and its woods are gone until it is worked out again.
 $SpriteMap = Join-Path $DefaultWorld 'sprites/biome/map.json'
-$Stands = Join-Path $Root 'world/stands/terrain/biome/stands.json'
+$Stands = Join-Path $Root "world/stands/$DefaultMaster/biome/stands.json"
 if (-not (Test-Path $SpriteMap) -or -not (Test-Path $Stands)) {
     Run 'working out the biomes and the stands (about half a minute, once)' $Npm @('run', 'world:sprites') $Frontend
 } else {

@@ -219,9 +219,10 @@ stage alone, with none of the debug panel in it (decision record 0079).
   with what each weighs, and ends with the whole against a budget of two megabytes at 2x. `-- --placeholders`
   makes the agent's placeholders for whatever is missing, cut from `world/ui/moodboard.webp` or drawn, and
   never writes over a file that is there. A frame that was not painted as a border - an image model's nine
-  tiles with lines between them, a framed box on stone - is kept as it was given in `world/ui/sources/`
-  with a recipe beside it, and `npm run world:nine-slice --prefix frontend` makes the border, and its fill,
-  from it; `-- --look <picture>` says what a picture is first. The nine-slice skill is how a job is done.
+  tiles with lines between them, a frame painted whole, a framed box on stone - is made into one by
+  `node nine-slice.ts <picture> --name <name>` in `scripts/`, which writes the border, its file of cuts and
+  a recipe to make it again into the folder it is run in, and says where; `--look <picture>` says how it
+  would cut it first. The nine-slice skill is how a job is done.
   See `docs/AUTHORING-THE-ART.md` and decision record 0068.
 
 ## The component library

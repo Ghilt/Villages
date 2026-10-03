@@ -18,6 +18,11 @@ describe('deciding which files in world/master are masters', () => {
     expect(masterNameOf('terrain2-preview.png')).toBeNull();
   });
 
+  it('takes a master with its rivers mended, and refuses the audit of what was painted', () => {
+    expect(masterNameOf('terrain3_mended_2026-10-03.png')).toBe('terrain3_mended_2026-10-03');
+    expect(masterNameOf('terrain3_mended_audit_2026-10-03.png')).toBeNull();
+  });
+
   it('refuses the palette strip, which is a picture of the palette', () => {
     expect(masterNameOf('palette-strip.png')).toBeNull();
   });
@@ -35,7 +40,8 @@ describe('deciding which files in world/master are masters', () => {
 
 describe('a master name becoming a path', () => {
   it('gives every master its own directory, the default one included', () => {
-    expect(worldDirOf(DEFAULT_MASTER)).toBe('masters/terrain');
+    expect(worldDirOf(DEFAULT_MASTER)).toBe('masters/terrain3_mended_2026-10-03');
+    expect(worldDirOf('terrain')).toBe('masters/terrain');
     expect(worldDirOf('terrain2')).toBe('masters/terrain2');
   });
 
