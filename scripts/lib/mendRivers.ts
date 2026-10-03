@@ -1,4 +1,4 @@
-import type { ClassRaster } from './raster.ts';
+import type { ClassRaster } from './master.ts';
 import {
   Ints,
   LAKE,

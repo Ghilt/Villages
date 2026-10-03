@@ -1,4 +1,4 @@
-import type { ClassRaster } from './raster.ts';
+import type { ClassRaster } from './master.ts';
 
 /**
  * The water of a master cut into pieces, and grown out over the land around it: the ground `mendRivers`

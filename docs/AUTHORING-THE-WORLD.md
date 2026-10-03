@@ -184,7 +184,7 @@ rather than a staircase, and no finer than what you painted.
 | `terrain2.png`, anything else | Any other PNG here is a world too, offered in the Debug map dropdown |
 | `terrain-base.png` | The generated master your edits sit on top of. Do not edit it |
 | `<name>-preview.png` | A small copy of that master for glancing at. Generated |
-| `<name>_mended_<date>.png` | That master with its broken rivers joined up, by `world:mend-rivers`. A world like any other |
+| `<name>_mended_<date>.png` | That master with its broken rivers joined up, by `scripts/mend-rivers.ts`. A world like any other |
 | `<name>_mended_audit_<date>.png` | What the mending painted, red on grey. Not a world, and not offered as one |
 | `palette-strip.png` | The thirty-two classes with their names and meanings, to eyedrop from |
 | `experiment/` | How this world was made, its sources, its thresholds and the generator |
@@ -206,14 +206,15 @@ It also prints what it found, terrain by terrain, which doubles as a description
 
 A river painted by hand, or traced from the sources, breaks up: two pieces that meet only at a corner, or
 stop a few pixels short of each other. A river is only a river where its pixels touch side to side, so
+`mend-rivers`, one of your tools in `scripts/` (see its README), run from that folder as
 
 ```
-npm run world:mend-rivers --prefix frontend -- E:/Code/Villages/world/master/terrain3.png
+node mend-rivers.ts ..\world\master\terrain3.png
 ```
 
 joins every piece of river to the sea, painting **only land, only to river, and as few pixels as joins
 them**: the pieces are joined cheapest gap first, and a lake on the way is used as a stepping stone but a
-lake no river needs is never joined to anything. It bridges gaps of up to eight pixels, `-- --max-gap 16`
+lake no river needs is never joined to anything. It bridges gaps of up to eight pixels, `--max-gap 16`
 for more. A river that no chain of such gaps brings to the sea is left as it is, because most of those do
 end inland - a wadi in the sand, the Jordan into the Dead Sea - and it lists the twenty largest of them,
 each with where it is, how many pixels of land lie between it and the nearest water that reaches the sea,

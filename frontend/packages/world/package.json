@@ -16,7 +16,6 @@
     "master": "node --max-old-space-size=8192 bin/buildMaster.ts",
     "import": "node --max-old-space-size=8192 bin/importMaster.ts",
     "merge": "node --max-old-space-size=8192 bin/mergeMaster.ts",
-    "mend-rivers": "node --max-old-space-size=8192 bin/mendRivers.ts",
     "tile": "node --max-old-space-size=8192 bin/tileWorld.ts",
     "sprites": "node --max-old-space-size=8192 bin/generateSpriteMap.ts",
     "flow": "node --max-old-space-size=8192 bin/flowWorld.ts",

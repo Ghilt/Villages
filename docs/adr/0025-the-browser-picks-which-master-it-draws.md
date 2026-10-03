@@ -28,7 +28,7 @@ Every master in `world/master` is a world the browser can ask for, and the dev s
   loading `terrain2` are the same operation.
 
   *Amended 2026-10-03:* the default is now `terrain3_mended_2026-10-03`, terrain3 with its rivers mended
-  by `world:mend-rivers`, so the commands with no arguments write `masters/terrain3_mended_2026-10-03/`.
+  by `scripts/mend-rivers.ts`, so the commands with no arguments write `masters/terrain3_mended_2026-10-03/`.
   It is named once, `DEFAULT_MASTER` in `packages/world/src/masters.ts`, and once more in
   `debug-quick-start.ps1`, which cannot import it. A browser that has picked a master keeps it.
 - **What counts as a master is one rule in one place**, `packages/world/src/masters.ts`, because three

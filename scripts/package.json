@@ -1,0 +1,9 @@
+{
+  "name": "villages-scripts",
+  "private": true,
+  "type": "module",
+  "description": "Adam's terminal tools for the files the game reads. Node 24 and nothing else: no npm install.",
+  "scripts": {
+    "test": "node --test"
+  }
+}

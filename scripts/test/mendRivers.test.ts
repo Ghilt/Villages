@@ -1,14 +1,18 @@
-import { describe, expect, it } from 'vitest';
+import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
 
-import { RIVER, mendRivers, nearestSeaWater } from './mendRivers.ts';
-import { createRaster } from './raster.ts';
-import type { ClassRaster } from './raster.ts';
+import type { ClassRaster } from '../lib/master.ts';
+import { RIVER, mendRivers, nearestSeaWater } from '../lib/mendRivers.ts';
 
 /** A raster written out as characters: `.` ocean, `L` lake, `~` river, `#` meadow. */
 const CLASSES: Record<string, number> = { '.': 0, L: 2, '~': RIVER, '#': 17 };
 
 function paint(rows: string[]): ClassRaster {
-  const raster = createRaster(rows[0]!.length, rows.length);
+  const raster = {
+    width: rows[0]!.length,
+    height: rows.length,
+    cells: new Uint8Array(rows[0]!.length * rows.length),
+  };
   rows.forEach((row, y) => {
     [...row].forEach((mark, x) => {
       raster.cells[y * raster.width + x] = CLASSES[mark]!;
@@ -22,7 +26,7 @@ function mend(rows: string[], maxGap: number) {
   const raster = paint(rows);
   const report = mendRivers(raster, { maxGap });
   for (const index of report.painted) {
-    expect(raster.cells[index]).toBeGreaterThan(RIVER);
+    assert.ok(raster.cells[index]! > RIVER);
   }
   const drawn = rows.map((row) => [...row]);
   for (const index of report.painted) {
@@ -34,27 +38,27 @@ function mend(rows: string[], maxGap: number) {
 describe('mending the breaks in rivers', () => {
   it('joins a river that touches the sea only at a corner with one pixel', () => {
     const { report, rows } = mend(['..######', '.~######', '##~~~###'], 4);
-    expect(report.painted).toHaveLength(1);
-    expect(rows).toEqual(['..######', '.~+#####', '##~~~###']);
-    expect(report.riverPiecesAtSeaBefore).toBe(1);
-    expect(report.riverPiecesAtSeaAfter).toBe(2);
+    assert.equal(report.painted.length, 1);
+    assert.deepEqual(rows, ['..######', '.~+#####', '##~~~###']);
+    assert.equal(report.riverPiecesAtSeaBefore, 1);
+    assert.equal(report.riverPiecesAtSeaAfter, 2);
   });
 
   it('bridges a three pixel gap with three pixels', () => {
     const { rows, report } = mend(['######..~~###~~~########'], 3);
-    expect(rows).toEqual(['######..~~+++~~~########']);
-    expect(report.bridges).toEqual([{ cost: 3, at: 11 }]);
-    expect(report.stranded).toEqual([]);
+    assert.deepEqual(rows, ['######..~~+++~~~########']);
+    assert.deepEqual(report.bridges, [{ cost: 3, at: 11 }]);
+    assert.deepEqual(report.stranded, []);
   });
 
   it('leaves a gap longer than the limit alone and names the river it strands', () => {
     const { rows, report } = mend(['######..~~####~~~########'], 3);
-    expect(rows).toEqual(['######..~~####~~~########']);
-    expect(report.stranded).toEqual([{ riverPixels: 3, at: 14 }]);
-    expect([...report.strandedPixels]).toEqual([14, 15, 16]);
-    expect(report.riverPiecesAtSeaAfter).toBe(1);
-    expect(nearestSeaWater(paint(rows), report.strandedPixels, 14, 10)).toEqual({ gap: 4, at: 9 });
-    expect(nearestSeaWater(paint(rows), report.strandedPixels, 14, 3)).toBeNull();
+    assert.deepEqual(rows, ['######..~~####~~~########']);
+    assert.deepEqual(report.stranded, [{ riverPixels: 3, at: 14 }]);
+    assert.deepEqual([...report.strandedPixels], [14, 15, 16]);
+    assert.equal(report.riverPiecesAtSeaAfter, 1);
+    assert.deepEqual(nearestSeaWater(paint(rows), report.strandedPixels, 14, 10), { gap: 4, at: 9 });
+    assert.equal(nearestSeaWater(paint(rows), report.strandedPixels, 14, 3), null);
   });
 
   it('steps through a lake on the way to the sea, and never bridges a lake that no river needs', () => {
@@ -67,7 +71,7 @@ describe('mending the breaks in rivers', () => {
       ],
       3,
     );
-    expect(rows).toEqual([
+    assert.deepEqual(rows, [
       '########~~+LLL+....########',
       '###########################',
       '###########################',
@@ -80,25 +84,25 @@ describe('mending the breaks in rivers', () => {
       ['#############', '###~~#~~#####', '#############', '#############', '#############', '.............'],
       4,
     );
-    expect(report.painted).toHaveLength(4);
-    expect(report.riverPiecesAtSeaAfter).toBe(2);
+    assert.equal(report.painted.length, 4);
+    assert.equal(report.riverPiecesAtSeaAfter, 2);
   });
 
   it('bridges across the antimeridian when that is the shorter way', () => {
     const { rows } = mend(['~###......##'], 4);
-    expect(rows).toEqual(['~###......++']);
+    assert.deepEqual(rows, ['~###......++']);
   });
 
   it('paints nothing in a world whose rivers already reach the sea', () => {
     const { report } = mend(['#~~~....#', '#~#######'], 8);
-    expect(report.painted).toHaveLength(0);
-    expect(report.bridges).toEqual([]);
+    assert.equal(report.painted.length, 0);
+    assert.deepEqual(report.bridges, []);
   });
 
   it('counts two rivers that reach the sea apart as two, not as the one sea they reach', () => {
     const { report } = mend(['#~.~#', '#####'], 8);
-    expect(report.riverPieces).toBe(2);
-    expect(report.riverPiecesAtSeaBefore).toBe(2);
+    assert.equal(report.riverPieces, 2);
+    assert.equal(report.riverPiecesAtSeaBefore, 2);
   });
 
   it('goes over the world until nothing more joins, so that running it again paints nothing', () => {
@@ -114,13 +118,13 @@ describe('mending the breaks in rivers', () => {
       once.rows.map((row) => row.replaceAll('+', '~')),
       3,
     );
-    expect(once.report.painted.length).toBeGreaterThan(0);
-    expect(twice.report.painted).toHaveLength(0);
-    expect(twice.report.stranded).toEqual(once.report.stranded);
+    assert.ok(once.report.painted.length > 0);
+    assert.equal(twice.report.painted.length, 0);
+    assert.deepEqual(twice.report.stranded, once.report.stranded);
   });
 
   it('refuses a limit that is not a whole number of pixels', () => {
-    expect(() => mendRivers(paint(['~#.']), { maxGap: 0 })).toThrow();
-    expect(() => mendRivers(paint(['~#.']), { maxGap: 2.5 })).toThrow();
+    assert.throws(() => mendRivers(paint(['~#.']), { maxGap: 0 }));
+    assert.throws(() => mendRivers(paint(['~#.']), { maxGap: 2.5 }));
   });
 });

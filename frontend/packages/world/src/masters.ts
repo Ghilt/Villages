@@ -9,7 +9,7 @@
 
 /**
  * The one the game draws unless told otherwise: `world/master/terrain3_mended_2026-10-03.png`, terrain3 with
- * its broken rivers joined to the sea by `world:mend-rivers`. Since 2026-10-03; `terrain.png` before that.
+ * its broken rivers joined to the sea by `scripts/mend-rivers.ts`. Since 2026-10-03; `terrain.png` before that.
  */
 export const DEFAULT_MASTER = 'terrain3_mended_2026-10-03';
 
@@ -19,7 +19,7 @@ const PREVIEW = '-preview';
 /** The thirty-two classes with their names written on them. A picture of the palette, not a world. */
 const NOT_A_WORLD = ['palette-strip'];
 
-/** What `world:mend-rivers` painted, in red on grey. A picture of an edit, not a world. */
+/** What `scripts/mend-rivers.ts` painted, in red on grey. A picture of an edit, not a world. */
 const AUDIT = '_audit_';
 
 /** The master a file name names, or nothing if that file is not one. */

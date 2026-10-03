@@ -1,0 +1,19 @@
+{
+  "$comment": "For an editor, and for a check by hand: Node runs these files as they are and never reads this. The types come from the frontend's install because this folder has none of its own; nothing here imports from it.",
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": ["ES2023"],
+    "module": "NodeNext",
+    "moduleResolution": "nodenext",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "types": ["node"],
+    "typeRoots": ["../frontend/node_modules/@types"]
+  },
+  "include": ["*.ts", "lib", "test"]
+}
