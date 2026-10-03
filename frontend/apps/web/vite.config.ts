@@ -6,6 +6,7 @@ import { defineConfig } from 'vite';
 
 import { artApi } from './vite/artApi.ts';
 import { buildApi } from './vite/build.ts';
+import { maplibreWorker } from './vite/maplibreWorker.ts';
 import { portraitsApi } from './vite/portraitsApi.ts';
 import { scenesApi } from './vite/scenesApi.ts';
 import { uiArtApi } from './vite/uiArtApi.ts';
@@ -22,7 +23,8 @@ export default defineConfig({
   // worldApi is the dev server's own answer to "what masters are there, and cut me that one";
   // portraitsApi and scenesApi serve Adam's portraits and scenes folders without a cache, so a picture
   // saved over another shows; and artApi cuts world/sprites again whenever a picture in it is saved, as
-  // uiArtApi does world/ui.
+  // uiArtApi does world/ui. maplibreWorker is the build's alone: it puts MapLibre's worker beside the chunk
+  // MapLibre was bundled into, where a built page looks for it. See decision record 0080.
   plugins: [
     react(),
     worldApi(),
@@ -32,6 +34,7 @@ export default defineConfig({
     uiArtApi(),
     worktreeApi(),
     buildApi(),
+    maplibreWorker(),
   ],
   define: {
     // Which world this page belongs to. Every tree runs its own game server now, so a page that
@@ -39,8 +42,9 @@ export default defineConfig({
     // explicit VITE_GATEWAY_URL still wins; this is only the answer when nothing was said. See 0031.
     'import.meta.env.VITE_GAME_PORT': JSON.stringify(String(tree.gamePort)),
   },
-  // MapLibre spawns its own module worker. Pre-bundling the package rewrites the import graph and the
-  // worker URL 404s, which leaves a live map that draws nothing but its background colour.
+  // MapLibre spawns its own module worker, from the file beside its own. Pre-bundling the package rewrites
+  // the import graph and the worker URL 404s, which leaves a live map that draws nothing but its background
+  // colour. A production build bundles it all the same, which is what maplibreWorker is for.
   optimizeDeps: {
     exclude: ['maplibre-gl'],
   },
