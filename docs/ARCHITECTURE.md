@@ -79,9 +79,9 @@ packages/world                               <-  apps/web
   decision record 0068.
 - The rest of `apps/web` stands in rows, and a folder imports only the rows above it, and in its own row only what
   the rule names: `ui`, `version`, `marks`, `log` and `geometry`, the ground's own measures, which lean on nothing
-  in the page; `net` and `stage`; the ground drawn, `map`, `fog` and `desk`; what stands on it, `sprites` and
-  `room`; the game's own surfaces, `house`, `figures`, `choice`, `dialogues`, `areas` and `inspect`; and what puts
-  it all together, the root, `debug` and `admin`. No two files import each other, however far round.
+  in the page; `net` and `stage`; the ground drawn, `map`, `fog`, `desk` and `water`; what stands on it,
+  `sprites` and `room`; the game's own surfaces, `house`, `figures`, `choice`, `dialogues`, `areas` and `inspect`;
+  and what puts it all together, the root, `debug` and `admin`. No two files import each other, however far round.
   `src/layers.test.ts` holds it. The imports that broke it on the first day were listed one by one and each
   ended by a step of the plan; none is left. What a surface needs from another surface is handed down: an
   overlay on the map is handed what the map marks and what a pick does, and a pane what it shows beside
@@ -303,6 +303,14 @@ in with unknown ground on the screen, it asks for a frame twelve times a second,
 asking the moment there is none. The page hands it the whole scene at once (`setScene`) and it works out what
 changed and asks for one frame, so however much changes together, it draws once. A new thing on the map is a
 layer of its own and a line in the renderer's stack, where it goes in the drawing's order.
+**The water is not in the sprite canvas but in the map**, a MapLibre custom layer (`water/WaterLayer.ts`) drawn
+in WebGL2 over the painted terrain and under the ink lines, so the fog and everything in the sprite canvas are over
+it (0081). Where the water is comes from the flat tiles, a mask a tile worked out in the browser by the fog's
+distance transform (`water/waterMask.ts`); which way the rivers run comes from flow tiles that `world:flow`
+writes beside the cut tiles, worked out offline from the master because it is a fact about the whole network
+(`packages/world/src/flow.ts`). Everything that moves is worked out in its fragment shaders from the ground's
+own coordinates. It has a clock of its own, thirty frames a second while some of it is on the screen and none
+otherwise, and it asks the map, not the sprite canvas, for them.
 
 ## What acts on its own
 

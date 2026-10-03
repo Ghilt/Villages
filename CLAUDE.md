@@ -81,6 +81,8 @@ tiles go through, that same step **also**:
 
 - **Re-cuts the tiles** if the master or the tiling changed: `npm run world:import --prefix frontend` then
   `npm run world:tile --prefix frontend`. About five minutes. The Debug map panel offers this per master too.
+- **Re-works the rivers' flow** if the master or the flow tool changed: `npm run world:flow --prefix frontend`,
+  under a minute a master. Without it a master's rivers stand still; `cut it` in the panel does it too.
 - **Re-works the sprite map** if the master, `world/biomes.json` or the generator changed:
   `npm run world:sprites --prefix frontend`, half a minute a master, and it prints the density of every
   biome against experiment 0006's ceiling. Without one a master draws no scenery at all.
@@ -314,12 +316,12 @@ Commands are added here as the increments land:
   see `docs/adr/0019`. What it is painted in is `world/palette.json`, what colour it is drawn in is
   `world/render.json`, and how it is painted is `world/painterly.json`.
 - The world's other tools, each `npm run <name> --prefix frontend` and each described in `docs/RUNNING.md`
-  beside the folder it reads: `world:sprites` works out a master's sprite map, `world:scenery` paints stills
-  of it, `world:paint` paints the painterly stills and writes the runtime copy of the styles (`-- --config-only`
-  for that alone), `world:art` cuts the sprites, `world:ui` the interface pictures and `world:nine-slice` a
-  border from a frame, and `world:portraits` and `world:scenes` draw placeholders, never over a file that is
-  there. `world:mend-rivers <master.png>` joins a master's broken rivers into a copy beside it, and is
-  described in `docs/AUTHORING-THE-WORLD.md` with the rest of the master's editing.
+  beside the folder it reads: `world:sprites` works out a master's sprite map, `world:flow` which way its rivers
+  run, `world:scenery` paints stills of the first, `world:paint` paints the painterly stills and writes the
+  runtime copy of the styles (`-- --config-only` for that alone), `world:art` cuts the sprites, `world:ui` the
+  interface pictures and `world:nine-slice` a border from a frame, and `world:portraits` and `world:scenes` draw
+  placeholders, never over a file that is there. `world:mend-rivers <master.png>` joins a master's broken rivers
+  into a copy beside it, and is described in `docs/AUTHORING-THE-WORLD.md` with the rest of the master's editing.
 - What the running program does, part by part, is `docs/RUNNING.md`: the debug panel and every section of
   it, the player's own levers, the fog, the event page and the component library, and Adam's folders of
   pictures with the tools that cut them. A step that changes what a part of it does changes its entry there

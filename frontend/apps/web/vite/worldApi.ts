@@ -26,9 +26,9 @@ import {
  * commands, which is five minutes or so of Node. Doing that from here rather than from a terminal is the
  * whole point: the loop from a Photoshop save to looking at it becomes one dropdown.
  *
- * **Cutting furnishes too**, because a repaint makes both stale and a half-regenerated world is the
- * confusing state. Furnishing on its own is the fast errand, half a minute, and is what a change to
- * `world/biomes.json` needs - which is the file somebody tuning a look edits over and over.
+ * **Cutting furnishes too, and works out the rivers' flow**, because a repaint makes all of it stale and a
+ * half-regenerated world is the confusing state. Furnishing on its own is the fast errand, half a minute, and
+ * is what a change to `world/biomes.json` needs - which is the file somebody tuning a look edits over and over.
  *
  * Development only. There is no deployment yet, and when there is, the world will be cut before it.
  */
@@ -326,6 +326,12 @@ async function cut(name: string, response: ServerResponse): Promise<void> {
     const tiled = await run('tileWorld.ts', found.file, say);
     if (tiled !== 0) {
       say(`failed: cutting ${name} exited with ${tiled}`);
+      return;
+    }
+    // Which way its rivers run, for the water: under a minute, and without it they stand still. See 0081.
+    const flowed = await run('flowWorld.ts', found.file, say);
+    if (flowed !== 0) {
+      say(`failed: working out ${name}'s rivers exited with ${flowed}`);
       return;
     }
     // A repaint makes the sprite map stale as surely as it makes the tiles stale, so the two are never

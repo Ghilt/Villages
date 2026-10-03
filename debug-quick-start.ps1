@@ -565,11 +565,12 @@ if (-not (Test-Path $Master)) {
     exit 1
 }
 
-if (-not (Test-Path (Join-Path $DefaultWorld 'terrain.geojson'))) {
-    Run 'tracing the coast and the lakes' $Npm @('run', 'world:import') $Frontend
-} else {
-    Good 'the coast and the lakes are traced'
+<# A world command, run when what it writes into the default world is missing; otherwise a word that it is there. #>
+function Ensure([string] $Made, [string] $What, [string[]] $Arguments, [string] $There) {
+    if (Test-Path (Join-Path $DefaultWorld $Made)) { Good $There } else { Run $What $Npm $Arguments $Frontend }
 }
+
+Ensure 'terrain.geojson' 'tracing the coast and the lakes' @('run', 'world:import') 'the coast and the lakes are traced'
 
 $Tiles = Join-Path $DefaultWorld 'tiles'
 if (-not (Test-Path (Join-Path $Tiles '7'))) {
@@ -579,11 +580,9 @@ if (-not (Test-Path (Join-Path $Tiles '7'))) {
     Good "the world is cut: $cut tiles"
 }
 
-if (-not (Test-Path (Join-Path $WorldDir 'paint.json'))) {
-    Run 'writing the painting styles' $Npm @('run', 'world:paint', '--', '--config-only') $Frontend
-} else {
-    Good 'the painting styles are written'
-}
+Ensure '..\..\paint.json' 'writing the styles' @('run', 'world:paint', '--', '--config-only') 'the styles are written'
+# Which way the rivers run, so the water runs downstream rather than standing still: under a minute (0081).
+Ensure 'flow\flow.json' 'working out which way rivers run' @('run', 'world:flow', '--', '--no-stills') 'the rivers run'
 
 # What kind of place every part of the world is, and where the scenery clumps. Without it the map draws
 # no scenery at all - which is the rule rather than a fault, but it is not what anyone starting from

@@ -1,0 +1,45 @@
+import { createStore } from '@villages/client-core';
+import type { Readable } from '@villages/client-core';
+
+import { note } from '../log/log';
+
+/**
+ * How this window draws the water, a switch in the Debug map section that steps through the three.
+ * Realistic at every load. A store, the one shape every
+ * piece of state the page watches takes, read in a component through `useStore`.
+ */
+export type WaterMode = 'realistic' | 'wavelets' | 'still';
+
+const ORDER: readonly WaterMode[] = ['realistic', 'wavelets', 'still'];
+
+const SAID: Record<WaterMode, string> = {
+  realistic: 'drawn with depth, waves, the sun, caustics and surf',
+  wavelets: 'drawn as its first look, little stylised wavelets coming and going',
+  still: 'still: the water is as painted',
+};
+
+interface WaterState {
+  mode: WaterMode;
+  /**
+   * Whether the map is showing the Flow renderer, which the water layer draws in place of the water: which way
+   * every river runs. Set by the renderer dropdown rather than by this switch.
+   */
+  flowView: boolean;
+}
+
+const water = createStore<WaterState>({ mode: 'realistic', flowView: false });
+
+export const waterStore: Readable<WaterState> = water;
+
+export function setFlowView(on: boolean): void {
+  if (on !== water.get().flowView) {
+    water.set({ flowView: on });
+  }
+}
+
+/** The next way of drawing it, round again after the last. */
+export function nextWaterMode(): void {
+  const mode = ORDER[(ORDER.indexOf(water.get().mode) + 1) % ORDER.length]!;
+  note('water', SAID[mode]);
+  water.set({ mode });
+}

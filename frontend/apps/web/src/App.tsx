@@ -33,6 +33,8 @@ import { worldRootOf } from './map/masters';
 import { cameraStore } from './map/camera';
 import { DEFAULT_RENDERER, RENDERERS, applyRenderer } from './map/renderers';
 import { SpriteOverlay } from './sprites/SpriteOverlay';
+import { placeWater } from './water/WaterLayer';
+import { setFlowView, waterStore } from './water/waterMode';
 import type { MapSprite } from './sprites/SpriteRenderer';
 import { tinctureColour } from './sprites/tinctures';
 import { useStore } from './store/useStore';
@@ -230,10 +232,20 @@ export function App({ master, devTools }: AppProps) {
   useEffect(() => {
     if (map !== null) {
       applyRenderer(map, renderer, { turn: camera.latticeTurn, size: camera.latticeSize });
+      // The water, over whichever renderer this is.
+      setFlowView(renderer === 'flow');
+      placeWater(map, worldRootOf(master));
+      map.triggerRepaint();
       const chosen = RENDERERS.find((candidate) => candidate.name === renderer);
       note('renderer', `${renderer}${chosen === undefined ? '' : `, ${chosen.note.toLowerCase()}`}`);
     }
-  }, [map, renderer, camera.latticeTurn, camera.latticeSize]);
+  }, [map, renderer, camera.latticeTurn, camera.latticeSize, master]);
+
+  // The water's switch redraws the map, so the new way of drawing it shows at once.
+  const water = useStore(waterStore, (state) => state.mode);
+  useEffect(() => {
+    map?.triggerRepaint();
+  }, [map, water]);
 
   // How an inspect window's "show it on the map" link reaches the camera, without anything in the interface
   // having to be handed a map it has no business holding.
