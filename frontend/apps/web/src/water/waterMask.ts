@@ -1,7 +1,7 @@
 import { squaredDistances } from '../fog/fogField';
 
 /**
- * WIP SPIKE: the water as the shader reads it, one flat tile at a time.
+ * The water as the shader reads it, one flat tile at a time.
  *
  * Four bytes a texel. Red is how far the texel lies from the shore, in world units, positive out on the water
  * and negative inland; green is the same for the edge of the deep ocean, positive out over it; blue is whether

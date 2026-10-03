@@ -4,8 +4,8 @@ import type { Readable } from '@villages/client-core';
 import { note } from '../log/log';
 
 /**
- * WIP SPIKE: how this window draws the water, a switch in the Debug map section that steps through the three.
- * Realistic at every load in this branch, because that is what the branch is for. A store, the one shape every
+ * How this window draws the water, a switch in the Debug map section that steps through the three.
+ * Realistic at every load. A store, the one shape every
  * piece of state the page watches takes, read in a component through `useStore`.
  */
 export type WaterMode = 'realistic' | 'wavelets' | 'still';
@@ -14,7 +14,7 @@ const ORDER: readonly WaterMode[] = ['realistic', 'wavelets', 'still'];
 
 const SAID: Record<WaterMode, string> = {
   realistic: 'drawn with depth, waves, the sun, caustics and surf',
-  wavelets: 'drawn as the first spike had it, little wavelets coming and going',
+  wavelets: 'drawn as its first look, little stylised wavelets coming and going',
   still: 'still: the water is as painted',
 };
 

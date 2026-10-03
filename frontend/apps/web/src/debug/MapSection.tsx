@@ -179,12 +179,12 @@ export function MapSection({ map, master, renderer, onRenderer }: MapSectionProp
         {fog ? 'fog of war: on' : 'fog of war: off'}
       </button>
 
-      {/* WIP spike: moving water on the sea, the lakes and the rivers; each press steps to the next way of drawing it. */}
+      {/* Moving water on the sea, the lakes and the rivers; each press steps to the next way of drawing it. */}
       <button
         type="button"
         className={water === 'still' ? 'debug-map__switch' : 'debug-map__switch debug-map__switch--on'}
         onClick={nextWaterMode}
-        title="step through the ways of drawing the water: realistic, the first spike's wavelets, and still"
+        title="step through the ways of drawing the water: realistic, the stylised wavelets, and still"
       >
         water: {water}
       </button>

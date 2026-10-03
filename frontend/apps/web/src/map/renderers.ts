@@ -44,7 +44,7 @@ export const RENDERERS: readonly RendererChoice[] = [
   {
     name: 'flow',
     title: 'Flow',
-    note: 'WIP spike: which way the rivers run, a colour for each way, arrows marching downstream from zoom 8, and black where a river has no way to the sea',
+    note: 'Which way the rivers run, a colour for each way, arrows marching downstream from zoom 8, and black where a river has no way to the sea',
   },
 ];
 

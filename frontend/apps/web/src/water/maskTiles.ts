@@ -7,7 +7,7 @@ import { SIDE, maskOf } from './waterMask';
 import type { WaterKinds } from './waterMask';
 
 /**
- * WIP SPIKE: the water's mask tiles, one a flat tile in view, each with its rivers' flow beside it.
+ * The water's mask tiles, one a flat tile in view, each with its rivers' flow beside it.
  *
  * A mask is worked out from the flat tile and its eight neighbours by `waterMask.ts`, a few distance transforms
  * and a handful of milliseconds, so they are worked out one at a time between frames. While a tile's own is on

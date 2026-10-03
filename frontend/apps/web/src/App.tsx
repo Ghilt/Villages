@@ -232,7 +232,7 @@ export function App({ master, devTools }: AppProps) {
   useEffect(() => {
     if (map !== null) {
       applyRenderer(map, renderer, { turn: camera.latticeTurn, size: camera.latticeSize });
-      // WIP spike: the water, over whichever renderer this is.
+      // The water, over whichever renderer this is.
       setFlowView(renderer === 'flow');
       placeWater(map, worldRootOf(master));
       map.triggerRepaint();
@@ -241,7 +241,7 @@ export function App({ master, devTools }: AppProps) {
     }
   }, [map, renderer, camera.latticeTurn, camera.latticeSize, master]);
 
-  // WIP spike: the water's switch redraws the map, so the new way of drawing it shows at once.
+  // The water's switch redraws the map, so the new way of drawing it shows at once.
   const water = useStore(waterStore, (state) => state.mode);
   useEffect(() => {
     map?.triggerRepaint();

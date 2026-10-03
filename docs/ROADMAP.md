@@ -16,8 +16,8 @@ record of what was done, which the git history already keeps.
 
 ## What stands today
 
-The map is ours: a hand-painted master, cut into tiles, painted in the browser at any zoom, lying on a desk
-when the camera pulls back past the world. A player arriving with no house is offered three seats on a
+The map is ours: a hand-painted master, cut into tiles, painted in the browser at any zoom, its water moving and
+its rivers running to the sea, lying on a desk when the camera pulls back past the world. A player arriving with no house is offered three seats on a
 parchment, takes one, and the house is founded from the same decision that records the taking — castle,
 ground about it, selectable, with an inspector on the left. Every event carries its two times, its place and
 significance, and its provenance. Two browsers see each other's houses live. Everything is in memory: there

@@ -303,6 +303,14 @@ in with unknown ground on the screen, it asks for a frame twelve times a second,
 asking the moment there is none. The page hands it the whole scene at once (`setScene`) and it works out what
 changed and asks for one frame, so however much changes together, it draws once. A new thing on the map is a
 layer of its own and a line in the renderer's stack, where it goes in the drawing's order.
+**The water is not in the sprite canvas but in the map**, a MapLibre custom layer (`water/WaterLayer.ts`) drawn
+in WebGL2 over the painted terrain and under the ink lines, so the fog and everything in the sprite canvas are over
+it (0081). Where the water is comes from the flat tiles, a mask a tile worked out in the browser by the fog's
+distance transform (`water/waterMask.ts`); which way the rivers run comes from flow tiles that `world:flow`
+writes beside the cut tiles, worked out offline from the master because it is a fact about the whole network
+(`packages/world/src/flow.ts`). Everything that moves is worked out in its fragment shaders from the ground's
+own coordinates. It has a clock of its own, thirty frames a second while some of it is on the screen and none
+otherwise, and it asks the map, not the sprite canvas, for them.
 
 ## What acts on its own
 

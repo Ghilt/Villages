@@ -19,16 +19,16 @@ import { waterStore } from './waterMode';
 import { WAVELETS } from './waveletsShader';
 
 /**
- * WIP SPIKE: the water, as a MapLibre custom layer drawn over the terrain and under the ink and the fog.
+ * The water, as a MapLibre custom layer drawn over the terrain and under the ink and the fog.
  *
  * Where the water is, how far from the shore and how deep, comes from the flat tiles through `waterMask.ts`,
  * one mask texture a tile, kept by `maskTiles.ts`. Everything that moves is worked out in the fragment shader
  * from the ground's own coordinates, so it pans with the map and needs no art. Each pattern comes in several
  * sizes that cross-fade by zoom, so it stays put on the ground and about the same size on the screen.
  *
- * Three ways to draw it, the Debug map's water switch: realistic, `realisticShader.ts`; the first spike's
- * wavelets, kept to compare against; and still. The Flow renderer is drawn here too, in place of the water,
- * by `flowView.ts`.
+ * Three ways to draw it, the Debug map's water switch: realistic, `realisticShader.ts`; the stylised
+ * wavelets, the water's first look, kept to compare against; and still. The Flow renderer is drawn here too, in place of the water,
+ * by `flowView.ts`. See decision record 0081.
  */
 
 export const WATER_LAYER = 'water';

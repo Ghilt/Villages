@@ -4,7 +4,7 @@ import type { DrawStart, Program } from './program';
 import { SIDE } from './waterMask';
 
 /**
- * WIP SPIKE: the Flow renderer, which the water layer draws in place of the water: every river in view coloured
+ * The Flow renderer, which the water layer draws in place of the water: every river in view coloured
  * by which way it runs, from the flow tiles alone. Its tiles are kept apart from the water's, because it needs
  * no mask and reaches further out.
  */

@@ -4,7 +4,7 @@ import { useStore } from '../store/useStore';
 import { Section } from './Section';
 
 /**
- * WIP SPIKE: the rivers' look, on sliders, for Adam to play with. What each number means is in
+ * The rivers' look, on sliders, for Adam's eye. What each number means is in
  * `water/riverTuning.ts`; they change the water on the next frame, and are said in the log once a slider stops.
  * Only the realistic water and only rivers that flow, from zoom 8.5 in.
  */

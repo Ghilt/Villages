@@ -2,7 +2,7 @@ import { WATER_LOOK } from './look';
 import { HELPERS, float, vec } from './glsl';
 
 /**
- * WIP SPIKE: the realistic water's fragment shader, five things laid over the painted sea: a tint from turquoise
+ * The realistic water's fragment shader, five things laid over the painted sea: a tint from turquoise
  * shallows to a dark deep; waves, a sum of travelling slopes lit by a sun in the north-west, which shade the
  * water and throw glints; caustics, a shifting net of light on the bottom of shallow water, bent by the waves
  * above it; surf, foam along the shore and lines of it rolling in; and on the rivers a look of their own, laid

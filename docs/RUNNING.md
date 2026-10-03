@@ -18,7 +18,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   `world/master/`, with each one's size and when it was last cut, and it says when the image has been
   saved since - which it re-checks whenever the window is given focus. A master nobody has cut yet gets
   a button, and pressing it runs `world:import` and `world:tile`, the two commands `CLAUDE.md` cuts a world
-  with, from the dev server with their output going into the debug log: about five minutes, once per master.
+  with, and then `world:flow` and `world:sprites`, from the dev server with their output going into the debug
+  log: about six minutes, once per master.
   Switching reloads the page on purpose. So the loop is: paint, save, alt-tab, pick it. See `docs/adr/0025`.
 - What it looks like: the renderer dropdown in that same panel. `Biome` is not a look and not even the
   terrain: it lays the sprite map's own biome raster on the world, flat and blocky, which is the only way
@@ -30,7 +31,20 @@ stage alone, with none of the debug panel in it (decision record 0079).
   numbers in `world/painterly.json` rather than a look. Only the terrain is precomputed: a tile knows its own zoom, so the treatment is drawn at the
   size it should be at whatever you are looking at. Painting happens in a pool of workers, and the tiles
   around the view are painted during the pauses so that moving the map finds them done. See
-  `docs/adr/0021` and `0022`.
+  `docs/adr/0021` and `0022`. `Flow` is not a look either: it draws, in place of the water, which way every
+  river runs, a colour for each way and arrows marching downstream from about zoom 8, and black where a river
+  has no way to any sea or lake - a break in the master's rivers to mend. See `docs/adr/0081`.
+- The water moves, from about zoom 8.5 in: depth, waves lit by a sun in the north-west, caustics on the bottom
+  of the shallows, and surf along the shore, over every renderer. `water: realistic` in the Debug map section
+  steps it on to `wavelets`, the water's first and stylised look, kept to compare against, and to `still`, for
+  that window; it is realistic at every load. The rivers run downstream, with crests across the current and
+  specks carried on it, from the flow `world:flow` works out beside the tiles; a master without it has still
+  rivers and the log says so. Their look is the **Water** section's eight sliders, below Debug map: how fast,
+  how far apart the crests are, how far the middle runs ahead, how thin and how bright the crests are, the
+  specks, and how much of the sea's waves and caustics a river keeps. They are remembered in that browser,
+  `reset` puts them back, and once a slider stops the log says all eight under `water` as `rivers tuned: …`,
+  which is the line to hand over when a setting should become the default. Every other number of the water
+  is in `apps/web/src/water/look.ts`. See `docs/adr/0081`.
 - What the program thinks is happening: the debug panel, one space docked down the right-hand side
   holding everything that helps during development, which minimises to a badge and remembers that,
   and is only in a development build: a production build leaves it out whole (0079).
@@ -45,7 +59,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
   `gateway: error fault: …`, with its stack in the server's log under `villages.feed`, which the quick-start
   writes to `.logs/backend.log`; see decision record 0029. **Everything in it is in a folding section**,
   and which section a new thing goes in is asked rather than guessed, as `CLAUDE.md` says. Today they are
-  Worktrees, Debug map, Scenery, Camera, Areas, World, Resources, Characters and Dialogues.
+  Worktrees, Debug map, Water, Scenery, Camera, Areas, World, Resources, Characters and Dialogues.
   **The log is not a section but a column of its own**, the whole height of the panel on its outer side,
   so what a button did is in view while the button is. It begins folded: the `log` toggle in the panel's
   header, beside `landscape`, opens it and `hide` in its own bar folds it away again. The events themselves are not in the

@@ -3,7 +3,7 @@ import { WORLD_MASTER_WIDTH } from '../geometry/world';
 import { DEEP_RANGE, SHORE_RANGE } from './waterMask';
 
 /**
- * WIP SPIKE: what every one of the water's shaders shares. A number as GLSL writes it, so a look's numbers can be
+ * What every one of the water's shaders shares. A number as GLSL writes it, so a look's numbers can be
  * written into the shaders' text; the vertex shader, which lays a quad over one tile; and the fragment shaders'
  * common part: the tile's mask, read back as how far from the shore and the deep, a hash and value noise.
  */

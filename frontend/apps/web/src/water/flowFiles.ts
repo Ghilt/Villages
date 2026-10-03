@@ -4,7 +4,7 @@ import { FLAT_MAX_ZOOM } from '../geometry/world';
 import { SIDE } from './waterMask';
 
 /**
- * WIP SPIKE: the rivers' flow, as `npm run world:flow` wrote it beside a master's tiles: which zoom 7 tiles have
+ * The rivers' flow, as `npm run world:flow` wrote it beside a master's tiles: which zoom 7 tiles have
  * any, how far down a river the along tiles take to come round again, and each tile's pixels. A master never run
  * through it has none, and its rivers stand still, which the log says once.
  */

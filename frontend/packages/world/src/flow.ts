@@ -2,7 +2,7 @@ import { CostHeap } from './costHeap.ts';
 import type { ClassRaster } from './raster.ts';
 
 /**
- * WIP SPIKE: which way the rivers run, worked out from the master and nothing else, so it follows whatever is
+ * Which way the rivers run, worked out from the master and nothing else, so it follows whatever is
  * painted in it.
  *
  * Water runs to the sea. Every river and lake pixel is given its shortest way there along the water, walking
@@ -19,6 +19,7 @@ import type { ClassRaster } from './raster.ts';
  *
  * What is still unreached runs into a lake with no way out big enough to be an inland sea, as the rivers of the
  * Great Basin do, and what is left after that is stranded: it has no way to any sea or lake, and stays still.
+ * See decision record 0081.
  */
 
 /** How a network pixel was reached: not at all, from the sea, across a gap, or into an inland lake. */

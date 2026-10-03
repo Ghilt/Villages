@@ -1,5 +1,5 @@
 /**
- * WIP SPIKE: every number of the water's look, for Adam's eye. Colours are red, green and blue from nought to
+ * Every number of the water's look, for Adam's eye. Colours are red, green and blue from nought to
  * one. A world unit is a pixel of the master, about a kilometre; a "size band" is the four on-screen sizes in
  * pixels at which a pattern fades in, is whole, starts to fade and is gone, so it stays put on the ground and
  * about the same size on the screen while the camera zooms.
@@ -81,7 +81,7 @@ export const WATER_LOOK = {
     },
   },
 
-  /** The first spike's stylised wavelets, kept to compare against. */
+  /** The stylised wavelets, the water's first look, kept to compare against. */
   wavelets: {
     firstCell: 1.5,
     step: 3,

@@ -133,7 +133,25 @@ sprite map goes stale: saving `world/biomes.json`, which changes every master's 
 image. The panel watches that file and says which of the two it is waiting on. To look at the biomes
 themselves rather than the scenery standing on them, pick `Biome` in the renderer dropdown.
 
-To argue about what grows rather than about where the biomes are, there is a fourth command:
+**The rivers run to the sea, and a break in one stops it.** The water on the map moves, and its rivers run
+downstream, which is worked out from the image by a fourth command, under a minute; `cut it` runs it as well:
+
+```
+npm run world:flow --prefix frontend
+```
+
+Every river is followed from the sea up along its pixels, corners included, so a river one pixel wide that steps
+diagonally is still joined. A break of up to six pixels is jumped, from a river's end to the rest of it, to a lake
+or to the sea; above a longer break the river has no way to any sea or lake, is **stranded**, and stands still.
+A lake of fifty pixels or more with no way out is an inland sea a river may end in, as the Great Basin's do. To
+see where the rivers are broken, pick `Flow` in the renderer dropdown: every river is coloured by the way it
+runs, and the stranded ones are black. The command also prints the longest stranded pieces with where they are,
+and paints a few places into `world/painterly/<place>-flow.png`, the rivers blue where they reach the sea, amber
+where they had to jump a gap, teal into an inland lake, red where stranded, and every jump drawn across;
+`-- --at 13.4,52.5` paints any place. So paint every river joined, corner to corner at least, and running into
+the sea, a lake or another river. See `docs/adr/0081`.
+
+To argue about what grows rather than about where the biomes are, there is a fifth command:
 
 ```
 npm run world:scenery --prefix frontend

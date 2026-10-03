@@ -2,7 +2,7 @@ import { WATER_LOOK } from './look';
 import { HELPERS, float, vec } from './glsl';
 
 /**
- * WIP SPIKE: the first spike's water, kept to compare against: little wavelets coming and going, a crest and a
+ * The water's first look, kept to compare against: little wavelets coming and going, a crest and a
  * trough each, in a few sizes that cross-fade by zoom.
  */
 

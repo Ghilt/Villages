@@ -15,7 +15,7 @@ import { readMaster } from './lib/master.ts';
 import { OUTPUT_DIR, PAINTERLY_DIR, PALETTE, RENDER, masterAt } from './lib/paths.ts';
 
 /**
- * WIP SPIKE: which way the rivers run, cut into tiles beside the terrain for the water shader to read.
+ * Which way the rivers run, cut into tiles beside the terrain for the water shader to read.
  *
  *   node bin/flowWorld.ts [master] [--bridge 6] [--along 6] [--no-stills] [--at lng,lat]
  *

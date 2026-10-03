@@ -4,7 +4,7 @@ import type { Readable } from '@villages/client-core';
 import { note } from '../log/log';
 
 /**
- * WIP SPIKE: the rivers' own look, as numbers Adam moves with the sliders in the debug panel's Water section.
+ * The rivers' own look, as numbers Adam moves with the sliders in the debug panel's Water section.
  *
  * Remembered in this browser, so a reload keeps them, and said once in the log after a slider stops moving, so
  * the log's copy button carries them to whoever is to write them down. Not a matter for the server: a way of
@@ -30,8 +30,8 @@ export interface RiverTuning {
 export const RIVER_DEFAULTS: RiverTuning = {
   speed: 1,
   spacing: 4,
-  bow: 1.65,
-  sharpness: 8,
+  bow: 1.15,
+  sharpness: 21.5,
   ripples: 0.45,
   specks: 0.3,
   waves: 0.25,

@@ -46,6 +46,7 @@ The commands it runs, if you would rather run them yourself:
 npm install --prefix frontend
 npm run world:import --prefix frontend
 npm run world:tile --prefix frontend
+npm run world:flow --prefix frontend
 npm run dev --prefix frontend
 cd backend && .\gradlew.bat :app:bootRun
 ```
@@ -53,7 +54,7 @@ cd backend && .\gradlew.bat :app:bootRun
 Then open http://localhost:5173 and you are looking at the world: pan and zoom, and see the frame your
 house will occupy. The map is ours, and it carries no text at all. It is painted by hand as an image,
 `world/master/terrain.png`, one flat colour per terrain across thirty-two of them: edit that in any image
-editor, run the two world commands again, and the world changes. `docs/AUTHORING-THE-WORLD.md` explains
+editor, run the world commands again, and the world changes. `docs/AUTHORING-THE-WORLD.md` explains
 how. Setting `VITE_MAP_STYLE_URL` shows a real map of Earth instead, for comparison.
 
 The **Debug map** panel at the top right picks which master is drawn - every PNG in `world/master/` is

@@ -3,7 +3,7 @@ import type * as maplibregl from 'maplibre-gl';
 import { VERTEX } from './glsl';
 
 /**
- * WIP SPIKE: the water's own WebGL, the little of it there is: a program linked and its uniforms found, a texture
+ * The water's own WebGL, the little of it there is: a program linked and its uniforms found, a texture
  * made from bytes, the one quad every tile is drawn with, and the state a draw starts from.
  *
  * MapLibre resets its own GL state after a custom layer draws, so a draw sets everything it needs; and a texture
