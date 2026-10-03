@@ -9,6 +9,7 @@ import type { MasterOnDisk } from '../map/masters';
 import { RENDERERS } from '../map/renderers';
 import { setFogOfWar } from '../fog/fogOfWar';
 import { nextWaterMode, waterStore } from '../water/waterMode';
+import { grassStore, toggleGrass } from '../sprites/grass/grassMode';
 import { lastingOn } from '../fog/describe';
 import { sessionStore } from '../net/gateway';
 import { useStore } from '../store/useStore';
@@ -43,6 +44,7 @@ export function MapSection({ map, master, renderer, onRenderer }: MapSectionProp
   const [working, setWorking] = useState<false | 'cut' | 'furnish'>(false);
   const fog = useStore(sessionStore, (state) => state.fogOfWar);
   const water = useStore(waterStore, (state) => state.mode);
+  const grass = useStore(grassStore, (state) => state.swaying);
   const connection = useStore(sessionStore, (state) => state.connection);
   const sight = useStore(sessionStore, (state) => state.yourSight);
   const today = useStore(sessionStore, (state) => state.world?.today ?? null);
@@ -187,6 +189,17 @@ export function MapSection({ map, master, renderer, onRenderer }: MapSectionProp
         title="step through the ways of drawing the water: realistic, the stylised wavelets, and still"
       >
         water: {water}
+      </button>
+
+      {/* WIP spike: the grass swaying in the wind on the grassland, from zoom 8.5 in. */}
+      <button
+        type="button"
+        className={grass ? 'debug-map__switch debug-map__switch--on' : 'debug-map__switch'}
+        onClick={toggleGrass}
+        aria-pressed={grass}
+        title="let the grass sway in the wind on the grassland, or hold it still in this window"
+      >
+        {grass ? 'grass: swaying' : 'grass: still'}
       </button>
 
       {/*

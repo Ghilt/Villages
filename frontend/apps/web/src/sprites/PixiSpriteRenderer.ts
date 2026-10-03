@@ -5,6 +5,7 @@ import { revealedAt } from '../fog/fogField';
 import type { FogField } from '../fog/fogField';
 import { createUncolouring } from '../fog/uncolouring';
 import { createFogLayer } from './FogLayer';
+import { createGrassLayer } from './grass/GrassLayer';
 import { soonest, type Layer } from './layer';
 import { buildMarkTextures } from './markTextures';
 import { createMarksLayer, type MarksLayer } from './MarksLayer';
@@ -288,9 +289,11 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       // Under everything, because it is the ground the rest stands on.
       scenery = createSceneryLayer();
       scenery.setGround(groundOf(groundField));
+      // WIP spike: the grass, swaying on the ground under everything that stands on it.
+      const grass = createGrassLayer(app.renderer, () => scene.scenery.tilesRoot, drawSoon);
       // The world outside vision over the scenery, both losing their colour on ground only revealed; then the
       // fog over them, and everything the fog must not cover above that.
-      world.addChild(scenery.container, marks.underTheFog);
+      world.addChild(grass.sprite, scenery.container, marks.underTheFog);
       stage.addChild(world);
       stage.addChild(fog.mesh);
       if (uncolourCanvas !== undefined) {
@@ -308,7 +311,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
 
       // Drawn in the order the old frame drew them: the marks, the ring put where they were just drawn, the
       // fog, the colour taken out, and the scenery.
-      layers = { marks, ring, drawn: [marks, ring, hazeLayer, uncolouringLayer, sceneryLayer] };
+      layers = { marks, ring, drawn: [marks, ring, hazeLayer, uncolouringLayer, grass, sceneryLayer] };
       // Whatever was handed over before the canvas was ready - the seats a founding choice offers always are,
       // since they arrive with the first frames - is given now, whole.
       apply(null, scene);
