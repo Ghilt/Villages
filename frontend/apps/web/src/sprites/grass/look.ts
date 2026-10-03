@@ -28,6 +28,17 @@ export const GRASS_LOOK = {
     colour: [0.93, 0.9, 0.7],
     opacity: 0.22,
   },
+  /**
+   * The colours of the grass's patches, which grassTuning.ts and its sliders lay out: bare ground keeps this share
+   * of its tufts; tall grass has a paler straw tip; brush is a low round clump, shaded under and lit on top.
+   */
+  patches: {
+    bareLeft: 0.06,
+    tallTip: [0.95, 0.89, 0.6],
+    brushDark: [0.19, 0.25, 0.1],
+    brushLight: [0.46, 0.52, 0.25],
+    brushOpacity: 0.6,
+  },
   blades: {
     /** One tuft to a cell this many world units across, and how tall a tuft stands. */
     cell: 0.42,

@@ -1,13 +1,15 @@
 /**
  * What a shader costs the graphics card, measured there rather than guessed: the time between two marks on the
- * card, averaged over a run of frames, and handed over once when the card has answered for all of them. A card or
- * a browser that will not say hands over nothing, and a run the card was interrupted in is measured again. The
- * first few frames after a start are let go by, because they carry the setting up - a picture made, a texture sent
- * - and not what a frame costs once it is going.
+ * card, the middle one of a run of frames, so that a frame stalled by a tile arriving does not speak for the rest,
+ * handed over once when the card has answered for all of them. A card or a browser that will not say hands over
+ * nothing, and a run the card was interrupted in is measured again. The first few frames after a start are let go
+ * by, because they carry the setting up - a picture made, a texture sent - and not what a frame costs once it is
+ * going.
  */
 
 /** How many frames are let go by before the measuring starts. */
 const SETTLING = 6;
+
 export interface CostMeter {
   /** Marks the start of what a frame draws; false when this frame is not being measured. */
   start(): boolean;
@@ -69,13 +71,12 @@ export function createCostMeter(gl: WebGL2RenderingContext | null | undefined, f
         clear();
         return null;
       }
-      const total = queries.reduce<number>(
-        (sum, query) => sum + (gl.getQueryParameter(query, gl.QUERY_RESULT) as number),
-        0,
-      );
+      const times = queries
+        .map((query) => gl.getQueryParameter(query, gl.QUERY_RESULT) as number)
+        .sort((one, other) => one - other);
       clear();
       done = true;
-      return total / frames / 1e6;
+      return times[Math.floor(times.length / 2)]! / 1e6;
     },
 
     again() {

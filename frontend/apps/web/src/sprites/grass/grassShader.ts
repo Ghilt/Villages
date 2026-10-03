@@ -16,6 +16,7 @@ const colour = (rgb: readonly number[]): string => rgb.map(float).join(', ');
 
 const G = GRASS_LOOK.gusts;
 const B = GRASS_LOOK.blades;
+const P = GRASS_LOOK.patches;
 const WIND = (GRASS_LOOK.wind * Math.PI) / 180;
 
 export const GRASS_VERTEX = `#version 300 es
@@ -45,6 +46,17 @@ uniform float uPixel;
 uniform sampler2D uMask;
 uniform vec2 uMaskOrigin;
 uniform vec2 uMaskSize;
+// How the grass grows in patches, from the sliders: grassTuning.ts says what each is.
+uniform float uPatch;
+uniform float uRagged;
+uniform float uSoft;
+uniform float uMingle;
+uniform float uBare;
+uniform float uTall;
+uniform float uBrush;
+uniform float uTallHeight;
+uniform float uBrushSize;
+uniform float uDensity;
 out vec4 fragColor;
 
 const float TAU = 6.2831853;
@@ -65,6 +77,11 @@ const vec3 TIP = vec3(${colour(B.tip)});
 const float TIP_ALPHA = ${float(B.tipOpacity)};
 const float FROM_PIXELS = ${float(B.fromPixels)};
 const float WHOLE_PIXELS = ${float(B.wholePixels)};
+const float BARE_LEFT = ${float(P.bareLeft)};
+const vec3 TALL_TIP = vec3(${colour(P.tallTip)});
+const vec3 BRUSH_DARK = vec3(${colour(P.brushDark)});
+const vec3 BRUSH_LIGHT = vec3(${colour(P.brushLight)});
+const float BRUSH_ALPHA = ${float(P.brushOpacity)};
 
 float hash(ivec2 cell, int salt) {
   uvec3 u = uvec3(ivec3(cell, salt)) * uvec3(1597334673u, 3812015801u, 2798796415u);
@@ -123,6 +140,44 @@ float gustAt(vec2 world) {
   return smoothstep(0.42, 0.8, big * 0.65 + small * 0.35);
 }
 
+// The two slow fields over the ground that mark out the patches.
+vec2 fieldsAt(vec2 world) {
+  vec2 broad = vec2(noise(world / uPatch + vec2(31.0, 7.0)), noise(world / (uPatch * 1.3) + vec2(71.0, 29.0)));
+  if (uRagged <= 0.0) {
+    return broad;
+  }
+  // A finer pattern breaks up the broad one's round outlines.
+  vec2 fine = vec2(
+    noise(world / (uPatch * 0.3) + vec2(13.0, 53.0)),
+    noise(world / (uPatch * 0.37) + vec2(47.0, 11.0))
+  );
+  return mix(broad, fine, uRagged * 0.5);
+}
+
+// The odds a patch of ground gives, nought to one each: that a tuft is missing because the ground is bare, that it
+// stands tall, and that it is brush. How much of each there is moves where the patterns are cut; how softly one
+// gives way to the next widens the band the odds change over, so the kinds thin into each other; and the mingling
+// is the odds of tall grass and brush anywhere, outside their own patches too.
+vec3 chancesOf(vec2 fields) {
+  float bareFrom = 0.5 + (0.5 - uBare) * 0.6;
+  float tallFrom = 0.5 + (0.5 - uTall) * 0.6;
+  float brushBelow = 0.5 - (0.5 - uBrush) * 0.6;
+  float soft = uSoft + 0.002;
+  float bare = smoothstep(bareFrom - soft, bareFrom + soft, fields.x);
+  float tall = smoothstep(tallFrom - soft, tallFrom + soft, fields.y);
+  float brush = 1.0 - smoothstep(brushBelow - soft, brushBelow + soft, fields.y);
+  return vec3(bare, mix(uMingle, 1.0, tall), mix(uMingle, 1.0, brush));
+}
+
+// Whether a tuft's root is in the grassland: one look at the mask, where grassAt softens the edge with five.
+float maskAt(vec2 world) {
+  vec2 at = (world - uMaskOrigin) / uMaskSize;
+  if (any(lessThan(at, vec2(0.0))) || any(greaterThan(at, vec2(1.0)))) {
+    return 0.0;
+  }
+  return texture(uMask, at).r;
+}
+
 float segment(vec2 p, vec2 a, vec2 b) {
   vec2 pa = p - a;
   vec2 ba = b - a;
@@ -136,50 +191,86 @@ void main() {
   if (grass <= 0.002) {
     discard;
   }
-  float gust = gustAt(world);
+  // The gusts show least on bare ground and most in tall grass, and the brush hardly bends.
+  vec3 kindHere = chancesOf(fieldsAt(world));
+  float gust = gustAt(world) * (1.0 - 0.85 * kindHere.x) * (1.0 + 0.6 * kindHere.y) * (1.0 - 0.5 * kindHere.z);
   vec3 rgb = SHEEN * gust * SHEEN_ALPHA;
   float alpha = gust * SHEEN_ALPHA;
 
-  // The tufts, while a cell is big enough on the screen to be worth one.
+  // The tufts and the brush, while a cell is big enough on the screen to be worth one.
   float worth = smoothstep(FROM_PIXELS, WHOLE_PIXELS, CELL * uScale);
   if (worth > 0.0) {
     // Which way down the wind is on the screen, and how tall a tuft stands there, in pixels.
     vec2 downWind = screenOf(uCentre + WIND) - screenOf(uCentre);
     downWind /= max(length(downWind), 1e-6);
     float tall = HEIGHT * uScale;
+    float tallest = tall * uTallHeight * 1.15;
     float thick = max(WIDTH, uPixel * 1.2);
-    // A tuft rises from its root, so the roots that can reach this pixel lie on the ground below it.
-    vec2 reach = groundUnder(vScreen + vec2(0.0, tall * 0.5)) / CELL;
+    // A tuft rises from its root and leans down the wind, so the roots that can reach this pixel lie on the
+    // ground below it and up the wind from it: the cells about there are the ones looked at.
+    vec2 reach = groundUnder(vScreen + vec2(0.0, tallest * 0.5) - downWind * tallest * 0.3) / CELL;
     ivec2 middle = ivec2(floor(reach));
+    // The patch fields and the gust change slowly over the ground, so they are worked out once, about the middle
+    // of the cells looked at, with how fast the fields change there, and each cell reads its own off that: a tuft
+    // is the same kind and bends the same way in every pixel it covers, for a fraction of the work.
+    vec2 about = reach * CELL;
+    vec2 fields = fieldsAt(about);
+    vec2 east = fieldsAt(about + vec2(1.0, 0.0)) - fields;
+    vec2 south = fieldsAt(about + vec2(0.0, 1.0)) - fields;
+    float blow = gustAt(about);
     float ink = 0.0;
-    float lit = 0.0;
-    for (int dy = -1; dy <= 2; dy++) {
-      for (int dx = -1; dx <= 1; dx++) {
+    vec3 colour = vec3(0.0);
+    float inkAlpha = 0.0;
+    for (int dy = -2; dy <= 2; dy++) {
+      for (int dx = -2; dx <= 2; dx++) {
         ivec2 cell = middle + ivec2(dx, dy);
         vec2 rootWorld = (vec2(cell) + vec2(hash(cell, 1), hash(cell, 2))) * CELL;
-        float here = grassAt(rootWorld);
-        if (here < 0.5) {
+        if (maskAt(rootWorld) < 0.5) {
           continue;
         }
-        float blow = gustAt(rootWorld);
-        float sway = sin(TAU * (uTime * SWAY_SPEED + hash(cell, 3))) * SWAY;
-        float size = tall * mix(0.7, 1.15, hash(cell, 4));
+        vec2 off = rootWorld - about;
+        vec3 odds = chancesOf(fields + east * off.x + south * off.y);
+        // So many of the tufts there could be grow at all, and bare ground keeps only a few of those.
+        if (hash(cell, 5) > uDensity * mix(1.0, BARE_LEFT, odds.x)) {
+          continue;
+        }
+        // Each tuft draws its kind: brush, tall grass, or the meadow's own.
+        float draw = hash(cell, 6);
+        bool isBrush = draw < odds.z;
+        float isTall = !isBrush && draw < odds.z + odds.y * (1.0 - odds.z) ? 1.0 : 0.0;
         vec2 root = screenOf(rootWorld);
-        vec2 tip = root + vec2(0.0, -size) + downWind * size * (blow * BEND + sway);
-        float away = segment(vScreen, root, tip);
-        float on = 1.0 - smoothstep(thick * 0.5, thick * 0.5 + uPixel, away);
-        if (on > ink) {
-          ink = on;
-          // How far up the stroke this pixel is: the root shaded, the tip lit, and lit more where bent.
-          vec2 rise = tip - root;
-          lit = clamp(dot(vScreen - root, rise) / max(dot(rise, rise), 1e-6), 0.0, 1.0) * mix(0.75, 1.0, blow);
+        if (isBrush) {
+          // Brush: a low round clump, shaded under and lit on top, that a gust only nudges.
+          float r = uBrushSize * uScale * mix(0.75, 1.25, hash(cell, 4));
+          vec2 centre = root + vec2(0.0, -r * 0.8) + downWind * r * blow * 0.25;
+          float d = length((vScreen - centre) * vec2(1.0, 1.15)) - r;
+          float on = 1.0 - smoothstep(-uPixel * 0.5, uPixel * 0.5, d);
+          if (on > ink) {
+            ink = on;
+            float top = clamp((centre.y - vScreen.y) / max(r, 1e-3) * 0.5 + 0.5, 0.0, 1.0);
+            colour = mix(BRUSH_DARK, BRUSH_LIGHT, top) * BRUSH_ALPHA;
+            inkAlpha = BRUSH_ALPHA;
+          }
+        } else {
+          // A tuft: a stroke from a shaded root to a lit tip, taller and paler in tall grass, bending down the wind.
+          float sway = sin(TAU * (uTime * SWAY_SPEED + hash(cell, 3))) * SWAY;
+          float size = tall * mix(1.0, uTallHeight, isTall) * mix(0.7, 1.15, hash(cell, 4));
+          vec2 tip = root + vec2(0.0, -size) + downWind * size * (blow * BEND * mix(1.0, 1.3, isTall) + sway);
+          float width = thick * mix(1.0, 1.25, isTall);
+          float on = 1.0 - smoothstep(width * 0.5, width * 0.5 + uPixel, segment(vScreen, root, tip));
+          if (on > ink) {
+            ink = on;
+            vec2 rise = tip - root;
+            float lit = clamp(dot(vScreen - root, rise) / max(dot(rise, rise), 1e-6), 0.0, 1.0) * mix(0.75, 1.0, blow);
+            colour = mix(ROOT * ROOT_ALPHA, mix(TIP, TALL_TIP, isTall) * TIP_ALPHA, lit);
+            inkAlpha = mix(ROOT_ALPHA, TIP_ALPHA, lit);
+          }
         }
       }
     }
     ink *= worth;
-    vec3 stroke = mix(ROOT * ROOT_ALPHA, TIP * TIP_ALPHA, lit);
-    float strokeAlpha = mix(ROOT_ALPHA, TIP_ALPHA, lit) * ink;
-    rgb = stroke * ink + rgb * (1.0 - strokeAlpha);
+    float strokeAlpha = inkAlpha * ink;
+    rgb = colour * ink + rgb * (1.0 - strokeAlpha);
     alpha = strokeAlpha + alpha * (1.0 - strokeAlpha);
   }
   fragColor = vec4(rgb, alpha) * grass;

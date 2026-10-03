@@ -22,6 +22,7 @@ import type { Layer } from '../layer';
 
 import { grassStore } from './grassMode';
 import { grassMaskOf, sameRange, tilesUnder } from './grassMask';
+import { grassTuningStore } from './grassTuning';
 import type { TileRange } from './grassMask';
 import { GRASS_FRAGMENT, GRASS_VERTEX } from './grassShader';
 import { GRASS_LOOK } from './look';
@@ -73,6 +74,16 @@ export function createGrassLayer(
     uPixel: { value: 1, type: 'f32' },
     uMaskOrigin: { value: new Float32Array(2), type: 'vec2<f32>' },
     uMaskSize: { value: new Float32Array([1, 1]), type: 'vec2<f32>' },
+    uPatch: { value: 7, type: 'f32' },
+    uRagged: { value: 0, type: 'f32' },
+    uSoft: { value: 0, type: 'f32' },
+    uMingle: { value: 0, type: 'f32' },
+    uBare: { value: 0, type: 'f32' },
+    uTall: { value: 0, type: 'f32' },
+    uBrush: { value: 0, type: 'f32' },
+    uTallHeight: { value: 1, type: 'f32' },
+    uBrushSize: { value: 0.17, type: 'f32' },
+    uDensity: { value: 1, type: 'f32' },
   });
   const empty = new BufferImageSource({
     resource: new Uint8Array(4),
@@ -112,6 +123,8 @@ export function createGrassLayer(
 
   const stopWatching = grassStore.watch(repaint);
   const stopWatchingShaders = shadersStore.watch(repaint);
+  // A slider moved shows on the next frame even where nothing else is moving the map.
+  const stopWatchingTuning = grassTuningStore.watch(repaint);
 
   /** Pieces the mask for a range of tiles, and puts it in place unless the view has moved on meanwhile. */
   async function build(range: TileRange, root: string): Promise<void> {
@@ -211,6 +224,17 @@ export function createGrassLayer(
       u.uTime = still ? 0 : (now / 1000) % 3600;
       u.uFade = fade;
       u.uPixel = 1 / (levelLook.resolution * resolution);
+      const tuning = grassTuningStore.get();
+      u.uPatch = tuning.size;
+      u.uRagged = tuning.ragged;
+      u.uSoft = tuning.soft;
+      u.uMingle = tuning.mingle;
+      u.uBare = tuning.bare;
+      u.uTall = tuning.tall;
+      u.uBrush = tuning.brush;
+      u.uTallHeight = tuning.tallHeight;
+      u.uBrushSize = tuning.brushSize;
+      u.uDensity = tuning.density;
       uniforms.update();
 
       const width = Math.max(1, Math.ceil(view.width * levelLook.resolution));
@@ -230,6 +254,7 @@ export function createGrassLayer(
     destroy(): void {
       stopWatching();
       stopWatchingShaders();
+      stopWatchingTuning();
       meter.dispose();
       sprite.destroy();
       target.destroy(true);

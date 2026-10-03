@@ -6,6 +6,8 @@ import { useStore } from '../store/useStore';
 import { shadersStore } from '../shaders/levels';
 import { LevelSwitch } from './LevelSwitch';
 import { Section } from './Section';
+import { Sliders } from './Sliders';
+import type { SliderDef } from './Sliders';
 
 /**
  * The water, a part of the Shaders section: whether it is drawn, in which look, and the rivers' look on sliders,
@@ -14,17 +16,7 @@ import { Section } from './Section';
  * Only the realistic water and only rivers that flow, from zoom 8.5 in.
  */
 
-interface Slider {
-  key: keyof RiverTuning;
-  label: string;
-  min: number;
-  max: number;
-  step: number;
-  /** The value as the line under the slider says it. */
-  say: (value: number) => string;
-}
-
-const SLIDERS: readonly Slider[] = [
+const SLIDERS: readonly SliderDef<keyof RiverTuning>[] = [
   {
     key: 'speed',
     label: 'How fast the water runs',
@@ -128,24 +120,7 @@ export function WaterSection() {
         From zoom 8.5 in. The sliders are the rivers’ own look, on the realistic water. Turn the fog of war
         off to see it clearly.
       </p>
-      {SLIDERS.map((slider) => (
-        <div key={slider.key}>
-          <label className="debug-map__label" htmlFor={`water-${slider.key}`}>
-            {slider.label}
-          </label>
-          <input
-            id={`water-${slider.key}`}
-            className="debug__slider"
-            type="range"
-            min={slider.min}
-            max={slider.max}
-            step={slider.step}
-            value={tuning[slider.key]}
-            onChange={(event) => setRiverTuning({ [slider.key]: Number(event.target.value) })}
-          />
-          <p className="debug-map__note">{slider.say(tuning[slider.key])}</p>
-        </div>
-      ))}
+      <Sliders idPrefix="water" sliders={SLIDERS} values={tuning} onChange={setRiverTuning} />
     </Section>
   );
 }
