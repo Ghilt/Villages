@@ -2,17 +2,16 @@ import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { deflateSync } from 'node:zlib';
 import { basename, resolve } from 'node:path';
 
-import { PNG } from 'pngjs';
-
 import { ACROSS_GAP, FROM_SEA, INLAND, STRANDED, riverFlow } from '../src/flow.ts';
-import { preparePalette, snapPrepared, toRgb } from '../src/palette.ts';
+import { toRgb } from '../src/palette.ts';
 import type { Palette, Rgb } from '../src/palette.ts';
 import { encodeRgbPng } from '../src/png.ts';
-import { createRaster, toLngLat, toPixel } from '../src/raster.ts';
-import type { ClassRaster } from '../src/raster.ts';
+import { toLngLat, toPixel } from '../src/raster.ts';
 import { TILE_SIZE, cutTile, mercatorRowOf, sourceColumnFor, sourceRowFor } from '../src/tiles.ts';
 import { DEFAULT_MASTER, masterNameOf, worldDirOf } from '../src/masters.ts';
 
+import { args, flag, named } from './lib/flags.ts';
+import { readMaster } from './lib/master.ts';
 import { OUTPUT_DIR, PAINTERLY_DIR, PALETTE, RENDER, masterAt } from './lib/paths.ts';
 
 /**
@@ -35,15 +34,6 @@ import { OUTPUT_DIR, PAINTERLY_DIR, PALETTE, RENDER, masterAt } from './lib/path
  * paints a few places with arrows on their rivers into `world/painterly/<place>-flow.png`.
  */
 
-const args = process.argv.slice(2);
-const flag = (name: string): string | undefined => {
-  const at = args.indexOf(`--${name}`);
-  return at < 0 ? undefined : args[at + 1];
-};
-const named = args.filter(
-  (value, index) => !value.startsWith('--') && args[index - 1]?.startsWith('--') !== true,
-);
-
 const masterPath = masterAt(named[0]);
 const master = masterNameOf(basename(masterPath)) ?? DEFAULT_MASTER;
 const outputDir = resolve(OUTPUT_DIR, worldDirOf(master), 'flow');
@@ -62,29 +52,7 @@ const idsOf = (...names: string[]) =>
   new Set(palette.classes.filter((one) => names.includes(one.name)).map((one) => one.id));
 const classes = { sea: idsOf('ocean', 'shallow-sea'), lake: idsOf('lake'), river: idsOf('river') };
 
-/** Read inside a function so the two gigabytes of RGBA pngjs hands back go before anything else starts. */
-function readMaster(bytes: Buffer): ClassRaster {
-  const prepared = preparePalette(palette);
-  const decoded = PNG.sync.read(bytes);
-  const world = createRaster(decoded.width, decoded.height);
-  const remembered = new Int16Array(1 << 24).fill(-1);
-  for (let index = 0; index < world.cells.length; index += 1) {
-    const at = index * 4;
-    const red = decoded.data[at]!;
-    const green = decoded.data[at + 1]!;
-    const blue = decoded.data[at + 2]!;
-    const colour = (red << 16) | (green << 8) | blue;
-    let id = remembered[colour]!;
-    if (id < 0) {
-      id = snapPrepared([red, green, blue], prepared).id;
-      remembered[colour] = id;
-    }
-    world.cells[index] = id;
-  }
-  return world;
-}
-
-const world = readMaster(await readFile(masterPath));
+const world = readMaster(masterPath, palette);
 console.log(`read ${master}, ${world.width} by ${world.height} (${since()})`);
 
 const flow = riverFlow(world, classes, { bridge, along });

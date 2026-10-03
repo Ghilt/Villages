@@ -1,3 +1,4 @@
+import { CostHeap } from './costHeap.ts';
 import type { ClassRaster } from './raster.ts';
 
 /**
@@ -230,7 +231,7 @@ export function riverFlow(raster: ClassRaster, classes: WaterClasses, options: F
   const order = new Int32Array(count);
   const viaJump = new Uint8Array(count);
   let settledCount = 0;
-  const heap = new Heap();
+  const heap = new CostHeap();
 
   const offer = (node: number, cost: number, from: number, jump = false) => {
     if (settled[node] === 0 && cost < distance[node]!) {
@@ -390,50 +391,3 @@ const wrapped = (difference: number, width: number): number => {
   const across = Math.abs(difference);
   return Math.min(across, width - across);
 };
-
-/** A binary heap of nodes by cost, growing as it needs to. */
-class Heap {
-  private costs = new Float64Array(1024);
-  private nodes = new Int32Array(1024);
-  size = 0;
-
-  push(cost: number, node: number): void {
-    if (this.size === this.costs.length) {
-      const costs = new Float64Array(this.size * 2);
-      costs.set(this.costs);
-      this.costs = costs;
-      const nodes = new Int32Array(this.size * 2);
-      nodes.set(this.nodes);
-      this.nodes = nodes;
-    }
-    let at = this.size++;
-    while (at > 0) {
-      const above = (at - 1) >> 1;
-      if (this.costs[above]! <= cost) break;
-      this.costs[at] = this.costs[above]!;
-      this.nodes[at] = this.nodes[above]!;
-      at = above;
-    }
-    this.costs[at] = cost;
-    this.nodes[at] = node;
-  }
-
-  pop(): number {
-    const top = this.nodes[0]!;
-    const cost = this.costs[--this.size]!;
-    const node = this.nodes[this.size]!;
-    let at = 0;
-    for (;;) {
-      let child = at * 2 + 1;
-      if (child >= this.size) break;
-      if (child + 1 < this.size && this.costs[child + 1]! < this.costs[child]!) child += 1;
-      if (this.costs[child]! >= cost) break;
-      this.costs[at] = this.costs[child]!;
-      this.nodes[at] = this.nodes[child]!;
-      at = child;
-    }
-    this.costs[at] = cost;
-    this.nodes[at] = node;
-    return top;
-  }
-}
