@@ -1,10 +1,14 @@
 import { resetRiverTuning, riverStore, setRiverTuning } from '../water/riverTuning';
 import type { RiverTuning } from '../water/riverTuning';
+import { setWaterEnabled, setWaterLook, waterStore } from '../water/waterMode';
+import type { WaterLook } from '../water/waterMode';
 import { useStore } from '../store/useStore';
+import { EnabledBox } from './EnabledBox';
 import { Section } from './Section';
 
 /**
- * The rivers' look, on sliders, for Adam's eye. What each number means is in
+ * The water, a part of the Shaders section: whether it is drawn, in which look, and the rivers' look on sliders,
+ * for Adam's eye. What each number means is in
  * `water/riverTuning.ts`; they change the water on the next frame, and are said in the log once a slider stops.
  * Only the realistic water and only rivers that flow, from zoom 8.5 in.
  */
@@ -88,6 +92,8 @@ const SLIDERS: readonly Slider[] = [
 
 export function WaterSection() {
   const tuning = useStore(riverStore);
+  const enabled = useStore(waterStore, (state) => state.enabled);
+  const look = useStore(waterStore, (state) => state.look);
   const tools = (
     <button
       type="button"
@@ -100,9 +106,26 @@ export function WaterSection() {
   );
   return (
     <Section name="Water" tools={tools}>
+      <EnabledBox
+        checked={enabled}
+        onChange={setWaterEnabled}
+        title="draw the moving water in this window, or leave the sea, the lakes and the rivers as painted"
+      />
+      <label className="debug-map__label" htmlFor="water-look">
+        Look
+      </label>
+      <select
+        id="water-look"
+        className="debug-map__select"
+        value={look}
+        onChange={(event) => setWaterLook(event.target.value as WaterLook)}
+      >
+        <option value="realistic">Realistic</option>
+        <option value="wavelets">Wavelets, its first look</option>
+      </select>
       <p className="debug-map__note">
-        The rivers’ own look, on the realistic water from zoom 8.5 in. Turn the fog of war off to see it
-        clearly.
+        From zoom 8.5 in. The sliders are the rivers’ own look, on the realistic water. Turn the fog of war
+        off to see it clearly.
       </p>
       {SLIDERS.map((slider) => (
         <div key={slider.key}>

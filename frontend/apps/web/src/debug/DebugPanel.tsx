@@ -12,7 +12,7 @@ import { CharactersSection } from './CharactersSection';
 import { DialoguesSection } from './DialoguesSection';
 import { MapSection } from './MapSection';
 import { ScenerySection } from './ScenerySection';
-import { WaterSection } from './WaterSection';
+import { ShadersSection } from './ShadersSection';
 import { WorktreesSection } from './WorktreesSection';
 import { logStore, atToClock, note } from '../log/log';
 import { stageStore, setLogOpen, setPanelShut, toggleShape } from './stage';
@@ -245,7 +245,7 @@ export function DebugPanel({ map, worldRoot, master, renderer, onRenderer }: Deb
 
           <MapSection map={map} master={master} renderer={renderer} onRenderer={onRenderer} />
 
-          <WaterSection />
+          <ShadersSection />
 
           <ScenerySection />
 

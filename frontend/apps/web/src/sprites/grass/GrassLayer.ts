@@ -29,7 +29,7 @@ import { GRASS_LOOK } from './look';
  *
  * It is worked out at a part of the screen's size, `look.ts`'s resolution, into a picture of its own, which is
  * then laid over the whole screen: a half across and down is a quarter of the pixels. It asks for a frame fifteen
- * times a second while some of it is on the screen and swaying, and for none otherwise, so the sprite canvas
+ * times a second while some of it is on the screen and enabled, and for none otherwise, so the sprite canvas
  * redraws for it and the map does not. The first time it has been drawn for a while it says once in the log
  * what it costs the graphics card, measured rather than guessed.
  */
@@ -202,7 +202,7 @@ export function createGrassLayer(
     draw(view: CameraView, now: number): number | null {
       sayCost();
       const fade = smoothstep(GRASS_LOOK.fromZoom - 0.5, GRASS_LOOK.fromZoom + 0.5, view.zoom);
-      const held = fade > 0 && grassStore.get().swaying ? maskFor(view) : null;
+      const held = fade > 0 && grassStore.get().enabled ? maskFor(view) : null;
       if (held === null || held.grassy === 0) {
         sprite.visible = false;
         return null;

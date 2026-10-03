@@ -27,3 +27,30 @@
   border-top: 1px solid var(--parchment-edge);
   margin: 0.75rem 0 0.5rem;
 }
+
+/* A section inside a section, as each shader is inside Shaders: set in by a line, under a quieter bar. */
+.debug__sectionbody > .debug__section {
+  margin-left: 0.15rem;
+  border-left: 2px solid var(--parchment-edge);
+}
+
+.debug__sectionbody > .debug__section > .debug__sectionbar {
+  border-top-color: transparent;
+  background: none;
+}
+
+/* The box that turns a shader on and off, at the top of its part of the Shaders section. */
+.debug__check {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.debug__check input {
+  margin: 0;
+  accent-color: #9d7c2a;
+  cursor: pointer;
+}

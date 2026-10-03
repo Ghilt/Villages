@@ -4,7 +4,8 @@ import type { Readable } from '@villages/client-core';
 import { note } from '../log/log';
 
 /**
- * The rivers' own look, as numbers Adam moves with the sliders in the debug panel's Water section.
+ * The rivers' own look, as numbers Adam moves with the sliders in the Water part of the debug panel's Shaders
+ * section.
  *
  * Remembered in this browser, so a reload keeps them, and said once in the log after a slider stops moving, so
  * the log's copy button carries them to whoever is to write them down. Not a matter for the server: a way of

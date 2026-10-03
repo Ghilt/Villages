@@ -4,42 +4,49 @@ import type { Readable } from '@villages/client-core';
 import { note } from '../log/log';
 
 /**
- * How this window draws the water, a switch in the Debug map section that steps through the three.
- * Realistic at every load. A store, the one shape every
- * piece of state the page watches takes, read in a component through `useStore`.
+ * Whether this window draws the water, and in which look: the Water part of the debug panel's Shaders section,
+ * an enabled box and a choice of two. Drawn, and realistic, at every load. A store, the one shape every piece of
+ * state the page watches takes, read in a component through `useStore`.
  */
-export type WaterMode = 'realistic' | 'wavelets' | 'still';
+export type WaterLook = 'realistic' | 'wavelets';
 
-const ORDER: readonly WaterMode[] = ['realistic', 'wavelets', 'still'];
-
-const SAID: Record<WaterMode, string> = {
+const SAID: Record<WaterLook, string> = {
   realistic: 'drawn with depth, waves, the sun, caustics and surf',
   wavelets: 'drawn as its first look, little stylised wavelets coming and going',
-  still: 'still: the water is as painted',
 };
 
 interface WaterState {
-  mode: WaterMode;
+  enabled: boolean;
+  look: WaterLook;
   /**
    * Whether the map is showing the Flow renderer, which the water layer draws in place of the water: which way
-   * every river runs. Set by the renderer dropdown rather than by this switch.
+   * every river runs. Set by the renderer dropdown, whether the water is enabled or not.
    */
   flowView: boolean;
 }
 
-const water = createStore<WaterState>({ mode: 'realistic', flowView: false });
+const water = createStore<WaterState>({ enabled: true, look: 'realistic', flowView: false });
 
 export const waterStore: Readable<WaterState> = water;
+
+export function setWaterEnabled(enabled: boolean): void {
+  if (enabled === water.get().enabled) {
+    return;
+  }
+  note('water', enabled ? SAID[water.get().look] : 'not drawn: the water is as painted');
+  water.set({ enabled });
+}
+
+export function setWaterLook(look: WaterLook): void {
+  if (look === water.get().look) {
+    return;
+  }
+  note('water', SAID[look]);
+  water.set({ look });
+}
 
 export function setFlowView(on: boolean): void {
   if (on !== water.get().flowView) {
     water.set({ flowView: on });
   }
-}
-
-/** The next way of drawing it, round again after the last. */
-export function nextWaterMode(): void {
-  const mode = ORDER[(ORDER.indexOf(water.get().mode) + 1) % ORDER.length]!;
-  note('water', SAID[mode]);
-  water.set({ mode });
 }

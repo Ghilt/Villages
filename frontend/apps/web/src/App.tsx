@@ -242,7 +242,7 @@ export function App({ master, devTools }: AppProps) {
   }, [map, renderer, camera.latticeTurn, camera.latticeSize, master]);
 
   // The water's switch redraws the map, so the new way of drawing it shows at once.
-  const water = useStore(waterStore, (state) => state.mode);
+  const water = useStore(waterStore, (state) => (state.enabled ? state.look : 'off'));
   useEffect(() => {
     map?.triggerRepaint();
   }, [map, water]);

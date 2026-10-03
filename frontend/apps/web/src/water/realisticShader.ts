@@ -51,7 +51,7 @@ uniform sampler2D uFlow;
 // How far down the river, as the cosine and sine of a turn every uAlongPeriod world units.
 uniform sampler2D uAlong;
 uniform float uAlongPeriod;
-// The rivers' own look, from the sliders in the debug panel's Water section.
+// The rivers' own look, from the sliders in the Water part of the debug panel's Shaders section.
 uniform float uRiverSpeed;
 uniform float uRippleSpacing;
 uniform float uRippleBow;

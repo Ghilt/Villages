@@ -77,3 +77,10 @@ marching downstream close in, and black where a river is stranded.
 - **Flow from a real river dataset.** It would not follow what Adam painted, and the master is the world.
 - **Flow downhill.** The master has no height, only classes; the sea is the one thing every river is known to
   be going towards.
+
+## Amendment, 2026-10-03: a part of the Shaders section
+
+Adam asked for one place for the shaders that are a look and nothing more. The water's switch in the Debug map
+section and its own Water section became the **Water** part of a **Shaders** section: an `enabled` box, which
+leaves the water as painted when unticked, a choice of look, realistic or the wavelets, and the rivers' sliders
+as they were. A shader added later gets a part of its own there, opening with the same box.

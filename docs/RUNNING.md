@@ -35,16 +35,17 @@ stage alone, with none of the debug panel in it (decision record 0079).
   river runs, a colour for each way and arrows marching downstream from about zoom 8, and black where a river
   has no way to any sea or lake - a break in the master's rivers to mend. See `docs/adr/0081`.
 - The water moves, from about zoom 8.5 in: depth, waves lit by a sun in the north-west, caustics on the bottom
-  of the shallows, and surf along the shore, over every renderer. `water: realistic` in the Debug map section
-  steps it on to `wavelets`, the water's first and stylised look, kept to compare against, and to `still`, for
-  that window; it is realistic at every load. The rivers run downstream, with crests across the current and
-  specks carried on it, from the flow `world:flow` works out beside the tiles; a master without it has still
-  rivers and the log says so. Their look is the **Water** section's eight sliders, below Debug map: how fast,
-  how far apart the crests are, how far the middle runs ahead, how thin and how bright the crests are, the
-  specks, and how much of the sea's waves and caustics a river keeps. They are remembered in that browser,
-  `reset` puts them back, and once a slider stops the log says all eight under `water` as `rivers tuned: …`,
-  which is the line to hand over when a setting should become the default. Every other number of the water
-  is in `apps/web/src/water/look.ts`. See `docs/adr/0081`.
+  of the shallows, and surf along the shore, over every renderer. It is the **Water** part of the **Shaders**
+  section, below Debug map, which holds a part for each shader that is a look and nothing more: `enabled`
+  unticked leaves the water as painted in that window, and its Look is `Realistic` or `Wavelets`, the water's
+  first and stylised look, kept to compare against; it is drawn, realistic, at every load. The rivers run
+  downstream, with crests across the current and specks carried on it, from the flow `world:flow` works out
+  beside the tiles; a master without it has still rivers and the log says so. Their look is the Water part's
+  eight sliders: how fast, how far apart the crests are, how far the middle runs ahead, how thin and how
+  bright the crests are, the specks, and how much of the sea's waves and caustics a river keeps. They are
+  remembered in that browser, `reset` puts them back, and once a slider stops the log says all eight under
+  `water` as `rivers tuned: …`, which is the line to hand over when a setting should become the default. Every
+  other number of the water is in `apps/web/src/water/look.ts`. See `docs/adr/0081`.
 - What the program thinks is happening: the debug panel, one space docked down the right-hand side
   holding everything that helps during development, which minimises to a badge and remembers that,
   and is only in a development build: a production build leaves it out whole (0079).
@@ -59,7 +60,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
   `gateway: error fault: …`, with its stack in the server's log under `villages.feed`, which the quick-start
   writes to `.logs/backend.log`; see decision record 0029. **Everything in it is in a folding section**,
   and which section a new thing goes in is asked rather than guessed, as `CLAUDE.md` says. Today they are
-  Worktrees, Debug map, Water, Scenery, Camera, Areas, World, Resources, Characters and Dialogues.
+  Worktrees, Debug map, Shaders, Scenery, Camera, Areas, World, Resources, Characters and Dialogues.
   **The log is not a section but a column of its own**, the whole height of the panel on its outer side,
   so what a button did is in view while the button is. It begins folded: the `log` toggle in the panel's
   header, beside `landscape`, opens it and `hide` in its own bar folds it away again. The events themselves are not in the

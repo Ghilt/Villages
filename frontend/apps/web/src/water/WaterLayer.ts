@@ -26,8 +26,8 @@ import { WAVELETS } from './waveletsShader';
  * from the ground's own coordinates, so it pans with the map and needs no art. Each pattern comes in several
  * sizes that cross-fade by zoom, so it stays put on the ground and about the same size on the screen.
  *
- * Three ways to draw it, the Debug map's water switch: realistic, `realisticShader.ts`; the stylised
- * wavelets, the water's first look, kept to compare against; and still. The Flow renderer is drawn here too, in place of the water,
+ * Two looks, chosen in the Water part of the debug panel's Shaders section, which can also turn it off:
+ * realistic, `realisticShader.ts`; and the stylised wavelets, the water's first look, kept to compare against. The Flow renderer is drawn here too, in place of the water,
  * by `flowView.ts`. See decision record 0081.
  */
 
@@ -139,7 +139,7 @@ export function createWaterLayer(worldRoot: string): maplibregl.CustomLayerInter
 
     render(context, options) {
       tiles.begin();
-      const { mode, flowView: showingFlow } = waterStore.get();
+      const { enabled, look, flowView: showingFlow } = waterStore.get();
       const zoom = map!.getZoom();
       const scale = pixelsPerWorldUnit(zoom);
       const start = {
@@ -156,8 +156,8 @@ export function createWaterLayer(worldRoot: string): maplibregl.CustomLayerInter
         return;
       }
       const fade = smoothstep(WATER_LOOK.fromZoom - 0.5, WATER_LOOK.fromZoom + 0.5, zoom);
-      const drawing = mode === 'realistic' ? realistic : wavelets;
-      if (mode === 'still' || fade <= 0 || !tiles.ready() || drawing === null) {
+      const drawing = look === 'realistic' ? realistic : wavelets;
+      if (!enabled || fade <= 0 || !tiles.ready() || drawing === null) {
         return;
       }
 
@@ -170,7 +170,7 @@ export function createWaterLayer(worldRoot: string): maplibregl.CustomLayerInter
       begin(context, drawing, start);
       context.uniform1i(where.uMask!, 0);
       context.uniform1f(where.uFade!, fade);
-      if (mode === 'realistic') {
+      if (look === 'realistic') {
         realisticUniforms(context, where, scale);
       } else {
         context.uniform1fv(where.uWeights!, weightsOf(W.firstCell, W.step, W.sizes, W.band, scale));
