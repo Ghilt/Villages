@@ -318,7 +318,8 @@ Commands are added here as the increments land:
   of it, `world:paint` paints the painterly stills and writes the runtime copy of the styles (`-- --config-only`
   for that alone), `world:art` cuts the sprites, `world:ui` the interface pictures and `world:nine-slice` a
   border from a frame, and `world:portraits` and `world:scenes` draw placeholders, never over a file that is
-  there.
+  there. `world:mend-rivers <master.png>` joins a master's broken rivers into a copy beside it, and is
+  described in `docs/AUTHORING-THE-WORLD.md` with the rest of the master's editing.
 - What the running program does, part by part, is `docs/RUNNING.md`: the debug panel and every section of
   it, the player's own levers, the fog, the event page and the component library, and Adam's folders of
   pictures with the tools that cut them. A step that changes what a part of it does changes its entry there

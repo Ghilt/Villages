@@ -16,13 +16,16 @@ const PREVIEW = '-preview';
 /** The thirty-two classes with their names written on them. A picture of the palette, not a world. */
 const NOT_A_WORLD = ['palette-strip'];
 
+/** What `world:mend-rivers` painted, in red on grey. A picture of an edit, not a world. */
+const AUDIT = '_audit_';
+
 /** The master a file name names, or nothing if that file is not one. */
 export function masterNameOf(file: string): string | null {
   if (!file.toLowerCase().endsWith('.png')) {
     return null;
   }
   const name = file.slice(0, -'.png'.length);
-  if (name === '' || name.endsWith(PREVIEW) || NOT_A_WORLD.includes(name)) {
+  if (name === '' || name.endsWith(PREVIEW) || name.includes(AUDIT) || NOT_A_WORLD.includes(name)) {
     return null;
   }
   return name;
