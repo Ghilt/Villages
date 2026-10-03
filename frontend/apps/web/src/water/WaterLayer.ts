@@ -10,6 +10,7 @@ import { WATER_LOOK } from './look';
 import { DEEP_RANGE, SHORE_RANGE, SIDE, maskOf } from './waterMask';
 import type { WaterKinds } from './waterMask';
 import { waterStore } from './waterMode';
+import { riverStore } from './riverTuning';
 
 /**
  * WIP SPIKE: the water, as a MapLibre custom layer drawn over the terrain and under the ink and the fog.
@@ -136,6 +137,18 @@ uniform float uWaves[${R.waves.sizes}];
 uniform float uCaustics[${R.caustics.sizes}];
 // Which way the rivers run on the map, red east and green south about a half, and blue how big a river.
 uniform sampler2D uFlow;
+// How far down the river, as the cosine and sine of a turn every uAlongPeriod world units.
+uniform sampler2D uAlong;
+uniform float uAlongPeriod;
+// The rivers' own look, from the sliders in the debug panel's Water section.
+uniform float uRiverSpeed;
+uniform float uRippleSpacing;
+uniform float uRippleBow;
+uniform float uRippleSharpness;
+uniform float uRippleBright;
+uniform float uSpeckBright;
+uniform float uRiverWaves;
+uniform float uRiverCaustics;
 
 const float SHELF = ${float(R.depth.shelf)};
 const float SHELF_EDGE = ${float(R.depth.shelfEdge)};
@@ -253,9 +266,27 @@ float causticAt(vec2 p, vec2 slope) {
   return light;
 }
 
+// Value noise that comes round again every so many cells across, for patterns laid along a river's coordinate,
+// which itself comes round every period.
+float wrappedNoise(vec2 at, float period) {
+  vec2 whole = floor(at);
+  vec2 part = at - whole;
+  vec2 w = part * part * (3.0 - 2.0 * part);
+  int p = max(1, int(period + 0.5));
+  ivec2 c = ivec2(whole);
+  int x0 = ((c.x % p) + p) % p;
+  int x1 = (x0 + 1) % p;
+  return mix(
+    mix(hash(ivec3(x0, c.y, 3)), hash(ivec3(x1, c.y, 3)), w.x),
+    mix(hash(ivec3(x0, c.y + 1, 3)), hash(ivec3(x1, c.y + 1, 3)), w.x),
+    w.y
+  );
+}
+
 void main() {
   vec4 here = waterAt();
   vec4 current = texture(uFlow, vTex);
+  vec4 downRiver = texture(uAlong, vTex);
   // A river is a pixel to three of the master wide, so it is never more than a texel and a half from a bank:
   // it keeps its edge where the master has it, firm, or the wander and the fade would wash it away.
   float river = smoothstep(0.2, 0.6, here.w);
@@ -286,7 +317,8 @@ void main() {
   // A stranded river is marked with no size at all, and stands still.
   float flowing = clamp(length(towards) * 1.4 - 0.2, 0.0, 1.0) * river * step(0.002, current.b);
   vec2 downstream = flowing > 0.0 ? normalize(towards) : vec2(0.0);
-  vec2 drift = downstream * mix(RIVER_SLOWEST, RIVER_FASTEST, current.b) * RIVER_CYCLE;
+  float riverSpeed = mix(RIVER_SLOWEST, RIVER_FASTEST, current.b) * uRiverSpeed;
+  vec2 drift = downstream * riverSpeed * RIVER_CYCLE;
   // Two copies of the surface slide downstream, each starting over once a cycle and faded out as it does, half
   // a cycle apart: the water moves, and a bend never stretches the pattern further than one cycle's slide.
   float phase = fract(uTime / RIVER_CYCLE);
@@ -294,10 +326,41 @@ void main() {
   vec2 second = vWorld - drift * fract(phase + 0.5);
   float between = abs(1.0 - 2.0 * phase);
 
+  // A river's own surface, laid along it rather than slid over it: ripples across the current, bowed so the
+  // middle runs ahead, travelling downstream at the river's speed and broken up so they are not stripes. How far
+  // down the river a pixel is runs round its bends, so they follow them. Nothing varies across a river by its
+  // distance from the bank: a river is a pixel to three of the master wide, and across it that distance has the
+  // pixels' square corners in it.
+  float along = atan(downRiver.g - 0.5, downRiver.r - 0.5) / TAU * uAlongPeriod;
+  // One speed for every ripple, whatever the river: a speed that changed across a river - and it does, fading
+  // towards its banks - would run its middle further ahead of its edges every second, until the ripples
+  // sheared into lines along it. Each river's own speed is the specks', which slide and start over.
+  float rippleSpeed = mix(RIVER_SLOWEST, RIVER_FASTEST, 0.5) * uRiverSpeed;
+  float moved = along + mod(uTime * rippleSpeed, uAlongPeriod);
+  float middle = smoothstep(0.0, 1.2, here.x);
+  float crestPhase = (moved + uRippleBow * middle) / uRippleSpacing;
+  float swell = max(0.5 + 0.5 * cos(TAU * crestPhase), 1e-5);
+  float whole = smoothstep(
+    0.3,
+    0.7,
+    wrappedNoise(vec2(moved / (2.0 * uRippleSpacing), middle * 3.0), uAlongPeriod / (2.0 * uRippleSpacing))
+  );
+  float crest = pow(swell, uRippleSharpness) * whole;
+  // Specks of light on the current: fine noise carried downstream on the water's two sliding copies.
+  float specks = mix(
+    smoothstep(0.72, 0.9, noise(first / 0.45)),
+    smoothstep(0.72, 0.9, noise(second / 0.45)),
+    between
+  );
+  float riverLight = (crest * uRippleBright + specks * uSpeckBright) * flowing;
+  // The ripples tip the surface as well, so they catch the sun.
+  vec2 rippleSlope =
+    -downstream * sin(TAU * crestPhase) * pow(swell, max(uRippleSharpness - 1.0, 0.0)) * 0.3 * whole * uRippleBright;
+
   // The surface, lit.
   vec2 slope = slopeAt(vWorld);
   if (flowing > 0.0) {
-    slope = mix(slope, mix(slopeAt(first), slopeAt(second), between), flowing);
+    slope = mix(slope, mix(slopeAt(first), slopeAt(second), between) * uRiverWaves + rippleSlope, flowing);
   }
   slope *= 1.0 - 0.6 * calm;
   vec3 normal = normalize(vec3(-slope, 1.0));
@@ -311,7 +374,11 @@ void main() {
   if (bottom > 0.0) {
     caustic = causticAt(vWorld, slope);
     if (flowing > 0.0) {
-      caustic = mix(caustic, mix(causticAt(first, slope), causticAt(second, slope), between), flowing);
+      caustic = mix(
+        caustic,
+        mix(causticAt(first, slope), causticAt(second, slope), between) * uRiverCaustics,
+        flowing
+      );
     }
     caustic *= bottom * CAUSTIC_STRENGTH;
   }
@@ -322,7 +389,8 @@ void main() {
   float line = smoothstep(0.0, 0.05, rolling) * (1.0 - smoothstep(0.05, 0.4, rolling));
   float broken = smoothstep(0.3, 0.7, noise(vWorld / 1.3 + vec2(uTime * 0.07, 0.0)));
   float edge = (1.0 - smoothstep(0.0, SURF_EDGE, wobbly)) * SURF_EDGE_ALPHA * mix(0.55, 1.0, broken);
-  float coming = line * (1.0 - smoothstep(0.0, SURF_REACH, shore)) * SURF_ALPHA * broken;
+  // No surf rolls in on a river: its lines would only trace the square corners of its banks.
+  float coming = line * (1.0 - smoothstep(0.0, SURF_REACH, shore)) * SURF_ALPHA * broken * (1.0 - river);
   float foam = max(edge, coming) * mix(1.0, SURF_LAKE, lake) * mix(1.0, SURF_RIVER, river);
 
   // Premultiplied: the tint, then the waves' light and shade, then the light added, then the foam over it.
@@ -334,7 +402,7 @@ void main() {
   alpha = lift + alpha * (1.0 - lift);
   rgb *= 1.0 - shade;
   alpha = shade + alpha * (1.0 - shade);
-  rgb += CAUSTIC * caustic + vec3(glint);
+  rgb += CAUSTIC * caustic + vec3(glint) + vec3(riverLight);
   rgb = SURF * foam + rgb * (1.0 - foam);
   alpha = foam + alpha * (1.0 - foam);
   fragColor = vec4(rgb, alpha) * water;
@@ -514,6 +582,9 @@ interface MaskTile {
   /** Which way its rivers run, from `npm run world:flow`, once it has arrived; null for a tile with none. */
   flow: WebGLTexture | null;
   flowPending: Uint8Array | null;
+  /** How far down the river each pixel is, which the river ripples are laid along. */
+  along: WebGLTexture | null;
+  alongPending: Uint8Array | null;
 }
 
 interface Program {
@@ -577,6 +648,9 @@ export function createWaterLayer(worldRoot: string): maplibregl.CustomLayerInter
   let said = false;
   const started = performance.now();
 
+  // A slider moved shows on the next frame even where nothing else is moving the map.
+  const stopWatching = riverStore.watch(() => map?.triggerRepaint());
+
   void terrainPalette().then((palette) => {
     const ids = (names: readonly string[]) =>
       new Set(palette.classes.filter((one) => names.includes(one.name)).map((one) => one.id));
@@ -590,10 +664,14 @@ export function createWaterLayer(worldRoot: string): maplibregl.CustomLayerInter
   });
 
   let flowSet: Set<string> | null = null;
+  /** How many world units down a river the along tiles take to come round again; the flow file says. */
+  let alongPeriod = 64;
   // Which tiles have their rivers' flow worked out. A master never run through `npm run world:flow` has none,
   // and its rivers stand still, which the log says once.
   const flowTiles = fetch(`${worldRoot}/flow/flow.json`)
-    .then(async (response) => (response.ok ? ((await response.json()) as { tiles: string[] }) : null))
+    .then(async (response) =>
+      response.ok ? ((await response.json()) as { tiles: string[]; alongPeriod?: number }) : null,
+    )
     .catch(() => null)
     .then((file) => {
       note(
@@ -603,13 +681,14 @@ export function createWaterLayer(worldRoot: string): maplibregl.CustomLayerInter
           : `rivers run downstream: their flow is worked out over ${file.tiles.length} tiles`,
       );
       flowSet = new Set(file?.tiles ?? []);
+      alongPeriod = file?.alongPeriod ?? 64;
       return flowSet;
     });
 
   /** One tile of flow as RGBA, or null if it will not come. */
-  const flowPixels = async (x: number, y: number): Promise<Uint8Array | null> => {
+  const flowPixels = async (x: number, y: number, which = ''): Promise<Uint8Array | null> => {
     try {
-      const response = await fetch(`${worldRoot}/flow/${FLAT_MAX_ZOOM}/${x}/${y}.png`);
+      const response = await fetch(`${worldRoot}/flow/${FLAT_MAX_ZOOM}/${x}/${y}${which}.png`);
       if (!response.ok) {
         return null;
       }
@@ -636,11 +715,10 @@ export function createWaterLayer(worldRoot: string): maplibregl.CustomLayerInter
     if (z !== FLAT_MAX_ZOOM || !(await flowTiles).has(`${x}/${y}`)) {
       return;
     }
-    const pixels = await flowPixels(x, y);
-    if (pixels !== null) {
-      tile.flowPending = pixels;
-      map?.triggerRepaint();
-    }
+    const [pixels, along] = await Promise.all([flowPixels(x, y), flowPixels(x, y, '-along')]);
+    tile.flowPending = pixels;
+    tile.alongPending = along;
+    map?.triggerRepaint();
   };
 
   // Working out a mask is a few distance transforms, a handful of milliseconds; one at a time, between frames.
@@ -670,6 +748,8 @@ export function createWaterLayer(worldRoot: string): maplibregl.CustomLayerInter
       used: frame,
       flow: null,
       flowPending: null,
+      along: null,
+      alongPending: null,
     };
     tiles.set(key, tile);
     void flowOf(z, x, y, tile);
@@ -745,6 +825,9 @@ export function createWaterLayer(worldRoot: string): maplibregl.CustomLayerInter
       }
       if (tile.flow !== null) {
         gl!.deleteTexture(tile.flow);
+      }
+      if (tile.along !== null) {
+        gl!.deleteTexture(tile.along);
       }
       tiles.delete(key);
     }
@@ -878,7 +961,21 @@ export function createWaterLayer(worldRoot: string): maplibregl.CustomLayerInter
     onAdd(added, context) {
       map = added;
       gl = context as WebGL2RenderingContext;
-      realistic = link(gl, REALISTIC, ['uWaves', 'uCaustics', 'uFlow']);
+      realistic = link(gl, REALISTIC, [
+        'uWaves',
+        'uCaustics',
+        'uFlow',
+        'uAlong',
+        'uAlongPeriod',
+        'uRiverSpeed',
+        'uRippleSpacing',
+        'uRippleBow',
+        'uRippleSharpness',
+        'uRippleBright',
+        'uSpeckBright',
+        'uRiverWaves',
+        'uRiverCaustics',
+      ]);
       still = textureOf(new Uint8Array([128, 128, 0, 255]), 1);
       wavelets = link(gl, WAVELETS, ['uWeights']);
       flowProgram = link(gl, FLOW, ['uFlow', 'uCell', 'uMarch']);
@@ -932,6 +1029,19 @@ export function createWaterLayer(worldRoot: string): maplibregl.CustomLayerInter
           weightsOf(R.caustics.first, 2, R.caustics.sizes, R.caustics.band, scale),
         );
         context.uniform1i(where.uFlow!, 1);
+        context.uniform1i(where.uAlong!, 2);
+        context.uniform1f(where.uAlongPeriod!, alongPeriod);
+        const river = riverStore.get();
+        // A whole, even number of ripples fits the period, so the pattern comes round with the coordinate.
+        const ripples = Math.max(2, 2 * Math.round(alongPeriod / (2 * river.spacing)));
+        context.uniform1f(where.uRiverSpeed!, river.speed);
+        context.uniform1f(where.uRippleSpacing!, alongPeriod / ripples);
+        context.uniform1f(where.uRippleBow!, river.bow);
+        context.uniform1f(where.uRippleSharpness!, river.sharpness);
+        context.uniform1f(where.uRippleBright!, river.ripples);
+        context.uniform1f(where.uSpeckBright!, river.specks);
+        context.uniform1f(where.uRiverWaves!, river.waves);
+        context.uniform1f(where.uRiverCaustics!, river.caustics);
       } else {
         context.uniform1fv(where.uWeights!, weightsOf(W.firstCell, W.step, W.sizes, W.band, scale));
       }
@@ -952,6 +1062,11 @@ export function createWaterLayer(worldRoot: string): maplibregl.CustomLayerInter
             tile.flowPending = null;
             uploads += 1;
           }
+          if (tile.alongPending !== null && uploads < UPLOADS_PER_FRAME) {
+            tile.along = textureOf(tile.alongPending, SIDE);
+            tile.alongPending = null;
+            uploads += 1;
+          }
           // Its own mask, or while that is on its way the part of an ancestor's that covers it.
           let source: MaskTile | undefined = tile;
           let up = 0;
@@ -965,6 +1080,8 @@ export function createWaterLayer(worldRoot: string): maplibregl.CustomLayerInter
           source.used = frame;
           const part = 1 / 2 ** up;
           // A borrowed mask has no flow that lines up with it; the river stands still until its own arrives.
+          context.activeTexture(context.TEXTURE2);
+          context.bindTexture(context.TEXTURE_2D, up === 0 && source.along !== null ? source.along : still);
           context.activeTexture(context.TEXTURE1);
           context.bindTexture(context.TEXTURE_2D, up === 0 && source.flow !== null ? source.flow : still);
           context.activeTexture(context.TEXTURE0);
@@ -1007,8 +1124,12 @@ export function createWaterLayer(worldRoot: string): maplibregl.CustomLayerInter
         if (tile.flow !== null) {
           gl?.deleteTexture(tile.flow);
         }
+        if (tile.along !== null) {
+          gl?.deleteTexture(tile.along);
+        }
       }
       tiles.clear();
+      stopWatching();
       gl?.deleteTexture(still);
       gl?.deleteProgram(realistic?.program ?? null);
       gl?.deleteProgram(wavelets?.program ?? null);
@@ -1033,7 +1154,15 @@ export function placeWater(map: maplibregl.Map, worldRoot: string): void {
     return;
   }
   if (map.getLayer(WATER_LAYER) === undefined) {
-    map.addLayer(createWaterLayer(worldRoot), 'lake-shore');
+    // A shader that will not compile throws from inside MapLibre and is otherwise said nowhere at all.
+    try {
+      map.addLayer(createWaterLayer(worldRoot), 'lake-shore');
+    } catch (error) {
+      note(
+        'water',
+        `the water could not be drawn: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
   } else {
     map.moveLayer(WATER_LAYER, 'lake-shore');
   }
