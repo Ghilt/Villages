@@ -42,6 +42,11 @@ export interface FlowOptions {
   /** Whether the raster joins round east to west, as the world does. */
   wraps?: boolean;
   /**
+   * Whether lengths are measured on the map, where a pixel of the master is taller than it is wide by the
+   * secant of its latitude, so they are world units; or in plain pixels.
+   */
+  mercator?: boolean;
+  /**
    * The fewest pixels a lake needs to be an inland sea a river may end in. A dot of a lake on a river with a
    * break below it is not one, or the river between the two would run backwards into it.
    */
@@ -66,6 +71,11 @@ export interface RiverFlow {
   isSink: Uint8Array;
   /** Every gap a river jumped, as the pixel it jumped from and the pixel it landed on, flattened. */
   gaps: number[];
+  /**
+   * How far each lies from where its water ends, the sea or an inland lake, along the water, in world units: a
+   * coordinate running down every river round its bends. A jump adds its price, so it steps at a gap.
+   */
+  along: Float64Array;
   /** The network pixel downstream of each; below -1 the sea pixel -2 - it, and -1 for none. */
   down: Int32Array;
   /** The network pixel at a raster index, or -1. */
@@ -83,7 +93,18 @@ export function riverFlow(raster: ClassRaster, classes: WaterClasses, options: F
   const wraps = options.wraps ?? true;
   const inlandLake = options.inlandLake ?? 50;
   const JUMP = options.jumpCost ?? 50;
+  const mercator = options.mercator ?? true;
   const { width, height, cells } = raster;
+
+  // How much taller than wide a pixel of each row is on the map.
+  const stretch = new Float64Array(height);
+  for (let row = 0; row < height; row += 1) {
+    const latitude = Math.min(85, Math.abs(90 - ((row + 0.5) / height) * 180));
+    stretch[row] = mercator ? 1 / Math.cos((latitude * Math.PI) / 180) : 1;
+  }
+  /** How long a step so far across and down from a pixel is on the map. */
+  const step = (pixel: number, across: number, down: number) =>
+    Math.hypot(across, down * stretch[Math.floor(pixel / width)]!);
 
   const kindOf = new Uint8Array(256);
   for (const id of classes.sea) kindOf[id] = SEA;
@@ -165,8 +186,8 @@ export function riverFlow(raster: ClassRaster, classes: WaterClasses, options: F
     for (let down = -bridge; down <= bridge; down += 1) {
       for (let across = -bridge; across <= bridge; across += 1) {
         if (Math.abs(across) <= 1 && Math.abs(down) <= 1) continue;
-        const length = Math.hypot(across, down);
-        if (length > bridge + 0.5) continue;
+        if (Math.hypot(across, down) > bridge + 0.5) continue;
+        const length = step(pixel, across, down);
         const far = offset(pixel, across, down);
         if (far < 0) continue;
         const kind = kindOf[cells[far]!]!;
@@ -233,7 +254,7 @@ export function riverFlow(raster: ClassRaster, classes: WaterClasses, options: F
           if (across === 0 && down === 0) continue;
           const near = offset(pixel, across, down);
           if (near < 0 || kindOf[cells[near]!]! < LAKE) continue;
-          offer(nodeAt(near), cost + (across !== 0 && down !== 0 ? Math.SQRT2 : 1), node);
+          offer(nodeAt(near), cost + step(pixel, across, down), node);
         }
       }
       for (let at = jumpStart[node]!; at < jumpStart[node + 1]!; at += 1) {
@@ -249,7 +270,7 @@ export function riverFlow(raster: ClassRaster, classes: WaterClasses, options: F
       for (let across = -1; across <= 1; across += 1) {
         const near = across === 0 && down === 0 ? -1 : offset(pixel, across, down);
         if (near >= 0 && kindOf[cells[near]!]! === SEA) {
-          offer(node, across !== 0 && down !== 0 ? Math.SQRT2 : 1, -2 - near);
+          offer(node, step(pixel, across, down), -2 - near);
         }
       }
     }
@@ -359,6 +380,7 @@ export function riverFlow(raster: ClassRaster, classes: WaterClasses, options: F
     isRiver,
     isSink,
     gaps,
+    along: distance,
     down: parent,
     nodeAt,
   };

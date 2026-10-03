@@ -10,7 +10,7 @@ import type { Palette, Rgb } from '../src/palette.ts';
 import { encodeRgbPng } from '../src/png.ts';
 import { createRaster, toLngLat, toPixel } from '../src/raster.ts';
 import type { ClassRaster } from '../src/raster.ts';
-import { TILE_SIZE, mercatorRowOf, sourceColumnFor, sourceRowFor } from '../src/tiles.ts';
+import { TILE_SIZE, cutTile, mercatorRowOf, sourceColumnFor, sourceRowFor } from '../src/tiles.ts';
 import { DEFAULT_MASTER, masterNameOf, worldDirOf } from '../src/masters.ts';
 
 import { OUTPUT_DIR, PAINTERLY_DIR, PALETTE, RENDER, masterAt } from './lib/paths.ts';
@@ -26,6 +26,10 @@ import { OUTPUT_DIR, PAINTERLY_DIR, PALETTE, RENDER, masterAt } from './lib/path
  * blue is how big a river it is, by how much drains through it, and nought where nothing flows. A stranded
  * river, with no way to any sea or lake, is all three nought, which no flowing one can be, so the flow view in
  * the Debug map can show where the master's rivers are broken.
+ *
+ * Beside each goes `<y>-along.png`: how far down the river each pixel is, `along` from `src/flow.ts`, as the
+ * cosine and sine of a turn every `ALONG_PERIOD` world units in red and green, so it can be filtered and still
+ * wraps cleanly; blue is 255 where a river flows. The water shader lays its river ripples along it.
  *
  * Then it says how much of the river reaches the sea, how many gaps it jumped and what it left stranded, and
  * paints a few places with arrows on their rivers into `world/painterly/<place>-flow.png`.
@@ -46,6 +50,8 @@ const outputDir = resolve(OUTPUT_DIR, worldDirOf(master), 'flow');
 const bridge = Number(flag('bridge') ?? 6);
 const along = Number(flag('along') ?? 6);
 const ZOOM = 7;
+/** How many world units down a river the along coordinate takes to come round again. */
+const ALONG_PERIOD = 64;
 
 const started = Date.now();
 const since = (): string => `${((Date.now() - started) / 1000).toFixed(1)}s`;
@@ -162,6 +168,34 @@ for (const piece of stranded.slice(0, 8)) {
   console.log(`  ${piece.size.toLocaleString().padStart(8)}  at ${where(piece.pixel)}`);
 }
 
+// How far down the river, smoothed over the river pixels round each, for the ripples to be laid along. The
+// measure itself steps a pixel at a time, so on a river that runs diagonally in a staircase its lines of equal
+// distance zigzag with the stairs, and so would every ripple; averaged over a few pixels they lie straight
+// across. Pixels much further down or up, across a jumped gap or a confluence, are left out of the average.
+const SMOOTHING = 2;
+const smoothAlong = new Float64Array(flow.pixels.length);
+for (let node = 0; node < flow.pixels.length; node += 1) {
+  if (flow.isRiver[node] === 0) continue;
+  const pixel = flow.pixels[node]!;
+  const here = flow.along[node]!;
+  let sum = 0;
+  let weight = 0;
+  for (let down = -SMOOTHING; down <= SMOOTHING; down += 1) {
+    const row = Math.floor(pixel / world.width) + down;
+    if (row < 0 || row >= world.height) continue;
+    for (let over = -SMOOTHING; over <= SMOOTHING; over += 1) {
+      const column = ((((pixel % world.width) + over) % world.width) + world.width) % world.width;
+      const near = flow.nodeAt(row * world.width + column);
+      if (near < 0 || flow.isRiver[near] === 0) continue;
+      const there = flow.along[near]!;
+      if (Math.abs(there - here) > 3 * SMOOTHING + 2) continue;
+      sum += there;
+      weight += 1;
+    }
+  }
+  smoothAlong[node] = sum / weight;
+}
+
 // The tiles: every zoom 7 tile a river pixel lies in, flowing or stranded, and the tile rows either side,
 // because towards the poles one master row is several rows of the map.
 const across = 2 ** ZOOM;
@@ -187,19 +221,35 @@ for (const key of [...wanted].sort((a, b) => a - b)) {
   const tileX = key % across;
   const tileY = Math.floor(key / across);
   const pixels = new Uint8Array(TILE_SIZE * TILE_SIZE * 3);
+  const alongPixels = new Uint8Array(TILE_SIZE * TILE_SIZE * 3);
+  const cut = cutTile(world, { zoom: ZOOM, x: tileX, y: tileY });
   let flowing = 0;
   for (let row = 0; row < TILE_SIZE; row += 1) {
     const masterRow = sourceRowFor(tileY, row, ZOOM, world.height);
+    const rowFrom = sourceRowFor(tileY, row - 0.5, ZOOM, world.height);
+    const rowTo = sourceRowFor(tileY, row + 0.5, ZOOM, world.height);
     // On the map a step south is longer than on the master by the secant of the latitude.
     const stretch = 1 / Math.cos(((90 - ((masterRow + 0.5) / world.height) * 180) * Math.PI) / 180);
     for (let column = 0; column < TILE_SIZE; column += 1) {
       const at = (row * TILE_SIZE + column) * 3;
       pixels[at] = 128;
       pixels[at + 1] = 128;
-      const masterColumn = sourceColumnFor(tileX, column, ZOOM, world.width);
-      const pixel = masterRow * world.width + masterColumn;
-      if (!classes.river.has(world.cells[pixel]!)) continue;
-      const node = flow.nodeAt(pixel);
+      alongPixels[at] = 128;
+      alongPixels[at + 1] = 128;
+      // River wherever the cut tile has river, which is wider than the master's by up to a pixel: the tiler
+      // takes the commonest of the master pixels a tile pixel covers, and a tie goes to the river. Its flow is
+      // a river pixel's among those, a flowing one before a stranded one.
+      if (!classes.river.has(cut.cells[row * TILE_SIZE + column]!)) continue;
+      const columnFrom = sourceColumnFor(tileX, column - 0.5, ZOOM, world.width);
+      const columnTo = sourceColumnFor(tileX, column + 0.5, ZOOM, world.width);
+      let node = -1;
+      for (let y = rowFrom; y <= rowTo; y += 1) {
+        for (let x = columnFrom; x <= columnTo; x += 1) {
+          const near = flow.nodeAt(y * world.width + x);
+          if (near < 0 || flow.isRiver[near] === 0) continue;
+          if (node < 0 || (flow.reached[node] === STRANDED && flow.reached[near] !== STRANDED)) node = near;
+        }
+      }
       if (node < 0) continue;
       if (flow.reached[node] === STRANDED) {
         pixels[at] = 0;
@@ -214,6 +264,10 @@ for (const key of [...wanted].sort((a, b) => a - b)) {
       pixels[at] = Math.round(128 + (127 * east) / length);
       pixels[at + 1] = Math.round(128 + (127 * south) / length);
       pixels[at + 2] = Math.max(1, Math.round((Math.log2(flow.upstream[node]!) / largest) * 255));
+      const turn = (smoothAlong[node]! / ALONG_PERIOD) * 2 * Math.PI;
+      alongPixels[at] = Math.round(128 + 127 * Math.cos(turn));
+      alongPixels[at + 1] = Math.round(128 + 127 * Math.sin(turn));
+      alongPixels[at + 2] = 255;
       flowing += 1;
     }
   }
@@ -222,12 +276,23 @@ for (const key of [...wanted].sort((a, b) => a - b)) {
   await mkdir(dir, { recursive: true });
   const png = encodeRgbPng({ width: TILE_SIZE, height: TILE_SIZE, pixels }, deflate);
   await writeFile(resolve(dir, `${tileY}.png`), png);
+  const alongPng = encodeRgbPng({ width: TILE_SIZE, height: TILE_SIZE, pixels: alongPixels }, deflate);
+  await writeFile(resolve(dir, `${tileY}-along.png`), alongPng);
+  bytes += alongPng.length;
   written.push(`${tileX}/${tileY}`);
   bytes += png.length;
 }
 await writeFile(
   resolve(outputDir, 'flow.json'),
-  `${JSON.stringify({ master, at: new Date().toISOString(), zoom: ZOOM, bridge, along, tiles: written })}\n`,
+  `${JSON.stringify({
+    master,
+    at: new Date().toISOString(),
+    zoom: ZOOM,
+    bridge,
+    along,
+    alongPeriod: ALONG_PERIOD,
+    tiles: written,
+  })}\n`,
 );
 console.log(
   `\n${written.length.toLocaleString()} flow tiles, ${(bytes / 1048576).toFixed(1)} MB, into ${outputDir} (${since()})`,

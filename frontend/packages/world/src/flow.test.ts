@@ -12,7 +12,7 @@ const classes = { sea: new Set([SEA]), lake: new Set([LAKE]), river: new Set([RI
  * These rasters are a few pixels wide: they do not join round as the world does, jump three pixels at most, and
  * a pixel of gap is worth five of river rather than fifty, so a detour need not be long to be one.
  */
-const flat = { wraps: false, inlandLake: 4, bridge: 3, jumpCost: 5 };
+const flat = { wraps: false, mercator: false, inlandLake: 4, bridge: 3, jumpCost: 5 };
 
 /** A raster drawn in characters: `~` sea, `o` lake, `=` river, anything else land. */
 function drawn(...rows: string[]): ClassRaster {
@@ -48,6 +48,17 @@ describe('which way the rivers run', () => {
     expect(at(raster, flow, 7, 3).east).toBeGreaterThan(0.9);
     // The mouth carries everything above it.
     expect(at(raster, flow, 7, 3).up).toBe(7);
+  });
+
+  it('measures how far down the river each pixel is, on the map', () => {
+    const raster = drawn('..........', '.======~~~', '..........');
+    const flow = riverFlow(raster, classes, flat);
+    // One step from the sea, then one more for every pixel up the river.
+    expect(flow.along[flow.nodeAt(1 * 10 + 6)]).toBeCloseTo(1);
+    expect(flow.along[flow.nodeAt(1 * 10 + 1)]).toBeCloseTo(6);
+    // On the map a step north or south is longer away from the equator, by the secant of the latitude.
+    const onTheMap = riverFlow(drawn('~', '=', '=', '.'), classes, { ...flat, mercator: true });
+    expect(onTheMap.along[onTheMap.nodeAt(2)]).toBeGreaterThan(2);
   });
 
   it('jumps a gap in a river, and runs the piece above it the same way', () => {
