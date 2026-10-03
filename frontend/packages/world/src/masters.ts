@@ -7,8 +7,11 @@
  * the dev server that lists them for the browser.
  */
 
-/** The one the game draws unless told otherwise: `world/master/terrain.png`. */
-export const DEFAULT_MASTER = 'terrain';
+/**
+ * The one the game draws unless told otherwise: `world/master/terrain3_mended_2026-10-03.png`, terrain3 with
+ * its broken rivers joined to the sea by `world:mend-rivers`. Since 2026-10-03; `terrain.png` before that.
+ */
+export const DEFAULT_MASTER = 'terrain3_mended_2026-10-03';
 
 /** A generated glance at a master, not a master. */
 const PREVIEW = '-preview';

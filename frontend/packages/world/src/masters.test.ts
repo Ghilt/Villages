@@ -40,7 +40,8 @@ describe('deciding which files in world/master are masters', () => {
 
 describe('a master name becoming a path', () => {
   it('gives every master its own directory, the default one included', () => {
-    expect(worldDirOf(DEFAULT_MASTER)).toBe('masters/terrain');
+    expect(worldDirOf(DEFAULT_MASTER)).toBe('masters/terrain3_mended_2026-10-03');
+    expect(worldDirOf('terrain')).toBe('masters/terrain');
     expect(worldDirOf('terrain2')).toBe('masters/terrain2');
   });
 

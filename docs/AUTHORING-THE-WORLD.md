@@ -161,7 +161,8 @@ rather than a staircase, and no finer than what you painted.
 
 | File | What it is |
 |---|---|
-| `terrain.png` | The world. Yours. This is the one you edit, and the one the app draws by default |
+| `terrain.png` | The world as first built. Yours. Drawn by default until 2026-10-03 |
+| `terrain3_mended_2026-10-03.png` | The one the app draws by default: `DEFAULT_MASTER` in `packages/world/src/masters.ts` |
 | `terrain2.png`, anything else | Any other PNG here is a world too, offered in the Debug map dropdown |
 | `terrain-base.png` | The generated master your edits sit on top of. Do not edit it |
 | `<name>-preview.png` | A small copy of that master for glancing at. Generated |
