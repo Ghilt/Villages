@@ -2,11 +2,15 @@ import { createStore } from '@villages/client-core';
 import type { Readable } from '@villages/client-core';
 
 import { note } from '../log/log';
+import { sayLevel } from '../shaders/levels';
+import type { ShaderLevel } from '../shaders/levels';
+
+import { WATER_LOOK } from './look';
 
 /**
- * Whether this window draws the water, and in which look: the Water part of the debug panel's Shaders section,
- * an enabled box and a choice of two. Drawn, and realistic, at every load. A store, the one shape every piece of
- * state the page watches takes, read in a component through `useStore`.
+ * How this window draws the water, and in which look: the Water part of the debug panel's Shaders section, its
+ * level in the part's bar and a choice of two looks inside it. High and realistic at every load. A store, the one
+ * shape every piece of state the page watches takes, read in a component through `useStore`.
  */
 export type WaterLook = 'realistic' | 'wavelets';
 
@@ -16,25 +20,25 @@ const SAID: Record<WaterLook, string> = {
 };
 
 interface WaterState {
-  enabled: boolean;
+  level: ShaderLevel;
   look: WaterLook;
   /**
    * Whether the map is showing the Flow renderer, which the water layer draws in place of the water: which way
-   * every river runs. Set by the renderer dropdown, whether the water is enabled or not.
+   * every river runs. Set by the renderer dropdown, at whatever level the water is.
    */
   flowView: boolean;
 }
 
-const water = createStore<WaterState>({ enabled: true, look: 'realistic', flowView: false });
+const water = createStore<WaterState>({ level: 'high', look: 'realistic', flowView: false });
 
 export const waterStore: Readable<WaterState> = water;
 
-export function setWaterEnabled(enabled: boolean): void {
-  if (enabled === water.get().enabled) {
+export function setWaterLevel(level: ShaderLevel): void {
+  if (level === water.get().level) {
     return;
   }
-  note('water', enabled ? SAID[water.get().look] : 'not drawn: the water is as painted');
-  water.set({ enabled });
+  note('water', level === 'off' ? 'off: the water is as painted' : sayLevel(level, WATER_LOOK.levels[level]));
+  water.set({ level });
 }
 
 export function setWaterLook(look: WaterLook): void {

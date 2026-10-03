@@ -15,6 +15,9 @@ import type { CameraView } from '../../geometry/cameraMath';
 import { classesOfTile, terrainPalette } from '../../geometry/terrainClasses';
 import { FLAT_MAX_ZOOM, TILE, WORLD_MASTER_WIDTH } from '../../geometry/world';
 import { note } from '../../log/log';
+import { createCostMeter } from '../../shaders/costMeter';
+import { drawnAt, sayLevel, shadersStore } from '../../shaders/levels';
+import type { ShaderLevel } from '../../shaders/levels';
 import type { Layer } from '../layer';
 
 import { grassStore } from './grassMode';
@@ -27,18 +30,16 @@ import { GRASS_LOOK } from './look';
  * WIP SPIKE: the grass, as a layer of the sprite canvas: under the scenery and the marks, and in the container
  * the fog takes the colour out of, so it is hazed and loses its colour exactly as the trees on it do.
  *
- * It is worked out at a part of the screen's size, `look.ts`'s resolution, into a picture of its own, which is
- * then laid over the whole screen: a half across and down is a quarter of the pixels. It asks for a frame fifteen
- * times a second while some of it is on the screen and enabled, and for none otherwise, so the sprite canvas
- * redraws for it and the map does not. The first time it has been drawn for a while it says once in the log
- * what it costs the graphics card, measured rather than guessed.
+ * It is worked out into a picture of its own at its level's share of the screen's size, then laid over the whole
+ * screen: low is a half across and down, a quarter of the pixels, high is all of them. It asks for frames at its
+ * level's rate while some of it is on the screen, and for none otherwise, so the sprite canvas redraws for it and
+ * the map does not. The first time it is drawn at a level it says once in the log what that costs the graphics
+ * card, measured rather than guessed. Its level is in the bar of the Grass part of the debug panel's Shaders
+ * section, under the switch over all of them.
  */
 
 /** One triangle that covers the screen, in clip space, so the fragment shader runs once for every pixel. */
 const COVER = new Float32Array([-1, -1, 3, -1, -1, 3]);
-const FRAME_MS = 1000 / GRASS_LOOK.framesPerSecond;
-/** How many frames the cost is measured over before it is said. */
-const MEASURED = 30;
 
 const smoothstep = (from: number, to: number, value: number): number => {
   const t = Math.min(1, Math.max(0, (value - from) / (to - from)));
@@ -104,13 +105,13 @@ export function createGrassLayer(
   let wanted: { range: TileRange; root: string } | null = null;
   let grassIds: Set<number> | null = null;
 
-  // The cost, measured on the graphics card where it will say, over the first frames the grass is drawn in.
-  const gl = (renderer as WebGLRenderer).gl as WebGL2RenderingContext | undefined;
-  const timer = gl?.getExtension('EXT_disjoint_timer_query_webgl2') ?? null;
-  const timings: WebGLQuery[] = [];
-  let said = false;
+  // What each level costs, measured on the graphics card where it will say, and said once a level.
+  const meter = createCostMeter((renderer as WebGLRenderer).gl as WebGL2RenderingContext | undefined);
+  const measured = new Set<ShaderLevel>();
+  let lastLevel: ShaderLevel | null = null;
 
   const stopWatching = grassStore.watch(repaint);
+  const stopWatchingShaders = shadersStore.watch(repaint);
 
   /** Pieces the mask for a range of tiles, and puts it in place unless the view has moved on meanwhile. */
   async function build(range: TileRange, root: string): Promise<void> {
@@ -169,43 +170,31 @@ export function createGrassLayer(
     return mask !== null && mask.root === root ? mask : null;
   }
 
-  /** Says once what the grass costs, when the frames measured have all come back from the graphics card. */
-  function sayCost(): void {
-    if (said || gl === undefined || timer === null || timings.length < MEASURED) {
-      return;
-    }
-    if (!timings.every((query) => gl.getQueryParameter(query, gl.QUERY_RESULT_AVAILABLE) as boolean)) {
-      return;
-    }
-    const disjoint = gl.getParameter(timer.GPU_DISJOINT_EXT) as boolean;
-    const total = timings.reduce<number>(
-      (sum, query) => sum + (gl.getQueryParameter(query, gl.QUERY_RESULT) as number),
-      0,
-    );
-    for (const query of timings.splice(0)) gl.deleteQuery(query);
-    if (disjoint) {
-      return;
-    }
-    said = true;
-    const ms = total / MEASURED / 1e6;
-    note(
-      'grass',
-      `sways at ${Math.round(GRASS_LOOK.resolution ** 2 * 100)}% of the screen's pixels, ${GRASS_LOOK.framesPerSecond} ` +
-        `frames a second: ${ms.toFixed(2)} ms of the graphics card a frame, ` +
-        `${((ms * GRASS_LOOK.framesPerSecond) / 10).toFixed(1)}% of its time`,
-    );
-  }
-
   return {
     sprite,
 
     draw(view: CameraView, now: number): number | null {
-      sayCost();
+      const level = drawnAt(grassStore.get().level);
+      const ms = meter.read();
+      if (ms !== null && lastLevel !== null && lastLevel !== 'off') {
+        measured.add(lastLevel);
+        const look = GRASS_LOOK.levels[lastLevel];
+        const share = ((ms * look.framesPerSecond) / 10).toFixed(1);
+        note(
+          'grass',
+          `${sayLevel(lastLevel, look)}: ${ms.toFixed(2)} ms of the graphics card a frame, ${share}% of its time`,
+        );
+      }
       const fade = smoothstep(GRASS_LOOK.fromZoom - 0.5, GRASS_LOOK.fromZoom + 0.5, view.zoom);
-      const held = fade > 0 && grassStore.get().enabled ? maskFor(view) : null;
-      if (held === null || held.grassy === 0) {
+      const held = fade > 0 && level !== 'off' ? maskFor(view) : null;
+      if (level === 'off' || held === null || held.grassy === 0) {
         sprite.visible = false;
         return null;
+      }
+      const levelLook = GRASS_LOOK.levels[level];
+      if (level !== lastLevel) {
+        lastLevel = level;
+        if (!measured.has(level)) meter.again();
       }
       const centre = toMercatorExact(view.center);
       const tilt = groundTilt(view);
@@ -221,31 +210,27 @@ export function createGrassLayer(
       u.uTilt[2] = tilt.lean;
       u.uTime = still ? 0 : (now / 1000) % 3600;
       u.uFade = fade;
-      u.uPixel = 1 / (GRASS_LOOK.resolution * resolution);
+      u.uPixel = 1 / (levelLook.resolution * resolution);
       uniforms.update();
 
-      const width = Math.max(1, Math.ceil(view.width * GRASS_LOOK.resolution));
-      const height = Math.max(1, Math.ceil(view.height * GRASS_LOOK.resolution));
+      const width = Math.max(1, Math.ceil(view.width * levelLook.resolution));
+      const height = Math.max(1, Math.ceil(view.height * levelLook.resolution));
       if (target.width !== width || target.height !== height || target.source.resolution !== resolution) {
         target.resize(width, height, resolution);
       }
-      const timing =
-        !said && timer !== null && gl !== undefined && timings.length < MEASURED ? gl.createQuery() : null;
-      if (timing !== null) gl!.beginQuery(timer!.TIME_ELAPSED_EXT, timing);
+      const measuring = meter.start();
       renderer.render({ container: mesh, target, clear: true, clearColor: [0, 0, 0, 0] });
-      if (timing !== null) {
-        gl!.endQuery(timer!.TIME_ELAPSED_EXT);
-        timings.push(timing);
-      }
+      if (measuring) meter.stop(true);
       sprite.visible = true;
       sprite.width = view.width;
       sprite.height = view.height;
-      return still ? null : FRAME_MS;
+      return still ? null : 1000 / levelLook.framesPerSecond;
     },
 
     destroy(): void {
       stopWatching();
-      for (const query of timings.splice(0)) gl?.deleteQuery(query);
+      stopWatchingShaders();
+      meter.dispose();
       sprite.destroy();
       target.destroy(true);
       mesh.destroy();

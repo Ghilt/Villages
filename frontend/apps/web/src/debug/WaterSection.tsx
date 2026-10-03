@@ -1,9 +1,10 @@
 import { resetRiverTuning, riverStore, setRiverTuning } from '../water/riverTuning';
 import type { RiverTuning } from '../water/riverTuning';
-import { setWaterEnabled, setWaterLook, waterStore } from '../water/waterMode';
+import { setWaterLevel, setWaterLook, waterStore } from '../water/waterMode';
 import type { WaterLook } from '../water/waterMode';
 import { useStore } from '../store/useStore';
-import { EnabledBox } from './EnabledBox';
+import { shadersStore } from '../shaders/levels';
+import { LevelSwitch } from './LevelSwitch';
 import { Section } from './Section';
 
 /**
@@ -92,7 +93,8 @@ const SLIDERS: readonly Slider[] = [
 
 export function WaterSection() {
   const tuning = useStore(riverStore);
-  const enabled = useStore(waterStore, (state) => state.enabled);
+  const level = useStore(waterStore, (state) => state.level);
+  const on = useStore(shadersStore, (state) => state.on);
   const look = useStore(waterStore, (state) => state.look);
   const tools = (
     <button
@@ -105,12 +107,11 @@ export function WaterSection() {
     </button>
   );
   return (
-    <Section name="Water" tools={tools}>
-      <EnabledBox
-        checked={enabled}
-        onChange={setWaterEnabled}
-        title="draw the moving water in this window, or leave the sea, the lakes and the rivers as painted"
-      />
+    <Section
+      name="Water"
+      tools={tools}
+      control={<LevelSwitch level={level} onChange={setWaterLevel} overruled={!on} what="the water" />}
+    >
       <label className="debug-map__label" htmlFor="water-look">
         Look
       </label>

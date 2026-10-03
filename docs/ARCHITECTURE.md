@@ -78,8 +78,8 @@ packages/world                               <-  apps/web
   the fonts and the world package's pure rules and types, which is what lets `/admin/inspect-ui-components` show every component with nothing running. See
   decision record 0068.
 - The rest of `apps/web` stands in rows, and a folder imports only the rows above it, and in its own row only what
-  the rule names: `ui`, `version`, `marks`, `log` and `geometry`, the ground's own measures, which lean on nothing
-  in the page; `net` and `stage`; the ground drawn, `map`, `fog`, `desk` and `water`; what stands on it,
+  the rule names: `ui`, `version`, `marks`, `log`, `geometry`, the ground's own measures, and `shaders`, how much
+  the map's shaders draw, which lean on nothing in the page; `net` and `stage`; the ground drawn, `map`, `fog`, `desk` and `water`; what stands on it,
   `sprites` and `room`; the game's own surfaces, `house`, `figures`, `choice`, `dialogues`, `areas` and `inspect`;
   and what puts it all together, the root, `debug` and `admin`. No two files import each other, however far round.
   `src/layers.test.ts` holds it. The imports that broke it on the first day were listed one by one and each
@@ -309,8 +309,10 @@ it (0081). Where the water is comes from the flat tiles, a mask a tile worked ou
 distance transform (`water/waterMask.ts`); which way the rivers run comes from flow tiles that `world:flow`
 writes beside the cut tiles, worked out offline from the master because it is a fact about the whole network
 (`packages/world/src/flow.ts`). Everything that moves is worked out in its fragment shaders from the ground's
-own coordinates. It has a clock of its own, thirty frames a second while some of it is on the screen and none
-otherwise, and it asks the map, not the sprite canvas, for them.
+own coordinates. It has a clock of its own, while some of it is on the screen and none otherwise, and it asks
+the map, not the sprite canvas, for frames. Each such shader is drawn at a level, `shaders/levels.ts`, off, low or
+high: at low the water is drawn into a picture of its own at half the map's width and height and laid over the
+map (`water/picture.ts`), at half the frame rate, and the grass, in the sprite canvas, the same way.
 
 ## What acts on its own
 

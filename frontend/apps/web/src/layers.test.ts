@@ -15,7 +15,7 @@ const ROWS: readonly (readonly string[])[] = [
   // What everything leans on, and which leans on nothing in the page: the ground's own measures and the
   // camera's arithmetic among them, and the one way a component reads a store. The component library is the showcase's alone until the game takes it
   // up, a surface at a time.
-  ['ui', 'version', 'marks', 'log', 'geometry', 'store'],
+  ['ui', 'version', 'marks', 'log', 'geometry', 'store', 'shaders'],
   // The connection to the game server, and the stage the panes are laid out in.
   ['net', 'stage'],
   // The ground, drawn: the map and its paint, the fog over it, the desk under it, and the water moving on it.
@@ -30,6 +30,8 @@ const ROWS: readonly (readonly string[])[] = [
 
 /** A folder that may import another in its own row. */
 const SIDEWAYS: readonly (readonly [string, string])[] = [
+  // How much the map's shaders draw is said in the log when it changes.
+  ['shaders', 'log'],
   ['desk', 'map'],
   // The water's mask measures distance from the shore with the fog's distance transform.
   ['water', 'fog'],

@@ -10,8 +10,15 @@ export const WATER_LOOK = {
    * and nothing redraws for it. Adam's number, 2026-10-02.
    */
   fromZoom: 8.5,
-  /** The frame rate the water is moved at, which is the only thing keeping the map redrawing. */
-  framesPerSecond: 30,
+  /**
+   * What low and high are for the water, the levels in the Shaders section: how much of the screen's width and
+   * height it is worked out at, and how often it moves, which is all that keeps the map redrawing for it. High is
+   * at every load.
+   */
+  levels: {
+    low: { resolution: 0.5, framesPerSecond: 15 },
+    high: { resolution: 1, framesPerSecond: 30 },
+  },
 
   /** The realistic water: depth, waves, sun, caustics and surf. */
   realistic: {

@@ -23,6 +23,12 @@ interface SectionProps {
    * targets for a hand that meant to unfold it.
    */
   reading?: ReactNode;
+  /**
+   * The one control that is the section's own on and off, in the bar whether it is open or folded, so a shader
+   * can be turned off without opening its part. Unlike the tools, it is the thing a hand reaching for the bar is
+   * after.
+   */
+  control?: ReactNode;
   /** Folded to begin with, for a section that is more often in the way than wanted. */
   shutToStart?: boolean;
   children: ReactNode;
@@ -32,7 +38,7 @@ function rememberedAs(name: string): string {
   return `villages.debug.fold.${name.toLowerCase().replace(/\s+/g, '-')}`;
 }
 
-export function Section({ name, tools, reading, shutToStart = false, children }: SectionProps) {
+export function Section({ name, tools, reading, control, shutToStart = false, children }: SectionProps) {
   const [open, setOpen] = useState(() => {
     try {
       const kept = localStorage.getItem(rememberedAs(name));
@@ -71,6 +77,7 @@ export function Section({ name, tools, reading, shutToStart = false, children }:
           <span className="debug__title">{name}</span>
         </button>
         {reading}
+        {control}
         {open && tools}
       </header>
 

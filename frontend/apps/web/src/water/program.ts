@@ -39,8 +39,16 @@ export function weightsOf(
   return weights;
 }
 
-/** The water's vertex shader with a fragment shader, and the uniforms every water shader has besides its own. */
-export function link(gl: WebGL2RenderingContext, fragment: string, uniforms: readonly string[]): Program {
+/**
+ * A fragment shader with the water's vertex shader, or another, and where the uniforms every water shader has are,
+ * besides its own.
+ */
+export function link(
+  gl: WebGL2RenderingContext,
+  fragment: string,
+  uniforms: readonly string[],
+  vertex = VERTEX,
+): Program {
   const compile = (type: number, source: string) => {
     const shader = gl.createShader(type)!;
     gl.shaderSource(shader, source);
@@ -51,7 +59,7 @@ export function link(gl: WebGL2RenderingContext, fragment: string, uniforms: rea
     return shader;
   };
   const program = gl.createProgram();
-  gl.attachShader(program, compile(gl.VERTEX_SHADER, VERTEX));
+  gl.attachShader(program, compile(gl.VERTEX_SHADER, vertex));
   gl.attachShader(program, compile(gl.FRAGMENT_SHADER, fragment));
   gl.bindAttribLocation(program, 0, 'aPos');
   gl.linkProgram(program);

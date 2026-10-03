@@ -78,9 +78,14 @@ marching downstream close in, and black where a river is stranded.
 - **Flow downhill.** The master has no height, only classes; the sea is the one thing every river is known to
   be going towards.
 
-## Amendment, 2026-10-03: a part of the Shaders section
+## Amendment, 2026-10-03: a part of the Shaders section, at a level
 
-Adam asked for one place for the shaders that are a look and nothing more. The water's switch in the Debug map
-section and its own Water section became the **Water** part of a **Shaders** section: an `enabled` box, which
-leaves the water as painted when unticked, a choice of look, realistic or the wavelets, and the rivers' sliders
-as they were. A shader added later gets a part of its own there, opening with the same box.
+Adam asked for one place for the shaders that are a look and nothing more, and for a cheaper water. The water's
+switch in the Debug map section and its own Water section became the **Water** part of a **Shaders** section:
+`off`, `low` or `high` in the part's bar, a choice of look, realistic or the wavelets, and the rivers' sliders as
+they were; the section's own bar has an `on` box that turns every shader off and back on at its level. High is
+the water as it was, every pixel at thirty frames a second. Low is a quarter of the pixels, the water drawn into
+a picture of its own half the map's width and height and laid over the map, at fifteen frames a second; measured
+on Adam's machine it costs between a fifth and a third of what high does a second. The first time it is drawn at
+a level the log says once what that costs the graphics card, timed there. A shader added later gets a part of its
+own, with the same three levels.

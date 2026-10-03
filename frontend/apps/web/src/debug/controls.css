@@ -39,12 +39,12 @@
   background: none;
 }
 
-/* The box that turns a shader on and off, at the top of its part of the Shaders section. */
+/* The box in the Shaders section's bar that turns every shader off, and on again at the levels they had. */
 .debug__check {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  font-size: 0.8rem;
+  gap: 0.3rem;
+  font-size: 0.72rem;
   color: var(--ink);
   cursor: pointer;
 }
@@ -53,4 +53,35 @@
   margin: 0;
   accent-color: #9d7c2a;
   cursor: pointer;
+}
+
+/* Off, low and high, three words in a row in the bar of each shader's part, the one that is on pressed. */
+.debug__levels {
+  display: inline-flex;
+  border: 1px solid var(--parchment-edge);
+  border-radius: 2px;
+}
+
+.debug__level {
+  font: inherit;
+  font-size: 0.68rem;
+  padding: 0.05rem 0.4rem;
+  color: var(--ink-soft);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.debug__level + .debug__level {
+  border-left: 1px solid var(--parchment-edge);
+}
+
+.debug__level--on {
+  color: var(--ink);
+  background: rgba(157, 124, 42, 0.22);
+}
+
+/* Kept but not drawn, while the switch over all the shaders is off. */
+.debug__levels--overruled {
+  opacity: 0.45;
 }

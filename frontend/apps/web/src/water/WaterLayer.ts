@@ -4,6 +4,10 @@ import { MercatorCoordinate } from 'maplibre-gl';
 import { note } from '../log/log';
 import { pixelsPerWorldUnit } from '../geometry/cameraMath';
 import { FLAT_MAX_ZOOM } from '../geometry/world';
+import { createCostMeter } from '../shaders/costMeter';
+import type { CostMeter } from '../shaders/costMeter';
+import { drawnAt, sayLevel, shadersStore } from '../shaders/levels';
+import type { ShaderLevel } from '../shaders/levels';
 
 import { flowFilesOf } from './flowFiles';
 import { FLOW } from './flowShader';
@@ -11,6 +15,8 @@ import { createFlowView } from './flowView';
 import type { TileRange } from './flowView';
 import { WATER_LOOK } from './look';
 import { createMaskTiles } from './maskTiles';
+import { createPicture } from './picture';
+import type { Picture } from './picture';
 import { begin, link, quadOf, smoothstep, textureOf, weightsOf } from './program';
 import type { Program } from './program';
 import { REALISTIC, REALISTIC_UNIFORMS } from './realisticShader';
@@ -26,9 +32,12 @@ import { WAVELETS } from './waveletsShader';
  * from the ground's own coordinates, so it pans with the map and needs no art. Each pattern comes in several
  * sizes that cross-fade by zoom, so it stays put on the ground and about the same size on the screen.
  *
- * Two looks, chosen in the Water part of the debug panel's Shaders section, which can also turn it off:
- * realistic, `realisticShader.ts`; and the stylised wavelets, the water's first look, kept to compare against. The Flow renderer is drawn here too, in place of the water,
- * by `flowView.ts`. See decision record 0081.
+ * Two looks, chosen in the Water part of the debug panel's Shaders section: realistic, `realisticShader.ts`; and
+ * the stylised wavelets, the water's first look, kept to compare against. And three levels, in that part's bar:
+ * off; low, drawn into a picture of its own at a part of the screen's size, `picture.ts`, at a lower rate; and
+ * high, the whole screen at the full rate. What a level costs the graphics card is said once in the log, the first
+ * time the water is drawn at it. The Flow renderer is drawn here too, in place of the water, by `flowView.ts`,
+ * whatever the level. See decision record 0081.
  */
 
 export const WATER_LAYER = 'water';
@@ -46,7 +55,11 @@ export function createWaterLayer(worldRoot: string): maplibregl.CustomLayerInter
   /** For a tile with no rivers, or none worked out: no current anywhere in it. */
   let still: WebGLTexture | null = null;
   let nextFrame: ReturnType<typeof setTimeout> | null = null;
-  let said = false;
+  let picture: Picture | null = null;
+  let meter: CostMeter | null = null;
+  /** The levels whose cost has been said, and the one the water was last drawn at. */
+  const measured = new Set<ShaderLevel>();
+  let lastLevel: ShaderLevel | null = null;
   const started = performance.now();
 
   const repaint = () => map?.triggerRepaint();
@@ -55,6 +68,7 @@ export function createWaterLayer(worldRoot: string): maplibregl.CustomLayerInter
   const flowView = createFlowView(flow, repaint);
   // A slider moved shows on the next frame even where nothing else is moving the map.
   const stopWatching = riverStore.watch(repaint);
+  const stopWatchingShaders = shadersStore.watch(repaint);
 
   /** The tiles of a zoom the view covers, from its four corners, which a tipped camera needs. */
   const tilesInView = (level: number): TileRange => {
@@ -89,12 +103,12 @@ export function createWaterLayer(worldRoot: string): maplibregl.CustomLayerInter
    * Keeps the water moving at its own frame rate, and only while some of it is on the screen: this is the one
    * thing keeping the map redrawing while nothing else changes.
    */
-  const keepMoving = () => {
+  const keepMoving = (framesPerSecond: number) => {
     if (nextFrame === null) {
       nextFrame = setTimeout(() => {
         nextFrame = null;
         repaint();
-      }, 1000 / WATER_LOOK.framesPerSecond);
+      }, 1000 / framesPerSecond);
     }
   };
 
@@ -135,11 +149,13 @@ export function createWaterLayer(worldRoot: string): maplibregl.CustomLayerInter
       flowProgram = link(gl, FLOW, ['uFlow', 'uCell', 'uMarch']);
       still = textureOf(gl, new Uint8Array([128, 128, 0, 255]), 1);
       quad = quadOf(gl);
+      picture = createPicture(gl);
+      meter = createCostMeter(gl);
     },
 
     render(context, options) {
       tiles.begin();
-      const { enabled, look, flowView: showingFlow } = waterStore.get();
+      const { level: own, look, flowView: showingFlow } = waterStore.get();
       const zoom = map!.getZoom();
       const scale = pixelsPerWorldUnit(zoom);
       const start = {
@@ -151,21 +167,30 @@ export function createWaterLayer(worldRoot: string): maplibregl.CustomLayerInter
       if (showingFlow) {
         const range = tilesInView(FLAT_MAX_ZOOM);
         if (flowProgram !== null && flowView.draw(context, flowProgram, start, zoom, range) > 0) {
-          keepMoving();
+          keepMoving(WATER_LOOK.levels.high.framesPerSecond);
         }
         return;
       }
       const fade = smoothstep(WATER_LOOK.fromZoom - 0.5, WATER_LOOK.fromZoom + 0.5, zoom);
       const drawing = look === 'realistic' ? realistic : wavelets;
-      if (!enabled || fade <= 0 || !tiles.ready() || drawing === null) {
+      const level = drawnAt(own);
+      if (level === 'off' || fade <= 0 || !tiles.ready() || drawing === null) {
         return;
+      }
+      const levelLook = WATER_LOOK.levels[level];
+      if (level !== lastLevel) {
+        lastLevel = level;
+        if (!measured.has(level)) meter?.again();
       }
 
       // Which mask tiles the view needs: the flat tiles a zoom coarser than the camera, so a mask texel is
       // a couple of pixels until the master's own pixels run out at the flat tiles' deepest zoom.
-      const level = Math.max(0, Math.min(FLAT_MAX_ZOOM, Math.floor(zoom)));
-      const { across, fromX, toX, fromY, toY } = tilesInView(level);
+      const tileZoom = Math.max(0, Math.min(FLAT_MAX_ZOOM, Math.floor(zoom)));
+      const { across, fromX, toX, fromY, toY } = tilesInView(tileZoom);
 
+      const measuring = meter?.start() ?? false;
+      const low = levelLook.resolution < 1;
+      if (low) picture!.begin(context, levelLook.resolution);
       const { where } = drawing;
       begin(context, drawing, start);
       context.uniform1i(where.uMask!, 0);
@@ -180,7 +205,7 @@ export function createWaterLayer(worldRoot: string): maplibregl.CustomLayerInter
       for (let y = fromY; y <= toY; y += 1) {
         for (let x = fromX; x <= toX; x += 1) {
           // Its own mask, or while that is on its way the part of an ancestor's that covers it.
-          const tile = tiles.drawable(context, level, x, y);
+          const tile = tiles.drawable(context, tileZoom, x, y);
           if (tile === null) {
             continue;
           }
@@ -204,14 +229,21 @@ export function createWaterLayer(worldRoot: string): maplibregl.CustomLayerInter
         }
       }
       context.bindVertexArray(null);
+      if (low) picture!.end(context, quad!.vao);
+      if (measuring) meter!.stop(drawn > 0);
       tiles.forget(context);
 
-      if (drawn > 0 && !said) {
-        said = true;
-        note('water', `drawn over ${drawn} tiles of sea, lake and river at zoom ${level}`);
+      const ms = meter?.read() ?? null;
+      if (ms !== null) {
+        measured.add(level);
+        const share = ((ms * levelLook.framesPerSecond) / 10).toFixed(1);
+        note(
+          'water',
+          `${sayLevel(level, levelLook)}: ${ms.toFixed(2)} ms of the graphics card a frame, ${share}% of its time`,
+        );
       }
       if (drawn > 0) {
-        keepMoving();
+        keepMoving(levelLook.framesPerSecond);
       }
     },
 
@@ -220,6 +252,9 @@ export function createWaterLayer(worldRoot: string): maplibregl.CustomLayerInter
         clearTimeout(nextFrame);
       }
       stopWatching();
+      stopWatchingShaders();
+      picture?.dispose(gl);
+      meter?.dispose();
       tiles.dispose(gl);
       flowView.dispose(gl);
       gl?.deleteTexture(still);

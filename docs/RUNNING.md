@@ -36,9 +36,12 @@ stage alone, with none of the debug panel in it (decision record 0079).
   has no way to any sea or lake - a break in the master's rivers to mend. See `docs/adr/0081`.
 - The water moves, from about zoom 8.5 in: depth, waves lit by a sun in the north-west, caustics on the bottom
   of the shallows, and surf along the shore, over every renderer. It is the **Water** part of the **Shaders**
-  section, below Debug map, which holds a part for each shader that is a look and nothing more: `enabled`
-  unticked leaves the water as painted in that window, and its Look is `Realistic` or `Wavelets`, the water's
-  first and stylised look, kept to compare against; it is drawn, realistic, at every load. The rivers run
+  section, below Debug map, which holds a part for each shader that is a look and nothing more, with `off`,
+  `low` and `high` in each part's bar, and an `on` box in the section's own bar that turns every shader off and
+  back on at the levels they had. High is every pixel at thirty frames a second; low is a quarter of them,
+  worked out into a picture of its own and laid over the map, at fifteen; the first time a shader is drawn at a
+  level, the log says once what that costs the graphics card. The water is high at every load, and its Look is
+  `Realistic` or `Wavelets`, the water's first and stylised look, kept to compare against. The rivers run
   downstream, with crests across the current and specks carried on it, from the flow `world:flow` works out
   beside the tiles; a master without it has still rivers and the log says so. Their look is the Water part's
   eight sliders: how fast, how far apart the crests are, how far the middle runs ahead, how thin and how

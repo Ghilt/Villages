@@ -9,13 +9,15 @@ export const GRASS_LOOK = {
   classes: ['steppe', 'meadow', 'savanna', 'alpine-meadow'],
   /** Where it fades in, as the water does: whole half a zoom in from here, gone half a zoom out. */
   fromZoom: 8.5,
-  /** How often it moves: fifteen frames a second is plenty for grass, and half the water's. */
-  framesPerSecond: 15,
   /**
-   * How many of the screen's pixels it is worked out at, across and down: a half is a quarter of the pixels,
-   * and so about a quarter of the cost. It is soft enough not to need more.
+   * What low and high are for the grass, the levels in the Shaders section: how much of the screen's width and
+   * height it is worked out at, a half being a quarter of the pixels and about a quarter of the cost, and how
+   * often it moves. Low is at every load.
    */
-  resolution: 0.5,
+  levels: {
+    low: { resolution: 0.5, framesPerSecond: 15 },
+    high: { resolution: 1, framesPerSecond: 30 },
+  },
   /** The way the wind blows, in degrees from east towards south: the sea's, so the two agree. */
   wind: WATER_LOOK.realistic.waves.wind,
   gusts: {
