@@ -9,15 +9,16 @@ A nine-slice job turns a picture Adam gives into a border the component library 
 any size: `world/ui/borders/<name>.webp` and its file of cuts, and a fill for inside it. **Only the frame
 is kept.** What it stands on, outside it and inside it, is cleared, and the inside is given a fill.
 
-The tool does the cutting: `npm run world:nine-slice --prefix frontend`, which is
-`frontend/packages/world/bin/nineSlice.ts`, its rules tested in `src/nineSlice.ts`. This file is how a job
-is done. Where the pictures go and what a border's file says is `docs/AUTHORING-THE-ART.md`; what a
-container does with them is `docs/UI-COMPONENTS.md`.
+The tool does the cutting: `scripts/nine-slice.ts`, run from `scripts/` as `node nine-slice.ts`, its
+rules tested in `scripts/test/`. It needs `npm install` in `scripts/` once, for sharp. It knows no folder of
+the program's: it is given a picture and writes into the folder it is run in, or `--out`, and ends by saying
+what it wrote and where. This file is how a job is done. Where the pictures go and what a border's file says
+is `docs/AUTHORING-THE-ART.md`; what a container does with them is `docs/UI-COMPONENTS.md`.
 
-The two done so far are the worked examples: `world/ui/sources/gilt-cherubs.json`, nine tiles on white
-gaps, clear round the frame, its middle tile a clean felt made into the fill; and
-`world/ui/sources/gilt-acanthus.json`, nine tiles on dark seams, standing on stone with a white box laid
-over its middle, which hid the seams, so its tiles are written out and its fill is painted.
+The two done first are the worked examples, their pictures and recipes kept in `world/ui/sources/`:
+`gilt-cherubs`, nine tiles on white gaps, clear round the frame, its middle tile a clean felt made into the
+fill; and `gilt-acanthus`, nine tiles on dark seams, standing on stone with a white box laid over its
+middle, which hid the seams, so its tiles are written out and its fill is painted.
 
 ## 1. Keep the source
 
@@ -27,60 +28,51 @@ again, so nothing is ever done to the source by hand.
 
 ## 2. Look at it
 
-    npm run world:nine-slice --prefix frontend -- --look <name>.webp
+    node nine-slice.ts --look ../world/ui/sources/<name>.webp
 
-says its size and how much of it is clear, the lines between tiles it finds from end to end, the dark
-lines that run a fifth of a column or a row (a gap hidden in places), and the warmth - red less blue - and
-brightness of its outer edge and its middle. Look at the picture as well, and at a corner and each seam up
-close, cropped large with a grid over it.
+says its size, how it would cut it - between white or black gaps, between thin or engraved lines, or, with
+no lines, where each edge starts to repeat - and what it takes the frame to stand on. Nothing is written.
+Look at the picture as well, and at a corner and each seam up close, cropped large with a grid over it.
 
-Then decide four things:
+Then decide four things, each an option of the tool:
 
-- **Where the tiles are.** An image model draws nine tiles with lines between them, white or black, a few
-  to twenty pixels wide, which leave a pale or dark edge a pixel or two wide on the tiles beside them. When
-  `--look` finds two lines each way, the tool finds them by itself and cuts their edges out too. When
-  something hides them - a box pasted over the middle hides the middle of every seam - measure each seam:
-  the mean brightness of each column (or row) across it, over a stretch of frame and a stretch of what it
-  stands on, and the tile ends where the brightness is back to its neighbours'. Write the tiles in the
-  recipe, `"columns"` and `"rows"`, three spans of `[first, last]` each, both counted, gap and edge left out.
-- **What the frame stands on.** `"alpha"` when the picture is clear round its frame already. Otherwise
-  `{ "warmth": 30 }` for a gilt frame on anything cooler - stone, black, white, felt: gilt keeps its red
-  well above its blue even in its darkest groove (42 to 107 in the acanthus frame) and the stone it stood
-  on did not (13 to 24). Choose the number between the frame's lowest and the ground's highest. Whatever
-  the picture's edge or its middle can reach through anything cooler is cleared; a dark crevice inside the
-  frame that neither reaches is kept, as the frame's own shadow; a fleck left standing on its own, under a
-  fiftieth the size of the frame, is cleared too.
-- **The middle.** The middle tile is a fill, never the border's own middle: a frame's edges are clear
-  inside their moulding, and a middle drawn only between the cuts would leave a clear band all round.
-  When it is a clean texture, `"fill": "<name>"` makes it the fill, mirrored into a square twice its size
-  so it repeats without a seam. When it is a white box, a picture, or a texture that darkens towards the
-  frame - mirrored, that bands - leave it out and lay a painted fill instead: a look in
-  `src/uiFills.ts` in the ground's colours and a placeholder for it in `src/uiPlaceholders.ts`, as `stone`
-  is for the acanthus frame.
-- **The edges.** `"repeat": "round"` unless there is a reason: an image model's edge tile is a segment
-  with capped ends - an acanthus joint, a column's ring - and `round` lays a whole number of them, so none
-  is cut off at a corner. `stretch` for a plain moulding with nothing on it.
+- **Where the tiles are.** When `--look` cuts where the tiles really meet, leave it. When it does not - a
+  box pasted over the middle hides the middle of every seam - measure each seam: the mean brightness of
+  each column (or row) across it, over a stretch of frame and a stretch of what it stands on, and the tile
+  ends where the brightness is back to its neighbours'. Say a frame with no lines with `--cuts top,right,
+  bottom,left`; tiles with gaps between them, written out, go into the recipe's `"columns"` and `"rows"`,
+  three spans of `[first, last]` each, both counted, gap and edge left out, and the border is made from the
+  recipe.
+- **What the frame stands on.** `--background` is `auto` unless there is a reason: `alpha` when it is
+  clear round the frame, `checker` on painted checks, `none` when the frame runs to the edge. A number for a
+  gilt frame on anything cooler - stone, black, white, felt: gilt keeps its red well above its blue even in
+  its darkest groove (42 to 107 in the acanthus frame) and the stone it stood on did not (13 to 24). Choose
+  the number between the frame's lowest and the ground's highest. Whatever the picture's edge or its middle
+  can reach through anything cooler is cleared; a dark crevice inside the frame that neither reaches is
+  kept, as the frame's own shadow; a fleck left standing on its own, under a fiftieth the size of the
+  frame, is cleared too.
+- **The middle.** Kept as the border's own by default, which suits a frame whose middle is a clean texture
+  running under its edges. `--fill <name>` makes the middle tile a fill instead, mirrored into a square
+  twice its size so it repeats without a seam. When it is a white box, a picture, or a texture that darkens
+  towards the frame - mirrored, that bands - `--clear-middle` drops it and a painted fill is laid instead:
+  a look in `frontend/packages/world/src/uiFills.ts` in the ground's colours and a placeholder for it in
+  `frontend/packages/world/src/uiPlaceholders.ts`, as `stone` is for the acanthus frame.
+- **The edges.** `--repeat round`, the default, unless there is a reason: an image model's edge tile is a
+  segment with capped ends - an acanthus joint, a column's ring - and `round` lays a whole number of them,
+  so none is cut off at a corner. `stretch` for a plain moulding with nothing on it. An edge tile with a
+  centrepiece on it - a sunburst, a crest - is laid that many times along a long box: say so to Adam.
 
-## 3. Write the recipe, and make it
+## 3. Make it
 
-`world/ui/sources/<name>.json`, beside the picture:
+    node nine-slice.ts ../world/ui/sources/<name>.webp --name <name> --out <a folder of its own>
 
-```json
-{
-  "picture": "gilt-acanthus.webp",
-  "background": { "warmth": 30 },
-  "columns": [[0, 382], [393, 778], [788, 1182]],
-  "rows": [[0, 396], [405, 780], [788, 1187]],
-  "repeat": "round"
-}
-```
-
-    npm run world:nine-slice --prefix frontend -- <name>
-
-writes `world/ui/borders/<name>.webp` and `<name>.json` - its cuts where the tiles met, where its words
-start, and a fill reaching four pixels under the frame's inner edge, measured half way along each side -
-and the fill, when the recipe makes one. It prints the tiles, the cuts, how deep the frame is on each
-side, where the fill begins and where the words start. The dev server cuts the border at once, as it does any picture saved in the folder.
+writes `<name>.webp` and `<name>.json` - its cuts where the tiles met, where its words start, and, when the
+middle is not kept, a fill reaching four pixels under the frame's inner edge, measured half way along each
+side - and `<name>.recipe.json`, and the fill when there is one. Move the border and its file into
+`world/ui/borders/`, the recipe into `world/ui/sources/` beside the picture, and a fill into
+`world/ui/fills/`; a recipe in `world/ui/borders/` would be taken for a file of cuts. Made again, it is
+`node nine-slice.ts ../world/ui/sources/<name>.recipe.json --out <a folder>`. The dev server cuts the border
+at once, as it does any picture saved in the folder.
 
 ## 4. Look at what it made
 

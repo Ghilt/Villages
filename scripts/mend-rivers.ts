@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs';
-import { basename, dirname, extname, join, resolve } from 'node:path';
+import { basename, extname, join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 
 import { masterColours, readMaster, readPalette, writeIndexed } from './lib/master.ts';
@@ -20,10 +20,10 @@ way is used as a stepping stone; a lake no river needs is never joined to anythi
   --max-gap <px>    the longest gap it bridges, in pixels. Default 8. Rivers further than that
                     from the sea are left as they are and listed, because most of them really do
                     end inland.
-  --out <folder>    where to write. Default: beside the master.
+  --out <folder>    where to write. Default: the folder you are in.
   --help            this.
 
-It writes two files, dated today:
+It writes two files, dated today, into the folder you are in or --out, and lists them at the end:
 
   <name>_mended_<date>.png        the mended master, a world like any other
   <name>_mended_audit_<date>.png  land grey, water as painted, every pixel it painted red,
@@ -62,7 +62,7 @@ const date = [day.getFullYear(), day.getMonth() + 1, day.getDate()]
   .map((part) => String(part).padStart(2, '0'))
   .join('-');
 const name = basename(source, extname(source));
-const folder = values.out === undefined ? dirname(source) : resolve(values.out);
+const folder = resolve(values.out ?? process.cwd());
 const mendedPath = join(folder, `${name}_mended_${date}.png`);
 const auditPath = join(folder, `${name}_mended_audit_${date}.png`);
 if (mendedPath === source || auditPath === source) {
@@ -149,10 +149,12 @@ for (const at of report.painted) {
 console.log('');
 const colours = masterColours(classes);
 const auditColours: Rgb[] = [...colours.slice(0, LAND), [180, 180, 180], [255, 0, 0], [255, 140, 0]];
-for (const [path, raster, table] of [
-  [mendedPath, mended, colours],
-  [auditPath, audit, auditColours],
+const written: string[] = [];
+for (const [path, raster, table, what] of [
+  [mendedPath, mended, colours, 'the mended master, a world like any other'],
+  [auditPath, audit, auditColours, 'what was painted, red on grey, and the rivers left cut off, orange'],
 ] as const) {
   const bytes = await writeIndexed(path, raster, table);
-  console.log(`${(bytes / 1048576).toFixed(2)} MB written to ${path} (${seconds()})`);
+  written.push(`  ${path}\n      ${what}, ${(bytes / 1048576).toFixed(2)} MB`);
 }
+console.log(`Wrote 2 files, in ${seconds()}:\n\n${written.join('\n')}`);

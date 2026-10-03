@@ -220,7 +220,8 @@ end inland - a wadi in the sand, the Jordan into the Dead Sea - and it lists the
 each with where it is, how many pixels of land lie between it and the nearest water that reaches the sea,
 and where that water is, for painting by hand.
 
-It writes two files beside the master and never touches the master itself: `<name>_mended_<date>.png`,
+It writes two files into the folder it is run in, or `--out`, says at the end what each is and where, and
+never touches the master itself: `<name>_mended_<date>.png`,
 which is a master and appears in the Debug map dropdown once imported, and `<name>_mended_audit_<date>.png`,
 the same picture with land grey, water as painted, **every pixel it painted red**, and the rivers it left
 cut off **orange**. About two minutes for a whole world. A bridge, once painted, can bring another river

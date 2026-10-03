@@ -31,6 +31,13 @@ compiler pointed at `scripts/tsconfig.json`. That borrows a compiler, not a depe
 it. Nothing runs these checks automatically yet; the agent that changes a tool runs them, as it runs the
 frontend's.
 
+*Amended 2026-10-03:* **sharp is the one package `scripts/` installs**, with its own `npm install` there,
+for the tools that read or write WebP, which Node cannot: the borders are WebP, and a lossless encoder of our
+own would have made every border several times the size it is. `lib/sharp.ts` loads it only when a tool asks,
+so a tool that does not need it runs before the install, and one that does says what to run. The nine-slice
+tool moved here from the world package on that basis, and with it the test that holds `world/ui/sources/` to
+its recipes.
+
 The program keeps one thing from the move: `masterNameOf` refuses a `_audit_` picture, because the rule about
 which files in `world/master` are worlds belongs to the program, whoever writes the files.
 

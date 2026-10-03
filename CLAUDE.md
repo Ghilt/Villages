@@ -236,7 +236,7 @@ size-ceilings.txt   every source file over 400 lines, which may only get shorter
 docs/       VISION SETTING MECHANICS LOOK-AND-FEEL RESPONSIVE-DESIGN GLOSSARY ARCHITECTURE ROADMAP
             TESTING EVENTS BUILDING-A-MECHANIC UI-COMPONENTS AUTHORING-THE-WORLD AUTHORING-THE-ART
             RUNNING, adr/, experiments/, plans/
-scripts/    Adam's terminal tools, node <tool>.ts; nothing of the program imported, nothing installed (0082)
+scripts/    Adam's terminal tools, node <tool>.ts; nothing of the program imported, only sharp installed (0082)
 contracts/  fixtures/*.json shared by the Kotlin and TypeScript protocol tests
 infra/      docker-compose.yml (MongoDB replica set, RabbitMQ)
 backend/    Gradle multi-module: domain, application, protocol, infrastructure-occurrent, infrastructure-rabbit,
@@ -262,8 +262,8 @@ and ESLint restricted imports on the frontend.
   the rows and the few sideways imports allowed, and excuses none. A new folder gets a row; an import the rows
   refuse is a sign the code is in the wrong folder, and what one surface needs from another is handed down
   from the root. See decision 0073.
-- `scripts/` imports nothing from `frontend/` or `backend/` and needs no `npm install`: Node 24 and its own
-  modules. It reads the repository's data files, `world/palette.json` and the masters, as data. A tool Adam
+- `scripts/` imports nothing from `frontend/` or `backend/`: Node 24, its own modules, and sharp for the
+  tools that read or write WebP, installed in `scripts/` by its own `npm install`. It reads the repository's data files, `world/palette.json` and the masters, as data. A tool Adam
   runs by hand goes there, not into a workspace of the program. See decision 0082.
 - The WebSocket protocol is a shared contract: Kotlin types and TypeScript (zod) schemas, both tested against the same
   fixtures in `contracts/fixtures/`. It also has a version, and the version has a recording: change a frame or a field
@@ -323,11 +323,12 @@ Commands are added here as the increments land:
   beside the folder it reads: `world:sprites` works out a master's sprite map, `world:flow` which way its rivers
   run, `world:scenery` paints stills of the first, `world:paint` paints the painterly stills and writes the
   runtime copy of the styles (`-- --config-only` for that alone), `world:art` cuts the sprites, `world:ui` the
-  interface pictures and `world:nine-slice` a border from a frame, and `world:portraits` and `world:scenes` draw
-  placeholders, never over a file that is there.
+  interface pictures, and `world:portraits` and `world:scenes` draw placeholders, never over a file that is
+  there.
 - Adam's own tools are in `scripts/`, apart from the program: terminal tools that change the files it reads,
   each `node <tool>.ts` from that folder, which prints its help when given nothing. `scripts/README.md` lists
-  them and says how one is added; `mend-rivers` joins a master's broken rivers. See decision 0082.
+  them and says how one is added; `mend-rivers` joins a master's broken rivers, and `nine-slice` makes a
+  border from a picture of a frame. See decision 0082.
 - What the running program does, part by part, is `docs/RUNNING.md`: the debug panel and every section of
   it, the player's own levers, the fog, the event page and the component library, and Adam's folders of
   pictures with the tools that cut them. A step that changes what a part of it does changes its entry there
