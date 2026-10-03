@@ -202,7 +202,10 @@ nothing, when the frame runs to the picture's edge; its own transparency; painte
 `--background 30`, whatever is cooler than gilt, because gilt keeps its red above its blue and stone, black
 and white do not. It keeps the picture's own middle as the border's, or with `--fill` makes the middle tile
 a fill of its own, mirrored so it repeats, or with `--clear-middle` drops it for a painted one. Its edges are
-laid `round` unless `--repeat` says otherwise. It also works out where the frame's words start - past each
+laid `round` unless `--repeat` says otherwise. **How thick it looks is its size**: the game shows a border at a
+quarter of its pixels, so an image model's 1254-pixel frame comes out with corners a hundred pixels across,
+and `--width 448` makes it the size of the moodboard's frames, corners thirty to forty across. The recipe
+remembers it. It also works out where the frame's words start - past each
 edge at its deepest, and clear of each corner's ornament by whichever side costs the words less room - and
 writes it as `content`; `--content` says it instead. `borders/gilt-cherubs` with `fills/dark-felt`, and
 `borders/gilt-acanthus` on the painted `fills/stone`, were made that way, and their pictures and recipes

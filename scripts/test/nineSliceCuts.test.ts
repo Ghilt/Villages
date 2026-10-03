@@ -8,6 +8,7 @@ import {
   clearBackground,
   isClearRound,
   opaque,
+  scaledFile,
   standsOnChecks,
 } from '../lib/nineSlice/frame.ts';
 import { readNineSliceRecipe, recipeText } from '../lib/nineSlice/recipe.ts';
@@ -182,6 +183,28 @@ describe('a recipe the tool writes', () => {
           'a',
         ),
       /not both/,
+    );
+  });
+});
+
+describe('a border made smaller', () => {
+  it('scales its cuts and where its words start with it, never a cut under a pixel', () => {
+    assert.deepEqual(
+      scaledFile(
+        { slice: [414, 421, 2, 419], repeat: 'round', content: [422, 429, 433, 427], middle: true },
+        448 / 1242,
+      ),
+      { slice: [149, 152, 1, 151], repeat: 'round', content: [152, 155, 156, 154], middle: true },
+    );
+  });
+
+  it('remembers how wide it was made in its recipe, and refuses a width too small to be a border', () => {
+    const text = '{ "picture": "a.png", "background": "none", "width": 448 }';
+    assert.equal(readNineSliceRecipe(text, 'a').width, 448);
+    assert.match(recipeText(readNineSliceRecipe(text, 'a')), /"width": 448/);
+    assert.throws(
+      () => readNineSliceRecipe('{ "picture": "a.png", "background": "none", "width": 8 }', 'a'),
+      /16 or more/,
     );
   });
 });

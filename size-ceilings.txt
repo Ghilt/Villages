@@ -32,5 +32,5 @@
 737 frontend/packages/world/src/lift.ts
 723 frontend/packages/world/src/painterly.test.ts
 574 frontend/packages/world/src/painterly.ts
-986 frontend/packages/world/src/uiPlaceholders.ts
+958 frontend/packages/world/src/uiPlaceholders.ts
 905 world/master/experiment/tools/build.mjs

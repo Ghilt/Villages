@@ -23,6 +23,8 @@ export interface NineSliceRecipe {
   readonly fill?: string;
   /** Whether the picture's own middle is kept as the border's middle, rather than dropped. */
   readonly middle?: boolean;
+  /** How wide the border is made, in pixels, its height and every length scaled with it; left out, as cut. */
+  readonly width?: number;
   /**
    * Where the words start, in from each edge of the joined picture, in its own pixels; left out, it is
    * worked out, past the edges and clear of the corners' ornaments.
@@ -47,7 +49,17 @@ export function readNineSliceRecipe(text: string, where: string): NineSliceRecip
   } catch (cause) {
     throw new Error(`${where} is not JSON: ${(cause as Error).message}`, { cause });
   }
-  const known = new Set(['picture', 'background', 'columns', 'rows', 'repeat', 'fill', 'middle', 'content']);
+  const known = new Set([
+    'picture',
+    'background',
+    'columns',
+    'rows',
+    'repeat',
+    'fill',
+    'middle',
+    'width',
+    'content',
+  ]);
   const stray = Object.keys(given).filter((key) => !known.has(key));
   if (stray.length > 0) {
     throw new Error(
@@ -68,6 +80,9 @@ export function readNineSliceRecipe(text: string, where: string): NineSliceRecip
   }
   if (given.middle !== undefined && typeof given.middle !== 'boolean') {
     throw new Error(`${where}: middle is true, to keep the picture's own middle, or false`);
+  }
+  if (given.width !== undefined && !(Number.isInteger(given.width) && (given.width as number) >= 16)) {
+    throw new Error(`${where}: width is a whole number of pixels, 16 or more`);
   }
   if (given.middle === true && given.fill !== undefined) {
     throw new Error(`${where}: the middle is kept or made a fill, not both`);
@@ -95,6 +110,7 @@ export function readNineSliceRecipe(text: string, where: string): NineSliceRecip
     repeat: repeat as Repeat,
     ...(given.fill === undefined ? {} : { fill: given.fill as string }),
     ...(given.middle === true ? { middle: true } : {}),
+    ...(given.width === undefined ? {} : { width: given.width as number }),
     ...(given.content === undefined ? {} : { content: contentGiven(given.content, where) }),
   };
 }
@@ -123,6 +139,7 @@ export function recipeText(recipe: NineSliceRecipe): string {
     repeat: recipe.repeat,
     ...(recipe.middle === true ? { middle: true } : {}),
     ...(recipe.fill === undefined ? {} : { fill: recipe.fill }),
+    ...(recipe.width === undefined ? {} : { width: recipe.width }),
     ...(recipe.content === undefined ? {} : { content: recipe.content }),
   };
   const oneLine = (_: string, inside: string) => `[${inside.replace(/\s+/g, ' ')}]`;

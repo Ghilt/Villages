@@ -314,3 +314,24 @@ export function mirroredSquare(image: Rgba, column: Span, row: Span): Rgba {
   }
   return { width, height: width, data };
 }
+
+/**
+ * A border's file for its picture made `factor` times the size: every length scaled with it, and no cut
+ * smaller than a pixel. The game shows a border at a quarter of its pixels, so this is how thick it looks.
+ */
+export function scaledFile(file: BorderFile, factor: number): BorderFile {
+  const scale = (sides: Sides, least: number): Sides => [
+    Math.max(least, Math.round(sides[0] * factor)),
+    Math.max(least, Math.round(sides[1] * factor)),
+    Math.max(least, Math.round(sides[2] * factor)),
+    Math.max(least, Math.round(sides[3] * factor)),
+  ];
+  return {
+    ...file,
+    slice: scale(file.slice, 1),
+    ...(file.inset === undefined ? {} : { inset: scale(file.inset, 0) }),
+    ...(file.content === undefined ? {} : { content: scale(file.content, 0) }),
+    ...(file.outset === undefined ? {} : { outset: scale(file.outset, 0) }),
+    ...(file.fillUnder === undefined ? {} : { fillUnder: scale(file.fillUnder, 0) }),
+  };
+}

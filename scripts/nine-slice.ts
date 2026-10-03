@@ -8,6 +8,7 @@ import { cutsFromEdges, linesIn, tilesAt } from './lib/nineSlice/cuts.ts';
 import {
   borderFileFor,
   clearBackground,
+  scaledFile,
   contentOf,
   innerDepths,
   isClearRound,
@@ -58,7 +59,11 @@ Options:
                        frame on stone: anything less warm than that is cleared, 30 is a start
   --fill <name>        make the middle a fill of its own, <name>.webp, instead of keeping it
   --clear-middle       drop the middle, for a fill the game lays under the border
-  --content <t,r,b,l>  where its words start, in from each edge, when what it works out is wrong
+  --width <px>         how wide to make the border, its height and cuts scaled with it. The game
+                       shows a border at a quarter of its pixels, so a 1254 picture makes corners
+                       some 100 px across on screen and --width 448 makes them about 37
+  --content <t,r,b,l>  where its words start, in from each edge, when what it works out is wrong,
+                       in the picture's own pixels, before --width
   --look <picture>     say what a picture is and how it would be cut, and write nothing
   --help               this
 
@@ -67,6 +72,7 @@ Needs sharp: run  npm install  in this folder once.
   node nine-slice.ts "E:\\Hämtade filer\\frame.png" --name cloud-sunburst
   node nine-slice.ts frame.png --name column-science --cuts 395,365,400,365 --out made
   node nine-slice.ts cloud-sunburst.recipe.json
+  node nine-slice.ts cloud-sunburst.recipe.json --width 448
 `;
 
 /** How far past the frame and its ornaments the words start, when nothing says: two shown. */
@@ -89,6 +95,7 @@ const { values, positionals } = parseArgs({
     fill: { type: 'string' },
     'clear-middle': { type: 'boolean', default: false },
     content: { type: 'string' },
+    width: { type: 'string' },
     look: { type: 'string' },
     help: { type: 'boolean', short: 'h', default: false },
   },
@@ -120,6 +127,13 @@ const sidesFrom = (text: string, what: string): Sides => {
     fail(`${what} is four whole numbers of pixels, top, right, bottom and left: ${what} 120,160,136,136`);
   }
   return parts as unknown as Sides;
+};
+
+const widthFrom = (text: string): number => {
+  const width = Number(text);
+  if (!Number.isInteger(width) || width < 16)
+    fail('--width is a whole number of pixels, 16 or more: --width 448');
+  return width;
 };
 
 function backgroundFrom(text: string | undefined, image: Rgba): { background: Background; why: string } {
@@ -208,18 +222,37 @@ async function make(name: string, picture: string, recipe: NineSliceRecipe, out:
     spanLength(columns[0]),
   ];
   const content = recipe.content ?? contentOf(frame, slice, CONTENT_MARGIN);
-  const file: BorderFile = borderFileFor(slice, innerDepths(frame, slice), recipe.repeat, content, middle);
+  const factor = recipe.width === undefined ? 1 : recipe.width / frame.width;
+  const sized = (length: number) => Math.max(1, Math.round(length * factor));
+  const file: BorderFile = scaledFile(
+    borderFileFor(slice, innerDepths(frame, slice), recipe.repeat, content, middle),
+    factor,
+  );
+  const [width, height] = [sized(frame.width), sized(frame.height)];
 
   const written: [string, string][] = [];
   const webp = resolve(out, `${name}.webp`);
-  await sharp(Buffer.from(frame.data), { raw: { width: frame.width, height: frame.height, channels: 4 } })
+  const raw = { raw: { width: frame.width, height: frame.height, channels: 4 as const } };
+  await (
+    factor === 1
+      ? sharp(Buffer.from(frame.data), raw)
+      : sharp(Buffer.from(frame.data), raw).resize(width, height, { fit: 'fill', kernel: 'lanczos3' })
+  )
     .webp(BORDER_WEBP)
     .toFile(webp);
-  written.push([webp, `the border, ${frame.width} by ${frame.height}`]);
+  const shown = (length: number) => Math.round(length / 4);
+  written.push([
+    webp,
+    `the border, ${width} by ${height}; the game shows it at a quarter of that, its corners ` +
+      `${shown(file.slice[3])} and ${shown(file.slice[1])} px across`,
+  ]);
   const json = resolve(out, `${name}.json`);
   const oneLine = (_: string, inside: string) => `[${inside.replace(/\s+/g, ' ')}]`;
   writeFileSync(json, `${JSON.stringify(file, null, 2).replace(/\[\s+([^\]]*?)\s+\]/g, oneLine)}\n`);
-  written.push([json, `its cuts, ${slice.join(' ')}, and where its words start, ${content.join(' ')}`]);
+  written.push([
+    json,
+    `its cuts, ${file.slice.join(' ')}, and where its words start, ${file.content!.join(' ')}`,
+  ]);
   const recipeFile = resolve(out, `${name}.recipe.json`);
   const fromOut = relative(out, picture).split(sep).join('/');
   writeFileSync(recipeFile, recipeText({ ...recipe, picture: fromOut }));
@@ -228,12 +261,13 @@ async function make(name: string, picture: string, recipe: NineSliceRecipe, out:
     const fill = mirroredSquare(image, columns[1], rows[1]);
     const fillFile = resolve(out, `${recipe.fill}.webp`);
     await sharp(Buffer.from(fill.data), { raw: { width: fill.width, height: fill.height, channels: 4 } })
+      .resize(sized(fill.width), sized(fill.height), { fit: 'fill', kernel: 'lanczos3' })
       .removeAlpha()
       .webp(FILL_WEBP)
       .toFile(fillFile);
     written.push([
       fillFile,
-      `the middle made a fill, ${fill.width} by ${fill.height}, for world\\ui\\fills\\`,
+      `the middle made a fill, ${sized(fill.width)} by ${sized(fill.height)}, for world\\ui\\fills\\`,
     ]);
   }
 
@@ -285,7 +319,14 @@ if (input!.endsWith('.json')) {
     const image = await decode(picture);
     tiles = tilesOf(recipe.background === 'alpha' ? image : opaque(image), undefined);
   }
-  await make(name, picture, { ...recipe, columns: tiles.columns, rows: tiles.rows }, out, tiles.how);
+  const width = values.width === undefined ? recipe.width : widthFrom(values.width);
+  await make(
+    name,
+    picture,
+    { ...recipe, columns: tiles.columns, rows: tiles.rows, ...(width === undefined ? {} : { width }) },
+    out,
+    tiles.how,
+  );
 } else {
   const picture = resolve(input!);
   if (!existsSync(picture)) fail(`there is no picture ${picture}`);
@@ -310,6 +351,7 @@ if (input!.endsWith('.json')) {
     repeat,
     ...(values.fill === undefined && !values['clear-middle'] ? { middle: true } : {}),
     ...(values.fill === undefined ? {} : { fill: values.fill }),
+    ...(values.width === undefined ? {} : { width: widthFrom(values.width) }),
     ...(values.content === undefined ? {} : { content: sidesFrom(values.content, '--content') }),
   };
   console.log(`background ${typeof background === 'string' ? background : background.warmth}: ${why}`);

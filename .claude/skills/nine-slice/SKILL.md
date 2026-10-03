@@ -62,6 +62,10 @@ Then decide four things, each an option of the tool:
   so none is cut off at a corner. `stretch` for a plain moulding with nothing on it. An edge tile with a
   centrepiece on it - a sunburst, a crest - is laid that many times along a long box: say so to Adam.
 
+- **Its size.** The game shows a border at a quarter of its pixels, so how thick it looks is how big it
+  is made: `--width 448` gives corners of thirty to forty pixels on screen, the size of the borders
+  beside it; an image model's 1254 as it is gives a hundred. Ask Adam when the frame is not like the others.
+
 ## 3. Make it
 
     node nine-slice.ts ../world/ui/sources/<name>.webp --name <name> --out <a folder of its own>
