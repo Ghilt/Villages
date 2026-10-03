@@ -552,11 +552,9 @@ if (-not (Test-Path (Join-Path $Frontend 'node_modules'))) {
 }
 
 $WorldDir = Join-Path $Root 'frontend\apps\web\public\world'
-# The master drawn unless the browser picked another: DEFAULT_MASTER in packages/world/src/masters.ts.
-$DefaultMaster = 'terrain3_mended_2026-10-03'
+$DefaultMaster = 'terrain3_mended_2026-10-03' # DEFAULT_MASTER in packages/world/src/masters.ts
 $Master = Join-Path $Root "world\master\$DefaultMaster.png"
-# One directory per hand-painted master, so the debug map panel can hold more than one world at once.
-# This is the one the two world commands write when given no arguments.
+# A directory a master, so the panel holds several worlds; the world commands write this one by default.
 $DefaultWorld = Join-Path $WorldDir "masters\$DefaultMaster"
 
 if (-not (Test-Path $Master)) {
