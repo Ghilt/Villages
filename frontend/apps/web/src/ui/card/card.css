@@ -150,6 +150,55 @@
       drop-shadow(0 0 6px color-mix(in srgb, var(--ui-gilt-light) 85%, transparent));
   }
 
+  /*
+   * A rolled thing: an edge in its rarity's colour, a glow that grows with the rarity, and its name on a pill of
+   * the colour in night's ink. Drawn as a box shadow, so the states' filters lift and darken it with the card.
+   */
+  .ui-card--rarity {
+    --ui-card-rarity: var(--ui-rarity-common);
+    --ui-card-rarity-glow: 3px;
+    box-shadow:
+      0 0 0 2px var(--ui-card-rarity),
+      0 0 var(--ui-card-rarity-glow) 1px var(--ui-card-rarity);
+  }
+
+  .ui-card--uncommon {
+    --ui-card-rarity: var(--ui-rarity-uncommon);
+    --ui-card-rarity-glow: 6px;
+  }
+
+  .ui-card--rare {
+    --ui-card-rarity: var(--ui-rarity-rare);
+    --ui-card-rarity-glow: 10px;
+  }
+
+  .ui-card--legendary {
+    --ui-card-rarity: var(--ui-rarity-legendary);
+    --ui-card-rarity-glow: 16px;
+    animation: ui-card-legendary 2.4s ease-in-out infinite;
+  }
+
+  @keyframes ui-card-legendary {
+    50% {
+      box-shadow:
+        0 0 0 2px var(--ui-card-rarity),
+        0 0 26px 3px var(--ui-card-rarity);
+    }
+  }
+
+  .ui-card__rarity {
+    align-self: flex-start;
+    padding: 0.05em 0.55em 0.1em;
+    border-radius: 999px;
+    /* A little lighter than the edge, so night's ink reads on it at every rarity: rare's blue is too dark alone. */
+    background: color-mix(in srgb, var(--ui-card-rarity) 82%, white);
+    color: var(--ui-night);
+    font-size: 0.72em;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
   .ui-card--disabled {
     opacity: 0.45;
     filter: saturate(0.4);
@@ -163,6 +212,10 @@
     .ui-card--press:hover,
     .ui-card--showing-hover {
       transform: none;
+    }
+
+    .ui-card--legendary {
+      animation: none;
     }
   }
 }

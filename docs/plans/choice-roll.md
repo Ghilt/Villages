@@ -216,7 +216,10 @@ the next roll is that rarity, so a legendary can be seen without four hundred pr
 
 **Checkpoint 3: Adam presses the button.**
 
-7. **The Take action button and the rarity-edged option card,** in the library and on its page.
+7. **The Take action button and the rarity-edged option card,** in the library and on its page. Done. The
+   button is the library's large `TextButton` as it is, so nothing new; the card is `Card` given a `rarity`, an
+   edge and a glow from the rarity tokens and the rarity named on a pill, nothing painted. Shown under *Rolled*
+   in *Collections*, on parchment and on night and in every state, every word readable.
 8. **The pane stands always.** Idle, the button, greyed with its reason; pressed, a roll; the hand shown
    plainly with its rarity, no animation yet. The Choice roll section and its lever. Adam plays the loop:
    press, pay, choose, see the resource go up.

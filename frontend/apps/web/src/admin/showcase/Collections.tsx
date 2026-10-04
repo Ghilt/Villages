@@ -1,7 +1,9 @@
 import { useState } from 'react';
 
 import { usePictures } from '../../ui/art/pictures';
+import { TextButton } from '../../ui/button/Button';
 import { Card } from '../../ui/card/Card';
+import type { Rarity } from '../../ui/card/Card';
 import { Grid } from '../../ui/grid/Grid';
 import { Stepper } from '../../ui/stepper/Stepper';
 import architecture from './pictures/architecture.webp';
@@ -47,6 +49,39 @@ const HAPPENINGS: readonly { readonly title: string; readonly picture: string; r
   { title: 'A Miracle Is Claimed', picture: religion, said: 'The bishop is not pleased.' },
 ];
 
+/** A hand of the choice roll's first content, one of each rarity, as the pane will deal them. */
+const ROLLED: readonly {
+  readonly rarity: Rarity;
+  readonly title: string;
+  readonly said: string;
+  readonly gives: string;
+}[] = [
+  {
+    rarity: 'common',
+    title: "Collect the mill's dues",
+    said: 'The miller pays what he owes, and a little early.',
+    gives: '+15 wealth',
+  },
+  {
+    rarity: 'uncommon',
+    title: "Stand godparent to a neighbour's child",
+    said: "A tie that will outlast both houses' quarrels.",
+    gives: '+40 influence',
+  },
+  {
+    rarity: 'rare',
+    title: 'Shelter a pilgrim of renown',
+    said: 'She blesses the house on leaving, and is heard to.',
+    gives: '+120 piety',
+  },
+  {
+    rarity: 'legendary',
+    title: "A dead bishop's library comes to the house",
+    said: 'Four carts of books, and two of them in no language you know.',
+    gives: '+400 reason',
+  },
+];
+
 /** The states a pressable card is shown in, side by side. */
 const STATES: readonly { readonly name: string; readonly props: Partial<Parameters<typeof Card>[0]> }[] = [
   { name: 'at rest', props: {} },
@@ -62,6 +97,7 @@ export function Collections() {
   const [count, setCount] = useState(9);
   const [open, setOpen] = useState<string | null>(null);
   const [pressed, setPressed] = useState(0);
+  const [taken, setTaken] = useState<string | null>(null);
   if (list === null) {
     return <p className="showcase__to-come">{problem ?? 'Reading the pictures…'}</p>;
   }
@@ -142,6 +178,71 @@ export function Collections() {
                 <Card
                   picture={<Portrait figure={FIGURES[2]!} />}
                   title={FIGURES[2]!.given}
+                  onPress={() => undefined}
+                  {...state.props}
+                />
+              </div>
+            </Specimen>
+          ))}
+        </Specimens>
+      </Part>
+
+      <Part title="Rolled">
+        <p className="ui-label showcase__lead">
+          A card given a rarity is a rolled thing, an option of the choice roll: edged in the rarity&rsquo;s
+          colour, glowing more the rarer, and saying its rarity in words at its head, because a colour alone
+          is not read by everybody. Over it, the button that rolls: words, Adam&rsquo;s call.{' '}
+          <span className="showcase__said">{taken === null ? 'nothing taken' : `took "${taken}"`}</span>
+        </p>
+        <Specimens>
+          <Specimen name='TextButton size="large"' note={['Take action', 'and disabled, while a hand waits']}>
+            <div className="showcase__try">
+              <TextButton size="large" onClick={() => setTaken(null)}>
+                Take action
+              </TextButton>
+              <TextButton size="large" disabled>
+                Take action
+              </TextButton>
+            </div>
+          </Specimen>
+          {ROLLED.map((one) => (
+            <Specimen
+              key={one.rarity}
+              name={`Card rarity="${one.rarity}"`}
+              note={['an option dealt', 'on card.figure']}
+            >
+              <div className="showcase__card-small">
+                <Card
+                  rarity={one.rarity}
+                  title={one.title}
+                  line={one.gives}
+                  onPress={() => setTaken(one.title)}
+                >
+                  <p className="ui-body">{one.said}</p>
+                </Card>
+              </div>
+            </Specimen>
+          ))}
+          {ROLLED.map((one) => (
+            <Specimen
+              key={`night-${one.rarity}`}
+              name={`Card rarity="${one.rarity}" recipe="card.event"`}
+              note="on night"
+            >
+              <div className="showcase__card-small">
+                <Card recipe="card.event" rarity={one.rarity} title={one.title} line={one.gives}>
+                  <p className="ui-body">{one.said}</p>
+                </Card>
+              </div>
+            </Specimen>
+          ))}
+          {STATES.slice(1).map((state) => (
+            <Specimen key={`rolled-${state.name}`} name={'Card rarity="rare" onPress'} note={state.name}>
+              <div className="showcase__card-small">
+                <Card
+                  rarity="rare"
+                  title={ROLLED[2]!.title}
+                  line={ROLLED[2]!.gives}
                   onPress={() => undefined}
                   {...state.props}
                 />

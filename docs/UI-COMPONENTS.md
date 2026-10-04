@@ -345,7 +345,11 @@ A line each: what it is for, its variants, and where on the page it is.
   button, its name stretched over all of it, so a screen reader hears the name once - or `label`, when the
   name on the card is not the whole of it - and a pointer can press it anywhere. It lifts under the
   pointer, goes back down pressed, has a gilt ring focused, a gilt glow chosen that is a dark edge on
-  parchment, and greys disabled. *Collections*.
+  parchment, and greys disabled. Given a `rarity` - `common`, `uncommon`, `rare` or `legendary` - it is a
+  rolled thing, an option of the choice roll: edged in the rarity's colour, glowing more the rarer and the
+  legendary breathing, and saying its rarity in words on a pill at its head, because a colour alone is not read
+  by everybody. Nothing painted: the edge, the glow and the pill are the rarity tokens. *Collections*, under
+  *Rolled*, beside the large `TextButton` that rolls.
 - **`Grid`**, `ui/grid/Grid.tsx`: things of one kind in rows and columns, every cell the same width -
   `columns` across, or as many as fit at `least` pixels - and a card as tall as the tallest in its row.
   With `rows` as well it **never scrolls**: every cell is sized so all of them fit the room it is given,
