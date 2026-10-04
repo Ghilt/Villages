@@ -6,6 +6,7 @@ import { REPEATS } from './lib/border.ts';
 import type { BorderFile, Repeat, Rgba, Sides } from './lib/border.ts';
 import { cutsFromEdges, linesIn, tilesAt } from './lib/nineSlice/cuts.ts';
 import {
+  asGiven,
   backgroundText,
   clearBackground,
   DARK_GROUND,
@@ -228,7 +229,7 @@ async function make(name: string, picture: string, recipe: NineSliceRecipe, out:
     }
   }
   const given = await decode(picture);
-  const image = recipe.background === 'alpha' ? given : opaque(given);
+  const image = asGiven(given, recipe.background);
   const { columns, rows } = recipe as Required<Pick<NineSliceRecipe, 'columns' | 'rows'>>;
   const middle = recipe.middle === true;
   const frame = clearBackground(joined(image, columns, rows, !middle), recipe.background, !middle);

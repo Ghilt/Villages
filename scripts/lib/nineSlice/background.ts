@@ -92,6 +92,15 @@ export function opaque(image: Rgba): Rgba {
   return { width: image.width, height: image.height, data };
 }
 
+/**
+ * The picture to clear: its own transparency kept when it has some, because what is clear in it is clear
+ * whatever colour the saving left there - often white - and made opaque only when it has none worth the
+ * name, which is then a slip in saving it.
+ */
+export function asGiven(image: Rgba, background: Background): Rgba {
+  return background === 'alpha' || isClearRound(image) ? image : opaque(image);
+}
+
 /** A piece left standing that is less than this share of the largest is a speck of what it stood on. */
 const ISLAND = 0.02;
 

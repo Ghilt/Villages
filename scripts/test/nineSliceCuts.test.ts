@@ -4,6 +4,7 @@ import { describe, it } from 'node:test';
 import type { Rgba } from '../lib/border.ts';
 import { cutsFromEdges, linesIn, tilesAt } from '../lib/nineSlice/cuts.ts';
 import {
+  asGiven,
   clearBackground,
   isClearRound,
   opaque,
@@ -159,6 +160,30 @@ describe('what a frame stands on', () => {
 
   it('keeps everything of a frame that stands on nothing', () => {
     assert.equal(clearBackground(onChecks, 'none'), onChecks);
+  });
+
+  it('keeps a picture’s own transparency when it is cleared by warmth, whatever colour lies under it', () => {
+    // Clear round a gilt ring, the clear pixels white underneath, as a saving often leaves them.
+    const clearOnWhite = picture(40, 40, (x, y) =>
+      Math.min(x, y, 39 - x, 39 - y) < 6 ? [255, 255, 255, 0] : [190, 140, 70, 255],
+    );
+    const cleared = clearBackground(asGiven(clearOnWhite, { warmth: 30, darker: 110 }), {
+      warmth: 30,
+      darker: 110,
+    });
+    assert.equal(alphaAt(cleared, 1, 1), 0);
+    assert.equal(alphaAt(cleared, 20, 20), 255);
+    assert.equal(
+      alphaAt(
+        asGiven(
+          picture(4, 4, () => [9, 9, 9, 140]),
+          { warmth: 30 },
+        ),
+        1,
+        1,
+      ),
+      255,
+    );
   });
 
   it('makes a picture opaque that was only half transparent by a slip in saving it', () => {

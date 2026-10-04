@@ -51,7 +51,9 @@ Then decide four things, each an option of the tool:
   Choose the number between the frame's lowest and the ground's highest. Where the frame holds something
   as cool as its ground but lighter - pale clouds on a night sky - say how dark the ground is as well,
   `30,dark:110`, and only what is both cooler and darker than that is cleared. `auto` chooses that itself
-  for a picture whose edge is a dark, cool ground, and says so. Whatever the picture's edge or its middle
+  for a picture whose edge is a dark, cool ground, and says so. A picture with transparency of its own keeps it
+  whichever is chosen: what is clear in it stays clear, whatever colour a saving left under it - often
+  white, which made opaque would stand round the frame as a halo. Whatever the picture's edge or its middle
   can reach through the ground is cleared; a dark crevice inside the frame that neither reaches is kept, as
   the frame's own shadow; a fleck left standing on its own, under a fiftieth the size of the frame, is
   cleared too. **A border holds its frame and nothing else**: what it stood on, outside it and inside
