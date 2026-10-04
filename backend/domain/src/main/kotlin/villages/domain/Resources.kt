@@ -75,13 +75,23 @@ data class Stock(val total: Long, val ratePerSecond: Double, val asOf: Instant) 
 }
 
 /**
- * One stock of each resource, empty and standing still: what a house is founded with.
+ * One stock of each resource, empty and standing still: what a house is founded with, but for its wealth.
  *
  * Every rate is zero because nothing in the world generates income yet. The rate is carried all the same
  * so that when something does, it is a number changing rather than a shape changing. See decision 0006.
  */
 fun emptyStocks(asOf: Instant): Map<Resource, Stock> =
     Resource.entries.associateWith { Stock(total = 0, ratePerSecond = 0.0, asOf = asOf) }
+
+/**
+ * What a house is founded with: some wealth, so that it can pay for its first choice rolls, and nothing else.
+ * Fifty is five rolls at today's price; both are numbers to tune. See decision record 0083.
+ */
+fun foundingStocks(asOf: Instant): Map<Resource, Stock> =
+    emptyStocks(asOf) + (Resource.WEALTH to Stock(total = FOUNDING_WEALTH, ratePerSecond = 0.0, asOf = asOf))
+
+/** How much wealth a house is founded with. */
+const val FOUNDING_WEALTH = 50L
 
 /**
  * Every resource's stock as a stored founding wrote it, and an empty one standing still for any resource added

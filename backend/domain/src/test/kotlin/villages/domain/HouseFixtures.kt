@@ -42,7 +42,11 @@ internal fun taking(choice: ChoiceId = whereToSettle.id, option: OptionId = sout
 
 // ---- resources -------------------------------------------------------------------------------
 
-internal val standing = HouseDecider.fold(HouseDecider.decide(ravenscar, HouseDecider.initial))
+/** A house founded and its founding wealth spent, so that the resource specs count from nothing. */
+internal val standing = HouseDecider.fold(HouseDecider.decide(ravenscar, HouseDecider.initial)).let { founded ->
+    HouseDecider.decide(SpendResource(house, Resource.WEALTH, FOUNDING_WEALTH, day, noon), founded)
+        .fold(founded, HouseDecider::evolve)
+}
 internal val glass = PledgeId(UUID.fromString("bb000000-0000-4000-8000-00000000d101"))
 internal val later = WorldTime(455205)
 

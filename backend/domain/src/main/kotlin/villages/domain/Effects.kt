@@ -56,7 +56,7 @@ private fun follows(
                 seat = effect.seat,
                 significance = HouseDecider.FOUNDING_SIGNIFICANCE,
                 banner = effect.banner,
-                resources = emptyStocks(recordedAt),
+                resources = foundingStocks(recordedAt),
                 worldTime = worldTime,
                 recordedAt = recordedAt,
             ),

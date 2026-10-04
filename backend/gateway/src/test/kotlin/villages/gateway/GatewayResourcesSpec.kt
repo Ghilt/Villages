@@ -7,6 +7,7 @@ import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
+import villages.domain.FOUNDING_WEALTH
 import villages.protocol.Batch
 import villages.protocol.CommandAccepted
 import villages.protocol.CommandRejected
@@ -30,7 +31,7 @@ class GatewayResourcesSpec : StringSpec({
         val yours = mine.filterIsInstance<YourHouse>().last().yours!!
         yours.resources.keys shouldContainExactlyInAnyOrder
             setOf("wealth", "naturalDomain", "influence", "reason", "piety")
-        yours.resources.getValue("wealth").total shouldBe 0
+        yours.resources.getValue("wealth").total shouldBe FOUNDING_WEALTH
         yours.resources.getValue("wealth").pledged shouldBe 0
         yours.pledges.shouldBeEmpty()
 
@@ -49,11 +50,11 @@ class GatewayResourcesSpec : StringSpec({
         founder.receive(granting(amount = 120))
 
         mine.filterIsInstance<CommandAccepted>().map { it.commandId } shouldContain COMMAND_TWO
-        mine.filterIsInstance<YourHouse>().last().yours!!.resources.getValue("wealth").total shouldBe 120
+        mine.filterIsInstance<YourHouse>().last().yours!!.resources.getValue("wealth").total shouldBe FOUNDING_WEALTH + 120
 
         founder.receive(spending(amount = 50, commandId = COMMAND_THREE))
 
-        mine.filterIsInstance<YourHouse>().last().yours!!.resources.getValue("wealth").total shouldBe 70
+        mine.filterIsInstance<YourHouse>().last().yours!!.resources.getValue("wealth").total shouldBe FOUNDING_WEALTH + 70
     }
 
     "a pledge is asked for in months and comes back as a day, held against what is free" {
@@ -96,7 +97,7 @@ class GatewayResourcesSpec : StringSpec({
         val (founder, mine) = rig.introduced()
         founder.receive(founding())
 
-        founder.receive(spending(amount = 1, commandId = COMMAND_TWO))
+        founder.receive(spending(amount = FOUNDING_WEALTH + 1, commandId = COMMAND_TWO))
 
         mine.filterIsInstance<CommandRejected>().single().reason shouldBe "notEnoughFree"
     }

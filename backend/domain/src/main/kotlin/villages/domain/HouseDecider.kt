@@ -52,7 +52,7 @@ object HouseDecider : Decider<HouseCommand, House, HouseEvent> {
         seat = command.seat,
         significance = FOUNDING_SIGNIFICANCE,
         banner = command.banner,
-        resources = emptyStocks(command.recordedAt),
+        resources = foundingStocks(command.recordedAt),
         worldTime = command.worldTime,
         recordedAt = command.recordedAt,
     )

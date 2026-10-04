@@ -195,7 +195,7 @@ the next roll is that rarity, so a legendary can be seen without four hundred pr
 
 **Checkpoint 2: a roll that costs, on the server.**
 
-2. **A house is founded with 50 wealth.** The founding stocks, the catalogue's words, the decider spec.
+2. **A house is founded with 50 wealth.** Done. `foundingStocks` and `FOUNDING_WEALTH`; the resource specs stand on a house whose founding wealth is spent, so they still count from nothing. The founding stocks, the catalogue's words, the decider spec.
 3. **`Roll` and `PlayerRolled`.** Rarity in the domain; an option's rarity and omens; the command, the event,
    the refusals, the store adapter, the catalogue and the fixtures. Decider specs for each refusal and for
    the three events of one decision.
