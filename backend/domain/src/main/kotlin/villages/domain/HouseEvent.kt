@@ -129,6 +129,23 @@ data class PlayerGivenChoice(
 ) : ChoiceEvent, PlayerEvent
 
 /**
+ * A player rolled: they pressed Take action, and the fate engine read these omens and rolled this rarity. The
+ * price follows as the house's own spend and the hand as the choice given, from the same decision, so a hand is
+ * never seen without its roll nor a roll without its price. The omens are history: the next roll's changes are
+ * worked out against what the house had at this one, and they answer why a hand was what it was. See decision
+ * record 0083.
+ */
+data class PlayerRolled(
+    override val houseId: HouseId,
+    val player: PlayerId,
+    val rollId: RollId,
+    val omens: List<Omen>,
+    val rarity: Rarity,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : ChoiceEvent, PlayerEvent
+
+/**
  * A player took one option of the choice they were given. What the option does follows from the same
  * decision, as the next events on the stream, so the action and its consequences are never seen apart.
  *

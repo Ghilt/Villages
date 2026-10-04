@@ -112,6 +112,24 @@ data class TakeAction(
 ) : ChoiceCommand
 
 /**
+ * Roll for this house: the player pressed Take action. Everything the fate engine worked out comes with it - the
+ * omens it read, the rarity it rolled, the price, and the hand it dealt - because the luck is the application's
+ * and `decide` only checks and records. Refused before founding, while a choice is pending, and when the price
+ * is not free. See decision record 0083.
+ */
+data class Roll(
+    override val houseId: HouseId,
+    val player: PlayerId,
+    val rollId: RollId,
+    val omens: List<Omen>,
+    val rarity: Rarity,
+    val price: Effect.Spend,
+    val hand: Choice,
+    val worldTime: WorldTime,
+    val recordedAt: Instant,
+) : ChoiceCommand
+
+/**
  * Offer this house a dialogue, whole. Refused for a house that does not exist, and for a dialogue it was
  * offered before: the id is worked out from the command that offered it, so the same command sent twice is
  * refused rather than doubled. Who it reaches is the house's player. See decision record 0071.

@@ -2,17 +2,20 @@ package villages.application
 
 import villages.domain.Choice
 import villages.domain.HouseId
+import villages.domain.Omen
 import villages.domain.PlayerId
 
 /**
  * The choice a player has to make, as the read model holds it. The correlation id is the story the choice
- * began, so an action answering it can be recorded as part of the same story rather than a new one.
+ * began, so an action answering it can be recorded as part of the same story rather than a new one. A hand a
+ * roll dealt carries the omens the roll read, in the order they are shown; any other choice has none.
  */
 data class ChoiceRow(
     val player: PlayerId,
     val houseId: HouseId,
     val choice: Choice,
     val correlationId: String,
+    val omens: List<Omen> = emptyList(),
 )
 
 /**

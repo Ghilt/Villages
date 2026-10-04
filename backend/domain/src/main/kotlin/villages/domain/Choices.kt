@@ -16,6 +16,30 @@ internal object Choices {
             listOf(PlayerGivenChoice(command.houseId, command.player, command.choice, command.worldTime, command.recordedAt))
         }
 
+        is Roll -> {
+            HouseDecider.founded(state)
+            if (state.pending != null) {
+                throw HouseError.ChoicePending
+            }
+            command.hand.refuseUnlessDealtBy(command.rarity, command.omens)
+            command.hand.refuseUnlessGivableTo(state)
+
+            // The roll, its price and its hand come out of one decision, so none is ever seen without the
+            // others. A price the house cannot pay is refused by the spend, and the whole roll with it.
+            listOf(
+                PlayerRolled(
+                    houseId = command.houseId,
+                    player = command.player,
+                    rollId = command.rollId,
+                    omens = command.omens,
+                    rarity = command.rarity,
+                    worldTime = command.worldTime,
+                    recordedAt = command.recordedAt,
+                ),
+            ) + follow.follow(listOf(command.price), command.player, command.worldTime, command.recordedAt) +
+                PlayerGivenChoice(command.houseId, command.player, command.hand, command.worldTime, command.recordedAt)
+        }
+
         is TakeAction -> {
             val pending = state.pending ?: throw HouseError.NoChoicePending
             if (pending.id != command.choiceId) {
@@ -39,6 +63,7 @@ internal object Choices {
     }
 
     fun evolve(state: House, event: ChoiceEvent): House = when (event) {
+        is PlayerRolled -> state
         is PlayerGivenChoice -> state.asked(event.choice)
         is PlayerTookAction -> state.asked(null)
     }

@@ -41,6 +41,7 @@ import villages.domain.PlayerCompletedDialogue
 import villages.domain.PlayerCompletedDialogueStep
 import villages.domain.PlayerLostDialogue
 import villages.domain.PlayerOfferedDialogue
+import villages.domain.PlayerRolled
 import villages.domain.PlayerTookAction
 import villages.domain.PlayerId
 import villages.domain.WorldTime
@@ -79,6 +80,7 @@ internal fun typeOf(event: HouseEvent): String = when (event) {
     is PlayerCompletedDialogueStep -> "villages.player.completedDialogueStep.v1"
     is PlayerCompletedDialogue -> "villages.player.completedDialogue.v1"
     is PlayerLostDialogue -> "villages.player.lostDialogue.v1"
+    is PlayerRolled -> "villages.player.rolled.v1"
     is PlayerTookAction -> "villages.player.tookAction.v1"
 }
 
@@ -98,6 +100,7 @@ internal fun dataOf(event: HouseEvent): String = when (event) {
     is PlayerCompletedDialogueStep -> """{"lineId":"${event.lineId.value}"}"""
     is PlayerCompletedDialogue -> """{"dialogueId":"${event.dialogueId.value}"}"""
     is PlayerLostDialogue -> """{"dialogueId":"${event.dialogueId.value}"}"""
+    is PlayerRolled -> """{"rarity":"${event.rarity}","omens":${event.omens.size}}"""
     is PlayerTookAction -> """{"optionId":"${event.optionId.value}"}"""
 }
 

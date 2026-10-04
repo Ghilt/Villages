@@ -10,6 +10,7 @@ import villages.domain.CharacterDecider
 import villages.domain.House
 import villages.domain.HouseDecider
 import villages.domain.HouseFounded
+import villages.domain.PlayerGivenChoice
 import villages.domain.Resource
 import villages.domain.Stat
 import villages.domain.Stock
@@ -36,6 +37,17 @@ class WrittenBeforeSpec : StringSpec({
         founding.resources.keys shouldBe Resource.entries.toSet() - Resource.PIETY
         val house = HouseDecider.fold(listOf(founding)).shouldBeInstanceOf<House.Founded>()
         house.stockOf(Resource.PIETY) shouldBe Stock(0, 0.0, founding.recordedAt)
+    }
+
+    "an option written before options had a rarity or omens reads back with neither" {
+        val data = storedData("villages.player.givenChoice.v1")
+        for (option in data["choice"]["options"]) {
+            (option as ObjectNode).remove(listOf("rarity", "omens"))
+        }
+        val given = Events.json.readValue(Events.json.writeValueAsBytes(data), PlayerGivenChoice::class.java)
+
+        given.choice.options.map { it.rarity } shouldBe listOf(null, null)
+        given.choice.options.map { it.omens } shouldBe listOf(emptyList(), emptyList())
     }
 
     "an appearance written before a stat existed reads back, with the middle of the scale of it" {

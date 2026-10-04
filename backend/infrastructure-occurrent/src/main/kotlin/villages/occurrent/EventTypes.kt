@@ -21,6 +21,7 @@ import villages.domain.HouseResourceSpent
 import villages.domain.PlayerCompletedDialogue
 import villages.domain.PlayerCompletedDialogueStep
 import villages.domain.PlayerGivenChoice
+import villages.domain.PlayerRolled
 import villages.domain.PlayerLostDialogue
 import villages.domain.PlayerOfferedDialogue
 import villages.domain.PlayerTookAction
@@ -57,6 +58,7 @@ object EventTypes : CloudEventTypeMapper<Event> {
         PlayerGivenChoice::class to "villages.player.givenChoice.v1",
         PlayerLostDialogue::class to "villages.player.lostDialogue.v1",
         PlayerOfferedDialogue::class to "villages.player.offeredDialogue.v1",
+        PlayerRolled::class to "villages.player.rolled.v1",
         PlayerTookAction::class to "villages.player.tookAction.v1",
     )
 

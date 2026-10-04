@@ -80,8 +80,11 @@ This is the loop the first iteration builds, and the shape every later "the play
 something" takes.
 
 1. A **giver** decides that a choice applies. Today the giver is arrival: a player who says hello with
-   no house and no choice pending is given the founding choice. Later givers are the fate engine's
-   rolls (`ARCHITECTURE.md`). A giver is application code; it issues `GiveChoice`.
+   no house and no choice pending is given the founding choice. A giver is application code; it issues
+   `GiveChoice`. The other giver is the **choice roll** (`ARCHITECTURE.md`), which issues `Roll` instead:
+   the omens, the rarity, the price as a spend and the hand, recorded as `PlayerRolled`, the spend and
+   `PlayerGivenChoice` from one decision, so a hand is never seen without the roll that paid for it. Its
+   options also carry their rarity and the omens that brought them. See decision record 0083.
 2. `decide` records `PlayerGivenChoice(choice)`. A **choice** is a prompt and two to four **options**;
    each option carries a label, a line of detail, and its **effect**, which is what taking it does.
    The event is self-describing: the roads not taken are history too, and a reader of the stream can

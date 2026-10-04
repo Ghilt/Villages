@@ -67,13 +67,17 @@ internal fun Choice.refuseUnlessGivableTo(state: House) {
  * One thing a choice offers: what it is called, a line saying more, and what taking it does.
  *
  * The label and the detail are content, written by whoever gave the choice. The effect is the part the
- * decider reads.
+ * decider reads. An option a choice roll dealt also says its rarity and which of the roll's omens brought it;
+ * one nothing rolled has neither, and a stored option written before either existed reads as such. See
+ * decision records 0074 and 0083.
  */
 data class Option(
     val id: OptionId,
     val label: String,
     val detail: String,
     val effect: Effect,
+    val rarity: Rarity? = null,
+    val omens: List<OmenKey> = emptyList(),
 )
 
 /**

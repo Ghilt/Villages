@@ -25,7 +25,9 @@
               "charge": "STAG",
               "chargeTincture": "ARGENT"
             }
-          }
+          },
+          "rarity": null,
+          "omens": []
         },
         {
           "id": "aa000000-0000-4000-8000-000000000002",
@@ -42,7 +44,9 @@
               "charge": "TOWER",
               "chargeTincture": "GULES"
             }
-          }
+          },
+          "rarity": null,
+          "omens": []
         }
       ]
     },

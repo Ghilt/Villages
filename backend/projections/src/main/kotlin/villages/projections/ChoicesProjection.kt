@@ -7,7 +7,9 @@ import villages.application.StoredEvent
 import villages.application.Follower
 import villages.domain.CharacterEvent
 import villages.domain.HouseFounded
+import villages.domain.Omen
 import villages.domain.PlayerGivenChoice
+import villages.domain.PlayerRolled
 import villages.domain.PlayerTookAction
 import villages.domain.PlayerId
 import villages.domain.ResourceEvent
@@ -28,12 +30,20 @@ import java.util.concurrent.CopyOnWriteArraySet
  */
 class ChoicesProjection(feed: EventFeed) : Follower(feed), ChoicesByPlayer {
     private val pending = ConcurrentHashMap<PlayerId, ChoiceRow>()
+
+    /** The omens of each player's last roll, by the story it began, until the hand it dealt arrives. */
+    private val rolled = ConcurrentHashMap<PlayerId, Pair<String, List<Omen>>>()
     private val listeners = CopyOnWriteArraySet<(PlayerId, ChoiceRow?) -> Unit>()
 
     /** Folds one stored event. Exhaustive over the event types, so a new one has to be placed. */
     override fun apply(stored: StoredEvent) {
         when (val event = stored.event) {
+            // A roll is written before the hand it deals, in one decision and one story, so its omens are kept
+            // until the hand under the same correlation arrives.
+            is PlayerRolled -> rolled[event.player] = stored.correlationId to event.omens
+
             is PlayerGivenChoice -> {
+                val roll = rolled.remove(event.player)?.takeIf { (story, _) -> story == stored.correlationId }
                 val row = ChoiceRow(
                     player = event.player,
                     houseId = event.houseId,
@@ -41,6 +51,7 @@ class ChoicesProjection(feed: EventFeed) : Follower(feed), ChoicesByPlayer {
                     // The story the choice began. An action answering it continues that story rather
                     // than starting one, which is what makes a founding read as one thing. See 0035.
                     correlationId = stored.correlationId,
+                    omens = roll?.second.orEmpty(),
                 )
                 pending[event.player] = row
                 tell(event.player, row)
@@ -94,5 +105,6 @@ class ChoicesProjection(feed: EventFeed) : Follower(feed), ChoicesByPlayer {
      */
     override fun reset() {
         pending.clear()
+        rolled.clear()
     }
 }

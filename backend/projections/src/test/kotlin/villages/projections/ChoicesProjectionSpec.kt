@@ -20,7 +20,13 @@ import villages.domain.HouseFounded
 import villages.domain.PlayerGivenChoice
 import villages.domain.HouseId
 import villages.domain.HouseName
+import villages.domain.Omen
+import villages.domain.OmenKey
+import villages.domain.OmenKind
+import villages.domain.PlayerRolled
 import villages.domain.PlayerTookAction
+import villages.domain.Rarity
+import villages.domain.RollId
 import villages.domain.Location
 import villages.domain.Option
 import villages.domain.OptionId
@@ -107,6 +113,24 @@ class ChoicesProjectionSpec : StringSpec({
 
         choices.pendingOf(adam) shouldBe ChoiceRow(adam, house, whereToSettle, "the-founding-story")
         choices.size shouldBe 1
+    }
+
+    "a hand a roll dealt carries the omens the roll read, and a choice in another story does not" {
+        val feed = ChoicesFed()
+        val choices = ChoicesProjection(feed).started()
+        val river = Omen(OmenKey("map.river"), OmenKind.MAP, "River")
+        val roll = PlayerRolled(house, adam, RollId(UUID.randomUUID()), listOf(river), Rarity.COMMON, onDay, atNoon)
+
+        feed.deliver(roll, "a-roll")
+        feed.deliver(given().first, "a-roll", version = 3)
+
+        choices.pendingOf(adam)?.omens shouldBe listOf(river)
+
+        feed.deliver(tookAction(), version = 4)
+        feed.deliver(roll, "another-roll", version = 5)
+        feed.deliver(given().first, "not-that-roll", version = 7)
+
+        choices.pendingOf(adam)?.omens shouldBe emptyList()
     }
 
     "a player who has been given nothing has nothing" {
