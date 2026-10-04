@@ -306,8 +306,8 @@ Commands are added here as the increments land:
   the code it serves was written. Launching it from a checkout means "show me this checkout", and the
   ports are per-tree now so taking one back cannot take anyone else's world with it (0031, 0037). It ends
   with every Villages server on the machine listed, whichever tree started it and how long it has been up.
-  Double-clicked, the window stays open and is the servers: `q` stops both, `l` tails the logs, closing it
-  leaves them running. This is how
+  Double-clicked, the window closes once both answer and the servers run on without it; it stays open
+  only when something failed, so the reason can be read. This is how
   Adam runs the program without an agent in the loop, so it stays true: a step that adds a server, a
   generated file or a prerequisite adds it there in the same commit.
 - Frontend, once, and again whenever `frontend/package-lock.json` changes: `npm install --prefix frontend`.

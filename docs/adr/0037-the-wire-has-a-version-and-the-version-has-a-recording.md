@@ -106,6 +106,12 @@ press. It passes `-Hold` now: the window is the servers while it is open, `q` en
 tail of both logs, and closing it leaves them running, which is what you want when you are done with the
 terminal and not with the game.
 
+*Amended 2026-10-04:* the hold is gone. Adam wanted the window to start the program and get out of the
+way, not to be a second thing on the screen to keep open. The double-click now closes once both servers
+answer, and pauses only when something failed. The servers never depended on the window, so nothing
+else changes: `-Stop` ends them, `-Logs` shows their tails, and the listing of every server is still
+printed before it closes, for anyone who runs it from a terminal.
+
 **It lists every Villages server on the machine**, whichever checkout started it, with the tree it
 belongs to and how long it has been up. That listing is what would have shown the six-day-old server in
 one line, and it is a page of the same argument: knowing beats assuming.
