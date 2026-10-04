@@ -264,12 +264,12 @@
   padding: 0.28rem 0.42rem;
   border: none;
   border-radius: 3px 3px 0 0;
-  background: rgba(239, 230, 211, 0.45);
+  background: color-mix(in srgb, var(--parchment) 45%, transparent);
   cursor: pointer;
 }
 
 .tabs__one:hover {
-  background: rgba(239, 230, 211, 0.78);
+  background: color-mix(in srgb, var(--parchment) 78%, transparent);
 }
 
 /* The one that is up: the same parchment as the pane below it, so the two read as one sheet. */
@@ -280,16 +280,6 @@
 
 .tabs__one--up .icon {
   color: var(--gold);
-}
-
-/*
- * A pane sharing a tabbed tile gives its top edge to the strip of tabs above it. Its card is whichever element
- * the pane marks `pane-card`, so the stage names no pane here.
- */
-.bay[data-tabbed] .pane-card {
-  border-width: 0 1px 0 0;
-  border-radius: 0;
-  box-shadow: none;
 }
 
 /*

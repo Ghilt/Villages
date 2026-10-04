@@ -82,7 +82,8 @@ packages/world                               <-  apps/web
   the map's shaders draw, which lean on nothing in the page; `net` and `stage`; the ground drawn, `map`, `fog`, `desk` and `water`; what stands on it,
   `sprites` and `room`; the game's own surfaces, `house`, `figures`, `choice`, `dialogues`, `areas` and `inspect`;
   and what puts it all together, the root, `debug` and `admin`. No two files import each other, however far round.
-  `src/layers.test.ts` holds it. The imports that broke it on the first day were listed one by one and each
+  `src/layers.test.ts` holds it. The component library in the top row is imported by `admin`, which shows it,
+  and by `stage`, which dresses each tile in a container (`stage/dress.ts`); no surface imports it yet. The imports that broke it on the first day were listed one by one and each
   ended by a step of the plan; none is left. What a surface needs from another surface is handed down: an
   overlay on the map is handed what the map marks and what a pick does, and a pane what it shows beside
   itself. See decision record 0073.

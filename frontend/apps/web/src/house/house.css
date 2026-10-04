@@ -1,19 +1,13 @@
 /* The house card: the shield, the name, the treasury and its sizes. */
 
 /*
- * The house, in the corner and cut off by it: bordered and rounded on the two edges that face the map,
- * flush against the two that are the window's. A card floating a rem away from the corner at this size
- * would read as a dialogue over the world rather than as part of the furniture.
+ * The house, in the corner: what is written on it, and none of the frame round it, which is the corner's
+ * container and drawn by the stage. See stage/dress.ts.
  */
 .hud__panel {
   pointer-events: auto;
   display: flex;
   flex-direction: column;
-  background: var(--parchment);
-  border: 1px solid var(--parchment-edge);
-  border-width: 1px 1px 0 0;
-  border-radius: 0 6px 0 0;
-  box-shadow: 0 -2px 18px var(--shadow);
 }
 
 /* The shield and what is written beside it. The padding is here rather than on the card, so the bar
@@ -30,7 +24,7 @@
 
 /* Nothing borne yet, so the whole card stands back rather than only the shield inside it. */
 .hud__panel--vacant {
-  background: rgba(239, 230, 211, 0.86);
+  opacity: 0.86;
 }
 
 .hud__banner {
@@ -85,7 +79,7 @@
 
 /* The field: dotted while nothing is borne on it, so an empty frame reads as empty rather than as sable. */
 .hud__shield {
-  fill: rgba(157, 124, 42, 0.07);
+  fill: color-mix(in srgb, var(--gold) 7%, transparent);
   stroke: var(--gold);
   stroke-width: 1.4;
   stroke-dasharray: 3 3;
@@ -198,9 +192,6 @@
   inset: 0;
   min-width: 0;
   max-width: none;
-  border-width: 1px 0 0;
-  border-radius: 0;
-  box-shadow: 0 -2px 10px var(--shadow);
 }
 
 /*

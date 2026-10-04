@@ -1,0 +1,44 @@
+/* A tile dressed in the component library's container, and the game's colours inside it. */
+
+/*
+ * Inside a dressed tile the game's colours are the library's: its words cream on the dark fill, its gold the
+ * gilt, and what was a sheet of parchment the night a little raised. Said here once, by the names the panes
+ * already use, so a pane's own rules say what each thing is and the dress says what that looks like - and a
+ * light dress later is these lines again. The debug panel is beside the stage and keeps the game's own.
+ */
+.dressed,
+.tabs--dressed {
+  --ink: var(--ui-cream);
+  --ink-soft: var(--ui-cream-soft);
+  --gold: var(--ui-gilt-light);
+  --parchment: var(--ui-night-raised);
+  --parchment-edge: var(--ui-gilt-deep);
+  --shadow: rgba(0, 0, 0, 0.5);
+}
+
+/*
+ * The tab bar over a dressed tile stands on night, as the frame below it does on its fill, so that its marks
+ * are read against something dark rather than against the gilt.
+ */
+.tabs--dressed {
+  background: var(--ui-night);
+  border-color: var(--ui-gilt-deep);
+}
+
+/* A container says which ink its words are in, and the panes inside it follow. */
+.dressed {
+  --ink: var(--ui-text);
+  --ink-soft: var(--ui-text-soft);
+}
+
+/*
+ * A window in the rail is a flow item, as tall as what it says and no taller than the rail leaves it, so its
+ * container is too, and passes the squeeze on to the window, which scrolls.
+ */
+.stage[data-form='spread'] .rail .bay > .dressed,
+.stage[data-form='spread'] .rail .bay > .dressed > .ui-container__content {
+  display: flex;
+  flex-direction: column;
+  flex: 0 1 auto;
+  min-height: 0;
+}

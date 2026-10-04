@@ -1,8 +1,12 @@
 import type { CSSProperties, ReactNode, RefObject } from 'react';
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 
+import '../ui/ui.css';
+
 import { note } from '../log/log';
+import { Container } from '../ui/container/Container';
 import { Compass } from './Compass';
+import { dressOf } from './dress';
 import { Seam } from './Seam';
 import { bayLayout, type BayName, type Box, isTabbed, type Rect, TAB_BAR, TILES } from './bayBox';
 import { baysStore, askFor, formNow, putAwayForRoom, show, showingIn, stageIs } from './bays';
@@ -161,7 +165,7 @@ export function Stage({ stage, panes, overlays }: StageProps) {
         hidden={!railed && (rect === null || !up)}
         style={railed || rect === null ? undefined : place(rect)}
       >
-        {pane?.draw(room, box.form === 'bays' ? box.along : null)}
+        {dressed(pane, room.size, !railed, pane?.draw(room, box.form === 'bays' ? box.along : null))}
       </div>
     );
   };
@@ -237,6 +241,7 @@ export function Stage({ stage, panes, overlays }: StageProps) {
         return (
           <TabBar
             key={name}
+            dressed={dressOf(name) !== undefined}
             sharing={sharing}
             showing={up.id}
             onShow={(id) => show(name, id)}
@@ -256,6 +261,22 @@ export function Stage({ stage, panes, overlays }: StageProps) {
 }
 
 const isWindow = (pane: { id: string }) => pane.id.startsWith('inspect:');
+
+/**
+ * A pane in the container its tile is dressed in, open or put away; as it drew itself where its tile is not
+ * dressed. Filling the tile, except in the rail, where a window is as tall as what it says.
+ */
+function dressed(pane: Pane | undefined, size: PaneSize, fills: boolean, drawn: ReactNode): ReactNode {
+  const dress = pane === undefined ? undefined : dressOf(pane.spread);
+  if (dress === undefined) {
+    return drawn;
+  }
+  return (
+    <Container recipe={size === 'strip' ? dress.strip : dress.open} fills={fills} className="ui-root dressed">
+      {drawn}
+    </Container>
+  );
+}
 
 /** The class a bay gets from what is in it: every inspect window is styled the same way. */
 function kindOf(id: string): string {

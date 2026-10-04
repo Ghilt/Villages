@@ -65,3 +65,12 @@ instead: the overlays are handed what the map marks and what a pick does, a pane
 itself, and a window closes itself when its area goes. Navigation and the trail stayed in `inspect/` rather
 than moving into the stage as the plan had it: the trail is a list of subjects, and the stage would have
 had to learn what a subject is to hold one.
+
+## Amendment, 2026-10-04: the stage takes up the library
+
+The component library, `ui`, was the showcase's alone, `admin` the one folder allowed to import it. The stage
+now dresses each tile of the spread in the library's container - the corner and the rail in the acanthus
+frame, and the others as they come - so `stage` may import `ui` as well. It is the one place that knows
+which tile is dressed in what, `stage/dress.ts`, and a pane inside a dressed tile still imports nothing from
+the library: it says what it is in the game's own colour names, and the dress says what those look like.
+The surfaces may take the library up themselves later, a component at a time, and the rule is widened then.

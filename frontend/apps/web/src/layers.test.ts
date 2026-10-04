@@ -13,8 +13,9 @@ import { describe, expect, it } from 'vitest';
 
 const ROWS: readonly (readonly string[])[] = [
   // What everything leans on, and which leans on nothing in the page: the ground's own measures and the
-  // camera's arithmetic among them, and the one way a component reads a store. The component library is the showcase's alone until the game takes it
-  // up, a surface at a time.
+  // camera's arithmetic among them, and the one way a component reads a store. The component library is the
+  // showcase's and the stage's: the stage dresses each tile in its container, and the panes in them take the
+  // library up a surface at a time.
   ['ui', 'version', 'marks', 'log', 'geometry', 'store', 'shaders'],
   // The connection to the game server, and the stage the panes are laid out in.
   ['net', 'stage'],
@@ -94,7 +95,7 @@ export function mayImport(from: string, to: string): boolean {
     return true;
   }
   if (to === 'ui') {
-    return from === 'admin';
+    return from === 'admin' || from === 'stage';
   }
   if (rowOf(from) === ROWS.length - 1) {
     return true;
@@ -221,6 +222,8 @@ describe('the rows', () => {
     expect(mayImport('figures', 'dialogues')).toBe(false);
     expect(mayImport('(root)', 'debug')).toBe(true);
     expect(mayImport('(root)', 'ui')).toBe(false);
+    expect(mayImport('house', 'ui')).toBe(false);
     expect(mayImport('admin', 'ui')).toBe(true);
+    expect(mayImport('stage', 'ui')).toBe(true);
   });
 });

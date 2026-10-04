@@ -19,15 +19,6 @@
 }
 
 /*
- * Set into the left edge, like the house card below it, rather than floating a gutter off it. The column
- * is one piece of furniture and its two tiles share an edge, so they share how they meet the stage too.
- */
-.stage[data-form='spread'] .rail .inspect {
-  border-width: 1px 1px 1px 0;
-  border-radius: 0 6px 6px 0;
-}
-
-/*
  * A window in the rail is a flow item sharing the column's one rectangle, not a box of its own. That is
  * what stops three of them pushing past the house in the corner: there is nowhere past to push to.
  */
