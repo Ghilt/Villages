@@ -220,7 +220,10 @@ the next roll is that rarity, so a legendary can be seen without four hundred pr
    button is the library's large `TextButton` as it is, so nothing new; the card is `Card` given a `rarity`, an
    edge and a glow from the rarity tokens and the rarity named on a pill, nothing painted. Shown under *Rolled*
    in *Collections*, on parchment and on night and in every state, every word readable.
-8. **The pane stands always.** Idle, the button, greyed with its reason; pressed, a roll; the hand shown
+8. **The pane stands always.** Done. `TakeAction.tsx` is the pane at rest, in its strip; a rolled option is the
+   library's `Card` with its rarity, the first surface of the game to take the library up (`TAKEN_UP` in
+   `layers.test.ts`); it puts itself back to its strip once a hand is answered, and once the house has arrived
+   after a founding. The Choice roll section is `debug/ChoiceRollSection.tsx`. Idle, the button, greyed with its reason; pressed, a roll; the hand shown
    plainly with its rarity, no animation yet. The Choice roll section and its lever. Adam plays the loop:
    press, pay, choose, see the resource go up.
 

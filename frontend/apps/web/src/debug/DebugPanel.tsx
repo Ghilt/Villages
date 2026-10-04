@@ -9,6 +9,7 @@ import { AreasSection } from './AreasSection';
 import { BuildBadge } from '../version/BuildBadge';
 import { CameraSection } from './CameraSection';
 import { CharactersSection } from './CharactersSection';
+import { ChoiceRollSection } from './ChoiceRollSection';
 import { DialoguesSection } from './DialoguesSection';
 import { MapSection } from './MapSection';
 import { ScenerySection } from './ScenerySection';
@@ -257,6 +258,7 @@ export function DebugPanel({ map, worldRoot, master, renderer, onRenderer }: Deb
           <ResourcesSection />
           <CharactersSection map={map} />
           <DialoguesSection />
+          <ChoiceRollSection />
 
           <BuildBadge />
         </div>

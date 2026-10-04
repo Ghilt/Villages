@@ -126,11 +126,12 @@ of using it and only they know which they are doing. See decision record 0044.
 
 ### Where it stands
 
-Being built, from `docs/plans/choice-roll.md`. The choice pattern runs end to end today - the world gives a
-choice, the player takes an option, and the taken option's consequences are recorded from the same decision -
-but what gives the choice is arrival rather than a roll: there is no Take action, no omen, no pool and no
-rarity yet. What exists is in `BUILDING-A-MECHANIC.md` under the choice pattern, and in decision records 0034
-and 0083.
+Being built, from `docs/plans/choice-roll.md`. **Take action works**: it stands in the bottom middle once
+there is a house, costs ten wealth, and deals a hand of three of one rarity from twenty resource actions in six
+pools, each option a card edged in its rarity; taking one gives what it says. The omens it reads are only the
+house's own so far - its holdings, whether it is a weak house, whether it is pious - and the report card is not
+built: the hand appears at once. What exists is in `BUILDING-A-MECHANIC.md` under the choice pattern, and in
+decision records 0034 and 0083.
 
 It is a pane with its three sizes as of 0044, which is also where the last media query in the app died: this
 mechanic's one breakpoint asked the window rather than the stage and had never fired.

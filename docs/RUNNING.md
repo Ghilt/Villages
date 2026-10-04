@@ -63,7 +63,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
   `gateway: error fault: …`, with its stack in the server's log under `villages.feed`, which the quick-start
   writes to `.logs/backend.log`; see decision record 0029. **Everything in it is in a folding section**,
   and which section a new thing goes in is asked rather than guessed, as `CLAUDE.md` says. Today they are
-  Worktrees, Debug map, Shaders, Scenery, Camera, Areas, World, Resources, Characters and Dialogues.
+  Worktrees, Debug map, Shaders, Scenery, Camera, Areas, World, Resources, Characters, Dialogues and Choice roll.
   **The log is not a section but a column of its own**, the whole height of the panel on its outer side,
   so what a button did is in view while the button is. It begins folded: the `log` toggle in the panel's
   header, beside `landscape`, opens it and `hide` in its own bar folds it away again. The events themselves are not in the
@@ -142,6 +142,20 @@ stage alone, with none of the debug panel in it (decision record 0079).
   and on a phone in the other bay with the two at half each; each is a line of the log under `dialogues`.
   `offer a dialogue` opens the pane: from its strip in the spread, and on a phone into the bay the map is
   not in, at half. See `docs/adr/0071`, `0069` and `0070`, and `docs/plans/character-dialogue.md`.
+- The choice roll, the player's own: **Take action**, in the bottom middle of the spread once there is a
+  house, put away to its strip at rest with what a roll costs beside it, ten wealth, and a house is founded
+  with fifty. Greyed, saying why, while the house has less than that free or a command is waiting on its
+  answer. Pressed, it rolls: the pane opens to full with a hand of three options of one rarity, each a card
+  edged and named in its rarity, saying what it gives; taking one gives it, and the pane goes back to its
+  strip. A hand cannot be rolled over while it waits. The asking and the answer are lines of the log under
+  `roll`, and the hand under `choice`, with its rarity and how many omens it was rolled from. The **Choice
+  roll** section of the debug panel, below Dialogues, looks into it: the hand's omens with their kind and,
+  on hover, their key; what the last roll drew from, which the player never sees - the pools it opened and
+  every action that could have been dealt, with its weight - and whether the throw or the lever chose its
+  rarity; the odds, 70, 22, 7 and 1 in a hundred. Its one lever, `next roll`, makes the next roll `common`,
+  `uncommon`, `rare` or `legendary` whatever the throw, or `the throw` again: it stands in for the world's
+  luck, not for the player. What a roll drew from is sent only while the instruments are open. See
+  `docs/adr/0083` and `docs/plans/choice-roll.md`.
 
 ## Adam's folders and the tools that cut them
 

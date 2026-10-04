@@ -28,6 +28,7 @@ import { HOUSE_PANE } from '../house/pane';
 /** None of the panes that come and go; a question standing; a house that has been offered a dialogue. */
 const NONE = { yourChoice: null, yourDialogues: null } as unknown as SessionState;
 const ASKING = { ...NONE, yourChoice: {} } as unknown as SessionState;
+const HOUSED = { ...NONE, yourHouse: {} } as unknown as SessionState;
 const TALKING = { ...NONE, yourDialogues: [{}] } as unknown as SessionState;
 
 /** Every pane on the stage for what the gateway has said and the subjects open, as the stage is handed them. */
@@ -160,20 +161,22 @@ describe('spreadWants', () => {
 });
 
 /**
- * The choice roll, which is the one pane that comes and goes.
- *
- * An empty tile takes no room at all, so with nothing pending the map runs clean to the bottom edge of the
- * stage - and the tile appears the moment the world asks something.
+ * The choice roll, which stands once there is a house: at rest it is Take action, put away to its strip, so the map
+ * runs nearly to the bottom edge of the stage - and before there is a house or a question it is not there at all.
+ * See decision record 0083.
  */
 describe('the choice roll', () => {
-  it('is not a pane at all until the world asks something', () => {
+  it('is not a pane at all until there is a house or a question', () => {
     expect(idsOf(panesFor([], NONE))).not.toContain(CHOICE_PANE.id);
     expect(idsOf(panesFor([], ASKING))).toContain(CHOICE_PANE.id);
+    expect(idsOf(panesFor([], HOUSED))).toContain(CHOICE_PANE.id);
   });
 
-  it('takes the bottom middle, and asks for nothing when there is no question', () => {
+  it('takes the bottom middle, a strip at rest and its full height opened', () => {
     expect(spreadWants(panesFor([], NONE), NOTHING_ASKED).bottomMiddle).toBeNull();
-    expect(spreadWants(panesFor([], ASKING), NOTHING_ASKED).bottomMiddle).toBe(tallOf(CHOICE_PANE).full);
+    expect(spreadWants(panesFor([], HOUSED), NOTHING_ASKED).bottomMiddle).toBe(STRIP);
+    const opened: Asked = { heights: { [CHOICE_PANE.id]: 'full' }, tiles: {} };
+    expect(spreadWants(panesFor([], ASKING), opened).bottomMiddle).toBe(tallOf(CHOICE_PANE).full);
   });
 
   // It has the tile to itself, so there is no strip of tabs to pay for.
@@ -237,11 +240,11 @@ describe('character dialogue', () => {
 describe('the corner', () => {
   const panes = panesFor([], NONE);
 
-  it('opens at its normal size until the player asks for another, where a tile of its own opens full', () => {
+  it('opens at its normal size until the player asks for another, and the choice roll at its strip', () => {
     expect(sizeAsked(KEY_FIGURES_PANE, NOTHING_ASKED)).toBe('small');
     expect(sizeAsked(HOUSE_PANE, NOTHING_ASKED)).toBe('small');
-    expect(sizeAsked(CHOICE_PANE, NOTHING_ASKED)).toBe('full');
-    expect(sizeAsked(CHOICE_PANE, { heights: { [CHOICE_PANE.id]: 'strip' }, tiles: {} })).toBe('strip');
+    expect(sizeAsked(CHOICE_PANE, NOTHING_ASKED)).toBe('strip');
+    expect(sizeAsked(CHOICE_PANE, { heights: { [CHOICE_PANE.id]: 'full' }, tiles: {} })).toBe('full');
   });
 
   // Opened out, and only opened out: the corner is the column's width the rest of the time.

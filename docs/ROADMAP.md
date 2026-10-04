@@ -61,7 +61,8 @@ character dialogue, the newest; the UI component library is built and waiting on
 - **The choice roll, as the core loop**: a *Take action* button that costs wealth, the omens the fate engine
   read slammed into a report card, a hand of one rarity dealt from pools of actions, and the server taught
   to read the ground so the map can be an omen. The steps, one commit each, are in
-  `docs/plans/choice-roll.md`; none is built. Adam's own, planned with him on 2026-10-04.
+  `docs/plans/choice-roll.md`; the first eight are built: Take action rolls, pays and deals a hand
+  in the running program. Adam's own, planned with him on 2026-10-04.
 - **A place for every mechanic**: the review of 2026-10-02 found each mechanic threaded by hand through the
   same thirteen shared files, and those files growing with every one. The fix is a plan of 43 steps over eleven
   checkpoints that Adam smoke-tests: two checks that stop the growth - the size ceilings (0072) and a rule for

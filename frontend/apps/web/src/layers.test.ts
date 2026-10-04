@@ -39,6 +39,8 @@ const SIDEWAYS: readonly (readonly [string, string])[] = [
   ['room', 'sprites'],
   ['dialogues', 'figures'],
   ['dialogues', 'house'],
+  // A dealt option says what it gives in the player's words for a resource.
+  ['choice', 'house'],
   ['inspect', 'figures'],
   ['inspect', 'house'],
   ['inspect', 'areas'],
@@ -89,13 +91,20 @@ function rowOf(folder: string): number {
   return ROWS.findIndex((row) => row.includes(folder));
 }
 
+/**
+ * The game's surfaces that have taken the component library up, one at a time, as `UI-COMPONENTS.md` says they
+ * will: until one has, it draws its own controls and may not reach into `ui`. The choice roll was the first,
+ * with its rarity cards and Take action. See decision record 0083.
+ */
+const TAKEN_UP: readonly string[] = ['choice'];
+
 /** Whether the rows let one folder import another. */
 export function mayImport(from: string, to: string): boolean {
   if (from === to) {
     return true;
   }
   if (to === 'ui') {
-    return from === 'admin' || from === 'stage';
+    return from === 'admin' || from === 'stage' || TAKEN_UP.includes(from);
   }
   if (rowOf(from) === ROWS.length - 1) {
     return true;

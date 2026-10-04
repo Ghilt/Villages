@@ -47,7 +47,9 @@ const STANDING: readonly Standing[] = [
   },
   {
     pane: CHOICE_PANE,
-    stands: (session) => session.yourChoice !== null,
+    // At rest it is Take action, so it stands once there is a house to take it; before then only a question
+    // raises it. See decision record 0083.
+    stands: (session) => session.yourChoice !== null || (session.yourHouse ?? null) !== null,
     draw: (room) => <Choosing room={room} />,
   },
   {

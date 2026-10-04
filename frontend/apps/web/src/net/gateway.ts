@@ -105,6 +105,15 @@ export function takeOption(choice: ChoiceView, option: OptionView): void {
 }
 
 /**
+ * Take action: rolls for a hand, saying what the page is looking at. A player's command, so nothing else of the
+ * player's goes until it is answered. What the page is looking at is `looking`'s to gather, and nothing yet. See
+ * decision record 0083.
+ */
+export function takeAction(): void {
+  session.roll({});
+}
+
+/**
  * Sends one of the debug panel's levers as a real command, and says so in the part of the log it belongs to.
  *
  * Every one is told its answer the way anything else is: an accepted or a rejected frame, filed in the

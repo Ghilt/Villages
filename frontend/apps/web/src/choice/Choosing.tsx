@@ -7,6 +7,8 @@ import { sessionStore, takeOption } from '../net/gateway';
 import { PaneSizeControl } from '../stage/PaneSizeControl';
 import type { Room } from '../stage/panes';
 import { useStore } from '../store/useStore';
+import { Card } from '../ui/card/Card';
+import { TakeAction, gives } from './TakeAction';
 
 /**
  * **The choice roll**: what the world is asking, and the options it is offering.
@@ -50,13 +52,16 @@ export function Choosing({ room }: { room: Room }) {
   }, [asked]);
 
   if (choice === null) {
-    return null;
+    return <TakeAction room={room} />;
   }
 
   if (room.size === 'strip') {
+    const rolled = choice.options[0]?.rarity;
     return (
       <section className="choice choice--strip pane-strip">
-        <span className="choice__aside">A letter awaits</span>
+        <span className="choice__aside">
+          {rolled === undefined ? 'A letter awaits' : `A ${rolled} hand awaits`}
+        </span>
         <PaneSizeControl room={room} />
       </section>
     );
@@ -150,7 +155,10 @@ function Carousel({
   );
 }
 
-/** One option, on a sheet of parchment. The shared component; see `LOOK-AND-FEEL.md`. */
+/**
+ * One option: a rolled one as the library's card edged in its rarity, saying what it gives; any other on a sheet of
+ * parchment, the shared component; see `LOOK-AND-FEEL.md`.
+ */
 function Parchment({
   choice,
   option,
@@ -160,6 +168,20 @@ function Parchment({
   option: OptionView;
   answering: boolean;
 }) {
+  if (option.rarity !== undefined) {
+    return (
+      <Card
+        rarity={option.rarity}
+        title={option.label}
+        line={gives(option)}
+        disabled={answering}
+        onPress={() => takeOption(choice, option)}
+      >
+        <p className="ui-body">{option.detail}</p>
+      </Card>
+    );
+  }
+
   return (
     <button
       type="button"
