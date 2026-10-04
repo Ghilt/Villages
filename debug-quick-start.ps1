@@ -22,15 +22,13 @@
         -NoBrowser   do not open the browser.
         -Stop        stop both, and whatever they started, and exit.
         -Logs        print the tail of both logs, and exit. This is what to paste into a conversation.
-        -Hold        stay open afterwards, with q to stop both. What the double-click wrapper passes.
 #>
 [CmdletBinding()]
 param(
     [switch] $WebOnly,
     [switch] $NoBrowser,
     [switch] $Stop,
-    [switch] $Logs,
-    [switch] $Hold
+    [switch] $Logs
 )
 
 $ErrorActionPreference = 'Stop'
@@ -747,41 +745,3 @@ if (-not $NoBrowser) {
 }
 
 Write-Host ''
-
-<#
-    Double-clicked, this window is the servers: it stays where you can see it, and q ends them.
-
-    Closing it instead leaves them running, which is what you want when you meant to keep playing and
-    were only done with the terminal. Nothing here holds the servers up; they are their own processes
-    and this is a keyboard.
-#>
-if ($Hold) {
-    Write-Host ''
-    Head 'this window'
-    Say  '  q   stop both servers and close this window'
-    Say  '  l   the tail of both logs'
-    Say  '  closing the window leaves them running'
-    Write-Host ''
-    while ($true) {
-        $key = $null
-        try {
-            $key = [Console]::ReadKey($true)
-        } catch {
-            # Nothing to read a key from, so there is nothing to hold on to either.
-            break
-        }
-        if ($key.KeyChar -eq 'q' -or $key.KeyChar -eq 'Q') {
-            Write-Host ''
-            Head 'stopping'
-            Stop-Everything
-            if (-not $script:Stopped) { Good 'nothing was running' }
-            Write-Host ''
-            exit 0
-        }
-        if ($key.KeyChar -eq 'l' -or $key.KeyChar -eq 'L') {
-            Show-Tail $BackendLog 20
-            Show-Tail $WebLog 15
-            Write-Host ''
-        }
-    }
-}
