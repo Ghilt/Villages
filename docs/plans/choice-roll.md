@@ -4,7 +4,7 @@
 omens the fate engine reads and where each comes from, the pools and the actions in them, the deal, the
 commands and events, what crosses the wire, the pane and its report card, the debug section, and the order
 it all gets built in. **What does not:** what the mechanic is for, which is `MECHANICS.md`; why it is shaped
-this way, which becomes decision records 0083 and 0084 in step 1; the words, which are `GLOSSARY.md`; the
+this way, which is decision records 0083 and 0084; the words, which are `GLOSSARY.md`; the
 hypothesis, which is experiment 0015. When a part of it is decided, that part becomes a decision record and
 leaves.
 
@@ -29,12 +29,13 @@ the player aims the roll by what they look at, and the rarity is a real gamble.
   *Sir Jeoffrey*, *River*, *Winter*, *Unknown*, *Missing wealth*. Each has a stable key (`map.river`,
   `figure:<id>`), a kind saying where it came from, the words the player reads, a mark, and sometimes a
   value (*Pious 64*). Adam chose the word.
-- **Reading.** All the omens of one roll, in the order they are shown. Recorded whole on the roll's event.
+- A roll's omens are recorded whole on its event, in the order they are shown. They are not given a word of
+  their own: *reading* was the candidate, and *reading place* already means something else.
 - **Pool.** A named grouping of actions, opened by omens. An action can be in many pools. **The player never
   sees a pool**, only omens: pools are the game's own filing and can be reorganised without anybody
   noticing.
 - **Action.** One thing a roll can offer: a rarity, the pools it is in, and a way of **dealing** it, which
-  fills in its details from the reading and the world at the moment of the roll (*a visit from a stranger
+  fills in its details from the omens and the world at the moment of the roll (*a visit from a stranger
   from the farthest house you know of*). Dealt, an action becomes an **option** of a choice, as today.
 - **Take action.** The button that provokes a roll. Words, not a mark: Adam's call.
 
@@ -48,12 +49,12 @@ picking one, **rarity** is common, uncommon, rare and legendary in grey, green, 
 2. The browser sends `roll` with **what it is looking at and nothing it could work out for itself**: the
    centre of the view and the zoom, which inspect windows are open, which dialogue is open, which key figure
    is focused. No terrain, no names, no omens.
-3. The server takes the **reading**: every omen source is asked in turn (below). Whatever the browser named
+3. The server works out the **omens**: every omen source is asked in turn (below). Whatever the browser named
    is checked, and anything the house may not see is dropped silently.
 4. The **rarity** is rolled from fixed odds, **70 / 22 / 7 / 1**, the same for everyone. Omens never move
    the odds (Adam: *pools only, odds fixed*). The whole hand is that one rarity (Adam: *one rarity per
    roll*), so the reveal has one moment and a legendary never sits beside two commons.
-5. The **open pools** are the ones an omen of the reading opens, and *Hearth*, which is always open.
+5. The **open pools** are the ones an omen of the roll opens, and *Hearth*, which is always open.
 6. The **candidates** are the actions of the rolled rarity in any open pool that can be dealt now. Each is
    weighted by **how many open pools it is in**, so an action the omens point at from two directions is
    likelier. **Three** are drawn without putting back, and each is dealt into an option that carries its
@@ -132,10 +133,10 @@ least one pool, and every rarity has at least three actions in Hearth that can b
 
 One new command and one new event; everything else is the existing choice pattern, with two fields more.
 
-- **`Roll`**, decided by the choices part: the reading, the rarity, the price as a spend, and the choice the
+- **`Roll`**, decided by the choices part: the omens, the rarity, the price as a spend, and the choice the
   fate engine dealt. Refused as `NoSuchHouse` before founding, `ChoicePending` while one is pending, and as a
   spend is refused when the price is not free.
-- **`villages.player.rolled.v1`**, `PlayerRolled`: `houseId`, `player`, `rollId`, `reading` (each omen's key,
+- **`villages.player.rolled.v1`**, `PlayerRolled`: `houseId`, `player`, `rollId`, `omens` (each one's key,
   kind, words and value), `rarity`. A player's event: the player reached into the world. Then, from the
   same decision, `villages.house.resourceSpent.v1` for the price and `villages.player.givenChoice.v1` for
   the hand, one correlation id, consecutive versions. The randomness is all in the application, before the
@@ -147,14 +148,14 @@ One new command and one new event; everything else is the existing choice patter
   `villages.player.offeredDialogue.v1` from the same decision, on the same stream.
 
 This changes one sentence of `ARCHITECTURE.md`, which says a roll is not a decision of the domain and only
-the taken option becomes an event. A roll that costs something is a decision, and the reading is the
-house's history: the next roll's *Piety risen* is worked out against it, and it answers "why was I offered
+the taken option becomes an event. A roll that costs something is a decision, and its omens are the
+house's history: the next roll's *Piety risen* is worked out against them, and they answer "why was I offered
 this?" for ever. Decision record 0083 says so.
 
 ## What crosses the wire
 
 - In: `roll { centre, zoom, inspecting, dialogue, figure }`, every field but the first two optional.
-- Out: `yourChoice` as today, its options with `rarity` and `omens`, and the choice with the `reading` it
+- Out: `yourChoice` as today, its options with `rarity` and `omens`, and the choice with the `omens` it
   was rolled from.
 - `PROTOCOL_VERSION` goes up once, `contracts/protocol-v23.txt` is written, and the fixtures gain a roll
   and a rolled choice.
@@ -177,7 +178,7 @@ per kind to begin with; which pictures in `world/ui/` and at what size is said i
 
 ## The Choice roll section
 
-A folding section of its own in the debug panel, because that is where Adam verifies: the last reading,
+A folding section of its own in the debug panel, because that is where Adam verifies: the last roll's omens,
 omen by omen with where each came from; the pools it opened; the candidates and their weights; the odds and
 the rarity drawn. One lever, **next rarity**, which stands in for the world's luck and not for the player:
 the next roll is that rarity, so a legendary can be seen without four hundred presses. Every roll is a
@@ -187,9 +188,9 @@ the next roll is that rarity, so a legendary can be seen without four hundred pr
 
 **Checkpoint 1: the shape in words.**
 
-1. **The documents.** Decision records 0083, *a roll is paid for and recorded with its reading*, and 0084,
+1. **The documents.** Done. Decision records 0083, *a roll is paid for and recorded with its omens*, and 0084,
    *the server reads the ground*; the choice roll entry in `MECHANICS.md` with everything Adam settled; the
-   fate engine in `ARCHITECTURE.md`; *omen*, *reading*, *pool*, *action*, *Take action* and *ground map* in
+   fate engine in `ARCHITECTURE.md`; *omen*, *pool*, *action*, *Take action* and *ground map* in
    `GLOSSARY.md`; experiment 0015's hypothesis.
 
 **Checkpoint 2: a roll that costs, on the server.**
@@ -198,7 +199,7 @@ the next roll is that rarity, so a legendary can be seen without four hundred pr
 3. **`Roll` and `PlayerRolled`.** Rarity in the domain; an option's rarity and omens; the command, the event,
    the refusals, the store adapter, the catalogue and the fixtures. Decider specs for each refusal and for
    the three events of one decision.
-4. **The fate engine.** Omen, reading, pool, action, the odds and the deal, in `application`, with the dice
+4. **The fate engine.** Omen, pool, action, the odds and the deal, in `application`, with the dice
    port; tests with fixed dice for the rarity, the weights and the draw without putting back; the two
    content checks.
 5. **The first content.** The twenty actions, the six pools, and the house omens: *Holdings*, *Weak house*,

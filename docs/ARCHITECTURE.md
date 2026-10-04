@@ -373,22 +373,42 @@ fault in its fold says which one it was.
 
 ## The fate engine
 
-Nothing of this is in the source yet. It is here rather than in `SETTING.md` because it is a part of the
-program rather than a part of the fiction, and `MECHANICS.md` points at it from the mechanics it drives.
+It is here rather than in `SETTING.md` because it is a part of the program rather than a part of the fiction,
+and `MECHANICS.md` points at it from the mechanics it drives. It is being built from
+`docs/plans/choice-roll.md`.
 
-The **fate engine** rolls what could happen to a house at a moment. Its inputs are the house's stats, its
-house-spirit, where the player is looking and what is around there; its output is a set of options of
-comparable value, each with a rarity, which reaches the player as a **choice roll**. It is one side of a coin
-whose other side is that mechanic, so what is asked of one is asked of the other: enough rolls that repeats
-are not noticeable, and never a legendary option sitting beside two commons.
+The **fate engine** rolls what could happen to a house at a moment, and what it rolls reaches the player as a
+**choice roll**. It is one side of a coin whose other side is that mechanic, so what is asked of one is asked
+of the other: enough actions that repeats are not noticeable, and never a legendary option sitting beside
+two commons. It works in four moves:
 
-Two things follow for the architecture, and neither is built:
+1. **The omens.** Every omen source is asked in turn - the house, what changed since its last roll, the
+   windows and the dialogue and the key figure the page says it has open, the ground in the **looking
+   circle**, the season - and each says what it sees. A source checks what a page names against the house's
+   own and against the fog, and drops what the house may not see. A new system that wants to colour the rolls
+   adds a source and nothing else.
+2. **The rarity**, from fixed odds with the dice port. Nothing moves the odds.
+3. **The pools** the omens open, and *Hearth*, which is always open.
+4. **The deal.** The actions of that rarity in an open pool that can be dealt now, each weighted by how many
+   open pools it is in; three drawn without putting back, each dealt into an option with its rarity and the
+   omens that brought it.
 
-- A roll is **not** a decision of the domain. The engine proposes; the player disposes; only the taken option
-  becomes an event. The giver of a choice is application code, as arrival is today, and the roll is what a
-  giver consults. See decision record 0034 for the pattern it plugs into.
-- A rolled option can name a thing that does not exist yet. Because play is chronological, that thing is
-  simply created going forward - there is nothing to reconcile with the past, and no constraint solver.
+The pools and the actions are content, written in Kotlin beside the engine in `application`, so a dealt action
+is code and can read the world. Two rules about the content are checks rather than hopes: every action is in
+Hearth, and every rarity has at least three actions that can be dealt with no omens at all.
+
+Two things follow for the architecture:
+
+- **A roll is a decision of the domain, and the luck is not.** The engine works out the omens, rolls and deals
+  in the application, then sends all of it as one `Roll` command; `decide` checks the house can pay and has
+  nothing pending, and records the roll, the price and the hand from one decision. Replaying a stream never
+  asks the dice. See decision record 0083, which replaced the earlier rule that only a taken option is an
+  event.
+- **The server reads the ground.** The page sends only where it is looking and how close; what is there comes
+  from each master's **ground map**, cut by a world tool and read through a port. See decision record 0084.
+
+A rolled option can name a thing that does not exist yet. Because play is chronological, that thing is
+simply created going forward - there is nothing to reconcile with the past, and no constraint solver.
 
 ## What the setting asks of the architecture
 

@@ -20,62 +20,93 @@ architecture.
 
 ## Choice roll
 
-One of the primary mechanics of the game as it stands.
+One of the primary mechanics of the game, and the core loop: what a player does when they want to do
+something.
 
 ### What it is
 
-The game presents a small set of choices, rolled from the state the house is in. The player picks one. The
-rolling is done by the **fate engine**, which takes the house's stats, its house-spirit, where the player is
-looking and what is around there; see `ARCHITECTURE.md`.
+The player presses **Take action** and pays for it. The game shows them every **omen** it took into account -
+how the house stands, what they have open, where they are looking, the season, what changed since the last
+roll - and stamps a **rarity**, then deals a hand of three **actions** of that rarity. The player takes one.
+The rolling is done by the **fate engine**; see `ARCHITECTURE.md`. How it is built, step by step, is
+`docs/plans/choice-roll.md`.
 
 ### What it is for
 
-**Agency.** The player can provoke a choice roll themselves, at the moments that seem interesting to them,
-and by choosing where and when they influence what the roll can offer. It is the main way a player reaches
-into the world on purpose rather than waiting to be asked.
+**Agency.** The player provokes a choice roll themselves, at the moments that seem interesting to them, and
+by choosing where and when they influence what the roll can offer. It is the main way a player reaches
+into the world on purpose rather than waiting to be asked. **They aim it by what they look at**: the inspect
+windows they have open, the dialogue they are in, the key figure they have focused, and the part of the map
+on their screen are all omens, and so is how the house stands. Each option carries the marks of the omens
+that brought it, so a player learns that looking at rivers while pious brings river-and-faith things, and
+aiming becomes a skill rather than superstition.
 
 **The rush of a good roll.** Rolling legendary actions should feel like a gamble paying off. For that to
 work the odds have to be real, so:
 
-- There must be **plenty of rolls**, enough that repeated options do not become noticeable.
-- A roll presents options of **comparable value**. If the player rolls legendary actions in a questline,
-  every option offered is high value. A legendary is never presented alongside two commons.
+- **The odds are fixed and the same for everyone**: 70 common, 22 uncommon, 7 rare, 1 legendary in a
+  hundred. **Omens never move them.** What the player looks at decides what a hand is *about*; luck alone
+  decides how *good* it is.
+- **A hand is one rarity**, so the reveal is one moment, and a legendary never sits beside two commons.
+- There must be **plenty of actions**, enough that repeats do not become noticeable.
 - Rarity runs common, uncommon, rare, legendary, with the standard colours in `LOOK-AND-FEEL.md`.
 
-**A way to do things at all.** A choice roll is how a player interacts with other players, progresses PvE
-questlines, and acquires resources. It is not a side activity.
+**A decision that costs.** A roll costs **10 wealth** for now, and a house is founded with 50 so it can roll
+at all. The hand **must be answered**: it can be set aside and come back to, and Take action stays greyed out
+until it is, but it cannot be walked away from or rerolled. The price always buys something, and every roll
+is a real decision.
 
-**A component the world can use.** A choice roll can also happen *without* the player provoking one, so that
-events and storylines can raise one as part of their flow.
+**A way to do things at all.** A choice roll is how a player acquires resources, starts storylines and
+dialogues, and one day interacts with other players. It is not a side activity.
 
-**It is clear when you provoke one.** A standardized button does it, so the player always knows that this is
-the thing that rolls. The button can hint at what will go into the roll — if some other system gives us a
-colour or a symbol, a flare or flourish of it on the button tells a player pursuing that thing to click now.
-The flourish is a hint only: **timing the click to it must never matter**. That particular way of hinting is
-an example rather than a decision.
+**A component the world can use.** A choice roll can also one day happen *without* the player provoking one,
+so that events and storylines can raise one as part of their flow.
+
+**It is clear when you provoke one.** One button does it, saying **Take action**, in words, Adam's call. It
+gives **no hint beforehand** of what the roll will read: the omens are revealed only after paying, and finding
+out what counts is part of the exploration.
 
 **A choice can expire.** This is a multiplayer world that keeps moving. A player who rolls a choice and
 leaves it for a real-life week comes back to a world that has gone on without them, and a choice that no
 longer means anything stops being pending rather than waiting for ever.
 
+### Omens, pools and actions
+
+An **omen** is one thing the engine took into account: *Holdings in Sweden*, *Weak house*, *Pious*, *Piety
+risen*, *Sir Jeoffrey*, *Unresolved dialogue*, *Missing wealth*, *River*, *House Varga*, *Unknown* where the
+fog covers everything, *Winter*. A **pool** is a named grouping of actions that omens open; an action can be in
+many, and one the omens point at from two directions is likelier. **The player sees omens and never pools.**
+An **action** is one thing a roll can offer, and it is dealt at the moment of the roll, so its details can come
+from the world: gossip about the nearest house names that house.
+
+The map's omens are worked out by the server from where the player is looking and how far they are zoomed in,
+never taken from the page: zoomed out the omens are broad, zoomed in they are close, and only ground the house
+has revealed counts. See decision record 0084.
+
 ### Look and feel
 
-The options are shown as a **wooden desktop with an inkwell**, each choice a textbox styled as a
-**parchment**. Hovering a parchment lifts it slightly, so it reads as something you can pick up. The shared
-language this draws on — the diegetic rule, the rarity colours — is in `LOOK-AND-FEEL.md`.
+The roll plays like **a report card at the end of a level**, Balatro's scoring the reference: the omens slam
+into a list one after another, each a mark, words and sometimes a value; the rarity is stamped across it; the
+options pop in. A click hurries the list, and **the stamp is never skipped**, because that is the rush. Then
+the list folds to a strip of omen marks above the options, so a card's marks can be matched against it.
+
+The options are shown as **parchments**, edged in their rarity's colour, on a **wooden desktop with an
+inkwell**. Hovering a parchment lifts it slightly, so it reads as something you can pick up. The shared
+language this draws on - the diegetic rule, the rarity colours - is in `LOOK-AND-FEEL.md`.
 
 ### UI
 
-A **pane** that exists only while a question is pending, and goes when it is answered. It has three sizes,
+A **pane** that is **always there** in the spread's bottom middle. Idle it is the Take action button; pressed,
+it opens to full in its own bay and plays the roll; answered, it goes back to the button. It has three sizes,
 and the mechanic owns all three:
 
-- **Full** — the prompt and every option laid out to read through. What a question arrives at, because
+- **Full** - the report card and then the options, laid out to read through. What a roll opens at, because
   reading it is the thing to do first. Three across a tile wide enough, three one under another in a bay
   tall enough, and the carousel in one that is neither.
-- **Small** — the **carousel**: one option at a time, with the way between them. For deciding rather than
+- **Small** - the **carousel**: one option at a time, with the way between them. For deciding rather than
   reading, because the places being offered are drawn on the map and the option you are on stays on the
   screen beside the one it means.
-- **Minimised** — set aside to a strip. Not closed: the question is still standing.
+- **Minimised** - set aside to a strip. Not closed: the question is still standing.
 
 **In the spread** it takes **bottom middle**, one height at both of its drawings so the bottom of the stage
 does not jump as it folds to the carousel; the 281 that bay is never narrower than is what the carousel
@@ -85,21 +116,24 @@ of using it and only they know which they are doing. See decision record 0044.
 
 ### Not decided
 
-- **What limits how many choice rolls a player can perform.** It is meant to cost something, and the
-  candidate is resource use, but there is no resource system yet.
-- **How a roll is hinted** on the button, beyond the example above.
 - **How expiry is decided**: what makes a choice irrelevant, and whether the player is told it lapsed.
+- **Whether a price ever changes** - with the house's standing, the rarity, or the omens - or is paid in
+  anything but wealth. Ten wealth is a temporary number.
+- **Whether an action can be dealt only when its omens are present**, rather than every action being in the
+  always-open pool and the omens only tilting the draw. The first content is the second kind.
+- **Hints on the button.** Settled as none for now; the old idea of a flourish when something new is among
+  the omens is kept here rather than forgotten.
 
 ### Where it stands
 
-Half built, under another name. The choice pattern runs end to end today — the world gives a choice, the
-player takes an option, and the taken option's consequences are recorded from the same decision — but what
-gives the choice is arrival rather than a roll, there is no fate engine, no rarity and no expiry. What
-exists is in `BUILDING-A-MECHANIC.md` under the choice pattern, and in decision record 0034.
+Being built, from `docs/plans/choice-roll.md`. The choice pattern runs end to end today - the world gives a
+choice, the player takes an option, and the taken option's consequences are recorded from the same decision -
+but what gives the choice is arrival rather than a roll: there is no Take action, no omen, no pool and no
+rarity yet. What exists is in `BUILDING-A-MECHANIC.md` under the choice pattern, and in decision records 0034
+and 0083.
 
 It is a pane with its three sizes as of 0044, which is also where the last media query in the app died: this
-mechanic's one breakpoint asked the window rather than the stage and had never fired. There is no
-standardised button that provokes a roll, because there is nothing to spend on one yet.
+mechanic's one breakpoint asked the window rather than the stage and had never fired.
 
 ---
 
