@@ -55,9 +55,9 @@ character dialogue, the newest; the UI component library is built and waiting on
   shown at `/admin/inspect-ui-components` before it is used, with placeholders copied from Adam's
   moodboard. The shape is decision record 0068, the method `UI-COMPONENTS.md`, and the steps, one commit
   each, are in `docs/plans/ui-component-library.md`: all eleven are built, the larger ones in parts, with a
-  contrast check that holds every word to what it needs. It is reaching the game a tile at a time: the
-  corner and the rail are dressed in the acanthus frame and the right column in the cherubs', and the letter
-  in the clouds comes next. Adam's own, asked for on 2026-09-30.
+  contrast check that holds every word to what it needs. It has reached the game's tiles: the corner and the
+  rail are dressed in the acanthus frame, the right column in the cherubs' and the letter in the clouds; the
+  panes inside them still draw their own controls, and take the library's up a component at a time. Adam's own, asked for on 2026-09-30.
 - **A place for every mechanic**: the review of 2026-10-02 found each mechanic threaded by hand through the
   same thirteen shared files, and those files growing with every one. The fix is a plan of 43 steps over eleven
   checkpoints that Adam smoke-tests: two checks that stop the growth - the size ceilings (0072) and a rule for

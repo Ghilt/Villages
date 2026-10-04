@@ -126,7 +126,7 @@ const TILES: readonly { recipe: RecipeName; width: number; height: number; holds
   {
     recipe: 'pane.middle',
     width: 736,
-    height: 224,
+    height: 256,
     holds: <TilePane title="Where shall the house raise its seat?" what="The letter along the bottom" />,
   },
   { recipe: 'strip.corner', width: 416, height: 44, holds: <Strip title="House" /> },

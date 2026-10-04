@@ -16,6 +16,7 @@ const DRESSES: Partial<Record<BayName, Dress>> = {
   bottomLeft: { open: 'pane.corner', strip: 'strip.corner' },
   left: { open: 'pane.rail', strip: 'strip.corner' },
   right: { open: 'pane.right', strip: 'strip.right' },
+  bottomMiddle: { open: 'pane.middle', strip: 'strip.middle' },
 };
 
 export function dressOf(home: BayName): Dress | undefined {

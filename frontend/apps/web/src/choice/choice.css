@@ -7,18 +7,15 @@
  * while the stage is 390 - and so had never once fired. It is a pane now, in the bottom middle of the
  * spread or in a bay on a phone, and three options across is all it ever draws here: a bay too narrow for
  * that gets the carousel instead, decided by the layout from the bay's own width. **There is no `@media`
- * rule left anywhere in this file.** See decision record 0044.
+ * rule left anywhere in this file.** See decision record 0044. What it is drawn in - the frame, the sky - is
+ * the letter's container, drawn by the stage; see stage/dress.ts.
  */
 .choice {
   position: absolute;
   inset: 0;
   display: flex;
   flex-direction: column;
-  padding: 0.7rem 0.9rem 0.9rem;
-  background: var(--parchment);
-  border: 1px solid var(--parchment-edge);
-  border-radius: 3px;
-  box-shadow: 0 2px 18px var(--shadow);
+  padding: 0.2rem 0.3rem 0.3rem;
   pointer-events: auto;
 }
 
@@ -57,6 +54,9 @@
 .choice__options {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+  /* Each row as tall as the letter leaves it and no taller, so an option too long for it scrolls in its parchment
+     rather than running on under the frame. */
+  grid-auto-rows: minmax(0, 1fr);
   gap: 0.6rem;
   flex: 1;
   min-height: 0;
@@ -135,7 +135,7 @@
   height: 0.35rem;
   border-radius: 50%;
   background: var(--ink-soft);
-  opacity: 0.35;
+  opacity: 0.7;
 }
 
 .carousel__dot--at {
@@ -161,14 +161,14 @@
   color: var(--ink);
   border: 1px solid var(--parchment-edge);
   border-radius: 2px;
-  background: rgba(157, 124, 42, 0.05);
+  background: color-mix(in srgb, var(--gold) 5%, transparent);
   cursor: pointer;
   overflow-y: auto;
 }
 
 .parchment:hover:not(:disabled) {
   border-color: var(--gold);
-  background: rgba(157, 124, 42, 0.12);
+  background: color-mix(in srgb, var(--gold) 12%, transparent);
 }
 
 .parchment:disabled {
@@ -184,10 +184,4 @@
   font-size: 0.78rem;
   line-height: 1.4;
   color: var(--ink-soft);
-}
-
-/* In a bay the choice roll fills it, edge to edge, the way everything in a bay does. */
-.stage[data-form='bays'] .bay > .choice {
-  border-width: 1px 0 0;
-  border-radius: 0;
 }

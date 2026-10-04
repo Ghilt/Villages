@@ -20,8 +20,9 @@ export const CHOICE_PANE: Pane = {
   // The same at both sizes, because a tile too narrow for three across draws the carousel in it and the
   // tile's height does not change when that happens. Measured against the founding choice's wordiest
   // option rather than picked, because an option that does not fit grows a scrollbar inside a sheet of
-  // parchment, which is not what parchment does.
-  tall: { full: 224, small: 224 },
+  // parchment, which is not what parchment does. 256 since the letter has had its frame of clouds, whose
+  // corners take 27 at the top and the bottom that a box of parchment did not.
+  tall: { full: 256, small: 256 },
   icon: 'letter',
   // Three options across a wide tile, or three down a tall bay. A bay that is neither - the bottom middle
   // of a small spread - gets the carousel, which is the whole answer to a row that has run out of room:
