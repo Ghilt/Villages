@@ -100,6 +100,18 @@ export interface Layout {
 
 const SIDES: readonly Side[] = ['top', 'right', 'bottom', 'left'];
 
+/**
+ * How far past its content a container's fill reaches, on each side: the room a picture behind the words -
+ * a scene - may run out into, under the frame, as far as the fill does and no further. Nothing where the
+ * fill stands inside the content, or where there is no fill.
+ */
+export function bleedOf(layout: Layout): Sides {
+  const [top, right, bottom, left] = layout.padding.map((pad, side) =>
+    Math.max(0, Math.round((pad - layout.fillInset[side]!) * 100) / 100),
+  );
+  return [top!, right!, bottom!, left!];
+}
+
 /** Four lengths at a scale, to the hundredth of a pixel. */
 function times(sides: Sides, by: number): Sides {
   if (by === 1) {

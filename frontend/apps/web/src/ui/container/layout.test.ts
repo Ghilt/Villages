@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { UiBorder } from '@villages/world';
 
-import { layoutOf, placeOf } from './layout';
+import { bleedOf, layoutOf, placeOf } from './layout';
 import type { Recipe } from './layout';
 
 const gilt: UiBorder = {
@@ -29,6 +29,21 @@ describe('a container laid out', () => {
   it('starts its content inside the cuts when the border says so, clear of a deep corner', () => {
     const deep: UiBorder = { ...gilt, slice: [100, 100, 100, 100], content: [16, 60, 22, 60] };
     expect(layoutOf({ border: 'gilt-acanthus', padding: 4 }, deep, sizeOf).padding).toEqual([20, 64, 26, 64]);
+  });
+
+  it('says how far past the content its fill reaches, for a picture behind the words to run out to', () => {
+    const deep: UiBorder = {
+      ...gilt,
+      slice: [100, 100, 100, 100],
+      content: [16, 60, 22, 60],
+      fillUnder: [90, 90, 90, 90],
+    };
+    const layout = layoutOf({ border: 'gilt-cherubs', padding: 2 }, deep, sizeOf);
+    // The fill stands 10 in from each edge, the words 18, 62, 24 and 62.
+    expect(bleedOf(layout)).toEqual([8, 52, 14, 52]);
+    expect(
+      bleedOf(layoutOf({ border: 'gilt-simple', padding: 8 }, { ...gilt, fillUnder: [0, 0, 0, 0] }, sizeOf)),
+    ).toEqual([12, 12, 12, 12]);
   });
 
   it('gives an embellishment none of the content’s room, wherever it is pinned', () => {

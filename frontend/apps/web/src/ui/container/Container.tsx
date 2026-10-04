@@ -5,8 +5,8 @@ import type { CSSProperties, ReactNode } from 'react';
 import { pictureIn, sourcesOf, usePictures } from '../art/pictures';
 import { BorderLayer, FillLayer } from '../border/Border';
 import { sidesInPixels } from '../border/borderStyle';
-import { layoutOf } from './layout';
-import type { Placed, Recipe } from './layout';
+import { bleedOf, layoutOf } from './layout';
+import type { Layout, Placed, Recipe } from './layout';
 import { RECIPES } from './recipes';
 import type { RecipeName } from './recipes';
 
@@ -22,8 +22,10 @@ import type { RecipeName } from './recipes';
  *
  * With `fills`, it is instead the size of the box it stands in, as a pane is the size of its tile: it
  * covers that box, and its content is a box of its own set in by the same cut, inset and padding, so a
- * pane laid over the whole of it - `position: absolute; inset: 0` - stays inside the border. What does
- * not fit is cut off at the border rather than pushing the box taller; the pane scrolls its own.
+ * pane laid over the whole of it - `position: absolute; inset: 0` - stays inside the border. The frame is
+ * laid over the pane rather than under it, and the pane is cut off where the fill ends, so a picture behind
+ * its words can run out under the frame to the fill's edge: `--ui-bleed-top`, `-right`, `-bottom` and
+ * `-left` say how far, and the frame's ornaments stay in front of it. The pane scrolls its own words.
  */
 export function Container({
   recipe,
@@ -74,7 +76,7 @@ export function Container({
       )}
       <div
         className="ui-container__content"
-        style={fills ? { inset: sidesInPixels(layout.padding) } : { padding: sidesInPixels(layout.padding) }}
+        style={fills ? filling(layout) : { padding: sidesInPixels(layout.padding) }}
       >
         {children}
       </div>
@@ -85,6 +87,19 @@ export function Container({
         ))}
     </div>
   );
+}
+
+/** Where a filling container's content stands, how far past it the fill reaches, and where it is cut. */
+function filling(layout: Layout): CSSProperties {
+  const [top, right, bottom, left] = bleedOf(layout);
+  return {
+    inset: sidesInPixels(layout.padding),
+    clipPath: `inset(${-top}px ${-right}px ${-bottom}px ${-left}px)`,
+    '--ui-bleed-top': `${top}px`,
+    '--ui-bleed-right': `${right}px`,
+    '--ui-bleed-bottom': `${bottom}px`,
+    '--ui-bleed-left': `${left}px`,
+  } as CSSProperties;
 }
 
 function EmbellishmentLayer({ placed }: { placed: Placed }) {

@@ -55,17 +55,38 @@ function Figure({ name, what, stats }: { name: string; what: string; stats: stri
   );
 }
 
-/** A pane as the game lays one in its tile: over the whole of what it is given, scrolling its own words. */
-function TilePane({ title, what }: { title: string; what: string }) {
+/**
+ * A picture behind a pane's words that runs out under the frame as far as the fill does, as a dialogue's
+ * scene does: stripes, so where it is cut can be seen.
+ */
+function Backdrop() {
+  const out = (side: string) => `calc(-1 * var(--ui-bleed-${side}, 0px))`;
   return (
-    <div style={{ position: 'absolute', inset: 0, overflowY: 'auto' }}>
-      <h3 className="ui-heading">{title}</h3>
-      <p className="ui-label">{what}</p>
-      <p className="ui-body">
-        A pane fills its tile and the frame is laid round the edge of it; the words start inside the frame and
-        scroll when there are more of them than the tile holds.
-      </p>
-    </div>
+    <div
+      style={{
+        position: 'absolute',
+        inset: `${out('top')} ${out('right')} ${out('bottom')} ${out('left')}`,
+        background:
+          'repeating-linear-gradient(45deg, var(--ui-lapis) 0 12px, var(--ui-lapis-deep) 12px 24px)',
+      }}
+    />
+  );
+}
+
+/** A pane as the game lays one in its tile: over the whole of what it is given, scrolling its own words. */
+function TilePane({ title, what, scene = false }: { title: string; what: string; scene?: boolean }) {
+  return (
+    <>
+      {scene && <Backdrop />}
+      <div style={{ position: 'absolute', inset: 0, overflowY: 'auto' }}>
+        <h3 className="ui-heading">{title}</h3>
+        <p className="ui-label">{what}</p>
+        <p className="ui-body">
+          A pane fills its tile and the frame is laid round the edge of it; the words start inside the frame
+          and scroll when there are more of them than the tile holds.
+        </p>
+      </div>
+    </>
   );
 }
 
@@ -98,7 +119,9 @@ const TILES: readonly { recipe: RecipeName; width: number; height: number; holds
     recipe: 'pane.right',
     width: 480,
     height: 520,
-    holds: <TilePane title="Dialogues" what="The column down the right" />,
+    holds: (
+      <TilePane title="Dialogues" what="The column down the right, its scene run out to the frame" scene />
+    ),
   },
   {
     recipe: 'pane.middle',
@@ -203,7 +226,8 @@ export function Containers() {
           The game&rsquo;s tiles, each at the size the spread usually gives it: a container that{' '}
           <em>fills</em> the box it stands in, holding a pane laid over the whole of it, as the game lays one.
           Drag a corner to squeeze it; the words stay inside the frame and scroll. A strip is a pane put away,
-          44 high.
+          44 high. The column&rsquo;s pane has a scene behind its words, striped, which runs out under the
+          frame as far as the fill does and stays behind the drapes.
         </p>
         <Specimens>
           {TILES.map(({ recipe, width, height, holds }) => (

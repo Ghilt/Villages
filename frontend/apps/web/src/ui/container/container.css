@@ -38,7 +38,11 @@
     min-width: 0;
   }
 
-  /* The size of the box it stands in, its content a box set in from it: a pane laid over a tile. */
+  /*
+   * The size of the box it stands in, its content a box set in from it: a pane laid over a tile. The pane is
+   * over the fill and under the frame, so what runs out past its words goes under the moulding and behind
+   * the ornaments, and it is cut where the fill ends, by the clip its style carries.
+   */
   .ui-container.ui-container--fills {
     position: absolute;
     inset: 0;
@@ -46,7 +50,7 @@
 
   .ui-container--fills > .ui-container__content {
     position: absolute;
-    overflow: hidden;
+    z-index: 1;
   }
 
   /* A recipe with no softer ink says everything in its main one. */

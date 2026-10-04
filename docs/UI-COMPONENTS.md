@@ -236,7 +236,10 @@ A line each: what it is for, its variants, and where on the page it is.
   holds - as wide as whatever holds it and as tall as its content. With `fills`, it is instead the size of
   the box it stands in, as a pane is its tile's: it covers that box, its content is a box set in by the same
   cut, inset and padding, and a pane laid over the whole of it with `position: absolute; inset: 0` stays
-  inside the frame and scrolls its own words. `layoutOf` in `ui/container/layout.ts`
+  inside the frame and scrolls its own words. The frame is laid over the pane, and the pane is cut where the
+  fill ends rather than where its words do, so a picture behind the words - a dialogue's scene - runs out
+  under the moulding to the fill's edge by `--ui-bleed-top`, `-right`, `-bottom` and `-left`, which
+  `bleedOf` works out, with the frame's ornaments in front of it. `layoutOf` in `ui/container/layout.ts`
   is its arithmetic: the padding, the margin and every embellishment's place. *Containers*, where every
   recipe is shown holding what it is for, with the recipe written out beside it; the page's *layers*
   switch dashes each embellishment's box and dots where the content starts, and does the same wherever a
