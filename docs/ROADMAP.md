@@ -58,6 +58,10 @@ character dialogue, the newest; the UI component library is built and waiting on
   contrast check that holds every word to what it needs. It has reached the game's tiles: the corner and the
   rail are dressed in the acanthus frame, the right column in the cherubs' and the letter in the clouds; the
   panes inside them still draw their own controls, and take the library's up a component at a time. Adam's own, asked for on 2026-09-30.
+- **The choice roll, as the core loop**: a *Take action* button that costs wealth, the omens the fate engine
+  read slammed into a report card, a hand of one rarity dealt from pools of actions, and the server taught
+  to read the ground so the map can be an omen. The steps, one commit each, are in
+  `docs/plans/choice-roll.md`; none is built. Adam's own, planned with him on 2026-10-04.
 - **A place for every mechanic**: the review of 2026-10-02 found each mechanic threaded by hand through the
   same thirteen shared files, and those files growing with every one. The fix is a plan of 43 steps over eleven
   checkpoints that Adam smoke-tests: two checks that stop the growth - the size ceilings (0072) and a rule for
@@ -78,8 +82,6 @@ memory until it exists, which is why nothing survives a restart.
 
 Wanted, not started, and each needs a hypothesis in `docs/experiments/` before any code.
 
-- **The fate engine**, and the choice roll built on it: a real roll from the house's state rather than a
-  founding choice handed out on arrival. See `MECHANICS.md` and `ARCHITECTURE.md`.
 - **A responsive interface.** Both forms have a layout now: the stage folds into two bays below 600 on its
   shorter side and unfolds at 660 (0040), and the spread is tiles on a map that never overlap (0041). What
   goes in them is settled too. The corner tabs between the house status and **navigation** (0042); the
