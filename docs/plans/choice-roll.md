@@ -206,7 +206,8 @@ the next roll is that rarity, so a legendary can be seen without four hundred pr
    `Action`, `FateEngine` with `ODDS`, and `RollService` with `ROLL_PRICE`; specs with toy content. Omen, pool, action, the odds and the deal, in `application`, with the dice
    port; tests with fixed dice for the rarity, the weights and the draw without putting back; the two
    content checks.
-5. **The first content.** The twenty actions, the six pools, and the house omens: *Holdings*, *Weak house*,
+5. **The first content.** Done. `FirstPools`, `ResourceActions` and `HouseOmens`, the keys in `OmenKeys`;
+   `FirstContentSpec` holds the two rules, each seen to fail once. The twenty actions, the six pools, and the house omens: *Holdings*, *Weak house*,
    *Pious*.
 6. **The wire.** The `roll` frame with only the centre and the zoom, the choice view's new fields, version 23
    and its recording, the client-core command.
