@@ -1,0 +1,8 @@
+{
+  "type": "command",
+  "commandId": "dd000000-0000-4000-8000-0000000b0002",
+  "command": {
+    "type": "nextRarity",
+    "rarity": "legendary"
+  }
+}

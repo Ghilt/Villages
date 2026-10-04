@@ -60,3 +60,6 @@ recorded over. See decision record 0037. What each one changed:
 - **22** - no frame changed. The recording learned to see every field however deep, by its path, so a field added
   three objects down moves it as a frame does; before, only a frame's own fields were recorded, and 17 and 18
   differ from the versions before them by the number alone. The recordings before 22 keep the old form.
+- **23** - the choice roll: `roll`, Take action with what the page is looking at; `nextRarity`, Adam's lever on
+  the next roll's luck; `rollDrawn`, what a roll drew from, sent only while the instruments are open; and a choice's
+  `omens` and an option's `rarity` and `omens`, left out of any choice no roll dealt. See decision record 0083.

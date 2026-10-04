@@ -79,12 +79,17 @@ class RollServiceSpec : StringSpec({
         world.commands shouldBe before
     }
 
-    "the lever's rarity stands in for the throw" {
+    "the lever's rarity stands in for the throw, once" {
         val (world, rolls) = rig()
 
-        rolls.roll(ada, Looking.NOTHING, Provenance.startedBy(UUID.randomUUID()), Rarity.RARE)
+        val heard = mutableListOf<Boolean>()
+        rolls.watch { _, _, forced -> heard += forced }
+        rolls.forceNext(ada, Rarity.RARE)
+
+        rolls.roll(ada, Looking.NOTHING, Provenance.startedBy(UUID.randomUUID()))
 
         world.stored.map { it.event }.filterIsInstance<PlayerRolled>().single().rarity shouldBe Rarity.RARE
         world.founded(HouseId.of(ada)).pending!!.options.map { it.rarity }.toSet() shouldBe setOf(Rarity.RARE)
+        heard shouldBe listOf(true)
     }
 })

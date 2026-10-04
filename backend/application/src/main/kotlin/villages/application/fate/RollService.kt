@@ -14,6 +14,8 @@ import villages.domain.Rarity
 import villages.domain.Resource
 import villages.domain.Roll
 import villages.domain.RollId
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArraySet
 
 /** What a roll costs: ten wealth, Adam's temporary number. The application's, so the domain stays content-free. */
 val ROLL_PRICE = Effect.Spend(Resource.WEALTH, 10)
@@ -31,14 +33,19 @@ class RollService(
     private val world: WorldClock,
     private val ids: FreshIds,
 ) {
+    /** The rarity each player's next roll is, where the debug panel's lever has said one. */
+    private val forced = ConcurrentHashMap<PlayerId, Rarity>()
+    private val listeners = CopyOnWriteArraySet<(PlayerId, Rolled, Boolean) -> Unit>()
+
     /**
-     * Rolls, records, and hands back what was rolled, for the debug panel's sake. Throws a HouseError when the
-     * decider refuses, exactly as the decider threw it; a player with no house is refused before anything rolls.
-     * `rarity` stands in for the world's luck, and only the debug panel's lever passes one.
+     * Rolls, records, and hands back what was rolled. Throws a HouseError when the decider refuses, exactly as the
+     * decider threw it; a player with no house is refused before anything rolls. A rarity the lever set stands in
+     * for the throw, and is used up only by a roll that is recorded.
      */
-    fun roll(player: PlayerId, looking: Looking, provenance: Provenance, rarity: Rarity? = null): Rolled {
+    fun roll(player: PlayerId, looking: Looking, provenance: Provenance): Rolled {
         val house = houses.ofPlayer(player) ?: throw HouseError.NoSuchHouse
         val today = world.today()
+        val rarity = forced[player]
         val rolled = engine.roll(Moment(house, looking, today), rarity)
         executor.execute(
             Roll(
@@ -54,6 +61,24 @@ class RollService(
             ),
             provenance,
         )
+        forced.remove(player, rarity)
+        for (listener in listeners) {
+            listener(player, rolled, rarity != null)
+        }
         return rolled
+    }
+
+    /**
+     * The debug panel's lever: this player's next roll is this rarity, whatever the throw, or the throw again when
+     * null. It stands in for the world's luck and not for the player.
+     */
+    fun forceNext(player: PlayerId, rarity: Rarity?) {
+        if (rarity == null) forced.remove(player) else forced[player] = rarity
+    }
+
+    /** Every roll recorded, with whether the lever chose its rarity, until closed: what the debug panel is told. */
+    fun watch(listener: (PlayerId, Rolled, Boolean) -> Unit): AutoCloseable {
+        listeners += listener
+        return AutoCloseable { listeners -= listener }
     }
 }

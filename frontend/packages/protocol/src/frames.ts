@@ -1,4 +1,19 @@
 import { z } from 'zod';
+import {
+  bannerSchema,
+  cellSchema,
+  pointSchema,
+  resourceNameSchema,
+  stockSchema,
+  worldDaySchema,
+} from './basics';
+import {
+  choiceViewSchema,
+  nextRarityPayloadSchema,
+  rollDrawnFrameSchema,
+  rollPayloadSchema,
+} from './choiceFrames';
+import { dialogueViewSchema } from './dialogueFrames';
 
 /**
  * The frames that cross the WebSocket, as zod schemas, so that a frame is checked at the edge and typed
@@ -8,53 +23,6 @@ import { z } from 'zod';
  * Times are the server's clock in milliseconds since the epoch. Optional fields are absent rather than
  * null. Heraldry is spelled the way the interface shows it.
  */
-
-/** A quadkey at zoom 8: eight digits, each 0 to 3. */
-/** A cell at any zoom the grid has: the empty string is the whole world, ten digits the deepest tile. */
-export const cellSchema = z.string().regex(/^[0-3]{0,10}$/);
-
-export const pointSchema = z.object({
-  lat: z.number().min(-90).max(90),
-  lon: z.number().min(-180).max(180),
-});
-
-export const tinctureSchema = z.enum(['or', 'argent', 'gules', 'azure', 'sable', 'vert', 'purpure']);
-export const divisionSchema = z.enum(['plain', 'perPale', 'perFess', 'quarterly']);
-export const chargeSchema = z.enum(['tower', 'stag', 'star']);
-
-export const bannerSchema = z.object({
-  field: tinctureSchema,
-  division: divisionSchema,
-  second: tinctureSchema.optional(),
-  charge: chargeSchema,
-  chargeTincture: tinctureSchema,
-});
-
-/**
- * How much of one resource a house has. Clients interpolate: total plus ratePerSecond times the seconds
- * since asOf, and what is free is that less `pledged`.
- *
- * `pledged` is summed by the gateway from the live pledges and stored nowhere as a number; it is on the
- * wire so the browser does not have to add up a list to draw one figure.
- */
-export const stockSchema = z.object({
-  total: z.number().int(),
-  pledged: z.number().int().nonnegative(),
-  ratePerSecond: z.number(),
-  asOf: z.number().int(),
-});
-
-/**
- * What the five resources are called on the wire: the code's names, not the player's.
- *
- * `naturalDomain` is shown to a player as Domain - the code qualifies it because `domain` already names
- * the innermost layer of the server. Which word is shown is the interface's to decide, and it decides it
- * in one place. See the naming rule in `BUILDING-A-MECHANIC.md`.
- */
-export const resourceNameSchema = z.enum(['wealth', 'naturalDomain', 'influence', 'reason', 'piety']);
-
-/** A day in the world's calendar, counted from the first day of year one. The calendar reads it. */
-export const worldDaySchema = z.number().int().nonnegative();
 
 /** One live pledge: what is tied up, how much, until when, and what for. */
 export const pledgeViewSchema = z.object({
@@ -161,114 +129,6 @@ export const visionPointViewSchema = z.object({
   until: worldDaySchema.optional(),
 });
 
-/**
- * What taking an option would do. `kind` names the case, as it does in the store. See 0034. A `grant` is
- * some of a resource given, and a `spend` some taken: what an option can cost, in a choice or a dialogue. See 0071.
- */
-export const effectViewSchema = z.discriminatedUnion('kind', [
-  z.object({ kind: z.literal('foundAt'), seat: pointSchema, name: z.string(), banner: bannerSchema }),
-  z.object({ kind: z.literal('grant'), resource: resourceNameSchema, amount: z.number().int().positive() }),
-  z.object({ kind: z.literal('spend'), resource: resourceNameSchema, amount: z.number().int().positive() }),
-]);
-
-export const optionViewSchema = z.object({
-  id: z.string(),
-  label: z.string(),
-  detail: z.string(),
-  effect: effectViewSchema,
-});
-
-/** Something a dialogue needs to stay true. `kind` names the case: `alive`, a character by id. See 0071. */
-export const requirementViewSchema = z.discriminatedUnion('kind', [
-  z.object({ kind: z.literal('alive'), character: z.string() }),
-]);
-
-/** How a dialogue stands: open, finished, or lost because one of its requirements failed. */
-export const endingViewSchema = z.discriminatedUnion('kind', [
-  z.object({ kind: z.literal('open') }),
-  z.object({ kind: z.literal('completed') }),
-  z.object({ kind: z.literal('lost'), because: requirementViewSchema }),
-]);
-
-/** Who speaks in a dialogue: the party says which side, and nothing about a screen. */
-export const speakerViewSchema = z.object({
-  id: z.string(),
-  party: z.number().int(),
-  name: z.string(),
-  portrait: z.string().optional(),
-  character: z.string().optional(),
-});
-
-/** Some of one resource, gained or, below nothing, lost. */
-export const impactViewSchema = z.object({ resource: resourceNameSchema, amount: z.number().int() });
-
-/**
- * How an option shows what taking it will do, as whoever wrote it chose: `shown`, with what, or `hidden`,
- * drawn as unknown. An option without one shows nothing until it is done. See decision record 0071.
- */
-export const revealImpactViewSchema = z.discriminatedUnion('kind', [
-  z.object({ kind: z.literal('shown'), impacts: z.array(impactViewSchema).min(1) }),
-  z.object({ kind: z.literal('hidden') }),
-]);
-
-/**
- * What a line shows as it is reached while playing: a `place`, which the camera is taken to, or a `house` or a
- * `character` by id, which a window is opened on. See decision record 0071.
- */
-export const showsViewSchema = z.discriminatedUnion('kind', [
-  z.object({ kind: z.literal('place'), at: pointSchema }),
-  z.object({ kind: z.literal('house'), id: z.string() }),
-  z.object({ kind: z.literal('character'), id: z.string() }),
-]);
-
-/**
- * A line still to be read, or an option to pick: who says it and the words, and nothing about what it will do
- * but, on an option, its reveal impact. And what it shows, which only a line still ahead carries, so a
- * dialogue read back shows nothing.
- */
-export const lineViewSchema = z.object({
-  id: z.string(),
-  speaker: z.string(),
-  words: z.string(),
-  revealImpact: revealImpactViewSchema.optional(),
-  shows: showsViewSchema.optional(),
-});
-
-/** A line said, with what saying it did to the house: what it gave, and what it took. */
-export const saidLineViewSchema = z.object({
-  id: z.string(),
-  speaker: z.string(),
-  words: z.string(),
-  effects: z.array(effectViewSchema),
-});
-
-/**
- * One dialogue as the player may know it. `revision` rises with every change to it. `next` ends in the step
- * to send when there are no `options`, and in the line the dialogue choice follows when there are. Nothing
- * past it is ever sent, and no requirement: a player learns of one only when it fails. See decision record 0071.
- */
-export const dialogueViewSchema = z.object({
-  id: z.string(),
-  revision: z.number().int(),
-  title: z.string(),
-  scene: z.string().optional(),
-  speakers: z.array(speakerViewSchema),
-  said: z.array(saidLineViewSchema),
-  next: z.array(lineViewSchema),
-  options: z.array(lineViewSchema),
-  ending: endingViewSchema,
-});
-
-/**
- * A choice as the parchment shows it. The interface renders this and nothing else, so a new kind of
- * choice needs no new frame and no new component. See decision record 0034.
- */
-export const choiceViewSchema = z.object({
-  id: z.string(),
-  prompt: z.string(),
-  options: z.array(optionViewSchema),
-});
-
 export const commandPayloadSchema = z.discriminatedUnion('type', [
   /**
    * Give this house some of a resource, or use some of it up.
@@ -337,6 +197,8 @@ export const commandPayloadSchema = z.discriminatedUnion('type', [
    * house's to say, so the client names a line and nothing else. See decision record 0071.
    */
   z.object({ type: z.literal('completeDialogueStep'), dialogueId: z.string(), lineId: z.string() }),
+  rollPayloadSchema,
+  nextRarityPayloadSchema,
 ]);
 
 export const clientFrameSchema = z.discriminatedUnion('type', [
@@ -440,6 +302,7 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('resync'), cells: z.array(cellSchema) }),
   z.object({ type: z.literal('pong'), t0: z.number().int(), serverTime: z.number().int() }),
   z.object({ type: z.literal('error'), code: z.string(), message: z.string() }),
+  rollDrawnFrameSchema,
   z.object({
     type: z.literal('event'),
     id: z.string(),
@@ -454,28 +317,9 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
   }),
 ]);
 
-export type Point = z.infer<typeof pointSchema>;
-export type Tincture = z.infer<typeof tinctureSchema>;
-export type Division = z.infer<typeof divisionSchema>;
-export type Charge = z.infer<typeof chargeSchema>;
-export type BannerSpec = z.infer<typeof bannerSchema>;
-export type Stock = z.infer<typeof stockSchema>;
-export type ResourceName = z.infer<typeof resourceNameSchema>;
 export type PledgeView = z.infer<typeof pledgeViewSchema>;
 export type YourHouseView = z.infer<typeof yourHouseViewSchema>;
 export type HouseView = z.infer<typeof houseViewSchema>;
-export type EffectView = z.infer<typeof effectViewSchema>;
-export type OptionView = z.infer<typeof optionViewSchema>;
-export type ChoiceView = z.infer<typeof choiceViewSchema>;
-export type RequirementView = z.infer<typeof requirementViewSchema>;
-export type EndingView = z.infer<typeof endingViewSchema>;
-export type SpeakerView = z.infer<typeof speakerViewSchema>;
-export type ImpactView = z.infer<typeof impactViewSchema>;
-export type RevealImpactView = z.infer<typeof revealImpactViewSchema>;
-export type ShowsView = z.infer<typeof showsViewSchema>;
-export type LineView = z.infer<typeof lineViewSchema>;
-export type SaidLineView = z.infer<typeof saidLineViewSchema>;
-export type DialogueView = z.infer<typeof dialogueViewSchema>;
 export type StatName = z.infer<typeof statNameSchema>;
 export type Sex = z.infer<typeof sexSchema>;
 export type HolderView = z.infer<typeof holderViewSchema>;

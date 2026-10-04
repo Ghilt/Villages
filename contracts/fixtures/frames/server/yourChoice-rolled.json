@@ -1,0 +1,56 @@
+{
+  "type": "yourChoice",
+  "choice": {
+    "id": "dd000000-0000-4000-8000-0000000c0001",
+    "prompt": "What will the house do?",
+    "options": [
+      {
+        "id": "dd000000-0000-4000-8000-000000000001",
+        "label": "Shelter a pilgrim of renown",
+        "detail": "She blesses the house on leaving, and is heard to.",
+        "effect": {
+          "kind": "grant",
+          "resource": "piety",
+          "amount": 120
+        },
+        "rarity": "rare",
+        "omens": ["house.pious"]
+      },
+      {
+        "id": "dd000000-0000-4000-8000-000000000002",
+        "label": "A wreck's cargo comes ashore on your land",
+        "detail": "Salvage is the lord's by old right.",
+        "effect": {
+          "kind": "grant",
+          "resource": "wealth",
+          "amount": 120
+        },
+        "rarity": "rare"
+      },
+      {
+        "id": "dd000000-0000-4000-8000-000000000003",
+        "label": "Correspond with a scholar abroad",
+        "detail": "Her letters arrive months late and worth the wait.",
+        "effect": {
+          "kind": "grant",
+          "resource": "reason",
+          "amount": 120
+        },
+        "rarity": "rare"
+      }
+    ],
+    "omens": [
+      {
+        "key": "house.holdings:the northern reaches",
+        "kind": "house",
+        "words": "Holdings in the northern reaches"
+      },
+      {
+        "key": "house.pious",
+        "kind": "house",
+        "words": "Pious",
+        "value": 104
+      }
+    ]
+  }
+}

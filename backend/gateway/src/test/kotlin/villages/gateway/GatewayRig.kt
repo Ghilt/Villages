@@ -21,6 +21,11 @@ import villages.application.WorldCalendar
 import villages.application.WorldClock
 import villages.application.WriteConflict
 import villages.application.started
+import villages.application.fate.FateEngine
+import villages.application.fate.FirstPools
+import villages.application.fate.HouseOmens
+import villages.application.fate.ResourceActions
+import villages.application.fate.RollService
 import villages.domain.CharacterCommand
 import villages.domain.CharacterDecider
 import villages.domain.CharacterEvent
@@ -218,6 +223,12 @@ internal class Rig(instrumentsOpen: Boolean = true, sendOn: Executor = Executor 
     val sights = SightProjection(world).started()
     val dialogueRows = DialoguesProjection(world).started()
     val worldClock = WorldClock { today }
+
+    /** The choice roll over the first content, with a die that always comes up one: common, and the first in the draw. */
+    val rolls = RollService(
+        FateEngine(listOf(HouseOmens()), FirstPools.ALL, ResourceActions.ALL, { 1 }, { UUID.randomUUID() }),
+        houses, world, { noon }, worldClock, { UUID.randomUUID() },
+    )
     var minted = 0
 
     /** The one master's stands, tile by tile, as the sprite map's folder would hold them. */
@@ -242,6 +253,7 @@ internal class Rig(instrumentsOpen: Boolean = true, sendOn: Executor = Executor 
             ids = { UUID.fromString("a1000000-0000-4000-8000-%012x".format(++minted)) },
         ),
         takeAction = TakeActionService(world, clock = { noon }, world = worldClock),
+        rolls = rolls,
         resources = ResourceService(
             world,
             clock = { noon },

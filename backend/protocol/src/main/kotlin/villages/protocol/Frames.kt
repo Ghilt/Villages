@@ -22,7 +22,7 @@ import tools.jackson.databind.JsonNode
  * that: the shape of every frame is recorded in contracts/protocol-v<n>.txt, and a wire that has moved
  * without a new number is a failing build. What each version changed is in contracts/README.md.
  */
-const val PROTOCOL_VERSION = 22
+const val PROTOCOL_VERSION = 23
 
 data class Point(val lat: Double, val lon: Double)
 
@@ -280,6 +280,8 @@ class WipeWorld : ClientFrame {
     JsonSubTypes.Type(TakeVisionPayload::class, name = "takeVision"),
     JsonSubTypes.Type(OfferDialoguePayload::class, name = "offerDialogue"),
     JsonSubTypes.Type(CompleteDialogueStepPayload::class, name = "completeDialogueStep"),
+    JsonSubTypes.Type(RollPayload::class, name = "roll"),
+    JsonSubTypes.Type(NextRarityPayload::class, name = "nextRarity"),
 )
 sealed interface CommandPayload
 
@@ -405,6 +407,7 @@ data class CompleteDialogueStepPayload(val dialogueId: String, val lineId: Strin
     JsonSubTypes.Type(TakenOver::class, name = "takenOver"),
     JsonSubTypes.Type(WorldWiped::class, name = "worldWiped"),
     JsonSubTypes.Type(StandsFrame::class, name = "stands"),
+    JsonSubTypes.Type(RollDrawn::class, name = "rollDrawn"),
 )
 sealed interface ServerFrame
 
@@ -504,148 +507,10 @@ data class VisionPointView(
 )
 
 /**
- * The player's dialogues, open and finished, in the order the house was offered them, wherever they are
- * looking. Sent after `yourSight` on hello, always a list, and again whenever one of them changes. What the
- * player has not reached stays on the server: each carries what has been said, the stretch still to read up
- * to and including the next step, and the options pending - never a line past that, and never what a line
- * will give until it has given it. See decision record 0071.
- */
-data class YourDialogues(val dialogues: List<DialogueView>) : ServerFrame
-
-/**
- * One dialogue as the player may know it. `revision` rises with every change to it, so a page holds its
- * reading place while it holds. `next` ends in the step to send when there are no `options`, and in the line
- * the dialogue choice follows when there are. Its requirements are never sent: a player learns of one only
- * when it fails, as why the dialogue was lost.
- */
-@JsonInclude(JsonInclude.Include.NON_NULL)
-data class DialogueView(
-    val id: String,
-    val revision: Long,
-    val title: String,
-    /** The picture's key, absent for none. */
-    val scene: String? = null,
-    val speakers: List<SpeakerView>,
-    val said: List<SaidLineView>,
-    val next: List<LineView>,
-    val options: List<LineView>,
-    val ending: EndingView,
-)
-
-/** Who speaks: which party, what they are called, their portrait's key and the character they are, if any. */
-@JsonInclude(JsonInclude.Include.NON_NULL)
-data class SpeakerView(
-    val id: String,
-    val party: Int,
-    val name: String,
-    val portrait: String? = null,
-    val character: String? = null,
-)
-
-/**
- * A line still to be read, or an option to pick: who says it and the words, and nothing about what it will do
- * but, on an option, its `revealImpact` - how whoever wrote it chose to show what taking it will do. Absent, the
- * option shows nothing until it is done. And `shows`, what the line shows as it is reached while playing, which
- * a line already said never carries, so a dialogue read back shows nothing. See decision record 0071.
- */
-@JsonInclude(JsonInclude.Include.NON_NULL)
-data class LineView(
-    val id: String,
-    val speaker: String,
-    val words: String,
-    val revealImpact: RevealImpactView? = null,
-    val shows: ShowsView? = null,
-)
-
-/** What a line shows: a `place`, the camera taken to it, or a `house` or a `character` by id, a window opened. */
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "kind")
-@JsonSubTypes(
-    JsonSubTypes.Type(ShowsView.Place::class, name = "place"),
-    JsonSubTypes.Type(ShowsView.House::class, name = "house"),
-    JsonSubTypes.Type(ShowsView.Character::class, name = "character"),
-)
-sealed interface ShowsView {
-    data class Place(val at: Point) : ShowsView
-
-    data class House(val id: String) : ShowsView
-
-    data class Character(val id: String) : ShowsView
-}
-
-/** How an option shows what taking it will do: `shown`, with what, or `hidden`, drawn as unknown. */
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "kind")
-@JsonSubTypes(
-    JsonSubTypes.Type(RevealImpactView.Shown::class, name = "shown"),
-    JsonSubTypes.Type(RevealImpactView.Hidden::class, name = "hidden"),
-)
-sealed interface RevealImpactView {
-    data class Shown(val impacts: List<ImpactView>) : RevealImpactView
-
-    data object Hidden : RevealImpactView
-}
-
-/** Some of one resource, gained or, below nothing, lost. `resource` is a wire name, so `naturalDomain`. */
-data class ImpactView(val resource: String, val amount: Long)
-
-/** A line said, with what saying it did to the house: what it gave, and what it took. */
-data class SaidLineView(val id: String, val speaker: String, val words: String, val effects: List<EffectView>)
-
-/** How a dialogue stands. `kind` names the case, as it does for an effect. */
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "kind")
-@JsonSubTypes(
-    JsonSubTypes.Type(EndingView.Open::class, name = "open"),
-    JsonSubTypes.Type(EndingView.Completed::class, name = "completed"),
-    JsonSubTypes.Type(EndingView.Lost::class, name = "lost"),
-)
-sealed interface EndingView {
-    data object Open : EndingView
-
-    data object Completed : EndingView
-
-    /** Ended unfinished, because one of its requirements failed; which one is the one the player learns of. */
-    data class Lost(val because: RequirementView) : EndingView
-}
-
-/** Something a dialogue needs to stay true. `kind` names the case. */
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "kind")
-@JsonSubTypes(
-    JsonSubTypes.Type(RequirementView.Alive::class, name = "alive"),
-)
-sealed interface RequirementView {
-    /** That this character, by id, is still alive. */
-    data class Alive(val character: String) : RequirementView
-}
-
-/**
  * The world was emptied and this session is finished with it: it holds no cells, hears nothing more and
  * accepts nothing more. Every session is told, because a wipe is everybody's. See decision record 0036.
  */
 data class WorldWiped(val message: String) : ServerFrame
-
-/**
- * A choice as the parchment shows it: what is being asked, and the two to four things that could be done
- * about it. The interface renders this and nothing else, so a new kind of choice needs no new frame.
- */
-data class ChoiceView(val id: String, val prompt: String, val options: List<OptionView>)
-
-data class OptionView(val id: String, val label: String, val detail: String, val effect: EffectView)
-
-/** What taking an option would do. `kind` names the case, as it does in the store. See 0034. */
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "kind")
-@JsonSubTypes(
-    JsonSubTypes.Type(FoundAtView::class, name = "foundAt"),
-    JsonSubTypes.Type(GrantView::class, name = "grant"),
-    JsonSubTypes.Type(SpendView::class, name = "spend"),
-)
-sealed interface EffectView
-
-data class FoundAtView(val seat: Point, val name: String, val banner: BannerSpec) : EffectView
-
-/** Some of a resource given to the house. `resource` is a wire name, so `naturalDomain` and not Domain. */
-data class GrantView(val resource: String, val amount: Long) : EffectView
-
-/** Some of a resource taken from the house: what an option costs. A wire name, as a grant's is. */
-data class SpendView(val resource: String, val amount: Long) : EffectView
 
 /**
  * One stored event, as stored: the envelope and the data, for a client that asked to watch. `eventType` is

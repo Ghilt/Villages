@@ -2,6 +2,7 @@ import type {
   ChoiceView,
   DialogueView,
   KeyFigureView,
+  RollDrawnFrame,
   ServerFrame,
   VisionPointView,
   YourHouseView,
@@ -18,6 +19,11 @@ export interface SessionState {
   yourHouse: YourHouseView | null;
   /** What this player has to decide, or null when they have nothing. What the parchment shows. */
   yourChoice: ChoiceView | null;
+  /**
+   * What this window's last roll drew from - the pools it opened, what was in the draw and how heavily - or null
+   * until one is told. Only ever sent while the instruments are open, and only the debug panel reads it. See 0083.
+   */
+  rollDrawn: RollDrawnFrame | null;
   /**
    * The player's living key figures, in the order they joined the house, or null until the gateway has
    * said. An empty list is a house with none; null is not having heard yet. See decision record 0055.
@@ -120,6 +126,12 @@ const SLICES = {
     onFrame: { yourChoice: (_, frame) => ({ yourChoice: frame.choice }) },
     onReset: forgottenWhenTakenOver({ yourChoice: null }),
   } satisfies Slice<'yourChoice'>,
+
+  rolls: {
+    initial: { rollDrawn: null },
+    onFrame: { rollDrawn: (_, frame) => ({ rollDrawn: frame }) },
+    onReset: forgottenWhenTakenOver({ rollDrawn: null }),
+  } satisfies Slice<'rollDrawn'>,
 
   keyFigures: {
     initial: { yourKeyFigures: null },

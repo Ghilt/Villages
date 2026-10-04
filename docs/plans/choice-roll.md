@@ -209,7 +209,9 @@ the next roll is that rarity, so a legendary can be seen without four hundred pr
 5. **The first content.** Done. `FirstPools`, `ResourceActions` and `HouseOmens`, the keys in `OmenKeys`;
    `FirstContentSpec` holds the two rules, each seen to fail once. The twenty actions, the six pools, and the house omens: *Holdings*, *Weak house*,
    *Pious*.
-6. **The wire.** The `roll` frame with only the centre and the zoom, the choice view's new fields, version 23
+6. **The wire.** Done, at version 23, with every field of `roll` already there rather than a second version for
+   the windows. `Frames.kt` and `frames.ts` gave up their dialogue and choice frames to files of their own to make
+   room, and `nextRarity` and `rollDrawn` came forward from step 8 because the lever lives with the wire. The `roll` frame with only the centre and the zoom, the choice view's new fields, version 23
    and its recording, the client-core command.
 
 **Checkpoint 3: Adam presses the button.**

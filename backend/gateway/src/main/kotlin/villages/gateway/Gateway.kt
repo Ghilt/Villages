@@ -18,6 +18,7 @@ import villages.application.Stands
 import villages.application.RecentEvents
 import villages.application.ResourceService
 import villages.application.TakeActionService
+import villages.application.fate.RollService
 import villages.application.DialogueService
 import villages.application.DialoguesByHouse
 import villages.application.VisionService
@@ -78,10 +79,9 @@ const val MOST_WAITING = 500
  * connection that should hear of it holds one of that cell's prefixes, from the zoom the house's
  * significance is first worth drawing at down to the deepest. That is at most eleven lookups a change.
  *
- * Nothing reaches a connection that its house's fog of war holds back, a snapshot or a delta: `Fog` is
- * asked of everything before it goes. See decision record 0061. That includes the scenery's stands, which
- * a page is sent tile by tile under the cells it holds, only where they touch ground its house has
- * revealed. See decision record 0067.
+ * Nothing reaches a connection that its house's fog of war holds back, a snapshot or a delta: `Fog` is asked of
+ * everything before it goes (0061). That includes the scenery's stands, which a page is sent tile by tile under
+ * the cells it holds, only where they touch ground its house has revealed (0067).
  */
 class Gateway(
     private val tokens: PlayerTokens,
@@ -94,6 +94,7 @@ class Gateway(
     private val world: WorldClock,
     arrival: Arrival,
     takeAction: TakeActionService,
+    rolls: RollService,
     resources: ResourceService,
     choices: ChoicesByPlayer,
     recent: RecentEvents,
@@ -144,18 +145,17 @@ class Gateway(
      * A part for each mechanic, in the order a player arriving is told things: the house, whom it holds, what it
      * sees, what it was told, what it is asked; then the stands and the timeline, which greet nobody; and Adam's
      * instruments, which one setting closes (0076). Made after the index and the sessions, because a part watches
-     * its read models from the moment it is made.
-     * See decision record 0075.
+     * its read models from the moment it is made. See decision record 0075.
      */
     private val parts: List<Part> = listOf(
         HousesPart(core, houses, theirHouses),
         KeyFiguresPart(core, figures, onTheMap, world),
         SightPart(core, sights),
         DialoguesPart(core, dialogues, dialogueRows),
-        ChoicesPart(core, arrival, takeAction, choices),
+        ChoicesPart(core, arrival, takeAction, choices, rolls),
         StandsPart(stands),
         TimelinePart(),
-        Instruments(instrumentsOpen, core, events, recent, emptyTheWorld, foundHouse, resources, keyFigures, visions, dialogues),
+        Instruments(instrumentsOpen, core, events, recent, emptyTheWorld, foundHouse, resources, keyFigures, visions, dialogues, rolls),
     )
 
     /** Every command the gateway takes, and every frame a part answers, each with the one part that handles it. */

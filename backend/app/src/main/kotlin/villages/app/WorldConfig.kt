@@ -12,6 +12,11 @@ import villages.application.DialogueService
 import villages.application.Dice
 import villages.application.FoundHouseService
 import villages.application.FreshIds
+import villages.application.fate.FateEngine
+import villages.application.fate.FirstPools
+import villages.application.fate.HouseOmens
+import villages.application.fate.ResourceActions
+import villages.application.fate.RollService
 import villages.application.KeyFigureService
 import villages.application.FaultBoard
 import villages.application.Faults
@@ -180,6 +185,18 @@ class WorldConfig {
     fun takeAction(world: InMemoryWorld, clock: Clock, worldClock: WorldClock): TakeActionService =
         TakeActionService(world.executor, clock = { clock.instant() }, world = worldClock)
 
+    /**
+     * The choice roll: the fate engine over the first content and the omen sources there are, and the use case that
+     * records what it deals. See decision record 0083.
+     */
+    @Bean
+    @Suppress("LongParameterList")
+    fun rolls(world: InMemoryWorld, houses: HousesProjection, clock: Clock, worldClock: WorldClock, dice: Dice, ids: FreshIds): RollService =
+        RollService(
+            FateEngine(listOf(HouseOmens()), FirstPools.ALL, ResourceActions.ALL, dice, ids),
+            houses, world.executor, { clock.instant() }, worldClock, ids,
+        )
+
     /** Chance, for whatever the world rolls. Never seeded from anything a client sends. */
     @Bean
     fun dice(): Dice = Dice { sides -> ThreadLocalRandom.current().nextInt(1, sides + 1) }
@@ -283,6 +300,7 @@ class WorldConfig {
         recentEvents: RecentEventsProjection,
         arrival: Arrival,
         takeAction: TakeActionService,
+        rolls: RollService,
         resources: ResourceService,
         worldWipe: WorldWipe,
         clock: Clock,
@@ -309,6 +327,7 @@ class WorldConfig {
         world = worldClock,
         arrival = arrival,
         takeAction = takeAction,
+        rolls = rolls,
         resources = resources,
         choices = choices,
         recent = recentEvents,

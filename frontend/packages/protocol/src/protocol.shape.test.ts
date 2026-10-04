@@ -1,13 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import {
-  clientFrameSchema,
-  commandPayloadSchema,
-  deltaSchema,
-  effectViewSchema,
-  serverFrameSchema,
-} from './frames';
+import { effectViewSchema } from './choiceFrames';
+import { clientFrameSchema, commandPayloadSchema, deltaSchema, serverFrameSchema } from './frames';
 import { PROTOCOL_VERSION } from './index';
 
 /**

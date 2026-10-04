@@ -5,7 +5,7 @@
  */
 
 /** Sent on the handshake so that the gateway can refuse a client it cannot speak to. */
-export const PROTOCOL_VERSION = 22;
+export const PROTOCOL_VERSION = 23;
 
 export {
   MAX_ZOOM,
@@ -41,66 +41,70 @@ export {
 export type { WorldDate } from './calendar';
 
 export {
-  bannerSchema,
-  cellSchema,
-  worldDaySchema,
-  chargeSchema,
-  choiceViewSchema,
+  characterOnMapViewSchema,
   clientFrameSchema,
   commandPayloadSchema,
-  effectViewSchema,
-  optionViewSchema,
   deltaSchema,
-  divisionSchema,
   frameTypesOf,
-  characterOnMapViewSchema,
   holderViewSchema,
   houseViewSchema,
   keyFigureViewSchema,
-  pointSchema,
   pledgeViewSchema,
-  resourceNameSchema,
+  serverFrameSchema,
   sexSchema,
   speciesSchema,
   statNameSchema,
-  stockSchema,
-  yourHouseViewSchema,
-  serverFrameSchema,
-  tinctureSchema,
   visionPointViewSchema,
+  yourHouseViewSchema,
 } from './frames';
+export {
+  bannerSchema,
+  cellSchema,
+  chargeSchema,
+  divisionSchema,
+  pointSchema,
+  resourceNameSchema,
+  stockSchema,
+  tinctureSchema,
+  worldDaySchema,
+} from './basics';
+export {
+  choiceViewSchema,
+  effectViewSchema,
+  nextRarityPayloadSchema,
+  omenKindSchema,
+  omenViewSchema,
+  optionViewSchema,
+  raritySchema,
+  rollDrawnFrameSchema,
+  rollPayloadSchema,
+} from './choiceFrames';
 export type {
-  BannerSpec,
   CharacterOnMapView,
-  Charge,
-  ChoiceView,
   ClientFrame,
   CommandPayload,
-  DialogueView,
   Delta,
-  Division,
-  EffectView,
-  EndingView,
   EventFrame,
   HolderView,
   HouseView,
-  ImpactView,
   KeyFigureView,
-  LineView,
-  OptionView,
-  Point,
   PledgeView,
+  ServerFrame,
+  Sex,
+  StatName,
+  VisionPointView,
+  YourHouseView,
+} from './frames';
+export type { BannerSpec, Charge, Division, Point, ResourceName, Stock, Tincture } from './basics';
+export type { ChoiceView, EffectView, OmenView, OptionView, Rarity, RollDrawnFrame } from './choiceFrames';
+export type {
+  DialogueView,
+  EndingView,
+  ImpactView,
+  LineView,
   RequirementView,
   RevealImpactView,
-  ResourceName,
   SaidLineView,
   ShowsView,
-  Sex,
   SpeakerView,
-  StatName,
-  Stock,
-  YourHouseView,
-  ServerFrame,
-  Tincture,
-  VisionPointView,
-} from './frames';
+} from './dialogueFrames';

@@ -4,11 +4,18 @@ import villages.application.Arrival
 import villages.application.ChoicesByPlayer
 import villages.application.Provenance
 import villages.application.TakeActionService
+import villages.application.fate.Looking
+import villages.application.fate.RollService
+import villages.domain.CharacterId
 import villages.domain.ChoiceId
+import villages.domain.DialogueId
+import villages.domain.HouseId
+import villages.domain.Location
 import villages.domain.OptionId
 import villages.domain.PlayerId
 import villages.protocol.ChoiceView
 import villages.protocol.ErrorFrame
+import villages.protocol.RollPayload
 import villages.protocol.TakeActionPayload
 import villages.protocol.YourChoice
 import java.util.UUID
@@ -16,16 +23,18 @@ import java.util.UUID
 /**
  * What a player is asked: the choice pending on their house, which reaches them wherever they are looking, like
  * their house does; the founding choice given to a player who arrives with no house and nothing to decide; and
- * taking an option, which is the player's own command. See decision records 0034 and 0075.
+ * taking an option, and rolling for a hand with Take action, which are the player's own commands. See decision records
+ * 0034, 0075 and 0083.
  */
 internal class ChoicesPart(
     private val core: Core,
     private val arrival: Arrival,
     private val takeAction: TakeActionService,
     private val choices: ChoicesByPlayer,
+    private val rolls: RollService,
 ) : Part {
     private val asked: AutoCloseable = choices.watch { player, row ->
-        core.sessionOf(player)?.let { tell(it, row?.choice?.toView()) }
+        core.sessionOf(player)?.let { tell(it, row?.choice?.toView(row.omens)) }
     }
 
     /** Which choice a connection has been told of, and whether it has been told anything at all. */
@@ -46,10 +55,16 @@ internal class ChoicesPart(
             connection.out.send(ErrorFrame("arrival", wrong.message ?: "could not be given a choice"))
             null
         }
-        tell(connection, (given ?: choices.pendingOf(who)?.choice)?.toView())
+        tell(connection, given?.toView() ?: choices.pendingOf(who)?.let { it.choice.toView(it.omens) })
     }
 
     override fun register(commands: Commands, frames: Frames) {
+        // A roll begins a story of its own, which the hand it deals and the action that answers it continue. The
+        // hand it hands back is what goes out, as arrival's does, rather than a read of the projection.
+        commands.on<RollPayload> { asking, payload ->
+            val rolled = rolls.roll(asking.who, payload.toLooking(), asking.startingAStory)
+            core.sessionOf(asking.who)?.let { tell(it, rolled.hand.toView(rolled.omens)) }
+        }
         commands.on<TakeActionPayload> { asking, payload ->
             takeAction.take(
                 player = asking.who,
@@ -62,6 +77,15 @@ internal class ChoicesPart(
             )
         }
     }
+
+    private fun RollPayload.toLooking() = Looking(
+        centre = centre?.let { Location(it.lat, it.lon) },
+        zoom = zoom,
+        inspectingHouses = inspectingHouses.map { HouseId(asUuid(it, "a house id")) },
+        inspectingCharacters = inspectingCharacters.map { CharacterId(asUuid(it, "a character id")) },
+        dialogue = dialogue?.let { DialogueId(asUuid(it, "a dialogue id")) },
+        figure = figure?.let { CharacterId(asUuid(it, "a character id")) },
+    )
 
     /** The story the pending choice began, so an action answering it belongs to that story. */
     private fun pendingStory(who: PlayerId): UUID? =

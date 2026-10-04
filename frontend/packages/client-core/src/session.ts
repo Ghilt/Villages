@@ -67,11 +67,16 @@ export interface Session {
   wipeWorld(): void;
   /** Takes one option of the choice the player has: a player's command. See 0035 on its story. */
   takeOption(choice: ChoiceView, option: OptionView): void;
+  /** Take action: rolls for a hand, saying what the page is looking at. A player's command. See 0083. */
+  roll(looking: Looking): void;
   /** Sends one of Adam's levers as a real command, said in the part of the log it belongs to. */
   pull(area: string, what: string, command: CommandPayload): void;
   /** Takes a step through one of the house's dialogues, from its pane: a player's command. See 0071. */
   completeDialogueStep(dialogueId: string, lineId: string, described: string): void;
 }
+
+/** What the page says it is looking at as it rolls: the `roll` command without its type. Every field a claim. */
+export type Looking = Omit<Extract<CommandPayload, { type: 'roll' }>, 'type'>;
 
 /**
  * The page's side of the conversation with the gateway: its state, folded from what each mechanic folds; the
@@ -167,6 +172,7 @@ export function createSession(ports: SessionPorts): Session {
     takenOver: () => connection?.close(),
     // A player's window never asks for stored events; they have a page of their own. See 0023.
     event: () => undefined,
+    rollDrawn: () => undefined,
   };
 
   /** Takes a frame in: the parts fold it, the listeners are told, then what the frame makes the session do. */
@@ -240,6 +246,10 @@ export function createSession(ports: SessionPorts): Session {
       if (!open()) return;
       ports.note('world', 'emptying the world');
       connection?.send({ type: 'wipeWorld' });
+    },
+
+    roll: (looking) => {
+      issue({ lane: 'player', area: 'roll', what: 'taking action', command: { type: 'roll', ...looking } });
     },
 
     takeOption: (choice, option) => {

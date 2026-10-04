@@ -10,6 +10,7 @@ import villages.application.Start
 import villages.application.StoredEvent
 import villages.application.VisionService
 import villages.application.WorldWipe
+import villages.application.fate.RollService
 import villages.domain.CharacterId
 import villages.domain.HouseId
 import villages.domain.HouseName
@@ -28,9 +29,12 @@ import villages.protocol.GiveVisionPayload
 import villages.protocol.GrantResourcePayload
 import villages.protocol.KillCharacterPayload
 import villages.protocol.MoveCharacterPayload
+import villages.protocol.NextRarityPayload
 import villages.protocol.OfferDialoguePayload
 import villages.protocol.PledgeResourcePayload
 import villages.protocol.ReleasePledgePayload
+import villages.protocol.ConsideredView
+import villages.protocol.RollDrawn
 import villages.protocol.SeeAll
 import villages.protocol.SpendResourcePayload
 import villages.protocol.TakeOffTheMapPayload
@@ -74,12 +78,28 @@ internal class Instruments(
     private val keyFigures: KeyFigureService,
     private val visions: VisionService,
     private val dialogues: DialogueService,
+    private val rolls: RollService,
 ) : Part {
     private val watching = ConcurrentHashMap.newKeySet<Gateway.Connection>()
 
     // From now: the debug panel watches the world happening, and would not thank us for the whole
     // chronicle replayed at it on every connect.
     private val feed: AutoCloseable = events.subscribe(Start.FROM_NOW) { stored -> tellWatchers(stored) }
+
+    // What a roll drew from goes to the roller's own panel: the pools are never the player's to see, so it is said
+    // only while the instruments are open.
+    private val drawn: AutoCloseable = rolls.watch { player, rolled, forced ->
+        if (open) {
+            core.sessionOf(player)?.out?.send(
+                RollDrawn(
+                    opened = rolled.opened,
+                    considered = rolled.considered.map { ConsideredView(it.action, it.weight) },
+                    rarity = rolled.rarity.toWire(),
+                    forced = forced,
+                ),
+            )
+        }
+    }
 
     /**
      * The levers, each a command like any other, and the four looks, each a frame: every one of them refused
@@ -158,6 +178,8 @@ internal class Instruments(
         lever<OfferDialoguePayload>(commands) { asking, payload ->
             dialogues.offerSample(player = asking.who, sample = payload.sample, provenance = asking.startingAStory)
         }
+        // The world's luck, for the next roll this player makes: a rarity, or none for the throw again. See 0083.
+        lever<NextRarityPayload>(commands) { asking, payload -> rolls.forceNext(asking.who, payload.rarity?.let(::asRarity)) }
     }
 
     private fun keyFigureLevers(commands: Commands) {
@@ -287,5 +309,6 @@ internal class Instruments(
 
     override fun close() {
         feed.close()
+        drawn.close()
     }
 }

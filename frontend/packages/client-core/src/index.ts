@@ -15,7 +15,7 @@ export type { Readable, Store } from './store';
 export { INITIAL_SESSION, endState, foldFrame } from './slices';
 export type { EndCause, FrameOf, FrameType, SessionState, Slice } from './slices';
 export { createSession } from './session';
-export type { ConnectOptions, Session, SessionListener, SessionPorts } from './session';
+export type { ConnectOptions, Looking, Session, SessionListener, SessionPorts } from './session';
 export type { Connection, ConnectionOptions, ConnectionState, SocketLike } from './connection';
 
 export {

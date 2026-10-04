@@ -142,7 +142,9 @@ export const sessionLog: GatewayListener = {
           'choice',
           frame.choice === null
             ? 'nothing to decide'
-            : `"${frame.choice.prompt}", ${frame.choice.options.length} options`,
+            : frame.choice.options[0]?.rarity === undefined
+              ? `"${frame.choice.prompt}", ${frame.choice.options.length} options`
+              : `a ${frame.choice.options[0].rarity} hand of ${frame.choice.options.length}, from ${frame.choice.omens?.length ?? 0} omens`,
         );
         return;
       case 'yourKeyFigures':
@@ -172,6 +174,13 @@ export const sessionLog: GatewayListener = {
         note('gateway', `${frame.message}; this window is no longer playing`);
         return;
       case 'event': // A player's window never asks for stored events; they have a page of their own (0023).
+        return;
+      case 'rollDrawn':
+        note(
+          'roll',
+          `drew ${frame.rarity}${frame.forced ? ", the lever's" : ''} from ${frame.opened.join(', ')}: ` +
+            `${frame.considered.length} could have been dealt`,
+        );
         return;
     }
     return frame satisfies never; // Every frame has a case above, so a new one does not compile until it has.

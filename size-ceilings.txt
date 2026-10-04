@@ -10,7 +10,7 @@
 # editor numbers them: every line break, and the last line when it has none.
 
 467 backend/gateway/src/main/kotlin/villages/gateway/Gateway.kt
-696 backend/protocol/src/main/kotlin/villages/protocol/Frames.kt
+561 backend/protocol/src/main/kotlin/villages/protocol/Frames.kt
 747 debug-quick-start.ps1
 819 frontend/apps/web/src/admin/showcase/showcase.css
 436 frontend/apps/web/src/areas/AreaOverlay.tsx
@@ -21,7 +21,6 @@
 459 frontend/apps/web/src/stage/bayBox.ts
 439 frontend/apps/web/src/stage/bays.test.ts
 444 frontend/apps/web/src/stage/bays.ts
-497 frontend/packages/protocol/src/frames.ts
 533 frontend/packages/world/bin/cutArt.ts
 723 frontend/packages/world/bin/cutUi.ts
 494 frontend/packages/world/bin/generateSpriteMap.ts
