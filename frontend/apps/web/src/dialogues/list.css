@@ -3,19 +3,14 @@
 /*
  * **Character dialogue**, standing in the column down the right edge.
  *
- * The parchment every pane is drawn on, set into the stage's right, top and bottom edges as the column on
- * the left is set into the left, so the only edges it draws are the one facing the map and the foot it has
- * when it stops above a letter or is put away. See decision record 0069.
+ * What is written in the column down the right, and none of the frame round it, which is the column's
+ * container and drawn by the stage. See decision record 0069 and stage/dress.ts.
  */
 .dialogues {
   position: absolute;
   inset: 0;
   display: flex;
   flex-direction: column;
-  background: var(--parchment);
-  border: 1px solid var(--parchment-edge);
-  border-width: 0 0 1px 1px;
-  box-shadow: -2px 0 18px var(--shadow);
   pointer-events: auto;
 }
 
@@ -104,7 +99,7 @@
 }
 
 .dialogues__open:hover {
-  background: rgba(157, 124, 42, 0.12);
+  background: color-mix(in srgb, var(--gold) 12%, transparent);
 }
 
 .dialogues__title {

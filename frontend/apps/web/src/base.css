@@ -7,6 +7,13 @@
   --parchment-edge: #cfbf9f;
   --gold: #9d7c2a;
   --shadow: rgba(36, 28, 20, 0.22);
+  /* Paper laid on the sheet - a bubble, an option - a little lighter than it; the other side's bubble, a
+     little warmer; and paper being pressed. */
+  --paper: #f8f3e7;
+  --paper-other: #f0e5cb;
+  --paper-pressed: #ece0c4;
+  /* What the house would not do. */
+  --refused: #8a3b2a;
 
   color-scheme: light;
   font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif;

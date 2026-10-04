@@ -14,6 +14,10 @@
   --parchment: var(--ui-night-raised);
   --parchment-edge: var(--ui-gilt-deep);
   --shadow: rgba(0, 0, 0, 0.5);
+  --paper: color-mix(in srgb, var(--ui-night-raised) 90%, var(--ui-cream));
+  --paper-other: color-mix(in srgb, var(--ui-night-raised) 86%, var(--ui-gilt));
+  --paper-pressed: color-mix(in srgb, var(--ui-night-raised) 82%, var(--ui-cream));
+  --refused: color-mix(in srgb, var(--ui-velvet-light) 50%, var(--ui-cream));
 }
 
 /*

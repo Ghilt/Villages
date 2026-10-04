@@ -31,12 +31,13 @@ on the page at `/admin/inspect-ui-components`; why it is pictures is decision re
 
 **The tiles are dressed.** Each tile of the spread is a container named for it, and a pane in it draws only
 what it says, never the frame round it: the corner, bottom left, and the rail of windows above it are Adam's
-acanthus frame on its stone, cream words and gilt marks; a pane put away to its strip is the narrow gilt on
+acanthus frame on its stone, cream words and gilt marks; the column down the right, where dialogues are,
+is the cherubs' frame on its dark felt, its bubbles and options a paper a little raised from it; a pane put away to its strip is the narrow gilt on
 the same stone, because no deep frame fits 44 pixels; the tab bar over the corner stands on night. On a phone
 a pane keeps the dress of the tile it belongs to. Inside a dressed tile the game's colours - its ink, its
-gold, its parchment - are the library's, said once in `stage/dress.ts` and `stage/dress.css`, so a light
+gold, its parchment, the papers laid on it - are the library's, said once in `stage/dress.ts` and `stage/dress.css`, so a light
 dress later is those lines again. A mark dimmed until it is wanted is never dimmed under the 3 to 1 a mark is
-read at. The right column and the letter along the bottom are still parchment, and come next.
+read at. The letter along the bottom is still parchment, and comes next.
 
 ## Rarity
 

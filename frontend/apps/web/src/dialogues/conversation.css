@@ -4,11 +4,13 @@
  * The scene: the whole of a conversation's pane, behind it, Adam's word - the picture cropped to the pane rather
  * than squeezed into it, a little below its middle, where the horizon of a landscape picture tends to be. A
  * light wash of the pane's own paper over it keeps the bubbles on it from fighting it. With no picture there
- * is nothing here, and the pane is its own paper.
+ * is nothing here, and the pane is its own paper. It runs out past the words under the frame, as far as the
+ * container's fill does, so the picture meets the moulding rather than stopping a margin short of it.
  */
 .dialogues__scene {
   position: absolute;
-  inset: 0;
+  inset: calc(-1 * var(--ui-bleed-top, 0px)) calc(-1 * var(--ui-bleed-right, 0px))
+    calc(-1 * var(--ui-bleed-bottom, 0px)) calc(-1 * var(--ui-bleed-left, 0px));
   overflow: hidden;
   pointer-events: none;
 }
@@ -25,7 +27,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(239, 230, 211, 0.12);
+  background: color-mix(in srgb, var(--parchment) 12%, transparent);
 }
 
 /*
@@ -40,7 +42,7 @@
 
 .dialogues--reading > .dialogues__head,
 .dialogues--reading > .dialogues__foot {
-  background: rgba(239, 230, 211, 0.94);
+  background: color-mix(in srgb, var(--parchment) 94%, transparent);
 }
 
 /* Padded at its foot clear of the compass, on a phone, so the last option scrolls out from under it. */
@@ -93,7 +95,7 @@
   padding: 0.45rem 0.7rem 0.5rem;
   border: 1px solid var(--parchment-edge);
   border-radius: 10px;
-  background: rgba(248, 243, 231, 0.95);
+  background: color-mix(in srgb, var(--paper) 95%, transparent);
   box-shadow: 0 1px 4px var(--shadow);
 }
 
@@ -103,7 +105,7 @@
 
 .dialogues__said--right .dialogues__bubble {
   border-bottom-right-radius: 2px;
-  background: rgba(240, 229, 203, 0.95);
+  background: color-mix(in srgb, var(--paper-other) 95%, transparent);
 }
 
 .dialogues__speaker {
@@ -157,7 +159,7 @@
   padding: 0.45rem 0.65rem;
   border: 1px solid var(--parchment-edge);
   border-radius: 4px;
-  background: rgba(248, 243, 231, 0.95);
+  background: color-mix(in srgb, var(--paper) 95%, transparent);
   box-shadow: 0 1px 4px var(--shadow);
   font: inherit;
   text-align: left;
@@ -166,7 +168,7 @@
 }
 
 .dialogues__option:hover:not(:disabled) {
-  background: rgba(236, 224, 196, 0.97);
+  background: color-mix(in srgb, var(--paper-pressed) 97%, transparent);
 }
 
 .dialogues__impact {
@@ -180,7 +182,7 @@
   padding: 0.4rem 1.5rem 0.5rem;
   border: 1px solid var(--gold);
   border-radius: 4px;
-  background: rgba(157, 124, 42, 0.16);
+  background: color-mix(in srgb, var(--gold) 16%, transparent);
   font: inherit;
   font-size: 1.08rem;
   font-variant: small-caps;
@@ -190,7 +192,7 @@
 }
 
 .dialogues__continue:hover:not(:disabled) {
-  background: rgba(157, 124, 42, 0.3);
+  background: color-mix(in srgb, var(--gold) 30%, transparent);
 }
 
 /* A step is out: nothing is pressed until it is answered. */
@@ -212,7 +214,7 @@
   margin-top: -0.2rem;
   padding: 0.1rem 0.6rem;
   border-radius: 999px;
-  background: rgba(239, 230, 211, 0.92);
+  background: color-mix(in srgb, var(--parchment) 92%, transparent);
   font-size: 0.85rem;
   font-variant-numeric: tabular-nums;
 }
@@ -250,7 +252,7 @@
   margin-top: 0.3rem;
   padding: 0.3rem 0.8rem;
   border-radius: 4px;
-  background: rgba(239, 230, 211, 0.92);
+  background: color-mix(in srgb, var(--parchment) 92%, transparent);
   font-size: 0.92rem;
   font-style: italic;
   text-align: center;
@@ -262,10 +264,10 @@
   align-self: stretch;
   padding: 0.3rem 0.6rem;
   border-radius: 4px;
-  background: rgba(239, 230, 211, 0.92);
+  background: color-mix(in srgb, var(--parchment) 92%, transparent);
   font-size: 0.85rem;
   font-style: italic;
-  color: #8a3b2a;
+  color: var(--refused);
 }
 
 .dialogues--strip .dialogues__name {
@@ -281,10 +283,4 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-/* In a bay it fills it edge to edge, as a window does, because a bay has no edge of the stage to sit into. */
-.stage[data-form='bays'] .bay > .dialogues {
-  border-width: 1px 0 0;
-  box-shadow: none;
 }
