@@ -143,7 +143,9 @@ Two checks hold it, and between them they see what either alone would not:
 - **`readable.test.ts`**, beside the recipes, measures what is behind every recipe's words - its fill, or
   its border's own middle - from the picture in `world/ui/` itself, and holds both of the recipe's inks to
   it. A fill painted too light for cream words, or a recipe that says ink on a dark fill, fails the check
-  with the recipe, the ink and the figure.
+  with the recipe, the ink and the figure. A mark is held there too: on every pane whose words are cream,
+  `--ui-gilt-light` - what a mark is picked out in, the tab that is up or the size chosen - wants the large
+  words' 3 to 1 against the fill.
 - **The page's contrast switch** measures every word on the page against what is painted behind it, the
   way it was drawn: up through the boxes it is in, and at each the layers under it - a fill, a border's
   middle, a button's face, a colour - with a picture taken at its average colour. Each word that falls
@@ -231,7 +233,10 @@ A line each: what it is for, its variants, and where on the page it is.
 - **`borderImageOf`, `fillImageOf`, `fillInsetOf`, `contentInsetOf`**, `ui/border/borderStyle.ts`: the
   arithmetic under both, for a component that lays a border itself.
 - **`Container`**, `ui/container/Container.tsx`: a recipe, by name or given whole, laid round what it
-  holds - as wide as whatever holds it and as tall as its content. `layoutOf` in `ui/container/layout.ts`
+  holds - as wide as whatever holds it and as tall as its content. With `fills`, it is instead the size of
+  the box it stands in, as a pane is its tile's: it covers that box, its content is a box set in by the same
+  cut, inset and padding, and a pane laid over the whole of it with `position: absolute; inset: 0` stays
+  inside the frame and scrolls its own words. `layoutOf` in `ui/container/layout.ts`
   is its arithmetic: the padding, the margin and every embellishment's place. *Containers*, where every
   recipe is shown holding what it is for, with the recipe written out beside it; the page's *layers*
   switch dashes each embellishment's box and dots where the content starts, and does the same wherever a
@@ -239,7 +244,12 @@ A line each: what it is for, its variants, and where on the page it is.
 - **`RECIPES`**, `ui/container/recipes.ts`: the named containers. The first are made from the moodboard -
   Adam's own sentence as `pane.cherub-corner`, the cathedral panel as `pane.cathedral`, its framed panes,
   its cards and its Paris plate - with `pane.plain` for a tab bar to tuck under, and Adam's own frames,
-  `pane.cherubs` and `pane.acanthus`; the game's own come as each surface is redone.
+  `pane.cherubs` and `pane.acanthus`. The game's own are named for the tile they dress: `pane.corner` and
+  `pane.rail` in the acanthus frame on stone, `pane.right` in the cherubs' on felt, `pane.middle` in the
+  clouds round their own sky, each at a scale that leaves the tile most of itself; and `strip.corner`,
+  `strip.right` and `strip.middle`, the narrow gilt on the same fills, for a pane put away to its 44 pixels,
+  which no deep frame fits. *Containers*, under *Filling a tile*, shows each at the size the spread gives
+  it, to be dragged smaller.
 - **`Mark`**, `ui/mark/Mark.tsx`: a mark by name, drawn, or painted when `world/ui/marks/` has it: the
   five resources, `wealth`, `domain`, `influence`, `reason` and `piety`; a figure's `kindness`, `physical`
   and `age`; and `close`, `minimise`, `maximise`, `previous`, `next`, `fold`, `less`, `more`, `eye-open`,

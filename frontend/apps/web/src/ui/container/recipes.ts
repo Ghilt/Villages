@@ -61,6 +61,33 @@ export const RECIPES = {
    */
   'pane.acanthus': { border: 'gilt-acanthus', fill: 'stone', padding: 4 },
 
+  /**
+   * The game's corner, bottom left, where the house, the key figures and navigation take turns: the
+   * acanthus frame on its stone, small enough that a tile 232 high keeps most of itself for the words.
+   */
+  'pane.corner': { border: 'gilt-acanthus', scale: 0.6, fill: 'stone', padding: 2 },
+
+  /** A window in the rail above the corner: the same frame, so the column reads as one. */
+  'pane.rail': { border: 'gilt-acanthus', scale: 0.6, fill: 'stone', padding: 2 },
+
+  /** The column down the right, where dialogues are: the cherubs' frame on its felt. */
+  'pane.right': { border: 'gilt-cherubs', scale: 0.5, fill: 'dark-felt', padding: 2 },
+
+  /** The letter along the bottom, where a choice is put: the clouds round their own sky. */
+  'pane.middle': { border: 'cloud-border', scale: 1, fill: 'cloud-sky', padding: 2 },
+
+  /**
+   * A pane of the corner or the rail put away to its 44-pixel strip, which no deep frame fits: the narrow
+   * gilt on the same stone, so the strip still reads as the corner's.
+   */
+  'strip.corner': { border: 'gilt-thin', scale: 0.5, fill: 'stone' },
+
+  /** The right column put away: the narrow gilt on its felt. */
+  'strip.right': { border: 'gilt-thin', scale: 0.5, fill: 'dark-felt' },
+
+  /** The letter put away: the narrow gilt on its sky. */
+  'strip.middle': { border: 'gilt-thin', scale: 0.5, fill: 'cloud-sky' },
+
   /** A plain gilt pane on parchment, with nothing standing out past it: what a tab bar tucks under. */
   'pane.plain': { border: 'gilt-simple', fill: 'parchment', text: 'ink', padding: 8 },
 

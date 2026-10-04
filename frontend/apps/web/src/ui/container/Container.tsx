@@ -19,17 +19,24 @@ import type { RecipeName } from './recipes';
  * inset and the recipe's padding. An embellishment takes none of the content's room: it stands where it
  * is pinned, over the border or out past the box, and a margin as wide as its overhang keeps the
  * container's neighbours clear of it. See docs/UI-COMPONENTS.md.
+ *
+ * With `fills`, it is instead the size of the box it stands in, as a pane is the size of its tile: it
+ * covers that box, and its content is a box of its own set in by the same cut, inset and padding, so a
+ * pane laid over the whole of it - `position: absolute; inset: 0` - stays inside the border. What does
+ * not fit is cut off at the border rather than pushing the box taller; the pane scrolls its own.
  */
 export function Container({
   recipe,
   children,
   className,
   style,
+  fills = false,
 }: {
   recipe: RecipeName | Recipe;
   children?: ReactNode;
   className?: string;
   style?: CSSProperties;
+  fills?: boolean;
 }) {
   const given: Recipe = typeof recipe === 'string' ? RECIPES[recipe] : recipe;
   const { list } = usePictures();
@@ -41,6 +48,7 @@ export function Container({
     'ui-container',
     given.text === 'ink' ? 'ui-on-parchment' : 'ui-on-night',
     given.soft === false ? 'ui-container--one-ink' : '',
+    fills ? 'ui-container--fills' : '',
     className ?? '',
   ]
     .filter((one) => one !== '')
@@ -48,7 +56,7 @@ export function Container({
   return (
     <div
       className={classes}
-      style={{ margin: sidesInPixels(layout.margin), ...style }}
+      style={fills ? style : { margin: sidesInPixels(layout.margin), ...style }}
       {...(typeof recipe === 'string' ? { 'data-recipe': recipe } : {})}
     >
       {given.fill !== undefined && <FillLayer name={given.fill} inset={layout.fillInset} />}
@@ -64,7 +72,10 @@ export function Container({
           {...(given.scale === undefined ? {} : { scale: given.scale })}
         />
       )}
-      <div className="ui-container__content" style={{ padding: sidesInPixels(layout.padding) }}>
+      <div
+        className="ui-container__content"
+        style={fills ? { inset: sidesInPixels(layout.padding) } : { padding: sidesInPixels(layout.padding) }}
+      >
         {children}
       </div>
       {layout.placed

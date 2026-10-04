@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 import { describe, expect, it } from 'vitest';
 
-import { colourOf, contrastOf, READABLE } from '../contrast';
+import { colourOf, contrastOf, READABLE, READABLE_LARGE } from '../contrast';
 import type { Rgba } from '../contrast';
 import css from '../ui.css?raw';
 import type { Recipe } from './layout';
@@ -113,6 +113,26 @@ describe('the recipes', () => {
       expect(unreadable).toEqual([]);
     },
   );
+});
+
+describe('the marks', () => {
+  // A mark is drawn in its words' colour, or picked out in gilt - the tab that is up, the size chosen - and
+  // a mark is a large thing to read, so gilt on every dark fill is held to the large bar.
+  it('can be picked out in gilt on every dark pane', { timeout: 30_000 }, async () => {
+    const unseen: string[] = [];
+    for (const name of RECIPE_NAMES) {
+      const recipe: Recipe = RECIPES[name];
+      const behind = recipe.text === 'ink' ? null : await behindOf(recipe);
+      if (behind === null) {
+        continue;
+      }
+      const contrast = contrastOf(token('ui-gilt-light'), behind.colour);
+      if (contrast < READABLE_LARGE) {
+        unseen.push(`${name}: --ui-gilt-light on ${behind.what} is ${contrast.toFixed(2)} to 1`);
+      }
+    }
+    expect(unseen).toEqual([]);
+  });
 });
 
 describe('a field', () => {

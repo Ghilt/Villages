@@ -38,6 +38,17 @@
     min-width: 0;
   }
 
+  /* The size of the box it stands in, its content a box set in from it: a pane laid over a tile. */
+  .ui-container.ui-container--fills {
+    position: absolute;
+    inset: 0;
+  }
+
+  .ui-container--fills > .ui-container__content {
+    position: absolute;
+    overflow: hidden;
+  }
+
   /* A recipe with no softer ink says everything in its main one. */
   .ui-container.ui-container--one-ink {
     --ui-text-soft: var(--ui-text);
