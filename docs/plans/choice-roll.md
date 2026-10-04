@@ -202,7 +202,8 @@ the next roll is that rarity, so a legendary can be seen without four hundred pr
    under its ceiling. Rarity in the domain; an option's rarity and omens; the command, the event,
    the refusals, the store adapter, the catalogue and the fixtures. Decider specs for each refusal and for
    the three events of one decision.
-4. **The fate engine.** Omen, pool, action, the odds and the deal, in `application`, with the dice
+4. **The fate engine.** Done. `villages.application.fate`: `Moment` and `Looking`, `OmenSource`, `Pool`,
+   `Action`, `FateEngine` with `ODDS`, and `RollService` with `ROLL_PRICE`; specs with toy content. Omen, pool, action, the odds and the deal, in `application`, with the dice
    port; tests with fixed dice for the rarity, the weights and the draw without putting back; the two
    content checks.
 5. **The first content.** The twenty actions, the six pools, and the house omens: *Holdings*, *Weak house*,
