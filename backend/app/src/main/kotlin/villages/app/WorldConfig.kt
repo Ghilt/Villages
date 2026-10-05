@@ -14,7 +14,7 @@ import villages.application.FoundHouseService
 import villages.application.FreshIds
 import villages.application.fate.FateEngine
 import villages.application.fate.FirstPools
-import villages.application.fate.HouseOmens
+import villages.application.fate.omenSources
 import villages.application.fate.ResourceActions
 import villages.application.fate.RollService
 import villages.application.KeyFigureService
@@ -191,11 +191,20 @@ class WorldConfig {
      */
     @Bean
     @Suppress("LongParameterList")
-    fun rolls(world: InMemoryWorld, houses: HousesProjection, clock: Clock, worldClock: WorldClock, dice: Dice, ids: FreshIds): RollService =
-        RollService(
-            FateEngine(listOf(HouseOmens()), FirstPools.ALL, ResourceActions.ALL, dice, ids),
-            houses, world.executor, { clock.instant() }, worldClock, ids,
-        )
+    fun rolls(
+        world: InMemoryWorld,
+        houses: HousesProjection,
+        characters: CharactersProjection,
+        sights: SightProjection,
+        dialogueRows: DialoguesProjection,
+        clock: Clock,
+        worldClock: WorldClock,
+        dice: Dice,
+        ids: FreshIds,
+    ): RollService = RollService(
+        FateEngine(omenSources(houses, characters, characters, sights, dialogueRows), FirstPools.ALL, ResourceActions.ALL, dice, ids),
+        houses, world.executor, { clock.instant() }, worldClock, ids,
+    )
 
     /** Chance, for whatever the world rolls. Never seeded from anything a client sends. */
     @Bean

@@ -234,7 +234,11 @@ the next roll is that rarity, so a legendary can be seen without four hundred pr
    windows and the camera, and `panes.tsx` hands it down to Take action, because the root is the one row that may
    read every surface. The open dialogue and the focused key figure move out of React state
    into stores the net layer can read; `roll` carries them and the open inspect windows.
-10. **Window, dialogue and figure omens,** each checked against the fog or against the house's own.
+10. **Window, dialogue and figure omens,** each checked against the fog or against the house's own. Done.
+    `LookingOmens.kt`, with every source listed once in `omenSources`; two small ports, `HouseById` and
+    `CharacterById`. A house's own window is an omen of its own, *Inspecting your own house*, which opens no pool,
+    because it is open most of the time. The fog is read as the circles alone, without the gateway's surface
+    tension, so a roll reads a little less than is drawn, never more (`Seen.kt`).
 11. **Season, change and *Missing wealth*.** The month through the calendar port; a projection of what each
     house had at its last roll; the spend an open dialogue is waiting on.
 

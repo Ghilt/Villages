@@ -11,7 +11,12 @@ import villages.protocol.CommandAccepted
 import villages.protocol.CommandRejected
 import villages.protocol.RollDrawn
 import villages.protocol.YourChoice
+import villages.protocol.YourDialogues
 import villages.protocol.YourHouse
+import villages.protocol.YourKeyFigures
+import villages.domain.HouseId
+import villages.domain.PlayerId
+import java.util.UUID
 
 /** Take action through the gateway: a roll paid for and answered with its hand, and Adam's lever on its luck. See 0083. */
 class GatewayRollsSpec : StringSpec({
@@ -74,6 +79,40 @@ class GatewayRollsSpec : StringSpec({
         drawn.forced shouldBe true
         drawn.opened shouldBe listOf("Hearth", "Coin", "Land")
         sent.filterIsInstance<YourChoice>().last().choice!!.options.map { it.rarity }.toSet() shouldBe setOf("legendary")
+    }
+
+    "a roll reads what the page has open, and drops what the house may not see" {
+        val rig = Rig()
+        val (player, sent) = rig.introduced()
+        player.receive(founding())
+        player.receive(addingAKeyFigure(COMMAND_TWO))
+        val figure = sent.filterIsInstance<YourKeyFigures>().last().keyFigures.single()
+        player.receive(offering("letter", COMMAND_THREE))
+        val letter = sent.filterIsInstance<YourDialogues>().last().dialogues.single().id
+        // A neighbour inside the seat's 34 km, and a house four hundred kilometres off, which the fog hides.
+        val near = "aa000000-0000-4000-8000-0000000000e1"
+        val far = "aa000000-0000-4000-8000-0000000000e2"
+        rig.introduced(near).first.receive(founding(name = "Varga", lat = 59.4, lon = 18.2))
+        rig.introduced(far).first.receive(founding(name = "Holm", lat = HELSINKI_LAT, lon = HELSINKI_LON))
+        fun houseOf(token: String) = HouseId.of(PlayerId(UUID.fromString(token))).value.toString()
+
+        player.receive(
+            """{"type":"command","commandId":"$COMMAND_FOUR","command":{"type":"roll",""" +
+                """"inspectingHouses":["${houseOf(TOKEN)}","${houseOf(near)}","${houseOf(far)}"],""" +
+                """"inspectingCharacters":["${figure.id}"],"dialogue":"$letter","figure":"${figure.id}"}}""",
+        )
+
+        val read = sent.filterIsInstance<YourChoice>().last().choice!!.omens.map { it.words }
+        val name = "${figure.givenName} ${figure.familyName}"
+        read shouldBe listOf(
+            "Holdings in the northern reaches",
+            "Weak house",
+            "Inspecting your own house",
+            "Inspecting House Varga",
+            "Inspecting $name",
+            "Unresolved: A letter from the coast",
+            name,
+        )
     }
 
     "with the instruments closed the lever is refused, and nothing of a draw is sent" {

@@ -5,6 +5,7 @@ import villages.application.EventFeed
 import villages.application.HouseChange
 import villages.application.HouseRow
 import villages.application.HousesByCell
+import villages.application.HouseById
 import villages.application.HousesByPlayer
 import villages.application.StoredEvent
 import villages.application.Follower
@@ -43,7 +44,7 @@ import java.util.concurrent.atomic.AtomicLong
  *
  * Disposable, like every read model: delete it, replay the feed, get it back.
  */
-class HousesProjection(feed: EventFeed) : Follower(feed), HousesByCell, HousesByPlayer {
+class HousesProjection(feed: EventFeed) : Follower(feed), HousesByCell, HousesByPlayer, HouseById {
     private class Indexed(val row: HouseRow, val quadkey: String, val coarsestZoom: Int)
 
     private val rows = ConcurrentHashMap<HouseId, Indexed>()
@@ -171,6 +172,8 @@ class HousesProjection(feed: EventFeed) : Follower(feed), HousesByCell, HousesBy
     override fun earliest(): WorldTime? = rows.values.minOfOrNull { it.row.since }
 
     override fun ofPlayer(player: PlayerId): HouseRow? = byPlayer[player]?.let { rows[it]?.row }
+
+    override fun ofHouse(id: HouseId): HouseRow? = rows[id]?.row
 
     override fun watch(listener: (HouseChange) -> Unit): AutoCloseable {
         listeners += listener

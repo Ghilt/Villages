@@ -43,6 +43,11 @@ data class CharacterRow(
     val revision: Long,
 )
 
+/** A character by their id, if there is one: what a choice roll asks of a person the page says it is inspecting. */
+fun interface CharacterById {
+    fun ofCharacter(id: CharacterId): CharacterRow?
+}
+
 /** A house's key figures as they now stand, for the player whose house it is. */
 data class KeyFiguresChange(val house: HouseId, val player: PlayerId, val keyFigures: List<CharacterRow>)
 

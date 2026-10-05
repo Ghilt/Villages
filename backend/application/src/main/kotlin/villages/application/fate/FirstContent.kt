@@ -17,7 +17,8 @@ object FirstPools {
     val COIN = Pool("Coin") { it.key in setOf(OmenKeys.MISSING_WEALTH, OmenKeys.RIVER, OmenKeys.COAST, OmenKeys.WEAK) }
     val LAND = Pool("Land") { it.key.startsWith("house.holdings:") || it.key.startsWith("map.ground:") }
     val COURT = Pool("Court") {
-        it.key.startsWith("map.house:") || it.key.startsWith("window.house:") || it.key.startsWith("figure:")
+        it.key.startsWith("map.house:") || it.key.startsWith("window.house:") || it.key.startsWith("figure:") ||
+            it.key.startsWith("dialogue:")
     }
     val LEARNING = Pool("Learning") { it.key == OmenKeys.WINTER || it.key.startsWith("window.character:") }
     val FAITH = Pool("Faith") { it.key == OmenKeys.PIOUS || it.key == OmenKeys.rose(Resource.PIETY) }

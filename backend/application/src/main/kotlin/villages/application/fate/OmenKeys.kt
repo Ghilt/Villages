@@ -18,6 +18,7 @@ object OmenKeys {
     fun rose(resource: Resource) = OmenKey("change.${resource.name.lowercase()}.rose")
 
     fun inspectingHouse(house: HouseId) = OmenKey("window.house:${house.value}")
+    val INSPECTING_OWN = OmenKey("window.ownHouse")
     fun inspectingCharacter(character: CharacterId) = OmenKey("window.character:${character.value}")
 
     fun dialogue(dialogue: DialogueId) = OmenKey("dialogue:${dialogue.value}")

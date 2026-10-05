@@ -104,3 +104,8 @@ interface HousesByCell {
 fun interface HousesByPlayer {
     fun ofPlayer(player: PlayerId): HouseRow?
 }
+
+/** A house by its own id, if there is one: what a choice roll asks of a house the page says it is inspecting. */
+fun interface HouseById {
+    fun ofHouse(id: HouseId): HouseRow?
+}

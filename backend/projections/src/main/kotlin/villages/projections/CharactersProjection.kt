@@ -1,5 +1,6 @@
 package villages.projections
 
+import villages.application.CharacterById
 import villages.application.CharacterMapChange
 import villages.application.CharacterRow
 import villages.application.CharacterSpan
@@ -59,7 +60,7 @@ import java.util.concurrent.atomic.AtomicLong
  *
  * Disposable, like every read model: delete it, replay the feed, get it back.
  */
-class CharactersProjection(feed: EventFeed) : Follower(feed), KeyFiguresByHouse, CharactersByCell {
+class CharactersProjection(feed: EventFeed) : Follower(feed), KeyFiguresByHouse, CharactersByCell, CharacterById {
     private class HouseFacts(val player: PlayerId, val name: HouseName, val banner: Banner)
 
     /** A span with the deepest cell its place falls in and the coarsest zoom it is drawn at, worked out once. */
@@ -198,6 +199,8 @@ class CharactersProjection(feed: EventFeed) : Follower(feed), KeyFiguresByHouse,
             listener(change)
         }
     }
+
+    override fun ofCharacter(id: CharacterId): CharacterRow? = characters[id]
 
     override fun of(house: HouseId): List<CharacterRow> =
         ties[house].orEmpty().mapNotNull { characters[it] }.filter { it.diedOn == null }

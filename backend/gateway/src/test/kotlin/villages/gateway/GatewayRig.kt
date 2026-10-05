@@ -23,7 +23,7 @@ import villages.application.WriteConflict
 import villages.application.started
 import villages.application.fate.FateEngine
 import villages.application.fate.FirstPools
-import villages.application.fate.HouseOmens
+import villages.application.fate.omenSources
 import villages.application.fate.ResourceActions
 import villages.application.fate.RollService
 import villages.domain.CharacterCommand
@@ -226,7 +226,7 @@ internal class Rig(instrumentsOpen: Boolean = true, sendOn: Executor = Executor 
 
     /** The choice roll over the first content, with a die that always comes up one: common, and the first in the draw. */
     val rolls = RollService(
-        FateEngine(listOf(HouseOmens()), FirstPools.ALL, ResourceActions.ALL, { 1 }, { UUID.randomUUID() }),
+        FateEngine(omenSources(houses, characters, characters, sights, dialogueRows), FirstPools.ALL, ResourceActions.ALL, { 1 }, { UUID.randomUUID() }),
         houses, world, { noon }, worldClock, { UUID.randomUUID() },
     )
     var minted = 0
