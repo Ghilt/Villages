@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
+import { focusFigure } from './focus';
 import { ageOn } from '@villages/client-core';
 import type { KeyFigureView, Point } from '@villages/protocol';
 
@@ -47,6 +48,10 @@ export function KeyFigures({ room }: KeyFiguresProps) {
     setOpen(kept);
   }
   const view = viewOf(figures, kept);
+
+  // Who is open is said beside the pane, so a choice roll can read it, and nobody is once the pane goes.
+  useEffect(() => focusFigure(kept), [kept]);
+  useEffect(() => () => focusFigure(null), []);
 
   const show = (figure: KeyFigureView) => {
     setOpen(figure.id);

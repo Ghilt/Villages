@@ -4,6 +4,7 @@ import type { SessionState } from '@villages/client-core';
 
 import { CHOICE_PANE } from './choice/pane';
 import { Choosing } from './choice/Choosing';
+import { lookingNow } from './looking';
 import { DIALOGUE_PANE } from './dialogues/pane';
 import { Dialogues } from './dialogues/Dialogues';
 import { KEY_FIGURES_PANE } from './figures/pane';
@@ -50,7 +51,7 @@ const STANDING: readonly Standing[] = [
     // At rest it is Take action, so it stands once there is a house to take it; before then only a question
     // raises it. See decision record 0083.
     stands: (session) => session.yourChoice !== null || (session.yourHouse ?? null) !== null,
-    draw: (room) => <Choosing room={room} />,
+    draw: (room) => <Choosing room={room} looking={lookingNow} />,
   },
   {
     pane: DIALOGUE_PANE,

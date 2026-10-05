@@ -1,4 +1,5 @@
 import { canAct, freeNow } from '@villages/client-core';
+import type { Looking } from '@villages/client-core';
 import type { OptionView } from '@villages/protocol';
 
 import { RESOURCE_WORDS } from '../house/describe';
@@ -18,9 +19,10 @@ export const ROLL_PRICE_WEALTH = 10;
 /**
  * **Take action**: the choice roll at rest, which is the button that provokes one. Words and not a mark, Adam's
  * call. Greyed while the house cannot pay or a command of the player's is waiting on its answer, and saying which;
- * pressed, it sends `roll`, and the hand that comes back takes the pane over. See `MECHANICS.md`, the choice roll.
+ * pressed, it sends `roll` with what the page is looking at, `looking` handed down from the root, and the hand
+ * that comes back takes the pane over. See `MECHANICS.md`, the choice roll.
  */
-export function TakeAction({ room }: { room: Room }) {
+export function TakeAction({ room, looking }: { room: Room; looking: () => Looking }) {
   const free = useStore(sessionStore, (state) => {
     const wealth = state.yourHouse?.resources.wealth;
     return wealth === undefined ? null : freeNow(wealth, Date.now());
@@ -41,7 +43,7 @@ export function TakeAction({ room }: { room: Room }) {
     <TextButton
       size={room.size === 'strip' ? 'small' : 'large'}
       disabled={whyNot !== null}
-      onClick={() => takeAction()}
+      onClick={() => takeAction(looking())}
     >
       Take action
     </TextButton>

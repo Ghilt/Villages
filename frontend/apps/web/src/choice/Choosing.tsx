@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { canAct } from '@villages/client-core';
+import type { Looking } from '@villages/client-core';
 import type { ChoiceView, OptionView } from '@villages/protocol';
 
 import { sessionStore, takeOption } from '../net/gateway';
@@ -40,7 +41,7 @@ import { TakeAction, gives } from './TakeAction';
  * gesture wherever it is offered, and spelling it out in words here would make it two things to learn.
  */
 
-export function Choosing({ room }: { room: Room }) {
+export function Choosing({ room, looking }: { room: Room; looking: () => Looking }) {
   const choice = useStore(sessionStore, (state) => state.yourChoice);
   const answering = !useStore(sessionStore, canAct);
   const [at, setAt] = useState(0);
@@ -52,7 +53,7 @@ export function Choosing({ room }: { room: Room }) {
   }, [asked]);
 
   if (choice === null) {
-    return <TakeAction room={room} />;
+    return <TakeAction room={room} looking={looking} />;
   }
 
   if (room.size === 'strip') {

@@ -1,5 +1,6 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 
+import { openDialogue } from './openDialogue';
 import {
   canAct,
   choose,
@@ -60,6 +61,11 @@ export function Dialogues({ room, inspect }: DialoguesProps) {
   const [open, setOpen] = useState<string | null>(null);
   // A dialogue that has gone - a wipe, another player - leaves the list behind it rather than nothing.
   const reading = dialogues?.find((one) => one.id === open) ?? null;
+
+  // Which dialogue is being read is said beside the pane, so a choice roll can read it, and none once it goes.
+  const readingId = reading?.id ?? null;
+  useEffect(() => openDialogue(readingId), [readingId]);
+  useEffect(() => () => openDialogue(null), []);
 
   if (room.size === 'strip') {
     return (

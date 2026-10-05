@@ -1,5 +1,5 @@
 import { createSession, ensurePlayerToken, forgetPlayerToken } from '@villages/client-core';
-import type { Connection, Readable, SessionListener, SessionState } from '@villages/client-core';
+import type { Connection, Looking, Readable, SessionListener, SessionState } from '@villages/client-core';
 import { PROTOCOL_VERSION } from '@villages/protocol';
 import type { ChoiceView, CommandPayload, OptionView } from '@villages/protocol';
 
@@ -105,12 +105,11 @@ export function takeOption(choice: ChoiceView, option: OptionView): void {
 }
 
 /**
- * Take action: rolls for a hand, saying what the page is looking at. A player's command, so nothing else of the
- * player's goes until it is answered. What the page is looking at is `looking`'s to gather, and nothing yet. See
- * decision record 0083.
+ * Take action: rolls for a hand, saying what the page is looking at, which the root gathers. A player's command,
+ * so nothing else of the player's goes until it is answered. See decision record 0083.
  */
-export function takeAction(): void {
-  session.roll({});
+export function takeAction(looking: Looking): void {
+  session.roll(looking);
 }
 
 /**

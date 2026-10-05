@@ -229,7 +229,10 @@ the next roll is that rarity, so a legendary can be seen without four hundred pr
 
 **Checkpoint 4: omens from what is open.**
 
-9. **The page says what it has open.** The open dialogue and the focused key figure move out of React state
+9. **The page says what it has open.** Done. The panes keep their own state and mirror it into
+   `figures/focus.ts` and `dialogues/openDialogue.ts`; `looking.ts` at the root gathers those, the inspect
+   windows and the camera, and `panes.tsx` hands it down to Take action, because the root is the one row that may
+   read every surface. The open dialogue and the focused key figure move out of React state
    into stores the net layer can read; `roll` carries them and the open inspect windows.
 10. **Window, dialogue and figure omens,** each checked against the fog or against the house's own.
 11. **Season, change and *Missing wealth*.** The month through the calendar port; a projection of what each

@@ -28,6 +28,7 @@ import type { PaneDef } from './stage/panes';
 import { panesOn, standingIn } from './panes';
 import { subjectsStore } from './inspect/subjects';
 import { arrive } from './stage/arrive';
+import { lookThrough } from './looking';
 import { askFor, formNow } from './stage/bays';
 import { CHOICE_PANE } from './choice/pane';
 import { worldRootOf } from './map/masters';
@@ -167,6 +168,9 @@ export function App({ master, devTools }: AppProps) {
   // The public half of your own house: what the map draws is the same view everyone else's house is
   // drawn from, and what only you can see hangs off it.
   const yours = yourHouse?.house ?? null;
+
+  // What a choice roll reads of the camera, where it is centred and how close. See `looking.ts`.
+  useEffect(() => lookThrough(map), [map]);
   // With the eye open your own house is drawn whether or not a held cell carries it. It can be missing
   // from one and still be known, because the gateway sends it to the session rather than to a cell.
   const drawn = useMemo(
