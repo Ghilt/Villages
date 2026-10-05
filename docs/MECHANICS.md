@@ -27,7 +27,7 @@ something.
 
 The player presses **Take action** and pays for it. The game shows them every **omen** it took into account -
 how the house stands, what they have open, where they are looking, the season, what changed since the last
-roll - and stamps a **rarity**, then deals a hand of three **actions** of that rarity. The player takes one.
+roll - and rolls a **rarity**, then deals a hand of three **actions** of that rarity. The player takes one.
 The rolling is done by the **fate engine**; see `ARCHITECTURE.md`. How it is built, step by step, is
 `docs/plans/choice-roll.md`.
 
@@ -86,9 +86,10 @@ has revealed counts. See decision record 0084.
 ### Look and feel
 
 The roll plays like **a report card at the end of a level**, Balatro's scoring the reference: the omens slam
-into a list one after another, each a mark, words and sometimes a value; the rarity is stamped across it; the
-options pop in. A click hurries the list, and **the stamp is never skipped**, because that is the rush. Then
-the list folds to a strip of omen marks above the options, so a card's marks can be matched against it.
+into a list one after another, each a mark, words and sometimes a value, and then the options pop in under it.
+A click hurries the list. **The rarity is said by the options alone**, by the tag on each and its colour's glow,
+Adam's word of 2026-10-05: nothing stamps it across the list. The list stays where it can be read, and each
+option carries the marks of the omens that brought it, so the two can be matched.
 
 The options are shown as **parchments**, edged in their rarity's colour, on a **wooden desktop with an
 inkwell**. Hovering a parchment lifts it slightly, so it reads as something you can pick up. The shared
@@ -100,17 +101,19 @@ A **pane** that is **always there** in the spread's bottom middle. Idle it is th
 it opens to full in its own bay and plays the roll; answered, it goes back to the button. It has three sizes,
 and the mechanic owns all three:
 
-- **Full** - the report card and then the options, laid out to read through. What a roll opens at, because
-  reading it is the thing to do first. Three across a tile wide enough, three one under another in a bay
-  tall enough, and the carousel in one that is neither.
-- **Small** - the **carousel**: one option at a time, with the way between them. For deciding rather than
-  reading, because the places being offered are drawn on the map and the option you are on stays on the
-  screen beside the one it means.
+- **Full** - on a desktop, three times as tall as the middle size, covering most of the middle of the screen:
+  the report card on top, a divider, and the options in a row along the bottom. What a roll opens at, because
+  reading it is the thing to do first. **The options never scroll on a desktop**: they are written to fit.
+- **Small** - the middle size, as tall as it always was: the list folded to its marks over the options, and
+  pressing the marks opens the pane out.
 - **Minimised** - set aside to a strip. Not closed: the question is still standing.
 
-**In the spread** it takes **bottom middle**, one height at both of its drawings so the bottom of the stage
-does not jump as it folds to the carousel; the 281 that bay is never narrower than is what the carousel
-reads at. **On a phone** it takes the map's bay, opening it to half if it was a strip, and the pane beside
+**On a phone** a rolled hand is always the list and then the options under it, one under another, and the pane
+scrolls when they do not fit. The founding letter keeps its own two drawings - three parchments across, and the
+**carousel** - and arrives at the middle size.
+
+**In the spread** it takes **bottom middle**, 768 tall opened out and 256 at its middle size, capped by the stage;
+the 281 that bay is never narrower than is what the carousel reads at. **On a phone** it takes the map's bay, opening it to half if it was a strip, and the pane beside
 it keeps the other; answering puts the map back. **Its size is the player's**: the two forms are two ways
 of using it and only they know which they are doing. See decision record 0044.
 
@@ -131,9 +134,9 @@ there is a house, costs ten wealth, and deals a hand of three of one rarity from
 pools, each option a card edged in its rarity; taking one gives what it says. It reads the house - its
 holdings, whether it is a weak house or pious, what rose since its last roll, a debt a dialogue is waiting on -
 the inspect windows open, the dialogue being read, the key figure open, and the season; not yet the map, which
-waits on the server reading the ground. A hand the page rolled plays as the report card: the omens land, the
-rarity is stamped, the options pop in, and the list folds to its marks above them; a press hurries the omens and
-never the stamp, and a hand already pending at a reload is drawn as it ends. What exists is in `BUILDING-A-MECHANIC.md` under the choice pattern, and in
+waits on the server reading the ground. A hand the page rolled plays as the report card: the omens land and the
+options pop in under them, the pane opened out to three times its middle size; a press hurries the omens, and a
+hand already pending at a reload is drawn as it ends. What exists is in `BUILDING-A-MECHANIC.md` under the choice pattern, and in
 decision records 0034 and 0083.
 
 It is a pane with its three sizes as of 0044, which is also where the last media query in the app died: this

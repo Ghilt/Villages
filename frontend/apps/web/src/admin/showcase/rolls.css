@@ -1,26 +1,13 @@
-/* The choice roll, played in a tile the size of the bottom middle: the list, then the strip above the hand. */
+/* The choice roll, played in rooms the size the game gives each form of it. */
 .showcase__roll {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
   height: 100%;
   padding: 0.4rem 0.6rem;
   box-sizing: border-box;
 }
 
-.showcase__hand {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.6rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.showcase__stamped {
-  position: relative;
-  min-width: 260px;
-  min-height: 120px;
+/* A phone's bay scrolls what does not fit, the stacked hand in it. */
+.showcase__roll--scroll {
+  overflow: auto;
 }
 
 /* What the filling container inside covers: this room, and not the page. */

@@ -189,10 +189,10 @@ describe('the choice roll', () => {
     expect(CHOICE_PANE.needs).not.toBeNull();
   });
 
-  // Its tile is one height however it is drawn, so the bottom of the stage does not jump as the player
-  // folds it to the carousel and back.
-  it('asks for the same tile whichever of its two drawings is in it', () => {
-    expect(tallOf(CHOICE_PANE).small).toBe(tallOf(CHOICE_PANE).full);
+  // Opened out it is three times its middle size, covering most of the middle of the stage, so a rolled hand's
+  // omens and its options both have room: Adam's word of 2026-10-05, which amended decision record 0044.
+  it('opens out to three times its middle size', () => {
+    expect(tallOf(CHOICE_PANE).full).toBe(tallOf(CHOICE_PANE).small * 3);
   });
 });
 

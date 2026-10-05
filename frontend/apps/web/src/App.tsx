@@ -216,12 +216,14 @@ export function App({ master, devTools }: AppProps) {
    * takeover remembers, so answering gives the bay back. See decision record 0044.
    */
   const asking = yourChoice?.id;
+  // A rolled hand opens out, to show its omens; any other question, the founding letter, at its middle size.
+  const handRolled = yourChoice?.options[0]?.rarity !== undefined;
   const asked = useRef(false);
   const housed = yours !== null;
   useEffect(() => {
     if (asking !== undefined) {
       asked.current = true;
-      arrive(CHOICE_PANE.id, { into: 'theMapsBay', inTheSpread: 'full' });
+      arrive(CHOICE_PANE.id, { into: 'theMapsBay', inTheSpread: handRolled ? 'full' : 'small' });
     } else if (asked.current && housed) {
       // Answered: in the spread the pane goes back to Take action, put away to its strip; on a phone the bay it
       // took over is given back as it always was. Not until there is a house, because the founding is answered
@@ -229,7 +231,7 @@ export function App({ master, devTools }: AppProps) {
       asked.current = false;
       if (formNow() !== 'bays') askFor(CHOICE_PANE.id, 'strip');
     }
-  }, [asking, housed]);
+  }, [asking, housed, handRolled]);
 
   /*
    * A dialogue arriving opens the pane: from its strip in the spread, and on a phone into the bay that is

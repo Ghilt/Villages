@@ -2,6 +2,13 @@
 
 - Status: accepted
 - Date: 2026-09-19
+- Amended 2026-10-05: **opened out on a desktop it is three times as tall**, 768 to the middle size's 256, on
+  Adam's word, so that a rolled hand's omens sit over its options rather than giving way to them; the layout caps
+  it at the stage. The rule below that the tile is one height at both drawings held while full and small drew the
+  same question two ways; they no longer do. A rolled hand is the list, a divider and the options in a row opened
+  out; the list folded to its marks over the options at the middle size, the marks opening it out; and on a phone
+  the list and the options one under another, scrolling. The founding letter keeps its two drawings. See
+  decision record 0083.
 
 ## Context
 

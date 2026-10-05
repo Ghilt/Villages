@@ -6,8 +6,10 @@ import { TextButton } from '../../ui/button/Button';
 import { Card } from '../../ui/card/Card';
 import type { Rarity } from '../../ui/card/Card';
 import { Container } from '../../ui/container/Container';
-import { OmenRow, OmenStrip, RarityStamp, ReportCard } from '../../ui/report/ReportCard';
+import { OmenRow, OmenStrip, ReportCard } from '../../ui/report/ReportCard';
 import type { OmenLine } from '../../ui/report/ReportCard';
+import { RolledHand } from '../../ui/report/RolledHand';
+import type { HandForm } from '../../ui/report/RolledHand';
 import { usePlay } from '../../ui/report/usePlay';
 import { Part, Specimen, Specimens } from './Specimen';
 
@@ -35,27 +37,49 @@ const HAND: readonly {
 
 const RARITIES: readonly Rarity[] = ['common', 'uncommon', 'rare', 'legendary'];
 
+/** Each form of the hand in a room the size the game gives it. */
+const ROOMS: readonly {
+  readonly form: HandForm;
+  readonly w: number;
+  readonly h: number;
+  readonly says: string;
+}[] = [
+  { form: 'full', w: 620, h: 700, says: 'opened out on a desktop: three times the height' },
+  { form: 'medium', w: 620, h: 256, says: "a desktop's middle size: press the marks to open it out" },
+  { form: 'stacked', w: 390, h: 520, says: 'on a phone: one under another, scrolling' },
+];
+
 /**
- * The choice roll's parts: the report card the omens slam into, the rarity stamped across it, and the list folded to
- * a strip of marks above the options that pop in - played whole in a tile the size of the bottom middle, again on a
- * press, and each part on its own. See decision record 0083.
+ * The choice roll's parts: the report card the omens slam into, the strip of marks it folds to, and the options
+ * that pop in under it - played whole in each form the game draws it in, again on a press, and each part on its
+ * own. The rarity is the options' to say, by their tag and their glow. See decision record 0083.
  */
 export function Rolls() {
   const [rolls, setRolls] = useState(0);
   const [rarity, setRarity] = useState<Rarity>('rare');
+  const [opened, setOpened] = useState(0);
   const { play, hurry } = usePlay(rolls === 0 ? null : `roll ${rolls}`, OMENS.length, HAND.length);
   const roll = (at: Rarity) => {
     setRarity(at);
     setRolls((was) => was + 1);
   };
+  const open = () => setOpened((was) => was + 1);
+  const options = HAND.map((one) => (
+    <Card key={one.title} rarity={rarity} title={one.title} line={one.gives} onPress={() => undefined}>
+      <OmenStrip omens={one.omens} small />
+    </Card>
+  ));
 
   return (
     <>
       <Part title="A roll, played">
         <p className="ui-label showcase__lead">
-          The omens land one after another, the rarity is stamped across them, and the options pop in; then
-          the list folds to its marks above them. A press on the list hurries it, and never the stamp.{' '}
-          <span className="showcase__said">{play.phase}</span>
+          The omens land one after another, then the options pop in under them. A press on the list hurries
+          it.{' '}
+          <span className="showcase__said">
+            {play.phase}
+            {opened === 0 ? '' : `, opened out ${opened} ${opened === 1 ? 'time' : 'times'}`}
+          </span>
         </p>
         <div className="showcase__try">
           {RARITIES.map((one) => (
@@ -64,47 +88,37 @@ export function Rolls() {
             </TextButton>
           ))}
         </div>
-        <div className="showcase__room showcase__roll-room" style={{ width: 620, height: 300 }}>
-          <Container recipe="pane.middle" fills>
-            <div className="showcase__roll">
-              {play.phase === 'rows' || play.phase === 'stamp' ? (
-                <ReportCard
-                  omens={OMENS}
-                  landed={play.landed}
-                  stamp={play.phase === 'stamp' ? rarity : null}
-                  onHurry={hurry}
-                />
-              ) : (
-                <>
-                  <OmenStrip omens={OMENS} />
-                  <ol className="showcase__hand">
-                    {HAND.slice(0, play.cardsIn).map((one) => (
-                      <li key={one.title} className={play.phase === 'cards' ? 'ui-pop' : ''}>
-                        <Card rarity={rarity} title={one.title} line={one.gives} onPress={() => undefined}>
-                          <OmenStrip omens={one.omens} small />
-                        </Card>
-                      </li>
-                    ))}
-                  </ol>
-                </>
-              )}
-            </div>
-          </Container>
-        </div>
+        <Specimens>
+          {ROOMS.map((room) => (
+            <Specimen key={room.form} name={`RolledHand form="${room.form}"`} note={room.says} wide>
+              <div className="showcase__room showcase__roll-room" style={{ width: room.w, height: room.h }}>
+                <Container recipe="pane.middle" fills>
+                  <div
+                    className={
+                      room.form === 'stacked' ? 'showcase__roll showcase__roll--scroll' : 'showcase__roll'
+                    }
+                  >
+                    <RolledHand
+                      form={room.form}
+                      omens={OMENS}
+                      play={play}
+                      options={options}
+                      onHurry={hurry}
+                      onOpen={open}
+                    />
+                  </div>
+                </Container>
+              </div>
+            </Specimen>
+          ))}
+        </Specimens>
       </Part>
 
       <Part title="Its parts">
         <Specimens>
-          <Specimen name="ReportCard" note="every omen landed, before the stamp" wide>
-            <ReportCard omens={OMENS} landed={OMENS.length} />
+          <Specimen name="ReportCard" note="every omen landed" wide>
+            <ReportCard omens={OMENS} />
           </Specimen>
-          {RARITIES.map((one) => (
-            <Specimen key={one} name={`RarityStamp rarity="${one}"`} note="over the list it lands on">
-              <div className="showcase__stamped">
-                <ReportCard omens={OMENS.slice(0, 3)} landed={3} stamp={one} />
-              </div>
-            </Specimen>
-          ))}
           <Specimen name="OmenRow" note="one of every kind, with its mark" wide>
             <ol className="ui-report__rows">
               {OMENS.map((omen) => (
@@ -115,16 +129,14 @@ export function Rolls() {
           <Specimen name="OmenStrip" note={['the list folded away', 'hover a mark for its words']}>
             <OmenStrip omens={OMENS} />
           </Specimen>
+          <Specimen name="OmenStrip onOpen" note="a button: the medium pane's way back to the list">
+            <OmenStrip omens={OMENS} onOpen={open} />
+          </Specimen>
           <Specimen name="OmenStrip small" note="on an option, the omens that brought it">
             <div className="showcase__card-small">
               <Card rarity="rare" title={HAND[0]!.title} line={HAND[0]!.gives}>
                 <OmenStrip omens={HAND[0]!.omens} small />
               </Card>
-            </div>
-          </Specimen>
-          <Specimen name="RarityStamp" note="alone">
-            <div className="showcase__stamped">
-              <RarityStamp rarity="legendary" />
             </div>
           </Specimen>
         </Specimens>

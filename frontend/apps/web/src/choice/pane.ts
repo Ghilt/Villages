@@ -23,7 +23,11 @@ export const CHOICE_PANE: Pane = {
   // option rather than picked, because an option that does not fit grows a scrollbar inside a sheet of
   // parchment, which is not what parchment does. 256 since the letter has had its frame of clouds, whose
   // corners take 27 at the top and the bottom that a box of parchment did not.
-  tall: { full: 256, small: 256 },
+  //
+  // Opened out on a desktop it is three times that, Adam's word of 2026-10-05: a rolled hand's omens on top and its
+  // options along the bottom, covering most of the middle of the screen; the layout caps it at the stage. The
+  // middle size is the one it always had, the omens folded to their marks over the options.
+  tall: { full: 768, small: 256 },
   icon: 'letter',
   // Three options across a wide tile, or three down a tall bay. A bay that is neither - the bottom middle
   // of a small spread - gets the carousel, which is the whole answer to a row that has run out of room:

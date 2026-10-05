@@ -162,6 +162,13 @@ this?" for ever. Decision record 0083 says so.
 
 ## The pane: a report card, then the hand
 
+> **Amended 2026-10-05, on Adam's word after he had seen it play.** There is no stamp: the rarity is said by the
+> options' tags and their glow alone. The list stays where it can be read with the options under it: opened out on
+> a desktop the pane is three times as tall, the list on top, a divider, the options along the bottom, never
+> scrolling; at its middle size the list is folded to its marks, which open the pane out when pressed; on a phone
+> the list and the options are one under another and the pane scrolls. Decision record 0044 is amended. What
+> follows is the first cut, kept as it was planned.
+
 **The choice roll pane is always there now**, in bottom middle (Adam: *the bottom middle pane, grown*). Idle
 it is the Take action button. Pressed, it opens to full in its own bay and plays the roll as **a list that
 fills like a report card at the end of a level**, Balatro's scoring the reference: each omen slams into the

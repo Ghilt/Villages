@@ -5,12 +5,15 @@ import type { Looking } from '@villages/client-core';
 import type { ChoiceView, OmenView, OptionView } from '@villages/protocol';
 
 import { sessionStore, takeOption } from '../net/gateway';
+import { formNow } from '../stage/bays';
 import { PaneSizeControl } from '../stage/PaneSizeControl';
 import type { Room } from '../stage/panes';
 import { useStore } from '../store/useStore';
 import { Card } from '../ui/card/Card';
-import { OmenStrip, ReportCard } from '../ui/report/ReportCard';
+import { OmenStrip } from '../ui/report/ReportCard';
 import type { OmenLine } from '../ui/report/ReportCard';
+import { RolledHand } from '../ui/report/RolledHand';
+import type { HandForm } from '../ui/report/RolledHand';
 import { usePlay } from '../ui/report/usePlay';
 import { handExpected } from './rolling';
 import { TakeAction, gives } from './TakeAction';
@@ -85,15 +88,25 @@ export function Choosing({ room, looking }: { room: Room; looking: () => Looking
     );
   }
 
-  if (rolled !== undefined && (play.phase === 'rows' || play.phase === 'stamp')) {
+  // A rolled hand: the omens and the options under them, in the form the room is - the list on top opened out on a
+  // desktop, its marks in the middle size, and everything one under another, scrolling, on a phone. See 0083.
+  if (rolled !== undefined) {
+    const form: HandForm = formNow() === 'bays' ? 'stacked' : room.size === 'full' ? 'full' : 'medium';
     return (
-      <section className="choice choice--report" aria-live="polite">
-        <PaneSizeControl room={room} />
-        <ReportCard
+      <section className={`choice choice--hand choice--${form}`} aria-live="polite">
+        <header className="choice__head">
+          <h2 className="choice__prompt">{choice.prompt}</h2>
+          <PaneSizeControl room={room} />
+        </header>
+        <RolledHand
+          form={form}
           omens={omens}
-          landed={play.landed}
-          stamp={play.phase === 'stamp' ? rolled : null}
+          play={play}
+          options={choice.options.map((option) => (
+            <Parchment key={option.id} choice={choice} option={option} answering={answering} omens={omens} />
+          ))}
           onHurry={hurry}
+          onOpen={() => room.ask('full')}
         />
       </section>
     );
@@ -101,26 +114,21 @@ export function Choosing({ room, looking }: { room: Room; looking: () => Looking
 
   const carousel = room.size === 'small';
   const shown = Math.min(at, choice.options.length - 1);
-  const popping = play.phase === 'cards';
 
   return (
     <section className={carousel ? 'choice choice--carousel' : 'choice'} aria-live="polite">
       <header className="choice__head">
         <h2 className="choice__prompt">{choice.prompt}</h2>
-        {omens.length > 0 && <OmenStrip omens={omens} />}
         <PaneSizeControl room={room} />
       </header>
 
       {carousel ? (
-        <Carousel choice={choice} at={shown} onAt={setAt} answering={answering} omens={omens} />
+        <Carousel choice={choice} at={shown} onAt={setAt} answering={answering} />
       ) : (
         <ol className="choice__options">
-          {choice.options.map((option, index) => (
-            <li
-              key={option.id}
-              className={index >= play.cardsIn ? 'choice__unpopped' : popping ? 'ui-pop' : undefined}
-            >
-              <Parchment choice={choice} option={option} answering={answering} omens={omens} />
+          {choice.options.map((option) => (
+            <li key={option.id}>
+              <Parchment choice={choice} option={option} answering={answering} />
             </li>
           ))}
         </ol>
@@ -140,13 +148,11 @@ function Carousel({
   at,
   onAt,
   answering,
-  omens,
 }: {
   choice: ChoiceView;
   at: number;
   onAt: (at: number) => void;
   answering: boolean;
-  omens: readonly OmenLine[];
 }) {
   const many = choice.options.length;
   const option = choice.options[at];
@@ -169,7 +175,7 @@ function Carousel({
       </button>
 
       <div className="carousel__sheet">
-        <Parchment choice={choice} option={option} answering={answering} omens={omens} />
+        <Parchment choice={choice} option={option} answering={answering} />
         <ol className="carousel__dots" aria-label={`option ${at + 1} of ${many}`}>
           {choice.options.map((one, index) => (
             <li

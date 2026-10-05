@@ -145,12 +145,13 @@ stage alone, with none of the debug panel in it (decision record 0079).
 - The choice roll, the player's own: **Take action**, in the bottom middle of the spread once there is a
   house, put away to its strip at rest with what a roll costs beside it, ten wealth, and a house is founded
   with fifty. Greyed, saying why, while the house has less than that free or a command is waiting on its
-  answer. Pressed, it rolls: the pane opens to full and plays the roll as a report card - the omens slam into
-  a list a third of a second apart, the rarity is stamped across it, and the hand of three options of one
-  rarity pops in, each a card edged and named in its rarity, saying what it gives, with the marks of the omens
-  that brought it. A press on the list lands the rest of the omens at once; the stamp always plays. The list
-  folds to a strip of its marks beside the question, the words on hover. Taking an option gives it, and the
-  pane goes back to its strip. A hand already pending when the page loads is drawn as it ends. A hand cannot be rolled over while it waits. The asking and the answer are lines of the log under
+  answer. Pressed, it rolls: the pane opens out, three times as tall as its middle size, and plays the roll as
+  a report card - the omens slam into a list a third of a second apart, and under a divider the hand of three
+  options of one rarity pops in along the bottom, each a card edged and named in its rarity, saying what it
+  gives, with the marks of the omens that brought it. A press on the list lands the rest of the omens at once.
+  At the middle size the list is folded to its marks over the options, and pressing them opens the pane out; on
+  a phone the list and the options are one under another and the pane scrolls. Taking an option gives it, and
+  the pane goes back to its strip. A hand already pending when the page loads is drawn as it ends. A hand cannot be rolled over while it waits. The asking and the answer are lines of the log under
   `roll`, and the hand under `choice`, with its rarity and how many omens it was rolled from. The **Choice
   roll** section of the debug panel, below Dialogues, looks into it: the hand's omens - the house's holdings,
   *Weak house*, *Pious*, what rose since the last roll, *Missing wealth* when an open dialogue waits on a cost
