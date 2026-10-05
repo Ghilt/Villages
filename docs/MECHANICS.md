@@ -128,9 +128,10 @@ of using it and only they know which they are doing. See decision record 0044.
 
 Being built, from `docs/plans/choice-roll.md`. **Take action works**: it stands in the bottom middle once
 there is a house, costs ten wealth, and deals a hand of three of one rarity from twenty resource actions in six
-pools, each option a card edged in its rarity; taking one gives what it says. The omens it reads are only the
-house's own so far - its holdings, whether it is a weak house, whether it is pious - and the report card is not
-built: the hand appears at once. What exists is in `BUILDING-A-MECHANIC.md` under the choice pattern, and in
+pools, each option a card edged in its rarity; taking one gives what it says. It reads the house - its
+holdings, whether it is a weak house or pious, what rose since its last roll, a debt a dialogue is waiting on -
+the inspect windows open, the dialogue being read, the key figure open, and the season; not yet the map, which
+waits on the server reading the ground. The report card is not built: the hand appears at once. What exists is in `BUILDING-A-MECHANIC.md` under the choice pattern, and in
 decision records 0034 and 0083.
 
 It is a pane with its three sizes as of 0044, which is also where the last media query in the app died: this

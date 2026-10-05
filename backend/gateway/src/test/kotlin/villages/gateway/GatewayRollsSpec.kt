@@ -37,7 +37,7 @@ class GatewayRollsSpec : StringSpec({
         val hand = sent.filterIsInstance<YourChoice>().last().choice!!
         hand.options shouldHaveSize 3
         hand.options.map { it.rarity }.toSet() shouldBe setOf("common")
-        hand.omens.map { it.words } shouldBe listOf("Holdings in the northern reaches", "Weak house")
+        hand.omens.map { it.words } shouldBe listOf("Holdings in the northern reaches", "Weak house", "Summer")
         sent.filterIsInstance<YourHouse>().last().yours!!.resources.getValue("wealth").total shouldBe
             FOUNDING_WEALTH - ROLL_PRICE.amount
     }
@@ -112,7 +112,30 @@ class GatewayRollsSpec : StringSpec({
             "Inspecting $name",
             "Unresolved: A letter from the coast",
             name,
+            "Summer",
         )
+    }
+
+    "a debt a dialogue is waiting on is Missing wealth, and what rose since the last roll is said with how much" {
+        val rig = Rig()
+        val (player, sent) = rig.introduced()
+        player.receive(founding())
+        player.receive(addingAKeyFigure(commandNumber(1)))
+        // The letter's first answer costs forty; the house is left with twenty-five free, enough to roll on.
+        player.receive(offering("letter", commandNumber(2)))
+        player.receive(spending(amount = FOUNDING_WEALTH - 25, commandId = commandNumber(3)))
+
+        player.receive(rolling(commandNumber(4)))
+
+        val first = sent.filterIsInstance<YourChoice>().last().choice!!
+        first.omens.single { it.words == "Missing wealth" }.value shouldBe 15L
+        player.receive(takingAction(first.id, first.options.first().id, commandNumber(5)))
+        player.receive(granting(resource = "piety", amount = 30, commandId = commandNumber(6)))
+
+        player.receive(rolling(commandNumber(7)))
+
+        val second = sent.filterIsInstance<YourChoice>().last().choice!!
+        second.omens.single { it.words == "Piety risen" }.value shouldBe 30L
     }
 
     "with the instruments closed the lever is refused, and nothing of a draw is sent" {

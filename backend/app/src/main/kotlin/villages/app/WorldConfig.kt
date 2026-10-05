@@ -38,6 +38,7 @@ import villages.gateway.Gateway
 import villages.occurrent.InMemoryWorld
 import villages.projections.CharactersProjection
 import villages.projections.ChoicesProjection
+import villages.projections.LastRollsProjection
 import villages.projections.DialoguesProjection
 import villages.projections.HousesProjection
 import villages.projections.RecentEventsProjection
@@ -197,12 +198,16 @@ class WorldConfig {
         characters: CharactersProjection,
         sights: SightProjection,
         dialogueRows: DialoguesProjection,
+        lastRolls: LastRollsProjection,
         clock: Clock,
         worldClock: WorldClock,
         dice: Dice,
         ids: FreshIds,
     ): RollService = RollService(
-        FateEngine(omenSources(houses, characters, characters, sights, dialogueRows), FirstPools.ALL, ResourceActions.ALL, dice, ids),
+        FateEngine(
+            omenSources(houses, characters, characters, sights, dialogueRows, lastRolls) { Calendar.monthOf(it.day) },
+            FirstPools.ALL, ResourceActions.ALL, dice, ids,
+        ),
         houses, world.executor, { clock.instant() }, worldClock, ids,
     )
 
@@ -284,6 +289,10 @@ class WorldConfig {
     /** What every house sees, worked out from where its seat and its people stand. See decision 0061. */
     @Bean(initMethod = "start", destroyMethod = "close")
     fun sights(world: InMemoryWorld): SightProjection = SightProjection(world.feed)
+
+    /** What every house had at its last choice roll, which the next one's changes are measured against. See 0083. */
+    @Bean(initMethod = "start", destroyMethod = "close")
+    fun lastRolls(world: InMemoryWorld): LastRollsProjection = LastRollsProjection(world.feed)
 
     /** Every dialogue each house was offered, and how far each has got, folded from the same feed. See 0071. */
     @Bean(initMethod = "start", destroyMethod = "close")

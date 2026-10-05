@@ -52,12 +52,14 @@ import villages.domain.PlayerId
 import villages.domain.WorldTime
 import villages.projections.CharactersProjection
 import villages.projections.ChoicesProjection
+import villages.projections.LastRollsProjection
 import villages.projections.DialoguesProjection
 import villages.projections.HousesProjection
 import villages.projections.RecentEventsProjection
 import villages.projections.SightProjection
 import villages.protocol.PROTOCOL_VERSION
 import villages.protocol.ServerFrame
+import villages.protocol.Calendar
 import villages.protocol.STAND_TILES
 import java.time.Clock
 import java.time.ZoneOffset
@@ -222,11 +224,12 @@ internal class Rig(instrumentsOpen: Boolean = true, sendOn: Executor = Executor 
     val characters = CharactersProjection(world).started()
     val sights = SightProjection(world).started()
     val dialogueRows = DialoguesProjection(world).started()
+    val lastRolls = LastRollsProjection(world).started()
     val worldClock = WorldClock { today }
 
     /** The choice roll over the first content, with a die that always comes up one: common, and the first in the draw. */
     val rolls = RollService(
-        FateEngine(omenSources(houses, characters, characters, sights, dialogueRows), FirstPools.ALL, ResourceActions.ALL, { 1 }, { UUID.randomUUID() }),
+        FateEngine(omenSources(houses, characters, characters, sights, dialogueRows, lastRolls) { Calendar.monthOf(it.day) }, FirstPools.ALL, ResourceActions.ALL, { 1 }, { UUID.randomUUID() }),
         houses, world, { noon }, worldClock, { UUID.randomUUID() },
     )
     var minted = 0

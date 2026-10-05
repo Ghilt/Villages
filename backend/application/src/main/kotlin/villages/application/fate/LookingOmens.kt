@@ -68,18 +68,25 @@ class FigureOmens(private val figures: KeyFiguresByHouse) : OmenSource {
 }
 
 /**
- * Every omen source there is, in the order the report card shows what they read: the house, then what the page has
- * open. One list, so the app and every test that rolls read the same omens. A new source is a line here.
+ * Every omen source there is, in the order the report card shows what they read: the house and what changed in it,
+ * what the page has open, and the time of year. One list, so the app and every test that rolls read the same omens.
+ * A new source is a line here.
  */
+@Suppress("LongParameterList")
 fun omenSources(
     houses: HouseById,
     characters: CharacterById,
     figures: KeyFiguresByHouse,
     sights: SightsByHouse,
     dialogues: DialoguesByHouse,
+    lastRolls: StandingAtLastRoll,
+    months: WorldMonths,
 ): List<OmenSource> = listOf(
     HouseOmens(),
+    ChangeOmens(lastRolls),
+    MissingWealthOmens(dialogues),
     WindowOmens(houses, characters, sights, figures),
     DialogueOmens(dialogues),
     FigureOmens(figures),
+    SeasonOmens(months),
 )

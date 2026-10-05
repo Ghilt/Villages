@@ -239,8 +239,10 @@ the next roll is that rarity, so a legendary can be seen without four hundred pr
     `CharacterById`. A house's own window is an omen of its own, *Inspecting your own house*, which opens no pool,
     because it is open most of the time. The fog is read as the circles alone, without the gateway's surface
     tension, so a roll reads a little less than is drawn, never more (`Seen.kt`).
-11. **Season, change and *Missing wealth*.** The month through the calendar port; a projection of what each
-    house had at its last roll; the spend an open dialogue is waiting on.
+11. **Season, change and *Missing wealth*.** Done, in `TimeAndChangeOmens.kt`. The month comes through a port of its
+    own, `WorldMonths`, rather than a third method on the calendar every fake implements, and the season is turned
+    round south of the equator. `LastRollsProjection` keeps what each house had at its last roll; *Missing wealth*
+    reads every open dialogue, whichever is being read, and says by how much.
 
 **Checkpoint 5: the server reads the ground.**
 

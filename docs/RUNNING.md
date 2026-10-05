@@ -149,7 +149,10 @@ stage alone, with none of the debug panel in it (decision record 0079).
   edged and named in its rarity, saying what it gives; taking one gives it, and the pane goes back to its
   strip. A hand cannot be rolled over while it waits. The asking and the answer are lines of the log under
   `roll`, and the hand under `choice`, with its rarity and how many omens it was rolled from. The **Choice
-  roll** section of the debug panel, below Dialogues, looks into it: the hand's omens with their kind and,
+  roll** section of the debug panel, below Dialogues, looks into it: the hand's omens - the house's holdings,
+  *Weak house*, *Pious*, what rose since the last roll, *Missing wealth* when an open dialogue waits on a cost
+  the house cannot pay, the windows open on houses it has revealed and on people it sees or holds, the dialogue
+  being read, the key figure open, and the season - with their kind and,
   on hover, their key; what the last roll drew from, which the player never sees - the pools it opened and
   every action that could have been dealt, with its weight - and whether the throw or the lever chose its
   rarity; the odds, 70, 22, 7 and 1 in a hundred. Its one lever, `next roll`, makes the next roll `common`,
