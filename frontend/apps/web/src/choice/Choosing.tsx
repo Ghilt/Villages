@@ -1,15 +1,25 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { canAct } from '@villages/client-core';
 import type { Looking } from '@villages/client-core';
-import type { ChoiceView, OptionView } from '@villages/protocol';
+import type { ChoiceView, OmenView, OptionView } from '@villages/protocol';
 
 import { sessionStore, takeOption } from '../net/gateway';
 import { PaneSizeControl } from '../stage/PaneSizeControl';
 import type { Room } from '../stage/panes';
 import { useStore } from '../store/useStore';
 import { Card } from '../ui/card/Card';
+import { OmenStrip, ReportCard } from '../ui/report/ReportCard';
+import type { OmenLine } from '../ui/report/ReportCard';
+import { usePlay } from '../ui/report/usePlay';
+import { handExpected } from './rolling';
 import { TakeAction, gives } from './TakeAction';
+
+/** An omen off the wire as the report card shows it. */
+const lineOf = (omen: OmenView): OmenLine =>
+  omen.value === undefined
+    ? { key: omen.key, kind: omen.kind, words: omen.words }
+    : { key: omen.key, kind: omen.kind, words: omen.words, value: omen.value };
 
 /**
  * **The choice roll**: what the world is asking, and the options it is offering.
@@ -45,12 +55,19 @@ export function Choosing({ room, looking }: { room: Room; looking: () => Looking
   const choice = useStore(sessionStore, (state) => state.yourChoice);
   const answering = !useStore(sessionStore, canAct);
   const [at, setAt] = useState(0);
+  const [playing, setPlaying] = useState<string | null>(null);
   const asked = choice?.id;
+  const rolled = choice?.options[0]?.rarity;
 
-  // A new question starts at its first option rather than wherever the last one was left.
+  // A new question starts at its first option rather than wherever the last one was left, and a hand this page
+  // rolled is played: the omens land, the rarity is stamped, the options pop in. See decision record 0083.
   useEffect(() => {
     setAt(0);
-  }, [asked]);
+    if (asked !== undefined && rolled !== undefined && handExpected()) setPlaying(asked);
+  }, [asked, rolled]);
+
+  const omens = useMemo(() => (choice?.omens ?? []).map(lineOf), [choice]);
+  const { play, hurry } = usePlay(playing, omens.length, choice?.options.length ?? 0);
 
   if (choice === null) {
     return <TakeAction room={room} looking={looking} />;
@@ -68,23 +85,42 @@ export function Choosing({ room, looking }: { room: Room; looking: () => Looking
     );
   }
 
+  if (rolled !== undefined && (play.phase === 'rows' || play.phase === 'stamp')) {
+    return (
+      <section className="choice choice--report" aria-live="polite">
+        <PaneSizeControl room={room} />
+        <ReportCard
+          omens={omens}
+          landed={play.landed}
+          stamp={play.phase === 'stamp' ? rolled : null}
+          onHurry={hurry}
+        />
+      </section>
+    );
+  }
+
   const carousel = room.size === 'small';
   const shown = Math.min(at, choice.options.length - 1);
+  const popping = play.phase === 'cards';
 
   return (
     <section className={carousel ? 'choice choice--carousel' : 'choice'} aria-live="polite">
       <header className="choice__head">
         <h2 className="choice__prompt">{choice.prompt}</h2>
+        {omens.length > 0 && <OmenStrip omens={omens} />}
         <PaneSizeControl room={room} />
       </header>
 
       {carousel ? (
-        <Carousel choice={choice} at={shown} onAt={setAt} answering={answering} />
+        <Carousel choice={choice} at={shown} onAt={setAt} answering={answering} omens={omens} />
       ) : (
         <ol className="choice__options">
-          {choice.options.map((option) => (
-            <li key={option.id}>
-              <Parchment choice={choice} option={option} answering={answering} />
+          {choice.options.map((option, index) => (
+            <li
+              key={option.id}
+              className={index >= play.cardsIn ? 'choice__unpopped' : popping ? 'ui-pop' : undefined}
+            >
+              <Parchment choice={choice} option={option} answering={answering} omens={omens} />
             </li>
           ))}
         </ol>
@@ -104,11 +140,13 @@ function Carousel({
   at,
   onAt,
   answering,
+  omens,
 }: {
   choice: ChoiceView;
   at: number;
   onAt: (at: number) => void;
   answering: boolean;
+  omens: readonly OmenLine[];
 }) {
   const many = choice.options.length;
   const option = choice.options[at];
@@ -131,7 +169,7 @@ function Carousel({
       </button>
 
       <div className="carousel__sheet">
-        <Parchment choice={choice} option={option} answering={answering} />
+        <Parchment choice={choice} option={option} answering={answering} omens={omens} />
         <ol className="carousel__dots" aria-label={`option ${at + 1} of ${many}`}>
           {choice.options.map((one, index) => (
             <li
@@ -164,10 +202,13 @@ function Parchment({
   choice,
   option,
   answering,
+  omens = [],
 }: {
   choice: ChoiceView;
   option: OptionView;
   answering: boolean;
+  /** The omens of the roll that dealt it, of which the option carries the marks of those that brought it. */
+  omens?: readonly OmenLine[];
 }) {
   if (option.rarity !== undefined) {
     return (
@@ -179,6 +220,7 @@ function Parchment({
         onPress={() => takeOption(choice, option)}
       >
         <p className="ui-body">{option.detail}</p>
+        <OmenStrip omens={omens.filter((omen) => option.omens?.includes(omen.key))} small />
       </Card>
     );
   }

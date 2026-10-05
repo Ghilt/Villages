@@ -8,6 +8,7 @@ import { PaneSizeControl } from '../stage/PaneSizeControl';
 import type { Room } from '../stage/panes';
 import { useStore } from '../store/useStore';
 import { TextButton } from '../ui/button/Button';
+import { expectHand } from './rolling';
 
 /**
  * What a roll costs in wealth, as the page says it before pressing. The server's `ROLL_PRICE` is the price, and a
@@ -43,7 +44,10 @@ export function TakeAction({ room, looking }: { room: Room; looking: () => Looki
     <TextButton
       size={room.size === 'strip' ? 'small' : 'large'}
       disabled={whyNot !== null}
-      onClick={() => takeAction(looking())}
+      onClick={() => {
+        expectHand();
+        takeAction(looking());
+      }}
     >
       Take action
     </TextButton>

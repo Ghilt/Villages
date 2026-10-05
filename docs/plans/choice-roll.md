@@ -258,7 +258,8 @@ the next roll is that rarity, so a legendary can be seen without four hundred pr
     the timing in `timing.ts` and `usePlay`; seven drawn omen marks in `Mark`, placeholders, nothing painted.
     Shown under *The choice roll* on the component page, every word readable. the omen row, the list, the stamp, the strip of marks, with
     placeholder marks.
-15. **The roll plays.** The rows slam in, a click hurries them, the stamp, the options pop in, the list
+15. **The roll plays.** Done. `choice/rolling.ts` remembers that this page pressed Take action, so only the hand
+    it rolled plays and a reload draws a hand settled; `Choosing.tsx` plays it with `usePlay`. The rows slam in, a click hurries them, the stamp, the options pop in, the list
     folds to the strip; a reload shows the end.
 
 **Checkpoint 7: gossip.**
