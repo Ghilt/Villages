@@ -92,6 +92,59 @@ const DRAWN = {
   // One less and one more, a stepper's two; the less is a hair shorter than the window's bar.
   less: <path d="M6.5 12 H17.5" className="ui-mark__line" />,
   more: <path d="M6.5 12 H17.5 M12 6.5 V17.5" className="ui-mark__line" />,
+  // The omens of a choice roll, one a kind, which the report card lands them under. Drawn placeholders until
+  // a picture is painted for each; see decision record 0083.
+  /** The house: a shield. */
+  'omen-house': (
+    <>
+      <path d="M5 4.5 H19 V11 C19 15.6 15.8 18.6 12 20 C8.2 18.6 5 15.6 5 11 Z" className="ui-mark__line" />
+    </>
+  ),
+  /** What changed: an arrow rising. */
+  'omen-change': (
+    <>
+      <path d="M5 17 L11 11 L14 14 L19.5 8.5" className="ui-mark__line" />
+      <path d="M15 8.5 H19.5 V13" className="ui-mark__line" />
+    </>
+  ),
+  /** A window open: a lens. */
+  'omen-window': (
+    <>
+      <path d="M10.5 4.5 A6 6 0 1 1 10.49 4.5" className="ui-mark__line" />
+      <path d="M15 15 L20 20" className="ui-mark__line" />
+    </>
+  ),
+  /** A dialogue: a speech bubble. */
+  'omen-dialogue': (
+    <>
+      <path d="M4.5 6 H19.5 V15 H11 L7 19 V15 H4.5 Z" className="ui-mark__line" />
+    </>
+  ),
+  /** A key figure: a head and shoulders. */
+  'omen-keyFigure': (
+    <>
+      <path d="M12 4.5 A3.5 3.5 0 1 1 11.99 4.5" className="ui-mark__line" />
+      <path d="M5 20 C5.6 15.6 8.4 13.5 12 13.5 C15.6 13.5 18.4 15.6 19 20" className="ui-mark__line" />
+    </>
+  ),
+  /** Where the player is looking: a sheet of map folded in three. */
+  'omen-map': (
+    <>
+      <path d="M3.5 6 L9 4 L15 6 L20.5 4 V18 L15 20 L9 18 L3.5 20 Z" className="ui-mark__line" />
+      <path d="M9 4 V18" className="ui-mark__line" />
+      <path d="M15 6 V20" className="ui-mark__line" />
+    </>
+  ),
+  /** The time of year: a sun. */
+  'omen-season': (
+    <>
+      <path d="M12 8.5 A3.5 3.5 0 1 1 11.99 8.5" className="ui-mark__line" />
+      <path
+        d="M12 3 V5.5 M12 18.5 V21 M3 12 H5.5 M18.5 12 H21 M5.6 5.6 L7.4 7.4 M16.6 16.6 L18.4 18.4 M5.6 18.4 L7.4 16.6 M16.6 7.4 L18.4 5.6"
+        className="ui-mark__line"
+      />
+    </>
+  ),
   'eye-open': (
     <>
       <path d={EYE.almond} className="ui-mark__line" />

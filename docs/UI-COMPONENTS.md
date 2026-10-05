@@ -256,7 +256,9 @@ A line each: what it is for, its variants, and where on the page it is.
 - **`Mark`**, `ui/mark/Mark.tsx`: a mark by name, drawn, or painted when `world/ui/marks/` has it: the
   five resources, `wealth`, `domain`, `influence`, `reason` and `piety`; a figure's `kindness`, `physical`
   and `age`; and `close`, `minimise`, `maximise`, `previous`, `next`, `fold`, `less`, `more`, `eye-open`,
-  `eye-shut`, `warning` and `search`. *Marks and readouts*.
+  `eye-shut`, `warning` and `search`; and a mark for each kind of omen a choice roll reads, `omen-house`,
+  `omen-change`, `omen-window`, `omen-dialogue`, `omen-keyFigure`, `omen-map` and `omen-season`, drawn
+  placeholders until a picture of the same name is painted. *Marks and readouts*.
 - **`TextButton`**, `ui/button/Button.tsx`: words on a face that stretches between its end caps to fit
   them. `face` is a picture in `world/ui/controls/`, `primary` unless it says otherwise; `size` is `small`,
   `regular` or `large`, 32, 44 or 60 pixels tall. *Buttons*.
@@ -405,6 +407,15 @@ A line each: what it is for, its variants, and where on the page it is.
   a finger, the arrow keys and typing the first letters pick, a phone opens its own picker, and an option
   can be `disabled`; where the browser lets its list be drawn, it is drawn on night with a gilt edge, and
   elsewhere it is the browser's. Held with `chosen` and `onChoose`. *Dialogs and fields*.
+- **`ReportCard`**, `ui/report/ReportCard.tsx`: what a choice roll took into account, filling like the scores
+  at the end of a level - each **`OmenRow`**, its kind's mark, its words and a value at the far end, slamming in
+  as it lands - and **`RarityStamp`** thrown across it in its rarity's colour. `landed` says how many omens are
+  in; a press on it is `onHurry`. **`OmenStrip`** is the list folded away, the marks in a row with their words
+  for tooltips, and `small` on an option card, the omens that brought it. `ui-pop` is the class an option pops
+  in by. **`playOf`** in `ui/report/timing.ts` is how a roll plays over time - omens a third of a second apart,
+  the stamp just under a second, the options a seventh apart - and how a hurry lands the rest of the omens and
+  never skips the stamp; **`usePlay`** plays one in a component. *The choice roll*, where a roll is played whole
+  in a tile the size of the bottom middle, at each rarity, and every part on its own.
 - **`Medallion`**, `ui/medallion/Medallion.tsx`: a round or oval frame, one fixed picture and never sliced,
   drawn `size` pixels tall. Where its frame is clear inside itself it has a window, and the `picture` it is
   given - a key figure's portrait - shows through it, covering it and cut to its round; the window is found

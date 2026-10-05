@@ -1,0 +1,160 @@
+/*
+ * The report card: the omens a roll read, slamming into a list one after another, and the rarity stamped across
+ * it. Words in the colour of whatever it stands on; the stamp in its rarity's. A slam is a fifth of a second and
+ * the stamp a little over half a second, so the roll has a rhythm rather than a wait (LOOK-AND-FEEL.md).
+ */
+
+@layer ui {
+  .ui-report {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25em;
+    min-height: 0;
+    cursor: pointer;
+  }
+
+  .ui-report__title {
+    margin: 0;
+    font-size: 0.95em;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .ui-report__rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15em;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .ui-report__row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.5em;
+    padding: 0.1em 0.3em;
+    border-bottom: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+  }
+
+  .ui-report__words {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ui-report__value {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+  }
+
+  /* Landing: dropped from above and too big, hitting the list, and settling. */
+  .ui-report__row--landing {
+    animation: ui-report-slam 0.2s cubic-bezier(0.2, 0.9, 0.3, 1.3) both;
+  }
+
+  @keyframes ui-report-slam {
+    from {
+      transform: translateY(-0.6em) scale(1.7);
+      opacity: 0;
+    }
+    70% {
+      transform: translateY(0) scale(0.96);
+      opacity: 1;
+    }
+    to {
+      transform: none;
+    }
+  }
+
+  /* The stamp: thrown down over the list, turned a little, in a double rule of its colour. */
+  .ui-stamp {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    padding: 0.15em 0.6em;
+    border: 3px double currentColor;
+    border-radius: 6px;
+    font-size: 1.9em;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    background: color-mix(in srgb, var(--ui-night) 55%, transparent);
+    transform: translate(-50%, -50%) rotate(-8deg);
+    animation: ui-stamp-down 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+    pointer-events: none;
+  }
+
+  .ui-stamp--common {
+    color: color-mix(in srgb, var(--ui-rarity-common) 70%, white);
+  }
+
+  .ui-stamp--uncommon {
+    color: color-mix(in srgb, var(--ui-rarity-uncommon) 70%, white);
+  }
+
+  .ui-stamp--rare {
+    color: color-mix(in srgb, var(--ui-rarity-rare) 65%, white);
+  }
+
+  .ui-stamp--legendary {
+    color: color-mix(in srgb, var(--ui-rarity-legendary) 75%, white);
+    text-shadow: 0 0 12px var(--ui-rarity-legendary);
+  }
+
+  @keyframes ui-stamp-down {
+    from {
+      transform: translate(-50%, -50%) rotate(-24deg) scale(3);
+      opacity: 0;
+    }
+    65% {
+      transform: translate(-50%, -50%) rotate(-6deg) scale(0.92);
+      opacity: 1;
+    }
+    to {
+      transform: translate(-50%, -50%) rotate(-8deg) scale(1);
+    }
+  }
+
+  /* The list folded away: the omens' marks in a row, the words on hover. */
+  .ui-omen-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35em;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .ui-omen-strip--small {
+    gap: 0.2em;
+    opacity: 0.85;
+  }
+
+  /* What pops in once the stamp has landed: an option card, from small and low to its place. */
+  .ui-pop {
+    animation: ui-pop-in 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.3) both;
+  }
+
+  @keyframes ui-pop-in {
+    from {
+      transform: translateY(1.2em) scale(0.6);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-report__row--landing,
+    .ui-stamp,
+    .ui-pop {
+      animation: none;
+    }
+  }
+}

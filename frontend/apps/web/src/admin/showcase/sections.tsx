@@ -9,6 +9,7 @@ import { DialogsAndFields } from './DialogsAndFields';
 import { Foundations } from './Foundations';
 import { MarksAndReadouts } from './MarksAndReadouts';
 import { Pictures } from './Pictures';
+import { Rolls } from './Rolls';
 import { TabsAndSections } from './TabsAndSections';
 
 /**
@@ -71,6 +72,12 @@ export const SECTIONS: readonly Section[] = [
     title: 'Controls',
     says: 'The slider, the meter, the stepper, the switch, a choice of a few, and hold to confirm.',
     Body: Controls,
+  },
+  {
+    id: 'roll',
+    title: 'The choice roll',
+    says: 'The report card the omens slam into, the rarity stamped across it, and the strip it folds to.',
+    Body: Rolls,
   },
   {
     id: 'sections',
