@@ -5,6 +5,7 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import villages.application.fate.GroundMap
 import villages.application.fate.ROLL_PRICE
 import villages.domain.FOUNDING_WEALTH
 import villages.protocol.CommandAccepted
@@ -136,6 +137,20 @@ class GatewayRollsSpec : StringSpec({
 
         val second = sent.filterIsInstance<YourChoice>().last().choice!!
         second.omens.single { it.words == "Piety risen" }.value shouldBe 30L
+    }
+
+    "the map is read on the ground of the world the page said it draws, where its view is centred" {
+        val rig = Rig()
+        // A world of forest, a degree a cell, and the page saying at hello that it draws it.
+        rig.grounds["woods"] = GroundMap(
+            360, 180, mapOf(10 to "broadleaf-forest"), ByteArray(360 * 180 * 2) { at -> if (at % 2 == 0) 10 else 0 },
+        )
+        val (player, sent) = rig.introduced(master = "woods")
+        player.receive(founding())
+
+        player.receive(rolling(COMMAND_TWO))
+
+        sent.filterIsInstance<YourChoice>().last().choice!!.omens.map { it.words } shouldContain "Forest"
     }
 
     "with the instruments closed the lever is refused, and nothing of a draw is sent" {

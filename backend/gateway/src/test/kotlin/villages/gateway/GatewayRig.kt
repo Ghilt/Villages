@@ -22,6 +22,7 @@ import villages.application.WorldClock
 import villages.application.WriteConflict
 import villages.application.started
 import villages.application.fate.FateEngine
+import villages.application.fate.GroundMap
 import villages.application.fate.FirstPools
 import villages.application.fate.omenSources
 import villages.application.fate.ResourceActions
@@ -227,9 +228,18 @@ internal class Rig(instrumentsOpen: Boolean = true, sendOn: Executor = Executor 
     val lastRolls = LastRollsProjection(world).started()
     val worldClock = WorldClock { today }
 
+    /** The ground maps a roll reads where the page is looking, by master: none until a spec lays one down. */
+    val grounds = mutableMapOf<String, GroundMap>()
+
     /** The choice roll over the first content, with a die that always comes up one: common, and the first in the draw. */
     val rolls = RollService(
-        FateEngine(omenSources(houses, characters, characters, sights, dialogueRows, lastRolls) { Calendar.monthOf(it.day) }, FirstPools.ALL, ResourceActions.ALL, { 1 }, { UUID.randomUUID() }),
+        FateEngine(
+            omenSources(
+                houses, characters, characters, sights, dialogueRows, lastRolls,
+                months = { Calendar.monthOf(it.day) }, grounds = { grounds[it] }, housesNear = houses,
+            ),
+            FirstPools.ALL, ResourceActions.ALL, { 1 }, { UUID.randomUUID() },
+        ),
         houses, world, { noon }, worldClock, { UUID.randomUUID() },
     )
     var minted = 0

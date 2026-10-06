@@ -157,7 +157,11 @@ stage alone, with none of the debug panel in it (decision record 0079).
   roll** section of the debug panel, below Dialogues, looks into it: the hand's omens - the house's holdings,
   *Weak house*, *Pious*, what rose since the last roll, *Missing wealth* when an open dialogue waits on a cost
   the house cannot pay, the windows open on houses it has revealed and on people it sees or holds, the dialogue
-  being read, the key figure open, and the season - with their kind and,
+  being read, the key figure open, where the view is centred - *Coast*, *River* within 400 km, *Forest*,
+  *Mountains*, *Fields*, *Grassland*, *Desert*, *Marsh* or *Ice* where it is a sixth of the revealed land or
+  more, *Open sea*, *House &lt;name&gt;* for houses standing in a circle of 150 km or less, and *Unknown* where the
+  fog covers it all, read by the game server off the ground map of the master the page draws - and the season -
+  with their kind and,
   on hover, their key; what the last roll drew from, which the player never sees - the pools it opened and
   every action that could have been dealt, with its weight - and whether the throw or the lever chose its
   rarity; the odds, 70, 22, 7 and 1 in a hundred. Its one lever, `next roll`, makes the next roll `common`,

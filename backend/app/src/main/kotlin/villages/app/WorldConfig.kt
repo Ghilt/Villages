@@ -13,6 +13,7 @@ import villages.application.Dice
 import villages.application.FoundHouseService
 import villages.application.FreshIds
 import villages.application.fate.FateEngine
+import villages.application.fate.GroundMaps
 import villages.application.fate.FirstPools
 import villages.application.fate.omenSources
 import villages.application.fate.ResourceActions
@@ -199,13 +200,17 @@ class WorldConfig {
         sights: SightProjection,
         dialogueRows: DialoguesProjection,
         lastRolls: LastRollsProjection,
+        ground: GroundMaps,
         clock: Clock,
         worldClock: WorldClock,
         dice: Dice,
         ids: FreshIds,
     ): RollService = RollService(
         FateEngine(
-            omenSources(houses, characters, characters, sights, dialogueRows, lastRolls) { Calendar.monthOf(it.day) },
+            omenSources(
+                houses, characters, characters, sights, dialogueRows, lastRolls,
+                months = { Calendar.monthOf(it.day) }, grounds = ground, housesNear = houses,
+            ),
             FirstPools.ALL, ResourceActions.ALL, dice, ids,
         ),
         houses, world.executor, { clock.instant() }, worldClock, ids,
@@ -231,6 +236,11 @@ class WorldConfig {
     @Bean
     fun stands(@Value("\${villages.stands:../../world/stands}") folder: String): Stands =
         FolderStands(Path.of(folder))
+
+    /** Each master's ground map, from the folder `world:ground` writes, as the stands are. See 0084. */
+    @Bean
+    fun ground(@Value("\${villages.ground:../../world/ground}") folder: String): GroundMaps =
+        FolderGround(Path.of(folder))
 
     @Bean
     @Suppress("LongParameterList")

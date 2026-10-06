@@ -15,6 +15,7 @@ import villages.domain.OptionId
 import villages.domain.PlayerId
 import villages.protocol.ChoiceView
 import villages.protocol.ErrorFrame
+import villages.protocol.Hello
 import villages.protocol.RollPayload
 import villages.protocol.TakeActionPayload
 import villages.protocol.YourChoice
@@ -37,10 +38,20 @@ internal class ChoicesPart(
         core.sessionOf(player)?.let { tell(it, row?.choice?.toView(row.omens)) }
     }
 
-    /** Which choice a connection has been told of, and whether it has been told anything at all. */
+    /**
+     * Which choice a connection has been told of, and whether it has been told anything at all; and the world its
+     * page draws, from hello, whose ground a roll reads where it is looking.
+     */
     private class Told {
         var choice: String? = null
         var ever = false
+
+        @Volatile
+        var master: String? = null
+    }
+
+    override fun arrive(connection: Gateway.Connection, hello: Hello, who: PlayerId) {
+        connection.keptBy(this) { Told() }.master = hello.master
     }
 
     /**
@@ -62,7 +73,8 @@ internal class ChoicesPart(
         // A roll begins a story of its own, which the hand it deals and the action that answers it continue. The
         // hand it hands back is what goes out, as arrival's does, rather than a read of the projection.
         commands.on<RollPayload> { asking, payload ->
-            val rolled = rolls.roll(asking.who, payload.toLooking(), asking.startingAStory)
+            val master = core.sessionOf(asking.who)?.keptBy(this) { Told() }?.master
+            val rolled = rolls.roll(asking.who, payload.toLooking().copy(master = master), asking.startingAStory)
             core.sessionOf(asking.who)?.let { tell(it, rolled.hand.toView(rolled.omens)) }
         }
         commands.on<TakeActionPayload> { asking, payload ->

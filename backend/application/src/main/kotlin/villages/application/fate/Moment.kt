@@ -21,6 +21,8 @@ data class Looking(
     val inspectingCharacters: List<CharacterId> = emptyList(),
     val dialogue: DialogueId? = null,
     val figure: CharacterId? = null,
+    /** The world the page draws, by its master's name, as it said at hello: whose ground the circle is read on. */
+    val master: String? = null,
 ) {
     companion object {
         val NOTHING = Looking()

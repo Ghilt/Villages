@@ -12,7 +12,7 @@ import kotlin.math.sqrt
 private const val EARTH_KM = 6371.0
 
 /** How far apart two places are on the ground, in kilometres, along the sphere. */
-internal fun kmBetween(a: Location, b: Location): Double {
+fun kmBetween(a: Location, b: Location): Double {
     val dLat = Math.toRadians(b.lat - a.lat)
     val dLon = Math.toRadians(b.lon - a.lon)
     val h = sin(dLat / 2) * sin(dLat / 2) +

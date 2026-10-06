@@ -134,8 +134,9 @@ Being built, from `docs/plans/choice-roll.md`. **Take action works**: it stands 
 there is a house, costs ten wealth, and deals a hand of three of one rarity from twenty resource actions in six
 pools, each option a card edged in its rarity; taking one gives what it says. It reads the house - its
 holdings, whether it is a weak house or pious, what rose since its last roll, a debt a dialogue is waiting on -
-the inspect windows open, the dialogue being read, the key figure open, and the season; not yet the map, which
-waits on the server reading the ground. A hand the page rolled plays as the report card: the omens land and the
+the inspect windows open, the dialogue being read, the key figure open, where the player is looking - the
+coast, a river close in, the kinds of ground, the open sea, houses by name zoomed in, or *Unknown* under the
+fog - and the season. A hand the page rolled plays as the report card: the omens land and the
 options pop in under them, the pane opened out to three times its middle size; a press hurries the omens, and a
 hand already pending at a reload is drawn as it ends. What exists is in `BUILDING-A-MECHANIC.md` under the choice pattern, and in
 decision records 0034 and 0083.

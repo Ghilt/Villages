@@ -257,7 +257,10 @@ the next roll is that rarity, so a legendary can be seen without four hundred pr
     master; the grid is the master's own, as 0084's amendment says. The tool, its grid and its file per master, gitignored output beside the stands;
     the quick start makes it, `RUNNING.md` and the regeneration list in `CLAUDE.md` say so. Grid size by
     measuring.
-13. **Map omens.** The ground port and its folder adapter; the looking circle from the centre and the zoom;
+13. **Map omens.** Done. `fate/Ground.kt` and `fate/MapOmens.kt`, `FolderGround` in the app (`villages.ground`
+    to point it elsewhere), and `HousesNear` on the houses projection. The page's master comes from hello, kept by
+    the choices part. A river is an omen only in a circle of 400 km or less, because from further out every land
+    has one; houses by name in 150 km or less. The ground port and its folder adapter; the looking circle from the centre and the zoom;
     terrain, river, coast, open sea, houses and characters through the fog, and *Unknown*.
 
 **Checkpoint 6: the report card.**
