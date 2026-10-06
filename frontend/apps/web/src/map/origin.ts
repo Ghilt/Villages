@@ -1,6 +1,6 @@
 import type * as maplibregl from 'maplibre-gl';
-import { decodeOrigin, whereFrom } from '@villages/world';
-import type { OriginFile, OriginGrid, WhereFrom } from '@villages/world';
+import { decodeOrigin, namesAt, whereFrom } from '@villages/world';
+import type { OriginFile, OriginGrid, WhereFrom, WorldName } from '@villages/world';
 
 import { note } from '../log/log';
 import { worldRootOf } from './masters';
@@ -8,13 +8,16 @@ import { worldRootOf } from './masters';
 /**
  * Where a point of the master came from on Earth, said in the debug log when the map is clicked under the
  * Origin renderer. The picture says it for the whole world at once; this says it for one place, with the
- * numbers. The map is worked out by `npm run world:origin` (see `docs/plans/real-world-names.md`) and read
- * the first time it is asked for, because it is fifteen megabytes nobody needs until then.
+ * numbers, and with the river, lake or peak named there, carried from Earth by `npm run world:names`. The map
+ * is worked out by `npm run world:origin` (see `docs/plans/real-world-names.md`), and both are read the first
+ * time they are asked for, because they are eighteen megabytes nobody needs until then.
  */
 
 interface Loaded {
   readonly file: OriginFile;
   readonly grid: OriginGrid;
+  /** Earth's names carried into this world, or none if `world:names` has not been run for it. */
+  readonly names: readonly WorldName[] | null;
 }
 
 const loaded = new Map<string, Promise<Loaded | null>>();
@@ -23,11 +26,16 @@ function load(master: string): Promise<Loaded | null> {
   let found = loaded.get(master);
   if (found === undefined) {
     const root = `${worldRootOf(master)}/origin`;
-    found = Promise.all([fetch(`${root}/origin.json`), fetch(`${root}/origin.bin`)])
-      .then(async ([json, bin]) => {
+    found = Promise.all([
+      fetch(`${root}/origin.json`),
+      fetch(`${root}/origin.bin`),
+      fetch(`${worldRootOf(master)}/names.json`),
+    ])
+      .then(async ([json, bin, names]) => {
         if (!json.ok || !bin.ok) return null;
         const file = (await json.json()) as OriginFile;
-        return { file, grid: decodeOrigin(await bin.arrayBuffer(), file) };
+        const carried = names.ok ? ((await names.json()) as { names: WorldName[] }).names : null;
+        return { file, grid: decodeOrigin(await bin.arrayBuffer(), file), names: carried };
       })
       .catch(() => null);
     loaded.set(master, found);
@@ -54,12 +62,22 @@ export function watchOrigin(map: maplibregl.Map, master: string): () => void {
       `${master} against ${answer.file.from}: ${share(earth)} of its land from Earth, ${share(invented)} invented, ` +
         `${share(clone)} copies. Click the map to ask where a place came from.`,
     );
+    note(
+      'origin',
+      answer.names === null
+        ? `no names carried into ${master} yet: npm run world:names --prefix frontend -- ${master}`
+        : `${answer.names.length} of Earth's names carried into ${master}: rivers, lakes and peaks, today's names, not yet 1790's`,
+    );
   });
   const onClick = (event: maplibregl.MapMouseEvent) => {
     if (origin === null) return;
     const { lng, lat } = event.lngLat;
     const found = whereFrom(origin.grid, lng, lat, origin.file.width, origin.file.height);
-    note('origin', `${degrees(lat, 'N', 'S')} ${degrees(lng, 'E', 'W')}: ${describe(found, lng, lat)}`);
+    const here = origin.names === null ? '' : named(origin.names, lng, lat);
+    note(
+      'origin',
+      `${degrees(lat, 'N', 'S')} ${degrees(lng, 'E', 'W')}: ${describe(found, lng, lat)}${here}`,
+    );
   };
   map.on('click', onClick);
   return () => {
@@ -80,6 +98,20 @@ export function describe(found: WhereFrom, lng: number, lat: number): string {
   return found.kind === 'clone'
     ? `a copy of Earth at ${where}, which is in the world elsewhere too (${sure})`
     : `from Earth at ${where}, ${travel} (${sure})`;
+}
+
+/** The river a place is by, the lake it is in or by, and the peak it is near, as the end of a line. */
+export function named(names: readonly WorldName[], lng: number, lat: number): string {
+  const { river, lake, peak } = namesAt(names, lng, lat);
+  const call = (one: WorldName) => (one.english === undefined ? one.name : `${one.name} (${one.english})`);
+  const parts = [
+    river === undefined ? null : `by the ${call(river)}`,
+    lake === undefined ? null : `at ${call(lake)}`,
+    peak === undefined
+      ? null
+      : `near ${call(peak)}${peak.elevation === undefined ? '' : `, ${peak.elevation.toLocaleString('en-GB')} m`}`,
+  ].filter((part) => part !== null);
+  return parts.length === 0 ? '' : `; ${parts.join(', ')}`;
 }
 
 function degrees(value: number, positive: string, negative: string): string {

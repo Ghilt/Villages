@@ -10,6 +10,7 @@ import type { Palette } from '../src/palette.ts';
 import { encodeRgbPng } from '../src/png.ts';
 import { DEFAULT_MASTER, masterNameOf, worldDirOf } from '../src/masters.ts';
 
+import { writeNames } from './lib/earthNames.ts';
 import { flag, named } from './lib/flags.ts';
 import { readMaster } from './lib/master.ts';
 import { OUTPUT_DIR, PALETTE, masterAt } from './lib/paths.ts';
@@ -21,7 +22,8 @@ import { OUTPUT_DIR, PALETTE, masterAt } from './lib/paths.ts';
  *
  * Reads the master and plain Earth's master it was edited from, works the map out (`src/origin.ts`), and
  * writes `origin.bin` and `origin.json` beside the master's tiles, with `origin.png`, the map drawn over the
- * world square for the Origin renderer. A few minutes a master. See `docs/plans/real-world-names.md`.
+ * world square for the Origin renderer. Then it carries Earth's named rivers, lakes and peaks through it into
+ * `names.json`, as `world:names` does. Two minutes a master. See `docs/plans/real-world-names.md`.
  */
 
 const masterPath = masterAt(named[0]);
@@ -77,3 +79,4 @@ say(
   `the origin of ${master}: ${share(counts.earth)} of its land from Earth, ${share(counts.invented)} invented, ` +
     `${share(counts.clone)} copies, in squares of ${origin.cell} pixels, to ${outputDir}`,
 );
+say(await writeNames(master, resolve(OUTPUT_DIR, worldDirOf(master)), origin, edited.width, edited.height));

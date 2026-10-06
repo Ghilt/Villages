@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { originOf } from './origin.ts';
+import { toWorld, wayBackOf } from './originBack.ts';
 import {
   ORIGIN_CLONE as CLONE,
   ORIGIN_EARTH as EARTH,
@@ -115,6 +116,20 @@ describe('the origin map', () => {
   it('calls the smaller of two copies of one place a copy, and leaves the original', () => {
     expect(statusAt(origin, 444, 184)).toBe(CLONE);
     expect(statusAt(origin, 184, 184)).toBe(EARTH);
+  });
+
+  it('runs backwards: a place on Earth goes to where its piece went, and removed or copied ground to nowhere', () => {
+    const back = wayBackOf(origin, 512, 256);
+    // The moved piece's (62.5, 64.5) on Earth is at (330.5, 72.5) in the world, and the turned one's comes back too.
+    const [x, y] = toWorld(back, 62.5, 64.5)!;
+    expect(x).toBeCloseTo(330.5, 0);
+    expect(y).toBeCloseTo(72.5, 0);
+    const turned = toWorld(back, 160 + Math.cos(Math.PI / 6) * 10.5, 64 - Math.sin(Math.PI / 6) * 10.5)!;
+    expect(Math.hypot(turned[0] - 430.5, turned[1] - 72.5)).toBeLessThan(1.5);
+    // Never moved: where it was. The copied ground's original stays; Earth's sea went nowhere.
+    expect(toWorld(back, 200.5, 120.5)).toEqual([200.5, 120.5]);
+    expect(toWorld(back, 184, 184)).toEqual([184, 184]);
+    expect(toWorld(back, 400, 120)).toBeNull();
   });
 
   it('reads back what it writes', () => {

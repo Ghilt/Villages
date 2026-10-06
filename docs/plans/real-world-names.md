@@ -191,7 +191,11 @@ Each its own commit, and the order is a suggestion.
    so first. **Built 2026-10-06**: 97.8% of the default master's land from Earth, 2.0% invented, 0.2%
    copies. The pins come when something needs correcting.
 3. **Rivers, lakes, seas and mountains named**, the whole world over. All their sources but one are already
-   on disk. The debug panel names the river under the cursor.
+   on disk. The debug panel names the river under the cursor. **Rivers, lakes and peaks built 2026-10-06**:
+   Natural Earth's 1,496 named rivers, 1,998 lakes and 632 peaks carried through the origin map run backwards
+   (`originBack.ts`), 16 gone with ground removed or copied, and a click under the Origin renderer names what
+   is there. **Seas and mountain ranges are still to come**: open sea has no square from Earth, so a sea's name
+   has to be carried by the coasts round it, and the source for both is not fetched yet.
 4. **The towns of 1790**: fetched, reviewed, and carried through.
 5. **Invented land named.**
 6. **Seats taken from real towns**, if Adam wants them.

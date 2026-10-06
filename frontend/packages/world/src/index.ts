@@ -41,6 +41,8 @@ export { DEFAULT_MASTER, worldDirOf } from './masters.ts';
 
 export { decodeOrigin, whereFrom } from './originFile.ts';
 export type { OriginFile, OriginGrid, WhereFrom } from './originFile.ts';
+export { namesAt } from './names.ts';
+export type { WorldName } from './names.ts';
 
 export { onLattice, paintPixel, preparePainterly, seedOf } from './painterly.ts';
 export type { ClassSampler, PainterlyStyle, PreparedPainterly } from './painterly.ts';

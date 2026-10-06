@@ -66,9 +66,17 @@ clicks in the log: a place at 11.07°N 106.48°E is `from Earth at 25.58°N 107.
 the south of China pushed fifteen degrees south; one in a band at 20.91°N 98.67°E is `invented land`. Earth's
 coast carried through lies on the painted coast round the Danish straits, where both shores moved.
 
+**2026-10-06, real names carried through it.** The hypothesis's own test: run the map backwards and carry
+Natural Earth's named rivers, lakes and peaks into the world. 1,496 rivers, 1,998 lakes and 632 peaks arrived,
+16 went with ground that was removed or copied. Clicked: the Thames where Britain went, `by the Thames`;
+Vänern where Sweden went, two and a half degrees from its place, `at Vänern`; the Dnipro where it always was;
+and `near Mont Blanc, 4,807 m`. The first carrying lost 82 names, Vänern among them: the squares' placements
+are each found to within a pixel, so the patches of Earth they cover leave slivers between them that were
+nobody's, and a shore point in one went nowhere. A pixel and a half of slack fixed it.
+
 ## Result
 
-Open: the numbers and the places looked at say yes; Adam's eye on the whole world is the test.
+Open: the numbers, the places looked at and the names carried say yes; Adam's eye on the whole world is the test.
 
 ## Decision
 
