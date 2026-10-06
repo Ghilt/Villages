@@ -74,6 +74,10 @@ and `near Mont Blanc, 4,807 m`. The first carrying lost 82 names, Vänern among 
 are each found to within a pixel, so the patches of Earth they cover leave slivers between them that were
 nobody's, and a shore point in one went nowhere. A pixel and a half of slack fixed it.
 
+Seas test it from the other side, since no square of sea came from anywhere: each is named by the nearest
+coast's placement carried out across the water. The Baltic between Sweden moved and the Baltic shore that
+stayed is `the Baltic Sea`; the water east of Australia, moved twenty degrees, is `the Tasman Sea`.
+
 ## Result
 
 Open: the numbers, the places looked at and the names carried say yes; Adam's eye on the whole world is the test.

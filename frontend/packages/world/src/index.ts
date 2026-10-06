@@ -39,7 +39,7 @@ export type { Lattice } from './lattice.ts';
 
 export { DEFAULT_MASTER, worldDirOf } from './masters.ts';
 
-export { decodeOrigin, whereFrom } from './originFile.ts';
+export { decodeOrigin, squareAt, whereFrom } from './originFile.ts';
 export type { OriginFile, OriginGrid, WhereFrom } from './originFile.ts';
 export { namesAt } from './names.ts';
 export type { WorldName } from './names.ts';

@@ -2,6 +2,8 @@ import { existsSync } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
+import { regionsOf } from '../../src/regions.ts';
+import type { EarthRegion, RegionKind } from '../../src/regions.ts';
 import { carryNames } from '../../src/names.ts';
 import type { EarthName, NameKind } from '../../src/names.ts';
 import { toWorld, wayBackOf } from '../../src/originBack.ts';
@@ -11,8 +13,9 @@ import { SOURCE_DIR } from './paths.ts';
 
 /**
  * Earth's named rivers, lakes and peaks, read out of Natural Earth in `world/source` and carried through a
- * master's origin map into `names.json` beside its tiles. What `world:names` does, and what `world:origin`
- * does after it has worked the map out, so that the two are never left out of step. See `src/names.ts`.
+ * master's origin map into `names.json` beside its tiles; and its named regions, seas and stretches of land, given to
+ * every square of the map in `regions.bin` beside that. What `world:names` does, and what `world:origin` does after it
+ * has worked the map out, so that the two are never left out of step. See `src/names.ts` and `src/regions.ts`.
  */
 
 /** Which files hold which kind of name: Natural Earth's own, fetched by `world:fetch-all`. */
@@ -23,6 +26,12 @@ const SOURCES: readonly { file: string; kind: NameKind }[] = [
   { file: 'ne_10m_lakes_europe', kind: 'lake' },
   { file: 'ne_10m_lakes_north_america', kind: 'lake' },
   { file: 'ne_10m_geography_regions_elevation_points', kind: 'peak' },
+];
+
+/** Which files hold the named regions. Optional: without them the rest is still carried. */
+const REGIONS: readonly { file: string; kind: RegionKind }[] = [
+  { file: 'ne_10m_geography_marine_polys', kind: 'sea' },
+  { file: 'ne_10m_geography_regions_polys', kind: 'land' },
 ];
 
 interface SourceFeature {
@@ -57,8 +66,26 @@ export async function writeNames(
     earth.push(...namesIn(file, kind, features));
   }
   const { carried, lost } = carryNames(earth, carry);
-  const counts = { river: 0, lake: 0, peak: 0 };
+  const counts = { river: 0, lake: 0, peak: 0, sea: 0, land: 0 };
   for (const one of carried) counts[one.kind] += 1;
+
+  const regions: EarthRegion[] = [];
+  const absent = REGIONS.filter(({ file }) => !existsSync(resolve(SOURCE_DIR, `${file}.geojson`)));
+  if (absent.length === 0) {
+    for (const { file, kind } of REGIONS) {
+      const { features } = JSON.parse(await readFile(resolve(SOURCE_DIR, `${file}.geojson`), 'utf8')) as {
+        features: SourceFeature[];
+      };
+      regions.push(...regionsIn(file, kind, features));
+    }
+    const given = regionsOf(grid, width, height, regions);
+    const both = new Uint16Array(grid.status.length * 2);
+    both.set(given.land, 0);
+    both.set(given.sea, grid.status.length);
+    await writeFile(resolve(worldDir, 'regions.bin'), new Uint8Array(both.buffer));
+    for (const k of new Set([...given.land, ...given.sea])) if (k > 0) counts[regions[k - 1]!.kind] += 1;
+  }
+
   await writeFile(
     resolve(worldDir, 'names.json'),
     `${JSON.stringify({
@@ -67,12 +94,46 @@ export async function writeNames(
       form: 'today',
       counts,
       names: carried,
+      // What the two layers of regions.bin, a land and then a sea for every square, number from one.
+      regions: regions.map(({ id, kind, name, english, feature }) => ({ id, kind, name, english, feature })),
     })}\n`,
   );
   return (
     `the names of ${master}: ${counts.river} rivers, ${counts.lake} lakes and ${counts.peak} peaks in the world, ` +
-    `${lost} gone with ground that was removed or copied`
+    `${lost} gone with ground that was removed or copied; ` +
+    (absent.length === 0
+      ? `${counts.sea} seas and ${counts.land} regions of land given to its squares`
+      : `no seas or regions, because ${absent[0]!.file} is not in world/source: npm run world:fetch-all --prefix frontend`)
   );
+}
+
+/** A source's named regions, each with its polygons. */
+function regionsIn(file: string, kind: RegionKind, features: readonly SourceFeature[]): EarthRegion[] {
+  const out: EarthRegion[] = [];
+  features.forEach((feature, at) => {
+    // Natural Earth's region polygons spell their fields in capitals and its marine ones do not.
+    const field = (key: string) => text(feature.properties[key] ?? feature.properties[key.toUpperCase()]);
+    const name = field('name');
+    if (name === undefined || feature.geometry === null) return;
+    const english = field('name_en');
+    const c = feature.geometry.coordinates as never;
+    const polygons =
+      feature.geometry.type === 'Polygon'
+        ? [c]
+        : feature.geometry.type === 'MultiPolygon'
+          ? (c as never[])
+          : [];
+    if (polygons.length === 0) return;
+    out.push({
+      id: field('wikidataid') ?? `${file}:${field('ne_id') ?? at}:${name}`,
+      kind,
+      name,
+      ...(english === undefined ? {} : { english }),
+      feature: field('featurecla') ?? kind,
+      polygons,
+    });
+  });
+  return out;
 }
 
 /** A source's named features, a river's many pieces sharing a number taken together as one river. */

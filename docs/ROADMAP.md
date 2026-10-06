@@ -76,8 +76,8 @@ and so is the origin map, the first of real names on the edited world and the ne
   cut from on Earth, with **invented land** given invented names. It is what real history will stand on,
   before 1790 as the backstory of a place and after it as the warped history `SETTING.md` promises. Six
   steps in `docs/plans/real-world-names.md`; the first two are built, the plan and the origin map, which
-  the Origin renderer shows and experiment 0016 waits on Adam's eye for, and most of the third: Earth's rivers,
-  lakes and peaks are named in the world, and seas and mountain ranges are next. Adam's own, asked for on
+  the Origin renderer shows and experiment 0016 waits on Adam's eye for, and the third: Earth's rivers, lakes,
+  peaks, seas and named lands are in the world. Next are the towns of 1790. Adam's own, asked for on
   2026-10-06.
 - **0.4** Local infrastructure: MongoDB replica set and RabbitMQ in Compose
 - **0.8** Testcontainers smoke test on MongoDB and RabbitMQ

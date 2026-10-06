@@ -85,7 +85,7 @@ tiles go through, that same step **also**:
   under a minute a master. Without it a master's rivers stand still; `cut it` in the panel does it too.
 - **Re-works the origin map** if the master changed: `npm run world:origin --prefix frontend`, two minutes a
   master. It says where on Earth each part of the master came from and which land is invented, and the Origin
-  renderer draws it; then it carries Earth's named rivers, lakes and peaks into the world through it. It prints
+  renderer draws it; then it carries Earth's named rivers, lakes, peaks, seas and lands into the world. It prints
   how much of the land is from Earth, invented and copied, and how many names went nowhere: the numbers to report.
 - **Re-works the sprite map** if the master, `world/biomes.json` or the generator changed:
   `npm run world:sprites --prefix frontend`, half a minute a master, and it prints the density of every

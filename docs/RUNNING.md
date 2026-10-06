@@ -40,8 +40,9 @@ stage alone, with none of the debug panel in it (decision record 0079).
   carried through, which lies on the painted coast wherever the map has a piece right. With it showing, the log
   says how much of the land is from Earth, invented and copied, and a click on the map says under `origin` where
   that place came from and what Earth named there: `from Earth at 51.51°N 0.87°W, moved 1.2° (sure 1.00); by the
-  Thames`, `at Vänern`, `near Mont Blanc, 4,807 m`, or `invented land`. The names are today's, not yet 1790's. It
-  reads what `world:origin` wrote, below. See `docs/plans/real-world-names.md` and experiment 0016.
+  Thames`, `at Vänern`, `in the Alps (range)`, `in India (peninsula)`, `near Mont Blanc, 4,807 m`, or `invented
+  land`. Open sea came from nowhere, so it is named by the coast nearest it: `sea, the Baltic Sea, named by the
+  nearest coast`. The names are today's, not yet 1790's. It reads what `world:origin` wrote, below. See `docs/plans/real-world-names.md` and experiment 0016.
 - The water moves, from about zoom 8.5 in: depth, waves lit by a sun in the north-west, caustics on the bottom
   of the shallows, and surf along the shore, over every renderer. It is the **Water** part of the **Shaders**
   section, below Debug map, which holds a part for each shader that is a look and nothing more, with `off`,
@@ -204,7 +205,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   Earth every square of 32 master pixels was cut from, against `world/master/terrain-base.png`, which is plain
   Earth (`-- --from <master>` names another). It writes `origin/` beside the master's tiles: the map, sixteen
   megabytes, and `origin.png`, the picture the Origin renderer lays on the world; then it carries Natural Earth's
-  named rivers, lakes and peaks from `world/source` through it into `names.json` beside them, three megabytes.
+  named rivers, lakes and peaks from `world/source` through it into `names.json` beside them, three megabytes,
+  and gives every square the named sea and stretch of land it is in or by, in `regions.bin`.
   `npm run world:names --prefix frontend` carries the names again without working the map out, in under a
   second. Two minutes a master; the quick start makes it when it is missing, and a master repainted makes it stale. It prints how much of the land
   is from Earth, invented and copied. Moving land with Nearest Neighbour keeps it traceable; land painted fresh,

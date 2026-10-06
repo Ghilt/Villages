@@ -104,7 +104,7 @@ export function whereFrom(
 ): WhereFrom {
   const mx = Math.min(width - 1, Math.max(0, ((lng + 180) / 360) * width));
   const my = Math.min(height - 1, Math.max(0, ((90 - lat) / 180) * height));
-  const k = Math.floor(my / grid.cell) * grid.columns + Math.floor(mx / grid.cell);
+  const k = squareAt(grid, lng, lat, width, height);
   const status = grid.status[k];
   if (status === undefined || status === ORIGIN_SEA) return { kind: 'sea' };
   if (status === ORIGIN_INVENTED) return { kind: 'invented', agreement: grid.agreement[k]! };
@@ -118,4 +118,11 @@ export function whereFrom(
     lat: 90 - (v / height) * 180,
     agreement: grid.agreement[k]!,
   };
+}
+
+/** Which square of the origin map a world longitude and latitude falls in, for a master `width` by `height`. */
+export function squareAt(grid: OriginGrid, lng: number, lat: number, width: number, height: number): number {
+  const mx = Math.min(width - 1, Math.max(0, ((lng + 180) / 360) * width));
+  const my = Math.min(height - 1, Math.max(0, ((90 - lat) / 180) * height));
+  return Math.floor(my / grid.cell) * grid.columns + Math.floor(mx / grid.cell);
 }
