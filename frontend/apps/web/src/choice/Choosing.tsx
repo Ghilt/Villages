@@ -14,7 +14,7 @@ import type { OmenLine } from '../ui/report/ReportCard';
 import { RolledHand } from '../ui/report/RolledHand';
 import type { HandForm } from '../ui/report/RolledHand';
 import { usePlay } from '../ui/report/usePlay';
-import { handExpected, openingOut } from './rolling';
+import { handExpected, openingOut, overOf } from './rolling';
 import { TakeAction, gives } from './TakeAction';
 
 /** An omen off the wire as the report card shows it. */
@@ -95,7 +95,7 @@ export function Choosing({ room, along, looking }: { room: Room; along: Along; l
   if (rolled !== undefined) {
     const form: HandForm = along === null ? 'full' : 'stacked';
     return (
-      <section className={`choice choice--hand choice--${form}`} aria-live="polite">
+      <section className={`choice choice--hand choice--${form}${overOf(along)}`} aria-live="polite">
         <header className="choice__head">
           <h2 className="choice__prompt">{choice.prompt}</h2>
           <PaneSizeControl room={room} />
@@ -117,7 +117,7 @@ export function Choosing({ room, along, looking }: { room: Room; along: Along; l
   const shown = Math.min(at, choice.options.length - 1);
 
   return (
-    <section className={carousel ? 'choice choice--carousel' : 'choice'} aria-live="polite">
+    <section className={`choice${carousel ? ' choice--carousel' : ''}${overOf(along)}`} aria-live="polite">
       <header className="choice__head">
         <h2 className="choice__prompt">{choice.prompt}</h2>
         <PaneSizeControl room={room} />
@@ -226,8 +226,10 @@ function Parchment({
         disabled={answering}
         onPress={() => takeOption(choice, option)}
       >
-        <p className="ui-body">{option.detail}</p>
-        <OmenStrip omens={omens.filter((omen) => option.omens?.includes(omen.key))} small />
+        <div className="choice__more">
+          <p className="ui-body">{option.detail}</p>
+          <OmenStrip omens={omens.filter((omen) => option.omens?.includes(omen.key))} small />
+        </div>
       </Card>
     );
   }

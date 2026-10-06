@@ -1,3 +1,5 @@
+import type { Along } from '../stage/panes';
+
 /**
  * Whether this page pressed Take action and is waiting on the hand it rolled: the hand that answers it is played,
  * the report card filling and the stamp landing, and any other - one already pending at a reload, one the world
@@ -26,4 +28,12 @@ export function handExpected(): boolean {
   const was = awaiting;
   awaiting = false;
   return was;
+}
+
+/**
+ * The class the letter takes opened out on a desktop, lying over everything: what it says fades in once its box
+ * has grown there, the cards' details a beat after their titles. See `choice.css` and decision record 0086.
+ */
+export function overOf(along: Along): string {
+  return along === null ? ' choice--over' : '';
 }

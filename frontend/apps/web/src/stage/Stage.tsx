@@ -79,6 +79,15 @@ export function Stage({ stage, panes, overlays }: StageProps) {
   // one of the things this memo already depends on - so a cached answer is never stale.
   const box = useMemo(() => bayLayout(stage, asking, wants, formNow()), [stage, asking, wants]);
 
+  // Whether the tiles may glide to where they are going, which they do in the spread whenever a size was asked
+  // for: not while the stage itself is being resized or crossing the fold, when everything follows the window at
+  // once and a glide would trail behind the grip. See decision record 0086.
+  const was = useRef({ w: stage.w, h: stage.h, form: box.form });
+  const easing = was.current.w === stage.w && was.current.h === stage.h && was.current.form === box.form;
+  useLayoutEffect(() => {
+    was.current = { w: stage.w, h: stage.h, form: box.form };
+  });
+
   // The manager asks this when it needs to know whether putting a window somewhere means anything, and to
   // say "top" rather than "the first bay" in the log. Before any effect of the game's asks it.
   useLayoutEffect(() => stageIs(box.form, box.along), [box.form, box.along]);
@@ -204,6 +213,7 @@ export function Stage({ stage, panes, overlays }: StageProps) {
       className="stage"
       data-form={box.form}
       data-along={box.along}
+      data-easing={easing ? 'yes' : undefined}
       style={{ '--bay-first': seam } as CSSProperties}
     >
       {panes.filter((pane) => !isWindow(pane)).map((pane) => bayFor(pane.id))}
@@ -259,8 +269,14 @@ export function Stage({ stage, panes, overlays }: StageProps) {
         );
       })}
 
-      {over !== undefined && (
-        <div className="veil" aria-hidden="true" onClick={() => askFor(over.id, 'strip')} />
+      {/* Always there in the spread, so that it fades out as well as in; it takes no press while it is down. */}
+      {box.form === 'spread' && (
+        <div
+          className="veil"
+          aria-hidden="true"
+          data-up={over === undefined ? undefined : 'yes'}
+          onClick={over === undefined ? undefined : () => askFor(over.id, 'strip')}
+        />
       )}
 
       {/* The moulding over the join, and the disc that stands on it. Only where there is a join:
@@ -331,6 +347,9 @@ function useRoomOnTheRail(
     // misses exactly the case that matters. Its children keep their own heights, so they are watched
     // too, and anything added to or taken out of the rail's tree asks again.
     const resized = new ResizeObserver(() => check.current());
+    // The rail itself too, because it glides to a new height when the corner below it changes size, and the
+    // room on it is what it comes to rather than where it set out from.
+    resized.observe(held);
     for (const bay of held.children) {
       const pane = bay.firstElementChild;
       if (pane !== null) {

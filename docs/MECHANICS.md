@@ -117,6 +117,9 @@ phone three, and the mechanic owns them all:
 scrolls when they do not fit. The founding letter keeps its own two drawings - three parchments across, and the
 **carousel** - and arrives at half.
 
+**On a desktop it glides** between its chip and its box over everything, the veil fading with it, and what it
+says fades in once it has landed, the cards' details a beat after their titles. See decision record 0086.
+
 **In the spread** it takes **bottom middle**, and it moves nothing whether it is put away or opened out. **On a
 phone** a question takes the map's bay, opening it to half if it was a strip, and the pane beside it keeps the
 other; a hand rolled from Take action lands where the letter already stands, and answering leaves it there,

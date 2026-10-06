@@ -58,11 +58,55 @@
   inset: 0;
   z-index: 6;
   background: color-mix(in srgb, var(--ink) 68%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--glide);
+}
+
+.veil[data-up] {
+  opacity: 1;
+  pointer-events: auto;
   cursor: pointer;
 }
 
 .bay[data-over] {
   z-index: 7;
+}
+
+/*
+ * A tile changing size or place glides there, quickly, in the spread: Adam's word of 2026-10-06.
+ *
+ * Not the floor, whose map would be redrawn at every step of it, and not while the stage itself is being resized
+ * or crossing the fold, when everything follows the window at once: `data-easing` is the stage saying which. The
+ * tile lying over the others stays over them until it has landed, and rises over them at once. Nothing glides
+ * for a player who has asked for less motion. See decision record 0086.
+ */
+.stage {
+  --glide: 160ms;
+  --glide-box:
+    left var(--glide) var(--glide-ease), top var(--glide) var(--glide-ease),
+    width var(--glide) var(--glide-ease), height var(--glide) var(--glide-ease);
+  --glide-ease: cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+.stage[data-form='spread'][data-easing] .bay:not(.bay--map),
+.stage[data-form='spread'][data-easing] .rail,
+.stage[data-form='spread'][data-easing] .tabs {
+  transition:
+    var(--glide-box),
+    z-index 0s var(--glide);
+}
+
+.stage[data-form='spread'][data-easing] .bay[data-over] {
+  transition:
+    var(--glide-box),
+    z-index 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage {
+    --glide: 0s;
+  }
 }
 
 /* A pane the player has not got up. Hidden rather than unmounted, for the reason above. */

@@ -227,3 +227,41 @@
 .choice--chip .choice__aside {
   flex: 0 1 auto;
 }
+
+/*
+ * On a desktop the letter's box glides first, and what it says fades in once it has landed: the chip as it
+ * shrinks to it, and the letter as it opens out over everything, the cards' details a beat after their titles,
+ * because the cards say more opened out than anywhere else. Two names for one fade, so that it plays again
+ * whichever way the letter went rather than only the first time. Done before a rolled hand's first omen lands.
+ * See decision record 0086.
+ */
+.choice--chip {
+  animation: choice-to-chip 120ms ease-out var(--glide, 0s) both;
+}
+
+.choice--over {
+  animation: choice-to-over 150ms ease-out var(--glide, 0s) both;
+}
+
+.choice--over .choice__more {
+  animation: choice-to-over 150ms ease-out calc(var(--glide, 0s) + 90ms) both;
+}
+
+@keyframes choice-to-chip {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes choice-to-over {
+  from {
+    opacity: 0;
+  }
+}
+
+/* The details of a rolled card, one under another as the card's own words are. */
+.choice__more {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15em;
+}

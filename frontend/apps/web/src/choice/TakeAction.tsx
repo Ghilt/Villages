@@ -8,7 +8,7 @@ import { PaneSizeControl } from '../stage/PaneSizeControl';
 import type { Along, Room } from '../stage/panes';
 import { useStore } from '../store/useStore';
 import { TextButton } from '../ui/button/Button';
-import { expectHand, openingOut } from './rolling';
+import { expectHand, openingOut, overOf } from './rolling';
 
 /**
  * What a roll costs in wealth, as the page says it before pressing. The server's `ROLL_PRICE` is the price, and a
@@ -69,7 +69,7 @@ export function TakeAction({ room, along, looking }: { room: Room; along: Along;
   }
 
   return (
-    <section className="choice choice--idle">
+    <section className={`choice choice--idle${overOf(along)}`}>
       <header className="choice__head">
         <span className="choice__aside" />
         <PaneSizeControl room={room} />

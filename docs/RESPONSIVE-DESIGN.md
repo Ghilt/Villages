@@ -172,6 +172,11 @@ stage before it gives up anything else.
 **An empty tile takes no room.** Nothing in the corner and the column runs to the bottom; nothing along the
 bottom and the floor keeps the whole bottom of the stage. A tile is never reserved against a future.
 
+**A tile changing size glides there, in 160 milliseconds**, whenever a size was asked for: never the floor,
+never while the stage itself is resized or crossing the fold, and never for a player who has asked for less
+motion. The veil fades in and out with bottom middle, and what bottom middle says fades in once its box has
+landed. See decision record 0086.
+
 **A tile that runs out of room draws what is in it smaller**, by a container query on the tile, which is the
 same thing the pane does on a phone. It **never changes form**: only the stage's shorter side decides
 whether it is the spread or the bays.
