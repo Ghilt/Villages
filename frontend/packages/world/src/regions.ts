@@ -20,8 +20,8 @@ export type RegionKind = 'sea' | 'land';
 export interface EarthRegion {
   readonly id: string;
   readonly kind: RegionKind;
+  /** Its name in English, where the source gives one. */
   readonly name: string;
-  readonly english?: string;
   /** What sort of region the source says it is: a sea, a bay, a strait; a range, a desert, a plateau. */
   readonly feature: string;
   /** Its polygons, each a list of rings. */

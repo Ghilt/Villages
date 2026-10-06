@@ -9,7 +9,7 @@ import type { EarthName, NameKind } from '../../src/names.ts';
 import { toWorld, wayBackOf } from '../../src/originBack.ts';
 import type { OriginGrid } from '../../src/originFile.ts';
 
-import { SOURCE_DIR } from './paths.ts';
+import { NAMES_DIR, SOURCE_DIR } from './paths.ts';
 
 /**
  * Earth's named rivers, lakes and peaks, read out of Natural Earth in `world/source` and carried through a
@@ -65,8 +65,10 @@ export async function writeNames(
     };
     earth.push(...namesIn(file, kind, features));
   }
+  const towns = await townsOf1790();
+  earth.push(...towns.towns);
   const { carried, lost } = carryNames(earth, carry);
-  const counts = { river: 0, lake: 0, peak: 0, sea: 0, land: 0 };
+  const counts = { river: 0, lake: 0, peak: 0, town: 0, sea: 0, land: 0 };
   for (const one of carried) counts[one.kind] += 1;
 
   const regions: EarthRegion[] = [];
@@ -95,12 +97,12 @@ export async function writeNames(
       counts,
       names: carried,
       // What the two layers of regions.bin, a land and then a sea for every square, number from one.
-      regions: regions.map(({ id, kind, name, english, feature }) => ({ id, kind, name, english, feature })),
+      regions: regions.map(({ id, kind, name, feature }) => ({ id, kind, name, feature })),
     })}\n`,
   );
   return (
-    `the names of ${master}: ${counts.river} rivers, ${counts.lake} lakes and ${counts.peak} peaks in the world, ` +
-    `${lost} gone with ground that was removed or copied; ` +
+    `the names of ${master}: ${counts.town} towns of 1790, ${counts.river} rivers, ${counts.lake} lakes and ` +
+    `${counts.peak} peaks in the world, ${lost} gone with ground that was removed or copied; ${towns.said}; ` +
     (absent.length === 0
       ? `${counts.sea} seas and ${counts.land} regions of land given to its squares`
       : `no seas or regions, because ${absent[0]!.file} is not in world/source: npm run world:fetch-all --prefix frontend`)
@@ -113,9 +115,9 @@ function regionsIn(file: string, kind: RegionKind, features: readonly SourceFeat
   features.forEach((feature, at) => {
     // Natural Earth's region polygons spell their fields in capitals and its marine ones do not.
     const field = (key: string) => text(feature.properties[key] ?? feature.properties[key.toUpperCase()]);
-    const name = field('name');
+    // In English, Adam's choice of 2026-10-06.
+    const name = field('name_en') ?? field('name');
     if (name === undefined || feature.geometry === null) return;
-    const english = field('name_en');
     const c = feature.geometry.coordinates as never;
     const polygons =
       feature.geometry.type === 'Polygon'
@@ -128,7 +130,6 @@ function regionsIn(file: string, kind: RegionKind, features: readonly SourceFeat
       id: field('wikidataid') ?? `${file}:${field('ne_id') ?? at}:${name}`,
       kind,
       name,
-      ...(english === undefined ? {} : { english }),
       feature: field('featurecla') ?? kind,
       polygons,
     });
@@ -140,17 +141,18 @@ function regionsIn(file: string, kind: RegionKind, features: readonly SourceFeat
 function namesIn(file: string, kind: NameKind, features: readonly SourceFeature[]): EarthName[] {
   const together = new Map<string, EarthName & { lines: [number, number][][] }>();
   features.forEach((feature, at) => {
-    const name = text(feature.properties['name']);
-    if (name === undefined || feature.geometry === null) return;
+    const local = text(feature.properties['name']);
+    if (local === undefined || feature.geometry === null) return;
+    // In English, Adam's choice of 2026-10-06, with the source's own name beside it where it differs.
+    const name = text(feature.properties['name_en']) ?? local;
     const number = text(feature.properties['rivernum']) ?? text(feature.properties['ne_id']) ?? String(at);
-    const id = text(feature.properties['wikidataid']) ?? `${file}:${number}:${name}`;
-    const english = text(feature.properties['name_en']);
+    const id = text(feature.properties['wikidataid']) ?? `${file}:${number}:${local}`;
     const elevation = feature.properties['elevation'];
     const one = together.get(id) ?? {
       id,
       kind,
       name,
-      ...(english === undefined ? {} : { english }),
+      ...(local === name ? {} : { also: local }),
       ...(typeof elevation === 'number' ? { elevation } : {}),
       lines: [],
     };
@@ -159,6 +161,52 @@ function namesIn(file: string, kind: NameKind, features: readonly SourceFeature[
   });
   return [...together.values()];
 }
+
+/**
+ * The towns of 1790: every place in Natural Earth's populated places that `world/names/1790.json` says
+ * stood then, under the name it gives, and how many it says had not been founded or has not reviewed yet.
+ */
+async function townsOf1790(): Promise<{ towns: EarthName[]; said: string }> {
+  const reviewPath = resolve(NAMES_DIR, '1790.json');
+  const placesPath = resolve(SOURCE_DIR, `${PLACES}.geojson`);
+  if (!existsSync(reviewPath) || !existsSync(placesPath)) {
+    return {
+      towns: [],
+      said: `no towns, because ${existsSync(reviewPath) ? placesPath : reviewPath} is missing`,
+    };
+  }
+  const review = (JSON.parse(await readFile(reviewPath, 'utf8')) as { towns: Record<string, Review> }).towns;
+  const { features } = JSON.parse(await readFile(placesPath, 'utf8')) as { features: SourceFeature[] };
+  const towns: EarthName[] = [];
+  let unborn = 0;
+  for (const feature of features) {
+    const id = text(feature.properties['WIKIDATAID']);
+    const decided = id === undefined ? undefined : review[id];
+    if (decided === undefined || feature.geometry === null) continue;
+    const [then, today] = decided;
+    if (then === null) {
+      unborn += 1;
+      continue;
+    }
+    towns.push({
+      id: id!,
+      kind: 'town',
+      name: then,
+      ...(today === then ? {} : { also: today }),
+      lines: linesOf(feature.geometry),
+    });
+  }
+  return {
+    towns,
+    said: `${unborn} reviewed places not yet founded in 1790, ${features.length - towns.length - unborn} not reviewed yet`,
+  };
+}
+
+/** Natural Earth's towns of today, which the review of 1790 is made against. */
+const PLACES = 'ne_10m_populated_places';
+
+/** A town as the review decides it: its name in 1790 or null, today's, and why they differ. */
+type Review = [string | null, string, string?];
 
 function text(value: unknown): string | undefined {
   if (typeof value === 'number') return String(value);

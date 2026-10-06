@@ -60,6 +60,11 @@ export const ART_DIR = resolve(REPO, 'frontend', 'apps', 'web', 'public', 'art')
 export const ART_CACHE_DIR = resolve(REPO, 'frontend', 'node_modules', '.cache', 'villages-art');
 /** The master image a human edits, and the palette strip to pick its colours from. */
 export const MASTER_DIR = resolve(REPO, 'world', 'master');
+/**
+ * What Earth's names were in 1790, as a person decided them: `1790.json`, the review of which towns stood
+ * and what English called them. Committed, as the master is. See `docs/plans/real-world-names.md`.
+ */
+export const NAMES_DIR = resolve(REPO, 'world', 'names');
 /** Downloaded Natural Earth files. Not committed: they are raw material, not our world. */
 export const SOURCE_DIR = resolve(REPO, 'world', 'source');
 /** Where the world the game plays on goes, served statically by the dev server and the build. */

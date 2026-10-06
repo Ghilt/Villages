@@ -199,15 +199,22 @@ Each its own commit, and the order is a suggestion.
    in or by (`regions.ts`): 286 seas and 880 lands - ranges, deserts, plateaus, peninsulas, islands. Open sea
    has no square from Earth, so it takes its sea from the nearest coast's placement carried out across the
    water.
-4. **The towns of 1790**: fetched, reviewed, and carried through.
+4. **The towns of 1790**: fetched, reviewed, and carried through. **First pass built 2026-10-06**: Natural
+   Earth's populated places say where a town is today; the review in `world/names/1790.json`, keyed by
+   Wikidata id, says whether it stood on the first of January 1790 and what English called it then, with a
+   reason for every name that differs. It covers the 522 places Natural Earth ranks highest today and some two
+   hundred more that mattered then: 536 stood, 200 did not, 295 had another name. 535 are in the world; the
+   ground of Sining went into invented land and Male's atoll is smaller than a square. Natural Earth's ranking
+   is today's, which is why the additions were needed: more regions are reviewed in later passes, and Acre,
+   Mocha, Murshidabad, Tetuan, Mogador, Sallee, Kilwa and Villa Rica need a source beside it.
 5. **Invented land named.**
 6. **Seats taken from real towns**, if Adam wants them.
 
 ## Open questions
 
-- **Which language.** The suggestion is to keep each place's local name of 1790 as its name - Danzig,
-  Wien, Kraków - with the English of 1790 beside it - Dantzick, Vienna, Cracow - and to decide later which
-  the player is shown.
+- ~~**Which language.**~~ **Answered 2026-10-06: English.** Every name is shown in English: a town's as an
+  English writer of 1790 would have written it - Dantzic, Cracow, Leghorn, Canton - and where English had no
+  name of its own, today's English one. Today's name, or a river's own, goes beside it.
 - **This partly undoes 0017.** Experiment 0001 found that removing every place name mattered as much as
   moving the coast: real names make the world read as Earth again. The suggestion is to use them as they
   were, since that is what Adam asked for, and amend 0017 when the first name appears. Bending names the

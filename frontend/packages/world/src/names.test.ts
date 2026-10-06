@@ -9,8 +9,8 @@ const carry: Carry = (lng, lat) => (lng > 50 ? null : [lng + 10, lat]);
 const river: EarthName = {
   id: 'Q1',
   kind: 'river',
-  name: 'Dnipro',
-  english: 'Dnieper',
+  name: 'Dnieper',
+  also: 'Dnipro',
   lines: [
     [
       [40, 10],
@@ -43,6 +43,7 @@ const halfLake: EarthName = {
   lines: [lake.lines[0]!.map(([x, y]) => [x + 30, y] as const)],
 };
 const peak: EarthName = { id: 'Q4', kind: 'peak', name: 'Elbrus', elevation: 5642, lines: [[[30, 40]]] };
+const town: EarthName = { id: 'Q1792', kind: 'town', name: 'Dantzic', also: 'Gdańsk', lines: [[[18, 54]]] };
 
 describe('carrying names into the world', () => {
   const { carried, lost } = carryNames([river, lake, halfLake, peak], carry, 0);
@@ -60,7 +61,7 @@ describe('carrying names into the world', () => {
         [56, 11],
       ],
     ]);
-    expect(dnipro.english).toBe('Dnieper');
+    expect(dnipro.also).toBe('Dnipro');
     expect(carried.find((one) => one.id === 'Q4')!.at).toEqual([40, 40]);
   });
 
@@ -94,12 +95,18 @@ describe('carrying names into the world', () => {
 });
 
 describe('what is named at a place', () => {
-  const { carried } = carryNames([river, lake, peak], carry, 0);
+  const { carried } = carryNames([river, lake, peak, town], carry, 0);
 
   it('names the river a place is by, the lake it is in and the peak it is near', () => {
-    expect(namesAt(carried, 54, 10.02).river?.name).toBe('Dnipro');
+    expect(namesAt(carried, 54, 10.02).river?.name).toBe('Dnieper');
     expect(namesAt(carried, 30.5, 20.5).lake?.name).toBe('Ladoga');
     expect(namesAt(carried, 40.1, 40.1).peak?.name).toBe('Elbrus');
+  });
+
+  it('names the town a place is near, with what it is called today', () => {
+    const near = namesAt(carried, 28.1, 54.1).town;
+    expect([near?.name, near?.also]).toEqual(['Dantzic', 'Gdańsk']);
+    expect(namesAt(carried, 28.5, 54).town).toBeUndefined();
   });
 
   it('names nothing far from all of them', () => {

@@ -48,6 +48,7 @@ const NAMED_LAYERS = [
   'ne_10m_geography_regions_elevation_points',
   'ne_10m_geography_marine_polys',
   'ne_10m_geography_regions_polys',
+  'ne_10m_populated_places',
 ] as const;
 
 export const WORLD_SOURCES: readonly WorldSource[] = [
@@ -101,6 +102,6 @@ export const WORLD_SOURCES: readonly WorldSource[] = [
     url: `${NATURAL_EARTH}/${layer}.geojson`,
     into: `${layer}.geojson`,
     credit: 'Natural Earth, public domain',
-    what: 'Named peaks, seas and land regions, carried into the world by world:names. See docs/plans/real-world-names.md.',
+    what: 'Named peaks, seas, land regions and towns, carried into the world by world:names. See docs/plans/real-world-names.md.',
   })),
 ];

@@ -1,25 +1,27 @@
 import { simplify } from './simplify.ts';
 
 /**
- * Earth's named rivers, lakes and peaks, carried into the world through the origin map, and the question a
- * page asks of them: what is named here? See `docs/plans/real-world-names.md`.
+ * Earth's named rivers, lakes, peaks and towns, carried into the world through the origin map, and the
+ * question a page asks of them: what is named here? See `docs/plans/real-world-names.md`.
  *
- * The names are the sources' own, today's, and not yet the ones of 1790: choosing those is a review of its
- * own. Every one is keyed by the source's identity of it - a Wikidata id where there is one - so that it keeps
- * its name when Adam repaints, and it lands wherever its ground went. Ground he removed or copied takes it
- * nowhere; a river is broken where it leaves Earth's ground or where Adam cut through it, and each run of it
- * keeps the name.
+ * Every name is in English, Adam's choice of 2026-10-06. A town's is the one an English writer of 1790 would
+ * have used, from the review in `world/names/1790.json`; a river's, lake's or peak's is today's English name,
+ * until a review gives it its 1790 one. Every one is keyed by the source's identity of it - a Wikidata id
+ * where there is one - so that it keeps its name when Adam repaints, and it lands wherever its ground went.
+ * Ground he removed or copied takes it nowhere; a river is broken where it leaves Earth's ground or where Adam
+ * cut through it, and each run of it keeps the name.
  */
 
-export type NameKind = 'river' | 'lake' | 'peak';
+export type NameKind = 'river' | 'lake' | 'peak' | 'town';
 
 /** A named thing on plain Earth, in Earth's longitude and latitude, as a source gives it. */
 export interface EarthName {
   readonly id: string;
   readonly kind: NameKind;
+  /** The name to show, in English. */
   readonly name: string;
-  /** The English name, where the source gives one and it differs. */
-  readonly english?: string;
+  /** Another name worth knowing: a town's today, where it differs; a river's own, where English has another. */
+  readonly also?: string;
   /** Metres, for a peak. */
   readonly elevation?: number;
   /** A river's runs, a lake's outlines, or a peak's one point, as `[longitude, latitude]`. */
@@ -31,7 +33,7 @@ export interface WorldName {
   readonly id: string;
   readonly kind: NameKind;
   readonly name: string;
-  readonly english?: string;
+  readonly also?: string;
   readonly elevation?: number;
   /** Where its name would be written: a peak's top, the middle of a river's longest run, a lake's middle. */
   readonly at: readonly [number, number];
@@ -62,7 +64,7 @@ export function carryNames(
           tolerance,
         ).map(({ x, y }) => [round(x), round(y)] as const),
       )
-      .filter((run) => run.length >= (name.kind === 'peak' ? 1 : 2));
+      .filter((run) => run.length >= (isPoint(name.kind) ? 1 : 2));
     if (kept.length === 0) {
       lost += 1;
       continue;
@@ -73,10 +75,10 @@ export function carryNames(
       id: name.id,
       kind: name.kind,
       name: name.name,
-      ...(name.english === undefined || name.english === name.name ? {} : { english: name.english }),
+      ...(name.also === undefined || name.also === name.name ? {} : { also: name.also }),
       ...(name.elevation === undefined ? {} : { elevation: name.elevation }),
       at,
-      lines: name.kind === 'peak' ? [] : kept,
+      lines: isPoint(name.kind) ? [] : kept,
     });
   }
   return { carried, lost };
@@ -141,23 +143,29 @@ function round(value: number): number {
   return Math.round(value * 10000) / 10000;
 }
 
+/** A peak and a town are points; a river and a lake are lines. */
+function isPoint(kind: NameKind): boolean {
+  return kind === 'peak' || kind === 'town';
+}
+
 /** How near a thing must be, in kilometres, to be the one a place is by, in or near. */
 const BY_A_RIVER = 6;
 const BY_A_LAKE = 2;
 const NEAR_A_PEAK = 30;
+const NEAR_A_TOWN = 25;
 
 /** What is named at a place in the world: the river it is by, the lake it is in or by, the peak it is near. */
 export function namesAt(
   names: readonly WorldName[],
   lng: number,
   lat: number,
-): { river?: WorldName; lake?: WorldName; peak?: WorldName } {
-  const found: { river?: WorldName; lake?: WorldName; peak?: WorldName } = {};
-  const nearest = { river: BY_A_RIVER, lake: BY_A_LAKE, peak: NEAR_A_PEAK };
+): { [kind in NameKind]?: WorldName } {
+  const found: { [kind in NameKind]?: WorldName } = {};
+  const nearest = { river: BY_A_RIVER, lake: BY_A_LAKE, peak: NEAR_A_PEAK, town: NEAR_A_TOWN };
   const across = 111.32 * Math.cos((lat * Math.PI) / 180);
   for (const name of names) {
     let distance: number;
-    if (name.kind === 'peak') {
+    if (isPoint(name.kind)) {
       distance = Math.hypot((name.at[0] - lng) * across, (name.at[1] - lat) * 111.32);
     } else {
       distance = Infinity;

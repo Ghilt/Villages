@@ -18,7 +18,6 @@ import { worldRootOf } from './masters';
 interface NamedRegion {
   readonly kind: 'sea' | 'land';
   readonly name: string;
-  readonly english?: string;
   readonly feature: string;
 }
 
@@ -95,7 +94,7 @@ export function watchOrigin(map: maplibregl.Map, master: string): () => void {
       'origin',
       answer.names === null
         ? `no names carried into ${master} yet: npm run world:names --prefix frontend -- ${master}`
-        : `${answer.names.length} of Earth's names carried into ${master}: rivers, lakes and peaks, today's names, not yet 1790's` +
+        : `${answer.names.length} of Earth's names carried into ${master}, in English: the towns of 1790, and rivers, lakes and peaks under today's names` +
             (answer.regions === null
               ? ', and no seas or regions'
               : `, and ${answer.regions.list.length} named seas and regions of land`),
@@ -134,11 +133,15 @@ export function describe(found: WhereFrom, lng: number, lat: number): string {
     : `from Earth at ${where}, ${travel} (${sure})`;
 }
 
-/** The river a place is by, the lake it is in or by, and the peak it is near, as the end of a line. */
+/**
+ * The town of 1790 a place is near, the river it is by, the lake it is in or by and the peak it is near, as
+ * the end of a line, every one in English with its other name after it: a town's today, a river's own.
+ */
 export function named(names: readonly WorldName[], lng: number, lat: number): string {
-  const { river, lake, peak } = namesAt(names, lng, lat);
-  const call = (one: WorldName) => (one.english === undefined ? one.name : `${one.name} (${one.english})`);
+  const { town, river, lake, peak } = namesAt(names, lng, lat);
+  const call = (one: WorldName) => (one.also === undefined ? one.name : `${one.name} (${one.also})`);
   const parts = [
+    town === undefined ? null : `near ${town.name}${town.also === undefined ? '' : ` (${town.also} today)`}`,
     river === undefined ? null : `by the ${call(river)}`,
     lake === undefined ? null : `at ${call(lake)}`,
     peak === undefined

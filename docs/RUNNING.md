@@ -41,8 +41,9 @@ stage alone, with none of the debug panel in it (decision record 0079).
   says how much of the land is from Earth, invented and copied, and a click on the map says under `origin` where
   that place came from and what Earth named there: `from Earth at 51.51°N 0.87°W, moved 1.2° (sure 1.00); by the
   Thames`, `at Vänern`, `in the Alps (range)`, `in India (peninsula)`, `near Mont Blanc, 4,807 m`, or `invented
-  land`. Open sea came from nowhere, so it is named by the coast nearest it: `sea, the Baltic Sea, named by the
-  nearest coast`. The names are today's, not yet 1790's. It reads what `world:origin` wrote, below. See `docs/plans/real-world-names.md` and experiment 0016.
+  land`, and the town of 1790 nearby: `near Dantzic (Gdańsk today)`. Open sea came from nowhere, so it is named
+  by the coast nearest it: `sea, the Baltic Sea, named by the nearest coast`. Every name is in English: a
+  town's as of 1790, a river's, lake's or peak's as of today. It reads what `world:origin` wrote, below. See `docs/plans/real-world-names.md` and experiment 0016.
 - The water moves, from about zoom 8.5 in: depth, waves lit by a sun in the north-west, caustics on the bottom
   of the shallows, and surf along the shore, over every renderer. It is the **Water** part of the **Shaders**
   section, below Debug map, which holds a part for each shader that is a look and nothing more, with `off`,
@@ -183,6 +184,11 @@ stage alone, with none of the debug panel in it (decision record 0079).
 
 ## Adam's folders and the tools that cut them
 
+- The towns of 1790: `world/names/1790.json`, one line a town, keyed by its Wikidata id: the name an English
+  writer of 1790 would have used, or `null` if it had not been founded; today's name, to read by; and why they
+  differ. An agent's review, Adam's to correct; a town not in it is not carried. `world:names` reads it, and
+  a change shows on the next click under the Origin renderer. See `docs/plans/real-world-names.md`.
+
 - What grows where: `world/biomes.json`, hand-edited, one entry a kind and one a biome. What reads it is
   `npm run world:sprites --prefix frontend`, which works out a biome for every sixteen world units and
   where the scenery clumps, and writes a **sprite map**: the biomes beside the cut tiles, the stands into
@@ -205,7 +211,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   Earth every square of 32 master pixels was cut from, against `world/master/terrain-base.png`, which is plain
   Earth (`-- --from <master>` names another). It writes `origin/` beside the master's tiles: the map, sixteen
   megabytes, and `origin.png`, the picture the Origin renderer lays on the world; then it carries Natural Earth's
-  named rivers, lakes and peaks from `world/source` through it into `names.json` beside them, three megabytes,
+  named rivers, lakes and peaks from `world/source`, and the towns `world/names/1790.json` says stood in 1790,
+  through it into `names.json` beside them, three megabytes,
   and gives every square the named sea and stretch of land it is in or by, in `regions.bin`.
   `npm run world:names --prefix frontend` carries the names again without working the map out, in under a
   second. Two minutes a master; the quick start makes it when it is missing, and a master repainted makes it stale. It prints how much of the land
