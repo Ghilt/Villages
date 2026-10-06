@@ -5,6 +5,8 @@ import {
   BAY_LEAST,
   bayLayout,
   type Box,
+  CHIP_LEAST,
+  CHIP_WANTS,
   COLUMN_LEAST,
   COLUMN_WANTS,
   FOLDS_UNDER,
@@ -12,7 +14,7 @@ import {
   GUTTER,
   inside,
   isTabbed,
-  MIDDLE_LEAST,
+  MIDDLE_WANTS,
   overlap,
   type Rect,
   RIGHT_LEAST,
@@ -35,8 +37,11 @@ const BIG: Asking = 'big';
 const SMALL: Asking = { small: 120 };
 const STRIP: Asking = { small: 44 };
 
-/** What the spread looks like with everything in it: a rail, a house in the corner, a choice pending. */
-const EVERYTHING: SpreadWants = { left: true, bottomLeft: 200, bottomMiddle: 132 };
+/** What the spread looks like with everything in it: a rail, a house in the corner, the letter put away. */
+const EVERYTHING: SpreadWants = { left: true, bottomLeft: 200, bottomMiddle: 'strip' };
+
+/** The same, with the letter opened out over it all. */
+const OPENED: SpreadWants = { ...EVERYTHING, bottomMiddle: 768 };
 
 /** The same, with the corner opened out on a pane that asks to reach along the bottom. */
 const REACHING: SpreadWants = { ...EVERYTHING, bottomLeft: 370, bottomLeftWide: 560 };
@@ -44,8 +49,11 @@ const REACHING: SpreadWants = { ...EVERYTHING, bottomLeft: 370, bottomLeftWide: 
 /** The same, with a dialogue standing down the right edge at its normal width. */
 const TALKING: SpreadWants = { ...EVERYTHING, right: 'normal' };
 
-const tilesOf = (box: { bays: Readonly<Record<string, Rect | null>> }): Rect[] =>
-  TILES.map((name) => box.bays[name]).filter((rect): rect is Rect => rect != null);
+/** The tiles laid out, but the one lying over the others, which is exempt from the rule that they never overlap. */
+const tilesOf = (box: ReturnType<typeof bayLayout>): Rect[] =>
+  TILES.filter((name) => name !== box.over)
+    .map((name) => box.bays[name])
+    .filter((rect): rect is Rect => rect != null);
 
 /** Whether two rectangles are at least this far apart, which is the gutter's promise. */
 const apart = (one: Rect, other: Rect, by: number): boolean =>
@@ -300,8 +308,8 @@ describe('the spread', () => {
 
   /*
    * The corner opened out, on a pane that asks to be wider than the column: the one tile whose width is
-   * not the column's. It grows along the bottom edge, the rail above keeps the column's width, and a letter
-   * along the bottom moves over. See decision record 0056.
+   * not the column's. It grows along the bottom edge, the rail above keeps the column's width, and the
+   * letter's chip moves over. See decision records 0056 and 0085.
    */
   describe('the corner reaching along the bottom', () => {
     it('takes the width it asked for and leaves the rail the column', () => {
@@ -312,7 +320,7 @@ describe('the spread', () => {
       expect(box.bays.bottomLeft?.x).toBe(0);
     });
 
-    it('moves the bottom middle over, rather than lying on it', () => {
+    it("moves the letter's chip over, rather than lying on it", () => {
       const box = spread(SPREAD, REACHING);
 
       expect(box.bays.bottomMiddle?.x ?? 0).toBeGreaterThanOrEqual(560 + GUTTER);
@@ -322,16 +330,17 @@ describe('the spread', () => {
       expect(spread(SPREAD, { ...REACHING, bottomLeftWide: 100 }).bays.bottomLeft?.w).toBe(COLUMN_WANTS);
     });
 
-    // 800 wide: the most the corner can take and leave the letter what it could always be read at.
-    it('stops where the bottom middle would go below the least it is ever left', () => {
+    // 800 wide: the most the corner can take and still leave the chip and a right column at its normal width.
+    it("stops where the letter's chip and a right column at its normal width would no longer fit", () => {
       const stage = { w: 800, h: 900 };
-      const box = spread(stage, { ...REACHING, bottomLeftWide: 5000 });
+      const box = spread(stage, { ...REACHING, bottomLeftWide: 5000, right: 'normal' });
 
-      expect(box.bays.bottomLeft?.w).toBe(stage.w - GUTTER * 2 - MIDDLE_LEAST);
-      expect(box.bays.bottomMiddle?.w).toBe(MIDDLE_LEAST);
+      expect(box.bays.bottomLeft?.w).toBe(stage.w - RIGHT_LEAST - CHIP_LEAST - GUTTER * 2);
+      expect(box.bays.bottomMiddle?.w).toBe(CHIP_LEAST);
+      expect(box.bays.right?.w).toBe(RIGHT_LEAST);
     });
 
-    // Capped against the letter whether or not the letter is there, so one arriving never resizes it.
+    // Capped against the chip whether or not the letter is there, so one arriving never resizes it.
     it('is the same width with a letter along the bottom and without one', () => {
       for (const w of [700, 800, 1000, 1568]) {
         const stage = { w, h: 900 };
@@ -342,41 +351,32 @@ describe('the spread', () => {
     });
   });
 
-  describe('the tile along the bottom middle', () => {
-    it('starts clear of the column, with air between them', () => {
-      const box = spread(SPREAD);
-      const column = box.bays.left?.w ?? 0;
+  // Put away or opened out and nothing between, and either way it moves nothing. Adam's word, 2026-10-06; 0085.
+  describe('the letter along the bottom middle', () => {
+    it('is put away to a chip a gutter off the bottom, centred in what the two columns leave', () => {
+      const box = spread(SPREAD, TALKING);
+      const chip = box.bays.bottomMiddle!;
+      const left = box.bays.left!;
+      const right = box.bays.right!;
 
-      expect(box.bays.bottomMiddle?.x ?? 0).toBeGreaterThanOrEqual(column + GUTTER);
+      expect(chip.h).toBe(STRIP_THICK);
+      expect(chip.y + chip.h).toBe(SPREAD.h - GUTTER);
+      expect(chip.x - (left.x + left.w)).toBe(right.x - (chip.x + chip.w));
+      expect(chip.w).toBe(CHIP_WANTS);
     });
 
-    it('takes the whole width when there is no column beside it', () => {
-      const box = spread(SPREAD, { left: false, bottomLeft: null, bottomMiddle: 132 });
+    it('is a chip in the middle of the floor when there is no column on either side', () => {
+      const chip = spread(SPREAD, { left: false, bottomLeft: null, bottomMiddle: 'strip' }).bays.bottomMiddle;
 
-      expect(box.bays.bottomMiddle?.x).toBe(GUTTER + Math.round((SPREAD.w - GUTTER * 2 - 736) / 2));
+      expect(chip?.x).toBe(Math.round((SPREAD.w - CHIP_WANTS) / 2));
     });
 
-    it('stops growing at a width three options still read as sentences across', () => {
-      expect(spread({ w: 3840, h: 2160 }).bays.bottomMiddle?.w).toBe(736);
-    });
-
-    /*
-     * The answer to "what if the bottom row is too narrow for both", which was a real question before the
-     * arithmetic existed to answer it.
-     *
-     * It cannot get very narrow: the column is capped at a third of the stage and the spread only happens
-     * above 600 on the shorter side, so the room left along the bottom has a floor. That floor is wide
-     * enough for the carousel, which is why the row never has to make the corner yield its tile. If someone
-     * widens the column, this is the test that says the bottom row stopped fitting.
-     */
-    it('never gets narrower than the carousel needs, at any stage the spread can be', () => {
+    // The corner reaching and the right column opened out are capped by it, so what they leave is never
+    // less than Take action can be pressed in. Taking either cap away fails this.
+    it('is never narrower than Take action can be pressed in, at any stage the spread can be', () => {
       let narrowest = Infinity;
       for (let w = 601; w <= 2400; w += 7) {
-        for (const h of [601, 700, 900, 1080, 1440]) {
-          // With the corner as it always was, and opened out reaching along the bottom as far as it can
-          // be asked to: the floor is the same either way, which is what the corner's cap is for. And with
-          // a column down the right at each of its sizes, which the letter goes between only when it keeps
-          // this much there.
+        for (const h of [601, 900, 1440]) {
           for (const wants of [EVERYTHING, REACHING, { ...REACHING, bottomLeftWide: 5000 }]) {
             for (const right of [null, 'normal', 'half', 'strip'] as const) {
               const box = spread({ w, h }, { ...wants, right });
@@ -386,13 +386,29 @@ describe('the spread', () => {
         }
       }
 
-      expect(narrowest).toBeGreaterThanOrEqual(MIDDLE_LEAST);
+      expect(narrowest).toBeGreaterThanOrEqual(CHIP_LEAST);
     });
 
-    it('sits a gutter off the bottom, because it has no edge of its own to be cut into', () => {
-      const box = spread(SPREAD);
+    it('opened out lies over everything, centred on the stage and standing where the chip stands', () => {
+      const box = spread(SPREAD, { ...OPENED, right: 'normal' });
+      const letter = box.bays.bottomMiddle!;
 
-      expect((box.bays.bottomMiddle?.y ?? 0) + (box.bays.bottomMiddle?.h ?? 0)).toBe(SPREAD.h - GUTTER);
+      expect(box.over).toBe('bottomMiddle');
+      expect(letter.w).toBe(MIDDLE_WANTS);
+      expect(letter.x).toBe((SPREAD.w - MIDDLE_WANTS) / 2);
+      expect(letter.y + letter.h).toBe(SPREAD.h - GUTTER);
+      expect(spread(SPREAD).over).toBeNull();
+    });
+
+    it('moves nothing by opening out or being put away', () => {
+      for (const w of [620, 800, 1248, 1568]) {
+        for (const right of [null, 'normal', 'half', 'strip'] as const) {
+          const away = spread({ w, h: 900 }, { ...REACHING, right });
+          const open = spread({ w, h: 900 }, { ...REACHING, bottomMiddle: 768, right });
+
+          expect({ ...open.bays, bottomMiddle: null }).toEqual({ ...away.bays, bottomMiddle: null });
+        }
+      }
     });
   });
 
@@ -444,10 +460,12 @@ describe('the spread', () => {
       }
     });
 
-    it('is put away to a strip across its top, at its normal width', () => {
+    // Along the bottom with the corner and the letter's chip, Adam's word of 2026-10-06. See 0085.
+    it('is put away to a strip across its bottom, at its normal width', () => {
       const right = spread(SPREAD, { ...TALKING, right: 'strip' }).bays.right;
+      const y = SPREAD.h - STRIP_THICK;
 
-      expect(right).toEqual({ x: SPREAD.w - RIGHT_WANTS, y: 0, w: RIGHT_WANTS, h: STRIP_THICK });
+      expect(right).toEqual({ x: SPREAD.w - RIGHT_WANTS, y, w: RIGHT_WANTS, h: STRIP_THICK });
     });
 
     it('never comes within a gutter of the corner reaching along the bottom', () => {
@@ -473,34 +491,12 @@ describe('the spread', () => {
       }
     });
 
-    describe('and the letter along the bottom', () => {
-      it('goes between the two columns, centred, while it has room to be read there', () => {
-        const box = spread(SPREAD, TALKING);
-        const letter = box.bays.bottomMiddle!;
-        const right = box.bays.right!;
-        const left = box.bays.left!;
-
-        expect(letter.x - (left.x + left.w)).toBe(right.x - (letter.x + letter.w));
-        expect(right.h).toBe(SPREAD.h);
-      });
-
-      // 800 wide: both columns at their least leave 192 between them, less than the carousel reads at.
-      it('keeps the place it has without the column where it has not, and the column stops above it', () => {
-        const stage = { w: 800, h: 900 };
-        const box = spread(stage, TALKING);
-        const letter = box.bays.bottomMiddle!;
-
-        expect(letter).toEqual(spread(stage, EVERYTHING).bays.bottomMiddle);
-        expect(box.bays.right?.h).toBe(letter.y - GUTTER);
-      });
-
-      it('keeps its place under a column put away, which stops at the top', () => {
-        const stage = { w: 800, h: 900 };
-        const box = spread(stage, { ...TALKING, right: 'strip' });
-
-        expect(box.bays.bottomMiddle).toEqual(spread(stage, EVERYTHING).bays.bottomMiddle);
-        expect(box.bays.right?.h).toBe(STRIP_THICK);
-      });
+    it('runs top to bottom whatever the letter is, and wherever the corner reaches', () => {
+      for (const w of [620, 800, 1248, 1568]) {
+        for (const bottomMiddle of [null, 'strip', 768] as const) {
+          expect(spread({ w, h: 900 }, { ...REACHING, bottomMiddle, right: 'half' }).bays.right?.h).toBe(900);
+        }
+      }
     });
   });
 });
@@ -526,7 +522,7 @@ describe('the tiles never overlap, and none leaves the stage', () => {
   const everyWant: SpreadWants[] = [];
   for (const left of [true, false]) {
     for (const bottomLeft of [null, 44, 200, 5000]) {
-      for (const bottomMiddle of [null, 132, 400]) {
+      for (const bottomMiddle of [null, 'strip', 400, 5000] as const) {
         // And the corner opened out, reaching along the bottom by as much as it can be asked to.
         for (const bottomLeftWide of [null, 560, 5000]) {
           // And the column down the right edge, at each of its three sizes or not there at all.
@@ -549,7 +545,8 @@ describe('the tiles never overlap, and none leaves the stage', () => {
         const box = bayLayout(stage, [BIG, BIG], wants, 'spread');
         const tiles = tilesOf(box);
 
-        for (const tile of tiles) {
+        // The tile lying over the others may overlap them, and still may not leave the stage.
+        for (const tile of box.over === null ? tiles : [...tiles, box.bays[box.over]!]) {
           if (tile.w <= 0 || tile.h <= 0) {
             say('empty', { stage, wants, tile });
           }

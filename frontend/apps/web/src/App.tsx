@@ -210,20 +210,19 @@ export function App({ master, devTools }: AppProps) {
   /*
    * A question arriving takes the big bay, and the small one keeps whatever was in it.
    *
-   * Only in the bays: the spread has a tile of its own along the bottom middle, and nothing is displaced
-   * to make room for it. Reading the question is the thing to do first, which is why it takes the map's
+   * Only in the bays: in the spread it opens out over everything, and nothing is displaced to make room
+   * for it. Reading the question is the thing to do first, which is why it takes the map's
    * bay rather than the other one - and the carousel is how a player puts the map back beside it. The
    * takeover remembers, so answering gives the bay back. See decision record 0044.
    */
   const asking = yourChoice?.id;
-  // A rolled hand opens out, to show its omens; any other question, the founding letter, at its middle size.
-  const handRolled = yourChoice?.options[0]?.rarity !== undefined;
   const asked = useRef(false);
   const housed = yours !== null;
   useEffect(() => {
     if (asking !== undefined) {
       asked.current = true;
-      arrive(CHOICE_PANE.id, { into: 'theMapsBay', inTheSpread: handRolled ? 'full' : 'small' });
+      // Opened out, over everything in the spread: the letter is put away or opened out there. See 0085.
+      arrive(CHOICE_PANE.id, { into: 'theMapsBay', inTheSpread: 'full' });
     } else if (asked.current && housed) {
       // Answered: in the spread the pane goes back to Take action, put away to its strip; on a phone the bay it
       // took over is given back as it always was. Not until there is a house, because the founding is answered
@@ -231,7 +230,7 @@ export function App({ master, devTools }: AppProps) {
       asked.current = false;
       if (formNow() !== 'bays') askFor(CHOICE_PANE.id, 'strip');
     }
-  }, [asking, housed, handRolled]);
+  }, [asking, housed]);
 
   /*
    * A dialogue arriving opens the pane: from its strip in the spread, and on a phone into the bay that is

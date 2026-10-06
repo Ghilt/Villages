@@ -90,14 +90,13 @@ export const COLUMN_LEAST = 288;
 export const MIDDLE_WANTS = 736;
 
 /**
- * The least the tile along the bottom middle is ever left, which is what the corner may not take from it.
- *
- * Not picked: it is what the bottom middle already came to on the narrowest spread there is, a 601-wide
- * stage with the column squeezed to its least, and the carousel reads at it. When the corner reaches along
- * the bottom it stops here, so a letter along the bottom moves over and never goes narrower than it could
- * be read at before the corner learnt to reach. See decision record 0056.
+ * How wide the letter is put away, and the least the bottom row always leaves it. Put away it is a **chip**:
+ * Take action and what it costs, or the hand that is waiting, in the middle of what the corner and the right
+ * column leave. The least caps how far they reach, so what they leave is never less than Take action can be
+ * pressed in. See decision record 0085.
  */
-export const MIDDLE_LEAST = 281;
+export const CHIP_WANTS = 280;
+export const CHIP_LEAST = 136;
 
 /**
  * How wide the column down the right edge wants to be, and the least it will be squeezed to.
@@ -198,8 +197,11 @@ export interface SpreadWants {
    * panes is up. See decision records 0056 and 0057.
    */
   bottomLeftWide?: number | null;
-  /** How tall the tile along the bottom middle is, or null when nothing is in it. */
-  bottomMiddle: number | null;
+  /**
+   * How tall the letter along the bottom middle is opened out, `strip` when it is put away to its chip, or
+   * null when nothing is in it. Two sizes and not three: in the spread it is one or the other. See 0085.
+   */
+  bottomMiddle: number | 'strip' | null;
   /**
    * How the column down the right edge is asked to be, or absent or null when nothing is in it. Which of
    * three, and not a number, because its widths are the layout's as the left column's is: a pane cannot
@@ -223,6 +225,8 @@ export interface BayLayout {
   along: 'rows' | 'columns';
   /** Where each bay is, or null when this form has no such bay or nobody asked for it. */
   bays: Readonly<Record<BayName, Rect | null>>;
+  /** The tile lying over all the others with a **veil** between, the letter opened out; exempt from no-overlap. */
+  over: BayName | null;
 }
 
 const NO_BAYS: Readonly<Record<BayName, Rect | null>> = {
@@ -299,7 +303,7 @@ function twoBays(stage: Box, asking: readonly [Asking, Asking]): BayLayout {
   // the first bay has it: better a map with nothing under it than two slivers.
   if (long < BAY_LEAST * 2) {
     const whole = { x: 0, y: 0, w: stage.w, h: stage.h };
-    return { form: 'bays', along, bays: { ...NO_BAYS, first: whole } };
+    return { form: 'bays', along, bays: { ...NO_BAYS, first: whole }, over: null };
   }
 
   const [first, second] = share(long, asking);
@@ -314,7 +318,7 @@ function twoBays(stage: Box, asking: readonly [Asking, Asking]): BayLayout {
           second: { x: first, y: 0, w: second, h: stage.h },
         };
 
-  return { form: 'bays', along, bays: { ...NO_BAYS, ...bays } };
+  return { form: 'bays', along, bays: { ...NO_BAYS, ...bays }, over: null };
 }
 
 /**
@@ -328,19 +332,21 @@ function columnWidth(stage: Box): number {
   return clamp(Math.round((stage.w - GUTTER * 2) / 3), COLUMN_LEAST, COLUMN_WANTS);
 }
 
+/** How wide the column down the right edge is at its normal size, before anything on the left is asked. */
+function rightNormal(stage: Box): number {
+  return clamp(Math.round((stage.w - GUTTER * 2) / 3), RIGHT_LEAST, RIGHT_WANTS);
+}
+
 /**
- * How wide the column down the right edge is, given the stage, how it was asked to be, and how far the
- * tiles on the left reach.
- *
- * It wants its own width and is squeezed to a third of the stage before it gives that up, as the left one
- * is; opened out it is half the stage, and never less than the normal size. Put away it is a strip at the
- * normal width. And it is never so wide that it comes within a gutter of whatever stands on the left, the
- * rail or the corner reaching along the bottom: it is cut last, from what they leave, so that its coming
- * and going resizes neither of them. See decision record 0069.
+ * How wide the column down the right edge is, given the stage, how it was asked to be, and how far what is
+ * on the left reaches. Opened out it is half the stage and never less than its normal size; put away, a strip
+ * at the normal width. Never within a gutter of what stands on the left, the rail, the corner reaching along
+ * the bottom or the letter's chip: it is cut last, from what they leave, so its coming and going resizes
+ * none of them. See decision record 0069.
  */
 function rightWidth(stage: Box, asked: RightWants, beside: number): number {
-  const normal = clamp(Math.round((stage.w - GUTTER * 2) / 3), RIGHT_LEAST, RIGHT_WANTS);
-  const wanted = asked === 'half' ? Math.max(normal, Math.round(stage.w / 2)) : normal;
+  const wanted =
+    asked === 'half' ? Math.max(rightNormal(stage), Math.round(stage.w / 2)) : rightNormal(stage);
   return Math.min(wanted, stage.w - (beside > 0 ? beside + GUTTER : GUTTER));
 }
 
@@ -355,14 +361,10 @@ function rightWidth(stage: Box, asked: RightWants, beside: number): number {
  * **An empty tile takes no room.** No pane in the corner and the column runs to the bottom; no choice
  * pending and the map keeps the whole bottom of the stage.
  *
- * **The corner can reach along the bottom**, and it is the one tile whose width is not the column's:
- * opened out it may be wider, and it grows to the right along the bottom edge while the rail above keeps
- * the column's width. The bottom middle then starts after the corner. See 0056 and 0057.
- *
- * **A second column stands down the right edge**, set into the right, top and bottom edges as the first is
- * into the left, and cut last, from what the others leave. The letter along the bottom goes between the two
- * while it has the least it is ever left there; where it has not, it keeps the place it has without the
- * column, and the column stops a gutter above it. See 0069.
+ * **The corner can reach along the bottom**, opened out, while the rail above keeps the column's width; see
+ * 0056 and 0057. **A second column stands down the right edge**, set into the right, top and bottom edges as
+ * the first is into the left, and cut last, from what the others leave; see 0069. **The letter moves
+ * nothing**: put away it is a chip in what the bottom row leaves, opened out it lies over it all; see 0085.
  */
 function tilesOnAMap(stage: Box, wants: SpreadWants): BayLayout {
   const floor = { x: 0, y: 0, w: stage.w, h: stage.h };
@@ -374,9 +376,9 @@ function tilesOnAMap(stage: Box, wants: SpreadWants): BayLayout {
   if (wants.bottomLeft !== null) {
     const tall = clamp(Math.round(wants.bottomLeft), BAY_LEAST, stage.h - GUTTER - BAY_LEAST);
     // Opened out on a pane that asks for it, the corner reaches along the bottom: never narrower than the
-    // column, and never so wide that it leaves the bottom middle less than it could be read at. Capped
-    // whether or not a letter is there, so a letter arriving never resizes the corner. See 0056.
-    const most = Math.max(column, stage.w - GUTTER * 2 - MIDDLE_LEAST);
+    // column, and never so far that the letter's chip and a right column at its normal width no longer fit
+    // beside it. Capped whether or not either is there, so neither arriving resizes the corner. See 0056.
+    const most = Math.max(column, stage.w - rightNormal(stage) - CHIP_LEAST - GUTTER * 2);
     const wide = clamp(Math.round(wants.bottomLeftWide ?? column), column, most);
     bays.bottomLeft = { x: 0, y: stage.h - tall, w: wide, h: tall };
     columnFloor = stage.h - tall - GUTTER;
@@ -393,38 +395,33 @@ function tilesOnAMap(stage: Box, wants: SpreadWants): BayLayout {
   // column, or the corner reaching past it.
   const beside = Math.max(bays.left?.w ?? 0, bays.bottomLeft?.w ?? 0);
   const clear = beside > 0 ? beside + GUTTER : GUTTER;
+  const letter = wants.bottomMiddle;
 
-  // The column down the right edge, top to bottom, or a strip across its top put away.
-  let right: Rect | null = null;
+  // The column down the right edge, top to bottom, or a strip across its bottom put away. It leaves the
+  // letter's chip its least whatever size the letter is, so that opening the letter resizes nothing under it.
   if (wants.right != null) {
-    const wide = rightWidth(stage, wants.right, beside);
+    const wide = rightWidth(stage, wants.right, letter === null ? beside : clear + CHIP_LEAST);
     const tall = wants.right === 'strip' ? STRIP : stage.h;
-    right = wide >= BAY_LEAST ? { x: stage.w - wide, y: 0, w: wide, h: tall } : null;
+    bays.right = wide >= BAY_LEAST ? { x: stage.w - wide, y: stage.h - tall, w: wide, h: tall } : null;
   }
 
-  if (wants.bottomMiddle !== null) {
-    const tall = clamp(Math.round(wants.bottomMiddle), BAY_LEAST, stage.h - GUTTER * 2);
-    // Between the two columns while the right one comes down to it and leaves it the least it is ever left;
-    // otherwise the place it has without one, all the width that is clear of the left.
-    const between = right !== null && wants.right !== 'strip' ? right.x - GUTTER - clear : -1;
-    const room = between >= MIDDLE_LEAST ? between : stage.w - clear - GUTTER;
-    // Centred in what the columns left, capped at a width three options still read as sentences across.
-    const wide = Math.min(MIDDLE_WANTS, room);
-    bays.bottomMiddle =
-      wide >= BAY_LEAST
-        ? { x: clear + Math.round((room - wide) / 2), y: stage.h - GUTTER - tall, w: wide, h: tall }
-        : null;
+  let over: BayName | null = null;
+  if (letter === 'strip') {
+    // Put away: a chip in the middle of what the two ends of the bottom row leave, a gutter off the bottom.
+    const room = (bays.right?.x ?? stage.w) - GUTTER - clear;
+    const wide = Math.min(CHIP_WANTS, room);
+    const x = clear + Math.round((room - wide) / 2);
+    bays.bottomMiddle = { x, y: stage.h - GUTTER - STRIP, w: wide, h: STRIP };
+  } else if (letter !== null) {
+    // Opened out: over everything, centred on the stage and standing where the chip stands, capped at a width
+    // three options still read as sentences across.
+    const wide = Math.min(MIDDLE_WANTS, stage.w - GUTTER * 2);
+    const tall = clamp(Math.round(letter), BAY_LEAST, stage.h - GUTTER * 2);
+    bays.bottomMiddle = { x: Math.round((stage.w - wide) / 2), y: stage.h - GUTTER - tall, w: wide, h: tall };
+    over = 'bottomMiddle';
   }
 
-  // A letter that did not go between the columns has the right one stop a gutter above it, where they meet.
-  const letter = bays.bottomMiddle;
-  if (right !== null && letter !== null && letter.x + letter.w + GUTTER > right.x) {
-    const tall = Math.min(right.h, letter.y - GUTTER);
-    right = tall >= BAY_LEAST ? { ...right, h: tall } : null;
-  }
-  bays.right = right;
-
-  return { form: 'spread', along: 'rows', bays };
+  return { form: 'spread', along: 'rows', bays, over };
 }
 
 /**

@@ -217,3 +217,13 @@
 .choice--strip {
   cursor: pointer;
 }
+
+/* Put away on a desktop, a chip in the middle of the bottom row: what it says, centred, and no size control. */
+.choice--strip.choice--chip {
+  justify-content: center;
+  padding: 0 0.75rem;
+}
+
+.choice--chip .choice__aside {
+  flex: 0 1 auto;
+}

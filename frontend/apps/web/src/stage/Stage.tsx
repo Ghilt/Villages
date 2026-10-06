@@ -20,6 +20,7 @@ import {
   type PaneSize,
   type Room,
   sizeAsked,
+  SIZES,
   sizeOf,
   spreadWants,
 } from './panes';
@@ -143,6 +144,7 @@ export function Stage({ stage, panes, overlays }: StageProps) {
       // One control on every pane, in both forms, except that the panes taking turns in a tile share the
       // one in its tab bar. See decision records 0045, 0046 and 0057.
       ask: (size) => askFor(id, size),
+      sizes: (box.form === 'spread' ? pane?.spreadSizes : undefined) ?? SIZES,
       ownControl: !tabbed,
       showMap: () => showMapBeside(id),
       openBeside: (other) => openBeside(id, other),
@@ -162,6 +164,7 @@ export function Stage({ stage, panes, overlays }: StageProps) {
         key={id}
         data-at={where ?? 'nowhere'}
         data-tabbed={tabbed ? 'yes' : undefined}
+        data-over={where !== null && where === box.over ? 'yes' : undefined}
         hidden={!railed && (rect === null || !up)}
         style={railed || rect === null ? undefined : place(rect)}
       >
@@ -187,6 +190,10 @@ export function Stage({ stage, panes, overlays }: StageProps) {
     box.form === 'spread'
       ? TILES.filter((name) => box.bays[name] !== null && isTabbed(name, panesIn(panes, name).length))
       : [];
+
+  // What lies over everything else in the spread - the letter opened out - and the veil under it, which puts
+  // it away when pressed: the world behind is dimmed rather than gone, and pressing it is the way back to it.
+  const over = box.over === null ? undefined : panesIn(panes, box.over)[0];
 
   // Where the seam between the two bays is, for the one thing that sits on it rather than in a bay.
   const first = box.bays.first;
@@ -234,6 +241,7 @@ export function Stage({ stage, panes, overlays }: StageProps) {
           size: sizeOf(asked),
           asked,
           ask: (size) => askFor(up.id, size),
+          sizes: up.spreadSizes ?? SIZES,
           ownControl: true,
           showMap: () => showMapBeside(up.id),
           openBeside: (other) => openBeside(up.id, other),
@@ -250,6 +258,10 @@ export function Stage({ stage, panes, overlays }: StageProps) {
           />
         );
       })}
+
+      {over !== undefined && (
+        <div className="veil" aria-hidden="true" onClick={() => askFor(over.id, 'strip')} />
+      )}
 
       {/* The moulding over the join, and the disc that stands on it. Only where there is a join:
           below 64 pixels the stage is one box and `--bay-first` is the whole of it. */}

@@ -51,7 +51,7 @@ const STANDING: readonly Standing[] = [
     // At rest it is Take action, so it stands once there is a house to take it; before then only a question
     // raises it. See decision record 0083.
     stands: (session) => session.yourChoice !== null || (session.yourHouse ?? null) !== null,
-    draw: (room) => <Choosing room={room} looking={lookingNow} />,
+    draw: (room, along) => <Choosing room={room} along={along} looking={lookingNow} />,
   },
   {
     pane: DIALOGUE_PANE,

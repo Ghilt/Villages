@@ -9,6 +9,9 @@
   out; the list folded to its marks over the options at the middle size, the marks opening it out; and on a phone
   the list and the options one under another, scrolling. The founding letter keeps its two drawings. See
   decision record 0083.
+- Superseded in part 2026-10-06 by 0085: **in the spread the letter is put away or opened out**, and there is no
+  middle size there; opened out it lies over everything with a veil under it, and put away it is a chip in the
+  middle of the bottom row. The middle size and the carousel are a phone's only.
 
 ## Context
 

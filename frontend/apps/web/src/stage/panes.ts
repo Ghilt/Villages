@@ -82,6 +82,12 @@ export interface Pane {
    * out is half the stage says otherwise. A tile its panes take turns in has its own, on {@link SharedTile}.
    */
   startsAt?: PaneSize;
+  /**
+   * The sizes its control offers in the spread, smallest first; all three when absent. The letter offers two,
+   * put away or opened out, because opened out it lies over everything and there is nothing between: Adam's
+   * word of 2026-10-06. See decision record 0085.
+   */
+  spreadSizes?: readonly PaneSize[];
 }
 
 /**
@@ -198,6 +204,15 @@ export function spreadWants(panes: readonly Pane[], asked: Asked): SpreadWants {
       : null;
   };
 
+  // How the letter along the bottom middle is asked to be: its chip, or its height opened out.
+  const letterOf = (): number | 'strip' | null => {
+    const first = panesIn(panes, 'bottomMiddle')[0];
+    if (first === undefined) {
+      return null;
+    }
+    return sizeAsked(first, asked) === 'strip' ? 'strip' : (first.tall?.full ?? 0);
+  };
+
   // How the column down the right edge is asked to be. Its widths are the layout's, so what it is asked
   // for is which of its three sizes, and the layout says what half of this stage is.
   const rightOf = (): RightWants | null => {
@@ -213,7 +228,7 @@ export function spreadWants(panes: readonly Pane[], asked: Asked): SpreadWants {
     left: panes.some((pane) => pane.spread === 'left'),
     bottomLeft: tallOf('bottomLeft'),
     bottomLeftWide: cornerWide(),
-    bottomMiddle: tallOf('bottomMiddle'),
+    bottomMiddle: letterOf(),
     right: rightOf(),
   };
 }
@@ -244,6 +259,40 @@ export function sizeAsked(pane: Pane, asked: Asked): PaneSize {
 }
 
 /**
+ * The tiles of which only one is ever opened out: the corner and the column down the right. Opening one out
+ * steps the other down to its normal size, so the bottom row always has the middle of it for the letter's
+ * chip. Adam's word of 2026-10-06; see decision record 0085.
+ */
+export const ONE_OPENED_OUT: readonly BayName[] = ['bottomLeft', 'right'];
+
+/**
+ * What the spread's tiles are asked after a pane asks for a size: that size, and, if it opened out one of
+ * {@link ONE_OPENED_OUT}, the other of them stepped down from opened out to its normal size. Says which pane
+ * stepped down, so that the log can say it; `askFor` in `bays.ts` writes the answer.
+ */
+export function askedInTheSpread(
+  panes: readonly Pane[],
+  asked: Asked,
+  pane: Pane,
+  size: PaneSize,
+): { asked: Asked; stepped: Pane | null } {
+  // A tile its panes take turns in is asked once for all of them; any other pane is asked for itself.
+  const setting = (one: Pane, to: PaneSize, from: Asked): Asked =>
+    SHARED_TILES[one.spread] !== undefined
+      ? { heights: from.heights, tiles: { ...from.tiles, [one.spread]: to } }
+      : { heights: { ...from.heights, [one.id]: to }, tiles: from.tiles };
+
+  const next = setting(pane, size, asked);
+  const other = ONE_OPENED_OUT.includes(pane.spread)
+    ? ONE_OPENED_OUT.filter((where) => where !== pane.spread).map((where) => panesIn(panes, where)[0])[0]
+    : undefined;
+  if (size !== 'full' || other === undefined || sizeAsked(other, next) !== 'full') {
+    return { asked: next, stepped: null };
+  }
+  return { asked: setting(other, 'small', next), stepped: other };
+}
+
+/**
  * The three sizes a pane is drawn at: put away, the normal one, and opened out.
  *
  * **Every pane has all three, and the player picks.** They need not be three different drawings - a pane
@@ -270,6 +319,8 @@ export interface Room {
   asked: PaneSize;
   /** Ask to be drawn at one of them. */
   ask: (size: PaneSize) => void;
+  /** The sizes its control offers, smallest first: all three, unless the pane offers fewer in the spread. */
+  sizes: readonly PaneSize[];
   /** Shows the map beside this pane, opened to be read, on a phone; in the spread the map is the floor. */
   showMap: () => void;
   /** Brings a pane beside this one: the other bay on a phone; in the spread, opened if it was put away. */

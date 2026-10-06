@@ -46,6 +46,25 @@
   z-index: 0;
 }
 
+/*
+ * The tile lying over everything else - the letter opened out - and the **veil** between it and the rest.
+ *
+ * Over the tiles, the tab bar, the seam and the compass, so the world behind is dimmed as one thing rather
+ * than piece by piece; pressing it puts the letter away. The debug panel is outside the stage and is never
+ * under it. See decision record 0085.
+ */
+.veil {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  background: color-mix(in srgb, var(--ink) 68%, transparent);
+  cursor: pointer;
+}
+
+.bay[data-over] {
+  z-index: 7;
+}
+
 /* A pane the player has not got up. Hidden rather than unmounted, for the reason above. */
 .bay[hidden],
 .rail[hidden] {

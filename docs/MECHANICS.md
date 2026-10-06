@@ -98,26 +98,28 @@ language this draws on - the diegetic rule, the rarity colours - is in `LOOK-AND
 ### UI
 
 A **pane** that is **always there** in the spread's bottom middle. Idle it is the Take action button; pressed,
-it opens to full in its own bay and plays the roll; answered, it goes back to the button. It has three sizes,
-and the mechanic owns all three:
+it opens out and plays the roll; answered, it goes back to the button. On a desktop it has two sizes and on a
+phone three, and the mechanic owns them all:
 
-- **Full** - on a desktop, three times as tall as the middle size, covering most of the middle of the screen:
-  the report card on top, a divider, and the options in a row along the bottom. What a roll opens at, because
-  reading it is the thing to do first. **The options never scroll on a desktop**: they are written to fit.
-- **Small** - the middle size, as tall as it always was: the list folded to its marks over the options, each
-  option its rarity's tag and its title and nothing more. Pressing the marks or an option opens the pane out:
-  an option is chosen only opened out, where it can be read whole.
-- **Minimised** - set aside to a strip. Not closed: the question is still standing. A press anywhere on the
-  strip opens the pane out, but on its own buttons, Take action and the size control, which do what they say.
+- **Full** - on a desktop it **lies over everything else**, 736 wide and up to 768 tall, centred on the stage, with
+  the **veil** dimming the whole stage under it; pressing the veil puts it away. The report card on top, a
+  divider, and the options in a row along the bottom. What every question opens at, the founding letter
+  included, because reading it is the thing to do first. **The options never scroll on a desktop**: they are
+  written to fit.
+- **Small** - a phone's only: the **carousel** for the founding letter, at half a phone.
+- **Minimised** - set aside. Not closed: the question is still standing. **On a desktop it is a chip** in the
+  middle of the bottom row: Take action and what a roll costs, or the hand that is waiting, and no size control,
+  because a press anywhere on it but on Take action opens it out. It gives way to the corner and the dialogues,
+  which lay themselves out as though it were not there and always leave it room. On a phone it is a strip with
+  its control, and a press anywhere on it but its buttons opens it out too.
 
 **On a phone** a rolled hand is always the list and then the options under it, one under another, and the pane
 scrolls when they do not fit. The founding letter keeps its own two drawings - three parchments across, and the
-**carousel** - and arrives at the middle size.
+**carousel** - and arrives at half.
 
-**In the spread** it takes **bottom middle**, 768 tall opened out and 256 at its middle size, capped by the stage;
-the 281 that bay is never narrower than is what the carousel reads at. **On a phone** it takes the map's bay, opening it to half if it was a strip, and the pane beside
-it keeps the other; answering puts the map back. **Its size is the player's**: the two forms are two ways
-of using it and only they know which they are doing. See decision record 0044.
+**In the spread** it takes **bottom middle**, and it moves nothing whether it is put away or opened out. **On a
+phone** it takes the map's bay, opening it to half if it was a strip, and the pane beside it keeps the other;
+answering puts the map back. See decision records 0044 and 0085.
 
 ### Not decided
 
@@ -140,12 +142,13 @@ holdings, whether it is a weak house or pious, what rose since its last roll, a 
 the inspect windows open, the dialogue being read, the key figure open, where the player is looking - the
 coast, a river close in, the kinds of ground, the open sea, houses by name zoomed in, or *Unknown* under the
 fog - and the season. A hand the page rolled plays as the report card: the omens land and the
-options pop in under them, the pane opened out to three times its middle size; a press hurries the omens, and a
+options pop in under them, the pane opened out over everything; a press hurries the omens, and a
 hand already pending at a reload is drawn as it ends. What exists is in `BUILDING-A-MECHANIC.md` under the choice pattern, and in
 decision records 0034 and 0083.
 
 It is a pane with its three sizes as of 0044, which is also where the last media query in the app died: this
-mechanic's one breakpoint asked the window rather than the stage and had never fired.
+mechanic's one breakpoint asked the window rather than the stage and had never fired. On a desktop it has had two
+since 0085.
 
 ---
 
@@ -249,10 +252,12 @@ is set into the left edge, and top to bottom, because a conversation is long:
 - **Normal**: 480 wide, wider than the column on the left, so there is room for a picture in the scene. On a
   narrow stage it is squeezed to a third, as the column on the left is.
 - **Opened out**: the right half of the stage.
-- **Put away**: a strip at the top right, with its name.
+- **Put away**: a strip at the bottom right, with its name, along the bottom with the corner's and the
+  letter's chip.
 
-It opens at the normal size. Where the column would meet the letter along the bottom on a narrow desktop,
-the letter keeps its room and the column stops above it. The column is decision record 0069's.
+It opens at the normal size. **It is never opened out with the corner**: opening either steps the other back
+to its normal size. It runs top to bottom always, and leaves the letter's chip its room. The column is decision
+record 0069's, and what it gives the letter is 0085's.
 
 **On a phone** it is a pane like any other, with no special treatment: it takes a bay, and the player opens
 it out when they want the whole screen for it.
