@@ -84,7 +84,15 @@ it snaps to will surprise you.
 ## What travels with a copy, and what does not
 
 Terrain does, because terrain is the pixel. Rivers do, because they are painted into the image as a class
-two pixels wide rather than kept as lines. Nothing else exists yet.
+two pixels wide rather than kept as lines.
+
+**Where it came from does too, as long as the pixels go with it.** `world:origin` works out where on Earth
+every part of a master was cut from by finding its pixels on plain Earth, `terrain-base.png`, so land moved,
+turned, stretched or warped with Nearest Neighbour stays the Earth it was, and a real name or a real event will
+follow it there. Land painted with the Pencil, filled with the bucket or opened up between pieces matches
+nowhere and is **invented land**, which is how to make some; a paste or the Clone Stamp of a place that is still
+in the world is a **copy**, invented land that looks like somewhere. The Origin renderer shows which is which.
+See `docs/plans/real-world-names.md`.
 
 ## Seeing your edit
 

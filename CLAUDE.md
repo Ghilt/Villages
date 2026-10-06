@@ -83,6 +83,10 @@ tiles go through, that same step **also**:
   `npm run world:tile --prefix frontend`. About five minutes. The Debug map panel offers this per master too.
 - **Re-works the rivers' flow** if the master or the flow tool changed: `npm run world:flow --prefix frontend`,
   under a minute a master. Without it a master's rivers stand still; `cut it` in the panel does it too.
+- **Re-works the origin map** if the master changed: `npm run world:origin --prefix frontend`, two minutes a
+  master. It says where on Earth each part of the master came from and which land is invented, and the Origin
+  renderer draws it; it prints how much of the land is from Earth, invented and copied, which is the number to
+  report.
 - **Re-works the sprite map** if the master, `world/biomes.json` or the generator changed:
   `npm run world:sprites --prefix frontend`, half a minute a master, and it prints the density of every
   biome against experiment 0006's ceiling. Without one a master draws no scenery at all.
@@ -324,7 +328,7 @@ Commands are added here as the increments land:
   `world/render.json`, and how it is painted is `world/painterly.json`.
 - The world's other tools, each `npm run <name> --prefix frontend` and each described in `docs/RUNNING.md`
   beside the folder it reads: `world:sprites` works out a master's sprite map, `world:flow` which way its rivers
-  run, `world:ground` the ground map the game server reads, `world:scenery` paints stills of the sprite map, `world:paint` paints the painterly stills and writes the
+  run, `world:origin` where on Earth each part of it came from, `world:ground` the ground map the game server reads, `world:scenery` paints stills of the sprite map, `world:paint` paints the painterly stills and writes the
   runtime copy of the styles (`-- --config-only` for that alone), `world:art` cuts the sprites, `world:ui` the
   interface pictures, and `world:portraits` and `world:scenes` draw placeholders, never over a file that is
   there.

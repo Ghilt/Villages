@@ -28,7 +28,7 @@ is no MongoDB and no RabbitMQ on the machine yet.
 Characters and key figures are built and waiting on Adam's eye. Nothing else here is started, and the four
 after them wait on the same thing. Fog of war, the exception, is under way a step at a time, and so is
 character dialogue; the UI component library is built and waiting on Adam's eye, and so is the choice roll,
-the newest.
+and so is the origin map, the first of real names on the edited world and the newest.
 
 - **Characters and key figures**: the people of the world, each with a history of their own, and the
   house's tie to the few it acts through, shown in a pane in the corner beside the house status. The shape
@@ -71,6 +71,13 @@ the newest.
   which folder of the web app may import which - then the bugs the review found, then a part per mechanic on
   the server and a session built from slices in `client-core`, then the folders, the panes, the stylesheet and
   the sprite canvas. Each checkpoint lands on main when it passes. Asked for by Adam on 2026-10-02.
+- **Real names on the edited world**: the rivers, lakes, seas and towns of 1790 carried onto Adam's
+  master through an **origin map** a tool works out from his edits, which says where each piece of it was
+  cut from on Earth, with **invented land** given invented names. It is what real history will stand on,
+  before 1790 as the backstory of a place and after it as the warped history `SETTING.md` promises. Six
+  steps in `docs/plans/real-world-names.md`; the first two are built, the plan and the origin map, which
+  the Origin renderer shows and experiment 0016 waits on Adam's eye for. Next are the names. Adam's own,
+  asked for on 2026-10-06.
 - **0.4** Local infrastructure: MongoDB replica set and RabbitMQ in Compose
 - **0.8** Testcontainers smoke test on MongoDB and RabbitMQ
 - **1.6** The bridge from the store to the broker
@@ -137,11 +144,6 @@ Wanted, not started, and each needs a hypothesis in `docs/experiments/` before a
   worked ground around them, and marks of time. Experiment 0006 proved the machine will draw it and
   found the budget by hand; the path is `docs/plans/world-generator.md`. The largest thing on this list
   and the one that would change how the world reads most.
-- **Real names on the edited world**: the rivers, lakes, seas and towns of 1790 carried onto Adam's
-  master through an **origin map** a tool works out from his edits, which says where each piece of it was
-  cut from on Earth, with invented land given invented names. It is what real history will stand on,
-  before 1790 as the backstory of a place and after it as the warped history `SETTING.md` promises. Six
-  steps in `docs/plans/real-world-names.md`; the hypothesis is experiment 0016, the origin map itself.
 - **Aliveness and scale**: a bot swarm to ten thousand connections on one machine, aggregation of sprites at
   low zoom, a custom stylised map style checked in, hardened reconnection and clock correction. The scale
   the architecture is designed for is not in doubt; proving it is simply not next.

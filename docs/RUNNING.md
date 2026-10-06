@@ -33,7 +33,14 @@ stage alone, with none of the debug panel in it (decision record 0079).
   around the view are painted during the pauses so that moving the map finds them done. See
   `docs/adr/0021` and `0022`. `Flow` is not a look either: it draws, in place of the water, which way every
   river runs, a colour for each way and arrows marching downstream from about zoom 8, and black where a river
-  has no way to any sea or lake - a break in the master's rivers to mend. See `docs/adr/0081`.
+  has no way to any sea or lake - a break in the master's rivers to mend. See `docs/adr/0081`. `Origin` is a
+  question about the master: where on Earth each square of it was cut from. Grey stayed where it was; a colour
+  moved, one hue for each way and deeper the further; magenta striped matches nowhere on Earth and is invented;
+  orange striped is a copy of somewhere a larger piece came from; and the thin white line is Earth's own coast
+  carried through, which lies on the painted coast wherever the map has a piece right. With it showing, the log
+  says how much of the land is from Earth, invented and copied, and a click on the map says under `origin` where
+  that place came from: `from Earth at 25.58°N 107.87°E, moved 14.6° (sure 1.00)`, or `invented land`. It reads
+  what `world:origin` wrote, below. See `docs/plans/real-world-names.md` and experiment 0016.
 - The water moves, from about zoom 8.5 in: depth, waves lit by a sun in the north-west, caustics on the bottom
   of the shallows, and surf along the shore, over every renderer. It is the **Water** part of the **Shaders**
   section, below Debug map, which holds a part for each shader that is a look and nothing more, with `off`,
@@ -192,6 +199,13 @@ stage alone, with none of the debug panel in it (decision record 0079).
   a master, which the quick start makes when it is missing. Only the game server reads it, to work out the map's
   omens of a roll, and it takes a master's name as its first argument (`-- terrain2`). A master repainted
   makes it stale. See `docs/adr/0084`.
+- Where the land came from: `npm run world:origin --prefix frontend` works out a master's **origin map**, where on
+  Earth every square of 32 master pixels was cut from, against `world/master/terrain-base.png`, which is plain
+  Earth (`-- --from <master>` names another). It writes `origin/` beside the master's tiles: the map, sixteen
+  megabytes, and `origin.png`, the picture the Origin renderer lays on the world. Two minutes a master; the
+  quick start makes it when it is missing, and a master repainted makes it stale. It prints how much of the land
+  is from Earth, invented and copied. Moving land with Nearest Neighbour keeps it traceable; land painted fresh,
+  or opened up between pieces, is invented. See `docs/plans/real-world-names.md`.
 - A picture of the scenery, without a browser: `npm run world:scenery --prefix frontend` paints five
   places at the zoom the scenery is actually in and stamps every point the sprite map asks for onto
   them, into `world/painterly/<place>-scenery.png`, half a minute for all of them. It prints each one's

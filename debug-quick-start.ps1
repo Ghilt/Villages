@@ -577,12 +577,12 @@ if (-not (Test-Path (Join-Path $Tiles '7'))) {
 }
 
 Ensure '..\..\paint.json' 'writing the styles' @('run', 'world:paint', '--', '--config-only') 'the styles are written'
-# Which way the rivers run, so the water runs downstream rather than standing still: under a minute (0081).
+# Which way the rivers run, under a minute (0081); and where on Earth each square came from, for the Origin renderer.
 Ensure 'flow\flow.json' 'working out which way rivers run' @('run', 'world:flow', '--', '--no-stills') 'the rivers run'
+Ensure 'origin\origin.json' 'working out where on Earth the land came from (two minutes, once)' @('run', 'world:origin') 'the origin map is worked out'
 
-# What kind of place every part of the world is, and where the scenery clumps: without it the map draws no
-# scenery at all. Half a minute, once per master (0054). Two halves: the biomes beside the page's world, and the
-# stands in world/stands, which only the game server reads (0067); a sprite map from before has only the first.
+# What kind of place every part of the world is and where the scenery clumps, half a minute once (0054): the biomes
+# beside the page's world, and the stands only the game server reads (0067). An old sprite map lacks the second.
 $SpriteMap = Join-Path $DefaultWorld 'sprites/biome/map.json'
 $Stands = Join-Path $Root "world/stands/$DefaultMaster/biome/stands.json"
 if (-not (Test-Path $SpriteMap) -or -not (Test-Path $Stands)) {

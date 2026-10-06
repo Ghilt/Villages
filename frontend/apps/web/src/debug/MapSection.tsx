@@ -7,6 +7,7 @@ import { giveVision, takeVision } from './levers';
 import { chooseMaster, cutMaster, describeMaster, furnishMaster, isStale, listMasters } from '../map/masters';
 import type { MasterOnDisk } from '../map/masters';
 import { RENDERERS } from '../map/renderers';
+import { watchOrigin } from '../map/origin';
 import { setFogOfWar } from '../fog/fogOfWar';
 import { lastingOn } from '../fog/describe';
 import { sessionStore } from '../net/gateway';
@@ -61,6 +62,12 @@ export function MapSection({ map, master, renderer, onRenderer }: MapSectionProp
     window.addEventListener('focus', refresh);
     return () => window.removeEventListener('focus', refresh);
   }, [refresh]);
+
+  // Under the Origin renderer a click on the map says where that place came from, in the log below.
+  useEffect(() => {
+    if (map === null || renderer !== 'origin') return undefined;
+    return watchOrigin(map, master);
+  }, [map, renderer, master]);
 
   const chosen = masters.find((candidate) => candidate.name === wanted);
   const needsCutting = chosen !== undefined && (chosen.cutAt === null || isStale(chosen));

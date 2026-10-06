@@ -23,6 +23,11 @@ import { painterlyTiles } from './painterlyTiles';
  * already a Mercator square of the whole world - the same square the map is drawn on - so MapLibre places
  * it on the world's own corners and stretches it at any zoom. It is deliberately blocky: a biome is
  * sixteen world units, and seeing exactly how coarse that is is the point of looking.
+ *
+ * `origin` is laid on the same way, and is a question about the master rather than the ground: where on
+ * Earth each square of it was cut from, worked out by `npm run world:origin`. Grey stayed where it was, a
+ * colour moved and says which way, magenta striped is invented land, orange striped is a copy of somewhere
+ * else, and the thin white line is Earth's own coast carried through. See `docs/plans/real-world-names.md`.
  */
 
 export interface RendererChoice {
@@ -41,6 +46,11 @@ export const RENDERERS: readonly RendererChoice[] = [
   { name: 'vivid', title: 'Vivid', note: "The master's own colours, pushed, with no medium over them" },
   { name: 'plate', title: 'Plate', note: "Raw's quieter colours, pushed the way vivid pushes the master's" },
   { name: 'biome', title: 'Biome', note: 'Not the terrain: what kind of place the sprite map thinks it is' },
+  {
+    name: 'origin',
+    title: 'Origin',
+    note: 'Where on Earth each square was cut from: grey stayed, a colour moved that way, magenta striped is invented, orange striped is a copy, white is Earth’s coast carried through',
+  },
   {
     name: 'flow',
     title: 'Flow',
@@ -90,6 +100,12 @@ const COARSE_STRETCH = 4;
 
 const BIOME_SOURCE = 'biome-raster';
 const BIOME_LAYER = 'biome-raster';
+
+/** The renderers that are one picture of the whole world square rather than the terrain, and where each is. */
+const PICTURES: Readonly<Record<string, string>> = {
+  biome: 'sprites/biome/biomes.png',
+  origin: 'origin/origin.png',
+};
 
 /**
  * The corners of the world, as the biome raster covers them.
@@ -141,9 +157,10 @@ export function applyRenderer(map: maplibregl.Map, name: string, lattice: Lattic
     map.setPaintProperty(FLAT_LAYER, 'raster-brightness-min', flowing ? 0.35 : 0);
   }
 
-  if (name === 'biome') {
+  const picture = PICTURES[name];
+  if (picture !== undefined) {
     // The flat terrain stays hidden under it: this is a different question about the same ground, and
-    // showing both at once would only make the biome's own edges hard to find.
+    // showing both at once would only make the picture's own edges hard to find.
     for (const layer of [...INK_LAYERS, FLAT_LAYER]) {
       if (map.getLayer(layer) !== undefined) {
         map.setLayoutProperty(layer, 'visibility', 'none');
@@ -151,15 +168,15 @@ export function applyRenderer(map: maplibregl.Map, name: string, lattice: Lattic
     }
     map.addSource(BIOME_SOURCE, {
       type: 'image',
-      url: `${worldRootOf(chosenMaster())}/sprites/biome/biomes.png`,
+      url: `${worldRootOf(chosenMaster())}/${picture}`,
       coordinates: WORLD_CORNERS,
     });
     map.addLayer({
       id: BIOME_LAYER,
       type: 'raster',
       source: BIOME_SOURCE,
-      // Nearest, so a biome cell is a square with an edge rather than a smear. The coarseness is the
-      // thing being looked at and softening it would be the panel lying about the resolution.
+      // Nearest, so a cell is a square with an edge rather than a smear. The coarseness is the thing being
+      // looked at and softening it would be the panel lying about the resolution.
       paint: { 'raster-opacity': 1, 'raster-resampling': 'nearest' },
     });
     return;

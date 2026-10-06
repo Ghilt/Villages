@@ -58,11 +58,16 @@ Sri Lanka is the weakest, and is probably turned as well as moved, which that te
 `npm run world:origin --prefix frontend`, one master at a time, a few minutes a master like the tiling.
 
 1. Cut the master's land into squares of about 32 pixels, 40 kilometres.
-2. For each, find where on plain Earth the same pattern sits, allowing for a move, a turn and a stretch,
-   and score it by the share of pixels that agree.
-3. Let neighbours help. A square tries first what worked for the square beside it, because land is moved
-   in pieces, and searches widely only when that fails. This is the PatchMatch method, and it is what makes
-   537 megapixels a matter of minutes.
+2. For each, find where on plain Earth the same pattern sits, allowing for a move, a turn and a stretch.
+   Searching scores a placement by the share of pixels that agree beyond chance; deciding allows each pixel
+   its class within a pixel either way, against how well the same placement does ten pixels off. The first
+   run judged exactly and called Borneo's rainforest invented: a turn half a pixel out misses every river a
+   pixel wide, and the mending made some rivers two wide.
+3. Let neighbours help. Every square is tried where it is first, because most land never moved; a square
+   that is found lends its placement to the squares beside it, because land is moved in pieces; and only a
+   square nothing has reached looks its small lakes up among Earth's, four at a time by the shape they make
+   (`originQuads.ts`), which finds a piece wherever it went. That is what makes 537 megapixels a matter of
+   minutes: on `terrain3_mended_2026-10-03`, a hundred seconds, of which 2,485 squares needed looking up.
 4. A square with no good match is **invented land**: the new ground in India's incision, or anything
    painted by hand rather than moved.
 5. A square that matches a place a larger piece already claims is a clone, from a paste or the Clone
@@ -85,12 +90,13 @@ area is invented whatever it resembles. Pins win over the tool.
 
 ### Seeing it
 
-- A still of the master with each moved piece tinted by how far it travelled, invented land hatched, and
-  Earth's own coastlines carried through and drawn thin on top. Where they lie on the painted coast, the
-  fit is right; where they do not, it is plain.
-- The numbers: how much land was matched, how sure, and how much is invented, region by region.
-- In the debug panel, a "where from" line for the point under the cursor: an Earth latitude and
-  longitude, or "invented land" (decision record 0023).
+- The **Origin** renderer in the Debug map: the master with each moved piece in a colour for the way it went,
+  invented land magenta and striped, copies orange, and Earth's own coastlines carried through and drawn thin
+  and white on top. Where they lie on the painted coast, the fit is right; where they do not, it is plain.
+- The numbers, printed by the tool and said in the log when the renderer is chosen: how much land is from
+  Earth, invented and copied.
+- A click on the map, with the renderer showing, says in the log where that place came from: an Earth
+  latitude and longitude, how far it moved and how sure, or "invented land" (decision record 0023).
 
 ### The alternative not taken
 
@@ -180,8 +186,10 @@ on them, each with its own plan when Adam chooses it:
 Each its own commit, and the order is a suggestion.
 
 1. **This plan.** Documents only.
-2. **The origin map**, as experiment 0016: `world:origin` run on the default master, the still, the
-   numbers, and the "where from" line in the debug panel. The riskiest assumption, so first.
+2. **The origin map**, as experiment 0016: `world:origin` run on the default master, the Origin renderer,
+   the numbers, and a click on the map saying in the log where a place came from. The riskiest assumption,
+   so first. **Built 2026-10-06**: 97.8% of the default master's land from Earth, 2.0% invented, 0.2%
+   copies. The pins come when something needs correcting.
 3. **Rivers, lakes, seas and mountains named**, the whole world over. All their sources but one are already
    on disk. The debug panel names the river under the cursor.
 4. **The towns of 1790**: fetched, reviewed, and carried through.
