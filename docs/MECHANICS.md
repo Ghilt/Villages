@@ -131,7 +131,7 @@ of using it and only they know which they are doing. See decision record 0044.
 
 ### Where it stands
 
-Being built, from `docs/plans/choice-roll.md`. **Take action works**: it stands in the bottom middle once
+Built, from `docs/plans/choice-roll.md`, all seventeen steps. **Take action works**: it stands in the bottom middle once
 there is a house, costs ten wealth, and deals a hand of three of one rarity from twenty resource actions in six
 pools and one conversation, each option a card edged in its rarity; taking one gives what it says. The
 conversation is **gossip**, a common: a servant brings word of the nearest other house within 1500 km, by name,
