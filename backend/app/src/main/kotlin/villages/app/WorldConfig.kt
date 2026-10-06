@@ -16,7 +16,7 @@ import villages.application.fate.FateEngine
 import villages.application.fate.GroundMaps
 import villages.application.fate.FirstPools
 import villages.application.fate.omenSources
-import villages.application.fate.ResourceActions
+import villages.application.fate.firstActions
 import villages.application.fate.RollService
 import villages.application.KeyFigureService
 import villages.application.FaultBoard
@@ -211,7 +211,7 @@ class WorldConfig {
                 houses, characters, characters, sights, dialogueRows, lastRolls,
                 months = { Calendar.monthOf(it.day) }, grounds = ground, housesNear = houses,
             ),
-            FirstPools.ALL, ResourceActions.ALL, dice, ids,
+            FirstPools.ALL, firstActions(houses, ids), dice, ids,
         ),
         houses, world.executor, { clock.instant() }, worldClock, ids,
     )

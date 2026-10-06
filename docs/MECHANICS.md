@@ -132,7 +132,9 @@ of using it and only they know which they are doing. See decision record 0044.
 
 Being built, from `docs/plans/choice-roll.md`. **Take action works**: it stands in the bottom middle once
 there is a house, costs ten wealth, and deals a hand of three of one rarity from twenty resource actions in six
-pools, each option a card edged in its rarity; taking one gives what it says. It reads the house - its
+pools and one conversation, each option a card edged in its rarity; taking one gives what it says. The
+conversation is **gossip**, a common: a servant brings word of the nearest other house within 1500 km, by name,
+and the house spreads it for a little influence or keeps it to itself, in the dialogues pane. It reads the house - its
 holdings, whether it is a weak house or pious, what rose since its last roll, a debt a dialogue is waiting on -
 the inspect windows open, the dialogue being read, the key figure open, where the player is looking - the
 coast, a river close in, the kinds of ground, the open sea, houses by name zoomed in, or *Unknown* under the

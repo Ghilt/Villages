@@ -25,7 +25,7 @@ import villages.application.fate.FateEngine
 import villages.application.fate.GroundMap
 import villages.application.fate.FirstPools
 import villages.application.fate.omenSources
-import villages.application.fate.ResourceActions
+import villages.application.fate.firstActions
 import villages.application.fate.RollService
 import villages.domain.CharacterCommand
 import villages.domain.CharacterDecider
@@ -238,7 +238,7 @@ internal class Rig(instrumentsOpen: Boolean = true, sendOn: Executor = Executor 
                 houses, characters, characters, sights, dialogueRows, lastRolls,
                 months = { Calendar.monthOf(it.day) }, grounds = { grounds[it] }, housesNear = houses,
             ),
-            FirstPools.ALL, ResourceActions.ALL, { 1 }, { UUID.randomUUID() },
+            FirstPools.ALL, firstActions(houses) { UUID.randomUUID() }, { 1 }, { UUID.randomUUID() },
         ),
         houses, world, { noon }, worldClock, { UUID.randomUUID() },
     )

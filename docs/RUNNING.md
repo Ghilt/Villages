@@ -152,7 +152,9 @@ stage alone, with none of the debug panel in it (decision record 0079).
   At the middle size the list is folded to its marks over the options, each just its rarity and its title, and
   pressing the marks or an option opens the pane out, where an option is taken; on
   a phone the list and the options are one under another and the pane scrolls. Taking an option gives it, and
-  the pane goes back to its strip. A hand already pending when the page loads is drawn as it ends. A hand cannot be rolled over while it waits. The asking and the answer are lines of the log under
+  the pane goes back to its strip. *Gossip from the kitchens*, a common, is a conversation rather than a
+  resource: taking it offers a dialogue about the nearest other house within 1500 km, which opens in the
+  dialogues pane, and with no house that near it is never dealt. A hand already pending when the page loads is drawn as it ends. A hand cannot be rolled over while it waits. The asking and the answer are lines of the log under
   `roll`, and the hand under `choice`, with its rarity and how many omens it was rolled from. The **Choice
   roll** section of the debug panel, below Dialogues, looks into it: the hand's omens - the house's holdings,
   *Weak house*, *Pious*, what rose since the last roll, *Missing wealth* when an open dialogue waits on a cost

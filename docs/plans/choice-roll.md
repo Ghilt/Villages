@@ -277,7 +277,8 @@ the next roll is that rarity, so a legendary can be seen without four hundred pr
 
 16. **An option can start a dialogue,** Done: `Effect.Converse`, stored as `converse` with the dialogue whole and
     sent as `converse` with its title alone, wire version 24. `Effect.Converse`, decided through `Follow` into the dialogues part.
-17. **The gossip** about the nearest other house, in Hearth and Court.
+17. **The gossip** Done: `fate/Gossip.kt`, and `firstActions` lists every action once for the app and the tests.
+    Heard of within 1500 km, a rumour of five chosen by the house it is about, +5 influence to spread it. about the nearest other house, in Hearth and Court.
 
 ## Not in this plan
 
