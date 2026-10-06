@@ -11,7 +11,7 @@
 
 467 backend/gateway/src/main/kotlin/villages/gateway/Gateway.kt
 561 backend/protocol/src/main/kotlin/villages/protocol/Frames.kt
-747 debug-quick-start.ps1
+746 debug-quick-start.ps1
 819 frontend/apps/web/src/admin/showcase/showcase.css
 436 frontend/apps/web/src/areas/AreaOverlay.tsx
 490 frontend/apps/web/src/map/painterlyTiles.ts

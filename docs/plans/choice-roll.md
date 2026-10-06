@@ -253,7 +253,8 @@ the next roll is that rarity, so a legendary can be seen without four hundred pr
 
 **Checkpoint 5: the server reads the ground.**
 
-12. **`world:ground`.** The tool, its grid and its file per master, gitignored output beside the stands;
+12. **`world:ground`.** Done. `src/ground.ts` and `bin/groundWorld.ts` in the world package, fifteen seconds a
+    master; the grid is the master's own, as 0084's amendment says. The tool, its grid and its file per master, gitignored output beside the stands;
     the quick start makes it, `RUNNING.md` and the regeneration list in `CLAUDE.md` say so. Grid size by
     measuring.
 13. **Map omens.** The ground port and its folder adapter; the looking circle from the centre and the zoom;

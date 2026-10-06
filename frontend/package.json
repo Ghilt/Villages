@@ -24,6 +24,7 @@
     "world:tile": "npm run tile --workspace @villages/world --",
     "world:sprites": "npm run sprites --workspace @villages/world --",
     "world:flow": "npm run flow --workspace @villages/world --",
+    "world:ground": "npm run ground --workspace @villages/world --",
     "world:scenery": "npm run scenery --workspace @villages/world --",
     "world:portraits": "npm run portraits --workspace @villages/world --",
     "world:scenes": "npm run scenes --workspace @villages/world --",

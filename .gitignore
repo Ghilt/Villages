@@ -41,6 +41,9 @@ world/painterly/
 # Output, reproducible, and kept out of the page's public folder on purpose. See decision record 0067.
 world/stands/
 
+# Each master's ground map, which only the game server reads, to work out what a player is looking at (0084).
+world/ground/
+
 # world/master/ is deliberately NOT ignored: the master image is the authored source of truth for
 # the shape of the world, and it travels with the repository. See docs/AUTHORING-THE-WORLD.md.
 #

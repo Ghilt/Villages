@@ -179,6 +179,12 @@ stage alone, with none of the debug panel in it (decision record 0079).
   both stale. The panel also watches `world/biomes.json`'s own mtime, because tuning a look makes every
   sprite map stale without touching a master. See `docs/adr/0054` and
   `docs/plans/biome-sprite-map.md`.
+- What the ground is, for the game server: `npm run world:ground --prefix frontend` reads a master into its
+  **ground map**, `world/ground/<master>/`, a cell every sixteen master pixels each way, each keeping its
+  commonest terrain and whether a river, a lake, the sea or a coast is in it: four megabytes and fifteen seconds
+  a master, which the quick start makes when it is missing. Only the game server reads it, to work out the map's
+  omens of a roll, and it takes a master's name as its first argument (`-- terrain2`). A master repainted
+  makes it stale. See `docs/adr/0084`.
 - A picture of the scenery, without a browser: `npm run world:scenery --prefix frontend` paints five
   places at the zoom the scenery is actually in and stamps every point the sprite map asks for onto
   them, into `world/painterly/<place>-scenery.png`, half a minute for all of them. It prints each one's

@@ -70,6 +70,11 @@ export const OUTPUT_DIR = resolve(REPO, 'frontend', 'apps', 'web', 'public', 'wo
  * committed. See `standsDirOf` and decision record 0067.
  */
 export const STANDS_DIR = resolve(REPO, 'world', 'stands');
+/**
+ * Where each master's ground map goes, a directory a master: read by the game server alone, to work out what a
+ * player is looking at, and never served to a page. Output, not committed. See decision record 0084.
+ */
+export const GROUND_DIR = resolve(REPO, 'world', 'ground');
 /** Where a warped copy of Earth goes: raw material for a new master, never read by the game. */
 export const WARPED_DIR = resolve(REPO, 'world', 'warped');
 

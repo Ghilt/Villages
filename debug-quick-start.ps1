@@ -580,13 +580,9 @@ Ensure '..\..\paint.json' 'writing the styles' @('run', 'world:paint', '--', '--
 # Which way the rivers run, so the water runs downstream rather than standing still: under a minute (0081).
 Ensure 'flow\flow.json' 'working out which way rivers run' @('run', 'world:flow', '--', '--no-stills') 'the rivers run'
 
-# What kind of place every part of the world is, and where the scenery clumps. Without it the map draws
-# no scenery at all - which is the rule rather than a fault, but it is not what anyone starting from
-# nothing is expecting to see. Half a minute, once per master. See decision record 0054.
-#
-# Two halves: the biomes beside the page's world, and the stands in world/stands, where only the game
-# server reads them (0067). A sprite map from before the stands moved has the first and not the second,
-# and its woods are gone until it is worked out again.
+# What kind of place every part of the world is, and where the scenery clumps: without it the map draws no
+# scenery at all. Half a minute, once per master (0054). Two halves: the biomes beside the page's world, and the
+# stands in world/stands, which only the game server reads (0067); a sprite map from before has only the first.
 $SpriteMap = Join-Path $DefaultWorld 'sprites/biome/map.json'
 $Stands = Join-Path $Root "world/stands/$DefaultMaster/biome/stands.json"
 if (-not (Test-Path $SpriteMap) -or -not (Test-Path $Stands)) {
@@ -595,6 +591,9 @@ if (-not (Test-Path $SpriteMap) -or -not (Test-Path $Stands)) {
     $map = Get-Content $SpriteMap -Raw | ConvertFrom-Json
     Good ("the world is furnished: {0:N0} stands in {1:N0} chunks" -f $map.stands, $map.chunks)
 }
+
+# What the ground is, for the game server to read where a player is looking (0084). Seconds, once per master.
+if (Test-Path (Join-Path $Root "world/ground/$DefaultMaster/ground.json")) { Good 'the ground is read' } else { Run 'reading the ground for the game server' $Npm @('run', 'world:ground') $Frontend }
 
 # What the scenery is drawn as: Adam's pictures in world/sprites, cut into one atlas. Cut at every start
 # and not only when there is none, because an atlas that was there used to be drawn as it was: a picture

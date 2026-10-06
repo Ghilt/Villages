@@ -2,6 +2,12 @@
 
 - Status: accepted
 - Date: 2026-10-04
+- Amended 2026-10-06, as it was built: the grid is on the **master's own latitude and longitude** rather than the
+  Mercator square, a cell every sixteen master pixels, 2048 by 1024 for today's masters, because the master is
+  already that grid and the server is handed a latitude and a longitude; nothing is gained by projecting twice.
+  A cell keeps its commonest terrain class and four marks, river, lake, sea and coast, two bytes, four megabytes
+  a master. The biome is left out until something asks for it: the terrain class says forest or mountain already.
+  `npm run world:ground`, `world/ground/<master>/`.
 
 ## Context
 
