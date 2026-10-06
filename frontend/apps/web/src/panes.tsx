@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 
 import type { SessionState } from '@villages/client-core';
 
-import { CHOICE_PANE } from './choice/pane';
+import { CHOICE_AT_REST, CHOICE_PANE } from './choice/pane';
 import { Choosing } from './choice/Choosing';
 import { lookingNow } from './looking';
 import { DIALOGUE_PANE } from './dialogues/pane';
@@ -33,7 +33,7 @@ import {
  *
  * Each pane is declared by its feature, in its own folder, and named here once: the house status, the key
  * figures and navigation, which share the corner and stand in it in this order; the choice roll while a
- * question does; and character dialogue from the house's first dialogue on. The map comes first, because it
+ * question does, and at rest once there is a house; and character dialogue from the house's first dialogue on. The map comes first, because it
  * is the floor, and its contents are App's, which holds the map; a window per subject open comes last,
  * newest first. A new mechanic's pane is a declaration in its folder and a line here. The stage is handed
  * the list and reads nothing of the game. See ARCHITECTURE's "The stage is handed its panes".
@@ -56,9 +56,15 @@ const STANDING: readonly Standing[] = [
   },
   {
     pane: CHOICE_PANE,
-    // At rest it is Take action, so it stands once there is a house to take it; before then only a question
-    // raises it. See decision record 0083.
-    stands: (session) => session.yourChoice !== null || (session.yourHouse ?? null) !== null,
+    // A question asked, or a hand dealt; before there is a house only a question raises it. See 0083.
+    stands: (session) => session.yourChoice !== null,
+    draw: (room, along) => <Choosing room={room} along={along} looking={lookingNow} />,
+  },
+  {
+    // At rest it is Take action, so it stands once there is a house to take it: the same pane, shorter opened
+    // out, because all it has to say is the button. See decision record 0085.
+    pane: CHOICE_AT_REST,
+    stands: (session) => session.yourChoice === null && (session.yourHouse ?? null) !== null,
     draw: (room, along) => <Choosing room={room} along={along} looking={lookingNow} />,
   },
   {

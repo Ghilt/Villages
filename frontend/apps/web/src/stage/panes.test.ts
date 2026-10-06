@@ -22,7 +22,7 @@ import {
 import type { Subject } from '../inspect/subjects';
 import { panesOn, standingIn } from '../panes';
 import { DIALOGUE_PANE } from '../dialogues/pane';
-import { CHOICE_PANE } from '../choice/pane';
+import { CHOICE_AT_REST, CHOICE_PANE } from '../choice/pane';
 import { KEY_FIGURES_PANE } from '../figures/pane';
 import { HOUSE_PANE } from '../house/pane';
 
@@ -179,6 +179,22 @@ describe('the choice roll', () => {
     expect(spreadWants(panesFor([], HOUSED), NOTHING_ASKED).bottomMiddle).toBe('strip');
     const opened: Asked = { heights: { [CHOICE_PANE.id]: 'full' }, tiles: {} };
     expect(spreadWants(panesFor([], ASKING), opened).bottomMiddle).toBe(tallOf(CHOICE_PANE).full);
+  });
+
+  // At rest all it says is Take action, so opened out it is a box that size rather than one over most of the
+  // screen; the same pane by the same id, so the size asked for carries across when a hand arrives. See 0085.
+  it('opens out at rest only as tall as Take action, under what a question opens out to', () => {
+    const opened: Asked = { heights: { [CHOICE_PANE.id]: 'full' }, tiles: {} };
+    const atRest = spreadWants(panesFor([], HOUSED), opened).bottomMiddle;
+    const asking = spreadWants(
+      panesFor([], { ...HOUSED, yourChoice: {} } as SessionState),
+      opened,
+    ).bottomMiddle;
+
+    expect(atRest).toBe(tallOf(CHOICE_AT_REST).full);
+    expect(asking).toBe(tallOf(CHOICE_PANE).full);
+    expect(atRest).toBeLessThan(asking as number);
+    expect(CHOICE_AT_REST.id).toBe(CHOICE_PANE.id);
   });
 
   // It has the tile to itself, so there is no strip of tabs to pay for.

@@ -32,3 +32,11 @@ export const CHOICE_PANE: Pane = {
   startsAt: 'strip',
   spreadSizes: ['strip', 'full'],
 };
+
+/**
+ * **The choice roll at rest**: Take action, with nothing asked. The same pane by the same id, so the size it was
+ * asked for carries across when a hand arrives, but opened out on a desktop only as tall as what it says - the
+ * button and what a roll costs - rather than a box over most of the screen with one button in the middle of it.
+ * 256, what the letter's middle size was. See decision record 0085.
+ */
+export const CHOICE_AT_REST: Pane = { ...CHOICE_PANE, tall: { full: 256, small: 256 } };

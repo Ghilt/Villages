@@ -104,7 +104,8 @@ phone three, and the mechanic owns them all:
 - **Full** - on a desktop it **lies over everything else**, 736 wide and up to 768 tall, centred on the stage, with
   the **veil** dimming the whole stage under it; pressing the veil puts it away. The report card on top, a
   divider, and the options in a row along the bottom. What every question opens at, the founding letter
-  included, because reading it is the thing to do first. **The options never scroll on a desktop**: they are
+  included, because reading it is the thing to do first. **At rest**, with nothing asked, opened out it is
+  only as tall as Take action and what a roll costs, 256, rather than a box over most of the screen. **The options never scroll on a desktop**: they are
   written to fit.
 - **Small** - a phone's only: the **carousel** for the founding letter, at half a phone.
 - **Minimised** - set aside. Not closed: the question is still standing. **On a desktop it is a chip** in the

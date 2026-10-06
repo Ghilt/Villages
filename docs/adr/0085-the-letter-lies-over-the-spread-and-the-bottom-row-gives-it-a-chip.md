@@ -5,6 +5,10 @@
 - Supersedes in part 0044 (the letter's middle size in the spread), 0056 (the corner's reach capped by the
   letter's least) and 0069 (the letter between the two columns, the right column stopping above it, and its
   strip across its top). Adam's words of 2026-10-06.
+- Amended 2026-10-06: **at rest, opened out, the letter is only as tall as Take action**, 256, the height the
+  middle size was, rather than 768 with one button in the middle of it. It is the same pane by the same id,
+  declared twice - `CHOICE_PANE` while a question stands, `CHOICE_AT_REST` while none does - so the size it was
+  asked for carries across when a hand arrives, and the box glides from one height to the other.
 
 ## Context
 
