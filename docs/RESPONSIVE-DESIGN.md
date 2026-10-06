@@ -60,7 +60,9 @@ never disagree — they read one value rather than writing into each other.
 **Nothing but the control moves the seam**, with one exception. Putting a different pane in a bay, pressing
 the **compass**, closing a pane: none of them changes how the stage is divided. The exception is something
 *arriving* in a bay that is a strip — something the player just clicked, or something the world has just
-sent — which opens that bay to half, because a thing nobody can read is not an answer. The compass is not
+sent — which opens that bay to half, because a thing nobody can read is not an answer. A thing arriving that
+is already standing in a bay stays where it is and only its bay opens, so a hand rolled from the letter lands
+in the letter rather than swapping it with the map. The compass is not
 one of those: what it opens is a list of ways on, and a strip of it is still a list of ways on. See decision
 record 0046.
 

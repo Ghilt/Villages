@@ -118,8 +118,9 @@ scrolls when they do not fit. The founding letter keeps its own two drawings - t
 **carousel** - and arrives at half.
 
 **In the spread** it takes **bottom middle**, and it moves nothing whether it is put away or opened out. **On a
-phone** it takes the map's bay, opening it to half if it was a strip, and the pane beside it keeps the other;
-answering puts the map back. See decision records 0044 and 0085.
+phone** a question takes the map's bay, opening it to half if it was a strip, and the pane beside it keeps the
+other; a hand rolled from Take action lands where the letter already stands, and answering leaves it there,
+back to Take action. See decision records 0044 and 0085.
 
 ### Not decided
 
