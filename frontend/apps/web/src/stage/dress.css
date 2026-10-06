@@ -46,3 +46,12 @@
   flex: 0 1 auto;
   min-height: 0;
 }
+
+/*
+ * And it fills the window's box when the box is the taller of the two, which is only ever while a window put away
+ * glides down to its strip: the frame shrinks with the box rather than snapping to the strip and leaving the room
+ * under it to close up empty. See `railGlide.ts`.
+ */
+.stage[data-form='spread'] .rail .bay > .dressed {
+  flex-grow: 1;
+}

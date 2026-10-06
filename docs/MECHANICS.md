@@ -407,7 +407,9 @@ pushes the oldest off rather than being refused. **When they no longer all fit, 
 others are put away, and opening another - from its strip, or by asking for it again from the map - brings
 it to the top and puts the rest away, so a rail out of room has one window open and the map rings that
 one. Nothing reopens by itself when the room comes back. A window left alone on a rail too short for it
-scrolls rather than losing its links off the bottom. See decision record 0058. **On a phone** a window takes the bay that is not the
+scrolls rather than losing its links off the bottom. See decision record 0058. **The windows glide** on a
+desktop: one opened or put away grows or shrinks to its new height, its frame with it, one arriving grows in
+from nothing, and the rest slide to where that leaves them; see decision record 0086. **On a phone** a window takes the bay that is not the
 map's, because the thing clicked is on the map, and opens it to half if it was a strip; closing it puts
 back what was there and leaves the arrangement alone. A link opens in the bay this window is not in, so the
 window it came from stays on the screen; in the spread there is one place a window goes, and a link is a

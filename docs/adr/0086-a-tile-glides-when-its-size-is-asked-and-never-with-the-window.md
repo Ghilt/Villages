@@ -3,6 +3,13 @@
 - Status: accepted
 - Date: 2026-10-06
 - Adds motion to 0041's spread and 0085's letter; nothing in either changes where anything ends up.
+- Amended 2026-10-06, Adam's word: **the windows on the rail glide too.** They are flow items rather than
+  rectangles the stage writes, so no transition can move them: the stage measures each one after every change to
+  what is on the rail and animates it from where it stood - its height, and a shift that makes up whatever the
+  flow does not - so a window opened or put away grows or shrinks, one arriving grows in from nothing, and the
+  rest slide, a window brought to the top included. A window gone leaves nothing to animate and the rest slide up
+  into its room. Its frame fills its box while the box is the taller, so one put away shrinks rather than snapping
+  to its strip. The arithmetic is pure and tested in `railGlide.ts`; the motion is looked at.
 
 ## Context
 

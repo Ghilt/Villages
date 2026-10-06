@@ -25,6 +25,7 @@ import {
   spreadWants,
 } from './panes';
 import { outOfRoom } from './rail';
+import { useGlideOnTheRail } from './railGlide';
 import { openingOut } from './strip';
 import { TabBar } from './TabBar';
 import { useStore } from '../store/useStore';
@@ -177,6 +178,7 @@ export function Stage({ stage, panes, overlays }: StageProps) {
         className={`bay bay--${kindOf(id)}`}
         key={id}
         data-at={where ?? 'nowhere'}
+        data-pane={id}
         data-tabbed={tabbed ? 'yes' : undefined}
         data-over={where !== null && where === box.over ? 'yes' : undefined}
         data-away={away ? 'yes' : undefined}
@@ -196,6 +198,12 @@ export function Stage({ stage, panes, overlays }: StageProps) {
   const railRef = useRef<HTMLDivElement | null>(null);
   const stacked = panes.filter(isWindow).map((pane) => ({ id: pane.id, asked: sizeAsked(pane, bays) }));
   useRoomOnTheRail(railRef, rail !== null, stacked);
+  // And the windows on it glide, as the tiles do: see `railGlide.ts`.
+  useGlideOnTheRail(
+    railRef,
+    easing && rail !== null,
+    stacked.map((one) => `${one.id}:${one.asked}`).join(' '),
+  );
 
   // A tile that more than one pane declared itself into gets a strip of tabs across its top. There is one
   // such tile today - the corner, holding the house status, the key figures and navigation - and the
