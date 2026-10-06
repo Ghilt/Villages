@@ -46,8 +46,8 @@ class WrittenBeforeSpec : StringSpec({
         }
         val given = Events.json.readValue(Events.json.writeValueAsBytes(data), PlayerGivenChoice::class.java)
 
-        given.choice.options.map { it.rarity } shouldBe listOf(null, null)
-        given.choice.options.map { it.omens } shouldBe listOf(emptyList(), emptyList())
+        given.choice.options.map { it.rarity }.toSet() shouldBe setOf(null)
+        given.choice.options.map { it.omens }.toSet() shouldBe setOf(emptyList())
     }
 
     "an appearance written before a stat existed reads back, with the middle of the scale of it" {

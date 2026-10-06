@@ -22,6 +22,7 @@ import villages.domain.Effect
     JsonSubTypes.Type(value = Effect.FoundAt::class, name = FOUND_AT),
     JsonSubTypes.Type(value = Effect.Grant::class, name = GRANT),
     JsonSubTypes.Type(value = Effect.Spend::class, name = SPEND),
+    JsonSubTypes.Type(value = Effect.Converse::class, name = CONVERSE),
 )
 internal interface EffectJson
 
@@ -31,3 +32,4 @@ internal const val KIND = "kind"
 internal const val FOUND_AT = "foundAt"
 internal const val GRANT = "grant"
 internal const val SPEND = "spend"
+internal const val CONVERSE = "converse"

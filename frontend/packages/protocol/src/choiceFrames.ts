@@ -11,6 +11,8 @@ export const effectViewSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('foundAt'), seat: pointSchema, name: z.string(), banner: bannerSchema }),
   z.object({ kind: z.literal('grant'), resource: resourceNameSchema, amount: z.number().int().positive() }),
   z.object({ kind: z.literal('spend'), resource: resourceNameSchema, amount: z.number().int().positive() }),
+  /** A conversation begun, by the dialogue's title and nothing of what is said in it. See 0083. */
+  z.object({ kind: z.literal('converse'), title: z.string() }),
 ]);
 
 /** How good a rolled option is, by its lower-case name. See decision record 0083. */

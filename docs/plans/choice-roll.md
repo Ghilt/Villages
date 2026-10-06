@@ -275,7 +275,8 @@ the next roll is that rarity, so a legendary can be seen without four hundred pr
 
 **Checkpoint 7: gossip.**
 
-16. **An option can start a dialogue,** `Effect.Converse`, decided through `Follow` into the dialogues part.
+16. **An option can start a dialogue,** Done: `Effect.Converse`, stored as `converse` with the dialogue whole and
+    sent as `converse` with its title alone, wire version 24. `Effect.Converse`, decided through `Follow` into the dialogues part.
 17. **The gossip** about the nearest other house, in Hearth and Court.
 
 ## Not in this plan

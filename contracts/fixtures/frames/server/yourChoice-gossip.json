@@ -1,0 +1,40 @@
+{
+  "type": "yourChoice",
+  "choice": {
+    "id": "dd000000-0000-4000-8000-0000000c0002",
+    "prompt": "What will the house do?",
+    "options": [
+      {
+        "id": "dd000000-0000-4000-8000-000000000011",
+        "label": "Gossip from the kitchens",
+        "detail": "A servant has heard something about House Varga.",
+        "effect": {
+          "kind": "converse",
+          "title": "Word of House Varga"
+        },
+        "rarity": "common",
+        "omens": [
+          "map.house:aa000000-0000-4000-8000-0000000000e1"
+        ]
+      },
+      {
+        "id": "dd000000-0000-4000-8000-000000000012",
+        "label": "Collect the mill's dues",
+        "detail": "The miller pays what he owes, and a little early.",
+        "effect": {
+          "kind": "grant",
+          "resource": "wealth",
+          "amount": 15
+        },
+        "rarity": "common"
+      }
+    ],
+    "omens": [
+      {
+        "key": "map.house:aa000000-0000-4000-8000-0000000000e1",
+        "kind": "map",
+        "words": "House Varga"
+      }
+    ]
+  }
+}

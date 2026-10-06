@@ -63,3 +63,5 @@ recorded over. See decision record 0037. What each one changed:
 - **23** - the choice roll: `roll`, Take action with what the page is looking at; `nextRarity`, Adam's lever on
   the next roll's luck; `rollDrawn`, what a roll drew from, sent only while the instruments are open; and a choice's
   `omens` and an option's `rarity` and `omens`, left out of any choice no roll dealt. See decision record 0083.
+- **24** - let an effect be a `converse`, a conversation begun by taking an option, said by the dialogue's
+  `title` and nothing of what is said in it.

@@ -112,6 +112,20 @@ internal object EventSamples {
                     ),
                 ),
                 Option(
+                    id = OptionId(UUID.fromString("aa000000-0000-4000-8000-000000000003")),
+                    label = "Hear the news first",
+                    detail = "A servant has word of the neighbours.",
+                    effect = Effect.Converse(
+                        Dialogue(
+                            id = DialogueId(UUID.fromString("dd000000-0000-4000-8000-00000000a002")),
+                            title = "Word of the neighbours",
+                            scene = null,
+                            speakers = listOf(Speaker(SpeakerId("servant"), 1, "A servant", null, null)),
+                            lines = listOf(Line(LineId("says"), SpeakerId("servant"), "They say Varga is broke.", then = Then.End)),
+                        ),
+                    ),
+                ),
+                Option(
                     id = southern,
                     label = "Hollin, under the southern hills",
                     detail = "Warm ground and old roads, and neighbours on every one of them.",

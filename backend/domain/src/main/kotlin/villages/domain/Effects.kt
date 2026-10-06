@@ -71,6 +71,14 @@ private fun follows(
         listOf(HouseResourceGranted(houseId, effect.resource, effect.amount, worldTime, recordedAt))
     }
 
+    // A conversation begun is offered as any dialogue is, and refused as one is when it was offered before.
+    is Effect.Converse -> {
+        if (effect.dialogue.id in HouseDecider.founded(state).dialogues.offered) {
+            throw HouseError.DialogueAlreadyOffered
+        }
+        listOf(PlayerOfferedDialogue(houseId, player, effect.dialogue, worldTime, recordedAt))
+    }
+
     // What an option costs is refused when the house has not that much free, as spending is, and then the
     // action or the step is refused with it: the player answers otherwise. See decision record 0071.
     is Effect.Spend -> {

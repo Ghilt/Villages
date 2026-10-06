@@ -55,7 +55,7 @@ internal fun Choice.refuseUnlessGivableTo(state: House) {
     if (state is House.Founded && options.any { it.effect is Effect.FoundAt }) {
         throw HouseError.AlreadyFounded
     }
-    if (state is House.NotFounded && options.any { it.effect is Effect.Grant || it.effect is Effect.Spend }) {
+    if (state is House.NotFounded && options.any { it.effect !is Effect.FoundAt }) {
         throw HouseError.NoSuchHouse
     }
     if (options.all { costsSomething(listOf(it.effect)) }) {
@@ -121,6 +121,13 @@ sealed interface Effect {
             }
         }
     }
+
+    /**
+     * Begin a conversation: offer the house this dialogue, whole, from the same decision as whatever reached it. What
+     * a rolled option that is a dialogue does - gossip, a visitor, the start of a storyline. Refused as an offer is,
+     * when the house was offered this dialogue before. See decision records 0071 and 0083.
+     */
+    data class Converse(val dialogue: Dialogue) : Effect
 }
 
 /** The identity of one choice, so that an action can only answer the choice it was given. */

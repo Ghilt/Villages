@@ -16,7 +16,10 @@
           "detail": "Cold water, long winters, and nobody near enough to argue with.",
           "effect": {
             "kind": "foundAt",
-            "seat": { "lat": 59.33, "lon": 18.07 },
+            "seat": {
+              "lat": 59.33,
+              "lon": 18.07
+            },
             "name": "Ravenscar",
             "banner": {
               "field": "SABLE",
@@ -30,12 +33,54 @@
           "omens": []
         },
         {
+          "id": "aa000000-0000-4000-8000-000000000003",
+          "label": "Hear the news first",
+          "detail": "A servant has word of the neighbours.",
+          "effect": {
+            "kind": "converse",
+            "dialogue": {
+              "id": "dd000000-0000-4000-8000-00000000a002",
+              "title": "Word of the neighbours",
+              "scene": null,
+              "speakers": [
+                {
+                  "id": "servant",
+                  "party": 1,
+                  "name": "A servant",
+                  "portrait": null,
+                  "character": null
+                }
+              ],
+              "lines": [
+                {
+                  "id": "says",
+                  "speaker": "servant",
+                  "words": "They say Varga is broke.",
+                  "effects": [],
+                  "recorded": false,
+                  "then": {
+                    "kind": "end"
+                  },
+                  "revealImpact": null,
+                  "shows": null
+                }
+              ],
+              "requirements": []
+            }
+          },
+          "rarity": null,
+          "omens": []
+        },
+        {
           "id": "aa000000-0000-4000-8000-000000000002",
           "label": "Hollin, under the southern hills",
           "detail": "Warm ground and old roads, and neighbours on every one of them.",
           "effect": {
             "kind": "foundAt",
-            "seat": { "lat": 47.5, "lon": 19.05 },
+            "seat": {
+              "lat": 47.5,
+              "lon": 19.05
+            },
             "name": "Hollin",
             "banner": {
               "field": "OR",

@@ -77,7 +77,7 @@ export function TakeAction({ room, looking }: { room: Room; looking: () => Looki
   );
 }
 
-/** What taking a rolled option gives, in the player's words: +15 wealth. */
+/** What taking a rolled option gives, in the player's words: +15 wealth, or the conversation it begins. */
 export function gives(option: OptionView): string {
   const effect = option.effect;
   switch (effect.kind) {
@@ -87,5 +87,7 @@ export function gives(option: OptionView): string {
       return `-${effect.amount} ${RESOURCE_WORDS[effect.resource].toLowerCase()}`;
     case 'foundAt':
       return `founds ${effect.name}`;
+    case 'converse':
+      return `a conversation: ${effect.title}`;
   }
 }

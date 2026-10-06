@@ -6,6 +6,7 @@ import villages.domain.Omen
 import villages.domain.OmenKind
 import villages.domain.Rarity
 import villages.protocol.ChoiceView
+import villages.protocol.ConverseView
 import villages.protocol.EffectView
 import villages.protocol.FoundAtView
 import villages.protocol.GrantView
@@ -62,4 +63,6 @@ internal fun Effect.toView(): EffectView = when (this) {
     is Effect.Grant -> GrantView(resource = resource.toWire(), amount = amount)
 
     is Effect.Spend -> SpendView(resource = resource.toWire(), amount = amount)
+
+    is Effect.Converse -> ConverseView(title = dialogue.title)
 }

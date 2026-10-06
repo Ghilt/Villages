@@ -89,6 +89,30 @@ class HouseRollsSpec : StringSpec({
         shouldThrow<HouseError.InvalidChoice> { HouseDecider.decide(rolling(unread), founded()) }
     }
 
+    "an option that begins a conversation offers the dialogue from the same decision, and only once" {
+        val servant = Speaker(SpeakerId("servant"), 1, "A servant", null, null)
+        val gossip = Dialogue(
+            id = DialogueId(UUID.fromString("dd000000-0000-4000-8000-00000000a002")),
+            title = "Word of House Varga",
+            scene = null,
+            speakers = listOf(servant),
+            lines = listOf(Line(LineId("says"), servant.id, "They say Varga is broke.", then = Then.End)),
+        )
+        val talking = dealt(1).copy(effect = Effect.Converse(gossip))
+        val before = founded()
+        val rolled = HouseDecider.decide(rolling(hand(talking, dealt(2), dealt(3))), before).fold(before, HouseDecider::evolve)
+        val taking = TakeAction(house, player, rolling().hand.id, talking.id, day, noon)
+
+        val events = HouseDecider.decide(taking, rolled)
+
+        events.map { it::class } shouldBe listOf(PlayerTookAction::class, PlayerOfferedDialogue::class)
+        val after = events.fold(rolled, HouseDecider::evolve).shouldBeInstanceOf<House.Founded>()
+        after.dialogues.open.single().dialogue shouldBe gossip
+
+        val again = HouseDecider.decide(rolling(hand(talking, dealt(2), dealt(3))), after).fold(after, HouseDecider::evolve)
+        shouldThrow<HouseError.DialogueAlreadyOffered> { HouseDecider.decide(taking, again) }
+    }
+
     "taking an option of a rolled hand answers it as any choice is answered" {
         val before = founded()
         val rolled = HouseDecider.decide(rolling(), before).fold(before, HouseDecider::evolve)

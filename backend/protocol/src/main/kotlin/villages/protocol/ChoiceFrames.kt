@@ -45,6 +45,7 @@ data class OmenView(val key: String, val kind: String, val words: String, val va
     JsonSubTypes.Type(FoundAtView::class, name = "foundAt"),
     JsonSubTypes.Type(GrantView::class, name = "grant"),
     JsonSubTypes.Type(SpendView::class, name = "spend"),
+    JsonSubTypes.Type(ConverseView::class, name = "converse"),
 )
 sealed interface EffectView
 
@@ -55,6 +56,12 @@ data class GrantView(val resource: String, val amount: Long) : EffectView
 
 /** Some of a resource taken from the house: what an option costs. A wire name, as a grant's is. */
 data class SpendView(val resource: String, val amount: Long) : EffectView
+
+/**
+ * A conversation begun: the dialogue taking the option offers, by its title and nothing more, because what is said
+ * in it reaches the page as it is reached and never before. See decision records 0071 and 0083.
+ */
+data class ConverseView(val title: String) : EffectView
 
 /**
  * Take action: roll for this player's house. It says what the page is looking at and nothing it could work out for
