@@ -29,6 +29,11 @@ export type Along = 'rows' | 'columns' | null;
 /** A pane as the stage is handed it: what it is, and what draws it in the room it was given. */
 export interface PaneDef extends Pane {
   draw(room: Room, along: Along): ReactNode;
+  /**
+   * How it asks for a size, where that is more than the bay manager's `askFor`: a window opened in the spread
+   * comes to the top of the rail. What its control does, and what a press on it put away does.
+   */
+  ask?: (size: PaneSize) => void;
 }
 
 export interface Pane {

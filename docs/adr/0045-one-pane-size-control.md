@@ -4,6 +4,10 @@
 - Date: 2026-09-19
 - Amended 2026-09-25 by 0057: in the spread, the panes taking turns in the corner share **one** control,
   at the far end of its tab bar, because the corner is one size whichever of them is up.
+- Amended 2026-10-06, Adam's word: **in the spread a press anywhere on a pane put away opens it out**, but on a
+  button of its own, which does what it says; the control still offers every size. The stage does it for every
+  pane, through the pane's own way of asking, so a window opened so comes to the top of the rail as it does from
+  its control. On a phone the letter's strip does it for itself, and no other strip does.
 
 ## Context
 

@@ -25,6 +25,7 @@ import {
   spreadWants,
 } from './panes';
 import { outOfRoom } from './rail';
+import { openingOut } from './strip';
 import { TabBar } from './TabBar';
 import { useStore } from '../store/useStore';
 
@@ -152,12 +153,16 @@ export function Stage({ stage, panes, overlays }: StageProps) {
       asked,
       // One control on every pane, in both forms, except that the panes taking turns in a tile share the
       // one in its tab bar. See decision records 0045, 0046 and 0057.
-      ask: (size) => askFor(id, size),
+      ask: pane?.ask ?? ((size) => askFor(id, size)),
       sizes: (box.form === 'spread' ? pane?.spreadSizes : undefined) ?? SIZES,
       ownControl: !tabbed,
       showMap: () => showMapBeside(id),
       openBeside: (other) => openBeside(id, other),
     };
+
+    // Put away in the spread, a press anywhere on it opens it out, but on a button of its own: Adam's word of
+    // 2026-10-06. The tab bar above the corner is its own and is not part of this.
+    const away = box.form === 'spread' && room.size === 'strip';
 
     // A window in the spread stacks inside the rail, which is itself the column's upper tile, so it is a
     // flow item rather than a box of its own. Everything else is placed by its rectangle.
@@ -174,6 +179,8 @@ export function Stage({ stage, panes, overlays }: StageProps) {
         data-at={where ?? 'nowhere'}
         data-tabbed={tabbed ? 'yes' : undefined}
         data-over={where !== null && where === box.over ? 'yes' : undefined}
+        data-away={away ? 'yes' : undefined}
+        onClick={away ? openingOut(() => room.ask('full')) : undefined}
         hidden={!railed && (rect === null || !up)}
         style={railed || rect === null ? undefined : place(rect)}
       >

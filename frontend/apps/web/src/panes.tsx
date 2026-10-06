@@ -12,13 +12,21 @@ import { KeyFigures } from './figures/KeyFigures';
 import { HOUSE_PANE } from './house/pane';
 import { HouseStatus } from './house/HouseStatus';
 import { Inspecting } from './inspect/Inspecting';
-import { inspectBeside } from './inspect/opening';
+import { inspectBeside, sizeWindow } from './inspect/opening';
 import { Navigating } from './inspect/Navigating';
 import { inspectPane } from './inspect/pane';
 import { subjectsStore, type Subject } from './inspect/subjects';
 import { sessionStore } from './net/gateway';
 import type { BaysConfig } from './stage/bays';
-import { type Along, MAP_PANE, NAVIGATION_PANE, type Pane, type PaneDef, type Room } from './stage/panes';
+import {
+  type Along,
+  MAP_PANE,
+  NAVIGATION_PANE,
+  type Pane,
+  type PaneDef,
+  type PaneSize,
+  type Room,
+} from './stage/panes';
 
 /**
  * Which panes stand on the stage, in which order, and what draws each.
@@ -83,6 +91,8 @@ export function panesOn(
     ...up.map((one) => ({ ...one.pane, draw: (room: Room, along: Along) => one.draw(room, along, going) })),
     ...open.map((subject) => ({
       ...inspectPane(subject),
+      // Opened in the spread, a window comes to the top of the rail, as asking for it from the map does.
+      ask: (size: PaneSize) => sizeWindow(subject, size),
       draw: (room: Room, along: Along) => <Inspecting subject={subject} room={room} along={along} />,
     })),
   ];

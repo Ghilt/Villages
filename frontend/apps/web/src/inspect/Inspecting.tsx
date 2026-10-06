@@ -9,7 +9,6 @@ import { sessionStore } from '../net/gateway';
 import type { Room } from '../stage/panes';
 import { type Description, describeArea, describeCharacter, describeHouse, type Legend } from './describe';
 import { InspectWindow, WindowBar } from './InspectWindow';
-import { sizeWindow } from './opening';
 import { forgetSubject, type Subject } from './subjects';
 import { trailStore, forget, lastNamed } from './trail';
 import { useStore } from '../store/useStore';
@@ -33,9 +32,7 @@ interface InspectingProps {
   along: 'rows' | 'columns' | null;
 }
 
-export function Inspecting({ subject, room: given, along }: InspectingProps) {
-  // Its own size control opens a put-away window at the top of the rail rather than where it stood.
-  const room: Room = { ...given, ask: (size) => sizeWindow(subject, size) };
+export function Inspecting({ subject, room, along }: InspectingProps) {
   const houses = useStore(sessionStore, (state) => state.houses);
   const yourKeyFigures = useStore(sessionStore, (state) => state.yourKeyFigures);
   const today = useStore(sessionStore, (state) => state.world?.today ?? null);

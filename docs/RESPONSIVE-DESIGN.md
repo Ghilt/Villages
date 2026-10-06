@@ -233,7 +233,9 @@ differs is who the room belongs to. See decision records 0045 and 0046.
 the stage it is taking: put away, the normal size, opened out. In the **bays** it names the arrangement,
 and the other bay follows because both of them are reading one value. In the **spread** each tile's size is
 its own, because a tile is not dividing anything with anybody, and the panes taking turns in bottom left
-share one control, in its tab bar. **Bottom middle offers two marks in the spread**, put away and opened
+share one control, in its tab bar. **In the spread a press anywhere on a pane put away opens it out**, but
+on a button of its own, which does what it says: the strip is the way back, the marks are for the other sizes.
+**Bottom middle offers two marks in the spread**, put away and opened
 out, and its chip carries none, because pressing the chip opens it. See decision records 0045, 0046, 0057
 and 0085 and `LOOK-AND-FEEL.md`.
 

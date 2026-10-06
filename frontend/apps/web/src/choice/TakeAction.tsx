@@ -6,9 +6,10 @@ import { RESOURCE_WORDS } from '../house/describe';
 import { sessionStore, takeAction } from '../net/gateway';
 import { PaneSizeControl } from '../stage/PaneSizeControl';
 import type { Along, Room } from '../stage/panes';
+import { openingOut } from '../stage/strip';
 import { useStore } from '../store/useStore';
 import { TextButton } from '../ui/button/Button';
-import { expectHand, openingOut, overOf } from './rolling';
+import { expectHand, overOf } from './rolling';
 
 /**
  * What a roll costs in wealth, as the page says it before pressing. The server's `ROLL_PRICE` is the price, and a
@@ -59,7 +60,7 @@ export function TakeAction({ room, along, looking }: { room: Room; along: Along;
       <section
         className={`choice choice--strip pane-strip${along === null ? ' choice--chip' : ''}`}
         title={whyNot ?? `costs ${price}`}
-        onClick={openingOut(() => room.ask('full'))}
+        onClick={along === null ? undefined : openingOut(() => room.ask('full'))}
       >
         {button}
         <span className="choice__aside">{whyNot ?? price}</span>

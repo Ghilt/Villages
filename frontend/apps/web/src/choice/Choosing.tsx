@@ -7,6 +7,7 @@ import type { ChoiceView, OmenView, OptionView } from '@villages/protocol';
 import { sessionStore, takeOption } from '../net/gateway';
 import { PaneSizeControl } from '../stage/PaneSizeControl';
 import type { Along, Room } from '../stage/panes';
+import { openingOut } from '../stage/strip';
 import { useStore } from '../store/useStore';
 import { Card } from '../ui/card/Card';
 import { OmenStrip } from '../ui/report/ReportCard';
@@ -14,7 +15,7 @@ import type { OmenLine } from '../ui/report/ReportCard';
 import { RolledHand } from '../ui/report/RolledHand';
 import type { HandForm } from '../ui/report/RolledHand';
 import { usePlay } from '../ui/report/usePlay';
-import { handExpected, openingOut, overOf } from './rolling';
+import { handExpected, overOf } from './rolling';
 import { TakeAction, gives } from './TakeAction';
 
 /** An omen off the wire as the report card shows it. */
@@ -78,7 +79,7 @@ export function Choosing({ room, along, looking }: { room: Room; along: Along; l
     return (
       <section
         className={`choice choice--strip pane-strip${along === null ? ' choice--chip' : ''}`}
-        onClick={openingOut(() => room.ask('full'))}
+        onClick={along === null ? undefined : openingOut(() => room.ask('full'))}
       >
         <span className="choice__aside">
           {rolled === undefined
