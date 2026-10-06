@@ -143,7 +143,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   `offer a dialogue` opens the pane: from its strip in the spread, and on a phone into the bay the map is
   not in, at half. See `docs/adr/0071`, `0069` and `0070`, and `docs/plans/character-dialogue.md`.
 - The choice roll, the player's own: **Take action**, in the bottom middle of the spread once there is a
-  house, put away to its strip at rest with what a roll costs beside it, ten wealth, and a house is founded
+  house, put away to its strip at rest with what a roll costs beside it - a press anywhere on the strip but its
+  buttons opens the pane out - ten wealth, and a house is founded
   with fifty. Greyed, saying why, while the house has less than that free or a command is waiting on its
   answer. Pressed, it rolls: the pane opens out, three times as tall as its middle size, and plays the roll as
   a report card - the omens slam into a list a third of a second apart, and under a divider the hand of three

@@ -107,7 +107,8 @@ and the mechanic owns all three:
 - **Small** - the middle size, as tall as it always was: the list folded to its marks over the options, each
   option its rarity's tag and its title and nothing more. Pressing the marks or an option opens the pane out:
   an option is chosen only opened out, where it can be read whole.
-- **Minimised** - set aside to a strip. Not closed: the question is still standing.
+- **Minimised** - set aside to a strip. Not closed: the question is still standing. A press anywhere on the
+  strip opens the pane out, but on its own buttons, Take action and the size control, which do what they say.
 
 **On a phone** a rolled hand is always the list and then the options under it, one under another, and the pane
 scrolls when they do not fit. The founding letter keeps its own two drawings - three parchments across, and the

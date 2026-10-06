@@ -15,7 +15,7 @@ import type { OmenLine } from '../ui/report/ReportCard';
 import { RolledHand } from '../ui/report/RolledHand';
 import type { HandForm } from '../ui/report/RolledHand';
 import { usePlay } from '../ui/report/usePlay';
-import { handExpected } from './rolling';
+import { handExpected, openingOut } from './rolling';
 import { TakeAction, gives } from './TakeAction';
 
 /** An omen off the wire as the report card shows it. */
@@ -79,9 +79,11 @@ export function Choosing({ room, looking }: { room: Room; looking: () => Looking
   if (room.size === 'strip') {
     const rolled = choice.options[0]?.rarity;
     return (
-      <section className="choice choice--strip pane-strip">
+      <section className="choice choice--strip pane-strip" onClick={openingOut(() => room.ask('full'))}>
         <span className="choice__aside">
-          {rolled === undefined ? 'A letter awaits' : `A ${rolled} hand awaits`}
+          {rolled === undefined
+            ? 'A letter awaits'
+            : `${rolled === 'uncommon' ? 'An' : 'A'} ${rolled} hand awaits`}
         </span>
         <PaneSizeControl room={room} />
       </section>

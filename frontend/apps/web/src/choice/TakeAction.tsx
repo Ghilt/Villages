@@ -8,7 +8,7 @@ import { PaneSizeControl } from '../stage/PaneSizeControl';
 import type { Room } from '../stage/panes';
 import { useStore } from '../store/useStore';
 import { TextButton } from '../ui/button/Button';
-import { expectHand } from './rolling';
+import { expectHand, openingOut } from './rolling';
 
 /**
  * What a roll costs in wealth, as the page says it before pressing. The server's `ROLL_PRICE` is the price, and a
@@ -55,7 +55,11 @@ export function TakeAction({ room, looking }: { room: Room; looking: () => Looki
 
   if (room.size === 'strip') {
     return (
-      <section className="choice choice--strip pane-strip" title={whyNot ?? `costs ${price}`}>
+      <section
+        className="choice choice--strip pane-strip"
+        title={whyNot ?? `costs ${price}`}
+        onClick={openingOut(() => room.ask('full'))}
+      >
         {button}
         <span className="choice__aside">{whyNot ?? price}</span>
         <PaneSizeControl room={room} />

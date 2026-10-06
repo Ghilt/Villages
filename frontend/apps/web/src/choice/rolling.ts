@@ -6,6 +6,16 @@
  */
 let awaiting = false;
 
+/**
+ * What a press on the pane put away to its strip does: opens it out, wherever on the strip it lands, unless it
+ * lands on a button of its own - Take action, the size control - which does what it says. Adam's word, 2026-10-06.
+ */
+export function openingOut(open: () => void): (event: { target: EventTarget | null }) => void {
+  return (event) => {
+    if (!(event.target instanceof Element && event.target.closest('button') !== null)) open();
+  };
+}
+
 /** Take action was pressed: the next rolled hand to arrive is this page's to play. */
 export function expectHand(): void {
   awaiting = true;

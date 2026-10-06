@@ -212,3 +212,8 @@
 .choice--stacked {
   overflow: hidden auto;
 }
+
+/* Put away, the whole strip opens the pane out when pressed, so it says so under the pointer. */
+.choice--strip {
+  cursor: pointer;
+}
