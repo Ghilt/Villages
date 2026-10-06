@@ -103,7 +103,14 @@ export function Choosing({ room, looking }: { room: Room; looking: () => Looking
           omens={omens}
           play={play}
           options={choice.options.map((option) => (
-            <Parchment key={option.id} choice={choice} option={option} answering={answering} omens={omens} />
+            <Parchment
+              key={option.id}
+              choice={choice}
+              option={option}
+              answering={answering}
+              omens={omens}
+              {...(form === 'medium' ? { open: () => room.ask('full') } : {})}
+            />
           ))}
           onHurry={hurry}
           onOpen={() => room.ask('full')}
@@ -209,13 +216,30 @@ function Parchment({
   option,
   answering,
   omens = [],
+  open,
 }: {
   choice: ChoiceView;
   option: OptionView;
   answering: boolean;
   /** The omens of the roll that dealt it, of which the option carries the marks of those that brought it. */
   omens?: readonly OmenLine[];
+  /**
+   * Given, the option is shown by its rarity and its title alone, and pressing it opens the pane out rather than
+   * taking it: the middle size on a desktop, where a whole option does not fit and nothing is chosen unread.
+   */
+  open?: () => void;
 }) {
+  if (option.rarity !== undefined && open !== undefined) {
+    return (
+      <Card
+        rarity={option.rarity}
+        title={option.label}
+        label={`${option.label}: open the pane to read it and choose`}
+        onPress={open}
+      />
+    );
+  }
+
   if (option.rarity !== undefined) {
     return (
       <Card

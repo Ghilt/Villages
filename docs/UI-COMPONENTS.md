@@ -414,7 +414,7 @@ A line each: what it is for, its variants, and where on the page it is.
   it is one button, the way back to the list; `small` on an option card, the omens that brought it. The rarity is
   the options' to say, by their tag and their glow, and nothing here says it. **`RolledHand`**, beside them, lays
   a hand out in one of three forms: `full`, the list, a divider and the options in a row along the bottom;
-  `medium`, the marks over the options; `stacked`, a phone's, everything one under another for whatever holds it
+  `medium`, the marks over the options, which the game draws as a rarity and a title each; `stacked`, a phone's, everything one under another for whatever holds it
   to scroll. On a desktop its options never scroll: they are written to fit. `ui-pop` is the class an option
   pops in by. **`playOf`** in `ui/report/timing.ts` is how a roll plays over time - omens a third of a second
   apart, a beat, the options a seventh apart - and how a hurry lands the rest of the omens; **`usePlay`** plays

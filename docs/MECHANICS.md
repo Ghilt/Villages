@@ -104,8 +104,9 @@ and the mechanic owns all three:
 - **Full** - on a desktop, three times as tall as the middle size, covering most of the middle of the screen:
   the report card on top, a divider, and the options in a row along the bottom. What a roll opens at, because
   reading it is the thing to do first. **The options never scroll on a desktop**: they are written to fit.
-- **Small** - the middle size, as tall as it always was: the list folded to its marks over the options, and
-  pressing the marks opens the pane out.
+- **Small** - the middle size, as tall as it always was: the list folded to its marks over the options, each
+  option its rarity's tag and its title and nothing more. Pressing the marks or an option opens the pane out:
+  an option is chosen only opened out, where it can be read whole.
 - **Minimised** - set aside to a strip. Not closed: the question is still standing.
 
 **On a phone** a rolled hand is always the list and then the options under it, one under another, and the pane

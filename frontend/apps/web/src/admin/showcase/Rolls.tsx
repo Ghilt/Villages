@@ -45,7 +45,12 @@ const ROOMS: readonly {
   readonly says: string;
 }[] = [
   { form: 'full', w: 620, h: 700, says: 'opened out on a desktop: three times the height' },
-  { form: 'medium', w: 620, h: 256, says: "a desktop's middle size: press the marks to open it out" },
+  {
+    form: 'medium',
+    w: 620,
+    h: 256,
+    says: "a desktop's middle size: the titles, and a press on the marks or an option opens it out",
+  },
   { form: 'stacked', w: 390, h: 520, says: 'on a phone: one under another, scrolling' },
 ];
 
@@ -64,11 +69,17 @@ export function Rolls() {
     setRolls((was) => was + 1);
   };
   const open = () => setOpened((was) => was + 1);
-  const options = HAND.map((one) => (
-    <Card key={one.title} rarity={rarity} title={one.title} line={one.gives} onPress={() => undefined}>
-      <OmenStrip omens={one.omens} small />
-    </Card>
-  ));
+  // At the middle size an option is its rarity and its title, and pressing it opens the pane out.
+  const optionsFor = (form: HandForm) =>
+    HAND.map((one) =>
+      form === 'medium' ? (
+        <Card key={one.title} rarity={rarity} title={one.title} onPress={open} />
+      ) : (
+        <Card key={one.title} rarity={rarity} title={one.title} line={one.gives} onPress={() => undefined}>
+          <OmenStrip omens={one.omens} small />
+        </Card>
+      ),
+    );
 
   return (
     <>
@@ -102,7 +113,7 @@ export function Rolls() {
                       form={room.form}
                       omens={OMENS}
                       play={play}
-                      options={options}
+                      options={optionsFor(room.form)}
                       onHurry={hurry}
                       onOpen={open}
                     />

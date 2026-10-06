@@ -210,5 +210,5 @@
 }
 
 .choice--stacked {
-  overflow: auto;
+  overflow: hidden auto;
 }

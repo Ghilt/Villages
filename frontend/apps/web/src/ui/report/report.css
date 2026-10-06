@@ -137,10 +137,11 @@
     min-height: 0;
   }
 
+  /* Down only: an omen slamming in is drawn wider than the list for a moment, and that is not a reason to scroll. */
   .ui-hand__report {
     flex: 1;
     min-height: 0;
-    overflow: auto;
+    overflow: hidden auto;
   }
 
   .ui-hand__options {

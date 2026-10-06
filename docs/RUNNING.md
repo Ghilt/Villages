@@ -149,7 +149,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   a report card - the omens slam into a list a third of a second apart, and under a divider the hand of three
   options of one rarity pops in along the bottom, each a card edged and named in its rarity, saying what it
   gives, with the marks of the omens that brought it. A press on the list lands the rest of the omens at once.
-  At the middle size the list is folded to its marks over the options, and pressing them opens the pane out; on
+  At the middle size the list is folded to its marks over the options, each just its rarity and its title, and
+  pressing the marks or an option opens the pane out, where an option is taken; on
   a phone the list and the options are one under another and the pane scrolls. Taking an option gives it, and
   the pane goes back to its strip. A hand already pending when the page loads is drawn as it ends. A hand cannot be rolled over while it waits. The asking and the answer are lines of the log under
   `roll`, and the hand under `choice`, with its rarity and how many omens it was rolled from. The **Choice
