@@ -137,6 +137,11 @@ Wanted, not started, and each needs a hypothesis in `docs/experiments/` before a
   worked ground around them, and marks of time. Experiment 0006 proved the machine will draw it and
   found the budget by hand; the path is `docs/plans/world-generator.md`. The largest thing on this list
   and the one that would change how the world reads most.
+- **Real names on the edited world**: the rivers, lakes, seas and towns of 1790 carried onto Adam's
+  master through an **origin map** a tool works out from his edits, which says where each piece of it was
+  cut from on Earth, with invented land given invented names. It is what real history will stand on,
+  before 1790 as the backstory of a place and after it as the warped history `SETTING.md` promises. Six
+  steps in `docs/plans/real-world-names.md`; the hypothesis is experiment 0016, the origin map itself.
 - **Aliveness and scale**: a bot swarm to ten thousand connections on one machine, aggregation of sprites at
   low zoom, a custom stylised map style checked in, hardened reconnection and clock correction. The scale
   the architecture is designed for is not in doubt; proving it is simply not next.

@@ -85,6 +85,11 @@ worth having on disk long before anything is allowed to place one.
 When the map does settle, the thing to decide is not *whether* but *which layer first*, and that
 deserves its own record.
 
+**2026-10-06: names first, and they need not wait.** `real-world-names.md` plans a tool that works out
+where on Earth each piece of an edited master was cut from, so that a real name follows the land wherever
+Adam moves it, and is worked out again each time he paints. If it holds, the objection above - a town in
+the sea wherever a coast has moved - goes for names, and later for real settlements too.
+
 ## What "lived in" is made of
 
 Roughly in the order the eye reads them, and each one is a layer the next can lean on.
