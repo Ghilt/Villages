@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { regionsOf } from './regions.ts';
+import { regionLabels, regionsOf } from './regions.ts';
 import type { EarthRegion } from './regions.ts';
 import { ORIGIN_EARTH, ORIGIN_INVENTED, ORIGIN_SEA } from './originFile.ts';
 import type { OriginGrid } from './originFile.ts';
@@ -77,6 +77,17 @@ describe('the named regions of the world', () => {
   it('names open sea by its nearest coast, carried out across the water, not by where it lies', () => {
     // Column 6 lies at 208 pixels, in the sea beyond; carried out from the moved land beside it, it is at 80.
     expect(nameOf(sea[2 * 16 + 6]!)).toBe('Sea It Came From');
+  });
+
+  it('writes the name of a region on its own squares, and of a sea on its open water', () => {
+    const labels = regionLabels(grid, { land, sea }, regions.length);
+    const squareOf = ([lng, lat]: readonly [number, number]) =>
+      Math.floor(((90 - lat) / 180) * 8) * 16 + Math.floor(((lng + 180) / 360) * 16);
+    const alps = labels[regions.findIndex((one) => one.name === 'Alps')]!;
+    expect(land[squareOf(alps.at)]).toBe(regions.findIndex((one) => one.name === 'Alps') + 1);
+    const water = labels[regions.findIndex((one) => one.name === 'Sea It Came From')]!;
+    expect(grid.status[squareOf(water.at)]).toBe(ORIGIN_SEA);
+    expect(water.squares).toBeGreaterThan(0);
   });
 
   it('gives invented land no region at all', () => {

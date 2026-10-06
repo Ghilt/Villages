@@ -63,9 +63,10 @@ export function MapSection({ map, master, renderer, onRenderer }: MapSectionProp
     return () => window.removeEventListener('focus', refresh);
   }, [refresh]);
 
-  // Under the Origin renderer a click on the map says where that place came from, in the log below.
+  // Under the Origin and Info map renderers a click on the map says where that place came from and what it is
+  // called, in the log below.
   useEffect(() => {
-    if (map === null || renderer !== 'origin') return undefined;
+    if (map === null || (renderer !== 'origin' && renderer !== 'info-map')) return undefined;
     return watchOrigin(map, master);
   }, [map, renderer, master]);
 

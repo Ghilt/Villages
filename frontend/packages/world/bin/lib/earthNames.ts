@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
-import { regionsOf } from '../../src/regions.ts';
+import { regionLabels, regionsOf } from '../../src/regions.ts';
 import type { EarthRegion, RegionKind } from '../../src/regions.ts';
 import { carryNames } from '../../src/names.ts';
 import type { EarthName, NameKind } from '../../src/names.ts';
@@ -72,6 +72,7 @@ export async function writeNames(
   for (const one of carried) counts[one.kind] += 1;
 
   const regions: EarthRegion[] = [];
+  let labels: ReturnType<typeof regionLabels> = [];
   const absent = REGIONS.filter(({ file }) => !existsSync(resolve(SOURCE_DIR, `${file}.geojson`)));
   if (absent.length === 0) {
     for (const { file, kind } of REGIONS) {
@@ -86,6 +87,7 @@ export async function writeNames(
     both.set(given.sea, grid.status.length);
     await writeFile(resolve(worldDir, 'regions.bin'), new Uint8Array(both.buffer));
     for (const k of new Set([...given.land, ...given.sea])) if (k > 0) counts[regions[k - 1]!.kind] += 1;
+    labels = regionLabels(grid, given, regions.length);
   }
 
   await writeFile(
@@ -96,8 +98,12 @@ export async function writeNames(
       form: 'today',
       counts,
       names: carried,
-      // What the two layers of regions.bin, a land and then a sea for every square, number from one.
-      regions: regions.map(({ id, kind, name, feature }) => ({ id, kind, name, feature })),
+      // What the two layers of regions.bin, a land and then a sea for every square, number from one; and where
+      // in the world each one's name goes, with how many squares it covers, for one that has any.
+      regions: regions.map(({ id, kind, name, feature, rank, from }, index) => ({
+        ...{ id, kind, name, feature, rank, from },
+        ...labels[index],
+      })),
     })}\n`,
   );
   return (
@@ -126,11 +132,15 @@ function regionsIn(file: string, kind: RegionKind, features: readonly SourceFeat
           ? (c as never[])
           : [];
     if (polygons.length === 0) return;
+    const rank = numeric(field('scalerank'));
+    const from = numeric(field('min_label'));
     out.push({
       id: field('wikidataid') ?? `${file}:${field('ne_id') ?? at}:${name}`,
       kind,
       name,
       feature: field('featurecla') ?? kind,
+      ...(rank === undefined ? {} : { rank }),
+      ...(from === undefined ? {} : { from }),
       polygons,
     });
   });
@@ -148,16 +158,20 @@ function namesIn(file: string, kind: NameKind, features: readonly SourceFeature[
     const number = text(feature.properties['rivernum']) ?? text(feature.properties['ne_id']) ?? String(at);
     const id = text(feature.properties['wikidataid']) ?? `${file}:${number}:${local}`;
     const elevation = feature.properties['elevation'];
-    const one = together.get(id) ?? {
+    const rank = numeric(feature.properties['scalerank']);
+    const from = numeric(feature.properties['min_label']) ?? numeric(feature.properties['min_zoom']);
+    const before = together.get(id);
+    // A river's pieces may be ranked apart; the river is as important as its most important piece.
+    together.set(id, {
       id,
       kind,
       name,
       ...(local === name ? {} : { also: local }),
       ...(typeof elevation === 'number' ? { elevation } : {}),
-      lines: [],
-    };
-    one.lines.push(...linesOf(feature.geometry));
-    together.set(id, one);
+      ...least('rank', before?.rank, rank),
+      ...least('from', before?.from, from),
+      lines: [...(before?.lines ?? []), ...linesOf(feature.geometry)],
+    });
   });
   return [...together.values()];
 }
@@ -188,11 +202,18 @@ async function townsOf1790(): Promise<{ towns: EarthName[]; said: string }> {
       unborn += 1;
       continue;
     }
+    const rank = numeric(feature.properties['SCALERANK']);
+    const from = numeric(feature.properties['MIN_ZOOM']);
     towns.push({
       id: id!,
       kind: 'town',
       name: then,
       ...(today === then ? {} : { also: today }),
+      ...(rank === undefined ? {} : { rank }),
+      // Natural Earth ranks today's towns, and Leghorn is not what it was; every town the review kept
+      // mattered in 1790, so none waits past this zoom to be named.
+      from: Math.min(from ?? TOWN_FROM, TOWN_FROM),
+      form: '1790',
       lines: linesOf(feature.geometry),
     });
   }
@@ -202,11 +223,29 @@ async function townsOf1790(): Promise<{ towns: EarthName[]; said: string }> {
   };
 }
 
+/** The zoom by which every town of 1790 is named, however Natural Earth ranks it today. */
+const TOWN_FROM = 4.5;
+
 /** Natural Earth's towns of today, which the review of 1790 is made against. */
 const PLACES = 'ne_10m_populated_places';
 
 /** A town as the review decides it: its name in 1790 or null, today's, and why they differ. */
 type Review = [string | null, string, string?];
+
+function numeric(value: unknown): number | undefined {
+  const number = typeof value === 'string' ? Number(value) : value;
+  return typeof number === 'number' && Number.isFinite(number) ? number : undefined;
+}
+
+/** The smaller of two optional numbers, as a field of that name, or no field when there is neither. */
+function least<Key extends string>(
+  key: Key,
+  one: number | undefined,
+  other: number | undefined,
+): { [k in Key]?: number } {
+  const both = [one, other].filter((value): value is number => value !== undefined);
+  return (both.length === 0 ? {} : { [key]: Math.min(...both) }) as { [k in Key]?: number };
+}
 
 function text(value: unknown): string | undefined {
   if (typeof value === 'number') return String(value);

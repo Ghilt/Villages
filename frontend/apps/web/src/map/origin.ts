@@ -1,81 +1,24 @@
 import type * as maplibregl from 'maplibre-gl';
-import { decodeOrigin, namesAt, squareAt, whereFrom } from '@villages/world';
-import type { OriginFile, OriginGrid, WhereFrom, WorldName } from '@villages/world';
+import { namesAt, squareAt, whereFrom } from '@villages/world';
+import type { WhereFrom, WorldName } from '@villages/world';
 
 import { note } from '../log/log';
-import { worldRootOf } from './masters';
+import { displayName, loadWorldNames } from './worldNames';
+import type { NamedRegion, WorldNames } from './worldNames';
 
 /**
  * Where a point of the master came from on Earth, said in the debug log when the map is clicked under the
  * Origin renderer. The picture says it for the whole world at once; this says it for one place, with the
  * numbers, and with the river, lake or peak named there, carried from Earth by `npm run world:names`, and the
- * region it is in or the sea it is by. The map is worked out by `npm run world:origin` (see
- * `docs/plans/real-world-names.md`), and all of it is read the first time it is asked for, because it is twenty
- * megabytes nobody needs until then.
+ * region it is in or the sea it is by. All of it is read once, by `worldNames.ts`, the first time it is
+ * asked for, because it is twenty megabytes nobody needs until then.
  */
-
-/** A named region, a sea or a stretch of land, as `names.json` lists them; `regions.bin` numbers them from one. */
-interface NamedRegion {
-  readonly kind: 'sea' | 'land';
-  readonly name: string;
-  readonly feature: string;
-}
-
-interface Loaded {
-  readonly file: OriginFile;
-  readonly grid: OriginGrid;
-  /** Earth's names carried into this world, or none if `world:names` has not been run for it. */
-  readonly names: readonly WorldName[] | null;
-  /** For every square, the land it is in and the sea it is by, or none if they were not worked out. */
-  readonly regions: {
-    readonly list: readonly NamedRegion[];
-    readonly land: Uint16Array;
-    readonly sea: Uint16Array;
-  } | null;
-}
-
-const loaded = new Map<string, Promise<Loaded | null>>();
-
-function load(master: string): Promise<Loaded | null> {
-  let found = loaded.get(master);
-  if (found === undefined) {
-    const root = `${worldRootOf(master)}/origin`;
-    found = Promise.all([
-      fetch(`${root}/origin.json`),
-      fetch(`${root}/origin.bin`),
-      fetch(`${worldRootOf(master)}/names.json`),
-      fetch(`${worldRootOf(master)}/regions.bin`),
-    ])
-      .then(async ([json, bin, names, regions]) => {
-        if (!json.ok || !bin.ok) return null;
-        const file = (await json.json()) as OriginFile;
-        const carried = names.ok
-          ? ((await names.json()) as { names: WorldName[]; regions?: NamedRegion[] })
-          : null;
-        const squares = file.columns * file.rows;
-        const layers =
-          regions.ok && carried?.regions !== undefined ? new Uint16Array(await regions.arrayBuffer()) : null;
-        return {
-          file,
-          grid: decodeOrigin(await bin.arrayBuffer(), file),
-          names: carried?.names ?? null,
-          regions:
-            layers === null || layers.length !== squares * 2
-              ? null
-              : { list: carried!.regions!, land: layers.subarray(0, squares), sea: layers.subarray(squares) },
-        };
-      })
-      .catch(() => null);
-    loaded.set(master, found);
-  }
-  return found;
-}
 
 /** Says what the origin map found for a master, then where every clicked point came from, until stopped. */
 export function watchOrigin(map: maplibregl.Map, master: string): () => void {
-  let origin: Loaded | null = null;
+  let origin: WorldNames | null = null;
   let stopped = false;
-  void load(master).then((answer) => {
+  void loadWorldNames(master).then((answer) => {
     if (stopped) return;
     origin = answer;
     if (answer === null) {
@@ -155,7 +98,7 @@ export function named(names: readonly WorldName[], lng: number, lat: number): st
  * The land a square is in and the sea it is by, said after where it came from. Open sea is named by the
  * coast nearest it, which is what the line says, because nothing at sea came from anywhere.
  */
-function regionLine(regions: NonNullable<Loaded['regions']>, k: number, atSea: boolean): string {
+function regionLine(regions: NonNullable<WorldNames['regions']>, k: number, atSea: boolean): string {
   const land = regions.list[(regions.land[k] ?? 0) - 1];
   const sea = regions.list[(regions.sea[k] ?? 0) - 1];
   if (atSea) return sea === undefined ? '' : `, ${called(sea)}, named by the nearest coast`;
@@ -168,7 +111,7 @@ function regionLine(regions: NonNullable<Loaded['regions']>, k: number, atSea: b
 
 /** A region's name as a sentence would say it: the Alps, the Baltic Sea, but Sicily; and what it is, where its name does not say. */
 function called(region: NamedRegion): string {
-  const name = region.name === region.name.toUpperCase() ? titled(region.name) : region.name;
+  const name = displayName(region);
   const sort = SORTS[region.feature] ?? region.feature.toLowerCase();
   const bare = /island|isl|cape|continent|geoarea/i.test(region.feature) || /^the /i.test(name);
   const says = sort === '' || name.toLowerCase().includes(sort) || region.kind === 'sea' ? '' : ` (${sort})`;
@@ -184,10 +127,6 @@ const SORTS: Readonly<Record<string, string>> = {
   Continent: '',
   'Dragons-be-here': '',
 };
-
-function titled(name: string): string {
-  return name.toLowerCase().replace(/(^|[\s-])\p{L}/gu, (letter) => letter.toUpperCase());
-}
 
 function degrees(value: number, positive: string, negative: string): string {
   return `${Math.abs(value).toFixed(2)}°${value >= 0 ? positive : negative}`;

@@ -44,6 +44,12 @@ stage alone, with none of the debug panel in it (decision record 0079).
   land`, and the town of 1790 nearby: `near Dantzic (Gdańsk today)`. Open sea came from nowhere, so it is named
   by the coast nearest it: `sea, the Baltic Sea, named by the nearest coast`. Every name is in English: a
   town's as of 1790, a river's, lake's or peak's as of today. It reads what `world:origin` wrote, below. See `docs/plans/real-world-names.md` and experiment 0016.
+  `Info map` is the same data written as an atlas would write it, on the flat tiles quietened as for Flow:
+  towns of 1790 in black beside their dots, rivers and lake shores drawn in blue with their names in blue
+  italic along them, peaks in brown with their height, seas in spaced blue italic and named lands in spaced
+  capitals. The important are written first and none covers another, so more appear as the camera comes in;
+  the same words are not written twice close together. A click says what the Origin renderer's does. It is
+  the first place to look when a name is wrong, and it draws nothing the data does not hold.
 - The water moves, from about zoom 8.5 in: depth, waves lit by a sun in the north-west, caustics on the bottom
   of the shallows, and surf along the shore, over every renderer. It is the **Water** part of the **Shaders**
   section, below Debug map, which holds a part for each shader that is a look and nothing more, with `off`,

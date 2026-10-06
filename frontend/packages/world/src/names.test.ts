@@ -65,6 +65,14 @@ describe('carrying names into the world', () => {
     expect(carried.find((one) => one.id === 'Q4')!.at).toEqual([40, 40]);
   });
 
+  it('remembers where on Earth each name stood, which carried is where it stands now', () => {
+    for (const one of carried) {
+      expect(carry(...one.earth)).toEqual(one.at);
+      expect(one.form).toBe('today');
+    }
+    expect(carried.find((one) => one.id === 'Q4')!.earth).toEqual([30, 40]);
+  });
+
   it('keeps a lake whole or not at all', () => {
     expect(carried.find((one) => one.id === 'Q2')!.lines[0]).toHaveLength(5);
     expect(carried.some((one) => one.id === 'Q3')).toBe(false);

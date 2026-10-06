@@ -14,6 +14,9 @@ import { simplify } from './simplify.ts';
 
 export type NameKind = 'river' | 'lake' | 'peak' | 'town';
 
+/** How sure a name is of being the one used in 1790: reviewed for it, or today's until it is. */
+export type NameForm = '1790' | 'today';
+
 /** A named thing on plain Earth, in Earth's longitude and latitude, as a source gives it. */
 export interface EarthName {
   readonly id: string;
@@ -24,25 +27,45 @@ export interface EarthName {
   readonly also?: string;
   /** Metres, for a peak. */
   readonly elevation?: number;
+  /** How much the thing matters, from 0 the most: the source's own rank, which for now is today's. */
+  readonly rank?: number;
+  /** The zoom from which the thing is worth naming on a map, the source's own judgement. */
+  readonly from?: number;
+  readonly form?: NameForm;
   /** A river's runs, a lake's outlines, or a peak's one point, as `[longitude, latitude]`. */
   readonly lines: readonly (readonly (readonly [number, number])[])[];
 }
 
-/** A named thing in the world, in the world's own longitude and latitude. */
+/**
+ * A named thing in the world, in the world's own longitude and latitude: what a page draws and what a quest
+ * or a line of flavour names. `id` is the real world's identity of it and never changes; `earth` is where on
+ * Earth its name stands, which is how the history of a real place will find it.
+ */
 export interface WorldName {
   readonly id: string;
   readonly kind: NameKind;
   readonly name: string;
   readonly also?: string;
   readonly elevation?: number;
+  readonly rank?: number;
+  readonly from?: number;
+  readonly form: NameForm;
   /** Where its name would be written: a peak's top, the middle of a river's longest run, a lake's middle. */
   readonly at: readonly [number, number];
+  /** The same place on Earth, before it was carried. */
+  readonly earth: readonly [number, number];
   /** A river's runs, a lake's outlines carried whole, or nothing for a peak. */
   readonly lines: readonly (readonly (readonly [number, number])[])[];
 }
 
 /** Where a point of Earth went in the world, or null where it went nowhere. Longitude and latitude both ways. */
 export type Carry = (lng: number, lat: number) => [number, number] | null;
+
+/** One unbroken run of a line, carried: each point in the world, and where it was on Earth. */
+interface Run {
+  readonly world: [number, number][];
+  readonly earth: (readonly [number, number])[];
+}
 
 /**
  * Carries every name, and says how many went nowhere. `tolerance` is in degrees: how far a carried line may
@@ -56,29 +79,38 @@ export function carryNames(
   const carried: WorldName[] = [];
   let lost = 0;
   for (const name of names) {
-    const runs = name.lines.flatMap((line) => carryLine(line, carry, name.kind === 'lake'));
-    const kept = runs
-      .map((run) =>
-        simplify(
-          run.map(([x, y]) => ({ x, y })),
-          tolerance,
-        ).map(({ x, y }) => [round(x), round(y)] as const),
-      )
-      .filter((run) => run.length >= (isPoint(name.kind) ? 1 : 2));
-    if (kept.length === 0) {
+    const runs = name.lines
+      .flatMap((line) => carryLine(line, carry, name.kind === 'lake'))
+      .filter((run) => run.world.length >= (isPoint(name.kind) ? 1 : 2));
+    if (runs.length === 0) {
       lost += 1;
       continue;
     }
-    const longest = kept.reduce((best, run) => (run.length > best.length ? run : best));
-    const at = name.kind === 'lake' ? middleOf(kept.flat()) : longest[Math.floor(longest.length / 2)]!;
+    // A name goes in the middle of the longest run, or of a lake's whole shore, in both worlds alike.
+    const longest = runs.reduce((best, run) => (run.world.length > best.world.length ? run : best));
+    const middle = Math.floor(longest.world.length / 2);
+    const lake = name.kind === 'lake';
+    const at = lake ? middleOf(runs.flatMap((run) => run.world)) : rounded(longest.world[middle]!);
+    const earth = lake ? middleOf(runs.flatMap((run) => run.earth)) : rounded(longest.earth[middle]!);
     carried.push({
       id: name.id,
       kind: name.kind,
       name: name.name,
       ...(name.also === undefined || name.also === name.name ? {} : { also: name.also }),
       ...(name.elevation === undefined ? {} : { elevation: name.elevation }),
+      ...(name.rank === undefined ? {} : { rank: name.rank }),
+      ...(name.from === undefined ? {} : { from: name.from }),
+      form: name.form ?? 'today',
       at,
-      lines: isPoint(name.kind) ? [] : kept,
+      earth,
+      lines: isPoint(name.kind)
+        ? []
+        : runs.map((run) =>
+            simplify(
+              run.world.map(([x, y]) => ({ x, y })),
+              tolerance,
+            ).map(({ x, y }) => [round(x), round(y)] as const),
+          ),
     });
   }
   return { carried, lost };
@@ -89,14 +121,9 @@ export function carryNames(
  * Earth land far apart in the world, which is a seam Adam cut. A lake's outline is kept whole, stepping over
  * the odd point of shore that went nowhere, or not kept at all: half a shore is not a lake.
  */
-function carryLine(
-  line: readonly (readonly [number, number])[],
-  carry: Carry,
-  whole: boolean,
-): [number, number][][] {
-  const runs: [number, number][][] = [];
-  let run: [number, number][] = [];
-  let before: readonly [number, number] | null = null;
+function carryLine(line: readonly (readonly [number, number])[], carry: Carry, whole: boolean): Run[] {
+  const runs: Run[] = [];
+  let run: Run = { world: [], earth: [] };
   let missing = 0;
   for (const point of line) {
     const there = carry(point[0], point[1]);
@@ -104,25 +131,25 @@ function carryLine(
       missing += 1;
       if (whole && missing > MOST_SHORE_MISSING * line.length) return [];
       if (whole) continue;
-      if (run.length > 0) runs.push(run);
-      run = [];
-      before = null;
+      if (run.world.length > 0) runs.push(run);
+      run = { world: [], earth: [] };
       continue;
     }
-    const last = run[run.length - 1];
-    if (last !== undefined && before !== null) {
+    const last = run.world[run.world.length - 1];
+    const before = run.earth[run.earth.length - 1];
+    if (last !== undefined && before !== undefined) {
       const onEarth = Math.hypot(point[0] - before[0], point[1] - before[1]);
       const inWorld = Math.hypot(there[0] - last[0], there[1] - last[1]);
       if (inWorld > 3 * onEarth + 0.05) {
         if (whole) return [];
         runs.push(run);
-        run = [];
+        run = { world: [], earth: [] };
       }
     }
-    run.push(there);
-    before = point;
+    run.world.push(there);
+    run.earth.push(point);
   }
-  if (run.length > 0) runs.push(run);
+  if (run.world.length > 0) runs.push(run);
   return runs;
 }
 
@@ -141,6 +168,10 @@ function middleOf(points: readonly (readonly [number, number])[]): [number, numb
 
 function round(value: number): number {
   return Math.round(value * 10000) / 10000;
+}
+
+function rounded([lng, lat]: readonly [number, number]): [number, number] {
+  return [round(lng), round(lat)];
 }
 
 /** A peak and a town are points; a river and a lake are lines. */

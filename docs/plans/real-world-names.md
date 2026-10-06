@@ -165,6 +165,31 @@ on them, each with its own plan when Adam chooses it:
   happen. It needs NPC factions, which are not decided, and a fate engine that rolls the world's history
   as well as a house's choices.
 
+## What the names are, for whatever reads them
+
+The data is the point and the renderers are pictures of it: the Info map writes it as an atlas, the Origin
+renderer's click reads it out, and a quest or a line of flavour will read the same thing. Per master, beside
+its tiles, written by `world:origin` and `world:names` and never edited:
+
+- **`names.json`, `names`**: every named town, river, lake and peak in the world. Each has an `id`, the real
+  world's identity of it - a Wikidata id where the source has one, `Q1792` for Dantzic - which never changes
+  when Adam repaints; its `kind`; its `name` in English and its `form`, `1790` where the review chose it and
+  `today` where nothing has yet; `also`, a town's name today or a river's own; `rank`, how much it matters,
+  0 the most, and `from`, the zoom from which it is worth naming, both the source's; `at`, where its name
+  goes in the world, and `earth`, the same place on plain Earth, which is how the history of a real place
+  will find it; and for a river or a lake its lines in the world.
+- **`names.json`, `regions`**, and **`regions.bin`**: every named sea and stretch of land, with its `id`,
+  `kind`, English `name`, what it is (`feature`), `rank`, `from`, and where its name goes; and for every
+  square of the origin map, the land it is in and the sea it is by.
+- **`world/names/1790.json`**, checked in: the review that decides the towns.
+
+What it does not yet do, and a quest will want: the game server cannot read it - it is beside the tiles,
+where only the page looks - so it wants a port as the ground map has (0084); the river file Natural Earth
+gives without Wikidata ids keys its rivers by file and number (the Danube is
+`ne_10m_rivers_lake_centerlines:25:Danube`), which holds while the source does; a painted river is not yet
+tied to the name of the river it came from; a town's rank is today's, not its standing in 1790; and nothing
+yet holds the history or the flavour of a place, which would be keyed by the same `id`.
+
 ## Where it lives
 
 - **The tools** are `world:origin` and `world:names` in `frontend/packages/world/bin/`, with the logic in

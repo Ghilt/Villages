@@ -24,6 +24,9 @@ export interface EarthRegion {
   readonly name: string;
   /** What sort of region the source says it is: a sea, a bay, a strait; a range, a desert, a plateau. */
   readonly feature: string;
+  /** How much it matters, from 0 the most, and the zoom from which it is worth naming: the source's own. */
+  readonly rank?: number;
+  readonly from?: number;
   /** Its polygons, each a list of rings. */
   readonly polygons: readonly (readonly Ring[])[];
 }
@@ -105,6 +108,57 @@ export function regionsOf(
     if (y >= 0 && y < height) sea[k] = at(painted.sea, x, y, COAST_REACH);
   }
   return { land, sea };
+}
+
+/** Where a named region's name is written in the world, and how many squares it covers there. */
+export interface RegionLabel {
+  readonly at: readonly [number, number];
+  readonly squares: number;
+}
+
+/**
+ * Where each region's name goes: on the square nearest the middle of all its squares, so that it always lies
+ * on the region itself, and for a sea on its open water when it has any rather than on a coast beside it. The
+ * middle is taken round the world, so that an ocean across the date line is named in it and not on the far
+ * side of the Earth. `count` is how many regions there are; a region with no squares has no label.
+ */
+export function regionLabels(grid: OriginGrid, given: RegionGrid, count: number): (RegionLabel | null)[] {
+  const squaresOf: number[][] = Array.from({ length: count + 1 }, () => []);
+  const coastOf: number[][] = Array.from({ length: count + 1 }, () => []);
+  for (let k = 0; k < grid.status.length; k += 1) {
+    if (given.land[k]! > 0) squaresOf[given.land[k]!]!.push(k);
+    const sea = given.sea[k]!;
+    if (sea > 0) (grid.status[k] === ORIGIN_SEA ? squaresOf : coastOf)[sea]!.push(k);
+  }
+  return Array.from({ length: count }, (_, index) => {
+    const own = squaresOf[index + 1]!.length > 0 ? squaresOf[index + 1]! : coastOf[index + 1]!;
+    if (own.length === 0) return null;
+    let across = 0;
+    let along = 0;
+    let down = 0;
+    for (const k of own) {
+      const turn = (((k % grid.columns) + 0.5) / grid.columns) * 2 * Math.PI;
+      across += Math.cos(turn);
+      along += Math.sin(turn);
+      down += Math.floor(k / grid.columns) + 0.5;
+    }
+    const column = ((Math.atan2(along, across) / (2 * Math.PI)) * grid.columns + grid.columns) % grid.columns;
+    const row = down / own.length;
+    let nearest = own[0]!;
+    let best = Infinity;
+    for (const k of own) {
+      let dx = Math.abs((k % grid.columns) + 0.5 - column);
+      dx = Math.min(dx, grid.columns - dx);
+      const dy = Math.floor(k / grid.columns) + 0.5 - row;
+      if (dx * dx + dy * dy < best) {
+        best = dx * dx + dy * dy;
+        nearest = k;
+      }
+    }
+    const lng = (((nearest % grid.columns) + 0.5) / grid.columns) * 360 - 180;
+    const lat = 90 - ((Math.floor(nearest / grid.columns) + 0.5) / grid.rows) * 180;
+    return { at: [Math.round(lng * 10000) / 10000, Math.round(lat * 10000) / 10000], squares: own.length };
+  });
 }
 
 /** Every region of one kind painted on a grid of Earth, the largest first: each cell its region's index plus one. */
