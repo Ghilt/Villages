@@ -10,6 +10,7 @@ import villages.domain.PlayerId
 import villages.domain.Vision
 import villages.domain.WorldTime
 import villages.protocol.Coverage
+import villages.protocol.HouseView
 import villages.protocol.StandRecords
 import kotlin.math.cos
 import kotlin.math.hypot
@@ -44,6 +45,10 @@ internal class Fog(
     @Volatile
     private var vision: Pair<WorldTime, Coverage>? = null
 
+    /**
+     * Whether a house stands where this one could know of it at all: its own, one seen from anywhere, one on ground it
+     * has revealed. Whether it was there to be known is [sent]'s question.
+     */
     fun letsThrough(row: HouseRow): Boolean =
         row.player == player ||
             row.significance.value >= SEEN_THROUGH_THE_FOG ||
@@ -76,6 +81,20 @@ internal class Fog(
                 seenOn(stood, day, partly)
             }
         }
+
+    /**
+     * A house as this one is sent it on [day], or null where the fog holds it back. Where it sees it - its own, one
+     * seen from anywhere, one in its vision - as it is; on ground it has revealed and sees no longer, as it was when
+     * the fog hid it, and dated so, which is not at all for a house founded there since. One founded that very day
+     * counts as there, as everything within one day does. A house's face does not change and nothing ends one, so as
+     * it was is whether it was there; and what changes about it since is not this house's to hear of, which is the
+     * fan-out's to keep. Adam's word of 2026-10-07; see decision records 0061 and 0089.
+     */
+    fun sent(row: HouseRow, day: WorldTime, view: HouseView): HouseView? {
+        if (!letsThrough(row)) return null
+        val hid = hidOn(row, day) ?: return view
+        return view.takeIf { row.since <= hid }?.copy(seenUntil = hid.day)
+    }
 
     /**
      * The day the fog hid a house from this one, for a house it is sent: null while it sees it on [today] - its own,

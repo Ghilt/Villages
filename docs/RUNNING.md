@@ -109,7 +109,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
   where the camera is looking until its `take it away` is pressed; both are real commands. The fog covers the
   world and not the signs: every icon, the offered seats and whatever stands in vision are drawn over it. Unknown ground is under a dark haze, revealed ground has its
   colour taken out, trees and castles too, and vision is clear. With no house the whole world is hazed. The server holds back what the fog hides:
-  a player is sent the houses on revealed ground and the people in vision, and their own wherever they are,
+  a player is sent the houses on revealed ground as they were when the fog hid it, dated, and the people in vision, and their own wherever they are,
   and the scenery's stands only where they touch revealed ground, tile by tile under the held cells, which
   the log counts under `stands`; the trees are grown from those and nothing else, so without the game server
   nothing grows. The server reads them from `world/stands/`, where the generator writes them and nothing serves

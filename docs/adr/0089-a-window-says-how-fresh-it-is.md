@@ -106,3 +106,6 @@ the first alternative considered is now the decision. *A tag answered by the gat
 does* still holds for a window out of the cells. One consequence is sharper for it: the map still sends a house on
 revealed ground as it is now, so one founded there after the fog came back is sent, dated before it existed.
 Holding revealed ground at the day the fog hid it - 0061's open question - is what would end that.
+
+That was ended the same day: revealed ground shows its buildings as they were when the fog hid it, so a house
+founded there since is not sent at all. See 0061's amendment.

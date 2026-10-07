@@ -368,14 +368,14 @@ class Gateway(
         private fun snapshot(cell: String) {
             val looking = looking
             val day = looking.day(world::today)
-            val contents = houses.inCell(cell, day, MOST_IN_A_CELL, looking.everything) { looking.letsSee(it) }
+            val (contents, sent) = looking.housesIn(houses, cell, day, MOST_IN_A_CELL)
             val standing = onTheMap.inCell(cell, day, MOST_IN_A_CELL, looking.everything) { placed: PlacedCharacter ->
                 looking.letsSee(placed.row, placed.span, day)
             }
             out.send(
                 Snapshot(
                     cell = cell,
-                    houses = contents.houses.map { looking.sent(it, day) },
+                    houses = sent,
                     asOfVersion = contents.asOf,
                     omitted = contents.omitted,
                     characters = standing.characters.map { it.row.toMapView(it.span) },

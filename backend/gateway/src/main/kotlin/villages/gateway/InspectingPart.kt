@@ -34,8 +34,9 @@ internal class InspectingPart(
         val day = looking.day(world::today)
         return when (asked.kind) {
             HOUSE -> houses.ofHouse(HouseId(id))
-                ?.takeIf { looking.sees(it) && looking.letsSee(it) }
-                ?.let { nothing.copy(house = looking.sent(it, day)) }
+                ?.takeIf { looking.sees(it) }
+                ?.let { looking.sent(it, day) }
+                ?.let { nothing.copy(house = it) }
             CHARACTER -> {
                 if (!looking.fogged) {
                     onTheMap.standing(CharacterId(id), day)?.let { nothing.copy(character = it.row.toMapView(it.span)) }

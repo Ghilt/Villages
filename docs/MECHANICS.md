@@ -824,8 +824,6 @@ lifts the whole of it for that window, drawn and held back alike, and every page
   ally or a storyline are all candidates.
 - **What a really big event is.** The number is significance 80 and up, drawn from zoom 2, and nothing in the
   world reaches it yet.
-- **Whether revealed ground shows buildings as they were last seen** rather than as they are now. As they are
-  now, for now; remembering what each player saw is a read model of its own.
 - **What a player sees before founding.** With no house there is nothing to see from, so the whole world is
   unknown, the seats a founding choice offers included.
 - **Whether a house ever shares its vision** with another.
@@ -861,7 +859,9 @@ and anything of significance 80 from anywhere, which nothing reaches yet. Nothin
 them, in its snapshot or its changes, and what is held back is not counted either. When the house's sight
 changes, every cell the player holds is answered again: a house on ground newly revealed appears, and
 somebody no longer in vision goes. From wire version 27 a house sent from revealed ground carries the day the
-fog hid it, which the same answer brings up to date. Turning the fog off lifts this as well as the drawing.
+fog hid it, which the same answer brings up to date. **Revealed ground shows its buildings as they were when the
+fog hid it:** a house founded there since is not sent, and what happens to a house under the fog is not told
+until the player sees it again. Turning the fog off lifts this as well as the drawing. See 0061's amendment.
 
 **The edge has surface tension**, from wire version 12, which carries it: the ground a ball of 40 km cannot
 get into between the circles is covered too, drawn and held back alike. It is one number,

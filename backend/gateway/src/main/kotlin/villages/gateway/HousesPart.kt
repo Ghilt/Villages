@@ -15,8 +15,8 @@ import villages.protocol.coarsestZoom
 
 /**
  * The houses on the map: a player's own, which reaches them wherever they are looking, and every house's
- * changes, fanned out to whoever holds a cell it is in, each as that player is sent it: with the day the fog hid
- * it, where it has. A cell's snapshot is the core's, because one frame answers for everything in a cell. See
+ * changes, fanned out to whoever holds a cell it is in and sees it now: what the fog has hidden is known as it was
+ * when it did, and its changes since are not told. A cell's snapshot is the core's, because one frame answers for everything in a cell. See
  * decision records 0026, 0075 and 0089.
  */
 internal class HousesPart(
@@ -49,8 +49,11 @@ internal class HousesPart(
             val holders = core.holders(deepest.at(zoom).quadkey) ?: continue
             for (connection in holders) {
                 val looking = connection.looking
-                if ((zoom >= coarsest || looking.everything) && looking.sees(row) && looking.letsSee(row)) {
-                    connection.enqueue(delta(looking.sent(row, looking.day(world::today), view)))
+                if ((zoom >= coarsest || looking.everything) && looking.sees(row)) {
+                    // What the fog has hidden is known as it was when it did, so nothing that happens to it since
+                    // reaches the player, its founding included; their cells are answered again when they see it.
+                    looking.sent(row, looking.day(world::today), view)?.takeIf { it.seenUntil == null }
+                        ?.let { connection.enqueue(delta(it)) }
                 }
             }
         }

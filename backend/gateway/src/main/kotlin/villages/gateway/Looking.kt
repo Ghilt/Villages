@@ -2,7 +2,10 @@ package villages.gateway
 
 import villages.application.CharacterRow
 import villages.application.CharacterSpan
+import villages.application.CellContents
 import villages.application.HouseRow
+import villages.application.HousesByCell
+import villages.domain.HouseId
 import villages.domain.WorldTime
 import villages.protocol.HouseView
 
@@ -36,15 +39,22 @@ internal data class Looking(
     /** Whether a house is on this day. Live sees everything; the past sees what existed then. */
     fun sees(row: HouseRow): Boolean = at?.let { row.existsAt(it) } ?: true
 
-    /** Whether the fog lets this house through. */
-    fun letsSee(row: HouseRow): Boolean = !fogged || fog.letsThrough(row)
-
     /**
-     * A house as this connection is sent it on [day], the one it is looking at: with the day the fog hid it, where it
-     * has, so that the page shows what it is told and works out nothing. See decision record 0089.
+     * A house as this connection is sent it on [day], the one it is looking at, or null where its fog holds it back:
+     * on ground it no longer sees, as it was when the fog hid it, and dated so, so that the page shows what it is told
+     * and works out nothing. See [Fog.sent] and decision records 0061 and 0089.
      */
-    fun sent(row: HouseRow, day: WorldTime, view: HouseView = row.toView()): HouseView =
-        if (!fogged) view else fog.hidOn(row, day)?.let { view.copy(seenUntil = it.day) } ?: view
+    fun sent(row: HouseRow, day: WorldTime, view: HouseView = row.toView()): HouseView? =
+        if (!fogged) view else fog.sent(row, day, view)
+
+    /** What a cell holds of houses on [day], and of that what this connection is sent: each worked out once. */
+    fun housesIn(houses: HousesByCell, cell: String, day: WorldTime, most: Int): Pair<CellContents, List<HouseView>> {
+        val sent = HashMap<HouseId, HouseView>()
+        val contents = houses.inCell(cell, day, most, everything) { row ->
+            sent(row, day)?.also { sent[row.id] = it } != null
+        }
+        return contents to contents.houses.map { sent.getValue(it.id) }
+    }
 
     /** Whether the fog lets this character, standing here, through on [day], the one it is looking at. */
     fun letsSee(row: CharacterRow, span: CharacterSpan, day: WorldTime): Boolean =
