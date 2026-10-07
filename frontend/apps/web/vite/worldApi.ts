@@ -19,16 +19,19 @@ import {
 
 /**
  * The dev server's errands for the debug map panel: what masters are in `world/master`, cutting one into
- * the world the browser draws, and furnishing it with a sprite map.
+ * the world the browser draws, furnishing it with a sprite map, and working out where its land came from.
  *
  * This exists because a master is a 32768 pixel image and the browser draws map tiles. Nothing in a page
  * can turn one into the other, so switching to a master nobody has cut yet means running the world
  * commands, which is five minutes or so of Node. Doing that from here rather than from a terminal is the
  * whole point: the loop from a Photoshop save to looking at it becomes one dropdown.
  *
- * **Cutting furnishes too, and works out the rivers' flow**, because a repaint makes all of it stale and a
- * half-regenerated world is the confusing state. Furnishing on its own is the fast errand, half a minute, and
- * is what a change to `world/biomes.json` needs - which is the file somebody tuning a look edits over and over.
+ * **Cutting does everything a repaint makes stale**: the tiles, the rivers' flow, the sprite map, the ground map
+ * the game server reads, and the origin map with the names carried through it, because a half-regenerated world
+ * is the confusing state, a stale ground map offers a river that is not there any more, and a stale origin map
+ * puts real names on the wrong ground. The quick start does the same, by itself, for a master saved since. The other errands mend one thing apart: furnishing,
+ * half a minute, is what a change to `world/biomes.json` needs; the origin, two minutes, a master cut before
+ * there was one; the names, a second, a change to `world/names/1790.json`.
  *
  * Development only. There is no deployment yet, and when there is, the world will be cut before it.
  */
@@ -37,6 +40,8 @@ const here = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(here, '..', '..', '..', '..');
 const MASTER_DIR = resolve(REPO, 'world', 'master');
 const BIOMES = resolve(REPO, 'world', 'biomes.json');
+/** The review of 1790 the names are carried from. See `docs/plans/real-world-names.md`. */
+const REVIEW = resolve(REPO, 'world', 'names', '1790.json');
 const WORLD_DIR = resolve(REPO, 'frontend', 'apps', 'web', 'public', 'world');
 /** Where the generator writes the stands, which nothing here serves. See `standsDirOf` and decision 0067. */
 const STANDS_DIR = resolve(REPO, 'world', 'stands');
@@ -57,7 +62,38 @@ export interface MasterOnDisk {
   cutAt: number | null;
   /** When its sprite map was last worked out, or nothing if it has none and so grows nothing. */
   furnishedAt: number | null;
+  /** When its origin map was last worked out, and its names last carried through it, or nothing if never. */
+  originAt: number | null;
+  namedAt: number | null;
 }
+
+/** An errand's steps: each a world command and what it was doing, should it fail. */
+export const ERRANDS = {
+  cut: [
+    ['importMaster.ts', 'tracing'],
+    ['tileWorld.ts', 'cutting'],
+    // Which way its rivers run, for the water: under a minute, and without it they stand still. See 0081.
+    ['flowWorld.ts', "working out the rivers' flow of"],
+    ['generateSpriteMap.ts', 'furnishing'],
+    // What the game server reads the looking circle off, seconds; a stale one offers a river that is gone (0084).
+    ['groundWorld.ts', 'reading the ground of'],
+    // Where its land came from, and the names carried through that, which a repaint leaves on the wrong ground.
+    ['originWorld.ts', 'working out the origin of'],
+  ],
+  furnish: [['generateSpriteMap.ts', 'furnishing']],
+  origin: [['originWorld.ts', 'working out the origin of']],
+  names: [['namesWorld.ts', 'carrying the names of']],
+} as const satisfies Record<string, readonly (readonly [string, string])[]>;
+
+type Errand = keyof typeof ERRANDS;
+
+/** What the last line says when an errand went through. The page reads `done:` as success. */
+const DONE: Record<Errand, string> = {
+  cut: 'is ready',
+  furnish: 'is furnished',
+  origin: 'has its origin worked out and its names carried',
+  names: 'has its names carried',
+};
 
 const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
 
@@ -84,6 +120,25 @@ async function pngShape(path: string): Promise<{ width: number; height: number }
   }
 }
 
+/** When a file was last written, or nothing if it is not there. */
+async function savedAt(path: string): Promise<number | null> {
+  try {
+    return (await stat(path)).mtimeMs;
+  } catch {
+    return null;
+  }
+}
+
+/** The time a manifest says it was written at, which is when what it describes was finished. */
+async function manifestAt(path: string): Promise<number | null> {
+  try {
+    const when = Date.parse((JSON.parse(await readFile(path, 'utf8')) as { at?: string }).at ?? '');
+    return Number.isNaN(when) ? null : when;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * When this master was last cut, or nothing if it never has been.
  *
@@ -94,22 +149,9 @@ async function pngShape(path: string): Promise<{ width: number; height: number }
  */
 async function cutWhen(name: string): Promise<number | null> {
   const world = resolve(WORLD_DIR, worldDirOf(name));
-  try {
-    const manifest = JSON.parse(await readFile(resolve(world, 'tiles', 'cut.json'), 'utf8')) as {
-      at?: string;
-    };
-    const at = Date.parse(manifest.at ?? '');
-    if (!Number.isNaN(at)) {
-      return at;
-    }
-  } catch {
-    // No manifest, so fall through to the outlines, which is a world cut before this existed.
-  }
-  try {
-    return (await stat(resolve(world, 'terrain.geojson'))).mtimeMs;
-  } catch {
-    return null;
-  }
+  return (
+    (await manifestAt(resolve(world, 'tiles', 'cut.json'))) ?? savedAt(resolve(world, 'terrain.geojson'))
+  );
 }
 
 /**
@@ -124,18 +166,9 @@ async function cutWhen(name: string): Promise<number | null> {
  * puts the button to furnish it again in front of whoever is looking. See decision record 0067.
  */
 async function furnishedWhen(name: string): Promise<number | null> {
-  const at = async (file: string): Promise<number | null> => {
-    try {
-      const manifest = JSON.parse(await readFile(file, 'utf8')) as { at?: string };
-      const when = Date.parse(manifest.at ?? '');
-      return Number.isNaN(when) ? null : when;
-    } catch {
-      return null;
-    }
-  };
   const [map, stands] = await Promise.all([
-    at(resolve(WORLD_DIR, worldDirOf(name), 'sprites', 'biome', 'map.json')),
-    at(resolve(STANDS_DIR, standsDirOf(name), 'stands.json')),
+    manifestAt(resolve(WORLD_DIR, worldDirOf(name), 'sprites', 'biome', 'map.json')),
+    manifestAt(resolve(STANDS_DIR, standsDirOf(name), 'stands.json')),
   ]);
   return map === null || stands === null ? null : Math.min(map, stands);
 }
@@ -158,22 +191,6 @@ export function asksForStands(url: string): boolean {
   return /^\/world\/masters\/[^/]+\/sprites\/[^/]+\/(stands(\/|$)|busiest-chunk\.json$)/.test(plain);
 }
 
-/**
- * When `world/biomes.json` was last saved.
- *
- * Beside the masters rather than inside each one, because it belongs to none of them: it is one
- * hand-edited file that every master's sprite map is generated through. Somebody tuning a look edits it
- * and nothing else, so without this the panel would go on saying every world was furnished and current
- * while all of them were a table out of date.
- */
-async function tunedWhen(): Promise<number | null> {
-  try {
-    return (await stat(BIOMES)).mtimeMs;
-  } catch {
-    return null;
-  }
-}
-
 async function masters(): Promise<MasterOnDisk[]> {
   const found: MasterOnDisk[] = [];
   for (const file of await readdir(MASTER_DIR)) {
@@ -182,11 +199,16 @@ async function masters(): Promise<MasterOnDisk[]> {
       continue;
     }
     const path = resolve(MASTER_DIR, file);
-    const [details, shape, cut, furnished] = await Promise.all([
+    const world = resolve(WORLD_DIR, worldDirOf(name));
+    // The origin map's description is written after its picture, and the names last of all, so each one's
+    // time is when that part was finished.
+    const [details, shape, cut, furnished, originAt, namedAt] = await Promise.all([
       stat(path),
       pngShape(path),
       cutWhen(name),
       furnishedWhen(name),
+      savedAt(resolve(world, 'origin', 'origin.json')),
+      savedAt(resolve(world, 'names.json')),
     ]);
     if (!details.isFile() || shape === null) {
       continue;
@@ -200,6 +222,8 @@ async function masters(): Promise<MasterOnDisk[]> {
       editedAt: details.mtimeMs,
       cutAt: cut,
       furnishedAt: furnished,
+      originAt,
+      namedAt,
     });
   }
 
@@ -255,7 +279,7 @@ function run(script: string, file: string, say: (line: string) => void): Promise
 /** One at a time: each command holds eight gigabytes of heap, and two of them would be unkind. */
 let busy: string | null = null;
 
-/** The master a browser asked for, or a reason it cannot be had. Both errands need the same check. */
+/** The master a browser asked for, or a reason it cannot be had. Every errand needs the same check. */
 async function chosen(name: string, response: ServerResponse): Promise<MasterOnDisk | null> {
   if (busy !== null) {
     response.statusCode = 409;
@@ -273,75 +297,33 @@ async function chosen(name: string, response: ServerResponse): Promise<MasterOnD
   return found;
 }
 
-/** Opens a plain-text response the browser can read a line at a time while it waits. */
-function streaming(response: ServerResponse): (line: string) => void {
+/**
+ * Runs one errand's steps against one master in turn, stopping at the first that fails, and writes each line
+ * the commands print straight down the response as it happens, so the browser can put them in the debug log
+ * while it waits. The last line is `done:` only if every step was.
+ */
+async function errand(name: string, which: Errand, response: ServerResponse): Promise<void> {
+  const found = await chosen(name, response);
+  if (found === null) {
+    return;
+  }
+  busy = name;
   response.statusCode = 200;
   response.setHeader('content-type', 'text/plain; charset=utf-8');
   response.setHeader('cache-control', 'no-store');
-  return (line: string): void => {
-    response.write(`${line}\n`);
-  };
-}
-
-/** Works out one master's biomes and stands. Half a minute, and all a biomes.json edit needs. */
-async function furnish(name: string, response: ServerResponse): Promise<void> {
-  const found = await chosen(name, response);
-  if (found === null) {
-    return;
-  }
-  busy = name;
-  const say = streaming(response);
+  const say = (line: string): void => void response.write(`${line}\n`);
   try {
-    say(`furnishing ${found.file}`);
-    const made = await run('generateSpriteMap.ts', found.file, say);
-    say(made === 0 ? `done: ${name} is furnished` : `failed: furnishing ${name} exited with ${made}`);
-  } catch (cause) {
-    say(`failed: ${(cause as Error).message}`);
-  } finally {
-    busy = null;
-    response.end();
-  }
-}
-
-/**
- * Cuts one master, writing each line the commands print straight down the response as it happens, so
- * the browser can put them in the debug log while it waits.
- */
-async function cut(name: string, response: ServerResponse): Promise<void> {
-  const found = await chosen(name, response);
-  if (found === null) {
-    return;
-  }
-
-  busy = name;
-  const say = streaming(response);
-
-  try {
-    say(`cutting ${found.file}, ${found.width} by ${found.height}`);
-    const traced = await run('importMaster.ts', found.file, say);
-    if (traced !== 0) {
-      say(`failed: tracing ${name} exited with ${traced}`);
-      return;
+    say(
+      `${which === 'cut' ? 'cutting' : ERRANDS[which][0][1]} ${found.file}, ${found.width} by ${found.height}`,
+    );
+    for (const [script, doing] of ERRANDS[which]) {
+      const code = await run(script, found.file, say);
+      if (code !== 0) {
+        say(`failed: ${doing} ${name} exited with ${code}`);
+        return;
+      }
     }
-    const tiled = await run('tileWorld.ts', found.file, say);
-    if (tiled !== 0) {
-      say(`failed: cutting ${name} exited with ${tiled}`);
-      return;
-    }
-    // Which way its rivers run, for the water: under a minute, and without it they stand still. See 0081.
-    const flowed = await run('flowWorld.ts', found.file, say);
-    if (flowed !== 0) {
-      say(`failed: working out ${name}'s rivers exited with ${flowed}`);
-      return;
-    }
-    // A repaint makes the sprite map stale as surely as it makes the tiles stale, so the two are never
-    // left out of step: pressing cut gives back a whole world rather than a bare one.
-    const made = await run('generateSpriteMap.ts', found.file, say);
-    if (made !== 0) {
-      say(`failed: furnishing ${name} exited with ${made}`);
-      return;
-    }
-    say(`done: ${name} is ready`);
+    say(`done: ${name} ${DONE[which]}`);
   } catch (cause) {
     say(`failed: ${(cause as Error).message}`);
   } finally {
@@ -365,17 +347,18 @@ export function worldApi(): Plugin {
         next();
       });
 
-      // Connect strips the mount path, so the listing is "/" and an errand is "/<name>/cut" or
-      // "/<name>/furnish".
+      // Connect strips the mount path, so the listing is "/" and an errand is "/<name>/<errand>".
       server.middlewares.use('/world-api/masters', (request, response, next) => {
         const url = request.url ?? '/';
 
         if (request.method === 'GET' && (url === '/' || url === '')) {
-          void Promise.all([masters(), tunedWhen()]).then(
-            ([found, tunedAt]) => {
+          // When world/biomes.json and the review of 1790 were saved, beside the masters rather than inside
+          // each, because each belongs to none of them and every master is made through it.
+          void Promise.all([masters(), savedAt(BIOMES), savedAt(REVIEW)]).then(
+            ([found, tunedAt, reviewedAt]) => {
               response.setHeader('content-type', 'application/json');
               response.setHeader('cache-control', 'no-store');
-              response.end(JSON.stringify({ masters: found, cutting: busy, tunedAt }));
+              response.end(JSON.stringify({ masters: found, cutting: busy, tunedAt, reviewedAt }));
             },
             (cause: Error) => {
               response.statusCode = 500;
@@ -385,10 +368,9 @@ export function worldApi(): Plugin {
           return;
         }
 
-        const asked = /^\/([^/]+)\/(cut|furnish)\/?$/.exec(url);
+        const asked = /^\/([^/]+)\/(cut|furnish|origin|names)\/?$/.exec(url);
         if (request.method === 'POST' && asked !== null) {
-          const name = decodeURIComponent(asked[1]!);
-          void (asked[2] === 'cut' ? cut(name, response) : furnish(name, response));
+          void errand(decodeURIComponent(asked[1]!), asked[2] as Errand, response);
           return;
         }
 

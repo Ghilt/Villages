@@ -34,7 +34,8 @@ One command, from the repository root:
 ```
 
 It checks the tools, installs the packages again whenever `package-lock.json` has changed since they were
-installed, generates whatever part of the world is missing, starts the game server and the dev server,
+installed, generates whatever part of the world is missing or older than the hand-painted master, so a
+repainted master is cut again by itself, starts the game server and the dev server,
 waits until both answer, prints the address to open, and opens it. From Explorer,
 `debug-quick-start.cmd` beside it does the same on a double click. Add `-Stop` to shut both down,
 `-Logs` to print what they said, `-WebOnly` for the map without the game server. Node 24 is the only

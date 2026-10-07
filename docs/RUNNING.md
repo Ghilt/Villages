@@ -18,8 +18,13 @@ stage alone, with none of the debug panel in it (decision record 0079).
   `world/master/`, with each one's size and when it was last cut, and it says when the image has been
   saved since - which it re-checks whenever the window is given focus. A master nobody has cut yet gets
   a button, and pressing it runs `world:import` and `world:tile`, the two commands `CLAUDE.md` cuts a world
-  with, and then `world:flow` and `world:sprites`, from the dev server with their output going into the debug
-  log: about six minutes, once per master.
+  with, and then `world:flow`, `world:sprites`, `world:ground` and `world:origin`, from the dev server with their
+  output going into the debug log: about eight minutes, once per master, and the same button cuts it again once
+  the image has been saved since. The quick start does the same for the default master by itself: whatever a
+  save has made stale is cut again when it starts, and nothing when nothing was saved. A master whose origin map is older than its last save, or whose names are older than
+  `world/names/1790.json`, says so under the dropdown, with a button to mend only that - **work out its
+  origin**, two minutes, or **carry its names again**, a second - and the Origin and Info map renderers say so
+  in the log, because a stale origin map puts real names on the wrong ground and looks no different.
   Switching reloads the page on purpose. So the loop is: paint, save, alt-tab, pick it. See `docs/adr/0025`.
 - What it looks like: the renderer dropdown in that same panel. `Biome` is not a look and not even the
   terrain: it lays the sprite map's own biome raster on the world, flat and blocky, which is the only way
@@ -33,7 +38,23 @@ stage alone, with none of the debug panel in it (decision record 0079).
   around the view are painted during the pauses so that moving the map finds them done. See
   `docs/adr/0021` and `0022`. `Flow` is not a look either: it draws, in place of the water, which way every
   river runs, a colour for each way and arrows marching downstream from about zoom 8, and black where a river
-  has no way to any sea or lake - a break in the master's rivers to mend. See `docs/adr/0081`.
+  has no way to any sea or lake - a break in the master's rivers to mend. See `docs/adr/0081`. `Origin` is a
+  question about the master: where on Earth each square of it was cut from. Grey stayed where it was; a colour
+  moved, one hue for each way and deeper the further; magenta striped matches nowhere on Earth and is invented;
+  orange striped is a copy of somewhere a larger piece came from; and the thin white line is Earth's own coast
+  carried through, which lies on the painted coast wherever the map has a piece right. With it showing, the log
+  says how much of the land is from Earth, invented and copied, and a click on the map says under `origin` where
+  that place came from and what Earth named there: `from Earth at 51.51°N 0.87°W, moved 1.2° (sure 1.00); by the
+  Thames`, `at Vänern`, `in the Alps (range)`, `in India (peninsula)`, `near Mont Blanc, 4,807 m`, or `invented
+  land`, and the town of 1790 nearby: `near Dantzic (Gdańsk today)`. Open sea came from nowhere, so it is named
+  by the coast nearest it: `sea, the Baltic Sea, named by the nearest coast`. Every name is in English: a
+  town's as of 1790, a river's, lake's or peak's as of today. It reads what `world:origin` wrote, below. See `docs/plans/real-world-names.md` and experiment 0016.
+  `Info map` is the same data written as an atlas would write it, on the flat tiles quietened as for Flow:
+  towns of 1790 in black beside their dots, rivers and lake shores drawn in blue with their names in blue
+  italic along them, peaks in brown with their height, seas in spaced blue italic and named lands in spaced
+  capitals. The important are written first and none covers another, so more appear as the camera comes in;
+  the same words are not written twice close together. A click says what the Origin renderer's does. It is
+  the first place to look when a name is wrong, and it draws nothing the data does not hold.
 - The water moves, from about zoom 8.5 in: depth, waves lit by a sun in the north-west, caustics on the bottom
   of the shallows, and surf along the shore, over every renderer. It is the **Water** part of the **Shaders**
   section, below Debug map, which holds a part for each shader that is a look and nothing more, with `off`,
@@ -165,7 +186,9 @@ stage alone, with none of the debug panel in it (decision record 0079).
   being read, the key figure open, where the view is centred - *Coast*, *River* within 400 km, *Forest*,
   *Mountains*, *Fields*, *Grassland*, *Desert*, *Marsh* or *Ice* where it is a sixth of the revealed land or
   more, *Open sea*, *House &lt;name&gt;* for houses standing in a circle of 150 km or less, and *Unknown* where the
-  fog covers it all, read by the game server off the ground map of the master the page draws - and the season -
+  fog covers it all, read by the game server off the ground map of the master the page draws; where its names
+  are carried, the river and the open sea by name, *The Vistula*, *The Baltic Sea*, and *Near &lt;town&gt;* for
+  the towns of 1790 in a circle of 150 km or less, at most two, on revealed ground - and the season -
   with their kind and,
   on hover, their key; what the last roll drew from, which the player never sees - the pools it opened and
   every action that could have been dealt, with its weight - and whether the throw or the lever chose its
@@ -175,6 +198,16 @@ stage alone, with none of the debug panel in it (decision record 0079).
   `docs/adr/0083` and `docs/plans/choice-roll.md`.
 
 ## Adam's folders and the tools that cut them
+
+- The towns, rivers, lakes and seas of 1790: `world/names/1790.json`, one line a thing, keyed as the names are -
+  a town by its Wikidata id, a river, a lake or a sea by its Wikidata id or Natural Earth's file, number and
+  name: the name an English writer of 1790 would have used, or `null` if it was not there then; today's name,
+  to read by; and why they differ. An agent's review, Adam's to correct; a town not in it is not carried, a
+  river, lake or sea not in it keeps today's English name - a lake written as English writes one, Lake
+  Constance where the source says only Constance - and a canal or a reservoir is carried only where it is
+  listed with a name. Its `added` part holds the towns of 1790 Natural Earth lacks - Mocha, Seringapatam - each
+  with where it stood on Earth as `[longitude, latitude]`. `world:names` reads it, and a change shows on the next
+  click under the Origin renderer and on the Info map. See `docs/plans/real-world-names.md`.
 
 - What grows where: `world/biomes.json`, hand-edited, one entry a kind and one a biome. What reads it is
   `npm run world:sprites --prefix frontend`, which works out a biome for every sixteen world units and
@@ -191,9 +224,26 @@ stage alone, with none of the debug panel in it (decision record 0079).
 - What the ground is, for the game server: `npm run world:ground --prefix frontend` reads a master into its
   **ground map**, `world/ground/<master>/`, a cell every sixteen master pixels each way, each keeping its
   commonest terrain and whether a river, a lake, the sea or a coast is in it: four megabytes and fifteen seconds
-  a master, which the quick start makes when it is missing. Only the game server reads it, to work out the map's
+  a master, which the quick start makes when it is missing or older than the master. Only the game server reads it, to work out the map's
   omens of a roll, and it takes a master's name as its first argument (`-- terrain2`). A master repainted
   makes it stale. See `docs/adr/0084`.
+- Where the land came from: `npm run world:origin --prefix frontend` works out a master's **origin map**, where on
+  Earth every square of 32 master pixels was cut from, against `world/master/terrain-base.png`, which is plain
+  Earth (`-- --from <master>` names another). It writes `origin/` beside the master's tiles: the map, sixteen
+  megabytes, and `origin.png`, the picture the Origin renderer lays on the world; then it carries Natural Earth's
+  named rivers, lakes and peaks from `world/source`, and the towns `world/names/1790.json` says stood in 1790,
+  through it into `names.json` beside them, three megabytes,
+  and gives every square the named sea and stretch of land it is in or by, in `regions.bin`. The same two files
+  go into `world/ground/<master>/` beside the ground map, where only the game server reads them, for the map's
+  omens; their shape is held by `contracts/fixtures/names.json` (0087). Canals and reservoirs are left out
+  unless the review names them, because nearly all of Natural Earth's were made after 1790.
+  `npm run world:names --prefix frontend` carries the names again without working the map out, in under a
+  second. Two minutes a master. Cutting a master in the Debug map does it as its last step, and the quick start
+  does it whenever the origin map is missing or older than the master, and carries the names again whenever
+  the server's copy is missing or older than `world/names/1790.json`; nothing else does. The game server reads
+  a master's names again when they are written, without a restart. It prints how much of the land
+  is from Earth, invented and copied. Moving land with Nearest Neighbour keeps it traceable; land painted fresh,
+  or opened up between pieces, is invented. See `docs/plans/real-world-names.md`.
 - A picture of the scenery, without a browser: `npm run world:scenery --prefix frontend` paints five
   places at the zoom the scenery is actually in and stamps every point the sprite map asks for onto
   them, into `world/painterly/<place>-scenery.png`, half a minute for all of them. It prints each one's

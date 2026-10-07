@@ -59,6 +59,9 @@ export interface MasterOnDisk {
   editedAt: number;
   cutAt: number | null;
   furnishedAt: number | null;
+  /** When its origin map was last worked out, and its names last carried through it, or nothing if never. */
+  originAt: number | null;
+  namedAt: number | null;
 }
 
 /** Painted since it was last cut, so what the map is drawing is not what the image says. */
@@ -85,19 +88,64 @@ export function isUnfurnished(master: MasterOnDisk, tunedAt: number | null): boo
 }
 
 /**
+ * What a cut master's origin map needs, if anything: worked out again, because it was never worked out or the
+ * master was painted since, which leaves real names on the wrong ground; or only its names carried again,
+ * because the review of 1790 was saved since they were. Nothing for a master that is not cut, which has no
+ * ground for names to stand on yet. See `docs/plans/real-world-names.md`.
+ */
+export function originNeeds(master: MasterOnDisk, reviewedAt: number | null): 'origin' | 'names' | null {
+  if (master.cutAt === null) {
+    return null;
+  }
+  if (master.originAt === null || master.editedAt > master.originAt) {
+    return 'origin';
+  }
+  if (master.namedAt === null || master.namedAt < master.originAt) {
+    return 'names';
+  }
+  return reviewedAt !== null && reviewedAt > master.namedAt ? 'names' : null;
+}
+
+/** What the panel says about a cut master's origin map and names when they are out of date, or nothing. */
+export function describeOrigin(master: MasterOnDisk | undefined, reviewedAt: number | null): string {
+  const needs = master === undefined ? null : originNeeds(master, reviewedAt);
+  if (master === undefined || needs === null) {
+    return '';
+  }
+  if (master.originAt === null) {
+    return 'no origin map yet, so no real names in this world';
+  }
+  return needs === 'origin'
+    ? `painted ${since(master.editedAt)} ago, after its origin map was worked out: names may stand on the wrong ground`
+    : 'world/names/1790.json saved after its names were carried';
+}
+
+/** The listing's own times, beside the masters: when world/biomes.json and the review of 1790 were saved. */
+export interface MastersListing {
+  masters: MasterOnDisk[];
+  tunedAt: number | null;
+  reviewedAt: number | null;
+}
+
+/**
  * Every master in the folder. Empty if nothing answers, which is what a built app looks like: there is
  * no dev server there to read a directory, and the world was cut before it was built.
  */
-export async function listMasters(): Promise<{ masters: MasterOnDisk[]; tunedAt: number | null }> {
+export async function listMasters(): Promise<MastersListing> {
+  const none = { masters: [], tunedAt: null, reviewedAt: null };
   try {
     const response = await fetch('/world-api/masters');
     if (!response.ok) {
-      return { masters: [], tunedAt: null };
+      return none;
     }
-    const body = (await response.json()) as { masters?: MasterOnDisk[]; tunedAt?: number | null };
-    return { masters: body.masters ?? [], tunedAt: body.tunedAt ?? null };
+    const body = (await response.json()) as Partial<MastersListing>;
+    return {
+      masters: body.masters ?? [],
+      tunedAt: body.tunedAt ?? null,
+      reviewedAt: body.reviewedAt ?? null,
+    };
   } catch {
-    return { masters: [], tunedAt: null };
+    return none;
   }
 }
 
@@ -121,7 +169,18 @@ export async function furnishMaster(name: string): Promise<boolean> {
   return errand(name, 'furnish');
 }
 
-async function errand(name: string, which: 'cut' | 'furnish'): Promise<boolean> {
+/**
+ * Works out where one master's land came from and carries its names through it again, two minutes; or, when
+ * only the review of 1790 has changed, carries the names alone, a second. What `originNeeds` says it needs.
+ */
+export async function mendOrigin(name: string, needs: 'origin' | 'names'): Promise<boolean> {
+  return errand(name, needs);
+}
+
+/** What the dev server can be asked to do to a master. */
+export type Errand = 'cut' | 'furnish' | 'origin' | 'names';
+
+async function errand(name: string, which: Errand): Promise<boolean> {
   let response: Response;
   try {
     response = await fetch(`/world-api/masters/${encodeURIComponent(name)}/${which}`, { method: 'POST' });
@@ -177,14 +236,20 @@ async function errand(name: string, which: 'cut' | 'furnish'): Promise<boolean> 
 export function describeMaster(
   chosen: MasterOnDisk | undefined,
   master: string,
-  working: false | 'cut' | 'furnish',
+  working: false | Errand,
   tunedAt: number | null = null,
 ): string {
   if (working === 'cut') {
-    return 'tracing the coast, cutting the tiles, then working out the biomes. Five minutes or so.';
+    return 'tracing the coast, cutting the tiles, working out the biomes and where the land came from. Eight minutes or so.';
   }
   if (working === 'furnish') {
     return 'working out the biomes and the stands. Half a minute.';
+  }
+  if (working === 'origin') {
+    return 'working out where the land came from and carrying the names through it. Two minutes.';
+  }
+  if (working === 'names') {
+    return 'carrying the names through the origin map. A second.';
   }
   if (chosen === undefined) {
     return `drawing ${master}; no dev server to ask what else there is`;

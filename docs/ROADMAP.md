@@ -28,7 +28,7 @@ is no MongoDB and no RabbitMQ on the machine yet.
 Characters and key figures are built and waiting on Adam's eye. Nothing else here is started, and the four
 after them wait on the same thing. Fog of war, the exception, is under way a step at a time, and so is
 character dialogue; the UI component library is built and waiting on Adam's eye, and so is the choice roll,
-the newest.
+and so is the origin map, the first of real names on the edited world and the newest.
 
 - **Characters and key figures**: the people of the world, each with a history of their own, and the
   house's tie to the few it acts through, shown in a pane in the corner beside the house status. The shape
@@ -71,6 +71,21 @@ the newest.
   which folder of the web app may import which - then the bugs the review found, then a part per mechanic on
   the server and a session built from slices in `client-core`, then the folders, the panes, the stylesheet and
   the sprite canvas. Each checkpoint lands on main when it passes. Asked for by Adam on 2026-10-02.
+- **Real names on the edited world**: the rivers, lakes, seas and towns of 1790 carried onto Adam's
+  master through an **origin map** a tool works out from his edits, which says where each piece of it was
+  cut from on Earth, with **invented land** given invented names. It is what real history will stand on,
+  before 1790 as the backstory of a place and after it as the warped history `SETTING.md` promises. Six
+  steps in `docs/plans/real-world-names.md`; the first two are built, the plan and the origin map, which
+  the Origin renderer shows and experiment 0016 waits on Adam's eye for, and the third: Earth's rivers, lakes,
+  peaks, seas and named lands are in the world, and the fourth: the towns of 1790, under the names English
+  gave them then, reviewed in `world/names/1790.json` the whole world over, region by region, then again with
+  Wikidata beside it, which added 62 towns Natural Earth lacks - Mocha, Seringapatam, Vila Rica - 3,168 in the
+  world; the Info map renderer writes all of it as an atlas would. The game server
+  reads them too, through a port and a contract (0087), and a roll's map omens name the river, the sea and the
+  towns of 1790 in view. The rivers carry their names of 1790 too - the Tagus, the Maese, the Burrampooter.
+  The lakes and seas carry theirs too - the Lake of Geneva, the German Ocean, the Archipelago. Left for later: the
+  823 places no source dates, and the named stretches of land, which keep today's names.
+  Adam's own, asked for on 2026-10-06.
 - **0.4** Local infrastructure: MongoDB replica set and RabbitMQ in Compose
 - **0.8** Testcontainers smoke test on MongoDB and RabbitMQ
 - **1.6** The bridge from the store to the broker

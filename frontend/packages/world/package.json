@@ -20,6 +20,8 @@
     "sprites": "node --max-old-space-size=8192 bin/generateSpriteMap.ts",
     "flow": "node --max-old-space-size=8192 bin/flowWorld.ts",
     "ground": "node --max-old-space-size=8192 bin/groundWorld.ts",
+    "origin": "node --max-old-space-size=8192 bin/originWorld.ts",
+    "names": "node --max-old-space-size=4096 bin/namesWorld.ts",
     "paint": "node --max-old-space-size=8192 bin/renderPainterly.ts",
     "fetch-world": "node --max-old-space-size=4096 bin/fetchWorld.ts",
     "scenery": "node --max-old-space-size=8192 bin/renderScenery.ts",

@@ -33,6 +33,9 @@ object OmenKeys {
     fun ground(kind: String) = OmenKey("map.ground:$kind")
     fun houseOnTheMap(house: HouseId) = OmenKey("map.house:${house.value}")
 
+    /** A town of 1790 by its real identity, a Wikidata id, which no repainting changes. See 0087. */
+    fun town(id: String) = OmenKey("map.town:$id")
+
     fun season(name: String) = OmenKey("season.$name")
     val WINTER = season("winter")
 }

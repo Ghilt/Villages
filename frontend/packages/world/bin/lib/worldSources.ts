@@ -43,6 +43,14 @@ const NATURAL_EARTH_LAYERS = [
   'ne_10m_rivers_europe',
 ] as const;
 
+/** The Natural Earth layers only the names are read from, also public domain. */
+const NAMED_LAYERS = [
+  'ne_10m_geography_regions_elevation_points',
+  'ne_10m_geography_marine_polys',
+  'ne_10m_geography_regions_polys',
+  'ne_10m_populated_places',
+] as const;
+
 export const WORLD_SOURCES: readonly WorldSource[] = [
   {
     name: 'Copernicus land cover',
@@ -88,5 +96,12 @@ export const WORLD_SOURCES: readonly WorldSource[] = [
     into: `${layer}.geojson`,
     credit: 'Natural Earth, public domain',
     what: 'Coastline, islands, glaciers, big lakes and the 200 m isobath: the shapes with real outlines.',
+  })),
+  ...NAMED_LAYERS.map((layer): WorldSource => ({
+    name: layer,
+    url: `${NATURAL_EARTH}/${layer}.geojson`,
+    into: `${layer}.geojson`,
+    credit: 'Natural Earth, public domain',
+    what: 'Named peaks, seas, land regions and towns, carried into the world by world:names. See docs/plans/real-world-names.md.',
   })),
 ];

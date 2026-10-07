@@ -83,6 +83,12 @@ tiles go through, that same step **also**:
   `npm run world:tile --prefix frontend`. About five minutes. The Debug map panel offers this per master too.
 - **Re-works the rivers' flow** if the master or the flow tool changed: `npm run world:flow --prefix frontend`,
   under a minute a master. Without it a master's rivers stand still; `cut it` in the panel does it too.
+- **Re-works the origin map** if the master changed: `npm run world:origin --prefix frontend`, two minutes a
+  master. It says where on Earth each part of the master came from and which land is invented, and the Origin
+  renderer draws it; then it carries Earth's named towns of 1790, rivers, lakes, peaks, seas and lands into the
+  world, the towns from the review in `world/names/1790.json`, beside the tiles for the page and beside the
+  ground map for the game server. It prints
+  how much of the land is from Earth, invented and copied, and how many names went nowhere: the numbers to report.
 - **Re-works the sprite map** if the master, `world/biomes.json` or the generator changed:
   `npm run world:sprites --prefix frontend`, half a minute a master, and it prints the density of every
   biome against experiment 0006's ceiling. Without one a master draws no scenery at all.
@@ -305,7 +311,12 @@ Commands are added here as the increments land:
   `debug-quick-start.cmd` on a double click from Explorer. It checks the tools, installs the packages
   again when `package-lock.json` has changed since they were installed (stopping this checkout's dev
   server first, because Windows will not replace a running program), generates whatever part
-  of the world is missing, cuts the sprites and the interface pictures again (seconds when nothing is new), starts the game
+  of the world is missing and cuts again whatever a save of the master has made stale - the coast, the tiles,
+  the rivers' flow, the sprite map, the ground map and the origin map with its names, in the order the panel's
+  `cut it` runs them, and nothing when the master was not saved since - and the styles again when
+  `world/painterly.json` or `world/render.json` was, the sprite map when `world/biomes.json` was, and the names
+  when `world/names/1790.json` was. It never writes through a link: tiles a worktree links from the main
+  checkout are that checkout's to cut, and it says so. It cuts the sprites and the interface pictures again (seconds when nothing is new), starts the game
   server and the dev server hidden with their output in
   `.logs/`, waits until both ports answer, and prints the address. `-Stop` stops both, `-Logs` prints
   their tails, `-WebOnly` skips the game server, `-NoBrowser` leaves the browser alone. **A port held by
@@ -328,7 +339,7 @@ Commands are added here as the increments land:
   `world/render.json`, and how it is painted is `world/painterly.json`.
 - The world's other tools, each `npm run <name> --prefix frontend` and each described in `docs/RUNNING.md`
   beside the folder it reads: `world:sprites` works out a master's sprite map, `world:flow` which way its rivers
-  run, `world:ground` the ground map the game server reads, `world:scenery` paints stills of the sprite map, `world:paint` paints the painterly stills and writes the
+  run, `world:origin` where on Earth each part of it came from and `world:names` the names carried through that, `world:ground` the ground map the game server reads, `world:scenery` paints stills of the sprite map, `world:paint` paints the painterly stills and writes the
   runtime copy of the styles (`-- --config-only` for that alone), `world:art` cuts the sprites, `world:ui` the
   interface pictures, and `world:portraits` and `world:scenes` draw placeholders, never over a file that is
   there.

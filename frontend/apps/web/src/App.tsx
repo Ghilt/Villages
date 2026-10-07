@@ -34,6 +34,7 @@ import { CHOICE_PANE } from './choice/pane';
 import { worldRootOf } from './map/masters';
 import { cameraStore } from './map/camera';
 import { DEFAULT_RENDERER, RENDERERS, applyRenderer } from './map/renderers';
+import { watchInfoMap } from './map/infoMap';
 import { SpriteOverlay } from './sprites/SpriteOverlay';
 import { placeWater } from './water/WaterLayer';
 import { setFlowView, waterStore } from './water/waterMode';
@@ -255,6 +256,12 @@ export function App({ master, devTools }: AppProps) {
       note('renderer', `${renderer}${chosen === undefined ? '' : `, ${chosen.note.toLowerCase()}`}`);
     }
   }, [map, renderer, camera.latticeTurn, camera.latticeSize, master]);
+
+  // The Info map's names, written over the map while it is the renderer. See `map/infoMap.ts`.
+  useEffect(
+    () => (map === null || renderer !== 'info-map' ? undefined : watchInfoMap(map, master)),
+    [map, renderer, master],
+  );
 
   // The water's switch redraws the map, so the new way of drawing it shows at once.
   const water = useStore(waterStore, (state) => `${state.level} ${state.look}`);

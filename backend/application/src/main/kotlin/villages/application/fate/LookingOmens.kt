@@ -83,6 +83,7 @@ fun omenSources(
     months: WorldMonths,
     grounds: GroundMaps,
     housesNear: HousesNear,
+    names: PlaceNamesByMaster = PlaceNamesByMaster { null },
 ): List<OmenSource> = listOf(
     HouseOmens(),
     ChangeOmens(lastRolls),
@@ -90,6 +91,6 @@ fun omenSources(
     WindowOmens(houses, characters, sights, figures),
     DialogueOmens(dialogues),
     FigureOmens(figures),
-    MapOmens(grounds, sights, housesNear),
+    MapOmens(grounds, sights, housesNear, names),
     SeasonOmens(months),
 )

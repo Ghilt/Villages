@@ -15,6 +15,13 @@ export interface ClassRaster {
   cells: Uint8Array;
 }
 
+/** A grid of numbers on the same unprojected grid: a class a pixel, or anything else wider than a byte. */
+export interface IndexRaster {
+  width: number;
+  height: number;
+  cells: Uint8Array | Uint16Array;
+}
+
 export function createRaster(width: number, height: number, fill = 0): ClassRaster {
   const cells = new Uint8Array(width * height);
   if (fill !== 0) {
@@ -66,7 +73,7 @@ export type Ring = readonly (readonly [number, number, ...number[]])[];
  * appears or vanishes depending on where it sits. Anything with area therefore gets at least the pixel it
  * sits in. Most of the world's lakes are smaller than a pixel of the master, so this is not an edge case.
  */
-export function fillPolygon(raster: ClassRaster, rings: readonly Ring[], value: number): number {
+export function fillPolygon(raster: IndexRaster, rings: readonly Ring[], value: number): number {
   const edges: { x0: number; y0: number; x1: number; y1: number }[] = [];
   let top = Infinity;
   let bottom = -Infinity;

@@ -561,39 +561,39 @@ if (-not (Test-Path $Master)) {
     exit 1
 }
 
-<# A world command, run when what it writes into the default world is missing; otherwise a word that it is there. #>
-function Ensure([string] $Made, [string] $What, [string[]] $Arguments, [string] $There) {
-    if (Test-Path (Join-Path $DefaultWorld $Made)) { Good $There } else { Run $What $Npm $Arguments $Frontend }
+<# The link an output would be written through, if any - a worktree's tiles junctioned from the main checkout's - or nothing. #>
+function Get-Link([string] $Path) {
+    for ($at = $Path; $at.Length -gt $Root.Length; $at = Split-Path $at -Parent) {
+        if ((Test-Path $at) -and ((Get-Item $at -Force).Attributes -band [IO.FileAttributes]::ReparsePoint)) { return Get-Item $at -Force }
+    }
 }
 
-Ensure 'terrain.geojson' 'tracing the coast and the lakes' @('run', 'world:import') 'the coast and the lakes are traced'
-
-$Tiles = Join-Path $DefaultWorld 'tiles'
-if (-not (Test-Path (Join-Path $Tiles '7'))) {
-    Run 'cutting the world into tiles (about two minutes, once)' $Npm @('run', 'world:tile') $Frontend
-} else {
-    $cut = @(Get-ChildItem -Path $Tiles -Recurse -Filter '*.png' -ErrorAction SilentlyContinue).Count
-    Good "the world is cut: $cut tiles"
+<# A world command, run when anything it makes - in the default world, or at a full path - is missing or older than any of $From,
+   so a repainted master is cut again by itself and an untouched one costs nothing; and never through a link, which is another checkout's. #>
+function Ensure([string[]] $Made, [string] $What, [string[]] $Arguments, [string] $There, [string[]] $From = @()) {
+    $paths = @($Made | ForEach-Object { [IO.Path]::GetFullPath($(if ([IO.Path]::IsPathRooted($_)) { $_ } else { Join-Path $DefaultWorld $_ })) })
+    $oldest = @($paths | ForEach-Object { if (Test-Path $_) { (Get-Item $_).LastWriteTimeUtc } else { [datetime]::MinValue } } | Sort-Object)[0]
+    $since = @($From | Where-Object { (Test-Path $_) -and (Get-Item $_).LastWriteTimeUtc -gt $oldest })
+    if ($oldest -eq [datetime]::MinValue) { $why = 'it is missing' } elseif ($since.Count -gt 0) { $why = "$(Split-Path $since[0] -Leaf) was saved since" } else { Good $There; return }
+    $link = @($paths | ForEach-Object { Get-Link $_ })
+    if ($link.Count -gt 0) { Warn "not $($What -replace ' \x28.*'), though $($why): $($link[0].Name) is linked from $($link[0].Target), whose checkout makes it"; return }
+    Run "$What, because $why" $Npm $Arguments $Frontend
 }
 
-Ensure '..\..\paint.json' 'writing the styles' @('run', 'world:paint', '--', '--config-only') 'the styles are written'
-# Which way the rivers run, so the water runs downstream rather than standing still: under a minute (0081).
-Ensure 'flow\flow.json' 'working out which way rivers run' @('run', 'world:flow', '--', '--no-stills') 'the rivers run'
-
-# What kind of place every part of the world is, and where the scenery clumps: without it the map draws no
-# scenery at all. Half a minute, once per master (0054). Two halves: the biomes beside the page's world, and the
-# stands in world/stands, which only the game server reads (0067); a sprite map from before has only the first.
-$SpriteMap = Join-Path $DefaultWorld 'sprites/biome/map.json'
-$Stands = Join-Path $Root "world/stands/$DefaultMaster/biome/stands.json"
-if (-not (Test-Path $SpriteMap) -or -not (Test-Path $Stands)) {
-    Run 'working out the biomes and the stands (about half a minute, once)' $Npm @('run', 'world:sprites') $Frontend
-} else {
-    $map = Get-Content $SpriteMap -Raw | ConvertFrom-Json
-    Good ("the world is furnished: {0:N0} stands in {1:N0} chunks" -f $map.stands, $map.chunks)
-}
-
-# What the ground is, for the game server to read where a player is looking (0084). Seconds, once per master.
-if (Test-Path (Join-Path $Root "world/ground/$DefaultMaster/ground.json")) { Good 'the ground is read' } else { Run 'reading the ground for the game server' $Npm @('run', 'world:ground') $Frontend }
+# Everything cut from the master is cut again when the master was saved since, in the order the panel's `cut it`
+# runs them; the styles when world/painterly.json or render.json was, the names when the review was (0087).
+$Painted = @($Master)
+Ensure 'terrain.geojson' 'tracing the coast and the lakes' @('run', 'world:import') 'the coast and the lakes are traced' $Painted
+Ensure 'tiles\cut.json' 'cutting the world into tiles (about two minutes)' @('run', 'world:tile') 'the world is cut' $Painted
+Ensure '..\..\paint.json' 'writing the styles' @('run', 'world:paint', '--', '--config-only') 'the styles are written' @((Join-Path $Root 'world\painterly.json'), (Join-Path $Root 'world\render.json'))
+Ensure 'flow\flow.json' 'working out which way rivers run' @('run', 'world:flow', '--', '--no-stills') 'the rivers run' $Painted
+# What kind of place every part of the world is and where the scenery clumps (0054): the biomes beside the page's
+# world and the stands only the game server reads (0067), again when world/biomes.json was saved since too.
+Ensure @('sprites\biome\map.json', (Join-Path $Root "world\stands\$DefaultMaster\biome\stands.json")) 'working out the biomes and the stands (about half a minute)' @('run', 'world:sprites') 'the world is furnished' @($Master, (Join-Path $Root 'world\biomes.json'))
+# What the ground is, for the game server to read where a player is looking (0084). Seconds.
+Ensure (Join-Path $Root "world\ground\$DefaultMaster\ground.json") 'reading the ground for the game server' @('run', 'world:ground') 'the ground is read' $Painted
+Ensure 'origin\origin.json' 'working out where on Earth the land came from (two minutes)' @('run', 'world:origin') 'the origin map is worked out' $Painted
+Ensure (Join-Path $Root "world\ground\$DefaultMaster\names.json") 'carrying the real names through the origin map' @('run', 'world:names') 'the names are carried' @((Join-Path $Root 'world\names\1790.json'))
 
 # What the scenery is drawn as: Adam's pictures in world/sprites, cut into one atlas. Cut at every start
 # and not only when there is none, because an atlas that was there used to be drawn as it was: a picture
@@ -692,7 +692,6 @@ if (Confirm-Port $WebPort 'the dev server' (Get-NewestWebConfigChange)) {
         exit 1
     }
 }
-
 
 # --- what to do now -------------------------------------------------------------------------------
 

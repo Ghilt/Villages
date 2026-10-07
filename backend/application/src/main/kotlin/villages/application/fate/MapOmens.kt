@@ -23,31 +23,47 @@ fun interface HousesNear {
  * at that zoom, read against the master's ground map and the house's fog. Only revealed ground counts, so a circle
  * of nothing but fog is the one omen *Unknown*. Zoomed out the circle is wide and its omens broad - coast,
  * mountains; zoomed in it is narrow and the houses standing in it are omens by name. See decision record 0084.
+ *
+ * Where the master's real names have been carried, the ground says whether and the names say what: the river is
+ * the Vistula and the open sea the Baltic, under the same keys as a river and the open sea with no name, so a pool
+ * opens on them just the same; and a town of 1790 standing in the circle is an omen of its own, by its key. See
+ * decision record 0087.
  */
 class MapOmens(
     private val grounds: GroundMaps,
     private val sights: SightsByHouse,
     private val houses: HousesNear,
+    private val names: PlaceNamesByMaster = PlaceNamesByMaster { null },
 ) : OmenSource {
     override fun read(moment: Moment): List<Omen> {
         val centre = moment.looking.centre ?: return emptyList()
         val zoom = moment.looking.zoom ?: return emptyList()
         val ground = moment.looking.master?.let(grounds::of) ?: return emptyList()
+        val named = moment.looking.master?.let(names::of)
         val radius = radiusAt(zoom, centre.lat)
         val sight = sights.of(moment.house.id)
 
-        val seen = sample(ground, centre, radius).filter { (place, _) -> sight.reveals(place) }.map { it.second }
+        val revealed = sample(ground, centre, radius).filter { (place, _) -> sight.reveals(place) }
+        val seen = revealed.map { it.second }
         if (seen.isEmpty()) {
             return listOf(Omen(OmenKeys.UNKNOWN, OmenKind.MAP, "Unknown"))
         }
         val land = seen.filter { it.has(GroundMap.COAST) || (!it.has(GroundMap.SEA) && it.terrain !in SEAS) }
         val omens = mutableListOf<Omen>()
         if (land.isEmpty()) {
-            omens += Omen(OmenKeys.OPEN_SEA, OmenKind.MAP, "Open sea")
+            val sea = named?.let { seaOf(it, revealed) }
+            omens += Omen(OmenKeys.OPEN_SEA, OmenKind.MAP, sea?.let { the(it.name) } ?: "Open sea")
         }
         if (seen.any { it.has(GroundMap.COAST) }) omens += Omen(OmenKeys.COAST, OmenKind.MAP, "Coast")
         if (radius <= RIVERS_WITHIN_KM && seen.any { it.has(GroundMap.RIVER) }) {
-            omens += Omen(OmenKeys.RIVER, OmenKind.MAP, "River")
+            val river = named?.let { riverOf(it, revealed, centre) }
+            omens += Omen(OmenKeys.RIVER, OmenKind.MAP, river?.let { the(it.name) } ?: "River")
+        }
+        if (named != null && radius <= TOWNS_WITHIN_KM) {
+            named.near(NameKind.TOWN, centre, radius)
+                .filter { sight.reveals(it.name.at) }
+                .take(MOST_TOWNS)
+                .forEach { omens += Omen(OmenKeys.town(it.name.id), OmenKind.MAP, "Near ${it.name.name}") }
         }
         GROUNDS.forEach { (word, terrains) ->
             val share = land.count { it.terrain in terrains }.toDouble() / max(1, land.size)
@@ -62,6 +78,20 @@ class MapOmens(
         }
         return omens
     }
+
+    /** The sea most of the revealed circle is in or by, by name: open water is named by its nearest coast. */
+    private fun seaOf(named: PlaceNames, revealed: List<Pair<Location, GroundCell>>): NamedRegion? =
+        revealed.mapNotNull { (place, _) -> named.regionAt(place, RegionKind.SEA) }
+            .groupingBy { it }.eachCount().maxByOrNull { it.value }?.key
+
+    /**
+     * The river nearest the centre that the ground shows and the house has revealed, by name: of the revealed cells a
+     * river runs through, nearest first, the first with a named river close enough to be the one painted there.
+     */
+    private fun riverOf(named: PlaceNames, revealed: List<Pair<Location, GroundCell>>, centre: Location): PlaceName? =
+        revealed.filter { (_, cell) -> cell.has(GroundMap.RIVER) }
+            .sortedBy { (place, _) -> kmBetween(place, centre) }
+            .firstNotNullOfOrNull { (place, _) -> named.near(NameKind.RIVER, place, RIVER_REACH_KM).firstOrNull()?.name }
 
     /** The cells of the circle, every one where there are few enough and an even spread of them where not. */
     private fun sample(ground: GroundMap, centre: Location, km: Double): List<Pair<Location, GroundCell>> {
@@ -107,6 +137,17 @@ class MapOmens(
 
         const val MOST_HOUSES = 3
 
+        /** Towns of 1790 are omens by name as close in as the houses are, the nearest few. */
+        const val TOWNS_WITHIN_KM = HOUSES_WITHIN_KM
+
+        const val MOST_TOWNS = 2
+
+        /**
+         * How far from a cell the ground marks with a river a named river's line may run and still be the river painted
+         * there: half a cell's diagonal, and a few pixels more for the painting and the carrying not agreeing exactly.
+         */
+        const val RIVER_REACH_KM = 18.0
+
         /** Cells the circle is read at, at most; a wider circle is read at an even spread of them. */
         const val MOST_CELLS = 200_000
 
@@ -126,6 +167,9 @@ class MapOmens(
             "Marsh" to setOf("marsh", "bog", "floodplain", "swamp-forest"),
             "Ice" to setOf("ice", "tundra"),
         )
+
+        /** A name as it starts an omen: the Vistula, the Baltic Sea. */
+        fun the(name: String): String = if (name.startsWith("The ")) name else "The $name"
 
         /** How far the looking circle reaches at a zoom, at a latitude, in kilometres. */
         fun radiusAt(zoom: Double, lat: Double): Double =

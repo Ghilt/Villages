@@ -3,7 +3,7 @@ import { relative } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import { OUTPUT_DIR, STANDS_DIR } from '../../../packages/world/bin/lib/paths.ts';
-import { asksForStands } from './worldApi.ts';
+import { ERRANDS, asksForStands } from './worldApi.ts';
 
 describe('the stands, which only the game server hands out', () => {
   it('are written where the dev server does not serve', () => {
@@ -42,5 +42,23 @@ describe('the stands, which only the game server hands out', () => {
     ]) {
       expect(asksForStands(url), url).toBe(false);
     }
+  });
+});
+
+describe('what a repaint makes stale, and cutting makes again', () => {
+  it('cuts, traces the rivers, furnishes, reads the ground, and works out where the land came from', () => {
+    expect(ERRANDS.cut.map(([script]) => script)).toEqual([
+      'importMaster.ts',
+      'tileWorld.ts',
+      'flowWorld.ts',
+      'generateSpriteMap.ts',
+      'groundWorld.ts',
+      'originWorld.ts',
+    ]);
+  });
+
+  it('can work out the origin, or carry the names, on their own', () => {
+    expect(ERRANDS.origin.map(([script]) => script)).toEqual(['originWorld.ts']);
+    expect(ERRANDS.names.map(([script]) => script)).toEqual(['namesWorld.ts']);
   });
 });

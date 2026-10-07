@@ -73,15 +73,18 @@ longer means anything stops being pending rather than waiting for ever.
 ### Omens, pools and actions
 
 An **omen** is one thing the engine took into account: *Holdings in Sweden*, *Weak house*, *Pious*, *Piety
-risen*, *Sir Jeoffrey*, *Unresolved dialogue*, *Missing wealth*, *River*, *House Varga*, *Unknown* where the
-fog covers everything, *Winter*. A **pool** is a named grouping of actions that omens open; an action can be in
+risen*, *Sir Jeoffrey*, *Unresolved dialogue*, *Missing wealth*, *The Vistula*, *Near Dantzic*, *House Varga*,
+*Unknown* where the fog covers everything, *Winter*. A **pool** is a named grouping of actions that omens open; an action can be in
 many, and one the omens point at from two directions is likelier. **The player sees omens and never pools.**
 An **action** is one thing a roll can offer, and it is dealt at the moment of the roll, so its details can come
 from the world: gossip about the nearest house names that house.
 
 The map's omens are worked out by the server from where the player is looking and how far they are zoomed in,
 never taken from the page: zoomed out the omens are broad, zoomed in they are close, and only ground the house
-has revealed counts. See decision record 0084.
+has revealed counts. See decision record 0084. Where the master's real names are carried, the ground says
+whether and the names say what: the river is *The Vistula* and the open sea *The German Ocean*, opening what any
+river or open sea opens, and zoomed in as close as houses are named, a town of 1790 in view is an omen of its
+own, *Near Dantzic*, which a questline can open on by the town's real identity. See decision record 0087.
 
 ### Look and feel
 
@@ -145,8 +148,8 @@ conversation is **gossip**, a common: a servant brings word of the nearest other
 and the house spreads it for a little influence or keeps it to itself, in the dialogues pane. It reads the house - its
 holdings, whether it is a weak house or pious, what rose since its last roll, a debt a dialogue is waiting on -
 the inspect windows open, the dialogue being read, the key figure open, where the player is looking - the
-coast, a river close in, the kinds of ground, the open sea, houses by name zoomed in, or *Unknown* under the
-fog - and the season. A hand the page rolled plays as the report card: the omens land and the
+coast, a river close in, the kinds of ground, the open sea, the river and the sea by their real names, houses
+and towns of 1790 by name zoomed in, or *Unknown* under the fog - and the season. A hand the page rolled plays as the report card: the omens land and the
 options pop in under them, the pane opened out over everything; a press hurries the omens, and a
 hand already pending at a reload is drawn as it ends. What exists is in `BUILDING-A-MECHANIC.md` under the choice pattern, and in
 decision records 0034 and 0083.
