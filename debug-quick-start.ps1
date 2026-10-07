@@ -590,11 +590,9 @@ Ensure 'flow\flow.json' 'working out which way rivers run' @('run', 'world:flow'
 # What kind of place every part of the world is and where the scenery clumps (0054): the biomes beside the page's
 # world and the stands only the game server reads (0067), again when world/biomes.json was saved since too.
 Ensure @('sprites\biome\map.json', (Join-Path $Root "world\stands\$DefaultMaster\biome\stands.json")) 'working out the biomes and the stands (about half a minute)' @('run', 'world:sprites') 'the world is furnished' @($Master, (Join-Path $Root 'world\biomes.json'))
-# What the ground is, for the game server to read where a player is looking (0084). Seconds.
+# The ground the server reads (0084), the origin, and both copies of the names, which a linked world leaves alone.
 Ensure (Join-Path $Root "world\ground\$DefaultMaster\ground.json") 'reading the ground for the game server' @('run', 'world:ground') 'the ground is read' $Painted
 Ensure 'origin\origin.json' 'working out where on Earth the land came from (two minutes)' @('run', 'world:origin') 'the origin map is worked out' $Painted
-# Both copies, the page's beside the tiles and the server's beside the ground map, so that a world linked from another
-# checkout leaves the names to it as it leaves the origin map they are carried through.
 Ensure @('names.json', (Join-Path $Root "world\ground\$DefaultMaster\names.json")) 'carrying the real names through the origin map' @('run', 'world:names') 'the names are carried' @((Join-Path $Root 'world\names\1790.json'))
 
 # What the scenery is drawn as: Adam's pictures in world/sprites, cut into one atlas. Cut at every start
