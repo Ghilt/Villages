@@ -6,7 +6,7 @@ import type { TerrainClass } from '@villages/world';
 
 import type { Area } from '../areas/areas';
 import { blazon, whereabouts } from '../house/describe';
-import type { RiverSeen } from './rivers';
+import type { WaterSeen } from './waters';
 import type { Subject } from './subjects';
 
 /**
@@ -187,12 +187,19 @@ export function describeArea(area: Area, houses: readonly HouseView[], legend: L
   };
 }
 
+/** What each kind of water is called in its window, and what one nobody has named is. */
+const WATER_WORDS = {
+  river: ['River', 'A river'],
+  lake: ['Lake', 'A lake'],
+  sea: ['Sea', 'A sea'],
+} as const;
+
 /**
- * A river, as the server named it for a click: its name in English, the one of 1790 where the review chose it with
- * today's under it, and a way back to where it was clicked. Nothing more yet - what a river can be for comes later.
+ * Water - a river, a lake, the sea - as the server named it for a click: its name in English, the one of 1790 where
+ * the review chose it with today's under it, and a way back to where it was clicked.
  */
-export function describeRiver(seen: RiverSeen): Description {
-  const { name, also, of1790 } = seen.river;
+export function describeWater(seen: WaterSeen): Description {
+  const { kind, name, also, of1790 } = seen.water;
   const under =
     name === undefined
       ? 'no name has reached you'
@@ -202,8 +209,8 @@ export function describeRiver(seen: RiverSeen): Description {
           ? `${also} today`
           : also;
   return {
-    kind: 'River',
-    name: name ?? 'A river',
+    kind: WATER_WORDS[kind][0],
+    name: name ?? WATER_WORDS[kind][1],
     ...(under === undefined ? {} : { under }),
     facts: [],
     links: [{ what: 'show it on the map', to: 'map', at: seen.at }],

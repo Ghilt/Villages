@@ -158,7 +158,7 @@ describe('the session, folded from what each mechanic folds', () => {
     expect(session.state()).toMatchObject({ connection: 'closed', seeAll: true, fogOfWar: true });
   });
 
-  it('asks what river is at a place only while open, and keeps the answer until a takeover', () => {
+  it('asks what water is at a place only while open, and keeps the answer until a takeover', () => {
     const socket = fakeSocket();
     const session = createSession({
       schedule: { after: () => () => undefined },
@@ -181,7 +181,7 @@ describe('the session, folded from what each mechanic folds', () => {
       type: 'inspected',
       at: { lat: 52.25, lon: 21 },
       revealed: true,
-      river: { id: 'Q548', name: 'Vistula', also: 'Wisła', of1790: true },
+      water: { kind: 'river', id: 'Q548', name: 'Vistula', also: 'Wisła', of1790: true },
     };
     socket.says(answer);
     expect(session.state().inspected).toEqual(answer);

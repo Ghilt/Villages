@@ -5,7 +5,7 @@
  */
 
 /** Sent on the handshake so that the gateway can refuse a client it cannot speak to. */
-export const PROTOCOL_VERSION = 25;
+export const PROTOCOL_VERSION = 26;
 
 export {
   MAX_ZOOM,
@@ -97,8 +97,8 @@ export type {
 } from './frames';
 export type { BannerSpec, Charge, Division, Point, ResourceName, Stock, Tincture } from './basics';
 export type { ChoiceView, EffectView, OmenView, OptionView, Rarity, RollDrawnFrame } from './choiceFrames';
-export { inspectAtFrameSchema, inspectedFrameSchema, riverViewSchema } from './placeFrames';
-export type { InspectedFrame, RiverView } from './placeFrames';
+export { inspectAtFrameSchema, inspectedFrameSchema, waterViewSchema } from './placeFrames';
+export type { InspectedFrame, WaterKind, WaterView } from './placeFrames';
 export type {
   DialogueView,
   EndingView,

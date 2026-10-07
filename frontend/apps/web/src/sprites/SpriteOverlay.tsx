@@ -22,7 +22,7 @@ interface SpriteOverlayProps {
    * What the map marks: the newest thing a window is open on, if any. Handed in, as picking is, so that the
    * overlay knows nothing of windows. See `App.tsx`.
    */
-  picked: { kind: 'house' | 'area' | 'character' | 'river'; id: string } | undefined;
+  picked: { kind: 'house' | 'area' | 'character' | 'river' | 'lake' | 'sea'; id: string } | undefined;
   /** A house or a person clicked on the map, which opens a window on them. */
   onPick: (thing: { kind: 'house' | 'character'; id: string }) => void;
 }

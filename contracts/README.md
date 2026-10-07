@@ -71,3 +71,5 @@ recorded over. See decision record 0037. What each one changed:
 - **25** - a page asks what river it points at: `inspectAt`, a place clicked, and `inspected`, whether the house has
   revealed it and the river there by its id, its name and today's beside a name of 1790, or none. See decision
   record 0087.
+- **26** - a click asks about any water, not only a river: `inspected` says the `water` there, a `river`, a `lake` or
+  the `sea` by its `kind`, in place of the `river` it said at 25.

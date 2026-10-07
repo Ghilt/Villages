@@ -197,14 +197,17 @@ stage alone, with none of the debug panel in it (decision record 0079).
   `uncommon`, `rare` or `legendary` whatever the throw, or `the throw` again: it stands in for the world's
   luck, not for the player. What a roll drew from is sent only while the instruments are open. See
   `docs/adr/0083` and `docs/plans/choice-roll.md`.
-- A river, the player's own: a click on a river on the map, zoomed in to 6 or closer, opens an **inspect
-  window** on it, marked with two waves: its name in English - the one of 1790 where the review chose it, with
-  today's under it - or *A river* where no named river is close enough to be the one painted there, and *show it
-  on the map*, back to where it was clicked. A click a house, a person or an area took is theirs. The page asks
-  the game server, which answers from the ground map and the names of the master the page draws, and only on
-  ground the house has revealed: under the fog nothing opens. Two clicks on the Vistula are one window. Every
-  answer is a line of the log under `inspect` - the river by name, *a river nobody has named*, *no river there*
-  or *under the fog*. See `docs/adr/0087`.
+- Water, the player's own: a click on a river, a lake or the sea on the map, zoomed in to 6 or closer, opens an
+  **inspect window** on it, marked with two waves for a river, a shore for a lake and an anchor for the sea: its
+  name in English - the one of 1790 where the review chose it, with today's under it - or *A river*, *A lake* or
+  *A sea* where nothing named is close enough to be the water painted there, and *show it on the map*, back to
+  where it was clicked. A click a house, a person or an area took is theirs. The page asks the game server, which
+  answers from the ground map and the names of the master the page draws, and only on ground the house has
+  revealed: under the fog nothing opens. The ground is read in cells some eighteen kilometres across, so a click
+  on a shore can name the water beside it: a lake is the one whose shores enclose the click, a cell mostly sea is
+  the sea, and otherwise a river comes before a lake and a lake before the sea. Two clicks on the Vistula are one
+  window. Every answer is a line of the log under `inspect` - `river, the Vistula (Wisła)`, `sea, the German
+  Ocean (North Sea today)`, *a lake nobody has named*, *no water there* or *under the fog*. See `docs/adr/0087`.
 
 ## Adam's folders and the tools that cut them
 

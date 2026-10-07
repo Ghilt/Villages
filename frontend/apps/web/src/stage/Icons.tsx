@@ -54,6 +54,18 @@ const FENCE = 'M4 8 H9 V4 H20 V14 H16 V20 H4 Z';
  */
 const WAVES = 'M2.5 9.5 Q6 6 9.5 9.5 T16.5 9.5 T21.5 9.5 M2.5 15.5 Q6 12 9.5 15.5 T16.5 15.5 T21.5 15.5';
 
+/** A lake: a shore all the way round, and one of the river's waves inside it. A placeholder, like the waves. */
+const SHORE = {
+  rim: 'M12 5.5 C18 5.5 21.5 8.5 21.5 12 C21.5 15.5 18 18.5 12 18.5 C6 18.5 2.5 15.5 2.5 12 C2.5 8.5 6 5.5 12 5.5 Z',
+  wave: 'M7 12.5 Q9.5 10 12 12.5 T17 12.5',
+} as const;
+
+/** The sea: an anchor, its ring, its stock across and its arms up either side. A placeholder, like the waves. */
+const ANCHOR = {
+  ring: { cx: 12, cy: 4.75, r: 2 },
+  body: 'M12 6.75 V20.5 M8 10 H16 M4.5 14 Q5.5 20.5 12 20.5 Q18.5 20.5 19.5 14',
+} as const;
+
 /**
  * Character dialogue: a speech bubble, its tail down to the left where somebody is speaking from. One
  * bubble and not two, because two at the size of a mark are one blot. A placeholder, like the bust.
@@ -79,7 +91,9 @@ export type IconName =
   | 'area'
   | 'speech'
   | 'list'
-  | 'river';
+  | 'river'
+  | 'lake'
+  | 'sea';
 
 /** Which way a needle points. The four are one drawing turned, never four drawings. */
 export type Point = 'up' | 'down' | 'left' | 'right';
@@ -121,6 +135,18 @@ export function Icon({ name, title }: IconProps) {
       {name === 'shield' && <path d={SHIELD} className="icon__line" />}
       {name === 'area' && <path d={FENCE} className="icon__line" />}
       {name === 'river' && <path d={WAVES} className="icon__line" />}
+      {name === 'lake' && (
+        <>
+          <path d={SHORE.rim} className="icon__line" />
+          <path d={SHORE.wave} className="icon__line" />
+        </>
+      )}
+      {name === 'sea' && (
+        <>
+          <circle {...ANCHOR.ring} className="icon__line" />
+          <path d={ANCHOR.body} className="icon__line" />
+        </>
+      )}
       {name === 'speech' && <path d={SPEECH} className="icon__line" />}
       {name === 'list' && (
         <>

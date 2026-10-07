@@ -347,7 +347,8 @@ points at something.
 ### What it is
 
 A window that says what one thing in the world is. That thing is its **subject** — today a house, an
-area, a character or a river, later a holding, a work, a place named in a conversation. The window says what the
+area, a character or water - a river, a lake, the sea - later a holding, a work, a place named in a
+conversation. The window says what the
 world knows about that subject, and then it offers **links**: the things worth looking at from here, each
 of which opens on its own.
 
@@ -435,10 +436,10 @@ the list of what is still to be worked out.
   roadmap. A dossier, a letter or a page in a ledger would sit on it; a card floats over it.
 - **Whether a window is kept.** Pinning one so a rail does not push it off, stepping back through what has
   been looked at, and whether any of it survives a reload.
-- **What else can be a subject.** A river is the first the server names rather than the browser: a click on
-  one asks, and the answer names it from the master's real names on ground the house has revealed (0087). Its
-  window says its name and nothing more yet; what a river is for, and whether a roll reads a window open on one
-  as it reads a house's, is still to come.
+- **What else can be a subject.** Water is the first the server names rather than the browser: a click on a
+  river, a lake or the sea asks, and the answer names it from the master's real names on ground the house has
+  revealed (0087). Its window says its name and nothing more yet; what water is for, and whether a roll reads a
+  window open on it as it reads a house's, is still to come.
 
 ### Where it stands
 

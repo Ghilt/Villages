@@ -62,8 +62,8 @@ export interface SessionState {
   /** Whether the fog of war is on in this window, drawn and held back alike. On at every load. See 0061. */
   fogOfWar: boolean;
   /**
-   * The last answer to what river the page pointed at, until another comes, or null before any: whether the house
-   * has revealed the place, and the river there by name. What an inspect window on a river is opened from. See 0087.
+   * The last answer to what water the page pointed at, until another comes, or null before any: whether the house
+   * has revealed the place, and the water there by name. What an inspect window on water is opened from. See 0087.
    */
   inspected: InspectedFrame | null;
 }

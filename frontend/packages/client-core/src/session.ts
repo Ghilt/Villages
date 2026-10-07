@@ -66,7 +66,7 @@ export interface Session {
   /** Empties the development world, for everyone connected to it. See 0036. */
   wipeWorld(): void;
   /**
-   * Asks what river is at a place on the map, which a click that hit nothing else does: the answer comes back as
+   * Asks what water is at a place on the map, which a click that hit nothing else does: the answer comes back as
    * `inspected`, kept in the state. Nothing is asked while the connection is not open. See 0087.
    */
   inspectAt(at: Point): void;
@@ -178,7 +178,7 @@ export function createSession(ports: SessionPorts): Session {
     // A player's window never asks for stored events; they have a page of their own. See 0023.
     event: () => undefined,
     rollDrawn: () => undefined,
-    // What river the page pointed at, kept in the state for the page to open a window from. See 0087.
+    // What water the page pointed at, kept in the state for the page to open a window from. See 0087.
     inspected: () => undefined,
   };
 

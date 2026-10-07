@@ -2,7 +2,8 @@
 
 - Status: accepted
 - Date: 2026-10-07
-- Amended 2026-10-07: a second reader, a click on a river, which asks the server and is answered by name.
+- Amended 2026-10-07: a second reader, a click on water - a river, a lake, the sea - which asks the server and is
+  answered by name.
 
 ## Context
 
@@ -52,11 +53,13 @@ before, so every pool that opened on them still does. A town of 1790 standing in
 as houses are named, is an omen of its own, *Near Dantzic*, keyed `map.town:<id>`: what a pool or a questline
 will open on.
 
-**The second reader is a click on a river.** A click on the map that hit no house, person or area sends
-`inspectAt` with the place, and the gateway answers `inspected`: whether the house has revealed it, and the river
-there - whether the master's ground map shows one, and which named river is close enough to be the one painted
-there, as the omen finds it - or none. The page opens an inspect window on a river it names, keyed by the river's
-`id`, so two clicks on the Vistula are one window. The page's copy of the names is not what it reads.
+**The second reader is a click on water.** A click on the map that hit no house, person or area sends
+`inspectAt` with the place, and the gateway answers `inspected`: whether the house has revealed it, and the water
+there - a lake whose carried shores enclose the place, a river where the master's ground map shows one and the
+named river close enough to be the one painted there, as the omen finds it, or the sea by the named sea the place
+is in or by - or none. A third question is asked of the names for it, which named thing's lines enclose a place.
+The page opens an inspect window on the water it names, keyed by its `id`, so two clicks on the Vistula are one
+window. The page's copy of the names is not what it reads.
 
 **Only what the house has revealed is named**, as only revealed ground counts (0084): a town under the fog is
 no omen, a river is named from a revealed cell the ground shows it in, and the sea from the revealed water.

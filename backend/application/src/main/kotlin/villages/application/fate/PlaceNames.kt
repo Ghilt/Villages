@@ -100,6 +100,25 @@ class PlaceNames(
         return nearest.values.sortedBy { it.km }
     }
 
+    /** Each name's lines' box, south, west, north and east, so that asking what encloses a place reads a few. */
+    private val boxes: List<Pair<PlaceName, DoubleArray>> by lazy {
+        names.filter { it.lines.isNotEmpty() }.map { name ->
+            val points = name.lines.flatten()
+            val (lats, lons) = points.map { it.lat } to points.map { it.lon }
+            name to doubleArrayOf(lats.min(), lons.min(), lats.max(), lons.max())
+        }
+    }
+
+    /**
+     * The named thing of a kind whose lines enclose a place, a lake by its shores: by whether a line due east from the
+     * place crosses them an odd number of times, so that an island in a lake is not in it. The smallest where one
+     * lies inside another. Lines that cross the date line are not read whole, and nothing that does is a lake.
+     */
+    fun inside(kind: NameKind, place: Location): PlaceName? =
+        boxes.filter { (name, box) ->
+            name.kind == kind && place.lat in box[0]..box[2] && place.lon in box[1]..box[3] && encloses(name.lines, place)
+        }.minByOrNull { (_, box) -> (box[2] - box[0]) * (box[3] - box[1]) }?.first
+
     /** The named land a place is in, or the named sea it is in or by: open water's is its nearest coast's. */
     fun regionAt(place: Location, kind: RegionKind): NamedRegion? {
         if (layers.isEmpty()) {
@@ -160,6 +179,21 @@ class PlaceNames(
             val columns = (floor(lons.start).toInt()..floor(lons.endInclusive).toInt())
                 .map { Math.floorMod(it + HALF_TURN.toInt(), across) }.distinct()
             return rows.flatMap { row -> columns.map { column -> row * across + column } }
+        }
+
+        /** Whether rings enclose a place: an odd number of their sides crossed going due east from it. */
+        fun encloses(rings: List<List<Location>>, place: Location): Boolean {
+            var inside = false
+            for (ring in rings) {
+                for ((a, b) in ring.zipWithNext()) {
+                    if ((a.lat > place.lat) != (b.lat > place.lat) &&
+                        place.lon < a.lon + (place.lat - a.lat) / (b.lat - a.lat) * (b.lon - a.lon)
+                    ) {
+                        inside = !inside
+                    }
+                }
+            }
+            return inside
         }
 
         /** A difference of longitude the short way round, between half a turn west and half a turn east. */

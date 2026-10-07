@@ -14,7 +14,7 @@ import villages.application.FoundHouseService
 import villages.application.FreshIds
 import villages.application.fate.FateEngine
 import villages.application.fate.GroundMaps
-import villages.application.fate.RiverAt
+import villages.application.fate.WaterAt
 import villages.application.fate.PlaceNamesByMaster
 import villages.application.fate.FirstPools
 import villages.application.fate.omenSources
@@ -378,7 +378,7 @@ class WorldConfig {
         dialogues = dialogues,
         dialogueRows = dialogueRows,
         stands = stands,
-        rivers = RiverAt(ground, placeNames),
+        waters = WaterAt(ground, placeNames),
         later = gatewayLater,
         instrumentsOpen = instruments,
         sendOn = gatewaySending,

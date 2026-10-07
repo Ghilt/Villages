@@ -27,13 +27,16 @@ export function inspectPane(subject: Subject): Pane {
  * The mark each kind of subject is known by, at the head of its window where the word for it used to be.
  *
  * The same marks the corner's tabs carry, so a house is a shield and a person a bust wherever either is
- * named; an area is a fence stepping along square corners, and a river two waves, which no tab has.
+ * named; an area is a fence stepping along square corners, a river two waves, a lake a shore with a wave
+ * in it and the sea an anchor, which no tab has.
  */
 export const SUBJECT_MARKS: Readonly<Record<Subject['kind'], IconName>> = {
   house: 'shield',
   character: 'figure',
   area: 'area',
   river: 'river',
+  lake: 'lake',
+  sea: 'sea',
 };
 
 /** What a window on each kind of subject is, in words, for a pane's title. */
@@ -42,4 +45,6 @@ const TITLES: Readonly<Record<Subject['kind'], string>> = {
   area: 'an area',
   character: 'a key figure',
   river: 'a river',
+  lake: 'a lake',
+  sea: 'a sea',
 };

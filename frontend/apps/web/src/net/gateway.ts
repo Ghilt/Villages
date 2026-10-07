@@ -90,7 +90,7 @@ export function seeAll(on: boolean): void {
 }
 
 /**
- * Asks the server what river is at a place on the map, which a click that hit no house, person or area does. The
+ * Asks the server what water is at a place on the map, which a click that hit no house, person or area does. The
  * answer comes back into the session as `inspected`, named only on ground the house has revealed. See 0087.
  */
 export function inspectAt(at: Point): void {

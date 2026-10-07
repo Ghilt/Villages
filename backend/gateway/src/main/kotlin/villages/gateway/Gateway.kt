@@ -18,7 +18,7 @@ import villages.application.Stands
 import villages.application.RecentEvents
 import villages.application.ResourceService
 import villages.application.TakeActionService
-import villages.application.fate.RiverAt
+import villages.application.fate.WaterAt
 import villages.application.fate.RollService
 import villages.application.DialogueService
 import villages.application.DialoguesByHouse
@@ -96,7 +96,7 @@ class Gateway(
     dialogues: DialogueService,
     dialogueRows: DialoguesByHouse,
     stands: Stands = Stands { _, _, _ -> null },
-    rivers: RiverAt = RiverAt.NOWHERE,
+    waters: WaterAt = WaterAt.NOWHERE,
     private val later: Later,
     instrumentsOpen: Boolean = true,
     /**
@@ -133,7 +133,7 @@ class Gateway(
 
     /**
      * A part for each mechanic, in the order a player arriving is told things: the house, whom it holds, what it sees,
-     * what it was told, what it is asked; then the stands, the rivers and the timeline, which greet nobody; and Adam's
+     * what it was told, what it is asked; then the stands, the waters and the timeline, which greet nobody; and Adam's
      * instruments, which one setting closes (0076). Made after the index and the sessions, because a part watches its
      * read models from the moment it is made. See decision record 0075.
      */
@@ -144,7 +144,7 @@ class Gateway(
         DialoguesPart(core, dialogues, dialogueRows),
         ChoicesPart(core, arrival, takeAction, choices, rolls),
         StandsPart(stands),
-        RiversPart(rivers),
+        WatersPart(waters),
         TimelinePart(),
         Instruments(instrumentsOpen, core, events, recent, emptyTheWorld, foundHouse, resources, keyFigures, visions, dialogues, rolls),
     )
