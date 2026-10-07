@@ -113,8 +113,8 @@ in one line where to look and what should be there.
 
 - **Start the dev server** through the `web` entry in `.claude/launch.json`, not from a shell.
 - **Drive it to the place the change shows** — the right renderer, the right master, the right part of the world,
-  the right zoom — rather than leaving it on whatever it opened with, and say so: the address, and what is on the
-  screen at it.
+  the right zoom — rather than leaving it on whatever it opened with, and say so: the address and the worktree
+  serving it, and what is on the screen at it.
 - **Copy the debug panel** into the presentation when the change is one the panel reports, because that is the
   instrument Adam reads; see decision record 0023.
 - **Start it in this tree, not somebody else's.** Every worktree serves on its own port now, so there is
@@ -158,7 +158,11 @@ the test, the still, or the number.
 
 **Immediately above it goes where to look**, and only that:
 
-- **The running program**: the address with its port, this tree's own, and nothing else on the line.
+- **The running program**: the address with its port, this tree's own, and beside it the worktree it is served
+  from - its folder under `.claude/worktrees/` and its branch, which need not share a name - and nothing else on
+  the line: `http://localhost:5429 · worktree fog-of-war-mechanic-3c9f45, branch claude/desktop-ui-bay-animations-f32616`.
+  The app does not always show which worktree a session is in, and it can stop the servers it started, so this
+  line is what lets Adam find the tree and start it again himself with `debug-quick-start.ps1` from its root.
 - **Documents**: links to them, when what there is to verify is something to read rather than run.
 
 One or the other, not a paragraph explaining either.
