@@ -296,6 +296,11 @@ Each its own commit, and the order is a suggestion.
      Laredo, Nacogdoches, Nueva Iberia, Fort Miro), the French villages of the west (Peoria, La Baye, Les
      Petites Côtes, the Sault), Kekionga, where Harmar was beaten in October 1790, Dubuque's mines, Oonalashka
      and Karluk - and 571 had not been founded. 32 left out, most of them Alaska's native villages.
+   - **Canada and Greenland**: 224 more places; 41 stood - the Loyalists' towns under their first names (New
+     Johnstown, Elizabethtown, Meyers Creek, The Bend), Shelburne, Fredericton, Saint John and Sydney, the
+     seigneuries and trading posts of the St. Lawrence (Rimouski, Chicoutimi, Mingan, Sept-Îles), Fort
+     Chipewyan of 1788, the Moravians' Hopedale, and Greenland's Danish colonies (Julianehaab, Frederikshaab,
+     Jakobshavn, Christianshaab, Godhavn, Holsteinsborg) - and 183 had not been founded. 21 left out.
 5. **Invented land named.**
 6. **Seats taken from real towns**, if Adam wants them.
 
