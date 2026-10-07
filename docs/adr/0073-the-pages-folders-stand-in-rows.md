@@ -74,3 +74,10 @@ frame, and the others as they come - so `stage` may import `ui` as well. It is t
 which tile is dressed in what, `stage/dress.ts`, and a pane inside a dressed tile still imports nothing from
 the library: it says what it is in the game's own colour names, and the dress says what those look like.
 The surfaces may take the library up themselves later, a component at a time, and the rule is widened then.
+
+## Amendment, 2026-10-07: the inspect window takes up the library
+
+`inspect` may import `ui` as well, the second of the game's surfaces to after the choice roll: a window's first row
+carries the library's `Tag` beside its name, saying how fresh what it shows is (0088). `TAKEN_UP` in
+`layers.test.ts` names it. The rest of the window still draws its own controls, and takes the library's up a
+component at a time.

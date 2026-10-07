@@ -5,6 +5,7 @@ import { focusOn } from '../map/focus';
 import { Icon } from '../stage/Icons';
 import { PaneSizeControl } from '../stage/PaneSizeControl';
 import { type Room } from '../stage/panes';
+import { Tag } from '../ui/tag/Tag';
 import { SUBJECT_MARKS } from './pane';
 import type { Description, Link } from './describe';
 import { inspectBeside, stopInspecting } from './opening';
@@ -42,6 +43,11 @@ interface WindowBarProps {
   room: Room;
   /** How the stage is cut, or null in the spread: the one form a window can be closed in. */
   along: 'rows' | 'columns' | null;
+  /**
+   * How fresh what it shows is, for a thing on the map: `current`, or the day the fog hid it, and the words a
+   * pointer resting on it is told. Absent where it cannot be said. See decision record 0088.
+   */
+  fresh?: { said: string; meant: string } | null;
 }
 
 /**
@@ -54,15 +60,18 @@ interface WindowBarProps {
  * **On a phone there is no close.** A window there is one of two bays, and it is replaced by navigating
  * to something else, which is how every pane on a phone leaves its bay. See `MECHANICS.md`.
  */
-export function WindowBar({ subject, kind, name, room, along }: WindowBarProps) {
+export function WindowBar({ subject, kind, name, room, along, fresh }: WindowBarProps) {
   return (
     <>
       <span className="inspect__mark" role="img" aria-label={kind} title={kind}>
         <Icon name={SUBJECT_MARKS[subject.kind]} />
       </span>
-      <h2 className="inspect__name" title={name}>
-        {name}
-      </h2>
+      <span className="inspect__named">
+        <h2 className="inspect__name" title={name}>
+          {name}
+        </h2>
+        {fresh != null && <Tag title={fresh.meant}>{fresh.said}</Tag>}
+      </span>
       <PaneSizeControl room={room} />
       {along === null && (
         <button
@@ -89,9 +98,11 @@ interface InspectWindowProps {
   along: 'rows' | 'columns' | null;
   /** The room it got, which is what its size control reports and changes. */
   room: Room;
+  /** How fresh what it shows is, beside its name. See `WindowBar` and decision record 0088. */
+  fresh?: { said: string; meant: string } | null;
 }
 
-export function InspectWindow({ subject, said, along, room }: InspectWindowProps) {
+export function InspectWindow({ subject, said, along, room, fresh }: InspectWindowProps) {
   // The trail learns a thing's name here because here is the only place that knows one: a name is the
   // description's, and the trail outlives the window - and a house that has left view has no name to look
   // up later. See `trail.ts`.
@@ -116,7 +127,14 @@ export function InspectWindow({ subject, said, along, room }: InspectWindowProps
   return (
     <section className="inspect" aria-live="polite">
       <header className="inspect__bar">
-        <WindowBar subject={subject} kind={said.kind} name={said.name} room={room} along={along} />
+        <WindowBar
+          subject={subject}
+          kind={said.kind}
+          name={said.name}
+          room={room}
+          along={along}
+          fresh={fresh ?? null}
+        />
       </header>
 
       {said.likeness !== undefined && (

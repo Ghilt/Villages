@@ -63,4 +63,10 @@ interface CharactersByCell {
      * wherever the camera is. See decision record 0087.
      */
     fun standing(id: CharacterId, at: WorldTime): PlacedCharacter? = null
+
+    /**
+     * Every span one character has stood in, oldest first, each with them as they are now: where a window on
+     * somebody who has left the house's vision finds where they were last seen. See decision record 0088.
+     */
+    fun spansOf(id: CharacterId): List<PlacedCharacter> = emptyList()
 }

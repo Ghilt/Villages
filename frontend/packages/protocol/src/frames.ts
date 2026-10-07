@@ -310,7 +310,8 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
   rollDrawnFrameSchema,
   /**
    * The answer to `inspect`, once: the house or the character as the map would show it, or neither when there is
-   * no such thing or the fog holds it back, by the rule a cell's snapshot is held to. See decision record 0087.
+   * no such thing or the fog holds it back, by the rule a cell's snapshot is held to. Somebody seen once and not now
+   * is answered as last seen, `seenUntil` the world-day the fog hid them; absent, it is as it is now. See 0087, 0088.
    */
   z.object({
     type: z.literal('inspected'),
@@ -318,6 +319,7 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
     id: z.string(),
     house: houseViewSchema.optional(),
     character: characterOnMapViewSchema.optional(),
+    seenUntil: worldDaySchema.optional(),
   }),
   z.object({
     type: z.literal('event'),

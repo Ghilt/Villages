@@ -34,6 +34,8 @@ export { TICK_MS, freeNow, stockNow } from './stocks';
 
 export { ageOn } from './ages';
 
+export { seenUntil } from './sighting';
+
 export { whatToFollow } from './following';
 export type { Following } from './following';
 

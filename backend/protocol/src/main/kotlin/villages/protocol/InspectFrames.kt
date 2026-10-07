@@ -11,8 +11,10 @@ data class Inspect(val kind: String, val id: String) : ClientFrame
 
 /**
  * The answer to [Inspect], once: the house or the character as the map would show it, or neither when there is
- * no such thing or the fog holds it back - a house on ground the player's house has not revealed, somebody out of
- * its vision - by the same rule a cell's snapshot is held to. See decision records 0061 and 0087.
+ * no such thing or the fog holds it back - a house on ground the player's house has not revealed, somebody it has
+ * never had in its vision - by the same rule a cell's snapshot is held to. Somebody it saw once and does not see
+ * now is answered as they were last seen, where they stood, with `seenUntil` the world-day the fog hid them;
+ * absent, what is answered is as it is now. See decision records 0061, 0087 and 0088.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class Inspected(
@@ -20,4 +22,5 @@ data class Inspected(
     val id: String,
     val house: HouseView? = null,
     val character: CharacterOnMapView? = null,
+    val seenUntil: Long? = null,
 ) : ServerFrame

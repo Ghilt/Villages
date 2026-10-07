@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
-import { charactersInView, housesInView } from '@villages/client-core';
+import { charactersInView, housesInView, seenUntil } from '@villages/client-core';
+import { describeDay, shortDay } from '@villages/protocol';
 import type { TerrainClass } from '@villages/world';
 
 import { areasStore } from '../areas/areas';
@@ -40,6 +41,7 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
   const legend = useLegend();
   const answers = useStore(sessionStore, (state) => state.inspected);
   const connection = useStore(sessionStore, (state) => state.connection);
+  const sight = useStore(sessionStore, (state) => state.yourSight);
 
   // An area the player deleted is not a window they shut, so the window goes rather than saying nothing -
   // and it leaves the trail with it, because a thing that has stopped existing is not a way back to
@@ -74,25 +76,60 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
   };
 
   /** What the gateway answered when the window asked after its subject, if it has. See 0087. */
+  const answer = subject.kind === 'area' ? undefined : answers[`${subject.kind}:${subject.id}`];
   const describeAnswer = (): Description | null => {
-    const answer = subject.kind === 'area' ? undefined : answers[`${subject.kind}:${subject.id}`];
     if (answer?.house !== undefined) {
       return describeHouse(answer.house, false, areas.areas);
     }
     return answer?.character === undefined ? null : describeCharacter(answer.character, today, false);
   };
 
-  // Out of what the camera holds, it says what it last said, and what the gateway answered where it has said
-  // nothing: the window is for reading, wherever the map is.
-  const said = sayingOrLastSaid(subject, describeSubject()) ?? describeAnswer();
+  // Out of what the camera holds, it says what the gateway answered, and what it last said until the gateway has:
+  // the window is for reading, wherever the map is.
+  const live = describeSubject();
+  const said =
+    live === null ? (describeAnswer() ?? sayingOrLastSaid(subject, null)) : sayingOrLastSaid(subject, live);
 
-  // Knowing nothing of a house or a person, it asks the gateway after them: once a connection, and answered once.
-  const knowsNothing = said === null && subject.kind !== 'area';
+  // Out of what the camera holds, it asks the gateway after a house or a person: once a connection, answered once,
+  // so what it says and how fresh that is do not hang on where the camera is. See 0087 and 0088.
+  const asks = live === null && subject.kind !== 'area';
   useEffect(() => {
-    if (knowsNothing && connection === 'open') {
+    if (asks && connection === 'open') {
       inspectSubject(subject.kind, subject.id);
     }
-  }, [knowsNothing, connection, subject]);
+  }, [asks, connection, subject]);
+
+  /**
+   * How fresh what it shows is, said beside its name: `current`, or the day the fog hid it. A house never moves, so
+   * the page works it out from the house's own sight; somebody who moves, the gateway, from where they stood. The
+   * player's own house and people are always current, and an area is the player's own drawing. See 0088.
+   */
+  const freshness = (): { said: string; meant: string } | null => {
+    const now = { said: 'current', meant: 'as it is now' };
+    if (subject.kind === 'area' || said === null) {
+      return null;
+    }
+    if (yourHouse?.house.id === subject.id || yourKeyFigures?.some((one) => one.id === subject.id)) {
+      return now;
+    }
+    const until =
+      subject.kind === 'character'
+        ? live !== null
+          ? 'now'
+          : answer?.character === undefined
+            ? null
+            : (answer.seenUntil ?? 'now')
+        : said.place === undefined || sight === null || today === null
+          ? null
+          : seenUntil(said.place, sight, today);
+    if (until === null) {
+      return null;
+    }
+    return until === 'now'
+      ? now
+      : { said: shortDay(until), meant: `as last seen: the fog hid it on ${describeDay(until)}` };
+  };
+  const fresh = freshness();
 
   if (subject.kind === 'area' && area === null) {
     return null;
@@ -105,7 +142,7 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
   if (room.size === 'strip') {
     return (
       <section className="inspect inspect--strip" aria-label={name}>
-        <WindowBar subject={subject} kind={kind} name={name} room={room} along={along} />
+        <WindowBar subject={subject} kind={kind} name={name} room={room} along={along} fresh={fresh} />
       </section>
     );
   }
@@ -113,7 +150,7 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
   if (said === null) {
     return <NothingKnown subject={subject} kind={kind} name={name} room={room} along={along} />;
   }
-  return <InspectWindow subject={subject} said={said} along={along} room={room} />;
+  return <InspectWindow subject={subject} said={said} along={along} room={room} fresh={fresh} />;
 }
 
 /** What each kind of subject is called where nothing more specific is known: its mark's words. */

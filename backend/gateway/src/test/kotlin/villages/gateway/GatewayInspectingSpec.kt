@@ -2,6 +2,7 @@ package villages.gateway
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
+import villages.domain.WorldTime
 import villages.protocol.Inspected
 import villages.protocol.ServerFrame
 import villages.protocol.YourHouse
@@ -52,7 +53,7 @@ class GatewayInspectingSpec : StringSpec({
         sent.answer().house?.name shouldBe "Kestrel"
     }
 
-    "somebody in the house's vision is answered as the map shows them, and nobody once they have left it" {
+    "somebody in the house's vision is answered as the map shows them, as they are now" {
         val rig = Rig()
         val (theirs, told) = rig.someoneElse()
         theirs.receive(founding(name = "Kestrel", lat = HELSINKI_LAT, lon = HELSINKI_LON))
@@ -64,11 +65,63 @@ class GatewayInspectingSpec : StringSpec({
         sent.clear()
 
         mine.receive(inspecting("character", agnes))
+
         sent.answer().character?.place?.lat shouldBe 59.35
+        sent.answer().seenUntil shouldBe null
+    }
+
+    // The window says when the fog hid them, and shows them where they stood then rather than where they went.
+    "somebody who has left the house's vision is answered as last seen, with the day the fog hid them" {
+        val rig = Rig()
+        val (theirs, told) = rig.someoneElse()
+        theirs.receive(founding(name = "Kestrel", lat = HELSINKI_LAT, lon = HELSINKI_LON))
+        theirs.receive(addingAKeyFigure(commandNumber(1)))
+        val agnes = told.filterIsInstance<YourKeyFigures>().last().keyFigures.single().id
+        theirs.receive(moving(agnes, 59.35, 18.10, commandNumber(2)))
+        val (mine, sent) = rig.introduced()
+        mine.receive(founding())
+        rig.day = WorldTime(today.day + 30)
+        theirs.receive(moving(agnes, HELSINKI_LAT, HELSINKI_LON, commandNumber(3)))
         sent.clear()
 
-        theirs.receive(moving(agnes, HELSINKI_LAT, HELSINKI_LON, commandNumber(3)))
         mine.receive(inspecting("character", agnes))
+
+        sent.answer().character?.place?.lat shouldBe 59.35
+        sent.answer().seenUntil shouldBe today.day + 30
+    }
+
+    // A day is most of an hour, and somebody walked through the house's vision and out again within one was seen.
+    "somebody who passed through the house's vision within a day is answered as seen, hidden that same day" {
+        val rig = Rig()
+        val (theirs, told) = rig.someoneElse()
+        theirs.receive(founding(name = "Kestrel", lat = HELSINKI_LAT, lon = HELSINKI_LON))
+        theirs.receive(addingAKeyFigure(commandNumber(1)))
+        val agnes = told.filterIsInstance<YourKeyFigures>().last().keyFigures.single().id
+        val (mine, sent) = rig.introduced()
+        mine.receive(founding())
+        theirs.receive(moving(agnes, 59.35, 18.10, commandNumber(2)))
+        theirs.receive(moving(agnes, HELSINKI_LAT, HELSINKI_LON, commandNumber(3)))
+        sent.clear()
+
+        mine.receive(inspecting("character", agnes))
+
+        sent.answer().character?.place?.lat shouldBe 59.35
+        sent.answer().seenUntil shouldBe today.day
+    }
+
+    "somebody the house has never had in its vision is answered with nobody" {
+        val rig = Rig()
+        val (theirs, told) = rig.someoneElse()
+        theirs.receive(founding(name = "Kestrel", lat = HELSINKI_LAT, lon = HELSINKI_LON))
+        theirs.receive(addingAKeyFigure(commandNumber(1)))
+        val agnes = told.filterIsInstance<YourKeyFigures>().last().keyFigures.single().id
+        theirs.receive(moving(agnes, HELSINKI_LAT, HELSINKI_LON, commandNumber(2)))
+        val (mine, sent) = rig.introduced()
+        mine.receive(founding())
+        sent.clear()
+
+        mine.receive(inspecting("character", agnes))
+
         sent.answer() shouldBe Inspected("character", agnes)
     }
 

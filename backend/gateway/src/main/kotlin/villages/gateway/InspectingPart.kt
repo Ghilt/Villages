@@ -14,8 +14,9 @@ import java.util.UUID
  * would show it, once. A window is fed from the cells the camera holds, so one whose subject the camera has never
  * held asks here instead, and is answered by the same rule a cell's snapshot is: the day the connection is looking
  * at, and what its fog lets through. Nothing is kept of the asking and nothing is sent again, because what a
- * window shows rarely changes; when its subject comes into a held cell, the cell's own changes reach it. See
- * decision record 0087.
+ * window shows rarely changes; when its subject comes into a held cell, the cell's own changes reach it. Somebody
+ * the house saw once and does not see now is answered as they were last seen, and when the fog hid them. See
+ * decision records 0087 and 0088.
  */
 internal class InspectingPart(
     private val houses: HouseById,
@@ -36,9 +37,13 @@ internal class InspectingPart(
                 ?.let { nothing.copy(house = it.toView()) }
             CHARACTER -> {
                 val day = looking.day(world::today)
-                onTheMap.standing(CharacterId(id), day)
-                    ?.takeIf { looking.letsSee(it.row, it.span, day) }
-                    ?.let { nothing.copy(character = it.row.toMapView(it.span)) }
+                if (!looking.fogged) {
+                    onTheMap.standing(CharacterId(id), day)?.let { nothing.copy(character = it.row.toMapView(it.span)) }
+                } else {
+                    looking.fog.lastSeen(onTheMap.spansOf(CharacterId(id)), day)?.let { (seen, until) ->
+                        nothing.copy(character = seen.row.toMapView(seen.span), seenUntil = until?.day)
+                    }
+                }
             }
             else -> null
         } ?: nothing

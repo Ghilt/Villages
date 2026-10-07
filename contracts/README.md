@@ -68,3 +68,5 @@ recorded over. See decision record 0037. What each one changed:
 - **25** - `inspect`, a window asking after its subject wherever the camera is, and `inspected`, the one answer:
   the house or the character as the map shows them, or neither where the fog holds them back. See decision
   record 0087.
+- **26** - gave `inspected` its `seenUntil`, the world-day the fog hid somebody a window asked after, who is
+  answered as they were last seen. See decision record 0088.

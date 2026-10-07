@@ -3,6 +3,7 @@ package villages.gateway
 import villages.application.CharacterRow
 import villages.application.CharacterSpan
 import villages.application.HouseRow
+import villages.application.PlacedCharacter
 import villages.application.VisionPoint
 import villages.domain.HouseId
 import villages.domain.PlayerId
@@ -59,6 +60,42 @@ internal class Fog(
      */
     fun letsThrough(x: Double, y: Double, reach: Double): Boolean =
         revealed.reaches(x / WORLD, y / WORLD, (reach + STAND_MARGIN) / WORLD)
+
+    /**
+     * Where somebody was last seen by this house, and the day the fog hid them: the latest of their spans in which
+     * its vision covered where they stood, and the day that stopped - null while it still does on [today]. Null
+     * when it never saw them. Vision and where they stand change only on the days a point or a span begins or
+     * ends, so those days and the ones before them are all there is to ask about. A point or a span begun and
+     * ended on one day was there for part of it, and counts on that day. See decision record 0088.
+     */
+    fun lastSeen(stood: List<PlacedCharacter>, today: WorldTime): Pair<PlacedCharacter, WorldTime?>? {
+        if (stood.isEmpty()) return null
+        seenOn(stood, today, partly = false)?.let { return it to null }
+        val days = (points.flatMap { listOf(it.since, it.until) } + stood.flatMap { listOf(it.span.since, it.span.until) })
+            .filterNotNull()
+            .flatMap { listOf(it, WorldTime(it.day - 1)) }
+            .filter { it <= today }
+            .distinct()
+            .sortedDescending()
+        for (day in days) {
+            if (day < today) seenOn(stood, day, partly = false)?.let { return it to WorldTime(day.day + 1) }
+            seenOn(stood, day, partly = true)?.let { return it to day }
+        }
+        return null
+    }
+
+    /** Whom of [stood] this house saw on [day]: through the whole of it, or - [partly] - for some of it as well. */
+    private fun seenOn(stood: List<PlacedCharacter>, day: WorldTime, partly: Boolean): PlacedCharacter? {
+        val during = { since: WorldTime, until: WorldTime? ->
+            since <= day && (until == null || day < until || (partly && since == until))
+        }
+        val there = stood.firstOrNull { during(it.span.since, it.span.until) } ?: return null
+        if (there.row.keyFigureOf.any { it.house == house } || there.span.significance.value >= SEEN_THROUGH_THE_FOG) {
+            return there
+        }
+        val vision = coverageOf(points.filter { during(it.since, it.until) })
+        return there.takeIf { vision.covers(it.span.place.lat, it.span.place.lon) }
+    }
 
     private fun visionOn(on: WorldTime): Coverage {
         vision?.takeIf { it.first == on }?.let { return it.second }
