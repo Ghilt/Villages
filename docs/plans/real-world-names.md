@@ -306,6 +306,16 @@ Each its own commit, and the order is a suggestion.
      Old Guatemala, ruined in 1773, Truxillo, Puerto Príncipe and St. Jago, French Saint-Domingue's Fort
      Dauphin and Aux Cayes, Spanish Trinidad's Puerto de España - one of them on ground Adam removed, and 90
      had not been founded: the railway, oil and banana towns, the canal's, the resorts. 57 left out.
+   - **South America**, Spain's viceroyalties of Peru, New Granada and the Río de la Plata, Portugal's Brazil
+     and the Dutch Guianas: 778 more places; 339 stood - Brazil's vilas and gold camps under their names of
+     the day (Parahiba, Tejuco, Carijós, Formigas, Jaguari, Barcellos, still the seat of Rio Negro, Ega,
+     Serpa, Vila Bela, Vila Maria), Spain's cities and missions (Huamanga, Angostura, Río de la Hacha, Valle
+     de Upar, La Bajada, Fraile Muerto, Guardia de Luján, Ballenary, founded by Ambrosio O'Higgins in 1789,
+     San Carlos de Chiloé, the missions of Moxos and Chiquitos), the Guaraní mission towns that were Spain's
+     until 1801, and Berbice's Nieuw Amsterdam - one of them on ground Adam removed, and 439 had not been
+     founded: the coffee and railway towns, the German and Italian colonies of the south, Patagonia and the
+     Chaco, still unconquered, and Riobamba, which the earthquake of 1797 moved. 177 small places of the
+     interior the reviewer could not date are left out.
 5. **Invented land named.**
 6. **Seats taken from real towns**, if Adam wants them.
 
