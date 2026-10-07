@@ -259,7 +259,9 @@ Each its own commit, and the order is a suggestion.
    Mocha, Murshidabad, Tetuan, Mogador, Sallee, Kilwa and Villa Rica need a source beside it.
    **Region by region from 2026-10-07**, every place Natural Earth has in a region, each with a reason where
    its name differs or it had not been founded. A place the reviewer could not date is left out rather than
-   guessed, and listed here.
+   guessed, and named or counted here. Every region has now been through once: 3,055 towns of 1790 are in
+   the world, 3,229 reviewed places had not been founded, and `world:names` counts 1,049 not reviewed - the
+   899 left out below, and 150 Natural Earth gives no Wikidata id, which the review cannot key.
    - **Europe**: 660 more places; 608 stood and are in the world under the names English gave them then -
      Stutgard, Coblentz, Maestricht, Bois-le-Duc, Spalatro, Uskub, Tammerfors, Fünfkirchen, Khadjibey, where
      Odessa was founded in 1794 - and 52 had not been founded. Left out: Çorovodë, Gramsh, Librazhd, Klaksvík,
@@ -327,6 +329,11 @@ Each its own commit, and the order is a suggestion.
      Bauchi, Yola and Gombe, Ibadan and Abeokuta, Liberia's, and El Fasher, made Darfur's capital in 1791,
      came later. 243 places the reviewer could not date are left out, towns of the savanna kingdoms and the
      coast that may well have stood.
+   - **Oceania and Antarctica**: 330 more places; two stood - Agaña, Spain's seat in the Marianas since
+     1668, and Coorooraa, Abba Thulle's town in the Pelew Islands, as Keate's account of Wilson's wreck spelt
+     it in 1788, which is on ground Adam removed - and 328 had not been founded: every town of Australia but
+     Sydney, which the first pass had, all of New Zealand's, the colonial posts of New Guinea and the islands,
+     and Antarctica's stations. Left out: Pago Pago, Avarua, Nadi, Alofi, Melekeok, Atafu, Neiafu, Funafuti.
 5. **Invented land named.**
 6. **Seats taken from real towns**, if Adam wants them.
 

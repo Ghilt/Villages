@@ -77,12 +77,12 @@ and so is the origin map, the first of real names on the edited world and the ne
   before 1790 as the backstory of a place and after it as the warped history `SETTING.md` promises. Six
   steps in `docs/plans/real-world-names.md`; the first two are built, the plan and the origin map, which
   the Origin renderer shows and experiment 0016 waits on Adam's eye for, and the third: Earth's rivers, lakes,
-  peaks, seas and named lands are in the world, and the fourth under way: the towns of 1790, under the names
-  English gave them then, reviewed in `world/names/1790.json` region by region - the largest first, then
-  Europe, Russia, the Near East, Africa, Asia and the Americas, 3,054 in the world; the Info map renderer writes all of it as an atlas would. The game server
+  peaks, seas and named lands are in the world, and the fourth: the towns of 1790, under the names English
+  gave them then, reviewed in `world/names/1790.json` the whole world over, region by region, 3,055 in the
+  world; the Info map renderer writes all of it as an atlas would. The game server
   reads them too, through a port and a contract (0085), and a roll's map omens name the river, the sea and the
   towns of 1790 in view. The rivers carry their names of 1790 too - the Tagus, the Maese, the Burrampooter.
-  Next are the other regions' towns.
+  Left for later: the 899 places the review could not date, and the names of 1790 for seas and lakes.
   Adam's own, asked for on 2026-10-06.
 - **0.4** Local infrastructure: MongoDB replica set and RabbitMQ in Compose
 - **0.8** Testcontainers smoke test on MongoDB and RabbitMQ
