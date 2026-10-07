@@ -276,6 +276,11 @@ Each its own commit, and the order is a suggestion.
      Meshed Hussein, Assouan, Siout, Ghuznee - two of them on ground Adam removed, and 86 had not been founded:
      the canal's towns, the oil's, the French and Italian posts, and the Ottomans' own late foundations, Ramadi
      and Nasiriyah. 58 places the reviewer could not date are left out.
+   - **South Asia and Burma**, the year of the third war with Mysore: 233 more places, under Rennell's and the
+     Company's spellings; 192 stood - Jessore, Burdwan, Boglipore, Fyzabad, Muttra, Juggernaut for Puri,
+     Conjeveram, Tinnevelly, Quilon, Trivandrum, Ahmednuggur, Bejapore, Prome, Bassein, Tavoy, Mergui, and Port
+     Cornwallis on the Andamans, settled in 1789 - one of them on ground Adam removed, and 41 had not been
+     founded: Mandalay, Lyallpur, Abbottabad, Shimla, Shillong, the railway and steel towns. 46 left out.
 5. **Invented land named.**
 6. **Seats taken from real towns**, if Adam wants them.
 
