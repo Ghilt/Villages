@@ -18,9 +18,10 @@ stage alone, with none of the debug panel in it (decision record 0079).
   `world/master/`, with each one's size and when it was last cut, and it says when the image has been
   saved since - which it re-checks whenever the window is given focus. A master nobody has cut yet gets
   a button, and pressing it runs `world:import` and `world:tile`, the two commands `CLAUDE.md` cuts a world
-  with, and then `world:flow`, `world:sprites` and `world:origin`, from the dev server with their output going
-  into the debug log: about eight minutes, once per master, and the same button cuts it again once the image
-  has been saved since. A master whose origin map is older than its last save, or whose names are older than
+  with, and then `world:flow`, `world:sprites`, `world:ground` and `world:origin`, from the dev server with their
+  output going into the debug log: about eight minutes, once per master, and the same button cuts it again once
+  the image has been saved since. The quick start does the same for the default master by itself: whatever a
+  save has made stale is cut again when it starts, and nothing when nothing was saved. A master whose origin map is older than its last save, or whose names are older than
   `world/names/1790.json`, says so under the dropdown, with a button to mend only that - **work out its
   origin**, two minutes, or **carry its names again**, a second - and the Origin and Info map renderers say so
   in the log, because a stale origin map puts real names on the wrong ground and looks no different.
@@ -216,7 +217,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
 - What the ground is, for the game server: `npm run world:ground --prefix frontend` reads a master into its
   **ground map**, `world/ground/<master>/`, a cell every sixteen master pixels each way, each keeping its
   commonest terrain and whether a river, a lake, the sea or a coast is in it: four megabytes and fifteen seconds
-  a master, which the quick start makes when it is missing. Only the game server reads it, to work out the map's
+  a master, which the quick start makes when it is missing or older than the master. Only the game server reads it, to work out the map's
   omens of a roll, and it takes a master's name as its first argument (`-- terrain2`). A master repainted
   makes it stale. See `docs/adr/0084`.
 - Where the land came from: `npm run world:origin --prefix frontend` works out a master's **origin map**, where on

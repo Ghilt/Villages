@@ -46,12 +46,13 @@ describe('the stands, which only the game server hands out', () => {
 });
 
 describe('what a repaint makes stale, and cutting makes again', () => {
-  it('cuts, traces the rivers, furnishes, and works out where the land came from', () => {
+  it('cuts, traces the rivers, furnishes, reads the ground, and works out where the land came from', () => {
     expect(ERRANDS.cut.map(([script]) => script)).toEqual([
       'importMaster.ts',
       'tileWorld.ts',
       'flowWorld.ts',
       'generateSpriteMap.ts',
+      'groundWorld.ts',
       'originWorld.ts',
     ]);
   });

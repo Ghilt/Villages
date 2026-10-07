@@ -307,8 +307,12 @@ Commands are added here as the increments land:
   `debug-quick-start.cmd` on a double click from Explorer. It checks the tools, installs the packages
   again when `package-lock.json` has changed since they were installed (stopping this checkout's dev
   server first, because Windows will not replace a running program), generates whatever part
-  of the world is missing, works the origin map out again when the master was saved since and carries the
-  names again when `world/names/1790.json` was, cuts the sprites and the interface pictures again (seconds when nothing is new), starts the game
+  of the world is missing and cuts again whatever a save of the master has made stale - the coast, the tiles,
+  the rivers' flow, the sprite map, the ground map and the origin map with its names, in the order the panel's
+  `cut it` runs them, and nothing when the master was not saved since - and the styles again when
+  `world/painterly.json` or `world/render.json` was, the sprite map when `world/biomes.json` was, and the names
+  when `world/names/1790.json` was. It never writes through a link: tiles a worktree links from the main
+  checkout are that checkout's to cut, and it says so. It cuts the sprites and the interface pictures again (seconds when nothing is new), starts the game
   server and the dev server hidden with their output in
   `.logs/`, waits until both ports answer, and prints the address. `-Stop` stops both, `-Logs` prints
   their tails, `-WebOnly` skips the game server, `-NoBrowser` leaves the browser alone. **A port held by

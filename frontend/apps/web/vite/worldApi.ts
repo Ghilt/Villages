@@ -26,9 +26,10 @@ import {
  * commands, which is five minutes or so of Node. Doing that from here rather than from a terminal is the
  * whole point: the loop from a Photoshop save to looking at it becomes one dropdown.
  *
- * **Cutting does everything a repaint makes stale**: the tiles, the rivers' flow, the sprite map, and the
- * origin map with the names carried through it, because a half-regenerated world is the confusing state and a
- * stale origin map puts real names on the wrong ground. The other errands mend one thing apart: furnishing,
+ * **Cutting does everything a repaint makes stale**: the tiles, the rivers' flow, the sprite map, the ground map
+ * the game server reads, and the origin map with the names carried through it, because a half-regenerated world
+ * is the confusing state, a stale ground map offers a river that is not there any more, and a stale origin map
+ * puts real names on the wrong ground. The quick start does the same, by itself, for a master saved since. The other errands mend one thing apart: furnishing,
  * half a minute, is what a change to `world/biomes.json` needs; the origin, two minutes, a master cut before
  * there was one; the names, a second, a change to `world/names/1790.json`.
  *
@@ -74,6 +75,8 @@ export const ERRANDS = {
     // Which way its rivers run, for the water: under a minute, and without it they stand still. See 0081.
     ['flowWorld.ts', "working out the rivers' flow of"],
     ['generateSpriteMap.ts', 'furnishing'],
+    // What the game server reads the looking circle off, seconds; a stale one offers a river that is gone (0084).
+    ['groundWorld.ts', 'reading the ground of'],
     // Where its land came from, and the names carried through that, which a repaint leaves on the wrong ground.
     ['originWorld.ts', 'working out the origin of'],
   ],
