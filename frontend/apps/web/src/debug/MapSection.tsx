@@ -4,8 +4,18 @@ import type * as maplibregl from 'maplibre-gl';
 import { note } from '../log/log';
 import { Section } from './Section';
 import { giveVision, takeVision } from './levers';
-import { chooseMaster, cutMaster, describeMaster, furnishMaster, isStale, listMasters } from '../map/masters';
-import type { MasterOnDisk } from '../map/masters';
+import {
+  chooseMaster,
+  cutMaster,
+  describeMaster,
+  describeOrigin,
+  furnishMaster,
+  isStale,
+  listMasters,
+  mendOrigin,
+  originNeeds,
+} from '../map/masters';
+import type { Errand, MasterOnDisk } from '../map/masters';
 import { RENDERERS } from '../map/renderers';
 import { watchOrigin } from '../map/origin';
 import { setFogOfWar } from '../fog/fogOfWar';
@@ -39,8 +49,9 @@ interface MapSectionProps {
 export function MapSection({ map, master, renderer, onRenderer }: MapSectionProps) {
   const [masters, setMasters] = useState<MasterOnDisk[]>([]);
   const [tunedAt, setTunedAt] = useState<number | null>(null);
+  const [reviewedAt, setReviewedAt] = useState<number | null>(null);
   const [wanted, setWanted] = useState(master);
-  const [working, setWorking] = useState<false | 'cut' | 'furnish'>(false);
+  const [working, setWorking] = useState<false | Errand>(false);
   const fog = useStore(sessionStore, (state) => state.fogOfWar);
   const connection = useStore(sessionStore, (state) => state.connection);
   const sight = useStore(sessionStore, (state) => state.yourSight);
@@ -52,6 +63,7 @@ export function MapSection({ map, master, renderer, onRenderer }: MapSectionProp
     void listMasters().then((answer) => {
       setMasters(answer.masters);
       setTunedAt(answer.tunedAt);
+      setReviewedAt(answer.reviewedAt);
     });
   }, []);
 
@@ -72,6 +84,20 @@ export function MapSection({ map, master, renderer, onRenderer }: MapSectionProp
 
   const chosen = masters.find((candidate) => candidate.name === wanted);
   const needsCutting = chosen !== undefined && (chosen.cutAt === null || isStale(chosen));
+  // What its origin map needs when the tiles do not, because cutting again works it out too.
+  const originNeed = chosen === undefined || needsCutting ? null : originNeeds(chosen, reviewedAt);
+
+  // The Origin and Info map renderers draw the origin map and the names, so they say when those are older
+  // than what they describe: a stale one looks exactly like a right one.
+  const outOfDate = needsCutting ? 'the tiles are older than the master' : describeOrigin(chosen, reviewedAt);
+  useEffect(() => {
+    if ((renderer === 'origin' || renderer === 'info-map') && chosen?.cutAt != null && outOfDate !== '') {
+      note(
+        'origin',
+        `${master} is out of date: ${outOfDate}. Mend it in Debug map before trusting these names.`,
+      );
+    }
+  }, [renderer, master, outOfDate, chosen?.cutAt]);
   const cutLabel = chosen?.cutAt === null ? 'cut it' : 'cut it again';
   // Offered whenever there is a world to furnish, not only when something looks out of date. Tuning a
   // look is running this over and over against a master nothing has touched, and a button that hid
@@ -89,18 +115,24 @@ export function MapSection({ map, master, renderer, onRenderer }: MapSectionProp
   };
 
   /**
-   * Runs one of the two errands, and starts the page again if it worked.
+   * Runs one of the errands, and starts the page again if it worked.
    *
    * The reload is not laziness. Every painter, every decoded tile and the whole sprite map are read once
    * at startup and held, so the one way to be certain nothing is still holding the old world is to begin
    * again - which is the same reason picking a different master reloads.
    */
-  const run = (which: 'cut' | 'furnish'): void => {
+  const run = (which: Errand): void => {
     if (chosen === undefined || working !== false) {
       return;
     }
     setWorking(which);
-    void (which === 'cut' ? cutMaster(chosen.name) : furnishMaster(chosen.name)).then((ready) => {
+    const asked =
+      which === 'cut'
+        ? cutMaster(chosen.name)
+        : which === 'furnish'
+          ? furnishMaster(chosen.name)
+          : mendOrigin(chosen.name, which);
+    void asked.then((ready) => {
       setWorking(false);
       refresh();
       if (ready) {
@@ -152,6 +184,24 @@ export function MapSection({ map, master, renderer, onRenderer }: MapSectionProp
         >
           {working === 'furnish' ? 'furnishing, watch the log' : furnishLabel}
         </button>
+      )}
+      {originNeed !== null && (
+        <>
+          <p className="debug-map__note">{describeOrigin(chosen, reviewedAt)}</p>
+          <button
+            type="button"
+            className="debug-map__cut"
+            onClick={() => run(originNeed)}
+            disabled={working !== false}
+            title="work out where its land came from and carry the real names through it, without recutting the tiles"
+          >
+            {working === originNeed
+              ? 'working, watch the log'
+              : originNeed === 'origin'
+                ? 'work out its origin'
+                : 'carry its names again'}
+          </button>
+        </>
       )}
 
       <label className="debug-map__label" htmlFor="renderer">

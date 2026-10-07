@@ -18,8 +18,12 @@ stage alone, with none of the debug panel in it (decision record 0079).
   `world/master/`, with each one's size and when it was last cut, and it says when the image has been
   saved since - which it re-checks whenever the window is given focus. A master nobody has cut yet gets
   a button, and pressing it runs `world:import` and `world:tile`, the two commands `CLAUDE.md` cuts a world
-  with, and then `world:flow` and `world:sprites`, from the dev server with their output going into the debug
-  log: about six minutes, once per master.
+  with, and then `world:flow`, `world:sprites` and `world:origin`, from the dev server with their output going
+  into the debug log: about eight minutes, once per master, and the same button cuts it again once the image
+  has been saved since. A master whose origin map is older than its last save, or whose names are older than
+  `world/names/1790.json`, says so under the dropdown, with a button to mend only that - **work out its
+  origin**, two minutes, or **carry its names again**, a second - and the Origin and Info map renderers say so
+  in the log, because a stale origin map puts real names on the wrong ground and looks no different.
   Switching reloads the page on purpose. So the loop is: paint, save, alt-tab, pick it. See `docs/adr/0025`.
 - What it looks like: the renderer dropdown in that same panel. `Biome` is not a look and not even the
   terrain: it lays the sprite map's own biome raster on the world, flat and blocky, which is the only way
@@ -221,7 +225,9 @@ stage alone, with none of the debug panel in it (decision record 0079).
   through it into `names.json` beside them, three megabytes,
   and gives every square the named sea and stretch of land it is in or by, in `regions.bin`.
   `npm run world:names --prefix frontend` carries the names again without working the map out, in under a
-  second. Two minutes a master; the quick start makes it when it is missing, and a master repainted makes it stale. It prints how much of the land
+  second. Two minutes a master. Cutting a master in the Debug map does it as its last step, and the quick start
+  does it whenever the origin map is missing or older than the master, and carries the names again whenever
+  they are older than `world/names/1790.json`; nothing else does. It prints how much of the land
   is from Earth, invented and copied. Moving land with Nearest Neighbour keeps it traceable; land painted fresh,
   or opened up between pieces, is invented. See `docs/plans/real-world-names.md`.
 - A picture of the scenery, without a browser: `npm run world:scenery --prefix frontend` paints five

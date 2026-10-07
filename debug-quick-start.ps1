@@ -561,9 +561,10 @@ if (-not (Test-Path $Master)) {
     exit 1
 }
 
-<# A world command, run when what it writes into the default world is missing; otherwise a word that it is there. #>
-function Ensure([string] $Made, [string] $What, [string[]] $Arguments, [string] $There) {
-    if (Test-Path (Join-Path $DefaultWorld $Made)) { Good $There } else { Run $What $Npm $Arguments $Frontend }
+<# A world command, run when what it writes into the default world is missing or older than any of $From; otherwise a word that it is there. #>
+function Ensure([string] $Made, [string] $What, [string[]] $Arguments, [string] $There, [string[]] $From = @()) {
+    $path = Join-Path $DefaultWorld $Made; $newer = @($From | Where-Object { (Test-Path $path) -and (Get-Item $_).LastWriteTimeUtc -gt (Get-Item $path).LastWriteTimeUtc })
+    if ((Test-Path $path) -and $newer.Count -eq 0) { Good $There } else { Run $What $Npm $Arguments $Frontend }
 }
 
 Ensure 'terrain.geojson' 'tracing the coast and the lakes' @('run', 'world:import') 'the coast and the lakes are traced'
@@ -572,14 +573,14 @@ $Tiles = Join-Path $DefaultWorld 'tiles'
 if (-not (Test-Path (Join-Path $Tiles '7'))) {
     Run 'cutting the world into tiles (about two minutes, once)' $Npm @('run', 'world:tile') $Frontend
 } else {
-    $cut = @(Get-ChildItem -Path $Tiles -Recurse -Filter '*.png' -ErrorAction SilentlyContinue).Count
-    Good "the world is cut: $cut tiles"
+    Good "the world is cut: $(@(Get-ChildItem -Path $Tiles -Recurse -Filter '*.png' -ErrorAction SilentlyContinue).Count) tiles"
 }
 
 Ensure '..\..\paint.json' 'writing the styles' @('run', 'world:paint', '--', '--config-only') 'the styles are written'
-# Which way the rivers run, under a minute (0081); and where on Earth each square came from, for the Origin renderer.
+# Which way rivers run (0081); the origin map and real names, remade when older than the master or 1790.json.
 Ensure 'flow\flow.json' 'working out which way rivers run' @('run', 'world:flow', '--', '--no-stills') 'the rivers run'
-Ensure 'origin\origin.json' 'working out where on Earth the land came from (two minutes, once)' @('run', 'world:origin') 'the origin map is worked out'
+Ensure 'origin\origin.json' 'working out where on Earth the land came from (two minutes)' @('run', 'world:origin') 'the origin map is worked out' @($Master)
+Ensure 'names.json' 'carrying the real names through the origin map' @('run', 'world:names') 'the names are carried' @((Join-Path $Root 'world\names\1790.json'))
 
 # What kind of place every part of the world is and where the scenery clumps, half a minute once (0054): the biomes
 # beside the page's world, and the stands only the game server reads (0067). An old sprite map lacks the second.
@@ -692,7 +693,6 @@ if (Confirm-Port $WebPort 'the dev server' (Get-NewestWebConfigChange)) {
         exit 1
     }
 }
-
 
 # --- what to do now -------------------------------------------------------------------------------
 

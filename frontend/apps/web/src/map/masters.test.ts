@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
-import { describeMaster, isStale, isUnfurnished, since, worldRootOf } from './masters';
+import {
+  describeMaster,
+  describeOrigin,
+  isStale,
+  isUnfurnished,
+  originNeeds,
+  since,
+  worldRootOf,
+} from './masters';
 import type { MasterOnDisk } from './masters';
 
 const SECOND = 1000;
@@ -17,6 +25,8 @@ function master(fields: Partial<MasterOnDisk> = {}): MasterOnDisk {
     editedAt: Date.now() - HOUR,
     cutAt: Date.now() - 30 * MINUTE,
     furnishedAt: Date.now() - 29 * MINUTE,
+    originAt: Date.now() - 28 * MINUTE,
+    namedAt: Date.now() - 28 * MINUTE,
     ...fields,
   };
 }
@@ -158,5 +168,32 @@ describe('saying how long ago', () => {
 
   it('never reads as the future, however the clocks disagree', () => {
     expect(since(Date.now() + 10 * MINUTE)).toBe('0 seconds');
+  });
+});
+
+describe('whether the real names stand on the ground the master has now', () => {
+  it('needs nothing when its origin map and names are newer than the master and the review', () => {
+    expect(originNeeds(master(), Date.now() - 2 * HOUR)).toBeNull();
+    expect(describeOrigin(master(), null)).toBe('');
+  });
+
+  it('needs its origin worked out again when the master was painted since, which moves land under the names', () => {
+    const painted = master({ editedAt: Date.now() - 10 * MINUTE });
+    expect(originNeeds(painted, null)).toBe('origin');
+    expect(describeOrigin(painted, null)).toContain('wrong ground');
+  });
+
+  it('needs its origin worked out when it has none', () => {
+    expect(originNeeds(master({ originAt: null, namedAt: null }), null)).toBe('origin');
+  });
+
+  it('needs only its names carried again when the review of 1790 was saved since', () => {
+    const reviewed = Date.now() - 5 * MINUTE;
+    expect(originNeeds(master(), reviewed)).toBe('names');
+    expect(describeOrigin(master(), reviewed)).toContain('1790.json');
+  });
+
+  it('needs nothing of a master that is not cut, which has no ground for names yet', () => {
+    expect(originNeeds(master({ cutAt: null, originAt: null }), null)).toBeNull();
   });
 });

@@ -195,9 +195,10 @@ yet holds the history or the flavour of a place, which would be keyed by the sam
 - **The tools** are `world:origin` and `world:names` in `frontend/packages/world/bin/`, with the logic in
   `src/origin.ts`, unit-tested on small made-up masters. They reuse `toPixel` and `toLngLat` from
   `src/raster.ts` and the river graph from `src/flow.ts`.
-- **What they write** is output, regenerated after every change to a master like the tiles, and both join
-  the list in `CLAUDE.md` and `debug-quick-start.ps1` when they land: `origin/` and `names.json` beside a
-  master's tiles.
+- **What they write** is output, `origin/`, `names.json` and `regions.bin` beside a master's tiles, and it
+  keeps up with the master by itself: cutting a master in the Debug map works it out as its last step, the
+  quick start works it out again whenever the master was saved since and carries the names again whenever the
+  review was, and the panel says when either is out of date, with a button to mend just that.
 - **What is checked in** is what a person decides: the pins, `world/names/1790.json`, and
   `world/names/invented-<name>.json`.
 - **The game** could take its seats from real towns of 1790 instead of the invented ones in

@@ -66,12 +66,14 @@ const file: OriginFile & { $comment: string } = {
 
 await mkdir(outputDir, { recursive: true });
 await writeFile(resolve(outputDir, 'origin.bin'), encodeOrigin(origin));
-await writeFile(resolve(outputDir, 'origin.json'), `${JSON.stringify(file, null, 2)}\n`);
 const picture = originPicture(origin, edited, base, sea, side);
 await writeFile(
   resolve(outputDir, 'origin.png'),
   encodeRgbPng(picture, (raw) => deflateSync(raw, { level: 6 })),
 );
+// Last, so that when it was written is when the origin map was finished: the debug panel and the quick start
+// read its time to tell an origin map older than the master.
+await writeFile(resolve(outputDir, 'origin.json'), `${JSON.stringify(file, null, 2)}\n`);
 
 const land = counts.earth + counts.invented + counts.clone;
 const share = (part: number) => `${((100 * part) / Math.max(1, land)).toFixed(1)}%`;

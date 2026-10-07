@@ -306,7 +306,8 @@ Commands are added here as the increments land:
   `debug-quick-start.cmd` on a double click from Explorer. It checks the tools, installs the packages
   again when `package-lock.json` has changed since they were installed (stopping this checkout's dev
   server first, because Windows will not replace a running program), generates whatever part
-  of the world is missing, cuts the sprites and the interface pictures again (seconds when nothing is new), starts the game
+  of the world is missing, works the origin map out again when the master was saved since and carries the
+  names again when `world/names/1790.json` was, cuts the sprites and the interface pictures again (seconds when nothing is new), starts the game
   server and the dev server hidden with their output in
   `.logs/`, waits until both ports answer, and prints the address. `-Stop` stops both, `-Logs` prints
   their tails, `-WebOnly` skips the game server, `-NoBrowser` leaves the browser alone. **A port held by
