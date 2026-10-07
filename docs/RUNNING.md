@@ -240,8 +240,9 @@ stage alone, with none of the debug panel in it (decision record 0079).
   `npm run world:names --prefix frontend` carries the names again without working the map out, in under a
   second. Two minutes a master. Cutting a master in the Debug map does it as its last step, and the quick start
   does it whenever the origin map is missing or older than the master, and carries the names again whenever
-  the server's copy is missing or older than `world/names/1790.json`; nothing else does. The game server reads
-  a master's names again when they are written, without a restart. It prints how much of the land
+  either copy is missing or older than `world/names/1790.json`; nothing else does. In a worktree whose world
+  is linked from another checkout it does neither, and says so, because both are that checkout's to make. The
+  game server reads a master's names again when they are written, without a restart. It prints how much of the land
   is from Earth, invented and copied. Moving land with Nearest Neighbour keeps it traceable; land painted fresh,
   or opened up between pieces, is invented. See `docs/plans/real-world-names.md`.
 - A picture of the scenery, without a browser: `npm run world:scenery --prefix frontend` paints five

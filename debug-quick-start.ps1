@@ -593,7 +593,9 @@ Ensure @('sprites\biome\map.json', (Join-Path $Root "world\stands\$DefaultMaster
 # What the ground is, for the game server to read where a player is looking (0084). Seconds.
 Ensure (Join-Path $Root "world\ground\$DefaultMaster\ground.json") 'reading the ground for the game server' @('run', 'world:ground') 'the ground is read' $Painted
 Ensure 'origin\origin.json' 'working out where on Earth the land came from (two minutes)' @('run', 'world:origin') 'the origin map is worked out' $Painted
-Ensure (Join-Path $Root "world\ground\$DefaultMaster\names.json") 'carrying the real names through the origin map' @('run', 'world:names') 'the names are carried' @((Join-Path $Root 'world\names\1790.json'))
+# Both copies, the page's beside the tiles and the server's beside the ground map, so that a world linked from another
+# checkout leaves the names to it as it leaves the origin map they are carried through.
+Ensure @('names.json', (Join-Path $Root "world\ground\$DefaultMaster\names.json")) 'carrying the real names through the origin map' @('run', 'world:names') 'the names are carried' @((Join-Path $Root 'world\names\1790.json'))
 
 # What the scenery is drawn as: Adam's pictures in world/sprites, cut into one atlas. Cut at every start
 # and not only when there is none, because an atlas that was there used to be drawn as it was: a picture
