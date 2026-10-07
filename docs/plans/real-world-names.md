@@ -289,6 +289,13 @@ Each its own commit, and the order is a suggestion.
      coal, steel and oil cities, the treaty ports and colonial towns - Yokohama, Haiphong, Kuching, Kota
      Kinabalu. 140 left out. Natural Earth gives Bose in Guangxi the Wikidata id of Baicheng in Jilin, so the
      one review keeps both out.
+   - **The United States**, thirteen states and two territories, with Spain's Florida, Louisiana, Texas, New
+     Mexico and California and Russia's Alaska: 663 more places; 92 stood - the eastern towns, some under older
+     names (Elizabeth Town, Derryfield, Northampton Town, Old Fort Schuyler, White's Fort, Cowford, the Moravians'
+     Salem), the Spanish presidios, missions and villas (Tucson, Santa Barbara, San Luis Obispo, Alburquerque,
+     Laredo, Nacogdoches, Nueva Iberia, Fort Miro), the French villages of the west (Peoria, La Baye, Les
+     Petites Côtes, the Sault), Kekionga, where Harmar was beaten in October 1790, Dubuque's mines, Oonalashka
+     and Karluk - and 571 had not been founded. 32 left out, most of them Alaska's native villages.
 5. **Invented land named.**
 6. **Seats taken from real towns**, if Adam wants them.
 

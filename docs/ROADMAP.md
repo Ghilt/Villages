@@ -79,7 +79,7 @@ and so is the origin map, the first of real names on the edited world and the ne
   the Origin renderer shows and experiment 0016 waits on Adam's eye for, and the third: Earth's rivers, lakes,
   peaks, seas and named lands are in the world, and the fourth under way: the towns of 1790, under the names
   English gave them then, reviewed in `world/names/1790.json` region by region - the largest first, then
-  Europe, Russia, the Near East, North Africa and Asia, 2,300 in the world; the Info map renderer writes all of it as an atlas would. The game server
+  Europe, Russia, the Near East, North Africa, Asia and the United States, 2,392 in the world; the Info map renderer writes all of it as an atlas would. The game server
   reads them too, through a port and a contract (0085), and a roll's map omens name the river, the sea and the
   towns of 1790 in view. The rivers carry their names of 1790 too - the Tagus, the Maese, the Burrampooter.
   Next are the other regions' towns.
