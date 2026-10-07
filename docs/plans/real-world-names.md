@@ -264,6 +264,13 @@ Each its own commit, and the order is a suggestion.
      Stutgard, Coblentz, Maestricht, Bois-le-Duc, Spalatro, Uskub, Tammerfors, Fünfkirchen, Khadjibey, where
      Odessa was founded in 1794 - and 52 had not been founded. Left out: Çorovodë, Gramsh, Librazhd, Klaksvík,
      Lahti, Iracoubo, Roura, Dzaoudzi, Bærum, Rørvik, Steinkjer, Mo i Rana, Sandnes, Leikanger, Makiivka.
+   - **Russia, Central Asia, the Caucasus and Mongolia**: 608 more places; 235 stood - the old Muscovite towns,
+     the Ural ironworks of the century, the Siberian ostrogs, Simbirsk, Kozlov, Viatka, Ust-Sysolsk, Obdorsk,
+     Verkhneudinsk, Kiachta, the khanates' Kokan, Khojend and Karshi, and Merv, which Bukhara laid waste in
+     1785 - and 374 had not been founded: the Soviet towns of mine and oil, the Amur and the coast, China's
+     until 1858 and 1860, the forts that came later - Grozny, Krasnodar, Khabarovsk - and nearly every town of
+     the Kazakh steppe. 103 small Siberian, steppe and mountain settlements the reviewer could not date are left
+     out.
 5. **Invented land named.**
 6. **Seats taken from real towns**, if Adam wants them.
 
