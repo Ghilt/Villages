@@ -5,6 +5,7 @@ import villages.application.CharacterSpan
 import villages.application.HouseRow
 import villages.application.VisionPoint
 import villages.domain.HouseId
+import villages.domain.Location
 import villages.domain.PlayerId
 import villages.domain.Vision
 import villages.domain.WorldTime
@@ -59,6 +60,9 @@ internal class Fog(
      */
     fun letsThrough(x: Double, y: Double, reach: Double): Boolean =
         revealed.reaches(x / WORLD, y / WORLD, (reach + STAND_MARGIN) / WORLD)
+
+    /** Whether the house has revealed a place: what a river pointed at may be named on, as a building stands still. */
+    fun reveals(place: Location): Boolean = revealed.covers(place.lat, place.lon)
 
     private fun visionOn(on: WorldTime): Coverage {
         vision?.takeIf { it.first == on }?.let { return it.second }

@@ -18,7 +18,10 @@ import { note, shortId } from '../log/log';
  */
 
 export type Subject =
-  { kind: 'house'; id: string } | { kind: 'area'; id: string } | { kind: 'character'; id: string };
+  | { kind: 'house'; id: string }
+  | { kind: 'area'; id: string }
+  | { kind: 'character'; id: string }
+  | { kind: 'river'; id: string };
 
 /**
  * How many can be open at once where there is room for them.
@@ -55,13 +58,15 @@ export function paneIdOf(subject: Subject): string {
   return `inspect:${keyOf(subject)}`;
 }
 
-/** The subject a pane id names, or null when the pane is not an inspect window. */
+/** The subject a pane id names, or null when the pane is not an inspect window. A river's id may hold colons. */
 export function subjectOfPane(id: string): Subject | null {
-  const [head, kind, rest] = id.split(':');
-  if (head !== 'inspect' || rest === undefined) {
+  const [head, kind, ...rest] = id.split(':');
+  if (head !== 'inspect' || rest.length === 0) {
     return null;
   }
-  return kind === 'house' || kind === 'area' || kind === 'character' ? { kind, id: rest } : null;
+  return kind === 'house' || kind === 'area' || kind === 'character' || kind === 'river'
+    ? { kind, id: rest.join(':') }
+    : null;
 }
 
 /** What the map marks: the newest thing opened, because that is what the player is looking at. */
@@ -74,7 +79,8 @@ function settle(open: readonly Subject[]): void {
 }
 
 function saying(subject: Subject): string {
-  return `${subject.kind} ${shortId(subject.id)}`;
+  // A river's id is its real identity, Q548 or a source's file, number and name, which a shortened UUID is not.
+  return `${subject.kind} ${subject.kind === 'river' ? subject.id : shortId(subject.id)}`;
 }
 
 /**

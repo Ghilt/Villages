@@ -49,6 +49,12 @@ const NINE = [4.5, 10.25, 16].flatMap((y) => [4.5, 10.25, 16].map((x) => ({ x, y
 const FENCE = 'M4 8 H9 V4 H20 V14 H16 V20 H4 Z';
 
 /**
+ * A river: two waves, one over the other, the way water is drawn at the size of a mark. A placeholder, like the
+ * bust, until Adam draws it.
+ */
+const WAVES = 'M2.5 9.5 Q6 6 9.5 9.5 T16.5 9.5 T21.5 9.5 M2.5 15.5 Q6 12 9.5 15.5 T16.5 15.5 T21.5 15.5';
+
+/**
  * Character dialogue: a speech bubble, its tail down to the left where somebody is speaking from. One
  * bubble and not two, because two at the size of a mark are one blot. A placeholder, like the bust.
  */
@@ -72,7 +78,8 @@ export type IconName =
   | 'nine'
   | 'area'
   | 'speech'
-  | 'list';
+  | 'list'
+  | 'river';
 
 /** Which way a needle points. The four are one drawing turned, never four drawings. */
 export type Point = 'up' | 'down' | 'left' | 'right';
@@ -113,6 +120,7 @@ export function Icon({ name, title }: IconProps) {
       {title !== undefined && <title>{title}</title>}
       {name === 'shield' && <path d={SHIELD} className="icon__line" />}
       {name === 'area' && <path d={FENCE} className="icon__line" />}
+      {name === 'river' && <path d={WAVES} className="icon__line" />}
       {name === 'speech' && <path d={SPEECH} className="icon__line" />}
       {name === 'list' && (
         <>

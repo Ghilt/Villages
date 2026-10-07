@@ -1,7 +1,7 @@
 import { createSession, ensurePlayerToken, forgetPlayerToken } from '@villages/client-core';
 import type { Connection, Looking, Readable, SessionListener, SessionState } from '@villages/client-core';
 import { PROTOCOL_VERSION } from '@villages/protocol';
-import type { ChoiceView, CommandPayload, OptionView } from '@villages/protocol';
+import type { ChoiceView, CommandPayload, OptionView, Point } from '@villages/protocol';
 
 import { note } from '../log/log';
 import { followStandsUnder, standsArrived } from './stands';
@@ -87,6 +87,14 @@ export function fogOfWar(on: boolean): void {
  */
 export function seeAll(on: boolean): void {
   session.seeAll(on);
+}
+
+/**
+ * Asks the server what river is at a place on the map, which a click that hit no house, person or area does. The
+ * answer comes back into the session as `inspected`, named only on ground the house has revealed. See 0087.
+ */
+export function inspectAt(at: Point): void {
+  session.inspectAt(at);
 }
 
 /** Empties the development world, for everyone connected to it. A debug affordance; see 0036. */

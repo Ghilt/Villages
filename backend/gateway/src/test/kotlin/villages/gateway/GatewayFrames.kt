@@ -72,6 +72,8 @@ internal fun seeAll(on: Boolean) = """{"type":"seeAll","on":$on}"""
 
 internal fun fogOfWar(on: Boolean) = """{"type":"fogOfWar","on":$on}"""
 
+internal fun inspectAt(lat: Double, lon: Double) = """{"type":"inspectAt","at":{"lat":$lat,"lon":$lon}}"""
+
 internal fun offering(sample: String, commandId: String) =
     """{"type":"command","commandId":"$commandId","command":{"type":"offerDialogue","sample":"$sample"}}"""
 

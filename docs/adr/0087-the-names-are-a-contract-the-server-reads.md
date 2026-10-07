@@ -2,6 +2,7 @@
 
 - Status: accepted
 - Date: 2026-10-07
+- Amended 2026-10-07: a second reader, a click on a river, which asks the server and is answered by name.
 
 ## Context
 
@@ -50,6 +51,12 @@ looking circle is *The Vistula* and the open sea *The Baltic Sea*, under the key
 before, so every pool that opened on them still does. A town of 1790 standing in the circle, zoomed in as close
 as houses are named, is an omen of its own, *Near Dantzic*, keyed `map.town:<id>`: what a pool or a questline
 will open on.
+
+**The second reader is a click on a river.** A click on the map that hit no house, person or area sends
+`inspectAt` with the place, and the gateway answers `inspected`: whether the house has revealed it, and the river
+there - whether the master's ground map shows one, and which named river is close enough to be the one painted
+there, as the omen finds it - or none. The page opens an inspect window on a river it names, keyed by the river's
+`id`, so two clicks on the Vistula are one window. The page's copy of the names is not what it reads.
 
 **Only what the house has revealed is named**, as only revealed ground counts (0084): a town under the fog is
 no omen, a river is named from a revealed cell the ground shows it in, and the sea from the revealed water.

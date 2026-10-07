@@ -47,7 +47,7 @@ interface AreaOverlayProps {
    * What the map marks: the newest thing a window is open on, if any. Handed in, as picking is, so that the
    * overlay knows nothing of windows. See `App.tsx`.
    */
-  picked: { kind: 'house' | 'area' | 'character'; id: string } | undefined;
+  picked: { kind: 'house' | 'area' | 'character' | 'river'; id: string } | undefined;
   /** An area clicked on the map, which opens a window on it. */
   onPick: (thing: { kind: 'area'; id: string }) => void;
 }
@@ -416,12 +416,12 @@ export function AreaOverlay({ map, worldRoot, turn, picked: top, onPick }: AreaO
       if (event.defaultPrevented || areasStore.get().armed || performance.now() - drewAt.current < 300) {
         return;
       }
-      const at = { lng: event.lngLat.lng, lat: event.lngLat.lat };
       const hit = [...areasStore.get().areas]
         .sort((one, other) => one.diamonds - other.diamonds)
-        .find((area) => insideFenceAt(area.fence, at));
-      // Empty ground closes nothing: a window is the player's to shut. Only a hit opens one.
+        .find((area) => insideFenceAt(area.fence, event.lngLat));
+      // Empty ground closes nothing: a window is the player's to shut. A hit opens one and keeps the click from rivers.
       if (hit !== undefined) {
+        event.preventDefault();
         pick.current({ kind: 'area', id: hit.id });
       }
     };

@@ -7,8 +7,16 @@ import { areasStore } from '../areas/areas';
 import { terrainPalette } from '../geometry/terrainClasses';
 import { sessionStore } from '../net/gateway';
 import type { Room } from '../stage/panes';
-import { type Description, describeArea, describeCharacter, describeHouse, type Legend } from './describe';
+import {
+  type Description,
+  describeArea,
+  describeCharacter,
+  describeHouse,
+  describeRiver,
+  type Legend,
+} from './describe';
 import { InspectWindow, WindowBar } from './InspectWindow';
+import { riversStore } from './rivers';
 import { forgetSubject, type Subject } from './subjects';
 import { trailStore, forget, lastNamed } from './trail';
 import { useStore } from '../store/useStore';
@@ -38,6 +46,7 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
   const today = useStore(sessionStore, (state) => state.world?.today ?? null);
   const yourHouse = useStore(sessionStore, (state) => state.yourHouse);
   const areas = useStore(areasStore);
+  const rivers = useStore(riversStore, (state) => state.seen);
   const trail = useStore(trailStore, (state) => state.steps);
   const legend = useLegend();
 
@@ -71,6 +80,12 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
       return area === null ? null : describeArea(area, housesInView(houses), legend);
     }
 
+    // A river is what the server said of it when it was clicked, kept for this page's life.
+    if (subject.kind === 'river') {
+      const seen = rivers.get(subject.id);
+      return seen === undefined ? null : describeRiver(seen);
+    }
+
     const house =
       housesInView(houses).find((one) => one.id === subject.id) ??
       (yourHouse?.house.id === subject.id ? yourHouse.house : undefined);
@@ -102,6 +117,7 @@ const KIND_WORDS: Record<Subject['kind'], string> = {
   house: 'House',
   area: 'Area',
   character: 'Key figure',
+  river: 'River',
 };
 
 interface OutOfViewProps {

@@ -1,0 +1,47 @@
+package villages.gateway
+
+import villages.application.fate.RiverAt
+import villages.domain.Location
+import villages.domain.PlayerId
+import villages.protocol.Hello
+import villages.protocol.InspectAt
+import villages.protocol.Inspected
+import villages.protocol.Point
+import villages.protocol.RiverView
+
+/**
+ * What river a page points at. A click on the map that hit nothing else asks with the place, and the answer names
+ * the river there from the master the page draws, which hello says, and only on ground the house has revealed, unless
+ * Adam's switch has lifted the fog. The page's own copy of the names is never what a player reads. See 0075 and 0087.
+ */
+internal class RiversPart(private val rivers: RiverAt) : Part {
+    /** The world the page draws, from hello. Null, and nothing it points at is a river. */
+    private class Drawn {
+        @Volatile
+        var master: String? = null
+    }
+
+    private fun drawnBy(connection: Gateway.Connection): Drawn = connection.keptBy(this) { Drawn() }
+
+    override fun arrive(connection: Gateway.Connection, hello: Hello, who: PlayerId) {
+        drawnBy(connection).master = hello.master
+    }
+
+    override fun register(commands: Commands, frames: Frames) {
+        frames.on<InspectAt> { connection, frame -> connection.out.send(answer(connection, frame.at)) }
+    }
+
+    private fun answer(connection: Gateway.Connection, at: Point): Inspected {
+        val place = at.takeIf { it.lat in -90.0..90.0 && it.lon in -180.0..180.0 }?.let { Location(it.lat, it.lon) }
+        val looking = connection.looking
+        if (place == null || (looking.fogged && !looking.fog.reveals(place))) {
+            return Inspected(at, revealed = false, river = null)
+        }
+        val river = drawnBy(connection).master?.let { rivers.at(it, place) }
+        return Inspected(
+            at,
+            revealed = true,
+            river = river?.let { RiverView(it.name?.id, it.name?.name, it.name?.also, it.name?.of1790 ?: false) },
+        )
+    }
+}

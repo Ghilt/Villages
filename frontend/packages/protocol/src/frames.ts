@@ -14,6 +14,7 @@ import {
   rollPayloadSchema,
 } from './choiceFrames';
 import { dialogueViewSchema } from './dialogueFrames';
+import { inspectAtFrameSchema, inspectedFrameSchema } from './placeFrames';
 
 /**
  * The frames that cross the WebSocket, as zod schemas, so that a frame is checked at the edge and typed
@@ -229,6 +230,7 @@ export const clientFrameSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('fogOfWar'), on: z.boolean() }),
   /** Empty the development world, for everyone. A debug frame, never a player's. See 0036. */
   z.object({ type: z.literal('wipeWorld') }),
+  inspectAtFrameSchema,
 ]);
 
 /**
@@ -303,6 +305,7 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('pong'), t0: z.number().int(), serverTime: z.number().int() }),
   z.object({ type: z.literal('error'), code: z.string(), message: z.string() }),
   rollDrawnFrameSchema,
+  inspectedFrameSchema,
   z.object({
     type: z.literal('event'),
     id: z.string(),

@@ -68,3 +68,6 @@ recorded over. See decision record 0037. What each one changed:
   `omens` and an option's `rarity` and `omens`, left out of any choice no roll dealt. See decision record 0083.
 - **24** - let an effect be a `converse`, a conversation begun by taking an option, said by the dialogue's
   `title` and nothing of what is said in it.
+- **25** - a page asks what river it points at: `inspectAt`, a place clicked, and `inspected`, whether the house has
+  revealed it and the river there by its id, its name and today's beside a name of 1790, or none. See decision
+  record 0087.

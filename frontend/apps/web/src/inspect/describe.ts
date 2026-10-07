@@ -6,6 +6,7 @@ import type { TerrainClass } from '@villages/world';
 
 import type { Area } from '../areas/areas';
 import { blazon, whereabouts } from '../house/describe';
+import type { RiverSeen } from './rivers';
 import type { Subject } from './subjects';
 
 /**
@@ -183,6 +184,29 @@ export function describeArea(area: Area, houses: readonly HouseView[], legend: L
       to: 'subject',
       subject: { kind: 'house', id: house.id },
     })),
+  };
+}
+
+/**
+ * A river, as the server named it for a click: its name in English, the one of 1790 where the review chose it with
+ * today's under it, and a way back to where it was clicked. Nothing more yet - what a river can be for comes later.
+ */
+export function describeRiver(seen: RiverSeen): Description {
+  const { name, also, of1790 } = seen.river;
+  const under =
+    name === undefined
+      ? 'no name has reached you'
+      : also === undefined
+        ? undefined
+        : of1790
+          ? `${also} today`
+          : also;
+  return {
+    kind: 'River',
+    name: name ?? 'A river',
+    ...(under === undefined ? {} : { under }),
+    facts: [],
+    links: [{ what: 'show it on the map', to: 'map', at: seen.at }],
   };
 }
 

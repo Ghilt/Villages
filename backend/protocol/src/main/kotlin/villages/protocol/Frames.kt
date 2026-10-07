@@ -22,7 +22,7 @@ import tools.jackson.databind.JsonNode
  * that: the shape of every frame is recorded in contracts/protocol-v<n>.txt, and a wire that has moved
  * without a new number is a failing build. What each version changed is in contracts/README.md.
  */
-const val PROTOCOL_VERSION = 24
+const val PROTOCOL_VERSION = 25
 
 data class Point(val lat: Double, val lon: Double)
 
@@ -188,6 +188,7 @@ data class CharacterOnMapView(
     JsonSubTypes.Type(SeeAll::class, name = "seeAll"),
     JsonSubTypes.Type(FogOfWar::class, name = "fogOfWar"),
     JsonSubTypes.Type(WipeWorld::class, name = "wipeWorld"),
+    JsonSubTypes.Type(InspectAt::class, name = "inspectAt"),
 )
 sealed interface ClientFrame
 
@@ -408,6 +409,7 @@ data class CompleteDialogueStepPayload(val dialogueId: String, val lineId: Strin
     JsonSubTypes.Type(WorldWiped::class, name = "worldWiped"),
     JsonSubTypes.Type(StandsFrame::class, name = "stands"),
     JsonSubTypes.Type(RollDrawn::class, name = "rollDrawn"),
+    JsonSubTypes.Type(Inspected::class, name = "inspected"),
 )
 sealed interface ServerFrame
 
@@ -531,31 +533,3 @@ data class EventFrame(
     val causationId: String,
     val data: JsonNode,
 ) : ServerFrame
-
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
-@JsonSubTypes(
-    JsonSubTypes.Type(HouseAppeared::class, name = "houseAppeared"),
-    JsonSubTypes.Type(HouseChanged::class, name = "houseChanged"),
-    JsonSubTypes.Type(CharacterArrived::class, name = "characterArrived"),
-    JsonSubTypes.Type(CharacterChanged::class, name = "characterChanged"),
-    JsonSubTypes.Type(CharacterGone::class, name = "characterGone"),
-)
-sealed interface Delta
-
-data class HouseAppeared(val house: HouseView) : Delta
-
-data class HouseChanged(val house: HouseView) : Delta
-
-/**
- * A character came to stand in a cell this connection holds, from nowhere or from a cell it did not hold.
- * Houses never move, so a client never had to drop anything; a character does, which is why there are three
- * of these where a house has two. The client keeps them in the held cells their `cell` falls in, and no
- * other.
- */
-data class CharacterArrived(val character: CharacterOnMapView) : Delta
-
-/** A character already drawn here moved within what this connection holds, or changed how they are drawn. */
-data class CharacterChanged(val character: CharacterOnMapView) : Delta
-
-/** A character left every cell this connection holds: moved away, taken off the map, or dead. */
-data class CharacterGone(val id: String, val version: Long) : Delta
