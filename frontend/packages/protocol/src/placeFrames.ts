@@ -14,8 +14,8 @@ export const inspectAtFrameSchema = z.object({ type: z.literal('inspectAt'), at:
 
 /**
  * Water pointed at: whether it is a river, a lake or the sea, its real identity, a Wikidata id where there is one,
- * and its name in English, with today's beside a name of 1790 the review chose. Neither where nothing named is close
- * enough to be the water painted there.
+ * and its name in English, with today's beside a name of 1790 the review chose, and a line or two about it where one
+ * was written. None of them where nothing named is close enough to be the water painted there.
  */
 export const waterViewSchema = z.object({
   kind: z.enum(['river', 'lake', 'sea']),
@@ -23,6 +23,7 @@ export const waterViewSchema = z.object({
   name: z.string().optional(),
   also: z.string().optional(),
   of1790: z.boolean(),
+  about: z.string().optional(),
 });
 
 /** The answer, for the place asked about: whether the house has revealed it, and the water there or none. */

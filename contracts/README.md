@@ -75,3 +75,5 @@ recorded over. See decision record 0037. What each one changed:
   the `sea` by its `kind`, in place of the `river` it said at 25.
 - **27** - gave `roll` its `inspectingWaters`, the places the page has windows on water open at, which the server
   reads again for the water there: a roll reads a window on the Vistula as *Inspecting the Vistula*.
+- **28** - gave the `water` in `inspected` its `about`, a line or two about the river, lake or sea from
+  `world/names/about.json`, where one was written.

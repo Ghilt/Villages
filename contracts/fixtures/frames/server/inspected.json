@@ -2,5 +2,12 @@
   "type": "inspected",
   "at": { "lat": 52.25, "lon": 21.0 },
   "revealed": true,
-  "water": { "kind": "river", "id": "Q548", "name": "Vistula", "also": "Wisła", "of1790": true }
+  "water": {
+    "kind": "river",
+    "id": "Q548",
+    "name": "Vistula",
+    "also": "Wisła",
+    "of1790": true,
+    "about": "Poland's great river, which carries the grain of the Polish plains past Warsaw to Dantzic."
+  }
 }

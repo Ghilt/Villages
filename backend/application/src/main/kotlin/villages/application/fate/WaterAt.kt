@@ -8,7 +8,8 @@ enum class WaterKind { RIVER, LAKE, SEA }
 /**
  * Water pointed at: what kind it is, and which, where the master's real names were carried - its real identity, a
  * Wikidata id where there is one, its name in English, and another worth knowing, today's beside a name of 1790 the
- * review chose. All but the kind null where nothing named is near enough to be the water painted there.
+ * review chose, and a line or two [about] it for its window. All but the kind null where nothing named is near
+ * enough to be the water painted there.
  */
 data class WaterHere(
     val kind: WaterKind,
@@ -16,6 +17,7 @@ data class WaterHere(
     val name: String? = null,
     val also: String? = null,
     val of1790: Boolean = false,
+    val about: String? = null,
 ) {
     /**
      * As English says it inside a sentence: the Vistula, the German Ocean, the Lake of Geneva, but Lake Maeler and
@@ -66,10 +68,10 @@ class WaterAt(private val grounds: GroundMaps, private val names: PlaceNamesByMa
 
     private fun seaAt(named: PlaceNames?, place: Location): WaterHere =
         named?.regionAt(place, RegionKind.SEA)
-            ?.let { WaterHere(WaterKind.SEA, it.id, it.name, it.also, it.of1790) }
+            ?.let { WaterHere(WaterKind.SEA, it.id, it.name, it.also, it.of1790, it.about) }
             ?: WaterHere(WaterKind.SEA)
 
-    private fun PlaceName.asWater(kind: WaterKind) = WaterHere(kind, id, name, also, of1790)
+    private fun PlaceName.asWater(kind: WaterKind) = WaterHere(kind, id, name, also, of1790, about)
 
     companion object {
         /** A world with no ground maps, where nothing is water. */

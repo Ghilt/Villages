@@ -68,7 +68,7 @@ describe('water the server named for a click', () => {
     expect(called('lake', 'Zuyder Zee')).toBe('the Zuyder Zee');
   });
 
-  it('is a window saying its kind and name, today’s under a name of 1790, and a way back to where it was clicked', () => {
+  it('is a window saying its kind and name, today’s under a name of 1790, what is said of it, and a way back', () => {
     expect(describeWater(heardWater(tagus)!)).toEqual({
       kind: 'River',
       name: 'Tagus',
@@ -81,6 +81,8 @@ describe('water the server named for a click', () => {
       name: 'German Ocean',
       under: 'North Sea today',
     });
+    const told = { ...northSea, water: { ...northSea.water!, about: 'The herring sea of the Dutch.' } };
+    expect(describeWater(heardWater(told)!).about).toBe('The herring sea of the Dutch.');
     const nameless = describeWater(heardWater({ ...vistula, water: { kind: 'lake', of1790: false } })!);
     expect(nameless).toMatchObject({ kind: 'Lake', name: 'A lake', under: 'no name has reached you' });
   });

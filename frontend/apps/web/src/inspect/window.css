@@ -101,6 +101,13 @@
   color: var(--ink-soft);
 }
 
+/* What is said of the thing, a line or two to read before its facts: a river's, a lake's, a sea's. */
+.inspect__about {
+  margin: 0.7rem 0 0;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
 .inspect__facts {
   display: grid;
   grid-template-columns: auto 1fr;

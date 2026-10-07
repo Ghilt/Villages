@@ -31,7 +31,7 @@ import {
  * is the confusing state, a stale ground map offers a river that is not there any more, and a stale origin map
  * puts real names on the wrong ground. The quick start does the same, by itself, for a master saved since. The other errands mend one thing apart: furnishing,
  * half a minute, is what a change to `world/biomes.json` needs; the origin, two minutes, a master cut before
- * there was one; the names, a second, a change to `world/names/1790.json`.
+ * there was one; the names, a second, a change to `world/names/1790.json` or `about.json`.
  *
  * Development only. There is no deployment yet, and when there is, the world will be cut before it.
  */
@@ -40,8 +40,9 @@ const here = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(here, '..', '..', '..', '..');
 const MASTER_DIR = resolve(REPO, 'world', 'master');
 const BIOMES = resolve(REPO, 'world', 'biomes.json');
-/** The review of 1790 the names are carried from. See `docs/plans/real-world-names.md`. */
+/** The review of 1790 the names are carried from, and the lines about the waters carried with them. See 0087. */
 const REVIEW = resolve(REPO, 'world', 'names', '1790.json');
+const ABOUT = resolve(REPO, 'world', 'names', 'about.json');
 const WORLD_DIR = resolve(REPO, 'frontend', 'apps', 'web', 'public', 'world');
 /** Where the generator writes the stands, which nothing here serves. See `standsDirOf` and decision 0067. */
 const STANDS_DIR = resolve(REPO, 'world', 'stands');
@@ -353,9 +354,12 @@ export function worldApi(): Plugin {
 
         if (request.method === 'GET' && (url === '/' || url === '')) {
           // When world/biomes.json and the review of 1790 were saved, beside the masters rather than inside
-          // each, because each belongs to none of them and every master is made through it.
-          void Promise.all([masters(), savedAt(BIOMES), savedAt(REVIEW)]).then(
-            ([found, tunedAt, reviewedAt]) => {
+          // each, because each belongs to none of them and every master is made through it. The lines about the
+          // waters are carried with the names, so the later of the two is when the names were last made stale.
+          void Promise.all([masters(), savedAt(BIOMES), savedAt(REVIEW), savedAt(ABOUT)]).then(
+            ([found, tunedAt, review, about]) => {
+              const reviewedAt =
+                review === null || about === null ? (review ?? about) : Math.max(review, about);
               response.setHeader('content-type', 'application/json');
               response.setHeader('cache-control', 'no-store');
               response.end(JSON.stringify({ masters: found, cutting: busy, tunedAt, reviewedAt }));

@@ -38,10 +38,11 @@ other's. What the contract says:
   when Adam repaints and is what anything that names a place keys by; `kind`, `river`, `lake`, `peak` or `town`;
   `name`, in English; `form`, `1790` where the review chose the name and `today` until one has; `also`, `rank`,
   `from`, and `elevation` for a peak; `at` and `earth`, where its name stands in the world and on Earth, as
-  `[longitude, latitude]`; and `lines`, a river's runs or a lake's shores in the world.
+  `[longitude, latitude]`; `lines`, a river's runs or a lake's shores in the world; and `about`, a line or two
+  about a river or a lake for the window on it, where `world/names/about.json` has one.
 - **A region**: `id`, `kind`, `sea` or `land`, `name`, `feature`, `rank` and `from`, and `at` and `squares` for one
   given any square; `form`, `1790`, and `also`, today's name, where the review chose its name - the German Ocean,
-  the North Sea today.
+  the North Sea today; and `about`, a line or two about a sea, as for a name.
 - **`regions.bin`**: two layers, the land each square is in and then the sea it is by, each a little-endian
   sixteen-bit number a square, a row at a time from the north-west, counting `regions` from one, nought for none.
 
@@ -59,7 +60,7 @@ there - a lake whose carried shores enclose the place, a river where the master'
 named river close enough to be the one painted there, as the omen finds it, or the sea by the named sea the place
 is in or by - or none. A third question is asked of the names for it, which named thing's lines enclose a place.
 The page opens an inspect window on the water it names, keyed by its `id`, so two clicks on the Vistula are one
-window. The page's copy of the names is not what it reads.
+window, with the line about it the answer carries. The page's copy of the names is not what it reads.
 
 **The third reader is a roll with a window open on water.** `roll` says where each was opened, never what
 water it is, and the roll reads every place again as the click was answered, on ground the house has revealed:

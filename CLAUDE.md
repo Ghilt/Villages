@@ -315,7 +315,7 @@ Commands are added here as the increments land:
   the rivers' flow, the sprite map, the ground map and the origin map with its names, in the order the panel's
   `cut it` runs them, and nothing when the master was not saved since - and the styles again when
   `world/painterly.json` or `world/render.json` was, the sprite map when `world/biomes.json` was, and the names
-  when `world/names/1790.json` was. It never writes through a link: tiles a worktree links from the main
+  when `world/names/1790.json` or `world/names/about.json` was. It never writes through a link: tiles a worktree links from the main
   checkout are that checkout's to cut, and it says so. It cuts the sprites and the interface pictures again (seconds when nothing is new), starts the game
   server and the dev server hidden with their output in
   `.logs/`, waits until both ports answer, and prints the address. `-Stop` stops both, `-Logs` prints

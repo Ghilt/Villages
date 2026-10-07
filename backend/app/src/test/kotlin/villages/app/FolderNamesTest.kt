@@ -44,6 +44,8 @@ class FolderNamesTest {
         assertEquals(Location(54.36, 18.64), dantzic.at)
         val vistula = names.names.single { it.kind == NameKind.RIVER }
         assertFalse(vistula.of1790)
+        assertEquals("Poland's great river, which carries the grain of the Polish plains past Warsaw to Dantzic.", vistula.about)
+        assertNull(dantzic.about)
         assertEquals(listOf(Location(54.35, 18.95), Location(53.5, 19.1), Location(51.48, 21.9)), vistula.lines.single())
         val peak = names.names.single { it.kind == NameKind.PEAK }
         assertEquals(4808.0, peak.elevation)
@@ -56,6 +58,8 @@ class FolderNamesTest {
         assertEquals("Sea of Azov", azoph.also)
         assertTrue(azoph.of1790)
         assertFalse(names.regions.first().of1790)
+        assertEquals("The East Sea of the Swedes and the Russians, at war on it since 1788.", names.regions.first().about)
+        assertNull(azoph.about)
         assertEquals("Pomerania", names.regionAt(Location(45.0, 45.0), RegionKind.LAND)?.name)
         assertEquals("Baltic Sea", names.regionAt(Location(45.0, 45.0), RegionKind.SEA)?.name)
         assertEquals("Baltic Sea", names.regionAt(Location(45.0, 135.0), RegionKind.SEA)?.name)

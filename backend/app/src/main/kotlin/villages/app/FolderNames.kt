@@ -88,6 +88,7 @@ class FolderNames(private val masters: Path) : PlaceNamesByMaster {
                 at = at,
                 earth = earth,
                 lines = node["lines"].list().map { run -> run.list().mapNotNull(::placeOf) }.filter { it.isNotEmpty() },
+                about = node.text("about"),
             )
         }
 
@@ -98,7 +99,9 @@ class FolderNames(private val masters: Path) : PlaceNamesByMaster {
             return if (kind == null || id == null || name == null) {
                 null
             } else {
-                NamedRegion(id, kind, name, node.text("feature") ?: "", node.text("also"), node.text("form") == "1790")
+                NamedRegion(
+                    id, kind, name, node.text("feature") ?: "", node.text("also"), node.text("form") == "1790", node.text("about"),
+                )
             }
         }
 

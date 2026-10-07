@@ -37,10 +37,11 @@ private val norrstrom = PlaceName(
     listOf(listOf(Location(59.0, 18.07), Location(59.6, 18.07))),
 )
 
-/** Lake Maeler, as an English writer of 1790 had Mälaren, drawn as a box west of Stockholm. */
+/** Lake Maeler, as an English writer of 1790 had Mälaren, drawn as a box west of Stockholm, with a line about it. */
 private val maeler = PlaceName(
     "Q211967", NameKind.LAKE, "Lake Maeler", "Mälaren", null, null, true, Location(59.35, 17.6), Location(59.35, 17.6),
     listOf(listOf(59.2 to 17.3, 59.2 to 17.95, 59.5 to 17.95, 59.5 to 17.3, 59.2 to 17.3).map { Location(it.first, it.second) }),
+    about = "The long lake behind Stockholm.",
 )
 
 /** Every square of the world by the Baltic, which is enough for a sea east of Stockholm. */
@@ -65,7 +66,11 @@ class GatewayWatersSpec : StringSpec({
 
         sent.filterIsInstance<Inspected>() shouldBe listOf(
             Inspected(Point(59.33, 18.07), revealed = true, water = WaterView("river", "Q1052063", "Norrström")),
-            Inspected(Point(59.35, 17.6), revealed = true, water = WaterView("lake", "Q211967", "Lake Maeler", "Mälaren", true)),
+            Inspected(
+                Point(59.35, 17.6),
+                revealed = true,
+                water = WaterView("lake", "Q211967", "Lake Maeler", "Mälaren", true, "The long lake behind Stockholm."),
+            ),
             // Sixty-four kilometres out from a seat that sees thirty-four: the fog's.
             Inspected(Point(59.33, 19.2), revealed = false, water = null),
         )

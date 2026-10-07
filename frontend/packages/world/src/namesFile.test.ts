@@ -44,6 +44,7 @@ const names: WorldName[] = [
         [21.9, 51.48],
       ],
     ],
+    about: "Poland's great river, which carries the grain of the Polish plains past Warsaw to Dantzic.",
   },
   {
     id: 'Q583',
@@ -59,7 +60,16 @@ const names: WorldName[] = [
   },
 ];
 const list: EarthRegion[] = [
-  { id: 'Q545', kind: 'sea', name: 'Baltic Sea', feature: 'sea', rank: 1, from: 2, polygons: [] },
+  {
+    id: 'Q545',
+    kind: 'sea',
+    name: 'Baltic Sea',
+    feature: 'sea',
+    rank: 1,
+    from: 2,
+    polygons: [],
+    about: 'The East Sea of the Swedes and the Russians, at war on it since 1788.',
+  },
   {
     id: 'ne_10m_geography_regions_polys:41:Pomerania',
     kind: 'land',

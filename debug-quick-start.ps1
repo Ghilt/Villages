@@ -581,7 +581,7 @@ function Ensure([string[]] $Made, [string] $What, [string[]] $Arguments, [string
 }
 
 # Everything cut from the master is cut again when the master was saved since, in the order the panel's `cut it`
-# runs them; the styles when world/painterly.json or render.json was, the names when the review was (0087).
+# runs them; the styles when world/painterly.json or render.json was, the names when the review or about.json was (0087).
 $Painted = @($Master)
 Ensure 'terrain.geojson' 'tracing the coast and the lakes' @('run', 'world:import') 'the coast and the lakes are traced' $Painted
 Ensure 'tiles\cut.json' 'cutting the world into tiles (about two minutes)' @('run', 'world:tile') 'the world is cut' $Painted
@@ -593,7 +593,7 @@ Ensure @('sprites\biome\map.json', (Join-Path $Root "world\stands\$DefaultMaster
 # What the ground is, for the game server to read where a player is looking (0084). Seconds.
 Ensure (Join-Path $Root "world\ground\$DefaultMaster\ground.json") 'reading the ground for the game server' @('run', 'world:ground') 'the ground is read' $Painted
 Ensure 'origin\origin.json' 'working out where on Earth the land came from (two minutes)' @('run', 'world:origin') 'the origin map is worked out' $Painted
-Ensure (Join-Path $Root "world\ground\$DefaultMaster\names.json") 'carrying the real names through the origin map' @('run', 'world:names') 'the names are carried' @((Join-Path $Root 'world\names\1790.json'))
+Ensure (Join-Path $Root "world\ground\$DefaultMaster\names.json") 'carrying the real names through the origin map' @('run', 'world:names') 'the names are carried' @((Join-Path $Root 'world\names\1790.json'), (Join-Path $Root 'world\names\about.json'))
 
 # What the scenery is drawn as: Adam's pictures in world/sprites, cut into one atlas. Cut at every start
 # and not only when there is none, because an atlas that was there used to be drawn as it was: a picture

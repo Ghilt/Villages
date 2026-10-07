@@ -33,6 +33,8 @@ export interface EarthRegion {
   readonly from?: number;
   /** Its polygons, each a list of rings. */
   readonly polygons: readonly (readonly Ring[])[];
+  /** A line or two about a sea for the inspect window on it, from `world/names/about.json`: see `about.ts`. */
+  readonly about?: string;
 }
 
 /** For every square, the land it is in and the sea it is by: an index into the list, plus one; nought for none. */

@@ -18,8 +18,8 @@ data class Inspected(val at: Point, val revealed: Boolean, val water: WaterView?
 
 /**
  * Water pointed at: whether it is a `river`, a `lake` or the `sea`, its real identity, a Wikidata id where there is
- * one, and its name in English, with today's beside a name of 1790 the review chose. Neither where nothing named is
- * close enough to be the water painted there.
+ * one, and its name in English, with today's beside a name of 1790 the review chose, and a line or two `about` it
+ * where one was written. None of them where nothing named is close enough to be the water painted there.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class WaterView(
@@ -28,4 +28,5 @@ data class WaterView(
     val name: String? = null,
     val also: String? = null,
     val of1790: Boolean = false,
+    val about: String? = null,
 )

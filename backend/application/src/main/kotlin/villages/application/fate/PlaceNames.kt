@@ -18,7 +18,8 @@ enum class RegionKind { SEA, LAND }
  * where there is one, and it never changes when Adam repaints: it is what a questline names a place by. [name] is
  * the English one, the one an English writer of 1790 used where [of1790] says it was reviewed for that, and today's
  * until then; [also] is another worth knowing, a town's today. [at] is where its name stands in the world, [earth]
- * the same place on Earth, and [lines] a river's runs or a lake's shores in the world, none for a point.
+ * the same place on Earth, and [lines] a river's runs or a lake's shores in the world, none for a point. [about] is a
+ * line or two about a river or a lake for the inspect window on it, from `world/names/about.json`.
  */
 data class PlaceName(
     val id: String,
@@ -33,6 +34,7 @@ data class PlaceName(
     val at: Location,
     val earth: Location,
     val lines: List<List<Location>>,
+    val about: String? = null,
 )
 
 /** A named sea or stretch of land: the Baltic Sea, a gulf, a strait; Pomerania, the Alps. */
@@ -45,6 +47,8 @@ data class NamedRegion(
     val also: String? = null,
     /** Whether the review of 1790 chose [name]: the German Ocean rather than the North Sea. */
     val of1790: Boolean = false,
+    /** A line or two about a sea for the inspect window on it, from `world/names/about.json`. */
+    val about: String? = null,
 )
 
 /** A named thing near a place, and how far from it, in kilometres. */

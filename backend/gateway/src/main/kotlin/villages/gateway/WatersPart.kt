@@ -42,7 +42,7 @@ internal class WatersPart(private val waters: WaterAt) : Part {
         return Inspected(
             at,
             revealed = true,
-            water = water?.let { WaterView(it.kind.name.lowercase(), it.id, it.name, it.also, it.of1790) },
+            water = water?.let { WaterView(it.kind.name.lowercase(), it.id, it.name, it.also, it.of1790, it.about) },
         )
     }
 }

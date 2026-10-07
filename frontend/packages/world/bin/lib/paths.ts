@@ -62,7 +62,8 @@ export const ART_CACHE_DIR = resolve(REPO, 'frontend', 'node_modules', '.cache',
 export const MASTER_DIR = resolve(REPO, 'world', 'master');
 /**
  * What Earth's names were in 1790, as a person decided them: `1790.json`, the review of which towns stood
- * and what English called them. Committed, as the master is. See `docs/plans/real-world-names.md`.
+ * and what English called them, and `about.json`, a line or two about the rivers, lakes and seas. Committed, as
+ * the master is. See `docs/plans/real-world-names.md`.
  */
 export const NAMES_DIR = resolve(REPO, 'world', 'names');
 /** Downloaded Natural Earth files. Not committed: they are raw material, not our world. */

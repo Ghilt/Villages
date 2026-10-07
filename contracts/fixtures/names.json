@@ -36,7 +36,8 @@
             [19.1, 53.5],
             [21.9, 51.48]
           ]
-        ]
+        ],
+        "about": "Poland's great river, which carries the grain of the Polish plains past Warsaw to Dantzic."
       },
       {
         "id": "Q583",
@@ -52,7 +53,17 @@
       }
     ],
     "regions": [
-      { "id": "Q545", "kind": "sea", "name": "Baltic Sea", "feature": "sea", "rank": 1, "from": 2, "at": [90, 45], "squares": 2 },
+      {
+        "id": "Q545",
+        "kind": "sea",
+        "name": "Baltic Sea",
+        "feature": "sea",
+        "rank": 1,
+        "from": 2,
+        "at": [90, 45],
+        "squares": 2,
+        "about": "The East Sea of the Swedes and the Russians, at war on it since 1788."
+      },
       {
         "id": "ne_10m_geography_regions_polys:41:Pomerania",
         "kind": "land",

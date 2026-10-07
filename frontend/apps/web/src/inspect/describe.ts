@@ -46,6 +46,8 @@ export interface Description {
   name: string;
   /** A line under the name, when the thing has one worth reading. */
   under?: string;
+  /** A line or two about the thing, to read before its facts: what is said of a river, a lake or a sea. */
+  about?: string;
   /**
    * A face, for a thing that has one: a person. Present with no portrait for somebody who has none, so
    * the window draws the bust rather than nothing; absent for a house or an area, which have no face.
@@ -196,10 +198,11 @@ const WATER_WORDS = {
 
 /**
  * Water - a river, a lake, the sea - as the server named it for a click: its name in English, the one of 1790 where
- * the review chose it with today's under it, and a way back to where it was clicked.
+ * the review chose it with today's under it, a line or two about it where the server has one, and a way back to
+ * where it was clicked.
  */
 export function describeWater(seen: WaterSeen): Description {
-  const { kind, name, also, of1790 } = seen.water;
+  const { kind, name, also, of1790, about } = seen.water;
   const under =
     name === undefined
       ? 'no name has reached you'
@@ -212,6 +215,7 @@ export function describeWater(seen: WaterSeen): Description {
     kind: WATER_WORDS[kind][0],
     name: name ?? WATER_WORDS[kind][1],
     ...(under === undefined ? {} : { under }),
+    ...(about === undefined ? {} : { about }),
     facts: [],
     links: [{ what: 'show it on the map', to: 'map', at: seen.at }],
   };

@@ -56,6 +56,8 @@ export interface WorldName {
   readonly earth: readonly [number, number];
   /** A river's runs, a lake's outlines carried whole, or nothing for a peak. */
   readonly lines: readonly (readonly (readonly [number, number])[])[];
+  /** A line or two about it for the inspect window on it, from `world/names/about.json`: see `about.ts`. */
+  readonly about?: string;
 }
 
 /** Where a point of Earth went in the world, or null where it went nowhere. Longitude and latitude both ways. */
