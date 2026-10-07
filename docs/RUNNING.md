@@ -199,12 +199,14 @@ stage alone, with none of the debug panel in it (decision record 0079).
 
 ## Adam's folders and the tools that cut them
 
-- The towns and rivers of 1790: `world/names/1790.json`, one line a town or a river, keyed as the names are -
-  a town by its Wikidata id, a river by its Wikidata id or Natural Earth's file, number and name: the name an
-  English writer of 1790 would have used, or `null` if it was not there then; today's name, to read by; and why
-  they differ. An agent's review, Adam's to correct; a town not in it is not carried, a river not in it keeps
-  today's name, and a canal is carried only where it is listed with a name. `world:names` reads it, and
-  a change shows on the next click under the Origin renderer. See `docs/plans/real-world-names.md`.
+- The towns, rivers, lakes and seas of 1790: `world/names/1790.json`, one line a thing, keyed as the names are -
+  a town by its Wikidata id, a river, a lake or a sea by its Wikidata id or Natural Earth's file, number and
+  name: the name an English writer of 1790 would have used, or `null` if it was not there then; today's name,
+  to read by; and why they differ. An agent's review, Adam's to correct; a town not in it is not carried, a
+  river, lake or sea not in it keeps today's English name - a lake written as English writes one, Lake
+  Constance where the source says only Constance - and a canal or a reservoir is carried only where it is
+  listed with a name. `world:names` reads it, and a change shows on the next click under the Origin renderer
+  and on the Info map. See `docs/plans/real-world-names.md`.
 
 - What grows where: `world/biomes.json`, hand-edited, one entry a kind and one a biome. What reads it is
   `npm run world:sprites --prefix frontend`, which works out a biome for every sixteen world units and
@@ -232,8 +234,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   through it into `names.json` beside them, three megabytes,
   and gives every square the named sea and stretch of land it is in or by, in `regions.bin`. The same two files
   go into `world/ground/<master>/` beside the ground map, where only the game server reads them, for the map's
-  omens; their shape is held by `contracts/fixtures/names.json` (0087). Canals are left out, because Natural
-  Earth's were dug after 1790.
+  omens; their shape is held by `contracts/fixtures/names.json` (0087). Canals and reservoirs are left out
+  unless the review names them, because nearly all of Natural Earth's were made after 1790.
   `npm run world:names --prefix frontend` carries the names again without working the map out, in under a
   second. Two minutes a master. Cutting a master in the Debug map does it as its last step, and the quick start
   does it whenever the origin map is missing or older than the master, and carries the names again whenever

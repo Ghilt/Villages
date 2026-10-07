@@ -37,7 +37,7 @@ export function watchOrigin(map: maplibregl.Map, master: string): () => void {
       'origin',
       answer.names === null
         ? `no names carried into ${master} yet: npm run world:names --prefix frontend -- ${master}`
-        : `${answer.names.length} of Earth's names carried into ${master}, in English: the towns of 1790, rivers under their names of 1790 where the review gives one, and lakes and peaks under today's names` +
+        : `${answer.names.length} of Earth's names carried into ${master}, in English: the towns of 1790, rivers, lakes and seas under their names of 1790 where the review gives one, and peaks under today's names` +
             (answer.regions === null
               ? ', and no seas or regions'
               : `, and ${answer.regions.list.length} named seas and regions of land`),
@@ -115,7 +115,8 @@ function called(region: NamedRegion): string {
   const sort = SORTS[region.feature] ?? region.feature.toLowerCase();
   const bare = /island|isl|cape|continent|geoarea/i.test(region.feature) || /^the /i.test(name);
   const says = sort === '' || name.toLowerCase().includes(sort) || region.kind === 'sea' ? '' : ` (${sort})`;
-  return `${bare ? '' : 'the '}${name}${says}`;
+  const also = region.also === undefined ? '' : ` (${region.also} today)`;
+  return `${bare ? '' : 'the '}${name}${says}${region.form === '1790' ? also : ''}`;
 }
 
 /** Natural Earth's own words for a sort of region, said plainly; nothing where the name is the whole story. */

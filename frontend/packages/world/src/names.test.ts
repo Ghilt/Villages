@@ -158,4 +158,43 @@ describe('a name as the review of 1790 decides it', () => {
     expect(asIn1790('river', undefined, 'Kiz?lirmak', ['Kizil Irmak', 'Kizil Irmak'])?.also).toBeUndefined();
     expect(asIn1790('river', undefined, 'pisuerga', ['Pisuerga', 'Pisuerga'])?.also).toBeUndefined();
   });
+
+  it('writes a lake as English does, where the source gives only its stem', () => {
+    expect(asIn1790('lake', 'Erie', 'Lake Erie', undefined)).toEqual({ name: 'Lake Erie' });
+    expect(asIn1790('lake', 'Woods', 'Lake of the Woods', undefined)?.name).toBe('Lake of the Woods');
+    expect(asIn1790('lake', 'Great Bear', 'Great Bear Lake', undefined)?.name).toBe('Great Bear Lake');
+    expect(asIn1790('lake', 'Constance', 'Bodensee', undefined)).toEqual({
+      name: 'Lake Constance',
+      also: 'Bodensee',
+    });
+    expect(asIn1790('lake', 'Mälaren', 'Mälaren', undefined)).toEqual({ name: 'Lake Mälaren' });
+    expect(asIn1790('lake', 'Dead Sea', 'Dead Sea', undefined)?.name).toBe('Dead Sea');
+    expect(asIn1790('lake', 'Issyk-Kul', 'Issyk-Kul', undefined)?.name).toBe('Issyk-Kul');
+    expect(asIn1790('lake', 'Constance', 'Bodensee', ['Lake of Constance', 'Bodensee'])?.name).toBe(
+      'Lake of Constance',
+    );
+  });
+
+  it('carries a reservoir only where the review names it, as a lake a dam only raised', () => {
+    expect(asIn1790('lake', 'Nasser', 'Lake Nasser', undefined, true)).toBeNull();
+    expect(asIn1790('lake', 'Ilmen', "Lake Il'Men'", ['Lake Ilmen', 'Lake Ilmen'], true)?.name).toBe(
+      'Lake Ilmen',
+    );
+    expect(asIn1790('lake', 'Rybinsk', 'Rybinsk Reservoir', [null, 'Rybinsk'], true)).toBeNull();
+  });
+
+  it('names a sea by the review too, and leaves an unreviewed one its English name', () => {
+    expect(asIn1790('sea', 'North Sea', 'North Sea', ['German Ocean', 'North Sea'])).toEqual({
+      name: 'German Ocean',
+      also: 'North Sea',
+      form: '1790',
+    });
+    expect(asIn1790('sea', 'Bay of Campeche', 'Bahía de Campeche', undefined)).toEqual({
+      name: 'Bay of Campeche',
+      also: 'Bahía de Campeche',
+    });
+    expect(asIn1790('sea', 'Southern Ocean', 'SOUTHERN OCEAN', undefined)).toEqual({
+      name: 'Southern Ocean',
+    });
+  });
 });

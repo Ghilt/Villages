@@ -38,7 +38,8 @@ other's. What the contract says:
   `from`, and `elevation` for a peak; `at` and `earth`, where its name stands in the world and on Earth, as
   `[longitude, latitude]`; and `lines`, a river's runs or a lake's shores in the world.
 - **A region**: `id`, `kind`, `sea` or `land`, `name`, `feature`, `rank` and `from`, and `at` and `squares` for one
-  given any square.
+  given any square; `form`, `1790`, and `also`, today's name, where the review chose its name - the German Ocean,
+  the North Sea today.
 - **`regions.bin`**: two layers, the land each square is in and then the sea it is by, each a little-endian
   sixteen-bit number a square, a row at a time from the north-west, counting `regions` from one, nought for none.
 
@@ -61,8 +62,9 @@ copy stops being served, as the stands left the served folder (0067).
 ## Consequences
 
 - Names reach the player for the first time, so an anachronism is now the player's to see. Natural Earth files
-  its canals as rivers, and the ones it has - Suez, Panama, the Caledonian - were dug after 1790, so none is
-  carried until a review dates them; the rivers keep today's names until a review gives them their 1790 ones.
+  its canals as rivers and its reservoirs as lakes, and nearly all of both - Suez, Panama, the Caledonian, Lake
+  Nasser - were made after 1790, so none is carried until a review dates it; the rivers, lakes and seas keep
+  today's names until a review gives them their 1790 ones.
 - A quest can name a place by its `id` and find it in any master: wherever Adam moved it, or nowhere if he
   removed it.
 - Two copies a master, five megabytes each, and the server holds a master's names in memory: some 140,000 points

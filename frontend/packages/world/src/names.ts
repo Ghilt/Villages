@@ -249,25 +249,121 @@ export type Reviewed = readonly [string | null, string, string?];
 /**
  * What a source's named thing is called in the world, as the review in `world/names/1790.json` decides: the
  * review's name of 1790 where it has one, else the source's English name, else its own; the other name worth
- * showing beside that; and whether it is the name of 1790. Null where the review says the thing was not there in
- * 1790, and for a canal the review has not dated: Natural Earth files its canals as rivers, and most of the ones it
- * has - Suez, Panama, the Caledonian - were dug after 1790.
+ * showing beside that; and whether it is the name of 1790. A sea or a stretch of land is named the same way. Null
+ * where the review says the thing was not there in 1790, and for a canal or a reservoir the review has not dated,
+ * `made` saying the source calls it one: Natural Earth files its canals as rivers and its reservoirs as lakes, and
+ * most of both - Suez, Panama, the Caledonian, Lake Nasser, the Rybinsk sea - were made after 1790.
  */
 export function asIn1790(
-  kind: NameKind,
+  kind: NameKind | 'sea' | 'land',
   english: string | undefined,
   local: string,
   decided: Reviewed | undefined,
+  made = false,
 ): { name: string; also?: string; form?: '1790' } | null {
-  const name = decided?.[0] ?? english ?? local;
-  const canal = kind === 'river' && /\bcanal\b/i.test(`${name} ${local}`);
-  if (decided?.[0] === null || (decided === undefined && canal)) return null;
-  const also = alsoOf(name, local, decided);
+  const name = decided?.[0] ?? (kind === 'lake' ? lakeInEnglish(english, local) : english) ?? local;
+  const dug = made || (kind === 'river' && /\bcanal\b/i.test(`${name} ${local}`));
+  if (decided?.[0] === null || (decided === undefined && dug)) return null;
+  const other = alsoOf(name, local, decided);
+  // Lake Mälaren needs no Mälaren beside it.
+  const also = kind === 'lake' && other !== undefined && within(other, name) ? undefined : other;
   return {
     name,
     ...(also === undefined ? {} : { also }),
     ...(decided === undefined ? {} : { form: '1790' as const }),
   };
+}
+
+/**
+ * A lake as English writes it. Natural Earth gives a lake's English name as its bare stem - Erie, Woods, Constance -
+ * so the source's own name is the English one where it says lake itself, Lake Erie, Lake of the Woods, Great Bear
+ * Lake, Lough Neagh; and a stem saying nothing of water is a Lake, Lake Constance beside the Bodensee.
+ */
+function lakeInEnglish(english: string | undefined, local: string): string | undefined {
+  if (wordsOf(local).some((word) => ENGLISH_LAKE.has(word))) return local;
+  if (english === undefined) return undefined;
+  return wordsOf(english).some((word) => WATER.has(word)) ? english : `Lake ${english}`;
+}
+
+/** The words that make a name an English lake's. */
+const ENGLISH_LAKE = new Set(['lake', 'lakes', 'loch', 'lough']);
+
+/** Words that say a name is already a water's, in English or the language it is named in. */
+const WATER = new Set([
+  ...ENGLISH_LAKE,
+  ...[
+    'sea',
+    'bay',
+    'channel',
+    'sound',
+    'inlet',
+    'arm',
+    'basin',
+    'strait',
+    'river',
+    'reservoir',
+    'pond',
+    'lagoon',
+  ],
+  ...[
+    'lago',
+    'lac',
+    'laguna',
+    'lagoa',
+    'ozero',
+    'see',
+    'meer',
+    'zee',
+    'haff',
+    'zaliv',
+    'zalew',
+    'jezioro',
+    'jezero',
+  ],
+  ...[
+    'hu',
+    'nuur',
+    'nur',
+    'co',
+    'tso',
+    'kul',
+    'köl',
+    'köli',
+    'göl',
+    'gölü',
+    'järvi',
+    'jarvi',
+    'vatn',
+    'vatnet',
+  ],
+  ...[
+    'sjön',
+    'sjøen',
+    'träsk',
+    'tó',
+    'yumco',
+    'embalse',
+    'represa',
+    'presa',
+    'dam',
+    'shuiku',
+    'sagar',
+    'samudra',
+  ],
+  ...['limni', 'étang', 'salar', 'chott', 'danau', 'buhayrat'],
+]);
+
+/** A name's words, in small letters, whatever the alphabet. */
+function wordsOf(name: string): string[] {
+  return name
+    .toLowerCase()
+    .split(/[^\p{L}\p{N}]+/u)
+    .filter(Boolean);
+}
+
+/** Whether one name's words stand together in another's: Mälaren in Lake Mälaren. */
+function within(one: string, other: string): boolean {
+  return ` ${wordsOf(other).join(' ')} `.includes(` ${wordsOf(one).join(' ')} `);
 }
 
 /**

@@ -51,7 +51,11 @@ class FolderNamesTest {
         assertEquals(Location(-45.83, -6.87), peak.at)
         assertEquals(Location(45.83, 6.87), peak.earth)
 
-        assertEquals(listOf("Baltic Sea", "Pomerania", "Sea of Azov"), names.regions.map { it.name })
+        assertEquals(listOf("Baltic Sea", "Pomerania", "Sea of Azoph"), names.regions.map { it.name })
+        val azoph = names.regions.last()
+        assertEquals("Sea of Azov", azoph.also)
+        assertTrue(azoph.of1790)
+        assertFalse(names.regions.first().of1790)
         assertEquals("Pomerania", names.regionAt(Location(45.0, 45.0), RegionKind.LAND)?.name)
         assertEquals("Baltic Sea", names.regionAt(Location(45.0, 45.0), RegionKind.SEA)?.name)
         assertEquals("Baltic Sea", names.regionAt(Location(45.0, 135.0), RegionKind.SEA)?.name)

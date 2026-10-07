@@ -82,7 +82,8 @@ and so is the origin map, the first of real names on the edited world and the ne
   world; the Info map renderer writes all of it as an atlas would. The game server
   reads them too, through a port and a contract (0087), and a roll's map omens name the river, the sea and the
   towns of 1790 in view. The rivers carry their names of 1790 too - the Tagus, the Maese, the Burrampooter.
-  Left for later: the 899 places the review could not date, and the names of 1790 for seas and lakes.
+  The lakes and seas carry theirs too - the Lake of Geneva, the German Ocean, the Archipelago. Left for later: the
+  899 places the review could not date, and the named stretches of land, which keep today's names.
   Adam's own, asked for on 2026-10-06.
 - **0.4** Local infrastructure: MongoDB replica set and RabbitMQ in Compose
 - **0.8** Testcontainers smoke test on MongoDB and RabbitMQ

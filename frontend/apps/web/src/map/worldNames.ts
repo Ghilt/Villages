@@ -14,8 +14,12 @@ import { worldRootOf } from './masters';
 export interface NamedRegion {
   readonly id: string;
   readonly kind: 'sea' | 'land';
-  /** In English. Natural Earth writes the largest in capitals, which `displayName` softens. */
+  /** In English, the one of 1790 where the review gives one. Natural Earth writes the largest in capitals, which `displayName` softens. */
   readonly name: string;
+  /** Another name worth knowing: today's, where the review's differs, or the source's own. */
+  readonly also?: string;
+  /** `1790` where the review chose the name. */
+  readonly form?: '1790';
   /** What the source says it is: a sea, a gulf, a strait; a range, a desert, an island. */
   readonly feature: string;
   readonly rank?: number;

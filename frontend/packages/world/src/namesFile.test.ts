@@ -72,7 +72,9 @@ const list: EarthRegion[] = [
   {
     id: 'ne_10m_geography_marine_polys:7:Sea of Azov',
     kind: 'sea',
-    name: 'Sea of Azov',
+    name: 'Sea of Azoph',
+    also: 'Sea of Azov',
+    form: '1790',
     feature: 'sea',
     polygons: [],
   },

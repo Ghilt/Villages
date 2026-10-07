@@ -20,8 +20,12 @@ export type RegionKind = 'sea' | 'land';
 export interface EarthRegion {
   readonly id: string;
   readonly kind: RegionKind;
-  /** Its name in English, where the source gives one. */
+  /** Its name in English: the one of 1790 where the review gives one, the German Ocean, else the source's. */
   readonly name: string;
+  /** Another name worth knowing: today's, where the review's differs, or the source's own. */
+  readonly also?: string;
+  /** Present where the review of 1790 chose the name. */
+  readonly form?: '1790';
   /** What sort of region the source says it is: a sea, a bay, a strait; a range, a desert, a plateau. */
   readonly feature: string;
   /** How much it matters, from 0 the most, and the zoom from which it is worth naming: the source's own. */

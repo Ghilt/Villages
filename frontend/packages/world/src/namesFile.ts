@@ -65,8 +65,11 @@ export function fileNames(
     columns,
     rows,
     names,
-    regions: (regions?.list ?? []).map(({ id, kind, name, feature, rank, from }, index) => ({
-      ...{ id, kind, name, feature },
+    regions: (regions?.list ?? []).map(({ id, kind, name, also, form, feature, rank, from }, index) => ({
+      ...{ id, kind, name },
+      ...(also === undefined ? {} : { also }),
+      ...(form === undefined ? {} : { form }),
+      feature,
       ...(rank === undefined ? {} : { rank }),
       ...(from === undefined ? {} : { from }),
       ...regions?.labels[index],

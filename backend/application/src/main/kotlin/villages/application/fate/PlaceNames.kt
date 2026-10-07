@@ -36,7 +36,16 @@ data class PlaceName(
 )
 
 /** A named sea or stretch of land: the Baltic Sea, a gulf, a strait; Pomerania, the Alps. */
-data class NamedRegion(val id: String, val kind: RegionKind, val name: String, val feature: String)
+data class NamedRegion(
+    val id: String,
+    val kind: RegionKind,
+    val name: String,
+    val feature: String,
+    /** Another name worth knowing: today's, where the review's name of 1790 differs. */
+    val also: String? = null,
+    /** Whether the review of 1790 chose [name]: the German Ocean rather than the North Sea. */
+    val of1790: Boolean = false,
+)
 
 /** A named thing near a place, and how far from it, in kilometres. */
 data class NamedNear(val name: PlaceName, val km: Double)

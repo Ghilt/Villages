@@ -68,7 +68,8 @@ export async function writeNames(
     const { features } = JSON.parse(await readFile(resolve(SOURCE_DIR, `${file}.geojson`), 'utf8')) as {
       features: SourceFeature[];
     };
-    earth.push(...namesIn(file, kind, features, kind === 'river' ? (review?.rivers ?? {}) : {}));
+    const reviewed = kind === 'river' ? review?.rivers : kind === 'lake' ? review?.lakes : undefined;
+    earth.push(...namesIn(file, kind, features, reviewed ?? {}));
   }
   const towns = await townsOf1790(review);
   earth.push(...towns.towns);
@@ -82,7 +83,7 @@ export async function writeNames(
       const { features } = JSON.parse(await readFile(resolve(SOURCE_DIR, `${file}.geojson`), 'utf8')) as {
         features: SourceFeature[];
       };
-      list.push(...regionsIn(file, kind, features));
+      list.push(...regionsIn(file, kind, features, kind === 'sea' ? (review?.seas ?? {}) : {}));
     }
     const given = regionsOf(grid, width, height, list);
     regions = { list, given, labels: regionLabels(grid, given, list.length) };
@@ -107,8 +108,13 @@ export async function writeNames(
   );
 }
 
-/** A source's named regions, each with its polygons. */
-function regionsIn(file: string, kind: RegionKind, features: readonly SourceFeature[]): EarthRegion[] {
+/** A source's named regions, each with its polygons, under the name the review of 1790 gives it where it has one. */
+function regionsIn(
+  file: string,
+  kind: RegionKind,
+  features: readonly SourceFeature[],
+  review: Readonly<Record<string, Reviewed>>,
+): EarthRegion[] {
   const out: EarthRegion[] = [];
   features.forEach((feature, at) => {
     // Natural Earth's region polygons spell their fields in capitals and its marine ones do not.
@@ -126,10 +132,18 @@ function regionsIn(file: string, kind: RegionKind, features: readonly SourceFeat
     if (polygons.length === 0) return;
     const rank = numeric(field('scalerank'));
     const from = numeric(field('min_label'));
+    // Keyed by the source's name, so that the review's renaming it does not move its key.
+    const id = field('wikidataid') ?? `${file}:${field('ne_id') ?? at}:${name}`;
+    const named = asIn1790(kind, field('name_en'), field('name') ?? name, review[id]);
+    if (named === null) return;
     out.push({
-      id: field('wikidataid') ?? `${file}:${field('ne_id') ?? at}:${name}`,
+      id,
       kind,
-      name,
+      name: named.name,
+      // Today's beside a name the review gave: the source's own region names are abbreviations as often as not.
+      ...(named.form === undefined
+        ? {}
+        : { ...(named.also === undefined ? {} : { also: named.also }), form: named.form }),
       feature: field('featurecla') ?? kind,
       ...(rank === undefined ? {} : { rank }),
       ...(from === undefined ? {} : { from }),
@@ -141,8 +155,8 @@ function regionsIn(file: string, kind: RegionKind, features: readonly SourceFeat
 
 /**
  * A source's named features, a river's many pieces sharing a number taken together as one river, each under the
- * name the review of 1790 gives it where it has one - the Tagus, not the Tajo - and left out where the review says
- * it was not there in 1790: a canal not yet dug.
+ * name the review of 1790 gives it where it has one - the Tagus, not the Tajo, the Lake of Geneva - and left out
+ * where the review says it was not there in 1790, or it is a canal or a reservoir the review has not dated.
  */
 function namesIn(
   file: string,
@@ -157,7 +171,8 @@ function namesIn(
     const number = text(feature.properties['rivernum']) ?? text(feature.properties['ne_id']) ?? String(at);
     const id = text(feature.properties['wikidataid']) ?? `${file}:${number}:${local}`;
     // In English, Adam's choice of 2026-10-06: the review's name of 1790, or the source's English one.
-    const named = asIn1790(kind, text(feature.properties['name_en']), local, review[id]);
+    const made = feature.properties['featurecla'] === 'Reservoir';
+    const named = asIn1790(kind, text(feature.properties['name_en']), local, review[id], made);
     if (named === null) return;
     const elevation = feature.properties['elevation'];
     const rank = numeric(feature.properties['scalerank']);
@@ -228,10 +243,15 @@ const TOWN_FROM = 4.5;
 /** Natural Earth's towns of today, which the review of 1790 is made against. */
 const PLACES = 'ne_10m_populated_places';
 
-/** The review of 1790, each part keyed as the names are: a town by its Wikidata id, a river as `namesIn` keys it. */
+/**
+ * The review of 1790, each part keyed as the names are: a town by its Wikidata id, a river or a lake as `namesIn`
+ * keys it, a sea as `regionsIn` does.
+ */
 interface Review1790 {
   readonly towns: Readonly<Record<string, Reviewed>>;
   readonly rivers: Readonly<Record<string, Reviewed>>;
+  readonly lakes: Readonly<Record<string, Reviewed>>;
+  readonly seas: Readonly<Record<string, Reviewed>>;
 }
 
 const REVIEW = resolve(NAMES_DIR, '1790.json');
@@ -240,7 +260,12 @@ const REVIEW = resolve(NAMES_DIR, '1790.json');
 async function readReview(): Promise<Review1790 | null> {
   if (!existsSync(REVIEW)) return null;
   const read = JSON.parse(await readFile(REVIEW, 'utf8')) as Partial<Review1790>;
-  return { towns: read.towns ?? {}, rivers: read.rivers ?? {} };
+  return {
+    towns: read.towns ?? {},
+    rivers: read.rivers ?? {},
+    lakes: read.lakes ?? {},
+    seas: read.seas ?? {},
+  };
 }
 
 function numeric(value: unknown): number | undefined {

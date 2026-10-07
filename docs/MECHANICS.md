@@ -82,7 +82,7 @@ from the world: gossip about the nearest house names that house.
 The map's omens are worked out by the server from where the player is looking and how far they are zoomed in,
 never taken from the page: zoomed out the omens are broad, zoomed in they are close, and only ground the house
 has revealed counts. See decision record 0084. Where the master's real names are carried, the ground says
-whether and the names say what: the river is *The Vistula* and the open sea *The Baltic Sea*, opening what any
+whether and the names say what: the river is *The Vistula* and the open sea *The German Ocean*, opening what any
 river or open sea opens, and zoomed in as close as houses are named, a town of 1790 in view is an omen of its
 own, *Near Dantzic*, which a questline can open on by the town's real identity. See decision record 0087.
 

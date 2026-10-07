@@ -151,6 +151,20 @@ letters back. A canal is carried only where the review lists it with a name: the
 the Tigris, the Shatt al Hai; the Hindiya channel and Hungary's Francis Canal were dug after 1790 and are
 not. A river the review has not reached keeps today's name, `form: today`.
 
+**The lakes and seas of 1790, built 2026-10-07**, in the same review and by the same rules. 92 lakes: the
+names of the century's books and charts (the Lake of Geneva and of Constance, Lake Wener, Lake Maeler, Koko
+Nor, Lake Tzana, the Lake of Tezcuco, Lake Maravi, Slave Lake and the Lake of the Hills, where Fort Chipewyan
+stood), the Zuyder Zee, a bay of the sea until 1932, the Frische Haff and the Putrid Sea, Lake Victoria and
+Lake Albert under their own names, Nalubaale and Mwitanzige, and the natural lakes Natural Earth files as
+reservoirs because a dam raised them later - Ilmen, Mjøsen, Lake St. John. 235 lakes go: 230 reservoirs, and
+the Salton Sea, the Sarygamysh and Razazah filled after 1790. A reservoir the review has not reached is not
+carried, as a canal is not. 55 seas: the German Ocean, the Frozen Ocean, the Archipelago, the Gulf of Venice,
+the Tuscan Sea, the Sea of Kamtschatka, the Gulf of Pechelee, Delagoa Bay, the Sound, Cook's River, which
+Vancouver found an inlet in 1794; a sea not listed keeps today's English name. Natural Earth gives a lake's
+English name as its bare stem, Erie or Woods, so a lake is written as English writes one: the source's own
+name where it says lake itself, Lake of the Woods, and Lake before a stem that does not, Lake Constance beside
+the Bodensee. A region carries `also`, today's name, only where the review renamed it.
+
 ### A painted river's name
 
 `world:flow` already traces every river on a master. Each traced river is sent through the origin map, the
@@ -208,7 +222,8 @@ What it does not yet do, and a quest will want: today's names honouring someone 
 name known yet - the Mackenzie, Fitzroy, Mitchell, Victoria, Daly, Ord and Katherine of Australia; the server reads
 it only for the map's omens so far; the
 copy beside the tiles names everything under the fog too, and must stop being served before players come
-(0087); canals are left out, because Natural Earth's were dug after 1790, until a review dates them; the
+(0087); canals and reservoirs are left out, because Natural Earth's were made after 1790, until a review dates
+them; the named stretches of land keep today's names - Anatolia, which 1790 called Natolia - until a review gives them theirs; the
 river file Natural Earth gives without Wikidata ids keys its rivers by file and number (the Danube is
 `ne_10m_rivers_lake_centerlines:25:Danube`), which holds while the source does; a painted river is not yet
 tied to the name of the river it came from; a town's rank is today's, not its standing in 1790; and nothing

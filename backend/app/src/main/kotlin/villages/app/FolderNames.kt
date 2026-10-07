@@ -95,7 +95,11 @@ class FolderNames(private val masters: Path) : PlaceNamesByMaster {
             val kind = RegionKind.entries.firstOrNull { it.name.lowercase() == node.text("kind") }
             val id = node.text("id")
             val name = node.text("name")
-            return if (kind == null || id == null || name == null) null else NamedRegion(id, kind, name, node.text("feature") ?: "")
+            return if (kind == null || id == null || name == null) {
+                null
+            } else {
+                NamedRegion(id, kind, name, node.text("feature") ?: "", node.text("also"), node.text("form") == "1790")
+            }
         }
 
         /** `[longitude, latitude]`, as the world package writes a place, or nothing for one off the Earth. */
