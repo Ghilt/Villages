@@ -99,7 +99,9 @@ Wanted, not started, and each needs a hypothesis in `docs/experiments/` before a
   is driven by drag and wheel. The camera is also still not told which part of the map the tiles are
   covering, so *show it on the map* can fly a thing to under the column.
 - **An inspect window that stays up to date.** A window is fed from the cells the camera is holding, so
-  panning away from a house leaves it with nothing to say. Your own house is the exception and shows the
+  panning away from a house leaves it with only what it last said, and a window the page has never filled -
+  one opened from the trail after a reload - with nothing; since 2026-10-07 it says that much rather than
+  sending the player to pan back. Your own house is the exception and shows the
   shape of the answer: the gateway sends it to the **session** rather than to a cell. An open window
   should be a subscription the same way - a frame, a version at both ends, a recording beside the old
   ones - and then a window on anything with an event stream is never stale. A subject with no stream, a

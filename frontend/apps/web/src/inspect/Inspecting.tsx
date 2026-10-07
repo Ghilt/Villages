@@ -9,6 +9,7 @@ import { sessionStore } from '../net/gateway';
 import type { Room } from '../stage/panes';
 import { type Description, describeArea, describeCharacter, describeHouse, type Legend } from './describe';
 import { InspectWindow, WindowBar } from './InspectWindow';
+import { sayingOrLastSaid } from './remembered';
 import { forgetSubject, type Subject } from './subjects';
 import { trailStore, forget, lastNamed } from './trail';
 import { useStore } from '../store/useStore';
@@ -56,7 +57,7 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
     return null;
   }
 
-  /** What the window says, or null for a subject that has left what this page can see. */
+  /** What the window can say now, or null for a subject not in what the camera holds. */
   const describeSubject = (): Description | null => {
     // A character is seen standing in a held cell, or as one of this player's own key figures wherever
     // they are; the second is how your own people stay inspectable after the camera has left them.
@@ -77,9 +78,10 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
     return house === undefined ? null : describeHouse(house, yourHouse?.house.id === house.id, areas.areas);
   };
 
-  const said = describeSubject();
-  // Which one, even put away and even out of view: the name the trail kept when it was last seen, and
-  // the word for the kind only where nothing has ever named it.
+  // Out of what the camera holds, it says what it last said: the window is for reading, wherever the map is.
+  const said = sayingOrLastSaid(subject, describeSubject());
+  // Which one, even put away and even never seen: the name the trail kept when it was last seen, and the
+  // word for the kind only where nothing has ever named it.
   const name = said?.name ?? lastNamed(trail, subject) ?? KIND_WORDS[subject.kind];
   const kind = said?.kind ?? KIND_WORDS[subject.kind];
 
@@ -92,7 +94,7 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
   }
 
   if (said === null) {
-    return <OutOfView subject={subject} kind={kind} name={name} room={room} along={along} />;
+    return <NothingKnown subject={subject} kind={kind} name={name} room={room} along={along} />;
   }
   return <InspectWindow subject={subject} said={said} along={along} room={room} />;
 }
@@ -104,7 +106,7 @@ const KIND_WORDS: Record<Subject['kind'], string> = {
   character: 'Key figure',
 };
 
-interface OutOfViewProps {
+interface NothingKnownProps {
   subject: Subject;
   kind: string;
   name: string;
@@ -113,16 +115,17 @@ interface OutOfViewProps {
 }
 
 /**
- * A house or a person who has left the held cells. Not gone from the world, only from what this page can
- * see: a stranger's key figure the camera has left, or a house panned away from.
+ * A house or a person this page has never been able to say anything of: a window opened from the trail after a
+ * reload, on something the camera is not holding. It is named, and says so plainly; it does not send the player
+ * off to find it on the map, because a window is for reading about a thing wherever the map is.
  */
-function OutOfView({ subject, kind, name, room, along }: OutOfViewProps) {
+function NothingKnown({ subject, kind, name, room, along }: NothingKnownProps) {
   return (
     <section className="inspect">
       <header className="inspect__bar">
         <WindowBar subject={subject} kind={kind} name={name} room={room} along={along} />
       </header>
-      <p className="inspect__gone">Out of view. Pan back to it, or pick something else.</p>
+      <p className="inspect__gone">Nothing known of it yet.</p>
     </section>
   );
 }

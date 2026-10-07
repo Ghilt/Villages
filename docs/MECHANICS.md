@@ -399,9 +399,14 @@ A **pane** per subject, opened on a click and closed by the player.
 
 **Put away, a window is its first row**: its mark, which one it is, its size control and its close. The
 strip says *Kettleby* rather than *House*, because a rail of three strips that all said *House* would say
-nothing, and on a desktop it keeps its close so a window can be shut without being opened first. A subject
-that has left what this page can see keeps the name the **trail** last saw it under, and only one nothing
-has ever named falls back to the word for its kind.
+nothing, and on a desktop it keeps its close so a window can be shut without being opened first.
+
+**A window does not care where the map is.** One whose subject the camera has left, or the fog has covered, goes
+on saying what it last said, its living numbers stood still, because a window is for reading about a thing and
+going on from it, wherever the map happens to be: Adam's word of 2026-10-07. Only one this page has never been
+able to say anything of - opened from the trail after a reload, on something the camera is not holding - says
+*Nothing known of it yet*, under the name the **trail** last saw it under, or the word for its kind where
+nothing ever named it. It never sends the player to pan back to it.
 
 **In the spread** the windows take **left** and stack on its rail, newest at the top, up to three; a fourth
 pushes the oldest off rather than being refused. **When they no longer all fit, one stays open** and the
