@@ -281,6 +281,14 @@ Each its own commit, and the order is a suggestion.
      Conjeveram, Tinnevelly, Quilon, Trivandrum, Ahmednuggur, Bejapore, Prome, Bassein, Tavoy, Mergui, and Port
      Cornwallis on the Andamans, settled in 1789 - one of them on ground Adam removed, and 41 had not been
      founded: Mandalay, Lyallpur, Abbottabad, Shimla, Shillong, the railway and steel towns. 46 left out.
+   - **East and Southeast Asia**: 626 more places; 444 stood - in China under the older English spellings the
+     first pass used (Chinchew, Fatshan, Jehol, Kalgan, Kirin, Ninguta, Kulja, King-te-chin, Teshoo Lumboo), in
+     Japan under the names of the castle towns (Kubota, Sumpu, Funai, Hyogo), Taiwan-fu and Kiayi, Louvo, Ligor,
+     Junk Ceylon, Acheen, Bencoolen, Buitenzorg, Amboyna and Coepang - one of them on ground Adam removed, and
+     185 had not been founded: most of Manchuria and Inner Mongolia, closed to settlers until the 1860s, the
+     coal, steel and oil cities, the treaty ports and colonial towns - Yokohama, Haiphong, Kuching, Kota
+     Kinabalu. 140 left out. Natural Earth gives Bose in Guangxi the Wikidata id of Baicheng in Jilin, so the
+     one review keeps both out.
 5. **Invented land named.**
 6. **Seats taken from real towns**, if Adam wants them.
 
