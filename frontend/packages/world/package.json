@@ -22,6 +22,7 @@
     "ground": "node --max-old-space-size=8192 bin/groundWorld.ts",
     "origin": "node --max-old-space-size=8192 bin/originWorld.ts",
     "names": "node --max-old-space-size=4096 bin/namesWorld.ts",
+    "height": "node bin/fetchWorld.ts --only etopo && node --max-old-space-size=8192 bin/heightWorld.ts",
     "paint": "node --max-old-space-size=8192 bin/renderPainterly.ts",
     "fetch-world": "node --max-old-space-size=4096 bin/fetchWorld.ts",
     "scenery": "node --max-old-space-size=8192 bin/renderScenery.ts",

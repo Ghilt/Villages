@@ -51,6 +51,22 @@ const NAMED_LAYERS = [
   'ne_10m_populated_places',
 ] as const;
 
+const ETOPO = 'https://www.ngdc.noaa.gov/mgg/global/relief/ETOPO2022/data/15s/15s_surface_elev_gtif';
+
+/**
+ * The 15-degree tiles of ETOPO 2022 around the Alps, each named for its north-west corner: 0 to 30 east,
+ * 30 to 60 north. The relief experiment's region, not yet the world's; about 114 MB.
+ */
+export const ETOPO_TILES = ['N45E000', 'N60E000', 'N45E015', 'N60E015'] as const;
+
+/** How long each is, so that a download cut short is fetched again rather than read. */
+const ETOPO_BYTES: Record<(typeof ETOPO_TILES)[number], number> = {
+  N45E000: 25195718,
+  N60E000: 33233231,
+  N45E015: 24525720,
+  N60E015: 36324897,
+};
+
 export const WORLD_SOURCES: readonly WorldSource[] = [
   {
     name: 'Copernicus land cover',
@@ -103,5 +119,13 @@ export const WORLD_SOURCES: readonly WorldSource[] = [
     into: `${layer}.geojson`,
     credit: 'Natural Earth, public domain',
     what: 'Named peaks, seas, land regions and towns, carried into the world by world:names. See docs/plans/real-world-names.md.',
+  })),
+  ...ETOPO_TILES.map((tile): WorldSource => ({
+    name: `ETOPO 2022 ${tile}`,
+    url: `${ETOPO}/ETOPO_2022_v1_15s_${tile}_surface.tif`,
+    into: `etopo/ETOPO_2022_v1_15s_${tile}_surface.tif`,
+    bytes: ETOPO_BYTES[tile],
+    credit: 'NOAA NCEI, ETOPO 2022 15 Arc-Second Global Relief Model, public domain (CC0)',
+    what: 'Height of land and sea floor every 15 arc-seconds, for the relief experiment (0017).',
   })),
 ];

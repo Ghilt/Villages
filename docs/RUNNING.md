@@ -245,6 +245,14 @@ stage alone, with none of the debug panel in it (decision record 0079).
   game server reads a master's names again when they are written, without a restart. It prints how much of the land
   is from Earth, invented and copied. Moving land with Nearest Neighbour keeps it traceable; land painted fresh,
   or opened up between pieces, is invented. See `docs/plans/real-world-names.md`.
+- How high the ground is, for the relief: `npm run world:height --prefix frontend` cuts ETOPO 2022's heights,
+  every 15 arc-seconds, into Terrarium tiles to zoom 8 in `public/world/masters/<master>/height/`, with
+  `height.json` saying where they reach and the highest point they found, which over the Alps is Mont Blanc.
+  Eight seconds and 38 MB. It reads the four 15-degree ETOPO tiles around the Alps from `world/source/etopo/`,
+  and fetches them first when they are missing, 114 MB once, through `world:fetch-all -- --only etopo`; `--only`
+  fetches any source whose name holds the word. The sea is held at nought and the height eases away over the last degree
+  inside the edge. It reads nothing of the master, so repainting one does not make it stale, and the quick
+  start makes it when it is missing. See experiment 0017.
 - A picture of the scenery, without a browser: `npm run world:scenery --prefix frontend` paints five
   places at the zoom the scenery is actually in and stamps every point the sprite map asks for onto
   them, into `world/painterly/<place>-scenery.png`, half a minute for all of them. It prints each one's
