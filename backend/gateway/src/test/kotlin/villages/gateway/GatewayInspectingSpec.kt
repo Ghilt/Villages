@@ -2,11 +2,16 @@ package villages.gateway
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import villages.domain.WorldTime
+import villages.protocol.Batch
+import villages.protocol.HouseChanged
 import villages.protocol.Inspected
 import villages.protocol.ServerFrame
+import villages.protocol.Snapshot
 import villages.protocol.YourHouse
 import villages.protocol.YourKeyFigures
+import villages.protocol.YourSight
 
 private fun inspecting(kind: String, id: String) = """{"type":"inspect","kind":"$kind","id":"$id"}"""
 
@@ -53,6 +58,36 @@ class GatewayInspectingSpec : StringSpec({
         sent.answer().house?.name shouldBe "Kestrel"
     }
 
+    // The gateway says it, wherever the house is sent from - a cell, a change to it, a window's answer - and the
+    // page shows what it is told: a house's sight changing is the cell answered again, so nothing more is sent.
+    "a house on ground no longer in vision is sent with the day the fog hid it: by its cell, its changes, a window" {
+        val rig = Rig()
+        val (theirs, _) = rig.someoneElse()
+        theirs.receive(founding(name = "Kestrel", lat = HELSINKI_LAT, lon = HELSINKI_LON))
+        val (mine, sent) = rig.introduced()
+        mine.receive(founding())
+        mine.receive(subscribe(HELSINKI_Z10))
+        mine.receive(givingVision(HELSINKI_LAT, HELSINKI_LON, commandNumber(1)))
+        sent.filterIsInstance<Snapshot>().last().houses.single().seenUntil shouldBe null
+        val given = sent.filterIsInstance<YourSight>().last().points.last().of!!
+        rig.day = WorldTime(today.day + 30)
+        sent.clear()
+
+        mine.receive(takingVision(given, commandNumber(2)))
+        val kestrel = sent.filterIsInstance<Snapshot>().single().houses.single()
+        kestrel.seenUntil shouldBe today.day + 30
+        sent.clear()
+
+        theirs.receive(granting())
+        rig.later.tick()
+        sent.filterIsInstance<Batch>().single().deltas.single()
+            .shouldBeInstanceOf<HouseChanged>().house.seenUntil shouldBe today.day + 30
+        sent.clear()
+
+        mine.receive(inspecting("house", kestrel.id))
+        sent.answer().house?.seenUntil shouldBe today.day + 30
+    }
+
     "somebody in the house's vision is answered as the map shows them, as they are now" {
         val rig = Rig()
         val (theirs, told) = rig.someoneElse()
@@ -67,7 +102,7 @@ class GatewayInspectingSpec : StringSpec({
         mine.receive(inspecting("character", agnes))
 
         sent.answer().character?.place?.lat shouldBe 59.35
-        sent.answer().seenUntil shouldBe null
+        sent.answer().character?.seenUntil shouldBe null
     }
 
     // The window says when the fog hid them, and shows them where they stood then rather than where they went.
@@ -87,7 +122,7 @@ class GatewayInspectingSpec : StringSpec({
         mine.receive(inspecting("character", agnes))
 
         sent.answer().character?.place?.lat shouldBe 59.35
-        sent.answer().seenUntil shouldBe today.day + 30
+        sent.answer().character?.seenUntil shouldBe today.day + 30
     }
 
     // A day is most of an hour, and somebody walked through the house's vision and out again within one was seen.
@@ -106,7 +141,7 @@ class GatewayInspectingSpec : StringSpec({
         mine.receive(inspecting("character", agnes))
 
         sent.answer().character?.place?.lat shouldBe 59.35
-        sent.answer().seenUntil shouldBe today.day
+        sent.answer().character?.seenUntil shouldBe today.day
     }
 
     "somebody the house has never had in its vision is answered with nobody" {

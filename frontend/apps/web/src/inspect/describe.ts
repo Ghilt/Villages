@@ -52,8 +52,6 @@ export interface Description {
   likeness?: { portrait: string | undefined };
   facts: readonly Fact[];
   links: readonly Link[];
-  /** Where it is, for a thing on the map: what the tag beside its name is worked out from. See 0089. */
-  place?: { lat: number; lon: number };
 }
 
 /**
@@ -90,7 +88,6 @@ export function describeHouse(house: HouseView, yours: boolean, areas: readonly 
   return {
     kind: yours ? 'Your house' : 'House',
     name: house.name,
-    place: house.seat,
     under: `under ${blazon(house)}`,
     facts: [
       { what: 'Seat', said: whereabouts(house) },
@@ -135,7 +132,6 @@ export function describeCharacter(
   return {
     kind: yours ? 'Your key figure' : 'Key figure',
     name: `${character.givenName} ${character.familyName}`,
-    ...(character.place === undefined ? {} : { place: character.place }),
     under: age === null ? `a ${character.sex}` : `a ${character.sex} of ${age}`,
     likeness: { portrait: character.portrait },
     facts: [

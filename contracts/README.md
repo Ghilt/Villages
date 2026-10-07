@@ -73,3 +73,6 @@ recorded over. See decision record 0037. What each one changed:
   record 0088.
 - **26** - gave `inspected` its `seenUntil`, the world-day the fog hid somebody a window asked after, who is
   answered as they were last seen. See decision record 0089.
+- **27** - moved `seenUntil` onto what it dates: a house's view carries the world-day the fog hid it from the house
+  it is sent to, from a cell, a change or a window's answer, and a character's view on `inspected` the same, so the
+  page shows the day it is told and works none of it out. See decision record 0089's amendment.

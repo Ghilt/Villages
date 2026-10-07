@@ -415,8 +415,9 @@ to pan back to it. A window out of what the camera holds asks the gateway once a
 hang on where the camera is. See decision record 0088.
 
 **A window on a thing on the map says how fresh it is**, in a small, quiet tag beside its name: `current`, or the
-day the fog hid it, `4 Mar 1793`, with the long form under the pointer. A house on revealed ground is dated by the
-end of the last stretch the house's vision covered its seat; somebody who has left its vision is shown where they
+day the fog hid it, `4 Mar 1793`, with the long form under the pointer. The server dates what it sends and the page
+only shows it: a house on revealed ground by the end of the last stretch the house's vision covered its seat, or the
+day it was revealed where only the surface tension ever did; somebody who has left its vision is shown where they
 stood when last seen, dated by when the fog hid them. The player's own house and people are always current, and an
 area has no tag. See decision record 0089.
 
@@ -859,7 +860,8 @@ their house has revealed and the people in its vision, their own house and key f
 and anything of significance 80 from anywhere, which nothing reaches yet. Nothing else in a cell reaches
 them, in its snapshot or its changes, and what is held back is not counted either. When the house's sight
 changes, every cell the player holds is answered again: a house on ground newly revealed appears, and
-somebody no longer in vision goes. Turning the fog off lifts this as well as the drawing.
+somebody no longer in vision goes. From wire version 27 a house sent from revealed ground carries the day the
+fog hid it, which the same answer brings up to date. Turning the fog off lifts this as well as the drawing.
 
 **The edge has surface tension**, from wire version 12, which carries it: the ground a ball of 40 km cannot
 get into between the circles is covered too, drawn and held back alike. It is one number,

@@ -15,8 +15,8 @@ import java.util.UUID
  * held asks here instead, and is answered by the same rule a cell's snapshot is: the day the connection is looking
  * at, and what its fog lets through. Nothing is kept of the asking and nothing is sent again, because what a
  * window shows rarely changes; when its subject comes into a held cell, the cell's own changes reach it. Somebody
- * the house saw once and does not see now is answered as they were last seen, and when the fog hid them. See
- * decision records 0088 and 0089.
+ * the house saw once and does not see now is answered as they were last seen, and a house or a person the fog has
+ * hidden with the day it did, as a cell sends a house. See decision records 0088 and 0089.
  */
 internal class InspectingPart(
     private val houses: HouseById,
@@ -31,17 +31,17 @@ internal class InspectingPart(
         val nothing = Inspected(asked.kind, asked.id)
         // An id that is not one is a thing there is none of, and is answered so rather than refused.
         val id = runCatching { UUID.fromString(asked.id) }.getOrNull() ?: return nothing
+        val day = looking.day(world::today)
         return when (asked.kind) {
             HOUSE -> houses.ofHouse(HouseId(id))
                 ?.takeIf { looking.sees(it) && looking.letsSee(it) }
-                ?.let { nothing.copy(house = it.toView()) }
+                ?.let { nothing.copy(house = looking.sent(it, day)) }
             CHARACTER -> {
-                val day = looking.day(world::today)
                 if (!looking.fogged) {
                     onTheMap.standing(CharacterId(id), day)?.let { nothing.copy(character = it.row.toMapView(it.span)) }
                 } else {
                     looking.fog.lastSeen(onTheMap.spansOf(CharacterId(id)), day)?.let { (seen, until) ->
-                        nothing.copy(character = seen.row.toMapView(seen.span), seenUntil = until?.day)
+                        nothing.copy(character = seen.row.toMapView(seen.span).copy(seenUntil = until?.day))
                     }
                 }
             }

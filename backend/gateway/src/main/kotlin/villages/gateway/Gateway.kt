@@ -145,7 +145,7 @@ class Gateway(
      * from the moment it is made. See decision record 0075.
      */
     private val parts: List<Part> = listOf(
-        HousesPart(core, houses, theirHouses),
+        HousesPart(core, houses, theirHouses, world),
         KeyFiguresPart(core, figures, onTheMap, world),
         SightPart(core, sights),
         DialoguesPart(core, dialogues, dialogueRows),
@@ -375,7 +375,7 @@ class Gateway(
             out.send(
                 Snapshot(
                     cell = cell,
-                    houses = contents.houses.map { it.toView() },
+                    houses = contents.houses.map { looking.sent(it, day) },
                     asOfVersion = contents.asOf,
                     omitted = contents.omitted,
                     characters = standing.characters.map { it.row.toMapView(it.span) },

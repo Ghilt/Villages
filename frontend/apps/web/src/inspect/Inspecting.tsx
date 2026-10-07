@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { charactersInView, housesInView, seenUntil } from '@villages/client-core';
+import { charactersInView, housesInView } from '@villages/client-core';
 import { describeDay, shortDay } from '@villages/protocol';
 import type { TerrainClass } from '@villages/world';
 
@@ -41,7 +41,6 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
   const legend = useLegend();
   const answers = useStore(sessionStore, (state) => state.inspected);
   const connection = useStore(sessionStore, (state) => state.connection);
-  const sight = useStore(sessionStore, (state) => state.yourSight);
 
   // An area the player deleted is not a window they shut, so the window goes rather than saying nothing -
   // and it leaves the trail with it, because a thing that has stopped existing is not a way back to
@@ -54,25 +53,37 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
     }
   }, [subject, area]);
 
-  /** What the window can say now, or null for a subject not in what the camera holds. */
-  const describeSubject = (): Description | null => {
+  /**
+   * What the window can say now, and the day the fog hid what it says it of as the gateway sent it - absent for the
+   * player's own and for anything it sees - or null for a subject not in what the camera holds.
+   */
+  const describeSubject = (): { said: Description; hidden: number | undefined } | null => {
     // A character is seen standing in a held cell, or as one of this player's own key figures wherever
     // they are; the second is how your own people stay inspectable after the camera has left them.
     if (subject.kind === 'character') {
       const standing = charactersInView(houses).find((one) => one.id === subject.id);
       const yours = yourKeyFigures?.find((one) => one.id === subject.id);
       const seen = standing ?? yours;
-      return seen === undefined ? null : describeCharacter(seen, today, yours !== undefined);
+      return seen === undefined
+        ? null
+        : { said: describeCharacter(seen, today, yours !== undefined), hidden: standing?.seenUntil };
     }
 
     if (subject.kind === 'area') {
-      return area === null ? null : describeArea(area, housesInView(houses), legend);
+      return area === null
+        ? null
+        : { said: describeArea(area, housesInView(houses), legend), hidden: undefined };
     }
 
     const house =
       housesInView(houses).find((one) => one.id === subject.id) ??
       (yourHouse?.house.id === subject.id ? yourHouse.house : undefined);
-    return house === undefined ? null : describeHouse(house, yourHouse?.house.id === house.id, areas.areas);
+    return house === undefined
+      ? null
+      : {
+          said: describeHouse(house, yourHouse?.house.id === house.id, areas.areas),
+          hidden: house.seenUntil,
+        };
   };
 
   /** What the gateway answered when the window asked after its subject, if it has. See 0088. */
@@ -88,7 +99,9 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
   // the window is for reading, wherever the map is.
   const live = describeSubject();
   const said =
-    live === null ? (describeAnswer() ?? sayingOrLastSaid(subject, null)) : sayingOrLastSaid(subject, live);
+    live === null
+      ? (describeAnswer() ?? sayingOrLastSaid(subject, null))
+      : sayingOrLastSaid(subject, live.said);
 
   // Out of what the camera holds, it asks the gateway after a house or a person: once a connection, answered once,
   // so what it says and how fresh that is do not hang on where the camera is. See 0088 and 0089.
@@ -100,34 +113,19 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
   }, [asks, connection, subject]);
 
   /**
-   * How fresh what it shows is, said beside its name: `current`, or the day the fog hid it. A house never moves, so
-   * the page works it out from the house's own sight; somebody who moves, the gateway, from where they stood. The
-   * player's own house and people are always current, and an area is the player's own drawing. See 0089.
+   * How fresh what it shows is, said beside its name: `current`, or the day the fog hid it. The gateway says which,
+   * on the house or the person it sends, and the page works none of it out; what is only remembered waits for the
+   * gateway's answer, and an area, which is the player's own drawing, has none. See 0089.
    */
   const freshness = (): { said: string; meant: string } | null => {
-    const now = { said: 'current', meant: 'as it is now' };
-    if (subject.kind === 'area' || said === null) {
+    const answered = answer?.house ?? answer?.character;
+    const hidden = live !== null ? live.hidden : answered === undefined ? null : answered.seenUntil;
+    if (subject.kind === 'area' || said === null || hidden === null) {
       return null;
     }
-    if (yourHouse?.house.id === subject.id || yourKeyFigures?.some((one) => one.id === subject.id)) {
-      return now;
-    }
-    const until =
-      subject.kind === 'character'
-        ? live !== null
-          ? 'now'
-          : answer?.character === undefined
-            ? null
-            : (answer.seenUntil ?? 'now')
-        : said.place === undefined || sight === null || today === null
-          ? null
-          : seenUntil(said.place, sight, today);
-    if (until === null) {
-      return null;
-    }
-    return until === 'now'
-      ? now
-      : { said: shortDay(until), meant: `as last seen: the fog hid it on ${describeDay(until)}` };
+    return hidden === undefined
+      ? { said: 'current', meant: 'as it is now' }
+      : { said: shortDay(hidden), meant: `as last seen: the fog hid it on ${describeDay(hidden)}` };
   };
   const fresh = freshness();
 

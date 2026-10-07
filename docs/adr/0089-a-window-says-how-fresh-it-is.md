@@ -76,3 +76,33 @@ than by a fixture both read. If they ever disagree, a fixture of sight histories
   window with no tag would leave it to be guessed.
 - **The day before the fog came back** - the last whole day seen - rather than the day it came back. Adam's words
   were when the fog hid it again.
+
+## Amendment, 2026-10-07: the gateway says it, for houses too
+
+Adam's word, the same day: it does not sound right that the page works out when a thing was last seen. The gateway
+decides what a player is sent, so it is the one that knows how old it is. Two copies of one rule in two languages
+had already come apart - a house of significance 80, seen from anywhere, was dated or left untagged by the page
+where a person of the same was current - and only the gateway, with the events behind it, can ever send a thing as it was.
+
+**The gateway dates what it sends, and the page shows what it is told.** `seenUntil` moves onto what it dates: a
+house's view carries it wherever the house is sent from - a cell's snapshot, a change fanned out, a window's
+answer - and a character's view on `inspected`. Absent, it is current. `Fog.hidOn` asks it of a house by the same
+search `Fog.lastSeen` asks of a person; `seenUntil` in `client-core` is gone, and the window's tag reads the day off
+the view it shows.
+
+**A house is asked about from the points near its seat only** - within their reach and twice the tension, with room
+to spare - because nothing further off can change whether its seat is covered, and that keeps it cheap enough to ask
+of every house a cell sends. **Nothing more is sent for it:** a house's sight changing already answers every held
+cell again, and the new days ride on that. There is no polling.
+
+**Ground only the surface tension revealed** - between points that never saw on one day, as a key figure's path
+leaves between its stops - was never in one day's vision. A house there is dated the day it was revealed, rather
+than left with no tag.
+
+**Wire version 27** carries it, and takes `seenUntil` off `inspected` itself.
+
+This replaces *A house's tag is the page's to work out* and the consequence that the two halves are written twice;
+the first alternative considered is now the decision. *A tag answered by the gateway goes as stale as the answer
+does* still holds for a window out of the cells. One consequence is sharper for it: the map still sends a house on
+revealed ground as it is now, so one founded there after the fog came back is sent, dated before it existed.
+Holding revealed ground at the day the fog hid it - 0061's open question - is what would end that.

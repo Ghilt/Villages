@@ -42,6 +42,11 @@ export const houseViewSchema = z.object({
   /** The world-day it exists from. */
   since: worldDaySchema,
   version: z.number().int(),
+  /**
+   * The world-day the fog hid it from the player's house, worked out by the gateway; absent while that house sees
+   * it. What the tag beside a window's name says. See decision record 0089.
+   */
+  seenUntil: worldDaySchema.optional(),
 });
 
 /**
@@ -96,7 +101,8 @@ export const keyFigureViewSchema = z.object({
  * A character standing on the map, as everyone holding the cell sees them: who and whose, how old and
  * where. Not their stats, which are their house's own. The age is counted here from `bornOn` and
  * `agedYears`, as a key figure's is. `cell` is the deepest cell the place falls in, as a house's is;
- * `since` the world-day they came to stand there; `version` the read model's revision.
+ * `since` the world-day they came to stand there; `version` the read model's revision; `seenUntil` as a house's,
+ * and only on `inspected`, because a cell sends nobody its house does not see.
  */
 export const characterOnMapViewSchema = z.object({
   id: z.string(),
@@ -112,6 +118,7 @@ export const characterOnMapViewSchema = z.object({
   keyFigureOf: z.array(holderViewSchema),
   since: worldDaySchema,
   version: z.number().int(),
+  seenUntil: worldDaySchema.optional(),
 });
 
 /**
@@ -311,7 +318,7 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
   /**
    * The answer to `inspect`, once: the house or the character as the map would show it, or neither when there is
    * no such thing or the fog holds it back, by the rule a cell's snapshot is held to. Somebody seen once and not now
-   * is answered as last seen, `seenUntil` the world-day the fog hid them; absent, it is as it is now. See 0088, 0089.
+   * is answered as last seen; either carries the day the fog hid it as `seenUntil`, on its view. See 0088, 0089.
    */
   z.object({
     type: z.literal('inspected'),
@@ -319,7 +326,6 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
     id: z.string(),
     house: houseViewSchema.optional(),
     character: characterOnMapViewSchema.optional(),
-    seenUntil: worldDaySchema.optional(),
   }),
   z.object({
     type: z.literal('event'),

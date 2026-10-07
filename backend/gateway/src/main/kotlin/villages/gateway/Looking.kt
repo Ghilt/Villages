@@ -4,6 +4,7 @@ import villages.application.CharacterRow
 import villages.application.CharacterSpan
 import villages.application.HouseRow
 import villages.domain.WorldTime
+import villages.protocol.HouseView
 
 /**
  * How a connection is looking at the world: on which day, with the eye open or not, and through what fog. One
@@ -37,6 +38,13 @@ internal data class Looking(
 
     /** Whether the fog lets this house through. */
     fun letsSee(row: HouseRow): Boolean = !fogged || fog.letsThrough(row)
+
+    /**
+     * A house as this connection is sent it on [day], the one it is looking at: with the day the fog hid it, where it
+     * has, so that the page shows what it is told and works out nothing. See decision record 0089.
+     */
+    fun sent(row: HouseRow, day: WorldTime, view: HouseView = row.toView()): HouseView =
+        if (!fogged) view else fog.hidOn(row, day)?.let { view.copy(seenUntil = it.day) } ?: view
 
     /** Whether the fog lets this character, standing here, through on [day], the one it is looking at. */
     fun letsSee(row: CharacterRow, span: CharacterSpan, day: WorldTime): Boolean =
