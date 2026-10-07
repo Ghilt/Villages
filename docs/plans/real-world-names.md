@@ -271,6 +271,11 @@ Each its own commit, and the order is a suggestion.
      until 1858 and 1860, the forts that came later - Grozny, Krasnodar, Khabarovsk - and nearly every town of
      the Kazakh steppe. 103 small Siberian, steppe and mountain settlements the reviewer could not date are left
      out.
+   - **The Near East and North Africa**, from Morocco to Afghanistan: 374 more places; 290 stood - Scanderoon,
+     Diarbekir, Aintab, Orfa, Rodosto, Satalia, Bona, Bugia, Mazagan, Casbin, Resht, Senna, Meshed Ali and
+     Meshed Hussein, Assouan, Siout, Ghuznee - two of them on ground Adam removed, and 86 had not been founded:
+     the canal's towns, the oil's, the French and Italian posts, and the Ottomans' own late foundations, Ramadi
+     and Nasiriyah. 58 places the reviewer could not date are left out.
 5. **Invented land named.**
 6. **Seats taken from real towns**, if Adam wants them.
 
