@@ -117,7 +117,12 @@ A step is not ready for review until Adam can see it. Reaching the end of the wo
 last thing an agent does before presenting is put the running program in the state that shows the change, and say
 in one line where to look and what should be there.
 
-- **Start the dev server** through the `web` entry in `.claude/launch.json`, not from a shell.
+- **Start it with `debug-quick-start.ps1 -NoBrowser`** from the worktree root, then open the address in the browser
+  pane. Not with the `web` entry of `.claude/launch.json`: the desktop app stops a server it started that way once
+  the session goes quiet, so Adam finds nothing at the address the hand-over names. The quick-start's servers are
+  detached and outlive the session, and it replaces a server older than the code it serves, so it is also the
+  restart after a protocol change. From the Bash tool, send its output to a file (`> .logs/quick-start.txt 2>&1`)
+  rather than through a pipe: the servers hold a pipe open and the call never returns.
 - **Drive it to the place the change shows** — the right renderer, the right master, the right part of the world,
   the right zoom — rather than leaving it on whatever it opened with, and say so: the address and the worktree
   serving it, and what is on the screen at it.
@@ -213,7 +218,9 @@ Before touching code, write `.sessions/<date>-<slug>.md` saying what this sessio
 tree it is touching, and read the other files in that directory first. Keep the areas current as they change, and
 delete the file when the work lands. More than one agent may be working at once, and the point is that a collision
 is visible before it happens rather than discovered in a merge. `.sessions/README.md` has the shape and the
-reasoning; the directory is gitignored on purpose.
+reasoning; the directory is gitignored on purpose. From a worktree, write the note through the shell: the app's
+guard refuses its file tools outside the worktree to keep the main checkout safe, and a note in an ignored folder
+cannot harm it. Adam's word of 2026-10-07.
 
 Definition of done for a step: it compiles, the checks are green, the documents that describe it are updated,
 glossary terms are used verbatim, no layer rule is violated, everything the change made stale has been
@@ -386,8 +393,9 @@ layout above are where they will go rather than where they are.
 - Everything: `scripts/check.ps1` or `scripts/check.sh` (0.14)
 
 The dev server is also registered in `.claude/launch.json` under the name `web`, so the preview tooling can start
-it directly. Restart it rather than trusting hot reload after a file has been rewritten wholesale: Vite reports a
-missing export that is plainly there. TypeScript is pinned below 7 on purpose; see `docs/adr/0015`.
+it directly while working; a hand-over uses the quick-start instead, as "Leave the program running" says. Restart
+it rather than trusting hot reload after a file has been rewritten wholesale: Vite reports a missing export that is
+plainly there. TypeScript is pinned below 7 on purpose; see `docs/adr/0015`.
 
 Setting `VITE_MAP_STYLE_URL` swaps our world for someone else's map, which is how to compare against the real
 Earth.
