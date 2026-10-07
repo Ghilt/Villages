@@ -134,6 +134,23 @@ not change when Adam repaints. Its 1790 form is chosen in three layers:
    `world/names/1790.json`, checked in, each with a line saying why. Adam overrides anything in the same
    file.
 
+Where English had no name of its own in 1790, today's stands - unless it honours someone born after 1790,
+in which case the older name stands where one is known: the Victoria Nile is the Kiira, the Grey the
+Māwheranui. Where none is known, today's stands and the plan says so below.
+
+**The rivers of 1790, built 2026-10-07**: 249 of Natural Earth's river pieces reviewed, keyed as the names
+are, a Wikidata id where it gives one and otherwise its file, number and name, because it splits a river into
+pieces under different names - the Rhine is Rhein, Rhin, Rhine, Nederrijn, Lek, Waal and IJssel. The English
+of the period comes from the books an English reader of 1790 had: Rennell's *Memoir of a Map of Hindoostan*
+for India (Burrampooter, Jumna, Kistna, Nerbudda), the Jesuits' spellings for China (Hoang-ho,
+Yang-tse-kiang), Bruce's *Travels*, published in 1790, for Abyssinia (Abay, Bahr el Abiad, Tacazze), Gibbon
+for the Oxus and the Jaxartes, Carver for the Oregon, or River of the West, which Gray named the Columbia in
+1792, and the German, Swedish and Hungarian names English used where those crowns ruled (Maese, Mayne,
+Moldau, Theiss, Maros, Kumo, Gotha). Names Natural Earth mangled - Gta lv, Kiz?lirmak, Rhne - have their
+letters back. A canal is carried only where the review lists it with a name: the Gharraf is an old course of
+the Tigris, the Shatt al Hai; the Hindiya channel and Hungary's Francis Canal were dug after 1790 and are
+not. A river the review has not reached keeps today's name, `form: today`.
+
 ### A painted river's name
 
 `world:flow` already traces every river on a master. Each traced river is sent through the origin map, the
@@ -187,7 +204,9 @@ same thing. Per master, beside its tiles and again beside its ground map, the sa
   square of the origin map, `columns` by `rows` of them, the land it is in and the sea it is by.
 - **`world/names/1790.json`**, checked in: the review that decides the towns.
 
-What it does not yet do, and a quest will want: the server reads it only for the map's omens so far; the
+What it does not yet do, and a quest will want: today's names honouring someone born after 1790 with no older
+name known yet - the Mackenzie, Fitzroy, Mitchell, Victoria, Daly, Ord and Katherine of Australia; the server reads
+it only for the map's omens so far; the
 copy beside the tiles names everything under the fog too, and must stop being served before players come
 (0085); canals are left out, because Natural Earth's were dug after 1790, until a review dates them; the
 river file Natural Earth gives without Wikidata ids keys its rivers by file and number (the Danube is

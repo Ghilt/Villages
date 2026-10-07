@@ -197,9 +197,11 @@ stage alone, with none of the debug panel in it (decision record 0079).
 
 ## Adam's folders and the tools that cut them
 
-- The towns of 1790: `world/names/1790.json`, one line a town, keyed by its Wikidata id: the name an English
-  writer of 1790 would have used, or `null` if it had not been founded; today's name, to read by; and why they
-  differ. An agent's review, Adam's to correct; a town not in it is not carried. `world:names` reads it, and
+- The towns and rivers of 1790: `world/names/1790.json`, one line a town or a river, keyed as the names are -
+  a town by its Wikidata id, a river by its Wikidata id or Natural Earth's file, number and name: the name an
+  English writer of 1790 would have used, or `null` if it was not there then; today's name, to read by; and why
+  they differ. An agent's review, Adam's to correct; a town not in it is not carried, a river not in it keeps
+  today's name, and a canal is carried only where it is listed with a name. `world:names` reads it, and
   a change shows on the next click under the Origin renderer. See `docs/plans/real-world-names.md`.
 
 - What grows where: `world/biomes.json`, hand-edited, one entry a kind and one a biome. What reads it is

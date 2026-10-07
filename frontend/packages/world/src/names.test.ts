@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { carryNames, namesAt } from './names.ts';
+import { asIn1790, carryNames, namesAt } from './names.ts';
 import type { Carry, EarthName } from './names.ts';
 
 /** Everything moves ten degrees east, except what lay east of fifty degrees, which was removed. */
@@ -120,5 +120,42 @@ describe('what is named at a place', () => {
   it('names nothing far from all of them', () => {
     expect(namesAt(carried, 0, 0)).toEqual({});
     expect(namesAt(carried, 54, 10.2).river).toBeUndefined();
+  });
+});
+
+describe('a name as the review of 1790 decides it', () => {
+  it('gives a reviewed river its name of 1790, with the name of today beside it, and says it is of 1790', () => {
+    expect(asIn1790('river', 'Tajo', 'Tajo', ['Tagus', 'Tagus'])).toEqual({
+      name: 'Tagus',
+      also: 'Tajo',
+      form: '1790',
+    });
+    expect(asIn1790('river', undefined, 'Daugava', ['Dwina', 'Daugava', 'why'])).toEqual({
+      name: 'Dwina',
+      also: 'Daugava',
+      form: '1790',
+    });
+  });
+
+  it('leaves a river the review has not reached under the English name of the source, its own beside it', () => {
+    expect(asIn1790('river', 'Dnieper', 'Dnipro', undefined)).toEqual({ name: 'Dnieper', also: 'Dnipro' });
+    expect(asIn1790('river', undefined, 'Vistula', undefined)).toEqual({ name: 'Vistula' });
+  });
+
+  it('carries a canal only where the review names it, and nothing it says was not there', () => {
+    expect(asIn1790('river', 'Suez Canal', 'Suez Canal', undefined)).toBeNull();
+    expect(
+      asIn1790('river', 'Gharraf Canal', 'Gharraf Canal', ['Shatt al Hai', 'Shatt al-Gharraf'])?.name,
+    ).toBe('Shatt al Hai');
+    expect(asIn1790('river', 'Ferenc Csatorna', 'Ferenc Csatorna', [null, 'Ferenc Canal'])).toBeNull();
+  });
+
+  it('never shows beside a name the same one again, or one the source mangled', () => {
+    expect(asIn1790('river', undefined, 'Klarlven', ['Klarälven', 'Klarälven'])).toEqual({
+      name: 'Klarälven',
+      form: '1790',
+    });
+    expect(asIn1790('river', undefined, 'Kiz?lirmak', ['Kizil Irmak', 'Kizil Irmak'])?.also).toBeUndefined();
+    expect(asIn1790('river', undefined, 'pisuerga', ['Pisuerga', 'Pisuerga'])?.also).toBeUndefined();
   });
 });

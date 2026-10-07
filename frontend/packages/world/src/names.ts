@@ -242,3 +242,45 @@ function inside(ring: readonly (readonly [number, number])[], lng: number, lat: 
   }
   return within;
 }
+
+/** A thing as the review of 1790 decides it: its name then, or null if it was not there; today's; and why. */
+export type Reviewed = readonly [string | null, string, string?];
+
+/**
+ * What a source's named thing is called in the world, as the review in `world/names/1790.json` decides: the
+ * review's name of 1790 where it has one, else the source's English name, else its own; the other name worth
+ * showing beside that; and whether it is the name of 1790. Null where the review says the thing was not there in
+ * 1790, and for a canal the review has not dated: Natural Earth files its canals as rivers, and most of the ones it
+ * has - Suez, Panama, the Caledonian - were dug after 1790.
+ */
+export function asIn1790(
+  kind: NameKind,
+  english: string | undefined,
+  local: string,
+  decided: Reviewed | undefined,
+): { name: string; also?: string; form?: '1790' } | null {
+  const name = decided?.[0] ?? english ?? local;
+  const canal = kind === 'river' && /\bcanal\b/i.test(`${name} ${local}`);
+  if (decided?.[0] === null || (decided === undefined && canal)) return null;
+  const also = alsoOf(name, local, decided);
+  return {
+    name,
+    ...(also === undefined ? {} : { also }),
+    ...(decided === undefined ? {} : { form: '1790' as const }),
+  };
+}
+
+/**
+ * The other name worth showing beside a thing's: today's from the review where it differs, else the source's own -
+ * but never the same name again, nor one the source has mangled, its letters lost (Klarlven) or turned to '?'.
+ */
+function alsoOf(name: string, local: string, decided: Reviewed | undefined): string | undefined {
+  // Letters alone, so that a name with its accented letters lost reads as the one it lost them from.
+  const plain = (one: string) => one.toLowerCase().replace(/[^a-z]/g, '');
+  const clean = [name, ...(decided ?? [])].filter((one): one is string => typeof one === 'string');
+  const garbled = (one: string) =>
+    one.includes('?') || clean.some((other) => other !== one && plain(other) === plain(one));
+  return [decided?.[1], local].find(
+    (one): one is string => one !== undefined && one !== name && !garbled(one),
+  );
+}
