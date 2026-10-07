@@ -45,10 +45,11 @@ stage alone, with none of the debug panel in it (decision record 0079).
   carried through, which lies on the painted coast wherever the map has a piece right. With it showing, the log
   says how much of the land is from Earth, invented and copied, and a click on the map says under `origin` where
   that place came from and what Earth named there: `from Earth at 51.51°N 0.87°W, moved 1.2° (sure 1.00); by the
-  Thames`, `at Vänern`, `in the Alps (range)`, `in India (peninsula)`, `near Mont Blanc, 4,807 m`, or `invented
-  land`, and the town of 1790 nearby: `near Dantzic (Gdańsk today)`. Open sea came from nowhere, so it is named
-  by the coast nearest it: `sea, the Baltic Sea, named by the nearest coast`. Every name is in English: a
-  town's as of 1790, a river's, lake's or peak's as of today. It reads what `world:origin` wrote, below. See `docs/plans/real-world-names.md` and experiment 0016.
+  Thames`, `at Lake Wener (Vänern)`, `in the Alps (range)`, `in India (peninsula)`, `near Mont Blanc, 4,807 m`, or
+  `invented land`, and the town of 1790 nearby: `near Dantzic (Gdańsk today)`. Open sea came from nowhere, so it is
+  named by the coast nearest it: `sea, the German Ocean (North Sea today), named by the nearest coast`. Every name
+  is in English: a town's as of 1790, a river's, lake's or sea's as of 1790 where the review gives one and today's
+  where not, a peak's and a stretch of land's as of today. It reads what `world:origin` wrote, below. See `docs/plans/real-world-names.md` and experiment 0016.
   `Info map` is the same data written as an atlas would write it, on the flat tiles quietened as for Flow:
   towns of 1790 in black beside their dots, rivers and lake shores drawn in blue with their names in blue
   italic along them, peaks in brown with their height, seas in spaced blue italic and named lands in spaced

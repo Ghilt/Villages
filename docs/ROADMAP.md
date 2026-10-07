@@ -76,7 +76,7 @@ and so is the origin map, the first of real names on the edited world and the ne
   cut from on Earth, with **invented land** given invented names. It is what real history will stand on,
   before 1790 as the backstory of a place and after it as the warped history `SETTING.md` promises. Six
   steps in `docs/plans/real-world-names.md`; the first two are built, the plan and the origin map, which
-  the Origin renderer shows and experiment 0016 waits on Adam's eye for, and the third: Earth's rivers, lakes,
+  the Origin renderer shows and Adam's eye accepted (experiment 0016), and the third: Earth's rivers, lakes,
   peaks, seas and named lands are in the world, and the fourth: the towns of 1790, under the names English
   gave them then, reviewed in `world/names/1790.json` the whole world over, region by region, then again with
   Wikidata beside it, which added 62 towns Natural Earth lacks - Mocha, Seringapatam, Vila Rica - 3,168 in the

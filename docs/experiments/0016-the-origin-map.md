@@ -1,7 +1,8 @@
 # 0016. The origin map
 
-- Status: open
+- Status: closed
 - Started: 2026-10-06
+- Closed: 2026-10-07
 
 ## Hypothesis
 
@@ -80,11 +81,13 @@ stayed is `the Baltic Sea`; the water east of Australia, moved twenty degrees, i
 
 ## Result
 
-Open: the numbers, the places looked at and the names carried say yes; Adam's eye on the whole world is the test.
+Yes. The numbers, the places looked at and the names carried said so, and Adam's eye on the whole world under the
+Origin renderer confirmed it: "the origin map looks really good".
 
 ## Decision
 
-Open.
+Kept. The origin map is what every real name is carried through, and the tool works it out again whenever the
+master is saved (the quick start and the Debug map's `cut it`). Pins wait until something needs correcting.
 
 ## Follow-ups
 
