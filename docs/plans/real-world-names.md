@@ -316,6 +316,17 @@ Each its own commit, and the order is a suggestion.
      founded: the coffee and railway towns, the German and Italian colonies of the south, Patagonia and the
      Chaco, still unconquered, and Riobamba, which the earthquake of 1797 moved. 177 small places of the
      interior the reviewer could not date are left out.
+   - **Africa south of the Sahara**: 748 more places; 71 stood - the capitals of the kingdoms (Coomassie,
+     Sego, Yendi, Wa, Ouahigouya, which Naba Kango had just made Yatenga's, Tenkodogo, Foumban, São Salvador
+     of Kongo, Idah, Wukari, Birnin Kebbi, and Zaria before the jihad), the Yoruba towns of Oyo's day, Old
+     Calabar, Warree and Onitsha, the old towns of the east coast, the Horn and the Nile (Lamu, Merca,
+     Berbera, Tadjoura, Harar, Axum, Shendy, Berber), the Portuguese vilas and posts (Tete, Quelimane,
+     Inhambane, Zumbo, Cacheu, Farim, Ziguinchor, Novo Redondo, Santo António of Príncipe), and the Dutch
+     company's Graaff-Reinet, Swellendam and Paarl - and 677 had not been founded: nearly every town of the
+     interior is a colonial post, a mission, or a railway or mining town, and the Fulani towns of the jihad,
+     Bauchi, Yola and Gombe, Ibadan and Abeokuta, Liberia's, and El Fasher, made Darfur's capital in 1791,
+     came later. 243 places the reviewer could not date are left out, towns of the savanna kingdoms and the
+     coast that may well have stood.
 5. **Invented land named.**
 6. **Seats taken from real towns**, if Adam wants them.
 
