@@ -70,6 +70,17 @@ stage alone, with none of the debug panel in it (decision record 0079).
   remembered in that browser, `reset` puts them back, and once a slider stops the log says all eight under
   `water` as `rivers tuned: …`, which is the line to hand over when a setting should become the default. Every
   other number of the water is in `apps/web/src/water/look.ts`. See `docs/adr/0081`.
+- The ground is shaded by its slope around the Alps, 0 to 30 east and 30 to 60 north, at every zoom: MapLibre's
+  own hillshade over the paint and under the water, lit from the upper right as the scenery's shadows are, from
+  the height tiles `world:height` cuts. It is the **Relief** part of the Shaders section, an experiment
+  (0016): `off`, `low` (faint) or `high` (strong) in its bar, high at every load, and a Shading choice inside of
+  MapLibre's five ways of drawing a hillshade, `igor` first, which shades slopes and leaves the flat alone, and a
+  `pixels` box: a hard block of shade for every height sample instead of the shade blended between them, for the
+  `plate` renderer, showing from about zoom 8 in. Blended, the shade shows a seam a few pixels wide along the
+  edge of a height tile close in, which pixels do not. The height is real Earth's and not the master's, so
+  wherever the master has moved the land the shading is off it.
+  A master with no height tiles is drawn flat and the log says what to run. Every number of it is in
+  `apps/web/src/map/relief.ts`.
 - What the program thinks is happening: the debug panel, one space docked down the right-hand side
   holding everything that helps during development, which minimises to a badge and remembers that,
   and is only in a development build: a production build leaves it out whole (0079).

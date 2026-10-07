@@ -33,6 +33,7 @@ import { askFor, formNow } from './stage/bays';
 import { CHOICE_PANE } from './choice/pane';
 import { worldRootOf } from './map/masters';
 import { cameraStore } from './map/camera';
+import { placeRelief } from './map/relief';
 import { DEFAULT_RENDERER, RENDERERS, applyRenderer } from './map/renderers';
 import { watchInfoMap } from './map/infoMap';
 import { SpriteOverlay } from './sprites/SpriteOverlay';
@@ -248,7 +249,8 @@ export function App({ master, devTools }: AppProps) {
   useEffect(() => {
     if (map !== null) {
       applyRenderer(map, renderer, { turn: camera.latticeTurn, size: camera.latticeSize });
-      // The water, over whichever renderer this is.
+      // The relief and then the water, over whichever renderer this is, the water over the relief.
+      placeRelief(map, worldRootOf(master));
       setFlowView(renderer === 'flow');
       placeWater(map, worldRootOf(master));
       map.triggerRepaint();
