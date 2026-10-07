@@ -7,6 +7,7 @@ import villages.application.Faults
 import villages.application.FoundHouseService
 import villages.application.PlacedCharacter
 import villages.application.CharactersByCell
+import villages.application.HouseById
 import villages.application.HousesByCell
 import villages.application.HousesByPlayer
 import villages.application.KeyFigureService
@@ -75,13 +76,11 @@ const val MOST_WAITING = 500
  * held, the fan-out index, coalescing, the fog gate and a cell's snapshot. What a mechanic says and takes is
  * a [Part] of its own, and the core hands each its turn. See decision record 0075.
  *
- * The fan-out is decision 0026 on the write side: a changed house has one deepest cell, and every
- * connection that should hear of it holds one of that cell's prefixes, from the zoom the house's
- * significance is first worth drawing at down to the deepest. That is at most eleven lookups a change.
+ * The fan-out is decision 0026 on the write side: a changed house has one deepest cell, and every connection that
+ * should hear of it holds one of its prefixes, from the zoom its significance is drawn at down: eleven lookups.
  *
- * Nothing reaches a connection that its house's fog of war holds back, a snapshot or a delta: `Fog` is asked of
- * everything before it goes (0061). That includes the scenery's stands, which a page is sent tile by tile under
- * the cells it holds, only where they touch ground its house has revealed (0067).
+ * Nothing reaches a connection that its house's fog of war holds back, a snapshot, a delta or a window's answer:
+ * `Fog` is asked of everything before it goes (0061), the scenery's stands included (0067).
  */
 class Gateway(
     private val tokens: PlayerTokens,
@@ -90,6 +89,7 @@ class Gateway(
     faults: Faults,
     private val houses: HousesByCell,
     theirHouses: HousesByPlayer,
+    houseById: HouseById = HouseById { null },
     private val clock: Clock,
     private val world: WorldClock,
     arrival: Arrival,
@@ -118,10 +118,7 @@ class Gateway(
     /** Which connections hold each cell: the whole of the fan-out index. */
     private val holding = CellIndex<Connection>()
 
-    /**
-     * The one session a player has. A player plays from one place: a second hello takes the player over
-     * and the older connection is stood down. One connection a player, not a set. See decision 0028.
-     */
+    /** The one session a player has: a second hello takes the player over and the older is stood down (0028). */
     private val sessions = ConcurrentHashMap<PlayerId, Connection>()
 
     /** Every live connection, so that a wipe can tell all of them and not only the introduced ones. */
@@ -142,10 +139,10 @@ class Gateway(
     }
 
     /**
-     * A part for each mechanic, in the order a player arriving is told things: the house, whom it holds, what it
-     * sees, what it was told, what it is asked; then the stands and the timeline, which greet nobody; and Adam's
-     * instruments, which one setting closes (0076). Made after the index and the sessions, because a part watches
-     * its read models from the moment it is made. See decision record 0075.
+     * A part for each mechanic, in the order a player arriving is told things: the house, whom it holds, what it sees,
+     * what it was told, what it is asked; then the stands, the timeline and the windows (0087), which greet nobody;
+     * and Adam's instruments (0076). Made after the index and the sessions, because a part watches its read models
+     * from the moment it is made. See decision record 0075.
      */
     private val parts: List<Part> = listOf(
         HousesPart(core, houses, theirHouses),
@@ -155,6 +152,7 @@ class Gateway(
         ChoicesPart(core, arrival, takeAction, choices, rolls),
         StandsPart(stands),
         TimelinePart(),
+        InspectingPart(houseById, onTheMap, world),
         Instruments(instrumentsOpen, core, events, recent, emptyTheWorld, foundHouse, resources, keyFigures, visions, dialogues, rolls),
     )
 

@@ -350,6 +350,7 @@ class WorldConfig {
         events = world.feed,
         faults = faults,
         houses = houses,
+        houseById = houses,
         theirHouses = houses,
         clock = clock,
         world = worldClock,

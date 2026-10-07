@@ -255,6 +255,7 @@ internal class Rig(instrumentsOpen: Boolean = true, sendOn: Executor = Executor 
         events = world,
         faults = faults,
         houses = houses,
+        houseById = houses,
         theirHouses = houses,
         clock = Clock.fixed(noon, ZoneOffset.UTC),
         world = worldClock,

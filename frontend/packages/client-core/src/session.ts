@@ -73,6 +73,11 @@ export interface Session {
   pull(area: string, what: string, command: CommandPayload): void;
   /** Takes a step through one of the house's dialogues, from its pane: a player's command. See 0071. */
   completeDialogueStep(dialogueId: string, lineId: string, described: string): void;
+  /**
+   * Asks after a window's subject wherever the camera is: answered once into `inspected`. Asked once a connection,
+   * because nothing is sent again, and not at all before the welcome. See decision record 0087.
+   */
+  inspect(kind: 'house' | 'character', id: string): void;
 }
 
 /** What the page says it is looking at as it rolls: the `roll` command without its type. Every field a claim. */
@@ -92,6 +97,8 @@ export function createSession(ports: SessionPorts): Session {
   let inFlight: InFlight = NOTHING_IN_FLIGHT;
 
   const open = () => connection !== null && store.get().connection === 'open';
+  /** The subjects asked after on this connection, by `kind:id`: a new connection asks again. */
+  const askedAfter = new Set<string>();
 
   const following = follower({
     send: (frame) => connection?.send(frame),
@@ -142,6 +149,7 @@ export function createSession(ports: SessionPorts): Session {
       const { seeAll, fogOfWar } = store.get();
       if (seeAll) connection?.send({ type: 'seeAll', on: true });
       if (!fogOfWar) connection?.send({ type: 'fogOfWar', on: false });
+      askedAfter.clear();
       // Anything the camera wanted before the gateway was listening is asked for now.
       following.welcomed();
     },
@@ -173,6 +181,7 @@ export function createSession(ports: SessionPorts): Session {
     // A player's window never asks for stored events; they have a page of their own. See 0023.
     event: () => undefined,
     rollDrawn: () => undefined,
+    inspected: () => undefined,
   };
 
   /** Takes a frame in: the parts fold it, the listeners are told, then what the frame makes the session do. */
@@ -240,6 +249,12 @@ export function createSession(ports: SessionPorts): Session {
     fogOfWar: (on) => {
       if (open()) connection?.send({ type: 'fogOfWar', on });
       store.set({ fogOfWar: on });
+    },
+
+    inspect: (kind, id) => {
+      if (!open() || askedAfter.has(`${kind}:${id}`)) return;
+      askedAfter.add(`${kind}:${id}`);
+      connection?.send({ type: 'inspect', kind, id });
     },
 
     wipeWorld: () => {

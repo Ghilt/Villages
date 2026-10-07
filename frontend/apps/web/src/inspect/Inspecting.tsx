@@ -5,7 +5,7 @@ import type { TerrainClass } from '@villages/world';
 
 import { areasStore } from '../areas/areas';
 import { terrainPalette } from '../geometry/terrainClasses';
-import { sessionStore } from '../net/gateway';
+import { inspectSubject, sessionStore } from '../net/gateway';
 import type { Room } from '../stage/panes';
 import { type Description, describeArea, describeCharacter, describeHouse, type Legend } from './describe';
 import { InspectWindow, WindowBar } from './InspectWindow';
@@ -15,15 +15,12 @@ import { trailStore, forget, lastNamed } from './trail';
 import { useStore } from '../store/useStore';
 
 /**
- * One inspect window, fed from what the browser already knows.
+ * One inspect window, fed from what the browser already knows, and where that is nothing, from the gateway.
  *
- * It reads the read models rather than keeping a copy, so a house that changes while it is being looked at
- * changes here, and a house that leaves the cells being held says so rather than freezing: the interface
- * never shows something it can no longer see. That behaviour was the old inspector's and it was hard won.
- *
- * Everything shown is already on the wire. No frame was added and no event, which is why the protocol
- * version did not move; `MECHANICS.md` records what the window is waiting on and it is the world, not the
- * interface.
+ * It reads the cells the camera holds rather than keeping a copy, so a house that changes while it is being looked
+ * at changes here. Once the camera has left it, it says what it last said; and a window this page has never been
+ * able to say anything of asks the gateway after its subject, once, and says what it is answered. A window is for
+ * reading about a thing wherever the map is: Adam's word of 2026-10-07, and decision record 0087.
  */
 
 interface InspectingProps {
@@ -41,6 +38,8 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
   const areas = useStore(areasStore);
   const trail = useStore(trailStore, (state) => state.steps);
   const legend = useLegend();
+  const answers = useStore(sessionStore, (state) => state.inspected);
+  const connection = useStore(sessionStore, (state) => state.connection);
 
   // An area the player deleted is not a window they shut, so the window goes rather than saying nothing -
   // and it leaves the trail with it, because a thing that has stopped existing is not a way back to
@@ -52,10 +51,6 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
       forget(subject);
     }
   }, [subject, area]);
-
-  if (subject.kind === 'area' && area === null) {
-    return null;
-  }
 
   /** What the window can say now, or null for a subject not in what the camera holds. */
   const describeSubject = (): Description | null => {
@@ -78,8 +73,30 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
     return house === undefined ? null : describeHouse(house, yourHouse?.house.id === house.id, areas.areas);
   };
 
-  // Out of what the camera holds, it says what it last said: the window is for reading, wherever the map is.
-  const said = sayingOrLastSaid(subject, describeSubject());
+  /** What the gateway answered when the window asked after its subject, if it has. See 0087. */
+  const describeAnswer = (): Description | null => {
+    const answer = subject.kind === 'area' ? undefined : answers[`${subject.kind}:${subject.id}`];
+    if (answer?.house !== undefined) {
+      return describeHouse(answer.house, false, areas.areas);
+    }
+    return answer?.character === undefined ? null : describeCharacter(answer.character, today, false);
+  };
+
+  // Out of what the camera holds, it says what it last said, and what the gateway answered where it has said
+  // nothing: the window is for reading, wherever the map is.
+  const said = sayingOrLastSaid(subject, describeSubject()) ?? describeAnswer();
+
+  // Knowing nothing of a house or a person, it asks the gateway after them: once a connection, and answered once.
+  const knowsNothing = said === null && subject.kind !== 'area';
+  useEffect(() => {
+    if (knowsNothing && connection === 'open') {
+      inspectSubject(subject.kind, subject.id);
+    }
+  }, [knowsNothing, connection, subject]);
+
+  if (subject.kind === 'area' && area === null) {
+    return null;
+  }
   // Which one, even put away and even never seen: the name the trail kept when it was last seen, and the
   // word for the kind only where nothing has ever named it.
   const name = said?.name ?? lastNamed(trail, subject) ?? KIND_WORDS[subject.kind];
@@ -115,9 +132,9 @@ interface NothingKnownProps {
 }
 
 /**
- * A house or a person this page has never been able to say anything of: a window opened from the trail after a
- * reload, on something the camera is not holding. It is named, and says so plainly; it does not send the player
- * off to find it on the map, because a window is for reading about a thing wherever the map is.
+ * A house or a person nothing can be said of: one the gateway has not answered yet, or one it answered with
+ * nothing - none such, or under the fog. It is named, and says so plainly; it does not send the player off to find
+ * it on the map, because a window is for reading about a thing wherever the map is.
  */
 function NothingKnown({ subject, kind, name, room, along }: NothingKnownProps) {
   return (

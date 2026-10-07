@@ -403,10 +403,12 @@ nothing, and on a desktop it keeps its close so a window can be shut without bei
 
 **A window does not care where the map is.** One whose subject the camera has left, or the fog has covered, goes
 on saying what it last said, its living numbers stood still, because a window is for reading about a thing and
-going on from it, wherever the map happens to be: Adam's word of 2026-10-07. Only one this page has never been
-able to say anything of - opened from the trail after a reload, on something the camera is not holding - says
-*Nothing known of it yet*, under the name the **trail** last saw it under, or the word for its kind where
-nothing ever named it. It never sends the player to pan back to it.
+going on from it, wherever the map happens to be: Adam's word of 2026-10-07. One this page has never been able to
+say anything of - opened from the trail after a reload, or on a house far away - asks the gateway after its
+subject, once, and says what it is answered: the house on ground the player's house has revealed, the person in
+its vision, by the fog's own rule. Where the answer is nothing it says *Nothing known of it yet*, under the name
+the **trail** last saw it under, or the word for its kind where nothing ever named it. It never sends the player
+to pan back to it. See decision record 0087.
 
 **In the spread** the windows take **left** and stack on its rail, newest at the top, up to three; a fourth
 pushes the oldest off rather than being refused. **When they no longer all fit, one stays open** and the

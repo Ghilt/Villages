@@ -148,6 +148,14 @@ export function restart(): void {
   window.location.reload();
 }
 
+/**
+ * Asks the gateway after a window's subject wherever the camera is, once a connection: what a window knowing
+ * nothing of a house or a person does. The answer is the session's `inspected`. See decision record 0087.
+ */
+export function inspectSubject(kind: 'house' | 'character', id: string): void {
+  session.inspect(kind, id);
+}
+
 /** Listens to the conversation from now on, until the function it hands back is called. See `SessionListener`. */
 export function observeGateway(listener: GatewayListener): () => void {
   return session.observe(listener);

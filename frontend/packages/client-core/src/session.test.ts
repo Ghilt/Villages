@@ -157,4 +157,43 @@ describe('the session, folded from what each mechanic folds', () => {
     socket.closes();
     expect(session.state()).toMatchObject({ connection: 'closed', seeAll: true, fogOfWar: true });
   });
+
+  // A window on something the page knows nothing of asks once, and the answer is kept by subject. See 0087.
+  it('asks after a subject once a connection, not before the welcome, and keeps the answer by subject', () => {
+    const socket = fakeSocket();
+    const session = createSession({
+      schedule: { after: () => () => undefined },
+      newId: () => 'c-1',
+      standsArrived: () => undefined,
+      followStands: () => undefined,
+      arriveAnew: () => undefined,
+      note: () => undefined,
+    });
+    session.connect({ socket: socket.socket, playerToken: 't', protocolVersion: 1, address: 'ws://here' });
+    socket.opens();
+    session.inspect('house', 'kestrel');
+    expect(socket.sent.some((frame) => frame.type === 'inspect')).toBe(false);
+
+    socket.says(welcome);
+    session.inspect('house', 'kestrel');
+    session.inspect('house', 'kestrel');
+    session.inspect('character', 'kestrel');
+    expect(socket.sent.filter((frame) => frame.type === 'inspect')).toEqual([
+      { type: 'inspect', kind: 'house', id: 'kestrel' },
+      { type: 'inspect', kind: 'character', id: 'kestrel' },
+    ]);
+
+    socket.says({ type: 'inspected', kind: 'house', id: 'kestrel' });
+    expect(session.state().inspected['house:kestrel']).toEqual({
+      type: 'inspected',
+      kind: 'house',
+      id: 'kestrel',
+    });
+    expect(session.state().inspected['character:kestrel']).toBeUndefined();
+
+    // A connection anew asks again, because the answer may have changed while it was gone.
+    socket.says(welcome);
+    session.inspect('house', 'kestrel');
+    expect(socket.sent.filter((frame) => frame.type === 'inspect')).toHaveLength(3);
+  });
 });

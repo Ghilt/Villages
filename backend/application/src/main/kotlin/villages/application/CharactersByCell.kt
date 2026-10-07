@@ -1,5 +1,6 @@
 package villages.application
 
+import villages.domain.CharacterId
 import villages.domain.Location
 import villages.domain.Significance
 import villages.domain.WorldTime
@@ -56,4 +57,10 @@ interface CharactersByCell {
 
     /** Every move, departure and death on the map from now on, in the order applied, until closed. */
     fun watchTheMap(listener: (CharacterMapChange) -> Unit): AutoCloseable
+
+    /**
+     * Where one character stood on day `at`, or null when they stood on no map then: what a window on them asks,
+     * wherever the camera is. See decision record 0087.
+     */
+    fun standing(id: CharacterId, at: WorldTime): PlacedCharacter? = null
 }

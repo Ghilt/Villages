@@ -65,3 +65,6 @@ recorded over. See decision record 0037. What each one changed:
   `omens` and an option's `rarity` and `omens`, left out of any choice no roll dealt. See decision record 0083.
 - **24** - let an effect be a `converse`, a conversation begun by taking an option, said by the dialogue's
   `title` and nothing of what is said in it.
+- **25** - `inspect`, a window asking after its subject wherever the camera is, and `inspected`, the one answer:
+  the house or the character as the map shows them, or neither where the fog holds them back. See decision
+  record 0087.

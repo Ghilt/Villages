@@ -18,11 +18,10 @@ import tools.jackson.databind.JsonNode
 /**
  * The version both ends declare in the handshake, so the gateway can refuse a client it cannot speak to.
  *
- * It goes up whenever a frame or a field below changes, and `ProtocolShapeSpec` is what makes sure of
- * that: the shape of every frame is recorded in contracts/protocol-v<n>.txt, and a wire that has moved
- * without a new number is a failing build. What each version changed is in contracts/README.md.
+ * It goes up whenever a frame or a field changes, and `ProtocolShapeSpec` makes sure of that: every frame's shape
+ * is recorded in contracts/protocol-v<n>.txt, and what each version changed is in contracts/README.md.
  */
-const val PROTOCOL_VERSION = 24
+const val PROTOCOL_VERSION = 25
 
 data class Point(val lat: Double, val lon: Double)
 
@@ -188,6 +187,7 @@ data class CharacterOnMapView(
     JsonSubTypes.Type(SeeAll::class, name = "seeAll"),
     JsonSubTypes.Type(FogOfWar::class, name = "fogOfWar"),
     JsonSubTypes.Type(WipeWorld::class, name = "wipeWorld"),
+    JsonSubTypes.Type(Inspect::class, name = "inspect"),
 )
 sealed interface ClientFrame
 
@@ -408,6 +408,7 @@ data class CompleteDialogueStepPayload(val dialogueId: String, val lineId: Strin
     JsonSubTypes.Type(WorldWiped::class, name = "worldWiped"),
     JsonSubTypes.Type(StandsFrame::class, name = "stands"),
     JsonSubTypes.Type(RollDrawn::class, name = "rollDrawn"),
+    JsonSubTypes.Type(Inspected::class, name = "inspected"),
 )
 sealed interface ServerFrame
 
@@ -415,10 +416,9 @@ sealed interface ServerFrame
 data class Welcome(val serverTime: Long, val playerId: String, val world: WorldNow) : ServerFrame
 
 /**
- * What a cell holds, sent on subscribing to it, before any deltas. `omitted` is how many more houses the
- * cell had than a snapshot carries, so a screen never claims to show all of what it shows most of, and
- * `omittedCharacters` the same for the characters standing in it. A cell with nobody standing in it
- * carries no `characters` at all.
+ * What a cell holds, sent on subscribing to it, before any deltas. `omitted` is how many more houses the cell had
+ * than a snapshot carries, so a screen never claims to show all of what it shows most of, and `omittedCharacters`
+ * the same for the characters standing in it. A cell with nobody standing in it carries no `characters` at all.
  */
 data class Snapshot(
     val cell: String,

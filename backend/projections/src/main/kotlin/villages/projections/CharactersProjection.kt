@@ -234,6 +234,11 @@ class CharactersProjection(feed: EventFeed) : Follower(feed), KeyFiguresByHouse,
         return CharactersInCell(standing.take(most), (standing.size - most).coerceAtLeast(0))
     }
 
+    override fun standing(id: CharacterId, at: WorldTime): PlacedCharacter? {
+        val here = spans[id]?.firstOrNull { it.span.covers(at) } ?: return null
+        return characters[id]?.let { PlacedCharacter(it, here.span) }
+    }
+
     override fun watchTheMap(listener: (CharacterMapChange) -> Unit): AutoCloseable {
         mapListeners += listener
         return AutoCloseable { mapListeners -= listener }

@@ -182,6 +182,16 @@ export const sessionLog: GatewayListener = {
             `${frame.considered.length} could have been dealt`,
         );
         return;
+      case 'inspected': {
+        // What a window asking after its subject was told: a name, or nothing at all. See 0087.
+        const someone = frame.character;
+        const told = frame.house?.name ?? (someone ? `${someone.givenName} ${someone.familyName}` : null);
+        note(
+          'inspect',
+          `the gateway answered the ${frame.kind} asked after: ${told ?? 'nothing, none such or under the fog'}`,
+        );
+        return;
+      }
     }
     return frame satisfies never; // Every frame has a case above, so a new one does not compile until it has.
   },

@@ -229,6 +229,11 @@ export const clientFrameSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('fogOfWar'), on: z.boolean() }),
   /** Empty the development world, for everyone. A debug frame, never a player's. See 0036. */
   z.object({ type: z.literal('wipeWorld') }),
+  /**
+   * A window asking after its subject wherever the camera is, once, when it opens on something the page knows
+   * nothing of. No subscription: it is answered once by `inspected`. See decision record 0087.
+   */
+  z.object({ type: z.literal('inspect'), kind: z.enum(['house', 'character']), id: z.string() }),
 ]);
 
 /**
@@ -303,6 +308,17 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('pong'), t0: z.number().int(), serverTime: z.number().int() }),
   z.object({ type: z.literal('error'), code: z.string(), message: z.string() }),
   rollDrawnFrameSchema,
+  /**
+   * The answer to `inspect`, once: the house or the character as the map would show it, or neither when there is
+   * no such thing or the fog holds it back, by the rule a cell's snapshot is held to. See decision record 0087.
+   */
+  z.object({
+    type: z.literal('inspected'),
+    kind: z.string(),
+    id: z.string(),
+    house: houseViewSchema.optional(),
+    character: characterOnMapViewSchema.optional(),
+  }),
   z.object({
     type: z.literal('event'),
     id: z.string(),

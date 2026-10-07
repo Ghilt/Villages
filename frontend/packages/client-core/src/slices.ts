@@ -25,6 +25,11 @@ export interface SessionState {
    */
   rollDrawn: RollDrawnFrame | null;
   /**
+   * What the gateway answered windows asking after their subject wherever the camera is, by `kind:id`: the house or
+   * the character, or neither where there is none or the fog holds it back. Asked once a connection. See 0087.
+   */
+  inspected: Readonly<Record<string, FrameOf<'inspected'>>>;
+  /**
    * The player's living key figures, in the order they joined the house, or null until the gateway has
    * said. An empty list is a house with none; null is not having heard yet. See decision record 0055.
    */
@@ -132,6 +137,17 @@ const SLICES = {
     onFrame: { rollDrawn: (_, frame) => ({ rollDrawn: frame }) },
     onReset: forgottenWhenTakenOver({ rollDrawn: null }),
   } satisfies Slice<'rollDrawn'>,
+
+  /** The answers to windows asking after their subject. Kept through a close; a takeover forgets them. See 0087. */
+  inspecting: {
+    initial: { inspected: {} },
+    onFrame: {
+      inspected: (state, frame) => ({
+        inspected: { ...state.inspected, [`${frame.kind}:${frame.id}`]: frame },
+      }),
+    },
+    onReset: forgottenWhenTakenOver({ inspected: {} }),
+  } satisfies Slice<'inspected'>,
 
   keyFigures: {
     initial: { yourKeyFigures: null },
