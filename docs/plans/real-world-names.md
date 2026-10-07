@@ -257,6 +257,13 @@ Each its own commit, and the order is a suggestion.
    ground of Sining went into invented land and Male's atoll is smaller than a square. Natural Earth's ranking
    is today's, which is why the additions were needed: more regions are reviewed in later passes, and Acre,
    Mocha, Murshidabad, Tetuan, Mogador, Sallee, Kilwa and Villa Rica need a source beside it.
+   **Region by region from 2026-10-07**, every place Natural Earth has in a region, each with a reason where
+   its name differs or it had not been founded. A place the reviewer could not date is left out rather than
+   guessed, and listed here.
+   - **Europe**: 660 more places; 608 stood and are in the world under the names English gave them then -
+     Stutgard, Coblentz, Maestricht, Bois-le-Duc, Spalatro, Uskub, Tammerfors, Fünfkirchen, Khadjibey, where
+     Odessa was founded in 1794 - and 52 had not been founded. Left out: Çorovodë, Gramsh, Librazhd, Klaksvík,
+     Lahti, Iracoubo, Roura, Dzaoudzi, Bærum, Rørvik, Steinkjer, Mo i Rana, Sandnes, Leikanger, Makiivka.
 5. **Invented land named.**
 6. **Seats taken from real towns**, if Adam wants them.
 
