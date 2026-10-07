@@ -37,7 +37,7 @@ export function watchOrigin(map: maplibregl.Map, master: string): () => void {
       'origin',
       answer.names === null
         ? `no names carried into ${master} yet: npm run world:names --prefix frontend -- ${master}`
-        : `${answer.names.length} of Earth's names carried into ${master}, in English: the towns of 1790, and rivers, lakes and peaks under today's names` +
+        : `${answer.names.length} of Earth's names carried into ${master}, in English: the towns of 1790, rivers under their names of 1790 where the review gives one, and lakes and peaks under today's names` +
             (answer.regions === null
               ? ', and no seas or regions'
               : `, and ${answer.regions.list.length} named seas and regions of land`),
