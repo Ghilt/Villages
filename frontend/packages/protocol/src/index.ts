@@ -5,7 +5,7 @@
  */
 
 /** Sent on the handshake so that the gateway can refuse a client it cannot speak to. */
-export const PROTOCOL_VERSION = 28;
+export const PROTOCOL_VERSION = 32;
 
 export {
   MAX_ZOOM,
@@ -32,6 +32,7 @@ export {
   dayOfMonthOf,
   daysInMonth,
   describeDay,
+  shortDay,
   isLeapYear,
   monthOf,
   monthsBetween,
@@ -97,8 +98,8 @@ export type {
 } from './frames';
 export type { BannerSpec, Charge, Division, Point, ResourceName, Stock, Tincture } from './basics';
 export type { ChoiceView, EffectView, OmenView, OptionView, Rarity, RollDrawnFrame } from './choiceFrames';
-export { inspectAtFrameSchema, inspectedFrameSchema, waterViewSchema } from './placeFrames';
-export type { InspectedFrame, WaterKind, WaterView } from './placeFrames';
+export { inspectAtFrameSchema, inspectedAtFrameSchema, waterViewSchema } from './placeFrames';
+export type { InspectedAtFrame, WaterKind, WaterView } from './placeFrames';
 export type {
   DialogueView,
   EndingView,

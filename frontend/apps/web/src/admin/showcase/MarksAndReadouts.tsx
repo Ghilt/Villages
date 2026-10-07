@@ -6,6 +6,7 @@ import { MarkButton, TextButton } from '../../ui/button/Button';
 import { Mark, MARK_NAMES } from '../../ui/mark/Mark';
 import type { MarkName } from '../../ui/mark/Mark';
 import { ResourceReadout } from '../../ui/readout/ResourceReadout';
+import { Tag } from '../../ui/tag/Tag';
 import { Tooltip } from '../../ui/tooltip/Tooltip';
 import { Part, Specimen, Specimens } from './Specimen';
 
@@ -155,6 +156,27 @@ export function MarksAndReadouts() {
             <Badged count={3} what="new">
               <TextButton face="secondary">Letters</TextButton>
             </Badged>
+          </Specimen>
+        </Specimens>
+      </Part>
+
+      <Part title="Tags">
+        <p className="ui-label showcase__lead">
+          A word or two of quiet context beside a name - how fresh what is shown of it is - small and soft, so
+          the name keeps the eye.
+        </p>
+        <Specimens>
+          <Specimen name="Tag" note="as it is now">
+            <Tag>current</Tag>
+          </Specimen>
+          <Specimen name="Tag" note="the day it was last seen">
+            <Tag>4 Mar 1793</Tag>
+          </Specimen>
+          <Specimen name="Tag" note="beside a name, as a window has it">
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span className="ui-heading">Ashby 11</span>
+              <Tag>4 Mar 1793</Tag>
+            </span>
           </Specimen>
         </Specimens>
       </Part>

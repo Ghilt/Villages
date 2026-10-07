@@ -9,7 +9,7 @@ import villages.application.fate.PlaceName
 import villages.application.fate.PlaceNames
 import villages.application.fate.RegionKind
 import villages.domain.Location
-import villages.protocol.Inspected
+import villages.protocol.InspectedAt
 import villages.protocol.Point
 import villages.protocol.WaterView
 import villages.protocol.YourChoice
@@ -64,15 +64,15 @@ class GatewayWatersSpec : StringSpec({
         mine.receive(inspectAt(59.35, 17.6))
         mine.receive(inspectAt(59.33, 19.2))
 
-        sent.filterIsInstance<Inspected>() shouldBe listOf(
-            Inspected(Point(59.33, 18.07), revealed = true, water = WaterView("river", "Q1052063", "Norrström")),
-            Inspected(
+        sent.filterIsInstance<InspectedAt>() shouldBe listOf(
+            InspectedAt(Point(59.33, 18.07), revealed = true, water = WaterView("river", "Q1052063", "Norrström")),
+            InspectedAt(
                 Point(59.35, 17.6),
                 revealed = true,
                 water = WaterView("lake", "Q211967", "Lake Maeler", "Mälaren", true, "The long lake behind Stockholm."),
             ),
             // Sixty-four kilometres out from a seat that sees thirty-four: the fog's.
-            Inspected(Point(59.33, 19.2), revealed = false, water = null),
+            InspectedAt(Point(59.33, 19.2), revealed = false, water = null),
         )
     }
 
@@ -84,7 +84,7 @@ class GatewayWatersSpec : StringSpec({
         sent.clear()
 
         mine.receive(inspectAt(HELSINKI_LAT, HELSINKI_LON))
-        sent.filterIsInstance<Inspected>().single() shouldBe Inspected(Point(HELSINKI_LAT, HELSINKI_LON), false, null)
+        sent.filterIsInstance<InspectedAt>().single() shouldBe InspectedAt(Point(HELSINKI_LAT, HELSINKI_LON), false, null)
         sent.clear()
 
         mine.receive(fogOfWar(false))
@@ -92,11 +92,11 @@ class GatewayWatersSpec : StringSpec({
         mine.receive(inspectAt(59.33, 18.07))
         rig.names["terrain"] = names
         mine.receive(inspectAt(59.33, 19.2))
-        sent.filterIsInstance<Inspected>() shouldBe listOf(
-            Inspected(Point(HELSINKI_LAT, HELSINKI_LON), revealed = true, water = null),
+        sent.filterIsInstance<InspectedAt>() shouldBe listOf(
+            InspectedAt(Point(HELSINKI_LAT, HELSINKI_LON), revealed = true, water = null),
             // The ground shows a river with no named one near enough to be it: a river all the same.
-            Inspected(Point(59.33, 18.07), revealed = true, water = WaterView("river")),
-            Inspected(Point(59.33, 19.2), revealed = true, water = WaterView("sea", "Q545", "Baltic Sea")),
+            InspectedAt(Point(59.33, 18.07), revealed = true, water = WaterView("river")),
+            InspectedAt(Point(59.33, 19.2), revealed = true, water = WaterView("sea", "Q545", "Baltic Sea")),
         )
     }
 
@@ -133,9 +133,9 @@ class GatewayWatersSpec : StringSpec({
         mine.receive(inspectAt(59.33, 18.07))
         mine.receive(inspectAt(95.0, 18.07))
 
-        sent.filterIsInstance<Inspected>() shouldBe listOf(
-            Inspected(Point(59.33, 18.07), revealed = true, water = null),
-            Inspected(Point(95.0, 18.07), revealed = false, water = null),
+        sent.filterIsInstance<InspectedAt>() shouldBe listOf(
+            InspectedAt(Point(59.33, 18.07), revealed = true, water = null),
+            InspectedAt(Point(95.0, 18.07), revealed = false, water = null),
         )
     }
 })

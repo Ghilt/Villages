@@ -1,20 +1,20 @@
 import { describe, expect, it } from 'vitest';
 
-import type { InspectedFrame } from '@villages/protocol';
+import type { InspectedAtFrame } from '@villages/protocol';
 
 import { describeWater } from './describe';
 import { paneIdOf, subjectOfPane } from './subjects';
 import { called, heardWater, sayAnswer, watersStore } from './waters';
 
 const at = { lat: 52.25, lon: 21 };
-const vistula: InspectedFrame = {
-  type: 'inspected',
+const vistula: InspectedAtFrame = {
+  type: 'inspectedAt',
   at,
   revealed: true,
   water: { kind: 'river', id: 'Q548', name: 'Vistula', also: 'Wisła', of1790: false },
 };
-const tagus: InspectedFrame = {
-  type: 'inspected',
+const tagus: InspectedAtFrame = {
+  type: 'inspectedAt',
   at: { lat: 39.46, lon: -8.2 },
   revealed: true,
   water: {
@@ -25,8 +25,8 @@ const tagus: InspectedFrame = {
     of1790: true,
   },
 };
-const northSea: InspectedFrame = {
-  type: 'inspected',
+const northSea: InspectedAtFrame = {
+  type: 'inspectedAt',
   at: { lat: 55.5, lon: 3 },
   revealed: true,
   water: { kind: 'sea', id: 'Q1693', name: 'German Ocean', also: 'North Sea', of1790: true },

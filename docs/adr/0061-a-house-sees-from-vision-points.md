@@ -115,3 +115,25 @@ as the server's own cache, for testing a place against thousands of points.
 
 **Map units for the radius**, as the holding measures its reach. Refused for 0026's reason: the size of the
 circle on the map is a drawing fact, and the domain of the world should not be written in the screen's units.
+
+## Amendment, 2026-10-07: revealed ground shows its buildings as they were
+
+*The buildings on it, as they are now* was the open question of this record, and Adam has answered it: revealed
+ground shows what stood on it **when the fog hid it**. A window had begun saying the day it did (0089), and a
+house founded there afterwards would have been dated before it existed.
+
+**Nothing new is kept for it.** A house's face - its name, its arms, its seat - does not change after it is
+founded, and nothing ends a house, so *as it was* comes down to *whether it was there*: whether it was founded by
+the day the fog hid its seat, `Fog.hidOn`, which the events already give. A house founded that very day counts as
+there, as everything within one day does. Remembering what each player saw, the read model this record expected,
+is not needed until a house's face can change or a house can end.
+
+- **A house founded on revealed ground after the fog hid it is not sent**: not in its cell's snapshot, not as it
+  is founded, not in a window's answer. Its ground looks as it did.
+- **What happens to a house under the fog is not told**: its changes reach a player only while they see it.
+  When they see it again, their sight changing answers their cells again, and it is as it is now.
+- `Fog.sent` says both, as a house is sent to one player, and the gateway asks nothing else of the fog about a
+  house. No new frame, no new field, and the wire stays at version 27.
+
+**The rule for revealed ground is now:** what stands still, as it was when the fog last hid it.
+

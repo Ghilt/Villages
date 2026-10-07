@@ -91,7 +91,7 @@ export function seeAll(on: boolean): void {
 
 /**
  * Asks the server what water is at a place on the map, which a click that hit no house, person or area does. The
- * answer comes back into the session as `inspected`, named only on ground the house has revealed. See 0087.
+ * answer comes back into the session as `inspectedAt`, named only on ground the house has revealed. See 0087.
  */
 export function inspectAt(at: Point): void {
   session.inspectAt(at);
@@ -154,6 +154,14 @@ export function restart(): void {
   forgetPlayerToken(tokens);
   note('player', 'starting over as somebody new');
   window.location.reload();
+}
+
+/**
+ * Asks the gateway after a window's subject wherever the camera is, once a connection: what a window knowing
+ * nothing of a house or a person does. The answer is the session's `inspected`. See decision record 0088.
+ */
+export function inspectSubject(kind: 'house' | 'character', id: string): void {
+  session.inspect(kind, id);
 }
 
 /** Listens to the conversation from now on, until the function it hands back is called. See `SessionListener`. */

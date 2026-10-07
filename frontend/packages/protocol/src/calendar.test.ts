@@ -8,6 +8,7 @@ import {
   dayOfMonthOf,
   daysInMonth,
   describeDay,
+  shortDay,
   isLeapYear,
   monthOf,
   monthsBetween,
@@ -84,5 +85,13 @@ describe('the calendar', () => {
     expect(describeDay(plusMonths(dayOf(1200, 1, 31), 1))).toBe('the twenty-ninth of February, year 1200');
     expect(describeDay(plusMonths(dayOf(1201, 1, 31), 1))).toBe('the twenty-eighth of February, year 1201');
     expect(describeDay(plusMonths(dayOf(1200, 1, 15), 1))).toBe('the fifteenth of February, year 1200');
+  });
+});
+
+describe('a day on a tag', () => {
+  it('is said short: the day, the month in three letters, the year', () => {
+    expect(shortDay(dayOf(1793, 3, 4))).toBe('4 Mar 1793');
+    expect(shortDay(dayOf(1790, 1, 1))).toBe('1 Jan 1790');
+    expect(shortDay(dayOf(1792, 12, 31))).toBe('31 Dec 1792');
   });
 });

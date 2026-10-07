@@ -50,7 +50,7 @@ export function WaterClicks({ map, onPick }: WaterClicksProps) {
     };
   }, [map]);
 
-  const answer = useStore(sessionStore, (state) => state.inspected);
+  const answer = useStore(sessionStore, (state) => state.inspectedAt);
   useEffect(() => {
     const was = asked.current;
     if (answer === null || was === null || answer.at.lat !== was.lat || answer.at.lon !== was.lon) {

@@ -277,6 +277,9 @@ A line each: what it is for, its variants, and where on the page it is.
   `showWord`, and always there for a screen reader. *Marks and readouts*.
 - **`Badge`** and **`Badged`**, `ui/badge/Badge.tsx`: a count on the corner of a mark or a button, nothing
   at nought, `99+` past ninety-nine. A drawn velvet pip until one is painted. *Marks and readouts*.
+- **`Tag`**, `ui/tag/Tag.tsx`: a word or two of quiet context beside a name - how fresh what is shown of it is,
+  `current` or the day it was last seen - small, in the soft ink and a hairline outline of it, so the name keeps
+  the eye. It is handed its words; saying a day is the caller's. Drawn rather than painted. *Marks and readouts*.
 - **`Tooltip`**, `ui/tooltip/Tooltip.tsx`: a few words about what is under the pointer, in the
   `tooltip.plain` recipe - a moment after the pointer arrives, at once from the keyboard, and when a finger
   holds a thing down on a phone; gone at Escape. It is drawn over the whole page rather than inside what it

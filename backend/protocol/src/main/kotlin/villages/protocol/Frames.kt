@@ -18,11 +18,10 @@ import tools.jackson.databind.JsonNode
 /**
  * The version both ends declare in the handshake, so the gateway can refuse a client it cannot speak to.
  *
- * It goes up whenever a frame or a field below changes, and `ProtocolShapeSpec` is what makes sure of
- * that: the shape of every frame is recorded in contracts/protocol-v<n>.txt, and a wire that has moved
- * without a new number is a failing build. What each version changed is in contracts/README.md.
+ * It goes up whenever a frame or a field changes, and `ProtocolShapeSpec` makes sure of that: every frame's shape
+ * is recorded in contracts/protocol-v<n>.txt, and what each version changed is in contracts/README.md.
  */
-const val PROTOCOL_VERSION = 28
+const val PROTOCOL_VERSION = 32
 
 data class Point(val lat: Double, val lon: Double)
 
@@ -79,8 +78,8 @@ data class PledgeView(
 )
 
 /**
- * A house as the map shows it. `since` is the world-day it exists from, as a count the calendar reads;
- * `version` is the stream version, so snapshots and deltas can be ordered.
+ * A house as the map shows it. `since` is the world-day it exists from; `version` the stream version, so snapshots and
+ * deltas can be ordered; `seenUntil` the day the fog hid it from the house it is sent to. See decision 0089.
  */
 data class HouseView(
     val id: String,
@@ -90,15 +89,15 @@ data class HouseView(
     val banner: BannerSpec,
     val since: Long,
     val version: Long,
+    @get:JsonInclude(JsonInclude.Include.NON_NULL) val seenUntil: Long? = null,
 )
 
 /**
  * The player's own house: everything anybody can see of it, and what only its owner can.
  *
- * **What a house has is private.** A `HouseView` goes to everyone holding the cell, up to two hundred at a
- * time, so putting five stocks on it would both tell the neighbours a house's business and multiply what a
- * snapshot weighs. Resources reach one session, the owner's, and the structure is what enforces that
- * rather than a convention anybody has to remember.
+ * **What a house has is private.** A `HouseView` goes to everyone holding the cell, up to two hundred at a time,
+ * so putting five stocks on it would both tell the neighbours a house's business and multiply what a snapshot
+ * weighs. Resources reach one session, the owner's, and the structure enforces that rather than a convention.
  *
  * The keys of `resources` are the wire's names for the five, which are the code's names and not the
  * player's: `naturalDomain` is shown as Domain. See the naming rule in `BUILDING-A-MECHANIC.md`.
@@ -152,11 +151,11 @@ data class KeyFigureView(
 /**
  * A character standing on the map, as everyone holding the cell sees them.
  *
- * Less than a key figure's view on purpose: a stranger sees who somebody is, how old, whose they are and
- * where they stand, and not their stats, which are the house's own. The age is not on the wire, for the
- * reason it is not on a key figure's: it is counted from `bornOn` and `agedYears` on the day it is read.
- * `cell` is the deepest cell the place falls in, as a house's is; `since` is the world-day they came to
- * stand there; `version` is the read model's revision, so of two copies the newer wins. See 0055.
+ * Less than a key figure's view on purpose: a stranger sees who somebody is, how old, whose they are and where they
+ * stand, and not their stats, which are the house's own. The age is not on the wire, for the reason it is not on a key
+ * figure's: it is counted from `bornOn` and `agedYears` on the day it is read. `cell` is the deepest cell the place
+ * falls in, as a house's is; `since` is the world-day they came to stand there; `version` is the read model's revision,
+ * so of two copies the newer wins; `seenUntil` is as a house's. See 0055.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class CharacterOnMapView(
@@ -174,6 +173,7 @@ data class CharacterOnMapView(
     val keyFigureOf: List<HolderView>,
     val since: Long,
     val version: Long,
+    val seenUntil: Long? = null,
 )
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
@@ -189,6 +189,7 @@ data class CharacterOnMapView(
     JsonSubTypes.Type(FogOfWar::class, name = "fogOfWar"),
     JsonSubTypes.Type(WipeWorld::class, name = "wipeWorld"),
     JsonSubTypes.Type(InspectAt::class, name = "inspectAt"),
+    JsonSubTypes.Type(Inspect::class, name = "inspect"),
 )
 sealed interface ClientFrame
 
@@ -410,6 +411,7 @@ data class CompleteDialogueStepPayload(val dialogueId: String, val lineId: Strin
     JsonSubTypes.Type(StandsFrame::class, name = "stands"),
     JsonSubTypes.Type(RollDrawn::class, name = "rollDrawn"),
     JsonSubTypes.Type(Inspected::class, name = "inspected"),
+    JsonSubTypes.Type(InspectedAt::class, name = "inspectedAt"),
 )
 sealed interface ServerFrame
 
@@ -417,10 +419,9 @@ sealed interface ServerFrame
 data class Welcome(val serverTime: Long, val playerId: String, val world: WorldNow) : ServerFrame
 
 /**
- * What a cell holds, sent on subscribing to it, before any deltas. `omitted` is how many more houses the
- * cell had than a snapshot carries, so a screen never claims to show all of what it shows most of, and
- * `omittedCharacters` the same for the characters standing in it. A cell with nobody standing in it
- * carries no `characters` at all.
+ * What a cell holds, sent on subscribing to it, before any deltas. `omitted` is how many more houses the cell had
+ * than a snapshot carries, so a screen never claims to show all of what it shows most of, and `omittedCharacters`
+ * the same for the characters standing in it. A cell with nobody standing in it carries no `characters` at all.
  */
 data class Snapshot(
     val cell: String,

@@ -55,7 +55,7 @@ as houses are named, is an omen of its own, *Near Dantzic*, keyed `map.town:<id>
 will open on.
 
 **The second reader is a click on water.** A click on the map that hit no house, person or area sends
-`inspectAt` with the place, and the gateway answers `inspected`: whether the house has revealed it, and the water
+`inspectAt` with the place, and the gateway answers `inspectedAt`: whether the house has revealed it, and the water
 there - a lake whose carried shores enclose the place, a river where the master's ground map shows one and the
 named river close enough to be the one painted there, as the omen finds it, or the sea by the named sea the place
 is in or by - or none. A third question is asked of the names for it, which named thing's lines enclose a place.

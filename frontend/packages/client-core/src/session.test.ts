@@ -158,6 +158,45 @@ describe('the session, folded from what each mechanic folds', () => {
     expect(session.state()).toMatchObject({ connection: 'closed', seeAll: true, fogOfWar: true });
   });
 
+  // A window on something the page knows nothing of asks once, and the answer is kept by subject. See 0088.
+  it('asks after a subject once a connection, not before the welcome, and keeps the answer by subject', () => {
+    const socket = fakeSocket();
+    const session = createSession({
+      schedule: { after: () => () => undefined },
+      newId: () => 'c-1',
+      standsArrived: () => undefined,
+      followStands: () => undefined,
+      arriveAnew: () => undefined,
+      note: () => undefined,
+    });
+    session.connect({ socket: socket.socket, playerToken: 't', protocolVersion: 1, address: 'ws://here' });
+    socket.opens();
+    session.inspect('house', 'kestrel');
+    expect(socket.sent.some((frame) => frame.type === 'inspect')).toBe(false);
+
+    socket.says(welcome);
+    session.inspect('house', 'kestrel');
+    session.inspect('house', 'kestrel');
+    session.inspect('character', 'kestrel');
+    expect(socket.sent.filter((frame) => frame.type === 'inspect')).toEqual([
+      { type: 'inspect', kind: 'house', id: 'kestrel' },
+      { type: 'inspect', kind: 'character', id: 'kestrel' },
+    ]);
+
+    socket.says({ type: 'inspected', kind: 'house', id: 'kestrel' });
+    expect(session.state().inspected['house:kestrel']).toEqual({
+      type: 'inspected',
+      kind: 'house',
+      id: 'kestrel',
+    });
+    expect(session.state().inspected['character:kestrel']).toBeUndefined();
+
+    // A connection anew asks again, because the answer may have changed while it was gone.
+    socket.says(welcome);
+    session.inspect('house', 'kestrel');
+    expect(socket.sent.filter((frame) => frame.type === 'inspect')).toHaveLength(3);
+  });
+
   it('asks what water is at a place only while open, and keeps the answer until a takeover', () => {
     const socket = fakeSocket();
     const session = createSession({
@@ -169,7 +208,7 @@ describe('the session, folded from what each mechanic folds', () => {
       note: () => undefined,
     });
     session.inspectAt({ lat: 52.25, lon: 21 });
-    expect(session.state().inspected).toBeNull();
+    expect(session.state().inspectedAt).toBeNull();
 
     session.connect({ socket: socket.socket, playerToken: 't', protocolVersion: 1, address: 'ws://here' });
     socket.opens();
@@ -178,14 +217,14 @@ describe('the session, folded from what each mechanic folds', () => {
     expect(socket.sent.at(-1)).toEqual({ type: 'inspectAt', at: { lat: 52.25, lon: 21 } });
 
     const answer: ServerFrame = {
-      type: 'inspected',
+      type: 'inspectedAt',
       at: { lat: 52.25, lon: 21 },
       revealed: true,
       water: { kind: 'river', id: 'Q548', name: 'Vistula', also: 'Wisła', of1790: true },
     };
     socket.says(answer);
-    expect(session.state().inspected).toEqual(answer);
+    expect(session.state().inspectedAt).toEqual(answer);
     socket.says({ type: 'takenOver', message: 'another window took this player over' });
-    expect(session.state().inspected).toBeNull();
+    expect(session.state().inspectedAt).toBeNull();
   });
 });

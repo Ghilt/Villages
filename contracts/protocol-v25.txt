@@ -36,8 +36,7 @@ client command .command:takeVision visionId
 client command command commandId
 client fogOfWar on
 client hello master playerToken protocolVersion
-client inspectAt .at lat lon
-client inspectAt at
+client inspect id kind
 client ping t0
 client seeAll on
 client subscribeCells cells
@@ -118,9 +117,14 @@ server commandAccepted commandId
 server commandRejected commandId reason
 server error code message
 server event causationId correlationId data eventType id stream streamVersion time
-server inspected .at lat lon
-server inspected .river also id name of1790
-server inspected at revealed river
+server inspected .character agedYears bornOn cell familyName givenName id keyFigureOf place portrait sex since species version
+server inspected .character.keyFigureOf[] banner id name
+server inspected .character.keyFigureOf[].banner charge chargeTincture division field second
+server inspected .character.place lat lon
+server inspected .house banner cell id name seat since version
+server inspected .house.banner charge chargeTincture division field second
+server inspected .house.seat lat lon
+server inspected character house id kind
 server pong serverTime t0
 server resync cells
 server rollDrawn .considered[] action weight

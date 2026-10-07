@@ -3,6 +3,7 @@ package villages.gateway
 import villages.application.CharacterRow
 import villages.application.CharacterSpan
 import villages.application.HouseRow
+import villages.application.PlacedCharacter
 import villages.application.VisionPoint
 import villages.domain.HouseId
 import villages.domain.Location
@@ -10,7 +11,10 @@ import villages.domain.PlayerId
 import villages.domain.Vision
 import villages.domain.WorldTime
 import villages.protocol.Coverage
+import villages.protocol.HouseView
 import villages.protocol.StandRecords
+import kotlin.math.cos
+import kotlin.math.hypot
 
 /**
  * What the fog of war lets one player be sent, worked out from their house's vision points: the table in
@@ -42,6 +46,10 @@ internal class Fog(
     @Volatile
     private var vision: Pair<WorldTime, Coverage>? = null
 
+    /**
+     * Whether a house stands where this one could know of it at all: its own, one seen from anywhere, one on ground it
+     * has revealed. Whether it was there to be known is [sent]'s question.
+     */
     fun letsThrough(row: HouseRow): Boolean =
         row.player == player ||
             row.significance.value >= SEEN_THROUGH_THE_FOG ||
@@ -63,6 +71,96 @@ internal class Fog(
 
     /** Whether the house has revealed a place: what a river pointed at may be named on, as a building stands still. */
     fun reveals(place: Location): Boolean = revealed.covers(place.lat, place.lon)
+    /**
+     * Where somebody was last seen by this house, and the day the fog hid them: the latest of their spans in which
+     * its vision covered where they stood, and the day that stopped - null while it still does on [today]. Null
+     * when it never saw them. See [hiding] and decision record 0089.
+     */
+    fun lastSeen(stood: List<PlacedCharacter>, today: WorldTime): Pair<PlacedCharacter, WorldTime?>? =
+        if (stood.isEmpty()) {
+            null
+        } else {
+            hiding(points, stood.flatMap { listOf(it.span.since, it.span.until) }, today) { day, partly ->
+                seenOn(stood, day, partly)
+            }
+        }
+
+    /**
+     * A house as this one is sent it on [day], or null where the fog holds it back. Where it sees it - its own, one
+     * seen from anywhere, one in its vision - as it is; on ground it has revealed and sees no longer, as it was when
+     * the fog hid it, and dated so, which is not at all for a house founded there since. One founded that very day
+     * counts as there, as everything within one day does. A house's face does not change and nothing ends one, so as
+     * it was is whether it was there; and what changes about it since is not this house's to hear of, which is the
+     * fan-out's to keep. Adam's word of 2026-10-07; see decision records 0061 and 0089.
+     */
+    fun sent(row: HouseRow, day: WorldTime, view: HouseView): HouseView? {
+        if (!letsThrough(row)) return null
+        val hid = hidOn(row, day) ?: return view
+        return view.takeIf { row.since <= hid }?.copy(seenUntil = hid.day)
+    }
+
+    /**
+     * The day the fog hid a house from this one, for a house it is sent: null while it sees it on [today] - its own,
+     * one seen from anywhere, one its vision covers - and otherwise the end of the last stretch in which its vision
+     * covered the seat. Ground the surface tension revealed between points that never saw on one day was never in
+     * one day's vision, so a house there was hidden on the day it was revealed. A house never moves, so only the
+     * points near its seat are asked about, which keeps this cheap enough to ask of every house a cell sends.
+     */
+    fun hidOn(row: HouseRow, today: WorldTime): WorldTime? {
+        if (row.player == player || row.significance.value >= SEEN_THROUGH_THE_FOG) return null
+        val (lat, lon) = row.seat.lat to row.seat.lon
+        val near = points.filter { point ->
+            val north = (point.place.lat - lat) * KILOMETRES_A_DEGREE
+            val east = (point.place.lon - lon) * KILOMETRES_A_DEGREE * cos(Math.toRadians((point.place.lat + lat) / 2))
+            hypot(north, east) < (point.radius + 2 * tension) * NEAR_ENOUGH
+        }
+        val sees = { these: List<VisionPoint> -> coverageOf(these).covers(lat, lon) }
+        hiding(near, emptyList(), today) { day, partly -> Unit.takeIf { sees(near.filter { it.during(day, partly) }) } }
+            ?.let { return it.second }
+        return near.map { it.since }.distinct().sorted().firstOrNull { day -> sees(near.filter { it.since <= day }) }
+    }
+
+    /**
+     * What [seenOn] finds on [today], with no day, or else on the latest day before it that it finds anything, with
+     * the day the fog hid it. Vision and where somebody stands change only on the days a point or a span begins or
+     * ends - [asked]'s, and [also] - so those days and the ones before them are all there is to ask about. A point
+     * or a span begun and ended on one day was there for part of it, and counts - [seenOn]'s `partly` - on that day.
+     */
+    private inline fun <T : Any> hiding(
+        asked: List<VisionPoint>,
+        also: List<WorldTime?>,
+        today: WorldTime,
+        seenOn: (day: WorldTime, partly: Boolean) -> T?,
+    ): Pair<T, WorldTime?>? {
+        seenOn(today, false)?.let { return it to null }
+        val days = (asked.flatMap { listOf(it.since, it.until) } + also)
+            .filterNotNull()
+            .flatMap { listOf(it, WorldTime(it.day - 1)) }
+            .filter { it <= today }
+            .distinct()
+            .sortedDescending()
+        for (day in days) {
+            if (day < today) seenOn(day, false)?.let { return it to WorldTime(day.day + 1) }
+            seenOn(day, true)?.let { return it to day }
+        }
+        return null
+    }
+
+    /** Whom of [stood] this house saw on [day]: through the whole of it, or - [partly] - for some of it as well. */
+    private fun seenOn(stood: List<PlacedCharacter>, day: WorldTime, partly: Boolean): PlacedCharacter? {
+        val there = stood.firstOrNull { during(it.span.since, it.span.until, day, partly) } ?: return null
+        if (there.row.keyFigureOf.any { it.house == house } || there.span.significance.value >= SEEN_THROUGH_THE_FOG) {
+            return there
+        }
+        val vision = coverageOf(points.filter { it.during(day, partly) })
+        return there.takeIf { vision.covers(it.span.place.lat, it.span.place.lon) }
+    }
+
+    private fun VisionPoint.during(day: WorldTime, partly: Boolean): Boolean = during(since, until, day, partly)
+
+    /** Whether a stretch from [since] until [until] is on [day]: the whole of it, or - [partly] - some of it. */
+    private fun during(since: WorldTime, until: WorldTime?, day: WorldTime, partly: Boolean): Boolean =
+        since <= day && (until == null || day < until || (partly && since == until))
 
     private fun visionOn(on: WorldTime): Coverage {
         vision?.takeIf { it.first == on }?.let { return it.second }
@@ -87,5 +185,14 @@ internal class Fog(
         const val STAND_MARGIN = 8.0
 
         private const val WORLD = StandRecords.WORLD_UNITS.toDouble()
+
+        /** A degree of latitude, near enough, for telling which vision points are anywhere near a house. */
+        private const val KILOMETRES_A_DEGREE = 111.2
+
+        /**
+         * How much further than its reach and the tension's twice over a point is still asked about a house: the
+         * coverage reads the map's stretched circles at their own latitudes, and this leaves room for that.
+         */
+        private const val NEAR_ENOUGH = 1.5
     }
 }

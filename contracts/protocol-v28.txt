@@ -27,9 +27,8 @@ client command .command:nextRarity rarity
 client command .command:offerDialogue sample
 client command .command:pledgeResource amount months purpose resource
 client command .command:releasePledge pledgeId
-client command .command:roll centre dialogue figure inspectingCharacters inspectingHouses inspectingWaters zoom
+client command .command:roll centre dialogue figure inspectingCharacters inspectingHouses zoom
 client command .command:roll.centre lat lon
-client command .command:roll.inspectingWaters[] lat lon
 client command .command:spendResource amount resource
 client command .command:takeAction choiceId optionId
 client command .command:takeOffTheMap characterId
@@ -65,8 +64,7 @@ command offerDialogue sample
 command pledgeResource amount months purpose resource
 command releasePledge pledgeId
 command roll .centre lat lon
-command roll .inspectingWaters[] lat lon
-command roll centre dialogue figure inspectingCharacters inspectingHouses inspectingWaters zoom
+command roll centre dialogue figure inspectingCharacters inspectingHouses zoom
 command spendResource amount resource
 command takeAction choiceId optionId
 command takeOffTheMap characterId
@@ -121,8 +119,8 @@ server commandRejected commandId reason
 server error code message
 server event causationId correlationId data eventType id stream streamVersion time
 server inspected .at lat lon
-server inspected .water about also id kind name of1790
-server inspected at revealed water
+server inspected .river also id name of1790
+server inspected at revealed river
 server pong serverTime t0
 server resync cells
 server rollDrawn .considered[] action weight

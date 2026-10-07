@@ -5,7 +5,7 @@ import villages.domain.Location
 import villages.domain.PlayerId
 import villages.protocol.Hello
 import villages.protocol.InspectAt
-import villages.protocol.Inspected
+import villages.protocol.InspectedAt
 import villages.protocol.Point
 import villages.protocol.WaterView
 
@@ -32,14 +32,14 @@ internal class WatersPart(private val waters: WaterAt) : Part {
         frames.on<InspectAt> { connection, frame -> connection.out.send(answer(connection, frame.at)) }
     }
 
-    private fun answer(connection: Gateway.Connection, at: Point): Inspected {
+    private fun answer(connection: Gateway.Connection, at: Point): InspectedAt {
         val place = at.takeIf { it.lat in -90.0..90.0 && it.lon in -180.0..180.0 }?.let { Location(it.lat, it.lon) }
         val looking = connection.looking
         if (place == null || (looking.fogged && !looking.fog.reveals(place))) {
-            return Inspected(at, revealed = false, water = null)
+            return InspectedAt(at, revealed = false, water = null)
         }
         val water = drawnBy(connection).master?.let { waters.at(it, place) }
-        return Inspected(
+        return InspectedAt(
             at,
             revealed = true,
             water = water?.let { WaterView(it.kind.name.lowercase(), it.id, it.name, it.also, it.of1790, it.about) },

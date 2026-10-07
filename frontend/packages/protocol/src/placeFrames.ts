@@ -27,8 +27,8 @@ export const waterViewSchema = z.object({
 });
 
 /** The answer, for the place asked about: whether the house has revealed it, and the water there or none. */
-export const inspectedFrameSchema = z.object({
-  type: z.literal('inspected'),
+export const inspectedAtFrameSchema = z.object({
+  type: z.literal('inspectedAt'),
   at: pointSchema,
   revealed: z.boolean(),
   water: waterViewSchema.nullable(),
@@ -36,4 +36,4 @@ export const inspectedFrameSchema = z.object({
 
 export type WaterView = z.infer<typeof waterViewSchema>;
 export type WaterKind = WaterView['kind'];
-export type InspectedFrame = z.infer<typeof inspectedFrameSchema>;
+export type InspectedAtFrame = z.infer<typeof inspectedAtFrameSchema>;

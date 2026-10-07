@@ -14,7 +14,7 @@ data class InspectAt(val at: Point) : ClientFrame
  * The answer to [InspectAt], for the place it asked about: whether the house has revealed it, and the water there, or
  * none - none too where it has not been revealed. Water whose name nobody knows is water all the same.
  */
-data class Inspected(val at: Point, val revealed: Boolean, val water: WaterView?) : ServerFrame
+data class InspectedAt(val at: Point, val revealed: Boolean, val water: WaterView?) : ServerFrame
 
 /**
  * Water pointed at: whether it is a `river`, a `lake` or the `sea`, its real identity, a Wikidata id where there is

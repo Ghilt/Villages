@@ -1,6 +1,6 @@
 import { createStore } from '@villages/client-core';
 import type { Readable } from '@villages/client-core';
-import type { InspectedFrame, WaterKind, WaterView } from '@villages/protocol';
+import type { InspectedAtFrame, WaterKind, WaterView } from '@villages/protocol';
 
 /**
  * The waters the server has named for this page's clicks - rivers, lakes and seas - by the id their inspect windows
@@ -23,7 +23,7 @@ export const watersStore: Readable<{ seen: ReadonlyMap<string, WaterSeen> }> = s
  * Takes an answer in: the water it names, kept under its real identity so that two clicks on the Vistula are one
  * window, or under the place for water nobody has named; or null where the answer names none.
  */
-export function heardWater(answer: InspectedFrame): WaterSeen | null {
+export function heardWater(answer: InspectedAtFrame): WaterSeen | null {
   if (answer.water === null) {
     return null;
   }
@@ -45,7 +45,7 @@ export function called(kind: WaterKind, name: string): string {
 }
 
 /** What the log says of an answer, for the debug panel: the water by kind and name, or why there is none. */
-export function sayAnswer(answer: InspectedFrame): string {
+export function sayAnswer(answer: InspectedAtFrame): string {
   const { lat, lon } = answer.at;
   const where = `${Math.abs(lat).toFixed(2)}°${lat < 0 ? 'S' : 'N'} ${Math.abs(lon).toFixed(2)}°${lon < 0 ? 'W' : 'E'}`;
   if (!answer.revealed) {

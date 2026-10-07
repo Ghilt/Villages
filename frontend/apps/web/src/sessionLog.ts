@@ -176,7 +176,7 @@ export const sessionLog: GatewayListener = {
         return;
       case 'event': // A player's window never asks for stored events; they have a page of their own (0023).
         return;
-      case 'inspected':
+      case 'inspectedAt':
         // What water a click pointed at, as the server named it, or why it named none. See 0087.
         note('inspect', sayAnswer(frame));
         return;
@@ -187,6 +187,16 @@ export const sessionLog: GatewayListener = {
             `${frame.considered.length} could have been dealt`,
         );
         return;
+      case 'inspected': {
+        // What a window asking after its subject was told: a name, or nothing at all. See 0088.
+        const someone = frame.character;
+        const told = frame.house?.name ?? (someone ? `${someone.givenName} ${someone.familyName}` : null);
+        note(
+          'inspect',
+          `the gateway answered the ${frame.kind} asked after: ${told ?? 'nothing, none such or under the fog'}`,
+        );
+        return;
+      }
     }
     return frame satisfies never; // Every frame has a case above, so a new one does not compile until it has.
   },

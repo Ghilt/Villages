@@ -67,7 +67,7 @@ export interface Session {
   wipeWorld(): void;
   /**
    * Asks what water is at a place on the map, which a click that hit nothing else does: the answer comes back as
-   * `inspected`, kept in the state. Nothing is asked while the connection is not open. See 0087.
+   * `inspectedAt`, kept in the state. Nothing is asked while the connection is not open. See 0087.
    */
   inspectAt(at: Point): void;
   /** Takes one option of the choice the player has: a player's command. See 0035 on its story. */
@@ -78,6 +78,11 @@ export interface Session {
   pull(area: string, what: string, command: CommandPayload): void;
   /** Takes a step through one of the house's dialogues, from its pane: a player's command. See 0071. */
   completeDialogueStep(dialogueId: string, lineId: string, described: string): void;
+  /**
+   * Asks after a window's subject wherever the camera is: answered once into `inspected`. Asked once a connection,
+   * because nothing is sent again, and not at all before the welcome. See decision record 0088.
+   */
+  inspect(kind: 'house' | 'character', id: string): void;
 }
 
 /** What the page says it is looking at as it rolls: the `roll` command without its type. Every field a claim. */
@@ -97,6 +102,8 @@ export function createSession(ports: SessionPorts): Session {
   let inFlight: InFlight = NOTHING_IN_FLIGHT;
 
   const open = () => connection !== null && store.get().connection === 'open';
+  /** The subjects asked after on this connection, by `kind:id`: a new connection asks again. */
+  const askedAfter = new Set<string>();
 
   const following = follower({
     send: (frame) => connection?.send(frame),
@@ -147,6 +154,7 @@ export function createSession(ports: SessionPorts): Session {
       const { seeAll, fogOfWar } = store.get();
       if (seeAll) connection?.send({ type: 'seeAll', on: true });
       if (!fogOfWar) connection?.send({ type: 'fogOfWar', on: false });
+      askedAfter.clear();
       // Anything the camera wanted before the gateway was listening is asked for now.
       following.welcomed();
     },
@@ -178,8 +186,9 @@ export function createSession(ports: SessionPorts): Session {
     // A player's window never asks for stored events; they have a page of their own. See 0023.
     event: () => undefined,
     rollDrawn: () => undefined,
-    // What water the page pointed at, kept in the state for the page to open a window from. See 0087.
     inspected: () => undefined,
+    // What water the page pointed at, kept in the state for the page to open a window from. See 0087.
+    inspectedAt: () => undefined,
   };
 
   /** Takes a frame in: the parts fold it, the listeners are told, then what the frame makes the session do. */
@@ -251,6 +260,12 @@ export function createSession(ports: SessionPorts): Session {
 
     inspectAt: (at) => {
       if (open()) connection?.send({ type: 'inspectAt', at });
+    },
+
+    inspect: (kind, id) => {
+      if (!open() || askedAfter.has(`${kind}:${id}`)) return;
+      askedAfter.add(`${kind}:${id}`);
+      connection?.send({ type: 'inspect', kind, id });
     },
 
     wipeWorld: () => {

@@ -228,7 +228,9 @@ internal class Rig(instrumentsOpen: Boolean = true, sendOn: Executor = Executor 
     val sights = SightProjection(world).started()
     val dialogueRows = DialoguesProjection(world).started()
     val lastRolls = LastRollsProjection(world).started()
-    val worldClock = WorldClock { today }
+    /** The world-day the rig's clock says, which a test may move on to see what a day passing does. */
+    var day: WorldTime = today
+    val worldClock = WorldClock { day }
 
     /** The ground maps a roll reads where the page is looking, by master: none until a spec lays one down. */
     val grounds = mutableMapOf<String, GroundMap>()
@@ -261,6 +263,7 @@ internal class Rig(instrumentsOpen: Boolean = true, sendOn: Executor = Executor 
         events = world,
         faults = faults,
         houses = houses,
+        houseById = houses,
         theirHouses = houses,
         clock = Clock.fixed(noon, ZoneOffset.UTC),
         world = worldClock,

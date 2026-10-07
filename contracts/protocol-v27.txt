@@ -27,9 +27,8 @@ client command .command:nextRarity rarity
 client command .command:offerDialogue sample
 client command .command:pledgeResource amount months purpose resource
 client command .command:releasePledge pledgeId
-client command .command:roll centre dialogue figure inspectingCharacters inspectingHouses inspectingWaters zoom
+client command .command:roll centre dialogue figure inspectingCharacters inspectingHouses zoom
 client command .command:roll.centre lat lon
-client command .command:roll.inspectingWaters[] lat lon
 client command .command:spendResource amount resource
 client command .command:takeAction choiceId optionId
 client command .command:takeOffTheMap characterId
@@ -37,8 +36,7 @@ client command .command:takeVision visionId
 client command command commandId
 client fogOfWar on
 client hello master playerToken protocolVersion
-client inspectAt .at lat lon
-client inspectAt at
+client inspect id kind
 client ping t0
 client seeAll on
 client subscribeCells cells
@@ -65,28 +63,27 @@ command offerDialogue sample
 command pledgeResource amount months purpose resource
 command releasePledge pledgeId
 command roll .centre lat lon
-command roll .inspectingWaters[] lat lon
-command roll centre dialogue figure inspectingCharacters inspectingHouses inspectingWaters zoom
+command roll centre dialogue figure inspectingCharacters inspectingHouses zoom
 command spendResource amount resource
 command takeAction choiceId optionId
 command takeOffTheMap characterId
 command takeVision visionId
-delta characterArrived .character agedYears bornOn cell familyName givenName id keyFigureOf place portrait sex since species version
+delta characterArrived .character agedYears bornOn cell familyName givenName id keyFigureOf place portrait seenUntil sex since species version
 delta characterArrived .character.keyFigureOf[] banner id name
 delta characterArrived .character.keyFigureOf[].banner charge chargeTincture division field second
 delta characterArrived .character.place lat lon
 delta characterArrived character
-delta characterChanged .character agedYears bornOn cell familyName givenName id keyFigureOf place portrait sex since species version
+delta characterChanged .character agedYears bornOn cell familyName givenName id keyFigureOf place portrait seenUntil sex since species version
 delta characterChanged .character.keyFigureOf[] banner id name
 delta characterChanged .character.keyFigureOf[].banner charge chargeTincture division field second
 delta characterChanged .character.place lat lon
 delta characterChanged character
 delta characterGone id version
-delta houseAppeared .house banner cell id name seat since version
+delta houseAppeared .house banner cell id name seat seenUntil since version
 delta houseAppeared .house.banner charge chargeTincture division field second
 delta houseAppeared .house.seat lat lon
 delta houseAppeared house
-delta houseChanged .house banner cell id name seat since version
+delta houseChanged .house banner cell id name seat seenUntil since version
 delta houseChanged .house.banner charge chargeTincture division field second
 delta houseChanged .house.seat lat lon
 delta houseChanged house
@@ -97,22 +94,22 @@ effect foundAt banner name seat
 effect grant amount resource
 effect spend amount resource
 server batch .deltas[]:characterArrived character
-server batch .deltas[]:characterArrived.character agedYears bornOn cell familyName givenName id keyFigureOf place portrait sex since species version
+server batch .deltas[]:characterArrived.character agedYears bornOn cell familyName givenName id keyFigureOf place portrait seenUntil sex since species version
 server batch .deltas[]:characterArrived.character.keyFigureOf[] banner id name
 server batch .deltas[]:characterArrived.character.keyFigureOf[].banner charge chargeTincture division field second
 server batch .deltas[]:characterArrived.character.place lat lon
 server batch .deltas[]:characterChanged character
-server batch .deltas[]:characterChanged.character agedYears bornOn cell familyName givenName id keyFigureOf place portrait sex since species version
+server batch .deltas[]:characterChanged.character agedYears bornOn cell familyName givenName id keyFigureOf place portrait seenUntil sex since species version
 server batch .deltas[]:characterChanged.character.keyFigureOf[] banner id name
 server batch .deltas[]:characterChanged.character.keyFigureOf[].banner charge chargeTincture division field second
 server batch .deltas[]:characterChanged.character.place lat lon
 server batch .deltas[]:characterGone id version
 server batch .deltas[]:houseAppeared house
-server batch .deltas[]:houseAppeared.house banner cell id name seat since version
+server batch .deltas[]:houseAppeared.house banner cell id name seat seenUntil since version
 server batch .deltas[]:houseAppeared.house.banner charge chargeTincture division field second
 server batch .deltas[]:houseAppeared.house.seat lat lon
 server batch .deltas[]:houseChanged house
-server batch .deltas[]:houseChanged.house banner cell id name seat since version
+server batch .deltas[]:houseChanged.house banner cell id name seat seenUntil since version
 server batch .deltas[]:houseChanged.house.banner charge chargeTincture division field second
 server batch .deltas[]:houseChanged.house.seat lat lon
 server batch deltas
@@ -120,18 +117,23 @@ server commandAccepted commandId
 server commandRejected commandId reason
 server error code message
 server event causationId correlationId data eventType id stream streamVersion time
-server inspected .at lat lon
-server inspected .water also id kind name of1790
-server inspected at revealed water
+server inspected .character agedYears bornOn cell familyName givenName id keyFigureOf place portrait seenUntil sex since species version
+server inspected .character.keyFigureOf[] banner id name
+server inspected .character.keyFigureOf[].banner charge chargeTincture division field second
+server inspected .character.place lat lon
+server inspected .house banner cell id name seat seenUntil since version
+server inspected .house.banner charge chargeTincture division field second
+server inspected .house.seat lat lon
+server inspected character house id kind
 server pong serverTime t0
 server resync cells
 server rollDrawn .considered[] action weight
 server rollDrawn considered forced opened rarity
-server snapshot .characters[] agedYears bornOn cell familyName givenName id keyFigureOf place portrait sex since species version
+server snapshot .characters[] agedYears bornOn cell familyName givenName id keyFigureOf place portrait seenUntil sex since species version
 server snapshot .characters[].keyFigureOf[] banner id name
 server snapshot .characters[].keyFigureOf[].banner charge chargeTincture division field second
 server snapshot .characters[].place lat lon
-server snapshot .houses[] banner cell id name seat since version
+server snapshot .houses[] banner cell id name seat seenUntil since version
 server snapshot .houses[].banner charge chargeTincture division field second
 server snapshot .houses[].seat lat lon
 server snapshot asOfVersion cell characters houses omitted omittedCharacters
@@ -181,7 +183,7 @@ server yourDialogues .dialogues[].said[].effects[]:spend amount resource
 server yourDialogues .dialogues[].speakers[] character id name party portrait
 server yourDialogues dialogues
 server yourHouse .yours house pledges resources
-server yourHouse .yours.house banner cell id name seat since version
+server yourHouse .yours.house banner cell id name seat seenUntil since version
 server yourHouse .yours.house.banner charge chargeTincture division field second
 server yourHouse .yours.house.seat lat lon
 server yourHouse .yours.pledges[] amount id purpose resource until

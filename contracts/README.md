@@ -68,12 +68,22 @@ recorded over. See decision record 0037. What each one changed:
   `omens` and an option's `rarity` and `omens`, left out of any choice no roll dealt. See decision record 0083.
 - **24** - let an effect be a `converse`, a conversation begun by taking an option, said by the dialogue's
   `title` and nothing of what is said in it.
-- **25** - a page asks what river it points at: `inspectAt`, a place clicked, and `inspected`, whether the house has
-  revealed it and the river there by its id, its name and today's beside a name of 1790, or none. See decision
-  record 0087.
-- **26** - a click asks about any water, not only a river: `inspected` says the `water` there, a `river`, a `lake` or
-  the `sea` by its `kind`, in place of the `river` it said at 25.
-- **27** - gave `roll` its `inspectingWaters`, the places the page has windows on water open at, which the server
-  reads again for the water there: a roll reads a window on the Vistula as *Inspecting the Vistula*.
-- **28** - gave the `water` in `inspected` its `about`, a line or two about the river, lake or sea from
-  `world/names/about.json`, where one was written.
+- **25** - `inspect`, a window asking after its subject wherever the camera is, and `inspected`, the one answer:
+  the house or the character as the map shows them, or neither where the fog holds them back. See decision
+  record 0088.
+- **26** - gave `inspected` its `seenUntil`, the world-day the fog hid somebody a window asked after, who is
+  answered as they were last seen. See decision record 0089.
+- **27** - moved `seenUntil` onto what it dates: a house's view carries the world-day the fog hid it from the house
+  it is sent to, from a cell, a change or a window's answer, and a character's view on `inspected` the same, so the
+  page shows the day it is told and works none of it out. See decision record 0089's amendment.
+- **28 to 31** are the waters', built on a branch that had not met 25: they were 25 to 28 there, moved up three
+  when main's landed first, so their recordings have no `inspect`, and their answer to a click is named
+  `inspected`, as it was there. **28** - a page asks what river it points at: `inspectAt`, a place clicked, and the
+  answer, whether the house has revealed it and the river there by its id, its name and today's beside a name of
+  1790, or none (decision record 0087). **29** - a click asks about any water, not only a river: the answer says
+  the `water` there, a `river`, a `lake` or the `sea` by its `kind`. **30** - gave `roll` its `inspectingWaters`,
+  the places the page has windows on water open at, which the server reads again for the water there: a roll reads
+  a window on the Vistula as *Inspecting the Vistula*. **31** - gave the `water` its `about`, a line or two about
+  the river, lake or sea from `world/names/about.json`, where one was written.
+- **32** - the two together, the windows that ask after their subjects and the water a click points at, as they
+  met on main: main's `inspected` keeps its name, and the answer to `inspectAt` is `inspectedAt`.

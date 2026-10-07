@@ -403,9 +403,24 @@ A **pane** per subject, opened on a click and closed by the player.
 
 **Put away, a window is its first row**: its mark, which one it is, its size control and its close. The
 strip says *Kettleby* rather than *House*, because a rail of three strips that all said *House* would say
-nothing, and on a desktop it keeps its close so a window can be shut without being opened first. A subject
-that has left what this page can see keeps the name the **trail** last saw it under, and only one nothing
-has ever named falls back to the word for its kind.
+nothing, and on a desktop it keeps its close so a window can be shut without being opened first.
+
+**A window does not care where the map is.** One whose subject the camera has left, or the fog has covered, goes
+on saying what it last said, its living numbers stood still, because a window is for reading about a thing and
+going on from it, wherever the map happens to be: Adam's word of 2026-10-07. One this page has never been able to
+say anything of - opened from the trail after a reload, or on a house far away - asks the gateway after its
+subject, once, and says what it is answered: the house on ground the player's house has revealed, the person in
+its vision, by the fog's own rule. Where the answer is nothing it says *Nothing known of it yet*, under the name
+the **trail** last saw it under, or the word for its kind where nothing ever named it. It never sends the player
+to pan back to it. A window out of what the camera holds asks the gateway once anyway, so what it says does not
+hang on where the camera is. See decision record 0088.
+
+**A window on a thing on the map says how fresh it is**, in a small, quiet tag beside its name: `current`, or the
+day the fog hid it, `4 Mar 1793`, with the long form under the pointer. The server dates what it sends and the page
+only shows it: a house on revealed ground by the end of the last stretch the house's vision covered its seat, or the
+day it was revealed where only the surface tension ever did; somebody who has left its vision is shown where they
+stood when last seen, dated by when the fog hid them. The player's own house and people are always current, and an
+area has no tag. See decision record 0089.
 
 **In the spread** the windows take **left** and stack on its rail, newest at the top, up to three; a fourth
 pushes the oldest off rather than being refused. **When they no longer all fit, one stays open** and the
@@ -814,8 +829,6 @@ lifts the whole of it for that window, drawn and held back alike, and every page
   ally or a storyline are all candidates.
 - **What a really big event is.** The number is significance 80 and up, drawn from zoom 2, and nothing in the
   world reaches it yet.
-- **Whether revealed ground shows buildings as they were last seen** rather than as they are now. As they are
-  now, for now; remembering what each player saw is a read model of its own.
 - **What a player sees before founding.** With no house there is nothing to see from, so the whole world is
   unknown, the seats a founding choice offers included.
 - **Whether a house ever shares its vision** with another.
@@ -850,7 +863,10 @@ their house has revealed and the people in its vision, their own house and key f
 and anything of significance 80 from anywhere, which nothing reaches yet. Nothing else in a cell reaches
 them, in its snapshot or its changes, and what is held back is not counted either. When the house's sight
 changes, every cell the player holds is answered again: a house on ground newly revealed appears, and
-somebody no longer in vision goes. Turning the fog off lifts this as well as the drawing.
+somebody no longer in vision goes. From wire version 27 a house sent from revealed ground carries the day the
+fog hid it, which the same answer brings up to date. **Revealed ground shows its buildings as they were when the
+fog hid it:** a house founded there since is not sent, and what happens to a house under the fog is not told
+until the player sees it again. Turning the fog off lifts this as well as the drawing. See 0061's amendment.
 
 **The edge has surface tension**, from wire version 12, which carries it: the ground a ball of 40 km cannot
 get into between the circles is covered too, drawn and held back alike. It is one number,

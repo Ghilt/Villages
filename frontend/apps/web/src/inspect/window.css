@@ -79,8 +79,17 @@
 }
 
 /* Which one it is, on the first row: one line, trimmed rather than wrapped, so the row is one height. */
-.inspect__name {
+/* The name and, beside it, the tag saying how fresh what the window shows is; together they take the row's room. */
+.inspect__named {
+  display: flex;
   flex: 1;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.inspect__name {
+  flex: 0 1 auto;
   min-width: 0;
   margin: 0;
   font-size: 1.1rem;

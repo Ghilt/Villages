@@ -43,7 +43,7 @@ private val betweenThem = Location(59.33, 18.95)
 
 private val banner = Banner(Tincture.SABLE, Division.PLAIN, null, Charge.STAG, Tincture.ARGENT)
 
-private fun house(of: PlayerId, at: Location, significance: Double = 20.0) = HouseRow(
+private fun house(of: PlayerId, at: Location, significance: Double = 20.0, since: WorldTime = today) = HouseRow(
     id = HouseId.of(of),
     player = of,
     name = HouseName.of("Kestrel"),
@@ -52,7 +52,7 @@ private fun house(of: PlayerId, at: Location, significance: Double = 20.0) = Hou
     banner = banner,
     resources = emptyMap(),
     pledges = emptyList(),
-    since = today,
+    since = since,
     until = null,
     version = 1,
 )
@@ -135,6 +135,55 @@ class FogSpec : StringSpec({
 
         fog.letsThrough(house(them, betweenThem)) shouldBe true
         fog.letsThrough(person(), standing(betweenThem), today) shouldBe false
+    }
+
+    "a house in vision, its own, or one seen from anywhere has no day the fog hid it: it is as it is now" {
+        val fog = Fog(me, seatAndAnEndedVision)
+
+        fog.hidOn(house(them, nearby), today) shouldBe null
+        fog.hidOn(house(me, paris), today) shouldBe null
+        fog.hidOn(house(them, paris, significance = 80.0), today) shouldBe null
+    }
+
+    // The Helsinki vision lasted until yesterday, so yesterday is the day the fog came back over it.
+    "a house on ground revealed and no longer in vision was hidden on the day that vision ended" {
+        val fog = Fog(me, seatAndAnEndedVision)
+
+        fog.hidOn(house(them, helsinki), today) shouldBe WorldTime(today.day - 1)
+        // Looking back at a day the vision lasted, it was in it.
+        fog.hidOn(house(them, helsinki), WorldTime(today.day - 5)) shouldBe null
+    }
+
+    // As the ground was when the fog hid it, yesterday: a house there by then is sent, dated, and one founded since is
+    // not. Founded the very day, it counts as there, as everything within one day does.
+    "a house on ground the fog has hidden is sent as it was then, so not at all if it was founded since" {
+        val fog = Fog(me, seatAndAnEndedVision)
+        val before = house(them, helsinki, since = WorldTime(today.day - 3))
+        val thatDay = house(them, helsinki, since = WorldTime(today.day - 1))
+
+        fog.sent(before, today, before.toView())?.seenUntil shouldBe today.day - 1
+        fog.sent(thatDay, today, thatDay.toView())?.seenUntil shouldBe today.day - 1
+        fog.sent(house(them, helsinki), today, house(them, helsinki).toView()) shouldBe null
+        // What it sees, and what is its own, are as they are, whenever they were founded.
+        fog.sent(house(them, nearby), today, house(them, nearby).toView()) shouldBe house(them, nearby).toView()
+        fog.sent(house(me, paris), today, house(me, paris).toView()) shouldBe house(me, paris).toView()
+        fog.sent(house(them, paris), today, house(them, paris).toView()) shouldBe null
+    }
+
+    "a vision begun and ended within one day saw a house that day, and the fog hid it the same day" {
+        val passing = point(helsinki, since = WorldTime(today.day - 5), until = WorldTime(today.day - 5))
+
+        Fog(me, listOf(point(stockholm), passing)).hidOn(house(them, helsinki), today) shouldBe WorldTime(today.day - 5)
+    }
+
+    // Stockholm's vision ended the day the one east of it began, so no one day saw both, or the ground between them.
+    "a house on ground only the tension between two days' points revealed was hidden on the day it was revealed" {
+        val before = point(stockholm, since = WorldTime(today.day - 10), until = WorldTime(today.day - 4))
+        val after = point(eastOfStockholm, since = WorldTime(today.day - 4))
+        val fog = Fog(me, listOf(before, after))
+
+        fog.letsThrough(house(them, betweenThem)) shouldBe true
+        fog.hidOn(house(them, betweenThem), today) shouldBe WorldTime(today.day - 4)
     }
 
     "a connection that has not said who it is sees only the really big" {

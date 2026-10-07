@@ -110,7 +110,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
   where the camera is looking until its `take it away` is pressed; both are real commands. The fog covers the
   world and not the signs: every icon, the offered seats and whatever stands in vision are drawn over it. Unknown ground is under a dark haze, revealed ground has its
   colour taken out, trees and castles too, and vision is clear. With no house the whole world is hazed. The server holds back what the fog hides:
-  a player is sent the houses on revealed ground and the people in vision, and their own wherever they are,
+  a player is sent the houses on revealed ground as they were when the fog hid it, dated, and the people in vision, and their own wherever they are,
   and the scenery's stands only where they touch revealed ground, tile by tile under the held cells, which
   the log counts under `stands`; the trees are grown from those and nothing else, so without the game server
   nothing grows. The server reads them from `world/stands/`, where the generator writes them and nothing serves
@@ -262,8 +262,9 @@ stage alone, with none of the debug panel in it (decision record 0079).
   `npm run world:names --prefix frontend` carries the names again without working the map out, in under a
   second. Two minutes a master. Cutting a master in the Debug map does it as its last step, and the quick start
   does it whenever the origin map is missing or older than the master, and carries the names again whenever
-  the server's copy is missing or older than `world/names/1790.json` or `about.json`; nothing else does. The game server reads
-  a master's names again when they are written, without a restart. It prints how much of the land
+  either copy is missing or older than `world/names/1790.json` or `about.json`; nothing else does. In a worktree
+  whose world is linked from another checkout it does neither, and says so, because both are that checkout's to
+  make. The game server reads a master's names again when they are written, without a restart. It prints how much of the land
   is from Earth, invented and copied. Moving land with Nearest Neighbour keeps it traceable; land painted fresh,
   or opened up between pieces, is invented. See `docs/plans/real-world-names.md`.
 - A picture of the scenery, without a browser: `npm run world:scenery --prefix frontend` paints five

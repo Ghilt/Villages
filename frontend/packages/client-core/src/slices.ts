@@ -1,7 +1,7 @@
 import type {
   ChoiceView,
   DialogueView,
-  InspectedFrame,
+  InspectedAtFrame,
   KeyFigureView,
   RollDrawnFrame,
   ServerFrame,
@@ -25,6 +25,11 @@ export interface SessionState {
    * until one is told. Only ever sent while the instruments are open, and only the debug panel reads it. See 0083.
    */
   rollDrawn: RollDrawnFrame | null;
+  /**
+   * What the gateway answered windows asking after their subject wherever the camera is, by `kind:id`: the house or
+   * the character, or neither where there is none or the fog holds it back. Asked once a connection. See 0088.
+   */
+  inspected: Readonly<Record<string, FrameOf<'inspected'>>>;
   /**
    * The player's living key figures, in the order they joined the house, or null until the gateway has
    * said. An empty list is a house with none; null is not having heard yet. See decision record 0055.
@@ -65,7 +70,7 @@ export interface SessionState {
    * The last answer to what water the page pointed at, until another comes, or null before any: whether the house
    * has revealed the place, and the water there by name. What an inspect window on water is opened from. See 0087.
    */
-  inspected: InspectedFrame | null;
+  inspectedAt: InspectedAtFrame | null;
 }
 
 /**
@@ -139,6 +144,17 @@ const SLICES = {
     onReset: forgottenWhenTakenOver({ rollDrawn: null }),
   } satisfies Slice<'rollDrawn'>,
 
+  /** The answers to windows asking after their subject. Kept through a close; a takeover forgets them. See 0088. */
+  inspecting: {
+    initial: { inspected: {} },
+    onFrame: {
+      inspected: (state, frame) => ({
+        inspected: { ...state.inspected, [`${frame.kind}:${frame.id}`]: frame },
+      }),
+    },
+    onReset: forgottenWhenTakenOver({ inspected: {} }),
+  } satisfies Slice<'inspected'>,
+
   keyFigures: {
     initial: { yourKeyFigures: null },
     onFrame: { yourKeyFigures: (_, frame) => ({ yourKeyFigures: frame.keyFigures }) },
@@ -192,10 +208,10 @@ const SLICES = {
    */
   /** What the page last pointed at, as the server answered. Forgotten to a takeover, like what the house was told. */
   places: {
-    initial: { inspected: null },
-    onFrame: { inspected: (_, frame) => ({ inspected: frame }) },
-    onReset: forgottenWhenTakenOver({ inspected: null }),
-  } satisfies Slice<'inspected'>,
+    initial: { inspectedAt: null },
+    onFrame: { inspectedAt: (_, frame) => ({ inspectedAt: frame }) },
+    onReset: forgottenWhenTakenOver({ inspectedAt: null }),
+  } satisfies Slice<'inspectedAt'>,
 
   switches: {
     initial: { seeAll: false, fogOfWar: true },

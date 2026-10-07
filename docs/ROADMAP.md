@@ -116,12 +116,12 @@ Wanted, not started, and each needs a hypothesis in `docs/experiments/` before a
   **touch**, which nothing has answered: hover lifts a parchment and the map
   is driven by drag and wheel. The camera is also still not told which part of the map the tiles are
   covering, so *show it on the map* can fly a thing to under the column.
-- **An inspect window that stays up to date.** A window is fed from the cells the camera is holding, so
-  panning away from a house leaves it with nothing to say. Your own house is the exception and shows the
-  shape of the answer: the gateway sends it to the **session** rather than to a cell. An open window
-  should be a subscription the same way - a frame, a version at both ends, a recording beside the old
-  ones - and then a window on anything with an event stream is never stale. A subject with no stream, a
-  piece of flavour with some lore attached, needs none of it.
+- **An inspect window that stays up to date.** A window says what it last knew once the camera has left its
+  subject, and one that knows nothing asks the gateway once and is answered by the fog's rule (0088), so it no
+  longer depends on where the map is. What is left is keeping an open window live while its subject changes out
+  of view, which nothing has needed yet. If one ever does, it becomes a subscription, as your own house already
+  is: the gateway sends it to the **session** rather than to a cell. A subject with no stream, a piece of flavour
+  with some lore attached, needs none of it.
 - **Somewhere the player can read the credits.** Three of the world's sources are CC-BY and must be
   credited. The map used to do it and did it on one renderer of six, so it does not any more (0050); the
   credit is in `AUTHORING-THE-WORLD.md` and there is nowhere in the game a player could find it. An about

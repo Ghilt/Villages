@@ -29,7 +29,7 @@ describe('what a roll says the page is looking at', () => {
 
   it('says where each window on water was opened, and never what the water is', () => {
     const vistula = heardWater({
-      type: 'inspected',
+      type: 'inspectedAt',
       at: { lat: 52.25, lon: 21 },
       revealed: true,
       water: { kind: 'river', id: 'Q548', name: 'Vistula', of1790: false },
