@@ -22,7 +22,7 @@ import tools.jackson.databind.JsonNode
  * that: the shape of every frame is recorded in contracts/protocol-v<n>.txt, and a wire that has moved
  * without a new number is a failing build. What each version changed is in contracts/README.md.
  */
-const val PROTOCOL_VERSION = 26
+const val PROTOCOL_VERSION = 27
 
 data class Point(val lat: Double, val lon: Double)
 

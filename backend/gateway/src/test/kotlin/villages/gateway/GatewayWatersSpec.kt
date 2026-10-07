@@ -12,6 +12,7 @@ import villages.domain.Location
 import villages.protocol.Inspected
 import villages.protocol.Point
 import villages.protocol.WaterView
+import villages.protocol.YourChoice
 
 /**
  * A master of a degree a cell, all land, with a river down the column Stockholm stands in, 18 to 19 east; a lake in
@@ -91,6 +92,29 @@ class GatewayWatersSpec : StringSpec({
             // The ground shows a river with no named one near enough to be it: a river all the same.
             Inspected(Point(59.33, 18.07), revealed = true, water = WaterView("river")),
             Inspected(Point(59.33, 19.2), revealed = true, water = WaterView("sea", "Q545", "Baltic Sea")),
+        )
+    }
+
+    "a roll reads the windows open on water as omens, by the server's names, and drops what the house has not revealed" {
+        val rig = Rig()
+        rig.grounds["terrain"] = watersAboutStockholm()
+        rig.names["terrain"] = names
+        val (mine, sent) = rig.introduced(master = "terrain")
+        mine.receive(founding())
+
+        // Two windows on Norrström, one on Lake Maeler, one on the sea out past the fog, and one off the Earth.
+        val places = listOf(59.33 to 18.07, 59.35 to 17.6, 59.4 to 18.07, 59.33 to 19.2, 95.0 to 18.07)
+        mine.receive(
+            """{"type":"command","commandId":"$COMMAND_TWO","command":{"type":"roll","inspectingWaters":[""" +
+                places.joinToString(",") { (lat, lon) -> """{"lat":$lat,"lon":$lon}""" } + "]}}",
+        )
+
+        sent.filterIsInstance<YourChoice>().last().choice!!.omens.map { it.words } shouldBe listOf(
+            "Holdings in the northern reaches",
+            "Weak house",
+            "Inspecting the Norrström",
+            "Inspecting Lake Maeler",
+            "Summer",
         )
     }
 

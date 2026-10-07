@@ -233,12 +233,16 @@ internal class Rig(instrumentsOpen: Boolean = true, sendOn: Executor = Executor 
     /** The ground maps a roll reads where the page is looking, by master: none until a spec lays one down. */
     val grounds = mutableMapOf<String, GroundMap>()
 
+    /** Each master's real names, by master: none until a spec lays some down. */
+    val names = mutableMapOf<String, PlaceNames>()
+
     /** The choice roll over the first content, with a die that always comes up one: common, and the first in the draw. */
     val rolls = RollService(
         FateEngine(
             omenSources(
                 houses, characters, characters, sights, dialogueRows, lastRolls,
                 months = { Calendar.monthOf(it.day) }, grounds = { grounds[it] }, housesNear = houses,
+                names = { names[it] },
             ),
             FirstPools.ALL, firstActions(houses) { UUID.randomUUID() }, { 1 }, { UUID.randomUUID() },
         ),
@@ -248,9 +252,6 @@ internal class Rig(instrumentsOpen: Boolean = true, sendOn: Executor = Executor 
 
     /** The one master's stands, tile by tile, as the sprite map's folder would hold them. */
     val standsOnDisk = mutableMapOf<Int, ByteArray>()
-
-    /** Each master's real names, by master: none until a spec lays some down. */
-    val names = mutableMapOf<String, PlaceNames>()
 
     /** Where the gateway hears that something acting on its own threw, said on purpose by a test. */
     val faults = FaultBoard()

@@ -95,6 +95,9 @@ internal class ChoicesPart(
         zoom = zoom,
         inspectingHouses = inspectingHouses.map { HouseId(asUuid(it, "a house id")) },
         inspectingCharacters = inspectingCharacters.map { CharacterId(asUuid(it, "a character id")) },
+        // A place off the Earth is no water, and is dropped as the fog drops what the house may not see.
+        inspectingWaters = inspectingWaters.filter { it.lat in -90.0..90.0 && it.lon in -180.0..180.0 }
+            .map { Location(it.lat, it.lon) },
         dialogue = dialogue?.let { DialogueId(asUuid(it, "a dialogue id")) },
         figure = figure?.let { CharacterId(asUuid(it, "a character id")) },
     )

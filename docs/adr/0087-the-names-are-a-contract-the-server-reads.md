@@ -3,7 +3,7 @@
 - Status: accepted
 - Date: 2026-10-07
 - Amended 2026-10-07: a second reader, a click on water - a river, a lake, the sea - which asks the server and is
-  answered by name.
+  answered by name; and a third, a roll with a window open on water.
 
 ## Context
 
@@ -60,6 +60,11 @@ named river close enough to be the one painted there, as the omen finds it, or t
 is in or by - or none. A third question is asked of the names for it, which named thing's lines enclose a place.
 The page opens an inspect window on the water it names, keyed by its `id`, so two clicks on the Vistula are one
 window. The page's copy of the names is not what it reads.
+
+**The third reader is a roll with a window open on water.** `roll` says where each was opened, never what
+water it is, and the roll reads every place again as the click was answered, on ground the house has revealed:
+*Inspecting the Vistula*, keyed `window.river:<id>`, `window.lake:<id>` or `window.sea:<id>`, and by the kind alone
+for water nobody has named, so a pool opens on any of them and a questline on one.
 
 **Only what the house has revealed is named**, as only revealed ground counts (0084): a town under the fog is
 no omen, a river is named from a revealed cell the ground shows it in, and the sea from the revealed water.

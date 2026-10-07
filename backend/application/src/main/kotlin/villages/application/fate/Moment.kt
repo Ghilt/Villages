@@ -19,6 +19,8 @@ data class Looking(
     val zoom: Double? = null,
     val inspectingHouses: List<HouseId> = emptyList(),
     val inspectingCharacters: List<CharacterId> = emptyList(),
+    /** Where each window open on water was opened: the places, which the server reads for the water again. */
+    val inspectingWaters: List<Location> = emptyList(),
     val dialogue: DialogueId? = null,
     val figure: CharacterId? = null,
     /** The world the page draws, by its master's name, as it said at hello: whose ground the circle is read on. */

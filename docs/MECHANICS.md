@@ -73,7 +73,7 @@ longer means anything stops being pending rather than waiting for ever.
 ### Omens, pools and actions
 
 An **omen** is one thing the engine took into account: *Holdings in Sweden*, *Weak house*, *Pious*, *Piety
-risen*, *Sir Jeoffrey*, *Unresolved dialogue*, *Missing wealth*, *The Vistula*, *Near Dantzic*, *House Varga*,
+risen*, *Sir Jeoffrey*, *Inspecting the Vistula*, *Unresolved dialogue*, *Missing wealth*, *The Vistula*, *Near Dantzic*, *House Varga*,
 *Unknown* where the fog covers everything, *Winter*. A **pool** is a named grouping of actions that omens open; an action can be in
 many, and one the omens point at from two directions is likelier. **The player sees omens and never pools.**
 An **action** is one thing a roll can offer, and it is dealt at the moment of the roll, so its details can come
@@ -438,8 +438,9 @@ the list of what is still to be worked out.
   been looked at, and whether any of it survives a reload.
 - **What else can be a subject.** Water is the first the server names rather than the browser: a click on a
   river, a lake or the sea asks, and the answer names it from the master's real names on ground the house has
-  revealed (0087). Its window says its name and nothing more yet; what water is for, and whether a roll reads a
-  window open on it as it reads a house's, is still to come.
+  revealed (0087). A roll reads a window open on it as it reads one on a house, *Inspecting the Vistula*, from
+  the place the window was opened at and never the page's word for what is there. Its window says its name and
+  nothing more yet; what water is for is still to come.
 
 ### Where it stands
 

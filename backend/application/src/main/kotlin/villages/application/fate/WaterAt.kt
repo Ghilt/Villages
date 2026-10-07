@@ -16,7 +16,23 @@ data class WaterHere(
     val name: String? = null,
     val also: String? = null,
     val of1790: Boolean = false,
-)
+) {
+    /**
+     * As English says it inside a sentence: the Vistula, the German Ocean, the Lake of Geneva, but Lake Maeler and
+     * Loch Ness, which take no article; and a river, a lake, a sea where nobody has named it.
+     */
+    val called: String
+        get() = when {
+            name == null -> "a ${kind.name.lowercase()}"
+            name.startsWith("The ") -> "the ${name.removePrefix("The ")}"
+            kind == WaterKind.LAKE && NO_ARTICLE.containsMatchIn(name) -> name
+            else -> "the $name"
+        }
+
+    private companion object {
+        val NO_ARTICLE = Regex("^(Lake|Loch|Lough) (?!of )")
+    }
+}
 
 /**
  * The water a player points at: what the master's ground map has where they clicked, a river, a lake or the sea, and

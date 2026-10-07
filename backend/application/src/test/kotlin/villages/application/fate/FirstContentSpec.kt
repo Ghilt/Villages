@@ -8,11 +8,13 @@ import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.shouldBe
 import villages.application.HouseRow
 import villages.domain.Banner
+import villages.domain.CharacterId
 import villages.domain.Charge
 import villages.domain.Division
 import villages.domain.HouseId
 import villages.domain.HouseName
 import villages.domain.Location
+import villages.domain.Omen
 import villages.domain.OmenKind
 import villages.domain.PlayerId
 import villages.domain.Rarity
@@ -80,5 +82,18 @@ class FirstContentSpec : StringSpec({
         val read = HouseOmens().read(bare.copy(house = house.withStock(Resource.PIETY) { Stock(100, 0.0, noon) }))
 
         FirstPools.ALL.filter { pool -> read.any(pool::opensOn) }.map { it.name } shouldBe listOf("Coin", "Land", "Faith")
+    }
+
+    "a window open on water opens the coin, whatever the water and whether or not anybody has named it" {
+        val windows = listOf(
+            WaterHere(WaterKind.RIVER, "Q548", "Vistula"),
+            WaterHere(WaterKind.LAKE),
+            WaterHere(WaterKind.SEA, "Q1693", "German Ocean"),
+        ).map { Omen(OmenKeys.inspectingWater(it), OmenKind.WINDOW, "Inspecting ${it.called}") }
+
+        windows.map { it.key.value } shouldBe listOf("window.river:Q548", "window.lake", "window.sea:Q1693")
+        windows.map { it.words } shouldBe listOf("Inspecting the Vistula", "Inspecting a lake", "Inspecting the German Ocean")
+        windows.map { omen -> FirstPools.ALL.filter { it.opensOn(omen) }.map { it.name } }.toSet() shouldBe setOf(listOf("Coin"))
+        FirstPools.COIN.opensOn(Omen(OmenKeys.inspectingCharacter(CharacterId(UUID.randomUUID())), OmenKind.WINDOW, "")) shouldBe false
     }
 })

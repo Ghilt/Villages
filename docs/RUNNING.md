@@ -183,8 +183,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   `roll`, and the hand under `choice`, with its rarity and how many omens it was rolled from. The **Choice
   roll** section of the debug panel, below Dialogues, looks into it: the hand's omens - the house's holdings,
   *Weak house*, *Pious*, what rose since the last roll, *Missing wealth* when an open dialogue waits on a cost
-  the house cannot pay, the windows open on houses it has revealed and on people it sees or holds, the dialogue
-  being read, the key figure open, where the view is centred - *Coast*, *River* within 400 km, *Forest*,
+  the house cannot pay, the windows open on houses it has revealed and on people it sees or holds, and on water
+  it has revealed, *Inspecting the Vistula*, *Inspecting Lake Maeler*, the dialogue being read, the key figure open, where the view is centred - *Coast*, *River* within 400 km, *Forest*,
   *Mountains*, *Fields*, *Grassland*, *Desert*, *Marsh* or *Ice* where it is a sixth of the revealed land or
   more, *Open sea*, *House &lt;name&gt;* for houses standing in a circle of 150 km or less, and *Unknown* where the
   fog covers it all, read by the game server off the ground map of the master the page draws; where its names
@@ -207,7 +207,9 @@ stage alone, with none of the debug panel in it (decision record 0079).
   on a shore can name the water beside it: a lake is the one whose shores enclose the click, a cell mostly sea is
   the sea, and otherwise a river comes before a lake and a lake before the sea. Two clicks on the Vistula are one
   window. Every answer is a line of the log under `inspect` - `river, the Vistula (Wisła)`, `sea, the German
-  Ocean (North Sea today)`, *a lake nobody has named*, *no water there* or *under the fog*. See `docs/adr/0087`.
+  Ocean (North Sea today)`, *a lake nobody has named*, *no water there* or *under the fog*. Take action with a
+  window on water open reads it as an omen, *Inspecting the Vistula*: the page says where the window was opened and
+  the server says what is there, on ground the house has revealed. See `docs/adr/0087`.
 
 ## Adam's folders and the tools that cut them
 

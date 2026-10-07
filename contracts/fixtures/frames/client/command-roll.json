@@ -10,6 +10,7 @@
     "zoom": 9.5,
     "inspectingHouses": ["6d5b0a2e-1c3f-4d7e-9a8b-0f1e2d3c4b5a"],
     "inspectingCharacters": ["cc000000-0000-4000-8000-000000000001"],
+    "inspectingWaters": [{ "lat": 59.33, "lon": 18.07 }],
     "dialogue": "1c000007-0000-4000-8000-000000000033",
     "figure": "cc000000-0000-4000-8000-000000000001"
   }
