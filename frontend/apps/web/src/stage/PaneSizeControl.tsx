@@ -1,11 +1,11 @@
-import { SIZES, type PaneSize, type Room } from './panes';
+import type { PaneSize, Room } from './panes';
 
 /**
  * **The pane size control**: how much of the stage this pane is taking, and the way to change it.
  *
  * **One control on every pane**, in both forms, replacing the chevron that used to only put a pane away.
  * Put away, the normal one, opened out - three marks, the one you are on filled in. Three on every pane
- * since 0046 gave the map a strip; there used to be a pane that offered two.
+ * since 0046 gave the map a strip, but for the letter in the spread, which is put away or opened out (0085).
  *
  * The mark is how much of a box is filled, which is the thing being chosen: a sliver, some of it, all of
  * it. That is deliberately not a metaphor - there is no folder, no chevron, no arrow pointing anywhere. A
@@ -35,7 +35,7 @@ export function PaneSizeControl({ room }: { room: Room }) {
   }
   return (
     <span className="pane-size" role="group" aria-label="how much room this takes">
-      {SIZES.map((size) => {
+      {room.sizes.map((size) => {
         const on = room.asked === size;
         const box = FILLED[size];
         return (

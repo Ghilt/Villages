@@ -1,4 +1,4 @@
-# 0085. The names are a contract the server reads
+# 0087. The names are a contract the server reads
 
 - Status: accepted
 - Date: 2026-10-07

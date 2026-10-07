@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 
 import type { SessionState } from '@villages/client-core';
 
-import { CHOICE_PANE } from './choice/pane';
+import { CHOICE_AT_REST, CHOICE_PANE } from './choice/pane';
 import { Choosing } from './choice/Choosing';
 import { lookingNow } from './looking';
 import { DIALOGUE_PANE } from './dialogues/pane';
@@ -12,20 +12,28 @@ import { KeyFigures } from './figures/KeyFigures';
 import { HOUSE_PANE } from './house/pane';
 import { HouseStatus } from './house/HouseStatus';
 import { Inspecting } from './inspect/Inspecting';
-import { inspectBeside } from './inspect/opening';
+import { inspectBeside, sizeWindow } from './inspect/opening';
 import { Navigating } from './inspect/Navigating';
 import { inspectPane } from './inspect/pane';
 import { subjectsStore, type Subject } from './inspect/subjects';
 import { sessionStore } from './net/gateway';
 import type { BaysConfig } from './stage/bays';
-import { type Along, MAP_PANE, NAVIGATION_PANE, type Pane, type PaneDef, type Room } from './stage/panes';
+import {
+  type Along,
+  MAP_PANE,
+  NAVIGATION_PANE,
+  type Pane,
+  type PaneDef,
+  type PaneSize,
+  type Room,
+} from './stage/panes';
 
 /**
  * Which panes stand on the stage, in which order, and what draws each.
  *
  * Each pane is declared by its feature, in its own folder, and named here once: the house status, the key
  * figures and navigation, which share the corner and stand in it in this order; the choice roll while a
- * question does; and character dialogue from the house's first dialogue on. The map comes first, because it
+ * question does, and at rest once there is a house; and character dialogue from the house's first dialogue on. The map comes first, because it
  * is the floor, and its contents are App's, which holds the map; a window per subject open comes last,
  * newest first. A new mechanic's pane is a declaration in its folder and a line here. The stage is handed
  * the list and reads nothing of the game. See ARCHITECTURE's "The stage is handed its panes".
@@ -48,10 +56,16 @@ const STANDING: readonly Standing[] = [
   },
   {
     pane: CHOICE_PANE,
-    // At rest it is Take action, so it stands once there is a house to take it; before then only a question
-    // raises it. See decision record 0083.
-    stands: (session) => session.yourChoice !== null || (session.yourHouse ?? null) !== null,
-    draw: (room) => <Choosing room={room} looking={lookingNow} />,
+    // A question asked, or a hand dealt; before there is a house only a question raises it. See 0083.
+    stands: (session) => session.yourChoice !== null,
+    draw: (room, along) => <Choosing room={room} along={along} looking={lookingNow} />,
+  },
+  {
+    // At rest it is Take action, so it stands once there is a house to take it: the same pane, shorter opened
+    // out, because all it has to say is the button. See decision record 0085.
+    pane: CHOICE_AT_REST,
+    stands: (session) => session.yourChoice === null && (session.yourHouse ?? null) !== null,
+    draw: (room, along) => <Choosing room={room} along={along} looking={lookingNow} />,
   },
   {
     pane: DIALOGUE_PANE,
@@ -83,6 +97,8 @@ export function panesOn(
     ...up.map((one) => ({ ...one.pane, draw: (room: Room, along: Along) => one.draw(room, along, going) })),
     ...open.map((subject) => ({
       ...inspectPane(subject),
+      // Opened in the spread, a window comes to the top of the rail, as asking for it from the map does.
+      ask: (size: PaneSize) => sizeWindow(subject, size),
       draw: (room: Room, along: Along) => <Inspecting subject={subject} room={room} along={along} />,
     })),
   ];

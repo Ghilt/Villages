@@ -78,31 +78,6 @@
     list-style: none;
   }
 
-  .ui-omen-strip__landing {
-    animation: ui-report-slam 0.2s cubic-bezier(0.2, 0.9, 0.3, 1.3) both;
-  }
-
-  /* The strip as the way back to the list: one button, the marks its face, lighter under the pointer. */
-  .ui-omen-strip__open {
-    margin: 0;
-    padding: 0.15em 0.3em;
-    border: 0;
-    border-radius: 4px;
-    background: none;
-    color: inherit;
-    font: inherit;
-    cursor: pointer;
-  }
-
-  .ui-omen-strip__open:hover {
-    background: color-mix(in srgb, currentColor 12%, transparent);
-  }
-
-  .ui-omen-strip__open:focus-visible {
-    outline: 2px solid var(--ui-focus);
-    outline-offset: 2px;
-  }
-
   .ui-omen-strip--small {
     gap: 0.2em;
     opacity: 0.85;
@@ -160,12 +135,6 @@
     overflow: hidden;
   }
 
-  .ui-hand--medium .ui-hand__options {
-    flex: 1;
-    height: auto;
-    min-height: 0;
-  }
-
   .ui-hand--stacked {
     height: auto;
   }
@@ -191,7 +160,6 @@
 
   @media (prefers-reduced-motion: reduce) {
     .ui-report__row--landing,
-    .ui-omen-strip__landing,
     .ui-pop {
       animation: none;
     }

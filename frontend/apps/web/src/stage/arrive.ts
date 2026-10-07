@@ -20,8 +20,9 @@ import { MAP_PANE, type PaneSize, sizeAsked } from './panes';
  * is still in view, or the map's own when reading it is the thing to do first, as a question is. What it
  * displaced comes back when it goes. And it opens that bay to at least half, because a thing that arrives as
  * a strip is a thing nobody can read; who asked is the difference between this and the compass, which lands
- * in a strip quite happily. In the spread everything is on the screen at once, so nothing is placed, and a
- * thing that was put away there comes back at the size it says.
+ * in a strip quite happily. A thing already standing in a bay stays there, unless it was pointed at the other.
+ * In the spread everything is on the screen at once, so nothing is placed, and a thing that was put away
+ * there comes back at the size it says.
  */
 
 export interface Arrival {
@@ -37,6 +38,14 @@ export function arrive(id: string, how: Arrival = {}): void {
     if (how.inTheSpread !== undefined && pane !== undefined && sizeAsked(pane, baysStore.get()) === 'strip') {
       askFor(id, how.inTheSpread);
     }
+    return;
+  }
+  // Already standing in a bay, and not pointed at another: it stays where it is and that bay opens to be read.
+  // Take action is pressed in the letter, and the hand it rolls arrives in the letter; taking the map's bay
+  // swapped the two at every press, Adam's find of 2026-10-06.
+  const standing = baysStore.get().holding.indexOf(id);
+  if (standing !== -1 && typeof how.into !== 'number') {
+    roomToRead(standing as Which);
     return;
   }
   const bay = how.into === 'theMapsBay' ? theMapsBay() : (how.into ?? awayFromTheMap());

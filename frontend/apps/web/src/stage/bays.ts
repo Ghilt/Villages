@@ -3,7 +3,15 @@ import type { Readable } from '@villages/client-core';
 
 import { note } from '../log/log';
 import type { BayName } from './bayBox';
-import { MAP_PANE, NAVIGATION_PANE, type Pane, type PaneSize, SHARED_TILES, sizeAsked } from './panes';
+import {
+  askedInTheSpread,
+  MAP_PANE,
+  NAVIGATION_PANE,
+  type Pane,
+  type PaneSize,
+  SHARED_TILES,
+  sizeAsked,
+} from './panes';
 import { type Arrangement, arrangementFor, askedIn, type Which } from './arrangement';
 
 /**
@@ -194,6 +202,11 @@ function titleOf(id: string): string {
   return paneById(id)?.title ?? id;
 }
 
+/** What the log calls a pane's tile: the corner, for the panes taking turns in it, and otherwise the pane. */
+function tileOf(pane: Pane): string {
+  return SHARED_TILES[pane.spread] === undefined ? titleOf(pane.id) : 'the corner';
+}
+
 /**
  * Which of the panes sharing a tile is up.
  *
@@ -249,21 +262,13 @@ export function put(which: Which, id: string): void {
 }
 
 /**
- * Ask for one of a pane's three sizes.
+ * Ask for one of a pane's three sizes: the one control every pane has, in both forms, which replaced a chevron
+ * that could only put a pane away and a button on one pane that swapped between two sizes. See 0045.
  *
- * The one control every pane has, in both forms. It replaced a chevron that could only put a pane away and
- * a second button on one pane that swapped between two sizes: they were the same question - how much of
- * the stage is this taking - asked twice with different words. See decision record 0045.
- *
- * **In the bays it names the arrangement**, which is 0045's rule with the mechanism taken out from under
- * it. It used to write the neighbour's size into the neighbour's own entry, and the two could then be
- * pulled apart by anything that moved a pane; now both bays read one value and the other follows because
- * there is nothing else for it to read.
- *
- * **In the spread a tile's height is its own**: there is nobody for it to speak for, because the map
- * behind it takes whatever is left over without being asked. And a pane that takes turns in a tile with
- * others speaks for the tile, which is one size whichever of them is up: asking from any of them, or from
- * the control in the tab bar, asks the same one thing. See decision record 0057.
+ * **In the bays it names the arrangement**: both bays read one value, and the other follows because there is
+ * nothing else for it to read. **In the spread a tile's height is its own**, because the map behind it takes
+ * whatever is left; a pane taking turns in a tile speaks for the tile, one size whichever is up (0057); and
+ * the corner and the right column are never both opened out, so opening one steps the other down (0085).
  */
 export function askFor(id: string, size: PaneSize): void {
   const pane = paneById(id);
@@ -272,22 +277,15 @@ export function askFor(id: string, size: PaneSize): void {
   }
 
   if (form !== 'bays') {
-    const shared = SHARED_TILES[pane.spread] !== undefined;
-    if (shared) {
-      if (sizeAsked(pane, store.get()) === size) {
-        return;
-      }
-      settle({ ...store.get(), tiles: { ...store.get().tiles, [pane.spread]: size } });
-      note('bay', `${pane.spread === 'bottomLeft' ? 'the corner' : pane.spread} ${SAID[size]}`);
-      return;
-    }
     // What it is at, which is what it opens at until it has been asked for anything: asking a pane that
     // opens at its normal size for its normal size changes nothing, and says nothing.
     if (sizeAsked(pane, store.get()) === size) {
       return;
     }
-    settle({ ...store.get(), heights: { ...store.get().heights, [id]: size } });
-    note('bay', `${titleOf(id)} ${SAID[size]}`);
+    const { asked, stepped } = askedInTheSpread(config.panes(), store.get(), pane, size);
+    settle({ ...store.get(), ...asked });
+    const also = stepped === null ? '' : `, ${tileOf(stepped)} ${SAID.small}`;
+    note('bay', `${tileOf(pane)} ${SAID[size]}${also}`);
     return;
   }
 

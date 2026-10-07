@@ -27,7 +27,7 @@ fun interface HousesNear {
  * Where the master's real names have been carried, the ground says whether and the names say what: the river is
  * the Vistula and the open sea the Baltic, under the same keys as a river and the open sea with no name, so a pool
  * opens on them just the same; and a town of 1790 standing in the circle is an omen of its own, by its key. See
- * decision record 0085.
+ * decision record 0087.
  */
 class MapOmens(
     private val grounds: GroundMaps,

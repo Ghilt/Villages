@@ -152,7 +152,9 @@ stage alone, with none of the debug panel in it (decision record 0079).
   answer are lines of the log under `dialogues`, and so is where each dialogue stands whenever one changes,
   as far as the player may know it; the dialogue itself, whole, is at `/admin/inspect-events`. In the game,
   the house's first dialogue puts up the **dialogues** pane, a column down the right of the spread with its
-  three sizes, and a pane navigation lists on a phone; it lists the dialogues waiting and finished, a lapsed
+  three sizes - put away, a strip along the bottom; opened out, it puts the corner back to its normal size,
+  and opening the corner out puts it back, a line of the log under `bay` saying both - and a pane navigation
+  lists on a phone; it lists the dialogues waiting and finished, a lapsed
   one saying why, and pressing one opens it to be read and played, over its scene, the picture from
   `world/scenes/` filling the pane: *continue*, a word in the middle of its foot, shows a line at a time
   and takes the step past the last, the options are at the end of the feed, and
@@ -164,17 +166,17 @@ stage alone, with none of the debug panel in it (decision record 0079).
   `offer a dialogue` opens the pane: from its strip in the spread, and on a phone into the bay the map is
   not in, at half. See `docs/adr/0071`, `0069` and `0070`, and `docs/plans/character-dialogue.md`.
 - The choice roll, the player's own: **Take action**, in the bottom middle of the spread once there is a
-  house, put away to its strip at rest with what a roll costs beside it - a press anywhere on the strip but its
-  buttons opens the pane out - ten wealth, and a house is founded
+  house, put away at rest to a **chip** in the middle of the bottom row with what a roll costs beside it - a
+  press anywhere on the chip but the button opens the pane out - ten wealth, and a house is founded
   with fifty. Greyed, saying why, while the house has less than that free or a command is waiting on its
-  answer. Pressed, it rolls: the pane opens out, three times as tall as its middle size, and plays the roll as
+  answer. Pressed, it rolls: the pane opens out over everything, the rest of the stage dimmed under a **veil**
+  that puts it away when pressed, and plays the roll as
   a report card - the omens slam into a list a third of a second apart, and under a divider the hand of three
   options of one rarity pops in along the bottom, each a card edged and named in its rarity, saying what it
   gives, with the marks of the omens that brought it. A press on the list lands the rest of the omens at once.
-  At the middle size the list is folded to its marks over the options, each just its rarity and its title, and
-  pressing the marks or an option opens the pane out, where an option is taken; on
-  a phone the list and the options are one under another and the pane scrolls. Taking an option gives it, and
-  the pane goes back to its strip. *Gossip from the kitchens*, a common, is a conversation rather than a
+  On a desktop it is put away or opened out and nothing between, and the corner and the dialogues never move
+  for it; on a phone the list and the options are one under another and the pane scrolls. Taking an option
+  gives it, and the pane goes back to its chip. *Gossip from the kitchens*, a common, is a conversation rather than a
   resource: taking it offers a dialogue about the nearest other house within 1500 km, which opens in the
   dialogues pane, and with no house that near it is never dealt. A hand already pending when the page loads is drawn as it ends. A hand cannot be rolled over while it waits. The asking and the answer are lines of the log under
   `roll`, and the hand under `choice`, with its rarity and how many omens it was rolled from. The **Choice
@@ -230,7 +232,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
   through it into `names.json` beside them, three megabytes,
   and gives every square the named sea and stretch of land it is in or by, in `regions.bin`. The same two files
   go into `world/ground/<master>/` beside the ground map, where only the game server reads them, for the map's
-  omens; their shape is held by `contracts/fixtures/names.json` (0085). Canals are left out, because Natural
+  omens; their shape is held by `contracts/fixtures/names.json` (0087). Canals are left out, because Natural
   Earth's were dug after 1790.
   `npm run world:names --prefix frontend` carries the names again without working the map out, in under a
   second. Two minutes a master. Cutting a master in the Debug map does it as its last step, and the quick start

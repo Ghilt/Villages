@@ -44,7 +44,7 @@ data class NamedNear(val name: PlaceName, val km: Double)
 /**
  * A master's real names as the server holds them: every named thing carried into its world, and for every square of
  * its origin map the land it is in and the sea it is by. Filed by `world:names` beside the ground map, the same
- * bytes the page reads; the shape is a contract, held by `contracts/fixtures/names.json`. See decision record 0085.
+ * bytes the page reads; the shape is a contract, held by `contracts/fixtures/names.json`. See decision record 0087.
  */
 class PlaceNames(
     val names: List<PlaceName>,

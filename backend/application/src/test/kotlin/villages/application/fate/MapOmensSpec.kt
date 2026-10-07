@@ -28,7 +28,7 @@ import java.util.UUID
 /**
  * Where the player is looking, read off a ground map of one-degree cells: forest with a river through it east of
  * the seat, the sea west of it, and the fog over everything the seat's circle has not reached; and, where the
- * master's real names were carried, what the river, the sea and the towns are called. See decisions 0084 and 0085.
+ * master's real names were carried, what the river, the sea and the towns are called. See decisions 0084 and 0087.
  */
 class MapOmensSpec : StringSpec({
     val today = WorldTime(454901)

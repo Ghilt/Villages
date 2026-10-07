@@ -84,3 +84,8 @@
     display: none;
   }
 }
+
+/* Put away in the spread, a press anywhere on a pane opens it out, so it says so under the pointer. */
+.stage[data-form='spread'] .bay[data-away] {
+  cursor: pointer;
+}

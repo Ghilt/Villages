@@ -2,6 +2,9 @@
 
 - Status: accepted
 - Date: 2026-09-30
+- Superseded in part 2026-10-06 by 0085: the column **runs top to bottom always** and never stops above the
+  letter, which is a chip between the columns put away and lies over everything opened out; it leaves the chip
+  its least; put away it is a strip across its **bottom**; and it is never opened out with the corner.
 - Adds a tile to 0041's spread, which had a column down the left, a corner and a tile along the bottom
   middle. 0056 said a pane wider in the rail, or a second column, would be its own decision; this is the
   second column.

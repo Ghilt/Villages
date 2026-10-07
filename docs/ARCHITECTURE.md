@@ -408,7 +408,7 @@ Two things follow for the architecture:
   from each master's **ground map**, cut by a world tool and read through a port. See decision record 0084.
 - **The server reads the names** the same way: the world tool files a master's real names beside its ground map
   as well as beside its tiles, the same bytes, and the server reads them through a port of their own. Their shape
-  is a contract between the two languages, held by a shared fixture as the wire is. See decision record 0085.
+  is a contract between the two languages, held by a shared fixture as the wire is. See decision record 0087.
 
 A rolled option can name a thing that does not exist yet. Because play is chronological, that thing is
 simply created going forward - there is nothing to reconcile with the past, and no constraint solver.

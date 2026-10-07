@@ -244,7 +244,7 @@ class WorldConfig {
     fun ground(@Value("\${villages.ground:../../world/ground}") folder: String): GroundMaps =
         FolderGround(Path.of(folder))
 
-    /** Each master's real names, from the copy `world:names` files beside its ground map. See 0085. */
+    /** Each master's real names, from the copy `world:names` files beside its ground map. See 0087. */
     @Bean
     fun placeNames(@Value("\${villages.ground:../../world/ground}") folder: String): PlaceNamesByMaster =
         FolderNames(Path.of(folder))

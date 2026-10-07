@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
 import { Divider } from '../divider/Divider';
-import { OmenStrip, ReportCard } from './ReportCard';
+import { ReportCard } from './ReportCard';
 import type { OmenLine } from './ReportCard';
 import type { Play } from './timing';
 
@@ -9,12 +9,10 @@ import type { Play } from './timing';
  * How a rolled hand is laid out:
  *
  * - `full`, opened out on a desktop: the report card on top, a divider, and the options in a row along the bottom.
- * - `medium`, a desktop's middle size: the list folded to its marks, which open it out again when pressed, over the
- *   options in a row.
  * - `stacked`, on a phone: the report card and the options under it one after another, scrolling when they do not
  *   fit. Only here does anything scroll; on a desktop the options are written to fit their room.
  */
-export type HandForm = 'full' | 'medium' | 'stacked';
+export type HandForm = 'full' | 'stacked';
 
 /**
  * **A rolled hand**: the omens a roll read and the options it dealt, played as the roll goes - the omens landing,
@@ -27,7 +25,6 @@ export function RolledHand({
   play,
   options,
   onHurry,
-  onOpen,
 }: {
   form: HandForm;
   omens: readonly OmenLine[];
@@ -36,8 +33,6 @@ export function RolledHand({
   options: readonly ReactNode[];
   /** Lands the omens still to come at once. */
   onHurry?: () => void;
-  /** Opens the medium form out to the full one, from its marks. */
-  onOpen?: () => void;
 }) {
   const playing = play.phase !== 'settled';
   const landed = playing ? play.landed : Infinity;
@@ -55,15 +50,6 @@ export function RolledHand({
       ))}
     </ol>
   );
-
-  if (form === 'medium') {
-    return (
-      <div className={`ui-hand ui-hand--medium`} onClick={playing ? onHurry : undefined}>
-        <OmenStrip omens={omens} landed={landed} {...(playing || onOpen === undefined ? {} : { onOpen })} />
-        {hand}
-      </div>
-    );
-  }
 
   return (
     <div className={`ui-hand ui-hand--${form}`}>

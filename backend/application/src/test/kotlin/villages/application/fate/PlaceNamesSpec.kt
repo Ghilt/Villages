@@ -6,7 +6,7 @@ import io.kotest.matchers.shouldBe
 import villages.domain.Location
 import kotlin.math.cos
 
-/** The questions the server asks of a master's real names. See decision record 0085. */
+/** The questions the server asks of a master's real names. See decision record 0087. */
 class PlaceNamesSpec : StringSpec({
     fun river(id: String, vararg points: Location) = PlaceName(
         id, NameKind.RIVER, id, null, null, null, false, points.first(), points.first(), listOf(points.toList()),

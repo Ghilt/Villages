@@ -60,7 +60,9 @@ never disagree — they read one value rather than writing into each other.
 **Nothing but the control moves the seam**, with one exception. Putting a different pane in a bay, pressing
 the **compass**, closing a pane: none of them changes how the stage is divided. The exception is something
 *arriving* in a bay that is a strip — something the player just clicked, or something the world has just
-sent — which opens that bay to half, because a thing nobody can read is not an answer. The compass is not
+sent — which opens that bay to half, because a thing nobody can read is not an answer. A thing arriving that
+is already standing in a bay stays where it is and only its bay opens, so a hand rolled from the letter lands
+in the letter rather than swapping it with the map. The compass is not
 one of those: what it opens is a list of ways on, and a strip of it is still a list of ways on. See decision
 record 0046.
 
@@ -102,11 +104,14 @@ the layout knows what any pane is for. There are five in the spread and two in t
 │ │  the rail │      the floor         │             │
 │ │           │                        │             │
 │ ├───────────┤                        │             │
-│ │  bottom   │  ┌─────────────────┐   │             │
-│ │   left    │  │  bottom middle  │   │             │
-│ └───────────┘  └─────────────────┘   └─────────────┤
+│ │  bottom   │                        │             │
+│ │   left    │   ┌───────────────┐    │             │
+│ │           │   │ bottom middle │    │             │
+│ └───────────┘   └───────────────┘    └─────────────┤
 └────────────────────────────────────────────────────┘
 ```
+
+Bottom middle is drawn put away, as its chip. Opened out it lies over all of it.
 
 **The floor** is the whole stage, under everything, and the one bay exempt from the rule that nothing
 overlaps, because everything lies on it on purpose. Its pane has no size in the spread: it is the ground the
@@ -133,25 +138,31 @@ rather than inside each pane. The desktop's form of the fold's rule: how big the
 corner, not to whatever is standing in it. See decision record 0057.
 
 **Opened out, bottom left reaches along the bottom**, the one tile whose width is not the column's: it grows
-along the bottom edge, the rail above keeps the column's width, and bottom middle moves over and never goes
-below 281. The cap is the same whether anything is along the bottom or not, so something arriving there
-never resizes the corner. See decision record 0056.
+along the bottom edge and the rail above keeps the column's width. It stops where it would leave bottom
+middle's chip and a right column at its normal width no room beside it, whether or not either is there, so
+neither arriving resizes the corner. See decision records 0056 and 0085.
 
-**Bottom middle** has no rules but its size and its putting away. It stands a gutter off the bottom edge,
-centred in what the column leaves, never wider than 736 and **never narrower than 281**. The column is
-capped at a third of the stage and the spread only exists above 600 on the shorter side, so that floor
-holds on every stage the spread can be; a test sweeps them all, so if the column is ever widened the thing
-that breaks says so. See decision record 0044.
+**Bottom middle is put away or opened out, and nothing between**, and either way it moves nothing. **Put away
+it is a chip**, 280 wide where there is room and never less than 136, a gutter off the bottom edge, in the
+middle of what the corner and the right column leave; they lay themselves out as though it were not there.
+**Opened out it lies over everything**, 736 wide and up to 768 tall, centred on the stage and standing where
+the chip stands, with the **veil** under it: the whole stage dimmed between it and everything else, the one
+tile exempt from the rule that tiles never overlap besides the floor. Pressing the veil puts it away. See
+decision records 0044 and 0085.
 
 **Right** is a second column, set into the stage's right, top and bottom edges as the first is set into the
 left, top to bottom. **It is cut last, from what the others leave**: never
 within a gutter of the wider of the rail and the corner, the corner reaching along the bottom included, so
 its coming and going resizes nothing on the left. Its three sizes are the layout's, as the left column's
 width is: normal, 480, squeezed to a third of a narrow stage first and never below 288; opened out, half
-the stage and never less than normal; put away, a strip 44 high across its top. **Bottom middle goes between
-the two columns while it has its 281 there**; where it has not, it keeps its place and the right column
-stops a gutter above it. On a desktop both columns are at their own widths, and on a narrow stage both are a
-third and the map is the middle one. See decision record 0069.
+the stage and never less than normal; put away, a strip 44 high across its **bottom**, so the three put away
+stand along one edge. It runs top to bottom always, and it is never so wide that it leaves bottom middle's
+chip less than its least. On a desktop both columns are at their own widths, and on a narrow stage both are a
+third and the map is the middle one; below 744 wide the right column is what gives up width. See decision
+records 0069 and 0085.
+
+**Only one of bottom left and right is opened out at a time.** Opening one out steps the other down to its
+normal size, so the middle of the bottom row is always there for the chip. See decision record 0085.
 
 **The column is one piece of furniture**, set into the stage's left and bottom edges rather than floating a
 gutter off them. Its two tiles share a width and one gutter between them, so they read as a column and not
@@ -160,6 +171,12 @@ stage before it gives up anything else.
 
 **An empty tile takes no room.** Nothing in the corner and the column runs to the bottom; nothing along the
 bottom and the floor keeps the whole bottom of the stage. A tile is never reserved against a future.
+
+**A tile changing size glides there, in 160 milliseconds**, whenever a size was asked for: never the floor,
+never while the stage itself is resized or crossing the fold, and never for a player who has asked for less
+motion. The veil fades in and out with bottom middle, and what bottom middle says fades in once its box has
+landed. The windows on the rail, which are not rectangles of the layout but stacked in it, glide too: they are
+measured after every change and each is animated from where it stood. See decision record 0086.
 
 **A tile that runs out of room draws what is in it smaller**, by a container query on the tile, which is the
 same thing the pane does on a phone. It **never changes form**: only the stage's shorter side decides
@@ -217,7 +234,11 @@ differs is who the room belongs to. See decision records 0045 and 0046.
 the stage it is taking: put away, the normal size, opened out. In the **bays** it names the arrangement,
 and the other bay follows because both of them are reading one value. In the **spread** each tile's size is
 its own, because a tile is not dividing anything with anybody, and the panes taking turns in bottom left
-share one control, in its tab bar. See decision records 0045, 0046 and 0057 and `LOOK-AND-FEEL.md`.
+share one control, in its tab bar. **In the spread a press anywhere on a pane put away opens it out**, but
+on a button of its own, which does what it says: the strip is the way back, the marks are for the other sizes.
+**Bottom middle offers two marks in the spread**, put away and opened
+out, and its chip carries none, because pressing the chip opens it. See decision records 0045, 0046, 0057
+and 0085 and `LOOK-AND-FEEL.md`.
 
 **Where things open differs between the forms, and nothing else does.** In the spread everything is on the
 screen, so a way on from a pane is a plain click and there is nothing to choose between; in the bays it

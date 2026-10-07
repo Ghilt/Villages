@@ -57,44 +57,18 @@ export function ReportCard({
 
 /**
  * The report card folded away: a row of the omens' marks, each with its words for a tooltip, so the marks on an
- * option can be matched against what the roll read. `landed` lands them one at a time, as the list's rows land.
- * Given `onOpen`, the whole row is one button that opens the list out - the medium pane's way back to it. `small`
- * is the size an option card carries them at.
+ * option can be matched against what the roll read. `small` is the size an option card carries them at.
  */
-export function OmenStrip({
-  omens,
-  landed = Infinity,
-  small = false,
-  onOpen,
-}: {
-  omens: readonly OmenLine[];
-  landed?: number;
-  small?: boolean;
-  onOpen?: () => void;
-}) {
-  const shown = omens.slice(0, landed);
-  const marks = (
+export function OmenStrip({ omens, small = false }: { omens: readonly OmenLine[]; small?: boolean }) {
+  return (
     <ul className={`ui-omen-strip${small ? ' ui-omen-strip--small' : ''}`} aria-label="omens">
-      {shown.map((omen, at) => (
-        <li
-          key={omen.key}
-          className={
-            Number.isFinite(landed) && at === shown.length - 1 ? 'ui-omen-strip__landing' : undefined
-          }
-        >
+      {omens.map((omen) => (
+        <li key={omen.key}>
           <Tooltip text={omen.value === undefined ? omen.words : `${omen.words} ${omen.value}`}>
             <Mark name={`omen-${omen.kind}`} size={small ? 14 : 18} title={omen.words} />
           </Tooltip>
         </li>
       ))}
     </ul>
-  );
-  if (onOpen === undefined) {
-    return marks;
-  }
-  return (
-    <button type="button" className="ui-omen-strip__open" onClick={onOpen} aria-label="show the omens">
-      {marks}
-    </button>
   );
 }

@@ -5,7 +5,7 @@ import type { WorldName } from './names.ts';
 import { fileNames } from './namesFile.ts';
 import type { EarthRegion } from './regions.ts';
 
-/** The names as the page and the game server read them, shared with the Kotlin side. See decision record 0085. */
+/** The names as the page and the game server read them, shared with the Kotlin side. See decision record 0087. */
 const fixture = JSON.parse(
   readFileSync(new URL('../../../../contracts/fixtures/names.json', import.meta.url), 'utf8'),
 ) as { file: unknown; regions: string };

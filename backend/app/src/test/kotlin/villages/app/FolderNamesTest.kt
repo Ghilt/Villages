@@ -18,7 +18,7 @@ import java.util.Base64
 
 /**
  * The names as the world package files them, read by the server: the shared fixture, which the world package's own
- * encoder writes and its test holds it to. JUnit rather than Kotest here, as in the rest of this module. See 0085.
+ * encoder writes and its test holds it to. JUnit rather than Kotest here, as in the rest of this module. See 0087.
  */
 class FolderNamesTest {
     private val json = JsonMapper.builder().build()

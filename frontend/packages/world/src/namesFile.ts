@@ -6,7 +6,7 @@ import type { EarthRegion, RegionGrid, RegionKind, RegionLabel } from './regions
  * and every named region, and `regions.bin` beside it, which region every square of the origin map is in and by.
  * The page reads the copy beside the tiles and the game server the one beside the ground map, and the two are
  * the same bytes. A contract between this package and the server: `contracts/fixtures/names.json` holds one,
- * written by this, and both ends are tested against it. See decision record 0085.
+ * written by this, and both ends are tested against it. See decision record 0087.
  */
 
 /** A named region as filed: what it is, and where its name goes and how many squares it covers, for one that has any. */
@@ -58,7 +58,7 @@ export function fileNames(
   }
   const file: NamesFile = {
     $comment:
-      'Written by npm run world:names or world:origin. Output: carried again from the origin map. See 0085.',
+      'Written by npm run world:names or world:origin. Output: carried again from the origin map. See 0087.',
     master,
     form: 'today',
     counts,

@@ -5,6 +5,7 @@ import type { SessionState } from '@villages/client-core';
 import { bayLayout, FOLDS_UNDER, isTabbed, STRIP, TAB_BAR, TILES } from './bayBox';
 import {
   type Asked,
+  askedInTheSpread,
   CORNER,
   cramps,
   MAP_PANE,
@@ -21,7 +22,7 @@ import {
 import type { Subject } from '../inspect/subjects';
 import { panesOn, standingIn } from '../panes';
 import { DIALOGUE_PANE } from '../dialogues/pane';
-import { CHOICE_PANE } from '../choice/pane';
+import { CHOICE_AT_REST, CHOICE_PANE } from '../choice/pane';
 import { KEY_FIGURES_PANE } from '../figures/pane';
 import { HOUSE_PANE } from '../house/pane';
 
@@ -30,6 +31,7 @@ const NONE = { yourChoice: null, yourDialogues: null } as unknown as SessionStat
 const ASKING = { ...NONE, yourChoice: {} } as unknown as SessionState;
 const HOUSED = { ...NONE, yourHouse: {} } as unknown as SessionState;
 const TALKING = { ...NONE, yourDialogues: [{}] } as unknown as SessionState;
+const BOTH = { ...NONE, yourChoice: {}, yourDialogues: [{}] } as unknown as SessionState;
 
 /** Every pane on the stage for what the gateway has said and the subjects open, as the stage is handed them. */
 const panesFor = (open: readonly Subject[], session: SessionState) =>
@@ -172,11 +174,27 @@ describe('the choice roll', () => {
     expect(idsOf(panesFor([], HOUSED))).toContain(CHOICE_PANE.id);
   });
 
-  it('takes the bottom middle, a strip at rest and its full height opened', () => {
+  it('takes the bottom middle, its chip at rest and its full height opened', () => {
     expect(spreadWants(panesFor([], NONE), NOTHING_ASKED).bottomMiddle).toBeNull();
-    expect(spreadWants(panesFor([], HOUSED), NOTHING_ASKED).bottomMiddle).toBe(STRIP);
+    expect(spreadWants(panesFor([], HOUSED), NOTHING_ASKED).bottomMiddle).toBe('strip');
     const opened: Asked = { heights: { [CHOICE_PANE.id]: 'full' }, tiles: {} };
     expect(spreadWants(panesFor([], ASKING), opened).bottomMiddle).toBe(tallOf(CHOICE_PANE).full);
+  });
+
+  // At rest all it says is Take action, so opened out it is a box that size rather than one over most of the
+  // screen; the same pane by the same id, so the size asked for carries across when a hand arrives. See 0085.
+  it('opens out at rest only as tall as Take action, under what a question opens out to', () => {
+    const opened: Asked = { heights: { [CHOICE_PANE.id]: 'full' }, tiles: {} };
+    const atRest = spreadWants(panesFor([], HOUSED), opened).bottomMiddle;
+    const asking = spreadWants(
+      panesFor([], { ...HOUSED, yourChoice: {} } as SessionState),
+      opened,
+    ).bottomMiddle;
+
+    expect(atRest).toBe(tallOf(CHOICE_AT_REST).full);
+    expect(asking).toBe(tallOf(CHOICE_PANE).full);
+    expect(atRest).toBeLessThan(asking as number);
+    expect(CHOICE_AT_REST.id).toBe(CHOICE_PANE.id);
   });
 
   // It has the tile to itself, so there is no strip of tabs to pay for.
@@ -189,10 +207,20 @@ describe('the choice roll', () => {
     expect(CHOICE_PANE.needs).not.toBeNull();
   });
 
-  // Opened out it is three times its middle size, covering most of the middle of the stage, so a rolled hand's
-  // omens and its options both have room: Adam's word of 2026-10-05, which amended decision record 0044.
-  it('opens out to three times its middle size', () => {
-    expect(tallOf(CHOICE_PANE).full).toBe(tallOf(CHOICE_PANE).small * 3);
+  // Put away or opened out over everything, and nothing between: Adam's word of 2026-10-06. See 0085.
+  it('offers two sizes in the spread, put away and opened out', () => {
+    expect(CHOICE_PANE.spreadSizes).toEqual(['strip', 'full']);
+    expect(SIZES).toHaveLength(3);
+  });
+
+  // Opened out it lies over everything, so it is never squeezed into the carousel on a desktop.
+  it('is never too small for its full form opened out, on the narrowest spread there is', () => {
+    const opened: Asked = { heights: { [CHOICE_PANE.id]: 'full' }, tiles: { bottomLeft: 'full' } };
+    const wants = spreadWants(panesFor([], BOTH), opened);
+    const letter = bayLayout({ w: FOLDS_UNDER + 1, h: 900 }, ['big', 'big'], wants, 'spread').bays
+      .bottomMiddle;
+
+    expect(cramps(CHOICE_PANE, letter)).toBe(false);
   });
 });
 
@@ -255,21 +283,6 @@ describe('the corner', () => {
   });
 
   /*
-   * The first time one tile's size changes another's form. On a 1000-wide stage the letter lays its
-   * options out beside the corner as it always has; with the corner opened out it reaches along the
-   * bottom and the letter, moved over, has room for its carousel instead. See 0056.
-   */
-  it('folds a letter to its carousel on a 1000-wide stage, while the corner reaches along the bottom', () => {
-    const stage = { w: 1000, h: 900 };
-    const asking = panesFor([], ASKING);
-    const laidOut = (asked: Asked) =>
-      bayLayout(stage, ['big', 'big'], spreadWants(asking, asked), 'spread').bays.bottomMiddle;
-
-    expect(cramps(CHOICE_PANE, laidOut(NOTHING_ASKED))).toBe(false);
-    expect(cramps(CHOICE_PANE, laidOut(cornerAt('full')))).toBe(true);
-  });
-
-  /*
    * Opened out it is as tall as the corner can be and still leave a window room in the rail above it, on
    * the shortest stage the spread is ever drawn on. A hundred and fifty pixels is a window's head and a
    * line or two of it, which is the least a rail is worth keeping.
@@ -280,5 +293,39 @@ describe('the corner', () => {
 
     expect(layout.form).toBe('spread');
     expect(layout.bays.left?.h).toBeGreaterThanOrEqual(150);
+  });
+});
+
+/**
+ * The corner and the column down the right are never both opened out: opening one steps the other down to its
+ * normal size, so the bottom row always has its middle for the letter's chip. Adam's word of 2026-10-06; 0085.
+ */
+describe('one of the corner and the right column opened out', () => {
+  const panes = panesFor([], TALKING);
+  const both: Asked = { heights: { [DIALOGUE_PANE.id]: 'full' }, tiles: { bottomLeft: 'full' } };
+
+  it('steps the dialogues down when the corner opens out, and the corner when the dialogues do', () => {
+    const corner = askedInTheSpread(panes, both, KEY_FIGURES_PANE, 'full');
+    const right = askedInTheSpread(panes, both, DIALOGUE_PANE, 'full');
+
+    expect(sizeAsked(DIALOGUE_PANE, corner.asked)).toBe('small');
+    expect(corner.stepped?.id).toBe(DIALOGUE_PANE.id);
+    expect(sizeAsked(HOUSE_PANE, right.asked)).toBe('small');
+    expect(right.stepped?.id).toBe(HOUSE_PANE.id);
+  });
+
+  it('leaves the other alone when it is not opened out, or when a pane is asked anything but opened out', () => {
+    const away: Asked = { heights: { [DIALOGUE_PANE.id]: 'strip' }, tiles: { bottomLeft: 'full' } };
+
+    expect(askedInTheSpread(panes, away, HOUSE_PANE, 'full').asked).toEqual(away);
+    expect(askedInTheSpread(panes, both, HOUSE_PANE, 'small').stepped).toBeNull();
+    expect(sizeAsked(DIALOGUE_PANE, askedInTheSpread(panes, both, HOUSE_PANE, 'small').asked)).toBe('full');
+  });
+
+  it('has nothing to say about a pane in neither, the letter opened out over both', () => {
+    const asked = askedInTheSpread(panesFor([], BOTH), both, CHOICE_PANE, 'full');
+
+    expect(asked.stepped).toBeNull();
+    expect(sizeAsked(HOUSE_PANE, asked.asked)).toBe('full');
   });
 });

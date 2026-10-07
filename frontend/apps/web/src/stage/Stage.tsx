@@ -20,10 +20,13 @@ import {
   type PaneSize,
   type Room,
   sizeAsked,
+  SIZES,
   sizeOf,
   spreadWants,
 } from './panes';
 import { outOfRoom } from './rail';
+import { useGlideOnTheRail } from './railGlide';
+import { openingOut } from './strip';
 import { TabBar } from './TabBar';
 import { useStore } from '../store/useStore';
 
@@ -77,6 +80,15 @@ export function Stage({ stage, panes, overlays }: StageProps) {
   // is read rather than passed because the layout is what sets it, and it only ever changes as a result of
   // one of the things this memo already depends on - so a cached answer is never stale.
   const box = useMemo(() => bayLayout(stage, asking, wants, formNow()), [stage, asking, wants]);
+
+  // Whether the tiles may glide to where they are going, which they do in the spread whenever a size was asked
+  // for: not while the stage itself is being resized or crossing the fold, when everything follows the window at
+  // once and a glide would trail behind the grip. See decision record 0086.
+  const was = useRef({ w: stage.w, h: stage.h, form: box.form });
+  const easing = was.current.w === stage.w && was.current.h === stage.h && was.current.form === box.form;
+  useLayoutEffect(() => {
+    was.current = { w: stage.w, h: stage.h, form: box.form };
+  });
 
   // The manager asks this when it needs to know whether putting a window somewhere means anything, and to
   // say "top" rather than "the first bay" in the log. Before any effect of the game's asks it.
@@ -142,11 +154,16 @@ export function Stage({ stage, panes, overlays }: StageProps) {
       asked,
       // One control on every pane, in both forms, except that the panes taking turns in a tile share the
       // one in its tab bar. See decision records 0045, 0046 and 0057.
-      ask: (size) => askFor(id, size),
+      ask: pane?.ask ?? ((size) => askFor(id, size)),
+      sizes: (box.form === 'spread' ? pane?.spreadSizes : undefined) ?? SIZES,
       ownControl: !tabbed,
       showMap: () => showMapBeside(id),
       openBeside: (other) => openBeside(id, other),
     };
+
+    // Put away in the spread, a press anywhere on it opens it out, but on a button of its own: Adam's word of
+    // 2026-10-06. The tab bar above the corner is its own and is not part of this.
+    const away = box.form === 'spread' && room.size === 'strip';
 
     // A window in the spread stacks inside the rail, which is itself the column's upper tile, so it is a
     // flow item rather than a box of its own. Everything else is placed by its rectangle.
@@ -161,7 +178,11 @@ export function Stage({ stage, panes, overlays }: StageProps) {
         className={`bay bay--${kindOf(id)}`}
         key={id}
         data-at={where ?? 'nowhere'}
+        data-pane={id}
         data-tabbed={tabbed ? 'yes' : undefined}
+        data-over={where !== null && where === box.over ? 'yes' : undefined}
+        data-away={away ? 'yes' : undefined}
+        onClick={away ? openingOut(() => room.ask('full')) : undefined}
         hidden={!railed && (rect === null || !up)}
         style={railed || rect === null ? undefined : place(rect)}
       >
@@ -177,6 +198,12 @@ export function Stage({ stage, panes, overlays }: StageProps) {
   const railRef = useRef<HTMLDivElement | null>(null);
   const stacked = panes.filter(isWindow).map((pane) => ({ id: pane.id, asked: sizeAsked(pane, bays) }));
   useRoomOnTheRail(railRef, rail !== null, stacked);
+  // And the windows on it glide, as the tiles do: see `railGlide.ts`.
+  useGlideOnTheRail(
+    railRef,
+    easing && rail !== null,
+    stacked.map((one) => `${one.id}:${one.asked}`).join(' '),
+  );
 
   // A tile that more than one pane declared itself into gets a strip of tabs across its top. There is one
   // such tile today - the corner, holding the house status, the key figures and navigation - and the
@@ -188,6 +215,10 @@ export function Stage({ stage, panes, overlays }: StageProps) {
       ? TILES.filter((name) => box.bays[name] !== null && isTabbed(name, panesIn(panes, name).length))
       : [];
 
+  // What lies over everything else in the spread - the letter opened out - and the veil under it, which puts
+  // it away when pressed: the world behind is dimmed rather than gone, and pressing it is the way back to it.
+  const over = box.over === null ? undefined : panesIn(panes, box.over)[0];
+
   // Where the seam between the two bays is, for the one thing that sits on it rather than in a bay.
   const first = box.bays.first;
   const seam = first === null ? '50%' : `${box.along === 'rows' ? first.h : first.w}px`;
@@ -197,6 +228,7 @@ export function Stage({ stage, panes, overlays }: StageProps) {
       className="stage"
       data-form={box.form}
       data-along={box.along}
+      data-easing={easing ? 'yes' : undefined}
       style={{ '--bay-first': seam } as CSSProperties}
     >
       {panes.filter((pane) => !isWindow(pane)).map((pane) => bayFor(pane.id))}
@@ -234,6 +266,7 @@ export function Stage({ stage, panes, overlays }: StageProps) {
           size: sizeOf(asked),
           asked,
           ask: (size) => askFor(up.id, size),
+          sizes: up.spreadSizes ?? SIZES,
           ownControl: true,
           showMap: () => showMapBeside(up.id),
           openBeside: (other) => openBeside(up.id, other),
@@ -250,6 +283,16 @@ export function Stage({ stage, panes, overlays }: StageProps) {
           />
         );
       })}
+
+      {/* Always there in the spread, so that it fades out as well as in; it takes no press while it is down. */}
+      {box.form === 'spread' && (
+        <div
+          className="veil"
+          aria-hidden="true"
+          data-up={over === undefined ? undefined : 'yes'}
+          onClick={over === undefined ? undefined : () => askFor(over.id, 'strip')}
+        />
+      )}
 
       {/* The moulding over the join, and the disc that stands on it. Only where there is a join:
           below 64 pixels the stage is one box and `--bay-first` is the whole of it. */}
@@ -319,6 +362,9 @@ function useRoomOnTheRail(
     // misses exactly the case that matters. Its children keep their own heights, so they are watched
     // too, and anything added to or taken out of the rail's tree asks again.
     const resized = new ResizeObserver(() => check.current());
+    // The rail itself too, because it glides to a new height when the corner below it changes size, and the
+    // room on it is what it comes to rather than where it set out from.
+    resized.observe(held);
     for (const bay of held.children) {
       const pane = bay.firstElementChild;
       if (pane !== null) {

@@ -581,7 +581,7 @@ function Ensure([string[]] $Made, [string] $What, [string[]] $Arguments, [string
 }
 
 # Everything cut from the master is cut again when the master was saved since, in the order the panel's `cut it`
-# runs them; the styles when world/painterly.json or render.json was, the names when the review was (0085).
+# runs them; the styles when world/painterly.json or render.json was, the names when the review was (0087).
 $Painted = @($Master)
 Ensure 'terrain.geojson' 'tracing the coast and the lakes' @('run', 'world:import') 'the coast and the lakes are traced' $Painted
 Ensure 'tiles\cut.json' 'cutting the world into tiles (about two minutes)' @('run', 'world:tile') 'the world is cut' $Painted

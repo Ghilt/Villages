@@ -5,9 +5,9 @@ import type { Looking } from '@villages/client-core';
 import type { ChoiceView, OmenView, OptionView } from '@villages/protocol';
 
 import { sessionStore, takeOption } from '../net/gateway';
-import { formNow } from '../stage/bays';
 import { PaneSizeControl } from '../stage/PaneSizeControl';
-import type { Room } from '../stage/panes';
+import type { Along, Room } from '../stage/panes';
+import { openingOut } from '../stage/strip';
 import { useStore } from '../store/useStore';
 import { Card } from '../ui/card/Card';
 import { OmenStrip } from '../ui/report/ReportCard';
@@ -15,7 +15,7 @@ import type { OmenLine } from '../ui/report/ReportCard';
 import { RolledHand } from '../ui/report/RolledHand';
 import type { HandForm } from '../ui/report/RolledHand';
 import { usePlay } from '../ui/report/usePlay';
-import { handExpected, openingOut } from './rolling';
+import { handExpected, overOf } from './rolling';
 import { TakeAction, gives } from './TakeAction';
 
 /** An omen off the wire as the report card shows it. */
@@ -31,18 +31,16 @@ const lineOf = (omen: OmenView): OmenLine =>
  * option. That is what lets a new kind of choice arrive with no change here at all. See decision record
  * 0034 and `MECHANICS.md`.
  *
- * A pane with three sizes, and the mechanic owns all three:
+ * A pane with three sizes on a phone and two on a desktop, and the mechanic owns them all:
  *
  * - **Full** - the prompt and every option laid out to read through. What it arrives at, because the world
- *   has asked something and reading it is the thing to do first.
- * - **Small** - the **carousel**: one option at a time, with the way between them. For glancing at the
- *   options while looking at the map they are about, which is the whole reason the map is drawn with the
- *   offered seats marked on it.
- * - **Minimised** - set aside to a strip. Not closed: the question is still standing.
+ *   has asked something and reading it is the thing to do first. On a desktop it lies over everything else.
+ * - **Small**, on a phone - the **carousel**: one option at a time, with the way between them. For glancing at
+ *   the options while looking at the map they are about.
+ * - **Minimised** - set aside to a strip, or on a desktop a chip in the middle of the bottom row with no size
+ *   control, because pressing it opens it. Not closed: the question is still standing.
  *
- * **Its size is the player's**, alone among the panes, because the two forms are two ways of using it and
- * only they know which they are doing. Every other pane's size is the layout's answer to how much room
- * there is. See decision record 0044.
+ * See decision records 0044 and 0085.
  *
  * Nothing here asks how big anything is. Whether there is room for the list at all is the layout's answer,
  * handed down as the size; whether that list is three across or one under another is a **container query**
@@ -54,7 +52,7 @@ const lineOf = (omen: OmenView): OmenLine =>
  * gesture wherever it is offered, and spelling it out in words here would make it two things to learn.
  */
 
-export function Choosing({ room, looking }: { room: Room; looking: () => Looking }) {
+export function Choosing({ room, along, looking }: { room: Room; along: Along; looking: () => Looking }) {
   const choice = useStore(sessionStore, (state) => state.yourChoice);
   const answering = !useStore(sessionStore, canAct);
   const [at, setAt] = useState(0);
@@ -73,29 +71,32 @@ export function Choosing({ room, looking }: { room: Room; looking: () => Looking
   const { play, hurry } = usePlay(playing, omens.length, choice?.options.length ?? 0);
 
   if (choice === null) {
-    return <TakeAction room={room} looking={looking} />;
+    return <TakeAction room={room} along={along} looking={looking} />;
   }
 
   if (room.size === 'strip') {
     const rolled = choice.options[0]?.rarity;
     return (
-      <section className="choice choice--strip pane-strip" onClick={openingOut(() => room.ask('full'))}>
+      <section
+        className={`choice choice--strip pane-strip${along === null ? ' choice--chip' : ''}`}
+        onClick={along === null ? undefined : openingOut(() => room.ask('full'))}
+      >
         <span className="choice__aside">
           {rolled === undefined
             ? 'A letter awaits'
             : `${rolled === 'uncommon' ? 'An' : 'A'} ${rolled} hand awaits`}
         </span>
-        <PaneSizeControl room={room} />
+        {along !== null && <PaneSizeControl room={room} />}
       </section>
     );
   }
 
-  // A rolled hand: the omens and the options under them, in the form the room is - the list on top opened out on a
-  // desktop, its marks in the middle size, and everything one under another, scrolling, on a phone. See 0083.
+  // A rolled hand: the omens and the options under them - the list on top on a desktop, and everything one under
+  // another, scrolling, on a phone. See 0083.
   if (rolled !== undefined) {
-    const form: HandForm = formNow() === 'bays' ? 'stacked' : room.size === 'full' ? 'full' : 'medium';
+    const form: HandForm = along === null ? 'full' : 'stacked';
     return (
-      <section className={`choice choice--hand choice--${form}`} aria-live="polite">
+      <section className={`choice choice--hand choice--${form}${overOf(along)}`} aria-live="polite">
         <header className="choice__head">
           <h2 className="choice__prompt">{choice.prompt}</h2>
           <PaneSizeControl room={room} />
@@ -105,17 +106,9 @@ export function Choosing({ room, looking }: { room: Room; looking: () => Looking
           omens={omens}
           play={play}
           options={choice.options.map((option) => (
-            <Parchment
-              key={option.id}
-              choice={choice}
-              option={option}
-              answering={answering}
-              omens={omens}
-              {...(form === 'medium' ? { open: () => room.ask('full') } : {})}
-            />
+            <Parchment key={option.id} choice={choice} option={option} answering={answering} omens={omens} />
           ))}
           onHurry={hurry}
-          onOpen={() => room.ask('full')}
         />
       </section>
     );
@@ -125,7 +118,7 @@ export function Choosing({ room, looking }: { room: Room; looking: () => Looking
   const shown = Math.min(at, choice.options.length - 1);
 
   return (
-    <section className={carousel ? 'choice choice--carousel' : 'choice'} aria-live="polite">
+    <section className={`choice${carousel ? ' choice--carousel' : ''}${overOf(along)}`} aria-live="polite">
       <header className="choice__head">
         <h2 className="choice__prompt">{choice.prompt}</h2>
         <PaneSizeControl room={room} />
@@ -218,30 +211,13 @@ function Parchment({
   option,
   answering,
   omens = [],
-  open,
 }: {
   choice: ChoiceView;
   option: OptionView;
   answering: boolean;
   /** The omens of the roll that dealt it, of which the option carries the marks of those that brought it. */
   omens?: readonly OmenLine[];
-  /**
-   * Given, the option is shown by its rarity and its title alone, and pressing it opens the pane out rather than
-   * taking it: the middle size on a desktop, where a whole option does not fit and nothing is chosen unread.
-   */
-  open?: () => void;
 }) {
-  if (option.rarity !== undefined && open !== undefined) {
-    return (
-      <Card
-        rarity={option.rarity}
-        title={option.label}
-        label={`${option.label}: open the pane to read it and choose`}
-        onPress={open}
-      />
-    );
-  }
-
   if (option.rarity !== undefined) {
     return (
       <Card
@@ -251,8 +227,10 @@ function Parchment({
         disabled={answering}
         onPress={() => takeOption(choice, option)}
       >
-        <p className="ui-body">{option.detail}</p>
-        <OmenStrip omens={omens.filter((omen) => option.omens?.includes(omen.key))} small />
+        <div className="choice__more">
+          <p className="ui-body">{option.detail}</p>
+          <OmenStrip omens={omens.filter((omen) => option.omens?.includes(omen.key))} small />
+        </div>
       </Card>
     );
   }

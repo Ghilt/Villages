@@ -1,7 +1,7 @@
 {
-  "$comment": "A master's names as world:names files them, for the page and the game server: `file` is a names.json exactly as written, and `regions` is the regions.bin beside it in base64, a world four squares across and two down. Written by the world package's own encoder, src/namesFile.ts, and read by the server's, FolderNames. See decision record 0085.",
+  "$comment": "A master's names as world:names files them, for the page and the game server: `file` is a names.json exactly as written, and `regions` is the regions.bin beside it in base64, a world four squares across and two down. Written by the world package's own encoder, src/namesFile.ts, and read by the server's, FolderNames. See decision record 0087.",
   "file": {
-    "$comment": "Written by npm run world:names or world:origin. Output: carried again from the origin map. See 0085.",
+    "$comment": "Written by npm run world:names or world:origin. Output: carried again from the origin map. See 0087.",
     "master": "fixture",
     "form": "today",
     "counts": { "river": 1, "lake": 0, "peak": 1, "town": 1, "sea": 1, "land": 1 },

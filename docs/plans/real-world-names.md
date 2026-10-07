@@ -168,7 +168,7 @@ No real event, figure or backstory is attached to it, ever; whatever it needs la
 ## What it is for, later
 
 The first use is built. The server reads where a player is looking off the ground map (0084), and a choice
-roll takes it as an omen (0083). **Since 2026-10-07 it reads the names too** (0085): they are filed beside the
+roll takes it as an omen (0083). **Since 2026-10-07 it reads the names too** (0087): they are filed beside the
 ground map as well as beside the tiles, read through a port the same way, and the ground says whether while
 the names say what - the river is *The Vistula* and the open sea *The Baltic Sea*, under the keys a river and
 the open sea already had, and a town of 1790 in view, zoomed in, is *Near Dantzic*, keyed by its Wikidata id.
@@ -190,7 +190,7 @@ The data is the point and the renderers are pictures of it: the Info map writes 
 renderer's click reads it out, the game server's omens read it, and a quest or a line of flavour will read the
 same thing. Per master, beside its tiles and again beside its ground map, the same bytes, written by
 `world:origin` and `world:names` and never edited; its shape is a contract both ends are tested against,
-`contracts/fixtures/names.json` (0085):
+`contracts/fixtures/names.json` (0087):
 
 - **`names.json`, `names`**: every named town, river, lake and peak in the world. Each has an `id`, the real
   world's identity of it - a Wikidata id where the source has one, `Q1792` for Dantzic - which never changes
@@ -208,7 +208,7 @@ What it does not yet do, and a quest will want: today's names honouring someone 
 name known yet - the Mackenzie, Fitzroy, Mitchell, Victoria, Daly, Ord and Katherine of Australia; the server reads
 it only for the map's omens so far; the
 copy beside the tiles names everything under the fog too, and must stop being served before players come
-(0085); canals are left out, because Natural Earth's were dug after 1790, until a review dates them; the
+(0087); canals are left out, because Natural Earth's were dug after 1790, until a review dates them; the
 river file Natural Earth gives without Wikidata ids keys its rivers by file and number (the Danube is
 `ne_10m_rivers_lake_centerlines:25:Danube`), which holds while the source does; a painted river is not yet
 tied to the name of the river it came from; a town's rank is today's, not its standing in 1790; and nothing

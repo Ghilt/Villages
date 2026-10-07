@@ -19,7 +19,7 @@ import { GROUND_DIR, NAMES_DIR, SOURCE_DIR } from './paths.ts';
  * every square of the map in `regions.bin` beside that. What `world:names` does, and what `world:origin` does after it
  * has worked the map out, so that the two are never left out of step. The same two files go beside the master's
  * ground map too, for the game server, which reads nothing the page is served. See `src/names.ts`,
- * `src/regions.ts`, `src/namesFile.ts` and decision record 0085.
+ * `src/regions.ts`, `src/namesFile.ts` and decision record 0087.
  */
 
 /** Which files hold which kind of name: Natural Earth's own, fetched by `world:fetch-all`. */

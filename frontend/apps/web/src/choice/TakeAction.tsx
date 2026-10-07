@@ -5,10 +5,11 @@ import type { OptionView } from '@villages/protocol';
 import { RESOURCE_WORDS } from '../house/describe';
 import { sessionStore, takeAction } from '../net/gateway';
 import { PaneSizeControl } from '../stage/PaneSizeControl';
-import type { Room } from '../stage/panes';
+import type { Along, Room } from '../stage/panes';
+import { openingOut } from '../stage/strip';
 import { useStore } from '../store/useStore';
 import { TextButton } from '../ui/button/Button';
-import { expectHand, openingOut } from './rolling';
+import { expectHand, overOf } from './rolling';
 
 /**
  * What a roll costs in wealth, as the page says it before pressing. The server's `ROLL_PRICE` is the price, and a
@@ -21,9 +22,10 @@ export const ROLL_PRICE_WEALTH = 10;
  * **Take action**: the choice roll at rest, which is the button that provokes one. Words and not a mark, Adam's
  * call. Greyed while the house cannot pay or a command of the player's is waiting on its answer, and saying which;
  * pressed, it sends `roll` with what the page is looking at, `looking` handed down from the root, and the hand
- * that comes back takes the pane over. See `MECHANICS.md`, the choice roll.
+ * that comes back takes the pane over. Put away on a desktop it is a chip with no size control, the button and what
+ * it costs, and a press anywhere else on it opens it out. See `MECHANICS.md`, the choice roll, and 0085.
  */
-export function TakeAction({ room, looking }: { room: Room; looking: () => Looking }) {
+export function TakeAction({ room, along, looking }: { room: Room; along: Along; looking: () => Looking }) {
   const free = useStore(sessionStore, (state) => {
     const wealth = state.yourHouse?.resources.wealth;
     return wealth === undefined ? null : freeNow(wealth, Date.now());
@@ -56,19 +58,19 @@ export function TakeAction({ room, looking }: { room: Room; looking: () => Looki
   if (room.size === 'strip') {
     return (
       <section
-        className="choice choice--strip pane-strip"
+        className={`choice choice--strip pane-strip${along === null ? ' choice--chip' : ''}`}
         title={whyNot ?? `costs ${price}`}
-        onClick={openingOut(() => room.ask('full'))}
+        onClick={along === null ? undefined : openingOut(() => room.ask('full'))}
       >
         {button}
         <span className="choice__aside">{whyNot ?? price}</span>
-        <PaneSizeControl room={room} />
+        {along !== null && <PaneSizeControl room={room} />}
       </section>
     );
   }
 
   return (
-    <section className="choice choice--idle">
+    <section className={`choice choice--idle${overOf(along)}`}>
       <header className="choice__head">
         <span className="choice__aside" />
         <PaneSizeControl room={room} />

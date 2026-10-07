@@ -25,7 +25,7 @@ import kotlin.io.path.isRegularFile
  * until its `names.json` is written again, which it is last. A name that is not one of the folder's own masters has
  * none and is never made into a path, as for the ground. The shape is a contract, held by
  * `contracts/fixtures/names.json`, and what this cannot read in it is left out rather than refused: a server with
- * fewer names still rolls. See decision records 0085 and 0084.
+ * fewer names still rolls. See decision records 0087 and 0084.
  */
 class FolderNames(private val masters: Path) : PlaceNamesByMaster {
     private class Read(val at: FileTime, val names: PlaceNames)

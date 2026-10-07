@@ -44,13 +44,7 @@ const ROOMS: readonly {
   readonly h: number;
   readonly says: string;
 }[] = [
-  { form: 'full', w: 620, h: 700, says: 'opened out on a desktop: three times the height' },
-  {
-    form: 'medium',
-    w: 620,
-    h: 256,
-    says: "a desktop's middle size: the titles, and a press on the marks or an option opens it out",
-  },
+  { form: 'full', w: 620, h: 700, says: 'opened out on a desktop, over everything' },
   { form: 'stacked', w: 390, h: 520, says: 'on a phone: one under another, scrolling' },
 ];
 
@@ -62,35 +56,23 @@ const ROOMS: readonly {
 export function Rolls() {
   const [rolls, setRolls] = useState(0);
   const [rarity, setRarity] = useState<Rarity>('rare');
-  const [opened, setOpened] = useState(0);
   const { play, hurry } = usePlay(rolls === 0 ? null : `roll ${rolls}`, OMENS.length, HAND.length);
   const roll = (at: Rarity) => {
     setRarity(at);
     setRolls((was) => was + 1);
   };
-  const open = () => setOpened((was) => was + 1);
-  // At the middle size an option is its rarity and its title, and pressing it opens the pane out.
-  const optionsFor = (form: HandForm) =>
-    HAND.map((one) =>
-      form === 'medium' ? (
-        <Card key={one.title} rarity={rarity} title={one.title} onPress={open} />
-      ) : (
-        <Card key={one.title} rarity={rarity} title={one.title} line={one.gives} onPress={() => undefined}>
-          <OmenStrip omens={one.omens} small />
-        </Card>
-      ),
-    );
+  const options = HAND.map((one) => (
+    <Card key={one.title} rarity={rarity} title={one.title} line={one.gives} onPress={() => undefined}>
+      <OmenStrip omens={one.omens} small />
+    </Card>
+  ));
 
   return (
     <>
       <Part title="A roll, played">
         <p className="ui-label showcase__lead">
           The omens land one after another, then the options pop in under them. A press on the list hurries
-          it.{' '}
-          <span className="showcase__said">
-            {play.phase}
-            {opened === 0 ? '' : `, opened out ${opened} ${opened === 1 ? 'time' : 'times'}`}
-          </span>
+          it. <span className="showcase__said">{play.phase}</span>
         </p>
         <div className="showcase__try">
           {RARITIES.map((one) => (
@@ -113,9 +95,8 @@ export function Rolls() {
                       form={room.form}
                       omens={OMENS}
                       play={play}
-                      options={optionsFor(room.form)}
+                      options={options}
                       onHurry={hurry}
-                      onOpen={open}
                     />
                   </div>
                 </Container>
@@ -139,9 +120,6 @@ export function Rolls() {
           </Specimen>
           <Specimen name="OmenStrip" note={['the list folded away', 'hover a mark for its words']}>
             <OmenStrip omens={OMENS} />
-          </Specimen>
-          <Specimen name="OmenStrip onOpen" note="a button: the medium pane's way back to the list">
-            <OmenStrip omens={OMENS} onOpen={open} />
           </Specimen>
           <Specimen name="OmenStrip small" note="on an option, the omens that brought it">
             <div className="showcase__card-small">
