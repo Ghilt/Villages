@@ -233,7 +233,9 @@ yet holds the history or the flavour of a place, which would be keyed by the sam
 
 - **The tools** are `world:origin` and `world:names` in `frontend/packages/world/bin/`, with the logic in
   `src/origin.ts`, unit-tested on small made-up masters. They reuse `toPixel` and `toLngLat` from
-  `src/raster.ts` and the river graph from `src/flow.ts`.
+  `src/raster.ts` and the river graph from `src/flow.ts`. How the review of 1790 is applied - a name of 1790 or
+  today's, a lake written as English writes one, a canal or a reservoir left out, the towns the review adds - is
+  `src/review1790.ts`, tested on its own.
 - **What they write** is output, `origin/`, `names.json` and `regions.bin` beside a master's tiles, and the
   last two again in `world/ground/<master>/` for the game server, and it keeps up with the master by itself: cutting a master in the Debug map works it out as its last step, the
   quick start works it out again whenever the master was saved since and carries the names again whenever the
@@ -271,12 +273,13 @@ Each its own commit, and the order is a suggestion.
    hundred more that mattered then: 536 stood, 200 did not, 295 had another name. 535 are in the world; the
    ground of Sining went into invented land and Male's atoll is smaller than a square. Natural Earth's ranking
    is today's, which is why the additions were needed: more regions are reviewed in later passes, and Acre,
-   Mocha, Murshidabad, Tetuan, Mogador, Sallee, Kilwa and Villa Rica need a source beside it.
+   Mocha, Murshidabad, Tetuan, Mogador, Sallee, Kilwa and Villa Rica need a source beside it - which the second
+   pass below gives them.
    **Region by region from 2026-10-07**, every place Natural Earth has in a region, each with a reason where
    its name differs or it had not been founded. A place the reviewer could not date is left out rather than
-   guessed, and named or counted here. Every region has now been through once: 3,055 towns of 1790 are in
-   the world, 3,229 reviewed places had not been founded, and `world:names` counts 1,049 not reviewed - the
-   899 left out below, and 150 Natural Earth gives no Wikidata id, which the review cannot key.
+   guessed, and named or counted here. Every region has now been through once: 3,055 towns of 1790 were in
+   the world after it, 3,229 reviewed places had not been founded, and `world:names` counted 1,049 not
+   reviewed - the 899 left out below, and 150 Natural Earth gives no Wikidata id, which the review cannot key.
    - **Europe**: 660 more places; 608 stood and are in the world under the names English gave them then -
      Stutgard, Coblentz, Maestricht, Bois-le-Duc, Spalatro, Uskub, Tammerfors, Fünfkirchen, Khadjibey, where
      Odessa was founded in 1794 - and 52 had not been founded. Left out: Çorovodë, Gramsh, Librazhd, Klaksvík,
@@ -349,6 +352,26 @@ Each its own commit, and the order is a suggestion.
      it in 1788, which is on ground Adam removed - and 328 had not been founded: every town of Australia but
      Sydney, which the first pass had, all of New Zealand's, the colonial posts of New Guinea and the islands,
      and Antarctica's stations. Left out: Pago Pago, Avarua, Nadi, Alofi, Melekeok, Atafu, Neiafu, Funafuti.
+
+   **A second pass, 2026-10-07**, with a source beside the reviewer: one query of Wikidata's public service,
+   asked once with Adam's leave and kept in no file the program reads, for the founding date, the earliest
+   record and the dated official names of the 897 places left out, and for where some eighty towns of 1790
+   Natural Earth lacks stand. Wikidata dates few of them - 634 have no founding date at all, and for a
+   municipality of Brazil or Russia the date it gives is often the one it became a municipality - so the dates
+   were read beside what the reviewer knew rather than taken whole. 76 more places reviewed: 51 stood - Goya,
+   Combarbalá, Guapi, Arjona, Chone, Milagro, La Punta for Sullana, Pilón for Montemorelos, Tanabe for
+   Maizuru, Lahtis, Kukarka, Melekess, the ironworks and ostrogs of the Urals and Siberia, Goundam and
+   Araouane - and 25 had not been founded, Pelotas, Juiz de Fora and Franca among them, and Raqqa and Manbij,
+   which lay in ruins. And 62 towns Natural Earth lacks are added, in their own part of the review, `added`,
+   each with its Wikidata id and where it stood: Acre, Mocha, Moorshedabad, Seringapatam, Arcot, Ummerapoora,
+   Arracan, Vila Rica, Mariana, Sabará, Vila Boa, Mogador, Sallee, Tetuan, Diriyah, Oczakow and Choczim, which
+   the Russians had taken in 1788, the Coromandel and Malabar factories of the Dutch, the Danes and the French
+   (Pulicat, Negapatam, Tranquebar, Karikal, Mahé, Tellicherry, Chandernagore, Chinsurah, Serampore), the forts
+   of the Gold Coast and the Gambia (Elmina, Annamaboe, Axim, James Fort, Bance Island), the slave ports of the
+   Niger's mouths (Bonny, Badagry), Loango, the Portuguese presidios of the Cuanza and the Zambezi, Quiloa,
+   Patta, Brava, Zeila and Suakem, Birni Ngazargamu, Cobbé, Kong and Salaga, Porto Bello, Kaskaskia and
+   Michilimackinac. 3,168 towns of 1790 are now in the world; `world:names` counts 973 places not reviewed -
+   the 823 no source dates, and the 150 without an id.
 5. **Invented land named.**
 6. **Seats taken from real towns**, if Adam wants them.
 

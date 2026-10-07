@@ -4,8 +4,10 @@ import { resolve } from 'node:path';
 
 import { regionLabels, regionsOf } from '../../src/regions.ts';
 import type { EarthRegion, RegionKind } from '../../src/regions.ts';
-import { asIn1790, carryNames } from '../../src/names.ts';
-import type { EarthName, NameKind, Reviewed } from '../../src/names.ts';
+import { carryNames } from '../../src/names.ts';
+import type { EarthName, NameKind } from '../../src/names.ts';
+import { asIn1790, townsAdded } from '../../src/review1790.ts';
+import type { AddedTown, Reviewed } from '../../src/review1790.ts';
 import { fileNames } from '../../src/namesFile.ts';
 import type { GivenRegions } from '../../src/namesFile.ts';
 import { toWorld, wayBackOf } from '../../src/originBack.ts';
@@ -196,7 +198,8 @@ function namesIn(
 
 /**
  * The towns of 1790: every place in Natural Earth's populated places that `world/names/1790.json` says
- * stood then, under the name it gives, and how many it says had not been founded or has not reviewed yet.
+ * stood then, under the name it gives, and the towns it adds that Natural Earth lacks; and how many it says had
+ * not been founded or has not reviewed yet.
  */
 async function townsOf1790(read: Review1790 | null): Promise<{ towns: EarthName[]; said: string }> {
   const placesPath = resolve(SOURCE_DIR, `${PLACES}.geojson`);
@@ -231,9 +234,16 @@ async function townsOf1790(read: Review1790 | null): Promise<{ towns: EarthName[
       lines: linesOf(feature.geometry),
     });
   }
+  const reviewed = towns.length;
+  const known = new Set(
+    features.map((feature) => text(feature.properties['WIKIDATAID'])).filter((id) => id !== undefined),
+  );
+  towns.push(...townsAdded(read.added, known, TOWN_FROM));
   return {
     towns,
-    said: `${unborn} reviewed places not yet founded in 1790, ${features.length - towns.length - unborn} not reviewed yet`,
+    said:
+      `${towns.length - reviewed} added by the review beside Natural Earth's places; ${unborn} reviewed places not yet founded in ` +
+      `1790, ${features.length - reviewed - unborn} not reviewed yet`,
   };
 }
 
@@ -249,6 +259,8 @@ const PLACES = 'ne_10m_populated_places';
  */
 interface Review1790 {
   readonly towns: Readonly<Record<string, Reviewed>>;
+  /** Towns of 1790 Natural Earth lacks, keyed by Wikidata id, each with where it stood. */
+  readonly added: Readonly<Record<string, AddedTown>>;
   readonly rivers: Readonly<Record<string, Reviewed>>;
   readonly lakes: Readonly<Record<string, Reviewed>>;
   readonly seas: Readonly<Record<string, Reviewed>>;
@@ -262,6 +274,7 @@ async function readReview(): Promise<Review1790 | null> {
   const read = JSON.parse(await readFile(REVIEW, 'utf8')) as Partial<Review1790>;
   return {
     towns: read.towns ?? {},
+    added: read.added ?? {},
     rivers: read.rivers ?? {},
     lakes: read.lakes ?? {},
     seas: read.seas ?? {},

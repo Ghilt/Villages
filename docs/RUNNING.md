@@ -205,8 +205,9 @@ stage alone, with none of the debug panel in it (decision record 0079).
   to read by; and why they differ. An agent's review, Adam's to correct; a town not in it is not carried, a
   river, lake or sea not in it keeps today's English name - a lake written as English writes one, Lake
   Constance where the source says only Constance - and a canal or a reservoir is carried only where it is
-  listed with a name. `world:names` reads it, and a change shows on the next click under the Origin renderer
-  and on the Info map. See `docs/plans/real-world-names.md`.
+  listed with a name. Its `added` part holds the towns of 1790 Natural Earth lacks - Mocha, Seringapatam - each
+  with where it stood on Earth as `[longitude, latitude]`. `world:names` reads it, and a change shows on the next
+  click under the Origin renderer and on the Info map. See `docs/plans/real-world-names.md`.
 
 - What grows where: `world/biomes.json`, hand-edited, one entry a kind and one a biome. What reads it is
   `npm run world:sprites --prefix frontend`, which works out a biome for every sixteen world units and
