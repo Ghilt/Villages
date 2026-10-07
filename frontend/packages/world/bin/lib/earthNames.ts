@@ -1,21 +1,25 @@
 import { existsSync } from 'node:fs';
-import { readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 import { regionLabels, regionsOf } from '../../src/regions.ts';
 import type { EarthRegion, RegionKind } from '../../src/regions.ts';
 import { carryNames } from '../../src/names.ts';
 import type { EarthName, NameKind } from '../../src/names.ts';
+import { fileNames } from '../../src/namesFile.ts';
+import type { GivenRegions } from '../../src/namesFile.ts';
 import { toWorld, wayBackOf } from '../../src/originBack.ts';
 import type { OriginGrid } from '../../src/originFile.ts';
 
-import { NAMES_DIR, SOURCE_DIR } from './paths.ts';
+import { GROUND_DIR, NAMES_DIR, SOURCE_DIR } from './paths.ts';
 
 /**
  * Earth's named rivers, lakes and peaks, read out of Natural Earth in `world/source` and carried through a
  * master's origin map into `names.json` beside its tiles; and its named regions, seas and stretches of land, given to
  * every square of the map in `regions.bin` beside that. What `world:names` does, and what `world:origin` does after it
- * has worked the map out, so that the two are never left out of step. See `src/names.ts` and `src/regions.ts`.
+ * has worked the map out, so that the two are never left out of step. The same two files go beside the master's
+ * ground map too, for the game server, which reads nothing the page is served. See `src/names.ts`,
+ * `src/regions.ts`, `src/namesFile.ts` and decision record 0085.
  */
 
 /** Which files hold which kind of name: Natural Earth's own, fetched by `world:fetch-all`. */
@@ -68,44 +72,31 @@ export async function writeNames(
   const towns = await townsOf1790();
   earth.push(...towns.towns);
   const { carried, lost } = carryNames(earth, carry);
-  const counts = { river: 0, lake: 0, peak: 0, town: 0, sea: 0, land: 0 };
-  for (const one of carried) counts[one.kind] += 1;
 
-  const regions: EarthRegion[] = [];
-  let labels: ReturnType<typeof regionLabels> = [];
+  let regions: GivenRegions | null = null;
   const absent = REGIONS.filter(({ file }) => !existsSync(resolve(SOURCE_DIR, `${file}.geojson`)));
   if (absent.length === 0) {
+    const list: EarthRegion[] = [];
     for (const { file, kind } of REGIONS) {
       const { features } = JSON.parse(await readFile(resolve(SOURCE_DIR, `${file}.geojson`), 'utf8')) as {
         features: SourceFeature[];
       };
-      regions.push(...regionsIn(file, kind, features));
+      list.push(...regionsIn(file, kind, features));
     }
-    const given = regionsOf(grid, width, height, regions);
-    const both = new Uint16Array(grid.status.length * 2);
-    both.set(given.land, 0);
-    both.set(given.sea, grid.status.length);
-    await writeFile(resolve(worldDir, 'regions.bin'), new Uint8Array(both.buffer));
-    for (const k of new Set([...given.land, ...given.sea])) if (k > 0) counts[regions[k - 1]!.kind] += 1;
-    labels = regionLabels(grid, given, regions.length);
+    const given = regionsOf(grid, width, height, list);
+    regions = { list, given, labels: regionLabels(grid, given, list.length) };
   }
 
-  await writeFile(
-    resolve(worldDir, 'names.json'),
-    `${JSON.stringify({
-      $comment: 'Written by npm run world:names or world:origin. Output: carried again from the origin map.',
-      master,
-      form: 'today',
-      counts,
-      names: carried,
-      // What the two layers of regions.bin, a land and then a sea for every square, number from one; and where
-      // in the world each one's name goes, with how many squares it covers, for one that has any.
-      regions: regions.map(({ id, kind, name, feature, rank, from }, index) => ({
-        ...{ id, kind, name, feature, rank, from },
-        ...labels[index],
-      })),
-    })}\n`,
-  );
+  const { file, bytes } = fileNames(master, carried, regions, grid.columns, grid.rows);
+  const text = `${JSON.stringify(file)}\n`;
+  // The page's copy beside the tiles, and the server's beside the ground map. `names.json` last in each, so that
+  // when it was written is when the names were: the panel, the quick start and the server read that time.
+  for (const dir of [worldDir, resolve(GROUND_DIR, master)]) {
+    await mkdir(dir, { recursive: true });
+    if (bytes !== null) await writeFile(resolve(dir, 'regions.bin'), bytes);
+    await writeFile(resolve(dir, 'names.json'), text);
+  }
+  const { counts } = file;
   return (
     `the names of ${master}: ${counts.town} towns of 1790, ${counts.river} rivers, ${counts.lake} lakes and ` +
     `${counts.peak} peaks in the world, ${lost} gone with ground that was removed or copied; ${towns.said}; ` +
@@ -155,6 +146,9 @@ function namesIn(file: string, kind: NameKind, features: readonly SourceFeature[
     if (local === undefined || feature.geometry === null) return;
     // In English, Adam's choice of 2026-10-06, with the source's own name beside it where it differs.
     const name = text(feature.properties['name_en']) ?? local;
+    // Natural Earth files its canals as rivers, and the ones it has - Suez, Panama, the Caledonian - were dug
+    // after 1790. None is carried until a review dates them.
+    if (kind === 'river' && /\bcanal\b/i.test(`${name} ${local}`)) return;
     const number = text(feature.properties['rivernum']) ?? text(feature.properties['ne_id']) ?? String(at);
     const id = text(feature.properties['wikidataid']) ?? `${file}:${number}:${local}`;
     const elevation = feature.properties['elevation'];
@@ -247,9 +241,10 @@ function least<Key extends string>(
   return (both.length === 0 ? {} : { [key]: Math.min(...both) }) as { [k in Key]?: number };
 }
 
+/** A field as words, its spaces closed up: Natural Earth writes some names with two, São  Francisco. */
 function text(value: unknown): string | undefined {
   if (typeof value === 'number') return String(value);
-  return typeof value === 'string' && value.trim() !== '' ? value.trim() : undefined;
+  return typeof value === 'string' && value.trim() !== '' ? value.trim().replace(/\s+/g, ' ') : undefined;
 }
 
 /** Every line of a geometry: a river's runs, a lake's rings, a peak as a line of one point. */

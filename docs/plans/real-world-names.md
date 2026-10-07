@@ -150,10 +150,12 @@ No real event, figure or backstory is attached to it, ever; whatever it needs la
 
 ## What it is for, later
 
-The first use is near. The server already reads where a player is looking off the ground map (0084), and
-a choice roll takes it as an omen (0083): today that omen is "a river" or "coast". With names beside the
-ground map, read through a port the same way, it can be the Vistula, or the coast below Danzig, and a
-dialogue can name the place it happens in.
+The first use is built. The server reads where a player is looking off the ground map (0084), and a choice
+roll takes it as an omen (0083). **Since 2026-10-07 it reads the names too** (0085): they are filed beside the
+ground map as well as beside the tiles, read through a port the same way, and the ground says whether while
+the names say what - the river is *The Vistula* and the open sea *The Baltic Sea*, under the keys a river and
+the open sea already had, and a town of 1790 in view, zoomed in, is *Near Dantzic*, keyed by its Wikidata id.
+Next a dialogue can name the place it happens in, and the coast can be the coast below Dantzic.
 
 The origin map and the gazetteer are also what real history needs, so they come first. Two layers stand
 on them, each with its own plan when Adam chooses it:
@@ -168,8 +170,10 @@ on them, each with its own plan when Adam chooses it:
 ## What the names are, for whatever reads them
 
 The data is the point and the renderers are pictures of it: the Info map writes it as an atlas, the Origin
-renderer's click reads it out, and a quest or a line of flavour will read the same thing. Per master, beside
-its tiles, written by `world:origin` and `world:names` and never edited:
+renderer's click reads it out, the game server's omens read it, and a quest or a line of flavour will read the
+same thing. Per master, beside its tiles and again beside its ground map, the same bytes, written by
+`world:origin` and `world:names` and never edited; its shape is a contract both ends are tested against,
+`contracts/fixtures/names.json` (0085):
 
 - **`names.json`, `names`**: every named town, river, lake and peak in the world. Each has an `id`, the real
   world's identity of it - a Wikidata id where the source has one, `Q1792` for Dantzic - which never changes
@@ -180,12 +184,13 @@ its tiles, written by `world:origin` and `world:names` and never edited:
   will find it; and for a river or a lake its lines in the world.
 - **`names.json`, `regions`**, and **`regions.bin`**: every named sea and stretch of land, with its `id`,
   `kind`, English `name`, what it is (`feature`), `rank`, `from`, and where its name goes; and for every
-  square of the origin map, the land it is in and the sea it is by.
+  square of the origin map, `columns` by `rows` of them, the land it is in and the sea it is by.
 - **`world/names/1790.json`**, checked in: the review that decides the towns.
 
-What it does not yet do, and a quest will want: the game server cannot read it - it is beside the tiles,
-where only the page looks - so it wants a port as the ground map has (0084); the river file Natural Earth
-gives without Wikidata ids keys its rivers by file and number (the Danube is
+What it does not yet do, and a quest will want: the server reads it only for the map's omens so far; the
+copy beside the tiles names everything under the fog too, and must stop being served before players come
+(0085); canals are left out, because Natural Earth's were dug after 1790, until a review dates them; the
+river file Natural Earth gives without Wikidata ids keys its rivers by file and number (the Danube is
 `ne_10m_rivers_lake_centerlines:25:Danube`), which holds while the source does; a painted river is not yet
 tied to the name of the river it came from; a town's rank is today's, not its standing in 1790; and nothing
 yet holds the history or the flavour of a place, which would be keyed by the same `id`.
@@ -195,8 +200,8 @@ yet holds the history or the flavour of a place, which would be keyed by the sam
 - **The tools** are `world:origin` and `world:names` in `frontend/packages/world/bin/`, with the logic in
   `src/origin.ts`, unit-tested on small made-up masters. They reuse `toPixel` and `toLngLat` from
   `src/raster.ts` and the river graph from `src/flow.ts`.
-- **What they write** is output, `origin/`, `names.json` and `regions.bin` beside a master's tiles, and it
-  keeps up with the master by itself: cutting a master in the Debug map works it out as its last step, the
+- **What they write** is output, `origin/`, `names.json` and `regions.bin` beside a master's tiles, and the
+  last two again in `world/ground/<master>/` for the game server, and it keeps up with the master by itself: cutting a master in the Debug map works it out as its last step, the
   quick start works it out again whenever the master was saved since and carries the names again whenever the
   review was, and the panel says when either is out of date, with a button to mend just that.
 - **What is checked in** is what a person decides: the pins, `world/names/1790.json`, and

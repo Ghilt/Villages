@@ -183,7 +183,9 @@ stage alone, with none of the debug panel in it (decision record 0079).
   being read, the key figure open, where the view is centred - *Coast*, *River* within 400 km, *Forest*,
   *Mountains*, *Fields*, *Grassland*, *Desert*, *Marsh* or *Ice* where it is a sixth of the revealed land or
   more, *Open sea*, *House &lt;name&gt;* for houses standing in a circle of 150 km or less, and *Unknown* where the
-  fog covers it all, read by the game server off the ground map of the master the page draws - and the season -
+  fog covers it all, read by the game server off the ground map of the master the page draws; where its names
+  are carried, the river and the open sea by name, *The Vistula*, *The Baltic Sea*, and *Near &lt;town&gt;* for
+  the towns of 1790 in a circle of 150 km or less, at most two, on revealed ground - and the season -
   with their kind and,
   on hover, their key; what the last roll drew from, which the player never sees - the pools it opened and
   every action that could have been dealt, with its weight - and whether the throw or the lever chose its
@@ -223,11 +225,15 @@ stage alone, with none of the debug panel in it (decision record 0079).
   megabytes, and `origin.png`, the picture the Origin renderer lays on the world; then it carries Natural Earth's
   named rivers, lakes and peaks from `world/source`, and the towns `world/names/1790.json` says stood in 1790,
   through it into `names.json` beside them, three megabytes,
-  and gives every square the named sea and stretch of land it is in or by, in `regions.bin`.
+  and gives every square the named sea and stretch of land it is in or by, in `regions.bin`. The same two files
+  go into `world/ground/<master>/` beside the ground map, where only the game server reads them, for the map's
+  omens; their shape is held by `contracts/fixtures/names.json` (0085). Canals are left out, because Natural
+  Earth's were dug after 1790.
   `npm run world:names --prefix frontend` carries the names again without working the map out, in under a
   second. Two minutes a master. Cutting a master in the Debug map does it as its last step, and the quick start
   does it whenever the origin map is missing or older than the master, and carries the names again whenever
-  they are older than `world/names/1790.json`; nothing else does. It prints how much of the land
+  the server's copy is missing or older than `world/names/1790.json`; nothing else does. The game server reads
+  a master's names again when they are written, without a restart. It prints how much of the land
   is from Earth, invented and copied. Moving land with Nearest Neighbour keeps it traceable; land painted fresh,
   or opened up between pieces, is invented. See `docs/plans/real-world-names.md`.
 - A picture of the scenery, without a browser: `npm run world:scenery --prefix frontend` paints five

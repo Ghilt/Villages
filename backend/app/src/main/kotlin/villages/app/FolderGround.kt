@@ -26,7 +26,7 @@ class FolderGround(private val masters: Path) : GroundMaps {
     private val json = JsonMapper.builder().build()
 
     override fun of(master: String): GroundMap? {
-        val own = ownFolder(master) ?: return null
+        val own = ownFolder(masters, master) ?: return null
         val about = own.resolve("ground.json")
         val cells = own.resolve("ground.bin")
         if (!about.isRegularFile() || !cells.isRegularFile()) {
@@ -41,13 +41,17 @@ class FolderGround(private val masters: Path) : GroundMaps {
         val classes = said["classes"].properties().associate { (id, name) -> id.toInt() to name.asString() }
         return GroundMap(said["width"].asInt(), said["height"].asInt(), classes, Files.readAllBytes(cells))
     }
+}
 
-    private fun ownFolder(master: String): Path? {
-        if (!masters.isDirectory()) {
-            return null
-        }
-        return Files.list(masters).use { entries ->
-            entries.filter { it.name == master && it.isDirectory() }.findFirst().orElse(null)
-        }
+/**
+ * A master's own folder among a folder of masters, picked by its name from what is there and never made from it, so
+ * that a name a page sends cannot climb out of the folder; or null for a name that is not one of them.
+ */
+internal fun ownFolder(masters: Path, master: String): Path? {
+    if (!masters.isDirectory()) {
+        return null
+    }
+    return Files.list(masters).use { entries ->
+        entries.filter { it.name == master && it.isDirectory() }.findFirst().orElse(null)
     }
 }

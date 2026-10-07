@@ -14,6 +14,7 @@ import villages.application.FoundHouseService
 import villages.application.FreshIds
 import villages.application.fate.FateEngine
 import villages.application.fate.GroundMaps
+import villages.application.fate.PlaceNamesByMaster
 import villages.application.fate.FirstPools
 import villages.application.fate.omenSources
 import villages.application.fate.firstActions
@@ -201,6 +202,7 @@ class WorldConfig {
         dialogueRows: DialoguesProjection,
         lastRolls: LastRollsProjection,
         ground: GroundMaps,
+        names: PlaceNamesByMaster,
         clock: Clock,
         worldClock: WorldClock,
         dice: Dice,
@@ -209,7 +211,7 @@ class WorldConfig {
         FateEngine(
             omenSources(
                 houses, characters, characters, sights, dialogueRows, lastRolls,
-                months = { Calendar.monthOf(it.day) }, grounds = ground, housesNear = houses,
+                months = { Calendar.monthOf(it.day) }, grounds = ground, housesNear = houses, names = names,
             ),
             FirstPools.ALL, firstActions(houses, ids), dice, ids,
         ),
@@ -241,6 +243,11 @@ class WorldConfig {
     @Bean
     fun ground(@Value("\${villages.ground:../../world/ground}") folder: String): GroundMaps =
         FolderGround(Path.of(folder))
+
+    /** Each master's real names, from the copy `world:names` files beside its ground map. See 0085. */
+    @Bean
+    fun placeNames(@Value("\${villages.ground:../../world/ground}") folder: String): PlaceNamesByMaster =
+        FolderNames(Path.of(folder))
 
     @Bean
     @Suppress("LongParameterList")

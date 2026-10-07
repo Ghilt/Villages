@@ -79,7 +79,8 @@ and so is the origin map, the first of real names on the edited world and the ne
   the Origin renderer shows and experiment 0016 waits on Adam's eye for, and the third: Earth's rivers, lakes,
   peaks, seas and named lands are in the world, and the first pass of the fourth: 535 towns of 1790, under the
   names English gave them then, reviewed in `world/names/1790.json`; the Info map renderer writes all of it as
-  an atlas would. Next are more towns, region by region.
+  an atlas would. The game server reads them too, through a port and a contract (0085), and a roll's map omens
+  name the river, the sea and the towns of 1790 in view. Next are more towns, region by region.
   Adam's own, asked for on 2026-10-06.
 - **0.4** Local infrastructure: MongoDB replica set and RabbitMQ in Compose
 - **0.8** Testcontainers smoke test on MongoDB and RabbitMQ

@@ -20,5 +20,6 @@ dependencies {
     testImplementation(libs.spring.boot.starter.test)
 }
 
-// The server reads the portraits from the repository, and its tests check that it finds them there.
-testsRead("world/portraits")
+// The server reads the portraits from the repository, and its tests check that it finds them there; and it reads
+// the names as the world package files them, which the shared fixture holds both ends to.
+testsRead("world/portraits", "contracts/fixtures/names.json")
