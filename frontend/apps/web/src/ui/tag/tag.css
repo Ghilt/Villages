@@ -1,0 +1,21 @@
+/*
+ * A tag: a word or two in the soft ink, small, in a hairline outline of the same ink, beside a name. Nothing about
+ * it is gold or bold, because it is there to be found rather than seen.
+ */
+
+@layer ui {
+  .ui-tag {
+    display: inline-block;
+    flex: none;
+    padding: 0.05em 0.4em 0.1em;
+    border: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+    border-radius: 0.25rem;
+    font-size: 0.68rem;
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+    color: var(--ui-text-soft);
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+}
