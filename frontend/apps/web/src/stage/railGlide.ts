@@ -107,7 +107,16 @@ export function useGlideOnTheRail(
     const gap = Number.parseFloat(style.rowGap) || 0;
     for (const glide of glidesOnTheRail(before.placed, now, gap)) {
       const one = windows.find((window) => window.dataset.pane === glide.id);
-      one?.animate(
+      if (one === undefined) {
+        continue;
+      }
+      // Gliding, its box is shorter than what it says, and what scrolls in it would show a scrollbar for the
+      // length of the glide: `rail.css` hides them until it has landed.
+      one.dataset.gliding = 'yes';
+      const landed = () => {
+        if (one.getAnimations().length === 0) delete one.dataset.gliding;
+      };
+      const animation = one.animate(
         [
           {
             height: `${glide.fromH}px`,
@@ -118,6 +127,8 @@ export function useGlideOnTheRail(
         ],
         { duration, easing },
       );
+      animation.onfinish = landed;
+      animation.oncancel = landed;
     }
   });
 }

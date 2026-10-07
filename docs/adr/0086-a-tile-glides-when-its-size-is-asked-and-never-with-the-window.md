@@ -9,7 +9,8 @@
   flow does not - so a window opened or put away grows or shrinks, one arriving grows in from nothing, and the
   rest slide, a window brought to the top included. A window gone leaves nothing to animate and the rest slide up
   into its room. Its frame fills its box while the box is the taller, so one put away shrinks rather than snapping
-  to its strip. The arithmetic is pure and tested in `railGlide.ts`; the motion is looked at.
+  to its strip, and while it glides it draws no scrollbar, because its box is shorter than what it says until it
+  lands. The arithmetic is pure and tested in `railGlide.ts`; the motion is looked at.
 
 ## Context
 

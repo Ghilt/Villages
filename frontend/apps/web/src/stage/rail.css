@@ -48,3 +48,12 @@
 .stage[data-form='bays'] .rail {
   display: contents;
 }
+
+/*
+ * A window gliding to its new height is shorter than what it says for the length of the glide, so what scrolls in
+ * it would flash a scrollbar; none is drawn until it has landed. Only the bar: nothing is laid out differently.
+ * See `railGlide.ts`.
+ */
+.stage[data-form='spread'] .rail .bay[data-gliding] * {
+  scrollbar-width: none;
+}
