@@ -45,7 +45,7 @@ interface WindowBarProps {
   along: 'rows' | 'columns' | null;
   /**
    * How fresh what it shows is, for a thing on the map: `current`, or the day the fog hid it, and the words a
-   * pointer resting on it is told. Absent where it cannot be said. See decision record 0088.
+   * pointer resting on it is told. Absent where it cannot be said. See decision record 0089.
    */
   fresh?: { said: string; meant: string } | null;
 }
@@ -98,7 +98,7 @@ interface InspectWindowProps {
   along: 'rows' | 'columns' | null;
   /** The room it got, which is what its size control reports and changes. */
   room: Room;
-  /** How fresh what it shows is, beside its name. See `WindowBar` and decision record 0088. */
+  /** How fresh what it shows is, beside its name. See `WindowBar` and decision record 0089. */
   fresh?: { said: string; meant: string } | null;
 }
 

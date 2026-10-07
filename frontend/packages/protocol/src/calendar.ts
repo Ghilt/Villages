@@ -167,7 +167,7 @@ export function monthsBetween(from: number, to: number): number {
 }
 
 /** How a day is written for a person: the day, its month, and the year it falls in. */
-/** A day as a tag says it, short: `4 Mar 1793`. See decision record 0088. */
+/** A day as a tag says it, short: `4 Mar 1793`. See decision record 0089. */
 export function shortDay(day: number): string {
   const { year, month, dayOfMonth } = dateOf(day);
   return `${dayOfMonth} ${MONTHS[month - 1]!.slice(0, 3)} ${year}`;

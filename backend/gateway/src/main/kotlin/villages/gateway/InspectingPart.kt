@@ -16,7 +16,7 @@ import java.util.UUID
  * at, and what its fog lets through. Nothing is kept of the asking and nothing is sent again, because what a
  * window shows rarely changes; when its subject comes into a held cell, the cell's own changes reach it. Somebody
  * the house saw once and does not see now is answered as they were last seen, and when the fog hid them. See
- * decision records 0087 and 0088.
+ * decision records 0088 and 0089.
  */
 internal class InspectingPart(
     private val houses: HouseById,

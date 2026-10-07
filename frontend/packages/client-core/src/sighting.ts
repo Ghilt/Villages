@@ -4,7 +4,7 @@ import type { VisionPointView } from '@villages/protocol';
 /**
  * Whether a place that never moves - a house's seat - is in a house's vision on `today`, `now`, or else the
  * world-day the fog hid it: the end of the last stretch in which the house's vision covered it. Null where the
- * house never saw it at all. What a window says beside its name, `current` or that day. See decision record 0088.
+ * house never saw it at all. What a window says beside its name, `current` or that day. See decision record 0089.
  *
  * Vision changes only on the days a vision point begins or ends, so those days and the ones before them are all
  * there is to ask about. A point that began and ended on one day saw for part of it, so it counts on that day, and

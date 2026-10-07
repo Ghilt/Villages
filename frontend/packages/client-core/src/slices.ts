@@ -26,7 +26,7 @@ export interface SessionState {
   rollDrawn: RollDrawnFrame | null;
   /**
    * What the gateway answered windows asking after their subject wherever the camera is, by `kind:id`: the house or
-   * the character, or neither where there is none or the fog holds it back. Asked once a connection. See 0087.
+   * the character, or neither where there is none or the fog holds it back. Asked once a connection. See 0088.
    */
   inspected: Readonly<Record<string, FrameOf<'inspected'>>>;
   /**
@@ -138,7 +138,7 @@ const SLICES = {
     onReset: forgottenWhenTakenOver({ rollDrawn: null }),
   } satisfies Slice<'rollDrawn'>,
 
-  /** The answers to windows asking after their subject. Kept through a close; a takeover forgets them. See 0087. */
+  /** The answers to windows asking after their subject. Kept through a close; a takeover forgets them. See 0088. */
   inspecting: {
     initial: { inspected: {} },
     onFrame: {

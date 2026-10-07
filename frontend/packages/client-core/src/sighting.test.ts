@@ -21,7 +21,7 @@ const walkedOn: VisionPointView = {
 
 /**
  * What a window on a house says beside its name: `current` while the house's vision covers it, or the day the fog
- * hid it. See decision record 0088.
+ * hid it. See decision record 0089.
  */
 describe('when a place was last seen', () => {
   it('is now, while the vision covers it', () => {

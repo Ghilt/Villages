@@ -1,8 +1,8 @@
-# 0088. A window says how fresh it is: current, or the day the fog hid it
+# 0089. A window says how fresh it is: current, or the day the fog hid it
 
 - Status: accepted
 - Date: 2026-10-07
-- Builds on 0087, a window answered wherever the camera is, and 0061, the fog's three levels. Adam's words of
+- Builds on 0088, a window answered wherever the camera is, and 0061, the fog's three levels. Adam's words of
   2026-10-07.
 
 ## Context
@@ -61,7 +61,7 @@ rule should hold it at the day the fog hid it, and the window will already be sa
 
 **A person's age is today's**, worked out from their birthday, even when where they stood is from a day long gone.
 
-**A tag answered by the gateway goes as stale as the answer does** (0087): somebody who walks back into the
+**A tag answered by the gateway goes as stale as the answer does** (0088): somebody who walks back into the
 house's vision while the window stays open out of the cells is still dated until the page reconnects, or they come
 into a held cell.
 

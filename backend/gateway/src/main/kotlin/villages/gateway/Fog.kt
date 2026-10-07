@@ -66,7 +66,7 @@ internal class Fog(
      * its vision covered where they stood, and the day that stopped - null while it still does on [today]. Null
      * when it never saw them. Vision and where they stand change only on the days a point or a span begins or
      * ends, so those days and the ones before them are all there is to ask about. A point or a span begun and
-     * ended on one day was there for part of it, and counts on that day. See decision record 0088.
+     * ended on one day was there for part of it, and counts on that day. See decision record 0089.
      */
     fun lastSeen(stood: List<PlacedCharacter>, today: WorldTime): Pair<PlacedCharacter, WorldTime?>? {
         if (stood.isEmpty()) return null

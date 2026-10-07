@@ -78,6 +78,6 @@ The surfaces may take the library up themselves later, a component at a time, an
 ## Amendment, 2026-10-07: the inspect window takes up the library
 
 `inspect` may import `ui` as well, the second of the game's surfaces to after the choice roll: a window's first row
-carries the library's `Tag` beside its name, saying how fresh what it shows is (0088). `TAKEN_UP` in
+carries the library's `Tag` beside its name, saying how fresh what it shows is (0089). `TAKEN_UP` in
 `layers.test.ts` names it. The rest of the window still draws its own controls, and takes the library's up a
 component at a time.

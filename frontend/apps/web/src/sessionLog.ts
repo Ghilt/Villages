@@ -183,7 +183,7 @@ export const sessionLog: GatewayListener = {
         );
         return;
       case 'inspected': {
-        // What a window asking after its subject was told: a name, or nothing at all. See 0087.
+        // What a window asking after its subject was told: a name, or nothing at all. See 0088.
         const someone = frame.character;
         const told = frame.house?.name ?? (someone ? `${someone.givenName} ${someone.familyName}` : null);
         note(

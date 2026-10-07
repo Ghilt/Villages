@@ -99,7 +99,7 @@ Wanted, not started, and each needs a hypothesis in `docs/experiments/` before a
   is driven by drag and wheel. The camera is also still not told which part of the map the tiles are
   covering, so *show it on the map* can fly a thing to under the column.
 - **An inspect window that stays up to date.** A window says what it last knew once the camera has left its
-  subject, and one that knows nothing asks the gateway once and is answered by the fog's rule (0087), so it no
+  subject, and one that knows nothing asks the gateway once and is answered by the fog's rule (0088), so it no
   longer depends on where the map is. What is left is keeping an open window live while its subject changes out
   of view, which nothing has needed yet. If one ever does, it becomes a subscription, as your own house already
   is: the gateway sends it to the **session** rather than to a cell. A subject with no stream, a piece of flavour

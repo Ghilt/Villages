@@ -52,7 +52,7 @@ export interface Description {
   likeness?: { portrait: string | undefined };
   facts: readonly Fact[];
   links: readonly Link[];
-  /** Where it is, for a thing on the map: what the tag beside its name is worked out from. See 0088. */
+  /** Where it is, for a thing on the map: what the tag beside its name is worked out from. See 0089. */
   place?: { lat: number; lon: number };
 }
 

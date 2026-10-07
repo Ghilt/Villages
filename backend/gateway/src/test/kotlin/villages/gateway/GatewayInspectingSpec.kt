@@ -16,7 +16,7 @@ private fun MutableList<ServerFrame>.answer(): Inspected = filterIsInstance<Insp
 /**
  * A window asking after its subject wherever the camera is, answered once by the rule a cell's snapshot is held to:
  * the fog lets through a house on revealed ground and somebody in vision. No cell is held in any of these. See
- * decision record 0087. The rig is GatewayRig.kt.
+ * decision record 0088. The rig is GatewayRig.kt.
  */
 class GatewayInspectingSpec : StringSpec({
 

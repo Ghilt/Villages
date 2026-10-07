@@ -150,7 +150,7 @@ export function restart(): void {
 
 /**
  * Asks the gateway after a window's subject wherever the camera is, once a connection: what a window knowing
- * nothing of a house or a person does. The answer is the session's `inspected`. See decision record 0087.
+ * nothing of a house or a person does. The answer is the session's `inspected`. See decision record 0088.
  */
 export function inspectSubject(kind: 'house' | 'character', id: string): void {
   session.inspect(kind, id);

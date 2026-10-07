@@ -409,13 +409,13 @@ subject, once, and says what it is answered: the house on ground the player's ho
 its vision, by the fog's own rule. Where the answer is nothing it says *Nothing known of it yet*, under the name
 the **trail** last saw it under, or the word for its kind where nothing ever named it. It never sends the player
 to pan back to it. A window out of what the camera holds asks the gateway once anyway, so what it says does not
-hang on where the camera is. See decision record 0087.
+hang on where the camera is. See decision record 0088.
 
 **A window on a thing on the map says how fresh it is**, in a small, quiet tag beside its name: `current`, or the
 day the fog hid it, `4 Mar 1793`, with the long form under the pointer. A house on revealed ground is dated by the
 end of the last stretch the house's vision covered its seat; somebody who has left its vision is shown where they
 stood when last seen, dated by when the fog hid them. The player's own house and people are always current, and an
-area has no tag. See decision record 0088.
+area has no tag. See decision record 0089.
 
 **In the spread** the windows take **left** and stack on its rail, newest at the top, up to three; a fourth
 pushes the oldest off rather than being refused. **When they no longer all fit, one stays open** and the

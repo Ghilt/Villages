@@ -1,4 +1,4 @@
-# 0087. A window asks after its subject once, and is answered by the fog's rule
+# 0088. A window asks after its subject once, and is answered by the fog's rule
 
 - Status: accepted
 - Date: 2026-10-07

@@ -75,7 +75,7 @@ export interface Session {
   completeDialogueStep(dialogueId: string, lineId: string, described: string): void;
   /**
    * Asks after a window's subject wherever the camera is: answered once into `inspected`. Asked once a connection,
-   * because nothing is sent again, and not at all before the welcome. See decision record 0087.
+   * because nothing is sent again, and not at all before the welcome. See decision record 0088.
    */
   inspect(kind: 'house' | 'character', id: string): void;
 }

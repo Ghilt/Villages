@@ -140,7 +140,7 @@ class Gateway(
 
     /**
      * A part for each mechanic, in the order a player arriving is told things: the house, whom it holds, what it sees,
-     * what it was told, what it is asked; then the stands, the timeline and the windows (0087), which greet nobody;
+     * what it was told, what it is asked; then the stands, the timeline and the windows (0088), which greet nobody;
      * and Adam's instruments (0076). Made after the index and the sessions, because a part watches its read models
      * from the moment it is made. See decision record 0075.
      */

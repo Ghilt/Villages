@@ -21,7 +21,7 @@ import { useStore } from '../store/useStore';
  * It reads the cells the camera holds rather than keeping a copy, so a house that changes while it is being looked
  * at changes here. Once the camera has left it, it says what it last said; and a window this page has never been
  * able to say anything of asks the gateway after its subject, once, and says what it is answered. A window is for
- * reading about a thing wherever the map is: Adam's word of 2026-10-07, and decision record 0087.
+ * reading about a thing wherever the map is: Adam's word of 2026-10-07, and decision record 0088.
  */
 
 interface InspectingProps {
@@ -75,7 +75,7 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
     return house === undefined ? null : describeHouse(house, yourHouse?.house.id === house.id, areas.areas);
   };
 
-  /** What the gateway answered when the window asked after its subject, if it has. See 0087. */
+  /** What the gateway answered when the window asked after its subject, if it has. See 0088. */
   const answer = subject.kind === 'area' ? undefined : answers[`${subject.kind}:${subject.id}`];
   const describeAnswer = (): Description | null => {
     if (answer?.house !== undefined) {
@@ -91,7 +91,7 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
     live === null ? (describeAnswer() ?? sayingOrLastSaid(subject, null)) : sayingOrLastSaid(subject, live);
 
   // Out of what the camera holds, it asks the gateway after a house or a person: once a connection, answered once,
-  // so what it says and how fresh that is do not hang on where the camera is. See 0087 and 0088.
+  // so what it says and how fresh that is do not hang on where the camera is. See 0088 and 0089.
   const asks = live === null && subject.kind !== 'area';
   useEffect(() => {
     if (asks && connection === 'open') {
@@ -102,7 +102,7 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
   /**
    * How fresh what it shows is, said beside its name: `current`, or the day the fog hid it. A house never moves, so
    * the page works it out from the house's own sight; somebody who moves, the gateway, from where they stood. The
-   * player's own house and people are always current, and an area is the player's own drawing. See 0088.
+   * player's own house and people are always current, and an area is the player's own drawing. See 0089.
    */
   const freshness = (): { said: string; meant: string } | null => {
     const now = { said: 'current', meant: 'as it is now' };

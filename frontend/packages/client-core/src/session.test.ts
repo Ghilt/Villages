@@ -158,7 +158,7 @@ describe('the session, folded from what each mechanic folds', () => {
     expect(session.state()).toMatchObject({ connection: 'closed', seeAll: true, fogOfWar: true });
   });
 
-  // A window on something the page knows nothing of asks once, and the answer is kept by subject. See 0087.
+  // A window on something the page knows nothing of asks once, and the answer is kept by subject. See 0088.
   it('asks after a subject once a connection, not before the welcome, and keeps the answer by subject', () => {
     const socket = fakeSocket();
     const session = createSession({

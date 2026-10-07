@@ -231,7 +231,7 @@ export const clientFrameSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('wipeWorld') }),
   /**
    * A window asking after its subject wherever the camera is, once, when it opens on something the page knows
-   * nothing of. No subscription: it is answered once by `inspected`. See decision record 0087.
+   * nothing of. No subscription: it is answered once by `inspected`. See decision record 0088.
    */
   z.object({ type: z.literal('inspect'), kind: z.enum(['house', 'character']), id: z.string() }),
 ]);
@@ -311,7 +311,7 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
   /**
    * The answer to `inspect`, once: the house or the character as the map would show it, or neither when there is
    * no such thing or the fog holds it back, by the rule a cell's snapshot is held to. Somebody seen once and not now
-   * is answered as last seen, `seenUntil` the world-day the fog hid them; absent, it is as it is now. See 0087, 0088.
+   * is answered as last seen, `seenUntil` the world-day the fog hid them; absent, it is as it is now. See 0088, 0089.
    */
   z.object({
     type: z.literal('inspected'),
