@@ -135,6 +135,13 @@ gave and the closing line each on paper of their own, with a soft shadow, so the
 the head and the foot are paper bars across it. The speakers stand in the scene in their bubbles, facing
 each other from the two sides. With no picture the pane is its own paper. `Scene`, in `dialogues/Scene.tsx`.
 
+**The ground has a shape.** The painted ground is shaded by its slope, its **relief**: faces turned from the
+light in a dusky violet, faces towards it in a warm cream, the flat left as painted. Heavy on the continent,
+out to zoom 6, where the mountain ranges stand out of the paint as an atlas draws them; easing to a light
+shading by zoom 9 and in, where the scenery and the paint carry the ground and the relief only gives it some
+variety. The light is the one the shadows are cut for, from the upper right. Over a renderer that draws the
+ground in hard cells, `plate`, it can come in the same cells, in a few hard tones. See decision record 0090.
+
 **A picture on the map.** Every sprite on the map is a picture Adam hands over, and every one of them has
 to agree with the others on three things, or it looks pasted on. **The light comes from the upper right**,
 because the first picture has it there. **The eye looks north and down at 45 degrees** at the closest zoom,

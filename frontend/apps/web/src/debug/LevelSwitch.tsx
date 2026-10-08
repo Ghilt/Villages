@@ -13,6 +13,8 @@ interface LevelSwitchProps {
   overruled: boolean;
   /** What the shader is, for the words said on hover. */
   what: string;
+  /** What each level means, on hover, where it is not how much of the screen is worked out. */
+  said?: Record<ShaderLevel, string>;
 }
 
 const SAID: Record<ShaderLevel, string> = {
@@ -21,7 +23,7 @@ const SAID: Record<ShaderLevel, string> = {
   high: 'every pixel, at the full rate',
 };
 
-export function LevelSwitch({ level, onChange, overruled, what }: LevelSwitchProps) {
+export function LevelSwitch({ level, onChange, overruled, what, said = SAID }: LevelSwitchProps) {
   return (
     <span
       className={overruled ? 'debug__levels debug__levels--overruled' : 'debug__levels'}
@@ -35,7 +37,7 @@ export function LevelSwitch({ level, onChange, overruled, what }: LevelSwitchPro
           className={one === level ? 'debug__level debug__level--on' : 'debug__level'}
           aria-pressed={one === level}
           onClick={() => onChange(one)}
-          title={`${what}: ${SAID[one]}${overruled ? ', once the shaders are on again' : ''}`}
+          title={`${what}: ${said[one]}${overruled ? ', once the shaders are on again' : ''}`}
         >
           {one}
         </button>

@@ -595,6 +595,12 @@ Ensure (Join-Path $Root "world\ground\$DefaultMaster\ground.json") 'reading the 
 Ensure 'origin\origin.json' 'working out where on Earth the land came from (two minutes)' @('run', 'world:origin') 'the origin map is worked out' $Painted
 Ensure @('names.json', (Join-Path $Root "world\ground\$DefaultMaster\names.json")) 'carrying the real names through the origin map' @('run', 'world:names') 'the names are carried' @((Join-Path $Root 'world\names\1790.json'), (Join-Path $Root 'world\names\about.json'))
 
+# How high the ground is, for the relief (0090): ETOPO, 444 MB once, fitted through the origin map, a few minutes.
+Ensure 'height\height.json' 'fetching and fitting the height of the world' @('run', 'world:height') 'the relief has its height' @((Join-Path $DefaultWorld 'origin\origin.json'))
+
+<# What a world command said, run quietly in the frontend: the cuts made at every start show only their last word. #>
+function Said([string] $Script) { Push-Location $Frontend; try { & $Npm @('run', '--silent', $Script) } finally { Pop-Location } }
+
 # What the scenery is drawn as: Adam's pictures in world/sprites, cut into one atlas. Cut at every start
 # and not only when there is none, because an atlas that was there used to be drawn as it was: a picture
 # saved while nothing was running, or a rule a merge changed, stayed off the map until the next save. A
@@ -605,12 +611,7 @@ Ensure @('names.json', (Join-Path $Root "world\ground\$DefaultMaster\names.json"
 # fails - which stops nothing, because the map can draw the atlas that was there. See decision 0059.
 $ArtAtlas = Join-Path $Frontend 'apps/web/public/art/scenery.json'
 Step 'the sprites are '
-Push-Location $Frontend
-try {
-    $said = @(& $Npm @('run', '--silent', 'world:art'))
-} finally {
-    Pop-Location
-}
+$said = @(Said 'world:art')
 if ($LASTEXITCODE -eq 0 -and (Test-Path $ArtAtlas)) {
     $atlas = Get-Content $ArtAtlas -Raw | ConvertFrom-Json
     $report = "cut: {0} in an atlas of {1}x{2}" -f @($atlas.frames.PSObject.Properties).Count, $atlas.width, $atlas.height
@@ -635,12 +636,7 @@ if ($LASTEXITCODE -eq 0 -and (Test-Path $ArtAtlas)) {
 # or says there is nothing cut yet. See decision 0068.
 $UiList = Join-Path $Frontend 'apps/web/public/ui/ui.json'
 Step 'the interface pictures are '
-Push-Location $Frontend
-try {
-    $said = @(& $Npm @('run', '--silent', 'world:ui'))
-} finally {
-    Pop-Location
-}
+$said = @(Said 'world:ui')
 if ($LASTEXITCODE -eq 0 -and (Test-Path $UiList)) {
     $report = 'cut'
     foreach ($line in $said) {

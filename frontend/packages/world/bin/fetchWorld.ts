@@ -18,12 +18,17 @@ import type { WorldSource } from './lib/worldSources.ts';
  * temporary directory is cleared, which it will be, and so that nobody has to find five download pages
  * again. About 4.5 GB, once, into a directory that is not committed.
  *
- *   node bin/fetchWorld.ts [--list] [--force]
+ *   node bin/fetchWorld.ts [--list] [--force] [--only <part of a name>]
  */
 
 const args = process.argv.slice(2);
 const listOnly = args.includes('--list');
 const force = args.includes('--force');
+const onlyAt = args.indexOf('--only');
+const only = onlyAt < 0 ? undefined : args[onlyAt + 1]?.toLowerCase();
+const sources = WORLD_SOURCES.filter(
+  (source) => only === undefined || source.name.toLowerCase().includes(only),
+);
 
 const megabytes = (bytes: number) => `${(bytes / 1048576).toFixed(1)} MB`;
 
@@ -126,7 +131,7 @@ async function downloadAndUnzip(source: WorldSource): Promise<void> {
 
 if (listOnly) {
   console.log(`the world is built from these, into ${SOURCE_DIR}:\n`);
-  for (const source of WORLD_SOURCES) {
+  for (const source of sources) {
     const paths = source.into !== undefined ? [source.into] : (source.members ?? []).map((m) => m.into);
     const here = paths.every((path) => existsSync(resolve(SOURCE_DIR, path)));
     console.log(`  ${here ? 'have' : 'need'}  ${source.name}`);
@@ -139,7 +144,7 @@ if (listOnly) {
 await mkdir(SOURCE_DIR, { recursive: true });
 let fetched = 0;
 
-for (const source of WORLD_SOURCES) {
+for (const source of sources) {
   if (source.into !== undefined) {
     const into = resolve(SOURCE_DIR, source.into);
     if (alreadyHave(into, source.bytes)) {
@@ -165,6 +170,6 @@ for (const source of WORLD_SOURCES) {
 console.log(`\n${fetched === 0 ? 'nothing to fetch, everything is here' : `fetched ${fetched} sources`}`);
 console.log(`into ${SOURCE_DIR}`);
 console.log('\ncredits, if any of this world is published:');
-for (const credit of new Set(WORLD_SOURCES.map((source) => source.credit))) {
+for (const credit of new Set(sources.map((source) => source.credit))) {
   console.log(`  ${credit}`);
 }

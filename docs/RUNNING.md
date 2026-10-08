@@ -71,6 +71,25 @@ stage alone, with none of the debug panel in it (decision record 0079).
   remembered in that browser, `reset` puts them back, and once a slider stops the log says all eight under
   `water` as `rivers tuned: …`, which is the line to hand over when a setting should become the default. Every
   other number of the water is in `apps/web/src/water/look.ts`. See `docs/adr/0081`.
+- The ground is shaded by its slope, the whole world, at every zoom, over the paint and under the water, lit
+  from the upper right as the scenery's shadows are, from the height tiles `world:height` cuts. It is the
+  **Relief** part of the Shaders section (0090): `off`, `low` (faint) or `high` (strong) in its bar, high at every
+  load. Inside it, first, **how strongly at each zoom**, for whichever shader draws it: how strong far out and how
+  far in that reaches, how strong close in and from which zoom; three quarters strength out to zoom 6 and 15%
+  from zoom 9 in until the sliders say otherwise, eased between, and at nought nothing is fetched or drawn there.
+  Somewhere not yet loaded is shaded softly from a coarser tile for a moment, never left bare. Then what draws it, two to compare. **Our shader**, the first, works
+  the shade out for every pixel from a tile's heights and a margin of its neighbours', so there is no seam; with
+  `pixels` ticked it shades a whole cell of the lattice the Camera section sets at a time, the turned diamonds the
+  `plate` renderer draws its ground in, cell for cell. **How steep** draws the ground steeper or flatter than it is,
+  and **hard tones** makes the shade a few steps each side of flat. **MapLibre's hillshade**, the second, has its
+  five ways of shading, `igor` first, and with `pixels` a square block of shade a height sample, not the diamonds;
+  blended, it shows a seam a few pixels wide along a height tile's edge close in. Every slider changes the map on
+  the next frame, is remembered in the browser that moved it, and once one stops the log says them all under
+  `relief` as `tuned: …`, the line to hand over when a setting should become the default; `reset` puts them back.
+  The height is the master's own, real Earth's read through its origin map, so the shading follows land Adam
+  moved, and invented land is given ground of the kind painted on it: rock a range, forest hills, farmland flat. A master with no height tiles is drawn flat and the log says what
+  to run. Its numbers are in
+  `apps/web/src/map/relief.ts` and `reliefTuning.ts`, and our shader is `reliefLayer.ts` and `reliefShader.ts`.
 - What the program thinks is happening: the debug panel, one space docked down the right-hand side
   holding everything that helps during development, which minimises to a badge and remembers that,
   and is only in a development build: a production build leaves it out whole (0079).
@@ -272,6 +291,18 @@ stage alone, with none of the debug panel in it (decision record 0079).
   make. The game server reads a master's names again when they are written, without a restart. It prints how much of the land
   is from Earth, invented and copied. Moving land with Nearest Neighbour keeps it traceable; land painted fresh,
   or opened up between pieces, is invented. See `docs/plans/real-world-names.md`.
+- How high the ground is, for the relief: `npm run world:height --prefix frontend` reads ETOPO 2022's whole world,
+  a height every 60 arc-seconds, through the master's origin map, so every point of the master has the height of
+  where on Earth it was cut from, and invented land is given ground of the kind the master paints on it, and
+  cuts it into Terrarium tiles to zoom 7 in `public/world/masters/<master>/height/`, saved as WebP without loss,
+  with `height.json` saying where they reach, which origin map they were fitted through, and the highest point
+  they found: on `terrain3_mended_2026-10-03` an invented summit at 33.6 N 80.3 E, 8,616 m, with Everest carried
+  4.8 degrees south with its range at 8,000 m, a summit averaged over a cell. 21,845 tiles, 205 MB, two and a
+  half minutes, the master read for its painting included. It reads `world/source/etopo/`, and fetches the one file first when it is
+  missing, 444 MB once, through `world:fetch-all -- --only etopo`; `--only` fetches any source whose name holds
+  the word. The sea is held at nought and the grid is read round the antimeridian. A master with no origin map
+  is given plain Earth's height, and it says so. Cutting a master in the Debug map fits it again after the
+  origin, and the quick start does whenever it is missing or the origin map is newer. See decision record 0090.
 - A picture of the scenery, without a browser: `npm run world:scenery --prefix frontend` paints five
   places at the zoom the scenery is actually in and stamps every point the sprite map asks for onto
   them, into `world/painterly/<place>-scenery.png`, half a minute for all of them. It prints each one's

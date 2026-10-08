@@ -181,11 +181,25 @@ One or the other, not a paragraph explaining either.
 ## Every session works in its own git worktree
 
 An agent does not work in `E:\Code\Villages` itself. Each session gets a worktree under
-`.claude/worktrees/<name>/`, which is a full checkout of the tree on its own branch, so several sessions
-edit the same files at once without seeing each other's half-finished work. Adam's own checkout, the one
-he paints the master in, stays the main one.
+`.claude/worktrees/<name>/`, which is a full checkout of the tree on its own branch, `claude/<name>`, so
+several sessions edit the same files at once without seeing each other's half-finished work. Adam's own
+checkout, the one he paints the master in, stays the main one.
 
 What follows from that, and bites in practice:
+
+- **A worktree is named for its branch.** `.claude/worktrees/<name>/` has `claude/<name>` checked out and
+  nothing else, so the folder, the branch, the Worktrees section of the debug panel and the ports, which
+  are worked out from the folder's name, all name the same piece of work. The app makes the two together.
+  They part when a new session is started in a folder an earlier one left behind: the session is given a
+  new branch and the folder keeps its old name. That is how `blissful-bouman-ea3009`, a gateway fix of
+  2026-09-26, came to hold `claude/techstack-3d-rendering-0a717a`, and `fog-of-war-mechanic-3c9f45` came to
+  hold `claude/desktop-ui-bay-animations-f32616`. So a session checks that `git branch --show-current`
+  names its folder before it touches anything. If it does not, the session says so and moves while there
+  is nothing in the old folder to lose: `git switch --detach` there frees the branch,
+  `git worktree add .claude/worktrees/<name> claude/<name>` makes the folder it should have, and
+  `EnterWorktree` with that path takes the session into it. The new folder then needs its packages, its
+  tiles and `--launch` like any fresh tree, and serves on ports of its own. The folder left behind sits on
+  a detached head until Adam removes it or asks a session to.
 
 - **Run everything from the worktree root**, never from the main checkout, and never `cd` out of it.
 - **`world/master/*.png` is per-worktree.** A master Adam saves in the main checkout is not in the
@@ -346,7 +360,7 @@ Commands are added here as the increments land:
   `world/render.json`, and how it is painted is `world/painterly.json`.
 - The world's other tools, each `npm run <name> --prefix frontend` and each described in `docs/RUNNING.md`
   beside the folder it reads: `world:sprites` works out a master's sprite map, `world:flow` which way its rivers
-  run, `world:origin` where on Earth each part of it came from and `world:names` the names carried through that, `world:ground` the ground map the game server reads, `world:scenery` paints stills of the sprite map, `world:paint` paints the painterly stills and writes the
+  run, `world:origin` where on Earth each part of it came from and `world:names` the names carried through that, `world:ground` the ground map the game server reads, `world:height` the whole world's height the relief is shaded from, `world:scenery` paints stills of the sprite map, `world:paint` paints the painterly stills and writes the
   runtime copy of the styles (`-- --config-only` for that alone), `world:art` cuts the sprites, `world:ui` the
   interface pictures, and `world:portraits` and `world:scenes` draw placeholders, never over a file that is
   there.

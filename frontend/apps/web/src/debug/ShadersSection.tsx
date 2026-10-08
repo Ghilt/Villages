@@ -1,6 +1,7 @@
 import { setShadersOn, shadersStore } from '../shaders/levels';
 import { useStore } from '../store/useStore';
 import { GrassSection } from './GrassSection';
+import { ReliefSection } from './ReliefSection';
 import { Section } from './Section';
 import { WaterSection } from './WaterSection';
 
@@ -20,6 +21,7 @@ export function ShadersSection() {
   return (
     <Section name="Shaders" control={control}>
       <WaterSection />
+      <ReliefSection />
       <GrassSection />
     </Section>
   );
