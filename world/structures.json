@@ -1,0 +1,180 @@
+{
+  "$comment": "Every type of structure there is, Adam's to tune: a first draft of 2026-10-08, every number a placeholder. Each list runs a level at a time, first to highest, and every list of a type is as long as its others. significance is how far out it is drawn (0 to 100; 20 is a founded house, drawn from zoom 8); sightKm how far its holder sees round it, never 0; groundHeight its size on the map in world units (the castle of today is 4); yields what it gives its holder a world month, which is a real day, by the resources' names on the wire. A slot takes a character, an item or either, has places at each level that never fall as the level rises, and is seen into by all or by its holder only; needed means the type gives nothing while it is empty, adds is what each filled place gives, scales names the stat of the character in it that what the type gives follows, and bringsItsOwn means an item in it gives its own. words is what each culture calls the type. zone is the ground it reaches when selected, the castle's alone so far. The server reads this once at start and the page through the dev server. See docs/plans/structures.md and decision record 0092.",
+  "types": {
+    "castle": {
+      "words": { "european": "castle", "islamic": "kasbah", "eastAsian": "castle", "african": "stockade" },
+      "significance": [20, 24, 28],
+      "sightKm": [34, 40, 48],
+      "groundHeight": [4, 4.5, 5],
+      "yields": { "naturalDomain": [3, 5, 8] },
+      "zone": { "reach": 25 },
+      "slots": [
+        { "name": "lord", "takes": "character", "places": [1, 1, 1], "seenBy": "all" },
+        { "name": "garrison", "takes": "item", "places": [1, 1, 1], "seenBy": "holder" },
+        { "name": "dungeon", "takes": "character", "places": [1, 2, 3], "seenBy": "holder" }
+      ]
+    },
+    "manor": {
+      "words": { "european": "manor house", "islamic": "konak", "eastAsian": "country residence", "african": "compound" },
+      "significance": [14, 17, 20],
+      "sightKm": [10, 12, 14],
+      "groundHeight": [3, 3.4, 3.8],
+      "yields": { "wealth": [4, 7, 11], "naturalDomain": [2, 3, 5] },
+      "slots": [
+        { "name": "steward", "takes": "character", "places": [1, 1, 1], "seenBy": "all", "scales": "reason" },
+        { "name": "cellar", "takes": "item", "places": [1, 2, 3], "seenBy": "holder" }
+      ]
+    },
+    "palace": {
+      "words": { "european": "palace", "islamic": "seraglio", "eastAsian": "palace", "african": "royal enclosure" },
+      "significance": [40, 50, 60],
+      "sightKm": [20, 24, 28],
+      "groundHeight": [5, 5.6, 6.2],
+      "yields": { "influence": [8, 14, 22] },
+      "slots": [
+        { "name": "throne", "takes": "character", "places": [1, 1, 1], "seenBy": "all", "needed": true },
+        { "name": "court", "takes": "character", "places": [3, 5, 7], "seenBy": "all" },
+        { "name": "treasury", "takes": "item", "places": [1, 2, 3], "seenBy": "holder" }
+      ]
+    },
+    "fort": {
+      "words": { "european": "star fort", "islamic": "citadel", "eastAsian": "fortress", "african": "fort" },
+      "significance": [22, 26, 30],
+      "sightKm": [40, 48, 56],
+      "groundHeight": [3.6, 4, 4.4],
+      "yields": { "naturalDomain": [2, 3, 4] },
+      "slots": [
+        { "name": "commander", "takes": "character", "places": [1, 1, 1], "seenBy": "all" },
+        { "name": "garrison", "takes": "item", "places": [1, 1, 1], "seenBy": "holder" },
+        { "name": "magazine", "takes": "item", "places": [1, 2, 3], "seenBy": "holder" }
+      ]
+    },
+    "watchtower": {
+      "words": { "european": "watchtower", "islamic": "watchtower", "eastAsian": "beacon tower", "african": "lookout" },
+      "significance": [12, 14, 16],
+      "sightKm": [50, 65, 80],
+      "groundHeight": [3.2, 3.6, 4],
+      "yields": {},
+      "slots": [{ "name": "lookout", "takes": "character", "places": [1, 1, 1], "seenBy": "all" }]
+    },
+    "prison": {
+      "words": { "european": "gaol", "islamic": "prison", "eastAsian": "prison", "african": "prison" },
+      "significance": [12, 14, 16],
+      "sightKm": [8, 10, 12],
+      "groundHeight": [2.8, 3.1, 3.4],
+      "yields": {},
+      "slots": [
+        { "name": "warden", "takes": "character", "places": [1, 1, 1], "seenBy": "all" },
+        { "name": "cells", "takes": "character", "places": [2, 4, 6], "seenBy": "holder", "adds": { "influence": 1 } }
+      ]
+    },
+    "cathedral": {
+      "words": { "european": "cathedral", "islamic": "great mosque", "eastAsian": "great temple", "african": "great shrine" },
+      "significance": [35, 45, 55],
+      "sightKm": [15, 18, 22],
+      "groundHeight": [5, 5.6, 6.2],
+      "yields": { "piety": [6, 10, 16] },
+      "slots": [
+        { "name": "bishop", "takes": "character", "places": [1, 1, 1], "seenBy": "all", "scales": "piety" },
+        { "name": "reliquary", "takes": "item", "places": [1, 1, 2], "seenBy": "all", "bringsItsOwn": true }
+      ]
+    },
+    "abbey": {
+      "words": { "european": "abbey", "islamic": "tekke", "eastAsian": "monastery", "african": "monastery" },
+      "significance": [16, 19, 22],
+      "sightKm": [10, 12, 14],
+      "groundHeight": [3.4, 3.8, 4.2],
+      "yields": { "piety": [3, 5, 8], "reason": [2, 3, 5] },
+      "slots": [
+        { "name": "abbot", "takes": "character", "places": [1, 1, 1], "seenBy": "all" },
+        { "name": "library", "takes": "item", "places": [1, 2, 3], "seenBy": "all", "bringsItsOwn": true }
+      ]
+    },
+    "mill": {
+      "words": { "european": "mill", "islamic": "mill", "eastAsian": "mill", "african": "mill" },
+      "significance": [8, 10, 12],
+      "sightKm": [6, 8, 10],
+      "groundHeight": [2.4, 2.7, 3],
+      "yields": { "wealth": [6, 12, 20] },
+      "slots": [{ "name": "granary", "takes": "item", "places": [1, 2, 3], "seenBy": "all" }]
+    },
+    "mine": {
+      "words": { "european": "mine", "islamic": "mine", "eastAsian": "mine", "african": "mine" },
+      "significance": [10, 12, 14],
+      "sightKm": [6, 8, 10],
+      "groundHeight": [2.4, 2.7, 3],
+      "yields": { "wealth": [8, 14, 22], "naturalDomain": [1, 2, 3] },
+      "slots": [
+        { "name": "overseer", "takes": "character", "places": [1, 1, 1], "seenBy": "all" },
+        { "name": "ore", "takes": "item", "places": [1, 2, 3], "seenBy": "holder" }
+      ]
+    },
+    "market": {
+      "words": { "european": "exchange", "islamic": "bazaar", "eastAsian": "market", "african": "market" },
+      "significance": [14, 17, 20],
+      "sightKm": [10, 12, 14],
+      "groundHeight": [2.8, 3.1, 3.4],
+      "yields": { "wealth": [5, 9, 14], "influence": [2, 3, 5] },
+      "slots": [
+        { "name": "factor", "takes": "character", "places": [1, 1, 1], "seenBy": "all", "scales": "reason" },
+        { "name": "warehouse", "takes": "item", "places": [1, 2, 3], "seenBy": "holder" }
+      ]
+    },
+    "harbour": {
+      "words": { "european": "harbour", "islamic": "port", "eastAsian": "port", "african": "harbour" },
+      "significance": [18, 22, 26],
+      "sightKm": [30, 36, 42],
+      "groundHeight": [3, 3.4, 3.8],
+      "yields": { "wealth": [5, 9, 14] },
+      "slots": [
+        { "name": "harbourmaster", "takes": "character", "places": [1, 1, 1], "seenBy": "all" },
+        { "name": "moorings", "takes": "item", "places": [1, 2, 3], "seenBy": "all", "adds": { "wealth": 3 } }
+      ]
+    },
+    "shipyard": {
+      "words": { "european": "shipyard", "islamic": "arsenal", "eastAsian": "shipyard", "african": "shipyard" },
+      "significance": [14, 17, 20],
+      "sightKm": [10, 12, 14],
+      "groundHeight": [3, 3.4, 3.8],
+      "yields": { "wealth": [3, 5, 8] },
+      "slots": [
+        { "name": "shipwright", "takes": "character", "places": [1, 1, 1], "seenBy": "all" },
+        { "name": "slipway", "takes": "item", "places": [1, 1, 2], "seenBy": "all" }
+      ]
+    },
+    "manufactory": {
+      "words": { "european": "manufactory", "islamic": "karkhana", "eastAsian": "workshop", "african": "workshop" },
+      "significance": [14, 17, 20],
+      "sightKm": [8, 10, 12],
+      "groundHeight": [3, 3.4, 3.8],
+      "yields": { "wealth": [10, 18, 30] },
+      "slots": [
+        { "name": "master", "takes": "character", "places": [1, 1, 1], "seenBy": "all", "scales": "reason" },
+        { "name": "stores", "takes": "item", "places": [1, 2, 3], "seenBy": "holder" }
+      ]
+    },
+    "academy": {
+      "words": { "european": "academy", "islamic": "madrasa", "eastAsian": "academy", "african": "school" },
+      "significance": [16, 20, 24],
+      "sightKm": [10, 12, 14],
+      "groundHeight": [3.4, 3.8, 4.2],
+      "yields": { "reason": [4, 7, 12] },
+      "slots": [
+        { "name": "rector", "takes": "character", "places": [1, 1, 1], "seenBy": "all", "scales": "reason" },
+        { "name": "fellows", "takes": "character", "places": [1, 2, 3], "seenBy": "all" },
+        { "name": "cabinet", "takes": "item", "places": [1, 2, 3], "seenBy": "all", "bringsItsOwn": true }
+      ]
+    },
+    "printingHouse": {
+      "words": { "european": "printing house", "islamic": "press", "eastAsian": "printing house", "african": "printing house" },
+      "significance": [10, 12, 14],
+      "sightKm": [8, 10, 12],
+      "groundHeight": [2.8, 3.1, 3.4],
+      "yields": { "influence": [3, 5, 8], "reason": [2, 3, 5] },
+      "slots": [
+        { "name": "printer", "takes": "character", "places": [1, 1, 1], "seenBy": "all" },
+        { "name": "presses", "takes": "item", "places": [1, 2, 3], "seenBy": "holder" }
+      ]
+    }
+  }
+}

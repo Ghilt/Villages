@@ -29,6 +29,12 @@ export const INSPECT_VIEWS: readonly InspectView[] = [
     needs: 'nothing',
   },
   {
+    path: '/admin/inspect-structures',
+    title: 'Structures',
+    what: 'Every type of structure in world/structures.json: what each gives its holder, sees, holds and is called.',
+    needs: 'nothing',
+  },
+  {
     path: '/admin/inspect-architecture',
     title: 'Architecture',
     what: 'How the world is set up: what is baked beforehand, how long each step takes, and what the running game reads.',

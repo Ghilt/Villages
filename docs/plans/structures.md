@@ -185,9 +185,10 @@ first draft.
 The words per culture are a draft for Adam to correct: cathedral, great mosque, great temple, great shrine.
 Candidates to swap in for any of the sixteen: a lodge, an observatory, a coffee house, barracks, a town hall.
 
-The server reads it once at start, `StructureTypes` in `application` returning a `StructureCatalogue`,
-by `FileStructureTypes` in `app`, wired in a `StructuresConfig.kt` of its own. The page and the tools read
-the copy cut beside the sprites. A contract fixture in `contracts/fixtures/` is read by both ends.
+The server reads it once at start into a `StructureCatalogue`, the domain's value, by `StructureCatalogueFile`
+in `app`, wired in a `StructuresConfig.kt` of its own; read once, it needs no port. The page reads it through the
+dev server at `/structures.json`, as the portraits are served, until a built page has a copy cut beside the
+sprites (step 13). A contract fixture, `contracts/fixtures/structures.json`, is read by both ends.
 
 ## Culture
 
@@ -215,6 +216,8 @@ the anchors change. The page reads it under a structure to choose its sprite and
   picture with its amount, an empty frame, a question mark - with `+3` when there are more than fit, and
   "2 of 4". `Socket` and `SlotRow` are added to the component library first, each on
   `/admin/inspect-ui-components` in every state.
+- **The catalogue's page**, `/admin/inspect-structures`: every type, a row each, as the page reads the file - and
+  from step 13 its sprites, a culture to a column. A catalogue to read, so not a section of the debug panel.
 - **The house status.** Its resource readouts count up once a rate is not zero; no new component.
 - **The debug panel**, a **Structures** section standing in for the world: raise here (type, level, you or
   nobody); *take control of this building*, which hands the one selected to the player's own house; level
@@ -233,7 +236,7 @@ program running on it at this tree's address.
 |---|---|---|---|
 | 0 | This plan, decision record 0092, experiment 0018, `MECHANICS.md`, `GLOSSARY.md`, `ROADMAP.md` | the documents | |
 | 1 | Make room: command payloads out of `Frames.kt`, the cell snapshot out of `Gateway.kt`, the sprite functions out of `App.tsx`; ceilings lowered | the checks | |
-| 2 | The catalogue: `world/structures.json`, its port and adapter, the contract fixture | the Structures section lists the types | |
+| 2 | The catalogue: `world/structures.json`, read at both ends, the contract fixture, a page of its own | `/admin/inspect-structures` | |
 | 3 | The structure's stream: `raised` and `changedHands`, the decider over the catalogue, every projection's `when`, *raise here*, the sixteen in Antarctica | the event page | |
 | 4a | The read model with face versions, `StructureView`, snapshot and deltas, a structures part, `hidOn` split and cached; 0061 and 0089 amended | the session log | bump |
 | 4b | The page: the slice and its stamp, `StructuresLayer` (with `MarksLayer.ts` split first), a placeholder per type, the pennant, the size by level | the map | |

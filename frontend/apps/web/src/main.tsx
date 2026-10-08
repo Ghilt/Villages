@@ -61,6 +61,15 @@ if (isInspectIndex(window.location.pathname)) {
       </StrictMode>,
     ),
   );
+} else if (inspecting === '/admin/inspect-structures') {
+  document.title = 'Villages: structures';
+  void import('./admin/Structures').then(({ Structures }) =>
+    root.render(
+      <StrictMode>
+        <Structures />
+      </StrictMode>,
+    ),
+  );
 } else if (inspecting === '/admin/inspect-architecture') {
   document.title = 'Villages: architecture';
   void import('./admin/architecture/InspectArchitecture').then(({ InspectArchitecture }) =>

@@ -1,0 +1,89 @@
+/*
+ * The catalogue of structures at /admin/inspect-structures: every type in world/structures.json, for reading.
+ *
+ * Its own page, a document like the events', so a full-width table on paper: a type to a row, the numbers set
+ * so a column reads down. A table wider than a phone scrolls inside its frame rather than the page.
+ */
+.catalogue {
+  min-height: 100%;
+  padding: 1.5rem 2rem 3rem;
+  background: #fbf7ec;
+}
+
+.catalogue__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.3rem 1rem;
+  padding-bottom: 0.7rem;
+  margin-bottom: 0.9rem;
+  border-bottom: 1px solid var(--parchment-edge);
+}
+
+.catalogue__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: normal;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.catalogue__count,
+.catalogue__key {
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace;
+  font-size: 0.7rem;
+  color: var(--ink-soft);
+}
+
+.catalogue__quiet {
+  color: var(--ink-soft);
+}
+
+.catalogue__problem {
+  color: #8f1d2f;
+}
+
+.catalogue__scroll {
+  overflow-x: auto;
+}
+
+.catalogue__table {
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.catalogue__table th,
+.catalogue__table td {
+  padding: 0.45rem 0.8rem 0.45rem 0;
+  vertical-align: top;
+  text-align: left;
+  border-bottom: 1px solid var(--parchment-edge);
+}
+
+.catalogue__table thead th {
+  font-weight: normal;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.catalogue__table tbody th {
+  white-space: nowrap;
+}
+
+.catalogue__table tbody th .catalogue__key {
+  display: block;
+}
+
+/* A figure never breaks across lines: the table scrolls in its frame before "34 / 40 / 48" splits. */
+.catalogue__table td {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.catalogue__slots {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}

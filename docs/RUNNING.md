@@ -237,6 +237,12 @@ stage alone, with none of the debug panel in it (decision record 0079).
   Ocean (North Sea today)`, *a lake nobody has named*, *no water there* or *under the fog*. Take action with a
   window on water open reads it as an omen, *Inspecting the Vistula*: the page says where the window was opened and
   the server says what is there, on ground the house has revealed. See `docs/adr/0087`.
+- The structures there can be: **`/admin/inspect-structures`**, a page of its own as the events have, is every type
+  in `world/structures.json` as the page reads it, a row a type - what it gives its holder a month at each level,
+  how far it sees and from which zoom it is drawn, its slots and what makes each count, its zone, and what each
+  culture calls it. It reads the file again on every load; one it cannot read is said in place of the table, naming
+  the type and the field. The structures' sprites will stand there too. Nothing in the world raises a structure yet.
+  See `docs/plans/structures.md`.
 
 ## Adam's folders and the tools that cut them
 
@@ -269,6 +275,12 @@ stage alone, with none of the debug panel in it (decision record 0079).
   both stale. The panel also watches `world/biomes.json`'s own mtime, because tuning a look makes every
   sprite map stale without touching a master. See `docs/adr/0054` and
   `docs/plans/biome-sprite-map.md`.
+- What a structure is: `world/structures.json`, hand-edited, one entry a type - its words in each culture, and level
+  by level how far out it is drawn, how far it sees, its size on the map and what it yields a world month, which is
+  a real day - with its slots and its influence zone if it has one. Nothing cuts it. The game server reads it once,
+  when it starts, and will not start on one it cannot read, saying which type and which field; the page reads it
+  through the dev server at `/structures.json` on every load, so `/admin/inspect-structures` shows a change at
+  once and the game server after a restart. Every number in it is a placeholder. See `docs/plans/structures.md`.
 - What the ground is, for the game server: `npm run world:ground --prefix frontend` reads a master into its
   **ground map**, `world/ground/<master>/`, a cell every sixteen master pixels each way, each keeping its
   commonest terrain and whether a river, a lake, the sea or a coast is in it: four megabytes and fifteen seconds

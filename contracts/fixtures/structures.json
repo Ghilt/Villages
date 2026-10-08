@@ -1,0 +1,25 @@
+{
+  "$comment": "A catalogue of structures filed as world/structures.json files one, two types small: the server's reader (StructureCatalogueFileTest) and the world package's (structures.test.ts) are both held to what it says. Between them it uses every field: a type of two levels with a zone and slots with every rule, and a type of one level with no yields, no zone, no slots and a word in one culture alone. See docs/plans/structures.md.",
+  "types": {
+    "castle": {
+      "words": { "european": "castle", "islamic": "kasbah", "eastAsian": "castle", "african": "stockade" },
+      "significance": [20, 24],
+      "sightKm": [34, 40],
+      "groundHeight": [4, 4.5],
+      "yields": { "naturalDomain": [3, 5], "wealth": [0, 2] },
+      "zone": { "reach": 25 },
+      "slots": [
+        { "name": "lord", "takes": "character", "places": [1, 1], "seenBy": "all", "needed": true, "scales": "piety" },
+        { "name": "cells", "takes": "either", "places": [2, 4], "seenBy": "holder", "adds": { "influence": 1 }, "bringsItsOwn": true }
+      ]
+    },
+    "watchtower": {
+      "words": { "european": "watchtower" },
+      "significance": [12],
+      "sightKm": [50],
+      "groundHeight": [3.2],
+      "yields": {},
+      "slots": []
+    }
+  }
+}

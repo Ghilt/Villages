@@ -77,7 +77,7 @@ field, now read as the place the house was founded, so no history is wiped.
 **The catalogue is data.** `world/structures.json` holds every type: its words in each culture, and by
 level its significance, sight, size and yields, its influence zone if it has one, and its slots with what
 each takes, how many, who may see into it and how what fills it counts. The numbers are Adam's. The server
-reads it once at start through a port; the page reads the copy cut beside the sprites.
+reads it once at start; the page reads it too, through the dev server until a copy is cut beside the sprites.
 
 **Culture is the ground's, per master.** Each master has a culture map, worked out from its origin map and a
 handful of Earth anchors, and shown by a renderer of its own. The page reads it under a structure when it

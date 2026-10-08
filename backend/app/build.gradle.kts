@@ -20,6 +20,7 @@ dependencies {
     testImplementation(libs.spring.boot.starter.test)
 }
 
-// The server reads the portraits from the repository, and its tests check that it finds them there; and it reads
-// the names as the world package files them, which the shared fixture holds both ends to.
-testsRead("world/portraits", "contracts/fixtures/names.json")
+// The server reads the portraits from the repository, and its tests check that it finds them there; it reads the
+// names as the world package files them, which the shared fixture holds both ends to; and it reads the catalogue of
+// structures, which the server will not start without and whose fixture holds both readers to one shape.
+testsRead("world/portraits", "contracts/fixtures/names.json", "world/structures.json", "contracts/fixtures/structures.json")
