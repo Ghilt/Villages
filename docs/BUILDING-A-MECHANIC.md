@@ -19,7 +19,7 @@ to end, from arrival to a founded house. What it
 is not yet is the choice roll `MECHANICS.md` describes: there is no fate engine behind the choice, no
 rarity on an option, and no expiry.
 
-## First, five questions
+## First, six questions
 
 Answer these before touching code, in a paragraph Adam can read back. The answers are the design.
 
@@ -29,7 +29,9 @@ Answer these before touching code, in a paragraph Adam can read back. The answer
    world** is a `WorldEvent`, typed `villages.house.<verb>.v<n>`; something **a player did** to reach
    into the world is a `PlayerEvent`, typed `villages.player.<verb>.v<n>`. The first half grows with
    every feature; the second should not. A thing that has not happened yet but is asked for is a
-   command, in the imperative: *found the house*. See decision record 0034.
+   command, in the imperative: *found the house*. See decision record 0034. **The names are Adam's to
+   approve, before any code**: propose every event's name with a line on what it means, and let him rename
+   them. A name in the event store outlives every other decision about it.
 2. **Whose history is it?** Every event belongs to one stream, and the stream is the thing whose
    history it is. There are two kinds of thing today. The house has the player's identity (decision
    0028), so anything a player is offered or does is the house's history: the vision says decisions are
@@ -55,6 +57,13 @@ Answer these before touching code, in a paragraph Adam can read back. The answer
    needs into rows; everything that can be derived is derived and never stored: a cell from a place
    (0026), a zoom from a significance, a fence from a seat. If two answers could disagree, only one of
    them is stored.
+6. **Which rules must always hold, and which history holds each?** Name the invariants - one holder at a
+   time, never more than nine key figures, never spending what is not there - and give each to the history
+   that can decide it alone, because a rule decided against one stream holds at the instant of the
+   decision. A rule that spans two histories cannot be held at once, only put right a moment after by a
+   listener: say so, say what is wrong in the moment between, and make that moment harmless. A rule held
+   by nothing is a hope. A plan carries them as a table: the invariant, the history that holds it, and
+   whether it holds at once or a moment after.
 
 Two things that bit while the first loop was built, and are worth reading before the second:
 

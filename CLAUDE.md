@@ -53,6 +53,16 @@ This is a loop, and Adam holds both ends of it: he verifies what lands, and he c
    the point of the options is to give Adam the wheel, not to make him pick from a menu. When he says
    "continue for some time", the options are longer runs instead: the `continue-for-some-time` skill.
 
+**A plan agrees its event names with Adam before anything is built.** When a plan adds events, the agent
+proposes every name with a line on what it means, and Adam approves or renames them up front, in the
+planning, not after the documents are written. A name in the event store outlives every other decision
+about it, and a bad one found late costs a wipe. Adam's word of 2026-10-08, after `conditionHung`.
+
+**And a plan designs its invariants.** It names the rules that must always hold and the history that holds
+each, and says which hold at the instant of a decision and which are only put right a moment after by a
+listener. Good invariant design is a goal of its own, not a by-product: a rule nobody holds is a hope. The
+sixth question of `docs/BUILDING-A-MECHANIC.md` is the method.
+
 **A button is a mark or it is words, and which one is Adam's call.** When he asks for a button, ask
 which before drawing it, and do not guess from what is beside it. The two are different things: a mark
 has to be learnt once and then costs nothing, and a word costs nothing to learn and then has to keep
