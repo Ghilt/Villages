@@ -98,7 +98,7 @@ export const SECTIONS: readonly Section[] = [
   {
     id: 'bars',
     title: 'Bars',
-    says: 'The bottom bar a phone chooses its panes with, along the bottom and turned down the side.',
+    says: 'The bottom bar a phone chooses its panes with, and the top bar over the map or a window on top.',
     Body: Bars,
   },
   {

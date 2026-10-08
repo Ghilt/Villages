@@ -1,0 +1,103 @@
+/*
+ * The top bar: a band a thumb thick, mark, name and controls in a row, or the same turned a quarter down a
+ * sliver, the controls at the top and the name reading down under the mark.
+ *
+ * Turned with `writing-mode` and not a transform, because a transform turns what is drawn and leaves the box
+ * it was drawn in where it was, which would put the controls a screen away from where they look; this way
+ * the name still gives up its room first and still trims itself.
+ */
+
+@layer ui {
+  .ui-top-bar {
+    position: relative;
+    box-sizing: border-box;
+    flex: none;
+    min-width: 0;
+  }
+
+  .ui-top-bar--across {
+    width: 100%;
+    height: var(--ui-bar-thick);
+  }
+
+  .ui-top-bar--turned {
+    width: var(--ui-bar-thick);
+    height: 100%;
+  }
+
+  .ui-top-bar > .ui-container {
+    position: absolute;
+    inset: 0;
+  }
+
+  .ui-top-bar__row {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    padding: 0 var(--ui-space-1) 0 0.7rem;
+    color: var(--ui-text);
+  }
+
+  .ui-top-bar--turned .ui-top-bar__row {
+    flex-direction: column;
+    gap: var(--ui-space-1);
+    padding: var(--ui-space-2) 0;
+  }
+
+  .ui-top-bar__mark {
+    display: inline-flex;
+    flex: none;
+  }
+
+  .ui-top-bar__named {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    gap: var(--ui-space-2);
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .ui-top-bar__name {
+    flex: 0 1 auto;
+    min-width: 0;
+    margin: 0;
+    font-family: var(--ui-font-display);
+    font-size: 1.1rem;
+    font-weight: normal;
+    line-height: 1.2;
+    font-variant: small-caps;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ui-top-bar__end {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: var(--ui-space-1);
+  }
+
+  /* Turned: the controls first, at the top, then the mark, then the name reading down the rest. */
+  .ui-top-bar--turned .ui-top-bar__end {
+    order: -1;
+    flex-direction: column;
+  }
+
+  .ui-top-bar--turned .ui-top-bar__named {
+    flex-direction: column;
+  }
+
+  .ui-top-bar--turned .ui-top-bar__name {
+    writing-mode: vertical-rl;
+    max-height: 100%;
+  }
+}

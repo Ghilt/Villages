@@ -255,7 +255,8 @@ A line each: what it is for, its variants, and where on the page it is.
   `pane.rail` in the acanthus frame on stone, `pane.right` in the cherubs' on felt, `pane.middle` in the
   clouds round their own sky, each at a scale that leaves the tile most of itself; and `strip.corner`,
   `strip.right` and `strip.middle`, the narrow gilt on the same fills, for a pane put away to its 44 pixels,
-  which no deep frame fits; and `bar.bottom`, the same gilt on stone, under the bottom bar's marks. *Containers*, under *Filling a tile*, shows each at the size the spread gives
+  which no deep frame fits; and `bar.bottom` and `bar.top`, the same gilt on stone, under the bottom bar's
+  marks and round the top bar. *Containers*, under *Filling a tile*, shows each at the size the spread gives
   it, to be dragged smaller.
 - **`Mark`**, `ui/mark/Mark.tsx`: a mark by name, drawn, or painted when `world/ui/marks/` has it: the
   five resources, `wealth`, `domain`, `influence`, `reason` and `piety`; a figure's `kindness`, `physical`
@@ -266,7 +267,8 @@ A line each: what it is for, its variants, and where on the page it is.
   the kinds of node, `unknown` for one not shown, `done` and `lost`, and the four buttons that are marks on Adam's
   word of 2026-10-15, `deliver`, `pledge`, `collect` and `quests`, drawn placeholders too; and the marks a pane is
   known by, named for the pane, the game's own drawings: `house`, `figures`, `letter`, `dialogues`, `map` and
-  `recent`, the clock turned back that the trail is known by. *Marks and readouts*.
+  `recent`, the clock turned back that the trail is known by; and the rest a window's subject is known by,
+  `area`, `river`, `lake` and `sea`. *Marks and readouts*.
 - **`TextButton`**, `ui/button/Button.tsx`: words on a face that stretches between its end caps to fit
   them. `face` is a picture in `world/ui/controls/`, `primary` unless it says otherwise; `size` is `small`,
   `regular` or `large`, 32, 44 or 60 pixels tall. *Buttons*.
@@ -338,6 +340,13 @@ A line each: what it is for, its variants, and where on the page it is.
   because pressing the lit one does something the game decides: the arrows, either pair, move along it -
   `stepAlong` and `stopOf` in `ui/bar/bar.ts` - and press nothing. It reads `borders/gilt-thin`,
   `fills/stone` and `controls/tab-chosen` through `bar.bottom`, all placeholders. *Bars*.
+- **`TopBar`**, `ui/bar/TopBar.tsx`: what is on top of a phone - the map, or a window - in one band a strip
+  thick: its mark, its `name` on one line and trimmed, a word `beside` it such as a `Tag`, and whatever
+  stands at its `end`, the pane's controls. The map and a window wear the same one, Adam's word of
+  2026-10-08. `turned` makes it a sliver 44 wide down a turned phone, the controls at the top and the name
+  reading down under the mark, the word beside it left out. It stands in `bar.top` unless it is
+  `framed={false}`, for a bar inside something already framed. It reads `borders/gilt-thin` and
+  `fills/stone`, both placeholders. *Bars*.
 - **`Expander`**, `ui/expander/Expander.tsx`: an expandable section, a heading that folds what is under it
   open and shut in a fifth of a second - its name on a rule, the `fold` mark turned down when it is open,
   and an `aside` at the far end said either way, a count or a total. Held by whoever uses it with `open`,

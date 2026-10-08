@@ -90,6 +90,21 @@ const PANES = {
   recent: ['M5.5 9.3 A8 8 0 1 1 5.5 14.7', 'M4.3 6 L5.5 9.3 L8.5 7.5', 'M13 7.5 V12 L16 14'],
 } as const;
 
+/**
+ * The marks a thing in the world is known by in the window on it, the game's own drawings too: a house is
+ * the shield and a person the bust, as above, and these are the rest - a fence stepping along square
+ * corners for an area, two waves for a river, a shore round a wave for a lake, and an anchor for the sea.
+ */
+const SUBJECTS = {
+  area: ['M4 8 H9 V4 H20 V14 H16 V20 H4 Z'],
+  river: ['M2.5 9.5 Q6 6 9.5 9.5 T16.5 9.5 T21.5 9.5 M2.5 15.5 Q6 12 9.5 15.5 T16.5 15.5 T21.5 15.5'],
+  lake: [
+    'M12 5.5 C18 5.5 21.5 8.5 21.5 12 C21.5 15.5 18 18.5 12 18.5 C6 18.5 2.5 15.5 2.5 12 C2.5 8.5 6 5.5 12 5.5 Z',
+    'M7 12.5 Q9.5 10 12 12.5 T17 12.5',
+  ],
+  sea: ['M12 6.75 V20.5 M8 10 H16 M4.5 14 Q5.5 20.5 12 20.5 Q18.5 20.5 19.5 14'],
+} as const;
+
 const stroked = (paths: readonly string[]) => (
   <>
     {paths.map((d) => (
@@ -114,6 +129,16 @@ const DRAWN = {
   dialogues: stroked(PANES.dialogues),
   map: stroked(PANES.map),
   recent: stroked(PANES.recent),
+  area: stroked(SUBJECTS.area),
+  river: stroked(SUBJECTS.river),
+  lake: stroked(SUBJECTS.lake),
+  // The anchor's ring is a circle, as the game draws it, and the rest of it one stroke.
+  sea: (
+    <>
+      <circle cx="12" cy="4.75" r="2" className="ui-mark__line" />
+      {stroked(SUBJECTS.sea)}
+    </>
+  ),
   // Two strokes crossed, shorter than the box, because corner to corner reads as a deletion.
   close: <path d="M7 7 L17 17 M17 7 L7 17" className="ui-mark__line" />,
   minimise: <path d="M6 12 H18" className="ui-mark__line" />,

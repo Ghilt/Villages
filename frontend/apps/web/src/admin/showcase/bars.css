@@ -11,3 +11,15 @@
 .showcase__bar-down {
   height: 320px;
 }
+
+/* A window's frame round its top bar, as tall as the bar and the frame's own edges. */
+.showcase__bar-framed {
+  position: relative;
+  height: 96px;
+}
+
+.showcase__top-marks {
+  display: grid;
+  gap: 4px;
+  width: min(240px, 100%);
+}
