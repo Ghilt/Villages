@@ -6,6 +6,8 @@ import { regionLabels, regionsOf } from '../../src/regions.ts';
 import type { EarthRegion, RegionKind } from '../../src/regions.ts';
 import { carryNames } from '../../src/names.ts';
 import type { EarthName, NameKind } from '../../src/names.ts';
+import { tellAbout } from '../../src/about.ts';
+import type { AboutFile } from '../../src/about.ts';
 import { asIn1790, townsAdded } from '../../src/review1790.ts';
 import type { AddedTown, Reviewed } from '../../src/review1790.ts';
 import { fileNames } from '../../src/namesFile.ts';
@@ -91,7 +93,10 @@ export async function writeNames(
     regions = { list, given, labels: regionLabels(grid, given, list.length) };
   }
 
-  const { file, bytes } = fileNames(master, carried, regions, grid.columns, grid.rows);
+  // A line or two about the rivers, lakes and seas, for the windows on them, given to every piece carried.
+  const told = tellAbout(await readAbout(), carried, regions?.list ?? []);
+  const filed = regions === null ? null : { ...regions, list: told.regions };
+  const { file, bytes } = fileNames(master, told.names, filed, grid.columns, grid.rows);
   const text = `${JSON.stringify(file)}\n`;
   // The page's copy beside the tiles, and the server's beside the ground map. `names.json` last in each, so that
   // when it was written is when the names were: the panel, the quick start and the server read that time.
@@ -106,7 +111,9 @@ export async function writeNames(
     `${counts.peak} peaks in the world, ${lost} gone with ground that was removed or copied; ${towns.said}; ` +
     (absent.length === 0
       ? `${counts.sea} seas and ${counts.land} regions of land given to its squares`
-      : `no seas or regions, because ${absent[0]!.file} is not in world/source: npm run world:fetch-all --prefix frontend`)
+      : `no seas or regions, because ${absent[0]!.file} is not in world/source: npm run world:fetch-all --prefix frontend`) +
+    `; ${told.given} rivers, lakes and seas given a line from about.json` +
+    (told.absent.length === 0 ? '' : `, and ${told.absent.length} of its ids not in this world`)
   );
 }
 
@@ -267,6 +274,12 @@ interface Review1790 {
 }
 
 const REVIEW = resolve(NAMES_DIR, '1790.json');
+const ABOUT = resolve(NAMES_DIR, 'about.json');
+
+/** The lines about the rivers, lakes and seas, or none without the file. See `src/about.ts`. */
+async function readAbout(): Promise<AboutFile> {
+  return existsSync(ABOUT) ? (JSON.parse(await readFile(ABOUT, 'utf8')) as AboutFile) : {};
+}
 
 /** The review, or null without one; a part it has not got yet is a part with nothing reviewed. */
 async function readReview(): Promise<Review1790 | null> {

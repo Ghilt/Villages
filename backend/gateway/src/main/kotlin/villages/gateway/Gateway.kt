@@ -19,6 +19,7 @@ import villages.application.Stands
 import villages.application.RecentEvents
 import villages.application.ResourceService
 import villages.application.TakeActionService
+import villages.application.fate.WaterAt
 import villages.application.fate.RollService
 import villages.application.DialogueService
 import villages.application.DialoguesByHouse
@@ -53,18 +54,6 @@ import java.util.concurrent.Executor
 fun interface Outbound {
     fun send(frame: ServerFrame)
 }
-
-/** Cells one connection may hold at once. A screen is a dozen or so; this is room to look ahead, not to hoard. */
-const val MOST_CELLS = 64
-
-/** Houses one snapshot carries. Past this the cell is a crowd, and the snapshot says how big a one. */
-const val MOST_IN_A_CELL = 200
-
-/** How long deltas gather before one batch goes out, so a busy cell is one frame a quarter second. */
-const val COALESCE_MS = 250L
-
-/** Deltas a connection may have waiting. Past this it is told to ask again rather than be buried. */
-const val MOST_WAITING = 500
 
 /**
  * The edge, without the transport: one instance per process, one `Connection` per socket. It speaks the
@@ -107,6 +96,7 @@ class Gateway(
     dialogues: DialogueService,
     dialogueRows: DialoguesByHouse,
     stands: Stands = Stands { _, _, _ -> null },
+    waters: WaterAt = WaterAt.NOWHERE,
     private val later: Later,
     instrumentsOpen: Boolean = true,
     /**
@@ -140,9 +130,9 @@ class Gateway(
 
     /**
      * A part for each mechanic, in the order a player arriving is told things: the house, whom it holds, what it sees,
-     * what it was told, what it is asked; then the stands, the timeline and the windows (0088), which greet nobody;
-     * and Adam's instruments (0076). Made after the index and the sessions, because a part watches its read models
-     * from the moment it is made. See decision record 0075.
+     * what it was told, what it is asked; then the stands, the waters, the timeline and the windows (0088), which greet
+     * nobody; and Adam's instruments (0076). Made after the index and the sessions, because a part watches its read
+     * models from the moment it is made. See decision record 0075.
      */
     private val parts: List<Part> = listOf(
         HousesPart(core, houses, theirHouses, world),
@@ -151,6 +141,7 @@ class Gateway(
         DialoguesPart(core, dialogues, dialogueRows),
         ChoicesPart(core, arrival, takeAction, choices, rolls),
         StandsPart(stands),
+        WatersPart(waters),
         TimelinePart(),
         InspectingPart(houseById, onTheMap, world),
         Instruments(instrumentsOpen, core, events, recent, emptyTheWorld, foundHouse, resources, keyFigures, visions, dialogues, rolls),

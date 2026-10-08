@@ -117,7 +117,7 @@ export function describeOrigin(master: MasterOnDisk | undefined, reviewedAt: num
   }
   return needs === 'origin'
     ? `painted ${since(master.editedAt)} ago, after its origin map was worked out: names may stand on the wrong ground`
-    : 'world/names/1790.json saved after its names were carried';
+    : 'world/names saved after its names were carried';
 }
 
 /** The listing's own times, beside the masters: when world/biomes.json and the review of 1790 were saved. */

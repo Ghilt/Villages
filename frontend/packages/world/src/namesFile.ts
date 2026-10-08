@@ -65,15 +65,18 @@ export function fileNames(
     columns,
     rows,
     names,
-    regions: (regions?.list ?? []).map(({ id, kind, name, also, form, feature, rank, from }, index) => ({
-      ...{ id, kind, name },
-      ...(also === undefined ? {} : { also }),
-      ...(form === undefined ? {} : { form }),
-      feature,
-      ...(rank === undefined ? {} : { rank }),
-      ...(from === undefined ? {} : { from }),
-      ...regions?.labels[index],
-    })),
+    regions: (regions?.list ?? []).map(
+      ({ id, kind, name, also, form, feature, rank, from, about }, index) => ({
+        ...{ id, kind, name },
+        ...(also === undefined ? {} : { also }),
+        ...(form === undefined ? {} : { form }),
+        feature,
+        ...(rank === undefined ? {} : { rank }),
+        ...(from === undefined ? {} : { from }),
+        ...regions?.labels[index],
+        ...(about === undefined ? {} : { about }),
+      }),
+    ),
   };
   return { file, bytes };
 }

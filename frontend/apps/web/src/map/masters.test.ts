@@ -187,10 +187,10 @@ describe('whether the real names stand on the ground the master has now', () => 
     expect(originNeeds(master({ originAt: null, namedAt: null }), null)).toBe('origin');
   });
 
-  it('needs only its names carried again when the review of 1790 was saved since', () => {
+  it('needs only its names carried again when the review of 1790 or the lines about the waters were saved since', () => {
     const reviewed = Date.now() - 5 * MINUTE;
     expect(originNeeds(master(), reviewed)).toBe('names');
-    expect(describeOrigin(master(), reviewed)).toContain('1790.json');
+    expect(describeOrigin(master(), reviewed)).toContain('world/names saved');
   });
 
   it('needs nothing of a master that is not cut, which has no ground for names yet', () => {

@@ -66,8 +66,9 @@ data class ConverseView(val title: String) : EffectView
 /**
  * Take action: roll for this player's house. It says what the page is looking at and nothing it could work out for
  * itself - where the view is centred and how close, the houses and characters it has inspect windows open on, the
- * dialogue it has open, and the key figure it has focused - and every field is a claim the server checks. The price,
- * the omens and the hand are all the server's. See decision records 0083 and 0084.
+ * places it opened windows on water at, the dialogue it has open, and the key figure it has focused - and every field
+ * is a claim the server checks: a place is read again for the water there, never named by the page. The price, the
+ * omens and the hand are all the server's. See decision records 0083, 0084 and 0087.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class RollPayload(
@@ -77,6 +78,8 @@ data class RollPayload(
     val inspectingHouses: List<String> = emptyList(),
     @get:JsonInclude(JsonInclude.Include.NON_EMPTY)
     val inspectingCharacters: List<String> = emptyList(),
+    @get:JsonInclude(JsonInclude.Include.NON_EMPTY)
+    val inspectingWaters: List<Point> = emptyList(),
     val dialogue: String? = null,
     val figure: String? = null,
 ) : CommandPayload

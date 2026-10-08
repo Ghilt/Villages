@@ -8,11 +8,19 @@ import { areasStore } from '../areas/areas';
 import { terrainPalette } from '../geometry/terrainClasses';
 import { inspectSubject, sessionStore } from '../net/gateway';
 import type { Room } from '../stage/panes';
-import { type Description, describeArea, describeCharacter, describeHouse, type Legend } from './describe';
+import {
+  type Description,
+  describeArea,
+  describeCharacter,
+  describeHouse,
+  describeWater,
+  type Legend,
+} from './describe';
 import { InspectWindow, WindowBar } from './InspectWindow';
 import { sayingOrLastSaid } from './remembered';
-import { forgetSubject, type Subject } from './subjects';
+import { forgetSubject, isWaterKind, type Subject } from './subjects';
 import { trailStore, forget, lastNamed } from './trail';
+import { watersStore } from './waters';
 import { useStore } from '../store/useStore';
 
 /**
@@ -37,6 +45,7 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
   const today = useStore(sessionStore, (state) => state.world?.today ?? null);
   const yourHouse = useStore(sessionStore, (state) => state.yourHouse);
   const areas = useStore(areasStore);
+  const waters = useStore(watersStore, (state) => state.seen);
   const trail = useStore(trailStore, (state) => state.steps);
   const legend = useLegend();
   const answers = useStore(sessionStore, (state) => state.inspected);
@@ -75,6 +84,12 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
         : { said: describeArea(area, housesInView(houses), legend), hidden: undefined };
     }
 
+    // Water is what the server said of it when it was clicked, kept for this page's life.
+    if (isWaterKind(subject.kind)) {
+      const seen = waters.get(subject.id);
+      return seen === undefined ? null : { said: describeWater(seen), hidden: undefined };
+    }
+
     const house =
       housesInView(houses).find((one) => one.id === subject.id) ??
       (yourHouse?.house.id === subject.id ? yourHouse.house : undefined);
@@ -104,8 +119,9 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
       : sayingOrLastSaid(subject, live.said);
 
   // Out of what the camera holds, it asks the gateway after a house or a person: once a connection, answered once,
-  // so what it says and how fresh that is do not hang on where the camera is. See 0088 and 0089.
-  const asks = live === null && subject.kind !== 'area';
+  // so what it says and how fresh that is do not hang on where the camera is. Water is asked after by a click, and
+  // an area is the player's own. See 0087, 0088 and 0089.
+  const asks = live === null && (subject.kind === 'house' || subject.kind === 'character');
   useEffect(() => {
     if (asks && connection === 'open') {
       inspectSubject(subject.kind, subject.id);
@@ -115,12 +131,13 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
   /**
    * How fresh what it shows is, said beside its name: `current`, or the day the fog hid it. The gateway says which,
    * on the house or the person it sends, and the page works none of it out; what is only remembered waits for the
-   * gateway's answer, and an area, which is the player's own drawing, has none. See 0089.
+   * gateway's answer; an area, which is the player's own drawing, has none, and nor has water, which the fog
+   * does not hide once a click has named it. See 0089.
    */
   const freshness = (): { said: string; meant: string } | null => {
     const answered = answer?.house ?? answer?.character;
     const hidden = live !== null ? live.hidden : answered === undefined ? null : answered.seenUntil;
-    if (subject.kind === 'area' || said === null || hidden === null) {
+    if (subject.kind === 'area' || isWaterKind(subject.kind) || said === null || hidden === null) {
       return null;
     }
     return hidden === undefined
@@ -156,6 +173,9 @@ const KIND_WORDS: Record<Subject['kind'], string> = {
   house: 'House',
   area: 'Area',
   character: 'Key figure',
+  river: 'River',
+  lake: 'Lake',
+  sea: 'Sea',
 };
 
 interface NothingKnownProps {

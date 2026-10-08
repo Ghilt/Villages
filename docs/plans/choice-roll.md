@@ -77,7 +77,7 @@ source, and nothing else changes. These are the first ones, one at least from ev
 |---|---|---|
 | House | *Holdings in &lt;region&gt;*, *Weak house*, *Pious* | the seat's region in the gazetteer; under two world-years since founding; piety at or above 100. Both numbers are Adam's to tune |
 | Change | *Piety risen*, and the same for each resource | what the house had at its last roll, against now |
-| Window | *Inspecting House Varga*, *Inspecting &lt;area&gt;* | the open inspect windows, each checked against the fog |
+| Window | *Inspecting House Varga*, *Inspecting &lt;area&gt;*, *Inspecting the Vistula* | the open inspect windows, each checked against the fog; a window on water by the place it was opened at, read again by the server |
 | Dialogue | *Unresolved: &lt;dialogue title&gt;*, *Missing wealth* | the open dialogue, if it is one of the house's own; *Missing wealth* when its next choice offers a spend the house cannot pay |
 | Key figure | *Sir Jeoffrey* | the focused key figure, if they are the house's own |
 | Map | *River*, *Coast*, *Forest*, *Mountains*, *Open sea*, *House Varga*, *Unknown* | the centre and the zoom, read against the **ground map** and the fog (below) |

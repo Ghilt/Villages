@@ -13,7 +13,7 @@ import { paneIdOf, type Subject } from './subjects';
 export function inspectPane(subject: Subject): Pane {
   return {
     id: paneIdOf(subject),
-    title: subject.kind === 'house' ? 'a house' : subject.kind === 'area' ? 'an area' : 'a key figure',
+    title: TITLES[subject.kind],
     // Down the column, where up to three of them stack. The rail inside that one tile is what limits how
     // many, so a window asks the column for no height of its own.
     spread: 'left',
@@ -27,10 +27,24 @@ export function inspectPane(subject: Subject): Pane {
  * The mark each kind of subject is known by, at the head of its window where the word for it used to be.
  *
  * The same marks the corner's tabs carry, so a house is a shield and a person a bust wherever either is
- * named; an area is a fence stepping along square corners, which no tab has.
+ * named; an area is a fence stepping along square corners, a river two waves, a lake a shore with a wave
+ * in it and the sea an anchor, which no tab has.
  */
 export const SUBJECT_MARKS: Readonly<Record<Subject['kind'], IconName>> = {
   house: 'shield',
   character: 'figure',
   area: 'area',
+  river: 'river',
+  lake: 'lake',
+  sea: 'sea',
+};
+
+/** What a window on each kind of subject is, in words, for a pane's title. */
+const TITLES: Readonly<Record<Subject['kind'], string>> = {
+  house: 'a house',
+  area: 'an area',
+  character: 'a key figure',
+  river: 'a river',
+  lake: 'a lake',
+  sea: 'a sea',
 };

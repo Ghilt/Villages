@@ -56,7 +56,8 @@ export const choiceViewSchema = z.object({
 
 /**
  * Take action: roll for this player's house. What the page is looking at and nothing it could work out for itself,
- * every field a claim the server checks; the price, the omens and the hand are all the server's. See 0083 and 0084.
+ * every field a claim the server checks - a window on water by the place it was opened at, which the server reads
+ * again - and the price, the omens and the hand are all the server's. See 0083, 0084 and 0087.
  */
 export const rollPayloadSchema = z.object({
   type: z.literal('roll'),
@@ -64,6 +65,7 @@ export const rollPayloadSchema = z.object({
   zoom: z.number().optional(),
   inspectingHouses: z.array(z.string()).optional(),
   inspectingCharacters: z.array(z.string()).optional(),
+  inspectingWaters: z.array(pointSchema).optional(),
   dialogue: z.string().optional(),
   figure: z.string().optional(),
 });

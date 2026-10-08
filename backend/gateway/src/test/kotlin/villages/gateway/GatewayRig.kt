@@ -23,6 +23,8 @@ import villages.application.WriteConflict
 import villages.application.started
 import villages.application.fate.FateEngine
 import villages.application.fate.GroundMap
+import villages.application.fate.PlaceNames
+import villages.application.fate.WaterAt
 import villages.application.fate.FirstPools
 import villages.application.fate.omenSources
 import villages.application.fate.firstActions
@@ -233,12 +235,16 @@ internal class Rig(instrumentsOpen: Boolean = true, sendOn: Executor = Executor 
     /** The ground maps a roll reads where the page is looking, by master: none until a spec lays one down. */
     val grounds = mutableMapOf<String, GroundMap>()
 
+    /** Each master's real names, by master: none until a spec lays some down. */
+    val names = mutableMapOf<String, PlaceNames>()
+
     /** The choice roll over the first content, with a die that always comes up one: common, and the first in the draw. */
     val rolls = RollService(
         FateEngine(
             omenSources(
                 houses, characters, characters, sights, dialogueRows, lastRolls,
                 months = { Calendar.monthOf(it.day) }, grounds = { grounds[it] }, housesNear = houses,
+                names = { names[it] },
             ),
             FirstPools.ALL, firstActions(houses) { UUID.randomUUID() }, { 1 }, { UUID.randomUUID() },
         ),
@@ -313,6 +319,7 @@ internal class Rig(instrumentsOpen: Boolean = true, sendOn: Executor = Executor 
         dialogues = DialogueService(world, characters, houses, clock = { noon }, world = worldClock),
         dialogueRows = dialogueRows,
         stands = Stands { master, x, y -> if (master == "terrain") standsOnDisk[y * STAND_TILES + x] ?: ByteArray(0) else null },
+        waters = WaterAt({ grounds[it] }, { names[it] }),
         later = later,
         instrumentsOpen = instrumentsOpen,
         sendOn = sendOn,

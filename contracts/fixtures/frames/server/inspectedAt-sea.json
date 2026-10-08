@@ -1,0 +1,6 @@
+{
+  "type": "inspectedAt",
+  "at": { "lat": 55.5, "lon": 3.0 },
+  "revealed": true,
+  "water": { "kind": "sea", "id": "Q1693", "name": "German Ocean", "also": "North Sea", "of1790": true }
+}

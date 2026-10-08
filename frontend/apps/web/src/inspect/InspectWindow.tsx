@@ -143,17 +143,20 @@ export function InspectWindow({ subject, said, along, room, fresh }: InspectWind
         </div>
       )}
       {said.under !== undefined && <p className="inspect__blazon">{said.under}</p>}
+      {said.about !== undefined && <p className="inspect__about">{said.about}</p>}
 
       {/* Bare `dt`/`dd`, not wrapped in a row each: the list is a two-column grid and a wrapper would
-          become the grid item instead of the pair. */}
-      <dl className="inspect__facts">
-        {said.facts.map((fact) => (
-          <Fragment key={fact.what}>
-            <dt>{fact.what}</dt>
-            <dd className={fact.ticking === true ? 'inspect__ticking' : undefined}>{fact.said}</dd>
-          </Fragment>
-        ))}
-      </dl>
+          become the grid item instead of the pair. None where there is nothing to list, as for water. */}
+      {said.facts.length > 0 && (
+        <dl className="inspect__facts">
+          {said.facts.map((fact) => (
+            <Fragment key={fact.what}>
+              <dt>{fact.what}</dt>
+              <dd className={fact.ticking === true ? 'inspect__ticking' : undefined}>{fact.said}</dd>
+            </Fragment>
+          ))}
+        </dl>
+      )}
 
       {said.links.length > 0 && (
         <>

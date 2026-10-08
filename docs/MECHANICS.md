@@ -73,7 +73,7 @@ longer means anything stops being pending rather than waiting for ever.
 ### Omens, pools and actions
 
 An **omen** is one thing the engine took into account: *Holdings in Sweden*, *Weak house*, *Pious*, *Piety
-risen*, *Sir Jeoffrey*, *Unresolved dialogue*, *Missing wealth*, *The Vistula*, *Near Dantzic*, *House Varga*,
+risen*, *Sir Jeoffrey*, *Inspecting the Vistula*, *Unresolved dialogue*, *Missing wealth*, *The Vistula*, *Near Dantzic*, *House Varga*,
 *Unknown* where the fog covers everything, *Winter*. A **pool** is a named grouping of actions that omens open; an action can be in
 many, and one the omens point at from two directions is likelier. **The player sees omens and never pools.**
 An **action** is one thing a roll can offer, and it is dealt at the moment of the roll, so its details can come
@@ -347,7 +347,8 @@ points at something.
 ### What it is
 
 A window that says what one thing in the world is. That thing is its **subject** — today a house, an
-area or a character, later a holding, a work, a place named in a conversation. The window says what the
+area, a character or water - a river, a lake, the sea - later a holding, a work, a place named in a
+conversation. The window says what the
 world knows about that subject, and then it offers **links**: the things worth looking at from here, each
 of which opens on its own.
 
@@ -450,8 +451,12 @@ the list of what is still to be worked out.
   roadmap. A dossier, a letter or a page in a ledger would sit on it; a card floats over it.
 - **Whether a window is kept.** Pinning one so a rail does not push it off, stepping back through what has
   been looked at, and whether any of it survives a reload.
-- **What else can be a subject**, and whether a subject is ever something the server names rather than
-  something the browser works out.
+- **What else can be a subject.** Water is the first the server names rather than the browser: a click on a
+  river, a lake or the sea asks, and the answer names it from the master's real names on ground the house has
+  revealed (0087). A roll reads a window open on it as it reads one on a house, *Inspecting the Vistula*, from
+  the place the window was opened at and never the page's word for what is there. Its window says its name and,
+  for the great rivers, lakes and seas, a line or two about it as a reader of 1790 might be told it; what water
+  is for is still to come.
 
 ### Where it stands
 

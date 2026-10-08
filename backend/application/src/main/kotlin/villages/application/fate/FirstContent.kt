@@ -14,7 +14,13 @@ import villages.domain.Resource
 object FirstPools {
     private fun OmenKey.startsWith(prefix: String) = value.startsWith(prefix)
 
-    val COIN = Pool("Coin") { it.key in setOf(OmenKeys.MISSING_WEALTH, OmenKeys.RIVER, OmenKeys.COAST, OmenKeys.WEAK) }
+    /** A window on water, of every kind, named or not: what the water trades in opens the coin. */
+    private val WATER_WINDOWS = WaterKind.entries.map { OmenKeys.inspectingWater(WaterHere(it)).value }.toSet()
+
+    val COIN = Pool("Coin") {
+        it.key in setOf(OmenKeys.MISSING_WEALTH, OmenKeys.RIVER, OmenKeys.COAST, OmenKeys.WEAK) ||
+            it.key.value.substringBefore(':') in WATER_WINDOWS
+    }
     val LAND = Pool("Land") { it.key.startsWith("house.holdings:") || it.key.startsWith("map.ground:") }
     val COURT = Pool("Court") {
         it.key.startsWith("map.house:") || it.key.startsWith("window.house:") || it.key.startsWith("figure:") ||

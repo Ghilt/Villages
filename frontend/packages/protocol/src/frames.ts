@@ -14,6 +14,7 @@ import {
   rollPayloadSchema,
 } from './choiceFrames';
 import { dialogueViewSchema } from './dialogueFrames';
+import { inspectAtFrameSchema, inspectedAtFrameSchema } from './placeFrames';
 
 /**
  * The frames that cross the WebSocket, as zod schemas, so that a frame is checked at the edge and typed
@@ -236,6 +237,7 @@ export const clientFrameSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('fogOfWar'), on: z.boolean() }),
   /** Empty the development world, for everyone. A debug frame, never a player's. See 0036. */
   z.object({ type: z.literal('wipeWorld') }),
+  inspectAtFrameSchema,
   /**
    * A window asking after its subject wherever the camera is, once, when it opens on something the page knows
    * nothing of. No subscription: it is answered once by `inspected`. See decision record 0088.
@@ -315,6 +317,7 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('pong'), t0: z.number().int(), serverTime: z.number().int() }),
   z.object({ type: z.literal('error'), code: z.string(), message: z.string() }),
   rollDrawnFrameSchema,
+  inspectedAtFrameSchema,
   /**
    * The answer to `inspect`, once: the house or the character as the map would show it, or neither when there is
    * no such thing or the fog holds it back, by the rule a cell's snapshot is held to. Somebody seen once and not now

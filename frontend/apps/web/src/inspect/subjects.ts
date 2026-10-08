@@ -18,7 +18,17 @@ import { note, shortId } from '../log/log';
  */
 
 export type Subject =
-  { kind: 'house'; id: string } | { kind: 'area'; id: string } | { kind: 'character'; id: string };
+  | { kind: 'house'; id: string }
+  | { kind: 'area'; id: string }
+  | { kind: 'character'; id: string }
+  | { kind: 'river' | 'lake' | 'sea'; id: string };
+
+/** Water, which the server names for a click: a river, a lake or the sea, by its real identity. */
+export type WaterSubject = Extract<Subject, { kind: 'river' | 'lake' | 'sea' }>;
+
+export function isWaterKind(kind: string | undefined): kind is WaterSubject['kind'] {
+  return kind === 'river' || kind === 'lake' || kind === 'sea';
+}
 
 /**
  * How many can be open at once where there is room for them.
@@ -55,13 +65,15 @@ export function paneIdOf(subject: Subject): string {
   return `inspect:${keyOf(subject)}`;
 }
 
-/** The subject a pane id names, or null when the pane is not an inspect window. */
+/** The subject a pane id names, or null when the pane is not an inspect window. A water's id may hold colons. */
 export function subjectOfPane(id: string): Subject | null {
-  const [head, kind, rest] = id.split(':');
-  if (head !== 'inspect' || rest === undefined) {
+  const [head, kind, ...rest] = id.split(':');
+  if (head !== 'inspect' || rest.length === 0) {
     return null;
   }
-  return kind === 'house' || kind === 'area' || kind === 'character' ? { kind, id: rest } : null;
+  return kind === 'house' || kind === 'area' || kind === 'character' || isWaterKind(kind)
+    ? { kind, id: rest.join(':') }
+    : null;
 }
 
 /** What the map marks: the newest thing opened, because that is what the player is looking at. */
@@ -74,7 +86,8 @@ function settle(open: readonly Subject[]): void {
 }
 
 function saying(subject: Subject): string {
-  return `${subject.kind} ${shortId(subject.id)}`;
+  // A water's id is its real identity, Q548 or a source's file, number and name, which a shortened UUID is not.
+  return `${subject.kind} ${isWaterKind(subject.kind) ? subject.id : shortId(subject.id)}`;
 }
 
 /**

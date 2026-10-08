@@ -1,6 +1,7 @@
 import type {
   ChoiceView,
   DialogueView,
+  InspectedAtFrame,
   KeyFigureView,
   RollDrawnFrame,
   ServerFrame,
@@ -65,6 +66,11 @@ export interface SessionState {
   seeAll: boolean;
   /** Whether the fog of war is on in this window, drawn and held back alike. On at every load. See 0061. */
   fogOfWar: boolean;
+  /**
+   * The last answer to what water the page pointed at, until another comes, or null before any: whether the house
+   * has revealed the place, and the water there by name. What an inspect window on water is opened from. See 0087.
+   */
+  inspectedAt: InspectedAtFrame | null;
 }
 
 /**
@@ -200,6 +206,13 @@ const SLICES = {
    * and the gateway is told them again at every welcome. A way of looking rather than a fact of the world, so no
    * frame changes them and no end forgets them.
    */
+  /** What the page last pointed at, as the server answered. Forgotten to a takeover, like what the house was told. */
+  places: {
+    initial: { inspectedAt: null },
+    onFrame: { inspectedAt: (_, frame) => ({ inspectedAt: frame }) },
+    onReset: forgottenWhenTakenOver({ inspectedAt: null }),
+  } satisfies Slice<'inspectedAt'>,
+
   switches: {
     initial: { seeAll: false, fogOfWar: true },
     onFrame: {},

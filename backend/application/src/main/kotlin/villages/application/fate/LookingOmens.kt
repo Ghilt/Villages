@@ -46,6 +46,24 @@ class WindowOmens(
     }
 }
 
+/**
+ * The inspect windows the page says it has open on water, as omens: each place a window on a river, a lake or the sea
+ * was opened at, kept only where the house has revealed it and read again for the water there, as the click was
+ * answered - *Inspecting the Vistula*. Water nobody has named is *Inspecting a river*, and two windows on the same water
+ * are one omen. The page says where, and never what. See decision records 0083 and 0087.
+ */
+class WaterWindowOmens(private val waters: WaterAt, private val sights: SightsByHouse) : OmenSource {
+    override fun read(moment: Moment): List<Omen> {
+        val master = moment.looking.master ?: return emptyList()
+        val sight = sights.of(moment.house.id)
+        return moment.looking.inspectingWaters
+            .filter { sight.reveals(it) }
+            .mapNotNull { waters.at(master, it) }
+            .map { Omen(OmenKeys.inspectingWater(it), OmenKind.WINDOW, "Inspecting ${it.called}") }
+            .distinctBy { it.key }
+    }
+}
+
 /** The dialogue the page says is being read, if it is one of the house's own and not yet ended. */
 class DialogueOmens(private val dialogues: DialoguesByHouse) : OmenSource {
     override fun read(moment: Moment): List<Omen> {
@@ -89,6 +107,7 @@ fun omenSources(
     ChangeOmens(lastRolls),
     MissingWealthOmens(dialogues),
     WindowOmens(houses, characters, sights, figures),
+    WaterWindowOmens(WaterAt(grounds, names), sights),
     DialogueOmens(dialogues),
     FigureOmens(figures),
     MapOmens(grounds, sights, housesNear, names),

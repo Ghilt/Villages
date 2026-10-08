@@ -22,7 +22,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
   output going into the debug log: about eight minutes, once per master, and the same button cuts it again once
   the image has been saved since. The quick start does the same for the default master by itself: whatever a
   save has made stale is cut again when it starts, and nothing when nothing was saved. A master whose origin map is older than its last save, or whose names are older than
-  `world/names/1790.json`, says so under the dropdown, with a button to mend only that - **work out its
+  `world/names/1790.json` or `about.json`, says so under the dropdown, with a button to mend only that - **work out its
   origin**, two minutes, or **carry its names again**, a second - and the Origin and Info map renderers say so
   in the log, because a stale origin map puts real names on the wrong ground and looks no different.
   Switching reloads the page on purpose. So the loop is: paint, save, alt-tab, pick it. See `docs/adr/0025`.
@@ -45,10 +45,11 @@ stage alone, with none of the debug panel in it (decision record 0079).
   carried through, which lies on the painted coast wherever the map has a piece right. With it showing, the log
   says how much of the land is from Earth, invented and copied, and a click on the map says under `origin` where
   that place came from and what Earth named there: `from Earth at 51.51°N 0.87°W, moved 1.2° (sure 1.00); by the
-  Thames`, `at Vänern`, `in the Alps (range)`, `in India (peninsula)`, `near Mont Blanc, 4,807 m`, or `invented
-  land`, and the town of 1790 nearby: `near Dantzic (Gdańsk today)`. Open sea came from nowhere, so it is named
-  by the coast nearest it: `sea, the Baltic Sea, named by the nearest coast`. Every name is in English: a
-  town's as of 1790, a river's, lake's or peak's as of today. It reads what `world:origin` wrote, below. See `docs/plans/real-world-names.md` and experiment 0016.
+  Thames`, `at Lake Wener (Vänern)`, `in the Alps (range)`, `in India (peninsula)`, `near Mont Blanc, 4,807 m`, or
+  `invented land`, and the town of 1790 nearby: `near Dantzic (Gdańsk today)`. Open sea came from nowhere, so it is
+  named by the coast nearest it: `sea, the German Ocean (North Sea today), named by the nearest coast`. Every name
+  is in English: a town's as of 1790, a river's, lake's or sea's as of 1790 where the review gives one and today's
+  where not, a peak's and a stretch of land's as of today. It reads what `world:origin` wrote, below. See `docs/plans/real-world-names.md` and experiment 0016.
   `Info map` is the same data written as an atlas would write it, on the flat tiles quietened as for Flow:
   towns of 1790 in black beside their dots, rivers and lake shores drawn in blue with their names in blue
   italic along them, peaks in brown with their height, seas in spaced blue italic and named lands in spaced
@@ -201,8 +202,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   `roll`, and the hand under `choice`, with its rarity and how many omens it was rolled from. The **Choice
   roll** section of the debug panel, below Dialogues, looks into it: the hand's omens - the house's holdings,
   *Weak house*, *Pious*, what rose since the last roll, *Missing wealth* when an open dialogue waits on a cost
-  the house cannot pay, the windows open on houses it has revealed and on people it sees or holds, the dialogue
-  being read, the key figure open, where the view is centred - *Coast*, *River* within 400 km, *Forest*,
+  the house cannot pay, the windows open on houses it has revealed and on people it sees or holds, and on water
+  it has revealed, *Inspecting the Vistula*, *Inspecting Lake Maeler*, the dialogue being read, the key figure open, where the view is centred - *Coast*, *River* within 400 km, *Forest*,
   *Mountains*, *Fields*, *Grassland*, *Desert*, *Marsh* or *Ice* where it is a sixth of the revealed land or
   more, *Open sea*, *House &lt;name&gt;* for houses standing in a circle of 150 km or less, and *Unknown* where the
   fog covers it all, read by the game server off the ground map of the master the page draws; where its names
@@ -215,6 +216,20 @@ stage alone, with none of the debug panel in it (decision record 0079).
   `uncommon`, `rare` or `legendary` whatever the throw, or `the throw` again: it stands in for the world's
   luck, not for the player. What a roll drew from is sent only while the instruments are open. See
   `docs/adr/0083` and `docs/plans/choice-roll.md`.
+- Water, the player's own: a click on a river, a lake or the sea on the map, zoomed in to 6 or closer, opens an
+  **inspect window** on it, marked with two waves for a river, a shore for a lake and an anchor for the sea: its
+  name in English - the one of 1790 where the review chose it, with today's under it - or *A river*, *A lake* or
+  *A sea* where nothing named is close enough to be the water painted there, and *show it on the map*, back to
+  where it was clicked. A click a house, a person or an area took is theirs. The page asks the game server, which
+  answers from the ground map and the names of the master the page draws, and only on ground the house has
+  revealed: under the fog nothing opens. The ground is read in cells some eighteen kilometres across, so a click
+  on a shore can name the water beside it: a lake is the one whose shores enclose the click, a cell mostly sea is
+  the sea, and otherwise a river comes before a lake and a lake before the sea. Two clicks on the Vistula are one
+  window. Under the name of a great river, lake or sea is a line or two about it, as an English reader of 1790
+  might be told it, which the server sends from `world/names/about.json`. Every answer is a line of the log under `inspect` - `river, the Vistula (Wisła)`, `sea, the German
+  Ocean (North Sea today)`, *a lake nobody has named*, *no water there* or *under the fog*. Take action with a
+  window on water open reads it as an omen, *Inspecting the Vistula*: the page says where the window was opened and
+  the server says what is there, on ground the house has revealed. See `docs/adr/0087`.
 
 ## Adam's folders and the tools that cut them
 
@@ -227,6 +242,13 @@ stage alone, with none of the debug panel in it (decision record 0079).
   listed with a name. Its `added` part holds the towns of 1790 Natural Earth lacks - Mocha, Seringapatam - each
   with where it stood on Earth as `[longitude, latitude]`. `world:names` reads it, and a change shows on the next
   click under the Origin renderer and on the Info map. See `docs/plans/real-world-names.md`.
+- What is said of the rivers, lakes and seas: `world/names/about.json`, one line a thing, under the name the
+  world gives it and the ids of every piece of it carried - two rivers of one name, the Dwinas of Riga and
+  Archangel, are two lines. A line or two each, as an English reader of 1790 might be told it and nothing after
+  the first of January 1790, for the rivers Natural Earth ranks highest and those the review named, the great
+  lakes and the seas. An agent's first draft, Adam's to correct. `world:names` gives every carried piece its
+  line and says how many it gave and which of the file's ids its world lacks; the window on the water shows it,
+  from the server. See `docs/adr/0087`.
 
 - What grows where: `world/biomes.json`, hand-edited, one entry a kind and one a biome. What reads it is
   `npm run world:sprites --prefix frontend`, which works out a biome for every sixteen world units and
@@ -259,9 +281,9 @@ stage alone, with none of the debug panel in it (decision record 0079).
   `npm run world:names --prefix frontend` carries the names again without working the map out, in under a
   second. Two minutes a master. Cutting a master in the Debug map does it as its last step, and the quick start
   does it whenever the origin map is missing or older than the master, and carries the names again whenever
-  either copy is missing or older than `world/names/1790.json`; nothing else does. In a worktree whose world
-  is linked from another checkout it does neither, and says so, because both are that checkout's to make. The
-  game server reads a master's names again when they are written, without a restart. It prints how much of the land
+  either copy is missing or older than `world/names/1790.json` or `about.json`; nothing else does. In a worktree
+  whose world is linked from another checkout it does neither, and says so, because both are that checkout's to
+  make. The game server reads a master's names again when they are written, without a restart. It prints how much of the land
   is from Earth, invented and copied. Moving land with Nearest Neighbour keeps it traceable; land painted fresh,
   or opened up between pieces, is invented. See `docs/plans/real-world-names.md`.
 - How high the ground is, for the relief: `npm run world:height --prefix frontend` reads ETOPO 2022's whole world,

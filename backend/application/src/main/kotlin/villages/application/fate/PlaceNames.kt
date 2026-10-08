@@ -18,7 +18,8 @@ enum class RegionKind { SEA, LAND }
  * where there is one, and it never changes when Adam repaints: it is what a questline names a place by. [name] is
  * the English one, the one an English writer of 1790 used where [of1790] says it was reviewed for that, and today's
  * until then; [also] is another worth knowing, a town's today. [at] is where its name stands in the world, [earth]
- * the same place on Earth, and [lines] a river's runs or a lake's shores in the world, none for a point.
+ * the same place on Earth, and [lines] a river's runs or a lake's shores in the world, none for a point. [about] is a
+ * line or two about a river or a lake for the inspect window on it, from `world/names/about.json`.
  */
 data class PlaceName(
     val id: String,
@@ -33,6 +34,7 @@ data class PlaceName(
     val at: Location,
     val earth: Location,
     val lines: List<List<Location>>,
+    val about: String? = null,
 )
 
 /** A named sea or stretch of land: the Baltic Sea, a gulf, a strait; Pomerania, the Alps. */
@@ -45,6 +47,8 @@ data class NamedRegion(
     val also: String? = null,
     /** Whether the review of 1790 chose [name]: the German Ocean rather than the North Sea. */
     val of1790: Boolean = false,
+    /** A line or two about a sea for the inspect window on it, from `world/names/about.json`. */
+    val about: String? = null,
 )
 
 /** A named thing near a place, and how far from it, in kilometres. */
@@ -99,6 +103,25 @@ class PlaceNames(
         }
         return nearest.values.sortedBy { it.km }
     }
+
+    /** Each name's lines' box, south, west, north and east, so that asking what encloses a place reads a few. */
+    private val boxes: List<Pair<PlaceName, DoubleArray>> by lazy {
+        names.filter { it.lines.isNotEmpty() }.map { name ->
+            val points = name.lines.flatten()
+            val (lats, lons) = points.map { it.lat } to points.map { it.lon }
+            name to doubleArrayOf(lats.min(), lons.min(), lats.max(), lons.max())
+        }
+    }
+
+    /**
+     * The named thing of a kind whose lines enclose a place, a lake by its shores: by whether a line due east from the
+     * place crosses them an odd number of times, so that an island in a lake is not in it. The smallest where one
+     * lies inside another. Lines that cross the date line are not read whole, and nothing that does is a lake.
+     */
+    fun inside(kind: NameKind, place: Location): PlaceName? =
+        boxes.filter { (name, box) ->
+            name.kind == kind && place.lat in box[0]..box[2] && place.lon in box[1]..box[3] && encloses(name.lines, place)
+        }.minByOrNull { (_, box) -> (box[2] - box[0]) * (box[3] - box[1]) }?.first
 
     /** The named land a place is in, or the named sea it is in or by: open water's is its nearest coast's. */
     fun regionAt(place: Location, kind: RegionKind): NamedRegion? {
@@ -160,6 +183,21 @@ class PlaceNames(
             val columns = (floor(lons.start).toInt()..floor(lons.endInclusive).toInt())
                 .map { Math.floorMod(it + HALF_TURN.toInt(), across) }.distinct()
             return rows.flatMap { row -> columns.map { column -> row * across + column } }
+        }
+
+        /** Whether rings enclose a place: an odd number of their sides crossed going due east from it. */
+        fun encloses(rings: List<List<Location>>, place: Location): Boolean {
+            var inside = false
+            for (ring in rings) {
+                for ((a, b) in ring.zipWithNext()) {
+                    if ((a.lat > place.lat) != (b.lat > place.lat) &&
+                        place.lon < a.lon + (place.lat - a.lat) / (b.lat - a.lat) * (b.lon - a.lon)
+                    ) {
+                        inside = !inside
+                    }
+                }
+            }
+            return inside
         }
 
         /** A difference of longitude the short way round, between half a turn west and half a turn east. */

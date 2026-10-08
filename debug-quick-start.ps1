@@ -581,7 +581,7 @@ function Ensure([string[]] $Made, [string] $What, [string[]] $Arguments, [string
 }
 
 # Everything cut from the master is cut again when the master was saved since, in the order the panel's `cut it`
-# runs them; the styles when world/painterly.json or render.json was, the names when the review was (0087).
+# runs them; the styles when world/painterly.json or render.json was, the names when the review or about.json was (0087).
 $Painted = @($Master)
 Ensure 'terrain.geojson' 'tracing the coast and the lakes' @('run', 'world:import') 'the coast and the lakes are traced' $Painted
 Ensure 'tiles\cut.json' 'cutting the world into tiles (about two minutes)' @('run', 'world:tile') 'the world is cut' $Painted
@@ -593,7 +593,7 @@ Ensure @('sprites\biome\map.json', (Join-Path $Root "world\stands\$DefaultMaster
 # The ground the server reads (0084), the origin, and both copies of the names, which a linked world leaves alone.
 Ensure (Join-Path $Root "world\ground\$DefaultMaster\ground.json") 'reading the ground for the game server' @('run', 'world:ground') 'the ground is read' $Painted
 Ensure 'origin\origin.json' 'working out where on Earth the land came from (two minutes)' @('run', 'world:origin') 'the origin map is worked out' $Painted
-Ensure @('names.json', (Join-Path $Root "world\ground\$DefaultMaster\names.json")) 'carrying the real names through the origin map' @('run', 'world:names') 'the names are carried' @((Join-Path $Root 'world\names\1790.json'))
+Ensure @('names.json', (Join-Path $Root "world\ground\$DefaultMaster\names.json")) 'carrying the real names through the origin map' @('run', 'world:names') 'the names are carried' @((Join-Path $Root 'world\names\1790.json'), (Join-Path $Root 'world\names\about.json'))
 
 # How high the ground is, for the relief (0090): ETOPO, 444 MB once, fitted through the origin map, a few minutes.
 Ensure 'height\height.json' 'fetching and fitting the height of the world' @('run', 'world:height') 'the relief has its height' @((Join-Path $DefaultWorld 'origin\origin.json'))

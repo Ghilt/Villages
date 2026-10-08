@@ -17,6 +17,7 @@ import {
 } from './net/arrivals';
 import type { Arrival, StandsArrival } from './net/arrivals';
 import type { GatewayListener } from './net/gateway';
+import { sayAnswer } from './inspect/waters';
 
 /*
  * The session in the log: every line the page's conversation with the gateway says, written by listening to it
@@ -174,6 +175,10 @@ export const sessionLog: GatewayListener = {
         note('gateway', `${frame.message}; this window is no longer playing`);
         return;
       case 'event': // A player's window never asks for stored events; they have a page of their own (0023).
+        return;
+      case 'inspectedAt':
+        // What water a click pointed at, as the server named it, or why it named none. See 0087.
+        note('inspect', sayAnswer(frame));
         return;
       case 'rollDrawn':
         note(

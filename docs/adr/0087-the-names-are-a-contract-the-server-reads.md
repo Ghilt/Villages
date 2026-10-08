@@ -2,6 +2,8 @@
 
 - Status: accepted
 - Date: 2026-10-07
+- Amended 2026-10-07: a second reader, a click on water - a river, a lake, the sea - which asks the server and is
+  answered by name; and a third, a roll with a window open on water.
 
 ## Context
 
@@ -36,10 +38,11 @@ other's. What the contract says:
   when Adam repaints and is what anything that names a place keys by; `kind`, `river`, `lake`, `peak` or `town`;
   `name`, in English; `form`, `1790` where the review chose the name and `today` until one has; `also`, `rank`,
   `from`, and `elevation` for a peak; `at` and `earth`, where its name stands in the world and on Earth, as
-  `[longitude, latitude]`; and `lines`, a river's runs or a lake's shores in the world.
+  `[longitude, latitude]`; `lines`, a river's runs or a lake's shores in the world; and `about`, a line or two
+  about a river or a lake for the window on it, where `world/names/about.json` has one.
 - **A region**: `id`, `kind`, `sea` or `land`, `name`, `feature`, `rank` and `from`, and `at` and `squares` for one
   given any square; `form`, `1790`, and `also`, today's name, where the review chose its name - the German Ocean,
-  the North Sea today.
+  the North Sea today; and `about`, a line or two about a sea, as for a name.
 - **`regions.bin`**: two layers, the land each square is in and then the sea it is by, each a little-endian
   sixteen-bit number a square, a row at a time from the north-west, counting `regions` from one, nought for none.
 
@@ -50,6 +53,19 @@ looking circle is *The Vistula* and the open sea *The Baltic Sea*, under the key
 before, so every pool that opened on them still does. A town of 1790 standing in the circle, zoomed in as close
 as houses are named, is an omen of its own, *Near Dantzic*, keyed `map.town:<id>`: what a pool or a questline
 will open on.
+
+**The second reader is a click on water.** A click on the map that hit no house, person or area sends
+`inspectAt` with the place, and the gateway answers `inspectedAt`: whether the house has revealed it, and the water
+there - a lake whose carried shores enclose the place, a river where the master's ground map shows one and the
+named river close enough to be the one painted there, as the omen finds it, or the sea by the named sea the place
+is in or by - or none. A third question is asked of the names for it, which named thing's lines enclose a place.
+The page opens an inspect window on the water it names, keyed by its `id`, so two clicks on the Vistula are one
+window, with the line about it the answer carries. The page's copy of the names is not what it reads.
+
+**The third reader is a roll with a window open on water.** `roll` says where each was opened, never what
+water it is, and the roll reads every place again as the click was answered, on ground the house has revealed:
+*Inspecting the Vistula*, keyed `window.river:<id>`, `window.lake:<id>` or `window.sea:<id>`, and by the kind alone
+for water nobody has named, so a pool opens on any of them and a questline on one.
 
 **Only what the house has revealed is named**, as only revealed ground counts (0084): a town under the fog is
 no omen, a river is named from a revealed cell the ground shows it in, and the sea from the revealed water.

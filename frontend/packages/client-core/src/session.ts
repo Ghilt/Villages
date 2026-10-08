@@ -1,4 +1,4 @@
-import type { ChoiceView, CommandPayload, OptionView, ServerFrame } from '@villages/protocol';
+import type { ChoiceView, CommandPayload, OptionView, Point, ServerFrame } from '@villages/protocol';
 
 import { NOTHING_IN_FLIGHT, answered, goingOut } from './commands';
 import type { InFlight, Outgoing } from './commands';
@@ -65,6 +65,11 @@ export interface Session {
   fogOfWar(on: boolean): void;
   /** Empties the development world, for everyone connected to it. See 0036. */
   wipeWorld(): void;
+  /**
+   * Asks what water is at a place on the map, which a click that hit nothing else does: the answer comes back as
+   * `inspectedAt`, kept in the state. Nothing is asked while the connection is not open. See 0087.
+   */
+  inspectAt(at: Point): void;
   /** Takes one option of the choice the player has: a player's command. See 0035 on its story. */
   takeOption(choice: ChoiceView, option: OptionView): void;
   /** Take action: rolls for a hand, saying what the page is looking at. A player's command. See 0083. */
@@ -182,6 +187,8 @@ export function createSession(ports: SessionPorts): Session {
     event: () => undefined,
     rollDrawn: () => undefined,
     inspected: () => undefined,
+    // What water the page pointed at, kept in the state for the page to open a window from. See 0087.
+    inspectedAt: () => undefined,
   };
 
   /** Takes a frame in: the parts fold it, the listeners are told, then what the frame makes the session do. */
@@ -249,6 +256,10 @@ export function createSession(ports: SessionPorts): Session {
     fogOfWar: (on) => {
       if (open()) connection?.send({ type: 'fogOfWar', on });
       store.set({ fogOfWar: on });
+    },
+
+    inspectAt: (at) => {
+      if (open()) connection?.send({ type: 'inspectAt', at });
     },
 
     inspect: (kind, id) => {

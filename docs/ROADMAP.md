@@ -81,14 +81,17 @@ and so is the origin map, the first of real names on the edited world and the ne
   cut from on Earth, with **invented land** given invented names. It is what real history will stand on,
   before 1790 as the backstory of a place and after it as the warped history `SETTING.md` promises. Six
   steps in `docs/plans/real-world-names.md`; the first two are built, the plan and the origin map, which
-  the Origin renderer shows and experiment 0016 waits on Adam's eye for, and the third: Earth's rivers, lakes,
+  the Origin renderer shows and Adam's eye accepted (experiment 0016), and the third: Earth's rivers, lakes,
   peaks, seas and named lands are in the world, and the fourth: the towns of 1790, under the names English
   gave them then, reviewed in `world/names/1790.json` the whole world over, region by region, then again with
   Wikidata beside it, which added 62 towns Natural Earth lacks - Mocha, Seringapatam, Vila Rica - 3,168 in the
   world; the Info map renderer writes all of it as an atlas would. The game server
   reads them too, through a port and a contract (0087), and a roll's map omens name the river, the sea and the
   towns of 1790 in view. The rivers carry their names of 1790 too - the Tagus, the Maese, the Burrampooter.
-  The lakes and seas carry theirs too - the Lake of Geneva, the German Ocean, the Archipelago. Left for later: the
+  The lakes and seas carry theirs too - the Lake of Geneva, the German Ocean, the Archipelago. A click on a river,
+  a lake or the sea opens an inspect window naming it, with a line or two about the great ones from
+  `world/names/about.json`, which the server answers from revealed ground, and Take
+  action with one open reads it as an omen, *Inspecting the Vistula*. Left for later: the
   823 places no source dates, and the named stretches of land, which keep today's names.
   Adam's own, asked for on 2026-10-06.
 - **0.4** Local infrastructure: MongoDB replica set and RabbitMQ in Compose
