@@ -152,11 +152,11 @@ export function Stage({ stage, panes, overlays }: StageProps) {
       // than leaving a pane too big for its tile to grow a scrollbar inside it.
       size: sizeOf(asked, cramps(pane, whole)),
       asked,
-      // One control on every pane, in both forms, except that the panes taking turns in a tile share the
-      // one in its tab bar. See decision records 0045, 0046 and 0057.
+      // One control on every pane in the spread, except that the panes taking turns in a tile share the one in
+      // its tab bar; on a phone, only on the pane on top, since one names the arrangement. See 0057 and 0109.
       ask: pane?.ask ?? ((size) => askFor(id, size)),
       sizes: (box.form === 'spread' ? pane?.spreadSizes : undefined) ?? SIZES,
-      ownControl: !tabbed,
+      ownControl: !tabbed && !(box.form === 'bays' && at === 1),
       showMap: () => showMapBeside(id),
       openBeside: (other) => openBeside(id, other),
     };

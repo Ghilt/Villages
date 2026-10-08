@@ -5,8 +5,9 @@ import { focusOn } from '../map/focus';
 import { Icon } from '../stage/Icons';
 import { PaneSizeControl } from '../stage/PaneSizeControl';
 import { type Room } from '../stage/panes';
+import { TopBar } from '../ui/bar/TopBar';
 import { Tag } from '../ui/tag/Tag';
-import { SUBJECT_MARKS } from './pane';
+import { SUBJECT_BAR_MARKS } from './pane';
 import type { Description, Link, SlotSeen } from './describe';
 import { SlotRow } from '../ui/socket/Socket';
 import { inspectBeside, stopInspecting } from './opening';
@@ -52,40 +53,44 @@ interface WindowBarProps {
 }
 
 /**
- * A window's first row: its mark, its name, its size control and, on a desktop, its close.
+ * A window's first row: its mark, its name, its size control and, on a desktop, its close - the library's top
+ * bar, the band the map wears on top of a phone too, drawn inside the window's frame rather than in one of its
+ * own, Adam's choice of 2026-10-08.
  *
  * **Put away, this row is the whole window**, which is why it is its own piece: a strip says which house
  * rather than that it is a house, and on a desktop can be shut without being opened first. The kind is
- * the mark and no longer a word above the name, the mark each kind is known by everywhere else.
+ * the mark and no longer a word above the name, the mark each kind is known by everywhere else. Put away on
+ * a turned phone, it turns with the strip.
  *
  * **On a phone there is no close.** A window there is one of two bays, and it is replaced by navigating
  * to something else, which is how every pane on a phone leaves its bay. See `MECHANICS.md`.
  */
 export function WindowBar({ subject, kind, name, room, along, fresh }: WindowBarProps) {
   return (
-    <>
-      <span className="inspect__mark" role="img" aria-label={kind} title={kind}>
-        <Icon name={SUBJECT_MARKS[subject.kind]} />
-      </span>
-      <span className="inspect__named">
-        <h2 className="inspect__name" title={name}>
-          {name}
-        </h2>
-        {fresh != null && <Tag title={fresh.meant}>{fresh.said}</Tag>}
-      </span>
-      <PaneSizeControl room={room} />
-      {along === null && (
-        <button
-          type="button"
-          className="inspect__close"
-          aria-label={`close ${name}`}
-          title={`close ${name}`}
-          onClick={() => stopInspecting(subject)}
-        >
-          <Icon name="close" />
-        </button>
-      )}
-    </>
+    <TopBar
+      mark={SUBJECT_BAR_MARKS[subject.kind]}
+      kind={kind}
+      name={name}
+      {...(fresh == null ? {} : { beside: <Tag title={fresh.meant}>{fresh.said}</Tag> })}
+      end={
+        <>
+          <PaneSizeControl room={room} />
+          {along === null && (
+            <button
+              type="button"
+              className="inspect__close"
+              aria-label={`close ${name}`}
+              title={`close ${name}`}
+              onClick={() => stopInspecting(subject)}
+            >
+              <Icon name="close" />
+            </button>
+          )}
+        </>
+      }
+      turned={along === 'columns' && room.size === 'strip'}
+      framed={false}
+    />
   );
 }
 

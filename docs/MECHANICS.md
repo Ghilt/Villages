@@ -693,9 +693,10 @@ spare, the shield and the name in the middle and the bar still on the bottom edg
 phone's. The blazon line is the first thing to go when the column is squeezed. See decision record 0057.
 
 **On a phone** it opens as a strip beneath the map opened out: the game is read off the map, and the card
-is 200 pixels of a phone's 844 that nobody has asked for yet. Pressing the strip is the first gesture there
-is, and it teaches the whole control; the middle mark gives half the stage, enough for the shield, the
-blazon, the treasury and the bar of levers with the map still up above it.
+is 200 pixels of a phone's 844 that nobody has asked for yet. The map's size control, in its top bar, is
+the first thing there is to press, and it teaches the whole control; its middle mark gives half the stage,
+enough for the shield, the blazon, the treasury and the bar of levers with the map still up above it. The
+card below carries no control of its own, because the pane on top's names the arrangement (0109).
 
 It is **responsive from the start**, and it is the mechanic that proves the rule: the card has never fitted
 a phone. It asked for `min-width: 26rem`, 416 pixels against a phone's 390, and that was the first thing

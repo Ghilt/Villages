@@ -2,6 +2,8 @@
 
 - Status: accepted
 - Date: 2026-09-20
+- Superseded 2026-10-08 by 0109: there is no compass on a phone, so nothing stands in the corner and nothing
+  steps clear of it; the bottom bar is the way between panes.
 
 ## Context
 

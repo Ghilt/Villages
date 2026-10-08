@@ -76,7 +76,7 @@ export interface BaysState {
  * the house status, in the game.
  *
  * The game is read off the map, and the house card is 200 pixels of a phone's 844 that the player has not
- * asked for yet. Pressing the strip is the first gesture there is, and it teaches the whole control.
+ * asked for yet. The map's size control is the first thing to press, and it teaches the whole control.
  */
 const OPENS_ON: BaysState = {
   holding: [MAP_PANE.id, NAVIGATION_PANE.id],

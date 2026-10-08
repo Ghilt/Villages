@@ -2,6 +2,8 @@
 
 - Status: accepted
 - Date: 2026-09-19
+- Superseded 2026-10-08 by 0109 on a phone: the compass goes, a bar of marks chooses the bottom pane, and
+  navigation is Recent alone. A pane is no longer equal in either bay: the top is the map's and the windows'.
 
 ## Context
 

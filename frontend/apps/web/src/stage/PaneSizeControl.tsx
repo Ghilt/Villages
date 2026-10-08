@@ -3,17 +3,18 @@ import type { PaneSize, Room } from './panes';
 /**
  * **The pane size control**: how much of the stage this pane is taking, and the way to change it.
  *
- * **One control on every pane**, in both forms, replacing the chevron that used to only put a pane away.
- * Put away, the normal one, opened out - three marks, the one you are on filled in. Three on every pane
- * since 0046 gave the map a strip, but for the letter in the spread, which is put away or opened out (0085).
+ * **One control on every pane in the spread, and on the pane on top of a phone**, replacing the chevron
+ * that used to only put a pane away; below the top it draws none, because the one on top names the
+ * arrangement for both (0109). Put away, the normal one, opened out - three marks, the one you are on
+ * filled in, but for the letter in the spread, which is put away or opened out (0085).
  *
  * The mark is how much of a box is filled, which is the thing being chosen: a sliver, some of it, all of
  * it. That is deliberately not a metaphor - there is no folder, no chevron, no arrow pointing anywhere. A
  * player reads it as a slider they can hit the ends of. See decision record 0045.
  *
- * It sits in the pane's top corner, out of the way of whatever the pane draws, and steps clear of the
- * compass when the compass is standing in that corner. A pane taking turns in a tile draws none: the tab
- * bar above it carries one for the tile, and this draws nothing when it is handed a room that says so.
+ * It sits in the pane's top corner, out of the way of whatever the pane draws, or at the far end of its
+ * top bar. A pane taking turns in a tile draws none: the tab bar above it carries one for the tile, and
+ * this draws nothing when it is handed a room that says so.
  */
 
 /** How much of the mark's box is filled, at each size. The box is 14 tall inside its outline. */

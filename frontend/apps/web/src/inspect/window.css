@@ -1,40 +1,33 @@
 /* An inspect window: its rows, its facts and its links. */
 
 /*
- * Put away: the window's first row and nothing else - its mark, which one it is, its size and its close -
- * so a strip says which house rather than that it is a house, and can be shut without being opened.
+ * Put away: the window's top bar and nothing else - its mark, which one it is, its size and its close - so
+ * a strip says which house rather than that it is a house, and can be shut without being opened. The bar
+ * fills the strip, across it or, turned, down it.
  */
 .inspect--strip {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  /* The compass is standing in the far end of this strip, so whatever the strip put there - the marks
-     on four of them, the word on the map's - steps in from the right rather than sitting under it. */
-  padding: 0 calc(0.3rem + var(--corner-right, 0px)) 0 0.75rem;
+  padding: 0;
   overflow: hidden;
 }
 
-/* In the rail a strip is as tall as the row it is, so putting a window away folds it up to its first row. */
-.stage[data-form='spread'] .rail .inspect--strip {
-  padding-top: 0.45rem;
-  padding-bottom: 0.4rem;
+.inspect--strip > .ui-top-bar {
+  width: 100%;
+  height: 100%;
 }
 
-/* The first row: the mark, the name, the size control and the close, in that order. */
+/* In the rail a strip is as tall as the row it is, so putting a window away folds it up to its top bar. */
+.stage[data-form='spread'] .rail .inspect--strip > .ui-top-bar {
+  height: var(--ui-bar-thick);
+}
+
+/*
+ * The first row, the library's top bar inside the window's frame: the mark, the name, the size control and
+ * the close, in that order, across the whole of the window, the line under it marking where the rest begins.
+ */
 .inspect__bar {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.45rem 0 0.4rem;
+  margin: 0 -0.85rem;
   border-bottom: 1px solid var(--parchment-edge);
-}
-
-/* What kind of thing it is, as the mark that kind is known by everywhere else. */
-.inspect__mark {
-  display: inline-flex;
-  flex: none;
-  width: 1.3rem;
-  height: 1.3rem;
 }
 
 /*
@@ -76,30 +69,6 @@
   float: right;
   width: 4.6rem;
   margin: 0.7rem 0 0.4rem 0.8rem;
-}
-
-/* Which one it is, on the first row: one line, trimmed rather than wrapped, so the row is one height. */
-/* The name and, beside it, the tag saying how fresh what the window shows is; together they take the row's room. */
-.inspect__named {
-  display: flex;
-  flex: 1;
-  align-items: center;
-  gap: 0.45rem;
-  min-width: 0;
-}
-
-.inspect__name {
-  flex: 0 1 auto;
-  min-width: 0;
-  margin: 0;
-  font-size: 1.1rem;
-  font-weight: normal;
-  line-height: 1.2;
-  font-variant: small-caps;
-  letter-spacing: 0.03em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .inspect__blazon {

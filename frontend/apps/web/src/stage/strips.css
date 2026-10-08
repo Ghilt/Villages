@@ -3,7 +3,8 @@
 /*
  * A pane put away, as a strip across its bay: what it is and the way back, in a row. One rule for every pane
  * whose strip is the plain one - the house, the key figures, navigation, the choice roll and the dialogues;
- * a window and the map draw their own. After every pane's own rules, which is what lets it be one class.
+ * a window and the map put away are their top bars, `TopBar`, which turns itself. After every pane's own
+ * rules, which is what lets it be one class.
  */
 .pane-strip {
   flex-direction: row;
@@ -45,11 +46,9 @@
 @container (max-width: 6rem) {
   .hud__panel--strip,
   .figures--strip,
-  .inspect--strip,
   .navigate--strip,
   .choice--strip,
-  .dialogues--strip,
-  .map-strip {
+  .dialogues--strip {
     /*
      * Reversed, so the marks are at the top and the name reads down from under them - the strip is 44
      * wide and the whole height here, and the corner the disc stands in is the bottom of it rather than
@@ -63,11 +62,9 @@
 
   .hud__panel--strip .hud__name,
   .figures--strip .figures__kind,
-  .inspect--strip .inspect__name,
   .navigate--strip .navigate__kind,
   .choice--strip .choice__aside,
-  .dialogues--strip .dialogues__name,
-  .map-strip .map-strip__name {
+  .dialogues--strip .dialogues__name {
     writing-mode: vertical-rl;
     /* The strip is the whole height of the stage, so the name has all of it to be trimmed against. */
     max-height: 100%;

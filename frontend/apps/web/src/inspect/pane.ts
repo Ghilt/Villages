@@ -1,5 +1,6 @@
 import type { IconName } from '../stage/Icons';
 import type { Pane } from '../stage/panes';
+import type { MarkName } from '../ui/mark/Mark';
 import { paneIdOf, type Subject } from './subjects';
 
 /**
@@ -49,4 +50,18 @@ const TITLES: Readonly<Record<Subject['kind'], string>> = {
   river: 'a river',
   lake: 'a lake',
   sea: 'a sea',
+};
+
+/**
+ * The same marks as the library has them, which is where a window's top bar draws them from: the shield is the
+ * library's `house` and the bust its `figures`, named for what they mean rather than what they show.
+ */
+export const SUBJECT_BAR_MARKS: Readonly<Record<Subject['kind'], MarkName>> = {
+  house: 'house',
+  character: 'figures',
+  structure: 'tower',
+  area: 'area',
+  river: 'river',
+  lake: 'lake',
+  sea: 'sea',
 };

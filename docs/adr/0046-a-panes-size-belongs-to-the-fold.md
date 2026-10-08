@@ -2,6 +2,8 @@
 
 - Status: accepted
 - Date: 2026-09-20
+- Amended 2026-10-08 by 0109: the map's strip is its top bar, with the size control on it, and no longer the
+  whole of it a way back; on a phone the control is the top pane's alone.
 
 ## Context
 

@@ -24,7 +24,7 @@ import { StoodDown } from './net/StoodDown';
 import { StartupScreen } from './startup/StartupScreen';
 import { startupStore, watchStartup } from './startup/startup';
 import { flyWith } from './map/focus';
-import { MapStrip } from './map/MapStrip';
+import { MapBar } from './map/MapBar';
 import { MapView } from './map/MapView';
 import { Room } from './room/Room';
 import { Stage } from './stage/Stage';
@@ -319,10 +319,10 @@ export function App({ master, devTools }: AppProps) {
         <WaterClicks map={map} onPick={inspect} />
         <RippleAlongWater map={map} worldRoot={worldRoot} />
         <InfluenceZone map={map} zone={zone} turn={camera.latticeTurn} />
-        {/* Put away, and still running underneath: a lid over the map, never instead of it. The
-              guard is the form rather than the size, because what a pane was asked to be outlives
-              the fold - and the floor of the spread is never put away. See `MapStrip`. */}
-        {along !== null && room.size === 'strip' && <MapStrip room={room} />}
+        {/* On a phone, the top bar with the size control: a lid along the top of a map still running
+              underneath, and the whole of it put away. Never in the spread, where the map is the floor
+              and has no size. See `MapBar`. */}
+        {along !== null && <MapBar room={room} along={along} />}
       </>
     ),
     [map, yours, worldRoot, sprites, camera.latticeTurn, open, marked, zone, started],

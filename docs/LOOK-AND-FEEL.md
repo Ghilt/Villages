@@ -106,10 +106,11 @@ for five words, and the words teach the marks. Every mark a number is known by i
 **The pane size control.** Three marks in a pane's corner saying how much of the stage it is taking: put
 away, the normal size, opened out. The mark is **how much of a box is filled**, which is the thing being
 chosen rather than a metaphor for it - no folder, no chevron, no arrow pointing anywhere. Every **pane**
-has one, in both forms, and it replaced a chevron that could only put a pane away. A pane that cannot be
-put away offers two marks rather than three. The panes taking turns in the corner of the spread share
+in the spread has one, and it replaced a chevron that could only put a pane away; on a phone only the
+pane on top has one, in its **top bar**, because one names the arrangement for both. A pane that cannot
+be put away offers two marks rather than three. The panes taking turns in the corner of the spread share
 one, at the far end of the **tab bar**, because the corner is one size whichever of them is up. See
-decision records 0045 and 0057.
+decision records 0045, 0057 and 0109.
 
 **The ornament.** Gold on parchment, drawn the same way wherever the interface embellishes an edge:
 **nested contours** at decreasing weight rather than one thick line, a **stud** where something is fixed,
@@ -289,12 +290,20 @@ stage, the same band down a landscape one. The **compass** stands on it. See dec
 it and the **pane size control** beside it. The same band turned a quarter in landscape, 44 pixels wide
 down the side of the stage with the name written **down** it rather than dropped — there is no room for a
 word across 44 pixels and eight hundred pixels of room along one. One shape and one thickness for every
-pane, so that putting anything away looks like putting anything else away, and two panes that say
-otherwise and say why: the **map** carries no control and is itself the way back, and **navigation**
-carries the marks of what it could put in the other bay, because that is the strip a player arrives in by
-pressing the compass. An inspect window's strip is its first row - the mark of its kind, the name of the
-thing, the control and, on a desktop, the close - so it says which house rather than that it is one. See
-`RESPONSIVE-DESIGN.md`, `MECHANICS.md` and decision records 0046 and 0047.
+pane, so that putting anything away looks like putting anything else away, and one pane that says
+otherwise and says why: **navigation** carries the marks of what it could put in the other bay, because
+that is the strip a player arrives in by pressing the compass. On a phone the pane below the top carries
+no control, because the pane on top's names the arrangement. The map and an inspect window put away are
+their **top bars** - the mark of its kind, the name of the thing, the control and, on a desktop, the
+close - so a window's says which house rather than that it is one. See `RESPONSIVE-DESIGN.md`,
+`MECHANICS.md` and decision records 0046, 0047 and 0109.
+
+**The top bar.** What is on top of a phone, the map or a window, said in one band a strip thick: its mark,
+its name trimmed to one line, a word or two beside the name, and its controls at the far end. The map and
+a window wear the same one, the strip's narrow gilt on stone over the map, and inside a window's frame on
+the frame's own stone, because a window keeps one frame round everything, Adam's choice. Turned with the
+phone, it is a sliver down the side, the controls at the top and the name reading down. See decision record
+0109.
 
 **The tab bar.** Several **panes** sharing one **bay**, and a strip of marks across its top saying which is
 up. Marks and no words: a column is 26rem at its widest and two words on a tab is a tab that wraps. Its

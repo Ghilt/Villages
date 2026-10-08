@@ -104,9 +104,9 @@ function rowOf(folder: string): number {
  * will: until one has, it draws its own controls and may not reach into `ui`. The choice roll was the first,
  * with its rarity cards and Take action (0083); the inspect window the second, with the tag beside a window's name
  * saying how fresh what it shows is (0089); later the quests, and the marks on the map with the card a crowd of them
- * opens into (0096); and the loading screen the game starts up under.
+ * opens into (0096); the loading screen the game starts up under; and the map, with its top bar on a phone (0109).
  */
-const TAKEN_UP: readonly string[] = ['choice', 'inspect', 'holdings', 'quests', 'sprites', 'startup'];
+const TAKEN_UP: readonly string[] = ['choice', 'inspect', 'holdings', 'quests', 'sprites', 'startup', 'map'];
 
 /** Whether the rows let one folder import another. */
 export function mayImport(from: string, to: string): boolean {

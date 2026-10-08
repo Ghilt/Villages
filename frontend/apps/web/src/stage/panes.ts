@@ -351,7 +351,8 @@ export interface Room {
   openBeside: (id: string) => void;
   /**
    * Whether the pane draws its own size control. Not in a tile its panes take turns in, in the spread:
-   * one tile, one size, and one control for it at the end of the tab bar. See decision record 0057.
+   * one tile, one size, and one control for it at the end of the tab bar (0057). Not below the top on a
+   * phone, where the pane on top's names the arrangement for both (0109).
    */
   ownControl: boolean;
 }
