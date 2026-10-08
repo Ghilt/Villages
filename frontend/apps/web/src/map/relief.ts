@@ -1,7 +1,7 @@
 import type * as maplibregl from 'maplibre-gl';
 import { createStore } from '@villages/client-core';
 import type { Readable } from '@villages/client-core';
-import { HEIGHT_BOUNDS, HEIGHT_MAX_ZOOM } from '@villages/world';
+import { HEIGHT_BOUNDS, HEIGHT_FORMAT, HEIGHT_MAX_ZOOM } from '@villages/world';
 
 import { note } from '../log/log';
 import { drawnAt, shadersStore } from '../shaders/levels';
@@ -94,7 +94,7 @@ const resampling = () => (relief.get().pixels ? 'nearest' : 'linear');
 function addSource(map: maplibregl.Map, worldRoot: string): void {
   map.addSource(SOURCE, {
     type: 'raster-dem',
-    tiles: [`${worldRoot}/height/{z}/{x}/{y}.png`],
+    tiles: [`${worldRoot}/height/{z}/{x}/{y}.${HEIGHT_FORMAT}`],
     encoding: 'terrarium',
     tileSize: 256,
     maxzoom: HEIGHT_MAX_ZOOM,

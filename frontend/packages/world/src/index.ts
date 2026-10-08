@@ -34,7 +34,7 @@ export {
 } from './area.ts';
 export type { DiamondGrid, Fence } from './area.ts';
 
-export { HEIGHT_BOUNDS, HEIGHT_MAX_ZOOM } from './height.ts';
+export { HEIGHT_BOUNDS, HEIGHT_FORMAT, HEIGHT_MAX_ZOOM } from './height.ts';
 
 export { GROUND_LATTICE, frameOf, worldXOf, worldYOf } from './lattice.ts';
 export type { Lattice } from './lattice.ts';

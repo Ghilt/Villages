@@ -1,14 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  edgeWeight,
-  fromTerrarium,
-  halve,
-  heightAt,
-  levelFor,
-  toTerrarium,
-  undoFloatPredictor,
-} from './height.ts';
+import { fromTerrarium, halve, heightAt, levelFor, toTerrarium, undoFloatPredictor } from './height.ts';
 import type { HeightGrid } from './height.ts';
 
 const grid = (width: number, height: number, values: number[]): HeightGrid => ({
@@ -78,12 +70,19 @@ describe('a height grid', () => {
     expect(heightAt(g, 50, 0)).toBe(300);
   });
 
-  it('lets the height go to nothing at the edge, over the band', () => {
-    const g = grid(10, 10, new Array(100).fill(1));
-    expect(edgeWeight(g, 5, 5, 1)).toBe(1);
-    expect(edgeWeight(g, 0, 5, 1)).toBe(0);
-    expect(edgeWeight(g, -1, 5, 1)).toBe(0);
-    expect(edgeWeight(g, 0.5, 5, 1)).toBeCloseTo(0.5);
+  it('carries a whole world round the antimeridian rather than holding its edge', () => {
+    const world: HeightGrid = {
+      width: 4,
+      height: 1,
+      west: -180,
+      north: 10,
+      cell: 90,
+      heights: Float32Array.from([100, 0, 0, 300]),
+    };
+    // Halfway between the last column's middle and the first's, across 180 degrees.
+    expect(heightAt(world, 180, 5)).toBe(200);
+    expect(heightAt(world, -180, 5)).toBe(200);
+    expect(heightAt(world, 135, 5)).toBe(300);
   });
 
   it('picks the pyramid level whose cell is nearest a pixel without being wider', () => {

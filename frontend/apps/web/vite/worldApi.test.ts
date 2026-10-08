@@ -46,7 +46,7 @@ describe('the stands, which only the game server hands out', () => {
 });
 
 describe('what a repaint makes stale, and cutting makes again', () => {
-  it('cuts, traces the rivers, furnishes, reads the ground, and works out where the land came from', () => {
+  it('cuts, traces the rivers, furnishes, reads the ground, works out where the land came from, and fits the height to it', () => {
     expect(ERRANDS.cut.map(([script]) => script)).toEqual([
       'importMaster.ts',
       'tileWorld.ts',
@@ -54,11 +54,12 @@ describe('what a repaint makes stale, and cutting makes again', () => {
       'generateSpriteMap.ts',
       'groundWorld.ts',
       'originWorld.ts',
+      'heightWorld.ts',
     ]);
   });
 
-  it('can work out the origin, or carry the names, on their own', () => {
-    expect(ERRANDS.origin.map(([script]) => script)).toEqual(['originWorld.ts']);
+  it('can work out the origin, and the height fitted through it, or carry the names, on their own', () => {
+    expect(ERRANDS.origin.map(([script]) => script)).toEqual(['originWorld.ts', 'heightWorld.ts']);
     expect(ERRANDS.names.map(([script]) => script)).toEqual(['namesWorld.ts']);
   });
 });

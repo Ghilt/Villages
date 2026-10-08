@@ -595,8 +595,8 @@ Ensure (Join-Path $Root "world\ground\$DefaultMaster\ground.json") 'reading the 
 Ensure 'origin\origin.json' 'working out where on Earth the land came from (two minutes)' @('run', 'world:origin') 'the origin map is worked out' $Painted
 Ensure @('names.json', (Join-Path $Root "world\ground\$DefaultMaster\names.json")) 'carrying the real names through the origin map' @('run', 'world:names') 'the names are carried' @((Join-Path $Root 'world\names\1790.json'))
 
-# How high the ground is around the Alps, for the relief (experiment 0017): ETOPO, 114 MB once, then seconds.
-Ensure 'height\height.json' 'fetching and cutting the height around the Alps' @('run', 'world:height') 'the relief has its height'
+# How high the ground is, for the relief (0090): ETOPO, 444 MB once, fitted through the origin map, a few minutes.
+Ensure 'height\height.json' 'fetching and fitting the height of the world' @('run', 'world:height') 'the relief has its height' @((Join-Path $DefaultWorld 'origin\origin.json'))
 
 <# What a world command said, run quietly in the frontend: the cuts made at every start show only their last word. #>
 function Said([string] $Script) { Push-Location $Frontend; try { & $Npm @('run', '--silent', $Script) } finally { Pop-Location } }

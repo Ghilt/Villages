@@ -1,12 +1,14 @@
-import { readFileSync } from 'node:fs';
-import { mkdir, rm, writeFile } from 'node:fs/promises';
+import { existsSync, readFileSync } from 'node:fs';
+import { mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { basename, resolve } from 'node:path';
-import { deflateSync, inflateSync } from 'node:zlib';
+import { inflateSync } from 'node:zlib';
+
+import sharp from 'sharp';
 
 import {
   HEIGHT_BOUNDS,
+  HEIGHT_FORMAT,
   HEIGHT_MAX_ZOOM,
-  edgeWeight,
   halve,
   heightAt,
   levelFor,
@@ -14,37 +16,42 @@ import {
   undoFloatPredictor,
 } from '../src/height.ts';
 import type { HeightGrid } from '../src/height.ts';
+import { FILL_SPLIT, fillOf, fittedHeight } from '../src/heightFitted.ts';
+import type { EarthHeight } from '../src/heightFitted.ts';
+import { decodeOrigin } from '../src/originFile.ts';
+import type { OriginFile } from '../src/originFile.ts';
 import { DEFAULT_MASTER, masterNameOf, worldDirOf } from '../src/masters.ts';
-import { encodeRgbPng } from '../src/png.ts';
 import { TILE_SIZE } from '../src/tiles.ts';
 
 import { flag, named } from './lib/flags.ts';
 import { OUTPUT_DIR, SOURCE_DIR, masterAt } from './lib/paths.ts';
-import { ETOPO_TILES } from './lib/worldSources.ts';
+import { ETOPO_WORLD } from './lib/worldSources.ts';
 
 /**
- * Height tiles for the relief experiment (0016): ETOPO 2022 cut into Terrarium PNGs beside a master's other
- * tiles, for MapLibre's hillshade to read.
+ * Height tiles for the relief (decision record 0090): ETOPO 2022's whole world, fitted to a master through its
+ * origin map and cut into Terrarium tiles beside the master's other tiles, lossless WebP, for the relief's
+ * shaders to read.
  *
- *   node bin/heightWorld.ts [master] [--max-zoom 8] [--band 1]
+ *   node bin/heightWorld.ts [master] [--max-zoom 7]
  *
- * Reads the 15-degree tiles `worldSources.ts` lists from `world/source/etopo/`, which
- * `npm run world:fetch-all -- --only etopo` fetches, joins them into one grid, and writes every tile from zoom
- * nought to `--max-zoom` that touches it into `public/world/masters/<master>/height/`, with `height.json`
- * saying where the height reaches. A pixel reads the level of a pyramid of halved grids nearest its own size,
- * so a tile far out is the mean of the ground under it rather than a few points of it. The sea is held at
- * nought, so the shading stops at the shore, and the height eases to nothing over `--band` degrees inside the
- * grid's edge, so that the edge is not shaded as a cliff.
+ * Reads ETOPO's world at 60 arc-seconds from `world/source/`, which `npm run world:height` fetches first when it
+ * is not there, 444 MB once, and writes every tile from zoom nought to `--max-zoom` into
+ * `public/world/masters/<master>/height/`, with `height.json` saying where it reaches. A pixel reads the level of
+ * a pyramid of halved grids nearest its own size, so a tile far out is the mean of the ground under it rather
+ * than a few points of it. The sea is held at nought, so the shading stops at the shore, and the grid is read
+ * round the antimeridian, so the Pacific has no edge.
  *
- * It reads real Earth and nothing of the master: wherever the master has moved the land, the relief lies in
- * the wrong place, and seeing whether that matters is part of the experiment.
+ * Every point of the master is given the height of the place on Earth its origin map says it was cut from
+ * (`src/heightFitted.ts`), so land Adam moved takes its height with it, and invented land is filled from the
+ * land around it. A master with no origin map yet is given plain Earth's, and told so. So the height is stale
+ * whenever the origin map is, which is whenever the master was cut since: cutting it in the Debug map runs this
+ * after the origin, and the quick start does whenever `origin.json` is newer than `height.json`.
  */
 
 const masterPath = masterAt(named[0]);
 const master = masterNameOf(basename(masterPath)) ?? DEFAULT_MASTER;
 const outputDir = resolve(OUTPUT_DIR, worldDirOf(master), 'height');
 const maxZoom = Number(flag('max-zoom') ?? HEIGHT_MAX_ZOOM);
-const band = Number(flag('band') ?? 1);
 
 const TAG = {
   width: 256,
@@ -130,38 +137,25 @@ function readEtopo(path: string): HeightGrid {
   return { width, height, west: tie[3]!, north: tie[4]!, cell: one(TAG.pixelScale), heights };
 }
 
-/** Grids that tile a rectangle between them, as one. */
-function join(parts: readonly HeightGrid[]): HeightGrid {
-  const cell = parts[0]!.cell;
-  const west = Math.min(...parts.map((part) => part.west));
-  const north = Math.max(...parts.map((part) => part.north));
-  const east = Math.max(...parts.map((part) => part.west + part.width * cell));
-  const south = Math.min(...parts.map((part) => part.north - part.height * cell));
-  const width = Math.round((east - west) / cell);
-  const height = Math.round((north - south) / cell);
-  const heights = new Float32Array(width * height);
-  for (const part of parts) {
-    const left = Math.round((part.west - west) / cell);
-    const top = Math.round((north - part.north) / cell);
-    for (let r = 0; r < part.height; r += 1) {
-      heights.set(part.heights.subarray(r * part.width, (r + 1) * part.width), (top + r) * width + left);
-    }
-  }
-  return { width, height, west, north, cell, heights };
-}
-
 const started = performance.now();
-const grid = join(
-  ETOPO_TILES.map((tile) => readEtopo(resolve(SOURCE_DIR, 'etopo', `ETOPO_2022_v1_15s_${tile}_surface.tif`))),
-);
+if (!existsSync(resolve(SOURCE_DIR, ETOPO_WORLD))) {
+  // Cutting a master in the Debug map runs this without fetching first; the quick start and npm run world:height
+  // fetch it. Nothing is taken away: the tiles there are left as they are.
+  console.log(
+    `no ${ETOPO_WORLD} in world/source, so no height cut: npm run world:height --prefix frontend fetches it`,
+  );
+  process.exit(0);
+}
+const grid = readEtopo(resolve(SOURCE_DIR, ETOPO_WORLD));
 const east = grid.west + grid.width * grid.cell;
 const south = grid.north - grid.height * grid.cell;
 console.log(
   `ETOPO ${grid.width} by ${grid.height}, ${grid.west} to ${east} east, ${south} to ${grid.north} north`,
 );
-if ([grid.west, south, east, grid.north].join() !== HEIGHT_BOUNDS.join()) {
+const [WEST, SOUTH, EAST, NORTH] = HEIGHT_BOUNDS;
+if (grid.west > WEST + 1e-6 || east < EAST - 1e-6 || south > SOUTH || grid.north < NORTH) {
   throw new Error(
-    `the tiles reach ${[grid.west, south, east, grid.north].join()}; the page asks within ${HEIGHT_BOUNDS.join()}`,
+    `the grid reaches ${[grid.west, south, east, grid.north].join()}; the page asks within ${HEIGHT_BOUNDS.join()}`,
   );
 }
 
@@ -170,9 +164,42 @@ while (pyramid.at(-1)!.width > 64) {
   pyramid.push(halve(pyramid.at(-1)!));
 }
 
-const tileX = (lon: number, zoom: number) => Math.floor(((lon + 180) / 360) * 2 ** zoom);
+const originDir = resolve(OUTPUT_DIR, worldDirOf(master), 'origin');
+const fitting = existsSync(resolve(originDir, 'origin.json'))
+  ? await (async () => {
+      const file = JSON.parse(await readFile(resolve(originDir, 'origin.json'), 'utf8')) as OriginFile;
+      const bytes = await readFile(resolve(originDir, 'origin.bin'));
+      const origin = decodeOrigin(
+        bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
+        file,
+      );
+      const size = { width: file.width, height: file.height };
+      // A cell of the fill read from the level of about a cell's size: the mean of the ground it came from.
+      const coarse =
+        pyramid[levelFor(((360 / file.width) * file.cell) / FILL_SPLIT, grid.cell, pyramid.length)]!;
+      const fill = fillOf(origin, size, (lon, lat) => heightAt(coarse, lon, lat));
+      const madeAt = (await stat(resolve(originDir, 'origin.json'))).mtime.toISOString();
+      return { file, origin, size, fill, madeAt };
+    })()
+  : null;
+console.log(
+  fitting === null
+    ? `${master} has no origin map, so its height is plain Earth's: npm run world:origin --prefix frontend -- ${master}`
+    : `fitted to ${master} through its origin map of ${fitting.madeAt}: ${fitting.file.counts.earth} squares from Earth, ` +
+        `${fitting.file.counts.clone} copies, ${fitting.file.counts.invented} invented and filled from around them`,
+);
+/** The master's height at a longitude and latitude of the world, from one level of the pyramid. */
+const heightOf = (level: HeightGrid): EarthHeight => {
+  const earth: EarthHeight = (lon, lat) => heightAt(level, lon, lat);
+  return fitting === null
+    ? (lon, lat) => Math.max(0, earth(lon, lat))
+    : fittedHeight(fitting.origin, fitting.size, fitting.fill, earth);
+};
+
+const within = (tile: number, zoom: number) => Math.min(2 ** zoom - 1, Math.max(0, Math.floor(tile)));
+const tileX = (lon: number, zoom: number) => within(((lon + 180) / 360) * 2 ** zoom, zoom);
 const tileY = (lat: number, zoom: number) =>
-  Math.floor(((1 - Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360)) / Math.PI) / 2) * 2 ** zoom);
+  within(((1 - Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360)) / Math.PI) / 2) * 2 ** zoom, zoom);
 
 await rm(outputDir, { recursive: true, force: true });
 const highest = { metres: -Infinity, lon: 0, lat: 0 };
@@ -182,28 +209,38 @@ let bytes = 0;
 for (let zoom = 0; zoom <= maxZoom; zoom += 1) {
   const size = TILE_SIZE * 2 ** zoom;
   const level = pyramid[levelFor(360 / size, grid.cell, pyramid.length)]!;
+  const metresAt = heightOf(level);
   let written = 0;
-  for (let x = tileX(grid.west, zoom); x <= tileX(east - 1e-9, zoom); x += 1) {
+  for (let x = tileX(WEST, zoom); x <= tileX(EAST - 1e-9, zoom); x += 1) {
     await mkdir(resolve(outputDir, String(zoom), String(x)), { recursive: true });
-    for (let y = tileY(grid.north, zoom); y <= tileY(south + 1e-9, zoom); y += 1) {
+    // A column's tiles are encoded together, so the encoder's own threads work while the next heights are read.
+    const encoding: Promise<void>[] = [];
+    for (let y = tileY(NORTH, zoom); y <= tileY(SOUTH, zoom); y += 1) {
       const pixels = new Uint8Array(TILE_SIZE * TILE_SIZE * 3);
       for (let py = 0; py < TILE_SIZE; py += 1) {
         const lat =
           (Math.atan(Math.sinh(Math.PI * (1 - (2 * (y * TILE_SIZE + py + 0.5)) / size))) * 180) / Math.PI;
         for (let px = 0; px < TILE_SIZE; px += 1) {
           const lon = ((x * TILE_SIZE + px + 0.5) / size) * 360 - 180;
-          const metres = Math.max(0, heightAt(level, lon, lat) * edgeWeight(grid, lon, lat, band));
+          const metres = metresAt(lon, lat);
           if (metres > highest.metres) {
             Object.assign(highest, { metres, lon, lat });
           }
           toTerrarium(metres, pixels, (py * TILE_SIZE + px) * 3);
         }
       }
-      const png = encodeRgbPng({ width: TILE_SIZE, height: TILE_SIZE, pixels }, deflateSync);
-      await writeFile(resolve(outputDir, String(zoom), String(x), `${y}.png`), png);
-      bytes += png.length;
+      const into = resolve(outputDir, String(zoom), String(x), `${y}.${HEIGHT_FORMAT}`);
+      encoding.push(
+        sharp(pixels, { raw: { width: TILE_SIZE, height: TILE_SIZE, channels: 3 } })
+          .webp({ lossless: true, effort: 4 })
+          .toFile(into)
+          .then((saved) => {
+            bytes += saved.size;
+          }),
+      );
       written += 1;
     }
+    await Promise.all(encoding);
   }
   tiles += written;
   console.log(`  zoom ${zoom}: ${written} tiles, read at ${(level.cell * 3600).toFixed(0)} arc-seconds`);
@@ -213,11 +250,13 @@ await writeFile(
   resolve(outputDir, 'height.json'),
   `${JSON.stringify(
     {
-      source: 'ETOPO 2022, 15 arc-seconds, NOAA NCEI, public domain',
+      source: 'ETOPO 2022, 60 arc-seconds, NOAA NCEI, public domain',
       encoding: 'terrarium',
+      format: HEIGHT_FORMAT,
       tileSize: TILE_SIZE,
       maxzoom: maxZoom,
-      bounds: [grid.west, south, east, grid.north],
+      bounds: HEIGHT_BOUNDS,
+      fitted: fitting === null ? null : { master, origin: fitting.madeAt, from: fitting.file.from },
       highest: {
         metres: Math.round(highest.metres),
         lon: +highest.lon.toFixed(3),
@@ -232,6 +271,6 @@ await writeFile(
 console.log(
   `\n${tiles} height tiles, ${(bytes / 1048576).toFixed(1)} MB, into ${outputDir}` +
     `\nhighest ${Math.round(highest.metres)} m at ${highest.lat.toFixed(3)} N ${highest.lon.toFixed(3)} E` +
-    ` (Mont Blanc is 4,806 m at 45.833 N 6.865 E)` +
+    ` (Everest is 8,849 m at 27.988 N 86.925 E on Earth, where the master has not moved it)` +
     `\n${((performance.now() - started) / 1000).toFixed(1)} s`,
 );

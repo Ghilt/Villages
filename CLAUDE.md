@@ -360,7 +360,7 @@ Commands are added here as the increments land:
   `world/render.json`, and how it is painted is `world/painterly.json`.
 - The world's other tools, each `npm run <name> --prefix frontend` and each described in `docs/RUNNING.md`
   beside the folder it reads: `world:sprites` works out a master's sprite map, `world:flow` which way its rivers
-  run, `world:origin` where on Earth each part of it came from and `world:names` the names carried through that, `world:ground` the ground map the game server reads, `world:scenery` paints stills of the sprite map, `world:paint` paints the painterly stills and writes the
+  run, `world:origin` where on Earth each part of it came from and `world:names` the names carried through that, `world:ground` the ground map the game server reads, `world:height` the whole world's height the relief is shaded from, `world:scenery` paints stills of the sprite map, `world:paint` paints the painterly stills and writes the
   runtime copy of the styles (`-- --config-only` for that alone), `world:art` cuts the sprites, `world:ui` the
   interface pictures, and `world:portraits` and `world:scenes` draw placeholders, never over a file that is
   there.

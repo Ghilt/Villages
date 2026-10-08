@@ -77,11 +77,16 @@ export const ERRANDS = {
     ['generateSpriteMap.ts', 'furnishing'],
     // What the game server reads the looking circle off, seconds; a stale one offers a river that is gone (0084).
     ['groundWorld.ts', 'reading the ground of'],
-    // Where its land came from, and the names carried through that, which a repaint leaves on the wrong ground.
+    // Where its land came from, and the names and the relief's height carried through that, all of which a
+    // repaint leaves on the wrong ground.
     ['originWorld.ts', 'working out the origin of'],
+    ['heightWorld.ts', 'fitting the height to'],
   ],
   furnish: [['generateSpriteMap.ts', 'furnishing']],
-  origin: [['originWorld.ts', 'working out the origin of']],
+  origin: [
+    ['originWorld.ts', 'working out the origin of'],
+    ['heightWorld.ts', 'fitting the height to'],
+  ],
   names: [['namesWorld.ts', 'carrying the names of']],
 } as const satisfies Record<string, readonly (readonly [string, string])[]>;
 
@@ -91,7 +96,7 @@ type Errand = keyof typeof ERRANDS;
 const DONE: Record<Errand, string> = {
   cut: 'is ready',
   furnish: 'is furnished',
-  origin: 'has its origin worked out and its names carried',
+  origin: 'has its origin worked out, its names carried and its height fitted',
   names: 'has its names carried',
 };
 

@@ -1,17 +1,23 @@
 /**
- * Height, for the relief experiment (0016): a grid of heights in metres on longitude and latitude, the way
+ * Height, for the relief (decision record 0090): a grid of heights in metres on longitude and latitude, the way
  * ETOPO 2022 comes, and the Terrarium encoding MapLibre reads a height tile in.
  *
  * Everything here is arithmetic; reading the files is `bin/heightWorld.ts`'s.
  */
 
 /**
- * Where the height reaches, west, south, east and north in degrees, and the closest zoom it is cut to: the
- * four ETOPO tiles around the Alps. The page asks for no height tile outside it, and the tool refuses to cut
- * one if the tiles it read say otherwise.
+ * Where the height reaches, west, south, east and north in degrees: the whole of the Mercator square. And the
+ * closest zoom it is cut to, where a tile pixel is about a master pixel and a little finer than ETOPO's 60
+ * arc-seconds; past it the page stretches the closest tile, which the light shading close in wants anyway.
  */
-export const HEIGHT_BOUNDS = [0, 30, 30, 60] as const;
-export const HEIGHT_MAX_ZOOM = 8;
+export const HEIGHT_BOUNDS = [-180, -85.051129, 180, 85.051129] as const;
+export const HEIGHT_MAX_ZOOM = 7;
+
+/**
+ * What a height tile is saved as: WebP without loss, about half the PNG it would otherwise be, and every byte
+ * back as it was written, which a height has to be.
+ */
+export const HEIGHT_FORMAT = 'webp';
 
 /** Heights on a regular grid of longitude and latitude, the first row the northernmost, each cell an area. */
 export interface HeightGrid {
@@ -82,35 +88,30 @@ export function halve(grid: HeightGrid): HeightGrid {
   return { width, height, west: grid.west, north: grid.north, cell: grid.cell * 2, heights };
 }
 
-/** The height at a place, read between the four nearest cell middles, and held at the edge past it. */
+/** Whether a grid goes the whole way round, so that east of its last column is its first. */
+function goesRound(grid: HeightGrid): boolean {
+  return Math.abs(grid.width * grid.cell - 360) < grid.cell / 2;
+}
+
+/**
+ * The height at a place, read between the four nearest cell middles: held at the edge past it, north and south
+ * and on a grid of a part of the world; carried round the antimeridian on one of the whole.
+ */
 export function heightAt(grid: HeightGrid, lon: number, lat: number): number {
   const x = (lon - grid.west) / grid.cell - 0.5;
   const y = (grid.north - lat) / grid.cell - 0.5;
-  const x0 = Math.min(grid.width - 1, Math.max(0, Math.floor(x)));
+  const round = goesRound(grid);
+  const column = (at: number) =>
+    round ? ((at % grid.width) + grid.width) % grid.width : Math.min(grid.width - 1, Math.max(0, at));
+  const x0 = column(Math.floor(x));
   const y0 = Math.min(grid.height - 1, Math.max(0, Math.floor(y)));
-  const x1 = Math.min(grid.width - 1, x0 + 1);
+  const x1 = column(x0 + 1);
   const y1 = Math.min(grid.height - 1, y0 + 1);
-  const fx = Math.min(1, Math.max(0, x - x0));
+  const fx = round ? x - Math.floor(x) : Math.min(1, Math.max(0, x - x0));
   const fy = Math.min(1, Math.max(0, y - y0));
   const top = grid.heights[y0 * grid.width + x0]! * (1 - fx) + grid.heights[y0 * grid.width + x1]! * fx;
   const bottom = grid.heights[y1 * grid.width + x0]! * (1 - fx) + grid.heights[y1 * grid.width + x1]! * fx;
   return top * (1 - fy) + bottom * fy;
-}
-
-/**
- * How much of its height a place keeps near the edge of the grid: all of it a `band` of degrees in, none at
- * the edge, eased between. Past the grid the ground is flat, and a height that fell to nothing in one cell
- * would be shaded as a cliff along the whole edge; spread over a band it is a slope too gentle to see.
- */
-export function edgeWeight(grid: HeightGrid, lon: number, lat: number, band: number): number {
-  const east = grid.west + grid.width * grid.cell;
-  const south = grid.north - grid.height * grid.cell;
-  const inside = Math.min(lon - grid.west, east - lon, grid.north - lat, lat - south);
-  if (inside <= 0) {
-    return 0;
-  }
-  const t = Math.min(1, inside / band);
-  return t * t * (3 - 2 * t);
 }
 
 /** The level of a pyramid, nought the finest, whose cell is nearest a pixel `degrees` wide without being wider. */
