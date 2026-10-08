@@ -87,7 +87,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
   the next frame, is remembered in the browser that moved it, and once one stops the log says them all under
   `relief` as `tuned: …`, the line to hand over when a setting should become the default; `reset` puts them back.
   The height is the master's own, real Earth's read through its origin map, so the shading follows land Adam
-  moved, and invented land is shaded smooth. A master with no height tiles is drawn flat and the log says what
+  moved, and invented land is given ground of the kind painted on it: rock a range, forest hills, farmland flat. A master with no height tiles is drawn flat and the log says what
   to run. Its numbers are in
   `apps/web/src/map/relief.ts` and `reliefTuning.ts`, and our shader is `reliefLayer.ts` and `reliefShader.ts`.
 - What the program thinks is happening: the debug panel, one space docked down the right-hand side
@@ -288,11 +288,12 @@ stage alone, with none of the debug panel in it (decision record 0079).
   or opened up between pieces, is invented. See `docs/plans/real-world-names.md`.
 - How high the ground is, for the relief: `npm run world:height --prefix frontend` reads ETOPO 2022's whole world,
   a height every 60 arc-seconds, through the master's origin map, so every point of the master has the height of
-  where on Earth it was cut from and invented land is filled smooth from around it, and cuts it into Terrarium
-  tiles to zoom 7 in `public/world/masters/<master>/height/`, saved as WebP without loss, with `height.json`
-  saying where they reach, which origin map they were fitted through, and the highest point they found: on
-  `terrain3_mended_2026-10-03` Everest, carried 4.8 degrees south with the range, 8,000 m, a summit averaged over
-  a cell. 21,845 tiles, 203 MB, two minutes. It reads `world/source/etopo/`, and fetches the one file first when it is
+  where on Earth it was cut from, and invented land is given ground of the kind the master paints on it, and
+  cuts it into Terrarium tiles to zoom 7 in `public/world/masters/<master>/height/`, saved as WebP without loss,
+  with `height.json` saying where they reach, which origin map they were fitted through, and the highest point
+  they found: on `terrain3_mended_2026-10-03` an invented summit at 33.6 N 80.3 E, 8,616 m, with Everest carried
+  4.8 degrees south with its range at 8,000 m, a summit averaged over a cell. 21,845 tiles, 205 MB, two and a
+  half minutes, the master read for its painting included. It reads `world/source/etopo/`, and fetches the one file first when it is
   missing, 444 MB once, through `world:fetch-all -- --only etopo`; `--only` fetches any source whose name holds
   the word. The sea is held at nought and the grid is read round the antimeridian. A master with no origin map
   is given plain Earth's height, and it says so. Cutting a master in the Debug map fits it again after the

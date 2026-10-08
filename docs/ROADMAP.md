@@ -68,7 +68,8 @@ and so is the origin map, the first of real names on the edited world and the ne
 - **Relief**: the ground shaded by its slope, the whole world, from ETOPO 2022's height, by a shader of our own
   with MapLibre's hillshade beside it to compare, heavy far out and light close in on four sliders in the Relief
   part of the Shaders section. Decision record 0090, closing experiment 0017; built and waiting on Adam's eye for
-  the numbers. Fitted to the master through its origin map, so land Adam moved takes its height with it.
+  the numbers. Fitted to the master through its origin map, so land Adam moved takes its height with it, and invented
+  land given ground of the kind he painted on it.
   What is open: one light for the water and the relief. Asked for by Adam on 2026-10-07, after the world was found to have no height at all.
 - **A place for every mechanic**: the review of 2026-10-02 found each mechanic threaded by hand through the
   same thirteen shared files, and those files growing with every one. The fix is a plan of 43 steps over eleven

@@ -26,8 +26,8 @@ the lattice, and then: heavy at zoom 5 and 6, light up close, for the whole worl
   at the equator, the whole world in one public-domain file of 444 MB, which `world:height` fetches into
   `world/source/` and reads through the master's origin map (experiment 0016): every point of the master is
   given the height of the place on Earth it was cut from, so a range Adam moved takes its height with it
-  (`src/heightFitted.ts`). Land the origin map finds nowhere on Earth, invented, is filled from the land around
-  it, smoother than Earth's but with no cliff where it meets it. Cut into Terrarium tiles to zoom 7 beside the
+  (`src/heightFitted.ts`). Land the origin map finds nowhere on Earth, invented, is given ground of the kind
+  Adam painted on it (`src/heightInvented.ts`), on a fill eased from the land around it. Cut into Terrarium tiles to zoom 7 beside the
   master's other tiles, the sea held at nought and the antimeridian read round. So the height is the master's,
   and stale whenever its origin map is: cutting a master in the Debug map fits it again after the origin, and
   the quick start does whenever `origin.json` is newer than `height.json`.
@@ -64,9 +64,16 @@ the lattice, and then: heavy at zoom 5 and 6, light up close, for the whole worl
 - **A fresh tree fetches 444 MB once**, and cuts 21,845 tiles, 203 MB as WebP without loss, in two minutes, the
   origin map read and the invented land filled included. The quick start does both when the height is missing
   or the origin map is newer, and the tiles are output, not committed, like every other cut of the world.
-- **Invented land is shaded smooth.** It has no height of its own, so its fill is eased from the land around
-  it, four cells to a square of the origin map; where it meets Earth's land the detail stops along the origin
-  map's squares, at the default strength a smooth plateau beside a textured one, not a line.
+- **Invented land is given ground of the kind painted on it**, Adam's of 2026-10-08, *"can you invent relief
+  for my invented land?"*. It has no height of its own, so it stands on a fill eased from the land around it,
+  four cells to a square of the origin map, and on that a noise that is the same every time it is cut: ridged
+  where the master paints bare rock, alpine meadow or ice, rolling hills where it paints forest, all but flat
+  where it paints farmland, marsh or sand (`RUGGED_BY_CLASS`). How far it swings is what its painting asks
+  inland, and the roughness Earth's land has beside it near the edge, faded in over its first few cells so
+  there is no cliff where the two meet. A range swings 2,200 m on waves of 50 km and finer, about as sharp as
+  the Himalaya at the same scale; a first invented summit on `terrain3_mended_2026-10-03` stands at 8,616 m on
+  an invented plateau already near 5,000, higher than Everest's 8,000 in this data. Its ranges run every way
+  rather than in the long parallel lines Earth's do, and the master is read for its painting, 15 seconds more.
 - **The relief and the water share their WebGL**, `shaders/webgl.ts`, rather than each writing it.
 - **The water's sun still stands in the north-west.** One light for the map is one number in `water/look.ts`,
   and Adam's call.

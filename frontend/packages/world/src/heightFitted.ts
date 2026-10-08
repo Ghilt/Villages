@@ -1,3 +1,5 @@
+import { RANGE_METRES, inventedGround, inventedRelief } from './heightInvented.ts';
+import type { InventedGround } from './heightInvented.ts';
 import { ORIGIN_CLONE, ORIGIN_EARTH, ORIGIN_INVENTED } from './originFile.ts';
 import type { OriginGrid } from './originFile.ts';
 
@@ -46,6 +48,23 @@ export interface Fill {
   readonly columns: number;
   readonly rows: number;
   readonly heights: Float32Array;
+  /** The ground invented on it, when the master's painting was given: `heightInvented.ts`. */
+  readonly ground?: InventedGround;
+}
+
+/** What inventing ground for invented land needs. */
+export interface Inventing {
+  /** The master's painting a cell of the fill, nought flat to one a range: `ruggednessOf`. */
+  readonly rugged: Float32Array;
+  /** Earth's height at its finest, to measure how rough the land beside invented land is. */
+  readonly fine: EarthHeight;
+}
+
+export interface FillOptions {
+  readonly split?: number;
+  readonly rounds?: number;
+  /** Without it invented land is filled smooth and nothing more. */
+  readonly inventing?: Inventing;
 }
 
 /**
@@ -57,8 +76,7 @@ export function fillOf(
   origin: OriginGrid,
   size: MasterSize,
   earth: EarthHeight,
-  split = FILL_SPLIT,
-  rounds = 256,
+  { split = FILL_SPLIT, rounds = 256, inventing }: FillOptions = {},
 ): Fill {
   const columns = origin.columns * split;
   const rows = origin.rows * split;
@@ -66,6 +84,17 @@ export function fillOf(
   const heights = new Float32Array(columns * rows);
   const settled = new Uint8Array(columns * rows);
   const invented: number[] = [];
+  // How far Earth's land spreads up and down within each cell, from four points of it at its finest.
+  const roughness = new Float32Array(inventing === undefined ? 0 : columns * rows);
+  const spreadAt = (k: number, i: number, j: number) => {
+    const at = [0.25, 0.75].flatMap((v) =>
+      [0.25, 0.75].map((u) =>
+        Math.max(0, inventing!.fine(...earthOf(origin, size, k, (i + u) * step, (j + v) * step))),
+      ),
+    );
+    const mean = at.reduce((sum, h) => sum + h, 0) / at.length;
+    return Math.sqrt(at.reduce((sum, h) => sum + (h - mean) ** 2, 0) / at.length);
+  };
   for (let j = 0; j < rows; j += 1) {
     for (let i = 0; i < columns; i += 1) {
       const k = Math.floor(j / split) * origin.columns + Math.floor(i / split);
@@ -76,6 +105,9 @@ export function fillOf(
       }
       if (isFromEarth(origin.status[k])) {
         heights[at] = Math.max(0, earth(...earthOf(origin, size, k, (i + 0.5) * step, (j + 0.5) * step)));
+        if (inventing !== undefined) {
+          roughness[at] = spreadAt(k, i, j);
+        }
       }
       settled[at] = 1;
     }
@@ -89,8 +121,11 @@ export function fillOf(
     return [cell(column - 1, row), cell(column + 1, row), cell(column, row - 1), cell(column, row + 1)];
   };
   // Inwards from the edge of each piece of invented land, a ring a pass, each cell the mean of those settled.
+  const rings = new Uint16Array(columns * rows);
+  let ring = 0;
   let open = invented;
   while (open.length > 0) {
+    ring += 1;
     const reached: [number, number][] = [];
     for (const at of open) {
       const known = around(at).filter((n) => settled[n] === 1);
@@ -104,6 +139,7 @@ export function fillOf(
     for (const [at, value] of reached) {
       heights[at] = value;
       settled[at] = 1;
+      rings[at] = ring;
     }
     open = open.filter((at) => settled[at] === 0);
   }
@@ -112,24 +148,30 @@ export function fillOf(
       heights[at] = around(at).reduce((sum, n) => sum + heights[n]!, 0) / 4;
     }
   }
-  return { split, columns, rows, heights };
+  const ground =
+    inventing === undefined
+      ? undefined
+      : inventedGround(columns, rows, invented, roughness, inventing.rugged, rings);
+  return { split, columns, rows, heights, ground };
 }
 
 /**
  * The master's height at a longitude and latitude of the world: Earth's where the origin map says that point
  * came from, carried by its square's turn and stretch; nought at sea; and for invented land, the fill read
- * between its cells' middles.
+ * between its cells' middles, with the ground invented on it when there is some, no wave of it narrower than
+ * twice `finest` master pixels, the size of what is being cut.
  */
 export function fittedHeight(
   origin: OriginGrid,
   size: MasterSize,
   fill: Fill,
   earth: EarthHeight,
+  finest = 1,
 ): EarthHeight {
   const { cell, columns, status } = origin;
   const step = cell / fill.split;
-  const filled = (column: number, row: number) =>
-    fill.heights[
+  const at = (grid: Float32Array, column: number, row: number) =>
+    grid[
       Math.min(fill.rows - 1, Math.max(0, row)) * fill.columns + ((column + fill.columns) % fill.columns)
     ]!;
   return (lon, lat) => {
@@ -148,8 +190,19 @@ export function fittedHeight(
     const top = Math.floor(sy);
     const wx = sx - left;
     const wy = sy - top;
-    const upper = filled(left, top) * (1 - wx) + filled(left + 1, top) * wx;
-    const lower = filled(left, top + 1) * (1 - wx) + filled(left + 1, top + 1) * wx;
-    return upper * (1 - wy) + lower * wy;
+    const between = (grid: Float32Array) =>
+      (at(grid, left, top) * (1 - wx) + at(grid, left + 1, top) * wx) * (1 - wy) +
+      (at(grid, left, top + 1) * (1 - wx) + at(grid, left + 1, top + 1) * wx) * wy;
+    const base = between(fill.heights);
+    if (fill.ground === undefined) {
+      return base;
+    }
+    const fade = between(fill.ground.fade);
+    if (fade <= 0) {
+      return base;
+    }
+    const swing = between(fill.ground.swing);
+    const range = Math.min(1, swing / RANGE_METRES);
+    return Math.max(0, base + fade * swing * inventedRelief(mx, my, range, finest));
   };
 }

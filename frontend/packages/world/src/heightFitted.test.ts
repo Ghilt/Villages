@@ -66,17 +66,17 @@ describe('the master’s own height, read through the origin map', () => {
 
   it('gives invented land a height between its neighbours’, never a cliff down to nought', () => {
     const origin = originOf([E, I, E, E, E, E, E, E]);
-    const square = fillOf(origin, SIZE, earth, 1).heights[1]!;
+    const square = fillOf(origin, SIZE, earth, { split: 1 }).heights[1]!;
     expect(square).toBeGreaterThan(1000);
     expect(square).toBeLessThan(1225);
-    const at = fittedHeight(origin, SIZE, fillOf(origin, SIZE, earth, 1), earth);
+    const at = fittedHeight(origin, SIZE, fillOf(origin, SIZE, earth, { split: 1 }), earth);
     expect(at(-45, 40)).toBeCloseTo(square, 0);
     expect(at(-89, 40)).toBeGreaterThan(1000);
   });
 
   it('fills finer than a square, so invented land meets each neighbour at the height it has beside it', () => {
     const origin = originOf([E, I, E, E, E, E, E, E]);
-    const fill = fillOf(origin, SIZE, earth, 2);
+    const fill = fillOf(origin, SIZE, earth, { split: 2 });
     // The invented square's two cells along its top: the western beside land lower than the eastern's.
     expect(fill.columns).toBe(8);
     expect(fill.heights[2]!).toBeLessThan(fill.heights[3]!);

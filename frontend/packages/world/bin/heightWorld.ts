@@ -18,13 +18,16 @@ import {
 import type { HeightGrid } from '../src/height.ts';
 import { FILL_SPLIT, fillOf, fittedHeight } from '../src/heightFitted.ts';
 import type { EarthHeight } from '../src/heightFitted.ts';
+import { ruggednessOf } from '../src/heightInvented.ts';
 import { decodeOrigin } from '../src/originFile.ts';
 import type { OriginFile } from '../src/originFile.ts';
 import { DEFAULT_MASTER, masterNameOf, worldDirOf } from '../src/masters.ts';
+import type { Palette } from '../src/palette.ts';
 import { TILE_SIZE } from '../src/tiles.ts';
 
 import { flag, named } from './lib/flags.ts';
-import { OUTPUT_DIR, SOURCE_DIR, masterAt } from './lib/paths.ts';
+import { readMaster } from './lib/master.ts';
+import { OUTPUT_DIR, PALETTE, SOURCE_DIR, masterAt } from './lib/paths.ts';
 import { ETOPO_WORLD } from './lib/worldSources.ts';
 
 /**
@@ -146,6 +149,21 @@ if (!existsSync(resolve(SOURCE_DIR, ETOPO_WORLD))) {
   );
   process.exit(0);
 }
+const originDir = resolve(OUTPUT_DIR, worldDirOf(master), 'origin');
+const originFile = existsSync(resolve(originDir, 'origin.json'))
+  ? (JSON.parse(readFileSync(resolve(originDir, 'origin.json'), 'utf8')) as OriginFile)
+  : null;
+// What the master paints a cell of the fill, for the ground invented on invented land: read before Earth's
+// heights and kept only as a grid of how rugged each cell is, because the master whole is gigabytes.
+const rugged =
+  originFile === null
+    ? null
+    : (() => {
+        const palette = JSON.parse(readFileSync(PALETTE, 'utf8')) as Palette;
+        const names: string[] = [];
+        for (const one of palette.classes) names[one.id] = one.name;
+        return ruggednessOf(readMaster(masterPath, palette), names, originFile.cell / FILL_SPLIT);
+      })();
 const grid = readEtopo(resolve(SOURCE_DIR, ETOPO_WORLD));
 const east = grid.west + grid.width * grid.cell;
 const south = grid.north - grid.height * grid.cell;
@@ -164,36 +182,41 @@ while (pyramid.at(-1)!.width > 64) {
   pyramid.push(halve(pyramid.at(-1)!));
 }
 
-const originDir = resolve(OUTPUT_DIR, worldDirOf(master), 'origin');
-const fitting = existsSync(resolve(originDir, 'origin.json'))
-  ? await (async () => {
-      const file = JSON.parse(await readFile(resolve(originDir, 'origin.json'), 'utf8')) as OriginFile;
-      const bytes = await readFile(resolve(originDir, 'origin.bin'));
-      const origin = decodeOrigin(
-        bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
-        file,
-      );
-      const size = { width: file.width, height: file.height };
-      // A cell of the fill read from the level of about a cell's size: the mean of the ground it came from.
-      const coarse =
-        pyramid[levelFor(((360 / file.width) * file.cell) / FILL_SPLIT, grid.cell, pyramid.length)]!;
-      const fill = fillOf(origin, size, (lon, lat) => heightAt(coarse, lon, lat));
-      const madeAt = (await stat(resolve(originDir, 'origin.json'))).mtime.toISOString();
-      return { file, origin, size, fill, madeAt };
-    })()
-  : null;
+const fitting =
+  originFile !== null && rugged !== null
+    ? await (async () => {
+        const file = originFile;
+        const bytes = await readFile(resolve(originDir, 'origin.bin'));
+        const origin = decodeOrigin(
+          bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
+          file,
+        );
+        const size = { width: file.width, height: file.height };
+        // A cell of the fill read from the level of about a cell's size: the mean of the ground it came from.
+        const coarse =
+          pyramid[levelFor(((360 / file.width) * file.cell) / FILL_SPLIT, grid.cell, pyramid.length)]!;
+        const fill = fillOf(origin, size, (lon, lat) => heightAt(coarse, lon, lat), {
+          inventing: { rugged, fine: (lon, lat) => heightAt(grid, lon, lat) },
+        });
+        const madeAt = (await stat(resolve(originDir, 'origin.json'))).mtime.toISOString();
+        return { file, origin, size, fill, madeAt };
+      })()
+    : null;
 console.log(
   fitting === null
     ? `${master} has no origin map, so its height is plain Earth's: npm run world:origin --prefix frontend -- ${master}`
     : `fitted to ${master} through its origin map of ${fitting.madeAt}: ${fitting.file.counts.earth} squares from Earth, ` +
-        `${fitting.file.counts.clone} copies, ${fitting.file.counts.invented} invented and filled from around them`,
+        `${fitting.file.counts.clone} copies, ${fitting.file.counts.invented} invented and given ground of the kind painted there`,
 );
-/** The master's height at a longitude and latitude of the world, from one level of the pyramid. */
-const heightOf = (level: HeightGrid): EarthHeight => {
+/**
+ * The master's height at a longitude and latitude of the world, from one level of the pyramid, for a zoom whose
+ * world is `size` pixels across: no invented ground finer than its pixels.
+ */
+const heightOf = (level: HeightGrid, size: number): EarthHeight => {
   const earth: EarthHeight = (lon, lat) => heightAt(level, lon, lat);
   return fitting === null
     ? (lon, lat) => Math.max(0, earth(lon, lat))
-    : fittedHeight(fitting.origin, fitting.size, fitting.fill, earth);
+    : fittedHeight(fitting.origin, fitting.size, fitting.fill, earth, fitting.file.width / size);
 };
 
 const within = (tile: number, zoom: number) => Math.min(2 ** zoom - 1, Math.max(0, Math.floor(tile)));
@@ -209,7 +232,7 @@ let bytes = 0;
 for (let zoom = 0; zoom <= maxZoom; zoom += 1) {
   const size = TILE_SIZE * 2 ** zoom;
   const level = pyramid[levelFor(360 / size, grid.cell, pyramid.length)]!;
-  const metresAt = heightOf(level);
+  const metresAt = heightOf(level, size);
   let written = 0;
   for (let x = tileX(WEST, zoom); x <= tileX(EAST - 1e-9, zoom); x += 1) {
     await mkdir(resolve(outputDir, String(zoom), String(x)), { recursive: true });
