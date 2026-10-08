@@ -65,10 +65,11 @@ and so is the origin map, the first of real names on the edited world and the ne
   and on main, with Adam's changes to the pane of 2026-10-05 and 06; experiment 0015 waits on his rolls. What
   is open: more content, actions only some omens unlock, characters on the map as omens, and tuning by
   playing. Adam's own, planned with him on 2026-10-04.
-- **Relief, a spike**: the ground shaded by its slope, from ETOPO 2022's height around the Alps, by MapLibre's
-  own hillshade, as the Relief part of the Shaders section. Experiment 0016, waiting on Adam's eye. Kept, the
-  height comes properly from the mapping project and the relief moves into the paint. Asked for by Adam on
-  2026-10-07, after the world was found to have no height at all.
+- **Relief**: the ground shaded by its slope, the whole world, from ETOPO 2022's height, by a shader of our own
+  with MapLibre's hillshade beside it to compare, heavy far out and light close in on four sliders in the Relief
+  part of the Shaders section. Decision record 0090, closing experiment 0017; built and waiting on Adam's eye for
+  the numbers. Fitted to the master through its origin map, so land Adam moved takes its height with it.
+  What is open: one light for the water and the relief. Asked for by Adam on 2026-10-07, after the world was found to have no height at all.
 - **A place for every mechanic**: the review of 2026-10-02 found each mechanic threaded by hand through the
   same thirteen shared files, and those files growing with every one. The fix is a plan of 43 steps over eleven
   checkpoints that Adam smoke-tests: two checks that stop the growth - the size ceilings (0072) and a rule for

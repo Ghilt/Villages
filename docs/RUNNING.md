@@ -70,17 +70,25 @@ stage alone, with none of the debug panel in it (decision record 0079).
   remembered in that browser, `reset` puts them back, and once a slider stops the log says all eight under
   `water` as `rivers tuned: …`, which is the line to hand over when a setting should become the default. Every
   other number of the water is in `apps/web/src/water/look.ts`. See `docs/adr/0081`.
-- The ground is shaded by its slope around the Alps, 0 to 30 east and 30 to 60 north, at every zoom: MapLibre's
-  own hillshade over the paint and under the water, lit from the upper right as the scenery's shadows are, from
-  the height tiles `world:height` cuts. It is the **Relief** part of the Shaders section, an experiment
-  (0016): `off`, `low` (faint) or `high` (strong) in its bar, high at every load, and a Shading choice inside of
-  MapLibre's five ways of drawing a hillshade, `igor` first, which shades slopes and leaves the flat alone, and a
-  `pixels` box: a hard block of shade for every height sample instead of the shade blended between them, for the
-  `plate` renderer, showing from about zoom 8 in. Blended, the shade shows a seam a few pixels wide along the
-  edge of a height tile close in, which pixels do not. The height is real Earth's and not the master's, so
-  wherever the master has moved the land the shading is off it.
-  A master with no height tiles is drawn flat and the log says what to run. Every number of it is in
-  `apps/web/src/map/relief.ts`.
+- The ground is shaded by its slope, the whole world, at every zoom, over the paint and under the water, lit
+  from the upper right as the scenery's shadows are, from the height tiles `world:height` cuts. It is the
+  **Relief** part of the Shaders section (0090): `off`, `low` (faint) or `high` (strong) in its bar, high at every
+  load. Inside it, first, **how strongly at each zoom**, for whichever shader draws it: how strong far out and how
+  far in that reaches, how strong close in and from which zoom; three quarters strength out to zoom 6 and 15%
+  from zoom 9 in until the sliders say otherwise, eased between, and at nought nothing is fetched or drawn there.
+  Somewhere not yet loaded is shaded softly from a coarser tile for a moment, never left bare. Then what draws it, two to compare. **Our shader**, the first, works
+  the shade out for every pixel from a tile's heights and a margin of its neighbours', so there is no seam; with
+  `pixels` ticked it shades a whole cell of the lattice the Camera section sets at a time, the turned diamonds the
+  `plate` renderer draws its ground in, cell for cell. **How steep** draws the ground steeper or flatter than it is,
+  and **hard tones** makes the shade a few steps each side of flat. **MapLibre's hillshade**, the second, has its
+  five ways of shading, `igor` first, and with `pixels` a square block of shade a height sample, not the diamonds;
+  blended, it shows a seam a few pixels wide along a height tile's edge close in. Every slider changes the map on
+  the next frame, is remembered in the browser that moved it, and once one stops the log says them all under
+  `relief` as `tuned: …`, the line to hand over when a setting should become the default; `reset` puts them back.
+  The height is the master's own, real Earth's read through its origin map, so the shading follows land Adam
+  moved, and invented land is shaded smooth. A master with no height tiles is drawn flat and the log says what
+  to run. Its numbers are in
+  `apps/web/src/map/relief.ts` and `reliefTuning.ts`, and our shader is `reliefLayer.ts` and `reliefShader.ts`.
 - What the program thinks is happening: the debug panel, one space docked down the right-hand side
   holding everything that helps during development, which minimises to a badge and remembers that,
   and is only in a development build: a production build leaves it out whole (0079).

@@ -314,6 +314,15 @@ own coordinates. It has a clock of its own, while some of it is on the screen an
 the map, not the sprite canvas, for frames. Each such shader is drawn at a level, `shaders/levels.ts`, off, low or
 high: at low the water is drawn into a picture of its own at half the map's width and height and laid over the
 map (`water/picture.ts`), at half the frame rate, and the grass, in the sprite canvas, the same way.
+**The relief is in the map too**, a custom layer of its own (`map/reliefLayer.ts`) between the painted terrain
+and the water, beside MapLibre's own hillshade, which is kept to compare (0090). It reads the height tiles
+`world:height` cuts from ETOPO 2022, read through the master's origin map, into a texture a tile with a margin of its neighbours' (`map/reliefTiles.ts`):
+asked for a view at a time, a few at once, a coarse cover first and then from the middle out, cancelled when the
+view moves on (`map/reliefQueue.ts`); drawn before its neighbours land, with its own ground carried past the edge
+until they do (`map/reliefMargin.ts`); and stood in for by a coarser tile, or finer ones, while it is on its way.
+It works the shade out in its fragment shader for every pixel, or for every cell of the ground's lattice; how
+strongly at each zoom is a curve (`map/reliefCurve.ts`). It has no clock: it draws when the map does. The water
+and the relief link their programs and draw their tiles with the same few helpers, `shaders/webgl.ts`.
 
 ## What acts on its own
 

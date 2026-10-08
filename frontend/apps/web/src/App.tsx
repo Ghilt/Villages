@@ -250,7 +250,7 @@ export function App({ master, devTools }: AppProps) {
     if (map !== null) {
       applyRenderer(map, renderer, { turn: camera.latticeTurn, size: camera.latticeSize });
       // The relief and then the water, over whichever renderer this is, the water over the relief.
-      placeRelief(map, worldRootOf(master));
+      placeRelief(map, worldRootOf(master), { turn: camera.latticeTurn, size: camera.latticeSize });
       setFlowView(renderer === 'flow');
       placeWater(map, worldRootOf(master));
       map.triggerRepaint();

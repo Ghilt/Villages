@@ -1,8 +1,8 @@
-# 0016. Relief from height
+# 0017. Relief from height
 
-- Status: open
+- Status: closed
 - Started: 2026-10-07
-- Closed:
+- Closed: 2026-10-07
 
 ## Hypothesis
 
@@ -90,16 +90,40 @@ so it says the hillshade costs too little to show rather than what a frame costs
   the turned diamonds `plate` draws its cells as; a relief on the diamonds themselves would have to be painted
   by the painterly worker, which reads the ground on that lattice already.
 
+**2026-10-07, a shader of our own beside MapLibre's.** Adam kept the relief out of the painter, which would
+have meant a repaint of every tile at every change, and asked for its pixels on the lattice instead. MapLibre's
+hillshade cannot do that: it shades a tile into square texels on the map's own grid, and has no setting to
+read them on a turned one. So the relief is now also drawn by a custom layer of ours, as the water is, kept
+beside MapLibre's to compare:
+
+- **It works the shade out for every screen pixel**, from a texture of the tile's heights with four texels of
+  each neighbour's round its edge, so the slope at an edge reads both sides of it and two tiles agree: no seam.
+- **With pixels, it shades a cell at a time**: it finds the middle of the lattice cell a pixel lies in, by
+  the same arithmetic `onLattice` paints the ground's cells with, and shades the whole cell from the slope
+  there. The painter puts a pixel at its Mercator place times the master's width, as the shader does, so the
+  cells are the ground's cells, not near them.
+- **Its levers are uniforms**, read every frame: the tones, a few hard steps each side of flat, and how steep
+  the ground is shaded as. Nothing repaints.
+
+The first numbers drew every alpine slope in its darkest tone; a slope of thirty degrees from the light now
+comes out about three quarters of the way to it. Over `plate` at zoom 10, three tones, the shade comes in the
+ground's own cells: olive where meadow turns from the light, grey cells on the snow. The still is
+`world/painterly/relief-plate-pixels-z10.png`, plate alone and with it.
+
 ## Result
 
-Pending Adam's eye.
+**Confirmed.** Adam, on the shading over `plate`: *"i think its looks good z5 to z6 with heavy relief, but then up
+close i think i want low, just light shading to give some variety"*, and then to take it to main, for the whole
+world. What surprised us: that the height lay on the painted world without the mapping project, and that the
+relief wanted to be strongest far out, where nothing raised could ever show, and lightest close in, where the
+first report had expected it to matter most.
 
 ## Decision
 
-Pending. Kept, the next step is the height properly: from the mapping project, fitted to the master, a
-decision record for height as world data, and then relief in the paint itself, where it can be stippled or
-hatched rather than shaded. Killed, the tool, the tiles and the lever come out and the source list keeps or
-loses its four tiles.
+**Keep**, as decision record 0090: ETOPO 2022's whole world at 60 arc-seconds, drawn by our own shader, with
+MapLibre's hillshade beside it to compare, and how strongly by zoom on four sliders, heavy out to zoom 6 and
+light from zoom 9 in. The relief and the water share their WebGL in `shaders/webgl.ts`. The four 15-second
+tiles around the Alps are no longer read.
 
 ## Follow-ups
 
@@ -107,6 +131,5 @@ loses its four tiles.
   takes the shadows' side. Moving the water's is one number in `water/look.ts`.
 - **The softness close in.** A finer height model, or the paint's own marks over the shading, if the eye
   wants rock at zoom 10.
-- **The rest of the world.** All 384 of ETOPO's 15-arc-second tiles, at the 23 to 36 MB these four were, come
-  to around ten gigabytes; or its coarser 30-second version. And height fitted to wherever the master has moved
-  the land.
+- **Height fitted to the master**, wherever Adam has moved the land: done the same day, through the origin map
+  (experiment 0016); see decision record 0090.

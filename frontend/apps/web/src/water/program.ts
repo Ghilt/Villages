@@ -1,10 +1,13 @@
 import type * as maplibregl from 'maplibre-gl';
 
+import { linkProgram, unitQuad } from '../shaders/webgl';
+
 import { VERTEX } from './glsl';
 
 /**
  * The water's own WebGL, the little of it there is: a program linked and its uniforms found, a texture
- * made from bytes, the one quad every tile is drawn with, and the state a draw starts from.
+ * made from bytes, the one quad every tile is drawn with, and the state a draw starts from. Linking and the quad
+ * are `shaders/webgl.ts`'s, shared with the relief.
  *
  * MapLibre resets its own GL state after a custom layer draws, so a draw sets everything it needs; and a texture
  * is made only inside `render`, never from a callback, because that would change a binding MapLibre thinks it
@@ -49,28 +52,8 @@ export function link(
   uniforms: readonly string[],
   vertex = VERTEX,
 ): Program {
-  const compile = (type: number, source: string) => {
-    const shader = gl.createShader(type)!;
-    gl.shaderSource(shader, source);
-    gl.compileShader(shader);
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-      throw new Error(`water shader: ${gl.getShaderInfoLog(shader) ?? 'did not compile'}`);
-    }
-    return shader;
-  };
-  const program = gl.createProgram();
-  gl.attachShader(program, compile(gl.VERTEX_SHADER, vertex));
-  gl.attachShader(program, compile(gl.FRAGMENT_SHADER, fragment));
-  gl.bindAttribLocation(program, 0, 'aPos');
-  gl.linkProgram(program);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    throw new Error(`water program: ${gl.getProgramInfoLog(program) ?? 'did not link'}`);
-  }
-  const where: Record<string, WebGLUniformLocation | null> = {};
-  for (const name of ['uMatrix', 'uTile', 'uTexRect', 'uMask', 'uTime', 'uScale', 'uFade', ...uniforms]) {
-    where[name] = gl.getUniformLocation(program, name);
-  }
-  return { program, where };
+  const common = ['uMatrix', 'uTile', 'uTexRect', 'uMask', 'uTime', 'uScale', 'uFade'];
+  return linkProgram(gl, vertex, fragment, [...common, ...uniforms], 'water');
 }
 
 /** A texture of RGBA bytes so many texels a side, filtered, and clamped at its edges. */
@@ -89,17 +72,7 @@ export function textureOf(gl: WebGL2RenderingContext, data: Uint8Array, side: nu
 }
 
 /** The unit quad every tile is drawn as, a strip of four corners in attribute nought. */
-export function quadOf(gl: WebGL2RenderingContext): { vao: WebGLVertexArrayObject; buffer: WebGLBuffer } {
-  const vao = gl.createVertexArray();
-  gl.bindVertexArray(vao);
-  const buffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]), gl.STATIC_DRAW);
-  gl.enableVertexAttribArray(0);
-  gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 8, 0);
-  gl.bindVertexArray(null);
-  return { vao, buffer };
-}
+export const quadOf = unitQuad;
 
 /** What every draw of the water starts from, whichever program it is. */
 export interface DrawStart {
