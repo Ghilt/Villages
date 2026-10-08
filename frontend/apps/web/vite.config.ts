@@ -11,6 +11,7 @@ import { portraitsApi } from './vite/portraitsApi.ts';
 import { scenesApi } from './vite/scenesApi.ts';
 import { uiArtApi } from './vite/uiArtApi.ts';
 import { worldApi } from './vite/worldApi.ts';
+import { worldFiles } from './vite/worldFiles.ts';
 import { worktreeApi } from './vite/worktrees.ts';
 import { worktreeHere } from './vite/worktreePort.ts';
 
@@ -20,7 +21,8 @@ const REPO = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 const tree = worktreeHere(REPO);
 
 export default defineConfig({
-  // worldApi is the dev server's own answer to "what masters are there, and cut me that one";
+  // worldApi is the dev server's own answer to "what masters are there, and cut me that one", and worldFiles
+  // sends the cut world itself, unwatched, because fifty thousand watched tiles slowed every answer;
   // portraitsApi and scenesApi serve Adam's portraits and scenes folders without a cache, so a picture
   // saved over another shows; and artApi cuts world/sprites again whenever a picture in it is saved, as
   // uiArtApi does world/ui. maplibreWorker is the build's alone: it puts MapLibre's worker beside the chunk
@@ -28,6 +30,7 @@ export default defineConfig({
   plugins: [
     react(),
     worldApi(),
+    worldFiles(),
     portraitsApi(),
     scenesApi(),
     artApi(),

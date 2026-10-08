@@ -85,3 +85,17 @@ falls back to naming the master it is drawing and saying so, and the world is cu
   costs a second.
 - **A separate small server for world commands.** A second process to start and to keep alive, for
   something the dev server already has the right to do and Vite already has a plugin interface for.
+
+## Amendment, 2026-10-07: the dev server sends the cut world itself, and does not watch it
+
+Vite watches everything under the app for a file to reload, `public/world` included, and with the relief's
+height tiles that folder became fifty thousand files once the junctions to the main checkout's tiles are
+followed. Watched, they held fifty thousand handles and more than a core of the processor while nobody asked for
+anything, and every file the dev server sent, a map tile or its own client, came about 70 ms late; the map's
+tiles could not keep up with a drag, the relief's least of all. Nothing is ever reloaded for a tile.
+
+So the watcher leaves `public/world` alone, and `apps/web/vite/worldFiles.ts` sends what is under it, found on
+disk when it is asked for: a tile in 3 ms. Vite's own public folder cannot just be told to stop watching,
+because outside a worktree it keeps a list of the files in it and hears of new ones from the watcher, and a
+master cut while the server runs would be missing from that list until a restart. What is not on disk is left
+to Vite as before, and the stands are still refused. A test holds that no spelling of a path leaves the folder.
