@@ -1,32 +1,11 @@
 package villages.gateway
 
-import villages.application.Arrival
-import villages.application.ChoicesByPlayer
-import villages.application.EventFeed
 import villages.application.Faults
-import villages.application.FoundHouseService
-import villages.application.PlacedCharacter
 import villages.application.CharactersByCell
-import villages.application.HouseById
 import villages.application.HousesByCell
-import villages.application.HousesByPlayer
-import villages.application.WorldKept
-import villages.application.KeyFigureService
-import villages.application.KeyFiguresByHouse
 import villages.application.PlayerTokens
 import villages.application.Later
-import villages.application.SightsByHouse
-import villages.application.Stands
-import villages.application.RecentEvents
-import villages.application.ResourceService
-import villages.application.TakeActionService
-import villages.application.fate.WaterAt
-import villages.application.fate.RollService
-import villages.application.DialogueService
-import villages.application.DialoguesByHouse
-import villages.application.VisionService
 import villages.application.WorldClock
-import villages.application.WorldWipe
 import villages.domain.PlayerId
 import villages.protocol.Batch
 import villages.protocol.ClientFrame
@@ -40,7 +19,6 @@ import villages.protocol.Pong
 import villages.protocol.ProtocolJson
 import villages.protocol.Resync
 import villages.protocol.ServerFrame
-import villages.protocol.Snapshot
 import villages.protocol.SubscribeCells
 import villages.protocol.TakenOver
 import villages.protocol.UnsubscribeCells
@@ -69,40 +47,26 @@ import java.util.concurrent.Executor
  */
 class Gateway(
     private val tokens: PlayerTokens,
-    foundHouse: FoundHouseService,
-    events: EventFeed,
     faults: Faults,
     private val houses: HousesByCell,
-    theirHouses: HousesByPlayer,
-    houseById: HouseById = HouseById { null },
     private val clock: Clock,
     private val world: WorldClock,
-    arrival: Arrival,
-    takeAction: TakeActionService,
-    rolls: RollService,
-    resources: ResourceService,
-    choices: ChoicesByPlayer,
-    recent: RecentEvents,
-    emptyTheWorld: WorldWipe,
-    keyFigures: KeyFigureService,
-    figures: KeyFiguresByHouse,
     private val onTheMap: CharactersByCell,
-    sights: SightsByHouse,
-    visions: VisionService,
-    dialogues: DialogueService,
-    dialogueRows: DialoguesByHouse,
-    stands: Stands = Stands { _, _, _ -> null },
-    waters: WaterAt = WaterAt.NOWHERE,
+    /** What every part is made from, a mechanic's ports apiece: see [Mechanics]. */
+    mechanics: Mechanics,
     private val later: Later,
-    private val instrumentsOpen: Boolean = true,
-    /** Where the world is kept and what of it cannot be read: said at hello, while the instruments are open. */
-    private val worldKept: WorldKept = WorldKept.IN_MEMORY,
     /**
      * What a connection's frames are sent on, and its cells answered again on: the thread that queued them, unless
      * the gateway is given threads of its own, as the app gives it. See decision record 0077.
      */
     private val sendOn: Executor = Executor { it.run() },
 ) : AutoCloseable {
+    /** Whether Adam's instruments are open, which says whether hello says where the world is kept. */
+    private val instrumentsOpen = mechanics.instrumentsOpen
+
+    /** Where the world is kept and what of it cannot be read: said at hello, while the instruments are open. */
+    private val worldKept = mechanics.worldKept
+
     /** Which connections hold each cell: the whole of the fan-out index. */
     private val holding = CellIndex<Connection>()
 
@@ -126,22 +90,8 @@ class Gateway(
         }
     }
 
-    /**
-     * A part for each mechanic, in the order a player arriving is told things: the house, whom it holds, what it sees,
-     * what it was told, what it is asked; then the stands, the waters, the timeline and the windows (0088), which greet
-     * nobody; and Adam's instruments (0076). Made after the index and the sessions, because a part watches its read
-     * models from the moment it is made. See decision record 0075.
-     */
-    private val parts: List<Part> = listOf(
-        HousesPart(core, houses, theirHouses, world),
-        KeyFiguresPart(core, figures, onTheMap, world),
-        SightPart(core, sights),
-        DialoguesPart(core, dialogues, dialogueRows),
-        ChoicesPart(core, arrival, takeAction, choices, rolls),
-        StandsPart(stands), WatersPart(waters), TimelinePart(),
-        InspectingPart(houseById, onTheMap, world),
-        Instruments(instrumentsOpen, core, events, recent, emptyTheWorld, foundHouse, resources, keyFigures, visions, dialogues, rolls, worldKept),
-    )
+    /** A part for each mechanic, made after the index and the sessions: see [partsOf] and decision record 0075. */
+    private val parts: List<Part> = partsOf(core, mechanics, houses, onTheMap, world)
 
     /** Every command the gateway takes, and every frame a part answers, each with the one part that handles it. */
     private val commands = Commands()
@@ -353,24 +303,7 @@ class Gateway(
         }
 
         /** What the cell holds on the day this connection is looking at, and of that what its fog lets through. */
-        private fun snapshot(cell: String) {
-            val looking = looking
-            val day = looking.day(world::today)
-            val (contents, sent) = looking.housesIn(houses, cell, day, MOST_IN_A_CELL)
-            val standing = onTheMap.inCell(cell, day, MOST_IN_A_CELL, looking.everything) { placed: PlacedCharacter ->
-                looking.letsSee(placed.row, placed.span, day)
-            }
-            out.send(
-                Snapshot(
-                    cell = cell,
-                    houses = sent,
-                    asOfVersion = contents.asOf,
-                    omitted = contents.omitted,
-                    characters = standing.characters.map { it.row.toMapView(it.span) },
-                    omittedCharacters = standing.omitted,
-                ),
-            )
-        }
+        private fun snapshot(cell: String) = out.send(snapshotOf(cell, looking, world, houses, onTheMap))
 
         /** Every held cell answered again, for a connection whose way of looking has changed. */
         private fun answerAgain() {

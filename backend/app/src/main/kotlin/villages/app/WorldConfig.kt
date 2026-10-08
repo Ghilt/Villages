@@ -38,6 +38,7 @@ import villages.application.WorldClock
 import villages.application.WorldWipe
 import villages.domain.WorldTime
 import villages.gateway.Gateway
+import villages.gateway.Mechanics
 import villages.occurrent.EventWorld
 import villages.projections.CharactersProjection
 import villages.projections.ChoicesProjection
@@ -351,33 +352,35 @@ class WorldConfig {
         @Value("\${villages.instruments:true}") instruments: Boolean,
     ): Gateway = Gateway(
         tokens = AnonymousTokens,
-        foundHouse = foundHouse,
-        events = world.feed,
         faults = faults,
         houses = houses,
-        houseById = houses,
-        theirHouses = houses,
         clock = clock,
         world = worldClock,
-        arrival = arrival,
-        takeAction = takeAction,
-        rolls = rolls,
-        resources = resources,
-        choices = choices,
-        recent = recentEvents,
-        emptyTheWorld = worldWipe,
-        keyFigures = keyFigures,
-        figures = characters,
         onTheMap = characters,
-        sights = sights,
-        visions = visions,
-        dialogues = dialogues,
-        dialogueRows = dialogueRows,
-        stands = stands,
-        waters = WaterAt(ground, placeNames),
+        mechanics = Mechanics(
+            foundHouse = foundHouse,
+            events = world.feed,
+            houseById = houses,
+            theirHouses = houses,
+            arrival = arrival,
+            takeAction = takeAction,
+            rolls = rolls,
+            resources = resources,
+            choices = choices,
+            recent = recentEvents,
+            emptyTheWorld = worldWipe,
+            keyFigures = keyFigures,
+            figures = characters,
+            sights = sights,
+            visions = visions,
+            dialogues = dialogues,
+            dialogueRows = dialogueRows,
+            stands = stands,
+            waters = WaterAt(ground, placeNames),
+            instrumentsOpen = instruments,
+            worldKept = world,
+        ),
         later = gatewayLater,
-        instrumentsOpen = instruments,
-        worldKept = world,
         sendOn = gatewaySending,
     )
 }

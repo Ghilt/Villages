@@ -24,7 +24,8 @@ import kotlin.reflect.KClass
  * - [ended], for whatever it keeps of a connection whose session is over;
  * - and its own watchers of its own read models, which it closes with [close].
  *
- * A new mechanic is a part of its own and a line in the gateway's list. See decision record 0075.
+ * A new mechanic is a part of its own, its ports a field or two of [Mechanics], and a line in [partsOf]. See decision
+ * record 0075.
  */
 internal interface Part : AutoCloseable {
     fun arrive(connection: Gateway.Connection, hello: Hello, who: PlayerId) {}

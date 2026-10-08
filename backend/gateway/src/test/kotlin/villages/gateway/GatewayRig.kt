@@ -264,70 +264,72 @@ internal class Rig(
     val faults = FaultBoard()
     val gateway = Gateway(
         tokens = AnonymousTokens,
-        foundHouse = FoundHouseService(world, clock = { noon }, world = worldClock),
-        events = world,
         faults = faults,
         houses = houses,
-        houseById = houses,
-        theirHouses = houses,
         clock = Clock.fixed(noon, ZoneOffset.UTC),
         world = worldClock,
-        arrival = Arrival(
-            world,
-            clock = { noon },
-            world = worldClock,
-            // Known ids rather than random ones, so a story can be named in an assertion.
-            ids = { UUID.fromString("a1000000-0000-4000-8000-%012x".format(++minted)) },
-        ),
-        takeAction = TakeActionService(world, clock = { noon }, world = worldClock),
-        rolls = rolls,
-        resources = ResourceService(
-            world,
-            clock = { noon },
-            world = worldClock,
-            calendar = thirtyDayMonths,
-            ids = { UUID.fromString("b1000000-0000-4000-8000-%012x".format(++minted)) },
-        ),
-        choices = choices,
-        recent = recent,
-        emptyTheWorld = {
-            val gone = world.events.size + world.characterEvents.size
-            world.events.clear()
-            world.characterEvents.clear()
-            houses.reset()
-            choices.reset()
-            recent.reset()
-            characters.reset()
-            sights.reset()
-            dialogueRows.reset()
-            gone
-        },
-        // A die that always comes up one, so every newcomer is the same known woman of eighteen.
-        keyFigures = KeyFigureService(
-            houses = world,
-            characters = world,
-            clock = { noon },
-            world = worldClock,
-            calendar = thirtyDayMonths,
-            dice = { 1 },
-            portraits = { listOf("woman-01", "man-01") },
-        ),
-        figures = characters,
         onTheMap = characters,
-        sights = sights,
-        visions = VisionService(
-            world,
-            clock = { noon },
-            world = worldClock,
-            ids = { UUID.fromString("e1000000-0000-4000-8000-%012x".format(++minted)) },
+        mechanics = Mechanics(
+            foundHouse = FoundHouseService(world, clock = { noon }, world = worldClock),
+            events = world,
+            houseById = houses,
+            theirHouses = houses,
+            arrival = Arrival(
+                world,
+                clock = { noon },
+                world = worldClock,
+                // Known ids rather than random ones, so a story can be named in an assertion.
+                ids = { UUID.fromString("a1000000-0000-4000-8000-%012x".format(++minted)) },
+            ),
+            takeAction = TakeActionService(world, clock = { noon }, world = worldClock),
+            rolls = rolls,
+            resources = ResourceService(
+                world,
+                clock = { noon },
+                world = worldClock,
+                calendar = thirtyDayMonths,
+                ids = { UUID.fromString("b1000000-0000-4000-8000-%012x".format(++minted)) },
+            ),
+            choices = choices,
+            recent = recent,
+            emptyTheWorld = {
+                val gone = world.events.size + world.characterEvents.size
+                world.events.clear()
+                world.characterEvents.clear()
+                houses.reset()
+                choices.reset()
+                recent.reset()
+                characters.reset()
+                sights.reset()
+                dialogueRows.reset()
+                gone
+            },
+            // A die that always comes up one, so every newcomer is the same known woman of eighteen.
+            keyFigures = KeyFigureService(
+                houses = world,
+                characters = world,
+                clock = { noon },
+                world = worldClock,
+                calendar = thirtyDayMonths,
+                dice = { 1 },
+                portraits = { listOf("woman-01", "man-01") },
+            ),
+            figures = characters,
+            sights = sights,
+            visions = VisionService(
+                world,
+                clock = { noon },
+                world = worldClock,
+                ids = { UUID.fromString("e1000000-0000-4000-8000-%012x".format(++minted)) },
+            ),
+            dialogues = DialogueService(world, characters, houses, clock = { noon }, world = worldClock),
+            dialogueRows = dialogueRows,
+            stands = Stands { master, x, y -> if (master == "terrain") standsOnDisk[y * STAND_TILES + x] ?: ByteArray(0) else null },
+            waters = WaterAt({ grounds[it] }, { names[it] }),
+            instrumentsOpen = instrumentsOpen,
+            worldKept = worldKept,
         ),
-        dialogues = DialogueService(world, characters, houses, clock = { noon }, world = worldClock),
-        dialogueRows = dialogueRows,
-        stands = Stands { master, x, y -> if (master == "terrain") standsOnDisk[y * STAND_TILES + x] ?: ByteArray(0) else null },
-        waters = WaterAt({ grounds[it] }, { names[it] }),
         later = later,
-        instrumentsOpen = instrumentsOpen,
-        worldKept = worldKept,
         sendOn = sendOn,
     )
 

@@ -67,6 +67,13 @@ looking answers every held cell again and tells the parts, which is how the stan
 moves. The core keeps the fog gate - every snapshot and delta asks `Looking` before it goes - and the parts
 say what the fog is.
 
+*Amended 2026-10-08, the parts made beside the core:* the gateway took every port a part reads as a
+parameter of its own and listed the parts itself, so `Gateway.kt` grew with every mechanic and reached its
+size ceiling (0072). The ports a part is made from are now one value, `Mechanics`, and the parts are made from
+it by `partsOf` in `GatewayParts.kt`; the cell snapshot is read in `Snapshots.kt`. A new mechanic is a field
+of `Mechanics` and a line in `partsOf`, and the core does not grow with it. The core keeps what it reads
+itself: the houses and the people in a cell, for the snapshot.
+
 ## Consequences
 
 - A sixth mechanic adds a family, a read model and a view file, and edits the folds that care about it and no

@@ -1,0 +1,83 @@
+package villages.gateway
+
+import villages.application.Arrival
+import villages.application.CharactersByCell
+import villages.application.ChoicesByPlayer
+import villages.application.DialogueService
+import villages.application.DialoguesByHouse
+import villages.application.EventFeed
+import villages.application.FoundHouseService
+import villages.application.HouseById
+import villages.application.HousesByCell
+import villages.application.HousesByPlayer
+import villages.application.KeyFigureService
+import villages.application.KeyFiguresByHouse
+import villages.application.RecentEvents
+import villages.application.ResourceService
+import villages.application.SightsByHouse
+import villages.application.Stands
+import villages.application.TakeActionService
+import villages.application.VisionService
+import villages.application.WorldKept
+import villages.application.WorldClock
+import villages.application.WorldWipe
+import villages.application.fate.RollService
+import villages.application.fate.WaterAt
+
+/**
+ * What the gateway's parts are made from: every port a mechanic reads or acts through at the edge. Gathered here so
+ * that a new mechanic is a field of this and a line in [partsOf], and the core in `Gateway.kt` does not grow with
+ * every one. The read models the core reads itself - the houses and the people in a cell, for its snapshots - stay
+ * the gateway's own. See decision record 0075.
+ */
+class Mechanics(
+    val foundHouse: FoundHouseService,
+    val events: EventFeed,
+    val theirHouses: HousesByPlayer,
+    val houseById: HouseById = HouseById { null },
+    val arrival: Arrival,
+    val takeAction: TakeActionService,
+    val rolls: RollService,
+    val resources: ResourceService,
+    val choices: ChoicesByPlayer,
+    val recent: RecentEvents,
+    val emptyTheWorld: WorldWipe,
+    val keyFigures: KeyFigureService,
+    val figures: KeyFiguresByHouse,
+    val sights: SightsByHouse,
+    val visions: VisionService,
+    val dialogues: DialogueService,
+    val dialogueRows: DialoguesByHouse,
+    val stands: Stands = Stands { _, _, _ -> null },
+    val waters: WaterAt = WaterAt.NOWHERE,
+    val instrumentsOpen: Boolean = true,
+    /** Where the world is kept and what of it cannot be read, which hello and the instruments say. */
+    val worldKept: WorldKept = WorldKept.IN_MEMORY,
+)
+
+/**
+ * A part for each mechanic, in the order a player arriving is told things: the house, whom it holds, what it sees,
+ * what it was told, what it is asked; then the stands, the waters, the timeline and the windows (0088), which greet
+ * nobody; and Adam's instruments (0076). A part watches its read models from the moment it is made, so the gateway
+ * makes them after its index and its sessions.
+ */
+internal fun partsOf(
+    core: Core,
+    mechanics: Mechanics,
+    houses: HousesByCell,
+    onTheMap: CharactersByCell,
+    world: WorldClock,
+): List<Part> = with(mechanics) {
+    listOf(
+        HousesPart(core, houses, theirHouses, world),
+        KeyFiguresPart(core, figures, onTheMap, world),
+        SightPart(core, sights),
+        DialoguesPart(core, dialogues, dialogueRows),
+        ChoicesPart(core, arrival, takeAction, choices, rolls),
+        StandsPart(stands),
+        WatersPart(waters),
+        TimelinePart(),
+        InspectingPart(houseById, onTheMap, world),
+        Instruments(instrumentsOpen, core, events, recent, emptyTheWorld, foundHouse, resources, keyFigures, visions, dialogues, rolls, worldKept),
+    )
+}
