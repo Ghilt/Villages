@@ -87,3 +87,6 @@ recorded over. See decision record 0037. What each one changed:
   the river, lake or sea from `world/names/about.json`, where one was written.
 - **32** - the two together, the windows that ask after their subjects and the water a click points at, as they
   met on main: main's `inspected` keeps its name, and the answer to `inspectAt` is `inspectedAt`.
+- **33** - gave the `water` in `inspectedAt` its `lines`, where it runs as the names have it - a river's whole
+  course, every piece under its name joined, and a lake's shores - cut to what the fog lets through, which a
+  window's selection is drawn along.

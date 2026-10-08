@@ -391,8 +391,22 @@ is the shape most likely to change.
 **Its first row is its mark, its name, its size control and, on a desktop, its close.** What kind of thing it is, is the
 mark that kind is known by everywhere else rather than a word above the name: a **shield** for a house and
 a **bust** for a person, the corner's own tabs, and for an area a **fence** stepping along square corners,
-because an area is fenced between painted pixels. The words - *Your house*, *Key figure*, *Area* - are the
-mark's label, for a player who hovers it or a screen reader.
+because an area is fenced between painted pixels, and for water two waves, a shore or an anchor. The words -
+*Your house*, *Key figure*, *Area* - are the mark's label, for a player who hovers it or a screen reader.
+
+**Water a click names is marked on the map in gold.** While its window is the newest, the water is fenced in gold,
+as an area is fenced in its red, washed faintly within and breathing as a picked area does: a river along the
+whole of its course as the names have it, every piece under its name joined and every break in its painting
+bridged, a lake within its shores, a river or a lake nobody has named all the water joined to the click, and the
+sea, which has no shores to stop at, about the click. The fence steps along the master's own pixels, never
+the diamonds the ground is drawn on, so turning the ground's grid does not change it. And a faint crackle of gold
+runs out along the same water from where the click landed, like a current along a wire - three sharp fronts close
+behind one another, the first the brightest and the other two fainter echoes of it, travelling slowly together up
+and down the river, flickering, the first throwing sparks ahead, fading over some ten seconds and some three and a
+half thousand screen pixels along it, never more than six hundred of the master's pixels, and none at all for a
+reader who has asked for less motion; a break in a river's painting is leapt. Only on ground the house has
+revealed, unless Adam's switch has lifted the fog: the server sends where the water runs cut to the fog, and the
+page reads the painted water along it from its own tiles.
 
 A link is **one button**, and *show it on the map* is the map's own mark rather than words. It carried a
 pair of needles saying which bay to open into until 0049, which is one decision per link too many.

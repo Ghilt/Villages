@@ -9,7 +9,9 @@ enum class WaterKind { RIVER, LAKE, SEA }
  * Water pointed at: what kind it is, and which, where the master's real names were carried - its real identity, a
  * Wikidata id where there is one, its name in English, and another worth knowing, today's beside a name of 1790 the
  * review chose, and a line or two [about] it for its window. All but the kind null where nothing named is near
- * enough to be the water painted there.
+ * enough to be the water painted there. [lines] are where it runs as the names have it, in the world: a river's
+ * whole course, every piece of it under its name joined to the one pointed at, and a lake's shores; none for the
+ * sea, or for water nobody has named. What a window's selection is drawn along.
  */
 data class WaterHere(
     val kind: WaterKind,
@@ -18,6 +20,7 @@ data class WaterHere(
     val also: String? = null,
     val of1790: Boolean = false,
     val about: String? = null,
+    val lines: List<List<Location>> = emptyList(),
 ) {
     /**
      * As English says it inside a sentence: the Vistula, the German Ocean, the Lake of Geneva, but Lake Maeler and
@@ -52,7 +55,7 @@ class WaterAt(private val grounds: GroundMaps, private val names: PlaceNamesByMa
         val cell = ground.at(place)
         val named = names.of(master)
         if (cell.has(GroundMap.LAKE)) {
-            named?.inside(NameKind.LAKE, place)?.let { return it.asWater(WaterKind.LAKE) }
+            named?.inside(NameKind.LAKE, place)?.let { return named.waterOf(it, WaterKind.LAKE) }
         }
         return when {
             cell.has(GroundMap.SEA) && cell.terrain in MapOmens.SEAS -> seaAt(named, place)
@@ -64,17 +67,46 @@ class WaterAt(private val grounds: GroundMaps, private val names: PlaceNamesByMa
     }
 
     private fun nearest(named: PlaceNames?, kind: WaterKind, name: NameKind, place: Location): WaterHere =
-        named?.near(name, place, MapOmens.RIVER_REACH_KM)?.firstOrNull()?.name?.asWater(kind) ?: WaterHere(kind)
+        named?.near(name, place, MapOmens.RIVER_REACH_KM)?.firstOrNull()?.name?.let { named.waterOf(it, kind) }
+            ?: WaterHere(kind)
 
     private fun seaAt(named: PlaceNames?, place: Location): WaterHere =
         named?.regionAt(place, RegionKind.SEA)
             ?.let { WaterHere(WaterKind.SEA, it.id, it.name, it.also, it.of1790, it.about) }
             ?: WaterHere(WaterKind.SEA)
 
-    private fun PlaceName.asWater(kind: WaterKind) = WaterHere(kind, id, name, also, of1790, about)
+    private fun PlaceNames.waterOf(piece: PlaceName, kind: WaterKind) =
+        WaterHere(kind, piece.id, piece.name, piece.also, piece.of1790, piece.about, courseOf(piece))
+
+    /**
+     * Where a named water runs: a lake's shores, and a river's every piece under its name that joins this one or a
+     * piece joined to it, end to end or side to side within [JOINED_KM], so that the Rhine's four pieces are one
+     * course and another river of the same name elsewhere is not.
+     */
+    private fun PlaceNames.courseOf(piece: PlaceName): List<List<Location>> {
+        if (piece.kind != NameKind.RIVER) {
+            return piece.lines
+        }
+        val left = names.filter { it.kind == NameKind.RIVER && it.name == piece.name && it !== piece }.toMutableList()
+        val taken = mutableListOf(piece)
+        val waiting = ArrayDeque(taken)
+        while (waiting.isNotEmpty()) {
+            val one = waiting.removeFirst().lines.flatten()
+            val joined = left.filter { other ->
+                other.lines.flatten().any { b -> one.any { a -> kmBetween(a, b) <= JOINED_KM } }
+            }
+            left.removeAll(joined)
+            taken += joined
+            waiting += joined
+        }
+        return taken.flatMap { it.lines }
+    }
 
     companion object {
         /** A world with no ground maps, where nothing is water. */
         val NOWHERE = WaterAt({ null }, { null })
+
+        /** How close two pieces of a river under one name come to be one course. */
+        const val JOINED_KM = 20.0
     }
 }

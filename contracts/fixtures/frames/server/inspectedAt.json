@@ -8,6 +8,13 @@
     "name": "Vistula",
     "also": "Wisła",
     "of1790": true,
-    "about": "Poland's great river, which carries the grain of the Polish plains past Warsaw to Dantzic."
+    "about": "Poland's great river, which carries the grain of the Polish plains past Warsaw to Dantzic.",
+    "lines": [
+      [
+        { "lat": 52.1, "lon": 21.05 },
+        { "lat": 52.25, "lon": 21.0 },
+        { "lat": 52.4, "lon": 20.9 }
+      ]
+    ]
   }
 }

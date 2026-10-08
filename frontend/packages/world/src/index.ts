@@ -23,6 +23,7 @@ export type { Palette, TerrainClass } from './palette.ts';
 export {
   areaAround,
   closePath,
+  diamondAt,
   diamondLattice,
   enclose,
   enclosedBy,

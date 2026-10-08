@@ -15,9 +15,18 @@ export interface WaterSeen {
   readonly at: { readonly lat: number; readonly lon: number };
 }
 
-const store = createStore<{ seen: ReadonlyMap<string, WaterSeen> }>({ seen: new Map() });
+export interface WatersState {
+  readonly seen: ReadonlyMap<string, WaterSeen>;
+  /**
+   * The last click that named water, which a ripple runs out along, counted so that a second click on the same
+   * water is a second ripple; null before any.
+   */
+  readonly clicked: { readonly seen: WaterSeen; readonly count: number } | null;
+}
 
-export const watersStore: Readable<{ seen: ReadonlyMap<string, WaterSeen> }> = store;
+const store = createStore<WatersState>({ seen: new Map(), clicked: null });
+
+export const watersStore: Readable<WatersState> = store;
 
 /**
  * Takes an answer in: the water it names, kept under its real identity so that two clicks on the Vistula are one
@@ -29,7 +38,8 @@ export function heardWater(answer: InspectedAtFrame): WaterSeen | null {
   }
   const id = answer.water.id ?? `at:${answer.at.lat.toFixed(3)},${answer.at.lon.toFixed(3)}`;
   const seen: WaterSeen = { id, water: answer.water, at: answer.at };
-  store.set({ seen: new Map(store.get().seen).set(id, seen) });
+  const { seen: had, clicked } = store.get();
+  store.set({ seen: new Map(had).set(id, seen), clicked: { seen, count: (clicked?.count ?? 0) + 1 } });
   return seen;
 }
 

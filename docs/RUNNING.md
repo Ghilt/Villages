@@ -207,7 +207,12 @@ stage alone, with none of the debug panel in it (decision record 0079).
   on a shore can name the water beside it: a lake is the one whose shores enclose the click, a cell mostly sea is
   the sea, and otherwise a river comes before a lake and a lake before the sea. Two clicks on the Vistula are one
   window. Under the name of a great river, lake or sea is a line or two about it, as an English reader of 1790
-  might be told it, which the server sends from `world/names/about.json`. Every answer is a line of the log under `inspect` - `river, the Vistula (Wisła)`, `sea, the German
+  might be told it, which the server sends from `world/names/about.json`. While its window is the newest the water is fenced
+  in gold, as an area is, along the master's own pixels whatever the ground's turn: a river along its whole course,
+  every piece under its name joined and its painting's breaks bridged, a lake within its shores, a nameless river or
+  lake all the water joined to the click, the sea about the click; and a faint crackle of gold, three fronts close together, runs slowly out along it from the click, up and
+  down a river and never over the land. Both on revealed ground, from the course the server sends cut to the fog. Every answer is a line of the log under
+  `inspect` - `river, the Vistula (Wisła)`, `sea, the German
   Ocean (North Sea today)`, *a lake nobody has named*, *no water there* or *under the fog*. Take action with a
   window on water open reads it as an omen, *Inspecting the Vistula*: the page says where the window was opened and
   the server says what is there, on ground the house has revealed. See `docs/adr/0087`.

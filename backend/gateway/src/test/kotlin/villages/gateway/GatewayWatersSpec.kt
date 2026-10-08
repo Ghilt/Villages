@@ -1,6 +1,7 @@
 package villages.gateway
 
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.doubles.plusOrMinus
 import io.kotest.matchers.shouldBe
 import villages.application.fate.GroundMap
 import villages.application.fate.NameKind
@@ -8,6 +9,7 @@ import villages.application.fate.NamedRegion
 import villages.application.fate.PlaceName
 import villages.application.fate.PlaceNames
 import villages.application.fate.RegionKind
+import villages.application.fate.kmBetween
 import villages.domain.Location
 import villages.protocol.InspectedAt
 import villages.protocol.Point
@@ -64,7 +66,8 @@ class GatewayWatersSpec : StringSpec({
         mine.receive(inspectAt(59.35, 17.6))
         mine.receive(inspectAt(59.33, 19.2))
 
-        sent.filterIsInstance<InspectedAt>() shouldBe listOf(
+        val answers = sent.filterIsInstance<InspectedAt>()
+        answers.map { it.copy(water = it.water?.copy(lines = emptyList())) } shouldBe listOf(
             InspectedAt(Point(59.33, 18.07), revealed = true, water = WaterView("river", "Q1052063", "Norrström")),
             InspectedAt(
                 Point(59.35, 17.6),
@@ -74,6 +77,14 @@ class GatewayWatersSpec : StringSpec({
             // Sixty-four kilometres out from a seat that sees thirty-four: the fog's.
             InspectedAt(Point(59.33, 19.2), revealed = false, water = null),
         )
+        // Where each runs comes with it, as far as the seat's thirty-four kilometres reveal and no further: Norrström
+        // from the edge of what it sees south of Stockholm to its end north of it, and the lake's nearer shores.
+        val course = answers[0].water!!.lines.flatten()
+        course.minOf { it.lat } shouldBe (59.02 plusOrMinus 0.03)
+        course.maxOf { it.lat } shouldBe 59.6
+        val shores = answers[1].water!!.lines.flatten()
+        shores.isNotEmpty() shouldBe true
+        shores.all { kmBetween(Location(it.lat, it.lon), Location(59.33, 18.07)) <= 35.0 } shouldBe true
     }
 
     "under the fog nothing is named, and with the fog lifted the ground says whether there is water at all" {

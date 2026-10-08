@@ -19,7 +19,9 @@ data class InspectedAt(val at: Point, val revealed: Boolean, val water: WaterVie
 /**
  * Water pointed at: whether it is a `river`, a `lake` or the `sea`, its real identity, a Wikidata id where there is
  * one, and its name in English, with today's beside a name of 1790 the review chose, and a line or two `about` it
- * where one was written. None of them where nothing named is close enough to be the water painted there.
+ * where one was written. None of them where nothing named is close enough to be the water painted there. And
+ * `lines`, where it runs as the names have it - a river's whole course, every piece under its name joined, and a
+ * lake's shores - cut to what the fog lets through: what a window's selection is drawn along.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class WaterView(
@@ -29,4 +31,6 @@ data class WaterView(
     val also: String? = null,
     val of1790: Boolean = false,
     val about: String? = null,
+    @get:JsonInclude(JsonInclude.Include.NON_EMPTY)
+    val lines: List<List<Point>> = emptyList(),
 )

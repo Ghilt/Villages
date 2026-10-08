@@ -1,6 +1,7 @@
 package villages.gateway
 
 import villages.application.fate.WaterAt
+import villages.application.fate.kmBetween
 import villages.domain.Location
 import villages.domain.PlayerId
 import villages.protocol.Hello
@@ -13,7 +14,8 @@ import villages.protocol.WaterView
  * What water a page points at, a river, a lake or the sea. A click on the map that hit nothing else asks with the
  * place, and the answer names the water there from the master the page draws, which hello says, and only on ground the
  * house has revealed, unless Adam's switch has lifted the fog. The page's own copy of the names is never what a player
- * reads. See 0075 and 0087.
+ * reads. The answer carries where the water runs, a river's course or a lake's shores, cut to what the fog lets
+ * through, which a window's selection is drawn along. See 0075 and 0087.
  */
 internal class WatersPart(private val waters: WaterAt) : Part {
     /** The world the page draws, from hello. Null, and nothing it points at is water. */
@@ -42,7 +44,43 @@ internal class WatersPart(private val waters: WaterAt) : Part {
         return InspectedAt(
             at,
             revealed = true,
-            water = water?.let { WaterView(it.kind.name.lowercase(), it.id, it.name, it.also, it.of1790, it.about) },
+            water = water?.let {
+                WaterView(it.kind.name.lowercase(), it.id, it.name, it.also, it.of1790, it.about, shown(it.lines, looking))
+            },
         )
+    }
+
+    /**
+     * The runs of a course the fog lets through: each piece of a run between two points a few kilometres apart is
+     * kept where the fog reveals its points, and a run is cut where it goes under the fog, so nothing of the course
+     * reaches the page from ground the house has not revealed. All of it with the fog lifted.
+     */
+    private fun shown(lines: List<List<Location>>, looking: Looking): List<List<Point>> =
+        lines.flatMap { run ->
+            val runs = mutableListOf<MutableList<Point>>()
+            var current: MutableList<Point>? = null
+            for (place in finely(run)) {
+                if (looking.fogged && !looking.fog.reveals(place)) {
+                    current = null
+                } else {
+                    val into = current ?: mutableListOf<Point>().also { runs += it }
+                    into += Point(place.lat, place.lon)
+                    current = into
+                }
+            }
+            runs
+        }.filter { it.size >= 2 }
+
+    /** A run with points put in wherever two are further apart than [STEP_KM], so the fog can cut it closely. */
+    private fun finely(run: List<Location>): List<Location> =
+        run.zipWithNext().flatMap { (a, b) ->
+            val steps = (kmBetween(a, b) / STEP_KM).toInt() + 1
+            (0 until steps).map { step ->
+                Location(a.lat + (b.lat - a.lat) * step / steps, a.lon + (b.lon - a.lon) * step / steps)
+            }
+        } + listOfNotNull(run.lastOrNull())
+
+    private companion object {
+        const val STEP_KM = 3.0
     }
 }

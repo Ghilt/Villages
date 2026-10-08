@@ -60,7 +60,10 @@ there - a lake whose carried shores enclose the place, a river where the master'
 named river close enough to be the one painted there, as the omen finds it, or the sea by the named sea the place
 is in or by - or none. A third question is asked of the names for it, which named thing's lines enclose a place.
 The page opens an inspect window on the water it names, keyed by its `id`, so two clicks on the Vistula are one
-window, with the line about it the answer carries. The page's copy of the names is not what it reads.
+window, with the line about it the answer carries. The answer carries where the water runs, too: a river's whole
+course, every piece of it under its name that joins the one pointed at, and a lake's shores, cut to what the fog
+lets through, which the window's gold selection on the map is drawn along. The page's copy of the names is not
+what it reads.
 
 **The third reader is a roll with a window open on water.** `roll` says where each was opened, never what
 water it is, and the roll reads every place again as the click was answered, on ground the house has revealed:

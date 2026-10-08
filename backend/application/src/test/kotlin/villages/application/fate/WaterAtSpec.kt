@@ -40,11 +40,12 @@ class WaterAtSpec : StringSpec({
     val waters = WaterAt({ ground }, { names })
 
     "a river the ground shows is named by the named river close enough to be the one painted there" {
-        waters.at("terrain", Location(52.0, 20.3)) shouldBe WaterHere(WaterKind.RIVER, "Q548", "Vistula", "Wisła")
+        waters.at("terrain", Location(52.0, 20.3)) shouldBe
+            WaterHere(WaterKind.RIVER, "Q548", "Vistula", "Wisła", lines = vistula.lines)
     }
 
     "a lake is named by the shores the place lies inside, and an island in it by the nearest shore of the lake's cell" {
-        val lake = WaterHere(WaterKind.LAKE, "Q6403", "Lake of Geneva", "Lake Geneva", of1790 = true)
+        val lake = WaterHere(WaterKind.LAKE, "Q6403", "Lake of Geneva", "Lake Geneva", of1790 = true, lines = geneva.lines)
         waters.at("terrain", Location(46.3, 8.5)) shouldBe lake
         names.inside(NameKind.LAKE, Location(46.5, 9.7)) shouldBe null
         waters.at("terrain", Location(46.5, 9.7)) shouldBe lake
@@ -64,5 +65,23 @@ class WaterAtSpec : StringSpec({
         WaterAt({ ground }, { null }).at("terrain", Location(46.3, 8.5)) shouldBe WaterHere(WaterKind.LAKE)
         WaterAt({ ground }, { null }).at("terrain", Location(30.0, -40.0)) shouldBe WaterHere(WaterKind.SEA)
         WaterAt.NOWHERE.at("terrain", Location(52.0, 20.3)) shouldBe null
+    }
+
+    "a river's course is every piece of it under its name joined to the one pointed at, and a lake's its shores" {
+        // The Vistula in three pieces, the third far off in another land; and a river of another name across it.
+        fun piece(id: String, name: String, vararg run: Pair<Double, Double>) = PlaceName(
+            id, NameKind.RIVER, name, null, null, null, false, Location(52.0, 20.5), Location(52.0, 20.5),
+            listOf(run.map { Location(it.first, it.second) }),
+        )
+        val upper = piece("ne:1:Wisla", "Vistula", 49.5 to 20.5, 51.0 to 20.5)
+        val lower = piece("Q548", "Vistula", 51.1 to 20.5, 53.0 to 20.5)
+        val elsewhere = piece("ne:2:Wisla", "Vistula", 30.0 to 20.5, 31.0 to 20.5)
+        val across = piece("ne:3:Pilica", "Pilica", 51.5 to 19.0, 51.5 to 20.5)
+        val pieces = PlaceNames(listOf(upper, lower, elsewhere, across, geneva), emptyList(), 0, 0, ShortArray(0))
+        val found = WaterAt({ ground }, { pieces })
+
+        found.at("terrain", Location(52.0, 20.3))!!.lines shouldBe lower.lines + upper.lines
+        found.at("terrain", Location(46.3, 8.5))!!.lines shouldBe geneva.lines
+        waters.at("terrain", Location(30.0, -40.0))!!.lines shouldBe emptyList()
     }
 })
