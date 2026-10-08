@@ -95,9 +95,20 @@ const QUESTS = {
   roads: 'M10.7 6.6 L7.6 10.7 M13.3 6.6 L16.4 10.7 M7.6 14.1 L10.7 17.5 M16.4 14.1 L13.3 17.5',
 } as const;
 
+/**
+ * Where the player has been: a clock's face with the hands on it, and its rim an arrow turning back,
+ * against the clock. The usual sign for a history, which the compass was not. A placeholder, like the bust.
+ */
+const RECENT = {
+  rim: 'M5.5 9.3 A8 8 0 1 1 5.5 14.7',
+  head: 'M4.3 6 L5.5 9.3 L8.5 7.5',
+  hands: 'M13 7.5 V12 L16 14',
+} as const;
+
 export type IconName =
   | 'shield'
   | 'compass'
+  | 'recent'
   | 'map'
   | 'window'
   | 'letter'
@@ -202,6 +213,13 @@ export function Icon({ name, title }: IconProps) {
           <circle cx="12" cy="12" r="10.6" className="icon__line" />
           <path d={ROSE.ordinal} className="icon__line" transform="rotate(45 12 12)" />
           <path d={ROSE.cardinal} className="icon__fill" />
+        </>
+      )}
+      {name === 'recent' && (
+        <>
+          <path d={RECENT.rim} className="icon__line" />
+          <path d={RECENT.head} className="icon__line" />
+          <path d={RECENT.hands} className="icon__line" />
         </>
       )}
       {name === 'map' && (

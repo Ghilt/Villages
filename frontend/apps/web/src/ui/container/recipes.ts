@@ -88,6 +88,12 @@ export const RECIPES = {
   /** The letter put away: the narrow gilt on its sky. */
   'strip.middle': { border: 'gilt-thin', scale: 0.5, fill: 'cloud-sky' },
 
+  /**
+   * The bottom bar, a phone's way between its panes: the strip's narrow gilt on its stone, because the bar
+   * is what the bottom pane is put away to.
+   */
+  'bar.bottom': { border: 'gilt-thin', scale: 0.5, fill: 'stone' },
+
   /** A plain gilt pane on parchment, with nothing standing out past it: what a tab bar tucks under. */
   'pane.plain': { border: 'gilt-simple', fill: 'parchment', text: 'ink', padding: 8 },
 

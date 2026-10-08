@@ -208,7 +208,7 @@ looks like: `previous` and `next` are a carousel's steps and not the needle, whi
 shows every mark at 17, 24 and 48 pixels side by side, because whether one reads small is a thing to see.
 
 **The marks the game already draws are the game's drawings**: the five resources', a key figure's stats,
-the close, the eye and the tower a structure is known by, copied stroke for stroke because the library cannot import them, and named as the
+the close, the eye, the tower a structure is known by and the marks a pane is known by, copied stroke for stroke because the library cannot import them, and named as the
 library names them - `domain`, where the protocol says `naturalDomain`. A copy is a drawing that can drift,
 so `admin/showcase/marks.test.ts`, which is the page's and may read the game's files, fails the moment one
 does. When the game draws its marks from the library there is one copy again and the test goes.
@@ -255,16 +255,18 @@ A line each: what it is for, its variants, and where on the page it is.
   `pane.rail` in the acanthus frame on stone, `pane.right` in the cherubs' on felt, `pane.middle` in the
   clouds round their own sky, each at a scale that leaves the tile most of itself; and `strip.corner`,
   `strip.right` and `strip.middle`, the narrow gilt on the same fills, for a pane put away to its 44 pixels,
-  which no deep frame fits. *Containers*, under *Filling a tile*, shows each at the size the spread gives
+  which no deep frame fits; and `bar.bottom`, the same gilt on stone, under the bottom bar's marks. *Containers*, under *Filling a tile*, shows each at the size the spread gives
   it, to be dragged smaller.
 - **`Mark`**, `ui/mark/Mark.tsx`: a mark by name, drawn, or painted when `world/ui/marks/` has it: the
   five resources, `wealth`, `domain`, `influence`, `reason` and `piety`; a figure's `kindness`, `physical`
   and `age`; and `close`, `minimise`, `maximise`, `previous`, `next`, `fold`, `less`, `more`, `eye-open`,
   `eye-shut`, `warning` and `search`; `tower`, what a structure and the Holdings tab are known by; and a mark for each kind of omen a choice roll reads, `omen-house`,
   `omen-change`, `omen-window`, `omen-dialogue`, `omen-keyFigure`, `omen-map` and `omen-season`, drawn
-  placeholders until a picture of the same name is painted; and a quest's, `talk`, `checklist` and `reward` for
+  placeholders until a picture of the same name is painted; a quest's, `talk`, `checklist` and `reward` for
   the kinds of node, `unknown` for one not shown, `done` and `lost`, and the four buttons that are marks on Adam's
-  word of 2026-10-15, `deliver`, `pledge`, `collect` and `quests`, drawn placeholders too. *Marks and readouts*.
+  word of 2026-10-15, `deliver`, `pledge`, `collect` and `quests`, drawn placeholders too; and the marks a pane is
+  known by, named for the pane, the game's own drawings: `house`, `figures`, `letter`, `dialogues`, `map` and
+  `recent`, the clock turned back that the trail is known by. *Marks and readouts*.
 - **`TextButton`**, `ui/button/Button.tsx`: words on a face that stretches between its end caps to fit
   them. `face` is a picture in `world/ui/controls/`, `primary` unless it says otherwise; `size` is `small`,
   `regular` or `large`, 32, 44 or 60 pixels tall. *Buttons*.
@@ -328,6 +330,14 @@ A line each: what it is for, its variants, and where on the page it is.
   than wrapping. `end` stands something at the far end of the bar, the tile's size control. `Tabbed`
   tucks the bar under the top of a pane's border, `pane.plain` unless it says otherwise, so the tabs stand
   out of the pane. *Tabs and sections*.
+- **`BottomBar`**, `ui/bar/BottomBar.tsx`: a phone's way between its panes - a row of marks a thumb thick,
+  `BAR_THICKNESS`, each an even share of it, the one standing in the bottom pane lit on the chosen tab's
+  parchment, turned to open into the pane above. `along="down"` stands it down the right edge of a turned
+  phone, the lit tab opening to its left. **Marks and no words**, Adam's call of 2026-10-08, each with its
+  words as its tooltip. A toolbar of buttons that say whether they are pressed rather than a row of tabs,
+  because pressing the lit one does something the game decides: the arrows, either pair, move along it -
+  `stepAlong` and `stopOf` in `ui/bar/bar.ts` - and press nothing. It reads `borders/gilt-thin`,
+  `fills/stone` and `controls/tab-chosen` through `bar.bottom`, all placeholders. *Bars*.
 - **`Expander`**, `ui/expander/Expander.tsx`: an expandable section, a heading that folds what is under it
   open and shut in a fifth of a second - its name on a rule, the `fold` mark turned down when it is open,
   and an `aside` at the far end said either way, a count or a total. Held by whoever uses it with `open`,

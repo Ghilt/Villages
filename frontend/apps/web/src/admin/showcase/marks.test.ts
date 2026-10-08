@@ -3,9 +3,9 @@ import { describe, expect, it } from 'vitest';
 /**
  * The library's marks that the game already draws are the game's drawings, stroke for stroke.
  *
- * The library cannot import the game, so it keeps its own copy of the number marks, the close and the
- * eye, and a copy is a drawing that can drift: a player who has learnt the house card's cross would find
- * another on a card built from the library. Read as text, both sides, until the game draws its marks from
+ * The library cannot import the game, so it keeps its own copy of the number marks, the close, the eye
+ * and the marks a pane is known by, and a copy is a drawing that can drift: a player who has learnt the
+ * house card's cross would find another on a card built from the library. Read as text, both sides, until the game draws its marks from
  * the library and there is one copy again. This lives with the page rather than the library because only
  * the page may look at the game's files.
  */
@@ -32,7 +32,7 @@ describe("the library's marks", () => {
     expect(quotedPaths(library).length).toBeGreaterThan(20);
   });
 
-  it('draws the number marks exactly as the game does', () => {
+  it('draws the number marks and the panes exactly as the game does', () => {
     // The eye is the library's own since the game's house bar gave its eye up on 2026-10-15 (0096).
     const eye = quotedPaths(/const EYE = \{[\s\S]*?\} as const;/.exec(library)?.[0] ?? '');
     const strays = quotedPaths(library).filter((path) => !game.includes(path) && !eye.includes(path));

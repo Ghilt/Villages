@@ -1,0 +1,121 @@
+/*
+ * The bottom bar: a thumb-thick band, its marks sharing it evenly, the lit one on the chosen tab's
+ * parchment turned to open into what the bar chooses for. The marks lie over the whole band, frame and
+ * all, so a mark is as tall as the bar is to a finger. What overrides a button's own is written
+ * `.ui-button.ui-bar__button`, so it wins whichever stylesheet the page happened to load first.
+ */
+
+@layer ui {
+  .ui-bar {
+    position: relative;
+    box-sizing: border-box;
+    flex: none;
+  }
+
+  .ui-bar--across {
+    width: 100%;
+    height: var(--ui-bar-thick);
+  }
+
+  .ui-bar--down {
+    width: var(--ui-bar-thick);
+    height: 100%;
+  }
+
+  .ui-bar > .ui-container {
+    position: absolute;
+    inset: 0;
+  }
+
+  .ui-bar__row {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+  }
+
+  .ui-bar--down .ui-bar__row {
+    flex-direction: column;
+  }
+
+  .ui-bar__row > .ui-tooltip-anchor {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+  }
+
+  /* A box its face is measured against, so the face can be turned and still fill it. */
+  .ui-button.ui-bar__button {
+    width: 100%;
+    height: 100%;
+    container-type: size;
+  }
+
+  /* The lit one's tab, its open edge turned to what the bar chooses for: up, or to the left. */
+  .ui-bar--across .ui-bar__button .ui-button__face {
+    transform: scaleY(-1);
+  }
+
+  .ui-bar--down .ui-bar__button .ui-button__face {
+    inset: auto;
+    top: 50%;
+    left: 50%;
+    width: 100cqh;
+    height: 100cqw;
+    transform: translate(-50%, -50%) rotate(90deg);
+  }
+
+  /* At rest a mark stands on the bar's stone with no face of its own, so its states are the mark's. */
+  .ui-button.ui-bar__button .ui-button__mark {
+    transition:
+      color 0.12s ease,
+      filter 0.12s ease;
+  }
+
+  .ui-button.ui-bar__button:hover:not(:disabled) .ui-button__mark,
+  .ui-button.ui-bar__button[data-showing='hover'] .ui-button__mark {
+    color: var(--ui-gilt-light);
+    filter: drop-shadow(0 0 4px color-mix(in srgb, var(--ui-gilt-light) 60%, transparent));
+  }
+
+  .ui-button.ui-bar__button:active:not(:disabled) .ui-button__mark,
+  .ui-button.ui-bar__button[data-showing='pressed'] .ui-button__mark {
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.6)) brightness(0.8);
+  }
+
+  /* Lit: ink on the parchment, as the chosen tab's words are, and no glow, because the face says it. */
+  .ui-button.ui-bar__button[aria-pressed='true'] .ui-button__mark {
+    color: var(--ui-ink);
+    filter: none;
+  }
+
+  .ui-button.ui-bar__button[aria-pressed='true'] .ui-button__face {
+    filter: none;
+  }
+
+  .ui-button.ui-bar__button[aria-pressed='true']:hover:not(:disabled) .ui-button__face,
+  .ui-button.ui-bar__button[aria-pressed='true'][data-showing='hover'] .ui-button__face {
+    filter: brightness(1.08);
+  }
+
+  /* Focused: the gilt ring drawn inside the mark's share, where the bar's edges cannot cut it off. */
+  .ui-button.ui-bar__button:focus-visible,
+  .ui-button.ui-bar__button[data-showing='focus'] {
+    outline: none;
+  }
+
+  .ui-button.ui-bar__button:focus-visible::after,
+  .ui-button.ui-bar__button[data-showing='focus']::after {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    z-index: 2;
+    border: 2px solid var(--ui-focus);
+    border-radius: 5px;
+    box-shadow:
+      0 0 0 1px rgba(43, 29, 16, 0.8),
+      inset 0 0 0 1px rgba(43, 29, 16, 0.8);
+    pointer-events: none;
+  }
+}

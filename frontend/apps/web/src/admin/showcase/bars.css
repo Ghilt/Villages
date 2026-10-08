@@ -1,0 +1,13 @@
+/* The bars, in boxes the size a phone gives them: across a phone's width, and down a turned phone's height. */
+.showcase__bar-across {
+  width: 390px;
+  max-width: 100%;
+}
+
+.showcase__bar-across--short {
+  width: 200px;
+}
+
+.showcase__bar-down {
+  height: 320px;
+}

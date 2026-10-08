@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react';
 
+import { Bars } from './Bars';
 import { BordersAndFills } from './BordersAndFills';
 import { Buttons } from './Buttons';
 import { Collections } from './Collections';
@@ -93,6 +94,12 @@ export const SECTIONS: readonly Section[] = [
     title: 'Tabs and sections',
     says: 'The tab bar, the expandable section, the scroll area, the divider and the title plate.',
     Body: TabsAndSections,
+  },
+  {
+    id: 'bars',
+    title: 'Bars',
+    says: 'The bottom bar a phone chooses its panes with, along the bottom and turned down the side.',
+    Body: Bars,
   },
   {
     id: 'collections',

@@ -70,6 +70,26 @@ const NUMBERS = {
   ],
 } as const;
 
+/**
+ * The marks a pane is known by, the game's own drawings in `stage/Icons.tsx`, which the library cannot
+ * import: what the bottom bar shows, a mark a pane. Named for the pane rather than the picture - `house` is
+ * the shield, `figures` the bust, `dialogues` the bubble - and `recent` is the clock turned back that the
+ * trail of where the player has been is known by.
+ */
+const PANES = {
+  house: ['M5 4 H19 V13 C19 18 12 21.5 12 21.5 C12 21.5 5 18 5 13 Z'],
+  figures: [
+    'M12 4.4 A3.7 3.7 0 1 1 11.99 4.4',
+    'M4.6 20.4 C5.1 15.9 8.1 13.7 12 13.7 C15.9 13.7 18.9 15.9 19.4 20.4 Z',
+  ],
+  letter: ['M3.5 6.5 H20.5 V17.5 H3.5 Z', 'M3.5 6.5 L12 13 L20.5 6.5'],
+  dialogues: [
+    'M5 4.5 H19 A2 2 0 0 1 21 6.5 V14 A2 2 0 0 1 19 16 H10.5 L6 20 V16 H5 A2 2 0 0 1 3 14 V6.5 A2 2 0 0 1 5 4.5 Z',
+  ],
+  map: ['M3 6.5 L9 4 L15 6.5 L21 4 V17.5 L15 20 L9 17.5 L3 20 Z', 'M9 4 V17.5 M15 6.5 V20'],
+  recent: ['M5.5 9.3 A8 8 0 1 1 5.5 14.7', 'M4.3 6 L5.5 9.3 L8.5 7.5', 'M13 7.5 V12 L16 14'],
+} as const;
+
 const stroked = (paths: readonly string[]) => (
   <>
     {paths.map((d) => (
@@ -88,6 +108,12 @@ const DRAWN = {
   kindness: stroked(NUMBERS.kindness),
   physical: stroked(NUMBERS.physical),
   age: stroked(NUMBERS.age),
+  house: stroked(PANES.house),
+  figures: stroked(PANES.figures),
+  letter: stroked(PANES.letter),
+  dialogues: stroked(PANES.dialogues),
+  map: stroked(PANES.map),
+  recent: stroked(PANES.recent),
   // Two strokes crossed, shorter than the box, because corner to corner reads as a deletion.
   close: <path d="M7 7 L17 17 M17 7 L7 17" className="ui-mark__line" />,
   minimise: <path d="M6 12 H18" className="ui-mark__line" />,
