@@ -777,6 +777,110 @@ corner already reaches along the bottom to 560, wider than the column, which is 
 
 ---
 
+## Structure
+
+Something built that stands on the map: a castle, a mill, a cathedral, a prison, a shipyard. In Adam's
+words they "represent a structure of some kind", held by a house now and a faction later, and they "provide
+its controller income of various resources". The pane that lists a house's own is **Holdings**.
+
+### What it is
+
+A thing in the world with a history of its own, not a part of a house. It has a **type** - one of sixteen
+in the catalogue, from a castle to a printing house - a name, a place, a **level**, higher being better,
+and a **holder**: a house, or nobody. A structure seen from its holder is one of that house's
+**holdings**, and a house may hold any number.
+
+**It gives its holder standing effects** for as long as it is held: an income in one or more of the five
+resources, and **sight** round it, every type a little and a watchtower most. A higher level gives more.
+
+**It has slots**: a place in it that takes something, and its **content**. A prison has cells for
+prisoners, a palace a throne for a king, a cathedral a reliquary for a relic, a shipyard a slipway for an
+unfinished galley, a fort a garrison. A content is a **character** or an **item**: a relic, a galley, forty
+soldiers, three hundred bushels of grain. Slots are permissive about what they take and strict about how
+many: a story may set a relic on a throne. What fills a slot changes what the structure gives, in the way
+its type says: an empty throne gives no influence, a pious bishop brings more piety than a worldly one,
+and a relic brings piety of its own to whoever holds the cathedral keeping it. Some types have nobody in
+them at all: a mill pays by its level, and its only slot is its granary.
+
+**The seat is a role one holding plays**: where the eye goes and the room is entered. Founding a house
+raises a castle and names it the seat. A house that loses its seat plays on without one until it names
+another.
+
+**Destroyed, it leaves a ruin**: no holder, nothing given, its contents still in it, and something that can
+be raised again.
+
+For now a house gets its castle from founding and everything else from the debug panel. All four ways a
+house will come by one are wanted: building it, a story handing it over, taking it, and finding it standing
+in the world of 1790.
+
+### What it is for
+
+Two things first, in Adam's words: they "should give vision to controller", and income.
+
+**Income.** The first thing in the game that pays a house, and goes on paying while the player is away: a
+number counting up in the house status rather than a reward handed over.
+
+**Seeing further.** Every holding lights its patch of the map, so to hold more is to know more.
+
+**Somewhere for a story to be.** A prisoner to free, a relic to steal, a galley to finish: a structure
+gives a roll and a dialogue something to point at and change, and its slots are where a story leaves its
+mark. No storyline uses one yet.
+
+### Look and feel
+
+On the map it is a picture drawn front-on from the camera's height, in its own colours and never tinted
+(`LOOK-AND-FEEL.md`), in the building tradition of the ground it stands on: **European, Islamic, East Asian or
+African**, each master having a culture map of its own and other ground borrowing the nearest. Far out it
+becomes a mark of its type. Over it flies a **pennant** in its holder's colours, none when nobody holds it,
+and a higher level is drawn a little larger. A ruin has a picture of its own. Some types have an
+**influence zone**, a ground they reach, drawn only while the structure is selected; the castle's is the
+ragged ground drawn about every seat today, and what each type's means is not designed yet.
+
+Clicking it opens **its window**, not its holder's: the name; the type, level and culture's word for it,
+*great mosque* where another culture says *cathedral*; the holder, a link; whether it is a seat; what it
+gives; its slots; and the map's mark.
+
+**Slots are a row of sockets each**: the slot's name, then a socket for every place in it - a portrait for a
+character, a picture with its amount for an item, an empty frame for an empty place - ending in *+3* when
+there are more than fit, and *2 of 4* beside it. **Anything a house does not know is a question mark**: a
+rival's cells show as many sockets as there are places, each a question mark. Which slots another house
+may see into is the type's: a king on a throne is known to all, a prison's cells only to its holder.
+
+### UI
+
+**Holdings is a pane of its own**: a tab of **bottom left** in the spread beside the key figures, its button
+a mark, and a row of *Go to* on a phone. Its three sizes:
+
+- **Minimised**: the strip, with the open holding's name or the pane's.
+- **Normal**: a list, the seat first, then the rest in the order they were gained: each row the structure's
+  picture, its name, its type and level, and what it gives. It scrolls; there is no limit.
+- **Opened out**, or a holding pressed: one holding's details, the same sections as its window, the map's
+  mark beside its name, and a way back to the list.
+
+With none it says that holdings will be shown here. The structure's window is an inspect window like any
+other and takes the same bays.
+
+### Not decided
+
+- **What each type's influence zone means**, and which types have one.
+- **How a story changes what a structure gives.** Conditions hung on it - *cursed until the miller's
+  daughter is freed* - were proposed and are out of scope for now.
+- **Building one**: what it costs, how long it takes, where a house may raise it.
+- **Taking one**: by force, by purchase, by inheritance, and what a garrison does about it.
+- **Factions** as holders, and the structures standing in the world of 1790 before any house arrives.
+- **Upkeep**: whether holding costs as well as pays.
+- **How a seatless house names another**, and what it lacks until it does.
+- **The words**: every type's word in each culture is a first draft.
+- **The numbers**: every yield, sight and level in the catalogue is a placeholder.
+
+### Where it stands
+
+Not built. Decision record 0092 is the shape and `docs/plans/structures.md` the steps, one commit each; the
+hypothesis is experiment 0018. Today a house's holding is its seat, a place on its founding event, drawn as a
+castle in the house's colours with ragged gold ground about it, and nothing in the game pays a house anything.
+
+---
+
 ## Fog of war
 
 What a house knows about the world, by where it can see. In Adam's words, it "limits what info you get from

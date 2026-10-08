@@ -28,7 +28,8 @@ database of each tree's own, and outlives a restart of the game server; RabbitMQ
 Characters and key figures are built and waiting on Adam's eye. Nothing else here is started, and the four
 after them wait on the same thing. Fog of war, the exception, is under way a step at a time, and so is
 character dialogue; the UI component library is built and waiting on Adam's eye, and so is the choice roll,
-and so is the origin map, the first of real names on the edited world and the newest.
+and so is the origin map, the first of real names on the edited world. Structures, the newest, are
+planned and not started.
 
 - **Characters and key figures**: the people of the world, each with a history of their own, and the
   house's tie to the few it acts through, shown in a pane in the corner beside the house status. The shape
@@ -95,6 +96,13 @@ and so is the origin map, the first of real names on the edited world and the ne
   action with one open reads it as an omen, *Inspecting the Vistula*. Left for later: the
   823 places no source dates, and the named stretches of land, which keep today's names.
   Adam's own, asked for on 2026-10-06.
+- **Structures**: castles, mills, cathedrals, prisons and shipyards, each a history of its own, held by a
+  house and later a faction, paying their holder and lighting the map round them, with levels, slots for a
+  prisoner, a king, a relic or a garrison, a look by the culture of the
+  ground they stand on, a window, and a Holdings tab beside the key figures. The house's seat becomes the
+  first of them, a castle raised at founding. The shape is decision record 0092 and the steps, one commit
+  each, are in `docs/plans/structures.md`; the hypothesis is experiment 0018. Step nought, the documents,
+  is written. It is also the first income in the game. Adam's own, planned with him on 2026-10-08.
 - **1.6** The bridge from the store to the broker, each tree in a virtual host of its own (0092), with the
   RabbitMQ half of 0.8's smoke test, which waited for there to be something to test
 - **0.13** End-to-end smoke test
@@ -148,7 +156,6 @@ Wanted, not started, and each needs a hypothesis in `docs/experiments/` before a
   what is happening to it, and nobody has named the second of the five empty places in its bar. See
   `MECHANICS.md`.
 - **House leanings**: what identity is made of, and how the world reflects it.
-- **Holdings on the map beyond the seat.**
 - **Neighbours**: awareness of nearby houses, and the first thing two houses can do to each other.
 - **The workbench**: the desk the map lies on becomes a place, with the house's papers on it and the map a
   quarter of it, hovered and scrolled into. The same camera; see experiment 0003.
@@ -173,6 +180,7 @@ Not commitments. Nobody is waiting on any of these.
 - **A ticking resource.** Some resource shown as a ticking income, which is what the rate shape in decision
   0006 exists for. The shape is on the wire and the browser knows how to count with it; every rate is zero
   because nothing generates income. The first mechanic that gives a house an income turns this on, and it
-  is a number changing rather than a frame changing.
+  is a number changing rather than a frame changing. Structures are that mechanic, at step ten of
+  `docs/plans/structures.md`.
 - **The banner drawn** from its own tinctures and charges instead of a plain shield. A luxury feature: it
   would look good and no part of the game is waiting for it.

@@ -465,6 +465,8 @@ increment to touch either starts from them.
    exist. **A key figure is not one of them**: it is a tie between a house and a character, written in the
    house's own history, so the house keeps its own rules about whom it holds. Characters are the first,
    decided in decision record 0055 before any code; each later kind gets its record the same way.
+   Structures are the second, decided in decision record 0092: a structure decides its own holder, so
+   holding one is not a tie on the house, and the house's seat becomes a role one of them plays.
 2. **The map is a temporal read model.** Rows carry `since` and `until` in world-time, and the map at
    world-time T is a range query: `since <= T < until`. Decided and built for houses with decision record
    0027. A character, who moves and dies, is the first thing to use the other half of it: the characters
