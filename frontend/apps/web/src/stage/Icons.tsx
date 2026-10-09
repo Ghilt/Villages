@@ -11,17 +11,6 @@
 /** A needle, the one mark that means *there*: what turns a finished conversation back to its quest. */
 const NEEDLE = 'M12 3.5 L17 19 L12 15.4 L7 19 Z';
 
-/**
- * A compass rose: four cardinal points filled, four between them drawn, inside a ring.
- *
- * The ordinals are outlined rather than filled so the rose reads as eight points and not as a blob at the
- * size a tab draws it. The two stars are one shape, the second turned by an eighth and drawn smaller.
- */
-const ROSE = {
-  cardinal: 'M12 1.7 L13.5 10.5 L22.3 12 L13.5 13.5 L12 22.3 L10.5 13.5 L1.7 12 L10.5 10.5 Z',
-  ordinal: 'M12 5.4 L12.9 11.1 L18.6 12 L12.9 12.9 L12 18.6 L11.1 12.9 L5.4 12 L11.1 11.1 Z',
-} as const;
-
 /** The house's own frame, the achievement's contour at the size of a mark. */
 const SHIELD = 'M5 4 H19 V13 C19 18 12 21.5 12 21.5 C12 21.5 5 18 5 13 Z';
 
@@ -95,7 +84,7 @@ const QUESTS = {
 
 /**
  * Where the player has been: a clock's face with the hands on it, and its rim an arrow turning back,
- * against the clock. The usual sign for a history, which the compass was not. A placeholder, like the bust.
+ * against the clock. The usual sign for a history. A placeholder, like the bust.
  */
 const RECENT = {
   rim: 'M5.5 9.3 A8 8 0 1 1 5.5 14.7',
@@ -105,7 +94,6 @@ const RECENT = {
 
 export type IconName =
   | 'shield'
-  | 'compass'
   | 'recent'
   | 'map'
   | 'window'
@@ -194,13 +182,6 @@ export function Icon({ name, title }: IconProps) {
         <>
           <path d={BUST.head} className="icon__line" />
           <path d={BUST.shoulders} className="icon__line" />
-        </>
-      )}
-      {name === 'compass' && (
-        <>
-          <circle cx="12" cy="12" r="10.6" className="icon__line" />
-          <path d={ROSE.ordinal} className="icon__line" transform="rotate(45 12 12)" />
-          <path d={ROSE.cardinal} className="icon__fill" />
         </>
       )}
       {name === 'recent' && (

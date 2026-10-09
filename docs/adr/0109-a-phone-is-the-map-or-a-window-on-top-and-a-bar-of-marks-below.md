@@ -30,14 +30,17 @@ right edge**; and a window keeps its frame round everything, its top bar **insid
 
 **The top holds the map or one window, and nothing else.** Upright it is the top bay, turned the left. A
 window arriving takes it, a second replaces the first, and its close puts the map back; the window stays in
-the trail.
+the trail. The player's own house arriving opens its window there too, while the camera flies to the seat,
+Adam's word of 2026-10-09 over leaving the map up for the flight.
 
 **The bottom holds every other pane, chosen by the bottom bar.** A band a thumb thick, `BAR_THICKNESS`, along
 the bottom of the stage, or down its right edge turned, with a mark for each pane that can stand there - the
 house, the key figures, the letter while it stands, the dialogues once there are any, and Recent - and the one
-standing there lit. Pressing a mark puts its pane there, opening the bottom to half if it was put away;
-pressing the lit one puts the bottom away, or opens it again. Put away, the bottom is the bar and nothing else:
-the bar is its strip.
+standing there lit. The holdings and the quests, which came after, have theirs too, in the order the panes are
+declared, when the bar was carried onto the main of 2026-10-21. Pressing a mark puts its pane there, opening the bottom to half if it was put away;
+pressing the lit one puts the bottom away, or opens it again. The bar is carved off the stage's edge and the
+two bays are cut from what it leaves, so nothing in their arithmetic learns it is there. Put away, the bottom
+keeps its strip above the bar, Adam's word of 2026-10-09, so the press below has somewhere to land.
 
 **The pane size control is the top pane's alone.** A window carries it in its **top bar**, the band a strip
 thick at its head with its mark, its name and its controls; put away, a window is its top bar, turned down the
@@ -58,9 +61,9 @@ put away and brought back with the same three marks as a window.
 phone it no longer lists the panes, because the bar does; a place pressed in it opens on top, and Recent
 stays where it is.
 
-It is built in three steps, each a commit: the top pane's top bar and the size control there alone; the top
-holding the map or one window; and the bar replacing the compass. The bar and the top bar are the component
-library's, `BottomBar` and `TopBar` in `ui/bar/`.
+It is built a commit at a time: the bar and the top bar in the component library, `BottomBar` and `TopBar`
+in `ui/bar/`; the size control on the top pane alone; the top holding the map or one window; the map's
+marks in its corner; and the bar replacing the compass.
 
 ## Consequences
 
@@ -69,8 +72,8 @@ it is about stay on the screen together (0040); a window on top now takes the ma
 back with its close. That is Adam's choice, and the bottom pane - the house, the letter, a conversation - still
 stands beside whatever is on top.
 
-**The bottom pane has no size control and draws no strip.** What is on top says how the stage is divided, and
-the bar is what the bottom is put away to.
+**The bottom pane has no size control.** What is on top says how the stage is divided; put away, its strip
+stands on the bar, a strip of chrome more than the bar alone, and a press on it gives half each.
 
 **Nothing floats over the world any more**, which the house had argued against since 0041 and the compass
 alone broke (0047). The padding every pane carried to step clear of the disc goes with it.

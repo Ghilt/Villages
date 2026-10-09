@@ -20,8 +20,8 @@ import { PaneSizeControl } from './PaneSizeControl';
  * is a tab that wraps. The mark is the one the pane declared, the name is its title, and a player who wants
  * the name hovers it or reads it aloud to a screen reader.
  *
- * Only in the spread. On a phone the same panes are reached through the compass, because a tab bar on a
- * 390-wide stage is a row of things too small to hit, and each of them carries its own control there.
+ * Only in the spread. On a phone the same panes are reached through the bottom bar, a thumb's width a
+ * mark, because a tab bar over a pane on a 390-wide stage is a row of things too small to hit.
  */
 
 interface TabBarProps {

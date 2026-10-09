@@ -45,7 +45,7 @@
   background: color-mix(in srgb, var(--parchment) 94%, transparent);
 }
 
-/* Padded at its foot clear of the compass, on a phone, so the last option scrolls out from under it. */
+/* Padded on the scroller rather than shorter, so the last option scrolls out to the foot of it. */
 .dialogues__feed {
   display: flex;
   flex-direction: column;
@@ -53,15 +53,9 @@
   flex: 1;
   min-height: 0;
   margin: 0;
-  padding: 0.75rem 0.75rem calc(0.75rem + var(--corner-bottom, 0px));
+  padding: 0.75rem;
   list-style: none;
   overflow-y: auto;
-}
-
-/* With *continue* under it the compass stands over the foot rather than the feed, so the last line read sits
-   just above the foot instead of a compass's height up from it. */
-.dialogues__feed--above-foot {
-  padding-bottom: 0.75rem;
 }
 
 /*
@@ -124,15 +118,13 @@
 
 /*
  * The foot, while there is a line to read: *continue* in the middle of it, the one thing to press while a
- * conversation is being read, and in the same place every time so a thumb can stay on it. It steps in from
- * both sides as far as the compass reaches into one of them on a phone, so it stays in the middle of the
- * pane and clear of the compass, rather than growing a compass tall.
+ * conversation is being read, and in the same place every time so a thumb can stay on it.
  */
 .dialogues__foot {
   display: flex;
   justify-content: center;
   flex: none;
-  padding: 0.55rem calc(0.75rem + var(--corner-right, 0px));
+  padding: 0.55rem 0.75rem;
   border-top: 1px solid var(--parchment-edge);
 }
 

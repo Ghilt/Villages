@@ -15,7 +15,7 @@ export type Which = 0 | 1;
  *
  * **A property of the fold, not of the panes in it.** A bay is not a pane's own room: it is one end of a
  * stage two things are sharing, and what happens to be standing in it has nothing to say about how much of
- * it there is. That is what makes moving a pane free - the compass puts navigation where the house status
+ * it there is. That is what makes moving a pane free - the bottom bar puts Recent where the house status
  * was and the seam does not move, because the seam was never the house's.
  *
  * It is also what makes the three sizes mean the same thing on every pane, which they did not while each
@@ -28,8 +28,8 @@ export type Arrangement = 'firstAway' | 'halfEach' | 'secondAway';
  *
  * Three constants and not a derivation, which is the point. React compares what `useStore` picks from a store
  * hands back by identity, so this returns the **same object** across every change that is not an
- * arrangement change - and the stage does not so much as recompute its layout when the compass swaps a
- * pane. "Moving a pane does not resize the bays" stops being a behaviour to be careful about and becomes
+ * arrangement change - and the stage does not so much as recompute its layout when the bar puts a pane
+ * below. "Moving a pane does not resize the bays" stops being a behaviour to be careful about and becomes
  * an identity. It also retires the cache that used to sit here for the same identity reason.
  *
  * `bayBox` is untouched by any of it: `['big', 'big']` already meant half each and `[{ small }, 'big']`

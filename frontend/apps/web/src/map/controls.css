@@ -7,8 +7,6 @@
 }
 
 /* Lifted clear of the build label, which owns the very corner. */
-/* Lifted clear of the build badge, and of the compass where that is standing in the same corner. */
 .maplibregl-ctrl-bottom-right {
-  padding-right: var(--corner-right, 0px);
-  padding-bottom: calc(0.9rem + var(--corner-bottom, 0px));
+  padding-bottom: 0.9rem;
 }

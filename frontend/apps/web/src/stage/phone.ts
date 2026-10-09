@@ -1,5 +1,8 @@
-import type { Which } from './arrangement';
-import { baysStore, paneById, put, roomToRead, takeOver } from './bays';
+import type { BarButton } from '../ui/bar/BottomBar';
+import type { MarkName } from '../ui/mark/Mark';
+import { askedIn, type Which } from './arrangement';
+import { askFor, baysStore, paneById, put, roomToRead, takeOver } from './bays';
+import type { IconName } from './Icons';
 import { MAP_PANE, type Pane } from './panes';
 
 /**
@@ -55,4 +58,45 @@ export function goTo(id: string): void {
  */
 export function showTheMap(): void {
   goTo(MAP_PANE.id);
+}
+
+/**
+ * A mark of the **bottom bar** pressed: the pane it stands for goes below, opened to half if the bottom was put
+ * away, and pressing the one already there - the lit one - puts the bottom away, or opens it again. Every press
+ * writes the one arrangement the size control on top writes, so the two can never disagree. See decision record
+ * 0109.
+ */
+export function pressInTheBar(id: string): void {
+  const { holding, arrangement } = baysStore.get();
+  if (holding[1] !== id) {
+    goTo(id);
+    return;
+  }
+  askFor(id, askedIn(arrangement, 1) === 'strip' ? 'small' : 'strip');
+}
+
+/**
+ * The library's mark for each pane's own, which is what the bar draws: the same drawings, named for the pane in
+ * the library where the stage names them for the picture.
+ */
+export const BAR_MARKS: Readonly<Partial<Record<IconName, MarkName>>> = {
+  shield: 'house',
+  figure: 'figures',
+  tower: 'tower',
+  letter: 'letter',
+  speech: 'dialogues',
+  quests: 'quests',
+  recent: 'recent',
+};
+
+/**
+ * The bar's marks: every pane standing below on a phone, in the order the panes are declared, a mark each and its
+ * name for the pointer and a screen reader. A pane with no mark here would be left off the bar, which a test holds
+ * none of the standing panes to.
+ */
+export function barButtons(panes: readonly Pane[]): readonly BarButton[] {
+  return panes.flatMap((pane) => {
+    const mark = BAR_MARKS[pane.icon];
+    return bayOnAPhone(pane) === 1 && mark !== undefined ? [{ id: pane.id, label: pane.title, mark }] : [];
+  });
 }

@@ -17,7 +17,7 @@ import '../panes';
  *
  * It had no test at all until 0046, and it is the module every one of that record's defects lived in. The
  * headline group below is the record's whole claim, and it is the one worth reading first: **nothing but
- * the control and an arrival moves the seam.** Pressing the compass does not, navigating a row does not,
+ * the control and an arrival moves the seam.** A takeover does not, navigating a row does not,
  * a window closing does not, and a pane ceasing to exist does not.
  *
  * The module keeps its state at the top level, so each test takes a fresh copy of it, configured as `main.tsx`
@@ -86,7 +86,7 @@ describe('what each bay asks the layout for', () => {
  * none of the verbs below can reach it.
  */
 describe('the seam does not move', () => {
-  it('when the compass puts navigation in a bay, or takes it away again', async () => {
+  it('when a takeover puts navigation in a bay, or gives the bay back again', async () => {
     const { baysStore, takeOver, giveBack } = await fresh();
     const before = baysStore.get().arrangement;
 
@@ -156,8 +156,8 @@ describe('the seam does not move', () => {
 
 /*
  * The one thing besides the control that does move it, and it is deliberately not part of putting a pane
- * in a bay. A window opened on a clicked castle into a 44-pixel strip is a window nobody can read; the
- * compass landing in one is fine, because navigation's strip is a list of ways on.
+ * in a bay. A window opened on a clicked castle into a 44-pixel strip is a window nobody can read, so the
+ * arrival asks for room; a pane merely put somewhere does not.
  */
 describe('room to read', () => {
   it('opens a bay that is a strip to half', async () => {
@@ -313,35 +313,6 @@ describe('what is in each bay', () => {
     giveBack(NAVIGATION_PANE.id);
 
     expect(baysStore.get().holding).toBe(before);
-  });
-});
-
-describe('where the compass opens navigation', () => {
-  /*
-   * Adam's words are "the bottom/right pane", twice. 0043 read it as the bay that is not the map's, which
-   * put the door somewhere else depending on what the player had been looking at.
-   */
-  it('is the second bay, whatever the player has swapped into it', async () => {
-    const { NEAR_BAY, baysStore, put, takeOver } = await fresh();
-
-    expect(NEAR_BAY).toBe(1);
-
-    // The map swapped to the bottom: the old rule would have opened navigation at the top instead.
-    put(1, MAP_PANE.id);
-    takeOver(NEAR_BAY, NAVIGATION_PANE.id);
-
-    expect(baysStore.get().holding[1]).toBe(NAVIGATION_PANE.id);
-  });
-
-  it('lands in a strip without opening it, because a strip of it is still a list of ways on', async () => {
-    const { baysStore, askFor, takeOver } = await fresh();
-
-    // The bottom bay put away, then the compass.
-    askFor(MAP_PANE.id, 'full');
-    takeOver(1, NAVIGATION_PANE.id);
-
-    expect(baysStore.get().arrangement).toBe('secondAway');
-    expect(askedIn(baysStore.get().arrangement, 1)).toBe('strip');
   });
 });
 

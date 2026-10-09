@@ -219,7 +219,7 @@ function Conversation({
   }, [dialogue, now.lines]);
 
   // The newest line is the one to read, so the feed follows it down as lines are shown and steps answered -
-  // to its very end, padding and all, which is what keeps the last option clear of the compass on a phone.
+  // to its very end, padding and all.
   const feed = useRef<HTMLOListElement | null>(null);
   useEffect(() => {
     const scroller = feed.current;
@@ -247,7 +247,7 @@ function Conversation({
         <PaneSizeControl room={room} />
       </header>
 
-      <ol ref={feed} className={now.next ? 'dialogues__feed dialogues__feed--above-foot' : 'dialogues__feed'}>
+      <ol ref={feed} className="dialogues__feed">
         {/* What a line did to the house is written under it, where it happened: the coin, +100. */}
         {dialogue.said.map((line) => (
           <Fragment key={line.id}>

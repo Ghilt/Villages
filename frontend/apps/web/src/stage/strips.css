@@ -2,17 +2,15 @@
 
 /*
  * A pane put away, as a strip across its bay: what it is and the way back, in a row. One rule for every pane
- * whose strip is the plain one - the house, the key figures, navigation, the choice roll and the dialogues;
- * a window and the map put away are their top bars, `TopBar`, which turns itself. After every pane's own
- * rules, which is what lets it be one class.
+ * whose strip is the plain one - the house, the key figures, Recent, the choice roll and the dialogues;
+ * a window put away is its top bar, `TopBar`, which turns itself, and the map a strip of the map with its
+ * marks in the corner. After every pane's own rules, which is what lets it be one class.
  */
 .pane-strip {
   flex-direction: row;
   align-items: center;
   gap: 0.6rem;
-  /* The compass is standing in the far end of this strip, so whatever the strip put there - the marks
-     on four of them, the word on the map's - steps in from the right rather than sitting under it. */
-  padding: 0 calc(0.3rem + var(--corner-right, 0px)) 0 0.75rem;
+  padding: 0 0.3rem 0 0.75rem;
 }
 
 /*
@@ -27,12 +25,9 @@
  * turns. It used to be hidden, which left a put-away pane saying nothing about what it was - and left the
  * map, whose strip is its own way back and carries no marks, as a blank bar. See decision record 0046.
  *
- * **The marks go to the far end from the compass, and the name follows them.** Upright the strip runs
- * along the bottom and the disc stands at the right of it, so the marks move in from the right and the
- * name keeps the rest; turned, the strip runs down the side and the disc stands at the **bottom** of it,
- * so the whole order flips - marks at the top, name under them, and the bottom of the strip left to the
- * disc. A put-away pane's controls are the one thing on it that has to be hittable, so they go where
- * nothing is standing. See decision record 0047.
+ * **The marks go to the top, and the name reads down from under them**, as a window's top bar turns: a
+ * put-away pane's controls are the one thing on it that has to be hittable, and the top of a sliver is
+ * where a thumb finds them. Upright they are at the far end of the strip and the name keeps the rest.
  *
  * `writing-mode` and not a transform, because a transform turns what is drawn and leaves the box it was
  * drawn in where it was, which would put the marks a screen away from where they look. This way the
@@ -51,13 +46,13 @@
   .dialogues--strip {
     /*
      * Reversed, so the marks are at the top and the name reads down from under them - the strip is 44
-     * wide and the whole height here, and the corner the disc stands in is the bottom of it rather than
-     * the far end. `flex-end` is the top in a reversed column, which is where everything packs.
+     * wide and the whole height here. `flex-end` is the top in a reversed column, which is where
+     * everything packs.
      */
     flex-direction: column-reverse;
     justify-content: flex-end;
     gap: 0.3rem;
-    padding: 0.4rem 0 calc(0.4rem + var(--corner-bottom, 0px));
+    padding: 0.4rem 0;
   }
 
   .hud__panel--strip .hud__name,
@@ -71,8 +66,7 @@
     text-align: left;
   }
 
-  .pane-size,
-  .navigate__ways {
+  .pane-size {
     flex-direction: column;
   }
 

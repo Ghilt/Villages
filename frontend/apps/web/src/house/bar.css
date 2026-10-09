@@ -1,7 +1,6 @@
 /* The house card's own size control, and the bar of the player's levers along its foot. */
 
-/* On a pane that has no bar of its own to put it in, it sits in the top corner. Nothing stands there
-   any more: the compass moved to the bottom one in 0047. */
+/* On a pane that has no bar of its own to put it in, it sits in the top corner. */
 .hud__panel > .pane-size {
   position: absolute;
   top: 0.15rem;
@@ -26,9 +25,6 @@
 .housebar {
   display: flex;
   border-top: 1px solid var(--parchment-edge);
-  /* The compass is standing in the corner the last place would otherwise run into. The places are equal,
-     so all six give up a little rather than the last one being half a place. */
-  padding-right: var(--corner-right, 0px);
 }
 
 .housebar__slot {

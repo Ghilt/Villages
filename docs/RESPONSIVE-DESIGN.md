@@ -57,29 +57,30 @@ when the stage is. See decision record 0048 and `LOOK-AND-FEEL.md`.
 arrangement that says it. **Naming one bay's size names the whole arrangement**, so the two controls can
 never disagree — they read one value rather than writing into each other.
 
-**Nothing but the control moves the seam**, with one exception. Putting a different pane in a bay, pressing
-the **compass**, closing a pane: none of them changes how the stage is divided. The exception is something
-*arriving* in a bay that is a strip — something the player just clicked, or something the world has just
-sent — which opens that bay to half, because a thing nobody can read is not an answer. A thing arriving that
-is already standing in a bay stays where it is and only its bay opens, so a hand rolled from the letter lands
-in the letter rather than swapping it with the map. The compass is not
-one of those: what it opens is a list of ways on, and a strip of it is still a list of ways on. See decision
-record 0046.
+**Nothing but the controls moves the seam**, and on a phone there are three: the size control on top, the
+**bottom bar**, and a press on the pane below when it is put away. Putting a different pane in a bay and
+closing a pane change nothing about how the stage is divided. The exception is something *arriving* in a
+bay that is a strip — something the player just clicked, or something the world has just sent — which opens
+that bay to half, because a thing nobody can read is not an answer. A thing arriving that is already standing
+in a bay stays where it is and only its bay opens, so a hand rolled from the letter lands in the letter rather
+than swapping it with the map. See decision records 0046 and 0109.
 
 ### What that looks like
 
-The three arrangements, upright. The same three turned, cut into a left and a right.
+The three arrangements, upright: the size control in the top pane's corner, the bottom bar under both, the
+mark of what is below lit, `[x]`. The same three turned, cut into a left and a right, with the bar down the right.
 
 ```
 ┌─────────────┐   ┌─────────────┐   ┌─────────────┐
-│             │   │             │   │ A           │
+│         ▁▄█ │   │         ▁▄█ │   │ A       ▁▄█ │
 │             │   │      A      │   ├─────────────┤
 │      A      │   │             │   │             │
-│             │   │             │   │      B      │
-│             │   ├─────────────┤   │             │
+│             │   ├─────────────┤   │      B      │
 │             │   │      B      │   │             │
 ├─────────────┤   │             │   │             │
-│ B       ▁▄█ │   │         ▁▄█ │   │         ▁▄█ │
+│ B           │   │             │   │             │
+├─────────────┤   ├─────────────┤   ├─────────────┤
+│ [x] o  o  o │   │ [x] o  o  o │   │ [x] o  o  o │
 └─────────────┘   └─────────────┘   └─────────────┘
  the rest and a      half each        a strip and
      strip                              the rest
@@ -217,11 +218,11 @@ instrument has a toggle for each.
 
 **Minimised is the same for every pane, and unless a pane says otherwise it is just the pane's name.** One
 thickness, one shape, so that putting anything away looks like putting anything else away. **The controls
-go to the end the compass is not standing at** — in from the right upright, and at the top turned, with
-the name reading down from under them — because a strip's controls are the one thing on it that has to be
-hittable. **A window on top is its top bar put away**, its controls at the far end or, turned, at the top,
-and **the map is a strip of itself** with its marks in the corner. Navigation's strip says otherwise and
-says why, below: a **stated** exception rather than a quiet one.
+go to the far end** — in from the right upright, and at the top turned, with the name reading down from under
+them — because a strip's controls are the one thing on it that has to be hittable. **A window on top is its
+top bar put away**, and **the map is a strip of itself** with its marks in the corner. **The pane below
+carries no control**, because the one on top names the arrangement, and stands its strip above the bottom bar;
+a press on it gives half each.
 
 **Medium and big are the pane's own business, and may be one drawing or two.** A pane whose full form is a
 list can draw the same list medium and simply show less of it, and another can draw something else
@@ -252,7 +253,7 @@ and 0085 and `LOOK-AND-FEEL.md`.
 **Where things open differs between the forms, and nothing else does.** In the spread everything is on the
 screen, so a way on from a pane is a plain click and there is nothing to choose between; in the bays it
 goes where it stands, a window or the map on top and anything else below, so a pane below stays beside what
-it opened. Tabs are the spread's; the compass is the bays'. **On a phone the one close is a window's**, and
+it opened. Tabs are the spread's; the bottom bar is the bays'. **On a phone the one close is a window's**, and
 it gives the map back; any other pane leaves its bay when the player navigates something else into it.
 
 **A conversation's scene is the whole of its pane, in every state**, cropped to the pane's shape: a narrow
@@ -269,22 +270,20 @@ there.
 
 ## The way between panes
 
-**The compass in the corner is the way to everything else.** It stands in the stage's bottom right corner
-and is in the same place however the split moves - it rode the divider until 0047, and the divider is the
-one thing on the stage that moves. One tap puts **navigation** in the bay under the thumb, which is the
-bottom one on a tall phone and the right one on a wide one, and navigation lists the panes above a divider
-and the **trail**, where the player has been, below it. It **never resizes anything**, which is what lets
-it land in a strip. See decision records 0043 and 0047 and `LOOK-AND-FEEL.md`.
+**The bottom bar is the way to everything below.** A band one strip thick along the bottom of the stage
+upright, and down its right edge turned, set into the edge rather than floating over anything, with a mark
+for every pane that stands below - the house, the key figures, the holdings, the letter while it stands, the
+dialogues once there are any, the quests once there are any, and **Recent** - in that order, and the one
+standing there lit. Marks and no words,
+Adam's call. **Pressing a mark puts its pane below**, opened to half if the bottom was put away; **pressing
+the lit one puts the bottom away**, or opens it again. The two bays are cut from what the bar leaves, so
+nothing in their arithmetic knows it is there. It replaced the **compass**, a disc in the corner that put a
+list of ways on in a bay, which Adam found too esoteric: the bar is the ways on themselves. See decision
+record 0109 and `LOOK-AND-FEEL.md`.
 
-**Put away, navigation is still a way somewhere**, the stated exception to minimised being just a name: its
-strip carries the marks of the panes it could go to, because a list of ways on is what it is for and this
-is the strip a player arrives in by pressing the compass.
-
-**A row goes where its thing stands**, and there is no needle, because there is nowhere else for anything
-to go: a pane takes navigation's own place below, the map takes the top, and a place in the trail opens
-its window on top while navigation stays beside it. In the spread navigation is a tab in bottom left
-instead, a row there is a plain click, and put away it is its name and nothing else. See decision record
-0109.
+**Recent is the trail, where the player has been, and nothing else**, in both forms: every pane is on the
+bar on a phone and on the screen in the spread. A place pressed in it opens its window on top, and Recent
+stays below beside it, so the player can go on down the list. In the spread it is a tab in bottom left.
 
 ## Container queries, not breakpoints
 
@@ -336,8 +335,8 @@ What the instrument found, and where each stands:
 
 - **Touch.** The one question the layout above does not answer, and the next thing this document owes.
   Things lift on hover and the map is driven by drag and wheel; neither has an answer on a finger. The
-  compass, the needles and the tabs were drawn as taps rather than hovers on purpose, which is a start and
-  not a design.
+  bottom bar and the tabs were drawn as taps rather than hovers on purpose, which is a start and not a
+  design.
 - **Whether 600 and 660 are right.** Two numbers somebody picked, not derived from anything: the first is
   where it folds and the gap between them is a guess about how fast a grip moves. Both move once there is
   enough at the boundary to judge them by. Two constants, in one place.

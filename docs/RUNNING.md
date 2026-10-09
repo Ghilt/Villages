@@ -365,8 +365,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   as far as the player may know it; the dialogue itself, whole, is at `/admin/inspect-events-log`. In the game,
   the house's first dialogue puts up the **dialogues** pane, a column down the right of the spread with its
   three sizes - put away, a strip along the bottom; opened out, it puts the corner back to its normal size,
-  and opening the corner out puts it back, a line of the log under `bay` saying both - and a pane navigation
-  lists on a phone; it lists the dialogues waiting and finished, a lapsed
+  and opening the corner out puts it back, a line of the log under `bay` saying both - and a mark of the
+  bottom bar on a phone; it lists the dialogues waiting and finished, a lapsed
   one saying why, and pressing one opens it to be read and played, over its scene, the picture from
   `world/scenes/` filling the pane: *continue*, a word in the middle of its foot, shows a line at a time
   and takes the step past the last, the options are at the end of the feed, and
@@ -400,7 +400,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   this building* ticks *Hold a castle on an island* a moment later, in the story of the taking; the log says *1 of 2
   ticked*. In the game the quest opens in the **quests** tab of the column down the right, beside the dialogues -
   the tab bar is two marks, the speech bubble and a little map of seals - on its map over its scene: the abbot lit,
-  two question marks below, a question mark half-way down and the blessing at the foot. The list behind its mark
+  two question marks below, a question mark half-way down and the blessing at the foot; on a phone it opens below
+  the map, its mark the little map of seals in the bottom bar. The list behind its mark
   holds every quest, open first. It is played there: the abbot's node pressed opens his conversation on the
   dialogues' tab, which ends, once finished, in a button with the quest's name and the needle that turns back to its
   map; the gift's or the light's card under the map has *Pledge* or *Deliver*, a mark each, greyed with

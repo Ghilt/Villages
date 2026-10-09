@@ -205,12 +205,12 @@ Wanted, not started, and each needs a hypothesis in `docs/experiments/` before a
 
 - **A responsive interface.** Both forms have a layout now: the stage folds into two bays below 600 on its
   shorter side and unfolds at 660 (0040), and the spread is tiles on a map that never overlap (0041). What
-  goes in them is settled too. The corner tabs between the house status and **navigation** (0042); the
+  goes in them is settled too. The corner tabs between the house status and **Recent** (0042); the
   choice roll is a pane with three sizes (0044); every pane carries one **pane size control** (0045); how
   much of the stage each bay gets belongs to the fold rather than to the panes, so the three sizes mean
-  the same thing everywhere and moving a pane resizes nothing (0046); the compass stands in the corner and
-  opens the bay under the thumb (0047); the join between the bays is drawn (0048); a link goes one
-  place (0049); on a desktop the letter is put away to a chip or opened out over everything under a veil,
+  the same thing everywhere and moving a pane resizes nothing (0046); the join between the bays is drawn
+  (0048); a link goes one place (0049); a phone is the map or one window on top and a bottom bar of marks
+  choosing what is below, the size control on top alone (0109); on a desktop the letter is put away to a chip or opened out over everything under a veil,
   the corner and the right column are never both opened out, and a press on any pane put away opens it
   (0085, 0045); and every tile and every window on the rail glides to its new size (0086). What is left is
   **touch**, which nothing has answered: hover lifts a parchment and the map

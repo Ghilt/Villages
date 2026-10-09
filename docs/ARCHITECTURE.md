@@ -759,11 +759,12 @@ mechanic be written once and drawn at every size.
 in order, with when each stands and what draws it; App supplies only the map's contents, because App holds
 the map. The stage is handed that list, and the bay manager is configured with it from `main.tsx`
 (`configureBays`), so neither reads the game, and a new mechanic's pane is a declaration in its folder and a
-line in `panes.tsx`. Two panes are the stage's own: the map, which is its floor, and navigation, which its
-compass opens.
+line in `panes.tsx`. Two panes are the stage's own: the map, which is its floor, and Recent, the trail.
 
-**A pane declares nothing about a phone.** How the two bays divide the stage is one value with three
-settings, held by the fold: a strip and the rest, half each, or the rest and a strip. A bay is one end of a
+**A pane declares only where it stands on a phone**, on top as the map and a window do or below with the
+rest (`phone`), and the stage's `phone.ts` is the one place that reads it; the bottom bar's room is carved
+off the stage's edge by `stageLayout` before the bays are cut, so their arithmetic never learns of it
+(0109). How the two bays divide the stage is one value with three settings, held by the fold: a strip and the rest, half each, or the rest and a strip. A bay is one end of a
 stage two panes are sharing, so what is standing in it has nothing to say about how much of it there is -
 which is what makes moving a pane between bays free, and what makes the three sizes mean the same thing on
 every pane. A tile in the spread is the other case and keeps its own heights, because nothing is competing

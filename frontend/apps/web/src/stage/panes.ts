@@ -9,9 +9,9 @@ import type { IconName } from './Icons';
  *
  * A pane is declared by its feature, in the feature's own folder, and placed by the layout; the root's
  * `panes.tsx` says which stand, in which order, and what draws them, and the stage is handed the list. Two
- * are the stage's own: the map, which is its floor, and navigation, which its compass opens. Nothing in the
- * layout knows what a map is, and no pane learns which bay it is in beyond the room it was given - which is
- * what lets a mechanic be written once and drawn at three sizes. See decision records 0040 and 0041.
+ * are the stage's own: the map, which is its floor, and Recent, the trail of where the player has been.
+ * Nothing in the layout knows what a map is, and no pane learns which bay it is in beyond the room it was
+ * given - which is what lets a mechanic be written once and drawn at three sizes. See 0040 and 0041.
  *
  * **What a pane declares is the spread's business only.** On a phone the three sizes are a strip, half the
  * stage and the rest, the same three for every pane, and which of the three arrangements the stage is in
@@ -171,22 +171,20 @@ export const MAP_PANE: Pane = {
 };
 
 /**
- * **Navigation**: the ways from here, and the ways back.
+ * **Recent**, which was navigation: the trail, the ways back to where the player has been.
  *
- * It shares the corner with the house status, which is what the **tab bar** is for: two panes, one tile,
- * and a strip of marks saying which is up. In the spread it is the trail and nothing else, because
- * everything a player might navigate *to* is already on the screen - the map is the floor and the house is
- * behind the other tab. On a phone it will say more, and that is its own step.
+ * It shares the corner with the house status, which is what the **tab bar** is for, and on a phone it is the
+ * last mark of the bottom bar. The trail and nothing else in both forms: every pane a player might go *to* is
+ * on the screen in the spread, and the bar is the way to them on a phone. It was called *Go to* and known by
+ * the compass while it listed the panes too; it is named for what it holds now. See decision record 0109.
  */
 export const NAVIGATION_PANE: Pane = {
   id: 'navigation',
-  // What it is *for* rather than what is in it. A player who pressed a compass is going somewhere;
-  // "where you have been" is the trail, which is only the lower half of what it offers.
-  title: 'go to',
+  title: 'recent',
   // Beside the house, in the corner, and the corner's size whichever of its tabs is up. See `CORNER`.
   spread: 'bottomLeft',
   tall: null,
-  icon: 'compass',
+  icon: 'recent',
   needs: null,
 };
 

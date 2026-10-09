@@ -70,7 +70,7 @@
 /* Nobody yet, said in the words Adam gave it, where the portraits will stand. */
 .figures__empty {
   margin: auto;
-  padding: 0 1.25rem calc(1.25rem + var(--corner-bottom, 0px));
+  padding: 0 1.25rem 1.25rem;
   max-width: 24ch;
   font-size: 0.95rem;
   font-style: italic;
@@ -91,7 +91,7 @@
 .figures__grid {
   --gap: 0.4rem;
   --caption: 0rem;
-  --row: calc((100cqh - var(--bar) - 0.7rem - var(--corner-bottom, 0px) - 2 * var(--gap)) / 3);
+  --row: calc((100cqh - var(--bar) - 0.7rem - 2 * var(--gap)) / 3);
   --across: calc((100cqw - 1.5rem - 2 * var(--gap)) / 3);
   --tall: min(calc(var(--row) - var(--caption)), calc(var(--across) * 4 / 3));
   flex: 1;
@@ -164,10 +164,10 @@
  * rather than a different drawing. **Beside** is the default: the portrait as tall as the room under the
  * bar, and the name above the stats to its right - the spread opened out, and a phone opened out on its
  * side. The rest are below, one rule each. `--room-h` and `--room-w` are what is left of the bay once the
- * bar, the padding and the compass's corner are taken, in the bay's own container units.
+ * bar and the padding are taken, in the bay's own container units.
  */
 .figures__one {
-  --room-h: calc(100cqh - var(--bar) - 1.1rem - var(--corner-bottom, 0px));
+  --room-h: calc(100cqh - var(--bar) - 1.1rem);
   --room-w: calc(100cqw - 1.8rem);
   flex: 1;
   min-height: 0;
@@ -179,7 +179,7 @@
     'portrait stats';
   align-content: start;
   gap: 0.45rem 0.9rem;
-  padding: 0.3rem 0.9rem calc(0.8rem + var(--corner-bottom, 0px));
+  padding: 0.3rem 0.9rem 0.8rem;
 }
 
 .figures__one > .portrait {

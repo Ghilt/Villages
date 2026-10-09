@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { HOUSE_PANE } from '../house/pane';
 import { inspectPane } from '../inspect/pane';
 import { MAP_PANE, NAVIGATION_PANE } from './panes';
-import { bayOnAPhone } from './phone';
+import { barButtons, bayOnAPhone } from './phone';
 
 /**
  * Where things stand on a phone: the map or one window on top, every other pane below, and nothing ever in the
@@ -136,5 +136,51 @@ describe('the map shown, on a phone', () => {
 
     expect(baysStore.get().holding).toEqual([MAP_PANE.id, HOUSE_PANE.id]);
     expect(subjectsStore.get().open).toEqual([KETTLEBY]);
+  });
+});
+
+describe('the bottom bar', () => {
+  it('puts the pane pressed below, opened to half when the bottom was put away', async () => {
+    const { baysStore, pressInTheBar } = await fresh();
+    expect(baysStore.get().arrangement).toBe('secondAway');
+
+    pressInTheBar(NAVIGATION_PANE.id);
+
+    expect(baysStore.get().holding).toEqual([MAP_PANE.id, NAVIGATION_PANE.id]);
+    expect(baysStore.get().arrangement).toBe('halfEach');
+  });
+
+  it('puts the bottom away when the lit one is pressed, and opens it again when it is pressed again', async () => {
+    const { askFor, baysStore, pressInTheBar } = await fresh();
+    askFor(HOUSE_PANE.id, 'small');
+
+    pressInTheBar(HOUSE_PANE.id);
+    expect(baysStore.get().arrangement).toBe('secondAway');
+
+    pressInTheBar(HOUSE_PANE.id);
+    expect(baysStore.get().arrangement).toBe('halfEach');
+  });
+
+  it('leaves the top as it is: what is up there, and how big', async () => {
+    const { askFor, baysStore, inspect, paneIdOf, pressInTheBar } = await fresh();
+    inspect(KETTLEBY);
+    askFor(paneIdOf(KETTLEBY), 'small');
+
+    pressInTheBar(NAVIGATION_PANE.id);
+
+    expect(baysStore.get().holding).toEqual([paneIdOf(KETTLEBY), NAVIGATION_PANE.id]);
+    expect(baysStore.get().arrangement).toBe('halfEach');
+  });
+
+  it('has a mark for every pane that can stand below, in the order they are declared, and none for the top', async () => {
+    const { panesOn } = await import('../panes');
+    // Every pane there can be at once: the house, the key figures, the holdings, a question asked rather than Take
+    // action at rest, a dialogue offered, a quest offered and Recent, and a window open.
+    const all = panesOn('11110111', [KETTLEBY], () => null);
+    const below = all.filter((pane) => bayOnAPhone(pane) === 1);
+
+    expect(barButtons(all).map((button) => button.id)).toEqual(below.map((pane) => pane.id));
+    expect(barButtons(all).map((button) => button.id)).not.toContain(MAP_PANE.id);
+    expect(barButtons(all).at(-1)?.id).toBe(NAVIGATION_PANE.id);
   });
 });

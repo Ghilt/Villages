@@ -316,7 +316,7 @@ it has reached, from wire version 16: the lines past the next step, what a line 
 requirements stay on the server. An option can spend, from version 17, and is refused while the house cannot
 pay, and from version 18 each option carries its reveal impact. A speaker's death ends every open dialogue they
 speak in, as lost, naming who died. Nothing in the world offers one yet. The pane stands in the column
-down the right from the house's first dialogue, at its three sizes, and on a phone navigation lists it;
+down the right from the house's first dialogue, at its three sizes, and on a phone it is a mark of the bottom bar;
 it lists the dialogues waiting and finished, a lapsed one saying why, and a dialogue offered opens it;
 pressing one opens the conversation, which is played through in the pane: the stretch a line at a time,
 the options at the end of the feed, and each step sent from there, on the wire from version 19. The
@@ -447,8 +447,9 @@ Two states, as the dialogues have:
 
 **The column down the right takes turns** between the dialogues and the quests, behind a tab bar of two marks, a
 speech bubble and a little map of seals, as the corner's tabs are marks; the column is one size whichever is up.
-On a phone it is a pane like any other. **A quest offered opens it on the quest's map**: in the spread its tab
-comes up, from its strip if the column was put away, and on a phone it takes the bay the map is not in. The
+On a phone it is a pane like any other, below the map, and the little map of seals is its mark in the bottom bar.
+**A quest offered opens it on the quest's map**: in the spread its tab comes up, from its strip if the column was
+put away, and on a phone it takes the bay below the map, as every pane but a window does. The
 dialogue a quest leads to arrives through the quest rather than on its own. *Deliver*, *Pledge*, *Collect* and
 the quests' tab are all marks, Adam's word of 2026-10-15.
 
@@ -513,8 +514,8 @@ of thing in the world costs a description of itself, not a component. This is th
 because everything the world grows will want to be looked at.
 
 **Several at once, where there is room.** On a screen with space a player can have three open and compare
-them. On a phone they get one, and the same links, each of which opens in the bay the window is not
-next. Comparing two houses should not mean remembering one of them.
+them. On a phone they get one, on top, and the same links, each of which opens in its place, with the trail
+to go back by. Comparing two houses should not mean remembering one of them.
 
 ### Look and feel
 
@@ -581,9 +582,9 @@ window takes the top, in the map's place, and opens it to half if it was a strip
 map or one window, Adam's word of 2026-10-08. A second window, from a link or the trail, takes the first
 one's place, which stays open, in no bay and in the trail; *show it on the map* puts the map back on top.
 **Its close is the way back to the map**, open or put away, and leaves the arrangement alone. In the spread
-there is one place a window goes, and a link is a plain click. The player's own house arriving opens no
-window on a phone, because it would cover the map the camera is flying over, and the house status stands
-below it already. See decision record 0109.
+there is one place a window goes, and a link is a plain click. The player's own house arriving opens its
+window on a phone too, on top while the camera flies to the seat, Adam's word of 2026-10-09; its close gives
+the map back. See decision record 0109.
 
 ### Not decided
 
@@ -618,7 +619,7 @@ whom they serve and where they stand, with a link to each house that holds them 
 which are their house's own. A window renders a
 description and knows nothing of what made it. Links go both ways between a house and the ground somebody
 has fenced around it, and *show it on the map* moves the camera. Up to three stack in a rail in the spread,
-a fourth pushing the oldest off; on a phone one of them takes a bay and its links open in the other.
+a fourth pushing the oldest off; on a phone one of them stands on top, in the map's place, and its links open in its place.
 
 What it says is everything the wire carries and no more, which for a house is a name, a banner, a seat, a
 founding day and one resource. It added no event and no frame, so the protocol version did not move. The
@@ -864,8 +865,8 @@ Its mark is a head and shoulders in profile, a placeholder.
 
 ### UI
 
-**A pane of its own**: the middle tab of **bottom left** in the spread, between the shield and the compass,
-and a row of *Go to* on a phone. That bay is one size whichever tab is up, so changing tabs moves nothing.
+**A pane of its own**: the middle tab of **bottom left** in the spread, between the shield and Recent,
+and the second mark of the bottom bar on a phone. That bay is one size whichever tab is up, so changing tabs moves nothing.
 See decision record 0057.
 
 **What each size shows**, the pane owning all three:
@@ -898,7 +899,7 @@ with the given names under it where there is a line to spare.
 ### Where it stands
 
 The tie exists on the server and on the wire, and the debug panel's Characters section takes key
-figures in and changes them. The pane is in the corner, the middle tab, and in *Go to* on a phone, at its
+figures in and changes them. The pane is in the corner, the middle tab, and on the bottom bar on a phone, at its
 three sizes: with nobody in it, it says key figures will be shown here; with one it opens on them; with
 more it is a grid of their portraits in the order they joined, three by three, and one pressed opens on
 them with nine small squares to go back by. Their details are the portrait and the name, with the map's
@@ -988,7 +989,7 @@ may see into is the type's: a king on a throne is known to all, a prison's cells
 ### UI
 
 **Holdings is a pane of its own**: a tab of **bottom left** in the spread beside the key figures, its button
-a mark, and a row of *Go to* on a phone. Its three sizes:
+a mark, and a mark of the bottom bar on a phone, the same tower. Its three sizes:
 
 - **Minimised**: the strip, with the open holding's name or the pane's.
 - **Normal**: a list, the seat first, then the rest in the order they were gained: each row the structure's

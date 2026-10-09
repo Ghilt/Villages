@@ -38,8 +38,10 @@ import {
  * Which panes stand on the stage, in which order, and what draws each.
  *
  * Each pane is declared by its feature, in its own folder, and named here once: the house status, the key
- * figures, the holdings and navigation, which share the corner and stand in it in this order; the choice roll while a
- * question does, and at rest once there is a house; and character dialogue from the house's first dialogue on. The map comes first, because it
+ * figures and the holdings, which share the corner; the choice roll while a question does, and at rest once there
+ * is a house; character dialogue from the house's first dialogue on, and the quests from the first quest on, which
+ * take turns in the column down the right; and Recent, last in the corner and last of the phone's bottom bar,
+ * whose marks stand in this order. The map comes first, because it
  * is the floor, and its contents are App's, which holds the map; a window per subject open comes last,
  * newest first. A new mechanic's pane is a declaration in its folder and a line here. The stage is handed
  * the list and reads nothing of the game. See ARCHITECTURE's "The stage is handed its panes".
@@ -49,8 +51,8 @@ interface Standing {
   pane: Pane;
   /** Whether it stands, read off what the gateway has heard. Always, when absent. */
   stands?: (session: SessionState) => boolean;
-  /** What draws it. Navigation is handed the panes there are to go to. */
-  draw: (room: Room, along: Along, going: readonly Pane[]) => ReactNode;
+  /** What draws it. */
+  draw: (room: Room, along: Along) => ReactNode;
 }
 
 /** Turn to a quest from a conversation that is part of it: its tab comes up, on the quest's map. See 0096. */
@@ -63,10 +65,6 @@ const STANDING: readonly Standing[] = [
   { pane: HOUSE_PANE, draw: (room) => <HouseStatus room={room} /> },
   { pane: KEY_FIGURES_PANE, draw: (room) => <KeyFigures room={room} /> },
   { pane: HOLDINGS_PANE, draw: (room) => <Holdings room={room} /> },
-  {
-    pane: NAVIGATION_PANE,
-    draw: (room, along, going) => <Navigating room={room} along={along} going={going} />,
-  },
   {
     pane: CHOICE_PANE,
     // A question asked, or a hand dealt; before there is a house only a question raises it. See 0083.
@@ -93,6 +91,7 @@ const STANDING: readonly Standing[] = [
     stands: (session) => (session.yourQuests?.length ?? 0) > 0,
     draw: (room) => <Quests room={room} />,
   },
+  { pane: NAVIGATION_PANE, draw: (room) => <Navigating room={room} /> },
 ];
 
 /**
@@ -110,12 +109,9 @@ export function panesOn(
   drawMap: PaneDef['draw'],
 ): readonly PaneDef[] {
   const up = STANDING.filter((_, at) => standing[at] === '1');
-  // What navigation offers to go to: everything standing, the map first, and not the windows, which are in
-  // the trail under their own names.
-  const going = [MAP_PANE, ...up.map((one) => one.pane)];
   return [
     { ...MAP_PANE, draw: drawMap },
-    ...up.map((one) => ({ ...one.pane, draw: (room: Room, along: Along) => one.draw(room, along, going) })),
+    ...up.map((one) => ({ ...one.pane, draw: one.draw })),
     ...open.map((subject) => ({
       ...inspectPane(subject),
       // Opened in the spread, a window comes to the top of the rail, as asking for it from the map does.

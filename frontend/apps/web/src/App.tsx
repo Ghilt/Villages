@@ -170,8 +170,8 @@ export function App({ master, devTools }: AppProps) {
   // Asked once the map is there, so a house heard before the map was ready still arrives. See `arrival.ts`.
   // A page opened by a map link stays where the link put it; the house's window opens all the same. Under the
   // loading screen there is no flight: the startup puts the camera on the seat, and lifts once it is drawn there.
-  // Not on a phone, where a window takes the map's place on top and would hide the flight to the seat; the
-  // house status is already below it there. See decision record 0109.
+  // On a phone the window takes the map's place on top, and its close gives the map back: Adam's word of
+  // 2026-10-09, over leaving the map up for the flight. See decision record 0109.
   useEffect(() => {
     if (map !== null && yours !== null && arriving(yours)) {
       const { seat } = yours;
@@ -179,9 +179,7 @@ export function App({ master, devTools }: AppProps) {
         note('camera', `flying to the seat at ${seat.lat.toFixed(3)}, ${seat.lon.toFixed(3)}`);
         map.flyTo({ center: [seat.lon, seat.lat], zoom: Math.max(map.getZoom(), FOUNDING_ZOOM) });
       }
-      if (formNow() !== 'bays') {
-        inspect({ kind: 'house', id: yours.id });
-      }
+      inspect({ kind: 'house', id: yours.id });
     }
   }, [map, yours]);
 

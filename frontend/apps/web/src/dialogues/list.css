@@ -19,7 +19,7 @@
   align-items: center;
   gap: 0.5rem;
   flex: none;
-  padding: 0.45rem calc(0.4rem + var(--corner-right, 0px)) 0.4rem 0.75rem;
+  padding: 0.45rem 0.4rem 0.4rem 0.75rem;
   border-bottom: 1px solid var(--parchment-edge);
 }
 
@@ -38,13 +38,13 @@
 
 /*
  * The list: the dialogues waiting, and under them the ones finished. It scrolls, and the padding is on the
- * scroller rather than a shorter list, so the last row scrolls out from under the compass on a phone.
+ * scroller rather than a shorter list, so the last row scrolls clear of the pane's foot.
  */
 .dialogues__list {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 0 0 calc(0.6rem + var(--corner-bottom, 0px));
+  padding: 0 0 0.6rem;
 }
 
 /* Waiting, and Finished: the same small capitals the key figures and navigation head their lists with. */

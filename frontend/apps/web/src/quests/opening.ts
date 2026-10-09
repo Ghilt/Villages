@@ -23,7 +23,7 @@ const shown = new Set<string>();
 
 /**
  * Open the pane for a quest that has arrived, if one has: in the spread its tab comes up in the column, from its
- * strip if the column was put away, and on a phone it takes the bay that is not the map's, as a dialogue does.
+ * strip if the column was put away, and on a phone it takes the bay below the map, as every pane but a window does.
  */
 export function openOnArrival(quests: readonly QuestView[]): void {
   const arrived = arrivals(shown, quests);

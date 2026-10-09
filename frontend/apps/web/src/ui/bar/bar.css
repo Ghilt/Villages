@@ -84,8 +84,11 @@
     filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.6)) brightness(0.8);
   }
 
-  /* Lit: ink on the parchment, as the chosen tab's words are, and no glow, because the face says it. */
-  .ui-button.ui-bar__button[aria-pressed='true'] .ui-button__mark {
+  /* Lit: ink on the parchment, as the chosen tab's words are, and no glow, because the face says it - under the
+     pointer too, where the gilt a mark at rest lights up in would be gilt on parchment. */
+  .ui-button.ui-bar__button[aria-pressed='true'] .ui-button__mark,
+  .ui-button.ui-bar__button[aria-pressed='true']:hover:not(:disabled) .ui-button__mark,
+  .ui-button.ui-bar__button[aria-pressed='true'][data-showing='hover'] .ui-button__mark {
     color: var(--ui-ink);
     filter: none;
   }

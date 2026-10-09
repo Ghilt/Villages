@@ -1,7 +1,7 @@
-/* Navigation: the ways to go, and the trail. */
+/* Recent: the trail, where the player has been. */
 
 /*
- * **Navigation**: the ways back, which in the spread is the trail and nothing else.
+ * **Recent**: the ways back, the trail and nothing else, in both forms.
  *
  * The same sheet as the house card it shares the corner with - it is the other side of one piece of
  * furniture, not a panel of its own - and it scrolls, because a list of where you have been is the one
@@ -58,9 +58,8 @@
 .navigate__list {
   flex: 1;
   margin: 0;
-  /* Padding on the scroller and not a shorter list: the last row scrolls out from under the compass
-     rather than being permanently half-covered by it. */
-  padding: 0 0 calc(0.4rem + var(--corner-bottom, 0px));
+  /* Padding on the scroller and not a shorter list, so the last row scrolls clear of the pane's foot. */
+  padding: 0 0 0.4rem;
   list-style: none;
   overflow-y: auto;
   min-height: 0;
@@ -82,42 +81,6 @@
 
 .navigate__go:hover:not(:disabled) {
   background: color-mix(in srgb, var(--gold) 12%, transparent);
-}
-
-/* A mark on navigation's strip, a way to a pane: a finger is not a mouse, so it is a row tall, not a glyph. */
-.navigate__there {
-  flex: none;
-  width: 2rem;
-  height: 2rem;
-  padding: 0.35rem;
-  border: none;
-  background: none;
-  cursor: pointer;
-}
-
-.navigate__there .icon {
-  opacity: 0.7;
-}
-
-.navigate__there:hover .icon {
-  opacity: 1;
-}
-
-/* A pane already up: the mark you are standing on rather than a place to go. */
-.navigate__there--here {
-  cursor: default;
-}
-
-.navigate__there--here .icon {
-  color: var(--gold);
-  opacity: 1;
-}
-
-/* The panes, above the divider that the trail sits under. */
-.navigate__list--panes {
-  flex: none;
-  border-bottom: 1px solid var(--parchment-edge);
-  padding-bottom: 0.35rem;
 }
 
 .navigate__go .icon {

@@ -160,16 +160,6 @@ export function formNow(): 'spread' | 'bays' {
   return form;
 }
 
-/**
- * Where the **compass** opens navigation: the bottom one on a tall phone, the right one on a wide one.
- *
- * Adam's words are "the bottom/right pane", twice, and this is literally that - the end of the stage the
- * thumb reaches, whichever way it is cut, whatever the player has swapped into it. 0043 read it as the bay
- * that is not the map's, so that the list never covered the world; the literal reading wins because a door
- * that is somewhere else depending on what you were looking at is a door you have to find. See 0047.
- */
-export const NEAR_BAY: Which = 1;
-
 /** What the player would call a bay, given how the stage is cut. */
 export function where(which: Which): string {
   if (cutAlong === 'rows') {
@@ -315,9 +305,9 @@ export function putAwayForRoom(ids: readonly string[]): void {
  * Open a bay to at least half, because something has arrived in it that is not worth arriving as a strip.
  *
  * The only thing besides the control that moves the seam, and it is deliberately **not** part of putting a
- * pane in a bay: the compass has to leave the seam exactly where it was, and a castle clicked on the map
+ * pane in a bay: a pane put somewhere leaves the seam exactly where it was, and a castle clicked on the map
  * has to open a window somebody can read. The difference is who asked - the player, or the world - and it
- * belongs where that is known rather than in here. So the arrival calls this and the compass does not.
+ * belongs where that is known rather than in here. So the arrival calls this and `put` does not.
  */
 export function roomToRead(which: Which): void {
   if (askedIn(store.get().arrangement, which) !== 'strip') {
@@ -345,8 +335,8 @@ export function takeOver(which: Which, id: string): void {
   const holding: [string, string] = which === 0 ? [id, store.get().holding[1]] : [store.get().holding[0], id];
   // Taking over a bay with something that is standing in the *other* one is a swap, as putting it there
   // by hand is: with two bays there is nowhere else for the displaced pane to go, and without this both
-  // bays end up holding the same pane. Reachable from one gesture - put navigation top from its own list,
-  // then press the compass, which opens it at the bottom.
+  // bays end up holding the same pane. Reachable before 0109, when navigation could be put on top from its
+  // own list and the compass then opened it at the bottom.
   if (store.get().holding[other] === id) {
     holding[other] = was;
   }

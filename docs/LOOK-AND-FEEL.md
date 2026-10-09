@@ -70,19 +70,14 @@ not decided.
 of a pane whose full form is a list, so that the list can be glanced through in a strip of screen while the
 map stays up beside it. Its first and only use is the choice roll. See decision record 0044.
 
-**The compass rose.** Four cardinal points filled and four between them drawn, inside a ring: the way to
-everything that is not on the screen. On a phone it is a disc in the **bottom right corner of the stage**,
-always the same corner, and one tap puts **navigation** in the bay under the thumb; in the spread it is a
-tab in the corner. The same mark doing the same job in the room each form has for it. The ordinals are
-outlined rather than filled so that it reads as eight points and not as a blob at the size a tab draws it.
-
-It is the **one thing that floats over the world**, and it floats because what it opens is everywhere while
-what it used to stand on — the seam between the bays — moves every time anything is resized. It is drawn to
-earn the corner rather than to sit on it: parchment, a rim and a fainter gold ring nested inside, which is
-the achievement's own way of drawing a frame, so it reads as a seal pressed into the corner of the sheet
-rather than as a button laid on top of one. A thumb across, which is what a **strip** is, because it is the
-same thumb. Whatever is under it steps clear, so nothing the player needs is ever beneath it. See decision
-records 0043 and 0047.
+**The bottom bar.** A phone's way between its panes: a band a thumb thick set into the stage's bottom edge,
+or down its right edge when the phone is turned, with a mark for each pane that can stand below and nothing
+else - marks and no words, Adam's call, each an even share of the band. The one standing below is **lit**:
+it stands on the chosen tab's parchment, turned so the tab opens into the pane it chose, upward or to the
+left, so the bar reads as the foot of a row of tabs rather than as buttons laid over the world. The rest
+stand on the strip's narrow gilt on stone, cream marks that light gilt under the pointer. It replaced the
+**compass rose**, a disc in the corner that opened a list of ways on and was the one thing that floated
+over the world; nothing floats now. `BottomBar` in the library. See decision record 0109.
 
 **The resource marks.** Five glyphs, one per resource, drawn stroked at the same weight as every other
 mark in the interface and coloured `--ink-soft`: a coin for wealth, a ridge of land for domain, two rings
@@ -282,19 +277,19 @@ stretches is an ornament that has been noticed; the rules stretch because a rule
 They run out to the stage's own edges rather than fading, for the reason the house card is flush against
 the edges it meets. It lies **over** the two bays rather than taking room from them, so nothing in the
 layout changed to make room for it, and it takes no pointer. One drawing turned: a band across a portrait
-stage, the same band down a landscape one. The **compass** stands on it. See decision record 0048.
+stage, the same band down a landscape one. On a phone it ends at the **bottom bar**. See decision record
+0048.
 
 **The strip.** What every **pane** looks like put away: a band 44 pixels across with the pane's name on
 it and the **pane size control** beside it. The same band turned a quarter in landscape, 44 pixels wide
 down the side of the stage with the name written **down** it rather than dropped — there is no room for a
 word across 44 pixels and eight hundred pixels of room along one. One shape and one thickness for every
-pane, so that putting anything away looks like putting anything else away, and one pane that says
-otherwise and says why: **navigation** carries the marks of what it could put in the other bay, because
-that is the strip a player arrives in by pressing the compass. On a phone the pane below the top carries
-no control, because the pane on top's names the arrangement. An inspect window put away is its **top
-bar** - the mark of its kind, the name of the thing, the control and the close - so it says which house
-rather than that it is one; the map put away is a strip of the map itself with its marks in the corner. See `RESPONSIVE-DESIGN.md`,
-`MECHANICS.md` and decision records 0046, 0047 and 0109.
+pane, so that putting anything away looks like putting anything else away. On a phone the pane below
+the top carries no control, because the pane on top's names the arrangement, and its strip stands on the
+**bottom bar**. An inspect window put away is its **top bar** - the mark of its kind, the name of the
+thing, the control and the close - so it says which house rather than that it is one; the map put away is
+a strip of the map itself with its marks in the corner. See `RESPONSIVE-DESIGN.md`, `MECHANICS.md` and
+decision records 0046 and 0109.
 
 **The top bar.** A window on top of a phone, said in one band a strip thick: its mark, its name trimmed to
 one line, a word or two beside the name, and its controls at the far end, inside the window's frame on
@@ -305,13 +300,14 @@ across the map was too heavy in the picture, Adam's word. See decision record 01
 
 **The tab bar.** Several **panes** sharing one **bay**, and a strip of marks across its top saying which is
 up. Marks and no words: a column is 26rem at its widest and two words on a tab is a tab that wraps. Its
-first use is the corner of the spread, where the house status, the key figures and navigation take turns,
-in that order: the house's own two first, then the way elsewhere. The key figures' mark is **a head and
+first use is the corner of the spread, where the house status, the key figures and Recent take turns,
+in that order: the house's own two first, then the way back. The key figures' mark is **a head and
 shoulders**, a bust as a portrait is framed, and a placeholder until the marks are drawn properly. The
 tabs stand at the left of the bar and the tile's one **pane size control** at its far end, because the
 tile is one size whichever tab is up: pressing a tab changes what is drawn and never how big it is. Only in
-the spread — a phone reaches the same panes through the compass, because a row of tabs on a 390-wide stage
-is a row of things too small to hit. See decision records 0042 and 0057.
+the spread — a phone reaches the same panes through the **bottom bar**, a thumb's width a mark, because a
+row of tabs over a pane on a 390-wide stage is a row of things too small to hit. See decision records 0042,
+0057 and 0109.
 
 **Scrollbars.** Wherever something scrolls - a list, a window taller than its room, the debug panel, the
 event viewer - the scrollbar is thin, its thumb in the soft ink and on no track of its own, so a list that

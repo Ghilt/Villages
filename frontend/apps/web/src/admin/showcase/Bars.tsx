@@ -16,8 +16,10 @@ import { Part, Specimen, Specimens } from './Specimen';
 const PANES: readonly BarButton[] = [
   { id: 'house', label: 'Your house', mark: 'house' },
   { id: 'figures', label: 'Key figures', mark: 'figures' },
+  { id: 'holdings', label: 'Holdings', mark: 'tower' },
   { id: 'letter', label: 'A letter', mark: 'letter' },
   { id: 'dialogues', label: 'Dialogues', mark: 'dialogues' },
+  { id: 'quests', label: 'Quests', mark: 'quests' },
   { id: 'recent', label: 'Recent', mark: 'recent' },
 ];
 
@@ -80,7 +82,7 @@ export function Bars() {
           <span className="showcase__said">{said}</span>
         </p>
         <Specimens>
-          <Specimen name="BottomBar" note="five panes, as wide as a phone" wide>
+          <Specimen name="BottomBar" note="seven panes, as wide as a phone" wide>
             <div className="showcase__bar-across">
               <BottomBar
                 buttons={PANES}

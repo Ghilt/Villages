@@ -178,9 +178,8 @@ export function MapView({ worldRoot, onReady }: MapViewProps) {
     map.touchPitch.disable();
     map.keyboard.disableRotation();
 
-    // The wheel asks the rule below directly. There were two buttons here until 0049, in the corner the
-    // compass now stands in; the floor still moves with the window, because the wheel and the pinch both
-    // read it.
+    // The wheel asks the rule below directly. There were two buttons here until 0049; the floor still moves
+    // with the window, because the wheel and the pinch both read it.
     const settleFloor = () => {
       // The floor is measured in the flat window at the floor's own tilt, which is none unless the ramp
       // has been pulled out past it.

@@ -5,10 +5,9 @@ import '../ui/ui.css';
 
 import { note } from '../log/log';
 import { Container } from '../ui/container/Container';
-import { Compass } from './Compass';
 import { dressOf } from './dress';
 import { Seam } from './Seam';
-import { bayLayout, type BayName, type Box, isTabbed, type Rect, TAB_BAR, TILES } from './bayBox';
+import { type BayName, type Box, isTabbed, type Rect, TAB_BAR, TILES } from './bayBox';
 import { baysStore, askFor, formNow, putAwayForRoom, show, showingIn, stageIs } from './bays';
 import { openBeside, showMap } from './arrive';
 import { askedIn, askingOf, type Which } from './arrangement';
@@ -24,6 +23,8 @@ import {
   sizeOf,
   spreadWants,
 } from './panes';
+import { PhoneBar } from './PhoneBar';
+import { stageLayout } from './stageLayout';
 import { outOfRoom } from './rail';
 import { useGlideOnTheRail } from './railGlide';
 import { openingOut } from './strip';
@@ -79,7 +80,7 @@ export function Stage({ stage, panes, overlays }: StageProps) {
   // `formNow()` is the form the stage was in a moment ago, which is what gives the fold its dead band. It
   // is read rather than passed because the layout is what sets it, and it only ever changes as a result of
   // one of the things this memo already depends on - so a cached answer is never stale.
-  const box = useMemo(() => bayLayout(stage, asking, wants, formNow()), [stage, asking, wants]);
+  const box = useMemo(() => stageLayout(stage, asking, wants, formNow()), [stage, asking, wants]);
 
   // Whether the tiles may glide to where they are going, which they do in the spread whenever a size was asked
   // for: not while the stage itself is being resized or crossing the fold, when everything follows the window at
@@ -291,10 +292,10 @@ export function Stage({ stage, panes, overlays }: StageProps) {
         />
       )}
 
-      {/* The moulding over the join, and the disc that stands on it. Only where there is a join:
-          below 64 pixels the stage is one box and `--bay-first` is the whole of it. */}
+      {/* The moulding over the join, only where there is one: below 64 pixels the stage is one box and
+          `--bay-first` is the whole of it. And the bottom bar along the phone's edge. See 0048 and 0109. */}
       {box.form === 'bays' && box.bays.second !== null && <Seam along={box.along} />}
-      {box.form === 'bays' && <Compass />}
+      {box.bar !== null && <PhoneBar panes={panes} rect={box.bar} />}
       {overlays}
     </div>
   );
