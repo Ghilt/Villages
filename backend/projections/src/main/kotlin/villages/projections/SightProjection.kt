@@ -29,6 +29,7 @@ import villages.domain.WorldTime
 import villages.domain.ResourceEvent
 import villages.domain.ChoiceEvent
 import villages.domain.DialogueEvent
+import villages.domain.StructureEvent
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CopyOnWriteArraySet
@@ -121,6 +122,8 @@ class SightProjection(feed: EventFeed) : Follower(feed), SightsByHouse {
             // Nothing else gives vision or takes it away.
             is ResourceEvent, is ChoiceEvent, is DialogueEvent,
             is CharacterAppeared, is CharacterStatChanged, is CharacterAged, is CharacterPortraitChanged,
+            // What a structure gives its holder to see is written into the house's own history, as vision given. 0092.
+            is StructureEvent,
             -> Unit
         }
     }

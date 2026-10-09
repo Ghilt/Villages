@@ -2,6 +2,7 @@ package villages.application
 
 import villages.domain.CharacterCommand
 import villages.domain.HouseCommand
+import villages.domain.StructureCommand
 
 /** Runs a command against its house's stream: load, decide, append. Throws a HouseError when refused. */
 fun interface HouseCommandExecutor {
@@ -14,6 +15,11 @@ fun interface HouseCommandExecutor {
  */
 fun interface CharacterCommandExecutor {
     fun execute(command: CharacterCommand, provenance: Provenance)
+}
+
+/** Runs a command against its structure's stream: load, decide, append. Throws a StructureError when refused. 0092. */
+fun interface StructureCommandExecutor {
+    fun execute(command: StructureCommand, provenance: Provenance)
 }
 
 /**

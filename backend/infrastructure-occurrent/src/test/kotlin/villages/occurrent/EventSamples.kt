@@ -59,6 +59,9 @@ import villages.domain.Speaker
 import villages.domain.SpeakerId
 import villages.domain.Species
 import villages.domain.Stat
+import villages.domain.StructureId
+import villages.domain.StructureRaised
+import villages.domain.StructureType
 import villages.domain.Then
 import villages.domain.Tincture
 import villages.domain.VisionId
@@ -222,6 +225,20 @@ internal object EventSamples {
     val agnesMoved = CharacterMoved(agnes, Location(59.33, 18.07), Significance(10.0), WorldTime(653_705), noon)
     val agnesLeft = CharacterLeftTheMap(agnes, WorldTime(653_705), noon)
 
+    /** The castle standing in Antarctica, held here by the sample house so that a holder is in the fixture. */
+    val antarcticCastle = StructureId(UUID.fromString("95ba5c28-4a79-3fa6-88aa-0ff1f5a0a559"))
+    val castleRaised = StructureRaised(
+        structureId = antarcticCastle,
+        structureType = StructureType("castle"),
+        name = "the Antarctic castle",
+        place = Location(-77.4, 10.0),
+        significance = Significance(20.0),
+        level = 1,
+        holder = house,
+        worldTime = WorldTime(653_705),
+        recordedAt = noon,
+    )
+
     val gotland = VisionId(UUID.fromString("dd000000-0000-4000-8000-000000000001"))
     val sawGotland = HouseGainedVision(house, gotland, Location(57.64, 18.30), 34.0, day, noon)
     val lostGotland = HouseLostVision(house, gotland, day, noon)
@@ -316,5 +333,6 @@ internal object EventSamples {
         "villages.player.offeredDialogue.v1" to aLetter,
         "villages.player.rolled.v1" to rolledARiver,
         "villages.player.tookAction.v1" to tookNorthern,
+        "villages.structure.raised.v1" to castleRaised,
     )
 }

@@ -237,10 +237,11 @@ program running on it at this tree's address.
 | 0 | This plan, decision record 0092, experiment 0018, `MECHANICS.md`, `GLOSSARY.md`, `ROADMAP.md` | the documents | |
 | 1 | Make room: command payloads out of `Frames.kt`, the cell snapshot out of `Gateway.kt`, the sprite functions out of `App.tsx`; ceilings lowered | the checks | |
 | 2 | The catalogue: `world/structures.json`, read at both ends, the contract fixture, a page of its own | `/admin/inspect-structures` | |
-| 3 | The structure's stream: `raised` and `changedHands`, the decider over the catalogue, every projection's `when`, *raise here*, the sixteen in Antarctica | the event page | |
+| 3a | The structure's stream: `raised`, the decider over the catalogue, its store, every projection's `when`, the sixteen in Antarctica | the event page | |
+| 3b | *Raise here* and *raise Antarctica's sixteen again*, the Structures section of the debug panel | the event page | bump |
 | 4a | The read model with face versions, `StructureView`, snapshot and deltas, a structures part, `hidOn` split and cached; 0061 and 0089 amended | the session log | bump |
 | 4b | The page: the slice and its stamp, `StructuresLayer` (with `MarksLayer.ts` split first), a placeholder per type, the pennant, the size by level | the map | |
-| 5 | The window: `inspect` kind `structure`, `describeStructure`, the holder's link; *take control of this building* on the one open | a click, then your pennant on it | bump |
+| 5 | The window: `inspect` kind `structure`, `describeStructure`, the holder's link; `changedHands` and *take control of this building* on the one open | a click, then your pennant on it | bump |
 | 6 | Sight from structures: the `StandingEffects` listener, `caughtUp`, `gainedVision` and `lostVision` written with the radius and `from` | the fog lifting round a structure taken | bump |
 | 7a | The seat refit on the server: the `Seats` reaction, `namedSeat`, `foundingPlace`, the seat's own sight removed, omens, season, gossip and dialogues reading the seat | a new house's events | bump |
 | 7b | The seat refit on the page: no house sprite; the room, the dive and the eye read the seat; the castle's influence zone when selected, in place of `HoldingOverlay` | a click on your castle | |

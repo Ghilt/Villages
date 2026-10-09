@@ -33,12 +33,13 @@ Answer these before touching code, in a paragraph Adam can read back. The answer
    approve, before any code**: propose every event's name with a line on what it means, and let him rename
    them. A name in the event store outlives every other decision about it.
 2. **Whose history is it?** Every event belongs to one stream, and the stream is the thing whose
-   history it is. There are two kinds of thing today. The house has the player's identity (decision
+   history it is. There are three kinds of thing today. The house has the player's identity (decision
    0028), so anything a player is offered or does is the house's history: the vision says decisions are
    taken in the house's name and remembered as the house's history. A thing whose lifetime is shared
    between houses, a cathedral, a territory or a person, is its own stream (`ARCHITECTURE.md`, "things
    with lifetimes are their own streams"), and the character is the first of them, decision record 0055.
-   What a house is to such a thing is still the house's history, as a key figure is.
+   What a house is to such a thing is still the house's history, as a key figure is - unless two houses could
+   contend for it, as for a structure, whose own history says who holds it (0092).
 3. **What does the player see?** Which frame carries it, and from where: a view read from a projection
    (`snapshot`, `batch`, `yourHouse`, `yourChoice`, `yourKeyFigures`) for the interface, and the
    stored event itself on the `event` frame for the debug panel. Then which panel line says it happened,

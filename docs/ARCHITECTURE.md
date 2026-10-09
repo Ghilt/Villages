@@ -110,7 +110,7 @@ violation when the rule was introduced.
 
 | Module | Holds |
 |---|---|
-| `domain` | The house and character aggregates: commands, events, state, the decide and evolve functions, value types, domain errors |
+| `domain` | The house, character and structure aggregates: commands, events, state, the decide and evolve functions, value types, domain errors |
 | `application` | Use cases and the ports they need: command execution, read model queries, the clock, player tokens |
 | `protocol` | The client and server message types, shared with the frontend through checked-in JSON fixtures, and the version of the wire, whose shape is recorded in `contracts/protocol-v<n>.txt` (0037) |
 | `infrastructure-occurrent` | CloudEvent conversion and type mapping, the MongoDB event store, the application service, durable subscriptions |
@@ -392,7 +392,7 @@ fault in its fold says which one it was.
 
 ## Scale principles
 
-1. One stream per house and one per character (decision 0055), and no global aggregate. Anything
+1. One stream per house, one per character and one per structure (decisions 0055 and 0092), and no global aggregate. Anything
    world-shaped is a projection.
 2. Resources are rates. Events are emitted when something changes, never on a clock, so idle players cost nothing.
 3. The world is partitioned into cells, at every zoom: a quadkey, so a cell's ancestor is its prefix. Routing keys,

@@ -12,6 +12,7 @@ import tools.jackson.module.kotlin.KotlinModule
 import villages.application.CharacterCommandExecutor
 import villages.application.HouseCommandExecutor
 import villages.application.Provenance
+import villages.application.StructureCommandExecutor
 import villages.application.WipeGate
 import villages.application.WriteConflict
 import villages.domain.CharacterCommand
@@ -26,6 +27,10 @@ import villages.domain.HouseEvent
 import villages.domain.Requirement
 import villages.domain.RevealImpact
 import villages.domain.Shows
+import villages.domain.StructureCatalogue
+import villages.domain.StructureCommand
+import villages.domain.StructureDecider
+import villages.domain.StructureEvent
 import villages.domain.Then
 import java.net.URI
 import java.time.ZoneOffset
@@ -70,6 +75,7 @@ object Events {
     private fun subjectOf(event: Event): String = when (event) {
         is HouseEvent -> event.houseId.value.toString()
         is CharacterEvent -> event.characterId.value.toString()
+        is StructureEvent -> event.structureId.value.toString()
     }
 }
 
@@ -165,4 +171,20 @@ class OccurrentCharacterCommandExecutor(
 
     override fun execute(command: CharacterCommand, provenance: Provenance) =
         loop.execute(command.characterId.stream, command, provenance)
+}
+
+/**
+ * The structure command executor port: the same loop, over a structure's stream and a structure's rules, which read the
+ * catalogue the server started with. See decision record 0092.
+ */
+class OccurrentStructureCommandExecutor(
+    store: EventStore,
+    converter: CloudEventConverter<Event>,
+    catalogue: StructureCatalogue,
+    gate: WipeGate,
+) : StructureCommandExecutor {
+    private val loop = StreamExecutor(store, converter, StructureDecider(catalogue), StructureEvent::class.java, gate)
+
+    override fun execute(command: StructureCommand, provenance: Provenance) =
+        loop.execute(command.structureId.stream, command, provenance)
 }

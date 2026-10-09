@@ -21,6 +21,7 @@ import villages.domain.ResourceEvent
 import villages.domain.ChoiceEvent
 import villages.domain.KeyFigureEvent
 import villages.domain.VisionEvent
+import villages.domain.StructureEvent
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArraySet
 
@@ -70,6 +71,7 @@ class DialoguesProjection(feed: EventFeed) : Follower(feed), DialoguesByHouse {
 
             // A dialogue is offered to a house; a character's own history says nothing about one.
             is CharacterEvent -> return
+            is StructureEvent -> return
         }
     }
 

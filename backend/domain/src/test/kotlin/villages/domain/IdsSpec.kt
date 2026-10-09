@@ -71,4 +71,12 @@ class IdsSpec : StringSpec({
 
         agnes.stream shouldBe "character:cb732500-39bd-3b39-a838-bb89f719578f"
     }
+
+    /** Pinned as the others are, by a second implementation: the castle standing in Antarctica, on every start. */
+    "the castle in Antarctica is a known structure, and names its own stream" {
+        val castle = StructureId.inAntarctica(StructureType("castle"))
+
+        castle.value shouldBe UUID.fromString("95ba5c28-4a79-3fa6-88aa-0ff1f5a0a559")
+        castle.stream shouldBe "structure:95ba5c28-4a79-3fa6-88aa-0ff1f5a0a559"
+    }
 })

@@ -16,6 +16,7 @@ import villages.domain.ResourceEvent
 import villages.domain.DialogueEvent
 import villages.domain.KeyFigureEvent
 import villages.domain.VisionEvent
+import villages.domain.StructureEvent
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArraySet
 
@@ -72,6 +73,7 @@ class ChoicesProjection(feed: EventFeed) : Follower(feed), ChoicesByPlayer {
 
             // A choice is put to a house, never to a character.
             is CharacterEvent -> return
+            is StructureEvent -> return
         }
     }
 

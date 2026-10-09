@@ -27,6 +27,7 @@ import villages.domain.ChoiceEvent
 import villages.domain.DialogueEvent
 import villages.domain.KeyFigureEvent
 import villages.domain.VisionEvent
+import villages.domain.StructureEvent
 import villages.protocol.Cell
 import villages.protocol.coarsestZoom
 import java.util.concurrent.ConcurrentHashMap
@@ -118,6 +119,8 @@ class HousesProjection(feed: EventFeed) : Follower(feed), HousesByCell, HousesBy
             // A person is not a house, and what one is to a house is the house's own history: nothing a
             // character's stream says moves a house's row. See decision record 0055.
             is CharacterEvent -> return
+            // A structure is drawn from a read model of its own. See decision record 0092.
+            is StructureEvent -> return
         }
         // Whether this house was already on the map is the read model's to say. A stream version cannot:
         // a house founded from a choice arrives at version three, behind the choice and the action.

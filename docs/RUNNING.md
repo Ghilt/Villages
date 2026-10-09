@@ -241,8 +241,13 @@ stage alone, with none of the debug panel in it (decision record 0079).
   in `world/structures.json` as the page reads it, a row a type - what it gives its holder a month at each level,
   how far it sees and from which zoom it is drawn, its slots and what makes each count, its zone, and what each
   culture calls it. It reads the file again on every load; one it cannot read is said in place of the table, naming
-  the type and the field. The structures' sprites will stand there too. Nothing in the world raises a structure yet.
-  See `docs/plans/structures.md`.
+  the type and the field. The structures' sprites will stand there too. See `docs/plans/structures.md`.
+- Every type standing at once: **Antarctica**. While the instruments are open the game server raises one structure of
+  every type when it starts, held by nobody, at its first level, four to a row about forty-five kilometres apart on
+  the ice of Queen Maud Land, from 77.4 to 78.6 degrees south and 10 to 16 east - the Antarctic castle first. Each
+  is a `villages.structure.raised.v1` on the event page, sixteen of them at every start, and an id worked out from
+  its type means a server starting over a kept world raises none twice. Nothing draws them yet. A wipe takes them
+  with everything else until the server starts again.
 
 ## Adam's folders and the tools that cut them
 

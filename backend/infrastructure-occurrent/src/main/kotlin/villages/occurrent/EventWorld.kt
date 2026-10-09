@@ -8,10 +8,12 @@ import villages.application.CharacterCommandExecutor
 import villages.application.EventFeed
 import villages.application.HouseCommandExecutor
 import villages.application.Resettable
+import villages.application.StructureCommandExecutor
 import villages.application.Unreadable
 import villages.application.WipeGate
 import villages.application.WorldKept
 import villages.domain.Event
+import villages.domain.StructureCatalogue
 
 /**
  * A whole world of events: the store, its subscriptions, and the ports over them, one executor for each kind of
@@ -22,6 +24,9 @@ interface EventWorld : WorldKept, AutoCloseable {
     val executor: HouseCommandExecutor
     val characterExecutor: CharacterCommandExecutor
     val feed: EventFeed
+
+    /** Structures' streams in this store, decided by the catalogue the server started with, which a world has not. */
+    fun structureExecutor(catalogue: StructureCatalogue): StructureCommandExecutor
 
     /** The moment a wipe takes. Every command here is run outside it, and what acts on its own must be too. */
     val gate: WipeGate

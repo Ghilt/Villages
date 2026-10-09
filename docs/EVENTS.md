@@ -62,7 +62,8 @@ Every event is one of two things, and the difference is worth keeping in sight.
 ended. They are what the chronicle is made of and what the map is drawn from. **This half grows**, and
 goes on growing: every feature that puts something in the world adds to it. Their types read
 `villages.<whose>.<verb>.v<n>`, after the thing whose history they are - `villages.house.` for a
-house's, `villages.character.` for a character's - and in the code they implement `WorldEvent`.
+house's, `villages.character.` for a character's, `villages.structure.` for a structure's - and in the code
+they implement `WorldEvent`.
 
 **The player's events** are things a player did, by which the world was reached into. Being asked
 something and answering it are the mechanics of play rather than happenings in the world, and a
@@ -78,7 +79,8 @@ the events are kept; the type says what kind of thing happened. See decision rec
 
 A character's stream, `character:<uuid>`, holds the world's half only: a player reaches into the world
 through their house and never through a character. What a character is to a house is the house's
-history, on the house's stream. See decision record 0055.
+history, on the house's stream. See decision record 0055. A structure's stream, `structure:<uuid>`, holds the world's
+half only too, and it, not the house, says who holds the structure. See decision record 0092.
 
 A house's events also come in **families**, one a mechanic, which is the third thing the code says about
 each of them: `ResourceEvent` for what a house has (granted, spent, pledged, released), `ChoiceEvent` for
@@ -118,6 +120,15 @@ world's.
 | `villages.character.moved.v1` | `characterId`, `place`, `significance`, `worldTime`, `recordedAt` | A character came to stand somewhere in the world, from nowhere or from where they stood. It carries where and how much that matters, as everything that puts a thing on the map does; the cell is worked out downstream. The significance is the character's own, 10 for every key figure until something decides it per character. | `MoveCharacter` | The characters projection, which closes the span they stood in and opens another; the sight projection, which does the same with the vision point they give each house holding them; the event list |
 | `villages.character.portraitChanged.v1` | `characterId`, `portrait`, `worldTime`, `recordedAt` | A character was given another portrait, or none: a new likeness, kept from now on. | `ChangePortrait` | The characters projection, and through it `yourKeyFigures`; the event list |
 | `villages.character.statChanged.v1` | `characterId`, `stat`, `value`, `worldTime`, `recordedAt` | One of a character's stats became a new value, between one and twenty. The value and not the change, so a reader knows where it stands without adding anything up; a key figure's power is their stats, so this is a key figure growing more or less powerful. | `ChangeStat` | The characters projection, and through it `yourKeyFigures`; the event list |
+
+## A structure's events
+
+One stream per structure, addressed as structure followed by its identifier. Every one of them is the
+world's. A structure decides its own holder, so who holds it is here and on no house's stream.
+
+| Type | Payload | Meaning | Produced by | Consumers |
+|---|---|---|---|---|
+| `villages.structure.raised.v1` | `structureId`, `structureType`, `name`, `place`, `significance`, `level`, `holder`, `worldTime`, `recordedAt` | A structure came to be: of a type in the catalogue, at a level it has, at a place, under a name, held by a house or by nobody. The significance is the catalogue's for the type at that level, carried so that how far out it is drawn is a fact of its history and not of a catalogue retuned since. Refused if it was raised already, or if the catalogue has no such type or the type no such level. | `RaiseStructure`, for the sixteen standing in Antarctica while the instruments are open | The event list |
 
 ## The player's events
 

@@ -16,6 +16,7 @@ import villages.domain.PlayerRolled
 import villages.domain.Resource
 import villages.domain.ResourceEvent
 import villages.domain.VisionEvent
+import villages.domain.StructureEvent
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -42,7 +43,7 @@ class LastRollsProjection(feed: EventFeed) : Follower(feed), StandingAtLastRoll 
             is ResourceEvent -> return
 
             // What else a house is asked, told, holds and sees, and the characters, are other read models' business.
-            is ChoiceEvent, is DialogueEvent, is KeyFigureEvent, is VisionEvent, is CharacterEvent -> return
+            is ChoiceEvent, is DialogueEvent, is KeyFigureEvent, is VisionEvent, is CharacterEvent, is StructureEvent -> return
         }
     }
 

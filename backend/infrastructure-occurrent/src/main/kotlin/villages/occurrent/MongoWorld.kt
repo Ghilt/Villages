@@ -15,9 +15,11 @@ import villages.application.Fault
 import villages.application.FaultBoard
 import villages.application.Faults
 import villages.application.HouseCommandExecutor
+import villages.application.StructureCommandExecutor
 import villages.application.Resettable
 import villages.application.Unreadable
 import villages.application.WipeGate
+import villages.domain.StructureCatalogue
 import java.time.Duration
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -79,6 +81,9 @@ class MongoWorld(
     override val executor: HouseCommandExecutor = OccurrentHouseCommandExecutor(store, converter, gate)
     override val characterExecutor: CharacterCommandExecutor = OccurrentCharacterCommandExecutor(store, converter, gate)
     override val feed = OccurrentEventFeed(subscriptions, store, converter, faults, gate)
+
+    override fun structureExecutor(catalogue: StructureCatalogue): StructureCommandExecutor =
+        OccurrentStructureCommandExecutor(store, converter, catalogue, gate)
 
     override val keptIn = "in MongoDB, database $database, which outlives the server"
 

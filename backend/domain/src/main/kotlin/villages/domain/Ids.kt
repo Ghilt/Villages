@@ -53,6 +53,25 @@ value class CharacterId(val value: UUID) {
     }
 }
 
+/** The identity of a structure, and the name of its stream: `structure:<uuid>`. See decision record 0092. */
+@JvmInline
+value class StructureId(val value: UUID) {
+    /** The stream this structure's events live in. */
+    val stream: String get() = "structure:$value"
+
+    companion object {
+        /** What a structure is named after, so the derivation cannot collide with anything else. */
+        private const val NAMED_AFTER = "villages:structure:"
+
+        /**
+         * One of the structures standing in Antarctica for Adam, one of each type: the same on every start, so a
+         * server that starts again over a kept world raises none of them twice. See docs/plans/structures.md.
+         */
+        fun inAntarctica(type: StructureType): StructureId =
+            StructureId(UUID.nameUUIDFromBytes("${NAMED_AFTER}antarctica:${type.name}".toByteArray(Charsets.UTF_8)))
+    }
+}
+
 /** The identity of one pledge, so that the release can name which one came back. */
 @JvmInline
 value class PledgeId(val value: UUID)

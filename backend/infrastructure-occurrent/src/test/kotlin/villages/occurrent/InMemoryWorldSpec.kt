@@ -36,7 +36,16 @@ import villages.domain.Location
 import villages.domain.PlayerId
 import villages.domain.Sex
 import villages.domain.Species
+import villages.domain.LevelSpec
+import villages.domain.RaiseStructure
+import villages.domain.Significance
 import villages.domain.Stat
+import villages.domain.StructureCatalogue
+import villages.domain.StructureError
+import villages.domain.StructureId
+import villages.domain.StructureRaised
+import villages.domain.StructureSpec
+import villages.domain.StructureType
 import villages.domain.Tincture
 import villages.domain.WorldTime
 import java.net.URI
@@ -122,6 +131,37 @@ class InMemoryWorldSpec : StringSpec({
 
             shouldThrow<CharacterError.AlreadyAppeared> { world.characterExecutor.execute(agnes, sent) }
             world.store.read("character:cb732500-39bd-3b39-a838-bb89f719578f").eventList() shouldHaveSize 1
+        }
+    }
+
+    val castle = StructureType("castle")
+    val catalogue = StructureCatalogue(mapOf(castle to StructureSpec(listOf(LevelSpec(Significance(20.0), 34.0, emptyMap())), emptyList())))
+    val raiseTheCastle = RaiseStructure(
+        structureId = StructureId.inAntarctica(castle),
+        structureType = castle,
+        name = "the Antarctic castle",
+        place = Location(-77.4, 10.0),
+        level = 1,
+        holder = null,
+        worldTime = WorldTime(653_705),
+        recordedAt = noon,
+    )
+
+    "a structure is kept on its own stream, comes back through the same feed, and is raised once" {
+        InMemoryWorld().use { world ->
+            val structures = OccurrentStructureCommandExecutor(world.store, world.converter, catalogue)
+            val delivered = mutableListOf<StoredEvent>()
+            val arrived = CountDownLatch(1)
+            world.feed.subscribe(Start.FROM_NOW) { delivered += it; arrived.countDown() }.use {
+                structures.execute(raiseTheCastle, sent)
+
+                arrived.await(5, TimeUnit.SECONDS) shouldBe true
+                val stored = delivered.single()
+                stored.type shouldBe "villages.structure.raised.v1"
+                stored.stream shouldBe "structure:95ba5c28-4a79-3fa6-88aa-0ff1f5a0a559"
+                stored.event.shouldBeInstanceOf<StructureRaised>().significance shouldBe Significance(20.0)
+            }
+            shouldThrow<StructureError.AlreadyRaised> { structures.execute(raiseTheCastle, sent) }
         }
     }
 

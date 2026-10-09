@@ -16,8 +16,10 @@ import villages.application.Faults
 import villages.application.HouseCommandExecutor
 import villages.application.Fault
 import villages.application.Resettable
+import villages.application.StructureCommandExecutor
 import villages.application.Unreadable
 import villages.application.WipeGate
+import villages.domain.StructureCatalogue
 import java.lang.reflect.Method
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
@@ -67,6 +69,9 @@ class InMemoryWorld(val faults: Faults = FaultBoard()) : EventWorld {
     private var reading: Unreadable? = null
 
     override fun unreadable(): Unreadable = reading ?: store.readEverything(converter).also { reading = it }
+
+    override fun structureExecutor(catalogue: StructureCatalogue): StructureCommandExecutor =
+        OccurrentStructureCommandExecutor(store, converter, catalogue, gate)
 
     /**
      * Waits until every subscription has handed on what it was given. One that never does is stuck whatever the

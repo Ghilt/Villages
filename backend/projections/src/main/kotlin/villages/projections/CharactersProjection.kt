@@ -34,6 +34,7 @@ import villages.domain.ResourceEvent
 import villages.domain.ChoiceEvent
 import villages.domain.DialogueEvent
 import villages.domain.VisionEvent
+import villages.domain.StructureEvent
 import villages.protocol.Cell
 import villages.protocol.coarsestZoom
 import java.util.concurrent.ConcurrentHashMap
@@ -151,7 +152,7 @@ class CharactersProjection(feed: EventFeed) : Follower(feed), KeyFiguresByHouse,
             }
 
             // What a house has, what it is asked and told, and what it sees are other read models' business.
-            is ResourceEvent, is ChoiceEvent, is DialogueEvent, is VisionEvent -> Unit
+            is ResourceEvent, is ChoiceEvent, is DialogueEvent, is VisionEvent, is StructureEvent -> Unit
         }
     }
 
