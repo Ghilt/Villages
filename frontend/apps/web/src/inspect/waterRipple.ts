@@ -28,7 +28,7 @@ const SPARK = '#fff1b8';
 const REACH_PX = 3600;
 const LEAST_REACH = 24;
 const MOST_REACH = 600;
-/** How far off the click the water may be found, as the fence finds it. */
+/** How far off the click the water may be found, as what the click picked is found. */
 const NEAR_PX = 48;
 const MOST_NEAR = 24;
 /** The most pixels it lights, which the sea about a click reaches first. */

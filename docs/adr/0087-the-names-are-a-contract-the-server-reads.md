@@ -62,7 +62,7 @@ is in or by - or none. A third question is asked of the names for it, which name
 The page opens an inspect window on the water it names, keyed by its `id`, so two clicks on the Vistula are one
 window, with the line about it the answer carries. The answer carries where the water runs, too: a river's whole
 course, every piece of it under its name that joins the one pointed at, and a lake's shores, cut to what the fog
-lets through, which the window's gold selection on the map is drawn along. The page's copy of the names is not
+lets through, which the ripple of gold a click sends runs out along. The page's copy of the names is not
 what it reads.
 
 **The third reader is a roll with a window open on water.** `roll` says where each was opened, never what

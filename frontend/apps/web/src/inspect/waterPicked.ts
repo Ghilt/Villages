@@ -7,12 +7,12 @@ import type { LngLat } from './waterReach';
 import type { WaterSeen } from './waters';
 
 /**
- * What a click on water picked out, which the fence round it and the ripple along it both draw: the master's own
- * pixels, never the diamonds the ground is painted on at whatever turn, so that the selection is the water and not
- * the way it is drawn. A river is all its water along the course the server sent, however its painting breaks; a
+ * What a click on water picked out, which the ripple runs out along: the master's own pixels, never the diamonds the
+ * ground is painted on at whatever turn, so that what it runs along is the water and not the way it is drawn. A
+ * river is all its water along the course the server sent, however its painting breaks; a
  * lake all its water within its shores; a river or a lake that came without a course, one nobody has named, all the
- * water joined to the click; the sea, which has no shores to stop at, the water joined to the click about it.
- * Worked out once for each window and kept, because both ask. See `waterReach.ts` and decision record 0087.
+ * water joined to the click; the sea, which has no shores to stop at, the water joined to the click about it. See
+ * `waterReach.ts` and decision record 0087.
  */
 export interface Picked {
   /** The master's pixels, unturned, one world unit each. */
@@ -45,25 +45,8 @@ const MOST_SPAN = 1024;
 /** How far apart the places along a course are that the tiles are read about, in world units. */
 const ALONG = 48;
 
-const kept = new WeakMap<WaterSeen, { field: FogField | null | undefined; picked: Promise<Picked> }>();
-
-/** What the water seen picked out, worked out once for it and the fog it was worked out under. */
-export function pickedOf(
-  seen: WaterSeen,
-  zoom: number,
-  worldRoot: string,
-  field: FogField | null | undefined,
-): Promise<Picked> {
-  const had = kept.get(seen);
-  if (had !== undefined && had.field === field) {
-    return had.picked;
-  }
-  const picked = pick(seen, zoom, worldRoot, field);
-  kept.set(seen, { field, picked });
-  return picked;
-}
-
-async function pick(
+/** What the water seen picked out, under the fog as it is. */
+export async function pickedOf(
   seen: WaterSeen,
   zoom: number,
   worldRoot: string,

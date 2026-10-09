@@ -1,10 +1,9 @@
-import { diamondAt, diamondLattice, fenceAround, frameOf, worldXOf, worldYOf } from '@villages/world';
-import type { DiamondGrid, Fence } from '@villages/world';
+import { diamondAt, diamondLattice, frameOf, worldXOf, worldYOf } from '@villages/world';
+import type { DiamondGrid } from '@villages/world';
 
 /**
- * The water a click picked out, as cells of a grid: which of them a window's selection takes, the fence drawn round
- * them like an area's, and how far along the water from the click each lies, which a ripple runs out through. A
- * flourish, and nothing more.
+ * The water a click picked out, as cells of a grid, and how far along the water from the click each lies, which a
+ * ripple runs out through. A flourish, and nothing more.
  *
  * A cell is taken where `open` allows it - water of the kind the server named, on ground the page may show. A river
  * or a lake the server named comes with where it runs, a river's whole course or a lake's shores, and the water
@@ -14,7 +13,7 @@ import type { DiamondGrid, Fence } from '@villages/world';
  * the tiles they are read from are the caller's. See decision records 0032 and 0087.
  */
 
-/** Whether the cell whose middle is at this place, in world units, may be in the selection. */
+/** Whether the cell whose middle is at this place, in world units, may be taken. */
 export type Open = (x: number, y: number) => boolean;
 
 /** A place, in longitude and latitude. */
@@ -150,40 +149,6 @@ export function cellsAlong(
   const takes = opening(grid, open, within);
   const seeds = [...near].filter(([key, far]) => far <= seed && takes(...cellOf(key))).map(([key]) => key);
   return flood(seeds, takes);
-}
-
-/** The fence round cells, as an area's is drawn round its own; null round none. */
-export function fenceOf(grid: DiamondGrid, cells: ReadonlySet<number>): Fence | null {
-  if (cells.size === 0) {
-    return null;
-  }
-  const rows = new Map<number, number[]>();
-  for (const key of cells) {
-    const [column, row] = cellOf(key);
-    const columns = rows.get(row) ?? [];
-    columns.push(column);
-    rows.set(row, columns);
-  }
-  const spans: { row: number; from: number; to: number }[] = [];
-  for (const [row, columns] of [...rows].sort(([one], [other]) => one - other)) {
-    columns.sort((one, other) => one - other);
-    let from = columns[0]!;
-    for (let at = 1; at <= columns.length; at += 1) {
-      if (at === columns.length || columns[at]! !== columns[at - 1]! + 1) {
-        spans.push({ row, from, to: columns[at - 1]! });
-        from = columns[at]!;
-      }
-    }
-  }
-  const left = Math.min(...spans.map((span) => span.from));
-  const top = spans[0]!.row;
-  const window = {
-    x: left,
-    y: top,
-    width: Math.max(...spans.map((span) => span.to)) - left + 1,
-    height: spans[spans.length - 1]!.row - top + 1,
-  };
-  return fenceAround({ grid, window, spans });
 }
 
 /**

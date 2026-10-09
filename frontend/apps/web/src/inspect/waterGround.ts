@@ -7,7 +7,7 @@ import { classesOfTile, terrainPalette } from '../geometry/terrainClasses';
 import type { LngLat, Open } from './waterReach';
 
 /**
- * The ground a click named water on, as the selection and the ripple read it: the zoom 7 tiles about it, read once,
+ * The ground a click named water on, as the ripple reads it: the zoom 7 tiles about it, read once,
  * which are the master's own pixels, and which of them are water of the kind named on ground the page may show -
  * every one with the fog lifted, which is no field; only what the field reveals with it on; none where the house has
  * revealed nothing, which is a null field. The page's own tiles, so nothing of it is the server's.

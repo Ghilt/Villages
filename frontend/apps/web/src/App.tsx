@@ -14,7 +14,7 @@ import { panelWants, stageBox } from './stage/stageBox';
 import { note } from './log/log';
 import { inspect } from './inspect/opening';
 import { WaterClicks } from './inspect/WaterClicks';
-import { WaterSelection } from './inspect/WaterSelection';
+import { RippleAlongWater } from './inspect/RippleAlongWater';
 import { sessionStore, gateway } from './net/gateway';
 import { followMap } from './net/followMap';
 import { arriving } from './house/arrival';
@@ -321,7 +321,7 @@ export function App({ master, devTools }: AppProps) {
         />
         {/* After the houses' and the areas', so that a click neither took asks what water is there. */}
         <WaterClicks map={map} onPick={inspect} />
-        <WaterSelection map={map} worldRoot={worldRoot} picked={open[0]} />
+        <RippleAlongWater map={map} worldRoot={worldRoot} />
         <HoldingOverlay map={map} houses={drawn} mine={eye ? yours : null} turn={camera.latticeTurn} />
         {/* Put away, and still running underneath: a lid over the map, never instead of it. The
               guard is the form rather than the size, because what a pane was asked to be outlives

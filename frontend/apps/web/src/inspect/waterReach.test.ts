@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { diamondAt, enclosedBy } from '@villages/world';
+import { diamondAt } from '@villages/world';
 
-import { cellOf, cellsAlong, cellsAround, cutShort, fenceOf, keyOf, waterFrom } from './waterReach';
+import { cellOf, cellsAlong, cellsAround, cutShort, keyOf, waterFrom } from './waterReach';
 
 // A world of 64 cells across, not turned, so a cell's column and row are its world x and y: the master's own pixels.
 const grid = { width: 64, turn: 0 };
@@ -76,15 +76,6 @@ describe('the water a click picks out', () => {
     const shores = [[placeOf(10, 10), placeOf(29, 10), placeOf(29, 29), placeOf(10, 29), placeOf(10, 10)]];
 
     expect(cellsAlong(shores, grid, lake, 2, null).size).toBe(400);
-  });
-
-  it('is fenced as an area is, and nothing is fenced round nothing', () => {
-    const cells = cellsAround(placeOf(31, 32), grid, (x) => rivers(x), 12, 2);
-    const fence = fenceOf(grid, cells)!;
-
-    expect(fence.parts).toHaveLength(1);
-    expect(enclosedBy(fence).spans.reduce((sum, span) => sum + span.to - span.from + 1, 0)).toBe(cells.size);
-    expect(fenceOf(grid, new Set())).toBeNull();
   });
 
   it('is followed along the water from the click, up and down a river, leaping a break and never the land', () => {

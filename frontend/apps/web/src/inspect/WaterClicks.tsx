@@ -15,7 +15,7 @@ import { heardWater } from './waters';
  * master's ground map and its real names, only on ground the house has revealed, and the page's own copy of the
  * names is never what a player reads (0087). Asked only zoomed in this far, because further out a click covers
  * more ground than one river. A click on dry ground opens nothing, as a click on empty ground closes nothing; one
- * that names water sends a gold ripple out along it, and `WaterSelection` fences it.
+ * that names water sends a gold ripple out along it: see `RippleAlongWater`.
  */
 const WATERS_FROM_ZOOM = 6;
 
