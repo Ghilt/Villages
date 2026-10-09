@@ -8,11 +8,10 @@ import type { MarkName } from '../mark/Mark';
 import { BAR_THICKNESS } from './bar';
 
 /**
- * The top bar: what is on top of a phone, said in one band a thumb thick - the mark it is known by, its
- * name, a word or two beside the name, and its controls at the far end. Put away, a pane on top is its top
- * bar and nothing else, which is why it is exactly a strip thick. The map and a window on a thing in the
- * world wear the same one, Adam's word of 2026-10-08, so that the top of a phone always reads the same
- * way whichever of the two is up.
+ * The top bar: a window on top of a phone, said in one band a thumb thick - the mark it is known by, its
+ * name, a word or two beside the name, and its controls at the far end. Put away, a window on top is its
+ * top bar and nothing else, which is why it is exactly a strip thick. The map wears none: a bar across it
+ * was too heavy in the picture, Adam's word of 2026-10-08, and it carries its controls alone.
  *
  * **Turned**, it is a sliver down the side of a turned phone, 44 wide: the controls at the top, the mark
  * under them and the name reading down from there, turned rather than dropped, because there is no room for

@@ -52,9 +52,8 @@ interface WindowBarProps {
 }
 
 /**
- * A window's first row: its mark, its name, its size control and its close - the library's top bar, the band
- * the map wears on top of a phone too, drawn inside the window's frame rather than in one of its own, Adam's
- * choice of 2026-10-08.
+ * A window's first row: its mark, its name, its size control and its close - the library's top bar, drawn
+ * inside the window's frame rather than in one of its own, Adam's choice of 2026-10-08.
  *
  * **Put away, this row is the whole window**, which is why it is its own piece: a strip says which house
  * rather than that it is a house, and can be shut without being opened first. The kind is the mark and no

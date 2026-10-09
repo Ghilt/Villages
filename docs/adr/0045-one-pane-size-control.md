@@ -8,7 +8,8 @@
   button of its own, which does what it says; the control still offers every size. The stage does it for every
   pane, through the pane's own way of asking, so a window opened so comes to the top of the rail as it does from
   its control. On a phone the letter's strip does it for itself, and no other strip does.
-- Amended 2026-10-08 by 0109: on a phone only the pane on top carries the control, in its top bar.
+- Amended 2026-10-08 by 0109: on a phone only the pane on top carries the control, a window in its top bar
+  and the map in its corner.
 
 ## Context
 

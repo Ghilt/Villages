@@ -340,10 +340,10 @@ A line each: what it is for, its variants, and where on the page it is.
   because pressing the lit one does something the game decides: the arrows, either pair, move along it -
   `stepAlong` and `stopOf` in `ui/bar/bar.ts` - and press nothing. It reads `borders/gilt-thin`,
   `fills/stone` and `controls/tab-chosen` through `bar.bottom`, all placeholders. *Bars*.
-- **`TopBar`**, `ui/bar/TopBar.tsx`: what is on top of a phone - the map, or a window - in one band a strip
+- **`TopBar`**, `ui/bar/TopBar.tsx`: a window on top of a phone in one band a strip
   thick: its mark, its `name` on one line and trimmed, a word `beside` it such as a `Tag`, and whatever
-  stands at its `end`, the pane's controls. The map and a window wear the same one, Adam's word of
-  2026-10-08. `turned` makes it a sliver 44 wide down a turned phone, the controls at the top and the name
+  stands at its `end`, the pane's controls. The map wears none: a bar across it was too heavy, Adam's
+  word of 2026-10-08, and it carries its marks alone. `turned` makes it a sliver 44 wide down a turned phone, the controls at the top and the name
   reading down under the mark, the word beside it left out. It stands in `bar.top` unless it is
   `framed={false}`, for a bar inside something already framed. It reads `borders/gilt-thin` and
   `fills/stone`, both placeholders. *Bars*.

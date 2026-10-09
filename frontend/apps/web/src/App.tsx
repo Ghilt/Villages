@@ -24,7 +24,7 @@ import { StoodDown } from './net/StoodDown';
 import { StartupScreen } from './startup/StartupScreen';
 import { startupStore, watchStartup } from './startup/startup';
 import { flyWith } from './map/focus';
-import { MapBar } from './map/MapBar';
+import { MapSize } from './map/MapSize';
 import { MapView } from './map/MapView';
 import { Room } from './room/Room';
 import { Stage } from './stage/Stage';
@@ -320,10 +320,9 @@ export function App({ master, devTools }: AppProps) {
         <WaterClicks map={map} onPick={inspect} />
         <RippleAlongWater map={map} worldRoot={worldRoot} />
         <InfluenceZone map={map} zone={zone} turn={camera.latticeTurn} />
-        {/* On a phone, the top bar with the size control: a lid along the top of a map still running
-              underneath, and the whole of it put away. Never in the spread, where the map is the floor
-              and has no size. See `MapBar`. */}
-        {along !== null && <MapBar room={room} along={along} />}
+        {/* On a phone, the size control in the map's corner over a little fade, and nothing else. Never in
+              the spread, where the map is the floor and has no size. See `MapSize`. */}
+        {along !== null && <MapSize room={room} />}
       </>
     ),
     [map, yours, worldRoot, sprites, camera.latticeTurn, open, marked, zone, started],

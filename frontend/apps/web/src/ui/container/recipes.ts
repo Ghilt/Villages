@@ -94,7 +94,7 @@ export const RECIPES = {
    */
   'bar.bottom': { border: 'gilt-thin', scale: 0.5, fill: 'stone' },
 
-  /** The top bar, over the map or a window on top of a phone: the same, because it is a strip put away. */
+  /** A top bar standing on its own, framed: the same, because a pane on top put away is a strip. */
   'bar.top': { border: 'gilt-thin', scale: 0.5, fill: 'stone' },
 
   /** A plain gilt pane on parchment, with nothing standing out past it: what a tab bar tucks under. */

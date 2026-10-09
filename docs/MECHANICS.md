@@ -269,7 +269,7 @@ to its normal size. It runs top to bottom always, and leaves the letter's chip i
 record 0069's, and what it gives the letter is 0085's.
 
 **On a phone** it is a pane like any other, with no special treatment: it stands below the map, and the
-player puts the map away from the map's top bar when they want the whole screen for it.
+player puts the map away from the marks in the map's corner when they want the whole screen for it.
 
 **It arrives the usual way.** A dialogue offered opens the pane: in the spread it appears on the right, or
 opens from its strip, and on a phone it takes the bay below the map, at half, as every pane but a window
@@ -695,7 +695,7 @@ spare, the shield and the name in the middle and the bar still on the bottom edg
 phone's. The blazon line is the first thing to go when the column is squeezed. See decision record 0057.
 
 **On a phone** it opens as a strip beneath the map opened out: the game is read off the map, and the card
-is 200 pixels of a phone's 844 that nobody has asked for yet. The map's size control, in its top bar, is
+is 200 pixels of a phone's 844 that nobody has asked for yet. The map's size control, in its corner, is
 the first thing there is to press, and it teaches the whole control; its middle mark gives half the stage,
 enough for the shield, the blazon, the treasury and the bar of levers with the map still up above it. The
 card below carries no control of its own, because the pane on top's names the arrangement (0109).

@@ -39,18 +39,20 @@ standing there lit. Pressing a mark puts its pane there, opening the bottom to h
 pressing the lit one puts the bottom away, or opens it again. Put away, the bottom is the bar and nothing else:
 the bar is its strip.
 
-**The pane size control is the top pane's alone**, in its **top bar**: the band a strip thick at its head with
-its mark, its name and its controls, the same band for the map and a window. One control is enough because it
-names the arrangement and the other bay follows (0046); the bar's lit mark writes the same one value, so the
-two cannot disagree. Put away, the top pane is its top bar, turned down the side when the phone is.
+**The pane size control is the top pane's alone.** A window carries it in its **top bar**, the band a strip
+thick at its head with its mark, its name and its controls; put away, a window is its top bar, turned down the
+side when the phone is. **The map carries the three marks alone**, in its top right corner over a little fade:
+a bar across it saying *the map* was too heavy in the picture, Adam's word on seeing it, and the map has
+nothing to say that the map does not. One control is enough because it names the arrangement and the other
+bay follows (0046); the bar's lit mark writes the same one value, so the two cannot disagree.
 
 **The pane below, put away, has no control, so a press anywhere on it gives half each**, Adam's word of
 2026-10-08, but on a button of its own, which does what it says - the spread's rule for a pane put away
 (0045), with half rather than opened out because on a phone the stage is two things shared.
 
-**The map's strip is no longer its own way back.** It is its top bar, with the size control on it, so 0046's
-exception - a strip of map with no control, the whole of it a button - goes: the map is put away and brought
-back as a window is.
+**The map's strip is no longer its own way back.** Put away, it is a strip of the map itself with the marks in
+its corner, so 0046's exception - a strip of map with no control, the whole of it a button - goes: the map is
+put away and brought back with the same three marks as a window.
 
 **Navigation is Recent**, the trail, on both forms, known by a clock turned back rather than the compass. On a
 phone it no longer lists the panes, because the bar does; a place pressed in it opens on top, and Recent
@@ -90,5 +92,9 @@ was marks, as the corner's tabs are; each still says its words to a pointer and 
 **The bar along the bottom when turned too.** One drawing rather than two, but it takes 44 of a turned phone's
 390 pixels of height from both bays; down the right edge it takes width, of which there is plenty.
 
-**A window's bar above its frame**, so it is exactly the map's. Shown to Adam beside the other; he chose the
+**A top bar on the map too**, the window's band across it with its mark and *the map*, so the top of a phone
+always reads the same. Built and looked at: Adam found it far too heavy in the composition, and the map needs
+only the controls.
+
+**A window's bar above its frame**, so it is exactly the band the map then wore. Shown to Adam beside the other; he chose the
 bar inside the frame, which keeps a window one framed thing.

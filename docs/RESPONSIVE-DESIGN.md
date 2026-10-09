@@ -115,9 +115,9 @@ Bottom middle is drawn put away, as its chip. Opened out it lies over all of it.
 
 **The floor** is the whole stage, under everything, and the one bay exempt from the rule that nothing
 overlaps, because everything lies on it on purpose. Its pane has no size in the spread: it is the ground the
-tiles stand on. On a phone the floor's pane is a pane like any other, with a **top bar** as a window has —
-its mark, its name and the size control, lying along the top of a map still running underneath — and put
-away it is that bar and nothing else. See decision record 0109.
+tiles stand on. On a phone the floor's pane is a pane like any other, with its size control in its top right
+corner over a little fade and nothing else, no name and no bar; put away, it is a strip of the map itself
+with the marks in its corner. See decision record 0109.
 
 **Left** is the upper tile of the column. **Its panes stack**: one under another on a **rail**, all of
 them drawn, up to three, because they are about different things and comparing two of them should not mean
@@ -219,9 +219,9 @@ instrument has a toggle for each.
 thickness, one shape, so that putting anything away looks like putting anything else away. **The controls
 go to the end the compass is not standing at** — in from the right upright, and at the top turned, with
 the name reading down from under them — because a strip's controls are the one thing on it that has to be
-hittable. **The pane on top is its top bar put away**, the map's and a window's alike, its controls at the
-far end or, turned, at the top. Navigation's strip says otherwise and says why, below: a **stated**
-exception rather than a quiet one.
+hittable. **A window on top is its top bar put away**, its controls at the far end or, turned, at the top,
+and **the map is a strip of itself** with its marks in the corner. Navigation's strip says otherwise and
+says why, below: a **stated** exception rather than a quiet one.
 
 **Medium and big are the pane's own business, and may be one drawing or two.** A pane whose full form is a
 list can draw the same list medium and simply show less of it, and another can draw something else
@@ -236,8 +236,8 @@ and the section above does not speak for it. It has the same three sizes and the
 differs is who the room belongs to. See decision records 0045 and 0046.
 
 **A pane carries a pane size control** — three marks saying how much of the stage it is taking: put away,
-the normal size, opened out. In the **bays** only the pane on top carries it, in its top bar, Adam's word
-of 2026-10-08: it names the arrangement, and the other bay follows because both of them are reading one
+the normal size, opened out. In the **bays** only the pane on top carries it, a window in its top bar and
+the map in its corner, Adam's word of 2026-10-08: it names the arrangement, and the other bay follows because both of them are reading one
 value, so one control says everything and the pane below draws none (0109). In the spread every pane
 carries one, bar the floor's. In the **spread** each tile's size is
 its own, because a tile is not dividing anything with anybody, and the panes taking turns in bottom left

@@ -1,0 +1,37 @@
+/*
+ * The map's size control on a phone: its marks in the top right corner of the map, over a little fade that
+ * is dark under the marks and gone a thumb away from them, so they read on sea, snow or fog and the map
+ * underneath is still the map. It takes the pointer only where the marks are. See `MapSize`.
+ */
+.map-size {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 4;
+  display: flex;
+  padding: 0.35rem 0.4rem 0.9rem 1.6rem;
+  background: radial-gradient(
+    ellipse 100% 100% at 100% 0%,
+    rgba(20, 16, 11, 0.55) 0%,
+    rgba(20, 16, 11, 0.3) 45%,
+    transparent 78%
+  );
+  pointer-events: none;
+}
+
+.map-size .pane-size {
+  pointer-events: auto;
+}
+
+/* Turned and put away the map is a sliver 44 wide: the marks stack, and the fade runs down rather than across. */
+@container (max-width: 6rem) {
+  .map-size {
+    padding: 0.35rem 0.35rem 1.6rem;
+    background: radial-gradient(
+      ellipse 100% 100% at 50% 0%,
+      rgba(20, 16, 11, 0.55) 0%,
+      rgba(20, 16, 11, 0.3) 45%,
+      transparent 78%
+    );
+  }
+}

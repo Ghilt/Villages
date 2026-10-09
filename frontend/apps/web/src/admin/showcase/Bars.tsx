@@ -158,14 +158,14 @@ export function Bars() {
 
       <Part title="The top bar">
         <p className="ui-label showcase__lead">
-          What is on top of a phone, the map or a window, in one band a strip thick: its mark, its name, a
-          word beside the name, and its controls at the far end. Put away, a pane on top is this and nothing
-          else. Turned, it is a sliver down the side with the name reading down.
+          A window on top of a phone, in one band a strip thick: its mark, its name, a word beside the name,
+          and its controls at the far end. Put away, a pane on top is this and nothing else. Turned, it is a
+          sliver down the side with the name reading down.
         </p>
         <Specimens>
-          <Specimen name="TopBar" note="the map, as wide as a phone" wide>
+          <Specimen name="TopBar" note="a window, as wide as a phone" wide>
             <div className="showcase__bar-across">
-              <TopBar mark="map" kind="The map" name="The map" end={<Controls />} />
+              <TopBar mark="lake" kind="A lake" name="The Lake of Geneva" end={<Controls close />} />
             </div>
           </Specimen>
           <Specimen name="TopBar beside" note="a window, how fresh it is beside its name, and its close" wide>
@@ -203,9 +203,12 @@ export function Bars() {
               </Container>
             </div>
           </Specimen>
-          <Specimen name="TopBar turned" note={['the map put away on a turned phone', 'controls at the top']}>
+          <Specimen
+            name="TopBar turned"
+            note={['a window put away on a turned phone', 'controls at the top']}
+          >
             <div className="showcase__bar-down">
-              <TopBar mark="map" kind="The map" name="The map" end={<Controls />} turned />
+              <TopBar mark="house" kind="A house" name="Kettleby" end={<Controls close />} turned />
             </div>
           </Specimen>
           <Specimen name="TopBar turned" note="a window put away, turned, its name trimmed">
@@ -215,7 +218,7 @@ export function Bars() {
           </Specimen>
           <Specimen name="TopBar" note="every mark a pane on top can carry">
             <div className="showcase__top-marks">
-              {(['map', 'house', 'figures', 'area', 'river', 'lake', 'sea'] as const).map((mark) => (
+              {(['house', 'figures', 'area', 'river', 'lake', 'sea'] as const).map((mark) => (
                 <TopBar key={mark} mark={mark} kind={mark} name={mark} />
               ))}
             </div>

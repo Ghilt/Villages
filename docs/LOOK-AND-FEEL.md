@@ -104,7 +104,8 @@ for five words, and the words teach the marks. Every mark a number is known by i
 away, the normal size, opened out. The mark is **how much of a box is filled**, which is the thing being
 chosen rather than a metaphor for it - no folder, no chevron, no arrow pointing anywhere. Every **pane**
 in the spread has one, and it replaced a chevron that could only put a pane away; on a phone only the
-pane on top has one, in its **top bar**, because one names the arrangement for both. A pane that cannot
+pane on top has one - a window in its **top bar**, the map in its top right corner over a little fade -
+because one names the arrangement for both. A pane that cannot
 be put away offers two marks rather than three. The panes taking turns in the corner of the spread share
 one, at the far end of the **tab bar**, because the corner is one size whichever of them is up. See
 decision records 0045, 0057 and 0109.
@@ -290,17 +291,17 @@ word across 44 pixels and eight hundred pixels of room along one. One shape and 
 pane, so that putting anything away looks like putting anything else away, and one pane that says
 otherwise and says why: **navigation** carries the marks of what it could put in the other bay, because
 that is the strip a player arrives in by pressing the compass. On a phone the pane below the top carries
-no control, because the pane on top's names the arrangement. The map and an inspect window put away are
-their **top bars** - the mark of its kind, the name of the thing, the control and, on a desktop, the
-close - so a window's says which house rather than that it is one. See `RESPONSIVE-DESIGN.md`,
+no control, because the pane on top's names the arrangement. An inspect window put away is its **top
+bar** - the mark of its kind, the name of the thing, the control and the close - so it says which house
+rather than that it is one; the map put away is a strip of the map itself with its marks in the corner. See `RESPONSIVE-DESIGN.md`,
 `MECHANICS.md` and decision records 0046, 0047 and 0109.
 
-**The top bar.** What is on top of a phone, the map or a window, said in one band a strip thick: its mark,
-its name trimmed to one line, a word or two beside the name, and its controls at the far end. The map and
-a window wear the same one, the strip's narrow gilt on stone over the map, and inside a window's frame on
+**The top bar.** A window on top of a phone, said in one band a strip thick: its mark, its name trimmed to
+one line, a word or two beside the name, and its controls at the far end, inside the window's frame on
 the frame's own stone, because a window keeps one frame round everything, Adam's choice. Turned with the
-phone, it is a sliver down the side, the controls at the top and the name reading down. See decision record
-0109.
+phone, it is a sliver down the side, the controls at the top and the name reading down. **The map has
+none**: its three marks stand in its top right corner over a little fade and nothing else, because a bar
+across the map was too heavy in the picture, Adam's word. See decision record 0109.
 
 **The tab bar.** Several **panes** sharing one **bay**, and a strip of marks across its top saying which is
 up. Marks and no words: a column is 26rem at its widest and two words on a tab is a tab that wraps. Its

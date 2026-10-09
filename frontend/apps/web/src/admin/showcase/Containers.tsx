@@ -151,7 +151,7 @@ const HOLDS: Record<RecipeName, () => ReactNode> = {
   'strip.right': () => <span className="ui-caps">Dialogues</span>,
   'strip.middle': () => <span className="ui-caps">A letter</span>,
   'bar.bottom': () => <span className="ui-caps">The bottom bar, under its marks</span>,
-  'bar.top': () => <span className="ui-caps">The map</span>,
+  'bar.top': () => <span className="ui-caps">Kettleby</span>,
   'card.figure': () => <Figure name="Count de Montreuil" what="Noble · Rationalist" stats="12 · 8 · 4" />,
   'tooltip.plain': () => <span className="ui-body">Keep your holdings in sight</span>,
   'screen.loading': () => <Pane title="Villages, while the map is painted" />,
