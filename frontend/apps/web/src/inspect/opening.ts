@@ -1,6 +1,5 @@
 import { arrive } from '../stage/arrive';
 import { baysStore, askFor, formNow, giveBack } from '../stage/bays';
-import { type Which } from '../stage/arrangement';
 import type { PaneSize, Room } from '../stage/panes';
 import { closeOne, openOn, paneIdOf, type Subject } from './subjects';
 
@@ -18,24 +17,21 @@ import { closeOne, openOn, paneIdOf, type Subject } from './subjects';
 /**
  * Open a window on something.
  *
- * In the bays it takes **the bay that is not the map's**, unless the player pointed at one with the
- * arrows - because the thing they clicked is on the map, and putting the window over the map would hide
- * what they just asked about. Closing it puts back whatever was there.
- *
- * And it opens the bay to at least half if it was a strip, because a window nobody can read is not an
- * answer to a click. That is the arrival's business rather than the manager's: the compass lands in a
- * strip quite happily, and the difference between the two is who asked. See decision record 0046.
+ * In the bays it takes **the top**, in the map's place or the window's that was there, because the top of a
+ * phone is the map or one window: Adam's word of 2026-10-08. Closing it gives the map back. And it opens the
+ * top to at least half if it was a strip, because a window nobody can read is not an answer to a click. See
+ * `phone.ts` and decision records 0046 and 0109.
  */
-export function inspect(subject: Subject, into: Which | null = null): void {
+export function inspect(subject: Subject): void {
   openOn(subject);
   // In the spread a window asked for again comes to the top of the rail, and one that was put away opens,
   // because a thing nobody can read is not an answer to a click. See decision record 0058.
-  arrive(paneIdOf(subject), { into: into ?? undefined, inTheSpread: 'full' });
+  arrive(paneIdOf(subject), { inTheSpread: 'full' });
 }
 
 /**
- * Open a window on something from a pane: beside it, so that the two stay side by side - what a window's links
- * do, and a line of a dialogue that shows a house or a person.
+ * Open a window on something from a pane: what a window's links do, and a line of a dialogue that shows a house
+ * or a person. On a phone it goes on top, as any window does.
  */
 export function inspectBeside(subject: Subject, from: Room): void {
   openOn(subject);

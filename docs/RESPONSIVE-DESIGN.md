@@ -187,8 +187,10 @@ whether it is the spread or the bays.
 ### In the bays
 
 **First and second** are the two boxes the fold cuts: the top and the bottom upright, the left and the right
-turned. A pane is in one of them or in neither, and putting one where the other already is swaps the two,
-because with two bays there is nowhere else for the displaced one to go.
+turned. A pane is in one of them or in neither. **The top holds the map or one window, and the bottom
+every other pane**, Adam's word of 2026-10-08: a pane says which it is, and nothing ever goes in the other
+end's bay. A window arriving takes the top in the map's place, a second takes the first one's place, which
+stays open in no bay, and closing one gives the map back. See decision record 0109.
 
 ## Panes
 
@@ -241,15 +243,17 @@ carries one, bar the floor's. In the **spread** each tile's size is
 its own, because a tile is not dividing anything with anybody, and the panes taking turns in bottom left
 share one control, in its tab bar. **In the spread a press anywhere on a pane put away opens it out**, but
 on a button of its own, which does what it says: the strip is the way back, the marks are for the other sizes.
+**On a phone a press anywhere on the pane below, put away, gives half each**, Adam's word of 2026-10-08:
+it has no control of its own, so its strip is the way back to half, and its buttons still do what they say.
 **Bottom middle offers two marks in the spread**, put away and opened
 out, and its chip carries none, because pressing the chip opens it. See decision records 0045, 0046, 0057
 and 0085 and `LOOK-AND-FEEL.md`.
 
 **Where things open differs between the forms, and nothing else does.** In the spread everything is on the
 screen, so a way on from a pane is a plain click and there is nothing to choose between; in the bays it
-goes into the other bay, so the pane it came from stays beside it. Tabs are the spread's; the compass is the
-bays'. **On a phone no pane has a close: a pane leaves its bay when the player navigates something else into
-it.**
+goes where it stands, a window or the map on top and anything else below, so a pane below stays beside what
+it opened. Tabs are the spread's; the compass is the bays'. **On a phone the one close is a window's**, and
+it gives the map back; any other pane leaves its bay when the player navigates something else into it.
 
 **A conversation's scene is the whole of its pane, in every state**, cropped to the pane's shape: a narrow
 slice of the picture in the tall column on a desktop, most of it at half a phone. The conversation is drawn
@@ -257,7 +261,7 @@ over it, so the scene takes none of the room the lines are read in.
 
 **A line of a dialogue that shows something is a way on the conversation takes rather than the player**, and
 it follows the same rule: in the spread the camera moves beside the column or the window opens in the rail,
-and in the bays the map or the window goes into the bay the conversation is not in. One thing more, Adam's
+and in the bays the map or the window goes on top, the conversation below it. One thing more, Adam's
 word: **the two go to half each** when the conversation had the stage opened out, because a thing shown in a
 strip is not shown and the conversation is what the player was reading. It is the third thing that moves the
 seam without being asked, after a letter and a window arriving, and for their reason: the world put it
@@ -272,15 +276,15 @@ bottom one on a tall phone and the right one on a wide one, and navigation lists
 and the **trail**, where the player has been, below it. It **never resizes anything**, which is what lets
 it land in a strip. See decision records 0043 and 0047 and `LOOK-AND-FEEL.md`.
 
-**Put away, navigation is still a way somewhere**, which is the second stated exception to minimised being
-just a name: its strip carries the marks of the panes it could put in the other bay, because a list of ways
-on is what it is for and this is the strip a player arrives in by pressing the compass.
+**Put away, navigation is still a way somewhere**, the stated exception to minimised being just a name: its
+strip carries the marks of the panes it could go to, because a list of ways on is what it is for and this
+is the strip a player arrives in by pressing the compass.
 
-**Every row carries a needle to the other bay**, so any pane can be put in either and the one it is already
-in is marked rather than taken away. **No pane is privileged there**: none is pinned where it is, and which
-bay two panes share on a desktop has nothing to say about where either of them can go on a phone. In the
-spread navigation is a tab in bottom left instead, a row there is a plain click, and put away it is its
-name and nothing else, because there are no bays to send anything to.
+**A row goes where its thing stands**, and there is no needle, because there is nowhere else for anything
+to go: a pane takes navigation's own place below, the map takes the top, and a place in the trail opens
+its window on top while navigation stays beside it. In the spread navigation is a tab in bottom left
+instead, a row there is a plain click, and put away it is its name and nothing else. See decision record
+0109.
 
 ## Container queries, not breakpoints
 

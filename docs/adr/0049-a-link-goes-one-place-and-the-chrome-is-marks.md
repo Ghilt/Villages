@@ -2,6 +2,8 @@
 
 - Status: accepted
 - Date: 2026-09-20
+- Amended 2026-10-08 by 0109: on a phone a link opens where its thing stands, a window on top in this one's
+  place and the map on top too, rather than in the bay the window is not in.
 
 ## Context
 

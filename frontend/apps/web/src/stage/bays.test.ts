@@ -354,16 +354,6 @@ describe('which bay is which', () => {
     stageIs('bays', 'columns');
     expect([where(0), where(1)]).toEqual(['left', 'right']);
   });
-
-  // Where a thing clicked on the map opens, so that the window does not cover what it is about.
-  it('knows which bay the map is not in', async () => {
-    const { awayFromTheMap, put } = await fresh();
-
-    expect(awayFromTheMap()).toBe(1);
-
-    put(1, MAP_PANE.id);
-    expect(awayFromTheMap()).toBe(0);
-  });
 });
 
 describe('who is up in a shared tile', () => {

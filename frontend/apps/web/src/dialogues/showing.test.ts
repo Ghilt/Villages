@@ -56,10 +56,10 @@ async function fresh() {
   bays.configureBays(panes.STAGE_PANES);
   const flights: { lat: number; lon: number }[] = [];
   focus.flyWith((place) => flights.push(place));
-  // What the dialogue pane is handed, as the stage and `panes.tsx` hand it: the map and a window beside it.
-  const room = { openBeside: (id: string) => arrive.openBeside(DIALOGUE_PANE.id, id) } as Room;
+  // What the dialogue pane is handed, as the stage and `panes.tsx` hand it: the map, and a window brought up.
+  const room = { openBeside: (id: string) => arrive.openBeside(id) } as Room;
   const beside: Beside = {
-    showMap: () => arrive.showMapBeside(DIALOGUE_PANE.id),
+    showMap: () => arrive.showMap(),
     window: (thing) => opening.inspectBeside(thing, room),
   };
   const showWhatIsReached = (dialogue: DialogueView, lines: readonly LineView[]) =>
@@ -153,20 +153,24 @@ describe('in the spread, a line reached', () => {
 });
 
 describe('on a phone, a line reached', () => {
-  it('shows the place in the bay the conversation is not in, and the two go to half each', async () => {
-    const { askFor, baysStore, flights, put, showWhatIsReached, stageIs } = await fresh();
+  it('shows the place on the map on top, the conversation below, and the two go to half each', async () => {
+    const { askFor, baysStore, flights, openOn, paneIdOf, showWhatIsReached, stageIs, takeOver } =
+      await fresh();
     stageIs('bays', 'rows');
-    put(0, DIALOGUE_PANE.id);
+    // A window on top, which the map takes the place of.
+    openOn({ kind: 'house', id: 'fenwold' });
+    takeOver(0, paneIdOf({ kind: 'house', id: 'fenwold' }));
+    takeOver(1, DIALOGUE_PANE.id);
     askFor(DIALOGUE_PANE.id, 'full');
 
     showWhatIsReached(letter(), [line('arrives', { kind: 'place', at: THE_SEAT })]);
 
     expect(flights).toEqual([THE_SEAT]);
-    expect(baysStore.get().holding).toEqual([DIALOGUE_PANE.id, MAP_PANE.id]);
+    expect(baysStore.get().holding).toEqual([MAP_PANE.id, DIALOGUE_PANE.id]);
     expect(baysStore.get().arrangement).toBe('halfEach');
   });
 
-  it('opens the window on the character it shows in the other bay, and the conversation stays', async () => {
+  it('opens the window on the character it shows on top, and the conversation stays below', async () => {
     const { askFor, baysStore, paneIdOf, showWhatIsReached, stageIs, takeOver } = await fresh();
     stageIs('bays', 'rows');
     takeOver(1, DIALOGUE_PANE.id);

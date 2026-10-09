@@ -70,9 +70,6 @@ not decided.
 of a pane whose full form is a list, so that the list can be glanced through in a strip of screen while the
 map stays up beside it. Its first and only use is the choice roll. See decision record 0044.
 
-**The needle.** One mark, pointing at a **bay**. One drawing turned four ways, so a player learns it once:
-this mark means *there*.
-
 **The compass rose.** Four cardinal points filled and four between them drawn, inside a ring: the way to
 everything that is not on the screen. On a phone it is a disc in the **bottom right corner of the stage**,
 always the same corner, and one tap puts **navigation** in the bay under the thumb; in the spread it is a
@@ -118,7 +115,7 @@ a **lozenge** where two runs meet, and an **open curl** that springs away from t
 itself without closing. Drawn once for the achievement the shield hangs in, and the vocabulary for any
 edge worth marking since. **None of it carries meaning** — the heraldry is the field and the charge, and
 this is the frame they hang in — so there is never anything in it for the player to read. A curl is drawn
-once and mirrored rather than drawn four times, which is the **needle**'s rule. See decision record 0048.
+once and mirrored rather than drawn four times, so a player learns it once. See decision record 0048.
 
 **The portrait frame.** One upright picture of a character, three by four, wherever a face is shown: the key
 figures, the inspect window, and a dialogue's bubbles and scene. In a window it hangs at the top right,
@@ -392,13 +389,11 @@ it runs on a rail, so the wheel has nothing to say while it is happening. Whethe
 is that nothing pops is allowed one thing that takes over is part of what experiment 0009 is asking.
 
 **The marks.** Every pane declares the mark it is known by, drawn in one place so that the same thing on a
-tab, in a list and wherever a pane is named later cannot drift apart. **The compass is the needle inside a
-ring**, deliberately: the needle says which bay a thing goes to and the compass opens the pane that lists
-the bays, so they read as one family rather than two unrelated drawings. A **link** out of an inspect
-window is one button rather than a pair of needles, and *show it on the map* is the map's own mark; see
+tab, in a list and wherever a pane is named later cannot drift apart. A **link** out of an inspect
+window is one button, and *show it on the map* is the map's own mark; see
 decision record 0049. A key figure's details carry the same map mark beside their name while they stand
 on the map, and none while they are on no map, doing what the window's does: the camera to them, and on a
-phone the map into the other bay. **The way back from one key figure to all of them is nine small
+phone the map on top. **The way back from one key figure to all of them is nine small
 squares**, the grid it goes back to, filled rather than outlined because nine outlines at the size of a
 mark are a blur, and drawn at **twice a mark's size**, Adam's word, because it is the one way back from
 where the pane has got to. **The way back from a conversation to all of them is the list it goes back to**,

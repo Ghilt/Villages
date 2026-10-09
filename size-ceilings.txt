@@ -17,7 +17,7 @@
 710 frontend/apps/web/src/sprites/scenery/SceneryLayer.ts
 599 frontend/apps/web/src/stage/bayBox.test.ts
 446 frontend/apps/web/src/stage/bayBox.ts
-442 frontend/apps/web/src/stage/bays.ts
+427 frontend/apps/web/src/stage/bays.ts
 511 frontend/packages/world/bin/cutArt.ts
 723 frontend/packages/world/bin/cutUi.ts
 494 frontend/packages/world/bin/generateSpriteMap.ts

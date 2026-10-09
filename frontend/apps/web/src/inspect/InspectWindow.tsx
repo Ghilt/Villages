@@ -25,12 +25,11 @@ import { remember } from './trail';
  * a house to the ground it stands in, and from there to whoever else stands in it, is how a player reads a
  * neighbourhood without having to think of the next question.
  *
- * **A link is one button, and it opens in the other bay.** It used to be its words with the **arrows**
+ * **A link is one button, and it opens where the thing stands.** It used to be its words with the **arrows**
  * beside them, so the player said not only *what* but *where*; that made a list of four links a list of
- * eight decisions and neither of them was the obvious one, which was following the link. There is one
- * sensible place for a thing to open - the bay this window is not in, so the window it came from stays on
- * the screen - and the player who wants it elsewhere has **navigation** for that. The same argument 0043
- * made for navigation's rows, arrived at from the other end. See decision record 0049.
+ * eight decisions and neither of them was the obvious one, which was following the link. On a phone a window
+ * followed to takes this one's place on top, which stays open and in the trail; in the spread it joins the
+ * rail. See decision records 0049 and 0109.
  *
  * **Show it on the map is its mark rather than its words**, in both forms: it is the only link that does
  * not open a window, and the map is the one thing on the stage a player already knows the mark for.
@@ -43,7 +42,7 @@ interface WindowBarProps {
   /** Which one: the name, where one is known. */
   name: string;
   room: Room;
-  /** How the stage is cut, or null in the spread: the one form a window can be closed in. */
+  /** How the stage is cut, or null in the spread: a window put away on a turned phone turns. */
   along: 'rows' | 'columns' | null;
   /**
    * How fresh what it shows is, for a thing on the map: `current`, or the day the fog hid it, and the words a
@@ -53,17 +52,17 @@ interface WindowBarProps {
 }
 
 /**
- * A window's first row: its mark, its name, its size control and, on a desktop, its close - the library's top
- * bar, the band the map wears on top of a phone too, drawn inside the window's frame rather than in one of its
- * own, Adam's choice of 2026-10-08.
+ * A window's first row: its mark, its name, its size control and its close - the library's top bar, the band
+ * the map wears on top of a phone too, drawn inside the window's frame rather than in one of its own, Adam's
+ * choice of 2026-10-08.
  *
  * **Put away, this row is the whole window**, which is why it is its own piece: a strip says which house
- * rather than that it is a house, and on a desktop can be shut without being opened first. The kind is
- * the mark and no longer a word above the name, the mark each kind is known by everywhere else. Put away on
- * a turned phone, it turns with the strip.
+ * rather than that it is a house, and can be shut without being opened first. The kind is the mark and no
+ * longer a word above the name, the mark each kind is known by everywhere else. Put away on a turned phone,
+ * it turns with the strip.
  *
- * **On a phone there is no close.** A window there is one of two bays, and it is replaced by navigating
- * to something else, which is how every pane on a phone leaves its bay. See `MECHANICS.md`.
+ * **On a phone the close is the way back to the map**, Adam's word of 2026-10-08: a window there stands on
+ * top in the map's place, and closing it gives the map back. See `MECHANICS.md` and decision record 0109.
  */
 export function WindowBar({ subject, kind, name, room, along, fresh }: WindowBarProps) {
   return (
@@ -75,17 +74,15 @@ export function WindowBar({ subject, kind, name, room, along, fresh }: WindowBar
       end={
         <>
           <PaneSizeControl room={room} />
-          {along === null && (
-            <button
-              type="button"
-              className="inspect__close"
-              aria-label={`close ${name}`}
-              title={`close ${name}`}
-              onClick={() => stopInspecting(subject)}
-            >
-              <Icon name="close" />
-            </button>
-          )}
+          <button
+            type="button"
+            className="inspect__close"
+            aria-label={`close ${name}`}
+            title={`close ${name}`}
+            onClick={() => stopInspecting(subject)}
+          >
+            <Icon name="close" />
+          </button>
         </>
       }
       turned={along === 'columns' && room.size === 'strip'}
@@ -97,10 +94,7 @@ export function WindowBar({ subject, kind, name, room, along, fresh }: WindowBar
 interface InspectWindowProps {
   subject: Subject;
   said: Description;
-  /**
-   * The arrows, when there are two bays to choose between. In the spread there is one place a window goes
-   * and one map, so a link is a plain click and no arrows are drawn.
-   */
+  /** How the stage is cut, or null in the spread: what its first row is handed. */
   along: 'rows' | 'columns' | null;
   /** The room it got, which is what its size control reports and changes. */
   room: Room;
@@ -117,9 +111,8 @@ export function InspectWindow({ subject, said, along, room, fresh }: InspectWind
   }, [subject, said.name]);
 
   /*
-   * Everything a window offers opens beside it, in the bay it is not in: a window nobody can see is not an
-   * answer to a click, and following a link from a window that then covers itself is the same mistake the
-   * compass was making. The room knows which bay that is; in the spread there is none to choose.
+   * Everything a window offers opens where it stands: on a phone a window on top, in this one's place, and the
+   * map on top too, a window nobody can see being no answer to a click. In the spread it joins the rail.
    */
   const follow = (link: Link) => {
     if (link.to === 'map') {

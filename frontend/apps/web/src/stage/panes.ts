@@ -49,6 +49,12 @@ export interface Pane {
    */
   spread: BayName;
   /**
+   * Where it stands on a phone: **on top**, the map's and the windows' alone, or **below**, everything else's
+   * and the bottom bar's to choose between. Below unless it says otherwise. Adam's word of 2026-10-08: the
+   * top is the map or a single window. See decision record 0109.
+   */
+  phone?: 'top' | 'below';
+  /**
    * How tall its tile is in the spread, at each size it is drawn at. Null for a pane with no tile of its
    * own: the map on the floor, a window in the rail, and a pane that takes turns in a tile with others,
    * whose tile is one size whichever of them is up - see {@link SHARED_TILES}.
@@ -157,6 +163,7 @@ export const MAP_PANE: Pane = {
   title: 'the map',
   // The ground everything else stands on, rather than a tile competing with the rest for room.
   spread: 'floor',
+  phone: 'top',
   // The floor is the whole stage and asks the column for nothing.
   tall: null,
   icon: 'map',
@@ -345,9 +352,9 @@ export interface Room {
   ask: (size: PaneSize) => void;
   /** The sizes its control offers, smallest first: all three, unless the pane offers fewer in the spread. */
   sizes: readonly PaneSize[];
-  /** Shows the map beside this pane, opened to be read, on a phone; in the spread the map is the floor. */
+  /** Shows the map, opened to be read, on top of a phone; in the spread the map is the floor. */
   showMap: () => void;
-  /** Brings a pane beside this one: the other bay on a phone; in the spread, opened if it was put away. */
+  /** Brings a pane up from this one: where it stands on a phone; in the spread, opened if it was put away. */
   openBeside: (id: string) => void;
   /**
    * Whether the pane draws its own size control. Not in a tile its panes take turns in, in the spread:

@@ -84,25 +84,7 @@
   background: color-mix(in srgb, var(--gold) 12%, transparent);
 }
 
-/*
- * A row in the bays: the row itself is where it goes, and one needle sends it the other way instead.
- *
- * Pressing the row puts the thing in the bay navigation is standing in, which is what a player means nine
- * times in ten - they came to this list in order to leave it. The needle at the far end is the other bay.
- * Every row is this row, and every pane can reach both. See decision record 0043.
- */
-.navigate__step--picked {
-  display: flex;
-  align-items: center;
-  padding-right: 0.35rem;
-}
-
-.navigate__step--picked .navigate__go {
-  flex: 1;
-  min-width: 0;
-}
-
-/* A finger is not a mouse: the needle in a list is a row tall rather than a glyph tall. */
+/* A mark on navigation's strip, a way to a pane: a finger is not a mouse, so it is a row tall, not a glyph. */
 .navigate__there {
   flex: none;
   width: 2rem;
@@ -121,7 +103,7 @@
   opacity: 1;
 }
 
-/* Where it already is: the needle you are standing on rather than a place to go. */
+/* A pane already up: the mark you are standing on rather than a place to go. */
 .navigate__there--here {
   cursor: default;
 }

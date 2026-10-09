@@ -170,6 +170,8 @@ export function App({ master, devTools }: AppProps) {
   // Asked once the map is there, so a house heard before the map was ready still arrives. See `arrival.ts`.
   // A page opened by a map link stays where the link put it; the house's window opens all the same. Under the
   // loading screen there is no flight: the startup puts the camera on the seat, and lifts once it is drawn there.
+  // Not on a phone, where a window takes the map's place on top and would hide the flight to the seat; the
+  // house status is already below it there. See decision record 0109.
   useEffect(() => {
     if (map !== null && yours !== null && arriving(yours)) {
       const { seat } = yours;
@@ -177,17 +179,16 @@ export function App({ master, devTools }: AppProps) {
         note('camera', `flying to the seat at ${seat.lat.toFixed(3)}, ${seat.lon.toFixed(3)}`);
         map.flyTo({ center: [seat.lon, seat.lat], zoom: Math.max(map.getZoom(), FOUNDING_ZOOM) });
       }
-      inspect({ kind: 'house', id: yours.id });
+      if (formNow() !== 'bays') {
+        inspect({ kind: 'house', id: yours.id });
+      }
     }
   }, [map, yours]);
 
   /*
-   * A question arriving takes the big bay, and the small one keeps whatever was in it.
-   *
-   * Only in the bays: in the spread it opens out over everything, and nothing is displaced to make room
-   * for it. Reading the question is the thing to do first, which is why it takes the map's
-   * bay rather than the other one - and the carousel is how a player puts the map back beside it. The
-   * takeover remembers, so answering gives the bay back. See decision record 0044.
+   * A question arriving opens the letter: on a phone below the map, as every pane but a window stands, opened
+   * to half if it was put away, and in the spread opened out over everything, nothing displaced to make room
+   * for it. See decision records 0044 and 0109.
    */
   const asking = yourChoice?.id;
   const asked = useRef(false);
@@ -196,10 +197,10 @@ export function App({ master, devTools }: AppProps) {
     if (asking !== undefined) {
       asked.current = true;
       // Opened out, over everything in the spread: the letter is put away or opened out there. See 0085.
-      arrive(CHOICE_PANE.id, { into: 'theMapsBay', inTheSpread: 'full' });
+      arrive(CHOICE_PANE.id, { inTheSpread: 'full' });
     } else if (asked.current && housed) {
-      // Answered: in the spread the pane goes back to Take action, put away to its strip; on a phone the bay it
-      // took over is given back as it always was. Not until there is a house, because the founding is answered
+      // Answered: in the spread the pane goes back to Take action, put away to its strip; on a phone it stays
+      // where it stands, Take action below the map. Not until there is a house, because the founding is answered
       // a moment before the house arrives, and in that moment the pane stands nowhere to be put away. See 0083.
       asked.current = false;
       if (formNow() !== 'bays') askFor(CHOICE_PANE.id, 'strip');
@@ -207,9 +208,9 @@ export function App({ master, devTools }: AppProps) {
   }, [asking, housed]);
 
   /*
-   * A dialogue arriving opens the pane: from its strip in the spread, and on a phone into the bay that is
-   * not the map's, as a window does, because the map is where the player was looking. What has arrived is
-   * the opening's to say: a dialogue waiting that this page has not been shown before. See `MECHANICS.md`.
+   * A dialogue arriving opens the pane: from its strip in the spread, and on a phone below the map, where every
+   * pane but a window stands. What has arrived is the opening's to say: a dialogue waiting that this page has
+   * not been shown before. See `MECHANICS.md`.
    */
   const offered = yourDialogues;
   useEffect(() => {

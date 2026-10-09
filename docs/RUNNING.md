@@ -374,9 +374,9 @@ stage alone, with none of the debug panel in it (decision record 0079).
   line, and an option the house cannot pay for says so under the options. A line can show something as it
   is reached while playing, once in the life of the page: the sample's rider takes the camera to the seat,
   the purse paid opens the house's window and the good word the figure's - beside the column on a desktop,
-  and on a phone in the other bay with the two at half each; each is a line of the log under `dialogues`.
-  `offer a dialogue` opens the pane: from its strip in the spread, and on a phone into the bay the map is
-  not in, at half. See `docs/adr/0071`, `0069` and `0070`, and `docs/plans/character-dialogue.md`.
+  and on a phone on top with the two at half each; each is a line of the log under `dialogues`.
+  `offer a dialogue` opens the pane: from its strip in the spread, and on a phone below the map, at half. See
+  `docs/adr/0071`, `0069` and `0070`, and `docs/plans/character-dialogue.md`.
 - Quests, in the same panel: the **Quests** section, below Dialogues. `offer a quest` offers the house the
   quest chosen beside it, by its name in `world/catalogues/quests/`, a file each naming the dialogues of
   `dialogues/` it offers; the first is *the abbot of the isle*. It is off, saying why on hover, while there is no

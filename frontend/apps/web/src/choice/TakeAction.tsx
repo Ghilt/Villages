@@ -7,7 +7,6 @@ import { useBalance } from '../net/balance';
 import { sessionStore, takeAction } from '../net/gateway';
 import { PaneSizeControl } from '../stage/PaneSizeControl';
 import type { Along, Room } from '../stage/panes';
-import { openingOut } from '../stage/strip';
 import { useStore } from '../store/useStore';
 import { TextButton } from '../ui/button/Button';
 import { expectHand, overOf } from './rolling';
@@ -58,7 +57,6 @@ export function TakeAction({ room, along, looking }: { room: Room; along: Along;
       <section
         className={`choice choice--strip pane-strip${along === null ? ' choice--chip' : ''}`}
         title={whyNot ?? `costs ${price}`}
-        onClick={along === null ? undefined : openingOut(() => room.ask('full'))}
       >
         {button}
         <span className="choice__aside">{whyNot ?? price}</span>

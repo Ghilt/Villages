@@ -6,10 +6,9 @@ import { paneIdOf, type Subject } from './subjects';
 /**
  * The pane that holds a window on one subject.
  *
- * On a phone it arrives at **half the stage**, which is what makes Adam's example come out right: the
- * thing that was clicked is still on the map above it. That is the arrival's doing rather than the pane's
- * - see `roomToRead` in `bays.ts` - because since 0046 a pane has nothing to say about how much of a bay
- * it gets.
+ * On a phone it stands **on top**, in the map's place, one at a time, and opens the top to half if it was a
+ * strip. That is the arrival's doing rather than the pane's - see `phone.ts` - because since 0046 a pane has
+ * nothing to say about how much of a bay it gets. See decision record 0109.
  */
 export function inspectPane(subject: Subject): Pane {
   return {
@@ -18,6 +17,8 @@ export function inspectPane(subject: Subject): Pane {
     // Down the column, where up to three of them stack. The rail inside that one tile is what limits how
     // many, so a window asks the column for no height of its own.
     spread: 'left',
+    // On top of a phone, one at a time: the map's place, which its close gives back. See decision record 0109.
+    phone: 'top',
     tall: null,
     icon: SUBJECT_MARKS[subject.kind],
     needs: null,

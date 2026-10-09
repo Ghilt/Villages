@@ -10,7 +10,7 @@ import { dressOf } from './dress';
 import { Seam } from './Seam';
 import { bayLayout, type BayName, type Box, isTabbed, type Rect, TAB_BAR, TILES } from './bayBox';
 import { baysStore, askFor, formNow, putAwayForRoom, show, showingIn, stageIs } from './bays';
-import { openBeside, showMapBeside } from './arrive';
+import { openBeside, showMap } from './arrive';
 import { askedIn, askingOf, type Which } from './arrangement';
 import {
   cramps,
@@ -157,13 +157,14 @@ export function Stage({ stage, panes, overlays }: StageProps) {
       ask: pane?.ask ?? ((size) => askFor(id, size)),
       sizes: (box.form === 'spread' ? pane?.spreadSizes : undefined) ?? SIZES,
       ownControl: !tabbed && !(box.form === 'bays' && at === 1),
-      showMap: () => showMapBeside(id),
-      openBeside: (other) => openBeside(id, other),
+      showMap,
+      openBeside,
     };
 
     // Put away in the spread, a press anywhere on it opens it out, but on a button of its own: Adam's word of
-    // 2026-10-06. The tab bar above the corner is its own and is not part of this.
-    const away = box.form === 'spread' && room.size === 'strip';
+    // 2026-10-06. The tab bar above the corner is its own and is not part of this. On a phone the pane below,
+    // put away, has no control of its own, so a press on it gives half each: Adam's word of 2026-10-08.
+    const away = room.size === 'strip' && (box.form === 'spread' || at === 1);
 
     // A window in the spread stacks inside the rail, which is itself the column's upper tile, so it is a
     // flow item rather than a box of its own. Everything else is placed by its rectangle.
@@ -182,7 +183,7 @@ export function Stage({ stage, panes, overlays }: StageProps) {
         data-tabbed={tabbed ? 'yes' : undefined}
         data-over={where !== null && where === box.over ? 'yes' : undefined}
         data-away={away ? 'yes' : undefined}
-        onClick={away ? openingOut(() => room.ask('full')) : undefined}
+        onClick={away ? openingOut(() => room.ask(box.form === 'spread' ? 'full' : 'small')) : undefined}
         hidden={!railed && (rect === null || !up)}
         style={railed || rect === null ? undefined : place(rect)}
       >
@@ -263,8 +264,8 @@ export function Stage({ stage, panes, overlays }: StageProps) {
           ask: (size) => askFor(up.id, size),
           sizes: up.spreadSizes ?? SIZES,
           ownControl: true,
-          showMap: () => showMapBeside(up.id),
-          openBeside: (other) => openBeside(up.id, other),
+          showMap,
+          openBeside,
         };
         return (
           <TabBar

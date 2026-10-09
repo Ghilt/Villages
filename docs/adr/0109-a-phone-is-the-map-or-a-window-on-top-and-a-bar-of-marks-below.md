@@ -44,6 +44,10 @@ its mark, its name and its controls, the same band for the map and a window. One
 names the arrangement and the other bay follows (0046); the bar's lit mark writes the same one value, so the
 two cannot disagree. Put away, the top pane is its top bar, turned down the side when the phone is.
 
+**The pane below, put away, has no control, so a press anywhere on it gives half each**, Adam's word of
+2026-10-08, but on a button of its own, which does what it says - the spread's rule for a pane put away
+(0045), with half rather than opened out because on a phone the stage is two things shared.
+
 **The map's strip is no longer its own way back.** It is its top bar, with the size control on it, so 0046's
 exception - a strip of map with no control, the whole of it a button - goes: the map is put away and brought
 back as a window is.

@@ -170,22 +170,6 @@ export function formNow(): 'spread' | 'bays' {
  */
 export const NEAR_BAY: Which = 1;
 
-/** The bay that is not the map's, which is the one a thing clicked on the map goes into. */
-export function awayFromTheMap(): Which {
-  return store.get().holding[0] === MAP_PANE.id ? 1 : 0;
-}
-
-/**
- * The map's own bay, which is the big one.
- *
- * What the **choice roll** takes when the world asks something: reading it is the thing to do first, and
- * the pane beside it is already the small one. The map comes back when the choice is answered, because a
- * takeover remembers what it displaced.
- */
-export function theMapsBay(): Which {
-  return awayFromTheMap() === 0 ? 1 : 0;
-}
-
 /** What the player would call a bay, given how the stage is cut. */
 export function where(which: Which): string {
   if (cutAlong === 'rows') {
@@ -379,19 +363,20 @@ export function takeOver(which: Which, id: string): void {
 /**
  * What goes back into a bay when whatever is in it leaves.
  *
- * What it displaced, or - if that has since gone, or it displaced nothing - whichever of the two panes the
- * bays open on is not already up: the map and the house status, in the game. A bay is never empty.
+ * What it displaced, or - if that has since gone, or it displaced nothing - the pane the bays open on in that
+ * same bay, the map on top and the house status below, unless it is up in the other. A bay is never empty.
  */
 function whatGoesBack(which: Which): string {
   const other: Which = which === 0 ? 1 : 0;
   const remembered = store.get().displaced[which];
+  const opened = config.opensOn[which];
   return remembered !== null &&
     remembered !== store.get().holding[other] &&
     paneById(remembered) !== undefined
     ? remembered
-    : store.get().holding[other] === config.opensOn[0]
-      ? config.opensOn[1]
-      : config.opensOn[0];
+    : opened !== store.get().holding[other]
+      ? opened
+      : config.opensOn[other];
 }
 
 /**

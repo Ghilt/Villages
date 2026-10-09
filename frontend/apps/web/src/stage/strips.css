@@ -82,7 +82,7 @@
   }
 }
 
-/* Put away in the spread, a press anywhere on a pane opens it out, so it says so under the pointer. */
-.stage[data-form='spread'] .bay[data-away] {
+/* Put away, a press anywhere on a pane opens it - out in the spread, to half below on a phone - so it says so. */
+.bay[data-away] {
   cursor: pointer;
 }

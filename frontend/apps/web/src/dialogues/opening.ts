@@ -33,8 +33,8 @@ const shown = new Set<string>();
  * Open the pane for a dialogue that has arrived, if one has.
  *
  * In the spread the pane is standing already, so one put away comes back to its normal size, and one open
- * stays as the player left it. On a phone it takes the bay that is not the map's, as a window does, and
- * opens it to at least half, because a dialogue that arrives as a strip is one nobody can read.
+ * stays as the player left it. On a phone it takes the bay below the map, as every pane but a window does,
+ * and opens it to at least half, because a dialogue that arrives as a strip is one nobody can read.
  */
 export function openOnArrival(
   dialogues: readonly DialogueView[],

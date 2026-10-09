@@ -114,8 +114,9 @@ phone three, and the mechanic owns them all:
 - **Minimised** - set aside. Not closed: the question is still standing. **On a desktop it is a chip** in the
   middle of the bottom row: Take action and what a roll costs, or the hand that is waiting, and no size control,
   because a press anywhere on it but on Take action opens it out. It gives way to the corner and the dialogues,
-  which lay themselves out as though it were not there and always leave it room. On a phone it is a strip with
-  its control, and a press anywhere on it but its buttons opens it out too.
+  which lay themselves out as though it were not there and always leave it room. On a phone it is a strip
+  below the map with no control, and a press anywhere on it but its buttons gives half each, as on any
+  pane put away there.
 
 **On a phone** a rolled hand is always the list and then the options under it, one under another, and the pane
 scrolls when they do not fit. The founding letter keeps its own two drawings - three parchments across, and the
@@ -125,9 +126,9 @@ scrolls when they do not fit. The founding letter keeps its own two drawings - t
 says fades in once it has landed, the cards' details a beat after their titles. See decision record 0086.
 
 **In the spread** it takes **bottom middle**, and it moves nothing whether it is put away or opened out. **On a
-phone** a question takes the map's bay, opening it to half if it was a strip, and the pane beside it keeps the
-other; a hand rolled from Take action lands where the letter already stands, and answering leaves it there,
-back to Take action. See decision records 0044 and 0085.
+phone** a question takes the bay below the map, as every pane but a window does, opening it to half if it
+was a strip, and the map stays on top; a hand rolled from Take action lands where the letter already stands,
+and answering leaves it there, back to Take action. See decision records 0044, 0085 and 0109.
 
 ### Not decided
 
@@ -267,11 +268,11 @@ It opens at the normal size. **It is never opened out with the corner**: opening
 to its normal size. It runs top to bottom always, and leaves the letter's chip its room. The column is decision
 record 0069's, and what it gives the letter is 0085's.
 
-**On a phone** it is a pane like any other, with no special treatment: it takes a bay, and the player opens
-it out when they want the whole screen for it.
+**On a phone** it is a pane like any other, with no special treatment: it stands below the map, and the
+player puts the map away from the map's top bar when they want the whole screen for it.
 
 **It arrives the usual way.** A dialogue offered opens the pane: in the spread it appears on the right, or
-opens from its strip, and on a phone it takes the bay that is not the map's, at half, as an inspect window
+opens from its strip, and on a phone it takes the bay below the map, at half, as every pane but a window
 does. A pane already open stays as the player left it. What arrives is a dialogue waiting that the page has
 not been shown before, so the ones waiting when a page loads open it, as a letter does, and the same one
 never opens it twice: a step taken, a reconnect or the list sent again is not a dialogue offered.
@@ -279,8 +280,7 @@ never opens it twice: a step taken, a reconnect or the list sent again is not a 
 **A line can show something.** Shown, a line can take the camera to a place, or open an inspect window on
 what it names - the house, a key figure, a place - so a conversation about the quay can show the quay. In
 the spread the map moves beside the column and the window opens in the rail, as a click would open it. On a
-phone the conversation goes to half in its bay and the other bay shows what the line names, the map or the
-window. It is the page's, never the house's history, and the conversation is never what gives way to it.
+phone the conversation goes to half below and the top shows what the line names, the map or the window. It is the page's, never the house's history, and the conversation is never what gives way to it.
 Adam's idea, from the camera going home by accident when a line paid.
 
 ### Not decided
@@ -328,8 +328,8 @@ pane, under the options, as well as in the log. A conversation opens over its sc
 dialogue names, from `world/scenes/`, a cut-paper harbour for now, filling the pane, with the bubbles over
 it on paper of their own. A line can show something, on the wire from version 21 and only while it is still
 ahead, and the sample's show the seat, the house and the figure: reached while playing, a line takes the
-camera to its place or opens its window, beside the conversation on a desktop and in the other bay on a
-phone, where the two go to half each; once in the life of the page, and an option only once the house has
+camera to its place or opens its window, beside the conversation on a desktop and on top of a phone,
+where the two go to half each; once in the life of the page, and an option only once the house has
 taken it. The debug panel's Dialogues section offers a dialogue and does nothing else, and a requirement is
 never sent to a page. Its shape is decided in decision record 0071: a dialogue offered whole on the house's
 stream; only its dialogue choices, and the lines that give something or end it, recorded; what a line gives
@@ -576,12 +576,14 @@ it to the top and puts the rest away, so a rail out of room has one window open 
 one. Nothing reopens by itself when the room comes back. A window left alone on a rail too short for it
 scrolls rather than losing its links off the bottom. See decision record 0058. **The windows glide** on a
 desktop: one opened or put away grows or shrinks to its new height, its frame with it, one arriving grows in
-from nothing, and the rest slide to where that leaves them; see decision record 0086. **On a phone** a window takes the bay that is not the
-map's, because the thing clicked is on the map, and opens it to half if it was a strip; closing it puts
-back what was there and leaves the arrangement alone. A link opens in the bay this window is not in, so the
-window it came from stays on the screen; in the spread there is one place a window goes, and a link is a
-plain click. **On a phone a window has no close**, open or put away: it is replaced by navigating to
-something else, which is how any pane there leaves its bay.
+from nothing, and the rest slide to where that leaves them; see decision record 0086. **On a phone** a
+window takes the top, in the map's place, and opens it to half if it was a strip: the top of a phone is the
+map or one window, Adam's word of 2026-10-08. A second window, from a link or the trail, takes the first
+one's place, which stays open, in no bay and in the trail; *show it on the map* puts the map back on top.
+**Its close is the way back to the map**, open or put away, and leaves the arrangement alone. In the spread
+there is one place a window goes, and a link is a plain click. The player's own house arriving opens no
+window on a phone, because it would cover the map the camera is flying over, and the house status stands
+below it already. See decision record 0109.
 
 ### Not decided
 

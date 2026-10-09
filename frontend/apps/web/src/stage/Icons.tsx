@@ -5,12 +5,10 @@
  * than inside the components that use them, because the same mark has to appear on a tab, in the navigation
  * list and wherever a pane is referred to later - and a mark that is redrawn is a mark that drifts.
  *
- * The compass is **the arrows' needle inside a ring**, deliberately: the arrows say which bay a thing opens
- * into and the compass opens the pane that lists them, so they should read as one family. See
- * `LOOK-AND-FEEL.md`.
+ * See `LOOK-AND-FEEL.md`.
  */
 
-/** The needle the arrows are drawn from, so the compass and the arrows are the same shape. */
+/** A needle, the one mark that means *there*: what turns a finished conversation back to its quest. */
 const NEEDLE = 'M12 3.5 L17 19 L12 15.4 L7 19 Z';
 
 /**
@@ -130,10 +128,8 @@ export type Point = 'up' | 'down' | 'left' | 'right';
 const TURN: Record<Point, number> = { up: 0, down: 180, left: -90, right: 90 };
 
 /**
- * One needle, pointing at a bay.
- *
- * The same shape the compass has inside its ring, and the same one the **arrows** are a pair of. A player
- * learns it once: this mark means *there*, and the ringed one means *the pane that lists the theres*.
+ * One needle, pointing: *there*. It pointed at a bay from navigation until a phone's top became the map or a
+ * window (0109); a finished conversation still turns back to its quest with it (0096).
  */
 export function Needle({ point }: { point: Point }) {
   return (
@@ -141,14 +137,6 @@ export function Needle({ point }: { point: Point }) {
       <path d={NEEDLE} className="icon__fill" transform={`rotate(${TURN[point]} 12 12)`} />
     </svg>
   );
-}
-
-/** Which way a needle points at one of the two bays, given how the stage is cut. */
-export function pointAt(along: 'rows' | 'columns', which: 0 | 1): Point {
-  if (along === 'rows') {
-    return which === 0 ? 'up' : 'down';
-  }
-  return which === 0 ? 'left' : 'right';
 }
 
 interface IconProps {
