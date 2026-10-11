@@ -70,7 +70,8 @@ Adam's choice, between this and a stack for each tree.
   into it, can leave events in its database that the new code reads differently. Pre-alpha, that is a wipe
   of that tree's world, from the debug panel, recorded in `docs/experiments/` as every wipe is (0011).
 - A deleted worktree leaves its database and its virtual host behind. They are small, and nothing reads
-  them; dropping the ones whose tree is gone is a chore for a tool when there are enough to matter.
+  them; `node drop-gone-worlds.ts --list`, in `scripts/`, says which belong to no checkout git still has, and
+  `--drop` drops them, never a world whose checkout is still there.
 - The standard ports are taken. Another MongoDB or RabbitMQ on this machine would clash, and there is none.
 - Nothing on the machine stops one tree's server being pointed at another tree's database by hand. The name
   is worked out, not typed, so it takes doing on purpose.

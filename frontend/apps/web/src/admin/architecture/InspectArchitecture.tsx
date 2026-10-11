@@ -76,8 +76,9 @@ export function InspectArchitecture() {
         <span className="arch__key arch__key--yet">running, not used yet</span>
         <p className="arch__legacy">
           Not drawn: Adam&apos;s own tools in <code>scripts/</code>, <code>mend-rivers</code> (it writes the
-          master it reads) and <code>nine-slice</code> (it writes a border into world/ui); and{' '}
-          {LEGACY.map((l) => `${l.script} (${l.why})`).join('; ')}.
+          master it reads), <code>nine-slice</code> (it writes a border into world/ui), <code>check</code> (it
+          runs every check in the repository) and <code>drop-gone-worlds</code> (it drops the worlds of
+          worktrees that are gone); and {LEGACY.map((l) => `${l.script} (${l.why})`).join('; ')}.
         </p>
       </footer>
     </main>
