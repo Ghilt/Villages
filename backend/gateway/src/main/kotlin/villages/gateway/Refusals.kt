@@ -29,6 +29,7 @@ internal fun DomainError.reasonCode(): String = when (this) {
     HouseError.NoSuchVision -> "noSuchVision"
     is HouseError.InvalidVision -> "invalidVision"
     HouseError.SeatNamedBefore -> "seatNamedBefore"
+    HouseError.NoSeat -> "noSeat"
     is HouseError.InvalidAmount -> "invalidAmount"
     is HouseError.InvalidPledge -> "invalidPledge"
     is HouseError.NotEnoughFree -> "notEnoughFree"

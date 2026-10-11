@@ -253,7 +253,8 @@ program running on it at this tree's address.
 | 7b | The castle's influence zone, drawn while it is selected, in place of `HoldingOverlay`'s ground about every seat (no house sprite where its seat is drawn landed with 7a; the room, the dive and the eye read the seat with step 9) | a click on your castle | |
 | 8a | The tab's mark, in the library | the component page | |
 | 8b | The Holdings tab: `yourHoldings`, the list (the placeholder pictures drawn in SVG from the map's shapes), the details | the corner | bump |
-| 9 | Ruins and lost seats: `ruined` and `rebuilt`, their levers, the `lostSeat` reaction, a seatless house (a second browser takes your castle), the ruin's sprite | the map and the house | bump |
+| 9a | Ruins: `ruined` and `rebuilt`, their levers, the ruin's sprite | the map | bump |
+| 9b | Lost seats: the seats listener writes `lostSeat` when a seat changes hands or falls; the seat's own sight ends with it (in place of removing it, so a seated house sees as before); a seatless house. `foundingPlace` is not introduced, and the room, the eye, omens, season, gossip and dialogues keep reading where the house was founded: the same place as its seat in every state the game can reach, until a house can name another | the house | |
 | 10a | Income: `SetIncome`, `incomeChanged`, rates per source, the listener paying by type and level | the treasury counting up | |
 | 10b | What each holding gives, in the window and the tab | the window | bump |
 | 11a | `Socket` and `SlotRow`, in the library | the component page | |

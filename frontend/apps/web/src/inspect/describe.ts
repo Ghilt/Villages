@@ -93,7 +93,7 @@ export function describeHouse(house: HouseView, yours: boolean, areas: readonly 
     name: house.name,
     under: `under ${blazon(house)}`,
     facts: [
-      { what: 'Seat', said: whereabouts(house) },
+      { what: 'Founded at', said: whereabouts(house) },
       { what: 'Founded', said: describeDay(house.since) },
       { what: 'Cell', said: house.cell },
     ],

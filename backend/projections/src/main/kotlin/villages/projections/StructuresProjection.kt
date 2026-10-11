@@ -13,6 +13,7 @@ import villages.domain.ChoiceEvent
 import villages.domain.DialogueEvent
 import villages.domain.HouseFounded
 import villages.domain.HouseId
+import villages.domain.HouseLostSeat
 import villages.domain.HouseNamedSeat
 import villages.domain.KeyFigureEvent
 import villages.domain.ResourceEvent
@@ -96,6 +97,14 @@ class StructuresProjection(feed: EventFeed) : Follower(feed), StructuresByCell {
                 val last = held.row.faces.last()
                 if (last.seatOf?.house == event.houseId) return
                 val face = last.copy(seatOf = holders[event.houseId], since = event.worldTime, stamp = applied.incrementAndGet())
+                put(held.row.copy(faces = held.row.faces + face), held.streamVersion, appeared = false)
+            }
+            // No longer its seat: the face says so from that day, if it still says whose.
+            is HouseLostSeat -> {
+                val held = rows[event.structureId] ?: return
+                val last = held.row.faces.last()
+                if (last.seatOf?.house != event.houseId) return
+                val face = last.copy(seatOf = null, since = event.worldTime, stamp = applied.incrementAndGet())
                 put(held.row.copy(faces = held.row.faces + face), held.streamVersion, appeared = false)
             }
             // What a house has, is asked, is told, holds and sees, and what befalls a person, changes no structure.

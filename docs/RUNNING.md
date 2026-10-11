@@ -289,7 +289,10 @@ stage alone, with none of the debug panel in it (decision record 0079).
   with the house a link away, and a house's window marks its seat on the map. While a castle is marked - its window
   or its house's the newest open - its **influence zone** is drawn about it, the ragged gold ground every seat used
   to have at all times, its reach the catalogue's `zone`; a type without one draws none. The seat still sees from where the
-  house was founded too, until a seat can be lost.
+  house was founded too, while it is the seat. When the castle changes hands or falls, the house loses it:
+  `villages.house.lostSeat.v1` in the story of what took it, the castle's window no longer saying whose seat it is,
+  the house's own mark back where it was founded, and its sight from there ended, the ground it saw revealed. A
+  house's window gives where it was founded as *Founded at*.
 - Ruining one and raising it again: **ruin it** and **rebuild it**, beside *take control of this building*, on the
   structure whose window was opened last. *Ruin it* writes `villages.structure.ruined.v1`, by fire: a ruin holds
   nobody, its holder's sight from it is taken back, and it is drawn as a ruin - the stump of a tower and a broken

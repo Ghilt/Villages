@@ -63,6 +63,17 @@ data class HouseNamedSeat(
 ) : SeatEvent, WorldEvent
 
 /**
+ * A house lost its seat: the structure that was it changed hands or fell, and the house plays on without one. Its
+ * sight from the seat ends with it. In the story of what took it. See decision record 0092.
+ */
+data class HouseLostSeat(
+    override val houseId: HouseId,
+    val structureId: StructureId,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : SeatEvent, WorldEvent
+
+/**
  * A house was founded. It carries where, and how much that matters: those two are what put a thing on the
  * map, and which tile it falls in is worked out downstream from the first. It carries a stock of every
  * resource there was when it was written, all of them empty and none of them growing, because nothing

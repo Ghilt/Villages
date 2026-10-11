@@ -885,7 +885,8 @@ stands. The debug panel's *take control of this building* hands the one whose wi
 which then flies their pennant and sees round it, as far as its type and level see; it pays nothing yet. Founding a
 house raises its castle and names it the seat, and the castle's window says so. The **Holdings** tab lists what the
 house holds, the seat first, and a holding pressed shows its details there. A structure can fall to ruin and be
-rebuilt, from the debug panel; a ruin holds nobody and gives nothing. Decision record 0092 is the shape and
+rebuilt, from the debug panel; a ruin holds nobody and gives nothing. A house whose castle changes hands or falls
+loses its seat, and its sight from it, and plays on seatless; how it names another is not decided. Decision record 0092 is the shape and
 `docs/plans/structures.md` the steps, one commit each; the hypothesis is experiment 0018. A castle's ragged gold ground is drawn only while it is selected, its influence zone, and nothing in the game
 pays a house anything yet.
 

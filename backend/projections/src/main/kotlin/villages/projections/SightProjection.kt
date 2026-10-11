@@ -27,7 +27,8 @@ import villages.domain.PlayerId
 import villages.domain.Vision
 import villages.domain.WorldTime
 import villages.domain.ResourceEvent
-import villages.domain.SeatEvent
+import villages.domain.HouseLostSeat
+import villages.domain.HouseNamedSeat
 import villages.domain.ChoiceEvent
 import villages.domain.DialogueEvent
 import villages.domain.StructureEvent
@@ -85,6 +86,14 @@ class SightProjection(feed: EventFeed) : Follower(feed), SightsByHouse {
                 tell(event.houseId)
             }
 
+            // A house that lost its seat sees from it no longer: the seat's point ends that day. What it covered stays
+            // revealed. Its sight from the structure itself, a vision given, ends with the structure's change of hands.
+            is HouseLostSeat -> {
+                if (close(event.houseId, VisionSource.Seat, event.worldTime)) {
+                    tell(event.houseId)
+                }
+            }
+
             is HouseLostVision -> {
                 if (close(event.houseId, VisionSource.Given(event.visionId), event.worldTime)) {
                     tell(event.houseId)
@@ -122,7 +131,7 @@ class SightProjection(feed: EventFeed) : Follower(feed), SightsByHouse {
             is CharacterDied -> offTheMap(event.characterId, event.worldTime)
 
             // Nothing else gives vision or takes it away.
-            is ResourceEvent, is ChoiceEvent, is DialogueEvent, is SeatEvent,
+            is ResourceEvent, is ChoiceEvent, is DialogueEvent, is HouseNamedSeat,
             is CharacterAppeared, is CharacterStatChanged, is CharacterAged, is CharacterPortraitChanged,
             // What a structure gives its holder to see is written into the house's own history, as vision given. 0092.
             is StructureEvent,

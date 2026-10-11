@@ -15,9 +15,17 @@ data class Seating(val structure: StructureId? = null, val everNamed: Boolean = 
             }
             listOf(HouseNamedSeat(command.houseId, command.structureId, command.worldTime, command.recordedAt))
         }
+        // Only the seat it has can be lost, so a loss heard again, or of another structure, writes nothing.
+        is LoseSeat -> {
+            if (structure != command.structureId) {
+                throw HouseError.NoSeat
+            }
+            listOf(HouseLostSeat(command.houseId, command.structureId, command.worldTime, command.recordedAt))
+        }
     }
 
     internal fun evolve(event: SeatEvent): Seating = when (event) {
         is HouseNamedSeat -> copy(structure = event.structureId, everNamed = true)
+        is HouseLostSeat -> copy(structure = null)
     }
 }

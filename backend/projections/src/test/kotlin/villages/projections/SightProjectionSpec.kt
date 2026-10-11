@@ -27,6 +27,8 @@ import villages.domain.HouseGainedVision
 import villages.domain.HouseId
 import villages.domain.HouseLostKeyFigure
 import villages.domain.HouseLostVision
+import villages.domain.HouseLostSeat
+import villages.domain.StructureId
 import villages.domain.HouseName
 import villages.domain.Location
 import villages.domain.PlayerId
@@ -235,5 +237,17 @@ class SightProjectionSpec : StringSpec({
         sights.reset()
 
         sights.of(adas).points.shouldBeEmpty()
+    }
+
+    "a house that lost its seat sees from it no longer, from that day, and what it saw stays revealed" {
+        val feed = HandFedSightEvents()
+        val sights = SightProjection(feed).started()
+        feed.deliver(founded(ada))
+        val castle = StructureId.seatOf(adas)
+
+        feed.deliver(HouseLostSeat(adas, castle, founding + 3, noon))
+
+        sights.of(adas).points shouldContainExactly listOf(seat().copy(until = founding + 3))
+        sights.of(adas).visionOn(founding + 3).shouldBeEmpty()
     }
 })

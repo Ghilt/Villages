@@ -41,6 +41,17 @@ data class NameSeat(
     val recordedAt: Instant,
 ) : SeatCommand
 
+/**
+ * The house's seat is no longer its: the structure changed hands or fell. Sent by the seats listener. Refused for a
+ * structure that is not the house's seat, so a loss heard again writes nothing. See decision record 0092.
+ */
+data class LoseSeat(
+    override val houseId: HouseId,
+    val structureId: StructureId,
+    val worldTime: WorldTime,
+    val recordedAt: Instant,
+) : SeatCommand
+
 /** A house was given some of a resource, from wherever the world gives things from. */
 data class GrantResource(
     override val houseId: HouseId,

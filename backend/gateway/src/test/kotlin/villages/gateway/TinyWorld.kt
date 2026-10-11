@@ -27,6 +27,7 @@ import villages.domain.HouseResourceSpent
 import villages.domain.PlayerCompletedDialogue
 import villages.domain.PlayerCompletedDialogueStep
 import villages.domain.PlayerGivenChoice
+import villages.domain.HouseLostSeat
 import villages.domain.HouseNamedSeat
 import villages.domain.PlayerLostDialogue
 import villages.domain.PlayerOfferedDialogue
@@ -44,6 +45,7 @@ internal fun typeOf(event: HouseEvent): String = when (event) {
     is HouseGainedVision -> "villages.house.gainedVision.v1"
     is HouseLostVision -> "villages.house.lostVision.v1"
     is HouseNamedSeat -> "villages.house.namedSeat.v1"
+    is HouseLostSeat -> "villages.house.lostSeat.v1"
     is HouseResourceGranted -> "villages.house.resourceGranted.v1"
     is HouseResourcePledged -> "villages.house.resourcePledged.v1"
     is HouseResourceReleased -> "villages.house.resourceReleased.v1"
@@ -65,6 +67,7 @@ internal fun dataOf(event: HouseEvent): String = when (event) {
     is HouseGainedVision -> """{"visionId":"${event.visionId.value}"}"""
     is HouseLostVision -> """{"visionId":"${event.visionId.value}"}"""
     is HouseNamedSeat -> """{"structureId":"${event.structureId.value}"}"""
+    is HouseLostSeat -> """{"structureId":"${event.structureId.value}"}"""
     is HouseResourceGranted -> """{"resource":"${event.resource}","amount":${event.amount}}"""
     is HouseResourcePledged -> """{"resource":"${event.resource}","amount":${event.amount}}"""
     is HouseResourceReleased -> """{"pledgeId":"${event.pledgeId.value}"}"""

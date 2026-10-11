@@ -28,4 +28,16 @@ class HouseSeatSpec : StringSpec({
         StructureId.seatOf(ravenscar.houseId) shouldBe castle
         StructureId.seatOf(HouseId.of(PlayerId(java.util.UUID.randomUUID()))) shouldNotBe castle
     }
+
+    "a house loses the seat it has, plays on without one, and loses it once" {
+        val seated = HouseDecider.decide(NameSeat(ravenscar.houseId, castle, day, noon), founded()).fold(founded(), HouseDecider::evolve)
+
+        val lost = HouseDecider.decide(LoseSeat(ravenscar.houseId, castle, day, noon), seated)
+        val seatless = lost.fold(seated, HouseDecider::evolve)
+
+        lost.single() shouldBe HouseLostSeat(ravenscar.houseId, castle, day, noon)
+        seatless.shouldBeInstanceOf<House.Founded>().seatedIn shouldBe null
+        shouldThrow<HouseError.NoSeat> { HouseDecider.decide(LoseSeat(ravenscar.houseId, castle, day, noon), seatless) }
+        shouldThrow<HouseError.SeatNamedBefore> { HouseDecider.decide(NameSeat(ravenscar.houseId, castle, day, noon), seatless) }
+    }
 })

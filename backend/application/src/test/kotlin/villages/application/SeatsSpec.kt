@@ -8,7 +8,9 @@ import villages.domain.Banner
 import villages.domain.Charge
 import villages.domain.Division
 import villages.domain.FoundHouse
+import villages.domain.HandOver
 import villages.domain.HouseFounded
+import villages.domain.HouseLostSeat
 import villages.domain.HouseId
 import villages.domain.HouseName
 import villages.domain.HouseNamedSeat
@@ -80,6 +82,25 @@ class SeatsSpec : StringSpec({
 
         world.stored.size shouldBe written
         world.stored.last().event.shouldBeInstanceOf<HouseNamedSeat>()
+        faults.reported.shouldBeEmpty()
+    }
+
+    "a seat handed to another, or fallen, is the house's seat no longer, in the story of what took it" {
+        val world = TinyWorld(catalogue)
+        val later = ManualLater()
+        val faults = KeptFaults()
+        world.seats(later, faults)
+        found(world)
+        later.tick()
+        later.tick()
+        val castle = StructureId.seatOf(HouseId.of(ada))
+
+        world.execute(HandOver(castle, null, today, noon), Provenance.startedBy(UUID.randomUUID()))
+        later.tick()
+
+        world.stored.last().event shouldBe HouseLostSeat(HouseId.of(ada), castle, today, noon)
+        world.founded(HouseId.of(ada)).seatedIn shouldBe null
+        world.stored.takeLast(2).map { it.correlationId }.distinct().size shouldBe 1
         faults.reported.shouldBeEmpty()
     }
 })

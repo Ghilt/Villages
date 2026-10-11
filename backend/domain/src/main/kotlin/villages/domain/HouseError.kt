@@ -60,6 +60,9 @@ sealed class HouseError(message: String) : DomainError(message) {
     /** Naming the founding castle the seat a second time, as a founding heard again would. See 0092. */
     data object SeatNamedBefore : HouseError("this house has named its seat before")
 
+    /** Losing a seat the house does not have: that structure is not its seat. */
+    data object NoSeat : HouseError("that is not this house's seat")
+
     /** Not enough of a resource is free, whether because there is little or because much is pledged. */
     class NotEnoughFree(resource: Resource, wanted: Long, free: Long) :
         HouseError("this house has $free ${resource.name.lowercase()} free, not $wanted")
