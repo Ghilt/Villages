@@ -1,0 +1,75 @@
+# The world's infrastructure: the event store and the broker, one of each for the whole machine.
+#
+#   docker compose -f infra/docker-compose.yml up -d      start both, or leave them be if they are up
+#   docker compose -f infra/docker-compose.yml ps         are they healthy
+#   docker compose -f infra/docker-compose.yml down       stop both; what they hold is kept       (Adam's)
+#   docker compose -f infra/docker-compose.yml down -v    stop both and forget everything they held (Adam's)
+#
+# One stack serves every worktree, so the project is named here rather than after the folder it was started
+# from: started from any tree it is the same two containers, and a tree keeps to a database and a virtual host
+# of its own inside them. Stopping it stops every tree's world, so that is Adam's, and so is bringing it up
+# on a change to this file, which makes both containers again under everyone. See decision record 0091.
+#
+# Both listen on 127.0.0.1 only. Neither asks for a password worth the name, and nothing off this machine has
+# any business with either.
+
+name: villages
+
+services:
+  # MongoDB has to be a replica set, because Occurrent's subscriptions are change streams and a lone server has
+  # none (0002). One member is enough for that. It is initiated by its own health check, which is the one thing
+  # that runs again and again until it succeeds: the first run starts the set, and every run after finds it. It
+  # is healthy once the member is the primary, which is a second or two after the set is started, because until
+  # then nothing can be written to it.
+  #
+  # The member is named localhost:27017 because that is where the game server on this machine finds it, and a
+  # driver connects to the names the set gives for its members rather than to the address it was handed.
+  mongodb:
+    image: mongo:8.0
+    command: ["--replSet", "rs0", "--bind_ip_all"]
+    ports:
+      - "127.0.0.1:27017:27017"
+    volumes:
+      - mongodb:/data/db
+      - mongodb-config:/data/configdb
+    healthcheck:
+      test:
+        - CMD
+        - mongosh
+        - --quiet
+        - --eval
+        - >-
+          try { rs.status() } catch (notYet) { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'localhost:27017' }] }) }
+          quit(db.hello().isWritablePrimary ? 0 : 1)
+      interval: 5s
+      timeout: 10s
+      start_period: 20s
+      retries: 30
+    restart: unless-stopped
+
+  # RabbitMQ 4.3 with its management page on http://localhost:15672, signed into as villages / villages. The
+  # node keeps its data under a directory named after the host, so the host is named rather than left to the
+  # container's id, which changes every time it is made.
+  rabbitmq:
+    image: rabbitmq:4.3-management
+    hostname: villages-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: villages
+      RABBITMQ_DEFAULT_PASS: villages
+    ports:
+      - "127.0.0.1:5672:5672"
+      - "127.0.0.1:15672:15672"
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 10s
+      start_period: 20s
+      retries: 30
+    restart: unless-stopped
+
+volumes:
+  mongodb:
+  mongodb-config:
+  rabbitmq:

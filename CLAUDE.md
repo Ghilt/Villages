@@ -142,6 +142,11 @@ What follows from that, and bites in practice:
   one's branch and port. See decision 0031.
 - **The stash stack is shared with every other worktree.** Never bare `git stash`; a WIP commit on the
   session's own branch is safer, because a pop can take another session's work.
+- **MongoDB and RabbitMQ in Docker are every tree's at once.** A tree keeps to its own database and its own
+  virtual host, `villages-<tree>`, and resets only its own world, with the debug panel's wipe. Never
+  stop, restart or `down -v` the stack, and never bring it up on a changed `infra/docker-compose.yml`:
+  each of those stops or forgets every session's world, and they are Adam's. A change to that file is a
+  step of its own and says so. See decision record 0091.
 - **`.sessions/` is the main repository's, not the worktree's** - it sits beside the shared `.git`, which
   is what makes it the one place every session can see. See decision record 0020.
 
@@ -238,8 +243,9 @@ and ESLint restricted imports on the frontend.
 
 Prerequisites: Node 24, and a JDK on the path for the server. Any recent one will do, because the
 Gradle toolchain fetches the 21 it compiles with; the machine's `JAVA_HOME` is on Temurin 17 and that
-is fine. Docker Desktop is needed by increment 0.4 and not before: the event store and the broker are
-in memory behind their ports until then.
+is fine. Docker Desktop, on WSL2, runs MongoDB and RabbitMQ from `infra/`; the game server does not
+use them yet, so the event store and the broker are still in memory behind their ports, and nothing
+else needs Docker but the tests that say so in their names.
 
 All the commands below are run **from the repository root**, `E:\Code\Villages`. The `--prefix frontend`
 part is what points npm at the frontend workspace, so running them from inside `frontend/` looks for
@@ -319,10 +325,14 @@ Commands are added here as the increments land:
   build and test side by side (`backend/gradle.properties`), so their output interleaves; `--no-parallel`
   runs them one at a time.
 
-The two below do not exist yet. They arrive with the increments named, and `infra/` and `scripts/` in the
-layout above are where they will go rather than where they are.
+- Infra: `docker compose -f infra/docker-compose.yml up -d`, once Docker Desktop is running. One MongoDB
+  replica set and one RabbitMQ for the whole machine, shared by every tree, each tree keeping to a
+  database and a virtual host named after it. `up -d` finds it already up when it is, so any session may
+  run it; `down`, which stops it, and `down -v`, which forgets it, are Adam's alone. See
+  `docs/RUNNING.md` and decision record 0091.
 
-- Infra: `docker compose -f infra/docker-compose.yml up -d` (increment 0.4)
+The one below does not exist yet. It arrives with the increment named.
+
 - Everything: `scripts/check.ps1` or `scripts/check.sh` (0.14)
 
 The dev server is also registered in `.claude/launch.json` under the name `web`, so the preview tooling can start

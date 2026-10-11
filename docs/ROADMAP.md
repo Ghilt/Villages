@@ -20,8 +20,8 @@ The map is ours: a hand-painted master, cut into tiles, painted in the browser a
 its rivers running to the sea, lying on a desk when the camera pulls back past the world. A player arriving with no house is offered three seats on a
 parchment, takes one, and the house is founded from the same decision that records the taking — castle,
 ground about it, selectable, with an inspector on the left. Every event carries its two times, its place and
-significance, and its provenance. Two browsers see each other's houses live. Everything is in memory: there
-is no MongoDB and no RabbitMQ on the machine yet.
+significance, and its provenance. Two browsers see each other's houses live. Everything is in memory: MongoDB
+and RabbitMQ run in Docker, and the game server does not use them yet.
 
 ## Now
 
@@ -95,15 +95,16 @@ and so is the origin map, the first of real names on the edited world and the ne
   action with one open reads it as an omen, *Inspecting the Vistula*. Left for later: the
   823 places no source dates, and the named stretches of land, which keep today's names.
   Adam's own, asked for on 2026-10-06.
-- **0.4** Local infrastructure: MongoDB replica set and RabbitMQ in Compose
-- **0.8** Testcontainers smoke test on MongoDB and RabbitMQ
+- **0.8** Testcontainers smoke test on MongoDB and RabbitMQ, and then the game server keeping its world in its
+  tree's own database (0091), so that a restart forgets nothing
 - **1.6** The bridge from the store to the broker
 - **0.13** End-to-end smoke test
 - **0.14** One check script for the whole repository
 - **1.15** The connection badge, the last piece of inspecting a house
 
-Blocked on the machine: Docker Desktop with the WSL2 backend, needed by the first three. Everything runs in
-memory until it exists, which is why nothing survives a restart.
+MongoDB and RabbitMQ are on the machine now, in Docker, from `infra/docker-compose.yml`, and nothing uses
+them yet: everything runs in memory until 0.8 points the game server at them, which is why nothing survives
+a restart.
 
 ## Later
 

@@ -403,3 +403,20 @@ stage alone, with none of the debug panel in it (decision record 0079).
   `apps/web/src/admin/architecture/`, held to the repository by `world.test.ts`: a new `world:` script, a
   moved reader or a file nothing makes fails it. The times of the tools the quick-start runs were measured
   on Adam's machine on 2026-10-11. The inspect pages are kept apart from the game by decision 0091.
+
+## The event store and the broker
+
+- MongoDB and RabbitMQ, from `infra/docker-compose.yml`, once Docker Desktop is running: one of each for the
+  whole machine, whichever tree started them, on the loopback address only. **The game server does not use
+  them yet**, so a world is still in memory and gone when its server stops.
+- MongoDB is `mongodb://localhost:27017/?replicaSet=rs0`, a replica set of one, which is what Occurrent's
+  subscriptions need. A tree's database will be named after it, `villages` in the main checkout and
+  `villages-<tree>` in a worktree, so no tree reads another's world.
+- RabbitMQ is `localhost:5672`, and its management page is **http://localhost:15672**, signed into as
+  `villages` / `villages`: what exchanges and queues exist and what is flowing through them. Nothing does yet.
+  A tree's messages will keep to a virtual host named as its database is, which the page's menu at the top
+  right picks between.
+- `docker compose -f infra/docker-compose.yml ps` says whether both are up and healthy; Docker Desktop's
+  Containers page says the same under `villages`. `down` stops them and keeps what they hold, and `down -v`
+  forgets it, for every tree at once, so both are Adam's and no session runs them; a session resets only
+  its own world, with the debug panel's wipe. See decision record 0091.

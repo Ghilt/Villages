@@ -142,10 +142,12 @@ a configuration change rather than a rewrite.
 
 ## What is in memory, for now
 
-There is no MongoDB or RabbitMQ on the machine yet, so the ports have in-memory adapters: Occurrent's
-in-memory event store and subscription model, wired in `InMemoryWorld`, behind `HouseCommandExecutor` and
-`EventFeed`. The gateway consumes the feed in-process and fans events out to every connection that asked to
-watch, which is the broker's job from increment 1.6 on. Nothing above the ports changes when the real store
+MongoDB and RabbitMQ run on the machine, one of each from `infra/docker-compose.yml` for every tree, each
+tree to keep to a database and a virtual host named after it (0091). Nothing uses them yet, so the ports
+have in-memory adapters: Occurrent's in-memory event store and subscription model, wired in
+`InMemoryWorld`, behind `HouseCommandExecutor` and `EventFeed`. The gateway consumes the feed in-process
+and fans events out to every connection that asked to watch, which is the broker's job from increment 1.6
+on. Nothing above the ports changes when the real store
 and broker arrive; nothing survives a restart until then, on purpose. The whole path is proven by
 `AppBootsTest`: a real socket, hello, a founded house, the event back.
 

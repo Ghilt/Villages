@@ -62,10 +62,16 @@ The **Debug map** panel at the top right picks which master is drawn - every PNG
 offered, and one that has never been cut into tiles can be cut from there - and which renderer draws it.
 The debug panel under it says what the program thinks is happening: the state of the world, and every
 event as it arrives. Its "found a house here" button sends a real command. Nothing is stored yet, so a
-restart of the game server forgets the houses; that is deliberate until MongoDB arrives with increment
-0.4.
+restart of the game server forgets the houses; that is deliberate until the game server keeps its world
+in MongoDB, which is next on `docs/ROADMAP.md`.
 
 `npm run check --prefix frontend` runs the typecheck, the linter, the formatter and the unit tests.
 
-Docker Desktop is not needed yet: the event store and the broker are in memory behind their ports until
-the increments in `docs/ROADMAP.md` put the real ones there.
+MongoDB and RabbitMQ are in `infra/docker-compose.yml`, and Docker Desktop on WSL2 runs them:
+
+```
+docker compose -f infra/docker-compose.yml up -d
+```
+
+The game server does not use them yet: the event store and the broker are in memory behind their ports
+until the increments in `docs/ROADMAP.md` put the real ones there.
