@@ -121,12 +121,23 @@ class AppBootsTest {
         assertEquals(promised.seat, standing.seat)
         assertEquals(promised.banner, standing.banner)
 
-        // Three events, one story: asked where, answered, and founded. The action's cause is the command.
+        // Three events, one story: asked where, answered, and founded. The action's cause is the command. Then the
+        // listeners carry it on in the same story: the castle raised, named the seat, and seen from. See 0092.
         val ours = "house:" + java.util.UUID.nameUUIDFromBytes("villages:house:$arriving".toByteArray())
-        window.until("three events") { frames ->
-            frames.filterIsInstance<EventFrame>().count { it.stream == ours } == 3
+        window.until("the founding, its seat and its sight") { frames ->
+            frames.filterIsInstance<EventFrame>().count { it.stream == ours } >= 5
         }
-        val events = window.heard.filterIsInstance<EventFrame>().filter { it.stream == ours }
+        val heard = window.heard.filterIsInstance<EventFrame>()
+        val events = heard.filter { it.stream == ours }.take(3)
+        val seatNamed = heard.filter { it.stream == ours }.drop(3).take(2)
+        val castle = "structure:" + seatNamed.first { it.eventType == "villages.house.namedSeat.v1" }.data["structureId"].asText()
+        window.until("the castle") { frames -> frames.any { it is EventFrame && it.stream == castle } }
+        val after = seatNamed + window.heard.filterIsInstance<EventFrame>().filter { it.stream == castle }
+        assertEquals(
+            setOf("villages.house.namedSeat.v1", "villages.house.gainedVision.v1", "villages.structure.raised.v1"),
+            after.map { it.eventType }.toSet(),
+        )
+        assertEquals(setOf(events[0].correlationId), after.map { it.correlationId }.toSet(), "the founding's story: $after")
         assertEquals(
             listOf("villages.player.givenChoice.v1", "villages.player.tookAction.v1", "villages.house.founded.v1"),
             events.map { it.eventType },
@@ -242,7 +253,9 @@ class AppBootsTest {
     @Test
     fun `wiping the world empties it, and the next player to arrive is offered seats in a world with nothing in it`() {
         val wiper = "9f1c74b2-6a35-4e90-8c21-b7d05fe3a648"
+        val wipers = "house:" + java.util.UUID.nameUUIDFromBytes("villages:house:$wiper".toByteArray())
         val first = Window(port)
+        first.say("""{"type":"watchEvents","on":true}""")
         first.say("""{"type":"hello","playerToken":"$wiper","protocolVersion":$PROTOCOL_VERSION}""")
         first.until("a choice") { frames -> frames.any { it is YourChoice } }
         val offered = first.last<YourChoice>().choice!!
@@ -251,6 +264,11 @@ class AppBootsTest {
                 """"choiceId":"${offered.id}","optionId":"${offered.options[0].id}"}}""",
         )
         first.until("a house") { frames -> frames.filterIsInstance<YourHouse>().last().yours != null }
+        // And what the listeners write after a founding - the castle, the seat, its sight - written before the wipe, so
+        // none of it is still on its way to a read model as the world is emptied.
+        first.until("the house's sight from its castle") { frames ->
+            frames.any { it is EventFrame && it.stream == wipers && it.eventType == "villages.house.gainedVision.v1" }
+        }
 
         first.say("""{"type":"wipeWorld"}""")
         first.until("being told the world went") { frames -> frames.any { it is WorldWiped } }
@@ -264,8 +282,9 @@ class AppBootsTest {
         assertNull(second.last<YourHouse>().yours, "the house went with the world")
         assertNotNull(second.last<YourChoice>().choice, "a player with no house is asked where to found")
         // The first event of the stream again, which is what proves the store was emptied and not hidden.
-        second.until("the choice event") { frames -> frames.any { it is EventFrame } }
-        assertEquals(1L, second.heard.filterIsInstance<EventFrame>().first().streamVersion)
+        // Its own stream's, because the server is shared and another test's listeners may still be writing for theirs.
+        second.until("the choice event") { frames -> frames.any { it is EventFrame && it.stream == wipers } }
+        assertEquals(1L, second.heard.filterIsInstance<EventFrame>().first { it.stream == wipers }.streamVersion)
 
         first.close()
         second.close()
@@ -287,17 +306,15 @@ class AppBootsTest {
         assertEquals(3, offered!!.options.size)
         assertEquals(3, offered.options.map { it.label.substringAfter(", in ") }.distinct().size)
 
+        // The stream is worked out from the player, not chosen by the client: see HouseId.of. Its own is listened for,
+        // because the server is shared and another test's listeners may still be writing for theirs.
+        val founders = "house:49d14206-e7b6-3cff-b12c-0fa929182509"
+        val founded = { frame: Any -> frame is EventFrame && frame.stream == founders && frame.eventType == "villages.house.founded.v1" }
         first.say("""{"type":"watchEvents","on":true}""")
         first.say(founding)
         first.until("the event and the house") { frames ->
-            frames.any { it is EventFrame } && frames.filterIsInstance<YourHouse>().last().yours != null
+            frames.any(founded) && frames.filterIsInstance<YourHouse>().last().yours != null
         }
-
-        // The founding choice this player was given came first, and the founding follows it.
-        val event = first.heard.filterIsInstance<EventFrame>().last()
-        assertEquals("villages.house.founded.v1", event.eventType)
-        // The stream is worked out from the player, not chosen by the client: see HouseId.of.
-        assertEquals("house:49d14206-e7b6-3cff-b12c-0fa929182509", event.stream)
         assertEquals("Ravenscar", first.last<YourHouse>().yours?.house?.name)
 
         first.say("""{"type":"subscribeCells","cells":["$cell"]}""")

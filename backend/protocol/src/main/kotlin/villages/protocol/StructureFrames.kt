@@ -26,6 +26,8 @@ data class StructureView(
     val since: Long,
     val stamp: Long,
     val seenUntil: Long? = null,
+    /** The house whose seat it is, in the face sent, or absent. */
+    val seatOf: HolderView? = null,
 )
 
 /** A structure came to be in a cell this connection holds and sees. The client keeps it in the held cells its `cell` falls in. */

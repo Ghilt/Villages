@@ -47,6 +47,21 @@ sealed interface KeyFigureEvent : HouseEvent
 /** What the house is given to see, beyond its seat and its key figures. See [ResourceEvent] for what a family is. */
 sealed interface VisionEvent : HouseEvent
 
+/** Which of its holdings is the house's seat. See [ResourceEvent] for what a family is. */
+sealed interface SeatEvent : HouseEvent
+
+/**
+ * A house named one of its holdings its seat: where the eye goes and the room is entered. Founding raises a castle
+ * and the seats listener names it, in the founding's story. Only the id: what the structure is, is on its own stream.
+ * See decision record 0092.
+ */
+data class HouseNamedSeat(
+    override val houseId: HouseId,
+    val structureId: StructureId,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : SeatEvent, WorldEvent
+
 /**
  * A house was founded. It carries where, and how much that matters: those two are what put a thing on the
  * map, and which tile it falls in is worked out downstream from the first. It carries a stock of every

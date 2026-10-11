@@ -154,7 +154,7 @@ export function describeCharacter(
 
 /**
  * A structure: its name; what it is, in the European word until the culture under it says another (step 12 of
- * docs/plans/structures.md); who holds it, with a way to that house; its level; and where it stands. `spec` is the
+ * docs/plans/structures.md), and whose seat it is, when it is one; who holds it, with a way to that house; its level; and where it stands. `spec` is the
  * catalogue's entry for its type, absent before the catalogue is read or for a type it lacks; `yours` whether the
  * player's house holds it, which makes it one of their holdings.
  */
@@ -172,7 +172,7 @@ export function describeStructure(
   return {
     kind: yours ? 'Your holding' : 'Structure',
     name: structure.name,
-    under: `${/^[aeiou]/.test(word) ? 'an' : 'a'} ${word}`,
+    under: `${/^[aeiou]/.test(word) ? 'an' : 'a'} ${word}${structure.seatOf === undefined ? '' : `, the seat of ${structure.seatOf.name}`}`,
     facts: [
       { what: 'Held by', said: holder?.name ?? 'nobody' },
       { what: 'Level', said: spec === undefined ? String(level) : `${level} of ${spec.levels}` },

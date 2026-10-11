@@ -109,3 +109,5 @@ recorded over. See decision record 0037. What each one changed:
   and a batch's `structureChanged` delta carries the new face to whoever sees or holds it, landed by its stamp.
 - **39** - a vision point says the structure it is seen from: `yourSight`'s points carry `from`, the structure a
   vision given is seen from, for what a holding lets its holder see.
+- **40** - a structure says whose seat it is: `StructureView` carries `seatOf`, the house whose seat it is in the face
+  sent, which a window says and which the page draws in place of that house's own mark.

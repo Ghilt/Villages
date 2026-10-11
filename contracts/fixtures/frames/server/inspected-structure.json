@@ -15,6 +15,16 @@
     "significance": 20.0,
     "since": 654635,
     "stamp": 1,
-    "seenUntil": 654700
+    "seenUntil": 654700,
+    "seatOf": {
+      "id": "6d5b0a2e-1c3f-4d7e-9a8b-0f1e2d3c4b5a",
+      "name": "Ravenscar",
+      "banner": {
+        "field": "sable",
+        "division": "plain",
+        "charge": "stag",
+        "chargeTincture": "argent"
+      }
+    }
   }
 }

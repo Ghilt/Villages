@@ -249,7 +249,7 @@ program running on it at this tree's address.
 | 5a | The window: `inspect` kind `structure`, `describeStructure`, the holder's link, a tower for its mark | a click | bump |
 | 5b | `changedHands` and *take control of this building* on the one open | your pennant on it | bump |
 | 6 | Sight from structures: the `StandingEffects` listener, `caughtUp`, `gainedVision` and `lostVision` written with the radius and `from` | the fog lifting round a structure taken | bump |
-| 7a | The seat refit on the server: the `Seats` reaction, `namedSeat`, `foundingPlace`, the seat's own sight removed, omens, season, gossip and dialogues reading the seat | a new house's events | bump |
+| 7a | The seat: the `Seats` reaction raises the castle at founding and `namedSeat` names it; a structure's face says whose seat it is, its window says so, and the house's own mark steps aside where its seat is drawn. The seat's own sight, `foundingPlace`, and omens, season, gossip and dialogues reading the seat move to step 9, where a seat can first be lost: until then the seat stands where the house was founded | a new house's events | bump |
 | 7b | The seat refit on the page: no house sprite; the room, the dive and the eye read the seat; the castle's influence zone when selected, in place of `HoldingOverlay` | a click on your castle | |
 | 8a | The tab's mark, in the library | the component page | |
 | 8b | The Holdings tab: `yourHoldings`, the list, the details | the corner | bump |

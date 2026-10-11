@@ -21,6 +21,8 @@ export const structureViewSchema = z.object({
   since: z.number().int(),
   stamp: z.number().int(),
   seenUntil: z.number().int().optional(),
+  /** The house whose seat it is, in the face sent; absent for one that is nobody's seat. */
+  seatOf: holderViewSchema.optional(),
 });
 
 /** A structure came to be in a cell this connection holds and sees. */

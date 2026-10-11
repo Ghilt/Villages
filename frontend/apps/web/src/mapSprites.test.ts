@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import type { StructureView } from '@villages/protocol';
 import type { StructureCatalogue, StructureTypeSpec } from '@villages/world';
 
-import { toStructureSprite } from './mapSprites';
+import { housesBesideTheirSeats, toStructureSprite } from './mapSprites';
 import { tinctureColour } from './sprites/tinctures';
 
 /** A type as the catalogue would read it, by the heights it stands at, a level at a time. */
@@ -72,5 +72,18 @@ describe('a structure as the map draws it', () => {
   it('leaves its height to the renderer before the catalogue is read, or for a type it does not know', () => {
     expect(toStructureSprite(structure('castle', 1), null).structure).toEqual({ picture: 'castle' });
     expect(toStructureSprite(structure('lodge', 1), CATALOGUE).structure).toEqual({ picture: 'lodge' });
+  });
+});
+
+describe('a house beside its seat', () => {
+  const castle = { ...structure('castle', 1, RAVENSCAR), seatOf: RAVENSCAR };
+
+  it('is not drawn as a house where its seat is drawn, which stands for it there', () => {
+    expect(housesBesideTheirSeats([{ id: 'h' }, { id: 'k' }], [castle])).toEqual([{ id: 'k' }]);
+  });
+
+  it("is drawn as itself while its seat is not in view, and a structure that is nobody's seat changes nothing", () => {
+    expect(housesBesideTheirSeats([{ id: 'h' }], [])).toEqual([{ id: 'h' }]);
+    expect(housesBesideTheirSeats([{ id: 'h' }], [structure('mill', 1, RAVENSCAR)])).toEqual([{ id: 'h' }]);
   });
 });

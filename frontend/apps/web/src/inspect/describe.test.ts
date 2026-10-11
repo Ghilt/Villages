@@ -110,6 +110,12 @@ describe("a structure's window", () => {
     });
   });
 
+  it('says whose seat it is, when it is one', () => {
+    expect(describeStructure({ ...abbey, holder: ravenscar, seatOf: ravenscar }, spec, true).under).toBe(
+      'an abbey, the seat of Ravenscar',
+    );
+  });
+
   it('says a type the catalogue has not told it of in its own name, spoken', () => {
     const said = describeStructure({ ...abbey, structureType: 'printingHouse' }, undefined, false);
 

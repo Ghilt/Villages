@@ -61,6 +61,19 @@ export function toStructureSprite(structure: StructureView, catalogue: Structure
   };
 }
 
+/**
+ * The houses to draw as houses: every one but a house whose seat is among the structures drawn, which stands for it
+ * there, so a seat is not drawn twice. A house whose seat is not in view - too far out to be sent, or under the fog -
+ * is still drawn as itself, which is also what the eye keeps in sight. See decision record 0092.
+ */
+export function housesBesideTheirSeats<H extends { id: string }>(
+  houses: readonly H[],
+  structures: readonly StructureView[],
+): H[] {
+  const seated = new Set(structures.flatMap((one) => (one.seatOf === undefined ? [] : [one.seatOf.id])));
+  return houses.filter((house) => !seated.has(house.id));
+}
+
 /** The gold of the interface, so a place being offered reads as the world asking rather than as a house. */
 const OFFERED = 0x9d7c2a;
 

@@ -14,6 +14,7 @@ import villages.domain.HouseGainedKeyFigure
 import villages.domain.HouseGainedVision
 import villages.domain.HouseLostKeyFigure
 import villages.domain.HouseLostVision
+import villages.domain.HouseNamedSeat
 import villages.domain.HouseResourceGranted
 import villages.domain.HouseResourcePledged
 import villages.domain.HouseResourceReleased
@@ -62,6 +63,7 @@ object EventTypes : CloudEventTypeMapper<Event> {
         PlayerOfferedDialogue::class to "villages.player.offeredDialogue.v1",
         PlayerRolled::class to "villages.player.rolled.v1",
         PlayerTookAction::class to "villages.player.tookAction.v1",
+        HouseNamedSeat::class to "villages.house.namedSeat.v1",
         StructureRaised::class to "villages.structure.raised.v1",
         StructureChangedHands::class to "villages.structure.changedHands.v1",
     )

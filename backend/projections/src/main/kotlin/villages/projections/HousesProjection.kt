@@ -26,6 +26,7 @@ import villages.domain.everyStock
 import villages.domain.ChoiceEvent
 import villages.domain.DialogueEvent
 import villages.domain.KeyFigureEvent
+import villages.domain.SeatEvent
 import villages.domain.VisionEvent
 import villages.domain.StructureEvent
 import villages.protocol.Cell
@@ -114,7 +115,7 @@ class HousesProjection(feed: EventFeed) : Follower(feed), HousesByCell, HousesBy
             is KeyFigureEvent -> return
 
             // What a house sees is the sight projection's, and nobody else is shown it. See decision 0061.
-            is VisionEvent -> return
+            is VisionEvent, is SeatEvent -> return
 
             // A person is not a house, and what one is to a house is the house's own history: nothing a
             // character's stream says moves a house's row. See decision record 0055.

@@ -41,7 +41,13 @@ import { watchInfoMap } from './map/infoMap';
 import { SpriteOverlay } from './sprites/SpriteOverlay';
 import { placeWater } from './water/WaterLayer';
 import { setFlowView, waterStore } from './water/waterMode';
-import { candidatesOf, toCharacterSprite, toSprite, toStructureSprite } from './mapSprites';
+import {
+  candidatesOf,
+  housesBesideTheirSeats,
+  toCharacterSprite,
+  toSprite,
+  toStructureSprite,
+} from './mapSprites';
 import { useStructureCatalogue } from './net/structureCatalogue';
 import { useStore } from './store/useStore';
 
@@ -128,7 +134,7 @@ export function App({ master, devTools }: AppProps) {
   const sprites = useMemo(
     () => [
       ...raised.map((structure) => toStructureSprite(structure, catalogue)),
-      ...drawn.map((house) => toSprite(house, eye && house.id === yours?.id)),
+      ...housesBesideTheirSeats(drawn, raised).map((house) => toSprite(house, eye && house.id === yours?.id)),
       ...standing.map(toCharacterSprite),
       ...candidatesOf(yourChoice),
     ],
@@ -237,6 +243,12 @@ export function App({ master, devTools }: AppProps) {
   const up = useStore(sessionStore, standingIn);
   // What is open, the newest first: the windows on the stage, and what the map marks.
   const open = useStore(subjectsStore, (subjects) => subjects.open);
+  // What the map marks: the newest thing opened, and a house drawn as its seat marked there.
+  const marked = useMemo(() => {
+    const top = open[0];
+    const seat = top?.kind === 'house' ? raised.find((one) => one.seatOf?.id === top.id) : undefined;
+    return seat === undefined ? top : { kind: 'structure' as const, id: seat.id };
+  }, [open, raised]);
 
   // The map's own pane, App's because App holds the map; every other pane is drawn by its feature, and which
   // stand and in what order is `panes.tsx`'s.
@@ -254,7 +266,7 @@ export function App({ master, devTools }: AppProps) {
               map={map}
               sprites={sprites}
               worldRoot={worldRoot}
-              picked={open[0]}
+              picked={marked}
               onPick={inspect}
             />
           )}
@@ -276,7 +288,7 @@ export function App({ master, devTools }: AppProps) {
         {along !== null && room.size === 'strip' && <MapStrip room={room} />}
       </>
     ),
-    [map, yours, worldRoot, sprites, camera.latticeTurn, drawn, eye, open],
+    [map, yours, worldRoot, sprites, camera.latticeTurn, drawn, eye, open, marked],
   );
   const panes = useMemo(() => panesOn(up, open, drawMap), [up, open, drawMap]);
 

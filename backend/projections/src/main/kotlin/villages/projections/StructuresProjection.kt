@@ -13,6 +13,7 @@ import villages.domain.ChoiceEvent
 import villages.domain.DialogueEvent
 import villages.domain.HouseFounded
 import villages.domain.HouseId
+import villages.domain.HouseNamedSeat
 import villages.domain.KeyFigureEvent
 import villages.domain.ResourceEvent
 import villages.domain.StructureId
@@ -66,12 +67,24 @@ class StructuresProjection(feed: EventFeed) : Follower(feed), StructuresByCell {
             is StructureChangedHands -> {
                 val held = rows[event.structureId] ?: return
                 if (stored.streamVersion <= held.streamVersion) return
-                val face = held.row.faces.last().copy(
+                val last = held.row.faces.last()
+                val face = last.copy(
                     holder = event.to?.let(holders::get),
+                    // Handed to another, it is no longer its old holder's seat as far as the map knows; the house's own
+                    // loss of it is step 9 of the plan.
+                    seatOf = last.seatOf?.takeIf { it.house == event.to },
                     since = event.worldTime,
                     stamp = applied.incrementAndGet(),
                 )
                 put(held.row.copy(faces = held.row.faces + face), stored.streamVersion, appeared = false)
+            }
+            // Whose seat it is goes on its face, so a house that last saw it sees it as whose seat it was then.
+            is HouseNamedSeat -> {
+                val held = rows[event.structureId] ?: return
+                val last = held.row.faces.last()
+                if (last.seatOf?.house == event.houseId) return
+                val face = last.copy(seatOf = holders[event.houseId], since = event.worldTime, stamp = applied.incrementAndGet())
+                put(held.row.copy(faces = held.row.faces + face), held.streamVersion, appeared = false)
             }
             // What a house has, is asked, is told, holds and sees, and what befalls a person, changes no structure.
             is ResourceEvent, is ChoiceEvent, is DialogueEvent, is KeyFigureEvent, is VisionEvent, is CharacterEvent -> Unit

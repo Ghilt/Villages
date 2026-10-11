@@ -7,7 +7,7 @@ package villages.domain
  *
  * It decides the founding itself and routes everything else. Each family of commands goes to the part of the
  * house that decides it - what it has to the [Treasury], whom it holds to [KeyFigures], what it sees to
- * [Visions], what it is told to [Dialogues], and what it is asked to [Choices] - and each family of events to the
+ * [Visions], which holding is its seat to [Seating], what it is told to [Dialogues], and what it is asked to [Choices] - and each family of events to the
  * part that folds it. A part is handed a [Follow] for the effects it asks of the rest of the house, which is the
  * only way one part reaches another. See decision record 0075.
  */
@@ -37,6 +37,7 @@ object HouseDecider : Decider<HouseCommand, House, HouseEvent> {
             is ResourceCommand -> founded(state).treasury.decide(command)
             is KeyFigureCommand -> founded(state).figures.decide(command)
             is VisionCommand -> founded(state).vision.decide(command)
+            is SeatCommand -> founded(state).seating.decide(command)
             is DialogueCommand -> founded(state).let { house -> house.dialogues.decide(command, house.player, follow) }
         }
     }
@@ -83,6 +84,7 @@ object HouseDecider : Decider<HouseCommand, House, HouseEvent> {
         is ResourceEvent -> state.ifFounded { copy(treasury = treasury.evolve(event)) }
         is KeyFigureEvent -> state.ifFounded { copy(figures = figures.evolve(event)) }
         is VisionEvent -> state.ifFounded { copy(vision = vision.evolve(event)) }
+        is SeatEvent -> state.ifFounded { copy(seating = seating.evolve(event)) }
         is DialogueEvent -> state.ifFounded { copy(dialogues = dialogues.evolve(event)) }
     }
 

@@ -77,6 +77,13 @@ value class StructureId(val value: UUID) {
          */
         fun inAntarctica(type: StructureType): StructureId =
             StructureId(UUID.nameUUIDFromBytes("${NAMED_AFTER}antarctica:${type.name}".toByteArray(Charsets.UTF_8)))
+
+        /**
+         * The castle founding raises for [house], its first seat: worked out from the house, so a founding heard again
+         * raises it on the same stream, and is refused there.
+         */
+        fun seatOf(house: HouseId): StructureId =
+            StructureId(UUID.nameUUIDFromBytes("${NAMED_AFTER}seat:${house.value}".toByteArray(Charsets.UTF_8)))
     }
 }
 

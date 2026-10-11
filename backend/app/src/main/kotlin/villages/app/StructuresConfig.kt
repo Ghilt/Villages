@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration
 import villages.application.Antarctica
 import villages.application.Faults
 import villages.application.ScheduledLater
+import villages.application.Seats
 import villages.application.StandingEffects
 import villages.application.StructureCommandExecutor
 import villages.application.StructureService
@@ -44,6 +45,11 @@ class StructuresConfig {
     @Bean
     fun structures(structures: StructureCommandExecutor, houses: HousesProjection, clock: Clock, worldClock: WorldClock): StructureService =
         StructureService(structures, houses, { clock.instant() }, worldClock)
+
+    /** Founding raises the house's castle and names it the seat. */
+    @Bean(initMethod = "start", destroyMethod = "close")
+    fun seats(world: EventWorld, later: ScheduledLater, faults: Faults, structures: StructureCommandExecutor, clock: Clock): Seats =
+        Seats(world.feed, later, faults, structures, world.executor, { clock.instant() })
 
     /** What each structure gives its holder, written into the holder's history: for now what it lets them see. */
     @Bean(initMethod = "start", destroyMethod = "close")

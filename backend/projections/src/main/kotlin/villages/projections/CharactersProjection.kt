@@ -31,6 +31,7 @@ import villages.domain.PlayerId
 import villages.domain.WorldTime
 import villages.domain.everyStat
 import villages.domain.ResourceEvent
+import villages.domain.SeatEvent
 import villages.domain.ChoiceEvent
 import villages.domain.DialogueEvent
 import villages.domain.VisionEvent
@@ -152,7 +153,7 @@ class CharactersProjection(feed: EventFeed) : Follower(feed), KeyFiguresByHouse,
             }
 
             // What a house has, what it is asked and told, and what it sees are other read models' business.
-            is ResourceEvent, is ChoiceEvent, is DialogueEvent, is VisionEvent, is StructureEvent -> Unit
+            is ResourceEvent, is ChoiceEvent, is DialogueEvent, is VisionEvent, is SeatEvent, is StructureEvent -> Unit
         }
     }
 

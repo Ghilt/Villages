@@ -12,6 +12,7 @@ import villages.domain.HouseId
 import villages.domain.HouseResourceGranted
 import villages.domain.HouseResourceSpent
 import villages.domain.KeyFigureEvent
+import villages.domain.SeatEvent
 import villages.domain.PlayerRolled
 import villages.domain.Resource
 import villages.domain.ResourceEvent
@@ -43,7 +44,7 @@ class LastRollsProjection(feed: EventFeed) : Follower(feed), StandingAtLastRoll 
             is ResourceEvent -> return
 
             // What else a house is asked, told, holds and sees, and the characters, are other read models' business.
-            is ChoiceEvent, is DialogueEvent, is KeyFigureEvent, is VisionEvent, is CharacterEvent, is StructureEvent -> return
+            is ChoiceEvent, is DialogueEvent, is KeyFigureEvent, is VisionEvent, is SeatEvent, is CharacterEvent, is StructureEvent -> return
         }
     }
 

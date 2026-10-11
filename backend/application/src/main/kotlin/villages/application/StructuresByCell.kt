@@ -21,6 +21,8 @@ data class StructureFace(
     val significance: Significance,
     val since: WorldTime,
     val stamp: Long,
+    /** The house whose seat it is, with what a window names it by, or none. */
+    val seatOf: Holder? = null,
 )
 
 /**

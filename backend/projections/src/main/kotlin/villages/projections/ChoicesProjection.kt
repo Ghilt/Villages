@@ -13,6 +13,7 @@ import villages.domain.PlayerRolled
 import villages.domain.PlayerTookAction
 import villages.domain.PlayerId
 import villages.domain.ResourceEvent
+import villages.domain.SeatEvent
 import villages.domain.DialogueEvent
 import villages.domain.KeyFigureEvent
 import villages.domain.VisionEvent
@@ -62,7 +63,7 @@ class ChoicesProjection(feed: EventFeed) : Follower(feed), ChoicesByPlayer {
 
             // What a house has, whom it holds and what it sees are other read models' business. This one only
             // tracks what is pending.
-            is ResourceEvent, is KeyFigureEvent, is VisionEvent -> return
+            is ResourceEvent, is KeyFigureEvent, is VisionEvent, is SeatEvent -> return
 
             // Founding by any means settles the question of where to found, so whatever was pending goes.
             // The domain says the same thing in `evolve`; this is that rule read off the events.

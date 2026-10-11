@@ -26,6 +26,21 @@ sealed interface KeyFigureCommand : HouseCommand
 /** A vision given outright, and taken away. See [ResourceCommand] for what a family is. */
 sealed interface VisionCommand : HouseCommand
 
+/** Which of its holdings is the house's seat. See [ResourceCommand] for what a family is. */
+sealed interface SeatCommand : HouseCommand
+
+/**
+ * Name a structure the house's seat: the role one of its holdings plays, where the eye goes and the room is entered.
+ * Sent by the seats listener for the castle founding raises. Refused for a house that has named its seat before,
+ * so a founding heard again names nothing twice. See decision record 0092.
+ */
+data class NameSeat(
+    override val houseId: HouseId,
+    val structureId: StructureId,
+    val worldTime: WorldTime,
+    val recordedAt: Instant,
+) : SeatCommand
+
 /** A house was given some of a resource, from wherever the world gives things from. */
 data class GrantResource(
     override val houseId: HouseId,

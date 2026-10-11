@@ -35,6 +35,8 @@ sealed interface House {
         val vision: Visions = Visions(),
         /** What it was told. */
         val dialogues: Dialogues = Dialogues(),
+        /** Which of its holdings is its seat. */
+        val seating: Seating = Seating(),
         /** The world-day it was founded on, and the instant that was recorded. */
         val foundedOn: WorldTime,
         val foundedAt: Instant,
@@ -53,6 +55,9 @@ sealed interface House {
 
         /** The visions this house was given outright and still has, in the order it was given them. */
         val visions: List<VisionId> get() = vision.given
+
+        /** The holding that is its seat, or null for a house that has none. See 0092. */
+        val seatedIn: StructureId? get() = seating.structure
 
         /** The dialogues this house was offered and has not finished, each with the steps taken. See 0071. */
         val openDialogues: List<OpenDialogue> get() = dialogues.open

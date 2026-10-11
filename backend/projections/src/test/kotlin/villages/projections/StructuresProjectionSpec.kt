@@ -18,6 +18,7 @@ import villages.domain.Event
 import villages.domain.HouseFounded
 import villages.domain.HouseId
 import villages.domain.HouseName
+import villages.domain.HouseNamedSeat
 import villages.domain.Location
 import villages.domain.PlayerId
 import villages.domain.Significance
@@ -131,5 +132,18 @@ class StructuresProjectionSpec : StringSpec({
         row.faceOn(today)?.holder shouldBe null
         row.faceOn(later)?.holder?.name shouldBe HouseName("Ravenscar")
         told.single().appeared shouldBe false
+    }
+
+    "a structure named a house's seat takes a face saying whose, once, and loses it handed to another" {
+        val (feed, structures) = rig()
+        feed.deliver(founded)
+        feed.deliver(raised(), version = 1)
+
+        feed.deliver(HouseNamedSeat(HouseId.of(ada), mill, today, noon))
+        feed.deliver(HouseNamedSeat(HouseId.of(ada), mill, today, noon))
+        structures.row(mill)!!.faces.map { it.seatOf?.name } shouldBe listOf(null, HouseName("Ravenscar"))
+
+        feed.deliver(StructureChangedHands(mill, from = HouseId.of(ada), to = null, today, noon), version = 2)
+        structures.row(mill)!!.faces.last().seatOf shouldBe null
     }
 })

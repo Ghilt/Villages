@@ -281,6 +281,13 @@ stage alone, with none of the debug panel in it (decision record 0079).
   its own step. Yours already is refused `sameHolder`, and with no house `noSuchHouse`. One raised **yours** sees
   the same way from the moment it is raised. Standing in for a story handing one over or a house
   taking it; closed with the instruments.
+- A house's seat: founding raises its castle, *Ravenscar Castle*, where the house was founded, held by it, and names
+  it the seat, as the founding's own story on the event page: `founded`, `raised`, `namedSeat`, then the house's
+  `gainedVision` from the castle. On the map the castle stands for the house where it is drawn, flying the house's
+  pennant, and the house's own castle mark steps aside; far out, or under the fog, where the castle is not sent,
+  the house's mark is drawn as before. A click on it opens the castle's window, *a castle, the seat of Ravenscar*,
+  with the house a link away, and a house's window marks its seat on the map. The seat still sees from where the
+  house was founded too, until a seat can be lost.
 - A structure on the map: its type's placeholder picture, drawn in code (`sprites/structurePictures.ts`) in its
   own colours, as tall on the ground as `groundHeight` in the catalogue says at its level, and far out the same
   picture at the size of a word, crossing over where a house's castle does. One a house holds flies a pennant in

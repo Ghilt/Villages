@@ -23,6 +23,7 @@ import villages.domain.HouseGainedKeyFigure
 import villages.domain.HouseGainedVision
 import villages.domain.HouseLostKeyFigure
 import villages.domain.HouseLostVision
+import villages.domain.HouseNamedSeat
 import villages.domain.Resource
 import villages.domain.PledgeId
 import villages.domain.HouseResourceSpent
@@ -243,6 +244,9 @@ internal object EventSamples {
     /** The same castle, taken from the sample house by nobody: held by nobody since. */
     val castleLeft = StructureChangedHands(antarcticCastle, from = house, to = null, WorldTime(653_706), noon)
 
+    /** The sample house's seat: the Antarctic castle, standing in for the one founding raises. */
+    val seatNamed = HouseNamedSeat(house, antarcticCastle, WorldTime(653_705), noon)
+
     val gotland = VisionId(UUID.fromString("dd000000-0000-4000-8000-000000000001"))
     val sawGotland = HouseGainedVision(house, gotland, Location(57.64, 18.30), 34.0, null, day, noon)
     val lostGotland = HouseLostVision(house, gotland, day, noon)
@@ -326,6 +330,7 @@ internal object EventSamples {
         "villages.house.gainedVision.v1" to sawGotland,
         "villages.house.lostKeyFigure.v1" to lostAgnes,
         "villages.house.lostVision.v1" to lostGotland,
+        "villages.house.namedSeat.v1" to seatNamed,
         "villages.house.resourceGranted.v1" to givenGold,
         "villages.house.resourcePledged.v1" to pledgedReason,
         "villages.house.resourceReleased.v1" to releasedReason,
