@@ -5,15 +5,7 @@ import { CAMERA } from '../map/mapConfig';
 import { setTiltRamp } from '../map/tilt';
 import { pullStore } from '../room/pull';
 
-import {
-  cameraStore,
-  STEEPEST_PARALLEL_PITCH,
-  isPlayers,
-  isSquareGround,
-  lensOf,
-  PLAYERS,
-  setCamera,
-} from '../map/camera';
+import { cameraStore, STEEPEST_PARALLEL_PITCH, isSquareGround, lensOf, setCamera } from '../map/camera';
 import {
   DIAMOND_BEARING,
   DIAMOND_LATTICE_SIZE,
@@ -32,7 +24,7 @@ import { useStore } from '../store/useStore';
  * **The lever of experiment 0008, not a part of the game.** Nothing here is reachable by anybody
  * playing. Every control starts at the player's camera: north-up on a diamond lattice, flat from zoom 7
  * out and tipped back forty-five degrees at the closest zoom, which is decision record 0060 as amended by
- * experiment 0011, and `player` puts it back there. Everything else is for looking at a world from another angle, which is answered by
+ * experiment 0011. Everything else is for looking at a world from another angle, which is answered by
  * looking and is why it is a slider and not a proposal. See decision record 0023.
  *
  * The terrain, the coast, the areas, the marks and the scenery all follow the camera, the marks and the
@@ -96,23 +88,10 @@ export function CameraSection({ map }: CameraSectionProps) {
     map.triggerRepaint();
   }, [map, how]);
 
-  const players = isPlayers(how);
   const wide = (1 / Math.cos((how.tilt * Math.PI) / 180)).toFixed(2);
 
-  const tools = (
-    <button
-      type="button"
-      className={players ? 'debug__button debug__button--on' : 'debug__button'}
-      onClick={() => setCamera(PLAYERS)}
-      aria-pressed={players}
-      title="put the camera back where a player has it: north-up, on diamonds, tipping as it comes in"
-    >
-      player
-    </button>
-  );
-
   return (
-    <Section name="Camera" tools={tools} reading={<ZoomReading map={map} />} shutToStart>
+    <Section name="Camera" reading={<ZoomReading map={map} />}>
       <label className="debug-map__label" htmlFor="camera-tilt">
         How far it tips at the closest zoom
       </label>

@@ -122,10 +122,10 @@ stage alone, with none of the debug panel in it (decision record 0079).
   camera goes and the ground about it is drawn below the zoom where everyone else's begins; theirs and
   nobody else's, so the world still thins out with distance. It costs nothing on the wire, because a
   player's own house already reaches them wherever they are looking. See `docs/adr/0038`.
-- The fog of war: `fog of war: on` in the Debug map section, on at every page load, and pressing it turns
-  the fog off for that window. A house sees from **vision points** - its seat, and each key figure standing
+- The fog of war: the `FoW` box in the Debug map section's bar, there folded or open, ticked at every page
+  load, and unticking it turns the fog off for that window. A house sees from **vision points** - its seat, and each key figure standing
   on the map, a circle of 34 km around each - and the server works them out and sends them as `yourSight`;
-  the log says what gives vision under `sight`. `give vision here`, under the switch, gives the house a circle
+  the log says what gives vision under `sight`. `give vision here`, in the Debug map section, gives the house a circle
   where the camera is looking until its `take it away` is pressed; both are real commands. The fog covers the
   world and not the signs: every icon, the offered seats and whatever stands in vision are drawn over it. Unknown ground is under a dark haze, revealed ground has its
   colour taken out, trees and castles too, and vision is clear. With no house the whole world is hazed. The server holds back what the fog hides:
@@ -133,7 +133,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
   and the scenery's stands only where they touch revealed ground, tile by tile under the held cells, which
   the log counts under `stands`; the trees are grown from those and nothing else, so without the game server
   nothing grows. The server reads them from `world/stands/`, where the generator writes them and nothing serves
-  them, `villages.stands` to point it elsewhere, for the master the page names in `hello`. `fog of war: off` lifts all of it, for that window. The edge has surface tension: circles closer than
+  them, `villages.stands` to point it elsewhere, for the master the page names in `hello`. `FoW` unticked lifts all of it, for that window. The edge has surface tension: circles closer than
   about 56 km are seen across and notches are rounded off, drawn and held back alike, `Vision.SURFACE_TENSION`.
   No tree grows on unknown ground, so with the fog on and no house the world is bare under the haze. Close
   in, the haze's bands of mist swell and drift, on a clock that runs only while some of it is on the screen.

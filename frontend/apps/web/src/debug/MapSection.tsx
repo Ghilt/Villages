@@ -144,7 +144,20 @@ export function MapSection({ map, master, renderer, onRenderer }: MapSectionProp
   const rendererChoice = RENDERERS.find((candidate) => candidate.name === renderer);
 
   return (
-    <Section name="Debug map">
+    <Section
+      name="Debug map"
+      control={
+        // Adam's switch for the fog of war. On at every load; off lifts all of it for this window, the
+        // drawing and what the gateway holds back. See decision record 0061.
+        <label
+          className="debug__check"
+          title="draw the fog of war over what your house cannot see, or lift it in this window"
+        >
+          <input type="checkbox" checked={fog} onChange={(event) => setFogOfWar(event.target.checked)} />
+          FoW
+        </label>
+      }
+    >
       <label className="debug-map__label" htmlFor="terrain">
         Terrain
       </label>
@@ -220,20 +233,6 @@ export function MapSection({ map, master, renderer, onRenderer }: MapSectionProp
         ))}
       </select>
       {rendererChoice !== undefined && <p className="debug-map__note">{rendererChoice.note}</p>}
-
-      {/*
-          Adam's switch for the fog of war, in words, as he asked. On at every load; off lifts all of it for
-          this window, the drawing and what the gateway holds back. See decision record 0061.
-        */}
-      <button
-        type="button"
-        className={fog ? 'debug-map__switch debug-map__switch--on' : 'debug-map__switch'}
-        onClick={() => setFogOfWar(!fog)}
-        aria-pressed={fog}
-        title="draw the fog of war over what your house cannot see, or lift it in this window"
-      >
-        {fog ? 'fog of war: on' : 'fog of war: off'}
-      </button>
 
       {/*
           Vision given outright, a real command each way. Left pressable without a house, so the refusal is

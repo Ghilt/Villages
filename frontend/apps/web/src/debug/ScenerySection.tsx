@@ -59,20 +59,19 @@ export function ScenerySection() {
   const spaced = Math.max(0, SPACINGS.indexOf(how.spacing));
   const shaded = Math.max(0, SHADOWS.indexOf(how.shadows));
 
-  const tools = (
-    <button
-      type="button"
-      className={how.on ? 'debug__button debug__button--on' : 'debug__button'}
-      onClick={() => setScenery({ on: !how.on })}
-      aria-pressed={how.on}
-      title="draw the world's furniture, or leave the ground bare"
-    >
-      {how.on ? 'furnished' : 'bare'}
-    </button>
+  const control = (
+    <label className="debug__check" title="draw the world's furniture, or leave the ground bare">
+      <input
+        type="checkbox"
+        checked={how.on}
+        onChange={(event) => setScenery({ on: event.target.checked })}
+      />
+      furnished
+    </label>
   );
 
   return (
-    <Section name="Scenery" tools={tools}>
+    <Section name="Scenery" control={control}>
       {map === null ? (
         <p className="debug-map__note">
           {hasNoSpriteMap()

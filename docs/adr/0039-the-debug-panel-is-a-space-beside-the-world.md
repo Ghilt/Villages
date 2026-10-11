@@ -51,7 +51,8 @@ a matter of taste. The panel is allowed to balloon into the room this frees: a l
 row, and one rule with no special case is worth more than a tidier-looking panel.
 
 **Everything in the panel is in a section, and every section folds on its own.** A chevron beside the
-title, and the fold is remembered per section. The panel scrolls and the bar with `hide` and `phone`
+title, and the fold is remembered per section; a section never opened starts folded (2026-10-11), and a
+switch a section is often reached for, such as the fog of war's, sits in its bar where it can be pressed folded. The panel scrolls and the bar with `hide` and `phone`
 does not, because it is expected to gain sections rather than stay the size it is and a way out that
 scrolls off the top is not a way out. A section's bar holds its title and a status or a button or two;
 more levers than that go in its body, where there is room to wrap.

@@ -29,8 +29,6 @@ interface SectionProps {
    * after.
    */
   control?: ReactNode;
-  /** Folded to begin with, for a section that is more often in the way than wanted. */
-  shutToStart?: boolean;
   children: ReactNode;
 }
 
@@ -38,14 +36,14 @@ function rememberedAs(name: string): string {
   return `villages.debug.fold.${name.toLowerCase().replace(/\s+/g, '-')}`;
 }
 
-export function Section({ name, tools, reading, control, shutToStart = false, children }: SectionProps) {
+export function Section({ name, tools, reading, control, children }: SectionProps) {
+  // Every section starts folded, so the panel opens as a row of titles with their switches, and what is
+  // opened is what is being watched. Adam's word of 2026-10-11.
   const [open, setOpen] = useState(() => {
     try {
-      const kept = localStorage.getItem(rememberedAs(name));
-      return kept === null ? !shutToStart : kept === 'yes';
+      return localStorage.getItem(rememberedAs(name)) === 'yes';
     } catch {
-      // A browser that will not remember is not a reason to start folded.
-      return !shutToStart;
+      return false;
     }
   });
 
