@@ -108,6 +108,7 @@ describe("the page's conversation with the gateway", () => {
       'gateway: connecting to ws://localhost:8080/ws',
       'gateway: welcome: player a1b2c3d4, server time 2026-09-05T12:00:00.200Z',
       'world: today is the twenty-fourth of June, year 1246; the earliest thing is from the seventeenth of March, year 1199',
+      'world: kept in MongoDB, database villages, which outlives the server',
     ]);
   });
 

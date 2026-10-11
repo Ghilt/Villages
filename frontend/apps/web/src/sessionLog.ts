@@ -101,6 +101,7 @@ export const sessionLog: GatewayListener = {
           'world',
           `today is ${describeDay(frame.world.today)}; the earliest thing is from ${describeDay(frame.world.earliest)}`,
         );
+        if (frame.keptIn) note('world', `kept ${frame.keptIn}`);
         return;
       case 'snapshot':
         gather(frame);

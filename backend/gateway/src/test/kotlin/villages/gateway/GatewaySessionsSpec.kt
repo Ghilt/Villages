@@ -49,6 +49,7 @@ class GatewaySessionsSpec : StringSpec({
                 serverTime = noon.toEpochMilli(),
                 playerId = TOKEN,
                 world = WorldNow(today = today.day, earliest = today.day),
+                keptIn = "in memory, and gone when the server stops",
             ),
             YourHouse(null),
         )

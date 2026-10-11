@@ -9,7 +9,7 @@
 # rest). One line a file: its length, a space, and its path from the repository root. A line is counted as an
 # editor numbers them: every line break, and the last line when it has none.
 
-456 backend/gateway/src/main/kotlin/villages/gateway/Gateway.kt
+454 backend/gateway/src/main/kotlin/villages/gateway/Gateway.kt
 536 backend/protocol/src/main/kotlin/villages/protocol/Frames.kt
 741 debug-quick-start.ps1
 819 frontend/apps/web/src/admin/showcase/showcase.css

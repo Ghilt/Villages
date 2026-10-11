@@ -21,7 +21,7 @@ import tools.jackson.databind.JsonNode
  * It goes up whenever a frame or a field changes, and `ProtocolShapeSpec` makes sure of that: every frame's shape
  * is recorded in contracts/protocol-v<n>.txt, and what each version changed is in contracts/README.md.
  */
-const val PROTOCOL_VERSION = 33
+const val PROTOCOL_VERSION = 34
 
 data class Point(val lat: Double, val lon: Double)
 
@@ -415,8 +415,8 @@ data class CompleteDialogueStepPayload(val dialogueId: String, val lineId: Strin
 )
 sealed interface ServerFrame
 
-/** The answer to hello, carrying where the world's clock stands. The player's own house follows in `yourHouse`. */
-data class Welcome(val serverTime: Long, val playerId: String, val world: WorldNow) : ServerFrame
+/** The answer to hello: where the world's clock stands, and where the world is kept while the instruments are open. */
+data class Welcome(val serverTime: Long, val playerId: String, val world: WorldNow, val keptIn: String? = null) : ServerFrame
 
 /**
  * What a cell holds, sent on subscribing to it, before any deltas. `omitted` is how many more houses the cell had

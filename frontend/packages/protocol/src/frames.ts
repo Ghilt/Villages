@@ -264,6 +264,8 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
     playerId: z.string(),
     /** Where the world's clock stands: today, and the earliest day anything is known to exist from. */
     world: z.object({ today: worldDaySchema, earliest: worldDaySchema }),
+    /** Where the world is kept - in memory, or which database - said only while the instruments are open (0091). */
+    keptIn: z.string().nullable().optional(),
   }),
   /** The player's own house and what only they can see of it. Null when they have none. */
   z.object({ type: z.literal('yourHouse'), yours: yourHouseViewSchema.nullable() }),

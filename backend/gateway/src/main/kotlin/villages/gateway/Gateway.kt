@@ -50,11 +50,6 @@ import java.time.Clock
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executor
 
-/** What the gateway needs to send a frame to a connection. The transport is Spring's; this is not. */
-fun interface Outbound {
-    fun send(frame: ServerFrame)
-}
-
 /**
  * The edge, without the transport: one instance per process, one `Connection` per socket. It speaks the
  * protocol, translates it to the application's terms and back, serves a cell's snapshot from the read
@@ -98,7 +93,9 @@ class Gateway(
     stands: Stands = Stands { _, _, _ -> null },
     waters: WaterAt = WaterAt.NOWHERE,
     private val later: Later,
-    instrumentsOpen: Boolean = true,
+    private val instrumentsOpen: Boolean = true,
+    /** Where the world is kept, in memory or in which database: said at hello, while the instruments are open. */
+    private val keptIn: String = "in memory, and gone when the server stops",
     /**
      * What a connection's frames are sent on, and its cells answered again on: the thread that queued them, unless
      * the gateway is given threads of its own, as the app gives it. See decision record 0077.
@@ -301,6 +298,7 @@ class Gateway(
                     serverTime = clock.millis(),
                     playerId = who.value.toString(),
                     world = WorldNow(today = today.day, earliest = (houses.earliest() ?: today).day),
+                    keptIn = keptIn.takeIf { instrumentsOpen },
                 ),
             )
             parts.forEach { it.greet(this, who) }

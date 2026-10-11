@@ -511,9 +511,9 @@ if ($WebOnly) {
 } else {
     # --version rather than -version: the old flag writes to stderr, which stops the script dead.
     $JavaVersion = (& $Java --version | Select-Object -First 1)
-    Good "java $JavaVersion"
-    Say  '        Gradle fetches the JDK 21 it compiles with, so this one only has to run it.'
+    Good "java $JavaVersion, which runs Gradle; Gradle fetches the 21 it compiles with"
 }
+$Store = if ($WebOnly) { 'memory' } else { & (Join-Path $Root 'infra\store.ps1') }  # where the world is kept (0091)
 
 # --- what the browser needs ------------------------------------------------------------------------
 
@@ -662,7 +662,7 @@ if (-not $WebOnly) {
     } else {
         Step 'game server  '
         Remember 'game' (Start-Server $Gradlew `
-            @('--console=plain', ':app:bootRun', "--args=--server.port=$GamePort") `
+            @('--console=plain', ':app:bootRun', "`"--args=--server.port=$GamePort --villages.store=$Store`"") `
             (Join-Path $Root 'backend') $BackendLog $BackendErrors)
         $GameUp = Wait-Listening $GamePort 300 'the game server'
         if (-not $GameUp) {
@@ -702,7 +702,7 @@ if ($GameUp) {
     Say ''
     Say "  The game server is the WebSocket on $GamePort. The debug panel should say `"open`", and its"
     Say '  "found a house here" button sends a real command: an event appears in the panel, one line,'
-    Say '  opening to the whole thing. Nothing is stored yet, so a restart of the server forgets them.'
+    Say "  opening to the whole thing. The panel's first lines say where the world is kept."
 } elseif (-not $WebOnly) {
     Say ''
     Warn 'The game server never came up, so the panel will say "closed" and there are no events.'

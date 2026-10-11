@@ -243,9 +243,10 @@ and ESLint restricted imports on the frontend.
 
 Prerequisites: Node 24, and a JDK on the path for the server. Any recent one will do, because the
 Gradle toolchain fetches the 21 it compiles with; the machine's `JAVA_HOME` is on Temurin 17 and that
-is fine. Docker Desktop, on WSL2, runs MongoDB and RabbitMQ from `infra/`; the game server does not
-use them yet, so the event store and the broker are still in memory behind their ports, and nothing
-else needs Docker but the tests that say so in their names.
+is fine. Docker Desktop, on WSL2, runs MongoDB and RabbitMQ from `infra/`. With it running the game
+server keeps its world in MongoDB, in a database of this tree's own, and a restart forgets nothing;
+without it the world is in memory and gone when the server stops. The broker is not used yet, and the
+tests that need Docker say so in their names and are skipped without it.
 
 All the commands below are run **from the repository root**, `E:\Code\Villages`. The `--prefix frontend`
 part is what points npm at the frontend workspace, so running them from inside `frontend/` looks for
@@ -264,7 +265,10 @@ Commands are added here as the increments land:
   when `world/names/1790.json` or `world/names/about.json` was. It never writes through a link: tiles a worktree links from the main
   checkout are that checkout's to cut, and it says so. It cuts the sprites and the interface pictures again (seconds when nothing is new), starts the game
   server and the dev server hidden with their output in
-  `.logs/`, waits until both ports answer, and prints the address. `-Stop` stops both, `-Logs` prints
+  `.logs/`, waits until both ports answer, and prints the address. When Docker is running it starts MongoDB
+  and RabbitMQ too if they are not up, and tells the game server to keep its world there; `infra/store.ps1`
+  is that half, and it never stops them or makes them again. `-Stop` stops both servers and leaves the stack
+  alone, because it is every tree's. `-Logs` prints
   their tails, `-WebOnly` skips the game server, `-NoBrowser` leaves the browser alone. **A port held by
   anything that is not this checkout's current server is taken**: another tree's, or one started before
   the code it serves was written. Launching it from a checkout means "show me this checkout", and the
@@ -313,8 +317,9 @@ Commands are added here as the increments land:
 - Backend, running: the `backend` entry in `.claude/launch.json`, which carries this tree's port; by hand it is
   `cd backend` then `./gradlew :app:bootRun --args=--server.port=<this tree's game port>`. The gateway is a
   WebSocket at `ws://localhost:<that port>/ws`, 8080 in the main checkout; the web app connects to its own
-  tree's on load, or to `VITE_GATEWAY_URL` when that is set. Everything is in memory until MongoDB exists, so
-  nothing survives a restart, on purpose. `--villages.instruments=false` closes Adam's instruments: every lever
+  tree's on load, or to `VITE_GATEWAY_URL` when that is set. Its world is in memory, gone on a restart, unless
+  it is given `--villages.store=mongo`, as the quick start gives it whenever Docker is running: then it is in
+  this tree's own database and outlives the server (0091). `--villages.instruments=false` closes Adam's instruments: every lever
   of the debug panel and the event page, seeing everything, the fog's switch and the wipe are refused
   `instrumentsClosed`, and the player's own commands go on. See decision record 0076.
 - Backend, checks: `cd backend` then `./gradlew check`. Gradle fetches the JDK 21 the toolchain asks for, so

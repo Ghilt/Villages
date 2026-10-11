@@ -38,7 +38,7 @@ import villages.application.WorldClock
 import villages.application.WorldWipe
 import villages.domain.WorldTime
 import villages.gateway.Gateway
-import villages.occurrent.InMemoryWorld
+import villages.occurrent.EventWorld
 import villages.projections.CharactersProjection
 import villages.projections.ChoicesProjection
 import villages.projections.LastRollsProjection
@@ -59,9 +59,8 @@ import java.util.concurrent.atomic.AtomicInteger
 private val feedLog = LoggerFactory.getLogger("villages.feed")
 
 /**
- * The wiring. Everything the world is made of, chosen here and nowhere else: today the in-memory world,
- * because there is no MongoDB on this machine yet; from increment 0.8 a profile chooses between this and
- * the real store, and nothing that depends on the ports changes.
+ * The wiring. Everything the world is made of, chosen here and nowhere else, but for where its events are kept,
+ * which `StoreConfig` chooses: nothing here can tell whether that is memory or MongoDB.
  */
 @Configuration
 class WorldConfig {
@@ -74,10 +73,6 @@ class WorldConfig {
     fun faults(): FaultBoard = FaultBoard().also { board ->
         board.watch { fault -> feedLog.error(fault.describe(), fault.thrown) }
     }
-
-    /** The world, whose feed says on `faults` what its subscribers throw. */
-    @Bean(destroyMethod = "close")
-    fun world(faults: Faults): InMemoryWorld = InMemoryWorld(faults)
 
     @Bean
     fun clock(): Clock = Clock.systemUTC()
@@ -106,7 +101,7 @@ class WorldConfig {
     )
 
     @Bean
-    fun foundHouse(world: InMemoryWorld, clock: Clock, worldClock: WorldClock): FoundHouseService =
+    fun foundHouse(world: EventWorld, clock: Clock, worldClock: WorldClock): FoundHouseService =
         FoundHouseService(world.executor, clock = { clock.instant() }, world = worldClock)
 
     /** Message ids. Aggregate identities are derived and never come from here; see decision 0035. */
@@ -115,12 +110,12 @@ class WorldConfig {
 
     /** What happens when a player arrives: with no house and nothing pending, they are asked where. */
     @Bean
-    fun arrival(world: InMemoryWorld, clock: Clock, worldClock: WorldClock, ids: FreshIds): Arrival =
+    fun arrival(world: EventWorld, clock: Clock, worldClock: WorldClock, ids: FreshIds): Arrival =
         Arrival(world.executor, clock = { clock.instant() }, world = worldClock, ids = ids)
 
     @Bean
     fun resources(
-        world: InMemoryWorld,
+        world: EventWorld,
         clock: Clock,
         worldClock: WorldClock,
         calendar: WorldCalendar,
@@ -157,7 +152,7 @@ class WorldConfig {
     @Bean(initMethod = "start", destroyMethod = "close")
     @Suppress("LongParameterList")
     fun pledges(
-        world: InMemoryWorld,
+        world: EventWorld,
         later: ScheduledLater,
         faults: Faults,
         resources: ResourceService,
@@ -168,7 +163,7 @@ class WorldConfig {
 
     /** Giving a house vision of a place outright, and taking it away. See decision record 0061. */
     @Bean
-    fun visions(world: InMemoryWorld, clock: Clock, worldClock: WorldClock, ids: FreshIds): VisionService =
+    fun visions(world: EventWorld, clock: Clock, worldClock: WorldClock, ids: FreshIds): VisionService =
         VisionService(world.executor, clock = { clock.instant() }, world = worldClock, ids = ids)
 
     /**
@@ -177,7 +172,7 @@ class WorldConfig {
      */
     @Bean
     fun dialogues(
-        world: InMemoryWorld,
+        world: EventWorld,
         characters: CharactersProjection,
         houses: HousesProjection,
         clock: Clock,
@@ -186,7 +181,7 @@ class WorldConfig {
         DialogueService(world.executor, characters, houses, clock = { clock.instant() }, world = worldClock)
 
     @Bean
-    fun takeAction(world: InMemoryWorld, clock: Clock, worldClock: WorldClock): TakeActionService =
+    fun takeAction(world: EventWorld, clock: Clock, worldClock: WorldClock): TakeActionService =
         TakeActionService(world.executor, clock = { clock.instant() }, world = worldClock)
 
     /**
@@ -196,7 +191,7 @@ class WorldConfig {
     @Bean
     @Suppress("LongParameterList")
     fun rolls(
-        world: InMemoryWorld,
+        world: EventWorld,
         houses: HousesProjection,
         characters: CharactersProjection,
         sights: SightProjection,
@@ -253,7 +248,7 @@ class WorldConfig {
     @Bean
     @Suppress("LongParameterList")
     fun keyFigures(
-        world: InMemoryWorld,
+        world: EventWorld,
         clock: Clock,
         worldClock: WorldClock,
         calendar: WorldCalendar,
@@ -272,7 +267,7 @@ class WorldConfig {
     /** Writes a character's death into every house that held them. See decision record 0055. */
     @Bean(initMethod = "start", destroyMethod = "close")
     fun characterDeaths(
-        world: InMemoryWorld,
+        world: EventWorld,
         later: ScheduledLater,
         faults: Faults,
         keyFigures: KeyFigureService,
@@ -281,7 +276,7 @@ class WorldConfig {
     /** Carries a broken requirement to every house with a dialogue that needs it. See decision record 0071. */
     @Bean(initMethod = "start", destroyMethod = "close")
     fun brokenRequirements(
-        world: InMemoryWorld,
+        world: EventWorld,
         later: ScheduledLater,
         faults: Faults,
         clock: Clock,
@@ -290,31 +285,31 @@ class WorldConfig {
 
     /** The map's read model, folded from the feed. In memory, so it starts empty with the store. */
     @Bean(initMethod = "start", destroyMethod = "close")
-    fun houses(world: InMemoryWorld): HousesProjection = HousesProjection(world.feed)
+    fun houses(world: EventWorld): HousesProjection = HousesProjection(world.feed)
 
     /** What each player has been asked and has not answered, folded from the same feed. */
     @Bean(initMethod = "start", destroyMethod = "close")
-    fun choices(world: InMemoryWorld): ChoicesProjection = ChoicesProjection(world.feed)
+    fun choices(world: EventWorld): ChoicesProjection = ChoicesProjection(world.feed)
 
     /** The end of the chronicle, kept so the event viewer can show what happened before it opened. */
     @Bean(initMethod = "start", destroyMethod = "close")
-    fun recentEvents(world: InMemoryWorld): RecentEventsProjection = RecentEventsProjection(world.feed)
+    fun recentEvents(world: EventWorld): RecentEventsProjection = RecentEventsProjection(world.feed)
 
     /** The characters, and which of them each house holds, folded from the same feed. See decision 0055. */
     @Bean(initMethod = "start", destroyMethod = "close")
-    fun characters(world: InMemoryWorld): CharactersProjection = CharactersProjection(world.feed)
+    fun characters(world: EventWorld): CharactersProjection = CharactersProjection(world.feed)
 
     /** What every house sees, worked out from where its seat and its people stand. See decision 0061. */
     @Bean(initMethod = "start", destroyMethod = "close")
-    fun sights(world: InMemoryWorld): SightProjection = SightProjection(world.feed)
+    fun sights(world: EventWorld): SightProjection = SightProjection(world.feed)
 
     /** What every house had at its last choice roll, which the next one's changes are measured against. See 0083. */
     @Bean(initMethod = "start", destroyMethod = "close")
-    fun lastRolls(world: InMemoryWorld): LastRollsProjection = LastRollsProjection(world.feed)
+    fun lastRolls(world: EventWorld): LastRollsProjection = LastRollsProjection(world.feed)
 
     /** Every dialogue each house was offered, and how far each has got, folded from the same feed. See 0071. */
     @Bean(initMethod = "start", destroyMethod = "close")
-    fun dialogueRows(world: InMemoryWorld): DialoguesProjection = DialoguesProjection(world.feed)
+    fun dialogueRows(world: EventWorld): DialoguesProjection = DialoguesProjection(world.feed)
 
     /**
      * Emptying the development world: the store and everything folded from it, in one moment that nothing written
@@ -322,14 +317,14 @@ class WorldConfig {
      * is, so a read model or a listener added later is emptied without being named here. See decision record 0036.
      */
     @Bean
-    fun worldWipe(world: InMemoryWorld, folded: List<Resettable>): WorldWipe = WorldWipe {
+    fun worldWipe(world: EventWorld, folded: List<Resettable>): WorldWipe = WorldWipe {
         world.wipe(folded)
     }
 
     @Bean(destroyMethod = "close")
     @Suppress("LongParameterList")
     fun gateway(
-        world: InMemoryWorld,
+        world: EventWorld,
         foundHouse: FoundHouseService,
         houses: HousesProjection,
         choices: ChoicesProjection,
@@ -382,6 +377,7 @@ class WorldConfig {
         waters = WaterAt(ground, placeNames),
         later = gatewayLater,
         instrumentsOpen = instruments,
+        keptIn = world.keptIn,
         sendOn = gatewaySending,
     )
 }

@@ -10,6 +10,8 @@ import villages.protocol.CommandAccepted
 import villages.protocol.CommandRejected
 import villages.protocol.ErrorFrame
 import villages.protocol.EventFrame
+import villages.protocol.ServerFrame
+import villages.protocol.Welcome
 import villages.protocol.WorldWiped
 import java.util.UUID
 
@@ -62,6 +64,17 @@ class GatewayInstrumentsSpec : StringSpec({
         sent.filterIsInstance<EventFrame>().shouldBeEmpty()
         sent.filterIsInstance<WorldWiped>().shouldBeEmpty()
         rig.houses.ofPlayer(PlayerId(UUID.fromString(TOKEN))) shouldNotBe null
+    }
+
+    "closed, the welcome does not say where the world is kept, and open it does" {
+        fun welcomeFrom(rig: Rig): Welcome {
+            val sent = mutableListOf<ServerFrame>()
+            rig.gateway.connect { sent += it }.receive(hello)
+            return sent.filterIsInstance<Welcome>().single()
+        }
+
+        welcomeFrom(Rig(instrumentsOpen = false)).keptIn shouldBe null
+        welcomeFrom(Rig()).keptIn shouldBe "in memory, and gone when the server stops"
     }
 
     "open, as it is by default, a lever does what it always did" {

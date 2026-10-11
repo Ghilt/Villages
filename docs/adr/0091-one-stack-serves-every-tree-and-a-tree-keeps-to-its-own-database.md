@@ -2,6 +2,14 @@
 
 - Status: accepted
 - Date: 2026-10-11
+- Amended 2026-10-11, as the database was built (increment 0.8): **the server works out its database from the
+  checkout it runs in**, `villages` where `.git` is the repository itself and `villages-<folder>` where it is a
+  file pointing at one, so a server keeps to its own tree's world however it was started; `villages.store=mongo`
+  turns it on and the quick start passes it whenever Docker is running. The quick start starts the stack only
+  when it is not running, and never brings a running one up, so it cannot make the containers again under
+  another session. The welcome says where the world is kept, while the instruments are open, and the debug
+  panel prints it. An event's time is kept as the text it was written as, because Occurrent refuses a date
+  finer than a millisecond and the server's clock is finer than that.
 
 ## Context
 

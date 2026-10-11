@@ -140,16 +140,26 @@ where, for a new one, is the checklist in `BUILDING-A-MECHANIC.md`.
 Deployment starts as one process. The gateway is written as though it were already separate, so extracting it later is
 a configuration change rather than a rewrite.
 
-## What is in memory, for now
+## Where the world is kept
 
-MongoDB and RabbitMQ run on the machine, one of each from `infra/docker-compose.yml` for every tree, each
-tree to keep to a database and a virtual host named after it (0091). Nothing uses them yet, so the ports
-have in-memory adapters: Occurrent's in-memory event store and subscription model, wired in
-`InMemoryWorld`, behind `HouseCommandExecutor` and `EventFeed`. The gateway consumes the feed in-process
-and fans events out to every connection that asked to watch, which is the broker's job from increment 1.6
-on. Nothing above the ports changes when the real store
-and broker arrive; nothing survives a restart until then, on purpose. The whole path is proven by
-`AppBootsTest`: a real socket, hello, a founded house, the event back.
+An `EventWorld` is the store, its subscriptions and the ports over them - `HouseCommandExecutor`,
+`CharacterCommandExecutor` and `EventFeed` - and there are two. `MongoWorld` keeps the world in MongoDB,
+through Occurrent's store and its subscriptions on the database's change streams, so it outlives the server.
+`InMemoryWorld` keeps it in Occurrent's in-memory store, so it is gone when the server stops, which is what
+every test wants and what the app runs on when it is not told otherwise. `StoreConfig` chooses, by
+`villages.store`, and nothing above the ports can tell which it was handed.
+
+MongoDB and RabbitMQ run on the machine, one of each from `infra/docker-compose.yml` for every tree (0091).
+A tree's server keeps its world in a database of the tree's own, `villages` in the main checkout and
+`villages-<tree>` in a worktree, which it works out from the checkout it runs in, so two sessions running
+at once never see each other's world. The quick start starts the stack when it is not running and passes
+`villages.store=mongo` whenever Docker is up, and the welcome says where the world is kept, which the
+debug panel prints.
+
+RabbitMQ is not used yet. The gateway consumes the feed in-process and fans events out to every connection
+that asked to watch, which is the broker's job from increment 1.6 on, in a virtual host of the tree's own.
+The whole path is proven by `AppBootsTest`: a real socket, hello, a founded house, the event back; the
+store itself by `MongoWorldDockerSpec`, against a MongoDB of its own in a container.
 
 ## What was verified about Occurrent
 

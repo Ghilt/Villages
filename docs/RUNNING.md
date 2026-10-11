@@ -407,11 +407,16 @@ stage alone, with none of the debug panel in it (decision record 0079).
 ## The event store and the broker
 
 - MongoDB and RabbitMQ, from `infra/docker-compose.yml`, once Docker Desktop is running: one of each for the
-  whole machine, whichever tree started them, on the loopback address only. **The game server does not use
-  them yet**, so a world is still in memory and gone when its server stops.
+  whole machine, whichever tree started them, on the loopback address only. The quick start starts them when
+  they are not up, says under **tools** where the world will be kept, and tells the game server.
+- **Where the world is kept** is the debug panel's first `world` line on connecting: *kept in MongoDB,
+  database villages-<tree>, which outlives the server*, or *kept in memory, and gone when the server
+  stops* when Docker was not running. With the first, found a house, stop the game server and start it
+  again, and the house is still there. The server's log says the same as it starts, under `villages.store`.
 - MongoDB is `mongodb://localhost:27017/?replicaSet=rs0`, a replica set of one, which is what Occurrent's
-  subscriptions need. A tree's database will be named after it, `villages` in the main checkout and
-  `villages-<tree>` in a worktree, so no tree reads another's world.
+  subscriptions need. A tree's database is named after it, `villages` in the main checkout and
+  `villages-<tree>` in a worktree, worked out by the server from the checkout it runs in, so no tree reads
+  another's world; `--villages.mongo.database` names another. Its events are the `events` collection.
 - RabbitMQ is `localhost:5672`, and its management page is **http://localhost:15672**, signed into as
   `villages` / `villages`: what exchanges and queues exist and what is flowing through them. Nothing does yet.
   A tree's messages will keep to a virtual host named as its database is, which the page's menu at the top

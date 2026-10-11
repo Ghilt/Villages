@@ -61,17 +61,18 @@ how. Setting `VITE_MAP_STYLE_URL` shows a real map of Earth instead, for compari
 The **Debug map** panel at the top right picks which master is drawn - every PNG in `world/master/` is
 offered, and one that has never been cut into tiles can be cut from there - and which renderer draws it.
 The debug panel under it says what the program thinks is happening: the state of the world, and every
-event as it arrives. Its "found a house here" button sends a real command. Nothing is stored yet, so a
-restart of the game server forgets the houses; that is deliberate until the game server keeps its world
-in MongoDB, which is next on `docs/ROADMAP.md`.
+event as it arrives. Its "found a house here" button sends a real command, and its first lines say where
+the world is kept: in MongoDB when Docker is running, where a restart of the game server forgets nothing,
+and in memory when it is not, where a restart forgets the houses.
 
 `npm run check --prefix frontend` runs the typecheck, the linter, the formatter and the unit tests.
 
-MongoDB and RabbitMQ are in `infra/docker-compose.yml`, and Docker Desktop on WSL2 runs them:
+MongoDB and RabbitMQ are in `infra/docker-compose.yml`, and Docker Desktop on WSL2 runs them. The
+quick start brings them up when Docker is running and they are not, and by hand it is:
 
 ```
 docker compose -f infra/docker-compose.yml up -d
 ```
 
-The game server does not use them yet: the event store and the broker are in memory behind their ports
-until the increments in `docs/ROADMAP.md` put the real ones there.
+Every checkout keeps its world in a database of its own in that one MongoDB, so several can run at once
+without touching each other's houses. RabbitMQ is not used yet.
