@@ -37,6 +37,8 @@ export const SCENES_DIR = resolve(REPO, 'world', 'scenes');
  * into it, never over anything already there.
  */
 export const SPRITES_DIR = resolve(REPO, 'world', 'sprites');
+/** The pictures of structures, one a type and a culture, which `world:structures` cuts into an atlas. */
+export const STRUCTURES_DIR = resolve(REPO, 'world', 'structures');
 /**
  * Adam's interface pictures: a folder a kind - borders, fills, embellishments, medallions, marks,
  * controls, dividers - every picture painted at four times the size it is shown, and committed as the

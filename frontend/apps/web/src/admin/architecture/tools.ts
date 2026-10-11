@@ -125,6 +125,18 @@ export const TOOLS: readonly Tool[] = [
     what: 'Paints every view in every style, and writes the styles the page reads.',
   },
   {
+    script: 'world:structures',
+    entry: 'cutStructures.ts',
+    group: 'pictures',
+    reads: ['structure-pictures'],
+    writes: ['structure-pictures', 'structure-atlas'],
+    seconds: 3,
+    time: 'seconds',
+    perMaster: false,
+    ranBy: 'dev server, on save',
+    what: 'Draws a placeholder for every structure picture missing, and cuts them all into one atlas.',
+  },
+  {
     script: 'world:art',
     entry: 'cutArt.ts',
     group: 'pictures',

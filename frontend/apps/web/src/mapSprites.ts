@@ -1,9 +1,8 @@
 import type { CharacterOnMapView, ChoiceView, HouseView, StructureView } from '@villages/protocol';
+import { RUIN_PICTURE, pictureKey } from '@villages/world';
 import type { Culture, StructureCatalogue } from '@villages/world';
 
 import type { MapSprite } from './sprites/SpriteRenderer';
-import { pictureKey } from './sprites/cultureStyles';
-import { RUIN_PICTURE } from './sprites/structureShapes';
 import { tinctureColour } from './sprites/tinctures';
 
 // What the session holds, as the marks the sprite renderer draws: houses, the people standing on the map, the

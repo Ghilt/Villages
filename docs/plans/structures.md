@@ -264,7 +264,7 @@ program running on it at this tree's address.
 | 11d | What fills a slot counts: `Yields`, one rule for the listener and the holder's window - needed, adds, a stat over ten, an item's own; the listener folds slots, stats and deaths; the holder's view carries what it pays | the treasury | bump |
 | 12 | The culture map: `world/cultures.json` (seventy-two anchors, Adam's to correct), `world:culture`, the Culture renderer and its click, the quick-start, the architecture page | the renderer | |
 | 13a | Culture looks: the placeholders drawn in code in each culture's colours under its crown, a ruin too, chosen by the culture map under the structure; the window and the tab name the type in that culture's word | the map, on two cultures | |
-| 13b | Culture pictures: a placeholder picture per type and culture written from the same shapes, a cutting tool of their own, the atlas, and the map drawing a painted picture where there is one | the map | |
+| 13b | Culture pictures: the shapes moved into the world package; `world/structures/`, a placeholder picture per type and culture and a ruin a culture drawn from them; `world:structures`, the atlas; the dev server cutting on start and on save; the map drawing from the atlas | a picture saved over a placeholder, on the map | |
 | 14 | Houses leave the cell snapshots: `Snapshot.houses`, the houses' fan-out, `Fog.sent(HouseRow)` | nothing changes on screen | bump |
 
 Sight (6) and the window (5) land before the refit (7), so a new house is never blind and a click on its

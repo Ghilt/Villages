@@ -1,9 +1,16 @@
-import { Graphics } from 'pixi.js';
-import type { Texture } from 'pixi.js';
+import { Graphics, Rectangle, Texture } from 'pixi.js';
+import type { TextureSource } from 'pixi.js';
 
-import { DRAWN_CULTURES, pictureKey, styled } from './cultureStyles';
-import { DRAWN_TYPES, INK, RUIN_PICTURE, pictureFor } from './structureShapes';
-import type { Picture } from './structureShapes';
+import {
+  DRAWN_CULTURES,
+  DRAWN_TYPES,
+  INK,
+  RUIN_PICTURE,
+  pictureFor,
+  pictureKey,
+  styled,
+} from '@villages/world';
+import type { Picture, StructureAtlasFile } from '@villages/world';
 
 /** Rasterises a shape on the canvas it will be drawn on, as `markTextures.ts` does every mark. */
 type Rasterise = (shape: Graphics) => Texture;
@@ -64,6 +71,8 @@ function draw(picture: Picture, rasterise: Rasterise): StructurePicture {
  */
 export interface StructurePictures {
   of(key: string): StructurePicture;
+  /** The pictures cut into an atlas by `world:structures`, drawn in place of the ones drawn in code from now on. */
+  paint(file: StructureAtlasFile, source: TextureSource): void;
 }
 
 export function buildStructurePictures(rasterise: Rasterise): StructurePictures {
@@ -75,10 +84,23 @@ export function buildStructurePictures(rasterise: Rasterise): StructurePictures 
     drawn.set(pictureKey(RUIN_PICTURE, culture), draw(styled(pictureFor('', true), culture), rasterise));
     drawn.set(pictureKey('', culture), draw(styled(pictureFor('', false), culture), rasterise));
   }
+  // What the atlas has, by the same keys: a picture painted, or the placeholder drawn from the same shapes.
+  const painted = new Map<string, StructurePicture>();
   return {
     of: (key) => {
       const [picture = '', culture = 'european'] = key.split('@');
-      return drawn.get(`${picture}@${culture}`) ?? drawn.get(`@${culture}`) ?? drawn.get('@european')!;
+      const asked = `${picture}@${culture}`;
+      return painted.get(asked) ?? drawn.get(asked) ?? drawn.get(`@${culture}`) ?? drawn.get('@european')!;
+    },
+    paint: (file, source) => {
+      for (const one of painted.values()) one.texture.destroy();
+      painted.clear();
+      for (const [key, frame] of Object.entries(file.frames)) {
+        painted.set(key, {
+          texture: new Texture({ source, frame: new Rectangle(frame.x, frame.y, frame.width, frame.height) }),
+          flag: { across: frame.flagX, down: frame.flagY },
+        });
+      }
     },
   };
 }

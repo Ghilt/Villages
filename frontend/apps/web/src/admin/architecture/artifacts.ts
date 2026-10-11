@@ -78,6 +78,14 @@ export const ARTIFACTS: readonly Artifact[] = [
     what: 'The scenery and the marks, as pictures.',
   },
   {
+    id: 'structure-pictures',
+    form: 'folder',
+    name: 'structure pictures',
+    path: 'world/structures/',
+    origin: 'authored',
+    what: 'A picture of every type of structure in every culture, and its ruin: placeholders until painted over.',
+  },
+  {
     id: 'ui-pictures',
     form: 'folder',
     name: 'interface pictures',
@@ -244,6 +252,14 @@ export const ARTIFACTS: readonly Artifact[] = [
     path: 'public/art/scenery.webp, scenery.json',
     origin: 'baked',
     what: 'Every sprite picture, cut and packed into one sheet.',
+  },
+  {
+    id: 'structure-atlas',
+    form: 'files',
+    name: 'structure atlas',
+    path: 'public/art/structures.webp, structures.json',
+    origin: 'baked',
+    what: 'Every structure picture, cut and packed into one sheet, which the map draws from.',
   },
   {
     id: 'ui-cut',

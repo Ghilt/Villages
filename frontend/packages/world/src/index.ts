@@ -44,6 +44,20 @@ export { DEFAULT_MASTER, worldDirOf } from './masters.ts';
 
 export { decodeOrigin, squareAt, whereFrom } from './originFile.ts';
 export { CULTURE_NONE, cultureAt } from './culture.ts';
+export {
+  DRAWN_CULTURES,
+  DRAWN_TYPES,
+  INK,
+  RUIN_PICTURE,
+  hexOf,
+  pictureFor,
+  pictureKey,
+  pictureOf,
+  pictureSvg,
+  styled,
+} from './structureLooks.ts';
+export type { Part, Picture } from './structureLooks.ts';
+export type { StructureAtlasFile, StructureFrame } from './structureArt.ts';
 export type { CultureFile } from './culture.ts';
 export type { OriginFile, OriginGrid, WhereFrom } from './originFile.ts';
 export { namesAt } from './names.ts';

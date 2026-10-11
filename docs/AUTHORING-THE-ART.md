@@ -30,6 +30,17 @@ To have a placeholder back, delete your picture and run:
 
 It never draws over a file that is there.
 
+**Structures have a folder of their own**, `world/structures/`, beside `world/structures.json`, the catalogue it
+pictures, and committed the same way: `<type>-<culture>.png` for every type of the catalogue in every culture -
+`castle-european.png`, `castle-islamic.png`, `printingHouse-eastAsian.png` - and `ruin-<culture>.png` for what any
+of them falls to. Sixty-eight, every one a placeholder drawn from the shapes the map draws in code until you save
+over it. Upright, the front of the building, on a transparent background, standing on the bottom edge: it is
+cropped to what is drawn and scaled to 160 pixels tall, so paint it 640 tall or more. Its pennant flies from the
+middle of the highest row anything is drawn in, so the tallest tower carries it. With the dev server running, a
+picture saved is on the map a few seconds later with no reload; `npm run world:structures --prefix frontend` cuts
+by hand. To have a placeholder back, delete your picture and cut again: it never draws over a file that is there.
+The Holdings tab still draws its small pictures in code.
+
 ## What a picture can be
 
 Anything an image tool gives you, untouched:

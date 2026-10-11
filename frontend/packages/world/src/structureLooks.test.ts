@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { pictureKey, styled } from './cultureStyles';
-import { pictureFor } from './structureShapes';
+import { pictureFor, pictureKey, pictureSvg, styled } from './structureLooks.ts';
 
 describe('a structure drawn in a culture', () => {
   const castle = pictureFor('castle', false);
@@ -26,5 +25,12 @@ describe('a structure drawn in a culture', () => {
   it('is asked for by what it is and the culture it is drawn in, European with none', () => {
     expect(pictureKey('mill', 'african')).toBe('mill@african');
     expect(pictureKey('a ruin', null)).toBe('a ruin@european');
+  });
+
+  it('is drawn as an SVG document for a placeholder picture, a shape an element', () => {
+    const svg = pictureSvg(styled(castle, 'african'), 192);
+
+    expect(svg.startsWith('<svg')).toBe(true);
+    expect(svg.match(/<(rect|polygon|circle) /g)).toHaveLength(styled(castle, 'african').parts.length);
   });
 });

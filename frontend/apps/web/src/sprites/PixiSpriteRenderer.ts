@@ -8,6 +8,7 @@ import { createFogLayer } from './FogLayer';
 import { createGrassLayer } from './grass/GrassLayer';
 import { soonest, type Layer } from './layer';
 import { buildMarkTextures } from './markTextures';
+import { watchStructureArt } from './structureAtlas';
 import { createMarksLayer, type MarksLayer } from './MarksLayer';
 import { createRingLayer, type RingLayer } from './RingLayer';
 import { createSceneryLayer } from './scenery/SceneryLayer';
@@ -124,6 +125,9 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
   function artCut(): void {
     scenery?.artChanged(drawSoon);
   }
+
+  /** Stops reading the structures' atlas again when the dev server cuts it again. */
+  let unpaint: (() => void) | null = null;
 
   /** The fog, and the haze's clock with it. */
   const hazeLayer: Layer = {
@@ -285,6 +289,11 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
         }),
       );
       const marks = createMarksLayer(camera, textures);
+      // The structures' pictures cut into an atlas, once they are read: until then, and without one, drawn in code.
+      unpaint = watchStructureArt(textures.structures, () => {
+        marks.setSprites(scene.sprites);
+        drawSoon();
+      });
       const ring = createRingLayer(textures, marks);
       // Under everything, because it is the ground the rest stands on.
       scenery = createSceneryLayer();
@@ -368,6 +377,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
         layer.destroy();
       }
       import.meta.hot?.off(ART_CUT, artCut);
+      unpaint?.();
       scenery = null;
       unwatch?.();
       unwatch = null;

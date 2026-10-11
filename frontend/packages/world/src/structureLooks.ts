@@ -1,10 +1,15 @@
+import { CULTURES } from './structures.ts';
+import type { Culture } from './structures.ts';
+
 /*
- * The placeholder picture of every type of structure, drawn in code until the sprites cut from the moodboard come, one
- * a type and a culture (step 13 of docs/plans/structures.md). Each is a front elevation in a box a hundred units wide
- * and a hundred tall, the ground at the bottom, drawn in its own colours rather than in white for a tint: a structure
- * is untinted, and who holds it is said by the pennant over it. A type the page has no picture for is drawn as a
- * plain house, so a type added to the catalogue is on the map before anyone has drawn it. Data, so that the map draws
- * them in Pixi (`structurePictures.ts`) and a pane draws them in SVG (`holdings/StructureFigure.tsx`) from one table.
+ * The placeholder picture of every type of structure, drawn in code, one a type, and its look in each culture: what the
+ * map draws until a picture painted for a type and culture is cut (step 13 of docs/plans/structures.md), and what the
+ * placeholder pictures in `world/structures/` are drawn from. In the world package, so a tool can draw them too.
+ * Each is a front elevation in a box a hundred units wide and a hundred tall, the ground at the bottom, drawn in its
+ * own colours rather than in white for a tint: a structure is untinted, and who holds it is said by the pennant over
+ * it. A type the page has no picture for is drawn as a plain house, so a type added to the catalogue is on the map
+ * before anyone has drawn it. Data, so that the map draws them in Pixi (`structurePictures.ts`), a pane in SVG
+ * (`holdings/StructureFigure.tsx`) and `world:structures` as placeholder pictures, from one table.
  */
 
 export const INK = 0x4a4034;
@@ -265,3 +270,112 @@ export function pictureFor(type: string, ruin: boolean): Picture {
 
 /** Every type that has a picture of its own. */
 export const DRAWN_TYPES: readonly string[] = Object.keys(PICTURES);
+
+/*
+ * How a placeholder picture is drawn in each building tradition, until the pictures painted for each type and culture
+ * come (step 13 of docs/plans/structures.md): the same front elevation, its colours taken into the culture's own -
+ * whitewash and green tile, dark tile and lacquer, mud and thatch - and a crown on what is tallest that says which at
+ * a glance: a dome, a flared roof, a cone of thatch. European is the picture as drawn. Data, so the map and the panes
+ * draw them alike.
+ */
+
+/** What each colour of the drawn pictures becomes in a culture: stone, wall, roof, slate, timber, earth. */
+const PALETTES: Readonly<Record<Culture, Readonly<Record<number, number>>>> = {
+  european: {},
+  islamic: {
+    0xc9c0ae: 0xdcc8a0,
+    0xece2c8: 0xf4eee0,
+    0xa65d3f: 0x3f8f7f,
+    0x6c7886: 0x3f8f7f,
+    0x8c6a48: 0xb08850,
+  },
+  eastAsian: {
+    0xc9c0ae: 0xb9b2a4,
+    0xece2c8: 0xeadcc0,
+    0xa65d3f: 0x3b4a5a,
+    0x6c7886: 0x3b4a5a,
+    0x8c6a48: 0xa8322c,
+  },
+  african: {
+    0xc9c0ae: 0xb98a5c,
+    0xece2c8: 0xc99a68,
+    0xa65d3f: 0xc8a24e,
+    0x6c7886: 0xc8a24e,
+    0x8c6a48: 0x7a5232,
+    0x7d6a55: 0x9a6a3e,
+  },
+};
+
+const TILE_GREEN = 0x3f8f7f;
+const DARK_TILE = 0x3b4a5a;
+const THATCH = 0xc8a24e;
+
+/** The crown on what is tallest, at the pennant's foot, and how much higher the pennant then stands. */
+function crownOf(culture: Culture, [x, y]: readonly [number, number]): { parts: Part[]; rise: number } {
+  switch (culture) {
+    case 'islamic':
+      return {
+        parts: [
+          ['circle', x, y + 2, 8, TILE_GREEN],
+          ['rect', x - 1, y - 12, 2, 6, GILT],
+        ],
+        rise: 12,
+      };
+    case 'eastAsian':
+      return {
+        parts: [['poly', [x - 20, y + 4, x - 10, y - 2, x, y - 8, x + 10, y - 2, x + 20, y + 4], DARK_TILE]],
+        rise: 8,
+      };
+    case 'african':
+      return { parts: [['poly', [x - 14, y + 6, x, y - 14, x + 14, y + 6], THATCH]], rise: 14 };
+    default:
+      return { parts: [], rise: 0 };
+  }
+}
+
+/** A picture in a culture's look: its colours the culture's, and its crown, the pennant over the crown. */
+export function styled(picture: Picture, culture: Culture): Picture {
+  if (culture === 'european') return picture;
+  const palette = PALETTES[culture];
+  const recolour = (colour: number) => palette[colour] ?? colour;
+  const parts = picture.parts.map((part): Part => {
+    if (part[0] === 'rect') return ['rect', part[1], part[2], part[3], part[4], recolour(part[5])];
+    if (part[0] === 'poly') return ['poly', part[1], recolour(part[2])];
+    return ['circle', part[1], part[2], part[3], recolour(part[4])];
+  });
+  const crown = crownOf(culture, picture.flag);
+  return { parts: [...parts, ...crown.parts], flag: [picture.flag[0], picture.flag[1] - crown.rise] };
+}
+
+/** The name a structure's picture is asked for by: what it is, a ruin or its type, and the culture it is drawn in. */
+export function pictureKey(picture: string, culture: Culture | null | undefined): string {
+  return `${picture}@${culture ?? 'european'}`;
+}
+
+/** Every culture a picture is drawn in. */
+export const DRAWN_CULTURES: readonly Culture[] = CULTURES;
+
+/** A colour of the shapes' table, as SVG and CSS write it. */
+export function hexOf(colour: number): string {
+  return `#${colour.toString(16).padStart(6, '0')}`;
+}
+
+/**
+ * A picture as an SVG document `size` pixels square, drawn as the map draws it, in ink round every shape: what a
+ * placeholder picture is rendered from. The box leaves room above for a crown and about for the ink.
+ */
+export function pictureSvg(picture: Picture, size: number): string {
+  const stroke = `stroke="${hexOf(INK)}" stroke-width="2" stroke-linejoin="round"`;
+  const parts = picture.parts.map((part) => {
+    if (part[0] === 'rect') {
+      const [, x, y, width, height, colour] = part;
+      return `<rect x="${x}" y="${y}" width="${width}" height="${height}" fill="${hexOf(colour)}" ${stroke}/>`;
+    }
+    if (part[0] === 'poly') {
+      return `<polygon points="${part[1].join(' ')}" fill="${hexOf(part[2])}" ${stroke}/>`;
+    }
+    const [, x, y, r, colour] = part;
+    return `<circle cx="${x}" cy="${y}" r="${r}" fill="${hexOf(colour)}" ${stroke}/>`;
+  });
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 -16 120 120" width="${size}" height="${size}">${parts.join('')}</svg>`;
+}

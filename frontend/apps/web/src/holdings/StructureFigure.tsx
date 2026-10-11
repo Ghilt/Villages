@@ -1,10 +1,5 @@
+import { INK, hexOf as hex, pictureFor, styled } from '@villages/world';
 import type { Culture } from '@villages/world';
-
-import { styled } from '../sprites/cultureStyles';
-import { INK, pictureFor } from '../sprites/structureShapes';
-
-/** A colour of the shapes' table, as CSS writes it. */
-const hex = (colour: number): string => `#${colour.toString(16).padStart(6, '0')}`;
 
 /**
  * A structure's placeholder picture, drawn in SVG from the same shapes the map draws in Pixi: what a row of the

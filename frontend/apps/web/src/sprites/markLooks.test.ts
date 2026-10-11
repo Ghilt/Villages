@@ -20,6 +20,7 @@ const TEXTURES = {
   pennant: picture(49, 64),
   structures: {
     of: (type: string) => ({ texture: MILL, flag: { across: type === 'mill' ? 0.5 : 0.25, down: 0 } }),
+    paint: () => {},
   },
 } satisfies Textures;
 
