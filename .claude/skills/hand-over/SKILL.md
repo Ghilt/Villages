@@ -86,6 +86,12 @@ not want to think about it. Do not commit yet. His answer decides what happens n
 - **👀 on every item he can check by looking at the running program**, saying where - which pane, which
   button, what should be there. **Those go first.** An unmarked item is one he takes on trust, reads in a
   document, or accepts from a test.
+- **Where is what Adam sees at the address, in his own browser**, never "the browser pane": that is the
+  agent's own tool, and in it the agent is another player. What the agent made as that player is on his map
+  only with the fog lifted, or once he makes it again with a lever; say which, and how.
+- **A place on the map is a link that opens the game there**, `http://localhost:<port>/?at=<lat>,<lon>&zoom=<z>`,
+  with what he will find there in plain words. Never a geographic name he is assumed to know: "the Sahel line"
+  meant nothing to him (2026-10-11).
 - **A step with nothing to look at says so.** Three honest unmarked items beat one 👀 invented to fill the
   quota.
 
