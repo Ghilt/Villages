@@ -1,11 +1,11 @@
 import { ageOn } from '@villages/client-core';
 import { describeDay } from '@villages/protocol';
-import type { HolderView, HouseView, Point, Sex, StructureView } from '@villages/protocol';
+import type { HolderView, HouseView, Point, ResourceName, Sex, StructureView } from '@villages/protocol';
 import { insideFenceAt } from '@villages/world';
 import type { StructureTypeSpec, TerrainClass } from '@villages/world';
 
 import type { Area } from '../areas/areas';
-import { blazon, whereabouts } from '../house/describe';
+import { blazon, saysPerMonth, whereabouts } from '../house/describe';
 import type { WaterSeen } from './waters';
 import type { Subject } from './subjects';
 
@@ -180,10 +180,41 @@ export function describeStructure(
     facts: [
       { what: 'Held by', said: holder?.name ?? 'nobody' },
       { what: 'Level', said: spec === undefined ? String(level) : `${level} of ${spec.levels}` },
+      // What it gives whoever holds it, the catalogue's for its type at its level; a ruin gives nothing.
+      ...(spec === undefined
+        ? []
+        : [
+            { what: 'Yields', said: givesOf(structure, spec) ?? 'nothing' },
+            {
+              what: 'Sees',
+              said: structure.ruin === true ? 'nothing' : `${spec.sightKm[level - 1] ?? 0} km around`,
+            },
+          ]),
       { what: 'Stands', said: `${place.lat.toFixed(3)}, ${place.lon.toFixed(3)}` },
     ],
     links,
   };
+}
+
+/** What a structure yields whoever holds it a world month, in words: `Domain +3 a month`; nothing for none. */
+export function givesOf(structure: StructureView, spec: StructureTypeSpec | undefined): string | undefined {
+  return spec === undefined ? undefined : saysPerMonth(yieldsOf(structure, spec));
+}
+
+/**
+ * What a structure yields whoever holds it a world month, the catalogue's for its type at its level, and nothing for a
+ * ruin. What the game server pays is worked out from the same catalogue, so the two say the same.
+ */
+export function yieldsOf(
+  structure: StructureView,
+  spec: StructureTypeSpec,
+): Partial<Record<ResourceName, number>> {
+  if (structure.ruin === true) {
+    return {};
+  }
+  return Object.fromEntries(
+    Object.entries(spec.yields).map(([resource, byLevel]) => [resource, byLevel?.[structure.level - 1] ?? 0]),
+  );
 }
 
 /** A name in the catalogue, said: `printingHouse` is a printing house. */

@@ -257,7 +257,7 @@ program running on it at this tree's address.
 | 9b | Lost seats: the seats listener writes `lostSeat` when a seat changes hands or falls; the seat's own sight ends with it (in place of removing it, so a seated house sees as before); a seatless house. `foundingPlace` is not introduced, and the room, the eye, omens, season, gossip and dialogues keep reading where the house was founded: the same place as its seat in every state the game can reach, until a house can name another | the house | |
 | 9c | Levels: `levelChanged`, *level up* and *level down*, the holder's sight widened or narrowed with it, the new vision given before the old is taken | a structure drawn larger | bump |
 | 10a | Income: `SetIncome`, `incomeChanged`, rates per source, the listener paying by type and level; the omens read a stock at the roll's instant, so what came in counts as a rise | the treasury counting up | |
-| 10b | What each holding gives, in the window and the tab | the window | bump |
+| 10b | What each holding gives, in the window and the tab: worked out on the page from its copy of the catalogue, the same numbers the server pays by, so no bump; when slots change what is paid (11c), the holder's figure comes from the server | the window | |
 | 11a | `Socket` and `SlotRow`, in the library | the component page | |
 | 11b | Slots: `slotFilled` and `slotEmptied`, items, a character in one slot, secrecy per viewer, the levers, the sockets | the window, as two houses | bump |
 | 11c | What fills a slot counts: adds, stats, an item's own | the treasury | |

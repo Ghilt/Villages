@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import type { StructureView } from '@villages/protocol';
 
-import { describeStructure } from '../inspect/describe';
+import { describeStructure, givesOf } from '../inspect/describe';
 import { note } from '../log/log';
 import { focusOn } from '../map/focus';
 import { sessionStore } from '../net/gateway';
@@ -21,7 +21,8 @@ import { StructureFigure } from './StructureFigure';
  * **strip** is a name, the pane's or the open holding's; **normal** and **opened out** are the list - each row the
  * structure's picture, its name, and what it is - or, a holding pressed, its details: the same words as its window,
  * the map's mark to show it, and a way back to the list. It scrolls; there is no limit. A house with none is told
- * that holdings will be shown here. What each holding gives joins its row when income does. See `MECHANICS.md`.
+ * that holdings will be shown here. Each row says what the holding yields a month, and its details how far it sees.
+ * See `MECHANICS.md`.
  */
 interface HoldingsProps {
   room: Room;
@@ -76,13 +77,15 @@ export function Holdings({ room }: HoldingsProps) {
         <div className="holdings__list">
           <List label="your holdings">
             {holdings.map((one) => {
-              const said = describeStructure(one, specOf(one), true);
+              const spec = specOf(one);
+              const said = describeStructure(one, spec, true);
+              const gives = givesOf(one, spec);
               return (
                 <ListRow
                   key={one.id}
                   lead={<StructureFigure type={one.structureType} />}
                   title={one.name}
-                  line={`${said.under ?? ''}, level ${one.level}`}
+                  line={`${said.under ?? ''}, level ${one.level}${gives === undefined ? '' : `; ${gives}`}`}
                   onPress={() => show(one)}
                 />
               );

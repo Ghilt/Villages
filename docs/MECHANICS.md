@@ -889,7 +889,8 @@ rebuilt, from the debug panel; a ruin holds nobody and gives nothing. The debug 
 structure's level, and its holder sees as far as the new level sees. A house whose castle changes hands or falls
 loses its seat, and its sight from it, and plays on seatless; how it names another is not decided. Decision record 0092 is the shape and
 `docs/plans/structures.md` the steps, one commit each; the hypothesis is experiment 0018. A castle's ragged gold ground is drawn only while it is selected, its influence zone. Every holding pays its holder
-what its type yields a month at its level, and the house's resources count up from it.
+what its type yields a month at its level, and the house's resources count up from it; a structure's window, and a
+holding's row in the tab, say what it yields and how far it sees.
 
 ---
 

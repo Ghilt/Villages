@@ -313,7 +313,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   what it was, at level 1, for nobody; only a ruin can be rebuilt (`notARuin`).
 - What your house holds: the **Holdings** tab of the corner, beside the key figures, its mark the tower. A list,
   the seat first and the rest in the order the house came to hold them, each row the structure's placeholder
-  picture, its name, and what it is - *a castle, the seat of Ravenscar, level 1*; with none it says that holdings
+  picture, its name, and what it is and yields - *a castle, the seat of Ravenscar, level 1; Domain +3 a month*;
+  with none it says that holdings
   will be shown here. A row pressed opens its details in the tab: the window's words, the map's mark to fly to it,
   and the list mark beside the name to go back. The game server sends it on hello and whenever a structure is
   raised for the house, taken by it or handed away (`yourHoldings`, private, through no fog), and the log says it
@@ -324,7 +325,10 @@ stage alone, with none of the debug panel in it (decision record 0079).
   the house's field; nobody's flies none. A type with no picture is a plain house. It is drawn from the zoom its
   significance says, like a house, and under the fog outside vision. A click on one opens its **inspect window**,
   marked with a tower: its name, *a mill* or *an abbey* in the catalogue's European word, who holds it with a way
-  to that house, its level of the type's highest, where it stands, and *show it on the map*; its mark is named
+  to that house, its level of the type's highest, what it yields whoever holds it a month and how far they see
+  from it - *Yields Domain +3 a month*, *Sees 34 km around*, the catalogue's for its type at its level, the same
+  numbers the game server pays and gives sight by, and *nothing* for a ruin - where it stands, and *show it on the
+  map*; its mark is named
   *Your holding* when your house holds it, and beside the name how fresh it is, as a house's window says. A window
   opened on one the camera has left asks the game server after it, and ground the house has never revealed
   answers nothing.

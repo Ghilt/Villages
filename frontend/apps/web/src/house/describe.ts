@@ -63,22 +63,36 @@ export function saysStock(stock: Stock, now: number): string {
 /** How many real seconds a world month lasts: a real day is a world month (decision record 0053). */
 const SECONDS_A_MONTH = 86_400;
 
+/** An amount a world month, signed: `+3 a month`. */
+function aMonth(perMonth: number): string {
+  return `${perMonth > 0 ? '+' : '-'}${Math.abs(perMonth).toLocaleString(undefined, { maximumFractionDigits: 1 })} a month`;
+}
+
 /** How fast a stock moves, a world month at a time, or nothing when it stands still: `+3 a month`. */
 export function saysRate(stock: Stock): string | undefined {
-  if (stock.ratePerSecond === 0) {
-    return undefined;
-  }
-  const perMonth = stock.ratePerSecond * SECONDS_A_MONTH;
-  return `${perMonth > 0 ? '+' : '-'}${Math.abs(perMonth).toLocaleString(undefined, { maximumFractionDigits: 1 })} a month`;
+  return stock.ratePerSecond === 0 ? undefined : aMonth(stock.ratePerSecond * SECONDS_A_MONTH);
+}
+
+/**
+ * Amounts a world month, every resource there is one of, in the order they are shown: `Wealth +6 a month, Domain +3
+ * a month`; or nothing, when every one is nothing.
+ */
+export function saysPerMonth(perMonth: Partial<Record<ResourceName, number>>): string | undefined {
+  const said = RESOURCES_IN_ORDER.flatMap((name) => {
+    const amount = perMonth[name] ?? 0;
+    return amount === 0 ? [] : [`${RESOURCE_WORDS[name]} ${aMonth(amount)}`];
+  });
+  return said.length === 0 ? undefined : said.join(', ');
 }
 
 /** What a house is paid, in every resource it is paid in: `paid Domain +3 a month`; or that it is paid nothing. */
 export function saysIncome(resources: Record<ResourceName, Stock>): string {
-  const paid = RESOURCES_IN_ORDER.flatMap((name) => {
-    const rate = saysRate(resources[name]);
-    return rate === undefined ? [] : [`${RESOURCE_WORDS[name]} ${rate}`];
-  });
-  return paid.length === 0 ? 'paid nothing' : `paid ${paid.join(', ')}`;
+  const paid = saysPerMonth(
+    Object.fromEntries(
+      RESOURCES_IN_ORDER.map((name) => [name, resources[name].ratePerSecond * SECONDS_A_MONTH]),
+    ),
+  );
+  return paid === undefined ? 'paid nothing' : `paid ${paid}`;
 }
 
 /** Where the seat is, to the three decimals that put it inside a master pixel. */

@@ -84,7 +84,13 @@ describe("a structure's window", () => {
     since: 654635,
     stamp: 8,
   };
-  const spec = { type: 'abbey', words: { european: 'abbey' }, levels: 3 } as unknown as StructureTypeSpec;
+  const spec = {
+    type: 'abbey',
+    words: { european: 'abbey' },
+    levels: 3,
+    sightKm: [10, 12, 14],
+    yields: { piety: [2, 3, 5], reason: [1, 2, 3] },
+  } as unknown as StructureTypeSpec;
 
   it("names it, says what it is in the catalogue's word, and that nobody holds it", () => {
     const said = describeStructure(abbey, spec, false);
@@ -93,6 +99,8 @@ describe("a structure's window", () => {
     expect(said.facts.map((fact) => `${fact.what}: ${fact.said}`)).toEqual([
       'Held by: nobody',
       'Level: 2 of 3',
+      'Yields: Reason +2 a month, Piety +3 a month',
+      'Sees: 12 km around',
       'Stands: -63.229, -55.910',
     ]);
     expect(said.links).toEqual([{ what: 'show it on the map', to: 'map', at: abbey.place }]);
@@ -114,6 +122,9 @@ describe("a structure's window", () => {
     const said = describeStructure({ ...abbey, ruin: true }, spec, false);
 
     expect([said.kind, said.under, said.facts[0]?.said]).toEqual(['Ruin', 'the ruin of an abbey', 'nobody']);
+    expect(
+      said.facts.filter((fact) => fact.what === 'Yields' || fact.what === 'Sees').map((fact) => fact.said),
+    ).toEqual(['nothing', 'nothing']);
   });
 
   it('says whose seat it is, when it is one', () => {
