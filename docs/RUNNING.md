@@ -286,7 +286,9 @@ stage alone, with none of the debug panel in it (decision record 0079).
   `gainedVision` from the castle. On the map the castle stands for the house where it is drawn, flying the house's
   pennant, and the house's own castle mark steps aside; far out, or under the fog, where the castle is not sent,
   the house's mark is drawn as before. A click on it opens the castle's window, *a castle, the seat of Ravenscar*,
-  with the house a link away, and a house's window marks its seat on the map. The seat still sees from where the
+  with the house a link away, and a house's window marks its seat on the map. While a castle is marked - its window
+  or its house's the newest open - its **influence zone** is drawn about it, the ragged gold ground every seat used
+  to have at all times, its reach the catalogue's `zone`; a type without one draws none. The seat still sees from where the
   house was founded too, until a seat can be lost.
 - A structure on the map: its type's placeholder picture, drawn in code (`sprites/structurePictures.ts`) in its
   own colours, as tall on the ground as `groundHeight` in the catalogue says at its level, and far out the same

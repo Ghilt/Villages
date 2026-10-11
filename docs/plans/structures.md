@@ -250,7 +250,7 @@ program running on it at this tree's address.
 | 5b | `changedHands` and *take control of this building* on the one open | your pennant on it | bump |
 | 6 | Sight from structures: the `StandingEffects` listener, `caughtUp`, `gainedVision` and `lostVision` written with the radius and `from` | the fog lifting round a structure taken | bump |
 | 7a | The seat: the `Seats` reaction raises the castle at founding and `namedSeat` names it; a structure's face says whose seat it is, its window says so, and the house's own mark steps aside where its seat is drawn. The seat's own sight, `foundingPlace`, and omens, season, gossip and dialogues reading the seat move to step 9, where a seat can first be lost: until then the seat stands where the house was founded | a new house's events | bump |
-| 7b | The seat refit on the page: no house sprite; the room, the dive and the eye read the seat; the castle's influence zone when selected, in place of `HoldingOverlay` | a click on your castle | |
+| 7b | The castle's influence zone, drawn while it is selected, in place of `HoldingOverlay`'s ground about every seat (no house sprite where its seat is drawn landed with 7a; the room, the dive and the eye read the seat with step 9) | a click on your castle | |
 | 8a | The tab's mark, in the library | the component page | |
 | 8b | The Holdings tab: `yourHoldings`, the list, the details | the corner | bump |
 | 9 | Ruins and lost seats: `ruined` and `rebuilt`, their levers, the `lostSeat` reaction, a seatless house (a second browser takes your castle), the ruin's sprite | the map and the house | bump |

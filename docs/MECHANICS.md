@@ -834,7 +834,7 @@ African**, each master having a culture map of its own and other ground borrowin
 becomes a mark of its type. Over it flies a **pennant** in its holder's colours, none when nobody holds it,
 and a higher level is drawn a little larger. A ruin has a picture of its own. Some types have an
 **influence zone**, a ground they reach, drawn only while the structure is selected; the castle's is the
-ragged ground drawn about every seat today, and what each type's means is not designed yet.
+ragged ground every seat used to have drawn about it, and what each type's means is not designed yet.
 
 Clicking it opens **its window**, not its holder's: the name; the type, level and culture's word for it,
 *great mosque* where another culture says *cathedral*; the holder, a link; whether it is a seat; what it
@@ -884,8 +884,8 @@ pennant of the house holding it. A click opens its window: its name, its type, w
 stands. The debug panel's *take control of this building* hands the one whose window is open to the player's house,
 which then flies their pennant and sees round it, as far as its type and level see; it pays nothing yet. Founding a
 house raises its castle and names it the seat, and the castle's window says so. Decision record 0092 is the shape and
-`docs/plans/structures.md` the steps, one commit each; the hypothesis is experiment 0018. Today a house's holding is its seat, a place on its founding event, drawn as a
-castle in the house's colours with ragged gold ground about it, and nothing in the game pays a house anything.
+`docs/plans/structures.md` the steps, one commit each; the hypothesis is experiment 0018. A castle's ragged gold ground is drawn only while it is selected, its influence zone, and nothing in the game
+pays a house anything yet.
 
 ---
 

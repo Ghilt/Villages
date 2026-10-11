@@ -19,7 +19,7 @@ import { followMap } from './net/followMap';
 import { arriving } from './house/arrival';
 import { startAtIn } from './net/startAt';
 import { eyeStore } from './house/eye';
-import { HoldingOverlay } from './areas/HoldingOverlay';
+import { InfluenceZone } from './areas/InfluenceZone';
 import { StoodDown } from './net/StoodDown';
 import { flyWith } from './map/focus';
 import { MapStrip } from './map/MapStrip';
@@ -249,6 +249,14 @@ export function App({ master, devTools }: AppProps) {
     const seat = top?.kind === 'house' ? raised.find((one) => one.seatOf?.id === top.id) : undefined;
     return seat === undefined ? top : { kind: 'structure' as const, id: seat.id };
   }, [open, raised]);
+  // The ground the marked structure reaches, drawn while it is marked, for a type the catalogue gives a zone.
+  const zone = useMemo(() => {
+    const structure = marked?.kind === 'structure' ? raised.find((one) => one.id === marked.id) : undefined;
+    const reach = catalogue?.types.find((one) => one.type === structure?.structureType)?.zone?.reach;
+    return structure === undefined || reach === undefined
+      ? null
+      : { id: structure.id, at: structure.place, reach };
+  }, [marked, raised, catalogue]);
 
   // The map's own pane, App's because App holds the map; every other pane is drawn by its feature, and which
   // stand and in what order is `panes.tsx`'s.
@@ -281,14 +289,14 @@ export function App({ master, devTools }: AppProps) {
         {/* After the houses' and the areas', so that a click neither took asks what water is there. */}
         <WaterClicks map={map} onPick={inspect} />
         <RippleAlongWater map={map} worldRoot={worldRoot} />
-        <HoldingOverlay map={map} houses={drawn} mine={eye ? yours : null} turn={camera.latticeTurn} />
+        <InfluenceZone map={map} zone={zone} turn={camera.latticeTurn} />
         {/* Put away, and still running underneath: a lid over the map, never instead of it. The
               guard is the form rather than the size, because what a pane was asked to be outlives
               the fold - and the floor of the spread is never put away. See `MapStrip`. */}
         {along !== null && room.size === 'strip' && <MapStrip room={room} />}
       </>
     ),
-    [map, yours, worldRoot, sprites, camera.latticeTurn, drawn, eye, open, marked],
+    [map, yours, worldRoot, sprites, camera.latticeTurn, open, marked, zone],
   );
   const panes = useMemo(() => panesOn(up, open, drawMap), [up, open, drawMap]);
 

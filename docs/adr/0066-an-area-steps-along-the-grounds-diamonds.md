@@ -105,3 +105,10 @@ keeps only the fence. A holding does follow, because it is worked out from the s
   no longer fall where the count changes.
 - **A holding round on the ground, not ragged.** It would have been the smaller change, and Adam asked for
   ragged. A circle is `areaAround` with no roughness, so either is one argument away.
+
+## Amendment, 2026-10-11: the holding is a castle's influence zone
+
+The ragged ground about every seat is no longer drawn at all times: it is the castle's influence zone, drawn only
+while the castle is selected, seeded by the castle rather than the house, its reach the catalogue's `zone` for the
+castle (25, as before). The lumps and the jitter are named in `InfluenceZone` now, still placeholders. See
+docs/plans/structures.md, step 7b, and decision record 0092.
