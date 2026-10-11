@@ -59,10 +59,11 @@ class StandingEffects(
     feed: EventFeed,
     later: Later,
     faults: Faults,
+    gate: WipeGate,
     private val catalogue: StructureCatalogue,
     private val visions: VisionService,
     private val incomes: IncomeService,
-) : Reaction("the standing-effects listener", feed, later, faults) {
+) : Reaction("the standing-effects listener", feed, later, faults, gate) {
     /**
      * A structure as this listener needs it: what it is, where, who holds it since which of its events, the last event
      * that changed what it gives, and what is in its slots.

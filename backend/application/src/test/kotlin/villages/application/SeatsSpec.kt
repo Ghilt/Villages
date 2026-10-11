@@ -28,7 +28,7 @@ import villages.domain.WorldTime
 import java.time.Instant
 import java.util.UUID
 
-/** Founding raises the house's castle and names it the seat, through the seats listener. See decision record 0092. */
+/** Founding raises the house's castle and names it the seat, through the seats listener. See decision record 0093. */
 class SeatsSpec : StringSpec({
     val noon = Instant.parse("2026-09-04T12:00:00Z")
     val today = WorldTime(653_705)
@@ -43,7 +43,7 @@ class SeatsSpec : StringSpec({
         Provenance.startedBy(UUID.randomUUID()),
     )
 
-    fun TinyWorld.seats(later: ManualLater, faults: KeptFaults) = Seats(this, later, faults, this, this, { noon }).started()
+    fun TinyWorld.seats(later: ManualLater, faults: KeptFaults) = Seats(this, later, faults, WipeGate(), this, this, { noon }).started()
 
     "founding raises the house's castle where it was founded, held by the house, and names it the seat, in the founding's story" {
         val world = TinyWorld(catalogue)

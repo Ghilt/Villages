@@ -29,16 +29,17 @@ import villages.domain.StructureType
  *
  * **And the seat is lost with the structure.** A seat handed to another or fallen to ruin is the house's seat no
  * longer: `lostSeat`, in the story of what took it, refused `noSeat` once lost, so a replay writes nothing again.
- * Its fold is of whose seat each structure is, and nothing more. See docs/plans/structures.md and decision 0092.
+ * Its fold is of whose seat each structure is, and nothing more. See docs/plans/structures.md and decision 0093.
  */
 class Seats(
     feed: EventFeed,
     later: Later,
     faults: Faults,
+    gate: WipeGate,
     private val structures: StructureCommandExecutor,
     private val houses: HouseCommandExecutor,
     private val clock: Clock,
-) : Reaction("the seats listener", feed, later, faults) {
+) : Reaction("the seats listener", feed, later, faults, gate) {
     /** Whose seat each structure is now. */
     private val seatOf = java.util.concurrent.ConcurrentHashMap<StructureId, HouseId>()
 

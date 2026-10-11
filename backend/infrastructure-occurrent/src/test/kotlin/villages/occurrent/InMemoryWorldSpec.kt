@@ -149,7 +149,7 @@ class InMemoryWorldSpec : StringSpec({
 
     "a structure is kept on its own stream, comes back through the same feed, and is raised once" {
         InMemoryWorld().use { world ->
-            val structures = OccurrentStructureCommandExecutor(world.store, world.converter, catalogue)
+            val structures = world.structureExecutor(catalogue)
             val delivered = mutableListOf<StoredEvent>()
             val arrived = CountDownLatch(1)
             world.feed.subscribe(Start.FROM_NOW) { delivered += it; arrived.countDown() }.use {
