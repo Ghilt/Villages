@@ -74,8 +74,15 @@ class OccurrentEventFeed(
             subscription.waitUntilStarted()
 
             if (from == Start.FROM_THE_BEGINNING) {
-                store.all(SortBy.natural(SortBy.SortDirection.ASCENDING)).use { everything ->
-                    everything.forEach(handoff::replayed)
+                try {
+                    store.all(SortBy.natural(SortBy.SortDirection.ASCENDING)).use { everything ->
+                        everything.forEach(handoff::replayed)
+                    }
+                } catch (@Suppress("TooGenericExceptionCaught") broken: Exception) {
+                    // The store could not hand the history back past an event. Said, and the subscriber goes on
+                    // with what arrives live: a server that cannot start is a world that cannot be wiped.
+                    val where = "reading the history, which stopped at an event the store could not read back"
+                    faults.report(Fault(nameOf(subscriber), where, broken))
                 }
                 // Anything that arrived while the replay ran, in the order it arrived, minus what it duplicated.
                 handoff.replayDone()

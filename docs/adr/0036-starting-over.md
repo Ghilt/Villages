@@ -82,6 +82,27 @@ not the mark on every event turned down above: one event, written by a wipe and 
 The same ten seconds, and the same fault when a subscription never gets there. `MongoWorldDockerSpec` holds the
 first guarantee against a real MongoDB, and fails without the marker.
 
+*Amended 2026-10-11, the same day:* **a world that outlives its server can hold events this code cannot read**,
+and the wipe is the answer to that too, until the world-persistence milestone brings versioned events and reading
+the old ones. Two kinds. An event of a shape the code has since changed - a field renamed or gone - which nothing
+can fold, so the house whose history holds it refuses every command; and, rarer, one the store itself cannot read
+back, left by a hand edit or a change to how the store writes, which stops a reading of the history there. So:
+
+- **The server reads its whole world once as it starts**, tries every event as it would fold it, and says what it
+  could not read: in its log, and to every window that says hello while the instruments are open, as the debug
+  panel's line `error unreadableEvents`, which names the first and says to wipe. A wipe leaves nothing unreadable.
+- **A follower whose history stops at an event the store cannot read back starts anyway**, and says so as a fault,
+  because a server that cannot start is a world that cannot be wiped.
+- **In MongoDB the wipe counts and deletes without reading an event back**, so a world holding one the store cannot
+  read can still be wiped.
+- **A subscription that fails is started again for ever while the failure is MongoDB's own** - a connection lost, a
+  restart - because those heal, and **at once given up on otherwise**: an event it cannot read back fails the same
+  way at every restart, which Occurrent's own setting retried forty times a second for as long as the server ran.
+  Given up on, it is said once as a fault, and the world wants wiping and the server starting again.
+
+`UnreadableSpec` holds the reading in memory, `MongoWorldDockerSpec` the store that cannot read an event back, and
+`GatewayInstrumentsSpec` what a window is told; each failed without what it holds.
+
 ## Consequences
 
 The loop can be tried from nothing in one click, and a second browser can watch the first arrive.

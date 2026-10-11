@@ -8,11 +8,16 @@ import io.kotest.core.test.TestCase
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.string.shouldContain
+import com.mongodb.client.MongoClients
+import org.bson.Document
 import org.occurrent.eventstore.api.WriteCondition
 import org.occurrent.eventstore.api.WriteConditionNotFulfilledException
 import org.testcontainers.DockerClientFactory
 import org.testcontainers.mongodb.MongoDBContainer
+import villages.application.Fault
+import villages.application.FaultBoard
 import villages.application.Provenance
 import villages.application.Start
 import villages.application.StoredEvent
@@ -50,7 +55,28 @@ class MongoWorldDockerSpec : StringSpec({
     val mongo by lazy { MongoDBContainer("mongo:8.0").withReplicaSet().also { it.start() } }
     afterSpec { if (docker) mongo.stop() }
 
-    fun world(database: String) = MongoWorld(mongo.connectionString, database)
+    fun world(database: String, faults: FaultBoard = FaultBoard()) = MongoWorld(mongo.connectionString, database, faults)
+
+    /**
+     * An event as Occurrent never writes one, its stream version a 32-bit number where Occurrent reads a 64-bit one:
+     * what a hand edit or a change to how the store writes would leave, and which the store cannot read back at all.
+     * A copy of the first event the world holds, on a stream of its own, after everything else.
+     */
+    fun writeUnreadable(database: String) = MongoClients.create(mongo.connectionString).use { client ->
+        val events = client.getDatabase(database).getCollection("events")
+        val last = events.find().sort(Document("position", -1)).first()!!.getLong("position")
+        val broken = Document(events.find().first()!!).apply {
+            remove("_id")
+            put("id", UUID.randomUUID().toString())
+            put("streamid", "house:f0f0f0f0-0000-4000-8000-0000000000bb")
+            put("streamversion", 1)
+            put("position", last + 1)
+        }
+        events.insertOne(broken)
+    }
+
+    /** Every fault said on a board, as it is said. */
+    fun heardOn(board: FaultBoard) = CopyOnWriteArrayList<Fault>().also { heard -> board.watch { heard += it } }
 
     val ravenscar = FoundHouse(
         houseId = HouseId(UUID.fromString("6d5b0a2e-1c3f-4d7e-9a8b-0f1e2d3c4b5a")),
@@ -191,4 +217,39 @@ class MongoWorldDockerSpec : StringSpec({
         refused.message shouldContain "MongoDB did not answer at mongodb://localhost:1"
         refused.message shouldContain "docker compose -f infra/docker-compose.yml up -d"
     }
+
+    "an event the store cannot read back stops a live subscription at once, said once, not retried for ever (needs Docker)"
+        .config(enabledOrReasonIf = needsDocker) {
+            val board = FaultBoard()
+            val faults = heardOn(board)
+            world("villages-jammed", board).use { world ->
+                world.executor.execute(ravenscar, sent)
+                world.feed.subscribe(Start.FROM_NOW) {}.use {
+                    writeUnreadable("villages-jammed")
+
+                    waitFor("the feed to give up on it") { faults.any { it.source == "the feed" } }
+                    Thread.sleep(2000)
+                    faults.count { it.source == "the feed" } shouldBe 1
+                }
+            }
+        }
+
+    "a world holding one still starts its followers, says where its store broke, and can still be wiped (needs Docker)"
+        .config(enabledOrReasonIf = needsDocker) {
+            val board = FaultBoard()
+            val faults = heardOn(board)
+            world("villages-broken", board).use { world ->
+                world.executor.execute(ravenscar, sent)
+                writeUnreadable("villages-broken")
+
+                world.feed.subscribe(Start.FROM_THE_BEGINNING) {}.close()
+                faults.map { it.about.orEmpty() }.single() shouldContain "reading the history"
+                world.unreadable().brokenAt.shouldNotBeNull()
+
+                world.wipe() shouldBe 2
+                world.unreadable().none shouldBe true
+                everything(world).shouldBeEmpty()
+            }
+        }
+
 })

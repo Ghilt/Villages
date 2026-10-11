@@ -16,6 +16,7 @@ import villages.application.Faults
 import villages.application.HouseCommandExecutor
 import villages.application.Fault
 import villages.application.Resettable
+import villages.application.Unreadable
 import villages.application.WipeGate
 import java.lang.reflect.Method
 import java.time.Duration
@@ -57,8 +58,15 @@ class InMemoryWorld(val faults: Faults = FaultBoard()) : EventWorld {
         store.wipeEveryStream().also {
             handedOn()
             folded.forEach(Resettable::reset)
+            reading = Unreadable.NONE
         }
     }
+
+    /** The last reading of the whole store: made the first time it is asked, and nothing unreadable after a wipe. */
+    @Volatile
+    private var reading: Unreadable? = null
+
+    override fun unreadable(): Unreadable = reading ?: store.readEverything(converter).also { reading = it }
 
     /**
      * Waits until every subscription has handed on what it was given. One that never does is stuck whatever the

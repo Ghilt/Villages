@@ -432,6 +432,10 @@ stage alone, with none of the debug panel in it (decision record 0079).
   Containers page says the same under `villages`. `down` stops them and keeps what they hold, and `down -v`
   forgets it, for every tree at once, so both are Adam's and no session runs them; a session resets only
   its own world, with the debug panel's wipe. See decision record 0092.
+- **A world holding events this code cannot read** - written by older code before an event changed shape - is said
+  as the server starts, in its log under `villages.store`, and to the debug panel on connecting, as
+  `gateway: error unreadableEvents` with how many, the first by type and stream, and what to do: the World
+  section's wipe. Until then a house with one in its history refuses every command. See decision record 0036.
 - A worktree deleted leaves its world behind in MongoDB. `node drop-gone-worlds.ts --list`, in `scripts/`, lists
   every world with how many events it holds, kept or gone, and `--drop` drops the gone ones: those whose
   checkout git no longer has a folder for. It asks MongoDB through the stack's own container, so it needs the

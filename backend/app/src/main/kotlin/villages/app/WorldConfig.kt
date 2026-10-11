@@ -377,7 +377,7 @@ class WorldConfig {
         waters = WaterAt(ground, placeNames),
         later = gatewayLater,
         instrumentsOpen = instruments,
-        keptIn = world.keptIn,
+        worldKept = world,
         sendOn = gatewaySending,
     )
 }

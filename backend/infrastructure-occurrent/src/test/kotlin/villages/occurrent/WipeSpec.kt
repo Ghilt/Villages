@@ -134,7 +134,7 @@ class WipeSpec : StringSpec({
 })
 
 /** Waits for something to be true, rather than for a length of time. */
-private fun waitFor(what: String, ready: () -> Boolean) {
+internal fun waitFor(what: String, ready: () -> Boolean) {
     val giveUp = System.nanoTime() + TimeUnit.SECONDS.toNanos(5)
     while (!ready()) {
         check(System.nanoTime() < giveUp) { "gave up waiting for $what" }

@@ -1,10 +1,12 @@
 package villages.occurrent
 
+import com.mongodb.MongoException
 import com.mongodb.MongoTimeoutException
 import com.mongodb.client.MongoClient
 import com.mongodb.client.MongoClients
 import org.occurrent.eventstore.mongodb.nativedriver.EventStoreConfig
 import org.occurrent.eventstore.mongodb.nativedriver.MongoEventStore
+import org.occurrent.filter.Filter
 import org.occurrent.mongodb.timerepresentation.TimeRepresentation
 import org.occurrent.retry.RetryStrategy
 import org.occurrent.subscription.mongodb.nativedriver.blocking.NativeMongoSubscriptionModel
@@ -14,6 +16,7 @@ import villages.application.FaultBoard
 import villages.application.Faults
 import villages.application.HouseCommandExecutor
 import villages.application.Resettable
+import villages.application.Unreadable
 import villages.application.WipeGate
 import java.time.Duration
 import java.util.concurrent.ExecutorService
@@ -52,9 +55,23 @@ class MongoWorld(
         )
     }
 
-    private val subscriptions = NativeMongoSubscriptionModel(
-        client.getDatabase(database), EVENTS, TIME, dispatcher, RetryStrategy.fixed(200),
-    )
+    /**
+     * How a subscription that fails is started again: for ever, waiting longer each time up to five seconds, while the
+     * failure is MongoDB's own - a connection lost, a restart, a failover - because those heal. Anything else is an
+     * event the subscription cannot read back, which fails the same way at every restart, forty times a second when
+     * let: that one is given up at once and said, and the subscription stops. Its world wants wiping and the server
+     * starting again. See decision record 0036.
+     */
+    private val restarts = RetryStrategy.exponentialBackoff(Duration.ofMillis(200), Duration.ofSeconds(5), 2.0)
+        .retryIf { it is MongoException }
+        .onError { info, thrown ->
+            if (!info.isRetryable) {
+                faults.report(Fault("the feed", "an event a subscription could not read back, so it stopped", thrown))
+            }
+        }
+
+    private val subscriptions =
+        NativeMongoSubscriptionModel(client.getDatabase(database), EVENTS, TIME, dispatcher, restarts)
     private val converter = Events.converter()
 
     override val gate = WipeGate()
@@ -65,12 +82,24 @@ class MongoWorld(
 
     override val keptIn = "in MongoDB, database $database, which outlives the server"
 
+    /**
+     * Counted and deleted without reading a single event back, unlike in memory, so that a world holding one the
+     * store cannot read - which is when a world most wants wiping - can still be wiped.
+     */
     override fun wipe(folded: Iterable<Resettable>): Int = gate.wiping {
-        store.wipeEveryStream().also {
+        store.count(Filter.all()).toInt().also {
+            store.delete(Filter.all())
             handedOn()
             folded.forEach(Resettable::reset)
+            reading = Unreadable.NONE
         }
     }
+
+    /** The last reading of the whole store: made the first time it is asked, and nothing unreadable after a wipe. */
+    @Volatile
+    private var reading: Unreadable? = null
+
+    override fun unreadable(): Unreadable = reading ?: store.readEverything(converter).also { reading = it }
 
     /**
      * Waits until every subscription has handed on what was written before the wipe, by a marker written after it,

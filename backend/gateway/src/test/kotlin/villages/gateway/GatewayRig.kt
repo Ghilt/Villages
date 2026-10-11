@@ -29,6 +29,7 @@ import villages.application.fate.FirstPools
 import villages.application.fate.omenSources
 import villages.application.fate.firstActions
 import villages.application.fate.RollService
+import villages.application.WorldKept
 import villages.domain.CharacterCommand
 import villages.domain.CharacterDecider
 import villages.domain.CharacterEvent
@@ -218,7 +219,11 @@ internal class ManualLater : Later {
  * The whole gateway on a tiny world. `instrumentsOpen` is the setting, `villages.instruments`, and `sendOn` what
  * frames are sent on: the calling thread, unless a spec hands it threads, as the app does.
  */
-internal class Rig(instrumentsOpen: Boolean = true, sendOn: Executor = Executor { it.run() }) {
+internal class Rig(
+    instrumentsOpen: Boolean = true,
+    sendOn: Executor = Executor { it.run() },
+    worldKept: WorldKept = WorldKept.IN_MEMORY,
+) {
     val world = TinyWorld()
     val later = ManualLater()
     val houses = HousesProjection(world).started()
@@ -322,6 +327,7 @@ internal class Rig(instrumentsOpen: Boolean = true, sendOn: Executor = Executor 
         waters = WaterAt({ grounds[it] }, { names[it] }),
         later = later,
         instrumentsOpen = instrumentsOpen,
+        worldKept = worldKept,
         sendOn = sendOn,
     )
 

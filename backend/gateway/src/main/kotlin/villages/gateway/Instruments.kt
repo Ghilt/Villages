@@ -8,12 +8,15 @@ import villages.application.RecentEvents
 import villages.application.ResourceService
 import villages.application.Start
 import villages.application.StoredEvent
+import villages.application.Unreadable
 import villages.application.VisionService
+import villages.application.WorldKept
 import villages.application.WorldWipe
 import villages.application.fate.RollService
 import villages.domain.CharacterId
 import villages.domain.HouseId
 import villages.domain.HouseName
+import villages.domain.PlayerId
 import villages.domain.Location
 import villages.domain.PledgeId
 import villages.domain.VisionId
@@ -79,6 +82,7 @@ internal class Instruments(
     private val visions: VisionService,
     private val dialogues: DialogueService,
     private val rolls: RollService,
+    private val kept: WorldKept,
 ) : Part {
     private val watching = ConcurrentHashMap.newKeySet<Gateway.Connection>()
 
@@ -99,6 +103,15 @@ internal class Instruments(
                 ),
             )
         }
+    }
+
+    /**
+     * A window arriving is told what the world holds that this code cannot read, while the instruments are open: what
+     * went wrong as the server started was said before any window was there to hear it. See decision record 0036.
+     */
+    override fun greet(connection: Gateway.Connection, who: PlayerId) {
+        val unreadable = kept.unreadable()
+        if (open && !unreadable.none) connection.out.send(ErrorFrame("unreadableEvents", told(unreadable)))
     }
 
     /**
@@ -311,4 +324,17 @@ internal class Instruments(
         feed.close()
         drawn.close()
     }
+}
+
+/** What the debug panel says of a world this code cannot read all of, and what to do about it, pre-alpha. */
+internal fun told(unreadable: Unreadable): String = buildString {
+    if (unreadable.events > 0) {
+        append("${unreadable.events} of this world's ${unreadable.of} events cannot be read by this code, the first ")
+        append("${unreadable.first}, and a house with one in its history refuses every command. ")
+    }
+    if (unreadable.brokenAt != null) {
+        append("The store could not be read back ${unreadable.brokenAt}, so the feed may have stopped. ")
+    }
+    append("Wipe this world: the World section, wipe")
+    append(if (unreadable.brokenAt != null) ", then start the game server again." else ".")
 }

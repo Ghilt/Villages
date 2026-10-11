@@ -31,7 +31,25 @@ class StoreConfig {
         "memory" -> InMemoryWorld(faults)
         "mongo" -> MongoWorld(connection, database.ifBlank { databaseFor(Path.of(CHECKOUT)) }, faults)
         else -> error("villages.store is '$store', and it can be memory or mongo")
-    }.also { world -> storeLog.info("the world is kept {}", world.keptIn) }
+    }.also { world -> sayWhereAndWhat(world) }
+
+    /**
+     * Says where the world is kept, and reads every event in it once, so that one this code cannot read is said as
+     * the server starts rather than found by a house that refuses every command. See decision record 0036.
+     */
+    private fun sayWhereAndWhat(world: EventWorld) {
+        storeLog.info("the world is kept {}", world.keptIn)
+        val unreadable = world.unreadable()
+        if (unreadable.none) {
+            storeLog.info("its {} events can all be read", unreadable.of)
+        } else {
+            val broken = unreadable.brokenAt?.let { ", and the store could not be read back $it" } ?: ""
+            storeLog.warn(
+                "{} of its {} events cannot be read, the first {}{}: wipe this world from the debug panel",
+                unreadable.events, unreadable.of, unreadable.first, broken,
+            )
+        }
+    }
 
     private companion object {
         /** The stack in `infra/docker-compose.yml`, and a server told to use it says so in five seconds if it is not up. */

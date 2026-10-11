@@ -192,6 +192,13 @@ Increment 0.7 compiled and ran the plan's riskiest assumption, on Occurrent 0.33
   time is `RFC_3339_STRING`, and every catalogued event comes back from MongoDB as it was written. The store's
   `WriteConditionNotFulfilledException` is the in-memory one's, so the executor's retry works unchanged.
   Testcontainers 2.0's `MongoDBContainer` is a lone server unless asked `withReplicaSet()`.
+- The native subscription model turns each change into a CloudEvent outside its retry of the subscriber, so a
+  change it cannot read back fails the whole subscription, which its retry strategy starts again from the same
+  change: with `RetryStrategy.fixed`, forty times a second for ever. The strategy is also what restarts a
+  subscription after MongoDB itself fails, so it cannot simply be limited. `MongoWorld` retries MongoDB's own
+  exceptions for ever, backing off to five seconds, and gives up at once on anything else, saying so through
+  `onError`, whose `ErrorInfo.isRetryable` is false only on the last. A subscription given up on is stopped for
+  good. See decision record 0036.
 
 ## How a change travels
 

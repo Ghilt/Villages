@@ -10,6 +10,7 @@ import villages.application.CharactersByCell
 import villages.application.HouseById
 import villages.application.HousesByCell
 import villages.application.HousesByPlayer
+import villages.application.WorldKept
 import villages.application.KeyFigureService
 import villages.application.KeyFiguresByHouse
 import villages.application.PlayerTokens
@@ -94,8 +95,8 @@ class Gateway(
     waters: WaterAt = WaterAt.NOWHERE,
     private val later: Later,
     private val instrumentsOpen: Boolean = true,
-    /** Where the world is kept, in memory or in which database: said at hello, while the instruments are open. */
-    private val keptIn: String = "in memory, and gone when the server stops",
+    /** Where the world is kept and what of it cannot be read: said at hello, while the instruments are open. */
+    private val worldKept: WorldKept = WorldKept.IN_MEMORY,
     /**
      * What a connection's frames are sent on, and its cells answered again on: the thread that queued them, unless
      * the gateway is given threads of its own, as the app gives it. See decision record 0077.
@@ -137,11 +138,9 @@ class Gateway(
         SightPart(core, sights),
         DialoguesPart(core, dialogues, dialogueRows),
         ChoicesPart(core, arrival, takeAction, choices, rolls),
-        StandsPart(stands),
-        WatersPart(waters),
-        TimelinePart(),
+        StandsPart(stands), WatersPart(waters), TimelinePart(),
         InspectingPart(houseById, onTheMap, world),
-        Instruments(instrumentsOpen, core, events, recent, emptyTheWorld, foundHouse, resources, keyFigures, visions, dialogues, rolls),
+        Instruments(instrumentsOpen, core, events, recent, emptyTheWorld, foundHouse, resources, keyFigures, visions, dialogues, rolls, worldKept),
     )
 
     /** Every command the gateway takes, and every frame a part answers, each with the one part that handles it. */
@@ -298,7 +297,7 @@ class Gateway(
                     serverTime = clock.millis(),
                     playerId = who.value.toString(),
                     world = WorldNow(today = today.day, earliest = (houses.earliest() ?: today).day),
-                    keptIn = keptIn.takeIf { instrumentsOpen },
+                    keptIn = worldKept.keptIn.takeIf { instrumentsOpen },
                 ),
             )
             parts.forEach { it.greet(this, who) }

@@ -5,6 +5,9 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.string.shouldContain
+import villages.application.Unreadable
+import villages.application.WorldKept
 import villages.domain.PlayerId
 import villages.protocol.CommandAccepted
 import villages.protocol.CommandRejected
@@ -75,6 +78,25 @@ class GatewayInstrumentsSpec : StringSpec({
 
         welcomeFrom(Rig(instrumentsOpen = false)).keptIn shouldBe null
         welcomeFrom(Rig()).keptIn shouldBe "in memory, and gone when the server stops"
+    }
+
+    "a window is told at hello what the world holds that this code cannot read, only while the instruments are open" {
+        val oldShapes = object : WorldKept {
+            override val keptIn = "in MongoDB, database villages-a-tree, which outlives the server"
+
+            override fun unreadable() =
+                Unreadable(events = 3, of = 120, first = "a villages.house.founded.v1 on house:x (KotlinInvalidNullException)")
+        }
+        fun errorsAtHello(rig: Rig) = mutableListOf<ServerFrame>()
+            .also { sent -> rig.gateway.connect { sent += it }.receive(hello) }
+            .filterIsInstance<ErrorFrame>()
+
+        val told = errorsAtHello(Rig(worldKept = oldShapes)).single()
+        told.code shouldBe "unreadableEvents"
+        told.message shouldContain "3 of this world's 120 events cannot be read"
+        told.message shouldContain "Wipe this world: the World section, wipe."
+        errorsAtHello(Rig(instrumentsOpen = false, worldKept = oldShapes)).shouldBeEmpty()
+        errorsAtHello(Rig()).shouldBeEmpty()
     }
 
     "open, as it is by default, a lever does what it always did" {

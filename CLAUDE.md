@@ -146,7 +146,10 @@ What follows from that, and bites in practice:
   virtual host, `villages-<tree>`, and resets only its own world, with the debug panel's wipe. Never
   stop, restart or `down -v` the stack, and never bring it up on a changed `infra/docker-compose.yml`:
   each of those stops or forgets every session's world, and they are Adam's. A change to that file is a
-  step of its own and says so. See decision record 0092.
+  step of its own and says so. See decision record 0092. A world outlives its server now, so a change to an
+  event's shape leaves events in it this code cannot read: the server says so as it starts, and the panel's
+  `error unreadableEvents` names them. Pre-alpha the answer is the World section's wipe of that tree's world, not
+  reading old shapes; versioned events come with the world-persistence milestone. See decision record 0036.
 - **`.sessions/` is the main repository's, not the worktree's** - it sits beside the shared `.git`, which
   is what makes it the one place every session can see. See decision record 0020.
 
