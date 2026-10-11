@@ -128,10 +128,10 @@ stage alone, with none of the debug panel in it (decision record 0079).
   moving the camera about writes nothing, and the cells a move brought back are counted and said in one line
   only when they carried something. `window.villagesPainterly()` gives the paint counters from a console.
 - The player's own levers: the bar along the bottom of the house card, in the corner. The eye is the
-  first place in it and five stand empty. Open, the player's own seat stays drawn however far back the
-  camera goes and the ground about it is drawn below the zoom where everyone else's begins; theirs and
-  nobody else's, so the world still thins out with distance. It costs nothing on the wire, because a
-  player's own house already reaches them wherever they are looking. See `docs/adr/0038`.
+  first place in it and five stand empty. Open, the player's own holdings stay drawn however far back the
+  camera goes, the seat among them, and the ground about it is drawn below the zoom where everyone else's begins;
+  theirs and nobody else's, so the world still thins out with distance. It costs nothing on the wire, because a
+  player's holdings already reach them wherever they are looking. See `docs/adr/0038`.
 - The fog of war: the `FoW` box in the Debug map section's bar, there folded or open, ticked at every page
   load, and unticking it turns the fog off for that window. A house sees from **vision points** - its seat, and each key figure standing
   on the map, a circle of 34 km around each - and the server works them out and sends them as `yourSight`;
@@ -156,7 +156,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
   Adam's switch, not a player's.
 - Areas, in the same panel: `draw an area` arms the next drag on the map, and dragging paints one. The
   ends join themselves and escape stops. Click an area to select it, which makes its line pulse and lists
-  how many diamonds of each terrain it encloses; `shade`, `recount` and `delete` are beside it. The
+  how many diamonds of each terrain it encloses, and how many houses have their seat inside it; `shade`, `recount` and `delete` are beside it. The
   boundary steps along the ground's own diamonds - one world unit each, turned as far as the ground is -
   rather than through them, so at z10 it lies along the diamonds the terrain is drawn in and tips with
   them; they are crisp on `vivid` and `plate`, softened by the medium on the rest. `raw` draws the tiles
@@ -283,16 +283,17 @@ stage alone, with none of the debug panel in it (decision record 0079).
   taking it; closed with the instruments.
 - A house's seat: founding raises its castle, *Ravenscar Castle*, where the house was founded, held by it, and names
   it the seat, as the founding's own story on the event page: `founded`, `raised`, `namedSeat`, then the house's
-  `gainedVision` from the castle. On the map the castle stands for the house where it is drawn, flying the house's
-  pennant, and the house's own castle mark steps aside; far out, or under the fog, where the castle is not sent,
-  the house's mark is drawn as before. A click on it opens the castle's window, *a castle, the seat of Ravenscar*,
+  `gainedVision` from the castle. A house is not drawn on the map at all: its structures are, the castle that is its
+  seat among them, flying the house's pennant; the game server sends a page the structures and people standing in
+  the squares of the map it shows and no houses, and a house's own player is sent their house by itself. A click on
+  the castle opens its window, *a castle, the seat of Ravenscar*,
   with the house a link away, and a house's window marks its seat on the map. While a castle is marked - its window
   or its house's the newest open - its **influence zone** is drawn about it, the ragged gold ground every seat used
   to have at all times, its reach the catalogue's `zone`; a type without one draws none. The seat still sees from where the
   house was founded too, while it is the seat. When the castle changes hands or falls, the house loses it:
   `villages.house.lostSeat.v1` in the story of what took it, the castle's window no longer saying whose seat it is,
-  the house's own mark back where it was founded, and its sight from there ended, the ground it saw revealed. A
-  house's window gives where it was founded as *Founded at*.
+  and its sight from there ended, the ground it saw revealed; a house without a seat is drawn nowhere, and its
+  window opens from any structure's link to it. A house's window gives where it was founded as *Founded at*.
 - Raising and lowering its level: **level up** and **level down**, beside *take control of this building*, on the
   structure whose window was opened last. Each writes `villages.structure.levelChanged.v1`: the structure is drawn
   larger or smaller, its window says the new level, and its holder sees as far as that level sees - the new sight

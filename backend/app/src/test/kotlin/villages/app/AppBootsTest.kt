@@ -14,13 +14,15 @@ import org.springframework.web.socket.handler.TextWebSocketHandler
 import villages.protocol.Batch
 import villages.protocol.Cell
 import villages.protocol.CommandRejected
-import villages.protocol.HouseAppeared
 import villages.protocol.EndingView
 import villages.protocol.EventFrame
 import villages.protocol.ProtocolJson
 import villages.protocol.RequirementView
 import villages.protocol.ServerFrame
 import villages.protocol.Snapshot
+import villages.protocol.StructureArrived
+import villages.protocol.StructureChanged
+import villages.protocol.StructureView
 import villages.protocol.TakenOver
 import villages.protocol.FoundAtView
 import villages.protocol.KeyFigureView
@@ -29,6 +31,7 @@ import villages.protocol.PROTOCOL_VERSION
 import villages.protocol.WorldWiped
 import villages.protocol.YourChoice
 import villages.protocol.YourDialogues
+import villages.protocol.YourHoldings
 import villages.protocol.YourHouse
 import villages.protocol.YourKeyFigures
 import java.util.UUID
@@ -36,7 +39,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
 
 /**
- * The whole process, booted, over real sockets: a house founded and read back from the map, and then the
+ * The whole process, booted, over real sockets: a house founded and its seat read back from the map, and then the
  * two rules of decision 0028 — a player has one house, and plays from one place.
  *
  * JUnit rather than Kotest here only because Spring's test support speaks JUnit.
@@ -96,7 +99,7 @@ class AppBootsTest {
             """"seat":{"lat":59.33,"lon":18.07},""" +
             """"banner":{"field":"sable","division":"plain","charge":"stag","chargeTincture":"argent"}}}"""
 
-    /** Stockholm before the warp, at the zoom a founding is worth drawing from. */
+    /** Stockholm before the warp, at the zoom a founding's castle is worth drawing from. */
     private val cell = "12003122"
 
     @Test
@@ -122,19 +125,23 @@ class AppBootsTest {
         assertEquals(promised.banner, standing.banner)
 
         // Three events, one story: asked where, answered, and founded. The action's cause is the command. Then the
-        // listeners carry it on in the same story: the castle raised, named the seat, and seen from. See 0092.
+        // listeners carry it on in the same story, in whichever order they get to it: the castle raised, named the
+        // seat, seen from and paid by. See 0092.
         val ours = "house:" + java.util.UUID.nameUUIDFromBytes("villages:house:$arriving".toByteArray())
-        window.until("the founding, its seat and its sight") { frames ->
-            frames.filterIsInstance<EventFrame>().count { it.stream == ours } >= 5
+        window.until("the founding, its seat, its sight and its pay") { frames ->
+            frames.filterIsInstance<EventFrame>().count { it.stream == ours } >= 6
         }
         val heard = window.heard.filterIsInstance<EventFrame>()
         val events = heard.filter { it.stream == ours }.take(3)
-        val seatNamed = heard.filter { it.stream == ours }.drop(3).take(2)
+        val seatNamed = heard.filter { it.stream == ours }.drop(3).take(3)
         val castle = "structure:" + seatNamed.first { it.eventType == "villages.house.namedSeat.v1" }.data["structureId"].asText()
         window.until("the castle") { frames -> frames.any { it is EventFrame && it.stream == castle } }
         val after = seatNamed + window.heard.filterIsInstance<EventFrame>().filter { it.stream == castle }
         assertEquals(
-            setOf("villages.house.namedSeat.v1", "villages.house.gainedVision.v1", "villages.structure.raised.v1"),
+            setOf(
+                "villages.house.namedSeat.v1", "villages.house.gainedVision.v1", "villages.house.incomeChanged.v1",
+                "villages.structure.raised.v1",
+            ),
             after.map { it.eventType }.toSet(),
         )
         assertEquals(setOf(events[0].correlationId), after.map { it.correlationId }.toSet(), "the founding's story: $after")
@@ -321,11 +328,15 @@ class AppBootsTest {
         }
         assertEquals("Ravenscar", first.last<YourHouse>().yours?.house?.name)
 
+        // A house is not drawn on the map: its castle is, its seat, raised and named by listeners a moment after.
+        first.until("the castle, the house's seat") { frames ->
+            frames.filterIsInstance<YourHoldings>().lastOrNull()?.holdings.orEmpty().any { it.seatOf?.name == "Ravenscar" }
+        }
         first.say("""{"type":"subscribeCells","cells":["$cell"]}""")
         first.until("a snapshot") { frames -> frames.any { it is Snapshot } }
         val snapshot = first.last<Snapshot>()
         assertEquals(cell, snapshot.cell)
-        assertEquals(listOf("Ravenscar"), snapshot.houses.map { it.name })
+        assertEquals(listOf("Ravenscar Castle"), snapshot.structures.filter { it.seatOf?.name == "Ravenscar" }.map { it.name })
 
         // A second window of the same player takes over, and is told the house is already theirs.
         val second = Window(port)
@@ -345,7 +356,7 @@ class AppBootsTest {
 
         second.say("""{"type":"subscribeCells","cells":["$cell"]}""")
         second.until("a snapshot") { frames -> frames.any { it is Snapshot } }
-        assertEquals(1, second.last<Snapshot>().houses.size, "one player, one house")
+        assertEquals(1, second.last<Snapshot>().structures.count { it.seatOf != null }, "one player, one house, one seat")
 
         first.close()
         second.close()
@@ -372,9 +383,11 @@ class AppBootsTest {
         )
         founding.until("its own house") { frames -> frames.filterIsInstance<YourHouse>().lastOrNull()?.yours != null }
 
-        looking.until("the house appearing where it looks") { frames ->
-            frames.filterIsInstance<Batch>().any { batch ->
-                batch.deltas.any { it is HouseAppeared && it.house.name == "Hollin" }
+        // The house is not drawn, its seat is: the castle arrives, and is named the seat a moment after.
+        looking.until("the house's seat appearing where it looks") { frames ->
+            frames.filterIsInstance<Batch>().flatMap { it.deltas }.any { delta ->
+                val structure: StructureView? = (delta as? StructureArrived)?.structure ?: (delta as? StructureChanged)?.structure
+                structure?.seatOf?.name == "Hollin"
             }
         }
 

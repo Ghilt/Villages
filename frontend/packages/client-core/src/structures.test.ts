@@ -28,8 +28,6 @@ function mill(id: string, stamp: number, level = 1, cell = Z10): StructureView {
 const snapshot = (cell: string, structures: StructureView[], structuresAsOf: number): ServerFrame => ({
   type: 'snapshot',
   cell,
-  houses: [],
-  asOfVersion: 1,
   structures,
   structuresAsOf,
 });

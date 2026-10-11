@@ -23,10 +23,6 @@ import villages.protocol.StructureArrived
 import villages.protocol.StructureChanged
 import java.util.UUID
 
-private fun raising(type: String, yours: Boolean, commandId: String = commandNumber(7), lat: Double = 54.36, lon: Double = 18.64) =
-    """{"type":"command","commandId":"$commandId","command":{"type":"raiseStructure","structureType":"$type",""" +
-        """"level":1,"place":{"lat":$lat,"lon":$lon},"yours":$yours}}"""
-
 private fun inspecting(id: StructureId) = """{"type":"inspect","kind":"structure","id":"${id.value}"}"""
 
 private fun takingControl(id: StructureId, commandId: String = commandNumber(9)) =

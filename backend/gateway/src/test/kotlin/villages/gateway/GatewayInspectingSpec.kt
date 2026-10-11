@@ -1,13 +1,10 @@
 package villages.gateway
 
 import io.kotest.core.spec.style.StringSpec
-import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import villages.domain.WorldTime
-import villages.protocol.Batch
 import villages.protocol.Inspected
 import villages.protocol.ServerFrame
-import villages.protocol.Snapshot
 import villages.protocol.YourHouse
 import villages.protocol.YourKeyFigures
 import villages.protocol.YourSight
@@ -18,9 +15,9 @@ private fun inspecting(kind: String, id: String) = """{"type":"inspect","kind":"
 private fun MutableList<ServerFrame>.answer(): Inspected = filterIsInstance<Inspected>().single()
 
 /**
- * A window asking after its subject wherever the camera is, answered once by the rule a cell's snapshot is held to:
- * the fog lets through a house on revealed ground and somebody in vision. No cell is held in any of these. See
- * decision record 0088. The rig is GatewayRig.kt.
+ * A window asking after its subject wherever the camera is, answered once through the fog: it lets through a house on
+ * revealed ground and somebody in vision. No cell is held in any of these. See decision record 0088. The rig is
+ * GatewayRig.kt.
  */
 class GatewayInspectingSpec : StringSpec({
 
@@ -57,41 +54,33 @@ class GatewayInspectingSpec : StringSpec({
         sent.answer().house?.name shouldBe "Kestrel"
     }
 
-    // The gateway says it, wherever the house is sent from - a cell, a window's answer - and the page shows what it
-    // is told: a house's sight changing is the cell answered again, so nothing more is sent. What happens to the
-    // house since is not told, because it is known as it was when the fog hid it.
-    "a house on ground no longer in vision is sent with the day the fog hid it, by its cell and a window, and no news" {
+    // The gateway says it and the page shows what it is told: a window on a house the fog has hidden is answered with
+    // the day it did.
+    "a house on ground no longer in vision is answered with the day the fog hid it" {
         val rig = Rig()
-        val (theirs, _) = rig.someoneElse()
+        val (theirs, told) = rig.someoneElse()
         theirs.receive(founding(name = "Kestrel", lat = HELSINKI_LAT, lon = HELSINKI_LON))
+        val kestrel = told.filterIsInstance<YourHouse>().last().yours!!.house
         val (mine, sent) = rig.introduced()
         mine.receive(founding())
-        mine.receive(subscribe(HELSINKI_Z10))
         mine.receive(givingVision(HELSINKI_LAT, HELSINKI_LON, commandNumber(1)))
-        sent.filterIsInstance<Snapshot>().last().houses.single().seenUntil shouldBe null
         val given = sent.filterIsInstance<YourSight>().last().points.last().of!!
-        rig.day = WorldTime(today.day + 30)
-        sent.clear()
-
-        mine.receive(takingVision(given, commandNumber(2)))
-        val kestrel = sent.filterIsInstance<Snapshot>().single().houses.single()
-        kestrel.seenUntil shouldBe today.day + 30
-        sent.clear()
-
-        theirs.receive(granting())
-        rig.later.tick()
-        sent.filterIsInstance<Batch>().flatMap { it.deltas }.shouldBeEmpty()
         sent.clear()
 
         mine.receive(inspecting("house", kestrel.id))
-        sent.answer().house?.seenUntil shouldBe today.day + 30
+        sent.answer() shouldBe Inspected("house", kestrel.id, house = kestrel)
+        rig.day = WorldTime(today.day + 30)
+        mine.receive(takingVision(given, commandNumber(2)))
+        sent.clear()
+
+        mine.receive(inspecting("house", kestrel.id))
+        sent.answer() shouldBe Inspected("house", kestrel.id, house = kestrel.copy(seenUntil = today.day + 30))
     }
 
-    "a house founded on ground the fog has hidden is not sent, from its founding, its cell or a window" {
+    "a house founded on ground the fog has hidden is not answered to a window" {
         val rig = Rig()
         val (mine, sent) = rig.introduced()
         mine.receive(founding())
-        mine.receive(subscribe(HELSINKI_Z10))
         mine.receive(givingVision(HELSINKI_LAT, HELSINKI_LON, commandNumber(1)))
         val given = sent.filterIsInstance<YourSight>().last().points.last().of!!
         rig.day = WorldTime(today.day + 30)
@@ -102,12 +91,7 @@ class GatewayInspectingSpec : StringSpec({
         val (theirs, told) = rig.someoneElse()
         theirs.receive(founding(name = "Kestrel", lat = HELSINKI_LAT, lon = HELSINKI_LON))
         val kestrel = told.filterIsInstance<YourHouse>().last().yours!!.house
-        rig.later.tick()
-        sent.filterIsInstance<Batch>().flatMap { it.deltas }.shouldBeEmpty()
 
-        mine.receive(unsubscribe(HELSINKI_Z10))
-        mine.receive(subscribe(HELSINKI_Z10))
-        sent.filterIsInstance<Snapshot>().single().houses.shouldBeEmpty()
         mine.receive(inspecting("house", kestrel.id))
         sent.answer() shouldBe Inspected("house", kestrel.id)
     }

@@ -11,10 +11,10 @@ import villages.protocol.CharacterArrived
 import villages.protocol.CharacterGone
 import villages.protocol.CommandAccepted
 import villages.protocol.CommandRejected
-import villages.protocol.HouseAppeared
 import villages.protocol.Point
 import villages.protocol.ServerFrame
 import villages.protocol.Snapshot
+import villages.protocol.StructureArrived
 import villages.protocol.VisionPointView
 import villages.protocol.YourKeyFigures
 import villages.protocol.YourSight
@@ -96,10 +96,10 @@ class GatewaySightSpec : StringSpec({
         looker.cells().shouldBeEmpty()
     }
 
-    "the fog holds back a house on ground the player's house has never seen, and lifting it sends it" {
+    "the fog holds back a structure on ground the player's house has never seen, and lifting it sends it" {
         val rig = Rig()
-        val (theirs, _) = rig.someoneElse()
-        theirs.receive(founding(name = "Kestrel", lat = HELSINKI_LAT, lon = HELSINKI_LON))
+        rig.aStructureIsRaised("castle", HELSINKI_LAT, HELSINKI_LON)
+        rig.aStructureIsRaised("mill")
         val (mine, sent) = rig.introduced()
         mine.receive(founding())
         sent.clear()
@@ -107,27 +107,26 @@ class GatewaySightSpec : StringSpec({
         mine.receive(subscribe(HELSINKI_Z10, STOCKHOLM_Z10))
 
         val fogged = sent.filterIsInstance<Snapshot>().associateBy { it.cell }
-        fogged.getValue(HELSINKI_Z10).houses.shouldBeEmpty()
+        fogged.getValue(HELSINKI_Z10).structures.shouldBeEmpty()
         // What is hidden is not counted either, because how much is hidden is itself something learnt.
-        fogged.getValue(HELSINKI_Z10).omitted shouldBe 0
-        fogged.getValue(STOCKHOLM_Z10).houses.single().name shouldBe "Ravenscar"
+        fogged.getValue(HELSINKI_Z10).omittedStructures shouldBe 0
+        fogged.getValue(STOCKHOLM_Z10).structures.single().name shouldBe "a new mill"
         sent.clear()
 
         mine.receive(fogOfWar(false))
-        sent.filterIsInstance<Snapshot>().single { it.cell == HELSINKI_Z10 }.houses.single().name shouldBe "Kestrel"
+        sent.filterIsInstance<Snapshot>().single { it.cell == HELSINKI_Z10 }.structures.single().name shouldBe "a new castle"
         sent.clear()
 
         mine.receive(fogOfWar(false))
         sent.shouldBeEmpty()
 
         mine.receive(fogOfWar(true))
-        sent.filterIsInstance<Snapshot>().single { it.cell == HELSINKI_Z10 }.houses.shouldBeEmpty()
+        sent.filterIsInstance<Snapshot>().single { it.cell == HELSINKI_Z10 }.structures.shouldBeEmpty()
     }
 
-    "a house arrives with the vision given over it, before which the page is told the new sight, and stays once it is taken away" {
+    "a structure arrives with the vision given over it, before which the page is told the new sight, and stays once it is taken away" {
         val rig = Rig()
-        val (theirs, _) = rig.someoneElse()
-        theirs.receive(founding(name = "Kestrel", lat = HELSINKI_LAT, lon = HELSINKI_LON))
+        rig.aStructureIsRaised("castle", HELSINKI_LAT, HELSINKI_LON)
         val (mine, sent) = rig.introduced()
         mine.receive(founding())
         mine.receive(subscribe(HELSINKI_Z10))
@@ -135,15 +134,17 @@ class GatewaySightSpec : StringSpec({
 
         mine.receive(givingVision(HELSINKI_LAT, HELSINKI_LON, commandNumber(1)))
 
-        sent.filterIsInstance<Snapshot>().single().houses.single().name shouldBe "Kestrel"
+        sent.filterIsInstance<Snapshot>().single().structures.single().name shouldBe "a new castle"
         sent.indexOfFirst { it is YourSight } shouldBeLessThan sent.indexOfFirst { it is Snapshot }
         val given = sent.filterIsInstance<YourSight>().last().points.last().of!!
         sent.clear()
 
         mine.receive(takingVision(given, commandNumber(2)))
 
-        // Revealed ground keeps its buildings: what stands still is still known.
-        sent.filterIsInstance<Snapshot>().single().houses.single().name shouldBe "Kestrel"
+        // Revealed ground keeps its buildings: what stands still is still known, as of the day the fog hid it.
+        val kept = sent.filterIsInstance<Snapshot>().single().structures.single()
+        kept.name shouldBe "a new castle"
+        kept.seenUntil shouldBe today.day
     }
 
     "somebody is sent only while they stand in vision, and not on ground that is only revealed" {
@@ -166,12 +167,11 @@ class GatewaySightSpec : StringSpec({
         mine.receive(takingVision(given, commandNumber(4)))
 
         val revealed = sent.filterIsInstance<Snapshot>().single()
-        revealed.houses.single().name shouldBe "Kestrel"
         revealed.characters.shouldBeEmpty()
         revealed.omittedCharacters shouldBe 0
     }
 
-    "a founding on ground the player has never seen is not told to them, and one in their vision is" {
+    "a structure raised on ground the player has never seen is not told to them, and one in their vision is" {
         val rig = Rig()
         val (mine, sent) = rig.introduced()
         mine.receive(founding())
@@ -179,12 +179,12 @@ class GatewaySightSpec : StringSpec({
         rig.later.tick()
         sent.clear()
 
-        rig.someoneElse().first.receive(founding(name = "Kestrel", lat = HELSINKI_LAT, lon = HELSINKI_LON))
-        rig.someoneElse().first.receive(founding(name = "Wren", lat = 59.34, lon = 18.06))
+        rig.aStructureIsRaised("castle", HELSINKI_LAT, HELSINKI_LON)
+        rig.aStructureIsRaised("mill", 59.34, 18.06)
         rig.later.tick()
 
         sent.filterIsInstance<Batch>().flatMap { it.deltas }
-            .map { it.shouldBeInstanceOf<HouseAppeared>().house.name } shouldBe listOf("Wren")
+            .map { it.shouldBeInstanceOf<StructureArrived>().structure.name } shouldBe listOf("a new mill")
     }
 
     "somebody walking into the house's vision arrives, and walking out of it is gone" {

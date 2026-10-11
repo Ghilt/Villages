@@ -246,10 +246,11 @@ player's, which today is which house is theirs, is sent to whichever window they
 record 0028.
 
 Today there is no broker. The read model's own change stream stands in for the exchange: the gateway watches
-the projection for changes and queries it for snapshots, both through the `HousesByCell` port. When RabbitMQ
-arrives the exchange takes over the fan-out between processes, and the gateway's side does not change - it
-still holds an index from cell to sessions and, for each changed house, walks that house's deepest cell up
-through all of its prefixes, sending to the holders at the zooms its significance is worth drawing at and to
+the projections for changes and queries them for snapshots, through `StructuresByCell` and `CharactersByCell`;
+no house rides a cell, because a house is not drawn on the map, and a player's own house is sent to their session
+by itself (decision 0092). When RabbitMQ arrives the exchange takes over the fan-out between processes, and the
+gateway's side does not change - it still holds an index from cell to sessions and, for each changed structure or
+person, walks its deepest cell up through all of its prefixes, sending to the holders at the zooms its significance is worth drawing at and to
 anyone who is seeing everything at the rest. A cell is a quadkey at any zoom, so a client asks for data on
 the same grid, at the same zoom, as the terrain tiles it draws; see decision record 0026.
 

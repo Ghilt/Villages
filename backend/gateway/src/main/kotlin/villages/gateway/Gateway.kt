@@ -309,7 +309,7 @@ class Gateway(
         }
 
         /** What the cell holds on the day this connection is looking at, and of that what its fog lets through. */
-        private fun snapshot(cell: String) = out.send(snapshotOf(cell, looking, world, houses, onTheMap, structures))
+        private fun snapshot(cell: String) = out.send(snapshotOf(cell, looking, world, onTheMap, structures))
 
         /** Every held cell answered again, for a connection whose way of looking has changed. */
         private fun answerAgain() {

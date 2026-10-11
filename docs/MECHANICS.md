@@ -889,7 +889,9 @@ rebuilt, from the debug panel; a ruin holds nobody and gives nothing. The debug 
 structure's level, and its holder sees as far as the new level sees, and fills and empties its slots - a person in
 one slot at a time, a thing with how many of it - strict about how many and permissive about what. A structure's
 window draws its slots as sockets: its holder sees into every one, another house in sight into the public ones and a
-question in each place of the rest, and nobody out of sight sees into any. What fills a slot changes what the
+question in each place of the rest, and nobody out of sight sees into any. A house is not drawn on the map:
+its structures are, and its seat is the structure where it has its headquarters. A house without a seat is
+drawn nowhere. What fills a slot changes what the
 structure pays its holder, by the slot's rule: a throne left empty, a bishop's piety, a prisoner, a relic. A
 structure is drawn, and its type named, in the culture of the ground it stands on, read off the master's culture
 map: the same castle is a kasbah in the desert and a stockade south of it. A house whose castle changes hands or falls

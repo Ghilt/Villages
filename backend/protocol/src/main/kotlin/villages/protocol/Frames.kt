@@ -21,7 +21,7 @@ import tools.jackson.databind.JsonNode
  * It goes up whenever a frame or a field changes, and `ProtocolShapeSpec` makes sure of that: every frame's shape
  * is recorded in contracts/protocol-v<n>.txt, and what each version changed is in contracts/README.md.
  */
-const val PROTOCOL_VERSION = 46
+const val PROTOCOL_VERSION = 47
 
 data class Point(val lat: Double, val lon: Double)
 
@@ -228,17 +228,16 @@ sealed interface ServerFrame
 data class Welcome(val serverTime: Long, val playerId: String, val world: WorldNow, val keptIn: String? = null) : ServerFrame
 
 /**
- * What a cell holds, sent on subscribing to it, before any deltas. `omitted` is how many more houses the cell had
- * than a snapshot carries, so a screen never claims to show all of what it shows most of, and `omittedCharacters`
- * the same for the characters standing in it. A cell with nobody standing in it carries no `characters` at all, and
- * one with no structure no `structures`; `structuresAsOf` is the structures' read model's count of changes when it was
- * read, which a page holds a copy against (see [StructureView]).
+ * What a cell holds, sent on subscribing to it, before any deltas: the people standing in it and the structures in
+ * it, and no houses, because a house is not drawn on the map - its structures are, its seat among them, and the
+ * player's own house reaches them in `yourHouse`. `omittedCharacters` is how many more people the cell had than a
+ * snapshot carries, so a screen never claims to show all of what it shows most of, and `omittedStructures` the same
+ * for structures. A cell with nobody standing in it carries no `characters` at all, and one with no structure no
+ * `structures`; `structuresAsOf` is the structures' read model's count of changes when it was read, which a page
+ * holds a copy against (see [StructureView]).
  */
 data class Snapshot(
     val cell: String,
-    val houses: List<HouseView>,
-    val asOfVersion: Long,
-    @get:JsonInclude(JsonInclude.Include.NON_DEFAULT) val omitted: Int = 0,
     @get:JsonInclude(JsonInclude.Include.NON_EMPTY) val characters: List<CharacterOnMapView> = emptyList(),
     @get:JsonInclude(JsonInclude.Include.NON_DEFAULT) val omittedCharacters: Int = 0,
     @get:JsonInclude(JsonInclude.Include.NON_EMPTY) val structures: List<StructureView> = emptyList(),

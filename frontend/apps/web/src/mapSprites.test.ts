@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import type { StructureView } from '@villages/protocol';
 import type { StructureCatalogue, StructureTypeSpec } from '@villages/world';
 
-import { housesBesideTheirSeats, toStructureSprite } from './mapSprites';
+import { toStructureSprite } from './mapSprites';
 import { tinctureColour } from './sprites/tinctures';
 
 /** A type as the catalogue would read it, by the heights it stands at, a level at a time. */
@@ -77,6 +77,13 @@ describe('a structure as the map draws it', () => {
   });
 });
 
+describe('one of your holdings with the eye open', () => {
+  it('is drawn however far back the camera goes, and no other structure is', () => {
+    expect(toStructureSprite(structure('castle', 1), null, null, true).always).toBe(true);
+    expect(toStructureSprite(structure('castle', 1), null)).not.toHaveProperty('always');
+  });
+});
+
 describe('a structure in a culture', () => {
   it('is drawn in the culture of the ground it stands on', () => {
     expect(toStructureSprite(structure('castle', 1), null, 'islamic').structure).toEqual({
@@ -91,18 +98,5 @@ describe('a ruin', () => {
 
     expect(drawn.structure).toEqual({ picture: 'a ruin@european', groundHeight: 4.5 });
     expect(drawn).not.toHaveProperty('pennant');
-  });
-});
-
-describe('a house beside its seat', () => {
-  const castle = { ...structure('castle', 1, RAVENSCAR), seatOf: RAVENSCAR };
-
-  it('is not drawn as a house where its seat is drawn, which stands for it there', () => {
-    expect(housesBesideTheirSeats([{ id: 'h' }, { id: 'k' }], [castle])).toEqual([{ id: 'k' }]);
-  });
-
-  it("is drawn as itself while its seat is not in view, and a structure that is nobody's seat changes nothing", () => {
-    expect(housesBesideTheirSeats([{ id: 'h' }], [])).toEqual([{ id: 'h' }]);
-    expect(housesBesideTheirSeats([{ id: 'h' }], [structure('mill', 1, RAVENSCAR)])).toEqual([{ id: 'h' }]);
   });
 });

@@ -27,7 +27,7 @@ private class Held {
     }
 }
 
-private fun snapshot(cell: String, asOf: Long) = Snapshot(cell, emptyList(), asOf, 0, emptyList(), 0)
+private fun snapshot(cell: String, asOf: Long) = Snapshot(cell, structuresAsOf = asOf)
 
 private fun event(n: Int) = EventFrame(
     id = "e$n", eventType = "villages.test.happened.v1", stream = "house:x", streamVersion = n.toLong(),

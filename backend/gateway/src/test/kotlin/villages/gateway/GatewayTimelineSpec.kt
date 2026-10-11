@@ -24,34 +24,32 @@ class GatewayTimelineSpec : StringSpec({
         sent.first().shouldBeInstanceOf<Welcome>().world shouldBe WorldNow(today = today.day, earliest = today.day)
     }
 
-    "looking at a day before a house was founded, its cell is empty; looking at live again, it is back" {
+    "looking at a day before a structure was raised, its cell is empty; looking at live again, it is back" {
         val rig = Rig()
-        val (founder, _) = rig.someoneElse()
-        founder.receive(founding())
+        rig.aStructureIsRaised()
         val (looker, sent) = rig.introduced(fogLifted = true)
-        looker.receive(subscribe(STOCKHOLM_Z8))
-        sent.single().shouldBeInstanceOf<Snapshot>().houses shouldHaveSize 1
+        looker.receive(subscribe(STOCKHOLM_Z10))
+        sent.single().shouldBeInstanceOf<Snapshot>().structures shouldHaveSize 1
         sent.clear()
 
         looker.receive("""{"type":"viewTime","at":${today.day - 1}}""")
-        sent.single().shouldBeInstanceOf<Snapshot>().houses.shouldBeEmpty()
+        sent.single().shouldBeInstanceOf<Snapshot>().structures.shouldBeEmpty()
         sent.clear()
 
         looker.receive("""{"type":"viewTime","at":null}""")
         val back = sent.single().shouldBeInstanceOf<Snapshot>()
-        back.houses shouldHaveSize 1
-        back.houses.single().since shouldBe today.day
+        back.structures shouldHaveSize 1
+        back.structures.single().since shouldBe today.day
     }
 
-    "a connection looking at the past is not told of a founding on a later day" {
+    "a connection looking at the past is not told of a structure raised on a later day" {
         val rig = Rig()
-        val (looker, sent) = rig.introduced()
-        looker.receive(subscribe(STOCKHOLM_Z8))
+        val (looker, sent) = rig.introduced(fogLifted = true)
+        looker.receive(subscribe(STOCKHOLM_Z10))
         looker.receive("""{"type":"viewTime","at":${today.day - 100}}""")
         sent.clear()
-        val (founder, _) = rig.someoneElse()
 
-        founder.receive(founding())
+        rig.aStructureIsRaised()
         rig.later.tick()
 
         sent.shouldBeEmpty()

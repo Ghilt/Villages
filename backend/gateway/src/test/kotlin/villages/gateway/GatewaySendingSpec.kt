@@ -4,11 +4,12 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import villages.protocol.Batch
 import villages.protocol.CommandAccepted
-import villages.protocol.HouseAppeared
 import villages.protocol.PROTOCOL_VERSION
 import villages.protocol.ServerFrame
 import villages.protocol.Snapshot
+import villages.protocol.StructureArrived
 import villages.protocol.YourChoice
+import villages.protocol.YourHoldings
 import villages.protocol.YourHouse
 import java.util.UUID
 import java.util.concurrent.CopyOnWriteArrayList
@@ -60,23 +61,27 @@ class GatewaySendingSpec : StringSpec({
             stuckHeard.waitFor("the slow window's choice") { frames -> frames.any { it is YourChoice } }
             stuck.set(true)
 
-            // The slow window founds a house there. Its own house is sent to it from the read model's watcher, which
-            // here is the thread the founding is decided on: sent on that thread to the stuck socket, the founding
-            // would wait with it, and the world with the founding.
-            val founding = thread(isDaemon = true) { slow.receive(founding()) }
-            founding.join(TimeUnit.SECONDS.toMillis(5))
-            founding.isAlive shouldBe false
+            // The slow window founds a house there and raises a mill of its own. Its own house and holdings are sent to
+            // it from the read models' watchers, which here are the thread the command is decided on: sent on that
+            // thread to the stuck socket, the command would wait with it, and the world with the command.
+            val acting = thread(isDaemon = true) {
+                slow.receive(founding())
+                slow.receive(raising("mill", yours = true, lat = 59.33, lon = 18.07))
+            }
+            acting.join(TimeUnit.SECONDS.toMillis(5))
+            acting.isAlive shouldBe false
 
-            // And the house appears to everybody else holding its cell, while the slow window still waits.
+            // And the mill arrives for everybody else holding its cell, while the slow window still waits.
             rig.later.tick()
-            heard.waitFor("the house appearing to the fast window") { frames ->
-                frames.filterIsInstance<Batch>().any { batch -> batch.deltas.any { it is HouseAppeared } }
+            heard.waitFor("the mill arriving at the fast window") { frames ->
+                frames.filterIsInstance<Batch>().any { batch -> batch.deltas.any { it is StructureArrived } }
             }
             stuckHeard.none { it is CommandAccepted } shouldBe true
 
             letGo.countDown()
-            stuckHeard.waitFor("the slow window caught up: its house, and the founding answered") { frames ->
-                frames.any { it is CommandAccepted } && frames.filterIsInstance<YourHouse>().last().yours != null
+            stuckHeard.waitFor("the slow window caught up: its house, its holdings, and both commands answered") { frames ->
+                frames.count { it is CommandAccepted } == 2 && frames.filterIsInstance<YourHouse>().last().yours != null &&
+                    frames.filterIsInstance<YourHoldings>().last().holdings.isNotEmpty()
             }
         } finally {
             letGo.countDown()

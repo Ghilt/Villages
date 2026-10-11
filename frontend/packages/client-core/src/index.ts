@@ -24,8 +24,6 @@ export {
   charactersInView,
   forgetCells,
   holdCells,
-  housesInView,
-  omittedInView,
   reduceHouses,
   structuresInView,
 } from './houses';

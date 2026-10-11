@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
-import { charactersInView, housesInView, structuresInView } from '@villages/client-core';
+import { charactersInView, structuresInView } from '@villages/client-core';
 import type { Readable } from '@villages/client-core';
 
 import { AreaOverlay } from './areas/AreaOverlay';
@@ -42,13 +42,7 @@ import { watchInfoMap } from './map/infoMap';
 import { SpriteOverlay } from './sprites/SpriteOverlay';
 import { placeWater } from './water/WaterLayer';
 import { setFlowView, waterStore } from './water/waterMode';
-import {
-  candidatesOf,
-  housesBesideTheirSeats,
-  toCharacterSprite,
-  toSprite,
-  toStructureSprite,
-} from './mapSprites';
+import { candidatesOf, toCharacterSprite, toStructureSprite } from './mapSprites';
 import { useStructureCatalogue } from './net/structureCatalogue';
 import { useStore } from './store/useStore';
 
@@ -104,6 +98,7 @@ export function App({ master, devTools }: AppProps) {
   const camera = useStore(cameraStore);
   const houses = useStore(sessionStore, (state) => state.houses);
   const yourHouse = useStore(sessionStore, (state) => state.yourHouse);
+  const holdings = useStore(sessionStore, (state) => state.yourHoldings);
   const yourChoice = useStore(sessionStore, (state) => state.yourChoice);
   const yourDialogues = useStore(sessionStore, (state) => state.yourDialogues);
   const eye = useStore(eyeStore, (state) => state.open);
@@ -114,7 +109,6 @@ export function App({ master, devTools }: AppProps) {
   const window = useWindow();
   const wants = panelWants(shut, log);
   const box = useMemo(() => stageBox(window, mode, wants), [window, mode, wants]);
-  const inView = useMemo(() => housesInView(houses), [houses]);
   const standing = useMemo(() => charactersInView(houses), [houses]);
   const raised = useMemo(() => structuresInView(houses), [houses]);
   const catalogue = useStructureCatalogue();
@@ -126,24 +120,30 @@ export function App({ master, devTools }: AppProps) {
 
   // What a choice roll reads of the camera, where it is centred and how close. See `looking.ts`.
   useEffect(() => lookThrough(map), [map]);
-  // With the eye open your own house is drawn whether or not a held cell carries it. It can be missing
-  // from one and still be known, because the gateway sends it to the session rather than to a cell.
+  // With the eye open your own holdings are drawn whether or not a held cell carries them, and however far back the
+  // camera goes: the gateway sends them to the session rather than to a cell. No house is drawn: its structures are.
   const drawn = useMemo(
     () =>
-      eye && yours !== null && !inView.some((house) => house.id === yours.id) ? [...inView, yours] : inView,
-    [inView, eye, yours],
+      eye && holdings !== null
+        ? [...raised, ...holdings.filter((one) => !raised.some((r) => r.id === one.id))]
+        : raised,
+    [raised, eye, holdings],
   );
-  // Structures first, so that a house or a person standing in front of one is drawn over it.
+  // Structures first, so that a person standing in front of one is drawn over it.
   const sprites = useMemo(
     () => [
-      ...raised.map((structure) =>
-        toStructureSprite(structure, catalogue, cultureOfPlace(cultures, structure.place)),
+      ...drawn.map((structure) =>
+        toStructureSprite(
+          structure,
+          catalogue,
+          cultureOfPlace(cultures, structure.place),
+          eye && structure.holder !== undefined && structure.holder.id === yours?.id,
+        ),
       ),
-      ...housesBesideTheirSeats(drawn, raised).map((house) => toSprite(house, eye && house.id === yours?.id)),
       ...standing.map(toCharacterSprite),
       ...candidatesOf(yourChoice),
     ],
-    [raised, catalogue, cultures, drawn, standing, eye, yours, yourChoice],
+    [drawn, catalogue, cultures, standing, eye, yours, yourChoice],
   );
 
   // The one connection to the gateway, opened as the app mounts.
@@ -248,20 +248,20 @@ export function App({ master, devTools }: AppProps) {
   const up = useStore(sessionStore, standingIn);
   // What is open, the newest first: the windows on the stage, and what the map marks.
   const open = useStore(subjectsStore, (subjects) => subjects.open);
-  // What the map marks: the newest thing opened, and a house drawn as its seat marked there.
+  // What the map marks: the newest thing opened, and for a house its seat, which is where a house is on the map.
   const marked = useMemo(() => {
     const top = open[0];
-    const seat = top?.kind === 'house' ? raised.find((one) => one.seatOf?.id === top.id) : undefined;
+    const seat = top?.kind === 'house' ? drawn.find((one) => one.seatOf?.id === top.id) : undefined;
     return seat === undefined ? top : { kind: 'structure' as const, id: seat.id };
-  }, [open, raised]);
+  }, [open, drawn]);
   // The ground the marked structure reaches, drawn while it is marked, for a type the catalogue gives a zone.
   const zone = useMemo(() => {
-    const structure = marked?.kind === 'structure' ? raised.find((one) => one.id === marked.id) : undefined;
+    const structure = marked?.kind === 'structure' ? drawn.find((one) => one.id === marked.id) : undefined;
     const reach = catalogue?.types.find((one) => one.type === structure?.structureType)?.zone?.reach;
     return structure === undefined || reach === undefined
       ? null
       : { id: structure.id, at: structure.place, reach };
-  }, [marked, raised, catalogue]);
+  }, [marked, drawn, catalogue]);
 
   // The map's own pane, App's because App holds the map; every other pane is drawn by its feature, and which
   // stand and in what order is `panes.tsx`'s.

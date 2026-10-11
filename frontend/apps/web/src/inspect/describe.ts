@@ -135,7 +135,7 @@ export function describeHouse(house: HouseView, yours: boolean, areas: readonly 
       // Every fenced area the seat falls inside. The only subject-to-subject link there is until the world
       // grows something else that overlaps: a house is in the ground somebody has drawn a line around.
       ...areas
-        .filter((area) => seatIsInside(area, house))
+        .filter((area) => placeIsInside(area, house.seat))
         .map((area): Link => ({
           what: `the ground it stands in, ${area.diamonds.toLocaleString()} diamonds`,
           to: 'subject',
@@ -265,8 +265,13 @@ function spoken(type: string): string {
 }
 
 /** An area: what it encloses, and who is standing in it. */
-export function describeArea(area: Area, houses: readonly HouseView[], legend: Legend | null): Description {
-  const inside = houses.filter((house) => seatIsInside(area, house));
+export function describeArea(
+  area: Area,
+  structures: readonly StructureView[],
+  legend: Legend | null,
+): Description {
+  // A house is where its seat stands, so the houses in an area are the seats standing in it.
+  const inside = structures.filter((one) => one.seatOf !== undefined && placeIsInside(area, one.place));
 
   const facts: Fact[] = [
     { what: 'Encloses', said: `${area.diamonds.toLocaleString()} diamonds` },
@@ -339,6 +344,6 @@ export function describeWater(seen: WaterSeen): Description {
  * `insideFenceAt`, the same question the area overlay asks of a click, so what the window says is in an
  * area is what the map says is. The fence carries the grid it was drawn on, so nothing has to be handed one.
  */
-function seatIsInside(area: Area, house: HouseView): boolean {
-  return insideFenceAt(area.fence, { lng: house.seat.lon, lat: house.seat.lat });
+function placeIsInside(area: Area, place: Point): boolean {
+  return insideFenceAt(area.fence, { lng: place.lon, lat: place.lat });
 }

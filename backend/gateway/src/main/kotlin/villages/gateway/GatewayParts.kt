@@ -82,7 +82,7 @@ internal fun partsOf(
     world: WorldClock,
 ): List<Part> = with(mechanics) {
     listOf(
-        HousesPart(core, houses, theirHouses, world),
+        HousesPart(core, houses, theirHouses),
         KeyFiguresPart(core, figures, onTheMap, world),
         HoldingsPart(core, structuresOnTheMap, houseById, SlotsSeen(structureCatalogue, characterById)),
         StructuresPart(core, structuresOnTheMap, world),

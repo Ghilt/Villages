@@ -265,7 +265,7 @@ program running on it at this tree's address.
 | 12 | The culture map: `world/cultures.json` (seventy-two anchors, Adam's to correct), `world:culture`, the Culture renderer and its click, the quick-start, the architecture page | the renderer | |
 | 13a | Culture looks: the placeholders drawn in code in each culture's colours under its crown, a ruin too, chosen by the culture map under the structure; the window and the tab name the type in that culture's word | the map, on two cultures | |
 | 13b | Culture pictures: the shapes moved into the world package; `world/structures/`, a placeholder picture per type and culture and a ruin a culture drawn from them; `world:structures`, the atlas; the dev server cutting on start and on save; the map drawing from the atlas | a picture saved over a placeholder, on the map | |
-| 14 | Houses leave the cell snapshots: `Snapshot.houses`, the houses' fan-out, `Fog.sent(HouseRow)` | nothing changes on screen | bump |
+| 14 | Houses leave the cell snapshots and the deltas, and the page draws no house: a house's structures stand for it, its seat among them; a house without a seat is drawn nowhere (Adam's word of 2026-10-11). The eye keeps the house's holdings drawn, an area counts the seats in it. `Fog.sent(HouseRow)` stays, for a window on a house | a seatless house gone from the map | bump |
 
 Sight (6) and the window (5) land before the refit (7), so a new house is never blind and a click on its
 castle always has a window to open. `Frames.kt`, `Gateway.kt`, `cutArt.ts` and `FogLayer.ts` are at their

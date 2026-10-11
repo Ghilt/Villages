@@ -137,11 +137,11 @@ describe("the page's conversation with the gateway", () => {
     const before = page.lines();
 
     page.socket.says(empty(Z8[1]!));
-    page.socket.says(fixture('snapshot'));
+    page.socket.says({ ...fixture('snapshot-structures'), cell: Z8[0] });
     expect(page.said(before)).toEqual([]);
     vi.advanceTimersByTime(300);
 
-    expect(page.said(before)).toEqual(['cells: 2 cells at z8: 2 houses']);
+    expect(page.said(before)).toEqual(['cells: 2 cells at z8: 1 structure, 1 more not sent']);
     expect(page.gateway.sessionStore.get().houses).not.toBe(undefined);
   });
 

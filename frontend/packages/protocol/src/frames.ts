@@ -255,12 +255,10 @@ export const clientFrameSchema = z.discriminatedUnion('type', [
 ]);
 
 /**
- * A change in a held cell. A house never moves, so it only ever appears or changes; a character moves, so a
- * character can also be **gone** from every cell a connection holds, and the client drops them.
+ * A change in a held cell: a person or a structure, never a house, which is not drawn on the map. A character moves,
+ * so a character can also be **gone** from every cell a connection holds, and the client drops them.
  */
 export const deltaSchema = z.discriminatedUnion('type', [
-  z.object({ type: z.literal('houseAppeared'), house: houseViewSchema }),
-  z.object({ type: z.literal('houseChanged'), house: houseViewSchema }),
   z.object({ type: z.literal('characterArrived'), character: characterOnMapViewSchema }),
   z.object({ type: z.literal('characterChanged'), character: characterOnMapViewSchema }),
   z.object({ type: z.literal('characterGone'), id: z.string(), version: z.number().int() }),
@@ -315,10 +313,6 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
   z.object({
     type: z.literal('snapshot'),
     cell: cellSchema,
-    houses: z.array(houseViewSchema),
-    asOfVersion: z.number().int(),
-    /** How many more the cell held than the snapshot carries. Absent means none. */
-    omitted: z.number().int().nonnegative().optional(),
     /** The characters standing in the cell. Absent means nobody. */
     characters: z.array(characterOnMapViewSchema).optional(),
     /** How many more characters stood there than the snapshot carries. Absent means none. */

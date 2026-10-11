@@ -1,28 +1,13 @@
-import type { CharacterOnMapView, ChoiceView, HouseView, StructureView } from '@villages/protocol';
+import type { CharacterOnMapView, ChoiceView, StructureView } from '@villages/protocol';
 import { RUIN_PICTURE, pictureKey } from '@villages/world';
 import type { Culture, StructureCatalogue } from '@villages/world';
 
 import type { MapSprite } from './sprites/SpriteRenderer';
 import { tinctureColour } from './sprites/tinctures';
 
-// What the session holds, as the marks the sprite renderer draws: houses, the people standing on the map, the
-// structures standing on it, and the seats a choice is offering. The renderer knows nothing of the game, so this is where the game is turned into marks.
-
-/**
- * A house as the renderer draws it: a mark at its seat, in its field's tincture.
- *
- * `always` is the eye: a house drawn however far back the camera goes. Only ever the player's own, and
- * only while the eye is open. See decision record 0038.
- */
-export function toSprite(house: HouseView, always: boolean): MapSprite {
-  return {
-    id: house.id,
-    at: { lng: house.seat.lon, lat: house.seat.lat },
-    tint: tinctureColour(house.banner.field),
-    kind: 'house',
-    always,
-  };
-}
+// What the session holds, as the marks the sprite renderer draws: the people standing on the map, the structures
+// standing on it, and the seats a choice is offering. No house: a house is not drawn, its structures are, its seat
+// among them. The renderer knows nothing of the game, so this is where the game is turned into marks.
 
 /** The soft ink of the interface, for somebody standing on the map whom no house holds. */
 const NOBODYS = 0x8a7a64;
@@ -46,13 +31,15 @@ const UNTINTED = 0xffffff;
 
 /**
  * A structure as the renderer draws it: its type's picture, as tall on the ground as the catalogue says for its
- * level, and its holder's pennant over it, or none for one nobody holds. Its own id space, so a structure and a house
+ * level, and its holder's pennant over it, or none for one nobody holds. Its own id space, so a structure and a person
  * can never be one mark. Without the catalogue, before it is read, the renderer stands it at a height of its own.
+ * `always` is the eye: one of the player's own holdings drawn however far back the camera goes (decision 0038).
  */
 export function toStructureSprite(
   structure: StructureView,
   catalogue: StructureCatalogue | null,
   culture: Culture | null = null,
+  always = false,
 ): MapSprite {
   const heights = catalogue?.types.find((one) => one.type === structure.structureType)?.groundHeight ?? [];
   const groundHeight = heights[Math.min(Math.max(structure.level, 1), heights.length) - 1];
@@ -61,6 +48,7 @@ export function toStructureSprite(
     at: { lng: structure.place.lon, lat: structure.place.lat },
     tint: UNTINTED,
     kind: 'structure',
+    ...(always ? { always } : {}),
     // A ruin is drawn as a ruin, as tall as what it was; either in the culture of the ground it stands on.
     structure: {
       picture: pictureKey(structure.ruin === true ? RUIN_PICTURE : structure.structureType, culture),
@@ -68,19 +56,6 @@ export function toStructureSprite(
     },
     ...(structure.holder === undefined ? {} : { pennant: tinctureColour(structure.holder.banner.field) }),
   };
-}
-
-/**
- * The houses to draw as houses: every one but a house whose seat is among the structures drawn, which stands for it
- * there, so a seat is not drawn twice. A house whose seat is not in view - too far out to be sent, or under the fog -
- * is still drawn as itself, which is also what the eye keeps in sight. See decision record 0092.
- */
-export function housesBesideTheirSeats<H extends { id: string }>(
-  houses: readonly H[],
-  structures: readonly StructureView[],
-): H[] {
-  const seated = new Set(structures.flatMap((one) => (one.seatOf === undefined ? [] : [one.seatOf.id])));
-  return houses.filter((house) => !seated.has(house.id));
 }
 
 /** The gold of the interface, so a place being offered reads as the world asking rather than as a house. */

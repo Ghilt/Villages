@@ -8,85 +8,98 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import villages.protocol.Batch
 import villages.protocol.ErrorFrame
-import villages.protocol.HouseAppeared
 import villages.protocol.Resync
 import villages.protocol.ServerFrame
 import villages.protocol.Snapshot
+import villages.protocol.StructureArrived
 import villages.protocol.TakenOver
+import villages.protocol.YourHouse
 
 /** The gateway: holding cells: snapshots, deltas, the eye, and a connection that falls behind or goes away. The rig is GatewayRig.kt. */
 class GatewayCellsSpec : StringSpec({
 
     "subscribing to a cell answers with a snapshot of what is there, at every zoom it is worth drawing at" {
         val rig = Rig()
-        val (founder, _) = rig.someoneElse()
-        founder.receive(founding())
+        rig.aStructureIsRaised()
         val (looker, sent) = rig.introduced(fogLifted = true)
 
         looker.receive(subscribe(STOCKHOLM_Z10, STOCKHOLM_Z8, STOCKHOLM_Z4))
 
         val snapshots = sent.map { it.shouldBeInstanceOf<Snapshot>() }
         snapshots.map { it.cell } shouldContainExactly listOf(STOCKHOLM_Z10, STOCKHOLM_Z8, STOCKHOLM_Z4)
-        // A founding is worth drawing from zoom eight in; the zoom-four cell is honestly empty.
-        snapshots[0].houses.map { it.name } shouldBe listOf("Ravenscar")
-        snapshots[0].houses.single().cell shouldBe STOCKHOLM_Z10
-        snapshots[1].houses shouldHaveSize 1
-        snapshots[2].houses.shouldBeEmpty()
-        snapshots.all { it.omitted == 0 } shouldBe true
+        // A mill is worth drawing from zoom nine in; the coarser cells are honestly empty.
+        snapshots[0].structures.map { it.name } shouldBe listOf("a new mill")
+        snapshots[0].structures.single().cell shouldBe STOCKHOLM_Z10
+        snapshots[1].structures.shouldBeEmpty()
+        snapshots[2].structures.shouldBeEmpty()
+        snapshots.all { it.omittedStructures == 0 } shouldBe true
     }
 
-    "a house founded after subscribing arrives as a delta, once the batch closes" {
-        val rig = Rig()
-        val (looker, sent) = rig.introduced(fogLifted = true)
-        looker.receive(subscribe(STOCKHOLM_Z8))
-        sent.clear()
-        val (founder, _) = rig.someoneElse()
-
-        founder.receive(founding())
-        sent.shouldBeEmpty()
-        rig.later.tick()
-
-        val batch = sent.single().shouldBeInstanceOf<Batch>()
-        val appeared = batch.deltas.single().shouldBeInstanceOf<HouseAppeared>()
-        appeared.house.name shouldBe "Ravenscar"
-        // Version two, behind the choice this player was given, and it still appears rather than changes:
-        // whether a house is new is the read model's answer and not the stream version's.
-        appeared.house.version shouldBe 2
-    }
-
-    "a house that reaches a connection through two of its cells is sent once" {
+    // A house is not drawn on the map: its structures are, its seat among them. The rig has no seats listener, so a
+    // founding here raises no castle, and nothing of it is in the cell at all.
+    "a house founded or changed in a held cell is not sent to whoever holds it, only to its own player" {
         val rig = Rig()
         val (looker, sent) = rig.introduced(fogLifted = true)
         looker.receive(subscribe(STOCKHOLM_Z10, STOCKHOLM_Z8))
         sent.clear()
-        val (founder, _) = rig.someoneElse()
+        val (founder, told) = rig.someoneElse()
 
         founder.receive(founding())
+        founder.receive(granting())
+        rig.later.tick()
+
+        sent.shouldBeEmpty()
+        told.filterIsInstance<YourHouse>().last().yours?.house?.name shouldBe "Ravenscar"
+        looker.receive(unsubscribe(STOCKHOLM_Z10))
+        looker.receive(subscribe(STOCKHOLM_Z10))
+        sent.single() shouldBe Snapshot(STOCKHOLM_Z10, structuresAsOf = rig.structuresOnTheMap.asOf())
+    }
+
+    "a structure raised after subscribing arrives as a delta, once the batch closes" {
+        val rig = Rig()
+        val (looker, sent) = rig.introduced(fogLifted = true)
+        looker.receive(subscribe(STOCKHOLM_Z10))
+        sent.clear()
+
+        rig.aStructureIsRaised()
+        sent.shouldBeEmpty()
+        rig.later.tick()
+
+        val batch = sent.single().shouldBeInstanceOf<Batch>()
+        batch.deltas.single().shouldBeInstanceOf<StructureArrived>().structure.name shouldBe "a new mill"
+    }
+
+    "a structure that reaches a connection through two of its cells is sent once" {
+        val rig = Rig()
+        val (looker, sent) = rig.introduced(fogLifted = true)
+        looker.receive(subscribe(STOCKHOLM_Z10, STOCKHOLM_Z10.take(9)))
+        sent.clear()
+
+        rig.aStructureIsRaised()
         rig.later.tick()
 
         sent.single().shouldBeInstanceOf<Batch>().deltas shouldHaveSize 1
     }
 
-    "a house too ordinary for a coarse cell does not reach a connection holding only that cell" {
+    "a structure too ordinary for a coarse cell does not reach a connection holding only that cell" {
         val rig = Rig()
         val (looker, sent) = rig.introduced(fogLifted = true)
-        looker.receive(subscribe(STOCKHOLM_Z4))
+        looker.receive(subscribe(STOCKHOLM_Z8))
         sent.clear()
-        val (founder, _) = rig.someoneElse()
 
-        founder.receive(founding())
+        rig.aStructureIsRaised()
         rig.later.tick()
 
         sent.shouldBeEmpty()
     }
 
-    "with the eye open a house too ordinary for a coarse cell is in its snapshot after all" {
+    "with the eye open a structure too ordinary for a coarse cell is in its snapshot after all" {
         val rig = Rig()
-        rig.aHouseIsFounded("Ravenscar")
+        rig.aStructureIsRaised()
         val (looker, sent) = rig.introduced(fogLifted = true)
 
         looker.receive(subscribe(STOCKHOLM_Z4))
-        sent.filterIsInstance<Snapshot>().single().houses.shouldBeEmpty()
+        sent.filterIsInstance<Snapshot>().single().structures.shouldBeEmpty()
         sent.clear()
 
         looker.receive(seeAll(true))
@@ -94,27 +107,26 @@ class GatewayCellsSpec : StringSpec({
         // Every held cell is answered again, so the map redraws at once rather than at the next pan.
         val snapshot = sent.filterIsInstance<Snapshot>().single()
         snapshot.cell shouldBe STOCKHOLM_Z4
-        snapshot.houses.single().name shouldBe "Ravenscar"
+        snapshot.structures.single().name shouldBe "a new mill"
     }
 
-    "with the eye open a founding reaches a connection holding only a coarse cell" {
+    "with the eye open a structure raised reaches a connection holding only a coarse cell" {
         val rig = Rig()
         val (looker, sent) = rig.introduced(fogLifted = true)
         looker.receive(subscribe(STOCKHOLM_Z4))
         looker.receive(seeAll(true))
         sent.clear()
-        val (founder, _) = rig.someoneElse()
 
-        founder.receive(founding())
+        rig.aStructureIsRaised()
         rig.later.tick()
 
         val batch = sent.single().shouldBeInstanceOf<Batch>()
-        batch.deltas.single().shouldBeInstanceOf<HouseAppeared>().house.name shouldBe "Ravenscar"
+        batch.deltas.single().shouldBeInstanceOf<StructureArrived>().structure.name shouldBe "a new mill"
     }
 
     "closing the eye answers the held cells again, and they are empty once more" {
         val rig = Rig()
-        rig.aHouseIsFounded("Ravenscar")
+        rig.aStructureIsRaised()
         val (looker, sent) = rig.introduced(fogLifted = true)
         looker.receive(subscribe(STOCKHOLM_Z4))
         looker.receive(seeAll(true))
@@ -122,7 +134,7 @@ class GatewayCellsSpec : StringSpec({
 
         looker.receive(seeAll(false))
 
-        sent.filterIsInstance<Snapshot>().single().houses.shouldBeEmpty()
+        sent.filterIsInstance<Snapshot>().single().structures.shouldBeEmpty()
     }
 
     "opening the eye twice says nothing the second time" {
@@ -137,15 +149,13 @@ class GatewayCellsSpec : StringSpec({
         sent.shouldBeEmpty()
     }
 
-    "several foundings in a quarter second are one batch" {
+    "several structures raised in a quarter second are one batch" {
         val rig = Rig()
         val (looker, sent) = rig.introduced(fogLifted = true)
-        looker.receive(subscribe(STOCKHOLM_Z8))
+        looker.receive(subscribe(STOCKHOLM_Z10))
         sent.clear()
 
-        rig.aHouseIsFounded("One")
-        rig.aHouseIsFounded("Two")
-        rig.aHouseIsFounded("Three")
+        repeat(3) { rig.aStructureIsRaised() }
         rig.later.pending shouldBe 1
         rig.later.tick()
 
@@ -155,12 +165,11 @@ class GatewayCellsSpec : StringSpec({
     "a connection that unsubscribed hears nothing more about the cell" {
         val rig = Rig()
         val (looker, sent) = rig.introduced(fogLifted = true)
-        looker.receive(subscribe(STOCKHOLM_Z8))
-        looker.receive(unsubscribe(STOCKHOLM_Z8))
+        looker.receive(subscribe(STOCKHOLM_Z10))
+        looker.receive(unsubscribe(STOCKHOLM_Z10))
         sent.clear()
-        val (founder, _) = rig.someoneElse()
 
-        founder.receive(founding())
+        rig.aStructureIsRaised()
         rig.later.tick()
 
         sent.shouldBeEmpty()
@@ -170,32 +179,32 @@ class GatewayCellsSpec : StringSpec({
     "a connection that went away is forgotten by every cell it held" {
         val rig = Rig()
         val (looker, sent) = rig.introduced(fogLifted = true)
-        looker.receive(subscribe(STOCKHOLM_Z8))
+        looker.receive(subscribe(STOCKHOLM_Z10))
         looker.disconnected()
         sent.clear()
-        val (founder, _) = rig.someoneElse()
 
-        founder.receive(founding())
+        rig.aStructureIsRaised()
         rig.later.tick()
 
         sent.shouldBeEmpty()
     }
 
-    // The founder's own house is sent to them before anyone holding its cell is told, so a throw there used
-    // to leave the fan-out with nobody told. Seeding closes each connection as its command is accepted.
+    // The holder's own holdings are sent to them as the structure is raised, before anyone holding its cell is told,
+    // so a throw there must not leave the fan-out with nobody told. Seeding closes each connection as its command is
+    // accepted.
 
-    "a founder whose socket is closing does not cost whoever holds the cell the house appearing" {
+    "a raiser whose socket is closing does not cost whoever holds the cell the structure arriving" {
         val rig = Rig()
         val (looker, sent) = rig.introduced(fogLifted = true)
-        looker.receive(subscribe(STOCKHOLM_Z8))
+        looker.receive(subscribe(STOCKHOLM_Z10))
         sent.clear()
-        val founder = rig.someoneLeaving()
+        val raiser = rig.someoneLeaving(founding())
 
-        founder.receive(founding())
+        raiser.receive(raising("mill", yours = true, lat = 59.33, lon = 18.07))
         rig.later.tick()
 
         val batch = sent.single().shouldBeInstanceOf<Batch>()
-        batch.deltas.single().shouldBeInstanceOf<HouseAppeared>().house.name shouldBe "Ravenscar"
+        batch.deltas.single().shouldBeInstanceOf<StructureArrived>().structure.holder?.name shouldBe "Ravenscar"
     }
 
     "more cells than a connection may hold is refused, and none of them taken" {
@@ -221,18 +230,20 @@ class GatewayCellsSpec : StringSpec({
     "a connection that falls too far behind is told to ask for its cells again, and the backlog is dropped" {
         val rig = Rig()
         val (looker, sent) = rig.introduced(fogLifted = true)
-        looker.receive(subscribe(STOCKHOLM_Z8))
+        looker.receive(subscribe(STOCKHOLM_Z10))
         sent.clear()
 
-        repeat(MOST_WAITING + 1) { index -> rig.aHouseIsFounded("H$index") }
+        repeat(MOST_WAITING + 1) { rig.aStructureIsRaised() }
 
-        sent.single() shouldBe Resync(listOf(STOCKHOLM_Z8))
+        sent.single() shouldBe Resync(listOf(STOCKHOLM_Z10))
         rig.later.tick()
         // Nothing more: the backlog went with the resync, and so did the cell, so asking again gets a snapshot.
         sent shouldHaveSize 1
         looker.cells().shouldBeEmpty()
-        looker.receive(subscribe(STOCKHOLM_Z8))
-        sent.last().shouldBeInstanceOf<Snapshot>().houses shouldHaveSize MOST_IN_A_CELL
+        looker.receive(subscribe(STOCKHOLM_Z10))
+        val again = sent.last().shouldBeInstanceOf<Snapshot>()
+        again.structures shouldHaveSize MOST_IN_A_CELL
+        again.omittedStructures shouldBe MOST_WAITING + 1 - MOST_IN_A_CELL
     }
 
     "a connection taken over while it is answered for its cells holds none of them after, and hears of nothing" {
@@ -253,7 +264,7 @@ class GatewayCellsSpec : StringSpec({
         sent.filterIsInstance<TakenOver>() shouldHaveSize 1
         sent.clear()
 
-        rig.aHouseIsFounded()
+        rig.aStructureIsRaised()
         rig.later.tick()
 
         sent.shouldBeEmpty()

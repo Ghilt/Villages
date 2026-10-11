@@ -1,13 +1,10 @@
 package villages.gateway
 
-import villages.application.CellContents
 import villages.application.CharacterRow
 import villages.application.CharacterSpan
 import villages.application.HouseRow
-import villages.application.HousesByCell
 import villages.application.StructureRow
 import villages.application.StructuresByCell
-import villages.domain.HouseId
 import villages.domain.WorldTime
 import villages.protocol.coarsestZoom
 import villages.protocol.HouseView
@@ -52,15 +49,6 @@ internal data class Looking(
      */
     fun sent(row: HouseRow, day: WorldTime, view: HouseView = row.toView()): HouseView? =
         if (!fogged) view else fog.sent(row, day, view)
-
-    /** What a cell holds of houses on [day], and of that what this connection is sent: each worked out once. */
-    fun housesIn(houses: HousesByCell, cell: String, day: WorldTime, most: Int): Pair<CellContents, List<HouseView>> {
-        val sent = HashMap<HouseId, HouseView>()
-        val contents = houses.inCell(cell, day, most, everything) { row ->
-            sent(row, day)?.also { sent[row.id] = it } != null
-        }
-        return contents to contents.houses.map { sent.getValue(it.id) }
-    }
 
     /**
      * A structure as this connection is sent it on [day]: the face of that day where it sees, or where the fog is

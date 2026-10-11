@@ -125,3 +125,6 @@ recorded over. See decision record 0037. What each one changed:
   every slot, another house the public ones. With slots, `stamp` is the later of the face's and the slots'.
 - **46** - what fills a slot counts: `StructureView` carries `yields`, what it pays its holder a world month by
   resource, in the holder's own view alone; and the item a `fillSlot` puts may carry `yields` of its own.
+- **47** - houses leave the map: a `snapshot` carries no `houses`, `asOfVersion` or `omitted`, and a batch no
+  `houseAppeared` or `houseChanged`. A house is not drawn; its structures are, its seat among them, and a player's
+  own house still arrives in `yourHouse`.

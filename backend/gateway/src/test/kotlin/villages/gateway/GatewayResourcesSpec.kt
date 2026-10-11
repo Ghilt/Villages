@@ -4,11 +4,9 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.string.shouldStartWith
 import io.kotest.matchers.collections.shouldContain
-import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import villages.domain.FOUNDING_WEALTH
-import villages.protocol.Batch
 import villages.protocol.CommandAccepted
 import villages.protocol.CommandRejected
 import villages.protocol.YourHouse
@@ -24,7 +22,7 @@ class GatewayResourcesSpec : StringSpec({
         theirs.clear()
 
         founder.receive(founding())
-        // The neighbour's deltas are coalesced, so nothing reaches them until the flush comes due.
+        // A neighbour's deltas are coalesced, so whatever would reach them waits for the flush.
         rig.later.tick()
 
         // The owner is told all five, under their wire names, which are the code's and not the player's.
@@ -35,11 +33,10 @@ class GatewayResourcesSpec : StringSpec({
         yours.resources.getValue("wealth").pledged shouldBe 0
         yours.pledges.shouldBeEmpty()
 
-        // The neighbour holding the cell sees the house arrive and is told nothing of what it has. A
-        // `yourHouse` is only ever about your own, and the public view has nowhere to carry a resource,
-        // so the privacy is the shape rather than a rule anybody has to remember. See decision 0028.
-        theirs.filterIsInstance<YourHouse>().shouldBeEmpty()
-        theirs.filterIsInstance<Batch>().flatMap { it.deltas }.shouldNotBeEmpty()
+        // The neighbour holding the cell is told nothing of it. A `yourHouse` is only ever about your own, and a
+        // house is not drawn on the map, so the privacy is the shape rather than a rule anybody has to remember.
+        // See decision 0028.
+        theirs.shouldBeEmpty()
     }
 
     "a granted resource comes back on the owner's own house, and a spend takes it off again" {

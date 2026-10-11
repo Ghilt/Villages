@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { charactersInView, housesInView, structuresInView } from '@villages/client-core';
+import { charactersInView, structuresInView } from '@villages/client-core';
 import { describeDay, shortDay } from '@villages/protocol';
 import type { StructureView } from '@villages/protocol';
 import type { TerrainClass } from '@villages/world';
@@ -106,7 +106,7 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
     if (subject.kind === 'area') {
       return area === null
         ? null
-        : { said: describeArea(area, housesInView(houses), legend), hidden: undefined };
+        : { said: describeArea(area, structuresInView(houses), legend), hidden: undefined };
     }
 
     // Water is what the server said of it when it was clicked, kept for this page's life.
@@ -115,9 +115,8 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
       return seen === undefined ? null : { said: describeWater(seen), hidden: undefined };
     }
 
-    const house =
-      housesInView(houses).find((one) => one.id === subject.id) ??
-      (yourHouse?.house.id === subject.id ? yourHouse.house : undefined);
+    // A house is not on the map, so only the player's own is known without asking; any other is asked after.
+    const house = yourHouse?.house.id === subject.id ? yourHouse.house : undefined;
     return house === undefined
       ? null
       : {

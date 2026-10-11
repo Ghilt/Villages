@@ -1,32 +1,24 @@
 import { isInside } from '@villages/protocol';
-import type { CharacterOnMapView, HouseView, ServerFrame, StructureView } from '@villages/protocol';
+import type { CharacterOnMapView, ServerFrame, StructureView } from '@villages/protocol';
 
 import { landStructure, restamped, structuresOf } from './structures';
 import type { StructuresByCell } from './structures';
 
 /**
- * What the map should be drawing, as the gateway has told us cell by cell: the houses, and the characters
- * standing among them.
+ * What the map should be drawing, as the gateway has told us cell by cell: the people standing in the held cells
+ * and the structures in them. No houses: a house is not drawn on the map, its structures are, its seat among them,
+ * and the player's own house arrives on its own. The slice keeps its old name, `houses`, until it is renamed.
  *
- * Kept per held cell rather than as one bag of houses, because that is how it arrives and how it goes:
- * a snapshot is the whole of one cell, a delta lands in every held cell that contains the house, and
- * letting a cell go takes its houses with it. What is drawn is the union, a house counted once at its
- * highest version. No reference counting, nothing to get out of step.
- *
- * **Characters are held the same way, with one difference: they move.** A house is only ever added to a
- * cell; a character who moved is taken out of every held cell their new place is not in, and one who is
- * gone is taken out of all of them. Held and let go with the houses, so there is one set of cells and
- * never two to keep in step. See decision record 0055.
- *
- * **Structures too**, by a rule of their own: a copy is replaced by its stamp, because a structure is sent the face
- * the house last saw and that may be older than the one held. See `structures.ts`.
+ * Kept per held cell rather than as one bag, because that is how it arrives and how it goes: a snapshot is the
+ * whole of one cell, a delta lands in every held cell that contains what it is about, and letting a cell go takes
+ * what it held with it. What is drawn is the union, each counted once. No reference counting, nothing to get out of
+ * step. A character who moved is taken out of every held cell their new place is not in, and one who is gone out of
+ * all of them (decision record 0055). A structure is replaced by its stamp, because it is sent the face the house
+ * last saw and that may be older than the one held (`structures.ts`). Both are held and let go together, so there is
+ * one set of cells and never two to keep in step.
  */
 export interface HousesState {
-  /** Each held cell and what it holds, by house id. A cell is held from the moment it is asked for. */
-  readonly byCell: ReadonlyMap<string, ReadonlyMap<string, HouseView>>;
-  /** How many more each cell held than its snapshot carried, so the count on screen is never a lie. */
-  readonly omitted: ReadonlyMap<string, number>;
-  /** Each held cell and the characters standing in it, by character id. */
+  /** Each held cell and the characters standing in it, by character id. A cell is held from the moment it is asked for. */
   readonly charactersByCell: ReadonlyMap<string, ReadonlyMap<string, CharacterOnMapView>>;
   /** How many more characters each cell held than its snapshot carried. */
   readonly omittedCharacters: ReadonlyMap<string, number>;
@@ -37,8 +29,6 @@ export interface HousesState {
 }
 
 export const NO_HOUSES: HousesState = {
-  byCell: new Map(),
-  omitted: new Map(),
   charactersByCell: new Map(),
   omittedCharacters: new Map(),
   structuresByCell: new Map(),
@@ -47,13 +37,9 @@ export const NO_HOUSES: HousesState = {
 
 /** Starts holding cells, empty until their snapshots come, so a delta arriving first has somewhere to land. */
 export function holdCells(state: HousesState, cells: readonly string[]): HousesState {
-  const byCell = new Map(state.byCell);
   const charactersByCell = new Map(state.charactersByCell);
   const structuresByCell = new Map(state.structuresByCell);
   for (const cell of cells) {
-    if (!byCell.has(cell)) {
-      byCell.set(cell, new Map());
-    }
     if (!charactersByCell.has(cell)) {
       charactersByCell.set(cell, new Map());
     }
@@ -61,26 +47,22 @@ export function holdCells(state: HousesState, cells: readonly string[]): HousesS
       structuresByCell.set(cell, new Map());
     }
   }
-  return { ...state, byCell, charactersByCell, structuresByCell };
+  return { ...state, charactersByCell, structuresByCell };
 }
 
 /** Lets cells go, and everything drawn only because of them goes too. */
 export function forgetCells(state: HousesState, cells: readonly string[]): HousesState {
-  const byCell = new Map(state.byCell);
-  const omitted = new Map(state.omitted);
   const charactersByCell = new Map(state.charactersByCell);
   const omittedCharacters = new Map(state.omittedCharacters);
   const structuresByCell = new Map(state.structuresByCell);
   const omittedStructures = new Map(state.omittedStructures);
   for (const cell of cells) {
-    byCell.delete(cell);
-    omitted.delete(cell);
     charactersByCell.delete(cell);
     omittedCharacters.delete(cell);
     structuresByCell.delete(cell);
     omittedStructures.delete(cell);
   }
-  return { byCell, omitted, charactersByCell, omittedCharacters, structuresByCell, omittedStructures };
+  return { charactersByCell, omittedCharacters, structuresByCell, omittedStructures };
 }
 
 /**
@@ -107,21 +89,17 @@ function replaced<T extends { id: string; version: number }>(
 /**
  * Folds one frame from the gateway in. Anything that is not about the map leaves the state untouched.
  *
- * A snapshot is the whole of what the cell holds on the day being looked at, so it replaces the cell: a
- * house it no longer lists is gone, which is exactly how looking at an earlier day empties the map. The
- * one thing kept from before is a higher version of a house the snapshot does list, from a delta that
- * overtook it. The characters standing in the cell are replaced the same way, and its structures by their stamps.
+ * A snapshot is the whole of what the cell holds on the day being looked at, so it replaces the cell: someone it no
+ * longer lists is gone, which is exactly how looking at an earlier day empties the map. The one thing kept from
+ * before is a higher version of someone the snapshot does list, from a delta that overtook it; its structures are
+ * replaced by their stamps.
  */
 export function reduceHouses(state: HousesState, frame: ServerFrame): HousesState {
   switch (frame.type) {
     case 'snapshot': {
-      if (!state.byCell.has(frame.cell)) {
+      if (!state.charactersByCell.has(frame.cell)) {
         return state;
       }
-      const byCell = new Map(state.byCell);
-      byCell.set(frame.cell, replaced(state.byCell.get(frame.cell), frame.houses));
-      const omitted = new Map(state.omitted);
-      omitted.set(frame.cell, frame.omitted ?? 0);
       const charactersByCell = new Map(state.charactersByCell);
       charactersByCell.set(
         frame.cell,
@@ -136,16 +114,12 @@ export function reduceHouses(state: HousesState, frame: ServerFrame): HousesStat
       );
       const omittedStructures = new Map(state.omittedStructures);
       omittedStructures.set(frame.cell, frame.omittedStructures ?? 0);
-      return { byCell, omitted, charactersByCell, omittedCharacters, structuresByCell, omittedStructures };
+      return { charactersByCell, omittedCharacters, structuresByCell, omittedStructures };
     }
     case 'batch': {
       let next = state;
       for (const delta of frame.deltas) {
         switch (delta.type) {
-          case 'houseAppeared':
-          case 'houseChanged':
-            next = landHouse(next, delta.house);
-            break;
           case 'characterArrived':
           case 'characterChanged':
             next = standCharacter(next, delta.character);
@@ -164,46 +138,23 @@ export function reduceHouses(state: HousesState, frame: ServerFrame): HousesStat
     case 'resync': {
       // The gateway dropped what it owed us and let the cells go. They are asked for again by whoever
       // drives the connection; here they simply hold nothing until the fresh snapshots arrive.
-      const byCell = new Map(state.byCell);
-      const omitted = new Map(state.omitted);
       const charactersByCell = new Map(state.charactersByCell);
       const omittedCharacters = new Map(state.omittedCharacters);
       const structuresByCell = new Map(state.structuresByCell);
       const omittedStructures = new Map(state.omittedStructures);
       for (const cell of frame.cells) {
-        if (byCell.has(cell)) {
-          byCell.set(cell, new Map());
-          omitted.delete(cell);
+        if (charactersByCell.has(cell)) {
           charactersByCell.set(cell, new Map());
           omittedCharacters.delete(cell);
           structuresByCell.set(cell, new Map());
           omittedStructures.delete(cell);
         }
       }
-      return { byCell, omitted, charactersByCell, omittedCharacters, structuresByCell, omittedStructures };
+      return { charactersByCell, omittedCharacters, structuresByCell, omittedStructures };
     }
     default:
       return state;
   }
-}
-
-/** A house lands in every held cell that contains it, unless that cell already has it at this version. */
-function landHouse(state: HousesState, house: HouseView): HousesState {
-  let byCell: Map<string, ReadonlyMap<string, HouseView>> | null = null;
-  for (const [cell, held] of state.byCell) {
-    if (!isInside(house.cell, cell)) {
-      continue;
-    }
-    const known = held.get(house.id);
-    if (known !== undefined && known.version >= house.version) {
-      continue;
-    }
-    byCell ??= new Map(state.byCell);
-    const updated = new Map(held);
-    updated.set(house.id, house);
-    byCell.set(cell, updated);
-  }
-  return byCell === null ? state : { ...state, byCell };
 }
 
 /** A structure raised or changed lands in every held cell that contains it, by its stamp. See `structures.ts`. */
@@ -214,7 +165,7 @@ function raiseStructure(state: HousesState, structure: StructureView): HousesSta
 
 /**
  * A character stands in every held cell their place is in, and in no other: one who moved is taken out
- * of the held cells they left, which is the whole difference between a character and a house.
+ * of the held cells they left.
  */
 function standCharacter(state: HousesState, character: CharacterOnMapView): HousesState {
   let charactersByCell: Map<string, ReadonlyMap<string, CharacterOnMapView>> | null = null;
@@ -257,7 +208,7 @@ function dropCharacter(state: HousesState, id: string, version: number): HousesS
 
 /** The cells being held, in the order they were asked for. */
 export function cellsHeld(state: HousesState): string[] {
-  return [...state.byCell.keys()];
+  return [...state.charactersByCell.keys()];
 }
 
 /** The union of what the held cells hold, once each at its highest version, in a stable order. */
@@ -274,11 +225,6 @@ function unionOf<T extends { id: string; version: number }>(cells: Iterable<Read
   return [...best.values()].sort((left, right) => (left.id < right.id ? -1 : left.id > right.id ? 1 : 0));
 }
 
-/** Every house to draw, once each at its highest version, in a stable order. */
-export function housesInView(state: HousesState): HouseView[] {
-  return unionOf(state.byCell.values());
-}
-
 /** Every character standing in the held cells, once each at their highest version, in a stable order. */
 export function charactersInView(state: HousesState): CharacterOnMapView[] {
   return unionOf(state.charactersByCell.values());
@@ -287,13 +233,4 @@ export function charactersInView(state: HousesState): CharacterOnMapView[] {
 /** Every structure standing in the held cells, once each at its latest face, in a stable order. */
 export function structuresInView(state: HousesState): StructureView[] {
   return structuresOf(state.structuresByCell);
-}
-
-/** How many houses the held cells hold beyond what was sent. A screen showing most of a crowd says so. */
-export function omittedInView(state: HousesState): number {
-  let total = 0;
-  for (const count of state.omitted.values()) {
-    total += count;
-  }
-  return total;
 }
