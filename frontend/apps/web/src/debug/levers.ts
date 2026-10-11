@@ -223,7 +223,7 @@ export function fillSlotWithItem(
   structureId: string,
   name: string,
   slot: string,
-  item: { name: string; about: string; amount?: number },
+  item: { name: string; about: string; amount?: number; yields?: Record<string, number> },
 ): void {
   pull('structures', `putting ${item.name} in the ${slot} of ${name}`, {
     type: 'fillSlot',

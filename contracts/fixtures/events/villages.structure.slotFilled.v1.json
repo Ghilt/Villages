@@ -11,7 +11,8 @@
       "itemId": "7a000000-0000-4000-8000-000000000040",
       "name": "a garrison",
       "about": "forty men of the coast",
-      "amount": 40
+      "amount": 40,
+      "yields": {}
     },
     "worldTime": 653706,
     "recordedAt": "2026-09-04T12:00:00Z"

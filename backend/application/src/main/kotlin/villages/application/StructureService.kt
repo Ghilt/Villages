@@ -12,6 +12,7 @@ import villages.domain.HouseId
 import villages.domain.Location
 import villages.domain.PlayerId
 import villages.domain.RaiseStructure
+import villages.domain.Resource
 import villages.domain.Rebuild
 import villages.domain.Ruin
 import villages.domain.StructureError
@@ -87,9 +88,20 @@ class StructureService(
         structures.execute(FillSlot(structure, slot, Content.Person(character), world.today(), clock.now()), provenance)
     }
 
-    /** Puts an item in a place of [slot] of [structure], under an id minted here, the first time it is put anywhere. */
-    fun fillWithItem(structure: StructureId, slot: String, name: String, about: String, amount: Long?, provenance: Provenance) {
-        val item = Content.Item(ContentId(ids.fresh()), name.trim(), about.trim(), amount)
+    /**
+     * Puts an item in a place of [slot] of [structure], under an id minted here, the first time it is put anywhere, with
+     * what it [yields] of its own a month.
+     */
+    fun fillWithItem(
+        structure: StructureId,
+        slot: String,
+        name: String,
+        about: String,
+        amount: Long?,
+        yields: Map<Resource, Double>,
+        provenance: Provenance,
+    ) {
+        val item = Content.Item(ContentId(ids.fresh()), name.trim(), about.trim(), amount, yields)
         structures.execute(FillSlot(structure, slot, item, world.today(), clock.now()), provenance)
     }
 

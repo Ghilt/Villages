@@ -39,7 +39,10 @@ internal class HoldingsPart(
     private fun holdingsOf(house: HouseId): YourHoldings = YourHoldings(
         structures.heldBy(house)
             .sortedWith(compareBy({ if (it.faces.last().seatOf?.house == house) 0 else 1 }, { heldSince(it, house) }))
-            .map { it.toView(it.faces.last(), seenUntil = null, slots.of(it, it.faces.last(), house, everything = true)) },
+            .map { row ->
+                val face = row.faces.last()
+                row.toView(face, seenUntil = null, slots.of(row, face, house, true), slots.yieldsOf(row, face, house, true))
+            },
     )
 
     /** The stamp of the face the house's holding of it began with: the order it came to hold them in. */

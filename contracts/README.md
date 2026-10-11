@@ -123,3 +123,5 @@ recorded over. See decision record 0037. What each one changed:
   and its `contents` - a `person` with a name and a portrait, or an `item` with a line about it and an amount -
   absent for a slot the house may not see into. Only while the house sees the structure now; its holder sees into
   every slot, another house the public ones. With slots, `stamp` is the later of the face's and the slots'.
+- **46** - what fills a slot counts: `StructureView` carries `yields`, what it pays its holder a world month by
+  resource, in the holder's own view alone; and the item a `fillSlot` puts may carry `yields` of its own.

@@ -9,7 +9,12 @@ import { useStore } from '../store/useStore';
 import { emptySlot, fillSlotWithItem, fillSlotWithPerson } from './levers';
 
 /** What a lever puts in a slot when it puts something: a thing the slot is for, or a chest. */
-export function sampleItem(slot: string): { name: string; about: string; amount?: number } {
+export function sampleItem(slot: string): {
+  name: string;
+  about: string;
+  amount?: number;
+  yields?: Record<string, number>;
+} {
   switch (slot) {
     case 'garrison':
       return { name: 'a garrison', about: 'men of the coast', amount: 40 };
@@ -18,7 +23,11 @@ export function sampleItem(slot: string): { name: string; about: string; amount?
     case 'stores':
       return { name: 'bushels of grain', about: 'the last harvest', amount: 300 };
     case 'reliquary':
-      return { name: 'a relic', about: 'the finger of a saint, they say' };
+      return { name: 'a relic', about: 'the finger of a saint, they say', yields: { piety: 2 } };
+    case 'library':
+      return { name: 'a folio of Euclid', about: 'with the plates', yields: { reason: 1 } };
+    case 'cabinet':
+      return { name: 'a narwhal tusk', about: 'or a unicorn, the seller said', yields: { reason: 2 } };
     case 'slipway':
       return { name: 'an unfinished galley', about: 'her ribs are up' };
     case 'moorings':

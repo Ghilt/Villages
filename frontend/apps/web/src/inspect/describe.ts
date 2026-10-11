@@ -230,8 +230,14 @@ export function describeStructure(
   };
 }
 
-/** What a structure yields whoever holds it a world month, in words: `Domain +3 a month`; nothing for none. */
+/**
+ * What a structure yields whoever holds it a world month, in words: `Domain +3 a month`; nothing for none. Its
+ * holder is sent what it is paid, what fills its slots counted; anybody else reads its type's at its level.
+ */
 export function givesOf(structure: StructureView, spec: StructureTypeSpec | undefined): string | undefined {
+  if (structure.yields !== undefined) {
+    return saysPerMonth(structure.yields);
+  }
   return spec === undefined ? undefined : saysPerMonth(yieldsOf(structure, spec));
 }
 

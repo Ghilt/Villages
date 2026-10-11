@@ -8,6 +8,7 @@ import villages.domain.Content
 import villages.domain.HouseId
 import villages.domain.SeenBy
 import villages.domain.StructureCatalogue
+import villages.domain.Yields
 import villages.domain.id
 import villages.protocol.ContentView
 import villages.protocol.SlotView
@@ -33,6 +34,19 @@ internal class SlotsSeen(private val catalogue: StructureCatalogue?, private val
                 contents = if (own || slot.seenBy == SeenBy.ALL) held.map(::viewOf) else null,
             )
         }
+    }
+
+    /**
+     * What [row] in [face] yields its holder a month, by resource on the wire, for its holder alone, and with the fog
+     * lifted: the same rule the house is paid by, so the holder reads what it is paid. Null for anybody else and for a
+     * ruin, which gives nothing.
+     */
+    fun yieldsOf(row: StructureRow, face: StructureFace, viewer: HouseId?, everything: Boolean): Map<String, Double>? {
+        if (face.ruin || !(everything || (viewer != null && face.holder?.house == viewer))) return null
+        val spec = catalogue?.of(face.type) ?: return null
+        return Yields.of(spec, face.level, row.slots) { person, stat ->
+            people.ofCharacter(person)?.takeIf { it.diedOn == null }?.stats?.get(stat)
+        }.mapKeys { (resource, _) -> resource.toWire() }
     }
 
     private fun viewOf(content: Content): ContentView = when (content) {

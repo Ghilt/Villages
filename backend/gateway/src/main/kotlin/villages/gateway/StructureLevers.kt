@@ -60,7 +60,8 @@ internal fun structureLevers(commands: Commands, open: Boolean, structures: Stru
             structures.fillWithPerson(structure, payload.slot, CharacterId(UUID.fromString(payload.characterId)), asking.startingAStory)
         } else {
             val item = requireNotNull(payload.item) { "a slot is filled with someone or with something" }
-            structures.fillWithItem(structure, payload.slot, item.name, item.about, item.amount, asking.startingAStory)
+            val yields = item.yields.orEmpty().mapKeys { (name, _) -> asResource(name) }
+            structures.fillWithItem(structure, payload.slot, item.name, item.about, item.amount, yields, asking.startingAStory)
         }
     }
     commands.lever<EmptySlotPayload>(open) { asking, payload ->

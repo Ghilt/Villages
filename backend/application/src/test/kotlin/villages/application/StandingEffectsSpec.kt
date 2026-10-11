@@ -7,7 +7,11 @@ import io.kotest.matchers.shouldBe
 import villages.domain.Banner
 import villages.domain.ChangeLevel
 import villages.domain.Charge
+import villages.domain.Content
+import villages.domain.ContentId
 import villages.domain.Division
+import villages.domain.EmptySlot
+import villages.domain.FillSlot
 import villages.domain.FoundHouse
 import villages.domain.HandOver
 import villages.domain.HouseGainedVision
@@ -15,18 +19,21 @@ import villages.domain.HouseId
 import villages.domain.HouseIncomeChanged
 import villages.domain.HouseLostVision
 import villages.domain.HouseName
+import villages.domain.IncomeSource
 import villages.domain.LevelSpec
 import villages.domain.Location
 import villages.domain.PlayerId
-import villages.domain.IncomeSource
 import villages.domain.RaiseStructure
 import villages.domain.Resource
 import villages.domain.Ruin
+import villages.domain.SeenBy
 import villages.domain.Significance
+import villages.domain.SlotSpec
 import villages.domain.StructureCatalogue
 import villages.domain.StructureId
 import villages.domain.StructureSpec
 import villages.domain.StructureType
+import villages.domain.Takes
 import villages.domain.Tincture
 import villages.domain.VisionId
 import villages.domain.WorldTime
@@ -45,7 +52,7 @@ class StandingEffectsSpec : StringSpec({
                     LevelSpec(Significance(8.0), 6.0, mapOf(Resource.WEALTH to 86_400.0)),
                     LevelSpec(Significance(10.0), 8.0, mapOf(Resource.WEALTH to 172_800.0)),
                 ),
-                emptyList(),
+                listOf(SlotSpec("granary", Takes.ITEM, listOf(1, 2), SeenBy.ALL, bringsItsOwn = true)),
             ),
         ),
     )
@@ -178,6 +185,24 @@ class StandingEffectsSpec : StringSpec({
         rig.later.tick()
 
         rig.world.stored.map { it.event }.filterIsInstance<HouseGainedVision>().shouldBeEmpty()
+    }
+
+    "what fills its slots counts: an item that brings its own pays its holder, and taken out stops paying" {
+        val rig = rig()
+        rig.listening()
+        raise(rig.world, holder = ada)
+        rig.later.tick()
+        val relic = Content.Item(ContentId(UUID.randomUUID()), "a relic", "", null, mapOf(Resource.PIETY to 86_400.0))
+
+        rig.world.execute(FillSlot(theMill, "granary", relic, today, noon), Provenance.startedBy(UUID.randomUUID()))
+        rig.later.tick()
+        rig.paid(ada).last().ratesPerSecond shouldBe mapOf(Resource.WEALTH to 1.0, Resource.PIETY to 1.0)
+
+        rig.world.execute(EmptySlot(theMill, "granary", relic.itemId, today, noon), Provenance.startedBy(UUID.randomUUID()))
+        rig.later.tick()
+        rig.paid(ada).last().ratesPerSecond shouldBe mapOf(Resource.WEALTH to 1.0)
+        rig.gained(ada).size shouldBe 1
+        rig.faults.reported.shouldBeEmpty()
     }
 
     "a structure fallen to ruin takes back its holder's vision from it" {

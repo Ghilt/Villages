@@ -44,6 +44,8 @@ export const structureViewSchema = z.object({
   ruin: z.boolean().optional(),
   /** Its slots, only while the house sees it now; absent out of sight, on a day gone by, and for a type with none. */
   slots: z.array(slotViewSchema).optional(),
+  /** What it yields its holder a world month, by resource, its slots counted: only in the holder's own view. */
+  yields: z.record(z.string(), z.number()).optional(),
 });
 
 /** A structure came to be in a cell this connection holds and sees. */
@@ -89,7 +91,12 @@ export const structureCommandSchemas = [
     slot: z.string(),
     characterId: z.string().optional(),
     item: z
-      .object({ name: z.string(), about: z.string().optional(), amount: z.number().int().optional() })
+      .object({
+        name: z.string(),
+        about: z.string().optional(),
+        amount: z.number().int().optional(),
+        yields: z.record(z.string(), z.number()).optional(),
+      })
       .optional(),
   }),
   z.object({ type: z.literal('emptySlot'), structureId: z.string(), slot: z.string() }),

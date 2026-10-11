@@ -68,11 +68,17 @@ internal data class Looking(
      */
     fun sent(row: StructureRow, day: WorldTime): StructureView? =
         if (!fogged) {
-            row.faceOn(day)?.let { row.toView(it, null, if (isLive) slots.of(row, it, fog.house, everything = true) else null) }
+            row.faceOn(day)?.let {
+                if (isLive) row.toView(it, null, slots.of(row, it, fog.house, true), slots.yieldsOf(row, it, fog.house, true)) else row.toView(it, null)
+            }
         } else {
             fog.faceOf(row, day)?.let { (face, hid) ->
                 // Its slots only while it is seen, and only today: what is in a slot is never as last seen.
-                row.toView(face, hid, if (hid == null && isLive) slots.of(row, face, fog.house, everything = false) else null)
+                if (hid == null && isLive) {
+                    row.toView(face, null, slots.of(row, face, fog.house, false), slots.yieldsOf(row, face, fog.house, false))
+                } else {
+                    row.toView(face, hid)
+                }
             }
         }
 

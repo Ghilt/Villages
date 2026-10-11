@@ -14,7 +14,12 @@ import villages.protocol.StructureView
  * one it last saw, with the day the fog hid it, and its slots when the house sees into them now. See
  * docs/plans/structures.md and decision record 0089.
  */
-internal fun StructureRow.toView(face: StructureFace, seenUntil: WorldTime?, slots: List<SlotView>? = null): StructureView = StructureView(
+internal fun StructureRow.toView(
+    face: StructureFace,
+    seenUntil: WorldTime?,
+    slots: List<SlotView>? = null,
+    yields: Map<String, Double>? = null,
+): StructureView = StructureView(
     id = id.value.toString(),
     structureType = face.type.name,
     name = name,
@@ -30,4 +35,5 @@ internal fun StructureRow.toView(face: StructureFace, seenUntil: WorldTime?, slo
     seatOf = face.seatOf?.let { HolderView(it.house.value.toString(), it.name.value, it.banner.toWire()) },
     ruin = if (face.ruin) true else null,
     slots = slots,
+    yields = yields,
 )

@@ -169,7 +169,13 @@ data class FillSlotPayload(
 
 /** An item as a lever puts it in a slot: its name, a line about it, and how many of it or none. */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-data class ItemPayload(val name: String, val about: String = "", val amount: Long? = null)
+data class ItemPayload(
+    val name: String,
+    val about: String = "",
+    val amount: Long? = null,
+    /** What it yields of its own a world month, by resource, in a slot that takes an item's own. */
+    val yields: Map<String, Double>? = null,
+)
 
 /** Take out of a structure's slot what was put in it last: Adam's *empty a place*. */
 data class EmptySlotPayload(val structureId: String, val slot: String) : CommandPayload

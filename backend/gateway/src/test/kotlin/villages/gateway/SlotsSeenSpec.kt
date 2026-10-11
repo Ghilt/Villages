@@ -19,6 +19,7 @@ import villages.domain.HouseName
 import villages.domain.LevelSpec
 import villages.domain.Location
 import villages.domain.PlayerId
+import villages.domain.Resource
 import villages.domain.SeenBy
 import villages.domain.Significance
 import villages.domain.SlotSpec
@@ -43,7 +44,10 @@ private val castle = StructureType("castle")
 private val catalogue = StructureCatalogue(
     mapOf(
         castle to StructureSpec(
-            listOf(LevelSpec(Significance(20.0), 34.0, emptyMap()), LevelSpec(Significance(24.0), 40.0, emptyMap())),
+            listOf(
+                LevelSpec(Significance(20.0), 34.0, mapOf(Resource.NATURAL_DOMAIN to 3.0)),
+                LevelSpec(Significance(24.0), 40.0, mapOf(Resource.NATURAL_DOMAIN to 5.0)),
+            ),
             listOf(
                 SlotSpec("lord", Takes.CHARACTER, listOf(1, 1), SeenBy.ALL),
                 SlotSpec("garrison", Takes.ITEM, listOf(1, 1), SeenBy.HOLDER),
@@ -109,5 +113,13 @@ class SlotsSeenSpec : StringSpec({
             slots = seen,
         )
         revealedOnce.sent(keep(paris), day)!!.let { listOf(it.slots, it.stamp) } shouldBe listOf(null, 3L)
+    }
+
+    "its holder is sent what it yields a month, its slots counted, and nobody else is" {
+        val mine = keep(stockholm, held = me)
+        val theirs = keep(stockholm)
+
+        seen.yieldsOf(mine, mine.faces.last(), HouseId.of(me), everything = false) shouldBe mapOf("naturalDomain" to 5.0)
+        seen.yieldsOf(theirs, theirs.faces.last(), HouseId.of(me), everything = false) shouldBe null
     }
 })

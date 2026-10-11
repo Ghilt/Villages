@@ -36,6 +36,11 @@ data class StructureView(
      * type with none. When present, `stamp` is the later of the face's and the slots' last change.
      */
     val slots: List<SlotView>? = null,
+    /**
+     * What it yields its holder a world month, by resource, what fills its slots counted: only in its holder's own
+     * view, because what is in a slot that only the holder sees into would show in it. Absent for anybody else.
+     */
+    val yields: Map<String, Double>? = null,
 )
 
 /**

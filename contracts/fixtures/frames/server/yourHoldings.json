@@ -65,7 +65,10 @@
             }
           ]
         }
-      ]
+      ],
+      "yields": {
+        "naturalDomain": 3.0
+      }
     }
   ]
 }

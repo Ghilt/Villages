@@ -92,7 +92,7 @@ class StructureServiceSpec : StringSpec({
     "an item is put in under an id minted for it, and emptying a place takes out what was put in last" {
         val (sentOn, service) = rig(hasHouse = true, slots = holding(agnes to PlaceInSlot(gaol, "cells")))
 
-        service.fillWithItem(castle, "garrison", " a garrison ", "forty men", 40, Provenance.startedBy(sent))
+        service.fillWithItem(castle, "garrison", " a garrison ", "forty men", 40, emptyMap(), Provenance.startedBy(sent))
         service.emptyLast(gaol, "cells", Provenance.startedBy(sent))
 
         sentOn shouldBe listOf(

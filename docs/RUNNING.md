@@ -317,7 +317,12 @@ stage alone, with none of the debug panel in it (decision record 0079).
   for a place left. Its holder sees into every slot; another house that sees it now sees into the slots the catalogue
   calls public and a question in every place of the rest, *? of 2*; out of sight, or on a day the scrubber has gone
   back to, the window draws none, because what is in a slot is never shown as last seen. With the fog lifted, every
-  slot is seen into. A slot filled or emptied redraws them at once, and a window on one of your own holdings reads
+  slot is seen into. What fills them counts toward what it pays its holder: a needed slot empty, a palace's throne,
+  and the type gives nothing of its own; a person in a slot that scales, a cathedral's bishop, scales it by their
+  stat over ten; every filled place of a slot that adds adds, a prisoner in the cells; and an item where an item's
+  own is taken yields its own, a relic in the reliquary (*put something in* puts one there with piety +2 a month).
+  The house is paid it, `incomeChanged`, a moment after the slot changes, and the window and the tab say what the
+  holder is paid; anybody else reads the type's at its level. A slot filled or emptied redraws them at once, and a window on one of your own holdings reads
   your holdings wherever the camera is, as one on a key figure reads your key figures.
 - Ruining one and raising it again: **ruin it** and **rebuild it**, beside *take control of this building*, on the
   structure whose window was opened last. *Ruin it* writes `villages.structure.ruined.v1`, by fire: a ruin holds

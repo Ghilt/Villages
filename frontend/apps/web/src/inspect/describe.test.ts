@@ -6,7 +6,7 @@ import type { StructureView } from '@villages/protocol';
 import type { StructureTypeSpec } from '@villages/world';
 
 import { portraitUrl } from '../figures/portraits';
-import { describeCharacter, describeStructure, socketsSaid } from './describe';
+import { describeCharacter, describeStructure, givesOf, socketsSaid } from './describe';
 import type { CharacterSeen } from './describe';
 
 const today = dayOf(1790, 5, 9);
@@ -139,6 +139,18 @@ describe("a structure's window", () => {
 
     expect(said.under).toBe('a printing house');
     expect(said.facts[1]).toEqual({ what: 'Level', said: '2' });
+  });
+});
+
+describe('what a structure gives, in its window', () => {
+  it("is what its holder is paid when the server says so, and its type's at its level otherwise", () => {
+    const spec = { yields: { wealth: [6, 12] } } as unknown as StructureTypeSpec;
+    const mill = { level: 2 } as unknown as StructureView;
+
+    expect(givesOf(mill, spec)).toBe('Wealth +12 a month');
+    expect(givesOf({ ...mill, yields: { wealth: 12, piety: 2 } }, spec)).toBe(
+      'Wealth +12 a month, Piety +2 a month',
+    );
   });
 });
 
