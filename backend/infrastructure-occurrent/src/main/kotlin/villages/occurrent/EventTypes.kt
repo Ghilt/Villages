@@ -27,6 +27,8 @@ import villages.domain.PlayerLostDialogue
 import villages.domain.PlayerOfferedDialogue
 import villages.domain.PlayerTookAction
 import villages.domain.StructureChangedHands
+import villages.domain.StructureRebuilt
+import villages.domain.StructureRuined
 import villages.domain.StructureRaised
 import kotlin.reflect.KClass
 
@@ -66,6 +68,8 @@ object EventTypes : CloudEventTypeMapper<Event> {
         HouseNamedSeat::class to "villages.house.namedSeat.v1",
         StructureRaised::class to "villages.structure.raised.v1",
         StructureChangedHands::class to "villages.structure.changedHands.v1",
+        StructureRuined::class to "villages.structure.ruined.v1",
+        StructureRebuilt::class to "villages.structure.rebuilt.v1",
     )
 
     private val byType: Map<String, KClass<out Event>> = rows.entries.associate { (klass, type) -> type to klass }

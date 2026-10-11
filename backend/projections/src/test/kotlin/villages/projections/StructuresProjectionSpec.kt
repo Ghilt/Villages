@@ -25,6 +25,8 @@ import villages.domain.Significance
 import villages.domain.StructureChangedHands
 import villages.domain.StructureId
 import villages.domain.StructureRaised
+import villages.domain.StructureRebuilt
+import villages.domain.StructureRuined
 import villages.domain.StructureType
 import villages.domain.Tincture
 import villages.domain.WorldTime
@@ -145,5 +147,17 @@ class StructuresProjectionSpec : StringSpec({
 
         feed.deliver(StructureChangedHands(mill, from = HouseId.of(ada), to = null, today, noon), version = 2)
         structures.row(mill)!!.faces.last().seatOf shouldBe null
+    }
+
+    "a structure fallen to ruin takes a face holding nobody, and rebuilt one standing again" {
+        val (feed, structures) = rig()
+        feed.deliver(founded)
+        feed.deliver(raised(), version = 1)
+
+        feed.deliver(StructureRuined(mill, "fire", today, noon), version = 2)
+        structures.row(mill)!!.faces.last().let { listOf(it.ruin, it.holder) } shouldBe listOf(true, null)
+
+        feed.deliver(StructureRebuilt(mill, StructureType("mill"), 1, Significance(8.0), HouseId.of(ada), today, noon), version = 3)
+        structures.row(mill)!!.faces.last().let { listOf(it.ruin, it.holder?.name) } shouldBe listOf(false, HouseName("Ravenscar"))
     }
 })

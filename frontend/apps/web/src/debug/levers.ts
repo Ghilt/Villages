@@ -193,6 +193,16 @@ export function takeControl(structureId: string, name: string): void {
   pull('structures', `taking control of ${name}`, { type: 'takeControl', structureId });
 }
 
+/** Brings a structure down to ruin, by fire: *ruin this building*. */
+export function ruinStructure(structureId: string, name: string): void {
+  pull('structures', `ruining ${name}, by fire`, { type: 'ruinStructure', structureId, cause: 'fire' });
+}
+
+/** Raises a ruin again as what it was, at its first level, for nobody: *rebuild this building*. */
+export function rebuildStructure(structureId: string, name: string): void {
+  pull('structures', `rebuilding ${name}`, { type: 'rebuildStructure', structureId });
+}
+
 /** Raises whichever of the sixteen in Antarctica a wipe took. */
 export function raiseAntarctica(): void {
   pull('structures', "raising Antarctica's sixteen again", { type: 'raiseAntarctica' });

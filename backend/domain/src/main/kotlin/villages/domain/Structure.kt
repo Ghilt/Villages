@@ -18,5 +18,7 @@ sealed interface Structure {
         val level: Int,
         val holder: HouseId?,
         val raisedOn: WorldTime,
+        /** Fallen: no holder, nothing given, and something that can be raised again. */
+        val ruined: Boolean = false,
     ) : Structure
 }

@@ -169,10 +169,14 @@ export function describeStructure(
   if (holder !== undefined) {
     links.push({ what: holder.name, to: 'subject', subject: { kind: 'house', id: holder.id } });
   }
+  const article = /^[aeiou]/.test(word) ? 'an' : 'a';
   return {
-    kind: yours ? 'Your holding' : 'Structure',
+    kind: structure.ruin === true ? 'Ruin' : yours ? 'Your holding' : 'Structure',
     name: structure.name,
-    under: `${/^[aeiou]/.test(word) ? 'an' : 'a'} ${word}${structure.seatOf === undefined ? '' : `, the seat of ${structure.seatOf.name}`}`,
+    under:
+      structure.ruin === true
+        ? `the ruin of ${article} ${word}`
+        : `${article} ${word}${structure.seatOf === undefined ? '' : `, the seat of ${structure.seatOf.name}`}`,
     facts: [
       { what: 'Held by', said: holder?.name ?? 'nobody' },
       { what: 'Level', said: spec === undefined ? String(level) : `${level} of ${spec.levels}` },

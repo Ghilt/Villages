@@ -7,6 +7,8 @@ import villages.domain.HouseLostVision
 import villages.domain.Location
 import villages.domain.StructureCatalogue
 import villages.domain.StructureChangedHands
+import villages.domain.StructureRebuilt
+import villages.domain.StructureRuined
 import villages.domain.StructureId
 import villages.domain.StructureRaised
 import villages.domain.StructureType
@@ -69,6 +71,20 @@ class StandingEffects(
                 structures[event.structureId] = Standing(was.type, was.level, was.place, event.to, stored.streamVersion, stored)
                 event.from?.let { reconcile(it, event.structureId) }
                 event.to?.let { reconcile(it, event.structureId) }
+            }
+
+            // A ruin gives nothing: whoever held it sees from it no longer. Rebuilt, it gives again to whoever holds it.
+            is StructureRuined -> {
+                val was = structures[event.structureId] ?: return
+                structures[event.structureId] = Standing(was.type, was.level, was.place, null, stored.streamVersion, stored)
+                was.holder?.let { reconcile(it, event.structureId) }
+            }
+
+            is StructureRebuilt -> {
+                val was = structures[event.structureId] ?: return
+                structures[event.structureId] =
+                    Standing(event.structureType, event.level, was.place, event.holder, stored.streamVersion, stored)
+                event.holder?.let { reconcile(it, event.structureId) }
             }
 
             is HouseGainedVision -> event.from?.let { structure ->

@@ -1,4 +1,4 @@
-import { INK, pictureOf } from '../sprites/structureShapes';
+import { INK, pictureFor } from '../sprites/structureShapes';
 
 /** A colour of the shapes' table, as CSS writes it. */
 const hex = (colour: number): string => `#${colour.toString(16).padStart(6, '0')}`;
@@ -7,11 +7,19 @@ const hex = (colour: number): string => `#${colour.toString(16).padStart(6, '0')
  * A structure's placeholder picture, drawn in SVG from the same shapes the map draws in Pixi: what a row of the
  * holdings leads with. The pictures cut from the moodboard replace both when they come (step 13 of the plan).
  */
-export function StructureFigure({ type, size = 36 }: { type: string; size?: number }) {
+export function StructureFigure({
+  type,
+  ruin = false,
+  size = 36,
+}: {
+  type: string;
+  ruin?: boolean;
+  size?: number;
+}) {
   const stroke = { stroke: hex(INK), strokeWidth: 2, strokeLinejoin: 'round' as const };
   return (
     <svg className="holdings__figure" viewBox="-3 -3 106 106" width={size} height={size} aria-hidden="true">
-      {pictureOf(type).parts.map((part, at) => {
+      {pictureFor(type, ruin).parts.map((part, at) => {
         if (part[0] === 'rect') {
           const [, x, y, width, height, colour] = part;
           return <rect key={at} x={x} y={y} width={width} height={height} fill={hex(colour)} {...stroke} />;

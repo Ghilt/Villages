@@ -23,6 +23,8 @@ export const structureViewSchema = z.object({
   seenUntil: z.number().int().optional(),
   /** The house whose seat it is, in the face sent; absent for one that is nobody's seat. */
   seatOf: holderViewSchema.optional(),
+  /** True for a ruin, in the face sent; absent for a structure standing. */
+  ruin: z.boolean().optional(),
 });
 
 /** A structure came to be in a cell this connection holds and sees. */

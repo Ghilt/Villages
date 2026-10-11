@@ -93,4 +93,28 @@ class StructureDeciderSpec : StringSpec({
     "a structure never raised cannot change hands" {
         shouldThrow<StructureError.NoSuchStructure> { decider.decide(handOver(rival), decider.initial) }
     }
+
+    "a structure falls to ruin, holds nobody, and can neither change hands nor fall again" {
+        val standing = decider.fold(decider.decide(raise(), decider.initial))
+
+        val fell = decider.decide(Ruin(id, "fire", WorldTime(653_707), noon), standing).single()
+        val ruin = decider.evolve(standing, fell).shouldBeInstanceOf<Structure.Raised>()
+
+        fell shouldBe StructureRuined(id, "fire", WorldTime(653_707), noon)
+        listOf(ruin.ruined, ruin.holder) shouldBe listOf(true, null)
+        shouldThrow<StructureError.IsARuin> { decider.decide(handOver(rival), ruin) }
+        shouldThrow<StructureError.IsARuin> { decider.decide(Ruin(id, "war", WorldTime(653_708), noon), ruin) }
+    }
+
+    "a ruin is rebuilt as what it was, at a level its type has, for a house or for nobody, and only a ruin is" {
+        val standing = decider.fold(decider.decide(raise(), decider.initial))
+        val ruin = decider.evolve(standing, decider.decide(Ruin(id, "fire", WorldTime(653_707), noon), standing).single())
+
+        val raisedAgain = decider.decide(Rebuild(id, null, 1, rival, WorldTime(653_708), noon), ruin).single()
+
+        raisedAgain shouldBe StructureRebuilt(id, mill, 1, Significance(8.0), rival, WorldTime(653_708), noon)
+        decider.evolve(ruin, raisedAgain).shouldBeInstanceOf<Structure.Raised>().let { listOf(it.ruined, it.holder) } shouldBe listOf(false, rival)
+        shouldThrow<StructureError.NotARuin> { decider.decide(Rebuild(id, null, 1, null, WorldTime(653_708), noon), standing) }
+        shouldThrow<StructureError.InvalidLevel> { decider.decide(Rebuild(id, null, 3, null, WorldTime(653_708), noon), ruin) }
+    }
 })

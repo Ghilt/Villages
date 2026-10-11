@@ -1,0 +1,15 @@
+{
+  "type": "villages.structure.rebuilt.v1",
+  "source": "urn:villages",
+  "subject": "95ba5c28-4a79-3fa6-88aa-0ff1f5a0a559",
+  "time": "2026-09-04T12:00:00Z",
+  "data": {
+    "structureId": "95ba5c28-4a79-3fa6-88aa-0ff1f5a0a559",
+    "structureType": "castle",
+    "level": 1,
+    "significance": 20.0,
+    "holder": null,
+    "worldTime": 653708,
+    "recordedAt": "2026-09-04T12:00:00Z"
+  }
+}

@@ -170,6 +170,9 @@ describe('saying what a batch brought', () => {
     ).toBe(
       '2 deltas in one batch: a new mill changed, held by Ravenscar, a new mill changed, held by nobody',
     );
+    expect(
+      describeBatch([{ type: 'structureChanged', structure: { ...mill, ruin: true, stamp: 16 } }], nobody),
+    ).toBe('1 delta in one batch: a new mill lies in ruin');
   });
 });
 

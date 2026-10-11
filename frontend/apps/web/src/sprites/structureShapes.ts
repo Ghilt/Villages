@@ -230,6 +230,20 @@ const PICTURES: Record<string, Picture> = {
   },
 };
 
+/**
+ * What any structure fallen to ruin is drawn as, whatever it was, until the ruins of each type are drawn (step 13):
+ * the stump of a tower and a broken wall over a heap of rubble, and no pennant, because nobody holds a ruin.
+ */
+const RUIN: Picture = {
+  parts: [
+    ['poly', [14, 100, 14, 54, 20, 46, 24, 58, 30, 50, 34, 62, 34, 100], STONE],
+    ['poly', [54, 100, 54, 68, 60, 62, 64, 72, 70, 64, 76, 70, 80, 66, 80, 100], STONE],
+    ['rect', 20, 70, 6, 10, INK],
+    ['poly', [2, 100, 16, 88, 32, 92, 46, 82, 62, 90, 78, 84, 98, 100], EARTH],
+  ],
+  flag: [24, 46],
+};
+
 /** What a type nobody has drawn yet is drawn as: a plain house, so it is on the map all the same. */
 const ANY: Picture = {
   parts: [['rect', 20, 50, 60, 50, WALL], ['poly', [14, 52, 50, 22, 86, 52], ROOF], door(45, 80)],
@@ -239,6 +253,14 @@ const ANY: Picture = {
 /** A type's picture, by the catalogue's name for it, or the plain house for a type nobody has drawn. */
 export function pictureOf(type: string): Picture {
   return PICTURES[type] ?? ANY;
+}
+
+/** The name the map and the panes ask for a ruin's picture by, which no type is called. */
+export const RUIN_PICTURE = 'a ruin';
+
+/** A structure's picture as it stands: its type's, or the ruin's. */
+export function pictureFor(type: string, ruin: boolean): Picture {
+  return ruin ? RUIN : pictureOf(type);
 }
 
 /** Every type that has a picture of its own. */

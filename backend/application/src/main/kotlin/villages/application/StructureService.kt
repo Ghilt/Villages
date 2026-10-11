@@ -5,6 +5,8 @@ import villages.domain.HouseError
 import villages.domain.HouseId
 import villages.domain.Location
 import villages.domain.PlayerId
+import villages.domain.Rebuild
+import villages.domain.Ruin
 import villages.domain.RaiseStructure
 import villages.domain.StructureId
 import villages.domain.StructureType
@@ -48,6 +50,16 @@ class StructureService(
      * handing one over or a house taking it. Refused `noSuchHouse` for a player who has founded none,
      * `noSuchStructure` for one never raised, and `sameHolder` for one the house holds already.
      */
+    /** Brings [structure] down to ruin: Adam's *ruin this building*. Refused `isARuin` for one that is already. */
+    fun ruin(structure: StructureId, cause: String, provenance: Provenance) {
+        structures.execute(Ruin(structure, cause, world.today(), clock.now()), provenance)
+    }
+
+    /** Raises the ruin [structure] again as what it was, at its first level, for nobody: Adam's *rebuild this building*. */
+    fun rebuild(structure: StructureId, provenance: Provenance) {
+        structures.execute(Rebuild(structure, null, 1, null, world.today(), clock.now()), provenance)
+    }
+
     fun takeControl(player: PlayerId, structure: StructureId, provenance: Provenance) {
         val house = HouseId.of(player).also { if (houses.ofHouse(it) == null) throw HouseError.NoSuchHouse }
         structures.execute(HandOver(structure, house, world.today(), clock.now()), provenance)

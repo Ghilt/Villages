@@ -151,7 +151,8 @@
         "level": 1,
         "significance": 10.0,
         "since": 653706,
-        "stamp": 14
+        "stamp": 14,
+        "ruin": true
       }
     }
   ]

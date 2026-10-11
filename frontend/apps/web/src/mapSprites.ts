@@ -2,6 +2,7 @@ import type { CharacterOnMapView, ChoiceView, HouseView, StructureView } from '@
 import type { StructureCatalogue } from '@villages/world';
 
 import type { MapSprite } from './sprites/SpriteRenderer';
+import { RUIN_PICTURE } from './sprites/structureShapes';
 import { tinctureColour } from './sprites/tinctures';
 
 // What the session holds, as the marks the sprite renderer draws: houses, the people standing on the map, the
@@ -56,7 +57,11 @@ export function toStructureSprite(structure: StructureView, catalogue: Structure
     at: { lng: structure.place.lon, lat: structure.place.lat },
     tint: UNTINTED,
     kind: 'structure',
-    structure: { picture: structure.structureType, ...(groundHeight === undefined ? {} : { groundHeight }) },
+    // A ruin is drawn as a ruin, as tall as what it was.
+    structure: {
+      picture: structure.ruin === true ? RUIN_PICTURE : structure.structureType,
+      ...(groundHeight === undefined ? {} : { groundHeight }),
+    },
     ...(structure.holder === undefined ? {} : { pennant: tinctureColour(structure.holder.banner.field) }),
   };
 }

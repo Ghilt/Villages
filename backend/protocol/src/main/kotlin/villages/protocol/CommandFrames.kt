@@ -21,6 +21,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
     JsonSubTypes.Type(RaiseAntarcticaPayload::class, name = "raiseAntarctica"),
     JsonSubTypes.Type(RaiseStructurePayload::class, name = "raiseStructure"),
     JsonSubTypes.Type(TakeControlPayload::class, name = "takeControl"),
+    JsonSubTypes.Type(RuinPayload::class, name = "ruinStructure"),
+    JsonSubTypes.Type(RebuildPayload::class, name = "rebuildStructure"),
     JsonSubTypes.Type(ReleasePledgePayload::class, name = "releasePledge"),
     JsonSubTypes.Type(SpendResourcePayload::class, name = "spendResource"),
     JsonSubTypes.Type(TakeActionPayload::class, name = "takeAction"),
@@ -146,6 +148,12 @@ data class RaiseStructurePayload(val structureType: String, val level: Int, val 
 
 /** Hand a structure to the sender's own house: Adam's *take control of this building*. See docs/plans/structures.md. */
 data class TakeControlPayload(val structureId: String) : CommandPayload
+
+/** Bring a structure down to ruin, for a cause a word or two long: Adam's *ruin this building*. */
+data class RuinPayload(val structureId: String, val cause: String) : CommandPayload
+
+/** Raise a ruin again as what it was, at its first level, for nobody: Adam's *rebuild this building*. */
+data class RebuildPayload(val structureId: String) : CommandPayload
 
 /** Raise whichever of the sixteen in Antarctica a wipe took, as the server does when it starts. A lever of Adam's. */
 class RaiseAntarcticaPayload : CommandPayload {

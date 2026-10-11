@@ -62,6 +62,8 @@ import villages.domain.Species
 import villages.domain.Stat
 import villages.domain.StructureId
 import villages.domain.StructureChangedHands
+import villages.domain.StructureRebuilt
+import villages.domain.StructureRuined
 import villages.domain.StructureRaised
 import villages.domain.StructureType
 import villages.domain.Then
@@ -247,6 +249,10 @@ internal object EventSamples {
     /** The sample house's seat: the Antarctic castle, standing in for the one founding raises. */
     val seatNamed = HouseNamedSeat(house, antarcticCastle, WorldTime(653_705), noon)
 
+    /** The same castle, fallen to fire and raised again for nobody. */
+    val castleFell = StructureRuined(antarcticCastle, "fire", WorldTime(653_707), noon)
+    val castleRebuilt = StructureRebuilt(antarcticCastle, StructureType("castle"), 1, Significance(20.0), null, WorldTime(653_708), noon)
+
     val gotland = VisionId(UUID.fromString("dd000000-0000-4000-8000-000000000001"))
     val sawGotland = HouseGainedVision(house, gotland, Location(57.64, 18.30), 34.0, null, day, noon)
     val lostGotland = HouseLostVision(house, gotland, day, noon)
@@ -344,5 +350,7 @@ internal object EventSamples {
         "villages.player.tookAction.v1" to tookNorthern,
         "villages.structure.changedHands.v1" to castleLeft,
         "villages.structure.raised.v1" to castleRaised,
+        "villages.structure.rebuilt.v1" to castleRebuilt,
+        "villages.structure.ruined.v1" to castleFell,
     )
 }

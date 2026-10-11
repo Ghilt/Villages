@@ -48,4 +48,6 @@ internal fun DomainError.reasonCode(): String = when (this) {
     is StructureError.InvalidName -> "invalidName"
     StructureError.NoSuchStructure -> "noSuchStructure"
     StructureError.SameHolder -> "sameHolder"
+    StructureError.IsARuin -> "isARuin"
+    StructureError.NotARuin -> "notARuin"
 }

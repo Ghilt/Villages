@@ -39,10 +39,38 @@ class StructureDecider(private val catalogue: StructureCatalogue) : Decider<Stru
             if (state !is Structure.Raised) {
                 throw StructureError.NoSuchStructure
             }
+            if (state.ruined) {
+                throw StructureError.IsARuin
+            }
             if (state.holder == command.to) {
                 throw StructureError.SameHolder
             }
             listOf(StructureChangedHands(command.structureId, state.holder, command.to, command.worldTime, command.recordedAt))
+        }
+        // A ruin has no holder, cannot change hands and has no level to change: held here, at once.
+        is Ruin -> {
+            val standing = state as? Structure.Raised ?: throw StructureError.NoSuchStructure
+            if (standing.ruined) {
+                throw StructureError.IsARuin
+            }
+            listOf(StructureRuined(command.structureId, command.cause.trim(), command.worldTime, command.recordedAt))
+        }
+        is Rebuild -> {
+            val ruin = state as? Structure.Raised ?: throw StructureError.NoSuchStructure
+            if (!ruin.ruined) {
+                throw StructureError.NotARuin
+            }
+            val type = command.structureType ?: ruin.type
+            val spec = catalogue.of(type) ?: throw StructureError.NoSuchType(type)
+            if (command.level !in 1..spec.highest) {
+                throw StructureError.InvalidLevel("a $type rises from 1 to ${spec.highest}, not ${command.level}")
+            }
+            listOf(
+                StructureRebuilt(
+                    command.structureId, type, command.level, spec.at(command.level).significance, command.holder,
+                    command.worldTime, command.recordedAt,
+                ),
+            )
         }
     }
 
@@ -58,6 +86,11 @@ class StructureDecider(private val catalogue: StructureCatalogue) : Decider<Stru
             raisedOn = event.worldTime,
         )
         is StructureChangedHands -> (state as? Structure.Raised)?.copy(holder = event.to) ?: state
+        is StructureRuined -> (state as? Structure.Raised)?.copy(holder = null, ruined = true) ?: state
+        is StructureRebuilt -> (state as? Structure.Raised)?.copy(
+            type = event.structureType, level = event.level, significance = event.significance,
+            holder = event.holder, ruined = false,
+        ) ?: state
     }
 
     companion object {

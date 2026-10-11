@@ -1,7 +1,7 @@
 import { Graphics } from 'pixi.js';
 import type { Texture } from 'pixi.js';
 
-import { DRAWN_TYPES, INK, pictureOf } from './structureShapes';
+import { DRAWN_TYPES, INK, RUIN_PICTURE, pictureFor, pictureOf } from './structureShapes';
 import type { Picture } from './structureShapes';
 
 /** Rasterises a shape on the canvas it will be drawn on, as `markTextures.ts` does every mark. */
@@ -63,6 +63,7 @@ export interface StructurePictures {
 
 export function buildStructurePictures(rasterise: Rasterise): StructurePictures {
   const drawn = new Map(DRAWN_TYPES.map((type) => [type, draw(pictureOf(type), rasterise)]));
+  drawn.set(RUIN_PICTURE, draw(pictureFor('', true), rasterise));
   const any = draw(pictureOf(''), rasterise);
   return { of: (type) => drawn.get(type) ?? any };
 }

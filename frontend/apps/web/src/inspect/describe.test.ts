@@ -110,6 +110,12 @@ describe("a structure's window", () => {
     });
   });
 
+  it('says it is a ruin, of what, held by nobody', () => {
+    const said = describeStructure({ ...abbey, ruin: true }, spec, false);
+
+    expect([said.kind, said.under, said.facts[0]?.said]).toEqual(['Ruin', 'the ruin of an abbey', 'nobody']);
+  });
+
   it('says whose seat it is, when it is one', () => {
     expect(describeStructure({ ...abbey, holder: ravenscar, seatOf: ravenscar }, spec, true).under).toBe(
       'an abbey, the seat of Ravenscar',

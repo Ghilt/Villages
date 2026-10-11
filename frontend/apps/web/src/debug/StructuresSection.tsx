@@ -9,7 +9,7 @@ import { subjectsStore } from '../inspect/subjects';
 import { sessionStore } from '../net/gateway';
 import { useStore } from '../store/useStore';
 import { Section } from './Section';
-import { raiseAntarctica, raiseStructure, takeControl } from './levers';
+import { raiseAntarctica, raiseStructure, rebuildStructure, ruinStructure, takeControl } from './levers';
 
 interface StructuresSectionProps {
   map: maplibregl.Map | null;
@@ -132,6 +132,26 @@ export function StructuresSection({ map }: StructuresSectionProps) {
           onClick={() => open !== null && takeControl(open.id, openName ?? open.id)}
         >
           take control of this building
+        </button>
+        <button
+          type="button"
+          className="debug__button"
+          disabled={connection !== 'open' || open === null}
+          title={openName === null ? "open a structure's window first" : `bring ${openName} down, by fire`}
+          onClick={() => open !== null && ruinStructure(open.id, openName ?? open.id)}
+        >
+          ruin it
+        </button>
+        <button
+          type="button"
+          className="debug__button"
+          disabled={connection !== 'open' || open === null}
+          title={
+            openName === null ? "open a structure's window first" : `raise ${openName} again, for nobody`
+          }
+          onClick={() => open !== null && rebuildStructure(open.id, openName ?? open.id)}
+        >
+          rebuild it
         </button>
       </div>
       <p className="debug__quiet">

@@ -113,3 +113,5 @@ recorded over. See decision record 0037. What each one changed:
   sent, which a window says and which the page draws in place of that house's own mark.
 - **41** - a house's holdings: the private `yourHoldings`, every structure the player's house holds now, its seat
   first and the rest in the order it came to hold them, sent on hello and whenever one changes hands or is raised.
+- **42** - ruins: `StructureView` carries `ruin` for a ruin, and Adam's levers `ruinStructure`, a structure and a cause,
+  and `rebuildStructure` bring one down and raise it again.

@@ -16,6 +16,7 @@ import villages.domain.LevelSpec
 import villages.domain.Location
 import villages.domain.PlayerId
 import villages.domain.RaiseStructure
+import villages.domain.Ruin
 import villages.domain.Significance
 import villages.domain.StructureCatalogue
 import villages.domain.StructureId
@@ -127,5 +128,17 @@ class StandingEffectsSpec : StringSpec({
         older.listening()
         older.later.tick()
         older.gained(bea).single().from shouldBe theMill
+    }
+
+    "a structure fallen to ruin takes back its holder's vision from it" {
+        val rig = rig()
+        rig.listening()
+        raise(rig.world, holder = ada)
+        rig.later.tick()
+
+        rig.world.execute(Ruin(theMill, "fire", today, noon), Provenance.startedBy(UUID.randomUUID()))
+        rig.later.tick()
+
+        rig.lost(ada).single().visionId shouldBe rig.gained(ada).single().visionId
     }
 })

@@ -18,6 +18,8 @@ import villages.domain.KeyFigureEvent
 import villages.domain.ResourceEvent
 import villages.domain.StructureId
 import villages.domain.StructureChangedHands
+import villages.domain.StructureRebuilt
+import villages.domain.StructureRuined
 import villages.domain.StructureRaised
 import villages.domain.VisionEvent
 import villages.protocol.Cell
@@ -78,6 +80,16 @@ class StructuresProjection(feed: EventFeed) : Follower(feed), StructuresByCell {
                 )
                 put(held.row.copy(faces = held.row.faces + face), stored.streamVersion, appeared = false)
             }
+            // Fallen: a face of its own from that day, nobody's and nobody's seat, kept for whoever last saw it standing.
+            is StructureRuined -> changed(event.structureId, stored.streamVersion) {
+                it.copy(holder = null, seatOf = null, ruin = true, since = event.worldTime)
+            }
+            is StructureRebuilt -> changed(event.structureId, stored.streamVersion) {
+                it.copy(
+                    type = event.structureType, level = event.level, significance = event.significance,
+                    holder = event.holder?.let(holders::get), seatOf = null, ruin = false, since = event.worldTime,
+                )
+            }
             // Whose seat it is goes on its face, so a house that last saw it sees it as whose seat it was then.
             is HouseNamedSeat -> {
                 val held = rows[event.structureId] ?: return
@@ -89,6 +101,14 @@ class StructuresProjection(feed: EventFeed) : Follower(feed), StructuresByCell {
             // What a house has, is asked, is told, holds and sees, and what befalls a person, changes no structure.
             is ResourceEvent, is ChoiceEvent, is DialogueEvent, is KeyFigureEvent, is VisionEvent, is CharacterEvent -> Unit
         }
+    }
+
+    /** A new face from the last, as [change] makes it, once for each event of the structure's own stream. */
+    private fun changed(id: StructureId, streamVersion: Long, change: (StructureFace) -> StructureFace) {
+        val held = rows[id] ?: return
+        if (streamVersion <= held.streamVersion) return
+        val face = change(held.row.faces.last()).copy(stamp = applied.incrementAndGet())
+        put(held.row.copy(faces = held.row.faces + face), streamVersion, appeared = false)
     }
 
     private fun put(row: StructureRow, streamVersion: Long, appeared: Boolean) {

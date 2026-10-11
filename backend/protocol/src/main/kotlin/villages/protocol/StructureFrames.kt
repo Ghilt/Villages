@@ -28,6 +28,8 @@ data class StructureView(
     val seenUntil: Long? = null,
     /** The house whose seat it is, in the face sent, or absent. */
     val seatOf: HolderView? = null,
+    /** True for a ruin, in the face sent, and absent for a structure standing. */
+    val ruin: Boolean? = null,
 )
 
 /**

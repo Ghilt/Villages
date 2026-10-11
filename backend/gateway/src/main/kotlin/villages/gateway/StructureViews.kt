@@ -25,4 +25,5 @@ internal fun StructureRow.toView(face: StructureFace, seenUntil: WorldTime?): St
     stamp = face.stamp,
     seenUntil = seenUntil?.day,
     seatOf = face.seatOf?.let { HolderView(it.house.value.toString(), it.name.value, it.banner.toWire()) },
+    ruin = if (face.ruin) true else null,
 )

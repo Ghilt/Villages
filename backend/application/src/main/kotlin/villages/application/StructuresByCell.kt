@@ -24,6 +24,8 @@ data class StructureFace(
     val stamp: Long,
     /** The house whose seat it is, with what a window names it by, or none. */
     val seatOf: Holder? = null,
+    /** Fallen to ruin: no holder and nobody's seat, until it is rebuilt. */
+    val ruin: Boolean = false,
 )
 
 /**

@@ -17,6 +17,12 @@ sealed class StructureError(message: String) : DomainError(message) {
     /** Nothing can be done to a structure that was never raised. */
     data object NoSuchStructure : StructureError("there is no such structure")
 
+    /** A ruin cannot change hands, change its level or fall again: it is rebuilt first. */
+    data object IsARuin : StructureError("it is a ruin")
+
+    /** Only a ruin is rebuilt; a structure standing is not. */
+    data object NotARuin : StructureError("it is not a ruin")
+
     /** Handing a structure to the holder it has changes nothing, so it is refused rather than written. */
     data object SameHolder : StructureError("it is held by them already")
 }

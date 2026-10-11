@@ -34,6 +34,32 @@ data class StructureRaised(
  * structure: what it changes for the two houses - what they are paid, what they see, a seat lost - is written after it
  * by listeners, in the same story. See docs/plans/structures.md.
  */
+/**
+ * A structure fell to ruin, for the cause given. A ruin has no holder and gives nothing: whoever held it holds it no
+ * longer, and what that means for them - what they see, a seat lost - follows from listeners, in the same story. Its
+ * contents stay in it until something takes them out. See docs/plans/structures.md.
+ */
+data class StructureRuined(
+    override val structureId: StructureId,
+    val cause: String,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : StructureEvent, WorldEvent
+
+/**
+ * A ruin was raised again: of a type, at a level, for a house or for nobody, its significance the catalogue's for
+ * that type and level, carried as a raising's is (0026). The same structure, its name and place unchanged.
+ */
+data class StructureRebuilt(
+    override val structureId: StructureId,
+    val structureType: StructureType,
+    val level: Int,
+    val significance: Significance,
+    val holder: HouseId?,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : StructureEvent, WorldEvent
+
 data class StructureChangedHands(
     override val structureId: StructureId,
     val from: HouseId?,

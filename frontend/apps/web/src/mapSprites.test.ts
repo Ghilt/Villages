@@ -75,6 +75,15 @@ describe('a structure as the map draws it', () => {
   });
 });
 
+describe('a ruin', () => {
+  it('is drawn as a ruin, as tall as what it was, and flies no pennant', () => {
+    const drawn = toStructureSprite({ ...structure('castle', 2), ruin: true }, CATALOGUE);
+
+    expect(drawn.structure).toEqual({ picture: 'a ruin', groundHeight: 4.5 });
+    expect(drawn).not.toHaveProperty('pennant');
+  });
+});
+
 describe('a house beside its seat', () => {
   const castle = { ...structure('castle', 1, RAVENSCAR), seatOf: RAVENSCAR };
 

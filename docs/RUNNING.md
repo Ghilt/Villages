@@ -290,6 +290,12 @@ stage alone, with none of the debug panel in it (decision record 0079).
   or its house's the newest open - its **influence zone** is drawn about it, the ragged gold ground every seat used
   to have at all times, its reach the catalogue's `zone`; a type without one draws none. The seat still sees from where the
   house was founded too, until a seat can be lost.
+- Ruining one and raising it again: **ruin it** and **rebuild it**, beside *take control of this building*, on the
+  structure whose window was opened last. *Ruin it* writes `villages.structure.ruined.v1`, by fire: a ruin holds
+  nobody, its holder's sight from it is taken back, and it is drawn as a ruin - the stump of a tower and a broken
+  wall - with no pennant, its window saying *the ruin of a mill*, and the log `the Antarctic mill lies in ruin`.
+  A ruin cannot be taken or ruined again (`isARuin`). *Rebuild it* writes `villages.structure.rebuilt.v1`, as
+  what it was, at level 1, for nobody; only a ruin can be rebuilt (`notARuin`).
 - What your house holds: the **Holdings** tab of the corner, beside the key figures, its mark the tower. A list,
   the seat first and the rest in the order the house came to hold them, each row the structure's placeholder
   picture, its name, and what it is - *a castle, the seat of Ravenscar, level 1*; with none it says that holdings

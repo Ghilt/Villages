@@ -205,6 +205,8 @@ export const commandPayloadSchema = z.discriminatedUnion('type', [
   }),
   z.object({ type: z.literal('raiseAntarctica') }),
   z.object({ type: z.literal('takeControl'), structureId: z.string() }),
+  z.object({ type: z.literal('ruinStructure'), structureId: z.string(), cause: z.string() }),
+  z.object({ type: z.literal('rebuildStructure'), structureId: z.string() }),
   z.object({ type: z.literal('takeOffTheMap'), characterId: z.string() }),
   /**
    * Give the house vision of a place outright, until it is taken away; how far it sees is the world's to say.
