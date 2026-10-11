@@ -34,7 +34,7 @@ class AntarcticaSpec : StringSpec({
         }
     }
 
-    "every type stands once, held by nobody, at its first level, four to a row on the ice" {
+    "every type stands once, held by nobody, at its first level, four to a row on the island" {
         val store = Raised()
 
         Antarctica(store, catalogue, { noon }, { WorldTime(653_705) }).raise() shouldBe 3
@@ -42,8 +42,9 @@ class AntarcticaSpec : StringSpec({
         store.commands.map { it.name } shouldBe listOf("the Antarctic castle", "the Antarctic mill", "the Antarctic printing house")
         store.commands.map { it.structureId } shouldBe catalogue.types.keys.map(StructureId::inAntarctica)
         store.commands.all { it.holder == null && it.level == 1 } shouldBe true
-        store.commands[1].place shouldBe Location(-77.4, 12.0)
-        Antarctica.placeOf(5) shouldBe Location(-77.8, 12.0)
+        store.commands[1].place shouldBe Location(-63.193, -56.07)
+        Antarctica.placeOf(5) shouldBe Location(-63.229, -56.07)
+        Antarctica.placeOf(15) shouldBe Location(-63.301, -55.91)
     }
 
     "starting again over a kept world raises none of them twice" {

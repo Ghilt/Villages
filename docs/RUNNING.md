@@ -250,13 +250,15 @@ stage alone, with none of the debug panel in it (decision record 0079).
   culture calls it. It reads the file again on every load; one it cannot read is said in place of the table, naming
   the type and the field. The structures' sprites will stand there too. See `docs/plans/structures.md`.
 - Every type standing at once: **Antarctica**. While the instruments are open the game server raises one structure of
-  every type when it starts, held by nobody, at its first level, four to a row about forty-five kilometres apart on
-  the ice of Queen Maud Land, from 77.4 to 78.6 degrees south and 10 to 16 east - the Antarctic castle first. Each
-  is a `villages.structure.raised.v1` on the event page, sixteen of them at every start, and an id worked out from
-  its type means a server starting over a kept world raises none twice. A wipe takes them with everything else,
-  and the Structures section's **raise Antarctica again** puts back whichever are gone. They are too far apart to
-  see more than four at once: zoom 6.3 over 78 south, 13 east shows two rows of them as signs, and **on the
-  map** under each one's `raised` on the event page opens the game over it.
+  every type when it starts, held by nobody, at its first level, four to a row about four kilometres apart on the
+  island off the tip of the Antarctic Peninsula, about 63.25 south and 56.03 west - the Antarctic castle at the
+  north-west corner. Each is a `villages.structure.raised.v1` on the event page, sixteen of them at every start,
+  and an id worked out from its type means a server starting over a kept world raises none twice; a world kept
+  from before they moved keeps them where they were first raised. A wipe takes them with everything else, and the
+  Structures section's **raise Antarctica again** puts back whichever are gone. All sixteen are on the screen at
+  once from zoom 9 over the island, with the fog lifted, and with *see everything* on too below the zoom each
+  one's significance is drawn from; **on the map** under each one's `raised` on the event page opens the game
+  over it.
 - Raising one where you look: the **Structures** section of the debug panel, after Resources. A type from the
   catalogue, a level it has, **yours** or **nobody's**, and **raise here** raises one at the middle of the map,
   named *a new mill* and the like; **raise Antarctica again** is the sixteen. Each is a command said in the log

@@ -9,7 +9,7 @@ import villages.domain.StructureType
 import java.util.UUID
 
 /**
- * One structure of every type in the catalogue, standing on the ice in Antarctica and held by nobody: Adam's, to fly
+ * One structure of every type in the catalogue, standing on an Antarctic island and held by nobody: Adam's, to fly
  * to and look at while the instruments are open. Not the world of 1790, which will raise structures in its towns; a
  * place where every type can be seen at once, far from anyone's house.
  *
@@ -47,10 +47,12 @@ class Antarctica(
 
     companion object {
         /**
-         * Where the [at]th type stands: four to a row, about forty-five kilometres apart each way, on the ice of
-         * Queen Maud Land, where no founding seat is offered and nothing else stands. Counted in tenths of a degree, so
-         * a row's latitude is the number it is written as and not a hair off it.
+         * Where the [at]th type stands: four to a row, the castle at the north-west corner, on the island off the
+         * tip of the Antarctic Peninsula that Adam chose on 2026-10-11, about its middle at 63.247 south, 56.030 west.
+         * Four kilometres apart each way, so all sixteen are on the screen at once from zoom 9: eight hundredths of a
+         * degree east, and on a map that stretches latitude as Mercator does, 0.036 degrees south looks as far.
+         * Counted in thousandths of a degree, so a place is the number it is written as and not a hair off it.
          */
-        fun placeOf(at: Int): Location = Location((-774 - 4 * (at / 4)) / 10.0, 10.0 + 2.0 * (at % 4))
+        fun placeOf(at: Int): Location = Location((-63_193 - 36 * (at / 4)) / 1000.0, (-56_150 + 80 * (at % 4)) / 1000.0)
     }
 }
