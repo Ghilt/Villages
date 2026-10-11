@@ -144,7 +144,8 @@ export function WorldSection({ map }: WorldSectionProps) {
     <Section name="World" tools={tools}>
       {levers}
       <p className="debug__quiet">
-        Events are at <a href={INSPECT_EVENTS}>{INSPECT_EVENTS}</a>
+        Events are at <a href={INSPECT_EVENTS}>{INSPECT_EVENTS}</a>, every inspect view at{' '}
+        <a href="/admin">/admin</a>
       </p>
     </Section>
   );

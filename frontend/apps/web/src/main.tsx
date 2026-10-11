@@ -1,7 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
-import { EventLog } from './admin/EventLog';
+import { inspectViewAt, isInspectIndex } from './admin/inspectViews';
 import { App } from './App';
 import type { DevTools } from './App';
 import { note } from './log/log';
@@ -13,12 +13,6 @@ import { sessionLog } from './sessionLog';
 import { configureBays } from './stage/bays';
 
 import './styles.css';
-
-/** A page that is not the game: every event the world stores, for reading. */
-const INSPECT_EVENTS = '/admin/inspect-events';
-
-/** The other: the component library, shown. See docs/UI-COMPONENTS.md. */
-const INSPECT_UI_COMPONENTS = '/admin/inspect-ui-components';
 
 /**
  * Which master is drawn, decided here and nowhere else.
@@ -34,23 +28,45 @@ if (container === null) {
 const root = createRoot(container);
 
 /**
- * Which page this is, by its address. A check rather than a router: there are three pages, one of them
- * is the game, and a router would be a dependency to hold two `if`s.
+ * Which page this is, by its address. A check rather than a router: the pages beside the game are listed in
+ * `admin/inspectViews.ts`, the index of them is `/admin`, and anything else is the game. Every inspect page is
+ * fetched with `import()`, so none of them, nor what they carry, is part of the game's bundle (0091).
  */
-if (window.location.pathname.startsWith(INSPECT_EVENTS)) {
-  document.title = 'Villages: events';
-  root.render(
-    <StrictMode>
-      <EventLog />
-    </StrictMode>,
+const inspecting = inspectViewAt(window.location.pathname)?.path;
+if (isInspectIndex(window.location.pathname)) {
+  document.title = 'Villages: inspect';
+  void import('./admin/InspectIndex').then(({ InspectIndex }) =>
+    root.render(
+      <StrictMode>
+        <InspectIndex />
+      </StrictMode>,
+    ),
   );
-} else if (window.location.pathname.startsWith(INSPECT_UI_COMPONENTS)) {
+} else if (inspecting === '/admin/inspect-events') {
+  document.title = 'Villages: events';
+  void import('./admin/EventLog').then(({ EventLog }) =>
+    root.render(
+      <StrictMode>
+        <EventLog />
+      </StrictMode>,
+    ),
+  );
+} else if (inspecting === '/admin/inspect-ui-components') {
   document.title = 'Villages: components';
   // Fetched only here, so neither the library nor its fonts and pictures are part of the game's bundle.
   void import('./admin/UiComponents').then(({ UiComponents }) =>
     root.render(
       <StrictMode>
         <UiComponents />
+      </StrictMode>,
+    ),
+  );
+} else if (inspecting === '/admin/inspect-architecture') {
+  document.title = 'Villages: architecture';
+  void import('./admin/architecture/InspectArchitecture').then(({ InspectArchitecture }) =>
+    root.render(
+      <StrictMode>
+        <InspectArchitecture />
       </StrictMode>,
     ),
   );

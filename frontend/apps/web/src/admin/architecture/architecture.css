@@ -1,0 +1,128 @@
+/*
+ * The architecture page, at /admin/inspect-architecture: how the world is set up. The colours say who makes a
+ * thing - Adam, a download, a tool - and green is what runs. The diagram's own rules are diagram.css.
+ */
+
+.arch {
+  --authored: #b8862b;
+  --authored-bg: #f6e7c4;
+  --fetched: #3a6c95;
+  --fetched-bg: #dbe8f3;
+  --baked: #6b6258;
+  --baked-bg: #ece6da;
+  --tool: #3b3229;
+  --runtime: #2e6b4f;
+  --runtime-bg: #dcefe3;
+  --chosen: #8f1d2f;
+  --mono: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace;
+
+  box-sizing: border-box;
+  max-width: 120rem;
+  margin: 0 auto;
+}
+
+.arch button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.arch code {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+}
+
+.arch__bar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.arch__side-title {
+  margin: 0 0 0.8rem;
+  font-size: 0.8rem;
+  font-weight: normal;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.arch__side-title span {
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+  font-style: italic;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ink-soft);
+}
+
+.arch__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.arch__key {
+  padding: 0.15rem 0.6rem;
+  font-size: 0.75rem;
+  border: 1px solid;
+  border-radius: 3px;
+}
+
+.arch__key--authored {
+  background: var(--authored-bg);
+  border-color: var(--authored);
+}
+
+.arch__key--fetched {
+  background: var(--fetched-bg);
+  border-color: var(--fetched);
+}
+
+.arch__key--baked {
+  background: var(--baked-bg);
+  border-color: var(--baked);
+}
+
+.arch__key--tool {
+  color: #fffdf6;
+  background: var(--tool);
+  border-color: var(--tool);
+}
+
+.arch__key--run {
+  background: var(--runtime-bg);
+  border-color: var(--runtime);
+}
+
+.arch__legacy {
+  flex-basis: 100%;
+  margin: 0.3rem 0 0;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
+
+/* Chosen, lit and dimmed: the timeline's bars here, the cards and arrows in diagram.css. */
+
+.arch .arch__step.is-dim {
+  opacity: 0.3;
+}
+
+.arch .arch__step.is-lit {
+  outline: 2px solid var(--ink-soft);
+  outline-offset: 1px;
+}
+
+.arch .arch__step.is-chosen {
+  outline: 3px solid var(--chosen);
+  outline-offset: 1px;
+}
+
+@media (width <= 900px) {
+  .arch__steps {
+    flex-wrap: wrap;
+  }
+}

@@ -1,0 +1,136 @@
+/* The top of the architecture page: the numbers, a master step by step, and what is chosen. */
+
+/* In numbers. */
+
+.arch__tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 0.8rem;
+  margin-bottom: 1.4rem;
+}
+
+.arch__tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.8rem 1rem;
+  background: #fffdf6;
+  border: 1px solid var(--parchment-edge);
+  border-radius: 3px;
+}
+
+.arch__figure {
+  font-size: 1.6rem;
+}
+
+.arch__tile-label {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+/* A master, step by step. */
+
+.arch__timeline {
+  margin-bottom: 1.2rem;
+}
+
+.arch__steps {
+  display: flex;
+  gap: 2px;
+  min-height: 3.2rem;
+}
+
+.arch__step {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 3.2rem;
+  padding: 0.3rem 0.4rem;
+  overflow: hidden;
+  font-family: var(--mono) !important;
+  font-size: 0.68rem !important;
+  text-align: left;
+  white-space: nowrap;
+  background: var(--baked-bg);
+  border: 1px solid var(--baked);
+  border-radius: 2px;
+}
+
+.arch__step span:last-child {
+  color: var(--ink-soft);
+}
+
+.arch__total {
+  margin: 0.4rem 0 0;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+/* What is chosen. */
+
+.arch__focus {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  min-height: 2rem;
+  padding: 0.7rem 1rem;
+  margin-bottom: 1.2rem;
+  background: #fffdf6;
+  border: 1px solid var(--ink-soft);
+  border-radius: 3px;
+  box-shadow: 0 3px 10px rgb(60 40 20 / 10%);
+}
+
+.arch__focus--empty {
+  font-style: italic;
+  color: var(--ink-soft);
+  border-style: dashed;
+  box-shadow: none;
+}
+
+.arch__focus p {
+  margin: 0.2rem 0 0.5rem;
+}
+
+.arch__focus-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: normal;
+}
+
+.arch__focus-title span {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+.arch__clear {
+  float: right;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.68rem !important;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: none;
+  border: 1px solid var(--parchment-edge);
+  border-radius: 2px;
+}
+
+.arch__facts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.2rem 1rem;
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.arch__facts dt {
+  color: var(--ink-soft);
+}
+
+.arch__facts dd {
+  margin: 0;
+}
+
+.arch__yes {
+  font-weight: bold;
+  color: var(--runtime);
+}

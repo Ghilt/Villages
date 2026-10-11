@@ -1,3 +1,5 @@
+import './event-log.css';
+
 import { useEffect, useState } from 'react';
 
 import { connect } from '@villages/client-core';
@@ -6,6 +8,7 @@ import type { EventFrame } from '@villages/protocol';
 
 import { browserSocket } from '../net/browserSocket';
 import { GATEWAY_URL } from '../net/address';
+import { BackToIndex } from './InspectIndex';
 
 /** Enough to hold a session's worth of play. Past this the oldest go, as in any log. */
 const MOST = 2000;
@@ -65,6 +68,7 @@ export function EventLog() {
         <button type="button" className="log__button" onClick={() => setEvents([])}>
           clear
         </button>
+        <BackToIndex />
       </header>
 
       {problem !== null && <p className="log__problem">{problem}</p>}

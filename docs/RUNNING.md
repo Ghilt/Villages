@@ -383,3 +383,23 @@ stage alone, with none of the debug panel in it (decision record 0079).
   the screen's density beside them. A section not built yet says which step of
   `docs/plans/ui-component-library.md` brings it. What a component is made of and how to add one is
   `docs/UI-COMPONENTS.md`; see decision record 0068.
+
+## The inspect views
+
+- Every page beside the game is listed at **`/admin`** on this tree's dev server: what each is for, what it
+  needs running, and the game itself. Each of them has a way back to it at the top, and the debug panel's
+  World section links it. A new page beside the game is added to `apps/web/src/admin/inspectViews.ts`.
+- **`/admin/inspect-architecture`** is how the world is set up, and needs nothing else running. Along the top,
+  the numbers: how long a master takes from its painting to a world the game serves, how many tools bake
+  it, and how many baked files the running game depends on; then a master step by step, each tool a bar as
+  long as it takes. Below is the diagram, flowing down the page: cards for what Adam authors and what is
+  downloaded, the tools that bake the world from them, and the files they write, each file card saying
+  whether it is one file, a few, or a folder, its path, and who makes it - Adam (gold), a download (blue),
+  a tool (grey). Under a dotted line are the running cards: the page, the gateway, the game server with what
+  it reads, the event store and the projections. Arrows run from what is read to what reads it. Drag to move
+  about, scroll to zoom, the minimap for the whole; choosing a card lights everything it depends on and
+  everything that depends on it, and the strip above the diagram says what it is, with the command to run a
+  tool. Adam's own tools and the stale scripts are named under it rather than drawn. Its data is
+  `apps/web/src/admin/architecture/`, held to the repository by `world.test.ts`: a new `world:` script, a
+  moved reader or a file nothing makes fails it. The times of the tools the quick-start runs were measured
+  on Adam's machine on 2026-10-11. The inspect pages are kept apart from the game by decision 0091.

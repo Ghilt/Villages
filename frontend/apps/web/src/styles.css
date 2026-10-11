@@ -23,7 +23,6 @@
 @import './version/version.css';
 @import './map/controls.css';
 @import './net/stood-down.css';
-@import './admin/event-log.css';
 @import './choice/choice.css';
 @import './inspect/card.css';
 @import './stage/rail.css';

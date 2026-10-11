@@ -83,7 +83,9 @@ packages/world                               <-  apps/web
   `sprites` and `room`; the game's own surfaces, `house`, `figures`, `choice`, `dialogues`, `areas` and `inspect`;
   and what puts it all together, the root, `debug` and `admin`. No two files import each other, however far round.
   `src/layers.test.ts` holds it. The component library in the top row is imported by `admin`, which shows it,
-  and by `stage`, which dresses each tile in a container (`stage/dress.ts`); no surface imports it yet. The imports that broke it on the first day were listed one by one and each
+  and by `stage`, which dresses each tile in a container (`stage/dress.ts`); no surface imports it yet. The
+  inspect pages in `admin` are cordoned off beyond that: nothing in the game imports them, the entry reaches
+  them only with `import()`, and the libraries they carry are theirs alone (`src/admin/boundary.test.ts`, 0091). The imports that broke it on the first day were listed one by one and each
   ended by a step of the plan; none is left. What a surface needs from another surface is handed down: an
   overlay on the map is handed what the map marks and what a pick does, and a pane what it shows beside
   itself. See decision record 0073.

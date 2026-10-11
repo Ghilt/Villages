@@ -3,6 +3,7 @@ import './showcase/showcase.css';
 
 import { useRef } from 'react';
 
+import { BackToIndex } from './InspectIndex';
 import { ContrastSummary, useUnreadable } from './showcase/ContrastCheck';
 import { useDensity } from './showcase/density';
 import { SECTIONS } from './showcase/sections';
@@ -41,6 +42,7 @@ export function UiComponents() {
         <div className="showcase__heading">
           <h1 className="ui-title">Components</h1>
           <p className="ui-epigraph">The library, shown: every part the interface is built from</p>
+          <BackToIndex />
         </div>
         <div className="showcase__switches">
           <Choice<Width>

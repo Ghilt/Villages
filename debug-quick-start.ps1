@@ -584,7 +584,7 @@ function Ensure([string[]] $Made, [string] $What, [string[]] $Arguments, [string
 # runs them; the styles when world/painterly.json or render.json was, the names when the review or about.json was (0087).
 $Painted = @($Master)
 Ensure 'terrain.geojson' 'tracing the coast and the lakes' @('run', 'world:import') 'the coast and the lakes are traced' $Painted
-Ensure 'tiles\cut.json' 'cutting the world into tiles (about two minutes)' @('run', 'world:tile') 'the world is cut' $Painted
+Ensure 'tiles\cut.json' 'cutting the world into tiles (about three minutes)' @('run', 'world:tile') 'the world is cut' $Painted
 Ensure '..\..\paint.json' 'writing the styles' @('run', 'world:paint', '--', '--config-only') 'the styles are written' @((Join-Path $Root 'world\painterly.json'), (Join-Path $Root 'world\render.json'))
 Ensure 'flow\flow.json' 'working out which way rivers run' @('run', 'world:flow', '--', '--no-stills') 'the rivers run' $Painted
 # What kind of place every part of the world is and where the scenery clumps (0054): the biomes beside the page's

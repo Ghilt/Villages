@@ -1,0 +1,214 @@
+/*
+ * The architecture diagram: cards, the arrows between them, and the dotted line between baked and running.
+ * A file card is a page with a coloured strip saying who makes it; a tool card is dark-headed; a running card
+ * is green. React Flow's own stylesheet comes first, and these rules dress what it draws.
+ */
+
+.diagram {
+  height: min(82vh, 60rem);
+  min-height: 28rem;
+  background: #fbf7ec;
+  border: 1px solid var(--parchment-edge);
+  border-radius: 3px;
+}
+
+.diagram .react-flow__node {
+  cursor: pointer;
+}
+
+.card {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  width: 100%;
+  height: 100%;
+  padding: 0 0.6rem 0.5rem;
+  overflow: hidden;
+  font-size: 0.72rem;
+  line-height: 1.3;
+  color: var(--ink, #2b2118);
+  background: #fffdf6;
+  border: 1px solid var(--baked);
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgb(60 40 20 / 12%);
+  transition: opacity 120ms;
+}
+
+.card__strip {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+  margin: 0 -0.6rem 0.15rem;
+  padding: 0.2rem 0.6rem;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: var(--baked-bg);
+  border-bottom: 1px solid var(--baked);
+}
+
+.card__by {
+  margin-left: auto;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.card__mark {
+  width: 1rem;
+  height: 0.9rem;
+  fill: #fffdf6;
+  stroke: currentcolor;
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+}
+
+.card__name {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.card__name--mono {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+}
+
+.card__path {
+  overflow: hidden;
+  font-size: 0.64rem !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card__what,
+.card__ran {
+  overflow: hidden;
+}
+
+.card__ran {
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+/* Files, by who makes them. */
+
+.card--authored {
+  border-color: var(--authored);
+}
+
+.card--authored .card__strip {
+  background: var(--authored-bg);
+  border-color: var(--authored);
+}
+
+.card--fetched {
+  border-color: var(--fetched);
+}
+
+.card--fetched .card__strip {
+  background: var(--fetched-bg);
+  border-color: var(--fetched);
+}
+
+/* Tools. */
+
+.card--tool {
+  border-color: var(--tool);
+  border-width: 1.5px;
+  border-radius: 10px;
+}
+
+.card--tool .card__strip {
+  color: #fffdf6;
+  background: var(--tool);
+  border-color: var(--tool);
+}
+
+/* What runs. */
+
+.card--run {
+  background: #f7fcf8;
+  border-color: var(--runtime);
+  border-width: 1.5px;
+}
+
+.card--run .card__strip {
+  color: #fffdf6;
+  background: var(--runtime);
+  border-color: var(--runtime);
+}
+
+.card--live {
+  border-style: dashed;
+}
+
+.card--run {
+  height: auto;
+  overflow: visible;
+  font-size: 0.75rem;
+}
+
+/* The line between baked and running. */
+
+.card-line {
+  position: relative;
+  height: 0;
+  border-top: 3px dotted var(--runtime);
+  pointer-events: none;
+}
+
+.card-line span {
+  position: absolute;
+  left: 0;
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.card-line__above {
+  bottom: 0.5rem;
+  color: var(--baked);
+}
+
+.card-line__below {
+  top: 0.5rem;
+  color: var(--runtime);
+}
+
+/* Arrows. */
+
+.diagram .arrow path {
+  stroke: #9b8f7f;
+  stroke-width: 1.2;
+}
+
+.diagram .arrow--talk path {
+  stroke: var(--runtime);
+  stroke-width: 2;
+  stroke-dasharray: 6 4;
+}
+
+.diagram .arrow.is-lit path {
+  stroke: var(--chosen);
+  stroke-width: 2.2;
+}
+
+.diagram .arrow.is-dim {
+  opacity: 0.12;
+}
+
+/* Chosen, lit, dimmed. */
+
+.card.is-dim {
+  opacity: 0.22;
+}
+
+.card.is-lit {
+  box-shadow: 0 0 0 2px var(--ink-soft);
+}
+
+.card.is-chosen {
+  box-shadow: 0 0 0 3px var(--chosen);
+}

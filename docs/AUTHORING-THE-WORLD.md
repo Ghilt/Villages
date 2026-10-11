@@ -116,7 +116,7 @@ world into map tiles, which is how the terrain itself is drawn: thirty-two class
 detailed come to well over a hundred thousand outlines, so terrain is pixels and only the ink is vector.
 See `docs/adr/0019`. The tiler works out where the master's detail runs out, which is zoom seven for a master this wide, and
 writes 21,845 tiles totalling 65 MB into `masters/<name>/tiles`. Tracing takes under a minute and
-cutting takes another four. A screen of map costs a few tens of
+cutting takes another three. A screen of map costs a few tens of
 kilobytes of that.
 
 From inside `frontend/` it is `npm run world:import`, with no prefix. The prefix is what tells npm where
