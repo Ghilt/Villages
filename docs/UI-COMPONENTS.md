@@ -381,6 +381,17 @@ A line each: what it is for, its variants, and where on the page it is.
   is. Its states are a light of cream over it rather than a shade, because shade takes from the ink's
   contrast on parchment; chosen is a bar down its start as well. A list too long for its room goes in a
   `ScrollArea`. *Collections*.
+- **`Socket`** and **`SlotRow`**, `ui/socket/Socket.tsx`: one place in a structure's slot, and the slot's row
+  of them. A socket is upright, three by four as a portrait is, `size` pixels tall: **empty**, a frame in fine
+  dashes of the words' own colour; a **portrait**, a person's picture covering it; an **item**, its picture or
+  the first letter of its name until it has one, and its `amount` on a velvet pip at its foot; **unknown**, a
+  question, for what the viewer is not told; and **more**, `+3`, the last of a row too long for its room. Given
+  `onPress` it is a button with every button's states. A `SlotRow` is the slot's name and how full it is on one
+  line - *dungeon*, *2 of 3* - and a socket a place under them, what fills it first and an empty frame for each
+  place left, wrapping in a narrow room; `secret` is a question in every place and *? of 4*, and past `most`
+  the last socket says how many more. Drawn, a velvet recess in a gilt line, and reads no picture of its own:
+  the portraits and the items' pictures are the pane's to give. `ui/socket/slots.ts` is its arithmetic.
+  *Slots*.
 - **`Dialog`** and **`DialogBox`**, `ui/dialog/Dialog.tsx`: a question that has to be answered before
   anything else - kill this key figure? - over the whole page, the page behind dimmed with night and out of
   reach. The browser's own modal dialog is under it, so it is drawn over everything, the keyboard stays in

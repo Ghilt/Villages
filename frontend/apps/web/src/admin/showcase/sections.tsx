@@ -10,6 +10,7 @@ import { Foundations } from './Foundations';
 import { MarksAndReadouts } from './MarksAndReadouts';
 import { Pictures } from './Pictures';
 import { Rolls } from './Rolls';
+import { Slots } from './Slots';
 import { TabsAndSections } from './TabsAndSections';
 
 /**
@@ -90,6 +91,12 @@ export const SECTIONS: readonly Section[] = [
     title: 'Collections',
     says: 'The card, the grid, the carousel and its dots, and the list.',
     Body: Collections,
+  },
+  {
+    id: 'slots',
+    title: 'Slots',
+    says: "A structure's slots: the socket for each place in one, and the slot's row of them.",
+    Body: Slots,
   },
   {
     id: 'dialogs',
