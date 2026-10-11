@@ -46,7 +46,7 @@ This is a loop, and Adam holds both ends of it: he verifies what lands, and he c
    commit: a decision record, the event catalogue, the glossary, the architecture.
 5. **On "continue", commit and go on.** With notes, fix them and hand over again. Then say in a line what landed.
    Bringing the work to main is the implicit last step of every plan: when "continue" comes after its last
-   step, say that it was the last, bring the work to main, and offer the next steps.
+   step, say that it was the last and bring the work to main, with the `to-main` skill.
 6. **Offer the next steps and stop again**, when nothing agreed comes next. Two to four concrete options, each
    a sentence or two on what it would produce and what it would cost, with a recommendation and the reason for
    it. Say plainly what is blocked and on what. Always leave room for an answer that is none of them, because
@@ -79,6 +79,9 @@ that moment comes, and Adam can call any of them by typing `/<name>`. What must 
 file. When Adam corrects how a moment is done, the correction goes into its skill, in the same step.
 
 - `hand-over` - the end of every step: verify, regenerate, leave the program running, present, checklist last.
+- `to-main` - Adam says "main", or a plan's last step is done: ask about the architecture diagram if something
+  significant was added, rebase, check, fast-forward main.
+- `regenerate-world` - a step changed the master or anything the world is built from: rebuild what it made stale.
 - `continue-for-some-time` - Adam is leaving for a while: offer three longer runs, then work one through,
   committing as it goes and stopping only where it said it would.
 - `nine-slice` - make a border for `world/ui/borders/` out of a frame picture Adam hands over.
@@ -89,40 +92,10 @@ The division of labour is this: Adam edits `world/master/terrain.png`, and picks
 taste. Everything that a tool can rebuild from those, an agent rebuilds, without being asked and without offering
 it as a choice. He should never be handed a change whose evidence he has to generate himself.
 
-So when a step changes the master, the palette, the render colours, the style file, or any code the paint or the
-tiles go through, that same step **also**:
-
-- **Re-cuts the tiles** if the master or the tiling changed: `npm run world:import --prefix frontend` then
-  `npm run world:tile --prefix frontend`. About five minutes. The Debug map panel offers this per master too.
-- **Re-works the rivers' flow** if the master or the flow tool changed: `npm run world:flow --prefix frontend`,
-  under a minute a master. Without it a master's rivers stand still; `cut it` in the panel does it too.
-- **Re-works the origin map** if the master changed: `npm run world:origin --prefix frontend`, two minutes a
-  master. It says where on Earth each part of the master came from and which land is invented, and the Origin
-  renderer draws it; then it carries Earth's named towns of 1790, rivers, lakes, peaks, seas and lands into the
-  world, the towns from the review in `world/names/1790.json`, beside the tiles for the page and beside the
-  ground map for the game server. It prints
-  how much of the land is from Earth, invented and copied, and how many names went nowhere: the numbers to report.
-- **Re-works the sprite map** if the master, `world/biomes.json` or the generator changed:
-  `npm run world:sprites --prefix frontend`, half a minute a master, and it prints the density of every
-  biome against experiment 0006's ceiling. Without one a master draws no scenery at all.
-- **Re-reads the ground** if the master or the ground tool changed: `npm run world:ground --prefix frontend`,
-  seconds a master. The game server reads it to work out what a player is looking at when they roll; a stale
-  one offers a river that is not there any more.
-- **Re-renders the scenery stills** after that, `npm run world:scenery --prefix frontend`, half a
-  minute, because a sprite map that changed and a still that did not is the stale-evidence trap in its
-  purest form. Say which places moved and by how much: the counts are printed beside every picture.
-- **Re-paints every view in every style**: `npm run world:paint --prefix frontend`. About four minutes for all of
-  them, and it also writes the runtime `paint.json` the app reads. After only a style edit,
-  `-- --config-only` is a second and is all the app needs.
-- **Says what moved.** Not "re-painted" but which views changed and by how much, and a before-and-after of the
-  worst one. A number and a picture, because a look cannot be reviewed from a claim.
-- **Re-tunes, or says plainly why not.** If the change altered what a style number means, the numbers are now
-  wrong and saying so is not enough. Either propose new ones with the pictures to argue them, or state in one
-  sentence that the judgement is Adam's eye and what to look for. Never leave a stale still and a tuning job on
-  the menu as though it were an optional extra.
-
-Stale output is worse than missing output, because it looks like evidence. A still painted by the previous rules
-is not a preview of anything.
+So when a step changes the master, the palette, the render colours, a style file, or any code the paint, the
+tiles or the maps go through, that same step regenerates everything it made stale, says what moved with a number
+and a picture, and re-tunes or says plainly why not: the `regenerate-world` skill. Stale output is worse than
+missing output, because it looks like evidence.
 
 ## Every session works in its own git worktree
 

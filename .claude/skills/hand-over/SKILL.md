@@ -21,8 +21,7 @@ including the things you had to fix on the way.
 
 If the step changed the master, the palette, the render colours, a style file, `world/biomes.json`, the
 names, or any code the paint or the tiles go through, do the regeneration now, without asking and without
-offering it as an option: `CLAUDE.md`, under "Adam paints the master", says what to run and what to
-report. Stale output is worse than missing output,
+offering it as an option: that is the `regenerate-world` skill. Stale output is worse than missing output,
 because it looks like evidence.
 
 ## 3. Leave the program running on the change
@@ -71,11 +70,12 @@ No commit message and no plan of commits: how the work is cut into commits is th
 not want to think about it. Do not commit yet. His answer decides what happens next:
 
 - **"continue"**, or **"cont"**, with no notes: commit what he verified, as many commits as best practice cuts it into,
-  say in a line what landed, and go on. If that was the last step of the plan, say so plainly, bring the
-  work to main - its implicit last step - and offer the next steps.
+  say in a line what landed, and go on. If that was the last step of the plan, say so plainly and bring the
+  work to main - its implicit last step - with the `to-main` skill.
 - **Notes**: fix them and hand over again. Nothing is committed.
-- **"main"**, or "bring it to main": he has verified it. Commit what is waiting, bring all of it to main,
-  and offer the next steps. Main moves on his word and only then.
+- **"main"**, or "bring it to main": he has verified it. The `to-main` skill: commit what is waiting, ask
+  about the architecture diagram if something significant was added, bring it all to main, and offer the
+  next steps. Main moves on his word and only then.
 
 ## The verify checklist
 
