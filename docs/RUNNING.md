@@ -118,7 +118,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   It opens the game in that tab at `/?at=<lat>,<lon>&zoom=10`, over the place instead of over the seat, and the
   log says `opened at ..., as the link asked`; the camera is all it moves, so ground the house cannot see is still
   under the fog, and Antarctica's sixteen want the fog lifted. A new tab would take the player over from any other
-  game tab. The `found a house here` button in it sends a
+  game tab. *Back* loads the page again rather than showing it as it was left: a page the browser restores from its
+  back/forward cache has lost its connection, and would sit *closed* drawing nothing. The `found a house here` button in it sends a
   real command and is how to make an event happen on purpose. The `restart` button beside `copy` forgets
   this browser's player and reloads, so the opening can be tried again from nothing; the house the old
   player founded stays in the world, because events are never deleted. `wipe` beside it empties the world

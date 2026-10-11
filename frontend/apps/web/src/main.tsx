@@ -27,6 +27,18 @@ if (container === null) {
 
 const root = createRoot(container);
 
+/*
+ * A page the browser brings back from its back/forward cache - the event page's map link followed, then *back* - is
+ * the page exactly as it was left, but its connection to the game server was closed when it was left, and a closed
+ * connection is never opened again. So it is loaded again, which is the one way it hears from the world again.
+ * Adam's tab of 2026-10-11 sat *closed*, drawing nothing, until this.
+ */
+window.addEventListener('pageshow', (event) => {
+  if (event.persisted) {
+    window.location.reload();
+  }
+});
+
 /**
  * Which page this is, by its address. A check rather than a router: the pages beside the game are listed in
  * `admin/inspectViews.ts`, the index of them is `/admin`, and anything else is the game. Every inspect page is
