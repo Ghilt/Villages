@@ -1,9 +1,13 @@
 import { Graphics } from 'pixi.js';
 import type { Texture } from 'pixi.js';
 
+import { buildStructurePictures, drawPennant } from './structurePictures';
+import type { StructurePictures } from './structurePictures';
+
 /*
  * The pictures every mark is drawn with: the castle and its sign, the pennant, the figure and its sign, and the
- * selection ring, each drawn once in white so that a tint colours it, and rasterised once. The marks layer's.
+ * selection ring, each drawn once in white so that a tint colours it, and rasterised once. The marks layer's. A
+ * structure's pictures are drawn in their own colours, in `structurePictures.ts`, and its holder's pennant in white.
  */
 
 /**
@@ -34,6 +38,10 @@ export interface Textures {
   figure: Texture;
   bust: Texture;
   ring: Texture;
+  /** Every type of structure's picture, and a plain house for a type with none. */
+  structures: StructurePictures;
+  /** The pennant a held structure flies, tinted its holder's field. */
+  pennant: Texture;
 }
 
 /**
@@ -163,6 +171,8 @@ export function buildMarkTextures(rasterise: Rasterise): Textures {
     figure: rasterise(figure),
     bust: rasterise(bust),
     ring: rasterise(ringOf),
+    structures: buildStructurePictures(rasterise),
+    pennant: drawPennant(rasterise),
   };
   castle.destroy();
   mark.destroy();

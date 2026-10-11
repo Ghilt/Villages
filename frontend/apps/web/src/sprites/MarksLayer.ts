@@ -6,6 +6,9 @@ import { isWithinView, toScreen } from '../geometry/cameraMath';
 import type { CameraView } from '../geometry/cameraMath';
 import { overTheFog } from './fogLayering';
 import type { Layer } from './layer';
+import { drawnOf, flyPennant, hide, letGo, show } from './markEntry';
+import type { Entry } from './markEntry';
+import { lookOf } from './markLooks';
 import type { Textures } from './markTextures';
 import type { CameraSource, DrawnSprite, MapSprite } from './SpriteRenderer';
 import {
@@ -18,57 +21,9 @@ import {
   sizesAt,
   wantedForm,
 } from './twoForms';
-import type { Form, TwoForms } from './twoForms';
 
 /**
- * What each kind of mark looks like, in world units on the ground and in screen pixels as a sign.
- *
- * A house crosses over at zoom 8.46, where both forms are 22 pixels, and by zoom 10 its castle stands
- * 64. The four world units are a map convention and not a measurement: a surveyed castle is about a
- * tenth of a unit here, and would cross over at zoom fourteen, four levels past where the camera stops.
- *
- * A candidate has no ground form at all. It is a question the world is asking rather than a thing
- * standing in the world, so it is the same size wherever the camera is.
- *
- * A character is a person, smaller than a house on the ground and as a sign: a figure a unit and a half
- * tall, and a bust of sixteen pixels. They cross over at zoom 9.4, just in from zoom 9 where a key
- * figure's significance first has them drawn, so they arrive as the sign and stand up as the camera comes
- * in; by zoom 10 the figure is 24 pixels beside a castle's 64.
- */
-const KINDS: Record<MapSprite['kind'], TwoForms> = {
-  house: { groundHeight: 4, iconHeight: 22 },
-  candidate: { iconHeight: 26 },
-  character: { groundHeight: 1.5, iconHeight: 16 },
-};
-
-interface Entry {
-  spec: MapSprite;
-  /** The thing itself, standing on its ground. Null for a kind that has no ground form. */
-  ground: Sprite | null;
-  /** The sign for it. Null for a kind that is only ever itself. */
-  icon: Sprite | null;
-  /** Which form the camera says this should be showing. Changes at the crossover, not gradually. */
-  showing: Form;
-  /** Where the trade between them has got to: nought the icon, one the ground form. */
-  blend: number;
-  /**
-   * How much of this mark is here at all: nought gone, one arrived.
-   *
-   * Apart from the blend, because they answer different questions and can run at once: a house may
-   * arrive at a zoom that also wants it to change form. Multiplied together at the end.
-   */
-  presence: number;
-  /** No longer among the marks to draw. It fades out and is let go of when it reaches nothing. */
-  leaving: boolean;
-  /**
-   * Whether it stands in vision, which puts its ground form over the fog rather than under it. Worked out
-   * when the mark or the house's vision changes, never a frame. See `fogLayering.ts`.
-   */
-  inVision: boolean;
-}
-
-/**
- * The marks: every house, person and offered seat, in both of its forms, and the ring under the one selected.
+ * The marks: every house, person, structure and offered seat, in both of its forms, a structure's pennant over it.
  *
  * Two things in the stack rather than one, because the fog lies between them: under it, the ground forms of
  * whatever stands outside vision, and over it every icon and whatever stands in vision. See `fogLayering.ts`
@@ -110,21 +65,23 @@ export function createMarksLayer(camera: CameraSource, textures: Textures): Mark
     vision?.covers({ lat: at.lat, lon: at.lng }) ?? false;
 
   /**
-   * Makes the sprites a kind needs, dressed once and never dressed again.
+   * Makes the sprites a mark needs, dressed as its look says.
    *
    * The texture, the anchor and the tint are all settled here because none of them depends on the zoom
    * any more. Only the height and the alpha change as the camera moves, which is two numbers a frame.
    */
   function sproutFor(spec: MapSprite): Entry {
-    const forms = KINDS[spec.kind];
+    const look = lookOf(spec, textures);
     // Settled, not mid-trade: a house arriving while the camera is still should already be whichever
     // form this zoom calls for, rather than fading in from the other one.
-    const showing = wantedForm(camera.zoom(), forms, 'icon');
+    const showing = wantedForm(camera.zoom(), look.forms, 'icon');
     // Settled in its form, but not yet present: a mark fades up rather than appearing whole.
     const entry: Entry = {
       spec,
+      look,
       ground: null,
       icon: null,
+      pennant: null,
       showing,
       blend: showing === 'ground' ? 1 : 0,
       presence: 0,
@@ -132,57 +89,44 @@ export function createMarksLayer(camera: CameraSource, textures: Textures): Mark
       inVision: standsInVision(spec.at),
     };
 
-    if (forms.groundHeight !== undefined) {
-      const sprite = new Sprite(spec.kind === 'character' ? textures.figure : textures.castle);
-      // The castle stands on the seat, and a person on their place, so the sprite hangs from its own
-      // bottom edge.
+    if (look.ground !== null) {
+      const sprite = new Sprite(look.ground);
+      // The castle stands on the seat, a person on their place and a structure on its own, so the sprite
+      // hangs from its own bottom edge.
       sprite.anchor.set(0.5, 1);
       sprite.tint = spec.tint;
       sprite.visible = false;
       (overTheFog('ground', entry.inVision) ? overIt : underTheFog).addChild(sprite);
       entry.ground = sprite;
     }
-    if (forms.iconHeight !== undefined) {
-      const sprite = new Sprite(
-        spec.kind === 'candidate'
-          ? textures.candidate
-          : spec.kind === 'character'
-            ? textures.bust
-            : textures.mark,
-      );
-      // The same anchor as the ground form, because the two forms of one thing stand on one point: a
-      // crossfade between two shapes hung from different places trades a jump in size for a jump in
-      // position, and the eye catches a translation far harder than a scale. A candidate has only this
-      // form, so it keeps its own: the staff's foot is the place, and the pennant flies above it.
-      sprite.anchor.set(spec.kind === 'candidate' ? 0 : 0.5, 1);
+    if (look.icon !== null) {
+      const sprite = new Sprite(look.icon);
+      sprite.anchor.set(look.iconAnchor, 1);
       sprite.tint = spec.tint;
       sprite.visible = false;
       overIt.addChild(sprite);
       entry.icon = sprite;
     }
+    dressPennant(entry);
     return entry;
   }
 
-  /**
-   * Draws one form at the height and the alpha the rule asked for.
-   *
-   * The scale is taken against the texture's own height rather than against the size the shape was
-   * laid out in, because `generateTexture` crops to what was actually drawn: the castle is laid out in
-   * 160 pixels and its ink covers about 132 of them. Dividing by the layout made a height of 45 pixels
-   * come out as 37, which would have made "four world units" a polite fiction and the crossover land
-   * somewhere other than where the arithmetic says.
-   */
-  function show(sprite: Sprite | null, height: number, alpha: number): void {
-    if (sprite === null) {
+  /** Gives a mark the pennant its holder flies, in their colours, or takes it down when nobody holds it. */
+  function dressPennant(entry: Entry): void {
+    const colour = entry.look.flag === null ? undefined : entry.spec.pennant;
+    if (colour === undefined) {
+      entry.pennant?.destroy();
+      entry.pennant = null;
       return;
     }
-    if (alpha <= 0) {
-      sprite.visible = false;
-      return;
+    if (entry.pennant === null) {
+      entry.pennant = new Sprite(textures.pennant);
+      // Its staff's foot is where it stands.
+      entry.pennant.anchor.set(0.05, 1);
+      entry.pennant.visible = false;
+      (entry.ground?.parent ?? overIt).addChild(entry.pennant);
     }
-    sprite.visible = true;
-    sprite.alpha = alpha;
-    sprite.scale.set(height / sprite.texture.height);
+    entry.pennant.tint = colour;
   }
 
   /**
@@ -192,17 +136,10 @@ export function createMarksLayer(camera: CameraSource, textures: Textures): Mark
   function sideOfTheFog(entry: Entry): void {
     entry.inVision = standsInVision(entry.spec.at);
     const belongs = overTheFog('ground', entry.inVision) ? overIt : underTheFog;
-    if (entry.ground !== null && entry.ground.parent !== belongs) {
-      belongs.addChild(entry.ground);
-    }
-  }
-
-  function hide(entry: Entry): void {
-    if (entry.ground !== null) {
-      entry.ground.visible = false;
-    }
-    if (entry.icon !== null) {
-      entry.icon.visible = false;
+    for (const sprite of [entry.ground, entry.pennant]) {
+      if (sprite !== null && sprite.parent !== belongs) {
+        belongs.addChild(sprite);
+      }
     }
   }
 
@@ -216,7 +153,7 @@ export function createMarksLayer(camera: CameraSource, textures: Textures): Mark
       const gone: string[] = [];
 
       for (const [id, entry] of entries) {
-        const forms = KINDS[entry.spec.kind];
+        const forms = entry.look.forms;
         // The camera decides which form, once and hard; time decides how long it takes to get there.
         // Advanced for every mark, on screen or not, so one that comes back into view is not stale.
         entry.showing = wantedForm(zoom, forms, entry.showing);
@@ -262,12 +199,14 @@ export function createMarksLayer(camera: CameraSource, textures: Textures): Mark
             sprite.y = point.y;
           }
         }
+        flyPennant(entry, sizes.ground * alphas.ground + sizes.icon * alphas.icon, point);
       }
 
       for (const id of gone) {
         const entry = entries.get(id);
-        entry?.ground?.destroy();
-        entry?.icon?.destroy();
+        if (entry !== undefined) {
+          letGo(entry);
+        }
         entries.delete(id);
       }
 
@@ -283,7 +222,7 @@ export function createMarksLayer(camera: CameraSource, textures: Textures): Mark
       }
       // Sized off the blend rather than off one form, because during the trade neither answers on its
       // own. At the crossover the two heights are equal, so this is a no-op exactly where it matters.
-      const sizes = sizesAt(zoom, KINDS[on.spec.kind]);
+      const sizes = sizesAt(zoom, on.look.forms);
       const alphas = alphasFor(on.blend);
       return { x: above.x, y: above.y, tall: sizes.ground * alphas.ground + sizes.icon * alphas.icon };
     },
@@ -300,14 +239,19 @@ export function createMarksLayer(camera: CameraSource, textures: Textures): Mark
           // Back again before it finished going. It fades up from wherever it had got to.
           existing.leaving = false;
           existing.spec = spec;
-          // A person who moved may have walked into vision or out of it.
-          sideOfTheFog(existing);
-          if (existing.ground !== null) {
+          // A structure a level up is larger, and one that changed hands flies another pennant or none.
+          existing.look = lookOf(spec, textures);
+          if (existing.ground !== null && existing.look.ground !== null) {
+            existing.ground.texture = existing.look.ground;
             existing.ground.tint = spec.tint;
           }
-          if (existing.icon !== null) {
+          if (existing.icon !== null && existing.look.icon !== null) {
+            existing.icon.texture = existing.look.icon;
             existing.icon.tint = spec.tint;
           }
+          dressPennant(existing);
+          // A person who moved may have walked into vision or out of it.
+          sideOfTheFog(existing);
         }
       }
 
@@ -364,25 +308,7 @@ export function createMarksLayer(camera: CameraSource, textures: Textures): Mark
     },
 
     report(): Record<string, DrawnSprite> {
-      return Object.fromEntries(
-        [...entries].map(([id, entry]) => {
-          const onGround = entry.ground?.visible === true;
-          const asIcon = entry.icon?.visible === true;
-          const above = onGround ? entry.ground : entry.icon;
-          return [
-            id,
-            {
-              x: above?.x ?? 0,
-              y: above?.y ?? 0,
-              visible: onGround || asIcon,
-              form: onGround && asIcon ? 'both' : onGround ? 'ground' : asIcon ? 'icon' : 'none',
-              height: above === null || above === undefined ? 0 : above.height,
-              presence: entry.presence,
-              groundOverTheFog: entry.ground !== null && entry.ground.parent === overIt,
-            } satisfies DrawnSprite,
-          ];
-        }),
-      );
+      return Object.fromEntries([...entries].map(([id, entry]) => [id, drawnOf(entry, overIt)]));
     },
 
     inVision(): number {

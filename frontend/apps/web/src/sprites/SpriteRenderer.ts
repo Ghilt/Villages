@@ -18,9 +18,17 @@ export interface MapSprite {
    * What sort of mark this is. A house is a thing standing in the world and fades out when the camera
    * is too far back to make it out; a candidate is a place being offered to the player right now, and
    * is drawn at every zoom because it is the thing they are being asked about. A character is a person
-   * standing somewhere, in the colours of the house they serve. See decision record 0055.
+   * standing somewhere, in the colours of the house they serve. See decision record 0055. A structure is a
+   * building standing in the world, drawn in its own colours with its holder's pennant over it. See 0092.
    */
-  kind: 'house' | 'candidate' | 'character';
+  kind: 'house' | 'candidate' | 'character' | 'structure';
+  /**
+   * A structure's picture, by its type's name, and its height on the ground in world units, which its level
+   * raises. Its tint is white, because a structure is drawn in its own colours. Absent for every other kind.
+   */
+  structure?: { picture: string; groundHeight?: number };
+  /** The colour of the pennant flown over it, its holder's field, or absent for a thing nobody holds. */
+  pennant?: number;
   /**
    * Drawn however far back the camera is, like a candidate and for a different reason: this one is the
    * player's own and they asked to keep it in sight. Never set for anyone else's. See 0038.
@@ -49,8 +57,8 @@ export interface SpriteRenderer {
    * Which house or person is at this point on the screen, by the id they were drawn under, or null.
    *
    * The renderer answers because it is the only thing that knows where it drew: the canvas takes no
-   * pointer events, so the map hands the click over. Houses and characters answer; a candidate is a place
-   * being offered rather than a thing standing in the world.
+   * pointer events, so the map hands the click over. Houses, characters and structures answer; a candidate
+   * is a place being offered rather than a thing standing in the world.
    */
   hitTest(point: { x: number; y: number }): string | null;
   /** Stop following, release the canvas and the textures. */
@@ -149,4 +157,6 @@ export interface DrawnSprite {
   presence: number;
   /** Whether its ground form is drawn over the fog, which it is in vision. Its icon always is. */
   groundOverTheFog: boolean;
+  /** Whether a pennant is flown over it, for a structure held by a house; absent for a mark that has none. */
+  pennant?: boolean;
 }

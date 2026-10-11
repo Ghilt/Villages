@@ -879,7 +879,8 @@ The catalogue is: sixteen types in `world/structures.json`, read by the game ser
 `/admin/inspect-structures`. A structure's history is on the server, and one of every type stands in Antarctica,
 raised by the server when it starts while the instruments are open, and the debug panel's Structures section
 raises one where the map looks. The page is sent them through the fog, each in the face its house last saw, and
-nothing draws them yet. Decision record 0092 is the shape and
+draws them: a placeholder picture a type, drawn in code and the same in every culture, larger a level up, and the
+pennant of the house holding it. Nothing opens when one is clicked yet. Decision record 0092 is the shape and
 `docs/plans/structures.md` the steps, one commit each; the hypothesis is experiment 0018. Today a house's holding is its seat, a place on its founding event, drawn as a
 castle in the house's colours with ragged gold ground about it, and nothing in the game pays a house anything.
 

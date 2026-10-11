@@ -12,6 +12,8 @@ import { useStore } from '../store/useStore';
 
 /** How a person's mark is told from a house's: its id is theirs with this in front. See App.tsx. */
 const CHARACTER = 'character:';
+/** The id space structures are drawn under, apart from houses and people. See `mapSprites.ts`. */
+const STRUCTURE = 'structure:';
 
 interface SpriteOverlayProps {
   map: maplibregl.Map;
@@ -105,7 +107,8 @@ export function SpriteOverlay({ map, sprites, worldRoot, picked: top, onPick }: 
   useEffect(() => {
     const onClick = (event: maplibregl.MapMouseEvent) => {
       const hit = renderer?.hitTest(event.point) ?? null;
-      if (hit !== null) {
+      // A structure has no window yet, so a click on one is left to whatever lies under it.
+      if (hit !== null && !hit.startsWith(STRUCTURE)) {
         event.preventDefault();
         pick.current(
           hit.startsWith(CHARACTER)

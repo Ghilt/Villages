@@ -27,6 +27,7 @@ export {
   housesInView,
   omittedInView,
   reduceHouses,
+  structuresInView,
 } from './houses';
 export type { HousesState } from './houses';
 

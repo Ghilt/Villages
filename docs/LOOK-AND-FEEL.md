@@ -208,7 +208,10 @@ keep far out. A **person** is a small standing figure close in - a head over a c
 hem, a unit and a half tall - and a head and shoulders far out, sixteen pixels, the key figures' own mark;
 they trade at zoom 9.4, just in from where a key figure is first drawn, and both are in the colours of
 the house they serve, the first that took them in. What has only an icon is a thing the world is saying
-rather than a thing standing in it, like the seat a choice is offering.
+rather than a thing standing in it, like the seat a choice is offering. A **structure** is drawn in its own
+colours and never tinted, and says who holds it by a **pennant** in the holder's field flown over it, none
+when nobody does. Until the marks of its types are drawn its sign is its own picture at the size of a word,
+the one exception to two drawings, and a placeholder.
 
 **The fog of war covers ground forms and never icons.** An icon is the sign for a thing rather than the
 thing, so it is drawn over the fog wherever it stands; a ground form is part of the world, and is under the

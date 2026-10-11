@@ -338,8 +338,13 @@ how soon it wants the next - the next frame, a time, or never - and the renderer
 canvas draws when the map has drawn and has no clock of its own, except the haze's: while the fog is drawn close
 in with unknown ground on the screen, it asks for a frame twelve times a second, so the haze can drift, and stops
 asking the moment there is none. The page hands it the whole scene at once (`setScene`) and it works out what
-changed and asks for one frame, so however much changes together, it draws once. A new thing on the map is a
-layer of its own and a line in the renderer's stack, where it goes in the drawing's order.
+changed and asks for one frame, so however much changes together, it draws once. A new way of drawing is a
+layer of its own and a line in the renderer's stack, where it goes in the drawing's order. **A new kind of
+thing standing on the map is a kind of mark instead**: the marks layer is the same for every kind - the trade
+between two forms, the fade in and out, the side of the fog, the click and the ring - and what differs, the
+pictures, the heights of the two forms and where a pennant flies, is its look (`sprites/markLooks.ts`). A
+structure was the first added that way; one mark's own sprites and what is done to them alone are
+`markEntry.ts`.
 **The water is not in the sprite canvas but in the map**, a MapLibre custom layer (`water/WaterLayer.ts`) drawn
 in WebGL2 over the painted terrain and under the ink lines, so the fog and everything in the sprite canvas are over
 it (0081). Where the water is comes from the flat tiles, a mask a tile worked out in the browser by the fog's

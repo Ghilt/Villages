@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
-import { charactersInView, housesInView } from '@villages/client-core';
+import { charactersInView, housesInView, structuresInView } from '@villages/client-core';
 import type { Readable } from '@villages/client-core';
 
 import { AreaOverlay } from './areas/AreaOverlay';
@@ -40,7 +40,8 @@ import { watchInfoMap } from './map/infoMap';
 import { SpriteOverlay } from './sprites/SpriteOverlay';
 import { placeWater } from './water/WaterLayer';
 import { setFlowView, waterStore } from './water/waterMode';
-import { candidatesOf, toCharacterSprite, toSprite } from './mapSprites';
+import { candidatesOf, toCharacterSprite, toSprite, toStructureSprite } from './mapSprites';
+import { useStructureCatalogue } from './structureCatalogue';
 import { useStore } from './store/useStore';
 
 /**
@@ -107,6 +108,8 @@ export function App({ master, devTools }: AppProps) {
   const box = useMemo(() => stageBox(window, mode, wants), [window, mode, wants]);
   const inView = useMemo(() => housesInView(houses), [houses]);
   const standing = useMemo(() => charactersInView(houses), [houses]);
+  const raised = useMemo(() => structuresInView(houses), [houses]);
+  const catalogue = useStructureCatalogue();
   // The public half of your own house: what the map draws is the same view everyone else's house is
   // drawn from, and what only you can see hangs off it.
   const yours = yourHouse?.house ?? null;
@@ -120,13 +123,15 @@ export function App({ master, devTools }: AppProps) {
       eye && yours !== null && !inView.some((house) => house.id === yours.id) ? [...inView, yours] : inView,
     [inView, eye, yours],
   );
+  // Structures first, so that a house or a person standing in front of one is drawn over it.
   const sprites = useMemo(
     () => [
+      ...raised.map((structure) => toStructureSprite(structure, catalogue)),
       ...drawn.map((house) => toSprite(house, eye && house.id === yours?.id)),
       ...standing.map(toCharacterSprite),
       ...candidatesOf(yourChoice),
     ],
-    [drawn, standing, eye, yours, yourChoice],
+    [raised, catalogue, drawn, standing, eye, yours, yourChoice],
   );
 
   // The one connection to the gateway, opened as the app mounts.

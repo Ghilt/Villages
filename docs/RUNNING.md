@@ -247,18 +247,25 @@ stage alone, with none of the debug panel in it (decision record 0079).
   every type when it starts, held by nobody, at its first level, four to a row about forty-five kilometres apart on
   the ice of Queen Maud Land, from 77.4 to 78.6 degrees south and 10 to 16 east - the Antarctic castle first. Each
   is a `villages.structure.raised.v1` on the event page, sixteen of them at every start, and an id worked out from
-  its type means a server starting over a kept world raises none twice. Nothing draws them yet. A wipe takes them
-  with everything else, and the Structures section's **raise Antarctica again** puts back whichever are gone.
+  its type means a server starting over a kept world raises none twice. A wipe takes them with everything else,
+  and the Structures section's **raise Antarctica again** puts back whichever are gone. They are too far apart to
+  see more than four at once: zoom 6.3 over 78 south, 13 east shows two rows of them as signs.
 - Raising one where you look: the **Structures** section of the debug panel, after Resources. A type from the
   catalogue, a level it has, **yours** or **nobody's**, and **raise here** raises one at the middle of the map,
   named *a new mill* and the like; **raise Antarctica again** is the sixteen. Each is a command said in the log
   under `structures` with its answer, and a raising is a `villages.structure.raised.v1` on the event page. Yours
   without a house is refused `noSuchHouse`; a type the catalogue lacks would be `noSuchType`. Adam's levers,
-  standing in for a house building one; closed with the other instruments (0076). Nothing draws a structure yet,
-  but the page is sent them: the log's `cells` lines count the structures each burst of snapshots brought, and a
-  batch names one raised in a cell the page holds, `a new mill raised`. What is sent is each one's face as the fog
-  allows it: today's where the house sees, the one it last saw on revealed ground, nothing on unknown ground -
-  Antarctica's sixteen therefore only with the fog lifted or *see everything* on, until a house sees them.
+  standing in for a house building one; closed with the other instruments (0076). The log's `cells` lines count
+  the structures each burst of snapshots brought, and a batch names one raised in a cell the page holds, `a new
+  mill raised`. What is sent is each one's face as the fog allows it: today's where the house sees, the one it
+  last saw on revealed ground, nothing on unknown ground - Antarctica's sixteen therefore only with the fog lifted
+  or *see everything* on, until a house sees them.
+- A structure on the map: its type's placeholder picture, drawn in code (`sprites/structurePictures.ts`) in its
+  own colours, as tall on the ground as `groundHeight` in the catalogue says at its level, and far out the same
+  picture at the size of a word, crossing over where a house's castle does. One a house holds flies a pennant in
+  the house's field; nobody's flies none. A type with no picture is a plain house. It is drawn from the zoom its
+  significance says, like a house, and under the fog outside vision. A click on one does nothing yet.
+  `window.villagesSprites()` in the console lists them as `structure:<id>`, with `pennant` true for one flying it.
 
 ## Adam's folders and the tools that cut them
 

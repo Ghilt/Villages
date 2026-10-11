@@ -201,10 +201,15 @@ the anchors change. The page reads it under a structure to choose its sprite and
 
 ## What the page shows
 
-- **The map.** A `StructuresLayer` of its own in the sprite canvas (0051): the sprite as the ground form, a
-  mark of the type as the icon, the pennant in the holder's colours (none when unheld), a little larger
-  each level, a ruin's sprite for a ruin. Placeholders at first, one per type; by culture from step 13.
-  Its influence zone, if its type has one, is drawn only while it is selected.
+- **The map.** A kind of mark in the sprite canvas's marks layer (0051), the layer houses and people are
+  drawn by, so that it shares their two forms, their fade, their side of the fog, their click and the ring
+  under the one selected: what differs is its look, in `sprites/markLooks.ts`. The sprite as the ground
+  form, a mark of the type as the icon, the pennant in the holder's colours (none when unheld), a little
+  larger each level, a ruin's sprite for a ruin. Placeholders at first, one per type, the icon the same
+  picture at the size of a word; by culture, and with marks of their own, from step 13. Its influence zone,
+  if its type has one, is drawn only while it is selected. (A `StructuresLayer` of its own was planned
+  first, and would have been a second hit test, a second ring and a second side of the fog to keep in step;
+  a kind of mark is the shared "I am on the map" Adam asked for.)
 - **The window.** `Subject` kind `structure`, `describeStructure`: the name; the type, level and culture's
   word; the holder, a link; *the seat of* when it is one; what it gives; its slots; show it on the map. `Description` grows sections any kind may carry.
 - **The Holdings tab.** `src/holdings/`, in the fifth row of `layers.test.ts`; `HOLDINGS_PANE` in the
@@ -240,7 +245,7 @@ program running on it at this tree's address.
 | 3a | The structure's stream: `raised`, the decider over the catalogue, its store, every projection's `when`, the sixteen in Antarctica | the event page | |
 | 3b | *Raise here* and *raise Antarctica's sixteen again*, the Structures section of the debug panel | the event page | bump |
 | 4a | The read model with face versions, `StructureView`, snapshot and deltas, a structures part, `hidOn` split and cached; 0061 and 0089 amended | the session log | bump |
-| 4b | The page: the slice and its stamp, `StructuresLayer` (with `MarksLayer.ts` split first), a placeholder per type, the pennant, the size by level | the map | |
+| 4b | The page: the slice and its stamp, a structure as a kind of mark (each kind's look out of `MarksLayer.ts` first), a placeholder per type, the pennant, the size by level | the map | |
 | 5 | The window: `inspect` kind `structure`, `describeStructure`, the holder's link; `changedHands` and *take control of this building* on the one open | a click, then your pennant on it | bump |
 | 6 | Sight from structures: the `StandingEffects` listener, `caughtUp`, `gainedVision` and `lostVision` written with the radius and `from` | the fog lifting round a structure taken | bump |
 | 7a | The seat refit on the server: the `Seats` reaction, `namedSeat`, `foundingPlace`, the seat's own sight removed, omens, season, gossip and dialogues reading the seat | a new house's events | bump |
