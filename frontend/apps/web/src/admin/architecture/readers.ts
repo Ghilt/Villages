@@ -114,8 +114,8 @@ export const LIVE: readonly {
   {
     id: 'event-store',
     name: 'the event store',
-    where: 'InMemoryWorld.kt',
-    what: "The world's memory: every event that has happened, in order, one stream a house, never changed once written. Everything the server knows is worked out from it. In memory for now and MongoDB later, so a restart begins the world again.",
+    where: 'MongoWorld.kt, InMemoryWorld.kt',
+    what: "The world's memory: every event that has happened, in order, one stream a house, never changed once written. Everything the server knows is worked out from it. Kept in MongoDB, in a database of each worktree's own, whenever Docker is running, so a restart forgets nothing; in memory without Docker, where a restart begins the world again.",
   },
   {
     id: 'projections',
