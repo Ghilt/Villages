@@ -3,7 +3,7 @@
  * culture calls it, and what it is at each of its levels. The server reads the same file for its rules, and the two
  * readers are held to one shape by `contracts/fixtures/structures.json`. This side keeps what the server passes over
  * - the words, the size on the map, the influence zone - as well as everything the debug panel lists. A file this
- * cannot read is refused whole, naming the type and the field. See decision record 0092.
+ * cannot read is refused whole, naming the type and the field. See decision record 0093.
  */
 
 /** The building traditions a structure can be drawn in. Ground of any other culture borrows the nearest. */

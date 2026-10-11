@@ -20,7 +20,7 @@ a place someone holds.
 
 ## Setup
 
-The build in `docs/plans/structures.md`, shaped by decision record 0092: a structure on a stream of its own,
+The build in `docs/plans/structures.md`, shaped by decision record 0093: a structure on a stream of its own,
 the catalogue of sixteen types in `world/structures.json`, the seat a role the founding castle plays, the
 income and the sight of every held structure written into its holder's history by one listener, the fog
 showing each face as it was last seen, slots and items, and a culture map per master. Nothing in the world raises a

@@ -6,7 +6,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 
-/** The house: which of its holdings is its seat. The fixtures are HouseFixtures.kt. See decision record 0092. */
+/** The house: which of its holdings is its seat. The fixtures are HouseFixtures.kt. See decision record 0093. */
 class HouseSeatSpec : StringSpec({
     val castle = StructureId.seatOf(ravenscar.houseId)
 

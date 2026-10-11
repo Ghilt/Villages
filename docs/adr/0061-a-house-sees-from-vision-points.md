@@ -140,7 +140,7 @@ is not needed until a house's face can change or a house can end.
 
 ## Amendment, 2026-10-09: a structure's face changes, and still nothing is kept per player
 
-Structures are the first things on revealed ground whose face can change: a new holder, a level, a ruin (0092).
+Structures are the first things on revealed ground whose face can change: a new holder, a level, a ruin (0093).
 That is the day this record put off, and it still needs no memory of what each player saw. **The structures' read
 model keeps every face a structure has had, over world-time, and the fog sends the one it had on the day the fog hid
 its place**, `Fog.faceOf`; where the house sees, the face of the day asked. The day the fog hid a place is

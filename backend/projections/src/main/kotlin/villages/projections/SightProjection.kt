@@ -133,7 +133,7 @@ class SightProjection(feed: EventFeed) : Follower(feed), SightsByHouse {
             // Nothing else gives vision or takes it away.
             is ResourceEvent, is ChoiceEvent, is DialogueEvent, is HouseNamedSeat,
             is CharacterAppeared, is CharacterStatChanged, is CharacterAged, is CharacterPortraitChanged,
-            // What a structure gives its holder to see is written into the house's own history, as vision given. 0092.
+            // What a structure gives its holder to see is written into the house's own history, as vision given. 0093.
             is StructureEvent,
             -> Unit
         }

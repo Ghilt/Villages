@@ -177,7 +177,7 @@ class OccurrentCharacterCommandExecutor(
 
 /**
  * The structure command executor port: the same loop, over a structure's stream and a structure's rules, which read the
- * catalogue the server started with. See decision record 0092.
+ * catalogue the server started with. See decision record 0093.
  */
 class OccurrentStructureCommandExecutor(
     store: EventStore,

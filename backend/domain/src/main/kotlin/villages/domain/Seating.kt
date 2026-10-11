@@ -4,7 +4,7 @@ package villages.domain
  * The house's seat: which of its holdings plays that role - where the eye goes and the room is entered - and whether
  * one was ever named. The part of a founded house that decides its seat commands and folds its seat events. Holding
  * is the structure's to say, so a house names a seat without asking whether it holds it; that its seat is one of its
- * holdings is put right a moment after, by a listener. See decision records 0075 and 0092.
+ * holdings is put right a moment after, by a listener. See decision records 0075 and 0093.
  */
 data class Seating(val structure: StructureId? = null, val everNamed: Boolean = false) {
     internal fun decide(command: SeatCommand): List<SeatEvent> = when (command) {

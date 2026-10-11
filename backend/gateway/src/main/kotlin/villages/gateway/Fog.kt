@@ -140,7 +140,7 @@ internal class Fog(
      * ruin since is not this house's to know, and one raised there since is not sent at all. A structure stands still,
      * so revealed ground is enough to know of it, as for a house. Worked out once a structure, a day and a face, because
      * a snapshot asks it of every structure in a cell, and this fog lives until the sight changes. See decision records
-     * 0061, 0089 and 0092.
+     * 0061, 0089 and 0093.
      */
     fun faceOf(row: StructureRow, day: WorldTime): Pair<StructureFace, WorldTime?>? {
         val key = Triple(row.id, day, row.faces.last().stamp)

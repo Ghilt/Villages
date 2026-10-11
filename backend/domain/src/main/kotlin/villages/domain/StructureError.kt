@@ -2,7 +2,7 @@ package villages.domain
 
 /**
  * Everything a structure's rules can refuse, thrown from `decide`. One branch of [DomainError], beside [HouseError]
- * and [CharacterError]. See decision record 0092.
+ * and [CharacterError]. See decision record 0093.
  */
 sealed class StructureError(message: String) : DomainError(message) {
     /** A structure is raised once; raising a ruin again is rebuilding it. */

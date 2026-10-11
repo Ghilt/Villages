@@ -4,7 +4,7 @@ import java.time.Instant
 
 /**
  * Everything that happens to a structure, on its own stream. The world's half: typed
- * `villages.structure.<verb>.v<n>`, and every one carries the two times. See decision record 0092.
+ * `villages.structure.<verb>.v<n>`, and every one carries the two times. See decision record 0093.
  */
 sealed interface StructureEvent : Event {
     val structureId: StructureId

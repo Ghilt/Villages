@@ -53,7 +53,7 @@ sealed interface SeatEvent : HouseEvent
 /**
  * A house named one of its holdings its seat: where the eye goes and the room is entered. Founding raises a castle
  * and the seats listener names it, in the founding's story. Only the id: what the structure is, is on its own stream.
- * See decision record 0092.
+ * See decision record 0093.
  */
 data class HouseNamedSeat(
     override val houseId: HouseId,
@@ -64,7 +64,7 @@ data class HouseNamedSeat(
 
 /**
  * A house lost its seat: the structure that was it changed hands or fell, and the house plays on without one. Its
- * sight from the seat ends with it. In the story of what took it. See decision record 0092.
+ * sight from the seat ends with it. In the story of what took it. See decision record 0093.
  */
 data class HouseLostSeat(
     override val houseId: HouseId,
@@ -291,7 +291,7 @@ data class HouseLostKeyFigure(
  * given. It puts nothing on the map for anybody but the house, so it carries no significance. `from` is the
  * structure it is seen from, for what a holding gives its holder, or null for vision given outright: so that a
  * retuned catalogue never rewrites what a house saw, a structure's sight is written into the house's history as
- * this. See decision records 0061 and 0092.
+ * this. See decision records 0061 and 0093.
  */
 data class HouseGainedVision(
     override val houseId: HouseId,

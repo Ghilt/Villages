@@ -111,4 +111,4 @@ keeps only the fence. A holding does follow, because it is worked out from the s
 The ragged ground about every seat is no longer drawn at all times: it is the castle's influence zone, drawn only
 while the castle is selected, seeded by the castle rather than the house, its reach the catalogue's `zone` for the
 castle (25, as before). The lumps and the jitter are named in `InfluenceZone` now, still placeholders. See
-docs/plans/structures.md, step 7b, and decision record 0092.
+docs/plans/structures.md, step 7b, and decision record 0093.

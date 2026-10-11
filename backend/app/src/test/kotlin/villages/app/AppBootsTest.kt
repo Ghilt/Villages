@@ -126,7 +126,7 @@ class AppBootsTest {
 
         // Three events, one story: asked where, answered, and founded. The action's cause is the command. Then the
         // listeners carry it on in the same story, in whichever order they get to it: the castle raised, named the
-        // seat, seen from and paid by. See 0092.
+        // seat, seen from and paid by. See 0093.
         val ours = "house:" + java.util.UUID.nameUUIDFromBytes("villages:house:$arriving".toByteArray())
         window.until("the founding, its seat, its sight and its pay") { frames ->
             frames.filterIsInstance<EventFrame>().count { it.stream == ours } >= 6

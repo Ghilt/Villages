@@ -3,7 +3,7 @@ package villages.domain
 /**
  * A structure's rules, decided against its own history and the catalogue. A class rather than an object, because
  * what a type is - its levels, and how far out each is drawn - is the catalogue's, and the catalogue is read when
- * the server starts: every decision of a running server reads the same one. See decision record 0092.
+ * the server starts: every decision of a running server reads the same one. See decision record 0093.
  */
 class StructureDecider(private val catalogue: StructureCatalogue) : Decider<StructureCommand, Structure, StructureEvent> {
     override val initial: Structure = Structure.NotRaised

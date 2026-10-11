@@ -46,7 +46,7 @@ const JITTER = 1.5;
  * The shape is an **area** and nothing more - `areaAround`, the component anything fenced uses - seeded by the
  * structure, so its ground is the same shape on every screen that draws it. Headless, like the area overlay: it
  * owns one source and its two layers and renders nothing of its own. Drawn at every zoom, because it is drawn
- * only for the one thing the player has asked about. See docs/plans/structures.md and decision record 0092.
+ * only for the one thing the player has asked about. See docs/plans/structures.md and decision record 0093.
  */
 export function InfluenceZone({ map, zone, turn }: InfluenceZoneProps) {
   const [width, setWidth] = useState<number | null>(null);

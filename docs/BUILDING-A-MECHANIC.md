@@ -39,7 +39,7 @@ Answer these before touching code, in a paragraph Adam can read back. The answer
    between houses, a cathedral, a territory or a person, is its own stream (`ARCHITECTURE.md`, "things
    with lifetimes are their own streams"), and the character is the first of them, decision record 0055.
    What a house is to such a thing is still the house's history, as a key figure is - unless two houses could
-   contend for it, as for a structure, whose own history says who holds it (0092).
+   contend for it, as for a structure, whose own history says who holds it (0093).
 3. **What does the player see?** Which frame carries it, and from where: a view read from a projection
    (`snapshot`, `batch`, `yourHouse`, `yourChoice`, `yourKeyFigures`) for the interface, and the
    stored event itself on the `event` frame for the debug panel. Then which panel line says it happened,

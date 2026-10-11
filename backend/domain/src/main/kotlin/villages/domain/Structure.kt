@@ -4,7 +4,7 @@ package villages.domain
  * A structure as its own history folds it: not raised yet, or standing - its type, its name, where it stands and how
  * far out it is drawn, its level, who holds it, a house or nobody, and what is in its slots. Its own stream, `structure:<uuid>`, because a
  * structure outlives and changes holders, and only its own history can say which one holds it. See decision record
- * 0092.
+ * 0093.
  */
 sealed interface Structure {
     data object NotRaised : Structure

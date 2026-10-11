@@ -19,7 +19,7 @@ export interface MapSprite {
    * is too far back to make it out; a candidate is a place being offered to the player right now, and
    * is drawn at every zoom because it is the thing they are being asked about. A character is a person
    * standing somewhere, in the colours of the house they serve. See decision record 0055. A structure is a
-   * building standing in the world, drawn in its own colours with its holder's pennant over it. See 0092.
+   * building standing in the world, drawn in its own colours with its holder's pennant over it. See 0093.
    */
   kind: 'house' | 'candidate' | 'character' | 'structure';
   /**

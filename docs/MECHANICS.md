@@ -895,7 +895,7 @@ drawn nowhere. What fills a slot changes what the
 structure pays its holder, by the slot's rule: a throne left empty, a bishop's piety, a prisoner, a relic. A
 structure is drawn, and its type named, in the culture of the ground it stands on, read off the master's culture
 map: the same castle is a kasbah in the desert and a stockade south of it. A house whose castle changes hands or falls
-loses its seat, and its sight from it, and plays on seatless; how it names another is not decided. Decision record 0092 is the shape and
+loses its seat, and its sight from it, and plays on seatless; how it names another is not decided. Decision record 0093 is the shape and
 `docs/plans/structures.md` the steps, one commit each; the hypothesis is experiment 0018. A castle's ragged gold ground is drawn only while it is selected, its influence zone. Every holding pays its holder
 what its type yields a month at its level, and the house's resources count up from it; a structure's window, and a
 holding's row in the tab, say what it yields and how far it sees.

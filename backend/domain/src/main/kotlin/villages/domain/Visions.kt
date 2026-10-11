@@ -8,7 +8,7 @@ package villages.domain
 data class Visions(val given: List<VisionId> = emptyList()) {
     internal fun decide(command: VisionCommand): List<VisionEvent> = when (command) {
         // How far a house sees goes on the event, so a later change to it leaves what was given as it was: a seat's
-        // reach, or what a structure's type and level see, which the command brings. See decision records 0061, 0092.
+        // reach, or what a structure's type and level see, which the command brings. See decision records 0061, 0093.
         is GiveVision -> {
             if (command.visionId in given) {
                 throw HouseError.InvalidVision("this house was already given vision under that name")

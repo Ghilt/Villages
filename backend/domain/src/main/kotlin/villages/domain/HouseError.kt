@@ -57,7 +57,7 @@ sealed class HouseError(message: String) : DomainError(message) {
 
     class InvalidVision(reason: String) : HouseError("not a vision: $reason")
 
-    /** Naming the founding castle the seat a second time, as a founding heard again would. See 0092. */
+    /** Naming the founding castle the seat a second time, as a founding heard again would. See 0093. */
     data object SeatNamedBefore : HouseError("this house has named its seat before")
 
     /** Losing a seat the house does not have: that structure is not its seat. */

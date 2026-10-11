@@ -10,7 +10,7 @@ import villages.protocol.YourHouse
 /**
  * A player's own house, which reaches them wherever they are looking, on hello and whenever it changes. Nobody else's
  * house is told to anyone: a house is not drawn on the map, its structures are, its seat among them, and a window
- * on a house asks after it by itself. See decision records 0075 and 0092.
+ * on a house asks after it by itself. See decision records 0075 and 0093.
  */
 internal class HousesPart(
     private val core: Core,

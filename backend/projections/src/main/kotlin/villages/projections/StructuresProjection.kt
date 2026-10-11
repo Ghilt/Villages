@@ -41,7 +41,7 @@ import java.util.concurrent.atomic.AtomicLong
  * The map's read model of structures, folded from the event feed: one row per structure, indexed by the deepest cell
  * it stands in and by the coarsest zoom its most significant face was ever worth drawing at, with every face it has
  * had over world-time. Which of them a house is sent is the fog's to say, at the gateway: the face of today where it
- * sees, the one it last saw where it saw once, none where it never did. See decision record 0092.
+ * sees, the one it last saw where it saw once, none where it never did. See decision record 0093.
  *
  * It keeps the houses a structure can be held by, their names and banners, so a face carries what its pennant needs
  * without asking another read model: the one feed delivers a house's founding before anything it holds, and a house's

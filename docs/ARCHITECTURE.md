@@ -248,7 +248,7 @@ record 0028.
 Today there is no broker. The read model's own change stream stands in for the exchange: the gateway watches
 the projections for changes and queries them for snapshots, through `StructuresByCell` and `CharactersByCell`;
 no house rides a cell, because a house is not drawn on the map, and a player's own house is sent to their session
-by itself (decision 0092). When RabbitMQ arrives the exchange takes over the fan-out between processes, and the
+by itself (decision 0093). When RabbitMQ arrives the exchange takes over the fan-out between processes, and the
 gateway's side does not change - it still holds an index from cell to sessions and, for each changed structure or
 person, walks its deepest cell up through all of its prefixes, sending to the holders at the zooms its significance is worth drawing at and to
 anyone who is seeing everything at the rest. A cell is a quadkey at any zoom, so a client asks for data on
@@ -303,7 +303,7 @@ answers a cell with all of them; the gateway picks one per house with `Fog.faceO
 the house sees, the face it had when the fog hid the place - `Fog.hidOn`, shared with houses - on revealed ground,
 none elsewhere. Each face is stamped with the read model's count of changes, and a snapshot carries the count it was
 read at, so a page holding a newer face than a snapshot sends still lets the snapshot's replace it. See decision
-records 0061 and 0092.
+records 0061 and 0093.
 
 The scenery's **stands** take the same road (0067). `hello` names the master the page draws; the gateway
 reads that master's stand files through the `Stands` port, whose adapter in `app` reads them from
@@ -412,11 +412,11 @@ did, and sets things right from its whole fold there instead.
   replays, and sets every holding right at `caughtUp()`. See docs/plans/structures.md.
 - **The seats listener**, `Seats`, raises a house's castle when it is founded, under an id worked out from the
   house, and names it the seat; both are refused the second time, so the history heard again writes nothing. The
-  founding, the castle, the naming and the castle's sight read as one story. See decision record 0092.
+  founding, the castle, the naming and the castle's sight read as one story. See decision record 0093.
 
 ## Scale principles
 
-1. One stream per house, one per character and one per structure (decisions 0055 and 0092), and no global aggregate. Anything
+1. One stream per house, one per character and one per structure (decisions 0055 and 0093), and no global aggregate. Anything
    world-shaped is a projection.
 2. Resources are rates. Events are emitted when something changes, never on a clock, so idle players cost nothing.
 3. The world is partitioned into cells, at every zoom: a quadkey, so a cell's ancestor is its prefix. Routing keys,
@@ -489,7 +489,7 @@ increment to touch either starts from them.
    exist. **A key figure is not one of them**: it is a tie between a house and a character, written in the
    house's own history, so the house keeps its own rules about whom it holds. Characters are the first,
    decided in decision record 0055 before any code; each later kind gets its record the same way.
-   Structures are the second, decided in decision record 0092: a structure decides its own holder, so
+   Structures are the second, decided in decision record 0093: a structure decides its own holder, so
    holding one is not a tie on the house, and the house's seat becomes a role one of them plays.
 2. **The map is a temporal read model.** Rows carry `since` and `until` in world-time, and the map at
    world-time T is a range query: `since <= T < until`. Decided and built for houses with decision record

@@ -53,7 +53,7 @@ value class CharacterId(val value: UUID) {
     }
 }
 
-/** The identity of a structure, and the name of its stream: `structure:<uuid>`. See decision record 0092. */
+/** The identity of a structure, and the name of its stream: `structure:<uuid>`. See decision record 0093. */
 @JvmInline
 value class StructureId(val value: UUID) {
     /** The stream this structure's events live in. */

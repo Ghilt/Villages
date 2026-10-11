@@ -5,7 +5,7 @@ package villages.domain
  * rules read. The words a culture calls a type by, its size on the map and its influence zone are the page's and are
  * not here. Read once when the server starts and handed to whatever decides by it, so every rule of a running
  * server reads the same numbers. A catalogue that breaks one of the rules below is refused whole, and the server with
- * it: a type nobody can raise is better than one raised with half its numbers. See decision record 0092.
+ * it: a type nobody can raise is better than one raised with half its numbers. See decision record 0093.
  */
 data class StructureCatalogue(val types: Map<StructureType, StructureSpec>) {
     init {

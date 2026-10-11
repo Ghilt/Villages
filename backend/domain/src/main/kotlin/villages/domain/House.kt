@@ -56,7 +56,7 @@ sealed interface House {
         /** The visions this house was given outright and still has, in the order it was given them. */
         val visions: List<VisionId> get() = vision.given
 
-        /** The holding that is its seat, or null for a house that has none. See 0092. */
+        /** The holding that is its seat, or null for a house that has none. See 0093. */
         val seatedIn: StructureId? get() = seating.structure
 
         /** The dialogues this house was offered and has not finished, each with the steps taken. See 0071. */

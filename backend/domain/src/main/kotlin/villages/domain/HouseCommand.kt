@@ -32,7 +32,7 @@ sealed interface SeatCommand : HouseCommand
 /**
  * Name a structure the house's seat: the role one of its holdings plays, where the eye goes and the room is entered.
  * Sent by the seats listener for the castle founding raises. Refused for a house that has named its seat before,
- * so a founding heard again names nothing twice. See decision record 0092.
+ * so a founding heard again names nothing twice. See decision record 0093.
  */
 data class NameSeat(
     override val houseId: HouseId,
@@ -43,7 +43,7 @@ data class NameSeat(
 
 /**
  * The house's seat is no longer its: the structure changed hands or fell. Sent by the seats listener. Refused for a
- * structure that is not the house's seat, so a loss heard again writes nothing. See decision record 0092.
+ * structure that is not the house's seat, so a loss heard again writes nothing. See decision record 0093.
  */
 data class LoseSeat(
     override val houseId: HouseId,
@@ -210,7 +210,7 @@ data class FailRequirement(
  * Give the house vision of a place, outright: it sees a circle about the place from this world-day until the
  * vision is taken away. The debug panel's lever, what a storyline giving sight of a far coast will issue, and what
  * a structure gives its holder, `from` it, at the radius its type and level see: the catalogue's to say, which the
- * house's rules cannot read, so the command carries it. See decision records 0061 and 0092.
+ * house's rules cannot read, so the command carries it. See decision records 0061 and 0093.
  */
 data class GiveVision(
     override val houseId: HouseId,

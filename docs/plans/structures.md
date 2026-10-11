@@ -3,7 +3,7 @@
 **What belongs here:** how structures get built - what a structure's record holds, how what it gives
 reaches its holder, how it is seen through the fog, what the map, its window, the Holdings tab and the
 debug panel show, and the order it all gets built in. **What does not:** why it is shaped this way, which is
-decision record 0092; what the mechanic is for, which is `MECHANICS.md`; the words, which are
+decision record 0093; what the mechanic is for, which is `MECHANICS.md`; the words, which are
 `GLOSSARY.md`; the hypothesis, which is experiment 0018. When a part of it is decided, that part becomes a
 decision record and leaves.
 
@@ -239,7 +239,7 @@ program running on it at this tree's address.
 
 | # | Step | Seen in | Wire |
 |---|---|---|---|
-| 0 | This plan, decision record 0092, experiment 0018, `MECHANICS.md`, `GLOSSARY.md`, `ROADMAP.md` | the documents | |
+| 0 | This plan, decision record 0093, experiment 0018, `MECHANICS.md`, `GLOSSARY.md`, `ROADMAP.md` | the documents | |
 | 1 | Make room: command payloads out of `Frames.kt`, the cell snapshot out of `Gateway.kt`, the sprite functions out of `App.tsx`; ceilings lowered | the checks | |
 | 2 | The catalogue: `world/structures.json`, read at both ends, the contract fixture, a page of its own | `/admin/inspect-structures` | |
 | 3a | The structure's stream: `raised`, the decider over the catalogue, its store, every projection's `when`, the sixteen in Antarctica | the event page | |

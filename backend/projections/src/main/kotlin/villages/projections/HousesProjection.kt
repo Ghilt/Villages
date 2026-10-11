@@ -126,7 +126,7 @@ class HousesProjection(feed: EventFeed) : Follower(feed), HousesByCell, HousesBy
             // A person is not a house, and what one is to a house is the house's own history: nothing a
             // character's stream says moves a house's row. See decision record 0055.
             is CharacterEvent -> return
-            // A structure is drawn from a read model of its own. See decision record 0092.
+            // A structure is drawn from a read model of its own. See decision record 0093.
             is StructureEvent -> return
         }
         // Whether this house was already on the map is the read model's to say. A stream version cannot:

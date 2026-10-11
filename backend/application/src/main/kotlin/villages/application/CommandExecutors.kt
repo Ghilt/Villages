@@ -17,7 +17,7 @@ fun interface CharacterCommandExecutor {
     fun execute(command: CharacterCommand, provenance: Provenance)
 }
 
-/** Runs a command against its structure's stream: load, decide, append. Throws a StructureError when refused. 0092. */
+/** Runs a command against its structure's stream: load, decide, append. Throws a StructureError when refused. 0093. */
 fun interface StructureCommandExecutor {
     fun execute(command: StructureCommand, provenance: Provenance)
 }

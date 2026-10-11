@@ -1,4 +1,4 @@
-# 0092. A structure is a history of its own, and the seat is a role one plays
+# 0093. A structure is a history of its own, and the seat is a role one plays
 
 - Status: accepted
 - Date: 2026-10-08

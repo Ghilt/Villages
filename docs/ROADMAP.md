@@ -100,7 +100,7 @@ planned and not started.
   house and later a faction, paying their holder and lighting the map round them, with levels, slots for a
   prisoner, a king, a relic or a garrison, a look by the culture of the
   ground they stand on, a window, and a Holdings tab beside the key figures. The house's seat becomes the
-  first of them, a castle raised at founding. The shape is decision record 0092 and the steps, one commit
+  first of them, a castle raised at founding. The shape is decision record 0093 and the steps, one commit
   each, are in `docs/plans/structures.md`; the hypothesis is experiment 0018. Step nought, the documents,
   is written. It is also the first income in the game. Adam's own, planned with him on 2026-10-08.
 - **1.6** The bridge from the store to the broker, each tree in a virtual host of its own (0092), with the

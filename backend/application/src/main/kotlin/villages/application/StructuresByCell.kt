@@ -56,7 +56,7 @@ data class StructureChange(val row: StructureRow, val appeared: Boolean)
 
 /**
  * The map's read model of structures, by cell. Unlike the houses' it answers with every face a structure has had,
- * because which face a house is sent is the fog's to say: the one it last saw. See decision record 0092.
+ * because which face a house is sent is the fog's to say: the one it last saw. See decision record 0093.
  */
 interface StructuresByCell {
     /**
