@@ -6,9 +6,13 @@ import { fromMercator, toMercatorExact } from '../geometry/cameraMath';
 
 import { CAMERA, lensFor, resolveStyle } from './mapConfig';
 import { constrainCamera, flatWindow, floorZoom } from './sheet';
+import { startAtIn } from '../net/startAt';
 import { tiltAt, tiltRamp, tippedAbout } from './tilt';
 
 import 'maplibre-gl/dist/maplibre-gl.css';
+
+/** Whether the map link has been said in the log: once a page load, though development makes the map twice. */
+let linkSaid = false;
 
 type Constrain = NonNullable<maplibregl.MapOptions['transformConstrain']>;
 
@@ -123,11 +127,21 @@ export function MapView({ worldRoot, onReady }: MapViewProps) {
       return { pitch, center };
     };
 
+    // A map link opens it over the place it names, and nothing else changes: the fog is the window's own.
+    const linked = startAtIn(window.location.search);
+    if (linked !== null && !linkSaid) {
+      linkSaid = true;
+      note(
+        'camera',
+        `opened at ${linked.lat.toFixed(3)}, ${linked.lon.toFixed(3)}, zoom ${linked.zoom}, as the link asked`,
+      );
+    }
+    const startZoom = linked?.zoom ?? CAMERA.initialZoom;
     const map = new maplibregl.Map({
       container,
       style: resolveStyle(import.meta.env, worldRoot),
-      center: [CAMERA.center.lng, CAMERA.center.lat],
-      zoom: CAMERA.initialZoom,
+      center: linked === null ? [CAMERA.center.lng, CAMERA.center.lat] : [linked.lon, linked.lat],
+      zoom: startZoom,
       minZoom: CAMERA.minZoom,
       maxZoom: CAMERA.maxZoom,
       transformConstrain: keepOnTheSheet,
@@ -135,7 +149,7 @@ export function MapView({ worldRoot, onReady }: MapViewProps) {
       // North-up and tipped by the zoom, which is the player's camera: decision record 0060 as amended by
       // experiment 0011. The lens that goes with it is set just below, because it is not a constructor
       // option.
-      pitch: tiltAt(CAMERA.initialZoom),
+      pitch: tiltAt(startZoom),
       bearing: CAMERA.bearing,
       // The ceiling, not the camera: what this opens is the debug panel's Camera section, the instrument
       // for experiment 0008. Eighty-five rather than the sixty MapLibre defaults to, so the lever can be

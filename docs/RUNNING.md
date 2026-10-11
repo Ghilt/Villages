@@ -112,7 +112,13 @@ stage alone, with none of the debug panel in it (decision record 0079).
   so what a button did is in view while the button is. It begins folded: the `log` toggle in the panel's
   header, beside `landscape`, opens it and `hide` in its own bar folds it away again. The events themselves are not in the
   panel: they are at **`/admin/inspect-events`**, a page of their own that watches the world without
-  playing in it, one line an event opening to the whole thing as the store holds it. The `found a house here` button in it sends a
+  playing in it, one line an event opening to the whole thing as the store holds it, and under it a row of where
+  it leads: for now **on the map**, on every event whose data names a place - the first latitude and longitude in
+  it, so a structure raised, a house founded, a person who moved, vision gained, the first seat a choice offered.
+  It opens the game in that tab at `/?at=<lat>,<lon>&zoom=10`, over the place instead of over the seat, and the
+  log says `opened at ..., as the link asked`; the camera is all it moves, so ground the house cannot see is still
+  under the fog, and Antarctica's sixteen want the fog lifted. A new tab would take the player over from any other
+  game tab. The `found a house here` button in it sends a
   real command and is how to make an event happen on purpose. The `restart` button beside `copy` forgets
   this browser's player and reloads, so the opening can be tried again from nothing; the house the old
   player founded stays in the world, because events are never deleted. `wipe` beside it empties the world
@@ -249,7 +255,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   is a `villages.structure.raised.v1` on the event page, sixteen of them at every start, and an id worked out from
   its type means a server starting over a kept world raises none twice. A wipe takes them with everything else,
   and the Structures section's **raise Antarctica again** puts back whichever are gone. They are too far apart to
-  see more than four at once: zoom 6.3 over 78 south, 13 east shows two rows of them as signs.
+  see more than four at once: zoom 6.3 over 78 south, 13 east shows two rows of them as signs, and **on the
+  map** under each one's `raised` on the event page opens the game over it.
 - Raising one where you look: the **Structures** section of the debug panel, after Resources. A type from the
   catalogue, a level it has, **yours** or **nobody's**, and **raise here** raises one at the middle of the map,
   named *a new mill* and the like; **raise Antarctica again** is the sixteen. Each is a command said in the log

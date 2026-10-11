@@ -150,3 +150,16 @@
   border-radius: 2px;
   overflow-x: auto;
 }
+
+/* Where an opened event leads, a row under it: words, so the row can grow without a legend. */
+.log__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin: -0.3rem 0 0.8rem;
+  font-size: 0.72rem;
+}
+
+.log__go {
+  color: #2e6b4f;
+}

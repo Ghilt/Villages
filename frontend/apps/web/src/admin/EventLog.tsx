@@ -8,6 +8,8 @@ import type { EventFrame } from '@villages/protocol';
 
 import { browserSocket } from '../net/browserSocket';
 import { GATEWAY_URL } from '../net/address';
+import { mapLink } from '../net/startAt';
+import { placeIn } from './eventLinks';
 import { BackToIndex } from './InspectIndex';
 
 /** Enough to hold a session's worth of play. Past this the oldest go, as in any log. */
@@ -128,8 +130,27 @@ function Entry({ event }: { event: EventFrame }) {
           </span>
         </summary>
         <pre className="log__json">{asStored(event)}</pre>
+        <Links data={event.data} />
       </details>
     </li>
+  );
+}
+
+/**
+ * Where an opened event leads, under what it says: for now the map, for an event that names a place, which opens
+ * the game in this tab over it. In words, not marks, by Adam's choice of 2026-10-11. A row, so that more can join it.
+ */
+function Links({ data }: { data: EventFrame['data'] }) {
+  const place = placeIn(data);
+  if (place === null) {
+    return null;
+  }
+  return (
+    <nav className="log__links" aria-label="where this event leads">
+      <a className="log__go" href={mapLink(place)}>
+        on the map
+      </a>
+    </nav>
   );
 }
 

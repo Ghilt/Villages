@@ -17,6 +17,7 @@ import { RippleAlongWater } from './inspect/RippleAlongWater';
 import { sessionStore, gateway } from './net/gateway';
 import { followMap } from './net/followMap';
 import { arriving } from './house/arrival';
+import { startAtIn } from './net/startAt';
 import { eyeStore } from './house/eye';
 import { HoldingOverlay } from './areas/HoldingOverlay';
 import { StoodDown } from './net/StoodDown';
@@ -145,11 +146,14 @@ export function App({ master, devTools }: AppProps) {
   // When the house arrives, the camera goes to it and its window opens: founded a moment ago, or standing
   // when the page loads, and never because it was sent again, which it is whenever anything in it changes.
   // Asked once the map is there, so a house heard before the map was ready still arrives. See `arrival.ts`.
+  // A page opened by a map link stays where the link put it; the house's window opens all the same.
   useEffect(() => {
     if (map !== null && yours !== null && arriving(yours)) {
       const { seat } = yours;
-      note('camera', `flying to the seat at ${seat.lat.toFixed(3)}, ${seat.lon.toFixed(3)}`);
-      map.flyTo({ center: [seat.lon, seat.lat], zoom: Math.max(map.getZoom(), FOUNDING_ZOOM) });
+      if (startAtIn(globalThis.location.search) === null) {
+        note('camera', `flying to the seat at ${seat.lat.toFixed(3)}, ${seat.lon.toFixed(3)}`);
+        map.flyTo({ center: [seat.lon, seat.lat], zoom: Math.max(map.getZoom(), FOUNDING_ZOOM) });
+      }
       inspect({ kind: 'house', id: yours.id });
     }
   }, [map, yours]);
