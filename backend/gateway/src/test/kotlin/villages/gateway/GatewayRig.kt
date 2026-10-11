@@ -4,24 +4,17 @@ import villages.application.Antarctica
 import villages.application.StructureService
 import villages.application.AnonymousTokens
 import villages.application.Arrival
-import villages.application.EventFeed
 import villages.application.FaultBoard
-import villages.application.CharacterCommandExecutor
 import villages.application.FoundHouseService
-import villages.application.HouseCommandExecutor
 import villages.application.KeyFigureService
 import villages.application.Later
-import villages.application.Provenance
 import villages.application.ResourceService
 import villages.application.Stands
-import villages.application.Start
-import villages.application.StoredEvent
 import villages.application.TakeActionService
 import villages.application.DialogueService
 import villages.application.VisionService
 import villages.application.WorldCalendar
 import villages.application.WorldClock
-import villages.application.WriteConflict
 import villages.application.started
 import villages.application.fate.FateEngine
 import villages.application.fate.GroundMap
@@ -32,30 +25,9 @@ import villages.application.fate.omenSources
 import villages.application.fate.firstActions
 import villages.application.fate.RollService
 import villages.application.WorldKept
-import villages.domain.CharacterCommand
-import villages.domain.CharacterDecider
-import villages.domain.CharacterEvent
-import villages.domain.HouseCommand
-import villages.domain.HouseDecider
-import villages.domain.HouseEvent
-import villages.domain.HouseFounded
-import villages.domain.HouseGainedKeyFigure
-import villages.domain.HouseGainedVision
-import villages.domain.HouseLostKeyFigure
-import villages.domain.HouseLostVision
-import villages.domain.HouseResourceSpent
-import villages.domain.HouseResourceReleased
-import villages.domain.HouseResourcePledged
-import villages.domain.HouseResourceGranted
-import villages.domain.PlayerGivenChoice
-import villages.domain.PlayerCompletedDialogue
-import villages.domain.PlayerCompletedDialogueStep
-import villages.domain.PlayerLostDialogue
-import villages.domain.PlayerOfferedDialogue
-import villages.domain.PlayerRolled
-import villages.domain.PlayerTookAction
 import villages.domain.PlayerId
 import villages.domain.WorldTime
+import villages.projections.StructuresProjection
 import villages.projections.CharactersProjection
 import villages.projections.ChoicesProjection
 import villages.projections.LastRollsProjection
@@ -76,119 +48,6 @@ import java.util.concurrent.Executor
  * What the gateway's specs stand on: a world small enough to hold in a test, a later that is whenever the
  * test says, and a rig that builds the real projections and services over them. See the specs beside it.
  */
-
-/** The catalogued type of an event, as the store would name it. */
-internal fun typeOf(event: HouseEvent): String = when (event) {
-    is HouseFounded -> "villages.house.founded.v1"
-    is HouseGainedKeyFigure -> "villages.house.gainedKeyFigure.v1"
-    is HouseLostKeyFigure -> "villages.house.lostKeyFigure.v1"
-    is HouseGainedVision -> "villages.house.gainedVision.v1"
-    is HouseLostVision -> "villages.house.lostVision.v1"
-    is HouseResourceGranted -> "villages.house.resourceGranted.v1"
-    is HouseResourcePledged -> "villages.house.resourcePledged.v1"
-    is HouseResourceReleased -> "villages.house.resourceReleased.v1"
-    is HouseResourceSpent -> "villages.house.resourceSpent.v1"
-    is PlayerGivenChoice -> "villages.player.givenChoice.v1"
-    is PlayerOfferedDialogue -> "villages.player.offeredDialogue.v1"
-    is PlayerCompletedDialogueStep -> "villages.player.completedDialogueStep.v1"
-    is PlayerCompletedDialogue -> "villages.player.completedDialogue.v1"
-    is PlayerLostDialogue -> "villages.player.lostDialogue.v1"
-    is PlayerRolled -> "villages.player.rolled.v1"
-    is PlayerTookAction -> "villages.player.tookAction.v1"
-}
-
-/** Enough of the data for the panel's sake. The stored form proper is pinned by its own fixture. */
-internal fun dataOf(event: HouseEvent): String = when (event) {
-    is HouseFounded -> """{"name":"${event.name.value}","significance":${event.significance.value}}"""
-    is HouseGainedKeyFigure -> """{"characterId":"${event.characterId.value}"}"""
-    is HouseLostKeyFigure -> """{"characterId":"${event.characterId.value}"}"""
-    is HouseGainedVision -> """{"visionId":"${event.visionId.value}"}"""
-    is HouseLostVision -> """{"visionId":"${event.visionId.value}"}"""
-    is HouseResourceGranted -> """{"resource":"${event.resource}","amount":${event.amount}}"""
-    is HouseResourcePledged -> """{"resource":"${event.resource}","amount":${event.amount}}"""
-    is HouseResourceReleased -> """{"pledgeId":"${event.pledgeId.value}"}"""
-    is HouseResourceSpent -> """{"resource":"${event.resource}","amount":${event.amount}}"""
-    is PlayerGivenChoice -> """{"prompt":"${event.choice.prompt}","options":${event.choice.options.size}}"""
-    is PlayerOfferedDialogue -> """{"title":"${event.dialogue.title}","lines":${event.dialogue.lines.size}}"""
-    is PlayerCompletedDialogueStep -> """{"lineId":"${event.lineId.value}"}"""
-    is PlayerCompletedDialogue -> """{"dialogueId":"${event.dialogueId.value}"}"""
-    is PlayerLostDialogue -> """{"dialogueId":"${event.dialogueId.value}"}"""
-    is PlayerRolled -> """{"rarity":"${event.rarity}","omens":${event.omens.size}}"""
-    is PlayerTookAction -> """{"optionId":"${event.optionId.value}"}"""
-}
-
-/** A character's events, catalogued the same way; the panel's copy of their data is not what is tested here. */
-internal fun typeOf(event: CharacterEvent): String =
-    "villages.character.${event::class.simpleName!!.removePrefix("Character").replaceFirstChar { it.lowercase() }}.v1"
-
-/**
- * A world small enough to hold in a test: one list of events, folded per stream, and a feed that delivers
- * synchronously. The gateway never knows the difference, which is the point of the ports.
- */
-internal class TinyWorld : HouseCommandExecutor, CharacterCommandExecutor, EventFeed {
-    val events = mutableListOf<HouseEvent>()
-    val characterEvents = mutableListOf<CharacterEvent>()
-
-    override fun execute(command: CharacterCommand, provenance: Provenance) {
-        val stream = characterEvents.filter { it.characterId == command.characterId }
-        val fresh = CharacterDecider.decide(command, CharacterDecider.fold(stream))
-        characterEvents += fresh
-        fresh.forEachIndexed { index, event ->
-            val record = StoredEvent(
-                id = "c-${characterEvents.size}-$index",
-                type = typeOf(event),
-                stream = event.characterId.stream,
-                streamVersion = (stream.size + index + 1).toLong(),
-                time = event.recordedAt,
-                data = "{}",
-                correlationId = provenance.correlationId.toString(),
-                causationId = provenance.commandId.toString(),
-                event = event,
-            )
-            this.stored += record
-            subscribers.toList().forEach { it(record) }
-        }
-    }
-
-    /** When set, every command loses the race for its stream, the way a contested one behaves. */
-    var contested = false
-    /** What has been stored, so a subscriber that wants the beginning can be given it. */
-    private val stored = mutableListOf<StoredEvent>()
-    private val subscribers = mutableListOf<(StoredEvent) -> Unit>()
-
-    override fun execute(command: HouseCommand, provenance: Provenance) {
-        if (contested) {
-            throw WriteConflict(command.houseId.stream, events.size.toLong())
-        }
-        val stream = events.filter { it.houseId == command.houseId }
-        val fresh = HouseDecider.decide(command, HouseDecider.fold(stream))
-        events += fresh
-        fresh.forEachIndexed { index, event ->
-            val record = StoredEvent(
-                id = "e-${events.size}",
-                type = typeOf(event),
-                stream = event.houseId.stream,
-                streamVersion = (stream.size + index + 1).toLong(),
-                time = event.recordedAt,
-                data = dataOf(event),
-                correlationId = provenance.correlationId.toString(),
-                causationId = provenance.commandId.toString(),
-                event = event,
-            )
-            this.stored += record
-            subscribers.toList().forEach { it(record) }
-        }
-    }
-
-    override fun subscribe(from: Start, subscriber: (StoredEvent) -> Unit): AutoCloseable {
-        if (from == Start.FROM_THE_BEGINNING) {
-            stored.forEach(subscriber)
-        }
-        subscribers += subscriber
-        return AutoCloseable { subscribers -= subscriber }
-    }
-
-}
 
 /**
  * Thirty days a month, which is enough for a test about stepping. What a month really is belongs to
@@ -262,8 +121,8 @@ internal class Rig(
     /** The one master's stands, tile by tile, as the sprite map's folder would hold them. */
     val standsOnDisk = mutableMapOf<Int, ByteArray>()
 
-    /** What the structure levers raised. */
-    val raised = RaisedInTheRig()
+    /** The structures on the map, folded from the world as the app's are. */
+    val structuresOnTheMap = StructuresProjection(world).started()
 
     /** Where the gateway hears that something acting on its own threw, said on purpose by a test. */
     val faults = FaultBoard()
@@ -274,6 +133,7 @@ internal class Rig(
         clock = Clock.fixed(noon, ZoneOffset.UTC),
         world = worldClock,
         onTheMap = characters,
+        structures = structuresOnTheMap,
         mechanics = Mechanics(
             foundHouse = FoundHouseService(world, clock = { noon }, world = worldClock),
             events = world,
@@ -298,9 +158,11 @@ internal class Rig(
             choices = choices,
             recent = recent,
             emptyTheWorld = {
-                val gone = world.events.size + world.characterEvents.size
+                val gone = world.events.size + world.characterEvents.size + world.structureEvents.size
                 world.events.clear()
                 world.characterEvents.clear()
+                world.structureEvents.clear()
+                structuresOnTheMap.reset()
                 houses.reset()
                 choices.reset()
                 recent.reset()
@@ -331,8 +193,8 @@ internal class Rig(
             dialogueRows = dialogueRows,
             stands = Stands { master, x, y -> if (master == "terrain") standsOnDisk[y * STAND_TILES + x] ?: ByteArray(0) else null },
             waters = WaterAt({ grounds[it] }, { names[it] }),
-            structures = StructureService(raised, houses, { noon }, worldClock),
-            antarctica = Antarctica(raised, RIG_CATALOGUE, { noon }, worldClock),
+            structures = StructureService(world, houses, { noon }, worldClock),
+            antarctica = Antarctica(world, RIG_CATALOGUE, { noon }, worldClock),
             instrumentsOpen = instrumentsOpen,
             worldKept = worldKept,
         ),

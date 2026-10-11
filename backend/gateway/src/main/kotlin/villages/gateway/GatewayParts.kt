@@ -4,27 +4,28 @@ import villages.application.Antarctica
 import villages.application.Arrival
 import villages.application.CharactersByCell
 import villages.application.ChoicesByPlayer
-import villages.application.DialogueService
 import villages.application.DialoguesByHouse
+import villages.application.DialogueService
 import villages.application.EventFeed
+import villages.application.fate.RollService
+import villages.application.fate.WaterAt
 import villages.application.FoundHouseService
 import villages.application.HouseById
 import villages.application.HousesByCell
 import villages.application.HousesByPlayer
-import villages.application.KeyFigureService
 import villages.application.KeyFiguresByHouse
+import villages.application.KeyFigureService
 import villages.application.RecentEvents
 import villages.application.ResourceService
 import villages.application.SightsByHouse
 import villages.application.Stands
+import villages.application.StructuresByCell
 import villages.application.StructureService
 import villages.application.TakeActionService
 import villages.application.VisionService
 import villages.application.WorldKept
 import villages.application.WorldClock
 import villages.application.WorldWipe
-import villages.application.fate.RollService
-import villages.application.fate.WaterAt
 
 /**
  * What the gateway's parts are made from: every port a mechanic reads or acts through at the edge. Gathered here so
@@ -70,11 +71,13 @@ internal fun partsOf(
     mechanics: Mechanics,
     houses: HousesByCell,
     onTheMap: CharactersByCell,
+    structuresOnTheMap: StructuresByCell,
     world: WorldClock,
 ): List<Part> = with(mechanics) {
     listOf(
         HousesPart(core, houses, theirHouses, world),
         KeyFiguresPart(core, figures, onTheMap, world),
+        StructuresPart(core, structuresOnTheMap, world),
         SightPart(core, sights),
         DialoguesPart(core, dialogues, dialogueRows),
         ChoicesPart(core, arrival, takeAction, choices, rolls),

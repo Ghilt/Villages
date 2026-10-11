@@ -109,6 +109,33 @@
       "type": "characterGone",
       "id": "cb732500-39bd-3b39-a838-bb89f7195791",
       "version": 12
+    },
+    {
+      "type": "structureArrived",
+      "structure": {
+        "id": "5d000000-0000-4000-8000-000000000001",
+        "structureType": "mill",
+        "name": "a new mill",
+        "place": {
+          "lat": 59.33,
+          "lon": 18.07
+        },
+        "cell": "1200312213",
+        "level": 1,
+        "holder": {
+          "id": "6d5b0a2e-1c3f-4d7e-9a8b-0f1e2d3c4b5a",
+          "name": "Ravenscar",
+          "banner": {
+            "field": "sable",
+            "division": "plain",
+            "charge": "stag",
+            "chargeTincture": "argent"
+          }
+        },
+        "significance": 10.0,
+        "since": 653705,
+        "stamp": 13
+      }
     }
   ]
 }

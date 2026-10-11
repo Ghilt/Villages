@@ -12,11 +12,12 @@ import {
   describeStands,
 } from './arrivals';
 
-const snapshot = (cell: string, houses: number, omitted?: number, characters = 0) => ({
+const snapshot = (cell: string, houses: number, omitted?: number, characters = 0, structures = 0) => ({
   cell,
   houses: Array.from({ length: houses }, (_, index) => index),
   ...(omitted === undefined ? {} : { omitted }),
   characters: Array.from({ length: characters }, (_, index) => index),
+  structures: Array.from({ length: structures }, (_, index) => index),
 });
 
 /** A burst of snapshots, folded in the order they arrived. */
@@ -66,6 +67,15 @@ describe('saying what arrived', () => {
     );
     expect(describeArrival(burst(snapshot('1200312213', 0, undefined, 1)))).toBe(
       '1 cell at z10: 0 houses, 1 character',
+    );
+  });
+
+  it('says the structures standing in the cells, and only when there are some', () => {
+    expect(describeArrival(burst(snapshot('1200312213', 0, undefined, 0, 16)))).toBe(
+      '1 cell at z10: 0 houses, 16 structures',
+    );
+    expect(describeArrival(burst(snapshot('1200312213', 1, undefined, 1, 1)))).toBe(
+      '1 cell at z10: 1 house, 1 character, 1 structure',
     );
   });
 
@@ -121,6 +131,24 @@ describe('saying what a batch brought', () => {
   it('falls back to the id for somebody gone who was never known here', () => {
     expect(describeBatch([{ type: 'characterGone', id: agnes.id, version: 11 }], nobody)).toBe(
       '1 delta in one batch: cb732500 went',
+    );
+  });
+
+  it('names every structure raised, as it names a person arriving', () => {
+    const mill = {
+      id: '5d000000-0000-4000-8000-000000000001',
+      structureType: 'mill',
+      name: 'a new mill',
+      place: { lat: 59.33, lon: 18.07 },
+      cell: '1200312213',
+      level: 1,
+      significance: 10,
+      since: 653705,
+      stamp: 13,
+    };
+
+    expect(describeBatch([{ type: 'structureArrived', structure: mill }], nobody)).toBe(
+      '1 delta in one batch: a new mill raised',
     );
   });
 });

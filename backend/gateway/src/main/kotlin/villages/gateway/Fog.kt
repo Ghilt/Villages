@@ -1,20 +1,25 @@
 package villages.gateway
 
+import java.util.concurrent.ConcurrentHashMap
+import kotlin.math.cos
+import kotlin.math.hypot
 import villages.application.CharacterRow
 import villages.application.CharacterSpan
 import villages.application.HouseRow
 import villages.application.PlacedCharacter
+import villages.application.StructureFace
+import villages.application.StructureRow
 import villages.application.VisionPoint
 import villages.domain.HouseId
 import villages.domain.Location
 import villages.domain.PlayerId
+import villages.domain.Significance
+import villages.domain.StructureId
 import villages.domain.Vision
 import villages.domain.WorldTime
 import villages.protocol.Coverage
 import villages.protocol.HouseView
 import villages.protocol.StandRecords
-import kotlin.math.cos
-import kotlin.math.hypot
 
 /**
  * What the fog of war lets one player be sent, worked out from their house's vision points: the table in
@@ -106,9 +111,16 @@ internal class Fog(
      * one day's vision, so a house there was hidden on the day it was revealed. A house never moves, so only the
      * points near its seat are asked about, which keeps this cheap enough to ask of every house a cell sends.
      */
-    fun hidOn(row: HouseRow, today: WorldTime): WorldTime? {
-        if (row.player == player || row.significance.value >= SEEN_THROUGH_THE_FOG) return null
-        val (lat, lon) = row.seat.lat to row.seat.lon
+    fun hidOn(row: HouseRow, today: WorldTime): WorldTime? = hidOn(row.seat, row.significance, row.player == player, today)
+
+    /**
+     * The day the fog hid a place from this house, for whatever stands still there: null while it sees it on [today] -
+     * its [own], one of a [significance] seen from anywhere, one in its vision - and otherwise the end of the last
+     * stretch in which its vision covered it. Houses and structures ask it alike; see the one above.
+     */
+    fun hidOn(place: Location, significance: Significance, own: Boolean, today: WorldTime): WorldTime? {
+        if (own || significance.value >= SEEN_THROUGH_THE_FOG) return null
+        val (lat, lon) = place.lat to place.lon
         val near = points.filter { point ->
             val north = (point.place.lat - lat) * KILOMETRES_A_DEGREE
             val east = (point.place.lon - lon) * KILOMETRES_A_DEGREE * cos(Math.toRadians((point.place.lat + lat) / 2))
@@ -119,6 +131,34 @@ internal class Fog(
             ?.let { return it.second }
         return near.map { it.since }.distinct().sorted().firstOrNull { day -> sees(near.filter { it.since <= day }) }
     }
+
+    /**
+     * The face of a structure this house is sent on [day], with the day the fog hid it - null while it sees it - or
+     * null where the fog holds it back. Its own, one seen from anywhere, one in its vision: the face of [day]. On ground
+     * it has revealed and sees no longer: the face it had when the fog hid the place, so a new holder, a level or a
+     * ruin since is not this house's to know, and one raised there since is not sent at all. A structure stands still,
+     * so revealed ground is enough to know of it, as for a house. Worked out once a structure, a day and a face, because
+     * a snapshot asks it of every structure in a cell, and this fog lives until the sight changes. See decision records
+     * 0061, 0089 and 0092.
+     */
+    fun faceOf(row: StructureRow, day: WorldTime): Pair<StructureFace, WorldTime?>? {
+        val key = Triple(row.id, day, row.faces.last().stamp)
+        val known = faces[key] ?: (workedOut(row, day) ?: NOT_SENT).also { faces[key] = it }
+        @Suppress("UNCHECKED_CAST")
+        return known.takeIf { it !== NOT_SENT } as Pair<StructureFace, WorldTime?>?
+    }
+
+    private fun workedOut(row: StructureRow, day: WorldTime): Pair<StructureFace, WorldTime?>? {
+        val now = row.faceOn(day) ?: return null
+        val own = house != null && now.holder?.house == house
+        val known = own || now.significance.value >= SEEN_THROUGH_THE_FOG || revealed.covers(row.place.lat, row.place.lon)
+        if (!known) return null
+        val hid = hidOn(row.place, now.significance, own, day) ?: return now to null
+        return row.faceOn(hid)?.let { it to hid }
+    }
+
+    /** The faces worked out, by structure, day and the stamp of its latest face. */
+    private val faces = ConcurrentHashMap<Triple<StructureId, WorldTime, Long>, Any>()
 
     /**
      * What [seenOn] finds on [today], with no day, or else on the latest day before it that it finds anything, with
@@ -176,6 +216,9 @@ internal class Fog(
 
         /** The fog of a connection that has not said who it is: it sees nothing, so only the really big. */
         val NOBODY = Fog(null, emptyList())
+
+        /** What [faceOf] keeps for a structure it does not send, since the map it keeps answers in holds no null. */
+        private val NOT_SENT = Any()
 
         /**
          * How far past its own reach a stand is still worth sending, in world units. The page thins what a stand

@@ -21,7 +21,7 @@ import tools.jackson.databind.JsonNode
  * It goes up whenever a frame or a field changes, and `ProtocolShapeSpec` makes sure of that: every frame's shape
  * is recorded in contracts/protocol-v<n>.txt, and what each version changed is in contracts/README.md.
  */
-const val PROTOCOL_VERSION = 35
+const val PROTOCOL_VERSION = 36
 
 data class Point(val lat: Double, val lon: Double)
 
@@ -229,7 +229,9 @@ data class Welcome(val serverTime: Long, val playerId: String, val world: WorldN
 /**
  * What a cell holds, sent on subscribing to it, before any deltas. `omitted` is how many more houses the cell had
  * than a snapshot carries, so a screen never claims to show all of what it shows most of, and `omittedCharacters`
- * the same for the characters standing in it. A cell with nobody standing in it carries no `characters` at all.
+ * the same for the characters standing in it. A cell with nobody standing in it carries no `characters` at all, and
+ * one with no structure no `structures`; `structuresAsOf` is the structures' read model's count of changes when it was
+ * read, which a page holds a copy against (see [StructureView]).
  */
 data class Snapshot(
     val cell: String,
@@ -238,6 +240,9 @@ data class Snapshot(
     @get:JsonInclude(JsonInclude.Include.NON_DEFAULT) val omitted: Int = 0,
     @get:JsonInclude(JsonInclude.Include.NON_EMPTY) val characters: List<CharacterOnMapView> = emptyList(),
     @get:JsonInclude(JsonInclude.Include.NON_DEFAULT) val omittedCharacters: Int = 0,
+    @get:JsonInclude(JsonInclude.Include.NON_EMPTY) val structures: List<StructureView> = emptyList(),
+    @get:JsonInclude(JsonInclude.Include.NON_DEFAULT) val omittedStructures: Int = 0,
+    @get:JsonInclude(JsonInclude.Include.NON_DEFAULT) val structuresAsOf: Long = 0,
 ) : ServerFrame
 
 /**

@@ -297,6 +297,13 @@ answered exactly for one place at a time by the gateway and the page's marks ali
 through a distance transform. See decision record 0061, and
 `docs/plans/fog-of-war.md` for what is built.
 
+A **structure's** face can change, so the structures' read model keeps every face it has had over world-time, and
+answers a cell with all of them; the gateway picks one per house with `Fog.faceOf`: the face of the day asked where
+the house sees, the face it had when the fog hid the place - `Fog.hidOn`, shared with houses - on revealed ground,
+none elsewhere. Each face is stamped with the read model's count of changes, and a snapshot carries the count it was
+read at, so a page holding a newer face than a snapshot sends still lets the snapshot's replace it. See decision
+records 0061 and 0092.
+
 The scenery's **stands** take the same road (0067). `hello` names the master the page draws; the gateway
 reads that master's stand files through the `Stands` port, whose adapter in `app` reads them from
 `world/stands/`, where the generator writes them and nothing serves them, picks the master among that

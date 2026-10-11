@@ -1,0 +1,25 @@
+{
+  "type": "snapshot",
+  "cell": "1200312213",
+  "houses": [],
+  "asOfVersion": 4,
+  "structures": [
+    {
+      "id": "95ba5c28-4a79-3fa6-88aa-0ff1f5a0a559",
+      "structureType": "castle",
+      "name": "the castle at Stockholm",
+      "place": {
+        "lat": 59.33,
+        "lon": 18.07
+      },
+      "cell": "1200312213",
+      "level": 1,
+      "significance": 20.0,
+      "since": 653700,
+      "stamp": 2,
+      "seenUntil": 653704
+    }
+  ],
+  "omittedStructures": 1,
+  "structuresAsOf": 9
+}

@@ -56,3 +56,6 @@ export type Charge = z.infer<typeof chargeSchema>;
 export type BannerSpec = z.infer<typeof bannerSchema>;
 export type Stock = z.infer<typeof stockSchema>;
 export type ResourceName = z.infer<typeof resourceNameSchema>;
+
+/** A house holding something - a key figure, a structure - named the way a view of the tie needs it. */
+export const holderViewSchema = z.object({ id: z.string(), name: z.string(), banner: bannerSchema });

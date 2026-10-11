@@ -109,3 +109,7 @@ Holding revealed ground at the day the fog hid it - 0061's open question - is wh
 
 That was ended the same day: revealed ground shows its buildings as they were when the fog hid it, so a house
 founded there since is not sent at all. See 0061's amendment.
+
+A structure is dated the same way, by the gateway, as the face it is sent: `seenUntil` on its view is the day the
+fog hid its place, absent while the house sees it. Unlike a house's, the face sent is the one it had on that day,
+not the one it has now. See 0061's amendment of 2026-10-09.

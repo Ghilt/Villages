@@ -33,6 +33,7 @@ import villages.projections.DialoguesProjection
 import villages.projections.HousesProjection
 import villages.projections.RecentEventsProjection
 import villages.projections.SightProjection
+import villages.projections.StructuresProjection
 
 /**
  * The gateway, wired: the core and every mechanic's part, made from the ports each mechanic reads or acts through.
@@ -70,6 +71,7 @@ class GatewayConfig {
         gatewaySending: ExecutorService,
         structures: StructureService,
         antarctica: Antarctica,
+        structuresOnTheMap: StructuresProjection,
         @Value("\${villages.instruments:true}") instruments: Boolean,
     ): Gateway = Gateway(
         tokens = AnonymousTokens,
@@ -78,6 +80,7 @@ class GatewayConfig {
         clock = clock,
         world = worldClock,
         onTheMap = characters,
+        structures = structuresOnTheMap,
         mechanics = Mechanics(
             foundHouse = foundHouse,
             events = world.feed,

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import {
   bannerSchema,
+  holderViewSchema,
   cellSchema,
   pointSchema,
   resourceNameSchema,
@@ -14,6 +15,7 @@ import {
   rollPayloadSchema,
 } from './choiceFrames';
 import { dialogueViewSchema } from './dialogueFrames';
+import { structureArrivedSchema, structureViewSchema } from './structureFrames';
 import { inspectAtFrameSchema, inspectedAtFrameSchema } from './placeFrames';
 
 /**
@@ -73,7 +75,6 @@ export const speciesSchema = z.enum(['person']);
 const statSchema = z.number().int().min(1).max(20);
 
 /** A house holding a character as a key figure, named the way a view of the tie needs it. */
-export const holderViewSchema = z.object({ id: z.string(), name: z.string(), banner: bannerSchema });
 
 /**
  * One of the player's key figures, as the pane shows them. Their age is not on the wire: it is the completed
@@ -265,6 +266,7 @@ export const deltaSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('characterArrived'), character: characterOnMapViewSchema }),
   z.object({ type: z.literal('characterChanged'), character: characterOnMapViewSchema }),
   z.object({ type: z.literal('characterGone'), id: z.string(), version: z.number().int() }),
+  structureArrivedSchema,
 ]);
 
 export const serverFrameSchema = z.discriminatedUnion('type', [
@@ -321,6 +323,11 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
     characters: z.array(characterOnMapViewSchema).optional(),
     /** How many more characters stood there than the snapshot carries. Absent means none. */
     omittedCharacters: z.number().int().nonnegative().optional(),
+    /** The structures standing in the cell, each in the face the house is sent. Absent means none. */
+    structures: z.array(structureViewSchema).optional(),
+    omittedStructures: z.number().int().nonnegative().optional(),
+    /** The structures' read model's count of changes when this was read; a copy stamped no later is replaced. */
+    structuresAsOf: z.number().int().optional(),
   }),
   z.object({ type: z.literal('batch'), deltas: z.array(deltaSchema) }),
   z.object({ type: z.literal('commandAccepted'), commandId: z.string() }),
@@ -378,3 +385,5 @@ export function frameTypesOf(union: {
 }): string[] {
   return union.options.map((option) => String(option.shape.type.value));
 }
+
+export { holderViewSchema };

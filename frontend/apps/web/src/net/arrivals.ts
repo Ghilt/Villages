@@ -25,14 +25,29 @@ export interface Arrival {
   omitted: number;
   /** The characters standing in those cells, counted apart from the houses. */
   characters: number;
+  /** The structures standing in them, in whatever face each house is sent. */
+  structures: number;
 }
 
-export const NOTHING_ARRIVED: Arrival = { cells: 0, zoom: 0, houses: 0, omitted: 0, characters: 0 };
+export const NOTHING_ARRIVED: Arrival = {
+  cells: 0,
+  zoom: 0,
+  houses: 0,
+  omitted: 0,
+  characters: 0,
+  structures: 0,
+};
 
 /** One more snapshot in the burst. Only the parts of the frame this counts are asked for. */
 export function alsoArrived(
   soFar: Arrival,
-  snapshot: { cell: string; houses: readonly unknown[]; omitted?: number; characters?: readonly unknown[] },
+  snapshot: {
+    cell: string;
+    houses: readonly unknown[];
+    omitted?: number;
+    characters?: readonly unknown[];
+    structures?: readonly unknown[];
+  },
 ): Arrival {
   return {
     cells: soFar.cells + 1,
@@ -40,27 +55,31 @@ export function alsoArrived(
     houses: soFar.houses + snapshot.houses.length,
     omitted: soFar.omitted + (snapshot.omitted ?? 0),
     characters: soFar.characters + (snapshot.characters?.length ?? 0),
+    structures: soFar.structures + (snapshot.structures?.length ?? 0),
   };
 }
 
 /**
- * What to say about the burst, or null when it is not worth a line. The characters are said only when
- * there are some, so a world with nobody on its map reads the way it always did.
+ * What to say about the burst, or null when it is not worth a line. The characters and the structures are
+ * said only when there are some, so a world with neither on its map reads the way it always did.
  */
 export function describeArrival(arrival: Arrival): string | null {
-  if (arrival.houses === 0 && arrival.omitted === 0 && arrival.characters === 0) {
+  if (arrival.houses === 0 && arrival.omitted === 0 && arrival.characters === 0 && arrival.structures === 0) {
     return null;
   }
   const cells = `${arrival.cells} cell${arrival.cells === 1 ? '' : 's'} at z${arrival.zoom}`;
   const houses = `${arrival.houses} house${arrival.houses === 1 ? '' : 's'}`;
   const characters =
     arrival.characters === 0 ? '' : `, ${arrival.characters} character${arrival.characters === 1 ? '' : 's'}`;
-  return `${cells}: ${houses}${characters}${arrival.omitted > 0 ? `, ${arrival.omitted} more not sent` : ''}`;
+  const structures =
+    arrival.structures === 0 ? '' : `, ${arrival.structures} structure${arrival.structures === 1 ? '' : 's'}`;
+  const more = arrival.omitted > 0 ? `, ${arrival.omitted} more not sent` : '';
+  return `${cells}: ${houses}${characters}${structures}${more}`;
 }
 
 /**
  * What to say about one batch of deltas: how many, and by name every character in it who arrived, moved
- * or went, because a person moving on the map is rare enough to be news and a house changing is not.
+ * or went, and every structure raised, because those are rare enough to be news and a house changing is not.
  * `nameOf` is who a character is by id, from what was held before the batch, since a character who is
  * gone arrives as nothing but an id.
  */
@@ -74,6 +93,8 @@ export function describeBatch(deltas: readonly Delta[], nameOf: (id: string) => 
         return [`${delta.character.givenName} ${delta.character.familyName} moved`];
       case 'characterGone':
         return [`${nameOf(delta.id) ?? delta.id.slice(0, 8)} went`];
+      case 'structureArrived':
+        return [`${delta.structure.name} raised`];
       default:
         return [];
     }

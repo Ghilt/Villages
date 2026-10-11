@@ -254,7 +254,11 @@ stage alone, with none of the debug panel in it (decision record 0079).
   named *a new mill* and the like; **raise Antarctica again** is the sixteen. Each is a command said in the log
   under `structures` with its answer, and a raising is a `villages.structure.raised.v1` on the event page. Yours
   without a house is refused `noSuchHouse`; a type the catalogue lacks would be `noSuchType`. Adam's levers,
-  standing in for a house building one; closed with the other instruments (0076). Nothing draws a structure yet.
+  standing in for a house building one; closed with the other instruments (0076). Nothing draws a structure yet,
+  but the page is sent them: the log's `cells` lines count the structures each burst of snapshots brought, and a
+  batch names one raised in a cell the page holds, `a new mill raised`. What is sent is each one's face as the fog
+  allows it: today's where the house sees, the one it last saw on revealed ground, nothing on unknown ground -
+  Antarctica's sixteen therefore only with the fog lifted or *see everything* on, until a house sees them.
 
 ## Adam's folders and the tools that cut them
 

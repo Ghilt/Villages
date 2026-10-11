@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 
 /**
- * What a batch carries: one change to what a connection's held cells hold, a house or a character, each told apart by
+ * What a batch carries: one change to what a connection's held cells hold, a house, a character or a structure, each told apart by
  * its `type`. Moved out of Frames.kt, past its ceiling, when the inspect frames came in.
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
     JsonSubTypes.Type(CharacterArrived::class, name = "characterArrived"),
     JsonSubTypes.Type(CharacterChanged::class, name = "characterChanged"),
     JsonSubTypes.Type(CharacterGone::class, name = "characterGone"),
+    JsonSubTypes.Type(StructureArrived::class, name = "structureArrived"),
 )
 sealed interface Delta
 

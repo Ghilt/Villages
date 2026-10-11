@@ -11,6 +11,7 @@ import villages.application.WorldClock
 import villages.domain.StructureCatalogue
 import villages.occurrent.EventWorld
 import villages.projections.HousesProjection
+import villages.projections.StructuresProjection
 import java.nio.file.Files
 import java.nio.file.Path
 import java.time.Clock
@@ -30,6 +31,10 @@ class StructuresConfig {
     @Bean
     fun structureExecutor(world: EventWorld, catalogue: StructureCatalogue): StructureCommandExecutor =
         world.structureExecutor(catalogue)
+
+    /** The structures on the map, by cell, with every face each has had: what a snapshot and the fog read. */
+    @Bean(initMethod = "start", destroyMethod = "close")
+    fun structuresOnTheMap(world: EventWorld): StructuresProjection = StructuresProjection(world.feed)
 
     /** Raising one where Adam's debug panel looks, for his own house or for nobody. */
     @Bean

@@ -1,13 +1,17 @@
 package villages.gateway
 
+import villages.application.CellContents
 import villages.application.CharacterRow
 import villages.application.CharacterSpan
-import villages.application.CellContents
 import villages.application.HouseRow
 import villages.application.HousesByCell
+import villages.application.StructureRow
+import villages.application.StructuresByCell
 import villages.domain.HouseId
 import villages.domain.WorldTime
+import villages.protocol.coarsestZoom
 import villages.protocol.HouseView
+import villages.protocol.StructureView
 
 /**
  * How a connection is looking at the world: on which day, with the eye open or not, and through what fog. One
@@ -54,6 +58,29 @@ internal data class Looking(
             sent(row, day)?.also { sent[row.id] = it } != null
         }
         return contents to contents.houses.map { sent.getValue(it.id) }
+    }
+
+    /**
+     * A structure as this connection is sent it on [day]: the face of that day where it sees, or where the fog is
+     * lifted; the face it last saw on ground revealed, dated so; or nothing. See [Fog.faceOf].
+     */
+    fun sent(row: StructureRow, day: WorldTime): StructureView? =
+        if (!fogged) {
+            row.faceOn(day)?.let { row.toView(it, null) }
+        } else {
+            fog.faceOf(row, day)?.let { (face, hid) -> row.toView(face, hid) }
+        }
+
+    /**
+     * What a cell holds of structures on [day] that this connection is sent and that are worth drawing at its zoom by
+     * the face it is sent - every one with the eye open - most significant first, at most [most], and how many more.
+     */
+    fun structuresIn(structures: StructuresByCell, cell: String, day: WorldTime, most: Int): Pair<List<StructureView>, Int> {
+        val sent = structures.inCell(cell, everything)
+            .mapNotNull { sent(it, day) }
+            .filter { everything || coarsestZoom(it.significance) <= cell.length }
+            .sortedWith(compareByDescending<StructureView> { it.significance }.thenBy { it.id })
+        return sent.take(most) to (sent.size - most).coerceAtLeast(0)
     }
 
     /** Whether the fog lets this character, standing here, through on [day], the one it is looking at. */

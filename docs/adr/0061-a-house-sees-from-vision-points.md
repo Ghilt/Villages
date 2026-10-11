@@ -137,3 +137,19 @@ is not needed until a house's face can change or a house can end.
 
 **The rule for revealed ground is now:** what stands still, as it was when the fog last hid it.
 
+
+## Amendment, 2026-10-09: a structure's face changes, and still nothing is kept per player
+
+Structures are the first things on revealed ground whose face can change: a new holder, a level, a ruin (0092).
+That is the day this record put off, and it still needs no memory of what each player saw. **The structures' read
+model keeps every face a structure has had, over world-time, and the fog sends the one it had on the day the fog hid
+its place**, `Fog.faceOf`; where the house sees, the face of the day asked. The day the fog hid a place is
+`Fog.hidOn`, split out of the houses' so that anything standing still asks it alike: a place, how significant, and
+whether it is the house's own. Both histories were already kept - the structure's on its stream, the house's sight
+in its vision points - so *as last seen* is a query of the two and not a third thing to keep.
+
+- **One raised on revealed ground after the fog hid it is not sent**, as a house founded there is not.
+- **What changes about it under the fog is not told**; seen again, the cells are answered again with today's face.
+- **The answer is worked out once a structure, a day and a face**, and kept in the fog, which is made anew whenever
+  the sight changes: a snapshot asks it of every structure in a cell.
+- A structure's slots are never shown as last seen, so they are no part of a face.

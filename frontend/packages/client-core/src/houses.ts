@@ -126,6 +126,9 @@ export function reduceHouses(state: HousesState, frame: ServerFrame): HousesStat
           case 'characterGone':
             next = dropCharacter(next, delta.id, delta.version);
             break;
+          case 'structureArrived':
+            // Said in the log already; held and drawn from the step after. See docs/plans/structures.md.
+            break;
         }
       }
       return next;

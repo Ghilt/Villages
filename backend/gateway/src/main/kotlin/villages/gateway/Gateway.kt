@@ -1,10 +1,14 @@
 package villages.gateway
 
-import villages.application.Faults
+import java.time.Clock
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Executor
 import villages.application.CharactersByCell
+import villages.application.Faults
 import villages.application.HousesByCell
-import villages.application.PlayerTokens
 import villages.application.Later
+import villages.application.PlayerTokens
+import villages.application.StructuresByCell
 import villages.application.WorldClock
 import villages.domain.PlayerId
 import villages.protocol.Batch
@@ -13,9 +17,9 @@ import villages.protocol.Command
 import villages.protocol.Delta
 import villages.protocol.ErrorFrame
 import villages.protocol.Hello
-import villages.protocol.PROTOCOL_VERSION
 import villages.protocol.Ping
 import villages.protocol.Pong
+import villages.protocol.PROTOCOL_VERSION
 import villages.protocol.ProtocolJson
 import villages.protocol.Resync
 import villages.protocol.ServerFrame
@@ -25,9 +29,6 @@ import villages.protocol.UnsubscribeCells
 import villages.protocol.Welcome
 import villages.protocol.WorldNow
 import villages.protocol.WorldWiped
-import java.time.Clock
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.Executor
 
 /**
  * The edge, without the transport: one instance per process, one `Connection` per socket. It speaks the
@@ -52,6 +53,8 @@ class Gateway(
     private val clock: Clock,
     private val world: WorldClock,
     private val onTheMap: CharactersByCell,
+    /** The structures on the map, which a cell's snapshot carries beside the houses and the people. */
+    private val structures: StructuresByCell,
     /** What every part is made from, a mechanic's ports apiece: see [Mechanics]. */
     mechanics: Mechanics,
     private val later: Later,
@@ -91,7 +94,7 @@ class Gateway(
     }
 
     /** A part for each mechanic, made after the index and the sessions: see [partsOf] and decision record 0075. */
-    private val parts: List<Part> = partsOf(core, mechanics, houses, onTheMap, world)
+    private val parts: List<Part> = partsOf(core, mechanics, houses, onTheMap, structures, world)
 
     /** Every command the gateway takes, and every frame a part answers, each with the one part that handles it. */
     private val commands = Commands()
@@ -303,7 +306,7 @@ class Gateway(
         }
 
         /** What the cell holds on the day this connection is looking at, and of that what its fog lets through. */
-        private fun snapshot(cell: String) = out.send(snapshotOf(cell, looking, world, houses, onTheMap))
+        private fun snapshot(cell: String) = out.send(snapshotOf(cell, looking, world, houses, onTheMap, structures))
 
         /** Every held cell answered again, for a connection whose way of looking has changed. */
         private fun answerAgain() {
