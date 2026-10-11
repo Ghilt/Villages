@@ -1,5 +1,6 @@
 package villages.application
 
+import villages.domain.HouseId
 import villages.domain.Location
 import villages.domain.Significance
 import villages.domain.StructureId
@@ -53,6 +54,9 @@ interface StructuresByCell {
 
     /** One structure, with every face it has had, wherever it stands, or null for none: what a window asks after. */
     fun row(id: StructureId): StructureRow?
+
+    /** Every structure [house] holds now, wherever it stands: its holdings, which its player is sent. */
+    fun heldBy(house: HouseId): List<StructureRow>
 
     /** How many changes the read model has applied. Monotonic, and only ever compared with a face's stamp. */
     fun asOf(): Long

@@ -69,7 +69,7 @@ class GatewayDialoguesSpec : StringSpec({
         val sent = mutableListOf<ServerFrame>()
         Rig().gateway.connect { sent += it }.receive(hello)
 
-        sent[4] shouldBe YourDialogues(emptyList())
+        sent[5] shouldBe YourDialogues(emptyList())
     }
 
     "an offer reaches its player as far as the dialogue choice, and not a line past it" {

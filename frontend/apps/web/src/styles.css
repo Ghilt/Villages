@@ -28,6 +28,7 @@
 @import './stage/rail.css';
 @import './inspect/navigate.css';
 @import './figures/figures.css';
+@import './holdings/holdings.css';
 @import './inspect/window.css';
 @import './map/map-strip.css';
 @import './inspect/navigate-ways.css';

@@ -24,7 +24,7 @@ const ROWS: readonly (readonly string[])[] = [
   // What stands on the ground, and the room around the desk.
   ['sprites', 'room'],
   // The game's own surfaces: the panes and windows a player reads and presses.
-  ['house', 'figures', 'choice', 'dialogues', 'areas', 'inspect'],
+  ['house', 'figures', 'holdings', 'choice', 'dialogues', 'areas', 'inspect'],
   // What puts it all together, and the instruments beside it.
   ['(root)', 'debug', 'admin'],
 ];
@@ -44,6 +44,8 @@ const SIDEWAYS: readonly (readonly [string, string])[] = [
   ['inspect', 'figures'],
   ['inspect', 'house'],
   ['inspect', 'areas'],
+  // A holding's details say what its window says.
+  ['holdings', 'inspect'],
 ];
 
 /**
@@ -97,7 +99,7 @@ function rowOf(folder: string): number {
  * with its rarity cards and Take action (0083); the inspect window the second, with the tag beside a window's name
  * saying how fresh what it shows is (0089).
  */
-const TAKEN_UP: readonly string[] = ['choice', 'inspect'];
+const TAKEN_UP: readonly string[] = ['choice', 'inspect', 'holdings'];
 
 /** Whether the rows let one folder import another. */
 export function mayImport(from: string, to: string): boolean {

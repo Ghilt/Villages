@@ -177,6 +177,7 @@ export function createSession(ports: SessionPorts): Session {
     yourHouse: () => undefined,
     yourChoice: () => undefined,
     yourKeyFigures: () => undefined,
+    yourHoldings: () => undefined,
     yourSight: () => undefined,
     yourDialogues: () => undefined,
     // The world this window was looking at is gone. Arriving anew is the only honest thing to do. See 0036.

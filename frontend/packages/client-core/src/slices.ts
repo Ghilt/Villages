@@ -5,6 +5,7 @@ import type {
   KeyFigureView,
   RollDrawnFrame,
   ServerFrame,
+  StructureView,
   VisionPointView,
   YourHouseView,
 } from '@villages/protocol';
@@ -35,6 +36,11 @@ export interface SessionState {
    * said. An empty list is a house with none; null is not having heard yet. See decision record 0055.
    */
   yourKeyFigures: readonly KeyFigureView[] | null;
+  /**
+   * Every structure the player's house holds, its seat first, or null until the gateway has said. An empty list is a
+   * house with none; null is not having heard yet. See docs/plans/structures.md.
+   */
+  yourHoldings: readonly StructureView[] | null;
   /**
    * Every vision point the player's house has had, oldest first, and the surface tension of the edge in
    * kilometres, or null until the gateway has said. What the fog of war is drawn from: vision is the points
@@ -160,6 +166,12 @@ const SLICES = {
     onFrame: { yourKeyFigures: (_, frame) => ({ yourKeyFigures: frame.keyFigures }) },
     onReset: forgottenWhenTakenOver({ yourKeyFigures: null }),
   } satisfies Slice<'yourKeyFigures'>,
+
+  holdings: {
+    initial: { yourHoldings: null },
+    onFrame: { yourHoldings: (_, frame) => ({ yourHoldings: frame.holdings }) },
+    onReset: forgottenWhenTakenOver({ yourHoldings: null }),
+  } satisfies Slice<'yourHoldings'>,
 
   sight: {
     initial: { yourSight: null },

@@ -283,8 +283,12 @@ class AppBootsTest {
         assertNotNull(second.last<YourChoice>().choice, "a player with no house is asked where to found")
         // The first event of the stream again, which is what proves the store was emptied and not hidden.
         // Its own stream's, because the server is shared and another test's listeners may still be writing for theirs.
-        second.until("the choice event") { frames -> frames.any { it is EventFrame && it.stream == wipers } }
-        assertEquals(1L, second.heard.filterIsInstance<EventFrame>().first { it.stream == wipers }.streamVersion)
+        // The choice asked again is the stream's first event, which it is only in a store that was emptied. Looked for by
+        // its type, because the event page's recent events can still take in one written just before the wipe: the
+        // wipe's race with events in flight, a task of its own.
+        val choiceAgain = { frame: Any -> frame is EventFrame && frame.stream == wipers && frame.eventType == "villages.player.givenChoice.v1" }
+        second.until("the choice event") { frames -> frames.any(choiceAgain) }
+        assertEquals(1L, second.heard.filterIsInstance<EventFrame>().last(choiceAgain).streamVersion)
 
         first.close()
         second.close()

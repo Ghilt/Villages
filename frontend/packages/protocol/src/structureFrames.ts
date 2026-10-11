@@ -37,4 +37,13 @@ export const structureChangedSchema = z.object({
   structure: structureViewSchema,
 });
 
+/**
+ * The player's holdings: every structure their house holds now, its seat first and the rest in the order it came to
+ * hold them, in today's face. Sent after `yourKeyFigures` on hello and whenever one changes. See structures.md.
+ */
+export const yourHoldingsFrameSchema = z.object({
+  type: z.literal('yourHoldings'),
+  holdings: z.array(structureViewSchema),
+});
+
 export type StructureView = z.infer<typeof structureViewSchema>;

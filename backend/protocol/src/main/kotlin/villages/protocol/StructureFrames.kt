@@ -30,6 +30,14 @@ data class StructureView(
     val seatOf: HolderView? = null,
 )
 
+/**
+ * The player's holdings: every structure their house holds now, wherever it stands, its seat first and the rest in
+ * the order the house came to hold them, each in today's face. Sent after `yourKeyFigures` on hello, always a list
+ * and empty when there are none, and again whenever one is raised for the house, taken, or handed away. What a house
+ * holds is its own, like what it has. See docs/plans/structures.md.
+ */
+data class YourHoldings(val holdings: List<StructureView>) : ServerFrame
+
 /** A structure came to be in a cell this connection holds and sees. The client keeps it in the held cells its `cell` falls in. */
 data class StructureArrived(val structure: StructureView) : Delta
 

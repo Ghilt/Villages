@@ -22,6 +22,7 @@ const HOUSE_FRAMES = [
   { type: 'yourHouse', yours: { house: { name: 'Ravenscar' } } },
   { type: 'yourChoice', choice: { prompt: 'Where shall the house raise its seat?' } },
   { type: 'yourKeyFigures', keyFigures: [{ id: 'agnes' }, { id: 'wilhelm' }] },
+  { type: 'yourHoldings', holdings: [{ id: 'castle' }, { id: 'mill' }, { id: 'abbey' }] },
   { type: 'yourSight', points: [{}, {}, {}, {}], tension: 40 },
   { type: 'yourDialogues', dialogues: [{}, {}, {}, {}] },
 ] as unknown as ServerFrame[];
@@ -43,6 +44,7 @@ describe('the session, folded from what each mechanic folds', () => {
     expect(state.yourHouse?.house.name).toBe('Ravenscar');
     expect(state.yourChoice?.prompt).toBe('Where shall the house raise its seat?');
     expect(state.yourKeyFigures).toHaveLength(2);
+    expect(state.yourHoldings).toHaveLength(3);
     expect(state.yourSight?.points).toHaveLength(4);
     expect(state.yourDialogues).toHaveLength(4);
   });
@@ -58,9 +60,17 @@ describe('the session, folded from what each mechanic folds', () => {
       closed.yourHouse,
       closed.yourChoice,
       closed.yourKeyFigures,
+      closed.yourHoldings,
       closed.yourSight,
       closed.yourDialogues,
-    ]).toEqual([was.yourHouse, was.yourChoice, was.yourKeyFigures, was.yourSight, was.yourDialogues]);
+    ]).toEqual([
+      was.yourHouse,
+      was.yourChoice,
+      was.yourKeyFigures,
+      was.yourHoldings,
+      was.yourSight,
+      was.yourDialogues,
+    ]);
   });
 
   it('taken over, forgets the house too, because somebody else is playing it now', () => {
@@ -72,9 +82,10 @@ describe('the session, folded from what each mechanic folds', () => {
       takenOver.yourHouse,
       takenOver.yourChoice,
       takenOver.yourKeyFigures,
+      takenOver.yourHoldings,
       takenOver.yourSight,
       takenOver.yourDialogues,
-    ]).toEqual([null, null, null, null, null]);
+    ]).toEqual([null, null, null, null, null, null]);
   });
 
   it('a step refused is said under its dialogue, and an answer to anything else leaves it be', () => {

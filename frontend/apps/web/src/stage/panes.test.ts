@@ -24,6 +24,7 @@ import { panesOn, standingIn } from '../panes';
 import { DIALOGUE_PANE } from '../dialogues/pane';
 import { CHOICE_AT_REST, CHOICE_PANE } from '../choice/pane';
 import { KEY_FIGURES_PANE } from '../figures/pane';
+import { HOLDINGS_PANE } from '../holdings/pane';
 import { HOUSE_PANE } from '../house/pane';
 
 /** None of the panes that come and go; a question standing; a house that has been offered a dialogue. */
@@ -49,6 +50,7 @@ describe('panesIn', () => {
     expect(panesIn(panesFor([], NONE), 'bottomLeft').map((pane) => pane.id)).toEqual([
       HOUSE_PANE.id,
       KEY_FIGURES_PANE.id,
+      HOLDINGS_PANE.id,
       NAVIGATION_PANE.id,
     ]);
   });

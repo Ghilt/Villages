@@ -113,6 +113,9 @@ class StructuresProjection(feed: EventFeed) : Follower(feed), StructuresByCell {
 
     override fun row(id: StructureId): StructureRow? = rows[id]?.row
 
+    override fun heldBy(house: HouseId): List<StructureRow> =
+        rows.values.map { it.row }.filter { it.faces.last().holder?.house == house }
+
     override fun asOf(): Long = applied.get()
 
     override fun watch(listener: (StructureChange) -> Unit): AutoCloseable {

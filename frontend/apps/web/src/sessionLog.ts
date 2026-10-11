@@ -155,6 +155,25 @@ export const sessionLog: GatewayListener = {
           note('characters', line);
         }
         return;
+      case 'yourHoldings': {
+        // Said when it differs from what was held: a holding gained or lost, the seat first.
+        const names = frame.holdings.map((one) =>
+          one.seatOf === undefined ? one.name : `${one.name} (seat)`,
+        );
+        const before = (was.yourHoldings ?? []).map((one) => `${one.id}@${one.stamp}`).join(' ');
+        if (
+          before !== frame.holdings.map((one) => `${one.id}@${one.stamp}`).join(' ') ||
+          was.yourHoldings === null
+        ) {
+          note(
+            'holdings',
+            names.length === 0
+              ? 'no holdings yet'
+              : `${names.length} ${names.length === 1 ? 'holding' : 'holdings'}: ${names.join(', ')}`,
+          );
+        }
+        return;
+      }
       case 'yourSight': {
         // Key figures by their names, and a structure a vision is seen from by its own, where a cell has carried it.
         const named = new Map<string, string>([

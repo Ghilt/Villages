@@ -9,6 +9,8 @@ import { DIALOGUE_PANE } from './dialogues/pane';
 import { Dialogues } from './dialogues/Dialogues';
 import { KEY_FIGURES_PANE } from './figures/pane';
 import { KeyFigures } from './figures/KeyFigures';
+import { HOLDINGS_PANE } from './holdings/pane';
+import { Holdings } from './holdings/Holdings';
 import { HOUSE_PANE } from './house/pane';
 import { HouseStatus } from './house/HouseStatus';
 import { Inspecting } from './inspect/Inspecting';
@@ -32,7 +34,7 @@ import {
  * Which panes stand on the stage, in which order, and what draws each.
  *
  * Each pane is declared by its feature, in its own folder, and named here once: the house status, the key
- * figures and navigation, which share the corner and stand in it in this order; the choice roll while a
+ * figures, the holdings and navigation, which share the corner and stand in it in this order; the choice roll while a
  * question does, and at rest once there is a house; and character dialogue from the house's first dialogue on. The map comes first, because it
  * is the floor, and its contents are App's, which holds the map; a window per subject open comes last,
  * newest first. A new mechanic's pane is a declaration in its folder and a line here. The stage is handed
@@ -50,6 +52,7 @@ interface Standing {
 const STANDING: readonly Standing[] = [
   { pane: HOUSE_PANE, draw: (room) => <HouseStatus room={room} /> },
   { pane: KEY_FIGURES_PANE, draw: (room) => <KeyFigures room={room} /> },
+  { pane: HOLDINGS_PANE, draw: (room) => <Holdings room={room} /> },
   {
     pane: NAVIGATION_PANE,
     draw: (room, along, going) => <Navigating room={room} along={along} going={going} />,

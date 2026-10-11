@@ -1,0 +1,123 @@
+/* The holdings: the list of what the house holds, and one holding's details. */
+
+/*
+ * **Holdings**: every structure the house holds, the corner's tab beside the key figures.
+ *
+ * Its bar is the key figures' and navigation's - small capitals in the soft ink - so the corner's tabs read as one
+ * family whichever is up. The list is the component library's.
+ */
+.holdings {
+  --bar: 2rem;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+}
+
+.holdings__bar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: none;
+  box-sizing: border-box;
+  height: var(--bar);
+  padding: 0.2rem 0.4rem 0 0.75rem;
+}
+
+.holdings__bar .pane-size {
+  margin-left: auto;
+}
+
+.holdings__head,
+.holdings__kind {
+  margin: 0;
+  overflow: hidden;
+  font-size: 0.72rem;
+  font-weight: normal;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink-soft);
+}
+
+.holdings__back,
+.holdings__map {
+  width: 1.6rem;
+  height: 1.6rem;
+  flex: none;
+  padding: 0.15rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.holdings__back:hover .icon,
+.holdings__map:hover .icon {
+  color: var(--gold);
+}
+
+.holdings__empty {
+  margin: auto;
+  padding: 0 1.25rem calc(1.25rem + var(--corner-bottom, 0px));
+  max-width: 24ch;
+  font-size: 0.95rem;
+  font-style: italic;
+  line-height: 1.4;
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+/* The list scrolls within the corner, and leaves room for whatever stands along its bottom. */
+.holdings__list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0.2rem 0.5rem calc(0.5rem + var(--corner-bottom, 0px));
+}
+
+.holdings__figure {
+  display: block;
+  flex: none;
+}
+
+.holdings__details {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0.3rem 0.85rem calc(0.75rem + var(--corner-bottom, 0px));
+}
+
+.holdings__title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.holdings__under {
+  flex: 1;
+  margin: 0;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.holdings__facts {
+  margin: 0.6rem 0 0;
+}
+
+.holdings__fact {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.15rem 0;
+}
+
+.holdings__fact dt {
+  min-width: 5.5rem;
+  font-variant: small-caps;
+  color: var(--ink-soft);
+}
+
+.holdings__fact dd {
+  margin: 0;
+}

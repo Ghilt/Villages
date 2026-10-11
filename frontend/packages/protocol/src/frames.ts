@@ -15,7 +15,12 @@ import {
   rollPayloadSchema,
 } from './choiceFrames';
 import { dialogueViewSchema } from './dialogueFrames';
-import { structureArrivedSchema, structureChangedSchema, structureViewSchema } from './structureFrames';
+import {
+  structureArrivedSchema,
+  structureChangedSchema,
+  structureViewSchema,
+  yourHoldingsFrameSchema,
+} from './structureFrames';
 import { inspectAtFrameSchema, inspectedAtFrameSchema } from './placeFrames';
 
 /**
@@ -288,6 +293,7 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('yourChoice'), choice: choiceViewSchema.nullable() }),
   /** The player's key figures in the order their house took them in, always a list. The pane's frame. */
   z.object({ type: z.literal('yourKeyFigures'), keyFigures: z.array(keyFigureViewSchema) }),
+  yourHoldingsFrameSchema,
   /**
    * Every vision point the player's house has had, oldest first: its vision is the ones lasting today, what it
    * has revealed is everything any of them has covered, and the rest is unknown. Always a list, empty while

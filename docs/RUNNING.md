@@ -290,6 +290,13 @@ stage alone, with none of the debug panel in it (decision record 0079).
   or its house's the newest open - its **influence zone** is drawn about it, the ragged gold ground every seat used
   to have at all times, its reach the catalogue's `zone`; a type without one draws none. The seat still sees from where the
   house was founded too, until a seat can be lost.
+- What your house holds: the **Holdings** tab of the corner, beside the key figures, its mark the tower. A list,
+  the seat first and the rest in the order the house came to hold them, each row the structure's placeholder
+  picture, its name, and what it is - *a castle, the seat of Ravenscar, level 1*; with none it says that holdings
+  will be shown here. A row pressed opens its details in the tab: the window's words, the map's mark to fly to it,
+  and the list mark beside the name to go back. The game server sends it on hello and whenever a structure is
+  raised for the house, taken by it or handed away (`yourHoldings`, private, through no fog), and the log says it
+  under `holdings`: `2 holdings: Ravenscar Castle (seat), the Antarctic mill`.
 - A structure on the map: its type's placeholder picture, drawn in code (`sprites/structurePictures.ts`) in its
   own colours, as tall on the ground as `groundHeight` in the catalogue says at its level, and far out the same
   picture at the size of a word, crossing over where a house's castle does. One a house holds flies a pennant in

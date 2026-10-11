@@ -35,8 +35,8 @@ class GatewaySessionsSpec : StringSpec({
         val sent = mutableListOf<ServerFrame>()
         rig.gateway.connect { sent += it }.receive(hello)
 
-        sent.map { it::class.simpleName }.take(6) shouldBe listOf(
-            "Welcome", "YourHouse", "YourKeyFigures", "YourSight", "YourDialogues", "YourChoice",
+        sent.map { it::class.simpleName }.take(7) shouldBe listOf(
+            "Welcome", "YourHouse", "YourKeyFigures", "YourHoldings", "YourSight", "YourDialogues", "YourChoice",
         )
     }
 

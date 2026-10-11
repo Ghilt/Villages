@@ -8,6 +8,7 @@ import villages.protocol.StandsFrame
 import villages.protocol.YourChoice
 import villages.protocol.YourDialogues
 import villages.protocol.YourHouse
+import villages.protocol.YourHoldings
 import villages.protocol.YourKeyFigures
 import villages.protocol.YourSight
 import java.util.concurrent.Executor
@@ -95,7 +96,7 @@ internal class Outbox(private val transport: Outbound, private val sendOn: Execu
     private fun kindOf(frame: ServerFrame): Any? = when (frame) {
         is Snapshot -> SnapshotOf(frame.cell)
         is StandsFrame -> StandsOf(frame.x, frame.y)
-        is YourHouse, is YourKeyFigures, is YourSight, is YourDialogues, is YourChoice -> frame::class
+        is YourHouse, is YourKeyFigures, is YourHoldings, is YourSight, is YourDialogues, is YourChoice -> frame::class
         else -> null
     }
 

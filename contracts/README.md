@@ -111,3 +111,5 @@ recorded over. See decision record 0037. What each one changed:
   vision given is seen from, for what a holding lets its holder see.
 - **40** - a structure says whose seat it is: `StructureView` carries `seatOf`, the house whose seat it is in the face
   sent, which a window says and which the page draws in place of that house's own mark.
+- **41** - a house's holdings: the private `yourHoldings`, every structure the player's house holds now, its seat
+  first and the rest in the order it came to hold them, sent on hello and whenever one changes hands or is raised.

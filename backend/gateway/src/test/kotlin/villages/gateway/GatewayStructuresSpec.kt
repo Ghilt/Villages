@@ -17,6 +17,7 @@ import villages.protocol.Batch
 import villages.protocol.CommandAccepted
 import villages.protocol.CommandRejected
 import villages.protocol.Inspected
+import villages.protocol.YourHoldings
 import villages.protocol.Snapshot
 import villages.protocol.StructureArrived
 import villages.protocol.StructureChanged
@@ -181,5 +182,21 @@ class GatewayStructuresSpec : StringSpec({
         val (closed, told) = Rig(instrumentsOpen = false).introduced()
         closed.receive(takingControl(id))
         told.filterIsInstance<CommandRejected>().single().reason shouldBe "instrumentsClosed"
+    }
+
+    "a player is told their house's holdings when one is raised for it or taken, the oldest first" {
+        val rig = Rig()
+        val (window, sent) = rig.introduced()
+        window.receive(founding())
+        window.receive(raising("mill", yours = false, lat = 59.33, lon = 18.07))
+        val nobodys = rig.world.structureEvents.single().structureId
+        sent.clear()
+
+        window.receive(raising("mill", yours = true, commandId = commandNumber(11)))
+        sent.filterIsInstance<YourHoldings>().last().holdings.map { it.name } shouldBe listOf("a new mill")
+
+        window.receive(takingControl(nobodys))
+        sent.filterIsInstance<YourHoldings>().last().holdings.map { it.id } shouldBe
+            listOf(rig.world.structureEvents[1].structureId.value.toString(), nobodys.value.toString())
     }
 })

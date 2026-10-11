@@ -61,7 +61,7 @@ class Mechanics(
 )
 
 /**
- * A part for each mechanic, in the order a player arriving is told things: the house, whom it holds, what it sees,
+ * A part for each mechanic, in the order a player arriving is told things: the house, whom it holds, what it holds, what it sees,
  * what it was told, what it is asked; then the stands, the waters, the timeline and the windows (0088), which greet
  * nobody; and Adam's instruments (0076). A part watches its read models from the moment it is made, so the gateway
  * makes them after its index and its sessions.
@@ -77,6 +77,7 @@ internal fun partsOf(
     listOf(
         HousesPart(core, houses, theirHouses, world),
         KeyFiguresPart(core, figures, onTheMap, world),
+        HoldingsPart(core, structuresOnTheMap, houseById),
         StructuresPart(core, structuresOnTheMap, world),
         SightPart(core, sights),
         DialoguesPart(core, dialogues, dialogueRows),
