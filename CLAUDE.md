@@ -146,7 +146,7 @@ What follows from that, and bites in practice:
   virtual host, `villages-<tree>`, and resets only its own world, with the debug panel's wipe. Never
   stop, restart or `down -v` the stack, and never bring it up on a changed `infra/docker-compose.yml`:
   each of those stops or forgets every session's world, and they are Adam's. A change to that file is a
-  step of its own and says so. See decision record 0091.
+  step of its own and says so. See decision record 0092.
 - **`.sessions/` is the main repository's, not the worktree's** - it sits beside the shared `.git`, which
   is what makes it the one place every session can see. See decision record 0020.
 
@@ -319,7 +319,7 @@ Commands are added here as the increments land:
   WebSocket at `ws://localhost:<that port>/ws`, 8080 in the main checkout; the web app connects to its own
   tree's on load, or to `VITE_GATEWAY_URL` when that is set. Its world is in memory, gone on a restart, unless
   it is given `--villages.store=mongo`, as the quick start gives it whenever Docker is running: then it is in
-  this tree's own database and outlives the server (0091). `--villages.instruments=false` closes Adam's instruments: every lever
+  this tree's own database and outlives the server (0092). `--villages.instruments=false` closes Adam's instruments: every lever
   of the debug panel and the event page, seeing everything, the fog's switch and the wipe are refused
   `instrumentsClosed`, and the player's own commands go on. See decision record 0076.
 - Backend, checks: `cd backend` then `./gradlew check`. Gradle fetches the JDK 21 the toolchain asks for, so
@@ -334,7 +334,7 @@ Commands are added here as the increments land:
   replica set and one RabbitMQ for the whole machine, shared by every tree, each tree keeping to a
   database and a virtual host named after it. `up -d` finds it already up when it is, so any session may
   run it; `down`, which stops it, and `down -v`, which forgets it, are Adam's alone. See
-  `docs/RUNNING.md` and decision record 0091.
+  `docs/RUNNING.md` and decision record 0092.
 
 The one below does not exist yet. It arrives with the increment named.
 

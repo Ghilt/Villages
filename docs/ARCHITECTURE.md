@@ -149,7 +149,7 @@ through Occurrent's store and its subscriptions on the database's change streams
 every test wants and what the app runs on when it is not told otherwise. `StoreConfig` chooses, by
 `villages.store`, and nothing above the ports can tell which it was handed.
 
-MongoDB and RabbitMQ run on the machine, one of each from `infra/docker-compose.yml` for every tree (0091).
+MongoDB and RabbitMQ run on the machine, one of each from `infra/docker-compose.yml` for every tree (0092).
 A tree's server keeps its world in a database of the tree's own, `villages` in the main checkout and
 `villages-<tree>` in a worktree, which it works out from the checkout it runs in, so two sessions running
 at once never see each other's world. The quick start starts the stack when it is not running and passes

@@ -21,7 +21,7 @@ dependencies {
     // In memory for the tests and whenever the app is not told otherwise.
     implementation(libs.occurrent.eventstore.inmemory)
     implementation(libs.occurrent.subscription.inmemory)
-    // In MongoDB when the app is told to keep its world there, behind the same ports. See decision 0091.
+    // In MongoDB when the app is told to keep its world there, behind the same ports. See decision 0092.
     implementation(libs.occurrent.eventstore.mongodb)
     implementation(libs.occurrent.subscription.mongodb)
 

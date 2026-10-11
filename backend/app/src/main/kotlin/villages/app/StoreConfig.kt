@@ -16,7 +16,7 @@ private val storeLog = LoggerFactory.getLogger("villages.store")
 /**
  * Where the world is kept, chosen here and nowhere else: in memory unless told otherwise, which is what every
  * test of the app wants, and in MongoDB with `villages.store=mongo`, which the quick start passes whenever
- * Docker is running. Nothing that is handed the ports can tell which. See decision record 0091.
+ * Docker is running. Nothing that is handed the ports can tell which. See decision record 0092.
  */
 @Configuration
 class StoreConfig {

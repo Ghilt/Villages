@@ -20,7 +20,7 @@ import java.util.concurrent.Executors
 
 /**
  * The world kept in MongoDB, in one database of its own: a tree keeps to the database named after it, so two
- * sessions running at once never see each other's world (decision record 0091). What it holds outlives the
+ * sessions running at once never see each other's world (decision record 0092). What it holds outlives the
  * server, which is the whole of the difference from `InMemoryWorld`; the ports over it are the same code.
  *
  * The database has to be a replica set, because the feed's subscriptions are its change streams (0002).

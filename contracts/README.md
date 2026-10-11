@@ -91,4 +91,4 @@ recorded over. See decision record 0037. What each one changed:
   course, every piece under its name joined, and a lake's shores - cut to what the fog lets through, which a
   window's selection is drawn along.
 - **34** - gave `welcome` its `keptIn`, where the world is kept, in memory or in MongoDB and which database, and what that
-  means for a restart, which the debug panel says on connecting; null while the instruments are closed. See decision record 0091.
+  means for a restart, which the debug panel says on connecting; null while the instruments are closed. See decision record 0092.

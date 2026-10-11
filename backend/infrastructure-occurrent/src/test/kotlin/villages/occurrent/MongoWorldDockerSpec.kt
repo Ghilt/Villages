@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit
 /**
  * The world kept in MongoDB, against a real one: a replica set of the spec's own in a container, thrown away
  * after it, which is what `TESTING.md` asks of a test that needs infrastructure. Each case keeps to a database
- * of its own, as each tree does (decision record 0091).
+ * of its own, as each tree does (decision record 0092).
  *
  * It needs Docker, says so in its name, and is skipped with the reason when Docker is not running.
  */

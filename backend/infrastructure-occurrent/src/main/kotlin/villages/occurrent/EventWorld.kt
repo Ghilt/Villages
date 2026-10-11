@@ -11,7 +11,7 @@ import villages.application.WipeGate
 
 /**
  * A whole world of events: the store, its subscriptions, and the ports over them, one executor for each kind of
- * stream. Kept in memory, or in MongoDB in a database of the tree's own (decision record 0091); nothing that is
+ * stream. Kept in memory, or in MongoDB in a database of the tree's own (decision record 0092); nothing that is
  * handed the ports can tell which.
  */
 interface EventWorld : AutoCloseable {

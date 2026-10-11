@@ -513,7 +513,7 @@ if ($WebOnly) {
     $JavaVersion = (& $Java --version | Select-Object -First 1)
     Good "java $JavaVersion, which runs Gradle; Gradle fetches the 21 it compiles with"
 }
-$Store = if ($WebOnly) { 'memory' } else { & (Join-Path $Root 'infra\store.ps1') }  # where the world is kept (0091)
+$Store = if ($WebOnly) { 'memory' } else { & (Join-Path $Root 'infra\store.ps1') }  # where the world is kept (0092)
 
 # --- what the browser needs ------------------------------------------------------------------------
 

@@ -26,7 +26,7 @@ occurrent-converter-jackson3 = { module = "org.occurrent:occurrent-cloudevent-co
 occurrent-subscription-api = { module = "org.occurrent:occurrent-subscription-api-blocking" }
 occurrent-subscription-inmemory = { module = "org.occurrent:occurrent-subscription-inmemory" }
 # The same two over MongoDB, on its own Java driver rather than through Spring Data: the store, and the
-# subscriptions as change streams. See decision record 0091.
+# subscriptions as change streams. See decision record 0092.
 occurrent-eventstore-mongodb = { module = "org.occurrent:occurrent-eventstore-mongodb-native" }
 occurrent-subscription-mongodb = { module = "org.occurrent:occurrent-subscription-mongodb-native-blocking" }
 # CloudEvents is what an event is stored as. Occurrent brings it, and we name it because we build

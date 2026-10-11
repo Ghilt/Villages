@@ -424,4 +424,4 @@ stage alone, with none of the debug panel in it (decision record 0079).
 - `docker compose -f infra/docker-compose.yml ps` says whether both are up and healthy; Docker Desktop's
   Containers page says the same under `villages`. `down` stops them and keeps what they hold, and `down -v`
   forgets it, for every tree at once, so both are Adam's and no session runs them; a session resets only
-  its own world, with the debug panel's wipe. See decision record 0091.
+  its own world, with the debug panel's wipe. See decision record 0092.

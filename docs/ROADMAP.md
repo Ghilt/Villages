@@ -95,7 +95,7 @@ and so is the origin map, the first of real names on the edited world and the ne
   action with one open reads it as an omen, *Inspecting the Vistula*. Left for later: the
   823 places no source dates, and the named stretches of land, which keep today's names.
   Adam's own, asked for on 2026-10-06.
-- **1.6** The bridge from the store to the broker, each tree in a virtual host of its own (0091), with the
+- **1.6** The bridge from the store to the broker, each tree in a virtual host of its own (0092), with the
   RabbitMQ half of 0.8's smoke test, which waited for there to be something to test
 - **0.13** End-to-end smoke test
 - **0.14** One check script for the whole repository

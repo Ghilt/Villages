@@ -1,4 +1,4 @@
-# 0091. One stack serves every tree, and a tree keeps to its own database
+# 0092. One stack serves every tree, and a tree keeps to its own database
 
 - Status: accepted
 - Date: 2026-10-11
