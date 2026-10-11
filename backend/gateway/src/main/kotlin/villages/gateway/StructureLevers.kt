@@ -8,6 +8,7 @@ import villages.domain.StructureType
 import villages.protocol.CommandPayload
 import villages.protocol.RaiseAntarcticaPayload
 import villages.protocol.RaiseStructurePayload
+import villages.protocol.ChangeLevelPayload
 import villages.protocol.RebuildPayload
 import villages.protocol.RuinPayload
 import villages.protocol.TakeControlPayload
@@ -29,7 +30,8 @@ internal inline fun <reified P : CommandPayload> Commands.lever(open: Boolean, n
 
 /**
  * Adam's levers for structures, standing in for the world: one raised where the panel looks, Antarctica's sixteen
- * raised again after a wipe has taken them, one handed to the sender's house, and one ruined or rebuilt. Registered by the instruments and closed with them. A type the catalogue
+ * raised again after a wipe has taken them, one handed to the sender's house, one raised or lowered a level, and
+ * one ruined or rebuilt. Registered by the instruments and closed with them. A type the catalogue
  * lacks is refused `noSuchType`, a level the type lacks `invalidLevel`, a place off the world `invalidLocation`, and a
  * type that is not even a name is malformed. See docs/plans/structures.md.
  */
@@ -46,6 +48,9 @@ internal fun structureLevers(commands: Commands, open: Boolean, structures: Stru
     }
     commands.lever<RaiseAntarcticaPayload>(open) { _, _ -> antarctica.raise() }
     // An id that is not one is malformed, as a type that is not a name is.
+    commands.lever<ChangeLevelPayload>(open) { asking, payload ->
+        structures.changeLevel(StructureId(UUID.fromString(payload.structureId)), payload.by, asking.startingAStory)
+    }
     commands.lever<RuinPayload>(open) { asking, payload ->
         structures.ruin(StructureId(UUID.fromString(payload.structureId)), payload.cause, asking.startingAStory)
     }

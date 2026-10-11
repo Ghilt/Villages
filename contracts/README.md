@@ -115,3 +115,4 @@ recorded over. See decision record 0037. What each one changed:
   first and the rest in the order it came to hold them, sent on hello and whenever one changes hands or is raised.
 - **42** - ruins: `StructureView` carries `ruin` for a ruin, and Adam's levers `ruinStructure`, a structure and a cause,
   and `rebuildStructure` bring one down and raise it again.
+- **43** - levels: Adam's lever `changeLevel`, a structure and a step of one up or one down.

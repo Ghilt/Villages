@@ -205,6 +205,7 @@ export const commandPayloadSchema = z.discriminatedUnion('type', [
   }),
   z.object({ type: z.literal('raiseAntarctica') }),
   z.object({ type: z.literal('takeControl'), structureId: z.string() }),
+  z.object({ type: z.literal('changeLevel'), structureId: z.string(), by: z.number().int() }),
   z.object({ type: z.literal('ruinStructure'), structureId: z.string(), cause: z.string() }),
   z.object({ type: z.literal('rebuildStructure'), structureId: z.string() }),
   z.object({ type: z.literal('takeOffTheMap'), characterId: z.string() }),

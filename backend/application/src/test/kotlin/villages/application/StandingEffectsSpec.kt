@@ -2,8 +2,10 @@ package villages.application
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
 import villages.domain.Banner
+import villages.domain.ChangeLevel
 import villages.domain.Charge
 import villages.domain.Division
 import villages.domain.FoundHouse
@@ -128,6 +130,38 @@ class StandingEffectsSpec : StringSpec({
         older.listening()
         older.later.tick()
         older.gained(bea).single().from shouldBe theMill
+    }
+
+    "a structure that goes up a level lets its holder see farther, the new vision given before the old is taken" {
+        val rig = rig()
+        rig.listening()
+        raise(rig.world, holder = ada)
+        rig.later.tick()
+
+        rig.world.execute(ChangeLevel(theMill, 1, today, noon), Provenance.startedBy(UUID.randomUUID()))
+        rig.later.tick()
+
+        rig.gained(ada).map { it.radius } shouldBe listOf(6.0, 8.0)
+        rig.lost(ada).single().visionId shouldBe rig.gained(ada).first().visionId
+        val written = rig.world.stored.map { it.event }
+        written.indexOfFirst { it is HouseLostVision } shouldBeGreaterThan written.indexOfLast { it is HouseGainedVision }
+        rig.faults.reported.shouldBeEmpty()
+
+        rig.world.execute(ChangeLevel(theMill, -1, today, noon), Provenance.startedBy(UUID.randomUUID()))
+        rig.later.tick()
+        rig.gained(ada).map { it.radius } shouldBe listOf(6.0, 8.0, 6.0)
+        rig.lost(ada).size shouldBe 2
+    }
+
+    "a structure nobody holds changes level and nobody is given anything" {
+        val rig = rig()
+        rig.listening()
+        raise(rig.world, holder = null)
+
+        rig.world.execute(ChangeLevel(theMill, 1, today, noon), Provenance.startedBy(UUID.randomUUID()))
+        rig.later.tick()
+
+        rig.world.stored.map { it.event }.filterIsInstance<HouseGainedVision>().shouldBeEmpty()
     }
 
     "a structure fallen to ruin takes back its holder's vision from it" {

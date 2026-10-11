@@ -1,0 +1,9 @@
+{
+  "type": "command",
+  "commandId": "6f0b2a3c-4d5e-4f60-8a71-b82c93d4e5f7",
+  "command": {
+    "type": "changeLevel",
+    "structureId": "95ba5c28-4a79-3fa6-88aa-0ff1f5a0a559",
+    "by": 1
+  }
+}

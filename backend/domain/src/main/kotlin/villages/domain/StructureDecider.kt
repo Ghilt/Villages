@@ -47,6 +47,19 @@ class StructureDecider(private val catalogue: StructureCatalogue) : Decider<Stru
             }
             listOf(StructureChangedHands(command.structureId, state.holder, command.to, command.worldTime, command.recordedAt))
         }
+        // Within the levels its type has, and never for a ruin, which has no level to change until it is rebuilt.
+        is ChangeLevel -> {
+            val standing = state as? Structure.Raised ?: throw StructureError.NoSuchStructure
+            if (standing.ruined) {
+                throw StructureError.IsARuin
+            }
+            val spec = catalogue.of(standing.type) ?: throw StructureError.NoSuchType(standing.type)
+            val level = standing.level + command.by
+            if (command.by == 0 || level !in 1..spec.highest) {
+                throw StructureError.InvalidLevel("a ${standing.type} at level ${standing.level} goes from 1 to ${spec.highest}, not to $level")
+            }
+            listOf(StructureLevelChanged(command.structureId, level, spec.at(level).significance, command.worldTime, command.recordedAt))
+        }
         // A ruin has no holder, cannot change hands and has no level to change: held here, at once.
         is Ruin -> {
             val standing = state as? Structure.Raised ?: throw StructureError.NoSuchStructure
@@ -86,6 +99,7 @@ class StructureDecider(private val catalogue: StructureCatalogue) : Decider<Stru
             raisedOn = event.worldTime,
         )
         is StructureChangedHands -> (state as? Structure.Raised)?.copy(holder = event.to) ?: state
+        is StructureLevelChanged -> (state as? Structure.Raised)?.copy(level = event.level, significance = event.significance) ?: state
         is StructureRuined -> (state as? Structure.Raised)?.copy(holder = null, ruined = true) ?: state
         is StructureRebuilt -> (state as? Structure.Raised)?.copy(
             type = event.structureType, level = event.level, significance = event.significance,

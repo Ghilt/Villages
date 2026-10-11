@@ -19,6 +19,7 @@ import villages.domain.KeyFigureEvent
 import villages.domain.ResourceEvent
 import villages.domain.StructureId
 import villages.domain.StructureChangedHands
+import villages.domain.StructureLevelChanged
 import villages.domain.StructureRebuilt
 import villages.domain.StructureRuined
 import villages.domain.StructureRaised
@@ -82,6 +83,10 @@ class StructuresProjection(feed: EventFeed) : Follower(feed), StructuresByCell {
                 put(held.row.copy(faces = held.row.faces + face), stored.streamVersion, appeared = false)
             }
             // Fallen: a face of its own from that day, nobody's and nobody's seat, kept for whoever last saw it standing.
+            // Up or down: a face of its own from that day, drawn larger or smaller, kept for whoever saw it before.
+            is StructureLevelChanged -> changed(event.structureId, stored.streamVersion) {
+                it.copy(level = event.level, significance = event.significance, since = event.worldTime)
+            }
             is StructureRuined -> changed(event.structureId, stored.streamVersion) {
                 it.copy(holder = null, seatOf = null, ruin = true, since = event.worldTime)
             }

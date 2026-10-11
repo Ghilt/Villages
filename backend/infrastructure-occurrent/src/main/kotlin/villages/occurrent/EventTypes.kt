@@ -28,6 +28,7 @@ import villages.domain.PlayerLostDialogue
 import villages.domain.PlayerOfferedDialogue
 import villages.domain.PlayerTookAction
 import villages.domain.StructureChangedHands
+import villages.domain.StructureLevelChanged
 import villages.domain.StructureRebuilt
 import villages.domain.StructureRuined
 import villages.domain.StructureRaised
@@ -70,6 +71,7 @@ object EventTypes : CloudEventTypeMapper<Event> {
         HouseLostSeat::class to "villages.house.lostSeat.v1",
         StructureRaised::class to "villages.structure.raised.v1",
         StructureChangedHands::class to "villages.structure.changedHands.v1",
+        StructureLevelChanged::class to "villages.structure.levelChanged.v1",
         StructureRuined::class to "villages.structure.ruined.v1",
         StructureRebuilt::class to "villages.structure.rebuilt.v1",
     )

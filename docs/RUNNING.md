@@ -293,6 +293,12 @@ stage alone, with none of the debug panel in it (decision record 0079).
   `villages.house.lostSeat.v1` in the story of what took it, the castle's window no longer saying whose seat it is,
   the house's own mark back where it was founded, and its sight from there ended, the ground it saw revealed. A
   house's window gives where it was founded as *Founded at*.
+- Raising and lowering its level: **level up** and **level down**, beside *take control of this building*, on the
+  structure whose window was opened last. Each writes `villages.structure.levelChanged.v1`: the structure is drawn
+  larger or smaller, its window says the new level, and its holder sees as far as that level sees - the new sight
+  given before the old is taken, two lines in the log's `sight`. Past either end of its levels, or for a ruin, it is
+  refused (`invalidLevel`, `isARuin`). The log says it under `arrivals`: `the Antarctic mill changed: level 2,
+  held by Ravenscar`.
 - Ruining one and raising it again: **ruin it** and **rebuild it**, beside *take control of this building*, on the
   structure whose window was opened last. *Ruin it* writes `villages.structure.ruined.v1`, by fire: a ruin holds
   nobody, its holder's sight from it is taken back, and it is drawn as a ruin - the stump of a tower and a broken

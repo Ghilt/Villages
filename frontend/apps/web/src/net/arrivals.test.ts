@@ -168,7 +168,7 @@ describe('saying what a batch brought', () => {
         nobody,
       ),
     ).toBe(
-      '2 deltas in one batch: a new mill changed, held by Ravenscar, a new mill changed, held by nobody',
+      '2 deltas in one batch: a new mill changed: level 1, held by Ravenscar, a new mill changed: level 1, held by nobody',
     );
     expect(
       describeBatch([{ type: 'structureChanged', structure: { ...mill, ruin: true, stamp: 16 } }], nobody),

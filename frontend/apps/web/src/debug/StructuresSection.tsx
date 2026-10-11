@@ -9,7 +9,14 @@ import { subjectsStore } from '../inspect/subjects';
 import { sessionStore } from '../net/gateway';
 import { useStore } from '../store/useStore';
 import { Section } from './Section';
-import { raiseAntarctica, raiseStructure, rebuildStructure, ruinStructure, takeControl } from './levers';
+import {
+  changeLevel,
+  raiseAntarctica,
+  raiseStructure,
+  rebuildStructure,
+  ruinStructure,
+  takeControl,
+} from './levers';
 
 interface StructuresSectionProps {
   map: maplibregl.Map | null;
@@ -132,6 +139,24 @@ export function StructuresSection({ map }: StructuresSectionProps) {
           onClick={() => open !== null && takeControl(open.id, openName ?? open.id)}
         >
           take control of this building
+        </button>
+        <button
+          type="button"
+          className="debug__button"
+          disabled={connection !== 'open' || open === null}
+          title={openName === null ? "open a structure's window first" : `raise ${openName} a level`}
+          onClick={() => open !== null && changeLevel(open.id, openName ?? open.id, 1)}
+        >
+          level up
+        </button>
+        <button
+          type="button"
+          className="debug__button"
+          disabled={connection !== 'open' || open === null}
+          title={openName === null ? "open a structure's window first" : `lower ${openName} a level`}
+          onClick={() => open !== null && changeLevel(open.id, openName ?? open.id, -1)}
+        >
+          level down
         </button>
         <button
           type="button"

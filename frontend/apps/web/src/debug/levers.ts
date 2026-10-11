@@ -193,6 +193,15 @@ export function takeControl(structureId: string, name: string): void {
   pull('structures', `taking control of ${name}`, { type: 'takeControl', structureId });
 }
 
+/** Raises or lowers a structure one level: *level up* and *level down*. */
+export function changeLevel(structureId: string, name: string, by: 1 | -1): void {
+  pull('structures', `${by > 0 ? 'raising' : 'lowering'} ${name} a level`, {
+    type: 'changeLevel',
+    structureId,
+    by,
+  });
+}
+
 /** Brings a structure down to ruin, by fire: *ruin this building*. */
 export function ruinStructure(structureId: string, name: string): void {
   pull('structures', `ruining ${name}, by fire`, { type: 'ruinStructure', structureId, cause: 'fire' });

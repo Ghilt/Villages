@@ -4,6 +4,7 @@ import villages.domain.HandOver
 import villages.domain.HouseError
 import villages.domain.HouseId
 import villages.domain.Location
+import villages.domain.ChangeLevel
 import villages.domain.PlayerId
 import villages.domain.Rebuild
 import villages.domain.Ruin
@@ -50,6 +51,11 @@ class StructureService(
      * handing one over or a house taking it. Refused `noSuchHouse` for a player who has founded none,
      * `noSuchStructure` for one never raised, and `sameHolder` for one the house holds already.
      */
+    /** Raises or lowers [structure] by [by] levels: Adam's *level up* and *level down*. Refused `invalidLevel` past either end. */
+    fun changeLevel(structure: StructureId, by: Int, provenance: Provenance) {
+        structures.execute(ChangeLevel(structure, by, world.today(), clock.now()), provenance)
+    }
+
     /** Brings [structure] down to ruin: Adam's *ruin this building*. Refused `isARuin` for one that is already. */
     fun ruin(structure: StructureId, cause: String, provenance: Provenance) {
         structures.execute(Ruin(structure, cause, world.today(), clock.now()), provenance)

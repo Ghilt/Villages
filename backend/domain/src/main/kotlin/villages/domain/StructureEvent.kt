@@ -60,6 +60,19 @@ data class StructureRebuilt(
     override val recordedAt: Instant,
 ) : StructureEvent, WorldEvent
 
+/**
+ * A structure went up or down to [level], its significance the catalogue's for its type at that level, carried as a
+ * raising's is (0026). What it gives its holder - how far they see from it, later what it pays - follows from
+ * listeners, in the same story. See docs/plans/structures.md.
+ */
+data class StructureLevelChanged(
+    override val structureId: StructureId,
+    val level: Int,
+    val significance: Significance,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : StructureEvent, WorldEvent
+
 data class StructureChangedHands(
     override val structureId: StructureId,
     val from: HouseId?,

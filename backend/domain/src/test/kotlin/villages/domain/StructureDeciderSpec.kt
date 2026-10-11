@@ -94,6 +94,29 @@ class StructureDeciderSpec : StringSpec({
         shouldThrow<StructureError.NoSuchStructure> { decider.decide(handOver(rival), decider.initial) }
     }
 
+    "a structure goes up and down within the levels its type has, its significance the catalogue's for the level" {
+        val standing = decider.fold(decider.decide(raise(level = 1), decider.initial))
+
+        val up = decider.decide(ChangeLevel(id, 1, WorldTime(653_706), noon), standing).single()
+        val higher = decider.evolve(standing, up).shouldBeInstanceOf<Structure.Raised>()
+
+        up shouldBe StructureLevelChanged(id, 2, Significance(10.0), WorldTime(653_706), noon)
+        listOf(higher.level, higher.significance) shouldBe listOf(2, Significance(10.0))
+        shouldThrow<StructureError.InvalidLevel> { decider.decide(ChangeLevel(id, 1, WorldTime(653_707), noon), higher) }
+        shouldThrow<StructureError.InvalidLevel> { decider.decide(ChangeLevel(id, -1, WorldTime(653_707), noon), standing) }
+        shouldThrow<StructureError.InvalidLevel> { decider.decide(ChangeLevel(id, 0, WorldTime(653_707), noon), standing) }
+        decider.decide(ChangeLevel(id, -1, WorldTime(653_707), noon), higher).single() shouldBe
+            StructureLevelChanged(id, 1, Significance(8.0), WorldTime(653_707), noon)
+    }
+
+    "a ruin has no level to change, and one never raised has none either" {
+        val standing = decider.fold(decider.decide(raise(level = 1), decider.initial))
+        val ruin = decider.evolve(standing, decider.decide(Ruin(id, "fire", WorldTime(653_707), noon), standing).single())
+
+        shouldThrow<StructureError.IsARuin> { decider.decide(ChangeLevel(id, 1, WorldTime(653_708), noon), ruin) }
+        shouldThrow<StructureError.NoSuchStructure> { decider.decide(ChangeLevel(id, 1, WorldTime(653_708), noon), decider.initial) }
+    }
+
     "a structure falls to ruin, holds nobody, and can neither change hands nor fall again" {
         val standing = decider.fold(decider.decide(raise(), decider.initial))
 

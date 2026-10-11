@@ -19,10 +19,6 @@ data class RaiseStructure(
     val recordedAt: Instant,
 ) : StructureCommand
 
-/**
- * Hand a structure to a house, or to nobody: a story handing it over, a house taking it, or for now Adam's lever
- * standing in for either. Only the structure's own history says who holds it, so this is the one decision that does.
- */
 /** Bring a structure down to ruin, for a reason a word or two long: fire, war, neglect. */
 data class Ruin(
     override val structureId: StructureId,
@@ -44,6 +40,21 @@ data class Rebuild(
     val recordedAt: Instant,
 ) : StructureCommand
 
+/**
+ * Raise or lower a structure by [by] levels, within the levels its type has: up is better. Its significance follows
+ * the catalogue's for the new level, and what it gives its holder follows that, by listeners.
+ */
+data class ChangeLevel(
+    override val structureId: StructureId,
+    val by: Int,
+    val worldTime: WorldTime,
+    val recordedAt: Instant,
+) : StructureCommand
+
+/**
+ * Hand a structure to a house, or to nobody: a story handing it over, a house taking it, or for now Adam's lever
+ * standing in for either. Only the structure's own history says who holds it, so this is the one decision that does.
+ */
 data class HandOver(
     override val structureId: StructureId,
     val to: HouseId?,

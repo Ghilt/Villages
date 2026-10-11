@@ -7,6 +7,7 @@ import villages.domain.HouseLostVision
 import villages.domain.Location
 import villages.domain.StructureCatalogue
 import villages.domain.StructureChangedHands
+import villages.domain.StructureLevelChanged
 import villages.domain.StructureRebuilt
 import villages.domain.StructureRuined
 import villages.domain.StructureId
@@ -20,7 +21,9 @@ import java.util.concurrent.ConcurrentHashMap
  * level see, and its own history says so. Who holds a structure is the structure's to say and what a house sees is
  * the house's, and no one decision can write both, so a reaction carries it: a structure raised for a house or
  * handed to one gives that house `gainedVision` from it, at the catalogue's radius of the moment and with `from`
- * naming it, and one handed away takes that vision back with `lostVision`. A retuned catalogue never rewrites what a
+ * naming it, and one handed away takes that vision back with `lostVision`. A structure that changes level changes
+ * how far its holder sees from it: the new vision is given before the old is taken, so the fog never closes between
+ * them. A retuned catalogue never rewrites what a
  * house saw, because what it saw is what was written. Income joins it in a later step. See docs/plans/structures.md.
  *
  * **It reconciles rather than replays.** For a house and a structure it plans one thing - set this right - and works
@@ -51,8 +54,11 @@ class StandingEffects(
 
     private val structures = ConcurrentHashMap<StructureId, Standing>()
 
+    /** A vision a house was given from a structure, and how far it sees. */
+    private data class Seen(val id: VisionId, val radius: Double)
+
     /** The vision each house was given from each structure, still open, and the reverse, to close one by its id. */
-    private val seen = ConcurrentHashMap<Pair<HouseId, StructureId>, VisionId>()
+    private val seen = ConcurrentHashMap<Pair<HouseId, StructureId>, Seen>()
     private val seenBy = ConcurrentHashMap<VisionId, Pair<HouseId, StructureId>>()
 
     @Volatile
@@ -73,6 +79,13 @@ class StandingEffects(
                 event.to?.let { reconcile(it, event.structureId) }
             }
 
+            // A level changes how far its holder sees from it, from the level's own event.
+            is StructureLevelChanged -> {
+                val was = structures[event.structureId] ?: return
+                structures[event.structureId] = Standing(was.type, event.level, was.place, was.holder, stored.streamVersion, stored)
+                was.holder?.let { reconcile(it, event.structureId) }
+            }
+
             // A ruin gives nothing: whoever held it sees from it no longer. Rebuilt, it gives again to whoever holds it.
             is StructureRuined -> {
                 val was = structures[event.structureId] ?: return
@@ -88,11 +101,14 @@ class StandingEffects(
             }
 
             is HouseGainedVision -> event.from?.let { structure ->
-                seen[event.houseId to structure] = event.visionId
+                seen[event.houseId to structure] = Seen(event.visionId, event.radius)
                 seenBy[event.visionId] = event.houseId to structure
             }
 
-            is HouseLostVision -> seenBy.remove(event.visionId)?.let { seen.remove(it) }
+            // Only if it is still the one held: a level's new vision is given before the old one is taken.
+            is HouseLostVision -> seenBy.remove(event.visionId)?.let { key ->
+                seen.computeIfPresent(key) { _, held -> held.takeIf { it.id != event.visionId } }
+            }
 
             else -> Unit
         }
@@ -124,9 +140,10 @@ class StandingEffects(
             val has = seen[house to structure]
             val provenance = Provenance.continuing(story = because)
             if (radius == null && has != null) {
-                visions.takeFrom(house, has, provenance)
-            } else if (radius != null && has == null) {
+                visions.takeFrom(house, has.id, provenance)
+            } else if (radius != null && has?.radius != radius) {
                 visions.giveFrom(house, structure, VisionId.seenFrom(structure, house, standing.since), standing.place, radius, provenance)
+                has?.let { visions.takeFrom(house, it.id, provenance) }
             }
         }
     }

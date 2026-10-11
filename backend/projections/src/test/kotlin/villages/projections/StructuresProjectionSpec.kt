@@ -23,6 +23,7 @@ import villages.domain.Location
 import villages.domain.PlayerId
 import villages.domain.Significance
 import villages.domain.StructureChangedHands
+import villages.domain.StructureLevelChanged
 import villages.domain.StructureId
 import villages.domain.StructureRaised
 import villages.domain.StructureRebuilt
@@ -159,5 +160,16 @@ class StructuresProjectionSpec : StringSpec({
 
         feed.deliver(StructureRebuilt(mill, StructureType("mill"), 1, Significance(8.0), HouseId.of(ada), today, noon), version = 3)
         structures.row(mill)!!.faces.last().let { listOf(it.ruin, it.holder?.name) } shouldBe listOf(false, HouseName("Ravenscar"))
+    }
+
+    "a structure that changes level takes a face of the new level, and one event folded twice takes one" {
+        val (feed, structures) = rig()
+        feed.deliver(founded)
+        feed.deliver(raised(), version = 1)
+
+        feed.deliver(StructureLevelChanged(mill, 2, Significance(12.0), today, noon), version = 2)
+        feed.deliver(StructureLevelChanged(mill, 2, Significance(12.0), today, noon), version = 2)
+
+        structures.row(mill)!!.faces.map { it.level to it.significance } shouldBe listOf(1 to Significance(10.0), 2 to Significance(12.0))
     }
 })

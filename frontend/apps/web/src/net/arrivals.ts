@@ -99,7 +99,7 @@ export function describeBatch(deltas: readonly Delta[], nameOf: (id: string) => 
         return [
           delta.structure.ruin === true
             ? `${delta.structure.name} lies in ruin`
-            : `${delta.structure.name} changed, held by ${delta.structure.holder?.name ?? 'nobody'}`,
+            : `${delta.structure.name} changed: level ${delta.structure.level}, held by ${delta.structure.holder?.name ?? 'nobody'}`,
         ];
       default:
         return [];

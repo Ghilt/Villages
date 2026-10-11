@@ -255,6 +255,7 @@ program running on it at this tree's address.
 | 8b | The Holdings tab: `yourHoldings`, the list (the placeholder pictures drawn in SVG from the map's shapes), the details | the corner | bump |
 | 9a | Ruins: `ruined` and `rebuilt`, their levers, the ruin's sprite | the map | bump |
 | 9b | Lost seats: the seats listener writes `lostSeat` when a seat changes hands or falls; the seat's own sight ends with it (in place of removing it, so a seated house sees as before); a seatless house. `foundingPlace` is not introduced, and the room, the eye, omens, season, gossip and dialogues keep reading where the house was founded: the same place as its seat in every state the game can reach, until a house can name another | the house | |
+| 9c | Levels: `levelChanged`, *level up* and *level down*, the holder's sight widened or narrowed with it, the new vision given before the old is taken | a structure drawn larger | bump |
 | 10a | Income: `SetIncome`, `incomeChanged`, rates per source, the listener paying by type and level | the treasury counting up | |
 | 10b | What each holding gives, in the window and the tab | the window | bump |
 | 11a | `Socket` and `SlotRow`, in the library | the component page | |
