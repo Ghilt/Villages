@@ -21,6 +21,15 @@ const EYE = {
 } as const;
 
 /**
+ * A structure, and the Holdings tab that lists a house's: a tower with three merlons and a door, the game's own
+ * drawing in `stage/Icons.tsx`, which the library cannot import. See docs/plans/structures.md.
+ */
+const TOWER = {
+  walls: 'M7 21 V9 H5.5 V3.5 H8.5 V6 H10.5 V3.5 H13.5 V6 H15.5 V3.5 H18.5 V9 H17 V21 Z',
+  door: 'M10.25 21 V17.5 A1.75 1.75 0 0 1 13.75 17.5 V21',
+} as const;
+
+/**
  * The marks a number is known by, the same drawings as the game's own in `marks/Mark.tsx`, which the
  * library cannot import: each a different silhouette before it is a different picture, because five of
  * them have to be told apart at seventeen pixels. See `LOOK-AND-FEEL.md`.
@@ -165,6 +174,12 @@ const DRAWN = {
       <circle cx="12" cy="12" r="8.6" className="ui-mark__line" />
       <path d="M12 7.4 V13.2" className="ui-mark__line" />
       <circle cx="12" cy="16.5" r="1.15" className="ui-mark__fill" />
+    </>
+  ),
+  tower: (
+    <>
+      <path d={TOWER.walls} className="ui-mark__line" />
+      <path d={TOWER.door} className="ui-mark__line" />
     </>
   ),
   // A glass and its handle, the moodboard's search: the handle to the bottom right, as it is held.

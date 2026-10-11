@@ -204,7 +204,7 @@ looks like: `previous` and `next` are a carousel's steps and not the needle, whi
 shows every mark at 17, 24 and 48 pixels side by side, because whether one reads small is a thing to see.
 
 **The marks the game already draws are the game's drawings**: the five resources', a key figure's stats,
-the close and the eye, copied stroke for stroke because the library cannot import them, and named as the
+the close, the eye and the tower a structure is known by, copied stroke for stroke because the library cannot import them, and named as the
 library names them - `domain`, where the protocol says `naturalDomain`. A copy is a drawing that can drift,
 so `admin/showcase/marks.test.ts`, which is the page's and may read the game's files, fails the moment one
 does. When the game draws its marks from the library there is one copy again and the test goes.
@@ -256,7 +256,7 @@ A line each: what it is for, its variants, and where on the page it is.
 - **`Mark`**, `ui/mark/Mark.tsx`: a mark by name, drawn, or painted when `world/ui/marks/` has it: the
   five resources, `wealth`, `domain`, `influence`, `reason` and `piety`; a figure's `kindness`, `physical`
   and `age`; and `close`, `minimise`, `maximise`, `previous`, `next`, `fold`, `less`, `more`, `eye-open`,
-  `eye-shut`, `warning` and `search`; and a mark for each kind of omen a choice roll reads, `omen-house`,
+  `eye-shut`, `warning` and `search`; `tower`, what a structure and the Holdings tab are known by; and a mark for each kind of omen a choice roll reads, `omen-house`,
   `omen-change`, `omen-window`, `omen-dialogue`, `omen-keyFigure`, `omen-map` and `omen-season`, drawn
   placeholders until a picture of the same name is painted. *Marks and readouts*.
 - **`TextButton`**, `ui/button/Button.tsx`: words on a face that stretches between its end caps to fit

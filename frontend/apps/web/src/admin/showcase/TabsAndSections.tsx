@@ -34,7 +34,7 @@ const HELD: Record<string, string> = {
 
 /** The same, as the game's own bar has them: marks and no words. */
 const MARK_TABS: readonly Tab[] = [
-  { id: 'holdings', label: 'Holdings', mark: 'domain' },
+  { id: 'holdings', label: 'Holdings', mark: 'tower' },
   { id: 'influence', label: 'Influence', mark: 'influence' },
   { id: 'reason', label: 'Reason', mark: 'reason' },
 ];
