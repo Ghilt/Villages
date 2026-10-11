@@ -24,9 +24,10 @@ interface SpriteOverlayProps {
    * What the map marks: the newest thing a window is open on, if any. Handed in, as picking is, so that the
    * overlay knows nothing of windows. See `App.tsx`.
    */
-  picked: { kind: 'house' | 'area' | 'character' | 'river' | 'lake' | 'sea'; id: string } | undefined;
-  /** A house or a person clicked on the map, which opens a window on them. */
-  onPick: (thing: { kind: 'house' | 'character'; id: string }) => void;
+  picked:
+    { kind: 'house' | 'area' | 'character' | 'structure' | 'river' | 'lake' | 'sea'; id: string } | undefined;
+  /** A house, a person or a structure clicked on the map, which opens a window on it. */
+  onPick: (thing: { kind: 'house' | 'character' | 'structure'; id: string }) => void;
 }
 
 /**
@@ -81,7 +82,13 @@ export function SpriteOverlay({ map, sprites, worldRoot, picked: top, onPick }: 
   // The ring follows whatever was opened last. With three windows up the map can still only mark one, and
   // the newest is the one the player is looking at.
   const selected =
-    top?.kind === 'house' ? top.id : top?.kind === 'character' ? `${CHARACTER}${top.id}` : null;
+    top?.kind === 'house'
+      ? top.id
+      : top?.kind === 'character'
+        ? `${CHARACTER}${top.id}`
+        : top?.kind === 'structure'
+          ? `${STRUCTURE}${top.id}`
+          : null;
   const scene = useMemo(
     () => ({ sprites, selected, everything, fog, scenery: how }),
     [sprites, selected, everything, fog, how],
@@ -107,13 +114,14 @@ export function SpriteOverlay({ map, sprites, worldRoot, picked: top, onPick }: 
   useEffect(() => {
     const onClick = (event: maplibregl.MapMouseEvent) => {
       const hit = renderer?.hitTest(event.point) ?? null;
-      // A structure has no window yet, so a click on one is left to whatever lies under it.
-      if (hit !== null && !hit.startsWith(STRUCTURE)) {
+      if (hit !== null) {
         event.preventDefault();
         pick.current(
           hit.startsWith(CHARACTER)
             ? { kind: 'character', id: hit.slice(CHARACTER.length) }
-            : { kind: 'house', id: hit },
+            : hit.startsWith(STRUCTURE)
+              ? { kind: 'structure', id: hit.slice(STRUCTURE.length) }
+              : { kind: 'house', id: hit },
         );
       }
     };

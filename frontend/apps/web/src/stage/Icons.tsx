@@ -79,6 +79,15 @@ const SPEECH =
  */
 const LIST = { rows: 'M9.5 7 H19.5 M9.5 12 H19.5 M9.5 17 H19.5', points: [7, 12, 17] } as const;
 
+/**
+ * A structure: a tower with three merlons and a door, the one thing every type has in common at the size of a mark,
+ * as a house is a shield whatever its arms. A placeholder, like the bust, until Adam draws it.
+ */
+const TOWER = {
+  walls: 'M7 21 V9 H5.5 V3.5 H8.5 V6 H10.5 V3.5 H13.5 V6 H15.5 V3.5 H18.5 V9 H17 V21 Z',
+  door: 'M10.25 21 V17.5 A1.75 1.75 0 0 1 13.75 17.5 V21',
+} as const;
+
 export type IconName =
   | 'shield'
   | 'compass'
@@ -93,7 +102,8 @@ export type IconName =
   | 'list'
   | 'river'
   | 'lake'
-  | 'sea';
+  | 'sea'
+  | 'tower';
 
 /** Which way a needle points. The four are one drawing turned, never four drawings. */
 export type Point = 'up' | 'down' | 'left' | 'right';
@@ -148,6 +158,12 @@ export function Icon({ name, title }: IconProps) {
         </>
       )}
       {name === 'speech' && <path d={SPEECH} className="icon__line" />}
+      {name === 'tower' && (
+        <>
+          <path d={TOWER.walls} className="icon__line" />
+          <path d={TOWER.door} className="icon__line" />
+        </>
+      )}
       {name === 'list' && (
         <>
           <path d={LIST.rows} className="icon__line" />

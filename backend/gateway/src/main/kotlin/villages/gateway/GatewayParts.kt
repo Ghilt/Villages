@@ -84,7 +84,7 @@ internal fun partsOf(
         StandsPart(stands),
         WatersPart(waters),
         TimelinePart(),
-        InspectingPart(houseById, onTheMap, world),
+        InspectingPart(houseById, onTheMap, structuresOnTheMap, world),
         Instruments(instrumentsOpen, core, events, recent, emptyTheWorld, foundHouse, resources, keyFigures, visions, dialogues, rolls, worldKept, structures, antarctica),
     )
 }

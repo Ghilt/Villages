@@ -42,7 +42,7 @@ import { SpriteOverlay } from './sprites/SpriteOverlay';
 import { placeWater } from './water/WaterLayer';
 import { setFlowView, waterStore } from './water/waterMode';
 import { candidatesOf, toCharacterSprite, toSprite, toStructureSprite } from './mapSprites';
-import { useStructureCatalogue } from './structureCatalogue';
+import { useStructureCatalogue } from './net/structureCatalogue';
 import { useStore } from './store/useStore';
 
 /**

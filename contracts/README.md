@@ -103,3 +103,5 @@ recorded over. See decision record 0037. What each one changed:
   read model's `structuresAsOf`, and a batch the `structureArrived` delta. A `StructureView` is the face a house is
   sent - the one of the day where it sees, the one it last saw where it saw once, with `seenUntil` - its holder a
   `HolderView` for the pennant, and its `stamp` the read model's count when that face began.
+- **37** - a window asks after a structure: `inspect` takes the kind `structure`, and `inspected` answers with a
+  `structure`, its `StructureView` in the face the house last saw, by the rule its cell's snapshot keeps.

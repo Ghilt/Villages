@@ -253,7 +253,7 @@ export const clientFrameSchema = z.discriminatedUnion('type', [
    * A window asking after its subject wherever the camera is, once, when it opens on something the page knows
    * nothing of. No subscription: it is answered once by `inspected`. See decision record 0088.
    */
-  z.object({ type: z.literal('inspect'), kind: z.enum(['house', 'character']), id: z.string() }),
+  z.object({ type: z.literal('inspect'), kind: z.enum(['house', 'character', 'structure']), id: z.string() }),
 ]);
 
 /**
@@ -338,8 +338,8 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
   rollDrawnFrameSchema,
   inspectedAtFrameSchema,
   /**
-   * The answer to `inspect`, once: the house or the character as the map would show it, or neither when there is
-   * no such thing or the fog holds it back, by the rule a cell's snapshot is held to. Somebody seen once and not now
+   * The answer to `inspect`, once: the house, the character or the structure as the map would show it, or none when
+   * there is no such thing or the fog holds it back, by the rule a cell's snapshot is held to. Somebody seen once and not now
    * is answered as last seen; either carries the day the fog hid it as `seenUntil`, on its view. See 0088, 0089.
    */
   z.object({
@@ -348,6 +348,7 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
     id: z.string(),
     house: houseViewSchema.optional(),
     character: characterOnMapViewSchema.optional(),
+    structure: structureViewSchema.optional(),
   }),
   z.object({
     type: z.literal('event'),

@@ -1,8 +1,8 @@
 import { ageOn } from '@villages/client-core';
 import { describeDay } from '@villages/protocol';
-import type { HolderView, HouseView, Point, Sex } from '@villages/protocol';
+import type { HolderView, HouseView, Point, Sex, StructureView } from '@villages/protocol';
 import { insideFenceAt } from '@villages/world';
-import type { TerrainClass } from '@villages/world';
+import type { StructureTypeSpec, TerrainClass } from '@villages/world';
 
 import type { Area } from '../areas/areas';
 import { blazon, whereabouts } from '../house/describe';
@@ -150,6 +150,41 @@ export function describeCharacter(
     ],
     links,
   };
+}
+
+/**
+ * A structure: its name; what it is, in the European word until the culture under it says another (step 12 of
+ * docs/plans/structures.md); who holds it, with a way to that house; its level; and where it stands. `spec` is the
+ * catalogue's entry for its type, absent before the catalogue is read or for a type it lacks; `yours` whether the
+ * player's house holds it, which makes it one of their holdings.
+ */
+export function describeStructure(
+  structure: StructureView,
+  spec: StructureTypeSpec | undefined,
+  yours: boolean,
+): Description {
+  const word = spec?.words.european ?? spoken(structure.structureType);
+  const { holder, level, place } = structure;
+  const links: Link[] = [{ what: 'show it on the map', to: 'map', at: place }];
+  if (holder !== undefined) {
+    links.push({ what: holder.name, to: 'subject', subject: { kind: 'house', id: holder.id } });
+  }
+  return {
+    kind: yours ? 'Your holding' : 'Structure',
+    name: structure.name,
+    under: `${/^[aeiou]/.test(word) ? 'an' : 'a'} ${word}`,
+    facts: [
+      { what: 'Held by', said: holder?.name ?? 'nobody' },
+      { what: 'Level', said: spec === undefined ? String(level) : `${level} of ${spec.levels}` },
+      { what: 'Stands', said: `${place.lat.toFixed(3)}, ${place.lon.toFixed(3)}` },
+    ],
+    links,
+  };
+}
+
+/** A name in the catalogue, said: `printingHouse` is a printing house. */
+function spoken(type: string): string {
+  return type.replace(/[A-Z]/g, (letter) => ` ${letter.toLowerCase()}`);
 }
 
 /** An area: what it encloses, and who is standing in it. */

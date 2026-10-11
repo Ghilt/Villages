@@ -1,0 +1,20 @@
+{
+  "type": "inspected",
+  "kind": "structure",
+  "id": "95ba5c28-4a79-3fa6-88aa-0ff1f5a0a559",
+  "structure": {
+    "id": "95ba5c28-4a79-3fa6-88aa-0ff1f5a0a559",
+    "structureType": "castle",
+    "name": "the Antarctic castle",
+    "place": {
+      "lat": -63.193,
+      "lon": -56.15
+    },
+    "cell": "2123302002",
+    "level": 1,
+    "significance": 20.0,
+    "since": 654635,
+    "stamp": 1,
+    "seenUntil": 654700
+  }
+}

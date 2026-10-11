@@ -1,18 +1,21 @@
 import { useEffect, useState } from 'react';
 
-import { charactersInView, housesInView } from '@villages/client-core';
+import { charactersInView, housesInView, structuresInView } from '@villages/client-core';
 import { describeDay, shortDay } from '@villages/protocol';
+import type { StructureView } from '@villages/protocol';
 import type { TerrainClass } from '@villages/world';
 
 import { areasStore } from '../areas/areas';
 import { terrainPalette } from '../geometry/terrainClasses';
 import { inspectSubject, sessionStore } from '../net/gateway';
+import { useStructureCatalogue } from '../net/structureCatalogue';
 import type { Room } from '../stage/panes';
 import {
   type Description,
   describeArea,
   describeCharacter,
   describeHouse,
+  describeStructure,
   describeWater,
   type Legend,
 } from './describe';
@@ -50,6 +53,14 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
   const legend = useLegend();
   const answers = useStore(sessionStore, (state) => state.inspected);
   const connection = useStore(sessionStore, (state) => state.connection);
+  const catalogue = useStructureCatalogue();
+  /** A structure as its window says it, by the catalogue's entry for its type and whether it is the player's. */
+  const sayStructure = (structure: StructureView): Description =>
+    describeStructure(
+      structure,
+      catalogue?.types.find((one) => one.type === structure.structureType),
+      structure.holder !== undefined && structure.holder.id === yourHouse?.house.id,
+    );
 
   // An area the player deleted is not a window they shut, so the window goes rather than saying nothing -
   // and it leaves the trail with it, because a thing that has stopped existing is not a way back to
@@ -76,6 +87,12 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
       return seen === undefined
         ? null
         : { said: describeCharacter(seen, today, yours !== undefined), hidden: standing?.seenUntil };
+    }
+
+    // A structure is seen standing in a held cell, in the face its house is sent.
+    if (subject.kind === 'structure') {
+      const standing = structuresInView(houses).find((one) => one.id === subject.id);
+      return standing === undefined ? null : { said: sayStructure(standing), hidden: standing.seenUntil };
     }
 
     if (subject.kind === 'area') {
@@ -107,6 +124,9 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
     if (answer?.house !== undefined) {
       return describeHouse(answer.house, false, areas.areas);
     }
+    if (answer?.structure !== undefined) {
+      return sayStructure(answer.structure);
+    }
     return answer?.character === undefined ? null : describeCharacter(answer.character, today, false);
   };
 
@@ -121,7 +141,9 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
   // Out of what the camera holds, it asks the gateway after a house or a person: once a connection, answered once,
   // so what it says and how fresh that is do not hang on where the camera is. Water is asked after by a click, and
   // an area is the player's own. See 0087, 0088 and 0089.
-  const asks = live === null && (subject.kind === 'house' || subject.kind === 'character');
+  const asks =
+    live === null &&
+    (subject.kind === 'house' || subject.kind === 'character' || subject.kind === 'structure');
   useEffect(() => {
     if (asks && connection === 'open') {
       inspectSubject(subject.kind, subject.id);
@@ -135,7 +157,7 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
    * does not hide once a click has named it. See 0089.
    */
   const freshness = (): { said: string; meant: string } | null => {
-    const answered = answer?.house ?? answer?.character;
+    const answered = answer?.house ?? answer?.character ?? answer?.structure;
     const hidden = live !== null ? live.hidden : answered === undefined ? null : answered.seenUntil;
     if (subject.kind === 'area' || isWaterKind(subject.kind) || said === null || hidden === null) {
       return null;
@@ -173,6 +195,7 @@ const KIND_WORDS: Record<Subject['kind'], string> = {
   house: 'House',
   area: 'Area',
   character: 'Key figure',
+  structure: 'Structure',
   river: 'River',
   lake: 'Lake',
   sea: 'Sea',

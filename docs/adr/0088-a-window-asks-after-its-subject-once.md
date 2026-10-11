@@ -66,3 +66,11 @@ nothing.
 - **The page asking every time a window opens.** One frame a window rather than one a subject a connection; it
   answers a staleness that is rare, for traffic that is not.
 - **No fog**: a window answered with whatever it asks after. A window would then be a way to see through the fog.
+
+## Amendment, 2026-10-11: a structure is asked after the same way
+
+A window on a structure asks after it as one on a house does: `inspect` with the kind `structure`, answered once
+by `inspected` carrying its `StructureView` in the face its cell would send - today's where the house sees or holds
+it, the one it last saw on revealed ground with `seenUntil`, and nothing on ground never revealed. Nothing new is
+kept: the read model already holds every face, so the answer is the fog's choice among them. Wire version 36. See
+docs/plans/structures.md, step 5a.

@@ -15,6 +15,7 @@ import villages.domain.StructureType
 import villages.protocol.Batch
 import villages.protocol.CommandAccepted
 import villages.protocol.CommandRejected
+import villages.protocol.Inspected
 import villages.protocol.Snapshot
 import villages.protocol.StructureArrived
 import java.util.UUID
@@ -22,6 +23,8 @@ import java.util.UUID
 private fun raising(type: String, yours: Boolean, commandId: String = commandNumber(7), lat: Double = 54.36, lon: Double = 18.64) =
     """{"type":"command","commandId":"$commandId","command":{"type":"raiseStructure","structureType":"$type",""" +
         """"level":1,"place":{"lat":$lat,"lon":$lon},"yours":$yours}}"""
+
+private fun inspecting(id: StructureId) = """{"type":"inspect","kind":"structure","id":"${id.value}"}"""
 
 private fun raisingAntarctica(commandId: String = commandNumber(8)) =
     """{"type":"command","commandId":"$commandId","command":{"type":"raiseAntarctica"}}"""
@@ -103,5 +106,37 @@ class GatewayStructuresSpec : StringSpec({
         val arrived = sent.filterIsInstance<Batch>().single().deltas.single().shouldBeInstanceOf<StructureArrived>()
         arrived.structure.holder?.name shouldBe "Ravenscar"
         arrived.structure.seenUntil shouldBe null
+    }
+
+    "a window asks after a structure wherever the camera is, and is answered with it as its cell would send it" {
+        val rig = Rig()
+        val (window, sent) = rig.introduced()
+        window.receive(founding())
+        window.receive(raising("mill", yours = true))
+        val id = rig.world.structureEvents.single().structureId
+        sent.clear()
+
+        window.receive(inspecting(id))
+
+        val answered = sent.filterIsInstance<Inspected>().single()
+        listOf(answered.kind, answered.id, answered.structure?.name, answered.structure?.holder?.name) shouldBe
+            listOf("structure", id.value.toString(), "a new mill", "Ravenscar")
+    }
+
+    "one on ground the house has never seen is held back, and answered once the fog is lifted" {
+        val rig = Rig()
+        val (window, sent) = rig.introduced()
+        window.receive(founding())
+        window.receive(raising("mill", yours = false, lat = HELSINKI_LAT, lon = HELSINKI_LON))
+        val id = rig.world.structureEvents.single().structureId
+        sent.clear()
+
+        window.receive(inspecting(id))
+        sent.filterIsInstance<Inspected>().single() shouldBe Inspected("structure", id.value.toString())
+        window.receive(fogOfWar(false))
+        sent.clear()
+
+        window.receive(inspecting(id))
+        sent.filterIsInstance<Inspected>().single().structure?.name shouldBe "a new mill"
     }
 })

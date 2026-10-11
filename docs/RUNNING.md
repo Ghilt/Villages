@@ -273,7 +273,11 @@ stage alone, with none of the debug panel in it (decision record 0079).
   own colours, as tall on the ground as `groundHeight` in the catalogue says at its level, and far out the same
   picture at the size of a word, crossing over where a house's castle does. One a house holds flies a pennant in
   the house's field; nobody's flies none. A type with no picture is a plain house. It is drawn from the zoom its
-  significance says, like a house, and under the fog outside vision. A click on one does nothing yet.
+  significance says, like a house, and under the fog outside vision. A click on one opens its **inspect window**,
+  marked with a tower: its name, *a mill* or *an abbey* in the catalogue's European word, who holds it with a way
+  to that house, its level of the type's highest, where it stands, and *show it on the map*; *Your holding* when
+  your house holds it, and beside the name how fresh it is, as a house's window says. A window opened on one the
+  camera has left asks the game server after it, and ground the house has never revealed answers nothing.
   `window.villagesSprites()` in the console lists them as `structure:<id>`, with `pennant` true for one flying it.
 
 ## Adam's folders and the tools that cut them

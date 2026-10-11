@@ -82,7 +82,7 @@ export interface Session {
    * Asks after a window's subject wherever the camera is: answered once into `inspected`. Asked once a connection,
    * because nothing is sent again, and not at all before the welcome. See decision record 0088.
    */
-  inspect(kind: 'house' | 'character', id: string): void;
+  inspect(kind: 'house' | 'character' | 'structure', id: string): void;
 }
 
 /** What the page says it is looking at as it rolls: the `roll` command without its type. Every field a claim. */

@@ -2,7 +2,10 @@ import { describe, expect, it } from 'vitest';
 
 import { dayOf } from '@villages/protocol';
 
-import { describeCharacter } from './describe';
+import type { StructureView } from '@villages/protocol';
+import type { StructureTypeSpec } from '@villages/world';
+
+import { describeCharacter, describeStructure } from './describe';
 import type { CharacterSeen } from './describe';
 
 const today = dayOf(1790, 5, 9);
@@ -66,5 +69,51 @@ describe('a window on a character', () => {
     expect(said.likeness).toEqual({ portrait: undefined });
     expect(said.facts).toContainEqual({ what: 'Stands', said: 'on no map' });
     expect(said.links.map((link) => link.to)).toEqual(['subject']);
+  });
+});
+
+describe("a structure's window", () => {
+  const abbey: StructureView = {
+    id: '5d000000-0000-4000-8000-000000000001',
+    structureType: 'abbey',
+    name: 'the Antarctic abbey',
+    place: { lat: -63.229, lon: -55.91 },
+    cell: '2123302003',
+    level: 2,
+    significance: 19,
+    since: 654635,
+    stamp: 8,
+  };
+  const spec = { type: 'abbey', words: { european: 'abbey' }, levels: 3 } as unknown as StructureTypeSpec;
+
+  it("names it, says what it is in the catalogue's word, and that nobody holds it", () => {
+    const said = describeStructure(abbey, spec, false);
+
+    expect([said.kind, said.name, said.under]).toEqual(['Structure', 'the Antarctic abbey', 'an abbey']);
+    expect(said.facts.map((fact) => `${fact.what}: ${fact.said}`)).toEqual([
+      'Held by: nobody',
+      'Level: 2 of 3',
+      'Stands: -63.229, -55.910',
+    ]);
+    expect(said.links).toEqual([{ what: 'show it on the map', to: 'map', at: abbey.place }]);
+  });
+
+  it('is one of your holdings when your house holds it, with a way to the house that does', () => {
+    const said = describeStructure({ ...abbey, holder: ravenscar }, spec, true);
+
+    expect(said.kind).toBe('Your holding');
+    expect(said.facts[0]).toEqual({ what: 'Held by', said: 'Ravenscar' });
+    expect(said.links[1]).toEqual({
+      what: 'Ravenscar',
+      to: 'subject',
+      subject: { kind: 'house', id: ravenscar.id },
+    });
+  });
+
+  it('says a type the catalogue has not told it of in its own name, spoken', () => {
+    const said = describeStructure({ ...abbey, structureType: 'printingHouse' }, undefined, false);
+
+    expect(said.under).toBe('a printing house');
+    expect(said.facts[1]).toEqual({ what: 'Level', said: '2' });
   });
 });

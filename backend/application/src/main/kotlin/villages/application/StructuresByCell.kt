@@ -49,6 +49,9 @@ interface StructuresByCell {
      */
     fun inCell(cell: String, everything: Boolean = false): List<StructureRow>
 
+    /** One structure, with every face it has had, wherever it stands, or null for none: what a window asks after. */
+    fun row(id: StructureId): StructureRow?
+
     /** How many changes the read model has applied. Monotonic, and only ever compared with a face's stamp. */
     fun asOf(): Long
 

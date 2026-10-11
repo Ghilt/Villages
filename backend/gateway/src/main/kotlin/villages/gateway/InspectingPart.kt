@@ -2,16 +2,18 @@ package villages.gateway
 
 import villages.application.CharactersByCell
 import villages.application.HouseById
+import villages.application.StructuresByCell
 import villages.application.WorldClock
 import villages.domain.CharacterId
 import villages.domain.HouseId
+import villages.domain.StructureId
 import villages.protocol.Inspect
 import villages.protocol.Inspected
 import java.util.UUID
 
 /**
- * A window on a thing, answered wherever the camera is: the house or the character it asks after, as the map
- * would show it, once. A window is fed from the cells the camera holds, so one whose subject the camera has never
+ * A window on a thing, answered wherever the camera is: the house, the character or the structure it asks after, as
+ * the map would show it, once. A window is fed from the cells the camera holds, so one whose subject the camera has never
  * held asks here instead, and is answered by the same rule a cell's snapshot is: the day the connection is looking
  * at, and what its fog lets through. Nothing is kept of the asking and nothing is sent again, because what a
  * window shows rarely changes; when its subject comes into a held cell, the cell's own changes reach it. Somebody
@@ -21,6 +23,7 @@ import java.util.UUID
 internal class InspectingPart(
     private val houses: HouseById,
     private val onTheMap: CharactersByCell,
+    private val structures: StructuresByCell,
     private val world: WorldClock,
 ) : Part {
     override fun register(commands: Commands, frames: Frames) {
@@ -46,6 +49,8 @@ internal class InspectingPart(
                     }
                 }
             }
+            // In the face the house last saw, or none on ground it has not revealed: the rule a cell's snapshot keeps.
+            STRUCTURE -> structures.row(StructureId(id))?.let { looking.sent(it, day) }?.let { nothing.copy(structure = it) }
             else -> null
         } ?: nothing
     }
@@ -53,5 +58,6 @@ internal class InspectingPart(
     private companion object {
         const val HOUSE = "house"
         const val CHARACTER = "character"
+        const val STRUCTURE = "structure"
     }
 }

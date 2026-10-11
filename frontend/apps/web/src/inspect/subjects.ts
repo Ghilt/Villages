@@ -21,6 +21,7 @@ export type Subject =
   | { kind: 'house'; id: string }
   | { kind: 'area'; id: string }
   | { kind: 'character'; id: string }
+  | { kind: 'structure'; id: string }
   | { kind: 'river' | 'lake' | 'sea'; id: string };
 
 /** Water, which the server names for a click: a river, a lake or the sea, by its real identity. */
@@ -71,7 +72,11 @@ export function subjectOfPane(id: string): Subject | null {
   if (head !== 'inspect' || rest.length === 0) {
     return null;
   }
-  return kind === 'house' || kind === 'area' || kind === 'character' || isWaterKind(kind)
+  return kind === 'house' ||
+    kind === 'area' ||
+    kind === 'character' ||
+    kind === 'structure' ||
+    isWaterKind(kind)
     ? { kind, id: rest.join(':') }
     : null;
 }

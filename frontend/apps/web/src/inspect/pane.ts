@@ -28,11 +28,12 @@ export function inspectPane(subject: Subject): Pane {
  *
  * The same marks the corner's tabs carry, so a house is a shield and a person a bust wherever either is
  * named; an area is a fence stepping along square corners, a river two waves, a lake a shore with a wave
- * in it and the sea an anchor, which no tab has.
+ * in it, the sea an anchor and a structure a tower, which no tab has.
  */
 export const SUBJECT_MARKS: Readonly<Record<Subject['kind'], IconName>> = {
   house: 'shield',
   character: 'figure',
+  structure: 'tower',
   area: 'area',
   river: 'river',
   lake: 'lake',
@@ -44,6 +45,7 @@ const TITLES: Readonly<Record<Subject['kind'], string>> = {
   house: 'a house',
   area: 'an area',
   character: 'a key figure',
+  structure: 'a structure',
   river: 'a river',
   lake: 'a lake',
   sea: 'a sea',
