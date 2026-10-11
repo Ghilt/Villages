@@ -19,10 +19,13 @@ import villages.application.FaultBoard
 import villages.application.Faults
 import villages.application.NamedSubscriber
 import villages.application.HouseCommandExecutor
+import villages.application.Resettable
 import villages.application.Start
 import villages.application.StoredEvent
+import villages.application.WipeGate
 import villages.domain.Event
 import java.lang.reflect.Method
+import java.time.Duration
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
@@ -40,12 +43,16 @@ import java.util.function.Consumer
  * duplicate instead, which the subscriber can drop by identity - and at-least-once is the guarantee a log
  * reader is supposed to have. The hand-over from the history to what arrives live is `Handoff`, under one lock,
  * so that nothing is lost in between and a subscriber is never handed two events at once. See decision 0029.
+ *
+ * Subscribing, and reading the history, are outside a wipe, [WipeGate]: a replay holds what arrives live until it
+ * is done, and a wipe that came in the middle would forget the world before the replay had handed it on.
  */
 class OccurrentEventFeed(
     private val subscriptions: SubscriptionModel,
     private val store: EventStoreQueries,
     private val converter: CloudEventConverter<Event>,
     private val faults: Faults,
+    private val gate: WipeGate,
 ) : EventFeed {
 
     override fun subscribe(from: Start, subscriber: (StoredEvent) -> Unit): AutoCloseable {
@@ -73,15 +80,17 @@ class OccurrentEventFeed(
         }
 
         val handoff = Handoff(replaying = from == Start.FROM_THE_BEGINNING, ::hand)
-        val subscription = subscriptions.subscribe(id, null, StartAt.now()) { cloudEvent -> handoff.live(cloudEvent) }
-        subscription.waitUntilStarted()
+        gate.outside {
+            val subscription = subscriptions.subscribe(id, null, StartAt.now()) { cloudEvent -> handoff.live(cloudEvent) }
+            subscription.waitUntilStarted()
 
-        if (from == Start.FROM_THE_BEGINNING) {
-            store.all(SortBy.natural(SortBy.SortDirection.ASCENDING)).use { everything ->
-                everything.forEach(handoff::replayed)
+            if (from == Start.FROM_THE_BEGINNING) {
+                store.all(SortBy.natural(SortBy.SortDirection.ASCENDING)).use { everything ->
+                    everything.forEach(handoff::replayed)
+                }
+                // Anything that arrived while the replay ran, in the order it arrived, minus what it duplicated.
+                handoff.replayDone()
             }
-            // Anything that arrived while the replay ran, in the order it arrived, minus what it duplicated.
-            handoff.replayDone()
         }
 
         return AutoCloseable { subscriptions.cancelSubscription(id) }
@@ -135,26 +144,54 @@ class InMemoryWorld(val faults: Faults = FaultBoard()) : AutoCloseable {
     val store = InMemoryEventStore(subscriptions)
     val converter = Events.converter()
 
-    val executor: HouseCommandExecutor = OccurrentHouseCommandExecutor(store, converter)
-    val characterExecutor: CharacterCommandExecutor = OccurrentCharacterCommandExecutor(store, converter)
-    val feed: EventFeed = OccurrentEventFeed(StopOnCancel(subscriptions), store, converter, faults)
+    /** The moment a wipe takes. Every command here is run outside it, and what acts on its own must be too. */
+    val gate = WipeGate()
+
+    val executor: HouseCommandExecutor = OccurrentHouseCommandExecutor(store, converter, gate)
+    val characterExecutor: CharacterCommandExecutor = OccurrentCharacterCommandExecutor(store, converter, gate)
+    val feed: EventFeed = OccurrentEventFeed(StopOnCancel(subscriptions), store, converter, faults, gate)
 
     /**
-     * Empties the store, stream by stream, and says how many events went.
+     * Empties the store and everything [folded] from it, and says how many events went.
+     *
+     * In one moment that nothing written crosses, `gate`: no command is half done when it begins, and none begins
+     * until it ends. The streams go first. Then the feed hands every subscriber whatever it still has for it, which
+     * the store gave each subscription as it was written and so all of it from before the wipe, and only then is
+     * everything folded forgotten. So nothing from the old world is folded into the new one, or sets a reaction off
+     * in it, however late it would otherwise have arrived.
      *
      * Stream by stream rather than by one filter because the count is the point: a line saying "emptied
      * the world, 37 events" is a line a reader can believe. See decision record 0036.
      */
-    fun wipe(): Int {
+    fun wipe(folded: Iterable<Resettable> = emptyList()): Int = gate.wiping {
         val streams = store.all(SortBy.natural(SortBy.SortDirection.ASCENDING)).use { everything ->
             everything.map { it.getExtension(STREAM_ID).toString() }.toList()
         }
         streams.distinct().forEach(store::deleteEventStream)
-        return streams.size
+        handedOn()
+        folded.forEach(Resettable::reset)
+        streams.size
+    }
+
+    /**
+     * Waits until every subscription has handed on what it was given. One that never does is stuck whatever the
+     * wipe does, so it is said, and the wipe goes on without it rather than leaving the world half emptied.
+     */
+    private fun handedOn() {
+        try {
+            subscriptions.waitUntilAllEventsProcessed(HANDING_ON)
+        } catch (stuck: IllegalStateException) {
+            faults.report(Fault("the wipe", "waiting for the feed to hand on what was written before it", stuck))
+        }
     }
 
     override fun close() {
         subscriptions.shutdown()
+    }
+
+    private companion object {
+        /** Far longer than any fold takes: a subscription still busy after this is stuck. */
+        val HANDING_ON: Duration = Duration.ofSeconds(10)
     }
 }
 

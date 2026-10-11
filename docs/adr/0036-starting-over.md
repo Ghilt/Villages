@@ -45,6 +45,34 @@ listener acting on its own is, rather than the list of them it was handed. The l
 release, whose wake-ups planned before a wipe then asked a house that was gone, or a new one founded by the
 same player, for a pledge it never made. Such a wake-up now does nothing. See `Follower` in `ARCHITECTURE.md`.
 
+*Amended 2026-10-11:* **the wipe is one moment that nothing written crosses**, and it says what that guarantees.
+The feed hands an event on, on a thread of its own, a moment after it is written, and the wipe emptied the read
+models without waiting for it. So an event written just before a wipe could reach a read model after it had been
+emptied and be folded into the new world, where the event page showed it, or set a reaction off there: once
+founding raised a castle a few milliseconds later, that was a castle for a house that no longer existed. Now
+every command is run outside a wipe, `WipeGate`: a wipe waits for any under way, and holds any new one until it
+is done. Inside it the streams go; then it waits until the feed has handed every subscriber everything it still
+had for it, all of it written before the wipe because nothing could be written during it; and only then is every
+`Resettable` emptied. A reaction checks that its plan is of this world and issues it in one step outside a wipe,
+and a follower reads the history outside one. What a wipe guarantees, then:
+
+- nothing written before it is folded into the world after it, or sets a reaction off in it;
+- nothing written after it is forgotten with the world before it;
+- whatever a reaction was issuing when it began is finished first, and goes with the world it was written in;
+- the count it reports is every event it removed, because no event is half written while it counts.
+
+Waiting, rather than marking each event with the world it was written in and having every follower drop the old
+ones, because the in-memory store gives each event to every subscription as it is written and counts how many each
+has still to hand on, so the wait is exact and between wipes costs a lock nobody waits for. A mark would be on every
+event and checked in every fold, and the read models would still be emptied on one thread while they folded on
+another. A subscriber that has not handed on what it has after ten seconds is stuck, which is said as a fault,
+and the wipe goes on without it rather than leaving the world half emptied. `WipeSpec` holds the first three.
+
+What it does not make whole is an action of several commands sent from a window. Taking a key figure in asks the
+house for room, writes the newcomer, and then takes them in, and a wipe can still fall between two of those and
+leave the newcomer standing alone in the new world. Each command is whole and the action is not; making it whole
+would take the gateway handling each frame outside a wipe.
+
 ## Consequences
 
 The loop can be tried from nothing in one click, and a second browser can watch the first arrive.

@@ -10,7 +10,7 @@ import villages.domain.HouseError
 import kotlin.reflect.KClass
 
 /** A reaction a test drives by hand: it plans whatever it is handed, and hears nothing it acts on. */
-private class Planning(later: Later, faults: Faults) : Reaction("a test's reaction", TinyWorld(), later, faults) {
+private class Planning(later: Later, faults: Faults) : Reaction("a test's reaction", TinyWorld(), later, faults, WipeGate()) {
     fun plan(what: String, settled: Set<KClass<out DomainError>> = emptySet(), command: () -> Unit) =
         issueLater(what, settled, command = command)
 

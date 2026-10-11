@@ -12,6 +12,7 @@ import tools.jackson.module.kotlin.KotlinModule
 import villages.application.CharacterCommandExecutor
 import villages.application.HouseCommandExecutor
 import villages.application.Provenance
+import villages.application.WipeGate
 import villages.application.WriteConflict
 import villages.domain.CharacterCommand
 import villages.domain.CharacterDecider
@@ -96,6 +97,9 @@ private const val ATTEMPTS = 3
  *
  * Written once for every kind of stream, so a second kind of thing borrows the loop rather than growing a
  * copy of it that drifts. See decision record 0055.
+ *
+ * The whole loop is outside a wipe, [WipeGate]: a command read from the world before a wipe is never written
+ * into the world after it. See decision record 0036.
  */
 internal class StreamExecutor<C, S, E : Event>(
     private val store: EventStore,
@@ -103,8 +107,11 @@ internal class StreamExecutor<C, S, E : Event>(
     private val decider: Decider<C, S, E>,
     /** The kind of event this stream holds, which is every event the converter hands back from it. */
     private val holds: Class<E>,
+    private val gate: WipeGate,
 ) {
-    fun execute(stream: String, command: C, provenance: Provenance) {
+    fun execute(stream: String, command: C, provenance: Provenance) = gate.outside { attempt(stream, command, provenance) }
+
+    private fun attempt(stream: String, command: C, provenance: Provenance) {
         repeat(ATTEMPTS) {
             val held = store.read(stream)
             val version = held.version()
@@ -140,8 +147,9 @@ internal class StreamExecutor<C, S, E : Event>(
 class OccurrentHouseCommandExecutor(
     store: EventStore,
     converter: CloudEventConverter<Event>,
+    gate: WipeGate,
 ) : HouseCommandExecutor {
-    private val loop = StreamExecutor(store, converter, HouseDecider, HouseEvent::class.java)
+    private val loop = StreamExecutor(store, converter, HouseDecider, HouseEvent::class.java, gate)
 
     override fun execute(command: HouseCommand, provenance: Provenance) =
         loop.execute(command.houseId.stream, command, provenance)
@@ -151,8 +159,9 @@ class OccurrentHouseCommandExecutor(
 class OccurrentCharacterCommandExecutor(
     store: EventStore,
     converter: CloudEventConverter<Event>,
+    gate: WipeGate,
 ) : CharacterCommandExecutor {
-    private val loop = StreamExecutor(store, converter, CharacterDecider, CharacterEvent::class.java)
+    private val loop = StreamExecutor(store, converter, CharacterDecider, CharacterEvent::class.java, gate)
 
     override fun execute(command: CharacterCommand, provenance: Provenance) =
         loop.execute(command.characterId.stream, command, provenance)

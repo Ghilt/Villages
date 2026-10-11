@@ -164,7 +164,7 @@ class WorldConfig {
         worldClock: MonthlyWorldClock,
         clock: Clock,
         ids: FreshIds,
-    ): Pledges = Pledges(world.feed, later, faults, resources, worldClock, clock = { clock.instant() }, ids = ids)
+    ): Pledges = Pledges(world.feed, later, faults, world.gate, resources, worldClock, clock = { clock.instant() }, ids = ids)
 
     /** Giving a house vision of a place outright, and taking it away. See decision record 0061. */
     @Bean
@@ -276,7 +276,7 @@ class WorldConfig {
         later: ScheduledLater,
         faults: Faults,
         keyFigures: KeyFigureService,
-    ): CharacterDeaths = CharacterDeaths(world.feed, later, faults, keyFigures)
+    ): CharacterDeaths = CharacterDeaths(world.feed, later, faults, world.gate, keyFigures)
 
     /** Carries a broken requirement to every house with a dialogue that needs it. See decision record 0071. */
     @Bean(initMethod = "start", destroyMethod = "close")
@@ -286,7 +286,7 @@ class WorldConfig {
         faults: Faults,
         clock: Clock,
         worldClock: WorldClock,
-    ): BrokenRequirements = BrokenRequirements(world.feed, later, faults, world.executor, { clock.instant() }, worldClock)
+    ): BrokenRequirements = BrokenRequirements(world.feed, later, faults, world.gate, world.executor, { clock.instant() }, worldClock)
 
     /** The map's read model, folded from the feed. In memory, so it starts empty with the store. */
     @Bean(initMethod = "start", destroyMethod = "close")
@@ -317,13 +317,13 @@ class WorldConfig {
     fun dialogueRows(world: InMemoryWorld): DialoguesProjection = DialoguesProjection(world.feed)
 
     /**
-     * Emptying the development world: the store and everything folded from it, in one act, so that nothing is
-     * left holding a house whose events are gone. Everything is every `Resettable` there is, so a read model or a
-     * listener added later is emptied without being named here. See decision record 0036.
+     * Emptying the development world: the store and everything folded from it, in one moment that nothing written
+     * crosses, so that nothing is left holding a house whose events are gone. Everything is every `Resettable` there
+     * is, so a read model or a listener added later is emptied without being named here. See decision record 0036.
      */
     @Bean
     fun worldWipe(world: InMemoryWorld, folded: List<Resettable>): WorldWipe = WorldWipe {
-        world.wipe().also { folded.forEach(Resettable::reset) }
+        world.wipe(folded)
     }
 
     @Bean(destroyMethod = "close")

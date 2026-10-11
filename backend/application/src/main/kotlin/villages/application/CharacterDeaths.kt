@@ -33,8 +33,9 @@ class CharacterDeaths(
     feed: EventFeed,
     later: Later,
     faults: Faults,
+    gate: WipeGate,
     private val keyFigures: KeyFigureService,
-) : Reaction("the listener for character deaths", feed, later, faults) {
+) : Reaction("the listener for character deaths", feed, later, faults, gate) {
     private val holders = ConcurrentHashMap<CharacterId, MutableSet<HouseId>>()
     private val deaths = ConcurrentHashMap<CharacterId, StoredEvent>()
 

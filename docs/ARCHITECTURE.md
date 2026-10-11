@@ -345,7 +345,10 @@ not when it is made, so that it has finished being made before the history reach
 each one as its bean is made, `initMethod = "start"`, which `FollowersTest` holds every one of them to. A
 follower is `Resettable`, and the development world's wipe empties every `Resettable` there is rather than a
 list of names, which is how the pledge release had been left out of it: whatever a reaction planned before a
-wipe now does nothing at all (0036). A follower subscribes under its own name, `NamedSubscriber`, so that a
+wipe now does nothing at all (0036). The wipe is one moment that no command crosses, `WipeGate`: it empties the
+followers only once the feed has handed them everything written before it, and a reaction checks its plan is of
+this world and issues it in one step outside a wipe, so nothing from before one is folded into the world after it
+or sets anything off there. A follower subscribes under its own name, `NamedSubscriber`, so that a
 fault in its fold says which one it was.
 
 - **The pledge release**, `Pledges`, waits out a pledge's span and gives it back: one wake-up a pledge, at

@@ -65,7 +65,7 @@ class CharacterDeathsSpec : StringSpec({
         found(world, ada)
         found(world, bea)
         val faults = KeptFaults()
-        return Rig(world, later, keyFigures, CharacterDeaths(world, later, faults, keyFigures).started(), faults)
+        return Rig(world, later, keyFigures, CharacterDeaths(world, later, faults, WipeGate(), keyFigures).started(), faults)
     }
 
     "a death writes the loss into every house that held them, in the death's story, and caused by it" {
@@ -109,7 +109,7 @@ class CharacterDeathsSpec : StringSpec({
         val before = rig.world.stored.size
 
         val again = ManualLater()
-        CharacterDeaths(rig.world, again, rig.faults, rig.keyFigures).started().use {
+        CharacterDeaths(rig.world, again, rig.faults, WipeGate(), rig.keyFigures).started().use {
             again.tick()
         }
 

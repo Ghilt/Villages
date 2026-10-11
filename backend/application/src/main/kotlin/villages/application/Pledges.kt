@@ -32,11 +32,12 @@ class Pledges(
     feed: EventFeed,
     later: Later,
     faults: Faults,
+    gate: WipeGate,
     private val resources: ResourceService,
     private val schedule: WorldSchedule,
     private val clock: Clock,
     private val ids: FreshIds,
-) : Reaction("the pledge release", feed, later, faults) {
+) : Reaction("the pledge release", feed, later, faults, gate) {
     override fun apply(stored: StoredEvent) {
         val event = stored.event as? HouseResourcePledged ?: return
         val due = schedule.whenIsDay(event.until)

@@ -52,7 +52,7 @@ class PledgesSpec : StringSpec({
         val clock = MonthlyWorldClock({ now }, thirtyDayMonths, opened, openingDay)
         val resources = ResourceService(world, { now }, clock, thirtyDayMonths, { UUID.randomUUID() })
         val faults = KeptFaults()
-        val pledges = Pledges(world, later, faults, resources, clock, { now }, { UUID.randomUUID() }).started()
+        val pledges = Pledges(world, later, faults, WipeGate(), resources, clock, { now }, { UUID.randomUUID() }).started()
         // A house to pledge from, and something to pledge.
         found(world, clock.today(), now)
         resources.grant(player, Resource.REASON, 100, Provenance.startedBy(UUID.randomUUID()))
@@ -94,6 +94,7 @@ class PledgesSpec : StringSpec({
             world,
             restarted,
             KeptFaults(),
+            WipeGate(),
             ResourceService(world, { muchLater }, clock, thirtyDayMonths, { UUID.randomUUID() }),
             clock,
             { muchLater },

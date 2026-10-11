@@ -18,13 +18,16 @@ import kotlin.reflect.KClass
  * - **Everything else is said.** Any other refusal, a write conflict the executor could not get past included,
  *   is a fault under the reaction's name and what it was doing, rather than lost on the timer's thread.
  * - **A wipe forgets what was planned.** A command planned before a wipe is not issued after it, so it asks
- *   nothing of a world it was not planned in. See decision records 0036 and 0055.
+ *   nothing of a world it was not planned in. The check and the command are one step outside the wipe's
+ *   [WipeGate], so no wipe comes between them, and one under way when a wipe begins is finished first and goes
+ *   with the world it was written in. See decision records 0036 and 0055.
  */
 abstract class Reaction(
     private val name: String,
     feed: EventFeed,
     private val later: Later,
     private val faults: Faults,
+    private val gate: WipeGate,
 ) : Follower(feed) {
     /** Which world what is planned belongs to: one more for every wipe. */
     private val world = AtomicLong()
@@ -41,18 +44,23 @@ abstract class Reaction(
     ) {
         val plannedIn = world.get()
         later.schedule(afterMs.coerceAtLeast(0)) {
-            if (world.get() != plannedIn) {
-                return@schedule
-            }
-            try {
-                command()
-            } catch (refused: DomainError) {
-                if (refused !is HouseError.NoSuchHouse && settled.none { it.isInstance(refused) }) {
-                    faults.report(Fault(name, what, refused))
+            gate.outside {
+                if (world.get() == plannedIn) {
+                    issue(what, settled, command)
                 }
-            } catch (@Suppress("TooGenericExceptionCaught") thrown: RuntimeException) {
-                faults.report(Fault(name, what, thrown))
             }
+        }
+    }
+
+    private fun issue(what: String, settled: Set<KClass<out DomainError>>, command: () -> Unit) {
+        try {
+            command()
+        } catch (refused: DomainError) {
+            if (refused !is HouseError.NoSuchHouse && settled.none { it.isInstance(refused) }) {
+                faults.report(Fault(name, what, refused))
+            }
+        } catch (@Suppress("TooGenericExceptionCaught") thrown: RuntimeException) {
+            faults.report(Fault(name, what, thrown))
         }
     }
 

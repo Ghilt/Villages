@@ -33,11 +33,12 @@ class BrokenRequirements(
     feed: EventFeed,
     later: Later,
     faults: Faults,
+    gate: WipeGate,
     private val houses: HouseCommandExecutor,
     private val clock: Clock,
     private val world: WorldClock,
     private val breaks: (Event) -> Set<Requirement> = ::requirementsBrokenBy,
-) : Reaction("the listener for broken requirements", feed, later, faults) {
+) : Reaction("the listener for broken requirements", feed, later, faults, gate) {
     /** What each open dialogue needs, by the house it is open in. */
     private val needs = ConcurrentHashMap<Pair<HouseId, DialogueId>, Set<Requirement>>()
 

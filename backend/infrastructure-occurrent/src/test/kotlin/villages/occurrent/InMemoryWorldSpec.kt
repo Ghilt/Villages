@@ -175,7 +175,7 @@ class InMemoryWorldSpec : StringSpec({
                     }
                 }
             }
-            val executor = OccurrentHouseCommandExecutor(contested, world.converter)
+            val executor = OccurrentHouseCommandExecutor(contested, world.converter, world.gate)
 
             val conflict = shouldThrow<WriteConflict> { executor.execute(ravenscar, sent) }
 

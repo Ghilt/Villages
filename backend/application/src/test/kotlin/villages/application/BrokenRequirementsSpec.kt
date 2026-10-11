@@ -73,9 +73,9 @@ class BrokenRequirementsSpec : StringSpec({
             )
         }
         val listener = if (breaks == null) {
-            BrokenRequirements(world, later, faults, world, { noon }, { today }).started()
+            BrokenRequirements(world, later, faults, WipeGate(), world, { noon }, { today }).started()
         } else {
-            BrokenRequirements(world, later, faults, world, { noon }, { today }, { event -> breaks(event).orEmpty() }).started()
+            BrokenRequirements(world, later, faults, WipeGate(), world, { noon }, { today }, { event -> breaks(event).orEmpty() }).started()
         }
         return Rig(world, later, listener, faults)
     }
@@ -144,7 +144,7 @@ class BrokenRequirementsSpec : StringSpec({
         val before = rig.world.stored.size
 
         val again = ManualLater()
-        BrokenRequirements(rig.world, again, rig.faults, rig.world, { noon }, { today }).started().use {
+        BrokenRequirements(rig.world, again, rig.faults, WipeGate(), rig.world, { noon }, { today }).started().use {
             again.tick()
         }
 
