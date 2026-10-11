@@ -269,15 +269,24 @@ stage alone, with none of the debug panel in it (decision record 0079).
   mill raised`. What is sent is each one's face as the fog allows it: today's where the house sees, the one it
   last saw on revealed ground, nothing on unknown ground - Antarctica's sixteen therefore only with the fog lifted
   or *see everything* on, until a house sees them.
+- Taking one: **take control of this building**, under the raising levers, hands the structure whose window was
+  opened last to your house; the line under it names that building, or asks for a structure's window first. One
+  `villages.structure.changedHands.v1` on the event page, from its holder to your house, and nothing else yet:
+  what it pays and what it lets you see come with their own steps. The log says `taking control of the Antarctic
+  mill` with its answer, and the batch that follows `the Antarctic mill changed, held by Ravenscar`; on the map it
+  flies your pennant, and its window says it is held by your house, its mark named *Your holding*. Yours already
+  is refused `sameHolder`, and with no house `noSuchHouse`. Standing in for a story handing one over or a house
+  taking it; closed with the instruments.
 - A structure on the map: its type's placeholder picture, drawn in code (`sprites/structurePictures.ts`) in its
   own colours, as tall on the ground as `groundHeight` in the catalogue says at its level, and far out the same
   picture at the size of a word, crossing over where a house's castle does. One a house holds flies a pennant in
   the house's field; nobody's flies none. A type with no picture is a plain house. It is drawn from the zoom its
   significance says, like a house, and under the fog outside vision. A click on one opens its **inspect window**,
   marked with a tower: its name, *a mill* or *an abbey* in the catalogue's European word, who holds it with a way
-  to that house, its level of the type's highest, where it stands, and *show it on the map*; *Your holding* when
-  your house holds it, and beside the name how fresh it is, as a house's window says. A window opened on one the
-  camera has left asks the game server after it, and ground the house has never revealed answers nothing.
+  to that house, its level of the type's highest, where it stands, and *show it on the map*; its mark is named
+  *Your holding* when your house holds it, and beside the name how fresh it is, as a house's window says. A window
+  opened on one the camera has left asks the game server after it, and ground the house has never revealed
+  answers nothing.
   `window.villagesSprites()` in the console lists them as `structure:<id>`, with `pennant` true for one flying it.
 
 ## Adam's folders and the tools that cut them

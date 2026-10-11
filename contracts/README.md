@@ -105,3 +105,5 @@ recorded over. See decision record 0037. What each one changed:
   `HolderView` for the pennant, and its `stamp` the read model's count when that face began.
 - **37** - a window asks after a structure: `inspect` takes the kind `structure`, and `inspected` answers with a
   `structure`, its `StructureView` in the face the house last saw, by the rule its cell's snapshot keeps.
+- **38** - a structure changes hands: Adam's lever `takeControl`, a structure's id, hands it to the sender's house,
+  and a batch's `structureChanged` delta carries the new face to whoever sees or holds it, landed by its stamp.

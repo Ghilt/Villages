@@ -9,6 +9,7 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import villages.domain.HouseId
 import villages.domain.Location
 import villages.domain.PlayerId
+import villages.domain.StructureChangedHands
 import villages.domain.StructureRaised
 import villages.domain.StructureId
 import villages.domain.StructureType
@@ -18,6 +19,7 @@ import villages.protocol.CommandRejected
 import villages.protocol.Inspected
 import villages.protocol.Snapshot
 import villages.protocol.StructureArrived
+import villages.protocol.StructureChanged
 import java.util.UUID
 
 private fun raising(type: String, yours: Boolean, commandId: String = commandNumber(7), lat: Double = 54.36, lon: Double = 18.64) =
@@ -25,6 +27,9 @@ private fun raising(type: String, yours: Boolean, commandId: String = commandNum
         """"level":1,"place":{"lat":$lat,"lon":$lon},"yours":$yours}}"""
 
 private fun inspecting(id: StructureId) = """{"type":"inspect","kind":"structure","id":"${id.value}"}"""
+
+private fun takingControl(id: StructureId, commandId: String = commandNumber(9)) =
+    """{"type":"command","commandId":"$commandId","command":{"type":"takeControl","structureId":"${id.value}"}}"""
 
 private fun raisingAntarctica(commandId: String = commandNumber(8)) =
     """{"type":"command","commandId":"$commandId","command":{"type":"raiseAntarctica"}}"""
@@ -138,5 +143,43 @@ class GatewayStructuresSpec : StringSpec({
 
         window.receive(inspecting(id))
         sent.filterIsInstance<Inspected>().single().structure?.name shouldBe "a new mill"
+    }
+
+    "taking control hands it to the sender's house as one fact, and a connection seeing it is sent its new face" {
+        val rig = Rig()
+        val (window, sent) = rig.introduced(fogLifted = true)
+        window.receive(founding())
+        window.receive(raising("mill", yours = false, lat = 59.33, lon = 18.07))
+        val id = rig.world.structureEvents.single().structureId
+        window.receive(subscribe(STOCKHOLM_Z10))
+        rig.later.tick()
+        sent.clear()
+
+        window.receive(takingControl(id))
+        rig.later.tick()
+
+        sent.filterIsInstance<CommandAccepted>().single().commandId shouldBe commandNumber(9)
+        val player = PlayerId(UUID.fromString(TOKEN))
+        rig.world.structureEvents.last() shouldBe
+            StructureChangedHands(id, from = null, to = HouseId.of(player), today, noon)
+        val changed = sent.filterIsInstance<Batch>().single().deltas.single().shouldBeInstanceOf<StructureChanged>()
+        changed.structure.holder?.name shouldBe "Ravenscar"
+    }
+
+    "one the house holds already is refused sameHolder, one never raised noSuchStructure, and closed instrumentsClosed" {
+        val rig = Rig()
+        val (window, sent) = rig.introduced()
+        window.receive(founding())
+        window.receive(raising("mill", yours = true))
+        val id = rig.world.structureEvents.single().structureId
+        sent.clear()
+
+        window.receive(takingControl(id))
+        window.receive(takingControl(StructureId(UUID.fromString(commandNumber(3))), commandNumber(10)))
+
+        sent.filterIsInstance<CommandRejected>().map { it.reason } shouldBe listOf("sameHolder", "noSuchStructure")
+        val (closed, told) = Rig(instrumentsOpen = false).introduced()
+        closed.receive(takingControl(id))
+        told.filterIsInstance<CommandRejected>().single().reason shouldBe "instrumentsClosed"
     }
 })

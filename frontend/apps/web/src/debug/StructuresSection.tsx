@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
+import { structuresInView } from '@villages/client-core';
 import { parseStructureCatalogue } from '@villages/world';
 import type { StructureTypeSpec } from '@villages/world';
 
+import { subjectsStore } from '../inspect/subjects';
 import { sessionStore } from '../net/gateway';
 import { useStore } from '../store/useStore';
 import { Section } from './Section';
-import { raiseAntarctica, raiseStructure } from './levers';
+import { raiseAntarctica, raiseStructure, takeControl } from './levers';
 
 interface StructuresSectionProps {
   map: maplibregl.Map | null;
@@ -15,13 +17,23 @@ interface StructuresSectionProps {
 
 /**
  * Adam's levers for structures, standing in for the world: one raised at the middle of the map, of a type and a level,
- * his own house's or nobody's, and Antarctica's sixteen raised again after a wipe has taken them. Each is a real
+ * his own house's or nobody's, Antarctica's sixteen raised again after a wipe has taken them, and the one whose window
+ * is open handed to his house, standing in for a story handing it over or a house taking it. Each is a real
  * command, said in the log under `structures` with its answer, and each raising is an event on the event page. The
  * types are the catalogue's, read as `/admin/inspect-structures` reads it, so a type added there is here on a reload.
  * See docs/plans/structures.md.
  */
 export function StructuresSection({ map }: StructuresSectionProps) {
   const connection = useStore(sessionStore, (state) => state.connection);
+  // The structure whose window was opened last, and what it is called wherever the page has heard of it.
+  const open = useStore(subjectsStore, (state) => state.open.find((one) => one.kind === 'structure') ?? null);
+  const openName = useStore(sessionStore, (state) =>
+    open === null
+      ? null
+      : (structuresInView(state.houses).find((one) => one.id === open.id)?.name ??
+        state.inspected[`structure:${open.id}`]?.structure?.name ??
+        open.id.slice(0, 8)),
+  );
   const [types, setTypes] = useState<readonly StructureTypeSpec[]>([]);
   const [type, setType] = useState('castle');
   const [level, setLevel] = useState(1);
@@ -111,6 +123,20 @@ export function StructuresSection({ map }: StructuresSectionProps) {
           raise Antarctica again
         </button>
       </div>
+      <div className="debug__levers">
+        <button
+          type="button"
+          className="debug__button"
+          disabled={connection !== 'open' || open === null}
+          title={openName === null ? "open a structure's window first" : `hand ${openName} to your house`}
+          onClick={() => open !== null && takeControl(open.id, openName ?? open.id)}
+        >
+          take control of this building
+        </button>
+      </div>
+      <p className="debug__quiet">
+        {openName === null ? "open a structure's window to take control of it" : `this building: ${openName}`}
+      </p>
     </Section>
   );
 }

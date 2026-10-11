@@ -188,6 +188,11 @@ export function raiseStructure(structureType: string, level: number, place: Poin
   );
 }
 
+/** Hands a structure to this player's house: *take control of this building*. */
+export function takeControl(structureId: string, name: string): void {
+  pull('structures', `taking control of ${name}`, { type: 'takeControl', structureId });
+}
+
 /** Raises whichever of the sixteen in Antarctica a wipe took. */
 export function raiseAntarctica(): void {
   pull('structures', "raising Antarctica's sixteen again", { type: 'raiseAntarctica' });

@@ -1,5 +1,6 @@
 package villages.application
 
+import villages.domain.HandOver
 import villages.domain.HouseError
 import villages.domain.HouseId
 import villages.domain.Location
@@ -9,8 +10,9 @@ import villages.domain.StructureId
 import villages.domain.StructureType
 
 /**
- * What can be done to structures from outside the world: for now, raising one, which only the debug panel does,
- * standing in for a house building one and for a story handing one over. See docs/plans/structures.md.
+ * What can be done to structures from outside the world: for now raising one and taking control of one, which only the
+ * debug panel does, standing in for a house building one and for a story handing one over. See
+ * docs/plans/structures.md.
  */
 class StructureService(
     private val structures: StructureCommandExecutor,
@@ -39,5 +41,15 @@ class StructureService(
             provenance,
         )
         return id
+    }
+
+    /**
+     * Hands [structure] to the player's own house: Adam's *take control of this building*, standing in for a story
+     * handing one over or a house taking it. Refused `noSuchHouse` for a player who has founded none,
+     * `noSuchStructure` for one never raised, and `sameHolder` for one the house holds already.
+     */
+    fun takeControl(player: PlayerId, structure: StructureId, provenance: Provenance) {
+        val house = HouseId.of(player).also { if (houses.ofHouse(it) == null) throw HouseError.NoSuchHouse }
+        structures.execute(HandOver(structure, house, world.today(), clock.now()), provenance)
     }
 }

@@ -134,21 +134,41 @@ describe('saying what a batch brought', () => {
     );
   });
 
-  it('names every structure raised, as it names a person arriving', () => {
-    const mill = {
-      id: '5d000000-0000-4000-8000-000000000001',
-      structureType: 'mill',
-      name: 'a new mill',
-      place: { lat: 59.33, lon: 18.07 },
-      cell: '1200312213',
-      level: 1,
-      significance: 10,
-      since: 653705,
-      stamp: 13,
-    };
+  const mill = {
+    id: '5d000000-0000-4000-8000-000000000001',
+    structureType: 'mill',
+    name: 'a new mill',
+    place: { lat: 59.33, lon: 18.07 },
+    cell: '1200312213',
+    level: 1,
+    significance: 10,
+    since: 653705,
+    stamp: 13,
+  };
 
+  it('names every structure raised, as it names a person arriving', () => {
     expect(describeBatch([{ type: 'structureArrived', structure: mill }], nobody)).toBe(
       '1 delta in one batch: a new mill raised',
+    );
+  });
+
+  it('names a structure that changed and who holds it now, nobody included', () => {
+    const ravenscar = {
+      id: 'h',
+      name: 'Ravenscar',
+      banner: { field: 'sable', division: 'plain', charge: 'stag', chargeTincture: 'argent' } as const,
+    };
+
+    expect(
+      describeBatch(
+        [
+          { type: 'structureChanged', structure: { ...mill, holder: ravenscar, stamp: 14 } },
+          { type: 'structureChanged', structure: { ...mill, stamp: 15 } },
+        ],
+        nobody,
+      ),
+    ).toBe(
+      '2 deltas in one batch: a new mill changed, held by Ravenscar, a new mill changed, held by nobody',
     );
   });
 });

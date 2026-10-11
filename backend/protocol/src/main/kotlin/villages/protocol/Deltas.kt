@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
     JsonSubTypes.Type(CharacterChanged::class, name = "characterChanged"),
     JsonSubTypes.Type(CharacterGone::class, name = "characterGone"),
     JsonSubTypes.Type(StructureArrived::class, name = "structureArrived"),
+    JsonSubTypes.Type(StructureChanged::class, name = "structureChanged"),
 )
 sealed interface Delta
 

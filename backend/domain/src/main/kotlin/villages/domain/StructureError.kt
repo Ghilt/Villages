@@ -13,4 +13,10 @@ sealed class StructureError(message: String) : DomainError(message) {
     class InvalidLevel(reason: String) : StructureError("not a level: $reason")
 
     class InvalidName(reason: String) : StructureError("not a structure's name: $reason")
+
+    /** Nothing can be done to a structure that was never raised. */
+    data object NoSuchStructure : StructureError("there is no such structure")
+
+    /** Handing a structure to the holder it has changes nothing, so it is refused rather than written. */
+    data object SameHolder : StructureError("it is held by them already")
 }

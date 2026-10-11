@@ -3,10 +3,13 @@ package villages.gateway
 import villages.application.Antarctica
 import villages.application.StructureService
 import villages.domain.Location
+import villages.domain.StructureId
 import villages.domain.StructureType
 import villages.protocol.CommandPayload
 import villages.protocol.RaiseAntarcticaPayload
 import villages.protocol.RaiseStructurePayload
+import villages.protocol.TakeControlPayload
+import java.util.UUID
 
 /**
  * One of Adam's levers: a command like any other, refused `instrumentsClosed` while the instruments are closed. Shared
@@ -23,8 +26,8 @@ internal inline fun <reified P : CommandPayload> Commands.lever(open: Boolean, n
 }
 
 /**
- * Adam's levers for structures, standing in for the world: one raised where the panel looks, and Antarctica's sixteen
- * raised again after a wipe has taken them. Registered by the instruments and closed with them. A type the catalogue
+ * Adam's levers for structures, standing in for the world: one raised where the panel looks, Antarctica's sixteen
+ * raised again after a wipe has taken them, and one handed to the sender's house. Registered by the instruments and closed with them. A type the catalogue
  * lacks is refused `noSuchType`, a level the type lacks `invalidLevel`, a place off the world `invalidLocation`, and a
  * type that is not even a name is malformed. See docs/plans/structures.md.
  */
@@ -40,4 +43,8 @@ internal fun structureLevers(commands: Commands, open: Boolean, structures: Stru
         )
     }
     commands.lever<RaiseAntarcticaPayload>(open) { _, _ -> antarctica.raise() }
+    // An id that is not one is malformed, as a type that is not a name is.
+    commands.lever<TakeControlPayload>(open) { asking, payload ->
+        structures.takeControl(asking.who, StructureId(UUID.fromString(payload.structureId)), asking.startingAStory)
+    }
 }

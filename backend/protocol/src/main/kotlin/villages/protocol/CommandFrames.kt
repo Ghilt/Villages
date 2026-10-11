@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
     JsonSubTypes.Type(PledgeResourcePayload::class, name = "pledgeResource"),
     JsonSubTypes.Type(RaiseAntarcticaPayload::class, name = "raiseAntarctica"),
     JsonSubTypes.Type(RaiseStructurePayload::class, name = "raiseStructure"),
+    JsonSubTypes.Type(TakeControlPayload::class, name = "takeControl"),
     JsonSubTypes.Type(ReleasePledgePayload::class, name = "releasePledge"),
     JsonSubTypes.Type(SpendResourcePayload::class, name = "spendResource"),
     JsonSubTypes.Type(TakeActionPayload::class, name = "takeAction"),
@@ -142,6 +143,9 @@ data class CompleteDialogueStepPayload(val dialogueId: String, val lineId: Strin
  * `structureType` is a type in the catalogue, `printingHouse`. See docs/plans/structures.md.
  */
 data class RaiseStructurePayload(val structureType: String, val level: Int, val place: Point, val yours: Boolean) : CommandPayload
+
+/** Hand a structure to the sender's own house: Adam's *take control of this building*. See docs/plans/structures.md. */
+data class TakeControlPayload(val structureId: String) : CommandPayload
 
 /** Raise whichever of the sixteen in Antarctica a wipe took, as the server does when it starts. A lever of Adam's. */
 class RaiseAntarcticaPayload : CommandPayload {

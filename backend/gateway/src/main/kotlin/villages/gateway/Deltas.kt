@@ -7,6 +7,7 @@ import villages.protocol.Delta
 import villages.protocol.HouseAppeared
 import villages.protocol.HouseChanged
 import villages.protocol.StructureArrived
+import villages.protocol.StructureChanged
 
 /** What makes two deltas the same one: the thing they are about and its version. */
 internal val Delta.key: Pair<String, Long>
@@ -17,4 +18,5 @@ internal val Delta.key: Pair<String, Long>
         is CharacterChanged -> "character:${character.id}" to character.version
         is CharacterGone -> "character:$id" to version
         is StructureArrived -> "structure:${structure.id}" to structure.stamp
+        is StructureChanged -> "structure:${structure.id}" to structure.stamp
     }

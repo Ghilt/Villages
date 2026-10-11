@@ -95,6 +95,8 @@ export function describeBatch(deltas: readonly Delta[], nameOf: (id: string) => 
         return [`${nameOf(delta.id) ?? delta.id.slice(0, 8)} went`];
       case 'structureArrived':
         return [`${delta.structure.name} raised`];
+      case 'structureChanged':
+        return [`${delta.structure.name} changed, held by ${delta.structure.holder?.name ?? 'nobody'}`];
       default:
         return [];
     }

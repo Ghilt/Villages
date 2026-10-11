@@ -21,6 +21,7 @@ import villages.domain.HouseName
 import villages.domain.Location
 import villages.domain.PlayerId
 import villages.domain.Significance
+import villages.domain.StructureChangedHands
 import villages.domain.StructureId
 import villages.domain.StructureRaised
 import villages.domain.StructureType
@@ -111,5 +112,24 @@ class StructuresProjectionSpec : StringSpec({
 
         structures.inCell("", everything = true).shouldBeEmpty()
         structures.asOf() shouldBeGreaterThan stamp
+    }
+
+    "a structure that changed hands takes a new face from that day, and keeps the old one for whoever last saw it so" {
+        val (feed, structures) = rig()
+        val told = mutableListOf<StructureChange>()
+        feed.deliver(founded)
+        feed.deliver(raised(holder = null), version = 1)
+        structures.watch { told += it }
+        val later = WorldTime(today.day + 3)
+
+        feed.deliver(StructureChangedHands(mill, from = null, to = HouseId.of(ada), later, noon), version = 2)
+        feed.deliver(StructureChangedHands(mill, from = null, to = HouseId.of(ada), later, noon), version = 2)
+
+        val row = structures.row(mill)!!
+        row.faces.map { it.holder?.name } shouldBe listOf(null, HouseName("Ravenscar"))
+        row.faces.last().stamp shouldBeGreaterThan row.faces.first().stamp
+        row.faceOn(today)?.holder shouldBe null
+        row.faceOn(later)?.holder?.name shouldBe HouseName("Ravenscar")
+        told.single().appeared shouldBe false
     }
 })

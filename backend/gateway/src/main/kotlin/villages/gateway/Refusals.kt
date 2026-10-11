@@ -45,4 +45,6 @@ internal fun DomainError.reasonCode(): String = when (this) {
     is StructureError.NoSuchType -> "noSuchType"
     is StructureError.InvalidLevel -> "invalidLevel"
     is StructureError.InvalidName -> "invalidName"
+    StructureError.NoSuchStructure -> "noSuchStructure"
+    StructureError.SameHolder -> "sameHolder"
 }

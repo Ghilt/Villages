@@ -5,10 +5,12 @@ import villages.application.StructuresByCell
 import villages.application.WorldClock
 import villages.protocol.Cell
 import villages.protocol.StructureArrived
+import villages.protocol.StructureChanged
 import villages.protocol.coarsestZoom
 
 /**
- * Structures on the map: each one raised, fanned out to every connection holding a cell it stands in and seeing it now.
+ * Structures on the map: each one raised or changed, fanned out to every connection holding a cell it stands in and
+ * seeing it now - or holding it, which a house that has just taken one does wherever it is.
  * What the fog has hidden is known as it was when it did, so what happens there since is not told: the cells are
  * answered again when the house sees the place. A change today is not part of an earlier day's map, so a connection
  * looking back at one is told nothing either. A cell's snapshot is the core's. See docs/plans/structures.md.
@@ -32,7 +34,7 @@ internal class StructuresPart(
                 if (!looking.isLive) continue
                 val view = looking.sent(row, looking.day(world::today))?.takeIf { it.seenUntil == null } ?: continue
                 if (zoom >= coarsestZoom(view.significance) || looking.everything) {
-                    connection.enqueue(StructureArrived(view))
+                    connection.enqueue(if (change.appeared) StructureArrived(view) else StructureChanged(view))
                 }
             }
         }

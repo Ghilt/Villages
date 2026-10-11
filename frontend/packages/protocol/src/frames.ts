@@ -15,7 +15,7 @@ import {
   rollPayloadSchema,
 } from './choiceFrames';
 import { dialogueViewSchema } from './dialogueFrames';
-import { structureArrivedSchema, structureViewSchema } from './structureFrames';
+import { structureArrivedSchema, structureChangedSchema, structureViewSchema } from './structureFrames';
 import { inspectAtFrameSchema, inspectedAtFrameSchema } from './placeFrames';
 
 /**
@@ -198,6 +198,7 @@ export const commandPayloadSchema = z.discriminatedUnion('type', [
     yours: z.boolean(),
   }),
   z.object({ type: z.literal('raiseAntarctica') }),
+  z.object({ type: z.literal('takeControl'), structureId: z.string() }),
   z.object({ type: z.literal('takeOffTheMap'), characterId: z.string() }),
   /**
    * Give the house vision of a place outright, until it is taken away; how far it sees is the world's to say.
@@ -267,6 +268,7 @@ export const deltaSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('characterChanged'), character: characterOnMapViewSchema }),
   z.object({ type: z.literal('characterGone'), id: z.string(), version: z.number().int() }),
   structureArrivedSchema,
+  structureChangedSchema,
 ]);
 
 export const serverFrameSchema = z.discriminatedUnion('type', [

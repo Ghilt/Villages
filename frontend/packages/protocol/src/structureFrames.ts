@@ -29,4 +29,10 @@ export const structureArrivedSchema = z.object({
   structure: structureViewSchema,
 });
 
+/** A structure in a cell this connection holds and sees took a new face: it changed hands. Landed by its stamp. */
+export const structureChangedSchema = z.object({
+  type: z.literal('structureChanged'),
+  structure: structureViewSchema,
+});
+
 export type StructureView = z.infer<typeof structureViewSchema>;

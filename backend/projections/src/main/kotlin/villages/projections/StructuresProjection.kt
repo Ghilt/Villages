@@ -16,6 +16,7 @@ import villages.domain.HouseId
 import villages.domain.KeyFigureEvent
 import villages.domain.ResourceEvent
 import villages.domain.StructureId
+import villages.domain.StructureChangedHands
 import villages.domain.StructureRaised
 import villages.domain.VisionEvent
 import villages.protocol.Cell
@@ -60,6 +61,17 @@ class StructuresProjection(feed: EventFeed) : Follower(feed), StructuresByCell {
                     stamp = applied.incrementAndGet(),
                 )
                 put(StructureRow(event.structureId, event.name, event.place, listOf(face)), stored.streamVersion, appeared = true)
+            }
+            // A new face from the day it changed hands, the old one kept for whoever last saw it so.
+            is StructureChangedHands -> {
+                val held = rows[event.structureId] ?: return
+                if (stored.streamVersion <= held.streamVersion) return
+                val face = held.row.faces.last().copy(
+                    holder = event.to?.let(holders::get),
+                    since = event.worldTime,
+                    stamp = applied.incrementAndGet(),
+                )
+                put(held.row.copy(faces = held.row.faces + face), stored.streamVersion, appeared = false)
             }
             // What a house has, is asked, is told, holds and sees, and what befalls a person, changes no structure.
             is ResourceEvent, is ChoiceEvent, is DialogueEvent, is KeyFigureEvent, is VisionEvent, is CharacterEvent -> Unit

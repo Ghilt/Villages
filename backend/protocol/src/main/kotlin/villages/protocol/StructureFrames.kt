@@ -30,3 +30,9 @@ data class StructureView(
 
 /** A structure came to be in a cell this connection holds and sees. The client keeps it in the held cells its `cell` falls in. */
 data class StructureArrived(val structure: StructureView) : Delta
+
+/**
+ * A structure in a cell this connection holds and sees took a new face: it changed hands. The whole view, as
+ * `structureArrived` carries one, and a page lands it the same way, by its stamp.
+ */
+data class StructureChanged(val structure: StructureView) : Delta

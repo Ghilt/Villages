@@ -25,6 +25,7 @@ import villages.domain.PlayerRolled
 import villages.domain.PlayerLostDialogue
 import villages.domain.PlayerOfferedDialogue
 import villages.domain.PlayerTookAction
+import villages.domain.StructureChangedHands
 import villages.domain.StructureRaised
 import kotlin.reflect.KClass
 
@@ -62,6 +63,7 @@ object EventTypes : CloudEventTypeMapper<Event> {
         PlayerRolled::class to "villages.player.rolled.v1",
         PlayerTookAction::class to "villages.player.tookAction.v1",
         StructureRaised::class to "villages.structure.raised.v1",
+        StructureChangedHands::class to "villages.structure.changedHands.v1",
     )
 
     private val byType: Map<String, KClass<out Event>> = rows.entries.associate { (klass, type) -> type to klass }

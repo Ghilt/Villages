@@ -154,6 +154,7 @@ export function reduceHouses(state: HousesState, frame: ServerFrame): HousesStat
             next = dropCharacter(next, delta.id, delta.version);
             break;
           case 'structureArrived':
+          case 'structureChanged':
             next = raiseStructure(next, delta.structure);
             break;
         }
@@ -205,7 +206,7 @@ function landHouse(state: HousesState, house: HouseView): HousesState {
   return byCell === null ? state : { ...state, byCell };
 }
 
-/** A structure raised lands in every held cell that contains it, by its stamp. See `structures.ts`. */
+/** A structure raised or changed lands in every held cell that contains it, by its stamp. See `structures.ts`. */
 function raiseStructure(state: HousesState, structure: StructureView): HousesState {
   const structuresByCell = landStructure(state.structuresByCell, structure);
   return structuresByCell === null ? state : { ...state, structuresByCell };

@@ -34,6 +34,16 @@ class StructureDecider(private val catalogue: StructureCatalogue) : Decider<Stru
                 ),
             )
         }
+        // One holder at a time, held here at the instant of the decision: nothing else says who holds it.
+        is HandOver -> {
+            if (state !is Structure.Raised) {
+                throw StructureError.NoSuchStructure
+            }
+            if (state.holder == command.to) {
+                throw StructureError.SameHolder
+            }
+            listOf(StructureChangedHands(command.structureId, state.holder, command.to, command.worldTime, command.recordedAt))
+        }
     }
 
     override fun evolve(state: Structure, event: StructureEvent): Structure = when (event) {
@@ -47,6 +57,7 @@ class StructureDecider(private val catalogue: StructureCatalogue) : Decider<Stru
             holder = event.holder,
             raisedOn = event.worldTime,
         )
+        is StructureChangedHands -> (state as? Structure.Raised)?.copy(holder = event.to) ?: state
     }
 
     companion object {

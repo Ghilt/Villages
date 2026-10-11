@@ -64,4 +64,33 @@ class StructureDeciderSpec : StringSpec({
         shouldThrow<StructureError.InvalidName> { decider.decide(raise(name = "  "), decider.initial) }
         shouldThrow<StructureError.InvalidName> { decider.decide(raise(name = "x".repeat(81)), decider.initial) }
     }
+
+    val rival = HouseId(UUID.fromString("0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8d"))
+    fun handOver(to: HouseId?) = HandOver(id, to, WorldTime(653_706), noon)
+
+    "a structure changes hands from the holder it has to the one it is given, and is held by them since" {
+        val standing = decider.fold(decider.decide(raise(), decider.initial))
+
+        val changed = decider.decide(handOver(rival), standing).single()
+
+        changed shouldBe StructureChangedHands(id, house, rival, WorldTime(653_706), noon)
+        decider.evolve(standing, changed).shouldBeInstanceOf<Structure.Raised>().holder shouldBe rival
+    }
+
+    "nobody may be handed it, and nobody may hand it on" {
+        val held = decider.fold(decider.decide(raise(), decider.initial))
+        val left = decider.evolve(held, decider.decide(handOver(null), held).single())
+
+        decider.decide(handOver(house), left).single() shouldBe StructureChangedHands(id, null, house, WorldTime(653_706), noon)
+    }
+
+    "one holder at a time: handing it to the one that holds it is refused, and changes nothing" {
+        val standing = decider.fold(decider.decide(raise(), decider.initial))
+
+        shouldThrow<StructureError.SameHolder> { decider.decide(handOver(house), standing) }
+    }
+
+    "a structure never raised cannot change hands" {
+        shouldThrow<StructureError.NoSuchStructure> { decider.decide(handOver(rival), decider.initial) }
+    }
 })

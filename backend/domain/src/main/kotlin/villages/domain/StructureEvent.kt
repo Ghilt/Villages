@@ -28,3 +28,16 @@ data class StructureRaised(
     override val worldTime: WorldTime,
     override val recordedAt: Instant,
 ) : StructureEvent, WorldEvent
+
+/**
+ * A structure passed from one holder to another, a house or nobody on either side. One fact, and the only one on the
+ * structure: what it changes for the two houses - what they are paid, what they see, a seat lost - is written after it
+ * by listeners, in the same story. See docs/plans/structures.md.
+ */
+data class StructureChangedHands(
+    override val structureId: StructureId,
+    val from: HouseId?,
+    val to: HouseId?,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : StructureEvent, WorldEvent

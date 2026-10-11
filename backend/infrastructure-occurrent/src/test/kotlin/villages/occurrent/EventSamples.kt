@@ -60,6 +60,7 @@ import villages.domain.SpeakerId
 import villages.domain.Species
 import villages.domain.Stat
 import villages.domain.StructureId
+import villages.domain.StructureChangedHands
 import villages.domain.StructureRaised
 import villages.domain.StructureType
 import villages.domain.Then
@@ -239,6 +240,9 @@ internal object EventSamples {
         recordedAt = noon,
     )
 
+    /** The same castle, taken from the sample house by nobody: held by nobody since. */
+    val castleLeft = StructureChangedHands(antarcticCastle, from = house, to = null, WorldTime(653_706), noon)
+
     val gotland = VisionId(UUID.fromString("dd000000-0000-4000-8000-000000000001"))
     val sawGotland = HouseGainedVision(house, gotland, Location(57.64, 18.30), 34.0, day, noon)
     val lostGotland = HouseLostVision(house, gotland, day, noon)
@@ -333,6 +337,7 @@ internal object EventSamples {
         "villages.player.offeredDialogue.v1" to aLetter,
         "villages.player.rolled.v1" to rolledARiver,
         "villages.player.tookAction.v1" to tookNorthern,
+        "villages.structure.changedHands.v1" to castleLeft,
         "villages.structure.raised.v1" to castleRaised,
     )
 }

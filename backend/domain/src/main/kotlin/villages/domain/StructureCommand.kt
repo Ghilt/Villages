@@ -18,3 +18,14 @@ data class RaiseStructure(
     val worldTime: WorldTime,
     val recordedAt: Instant,
 ) : StructureCommand
+
+/**
+ * Hand a structure to a house, or to nobody: a story handing it over, a house taking it, or for now Adam's lever
+ * standing in for either. Only the structure's own history says who holds it, so this is the one decision that does.
+ */
+data class HandOver(
+    override val structureId: StructureId,
+    val to: HouseId?,
+    val worldTime: WorldTime,
+    val recordedAt: Instant,
+) : StructureCommand
