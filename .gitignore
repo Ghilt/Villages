@@ -11,6 +11,9 @@
 *.class
 *.log
 hs_err_pid*
+# A heap dump, which the Kotlin compile daemon writes beside the build when it runs out of memory: hundreds of
+# megabytes, and once nearly committed.
+*.hprof
 
 # IDEs
 .idea/
