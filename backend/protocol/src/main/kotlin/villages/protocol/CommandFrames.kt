@@ -18,6 +18,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
     JsonSubTypes.Type(KillCharacterPayload::class, name = "killCharacter"),
     JsonSubTypes.Type(MoveCharacterPayload::class, name = "moveCharacter"),
     JsonSubTypes.Type(PledgeResourcePayload::class, name = "pledgeResource"),
+    JsonSubTypes.Type(RaiseAntarcticaPayload::class, name = "raiseAntarctica"),
+    JsonSubTypes.Type(RaiseStructurePayload::class, name = "raiseStructure"),
     JsonSubTypes.Type(ReleasePledgePayload::class, name = "releasePledge"),
     JsonSubTypes.Type(SpendResourcePayload::class, name = "spendResource"),
     JsonSubTypes.Type(TakeActionPayload::class, name = "takeAction"),
@@ -133,3 +135,19 @@ data class OfferDialoguePayload(val sample: String) : CommandPayload
  * one is the next, is the house's to say, so the client names a line and nothing else. See decision record 0071.
  */
 data class CompleteDialogueStepPayload(val dialogueId: String, val lineId: String) : CommandPayload
+
+/**
+ * Raise a structure of a type at a level where the debug panel is looking, the sender's own house's or nobody's. A lever
+ * of Adam's, standing in for a house building one; its name, its id and the holder's house are the server's to work out.
+ * `structureType` is a type in the catalogue, `printingHouse`. See docs/plans/structures.md.
+ */
+data class RaiseStructurePayload(val structureType: String, val level: Int, val place: Point, val yours: Boolean) : CommandPayload
+
+/** Raise whichever of the sixteen in Antarctica a wipe took, as the server does when it starts. A lever of Adam's. */
+class RaiseAntarcticaPayload : CommandPayload {
+    override fun equals(other: Any?): Boolean = other is RaiseAntarcticaPayload
+
+    override fun hashCode(): Int = javaClass.hashCode()
+
+    override fun toString(): String = "RaiseAntarcticaPayload"
+}

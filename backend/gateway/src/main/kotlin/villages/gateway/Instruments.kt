@@ -1,5 +1,7 @@
 package villages.gateway
 
+import villages.application.Antarctica
+import villages.application.StructureService
 import villages.application.DialogueService
 import villages.application.EventFeed
 import villages.application.FoundHouseService
@@ -83,6 +85,8 @@ internal class Instruments(
     private val dialogues: DialogueService,
     private val rolls: RollService,
     private val kept: WorldKept,
+    private val structures: StructureService,
+    private val antarctica: Antarctica,
 ) : Part {
     private val watching = ConcurrentHashMap.newKeySet<Gateway.Connection>()
 
@@ -171,6 +175,7 @@ internal class Instruments(
             )
         }
         keyFigureLevers(commands)
+        structureLevers(commands, open, structures, antarctica)
         // A place off the world is refused by the place itself, as `invalidLocation`.
         lever<GiveVisionPayload>(commands) { asking, payload ->
             visions.give(
@@ -250,14 +255,8 @@ internal class Instruments(
 
     private fun figure(id: String) = CharacterId(asUuid(id, "a character id"))
 
-    private inline fun <reified P : CommandPayload> lever(commands: Commands, noinline pull: (Asking, P) -> Unit) {
-        commands.on<P> { asking, payload ->
-            if (!open) {
-                throw InstrumentsClosed()
-            }
-            pull(asking, payload)
-        }
-    }
+    private inline fun <reified P : CommandPayload> lever(commands: Commands, noinline pull: (Asking, P) -> Unit) =
+        commands.lever(open, pull)
 
     /**
      * Starts sending a connection every event, beginning with what it missed, or stops.

@@ -22,6 +22,9 @@ value class StructureType(val name: String) {
         require(NAME.matches(name)) { "a structure type is named in lower camel case, not '$name'" }
     }
 
+    /** Its name as words, for a name the world gives it before anyone names it better: `printingHouse`, printing house. */
+    val inWords: String get() = name.replace(Regex("[A-Z]")) { " ${it.value.lowercase()}" }
+
     override fun toString(): String = name
 
     companion object {

@@ -4,7 +4,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import villages.application.AnonymousTokens
 import villages.application.Arrival
 import villages.application.BrokenRequirements
 import villages.application.CharacterDeaths
@@ -14,7 +13,6 @@ import villages.application.FoundHouseService
 import villages.application.FreshIds
 import villages.application.fate.FateEngine
 import villages.application.fate.GroundMaps
-import villages.application.fate.WaterAt
 import villages.application.fate.PlaceNamesByMaster
 import villages.application.fate.FirstPools
 import villages.application.fate.omenSources
@@ -37,8 +35,6 @@ import villages.application.WorldCalendar
 import villages.application.WorldClock
 import villages.application.WorldWipe
 import villages.domain.WorldTime
-import villages.gateway.Gateway
-import villages.gateway.Mechanics
 import villages.occurrent.EventWorld
 import villages.projections.CharactersProjection
 import villages.projections.ChoicesProjection
@@ -321,66 +317,4 @@ class WorldConfig {
     fun worldWipe(world: EventWorld, folded: List<Resettable>): WorldWipe = WorldWipe {
         world.wipe(folded)
     }
-
-    @Bean(destroyMethod = "close")
-    @Suppress("LongParameterList")
-    fun gateway(
-        world: EventWorld,
-        foundHouse: FoundHouseService,
-        houses: HousesProjection,
-        choices: ChoicesProjection,
-        recentEvents: RecentEventsProjection,
-        arrival: Arrival,
-        takeAction: TakeActionService,
-        rolls: RollService,
-        resources: ResourceService,
-        worldWipe: WorldWipe,
-        clock: Clock,
-        worldClock: WorldClock,
-        keyFigures: KeyFigureService,
-        characters: CharactersProjection,
-        sights: SightProjection,
-        visions: VisionService,
-        dialogues: DialogueService,
-        dialogueRows: DialoguesProjection,
-        stands: Stands,
-        ground: GroundMaps,
-        placeNames: PlaceNamesByMaster,
-        faults: Faults,
-        gatewayLater: ScheduledLater,
-        gatewaySending: ExecutorService,
-        @Value("\${villages.instruments:true}") instruments: Boolean,
-    ): Gateway = Gateway(
-        tokens = AnonymousTokens,
-        faults = faults,
-        houses = houses,
-        clock = clock,
-        world = worldClock,
-        onTheMap = characters,
-        mechanics = Mechanics(
-            foundHouse = foundHouse,
-            events = world.feed,
-            houseById = houses,
-            theirHouses = houses,
-            arrival = arrival,
-            takeAction = takeAction,
-            rolls = rolls,
-            resources = resources,
-            choices = choices,
-            recent = recentEvents,
-            emptyTheWorld = worldWipe,
-            keyFigures = keyFigures,
-            figures = characters,
-            sights = sights,
-            visions = visions,
-            dialogues = dialogues,
-            dialogueRows = dialogueRows,
-            stands = stands,
-            waters = WaterAt(ground, placeNames),
-            instrumentsOpen = instruments,
-            worldKept = world,
-        ),
-        later = gatewayLater,
-        sendOn = gatewaySending,
-    )
 }

@@ -96,3 +96,6 @@ recorded over. See decision record 0037. What each one changed:
   window's selection is drawn along.
 - **34** - gave `welcome` its `keptIn`, where the world is kept, in memory or in MongoDB and which database, and what that
   means for a restart, which the debug panel says on connecting; null while the instruments are closed. See decision record 0092.
+- **35** - the first of structures: two of Adam's levers, `raiseStructure`, a type of the catalogue at a level
+  where the panel looks, the sender's house's or nobody's, and `raiseAntarctica`, the sixteen there again after a
+  wipe. See `docs/plans/structures.md`.

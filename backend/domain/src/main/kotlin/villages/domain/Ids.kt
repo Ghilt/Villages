@@ -64,6 +64,14 @@ value class StructureId(val value: UUID) {
         private const val NAMED_AFTER = "villages:structure:"
 
         /**
+         * The structure a lever raises. Worked out from the player who pulled it and the command, as a character's
+         * is from its house, so the same command sent twice writes to one stream and the second raising is refused,
+         * and a command id copied off somebody else's event raises nothing of theirs.
+         */
+        fun raisedBy(player: PlayerId, commandId: UUID): StructureId =
+            StructureId(UUID.nameUUIDFromBytes("$NAMED_AFTER${player.value}:$commandId".toByteArray(Charsets.UTF_8)))
+
+        /**
          * One of the structures standing in Antarctica for Adam, one of each type: the same on every start, so a
          * server that starts again over a kept world raises none of them twice. See docs/plans/structures.md.
          */

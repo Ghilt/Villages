@@ -6,9 +6,11 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import villages.application.Antarctica
 import villages.application.StructureCommandExecutor
+import villages.application.StructureService
 import villages.application.WorldClock
 import villages.domain.StructureCatalogue
 import villages.occurrent.EventWorld
+import villages.projections.HousesProjection
 import java.nio.file.Files
 import java.nio.file.Path
 import java.time.Clock
@@ -28,6 +30,11 @@ class StructuresConfig {
     @Bean
     fun structureExecutor(world: EventWorld, catalogue: StructureCatalogue): StructureCommandExecutor =
         world.structureExecutor(catalogue)
+
+    /** Raising one where Adam's debug panel looks, for his own house or for nobody. */
+    @Bean
+    fun structures(structures: StructureCommandExecutor, houses: HousesProjection, clock: Clock, worldClock: WorldClock): StructureService =
+        StructureService(structures, houses, { clock.instant() }, worldClock)
 
     @Bean
     fun antarctica(structures: StructureCommandExecutor, catalogue: StructureCatalogue, clock: Clock, worldClock: WorldClock): Antarctica =

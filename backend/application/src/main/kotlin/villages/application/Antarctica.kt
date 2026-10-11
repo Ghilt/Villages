@@ -31,7 +31,7 @@ class Antarctica(
             RaiseStructure(
                 structureId = StructureId.inAntarctica(type),
                 structureType = type,
-                name = "the Antarctic ${wordsOf(type)}",
+                name = "the Antarctic ${type.inWords}",
                 place = place,
                 level = 1,
                 holder = null,
@@ -52,8 +52,5 @@ class Antarctica(
          * a row's latitude is the number it is written as and not a hair off it.
          */
         fun placeOf(at: Int): Location = Location((-774 - 4 * (at / 4)) / 10.0, 10.0 + 2.0 * (at % 4))
-
-        /** A type's name as words, for a name nobody will keep: `printingHouse` is a printing house. */
-        fun wordsOf(type: StructureType): String = type.name.replace(Regex("[A-Z]")) { " ${it.value.lowercase()}" }
     }
 }

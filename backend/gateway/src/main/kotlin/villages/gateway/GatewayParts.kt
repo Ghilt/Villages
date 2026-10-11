@@ -1,5 +1,6 @@
 package villages.gateway
 
+import villages.application.Antarctica
 import villages.application.Arrival
 import villages.application.CharactersByCell
 import villages.application.ChoicesByPlayer
@@ -16,6 +17,7 @@ import villages.application.RecentEvents
 import villages.application.ResourceService
 import villages.application.SightsByHouse
 import villages.application.Stands
+import villages.application.StructureService
 import villages.application.TakeActionService
 import villages.application.VisionService
 import villages.application.WorldKept
@@ -50,6 +52,8 @@ class Mechanics(
     val dialogueRows: DialoguesByHouse,
     val stands: Stands = Stands { _, _, _ -> null },
     val waters: WaterAt = WaterAt.NOWHERE,
+    val structures: StructureService,
+    val antarctica: Antarctica,
     val instrumentsOpen: Boolean = true,
     /** Where the world is kept and what of it cannot be read, which hello and the instruments say. */
     val worldKept: WorldKept = WorldKept.IN_MEMORY,
@@ -78,6 +82,6 @@ internal fun partsOf(
         WatersPart(waters),
         TimelinePart(),
         InspectingPart(houseById, onTheMap, world),
-        Instruments(instrumentsOpen, core, events, recent, emptyTheWorld, foundHouse, resources, keyFigures, visions, dialogues, rolls, worldKept),
+        Instruments(instrumentsOpen, core, events, recent, emptyTheWorld, foundHouse, resources, keyFigures, visions, dialogues, rolls, worldKept, structures, antarctica),
     )
 }

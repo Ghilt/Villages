@@ -106,7 +106,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   `gateway: error fault: …`, with its stack in the server's log under `villages.feed`, which the quick-start
   writes to `.logs/backend.log`; see decision record 0029. **Everything in it is in a folding section**,
   and which section a new thing goes in is asked rather than guessed, as `CLAUDE.md` says. Today they are
-  Worktrees, Debug map, Shaders, Scenery, Camera, Areas, World, Resources, Characters, Dialogues and Choice roll.
+  Worktrees, Debug map, Shaders, Scenery, Camera, Areas, World, Resources, Structures, Characters, Dialogues and
+  Choice roll.
   **The log is not a section but a column of its own**, the whole height of the panel on its outer side,
   so what a button did is in view while the button is. It begins folded: the `log` toggle in the panel's
   header, beside `landscape`, opens it and `hide` in its own bar folds it away again. The events themselves are not in the
@@ -247,7 +248,13 @@ stage alone, with none of the debug panel in it (decision record 0079).
   the ice of Queen Maud Land, from 77.4 to 78.6 degrees south and 10 to 16 east - the Antarctic castle first. Each
   is a `villages.structure.raised.v1` on the event page, sixteen of them at every start, and an id worked out from
   its type means a server starting over a kept world raises none twice. Nothing draws them yet. A wipe takes them
-  with everything else until the server starts again.
+  with everything else, and the Structures section's **raise Antarctica again** puts back whichever are gone.
+- Raising one where you look: the **Structures** section of the debug panel, after Resources. A type from the
+  catalogue, a level it has, **yours** or **nobody's**, and **raise here** raises one at the middle of the map,
+  named *a new mill* and the like; **raise Antarctica again** is the sixteen. Each is a command said in the log
+  under `structures` with its answer, and a raising is a `villages.structure.raised.v1` on the event page. Yours
+  without a house is refused `noSuchHouse`; a type the catalogue lacks would be `noSuchType`. Adam's levers,
+  standing in for a house building one; closed with the other instruments (0076). Nothing draws a structure yet.
 
 ## Adam's folders and the tools that cut them
 

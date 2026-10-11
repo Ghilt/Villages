@@ -877,7 +877,8 @@ other and takes the same bays.
 
 The catalogue is: sixteen types in `world/structures.json`, read by the game server when it starts and listed at
 `/admin/inspect-structures`. A structure's history is on the server, and one of every type stands in Antarctica,
-raised by the server when it starts while the instruments are open; nothing draws them yet. Decision record 0092 is the shape and
+raised by the server when it starts while the instruments are open, and the debug panel's Structures section
+raises one where the map looks; nothing draws them yet. Decision record 0092 is the shape and
 `docs/plans/structures.md` the steps, one commit each; the hypothesis is experiment 0018. Today a house's holding is its seat, a place on its founding event, drawn as a
 castle in the house's colours with ragged gold ground about it, and nothing in the game pays a house anything.
 

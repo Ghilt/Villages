@@ -173,3 +173,22 @@ export function nextRarity(rarity: Rarity | null): void {
     rarity === null ? { type: 'nextRarity' } : { type: 'nextRarity', rarity },
   );
 }
+
+/*
+ * Structures, raised where the panel looks or again in Antarctica. Adam's levers, standing in for a house building one
+ * and for a story handing one over. See docs/plans/structures.md.
+ */
+
+/** Raises a structure of a type at a level at a place, this player's house's or nobody's. */
+export function raiseStructure(structureType: string, level: number, place: Point, yours: boolean): void {
+  pull(
+    'structures',
+    `raising a ${structureType} of level ${level} at ${place.lat.toFixed(3)}, ${place.lon.toFixed(3)}, ${yours ? 'yours' : "nobody's"}`,
+    { type: 'raiseStructure', structureType, level, place, yours },
+  );
+}
+
+/** Raises whichever of the sixteen in Antarctica a wipe took. */
+export function raiseAntarctica(): void {
+  pull('structures', "raising Antarctica's sixteen again", { type: 'raiseAntarctica' });
+}

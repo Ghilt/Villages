@@ -128,7 +128,7 @@ world's. A structure decides its own holder, so who holds it is here and on no h
 
 | Type | Payload | Meaning | Produced by | Consumers |
 |---|---|---|---|---|
-| `villages.structure.raised.v1` | `structureId`, `structureType`, `name`, `place`, `significance`, `level`, `holder`, `worldTime`, `recordedAt` | A structure came to be: of a type in the catalogue, at a level it has, at a place, under a name, held by a house or by nobody. The significance is the catalogue's for the type at that level, carried so that how far out it is drawn is a fact of its history and not of a catalogue retuned since. Refused if it was raised already, or if the catalogue has no such type or the type no such level. | `RaiseStructure`, for the sixteen standing in Antarctica while the instruments are open | The event list |
+| `villages.structure.raised.v1` | `structureId`, `structureType`, `name`, `place`, `significance`, `level`, `holder`, `worldTime`, `recordedAt` | A structure came to be: of a type in the catalogue, at a level it has, at a place, under a name, held by a house or by nobody. The significance is the catalogue's for the type at that level, carried so that how far out it is drawn is a fact of its history and not of a catalogue retuned since. Refused if it was raised already, or if the catalogue has no such type or the type no such level. | `RaiseStructure`: for the sixteen standing in Antarctica while the instruments are open, and from the Structures section's *raise here* and *raise Antarctica again* | The event list |
 
 ## The player's events
 

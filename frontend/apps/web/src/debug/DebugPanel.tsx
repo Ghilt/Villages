@@ -20,6 +20,7 @@ import { stageStore, setLogOpen, setPanelShut, toggleShape } from './stage';
 import { PANEL_WANTS } from '../stage/stageBox';
 import { describeTerrainStep } from './terrainDepth';
 import { ResourcesSection } from './ResourcesSection';
+import { StructuresSection } from './StructuresSection';
 import { WorldSection } from './WorldSection';
 import { useStore } from '../store/useStore';
 
@@ -256,6 +257,7 @@ export function DebugPanel({ map, worldRoot, master, renderer, onRenderer }: Deb
 
           <WorldSection map={map} />
           <ResourcesSection />
+          <StructuresSection map={map} />
           <CharactersSection map={map} />
           <DialoguesSection />
           <ChoiceRollSection />

@@ -1,5 +1,7 @@
 package villages.gateway
 
+import villages.application.Antarctica
+import villages.application.StructureService
 import villages.application.AnonymousTokens
 import villages.application.Arrival
 import villages.application.EventFeed
@@ -260,6 +262,9 @@ internal class Rig(
     /** The one master's stands, tile by tile, as the sprite map's folder would hold them. */
     val standsOnDisk = mutableMapOf<Int, ByteArray>()
 
+    /** What the structure levers raised. */
+    val raised = RaisedInTheRig()
+
     /** Where the gateway hears that something acting on its own threw, said on purpose by a test. */
     val faults = FaultBoard()
     val gateway = Gateway(
@@ -326,6 +331,8 @@ internal class Rig(
             dialogueRows = dialogueRows,
             stands = Stands { master, x, y -> if (master == "terrain") standsOnDisk[y * STAND_TILES + x] ?: ByteArray(0) else null },
             waters = WaterAt({ grounds[it] }, { names[it] }),
+            structures = StructureService(raised, houses, { noon }, worldClock),
+            antarctica = Antarctica(raised, RIG_CATALOGUE, { noon }, worldClock),
             instrumentsOpen = instrumentsOpen,
             worldKept = worldKept,
         ),
