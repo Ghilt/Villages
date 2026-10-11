@@ -305,6 +305,13 @@ stage alone, with none of the debug panel in it (decision record 0079).
   fallen, the same event with no rates. A world month is a real day (0053), so three a month is one every eight
   hours, and the house status counts up between. The debug panel's **Resources** section says each rate beside
   its figure, `+3 a month`, and the log says it under `income` whenever it changes: `paid Domain +3 a month`.
+- Filling its slots: under the level and ruin levers, a slot of the open structure's type, someone to put in it -
+  one of your key figures, or anyone standing in view - and **put them in**, **put something in** - a thing the
+  slot is for, a garrison of forty, bushels of grain, a relic, or a chest - and **empty a place**, which takes out
+  what was put in last. Each writes `villages.structure.slotFilled.v1` or `slotEmptied.v1`, on the event page; a
+  person already in another slot is taken out of it first, in the same story. A full slot is refused `slotFull`,
+  the same person twice `alreadyInSlot`, an empty one emptied `notInSlot`, and a ruin filled `isARuin`; a level is
+  not lowered under what a slot holds (`invalidLevel`). What is in them is not drawn yet.
 - Ruining one and raising it again: **ruin it** and **rebuild it**, beside *take control of this building*, on the
   structure whose window was opened last. *Ruin it* writes `villages.structure.ruined.v1`, by fire: a ruin holds
   nobody, its holder's sight from it is taken back, and it is drawn as a ruin - the stump of a tower and a broken

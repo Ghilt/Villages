@@ -66,6 +66,10 @@ import villages.domain.Stat
 import villages.domain.StructureId
 import villages.domain.StructureChangedHands
 import villages.domain.StructureLevelChanged
+import villages.domain.StructureSlotEmptied
+import villages.domain.StructureSlotFilled
+import villages.domain.Content
+import villages.domain.ContentId
 import villages.domain.StructureRebuilt
 import villages.domain.StructureRuined
 import villages.domain.StructureRaised
@@ -266,6 +270,14 @@ internal object EventSamples {
     val seatLost = HouseLostSeat(house, antarcticCastle, WorldTime(653_706), noon)
 
     /** The same castle, fallen to fire and raised again for nobody. */
+    /** A garrison of forty put in the castle, and taken out again; and Agnes in its dungeon, the other case. */
+    val garrison = ContentId(UUID.fromString("7a000000-0000-4000-8000-000000000040"))
+    val garrisoned = StructureSlotFilled(
+        antarcticCastle, "garrison", Content.Item(garrison, "a garrison", "forty men of the coast", 40), WorldTime(653_706), noon,
+    )
+    val ungarrisoned = StructureSlotEmptied(antarcticCastle, "garrison", garrison, WorldTime(653_707), noon)
+    val agnesImprisoned = StructureSlotFilled(antarcticCastle, "dungeon", Content.Person(agnes), WorldTime(653_706), noon)
+
     val castleLevelled = StructureLevelChanged(antarcticCastle, 2, Significance(24.0), WorldTime(653_706), noon)
     val castleFell = StructureRuined(antarcticCastle, "fire", WorldTime(653_707), noon)
     val castleRebuilt = StructureRebuilt(antarcticCastle, StructureType("castle"), 1, Significance(20.0), null, WorldTime(653_708), noon)
@@ -340,6 +352,14 @@ internal object EventSamples {
     val theLetterRead = PlayerCompletedDialogue(house, player, aLetter.dialogue.id, day, noon)
     val theLetterLost = PlayerLostDialogue(house, player, aLetter.dialogue.id, Requirement.Alive(agnes), day, noon)
 
+    /**
+     * Another case of a sealed field than its type's sample writes, each pinned to a fixture of its own under
+     * contracts/fixtures/events/cases: what fills a slot is a person or an item, and one sample cannot be both.
+     */
+    val cases: Map<String, Event> = mapOf(
+        "villages.structure.slotFilled.v1.person" to agnesImprisoned,
+    )
+
     val samples: Map<String, Event> = mapOf(
         "villages.character.aged.v1" to agnesAged,
         "villages.character.appeared.v1" to agnesAppeared,
@@ -369,6 +389,8 @@ internal object EventSamples {
         "villages.player.tookAction.v1" to tookNorthern,
         "villages.structure.changedHands.v1" to castleLeft,
         "villages.structure.levelChanged.v1" to castleLevelled,
+        "villages.structure.slotEmptied.v1" to ungarrisoned,
+        "villages.structure.slotFilled.v1" to garrisoned,
         "villages.structure.raised.v1" to castleRaised,
         "villages.structure.rebuilt.v1" to castleRebuilt,
         "villages.structure.ruined.v1" to castleFell,

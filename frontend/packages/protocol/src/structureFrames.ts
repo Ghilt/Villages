@@ -48,4 +48,34 @@ export const yourHoldingsFrameSchema = z.object({
   holdings: z.array(structureViewSchema),
 });
 
+/**
+ * Adam's levers for structures, standing in for the world: one raised where the panel looks, Antarctica's sixteen
+ * again, one handed to the sender's house, a level up or down, a place of a slot filled or emptied, and one ruined or
+ * rebuilt. Commands of the client's, spread into its union of commands. See docs/plans/structures.md.
+ */
+export const structureCommandSchemas = [
+  z.object({
+    type: z.literal('raiseStructure'),
+    structureType: z.string(),
+    level: z.number().int(),
+    place: pointSchema,
+    yours: z.boolean(),
+  }),
+  z.object({ type: z.literal('raiseAntarctica') }),
+  z.object({ type: z.literal('takeControl'), structureId: z.string() }),
+  z.object({ type: z.literal('changeLevel'), structureId: z.string(), by: z.number().int() }),
+  z.object({
+    type: z.literal('fillSlot'),
+    structureId: z.string(),
+    slot: z.string(),
+    characterId: z.string().optional(),
+    item: z
+      .object({ name: z.string(), about: z.string().optional(), amount: z.number().int().optional() })
+      .optional(),
+  }),
+  z.object({ type: z.literal('emptySlot'), structureId: z.string(), slot: z.string() }),
+  z.object({ type: z.literal('ruinStructure'), structureId: z.string(), cause: z.string() }),
+  z.object({ type: z.literal('rebuildStructure'), structureId: z.string() }),
+] as const;
+
 export type StructureView = z.infer<typeof structureViewSchema>;

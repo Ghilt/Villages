@@ -2,6 +2,7 @@ package villages.gateway
 
 import villages.application.Antarctica
 import villages.application.StructureService
+import villages.domain.CharacterId
 import villages.domain.Location
 import villages.domain.StructureId
 import villages.domain.StructureType
@@ -9,6 +10,8 @@ import villages.protocol.CommandPayload
 import villages.protocol.RaiseAntarcticaPayload
 import villages.protocol.RaiseStructurePayload
 import villages.protocol.ChangeLevelPayload
+import villages.protocol.EmptySlotPayload
+import villages.protocol.FillSlotPayload
 import villages.protocol.RebuildPayload
 import villages.protocol.RuinPayload
 import villages.protocol.TakeControlPayload
@@ -30,8 +33,8 @@ internal inline fun <reified P : CommandPayload> Commands.lever(open: Boolean, n
 
 /**
  * Adam's levers for structures, standing in for the world: one raised where the panel looks, Antarctica's sixteen
- * raised again after a wipe has taken them, one handed to the sender's house, one raised or lowered a level, and
- * one ruined or rebuilt. Registered by the instruments and closed with them. A type the catalogue
+ * raised again after a wipe has taken them, one handed to the sender's house, one raised or lowered a level, a
+ * place of a slot filled or emptied, and one ruined or rebuilt. Registered by the instruments and closed with them. A type the catalogue
  * lacks is refused `noSuchType`, a level the type lacks `invalidLevel`, a place off the world `invalidLocation`, and a
  * type that is not even a name is malformed. See docs/plans/structures.md.
  */
@@ -50,6 +53,18 @@ internal fun structureLevers(commands: Commands, open: Boolean, structures: Stru
     // An id that is not one is malformed, as a type that is not a name is.
     commands.lever<ChangeLevelPayload>(open) { asking, payload ->
         structures.changeLevel(StructureId(UUID.fromString(payload.structureId)), payload.by, asking.startingAStory)
+    }
+    commands.lever<FillSlotPayload>(open) { asking, payload ->
+        val structure = StructureId(UUID.fromString(payload.structureId))
+        if (payload.characterId != null) {
+            structures.fillWithPerson(structure, payload.slot, CharacterId(UUID.fromString(payload.characterId)), asking.startingAStory)
+        } else {
+            val item = requireNotNull(payload.item) { "a slot is filled with someone or with something" }
+            structures.fillWithItem(structure, payload.slot, item.name, item.about, item.amount, asking.startingAStory)
+        }
+    }
+    commands.lever<EmptySlotPayload>(open) { asking, payload ->
+        structures.emptyLast(StructureId(UUID.fromString(payload.structureId)), payload.slot, asking.startingAStory)
     }
     commands.lever<RuinPayload>(open) { asking, payload ->
         structures.ruin(StructureId(UUID.fromString(payload.structureId)), payload.cause, asking.startingAStory)

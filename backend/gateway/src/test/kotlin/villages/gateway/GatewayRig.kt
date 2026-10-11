@@ -193,7 +193,7 @@ internal class Rig(
             dialogueRows = dialogueRows,
             stands = Stands { master, x, y -> if (master == "terrain") standsOnDisk[y * STAND_TILES + x] ?: ByteArray(0) else null },
             waters = WaterAt({ grounds[it] }, { names[it] }),
-            structures = StructureService(world, houses, { noon }, worldClock),
+            structures = StructureService(world, houses, { noon }, worldClock, structuresOnTheMap, { UUID.randomUUID() }),
             antarctica = Antarctica(world, RIG_CATALOGUE, { noon }, worldClock),
             instrumentsOpen = instrumentsOpen,
             worldKept = worldKept,

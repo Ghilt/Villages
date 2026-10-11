@@ -20,6 +20,7 @@ import {
   structureChangedSchema,
   structureViewSchema,
   yourHoldingsFrameSchema,
+  structureCommandSchemas,
 } from './structureFrames';
 import { inspectAtFrameSchema, inspectedAtFrameSchema } from './placeFrames';
 
@@ -194,20 +195,7 @@ export const commandPayloadSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('killCharacter'), characterId: z.string(), cause: z.string() }),
   /** Put a key figure somewhere on the map. The place and nothing else: how much it matters is the world's. */
   z.object({ type: z.literal('moveCharacter'), characterId: z.string(), place: pointSchema }),
-  // Adam's levers for structures: one raised where the panel looks, and Antarctica's sixteen again. See
-  // docs/plans/structures.md.
-  z.object({
-    type: z.literal('raiseStructure'),
-    structureType: z.string(),
-    level: z.number().int(),
-    place: pointSchema,
-    yours: z.boolean(),
-  }),
-  z.object({ type: z.literal('raiseAntarctica') }),
-  z.object({ type: z.literal('takeControl'), structureId: z.string() }),
-  z.object({ type: z.literal('changeLevel'), structureId: z.string(), by: z.number().int() }),
-  z.object({ type: z.literal('ruinStructure'), structureId: z.string(), cause: z.string() }),
-  z.object({ type: z.literal('rebuildStructure'), structureId: z.string() }),
+  ...structureCommandSchemas,
   z.object({ type: z.literal('takeOffTheMap'), characterId: z.string() }),
   /**
    * Give the house vision of a place outright, until it is taken away; how far it sees is the world's to say.

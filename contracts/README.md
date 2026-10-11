@@ -116,3 +116,6 @@ recorded over. See decision record 0037. What each one changed:
 - **42** - ruins: `StructureView` carries `ruin` for a ruin, and Adam's levers `ruinStructure`, a structure and a cause,
   and `rebuildStructure` bring one down and raise it again.
 - **43** - levels: Adam's lever `changeLevel`, a structure and a step of one up or one down.
+- **42** - levels: Adam's lever `changeLevel`, a structure and a step of one up or one down.
+- **44** - slots: Adam's levers `fillSlot`, a structure, a slot and someone by `characterId` or else an `item` - a
+  name, a line about it, an amount - and `emptySlot`, which takes out what was put in a slot last.

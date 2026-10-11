@@ -19,6 +19,7 @@ import villages.domain.CharacterCommand
 import villages.domain.CharacterDecider
 import villages.domain.CharacterEvent
 import villages.domain.Decider
+import villages.domain.Content
 import villages.domain.Effect
 import villages.domain.Event
 import villages.domain.HouseCommand
@@ -62,6 +63,7 @@ object Events {
         .addMixIn(Requirement::class.java, RequirementJson::class.java)
         .addMixIn(RevealImpact::class.java, RevealImpactJson::class.java)
         .addMixIn(Shows::class.java, ShowsJson::class.java)
+        .addMixIn(Content::class.java, ContentJson::class.java)
         .build()
 
     fun converter(): JacksonCloudEventConverter<Event> =

@@ -7,12 +7,16 @@ import io.kotest.matchers.comparables.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
 import villages.application.EventFeed
 import villages.application.Holder
+import villages.application.PlaceInSlot
 import villages.application.Start
 import villages.application.StoredEvent
 import villages.application.StructureChange
 import villages.application.started
 import villages.domain.Banner
+import villages.domain.CharacterId
 import villages.domain.Charge
+import villages.domain.Content
+import villages.domain.ContentId
 import villages.domain.Division
 import villages.domain.Event
 import villages.domain.HouseFounded
@@ -28,6 +32,8 @@ import villages.domain.StructureId
 import villages.domain.StructureRaised
 import villages.domain.StructureRebuilt
 import villages.domain.StructureRuined
+import villages.domain.StructureSlotEmptied
+import villages.domain.StructureSlotFilled
 import villages.domain.StructureType
 import villages.domain.Tincture
 import villages.domain.WorldTime
@@ -171,5 +177,23 @@ class StructuresProjectionSpec : StringSpec({
         feed.deliver(StructureLevelChanged(mill, 2, Significance(12.0), today, noon), version = 2)
 
         structures.row(mill)!!.faces.map { it.level to it.significance } shouldBe listOf(1 to Significance(10.0), 2 to Significance(12.0))
+    }
+
+    "what is in a slot is the row's, now, with no face of its own, and the read model says which slot a person is in" {
+        val (feed, structures) = rig()
+        val agnes = CharacterId(UUID.fromString("cb732500-39bd-3b39-a838-bb89f719578f"))
+        feed.deliver(founded)
+        feed.deliver(raised(), version = 1)
+
+        feed.deliver(StructureSlotFilled(mill, "granary", Content.Person(agnes), today, noon), version = 2)
+        feed.deliver(StructureSlotFilled(mill, "granary", Content.Person(agnes), today, noon), version = 2)
+
+        structures.of(mill) shouldBe mapOf("granary" to listOf(Content.Person(agnes)))
+        structures.row(mill)!!.faces shouldHaveSize 1
+        structures.slotOf(agnes) shouldBe PlaceInSlot(mill, "granary")
+
+        feed.deliver(StructureSlotEmptied(mill, "granary", ContentId(agnes.value), today, noon), version = 3)
+        structures.of(mill) shouldBe emptyMap()
+        structures.slotOf(agnes) shouldBe null
     }
 })

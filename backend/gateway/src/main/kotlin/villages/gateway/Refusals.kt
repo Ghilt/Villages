@@ -51,4 +51,9 @@ internal fun DomainError.reasonCode(): String = when (this) {
     StructureError.SameHolder -> "sameHolder"
     StructureError.IsARuin -> "isARuin"
     StructureError.NotARuin -> "notARuin"
+    is StructureError.NoSuchSlot -> "noSuchSlot"
+    is StructureError.SlotFull -> "slotFull"
+    StructureError.AlreadyInSlot -> "alreadyInSlot"
+    StructureError.NotInSlot -> "notInSlot"
+    is StructureError.InvalidContent -> "invalidContent"
 }

@@ -22,6 +22,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
     JsonSubTypes.Type(RaiseStructurePayload::class, name = "raiseStructure"),
     JsonSubTypes.Type(TakeControlPayload::class, name = "takeControl"),
     JsonSubTypes.Type(ChangeLevelPayload::class, name = "changeLevel"),
+    JsonSubTypes.Type(FillSlotPayload::class, name = "fillSlot"),
+    JsonSubTypes.Type(EmptySlotPayload::class, name = "emptySlot"),
     JsonSubTypes.Type(RuinPayload::class, name = "ruinStructure"),
     JsonSubTypes.Type(RebuildPayload::class, name = "rebuildStructure"),
     JsonSubTypes.Type(ReleasePledgePayload::class, name = "releasePledge"),
@@ -152,6 +154,25 @@ data class TakeControlPayload(val structureId: String) : CommandPayload
 
 /** Raise or lower a structure by [by] levels, one up or one down: Adam's *level up* and *level down*. */
 data class ChangeLevelPayload(val structureId: String, val by: Int) : CommandPayload
+
+/**
+ * Put a person, by [characterId], or else an [item], in a place of a structure's slot: Adam's *put someone in* and
+ * *put something in*. One of the two; with neither it is malformed.
+ */
+@JsonInclude(JsonInclude.Include.NON_NULL)
+data class FillSlotPayload(
+    val structureId: String,
+    val slot: String,
+    val characterId: String? = null,
+    val item: ItemPayload? = null,
+) : CommandPayload
+
+/** An item as a lever puts it in a slot: its name, a line about it, and how many of it or none. */
+@JsonInclude(JsonInclude.Include.NON_NULL)
+data class ItemPayload(val name: String, val about: String = "", val amount: Long? = null)
+
+/** Take out of a structure's slot what was put in it last: Adam's *empty a place*. */
+data class EmptySlotPayload(val structureId: String, val slot: String) : CommandPayload
 
 /** Bring a structure down to ruin, for a cause a word or two long: Adam's *ruin this building*. */
 data class RuinPayload(val structureId: String, val cause: String) : CommandPayload

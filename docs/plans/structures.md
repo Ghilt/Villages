@@ -257,10 +257,11 @@ program running on it at this tree's address.
 | 9b | Lost seats: the seats listener writes `lostSeat` when a seat changes hands or falls; the seat's own sight ends with it (in place of removing it, so a seated house sees as before); a seatless house. `foundingPlace` is not introduced, and the room, the eye, omens, season, gossip and dialogues keep reading where the house was founded: the same place as its seat in every state the game can reach, until a house can name another | the house | |
 | 9c | Levels: `levelChanged`, *level up* and *level down*, the holder's sight widened or narrowed with it, the new vision given before the old is taken | a structure drawn larger | bump |
 | 10a | Income: `SetIncome`, `incomeChanged`, rates per source, the listener paying by type and level; the omens read a stock at the roll's instant, so what came in counts as a rise | the treasury counting up | |
-| 10b | What each holding gives, in the window and the tab: worked out on the page from its copy of the catalogue, the same numbers the server pays by, so no bump; when slots change what is paid (11c), the holder's figure comes from the server | the window | |
+| 10b | What each holding gives, in the window and the tab: worked out on the page from its copy of the catalogue, the same numbers the server pays by, so no bump; when slots change what is paid (11d), the holder's figure comes from the server | the window | |
 | 11a | `Socket` and `SlotRow`, in the library | the component page | |
-| 11b | Slots: `slotFilled` and `slotEmptied`, items, a character in one slot, secrecy per viewer, the levers, the sockets | the window, as two houses | bump |
-| 11c | What fills a slot counts: adds, stats, an item's own | the treasury | |
+| 11b | Slots: `slotFilled` and `slotEmptied`, items, a person in one slot at a time, the levers; a slot change is the row's, now, with no face | the event page | bump |
+| 11c | The sockets in the window and the tab, cut for each viewer: the holder sees into every slot, another house in sight into the public ones and a question in every place of the rest, nobody out of sight | the window, as two houses | bump |
+| 11d | What fills a slot counts: adds, stats, an item's own | the treasury | |
 | 12 | The culture map: `world/cultures.json`, the tool, the Culture renderer, the quick-start | the renderer | |
 | 13 | Culture sprites: sixteen types by four cultures, the ruins and the type marks, placeholders from the moodboard, a cutting tool of their own, the atlas | the map, on two cultures | |
 | 14 | Houses leave the cell snapshots: `Snapshot.houses`, the houses' fan-out, `Fog.sent(HouseRow)` | nothing changes on screen | bump |

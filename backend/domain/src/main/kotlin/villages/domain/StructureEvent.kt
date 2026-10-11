@@ -73,6 +73,27 @@ data class StructureLevelChanged(
     override val recordedAt: Instant,
 ) : StructureEvent, WorldEvent
 
+/**
+ * A person or an item was put in a place of one of the structure's slots, after whatever was in it already. What it
+ * changes for the holder follows from listeners, in the same story. See docs/plans/structures.md.
+ */
+data class StructureSlotFilled(
+    override val structureId: StructureId,
+    val slot: String,
+    val content: Content,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : StructureEvent, WorldEvent
+
+/** One content was taken out of a slot, and the rest stay as they were. What it was is on the event that put it in. */
+data class StructureSlotEmptied(
+    override val structureId: StructureId,
+    val slot: String,
+    val contentId: ContentId,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : StructureEvent, WorldEvent
+
 data class StructureChangedHands(
     override val structureId: StructureId,
     val from: HouseId?,

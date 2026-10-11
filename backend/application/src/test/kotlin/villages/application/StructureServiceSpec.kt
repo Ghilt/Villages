@@ -5,8 +5,13 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import villages.domain.Banner
+import villages.domain.CharacterId
 import villages.domain.Charge
+import villages.domain.Content
+import villages.domain.ContentId
 import villages.domain.Division
+import villages.domain.EmptySlot
+import villages.domain.FillSlot
 import villages.domain.HouseError
 import villages.domain.HouseId
 import villages.domain.HouseName
@@ -15,6 +20,7 @@ import villages.domain.PlayerId
 import villages.domain.RaiseStructure
 import villages.domain.Significance
 import villages.domain.StructureCommand
+import villages.domain.StructureError
 import villages.domain.StructureId
 import villages.domain.StructureType
 import villages.domain.Tincture
@@ -36,10 +42,10 @@ class StructureServiceSpec : StringSpec({
         resources = emptyMap(), pledges = emptyList(), since = today, until = null, version = 1,
     )
 
-    fun rig(hasHouse: Boolean): Pair<MutableList<StructureCommand>, StructureService> {
+    fun rig(hasHouse: Boolean, slots: StructureSlots = NO_SLOTS): Pair<MutableList<StructureCommand>, StructureService> {
         val sentOn = mutableListOf<StructureCommand>()
         val houses = HouseById { id -> founded.takeIf { hasHouse && id == house } }
-        return sentOn to StructureService({ command, _ -> sentOn += command }, houses, { noon }, { today })
+        return sentOn to StructureService({ command, _ -> sentOn += command }, houses, { noon }, { today }, slots, { sent })
     }
 
     "a structure is raised where asked, the player's house's, under an id worked out from the player and the command" {
@@ -67,4 +73,47 @@ class StructureServiceSpec : StringSpec({
         }
         sentOn.shouldBeEmpty()
     }
+
+    val gaol = StructureId(UUID.fromString("95ba5c28-4a79-3fa6-88aa-0ff1f5a0a559"))
+    val castle = StructureId(UUID.fromString("95ba5c28-4a79-3fa6-88aa-0ff1f5a0a55a"))
+    val agnes = CharacterId(UUID.fromString("cb732500-39bd-3b39-a838-bb89f719578f"))
+
+    "a person put in a slot is taken out of the one they were in first, in the same story" {
+        val (sentOn, service) = rig(hasHouse = true, slots = holding(agnes to PlaceInSlot(gaol, "cells")))
+
+        service.fillWithPerson(castle, "dungeon", agnes, Provenance.startedBy(sent))
+
+        sentOn shouldBe listOf(
+            EmptySlot(gaol, "cells", ContentId(agnes.value), today, noon),
+            FillSlot(castle, "dungeon", Content.Person(agnes), today, noon),
+        )
+    }
+
+    "an item is put in under an id minted for it, and emptying a place takes out what was put in last" {
+        val (sentOn, service) = rig(hasHouse = true, slots = holding(agnes to PlaceInSlot(gaol, "cells")))
+
+        service.fillWithItem(castle, "garrison", " a garrison ", "forty men", 40, Provenance.startedBy(sent))
+        service.emptyLast(gaol, "cells", Provenance.startedBy(sent))
+
+        sentOn shouldBe listOf(
+            FillSlot(castle, "garrison", Content.Item(ContentId(sent), "a garrison", "forty men", 40), today, noon),
+            EmptySlot(gaol, "cells", ContentId(agnes.value), today, noon),
+        )
+        shouldThrow<StructureError.NotInSlot> { service.emptyLast(castle, "garrison", Provenance.startedBy(sent)) }
+    }
 })
+
+/** Slots holding these people, each where it says, and nothing else. */
+private fun holding(vararg people: Pair<CharacterId, PlaceInSlot>) = object : StructureSlots {
+    override fun of(structure: StructureId): Map<String, List<Content>> =
+        people.filter { it.second.structure == structure }.groupBy({ it.second.slot }, { Content.Person(it.first) })
+
+    override fun slotOf(character: CharacterId): PlaceInSlot? = people.firstOrNull { it.first == character }?.second
+}
+
+/** Slots with nothing in them and nobody put anywhere. */
+private val NO_SLOTS = object : StructureSlots {
+    override fun of(structure: villages.domain.StructureId) = emptyMap<String, List<villages.domain.Content>>()
+
+    override fun slotOf(character: villages.domain.CharacterId): PlaceInSlot? = null
+}

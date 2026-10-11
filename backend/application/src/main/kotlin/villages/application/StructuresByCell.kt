@@ -1,5 +1,6 @@
 package villages.application
 
+import villages.domain.Content
 import villages.domain.HouseId
 import villages.domain.Location
 import villages.domain.Significance
@@ -29,10 +30,18 @@ data class StructureFace(
 )
 
 /**
- * A structure as the map's read model holds it: where it stands, what it is called, and every face it has had, the
- * first first. A structure never moves, so its place and its cell are its own and not a face's.
+ * A structure as the map's read model holds it: where it stands, what it is called, every face it has had, the first
+ * first, and what is in its slots now. A structure never moves, so its place and its cell are its own and not a
+ * face's; and its slots are never shown as last seen, so they are the row's, now, and not a face's either.
  */
-data class StructureRow(val id: StructureId, val name: String, val place: Location, val faces: List<StructureFace>) {
+data class StructureRow(
+    val id: StructureId,
+    val name: String,
+    val place: Location,
+    val faces: List<StructureFace>,
+    /** What each slot holds now, by the slot's name, in the order it was put there. */
+    val slots: Map<String, List<Content>> = emptyMap(),
+) {
     /** The face it had on [day]: the latest begun by then, so of two changes on one day the later. Null before it stood. */
     fun faceOn(day: WorldTime): StructureFace? = faces.lastOrNull { it.since <= day }
 

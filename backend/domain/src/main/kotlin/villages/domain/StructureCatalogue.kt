@@ -88,6 +88,9 @@ data class SlotSpec(
         }
         require(adds.values.all { it >= 0.0 && it.isFinite() }) { "what the $name slot adds is nothing or more" }
     }
+
+    /** How many places it has at a level: the catalogue's, or its highest level's past the end of the list. */
+    fun placesAt(level: Int): Int = places.getOrElse(level - 1) { places.lastOrNull() ?: 0 }
 }
 
 /** What a slot is for: a person, a thing, or either. */

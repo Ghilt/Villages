@@ -21,6 +21,7 @@ import villages.projections.StructuresProjection
 import java.nio.file.Files
 import java.nio.file.Path
 import java.time.Clock
+import java.util.UUID
 
 /**
  * Structures, wired: the catalogue of their types, read once when the server starts from `world/structures.json`, or
@@ -44,8 +45,13 @@ class StructuresConfig {
 
     /** Raising one where Adam's debug panel looks, for his own house or for nobody. */
     @Bean
-    fun structures(structures: StructureCommandExecutor, houses: HousesProjection, clock: Clock, worldClock: WorldClock): StructureService =
-        StructureService(structures, houses, { clock.instant() }, worldClock)
+    fun structures(
+        structures: StructureCommandExecutor,
+        houses: HousesProjection,
+        onTheMap: StructuresProjection,
+        clock: Clock,
+        worldClock: WorldClock,
+    ): StructureService = StructureService(structures, houses, { clock.instant() }, worldClock, onTheMap, { UUID.randomUUID() })
 
     /** Founding raises the house's castle and names it the seat. */
     @Bean(initMethod = "start", destroyMethod = "close")

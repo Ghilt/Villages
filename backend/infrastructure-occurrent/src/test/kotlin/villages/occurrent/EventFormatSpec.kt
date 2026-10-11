@@ -8,6 +8,7 @@ import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldMatch
 import tools.jackson.databind.JsonNode
+import villages.domain.Content
 import villages.domain.Effect
 import villages.domain.Requirement
 import villages.domain.RevealImpact
@@ -33,6 +34,10 @@ class EventFormatSpec : StringSpec({
 
     fun fixture(type: String): JsonNode =
         Events.json.readTree(File("../../contracts/fixtures/events/$type.json"))
+
+    /** Another case of a sealed field than a type's sample writes, pinned in a folder of its own. */
+    fun case(name: String): JsonNode =
+        Events.json.readTree(File("../../contracts/fixtures/events/cases/$name.json"))
 
     "every catalogued type has a sample here, so none of them goes unpinned" {
         samples.keys shouldContainExactlyInAnyOrder EventTypes.rows.values.toSet()
@@ -72,6 +77,19 @@ class EventFormatSpec : StringSpec({
         }
     }
 
+    "and every other case of a sealed field is stored as its own fixture says, and reads back" {
+        for ((name, event) in EventSamples.cases) {
+            val pinned = case(name)
+            val stored = converter.toCloudEvent(event)
+
+            withClue(name) {
+                stored.type shouldBe pinned["type"].asString()
+                Events.json.readTree(stored.data!!.toBytes()) shouldBe pinned["data"]
+                Events.json.readValue(Events.json.writeValueAsBytes(pinned["data"]), event.javaClass) shouldBe event
+            }
+        }
+    }
+
     "a sealed field says which case it holds, so a reader never has to guess" {
         val written = Events.json.readTree(converter.toCloudEvent(whereToSettle).data!!.toBytes())
 
@@ -104,6 +122,7 @@ class EventFormatSpec : StringSpec({
             Requirement::class to RequirementJson::class,
             RevealImpact::class to RevealImpactJson::class,
             Shows::class to ShowsJson::class,
+            Content::class to ContentJson::class,
         )
         val named = mixIns.mapValues { (_, mixIn) -> mixIn.java.getAnnotation(JsonSubTypes::class.java).value.toList() }
 
@@ -112,7 +131,8 @@ class EventFormatSpec : StringSpec({
                 types.map { it.value } shouldContainExactlyInAnyOrder sealed.sealedSubclasses
             }
         }
-        samples.keys.flatMap { kindsIn(fixture(it)) }.toSet() shouldContainAll named.values.flatten().map { it.name }
+        (samples.keys.flatMap { kindsIn(fixture(it)) } + EventSamples.cases.keys.flatMap { kindsIn(case(it)) }).toSet() shouldContainAll
+            named.values.flatten().map { it.name }
     }
 })
 

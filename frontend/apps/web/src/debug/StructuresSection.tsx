@@ -9,6 +9,7 @@ import { subjectsStore } from '../inspect/subjects';
 import { sessionStore } from '../net/gateway';
 import { useStore } from '../store/useStore';
 import { Section } from './Section';
+import { SlotLevers } from './SlotLevers';
 import {
   changeLevel,
   raiseAntarctica,
@@ -25,7 +26,8 @@ interface StructuresSectionProps {
 /**
  * Adam's levers for structures, standing in for the world: one raised at the middle of the map, of a type and a level,
  * his own house's or nobody's, Antarctica's sixteen raised again after a wipe has taken them, and the one whose window
- * is open handed to his house, standing in for a story handing it over or a house taking it. Each is a real
+ * is open handed to his house, standing in for a story handing it over or a house taking it; its level, its slots
+ * filled and emptied, its ruin. Each is a real
  * command, said in the log under `structures` with its answer, and each raising is an event on the event page. The
  * types are the catalogue's, read as `/admin/inspect-structures` reads it, so a type added there is here on a reload.
  * See docs/plans/structures.md.
@@ -40,6 +42,13 @@ export function StructuresSection({ map }: StructuresSectionProps) {
       : (structuresInView(state.houses).find((one) => one.id === open.id)?.name ??
         state.inspected[`structure:${open.id}`]?.structure?.name ??
         open.id.slice(0, 8)),
+  );
+  const openType = useStore(sessionStore, (state) =>
+    open === null
+      ? null
+      : (structuresInView(state.houses).find((one) => one.id === open.id)?.structureType ??
+        state.inspected[`structure:${open.id}`]?.structure?.structureType ??
+        null),
   );
   const [types, setTypes] = useState<readonly StructureTypeSpec[]>([]);
   const [type, setType] = useState('castle');
@@ -179,6 +188,7 @@ export function StructuresSection({ map }: StructuresSectionProps) {
           rebuild it
         </button>
       </div>
+      <SlotLevers open={open?.id ?? null} name={openName} spec={types.find((one) => one.type === openType)} />
       <p className="debug__quiet">
         {openName === null ? "open a structure's window to take control of it" : `this building: ${openName}`}
       </p>

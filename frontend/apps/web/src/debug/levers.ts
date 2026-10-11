@@ -202,6 +202,42 @@ export function changeLevel(structureId: string, name: string, by: 1 | -1): void
   });
 }
 
+/** Puts someone in a place of a structure's slot, out of whichever slot they were in: *put them in*. */
+export function fillSlotWithPerson(
+  structureId: string,
+  name: string,
+  slot: string,
+  characterId: string,
+  who: string,
+): void {
+  pull('structures', `putting ${who} in the ${slot} of ${name}`, {
+    type: 'fillSlot',
+    structureId,
+    slot,
+    characterId,
+  });
+}
+
+/** Puts a thing in a place of a structure's slot: *put something in*. */
+export function fillSlotWithItem(
+  structureId: string,
+  name: string,
+  slot: string,
+  item: { name: string; about: string; amount?: number },
+): void {
+  pull('structures', `putting ${item.name} in the ${slot} of ${name}`, {
+    type: 'fillSlot',
+    structureId,
+    slot,
+    item,
+  });
+}
+
+/** Takes out of a structure's slot what was put in it last: *empty a place*. */
+export function emptySlot(structureId: string, name: string, slot: string): void {
+  pull('structures', `emptying a place of the ${slot} of ${name}`, { type: 'emptySlot', structureId, slot });
+}
+
 /** Brings a structure down to ruin, by fire: *ruin this building*. */
 export function ruinStructure(structureId: string, name: string): void {
   pull('structures', `ruining ${name}, by fire`, { type: 'ruinStructure', structureId, cause: 'fire' });
