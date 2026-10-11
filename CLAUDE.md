@@ -34,19 +34,14 @@ This is a loop, and Adam holds both ends of it: he approves what lands, and he c
 1. **Agree the step.** State it in one short paragraph, what and why and which files, before touching code.
 2. **Build it small.** One coherent step per commit: a module skeleton, a document, one test with its
    implementation. If it grows past a few hundred lines, it was two steps.
-3. **Verify it.** Run the checks, and for anything visible, look at it in a browser and say what you saw. Report
-   what failed, including the things you had to fix on the way. Adam verifies through the debug panel, not
-   through code, so whatever the step makes the program do must show there; see decision record 0023.
-4. **Hand it over ready to look at, not ready to build.** Regenerate whatever the change made stale and leave
-   the program running, before asking for review. See below: this is not optional and it is never an option
-   on the menu.
-5. **Documents travel with it.** A change to a decision, an event or a term updates its document in the same
+3. **Hand it over: the `hand-over` skill.** Verify it, regenerate whatever it made stale, leave the program
+   running on the change, and present it ending with the verify checklist. Then stop: do not commit. This is
+   not optional and it is never an option on the menu.
+4. **Documents travel with it.** A change to a decision, an event or a term updates its document in the same
    commit: a decision record, the event catalogue, the glossary, the architecture.
-6. **Present it for review and stop.** A summary, the file list, the check output, the documents touched, and a
-   proposed commit message. Do not commit. End it with the **verify checklist**, below.
-7. **Commit on Adam's word, immediately,** then say what landed. One "commit" is the approval; asking for it
+5. **Commit on Adam's word, immediately,** then say what landed. One "commit" is the approval; asking for it
    again is the failure, not the caution.
-8. **Offer the next steps and stop again.** Two to four concrete options, each a sentence or two on what it
+6. **Offer the next steps and stop again.** Two to four concrete options, each a sentence or two on what it
    would produce and what it would cost, with a recommendation and the reason for it. Say plainly what is
    blocked and on what. Always leave room for a fifth answer that is none of them, because the point of the
    options is to give Adam the wheel, not to make him pick from a menu.
@@ -69,6 +64,15 @@ nothing waits on him. See `docs/UI-COMPONENTS.md` and decision record 0068.
 Never choose the next increment alone, and never chain increments together to save a round trip. The roadmap is a
 menu, not a queue: its order is a suggestion, and Adam reorders it freely. When an option is not on the roadmap
 but is clearly better, offer it anyway and say why.
+
+## Skills: the moments of the loop, one file each
+
+A procedure that belongs to one moment of a session is a skill in `.claude/skills/<name>/SKILL.md`, read when
+that moment comes, and Adam can call any of them by typing `/<name>`. What must hold all the time stays in this
+file. When Adam corrects how a moment is done, the correction goes into its skill, in the same step.
+
+- `hand-over` - the end of every step: verify, regenerate, leave the program running, present, checklist last.
+- `nine-slice` - make a border for `world/ui/borders/` out of a frame picture Adam hands over.
 
 ## Adam paints the master. Everything else derived from it is the agent's to regenerate
 
@@ -110,73 +114,6 @@ tiles go through, that same step **also**:
 
 Stale output is worse than missing output, because it looks like evidence. A still painted by the previous rules
 is not a preview of anything.
-
-## Leave the program running, and say where to look
-
-A step is not ready for review until Adam can see it. Reaching the end of the work is not the end of the step: the
-last thing an agent does before presenting is put the running program in the state that shows the change, and say
-in one line where to look and what should be there.
-
-- **Start it with `debug-quick-start.ps1 -NoBrowser`** from the worktree root, then open the address in the browser
-  pane. Not with the `web` entry of `.claude/launch.json`: the desktop app stops a server it started that way once
-  the session goes quiet, so Adam finds nothing at the address the hand-over names. The quick-start's servers are
-  detached and outlive the session, and it replaces a server older than the code it serves, so it is also the
-  restart after a protocol change. From the Bash tool, send its output to a file (`> .logs/quick-start.txt 2>&1`)
-  rather than through a pipe: the servers hold a pipe open and the call never returns.
-- **Drive it to the place the change shows** — the right renderer, the right master, the right part of the world,
-  the right zoom — rather than leaving it on whatever it opened with, and say so: the address and the worktree
-  serving it, and what is on the screen at it.
-- **Copy the debug panel** into the presentation when the change is one the panel reports, because that is the
-  instrument Adam reads; see decision record 0023.
-- **Start it in this tree, not somebody else's.** Every worktree serves on its own port now, so there is
-  no excuse for reviewing a change in a tree that does not contain it. If a port is taken anyway, do not
-  stop the server holding it: it belongs to another session. Say so.
-
-Where a change genuinely cannot be seen in the running program — the offline renderer, a build rule, a document —
-say that plainly and say what stands in for it instead, whether that is a test, a still, or a number.
-
-**The browser pane stops animation frames when it is hidden**, and MapLibre waits on one for its style to
-load and for every `flyTo`. A hidden pane therefore shows a map that never finishes loading and a camera
-that reports itself moving while standing still, neither of which is a bug in the program. A screenshot
-pumps one frame, so a handful of them in a row carries a flight to its end; the DOM, the debug panel and
-the log can be read without any of that.
-
-
-## End every stop with a verify checklist
-
-Whenever the loop comes back to Adam to look at something, **the last thing written is a checklist of at
-most three things to check**, and nothing comes after it. Not the summary, not the commit message, not an
-offer of next steps: those go above it, because the checklist is what he reads first and acts on.
-
-**Three at most, whatever the size of the commit.** It is there to refresh a memory, not to enumerate a
-diff. A checklist with one item a changed file is a checklist nobody reads, and a twenty-line change and a
-two-hundred-line one get the same three items, picked for what would be embarrassing to have got wrong.
-
-**Number the items, 1 to 3, so Adam can answer one by its number.** A question put to him is an item like
-any other, and "2" is only an answer when there is a 2 to point at. Write them as a numbered list - `1.`,
-`2.`, `3.` - with the eye inside the item, never as unnumbered checkboxes.
-
-**Mark with an eye, 👀, every item he can check by looking at the running program**, and say in the item
-where to look - which pane, which button, what should be there. An unmarked item is one he has to take on
-trust, read in a document, or accept from a test. **The marked ones go first**, because looking is cheaper
-than reading and it is the check that actually catches things; where there are three and one of them can
-be seen, that one is the first line.
-
-**A step with nothing to look at says so, and that is an answer rather than a failure.** The offline
-renderer, a build rule, a domain rule with no caller yet: none of them can be seen, and three honest
-unmarked items beat one marked item invented to fill the quota. Say in one line what stands in for it -
-the test, the still, or the number.
-
-**Immediately above it goes where to look**, and only that:
-
-- **The running program**: the address with its port, this tree's own, and beside it the worktree it is served
-  from - its folder under `.claude/worktrees/` and its branch, which need not share a name - and nothing else on
-  the line: `http://localhost:5429 · worktree fog-of-war-mechanic-3c9f45, branch claude/desktop-ui-bay-animations-f32616`.
-  The app does not always show which worktree a session is in, and it can stop the servers it started, so this
-  line is what lets Adam find the tree and start it again himself with `debug-quick-start.ps1` from its root.
-- **Documents**: links to them, when what there is to verify is something to read rather than run.
-
-One or the other, not a paragraph explaining either.
 
 ## Every session works in its own git worktree
 
@@ -407,7 +344,7 @@ layout above are where they will go rather than where they are.
 - Everything: `scripts/check.ps1` or `scripts/check.sh` (0.14)
 
 The dev server is also registered in `.claude/launch.json` under the name `web`, so the preview tooling can start
-it directly while working; a hand-over uses the quick-start instead, as "Leave the program running" says. Restart
+it directly while working; a hand-over uses the quick-start instead, as the `hand-over` skill says. Restart
 it rather than trusting hot reload after a file has been rewritten wholesale: Vite reports a missing export that is
 plainly there. TypeScript is pinned below 7 on purpose; see `docs/adr/0015`.
 
