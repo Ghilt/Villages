@@ -1,12 +1,14 @@
 import { useState } from 'react';
 
 import type { StructureView } from '@villages/protocol';
+import type { Culture } from '@villages/world';
 
 import { describeStructure, givesOf } from '../inspect/describe';
 import { Slots } from '../inspect/InspectWindow';
 import { note } from '../log/log';
 import { focusOn } from '../map/focus';
 import { sessionStore } from '../net/gateway';
+import { cultureOfPlace, useCultureMap } from '../map/culture';
 import { useStructureCatalogue } from '../net/structureCatalogue';
 import { Icon } from '../stage/Icons';
 import { type Room } from '../stage/panes';
@@ -32,6 +34,8 @@ interface HoldingsProps {
 export function Holdings({ room }: HoldingsProps) {
   const holdings = useStore(sessionStore, (state) => state.yourHoldings) ?? [];
   const catalogue = useStructureCatalogue();
+  const cultures = useCultureMap();
+  const cultureOf = (one: StructureView) => cultureOfPlace(cultures, one.place);
   const [open, setOpen] = useState<string | null>(null);
   const shown = holdings.find((one) => one.id === open) ?? null;
   const specOf = (one: StructureView) => catalogue?.types.find((type) => type.type === one.structureType);
@@ -79,12 +83,12 @@ export function Holdings({ room }: HoldingsProps) {
           <List label="your holdings">
             {holdings.map((one) => {
               const spec = specOf(one);
-              const said = describeStructure(one, spec, true);
+              const said = describeStructure(one, spec, true, cultureOf(one));
               const gives = givesOf(one, spec);
               return (
                 <ListRow
                   key={one.id}
-                  lead={<StructureFigure type={one.structureType} />}
+                  lead={<StructureFigure type={one.structureType} culture={cultureOf(one)} />}
                   title={one.name}
                   line={`${said.under ?? ''}, level ${one.level}${gives === undefined ? '' : `; ${gives}`}`}
                   onPress={() => show(one)}
@@ -96,7 +100,12 @@ export function Holdings({ room }: HoldingsProps) {
       )}
 
       {shown !== null && (
-        <Details holding={shown} said={describeStructure(shown, specOf(shown), true)} room={room} />
+        <Details
+          holding={shown}
+          said={describeStructure(shown, specOf(shown), true, cultureOf(shown))}
+          culture={cultureOf(shown)}
+          room={room}
+        />
       )}
     </section>
   );
@@ -106,10 +115,12 @@ export function Holdings({ room }: HoldingsProps) {
 function Details({
   holding,
   said,
+  culture,
   room,
 }: {
   holding: StructureView;
   said: ReturnType<typeof describeStructure>;
+  culture: Culture | null;
   room: Room;
 }) {
   // The camera on it, and on a phone the map in the bay this pane is not in, as a window's map link does. See 0049.
@@ -121,7 +132,7 @@ function Details({
   return (
     <div className="holdings__details">
       <div className="holdings__title">
-        <StructureFigure type={holding.structureType} size={56} />
+        <StructureFigure type={holding.structureType} culture={culture} size={56} />
         <p className="holdings__under">{said.under}</p>
         <button
           type="button"

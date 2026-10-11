@@ -1,9 +1,10 @@
 import type * as maplibregl from 'maplibre-gl';
 import { cultureAt } from '@villages/world';
-import type { CultureFile } from '@villages/world';
+import type { Culture, CultureFile } from '@villages/world';
+import { useEffect, useState } from 'react';
 
 import { note } from '../log/log';
-import { worldRootOf } from './masters';
+import { chosenMaster, worldRootOf } from './masters';
 
 /** A master's culture map as the page reads it: what `culture.json` says, and a byte a square. */
 export interface CultureMap {
@@ -18,6 +19,40 @@ export const CULTURE_WORDS: Readonly<Record<string, string>> = {
   eastAsian: 'East Asian',
   african: 'African',
 };
+
+/** The culture maps being read, a master each, once a page load, by whatever asks first. */
+const reading = new Map<string, Promise<CultureMap | null>>();
+
+/** A master's culture map, read once a page load and shared. */
+export function readCultureMap(master: string): Promise<CultureMap | null> {
+  let read = reading.get(master);
+  if (read === undefined) {
+    read = loadCultureMap(master);
+    reading.set(master, read);
+  }
+  return read;
+}
+
+/** The culture map of the master this page draws, or null until it is read, and for good when there is none. */
+export function useCultureMap(master: string = chosenMaster()): CultureMap | null {
+  const [known, setKnown] = useState<CultureMap | null>(null);
+  useEffect(() => {
+    let live = true;
+    void readCultureMap(master).then((read) => live && setKnown(read));
+    return () => {
+      live = false;
+    };
+  }, [master]);
+  return known;
+}
+
+/** The culture a place is built in, by a culture map, or null at sea, off it, or with no map. */
+export function cultureOfPlace(
+  known: CultureMap | null,
+  place: { lat: number; lon: number },
+): Culture | null {
+  return known === null ? null : cultureAt(known.file, known.cultures, place.lon, place.lat);
+}
 
 /** A master's culture map, read from beside its tiles, or null when `world:culture` has not worked it out. */
 export async function loadCultureMap(master: string): Promise<CultureMap | null> {

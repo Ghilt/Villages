@@ -1,7 +1,8 @@
 import type { CharacterOnMapView, ChoiceView, HouseView, StructureView } from '@villages/protocol';
-import type { StructureCatalogue } from '@villages/world';
+import type { Culture, StructureCatalogue } from '@villages/world';
 
 import type { MapSprite } from './sprites/SpriteRenderer';
+import { pictureKey } from './sprites/cultureStyles';
 import { RUIN_PICTURE } from './sprites/structureShapes';
 import { tinctureColour } from './sprites/tinctures';
 
@@ -49,7 +50,11 @@ const UNTINTED = 0xffffff;
  * level, and its holder's pennant over it, or none for one nobody holds. Its own id space, so a structure and a house
  * can never be one mark. Without the catalogue, before it is read, the renderer stands it at a height of its own.
  */
-export function toStructureSprite(structure: StructureView, catalogue: StructureCatalogue | null): MapSprite {
+export function toStructureSprite(
+  structure: StructureView,
+  catalogue: StructureCatalogue | null,
+  culture: Culture | null = null,
+): MapSprite {
   const heights = catalogue?.types.find((one) => one.type === structure.structureType)?.groundHeight ?? [];
   const groundHeight = heights[Math.min(Math.max(structure.level, 1), heights.length) - 1];
   return {
@@ -57,9 +62,9 @@ export function toStructureSprite(structure: StructureView, catalogue: Structure
     at: { lng: structure.place.lon, lat: structure.place.lat },
     tint: UNTINTED,
     kind: 'structure',
-    // A ruin is drawn as a ruin, as tall as what it was.
+    // A ruin is drawn as a ruin, as tall as what it was; either in the culture of the ground it stands on.
     structure: {
-      picture: structure.ruin === true ? RUIN_PICTURE : structure.structureType,
+      picture: pictureKey(structure.ruin === true ? RUIN_PICTURE : structure.structureType, culture),
       ...(groundHeight === undefined ? {} : { groundHeight }),
     },
     ...(structure.holder === undefined ? {} : { pennant: tinctureColour(structure.holder.banner.field) }),

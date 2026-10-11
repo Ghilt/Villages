@@ -8,6 +8,7 @@ import type { TerrainClass } from '@villages/world';
 import { areasStore } from '../areas/areas';
 import { terrainPalette } from '../geometry/terrainClasses';
 import { inspectSubject, sessionStore } from '../net/gateway';
+import { cultureOfPlace, useCultureMap } from '../map/culture';
 import { useStructureCatalogue } from '../net/structureCatalogue';
 import type { Room } from '../stage/panes';
 import {
@@ -55,12 +56,14 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
   const answers = useStore(sessionStore, (state) => state.inspected);
   const connection = useStore(sessionStore, (state) => state.connection);
   const catalogue = useStructureCatalogue();
+  const cultures = useCultureMap();
   /** A structure as its window says it, by the catalogue's entry for its type and whether it is the player's. */
   const sayStructure = (structure: StructureView): Description =>
     describeStructure(
       structure,
       catalogue?.types.find((one) => one.type === structure.structureType),
       structure.holder !== undefined && structure.holder.id === yourHouse?.house.id,
+      cultureOfPlace(cultures, structure.place),
     );
 
   // An area the player deleted is not a window they shut, so the window goes rather than saying nothing -

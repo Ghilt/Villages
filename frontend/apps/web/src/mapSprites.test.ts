@@ -50,7 +50,7 @@ describe('a structure as the map draws it', () => {
       id: 'structure:a',
       at: { lng: -77.4, lat: -78.4 },
       kind: 'structure',
-      structure: { picture: 'castle', groundHeight: 4.5 },
+      structure: { picture: 'castle@european', groundHeight: 4.5 },
     });
   });
 
@@ -70,8 +70,18 @@ describe('a structure as the map draws it', () => {
   });
 
   it('leaves its height to the renderer before the catalogue is read, or for a type it does not know', () => {
-    expect(toStructureSprite(structure('castle', 1), null).structure).toEqual({ picture: 'castle' });
-    expect(toStructureSprite(structure('lodge', 1), CATALOGUE).structure).toEqual({ picture: 'lodge' });
+    expect(toStructureSprite(structure('castle', 1), null).structure).toEqual({ picture: 'castle@european' });
+    expect(toStructureSprite(structure('lodge', 1), CATALOGUE).structure).toEqual({
+      picture: 'lodge@european',
+    });
+  });
+});
+
+describe('a structure in a culture', () => {
+  it('is drawn in the culture of the ground it stands on', () => {
+    expect(toStructureSprite(structure('castle', 1), null, 'islamic').structure).toEqual({
+      picture: 'castle@islamic',
+    });
   });
 });
 
@@ -79,7 +89,7 @@ describe('a ruin', () => {
   it('is drawn as a ruin, as tall as what it was, and flies no pennant', () => {
     const drawn = toStructureSprite({ ...structure('castle', 2), ruin: true }, CATALOGUE);
 
-    expect(drawn.structure).toEqual({ picture: 'a ruin', groundHeight: 4.5 });
+    expect(drawn.structure).toEqual({ picture: 'a ruin@european', groundHeight: 4.5 });
     expect(drawn).not.toHaveProperty('pennant');
   });
 });

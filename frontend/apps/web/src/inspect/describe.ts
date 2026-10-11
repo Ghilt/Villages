@@ -10,7 +10,7 @@ import type {
   StructureView,
 } from '@villages/protocol';
 import { insideFenceAt } from '@villages/world';
-import type { StructureTypeSpec, TerrainClass } from '@villages/world';
+import type { Culture, StructureTypeSpec, TerrainClass } from '@villages/world';
 
 import type { Area } from '../areas/areas';
 import { portraitUrl } from '../figures/portraits';
@@ -195,8 +195,10 @@ export function describeStructure(
   structure: StructureView,
   spec: StructureTypeSpec | undefined,
   yours: boolean,
+  culture: Culture | null = null,
 ): Description {
-  const word = spec?.words.european ?? spoken(structure.structureType);
+  // The catalogue's word for it in the culture it is built in: a great mosque, a stockade.
+  const word = spec?.words[culture ?? 'european'] ?? spec?.words.european ?? spoken(structure.structureType);
   const { holder, level, place } = structure;
   const links: Link[] = [{ what: 'show it on the map', to: 'map', at: place }];
   if (holder !== undefined) {

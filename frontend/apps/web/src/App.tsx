@@ -33,6 +33,7 @@ import { arrive } from './stage/arrive';
 import { lookThrough } from './looking';
 import { askFor, formNow } from './stage/bays';
 import { CHOICE_PANE } from './choice/pane';
+import { cultureOfPlace, useCultureMap } from './map/culture';
 import { worldRootOf } from './map/masters';
 import { cameraStore } from './map/camera';
 import { placeRelief } from './map/relief';
@@ -117,6 +118,8 @@ export function App({ master, devTools }: AppProps) {
   const standing = useMemo(() => charactersInView(houses), [houses]);
   const raised = useMemo(() => structuresInView(houses), [houses]);
   const catalogue = useStructureCatalogue();
+  // The culture each structure stands in, read off the culture map of the master drawn, so its picture is drawn in it.
+  const cultures = useCultureMap(master);
   // The public half of your own house: what the map draws is the same view everyone else's house is
   // drawn from, and what only you can see hangs off it.
   const yours = yourHouse?.house ?? null;
@@ -133,12 +136,14 @@ export function App({ master, devTools }: AppProps) {
   // Structures first, so that a house or a person standing in front of one is drawn over it.
   const sprites = useMemo(
     () => [
-      ...raised.map((structure) => toStructureSprite(structure, catalogue)),
+      ...raised.map((structure) =>
+        toStructureSprite(structure, catalogue, cultureOfPlace(cultures, structure.place)),
+      ),
       ...housesBesideTheirSeats(drawn, raised).map((house) => toSprite(house, eye && house.id === yours?.id)),
       ...standing.map(toCharacterSprite),
       ...candidatesOf(yourChoice),
     ],
-    [raised, catalogue, drawn, standing, eye, yours, yourChoice],
+    [raised, catalogue, cultures, drawn, standing, eye, yours, yourChoice],
   );
 
   // The one connection to the gateway, opened as the app mounts.

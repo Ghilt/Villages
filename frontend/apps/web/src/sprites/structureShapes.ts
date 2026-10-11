@@ -258,7 +258,7 @@ export function pictureOf(type: string): Picture {
 /** The name the map and the panes ask for a ruin's picture by, which no type is called. */
 export const RUIN_PICTURE = 'a ruin';
 
-/** A structure's picture as it stands: its type's, or the ruin's. */
+/** A structure's picture as it stands: its type's, or the ruin's. `styled` draws it in a culture's look. */
 export function pictureFor(type: string, ruin: boolean): Picture {
   return ruin ? RUIN : pictureOf(type);
 }

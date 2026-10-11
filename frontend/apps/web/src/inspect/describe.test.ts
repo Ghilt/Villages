@@ -119,6 +119,16 @@ describe("a structure's window", () => {
     });
   });
 
+  it('names it in the word of the culture it is built in', () => {
+    const worded = {
+      ...spec,
+      words: { european: 'abbey', islamic: 'zawiya' },
+    } as unknown as StructureTypeSpec;
+
+    expect(describeStructure(abbey, worded, false, 'islamic').under).toBe('a zawiya');
+    expect(describeStructure(abbey, worded, false, null).under).toBe('an abbey');
+  });
+
   it('says it is a ruin, of what, held by nobody', () => {
     const said = describeStructure({ ...abbey, ruin: true }, spec, false);
 

@@ -1,7 +1,8 @@
 import { Graphics } from 'pixi.js';
 import type { Texture } from 'pixi.js';
 
-import { DRAWN_TYPES, INK, RUIN_PICTURE, pictureFor, pictureOf } from './structureShapes';
+import { DRAWN_CULTURES, pictureKey, styled } from './cultureStyles';
+import { DRAWN_TYPES, INK, RUIN_PICTURE, pictureFor } from './structureShapes';
 import type { Picture } from './structureShapes';
 
 /** Rasterises a shape on the canvas it will be drawn on, as `markTextures.ts` does every mark. */
@@ -9,7 +10,8 @@ type Rasterise = (shape: Graphics) => Texture;
 
 /*
  * The placeholder picture of every type of structure, rasterised for the map from the shapes in `structureShapes.ts`:
- * one a type, in its own colours, until the sprites cut from the moodboard come (step 13 of docs/plans/structures.md).
+ * one a type and a culture, in its own colours, until the pictures painted for each come (step 13 of
+ * docs/plans/structures.md).
  */
 
 /** Laid out this many pixels to the box's unit: a hundred-unit box is drawn 160 tall, as the castle is. */
@@ -56,16 +58,29 @@ function draw(picture: Picture, rasterise: Rasterise): StructurePicture {
   return { texture, flag };
 }
 
-/** Every type's picture, by the catalogue's name for it, and the plain house for any other. */
+/**
+ * Every type's picture in every culture, and the ruin's, by `pictureKey`: `mill@islamic`. A type nobody has drawn
+ * is the plain house in its culture; a name with no culture is drawn European.
+ */
 export interface StructurePictures {
-  of(type: string): StructurePicture;
+  of(key: string): StructurePicture;
 }
 
 export function buildStructurePictures(rasterise: Rasterise): StructurePictures {
-  const drawn = new Map(DRAWN_TYPES.map((type) => [type, draw(pictureOf(type), rasterise)]));
-  drawn.set(RUIN_PICTURE, draw(pictureFor('', true), rasterise));
-  const any = draw(pictureOf(''), rasterise);
-  return { of: (type) => drawn.get(type) ?? any };
+  const drawn = new Map<string, StructurePicture>();
+  for (const culture of DRAWN_CULTURES) {
+    for (const type of DRAWN_TYPES) {
+      drawn.set(pictureKey(type, culture), draw(styled(pictureFor(type, false), culture), rasterise));
+    }
+    drawn.set(pictureKey(RUIN_PICTURE, culture), draw(styled(pictureFor('', true), culture), rasterise));
+    drawn.set(pictureKey('', culture), draw(styled(pictureFor('', false), culture), rasterise));
+  }
+  return {
+    of: (key) => {
+      const [picture = '', culture = 'european'] = key.split('@');
+      return drawn.get(`${picture}@${culture}`) ?? drawn.get(`@${culture}`) ?? drawn.get('@european')!;
+    },
+  };
 }
 
 /**

@@ -339,11 +339,14 @@ stage alone, with none of the debug panel in it (decision record 0079).
   raised for the house, taken by it or handed away (`yourHoldings`, private, through no fog), and the log says it
   under `holdings`: `2 holdings: Ravenscar Castle (seat), the Antarctic mill`.
 - A structure on the map: its type's placeholder picture, drawn in code (`sprites/structurePictures.ts`) in its
-  own colours, as tall on the ground as `groundHeight` in the catalogue says at its level, and far out the same
+  own colours and in the look of the culture under it, read off the master's culture map: European as drawn,
+  Islamic in plaster, sandstone and green tile under a dome, East Asian in dark tile under a flared roof, African
+  in mud under a cone of thatch (`sprites/cultureStyles.ts`), a ruin too; as tall on the ground as `groundHeight` in the catalogue says at its level, and far out the same
   picture at the size of a word, crossing over where a house's castle does. One a house holds flies a pennant in
   the house's field; nobody's flies none. A type with no picture is a plain house. It is drawn from the zoom its
   significance says, like a house, and under the fog outside vision. A click on one opens its **inspect window**,
-  marked with a tower: its name, *a mill* or *an abbey* in the catalogue's European word, who holds it with a way
+  marked with a tower: its name, *a mill* or *an abbey* in the catalogue's word for the culture it stands in - a
+  castle on Islamic ground is *a kasbah*, on African *a stockade* - who holds it with a way
   to that house, its level of the type's highest, what it yields whoever holds it a month and how far they see
   from it - *Yields Domain +3 a month*, *Sees 34 km around*, the catalogue's for its type at its level, the same
   numbers the game server pays and gives sight by, and *nothing* for a ruin - where it stands, and *show it on the
