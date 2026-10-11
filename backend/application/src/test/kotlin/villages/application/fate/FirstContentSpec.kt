@@ -41,7 +41,7 @@ class FirstContentSpec : StringSpec({
         Banner(Tincture.SABLE, Division.PLAIN, null, Charge.STAG, Tincture.ARGENT),
         resources = foundingStocks(noon), pledges = emptyList(), since = founded, until = null, version = 1,
     )
-    val bare = Moment(house, Looking.NOTHING, founded)
+    val bare = Moment(house, Looking.NOTHING, founded, noon)
 
     "every action is in Hearth and in at least one pool besides" {
         for (action in ResourceActions.ALL) {

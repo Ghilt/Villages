@@ -19,6 +19,7 @@ import villages.domain.HouseNamedSeat
 import villages.domain.HouseResourceGranted
 import villages.domain.HouseResourcePledged
 import villages.domain.HouseResourceReleased
+import villages.domain.HouseIncomeChanged
 import villages.domain.HouseResourceSpent
 import villages.domain.PlayerCompletedDialogue
 import villages.domain.PlayerCompletedDialogueStep
@@ -59,6 +60,7 @@ object EventTypes : CloudEventTypeMapper<Event> {
         HouseResourceGranted::class to "villages.house.resourceGranted.v1",
         HouseResourcePledged::class to "villages.house.resourcePledged.v1",
         HouseResourceReleased::class to "villages.house.resourceReleased.v1",
+        HouseIncomeChanged::class to "villages.house.incomeChanged.v1",
         HouseResourceSpent::class to "villages.house.resourceSpent.v1",
         PlayerCompletedDialogue::class to "villages.player.completedDialogue.v1",
         PlayerCompletedDialogueStep::class to "villages.player.completedDialogueStep.v1",

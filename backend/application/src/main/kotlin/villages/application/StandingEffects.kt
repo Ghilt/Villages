@@ -3,8 +3,12 @@ package villages.application
 import villages.domain.HouseError
 import villages.domain.HouseGainedVision
 import villages.domain.HouseId
+import villages.domain.HouseIncomeChanged
 import villages.domain.HouseLostVision
+import villages.domain.IncomeSource
+import villages.domain.Incomes
 import villages.domain.Location
+import villages.domain.Resource
 import villages.domain.StructureCatalogue
 import villages.domain.StructureChangedHands
 import villages.domain.StructureLevelChanged
@@ -17,14 +21,19 @@ import villages.domain.VisionId
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * The standing-effects listener: a house sees from exactly the structures it holds, as far as each one's type and
- * level see, and its own history says so. Who holds a structure is the structure's to say and what a house sees is
+ * The standing-effects listener: a house sees from, and is paid by, exactly the structures it holds, as far as each
+ * one's type and level see and as much as they yield, and its own history says so. Who holds a structure is the structure's to say and what a house sees is
  * the house's, and no one decision can write both, so a reaction carries it: a structure raised for a house or
  * handed to one gives that house `gainedVision` from it, at the catalogue's radius of the moment and with `from`
  * naming it, and one handed away takes that vision back with `lostVision`. A structure that changes level changes
  * how far its holder sees from it: the new vision is given before the old is taken, so the fog never closes between
  * them. A retuned catalogue never rewrites what a
- * house saw, because what it saw is what was written. Income joins it in a later step. See docs/plans/structures.md.
+ * house saw, because what it saw is what was written.
+ *
+ * **And it pays.** What a structure yields its holder each month at its level, the catalogue's, is the house's
+ * `incomeChanged` under the structure's own source, per second; a structure handed away, fallen or nobody's pays
+ * nothing, which is the same event with no rates. What was paid is what was written, so retuning the catalogue
+ * changes what is paid from the next change and never what was. See docs/plans/structures.md.
  *
  * **It reconciles rather than replays.** For a house and a structure it plans one thing - set this right - and works
  * out what is right when that runs, from its own fold at that moment: the vision the house should have from the
@@ -41,6 +50,7 @@ class StandingEffects(
     faults: Faults,
     private val catalogue: StructureCatalogue,
     private val visions: VisionService,
+    private val incomes: IncomeService,
 ) : Reaction("the standing-effects listener", feed, later, faults) {
     /** A structure as this listener needs it: what it is, where, who holds it since which of its events, and that event. */
     private class Standing(
@@ -61,12 +71,17 @@ class StandingEffects(
     private val seen = ConcurrentHashMap<Pair<HouseId, StructureId>, Seen>()
     private val seenBy = ConcurrentHashMap<VisionId, Pair<HouseId, StructureId>>()
 
+    /** What each house is paid from each structure, as its own history last said, and which structure a source is. */
+    private val paid = ConcurrentHashMap<Pair<HouseId, StructureId>, Map<Resource, Double>>()
+    private val sources = ConcurrentHashMap<IncomeSource, StructureId>()
+
     @Volatile
     private var live = false
 
     override fun apply(stored: StoredEvent) {
         when (val event = stored.event) {
             is StructureRaised -> {
+                sources[IncomeSource.of(event.structureId)] = event.structureId
                 structures[event.structureId] =
                     Standing(event.structureType, event.level, event.place, event.holder, stored.streamVersion, stored)
                 event.holder?.let { reconcile(it, event.structureId) }
@@ -106,6 +121,10 @@ class StandingEffects(
             }
 
             // Only if it is still the one held: a level's new vision is given before the old one is taken.
+            is HouseIncomeChanged -> sources[event.source]?.let { structure ->
+                if (event.ratesPerSecond.isEmpty()) paid.remove(event.houseId to structure) else paid[event.houseId to structure] = event.ratesPerSecond
+            }
+
             is HouseLostVision -> seenBy.remove(event.visionId)?.let { key ->
                 seen.computeIfPresent(key) { _, held -> held.takeIf { it.id != event.visionId } }
             }
@@ -120,7 +139,7 @@ class StandingEffects(
         for ((structure, standing) in structures) {
             standing.holder?.let { reconcile(it, structure) }
         }
-        for ((house, structure) in seen.keys) {
+        for ((house, structure) in seen.keys + paid.keys) {
             reconcile(house, structure)
         }
     }
@@ -146,6 +165,14 @@ class StandingEffects(
                 has?.let { visions.takeFrom(house, it.id, provenance) }
             }
         }
+        issueLater("setting right what ${structure.stream} pays ${house.stream}") {
+            val standing = structures[structure]
+            val yields = standing?.takeIf { it.holder == house }?.let { catalogue.of(it.type)?.at(it.level)?.yieldsPerMonth }
+            val wanted = Incomes.paying(yields.orEmpty().mapValues { (_, perMonth) -> perMonth / Incomes.SECONDS_A_MONTH })
+            if (wanted != paid[house to structure].orEmpty()) {
+                incomes.pay(house, IncomeSource.of(structure), wanted, Provenance.continuing(story = because))
+            }
+        }
     }
 
     /** Forgets every structure and every vision it knew of, because the world they were in has been emptied. */
@@ -153,5 +180,7 @@ class StandingEffects(
         structures.clear()
         seen.clear()
         seenBy.clear()
+        paid.clear()
+        sources.clear()
     }
 }

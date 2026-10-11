@@ -299,6 +299,12 @@ stage alone, with none of the debug panel in it (decision record 0079).
   given before the old is taken, two lines in the log's `sight`. Past either end of its levels, or for a ruin, it is
   refused (`invalidLevel`, `isARuin`). The log says it under `arrivals`: `the Antarctic mill changed: level 2,
   held by Ravenscar`.
+- What a holding pays: every structure a house holds pays it what the catalogue says its type yields a month at
+  its level - a castle at level 1 three domain - as `villages.house.incomeChanged.v1` on the house, under the
+  structure's own source, a moment after it is raised for the house, taken, levelled or rebuilt; handed away or
+  fallen, the same event with no rates. A world month is a real day (0053), so three a month is one every eight
+  hours, and the house status counts up between. The debug panel's **Resources** section says each rate beside
+  its figure, `+3 a month`, and the log says it under `income` whenever it changes: `paid Domain +3 a month`.
 - Ruining one and raising it again: **ruin it** and **rebuild it**, beside *take control of this building*, on the
   structure whose window was opened last. *Ruin it* writes `villages.structure.ruined.v1`, by fire: a ruin holds
   nobody, its holder's sight from it is taken back, and it is drawn as a ruin - the stump of a tower and a broken

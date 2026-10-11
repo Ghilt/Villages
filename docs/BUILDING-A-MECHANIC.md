@@ -164,9 +164,10 @@ taken belongs in the walk, so the decider and the page cannot come to disagree.
 
 A resource is a `Stock` - `{ total, ratePerSecond, asOf }` (decision 0006): an event when the rate changes,
 never on a clock, and the client interpolates between them. `ARCHITECTURE.md` has the shape and its limits.
-There are five of them, named in `GLOSSARY.md`, and **every rate is zero**: nothing in the world generates
-income yet, so nothing has had to emit a rate change. The first mechanic that gives a house income is the
-first to need that event, and writing it is the whole of the work.
+There are five of them, named in `GLOSSARY.md`. What changes a rate is `incomeChanged`, one source at a time:
+a house's treasury keeps what each source pays and each stock runs at the sum, re-based at every change, so a
+mechanic that pays a house names a source and sets its rates, and never touches a stock. Structures were the
+first (`docs/plans/structures.md`); the standing-effects listener is the one that writes it today.
 
 ### A thing with a lifetime
 

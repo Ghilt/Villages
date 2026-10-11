@@ -35,7 +35,7 @@ class GossipSpec : StringSpec({
     val far = houseAt("Faraway", Location(-33.9, 151.2))
     fun dealing(vararg standing: HouseRow) =
         Gossip({ place, km, _ -> standing.filter { kmBetween(it.seat, place) <= km } }) { UUID.randomUUID() }
-            .action.deal(Moment(ours, Looking.NOTHING, today), emptyList())
+            .action.deal(Moment(ours, Looking.NOTHING, today, Instant.EPOCH), emptyList())
 
     "a servant brings word of the nearest other house, by its name, as a conversation" {
         val dealt = dealing(ours, varga, holm, far)!!

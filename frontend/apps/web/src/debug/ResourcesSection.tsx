@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import type { ResourceName } from '@villages/protocol';
 
-import { RESOURCES_IN_ORDER, RESOURCE_WORDS, saysStock } from '../house/describe';
+import { RESOURCES_IN_ORDER, RESOURCE_WORDS, saysRate, saysStock } from '../house/describe';
 import { sessionStore } from '../net/gateway';
 import { Section } from './Section';
 import { grantResource, pledgeResource, releasePledge, spendResource } from './levers';
@@ -59,6 +59,7 @@ export function ResourcesSection() {
             <li className="debug__stock" key={name}>
               <span className="debug__stock-name">{RESOURCE_WORDS[name]}</span>
               <span className="debug__stock-figure">{saysStock(yours.resources[name], Date.now())}</span>
+              <span className="debug__quiet">{saysRate(yours.resources[name]) ?? ''}</span>
               <button
                 type="button"
                 className="debug__button"

@@ -3,13 +3,16 @@ package villages.application
 import villages.domain.Banner
 import villages.domain.HouseId
 import villages.domain.HouseName
+import villages.domain.IncomeSource
+import villages.domain.Incomes
 import villages.domain.Location
 import villages.domain.PlayerId
-import villages.domain.Significance
 import villages.domain.Pledge
 import villages.domain.Resource
+import villages.domain.Significance
 import villages.domain.Stock
 import villages.domain.WorldTime
+import java.time.Instant
 
 /**
  * A house as the map's read model holds it. Not the domain's `House`: this is shaped for drawing, and it
@@ -34,6 +37,8 @@ data class HouseRow(
     val until: WorldTime?,
     /** The stream version this row reflects, so a snapshot and a later delta can be put in order. */
     val version: Long,
+    /** What each source pays it, whose sum is each stock's rate. */
+    val incomes: Incomes = Incomes(),
 ) {
     /** What this house has of one resource. A founded house has all five, so this never misses. */
     fun stockOf(resource: Resource): Stock = resources.getValue(resource)
@@ -44,6 +49,10 @@ data class HouseRow(
     /** The row with one of its stocks changed. */
     fun withStock(resource: Resource, change: (Stock) -> Stock): HouseRow =
         copy(resources = resources + (resource to change(stockOf(resource))))
+
+    /** The row with one source paying [rates] from [at]: every stock it touches brought up to then and set running. */
+    fun paid(source: IncomeSource, rates: Map<Resource, Double>, at: Instant): HouseRow =
+        incomes.with(source, rates).let { after -> copy(incomes = after, resources = after.rebased(resources, at)) }
 
     fun existsAt(at: WorldTime): Boolean = at >= since && (until == null || at < until)
 }

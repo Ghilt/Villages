@@ -140,6 +140,20 @@ data class HouseResourceReleased(
 ) : ResourceEvent, WorldEvent
 
 /**
+ * What one source pays the house changed: from now it pays these rates, by resource per second, and none for a
+ * resource left out; empty when it stopped paying. Each stock it touches is brought up to now and runs on at the sum
+ * of its sources. What the source is - a structure held, today - is the source's name; why it changed is the story
+ * around it. See docs/plans/structures.md.
+ */
+data class HouseIncomeChanged(
+    override val houseId: HouseId,
+    val source: IncomeSource,
+    val ratesPerSecond: Map<Resource, Double>,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : ResourceEvent, WorldEvent
+
+/**
  * A player was given a choice to make. The whole choice is here, options and effects and all, so the
  * stream says what was offered and not only what was taken: the roads not taken are history too.
  *

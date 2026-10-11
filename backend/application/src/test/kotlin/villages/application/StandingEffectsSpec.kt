@@ -12,12 +12,15 @@ import villages.domain.FoundHouse
 import villages.domain.HandOver
 import villages.domain.HouseGainedVision
 import villages.domain.HouseId
+import villages.domain.HouseIncomeChanged
 import villages.domain.HouseLostVision
 import villages.domain.HouseName
 import villages.domain.LevelSpec
 import villages.domain.Location
 import villages.domain.PlayerId
+import villages.domain.IncomeSource
 import villages.domain.RaiseStructure
+import villages.domain.Resource
 import villages.domain.Ruin
 import villages.domain.Significance
 import villages.domain.StructureCatalogue
@@ -36,7 +39,15 @@ class StandingEffectsSpec : StringSpec({
     val today = WorldTime(653_705)
     val mill = StructureType("mill")
     val catalogue = StructureCatalogue(
-        mapOf(mill to StructureSpec(listOf(LevelSpec(Significance(8.0), 6.0, emptyMap()), LevelSpec(Significance(10.0), 8.0, emptyMap())), emptyList())),
+        mapOf(
+            mill to StructureSpec(
+                listOf(
+                    LevelSpec(Significance(8.0), 6.0, mapOf(Resource.WEALTH to 86_400.0)),
+                    LevelSpec(Significance(10.0), 8.0, mapOf(Resource.WEALTH to 172_800.0)),
+                ),
+                emptyList(),
+            ),
+        ),
     )
     val ada = PlayerId(UUID.fromString("0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8d"))
     val bea = PlayerId(UUID.fromString("0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8e"))
@@ -69,9 +80,14 @@ class StandingEffectsSpec : StringSpec({
     }
 
     fun Rig.listening(): StandingEffects =
-        StandingEffects(world, later, faults, catalogue, VisionService(world, { noon }, { today }, { UUID.randomUUID() })).started()
+        StandingEffects(
+            world, later, faults, catalogue,
+            VisionService(world, { noon }, { today }, { UUID.randomUUID() }),
+            IncomeService(world, { noon }, { today }),
+        ).started()
 
     fun Rig.gained(player: PlayerId) = world.stored.map { it.event }.filterIsInstance<HouseGainedVision>().filter { it.houseId == HouseId.of(player) }
+    fun Rig.paid(player: PlayerId) = world.stored.map { it.event }.filterIsInstance<HouseIncomeChanged>().filter { it.houseId == HouseId.of(player) }
     fun Rig.lost(player: PlayerId) = world.stored.map { it.event }.filterIsInstance<HouseLostVision>().filter { it.houseId == HouseId.of(player) }
 
     "a structure handed to a house lets it see from it, as far as its type and level see, and says from where" {
@@ -174,5 +190,54 @@ class StandingEffectsSpec : StringSpec({
         rig.later.tick()
 
         rig.lost(ada).single().visionId shouldBe rig.gained(ada).single().visionId
+    }
+
+    "a structure raised for a house pays it what its type yields a month at its level, per second, under its own source" {
+        val rig = rig()
+        rig.listening()
+
+        raise(rig.world, holder = ada)
+        rig.later.tick()
+
+        rig.paid(ada).single().let { listOf(it.source, it.ratesPerSecond) } shouldBe
+            listOf(IncomeSource.of(theMill), mapOf(Resource.WEALTH to 1.0))
+        rig.faults.reported.shouldBeEmpty()
+    }
+
+    "handed on, it stops paying the old holder and pays the new; a level up pays more; a ruin pays nobody" {
+        val rig = rig()
+        rig.listening()
+        raise(rig.world, holder = ada)
+        rig.later.tick()
+
+        handOver(rig.world, bea)
+        rig.later.tick()
+        rig.paid(ada).last().ratesPerSecond shouldBe emptyMap()
+        rig.paid(bea).single().ratesPerSecond shouldBe mapOf(Resource.WEALTH to 1.0)
+
+        rig.world.execute(ChangeLevel(theMill, 1, today, noon), Provenance.startedBy(UUID.randomUUID()))
+        rig.later.tick()
+        rig.paid(bea).last().ratesPerSecond shouldBe mapOf(Resource.WEALTH to 2.0)
+
+        rig.world.execute(Ruin(theMill, "fire", today, noon), Provenance.startedBy(UUID.randomUUID()))
+        rig.later.tick()
+        rig.paid(bea).last().ratesPerSecond shouldBe emptyMap()
+        rig.faults.reported.shouldBeEmpty()
+    }
+
+    "a structure nobody holds pays nobody, and paying again what is paid writes nothing" {
+        val rig = rig()
+        rig.listening()
+        raise(rig.world, holder = null)
+        rig.later.tick()
+        rig.world.stored.map { it.event }.filterIsInstance<HouseIncomeChanged>().shouldBeEmpty()
+
+        handOver(rig.world, ada)
+        rig.later.tick()
+        val written = rig.world.stored.size
+        rig.listening()
+        rig.later.tick()
+        rig.world.stored.size shouldBe written
+        rig.paid(ada).size shouldBe 1
     }
 })

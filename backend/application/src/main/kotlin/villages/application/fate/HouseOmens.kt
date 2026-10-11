@@ -16,7 +16,7 @@ class HouseOmens : OmenSource {
         regionOf(moment.house.seat).let { Omen(OmenKeys.holdings(it), OmenKind.HOUSE, "Holdings in $it") },
         Omen(OmenKeys.WEAK, OmenKind.HOUSE, "Weak house")
             .takeIf { moment.today.day - moment.house.since.day < WEAK_FOR_DAYS },
-        moment.house.stockOf(Resource.PIETY).total.let { piety ->
+        moment.house.stockOf(Resource.PIETY).at(moment.now).let { piety ->
             Omen(OmenKeys.PIOUS, OmenKind.HOUSE, "Pious", piety).takeIf { piety >= PIOUS_AT }
         },
     )

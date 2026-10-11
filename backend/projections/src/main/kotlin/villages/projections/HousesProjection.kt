@@ -18,6 +18,7 @@ import villages.domain.HouseResourceSpent
 import villages.domain.HouseResourceReleased
 import villages.domain.HouseResourcePledged
 import villages.domain.HouseResourceGranted
+import villages.domain.HouseIncomeChanged
 import villages.domain.HouseId
 import villages.domain.PlayerId
 import villages.domain.Location
@@ -84,6 +85,11 @@ class HousesProjection(feed: EventFeed) : Follower(feed), HousesByCell, HousesBy
 
             is HouseResourceSpent -> changed(event.houseId, stored) {
                 it.withStock(event.resource) { stock -> stock.minus(event.amount, event.recordedAt) }
+            } ?: return
+
+            // A source paying something else: every stock it touches is brought up to then and set running anew.
+            is HouseIncomeChanged -> changed(event.houseId, stored) {
+                it.paid(event.source, event.ratesPerSecond, event.recordedAt)
             } ?: return
 
             is HouseResourcePledged -> changed(event.houseId, stored) {

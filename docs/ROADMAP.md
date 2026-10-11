@@ -177,10 +177,5 @@ Wanted, not started, and each needs a hypothesis in `docs/experiments/` before a
 
 Not commitments. Nobody is waiting on any of these.
 
-- **A ticking resource.** Some resource shown as a ticking income, which is what the rate shape in decision
-  0006 exists for. The shape is on the wire and the browser knows how to count with it; every rate is zero
-  because nothing generates income. The first mechanic that gives a house an income turns this on, and it
-  is a number changing rather than a frame changing. Structures are that mechanic, at step ten of
-  `docs/plans/structures.md`.
 - **The banner drawn** from its own tinctures and charges instead of a plain shield. A luxury feature: it
   would look good and no part of the game is waiting for it.

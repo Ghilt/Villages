@@ -7,6 +7,7 @@ import villages.domain.HouseId
 import villages.domain.Location
 import villages.domain.Omen
 import villages.domain.WorldTime
+import java.time.Instant
 
 /**
  * What the page says it is looking at when the player presses Take action, and nothing it could work out for
@@ -31,11 +32,15 @@ data class Looking(
     }
 }
 
-/** The moment a roll is made at: whose house, as the map's read model holds it, what the page is looking at, and the day. */
+/**
+ * The moment a roll is made at: whose house, as the map's read model holds it, what the page is looking at, the day,
+ * and the instant, which a stock running at a rate is read at.
+ */
 data class Moment(
     val house: HouseRow,
     val looking: Looking,
     val today: WorldTime,
+    val now: Instant,
 )
 
 /**

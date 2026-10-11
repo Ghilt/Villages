@@ -60,6 +60,27 @@ export function saysStock(stock: Stock, now: number): string {
   return `${(total - stock.pledged).toLocaleString()}/${total.toLocaleString()}`;
 }
 
+/** How many real seconds a world month lasts: a real day is a world month (decision record 0053). */
+const SECONDS_A_MONTH = 86_400;
+
+/** How fast a stock moves, a world month at a time, or nothing when it stands still: `+3 a month`. */
+export function saysRate(stock: Stock): string | undefined {
+  if (stock.ratePerSecond === 0) {
+    return undefined;
+  }
+  const perMonth = stock.ratePerSecond * SECONDS_A_MONTH;
+  return `${perMonth > 0 ? '+' : '-'}${Math.abs(perMonth).toLocaleString(undefined, { maximumFractionDigits: 1 })} a month`;
+}
+
+/** What a house is paid, in every resource it is paid in: `paid Domain +3 a month`; or that it is paid nothing. */
+export function saysIncome(resources: Record<ResourceName, Stock>): string {
+  const paid = RESOURCES_IN_ORDER.flatMap((name) => {
+    const rate = saysRate(resources[name]);
+    return rate === undefined ? [] : [`${RESOURCE_WORDS[name]} ${rate}`];
+  });
+  return paid.length === 0 ? 'paid nothing' : `paid ${paid.join(', ')}`;
+}
+
 /** Where the seat is, to the three decimals that put it inside a master pixel. */
 export function whereabouts(house: HouseView): string {
   const northing = `${Math.abs(house.seat.lat).toFixed(3)}° ${house.seat.lat >= 0 ? 'N' : 'S'}`;

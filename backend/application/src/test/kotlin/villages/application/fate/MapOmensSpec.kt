@@ -65,7 +65,7 @@ class MapOmensSpec : StringSpec({
     }
     fun omensOf(centre: Location, zoom: Double, seenKm: Double = 2000.0, named: PlaceNames? = null) =
         MapOmens({ map }, sightOf(seenKm), houses = { _, _, _ -> listOf(ours, neighbour) }, names = { named })
-            .read(Moment(ours, Looking(centre = centre, zoom = zoom, master = "terrain"), today))
+            .read(Moment(ours, Looking(centre = centre, zoom = zoom, master = "terrain"), today, Instant.EPOCH))
     fun omens(centre: Location, zoom: Double, seenKm: Double = 2000.0) = omensOf(centre, zoom, seenKm).map { it.words }
 
     // The names: a river down the painted one's column, a town of 1790 beside the seat and one far off in the
@@ -121,7 +121,7 @@ class MapOmensSpec : StringSpec({
 
     "a page with no master, or no view, reads nothing of the map" {
         MapOmens({ null }, sightOf(2000.0), houses = { _, _, _ -> emptyList() })
-            .read(Moment(ours, Looking(centre = seat, zoom = 6.0, master = "none"), today)) shouldBe emptyList()
+            .read(Moment(ours, Looking(centre = seat, zoom = 6.0, master = "none"), today, Instant.EPOCH)) shouldBe emptyList()
     }
 
     "a river the names know is the omen by its name, under a river's own key, so it opens what a river opens" {

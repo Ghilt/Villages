@@ -5,6 +5,7 @@ import type { ServerFrame } from '@villages/protocol';
 import { whatChangedIn } from './dialogues/describe';
 import { fullName, whatChanged } from './figures/describe';
 import { describeSight } from './fog/describe';
+import { saysIncome } from './house/describe';
 import { note, shortId } from './log/log';
 import {
   NOTHING_ARRIVED,
@@ -136,9 +137,16 @@ export const sessionLog: GatewayListener = {
       case 'pong':
         note('gateway', `pong, round trip ${Date.now() - frame.t0} ms`);
         return;
-      case 'yourHouse':
+      case 'yourHouse': {
         note('house', frame.yours === null ? 'no house yet' : `your house is ${frame.yours.house.name}`);
+        // What it is paid, when that changes: a holding gained, lost, levelled or fallen. Nothing paid is nothing new.
+        const before = was.yourHouse === null ? 'paid nothing' : saysIncome(was.yourHouse.resources);
+        const income = frame.yours === null ? before : saysIncome(frame.yours.resources);
+        if (income !== before) {
+          note('income', income);
+        }
         return;
+      }
       case 'yourChoice':
         note(
           'choice',

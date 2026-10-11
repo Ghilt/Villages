@@ -77,8 +77,9 @@ data class Stock(val total: Long, val ratePerSecond: Double, val asOf: Instant) 
 /**
  * One stock of each resource, empty and standing still: what a house is founded with, but for its wealth.
  *
- * Every rate is zero because nothing in the world generates income yet. The rate is carried all the same
- * so that when something does, it is a number changing rather than a shape changing. See decision 0006.
+ * Every rate is zero at founding: what pays a house is what it holds, and its castle starts paying a moment
+ * later, by `incomeChanged`. The rate was carried from the start so that income would be a number changing
+ * rather than a shape changing. See decision 0006.
  */
 fun emptyStocks(asOf: Instant): Map<Resource, Stock> =
     Resource.entries.associateWith { Stock(total = 0, ratePerSecond = 0.0, asOf = asOf) }

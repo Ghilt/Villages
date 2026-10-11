@@ -9,6 +9,8 @@ import villages.domain.ChoiceEvent
 import villages.domain.DialogueEvent
 import villages.domain.HouseFounded
 import villages.domain.HouseId
+import villages.domain.HouseIncomeChanged
+import villages.domain.Incomes
 import villages.domain.HouseResourceGranted
 import villages.domain.HouseResourceSpent
 import villages.domain.KeyFigureEvent
@@ -18,6 +20,8 @@ import villages.domain.Resource
 import villages.domain.ResourceEvent
 import villages.domain.VisionEvent
 import villages.domain.StructureEvent
+import villages.domain.Stock
+import villages.domain.everyStock
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -29,16 +33,31 @@ import java.util.concurrent.ConcurrentHashMap
  * Disposable, like every read model: delete it, replay the feed, get it back.
  */
 class LastRollsProjection(feed: EventFeed) : Follower(feed), StandingAtLastRoll {
-    private val now = ConcurrentHashMap<HouseId, Map<Resource, Long>>()
+    /** A house's stocks as its own events leave them, running at what its sources pay. */
+    private data class Held(val stocks: Map<Resource, Stock>, val incomes: Incomes = Incomes())
+
+    private val now = ConcurrentHashMap<HouseId, Held>()
     private val atLastRoll = ConcurrentHashMap<HouseId, Map<Resource, Long>>()
 
     /** Folds one stored event. Exhaustive over the event types, so a new one has to be placed. */
     override fun apply(stored: StoredEvent) {
         when (val event = stored.event) {
-            is HouseFounded -> now[event.houseId] = event.resources.mapValues { (_, stock) -> stock.total }
-            is HouseResourceGranted -> moved(event.houseId, event.resource, event.amount)
-            is HouseResourceSpent -> moved(event.houseId, event.resource, -event.amount)
-            is PlayerRolled -> now[event.houseId]?.let { atLastRoll[event.houseId] = it }
+            is HouseFounded -> now[event.houseId] = Held(everyStock(event.resources, event.recordedAt))
+            is HouseResourceGranted -> moved(event.houseId) { held ->
+                held.copy(stocks = held.stocks + (event.resource to held.stocks.getValue(event.resource).plus(event.amount, event.recordedAt)))
+            }
+            is HouseResourceSpent -> moved(event.houseId) { held ->
+                held.copy(stocks = held.stocks + (event.resource to held.stocks.getValue(event.resource).minus(event.amount, event.recordedAt)))
+            }
+            // What came in at a rate is a rise as much as what was granted, so a stock runs on here as it does on the house.
+            is HouseIncomeChanged -> moved(event.houseId) { held ->
+                held.incomes.with(event.source, event.ratesPerSecond).let { after ->
+                    Held(after.rebased(held.stocks, event.recordedAt), after)
+                }
+            }
+            is PlayerRolled -> now[event.houseId]?.let { held ->
+                atLastRoll[event.houseId] = held.stocks.mapValues { (_, stock) -> stock.at(event.recordedAt) }
+            }
 
             // A pledge ties a resource up without changing how much there is, which is what a rise is of.
             is ResourceEvent -> return
@@ -48,8 +67,8 @@ class LastRollsProjection(feed: EventFeed) : Follower(feed), StandingAtLastRoll 
         }
     }
 
-    private fun moved(house: HouseId, resource: Resource, by: Long) {
-        now.computeIfPresent(house) { _, totals -> totals + (resource to (totals[resource] ?: 0) + by) }
+    private fun moved(house: HouseId, change: (Held) -> Held) {
+        now.computeIfPresent(house) { _, held -> change(held) }
     }
 
     override fun of(house: HouseId): Map<Resource, Long>? = atLastRoll[house]

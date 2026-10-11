@@ -18,7 +18,9 @@ import villages.domain.Resource
 import villages.domain.PledgeId
 import villages.domain.HouseResourceReleased
 import villages.domain.HouseResourcePledged
+import villages.domain.HouseIncomeChanged
 import villages.domain.HouseResourceGranted
+import villages.domain.IncomeSource
 import villages.domain.HouseEvent
 import villages.domain.HouseId
 import villages.domain.HouseName
@@ -278,6 +280,23 @@ class HousesProjectionSpec : StringSpec({
         val row = houses.ofPlayer(ravenscar.player)!!
         row.stockOf(Resource.WEALTH).at(noon) shouldBe 120
         row.version shouldBe 2
+    }
+
+    "what a source pays reaches the row as a rate, the stock brought up to then, and its stopping stops it" {
+        val feed = HandFed()
+        val houses = HousesProjection(feed).started()
+        val ravenscar = founded("Ravenscar", 59.33, 18.07)
+        val mill = IncomeSource("structure:5d000000-0000-4000-8000-000000000001")
+        feed.deliver(ravenscar)
+        val founding = houses.ofPlayer(ravenscar.player)!!.stockOf(Resource.WEALTH).at(noon)
+
+        feed.deliver(HouseIncomeChanged(ravenscar.houseId, mill, mapOf(Resource.WEALTH to 0.5), someDay, noon), version = 2)
+        houses.ofPlayer(ravenscar.player)!!.stockOf(Resource.WEALTH).let { listOf(it.ratePerSecond, it.at(noon.plusSeconds(60))) } shouldBe
+            listOf(0.5, founding + 30)
+
+        feed.deliver(HouseIncomeChanged(ravenscar.houseId, mill, emptyMap(), someDay, noon.plusSeconds(60)), version = 3)
+        houses.ofPlayer(ravenscar.player)!!.stockOf(Resource.WEALTH).let { listOf(it.ratePerSecond, it.at(noon.plusSeconds(600))) } shouldBe
+            listOf(0.0, founding + 30)
     }
 
     "a pledge reaches the row as a pledge, and releasing it takes it off again" {

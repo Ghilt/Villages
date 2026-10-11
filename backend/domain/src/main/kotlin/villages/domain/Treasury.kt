@@ -11,6 +11,8 @@ data class Treasury(
     val resources: Map<Resource, Stock>,
     /** What is spoken for, and the only record of it. See `Pledge`. */
     val pledges: List<Pledge> = emptyList(),
+    /** What each source pays, whose sum is each stock's rate. */
+    val incomes: Incomes = Incomes(),
 ) {
     /** What this house has of one resource. A founded house has all five, so this never misses. */
     fun stockOf(resource: Resource): Stock = resources.getValue(resource)
@@ -97,6 +99,19 @@ data class Treasury(
             )
         }
 
+        // The same rates again change nothing and write nothing: a reconciliation heard twice is harmless.
+        is SetIncome -> {
+            if (command.ratesPerSecond.values.any { !it.isFinite() }) {
+                throw HouseError.InvalidAmount("a rate is a number, and ${command.ratesPerSecond} are not all numbers")
+            }
+            val rates = Incomes.paying(command.ratesPerSecond)
+            if (rates == incomes.of(command.source)) {
+                emptyList()
+            } else {
+                listOf(HouseIncomeChanged(command.houseId, command.source, rates, command.worldTime, command.recordedAt))
+            }
+        }
+
         is ReleasePledge -> {
             if (pledges.none { it.id == command.pledgeId }) {
                 throw HouseError.NoSuchPledge
@@ -127,6 +142,9 @@ data class Treasury(
         // Nothing is added back, because nothing was taken away: what is pledged is the sum of this list,
         // so dropping the pledge is the whole of the release.
         is HouseResourceReleased -> copy(pledges = pledges.filterNot { it.id == event.pledgeId })
+        is HouseIncomeChanged -> incomes.with(event.source, event.ratesPerSecond).let { after ->
+            copy(resources = after.rebased(resources, event.recordedAt), incomes = after)
+        }
     }
 
     /** The treasury with one of its stocks changed. */

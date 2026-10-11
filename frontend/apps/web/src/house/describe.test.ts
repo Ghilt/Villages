@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { Stock } from '@villages/protocol';
 
-import { RESOURCES_IN_ORDER, RESOURCE_WORDS, saysStock } from './describe';
+import { RESOURCES_IN_ORDER, RESOURCE_WORDS, saysIncome, saysRate, saysStock } from './describe';
 
 const noon = 1_788_609_600_000;
 
@@ -42,5 +42,27 @@ describe('what a resource reads as', () => {
 
   it('counts the rate in, so a growing stock says what it stands at now', () => {
     expect(saysStock(stock({ total: 100, ratePerSecond: 2 }), noon + 30_000)).toBe('160');
+  });
+});
+
+describe('what a house is paid', () => {
+  it('says a rate a world month at a time, which is a real day, and nothing for a stock standing still', () => {
+    expect(saysRate(stock({ ratePerSecond: 3 / 86_400 }))).toBe('+3 a month');
+    expect(saysRate(stock({ ratePerSecond: -0.5 / 86_400 }))).toBe('-0.5 a month');
+    expect(saysRate(stock())).toBeUndefined();
+  });
+
+  it('says every resource it is paid in, in the order they are shown, or that it is paid nothing', () => {
+    const still = stock();
+    const resources = {
+      wealth: stock({ ratePerSecond: 6 / 86_400 }),
+      naturalDomain: stock({ ratePerSecond: 3 / 86_400 }),
+      influence: still,
+      reason: still,
+      piety: still,
+    };
+
+    expect(saysIncome(resources)).toBe('paid Wealth +6 a month, Domain +3 a month');
+    expect(saysIncome({ ...resources, wealth: still, naturalDomain: still })).toBe('paid nothing');
   });
 });

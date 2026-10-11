@@ -101,6 +101,19 @@ data class ReleasePledge(
     val recordedAt: Instant,
 ) : ResourceCommand
 
+/**
+ * What one source pays the house from now, by resource per second; nothing, or only zeros, to stop it paying. Sent
+ * by the standing-effects listener for a structure the house holds. The same rates again write nothing, so a
+ * reconciliation run twice is harmless. See docs/plans/structures.md.
+ */
+data class SetIncome(
+    override val houseId: HouseId,
+    val source: IncomeSource,
+    val ratesPerSecond: Map<Resource, Double>,
+    val worldTime: WorldTime,
+    val recordedAt: Instant,
+) : ResourceCommand
+
 /** Found a house: give it a name, a seat on the map and a banner, on this world-day, recorded now. */
 data class FoundHouse(
     override val houseId: HouseId,

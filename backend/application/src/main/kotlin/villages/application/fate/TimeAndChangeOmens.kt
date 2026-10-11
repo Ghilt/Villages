@@ -38,7 +38,7 @@ class SeasonOmens(private val months: WorldMonths) : OmenSource {
 
 /**
  * What a house had of each resource when it last rolled, or null before its first roll: what *Piety risen* is
- * measured against. Folded from the feed by the projection that keeps it; nothing about it is stored on the roll.
+ * measured against, income run on to that instant included. Folded from the feed by the projection that keeps it; nothing about it is stored on the roll.
  */
 fun interface StandingAtLastRoll {
     fun of(house: HouseId): Map<Resource, Long>?
@@ -49,7 +49,7 @@ class ChangeOmens(private val lastRolls: StandingAtLastRoll) : OmenSource {
     override fun read(moment: Moment): List<Omen> {
         val then = lastRolls.of(moment.house.id) ?: return emptyList()
         return Resource.entries.mapNotNull { resource ->
-            val risen = moment.house.stockOf(resource).total - (then[resource] ?: 0)
+            val risen = moment.house.stockOf(resource).at(moment.now) - (then[resource] ?: 0)
             Omen(OmenKeys.rose(resource), OmenKind.CHANGE, "${WORDS.getValue(resource)} risen", risen).takeIf { risen > 0 }
         }
     }
@@ -73,7 +73,7 @@ class ChangeOmens(private val lastRolls: StandingAtLastRoll) : OmenSource {
  */
 class MissingWealthOmens(private val dialogues: DialoguesByHouse) : OmenSource {
     override fun read(moment: Moment): List<Omen> {
-        val free = moment.house.stockOf(Resource.WEALTH).total - moment.house.pledgedOf(Resource.WEALTH)
+        val free = moment.house.stockOf(Resource.WEALTH).at(moment.now) - moment.house.pledgedOf(Resource.WEALTH)
         val short = dialogues.of(moment.house.id)
             .filter { it.ending == DialogueEnding.Open }
             .flatMap { row -> row.dialogue.walk(row.taken).options }

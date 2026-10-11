@@ -29,6 +29,8 @@ import villages.domain.Resource
 import villages.domain.PledgeId
 import villages.domain.HouseResourceSpent
 import villages.domain.HouseResourceReleased
+import villages.domain.HouseIncomeChanged
+import villages.domain.IncomeSource
 import villages.domain.HouseResourcePledged
 import villages.domain.HouseResourceGranted
 import villages.domain.PlayerGivenChoice
@@ -209,6 +211,15 @@ internal object EventSamples {
         recordedAt = noon,
     )
 
+    /** The Antarctic castle paying the house domain, a little over three a world month. */
+    val paidByTheCastle = HouseIncomeChanged(
+        houseId = house,
+        source = IncomeSource("structure:95ba5c28-4a79-3fa6-88aa-0ff1f5a0a559"),
+        ratesPerSecond = mapOf(Resource.NATURAL_DOMAIN to 0.00004),
+        worldTime = WorldTime(653_706),
+        recordedAt = noon,
+    )
+
     val agnes = CharacterId(UUID.fromString("cb732500-39bd-3b39-a838-bb89f719578f"))
     val agnesAppeared = CharacterAppeared(
         characterId = agnes,
@@ -340,6 +351,7 @@ internal object EventSamples {
         "villages.house.founded.v1" to ravenscar,
         "villages.house.gainedKeyFigure.v1" to tookAgnesIn,
         "villages.house.gainedVision.v1" to sawGotland,
+        "villages.house.incomeChanged.v1" to paidByTheCastle,
         "villages.house.lostKeyFigure.v1" to lostAgnes,
         "villages.house.lostVision.v1" to lostGotland,
         "villages.house.lostSeat.v1" to seatLost,

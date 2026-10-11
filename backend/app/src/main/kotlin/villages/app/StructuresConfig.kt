@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import villages.application.Antarctica
 import villages.application.Faults
+import villages.application.IncomeService
 import villages.application.ScheduledLater
 import villages.application.Seats
 import villages.application.StandingEffects
@@ -51,7 +52,7 @@ class StructuresConfig {
     fun seats(world: EventWorld, later: ScheduledLater, faults: Faults, structures: StructureCommandExecutor, clock: Clock): Seats =
         Seats(world.feed, later, faults, structures, world.executor, { clock.instant() })
 
-    /** What each structure gives its holder, written into the holder's history: for now what it lets them see. */
+    /** What each structure gives its holder, written into the holder's history: what it lets them see, and what it pays. */
     @Bean(initMethod = "start", destroyMethod = "close")
     fun standingEffects(
         world: EventWorld,
@@ -59,7 +60,10 @@ class StructuresConfig {
         faults: Faults,
         catalogue: StructureCatalogue,
         visions: VisionService,
-    ): StandingEffects = StandingEffects(world.feed, later, faults, catalogue, visions)
+        clock: Clock,
+        worldClock: WorldClock,
+    ): StandingEffects =
+        StandingEffects(world.feed, later, faults, catalogue, visions, IncomeService(world.executor, { clock.instant() }, worldClock))
 
     @Bean
     fun antarctica(structures: StructureCommandExecutor, catalogue: StructureCatalogue, clock: Clock, worldClock: WorldClock): Antarctica =

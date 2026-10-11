@@ -23,6 +23,7 @@ import villages.domain.HouseLostVision
 import villages.domain.HouseResourceGranted
 import villages.domain.HouseResourcePledged
 import villages.domain.HouseResourceReleased
+import villages.domain.HouseIncomeChanged
 import villages.domain.HouseResourceSpent
 import villages.domain.PlayerCompletedDialogue
 import villages.domain.PlayerCompletedDialogueStep
@@ -49,6 +50,7 @@ internal fun typeOf(event: HouseEvent): String = when (event) {
     is HouseResourceGranted -> "villages.house.resourceGranted.v1"
     is HouseResourcePledged -> "villages.house.resourcePledged.v1"
     is HouseResourceReleased -> "villages.house.resourceReleased.v1"
+    is HouseIncomeChanged -> "villages.house.incomeChanged.v1"
     is HouseResourceSpent -> "villages.house.resourceSpent.v1"
     is PlayerGivenChoice -> "villages.player.givenChoice.v1"
     is PlayerOfferedDialogue -> "villages.player.offeredDialogue.v1"
@@ -71,6 +73,7 @@ internal fun dataOf(event: HouseEvent): String = when (event) {
     is HouseResourceGranted -> """{"resource":"${event.resource}","amount":${event.amount}}"""
     is HouseResourcePledged -> """{"resource":"${event.resource}","amount":${event.amount}}"""
     is HouseResourceReleased -> """{"pledgeId":"${event.pledgeId.value}"}"""
+    is HouseIncomeChanged -> """{"source":"${event.source}"}"""
     is HouseResourceSpent -> """{"resource":"${event.resource}","amount":${event.amount}}"""
     is PlayerGivenChoice -> """{"prompt":"${event.choice.prompt}","options":${event.choice.options.size}}"""
     is PlayerOfferedDialogue -> """{"title":"${event.dialogue.title}","lines":${event.dialogue.lines.size}}"""

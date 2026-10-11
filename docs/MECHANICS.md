@@ -882,14 +882,14 @@ raises one where the map looks. The page is sent them through the fog, each in t
 draws them: a placeholder picture a type, drawn in code and the same in every culture, larger a level up, and the
 pennant of the house holding it. A click opens its window: its name, its type, who holds it, its level and where it
 stands. The debug panel's *take control of this building* hands the one whose window is open to the player's house,
-which then flies their pennant and sees round it, as far as its type and level see; it pays nothing yet. Founding a
+which then flies their pennant and sees round it, as far as its type and level see, and is paid what it yields. Founding a
 house raises its castle and names it the seat, and the castle's window says so. The **Holdings** tab lists what the
 house holds, the seat first, and a holding pressed shows its details there. A structure can fall to ruin and be
 rebuilt, from the debug panel; a ruin holds nobody and gives nothing. The debug panel raises and lowers a
 structure's level, and its holder sees as far as the new level sees. A house whose castle changes hands or falls
 loses its seat, and its sight from it, and plays on seatless; how it names another is not decided. Decision record 0092 is the shape and
-`docs/plans/structures.md` the steps, one commit each; the hypothesis is experiment 0018. A castle's ragged gold ground is drawn only while it is selected, its influence zone, and nothing in the game
-pays a house anything yet.
+`docs/plans/structures.md` the steps, one commit each; the hypothesis is experiment 0018. A castle's ragged gold ground is drawn only while it is selected, its influence zone. Every holding pays its holder
+what its type yields a month at its level, and the house's resources count up from it.
 
 ---
 
