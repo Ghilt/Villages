@@ -9,12 +9,13 @@ import org.occurrent.mongodb.timerepresentation.TimeRepresentation
 import org.occurrent.retry.RetryStrategy
 import org.occurrent.subscription.mongodb.nativedriver.blocking.NativeMongoSubscriptionModel
 import villages.application.CharacterCommandExecutor
-import villages.application.EventFeed
+import villages.application.Fault
 import villages.application.FaultBoard
 import villages.application.Faults
 import villages.application.HouseCommandExecutor
 import villages.application.Resettable
 import villages.application.WipeGate
+import java.time.Duration
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -60,17 +61,34 @@ class MongoWorld(
 
     override val executor: HouseCommandExecutor = OccurrentHouseCommandExecutor(store, converter, gate)
     override val characterExecutor: CharacterCommandExecutor = OccurrentCharacterCommandExecutor(store, converter, gate)
-    override val feed: EventFeed = OccurrentEventFeed(subscriptions, store, converter, faults, gate)
+    override val feed = OccurrentEventFeed(subscriptions, store, converter, faults, gate)
 
     override val keptIn = "in MongoDB, database $database, which outlives the server"
 
-    /**
-     * The wipe, in the gate as in memory, but without waiting for the feed to hand on what was written before it:
-     * a change stream has nothing like the in-memory model's wait, so an event still on its way when the wipe
-     * begins can reach a read model after it was emptied.
-     */
     override fun wipe(folded: Iterable<Resettable>): Int = gate.wiping {
-        store.wipeEveryStream().also { folded.forEach(Resettable::reset) }
+        store.wipeEveryStream().also {
+            handedOn()
+            folded.forEach(Resettable::reset)
+        }
+    }
+
+    /**
+     * Waits until every subscription has handed on what was written before the wipe, by a marker written after it,
+     * which a change stream hands on after everything before it: the in-memory model's wait, which a change stream
+     * has nothing like. The marker is deleted however the wait ends. One that never arrives is said, and the wipe goes
+     * on without it rather than leaving the world half emptied, as in memory.
+     */
+    private fun handedOn() {
+        val marker = aMarker()
+        val stream = "marker:${marker.id}"
+        try {
+            if (!feed.handedOn(marker, HANDING_ON) { store.write(stream, listOf(it)) }) {
+                val stuck = IllegalStateException("a subscription had not been handed the marker after $HANDING_ON")
+                faults.report(Fault("the wipe", "waiting for the feed to hand on what was written before it", stuck))
+            }
+        } finally {
+            store.deleteEventStream(stream)
+        }
     }
 
     override fun close() {
@@ -81,6 +99,9 @@ class MongoWorld(
 
     private companion object {
         const val EVENTS = "events"
+
+        /** Far longer than any fold takes: a subscription still busy after this is stuck. */
+        val HANDING_ON: Duration = Duration.ofSeconds(10)
 
         /**
          * An event's time kept as the text it was written as, to the nanosecond, as the store in memory keeps it,

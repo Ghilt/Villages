@@ -16,6 +16,7 @@ import org.testcontainers.mongodb.MongoDBContainer
 import villages.application.Provenance
 import villages.application.Start
 import villages.application.StoredEvent
+import villages.application.started
 import villages.domain.Banner
 import villages.domain.Charge
 import villages.domain.Division
@@ -146,6 +147,27 @@ class MongoWorldDockerSpec : StringSpec({
 
                 world.wipe() shouldBe held
                 everything(world).shouldBeEmpty()
+            }
+        }
+
+    "an event the feed is still handing on when the wipe begins is not folded into the world after it (needs Docker)"
+        .config(enabledOrReasonIf = needsDocker) {
+            world("villages-wipe-late").use { world ->
+                val heard = CopyOnWriteArrayList<StoredEvent>()
+                world.feed.subscribe(Start.FROM_NOW) { heard += it }.use {
+                    SlowToFold(world.feed).started().use { slow ->
+                        world.executor.execute(ravenscar, sent)
+                        slow.folding.await(10, TimeUnit.SECONDS) shouldBe true
+
+                        world.wipe(listOf(slow)) shouldBe 1
+
+                        slow.folded.await(5, TimeUnit.SECONDS) shouldBe true
+                        slow.held.shouldBeEmpty()
+                        // The marker the wipe waited on is handed to nobody, and gone with the wipe.
+                        heard.map { it.type } shouldBe listOf("villages.house.founded.v1")
+                        everything(world).shouldBeEmpty()
+                    }
+                }
             }
         }
 

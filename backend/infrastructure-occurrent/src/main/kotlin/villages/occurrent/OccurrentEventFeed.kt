@@ -14,6 +14,7 @@ import villages.application.Start
 import villages.application.StoredEvent
 import villages.application.WipeGate
 import villages.domain.Event
+import java.time.Duration
 import java.util.UUID
 
 /**
@@ -37,6 +38,7 @@ class OccurrentEventFeed(
     private val faults: Faults,
     private val gate: WipeGate,
 ) : EventFeed {
+    private val markers = Markers()
 
     override fun subscribe(from: Start, subscriber: (StoredEvent) -> Unit): AutoCloseable {
         val id = "feed-${UUID.randomUUID()}"
@@ -44,7 +46,8 @@ class OccurrentEventFeed(
         val alreadySeen = HashSet<String>()
 
         fun hand(cloudEvent: CloudEvent) {
-            if (!alreadySeen.add(cloudEvent.id)) {
+            // A marker is the feed's own, and one a wipe left behind by dying half way is not the world's history.
+            if (cloudEvent.type == MARKER || !alreadySeen.add(cloudEvent.id)) {
                 return
             }
             // Thrown on to Occurrent, either throw below would be retried, and the retry dropped above as already
@@ -64,7 +67,10 @@ class OccurrentEventFeed(
 
         val handoff = Handoff(replaying = from == Start.FROM_THE_BEGINNING, ::hand)
         gate.outside {
-            val subscription = subscriptions.subscribe(id, null, StartAt.now()) { cloudEvent -> handoff.live(cloudEvent) }
+            markers.joined(id)
+            val subscription = subscriptions.subscribe(id, null, StartAt.now()) { cloudEvent ->
+                if (cloudEvent.type == MARKER) markers.reached(id, cloudEvent.id) else handoff.live(cloudEvent)
+            }
             subscription.waitUntilStarted()
 
             if (from == Start.FROM_THE_BEGINNING) {
@@ -76,7 +82,21 @@ class OccurrentEventFeed(
             }
         }
 
-        return AutoCloseable { subscriptions.cancelSubscription(id) }
+        return AutoCloseable {
+            subscriptions.cancelSubscription(id)
+            markers.gone(id)
+        }
+    }
+
+    /**
+     * Waits until every subscription has been handed everything written before [marker], which [write] puts in the
+     * store, and says whether they all got there within [timeout]. For a wipe, inside its gate, on a store whose
+     * subscriptions have nothing like the in-memory model's own wait: see `Markers`.
+     */
+    internal fun handedOn(marker: CloudEvent, timeout: Duration, write: (CloudEvent) -> Unit): Boolean {
+        markers.expect(marker.id)
+        write(marker)
+        return markers.awaitAll(marker.id, timeout)
     }
 }
 

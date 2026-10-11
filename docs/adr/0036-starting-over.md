@@ -73,6 +73,15 @@ house for room, writes the newcomer, and then takes them in, and a wipe can stil
 leave the newcomer standing alone in the new world. Each command is whole and the action is not; making it whole
 would take the gateway handling each frame outside a wipe.
 
+*Amended 2026-10-11, when the world went into MongoDB (0092):* the wait above is the in-memory subscription model's
+own, and MongoDB's change streams have nothing like it. So in MongoDB the wipe writes one **marker** once the
+streams are gone, an event of the feed's own on a stream of its own, which a change stream hands each subscription
+after everything written before it; the wipe waits until every subscription live then has been handed it, and only
+then empties every `Resettable`. The marker is handed to no subscriber and is deleted however the wait ends. It is
+not the mark on every event turned down above: one event, written by a wipe and gone with it, and nothing folds it.
+The same ten seconds, and the same fault when a subscription never gets there. `MongoWorldDockerSpec` holds the
+first guarantee against a real MongoDB, and fails without the marker.
+
 ## Consequences
 
 The loop can be tried from nothing in one click, and a second browser can watch the first arrive.

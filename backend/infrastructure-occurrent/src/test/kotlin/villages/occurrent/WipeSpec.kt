@@ -150,7 +150,7 @@ private fun settled(later: Later) {
 }
 
 /** A read model whose fold is slow, so that what it is folding when a wipe begins is still being folded after it. */
-private class SlowToFold(feed: EventFeed) : Follower(feed) {
+internal class SlowToFold(feed: EventFeed) : Follower(feed) {
     val held = CopyOnWriteArrayList<String>()
     val folding = CountDownLatch(1)
     val folded = CountDownLatch(1)
