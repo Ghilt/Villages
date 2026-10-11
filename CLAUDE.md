@@ -44,6 +44,8 @@ This is a loop, and Adam holds both ends of it: he verifies what lands, and he c
 4. **Documents travel with it.** A change to a decision, an event or a term updates its document in the same
    commit: a decision record, the event catalogue, the glossary, the architecture.
 5. **On "continue", commit and go on.** With notes, fix them and hand over again. Then say in a line what landed.
+   Bringing the work to main is the implicit last step of every plan: when "continue" comes after its last
+   step, say that it was the last, bring the work to main, and offer the next steps.
 6. **Offer the next steps and stop again**, when nothing agreed comes next. Two to four concrete options, each
    a sentence or two on what it would produce and what it would cost, with a recommendation and the reason for
    it. Say plainly what is blocked and on what. Always leave room for an answer that is none of them, because
