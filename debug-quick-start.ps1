@@ -590,11 +590,11 @@ Ensure 'flow\flow.json' 'working out which way rivers run' @('run', 'world:flow'
 # What kind of place every part of the world is and where the scenery clumps (0054): the biomes beside the page's
 # world and the stands only the game server reads (0067), again when world/biomes.json was saved since too.
 Ensure @('sprites\biome\map.json', (Join-Path $Root "world\stands\$DefaultMaster\biome\stands.json")) 'working out the biomes and the stands (about half a minute)' @('run', 'world:sprites') 'the world is furnished' @($Master, (Join-Path $Root 'world\biomes.json'))
-# The ground the server reads (0084), the origin, and both copies of the names, which a linked world leaves alone.
+# The ground the server reads (0084), the origin, both copies of the names, and the cultures structures are drawn in (0092).
 Ensure (Join-Path $Root "world\ground\$DefaultMaster\ground.json") 'reading the ground for the game server' @('run', 'world:ground') 'the ground is read' $Painted
 Ensure 'origin\origin.json' 'working out where on Earth the land came from (two minutes)' @('run', 'world:origin') 'the origin map is worked out' $Painted
 Ensure @('names.json', (Join-Path $Root "world\ground\$DefaultMaster\names.json")) 'carrying the real names through the origin map' @('run', 'world:names') 'the names are carried' @((Join-Path $Root 'world\names\1790.json'), (Join-Path $Root 'world\names\about.json'))
-
+Ensure 'culture\culture.json' 'working out the culture of every part of the world' @('run', 'world:culture') 'the cultures are worked out' @((Join-Path $DefaultWorld 'origin\origin.json'), (Join-Path $Root 'world\cultures.json'))
 # How high the ground is, for the relief (0090): ETOPO, 444 MB once, fitted through the origin map, a few minutes.
 Ensure 'height\height.json' 'fetching and fitting the height of the world' @('run', 'world:height') 'the relief has its height' @((Join-Path $DefaultWorld 'origin\origin.json'))
 

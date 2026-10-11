@@ -62,6 +62,14 @@ export const ARTIFACTS: readonly Artifact[] = [
     what: 'Which real towns of 1790 the world keeps, and what the names say about themselves.',
   },
   {
+    id: 'cultures',
+    form: 'file',
+    name: 'cultures',
+    path: 'world/cultures.json',
+    origin: 'authored',
+    what: 'Places on Earth, each tagged with the building tradition a structure there is drawn in.',
+  },
+  {
     id: 'sprite-pictures',
     form: 'folder',
     name: 'sprite pictures',
@@ -193,6 +201,15 @@ export const ARTIFACTS: readonly Artifact[] = [
     origin: 'baked',
     what: 'Where on Earth each part of the world came from, and which land is invented.',
     size: '16 MB',
+  },
+  {
+    id: 'culture',
+    form: 'folder',
+    name: 'culture map',
+    path: `${M}/culture/`,
+    origin: 'baked',
+    what: 'The building tradition each part of the world is drawn in, worked out from the origin map and the cultures.',
+    size: '0.6 MB',
   },
   {
     id: 'names',

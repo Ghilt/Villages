@@ -94,6 +94,12 @@ nowhere and is **invented land**, which is how to make some; a paste or the Clon
 in the world is a **copy**, invented land that looks like somewhere. The Origin renderer shows which is which.
 See `docs/plans/real-world-names.md`.
 
+**And so does the culture it is built in.** `world/cultures.json` is a few dozen places on Earth, each tagged
+European, Islamic, East Asian or African: land takes the culture of the place nearest where it came from, and
+invented land the culture of the nearest land that came from Earth. Moving a piece of Europe into the desert keeps
+it European. To change where a culture reaches, add or move an anchor there and save; the quick start works the
+map out again, and the Culture renderer shows it.
+
 ## Seeing your edit
 
 Save the image, alt-tab to the running app, and pick it in the **Debug map** part of the debug panel,

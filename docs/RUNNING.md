@@ -414,6 +414,16 @@ stage alone, with none of the debug panel in it (decision record 0079).
   make. The game server reads a master's names again when they are written, without a restart. It prints how much of the land
   is from Earth, invented and copied. Moving land with Nearest Neighbour keeps it traceable; land painted fresh,
   or opened up between pieces, is invented. See `docs/plans/real-world-names.md`.
+- The culture each place is built in: `npm run world:culture --prefix frontend` works out a master's **culture
+  map** from its origin map and `world/cultures.json`, the places on Earth each tagged European, Islamic, East
+  Asian or African, which are Adam's to correct: land that came from Earth takes the culture of the anchor nearest
+  where it came from, invented land the culture of the nearest land that came from Earth, sea none. It writes
+  `culture/` beside the master's tiles - a byte a square of the origin map, and `culture.png`, the picture the
+  **Culture** renderer of the Debug map lays on the world: blue European, green Islamic, red East Asian, ochre
+  African - and prints what share of the land is of each. Two seconds a master; the quick start does it whenever
+  the culture map is missing or older than the origin map or `world/cultures.json`. Under the Culture renderer a
+  click says in the log, under `culture`, what culture the place is built in. A structure is drawn in the culture
+  under it, read from the map when it is drawn, so a repainted master redraws its structures.
 - How high the ground is, for the relief: `npm run world:height --prefix frontend` reads ETOPO 2022's whole world,
   a height every 60 arc-seconds, through the master's origin map, so every point of the master has the height of
   where on Earth it was cut from, and invented land is given ground of the kind the master paints on it, and

@@ -14,6 +14,8 @@ export const PALETTE = resolve(REPO, 'world', 'palette.json');
 export const RENDER = resolve(REPO, 'world', 'render.json');
 /** What grows where: the biomes, the kinds, and how thickly each one stands. Hand-edited. */
 export const BIOMES = resolve(REPO, 'world', 'biomes.json');
+/** The places on Earth each culture is anchored at, which every master's culture map is worked out from. */
+export const CULTURES_FILE = resolve(REPO, 'world', 'cultures.json');
 export const MASTER_CONFIG = resolve(REPO, 'world', 'master.json');
 /** How the world is painted, as opposed to what colour each class is. */
 export const PAINTERLY = resolve(REPO, 'world', 'painterly.json');

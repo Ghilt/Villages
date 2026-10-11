@@ -31,6 +31,9 @@ import { painterlyTiles } from './painterlyTiles';
  * Earth each square of it was cut from, worked out by `npm run world:origin`. Grey stayed where it was, a
  * colour moved and says which way, magenta striped is invented land, orange striped is a copy of somewhere
  * else, and the thin white line is Earth's own coast carried through. See `docs/plans/real-world-names.md`.
+ *
+ * `culture` is laid on the same way: the building tradition each place is drawn in, worked out by
+ * `npm run world:culture` from the origin map and `world/cultures.json`. See `docs/plans/structures.md`.
  */
 
 export interface RendererChoice {
@@ -53,6 +56,11 @@ export const RENDERERS: readonly RendererChoice[] = [
     name: 'origin',
     title: 'Origin',
     note: 'Where on Earth each square was cut from: grey stayed, a colour moved that way, magenta striped is invented, orange striped is a copy, white is Earth’s coast carried through',
+  },
+  {
+    name: 'culture',
+    title: 'Culture',
+    note: 'The building tradition each place is drawn in, from where on Earth it came: blue European, green Islamic, red East Asian, ochre African',
   },
   {
     name: 'info-map',
@@ -122,6 +130,7 @@ const QUIET: Readonly<Record<string, { saturation: number; brightness: number }>
 const PICTURES: Readonly<Record<string, string>> = {
   biome: 'sprites/biome/biomes.png',
   origin: 'origin/origin.png',
+  culture: 'culture/culture.png',
 };
 
 /**

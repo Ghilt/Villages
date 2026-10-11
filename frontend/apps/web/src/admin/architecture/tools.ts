@@ -69,6 +69,17 @@ export const TOOLS: readonly Tool[] = [
     what: "Works out where on Earth the land came from, and carries Earth's names in.",
   },
   {
+    script: 'world:culture',
+    entry: 'cultureWorld.ts',
+    group: 'master',
+    reads: ['origin', 'cultures'],
+    writes: ['culture'],
+    seconds: 2,
+    perMaster: true,
+    ranBy: 'quick-start',
+    what: 'Works out the building tradition each part of the world is drawn in.',
+  },
+  {
     script: 'world:names',
     entry: 'namesWorld.ts',
     group: 'master',

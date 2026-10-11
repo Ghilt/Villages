@@ -18,6 +18,7 @@ const ORDER = [
   'world:sprites',
   'world:ground',
   'world:origin',
+  'world:culture',
   'world:height',
 ];
 

@@ -272,7 +272,7 @@ Commands are added here as the increments land:
   again when `package-lock.json` has changed since they were installed (stopping this checkout's dev
   server first, because Windows will not replace a running program), generates whatever part
   of the world is missing and cuts again whatever a save of the master has made stale - the coast, the tiles,
-  the rivers' flow, the sprite map, the ground map and the origin map with its names, in the order the panel's
+  the rivers' flow, the sprite map, the ground map, the origin map with its names and the culture map, in the order the panel's
   `cut it` runs them, and nothing when the master was not saved since - and the styles again when
   `world/painterly.json` or `world/render.json` was, the sprite map when `world/biomes.json` was, and the names
   when `world/names/1790.json` or `world/names/about.json` was. It never writes through a link: tiles a worktree links from the main
@@ -302,7 +302,7 @@ Commands are added here as the increments land:
   `world/render.json`, and how it is painted is `world/painterly.json`.
 - The world's other tools, each `npm run <name> --prefix frontend` and each described in `docs/RUNNING.md`
   beside the folder it reads: `world:sprites` works out a master's sprite map, `world:flow` which way its rivers
-  run, `world:origin` where on Earth each part of it came from and `world:names` the names carried through that, `world:ground` the ground map the game server reads, `world:height` the whole world's height the relief is shaded from, `world:scenery` paints stills of the sprite map, `world:paint` paints the painterly stills and writes the
+  run, `world:origin` where on Earth each part of it came from and `world:names` the names carried through that, `world:culture` the building tradition each part is drawn in, `world:ground` the ground map the game server reads, `world:height` the whole world's height the relief is shaded from, `world:scenery` paints stills of the sprite map, `world:paint` paints the painterly stills and writes the
   runtime copy of the styles (`-- --config-only` for that alone), `world:art` cuts the sprites, `world:ui` the
   interface pictures, and `world:portraits` and `world:scenes` draw placeholders, never over a file that is
   there.

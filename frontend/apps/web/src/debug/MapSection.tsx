@@ -17,6 +17,7 @@ import {
 } from '../map/masters';
 import type { Errand, MasterOnDisk } from '../map/masters';
 import { RENDERERS } from '../map/renderers';
+import { watchCulture } from '../map/culture';
 import { watchOrigin } from '../map/origin';
 import { setFogOfWar } from '../fog/fogOfWar';
 import { lastingOn } from '../fog/describe';
@@ -80,6 +81,11 @@ export function MapSection({ map, master, renderer, onRenderer }: MapSectionProp
   useEffect(() => {
     if (map === null || (renderer !== 'origin' && renderer !== 'info-map')) return undefined;
     return watchOrigin(map, master);
+  }, [map, renderer, master]);
+  // Under the Culture renderer a click says what culture that place is built in.
+  useEffect(() => {
+    if (map === null || renderer !== 'culture') return undefined;
+    return watchCulture(map, master);
   }, [map, renderer, master]);
 
   const chosen = masters.find((candidate) => candidate.name === wanted);

@@ -262,7 +262,7 @@ program running on it at this tree's address.
 | 11b | Slots: `slotFilled` and `slotEmptied`, items, a person in one slot at a time, the levers; a slot change is the row's, now, with no face | the event page | bump |
 | 11c | The sockets in the window and the tab, cut for each viewer: the holder sees into every slot, another house in sight into the public ones and a question in every place of the rest, nobody out of sight | the window, as two houses | bump |
 | 11d | What fills a slot counts: `Yields`, one rule for the listener and the holder's window - needed, adds, a stat over ten, an item's own; the listener folds slots, stats and deaths; the holder's view carries what it pays | the treasury | bump |
-| 12 | The culture map: `world/cultures.json`, the tool, the Culture renderer, the quick-start | the renderer | |
+| 12 | The culture map: `world/cultures.json` (seventy-two anchors, Adam's to correct), `world:culture`, the Culture renderer and its click, the quick-start, the architecture page | the renderer | |
 | 13 | Culture sprites: sixteen types by four cultures, the ruins and the type marks, placeholders from the moodboard, a cutting tool of their own, the atlas | the map, on two cultures | |
 | 14 | Houses leave the cell snapshots: `Snapshot.houses`, the houses' fan-out, `Fog.sent(HouseRow)` | nothing changes on screen | bump |
 
