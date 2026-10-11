@@ -15,24 +15,11 @@ export interface BuildHere {
 }
 
 /**
- * How much of a branch name the corner will carry.
- *
- * Long enough for `main` and for a human-named branch, short enough that a generated one does not run
- * across the bottom of the window. The end is what is cut, because the beginning is what tells you
- * whether you are looking at main.
+ * Everything the label says after the branch. The branch is shown whole and apart from it, so it can be
+ * copied on its own: a worktree is found by its name, and a name cut short finds nothing.
  */
-export const BRANCH_ROOM = 24;
-
-function shortly(branch: string): string {
-  return branch.length <= BRANCH_ROOM ? branch : `${branch.slice(0, BRANCH_ROOM - 1)}…`;
-}
-
-/** A page with no dev server to ask still knows what it speaks, so the label is never empty. */
 export function badgeText(build: BuildHere | null): string {
   const parts: string[] = [];
-  if (build !== null && build.branch !== '') {
-    parts.push(shortly(build.branch));
-  }
   if (build !== null && build.commit !== '') {
     // A plus, not the word: the corner is four millimetres tall and the mark is for the person who
     // already knows there are uncommitted changes and wants reminding which window has them.

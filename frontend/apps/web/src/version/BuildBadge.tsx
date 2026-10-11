@@ -4,7 +4,8 @@ import { badgeText, readBuild } from './badge';
 import type { BuildHere } from './badge';
 
 /**
- * A line in the bottom right corner saying which build this window is.
+ * A line at the foot of the debug panel saying which build this window is, the branch whole, wrapping
+ * if it must, and taken in one click to be copied.
  *
  * Deliberately the smallest thing on the screen. It is not part of the fiction and it will go when the
  * game has players, but while there are a dozen checkouts that all look alike it is the difference
@@ -29,5 +30,14 @@ export function BuildBadge() {
     };
   }, []);
 
-  return <div className="build">{badgeText(build)}</div>;
+  return (
+    <div className="build">
+      {build !== null && build.branch !== '' && (
+        <span className="build__branch" title="click to select the whole name">
+          {build.branch}
+        </span>
+      )}
+      <span>{badgeText(build)}</span>
+    </div>
+  );
 }

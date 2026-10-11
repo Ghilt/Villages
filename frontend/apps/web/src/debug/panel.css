@@ -316,3 +316,19 @@
   color: var(--gold);
   margin-right: 0.35rem;
 }
+
+/* The panel's foot: the admin pages on the left, which build this is on the right. */
+.debug__foot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.25rem 0.5rem 0.3rem;
+}
+
+.debug__adminlink {
+  flex: 0 0 auto;
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  font-size: 0.68rem;
+  color: var(--ink-soft);
+}

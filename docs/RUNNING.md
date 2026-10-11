@@ -97,6 +97,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   the player's interface is laid out in and the only thing a player would ever see; two grips resize it,
   and the toggle in the very top right confines it to a phone, which is how to check that a mechanic
   reads at both shapes without a second monitor. See `docs/adr/0039` and `docs/RESPONSIVE-DESIGN.md`.
+  Every section starts folded. At its foot, `admin` opens this tree's `/admin` in a new tab, and the
+  build line names the branch whole, a click selecting all of it to copy, then the commit and the wire.
   It is the log and the buttons; the block of state above them went on 2026-09-16
   because Adam never read it, and what it used to say every four hundred milliseconds is now said once,
   when it changes, as a line of the log. Its copy button puts the log on the clipboard, which is the

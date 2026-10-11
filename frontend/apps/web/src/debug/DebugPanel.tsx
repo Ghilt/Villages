@@ -260,7 +260,13 @@ export function DebugPanel({ map, worldRoot, master, renderer, onRenderer }: Deb
           <DialoguesSection />
           <ChoiceRollSection />
 
-          <BuildBadge />
+          <footer className="debug__foot">
+            {/* The admin pages of this tree, at its own address, so it opens the admin of the build in view. */}
+            <a className="debug__adminlink" href="/admin" target="_blank" rel="noreferrer">
+              admin
+            </a>
+            <BuildBadge />
+          </footer>
         </div>
       </div>
 
