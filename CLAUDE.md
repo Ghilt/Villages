@@ -9,8 +9,8 @@ thousands of concurrent players in one shared world.
 Adam thinks about two things: whether a change looks right in the running program, and when work goes to
 main. Everything about commits is the agent's, and he does not want to be asked about it.
 
-- **"continue" with no notes is the word.** When a hand-over comes back with just "continue" ("good,
-  continue" and "looks good, continue" too), commit what he verified and go on. With notes, nothing is
+- **"continue" with no notes is the word.** When a hand-over comes back with just "continue" ("cont" for
+  short, and "good, continue" and "looks good, continue" too), commit what he verified and go on. With notes, nothing is
   committed: fix them and hand over again. A question, or "looks good" alone, is not the word. Saying it
   once is the whole of it: do not ask again or restate the change set.
 - **Inside a long run he picked**, the `continue-for-some-time` skill, the agent commits each step itself
@@ -22,7 +22,8 @@ main. Everything about commits is the agent's, and he does not want to be asked 
   `Co-Authored-By` trailer on every message. Steps that pile up before a "continue" still land as one
   commit each.
 - **Main is Adam's.** Never rebase onto main or move main without his word in that turn ("bring it to
-  main"), and never push or tag without it.
+  main", or "main" alone), and never push or tag without it. "main" at a verify stop also means he has
+  verified: commit what is waiting, bring it all to main, and offer the next steps.
 - No amends of a commit he has seen, force pushes, hard resets, or history rewrites without explicit
   approval.
 - `.claude/settings.json` is where the harness half of this lives. It denies force pushes, hard resets and

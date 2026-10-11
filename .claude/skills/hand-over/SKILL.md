@@ -70,11 +70,12 @@ document - say so plainly, and say what stands in for it: a test, a still, or a 
 No commit message and no plan of commits: how the work is cut into commits is the agent's, and Adam does
 not want to think about it. Do not commit yet. His answer decides what happens next:
 
-- **"continue"**, with no notes: commit what he verified, as many commits as best practice cuts it into,
+- **"continue"**, or **"cont"**, with no notes: commit what he verified, as many commits as best practice cuts it into,
   say in a line what landed, and go on. If that was the last step of the plan, say so plainly, bring the
   work to main - its implicit last step - and offer the next steps.
 - **Notes**: fix them and hand over again. Nothing is committed.
-- **"bring it to main"**: that, and only then.
+- **"main"**, or "bring it to main": he has verified it. Commit what is waiting, bring all of it to main,
+  and offer the next steps. Main moves on his word and only then.
 
 ## The verify checklist
 
