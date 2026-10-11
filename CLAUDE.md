@@ -4,23 +4,27 @@ Villages is an exploratory, persistent, multiplayer experience: each player play
 the real world. Gameplay is discovered by experiment. The architecture keeps change cheap and is designed for tens of
 thousands of concurrent players in one shared world.
 
-## The one hard rule: a human vets every change before it is committed
+## The one hard rule: nothing is committed that Adam has not verified, and only Adam sends work to main
 
-- Never run `git commit`, `git push`, `git rebase` or `git tag` unless Adam has approved the specific change set in
-  the current conversation turn (he reviews the working tree and says "commit").
-- Before asking for approval, present: what changed and why, the list of files, the test output, and which documents
-  were updated.
-- One commit per increment. Conventional Commits with these scopes: `domain`, `application`, `occurrent`, `rabbit`,
-  `projections`, `gateway`, `protocol`, `web`, `client-core`, `docs`, `infra`, `build`. End every commit message with
-  the `Co-Authored-By` trailer.
-- **"Looks good, continue" is the word too**, and so is "good, continue": Adam's standing answer of
-  2026-10-01. Either means commit the change set he has just reviewed, then go on to the next step. Anything
-  else without "commit" - "looks good" alone, a question - is not approval.
-- **His word is the whole of the approval, and it is given once.** When Adam says commit, commit: do not ask
-  again, do not restate the change set for a second confirmation, and do not wait for anything else. Saying it
-  twice is not a safeguard, it is a tax, and the safeguard is that nothing is committed until he has said it at
-  all. The same goes for a rebase or a push he has asked for in that turn.
-- No amends, force pushes, hard resets, or history rewrites without explicit approval.
+Adam thinks about two things: whether a change looks right in the running program, and when work goes to
+main. Everything about commits is the agent's, and he does not want to be asked about it.
+
+- **"continue" with no notes is the word.** When a hand-over comes back with just "continue" ("good,
+  continue" and "looks good, continue" too), commit what he verified and go on. With notes, nothing is
+  committed: fix them and hand over again. A question, or "looks good" alone, is not the word. Saying it
+  once is the whole of it: do not ask again or restate the change set.
+- **Inside a long run he picked**, the `continue-for-some-time` skill, the agent commits each step itself
+  once its checks are green, and Adam verifies at the checkpoints the run named before it began. That is
+  the only time a commit lands before he has looked at it.
+- **How the work is cut into commits is the agent's**, done by best practice and never put to Adam: one
+  coherent change per commit, Conventional Commits with these scopes: `domain`, `application`, `occurrent`,
+  `rabbit`, `projections`, `gateway`, `protocol`, `web`, `client-core`, `docs`, `infra`, `build`, and the
+  `Co-Authored-By` trailer on every message. Steps that pile up before a "continue" still land as one
+  commit each.
+- **Main is Adam's.** Never rebase onto main or move main without his word in that turn ("bring it to
+  main"), and never push or tag without it.
+- No amends of a commit he has seen, force pushes, hard resets, or history rewrites without explicit
+  approval.
 - `.claude/settings.json` is where the harness half of this lives. It denies force pushes, hard resets and
   `git clean` outright, prompts on `git push` and `git tag`, which are rare and hard to undo, and allows
   `git commit` and `git rebase`, so that Adam's word in the conversation is the only gate on them. Adam made
@@ -29,7 +33,7 @@ thousands of concurrent players in one shared world.
 
 ## Working agreement
 
-This is a loop, and Adam holds both ends of it: he approves what lands, and he chooses what comes next.
+This is a loop, and Adam holds both ends of it: he verifies what lands, and he chooses what comes next.
 
 1. **Agree the step.** State it in one short paragraph, what and why and which files, before touching code.
 2. **Build it small.** One coherent step per commit: a module skeleton, a document, one test with its
@@ -39,12 +43,12 @@ This is a loop, and Adam holds both ends of it: he approves what lands, and he c
    not optional and it is never an option on the menu.
 4. **Documents travel with it.** A change to a decision, an event or a term updates its document in the same
    commit: a decision record, the event catalogue, the glossary, the architecture.
-5. **Commit on Adam's word, immediately,** then say what landed. One "commit" is the approval; asking for it
-   again is the failure, not the caution.
-6. **Offer the next steps and stop again.** Two to four concrete options, each a sentence or two on what it
-   would produce and what it would cost, with a recommendation and the reason for it. Say plainly what is
-   blocked and on what. Always leave room for a fifth answer that is none of them, because the point of the
-   options is to give Adam the wheel, not to make him pick from a menu.
+5. **On "continue", commit and go on.** With notes, fix them and hand over again. Then say in a line what landed.
+6. **Offer the next steps and stop again**, when nothing agreed comes next. Two to four concrete options, each
+   a sentence or two on what it would produce and what it would cost, with a recommendation and the reason for
+   it. Say plainly what is blocked and on what. Always leave room for an answer that is none of them, because
+   the point of the options is to give Adam the wheel, not to make him pick from a menu. When he says
+   "continue for some time", the options are longer runs instead: the `continue-for-some-time` skill.
 
 **A button is a mark or it is words, and which one is Adam's call.** When he asks for a button, ask
 which before drawing it, and do not guess from what is beside it. The two are different things: a mark
@@ -61,8 +65,8 @@ which pictures in `world/ui/` it reads, the size to paint each at, and which are
 placeholders are the agent's to make, copied from the moodboard; Adam replaces them when he chooses and
 nothing waits on him. See `docs/UI-COMPONENTS.md` and decision record 0068.
 
-Never choose the next increment alone, and never chain increments together to save a round trip. The roadmap is a
-menu, not a queue: its order is a suggestion, and Adam reorders it freely. When an option is not on the roadmap
+Never choose the next increment alone, and never chain increments together to save a round trip, except
+inside a long run Adam picked, whose steps were named before it began. The roadmap is a menu, not a queue: its order is a suggestion, and Adam reorders it freely. When an option is not on the roadmap
 but is clearly better, offer it anyway and say why.
 
 ## Skills: the moments of the loop, one file each
@@ -72,6 +76,8 @@ that moment comes, and Adam can call any of them by typing `/<name>`. What must 
 file. When Adam corrects how a moment is done, the correction goes into its skill, in the same step.
 
 - `hand-over` - the end of every step: verify, regenerate, leave the program running, present, checklist last.
+- `continue-for-some-time` - Adam is leaving for a while: offer three longer runs, then work one through,
+  committing as it goes and stopping only where it said it would.
 - `nine-slice` - make a border for `world/ui/borders/` out of a frame picture Adam hands over.
 
 ## Adam paints the master. Everything else derived from it is the agent's to regenerate

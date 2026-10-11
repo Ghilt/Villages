@@ -1,6 +1,6 @@
 ---
 name: hand-over
-description: Bring a finished step back to Adam for review - regenerate what it made stale, leave the program running on the change, and present it ending with the address and a numbered verify checklist. Use at the end of every step, before asking for "commit", and whenever the loop comes back to Adam to look at something. Adam can also type /hand-over.
+description: Bring a finished step back to Adam for review - regenerate what it made stale, leave the program running on the change, and present it ending with the address and a numbered verify checklist. Use at the end of every step, before anything is committed, and whenever the loop comes back to Adam to look at something. Adam can also type /hand-over.
 ---
 
 # Hand-over
@@ -58,18 +58,22 @@ document - say so plainly, and say what stands in for it: a test, a still, or a 
 4. **The documents touched** - a change to a decision, an event or a term updates its document in the same
    commit - or, if a thing fit no document, say that a new one is needed.
 5. **What was regenerated and what moved**, with a number and a picture, when step 2 ran.
-6. **The proposed commit message**: Conventional Commits, the scopes in `CLAUDE.md`, the `Co-Authored-By`
-   trailer.
-7. **Where to look**, one line and nothing else on it - either the running program:
+6. **Where to look**, one line and nothing else on it - either the running program:
 
        http://localhost:5548 · worktree <folder under .claude/worktrees/>, branch <git branch --show-current>
 
    or links to the documents, when what there is to verify is something to read. The folder and the branch
    can differ, and the app does not always show which tree a session is in, so this line is what lets Adam
    find the tree and start it himself.
-8. **The verify checklist**, last, with nothing after it.
+7. **The verify checklist**, last, with nothing after it.
 
-Do not commit. Wait for Adam's word, as the hard rule in `CLAUDE.md` says.
+No commit message and no plan of commits: how the work is cut into commits is the agent's, and Adam does
+not want to think about it. Do not commit yet. His answer decides what happens next:
+
+- **"continue"**, with no notes: commit what he verified, as many commits as best practice cuts it into,
+  say in a line what landed, and go on.
+- **Notes**: fix them and hand over again. Nothing is committed.
+- **"bring it to main"**: that, and only then.
 
 ## The verify checklist
 
