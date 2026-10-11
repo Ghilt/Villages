@@ -33,7 +33,39 @@
           "charge": "stag",
           "chargeTincture": "argent"
         }
-      }
+      },
+      "slots": [
+        {
+          "name": "lord",
+          "places": 1,
+          "contents": []
+        },
+        {
+          "name": "garrison",
+          "places": 1,
+          "contents": [
+            {
+              "kind": "item",
+              "id": "7a000000-0000-4000-8000-000000000040",
+              "name": "a garrison",
+              "about": "forty men of the coast",
+              "amount": 40
+            }
+          ]
+        },
+        {
+          "name": "dungeon",
+          "places": 1,
+          "contents": [
+            {
+              "kind": "person",
+              "id": "cb732500-39bd-3b39-a838-bb89f719578f",
+              "name": "Agnes Hollin",
+              "portrait": "woman-04"
+            }
+          ]
+        }
+      ]
     }
   ]
 }

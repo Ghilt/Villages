@@ -146,7 +146,7 @@ class StructuresProjection(feed: EventFeed) : Follower(feed), StructuresByCell, 
     private fun slotted(id: StructureId, streamVersion: Long, change: (Map<String, List<Content>>) -> Map<String, List<Content>>) {
         val held = rows[id] ?: return
         if (streamVersion <= held.streamVersion) return
-        put(held.row.copy(slots = change(held.row.slots)), streamVersion, appeared = false)
+        put(held.row.copy(slots = change(held.row.slots), slotsStamp = applied.incrementAndGet()), streamVersion, appeared = false)
     }
 
     private fun put(row: StructureRow, streamVersion: Long, appeared: Boolean) {

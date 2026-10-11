@@ -7,7 +7,8 @@ import { PaneSizeControl } from '../stage/PaneSizeControl';
 import { type Room } from '../stage/panes';
 import { Tag } from '../ui/tag/Tag';
 import { SUBJECT_MARKS } from './pane';
-import type { Description, Link } from './describe';
+import type { Description, Link, SlotSeen } from './describe';
+import { SlotRow } from '../ui/socket/Socket';
 import { inspectBeside, stopInspecting } from './opening';
 import { type Subject } from './subjects';
 import { remember } from './trail';
@@ -158,6 +159,7 @@ export function InspectWindow({ subject, said, along, room, fresh }: InspectWind
         </dl>
       )}
 
+      {said.slots !== undefined && said.slots.length > 0 && <Slots slots={said.slots} />}
       {said.links.length > 0 && (
         <>
           <h3 className="inspect__onward">Links</h3>
@@ -179,5 +181,23 @@ export function InspectWindow({ subject, said, along, room, fresh }: InspectWind
         </>
       )}
     </section>
+  );
+}
+
+/** A structure's slots, a row of sockets each, as the window and the Holdings tab draw them. */
+export function Slots({ slots }: { slots: readonly SlotSeen[] }) {
+  return (
+    <div className="inspect__slots">
+      {slots.map((slot) => (
+        <SlotRow
+          key={slot.name}
+          name={slot.name}
+          places={slot.places}
+          contents={slot.contents ?? []}
+          secret={slot.contents === null}
+          size={40}
+        />
+      ))}
+    </div>
   );
 }

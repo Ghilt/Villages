@@ -2,30 +2,32 @@ package villages.gateway
 
 import villages.application.Antarctica
 import villages.application.Arrival
+import villages.application.CharacterById
 import villages.application.CharactersByCell
 import villages.application.ChoicesByPlayer
-import villages.application.DialoguesByHouse
 import villages.application.DialogueService
+import villages.application.DialoguesByHouse
 import villages.application.EventFeed
-import villages.application.fate.RollService
-import villages.application.fate.WaterAt
 import villages.application.FoundHouseService
 import villages.application.HouseById
 import villages.application.HousesByCell
 import villages.application.HousesByPlayer
-import villages.application.KeyFiguresByHouse
 import villages.application.KeyFigureService
+import villages.application.KeyFiguresByHouse
 import villages.application.RecentEvents
 import villages.application.ResourceService
 import villages.application.SightsByHouse
 import villages.application.Stands
-import villages.application.StructuresByCell
 import villages.application.StructureService
+import villages.application.StructuresByCell
 import villages.application.TakeActionService
 import villages.application.VisionService
 import villages.application.WorldKept
 import villages.application.WorldClock
 import villages.application.WorldWipe
+import villages.application.fate.RollService
+import villages.application.fate.WaterAt
+import villages.domain.StructureCatalogue
 
 /**
  * What the gateway's parts are made from: every port a mechanic reads or acts through at the edge. Gathered here so
@@ -58,6 +60,11 @@ class Mechanics(
     val instrumentsOpen: Boolean = true,
     /** Where the world is kept and what of it cannot be read, which hello and the instruments say. */
     val worldKept: WorldKept = WorldKept.IN_MEMORY,
+
+    /** The catalogue, for what a structure's slots are and how many places each has; none shows no slots. */
+    val structureCatalogue: StructureCatalogue? = null,
+    /** People by their id, for a person in a slot to be said by name. */
+    val characterById: CharacterById = CharacterById { null },
 )
 
 /**
@@ -77,7 +84,7 @@ internal fun partsOf(
     listOf(
         HousesPart(core, houses, theirHouses, world),
         KeyFiguresPart(core, figures, onTheMap, world),
-        HoldingsPart(core, structuresOnTheMap, houseById),
+        HoldingsPart(core, structuresOnTheMap, houseById, SlotsSeen(structureCatalogue, characterById)),
         StructuresPart(core, structuresOnTheMap, world),
         SightPart(core, sights),
         DialoguesPart(core, dialogues, dialogueRows),

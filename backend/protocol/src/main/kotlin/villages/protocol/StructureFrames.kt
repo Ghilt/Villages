@@ -30,6 +30,33 @@ data class StructureView(
     val seatOf: HolderView? = null,
     /** True for a ruin, in the face sent, and absent for a structure standing. */
     val ruin: Boolean? = null,
+    /**
+     * Its slots as this house is shown them, only while it sees the structure now: every one for its holder, and for
+     * another house the public ones and of the rest how many places. Absent out of sight, on a day gone by, and for a
+     * type with none. When present, `stamp` is the later of the face's and the slots' last change.
+     */
+    val slots: List<SlotView>? = null,
+)
+
+/**
+ * One slot of a structure as a house is shown it: its name, how many places it has at the structure's level, and
+ * what is in them in the order it was put there - absent, rather than empty, for a slot this house may not see into.
+ */
+@JsonInclude(JsonInclude.Include.NON_NULL)
+data class SlotView(val name: String, val places: Int, val contents: List<ContentView>? = null)
+
+/**
+ * What fills a place: `kind` `person`, with their name and the key of their portrait, or `item`, with what it is
+ * called, a line about it and how many of it. `id` is the person's or the item's.
+ */
+@JsonInclude(JsonInclude.Include.NON_NULL)
+data class ContentView(
+    val kind: String,
+    val id: String,
+    val name: String,
+    val portrait: String? = null,
+    val about: String? = null,
+    val amount: Long? = null,
 )
 
 /**

@@ -311,7 +311,14 @@ stage alone, with none of the debug panel in it (decision record 0079).
   what was put in last. Each writes `villages.structure.slotFilled.v1` or `slotEmptied.v1`, on the event page; a
   person already in another slot is taken out of it first, in the same story. A full slot is refused `slotFull`,
   the same person twice `alreadyInSlot`, an empty one emptied `notInSlot`, and a ruin filled `isARuin`; a level is
-  not lowered under what a slot holds (`invalidLevel`). What is in them is not drawn yet.
+  not lowered under what a slot holds (`invalidLevel`).
+- What is in its slots: the structure's window, and a holding's details in the Holdings tab, draw a row of sockets
+  for each slot under its facts - its name, *2 of 3*, a portrait for a person, an item with how many, an empty frame
+  for a place left. Its holder sees into every slot; another house that sees it now sees into the slots the catalogue
+  calls public and a question in every place of the rest, *? of 2*; out of sight, or on a day the scrubber has gone
+  back to, the window draws none, because what is in a slot is never shown as last seen. With the fog lifted, every
+  slot is seen into. A slot filled or emptied redraws them at once, and a window on one of your own holdings reads
+  your holdings wherever the camera is, as one on a key figure reads your key figures.
 - Ruining one and raising it again: **ruin it** and **rebuild it**, beside *take control of this building*, on the
   structure whose window was opened last. *Ruin it* writes `villages.structure.ruined.v1`, by fire: a ruin holds
   nobody, its holder's sight from it is taken back, and it is drawn as a ruin - the stump of a tower and a broken

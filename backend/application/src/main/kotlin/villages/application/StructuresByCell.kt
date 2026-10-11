@@ -41,6 +41,8 @@ data class StructureRow(
     val faces: List<StructureFace>,
     /** What each slot holds now, by the slot's name, in the order it was put there. */
     val slots: Map<String, List<Content>> = emptyMap(),
+    /** The read model's count when its slots last changed, beside its faces' stamps: what a view with slots carries. */
+    val slotsStamp: Long = 0,
 ) {
     /** The face it had on [day]: the latest begun by then, so of two changes on one day the later. Null before it stood. */
     fun faceOn(day: WorldTime): StructureFace? = faces.lastOrNull { it.since <= day }

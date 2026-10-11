@@ -119,3 +119,7 @@ recorded over. See decision record 0037. What each one changed:
 - **42** - levels: Adam's lever `changeLevel`, a structure and a step of one up or one down.
 - **44** - slots: Adam's levers `fillSlot`, a structure, a slot and someone by `characterId` or else an `item` - a
   name, a line about it, an amount - and `emptySlot`, which takes out what was put in a slot last.
+- **45** - what is in a structure's slots: `StructureView` carries `slots`, each a name, its `places` at the level
+  and its `contents` - a `person` with a name and a portrait, or an `item` with a line about it and an amount -
+  absent for a slot the house may not see into. Only while the house sees the structure now; its holder sees into
+  every slot, another house the public ones. With slots, `stamp` is the later of the face's and the slots'.

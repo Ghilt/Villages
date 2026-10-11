@@ -5,7 +5,8 @@ import { dayOf } from '@villages/protocol';
 import type { StructureView } from '@villages/protocol';
 import type { StructureTypeSpec } from '@villages/world';
 
-import { describeCharacter, describeStructure } from './describe';
+import { portraitUrl } from '../figures/portraits';
+import { describeCharacter, describeStructure, socketsSaid } from './describe';
 import type { CharacterSeen } from './describe';
 
 const today = dayOf(1790, 5, 9);
@@ -138,5 +139,37 @@ describe("a structure's window", () => {
 
     expect(said.under).toBe('a printing house');
     expect(said.facts[1]).toEqual({ what: 'Level', said: '2' });
+  });
+});
+
+describe("a structure's slots in its window", () => {
+  it('are a portrait for a person, an item and its amount, and a question in every place of one not seen into', () => {
+    expect(
+      socketsSaid([
+        {
+          name: 'dungeon',
+          places: 2,
+          contents: [{ kind: 'person', id: 'a', name: 'Agnes Hollin', portrait: 'woman-04' }],
+        },
+        {
+          name: 'garrison',
+          places: 1,
+          contents: [{ kind: 'item', id: 'b', name: 'a garrison', amount: 40 }],
+        },
+        { name: 'cells', places: 4 },
+      ]),
+    ).toEqual([
+      {
+        name: 'dungeon',
+        places: 2,
+        contents: [{ kind: 'portrait', picture: portraitUrl('woman-04'), name: 'Agnes Hollin' }],
+      },
+      { name: 'garrison', places: 1, contents: [{ kind: 'item', name: 'a garrison', amount: 40 }] },
+      { name: 'cells', places: 4, contents: null },
+    ]);
+  });
+
+  it('are absent from a window on one seen no longer, which the wire sends without them', () => {
+    expect(socketsSaid(undefined)).toBeUndefined();
   });
 });

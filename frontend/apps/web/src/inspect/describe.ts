@@ -1,11 +1,21 @@
 import { ageOn } from '@villages/client-core';
 import { describeDay } from '@villages/protocol';
-import type { HolderView, HouseView, Point, ResourceName, Sex, StructureView } from '@villages/protocol';
+import type {
+  HolderView,
+  HouseView,
+  Point,
+  ResourceName,
+  Sex,
+  SlotView,
+  StructureView,
+} from '@villages/protocol';
 import { insideFenceAt } from '@villages/world';
 import type { StructureTypeSpec, TerrainClass } from '@villages/world';
 
 import type { Area } from '../areas/areas';
+import { portraitUrl } from '../figures/portraits';
 import { blazon, saysPerMonth, whereabouts } from '../house/describe';
+import type { SocketContent } from '../ui/socket/slots';
 import type { WaterSeen } from './waters';
 import type { Subject } from './subjects';
 
@@ -54,7 +64,30 @@ export interface Description {
    */
   likeness?: { portrait: string | undefined };
   facts: readonly Fact[];
+  /** A structure's slots as the house is shown them, each a row of sockets: `contents` null for one it may not see into. */
+  slots?: readonly SlotSeen[];
   links: readonly Link[];
+}
+
+/** One slot as a window draws it: its name, how many places, and what fills them, or null for a question in each. */
+export interface SlotSeen {
+  name: string;
+  places: number;
+  contents: readonly SocketContent[] | null;
+}
+
+/** What a slot's sockets show of what the wire says fills it: a person's portrait, or an item and how many. */
+export function socketsSaid(slots: readonly SlotView[] | undefined): SlotSeen[] | undefined {
+  return slots?.map((slot) => ({
+    name: slot.name,
+    places: slot.places,
+    contents:
+      slot.contents?.map((one): SocketContent =>
+        one.kind === 'person' && one.portrait !== undefined
+          ? { kind: 'portrait', picture: portraitUrl(one.portrait), name: one.name }
+          : { kind: 'item', name: one.name, ...(one.amount === undefined ? {} : { amount: one.amount }) },
+      ) ?? null,
+  }));
 }
 
 /**
@@ -192,6 +225,7 @@ export function describeStructure(
           ]),
       { what: 'Stands', said: `${place.lat.toFixed(3)}, ${place.lon.toFixed(3)}` },
     ],
+    ...(structure.slots === undefined ? {} : { slots: socketsSaid(structure.slots) ?? [] }),
     links,
   };
 }

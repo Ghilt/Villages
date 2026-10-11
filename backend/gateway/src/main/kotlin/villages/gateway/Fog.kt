@@ -44,7 +44,8 @@ internal class Fog(
     private val points: List<VisionPoint>,
     private val tension: Double = Vision.SURFACE_TENSION,
 ) {
-    private val house: HouseId? = player?.let { HouseId.of(it) }
+    /** Whose fog it is: the house that sees through it, or nobody's. */
+    val house: HouseId? = player?.let { HouseId.of(it) }
     private val revealed = coverageOf(points)
 
     /** The vision of the last day asked about. Two threads asking at once can only work it out twice. */

@@ -1,7 +1,5 @@
 package villages.app
 
-import java.time.Clock
-import java.util.concurrent.ExecutorService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -9,10 +7,6 @@ import villages.application.AnonymousTokens
 import villages.application.Antarctica
 import villages.application.Arrival
 import villages.application.DialogueService
-import villages.application.fate.GroundMaps
-import villages.application.fate.PlaceNamesByMaster
-import villages.application.fate.RollService
-import villages.application.fate.WaterAt
 import villages.application.Faults
 import villages.application.FoundHouseService
 import villages.application.KeyFigureService
@@ -24,6 +18,11 @@ import villages.application.TakeActionService
 import villages.application.VisionService
 import villages.application.WorldClock
 import villages.application.WorldWipe
+import villages.application.fate.GroundMaps
+import villages.application.fate.PlaceNamesByMaster
+import villages.application.fate.RollService
+import villages.application.fate.WaterAt
+import villages.domain.StructureCatalogue
 import villages.gateway.Gateway
 import villages.gateway.Mechanics
 import villages.occurrent.EventWorld
@@ -34,6 +33,8 @@ import villages.projections.HousesProjection
 import villages.projections.RecentEventsProjection
 import villages.projections.SightProjection
 import villages.projections.StructuresProjection
+import java.time.Clock
+import java.util.concurrent.ExecutorService
 
 /**
  * The gateway, wired: the core and every mechanic's part, made from the ports each mechanic reads or acts through.
@@ -72,6 +73,7 @@ class GatewayConfig {
         structures: StructureService,
         antarctica: Antarctica,
         structuresOnTheMap: StructuresProjection,
+        catalogue: StructureCatalogue,
         @Value("\${villages.instruments:true}") instruments: Boolean,
     ): Gateway = Gateway(
         tokens = AnonymousTokens,
@@ -105,6 +107,9 @@ class GatewayConfig {
             antarctica = antarctica,
             instrumentsOpen = instruments,
             worldKept = world,
+
+            structureCatalogue = catalogue,
+            characterById = characters,
         ),
         later = gatewayLater,
         sendOn = gatewaySending,

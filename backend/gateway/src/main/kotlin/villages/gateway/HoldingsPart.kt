@@ -17,6 +17,8 @@ internal class HoldingsPart(
     private val core: Core,
     private val structures: StructuresByCell,
     private val houses: HouseById,
+    /** What a holder is shown of its own slots: every one. */
+    private val slots: SlotsSeen,
 ) : Part {
     private val changes: AutoCloseable = structures.watch { change -> told(change.row) }
 
@@ -37,7 +39,7 @@ internal class HoldingsPart(
     private fun holdingsOf(house: HouseId): YourHoldings = YourHoldings(
         structures.heldBy(house)
             .sortedWith(compareBy({ if (it.faces.last().seatOf?.house == house) 0 else 1 }, { heldSince(it, house) }))
-            .map { it.toView(it.faces.last(), seenUntil = null) },
+            .map { it.toView(it.faces.last(), seenUntil = null, slots.of(it, it.faces.last(), house, everything = true)) },
     )
 
     /** The stamp of the face the house's holding of it began with: the order it came to hold them in. */

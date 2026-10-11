@@ -9,6 +9,23 @@ import { holderViewSchema, pointSchema } from './basics';
  * structure the later stamp is the later face, and a snapshot replaces a copy stamped no later than its
  * `structuresAsOf`.
  */
+/** What fills a place: a person, with the key of their portrait, or an item, with a line about it and how many. */
+export const contentViewSchema = z.object({
+  kind: z.enum(['person', 'item']),
+  id: z.string(),
+  name: z.string(),
+  portrait: z.string().optional(),
+  about: z.string().optional(),
+  amount: z.number().int().optional(),
+});
+
+/** One slot as this house is shown it: `contents` absent, not empty, for a slot it may not see into. */
+export const slotViewSchema = z.object({
+  name: z.string(),
+  places: z.number().int(),
+  contents: z.array(contentViewSchema).optional(),
+});
+
 export const structureViewSchema = z.object({
   id: z.string(),
   structureType: z.string(),
@@ -25,6 +42,8 @@ export const structureViewSchema = z.object({
   seatOf: holderViewSchema.optional(),
   /** True for a ruin, in the face sent; absent for a structure standing. */
   ruin: z.boolean().optional(),
+  /** Its slots, only while the house sees it now; absent out of sight, on a day gone by, and for a type with none. */
+  slots: z.array(slotViewSchema).optional(),
 });
 
 /** A structure came to be in a cell this connection holds and sees. */
@@ -78,4 +97,6 @@ export const structureCommandSchemas = [
   z.object({ type: z.literal('rebuildStructure'), structureId: z.string() }),
 ] as const;
 
+export type SlotView = z.infer<typeof slotViewSchema>;
+export type ContentView = z.infer<typeof contentViewSchema>;
 export type StructureView = z.infer<typeof structureViewSchema>;

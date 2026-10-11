@@ -3,6 +3,7 @@ import { useState } from 'react';
 import type { StructureView } from '@villages/protocol';
 
 import { describeStructure, givesOf } from '../inspect/describe';
+import { Slots } from '../inspect/InspectWindow';
 import { note } from '../log/log';
 import { focusOn } from '../map/focus';
 import { sessionStore } from '../net/gateway';
@@ -140,6 +141,7 @@ function Details({
           </div>
         ))}
       </dl>
+      {said.slots !== undefined && said.slots.length > 0 && <Slots slots={said.slots} />}
     </div>
   );
 }

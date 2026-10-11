@@ -45,6 +45,7 @@ interface InspectingProps {
 export function Inspecting({ subject, room, along }: InspectingProps) {
   const houses = useStore(sessionStore, (state) => state.houses);
   const yourKeyFigures = useStore(sessionStore, (state) => state.yourKeyFigures);
+  const yourHoldings = useStore(sessionStore, (state) => state.yourHoldings);
   const today = useStore(sessionStore, (state) => state.world?.today ?? null);
   const yourHouse = useStore(sessionStore, (state) => state.yourHouse);
   const areas = useStore(areasStore);
@@ -89,10 +90,14 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
         : { said: describeCharacter(seen, today, yours !== undefined), hidden: standing?.seenUntil };
     }
 
-    // A structure is seen standing in a held cell, in the face its house is sent.
+    // A structure is seen standing in a held cell, in the face its house is sent, or as one of this player's own
+    // holdings wherever it stands, which is sent again whenever it changes: of the two, the later stamp.
     if (subject.kind === 'structure') {
       const standing = structuresInView(houses).find((one) => one.id === subject.id);
-      return standing === undefined ? null : { said: sayStructure(standing), hidden: standing.seenUntil };
+      const yours = yourHoldings?.find((one) => one.id === subject.id);
+      const seen =
+        standing === undefined || (yours !== undefined && yours.stamp > standing.stamp) ? yours : standing;
+      return seen === undefined ? null : { said: sayStructure(seen), hidden: seen.seenUntil };
     }
 
     if (subject.kind === 'area') {

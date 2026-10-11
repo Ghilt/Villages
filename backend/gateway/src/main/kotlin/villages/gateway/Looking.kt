@@ -33,6 +33,8 @@ internal data class Looking(
     val fogged: Boolean = true,
     /** What the fog lets through, from the house's vision points: next to nothing until hello says whose. */
     val fog: Fog = Fog.NOBODY,
+    /** What it is shown of a structure's slots: the gateway's, the same for every connection. */
+    val slots: SlotsSeen = SlotsSeen.NONE,
 ) {
     /** Whether it is the world as it is today, rather than an earlier day. */
     val isLive: Boolean get() = at == null
@@ -66,9 +68,12 @@ internal data class Looking(
      */
     fun sent(row: StructureRow, day: WorldTime): StructureView? =
         if (!fogged) {
-            row.faceOn(day)?.let { row.toView(it, null) }
+            row.faceOn(day)?.let { row.toView(it, null, if (isLive) slots.of(row, it, fog.house, everything = true) else null) }
         } else {
-            fog.faceOf(row, day)?.let { (face, hid) -> row.toView(face, hid) }
+            fog.faceOf(row, day)?.let { (face, hid) ->
+                // Its slots only while it is seen, and only today: what is in a slot is never as last seen.
+                row.toView(face, hid, if (hid == null && isLive) slots.of(row, face, fog.house, everything = false) else null)
+            }
         }
 
     /**

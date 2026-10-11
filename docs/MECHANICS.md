@@ -887,7 +887,9 @@ house raises its castle and names it the seat, and the castle's window says so. 
 house holds, the seat first, and a holding pressed shows its details there. A structure can fall to ruin and be
 rebuilt, from the debug panel; a ruin holds nobody and gives nothing. The debug panel raises and lowers a
 structure's level, and its holder sees as far as the new level sees, and fills and empties its slots - a person in
-one slot at a time, a thing with how many of it - strict about how many and permissive about what. A house whose castle changes hands or falls
+one slot at a time, a thing with how many of it - strict about how many and permissive about what. A structure's
+window draws its slots as sockets: its holder sees into every one, another house in sight into the public ones and a
+question in each place of the rest, and nobody out of sight sees into any. A house whose castle changes hands or falls
 loses its seat, and its sight from it, and plays on seatless; how it names another is not decided. Decision record 0092 is the shape and
 `docs/plans/structures.md` the steps, one commit each; the hypothesis is experiment 0018. A castle's ragged gold ground is drawn only while it is selected, its influence zone. Every holding pays its holder
 what its type yields a month at its level, and the house's resources count up from it; a structure's window, and a

@@ -70,6 +70,9 @@ class Gateway(
     /** Where the world is kept and what of it cannot be read: said at hello, while the instruments are open. */
     private val worldKept = mechanics.worldKept
 
+    /** What every connection is shown of a structure's slots. */
+    private val slotsSeen = SlotsSeen(mechanics.structureCatalogue, mechanics.characterById)
+
     /** Which connections hold each cell: the whole of the fan-out index. */
     private val holding = CellIndex<Connection>()
 
@@ -150,7 +153,7 @@ class Gateway(
 
         /** How this connection is looking at the world, replaced whole: see [Looking]. Read by the fan-outs too. */
         @Volatile
-        internal var looking: Looking = Looking()
+        internal var looking: Looking = Looking(slots = slotsSeen)
             private set
 
         /** Set when this session is over, by a takeover or by the socket going away. It then does nothing. */

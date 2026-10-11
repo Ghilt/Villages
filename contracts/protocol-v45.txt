@@ -1,0 +1,289 @@
+# The shape of the wire at version 45: every frame that may cross it, and every field it
+# carries, however deep. Recorded rather than derived so that changing the wire is a deliberate act with
+# a version number on it. Both ends check themselves against this file, which is also what pins the
+# Kotlin constant and the TypeScript one to each other. See ADR 0037.
+#
+# <side> <name on the wire> <field>...          a frame's own fields, sorted; the discriminator is not one
+# <side> <name on the wire> <path> <field>...   an object a field holds, by its path: .field, [] a list's
+#                                              items, {} a map's values, :name one case of a union
+
+version 45
+
+client command .command:addKeyFigure
+client command .command:ageCharacter characterId years
+client command .command:changeLevel by structureId
+client command .command:changePortrait characterId portrait
+client command .command:changeStat by characterId stat
+client command .command:completeDialogueStep dialogueId lineId
+client command .command:emptySlot slot structureId
+client command .command:fillSlot characterId item slot structureId
+client command .command:fillSlot.item about amount name
+client command .command:foundHouse banner name seat
+client command .command:foundHouse.banner charge chargeTincture division field second
+client command .command:foundHouse.seat lat lon
+client command .command:giveVision place
+client command .command:giveVision.place lat lon
+client command .command:grantResource amount resource
+client command .command:killCharacter cause characterId
+client command .command:moveCharacter characterId place
+client command .command:moveCharacter.place lat lon
+client command .command:nextRarity rarity
+client command .command:offerDialogue sample
+client command .command:pledgeResource amount months purpose resource
+client command .command:raiseAntarctica
+client command .command:raiseStructure level place structureType yours
+client command .command:raiseStructure.place lat lon
+client command .command:rebuildStructure structureId
+client command .command:releasePledge pledgeId
+client command .command:roll centre dialogue figure inspectingCharacters inspectingHouses inspectingWaters zoom
+client command .command:roll.centre lat lon
+client command .command:roll.inspectingWaters[] lat lon
+client command .command:ruinStructure cause structureId
+client command .command:spendResource amount resource
+client command .command:takeAction choiceId optionId
+client command .command:takeControl structureId
+client command .command:takeOffTheMap characterId
+client command .command:takeVision visionId
+client command command commandId
+client fogOfWar on
+client hello master playerToken protocolVersion
+client inspect id kind
+client inspectAt .at lat lon
+client inspectAt at
+client ping t0
+client seeAll on
+client subscribeCells cells
+client unsubscribeCells cells
+client viewTime at
+client watchEvents on
+client wipeWorld
+command addKeyFigure
+command ageCharacter characterId years
+command changeLevel by structureId
+command changePortrait characterId portrait
+command changeStat by characterId stat
+command completeDialogueStep dialogueId lineId
+command emptySlot slot structureId
+command fillSlot .item about amount name
+command fillSlot characterId item slot structureId
+command foundHouse .banner charge chargeTincture division field second
+command foundHouse .seat lat lon
+command foundHouse banner name seat
+command giveVision .place lat lon
+command giveVision place
+command grantResource amount resource
+command killCharacter cause characterId
+command moveCharacter .place lat lon
+command moveCharacter characterId place
+command nextRarity rarity
+command offerDialogue sample
+command pledgeResource amount months purpose resource
+command raiseAntarctica
+command raiseStructure .place lat lon
+command raiseStructure level place structureType yours
+command rebuildStructure structureId
+command releasePledge pledgeId
+command roll .centre lat lon
+command roll .inspectingWaters[] lat lon
+command roll centre dialogue figure inspectingCharacters inspectingHouses inspectingWaters zoom
+command ruinStructure cause structureId
+command spendResource amount resource
+command takeAction choiceId optionId
+command takeControl structureId
+command takeOffTheMap characterId
+command takeVision visionId
+delta characterArrived .character agedYears bornOn cell familyName givenName id keyFigureOf place portrait seenUntil sex since species version
+delta characterArrived .character.keyFigureOf[] banner id name
+delta characterArrived .character.keyFigureOf[].banner charge chargeTincture division field second
+delta characterArrived .character.place lat lon
+delta characterArrived character
+delta characterChanged .character agedYears bornOn cell familyName givenName id keyFigureOf place portrait seenUntil sex since species version
+delta characterChanged .character.keyFigureOf[] banner id name
+delta characterChanged .character.keyFigureOf[].banner charge chargeTincture division field second
+delta characterChanged .character.place lat lon
+delta characterChanged character
+delta characterGone id version
+delta houseAppeared .house banner cell id name seat seenUntil since version
+delta houseAppeared .house.banner charge chargeTincture division field second
+delta houseAppeared .house.seat lat lon
+delta houseAppeared house
+delta houseChanged .house banner cell id name seat seenUntil since version
+delta houseChanged .house.banner charge chargeTincture division field second
+delta houseChanged .house.seat lat lon
+delta houseChanged house
+delta structureArrived .structure cell holder id level name place ruin seatOf seenUntil significance since slots stamp structureType
+delta structureArrived .structure.holder banner id name
+delta structureArrived .structure.holder.banner charge chargeTincture division field second
+delta structureArrived .structure.place lat lon
+delta structureArrived .structure.seatOf banner id name
+delta structureArrived .structure.seatOf.banner charge chargeTincture division field second
+delta structureArrived .structure.slots[] contents name places
+delta structureArrived .structure.slots[].contents[] about amount id kind name portrait
+delta structureArrived structure
+delta structureChanged .structure cell holder id level name place ruin seatOf seenUntil significance since slots stamp structureType
+delta structureChanged .structure.holder banner id name
+delta structureChanged .structure.holder.banner charge chargeTincture division field second
+delta structureChanged .structure.place lat lon
+delta structureChanged .structure.seatOf banner id name
+delta structureChanged .structure.seatOf.banner charge chargeTincture division field second
+delta structureChanged .structure.slots[] contents name places
+delta structureChanged .structure.slots[].contents[] about amount id kind name portrait
+delta structureChanged structure
+effect converse title
+effect foundAt .banner charge chargeTincture division field second
+effect foundAt .seat lat lon
+effect foundAt banner name seat
+effect grant amount resource
+effect spend amount resource
+server batch .deltas[]:characterArrived character
+server batch .deltas[]:characterArrived.character agedYears bornOn cell familyName givenName id keyFigureOf place portrait seenUntil sex since species version
+server batch .deltas[]:characterArrived.character.keyFigureOf[] banner id name
+server batch .deltas[]:characterArrived.character.keyFigureOf[].banner charge chargeTincture division field second
+server batch .deltas[]:characterArrived.character.place lat lon
+server batch .deltas[]:characterChanged character
+server batch .deltas[]:characterChanged.character agedYears bornOn cell familyName givenName id keyFigureOf place portrait seenUntil sex since species version
+server batch .deltas[]:characterChanged.character.keyFigureOf[] banner id name
+server batch .deltas[]:characterChanged.character.keyFigureOf[].banner charge chargeTincture division field second
+server batch .deltas[]:characterChanged.character.place lat lon
+server batch .deltas[]:characterGone id version
+server batch .deltas[]:houseAppeared house
+server batch .deltas[]:houseAppeared.house banner cell id name seat seenUntil since version
+server batch .deltas[]:houseAppeared.house.banner charge chargeTincture division field second
+server batch .deltas[]:houseAppeared.house.seat lat lon
+server batch .deltas[]:houseChanged house
+server batch .deltas[]:houseChanged.house banner cell id name seat seenUntil since version
+server batch .deltas[]:houseChanged.house.banner charge chargeTincture division field second
+server batch .deltas[]:houseChanged.house.seat lat lon
+server batch .deltas[]:structureArrived structure
+server batch .deltas[]:structureArrived.structure cell holder id level name place ruin seatOf seenUntil significance since slots stamp structureType
+server batch .deltas[]:structureArrived.structure.holder banner id name
+server batch .deltas[]:structureArrived.structure.holder.banner charge chargeTincture division field second
+server batch .deltas[]:structureArrived.structure.place lat lon
+server batch .deltas[]:structureArrived.structure.seatOf banner id name
+server batch .deltas[]:structureArrived.structure.seatOf.banner charge chargeTincture division field second
+server batch .deltas[]:structureArrived.structure.slots[] contents name places
+server batch .deltas[]:structureArrived.structure.slots[].contents[] about amount id kind name portrait
+server batch .deltas[]:structureChanged structure
+server batch .deltas[]:structureChanged.structure cell holder id level name place ruin seatOf seenUntil significance since slots stamp structureType
+server batch .deltas[]:structureChanged.structure.holder banner id name
+server batch .deltas[]:structureChanged.structure.holder.banner charge chargeTincture division field second
+server batch .deltas[]:structureChanged.structure.place lat lon
+server batch .deltas[]:structureChanged.structure.seatOf banner id name
+server batch .deltas[]:structureChanged.structure.seatOf.banner charge chargeTincture division field second
+server batch .deltas[]:structureChanged.structure.slots[] contents name places
+server batch .deltas[]:structureChanged.structure.slots[].contents[] about amount id kind name portrait
+server batch deltas
+server commandAccepted commandId
+server commandRejected commandId reason
+server error code message
+server event causationId correlationId data eventType id stream streamVersion time
+server inspected .character agedYears bornOn cell familyName givenName id keyFigureOf place portrait seenUntil sex since species version
+server inspected .character.keyFigureOf[] banner id name
+server inspected .character.keyFigureOf[].banner charge chargeTincture division field second
+server inspected .character.place lat lon
+server inspected .house banner cell id name seat seenUntil since version
+server inspected .house.banner charge chargeTincture division field second
+server inspected .house.seat lat lon
+server inspected .structure cell holder id level name place ruin seatOf seenUntil significance since slots stamp structureType
+server inspected .structure.holder banner id name
+server inspected .structure.holder.banner charge chargeTincture division field second
+server inspected .structure.place lat lon
+server inspected .structure.seatOf banner id name
+server inspected .structure.seatOf.banner charge chargeTincture division field second
+server inspected .structure.slots[] contents name places
+server inspected .structure.slots[].contents[] about amount id kind name portrait
+server inspected character house id kind structure
+server inspectedAt .at lat lon
+server inspectedAt .water about also id kind lines name of1790
+server inspectedAt .water.lines[][] lat lon
+server inspectedAt at revealed water
+server pong serverTime t0
+server resync cells
+server rollDrawn .considered[] action weight
+server rollDrawn considered forced opened rarity
+server snapshot .characters[] agedYears bornOn cell familyName givenName id keyFigureOf place portrait seenUntil sex since species version
+server snapshot .characters[].keyFigureOf[] banner id name
+server snapshot .characters[].keyFigureOf[].banner charge chargeTincture division field second
+server snapshot .characters[].place lat lon
+server snapshot .houses[] banner cell id name seat seenUntil since version
+server snapshot .houses[].banner charge chargeTincture division field second
+server snapshot .houses[].seat lat lon
+server snapshot .structures[] cell holder id level name place ruin seatOf seenUntil significance since slots stamp structureType
+server snapshot .structures[].holder banner id name
+server snapshot .structures[].holder.banner charge chargeTincture division field second
+server snapshot .structures[].place lat lon
+server snapshot .structures[].seatOf banner id name
+server snapshot .structures[].seatOf.banner charge chargeTincture division field second
+server snapshot .structures[].slots[] contents name places
+server snapshot .structures[].slots[].contents[] about amount id kind name portrait
+server snapshot asOfVersion cell characters houses omitted omittedCharacters omittedStructures structures structuresAsOf
+server stands stands x y
+server takenOver message
+server welcome .world earliest today
+server welcome keptIn playerId serverTime world
+server worldWiped message
+server yourChoice .choice id omens options prompt
+server yourChoice .choice.omens[] key kind value words
+server yourChoice .choice.options[] detail effect id label omens rarity
+server yourChoice .choice.options[].effect:converse title
+server yourChoice .choice.options[].effect:foundAt banner name seat
+server yourChoice .choice.options[].effect:foundAt.banner charge chargeTincture division field second
+server yourChoice .choice.options[].effect:foundAt.seat lat lon
+server yourChoice .choice.options[].effect:grant amount resource
+server yourChoice .choice.options[].effect:spend amount resource
+server yourChoice choice
+server yourDialogues .dialogues[] ending id next options revision said scene speakers title
+server yourDialogues .dialogues[].ending:completed
+server yourDialogues .dialogues[].ending:lost because
+server yourDialogues .dialogues[].ending:lost.because:alive character
+server yourDialogues .dialogues[].ending:open
+server yourDialogues .dialogues[].next[] id revealImpact shows speaker words
+server yourDialogues .dialogues[].next[].revealImpact:hidden
+server yourDialogues .dialogues[].next[].revealImpact:shown impacts
+server yourDialogues .dialogues[].next[].revealImpact:shown.impacts[] amount resource
+server yourDialogues .dialogues[].next[].shows:character id
+server yourDialogues .dialogues[].next[].shows:house id
+server yourDialogues .dialogues[].next[].shows:place at
+server yourDialogues .dialogues[].next[].shows:place.at lat lon
+server yourDialogues .dialogues[].options[] id revealImpact shows speaker words
+server yourDialogues .dialogues[].options[].revealImpact:hidden
+server yourDialogues .dialogues[].options[].revealImpact:shown impacts
+server yourDialogues .dialogues[].options[].revealImpact:shown.impacts[] amount resource
+server yourDialogues .dialogues[].options[].shows:character id
+server yourDialogues .dialogues[].options[].shows:house id
+server yourDialogues .dialogues[].options[].shows:place at
+server yourDialogues .dialogues[].options[].shows:place.at lat lon
+server yourDialogues .dialogues[].said[] effects id speaker words
+server yourDialogues .dialogues[].said[].effects[]:converse title
+server yourDialogues .dialogues[].said[].effects[]:foundAt banner name seat
+server yourDialogues .dialogues[].said[].effects[]:foundAt.banner charge chargeTincture division field second
+server yourDialogues .dialogues[].said[].effects[]:foundAt.seat lat lon
+server yourDialogues .dialogues[].said[].effects[]:grant amount resource
+server yourDialogues .dialogues[].said[].effects[]:spend amount resource
+server yourDialogues .dialogues[].speakers[] character id name party portrait
+server yourDialogues dialogues
+server yourHoldings .holdings[] cell holder id level name place ruin seatOf seenUntil significance since slots stamp structureType
+server yourHoldings .holdings[].holder banner id name
+server yourHoldings .holdings[].holder.banner charge chargeTincture division field second
+server yourHoldings .holdings[].place lat lon
+server yourHoldings .holdings[].seatOf banner id name
+server yourHoldings .holdings[].seatOf.banner charge chargeTincture division field second
+server yourHoldings .holdings[].slots[] contents name places
+server yourHoldings .holdings[].slots[].contents[] about amount id kind name portrait
+server yourHoldings holdings
+server yourHouse .yours house pledges resources
+server yourHouse .yours.house banner cell id name seat seenUntil since version
+server yourHouse .yours.house.banner charge chargeTincture division field second
+server yourHouse .yours.house.seat lat lon
+server yourHouse .yours.pledges[] amount id purpose resource until
+server yourHouse .yours.resources{} asOf pledged ratePerSecond total
+server yourHouse yours
+server yourKeyFigures .keyFigures[] agedYears bornOn familyName givenName id keyFigureOf place portrait sex species stats version
+server yourKeyFigures .keyFigures[].keyFigureOf[] banner id name
+server yourKeyFigures .keyFigures[].keyFigureOf[].banner charge chargeTincture division field second
+server yourKeyFigures .keyFigures[].place lat lon
+server yourKeyFigures .keyFigures[].stats kindness physical piety reason
+server yourKeyFigures keyFigures
+server yourSight .points[] from kind of place radius since until
+server yourSight .points[].place lat lon
+server yourSight points tension

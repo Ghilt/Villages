@@ -136,6 +136,14 @@
   overflow-wrap: anywhere;
 }
 
+/* A structure's slots, a row of sockets each, under its facts; the Holdings tab's details draw the same. */
+.inspect__slots {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin: 0.8rem 0 0;
+}
+
 /* A resource is a rate, so this number is never still. Tabular figures keep it from jittering. */
 .inspect__ticking {
   font-variant-numeric: tabular-nums;
