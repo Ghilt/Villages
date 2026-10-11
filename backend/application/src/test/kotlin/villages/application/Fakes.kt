@@ -10,6 +10,11 @@ import villages.domain.HouseCommand
 import villages.domain.HouseDecider
 import villages.domain.HouseEvent
 import villages.domain.HouseId
+import villages.domain.StructureCatalogue
+import villages.domain.StructureCommand
+import villages.domain.StructureDecider
+import villages.domain.StructureEvent
+import villages.domain.StructureId
 import java.util.UUID
 
 /*
@@ -18,13 +23,17 @@ import java.util.UUID
  */
 
 /**
- * Houses and characters folded in memory with their real deciders, telling their subscribers every event as it is
+ * Houses, characters and structures - these over the [catalogue] - folded in memory with their real deciders, telling their subscribers every event as it is
  * written; able to be told of an event from anywhere else, as though another stream had written it; and counting
  * the commands it is asked to run, refused or not.
  */
-internal class TinyWorld : HouseCommandExecutor, CharacterCommandExecutor, EventFeed {
+internal class TinyWorld(
+    /** What its structures are, for a test that raises any: a catalogue cannot be empty, so none is none. */
+    private val catalogue: StructureCatalogue? = null,
+) : HouseCommandExecutor, CharacterCommandExecutor, StructureCommandExecutor, EventFeed {
     private val houses = mutableMapOf<HouseId, MutableList<HouseEvent>>()
     private val characters = mutableMapOf<CharacterId, MutableList<CharacterEvent>>()
+    private val structures = mutableMapOf<StructureId, MutableList<StructureEvent>>()
     private val subscribers = mutableListOf<(StoredEvent) -> Unit>()
     val stored = mutableListOf<StoredEvent>()
     var commands = 0
@@ -48,6 +57,16 @@ internal class TinyWorld : HouseCommandExecutor, CharacterCommandExecutor, Event
         }
     }
 
+    override fun execute(command: StructureCommand, provenance: Provenance) {
+        commands++
+        val decider = StructureDecider(checkNotNull(catalogue) { "this tiny world was made without a catalogue of structures" })
+        val held = structures.getOrPut(command.structureId) { mutableListOf() }
+        decider.decide(command, decider.fold(held)).forEach { event ->
+            held += event
+            tell(event, command.structureId.stream, held.size.toLong(), provenance)
+        }
+    }
+
     /** An event from some other stream, arriving on the feed in the story given. */
     fun hear(event: Event, story: UUID): StoredEvent =
         tell(event, ELSEWHERE, stored.count { it.stream == ELSEWHERE } + 1L, Provenance(UUID.randomUUID(), story))
@@ -59,6 +78,7 @@ internal class TinyWorld : HouseCommandExecutor, CharacterCommandExecutor, Event
     fun wipe() {
         houses.clear()
         characters.clear()
+        structures.clear()
         stored.clear()
     }
 

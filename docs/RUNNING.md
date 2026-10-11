@@ -271,11 +271,14 @@ stage alone, with none of the debug panel in it (decision record 0079).
   or *see everything* on, until a house sees them.
 - Taking one: **take control of this building**, under the raising levers, hands the structure whose window was
   opened last to your house; the line under it names that building, or asks for a structure's window first. One
-  `villages.structure.changedHands.v1` on the event page, from its holder to your house, and nothing else yet:
-  what it pays and what it lets you see come with their own steps. The log says `taking control of the Antarctic
-  mill` with its answer, and the batch that follows `the Antarctic mill changed, held by Ravenscar`; on the map it
-  flies your pennant, and its window says it is held by your house, its mark named *Your holding*. Yours already
-  is refused `sameHolder`, and with no house `noSuchHouse`. Standing in for a story handing one over or a house
+  `villages.structure.changedHands.v1` on the event page, from its holder to your house, and a moment after, in
+  the same story, your house's `gainedVision` from it at the catalogue's `sightKm` for its type and level; the
+  house it was taken from gets `lostVision`. The fog lifts round it, and the log says `taking control of the
+  Antarctic mill` with its answer, the batch that follows `the Antarctic mill changed, held by Ravenscar`, and the
+  `sight` line names it: `the seat (34 km) and the Antarctic mill (6 km) give vision`. On the map it flies your
+  pennant, and its window says it is held by your house, its mark named *Your holding*. What it pays comes with
+  its own step. Yours already is refused `sameHolder`, and with no house `noSuchHouse`. One raised **yours** sees
+  the same way from the moment it is raised. Standing in for a story handing one over or a house
   taking it; closed with the instruments.
 - A structure on the map: its type's placeholder picture, drawn in code (`sprites/structurePictures.ts`) in its
   own colours, as tall on the ground as `groundHeight` in the catalogue says at its level, and far out the same

@@ -24,10 +24,14 @@ function inWords(names: readonly string[]): string {
   return `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
 }
 
+/**
+ * `nameOf` names a key figure or a structure by its id, where the page has heard of them: a vision given from a
+ * structure is said by the structure's name, *the Antarctic mill*.
+ */
 export function describeSight(
   points: readonly VisionPointView[],
   today: number | null,
-  nameOf: (characterId: string) => string | undefined,
+  nameOf: (id: string) => string | undefined,
 ): string {
   if (points.length === 0) {
     return 'no vision yet: there is no house to see from';
@@ -38,13 +42,18 @@ export function describeSight(
       ? 'the seat'
       : point.kind === 'keyFigure'
         ? (nameOf(point.of ?? '') ?? 'a key figure')
-        : `the vision given at ${point.place.lat.toFixed(2)}, ${point.place.lon.toFixed(2)}`,
+        : point.from !== undefined
+          ? (nameOf(point.from) ?? 'a structure')
+          : `the vision given at ${point.place.lat.toFixed(2)}, ${point.place.lon.toFixed(2)}`,
   );
+  // One reach for all of them is said once; reaches that differ, a seat's and a mill's, are said beside each.
   const radii = [...new Set(lasting.map((point) => point.radius))];
   const reach = radii.length === 1 ? `, ${radii[0]} km around ${lasting.length === 1 ? 'it' : 'each'}` : '';
+  const said =
+    radii.length === 1 ? givers : givers.map((giver, at) => `${giver} (${lasting[at]!.radius} km)`);
   const seen = `${points.length} ${points.length === 1 ? 'place' : 'places'} seen from in all`;
   if (lasting.length === 0) {
     return `nothing gives vision now; ${seen}`;
   }
-  return `${inWords(givers)} ${lasting.length === 1 ? 'gives' : 'give'} vision${reach}; ${seen}`;
+  return `${inWords(said)} ${lasting.length === 1 ? 'gives' : 'give'} vision${reach}; ${seen}`;
 }

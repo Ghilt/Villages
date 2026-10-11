@@ -5,8 +5,12 @@ import org.springframework.boot.ApplicationRunner
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import villages.application.Antarctica
+import villages.application.Faults
+import villages.application.ScheduledLater
+import villages.application.StandingEffects
 import villages.application.StructureCommandExecutor
 import villages.application.StructureService
+import villages.application.VisionService
 import villages.application.WorldClock
 import villages.domain.StructureCatalogue
 import villages.occurrent.EventWorld
@@ -40,6 +44,16 @@ class StructuresConfig {
     @Bean
     fun structures(structures: StructureCommandExecutor, houses: HousesProjection, clock: Clock, worldClock: WorldClock): StructureService =
         StructureService(structures, houses, { clock.instant() }, worldClock)
+
+    /** What each structure gives its holder, written into the holder's history: for now what it lets them see. */
+    @Bean(initMethod = "start", destroyMethod = "close")
+    fun standingEffects(
+        world: EventWorld,
+        later: ScheduledLater,
+        faults: Faults,
+        catalogue: StructureCatalogue,
+        visions: VisionService,
+    ): StandingEffects = StandingEffects(world.feed, later, faults, catalogue, visions)
 
     @Bean
     fun antarctica(structures: StructureCommandExecutor, catalogue: StructureCatalogue, clock: Clock, worldClock: WorldClock): Antarctica =

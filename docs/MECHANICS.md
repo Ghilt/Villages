@@ -882,7 +882,7 @@ raises one where the map looks. The page is sent them through the fog, each in t
 draws them: a placeholder picture a type, drawn in code and the same in every culture, larger a level up, and the
 pennant of the house holding it. A click opens its window: its name, its type, who holds it, its level and where it
 stands. The debug panel's *take control of this building* hands the one whose window is open to the player's house,
-which then flies their pennant; it pays nothing and shows nothing more yet. Decision record 0092 is the shape and
+which then flies their pennant and sees round it, as far as its type and level see; it pays nothing yet. Decision record 0092 is the shape and
 `docs/plans/structures.md` the steps, one commit each; the hypothesis is experiment 0018. Today a house's holding is its seat, a place on its founding event, drawn as a
 castle in the house's colours with ragged gold ground about it, and nothing in the game pays a house anything.
 

@@ -4,6 +4,7 @@ import villages.domain.GiveVision
 import villages.domain.HouseId
 import villages.domain.Location
 import villages.domain.PlayerId
+import villages.domain.StructureId
 import villages.domain.TakeVision
 import villages.domain.VisionId
 
@@ -36,5 +37,15 @@ class VisionService(
 
     fun take(player: PlayerId, visionId: VisionId, provenance: Provenance) {
         executor.execute(TakeVision(HouseId.of(player), visionId, world.today(), clock.now()), provenance)
+    }
+
+    /** Gives [house] the sight of a structure it holds, [radius] kilometres about [place], under the id worked out. */
+    fun giveFrom(house: HouseId, structure: StructureId, visionId: VisionId, place: Location, radius: Double, provenance: Provenance) {
+        executor.execute(GiveVision(house, visionId, place, world.today(), clock.now(), radius, structure), provenance)
+    }
+
+    /** Takes away a vision [house] has: what a structure it no longer holds gave it. */
+    fun takeFrom(house: HouseId, visionId: VisionId, provenance: Provenance) {
+        executor.execute(TakeVision(house, visionId, world.today(), clock.now()), provenance)
     }
 }

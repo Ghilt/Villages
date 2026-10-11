@@ -218,7 +218,7 @@ class SightProjectionSpec : StringSpec({
         feed.deliver(founded(ada))
 
         // Twice the size of anything today, which is what a rule changed after the giving would look like.
-        feed.deliver(HouseGainedVision(adas, far, visby, 68.0, founding + 1, noon))
+        feed.deliver(HouseGainedVision(adas, far, visby, 68.0, null, founding + 1, noon))
         feed.deliver(HouseLostVision(adas, far, founding + 6, noon))
 
         sights.of(adas).points shouldContainExactly listOf(

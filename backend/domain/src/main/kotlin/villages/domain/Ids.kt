@@ -86,7 +86,16 @@ value class PledgeId(val value: UUID)
 
 /** The identity of one vision given outright, so that taking it away can name which. See decision 0061. */
 @JvmInline
-value class VisionId(val value: UUID)
+value class VisionId(val value: UUID) {
+    companion object {
+        /**
+         * The vision [house] has from [structure] for the holding that began at the structure's [since]th event:
+         * worked out rather than minted, so the same holding given twice is refused rather than seen twice.
+         */
+        fun seenFrom(structure: StructureId, house: HouseId, since: Long): VisionId =
+            VisionId(UUID.nameUUIDFromBytes("villages:vision:${structure.value}:${house.value}:$since".toByteArray(Charsets.UTF_8)))
+    }
+}
 
 /** The human, for now an anonymous token the browser generated. */
 @JvmInline

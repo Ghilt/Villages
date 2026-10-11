@@ -25,5 +25,6 @@ internal fun Sight.toView(): List<VisionPointView> = points.map { point ->
         radius = point.radius,
         since = point.since.day,
         until = point.until?.day,
+        from = point.from?.value?.toString(),
     )
 }

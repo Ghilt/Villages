@@ -21,7 +21,7 @@ import tools.jackson.databind.JsonNode
  * It goes up whenever a frame or a field changes, and `ProtocolShapeSpec` makes sure of that: every frame's shape
  * is recorded in contracts/protocol-v<n>.txt, and what each version changed is in contracts/README.md.
  */
-const val PROTOCOL_VERSION = 38
+const val PROTOCOL_VERSION = 39
 
 data class Point(val lat: Double, val lon: Double)
 
@@ -308,7 +308,7 @@ data class YourSight(val points: List<VisionPointView>, val tension: Double) : S
 
 /**
  * Somewhere the house sees from. `kind` says what gives it - `seat`, `keyFigure` or `given` - and `of` is the
- * key figure's id or the given vision's, absent for the seat. `radius` is how far it sees around `place`, in **kilometres** on the
+ * key figure's id or the given vision's, absent for the seat; `from` is the structure a vision given is seen from. `radius` is how far it sees around `place`, in **kilometres** on the
  * ground: how big that is on the map is worked out at the place's latitude, where Mercator draws the circle
  * round. `since` and `until` are world-days; `until` is absent while it still gives vision.
  */
@@ -320,6 +320,7 @@ data class VisionPointView(
     val radius: Double,
     val since: Long,
     val until: Long? = null,
+    val from: String? = null,
 )
 
 /**

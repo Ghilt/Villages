@@ -4,6 +4,7 @@ import villages.domain.CharacterId
 import villages.domain.HouseId
 import villages.domain.Location
 import villages.domain.PlayerId
+import villages.domain.StructureId
 import villages.domain.VisionId
 import villages.domain.WorldTime
 
@@ -39,6 +40,8 @@ data class VisionPoint(
     val since: WorldTime,
     /** The day it stopped giving vision, or null while it still does. */
     val until: WorldTime?,
+    /** The structure a vision given is seen from, or null: what the log names it by. See 0092. */
+    val from: StructureId? = null,
 ) {
     /** Whether it gives vision on a day: `since <= day < until`, the rule every span in the world keeps. */
     fun covers(at: WorldTime): Boolean = at >= since && (until == null || at < until)

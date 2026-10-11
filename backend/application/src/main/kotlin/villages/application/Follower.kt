@@ -25,7 +25,14 @@ abstract class Follower(private val feed: EventFeed) : Resettable, AutoCloseable
             started = true
             subscription = feed.subscribe(Start.FROM_THE_BEGINNING, NamedSubscriber(javaClass.simpleName, ::apply))
         }
+        caughtUp()
     }
+
+    /**
+     * Called once the history is folded, before anything new is: for a listener that must not act on the past as it
+     * replays, because the past already holds what it did, and sets things right from its whole fold here instead.
+     */
+    protected open fun caughtUp() {}
 
     /** Whether it has been started: what the app's own test asks of every follower it is made of. */
     val isStarted: Boolean

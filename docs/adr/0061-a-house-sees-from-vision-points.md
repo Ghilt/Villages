@@ -153,3 +153,12 @@ in its vision points - so *as last seen* is a query of the two and not a third t
 - **The answer is worked out once a structure, a day and a face**, and kept in the fog, which is made anew whenever
   the sight changes: a snapshot asks it of every structure in a cell.
 - A structure's slots are never shown as last seen, so they are no part of a face.
+
+## Amendment, 2026-10-11: a holding sees, written into its holder's history
+
+A structure lets the house holding it see round it, as far as its type and level see in the catalogue. That
+sight is not worked out here as a seat's or a key figure's is, but written into the house's history as vision
+given: `gainedVision` carries the radius of the moment and `from`, the structure, and `lostVision` ends it when
+the structure changes hands. Adam's choice of 2026-10-08, so that retuning the catalogue never rewrites what a
+house saw. The sight projection folds them as it folds any vision given, and the log names the structure. Written
+by the standing-effects listener; wire version 38 carries `from` on a vision point. See docs/plans/structures.md.

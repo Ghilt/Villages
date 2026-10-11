@@ -1,4 +1,4 @@
-import { charactersInView } from '@villages/client-core';
+import { charactersInView, structuresInView } from '@villages/client-core';
 import { PROTOCOL_VERSION, describeDay } from '@villages/protocol';
 import type { ServerFrame } from '@villages/protocol';
 
@@ -156,10 +156,14 @@ export const sessionLog: GatewayListener = {
         }
         return;
       case 'yourSight': {
-        const figures = new Map((was.yourKeyFigures ?? []).map((one) => [one.id, fullName(one)]));
+        // Key figures by their names, and a structure a vision is seen from by its own, where a cell has carried it.
+        const named = new Map<string, string>([
+          ...(was.yourKeyFigures ?? []).map((one): [string, string] => [one.id, fullName(one)]),
+          ...structuresInView(was.houses).map((one): [string, string] => [one.id, one.name]),
+        ]);
         note(
           'sight',
-          describeSight(frame.points, was.world?.today ?? null, (id) => figures.get(id)),
+          describeSight(frame.points, was.world?.today ?? null, (id) => named.get(id)),
         );
         return;
       }

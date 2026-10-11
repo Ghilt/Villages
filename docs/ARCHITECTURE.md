@@ -367,13 +367,13 @@ and the relief link their programs and draw their tiles with the same few helper
 
 ## What acts on its own
 
-Three things in the program act without anybody sending a command, and they keep the same rules: one
+Four things in the program act without anybody sending a command, and they keep the same rules: one
 subscription to the feed from the beginning, with a fold of their own rather than a read of a read model,
 because two subscriptions can stand at different points in the feed; commands issued through `Later`,
 never inside the feed's own callback; no cancellation table; and every refusal that means "already done"
 swallowed, which is what makes a replay write nothing twice.
 
-Those rules are kept once, in **`Reaction`**, which each of the three is: `issueLater(what, settled)`
+Those rules are kept once, in **`Reaction`**, which each of the four is: `issueLater(what, settled)`
 plans a command on `Later`, swallows the refusals the caller names as meaning "already done" and the want
 of a house a wipe took, and reports anything else - a write conflict the executor could not get past
 included - as a fault under the reaction's name and what it was doing. What it writes continues the story
@@ -388,7 +388,9 @@ wipe now does nothing at all (0036). The wipe is one moment that no command cros
 followers only once the feed has handed them everything written before it, and a reaction checks its plan is of
 this world and issues it in one step outside a wipe, so nothing from before one is folded into the world after it
 or sets anything off there. A follower subscribes under its own name, `NamedSubscriber`, so that a
-fault in its fold says which one it was.
+fault in its fold says which one it was. Once the history is folded, before anything new is, a follower is told
+`caughtUp()`: for a listener that must not act on the past as it goes by, because the past already holds what it
+did, and sets things right from its whole fold there instead.
 
 - **The pledge release**, `Pledges`, waits out a pledge's span and gives it back: one wake-up a pledge, at
   the moment it is due, and none without one. See decision record 0053.
@@ -401,6 +403,12 @@ fault in its fold says which one it was.
   every house with an open dialogue that needs one, in the story of the event that broke it; a dialogue
   offered with a requirement already broken lapses at once. What a failure ends is the house's own rule. A
   death is heard by both listeners, each for its own concern. See decision record 0071.
+- **The standing-effects listener**, `StandingEffects`, writes what each structure gives its holder into the
+  holder's history: for now what it lets them see, `gainedVision` from it at the catalogue's radius and
+  `lostVision` when it changes hands. It **reconciles** rather than replays: for a house and a structure it plans
+  "set this right" and works out what is right when that runs, from its own fold, so a change of hands comes right
+  in either order and an id worked out from the holding refuses a second gift. It plans nothing while the history
+  replays, and sets every holding right at `caughtUp()`. See docs/plans/structures.md.
 
 ## Scale principles
 

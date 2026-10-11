@@ -30,6 +30,7 @@ import villages.domain.ResourceEvent
 import villages.domain.ChoiceEvent
 import villages.domain.DialogueEvent
 import villages.domain.StructureEvent
+import villages.domain.StructureId
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CopyOnWriteArraySet
@@ -79,7 +80,7 @@ class SightProjection(feed: EventFeed) : Follower(feed), SightsByHouse {
 
             // The size is the event's own, not the rule's today: a vision given is what it was given as.
             is HouseGainedVision -> {
-                open(event.houseId, VisionSource.Given(event.visionId), event.place, event.radius, event.worldTime)
+                open(event.houseId, VisionSource.Given(event.visionId), event.place, event.radius, event.worldTime, event.from)
                 tell(event.houseId)
             }
 
@@ -138,9 +139,9 @@ class SightProjection(feed: EventFeed) : Follower(feed), SightsByHouse {
         }
     }
 
-    private fun open(house: HouseId, source: VisionSource, place: Location, radius: Double, on: WorldTime) {
+    private fun open(house: HouseId, source: VisionSource, place: Location, radius: Double, on: WorldTime, from: StructureId? = null) {
         points.getOrPut(house) { CopyOnWriteArrayList() } +=
-            VisionPoint(source, place, radius = radius, since = on, until = null)
+            VisionPoint(source, place, radius = radius, since = on, until = null, from = from)
     }
 
     /** Ends the point this source is giving the house, if it is giving one. Says whether it was. */

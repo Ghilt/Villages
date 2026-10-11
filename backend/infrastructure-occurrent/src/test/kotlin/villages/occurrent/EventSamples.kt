@@ -244,7 +244,7 @@ internal object EventSamples {
     val castleLeft = StructureChangedHands(antarcticCastle, from = house, to = null, WorldTime(653_706), noon)
 
     val gotland = VisionId(UUID.fromString("dd000000-0000-4000-8000-000000000001"))
-    val sawGotland = HouseGainedVision(house, gotland, Location(57.64, 18.30), 34.0, day, noon)
+    val sawGotland = HouseGainedVision(house, gotland, Location(57.64, 18.30), 34.0, null, day, noon)
     val lostGotland = HouseLostVision(house, gotland, day, noon)
 
     // A dialogue with every case of every sealed field in it: each thing that can follow a line, a grant, a

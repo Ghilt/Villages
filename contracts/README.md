@@ -107,3 +107,5 @@ recorded over. See decision record 0037. What each one changed:
   `structure`, its `StructureView` in the face the house last saw, by the rule its cell's snapshot keeps.
 - **38** - a structure changes hands: Adam's lever `takeControl`, a structure's id, hands it to the sender's house,
   and a batch's `structureChanged` delta carries the new face to whoever sees or holds it, landed by its stamp.
+- **39** - a vision point says the structure it is seen from: `yourSight`'s points carry `from`, the structure a
+  vision given is seen from, for what a holding lets its holder see.

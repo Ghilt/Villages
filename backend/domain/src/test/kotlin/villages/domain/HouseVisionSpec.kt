@@ -11,7 +11,7 @@ class HouseVisionSpec : StringSpec({
     "a house given vision of a place sees a circle as big as Mallorca about it, from that day on" {
         val events = HouseDecider.decide(GiveVision(ravenscar.houseId, vision(1), gotland, day, noon), founded())
 
-        events.single() shouldBe HouseGainedVision(ravenscar.houseId, vision(1), gotland, Vision.MALLORCA, day, noon)
+        events.single() shouldBe HouseGainedVision(ravenscar.houseId, vision(1), gotland, Vision.MALLORCA, null, day, noon)
         give(founded(), 1).shouldBeInstanceOf<House.Founded>().visions shouldBe listOf(vision(1))
         Vision.MALLORCA shouldBe 34.0
     }

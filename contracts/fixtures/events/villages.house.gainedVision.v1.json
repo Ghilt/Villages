@@ -11,6 +11,7 @@
       "lon": 18.3
     },
     "radius": 34.0,
+    "from": null,
     "worldTime": 454901,
     "recordedAt": "2026-09-04T12:00:00Z"
   }

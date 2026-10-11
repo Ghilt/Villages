@@ -125,7 +125,7 @@ export const characterOnMapViewSchema = z.object({
 
 /**
  * Somewhere the player's house sees from. `kind` says what gives it and `of` is the key figure's id or the
- * given vision's, absent for the seat. `radius` is how far it sees around `place`, in **kilometres** on the ground; how big that is
+ * given vision's, absent for the seat; `from` the structure a vision given is seen from. `radius` is how far it sees around `place`, in **kilometres** on the ground; how big that is
  * on the map is worked out at the place's latitude. `since` and `until` are world-days, and `until` is
  * absent while it still gives vision. See decision record 0061.
  */
@@ -136,6 +136,7 @@ export const visionPointViewSchema = z.object({
   radius: z.number().positive(),
   since: worldDaySchema,
   until: worldDaySchema.optional(),
+  from: z.string().optional(),
 });
 
 export const commandPayloadSchema = z.discriminatedUnion('type', [

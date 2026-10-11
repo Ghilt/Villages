@@ -169,8 +169,9 @@ data class FailRequirement(
 
 /**
  * Give the house vision of a place, outright: it sees a circle about the place from this world-day until the
- * vision is taken away. The debug panel's lever today, and what a storyline giving sight of a far coast will
- * issue. See decision record 0061.
+ * vision is taken away. The debug panel's lever, what a storyline giving sight of a far coast will issue, and what
+ * a structure gives its holder, `from` it, at the radius its type and level see: the catalogue's to say, which the
+ * house's rules cannot read, so the command carries it. See decision records 0061 and 0092.
  */
 data class GiveVision(
     override val houseId: HouseId,
@@ -178,6 +179,10 @@ data class GiveVision(
     val place: Location,
     val worldTime: WorldTime,
     val recordedAt: Instant,
+    /** How far it sees, in kilometres: a seat's unless a structure's type and level say otherwise. */
+    val radius: Double = Vision.MALLORCA,
+    /** The structure it is seen from, or null for vision given outright. */
+    val from: StructureId? = null,
 ) : VisionCommand
 
 /** Take away a vision the house was given. Refused for one it does not have. */

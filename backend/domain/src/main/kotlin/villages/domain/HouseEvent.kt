@@ -248,14 +248,17 @@ data class HouseLostKeyFigure(
  * A house was given vision of a place: it sees a circle about it, `radius` kilometres on the ground, from this
  * world-day until the vision is taken away. What gave it is the story it belongs to rather than a field on it.
  * The circle's size is on the event, so a later change to how far a house sees does not change what it was
- * given. It puts nothing on the map for anybody but the house, so it carries no significance. See decision
- * record 0061.
+ * given. It puts nothing on the map for anybody but the house, so it carries no significance. `from` is the
+ * structure it is seen from, for what a holding gives its holder, or null for vision given outright: so that a
+ * retuned catalogue never rewrites what a house saw, a structure's sight is written into the house's history as
+ * this. See decision records 0061 and 0092.
  */
 data class HouseGainedVision(
     override val houseId: HouseId,
     val visionId: VisionId,
     val place: Location,
     val radius: Double,
+    val from: StructureId? = null,
     override val worldTime: WorldTime,
     override val recordedAt: Instant,
 ) : VisionEvent, WorldEvent

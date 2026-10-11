@@ -61,6 +61,25 @@ describe('what the log says about what a house sees', () => {
     );
   });
 
+  it('names a structure a vision is seen from, and says each reach beside its giver when they differ', () => {
+    const mill: VisionPointView = {
+      kind: 'given',
+      of: 'dd000000-0000-4000-8000-000000000002',
+      place: { lat: -63.265, lon: -56.15 },
+      radius: 6,
+      since: TODAY,
+      from: '5d000000-0000-4000-8000-000000000001',
+    };
+    const named = (id: string) => (id === mill.from ? 'the Antarctic mill' : undefined);
+
+    expect(describeSight([seat, mill], TODAY, named)).toBe(
+      'the seat (34 km) and the Antarctic mill (6 km) give vision; 2 places seen from in all',
+    );
+    expect(describeSight([mill], TODAY, () => undefined)).toBe(
+      'a structure gives vision, 6 km around it; 1 place seen from in all',
+    );
+  });
+
   it('says so when everything has ended', () => {
     expect(describeSight([inUppsala], TODAY, names)).toBe(
       'nothing gives vision now; 1 place seen from in all',
