@@ -49,6 +49,9 @@ Every increment lands with the test that proves it. The tests are the reason we 
 - MapLibre and Pixi are never instantiated in unit tests. Their maths is pure and tested directly; their pixels get
   one end-to-end smoke test.
 - A test that needs Docker says so in its name, and is skipped with a clear message when Docker is absent.
+  `MongoWorldDockerSpec` is the pattern: `(needs Docker)` at the end of each case's name, and each case
+  `.config(enabledOrReasonIf = needsDocker)`. Each case, because Kotest 6 ignored the same condition set once
+  as the spec's `defaultTestConfig` and ran them all, which was found by pretending Docker was not there.
 
 ## Running
 

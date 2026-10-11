@@ -174,6 +174,14 @@ Increment 0.7 compiled and ran the plan's riskiest assumption, on Occurrent 0.33
   `InMemoryWorld` stops a cancelled subscription itself and wakes the threads when it shuts down, so a world
   closes at once, the server stops without the wait, and no test that closes a world waits five seconds for it.
   Both go when a release has the fix.
+- Increment 0.8 ran the MongoDB half, on the driver itself rather than Spring Data:
+  `MongoEventStore(client, database, collection, EventStoreConfig(timeRepresentation))` and
+  `NativeMongoSubscriptionModel(database, collection, timeRepresentation, executor, retryStrategy)`, from
+  `occurrent-eventstore-mongodb-native` and `occurrent-subscription-mongodb-native-blocking`, on the Mongo
+  driver 5.8.1 Spring Boot manages. Kept as `DATE`, a time finer than a millisecond is refused outright, so the
+  time is `RFC_3339_STRING`, and every catalogued event comes back from MongoDB as it was written. The store's
+  `WriteConditionNotFulfilledException` is the in-memory one's, so the executor's retry works unchanged.
+  Testcontainers 2.0's `MongoDBContainer` is a lone server unless asked `withReplicaSet()`.
 
 ## How a change travels
 
