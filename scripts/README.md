@@ -1,7 +1,8 @@
 # Adam's tools
 
 > **What belongs here:** terminal tools Adam runs by hand to change the files the game reads - the masters,
-> and in time anything else in `world/`. **What does not:** anything the program runs, builds or serves, which
+> and in time anything else in `world/` - and to look after the machine it runs on: the repository's one check.
+> **What does not:** anything the program runs, builds or serves, which
 > lives in `frontend/` and `backend/`; and the program's own world pipeline, the `world:*` commands, which is
 > `docs/RUNNING.md`. See decision record 0082.
 
@@ -21,10 +22,11 @@ imports the program, so a tool works on any checkout, whatever state the fronten
 
 ## The tools
 
-| Tool             | What it does                                                                                                                                                                                                                                   |
-| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mend-rivers.ts` | Joins a master's broken rivers to the sea, painting as few land pixels to river as it can, and writes a mended copy and an audit picture beside it. `docs/AUTHORING-THE-WORLD.md` says more                                                    |
-| `nine-slice.ts`  | Makes a border for the game, `<name>.webp` and its file of cuts, from a picture of a frame, with a recipe to make it again. Finds the cuts itself, with or without lines between the tiles. Needs sharp. `docs/AUTHORING-THE-ART.md` says more |
+| Tool             | What it does                                                                                                                                                                                                                                                                                                                   |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `mend-rivers.ts` | Joins a master's broken rivers to the sea, painting as few land pixels to river as it can, and writes a mended copy and an audit picture beside it. `docs/AUTHORING-THE-WORLD.md` says more                                                                                                                                    |
+| `nine-slice.ts`  | Makes a border for the game, `<name>.webp` and its file of cuts, from a picture of a frame, with a recipe to make it again. Finds the cuts itself, with or without lines between the tiles. Needs sharp. `docs/AUTHORING-THE-ART.md` says more                                                                                 |
+| `check.ts`       | Every check in the repository, one part after another - the backend's, the frontend's and this folder's - each part's whole output in `.logs/check-<part>.log` and one line a part said. `check.ps1` and `check.sh` run it. The one tool here that does its work given nothing, because checking everything is the whole of it |
 
 ## Adding one
 
@@ -42,6 +44,12 @@ imports the program, so a tool works on any checkout, whatever state the fronten
 - **Add it to the table above**, and to the document that owns the files it changes.
 
 ## Checking
+
+```
+node check.ts --only scripts
+```
+
+That runs this folder's three checks, which `node check.ts` runs with the rest of the repository's. By hand:
 
 ```
 node --test

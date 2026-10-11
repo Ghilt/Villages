@@ -336,9 +336,10 @@ Commands are added here as the increments land:
   run it; `down`, which stops it, and `down -v`, which forgets it, are Adam's alone. See
   `docs/RUNNING.md` and decision record 0092.
 
-The one below does not exist yet. It arrives with the increment named.
-
-- Everything: `scripts/check.ps1` or `scripts/check.sh` (0.14)
+- Everything, one command: `scripts/check.ps1` or `scripts/check.sh`, which run `node scripts/check.ts`: the
+  backend's check, the frontend's and `scripts/`'s own, one after another, each part's whole output in
+  `.logs/check-<part>.log` and one line a part said, with what failed. About five minutes; `--only frontend`
+  runs one part. It needs `npm install` once in `frontend/` and in `scripts/`, and says so when it is missing.
 
 The dev server is also registered in `.claude/launch.json` under the name `web`, so the preview tooling can start
 it directly while working; a hand-over uses the quick-start instead, as the `hand-over` skill says. Restart
