@@ -2,7 +2,8 @@
  * How the world is set up, as data and the questions asked of it: what Adam authors and what is fetched
  * (`artifacts.ts`), every tool that bakes the world beforehand (`tools.ts`), and which baked files the running
  * game reads (`readers.ts`). The architecture page draws this, and `world.test.ts` holds it to the repository:
- * a `world:` script with no tool fails, and so does a file read that nothing makes.
+ * a `world:` script with no tool fails, and so does a file read that nothing makes. What the game is made of once it
+ * runs, and what passes between its pieces, is `running.ts`.
  */
 
 import { ARTIFACTS } from './artifacts';
@@ -13,7 +14,9 @@ import type { Artifact, Reader, Tool } from './types';
 export type { Artifact, Origin, Reader, Tool } from './types';
 
 export { ARTIFACTS } from './artifacts';
-export { LIVE, READERS } from './readers';
+export { READERS } from './readers';
+export { GROUPS, PIECES, TALKS, group, piece } from './running';
+export type { Group, GroupId, Piece, Runs, Talk } from './running';
 export { LEGACY, TOOLS } from './tools';
 
 export function artifact(id: string): Artifact {

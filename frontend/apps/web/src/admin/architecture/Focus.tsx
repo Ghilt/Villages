@@ -1,15 +1,19 @@
 import { took } from './Timeline';
 import {
-  LIVE,
+  PIECES,
   READERS,
+  TALKS,
   TOOLS,
   artifact,
   downstreamOf,
   makersOf,
   readersOf,
   toolsReading,
+  group,
+  piece,
   upstreamOf,
 } from './world';
+import type { Piece } from './world';
 
 /** What the chosen card is, said: where it lives, what makes it, what it depends on, what depends on it. */
 export function Focus({ chosen, clear }: { chosen: string | null; clear: () => void }) {
@@ -28,8 +32,8 @@ export function Focus({ chosen, clear }: { chosen: string | null; clear: () => v
       </button>
       {kind === 'file' && <FileFocus id={id} />}
       {kind === 'tool' && <ToolFocus script={id} />}
-      {kind === 'run' && (id === 'page' || id === 'server') && <ProgramFocus program={id} />}
-      {kind === 'run' && id !== 'page' && id !== 'server' && <LiveFocus id={id} />}
+      {kind === 'run' && <PieceFocus id={id} />}
+      {kind === 'group' && <GroupFocus id={id} />}
     </section>
   );
 }
@@ -105,34 +109,79 @@ function ToolFocus({ script }: { script: string }) {
   );
 }
 
-function ProgramFocus({ program }: { program: 'page' | 'server' }) {
+/** The baked files a program reads, where they come from, and which parts of it read them. */
+function Reads({ program }: { program: 'page' | 'server' }) {
   const readers = READERS.filter((r) => r.program === program);
   const files = new Set(readers.flatMap((r) => r.reads));
   const from = new Set<string>();
   files.forEach((file) => upstreamOf(file).files.forEach((f) => from.add(f)));
   return (
     <>
-      <h3 className="arch__focus-title">{program === 'page' ? 'The page' : 'The game server'}</h3>
+      <dt>reads</dt>
+      <dd>{names(files)}</dd>
+      <dt>which come from</dt>
+      <dd>{names([...from].filter((f) => !files.has(f)))}</dd>
+      <dt>read by</dt>
+      <dd>{readers.map((r) => `${r.name} (${r.where})`).join(', ')}</dd>
+    </>
+  );
+}
+
+const WHERE = {
+  browser: 'in the browser',
+  server: "in the game server's process",
+  docker: 'in Docker, beside it',
+};
+
+/** What passes between a piece and the pieces it talks to, each way. */
+function talksOf(p: Piece): string {
+  return TALKS.filter((t) => t.from === p.id || t.to === p.id)
+    .map((t) => {
+      const other = piece(t.from === p.id ? t.to : t.from);
+      const way = t.both ? '⇄' : t.from === p.id ? '→' : '←';
+      return `${way} ${other.name}: ${t.says}`;
+    })
+    .join('; ');
+}
+
+function PieceFocus({ id }: { id: string }) {
+  const p = piece(id);
+  return (
+    <>
+      <h3 className="arch__focus-title">
+        {p.name} <code>{p.where}</code>
+      </h3>
+      <p>{p.what}</p>
       <dl className="arch__facts">
-        <dt>reads</dt>
-        <dd>{names(files)}</dd>
-        <dt>which come from</dt>
-        <dd>{names([...from].filter((f) => !files.has(f)))}</dd>
-        <dt>read by</dt>
-        <dd>{readers.map((r) => `${r.name} (${r.where})`).join(', ')}</dd>
+        <dt>runs</dt>
+        <dd>
+          {WHERE[p.runs]}
+          {p.group === undefined ? '' : `, in ${group(p.group).name.toLowerCase()}`}
+          {p.yet === undefined ? '' : `; not used until increment ${p.yet}`}
+          {p.instead === undefined ? '' : `; instead of ${piece(p.instead).name} when Docker is not running`}
+        </dd>
+        <dt>talks to</dt>
+        <dd>{talksOf(p)}</dd>
+        {id === 'page' && <Reads program="page" />}
       </dl>
     </>
   );
 }
 
-function LiveFocus({ id }: { id: string }) {
-  const live = LIVE.find((l) => l.id === id)!;
+function GroupFocus({ id }: { id: string }) {
+  const g = group(id);
+  const inside = PIECES.filter((p) => p.group === id);
   return (
     <>
       <h3 className="arch__focus-title">
-        {live.name} <code>{live.where}</code>
+        {g.name} <code>{g.where}</code>
       </h3>
-      <p>{live.what}</p>
+      <p>{g.what}</p>
+      <dl className="arch__facts">
+        <dt>made of</dt>
+        <dd>{inside.map((p) => p.name).join(', ')}</dd>
+        {id === 'server' && <Reads program="server" />}
+      </dl>
     </>
   );
 }

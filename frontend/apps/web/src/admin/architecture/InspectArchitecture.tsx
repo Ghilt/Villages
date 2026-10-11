@@ -21,11 +21,21 @@ import { ARTIFACTS, LEGACY, TOOLS, readAtRuntime, secondsForAMaster } from './wo
 export function InspectArchitecture() {
   const [chosen, choose] = useState<string | null>(null);
   const { placed, arrows, line } = useMemo(layOut, []);
-  const lit = useMemo(() => (chosen === null ? null : related(chosen, arrows)), [chosen, arrows]);
+  const cards = useMemo(() => placed.map((p) => p.card), [placed]);
+  const lit = useMemo(
+    () => (chosen === null ? null : related(chosen, arrows, cards)),
+    [chosen, arrows, cards],
+  );
+  // A piece inside a group that is lit is lit with it: the group is the whole process the files are read by.
+  const groupOf = useMemo(() => new Map(placed.map((p) => [p.card.id, p.parent])), [placed]);
   const stateOf = useCallback(
-    (card: string) =>
-      lit === null ? '' : card === chosen ? 'is-chosen' : lit.has(card) ? 'is-lit' : 'is-dim',
-    [lit, chosen],
+    (card: string) => {
+      if (lit === null) return '';
+      if (card === chosen) return 'is-chosen';
+      const inside = groupOf.get(card);
+      return lit.has(card) || (inside !== undefined && lit.has(inside)) ? 'is-lit' : 'is-dim';
+    },
+    [lit, chosen, groupOf],
   );
   const minutes = Math.round(secondsForAMaster() / 60);
 
@@ -63,6 +73,7 @@ export function InspectArchitecture() {
         <span className="arch__key arch__key--baked">made by a tool</span>
         <span className="arch__key arch__key--tool">a tool</span>
         <span className="arch__key arch__key--run">running</span>
+        <span className="arch__key arch__key--yet">running, not used yet</span>
         <p className="arch__legacy">
           Not drawn: Adam&apos;s own tools in <code>scripts/</code>, <code>mend-rivers</code> (it writes the
           master it reads) and <code>nine-slice</code> (it writes a border into world/ui); and{' '}

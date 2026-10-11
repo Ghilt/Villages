@@ -6,17 +6,19 @@ import type { Edge, Node } from '@xyflow/react';
 import { useMemo } from 'react';
 
 import { CARD_TYPES } from './Cards';
-import type { Arrow, Card } from './graph';
-import type { Line, Placed } from './layout';
+import type { Card } from './graph';
+import type { Drawn, Line, Placed } from './layout';
 import { artifact } from './world';
 
 /**
  * The diagram: every card where the layout put it, arrows from what is read to what reads it, and the
- * dotted line between baked and running. Cards cannot be joined by hand; choosing one lights its chain.
+ * dotted line between baked and running. Beneath it, the running pieces stand in the boxes of the groups they fit
+ * in, and say on every arrow between them what passes along it. Cards cannot be joined by hand; choosing one
+ * lights its chain.
  */
 export function Diagram(props: {
   placed: readonly Placed[];
-  arrows: readonly Arrow[];
+  arrows: readonly Drawn[];
   line: Line;
   stateOf: (card: string) => string;
   choose: (card: string | null) => void;
@@ -33,13 +35,15 @@ export function Diagram(props: {
         selectable: false,
         draggable: false,
       },
+      // A group comes before the pieces inside it, which stand where the layout put them in its box.
       ...placed.map((p) => ({
         id: p.card.id,
         type: p.card.kind,
         position: { x: p.x, y: p.y },
         width: p.width,
-        // A running card is as tall as what it says; the rest are as tall as the layout made room for.
-        ...(p.card.kind === 'program' || p.card.kind === 'live' ? {} : { height: p.height }),
+        height: p.height,
+        ...(p.parent === undefined ? {} : { parentId: p.parent }),
+        ...(p.card.kind === 'group' ? { zIndex: -1 } : {}),
         data: { card: p.card, state: stateOf(p.card.id) },
       })),
     ],
@@ -54,15 +58,18 @@ export function Diagram(props: {
           id: a.id,
           source: a.from,
           target: a.to,
-          className: `arrow ${a.flow ? '' : 'arrow--talk'} ${state}`,
+          className: `arrow ${a.flow ? '' : 'arrow--talk'} ${a.when ? `arrow--${a.when}` : ''} ${state}`,
           markerEnd: { type: MarkerType.ArrowClosed, width: 14, height: 14 },
           ...(a.flow
             ? {}
             : {
-                sourceHandle: 'right',
-                targetHandle: 'left',
-                type: 'straight',
-                markerStart: { type: MarkerType.ArrowClosed, width: 14, height: 14 },
+                sourceHandle: `${a.fromSide}-out`,
+                targetHandle: `${a.toSide}-in`,
+                type: 'smoothstep',
+                label: a.says,
+                labelBgPadding: [6, 3] as [number, number],
+                labelBgBorderRadius: 3,
+                ...(a.both ? { markerStart: { type: MarkerType.ArrowClosed, width: 14, height: 14 } } : {}),
               }),
         };
       }),
@@ -106,5 +113,6 @@ function colourOf(node: Node): string {
   if (card === undefined) return 'transparent';
   if (card.kind === 'tool') return '#3b3229';
   if (card.kind === 'file') return ORIGIN_COLOUR[artifact(card.ref).origin];
+  if (card.kind === 'group') return '#dcefe3';
   return '#2e6b4f';
 }

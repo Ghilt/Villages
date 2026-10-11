@@ -1,23 +1,31 @@
-import { ARTIFACTS, LIVE, READERS, TOOLS } from './world';
+import { ARTIFACTS, GROUPS, PIECES, READERS, TALKS, TOOLS } from './world';
+import type { Talk } from './world';
 
-/** A card on the diagram: a file, a tool, a running program or part of one, or the line between them. */
+/** A card on the diagram: a file, a tool, a running piece, or a group of running pieces that fit together. */
 export type Card =
   | { readonly id: string; readonly kind: 'file'; readonly ref: string }
   | { readonly id: string; readonly kind: 'tool'; readonly ref: string }
-  | { readonly id: string; readonly kind: 'program'; readonly ref: 'page' | 'server' }
-  | { readonly id: string; readonly kind: 'live'; readonly ref: string };
+  | { readonly id: string; readonly kind: 'piece'; readonly ref: string; readonly group?: string }
+  | { readonly id: string; readonly kind: 'group'; readonly ref: string };
 
-/** An arrow. `flow` is false between running cards, which talk rather than make one another. */
+/**
+ * An arrow. `flow` is false between running pieces, which talk rather than make one another, and then the arrow
+ * says what passes along it, whether it goes both ways, and whether it is only instead of another or not yet built.
+ */
 export interface Arrow {
   readonly id: string;
   readonly from: string;
   readonly to: string;
   readonly flow: boolean;
+  readonly says?: string;
+  readonly both?: boolean;
+  readonly when?: Talk['when'];
 }
 
 export const fileCard = (id: string) => `file:${id}`;
 export const toolCard = (script: string) => `tool:${script}`;
 export const runCard = (id: string) => `run:${id}`;
+export const groupCard = (id: string) => `group:${id}`;
 
 /**
  * The tools drawn: not Adam's own, one of which writes the master it reads and would loop the flow, and not
@@ -40,16 +48,18 @@ export function bakedGraph(): { cards: Card[]; arrows: Arrow[] } {
   return { cards, arrows };
 }
 
-/** The running cards, in the order they stand beneath the line, and the arrows into and between them. */
+/**
+ * The running cards, groups before the pieces inside them, and the arrows into and between them. The baked files
+ * the game server reads arrive at its group, because it is the whole process that reads them.
+ */
 export function runningGraph(): { cards: Card[]; arrows: Arrow[] } {
   const cards: Card[] = [
-    { id: runCard('page'), kind: 'program', ref: 'page' },
-    { id: runCard('gateway'), kind: 'live', ref: 'gateway' },
-    { id: runCard('server'), kind: 'program', ref: 'server' },
-    ...LIVE.filter((l) => l.id !== 'gateway').map((l): Card => ({
-      id: runCard(l.id),
-      kind: 'live',
-      ref: l.id,
+    ...GROUPS.map((g): Card => ({ id: groupCard(g.id), kind: 'group', ref: g.id })),
+    ...PIECES.map((p): Card => ({
+      id: runCard(p.id),
+      kind: 'piece',
+      ref: p.id,
+      ...(p.group === undefined ? {} : { group: groupCard(p.group) }),
     })),
   ];
   const read = new Set<string>();
@@ -59,15 +69,10 @@ export function runningGraph(): { cards: Card[]; arrows: Arrow[] } {
       const key = `${file}>${reader.program}`;
       if (read.has(key)) continue;
       read.add(key);
-      arrows.push(arrow(fileCard(file), runCard(reader.program)));
+      arrows.push(arrow(fileCard(file), reader.program === 'page' ? runCard('page') : groupCard('server')));
     }
   }
-  arrows.push(
-    talk(runCard('page'), runCard('gateway')),
-    talk(runCard('gateway'), runCard('server')),
-    talk(runCard('server'), runCard('event-store')),
-    talk(runCard('event-store'), runCard('projections')),
-  );
+  arrows.push(...TALKS.map(talk));
   return { cards, arrows };
 }
 
@@ -75,15 +80,17 @@ function arrow(from: string, to: string): Arrow {
   return { id: `${from}>${to}`, from, to, flow: true };
 }
 
-function talk(from: string, to: string): Arrow {
-  return { id: `${from}>${to}`, from, to, flow: false };
+function talk(t: Talk): Arrow {
+  const [from, to] = [runCard(t.from), runCard(t.to)];
+  return { id: `${from}>${to}`, from, to, flow: false, says: t.says, both: t.both, when: t.when };
 }
 
 /**
  * Everything a card depends on and everything that depends on it, following only the arrows that make
- * things: so choosing the master lights the files and the programs made from it, and not the event store.
+ * things: so choosing the master lights the files and the programs made from it, and not the event store. A
+ * running piece also lights the pieces it talks to, one step away, and a group the pieces inside it.
  */
-export function related(chosen: string, arrows: readonly Arrow[]): Set<string> {
+export function related(chosen: string, arrows: readonly Arrow[], cards: readonly Card[] = []): Set<string> {
   const flowing = arrows.filter((a) => a.flow);
   const reach = (ends: (a: Arrow) => readonly [string, string]): Set<string> => {
     const seen = new Set([chosen]);
@@ -100,5 +107,9 @@ export function related(chosen: string, arrows: readonly Arrow[]): Set<string> {
     }
     return seen;
   };
-  return new Set([...reach((a) => [a.from, a.to]), ...reach((a) => [a.to, a.from])]);
+  const near = arrows
+    .filter((a) => !a.flow && (a.from === chosen || a.to === chosen))
+    .flatMap((a) => [a.from, a.to]);
+  const inside = cards.filter((c) => c.kind === 'piece' && c.group === chosen).map((c) => c.id);
+  return new Set([...reach((a) => [a.from, a.to]), ...reach((a) => [a.to, a.from]), ...near, ...inside]);
 }

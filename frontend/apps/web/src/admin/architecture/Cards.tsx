@@ -1,10 +1,11 @@
 import { Handle, Position } from '@xyflow/react';
 import type { Node, NodeProps } from '@xyflow/react';
+import { Fragment } from 'react';
 
 import type { Card } from './graph';
 import { took } from './Timeline';
-import { PROGRAMS } from './readers';
-import { LIVE, TOOLS, artifact } from './world';
+import { TOOLS, artifact, group, piece } from './world';
+import type { Piece } from './world';
 
 /** What a card is told: which card it is, and whether it is chosen, lit by the choice, or dimmed. */
 export type CardData = { card: Card; state: string };
@@ -29,14 +30,36 @@ function FormMark({ form }: { form: 'file' | 'files' | 'folder' }) {
   );
 }
 
-function Ends({ sides = false }: { sides?: boolean }) {
+function Ends() {
   return (
     <>
       <Handle type="target" position={Position.Top} isConnectable={false} />
       <Handle type="source" position={Position.Bottom} isConnectable={false} />
-      {/* Running cards talk to the ones beside them, so their arrows run side to side. */}
-      {sides && <Handle id="left" type="target" position={Position.Left} isConnectable={false} />}
-      {sides && <Handle id="right" type="source" position={Position.Right} isConnectable={false} />}
+    </>
+  );
+}
+
+const SIDES = [
+  ['top', Position.Top],
+  ['bottom', Position.Bottom],
+  ['left', Position.Left],
+  ['right', Position.Right],
+] as const;
+
+/**
+ * A running piece talks to the pieces around it on whichever side faces them, so it has a way in and a way out
+ * on every side; the baked files' arrows arrive at the top, at the handle with no name.
+ */
+function Sides() {
+  return (
+    <>
+      <Handle type="target" position={Position.Top} isConnectable={false} />
+      {SIDES.map(([side, position]) => (
+        <Fragment key={side}>
+          <Handle id={`${side}-in`} type="target" position={position} isConnectable={false} />
+          <Handle id={`${side}-out`} type="source" position={position} isConnectable={false} />
+        </Fragment>
+      ))}
     </>
   );
 }
@@ -77,33 +100,46 @@ export function ToolCard({ data }: NodeProps<CardNode>) {
   );
 }
 
-export function ProgramCard({ data }: NodeProps<CardNode>) {
-  const program = PROGRAMS[data.card.ref as keyof typeof PROGRAMS];
+const RUNS = { browser: 'in the browser', server: 'in the game server', docker: 'in Docker' } as const;
+
+/** What a piece's strip says on its right: that it is not built yet, or stands in for another, or nothing. */
+function noteOf(p: Piece): string | null {
+  if (p.yet !== undefined) return `not used until ${p.yet}`;
+  if (p.instead !== undefined) return 'without Docker';
+  return null;
+}
+
+export function PieceCard({ data }: NodeProps<CardNode>) {
+  const p = piece(data.card.ref);
+  const note = noteOf(p);
+  const how = [p.yet !== undefined && 'card--yet', p.instead !== undefined && 'card--instead'].filter(
+    Boolean,
+  );
   return (
-    <div className={`card card--run ${data.state}`}>
-      <Ends sides />
+    <div className={`card card--run card--${p.runs} ${how.join(' ')} ${data.state}`}>
+      <Sides />
       <div className="card__strip">
-        <span>runs</span>
+        <span>runs {RUNS[p.runs]}</span>
+        {note !== null && <span className="card__by">{note}</span>}
       </div>
-      <div className="card__name">{program.name}</div>
-      <code className="card__path">{program.where}</code>
-      <div className="card__what">{program.what}</div>
+      <div className="card__name">{p.name}</div>
+      <code className="card__path">{p.where}</code>
+      <div className="card__what">{p.what}</div>
     </div>
   );
 }
 
-export function LiveCard({ data }: NodeProps<CardNode>) {
-  const live = LIVE.find((l) => l.id === data.card.ref)!;
+/** A box round the pieces that fit together, saying what they are together. */
+export function GroupCard({ data }: NodeProps<CardNode>) {
+  const g = group(data.card.ref);
   return (
-    <div className={`card card--run card--live ${data.state}`}>
-      <Ends sides />
-      <div className="card__strip">
-        <span>runs</span>
-        <span className="card__by">not a file: gone when it stops</span>
+    <div className={`run-group run-group--${g.id} ${data.state}`}>
+      {/* The baked files the game server reads arrive here, to one side of the page standing above. */}
+      <Handle type="target" position={Position.Top} isConnectable={false} style={{ left: '10%' }} />
+      <div className="run-group__name">
+        {g.name} <code>{g.where}</code>
       </div>
-      <div className="card__name">{live.name}</div>
-      <code className="card__path">{live.where}</code>
-      <div className="card__what">{live.what}</div>
+      <div className="run-group__what">{g.what}</div>
     </div>
   );
 }
@@ -121,7 +157,7 @@ export function LineCard({ data }: NodeProps<Node<{ width: number }>>) {
 export const CARD_TYPES = {
   file: FileCard,
   tool: ToolCard,
-  program: ProgramCard,
-  live: LiveCard,
+  piece: PieceCard,
+  group: GroupCard,
   line: LineCard,
 };

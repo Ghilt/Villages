@@ -1,6 +1,7 @@
 /*
  * The architecture page, at /admin/inspect-architecture: how the world is set up. The colours say who makes a
- * thing - Adam, a download, a tool - and green is what runs. The diagram's own rules are diagram.css.
+ * thing - Adam, a download, a tool - and green is what runs, sea green what runs in Docker beside the game. The
+ * diagram's own rules are diagram.css.
  */
 
 .arch {
@@ -13,6 +14,8 @@
   --tool: #3b3229;
   --runtime: #2e6b4f;
   --runtime-bg: #dcefe3;
+  --docker: #24607a;
+  --docker-bg: #dbecf2;
   --chosen: #8f1d2f;
   --mono: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace;
 
@@ -96,6 +99,12 @@
 .arch__key--run {
   background: var(--runtime-bg);
   border-color: var(--runtime);
+}
+
+.arch__key--yet {
+  background: var(--runtime-bg);
+  border-color: var(--runtime);
+  border-style: dashed;
 }
 
 .arch__legacy {

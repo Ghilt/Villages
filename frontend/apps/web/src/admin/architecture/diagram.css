@@ -139,14 +139,103 @@
   border-color: var(--runtime);
 }
 
-.card--live {
+.card--run {
+  font-size: 0.75rem;
+}
+
+/* A piece has a way in and out on every side; they are where the arrows meet it, not things to see. */
+.card--run .react-flow__handle,
+.run-group .react-flow__handle {
+  opacity: 0;
+}
+
+.card--docker {
+  background: #f6fafc;
+  border-color: var(--docker);
+}
+
+.card--docker .card__strip {
+  background: var(--docker);
+  border-color: var(--docker);
+}
+
+/* Running and not used yet, or there only instead of another: drawn dashed, as their arrows are. */
+.card--yet,
+.card--instead {
   border-style: dashed;
 }
 
-.card--run {
-  height: auto;
-  overflow: visible;
-  font-size: 0.75rem;
+.card--yet .card__what,
+.card--instead .card__what {
+  color: var(--ink-soft);
+}
+
+/* React Flow dresses a node called a group in a box of its own; this one draws its own. */
+.diagram .react-flow__node-group {
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/*
+ * A group's box: what the pieces inside it are together, said in its top left corner, clear of the arrow that
+ * comes down into the middle of it.
+ */
+.run-group {
+  box-sizing: border-box;
+  text-align: left;
+  width: 100%;
+  height: 100%;
+  padding: 0.6rem 1rem;
+  background: rgb(220 239 227 / 35%);
+  border: 2px solid var(--runtime);
+  border-radius: 10px;
+  transition: opacity 120ms;
+}
+
+.run-group--events {
+  background: rgb(219 236 242 / 45%);
+  border-color: var(--docker);
+}
+
+.run-group__name {
+  max-width: 25rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--runtime);
+}
+
+.run-group--events .run-group__name {
+  color: var(--docker);
+}
+
+.run-group__name code {
+  display: block;
+  margin-top: 0.1rem;
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: var(--ink-soft);
+}
+
+.run-group__what {
+  max-width: 25rem;
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+.run-group.is-dim {
+  opacity: 0.35;
+}
+
+.run-group.is-lit {
+  box-shadow: 0 0 0 3px var(--ink-soft);
+}
+
+.run-group.is-chosen {
+  box-shadow: 0 0 0 4px var(--chosen);
 }
 
 /* The line between baked and running. */
@@ -187,7 +276,24 @@
 .diagram .arrow--talk path {
   stroke: var(--runtime);
   stroke-width: 2;
+}
+
+.diagram .arrow--yet path,
+.diagram .arrow--instead path {
   stroke-dasharray: 6 4;
+}
+
+/* What passes along an arrow between running pieces, written on it. */
+.diagram .arrow--talk .react-flow__edge-text {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--runtime);
+}
+
+.diagram .arrow--talk .react-flow__edge-textbg {
+  fill: #f7fcf8;
+  stroke: var(--runtime);
+  stroke-width: 0.6;
 }
 
 .diagram .arrow.is-lit path {

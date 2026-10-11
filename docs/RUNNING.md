@@ -395,8 +395,15 @@ stage alone, with none of the debug panel in it (decision record 0079).
   long as it takes. Below is the diagram, flowing down the page: cards for what Adam authors and what is
   downloaded, the tools that bake the world from them, and the files they write, each file card saying
   whether it is one file, a few, or a folder, its path, and who makes it - Adam (gold), a download (blue),
-  a tool (grey). Under a dotted line are the running cards: the page, the gateway, the game server with what
-  it reads, the event store and the projections. Arrows run from what is read to what reads it. Drag to move
+  a tool (grey). Under a dotted line is the running game: the page on its own, then two boxes of the pieces
+  that fit together, each card saying where it runs - in the browser, in the game server, or in Docker (sea
+  green). **The game server** box holds the gateway, the rules, the reactions and the projections, and the
+  baked files it reads arrive at the box; **the event store** box holds Occurrent, MongoDB, RabbitMQ and the
+  in-memory store used without Docker, the last two dashed because one is not used until 1.6 and the other
+  only instead of MongoDB. Every arrow between running pieces says what passes along it - commands, the feed,
+  the world now - and choosing a piece lights the pieces it talks to, a box the pieces in it. Their words are
+  `apps/web/src/admin/architecture/running.ts`, held by `running.test.ts`. Arrows run from what is read to what
+  reads it. Drag to move
   about, scroll to zoom, the minimap for the whole; choosing a card lights everything it depends on and
   everything that depends on it, and the strip above the diagram says what it is, with the command to run a
   tool. Adam's own tools and the stale scripts are named under it rather than drawn. Its data is
