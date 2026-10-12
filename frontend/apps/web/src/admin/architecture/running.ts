@@ -51,8 +51,8 @@ export const GROUPS: readonly Group[] = [
   {
     id: 'events',
     name: 'The event store',
-    where: 'Occurrent · MongoDB · RabbitMQ',
-    what: 'How the world is kept and passed on, three pieces with one job: Occurrent writes each event once and hands it on, MongoDB keeps it for good, and RabbitMQ will carry it to every gateway. Nothing is ever changed once written; everything else is worked out from it.',
+    where: 'Occurrent · MongoDB · the bridge · RabbitMQ',
+    what: 'How the world is kept and passed on, four pieces with one job: Occurrent writes each event once and hands it on, MongoDB keeps it for good, and the bridge publishes every one to RabbitMQ, which will carry it to the read models and every gateway. Nothing is ever changed once written; everything else is worked out from it.',
   },
 ];
 
@@ -122,13 +122,20 @@ export const PIECES: readonly Piece[] = [
     what: "Where the events are kept when Docker is not running, and in every test: Occurrent's own store in the server's memory, behind the same ports, so nothing else can tell. Gone when the server stops, and a restart begins the world again.",
   },
   {
+    id: 'bridge',
+    name: 'The bridge',
+    where: 'backend/infrastructure-rabbit',
+    runs: 'server',
+    group: 'events',
+    what: 'Follows every event as it is written and publishes it to RabbitMQ, counting it carried only once RabbitMQ has confirmed it, and keeps its place in MongoDB. So an event written while the server or the broker was down is published once both are back. Only when the world is kept in MongoDB.',
+  },
+  {
     id: 'rabbitmq',
     name: 'RabbitMQ',
-    where: 'localhost:5672 · page on :15672',
+    where: 'localhost:5672 · villages-<tree> · page on :15672',
     runs: 'docker',
     group: 'events',
-    yet: '1.6',
-    what: 'The broker: running beside MongoDB, and not used yet. From increment 1.6 every stored event is published to it, addressed by the cell it happened in, and each gateway hears only the cells its players hold, which is what lets more than one gateway serve one world. A virtual host for every worktree.',
+    what: "The broker. Every stored event is published to its exchange villages.events, in a virtual host of the worktree's own, addressed by its type and the cell it happened in. Nothing reads from it yet: the read models and the event page are to follow it, each through a queue of its own, which is what will let more than one gateway serve one world.",
   },
 ];
 
@@ -142,8 +149,9 @@ export const TALKS: readonly Talk[] = [
   { from: 'reactions', to: 'rules', says: 'commands, too' },
   { from: 'occurrent', to: 'projections', says: 'the feed' },
   { from: 'projections', to: 'gateway', says: 'the world now' },
-  { from: 'mongodb', to: 'rabbitmq', says: 'every event', when: 'yet' },
-  { from: 'rabbitmq', to: 'gateway', says: 'from 1.6', when: 'yet' },
+  { from: 'occurrent', to: 'bridge', says: 'every event, from where it stopped' },
+  { from: 'bridge', to: 'rabbitmq', says: 'published, by cell' },
+  { from: 'rabbitmq', to: 'projections', says: 'the feed, from step 7', when: 'yet' },
 ];
 
 export function piece(id: string): Piece {

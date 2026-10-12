@@ -39,7 +39,8 @@ const GROUP = { width: 2 * PAD + 2 * COLUMN + PIECE.width, height: HEADER + ROW 
 
 /**
  * Where each running piece stands: a column of three and a row of two in its group's box, the page alone above
- * them. The gateway is above what feeds it, Occurrent above what keeps its events, and the feed runs up.
+ * them. The gateway is above what feeds it, Occurrent above what keeps its events, the bridge beside it and above
+ * the broker it publishes to, and the feed runs up.
  */
 const SPOTS: Record<string, { readonly col: number; readonly row: number }> = {
   page: { col: 1, row: 0 },
@@ -48,6 +49,7 @@ const SPOTS: Record<string, { readonly col: number; readonly row: number }> = {
   reactions: { col: 1, row: 1 },
   projections: { col: 2, row: 1 },
   occurrent: { col: 1, row: 0 },
+  bridge: { col: 2, row: 0 },
   memory: { col: 0, row: 1 },
   mongodb: { col: 1, row: 1 },
   rabbitmq: { col: 2, row: 1 },
@@ -58,7 +60,7 @@ const GROUP_ORDER = ['group:server', 'group:events'];
 
 /** An arrow that would cut through the cards between its ends goes round the outside instead. */
 const ROUND: Record<string, readonly [Side, Side]> = {
-  'run:rabbitmq>run:gateway': ['right', 'right'],
+  'run:rabbitmq>run:projections': ['right', 'right'],
   'run:occurrent>run:memory': ['left', 'top'],
 };
 
