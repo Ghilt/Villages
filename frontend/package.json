@@ -38,7 +38,8 @@
     "world:ui": "npm run ui --workspace @villages/world --",
     "world:paint": "npm run paint --workspace @villages/world --",
     "world:fetch-all": "npm run fetch-world --workspace @villages/world --",
-    "world:ready": "npm run ready --workspace @villages/world --"
+    "world:ready": "npm run ready --workspace @villages/world --",
+    "world:prune": "npm run prune --workspace @villages/world --"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

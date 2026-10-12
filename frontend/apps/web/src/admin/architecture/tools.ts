@@ -206,6 +206,18 @@ export const TOOLS: readonly Tool[] = [
     what: 'Borrows each world step from the world cache, and makes, files and borrows the ones nobody has made.',
   },
   {
+    script: 'world:prune',
+    entry: 'pruneWorld.ts',
+    group: 'cache',
+    reads: [],
+    writes: [],
+    seconds: 2,
+    time: 'seconds',
+    perMaster: false,
+    ranBy: 'by hand',
+    what: 'Says which world cache entries no tree uses any more, and with --drop takes them off.',
+  },
+  {
     script: 'mend-rivers',
     entry: 'scripts/mend-rivers.ts',
     group: 'adam',

@@ -52,7 +52,9 @@ function ShelfFocus() {
       <p>{WORLD_CACHE.what}</p>
       <dl className="arch__facts">
         <dt>filled and lent by</dt>
-        <dd>world:ready, which the quick start and the Debug map run</dd>
+        <dd>
+          world:ready, which the quick start and the Debug map run; world:prune clears what no tree uses
+        </dd>
         <dt>the tools in it</dt>
         <dd>{WORLD_CACHE.tools.join(', ')}</dd>
         <dt>what they make</dt>

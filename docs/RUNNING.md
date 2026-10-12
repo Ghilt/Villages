@@ -381,7 +381,9 @@ made it with the last thing its tool said, or the tool's own output as it makes 
 from it, `-- --force` to make them again even when the shelf has them, `-- --why` to be told where each step stands
 and what moved without making anything. What a tree borrowed is written in `public/world/borrowed.json`. A master
 nobody has made costs its steps once, about nine minutes; every tree after it, seconds. See
-`docs/plans/world-cache.md`.
+`docs/plans/world-cache.md`. `npm run world:prune --prefix frontend` says which entries on the shelf no tree uses
+any more - none a tree borrows, none a tree's record names, none being made or lent, none made in the last week -
+and `-- --drop` takes them off; by hand only, as `drop-gone-worlds` is.
 
 - The towns, rivers, lakes and seas of 1790: `world/names/1790.json`, one line a thing, keyed as the names are -
   a town by its Wikidata id, a river, a lake or a sea by its Wikidata id or Natural Earth's file, number and
