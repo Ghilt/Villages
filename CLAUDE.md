@@ -328,6 +328,9 @@ Commands are added here as the increments land:
 - Frontend, look at it: `npm run dev --prefix frontend`, then open the address it prints. That is
   http://localhost:5173 in the main checkout and a port of its own in each worktree; see decision 0031.
 - Frontend, checks: `npm run check --prefix frontend` (typecheck, lint, format, unit tests)
+- End to end: `npm run e2e --prefix frontend`: the game in Chrome on servers and a world of the test's own - the map
+  painted, a house founded, another window seeing it, a restart that forgets nothing. Under a minute. It needs this
+  tree's world cut, and MongoDB up for the restart. See `docs/TESTING.md`.
 - Backend, running: the `backend` entry in `.claude/launch.json`, which carries this tree's port; by hand it is
   `cd backend` then `./gradlew :app:bootRun --args=--server.port=<this tree's game port>`. The gateway is a
   WebSocket at `ws://localhost:<that port>/ws`, 8080 in the main checkout; the web app connects to its own

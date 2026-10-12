@@ -105,7 +105,6 @@ planned and not started.
   is written. It is also the first income in the game. Adam's own, planned with him on 2026-10-08.
 - **1.6** The bridge from the store to the broker, each tree in a virtual host of its own (0092), with the
   RabbitMQ half of 0.8's smoke test, which waited for there to be something to test
-- **0.13** End-to-end smoke test
 - **1.15** The connection badge, the last piece of inspecting a house
 
 MongoDB and RabbitMQ are on the machine, in Docker, from `infra/docker-compose.yml`. The game server keeps
