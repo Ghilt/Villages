@@ -29,7 +29,7 @@ Characters and key figures are built and waiting on Adam's eye. Nothing else her
 after them wait on the same thing. Fog of war, the exception, is under way a step at a time, and so is
 character dialogue; the UI component library is built and waiting on Adam's eye, and so is the choice roll,
 and so is the origin map, the first of real names on the edited world. Structures are planned and not
-started, and so is the broker, the newest.
+started, and so is the broker; the world cache, the newest, is planned.
 
 - **Characters and key figures**: the people of the world, each with a history of their own, and the
   house's tie to the few it acts through, shown in a pane in the corner beside the house status. The shape
@@ -111,6 +111,13 @@ started, and so is the broker, the newest.
   virtual host, and nothing follows it yet. With it comes the RabbitMQ half of 0.8's smoke test, which waited
   for there to be something to test. Still one game server per tree. Adam's own, planned with him on
   2026-10-12.
+- **The world cache**: a new tree up in about a minute and a half rather than seventeen. Each step of the
+  world (tiles, flow, sprite map, ground, origin, names, culture, height) is made once, filed on a shelf the
+  whole machine shares under a fingerprint of everything it was made from, and borrowed by every tree with the
+  same inputs; a change to the master, a world file or a world tool is a new fingerprint, so it is built again,
+  once. `npm run world:ready` becomes the one way the world is built, for the quick start and the debug panel
+  alike, and the architecture page draws it with a strip of how a tree starts. The shape is decision record
+  0095 and the steps, one commit each, are in `docs/plans/world-cache.md`. Adam's own, asked for on 2026-10-12.
 - **1.15** The connection badge, the last piece of inspecting a house
 
 MongoDB and RabbitMQ are on the machine, in Docker, from `infra/docker-compose.yml`. The game server keeps
