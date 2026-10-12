@@ -54,6 +54,18 @@ and how far out it stays drawn is worked out from the significance. See decision
   panel's `wipe` button is not that wipe and is not journalled: it empties an in-memory development world that
   dies at every restart of the server anyway. See decision record 0036.
 
+## The routing key
+
+When RabbitMQ carries an event, it is published to the topic exchange `villages.events` under a key made of
+its type without `villages.`, then the cell of where it happened, a word a digit, at the deepest zoom:
+`villages.house.founded.v1` at cell 1203002113 is `house.founded.v1.1.2.0.3.0.0.2.1.1.3`. So a tile binds
+everything that happened in it as `*.*.*.` and its quadkey's digits and `#`. An event that says nowhere, and
+one the code cannot read, end in `none`: `character.died.v1.none`. The wipe's marker is `feed.marker.none`.
+
+The events that say where they happened are the four that carry a place: `villages.house.founded.v1` by its
+seat, `villages.house.gainedVision.v1`, `villages.character.moved.v1` and `villages.structure.raised.v1` by
+their place. A new event that carries one is routed by it, and a test fails until it is. See decision record 0094.
+
 ## Two kinds of event
 
 Every event is one of two things, and the difference is worth keeping in sight.
