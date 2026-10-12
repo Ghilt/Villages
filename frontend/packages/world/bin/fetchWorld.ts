@@ -1,4 +1,4 @@
-import { createWriteStream, existsSync, statSync } from 'node:fs';
+import { createWriteStream, existsSync, renameSync, statSync } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { Readable } from 'node:stream';
@@ -7,6 +7,7 @@ import { pipeline } from 'node:stream/promises';
 import { Unzip, UnzipInflate } from 'fflate';
 
 import { SOURCE_DIR } from './lib/paths.ts';
+import { borrowSources } from './lib/sharedSources.ts';
 import { WORLD_SOURCES } from './lib/worldSources.ts';
 import type { WorldSource } from './lib/worldSources.ts';
 
@@ -17,6 +18,10 @@ import type { WorldSource } from './lib/worldSources.ts';
  * temporary directory. That is not a plan. This exists so that the world stays changeable when the
  * temporary directory is cleared, which it will be, and so that nobody has to find five download pages
  * again. About 4.5 GB, once, into a directory that is not committed.
+ *
+ * Once, on the machine: a worktree borrows the main checkout's by hard link (`lib/sharedSources.ts`), so every
+ * file is written beside where it goes and renamed over it, which gives this tree a file of its own and leaves
+ * the one the main checkout lent alone. Written straight into place, a download would have rewritten it for both.
  *
  *   node bin/fetchWorld.ts [--list] [--force] [--only <part of a name>]
  */
@@ -68,7 +73,8 @@ async function download(source: WorldSource, into: string): Promise<void> {
   body.on('end', () => counted.push(null));
   body.on('error', (error) => counted.destroy(error));
 
-  await pipeline(counted, createWriteStream(into));
+  await pipeline(counted, createWriteStream(`${into}.downloading`));
+  renameSync(`${into}.downloading`, into);
 }
 
 /**
@@ -91,12 +97,14 @@ async function downloadAndUnzip(source: WorldSource): Promise<void> {
     if (member === undefined) {
       return;
     }
-    const out = createWriteStream(resolve(SOURCE_DIR, member.into));
+    const into = resolve(SOURCE_DIR, member.into);
+    const out = createWriteStream(`${into}.downloading`);
     writing.push(
       new Promise<void>((done, failed) => {
         out.on('error', failed);
         out.on('close', () => {
-          console.log(`    ${member.into}, ${megabytes(statSync(resolve(SOURCE_DIR, member.into)).size)}`);
+          renameSync(`${into}.downloading`, into);
+          console.log(`    ${member.into}, ${megabytes(statSync(into).size)}`);
           done();
         });
       }),
@@ -141,6 +149,11 @@ if (listOnly) {
   process.exit(0);
 }
 
+// What the main checkout has already fetched is borrowed rather than fetched again, here as in the quick start.
+const lent = borrowSources();
+if (lent.files > 0 || lent.said.includes('junction')) {
+  console.log(`world/source: ${lent.said}`);
+}
 await mkdir(SOURCE_DIR, { recursive: true });
 let fetched = 0;
 

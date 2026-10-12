@@ -439,7 +439,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   4.8 degrees south with its range at 8,000 m, a summit averaged over a cell. 21,845 tiles, 205 MB, two and a
   half minutes, the master read for its painting included. It reads `world/source/etopo/`, and fetches the one file first when it is
   missing, 444 MB once, through `world:fetch-all -- --only etopo`; `--only` fetches any source whose name holds
-  the word. The sea is held at nought and the grid is read round the antimeridian. A master with no origin map
+  the word. In a worktree it is the main checkout's, borrowed a file at a time by hard link rather than fetched
+  (0095). The sea is held at nought and the grid is read round the antimeridian. A master with no origin map
   is given plain Earth's height, and it says so. Cutting a master in the Debug map fits it again after the
   origin, and the quick start does whenever it is missing or the origin map is newer. See decision record 0090.
 - A picture of the scenery, without a browser: `npm run world:scenery --prefix frontend` paints five

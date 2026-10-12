@@ -254,6 +254,11 @@ npm run world:fetch-all --prefix frontend
 About ten minutes on a decent connection, once. Adding `-- --list` says what the five sources are, what
 each one contributes and how it is licensed, without downloading anything.
 
+Once on the machine, that is, in the main checkout. A worktree borrows what the main checkout has fetched, a hard
+link to each file, before it fetches anything itself, and the quick start does the same at every start; a file
+it fetches of its own is written beside the borrowed one and renamed over it, so the main checkout's is never
+changed. See decision record 0095.
+
 ### The credit, which is owed
 
 **Three of the sources are CC-BY and must be credited**: the **Copernicus Global Land Service** land cover,

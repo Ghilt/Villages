@@ -549,11 +549,12 @@ if (-not (Test-Path (Join-Path $Frontend 'node_modules'))) {
     }
 }
 
+# The downloads the world is built from, 4.9 GB, are the main checkout's, borrowed a file at a time by hard link (0095).
+Step 'the downloads are '; Write-Host (& node (Join-Path $Frontend 'packages\world\bin\borrowSources.ts')) -ForegroundColor Green
 $WorldDir = Join-Path $Root 'frontend\apps\web\public\world'
 $DefaultMaster = 'terrain3_mended_2026-10-03' # DEFAULT_MASTER in packages/world/src/masters.ts
 $Master = Join-Path $Root "world\master\$DefaultMaster.png"
-# A directory a master, so the panel holds several worlds; the world commands write this one by default.
-$DefaultWorld = Join-Path $WorldDir "masters\$DefaultMaster"
+$DefaultWorld = Join-Path $WorldDir "masters\$DefaultMaster" # a directory a master, which the world commands write
 
 if (-not (Test-Path $Master)) {
     Bad "the hand-painted world is missing: $Master"
@@ -587,15 +588,14 @@ Ensure 'terrain.geojson' 'tracing the coast and the lakes' @('run', 'world:impor
 Ensure 'tiles\cut.json' 'cutting the world into tiles (about three minutes)' @('run', 'world:tile') 'the world is cut' $Painted
 Ensure '..\..\paint.json' 'writing the styles' @('run', 'world:paint', '--', '--config-only') 'the styles are written' @((Join-Path $Root 'world\painterly.json'), (Join-Path $Root 'world\render.json'))
 Ensure 'flow\flow.json' 'working out which way rivers run' @('run', 'world:flow', '--', '--no-stills') 'the rivers run' $Painted
-# What kind of place every part of the world is and where the scenery clumps (0054): the biomes beside the page's
-# world and the stands only the game server reads (0067), again when world/biomes.json was saved since too.
+# The biomes beside the page's world (0054) and the stands only the game server reads (0067), and after biomes.json.
 Ensure @('sprites\biome\map.json', (Join-Path $Root "world\stands\$DefaultMaster\biome\stands.json")) 'working out the biomes and the stands (about half a minute)' @('run', 'world:sprites') 'the world is furnished' @($Master, (Join-Path $Root 'world\biomes.json'))
 # The ground the server reads (0084), the origin, both copies of the names, and the cultures structures are drawn in (0093).
 Ensure (Join-Path $Root "world\ground\$DefaultMaster\ground.json") 'reading the ground for the game server' @('run', 'world:ground') 'the ground is read' $Painted
 Ensure 'origin\origin.json' 'working out where on Earth the land came from (two minutes)' @('run', 'world:origin') 'the origin map is worked out' $Painted
 Ensure @('names.json', (Join-Path $Root "world\ground\$DefaultMaster\names.json")) 'carrying the real names through the origin map' @('run', 'world:names') 'the names are carried' @((Join-Path $Root 'world\names\1790.json'), (Join-Path $Root 'world\names\about.json'))
 Ensure 'culture\culture.json' 'working out the culture of every part of the world' @('run', 'world:culture') 'the cultures are worked out' @((Join-Path $DefaultWorld 'origin\origin.json'), (Join-Path $Root 'world\cultures.json'))
-# How high the ground is, for the relief (0090): ETOPO, 444 MB once, fitted through the origin map, a few minutes.
+# How high the ground is, for the relief (0090): ETOPO, borrowed above, fitted through the origin map, a few minutes.
 Ensure 'height\height.json' 'fetching and fitting the height of the world' @('run', 'world:height') 'the relief has its height' @((Join-Path $DefaultWorld 'origin\origin.json'))
 
 <# What a world command said, run quietly in the frontend: the cuts made at every start show only their last word. #>

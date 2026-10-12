@@ -323,7 +323,9 @@ Commands are added here as the increments land:
   stand in for the world and never for the player: see `docs/BUILDING-A-MECHANIC.md`.
 - The 4.4 GB the world is built from lives in `world/source/`, not committed:
   `npm run world:fetch-all --prefix frontend` fills it from nothing, and `-- --list` says what each source
-  is for. The generator is `world/master/experiment/tools/build.mjs`; two minutes for the whole world.
+  is for. It is fetched once, into the main checkout: a worktree is given a hard link to each file of it that
+  it lacks, by the quick start and by `world:fetch-all` itself, never a junction, which `git worktree remove`
+  would empty through (decision record 0095, experiment 0019). The generator is `world/master/experiment/tools/build.mjs`; two minutes for the whole world.
 - The older thirteen-class path, `world:fetch` and `world:master`, is stale and says so when run. It
   refuses to overwrite a hand-painted master and writes alongside; the merge script replays hand edits. `world:build` warps Earth into raw material for
   a different starting point.
