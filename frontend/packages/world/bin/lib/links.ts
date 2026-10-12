@@ -94,7 +94,7 @@ const sleeper = new Int32Array(new SharedArrayBuffer(4));
  * Runs `act` and tries again a few times when Windows says a file is busy: a virus scanner holds a file it has just
  * seen written for a moment, and a remove or rename in that moment fails with EBUSY or EPERM.
  */
-function patiently<T>(act: () => T): T {
+export function patiently<T>(act: () => T): T {
   for (let attempt = 0; ; attempt++) {
     try {
       return act();
