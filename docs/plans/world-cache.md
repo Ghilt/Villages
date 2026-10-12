@@ -162,11 +162,12 @@ folder whose other masters are borrowed from the main checkout's by hard link, a
 A master's whole set is about 390 MB on the shelf; tiles and height are most of it. A repaint, or a change to
 code every step imports, files another whole set; a change to `render.json` files new tiles and styles, 66 MB.
 
-A fresh tree whose world is on the shelf: the install (10 s), the world (about ten seconds of hard links), the
-pictures (13 s),
-and the compile, which the quick start starts first so the rest goes by beside it. About a minute and a half,
-under a minute once Gradle keeps compiled classes for every tree. The first tree after a change to the master
-or a world tool pays the build once: about nine minutes, with nothing to download.
+Measured on 2026-10-12, a brand-new worktree on a filled shelf - no packages, no world, no compiled server - was
+ready in **68 seconds**, where a fresh tree took about seventeen minutes: the tools and the Docker stack 24 s, the
+packages 9 s, the world borrowed in 14 s (ten steps, 54,000 files hard-linked, and the downloads in half a
+second), the pictures 13 s, the dev server 6 s, and the game server beside all of it in 10 s, every class from
+Gradle's build cache. The first tree to make a master's world made all ten steps in 9 minutes 46 seconds, with
+nothing to download; a tree whose world is current says so in under half a second. The shelf held 400 MB.
 
 ## Steps
 

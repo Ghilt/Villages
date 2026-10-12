@@ -59,8 +59,9 @@ it was made from, and a tree borrows it by hard link.** The shape, the steps and
 
 ## Consequences
 
-- A fresh tree whose world is on the shelf has it in seconds, and starts in about a minute and a half, most of
-  it the game server's first compile.
+- A fresh tree whose world is on the shelf has it in seconds: measured on 2026-10-12, a brand-new worktree was
+  ready in 68 seconds, its world borrowed in 14 and its server's classes taken from Gradle's build cache, where
+  a fresh tree took about seventeen minutes.
 - The first tree to need a new master, or a world tool's new code, pays for it once, about nine minutes with
   nothing to download, and every tree after it has it for nothing. A branch that changes a tool every step
   imports files a whole new set, about 390 MB; `world:prune` drops entries no tree links to.
