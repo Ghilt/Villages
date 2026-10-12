@@ -3,9 +3,10 @@
 
         .\debug-quick-start.ps1
 
-    It checks the tools, generates whatever part of the world is missing, starts the game server and the
-    dev server, waits until both of them answer, and prints the address to open. Nothing here is clever:
-    every step is a command from CLAUDE.md, run in order, with the answer to "did that work" after it.
+    It checks the tools, starts the game server compiling, makes the world current through the world cache -
+    borrowed in seconds from whichever tree made it from the same inputs, made once when nobody has - starts the
+    dev server, waits until both of them answer, and prints the address to open. Nothing here is clever: every
+    step is a command from CLAUDE.md, with the answer to "did that work" after it. See decision record 0095.
 
     Both servers run hidden, with everything they print going to .logs/ beside this file.
 
@@ -32,6 +33,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+$Began = Get-Date
 
 $Root = $PSScriptRoot
 $LogDir = Join-Path $Root '.logs'
@@ -515,6 +517,23 @@ if ($WebOnly) {
 }
 $Store = if ($WebOnly) { '--villages.store=memory' } else { & (Join-Path $Root 'infra\store.ps1') }  # 0092, 0094
 
+# The game server is started first and waited for under 'starting': compiling it is the longest thing a fresh tree
+# does and needs nothing below, so it compiles while the packages are checked and the world is made (0095).
+if (-not (Test-Path $LogDir)) { New-Item -ItemType Directory -Path $LogDir | Out-Null }
+$GameUp = $false
+$GameStarted = $false
+if (-not $WebOnly) {
+    if (Confirm-Port $GamePort 'the game server' (Get-NewestBackendChange)) {
+        $GameUp = $true
+    } else {
+        Good "the game server is compiling and starting on $GamePort, while the rest is made ready"
+        Remember 'game' (Start-Server $Gradlew `
+            @('--console=plain', ':app:bootRun', "`"--args=--server.port=$GamePort $Store`"") `
+            (Join-Path $Root 'backend') $BackendLog $BackendErrors)
+        $GameStarted = $true
+    }
+}
+
 # --- what the browser needs ------------------------------------------------------------------------
 
 Head 'the browser app'
@@ -549,12 +568,8 @@ if (-not (Test-Path (Join-Path $Frontend 'node_modules'))) {
     }
 }
 
-# The downloads the world is built from, 4.9 GB, are the main checkout's, borrowed a file at a time by hard link (0095).
-Step 'the downloads are '; Write-Host (& node (Join-Path $Frontend 'packages\world\bin\borrowSources.ts')) -ForegroundColor Green
-$WorldDir = Join-Path $Root 'frontend\apps\web\public\world'
 $DefaultMaster = 'terrain3_mended_2026-10-03' # DEFAULT_MASTER in packages/world/src/masters.ts
 $Master = Join-Path $Root "world\master\$DefaultMaster.png"
-$DefaultWorld = Join-Path $WorldDir "masters\$DefaultMaster" # a directory a master, which the world commands write
 
 if (-not (Test-Path $Master)) {
     Bad "the hand-painted world is missing: $Master"
@@ -562,41 +577,10 @@ if (-not (Test-Path $Master)) {
     exit 1
 }
 
-<# The link an output would be written through, if any - a worktree's tiles junctioned from the main checkout's - or nothing. #>
-function Get-Link([string] $Path) {
-    for ($at = $Path; $at.Length -gt $Root.Length; $at = Split-Path $at -Parent) {
-        if ((Test-Path $at) -and ((Get-Item $at -Force).Attributes -band [IO.FileAttributes]::ReparsePoint)) { return Get-Item $at -Force }
-    }
-}
-
-<# A world command, run when anything it makes - in the default world, or at a full path - is missing or older than any of $From,
-   so a repainted master is cut again by itself and an untouched one costs nothing; and never through a link, which is another checkout's. #>
-function Ensure([string[]] $Made, [string] $What, [string[]] $Arguments, [string] $There, [string[]] $From = @()) {
-    $paths = @($Made | ForEach-Object { [IO.Path]::GetFullPath($(if ([IO.Path]::IsPathRooted($_)) { $_ } else { Join-Path $DefaultWorld $_ })) })
-    $oldest = @($paths | ForEach-Object { if (Test-Path $_) { (Get-Item $_).LastWriteTimeUtc } else { [datetime]::MinValue } } | Sort-Object)[0]
-    $since = @($From | Where-Object { (Test-Path $_) -and (Get-Item $_).LastWriteTimeUtc -gt $oldest })
-    if ($oldest -eq [datetime]::MinValue) { $why = 'it is missing' } elseif ($since.Count -gt 0) { $why = "$(Split-Path $since[0] -Leaf) was saved since" } else { Good $There; return }
-    $link = @($paths | ForEach-Object { Get-Link $_ })
-    if ($link.Count -gt 0) { Warn "not $($What -replace ' \x28.*'), though $($why): $($link[0].Name) is linked from $($link[0].Target), whose checkout makes it"; return }
-    Run "$What, because $why" $Npm $Arguments $Frontend
-}
-
-# Everything cut from the master is cut again when the master was saved since, in the order the panel's `cut it`
-# runs them; the styles when world/painterly.json or render.json was, the names when the review or about.json was (0087).
-$Painted = @($Master)
-Ensure 'terrain.geojson' 'tracing the coast and the lakes' @('run', 'world:import') 'the coast and the lakes are traced' $Painted
-Ensure 'tiles\cut.json' 'cutting the world into tiles (about three minutes)' @('run', 'world:tile') 'the world is cut' $Painted
-Ensure '..\..\paint.json' 'writing the styles' @('run', 'world:paint', '--', '--config-only') 'the styles are written' @((Join-Path $Root 'world\painterly.json'), (Join-Path $Root 'world\render.json'))
-Ensure 'flow\flow.json' 'working out which way rivers run' @('run', 'world:flow', '--', '--no-stills') 'the rivers run' $Painted
-# The biomes beside the page's world (0054) and the stands only the game server reads (0067), and after biomes.json.
-Ensure @('sprites\biome\map.json', (Join-Path $Root "world\stands\$DefaultMaster\biome\stands.json")) 'working out the biomes and the stands (about half a minute)' @('run', 'world:sprites') 'the world is furnished' @($Master, (Join-Path $Root 'world\biomes.json'))
-# The ground the server reads (0084), the origin, both copies of the names, and the cultures structures are drawn in (0093).
-Ensure (Join-Path $Root "world\ground\$DefaultMaster\ground.json") 'reading the ground for the game server' @('run', 'world:ground') 'the ground is read' $Painted
-Ensure 'origin\origin.json' 'working out where on Earth the land came from (two minutes)' @('run', 'world:origin') 'the origin map is worked out' $Painted
-Ensure @('names.json', (Join-Path $Root "world\ground\$DefaultMaster\names.json")) 'carrying the real names through the origin map' @('run', 'world:names') 'the names are carried' @((Join-Path $Root 'world\names\1790.json'), (Join-Path $Root 'world\names\about.json'))
-Ensure 'culture\culture.json' 'working out the culture of every part of the world' @('run', 'world:culture') 'the cultures are worked out' @((Join-Path $DefaultWorld 'origin\origin.json'), (Join-Path $Root 'world\cultures.json'))
-# How high the ground is, for the relief (0090): ETOPO, borrowed above, fitted through the origin map, a few minutes.
-Ensure 'height\height.json' 'fetching and fitting the height of the world' @('run', 'world:height') 'the relief has its height' @((Join-Path $DefaultWorld 'origin\origin.json'))
+# The world, made current through the world cache (0095): each step borrowed in seconds when any tree has made it
+# from the same master, files and tools, and made once for every tree when nobody has, the reason said; nothing
+# done when nothing changed. It borrows the main checkout's downloads first, ETOPO and Natural Earth.
+Run 'making the world current' $Npm @('run', '--silent', 'world:ready') $Frontend
 
 <# What a world command said, run quietly in the frontend: the cuts made at every start show only their last word. #>
 function Said([string] $Script) { Push-Location $Frontend; try { & $Npm @('run', '--silent', $Script) } finally { Pop-Location } }
@@ -653,23 +637,13 @@ if ($LASTEXITCODE -eq 0 -and (Test-Path $UiList)) {
 
 Head 'starting'
 
-if (-not (Test-Path $LogDir)) { New-Item -ItemType Directory -Path $LogDir | Out-Null }
-
-$GameUp = $false
-if (-not $WebOnly) {
-    if (Confirm-Port $GamePort 'the game server' (Get-NewestBackendChange)) {
-        $GameUp = $true
-    } else {
-        Step 'game server  '
-        Remember 'game' (Start-Server $Gradlew `
-            @('--console=plain', ':app:bootRun', "`"--args=--server.port=$GamePort $Store`"") `
-            (Join-Path $Root 'backend') $BackendLog $BackendErrors)
-        $GameUp = Wait-Listening $GamePort 300 'the game server'
-        if (-not $GameUp) {
-            Show-Tail $BackendLog
-            Show-Tail $BackendErrors 15
-            Warn 'the map still works without it. Everything below is still true.'
-        }
+if ($GameStarted) {
+    Step 'game server  '
+    $GameUp = Wait-Listening $GamePort 300 'the game server'
+    if (-not $GameUp) {
+        Show-Tail $BackendLog
+        Show-Tail $BackendErrors 15
+        Warn 'the map still works without it. Everything below is still true.'
     }
 }
 
@@ -738,4 +712,5 @@ if (-not $NoBrowser) {
     Start-Process $Address | Out-Null
 }
 
+Good "ready in $([int] ((Get-Date) - $Began).TotalSeconds)s"
 Write-Host ''

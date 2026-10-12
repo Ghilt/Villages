@@ -421,7 +421,7 @@ nobody has made costs its steps once, about nine minutes; every tree after it, s
 - What the ground is, for the game server: `npm run world:ground --prefix frontend` reads a master into its
   **ground map**, `world/ground/<master>/`, a cell every sixteen master pixels each way, each keeping its
   commonest terrain and whether a river, a lake, the sea or a coast is in it: four megabytes and fifteen seconds
-  a master, which the quick start makes when it is missing or older than the master. Only the game server reads it, to work out the map's
+  a master, which the quick start makes current with `world:ready`. Only the game server reads it, to work out the map's
   omens of a roll, and it takes a master's name as its first argument (`-- terrain2`). A master repainted
   makes it stale. See `docs/adr/0084`.
 - Where the land came from: `npm run world:origin --prefix frontend` works out a master's **origin map**, where on
@@ -435,11 +435,10 @@ nobody has made costs its steps once, about nine minutes; every tree after it, s
   omens; their shape is held by `contracts/fixtures/names.json` (0087). Canals and reservoirs are left out
   unless the review names them, because nearly all of Natural Earth's were made after 1790.
   `npm run world:names --prefix frontend` carries the names again without working the map out, in under a
-  second. Two minutes a master. Cutting a master in the Debug map does it as its last step, and the quick start
-  does it whenever the origin map is missing or older than the master, and carries the names again whenever
-  either copy is missing or older than `world/names/1790.json` or `about.json`; nothing else does. In a worktree
-  whose world is linked from another checkout it does neither, and says so, because both are that checkout's to
-  make. The game server reads a master's names again when they are written, without a restart. It prints how much of the land
+  second. Two minutes a master. Cutting a master in the Debug map makes it current, and the quick start does for
+  the default master; `world:ready` makes the origin map again whenever the master, `terrain-base.png` or the
+  palette changed, and carries the names again, a step of their own, whenever the origin map, Natural Earth,
+  `world/names/1790.json` or `about.json` did. The game server reads a master's names again when they are written, without a restart. It prints how much of the land
   is from Earth, invented and copied. Moving land with Nearest Neighbour keeps it traceable; land painted fresh,
   or opened up between pieces, is invented. See `docs/plans/real-world-names.md`.
 - The culture each place is built in: `npm run world:culture --prefix frontend` works out a master's **culture
@@ -448,8 +447,8 @@ nobody has made costs its steps once, about nine minutes; every tree after it, s
   where it came from, invented land the culture of the nearest land that came from Earth, sea none. It writes
   `culture/` beside the master's tiles - a byte a square of the origin map, and `culture.png`, the picture the
   **Culture** renderer of the Debug map lays on the world: blue European, green Islamic, red East Asian, ochre
-  African - and prints what share of the land is of each. Two seconds a master; the quick start does it whenever
-  the culture map is missing or older than the origin map or `world/cultures.json`. Under the Culture renderer a
+  African - and prints what share of the land is of each. Two seconds a master; `world:ready`, and so the quick start,
+  makes it again whenever the origin map or `world/cultures.json` changed. Under the Culture renderer a
   click says in the log, under `culture`, what culture the place is built in. A structure is drawn in the culture
   under it, read from the map when it is drawn, so a repainted master redraws its structures.
 - How high the ground is, for the relief: `npm run world:height --prefix frontend` reads ETOPO 2022's whole world,
@@ -464,7 +463,7 @@ nobody has made costs its steps once, about nine minutes; every tree after it, s
   the word. In a worktree it is the main checkout's, borrowed a file at a time by hard link rather than fetched
   (0095). The sea is held at nought and the grid is read round the antimeridian. A master with no origin map
   is given plain Earth's height, and it says so. Cutting a master in the Debug map fits it again after the
-  origin, and the quick start does whenever it is missing or the origin map is newer. See decision record 0090.
+  origin, and `world:ready` whenever the origin map, the master or ETOPO changed. See decision record 0090.
 - A picture of the scenery, without a browser: `npm run world:scenery --prefix frontend` paints five
   places at the zoom the scenery is actually in and stamps every point the sprite map asks for onto
   them, into `world/painterly/<place>-scenery.png`, half a minute for all of them. It prints each one's

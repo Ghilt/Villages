@@ -135,11 +135,13 @@ What follows from that, and bites in practice:
   worktree until the worktree is refreshed from it. Say which one was read when it matters.
 - **`world/painterly/`, `world/stands/`, the cut tiles under `frontend/apps/web/public/world/`, and
   `.logs/` are output and per-worktree.** They are gitignored, they do not travel with a branch, and a
-  worktree that has never cut them cannot serve a map. Junctioning the main checkout's tiles into the
-  worktree is the cheap way to get a map up without a five-minute recut. So is `frontend/node_modules`: a
-  fresh tree needs `npm install --prefix frontend` once before anything in it runs, and again after any
-  merge that changes `frontend/package-lock.json`. Junction each master's `tiles` rather than the whole
-  `public/world`, though: a sprite map furnished through that junction is written into the main checkout's.
+  worktree that has never made them cannot serve a map. `npm run world:ready --prefix frontend`, which the
+  quick start runs, borrows them from the world cache in seconds, as hard links to what another tree made from
+  the same inputs (decision record 0095). **Never junction another checkout's world into a tree**:
+  `git worktree remove --force`, which is how a tree is deleted, empties the folder a junction points at
+  (experiment 0019); `world:ready` takes away the junctions trees were given by hand before this. So is
+  `frontend/node_modules` per-worktree: a fresh tree needs `npm install --prefix frontend` once before anything
+  in it runs, and again after any merge that changes `frontend/package-lock.json`.
 - **Each tree serves on its own pair of ports**, a hash of its directory name, so several can run at once
   and a tree's address never moves. The main checkout keeps 5173 and 8080; a worktree's game server sits
   three thousand above its dev server, so 5548 serves the page and 8548 serves the world, and the page
@@ -269,19 +271,19 @@ part is what points npm at the frontend workspace, so running them from inside `
 Commands are added here as the increments land:
 
 - Everything, from a cold machine: `.\debug-quick-start.ps1` from the repository root, or
-  `debug-quick-start.cmd` on a double click from Explorer. It checks the tools, installs the packages
-  again when `package-lock.json` has changed since they were installed (stopping this checkout's dev
-  server first, because Windows will not replace a running program), generates whatever part
-  of the world is missing and cuts again whatever a save of the master has made stale - the coast, the tiles,
-  the rivers' flow, the sprite map, the ground map, the origin map with its names and the culture map, in the order the panel's
-  `cut it` runs them, and nothing when the master was not saved since - and the styles again when
-  `world/painterly.json` or `world/render.json` was, the sprite map when `world/biomes.json` was, and the names
-  when `world/names/1790.json` or `world/names/about.json` was. It never writes through a link: tiles a worktree links from the main
-  checkout are that checkout's to cut, and it says so. It cuts the sprites and the interface pictures again (seconds when nothing is new), starts the game
-  server and the dev server hidden with their output in
-  `.logs/`, waits until both ports answer, and prints the address. When Docker is running it starts MongoDB
-  and RabbitMQ too if they are not up, and tells the game server to keep its world in the one and have the other
-  carry it; `infra/store.ps1`
+  `debug-quick-start.cmd` on a double click from Explorer. It checks the tools, starts the game server
+  compiling first, installs the packages again when `package-lock.json` has changed since they were installed
+  (stopping this checkout's dev server first, because Windows will not replace a running program), and makes
+  the default master's world current with `world:ready`: every world step - the coast, the tiles, the styles,
+  the rivers' flow, the sprite map, the ground map, the origin map, the names and the culture map, the height -
+  borrowed from the world cache when any tree has made it from the same master, files and tools, made once for
+  every tree when nobody has, and nothing done when nothing changed; it borrows the main checkout's downloads
+  first (decision record 0095). It cuts the sprites and the interface pictures again (seconds when nothing is
+  new), starts the dev server, with both servers hidden and their output in
+  `.logs/`, waits until both ports answer, and prints the address and how long it took. A fresh tree whose
+  world is on the shelf is up in about a minute: 68 seconds, measured on 2026-10-12. When Docker is running it
+  starts MongoDB and RabbitMQ too if they are not up, and tells the game server to keep its world in the one and
+  have the other carry it; `infra/store.ps1`
   is that half, and it never stops them or makes them again. `-Stop` stops both servers and leaves the stack
   alone, because it is every tree's. `-Logs` prints
   their tails, `-WebOnly` skips the game server, `-NoBrowser` leaves the browser alone. **A port held by

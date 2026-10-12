@@ -13,31 +13,37 @@ preview of anything.
 The picture of all of this - every tool, what it reads, what it writes, how long it takes, and which of it
 the running game reads - is the page `/admin/inspect-architecture`. This file is what to run.
 
-## 1. Work out what is stale
+## 1. Make it current
 
-Find the row for each thing the step changed, and run every tool in it. Run from the worktree root, each as
-`npm run <tool> --prefix frontend`, a master's name as the first argument when it is not the default one.
+`npm run world:ready --prefix frontend` from the worktree root, a master's name after `--` when it is not the
+default one. It works out every world step's fingerprint from what the step is made from - the master, every
+file, the tools' own code - and says a line a step: *current*, *borrowed from the world cache*, or the tool's own
+output as it makes the step, with the reason (*world/palette.json changed*). It never needs telling what is
+stale, and it never writes through a link. `-- --why` says where each step stands and what moved, making
+nothing; `-- --only <step>` makes one step and every step made from it. See decision record 0095.
 
-| You changed | Run, in this order | Time a master, measured 2026-10-11 |
+A change to a tool's code moves that tool's fingerprint, so `world:ready` makes it again after the change, once
+for every tree. A change to a tool whose output does not move with its code - a library's behaviour, say - is
+made again with `-- --only <step> --force`.
+
+It makes what the game reads, never the stills. Those are by hand, each `npm run <tool> --prefix frontend`:
+
+| You changed | Paint, after `world:ready` | Time a master, measured 2026-10-11 |
 |---|---|---|
-| the master, or the palette | `world:import`, `world:tile`, `world:flow`, `world:sprites`, `world:ground`, `world:origin`, `world:culture`, `world:height`, `world:scenery`, `world:paint` | about twelve minutes |
-| the tiling or `world/render.json` | `world:tile`, `world:paint` | about four minutes |
-| the flow tool | `world:flow` | a minute and a half |
-| `world/biomes.json` or the sprite generator | `world:sprites`, `world:scenery` | a minute |
-| the ground tool | `world:ground` | seconds |
-| the origin tool | `world:origin`, `world:culture`, `world:height` | five minutes |
-| `world/cultures.json` or the culture tool | `world:culture` | two seconds |
-| `world/names/1790.json` or `about.json` | `world:names` | a second |
-| `world/painterly.json` only | `world:paint -- --config-only`, and `world:paint` for the stills | a second, or a minute |
+| the master, or the palette | `world:scenery`, `world:paint`, `world:flow` for its stills | about two minutes |
+| the tiling or `world/render.json` | `world:paint` | a minute |
+| the flow tool | `world:flow` (its stills; it makes the tree's own flow, which the next `world:ready` borrows over) | a minute and a half |
+| `world/biomes.json` or the sprite generator | `world:scenery` | seconds |
+| `world/painterly.json` | `world:paint` for the stills | a minute |
 | a picture in `world/sprites/` or `world/ui/` | nothing: `world:art` and `world:ui` run on every dev-server start and on save | |
 
-The quick-start does the same from the files' dates, and the Debug map panel's `cut it` runs the master's
-row for one master. Neither paints the stills, and neither writes through a link: tiles a worktree
-links from the main checkout are that checkout's, and they are cut there or not at all. Say which.
+What `world:ready` made rather than borrowed it filed for every tree, and what it borrowed was made by the tree
+it names. The quick start and the Debug map panel's buttons run the same `world:ready`.
 
 ## 2. Read what each tool prints
 
-These are the numbers to carry into the hand-over:
+These are the numbers to carry into the hand-over. A step `world:ready` borrowed says the last thing its tool said
+when it was made; `-- --only <step> --force` makes it again to read all of it:
 
 - `world:origin`: how much of the land is from Earth, invented and copied, and how many names went nowhere.
 - `world:culture`: what share of the land is of each culture. The Culture renderer is its picture.
@@ -61,5 +67,6 @@ were an optional extra.
 
 ## Change this skill
 
-When a tool is added to the world, it gets a row here, a place on `/admin/inspect-architecture`, and a line
-in the quick-start, in the same step.
+When a tool is added to the world, it gets a step in `frontend/packages/world/bin/lib/worldSteps.ts`, which is
+what `world:ready`, the quick start and the panel all make, and a place on `/admin/inspect-architecture`, in the
+same step; a still it paints gets a row here.
