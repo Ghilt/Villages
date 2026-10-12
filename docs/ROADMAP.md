@@ -21,7 +21,7 @@ its rivers running to the sea, lying on a desk when the camera pulls back past t
 parchment, takes one, and the house is founded from the same decision that records the taking — castle,
 ground about it, selectable, with an inspector on the left. Every event carries its two times, its place and
 significance, and its provenance. Two browsers see each other's houses live. The world is kept in MongoDB, in a
-database of each tree's own, and outlives a restart of the game server; RabbitMQ runs beside it, unused.
+database of each tree's own, and outlives a restart of the game server; RabbitMQ carries every event stored.
 
 ## Now
 
@@ -107,13 +107,15 @@ started, and so is the broker, the newest.
   bridge that follows the store durably and waits for the broker's confirm, each tree in a virtual host of its
   own that the server makes and `drop-gone-worlds` drops; the reactions stay on the store. The shape is decision
   record 0094, proposed, and the eleven steps, one commit each with three checkpoints, are in
-  `docs/plans/broker.md`; step nought, the documents, is written. With it comes the RabbitMQ half of 0.8's
-  smoke test, which waited for there to be something to test. Still one game server per tree. Adam's own,
-  planned with him on 2026-10-12.
+  `docs/plans/broker.md`; steps nought to five are built, the bridge publishing every event to the tree's
+  virtual host, and nothing follows it yet. With it comes the RabbitMQ half of 0.8's smoke test, which waited
+  for there to be something to test. Still one game server per tree. Adam's own, planned with him on
+  2026-10-12.
 - **1.15** The connection badge, the last piece of inspecting a house
 
 MongoDB and RabbitMQ are on the machine, in Docker, from `infra/docker-compose.yml`. The game server keeps
-its world in MongoDB whenever Docker is running; RabbitMQ waits for 1.6.
+its world in MongoDB whenever Docker is running, and RabbitMQ carries every event it stores; nothing follows
+the broker yet.
 
 ## Later
 

@@ -8,30 +8,60 @@ import villages.application.Faults
 import villages.occurrent.EventWorld
 import villages.occurrent.InMemoryWorld
 import villages.occurrent.MongoWorld
+import villages.protocol.Cell
+import villages.rabbit.Broker
+import villages.rabbit.CarriedWorld
+import villages.rabbit.RoutingKeys
 import java.nio.file.Files
 import java.nio.file.Path
 
 private val storeLog = LoggerFactory.getLogger("villages.store")
 
 /**
- * Where the world is kept, chosen here and nowhere else: in memory unless told otherwise, which is what every
- * test of the app wants, and in MongoDB with `villages.store=mongo`, which the quick start passes whenever
- * Docker is running. Nothing that is handed the ports can tell which. See decision record 0092.
+ * Where the world is kept, and whether RabbitMQ carries it, chosen here and nowhere else: in memory and in-process
+ * unless told otherwise, which is what every test of the app wants; in MongoDB with `villages.store=mongo`, and
+ * carried by RabbitMQ in the tree's own virtual host with `villages.broker=rabbit`, both of which the quick start
+ * passes whenever the stack is up. Nothing that is handed the ports can tell which. See decision records 0092 and
+ * 0094.
  */
 @Configuration
 class StoreConfig {
     /** The world, whose feed says on `faults` what its subscribers throw. */
     @Bean(destroyMethod = "close")
+    @Suppress("LongParameterList")
     fun world(
         faults: Faults,
         @Value("\${villages.store:memory}") store: String,
         @Value("\${villages.mongo.connection:$LOCAL_MONGO}") connection: String,
         @Value("\${villages.mongo.database:}") database: String,
-    ): EventWorld = when (store) {
-        "memory" -> InMemoryWorld(faults)
-        "mongo" -> MongoWorld(connection, database.ifBlank { databaseFor(Path.of(CHECKOUT)) }, faults)
-        else -> error("villages.store is '$store', and it can be memory or mongo")
-    }.also { world -> sayWhereAndWhat(world) }
+        @Value("\${villages.broker:in-process}") broker: String,
+        @Value("\${villages.rabbit.uri:$LOCAL_RABBIT}") rabbit: String,
+        @Value("\${villages.rabbit.management:$LOCAL_MANAGEMENT}") management: String,
+        @Value("\${villages.rabbit.vhost:}") virtualHost: String,
+    ): EventWorld {
+        check(broker in BROKERS) { "villages.broker is '$broker', and it can be ${BROKERS.joinToString(" or ")}" }
+        check(broker != "rabbit" || store == "mongo") {
+            "villages.broker=rabbit needs villages.store=mongo: in memory, a wipe cannot wait for what the broker " +
+                "still holds. See decision record 0094."
+        }
+        val kept = when (store) {
+            "memory" -> InMemoryWorld(faults)
+            "mongo" -> MongoWorld(connection, database.ifBlank { databaseFor(Path.of(CHECKOUT)) }, faults)
+            else -> error("villages.store is '$store', and it can be memory or mongo")
+        }
+        val world = if (kept is MongoWorld && broker == "rabbit") {
+            val tree = Broker(rabbit, management, virtualHost.ifBlank { kept.database })
+            try {
+                CarriedWorld(kept, tree, RoutingKeys { place -> Cell.of(place.lat, place.lon).quadkey })
+            } catch (@Suppress("TooGenericExceptionCaught") unanswered: Exception) {
+                kept.close()
+                throw unanswered
+            }
+        } else {
+            kept
+        }
+        return world.also { sayWhereAndWhat(it) }
+    }
 
     /**
      * Says where the world is kept, and reads every event in it once, so that one this code cannot read is said as
@@ -54,6 +84,12 @@ class StoreConfig {
     private companion object {
         /** The stack in `infra/docker-compose.yml`, and a server told to use it says so in five seconds if it is not up. */
         const val LOCAL_MONGO = "mongodb://localhost:27017/?replicaSet=rs0&serverSelectionTimeoutMS=5000"
+
+        /** The same stack's RabbitMQ, as the user it makes, and its management page, which makes virtual hosts. */
+        const val LOCAL_RABBIT = "amqp://villages:villages@localhost:5672"
+        const val LOCAL_MANAGEMENT = "http://localhost:15672"
+
+        val BROKERS = listOf("in-process", "rabbit")
 
         /** The checkout the server runs in: it is started in `backend/app`, as the folders it reads assume. */
         const val CHECKOUT = "../.."

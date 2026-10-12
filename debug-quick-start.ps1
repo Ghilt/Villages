@@ -513,7 +513,7 @@ if ($WebOnly) {
     $JavaVersion = (& $Java --version | Select-Object -First 1)
     Good "java $JavaVersion, which runs Gradle; Gradle fetches the 21 it compiles with"
 }
-$Store = if ($WebOnly) { 'memory' } else { & (Join-Path $Root 'infra\store.ps1') }  # where the world is kept (0092)
+$Store = if ($WebOnly) { '--villages.store=memory' } else { & (Join-Path $Root 'infra\store.ps1') }  # 0092, 0094
 
 # --- what the browser needs ------------------------------------------------------------------------
 
@@ -662,7 +662,7 @@ if (-not $WebOnly) {
     } else {
         Step 'game server  '
         Remember 'game' (Start-Server $Gradlew `
-            @('--console=plain', ':app:bootRun', "`"--args=--server.port=$GamePort --villages.store=$Store`"") `
+            @('--console=plain', ':app:bootRun', "`"--args=--server.port=$GamePort $Store`"") `
             (Join-Path $Root 'backend') $BackendLog $BackendErrors)
         $GameUp = Wait-Listening $GamePort 300 'the game server'
         if (-not $GameUp) {

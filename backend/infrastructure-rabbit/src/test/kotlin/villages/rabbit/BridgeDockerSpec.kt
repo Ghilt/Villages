@@ -165,6 +165,21 @@ class BridgeDockerSpec : StringSpec({
             }
         }
 
+    "a world carried by RabbitMQ says so, and what it stores reaches its own virtual host (needs Docker)"
+        .config(enabledOrReasonIf = needsDocker) {
+            val broker = broker("villages-carried")
+            val queue = everything(broker)
+            val house = HouseId(UUID.randomUUID())
+
+            CarriedWorld(MongoWorld(mongo.connectionString, "villages-carried"), broker, keys).use { world ->
+                world.keptIn shouldBe "in MongoDB, database villages-carried, which outlives the server, " +
+                    "and carried by RabbitMQ in the virtual host villages-carried"
+                world.executor.execute(founding(house), told())
+
+                taken(broker, queue, 1).map(::streamOf) shouldBe listOf(house.stream)
+            }
+        }
+
     "a broker stopped and started again loses nothing, and the bridge says so once (needs Docker)"
         .config(enabledOrReasonIf = needsDocker) {
             val broker = broker("villages-bridge-restart")

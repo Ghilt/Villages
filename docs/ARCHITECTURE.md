@@ -156,8 +156,11 @@ at once never see each other's world. The quick start starts the stack when it i
 `villages.store=mongo` whenever Docker is up, and the welcome says where the world is kept, which the
 debug panel prints.
 
-RabbitMQ is not used yet. The gateway consumes the feed in-process and fans events out to every connection
-that asked to watch, which is the broker's job from increment 1.6 on, in a virtual host of the tree's own.
+With `villages.broker=rabbit`, which needs MongoDB and which the quick start passes with it, the world is a
+`CarriedWorld`: **the bridge** follows the store durably and publishes every event it stores to RabbitMQ's
+`villages.events`, in a virtual host of the tree's own that the server makes as it starts (decision record
+0094). Nothing follows the broker yet: the gateway consumes the feed in-process and fans events out to every
+connection that asked to watch, which the broker takes over as `docs/plans/broker.md` goes on.
 The whole path is proven by `AppBootsTest`: a real socket, hello, a founded house, the event back; the
 store itself by `MongoWorldDockerSpec`, against a MongoDB of its own in a container.
 

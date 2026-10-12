@@ -563,17 +563,26 @@ stage alone, with none of the debug panel in it (decision record 0079).
   whole machine, whichever tree started them, on the loopback address only. The quick start starts them when
   they are not up, says under **tools** where the world will be kept, and tells the game server.
 - **Where the world is kept** is the debug panel's first `world` line on connecting: *kept in MongoDB,
-  database villages-<tree>, which outlives the server*, or *kept in memory, and gone when the server
-  stops* when Docker was not running. With the first, found a house, stop the game server and start it
-  again, and the house is still there. The server's log says the same as it starts, under `villages.store`.
+  database villages-<tree>, which outlives the server, and carried by RabbitMQ in the virtual host
+  villages-<tree>*, or *kept in memory, and gone when the server stops* when Docker was not running. With
+  the first, found a house, stop the game server and start it again, and the house is still there. The
+  server's log says the same as it starts, under `villages.store`. `--villages.store=mongo` keeps it in
+  MongoDB and `--villages.broker=rabbit` has RabbitMQ carry it, which needs the first; the quick start passes
+  both when the stack is up.
 - MongoDB is `mongodb://localhost:27017/?replicaSet=rs0`, a replica set of one, which is what Occurrent's
   subscriptions need. A tree's database is named after it, `villages` in the main checkout and
   `villages-<tree>` in a worktree, worked out by the server from the checkout it runs in, so no tree reads
   another's world; `--villages.mongo.database` names another. Its events are the `events` collection.
 - RabbitMQ is `localhost:5672`, and its management page is **http://localhost:15672**, signed into as
-  `villages` / `villages`: what exchanges and queues exist and what is flowing through them. Nothing does yet.
-  A tree's messages will keep to a virtual host named as its database is, which the page's menu at the top
-  right picks between.
+  `villages` / `villages`: what exchanges and queues exist and what is flowing through them. A tree's messages
+  keep to a virtual host named as its database is, which the server makes as it starts and the page's menu at
+  the top right picks between. In it, **the bridge** publishes every event the world stores to the exchange
+  `villages.events`, under a routing key of its type and the cell where it happened (`EVENTS.md`), over a
+  connection named *villages: the bridge*; the exchange's page shows the rate as houses are founded. Nothing
+  follows it yet, so a message no queue is bound for goes nowhere: a queue bound by hand to `#` on the
+  exchange's page fills with every event from then on, and fills again with what was written while the server
+  was down once it is back, because the bridge keeps its place in the tree's database, in `checkpoints`.
+  Delete such a queue when done. See decision record 0094.
 - `docker compose -f infra/docker-compose.yml ps` says whether both are up and healthy; Docker Desktop's
   Containers page says the same under `villages`. `down` stops them and keeps what they hold, and `down -v`
   forgets it, for every tree at once, so both are Adam's and no session runs them; a session resets only

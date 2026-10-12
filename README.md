@@ -75,4 +75,4 @@ docker compose -f infra/docker-compose.yml up -d
 ```
 
 Every checkout keeps its world in a database of its own in that one MongoDB, so several can run at once
-without touching each other's houses. RabbitMQ is not used yet.
+without touching each other's houses, and RabbitMQ carries every event it stores in a virtual host of its own.
