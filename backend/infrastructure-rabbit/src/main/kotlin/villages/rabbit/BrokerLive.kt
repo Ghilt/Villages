@@ -65,7 +65,8 @@ class BrokerLive(private val broker: Broker, private val faults: Faults) : Live 
 
         /** Its queue is gone: said once, and made again until it can be, the history read once more each time. */
         private fun lost(why: Exception) {
-            faults.report(Fault(follower, "its queue on RabbitMQ, which it makes again and reads the history", why))
+            // Said as "HousesProjection threw on losing its queue on RabbitMQ, so it makes another ...: why".
+            faults.report(Fault(follower, "losing its queue on RabbitMQ, so it makes another and reads the history again", why))
             val gone = connection
             thread(name = "villages: $follower listening again", isDaemon = true) {
                 runCatching { gone?.takeIf { it.isOpen }?.close() }
