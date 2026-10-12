@@ -43,8 +43,12 @@ export function Diagram(props: {
         width: p.width,
         height: p.height,
         ...(p.parent === undefined ? {} : { parentId: p.parent }),
-        ...(p.card.kind === 'group' ? { zIndex: -1 } : {}),
-        data: { card: p.card, state: stateOf(p.card.id) },
+        ...(p.card.kind === 'group' || p.card.kind === 'shelf' ? { zIndex: -1 } : {}),
+        data: {
+          card: p.card,
+          state: stateOf(p.card.id),
+          ...(p.words === undefined ? {} : { words: p.words }),
+        },
       })),
     ],
     [placed, line, stateOf],
@@ -114,5 +118,6 @@ function colourOf(node: Node): string {
   if (card.kind === 'tool') return '#3b3229';
   if (card.kind === 'file') return ORIGIN_COLOUR[artifact(card.ref).origin];
   if (card.kind === 'group') return '#dcefe3';
+  if (card.kind === 'shelf') return 'rgb(236 230 218 / 60%)';
   return '#2e6b4f';
 }

@@ -4,6 +4,8 @@ import { describe, expect, it } from 'vitest';
 
 import { WORLD_STEPS } from '../../../../../packages/world/bin/lib/worldSteps.ts';
 
+import { WORLD_CACHE } from './cache';
+import { STAGES } from './starting';
 import { ARTIFACTS, LEGACY, READERS, TOOLS, downstreamOf, upstreamOf } from './world';
 
 /** A path from the repository's root. */
@@ -78,6 +80,23 @@ describe('the architecture page', () => {
       ];
     });
     expect(drift).toEqual([]);
+  });
+
+  it("draws in the world cache's box exactly the world steps' tools and what they make, in their order", () => {
+    const scripts = WORLD_STEPS.map((step) => {
+      const entry = step.tool.slice(step.tool.lastIndexOf('/') + 1);
+      return TOOLS.find((t) => t.entry === entry)?.script;
+    });
+    expect([...WORLD_CACHE.tools]).toEqual(scripts);
+    const made = [...new Set(WORLD_STEPS.flatMap((step) => step.makes.map((one) => one.is)))].sort();
+    expect([...WORLD_CACHE.files].sort()).toEqual(made);
+  });
+
+  it('starts a tree as the quick start does, part by part and in its order', () => {
+    const script = readFileSync(fromRoot('debug-quick-start.ps1'), 'utf8');
+    const at = STAGES.map((stage) => script.indexOf(stage.says));
+    expect(STAGES.filter((_, i) => at[i] === -1).map((stage) => stage.says)).toEqual([]);
+    expect(at).toEqual([...at].sort((a, b) => a - b));
   });
 
   it('traces the terrain tiles back to the master, and the master on to both programs', () => {

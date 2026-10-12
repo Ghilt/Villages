@@ -7,6 +7,7 @@
  */
 
 import { ARTIFACTS } from './artifacts';
+import { WORLD_CACHE } from './cache';
 import { READERS } from './readers';
 import { TOOLS } from './tools';
 import type { Artifact, Reader, Tool } from './types';
@@ -92,11 +93,17 @@ export function downstreamOf(id: string): { files: Set<string>; tools: Set<strin
   return { files, tools, readers };
 }
 
-/** How long a master takes from its painting to a world the game can serve: the tools the quick-start runs. */
+/** How long one world step's tool takes when it runs for world:ready: the styles alone, for the painter. */
+export function secondsOfStep(tool: Tool): number {
+  return tool.script === 'world:paint' ? 1 : tool.seconds;
+}
+
+/**
+ * How long a master takes from its painting to a world the game can serve, when nobody has made it: every world
+ * step's tool one after the other, once on the machine, after which every tree borrows it.
+ */
 export function secondsForAMaster(): number {
-  return TOOLS.filter(
-    (tool) => tool.group === 'master' && tool.ranBy.includes('quick-start') && tool.script !== 'world:names',
-  )
-    .map((tool) => (tool.script === 'world:paint' ? 1 : tool.seconds))
+  return WORLD_CACHE.tools
+    .map((script) => secondsOfStep(TOOLS.find((tool) => tool.script === script)!))
     .reduce((sum, s) => sum + s, 0);
 }

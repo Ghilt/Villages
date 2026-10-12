@@ -10,7 +10,7 @@ export const TOOLS: readonly Tool[] = [
     writes: ['outlines', 'lookup'],
     seconds: 36,
     perMaster: true,
-    ranBy: 'quick-start, cut it',
+    ranBy: 'world:ready, when nobody has made its step',
     what: 'Traces the coast and the large lakes.',
   },
   {
@@ -21,7 +21,7 @@ export const TOOLS: readonly Tool[] = [
     writes: ['tiles'],
     seconds: 174,
     perMaster: true,
-    ranBy: 'quick-start, cut it',
+    ranBy: 'world:ready, when nobody has made its step',
     what: 'Cuts the master into map tiles.',
   },
   {
@@ -32,7 +32,7 @@ export const TOOLS: readonly Tool[] = [
     writes: ['flow', 'stills'],
     seconds: 79,
     perMaster: true,
-    ranBy: 'quick-start, cut it',
+    ranBy: 'world:ready, when nobody has made its step',
     what: 'Works out which way the rivers run.',
   },
   {
@@ -43,7 +43,7 @@ export const TOOLS: readonly Tool[] = [
     writes: ['sprite-map', 'stands'],
     seconds: 20,
     perMaster: true,
-    ranBy: 'quick-start, cut it',
+    ranBy: 'world:ready, when nobody has made its step',
     what: 'Works out the biomes and where the scenery stands.',
   },
   {
@@ -54,7 +54,7 @@ export const TOOLS: readonly Tool[] = [
     writes: ['ground'],
     seconds: 20,
     perMaster: true,
-    ranBy: 'quick-start, cut it',
+    ranBy: 'world:ready, when nobody has made its step',
     what: 'Reads the ground for the game server.',
   },
   {
@@ -65,7 +65,7 @@ export const TOOLS: readonly Tool[] = [
     writes: ['origin', 'names', 'names-server'],
     seconds: 143,
     perMaster: true,
-    ranBy: 'quick-start, cut it',
+    ranBy: 'world:ready, when nobody has made its step',
     what: "Works out where on Earth the land came from, and carries Earth's names in.",
   },
   {
@@ -76,7 +76,7 @@ export const TOOLS: readonly Tool[] = [
     writes: ['culture'],
     seconds: 2,
     perMaster: true,
-    ranBy: 'quick-start',
+    ranBy: 'world:ready, when nobody has made its step',
     what: 'Works out the building tradition each part of the world is drawn in.',
   },
   {
@@ -87,7 +87,7 @@ export const TOOLS: readonly Tool[] = [
     writes: ['names', 'names-server'],
     seconds: 3,
     perMaster: true,
-    ranBy: 'quick-start',
+    ranBy: 'world:ready, when nobody has made its step',
     what: 'Carries the names again, after the review changed.',
   },
   {
@@ -98,7 +98,7 @@ export const TOOLS: readonly Tool[] = [
     writes: ['height'],
     seconds: 166,
     perMaster: true,
-    ranBy: 'quick-start, cut it',
+    ranBy: 'world:ready, when nobody has made its step',
     what: "Fits the real Earth's height to the world through the origin map.",
   },
   {
@@ -121,7 +121,7 @@ export const TOOLS: readonly Tool[] = [
     seconds: 63,
     time: '1 min, or 1 s for paint.json alone',
     perMaster: false,
-    ranBy: 'quick-start (paint.json alone)',
+    ranBy: 'world:ready (paint.json alone), and by hand for the stills',
     what: 'Paints every view in every style, and writes the styles the page reads.',
   },
   {
@@ -191,7 +191,7 @@ export const TOOLS: readonly Tool[] = [
     time: 'about 10 min, once',
     perMaster: false,
     ranBy: 'by hand, once a machine',
-    what: 'Downloads the real Earth the world is built from, 4.4 GB.',
+    what: 'Downloads the real Earth the world is built from, 4.4 GB, into the main checkout; a worktree borrows it.',
   },
   {
     script: 'world:ready',
@@ -202,7 +202,7 @@ export const TOOLS: readonly Tool[] = [
     seconds: 10,
     time: 'seconds when the world cache has it; the steps it makes when not',
     perMaster: true,
-    ranBy: 'quick-start',
+    ranBy: 'quick-start, the Debug map',
     what: 'Borrows each world step from the world cache, and makes, files and borrows the ones nobody has made.',
   },
   {

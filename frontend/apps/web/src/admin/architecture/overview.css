@@ -134,3 +134,67 @@
   font-weight: bold;
   color: var(--runtime);
 }
+
+/* Starting a tree: each part of the quick start on one clock, the game server's bar beside the rest. */
+
+.arch__start {
+  margin-bottom: 1.2rem;
+}
+
+.arch__lanes {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.arch__lane {
+  display: grid;
+  grid-template-columns: 9rem minmax(8rem, 1fr) minmax(12rem, 22rem);
+  gap: 0.6rem;
+  align-items: center;
+  font-size: 0.75rem;
+}
+
+.arch__lane-name {
+  font-family: var(--mono);
+}
+
+.arch__track {
+  position: relative;
+  height: 1rem;
+  background: var(--baked-bg);
+  border-radius: 2px;
+}
+
+.arch__span {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  min-width: 3px;
+  background: var(--baked);
+  border-radius: 2px;
+}
+
+.arch__span--beside {
+  background: var(--runtime);
+}
+
+.arch__lane-time {
+  font-family: var(--mono);
+}
+
+.arch__was {
+  color: var(--ink-soft);
+}
+
+@media (width <= 900px) {
+  .arch__lane {
+    grid-template-columns: 7rem 1fr;
+  }
+
+  .arch__lane-time {
+    grid-column: 2;
+  }
+}

@@ -115,7 +115,7 @@ export const ARTIFACTS: readonly Artifact[] = [
     name: 'Natural Earth',
     path: 'world/source/*.geojson',
     origin: 'fetched',
-    what: 'Rivers, lakes, peaks, seas, lands and towns of the real Earth.',
+    what: 'Rivers, lakes, peaks, seas, lands and towns of the real Earth. Fetched once, into the main checkout; every worktree borrows it by hard link.',
   },
   {
     id: 'etopo',
@@ -123,7 +123,7 @@ export const ARTIFACTS: readonly Artifact[] = [
     name: 'ETOPO',
     path: 'world/source/etopo/',
     origin: 'fetched',
-    what: 'How high and how deep the real Earth is.',
+    what: 'How high and how deep the real Earth is. Fetched once, into the main checkout; every worktree borrows it by hard link.',
     size: '444 MB',
   },
   {

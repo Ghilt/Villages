@@ -558,12 +558,17 @@ nobody has made costs its steps once, about nine minutes; every tree after it, s
   needs running, and the game itself. Each of them has a way back to it at the top, and the debug panel's
   World section links it. A new page beside the game is added to `apps/web/src/admin/inspectViews.ts`.
 - **`/admin/inspect-architecture`** is how the world is set up, and needs nothing else running. Along the top,
-  the numbers: how long a master takes from its painting to a world the game serves, how many tools bake
-  it, and how many baked files the running game depends on; then a master step by step, each tool a bar as
-  long as it takes. Below is the diagram, flowing down the page: cards for what Adam authors and what is
-  downloaded, the tools that bake the world from them, and the files they write, each file card saying
+  the numbers: how long a brand-new worktree takes to the game with its world borrowed, how long a master's
+  world takes from its painting when nobody has made it, how many tools bake it, and how many baked files the
+  running game depends on. Then **Starting a tree**: each part of the quick start a bar on one clock, where it
+  began and how long it took in a brand-new worktree measured on 2026-10-12, the game server's green bar
+  beside the rest, and what each took before the world cache; its parts are held to the script's own words by
+  `world.test.ts`. Then a master step by step, its ten world steps in the order `world:ready` makes them, each
+  a bar as long as its tool takes. Below is the diagram, flowing down the page: cards for what Adam authors and
+  what is downloaded, the tools that bake the world from them, and the files they write, each file card saying
   whether it is one file, a few, or a folder, its path, and who makes it - Adam (gold), a download (blue),
-  a tool (grey). Under a dotted line is the running game: the page on its own, then two boxes of the pieces
+  a tool (grey). The world steps' tools and what they make stand in a dashed box, **the world cache, shared by
+  every tree**, which says what it is and where; choosing it lights everything in it. Under a dotted line is the running game: the page on its own, then two boxes of the pieces
   that fit together, each card saying where it runs - in the browser, in the game server, or in Docker (sea
   green). **The game server** box holds the gateway, the rules, the reactions and the projections, and the
   baked files it reads arrive at the box; **the event store** box holds Occurrent, MongoDB, RabbitMQ and the

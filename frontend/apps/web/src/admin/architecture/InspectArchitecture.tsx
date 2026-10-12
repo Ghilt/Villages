@@ -9,6 +9,8 @@ import { Diagram } from './Diagram';
 import { Focus } from './Focus';
 import { related } from './graph';
 import { layOut } from './layout';
+import { Startup } from './Startup';
+import { FRESH_TREE } from './starting';
 import { Timeline } from './Timeline';
 import { ARTIFACTS, LEGACY, TOOLS, readAtRuntime, secondsForAMaster } from './world';
 
@@ -52,7 +54,14 @@ export function InspectArchitecture() {
       </header>
 
       <section className="arch__tiles" aria-label="In numbers">
-        <Tile figure={`${minutes} min`} label="a master from its painting to a world the game serves" />
+        <Tile
+          figure={`${FRESH_TREE.seconds} s`}
+          label="a brand-new worktree to the game, its world borrowed"
+        />
+        <Tile
+          figure={`${minutes} min`}
+          label="a master's world from its painting, made once for every tree"
+        />
         <Tile figure={`${TOOLS.length}`} label="tools that bake the world beforehand" />
         <Tile
           figure={`${ARTIFACTS.filter((a) => a.origin !== 'baked').length}`}
@@ -60,6 +69,8 @@ export function InspectArchitecture() {
         />
         <Tile figure={`${readAtRuntime().length}`} label="baked files the running game depends on" />
       </section>
+
+      <Startup />
 
       <Timeline stateOf={stateOf} choose={choose} />
 

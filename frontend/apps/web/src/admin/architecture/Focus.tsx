@@ -1,3 +1,4 @@
+import { WORLD_CACHE } from './cache';
 import { took } from './Timeline';
 import {
   PIECES,
@@ -34,11 +35,32 @@ export function Focus({ chosen, clear }: { chosen: string | null; clear: () => v
       {kind === 'tool' && <ToolFocus script={id} />}
       {kind === 'run' && <PieceFocus id={id} />}
       {kind === 'group' && <GroupFocus id={id} />}
+      {kind === 'shelf' && <ShelfFocus />}
     </section>
   );
 }
 
 const names = (ids: Iterable<string>) => [...ids].map((id) => artifact(id).name).join(', ') || 'nothing';
+
+/** The world cache's box: what it is, where it is, what is in it, and what fills it. */
+function ShelfFocus() {
+  return (
+    <>
+      <h3 className="arch__focus-title">
+        {WORLD_CACHE.name} <code>{WORLD_CACHE.where}</code>
+      </h3>
+      <p>{WORLD_CACHE.what}</p>
+      <dl className="arch__facts">
+        <dt>filled and lent by</dt>
+        <dd>world:ready, which the quick start and the Debug map run</dd>
+        <dt>the tools in it</dt>
+        <dd>{WORLD_CACHE.tools.join(', ')}</dd>
+        <dt>what they make</dt>
+        <dd>{names(WORLD_CACHE.files)}</dd>
+      </dl>
+    </>
+  );
+}
 
 function FileFocus({ id }: { id: string }) {
   const a = artifact(id);

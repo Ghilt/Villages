@@ -4,11 +4,12 @@ import { Fragment } from 'react';
 
 import type { Card } from './graph';
 import { took } from './Timeline';
+import { WORLD_CACHE } from './cache';
 import { TOOLS, artifact, group, piece } from './world';
 import type { Piece } from './world';
 
 /** What a card is told: which card it is, and whether it is chosen, lit by the choice, or dimmed. */
-export type CardData = { card: Card; state: string };
+export type CardData = { card: Card; state: string; words?: { x: number; y: number; width: number } };
 export type CardNode = Node<CardData>;
 
 const MADE_BY = { authored: 'by Adam', fetched: 'downloaded', baked: 'made by a tool' } as const;
@@ -144,6 +145,25 @@ export function GroupCard({ data }: NodeProps<CardNode>) {
   );
 }
 
+/** The world cache's box round the master's tools and what they make, saying at its head what it is. */
+export function ShelfCard({ data }: NodeProps<CardNode>) {
+  return (
+    <div className={`shelf ${data.state}`}>
+      <div
+        className="shelf__words"
+        style={
+          data.words === undefined ? {} : { left: data.words.x, top: data.words.y, width: data.words.width }
+        }
+      >
+        <div className="shelf__name">
+          {WORLD_CACHE.name} <code>{WORLD_CACHE.where}</code>
+        </div>
+        <div className="shelf__what">{WORLD_CACHE.what}</div>
+      </div>
+    </div>
+  );
+}
+
 /** The dotted line between what is baked beforehand and what runs. */
 export function LineCard({ data }: NodeProps<Node<{ width: number }>>) {
   return (
@@ -159,5 +179,6 @@ export const CARD_TYPES = {
   tool: ToolCard,
   piece: PieceCard,
   group: GroupCard,
+  shelf: ShelfCard,
   line: LineCard,
 };
