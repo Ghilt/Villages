@@ -16,6 +16,7 @@ import { toWorld, wayBackOf } from '../../src/originBack.ts';
 import type { OriginGrid } from '../../src/originFile.ts';
 
 import { removeHere } from './links.ts';
+import { PLACES, REGIONS, SOURCES } from './nameSources.ts';
 import { ownFile, writtenAt } from './outputs.ts';
 import { GROUND_DIR, NAMES_DIR, SOURCE_DIR } from './paths.ts';
 
@@ -27,22 +28,6 @@ import { GROUND_DIR, NAMES_DIR, SOURCE_DIR } from './paths.ts';
  * ground map too, for the game server, which reads nothing the page is served. See `src/names.ts`,
  * `src/regions.ts`, `src/namesFile.ts` and decision record 0087.
  */
-
-/** Which files hold which kind of name: Natural Earth's own, fetched by `world:fetch-all`. */
-const SOURCES: readonly { file: string; kind: NameKind }[] = [
-  { file: 'ne_10m_rivers_lake_centerlines', kind: 'river' },
-  { file: 'ne_10m_rivers_europe', kind: 'river' },
-  { file: 'ne_10m_lakes', kind: 'lake' },
-  { file: 'ne_10m_lakes_europe', kind: 'lake' },
-  { file: 'ne_10m_lakes_north_america', kind: 'lake' },
-  { file: 'ne_10m_geography_regions_elevation_points', kind: 'peak' },
-];
-
-/** Which files hold the named regions. Optional: without them the rest is still carried. */
-const REGIONS: readonly { file: string; kind: RegionKind }[] = [
-  { file: 'ne_10m_geography_marine_polys', kind: 'sea' },
-  { file: 'ne_10m_geography_regions_polys', kind: 'land' },
-];
 
 interface SourceFeature {
   properties: Record<string, unknown>;
@@ -262,9 +247,6 @@ async function townsOf1790(read: Review1790 | null): Promise<{ towns: EarthName[
 
 /** The zoom by which every town of 1790 is named, however Natural Earth ranks it today. */
 const TOWN_FROM = 4.5;
-
-/** Natural Earth's towns of today, which the review of 1790 is made against. */
-const PLACES = 'ne_10m_populated_places';
 
 /**
  * The review of 1790, each part keyed as the names are: a town by its Wikidata id, a river or a lake as `namesIn`

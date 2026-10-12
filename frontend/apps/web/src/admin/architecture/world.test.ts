@@ -2,6 +2,8 @@ import { existsSync, readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
+import { WORLD_STEPS } from '../../../../../packages/world/bin/lib/worldSteps.ts';
+
 import { ARTIFACTS, LEGACY, READERS, TOOLS, downstreamOf, upstreamOf } from './world';
 
 /** A path from the repository's root. */
@@ -57,6 +59,25 @@ describe('the architecture page', () => {
       }),
     ).filter((path) => !existsSync(fromRoot(path)));
     expect(gone).toEqual([]);
+  });
+
+  it('draws every world step as its tool, reading what the step is made from and writing what it makes', () => {
+    // The world cache files a step under a fingerprint of what the step table says it is made from (0095), so a
+    // file the page knows a tool reads that the table leaves out would be a world borrowed that is not current.
+    const drift = WORLD_STEPS.flatMap((step) => {
+      const tool = TOOLS.find((t) => t.entry === step.tool.slice(step.tool.lastIndexOf('/') + 1));
+      if (tool === undefined) return [`${step.name}: no tool on the page`];
+      return [
+        ...[...step.from.map((input) => input.is), ...step.after]
+          .filter((is) => !tool.reads.includes(is))
+          .map((is) => `${step.name} is made from ${is}, which the page's ${tool.script} does not read`),
+        ...step.makes
+          .map((made) => made.is)
+          .filter((is) => !tool.writes.includes(is))
+          .map((is) => `${step.name} makes ${is}, which the page's ${tool.script} does not write`),
+      ];
+    });
+    expect(drift).toEqual([]);
   });
 
   it('traces the terrain tiles back to the master, and the master on to both programs', () => {
