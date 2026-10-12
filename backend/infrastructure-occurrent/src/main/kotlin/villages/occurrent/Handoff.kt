@@ -26,6 +26,14 @@ internal class Handoff<T>(replaying: Boolean, private val hand: (T) -> Unit) {
         synchronized(lock) { hand(event) }
     }
 
+    /**
+     * The history is to be read again, because the live side missed some of what was written: what arrives from now
+     * waits behind it again, as it did the first time. See decision record 0094.
+     */
+    fun rearm() {
+        synchronized(lock) { replaying = true }
+    }
+
     /** The history is all handed on: what arrived meanwhile follows it, in the order it arrived. */
     fun replayDone() {
         synchronized(lock) {

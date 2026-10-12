@@ -39,7 +39,8 @@ class OccurrentEventFeed internal constructor(
     private val markers: Markers,
 ) : EventFeed {
     override fun subscribe(from: Start, subscriber: (StoredEvent) -> Unit): AutoCloseable {
-        val id = "feed-${UUID.randomUUID()}"
+        // Named for whom it follows, so that a queue on the broker's page says whose it is.
+        val id = "${nameOf(subscriber)}.${UUID.randomUUID().toString().take(8)}"
         // Touched only under the hand-off's lock.
         val alreadySeen = HashSet<String>()
 
@@ -70,24 +71,38 @@ class OccurrentEventFeed internal constructor(
         }
 
         val handoff = Handoff(replaying = from == Start.FROM_THE_BEGINNING, ::hand)
+
+        fun replay() {
+            try {
+                store.all(SortBy.natural(SortBy.SortDirection.ASCENDING)).use { everything ->
+                    everything.forEach(handoff::replayed)
+                }
+            } catch (@Suppress("TooGenericExceptionCaught") broken: Exception) {
+                // The store could not hand the history back past an event. Said, and the subscriber goes on
+                // with what arrives live: a server that cannot start is a world that cannot be wiped.
+                val where = "reading the history, which stopped at an event the store could not read back"
+                faults.report(Fault(nameOf(subscriber), where, broken))
+            }
+            // Anything that arrived while the replay ran, in the order it arrived, minus what it duplicated.
+            handoff.replayDone()
+        }
+
+        val listener = object : Listener {
+            override fun arrived(event: CloudEvent) = handoff.live(event)
+
+            // The same as subscribing, again: listen first, then the history, which holds what was missed. A feed that
+            // starts from now has no history to read, and what it missed it misses.
+            override fun missed(listenAgain: () -> Unit) = gate.outside {
+                if (from == Start.FROM_THE_BEGINNING) handoff.rearm()
+                listenAgain()
+                if (from == Start.FROM_THE_BEGINNING) replay()
+            }
+        }
+
         val listening = gate.outside {
             markers.joined(id)
-            val listening = live.listen(id, handoff::live)
-
-            if (from == Start.FROM_THE_BEGINNING) {
-                try {
-                    store.all(SortBy.natural(SortBy.SortDirection.ASCENDING)).use { everything ->
-                        everything.forEach(handoff::replayed)
-                    }
-                } catch (@Suppress("TooGenericExceptionCaught") broken: Exception) {
-                    // The store could not hand the history back past an event. Said, and the subscriber goes on
-                    // with what arrives live: a server that cannot start is a world that cannot be wiped.
-                    val where = "reading the history, which stopped at an event the store could not read back"
-                    faults.report(Fault(nameOf(subscriber), where, broken))
-                }
-                // Anything that arrived while the replay ran, in the order it arrived, minus what it duplicated.
-                handoff.replayDone()
-            }
+            val listening = live.listen(id, listener)
+            if (from == Start.FROM_THE_BEGINNING) replay()
             listening
         }
 

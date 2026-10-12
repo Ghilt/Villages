@@ -16,6 +16,7 @@ import org.occurrent.subscription.mongodb.nativedriver.blocking.NativeMongoCheck
 import org.occurrent.subscription.mongodb.nativedriver.blocking.NativeMongoSubscriptionModel
 import org.occurrent.subscription.mongodb.nativedriver.blocking.NativeMongoSubscriptionModelConfig
 import villages.application.CharacterCommandExecutor
+import villages.application.EventFeed
 import villages.application.Fault
 import villages.application.FaultBoard
 import villages.application.Faults
@@ -92,6 +93,12 @@ class MongoWorld(
     private val markers = Markers()
 
     override val feed = OccurrentEventFeed(StoreSubscriptions(subscriptions), store, converter, faults, gate, markers)
+
+    /**
+     * A feed over this world with another live half, the broker's (decision record 0094): the history read from this
+     * store, and a wipe here waiting for its followers as for the store's own, through the same markers.
+     */
+    fun follow(live: Live): EventFeed = OccurrentEventFeed(live, store, converter, faults, gate, markers)
 
     override fun structureExecutor(catalogue: StructureCatalogue): StructureCommandExecutor =
         OccurrentStructureCommandExecutor(store, converter, catalogue, gate)

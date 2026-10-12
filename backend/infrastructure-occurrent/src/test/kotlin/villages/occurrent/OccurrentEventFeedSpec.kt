@@ -36,9 +36,9 @@ class OccurrentEventFeedSpec : StringSpec({
             world.executor.execute(founding(name), Provenance(commandId = id, correlationId = id))
         }
         val markers = Markers()
-        var arrive: (CloudEvent) -> Unit = {}
-        val byHand = Live { _, arrived -> arrive = arrived; AutoCloseable {} }
+        val byHand = ByHand()
         val feed = OccurrentEventFeed(byHand, world.store, world.converter, FaultBoard(), WipeGate(), markers)
+        val arrive = { event: CloudEvent -> byHand.listener!!.arrived(event) }
 
         val happened = Collections.synchronizedList(mutableListOf<String>())
         val marker = aMarker()
@@ -58,10 +58,62 @@ class OccurrentEventFeedSpec : StringSpec({
         happened shouldBe listOf("Ravenscar", "Hollin", "reached")
         world.close()
     }
+
+    "what a live half missed is handed on from the store, after the history it follows and before what arrives next" {
+        val world = InMemoryWorld()
+        val byHand = ByHand()
+        val feed = OccurrentEventFeed(byHand, world.store, world.converter, FaultBoard(), WipeGate(), Markers())
+        fun found(name: String): CloudEvent {
+            val house = HouseId(UUID.randomUUID())
+            world.executor.execute(founding(name, house), Provenance(commandId = house.value, correlationId = house.value))
+            return world.store.read(house.stream).events().toList().single()
+        }
+        found("Ravenscar")
+        val handed = Collections.synchronizedList(mutableListOf<String>())
+
+        feed.subscribe(Start.FROM_THE_BEGINNING) { handed += (it.event as HouseFounded).name.value }.use {
+            // Written while the live half was away, so never handed to it.
+            found("Hollin")
+            val greymere = found("Greymere")
+            // Back, and the first thing it hears is one the store holds too: it waits behind the history, once.
+            byHand.listener!!.missed { byHand.listener!!.arrived(greymere) }
+            byHand.listener!!.arrived(found("Ashby"))
+        }
+
+        handed shouldBe listOf("Ravenscar", "Hollin", "Greymere", "Ashby")
+        world.close()
+    }
+
+    "a feed from now that missed something listens again, and reads no history" {
+        val world = InMemoryWorld()
+        val byHand = ByHand()
+        val feed = OccurrentEventFeed(byHand, world.store, world.converter, FaultBoard(), WipeGate(), Markers())
+        val handed = Collections.synchronizedList(mutableListOf<String>())
+
+        feed.subscribe(Start.FROM_NOW) { handed += (it.event as HouseFounded).name.value }.use {
+            val house = HouseId(UUID.randomUUID())
+            world.executor.execute(founding("Hollin", house), Provenance(commandId = house.value, correlationId = house.value))
+            byHand.listener!!.missed {}
+        }
+
+        handed shouldBe emptyList()
+        world.close()
+    }
 })
 
-private fun founding(name: String) = FoundHouse(
-    houseId = HouseId(UUID.randomUUID()),
+/** A live half driven by hand: it hands on what a case tells it to, when it tells it to. */
+private class ByHand : Live {
+    @Volatile
+    var listener: Listener? = null
+
+    override fun listen(subscription: String, to: Listener): AutoCloseable {
+        listener = to
+        return AutoCloseable {}
+    }
+}
+
+private fun founding(name: String, house: HouseId = HouseId(UUID.randomUUID())) = FoundHouse(
+    houseId = house,
     player = PlayerId(UUID.randomUUID()),
     name = HouseName(name),
     seat = Location(59.33, 18.07),
