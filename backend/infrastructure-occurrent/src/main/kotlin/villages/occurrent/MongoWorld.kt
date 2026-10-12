@@ -4,12 +4,17 @@ import com.mongodb.MongoException
 import com.mongodb.MongoTimeoutException
 import com.mongodb.client.MongoClient
 import com.mongodb.client.MongoClients
+import io.cloudevents.CloudEvent
 import org.occurrent.eventstore.mongodb.nativedriver.EventStoreConfig
 import org.occurrent.eventstore.mongodb.nativedriver.MongoEventStore
 import org.occurrent.filter.Filter
 import org.occurrent.mongodb.timerepresentation.TimeRepresentation
 import org.occurrent.retry.RetryStrategy
+import org.occurrent.subscription.StartAt
+import org.occurrent.subscription.blocking.durable.DurableSubscriptionModel
+import org.occurrent.subscription.mongodb.nativedriver.blocking.NativeMongoCheckpointStorage
 import org.occurrent.subscription.mongodb.nativedriver.blocking.NativeMongoSubscriptionModel
+import org.occurrent.subscription.mongodb.nativedriver.blocking.NativeMongoSubscriptionModelConfig
 import villages.application.CharacterCommandExecutor
 import villages.application.Fault
 import villages.application.FaultBoard
@@ -21,6 +26,7 @@ import villages.application.Unreadable
 import villages.application.WipeGate
 import villages.domain.StructureCatalogue
 import java.time.Duration
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -80,6 +86,7 @@ class MongoWorld(
 
     override val executor: HouseCommandExecutor = OccurrentHouseCommandExecutor(store, converter, gate)
     override val characterExecutor: CharacterCommandExecutor = OccurrentCharacterCommandExecutor(store, converter, gate)
+
     /** Which subscriptions have yet to reach a wipe's marker, whichever feed over this world they follow. */
     private val markers = Markers()
 
@@ -89,6 +96,48 @@ class MongoWorld(
         OccurrentStructureCommandExecutor(store, converter, catalogue, gate)
 
     override val keptIn = "in MongoDB, database $database, which outlives the server"
+
+    /** Every carrier still running, closed with the world. */
+    private val carriers = CopyOnWriteArrayList<AutoCloseable>()
+
+    /**
+     * Follows the store durably under [name], for the bridge to the broker (decision record 0094). [carry] is handed
+     * every event written since that name first followed this world, markers too, one at a time, in the order they
+     * were written, on a thread of its own. Once it returns, the place it reached is kept in `checkpoints`, so a
+     * server started again goes on from there, and an event written while it was down is handed on when it is back.
+     *
+     * So [carry] returns only once an event is where it is going. Whatever it throws, or MongoDB does, the same event
+     * is handed again after a wait that grows to five seconds, said once until one is carried. A place too old for
+     * MongoDB to resume from is said, and the carrying goes on from now: what was written meanwhile is not handed on.
+     * Closing keeps the place. It is never cancelled, which would forget it.
+     */
+    fun carry(name: String, carry: (CloudEvent) -> Unit): AutoCloseable {
+        val said = CarrierFaults(name, faults)
+        val retry = RetryStrategy.exponentialBackoff(Duration.ofMillis(200), Duration.ofSeconds(5), 2.0)
+            .onError { _, thrown -> said.failed(thrown) }
+        val threads = Executors.newSingleThreadExecutor()
+        val follows = NativeMongoSubscriptionModelConfig.withConfig()
+            .retryStrategy(retry)
+            .restartSubscriptionsOnChangeStreamHistoryLost(true)
+        val durable = DurableSubscriptionModel(
+            NativeMongoSubscriptionModel(client.getDatabase(database), EVENTS, TIME, threads, follows),
+            NativeMongoCheckpointStorage(client.getDatabase(database), CHECKPOINTS),
+        )
+        durable.subscribe(name, null, StartAt.subscriptionModelDefault()) { cloudEvent ->
+            carry(cloudEvent)
+            said.carried()
+        }.waitUntilStarted()
+
+        val carrier = AutoCloseable {
+            durable.shutdown()
+            threads.shutdownNow()
+        }
+        carriers += carrier
+        return AutoCloseable {
+            carriers -= carrier
+            carrier.close()
+        }
+    }
 
     /**
      * Counted and deleted without reading a single event back, unlike in memory, so that a world holding one the
@@ -131,6 +180,7 @@ class MongoWorld(
     }
 
     override fun close() {
+        carriers.forEach(AutoCloseable::close)
         subscriptions.shutdown()
         dispatcher.shutdownNow()
         client.close()
@@ -138,6 +188,9 @@ class MongoWorld(
 
     private companion object {
         const val EVENTS = "events"
+
+        /** Where a carrier keeps its place, one document a name. */
+        const val CHECKPOINTS = "checkpoints"
 
         /** Far longer than any fold takes: a subscription still busy after this is stuck. */
         val HANDING_ON: Duration = Duration.ofSeconds(10)

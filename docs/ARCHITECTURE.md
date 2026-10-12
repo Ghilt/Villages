@@ -199,6 +199,15 @@ Increment 0.7 compiled and ran the plan's riskiest assumption, on Occurrent 0.33
   exceptions for ever, backing off to five seconds, and gives up at once on anything else, saying so through
   `onError`, whose `ErrorInfo.isRetryable` is false only on the last. A subscription given up on is stopped for
   good. See decision record 0036.
+- The bridge to the broker rides a durable subscription, `DurableSubscriptionModel` over the native model, its
+  place kept by `NativeMongoCheckpointStorage` in `checkpoints` (`occurrent-subscription-durable-blocking`,
+  `occurrent-subscription-mongodb-native-blocking-checkpoint-storage`). It keeps the place once the subscriber
+  returns, and a subscriber that throws is handed the same event again. Starting with
+  `StartAt.subscriptionModelDefault()` reads the place kept, and with none keeps where the stream is now;
+  `StartAt.now()` would pass the place by. **`cancelSubscription` deletes the place**, so a carrier is only ever
+  shut down. A place MongoDB's oplog no longer reaches is error 286, which the model answers by starting from now
+  when told `restartSubscriptionsOnChangeStreamHistoryLost`; an oplog never cut short, as on a replica set started
+  for a test, reaches back to any time, even 1970. See decision record 0094.
 
 ## How a change travels
 
