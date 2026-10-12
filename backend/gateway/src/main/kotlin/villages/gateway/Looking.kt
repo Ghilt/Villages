@@ -5,6 +5,7 @@ import villages.application.CharacterSpan
 import villages.application.HouseRow
 import villages.application.StructureRow
 import villages.application.StructuresByCell
+import villages.domain.StructureId
 import villages.domain.WorldTime
 import villages.protocol.coarsestZoom
 import villages.protocol.HouseView
@@ -32,6 +33,11 @@ internal data class Looking(
     val fog: Fog = Fog.NOBODY,
     /** What it is shown of a structure's slots: the gateway's, the same for every connection. */
     val slots: SlotsSeen = SlotsSeen.NONE,
+    /**
+     * The structures it sees through the fog, as if they stood in its vision: Antarctica's, while the instruments are
+     * open, and none otherwise. The gateway's, the same for every connection.
+     */
+    val seenThroughTheFog: Set<StructureId> = emptySet(),
 ) {
     /** Whether it is the world as it is today, rather than an earlier day. */
     val isLive: Boolean get() = at == null
@@ -60,7 +66,8 @@ internal data class Looking(
                 if (isLive) row.toView(it, null, slots.of(row, it, fog.house, true), slots.yieldsOf(row, it, fog.house, true)) else row.toView(it, null)
             }
         } else {
-            fog.faceOf(row, day)?.let { (face, hid) ->
+            val seen = if (row.id in seenThroughTheFog) row.faceOn(day)?.let { it to null } else fog.faceOf(row, day)
+            seen?.let { (face, hid) ->
                 // Its slots only while it is seen, and only today: what is in a slot is never as last seen.
                 if (hid == null && isLive) {
                     row.toView(face, null, slots.of(row, face, fog.house, false), slots.yieldsOf(row, face, fog.house, false))

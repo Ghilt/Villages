@@ -45,6 +45,12 @@ class Antarctica(
         false
     }
 
+    /**
+     * The ones it raises, one of every type in the catalogue: what every window sees through the fog while the
+     * instruments are open, because they are Adam's to fly to and look at, and no house has ever seen them.
+     */
+    val standing: Set<StructureId> = catalogue.types.keys.mapTo(HashSet(), StructureId::inAntarctica)
+
     companion object {
         /**
          * Where the [at]th type stands: four to a row, the castle at the north-west corner, on the island off the

@@ -73,6 +73,9 @@ class Gateway(
     /** What every connection is shown of a structure's slots. */
     private val slotsSeen = SlotsSeen(mechanics.structureCatalogue, mechanics.characterById)
 
+    /** What every connection sees through the fog: Antarctica's structures, while the instruments are open. */
+    private val seenThroughTheFog = if (instrumentsOpen) mechanics.antarctica.standing else emptySet()
+
     /** Which connections hold each cell: the whole of the fan-out index. */
     private val holding = CellIndex<Connection>()
 
@@ -153,7 +156,7 @@ class Gateway(
 
         /** How this connection is looking at the world, replaced whole: see [Looking]. Read by the fan-outs too. */
         @Volatile
-        internal var looking: Looking = Looking(slots = slotsSeen)
+        internal var looking: Looking = Looking(slots = slotsSeen, seenThroughTheFog = seenThroughTheFog)
             private set
 
         /** Set when this session is over, by a takeover or by the socket going away. It then does nothing. */

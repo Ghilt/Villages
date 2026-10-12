@@ -6,6 +6,7 @@ import io.kotest.matchers.comparables.shouldBeGreaterThanOrEqualTo
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldStartWith
 import io.kotest.matchers.types.shouldBeInstanceOf
+import villages.application.Antarctica
 import villages.domain.HouseId
 import villages.domain.Location
 import villages.domain.PlayerId
@@ -14,6 +15,7 @@ import villages.domain.StructureRaised
 import villages.domain.StructureId
 import villages.domain.StructureType
 import villages.protocol.Batch
+import villages.protocol.Cell
 import villages.protocol.CommandAccepted
 import villages.protocol.CommandRejected
 import villages.protocol.Inspected
@@ -30,6 +32,9 @@ private fun takingControl(id: StructureId, commandId: String = commandNumber(9))
 
 private fun raisingAntarctica(commandId: String = commandNumber(8)) =
     """{"type":"command","commandId":"$commandId","command":{"type":"raiseAntarctica"}}"""
+
+/** The cell Antarctica's first two stand in, the rig's whole catalogue. */
+private val ANTARCTICA_Z10 = Antarctica.placeOf(0).let { Cell.of(it.lat, it.lon, 10).quadkey }
 
 /** Adam's levers for structures, as the gateway takes them. See docs/plans/structures.md. */
 class GatewayStructuresSpec : StringSpec({
@@ -78,6 +83,32 @@ class GatewayStructuresSpec : StringSpec({
 
         sent.filterIsInstance<CommandRejected>().map { it.reason } shouldBe List(2) { "instrumentsClosed" }
         rig.world.structureEvents.shouldBeEmpty()
+    }
+
+    "open, Antarctica's are seen through the fog by a window that was never near them, as they are today" {
+        val rig = Rig()
+        val (window, sent) = rig.introduced()
+        window.receive(founding())
+        window.receive(raisingAntarctica())
+        sent.clear()
+
+        window.receive(subscribe(ANTARCTICA_Z10))
+
+        val seen = sent.filterIsInstance<Snapshot>().single().structures
+        seen.map { it.structureType }.toSet() shouldBe setOf("castle", "mill")
+        seen.map { it.seenUntil }.toSet() shouldBe setOf(null)
+    }
+
+    "closed, Antarctica's are under the fog like anything else" {
+        val rig = Rig(instrumentsOpen = false)
+        val (window, sent) = rig.introduced()
+        window.receive(founding())
+        Antarctica(rig.world, RIG_CATALOGUE, { noon }, rig.worldClock).raise()
+        sent.clear()
+
+        window.receive(subscribe(ANTARCTICA_Z10))
+
+        sent.filterIsInstance<Snapshot>().single().structures.shouldBeEmpty()
     }
 
     "a cell's snapshot carries the structures standing in it, and the count a page holds its copies against" {

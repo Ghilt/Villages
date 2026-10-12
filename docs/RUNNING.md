@@ -117,7 +117,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
   it, so a structure raised, a house founded, a person who moved, vision gained, the first seat a choice offered.
   It opens the game in that tab at `/?at=<lat>,<lon>&zoom=10`, over the place instead of over the seat, and the
   log says `opened at ..., as the link asked`; the camera is all it moves, so ground the house cannot see is still
-  under the fog, and Antarctica's sixteen want the fog lifted. A new tab would take the player over from any other
+  under the fog; Antarctica's sixteen are seen through it while the instruments are open. A new tab would take the player over from any other
   game tab. *Back* loads the page again rather than showing it as it was left: a page the browser restores from its
   back/forward cache has lost its connection, and would sit *closed* drawing nothing. The `found a house here` button in it sends a
   real command and is how to make an event happen on purpose. The `restart` button beside `copy` forgets
@@ -257,8 +257,9 @@ stage alone, with none of the debug panel in it (decision record 0079).
   and an id worked out from its type means a server starting over a kept world raises none twice; a world kept
   from before they moved keeps them where they were first raised. A wipe takes them with everything else, and the
   Structures section's **raise Antarctica again** puts back whichever are gone. All sixteen are on the screen at
-  once from zoom 9 over the island, with the fog lifted, and with *see everything* on too below the zoom each
-  one's significance is drawn from; **on the map** under each one's `raised` on the event page opens the game
+  once from zoom 9 over the island, and every window sees them through the fog while the instruments are open, as
+  if they stood in its vision, what their slots hold included; with *see everything* on, below the zoom each
+  one's significance is drawn from too; **on the map** under each one's `raised` on the event page opens the game
   over it.
 - Raising one where you look: the **Structures** section of the debug panel, after Resources. A type from the
   catalogue, a level it has, **yours** or **nobody's**, and **raise here** raises one at the middle of the map,
@@ -268,8 +269,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   standing in for a house building one; closed with the other instruments (0076). The log's `cells` lines count
   the structures each burst of snapshots brought, and a batch names one raised in a cell the page holds, `a new
   mill raised`. What is sent is each one's face as the fog allows it: today's where the house sees, the one it
-  last saw on revealed ground, nothing on unknown ground - Antarctica's sixteen therefore only with the fog lifted
-  or *see everything* on, until a house sees them.
+  last saw on revealed ground, nothing on unknown ground - but for Antarctica's sixteen, which every window sees
+  through the fog while the instruments are open.
 - Taking one: **take control of this building**, under the raising levers, hands the structure whose window was
   opened last to your house; the line under it names that building, or asks for a structure's window first. One
   `villages.structure.changedHands.v1` on the event page, from its holder to your house, and a moment after, in

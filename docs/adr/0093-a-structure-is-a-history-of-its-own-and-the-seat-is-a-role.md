@@ -93,7 +93,9 @@ into is a question mark.
 **Antarctica, for Adam.** While the instruments are open (0076), the server stands one structure of every
 type in Antarctica, held by nobody, and the debug panel can hand the one selected to the player's own house
 with the same `changedHands` any hand-over writes. It is the debug panel standing in for the world, not a
-way for a player to take anything.
+way for a player to take anything. No house has ever seen them, so while the instruments are open every window
+sees them through the fog, as if they stood in its vision: they are there to be flown to and looked at, and a
+fog over them hid the very thing they are for. Amended 2026-10-12, on Adam's word.
 
 ## Consequences
 
