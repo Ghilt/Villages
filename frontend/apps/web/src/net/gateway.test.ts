@@ -290,7 +290,7 @@ describe("the page's conversation with the gateway", () => {
     ]);
   });
 
-  it("says what changed in the house's key figures, its sight and its dialogues, and keeps the latest", async () => {
+  it("says what changed in the house's key figures, its holdings, its sight and its dialogues, and keeps the latest", async () => {
     const page = await arrived();
     const before = page.lines();
 
@@ -301,6 +301,7 @@ describe("the page's conversation with the gateway", () => {
     figures.keyFigures[0]!.stats.piety = 14;
     figures.keyFigures[0]!.version = 5;
     page.socket.says(figures);
+    page.socket.says(fixture('yourHoldings'));
     page.socket.says(fixture('yourSight'));
     page.socket.says(fixture('yourDialogues'));
     page.socket.says(fixture('yourHouse'));
@@ -308,7 +309,8 @@ describe("the page's conversation with the gateway", () => {
     expect(page.said(before)).toEqual([
       'characters: 2 key figures: Agnes Hollin, a woman of 0; Wilhelm Ystad, a man of 0',
       'characters: Agnes Hollin: piety went from 13 to 14',
-      'sight: a structure (34 km), Agnes Hollin (34 km), the vision given at 55.68, 12.57 (34 km) and a structure (6 km) give vision; 5 places seen from in all',
+      'holdings: 1 holding: Ravenscar Castle (seat)',
+      'sight: Ravenscar Castle (34 km), Agnes Hollin (34 km), the vision given at 55.68, 12.57 (34 km) and a structure (6 km) give vision; 5 places seen from in all',
       'dialogues: "A letter from the coast": 1 line to read, up to the next step',
       'dialogues: "A second letter": 1 line to read, then a dialogue choice of 3',
       'dialogues: "The dues": finished, 1 line said',

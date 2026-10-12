@@ -183,10 +183,12 @@ export const sessionLog: GatewayListener = {
         return;
       }
       case 'yourSight': {
-        // Key figures by their names, and a structure a vision is seen from by its own, where a cell has carried it.
+        // Key figures by their names, and a structure a vision is seen from by its own: the house's own holdings,
+        // which arrive before its sight, and any other a cell has carried.
         const named = new Map<string, string>([
           ...(was.yourKeyFigures ?? []).map((one): [string, string] => [one.id, fullName(one)]),
           ...structuresInView(was.onTheMap).map((one): [string, string] => [one.id, one.name]),
+          ...(was.yourHoldings ?? []).map((one): [string, string] => [one.id, one.name]),
         ]);
         note(
           'sight',
