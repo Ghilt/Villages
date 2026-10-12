@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { lastStep, readJUnit, readNodeTest, readVitest, tail, took } from '../lib/checks.ts';
+import { lastStep, readJUnit, readNodeTest, readPlaywright, readVitest, tail, took } from '../lib/checks.ts';
 
 const passing = `<?xml version="1.0" encoding="UTF-8"?>
 <testsuite name="villages.occurrent.MarkersSpec" tests="4" skipped="0" failures="0" errors="0" time="0.1">
@@ -44,6 +44,31 @@ describe("reading the checks' output", () => {
   it("reads Node's own test runner, and the tests it crossed out", () => {
     const log = ['✖ reads a master (3.2ms)', 'ℹ tests 52', 'ℹ pass 51', 'ℹ fail 1', 'ℹ skipped 0'].join('\n');
     assert.deepEqual(readNodeTest(log), { tests: 52, failed: 1, skipped: 0, failures: ['reads a master'] });
+  });
+
+  it("reads Playwright's summary, and names the tests it numbered as failed without the rule after them", () => {
+    const failing = [
+      '  x  1 e2e\\smoke.e2e.ts:11:1 › the map, a house founded (31.6s)',
+      '  1) e2e\\smoke.e2e.ts:11:1 › the map, a house founded ─────────────────',
+      '    Error: expect(locator).toBeAttached() failed',
+      '  1 failed',
+    ].join('\n');
+    assert.deepEqual(readPlaywright(failing), {
+      tests: 1,
+      failed: 1,
+      skipped: 0,
+      failures: ['e2e\\smoke.e2e.ts:11:1 › the map, a house founded'],
+    });
+    assert.deepEqual(
+      readPlaywright('  ok 1 e2e\\smoke.e2e.ts:11:1 › the map (30.1s)\n\n  1 passed (39.7s)'),
+      {
+        tests: 1,
+        failed: 0,
+        skipped: 0,
+        failures: [],
+      },
+    );
+    assert.equal(readPlaywright('Error: no tests found'), null);
   });
 
   it("says which step of the frontend's check was under way, and not the command it ran", () => {

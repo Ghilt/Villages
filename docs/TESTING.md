@@ -65,7 +65,7 @@ Commands are filled in here as the increments land.
   by side (`backend/gradle.properties`), so their lines interleave in the output; `--no-parallel` runs them one at a
   time.
 - Frontend: `cd frontend` then `npm run check`, from 0.10
-- End to end: `cd frontend` then `npm run e2e`, from 0.13. It starts a dev
+- End to end: `cd frontend` then `npm run e2e`, from 0.13; the check script's fourth part runs it too. It starts a dev
   server and a game server of its own, on this tree's ports a thousand up, the page pointed at its game server, and
   keeps its world in a MongoDB database of its own, `villages-e2e-<tree>`, emptied before and dropped after; with no
   MongoDB up it runs in memory and says the restart was not tried. It drives Chrome, the one on the machine, headless,

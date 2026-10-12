@@ -53,6 +53,21 @@ export function readNodeTest(log: string): Tally | null {
 }
 
 /**
+ * Playwright's list summary, `1 passed (39.7s)` and its kin, and every test it numbered as failed - `1) e2e/... ›
+ * the map ... ───` - without the rule it draws after the name.
+ */
+export function readPlaywright(coloured: string): Tally | null {
+  const log = plain(coloured);
+  const count = (word: string) => Number(new RegExp(`^\\s+([0-9]+) ${word}\\b`, 'm').exec(log)?.[1] ?? 0);
+  const [passed, failed, skipped] = [count('passed'), count('failed'), count('skipped')];
+  if (passed + failed + skipped === 0) return null;
+  const failures = [
+    ...new Set([...log.matchAll(/^\s+[0-9]+\) (.+)$/gm)].map((m) => m[1]!.replace(/[─\s]+$/, ''))),
+  ];
+  return { tests: passed + failed + skipped, failed, skipped, failures };
+}
+
+/**
  * Which step of `npm run check` was under way when it stopped: npm says each one as it starts it, and the steps
  * run one after another until one fails.
  */

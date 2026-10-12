@@ -354,7 +354,7 @@ Commands are added here as the increments land:
   `docs/RUNNING.md` and decision record 0092.
 
 - Everything, one command: `scripts/check.ps1` or `scripts/check.sh`, which run `node scripts/check.ts`: the
-  backend's check, the frontend's and `scripts/`'s own, one after another, each part's whole output in
+  backend's check, the frontend's, `scripts/`'s own and the end-to-end test, one after another, each part's whole output in
   `.logs/check-<part>.log` and one line a part said, with what failed. About five minutes; `--only frontend`
   runs one part. It needs `npm install` once in `frontend/` and in `scripts/`, and says so when it is missing.
 

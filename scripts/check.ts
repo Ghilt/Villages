@@ -3,24 +3,28 @@ import { closeSync, existsSync, mkdirSync, openSync, readFileSync, readdirSync, 
 import { join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 
-import { lastStep, readJUnit, readNodeTest, readVitest, tail, took } from './lib/checks.ts';
+import { lastStep, readJUnit, readNodeTest, readPlaywright, readVitest, tail, took } from './lib/checks.ts';
 
 const HELP = `
 check - every check in the repository, one part after another, and what each said
 
-  node check.ts [--only backend,frontend,scripts]
+  node check.ts [--only backend,frontend,scripts,e2e]
   .\\check.ps1  or  ./check.sh, which run this
 
 Unlike the other tools here it does its work given nothing, because checking everything is the
-whole of it. Three parts, one after another, because two at once on a busy machine make tests
+whole of it. Four parts, one after another, because two at once on a busy machine make tests
 time out that pass alone:
 
   backend    ./gradlew check: every module's tests, the architecture rules, the size ceilings.
              The tests that need Docker are skipped when it is not running, and it says how many.
   frontend   npm run check: the typecheck, the linter, the formatter and the unit tests.
   scripts    this folder's own: node --test, its types, and its formatting.
+  e2e        npm run e2e: the game end to end in Chrome - the map drawn, a house founded, another
+             window seeing it, and a restart of the game server that forgets nothing - on servers
+             and a world of the test's own. The restart is not tried when MongoDB is not up. It
+             needs this tree's world cut, which the quick start does.
 
-  --only <parts>   the parts to run, by name, separated by commas. Default: all three.
+  --only <parts>   the parts to run, by name, separated by commas. Default: all four.
   --help           this.
 
 Each part's whole output is written to .logs/check-<part>.log at the repository's root, over the
@@ -144,6 +148,21 @@ const PARTS: readonly Part[] = [
     },
     failures: (log) => readNodeTest(log)?.failures ?? [],
   },
+  {
+    name: 'e2e',
+    steps: [{ what: 'e2e', command: 'npm', args: ['run', 'e2e'], cwd: join(root, 'frontend') }],
+    missing: () => {
+      if (!existsSync(frontendTools)) return 'npm install --prefix frontend, once, from the repository root';
+      if (!worldCut()) return "this tree's world cut, which the quick start does: debug-quick-start.ps1";
+      return null;
+    },
+    said: (log) => {
+      const tally = readPlaywright(log);
+      const tests = tally === null ? 'its test' : `${tally.tests} test${tally.tests === 1 ? '' : 's'}`;
+      return `${tests}${mongoUp() ? '' : ', the restart not tried because MongoDB is not up'}`;
+    },
+    failures: (log) => readPlaywright(log)?.failures ?? [],
+  },
 ];
 
 // The answer is the exit code, set rather than given to process.exit, which on Windows can abort Node with
@@ -246,6 +265,26 @@ function backendReports(since: number): string[] {
         .filter((file) => file.endsWith('.xml') && statSync(join(folder, file)).mtimeMs >= since)
         .map((file) => readFileSync(join(folder, file), 'utf8')),
     );
+}
+
+/** Whether any master of this tree has been cut into tiles, which the end-to-end test draws the map from. */
+function worldCut(): boolean {
+  const masters = join(root, 'frontend', 'apps', 'web', 'public', 'world', 'masters');
+  return (
+    existsSync(masters) && readdirSync(masters).some((master) => existsSync(join(masters, master, 'tiles')))
+  );
+}
+
+/** Whether the MongoDB in infra/ is up, which is whether the end-to-end test tried a restart. */
+function mongoUp(): boolean {
+  const asked = spawnSync(
+    'docker',
+    ['compose', '-f', join(root, 'infra', 'docker-compose.yml'), 'ps', '--status', 'running', '--services'],
+    {
+      encoding: 'utf8',
+    },
+  );
+  return asked.status === 0 && asked.stdout.split(/\r?\n/).includes('mongodb');
 }
 
 /** Whether Docker answers, which is whether the tests that need it ran. */
