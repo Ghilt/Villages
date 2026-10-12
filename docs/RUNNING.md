@@ -261,6 +261,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
   if they stood in its vision, what their slots hold included; with *see everything* on, below the zoom each
   one's significance is drawn from too; **on the map** under each one's `raised` on the event page opens the game
   over it.
+  The map mark in the Structures bar, there folded or open, flies the camera to the island at zoom 9.
 - Raising one where you look: the **Structures** section of the debug panel, after Resources. A type from the
   catalogue, a level it has, **yours** or **nobody's**, and **raise here** raises one at the middle of the map,
   named *a new mill* and the like; **raise Antarctica again** is the sixteen. Each is a command said in the log

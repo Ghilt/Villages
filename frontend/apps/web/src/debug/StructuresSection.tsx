@@ -6,6 +6,7 @@ import { parseStructureCatalogue } from '@villages/world';
 import type { StructureTypeSpec } from '@villages/world';
 
 import { subjectsStore } from '../inspect/subjects';
+import { Icon } from '../stage/Icons';
 import { sessionStore } from '../net/gateway';
 import { useStore } from '../store/useStore';
 import { Section } from './Section';
@@ -18,6 +19,12 @@ import {
   ruinStructure,
   takeControl,
 } from './levers';
+
+/**
+ * The middle of Antarctica's sixteen, on the island the server raises them on (`Antarctica.placeOf` in the
+ * application module), and the zoom from which all of them are on the screen at once.
+ */
+const ANTARCTICA = { lat: -63.247, lon: -56.03, zoom: 9 };
 
 interface StructuresSectionProps {
   map: maplibregl.Map | null;
@@ -77,7 +84,21 @@ export function StructuresSection({ map }: StructuresSectionProps) {
   };
 
   return (
-    <Section name="Structures">
+    <Section
+      name="Structures"
+      control={
+        <button
+          type="button"
+          className="debug__button debug__mapmark"
+          disabled={map === null}
+          onClick={() => map?.flyTo({ center: [ANTARCTICA.lon, ANTARCTICA.lat], zoom: ANTARCTICA.zoom })}
+          title="take the camera to Antarctica's sixteen"
+          aria-label="take the camera to Antarctica's sixteen"
+        >
+          <Icon name="map" />
+        </button>
+      }
+    >
       <div className="debug__levers">
         <select
           className="debug-map__select"

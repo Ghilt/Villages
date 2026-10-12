@@ -332,3 +332,15 @@
   font-size: 0.68rem;
   color: var(--ink-soft);
 }
+
+/* A mark rather than a word in a section's bar: as tall as the words beside it. */
+.debug__mapmark {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.05rem 0.25rem;
+}
+
+.debug__mapmark .icon {
+  width: 0.95rem;
+  height: 0.95rem;
+}
