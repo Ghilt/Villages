@@ -80,7 +80,10 @@ class MongoWorld(
 
     override val executor: HouseCommandExecutor = OccurrentHouseCommandExecutor(store, converter, gate)
     override val characterExecutor: CharacterCommandExecutor = OccurrentCharacterCommandExecutor(store, converter, gate)
-    override val feed = OccurrentEventFeed(subscriptions, store, converter, faults, gate)
+    /** Which subscriptions have yet to reach a wipe's marker, whichever feed over this world they follow. */
+    private val markers = Markers()
+
+    override val feed = OccurrentEventFeed(StoreSubscriptions(subscriptions), store, converter, faults, gate, markers)
 
     override fun structureExecutor(catalogue: StructureCatalogue): StructureCommandExecutor =
         OccurrentStructureCommandExecutor(store, converter, catalogue, gate)
@@ -116,7 +119,9 @@ class MongoWorld(
         val marker = aMarker()
         val stream = "marker:${marker.id}"
         try {
-            if (!feed.handedOn(marker, HANDING_ON) { store.write(stream, listOf(it)) }) {
+            markers.expect(marker.id)
+            store.write(stream, listOf(marker))
+            if (!markers.awaitAll(marker.id, HANDING_ON)) {
                 val stuck = IllegalStateException("a subscription had not been handed the marker after $HANDING_ON")
                 faults.report(Fault("the wipe", "waiting for the feed to hand on what was written before it", stuck))
             }

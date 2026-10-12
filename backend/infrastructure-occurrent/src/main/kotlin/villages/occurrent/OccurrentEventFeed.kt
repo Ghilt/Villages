@@ -4,8 +4,6 @@ import io.cloudevents.CloudEvent
 import org.occurrent.application.converter.CloudEventConverter
 import org.occurrent.eventstore.api.SortBy
 import org.occurrent.eventstore.api.blocking.EventStoreQueries
-import org.occurrent.subscription.StartAt
-import org.occurrent.subscription.api.blocking.SubscriptionModel
 import villages.application.EventFeed
 import villages.application.Fault
 import villages.application.Faults
@@ -14,12 +12,12 @@ import villages.application.Start
 import villages.application.StoredEvent
 import villages.application.WipeGate
 import villages.domain.Event
-import java.time.Duration
 import java.util.UUID
 
 /**
- * The event feed port over an Occurrent subscription. Whichever store is underneath, in memory or in MongoDB,
- * this is the same code, because a subscription model is the same interface over both.
+ * The event feed port: a live half, [Live], and the history, which is always read from the store. Whichever store
+ * is underneath, in memory or in MongoDB, and whichever live half, the store's own subscriptions or the broker
+ * (decision record 0094), this is the same code.
  *
  * Starting from the beginning is the careful part, and the order matters: **subscribe first, then replay**.
  * Replaying first and subscribing afterwards leaves a window in which an event appended between the two is
@@ -29,25 +27,31 @@ import java.util.UUID
  * so that nothing is lost in between and a subscriber is never handed two events at once. See decision 0029.
  *
  * Subscribing, and reading the history, are outside a wipe, [WipeGate]: a replay holds what arrives live until it
- * is done, and a wipe that came in the middle would forget the world before the replay had handed it on.
+ * is done, and a wipe that came in the middle would forget the world before the replay had handed it on. The
+ * wipe's [Markers] are the world's rather than the feed's, so that a wipe waits for every feed over the world.
  */
-class OccurrentEventFeed(
-    private val subscriptions: SubscriptionModel,
+class OccurrentEventFeed internal constructor(
+    private val live: Live,
     private val store: EventStoreQueries,
     private val converter: CloudEventConverter<Event>,
     private val faults: Faults,
     private val gate: WipeGate,
+    private val markers: Markers,
 ) : EventFeed {
-    private val markers = Markers()
-
     override fun subscribe(from: Start, subscriber: (StoredEvent) -> Unit): AutoCloseable {
         val id = "feed-${UUID.randomUUID()}"
         // Touched only under the hand-off's lock.
         val alreadySeen = HashSet<String>()
 
         fun hand(cloudEvent: CloudEvent) {
-            // A marker is the feed's own, and one a wipe left behind by dying half way is not the world's history.
-            if (cloudEvent.type == MARKER || !alreadySeen.add(cloudEvent.id)) {
+            // A marker is the feed's own. Handed this far, everything written before it has been handed on, which is
+            // what a wipe waits for; never the subscriber's, and one a wipe left behind by dying half way is not the
+            // world's history.
+            if (cloudEvent.type == MARKER) {
+                markers.reached(id, cloudEvent.id)
+                return
+            }
+            if (!alreadySeen.add(cloudEvent.id)) {
                 return
             }
             // Thrown on to Occurrent, either throw below would be retried, and the retry dropped above as already
@@ -66,12 +70,9 @@ class OccurrentEventFeed(
         }
 
         val handoff = Handoff(replaying = from == Start.FROM_THE_BEGINNING, ::hand)
-        gate.outside {
+        val listening = gate.outside {
             markers.joined(id)
-            val subscription = subscriptions.subscribe(id, null, StartAt.now()) { cloudEvent ->
-                if (cloudEvent.type == MARKER) markers.reached(id, cloudEvent.id) else handoff.live(cloudEvent)
-            }
-            subscription.waitUntilStarted()
+            val listening = live.listen(id, handoff::live)
 
             if (from == Start.FROM_THE_BEGINNING) {
                 try {
@@ -87,23 +88,13 @@ class OccurrentEventFeed(
                 // Anything that arrived while the replay ran, in the order it arrived, minus what it duplicated.
                 handoff.replayDone()
             }
+            listening
         }
 
         return AutoCloseable {
-            subscriptions.cancelSubscription(id)
+            listening.close()
             markers.gone(id)
         }
-    }
-
-    /**
-     * Waits until every subscription has been handed everything written before [marker], which [write] puts in the
-     * store, and says whether they all got there within [timeout]. For a wipe, inside its gate, on a store whose
-     * subscriptions have nothing like the in-memory model's own wait: see `Markers`.
-     */
-    internal fun handedOn(marker: CloudEvent, timeout: Duration, write: (CloudEvent) -> Unit): Boolean {
-        markers.expect(marker.id)
-        write(marker)
-        return markers.awaitAll(marker.id, timeout)
     }
 }
 

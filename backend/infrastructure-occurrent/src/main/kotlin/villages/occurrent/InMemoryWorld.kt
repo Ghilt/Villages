@@ -52,7 +52,9 @@ class InMemoryWorld(val faults: Faults = FaultBoard()) : EventWorld {
 
     override val executor: HouseCommandExecutor = OccurrentHouseCommandExecutor(store, converter, gate)
     override val characterExecutor: CharacterCommandExecutor = OccurrentCharacterCommandExecutor(store, converter, gate)
-    override val feed: EventFeed = OccurrentEventFeed(StopOnCancel(subscriptions), store, converter, faults, gate)
+    // The markers are only MongoDB's way to wait; in memory the model waits itself, below.
+    override val feed: EventFeed =
+        OccurrentEventFeed(StoreSubscriptions(StopOnCancel(subscriptions)), store, converter, faults, gate, Markers())
 
     override val keptIn = "in memory, and gone when the server stops"
 
