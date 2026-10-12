@@ -27,7 +27,7 @@ changes.
 ## Decision
 
 **Each world step's output is filed once, on a shelf the whole machine shares, under a fingerprint of everything
-it was made from, and a tree borrows it by linking.** The shape, the steps and the order they are built in are
+it was made from, and a tree borrows it by hard link.** The shape, the steps and the order they are built in are
 `docs/plans/world-cache.md`.
 
 - **What decides staleness is content, never dates.** A step's fingerprint hashes the bytes of the master and
@@ -41,13 +41,18 @@ it was made from, and a tree borrows it by linking.** The shape, the steps and t
 - **An entry is made beside the shelf and renamed into it whole**, by the tool itself told where to write; it is
   never written again, and nothing writes or deletes through a link. A tree goes on serving its old world while
   a new entry is made.
-- **A tree borrows by junction**, for the folders of tiles, flow, sprite map, stands, origin, culture and height,
-  and by copy for the loose files, data before manifest with the entry's dates, because the game server reloads
-  on a manifest's date.
+- **A tree borrows by hard link, a file at a time, and never by junction.** The folders of tiles, flow, sprite
+  map, stands, origin, culture and height are made again in the tree as real folders of hard links to the entry's
+  files, about seven seconds for a master's 54,000; the loose files are copied, data before manifest with the
+  entry's dates, because the game server reloads on a manifest's date. A junction is ruled out by experiment
+  0019: `git worktree remove --force`, how a tree is deleted, empties what a junction points at, so a tree that
+  borrowed by junction would take the shelf with it. A borrowed file is never written in place; whatever replaces
+  one writes beside it and renames over it.
 - **`npm run world:ready` is the only thing that builds the world.** The quick start, the debug panel's buttons
   and the `world:<step>` scripts all run it, so the list of steps is one list and every runner makes the same
   world.
-- **The downloads are shared as they are**: a tree without `world/source` links the main checkout's.
+- **The downloads are shared the same way**: a tree is given a hard link to each file of the main checkout's
+  `world/source` it lacks.
 - **A fingerprint is held, not hoped for.** Each tool runs with a recorder of the files it opens, and an entry is
   refused if the tool opened a file its fingerprint does not name, or if an input changed while it ran.
 
@@ -60,9 +65,13 @@ it was made from, and a tree borrows it by linking.** The shape, the steps and t
   imports files a whole new set, about 390 MB; `world:prune` drops entries no tree links to.
 - The dates' false alarms and missed changes go together: a palette change re-cuts the tiles, a change to a
   tool re-runs it, and a fresh tree is never told its borrowed world is stale.
-- A tree's world folders are now mostly junctions into a folder outside it. Deleting a tree with Explorer or
-  `git worktree remove` must not follow them into the shelf; what Node and git do to a junction is tested and
-  recorded before anything links, rather than assumed.
+- A tree's world is now mostly second names of the shelf's files. Deleting a tree, by any means, takes its names
+  and leaves the files; what Node and git do to a link is tested and recorded (experiment 0019) rather than
+  assumed. A write made into a borrowed file in place would change every tree's, so the tools refuse to write over
+  a borrowed world, and an entry is checked against the sizes and dates it was filed with whenever it is borrowed.
+- The seventeen trees that junctioned the main checkout's world by hand, and the three that junctioned its
+  downloads, are each one `git worktree remove` from deleting what they point at. `world:ready` takes the junction
+  away, the link alone, the first time it runs in one.
 - The shelf is shared state, so it has locks: one a tree, one a step and fingerprint so two trees never build
   the same entry together, and one for the machine around the tools that take 8 GB.
 - The painterly and scenery stills, made by hand into `world/painterly/`, stay per tree.
@@ -75,6 +84,11 @@ it was made from, and a tree borrows it by linking.** The shape, the steps and t
   and one that re-cuts writes into the main checkout's.
 - **Copy rather than link.** Twenty-one thousand tiles twice over, and the height's as many again, is a minute of
   small files on Windows for every tree, for a world that never changes once made.
+- **Borrow by junction**, one link a folder and instant. Refuted by experiment 0019: deleting the tree deletes
+  what the junction points at. A directory symbolic link would not be, and Windows makes one only in Developer
+  Mode, which this machine is not in.
+- **Make the shelf read-only.** The attribute belongs to a file under every name it has, so the first tree that
+  removes its borrowed names clears it for all of them; it would protect nothing for long.
 - **Keep the dates and give a copied world its dates back.** It mends the false alarms and leaves the missed
   changes: a date says when, not what.
 - **A fingerprint of the master alone.** Misses every palette, render, biome, culture and tool change, which is

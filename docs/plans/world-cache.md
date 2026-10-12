@@ -46,7 +46,7 @@ A **world step** is one tool's part of the world for one master: what it reads, 
 There are ten, in the order they run: import, tile, styles (`paint.json`), flow, sprites, ground, origin, names,
 culture, height. `bin/lib/worldSteps.ts` is the table of them, and the one list everything else reads.
 
-| Step | Reads | Writes: folders, linked | Writes: loose files, copied |
+| Step | Reads | Writes: folders, borrowed by hard link | Writes: loose files, copied |
 |---|---|---|---|
 | import | master, palette | | `M/terrain.geojson`, `M/terrain-lookup.png`, `world/master/<m>-preview.png` |
 | tile | master, palette, render | `M/tiles/` | |
@@ -90,8 +90,8 @@ keeps its store in `.git/lfs`).
   hash, and `said.txt`, what the tool printed as it made it.
 - An entry is built in `<step>/<fingerprint>.making-<id>/`, by the tool itself told where to write (`--out`
   and its neighbours), so a tree goes on serving its old world while a long step runs. When the tool has exited
-  without fault and every declared output is there, `key.json` is written, the files are made read-only, and the
-  folder is renamed to its fingerprint in one move.
+  without fault and every declared output is there, `key.json` is written, with the size and date of every file,
+  and the folder is renamed to its fingerprint in one move.
 - A folder without `key.json` is never borrowed.
 
 ## Borrowing
@@ -99,30 +99,41 @@ keeps its store in `.git/lfs`).
 `npm run world:ready [master]` is the one runner, and the only thing that builds the world. For each step in
 order it works out the fingerprint, and then:
 
-- **on the shelf**: the tree's folders for that step become junctions to the entry's, which is instant, and its
-  loose files are copied, data before manifest (`ground.bin` before `ground.json`, `regions.bin` before
-  `names.json`), each given the entry's date. The game server's readers reload on the manifest's date, so a
-  reader that sees the new manifest finds the new data under it. What the tool printed when it was made is
-  printed again.
+- **on the shelf**: the tree's folders for that step are made again as real folders whose every file is a hard
+  link to the entry's, about seven seconds for a whole master's 54,000 files and none of it copied; its loose
+  files are copied, data before manifest (`ground.bin` before `ground.json`, `regions.bin` before `names.json`),
+  each given the entry's date. The game server's readers reload on the manifest's date, so a reader that sees the
+  new manifest finds the new data under it. What the tool printed when it was made is printed again. The tree
+  writes down what it borrowed in `M/world-cache.json`, a step and fingerprint each, so the next start finds it
+  borrowed already and does nothing.
 - **not on the shelf**: the tool is run into a new entry, as above, and then borrowed.
 
 `--only <step>` makes that step and every later step whose fingerprint moved with it; `--force` builds even
 what is on the shelf. The quick start runs it for the default master, the debug panel's buttons run it for
 theirs, and the `world:<step>` scripts the regenerate-world skill uses run it with `--only`.
 
-**A tree without `world/source`** is given a junction to the main checkout's, 4.9 GB, so nothing is downloaded
-twice and every tree carries names. `fetchWorld` refuses to download through it.
+**Never a junction.** A junction is a folder that is another folder, and `git worktree remove --force`, which
+is how a tree is deleted, empties the folder it points at (experiment 0019). A hard link is a second name for one
+file, and deleting a tree takes its names and leaves the file to every other.
 
-**Links a tree already has** are put right as it borrows: a junction of a whole `public/world`, or of a
-master's `tiles` or `flow`, to the main checkout's - which a dozen trees have, made by hand before this - is
-replaced, and a whole linked `public/world` is split one level down so the tree's other masters stay linked
-where they were.
+**The downloads are borrowed the same way**: a tree is given a hard link to each file of the main checkout's
+`world/source` it lacks, 4.9 GB and a few dozen files, so nothing is downloaded twice and every tree carries
+names. `fetchWorld` downloads beside a file and renames over it, so a fetch in one tree never changes another's.
+
+**Junctions a tree already has** are put right as it borrows: a junction of a whole `public/world`, or of a
+master's `tiles` or `flow`, to the main checkout's - which seventeen trees have, made by hand before this - is
+taken away, the link alone, and the tree borrows in its place; a whole linked `public/world` is made a real
+folder whose other masters are borrowed from the main checkout's by hard link, as they were seen before.
 
 ## Invariants
 
-- **An entry never changes once it is filed.** Held at the instant: tools write only into a `.making-` folder,
-  its files are read-only before the rename, every tool refuses an output folder that is a link, and one remover
-  that never follows a link (`bin/lib/links.ts`) replaces the tools' own `rm -r`.
+- **An entry never changes once it is filed.** Held at the instant: tools write only into a `.making-` folder;
+  every tool refuses to write over a borrowed world (its stamp is a hard link) or through a junction; whatever
+  replaces a borrowed file writes beside it and renames over it; and one remover that never follows a link
+  (`bin/lib/links.ts`) replaces the tools' own `rm -r`. Checked when an entry is borrowed: every file's size and
+  date against those `key.json` was filed with, and an entry found changed is thrown away and made again rather
+  than borrowed. Read-only files would not hold it, because the attribute is the file's under every name and the
+  first tree to remove its names clears it.
 - **An entry is whole.** Held at the instant: `key.json` is written last, after the tool's clean exit and a
   check that every declared output is there.
 - **A fingerprint covers everything its output was made from.** Held at the instant of filing: the tool runs
@@ -130,21 +141,23 @@ where they were.
   fingerprint does not name, or if an input changed while it ran. Held by tests as well: each step's inputs
   agree with the architecture page's `reads`, so the picture and the runner cannot disagree.
 - **A tree serves one entry a step, or is said to be stale.** Put right a moment after: a save of the master
-  leaves the old junctions in place until the next `world:ready`, and the debug panel says which steps are stale
+  leaves the old borrow in place until the next `world:ready`, and the debug panel says which steps are stale
   and which input changed, from fingerprints, never from dates.
 - **Two runs at once stay correct.** Held at the instant of decision: a lock a tree, so the quick start and the
   panel never build in one tree together; a lock a step and fingerprint, so a second tree waits for the first's
   entry instead of building it again; and one for the machine around the tools that take 8 GB. The rename
   refusing to replace an entry that is there is the backstop.
-- **Clearing the shelf never takes what a tree uses.** Held by `world:prune`: it keeps every entry any tree's
-  links resolve to, anything locked, and anything borrowed in the last week.
+- **Clearing the shelf never takes what a tree uses.** Held by `world:prune`: it keeps every entry a file of
+  which has another name (a tree borrows it), every entry a live tree's `world-cache.json` names, anything
+  locked, and anything borrowed in the last week.
 
 ## What it costs and what it saves
 
 A master's whole set is about 390 MB on the shelf; tiles and height are most of it. A repaint, or a change to
 code every step imports, files another whole set; a change to `render.json` files new tiles and styles, 66 MB.
 
-A fresh tree whose world is on the shelf: the install (10 s), the world (a few seconds), the pictures (13 s),
+A fresh tree whose world is on the shelf: the install (10 s), the world (about ten seconds of hard links), the
+pictures (13 s),
 and the compile, which the quick start starts first so the rest goes by beside it. About a minute and a half,
 under a minute once Gradle keeps compiled classes for every tree. The first tree after a change to the master
 or a world tool pays the build once: about nine minutes, with nothing to download.
@@ -157,8 +170,8 @@ program running on it at this tree's address. Steps 2 to 6 change nothing on the
 | # | Step | Seen in |
 |---|---|---|
 | 0 | This plan, decision record 0095, `ROADMAP.md`, `GLOSSARY.md` | the documents |
-| 1 | Shared downloads: the quick start links `world/source` to the main checkout's when a tree has none and warns when one is missing what the world needs; `fetchWorld` refuses to write through the link | the quick start's lines, names in a fresh tree |
-| 2 | `bin/lib/links.ts`: a link or not, a junction, the remover that never follows one, a copy keeping its date, the guard; tests that prove what Node does to a junction here, written up in `docs/experiments/` | the checks |
+| 1 | `bin/lib/links.ts`: a junction known for one, the remover that never follows it, hard links a file at a time, a file placed in one move with its date; tests that prove what Node and git do here, experiment 0019 | the checks |
+| 2 | Shared downloads: a tree is given a hard link to each file of the main checkout's `world/source` it lacks; `fetchWorld` downloads beside a file and renames over it | the quick start's lines, names in a fresh tree |
 | 3 | The tools write where they are told: `--out` and its neighbours on the ten, `--no-names` on origin, the guard in each, their `rm -r` replaced; flow's read of `render.json` and the sprite map's of `painterly.json`, which only the stills and a printed report use, moved behind those; with no options each does exactly what it does now | the checks |
 | 4 | The fingerprint: `bin/lib/worldSteps.ts`, `bin/lib/worldKeys.ts`, with tests, and the cross-check against the architecture page's `tools.ts` | the checks |
 | 5 | The shelf: `bin/lib/worldCache.ts` - look up, file, borrow, the locks - with tests over small stand-in tools in a scratch folder | the checks |

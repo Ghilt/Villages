@@ -24,7 +24,9 @@ export default defineConfig({
           name: 'world',
           root: 'packages/world',
           environment: 'node',
-          include: ['src/**/*.test.ts'],
+          // `bin/` too: how the tools treat a link, and what the world cache files a step under, are rules
+          // every tree's world depends on rather than details of a tool.
+          include: ['src/**/*.test.ts', 'bin/**/*.test.ts'],
         },
       },
       {
