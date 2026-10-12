@@ -13,6 +13,7 @@ import type { Culture } from '../src/structures.ts';
 import { masterRowsAt } from '../src/tiles.ts';
 
 import { flag, named } from './lib/flags.ts';
+import { ownFolder, writtenAt } from './lib/outputs.ts';
 import { CULTURES_FILE, OUTPUT_DIR, masterAt } from './lib/paths.ts';
 
 /**
@@ -81,7 +82,8 @@ const file: CultureFile & { $comment: string } = {
   height: originFile.height,
   counts,
 };
-const outputDir = resolve(worldDir, 'culture');
+const outputDir = writtenAt(resolve(worldDir, 'culture'));
+ownFolder(outputDir, 'the culture map');
 await mkdir(outputDir, { recursive: true });
 await writeFile(resolve(outputDir, 'culture.bin'), cultures);
 await writeFile(

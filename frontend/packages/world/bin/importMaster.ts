@@ -1,6 +1,6 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { deflateSync } from 'node:zlib';
-import { basename, resolve } from 'node:path';
+import { basename, dirname, resolve } from 'node:path';
 
 import { PNG } from 'pngjs';
 
@@ -17,7 +17,8 @@ import type { Ring } from '../src/trace.ts';
 import { DEFAULT_MASTER, masterNameOf, worldDirOf } from '../src/masters.ts';
 
 import { flag, named } from './lib/flags.ts';
-import { MASTER_DIR, OUTPUT_DIR, PALETTE } from './lib/paths.ts';
+import { ownFile, writtenAt } from './lib/outputs.ts';
+import { MASTER_DIR, OUTPUT_DIR, PALETTE, masterAt } from './lib/paths.ts';
 
 /**
  * Reads the hand-edited master and gives the game its world.
@@ -57,10 +58,11 @@ const SUSPICIOUS_DISTANCE = 18;
  * panel can load any of them. The preview is named after it too, for the same reason.
  */
 
-const masterPath = named[0] === undefined ? resolve(MASTER_DIR, `${DEFAULT_MASTER}.png`) : resolve(named[0]);
+const masterPath = masterAt(named[0]);
 const master = masterNameOf(basename(masterPath)) ?? DEFAULT_MASTER;
 const palettePath = flag('palette') ?? PALETTE;
-const outputDir = flag('out') ?? resolve(OUTPUT_DIR, worldDirOf(master));
+const outputDir = flag('out') ?? writtenAt(resolve(OUTPUT_DIR, worldDirOf(master)));
+const previewPath = writtenAt(resolve(MASTER_DIR, `${master}-preview.png`));
 
 const palette = JSON.parse(await readFile(palettePath, 'utf8')) as Palette;
 const problems = paletteProblems(palette);
@@ -261,7 +263,10 @@ for (const terrain of targets) {
   );
 }
 
+for (const one of ['terrain.geojson', 'terrain-lookup.png']) ownFile(resolve(outputDir, one), 'the coast');
+ownFile(previewPath, 'the preview');
 await mkdir(outputDir, { recursive: true });
+await mkdir(dirname(previewPath), { recursive: true });
 const shapes = JSON.stringify({ type: 'FeatureCollection', features });
 await writeFile(resolve(outputDir, 'terrain.geojson'), shapes);
 
@@ -302,7 +307,7 @@ for (let row = 0; row < preview.height; row += 1) {
   }
 }
 await writeFile(
-  resolve(MASTER_DIR, `${master}-preview.png`),
+  previewPath,
   encodeIndexedPng(preview, colours, (data) => new Uint8Array(deflateSync(data, { level: 9 }))),
 );
 

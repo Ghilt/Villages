@@ -11,8 +11,9 @@ import { encodeRgbPng } from '../src/png.ts';
 import { DEFAULT_MASTER, masterNameOf, worldDirOf } from '../src/masters.ts';
 
 import { writeNames } from './lib/earthNames.ts';
-import { flag, named } from './lib/flags.ts';
+import { args, flag, named } from './lib/flags.ts';
 import { readMaster } from './lib/master.ts';
+import { ownFolder, writtenAt } from './lib/outputs.ts';
 import { OUTPUT_DIR, PALETTE, masterAt } from './lib/paths.ts';
 
 /**
@@ -30,7 +31,7 @@ const masterPath = masterAt(named[0]);
 const master = masterNameOf(basename(masterPath)) ?? DEFAULT_MASTER;
 const from = flag('from') ?? 'terrain-base';
 const side = Number(flag('side') ?? 4096);
-const outputDir = resolve(OUTPUT_DIR, worldDirOf(master), 'origin');
+const outputDir = writtenAt(resolve(OUTPUT_DIR, worldDirOf(master), 'origin'));
 const started = Date.now();
 const seconds = () => `${((Date.now() - started) / 1000).toFixed(0)}s`;
 const say = (line: string) => console.log(`[${seconds()}] ${line}`);
@@ -64,6 +65,7 @@ const file: OriginFile & { $comment: string } = {
   counts,
 };
 
+ownFolder(outputDir, 'the origin map');
 await mkdir(outputDir, { recursive: true });
 await writeFile(resolve(outputDir, 'origin.bin'), encodeOrigin(origin));
 const picture = originPicture(origin, edited, base, sea, side);
@@ -81,4 +83,15 @@ say(
   `the origin of ${master}: ${share(counts.earth)} of its land from Earth, ${share(counts.invented)} invented, ` +
     `${share(counts.clone)} copies, in squares of ${origin.cell} pixels, to ${outputDir}`,
 );
-say(await writeNames(master, resolve(OUTPUT_DIR, worldDirOf(master)), origin, edited.width, edited.height));
+// `--no-names` leaves them to world:names, which the world cache files as a step of its own (0095).
+if (!args.includes('--no-names')) {
+  say(
+    await writeNames(
+      master,
+      writtenAt(resolve(OUTPUT_DIR, worldDirOf(master))),
+      origin,
+      edited.width,
+      edited.height,
+    ),
+  );
+}

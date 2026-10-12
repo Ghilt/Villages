@@ -361,6 +361,12 @@ stage alone, with none of the debug panel in it (decision record 0079).
 
 ## Adam's folders and the tools that cut them
 
+Every world tool below takes `-- --into <folder>`, and then writes what it would have written in the repository
+under that folder instead, laid out the same way: how the world cache has a tool make a new entry while the tree
+goes on serving the world it has. Run without it in a tree that borrowed its world, a tool first takes back the
+part it makes - the borrowed names go, the world cache's files stay - so what it writes is the tree's own. It
+will not write where a junction stands above its folder, which is another checkout's. See decision record 0095.
+
 - The towns, rivers, lakes and seas of 1790: `world/names/1790.json`, one line a thing, keyed as the names are -
   a town by its Wikidata id, a river, a lake or a sea by its Wikidata id or Natural Earth's file, number and
   name: the name an English writer of 1790 would have used, or `null` if it was not there then; today's name,

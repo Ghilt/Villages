@@ -1,4 +1,4 @@
-import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { deflateSync } from 'node:zlib';
 import { basename, resolve } from 'node:path';
 
@@ -12,6 +12,7 @@ import { DEFAULT_MASTER, masterNameOf, worldDirOf } from '../src/masters.ts';
 
 import { args, flag, named } from './lib/flags.ts';
 import { readMaster } from './lib/master.ts';
+import { freshFolder, writtenAt } from './lib/outputs.ts';
 import { OUTPUT_DIR, PAINTERLY_DIR, PALETTE, RENDER, masterAt } from './lib/paths.ts';
 
 /**
@@ -36,7 +37,7 @@ import { OUTPUT_DIR, PAINTERLY_DIR, PALETTE, RENDER, masterAt } from './lib/path
 
 const masterPath = masterAt(named[0]);
 const master = masterNameOf(basename(masterPath)) ?? DEFAULT_MASTER;
-const outputDir = resolve(OUTPUT_DIR, worldDirOf(master), 'flow');
+const outputDir = writtenAt(resolve(OUTPUT_DIR, worldDirOf(master), 'flow'));
 const bridge = Number(flag('bridge') ?? 6);
 const along = Number(flag('along') ?? 6);
 const ZOOM = 7;
@@ -47,7 +48,6 @@ const started = Date.now();
 const since = (): string => `${((Date.now() - started) / 1000).toFixed(1)}s`;
 
 const palette = JSON.parse(await readFile(PALETTE, 'utf8')) as Palette;
-const render = JSON.parse(await readFile(RENDER, 'utf8')) as { sea: string; colours: Record<string, string> };
 const idsOf = (...names: string[]) =>
   new Set(palette.classes.filter((one) => names.includes(one.name)).map((one) => one.id));
 const classes = { sea: idsOf('ocean', 'shallow-sea'), lake: idsOf('lake'), river: idsOf('river') };
@@ -180,7 +180,7 @@ for (let node = 0; node < flow.pixels.length; node += 1) {
   }
 }
 
-await rm(outputDir, { recursive: true, force: true });
+freshFolder(outputDir, "the rivers' flow");
 const deflate = (data: Uint8Array) => new Uint8Array(deflateSync(data, { level: 6 }));
 const written: string[] = [];
 let bytes = 0;
@@ -269,6 +269,11 @@ console.log(
 // The stills: a few places at four times the master, rivers coloured by how they were reached, an arrow on
 // every few pixels of them, and the gaps that were jumped drawn across.
 if (!args.includes('--no-stills')) {
+  // Read only here, so that what the stills are coloured in is no part of what the flow is made from.
+  const render = JSON.parse(await readFile(RENDER, 'utf8')) as {
+    sea: string;
+    colours: Record<string, string>;
+  };
   const PLACES = [
     { name: 'bohemia', lng: 14.4, lat: 50.4, says: 'the Vltava into the Elbe, north to the North Sea' },
     { name: 'rhine', lng: 6.2, lat: 51.4, says: 'the Rhine and the Maas into the North Sea' },

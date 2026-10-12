@@ -1,4 +1,4 @@
-import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { deflateSync } from 'node:zlib';
 import { basename, resolve } from 'node:path';
 
@@ -34,6 +34,7 @@ import { biomeCellOf } from '../src/spriteMap.ts';
 
 import { args, flag, named } from './lib/flags.ts';
 import { classSamplerOf, readMaster } from './lib/master.ts';
+import { freshFolder, writtenAt } from './lib/outputs.ts';
 import { BIOMES, OUTPUT_DIR, PAINTERLY, PALETTE, STANDS_DIR, masterAt } from './lib/paths.ts';
 
 /**
@@ -56,8 +57,8 @@ import { BIOMES, OUTPUT_DIR, PAINTERLY, PALETTE, STANDS_DIR, masterAt } from './
 const masterPath = masterAt(named[0]);
 const master = masterNameOf(basename(masterPath)) ?? DEFAULT_MASTER;
 const layer = flag('layer') ?? 'biome';
-const outputDir = flag('out') ?? resolve(OUTPUT_DIR, worldDirOf(master), 'sprites', layer);
-const standsDir = flag('stands') ?? resolve(STANDS_DIR, standsDirOf(master, layer));
+const outputDir = flag('out') ?? writtenAt(resolve(OUTPUT_DIR, worldDirOf(master), 'sprites', layer));
+const standsDir = flag('stands') ?? writtenAt(resolve(STANDS_DIR, standsDirOf(master, layer)));
 const readable = args.includes('--readable');
 
 /** The biome raster's side, in cells. One cell is sixteen world units, about twenty kilometres. */
@@ -293,10 +294,9 @@ for (let gridY = 0; gridY < parents; gridY += 1) {
 }
 console.log(`placed ${placed.toLocaleString()} stands (${since()})`);
 
-// Both halves go, the public one with any stands an older generator left in it, so neither can outlive the
-// other and nothing the page could fetch is left behind.
-await rm(outputDir, { recursive: true, force: true });
-await rm(standsDir, { recursive: true, force: true });
+// Both halves go, so neither can outlive the other and nothing the page could fetch is left behind (0067, 0095).
+freshFolder(outputDir, 'the sprite map');
+freshFolder(standsDir, 'the stands');
 await mkdir(outputDir, { recursive: true });
 await mkdir(standsDir, { recursive: true });
 

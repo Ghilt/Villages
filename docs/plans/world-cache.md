@@ -88,8 +88,8 @@ keeps its store in `.git/lfs`).
 
 - `<step>/<fingerprint>/` is an **entry**: exactly that step's output, `key.json` naming every input and its
   hash, and `said.txt`, what the tool printed as it made it.
-- An entry is built in `<step>/<fingerprint>.making-<id>/`, by the tool itself told where to write (`--out`
-  and its neighbours), so a tree goes on serving its old world while a long step runs. When the tool has exited
+- An entry is built in `<step>/<fingerprint>.making-<id>/`, by the tool itself told where to write
+  (`--into <folder>`, under which it lays out what it would have written in the repository), so a tree goes on serving its old world while a long step runs. When the tool has exited
   without fault and every declared output is there, `key.json` is written, with the size and date of every file,
   and the folder is renamed to its fingerprint in one move.
 - A folder without `key.json` is never borrowed.
@@ -172,7 +172,7 @@ program running on it at this tree's address. Steps 2 to 6 change nothing on the
 | 0 | This plan, decision record 0095, `ROADMAP.md`, `GLOSSARY.md` | the documents |
 | 1 | `bin/lib/links.ts`: a junction known for one, the remover that never follows it, hard links a file at a time, a file placed in one move with its date; tests that prove what Node and git do here, experiment 0019 | the checks |
 | 2 | Shared downloads: a tree is given a hard link to each file of the main checkout's `world/source` it lacks; `fetchWorld` downloads beside a file and renames over it | the quick start's lines, names in a fresh tree |
-| 3 | The tools write where they are told: `--out` and its neighbours on the ten, `--no-names` on origin, the guard in each, their `rm -r` replaced; flow's read of `render.json` and the sprite map's of `painterly.json`, which only the stills and a printed report use, moved behind those; with no options each does exactly what it does now | the checks |
+| 3 | The tools write where they are told: `--into <folder>` on the ten, `--no-names` on origin, each taking back what its tree borrowed before it writes, their `rm -r` replaced; flow's read of `render.json` moved into its stills, and the sprite map's fingerprint reading only the views of `painterly.json`, which only its printed report uses; with no options each does exactly what it does now | the checks |
 | 4 | The fingerprint: `bin/lib/worldSteps.ts`, `bin/lib/worldKeys.ts`, with tests, and the cross-check against the architecture page's `tools.ts` | the checks |
 | 5 | The shelf: `bin/lib/worldCache.ts` - look up, file, borrow, the locks - with tests over small stand-in tools in a scratch folder | the checks |
 | 6 | `world:ready`: `bin/readyWorld.ts`, `--only`, `--force`, `--why`, the recorder of files opened, the `world:<step>` scripts through it | this tree's world borrowed, timed |

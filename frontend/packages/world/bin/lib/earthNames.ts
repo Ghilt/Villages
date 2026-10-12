@@ -15,6 +15,8 @@ import type { GivenRegions } from '../../src/namesFile.ts';
 import { toWorld, wayBackOf } from '../../src/originBack.ts';
 import type { OriginGrid } from '../../src/originFile.ts';
 
+import { removeHere } from './links.ts';
+import { ownFile, writtenAt } from './outputs.ts';
 import { GROUND_DIR, NAMES_DIR, SOURCE_DIR } from './paths.ts';
 
 /**
@@ -100,9 +102,13 @@ export async function writeNames(
   const text = `${JSON.stringify(file)}\n`;
   // The page's copy beside the tiles, and the server's beside the ground map. `names.json` last in each, so that
   // when it was written is when the names were: the panel, the quick start and the server read that time.
-  for (const dir of [worldDir, resolve(GROUND_DIR, master)]) {
+  // `worldDir` is where the caller is writing, the tree or a new world cache entry; the ground's copy goes beside it.
+  for (const dir of [worldDir, writtenAt(resolve(GROUND_DIR, master))]) {
+    for (const one of ['regions.bin', 'names.json']) ownFile(resolve(dir, one), 'the names');
     await mkdir(dir, { recursive: true });
+    // Without the regions' sources there are none, and one an older run left would name the wrong seas.
     if (bytes !== null) await writeFile(resolve(dir, 'regions.bin'), bytes);
+    else removeHere(resolve(dir, 'regions.bin'));
     await writeFile(resolve(dir, 'names.json'), text);
   }
   const { counts } = file;

@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs';
-import { mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { basename, resolve } from 'node:path';
 import { inflateSync } from 'node:zlib';
 
@@ -27,6 +27,7 @@ import { TILE_SIZE } from '../src/tiles.ts';
 
 import { flag, named } from './lib/flags.ts';
 import { readMaster } from './lib/master.ts';
+import { freshFolder, writtenAt } from './lib/outputs.ts';
 import { OUTPUT_DIR, PALETTE, SOURCE_DIR, masterAt } from './lib/paths.ts';
 import { ETOPO_WORLD } from './lib/worldSources.ts';
 
@@ -53,7 +54,7 @@ import { ETOPO_WORLD } from './lib/worldSources.ts';
 
 const masterPath = masterAt(named[0]);
 const master = masterNameOf(basename(masterPath)) ?? DEFAULT_MASTER;
-const outputDir = resolve(OUTPUT_DIR, worldDirOf(master), 'height');
+const outputDir = writtenAt(resolve(OUTPUT_DIR, worldDirOf(master), 'height'));
 const maxZoom = Number(flag('max-zoom') ?? HEIGHT_MAX_ZOOM);
 
 const TAG = {
@@ -224,7 +225,7 @@ const tileX = (lon: number, zoom: number) => within(((lon + 180) / 360) * 2 ** z
 const tileY = (lat: number, zoom: number) =>
   within(((1 - Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360)) / Math.PI) / 2) * 2 ** zoom, zoom);
 
-await rm(outputDir, { recursive: true, force: true });
+freshFolder(outputDir, 'the height');
 const highest = { metres: -Infinity, lon: 0, lat: 0 };
 let tiles = 0;
 let bytes = 0;

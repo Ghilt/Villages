@@ -7,6 +7,7 @@ import { DEFAULT_MASTER, masterNameOf } from '../src/masters.ts';
 
 import { named } from './lib/flags.ts';
 import { readMaster } from './lib/master.ts';
+import { ownFile, writtenAt } from './lib/outputs.ts';
 import { GROUND_DIR, PALETTE, masterAt } from './lib/paths.ts';
 
 /**
@@ -21,7 +22,7 @@ import { GROUND_DIR, PALETTE, masterAt } from './lib/paths.ts';
 
 const masterPath = masterAt(named[0]);
 const master = masterNameOf(basename(masterPath)) ?? DEFAULT_MASTER;
-const outputDir = resolve(GROUND_DIR, master);
+const outputDir = writtenAt(resolve(GROUND_DIR, master));
 const started = Date.now();
 
 const palette = JSON.parse(await readFile(PALETTE, 'utf8')) as Palette;
@@ -35,6 +36,7 @@ const ground = groundOf(world, {
   river: idsOf('river'),
 });
 
+for (const one of ['ground.bin', 'ground.json']) ownFile(resolve(outputDir, one), 'the ground map');
 await mkdir(outputDir, { recursive: true });
 await writeFile(resolve(outputDir, 'ground.bin'), ground.cells);
 await writeFile(

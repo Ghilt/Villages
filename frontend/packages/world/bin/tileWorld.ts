@@ -11,7 +11,8 @@ import { DEFAULT_MASTER, masterNameOf, worldDirOf } from '../src/masters.ts';
 
 import { flag, named } from './lib/flags.ts';
 import { readMaster } from './lib/master.ts';
-import { MASTER_DIR, OUTPUT_DIR, PALETTE, RENDER } from './lib/paths.ts';
+import { ownFolder, writtenAt } from './lib/outputs.ts';
+import { OUTPUT_DIR, PALETTE, RENDER, masterAt } from './lib/paths.ts';
 
 /**
  * Cuts the world into map tiles, in the colours it is drawn in.
@@ -26,9 +27,10 @@ import { MASTER_DIR, OUTPUT_DIR, PALETTE, RENDER } from './lib/paths.ts';
  * the debug map panel can load any of them.
  */
 
-const masterPath = named[0] === undefined ? resolve(MASTER_DIR, `${DEFAULT_MASTER}.png`) : resolve(named[0]);
+const masterPath = masterAt(named[0]);
 const master = masterNameOf(basename(masterPath)) ?? DEFAULT_MASTER;
-const outputDir = flag('out') ?? resolve(OUTPUT_DIR, worldDirOf(master), 'tiles');
+const outputDir = flag('out') ?? writtenAt(resolve(OUTPUT_DIR, worldDirOf(master), 'tiles'));
+ownFolder(outputDir, 'the tiles');
 
 const palette = JSON.parse(await readFile(PALETTE, 'utf8')) as Palette;
 const render = JSON.parse(await readFile(RENDER, 'utf8')) as {

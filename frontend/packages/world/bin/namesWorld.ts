@@ -8,6 +8,7 @@ import type { OriginFile } from '../src/originFile.ts';
 
 import { writeNames } from './lib/earthNames.ts';
 import { named } from './lib/flags.ts';
+import { writtenAt } from './lib/outputs.ts';
 import { OUTPUT_DIR, masterAt } from './lib/paths.ts';
 
 /**
@@ -31,5 +32,5 @@ if (!existsSync(resolve(originDir, 'origin.json'))) {
 const file = JSON.parse(await readFile(resolve(originDir, 'origin.json'), 'utf8')) as OriginFile;
 const bytes = await readFile(resolve(originDir, 'origin.bin'));
 const grid = decodeOrigin(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength), file);
-const said = await writeNames(master, worldDir, grid, file.width, file.height);
+const said = await writeNames(master, writtenAt(worldDir), grid, file.width, file.height);
 console.log(`${said}, in ${((Date.now() - started) / 1000).toFixed(1)}s`);
