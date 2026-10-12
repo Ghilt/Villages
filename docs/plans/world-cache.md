@@ -108,9 +108,15 @@ order it works out the fingerprint, and then:
   borrowed already and does nothing.
 - **not on the shelf**: the tool is run into a new entry, as above, and then borrowed.
 
-`--only <step>` makes that step and every later step whose fingerprint moved with it; `--force` builds even
-what is on the shelf. The quick start runs it for the default master, the debug panel's buttons run it for
-theirs, and the `world:<step>` scripts the regenerate-world skill uses run it with `--only`.
+`--only <step>` makes that step and every step made from it; `--force` builds even what is on the shelf, and
+takes the old entry off it; `--why` says where each step stands and what moved, and makes nothing. The quick
+start runs it for the default master and the debug panel's buttons run it for theirs. The `world:<step>`
+scripts stay the tools themselves, run by hand for what only a hand run gives - the flow's stills, a tool's own
+options - and make the tree's own world, which the next `world:ready` borrows over again.
+
+The tool is run with a recorder loaded first (`bin/lib/recordReads.ts`) that writes down every file it opens to
+read; an entry whose tool read a file of the repository that its fingerprint does not count is refused, and so
+is one whose inputs changed while it ran.
 
 **Never a junction.** A junction is a folder that is another folder, and `git worktree remove --force`, which
 is how a tree is deleted, empties the folder it points at (experiment 0019). A hard link is a second name for one
@@ -175,7 +181,7 @@ program running on it at this tree's address. Steps 2 to 6 change nothing on the
 | 3 | The tools write where they are told: `--into <folder>` on the ten, `--no-names` on origin, each taking back what its tree borrowed before it writes, their `rm -r` replaced; flow's read of `render.json` moved into its stills, and the sprite map's fingerprint reading only the views of `painterly.json`, which only its printed report uses; with no options each does exactly what it does now | the checks |
 | 4 | The fingerprint: `bin/lib/worldSteps.ts`, `bin/lib/worldKeys.ts`, with tests, and the cross-check against the architecture page's `tools.ts` | the checks |
 | 5 | The shelf: `bin/lib/worldCache.ts` - look up, file, borrow, the locks - with tests over small stand-in tools in a scratch folder | the checks |
-| 6 | `world:ready`: `bin/readyWorld.ts`, `--only`, `--force`, `--why`, the recorder of files opened, the `world:<step>` scripts through it | this tree's world borrowed, timed |
+| 6 | `world:ready`: `bin/readyWorld.ts`, `--only`, `--force`, `--why`, the recorder of files opened; the `world:<step>` scripts stay the tools | this tree's world borrowed, timed |
 | 7 | The debug panel judges by fingerprints: its buttons run `world:ready`, busy is the tree's lock, and each step is current or stale with the reason; decision 0025 amended | the Debug map section |
 | 8 | The quick start runs `world:ready` in place of its world block, and starts the game server's compile first; `CLAUDE.md`, the regenerate-world skill; a new tree timed against the filled shelf | a fresh tree's quick start |
 | 9 | The architecture page: the world cache drawn as a box round what the master's steps bake, and a strip, *Starting a tree*, with each step of the quick start and its time | `/admin/inspect-architecture` |

@@ -31,7 +31,8 @@
     "portraits": "node bin/drawPortraits.ts",
     "scenes": "node bin/drawScenes.ts",
     "art": "node bin/cutArt.ts",
-    "ui": "node bin/cutUi.ts"
+    "ui": "node bin/cutUi.ts",
+    "ready": "node bin/readyWorld.ts"
   },
   "devDependencies": {
     "fflate": "^0.8.3",

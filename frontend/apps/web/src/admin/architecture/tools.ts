@@ -194,6 +194,18 @@ export const TOOLS: readonly Tool[] = [
     what: 'Downloads the real Earth the world is built from, 4.4 GB.',
   },
   {
+    script: 'world:ready',
+    entry: 'readyWorld.ts',
+    group: 'cache',
+    reads: [],
+    writes: [],
+    seconds: 10,
+    time: 'seconds when the world cache has it; the steps it makes when not',
+    perMaster: true,
+    ranBy: 'quick-start',
+    what: 'Borrows each world step from the world cache, and makes, files and borrows the ones nobody has made.',
+  },
+  {
     script: 'mend-rivers',
     entry: 'scripts/mend-rivers.ts',
     group: 'adam',

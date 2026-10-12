@@ -5,7 +5,8 @@
     "types": ["node"],
     "module": "NodeNext",
     "moduleResolution": "nodenext",
-    "allowImportingTsExtensions": true
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true
   },
   "include": ["bin", "src"]
 }

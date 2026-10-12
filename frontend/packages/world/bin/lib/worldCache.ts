@@ -58,7 +58,11 @@ function filesUnder(root: string, folder = root): string[] {
 }
 
 export class Shelf {
-  constructor(readonly dir: string) {}
+  readonly dir: string;
+
+  constructor(dir: string) {
+    this.dir = dir;
+  }
 
   entryOf(step: StepName, key: string): string {
     return join(this.dir, step, key);
@@ -267,7 +271,8 @@ export function isBorrowed(
     const same =
       made.folder === true
         ? here.ino === there.ino && here.dev === there.dev && here.ino !== 0
-        : here.size === there.size && here.mtimeMs === there.mtimeMs;
+        : // A copy's date goes through milliseconds on its way, and loses what was finer.
+          here.size === there.size && Math.abs(here.mtimeMs - there.mtimeMs) < 2;
     if (!same) return false;
   }
   return true;

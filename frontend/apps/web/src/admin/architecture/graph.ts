@@ -28,11 +28,16 @@ export const runCard = (id: string) => `run:${id}`;
 export const groupCard = (id: string) => `group:${id}`;
 
 /**
- * The tools drawn: not Adam's own, one of which writes the master it reads and would loop the flow, and not
- * the two that draw placeholders by hand, which make nothing the rest of the world is made from.
+ * The tools drawn: not Adam's own, one of which writes the master it reads and would loop the flow, not
+ * the two that draw placeholders by hand, which make nothing the rest of the world is made from, and not the world
+ * cache's, which runs the master's tools rather than reading any file of its own.
  */
 export const DRAWN_TOOLS = TOOLS.filter(
-  (tool) => tool.group !== 'adam' && tool.script !== 'world:portraits' && tool.script !== 'world:scenes',
+  (tool) =>
+    tool.group !== 'adam' &&
+    tool.group !== 'cache' &&
+    tool.script !== 'world:portraits' &&
+    tool.script !== 'world:scenes',
 );
 
 /** Everything baked beforehand, as cards and arrows: files into tools, tools into files. */

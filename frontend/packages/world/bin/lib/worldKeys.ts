@@ -44,8 +44,10 @@ export interface Fingerprint {
 export class HashMemo {
   private readonly known = new Map<string, string>();
   private changed = false;
+  private readonly file: string | undefined;
 
-  constructor(private readonly file?: string) {
+  constructor(file?: string) {
+    this.file = file;
     if (file !== undefined && existsSync(file)) {
       try {
         for (const [at, hash] of Object.entries(

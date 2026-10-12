@@ -31,7 +31,7 @@ export interface Tool {
   /** What runs it without anyone asking. */
   readonly ranBy: string;
   readonly what: string;
-  readonly group: 'master' | 'pictures' | 'once' | 'adam';
+  readonly group: 'master' | 'pictures' | 'once' | 'adam' | 'cache';
 }
 
 /** A part of the running game that reads baked files. */

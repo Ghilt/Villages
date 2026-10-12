@@ -48,9 +48,10 @@ it was made from, and a tree borrows it by hard link.** The shape, the steps and
   0019: `git worktree remove --force`, how a tree is deleted, empties what a junction points at, so a tree that
   borrowed by junction would take the shelf with it. A borrowed file is never written in place; whatever replaces
   one writes beside it and renames over it.
-- **`npm run world:ready` is the only thing that builds the world.** The quick start, the debug panel's buttons
-  and the `world:<step>` scripts all run it, so the list of steps is one list and every runner makes the same
-  world.
+- **`npm run world:ready` is the way the world is built.** The quick start and the debug panel's buttons run it,
+  over one list of steps (`bin/lib/worldSteps.ts`), so every way of making the world makes the same one. The
+  `world:<step>` scripts stay the tools themselves, for a hand run's stills and options; what a hand run makes is
+  the tree's own, and the next `world:ready` borrows over it again.
 - **The downloads are shared the same way**: a tree is given a hard link to each file of the main checkout's
   `world/source` it lacks.
 - **A fingerprint is held, not hoped for.** Each tool runs with a recorder of the files it opens, and an entry is

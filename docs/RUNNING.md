@@ -367,6 +367,19 @@ goes on serving the world it has. Run without it in a tree that borrowed its wor
 part it makes - the borrowed names go, the world cache's files stay - so what it writes is the tree's own. It
 will not write where a junction stands above its folder, which is another checkout's. See decision record 0095.
 
+**The world cache** is how the world is made in a tree without making it again: `npm run world:ready --prefix
+frontend` makes a master's world current, each of its ten **world steps** - import, tile, styles, flow, sprites,
+ground, origin, names, culture, height - borrowed from the shelf when it has the entry this tree's inputs name, and
+made, filed and borrowed when nobody has made it yet. The shelf is `E:\Code\Villages\.git\world-cache\`, one for
+the machine; a borrowed folder is hard links to the shelf's files, a few seconds for a whole master, and the few
+loose files are copies. It prints a line a step: *current*, *borrowed from the world cache, made in* the tree that
+made it with the last thing its tool said, or the tool's own output as it makes one, with the reason
+(*world/palette.json changed*). `-- terrain2` for another master, `-- --only origin` for a step and every step made
+from it, `-- --force` to make them again even when the shelf has them, `-- --why` to be told where each step stands
+and what moved without making anything. What a tree borrowed is written in `public/world/borrowed.json`. A master
+nobody has made costs its steps once, about nine minutes; every tree after it, seconds. See
+`docs/plans/world-cache.md`.
+
 - The towns, rivers, lakes and seas of 1790: `world/names/1790.json`, one line a thing, keyed as the names are -
   a town by its Wikidata id, a river, a lake or a sea by its Wikidata id or Natural Earth's file, number and
   name: the name an English writer of 1790 would have used, or `null` if it was not there then; today's name,
