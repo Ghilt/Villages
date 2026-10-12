@@ -13,6 +13,13 @@
   one `Faults` port, which the server's log and the gateway watch as they watched the feed; a feed's fault is
   said word for word as before. A pledge whose house went in a wipe is as settled as one already released, so a
   wipe is not a fault in every window.
+- Amended 2026-10-12, as the broker was built (decision record 0094): **the checkpoint this record found missing
+  exists for the bridge**, the relay from the store to RabbitMQ, which keeps its place in MongoDB once the broker
+  has confirmed each event. The read models still read the whole history on every start. And **a feed's live half
+  is a parameter**, the store's subscriptions or the broker's queues, with the same order on both: listen first,
+  then read the history. A live half that missed some of what was written says so, and the feed listens again and
+  reads the history once more, with what arrives meanwhile waiting behind it, so the gap costs duplicates and not
+  losses, as the first subscribing does.
 
 ## Context
 

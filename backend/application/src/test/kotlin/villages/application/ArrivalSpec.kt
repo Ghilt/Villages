@@ -44,7 +44,7 @@ class ArrivalSpec : StringSpec({
     "a player with no house and nothing to decide is asked where to found one" {
         val (world, arrival) = rig()
 
-        val choice = arrival.arrive(adam)
+        val choice = arrival.arrive(adam)?.choice
 
         choice shouldBe FoundingChoices.forPlayer(adam)
         val event = world.events.single().shouldBeInstanceOf<PlayerGivenChoice>()
@@ -57,9 +57,11 @@ class ArrivalSpec : StringSpec({
     "and arriving starts a story, so the choice is its own correlation" {
         val (world, arrival) = rig()
 
-        arrival.arrive(adam)
+        val story = arrival.arrive(adam)!!.story
 
         world.provenances.single() shouldBe Provenance(commandId = given, correlationId = given)
+        // Handed back, so the action answering the choice continues it without asking a read model.
+        story shouldBe given
     }
 
     "arriving again gives nothing, because the first question has not been answered" {
@@ -73,7 +75,7 @@ class ArrivalSpec : StringSpec({
 
     "a player who has already founded is asked nothing" {
         val (world, arrival) = rig()
-        val choice = arrival.arrive(adam)!!
+        val choice = arrival.arrive(adam)!!.choice
         world.execute(
             villages.domain.TakeAction(
                 houseId = HouseId.of(adam),
@@ -95,7 +97,7 @@ class ArrivalSpec : StringSpec({
 
     "taking an option founds the house where that option promised" {
         val (world, arrival) = rig()
-        val choice = arrival.arrive(adam)!!
+        val choice = arrival.arrive(adam)!!.choice
         val taking = choice.options[2]
         val service = TakeActionService(world, clock = { noon }, world = { day })
 

@@ -56,7 +56,7 @@ class StructuresConfig {
     /** Founding raises the house's castle and names it the seat. */
     @Bean(initMethod = "start", destroyMethod = "close")
     fun seats(world: EventWorld, later: ScheduledLater, faults: Faults, structures: StructureCommandExecutor, clock: Clock): Seats =
-        Seats(world.feed, later, faults, world.gate, structures, world.executor, { clock.instant() })
+        Seats(world.storeFeed, later, faults, world.gate, structures, world.executor, { clock.instant() })
 
     /** What each structure gives its holder, written into the holder's history: what it lets them see, and what it pays. */
     @Bean(initMethod = "start", destroyMethod = "close")
@@ -69,7 +69,7 @@ class StructuresConfig {
         clock: Clock,
         worldClock: WorldClock,
     ): StandingEffects =
-        StandingEffects(world.feed, later, faults, world.gate, catalogue, visions, IncomeService(world.executor, { clock.instant() }, worldClock))
+        StandingEffects(world.storeFeed, later, faults, world.gate, catalogue, visions, IncomeService(world.executor, { clock.instant() }, worldClock))
 
     @Bean
     fun antarctica(structures: StructureCommandExecutor, catalogue: StructureCatalogue, clock: Clock, worldClock: WorldClock): Antarctica =

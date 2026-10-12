@@ -132,6 +132,24 @@ class GatewayChoicesSpec : StringSpec({
         events.map { it.streamVersion } shouldBe listOf(2L, 3L)
     }
 
+    "and that story is the choice's, even when the read model has not folded the choice yet" {
+        val rig = Rig()
+        val (player, _) = rig.introduced()
+        val (watching, watcher) = rig.someoneElse()
+        watching.receive("""{"type":"watchEvents","on":true}""")
+        val choice = rig.pending()!!
+        // The watcher is a player too, given a choice of its own: this one is on the first player's house.
+        val given = watcher.filterIsInstance<EventFrame>()
+            .single { it.eventType == "villages.player.givenChoice.v1" && it.stream == HouseId.of(PlayerId(UUID.fromString(TOKEN))).stream }
+        watcher.clear()
+        // A read model a hop behind, as it is when the broker carries the world (0094): it has not got the choice.
+        rig.choices.reset()
+
+        player.receive(takingAction(choice.id.value.toString(), choice.options[0].id.value.toString()))
+
+        watcher.filterIsInstance<EventFrame>().map { it.correlationId }.distinct() shouldBe listOf(given.correlationId)
+    }
+
     "taking an option that was not offered is refused, and says which rule refused it" {
         val rig = Rig()
         val (player, sent) = rig.introduced()

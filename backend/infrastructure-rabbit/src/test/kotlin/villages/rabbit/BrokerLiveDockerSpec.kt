@@ -27,7 +27,12 @@ import villages.domain.PlayerId
 import villages.domain.Tincture
 import villages.domain.WorldTime
 import villages.occurrent.MongoWorld
+import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
 import java.time.Instant
+import java.util.Base64
 import java.util.Collections
 import java.util.UUID
 import java.util.concurrent.CopyOnWriteArrayList
@@ -70,6 +75,16 @@ class BrokerLiveDockerSpec : StringSpec({
         val broker = Broker("amqp://villages:villages@${rabbit.host}:${rabbit.amqpPort}", rabbit.httpUrl, tree)
         val world = MongoWorld(mongo.connectionString, tree, faults)
         return Carried(world, CarriedWorld(world, broker, RoutingKeys { "1203" }), faults, broker)
+    }
+
+    /** The names of the queues in a virtual host, as the management page lists them. */
+    fun queuesIn(tree: String): List<String> {
+        val asked = HttpRequest.newBuilder(URI("${rabbit.httpUrl}/api/queues/$tree?columns=name"))
+            .header("Authorization", "Basic " + Base64.getEncoder().encodeToString("villages:villages".toByteArray()))
+            .build()
+        val answer = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).build()
+            .send(asked, HttpResponse.BodyHandlers.ofString()).body()
+        return Regex(""""name":"([^"]+)"""").findAll(answer).map { it.groupValues[1] }.toList()
     }
 
     fun found(world: MongoWorld): HouseId = HouseId(UUID.randomUUID()).also { house ->
@@ -125,6 +140,22 @@ class BrokerLiveDockerSpec : StringSpec({
                     folded.shouldBeEmpty()
                     Thread.sleep(1_000)
                     folded.shouldBeEmpty()
+                }
+            }
+        }
+
+    "a world carried by RabbitMQ: the read models follow it by a queue named after each, the reactions the store (needs Docker)"
+        .config(enabledOrReasonIf = needsDocker) {
+            carried("villages-broker-who").use { tree ->
+                val handed = CopyOnWriteArrayList<String>()
+                tree.carried.feed.subscribe(Start.FROM_NOW, NamedSubscriber("HousesProjection") { handed += it.stream }).use {
+                    tree.carried.storeFeed.subscribe(Start.FROM_NOW, NamedSubscriber("Seats") {}).use {
+                        val house = found(tree.world)
+                        waitFor("the founding handed through the broker") { handed.isNotEmpty() }
+
+                        handed shouldBe listOf(house.stream)
+                        queuesIn("villages-broker-who").map { it.substringBefore('.') } shouldBe listOf("HousesProjection")
+                    }
                 }
             }
         }

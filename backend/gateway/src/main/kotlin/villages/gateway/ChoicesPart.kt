@@ -20,6 +20,7 @@ import villages.protocol.RollPayload
 import villages.protocol.TakeActionPayload
 import villages.protocol.YourChoice
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * What a player is asked: the choice pending on their house, which reaches them wherever they are looking, like
@@ -39,12 +40,13 @@ internal class ChoicesPart(
     }
 
     /**
-     * Which choice a connection has been told of, and whether it has been told anything at all; and the world its
-     * page draws, from hello, whose ground a roll reads where it is looking.
+     * Which choice a connection has been told of, and whether it has been told anything at all; the story each choice
+     * it was handed began; and the world its page draws, from hello, whose ground a roll reads where it is looking.
      */
     private class Told {
         var choice: String? = null
         var ever = false
+        val stories = ConcurrentHashMap<ChoiceId, UUID>()
 
         @Volatile
         var master: String? = null
@@ -66,7 +68,8 @@ internal class ChoicesPart(
             connection.out.send(ErrorFrame("arrival", wrong.message ?: "could not be given a choice"))
             null
         }
-        tell(connection, given?.toView() ?: choices.pendingOf(who)?.let { it.choice.toView(it.omens) })
+        given?.let { connection.keptBy(this) { Told() }.stories[it.choice.id] = it.story }
+        tell(connection, given?.choice?.toView() ?: choices.pendingOf(who)?.let { it.choice.toView(it.omens) })
     }
 
     override fun register(commands: Commands, frames: Frames) {
@@ -75,17 +78,25 @@ internal class ChoicesPart(
         commands.on<RollPayload> { asking, payload ->
             val master = core.sessionOf(asking.who)?.keptBy(this) { Told() }?.master
             val rolled = rolls.roll(asking.who, payload.toLooking().copy(master = master), asking.startingAStory)
-            core.sessionOf(asking.who)?.let { tell(it, rolled.hand.toView(rolled.omens)) }
+            core.sessionOf(asking.who)?.let {
+                it.keptBy(this) { Told() }.stories[rolled.hand.id] = asking.startingAStory.correlationId
+                tell(it, rolled.hand.toView(rolled.omens))
+            }
         }
         commands.on<TakeActionPayload> { asking, payload ->
+            val choice = ChoiceId(asUuid(payload.choiceId, "a choice id"))
+            // An action continues the story the choice began, so the action and what it does wear the same
+            // correlation as the question. The server decides this, not the client: nothing about correlation
+            // crosses the wire. The story the window was handed with the choice comes first, and the read model
+            // only after, because it is a moment behind and further when the broker carries the world (0035, 0094).
+            val story = core.sessionOf(asking.who)?.keptBy(this) { Told() }?.stories?.get(choice)
+                ?: pendingStory(asking.who)
+                ?: asking.commandId
             takeAction.take(
                 player = asking.who,
-                choiceId = ChoiceId(asUuid(payload.choiceId, "a choice id")),
+                choiceId = choice,
                 optionId = OptionId(asUuid(payload.optionId, "an option id")),
-                // An action continues the story the choice began, so the action and what it does wear the same
-                // correlation as the question. The server decides this, not the client: nothing about
-                // correlation crosses the wire. See decision record 0035.
-                provenance = Provenance(asking.commandId, pendingStory(asking.who) ?: asking.commandId),
+                provenance = Provenance(asking.commandId, story),
             )
         }
     }

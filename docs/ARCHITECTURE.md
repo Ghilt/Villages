@@ -114,7 +114,7 @@ violation when the rule was introduced.
 | `application` | Use cases and the ports they need: command execution, read model queries, the clock, player tokens |
 | `protocol` | The client and server message types, shared with the frontend through checked-in JSON fixtures, and the version of the wire, whose shape is recorded in `contracts/protocol-v<n>.txt` (0037) |
 | `infrastructure-occurrent` | CloudEvent conversion and type mapping, the MongoDB event store, the application service, durable subscriptions |
-| `infrastructure-rabbit` | Broker topology, the bridge that publishes stored events, and the feed the gateway consumes |
+| `infrastructure-rabbit` | The tree's virtual host and the exchange, the bridge that publishes stored events, the routing key, and the broker feed the read models follow (0094) |
 | `projections` | Read models. The first is houses by cell, which the map is drawn from; the sight is what every house can see, which the fog of war is drawn from |
 | `gateway` | Player connections, cell subscriptions, snapshots, coalesced deltas, command intake through one registry, `Commands`, and Adam's instruments as a part of their own, `Instruments`, which `villages.instruments` closes (0076) |
 | `app` | The Spring Boot bootstrap and the wiring. The only module that knows every other one |
@@ -159,8 +159,11 @@ debug panel prints.
 With `villages.broker=rabbit`, which needs MongoDB and which the quick start passes with it, the world is a
 `CarriedWorld`: **the bridge** follows the store durably and publishes every event it stores to RabbitMQ's
 `villages.events`, in a virtual host of the tree's own that the server makes as it starts (decision record
-0094). Nothing follows the broker yet: the gateway consumes the feed in-process and fans events out to every
-connection that asked to watch, which the broker takes over as `docs/plans/broker.md` goes on.
+0094). The read models, the recent events and the event page then follow **the broker feed**: the same feed,
+its live half taken from RabbitMQ, each follower through an exclusive queue named after it. The reactions follow
+the store itself, `storeFeed`, so the world goes on acting while the broker is away and only the view of it
+falls behind until the followers have made their queues again and read the history. Without the broker every
+follower follows the store, in-process, as before.
 The whole path is proven by `AppBootsTest`: a real socket, hello, a founded house, the event back; the
 store itself by `MongoWorldDockerSpec`, against a MongoDB of its own in a container.
 
@@ -220,27 +223,33 @@ flowchart LR
   G -->|use case| A[Application]
   A -->|decide| D[Domain]
   A -->|append with expected version| ES[(Event store)]
-  ES -->|subscription| BR[Event bridge]
-  ES -->|subscription| PR[Projection]
-  BR -->|publish| X{{Exchange: routing key per cell}}
-  PR --> RM[(Read model)]
-  X -->|feed| G
-  RM -->|snapshot on subscribe| G
+  ES -->|durable subscription| BR[Bridge]
+  ES -->|subscription| RE[Reactions]
+  RE -->|commands| A
+  BR -->|publish, confirmed| X{{villages.events: routing key per cell}}
+  X -->|a queue per follower| PR[Projection]
+  ES -.->|history, on start and after a gap| PR
+  PR --> RM[Read model]
+  RM -->|snapshot on subscribe, and changes| G
   G -->|batched deltas| P
 ```
 
 A player arrives and is asked something. Saying hello with no house and nothing pending writes
 `PlayerGivenChoice` to their house's stream, and the gateway answers with what it gave rather than with a
 read of the projection, because the projection folds on another thread and would sometimes say
-"nothing" about a choice just written. Taking one option writes the action and what it does from one
+"nothing" about a choice just written. It keeps the story that choice began for the window too, so that the
+action answering it continues that story without asking the projection either, which is a further hop behind
+when the broker carries the world (0094). Taking one option writes the action and what it does from one
 decision, at consecutive versions and under one correlation id, and the map's read model draws the
 founding out of that. See decision records 0034 and 0035.
 
 A player founds a house. The gateway hands the command to the application, which loads the stream, calls `decide`,
-and appends the resulting events with the stream version as the write condition. Two subscriptions read the store from
-there: one updates the read model, one publishes to the broker with a routing key that carries the cell. Every gateway
-node consumes that feed, matches each event against the cells its sessions are watching, and pushes a coalesced batch.
-A newly subscribed client is served a snapshot from the read model first, and drops any delta it has already seen.
+and appends the resulting events with the stream version as the write condition. The bridge follows the store from
+there and publishes each event to the broker with a routing key that carries the cell, and the read models follow
+the broker, each through a queue of its own, while the reactions follow the store itself (decision record 0094).
+The gateway watches the read models, matches each change against the cells its sessions are watching, and pushes a
+coalesced batch. A newly subscribed client is served a snapshot from the read model first, and drops any delta it
+has already seen.
 
 There is no outbox table and no dual write. The append to the stream is the only write there is, and the
 event is the change rather than a notification about one, so the store *is* the outbox and the subscription
@@ -257,11 +266,13 @@ cell it held. What a session holds - its cells, the day it is looking at - is it
 player's, which today is which house is theirs, is sent to whichever window they are in. See decision
 record 0028.
 
-Today there is no broker. The read model's own change stream stands in for the exchange: the gateway watches
-the projections for changes and queries them for snapshots, through `StructuresByCell` and `CharactersByCell`;
-no house rides a cell, because a house is not drawn on the map, and a player's own house is sent to their session
-by itself (decision 0093). When RabbitMQ arrives the exchange takes over the fan-out between processes, and the
-gateway's side does not change - it still holds an index from cell to sessions and, for each changed structure or
+The broker carries events to the read models, and the read models' watchers carry their changes to the gateway:
+the gateway watches the projections for changes and queries them for snapshots, through `StructuresByCell` and
+`CharactersByCell`; no house rides a cell, because a house is not drawn on the map, and a player's own house is
+sent to their session by itself (decision 0093). Every follower is bound to everything, because each server keeps
+every read model; when a gateway keeps none of its own, it binds only the cells its sessions hold, which the
+routing key already carries, and the gateway's side does not change - it still holds an index from cell to
+sessions and, for each changed structure or
 person, walks its deepest cell up through all of its prefixes, sending to the holders at the zooms its significance is worth drawing at and to
 anyone who is seeing everything at the rest. A cell is a quadkey at any zoom, so a client asks for data on
 the same grid, at the same zoom, as the terrain tiles it draws; see decision record 0026.
@@ -437,7 +448,9 @@ did, and sets things right from its whole fold there instead.
    mirrored in the browser and held to shared vectors. An event carries where it happened and how much it matters,
    never a cell; how far out a thing is drawn comes from its significance. See decision record 0026.
 4. Gateway nodes are stateless apart from their live connections: one broker consumer per node, an in-memory index
-   from cell to sessions, and no stickiness required from a load balancer.
+   from cell to sessions, and no stickiness required from a load balancer. Not yet: today the one server keeps every
+   read model, so each follows the broker through a queue of its own bound to everything; one consumer a node, bound
+   to its sessions' cells, comes with a gateway that keeps no read models (decision record 0094).
 5. Pushes are coalesced per session on a short timer, and outbound queues are bounded. A client that cannot keep up is
    told to resynchronise rather than being allowed to grow a queue. Every frame to a connection leaves through one
    queue, its `Outbox`, one at a time: a snapshot, a tile of stands or a `your…` frame still waiting is replaced

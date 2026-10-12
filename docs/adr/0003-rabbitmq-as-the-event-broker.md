@@ -2,6 +2,13 @@
 
 - Status: accepted
 - Date: 2026-09-01
+- Amended 2026-10-12, as the broker was built (decision record 0094): **one queue per follower, bound to
+  everything, until a gateway keeps no read models of its own.** The one server keeps every read model, so each
+  follows the broker through an exclusive queue named after it rather than one queue a node; the cell is in the
+  routing key already, `<aggregate>.<verb>.v<n>` and its quadkey a digit a word, so a node that binds by cell later
+  changes a binding and not the bridge. The durable subscription is Occurrent's, its place kept in MongoDB, and
+  the bridge publishes by hand, because Occurrent 0.33 has no broker module. The reactions follow the store, not
+  the broker.
 
 ## Context
 

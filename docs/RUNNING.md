@@ -607,11 +607,16 @@ and `-- --drop` takes them off; by hand only, as `drop-gone-worlds` is.
   keep to a virtual host named as its database is, which the server makes as it starts and the page's menu at
   the top right picks between. In it, **the bridge** publishes every event the world stores to the exchange
   `villages.events`, under a routing key of its type and the cell where it happened (`EVENTS.md`), over a
-  connection named *villages: the bridge*; the exchange's page shows the rate as houses are founded. Nothing
-  follows it yet, so a message no queue is bound for goes nowhere: a queue bound by hand to `#` on the
-  exchange's page fills with every event from then on, and fills again with what was written while the server
-  was down once it is back, because the bridge keeps its place in the tree's database, in `checkpoints`.
-  Delete such a queue when done. See decision record 0094.
+  connection named *villages: the bridge*; the exchange's page shows the rate as houses are founded. The read
+  models, the recent events and the event page follow it: the Queues page lists one queue for each, named after
+  it with a suffix, `HousesProjection.3f2a9c1b`, each over a connection of its own, *villages: HousesProjection*,
+  and gone when the server stops. The reactions - the castle raised at a founding, the income and sight of what
+  a house holds - follow the store and have none. Closing a follower's connection on the Connections page puts
+  `error fault` in the debug panel; the follower makes its connection and queue again and reads the history, so
+  nothing on the map goes missing. A queue bound by hand to `#` on the exchange's page fills with every event
+  from then on, and fills again with what was written while the server was down once it is back, because the
+  bridge keeps its place in the tree's database, in `checkpoints`. Delete such a queue when done. See decision
+  record 0094.
 - `docker compose -f infra/docker-compose.yml ps` says whether both are up and healthy; Docker Desktop's
   Containers page says the same under `villages`. `down` stops them and keeps what they hold, and `down -v`
   forgets it, for every tree at once, so both are Adam's and no session runs them; a session resets only

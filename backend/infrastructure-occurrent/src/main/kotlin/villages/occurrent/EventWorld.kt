@@ -23,7 +23,15 @@ import villages.domain.StructureCatalogue
 interface EventWorld : WorldKept, AutoCloseable {
     val executor: HouseCommandExecutor
     val characterExecutor: CharacterCommandExecutor
+
+    /** What the read models and the gateway follow: the store's own, or the broker's when it carries the world. */
     val feed: EventFeed
+
+    /**
+     * What the world's own reactions follow: always the store's, so the world acts on its own even while the broker
+     * is away, and only the view of it falls behind (decision record 0094).
+     */
+    val storeFeed: EventFeed get() = feed
 
     /** Structures' streams in this store, decided by the catalogue the server started with, which a world has not. */
     fun structureExecutor(catalogue: StructureCatalogue): StructureCommandExecutor
