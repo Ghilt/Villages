@@ -7,7 +7,7 @@ import type { StructuresByCell } from './structures';
 /**
  * What the map should be drawing, as the gateway has told us cell by cell: the people standing in the held cells
  * and the structures in them. No houses: a house is not drawn on the map, its structures are, its seat among them,
- * and the player's own house arrives on its own. The slice keeps its old name, `houses`, until it is renamed.
+ * and the player's own house arrives on its own.
  *
  * Kept per held cell rather than as one bag, because that is how it arrives and how it goes: a snapshot is the
  * whole of one cell, a delta lands in every held cell that contains what it is about, and letting a cell go takes
@@ -17,7 +17,7 @@ import type { StructuresByCell } from './structures';
  * last saw and that may be older than the one held (`structures.ts`). Both are held and let go together, so there is
  * one set of cells and never two to keep in step.
  */
-export interface HousesState {
+export interface OnTheMapState {
   /** Each held cell and the characters standing in it, by character id. A cell is held from the moment it is asked for. */
   readonly charactersByCell: ReadonlyMap<string, ReadonlyMap<string, CharacterOnMapView>>;
   /** How many more characters each cell held than its snapshot carried. */
@@ -28,7 +28,7 @@ export interface HousesState {
   readonly omittedStructures: ReadonlyMap<string, number>;
 }
 
-export const NO_HOUSES: HousesState = {
+export const NOTHING_ON_THE_MAP: OnTheMapState = {
   charactersByCell: new Map(),
   omittedCharacters: new Map(),
   structuresByCell: new Map(),
@@ -36,7 +36,7 @@ export const NO_HOUSES: HousesState = {
 };
 
 /** Starts holding cells, empty until their snapshots come, so a delta arriving first has somewhere to land. */
-export function holdCells(state: HousesState, cells: readonly string[]): HousesState {
+export function holdCells(state: OnTheMapState, cells: readonly string[]): OnTheMapState {
   const charactersByCell = new Map(state.charactersByCell);
   const structuresByCell = new Map(state.structuresByCell);
   for (const cell of cells) {
@@ -51,7 +51,7 @@ export function holdCells(state: HousesState, cells: readonly string[]): HousesS
 }
 
 /** Lets cells go, and everything drawn only because of them goes too. */
-export function forgetCells(state: HousesState, cells: readonly string[]): HousesState {
+export function forgetCells(state: OnTheMapState, cells: readonly string[]): OnTheMapState {
   const charactersByCell = new Map(state.charactersByCell);
   const omittedCharacters = new Map(state.omittedCharacters);
   const structuresByCell = new Map(state.structuresByCell);
@@ -94,7 +94,7 @@ function replaced<T extends { id: string; version: number }>(
  * before is a higher version of someone the snapshot does list, from a delta that overtook it; its structures are
  * replaced by their stamps.
  */
-export function reduceHouses(state: HousesState, frame: ServerFrame): HousesState {
+export function reduceOnTheMap(state: OnTheMapState, frame: ServerFrame): OnTheMapState {
   switch (frame.type) {
     case 'snapshot': {
       if (!state.charactersByCell.has(frame.cell)) {
@@ -158,7 +158,7 @@ export function reduceHouses(state: HousesState, frame: ServerFrame): HousesStat
 }
 
 /** A structure raised or changed lands in every held cell that contains it, by its stamp. See `structures.ts`. */
-function raiseStructure(state: HousesState, structure: StructureView): HousesState {
+function raiseStructure(state: OnTheMapState, structure: StructureView): OnTheMapState {
   const structuresByCell = landStructure(state.structuresByCell, structure);
   return structuresByCell === null ? state : { ...state, structuresByCell };
 }
@@ -167,7 +167,7 @@ function raiseStructure(state: HousesState, structure: StructureView): HousesSta
  * A character stands in every held cell their place is in, and in no other: one who moved is taken out
  * of the held cells they left.
  */
-function standCharacter(state: HousesState, character: CharacterOnMapView): HousesState {
+function standCharacter(state: OnTheMapState, character: CharacterOnMapView): OnTheMapState {
   let charactersByCell: Map<string, ReadonlyMap<string, CharacterOnMapView>> | null = null;
   for (const [cell, held] of state.charactersByCell) {
     const known = held.get(character.id);
@@ -191,7 +191,7 @@ function standCharacter(state: HousesState, character: CharacterOnMapView): Hous
 }
 
 /** A character gone from everything this connection holds is taken out of every held cell. */
-function dropCharacter(state: HousesState, id: string, version: number): HousesState {
+function dropCharacter(state: OnTheMapState, id: string, version: number): OnTheMapState {
   let charactersByCell: Map<string, ReadonlyMap<string, CharacterOnMapView>> | null = null;
   for (const [cell, held] of state.charactersByCell) {
     const known = held.get(id);
@@ -207,7 +207,7 @@ function dropCharacter(state: HousesState, id: string, version: number): HousesS
 }
 
 /** The cells being held, in the order they were asked for. */
-export function cellsHeld(state: HousesState): string[] {
+export function cellsHeld(state: OnTheMapState): string[] {
   return [...state.charactersByCell.keys()];
 }
 
@@ -226,11 +226,11 @@ function unionOf<T extends { id: string; version: number }>(cells: Iterable<Read
 }
 
 /** Every character standing in the held cells, once each at their highest version, in a stable order. */
-export function charactersInView(state: HousesState): CharacterOnMapView[] {
+export function charactersInView(state: OnTheMapState): CharacterOnMapView[] {
   return unionOf(state.charactersByCell.values());
 }
 
 /** Every structure standing in the held cells, once each at its latest face, in a stable order. */
-export function structuresInView(state: HousesState): StructureView[] {
+export function structuresInView(state: OnTheMapState): StructureView[] {
   return structuresOf(state.structuresByCell);
 }

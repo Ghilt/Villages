@@ -2,7 +2,7 @@ import { isInside } from '@villages/protocol';
 import type { StructureView } from '@villages/protocol';
 
 /**
- * The structures standing in the held cells, kept beside the houses and the characters in `houses.ts` and held and
+ * The structures standing in the held cells, kept beside the characters in `onTheMap.ts` and held and
  * let go with them, so there is still one set of cells.
  *
  * **A copy is replaced by its stamp, not kept by its version.** A house's snapshot keeps a held copy at a higher

@@ -14,7 +14,7 @@ const NOBODYS = 0x8a7a64;
 
 /**
  * A character as the renderer draws them: a figure at their place, in the colours of the house they serve,
- * which is the first that took them in. Their own id space, so a person and a house can never be one mark.
+ * which is the first that took them in. Their own id space, so a person and a structure can never be one mark.
  */
 export function toCharacterSprite(character: CharacterOnMapView): MapSprite {
   const serves = character.keyFigureOf[0];

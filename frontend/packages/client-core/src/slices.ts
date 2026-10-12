@@ -10,8 +10,8 @@ import type {
   YourHouseView,
 } from '@villages/protocol';
 
-import { NO_HOUSES, reduceHouses } from './houses';
-import type { HousesState } from './houses';
+import { NOTHING_ON_THE_MAP, reduceOnTheMap } from './onTheMap';
+import type { OnTheMapState } from './onTheMap';
 
 /** What the page knows of the world and of its own house, as the gateway has told it. */
 export interface SessionState {
@@ -61,7 +61,8 @@ export interface SessionState {
   stepping: { commandId: string; dialogueId: string; lineId: string } | null;
   /** The id of the player's command in flight, so the panes stop taking a second answer. */
   acting: string | null;
-  houses: HousesState;
+  /** What the map should draw, cell by cell: the people and the structures standing in the held cells. */
+  onTheMap: OnTheMapState;
   /** Where the world's clock stands, as welcome said, or null until it has. */
   world: { today: number; earliest: number } | null;
   playerToken: string;
@@ -123,14 +124,14 @@ const SLICES = {
 
   /** The cells followed and what is in them, which the map draws. Gone with any end: nobody is updating them. */
   cells: {
-    initial: { houses: NO_HOUSES },
+    initial: { onTheMap: NOTHING_ON_THE_MAP },
     onFrame: {
-      snapshot: (state, frame) => ({ houses: reduceHouses(state.houses, frame) }),
-      batch: (state, frame) => ({ houses: reduceHouses(state.houses, frame) }),
-      resync: (state, frame) => ({ houses: reduceHouses(state.houses, frame) }),
+      snapshot: (state, frame) => ({ onTheMap: reduceOnTheMap(state.onTheMap, frame) }),
+      batch: (state, frame) => ({ onTheMap: reduceOnTheMap(state.onTheMap, frame) }),
+      resync: (state, frame) => ({ onTheMap: reduceOnTheMap(state.onTheMap, frame) }),
     },
-    onReset: () => ({ houses: NO_HOUSES }),
-  } satisfies Slice<'houses'>,
+    onReset: () => ({ onTheMap: NOTHING_ON_THE_MAP }),
+  } satisfies Slice<'onTheMap'>,
 
   house: {
     initial: { yourHouse: null },

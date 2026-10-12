@@ -4,8 +4,8 @@ import type { ClientFrame } from '@villages/protocol';
 
 import { HOLD_MS, follower } from './follower';
 import type { Follower } from './follower';
-import { NO_HOUSES, cellsHeld } from './houses';
-import type { HousesState } from './houses';
+import { NOTHING_ON_THE_MAP, cellsHeld } from './onTheMap';
+import type { OnTheMapState } from './onTheMap';
 
 /** The most cells the gateway lets one connection hold, past which it refuses a subscription whole. */
 const MOST_CELLS = 64;
@@ -15,7 +15,7 @@ const MOST_CELLS = 64;
  * it past sixty-four, and answers each cell it takes, later, when the test delivers the answers.
  */
 function rig() {
-  let houses: HousesState = NO_HOUSES;
+  let onTheMap: OnTheMapState = NOTHING_ON_THE_MAP;
   const gatewayHolds = new Set<string>();
   const answers: string[] = [];
   let refusals = 0;
@@ -42,8 +42,8 @@ function rig() {
       }
     },
     canSend: () => open,
-    houses: () => houses,
-    setHouses: (next) => (houses = next),
+    onTheMap: () => onTheMap,
+    setOnTheMap: (next) => (onTheMap = next),
     followStands: () => undefined,
     note: (area, message) => said.push(`${area}: ${message}`),
     schedule: {
@@ -60,7 +60,7 @@ function rig() {
     said,
     gatewayHolds,
     refusals: () => refusals,
-    drawn: () => cellsHeld(houses).sort(),
+    drawn: () => cellsHeld(onTheMap).sort(),
     welcome: () => {
       open = true;
       following.welcomed();

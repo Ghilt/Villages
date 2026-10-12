@@ -19,15 +19,15 @@ export type { ConnectOptions, Looking, Session, SessionListener, SessionPorts } 
 export type { Connection, ConnectionOptions, ConnectionState, SocketLike } from './connection';
 
 export {
-  NO_HOUSES,
+  NOTHING_ON_THE_MAP,
   cellsHeld,
   charactersInView,
   forgetCells,
   holdCells,
-  reduceHouses,
+  reduceOnTheMap,
   structuresInView,
-} from './houses';
-export type { HousesState } from './houses';
+} from './onTheMap';
+export type { OnTheMapState } from './onTheMap';
 
 export { TICK_MS, freeNow, stockNow } from './stocks';
 

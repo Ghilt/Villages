@@ -10,9 +10,9 @@ import { createPixiSpriteRenderer } from './PixiSpriteRenderer';
 import type { MapSprite } from './SpriteRenderer';
 import { useStore } from '../store/useStore';
 
-/** How a person's mark is told from a house's: its id is theirs with this in front. See App.tsx. */
+/** How a person's mark is told from a structure's: its id is theirs with this in front. See App.tsx. */
 const CHARACTER = 'character:';
-/** The id space structures are drawn under, apart from houses and people. See `mapSprites.ts`. */
+/** The id space structures are drawn under, apart from people. See `mapSprites.ts`. */
 const STRUCTURE = 'structure:';
 
 interface SpriteOverlayProps {
@@ -26,8 +26,8 @@ interface SpriteOverlayProps {
    */
   picked:
     { kind: 'house' | 'area' | 'character' | 'structure' | 'river' | 'lake' | 'sea'; id: string } | undefined;
-  /** A house, a person or a structure clicked on the map, which opens a window on it. */
-  onPick: (thing: { kind: 'house' | 'character' | 'structure'; id: string }) => void;
+  /** A person or a structure clicked on the map, which opens a window on it. */
+  onPick: (thing: { kind: 'character' | 'structure'; id: string }) => void;
 }
 
 /**
@@ -80,15 +80,13 @@ export function SpriteOverlay({ map, sprites, worldRoot, picked: top, onPick }: 
   );
   const how = useMemo(() => ({ ...scenery, tilesRoot: worldRoot }), [scenery, worldRoot]);
   // The ring follows whatever was opened last. With three windows up the map can still only mark one, and
-  // the newest is the one the player is looking at.
+  // the newest is the one the player is looking at. A house is marked by its seat, which the app hands in.
   const selected =
-    top?.kind === 'house'
-      ? top.id
-      : top?.kind === 'character'
-        ? `${CHARACTER}${top.id}`
-        : top?.kind === 'structure'
-          ? `${STRUCTURE}${top.id}`
-          : null;
+    top?.kind === 'character'
+      ? `${CHARACTER}${top.id}`
+      : top?.kind === 'structure'
+        ? `${STRUCTURE}${top.id}`
+        : null;
   const scene = useMemo(
     () => ({ sprites, selected, everything, fog, scenery: how }),
     [sprites, selected, everything, fog, how],
@@ -100,7 +98,7 @@ export function SpriteOverlay({ map, sprites, worldRoot, picked: top, onPick }: 
   }, [renderer, scene]);
 
   /**
-   * Picking a house or a person, which opens an **inspect window** on them.
+   * Picking a structure or a person, which opens an **inspect window** on them.
    *
    * The canvas takes no pointer events, so the map hands the click over and the renderer says what it drew
    * there. A hit is marked handled, which is how the area overlay knows to leave the click alone: two
@@ -114,15 +112,17 @@ export function SpriteOverlay({ map, sprites, worldRoot, picked: top, onPick }: 
   useEffect(() => {
     const onClick = (event: maplibregl.MapMouseEvent) => {
       const hit = renderer?.hitTest(event.point) ?? null;
-      if (hit !== null) {
-        event.preventDefault();
-        pick.current(
-          hit.startsWith(CHARACTER)
-            ? { kind: 'character', id: hit.slice(CHARACTER.length) }
+      const thing =
+        hit === null
+          ? null
+          : hit.startsWith(CHARACTER)
+            ? { kind: 'character' as const, id: hit.slice(CHARACTER.length) }
             : hit.startsWith(STRUCTURE)
-              ? { kind: 'structure', id: hit.slice(STRUCTURE.length) }
-              : { kind: 'house', id: hit },
-        );
+              ? { kind: 'structure' as const, id: hit.slice(STRUCTURE.length) }
+              : null;
+      if (thing !== null) {
+        event.preventDefault();
+        pick.current(thing);
       }
     };
 

@@ -11,8 +11,6 @@ const picture = (width: number, height: number) => ({ width, height }) as Textur
 
 const MILL = picture(120, 160);
 const TEXTURES = {
-  castle: picture(150, 132),
-  mark: picture(48, 64),
   candidate: picture(44, 64),
   figure: picture(80, 160),
   bust: picture(60, 64),
@@ -33,14 +31,15 @@ const structure = (groundHeight?: number): MapSprite => ({
 });
 
 describe("a structure's look", () => {
-  it('stands as tall as it was told, and crosses over where a house does, whatever its height', () => {
-    const house = lookOf({ ...structure(), id: 'h', kind: 'house' }, TEXTURES);
+  it('stands as tall as it was told, and crosses over where a castle of four units does, whatever its height', () => {
+    const castle = lookOf(structure(4), TEXTURES);
     const mill = lookOf(structure(2.4), TEXTURES);
     const higher = lookOf(structure(3), TEXTURES);
 
     expect(mill.forms.groundHeight).toBe(2.4);
-    expect(crossoverZoom(mill.forms)).toBeCloseTo(crossoverZoom(house.forms)!, 6);
-    expect(crossoverZoom(higher.forms)).toBeCloseTo(crossoverZoom(house.forms)!, 6);
+    expect(crossoverZoom(castle.forms)).toBeCloseTo(8.46, 2);
+    expect(crossoverZoom(mill.forms)).toBeCloseTo(crossoverZoom(castle.forms)!, 6);
+    expect(crossoverZoom(higher.forms)).toBeCloseTo(crossoverZoom(castle.forms)!, 6);
     expect(higher.forms.iconHeight).toBeGreaterThan(mill.forms.iconHeight!);
   });
 
@@ -57,7 +56,7 @@ describe("a structure's look", () => {
   });
 
   it('flies no pennant on anything that is not a structure', () => {
-    expect(lookOf({ ...structure(), kind: 'house' }, TEXTURES).flag).toBeNull();
+    expect(lookOf({ ...structure(), kind: 'character' }, TEXTURES).flag).toBeNull();
   });
 });
 
@@ -80,7 +79,7 @@ describe('where a pennant flies', () => {
   });
 
   it('nowhere for a look that flies none, or a mark not drawn', () => {
-    expect(pennantOn(lookOf({ ...structure(), kind: 'house' }, TEXTURES), 80, { x: 0, y: 0 })).toBeNull();
+    expect(pennantOn(lookOf({ ...structure(), kind: 'character' }, TEXTURES), 80, { x: 0, y: 0 })).toBeNull();
     expect(pennantOn(look, 0, { x: 0, y: 0 })).toBeNull();
   });
 });

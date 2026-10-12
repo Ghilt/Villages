@@ -46,14 +46,14 @@ export function StructuresSection({ map }: StructuresSectionProps) {
   const openName = useStore(sessionStore, (state) =>
     open === null
       ? null
-      : (structuresInView(state.houses).find((one) => one.id === open.id)?.name ??
+      : (structuresInView(state.onTheMap).find((one) => one.id === open.id)?.name ??
         state.inspected[`structure:${open.id}`]?.structure?.name ??
         open.id.slice(0, 8)),
   );
   const openType = useStore(sessionStore, (state) =>
     open === null
       ? null
-      : (structuresInView(state.houses).find((one) => one.id === open.id)?.structureType ??
+      : (structuresInView(state.onTheMap).find((one) => one.id === open.id)?.structureType ??
         state.inspected[`structure:${open.id}`]?.structure?.structureType ??
         null),
   );

@@ -5,8 +5,8 @@ import type { FogField } from '../fog/fogField';
 import type { LngLat } from '../geometry/cameraMath';
 
 /**
- * What the renderer needs to know about a thing on the map. Deliberately not a house: the renderer draws
- * marks on a map and knows nothing about the game, so a house is turned into one of these on the way in.
+ * What the renderer needs to know about a thing on the map. Deliberately not a structure or a person: the renderer
+ * draws marks on a map and knows nothing about the game, so each is turned into one of these on the way in.
  */
 export interface MapSprite {
   /** Stable across updates, and the seed of the sprite's own place in the idle motion. */
@@ -15,13 +15,13 @@ export interface MapSprite {
   /** The tincture of the field, as a colour, until real banners arrive. */
   tint: number;
   /**
-   * What sort of mark this is. A house is a thing standing in the world and fades out when the camera
-   * is too far back to make it out; a candidate is a place being offered to the player right now, and
-   * is drawn at every zoom because it is the thing they are being asked about. A character is a person
-   * standing somewhere, in the colours of the house they serve. See decision record 0055. A structure is a
-   * building standing in the world, drawn in its own colours with its holder's pennant over it. See 0093.
+   * What sort of mark this is. A structure is a building standing in the world, drawn in its own colours with
+   * its holder's pennant over it, and fades out when the camera is too far back to make it out; see 0093. A
+   * candidate is a place being offered to the player right now, and is drawn at every zoom because it is the
+   * thing they are being asked about. A character is a person standing somewhere, in the colours of the house
+   * they serve; see decision record 0055. A house is not drawn at all: its structures are.
    */
-  kind: 'house' | 'candidate' | 'character' | 'structure';
+  kind: 'candidate' | 'character' | 'structure';
   /**
    * A structure's picture, by its type's name, and its height on the ground in world units, which its level
    * raises. Its tint is white, because a structure is drawn in its own colours. Absent for every other kind.

@@ -44,7 +44,7 @@ interface InspectingProps {
 }
 
 export function Inspecting({ subject, room, along }: InspectingProps) {
-  const houses = useStore(sessionStore, (state) => state.houses);
+  const onTheMap = useStore(sessionStore, (state) => state.onTheMap);
   const yourKeyFigures = useStore(sessionStore, (state) => state.yourKeyFigures);
   const yourHoldings = useStore(sessionStore, (state) => state.yourHoldings);
   const today = useStore(sessionStore, (state) => state.world?.today ?? null);
@@ -85,7 +85,7 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
     // A character is seen standing in a held cell, or as one of this player's own key figures wherever
     // they are; the second is how your own people stay inspectable after the camera has left them.
     if (subject.kind === 'character') {
-      const standing = charactersInView(houses).find((one) => one.id === subject.id);
+      const standing = charactersInView(onTheMap).find((one) => one.id === subject.id);
       const yours = yourKeyFigures?.find((one) => one.id === subject.id);
       const seen = standing ?? yours;
       return seen === undefined
@@ -96,7 +96,7 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
     // A structure is seen standing in a held cell, in the face its house is sent, or as one of this player's own
     // holdings wherever it stands, which is sent again whenever it changes: of the two, the later stamp.
     if (subject.kind === 'structure') {
-      const standing = structuresInView(houses).find((one) => one.id === subject.id);
+      const standing = structuresInView(onTheMap).find((one) => one.id === subject.id);
       const yours = yourHoldings?.find((one) => one.id === subject.id);
       const seen =
         standing === undefined || (yours !== undefined && yours.stamp > standing.stamp) ? yours : standing;
@@ -106,7 +106,7 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
     if (subject.kind === 'area') {
       return area === null
         ? null
-        : { said: describeArea(area, structuresInView(houses), legend), hidden: undefined };
+        : { said: describeArea(area, structuresInView(onTheMap), legend), hidden: undefined };
     }
 
     // Water is what the server said of it when it was clicked, kept for this page's life.

@@ -5,8 +5,8 @@ import { buildStructurePictures, drawPennant } from './structurePictures';
 import type { StructurePictures } from './structurePictures';
 
 /*
- * The pictures every mark is drawn with: the castle and its sign, the pennant, the figure and its sign, and the
- * selection ring, each drawn once in white so that a tint colours it, and rasterised once. The marks layer's. A
+ * The pictures every mark is drawn with: the offered seat's pennant, the figure and its sign, and the selection
+ * ring, each drawn once in white so that a tint colours it, and rasterised once. The marks layer's. A
  * structure's pictures are drawn in their own colours, in `structurePictures.ts`, and its holder's pennant in white.
  */
 
@@ -18,10 +18,6 @@ import type { StructurePictures } from './structurePictures';
  * is scaled against is its own texture's height, in `show`.
  */
 export const TEXTURE = {
-  castleHeight: 160,
-  castleWidth: 150,
-  markHeight: 64,
-  markWidth: 48,
   candidateHeight: 64,
   candidateWidth: 44,
   figureHeight: 160,
@@ -32,8 +28,6 @@ export const TEXTURE = {
 } as const;
 
 export interface Textures {
-  castle: Texture;
-  mark: Texture;
   candidate: Texture;
   figure: Texture;
   bust: Texture;
@@ -56,65 +50,7 @@ export type Rasterise = (shape: Graphics) => Texture;
 
 /** Draws every shape a mark needs, rasterised by the canvas it will be drawn on. */
 export function buildMarkTextures(rasterise: Rasterise): Textures {
-  const { castleWidth: w, castleHeight: h } = TEXTURE;
-
-  // The ground form: a castle, two towers with a battlemented wall between them, drawn in white so
-  // that a tint can colour it per house. One outline, because a tinted sprite with seams shows them.
-  // Everything is a fraction of the texture, so the drawing survives being given a different size.
-  const tower = w * 0.267;
-  const towerTop = h * 0.3;
-  const wallTop = h * 0.56;
-  const crenel = h * 0.094;
-  const gap = w * 0.089;
-  const castle = new Graphics()
-    .moveTo(3, h - 3)
-    .lineTo(3, towerTop)
-    .lineTo(3 + tower / 3, towerTop)
-    .lineTo(3 + tower / 3, towerTop - crenel)
-    .lineTo(3 + (tower * 2) / 3, towerTop - crenel)
-    .lineTo(3 + (tower * 2) / 3, towerTop)
-    .lineTo(3 + tower, towerTop)
-    .lineTo(3 + tower, wallTop)
-    .lineTo(w / 2 - gap, wallTop)
-    .lineTo(w / 2 - gap, wallTop - crenel)
-    .lineTo(w / 2 + gap, wallTop - crenel)
-    .lineTo(w / 2 + gap, wallTop)
-    .lineTo(w - 3 - tower, wallTop)
-    .lineTo(w - 3 - tower, towerTop)
-    .lineTo(w - 3 - (tower * 2) / 3, towerTop)
-    .lineTo(w - 3 - (tower * 2) / 3, towerTop - crenel)
-    .lineTo(w - 3 - tower / 3, towerTop - crenel)
-    .lineTo(w - 3 - tower / 3, towerTop)
-    .lineTo(w - 3, towerTop)
-    .lineTo(w - 3, h - 3)
-    .closePath()
-    .fill(0xffffff)
-    .stroke({ width: 6, color: 0x4a4034, alpha: 0.85 });
-
-  // The icon: the same castle said in three strokes. The detailed one is unreadable at 22 pixels -
-  // its crenellations come to two pixels and its outline eats the fill - so the sign is a keep with
-  // three merlons and nothing else. What it has to do is read as a castle at the size of a word.
-  const { markWidth: mw, markHeight: mh } = TEXTURE;
-  const top = mh * 0.16;
-  const shoulder = mh * 0.34;
-  const mark = new Graphics()
-    .moveTo(4, mh - 3)
-    .lineTo(4, top)
-    .lineTo(mw * 0.3, top)
-    .lineTo(mw * 0.3, shoulder)
-    .lineTo(mw * 0.42, shoulder)
-    .lineTo(mw * 0.42, top)
-    .lineTo(mw * 0.58, top)
-    .lineTo(mw * 0.58, shoulder)
-    .lineTo(mw * 0.7, shoulder)
-    .lineTo(mw * 0.7, top)
-    .lineTo(mw - 4, top)
-    .lineTo(mw - 4, mh - 3)
-    .closePath()
-    .fill(0xffffff)
-    .stroke({ width: 5, color: 0x4a4034, alpha: 0.9 });
-
-  // A pennant on a staff: a place the world is offering, rather than a house that stands there.
+  // A pennant on a staff: a place the world is offering, rather than a thing that stands there.
   const { candidateWidth: cw, candidateHeight: ch } = TEXTURE;
   const candidate = new Graphics()
     .moveTo(4, 2)
@@ -157,7 +93,7 @@ export function buildMarkTextures(rasterise: Rasterise): Textures {
     .fill(0xffffff)
     .stroke({ width: 5, color: 0x4a4034, alpha: 0.9 });
 
-  // What marks the selected house: a ring on the ground under it rather than a change to the mark
+  // What marks the selected structure or person: a ring on the ground under it rather than a change to the mark
   // itself, so that what is selected is still drawn as what it is.
   const r = TEXTURE.ringDiameter;
   const ringOf = new Graphics()
@@ -165,8 +101,6 @@ export function buildMarkTextures(rasterise: Rasterise): Textures {
     .stroke({ width: 6, color: 0xffffff, alpha: 1 });
 
   const built = {
-    castle: rasterise(castle),
-    mark: rasterise(mark),
     candidate: rasterise(candidate),
     figure: rasterise(figure),
     bust: rasterise(bust),
@@ -174,8 +108,6 @@ export function buildMarkTextures(rasterise: Rasterise): Textures {
     structures: buildStructurePictures(rasterise),
     pennant: drawPennant(rasterise),
   };
-  castle.destroy();
-  mark.destroy();
   candidate.destroy();
   figure.destroy();
   bust.destroy();

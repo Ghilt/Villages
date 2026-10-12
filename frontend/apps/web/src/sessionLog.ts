@@ -112,7 +112,7 @@ export const sessionLog: GatewayListener = {
         return;
       case 'batch': {
         // Who was standing where before the batch, so that somebody gone can be named in the line.
-        const known = new Map(charactersInView(was.houses).map((one) => [one.id, one]));
+        const known = new Map(charactersInView(was.onTheMap).map((one) => [one.id, one]));
         note(
           'cells',
           describeBatch(frame.deltas, (id) => {
@@ -186,7 +186,7 @@ export const sessionLog: GatewayListener = {
         // Key figures by their names, and a structure a vision is seen from by its own, where a cell has carried it.
         const named = new Map<string, string>([
           ...(was.yourKeyFigures ?? []).map((one): [string, string] => [one.id, fullName(one)]),
-          ...structuresInView(was.houses).map((one): [string, string] => [one.id, one.name]),
+          ...structuresInView(was.onTheMap).map((one): [string, string] => [one.id, one.name]),
         ]);
         note(
           'sight',

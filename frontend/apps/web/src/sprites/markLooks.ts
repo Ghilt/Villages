@@ -12,29 +12,27 @@ import type { TwoForms } from './twoForms';
  */
 
 /**
- * What each kind of mark looks like, in world units on the ground and in screen pixels as a sign.
- *
- * A house crosses over at zoom 8.46, where both forms are 22 pixels, and by zoom 10 its castle stands
- * 64. The four world units are a map convention and not a measurement: a surveyed castle is about a
- * tenth of a unit here, and would cross over at zoom fourteen, four levels past where the camera stops.
+ * What each kind of mark but a structure looks like, in world units on the ground and in screen pixels as a sign.
  *
  * A candidate has no ground form at all. It is a question the world is asking rather than a thing
  * standing in the world, so it is the same size wherever the camera is.
  *
- * A character is a person, smaller than a house on the ground and as a sign: a figure a unit and a half
+ * A character is a person, smaller than a castle on the ground and as a sign: a figure a unit and a half
  * tall, and a bust of sixteen pixels. They cross over at zoom 9.4, just in from zoom 9 where a key
  * figure's significance first has them drawn, so they arrive as the sign and stand up as the camera comes
  * in; by zoom 10 the figure is 24 pixels beside a castle's 64.
  */
 const KINDS: Record<Exclude<MapSprite['kind'], 'structure'>, TwoForms> = {
-  house: { groundHeight: 4, iconHeight: 22 },
   candidate: { iconHeight: 26 },
   character: { groundHeight: 1.5, iconHeight: 16 },
 };
 
 /**
- * A structure's sign, in screen pixels for each world unit it stands on the ground: a house's ratio, so that every
- * structure crosses over where a house does, at zoom 8.46, and one a level higher is larger in both forms.
+ * A structure's sign, in screen pixels for each world unit it stands on the ground: one ratio for every one, so that
+ * every structure crosses over at zoom 8.46, where a castle of four units is 22 pixels in both forms and by zoom 10
+ * stands 64, and one a level higher is larger in both forms. The four units are a map convention and not a
+ * measurement: a surveyed castle is about a tenth of a unit here, and would cross over at zoom fourteen, four levels
+ * past where the camera stops.
  */
 const SIGN_PER_UNIT = 5.5;
 
@@ -99,15 +97,8 @@ export function lookOf(spec: MapSprite, textures: Textures): Look {
   const person = spec.kind === 'character';
   return {
     forms,
-    ground: forms.groundHeight === undefined ? null : person ? textures.figure : textures.castle,
-    icon:
-      forms.iconHeight === undefined
-        ? null
-        : spec.kind === 'candidate'
-          ? textures.candidate
-          : person
-            ? textures.bust
-            : textures.mark,
+    ground: forms.groundHeight === undefined ? null : textures.figure,
+    icon: forms.iconHeight === undefined ? null : person ? textures.bust : textures.candidate,
     iconAnchor: spec.kind === 'candidate' ? 0 : 0.5,
     flag: null,
   };

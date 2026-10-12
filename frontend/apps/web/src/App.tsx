@@ -96,7 +96,7 @@ export function App({ master, devTools }: AppProps) {
   const [renderer, setRenderer] = useState(DEFAULT_RENDERER);
   // The lattice the ground is painted on, which is Adam's lever rather than a player's. See 0008.
   const camera = useStore(cameraStore);
-  const houses = useStore(sessionStore, (state) => state.houses);
+  const onTheMap = useStore(sessionStore, (state) => state.onTheMap);
   const yourHouse = useStore(sessionStore, (state) => state.yourHouse);
   const holdings = useStore(sessionStore, (state) => state.yourHoldings);
   const yourChoice = useStore(sessionStore, (state) => state.yourChoice);
@@ -109,8 +109,8 @@ export function App({ master, devTools }: AppProps) {
   const window = useWindow();
   const wants = panelWants(shut, log);
   const box = useMemo(() => stageBox(window, mode, wants), [window, mode, wants]);
-  const standing = useMemo(() => charactersInView(houses), [houses]);
-  const raised = useMemo(() => structuresInView(houses), [houses]);
+  const standing = useMemo(() => charactersInView(onTheMap), [onTheMap]);
+  const raised = useMemo(() => structuresInView(onTheMap), [onTheMap]);
   const catalogue = useStructureCatalogue();
   // The culture each structure stands in, read off the culture map of the master drawn, so its picture is drawn in it.
   const cultures = useCultureMap(master);
@@ -291,7 +291,7 @@ export function App({ master, devTools }: AppProps) {
           picked={open[0]}
           onPick={inspect}
         />
-        {/* After the houses' and the areas', so that a click neither took asks what water is there. */}
+        {/* After the marks' and the areas', so that a click neither took asks what water is there. */}
         <WaterClicks map={map} onPick={inspect} />
         <RippleAlongWater map={map} worldRoot={worldRoot} />
         <InfluenceZone map={map} zone={zone} turn={camera.latticeTurn} />

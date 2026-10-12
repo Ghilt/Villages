@@ -55,8 +55,8 @@ export function SlotLevers({
   const connection = useStore(sessionStore, (state) => state.connection);
   const figures = useStore(sessionStore, (state) => state.yourKeyFigures) ?? [];
   // The held cells, and who stands in them worked out here: a selector that made a new list each time would never settle.
-  const houses = useStore(sessionStore, (state) => state.houses);
-  const standing = useMemo(() => charactersInView(houses), [houses]);
+  const onTheMap = useStore(sessionStore, (state) => state.onTheMap);
+  const standing = useMemo(() => charactersInView(onTheMap), [onTheMap]);
   const people = [
     ...figures.map((one) => ({ id: one.id, said: fullName(one) })),
     ...standing

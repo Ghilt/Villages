@@ -27,7 +27,7 @@ function fixture(name: string): Record<string, unknown> {
   return JSON.parse(readFileSync(at, 'utf8')) as Record<string, unknown>;
 }
 
-const empty = (cell: string) => ({ type: 'snapshot', cell, houses: [], asOfVersion: 0 });
+const empty = (cell: string) => ({ type: 'snapshot', cell });
 
 const Z8 = ['12003122', '12003123'];
 const Z9 = ['120031220', '120031221'];
@@ -142,7 +142,7 @@ describe("the page's conversation with the gateway", () => {
     vi.advanceTimersByTime(300);
 
     expect(page.said(before)).toEqual(['cells: 2 cells at z8: 1 structure, 1 more not sent']);
-    expect(page.gateway.sessionStore.get().houses).not.toBe(undefined);
+    expect(page.gateway.sessionStore.get().onTheMap).not.toBe(undefined);
   });
 
   it('on a zoom step, asks for the new cells, and lets the old go only once every new one has answered', async () => {

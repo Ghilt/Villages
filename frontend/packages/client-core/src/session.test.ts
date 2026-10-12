@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { ServerFrame } from '@villages/protocol';
 
-import { NO_HOUSES, cellsHeld, holdCells } from './houses';
+import { NOTHING_ON_THE_MAP, cellsHeld, holdCells } from './onTheMap';
 import { createSession } from './session';
 import { INITIAL_SESSION, endState, foldFrame } from './slices';
 import type { SessionState } from './slices';
@@ -29,7 +29,7 @@ const HOUSE_FRAMES = [
 
 /** A session that has heard the house's every frame, holding a cell. */
 function heardEverything(): SessionState {
-  let state: SessionState = { ...INITIAL_SESSION, houses: holdCells(NO_HOUSES, ['12003122']) };
+  let state: SessionState = { ...INITIAL_SESSION, onTheMap: holdCells(NOTHING_ON_THE_MAP, ['12003122']) };
   for (const frame of [welcome, ...HOUSE_FRAMES]) {
     state = foldFrame(state, frame);
   }
@@ -55,7 +55,7 @@ describe('the session, folded from what each mechanic folds', () => {
     const closed = endState(was, 'closed');
 
     expect(closed.connection).toBe('closed');
-    expect(cellsHeld(closed.houses)).toEqual([]);
+    expect(cellsHeld(closed.onTheMap)).toEqual([]);
     expect([
       closed.yourHouse,
       closed.yourChoice,
@@ -77,7 +77,7 @@ describe('the session, folded from what each mechanic folds', () => {
     const takenOver = endState(heardEverything(), 'takenOver');
 
     expect(takenOver.connection).toBe('takenOver');
-    expect(cellsHeld(takenOver.houses)).toEqual([]);
+    expect(cellsHeld(takenOver.onTheMap)).toEqual([]);
     expect([
       takenOver.yourHouse,
       takenOver.yourChoice,

@@ -108,8 +108,8 @@ export function createSession(ports: SessionPorts): Session {
   const following = follower({
     send: (frame) => connection?.send(frame),
     canSend: open,
-    houses: () => store.get().houses,
-    setHouses: (houses) => store.set({ houses }),
+    onTheMap: () => store.get().onTheMap,
+    setOnTheMap: (onTheMap) => store.set({ onTheMap }),
     followStands: ports.followStands,
     note: ports.note,
     schedule: ports.schedule,

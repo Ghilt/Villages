@@ -1,8 +1,8 @@
 import type { ClientFrame } from '@villages/protocol';
 
 import { whatToFollow } from './following';
-import { cellsHeld, forgetCells, holdCells } from './houses';
-import type { HousesState } from './houses';
+import { cellsHeld, forgetCells, holdCells } from './onTheMap';
+import type { OnTheMapState } from './onTheMap';
 
 /**
  * How long what is on the screen is kept after the gateway has been told to stop sending it.
@@ -23,9 +23,9 @@ export interface FollowerPorts {
   send(frame: ClientFrame): void;
   /** Whether the gateway is listening: open, and past the welcome. */
   canSend(): boolean;
-  /** The houses held now, which are the session's, and their replacement. */
-  houses(): HousesState;
-  setHouses(houses: HousesState): void;
+  /** What stands in the held cells now, which is the session's, and its replacement. */
+  onTheMap(): OnTheMapState;
+  setOnTheMap(onTheMap: OnTheMapState): void;
   /** Tells the scenery which cells the gateway is following now. See decision record 0067. */
   followStands(cells: string[]): void;
   /** Says something in the log, as `note(area, message)`. */
@@ -60,7 +60,7 @@ export interface Follower {
 export function follower(ports: FollowerPorts): Follower {
   /** What the camera last asked for, so it can be asked for again once the gateway is listening. */
   let wanted: string[] = [];
-  /** Cells the gateway has been told to stop sending, whose houses are still drawn. */
+  /** Cells the gateway has been told to stop sending, whose marks are still drawn. */
   let released = new Set<string>();
   /** The cells of the last subscription, so that a refusal knows which ones are not coming. */
   let askedFor: string[] = [];
@@ -85,7 +85,7 @@ export function follower(ports: FollowerPorts): Follower {
     const cells = [...released];
     released = new Set();
     ports.note('cells', `let go of ${cells.length} cell${cells.length === 1 ? '' : 's'} ${why}`);
-    ports.setHouses(forgetCells(ports.houses(), cells));
+    ports.setOnTheMap(forgetCells(ports.onTheMap(), cells));
   };
 
   /**
@@ -94,7 +94,7 @@ export function follower(ports: FollowerPorts): Follower {
    * told to stop sending them. See decision record 0067.
    */
   const followStands = () => {
-    ports.followStands(cellsHeld(ports.houses()).filter((cell) => !released.has(cell)));
+    ports.followStands(cellsHeld(ports.onTheMap()).filter((cell) => !released.has(cell)));
   };
 
   /**
@@ -112,9 +112,9 @@ export function follower(ports: FollowerPorts): Follower {
     if (!ports.canSend()) {
       return;
     }
-    // What is actually being followed. A released cell is still held - its houses are still drawn - but
+    // What is actually being followed. A released cell is still held - what is in it is still drawn - but
     // the gateway has stopped answering for it, so wanting it again means asking for it again.
-    const followed = cellsHeld(ports.houses()).filter((cell) => !released.has(cell));
+    const followed = cellsHeld(ports.onTheMap()).filter((cell) => !released.has(cell));
     const { ask, letGo } = whatToFollow(followed, cells);
 
     // The gateway is told to stop sending **before** it is asked for more, because it holds at most
@@ -134,7 +134,7 @@ export function follower(ports: FollowerPorts): Follower {
         released.delete(cell);
       }
       askedFor = ask;
-      ports.setHouses(holdCells(ports.houses(), ask));
+      ports.setOnTheMap(holdCells(ports.onTheMap(), ask));
       ports.send({ type: 'subscribeCells', cells: ask });
     }
     if (letGo.length > 0 || ask.length > 0) {
@@ -155,7 +155,7 @@ export function follower(ports: FollowerPorts): Follower {
       );
     } else if (awaiting.size === 0) {
       // Nothing outstanding and nothing new asked for, so nothing is coming to replace them: a pan off
-      // the edge of the world, or a view that shrank. Waiting would leave stale houses drawn.
+      // the edge of the world, or a view that shrank. Waiting would leave stale marks drawn.
       //
       // The `awaiting` test is what makes this safe to call twice. A map movement fires `moveend` and
       // `zoomend` both, so this runs twice for one step; the second time there is nothing left to ask
@@ -192,7 +192,7 @@ export function follower(ports: FollowerPorts): Follower {
      *
      * And what was let go to make room for them is asked for again, because the gateway was told to stop
      * sending it a moment ago and the thing meant to replace it never arrived. Without that the map keeps
-     * drawing houses nobody is updating until the release timer empties it.
+     * drawing marks nobody is updating until the release timer empties it.
      */
     refused: (why) => {
       stopHolding();
@@ -204,7 +204,7 @@ export function follower(ports: FollowerPorts): Follower {
       released = new Set();
 
       if (refused.length > 0) {
-        ports.setHouses(forgetCells(ports.houses(), refused));
+        ports.setOnTheMap(forgetCells(ports.onTheMap(), refused));
       }
       followStands();
       ports.note(
