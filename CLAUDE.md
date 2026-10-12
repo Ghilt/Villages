@@ -354,7 +354,9 @@ Commands are added here as the increments land:
   it that its tests read, and `check` fails when one is missing; `buildSrc` holds the one convention they
   share. Versions live in `backend/gradle/libs.versions.toml`. Modules that do not depend on each other
   build and test side by side (`backend/gradle.properties`), so their output interleaves; `--no-parallel`
-  runs them one at a time.
+  runs them one at a time. What a module compiles to is kept in Gradle's build cache, in the user's home and
+  so shared by every tree, which is what spares a fresh worktree its first compile; a test's result never is,
+  because a test that skips itself without Docker would be remembered as passed (decision record 0095).
 
 - Infra: `docker compose -f infra/docker-compose.yml up -d`, once Docker Desktop is running. One MongoDB
   replica set and one RabbitMQ for the whole machine, shared by every tree, each tree keeping to a

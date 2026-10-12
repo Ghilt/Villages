@@ -28,6 +28,9 @@ val repository: File = rootDir.parentFile
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+    // Never taken from the build cache, which every tree on the machine shares (gradle.properties): a test that
+    // skips itself when Docker is not running would be remembered as passed for a tree where it is.
+    outputs.cacheIf("a test's result depends on what is running on the machine, not only on its inputs") { false }
     inputs.files(testsRead.paths.map { paths -> paths.map { repository.resolve(it) } })
         .withPropertyName("testsRead")
         .withPathSensitivity(PathSensitivity.RELATIVE)
