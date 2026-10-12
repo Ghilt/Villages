@@ -28,8 +28,8 @@ database of each tree's own, and outlives a restart of the game server; RabbitMQ
 Characters and key figures are built and waiting on Adam's eye. Nothing else here is started, and the four
 after them wait on the same thing. Fog of war, the exception, is under way a step at a time, and so is
 character dialogue; the UI component library is built and waiting on Adam's eye, and so is the choice roll,
-and so is the origin map, the first of real names on the edited world. Structures, the newest, are
-planned and not started.
+and so is the origin map, the first of real names on the edited world. Structures are planned and not
+started, and so is the broker, the newest.
 
 - **Characters and key figures**: the people of the world, each with a history of their own, and the
   house's tie to the few it acts through, shown in a pane in the corner beside the house status. The shape
@@ -103,8 +103,13 @@ planned and not started.
   first of them, a castle raised at founding. The shape is decision record 0093 and the steps, one commit
   each, are in `docs/plans/structures.md`; the hypothesis is experiment 0018. Step nought, the documents,
   is written. It is also the first income in the game. Adam's own, planned with him on 2026-10-08.
-- **1.6** The bridge from the store to the broker, each tree in a virtual host of its own (0092), with the
-  RabbitMQ half of 0.8's smoke test, which waited for there to be something to test
+- **The broker, 1.6**: RabbitMQ carrying every stored event to the read models and every window, through a
+  bridge that follows the store durably and waits for the broker's confirm, each tree in a virtual host of its
+  own that the server makes and `drop-gone-worlds` drops; the reactions stay on the store. The shape is decision
+  record 0094, proposed, and the eleven steps, one commit each with three checkpoints, are in
+  `docs/plans/broker.md`; step nought, the documents, is written. With it comes the RabbitMQ half of 0.8's
+  smoke test, which waited for there to be something to test. Still one game server per tree. Adam's own,
+  planned with him on 2026-10-12.
 - **1.15** The connection badge, the last piece of inspecting a house
 
 MongoDB and RabbitMQ are on the machine, in Docker, from `infra/docker-compose.yml`. The game server keeps
