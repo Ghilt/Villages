@@ -24,6 +24,7 @@ import villages.application.StructureCommandExecutor
 import villages.application.Resettable
 import villages.application.Unreadable
 import villages.application.WipeGate
+import villages.domain.Event
 import villages.domain.StructureCatalogue
 import java.time.Duration
 import java.util.concurrent.CopyOnWriteArrayList
@@ -96,6 +97,20 @@ class MongoWorld(
         OccurrentStructureCommandExecutor(store, converter, catalogue, gate)
 
     override val keptIn = "in MongoDB, database $database, which outlives the server"
+
+    /**
+     * The event a CloudEvent written here holds, as this code reads it: null for a wipe's marker, and for one it
+     * cannot read, which is the feed's to say (0036). For a carrier, which carries the store as it is.
+     */
+    fun eventIn(cloudEvent: CloudEvent): Event? = if (cloudEvent.type == MARKER) {
+        null
+    } else {
+        try {
+            converter.toDomainEvent(cloudEvent)
+        } catch (@Suppress("TooGenericExceptionCaught", "SwallowedException") unreadable: Exception) {
+            null
+        }
+    }
 
     /** Every carrier still running, closed with the world. */
     private val carriers = CopyOnWriteArrayList<AutoCloseable>()

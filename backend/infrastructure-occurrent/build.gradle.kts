@@ -14,8 +14,9 @@ dependencies {
     implementation(platform(libs.spring.boot.dependencies))
     implementation(libs.occurrent.eventstore.api)
     implementation(libs.occurrent.converter.jackson3)
-    // The executor builds its own envelopes, so the CloudEvent builder is ours to name. See 0035.
-    implementation(libs.cloudevents.core)
+    // The executor builds its own envelopes, so the CloudEvent builder is ours to name. See 0035. And a CloudEvent is
+    // what a feed's live half and a carrier hand on, so whoever implements one or rides one sees it too (0094).
+    api(libs.cloudevents.core)
     implementation(libs.jackson.module.kotlin)
     implementation(libs.occurrent.subscription.api)
     // In memory for the tests and whenever the app is not told otherwise.

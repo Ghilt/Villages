@@ -10,6 +10,9 @@ occurrent = "0.33.0"
 kotest = "6.2.4"
 archunit = "1.5.0"
 testcontainers = "2.0.5"
+# The version Occurrent 0.33 brings, which neither BOM pins: named so that a module seeing CloudEvents through
+# infrastructure-occurrent's API, as infrastructure-rabbit does, resolves the same one.
+cloudevents = "4.0.1"
 
 [libraries]
 spring-boot-dependencies = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "spring-boot" }
@@ -38,7 +41,7 @@ occurrent-checkpoint-mongodb = { module = "org.occurrent:occurrent-subscription-
 amqp-client = { module = "com.rabbitmq:amqp-client" }
 # CloudEvents is what an event is stored as. Occurrent brings it, and we name it because we build
 # envelopes ourselves: the provenance extensions of decision record 0035.
-cloudevents-core = { module = "io.cloudevents:cloudevents-core" }
+cloudevents-core = { module = "io.cloudevents:cloudevents-core", version.ref = "cloudevents" }
 # Jackson 3 lives under tools.jackson; Spring Boot manages its version.
 jackson-module-kotlin = { module = "tools.jackson.module:jackson-module-kotlin" }
 jackson-databind = { module = "tools.jackson.core:jackson-databind" }

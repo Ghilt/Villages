@@ -14,6 +14,7 @@ dependencies {
 
     // Every event that says where it happened is routed by it: the spec walks the events to hold that.
     testImplementation(kotlin("reflect"))
-    // A RabbitMQ of the test's own, thrown away after it, for the specs that say they need Docker.
+    // A RabbitMQ and a MongoDB of the test's own, thrown away after it, for the specs that say they need Docker.
     testImplementation(libs.testcontainers.rabbitmq)
+    testImplementation(libs.testcontainers.mongodb)
 }
