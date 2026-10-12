@@ -918,9 +918,10 @@ A house sees the map at three levels:
 - **Unknown**: where it has never seen. Only the terrain, and really big events.
 
 **What gives vision is a vision point**: a place, the size of the circle seen around it, and when it starts
-and stops giving vision. Anything can give vision. Today a house's **seat** does, from the day it is founded,
-and each of its **key figures** standing on the map does, for as long as they stand in one place; both see a
-circle about the size of Mallorca. A point that has ended leaves what it covered revealed. An event could give
+and stops giving vision. Anything can give vision. Today every **structure** a house holds does, its seat
+among them, as far as its type and level see, and each of its **key figures** standing on the map does, for as
+long as they stand in one place, a circle about the size of Mallorca, which is as far as a castle sees at its
+first level. Founding gives no vision of its own: the castle it raises does. A point that has ended leaves what it covered revealed. An event could give
 vision of another continent for a couple of in-game months, which is a vision point with a start and an end.
 
 Nothing is stopped by the fog. A player can put a key figure or found a house in unknown ground; what the fog

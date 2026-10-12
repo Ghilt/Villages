@@ -133,8 +133,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   theirs and nobody else's, so the world still thins out with distance. It costs nothing on the wire, because a
   player's holdings already reach them wherever they are looking. See `docs/adr/0038`.
 - The fog of war: the `FoW` box in the Debug map section's bar, there folded or open, ticked at every page
-  load, and unticking it turns the fog off for that window. A house sees from **vision points** - its seat, and each key figure standing
-  on the map, a circle of 34 km around each - and the server works them out and sends them as `yourSight`;
+  load, and unticking it turns the fog off for that window. A house sees from **vision points** - each structure it holds, as far as its
+  type and level see, its castle 34 km at first, and each key figure standing on the map, 34 km around them - and the server works them out and sends them as `yourSight`;
   the log says what gives vision under `sight`. `give vision here`, in the Debug map section, gives the house a circle
   where the camera is looking until its `take it away` is pressed; both are real commands. The fog covers the
   world and not the signs: every icon, the offered seats and whatever stands in vision are drawn over it. Unknown ground is under a dark haze, revealed ground has its
@@ -278,7 +278,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
   the same story, your house's `gainedVision` from it at the catalogue's `sightKm` for its type and level; the
   house it was taken from gets `lostVision`. The fog lifts round it, and the log says `taking control of the
   Antarctic mill` with its answer, the batch that follows `the Antarctic mill changed, held by Ravenscar`, and the
-  `sight` line names it: `the seat (34 km) and the Antarctic mill (6 km) give vision`. On the map it flies your
+  `sight` line names it: `Ravenscar Castle (34 km) and the Antarctic mill (6 km) give vision`. On the map it flies your
   pennant, and its window says it is held by your house, its mark named *Your holding*. What it pays comes with
   its own step. Yours already is refused `sameHolder`, and with no house `noSuchHouse`. One raised **yours** sees
   the same way from the moment it is raised. Standing in for a story handing one over or a house

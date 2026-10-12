@@ -5,6 +5,8 @@ import villages.protocol.Cell
 import villages.protocol.PROTOCOL_VERSION
 import java.time.Instant
 import java.util.UUID
+import villages.application.VisionSource
+import villages.domain.VisionId
 
 /* What the gateway's specs send it, as the page would, and the places and days they stand on. */
 
@@ -115,3 +117,6 @@ internal fun takingOff(characterId: String, commandId: String) =
 
 /** A command id of its own for every command a test sends, since a key figure's id is worked out from one. */
 internal fun commandNumber(n: Int) = "c0000000-0000-4000-8000-%012d".format(n)
+
+/** A castle's sight, as every structure a house holds lets it see: the source a test's vision point is given by. */
+internal val A_CASTLES_SIGHT = VisionSource.Given(VisionId(UUID.fromString("dd000000-0000-4000-8000-0000000000ca")))

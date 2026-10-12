@@ -7,7 +7,6 @@ import villages.application.Holder
 import villages.application.StructureFace
 import villages.application.StructureRow
 import villages.application.VisionPoint
-import villages.application.VisionSource
 import villages.domain.Banner
 import villages.domain.CharacterId
 import villages.domain.Charge
@@ -96,7 +95,7 @@ class SlotsSeenSpec : StringSpec({
     }
 
     "sent while it is seen today, with the later stamp; on ground seen no longer, or on a day gone by, no slots" {
-        val inSight = Looking(fog = Fog(me, listOf(VisionPoint(VisionSource.Seat, stockholm, Vision.MALLORCA, WorldTime(day.day - 20), null))), slots = seen)
+        val inSight = Looking(fog = Fog(me, listOf(VisionPoint(A_CASTLES_SIGHT, stockholm, Vision.MALLORCA, WorldTime(day.day - 20), null))), slots = seen)
         val near = keep(stockholm)
 
         inSight.sent(near, day)!!.let { listOf(it.slots?.size, it.stamp) } shouldBe listOf(3, 7L)
@@ -106,8 +105,8 @@ class SlotsSeenSpec : StringSpec({
             fog = Fog(
                 me,
                 listOf(
-                    VisionPoint(VisionSource.Seat, stockholm, Vision.MALLORCA, WorldTime(day.day - 20), null),
-                    VisionPoint(VisionSource.Seat, paris, Vision.MALLORCA, WorldTime(day.day - 10), WorldTime(day.day - 1)),
+                    VisionPoint(A_CASTLES_SIGHT, stockholm, Vision.MALLORCA, WorldTime(day.day - 20), null),
+                    VisionPoint(A_CASTLES_SIGHT, paris, Vision.MALLORCA, WorldTime(day.day - 10), WorldTime(day.day - 1)),
                 ),
             ),
             slots = seen,

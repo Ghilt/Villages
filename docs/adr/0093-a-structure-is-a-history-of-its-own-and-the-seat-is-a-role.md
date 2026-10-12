@@ -72,7 +72,10 @@ written after it by listeners, in the same story.
 **The seat is a role.** Founding a house raises a castle, held by the house, and names it the house's seat
 with `villages.house.namedSeat.v1`, a tie on the house's own stream. Losing the castle writes `lostSeat`
 and the house plays on without one until it names another. The founding event keeps its stored `seat`
-field, now read as the place the house was founded, so no history is wiped.
+field, now read as the place the house was founded, so no history is wiped. Founding gives no vision of its
+own: a house sees through what it holds, the castle among it, and through its key figures; the seat's own point
+that founding used to open is gone, so the castle's sight is not counted twice. Amended 2026-10-12, on Adam's
+word.
 
 **The catalogue is data.** `world/structures.json` holds every type: its words in each culture, and by
 level its significance, sight, size and yields, its influence zone if it has one, and its slots with what

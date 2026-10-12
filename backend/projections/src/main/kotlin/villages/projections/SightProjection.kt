@@ -40,13 +40,14 @@ import java.util.concurrent.CopyOnWriteArraySet
 /**
  * Every house's vision points, folded from the feed: what each house sees now, and what it has seen.
  *
- * Three things give a house vision today. Two are worked out here rather than recorded, because the world
+ * Two things give a house vision today. Each of its **key figures** gives a point for every stretch they
+ * stood in one place while they were the house's, worked out here rather than recorded, because the world
  * already records where they stand and a second record of the same place could come to disagree with the
- * first. Its **seat** gives a point from the day it was founded. Each of its **key figures** gives one for
- * every stretch they stood in one place while they were the house's: a move closes the point they stood at
- * and opens the next, and leaving the map, dying or being lost to the house closes it. The third is **vision
- * given outright**, which nothing else records, so it is its own pair of events and is read straight off
- * them. A closed point is still a point, because what it covered stays revealed. See decision record 0061.
+ * first: a move closes the point they stood at and opens the next, and leaving the map, dying or being lost to
+ * the house closes it. The other is **vision given outright**, which nothing else records, so it is its own
+ * pair of events and is read straight off them; it is how every structure a house holds lets it see, its seat
+ * among them, and founding gives none of its own. A closed point is still a point, because what it covered
+ * stays revealed. See decision records 0061 and 0093.
  *
  * The fold is its own rather than a read of the characters projection, because two subscriptions can stand
  * at different points in the feed; where a character stands and whose they are is folded here as well.
@@ -74,24 +75,13 @@ class SightProjection(feed: EventFeed) : Follower(feed), SightsByHouse {
 
     override fun apply(stored: StoredEvent) {
         when (val event = stored.event) {
-            is HouseFounded -> {
-                players[event.houseId] = event.player
-                open(event.houseId, VisionSource.Seat, event.seat, Vision.MALLORCA, event.worldTime)
-                tell(event.houseId)
-            }
+            // Founding gives no vision of its own: the castle it raises does, a moment after, as vision given.
+            is HouseFounded -> players[event.houseId] = event.player
 
             // The size is the event's own, not the rule's today: a vision given is what it was given as.
             is HouseGainedVision -> {
                 open(event.houseId, VisionSource.Given(event.visionId), event.place, event.radius, event.worldTime, event.from)
                 tell(event.houseId)
-            }
-
-            // A house that lost its seat sees from it no longer: the seat's point ends that day. What it covered stays
-            // revealed. Its sight from the structure itself, a vision given, ends with the structure's change of hands.
-            is HouseLostSeat -> {
-                if (close(event.houseId, VisionSource.Seat, event.worldTime)) {
-                    tell(event.houseId)
-                }
             }
 
             is HouseLostVision -> {
@@ -131,7 +121,8 @@ class SightProjection(feed: EventFeed) : Follower(feed), SightsByHouse {
             is CharacterDied -> offTheMap(event.characterId, event.worldTime)
 
             // Nothing else gives vision or takes it away.
-            is ResourceEvent, is ChoiceEvent, is DialogueEvent, is HouseNamedSeat,
+            // A seat lost takes no vision of its own: what the structure gave ends with its change of hands or its ruin.
+            is ResourceEvent, is ChoiceEvent, is DialogueEvent, is HouseNamedSeat, is HouseLostSeat,
             is CharacterAppeared, is CharacterStatChanged, is CharacterAged, is CharacterPortraitChanged,
             // What a structure gives its holder to see is written into the house's own history, as vision given. 0093.
             is StructureEvent,

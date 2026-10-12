@@ -6,6 +6,9 @@ import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.ints.shouldBeLessThan
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import villages.domain.HouseId
+import villages.domain.PlayerId
+import villages.domain.StructureId
 import villages.protocol.Batch
 import villages.protocol.CharacterArrived
 import villages.protocol.CharacterGone
@@ -18,6 +21,7 @@ import villages.protocol.StructureArrived
 import villages.protocol.VisionPointView
 import villages.protocol.YourKeyFigures
 import villages.protocol.YourSight
+import java.util.UUID
 
 /** The gateway: what a house sees, and what the fog of war holds back. The rig is GatewayRig.kt. */
 class GatewaySightSpec : StringSpec({
@@ -29,16 +33,19 @@ class GatewaySightSpec : StringSpec({
         sent[4] shouldBe YourSight(emptyList(), tension = 40.0)
     }
 
-    "a founded house sees from its seat, as big a circle as Mallorca, and its player is told" {
+    "founding gives no vision of its own: the house sees from its castle once it is raised, and its player is told" {
         val rig = Rig()
         val (mine, sent) = rig.introduced()
 
         mine.receive(founding())
+        sent.filterIsInstance<YourSight>().shouldBeEmpty()
 
-        sent.filterIsInstance<YourSight>().last() shouldBe YourSight(
-            listOf(VisionPointView(kind = "seat", place = Point(59.33, 18.07), radius = 34.0, since = today.day)),
-            tension = 40.0,
-        )
+        rig.settle()
+
+        val castle = StructureId.seatOf(HouseId.of(PlayerId(UUID.fromString(TOKEN))))
+        val seen = sent.filterIsInstance<YourSight>().last().points.single()
+        listOf(seen.kind, seen.place, seen.radius, seen.since, seen.until, seen.from) shouldBe
+            listOf("given", Point(59.33, 18.07), 34.0, today.day, null, castle.value.toString())
     }
 
     "a key figure put on the map gives vision there, and moving them closes that point and opens the next" {
@@ -52,7 +59,6 @@ class GatewaySightSpec : StringSpec({
         mine.receive(moving(agnes, 57.64, 18.30, commandNumber(3)))
 
         sent.filterIsInstance<YourSight>().last().points shouldBe listOf(
-            VisionPointView(kind = "seat", place = Point(59.33, 18.07), radius = 34.0, since = today.day),
             VisionPointView("keyFigure", agnes, Point(59.86, 17.64), 34.0, since = today.day, until = today.day),
             VisionPointView("keyFigure", agnes, Point(57.64, 18.30), 34.0, since = today.day),
         )
@@ -102,6 +108,7 @@ class GatewaySightSpec : StringSpec({
         rig.aStructureIsRaised("mill")
         val (mine, sent) = rig.introduced()
         mine.receive(founding())
+        rig.settle()
         sent.clear()
 
         mine.receive(subscribe(HELSINKI_Z10, STOCKHOLM_Z10))
@@ -110,7 +117,7 @@ class GatewaySightSpec : StringSpec({
         fogged.getValue(HELSINKI_Z10).structures.shouldBeEmpty()
         // What is hidden is not counted either, because how much is hidden is itself something learnt.
         fogged.getValue(HELSINKI_Z10).omittedStructures shouldBe 0
-        fogged.getValue(STOCKHOLM_Z10).structures.single().name shouldBe "a new mill"
+        fogged.getValue(STOCKHOLM_Z10).structures.map { it.name }.sorted() shouldBe listOf("Ravenscar Castle", "a new mill")
         sent.clear()
 
         mine.receive(fogOfWar(false))
@@ -175,6 +182,7 @@ class GatewaySightSpec : StringSpec({
         val rig = Rig()
         val (mine, sent) = rig.introduced()
         mine.receive(founding())
+        rig.settle()
         mine.receive(subscribe(HELSINKI_Z10, STOCKHOLM_Z10))
         rig.later.tick()
         sent.clear()
@@ -195,6 +203,7 @@ class GatewaySightSpec : StringSpec({
         val agnes = told.filterIsInstance<YourKeyFigures>().last().keyFigures.single().id
         val (mine, sent) = rig.introduced()
         mine.receive(founding())
+        rig.settle()
         mine.receive(subscribe(STOCKHOLM_Z10, HELSINKI_Z10))
         rig.later.tick()
         sent.clear()

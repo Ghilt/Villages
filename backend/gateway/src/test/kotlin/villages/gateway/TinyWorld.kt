@@ -37,6 +37,7 @@ import villages.domain.PlayerTookAction
 import villages.domain.StructureCommand
 import villages.domain.StructureDecider
 import villages.domain.StructureEvent
+import java.util.UUID
 
 /** The catalogued type of an event, as the store would name it. */
 internal fun typeOf(event: HouseEvent): String = when (event) {
@@ -103,7 +104,7 @@ internal class TinyWorld : HouseCommandExecutor, CharacterCommandExecutor, Struc
         val fresh = structures.decide(command, structures.fold(stream))
         structureEvents += fresh
         fresh.forEachIndexed { index, event ->
-            publish(event, event.structureId.stream, (stream.size + index + 1).toLong(), "s-${structureEvents.size}-$index", provenance)
+            publish(event, event.structureId.stream, (stream.size + index + 1).toLong(), idOf("s-${structureEvents.size}-$index"), provenance)
         }
     }
 
@@ -130,7 +131,7 @@ internal class TinyWorld : HouseCommandExecutor, CharacterCommandExecutor, Struc
         characterEvents += fresh
         fresh.forEachIndexed { index, event ->
             val record = StoredEvent(
-                id = "c-${characterEvents.size}-$index",
+                id = idOf("c-${characterEvents.size}-$index"),
                 type = typeOf(event),
                 stream = event.characterId.stream,
                 streamVersion = (stream.size + index + 1).toLong(),
@@ -160,7 +161,7 @@ internal class TinyWorld : HouseCommandExecutor, CharacterCommandExecutor, Struc
         events += fresh
         fresh.forEachIndexed { index, event ->
             val record = StoredEvent(
-                id = "e-${events.size}",
+                id = idOf("e-${events.size}-$index"),
                 type = typeOf(event),
                 stream = event.houseId.stream,
                 streamVersion = (stream.size + index + 1).toLong(),
@@ -174,6 +175,9 @@ internal class TinyWorld : HouseCommandExecutor, CharacterCommandExecutor, Struc
             subscribers.toList().forEach { it(record) }
         }
     }
+
+    /** An event's id, a UUID as the store's are, because a listener carries it on as what caused its command. */
+    private fun idOf(name: String): String = UUID.nameUUIDFromBytes(name.toByteArray(Charsets.UTF_8)).toString()
 
     override fun subscribe(from: Start, subscriber: (StoredEvent) -> Unit): AutoCloseable {
         if (from == Start.FROM_THE_BEGINNING) {

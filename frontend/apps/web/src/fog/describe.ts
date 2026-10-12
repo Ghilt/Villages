@@ -38,15 +38,13 @@ export function describeSight(
   }
   const lasting = points.filter((point) => lastingOn(point, today));
   const givers = lasting.map((point) =>
-    point.kind === 'seat'
-      ? 'the seat'
-      : point.kind === 'keyFigure'
-        ? (nameOf(point.of ?? '') ?? 'a key figure')
-        : point.from !== undefined
-          ? (nameOf(point.from) ?? 'a structure')
-          : `the vision given at ${point.place.lat.toFixed(2)}, ${point.place.lon.toFixed(2)}`,
+    point.kind === 'keyFigure'
+      ? (nameOf(point.of ?? '') ?? 'a key figure')
+      : point.from !== undefined
+        ? (nameOf(point.from) ?? 'a structure')
+        : `the vision given at ${point.place.lat.toFixed(2)}, ${point.place.lon.toFixed(2)}`,
   );
-  // One reach for all of them is said once; reaches that differ, a seat's and a mill's, are said beside each.
+  // One reach for all of them is said once; reaches that differ, a castle's and a mill's, are said beside each.
   const radii = [...new Set(lasting.map((point) => point.radius))];
   const reach = radii.length === 1 ? `, ${radii[0]} km around ${lasting.length === 1 ? 'it' : 'each'}` : '';
   const said =

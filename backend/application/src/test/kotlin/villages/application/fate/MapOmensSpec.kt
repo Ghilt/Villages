@@ -24,6 +24,9 @@ import villages.domain.WorldTime
 import villages.domain.foundingStocks
 import java.time.Instant
 import java.util.UUID
+import villages.domain.VisionId
+
+private val A_CASTLE = VisionId(UUID.fromString("dd000000-0000-4000-8000-0000000000ca"))
 
 /**
  * Where the player is looking, read off a ground map of one-degree cells: forest with a river through it east of
@@ -58,7 +61,7 @@ class MapOmensSpec : StringSpec({
     val sightOf = { km: Double ->
         object : SightsByHouse {
             override fun of(house: HouseId) =
-                Sight(house, listOf(VisionPoint(VisionSource.Seat, seat, km, today, null)))
+                Sight(house, listOf(VisionPoint(VisionSource.Given(A_CASTLE), seat, km, today, null)))
 
             override fun watch(listener: (SightChange) -> Unit) = AutoCloseable {}
         }

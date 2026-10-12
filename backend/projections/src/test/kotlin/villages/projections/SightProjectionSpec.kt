@@ -42,6 +42,8 @@ import villages.domain.emptyStocks
 import java.time.Instant
 import java.util.UUID
 
+private val A_CASTLE = VisionId(UUID.fromString("dd000000-0000-4000-8000-0000000000ca"))
+
 /** A feed that delivers whatever it is handed, of either kind of stream, the moment it is handed it. */
 private class HandFedSightEvents : EventFeed {
     private val subscribers = mutableListOf<(StoredEvent) -> Unit>()
@@ -85,8 +87,11 @@ class SightProjectionSpec : StringSpec({
         emptyStocks(noon), on, noon,
     )
     fun moved(n: Int, to: Location, on: WorldTime) = CharacterMoved(figure(n), to, Significance(10.0), on, noon)
-    fun seat(at: Location = stockholm, since: WorldTime = founding) =
-        VisionPoint(VisionSource.Seat, at, Vision.MALLORCA, since, until = null)
+    /** The sight the standing-effects listener gives a house from the castle founding raised: vision given. */
+    fun castlesSight(player: PlayerId, at: Location = stockholm, on: WorldTime = founding) =
+        HouseGainedVision(HouseId.of(player), A_CASTLE, at, Vision.MALLORCA, StructureId.seatOf(HouseId.of(player)), on, noon)
+    fun castle(of: PlayerId = ada, at: Location = stockholm, since: WorldTime = founding) =
+        VisionPoint(VisionSource.Given(A_CASTLE), at, Vision.MALLORCA, since, until = null, from = StructureId.seatOf(HouseId.of(of)))
     fun standing(n: Int, at: Location, since: WorldTime, until: WorldTime? = null) =
         VisionPoint(VisionSource.KeyFigure(figure(n)), at, Vision.MALLORCA, since, until)
 
@@ -94,14 +99,17 @@ class SightProjectionSpec : StringSpec({
         SightProjection(HandFedSightEvents()).started().of(adas).points.shouldBeEmpty()
     }
 
-    "a founded house sees from its seat, from the day it was founded, for as big a circle as Mallorca" {
+    "founding gives no vision of its own: the house sees from the castle it raised, once that gives its sight" {
         val feed = HandFedSightEvents()
         val sights = SightProjection(feed).started()
 
         feed.deliver(founded(ada))
+        sights.of(adas).points.shouldBeEmpty()
 
-        sights.of(adas).points shouldContainExactly listOf(seat())
-        sights.of(adas).visionOn(founding + 1) shouldContainExactly listOf(seat())
+        feed.deliver(castlesSight(ada))
+
+        sights.of(adas).points shouldContainExactly listOf(castle())
+        sights.of(adas).visionOn(founding + 1) shouldContainExactly listOf(castle())
         Vision.MALLORCA shouldBe 34.0
     }
 
@@ -109,31 +117,34 @@ class SightProjectionSpec : StringSpec({
         val feed = HandFedSightEvents()
         val sights = SightProjection(feed).started()
         feed.deliver(founded(ada))
+        feed.deliver(castlesSight(ada))
 
         // Standing in Uppsala before anyone took them in: what they saw then was nobody's.
         feed.deliver(moved(1, uppsala, founding + 2))
         feed.deliver(HouseGainedKeyFigure(adas, figure(1), founding + 5, noon))
 
-        sights.of(adas).points shouldContainExactly listOf(seat(), standing(1, uppsala, founding + 5))
+        sights.of(adas).points shouldContainExactly listOf(castle(), standing(1, uppsala, founding + 5))
     }
 
     "a key figure on no map gives no vision until they are put somewhere" {
         val feed = HandFedSightEvents()
         val sights = SightProjection(feed).started()
         feed.deliver(founded(ada))
+        feed.deliver(castlesSight(ada))
         feed.deliver(HouseGainedKeyFigure(adas, figure(1), founding + 1, noon))
 
-        sights.of(adas).points shouldContainExactly listOf(seat())
+        sights.of(adas).points shouldContainExactly listOf(castle())
 
         feed.deliver(moved(1, visby, founding + 3))
 
-        sights.of(adas).points shouldContainExactly listOf(seat(), standing(1, visby, founding + 3))
+        sights.of(adas).points shouldContainExactly listOf(castle(), standing(1, visby, founding + 3))
     }
 
     "a move closes the point a key figure stood at and opens the next, and the closed one is still revealed" {
         val feed = HandFedSightEvents()
         val sights = SightProjection(feed).started()
         feed.deliver(founded(ada))
+        feed.deliver(castlesSight(ada))
         feed.deliver(HouseGainedKeyFigure(adas, figure(1), founding, noon))
         feed.deliver(moved(1, uppsala, founding + 1))
 
@@ -141,18 +152,19 @@ class SightProjectionSpec : StringSpec({
 
         val sight = sights.of(adas)
         sight.points shouldContainExactly listOf(
-            seat(),
+            castle(),
             standing(1, uppsala, founding + 1, until = founding + 4),
             standing(1, visby, founding + 4),
         )
         // Vision is what lasts; what ended is revealed and no longer seen.
-        sight.visionOn(founding + 4) shouldContainExactly listOf(seat(), standing(1, visby, founding + 4))
+        sight.visionOn(founding + 4) shouldContainExactly listOf(castle(), standing(1, visby, founding + 4))
     }
 
     "two moves on one day still reveal the place stood at in between, for no time at all" {
         val feed = HandFedSightEvents()
         val sights = SightProjection(feed).started()
         feed.deliver(founded(ada))
+        feed.deliver(castlesSight(ada))
         feed.deliver(HouseGainedKeyFigure(adas, figure(1), founding, noon))
 
         feed.deliver(moved(1, uppsala, founding + 1))
@@ -160,13 +172,14 @@ class SightProjectionSpec : StringSpec({
 
         val sight = sights.of(adas)
         sight.points shouldHaveSize 3
-        sight.visionOn(founding + 1) shouldContainExactly listOf(seat(), standing(1, visby, founding + 1))
+        sight.visionOn(founding + 1) shouldContainExactly listOf(castle(), standing(1, visby, founding + 1))
     }
 
     "leaving the map, dying and being lost to the house each close the point a key figure gives" {
         val feed = HandFedSightEvents()
         val sights = SightProjection(feed).started()
         feed.deliver(founded(ada))
+        feed.deliver(castlesSight(ada))
         for (n in 1..3) {
             feed.deliver(HouseGainedKeyFigure(adas, figure(n), founding, noon))
             feed.deliver(moved(n, uppsala, founding))
@@ -177,25 +190,27 @@ class SightProjectionSpec : StringSpec({
         feed.deliver(HouseLostKeyFigure(adas, figure(3), founding + 4, noon))
 
         sights.of(adas).points shouldContainExactly listOf(
-            seat(),
+            castle(),
             standing(1, uppsala, founding, until = founding + 2),
             standing(2, uppsala, founding, until = founding + 3),
             standing(3, uppsala, founding, until = founding + 4),
         )
-        sights.of(adas).visionOn(founding + 5) shouldContainExactly listOf(seat())
+        sights.of(adas).visionOn(founding + 5) shouldContainExactly listOf(castle())
     }
 
     "one person serving two houses gives both of them vision, each from the day they took them in" {
         val feed = HandFedSightEvents()
         val sights = SightProjection(feed).started()
         feed.deliver(founded(ada))
+        feed.deliver(castlesSight(ada))
         feed.deliver(founded(bea, seat = visby))
+        feed.deliver(castlesSight(bea, visby))
         feed.deliver(moved(1, uppsala, founding))
         feed.deliver(HouseGainedKeyFigure(adas, figure(1), founding + 1, noon))
         feed.deliver(HouseGainedKeyFigure(beas, figure(1), founding + 2, noon))
 
-        sights.of(adas).points shouldContainExactly listOf(seat(), standing(1, uppsala, founding + 1))
-        sights.of(beas).points shouldContainExactly listOf(seat(at = visby), standing(1, uppsala, founding + 2))
+        sights.of(adas).points shouldContainExactly listOf(castle(), standing(1, uppsala, founding + 1))
+        sights.of(beas).points shouldContainExactly listOf(castle(bea, at = visby), standing(1, uppsala, founding + 2))
     }
 
     "every change is told to the player whose house it is, and what changes nothing is not told" {
@@ -205,12 +220,13 @@ class SightProjectionSpec : StringSpec({
         sights.watch { told += it }
 
         feed.deliver(founded(ada))
+        feed.deliver(castlesSight(ada))
         feed.deliver(HouseGainedKeyFigure(adas, figure(1), founding, noon))
         feed.deliver(CharacterStatChanged(figure(1), Stat.PIETY, 12, founding, noon))
         feed.deliver(moved(1, uppsala, founding + 1))
 
         told.map { it.player } shouldContainExactly listOf(ada, ada)
-        told.last().sight.points shouldContainExactly listOf(seat(), standing(1, uppsala, founding + 1))
+        told.last().sight.points shouldContainExactly listOf(castle(), standing(1, uppsala, founding + 1))
     }
 
     "vision given outright is a point of its own, as big as its event says, until it is taken away" {
@@ -218,13 +234,14 @@ class SightProjectionSpec : StringSpec({
         val sights = SightProjection(feed).started()
         val far = VisionId(UUID.fromString("dd000000-0000-4000-8000-000000000001"))
         feed.deliver(founded(ada))
+        feed.deliver(castlesSight(ada))
 
         // Twice the size of anything today, which is what a rule changed after the giving would look like.
         feed.deliver(HouseGainedVision(adas, far, visby, 68.0, null, founding + 1, noon))
         feed.deliver(HouseLostVision(adas, far, founding + 6, noon))
 
         sights.of(adas).points shouldContainExactly listOf(
-            seat(),
+            castle(),
             VisionPoint(VisionSource.Given(far), visby, 68.0, since = founding + 1, until = founding + 6),
         )
     }
@@ -233,21 +250,24 @@ class SightProjectionSpec : StringSpec({
         val feed = HandFedSightEvents()
         val sights = SightProjection(feed).started()
         feed.deliver(founded(ada))
+        feed.deliver(castlesSight(ada))
 
         sights.reset()
 
         sights.of(adas).points.shouldBeEmpty()
     }
 
-    "a house that lost its seat sees from it no longer, from that day, and what it saw stays revealed" {
+    "losing its seat takes no vision of its own: what the castle gave ends when its sight is taken, and stays revealed" {
         val feed = HandFedSightEvents()
         val sights = SightProjection(feed).started()
         feed.deliver(founded(ada))
-        val castle = StructureId.seatOf(adas)
+        feed.deliver(castlesSight(ada))
 
-        feed.deliver(HouseLostSeat(adas, castle, founding + 3, noon))
+        feed.deliver(HouseLostSeat(adas, StructureId.seatOf(adas), founding + 3, noon))
+        sights.of(adas).points shouldContainExactly listOf(castle())
 
-        sights.of(adas).points shouldContainExactly listOf(seat().copy(until = founding + 3))
+        feed.deliver(HouseLostVision(adas, A_CASTLE, founding + 3, noon))
+        sights.of(adas).points shouldContainExactly listOf(castle().copy(until = founding + 3))
         sights.of(adas).visionOn(founding + 3).shouldBeEmpty()
     }
 })

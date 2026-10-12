@@ -12,12 +12,10 @@ import villages.protocol.VisionPointView
 internal fun Sight.toView(): List<VisionPointView> = points.map { point ->
     VisionPointView(
         kind = when (point.source) {
-            VisionSource.Seat -> "seat"
             is VisionSource.KeyFigure -> "keyFigure"
             is VisionSource.Given -> "given"
         },
         of = when (val source = point.source) {
-            VisionSource.Seat -> null
             is VisionSource.KeyFigure -> source.character.value.toString()
             is VisionSource.Given -> source.vision.value.toString()
         },

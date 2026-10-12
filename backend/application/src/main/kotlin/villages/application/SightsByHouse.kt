@@ -9,12 +9,10 @@ import villages.domain.VisionId
 import villages.domain.WorldTime
 
 /**
- * What gives a house a **vision point**: the thing it sees from. Anything can, in time; two things do today.
+ * What gives a house a **vision point**: the thing it sees from. Anything can, in time; two things do today. A
+ * structure the house holds is a vision given, its seat among them: founding gives none of its own (0093).
  */
 sealed interface VisionSource {
-    /** The house's own seat, from the day it was founded, for as long as the house stands. */
-    data object Seat : VisionSource
-
     /** One of its key figures, for as long as they stand in one place and are the house's. */
     data class KeyFigure(val character: CharacterId) : VisionSource
 
@@ -25,7 +23,7 @@ sealed interface VisionSource {
 /**
  * Somewhere a house sees from, for a stretch of world-time: a place, how far it sees around it, and the span
  * it gives vision over. Adam's shape, so that anything can give vision and give it for a while - a seat for
- * as long as the house stands, a key figure for as long as they stand in one place, and later a far coast for
+ * as long as the house holds it, a key figure for as long as they stand in one place, and later a far coast for
  * a couple of months. See decision record 0061.
  *
  * The radius is a distance on the ground, in kilometres, rather than in map units: how far a house sees is a

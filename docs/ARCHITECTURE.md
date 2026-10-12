@@ -277,10 +277,11 @@ it in sight is a page drawing what it already has. See decision record 0038.
 ## What a house sees
 
 The fog of war is one read model and a frame. `SightProjection` folds every house's **vision points** from
-the feed - its seat from the founding, and each key figure for every stretch they stand in one place while
-they are the house's - and works them out rather than recording them, because the world already records
-where a seat is and where a person stands. Vision given outright is recorded, because nothing else records
-it: `house.gainedVision` and `house.lostVision`, read straight off the events. The gateway sends a house's points to its player as `yourSight`,
+the feed - each key figure for every stretch they stand in one place while they are the house's - and works
+them out rather than recording them, because the world already records where a person stands. Vision given
+outright is recorded, because nothing else records it: `house.gainedVision` and `house.lostVision`, read
+straight off the events. That is how every structure a house holds lets it see, its seat among them; founding
+gives none of its own (0093). The gateway sends a house's points to its player as `yourSight`,
 on hello and whenever one opens or closes, the way it sends `yourHouse`: to the session, never to a cell.
 
 The server is the one place a sight is worked out. The page draws the fog from what it is sent, and the

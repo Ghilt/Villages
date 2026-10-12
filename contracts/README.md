@@ -128,3 +128,5 @@ recorded over. See decision record 0037. What each one changed:
 - **47** - houses leave the map: a `snapshot` carries no `houses`, `asOfVersion` or `omitted`, and a batch no
   `houseAppeared` or `houseChanged`. A house is not drawn; its structures are, its seat among them, and a player's
   own house still arrives in `yourHouse`.
+- **48** - only structures give a house vision: a `yourSight` point is never of kind `seat`, because founding opens
+  none of its own; the castle it raises gives it, as vision given `from` that castle.

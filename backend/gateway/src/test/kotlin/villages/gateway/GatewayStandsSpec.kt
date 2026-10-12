@@ -53,6 +53,7 @@ class GatewayStandsSpec : StringSpec({
         rig.standsOnDisk[STOCKHOLM_TILE] = atTheSeat + justOutside + farOff
         val (mine, sent) = rig.introduced(master = "terrain")
         mine.receive(founding())
+        rig.settle()
         sent.clear()
 
         mine.receive(subscribe(STOCKHOLM_Z10))
@@ -69,6 +70,7 @@ class GatewayStandsSpec : StringSpec({
         rig.standsOnDisk[STOCKHOLM_TILE] = atTheSeat + justOutside + farOff
         val (mine, sent) = rig.introduced(master = "terrain")
         mine.receive(founding())
+        rig.settle()
         mine.receive(subscribe(STOCKHOLM_Z10))
         sent.clear()
 
@@ -85,6 +87,7 @@ class GatewayStandsSpec : StringSpec({
         rig.standsOnDisk[STOCKHOLM_TILE] = atTheSeat + justOutside + farOff
         val (mine, sent) = rig.introduced(master = "terrain")
         mine.receive(founding())
+        rig.settle()
         mine.receive(subscribe(STOCKHOLM_Z10))
         sent.clear()
 
@@ -103,6 +106,7 @@ class GatewayStandsSpec : StringSpec({
         rig.standsOnDisk[STOCKHOLM_TILE] = atTheSeat
         val (mine, sent) = rig.introduced(master = "terrain")
         mine.receive(founding())
+        rig.settle()
         val eastOfIt = Cell.of(59.33, 18.07 + 360.0 / 1024, 10).quadkey
         sent.clear()
 

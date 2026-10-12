@@ -60,6 +60,7 @@ class GatewayWatersSpec : StringSpec({
         rig.names["terrain"] = names
         val (mine, sent) = rig.introduced(master = "terrain")
         mine.receive(founding())
+        rig.settle()
         sent.clear()
 
         mine.receive(inspectAt(59.33, 18.07))
@@ -117,6 +118,7 @@ class GatewayWatersSpec : StringSpec({
         rig.names["terrain"] = names
         val (mine, sent) = rig.introduced(master = "terrain")
         mine.receive(founding())
+        rig.settle()
 
         // Two windows on Norrström, one on Lake Maeler, one on the sea out past the fog, and one off the Earth.
         val places = listOf(59.33 to 18.07, 59.35 to 17.6, 59.4 to 18.07, 59.33 to 19.2, 95.0 to 18.07)
@@ -139,6 +141,7 @@ class GatewayWatersSpec : StringSpec({
         rig.grounds["terrain"] = watersAboutStockholm()
         val (mine, sent) = rig.introduced()
         mine.receive(founding())
+        rig.settle()
         sent.clear()
 
         mine.receive(inspectAt(59.33, 18.07))

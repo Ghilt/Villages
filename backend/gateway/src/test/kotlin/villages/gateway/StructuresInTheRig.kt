@@ -6,10 +6,13 @@ import villages.domain.StructureCatalogue
 import villages.domain.StructureSpec
 import villages.domain.StructureType
 
-/** The rig's catalogue: two types of one level, enough for a lever to raise one and Antarctica to raise both. */
+/**
+ * The rig's catalogue: two types of one level, enough for a lever to raise one and Antarctica to raise both. A castle
+ * sees as far as the real one does at its first level, as big a circle as Mallorca, and a mill six kilometres.
+ */
 internal val RIG_CATALOGUE = StructureCatalogue(
-    listOf("castle", "mill").associate { type ->
-        StructureType(type) to StructureSpec(listOf(LevelSpec(Significance(10.0), 6.0, emptyMap())), emptyList())
+    mapOf("castle" to 34.0, "mill" to 6.0).entries.associate { (type, sight) ->
+        StructureType(type) to StructureSpec(listOf(LevelSpec(Significance(10.0), sight, emptyMap())), emptyList())
     },
 )
 

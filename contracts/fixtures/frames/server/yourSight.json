@@ -2,13 +2,15 @@
   "type": "yourSight",
   "points": [
     {
-      "kind": "seat",
+      "kind": "given",
+      "of": "dd000000-0000-4000-8000-0000000000ca",
       "place": {
         "lat": 59.33,
         "lon": 18.07
       },
       "radius": 34,
-      "since": 653705
+      "since": 653705,
+      "from": "5d000000-0000-4000-8000-0000000000ca"
     },
     {
       "kind": "keyFigure",

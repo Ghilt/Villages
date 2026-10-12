@@ -6,7 +6,6 @@ import villages.application.Holder
 import villages.application.StructureFace
 import villages.application.StructureRow
 import villages.application.VisionPoint
-import villages.application.VisionSource
 import villages.domain.Banner
 import villages.domain.Charge
 import villages.domain.Division
@@ -43,8 +42,8 @@ private fun structure(at: Location, vararg faces: StructureFace) =
 
 /** A seat at Stockholm, and a vision of Helsinki that lasted from ten days ago until yesterday. */
 private val seatAndAnEndedVision = listOf(
-    VisionPoint(VisionSource.Seat, stockholm, Vision.MALLORCA, daysAgo(20), null),
-    VisionPoint(VisionSource.Seat, helsinki, Vision.MALLORCA, daysAgo(10), daysAgo(1)),
+    VisionPoint(A_CASTLES_SIGHT, stockholm, Vision.MALLORCA, daysAgo(20), null),
+    VisionPoint(A_CASTLES_SIGHT, helsinki, Vision.MALLORCA, daysAgo(10), daysAgo(1)),
 )
 
 /**

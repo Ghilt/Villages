@@ -308,7 +308,7 @@ describe("the page's conversation with the gateway", () => {
     expect(page.said(before)).toEqual([
       'characters: 2 key figures: Agnes Hollin, a woman of 0; Wilhelm Ystad, a man of 0',
       'characters: Agnes Hollin: piety went from 13 to 14',
-      'sight: the seat (34 km), Agnes Hollin (34 km), the vision given at 55.68, 12.57 (34 km) and a structure (6 km) give vision; 5 places seen from in all',
+      'sight: a structure (34 km), Agnes Hollin (34 km), the vision given at 55.68, 12.57 (34 km) and a structure (6 km) give vision; 5 places seen from in all',
       'dialogues: "A letter from the coast": 1 line to read, up to the next step',
       'dialogues: "A second letter": 1 line to read, then a dialogue choice of 3',
       'dialogues: "The dues": finished, 1 line said',

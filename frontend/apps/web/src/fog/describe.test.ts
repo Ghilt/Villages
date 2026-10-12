@@ -6,7 +6,15 @@ import { describeSight, lastingOn } from './describe';
 const TODAY = 653_709;
 const AGNES = 'cb732500-39bd-3b39-a838-bb89f719578f';
 
-const seat: VisionPointView = { kind: 'seat', place: { lat: 59.33, lon: 18.07 }, radius: 34, since: 653_705 };
+const CASTLE = '5d000000-0000-4000-8000-0000000000ca';
+const castle: VisionPointView = {
+  kind: 'given',
+  of: 'dd000000-0000-4000-8000-0000000000ca',
+  place: { lat: 59.33, lon: 18.07 },
+  radius: 34,
+  since: 653_705,
+  from: CASTLE,
+};
 const inUppsala: VisionPointView = {
   kind: 'keyFigure',
   of: AGNES,
@@ -23,22 +31,22 @@ const onGotland: VisionPointView = {
   since: TODAY,
 };
 
-const names = (id: string) => (id === AGNES ? 'Agnes Hollin' : undefined);
+const names = (id: string) => ({ [AGNES]: 'Agnes Hollin', [CASTLE]: 'Ravenscar Castle' })[id];
 
 describe('what the log says about what a house sees', () => {
   it('says there is nothing to see from before there is a house', () => {
     expect(describeSight([], TODAY, names)).toBe('no vision yet: there is no house to see from');
   });
 
-  it('names the seat, and how far it sees', () => {
-    expect(describeSight([seat], TODAY, names)).toBe(
-      'the seat gives vision, 34 km around it; 1 place seen from in all',
+  it('names the castle the house sees from, and how far it sees', () => {
+    expect(describeSight([castle], TODAY, names)).toBe(
+      'Ravenscar Castle gives vision, 34 km around it; 1 place seen from in all',
     );
   });
 
   it('names who gives vision now, and counts the places seen from that have ended too', () => {
-    expect(describeSight([seat, inUppsala, onGotland], TODAY, names)).toBe(
-      'the seat and Agnes Hollin give vision, 34 km around each; 3 places seen from in all',
+    expect(describeSight([castle, inUppsala, onGotland], TODAY, names)).toBe(
+      'Ravenscar Castle and Agnes Hollin give vision, 34 km around each; 3 places seen from in all',
     );
   });
 
@@ -56,8 +64,8 @@ describe('what the log says about what a house sees', () => {
       radius: 34,
       since: TODAY,
     };
-    expect(describeSight([seat, given], TODAY, names)).toBe(
-      'the seat and the vision given at 55.68, 12.57 give vision, 34 km around each; 2 places seen from in all',
+    expect(describeSight([castle, given], TODAY, names)).toBe(
+      'Ravenscar Castle and the vision given at 55.68, 12.57 give vision, 34 km around each; 2 places seen from in all',
     );
   });
 
@@ -70,10 +78,10 @@ describe('what the log says about what a house sees', () => {
       since: TODAY,
       from: '5d000000-0000-4000-8000-000000000001',
     };
-    const named = (id: string) => (id === mill.from ? 'the Antarctic mill' : undefined);
+    const named = (id: string) => (id === mill.from ? 'the Antarctic mill' : names(id));
 
-    expect(describeSight([seat, mill], TODAY, named)).toBe(
-      'the seat (34 km) and the Antarctic mill (6 km) give vision; 2 places seen from in all',
+    expect(describeSight([castle, mill], TODAY, named)).toBe(
+      'Ravenscar Castle (34 km) and the Antarctic mill (6 km) give vision; 2 places seen from in all',
     );
     expect(describeSight([mill], TODAY, () => undefined)).toBe(
       'a structure gives vision, 6 km around it; 1 place seen from in all',
@@ -89,7 +97,7 @@ describe('what the log says about what a house sees', () => {
 
 describe('whether a vision point still gives vision', () => {
   it('lasts while it has no end, and stops on the day it ends', () => {
-    expect(lastingOn(seat, TODAY)).toBe(true);
+    expect(lastingOn(castle, TODAY)).toBe(true);
     expect(lastingOn(inUppsala, TODAY)).toBe(false);
     expect(lastingOn(inUppsala, TODAY - 1)).toBe(true);
   });

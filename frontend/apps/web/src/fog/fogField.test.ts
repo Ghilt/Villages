@@ -82,7 +82,7 @@ function where(field: FogField, lat: number, lon: number): { revealed: number; v
 }
 
 const point = (lat: number, lon: number, kilometres = 34, until?: number): VisionPointView => ({
-  kind: 'seat',
+  kind: 'given',
   place: { lat, lon },
   radius: kilometres,
   since: 0,

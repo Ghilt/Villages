@@ -6,9 +6,12 @@ import villages.application.AnonymousTokens
 import villages.application.Arrival
 import villages.application.FaultBoard
 import villages.application.FoundHouseService
+import villages.application.IncomeService
 import villages.application.KeyFigureService
 import villages.application.Later
 import villages.application.ResourceService
+import villages.application.Seats
+import villages.application.StandingEffects
 import villages.application.Stands
 import villages.application.TakeActionService
 import villages.application.DialogueService
@@ -24,6 +27,7 @@ import villages.application.fate.FirstPools
 import villages.application.fate.omenSources
 import villages.application.fate.firstActions
 import villages.application.fate.RollService
+import villages.application.WipeGate
 import villages.application.WorldKept
 import villages.domain.PlayerId
 import villages.domain.WorldTime
@@ -126,6 +130,30 @@ internal class Rig(
 
     /** Where the gateway hears that something acting on its own threw, said on purpose by a test. */
     val faults = FaultBoard()
+
+    /**
+     * What the app's listeners plan - the seats listener raising a house's castle as it is founded, the
+     * standing-effects listener giving the house its sight and its income - kept apart from the gateway's own later
+     * and done only when a test asks, with [settle]. A test that does not ask sees a house in the moment before:
+     * founded, with no castle yet and nothing it sees from.
+     */
+    val reactions = ManualLater()
+
+    init {
+        val gate = WipeGate()
+        Seats(world, reactions, faults, gate, world, world, { noon }).started()
+        StandingEffects(
+            world, reactions, faults, gate, RIG_CATALOGUE,
+            VisionService(world, { noon }, worldClock) { UUID.fromString("e2000000-0000-4000-8000-%012x".format(++minted)) },
+            IncomeService(world, { noon }, worldClock),
+        ).started()
+    }
+
+    /** Lets the listeners do whatever they have planned, and whatever that plans in turn: a founding's castle and its sight. */
+    fun settle() {
+        while (reactions.pending > 0) reactions.tick()
+    }
+
     val gateway = Gateway(
         tokens = AnonymousTokens,
         faults = faults,

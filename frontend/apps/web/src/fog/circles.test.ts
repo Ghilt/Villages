@@ -8,7 +8,7 @@ import { toMercator } from '../geometry/cameraMath';
 import { circleOf, visionOf } from './circles';
 
 const at = (lat: number, lon: number, until?: number): VisionPointView => ({
-  kind: 'seat',
+  kind: 'given',
   place: { lat, lon },
   radius: 34,
   since: 100,
@@ -50,7 +50,10 @@ describe('a vision point as the fog draws it', () => {
     };
 
     for (const vector of fixture.vectors) {
-      const circle = circleOf({ kind: 'seat', place: vector.centre, radius: vector.kilometres, since: 0 }, 0);
+      const circle = circleOf(
+        { kind: 'given', place: vector.centre, radius: vector.kilometres, since: 0 },
+        0,
+      );
       const place = toMercator({ lng: vector.place.lon, lat: vector.place.lat });
       const apart = Math.hypot(
         place.x * WORLD_MASTER_WIDTH - circle.x,

@@ -28,6 +28,7 @@ class GatewayInspectingSpec : StringSpec({
         val kestrel = told.filterIsInstance<YourHouse>().last().yours!!.house
         val (mine, sent) = rig.introduced()
         mine.receive(founding())
+        rig.settle()
         sent.clear()
 
         mine.receive(inspecting("house", kestrel.id))
@@ -105,6 +106,7 @@ class GatewayInspectingSpec : StringSpec({
         theirs.receive(moving(agnes, 59.35, 18.10, commandNumber(2)))
         val (mine, sent) = rig.introduced()
         mine.receive(founding())
+        rig.settle()
         sent.clear()
 
         mine.receive(inspecting("character", agnes))
@@ -123,6 +125,7 @@ class GatewayInspectingSpec : StringSpec({
         theirs.receive(moving(agnes, 59.35, 18.10, commandNumber(2)))
         val (mine, sent) = rig.introduced()
         mine.receive(founding())
+        rig.settle()
         rig.day = WorldTime(today.day + 30)
         theirs.receive(moving(agnes, HELSINKI_LAT, HELSINKI_LON, commandNumber(3)))
         sent.clear()
@@ -142,6 +145,7 @@ class GatewayInspectingSpec : StringSpec({
         val agnes = told.filterIsInstance<YourKeyFigures>().last().keyFigures.single().id
         val (mine, sent) = rig.introduced()
         mine.receive(founding())
+        rig.settle()
         theirs.receive(moving(agnes, 59.35, 18.10, commandNumber(2)))
         theirs.receive(moving(agnes, HELSINKI_LAT, HELSINKI_LON, commandNumber(3)))
         sent.clear()

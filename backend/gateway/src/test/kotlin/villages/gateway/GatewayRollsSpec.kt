@@ -86,6 +86,7 @@ class GatewayRollsSpec : StringSpec({
         val rig = Rig()
         val (player, sent) = rig.introduced()
         player.receive(founding())
+        rig.settle()
         player.receive(addingAKeyFigure(COMMAND_TWO))
         val figure = sent.filterIsInstance<YourKeyFigures>().last().keyFigures.single()
         player.receive(offering("letter", COMMAND_THREE))
@@ -147,6 +148,7 @@ class GatewayRollsSpec : StringSpec({
         )
         val (player, sent) = rig.introduced(master = "woods")
         player.receive(founding())
+        rig.settle()
 
         player.receive(rolling(COMMAND_TWO))
 

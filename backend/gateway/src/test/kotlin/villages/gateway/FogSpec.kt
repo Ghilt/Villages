@@ -7,7 +7,6 @@ import villages.application.CharacterSpan
 import villages.application.Holder
 import villages.application.HouseRow
 import villages.application.VisionPoint
-import villages.application.VisionSource
 import villages.domain.Banner
 import villages.domain.CharacterId
 import villages.domain.CharacterName
@@ -76,7 +75,7 @@ private fun standing(at: Location, significance: Double = 10.0) =
     CharacterSpan(at, Significance(significance), since = today, until = null)
 
 private fun point(at: Location, since: WorldTime = today, until: WorldTime? = null) =
-    VisionPoint(VisionSource.Seat, at, Vision.MALLORCA, since, until)
+    VisionPoint(A_CASTLES_SIGHT, at, Vision.MALLORCA, since, until)
 
 /** A seat at Stockholm, and a vision of Helsinki that lasted from ten days ago until yesterday. */
 private val seatAndAnEndedVision = listOf(
