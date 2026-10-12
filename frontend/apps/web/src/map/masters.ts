@@ -49,6 +49,16 @@ export function chooseMaster(name: string): void {
   window.location.reload();
 }
 
+/** Where one world step of a master stands in this tree, as the world cache tells it: see decision record 0095. */
+export type Standing = 'current' | 'on the shelf' | 'to make' | 'cannot';
+
+/** One world step of a master - the tiles, the flow, the sprite map, the origin - and why it is not current. */
+export interface StepOnDisk {
+  name: string;
+  standing: Standing;
+  why: string[];
+}
+
 /** One master image in `world/master`, as the dev server sees it. */
 export interface MasterOnDisk {
   name: string;
@@ -56,75 +66,74 @@ export interface MasterOnDisk {
   width: number;
   height: number;
   bytes: number;
-  editedAt: number;
-  cutAt: number | null;
-  furnishedAt: number | null;
-  /** When its origin map was last worked out, and its names last carried through it, or nothing if never. */
-  originAt: number | null;
-  namedAt: number | null;
+  /** Whether this tree has its tiles at all, current or not: whether the map can draw it without waiting. */
+  drawn: boolean;
+  steps: StepOnDisk[];
 }
 
-/** Painted since it was last cut, so what the map is drawing is not what the image says. */
+/** The steps a repaint makes stale and only cutting again mends. The rest are mended apart, and quicker. */
+const CUT_STEPS = ['import', 'tile', 'styles', 'flow', 'ground'];
+const ORIGIN_STEPS = ['origin', 'culture', 'height'];
+
+const notCurrent = (step: StepOnDisk) => step.standing === 'on the shelf' || step.standing === 'to make';
+const stale = (master: MasterOnDisk, names: string[]) =>
+  master.steps.filter((step) => names.includes(step.name) && notCurrent(step));
+
+/**
+ * Whether what is drawn is not what the image and the files it is made from say: told from what each step is made
+ * from, never from a date, so a tree checked out a minute ago is not told its borrowed world is stale.
+ */
 export function isStale(master: MasterOnDisk): boolean {
-  return master.cutAt !== null && master.editedAt > master.cutAt;
+  return master.drawn && stale(master, CUT_STEPS).length > 0;
 }
 
 /**
- * Whether a master's sprite map is out of date, and so whether its scenery is standing on stale ground.
- *
- * Two ways for it to be: the image was painted since, or **`world/biomes.json` was saved since**. The
- * second is the one that matters in practice and the one this existed without for a moment: tuning a
- * look edits that file and nothing else, so a sprite map goes out of date without any master changing,
- * and a panel that only watched the image would have gone on saying every world was current.
- *
- * Separate from `isStale` because the two go stale together and are mended apart: furnishing is half a
- * minute where cutting is five.
+ * Whether a master's sprite map is out of date, and so whether its scenery is standing on stale ground: the image
+ * painted since, or **`world/biomes.json` saved since**, which tuning a look does over and over without touching
+ * a master. Separate from `isStale` because the two go stale together and are mended apart.
  */
-export function isUnfurnished(master: MasterOnDisk, tunedAt: number | null): boolean {
-  if (master.furnishedAt === null) {
-    return true;
-  }
-  return master.editedAt > master.furnishedAt || (tunedAt !== null && tunedAt > master.furnishedAt);
+export function isUnfurnished(master: MasterOnDisk): boolean {
+  return master.steps.some((step) => step.name === 'sprites' && step.standing !== 'current');
 }
 
 /**
- * What a cut master's origin map needs, if anything: worked out again, because it was never worked out or the
- * master was painted since, which leaves real names on the wrong ground; or only its names carried again,
- * because the review of 1790 was saved since they were. Nothing for a master that is not cut, which has no
- * ground for names to stand on yet. See `docs/plans/real-world-names.md`.
+ * What a cut master's origin map needs, if anything: worked out again, with the cultures and the height fitted
+ * through it, because the master was painted since; or only its names carried again, because the review of 1790
+ * was saved since. Nothing for a master that is not drawn yet. See `docs/plans/real-world-names.md`.
  */
-export function originNeeds(master: MasterOnDisk, reviewedAt: number | null): 'origin' | 'names' | null {
-  if (master.cutAt === null) {
+export function originNeeds(master: MasterOnDisk): 'origin' | 'names' | null {
+  if (!master.drawn) {
     return null;
   }
-  if (master.originAt === null || master.editedAt > master.originAt) {
+  if (stale(master, ORIGIN_STEPS).length > 0) {
     return 'origin';
   }
-  if (master.namedAt === null || master.namedAt < master.originAt) {
-    return 'names';
-  }
-  return reviewedAt !== null && reviewedAt > master.namedAt ? 'names' : null;
+  return stale(master, ['names']).length > 0 ? 'names' : null;
 }
+
+/** Why a step is not current, in a few words, or nothing when it is. */
+const reason = (step: StepOnDisk | undefined) =>
+  step === undefined ? '' : `${step.name}: ${step.why[0] ?? ''}`;
 
 /** What the panel says about a cut master's origin map and names when they are out of date, or nothing. */
-export function describeOrigin(master: MasterOnDisk | undefined, reviewedAt: number | null): string {
-  const needs = master === undefined ? null : originNeeds(master, reviewedAt);
-  if (master === undefined || needs === null) {
+export function describeOrigin(master: MasterOnDisk | undefined): string {
+  const needs = master === undefined ? null : originNeeds(master);
+  if (master === undefined) {
     return '';
   }
-  if (master.originAt === null) {
-    return 'no origin map yet, so no real names in this world';
+  const names = master.steps.find((step) => step.name === 'names');
+  if (needs === null) {
+    return names?.standing === 'cannot' ? `no real names in this world: ${names.why[0] ?? ''}` : '';
   }
   return needs === 'origin'
-    ? `painted ${since(master.editedAt)} ago, after its origin map was worked out: names may stand on the wrong ground`
-    : 'world/names saved after its names were carried';
+    ? `its origin map is out of date (${reason(stale(master, ORIGIN_STEPS)[0])}): names may stand on the wrong ground`
+    : `its names are out of date (${reason(names)})`;
 }
 
-/** The listing's own times, beside the masters: when world/biomes.json and the review of 1790 were saved. */
+/** The listing, and who is making this tree's world just now, if anybody is. */
 export interface MastersListing {
   masters: MasterOnDisk[];
-  tunedAt: number | null;
-  reviewedAt: number | null;
+  working: string | null;
 }
 
 /**
@@ -132,18 +141,14 @@ export interface MastersListing {
  * no dev server there to read a directory, and the world was cut before it was built.
  */
 export async function listMasters(): Promise<MastersListing> {
-  const none = { masters: [], tunedAt: null, reviewedAt: null };
+  const none = { masters: [], working: null };
   try {
     const response = await fetch('/world-api/masters');
     if (!response.ok) {
       return none;
     }
     const body = (await response.json()) as Partial<MastersListing>;
-    return {
-      masters: body.masters ?? [],
-      tunedAt: body.tunedAt ?? null,
-      reviewedAt: body.reviewedAt ?? null,
-    };
+    return { masters: body.masters ?? [], working: body.working ?? null };
   } catch {
     return none;
   }
@@ -227,26 +232,25 @@ async function errand(name: string, which: Errand): Promise<boolean> {
 }
 
 /**
- * What the panel says under the terrain dropdown: enough to know whether what is on the screen is what
- * the image on disk says.
+ * What the panel says under the terrain dropdown: enough to know whether what is on the screen is what the image
+ * on disk and the files it is made from say, and why not.
  *
- * Picking a master that is already cut reloads the page straight away, so the only states that get as
- * far as being described are the one being drawn and the ones that need cutting first.
+ * Picking a master that is already drawn reloads the page straight away, so the only states that get as far as
+ * being described are the one being drawn and the ones that need cutting first.
  */
 export function describeMaster(
   chosen: MasterOnDisk | undefined,
   master: string,
   working: false | Errand,
-  tunedAt: number | null = null,
 ): string {
   if (working === 'cut') {
-    return 'tracing the coast, cutting the tiles, working out the biomes and where the land came from. Eight minutes or so.';
+    return 'making what is out of date and borrowing the rest from the world cache: seconds for what another tree made, nine minutes for a master nobody has.';
   }
   if (working === 'furnish') {
-    return 'working out the biomes and the stands. Half a minute.';
+    return 'working out the biomes and the stands, or borrowing them. Half a minute at most.';
   }
   if (working === 'origin') {
-    return 'working out where the land came from and carrying the names through it. Two minutes.';
+    return 'working out where the land came from, and the names, cultures and height carried through it. Two minutes, or seconds from the world cache.';
   }
   if (working === 'names') {
     return 'carrying the names through the origin map. A second.';
@@ -260,24 +264,23 @@ export function describeMaster(
   // width the world is supposed to be, so a master of another size draws, but not faithfully.
   const odd =
     chosen.width === WORLD_MASTER_WIDTH ? '' : `, and not the ${WORLD_MASTER_WIDTH} this world expects`;
+  const borrowable = chosen.steps.every((step) => step.standing !== 'to make');
 
-  if (chosen.cutAt === null) {
-    return `${size}${odd}, never cut into a world`;
+  if (!chosen.drawn) {
+    return `${size}${odd}, never cut into a world${borrowable ? ' here, and the world cache has it: seconds' : ''}`;
   }
   if (isStale(chosen)) {
-    return `${size}${odd}, painted ${since(chosen.editedAt)} ago, after it was last cut`;
+    return `${size}${odd}, out of date: ${reason(stale(chosen, CUT_STEPS)[0])}`;
   }
-  if (chosen.furnishedAt === null) {
-    return `${size}${odd}, cut ${since(chosen.cutAt)} ago, and growing nothing: it has no sprite map`;
+  const sprites = chosen.steps.find((step) => step.name === 'sprites');
+  if (sprites?.standing === 'cannot') {
+    return `${size}${odd}, growing nothing: ${sprites.why[0] ?? 'it has no sprite map'}`;
   }
-  if (isUnfurnished(chosen, tunedAt)) {
-    const why =
-      tunedAt !== null && tunedAt > chosen.furnishedAt
-        ? `world/biomes.json saved ${since(tunedAt)} ago`
-        : `painted ${since(chosen.editedAt)} ago`;
-    return `${size}${odd}, ${why}, after its biomes were worked out`;
+  if (isUnfurnished(chosen)) {
+    return `${size}${odd}, its sprite map is out of date: ${sprites?.why[0] ?? ''}`;
   }
-  return `${size}${odd}, cut ${since(chosen.cutAt)} ago, furnished ${since(chosen.furnishedAt)} ago`;
+  const cannot = chosen.steps.filter((step) => step.standing === 'cannot').map((step) => step.name);
+  return `${size}${odd}, current: every step is what it is made from${cannot.length > 0 ? `, but no ${cannot.join(' or ')}` : ''}`;
 }
 
 /** How long ago, in the roughest terms that are still useful. */

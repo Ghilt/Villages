@@ -3,6 +3,7 @@ import { relative } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import { OUTPUT_DIR, STANDS_DIR } from '../../../packages/world/bin/lib/paths.ts';
+import { WORLD_STEPS } from '../../../packages/world/bin/lib/worldSteps.ts';
 import { ERRANDS, asksForStands } from './worldApi.ts';
 
 describe('the stands, which only the game server hands out', () => {
@@ -45,21 +46,18 @@ describe('the stands, which only the game server hands out', () => {
   });
 });
 
-describe('what a repaint makes stale, and cutting makes again', () => {
-  it('cuts, traces the rivers, furnishes, reads the ground, works out where the land came from, and fits the height to it', () => {
-    expect(ERRANDS.cut.map(([script]) => script)).toEqual([
-      'importMaster.ts',
-      'tileWorld.ts',
-      'flowWorld.ts',
-      'generateSpriteMap.ts',
-      'groundWorld.ts',
-      'originWorld.ts',
-      'heightWorld.ts',
-    ]);
+describe('what each errand asks world:ready for', () => {
+  it('makes every world step current when it cuts, the same list the quick start makes', () => {
+    expect(ERRANDS.cut).toEqual([]);
   });
 
-  it('can work out the origin, and the height fitted through it, or carry the names, on their own', () => {
-    expect(ERRANDS.origin.map(([script]) => script)).toEqual(['originWorld.ts', 'heightWorld.ts']);
-    expect(ERRANDS.names.map(([script]) => script)).toEqual(['namesWorld.ts']);
+  it('can furnish, work out the origin, or carry the names, each with the steps made from them', () => {
+    const named = new Set(WORLD_STEPS.map((step) => step.name));
+    for (const words of [ERRANDS.furnish, ERRANDS.origin, ERRANDS.names]) {
+      expect(words[0]).toBe('--only');
+      expect(named.has(words[1] as never)).toBe(true);
+    }
+    expect(ERRANDS.origin[1]).toBe('origin');
+    expect(ERRANDS.names[1]).toBe('names');
   });
 });

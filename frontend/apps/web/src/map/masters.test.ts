@@ -9,27 +9,56 @@ import {
   since,
   worldRootOf,
 } from './masters';
-import type { MasterOnDisk } from './masters';
+import type { MasterOnDisk, Standing } from './masters';
 
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 const HOUR = 60 * MINUTE;
 
-function master(fields: Partial<MasterOnDisk> = {}): MasterOnDisk {
+const STEPS = [
+  'import',
+  'tile',
+  'styles',
+  'flow',
+  'sprites',
+  'ground',
+  'origin',
+  'names',
+  'culture',
+  'height',
+];
+
+/** A master every step of which is current, but for the ones given otherwise, with why. */
+function master(
+  fields: Partial<MasterOnDisk> = {},
+  standing: Record<string, [Standing, string?]> = {},
+): MasterOnDisk {
   return {
     name: 'terrain',
     file: 'terrain.png',
     width: 32768,
     height: 16384,
     bytes: 24_749_719,
-    editedAt: Date.now() - HOUR,
-    cutAt: Date.now() - 30 * MINUTE,
-    furnishedAt: Date.now() - 29 * MINUTE,
-    originAt: Date.now() - 28 * MINUTE,
-    namedAt: Date.now() - 28 * MINUTE,
+    drawn: true,
+    steps: STEPS.map((name) => {
+      const [is, why] = standing[name] ?? ['current'];
+      return { name, standing: is, why: why === undefined ? [] : [why] };
+    }),
     ...fields,
   };
 }
+
+const painted = {
+  import: ['to make', 'world/master/terrain.png changed'],
+  tile: ['to make', 'world/master/terrain.png changed'],
+  flow: ['to make', 'world/master/terrain.png changed'],
+  sprites: ['to make', 'world/master/terrain.png changed'],
+  ground: ['to make', 'world/master/terrain.png changed'],
+  origin: ['to make', 'world/master/terrain.png changed'],
+  names: ['to make', 'origin, which it is made from, was made again'],
+  culture: ['to make', 'origin, which it is made from, was made again'],
+  height: ['to make', 'world/master/terrain.png changed'],
+} satisfies Record<string, [Standing, string]>;
 
 describe('where a master is served from', () => {
   it('is a directory of its own, so more than one can exist at a time', () => {
@@ -39,16 +68,20 @@ describe('where a master is served from', () => {
 });
 
 describe('whether what is drawn is what the image says', () => {
-  it('is stale when the master was saved after it was cut, which is what a Photoshop save looks like', () => {
-    expect(isStale(master({ cutAt: 1000, editedAt: 2000 }))).toBe(true);
+  it('is stale when the master was painted since, which is what a Photoshop save looks like', () => {
+    expect(isStale(master({}, painted))).toBe(true);
   });
 
-  it('is not stale when it was cut after the last save', () => {
-    expect(isStale(master({ cutAt: 2000, editedAt: 1000 }))).toBe(false);
+  it('is stale when a file the tiles are made from was saved since, a palette or the render colours', () => {
+    expect(isStale(master({}, { tile: ['to make', 'world/render.json changed'] }))).toBe(true);
+  });
+
+  it('is not stale when every step is what it is made from, however recently the tree was checked out', () => {
+    expect(isStale(master())).toBe(false);
   });
 
   it('is not stale when it has never been cut, because there is nothing to be out of date', () => {
-    expect(isStale(master({ cutAt: null }))).toBe(false);
+    expect(isStale(master({ drawn: false }, painted))).toBe(false);
   });
 });
 
@@ -65,46 +98,47 @@ describe('what the panel says about the chosen master', () => {
     expect(describeMaster(master(), 'terrain', false)).not.toContain('not the');
   });
 
-  it('says when it has never been cut, which is why nothing would be drawn', () => {
-    expect(describeMaster(master({ cutAt: null }), 'terrain', false)).toContain('never cut');
+  it('says when it has never been cut here, and when the world cache has it all the same', () => {
+    expect(describeMaster(master({ drawn: false }, painted), 'terrain', false)).toContain('never cut');
+    const shelved = master({ drawn: false }, { tile: ['on the shelf', 'nothing was made before'] });
+    expect(describeMaster(shelved, 'terrain', false)).toContain('the world cache has it');
   });
 
-  it('says when the image has been painted since it was cut', () => {
-    const painted = master({ cutAt: Date.now() - HOUR, editedAt: Date.now() - MINUTE });
+  it('says which step is out of date and why, when the image has been painted since', () => {
+    const told = describeMaster(master({}, painted), 'terrain', false);
 
-    expect(describeMaster(painted, 'terrain', false)).toContain('after it was last cut');
+    expect(told).toContain('out of date');
+    expect(told).toContain('world/master/terrain.png changed');
   });
 
-  it('says what it is doing while it cuts, because that takes a minute and a half', () => {
-    expect(describeMaster(master(), 'terrain', 'cut')).toContain('cutting the tiles');
+  it('says what it is doing while it cuts, and that the world cache can make it quick', () => {
+    expect(describeMaster(master(), 'terrain', 'cut')).toContain('world cache');
   });
 
   it('says what it is doing while it furnishes, which is the quick one of the two', () => {
     expect(describeMaster(master(), 'terrain', 'furnish')).toContain('biomes');
   });
 
-  it('says when a master is cut but grows nothing, because that is a state and not a fault', () => {
-    expect(describeMaster(master({ furnishedAt: null }), 'terrain', false)).toContain('no sprite map');
+  it('says when a master grows nothing, because that is a state and not a fault', () => {
+    const bare = master({}, { sprites: ['cannot', 'world/biomes.json is missing'] });
+    expect(describeMaster(bare, 'terrain', false)).toContain('growing nothing');
   });
 
   it('says when the table was tuned since the biomes were worked out, and names the file', () => {
-    const tuned = describeMaster(master({ furnishedAt: Date.now() - HOUR }), 'terrain', false, Date.now());
+    const tuned = describeMaster(
+      master({}, { sprites: ['to make', 'world/biomes.json changed'] }),
+      'terrain',
+      false,
+    );
 
     expect(tuned).toContain('world/biomes.json');
-    expect(tuned).toContain('after its biomes');
+    expect(tuned).toContain('sprite map is out of date');
   });
 
-  it('says when the image has been painted since its biomes were worked out', () => {
-    // Cut after the paint but furnished before it, which is what a biomes.json edit followed by a
-    // recut of the tiles alone would leave behind.
-    const painted = master({
-      cutAt: Date.now() - 30 * SECOND,
-      editedAt: Date.now() - MINUTE,
-      furnishedAt: Date.now() - HOUR,
-    });
-
-    expect(isStale(painted)).toBe(false);
-    expect(describeMaster(painted, 'terrain', false)).toContain('after its biomes');
+  it('says when every step is current, and what it has none of', () => {
+    expect(describeMaster(master(), 'terrain', false)).toContain('current');
+    const nameless = master({}, { names: ['cannot', 'world/source/ne_10m_lakes.geojson is missing'] });
+    expect(describeMaster(nameless, 'terrain', false)).toContain('but no names');
   });
 
   it('falls back to the master being drawn when nothing answered, which is a built app', () => {
@@ -113,41 +147,24 @@ describe('what the panel says about the chosen master', () => {
 });
 
 describe('whether a master is furnished', () => {
-  it('is not, when it has no sprite map at all', () => {
-    expect(isUnfurnished(master({ furnishedAt: null }), null)).toBe(true);
+  it('is not, when its sprite map cannot be made or is out of date', () => {
+    expect(isUnfurnished(master({}, { sprites: ['cannot', 'world/biomes.json is missing'] }))).toBe(true);
+    expect(isUnfurnished(master({}, painted))).toBe(true);
   });
 
-  it('is not, when the image was painted afterwards', () => {
-    expect(
-      isUnfurnished(master({ furnishedAt: Date.now() - HOUR, editedAt: Date.now() - MINUTE }), null),
-    ).toBe(true);
-  });
-
-  it('is, when the sprite map is newer than the paint', () => {
-    expect(isUnfurnished(master(), null)).toBe(false);
+  it('is, when the sprite map is what it is made from', () => {
+    expect(isUnfurnished(master())).toBe(false);
   });
 
   /**
-   * The one that matters in practice, and the one this was written without for a moment. Tuning a look
-   * edits world/biomes.json and no master, so a sprite map goes out of date with nothing on any image
-   * having changed - and a panel watching only the images would go on calling every world current.
+   * The one that matters in practice. Tuning a look edits world/biomes.json and no master, so a sprite map goes
+   * out of date with nothing on any image having changed; its fingerprint is made from the file, so it moves.
    */
-  it('is not, when world/biomes.json was saved after the sprite map was made', () => {
-    const furnished = master({ furnishedAt: Date.now() - HOUR });
+  it('is not, when world/biomes.json was saved since, and the tiles are not stale for it', () => {
+    const tuned = master({}, { sprites: ['to make', 'world/biomes.json changed'] });
 
-    expect(isUnfurnished(furnished, Date.now() - MINUTE)).toBe(true);
-    expect(isUnfurnished(furnished, Date.now() - 2 * HOUR)).toBe(false);
-  });
-
-  /**
-   * The two go stale for the same reason and are mended by different commands, so a master can want
-   * one, the other, or both. Keeping them apart is what makes a biomes.json edit half a minute.
-   */
-  it('is a separate question from whether the tiles are stale', () => {
-    const justRecut = master({ cutAt: Date.now() - MINUTE, furnishedAt: null });
-
-    expect(isStale(justRecut)).toBe(false);
-    expect(isUnfurnished(justRecut, null)).toBe(true);
+    expect(isUnfurnished(tuned)).toBe(true);
+    expect(isStale(tuned)).toBe(false);
   });
 });
 
@@ -172,28 +189,30 @@ describe('saying how long ago', () => {
 });
 
 describe('whether the real names stand on the ground the master has now', () => {
-  it('needs nothing when its origin map and names are newer than the master and the review', () => {
-    expect(originNeeds(master(), Date.now() - 2 * HOUR)).toBeNull();
-    expect(describeOrigin(master(), null)).toBe('');
+  it('needs nothing when its origin map and names are what they are made from', () => {
+    expect(originNeeds(master())).toBeNull();
+    expect(describeOrigin(master())).toBe('');
   });
 
   it('needs its origin worked out again when the master was painted since, which moves land under the names', () => {
-    const painted = master({ editedAt: Date.now() - 10 * MINUTE });
-    expect(originNeeds(painted, null)).toBe('origin');
-    expect(describeOrigin(painted, null)).toContain('wrong ground');
-  });
-
-  it('needs its origin worked out when it has none', () => {
-    expect(originNeeds(master({ originAt: null, namedAt: null }), null)).toBe('origin');
+    const moved = master({}, { origin: painted.origin, names: painted.names, culture: painted.culture });
+    expect(originNeeds(moved)).toBe('origin');
+    expect(describeOrigin(moved)).toContain('wrong ground');
   });
 
   it('needs only its names carried again when the review of 1790 or the lines about the waters were saved since', () => {
-    const reviewed = Date.now() - 5 * MINUTE;
-    expect(originNeeds(master(), reviewed)).toBe('names');
-    expect(describeOrigin(master(), reviewed)).toContain('world/names saved');
+    const reviewed = master({}, { names: ['to make', 'world/names/1790.json changed'] });
+    expect(originNeeds(reviewed)).toBe('names');
+    expect(describeOrigin(reviewed)).toContain('world/names/1790.json changed');
+  });
+
+  it('says when there are no names to carry, and why', () => {
+    const nameless = master({}, { names: ['cannot', 'world/source/ne_10m_lakes.geojson is missing'] });
+    expect(originNeeds(nameless)).toBeNull();
+    expect(describeOrigin(nameless)).toContain('no real names');
   });
 
   it('needs nothing of a master that is not cut, which has no ground for names yet', () => {
-    expect(originNeeds(master({ cutAt: null, originAt: null }), null)).toBeNull();
+    expect(originNeeds(master({ drawn: false }, painted))).toBeNull();
   });
 });

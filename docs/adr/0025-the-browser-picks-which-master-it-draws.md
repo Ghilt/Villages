@@ -99,3 +99,18 @@ disk when it is asked for: a tile in 3 ms. Vite's own public folder cannot just 
 because outside a worktree it keeps a list of the files in it and hears of new ones from the watcher, and a
 master cut while the server runs would be missing from that list until a restart. What is not on disk is left
 to Vite as before, and the stands are still refused. A test holds that no spelling of a path leaves the folder.
+
+## Amendment, 2026-10-12: the dev server makes the world with `world:ready`, and tells stale from fingerprints
+
+The panel's errands were a list of their own, two steps short of the quick start's - no culture map, no styles -
+and they judged a world stale from dates: a master saved after the tiles' manifest was written. Git dates every
+file of a new checkout at the moment of checkout, so a world borrowed from another tree always looked stale,
+and the dates missed real changes, a palette saved or a tool's code changed. They also wrote through a junction
+into the main checkout's world when a tree had one.
+
+Every errand now runs `world:ready` (decision record 0095): cutting makes every world step current, and
+furnishing, the origin and the names make theirs and every step made from them. The listing says where each
+step of each master stands - current, on the world cache's shelf, to make, or not to be made without an input -
+and why, worked out from what it is made from. What the buttons are and what they say is as before. One run a
+tree at a time is held by the world cache's lock of the tree rather than by the dev server, so a press while the
+quick start is making the world is refused and says who has it.

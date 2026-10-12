@@ -13,19 +13,22 @@ stage alone, with none of the debug panel in it (decision record 0079).
 
 ## The debug panel and the game
 
-- Which world is drawn: the **Debug map** part of the debug panel, down the right-hand side. Its terrain
-  dropdown is every PNG in
-  `world/master/`, with each one's size and when it was last cut, and it says when the image has been
-  saved since - which it re-checks whenever the window is given focus. A master nobody has cut yet gets
-  a button, and pressing it runs `world:import` and `world:tile`, the two commands `CLAUDE.md` cuts a world
-  with, and then `world:flow`, `world:sprites`, `world:ground` and `world:origin`, from the dev server with their
-  output going into the debug log: about eight minutes, once per master, and the same button cuts it again once
-  the image has been saved since. The quick start does the same for the default master by itself: whatever a
-  save has made stale is cut again when it starts, and nothing when nothing was saved. A master whose origin map is older than its last save, or whose names are older than
-  `world/names/1790.json` or `about.json`, says so under the dropdown, with a button to mend only that - **work out its
-  origin**, two minutes, or **carry its names again**, a second - and the Origin and Info map renderers say so
-  in the log, because a stale origin map puts real names on the wrong ground and looks no different.
-  Switching reloads the page on purpose. So the loop is: paint, save, alt-tab, pick it. See `docs/adr/0025`.
+- Which world is drawn: the **Debug map** part of the debug panel, down the right-hand side. Its terrain dropdown
+  is every PNG in `world/master/`, with each one's size, and it says whether this tree's world of it is current:
+  each of its ten world steps is worked out from what it is made from, never from dates, and the panel says the
+  first that is out of date and why - *tile: world/master/terrain.png changed*, *sprites: world/biomes.json
+  changed* - which it re-checks whenever the window is given focus. A master nobody has cut here gets a button,
+  and pressing it runs `world:ready` from the dev server, with its output going into the debug log: whatever the
+  world cache has for these inputs is borrowed in seconds, and whatever nobody has made is made, about nine
+  minutes the first time for a master on the whole machine. The same button makes it current again once the
+  image, or a file a step is made from, has been saved since. The quick start does the same for the default
+  master by itself, and nothing when nothing was saved. A master whose origin map is out of date, or whose names
+  are, says so under the dropdown, with a button to mend only that - **work out its origin**, with the cultures
+  and the height made from it, or **carry its names again**, a second - and the Origin and Info map renderers say
+  so in the log, because a stale origin map puts real names on the wrong ground and looks no different. **furnish
+  it** works out the sprite map alone. One run a tree at a time, whoever started it: a press while the quick
+  start is making the world is refused and says so. Switching reloads the page on purpose. So the loop is: paint,
+  save, alt-tab, pick it. See `docs/adr/0025` and 0095.
 - What it looks like: the renderer dropdown in that same panel. `Biome` is not a look and not even the
   terrain: it lays the sprite map's own biome raster on the world, flat and blocky, which is the only way
   to review a biome without the scenery standing on it in the way. `Raw` is the flat

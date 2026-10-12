@@ -42,15 +42,13 @@ interface MapSectionProps {
  * be drawn - the browser draws map tiles, not a 32768 pixel image - so picking one offers to cut it,
  * and the commands' own output goes into the debug log below while it runs. See docs/adr/0025.
  *
- * **Two errands, because they go stale together and are mended apart.** Cutting traces the coast, cuts
- * the tiles and works out the biomes, which is five minutes; furnishing does only the last of those,
- * which is half a minute and is what an edit to `world/biomes.json` needs. A master that is cut but not
- * furnished draws a bare world, and the dropdown says so. See docs/adr/0054.
+ * **Every errand is `world:ready`**, which borrows from the world cache whatever another tree made from the same
+ * inputs and makes the rest once for every tree. Cutting makes every step current; furnishing makes the sprite map
+ * alone, which is what an edit to `world/biomes.json` needs; the origin and the names theirs. What is out of date,
+ * and why, is told from what each step is made from, never from dates. See docs/adr/0054 and 0095.
  */
 export function MapSection({ map, master, renderer, onRenderer }: MapSectionProps) {
   const [masters, setMasters] = useState<MasterOnDisk[]>([]);
-  const [tunedAt, setTunedAt] = useState<number | null>(null);
-  const [reviewedAt, setReviewedAt] = useState<number | null>(null);
   const [wanted, setWanted] = useState(master);
   const [working, setWorking] = useState<false | Errand>(false);
   const fog = useStore(sessionStore, (state) => state.fogOfWar);
@@ -61,11 +59,7 @@ export function MapSection({ map, master, renderer, onRenderer }: MapSectionProp
   const given = (sight?.points ?? []).filter((point) => point.kind === 'given' && lastingOn(point, today));
 
   const refresh = useCallback(() => {
-    void listMasters().then((answer) => {
-      setMasters(answer.masters);
-      setTunedAt(answer.tunedAt);
-      setReviewedAt(answer.reviewedAt);
-    });
+    void listMasters().then((answer) => setMasters(answer.masters));
   }, []);
 
   // Also whenever the window is given focus, which is what coming back from an image editor looks like:
@@ -89,32 +83,33 @@ export function MapSection({ map, master, renderer, onRenderer }: MapSectionProp
   }, [map, renderer, master]);
 
   const chosen = masters.find((candidate) => candidate.name === wanted);
-  const needsCutting = chosen !== undefined && (chosen.cutAt === null || isStale(chosen));
+  const needsCutting = chosen !== undefined && (!chosen.drawn || isStale(chosen));
   // What its origin map needs when the tiles do not, because cutting again works it out too.
-  const originNeed = chosen === undefined || needsCutting ? null : originNeeds(chosen, reviewedAt);
+  const originNeed = chosen === undefined || needsCutting ? null : originNeeds(chosen);
 
   // The Origin and Info map renderers draw the origin map and the names, so they say when those are older
   // than what they describe: a stale one looks exactly like a right one.
-  const outOfDate = needsCutting ? 'the tiles are older than the master' : describeOrigin(chosen, reviewedAt);
+  const outOfDate = needsCutting ? 'its world is out of date' : describeOrigin(chosen);
   useEffect(() => {
-    if ((renderer === 'origin' || renderer === 'info-map') && chosen?.cutAt != null && outOfDate !== '') {
+    if ((renderer === 'origin' || renderer === 'info-map') && chosen?.drawn === true && outOfDate !== '') {
       note(
         'origin',
         `${master} is out of date: ${outOfDate}. Mend it in Debug map before trusting these names.`,
       );
     }
-  }, [renderer, master, outOfDate, chosen?.cutAt]);
-  const cutLabel = chosen?.cutAt === null ? 'cut it' : 'cut it again';
+  }, [renderer, master, outOfDate, chosen?.drawn]);
+  const cutLabel = chosen?.drawn === false ? 'cut it' : 'cut it again';
   // Offered whenever there is a world to furnish, not only when something looks out of date. Tuning a
   // look is running this over and over against a master nothing has touched, and a button that hid
   // itself until the panel thought it was needed would be missing for exactly that.
-  const canFurnish = chosen !== undefined && chosen.cutAt !== null;
-  const furnishLabel = chosen?.furnishedAt === null ? 'furnish it' : 'furnish it again';
+  const canFurnish = chosen?.drawn === true;
+  const sprites = chosen?.steps.find((step) => step.name === 'sprites');
+  const furnishLabel = sprites?.standing === 'current' ? 'furnish it again' : 'furnish it';
 
   const pick = (name: string): void => {
     setWanted(name);
     const found = masters.find((candidate) => candidate.name === name);
-    if (found !== undefined && found.cutAt !== null && name !== master) {
+    if (found !== undefined && found.drawn && name !== master) {
       note('world', `loading ${name}`);
       chooseMaster(name);
     }
@@ -178,11 +173,11 @@ export function MapSection({ map, master, renderer, onRenderer }: MapSectionProp
         {masters.map((candidate) => (
           <option key={candidate.name} value={candidate.name}>
             {candidate.name}
-            {candidate.cutAt === null ? ' (not cut)' : candidate.furnishedAt === null ? ' (bare)' : ''}
+            {!candidate.drawn ? ' (not cut)' : isStale(candidate) ? ' (out of date)' : ''}
           </option>
         ))}
       </select>
-      <p className="debug-map__note">{describeMaster(chosen, master, working, tunedAt)}</p>
+      <p className="debug-map__note">{describeMaster(chosen, master, working)}</p>
       {needsCutting && (
         <button
           type="button"
@@ -206,7 +201,7 @@ export function MapSection({ map, master, renderer, onRenderer }: MapSectionProp
       )}
       {originNeed !== null && (
         <>
-          <p className="debug-map__note">{describeOrigin(chosen, reviewedAt)}</p>
+          <p className="debug-map__note">{describeOrigin(chosen)}</p>
           <button
             type="button"
             className="debug-map__cut"
