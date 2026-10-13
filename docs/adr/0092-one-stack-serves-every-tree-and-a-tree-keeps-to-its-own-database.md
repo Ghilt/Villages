@@ -15,7 +15,9 @@
   quick start passes `villages.broker=rabbit` with `villages.store=mongo` whenever the stack is up, and RabbitMQ
   without MongoDB is refused. The end-to-end test's world, `villages-e2e-<tree>`, has a virtual host of its own
   too, which it deletes after itself. `drop-gone-worlds` drops a gone tree's virtual host with its database, and
-  leaves a live tree's test world alone. A test that needs RabbitMQ starts one of its own, as for MongoDB.
+  leaves a live tree's test world alone. A test that needs RabbitMQ starts one of its own, as for MongoDB. And
+  **the quick start runs `drop-gone-worlds --drop` itself** every time it finds the stack up, Adam's word of the
+  same day: sessions are left as they are, never closed, so a clean-up somebody has to remember never happens.
 
 ## Context
 
@@ -76,8 +78,9 @@ Adam's choice, between this and a stack for each tree.
   into it, can leave events in its database that the new code reads differently. Pre-alpha, that is a wipe
   of that tree's world, from the debug panel, recorded in `docs/experiments/` as every wipe is (0011).
 - A deleted worktree leaves its database and its virtual host behind. They are small, and nothing reads
-  them; `node drop-gone-worlds.ts --list`, in `scripts/`, says which belong to no checkout git still has, and
-  `--drop` drops them, never a world whose checkout is still there.
+  them; the quick start drops them at every start, and `node drop-gone-worlds.ts --list`, in `scripts/`, says
+  which belong to no checkout git still has, and `--drop` drops them, never a world whose checkout is still
+  there.
 - The standard ports are taken. Another MongoDB or RabbitMQ on this machine would clash, and there is none.
 - Nothing on the machine stops one tree's server being pointed at another tree's database by hand. The name
   is worked out, not typed, so it takes doing on purpose.

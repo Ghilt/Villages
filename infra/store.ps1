@@ -4,6 +4,9 @@
     said plainly, because a world in memory is gone when the server stops (decision records 0092 and 0094). Run
     by debug-quick-start.ps1, whose words and tools it uses.
 
+    With the stack up it drops the worlds of worktrees that are gone, with scripts/drop-gone-worlds.ts, so the
+    stack never fills with worlds nobody reads; Adam leaves sessions as they are, and nothing else would.
+
     It starts the stack in docker-compose.yml only when the stack is not running, and leaves a running one alone:
     the stack is every tree's at once, and bringing it up on a changed file would make its containers again under
     every session. Stopping it is Adam's alone, so nothing here does. See decision record 0092.
@@ -34,6 +37,16 @@ if ($running -notcontains 'mongodb' -or $running -notcontains 'rabbitmq') {
         return '--villages.store=memory'
     }
     Write-Host 'up' -ForegroundColor Green
+}
+
+# A worktree deleted leaves its world behind, a database and a virtual host; they are dropped here, at every start,
+# so nobody has to remember to. Only those whose checkout git no longer has a folder for, and never a live tree's.
+$said = (& (Resolve-Tool @('node.exe', 'node')) (Join-Path $Root 'scripts\drop-gone-worlds.ts') --drop 2>$null) -join "`n"
+$gone = [regex]::Match($said, 'Dropped (\d+) of \d+ worlds?[^,]*, and deleted (\d+) of \d+ virtual hosts?')
+if ($LASTEXITCODE -ne 0) {
+    Warn 'the worlds of worktrees that are gone were not all dropped: node scripts/drop-gone-worlds.ts --list says which'
+} elseif ($gone.Success) {
+    Good "dropped the worlds of worktrees that are gone: $($gone.Groups[1].Value) in MongoDB, $($gone.Groups[2].Value) in RabbitMQ"
 }
 
 Good 'the world in MongoDB, in a database of this tree''s own, which outlives a restart of the game server'

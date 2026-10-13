@@ -383,7 +383,7 @@ and what moved without making anything. What a tree borrowed is written in `publ
 nobody has made costs its steps once, about nine minutes; every tree after it, seconds. See
 `docs/plans/world-cache.md`. `npm run world:prune --prefix frontend` says which entries on the shelf no tree uses
 any more - none a tree borrows, none a tree's record names, none being made or lent, none made in the last week -
-and `-- --drop` takes them off; by hand only, as `drop-gone-worlds` is.
+and `-- --drop` takes them off; by hand only.
 
 - The towns, rivers, lakes and seas of 1790: `world/names/1790.json`, one line a thing, keyed as the names are -
   a town by its Wikidata id, a river, a lake or a sea by its Wikidata id or Natural Earth's file, number and
@@ -635,7 +635,9 @@ and `-- --drop` takes them off; by hand only, as `drop-gone-worlds` is.
   as the server starts, in its log under `villages.store`, and to the debug panel on connecting, as
   `gateway: error unreadableEvents` with how many, the first by type and stream, and what to do: the World
   section's wipe. Until then a house with one in its history refuses every command. See decision record 0036.
-- A worktree deleted leaves its world behind in MongoDB, and its virtual host in RabbitMQ. `node
+- A worktree deleted leaves its world behind in MongoDB, and its virtual host in RabbitMQ, and **the quick start
+  drops them**, every time it finds the stack up, saying under **tools** how many when there were any: nobody
+  has to remember to, since sessions are left as they are. By hand, `node
   drop-gone-worlds.ts --list`, in `scripts/`, lists every world with how many events it holds and every virtual
   host, kept or gone, and `--drop` drops the gone ones: those whose checkout git no longer has a folder for. The
   end-to-end test's world of a checkout that is still here is kept, because a test may be running in it. It asks
