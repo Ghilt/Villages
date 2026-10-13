@@ -266,6 +266,19 @@
   color: var(--runtime);
 }
 
+/* The line under what the world is made from: in the colour of what Adam writes, the most of it. */
+.card-line--sources {
+  border-top: 2px solid var(--authored);
+}
+
+.card-line--sources .card-line__above {
+  color: var(--authored);
+}
+
+.card-line--sources .card-line__below {
+  color: var(--baked);
+}
+
 /* Arrows. */
 
 .diagram .arrow path {

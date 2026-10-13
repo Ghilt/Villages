@@ -20,10 +20,11 @@ export function Diagram(props: {
   placed: readonly Placed[];
   arrows: readonly Drawn[];
   line: Line;
+  sources: Line;
   stateOf: (card: string) => string;
   choose: (card: string | null) => void;
 }) {
-  const { placed, arrows, line, stateOf, choose } = props;
+  const { placed, arrows, line, sources, stateOf, choose } = props;
 
   const nodes = useMemo<Node[]>(
     () => [
@@ -32,6 +33,19 @@ export function Diagram(props: {
         type: 'line',
         position: { x: line.x, y: line.y },
         data: { width: line.width },
+        selectable: false,
+        draggable: false,
+      },
+      {
+        id: 'line:sources',
+        type: 'line',
+        position: { x: sources.x, y: sources.y },
+        data: {
+          width: sources.width,
+          kind: 'sources',
+          above: '↑ what the world is made from: written by Adam, or downloaded',
+          below: '↓ what the tools make of it',
+        },
         selectable: false,
         draggable: false,
       },
@@ -51,7 +65,7 @@ export function Diagram(props: {
         },
       })),
     ],
-    [placed, line, stateOf],
+    [placed, line, sources, stateOf],
   );
 
   const edges = useMemo<Edge[]>(
@@ -86,7 +100,7 @@ export function Diagram(props: {
         nodes={nodes}
         edges={edges}
         nodeTypes={CARD_TYPES}
-        onNodeClick={(_, node) => choose(node.id === 'line' ? null : node.id)}
+        onNodeClick={(_, node) => choose(node.id.startsWith('line') ? null : node.id)}
         onPaneClick={() => choose(null)}
         nodesConnectable={false}
         nodesDraggable={false}

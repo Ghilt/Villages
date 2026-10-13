@@ -2,6 +2,7 @@ import dagre from '@dagrejs/dagre';
 
 import { SHELF_CARD, bakedGraph, inShelf, runningGraph } from './graph';
 import type { Arrow, Card } from './graph';
+import { TOOLS, artifact } from './world';
 
 /** Where a card stands, its top-left corner, and how big it is: inside its group's box when it has one. */
 export interface Placed {
@@ -20,12 +21,21 @@ export type Side = 'top' | 'bottom' | 'left' | 'right';
 /** An arrow and the sides of its two cards it leaves and arrives at. */
 export type Drawn = Arrow & { readonly fromSide?: Side; readonly toSide?: Side };
 
-/** The line between what is baked and what runs: where it is, across the whole diagram. */
+/** A line across the whole diagram: between what is baked and what runs, or under what the world is made from. */
 export interface Line {
   readonly x: number;
   readonly y: number;
   readonly width: number;
 }
+
+/** A file the world is made from: written by Adam or downloaded, and never by a tool of the world. */
+export const isSource = (card: Card): boolean =>
+  card.kind === 'file' && artifact(card.ref).origin !== 'baked';
+
+/** A tool that makes nothing but sources, the download: it stands above them rather than among the rest. */
+export const makesSources = (card: Card): boolean =>
+  card.kind === 'tool' &&
+  TOOLS.find((tool) => tool.script === card.ref)!.writes.every((id) => artifact(id).origin !== 'baked');
 
 const WIDE = 196;
 const GAP = 40;
@@ -86,15 +96,21 @@ export function sizeOf(card: Card): { width: number; height: number } {
 }
 
 /**
- * The whole diagram, laid out top to bottom. What is baked is laid out by dagre in ranks, so each tool stands
- * below what it reads and above what it writes. The running cards are not part of that: they stand beneath a
- * line drawn under the lowest baked card, so every arrow into them crosses it, the page alone and then each
- * group's box with its pieces in it. The master's tools and what they make stand in the world cache's box, which
- * dagre lays out as a cluster: as big as they need, and the rest of the baked cards round it.
+ * The whole diagram, laid out top to bottom. Along the top, on one row, every file the world is made from - what
+ * Adam writes and what is downloaded - with the download above the files it fetches, and a line under the row.
+ * Under that, what the tools make of them is laid out by dagre in ranks, so each tool stands below what it reads
+ * and above what it writes; each source stands over the tools that read it, so its arrows stay short. The running
+ * cards are not part of that: they stand beneath a line drawn under the lowest baked card, so every arrow into them
+ * crosses it, the page alone and then each group's box with its pieces in it. The master's tools and what they
+ * make stand in the world cache's box, which dagre lays out as a cluster: as big as they need, and the rest of the
+ * baked cards round it.
  */
-export function layOut(): { placed: Placed[]; arrows: Drawn[]; line: Line } {
+export function layOut(): { placed: Placed[]; arrows: Drawn[]; line: Line; sources: Line } {
   const baked = bakedGraph();
   const running = runningGraph();
+  const above = (card: Card) => isSource(card) || makesSources(card);
+  const made = baked.cards.filter((card) => !above(card));
+  const inMade = new Set(made.map((card) => card.id));
 
   const graph = new dagre.graphlib.Graph({ compound: true });
   // Cards a rank apart by more than the box's padding twice over, so a card beside the box stays clear of it.
@@ -106,16 +122,16 @@ export function layOut(): { placed: Placed[]; arrows: Drawn[]; line: Line } {
     ranker: 'tight-tree',
   });
   graph.setDefaultEdgeLabel(() => ({}));
-  for (const card of baked.cards) graph.setNode(card.id, card.kind === 'shelf' ? {} : sizeOf(card));
-  for (const card of baked.cards) if (inShelf(card)) graph.setParent(card.id, SHELF_CARD);
+  for (const card of made) graph.setNode(card.id, card.kind === 'shelf' ? {} : sizeOf(card));
+  for (const card of made) if (inShelf(card)) graph.setParent(card.id, SHELF_CARD);
   // What the box says is a card of its own inside it that nothing points at, so dagre leaves it room among the
   // box's own cards and never puts another card under the words.
   graph.setNode(SHELF_WORDS, SHELF.words);
   graph.setParent(SHELF_WORDS, SHELF_CARD);
-  for (const a of baked.arrows) graph.setEdge(a.from, a.to);
+  for (const a of baked.arrows) if (inMade.has(a.from) && inMade.has(a.to)) graph.setEdge(a.from, a.to);
   dagre.layout(graph);
 
-  const placed: Placed[] = baked.cards.map((card) => {
+  const placed: Placed[] = made.map((card) => {
     const at = graph.node(card.id);
     if (card.kind !== 'shelf') {
       return { card, x: at.x - at.width / 2, y: at.y - at.height / 2, width: at.width, height: at.height };
@@ -131,6 +147,9 @@ export function layOut(): { placed: Placed[]; arrows: Drawn[]; line: Line } {
       words: { x: words.x - words.width / 2 - x, y: words.y - words.height / 2 - y, width: words.width },
     };
   });
+  const sources = placeSources(baked.cards, baked.arrows, placed);
+  placed.push(...sources.placed);
+
   const left = Math.min(...placed.map((p) => p.x));
   const right = Math.max(...placed.map((p) => p.x + p.width));
   const bottom = Math.max(...placed.map((p) => p.y + p.height));
@@ -174,7 +193,74 @@ export function layOut(): { placed: Placed[]; arrows: Drawn[]; line: Line } {
     return { ...a, fromSide, toSide };
   });
 
-  return { placed, arrows: [...baked.arrows, ...sided], line };
+  return {
+    placed,
+    arrows: [...baked.arrows, ...sided],
+    line,
+    sources: { x: left - GAP, y: sources.line, width: right - left + 2 * GAP },
+  };
+}
+
+/** Room between two sources on their row, and between the rows above and below it. */
+const SOURCE_GAP = 26;
+const ROW_GAP = 64;
+const UNDER_LINE = 80;
+
+/**
+ * The sources on their row and the download above it, and where the line under the row goes. Each source stands
+ * where the tools reading it are, on average, so its arrows run down rather than across, and what one download
+ * fetches stands together under it; one nothing below reads goes to the right end. What dagre laid out is moved
+ * down beneath them, in place.
+ */
+function placeSources(
+  cards: readonly Card[],
+  arrows: readonly Arrow[],
+  made: Placed[],
+): { placed: Placed[]; line: number } {
+  const centre = new Map(made.map((p) => [p.card.id, p.x + p.width / 2]));
+  const sources = cards.filter(isSource);
+  const downloads = cards.filter(makesSources);
+  const under = (id: string) => {
+    const readers = arrows.filter((a) => a.from === id && centre.has(a.to)).map((a) => centre.get(a.to)!);
+    return readers.length === 0 ? Infinity : readers.reduce((sum, x) => sum + x, 0) / readers.length;
+  };
+  // What one download fetches stands together, under it, where its files' readers are on average.
+  const fetchedBy = new Map<string, string[]>();
+  for (const card of downloads) {
+    const fetched = arrows.filter((a) => a.from === card.id).map((a) => a.to);
+    for (const id of fetched) fetchedBy.set(id, fetched);
+  }
+  const mean = (xs: number[]) => {
+    const known = xs.filter(Number.isFinite);
+    return known.length === 0 ? Infinity : known.reduce((sum, x) => sum + x, 0) / known.length;
+  };
+  const place = (id: string) => mean((fetchedBy.get(id) ?? [id]).map(under));
+  const ordered = [...sources].sort(
+    (one, other) => place(one.id) - place(other.id) || under(one.id) - under(other.id),
+  );
+
+  const file = sizeOf({ id: '', kind: 'file', ref: '' });
+  const tool = sizeOf({ id: '', kind: 'tool', ref: '' });
+  const width = ordered.length * file.width + (ordered.length - 1) * SOURCE_GAP;
+  const middle = (Math.min(...made.map((p) => p.x)) + Math.max(...made.map((p) => p.x + p.width))) / 2;
+  const rowY = downloads.length > 0 ? tool.height + ROW_GAP : 0;
+  const placed: Placed[] = ordered.map((card, i) => ({
+    card,
+    x: middle - width / 2 + i * (file.width + SOURCE_GAP),
+    y: rowY,
+    ...file,
+  }));
+  const at = new Map(placed.map((p) => [p.card.id, p.x + p.width / 2]));
+  for (const card of downloads) {
+    const fetched = arrows.filter((a) => a.from === card.id && at.has(a.to)).map((a) => at.get(a.to)!);
+    const x = fetched.reduce((sum, one) => sum + one, 0) / Math.max(1, fetched.length);
+    placed.push({ card, x: x - tool.width / 2, y: 0, ...tool });
+  }
+
+  const line = rowY + file.height + UNDER_LINE / 2;
+  const shift = line + UNDER_LINE - Math.min(...made.map((p) => p.y));
+  made.forEach((p, i) => (made[i] = { ...p, y: p.y + shift }));
+  return { placed, line };
 }
 
 /** The sides two pieces face each other by: top and bottom when one is mostly above the other, else left and right. */

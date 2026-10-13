@@ -164,12 +164,24 @@ export function ShelfCard({ data }: NodeProps<CardNode>) {
   );
 }
 
-/** The dotted line between what is baked beforehand and what runs. */
-export function LineCard({ data }: NodeProps<Node<{ width: number }>>) {
+/**
+ * A line across the diagram, saying what is above it and what below: the dotted one between what is baked
+ * beforehand and what runs, or the one under what the world is made from.
+ */
+export function LineCard({
+  data,
+}: NodeProps<Node<{ width: number; kind?: string; above?: string; below?: string }>>) {
   return (
-    <div className="card-line" style={{ width: data.width }}>
-      <span className="card-line__above">↑ baked beforehand, on the machine, before the game starts</span>
-      <span className="card-line__below">↓ running: what the game reads and keeps while it plays</span>
+    <div
+      className={`card-line ${data.kind === undefined ? '' : `card-line--${data.kind}`}`}
+      style={{ width: data.width }}
+    >
+      <span className="card-line__above">
+        {data.above ?? '↑ baked beforehand, on the machine, before the game starts'}
+      </span>
+      <span className="card-line__below">
+        {data.below ?? '↓ running: what the game reads and keeps while it plays'}
+      </span>
     </div>
   );
 }

@@ -22,7 +22,7 @@ import { ARTIFACTS, LEGACY, TOOLS, readAtRuntime, secondsForAMaster } from './wo
  */
 export function InspectArchitecture() {
   const [chosen, choose] = useState<string | null>(null);
-  const { placed, arrows, line } = useMemo(layOut, []);
+  const { placed, arrows, line, sources } = useMemo(layOut, []);
   const cards = useMemo(() => placed.map((p) => p.card), [placed]);
   const lit = useMemo(
     () => (chosen === null ? null : related(chosen, arrows, cards)),
@@ -76,7 +76,14 @@ export function InspectArchitecture() {
 
       <Focus chosen={chosen} clear={() => choose(null)} />
 
-      <Diagram placed={placed} arrows={arrows} line={line} stateOf={stateOf} choose={choose} />
+      <Diagram
+        placed={placed}
+        arrows={arrows}
+        line={line}
+        sources={sources}
+        stateOf={stateOf}
+        choose={choose}
+      />
 
       <footer className="arch__legend" aria-label="Legend">
         <span className="arch__key arch__key--authored">by Adam</span>
