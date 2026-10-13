@@ -1,5 +1,6 @@
 import '@xyflow/react/dist/style.css';
 import './diagram.css';
+import './shelf.css';
 
 import { Background, Controls, MarkerType, MiniMap, ReactFlow } from '@xyflow/react';
 import type { Edge, Node } from '@xyflow/react';

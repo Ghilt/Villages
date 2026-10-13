@@ -1,7 +1,8 @@
 /*
  * The architecture diagram: cards, the arrows between them, and the dotted line between baked and running.
  * A file card is a page with a coloured strip saying who makes it; a tool card is dark-headed; a running card
- * is green. React Flow's own stylesheet comes first, and these rules dress what it draws.
+ * is green. React Flow's own stylesheet comes first, and these rules dress what it draws; the world cache's box is
+ * shelf.css.
  */
 
 .diagram {
@@ -330,63 +331,4 @@
 
 .card.is-chosen {
   box-shadow: 0 0 0 3px var(--chosen);
-}
-
-/*
- * The world cache's box: the master's tools and what they make, which every tree borrows. Dashed, in the colour of
- * what a tool makes, because it is not a thing on its own but where those things are kept.
- */
-.diagram .react-flow__node-shelf {
-  pointer-events: all;
-}
-
-.shelf {
-  position: relative;
-  box-sizing: border-box;
-  width: 100%;
-  height: 100%;
-  text-align: left;
-  background: rgb(236 230 218 / 40%);
-  border: 2px dashed var(--baked);
-  border-radius: 12px;
-  transition: opacity 120ms;
-}
-
-.shelf__words {
-  position: absolute;
-  box-sizing: border-box;
-  padding: 0.4rem 0.2rem;
-}
-
-.shelf__name {
-  font-size: 1.15rem;
-  font-weight: 600;
-  color: var(--baked);
-}
-
-.shelf__name code {
-  display: block;
-  margin-top: 0.1rem;
-  font-size: 0.72rem;
-  font-weight: 400;
-  color: var(--ink-soft);
-}
-
-.shelf__what {
-  max-width: 44rem;
-  margin-top: 0.3rem;
-  font-size: 0.82rem;
-  line-height: 1.4;
-}
-
-.shelf.is-dim {
-  opacity: 0.35;
-}
-
-.shelf.is-lit {
-  box-shadow: 0 0 0 3px var(--ink-soft);
-}
-
-.shelf.is-chosen {
-  box-shadow: 0 0 0 4px var(--chosen);
 }
