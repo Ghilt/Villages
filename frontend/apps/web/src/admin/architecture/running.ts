@@ -52,7 +52,7 @@ export const GROUPS: readonly Group[] = [
     id: 'events',
     name: 'The event store',
     where: 'Occurrent · MongoDB · the bridge · RabbitMQ',
-    what: 'How the world is kept and passed on, four pieces with one job: Occurrent writes each event once and hands it on, MongoDB keeps it for good, and the bridge publishes every one to RabbitMQ, which will carry it to the read models and every gateway. Nothing is ever changed once written; everything else is worked out from it.',
+    what: 'How the world is kept and passed on, four pieces with one job: Occurrent writes each event once and hands it on, MongoDB keeps it for good, and the bridge publishes every one to RabbitMQ, which carries it to the read models. Nothing is ever changed once written; everything else is worked out from it.',
   },
 ];
 
@@ -94,7 +94,7 @@ export const PIECES: readonly Piece[] = [
     where: 'backend/projections',
     runs: 'server',
     group: 'server',
-    what: 'The world as it stands now: houses by cell, choices, key figures, sight, dialogues, the last rolls. Folded from every event as the feed hands it on, so the gateway can answer what is where without reading the history. Kept in memory, and folded again from the whole history every time the server starts.',
+    what: 'The world as it stands now: structures by cell, choices, key figures, sight, dialogues, the last rolls. Each folds the history from the store and then every event RabbitMQ carries, through a queue of its own, so the gateway can answer what is where without reading the history. Kept in memory, and folded again from the whole history every time the server starts, and after RabbitMQ has been away.',
   },
   {
     id: 'occurrent',
@@ -135,7 +135,7 @@ export const PIECES: readonly Piece[] = [
     where: 'localhost:5672 · villages-<tree> · page on :15672',
     runs: 'docker',
     group: 'events',
-    what: "The broker. Every stored event is published to its exchange villages.events, in a virtual host of the worktree's own, addressed by its type and the cell it happened in. Nothing reads from it yet: the read models and the event page are to follow it, each through a queue of its own, which is what will let more than one gateway serve one world.",
+    what: "The broker. Every stored event is published to its exchange villages.events, in a virtual host of the worktree's own, addressed by its type and the cell it happened in, and the read models and the event page each follow it through a queue of their own. The reactions do not: they follow the store, so the world acts on while the broker is away. What will let more than one gateway serve one world.",
   },
 ];
 
@@ -145,13 +145,13 @@ export const TALKS: readonly Talk[] = [
   { from: 'rules', to: 'occurrent', says: "a house's history, and what was decided", both: true },
   { from: 'occurrent', to: 'mongodb', says: 'kept, and handed back', both: true },
   { from: 'occurrent', to: 'memory', says: 'or, without Docker', both: true, when: 'instead' },
-  { from: 'occurrent', to: 'reactions', says: 'the feed' },
+  { from: 'occurrent', to: 'reactions', says: 'the feed, from the store' },
   { from: 'reactions', to: 'rules', says: 'commands, too' },
-  { from: 'occurrent', to: 'projections', says: 'the feed' },
+  { from: 'occurrent', to: 'projections', says: 'the history' },
   { from: 'projections', to: 'gateway', says: 'the world now' },
   { from: 'occurrent', to: 'bridge', says: 'every event, from where it stopped' },
   { from: 'bridge', to: 'rabbitmq', says: 'published, by cell' },
-  { from: 'rabbitmq', to: 'projections', says: 'the feed, from step 7', when: 'yet' },
+  { from: 'rabbitmq', to: 'projections', says: 'every event, a queue each' },
 ];
 
 export function piece(id: string): Piece {
