@@ -315,8 +315,8 @@ Commands are added here as the increments land:
 - Adam's own tools are in `scripts/`, apart from the program: terminal tools that change the files it reads,
   each `node <tool>.ts` from that folder, which prints its help when given nothing. `scripts/README.md` lists
   them and says how one is added; `mend-rivers` joins a master's broken rivers, `nine-slice` makes a
-  border from a picture of a frame, and `drop-gone-worlds` drops the MongoDB worlds of worktrees that are
-  gone (`--list` first). See decision 0082.
+  border from a picture of a frame, and `drop-gone-worlds` drops the MongoDB worlds and RabbitMQ virtual hosts of
+  worktrees that are gone (`--list` first). See decision 0082.
 - What the running program does, part by part, is `docs/RUNNING.md`: the debug panel and every section of
   it, the player's own levers, the fog, the event page and the component library, and Adam's folders of
   pictures with the tools that cut them. A step that changes what a part of it does changes its entry there

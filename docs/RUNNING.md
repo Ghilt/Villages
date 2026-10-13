@@ -625,7 +625,9 @@ and `-- --drop` takes them off; by hand only, as `drop-gone-worlds` is.
   as the server starts, in its log under `villages.store`, and to the debug panel on connecting, as
   `gateway: error unreadableEvents` with how many, the first by type and stream, and what to do: the World
   section's wipe. Until then a house with one in its history refuses every command. See decision record 0036.
-- A worktree deleted leaves its world behind in MongoDB. `node drop-gone-worlds.ts --list`, in `scripts/`, lists
-  every world with how many events it holds, kept or gone, and `--drop` drops the gone ones: those whose
-  checkout git no longer has a folder for. It asks MongoDB through the stack's own container, so it needs the
-  stack up and nothing installed.
+- A worktree deleted leaves its world behind in MongoDB, and its virtual host in RabbitMQ. `node
+  drop-gone-worlds.ts --list`, in `scripts/`, lists every world with how many events it holds and every virtual
+  host, kept or gone, and `--drop` drops the gone ones: those whose checkout git no longer has a folder for. The
+  end-to-end test's world of a checkout that is still here is kept, because a test may be running in it. It asks
+  MongoDB through the stack's own container and RabbitMQ through its management page, so it needs the stack up and
+  nothing installed.

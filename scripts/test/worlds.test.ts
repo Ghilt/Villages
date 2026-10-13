@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { databaseFor, goneWorlds, readWorktrees } from '../lib/worlds.ts';
+import { databaseFor, goneWorlds, readWorktrees, testWorldFor } from '../lib/worlds.ts';
 
 const porcelain = [
   'worktree E:/Code/Villages\nHEAD 0a0166c\nbranch refs/heads/main',
@@ -43,5 +43,19 @@ describe('the worlds of checkouts that are gone', () => {
       'villages-deleted-without-a-trace',
       'villages-long-gone-1a2b3c',
     ]);
+  });
+
+  it("keeps the end-to-end test's world of a checkout that is here, which a running test may be using", () => {
+    // The same name frontend/e2e/servers.ts gives it.
+    assert.equal(testWorldFor(null), 'villages-e2e-main');
+    assert.equal(testWorldFor('docker-roadmap-impl-03b5ca'), 'villages-e2e-docker-roadmap-impl-03b5ca');
+    const virtualHosts = [
+      '/',
+      'villages',
+      'villages-e2e-main',
+      'villages-e2e-docker-roadmap-impl-03b5ca',
+      'villages-e2e-long-gone-1a2b3c',
+    ];
+    assert.deepEqual(goneWorlds(virtualHosts, readWorktrees(porcelain)), ['villages-e2e-long-gone-1a2b3c']);
   });
 });
