@@ -80,8 +80,7 @@ export const WORLD_STEPS: readonly WorldStep[] = [
     after: [],
     makes: [
       { path: `${M}/terrain.geojson`, is: 'outlines' },
-      { path: `${M}/terrain-lookup.png`, is: 'lookup' },
-      { path: 'world/master/<m>-preview.png', is: 'lookup' },
+      { path: 'world/master/<m>-preview.png', is: 'preview' },
     ],
     doing: 'tracing the coast and the lakes',
     done: 'the coast and the lakes are traced',

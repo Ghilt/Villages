@@ -26,7 +26,7 @@ export const WORLD_CACHE = {
   ],
   files: [
     'outlines',
-    'lookup',
+    'preview',
     'tiles',
     'paint',
     'flow',

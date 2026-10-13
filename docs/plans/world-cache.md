@@ -48,7 +48,7 @@ culture, height. `bin/lib/worldSteps.ts` is the table of them, and the one list 
 
 | Step | Reads | Writes: folders, borrowed by hard link | Writes: loose files, copied |
 |---|---|---|---|
-| import | master, palette | | `M/terrain.geojson`, `M/terrain-lookup.png`, `world/master/<m>-preview.png` |
+| import | master, palette | | `M/terrain.geojson`, `world/master/<m>-preview.png` |
 | tile | master, palette, render | `M/tiles/` | |
 | styles | palette, render, painterly | | `public/world/paint.json` |
 | flow | master, palette | `M/flow/` | |

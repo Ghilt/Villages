@@ -7,7 +7,7 @@ export const TOOLS: readonly Tool[] = [
     entry: 'importMaster.ts',
     group: 'master',
     reads: ['master', 'palette'],
-    writes: ['outlines', 'lookup'],
+    writes: ['outlines', 'preview'],
     seconds: 36,
     perMaster: true,
     ranBy: 'world:ready, when nobody has made its step',

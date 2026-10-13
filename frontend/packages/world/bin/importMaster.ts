@@ -25,8 +25,8 @@ import { MASTER_DIR, OUTPUT_DIR, PALETTE, masterAt } from './lib/paths.ts';
  *
  * Every pixel is snapped to the terrain class it is nearest, so the fringe an image editor leaves along a
  * transformed edge becomes a clean boundary instead of an error. Then each class is traced into outlines,
- * simplified and smoothed, and written as one file of shapes the map can draw. A small copy of the terrain
- * grid goes out alongside it, for the questions the game asks of a place rather than of a shape.
+ * simplified and smoothed, and written as one file of shapes the map can draw. A small copy of the master goes out
+ * beside it, the preview, for an agent to look at.
  *
  * See docs/AUTHORING-THE-WORLD.md.
  */
@@ -39,8 +39,6 @@ const SMOOTHING_PASSES = 1;
  * afterwards. This second, gentler pass takes those back out.
  */
 const TIDY_TOLERANCE = 0.7;
-/** The terrain grid the game keeps for lookups, small enough to load without thinking about it. */
-const LOOKUP_WIDTH = 2048;
 /**
  * A colour further than this from every class was probably not chosen on purpose. Kept at roughly half the
  * minimum distance between two classes, so that it stayed sensitive when that minimum was loosened to 40.
@@ -263,33 +261,18 @@ for (const terrain of targets) {
   );
 }
 
-for (const one of ['terrain.geojson', 'terrain-lookup.png']) ownFile(resolve(outputDir, one), 'the coast');
+ownFile(resolve(outputDir, 'terrain.geojson'), 'the coast');
 ownFile(previewPath, 'the preview');
 await mkdir(outputDir, { recursive: true });
 await mkdir(dirname(previewPath), { recursive: true });
 const shapes = JSON.stringify({ type: 'FeatureCollection', features });
 await writeFile(resolve(outputDir, 'terrain.geojson'), shapes);
 
-// The grid the game asks questions of: what terrain is under this place, and is it land at all.
-const scale = Math.max(1, Math.round(raster.width / LOOKUP_WIDTH));
-const lookup = createRaster(Math.floor(raster.width / scale), Math.floor(raster.height / scale));
-for (let row = 0; row < lookup.height; row += 1) {
-  for (let column = 0; column < lookup.width; column += 1) {
-    lookup.cells[row * lookup.width + column] =
-      raster.cells[row * scale * raster.width + column * scale] ?? 0;
-  }
-}
-
 const index = byId(palette);
 const colours: Rgb[] = [];
 for (let id = 0; id <= Math.max(...palette.classes.map((terrain) => terrain.id)); id += 1) {
   colours.push(toRgb(index.get(id)?.colour ?? '#ff00ff'));
 }
-await writeFile(
-  resolve(outputDir, 'terrain-lookup.png'),
-  encodeIndexedPng(lookup, colours, (data) => new Uint8Array(deflateSync(data, { level: 9 }))),
-);
-
 /**
  * A small copy of the world for glancing at, written here rather than by the master build because this
  * is the only place that reads the image the game is actually drawn from. Nearest neighbour, since
@@ -312,5 +295,5 @@ await writeFile(
 );
 
 console.log(`\n${features.length} shapes, ${(shapes.length / 1048576).toFixed(2)} MB`);
-console.log(`lookup grid ${lookup.width} by ${lookup.height}`);
+console.log(`preview ${preview.width} by ${preview.height}`);
 console.log(`into ${outputDir}`);

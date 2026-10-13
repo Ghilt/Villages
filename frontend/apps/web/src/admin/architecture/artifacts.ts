@@ -135,12 +135,12 @@ export const ARTIFACTS: readonly Artifact[] = [
     what: 'The coast and the large lakes, as lines.',
   },
   {
-    id: 'lookup',
-    form: 'files',
-    name: 'lookup and preview',
-    path: `${M}/terrain-lookup.png, world/master/<m>-preview.png`,
+    id: 'preview',
+    form: 'file',
+    name: 'preview',
+    path: 'world/master/<m>-preview.png',
     origin: 'baked',
-    what: 'For looking at the import; nothing running reads them.',
+    what: 'The master, 2048 by 1024, in the colours it was painted in.',
   },
   {
     id: 'tiles',
