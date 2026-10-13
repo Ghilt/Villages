@@ -24,8 +24,11 @@ export function testDatabase(tree: string | null): string {
   return `villages-e2e-${(tree ?? 'main').toLowerCase().replace(/[^a-z0-9-]/g, '-')}`.slice(0, 63);
 }
 
-/** Whether the MongoDB in infra/ is up, which is whether the test can keep its world and so restart it. */
-export function mongoIsUp(): boolean {
+/**
+ * Whether a service of the stack in infra/ is up: `mongodb`, which is whether the test can keep its world and so
+ * restart it, and `rabbitmq`, which is whether RabbitMQ can carry it.
+ */
+export function stackHas(service: 'mongodb' | 'rabbitmq'): boolean {
   const asked = spawnSync(
     'docker',
     ['compose', '-f', join(ROOT, 'infra', 'docker-compose.yml'), 'ps', '--status', 'running', '--services'],
@@ -33,7 +36,18 @@ export function mongoIsUp(): boolean {
       encoding: 'utf8',
     },
   );
-  return asked.status === 0 && asked.stdout.split(/\r?\n/).includes('mongodb');
+  return asked.status === 0 && asked.stdout.split(/\r?\n/).includes(service);
+}
+
+/**
+ * Deletes the test's virtual host in RabbitMQ, which the game server made, named as its database is (decision record
+ * 0094), through the management page the stack serves. One that is not there is already as it should be.
+ */
+export async function deleteVirtualHost(name: string): Promise<void> {
+  await fetch(`http://localhost:15672/api/vhosts/${encodeURIComponent(name)}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Basic ${Buffer.from('villages:villages').toString('base64')}` },
+  }).catch(() => undefined);
 }
 
 /** Drops the test's world, through the mongosh in the stack's own container. */
@@ -52,15 +66,23 @@ export function dropDatabase(database: string): void {
   ]);
 }
 
+/** Where the test's world is kept and whether RabbitMQ carries it, as the game server is told. */
+export interface Keeping {
+  readonly store: 'mongo' | 'memory';
+  readonly broker: 'rabbit' | 'in-process';
+  /** The database, and the virtual host the server names after it. */
+  readonly database: string;
+}
+
 /**
  * Starts the game server on `port`, keeping its world as told, and resolves once it answers. Its output goes to
  * .logs/e2e-game.log. It is Gradle's bootRun, which builds what has changed first, so the first start can take
  * a minute.
  */
-export async function startGame(port: number, store: 'mongo' | 'memory', database: string): Promise<void> {
+export async function startGame(port: number, { store, broker, database }: Keeping): Promise<void> {
   mkdirSync(join(ROOT, '.logs'), { recursive: true });
   const out = openSync(join(ROOT, '.logs', 'e2e-game.log'), 'a');
-  const args = `--server.port=${port} --villages.store=${store} --villages.mongo.database=${database}`;
+  const args = `--server.port=${port} --villages.store=${store} --villages.broker=${broker} --villages.mongo.database=${database}`;
   // Named whole: a shell told not to look in its own folder for commands finds no gradlew.bat otherwise.
   const gradlew = windows ? `"${join(ROOT, 'backend', 'gradlew.bat')}"` : './gradlew';
   spawn(`${gradlew} --console=plain :app:bootRun "--args=${args}"`, {

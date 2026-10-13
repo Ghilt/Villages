@@ -20,8 +20,9 @@ time out that pass alone:
   frontend   npm run check: the typecheck, the linter, the formatter and the unit tests.
   scripts    this folder's own: node --test, its types, and its formatting.
   e2e        npm run e2e: the game end to end in Chrome - the map drawn, a house founded, another
-             window seeing it, and a restart of the game server that forgets nothing - on servers
-             and a world of the test's own. The restart is not tried when MongoDB is not up. It
+             window seeing it, and a restart of the game server that forgets nothing - on servers,
+             a world and a virtual host of the test's own, the world carried by RabbitMQ. The
+             restart is not tried when MongoDB is not up, nor RabbitMQ used when it is not. It
              needs this tree's world cut, which the quick start does.
 
   --only <parts>   the parts to run, by name, separated by commas. Default: all four.
@@ -159,7 +160,12 @@ const PARTS: readonly Part[] = [
     said: (log) => {
       const tally = readPlaywright(log);
       const tests = tally === null ? 'its test' : `${tally.tests} test${tally.tests === 1 ? '' : 's'}`;
-      return `${tests}${mongoUp() ? '' : ', the restart not tried because MongoDB is not up'}`;
+      const short = !stackHas('mongodb')
+        ? ', the restart not tried because MongoDB is not up'
+        : !stackHas('rabbitmq')
+          ? ', not carried by RabbitMQ because it is not up'
+          : '';
+      return `${tests}${short}`;
     },
     failures: (log) => readPlaywright(log)?.failures ?? [],
   },
@@ -275,8 +281,11 @@ function worldCut(): boolean {
   );
 }
 
-/** Whether the MongoDB in infra/ is up, which is whether the end-to-end test tried a restart. */
-function mongoUp(): boolean {
+/**
+ * Whether a service of the stack in infra/ is up: MongoDB, which is whether the end-to-end test tried a restart, and
+ * RabbitMQ, which is whether it carried the world.
+ */
+function stackHas(service: 'mongodb' | 'rabbitmq'): boolean {
   const asked = spawnSync(
     'docker',
     ['compose', '-f', join(root, 'infra', 'docker-compose.yml'), 'ps', '--status', 'running', '--services'],
@@ -284,7 +293,7 @@ function mongoUp(): boolean {
       encoding: 'utf8',
     },
   );
-  return asked.status === 0 && asked.stdout.split(/\r?\n/).includes('mongodb');
+  return asked.status === 0 && asked.stdout.split(/\r?\n/).includes(service);
 }
 
 /** Whether Docker answers, which is whether the tests that need it ran. */

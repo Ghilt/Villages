@@ -22,6 +22,9 @@ test('the map, a house founded, another window seeing it, and a restart that for
     // A line's area and what it says sit side by side with nothing between them: renderer, painted.
     await logSays(player, /renderer\s*painted/);
     await logSays(player, 'welcome: player');
+    // With the stack up, every event reaches the page through RabbitMQ, in the test's own virtual host (0094).
+    if (process.env['E2E_BROKER'] === 'rabbit')
+      await logSays(player, 'carried by RabbitMQ in the virtual host');
   });
 
   await test.step('another window watches the world happening', async () => {
@@ -53,7 +56,11 @@ test('the map, a house founded, another window seeing it, and a restart that for
     }
     const { game } = testPorts();
     await stopGame(game);
-    await startGame(game, 'mongo', process.env['E2E_DATABASE']!);
+    await startGame(game, {
+      store: 'mongo',
+      broker: process.env['E2E_BROKER'] === 'rabbit' ? 'rabbit' : 'in-process',
+      database: process.env['E2E_DATABASE']!,
+    });
     await player.reload();
     await logSays(player, `your house is ${name}`);
     await expect(player.locator('button.parchment')).toHaveCount(0);

@@ -13,10 +13,10 @@ Every increment lands with the test that proves it. The tests are the reason we 
 | Architecture | Layer rules: what a module may depend on and import | ArchUnit on the backend; project references and restricted imports on the frontend | yes |
 | Unit, pure | Deciders, value objects, cell maths, banner rules, reducers, ticker maths, protocol codecs | Kotest, Vitest | yes |
 | Application | Use cases against the in-memory event store; the connection state machine against a fake socket | Kotest with the Occurrent in-memory store, Vitest | yes |
-| Integration | Real infrastructure: an appended event reaches the broker with the right routing key, a projection updates | Testcontainers with MongoDB and RabbitMQ | yes, needs Docker |
+| Integration | Real infrastructure: an appended event reaches the broker with the right routing key, a projection updates | Testcontainers with MongoDB and RabbitMQ: `MongoWorldDockerSpec`, `CarryDockerSpec`, `BrokerDockerSpec`, `BridgeDockerSpec`, `BrokerLiveDockerSpec` | yes, needs Docker |
 | Edge | The gateway protocol over a real WebSocket; interface components against a fake client | Spring WebSocket test client, React Testing Library | yes |
 | Contract | The same JSON fixtures parse and round-trip in Kotlin and in TypeScript | Kotest and Vitest over the shared fixtures | yes |
-| End to end | The whole stack in a browser: the map is painted, a house is founded, another window sees it, a restart of the game server forgets nothing | Playwright, in the machine's own Chrome | yes, needs this tree's world cut; the restart needs Docker |
+| End to end | The whole stack in a browser: the map is painted, a house is founded, another window sees it, a restart of the game server forgets nothing | Playwright, in the machine's own Chrome | yes, needs this tree's world cut; the restart and RabbitMQ need Docker |
 | Load | Thousands of simultaneous connections | the bot swarm | manual |
 
 ## Rules
@@ -57,8 +57,8 @@ Every increment lands with the test that proves it. The tests are the reason we 
 
 Commands are filled in here as the increments land.
 
-- Everything: `scripts/check.ps1` or `scripts/check.sh`, from 0.14: the backend, the frontend and `scripts/`'s own
-  tests, types and format, one after another rather than side by side, because two at once on a busy machine make
+- Everything: `scripts/check.ps1` or `scripts/check.sh`, from 0.14: the backend, the frontend, `scripts/`'s own
+  tests, types and format, and the end-to-end test, one after another rather than side by side, because two at once on a busy machine make
   tests time out that pass alone. One line a part, what failed by name, and each part's whole output in
   `.logs/check-<part>.log`; `--only <part>` runs one.
 - Backend: `cd backend` then `./gradlew check`, from 0.5. Modules that do not depend on each other build and test side
@@ -67,8 +67,10 @@ Commands are filled in here as the increments land.
 - Frontend: `cd frontend` then `npm run check`, from 0.10
 - End to end: `cd frontend` then `npm run e2e`, from 0.13; the check script's fourth part runs it too. It starts a dev
   server and a game server of its own, on this tree's ports a thousand up, the page pointed at its game server, and
-  keeps its world in a MongoDB database of its own, `villages-e2e-<tree>`, emptied before and dropped after; with no
-  MongoDB up it runs in memory and says the restart was not tried. It drives Chrome, the one on the machine, headless,
+  keeps its world in a MongoDB database of its own, `villages-e2e-<tree>`, emptied before and dropped after, carried
+  by RabbitMQ in a virtual host of the same name, deleted after, and checks the panel says so; with no MongoDB up it
+  runs in memory and says the restart was not tried, and with no RabbitMQ up, in-process and says that. It drives
+  Chrome, the one on the machine, headless,
   and reads what Adam reads: the debug panel's log. A failure leaves a trace in `.logs/e2e/results`, opened with
   `npx playwright show-trace`, and the report is `.logs/e2e/report`. The game server's output is `.logs/e2e-game.log`.
 
