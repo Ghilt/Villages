@@ -12,6 +12,11 @@
     every session. Stopping it is Adam's alone, so nothing here does. See decision record 0092.
 #>
 
+# The quick start stops on any error, and Windows PowerShell makes one of whatever a program says on stderr: Docker
+# installed but not running says so there, and the world went nowhere rather than into memory. Every call below is
+# judged by its exit code instead. Only this script's own scope.
+$ErrorActionPreference = 'Continue'
+
 $Docker = Resolve-Tool @('docker.exe', 'docker')
 $Compose = Join-Path $Root 'infra\docker-compose.yml'
 
