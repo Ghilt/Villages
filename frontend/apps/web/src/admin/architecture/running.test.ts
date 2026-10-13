@@ -3,7 +3,7 @@ import { existsSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 import { groupCard, related, runCard, runningGraph } from './graph';
-import { GROUPS, PIECES, TALKS } from './world';
+import { GROUPS, PIECES, READERS, TALKS } from './world';
 
 /** A path from the repository's root. */
 const fromRoot = (path: string) => new URL(`../../../../../../${path}`, import.meta.url);
@@ -21,9 +21,16 @@ describe('the running game, as the architecture page draws it', () => {
   });
 
   it('names the folders of the pieces that are folders of the repository as they are', () => {
-    const folders = PIECES.flatMap((p) => p.where.split(/, | · /)).filter((w) =>
-      /^(backend|frontend)\//.test(w),
-    );
+    // A part of the page names its files from the page's own src/, as its readers do.
+    const folders = PIECES.flatMap((p) =>
+      p.where
+        .split(/, | · /)
+        .map((w) =>
+          p.group === 'page' && !/^(backend|frontend)\//.test(w) && /^[a-z]+\//.test(w)
+            ? `frontend/apps/web/src/${w}`
+            : w,
+        ),
+    ).filter((w) => /^(backend|frontend)\//.test(w));
     expect(folders.filter((folder) => !existsSync(fromRoot(folder)))).toEqual([]);
   });
 
@@ -41,9 +48,19 @@ describe('the running game, as the architecture page draws it', () => {
     expect(lit.has(runCard('gateway'))).toBe(false);
   });
 
-  it('brings the baked files the game server reads to its group, and the ones the page reads to the page', () => {
+  it('brings the files the game server reads to its group, and those the page reads to the part reading them', () => {
+    const parts = new Set(PIECES.filter((p) => p.group === 'page').map((p) => p.id));
+    expect(
+      READERS.filter((r) => (r.program === 'page') !== parts.has(r.piece ?? '')).map((r) => r.id),
+    ).toEqual([]);
     const { arrows } = runningGraph();
     const into = new Set(arrows.filter((a) => a.flow).map((a) => a.to));
-    expect([...into].sort()).toEqual([groupCard('server'), runCard('page')].sort());
+    const reading = new Set(READERS.flatMap((r) => (r.piece === undefined ? [] : [runCard(r.piece)])));
+    expect([...into].sort()).toEqual([groupCard('server'), ...reading].sort());
+  });
+
+  it('draws a box for the page with a card for each of its shaders', () => {
+    const page = PIECES.filter((p) => p.group === 'page').map((p) => p.id);
+    expect(page).toEqual(expect.arrayContaining(['relief', 'water', 'grass', 'fog', 'pictures', 'painter']));
   });
 });

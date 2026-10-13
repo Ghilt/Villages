@@ -95,7 +95,10 @@ function FileFocus({ id }: { id: string }) {
         <dt>read while running</dt>
         <dd className={runtime.length > 0 ? 'arch__yes' : ''}>
           {runtime
-            .map((r) => `${r.name} (${r.program === 'page' ? 'the page' : 'the game server'})`)
+            .map(
+              (r) =>
+                `${r.name} (${r.piece === undefined ? 'the game server' : piece(r.piece).name.toLowerCase()})`,
+            )
             .join(', ') || 'nothing reads it while the game runs'}
         </dd>
         {a.development !== undefined && (
@@ -141,6 +144,19 @@ function ToolFocus({ script }: { script: string }) {
           </>
         )}
       </dl>
+    </>
+  );
+}
+
+/** The baked files a part of the page reads, and what in it reads each. */
+function PieceReads({ id }: { id: string }) {
+  const readers = READERS.filter((r) => r.piece === id);
+  return (
+    <>
+      <dt>reads</dt>
+      <dd>
+        {readers.map((r) => `${names(r.reads)}, for ${r.name} (${r.where})`).join('; ') || 'nothing baked'}
+      </dd>
     </>
   );
 }
@@ -192,13 +208,13 @@ function PieceFocus({ id }: { id: string }) {
         <dt>runs</dt>
         <dd>
           {WHERE[p.runs]}
-          {p.group === undefined ? '' : `, in ${group(p.group).name.toLowerCase()}`}
+          {`, in ${group(p.group).name.toLowerCase()}`}
           {p.yet === undefined ? '' : `; not used until increment ${p.yet}`}
           {p.instead === undefined ? '' : `; instead of ${piece(p.instead).name} when Docker is not running`}
         </dd>
         <dt>talks to</dt>
         <dd>{talksOf(p)}</dd>
-        {id === 'page' && <Reads program="page" />}
+        {p.group === 'page' && <PieceReads id={id} />}
       </dl>
     </>
   );
@@ -216,7 +232,7 @@ function GroupFocus({ id }: { id: string }) {
       <dl className="arch__facts">
         <dt>made of</dt>
         <dd>{inside.map((p) => p.name).join(', ')}</dd>
-        {id === 'server' && <Reads program="server" />}
+        {(id === 'page' || id === 'server') && <Reads program={id} />}
       </dl>
     </>
   );

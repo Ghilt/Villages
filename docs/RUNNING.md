@@ -575,21 +575,26 @@ and `-- --drop` takes them off; by hand only, as `drop-gone-worlds` is.
   development, and says at its foot what the agent does with it: the master's preview, which an agent opens to
   see a master too big to open whole, the stills, and `world:scenery`. The world steps' tools and what they make
   stand in a dashed box, **the world cache, shared by every tree**, which says what it is and where; choosing it
-  lights everything in it. Under a dotted line is the running game: the page on its own, then two boxes of the
-  pieces that fit together, each card saying where it runs - in the browser, in the game server, or in Docker
-  (sea green). **The game server** box holds the gateway, the rules, the reactions and the projections, and the
-  baked files it reads arrive at the box; **the event store** box holds Occurrent, MongoDB, the bridge, RabbitMQ
-  and the in-memory store used without Docker, the last dashed because it is used only instead of MongoDB.
-  Every arrow between running pieces says what passes along it - commands, the history, every event a queue
-  each, the world now - and choosing a piece lights the pieces it talks to, a box the pieces in it. Their words are
+  lights everything in it. Under a dotted line is the running game, three boxes of the pieces that fit together,
+  each card saying where it runs - in the browser, in the game server, or in Docker (sea green). **The page**
+  box holds its parts in a row, each under the baked files it reads, which arrive at it: the painter, which is
+  arithmetic in workers and not a shader, the grass, water and relief shaders, the map, the picture renderers -
+  Biome, Origin and Culture - the sprites and the panes; under them the fog shader, which reads nothing baked,
+  and the connection, which talks to the gateway and tells the sprites, the panes and the fog what the house
+  has and sees. **The game server** box holds the gateway, the rules, the reactions and the projections, and
+  the baked files it reads arrive at the box; **the event store** box holds Occurrent, MongoDB, the bridge,
+  RabbitMQ and the in-memory store used without Docker, the last dashed because it is used only instead of
+  MongoDB. Every arrow between running pieces says what passes along it - commands, the history, every event a
+  queue each, the world now - and choosing a piece lights the pieces it talks to, a box the pieces in it. Their
+  words are
   `apps/web/src/admin/architecture/running.ts`, held by `running.test.ts`. Arrows run from what is read to what
-  reads it. Drag to move
-  about, scroll to zoom, the minimap for the whole; choosing a card lights everything it depends on and
-  everything that depends on it, and the strip above the diagram says what it is, with the command to run a
-  tool. Adam's own tools and the stale scripts are named under it rather than drawn. Its data is
-  `apps/web/src/admin/architecture/`, held to the repository by `world.test.ts`: a new `world:` script, a
-  moved reader or a file nothing makes fails it. The times of the tools the quick-start runs were measured
-  on Adam's machine on 2026-10-11. The inspect pages are kept apart from the game by decision 0091.
+  reads it. Drag to move about, scroll to zoom, the minimap for the whole; choosing a card lights everything it
+  depends on and everything that depends on it, and the strip above the diagram says what it is, what reads it
+  while the game runs, and the command to run a tool. Adam's own tools and the stale scripts are named under it
+  rather than drawn. Its data is `apps/web/src/admin/architecture/`, held to the repository by `world.test.ts`:
+  a new `world:` script, a moved reader, a file nothing makes, or a baked file nothing reads that does not carry
+  the robot, fails it. The times of the tools the quick-start runs were measured on
+  Adam's machine on 2026-10-11. The inspect pages are kept apart from the game by decision 0091.
 
 ## The event store and the broker
 

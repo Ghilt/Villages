@@ -252,6 +252,11 @@
   line-height: 1.35;
 }
 
+/* The page's box is a row of eight wide, and says what it is across more of it, clear of the cards under it. */
+.run-group--page .run-group__what {
+  max-width: 48rem;
+}
+
 .run-group.is-dim {
   opacity: 0.35;
 }

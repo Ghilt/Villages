@@ -45,6 +45,8 @@ export interface Tool {
 export interface Reader {
   readonly id: string;
   readonly program: 'page' | 'server';
+  /** The part of the page that reads it, from `running.ts`; the game server reads as one process, and has none. */
+  readonly piece?: string;
   readonly name: string;
   readonly where: string;
   readonly reads: readonly string[];

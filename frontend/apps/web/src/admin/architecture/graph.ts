@@ -66,8 +66,9 @@ export function bakedGraph(): { cards: Card[]; arrows: Arrow[] } {
 }
 
 /**
- * The running cards, groups before the pieces inside them, and the arrows into and between them. The baked files
- * the game server reads arrive at its group, because it is the whole process that reads them.
+ * The running cards, groups before the pieces inside them, and the arrows into and between them. A baked file the
+ * page reads arrives at the part of the page that reads it; one the game server reads arrives at its group,
+ * because it is the whole process that reads them.
  */
 export function runningGraph(): { cards: Card[]; arrows: Arrow[] } {
   const cards: Card[] = [
@@ -76,17 +77,18 @@ export function runningGraph(): { cards: Card[]; arrows: Arrow[] } {
       id: runCard(p.id),
       kind: 'piece',
       ref: p.id,
-      ...(p.group === undefined ? {} : { group: groupCard(p.group) }),
+      group: groupCard(p.group),
     })),
   ];
   const read = new Set<string>();
   const arrows: Arrow[] = [];
   for (const reader of READERS) {
+    const into = reader.piece === undefined ? groupCard('server') : runCard(reader.piece);
     for (const file of reader.reads) {
-      const key = `${file}>${reader.program}`;
+      const key = `${file}>${into}`;
       if (read.has(key)) continue;
       read.add(key);
-      arrows.push(arrow(fileCard(file), reader.program === 'page' ? runCard('page') : groupCard('server')));
+      arrows.push(arrow(fileCard(file), into));
     }
   }
   arrows.push(...TALKS.map(talk));

@@ -59,6 +59,20 @@ describe('the architecture page', () => {
     expect(orphans).toEqual([]);
   });
 
+  it('reads every baked file, or says that only an agent at work does', () => {
+    // A file made and then read by nothing is an arrow missing from the page, as the culture map's and the structure
+    // atlas's were, or a file only an agent looks at, drawn with the robot; or it is waste, as the lookup grid was,
+    // the preview again beside the tiles, and is not made.
+    const unread = ARTIFACTS.filter(
+      (a) =>
+        a.origin === 'baked' &&
+        readersOf(a.id).length === 0 &&
+        toolsReading(a.id).length === 0 &&
+        a.development === undefined,
+    ).map((a) => a.id);
+    expect(unread).toEqual([]);
+  });
+
   it('marks for development only what the game and its tools never read', () => {
     const read = (id: string) => readersOf(id).length > 0 || toolsReading(id).length > 0;
     const files = ARTIFACTS.filter((a) => a.development !== undefined && read(a.id));

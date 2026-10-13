@@ -153,7 +153,7 @@ export function GroupCard({ data }: NodeProps<CardNode>) {
   const g = group(data.card.ref);
   return (
     <div className={`run-group run-group--${g.id} ${data.state}`}>
-      {/* The baked files the game server reads arrive here, to one side of the page standing above. */}
+      {/* The baked files the game server reads arrive here, to one side of the page's box above it. */}
       <Handle type="target" position={Position.Top} isConnectable={false} style={{ left: '10%' }} />
       <div className="run-group__name">
         {g.name} <code>{g.where}</code>

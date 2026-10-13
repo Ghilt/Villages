@@ -2,7 +2,7 @@ import dagre from '@dagrejs/dagre';
 
 import { SHELF_CARD, bakedGraph, inShelf, runningGraph } from './graph';
 import type { Arrow, Card } from './graph';
-import { TOOLS, artifact } from './world';
+import { TOOLS, artifact, piece } from './world';
 
 /** Where a card stands, its top-left corner, and how big it is: inside its group's box when it has one. */
 export interface Placed {
@@ -53,15 +53,26 @@ const ROW = PIECE.height + 100;
 const PAD = 30;
 const HEADER = 100;
 const BETWEEN = 120;
-const GROUP = { width: 2 * PAD + 2 * COLUMN + PIECE.width, height: HEADER + ROW + PIECE.height + PAD };
 
 /**
- * Where each running piece stands: a column of three and a row of two in its group's box, the page alone above
- * them. The gateway is above what feeds it, Occurrent above what keeps its events, the bridge beside it and above
- * the broker it publishes to, and the feed runs up.
+ * Where each running piece stands in its group's box, by column and row. In the page, a row of the parts that
+ * read baked files, in the order of where what each reads stands above, on average, and under them the
+ * connection, which talks down to the gateway and up to the parts drawing what it is told, the fog beside it. In
+ * the game server and the event store, a column of three and a row of two: the gateway is above what feeds it,
+ * Occurrent above what keeps its events, the bridge beside it and above the broker it publishes to, and the feed
+ * runs up.
  */
 const SPOTS: Record<string, { readonly col: number; readonly row: number }> = {
-  page: { col: 1, row: 0 },
+  painter: { col: 0, row: 0 },
+  grass: { col: 1, row: 0 },
+  water: { col: 2, row: 0 },
+  map: { col: 3, row: 0 },
+  pictures: { col: 4, row: 0 },
+  sprites: { col: 5, row: 0 },
+  panes: { col: 6, row: 0 },
+  relief: { col: 7, row: 0 },
+  fog: { col: 4.5, row: 1 },
+  connection: { col: 5.5, row: 1 },
   gateway: { col: 1, row: 0 },
   rules: { col: 0, row: 1 },
   reactions: { col: 1, row: 1 },
@@ -73,11 +84,21 @@ const SPOTS: Record<string, { readonly col: number; readonly row: number }> = {
   rabbitmq: { col: 2, row: 1 },
 };
 
-/** The groups' boxes, top to bottom beneath the page. */
-const GROUP_ORDER = ['group:server', 'group:events'];
+/** The groups' boxes, top to bottom beneath the line. */
+const GROUP_ORDER = ['group:page', 'group:server', 'group:events'];
+
+/** A group's box: as wide and as tall as the columns and rows its pieces stand in, and room for what it says. */
+function boxOf(group: string): { width: number; height: number } {
+  const spots = Object.entries(SPOTS)
+    .filter(([id]) => `group:${piece(id).group}` === group)
+    .map(([, spot]) => spot);
+  const [cols, rows] = [Math.max(...spots.map((s) => s.col)), Math.max(...spots.map((s) => s.row))];
+  return { width: 2 * PAD + cols * COLUMN + PIECE.width, height: HEADER + rows * ROW + PIECE.height + PAD };
+}
 
 /** An arrow that would cut through the cards between its ends goes round the outside instead. */
 const ROUND: Record<string, readonly [Side, Side]> = {
+  'run:connection>run:gateway': ['bottom', 'top'],
   'run:rabbitmq>run:projections': ['right', 'right'],
   'run:occurrent>run:memory': ['left', 'top'],
 };
@@ -99,7 +120,7 @@ export function sizeOf(card: Card): { width: number; height: number } {
     case 'piece':
       return { ...PIECE };
     case 'group':
-      return GROUP;
+      return boxOf(card.id);
     case 'shelf':
       return { width: 0, height: 0 };
   }
@@ -111,8 +132,8 @@ export function sizeOf(card: Card): { width: number; height: number } {
  * Under that, what the tools make of them is laid out by dagre in ranks, so each tool stands below what it reads
  * and above what it writes; each source stands over the tools that read it, so its arrows stay short. The running
  * cards are not part of that: they stand beneath a line drawn under the lowest baked card, so every arrow into them
- * crosses it, the page alone and then each group's box with its pieces in it. The master's tools and what they
- * make stand in the world cache's box, which dagre lays out as a cluster: as big as they need, and the rest of the
+ * crosses it: each group's box with its pieces in it, the page's first. The master's tools and what they make
+ * stand in the world cache's box, which dagre lays out as a cluster: as big as they need, and the rest of the
  * baked cards round it.
  */
 export function layOut(): { placed: Placed[]; arrows: Drawn[]; line: Line; sources: Line } {
@@ -167,33 +188,25 @@ export function layOut(): { placed: Placed[]; arrows: Drawn[]; line: Line; sourc
   const line: Line = { x: left - GAP, y: bottom + 70, width: right - left + 2 * GAP };
 
   const middle = (left + right) / 2;
-  const top = line.y + 110;
-  const boxes = new Map(
-    GROUP_ORDER.map((id, i) => [
-      id,
-      { x: middle - GROUP.width / 2, y: top + PIECE.height + BETWEEN + i * (GROUP.height + BETWEEN) },
-    ]),
-  );
+  const boxes = new Map<string, { x: number; y: number; width: number; height: number }>();
+  let top = line.y + 110;
+  for (const id of GROUP_ORDER) {
+    const size = boxOf(id);
+    boxes.set(id, { x: middle - size.width / 2, y: top, ...size });
+    top += size.height + BETWEEN;
+  }
   const at = new Map<string, { x: number; y: number }>();
   for (const card of running.cards) {
     if (card.kind === 'group') {
-      const box = boxes.get(card.id)!;
-      placed.push({ card, ...box, ...GROUP });
+      placed.push({ card, ...boxes.get(card.id)! });
       continue;
     }
-    if (card.kind !== 'piece') continue;
+    if (card.kind !== 'piece' || card.group === undefined) continue;
     const spot = SPOTS[card.ref]!;
-    const x = PAD + spot.col * COLUMN;
-    const y = HEADER + spot.row * ROW;
-    if (card.group === undefined) {
-      const alone = { x: middle - PIECE.width / 2, y: top };
-      placed.push({ card, ...alone, ...PIECE });
-      at.set(card.id, alone);
-    } else {
-      const box = boxes.get(card.group)!;
-      placed.push({ card, x, y, ...PIECE, parent: card.group });
-      at.set(card.id, { x: box.x + x, y: box.y + y });
-    }
+    const [x, y] = [PAD + spot.col * COLUMN, HEADER + spot.row * ROW];
+    const box = boxes.get(card.group)!;
+    placed.push({ card, x, y, ...PIECE, parent: card.group });
+    at.set(card.id, { x: box.x + x, y: box.y + y });
   }
 
   const sided = running.arrows.map((a): Drawn => {
