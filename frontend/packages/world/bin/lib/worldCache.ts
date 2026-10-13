@@ -57,6 +57,9 @@ function filesUnder(root: string, folder = root): string[] {
   return found;
 }
 
+/** How many entries this process has begun making, so that each has a folder of its own. */
+let begun = 0;
+
 export class Shelf {
   readonly dir: string;
 
@@ -87,10 +90,16 @@ export class Shelf {
     }
   }
 
-  /** A new folder beside the shelf for a tool to make an entry in, with `--into`. */
+  /**
+   * A new folder beside the shelf for a tool to make an entry in, with `--into`: its own, never another's. Two begun
+   * in one millisecond by one process are told apart by how many it has begun, and a folder already there is refused
+   * rather than shared.
+   */
   making(step: StepName, key: string): string {
-    const at = join(this.dir, step, `${key}.making-${process.pid}-${Date.now().toString(36)}`);
-    mkdirSync(at, { recursive: true });
+    begun += 1;
+    const at = join(this.dir, step, `${key}.making-${process.pid}-${Date.now().toString(36)}-${begun}`);
+    mkdirSync(dirname(at), { recursive: true });
+    mkdirSync(at);
     return at;
   }
 
