@@ -98,6 +98,12 @@ function FileFocus({ id }: { id: string }) {
             .map((r) => `${r.name} (${r.program === 'page' ? 'the page' : 'the game server'})`)
             .join(', ') || 'nothing reads it while the game runs'}
         </dd>
+        {a.development !== undefined && (
+          <>
+            <dt>for development</dt>
+            <dd>{a.development}</dd>
+          </>
+        )}
         <dt>stale when it changes</dt>
         <dd>{names(down.files)}</dd>
       </dl>
@@ -128,6 +134,12 @@ function ToolFocus({ script }: { script: string }) {
         <dd>{names(tool.reads)}</dd>
         <dt>writes</dt>
         <dd>{names(tool.writes)}</dd>
+        {tool.development !== undefined && (
+          <>
+            <dt>for development</dt>
+            <dd>{tool.development}</dd>
+          </>
+        )}
       </dl>
     </>
   );

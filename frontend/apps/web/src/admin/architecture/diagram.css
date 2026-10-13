@@ -92,6 +92,31 @@
   color: var(--ink-soft);
 }
 
+/*
+ * For development: a file or a tool only an agent at work reads or runs, and the game never does. The robot says so
+ * in the strip, on a light ground so it reads on a tool's dark strip too, and a line at the foot says what for.
+ */
+.card__robot {
+  flex: none;
+  width: 1.15rem;
+  height: 1.15rem;
+  padding: 1px;
+  fill: none;
+  stroke: var(--agent);
+  stroke-width: 1.3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  background: var(--agent-bg);
+  border: 1px solid var(--agent);
+  border-radius: 3px;
+}
+
+.card__for {
+  margin-top: auto;
+  font-style: italic;
+  color: var(--agent);
+}
+
 /* Files, by who makes them. */
 
 .card--authored {

@@ -5,6 +5,7 @@ import './overview.css';
 import { useCallback, useMemo, useState } from 'react';
 
 import { BackToIndex } from '../InspectIndex';
+import { Robot } from './Cards';
 import { Diagram } from './Diagram';
 import { Focus } from './Focus';
 import { related } from './graph';
@@ -92,6 +93,9 @@ export function InspectArchitecture() {
         <span className="arch__key arch__key--tool">a tool</span>
         <span className="arch__key arch__key--run">running</span>
         <span className="arch__key arch__key--yet">running, not used yet</span>
+        <span className="arch__key arch__key--agent">
+          <Robot /> for development: only an agent at work reads it or runs it, never the game
+        </span>
         <p className="arch__legacy">
           Not drawn: Adam&apos;s own tools in <code>scripts/</code>, <code>mend-rivers</code> (it writes the
           master it reads), <code>nine-slice</code> (it writes a border into world/ui), <code>check</code> (it

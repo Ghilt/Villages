@@ -570,16 +570,18 @@ and `-- --drop` takes them off; by hand only, as `drop-gone-worlds` is.
   file the world is made from - what Adam authors (gold) and what is downloaded (blue) - each under the tools
   that read it, with `world:fetch-all` above the downloads it fetches and a gold line under the row; under the
   line, the tools that bake the world from them and the files they write, each file card saying whether it is
-  one file, a few, or a folder, its path, and who makes it - Adam (gold), a download (blue), a tool (grey). The
-  world steps' tools and what they make stand in a dashed box, **the world cache, shared by every tree**, which
-  says what it is and where; choosing it lights everything in it. Under a dotted line is the running game: the
-  page on its own, then two boxes of the pieces that fit together, each card saying where it runs - in the
-  browser, in the game server, or in Docker (sea green). **The game server** box holds the gateway, the rules,
-  the reactions and the projections, and the baked files it reads arrive at the box; **the event store** box
-  holds Occurrent, MongoDB, the bridge, RabbitMQ and the in-memory store used without Docker, the last dashed
-  because it is used only instead of MongoDB. Every arrow between running pieces says what passes along it -
-  commands, the history, every event a queue each, the world now - and choosing a piece lights the pieces it
-  talks to, a box the pieces in it. Their words are
+  one file, a few, or a folder, its path, and who makes it - Adam (gold), a download (blue), a tool (grey). A
+  file or a tool that only an agent at work reads or runs, and the game never does, carries **the robot**, for
+  development, and says at its foot what the agent does with it: the master's preview, which an agent opens to
+  see a master too big to open whole, the stills, and `world:scenery`. The world steps' tools and what they make
+  stand in a dashed box, **the world cache, shared by every tree**, which says what it is and where; choosing it
+  lights everything in it. Under a dotted line is the running game: the page on its own, then two boxes of the
+  pieces that fit together, each card saying where it runs - in the browser, in the game server, or in Docker
+  (sea green). **The game server** box holds the gateway, the rules, the reactions and the projections, and the
+  baked files it reads arrive at the box; **the event store** box holds Occurrent, MongoDB, the bridge, RabbitMQ
+  and the in-memory store used without Docker, the last dashed because it is used only instead of MongoDB.
+  Every arrow between running pieces says what passes along it - commands, the history, every event a queue
+  each, the world now - and choosing a piece lights the pieces it talks to, a box the pieces in it. Their words are
   `apps/web/src/admin/architecture/running.ts`, held by `running.test.ts`. Arrows run from what is read to what
   reads it. Drag to move
   about, scroll to zoom, the minimap for the whole; choosing a card lights everything it depends on and

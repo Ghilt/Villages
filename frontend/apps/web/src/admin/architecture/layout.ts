@@ -37,7 +37,10 @@ export const makesSources = (card: Card): boolean =>
   card.kind === 'tool' &&
   TOOLS.find((tool) => tool.script === card.ref)!.writes.every((id) => artifact(id).origin !== 'baked');
 
-const WIDE = 196;
+const FILE = { width: 196, height: 120 };
+const TOOL = { width: 196, height: 124 };
+/** How much taller a card is that says at its foot what an agent does with it. */
+const FOOT = 34;
 const GAP = 40;
 /** The world cache's box: room round the cards inside it, and a place inside it for what it says. */
 const SHELF = { pad: 12, words: { width: 600, height: 130 } };
@@ -79,15 +82,22 @@ const ROUND: Record<string, readonly [Side, Side]> = {
   'run:occurrent>run:memory': ['left', 'top'],
 };
 
-/** How big a card is drawn, so the layout and the drawing agree. */
+/**
+ * How big a card is drawn, so the layout and the drawing agree: a new object each time, because dagre writes where
+ * it put a card into the one it is given.
+ */
 export function sizeOf(card: Card): { width: number; height: number } {
   switch (card.kind) {
-    case 'file':
-      return { width: WIDE, height: 120 };
-    case 'tool':
-      return { width: WIDE, height: 124 };
+    case 'file': {
+      const a = artifact(card.ref);
+      return { ...FILE, height: FILE.height + (a.development === undefined ? 0 : FOOT) };
+    }
+    case 'tool': {
+      const tool = TOOLS.find((one) => one.script === card.ref)!;
+      return { ...TOOL, height: TOOL.height + (tool.development === undefined ? 0 : FOOT) };
+    }
     case 'piece':
-      return PIECE;
+      return { ...PIECE };
     case 'group':
       return GROUP;
     case 'shelf':
@@ -239,8 +249,7 @@ function placeSources(
     (one, other) => place(one.id) - place(other.id) || under(one.id) - under(other.id),
   );
 
-  const file = sizeOf({ id: '', kind: 'file', ref: '' });
-  const tool = sizeOf({ id: '', kind: 'tool', ref: '' });
+  const [file, tool] = [FILE, TOOL];
   const width = ordered.length * file.width + (ordered.length - 1) * SOURCE_GAP;
   const middle = (Math.min(...made.map((p) => p.x)) + Math.max(...made.map((p) => p.x + p.width))) / 2;
   const rowY = downloads.length > 0 ? tool.height + ROW_GAP : 0;

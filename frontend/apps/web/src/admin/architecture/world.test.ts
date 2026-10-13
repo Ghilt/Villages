@@ -6,7 +6,16 @@ import { WORLD_STEPS } from '../../../../../packages/world/bin/lib/worldSteps.ts
 
 import { WORLD_CACHE } from './cache';
 import { STAGES } from './starting';
-import { ARTIFACTS, LEGACY, READERS, TOOLS, downstreamOf, upstreamOf } from './world';
+import {
+  ARTIFACTS,
+  LEGACY,
+  READERS,
+  TOOLS,
+  downstreamOf,
+  readersOf,
+  toolsReading,
+  upstreamOf,
+} from './world';
 
 /** A path from the repository's root. */
 const fromRoot = (path: string) => new URL(`../../../../../../${path}`, import.meta.url);
@@ -48,6 +57,17 @@ describe('the architecture page', () => {
       (a) => a.origin === 'baked' && !TOOLS.some((t) => t.writes.includes(a.id)),
     ).map((a) => a.id);
     expect(orphans).toEqual([]);
+  });
+
+  it('marks for development only what the game and its tools never read', () => {
+    const read = (id: string) => readersOf(id).length > 0 || toolsReading(id).length > 0;
+    const files = ARTIFACTS.filter((a) => a.development !== undefined && read(a.id));
+    const tools = TOOLS.filter(
+      (t) =>
+        t.development !== undefined &&
+        t.writes.some((id) => read(id) || !ARTIFACTS.find((a) => a.id === id)!.development),
+    );
+    expect([...files.map((a) => a.id), ...tools.map((t) => t.script)]).toEqual([]);
   });
 
   it('names every reader of the running game where it is', () => {

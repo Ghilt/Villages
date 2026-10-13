@@ -141,6 +141,7 @@ export const ARTIFACTS: readonly Artifact[] = [
     path: 'world/master/<m>-preview.png',
     origin: 'baked',
     what: 'The master, 2048 by 1024, in the colours it was painted in.',
+    development: 'An agent opens it to see the master, which is too big to open whole.',
   },
   {
     id: 'tiles',
@@ -166,6 +167,7 @@ export const ARTIFACTS: readonly Artifact[] = [
     path: 'world/painterly/*.png',
     origin: 'baked',
     what: 'Pictures of views, painted offline for judging a look. Nothing running reads them.',
+    development: 'An agent paints them to judge a look by, and shows them to Adam in a hand-over.',
   },
   {
     id: 'flow',

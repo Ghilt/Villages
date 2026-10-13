@@ -111,6 +111,7 @@ export const TOOLS: readonly Tool[] = [
     perMaster: true,
     ranBy: 'by hand',
     what: 'Paints stills of the scenery, for judging it.',
+    development: 'An agent runs it to see the scenery a change to the biomes or the sprite map makes.',
   },
   {
     script: 'world:paint',

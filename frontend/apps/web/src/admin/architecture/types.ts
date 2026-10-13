@@ -12,6 +12,11 @@ export interface Artifact {
   readonly form: 'file' | 'files' | 'folder';
   readonly what: string;
   readonly size?: string;
+  /**
+   * What an agent at work on the world does with a file the running game never reads: looks at it to see what it
+   * cannot open, or to judge a look and show Adam. Drawn with the robot, for development.
+   */
+  readonly development?: string;
 }
 
 export interface Tool {
@@ -32,6 +37,8 @@ export interface Tool {
   readonly ranBy: string;
   readonly what: string;
   readonly group: 'master' | 'pictures' | 'once' | 'adam' | 'cache';
+  /** What an agent does with what it makes, when nothing of the game reads any of it. Drawn with the robot. */
+  readonly development?: string;
 }
 
 /** A part of the running game that reads baked files. */

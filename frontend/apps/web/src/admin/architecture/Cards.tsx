@@ -31,6 +31,20 @@ function FormMark({ form }: { form: 'file' | 'files' | 'folder' }) {
   );
 }
 
+/** The robot: what an agent reads or runs while it works on the world, and the game never does. */
+export function Robot() {
+  return (
+    <svg className="card__robot" viewBox="0 0 16 16" role="img" aria-label="for development">
+      <path d="M8 1.6v2" />
+      <circle cx="8" cy="1.4" r="0.6" />
+      <rect x="3" y="3.6" width="10" height="7.4" rx="2" />
+      <circle cx="6.1" cy="6.9" r="0.9" />
+      <circle cx="9.9" cy="6.9" r="0.9" />
+      <path d="M6.2 9.2h3.6 M1.4 6v2.6 M14.6 6v2.6 M5.6 11v3h4.8v-3" />
+    </svg>
+  );
+}
+
 function Ends() {
   return (
     <>
@@ -74,10 +88,12 @@ export function FileCard({ data }: NodeProps<CardNode>) {
         <FormMark form={a.form} />
         <span>{a.form}</span>
         <span className="card__by">{MADE_BY[a.origin]}</span>
+        {a.development !== undefined && <Robot />}
       </div>
       <div className="card__name">{a.name}</div>
       <code className="card__path">{a.path}</code>
       <div className="card__what">{a.what}</div>
+      {a.development !== undefined && <div className="card__for">for development: {a.development}</div>}
     </div>
   );
 }
@@ -93,10 +109,12 @@ export function ToolCard({ data }: NodeProps<CardNode>) {
           {took(tool)}
           {tool.perMaster ? ' a master' : ''}
         </span>
+        {tool.development !== undefined && <Robot />}
       </div>
       <div className="card__name card__name--mono">{tool.script}</div>
       <div className="card__what">{tool.what}</div>
       <div className="card__ran">run by {tool.ranBy}</div>
+      {tool.development !== undefined && <div className="card__for">for development: {tool.development}</div>}
     </div>
   );
 }
