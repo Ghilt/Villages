@@ -29,7 +29,7 @@ Characters and key figures are built and waiting on Adam's eye. Nothing else her
 after them wait on the same thing. Fog of war, the exception, is under way a step at a time, and so is
 character dialogue; the UI component library is built and waiting on Adam's eye, and so is the choice roll,
 and so is the origin map, the first of real names on the edited world. Structures are planned and not
-started, and so is the broker; the world cache, the newest, is built and waiting on Adam's eye.
+started; the world cache, the newest, is built and waiting on Adam's eye.
 
 - **Characters and key figures**: the people of the world, each with a history of their own, and the
   house's tie to the few it acts through, shown in a pane in the corner beside the house status. The shape
@@ -103,15 +103,6 @@ started, and so is the broker; the world cache, the newest, is built and waiting
   first of them, a castle raised at founding. The shape is decision record 0093 and the steps, one commit
   each, are in `docs/plans/structures.md`; the hypothesis is experiment 0018. Step nought, the documents,
   is written. It is also the first income in the game. Adam's own, planned with him on 2026-10-08.
-- **The broker, 1.6**: RabbitMQ carrying every stored event to the read models and every window, through a
-  bridge that follows the store durably and waits for the broker's confirm, each tree in a virtual host of its
-  own that the server makes and `drop-gone-worlds` drops; the reactions stay on the store. The shape is decision
-  record 0094, proposed, and the eleven steps, one commit each with three checkpoints, are in
-  `docs/plans/broker.md`; steps nought to seven are built: the bridge publishing every event to the tree's
-  virtual host, and the read models and the event page following it, each through a queue of its own. What is
-  left is the end-to-end test on RabbitMQ, the clean-up of gone virtual hosts, and the documents. With it comes
-  the RabbitMQ half of 0.8's smoke test, which waited for there to be something to test. Still one game server
-  per tree. Adam's own, planned with him on 2026-10-12.
 - **The world cache**: a new tree up in 68 seconds rather than seventeen minutes, measured on 2026-10-12. All
   twelve steps are built and waiting on Adam's eye. Each step of the
   world (tiles, flow, sprite map, ground, origin, names, culture, height) is made once, filed on a shelf the
@@ -183,6 +174,11 @@ Wanted, not started, and each needs a hypothesis in `docs/experiments/` before a
   worked ground around them, and marks of time. Experiment 0006 proved the machine will draw it and
   found the budget by hand; the path is `docs/plans/world-generator.md`. The largest thing on this list
   and the one that would change how the world reads most.
+- **More than one game server on one world**: what RabbitMQ was chosen for, and what the broker of decision
+  record 0094 leaves ready but does not do. A player's session and its takeover, the reactions, the wipe and the
+  instruments reaching across servers; the read models saved with a checkpoint, so a start does not fold the
+  whole history; a gateway that keeps no read models of its own and binds only its sessions' cells, which the
+  routing key already carries. Left out of 1.6 on purpose, 2026-10-12.
 - **Aliveness and scale**: a bot swarm to ten thousand connections on one machine, aggregation of sprites at
   low zoom, a custom stylised map style checked in, hardened reconnection and clock correction. The scale
   the architecture is designed for is not in doubt; proving it is simply not next.

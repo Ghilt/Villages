@@ -10,6 +10,12 @@
   another session. The welcome says where the world is kept, while the instruments are open, and the debug
   panel prints it. An event's time is kept as the text it was written as, because Occurrent refuses a date
   finer than a millisecond and the server's clock is finer than that.
+- Amended 2026-10-13, as the broker was built (decision record 0094): **the server makes its own virtual host**
+  as it starts, named as its database is, through RabbitMQ's management page, because AMQP cannot make one; the
+  quick start passes `villages.broker=rabbit` with `villages.store=mongo` whenever the stack is up, and RabbitMQ
+  without MongoDB is refused. The end-to-end test's world, `villages-e2e-<tree>`, has a virtual host of its own
+  too, which it deletes after itself. `drop-gone-worlds` drops a gone tree's virtual host with its database, and
+  leaves a live tree's test world alone. A test that needs RabbitMQ starts one of its own, as for MongoDB.
 
 ## Context
 

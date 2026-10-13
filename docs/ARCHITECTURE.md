@@ -115,7 +115,7 @@ violation when the rule was introduced.
 | `protocol` | The client and server message types, shared with the frontend through checked-in JSON fixtures, and the version of the wire, whose shape is recorded in `contracts/protocol-v<n>.txt` (0037) |
 | `infrastructure-occurrent` | CloudEvent conversion and type mapping, the MongoDB event store, the application service, durable subscriptions |
 | `infrastructure-rabbit` | The tree's virtual host and the exchange, the bridge that publishes stored events, the routing key, and the broker feed the read models follow (0094) |
-| `projections` | Read models. The first is houses by cell, which the map is drawn from; the sight is what every house can see, which the fog of war is drawn from |
+| `projections` | Read models: the structures and people by cell, which the map is drawn from, the houses, the choices, the dialogues; the sight is what every house can see, which the fog of war is drawn from |
 | `gateway` | Player connections, cell subscriptions, snapshots, coalesced deltas, command intake through one registry, `Commands`, and Adam's instruments as a part of their own, `Instruments`, which `villages.instruments` closes (0076) |
 | `app` | The Spring Boot bootstrap and the wiring. The only module that knows every other one |
 | `arch-tests` | The layer rules, as tests |

@@ -573,10 +573,10 @@ and `-- --drop` takes them off; by hand only, as `drop-gone-worlds` is.
   every tree**, which says what it is and where; choosing it lights everything in it. Under a dotted line is the running game: the page on its own, then two boxes of the pieces
   that fit together, each card saying where it runs - in the browser, in the game server, or in Docker (sea
   green). **The game server** box holds the gateway, the rules, the reactions and the projections, and the
-  baked files it reads arrive at the box; **the event store** box holds Occurrent, MongoDB, RabbitMQ and the
-  in-memory store used without Docker, the last two dashed because one is not used until 1.6 and the other
-  only instead of MongoDB. Every arrow between running pieces says what passes along it - commands, the feed,
-  the world now - and choosing a piece lights the pieces it talks to, a box the pieces in it. Their words are
+  baked files it reads arrive at the box; **the event store** box holds Occurrent, MongoDB, the bridge, RabbitMQ
+  and the in-memory store used without Docker, the last dashed because it is used only instead of MongoDB.
+  Every arrow between running pieces says what passes along it - commands, the history, every event a queue
+  each, the world now - and choosing a piece lights the pieces it talks to, a box the pieces in it. Their words are
   `apps/web/src/admin/architecture/running.ts`, held by `running.test.ts`. Arrows run from what is read to what
   reads it. Drag to move
   about, scroll to zoom, the minimap for the whole; choosing a card lights everything it depends on and

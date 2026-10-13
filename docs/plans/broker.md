@@ -7,6 +7,9 @@ which is decision record 0094; why there is a broker at all, which is 0003; the 
 which is 0092; the words, which are `GLOSSARY.md`. When a part of it is decided, that part becomes a decision
 record and leaves.
 
+**Built, all eleven steps, by 2026-10-13.** Decision record 0094 is accepted and says what was decided; this
+file stays as the record of the order it was built in and the rules it holds.
+
 ---
 
 ## The problem, in one paragraph

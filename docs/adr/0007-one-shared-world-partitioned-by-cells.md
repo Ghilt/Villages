@@ -2,6 +2,9 @@
 
 - Status: accepted
 - Date: 2026-09-01
+- Overtaken in part by 0026: an event carries a place and a significance and never a cell, and a cell is a
+  quadkey at any zoom, worked out downstream by one shared function. The broker's routing key carries that cell,
+  a digit a word (0094).
 
 ## Context
 

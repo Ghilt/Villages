@@ -249,3 +249,9 @@ move". The sprites no longer always move: the idle motion was removed at Adam's 
 nothing to animate between camera movements and the overlay now draws on the map's own `render` with no
 repaint forced at all. Measured again the same way, across 27 marks through a move of both centre and
 zoom: no slip at all, where one screen pixel was 93 metres of ground.
+
+**Answered 2026-10-13: the broker's question.** "Can the broker's routing key carry the cell through the
+library's own bridge, or do we publish by hand?" By hand. Occurrent 0.33 has no broker module - its RabbitMQ
+module is on its main branch and in no release yet - so the bridge is ours: Occurrent's durable subscription
+keeps its place in MongoDB, and the bridge publishes each event with RabbitMQ's own client, under a routing key
+of its type and the cell of its place, a digit a word, `house.founded.v1.1.2.0.3…`. See decision record 0094.
