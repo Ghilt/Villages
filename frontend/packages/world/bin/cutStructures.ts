@@ -25,12 +25,12 @@ import { ART_DIR, STRUCTURES_DIR } from './lib/paths.ts';
  *
  *   node bin/cutStructures.ts
  *
- * First it draws a placeholder for every picture `world/structures/` has none of, from the same shapes the map draws
- * in code, and remembers what it drew in `placeholders.json`, so a picture saved over one is known to be Adam's and is
- * never drawn over. Then it crops every picture to what is drawn in it, scales it to one height, finds where a
- * pennant stands on it, and packs them all into `public/art/structures.webp` with `structures.json` beside it, which
- * the map draws from where it has a picture and draws in code where it has none. Nothing is written when nothing is
- * new. Seconds. See docs/plans/structures.md.
+ * First it draws a placeholder for every picture `world/sprites/structures/` has none of, from the same shapes the
+ * map draws in code, and remembers what it drew in `placeholders.json` there, so a picture saved over one is known to
+ * be Adam's and is never drawn over. Then it crops every picture to what is drawn in it, scales it to one height,
+ * finds where a pennant stands on it, and packs them all into `public/art/structures.webp` with `structures.json`
+ * beside it, which the map draws from where it has a picture and draws in code where it has none. Nothing is written
+ * when nothing is new. Seconds. See docs/plans/structures.md.
  */
 
 /** How tall every picture is cut, in pixels: the map lays a structure out 160 tall, as its castle is. */

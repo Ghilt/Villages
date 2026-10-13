@@ -4,10 +4,10 @@ import type { Culture } from './structures.ts';
 /*
  * The placeholder picture of every type of structure, drawn in code, one a type, and its look in each culture: what the
  * map draws until a picture painted for a type and culture is cut (step 13 of docs/plans/structures.md), and what the
- * placeholder pictures in `world/structures/` are drawn from. In the world package, so a tool can draw them too.
- * Each is a front elevation in a box a hundred units wide and a hundred tall, the ground at the bottom, drawn in its
- * own colours rather than in white for a tint: a structure is untinted, and who holds it is said by the pennant over
- * it. A type the page has no picture for is drawn as a plain house, so a type added to the catalogue is on the map
+ * placeholder pictures in `world/sprites/structures/` are drawn from. In the world package, so a tool can draw them
+ * too. Each is a front elevation in a box a hundred units wide and a hundred tall, the ground at the bottom, drawn in
+ * its own colours rather than in white for a tint: a structure is untinted, and who holds it is said by the pennant
+ * over it. A type the page has no picture for is drawn as a plain house, so a type added to the catalogue is on the map
  * before anyone has drawn it. Data, so that the map draws them in Pixi (`structurePictures.ts`), a pane in SVG
  * (`holdings/StructureFigure.tsx`) and `world:structures` as placeholder pictures, from one table.
  */

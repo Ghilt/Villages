@@ -7,7 +7,7 @@ import type { Plugin, ViteDevServer } from 'vite';
 
 /**
  * The dev server keeps the art cut: whenever a picture in `world/sprites/` is saved, and every time the
- * server starts, it runs `npm run world:art` again, and when that changed the atlas it tells the page,
+ * server starts, it runs `npm run world:art` again - all but `structures/`, which `structuresArtApi.ts` cuts - and when that changed the atlas it tells the page,
  * which lets go of the old atlas and draws the new one.
  *
  * So the loop for a sprite is the portraits' loop without the reload: save a picture over a
@@ -36,6 +36,11 @@ const PICTURES = new Set(['.png', '.webp', '.jpg', '.jpeg']);
 /** Whether a changed file is one the cut reads, so the tool's own writes never set it off again. */
 export function isPicture(file: string): boolean {
   return PICTURES.has(extname(file).toLowerCase());
+}
+
+/** Whether a file saved in `world/sprites/`, as the watcher names it, is a structure's, which this cut leaves alone. */
+export function isStructures(file: string): boolean {
+  return file.replaceAll('\\', '/').startsWith('structures/');
 }
 
 function cut(server: ViteDevServer, why: string): Promise<boolean> {
@@ -119,7 +124,7 @@ export function artApi(): Plugin {
         return;
       }
       const watcher = watch(SPRITES_DIR, { recursive: true }, (_, file) => {
-        if (file === null || !isPicture(file)) {
+        if (file === null || !isPicture(file) || isStructures(file)) {
           return;
         }
         if (waiting !== null) {

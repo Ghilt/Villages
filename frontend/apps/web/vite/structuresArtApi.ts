@@ -9,15 +9,15 @@ import { isPicture, oneCutAtATime } from './artApi.ts';
 
 /**
  * The dev server keeps the structures' pictures cut, as `artApi.ts` keeps the scenery's: every time it starts, and
- * whenever a picture in `world/structures/` is saved, it runs `npm run world:structures`, which draws a placeholder
- * for any picture missing and packs them all into an atlas; when the atlas changed it tells the page, which draws
- * from the new one. Save a picture over a placeholder, look at the map. Development only. See
+ * whenever a picture in `world/sprites/structures/` is saved, it runs `npm run world:structures`, which draws a
+ * placeholder for any picture missing and packs them all into an atlas; when the atlas changed it tells the page,
+ * which draws from the new one. Save a picture over a placeholder, look at the map. Development only. See
  * docs/plans/structures.md.
  */
 
 const here = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(here, '..', '..', '..', '..');
-const STRUCTURES_DIR = resolve(REPO, 'world', 'structures');
+const STRUCTURES_DIR = resolve(REPO, 'world', 'sprites', 'structures');
 const WORLD_PACKAGE = resolve(REPO, 'frontend', 'packages', 'world');
 const ATLAS = resolve(REPO, 'frontend', 'apps', 'web', 'public', 'art', 'structures.json');
 
@@ -29,7 +29,7 @@ const SETTLE_MS = 300;
 
 function cut(server: ViteDevServer, why: string): Promise<boolean> {
   const log = server.config.logger;
-  log.info(`[structures] ${why}: cutting world/structures`);
+  log.info(`[structures] ${why}: cutting world/sprites/structures`);
   return new Promise((settle) => {
     const child = spawn(process.execPath, ['bin/cutStructures.ts'], {
       cwd: WORLD_PACKAGE,

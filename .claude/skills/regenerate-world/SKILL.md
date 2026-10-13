@@ -35,7 +35,7 @@ It makes what the game reads, never the stills. Those are by hand, each `npm run
 | the flow tool | `world:flow` (its stills; it makes the tree's own flow, which the next `world:ready` borrows over) | a minute and a half |
 | `world/biomes.json` or the sprite generator | `world:scenery` | seconds |
 | `world/painterly.json` | `world:paint` for the stills | a minute |
-| a picture in `world/sprites/` or `world/ui/` | nothing: `world:art` and `world:ui` run on every dev-server start and on save | |
+| a picture in `world/sprites/` or `world/ui/` | nothing: `world:art`, `world:structures` and `world:ui` run on every dev-server start and on save | |
 
 What `world:ready` made rather than borrowed it filed for every tree, and what it borrowed was made by the tree
 it names. The quick start and the Debug map panel's buttons run the same `world:ready`.

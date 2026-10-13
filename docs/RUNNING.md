@@ -474,17 +474,18 @@ and `-- --drop` takes them off; by hand only.
   lng,lat` looks anywhere, `-- --view alps` at one of them, `-- --zoom 10.4` closer, `-- --style flat`
   without the paint, `-- --spacing 0` without the spacing that keeps trees off each other (two, three to
   see more of it). This is what a change to `world/biomes.json` is argued from.
-- Structures' pictures: `world/structures/` is Adam's folder, one picture a type and a culture and a ruin a
-  culture, sixty-eight, every one a placeholder drawn from the map's own shapes until he saves over it
+- Structures' pictures: `world/sprites/structures/` is Adam's folder, one picture a type and a culture and a ruin
+  a culture, sixty-eight, every one a placeholder drawn from the map's own shapes until he saves over it
   (`AUTHORING-THE-ART.md` says how). `npm run world:structures --prefix frontend` draws whatever placeholder is
-  missing, never over a file that is there, remembering what it drew in `placeholders.json` so a picture saved over
-  one is known to be his, then crops, scales to 160 tall and packs every picture into `public/art/structures.webp`
+  missing, never over a file that is there, remembering what it drew in that folder's own `placeholders.json` so a
+  picture saved over one is known to be his, then crops, scales to 160 tall and packs every picture into `public/art/structures.webp`
   with `structures.json` beside it, and prints how many are painted and how many placeholders. Seconds. The dev
   server runs it as it starts and whenever a picture in the folder is saved, and tells the page, which draws from
   the new atlas at once; the map draws a structure from the atlas where it has its picture and in code where it
   has none, and the log says under `structures` how many pictures it read.
-- Sprites: `world/sprites/` is Adam's folder, committed as the master is: `scenery/<kind>` for every
-  kind in `world/biomes.json` and `marks/<name>` for every mark. Any PNG, WebP or JPEG, any size, on a
+- Sprites: `world/sprites/` is Adam's folder, committed as the master is, and holds every picture drawn on
+  the map: `scenery/<kind>` for every kind in `world/biomes.json`, `marks/<name>` for every mark, and
+  `structures/`, which has a cut of its own, above. Any PNG, WebP or JPEG, any size, on a
   flat background or a transparent one, or standing on a **plinth** - the block of turf and soil an image
   model draws a thing on, which is lifted off with its paper and its shadow (`src/lift.ts`). **Saving over
   a placeholder replaces it**, and with the dev server running the picture is on the map a few seconds

@@ -32,13 +32,17 @@ export const PORTRAITS_DIR = resolve(REPO, 'world', 'portraits');
  */
 export const SCENES_DIR = resolve(REPO, 'world', 'scenes');
 /**
- * Adam's sprites: a picture per scenery kind in `scenery/` and per mark in `marks/`, any format, any size,
- * on a flat background or a transparent one, and committed as the portraits are. Placeholders are drawn
- * into it, never over anything already there.
+ * Adam's sprites, every picture drawn on the map: a picture per scenery kind in `scenery/` and per mark in
+ * `marks/`, any format, any size, on a flat background or a transparent one, and the structures' in
+ * `structures/`; committed as the portraits are. Placeholders are drawn into it, never over anything
+ * already there.
  */
 export const SPRITES_DIR = resolve(REPO, 'world', 'sprites');
-/** The pictures of structures, one a type and a culture, which `world:structures` cuts into an atlas. */
-export const STRUCTURES_DIR = resolve(REPO, 'world', 'structures');
+/**
+ * The pictures of structures, one a type and a culture, which `world:structures` cuts into an atlas of
+ * their own, with their own record of placeholders, apart from the scenery's that `world:art` keeps.
+ */
+export const STRUCTURES_DIR = resolve(SPRITES_DIR, 'structures');
 /**
  * Adam's interface pictures: a folder a kind - borders, fills, embellishments, medallions, marks,
  * controls, dividers - every picture painted at four times the size it is shown, and committed as the

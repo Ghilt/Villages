@@ -27,8 +27,9 @@ export default defineConfig({
   // sends the cut world itself, unwatched, because fifty thousand watched tiles slowed every answer;
   // portraitsApi and scenesApi serve Adam's portraits and scenes folders without a cache, so a picture
   // saved over another shows, and structuresApi serves world/structures.json the same way; and artApi cuts
-  // world/sprites again whenever a picture in it is saved, as uiArtApi does world/ui and structuresArtApi world/structures. maplibreWorker is the build's alone: it puts MapLibre's worker beside the chunk
-  // MapLibre was bundled into, where a built page looks for it. See decision record 0080.
+  // world/sprites again whenever a picture in it is saved, as uiArtApi does world/ui, and structuresArtApi
+  // the structures' own folder in it. maplibreWorker is the build's alone: it puts MapLibre's worker beside
+  // the chunk MapLibre was bundled into, where a built page looks for it. See decision record 0080.
   plugins: [
     react(),
     worldApi(),

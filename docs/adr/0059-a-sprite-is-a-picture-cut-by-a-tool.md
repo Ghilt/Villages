@@ -133,6 +133,18 @@ picture that had only been read - so each start, and each of those, would have b
 map for nothing. The cut's last line ends with what came of it, `nothing new` or which sprites were newly
 cut, and that is the line the quick start shows.
 
+### Amended 2026-10-12: every picture drawn on the map is in `world/sprites/`
+
+The structures' pictures came with 0093 into a folder of their own, `world/structures/`, beside the
+catalogue they picture. Adam asked why they were not with the other sprites. They are sprites, so they are
+`world/sprites/structures/` now, beside `scenery/` and `marks/`, and the folder's test holds it to those
+three and its record of placeholders, so a fourth group is a decision rather than a drift.
+
+They keep their own cut, `world:structures`, and their own `placeholders.json` inside their folder. The two
+cuts run side by side as the dev server starts, and one record written by both would lose lines; and they
+are cut to different rules, cropped and stood on their bottom edge rather than keyed and lifted. The dev
+server's watcher on `world/sprites/` leaves `structures/` to the structures' own.
+
 ## Consequences
 
 Adam can drop a picture into a folder and see it on the map in about a second, with no command to

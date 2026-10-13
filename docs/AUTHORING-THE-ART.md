@@ -8,13 +8,15 @@
 
 ## Where a picture goes
 
-`world/sprites/` is yours, and it is committed.
+`world/sprites/` is yours, and it is committed: every picture drawn on the map, a folder a group.
 
 - `world/sprites/scenery/<kind>.png`, one for every kind in `world/biomes.json`: pine, spruce, birch,
   oak, beech, palm, jungle, acacia, mangrove, snag, scrub, heather, grass, reed, boulder, cactus.
 - `world/sprites/marks/<name>.png`, one for every mark the map places: castle, castle-icon, candidate,
   figure, figure-icon, selection-ring. These are placeholders only for now: the map still draws the marks
   in code, because they take a house's colours. See 0059.
+- `world/sprites/structures/<type>-<culture>.png`, one for every type of structure in every culture, and a
+  ruin a culture. Cut by a tool of their own, and painted to rules of their own: see below.
 
 **Save your picture over the placeholder**, as `oak.webp` or `oak.png` or `oak.jpg`. Delete the placeholder if
 the extension differs, because two files that are both `oak` are refused; the placeholder's record goes with
@@ -30,16 +32,17 @@ To have a placeholder back, delete your picture and run:
 
 It never draws over a file that is there.
 
-**Structures have a folder of their own**, `world/structures/`, beside `world/structures.json`, the catalogue it
-pictures, and committed the same way: `<type>-<culture>.png` for every type of the catalogue in every culture -
-`castle-european.png`, `castle-islamic.png`, `printingHouse-eastAsian.png` - and `ruin-<culture>.png` for what any
-of them falls to. Sixty-eight, every one a placeholder drawn from the shapes the map draws in code until you save
-over it. Upright, the front of the building, on a transparent background, standing on the bottom edge: it is
-cropped to what is drawn and scaled to 160 pixels tall, so paint it 640 tall or more. Its pennant flies from the
-middle of the highest row anything is drawn in, so the tallest tower carries it. With the dev server running, a
-picture saved is on the map a few seconds later with no reload; `npm run world:structures --prefix frontend` cuts
-by hand. To have a placeholder back, delete your picture and cut again: it never draws over a file that is there.
-The Holdings tab still draws its small pictures in code.
+**Structures are cut by a tool of their own**, from `world/sprites/structures/`, which keeps its own record of
+which are still placeholders, `placeholders.json` in that folder: `<type>-<culture>.png` for every type of
+`world/structures.json` in every culture - `castle-european.png`, `castle-islamic.png`,
+`printingHouse-eastAsian.png` - and `ruin-<culture>.png` for what any of them falls to. Sixty-eight, every one a
+placeholder drawn from the shapes the map draws in code until you save over it. Upright, the front of the
+building, on a transparent background, standing on the bottom edge: it is cropped to what is drawn and scaled to
+160 pixels tall, so paint it 640 tall or more. Its pennant flies from the middle of the highest row anything is
+drawn in, so the tallest tower carries it. With the dev server running, a picture saved is on the map a few
+seconds later with no reload; `npm run world:structures --prefix frontend` cuts by hand. To have a placeholder
+back, delete your picture and cut again: it never draws over a file that is there. The Holdings tab still draws
+its small pictures in code.
 
 ## What a picture can be
 

@@ -4,10 +4,10 @@ import type { Culture } from './structures.ts';
 import { RUIN_PICTURE, pictureKey } from './structureLooks.ts';
 
 /*
- * The pictures of structures as files and as an atlas: a picture a type and a culture in `world/structures/`, named
- * `<type>-<culture>.png` and `ruin-<culture>.png`, which `world:structures` cuts into one atlas beside the scenery's,
- * keyed as the map asks for a picture, `mill@islamic`. Placeholders drawn from the shapes until Adam paints over
- * them. See docs/plans/structures.md.
+ * The pictures of structures as files and as an atlas: a picture a type and a culture in `world/sprites/structures/`,
+ * named `<type>-<culture>.png` and `ruin-<culture>.png`, which `world:structures` cuts into one atlas beside the
+ * scenery's, keyed as the map asks for a picture, `mill@islamic`. Placeholders drawn from the shapes until Adam paints
+ * over them. See docs/plans/structures.md.
  */
 
 /** One picture in the atlas, and where on it a pennant's staff stands, as fractions of its width and height. */
@@ -20,7 +20,7 @@ export interface StructureFrame {
   flagY: number;
   /** Still the placeholder drawn for it, not a picture painted over it. */
   placeholder: boolean;
-  /** The file it was cut from, under `world/structures/`. */
+  /** The file it was cut from, under `world/sprites/structures/`. */
   source: string;
 }
 

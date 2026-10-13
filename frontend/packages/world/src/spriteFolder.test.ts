@@ -27,6 +27,15 @@ function namesIn(group: string): string[] {
 }
 
 describe("the sprites folder, which is Adam's", () => {
+  it('holds every picture drawn on the map, a folder a group, and the record of placeholders', () => {
+    expect(readdirSync(fileURLToPath(SPRITES)).sort()).toEqual([
+      'marks',
+      'placeholders.json',
+      'scenery',
+      'structures',
+    ]);
+  });
+
   it('holds exactly one picture for every kind in world/biomes.json', () => {
     const names = namesIn('scenery');
     for (const kind of kinds) {
