@@ -37,6 +37,10 @@ world/source/
 # is per-checkout: `node frontend/apps/web/vite/worktreePort.ts --launch` writes it. See decision 0031.
 .claude/launch.json
 
+# Where this tree's session stands: its plan's steps and the verification requests waiting on Adam. The
+# session's own, replaced whole by its next plan; the plan skill says its shape, the button bar reads it.
+.claude/status.json
+
 # Views the painterly renderer paints. Output, reproducible, and tens of megabytes of it.
 world/painterly/
 

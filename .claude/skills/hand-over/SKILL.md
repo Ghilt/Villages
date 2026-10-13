@@ -1,9 +1,22 @@
 ---
 name: hand-over
-description: Bring a finished step back to Adam for review - regenerate what it made stale, leave the program running on the change, and present it ending with the address and a numbered verify checklist. Use at the end of every step, before anything is committed, and whenever the loop comes back to Adam to look at something. Adam can also type /hand-over.
+description: Bring a finished step back to Adam for review - regenerate what it made stale, leave the program running on the change, and present it ending with the address and its numbered verification requests. Use at the end of every step, before anything is committed, and whenever the loop comes back to Adam to look at something. Adam can also type /hand-over.
 ---
 
 # Hand-over
+
+## At a glance
+
+The end of every step: Adam sees it working before anything is committed.
+
+- **Verify, regenerate, leave it running** - the checks, whatever the step made stale rebuilt, and the
+  program started in this tree with the quick start, driven to where the change shows.
+- **Present in a fixed order** - what and why, files, checks, documents, what moved, where to look, and the
+  verification requests last.
+- **Verification requests** - at most three, numbered, 👀 first; written into the status file too, so the
+  button bar shows them and can paste them into the prompt.
+- **His answer decides** - "continue" commits and goes on; notes are fixed and handed over again; "main"
+  brings it all to main.
 
 A step is not finished when the work is. It is finished when Adam can see it: the program running in this
 tree, standing on the change, and a presentation he can read top to bottom and answer by a number. He
@@ -64,20 +77,33 @@ document - say so plainly, and say what stands in for it: a test, a still, or a 
    or links to the documents, when what there is to verify is something to read. The folder and the branch
    can differ, and the app does not always show which tree a session is in, so this line is what lets Adam
    find the tree and start it himself.
-7. **The verify checklist**, last, with nothing after it.
+7. **The verification requests**, last, with nothing after it.
+
+Write the same requests into the status file as you present them, as the `plan` skill describes it: its
+`verification`, with the step it is for, the where-to-look line and the requests as written. That is what the
+button bar shows Adam, in this session and from the others, and what it pastes into the prompt for him to
+answer.
 
 No commit message and no plan of commits: how the work is cut into commits is the agent's, and Adam does
 not want to think about it. Do not commit yet. His answer decides what happens next:
 
 - **"continue"**, or **"cont"**, with no notes: commit what he verified, as many commits as best practice cuts it into,
-  say in a line what landed, and go on. If that was the last step of the plan, say so plainly and bring the
+  mark the step `committed` in the status file and set its `verification` to `null`, say in a line what
+  landed, and go on. If that was the last step of the plan, say so plainly and bring the
   work to main - its implicit last step - with the `to-main` skill.
 - **Notes**: fix them and hand over again. Nothing is committed.
+- **The requests answered**: the button bar pastes them into the prompt with an empty line under each, and
+  Adam writes his answer there. Read each answer by its number. When no answer raises anything and the reply
+  says "continue", that is the word; when any answer raises something, the reply is notes, whatever else it
+  says. An answer left empty raises nothing.
 - **"main"**, or "bring it to main": he has verified it. The `to-main` skill: commit what is waiting, ask
   about the architecture diagram if something significant was added, bring it all to main, and offer the
   next steps. Main moves on his word and only then.
 
-## The verify checklist
+## The verification requests
+
+A **verification request** is one thing Adam is asked to check before a step is committed. The plan drafted
+them; these are the real ones, written from what the step turned out to be.
 
 - **Three items at most**, whatever the size of the step. It refreshes a memory; it does not enumerate a
   diff. Pick them for what would be embarrassing to have got wrong.

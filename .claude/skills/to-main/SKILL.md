@@ -5,6 +5,17 @@ description: Bring a worktree's work to main - ask about the architecture diagra
 
 # To main
 
+## At a glance
+
+Main moves on Adam's word and only then, and when the word comes the agent does the whole of it.
+
+- **The word** - "main", "bring it to main", or "continue" after a plan's last step.
+- **Rebase, never merge** - onto main from the worktree, then the checks again, because the tree that was
+  tested is not the tree that lands.
+- **Fast-forward from the main checkout** - `merge --ff-only`, never handing Adam the steps.
+- **The diagram** - asked about once, in one line, only when something significant was added to it.
+- **The status file** - every committed step marked `main`.
+
 Main is Adam's: it moves on his word and only then. When the word comes, the agent does the whole of it
 itself and never hands him the steps.
 
@@ -48,8 +59,9 @@ in a worktree, or refused by the harness - asks Adam once, plainly, rather than 
 
 ## 5. Say what landed, and offer what next
 
-One line per commit that landed on main. Delete this session's `.sessions/` note: the work has landed. Then
-offer the next steps, as the loop in `CLAUDE.md` says, and end with the checklist.
+One line per commit that landed on main. Mark every `committed` step of the status file `main`, as the
+`plan` skill describes it. Delete this session's `.sessions/` note: the work has landed. Then offer the next
+steps, as the loop in `CLAUDE.md` says, and end with the verification requests, when any are waiting.
 
 ## Change this skill
 

@@ -40,7 +40,7 @@ This is a loop, and Adam holds both ends of it: he verifies what lands, and he c
 2. **Build it small.** One coherent step per commit: a module skeleton, a document, one test with its
    implementation. If it grows past a few hundred lines, it was two steps.
 3. **Hand it over: the `hand-over` skill.** Verify it, regenerate whatever it made stale, leave the program
-   running on the change, and present it ending with the verify checklist. Then stop: do not commit. This is
+   running on the change, and present it ending with its verification requests. Then stop: do not commit. This is
    not optional and it is never an option on the menu.
 4. **Documents travel with it.** A change to a decision, an event or a term updates its document in the same
    commit: a decision record, the event catalogue, the glossary, the architecture.
@@ -52,6 +52,13 @@ This is a loop, and Adam holds both ends of it: he verifies what lands, and he c
    it. Say plainly what is blocked and on what. Always leave room for an answer that is none of them, because
    the point of the options is to give Adam the wheel, not to make him pick from a menu. When he says
    "continue for some time", the options are longer runs instead: the `continue-for-some-time` skill.
+
+**Work of more than one step is planned first, with the `plan` skill**: cut into steps, each with the
+**verification requests** Adam will be asked at its hand-over drafted up front, the things he is asked to
+check before a step is committed. Its steps go into the session's **status file**, `.claude/status.json` in
+the worktree, which every moment of the loop keeps true - the hand-over writes the requests waiting,
+"continue" marks a step committed, `to-main` marks it on main - and which Adam's button bar draws for every
+session alike: `13(10) / 15`, committed, on main, of all, and the requests behind it.
 
 **A plan agrees its event names with Adam before anything is built.** When a plan adds events, the agent
 proposes every name with a line on what it means, and Adam approves or renames them up front, in the
@@ -73,7 +80,7 @@ Guessing wrong is cheap to fix and it is still drawing it twice. The same questi
 is built from the component library in `frontend/apps/web/src/ui/`: a pane is a **container** named by a
 **recipe** - a border, a fill, its embellishments - and never a stylesheet of its own. A component the
 library lacks is added to it first, in its own commit, and shown on that page in every variant and state;
-only then is it used. A step that adds or changes one points its verify checklist at that page, and says
+only then is it used. A step that adds or changes one points its verification requests at that page, and says
 which pictures in `world/ui/` it reads, the size to paint each at, and which are still placeholders. The
 placeholders are the agent's to make, copied from the moodboard; Adam replaces them when he chooses and
 nothing waits on him. See `docs/UI-COMPONENTS.md` and decision record 0068.
@@ -88,7 +95,10 @@ A procedure that belongs to one moment of a session is a skill in `.claude/skill
 that moment comes, and Adam can call any of them by typing `/<name>`. What must hold all the time stays in this
 file. When Adam corrects how a moment is done, the correction goes into its skill, in the same step.
 
-- `hand-over` - the end of every step: verify, regenerate, leave the program running, present, checklist last.
+- `plan` - work of more than one step: cut it into steps, draft each one's verification requests, and write
+  the steps into the status file.
+- `hand-over` - the end of every step: verify, regenerate, leave the program running, present, verification
+  requests last.
 - `to-main` - Adam says "main", or a plan's last step is done: ask about the architecture diagram if something
   significant was added, rebase, check, fast-forward main.
 - `regenerate-world` - a step changed the master or anything the world is built from: rebuild what it made stale.

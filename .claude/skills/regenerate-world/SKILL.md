@@ -5,6 +5,18 @@ description: Rebuild everything a change made stale in the world - tiles, rivers
 
 # Regenerate the world
 
+## At a glance
+
+Whatever a step made stale in the world is rebuilt in that step, without asking, and what moved is said with a
+number and a picture.
+
+- **Adam paints, the agent rebuilds** - the master and the numbers of taste are his; everything a tool can
+  make from them is the agent's.
+- **`world:ready`** - works out each world step's fingerprint and makes, borrows from the world cache, or
+  leaves each one; it never needs telling what is stale.
+- **The stills are by hand** - `world:scenery` and `world:paint`, run when a change shows in them.
+- **Stale output is worse than missing** - because it looks like evidence.
+
 Adam paints the master and picks the numbers that are matters of taste. Everything a tool can rebuild from
 those, the agent rebuilds, without being asked and without offering it as a choice. Stale output is worse
 than missing output, because it looks like evidence: a still painted by the previous rules is not a

@@ -5,6 +5,16 @@ description: Make a nine-slice border for world/ui/borders/ out of a frame pictu
 
 # Nine slice
 
+## At a glance
+
+A picture of a frame Adam hands over becomes a border the component library can lay round a box of any size.
+
+- **Only the frame is kept** - what it stands on, outside and inside, is cleared, and the inside given a fill.
+- **The source is kept untouched** - in `world/ui/sources/`, beside the recipe that cut it.
+- **The tool cuts, the agent looks** - `scripts/nine-slice.ts` does the cutting; the agent reads the picture
+  first and judges what it made after.
+- **Corners drawn once, edges repeated** - the cuts fall where the frame's own tiles meet.
+
 A nine-slice job turns a picture Adam gives into a border the component library can lay round a box of
 any size: `world/ui/borders/<name>.webp` and its file of cuts, and a fill for inside it. **Only the frame
 is kept.** What it stands on, outside it and inside it, is cleared, and the inside is given a fill.
