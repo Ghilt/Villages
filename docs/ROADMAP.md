@@ -111,7 +111,6 @@ started; the world cache, the newest, is built and waiting on Adam's eye.
   once. `npm run world:ready` becomes the one way the world is built, for the quick start and the debug panel
   alike, and the architecture page draws it with a strip of how a tree starts. The shape is decision record
   0095 and the steps, one commit each, are in `docs/plans/world-cache.md`. Adam's own, asked for on 2026-10-12.
-- **1.15** The connection badge, the last piece of inspecting a house
 
 MongoDB and RabbitMQ are on the machine, in Docker, from `infra/docker-compose.yml`. The game server keeps
 its world in MongoDB whenever Docker is running, and RabbitMQ carries every event it stores to the read models.
