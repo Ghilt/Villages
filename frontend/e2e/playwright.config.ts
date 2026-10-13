@@ -23,7 +23,10 @@ export default defineConfig({
     baseURL: `http://localhost:${web}`,
     channel: 'chrome',
     headless: true,
-    viewport: { width: 1280, height: 800 },
+    // Wide enough that the stage keeps the desktop's spread once the debug panel and its log, which the test reads,
+    // have taken their room beside it: narrower, the stage folds into the phone's bays, where Take action is behind
+    // a mark rather than on the stage.
+    viewport: { width: 1680, height: 900 },
     // The map is WebGL 2, which a headless Chrome draws in software only when told it may.
     launchOptions: {
       args: ['--enable-unsafe-swiftshader', '--use-angle=swiftshader', '--ignore-gpu-blocklist'],

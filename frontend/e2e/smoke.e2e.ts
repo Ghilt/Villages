@@ -5,10 +5,11 @@ import { startGame, stopGame, testPorts } from './servers.ts';
 
 /**
  * The game end to end, as a player meets it: the map drawn, a house founded from the parchment, a second window
- * seeing the founding as it happens, and the house still the player's after the game server is stopped and started
- * again. What it reads is what Adam reads, the debug panel's log; what it presses is what a player presses.
+ * seeing the founding as it happens, an action taken with Take action - a roll paid for, a hand dealt, a card
+ * played - and the house still the player's after the game server is stopped and started again. What it reads is
+ * what Adam reads, the debug panel's log and the event page; what it presses is what a player presses.
  */
-test('the map, a house founded, another window seeing it, and a restart that forgets nothing', async ({
+test('the map, a house founded, another window seeing it, an action taken, and a restart that forgets nothing', async ({
   browser,
 }) => {
   const player = await (await browser.newContext()).newPage();
@@ -43,6 +44,22 @@ test('the map, a house founded, another window seeing it, and a restart that for
 
   await test.step('the other window sees the founding as it is stored', async () => {
     await expect(watcher.locator('.log__entry', { hasText: name }).first()).toBeAttached();
+  });
+
+  await test.step('an action is taken: a roll deals a hand for its price, and the first card of it is played', async () => {
+    // What the other window had seen before, so the step counts what it adds whatever the world held already.
+    const said = (what: string) => watcher.locator('.log__what').filter({ hasText: new RegExp(`^${what}$`) });
+    const [rolled, spent, took] = await Promise.all(
+      ['rolled', 'resource spent', 'took action'].map((what) => said(what).count()),
+    );
+    await player.getByRole('button', { name: 'Take action', exact: true }).first().click();
+    await logSays(player, /hand of \d+, from \d+ omens/);
+    // Dealt once the omens have landed, which is when a card can be pressed.
+    await player.locator('button.ui-card__press').first().click();
+    // The roll, what it cost and the action taken, as the store has them.
+    await expect(said('rolled')).toHaveCount(rolled! + 1);
+    await expect(said('resource spent')).toHaveCount(spent! + 1);
+    await expect(said('took action')).toHaveCount(took! + 1);
   });
 
   await test.step('a restart of the game server forgets nothing', async () => {

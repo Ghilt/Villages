@@ -20,7 +20,8 @@ time out that pass alone:
   frontend   npm run check: the typecheck, the linter, the formatter and the unit tests.
   scripts    this folder's own: node --test, its types, and its formatting.
   e2e        npm run e2e: the game end to end in Chrome - the map drawn, a house founded, another
-             window seeing it, and a restart of the game server that forgets nothing - on servers,
+             window seeing it, an action taken with Take action, and a restart of the game server
+             that forgets nothing - on servers,
              a world and a virtual host of the test's own, the world carried by RabbitMQ. The
              restart is not tried when MongoDB is not up, nor RabbitMQ used when it is not. It
              needs this tree's world cut, which the quick start does.

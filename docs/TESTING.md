@@ -16,7 +16,7 @@ Every increment lands with the test that proves it. The tests are the reason we 
 | Integration | Real infrastructure: an appended event reaches the broker with the right routing key, a projection updates | Testcontainers with MongoDB and RabbitMQ: `MongoWorldDockerSpec`, `CarryDockerSpec`, `BrokerDockerSpec`, `BridgeDockerSpec`, `BrokerLiveDockerSpec` | yes, needs Docker |
 | Edge | The gateway protocol over a real WebSocket; interface components against a fake client | Spring WebSocket test client, React Testing Library | yes |
 | Contract | The same JSON fixtures parse and round-trip in Kotlin and in TypeScript | Kotest and Vitest over the shared fixtures | yes |
-| End to end | The whole stack in a browser: the map is painted, a house is founded, another window sees it, a restart of the game server forgets nothing | Playwright, in the machine's own Chrome | yes, needs this tree's world cut; the restart and RabbitMQ need Docker |
+| End to end | The whole stack in a browser: the map is painted, a house is founded, another window sees it, an action is taken with Take action, a restart of the game server forgets nothing | Playwright, in the machine's own Chrome | yes, needs this tree's world cut; the restart and RabbitMQ need Docker |
 | Load | Thousands of simultaneous connections | the bot swarm | manual |
 
 ## Rules
