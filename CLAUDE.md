@@ -89,22 +89,34 @@ Never choose the next increment alone, and never chain increments together to sa
 inside a long run Adam picked, whose steps were named before it began. The roadmap is a menu, not a queue: its order is a suggestion, and Adam reorders it freely. When an option is not on the roadmap
 but is clearly better, offer it anyway and say why.
 
-## Skills: the moments of the loop, one file each
+## Skills: the moments of the loop
 
-A procedure that belongs to one moment of a session is a skill in `.claude/skills/<name>/SKILL.md`, read when
-that moment comes, and Adam can call any of them by typing `/<name>`. What must hold all the time stays in this
-file. When Adam corrects how a moment is done, the correction goes into its skill, in the same step.
+A procedure that belongs to one moment of a session is a skill, read when that moment comes. What must hold all the
+time stays in this file.
 
-- `plan` - work of more than one step: cut it into steps, draft each one's verification requests, and write
+The four moments of the loop are skills of the shared **`loop` plugin**, which every project of Adam's uses. It is
+installed from the repository `E:\Code\ghilt-workflow` (`github.com/Ghilt/ghilt-workflow`, private), and Adam calls them
+by typing `/loop:<name>`. What is true of Villages only is not in the plugin: it is in `.claude/workflow.json` (what the
+project is verified through, how its checks run, what it rebuilds) and in one notes file per skill,
+`.claude/loop/<name>.md`, which the skill reads in its first step. The two skills that exist only for Villages stay in
+`.claude/skills/<name>/SKILL.md`, and Adam can call them by typing `/<name>`.
+
+- `loop:plan` - work of more than one step: cut it into steps, draft each one's verification requests, and write
   the steps into the status file.
-- `hand-over` - the end of every step: verify, regenerate, leave the program running, present, verification
+- `loop:hand-over` - the end of every step: verify, regenerate, leave the program running, present, verification
   requests last.
-- `to-main` - Adam says "main", or a plan's last step is done: ask about the architecture diagram if something
+- `loop:to-main` - Adam says "main", or a plan's last step is done: ask about the architecture diagram if something
   significant was added, rebase, check, fast-forward main.
 - `regenerate-world` - a step changed the master or anything the world is built from: rebuild what it made stale.
-- `continue-for-some-time` - Adam is leaving for a while: offer three longer runs, then work one through,
+- `loop:continue-for-some-time` - Adam is leaving for a while: offer three longer runs, then work one through,
   committing as it goes and stopping only where it said it would.
 - `nine-slice` - make a border for `world/ui/borders/` out of a frame picture Adam hands over.
+
+**When Adam corrects how a moment is done**, the correction goes in the same step, and the agent says which kind it is.
+True of Villages only: that skill's notes file in `.claude/loop/`. Should hold in every project: a change to the plugin in
+the `ghilt-workflow` repository with a line in its `CHANGELOG.md` and a new version, which its README describes. Never into
+the installed copy under `~/.claude/plugins/cache/`, which the next update overwrites. A correction to `regenerate-world`
+or `nine-slice` goes into its own `SKILL.md` here.
 
 ## Adam paints the master. Everything else derived from it is the agent's to regenerate
 
