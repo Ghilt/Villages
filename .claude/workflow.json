@@ -1,0 +1,42 @@
+{
+  "mainBranch": "main",
+  "statusFile": ".claude/status.json",
+  "plansDir": "docs/plans",
+
+  "checks": {
+    "command": "node scripts/check.ts",
+    "scopes": {
+      "frontend": "npm run check --prefix frontend",
+      "backend": "cd backend && ./gradlew check",
+      "end-to-end": "npm run e2e --prefix frontend"
+    }
+  },
+
+  "verification": {
+    "surface": "running-program",
+    "start": "powershell -File debug-quick-start.ps1 -NoBrowser",
+    "startOutput": ".logs/quick-start.txt",
+    "address": "http://localhost:<this tree's port, which node frontend/apps/web/vite/worktreePort.ts prints>",
+    "lookAt": "The game at that address in Adam's own browser, with the debug panel open for whatever the change reports",
+    "standIns": "A test, a still from world:scenery or world:paint, or a number, when the change is in the offline renderer, a build rule or a document"
+  },
+
+  "regenerate": [
+    {
+      "when": "The step changed the master (world/master/terrain.png), world/palette.json, world/render.json, world/painterly.json, world/biomes.json, world/names/, world/cultures.json, or any tool or code the tiles, the paint or the maps go through; or this tree has no world cut yet",
+      "run": "The regenerate-world skill: npm run world:ready --prefix frontend, then the stills it names, then say what moved with a number and a picture"
+    }
+  ],
+
+  "architecture": {
+    "question": "/admin/inspect-architecture, the page that draws how the world is set up and what the running game is made of; its source is frontend/apps/web/src/admin/architecture/",
+    "askWhen": "A new running piece (a server, a store, a database, a queue, a connection between them), a new tool that bakes the world, a new kind of file it writes, a new part of the game that reads one, or a part that changed what it is responsible for. Not a fix, a pane, a mechanic inside the server or a document"
+  },
+
+  "notes": {
+    "hand-over": ".claude/loop/hand-over.md",
+    "plan": ".claude/loop/plan.md",
+    "to-main": ".claude/loop/to-main.md",
+    "continue-for-some-time": ".claude/loop/continue-for-some-time.md"
+  }
+}
