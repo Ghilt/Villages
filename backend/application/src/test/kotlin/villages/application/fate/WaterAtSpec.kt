@@ -59,12 +59,27 @@ class WaterAtSpec : StringSpec({
     }
 
     "water the ground shows with nothing named near is water all the same, and where it shows none there is none" {
-        waters.at("terrain", Location(10.0, 20.5)) shouldBe WaterHere(WaterKind.RIVER)
+        waters.at("terrain", Location(10.0, 20.5)) shouldBe WaterHere(WaterKind.RIVER, "ground:200,0")
         waters.at("terrain", Location(52.0, 22.5)) shouldBe null
-        WaterAt({ ground }, { null }).at("terrain", Location(52.0, 20.3)) shouldBe WaterHere(WaterKind.RIVER)
-        WaterAt({ ground }, { null }).at("terrain", Location(46.3, 8.5)) shouldBe WaterHere(WaterKind.LAKE)
-        WaterAt({ ground }, { null }).at("terrain", Location(30.0, -40.0)) shouldBe WaterHere(WaterKind.SEA)
+        WaterAt({ ground }, { null }).at("terrain", Location(52.0, 20.3)) shouldBe WaterHere(WaterKind.RIVER, "ground:200,0")
+        WaterAt({ ground }, { null }).at("terrain", Location(46.3, 8.5)) shouldBe WaterHere(WaterKind.LAKE, "ground:188,43")
+        WaterAt({ ground }, { null }).at("terrain", Location(30.0, -40.0)) shouldBe WaterHere(WaterKind.SEA, "ground:0,0")
         WaterAt.NOWHERE.at("terrain", Location(52.0, 20.3)) shouldBe null
+    }
+
+    "water nobody has named is one water wherever it is pointed at, and another water joined to it by nothing is another" {
+        // A lake of two cells joined corner to corner, a lake of one cell beside it across dry ground, and a lake
+        // that runs across the antimeridian.
+        val dry = ByteArray(360 * 180 * 2)
+        for ((x, y) in listOf(10 to 10, 11 to 11, 13 to 10, 0 to 50, 359 to 50)) dry[(y * 360 + x) * 2 + 1] = GroundMap.LAKE.toByte()
+        val lakes = WaterAt({ GroundMap(360, 180, mapOf(0 to "grassland"), dry) }, { null })
+        fun idAt(x: Int, y: Int) = lakes.at("terrain", Location(89.5 - y, x - 179.5))?.id
+
+        idAt(10, 10) shouldBe "ground:10,10"
+        idAt(11, 11) shouldBe "ground:10,10"
+        idAt(13, 10) shouldBe "ground:13,10"
+        idAt(359, 50) shouldBe "ground:0,50"
+        idAt(0, 50) shouldBe "ground:0,50"
     }
 
     "a river's course is every piece of it under its name joined to the one pointed at, and a lake's its shores" {

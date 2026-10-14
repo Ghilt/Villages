@@ -8,10 +8,11 @@ enum class WaterKind { RIVER, LAKE, SEA }
 /**
  * Water pointed at: what kind it is, and which, where the master's real names were carried - its real identity, a
  * Wikidata id where there is one, its name in English, and another worth knowing, today's beside a name of 1790 the
- * review chose, and a line or two [about] it for its window. All but the kind null where nothing named is near
- * enough to be the water painted there. [lines] are where it runs as the names have it, in the world: a river's
- * whole course, every piece of it under its name joined to the one pointed at, and a lake's shores; none for the
- * sea, or for water nobody has named. What a window's selection is drawn along.
+ * review chose, and a line or two [about] it for its window. Water nothing named is near enough to be has only its
+ * kind and an [id] from the ground: the water painted there that the place is joined to, so that two clicks on one
+ * unnamed lake are one window, as two on the Vistula are. [lines] are where it runs as the names have it, in the
+ * world: a river's whole course, every piece of it under its name joined to the one pointed at, and a lake's shores;
+ * none for the sea, or for water nobody has named. What a window's selection is drawn along.
  */
 data class WaterHere(
     val kind: WaterKind,
@@ -34,8 +35,15 @@ data class WaterHere(
             else -> "the $name"
         }
 
-    private companion object {
-        val NO_ARTICLE = Regex("^(Lake|Loch|Lough) (?!of )")
+    /** Its real identity, a Wikidata id or a source's; null for water nobody has named, whose [id] is the ground's. */
+    val realId: String?
+        get() = id?.takeUnless { it.startsWith(GROUND_ID) }
+
+    companion object {
+        /** What the id of water nobody has named starts with: it is known by the ground, not by a name. */
+        const val GROUND_ID = "ground:"
+
+        private val NO_ARTICLE = Regex("^(Lake|Loch|Lough) (?!of )")
     }
 }
 
@@ -45,7 +53,8 @@ data class WaterHere(
  * nearest named river close enough to be the one painted there, as the map's omens find it, and the sea by the named
  * sea the place is in or by. The ground is read in cells some eighteen kilometres across, so where a cell holds more
  * than one water its own terrain says which: a cell mostly sea is the sea, and otherwise a river comes before a lake
- * and a lake before the sea along a shore. Whether the house may know is not asked here: that is the asker's to say,
+ * and a lake before the sea along a shore. Water nothing names is known by the first cell of the water it is joined
+ * to, `ground:<x>,<y>`. Whether the house may know is not asked here: that is the asker's to say,
  * from its fog or its sight. What an inspect window on water shows, and what a roll reads of one. See decision 0087.
  */
 class WaterAt(private val grounds: GroundMaps, private val names: PlaceNamesByMaster) {
@@ -57,23 +66,26 @@ class WaterAt(private val grounds: GroundMaps, private val names: PlaceNamesByMa
         if (cell.has(GroundMap.LAKE)) {
             named?.inside(NameKind.LAKE, place)?.let { return named.waterOf(it, WaterKind.LAKE) }
         }
+        val unnamed = { kind: WaterKind -> WaterHere(kind, ground.joinedId(MARKS.getValue(kind), place)) }
         return when {
-            cell.has(GroundMap.SEA) && cell.terrain in MapOmens.SEAS -> seaAt(named, place)
-            cell.has(GroundMap.RIVER) -> nearest(named, WaterKind.RIVER, NameKind.RIVER, place)
-            cell.has(GroundMap.LAKE) -> nearest(named, WaterKind.LAKE, NameKind.LAKE, place)
-            cell.has(GroundMap.SEA) -> seaAt(named, place)
+            cell.has(GroundMap.SEA) && cell.terrain in MapOmens.SEAS -> seaAt(named, place) ?: unnamed(WaterKind.SEA)
+            cell.has(GroundMap.RIVER) -> nearest(named, WaterKind.RIVER, place) ?: unnamed(WaterKind.RIVER)
+            cell.has(GroundMap.LAKE) -> nearest(named, WaterKind.LAKE, place) ?: unnamed(WaterKind.LAKE)
+            cell.has(GroundMap.SEA) -> seaAt(named, place) ?: unnamed(WaterKind.SEA)
             else -> null
         }
     }
 
-    private fun nearest(named: PlaceNames?, kind: WaterKind, name: NameKind, place: Location): WaterHere =
-        named?.near(name, place, MapOmens.RIVER_REACH_KM)?.firstOrNull()?.name?.let { named.waterOf(it, kind) }
-            ?: WaterHere(kind)
+    private fun nearest(named: PlaceNames?, kind: WaterKind, place: Location): WaterHere? =
+        named?.near(if (kind == WaterKind.RIVER) NameKind.RIVER else NameKind.LAKE, place, MapOmens.RIVER_REACH_KM)
+            ?.firstOrNull()?.name?.let { named.waterOf(it, kind) }
 
-    private fun seaAt(named: PlaceNames?, place: Location): WaterHere =
+    private fun seaAt(named: PlaceNames?, place: Location): WaterHere? =
         named?.regionAt(place, RegionKind.SEA)
             ?.let { WaterHere(WaterKind.SEA, it.id, it.name, it.also, it.of1790, it.about) }
-            ?: WaterHere(WaterKind.SEA)
+
+    private fun GroundMap.joinedId(mark: Int, place: Location): String? =
+        waterJoinedTo(mark, indexOf(place))?.let { "${WaterHere.GROUND_ID}${it % width},${it / width}" }
 
     private fun PlaceNames.waterOf(piece: PlaceName, kind: WaterKind) =
         WaterHere(kind, piece.id, piece.name, piece.also, piece.of1790, piece.about, courseOf(piece))
@@ -105,6 +117,13 @@ class WaterAt(private val grounds: GroundMaps, private val names: PlaceNamesByMa
     companion object {
         /** A world with no ground maps, where nothing is water. */
         val NOWHERE = WaterAt({ null }, { null })
+
+        /** The mark on the ground that each kind of water is painted with. */
+        private val MARKS = mapOf(
+            WaterKind.RIVER to GroundMap.RIVER,
+            WaterKind.LAKE to GroundMap.LAKE,
+            WaterKind.SEA to GroundMap.SEA,
+        )
 
         /** How close two pieces of a river under one name come to be one course. */
         const val JOINED_KM = 20.0

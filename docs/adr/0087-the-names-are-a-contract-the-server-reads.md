@@ -4,6 +4,8 @@
 - Date: 2026-10-07
 - Amended 2026-10-07: a second reader, a click on water - a river, a lake, the sea - which asks the server and is
   answered by name; and a third, a roll with a window open on water.
+- Amended 2026-10-14: water nobody has named is known by the ground, the first cell of the water it is joined to,
+  so that two clicks on one unnamed lake are one window.
 
 ## Context
 
@@ -60,7 +62,12 @@ there - a lake whose carried shores enclose the place, a river where the master'
 named river close enough to be the one painted there, as the omen finds it, or the sea by the named sea the place
 is in or by - or none. A third question is asked of the names for it, which named thing's lines enclose a place.
 The page opens an inspect window on the water it names, keyed by its `id`, so two clicks on the Vistula are one
-window, with the line about it the answer carries. The answer carries where the water runs, too: a river's whole
+window, with the line about it the answer carries. Water nobody has named has an `id` too, `ground:<x>,<y>`: the
+first cell, row by row, of the water of its kind on the master's ground map that the place is joined to, side to
+side or corner to corner and across the antimeridian. Every click on one unnamed lake, one unnamed river's water or
+one unnamed sea gives the same, so it is one window as the Vistula is; before, the page keyed it by the place
+clicked, and each click on another part of the lake opened another window. Two small lakes in neighbouring cells,
+some eighteen kilometres apart, are one water by this, and two unnamed rivers that run into each other are one. The answer carries where the water runs, too: a river's whole
 course, every piece of it under its name that joins the one pointed at, and a lake's shores, cut to what the fog
 lets through, which the ripple of gold a click sends runs out along. The page's copy of the names is not
 what it reads.
@@ -68,7 +75,7 @@ what it reads.
 **The third reader is a roll with a window open on water.** `roll` says where each was opened, never what
 water it is, and the roll reads every place again as the click was answered, on ground the house has revealed:
 *Inspecting the Vistula*, keyed `window.river:<id>`, `window.lake:<id>` or `window.sea:<id>`, and by the kind alone
-for water nobody has named, so a pool opens on any of them and a questline on one.
+for water nobody has named, its ground `id` notwithstanding, so a pool opens on any of them and a questline on one.
 
 **Only what the house has revealed is named**, as only revealed ground counts (0084): a town under the fog is
 no omen, a river is named from a revealed cell the ground shows it in, and the sea from the revealed water.

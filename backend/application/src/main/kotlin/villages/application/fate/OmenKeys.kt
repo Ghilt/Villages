@@ -21,8 +21,12 @@ object OmenKeys {
     val INSPECTING_OWN = OmenKey("window.ownHouse")
     fun inspectingCharacter(character: CharacterId) = OmenKey("window.character:${character.value}")
 
-    /** A window on water by its kind and real identity, `window.river:Q548`, or by its kind alone where it has none. */
-    fun inspectingWater(water: WaterHere) = OmenKey("window.${water.kind.name.lowercase()}${water.id?.let { ":$it" } ?: ""}")
+    /**
+     * A window on water by its kind and real identity, `window.river:Q548`, or by its kind alone where it has none:
+     * every lake nobody has named is the one omen, whichever lake its window is on.
+     */
+    fun inspectingWater(water: WaterHere) =
+        OmenKey("window.${water.kind.name.lowercase()}${water.realId?.let { ":$it" } ?: ""}")
 
     fun dialogue(dialogue: DialogueId) = OmenKey("dialogue:${dialogue.value}")
     val MISSING_WEALTH = OmenKey("dialogue.missingWealth")

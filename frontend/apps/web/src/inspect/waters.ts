@@ -29,8 +29,9 @@ const store = createStore<WatersState>({ seen: new Map(), clicked: null });
 export const watersStore: Readable<WatersState> = store;
 
 /**
- * Takes an answer in: the water it names, kept under its real identity so that two clicks on the Vistula are one
- * window, or under the place for water nobody has named; or null where the answer names none.
+ * Takes an answer in: the water it names, kept under its identity so that two clicks on the Vistula are one window,
+ * and two on a lake nobody has named, which the server knows by the water it is joined to; under the place only for
+ * an answer that came with no identity at all; or null where the answer names none.
  */
 export function heardWater(answer: InspectedAtFrame): WaterSeen | null {
   if (answer.water === null) {

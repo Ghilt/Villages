@@ -106,8 +106,9 @@ class GatewayWatersSpec : StringSpec({
         mine.receive(inspectAt(59.33, 19.2))
         sent.filterIsInstance<InspectedAt>() shouldBe listOf(
             InspectedAt(Point(HELSINKI_LAT, HELSINKI_LON), revealed = true, water = null),
-            // The ground shows a river with no named one near enough to be it: a river all the same.
-            InspectedAt(Point(59.33, 18.07), revealed = true, water = WaterView("river")),
+            // The ground shows a river with no named one near enough to be it: a river all the same, known by the first
+            // cell of the water it is joined to.
+            InspectedAt(Point(59.33, 18.07), revealed = true, water = WaterView("river", "ground:198,0")),
             InspectedAt(Point(59.33, 19.2), revealed = true, water = WaterView("sea", "Q545", "Baltic Sea")),
         )
     }

@@ -466,7 +466,9 @@ the list of what is still to be worked out.
 - **What else can be a subject.** Water is the first the server names rather than the browser: a click on a
   river, a lake or the sea asks, and the answer names it from the master's real names on ground the house has
   revealed (0087). A roll reads a window open on it as it reads one on a house, *Inspecting the Vistula*, from
-  the place the window was opened at and never the page's word for what is there. Its window says its name and,
+  the place the window was opened at and never the page's word for what is there. A click anywhere on water
+  whose window is open raises that window, named or not: water nobody has named is known by the water it is
+  joined to on the ground, so one unnamed lake is one window however often it is clicked. Its window says its name and,
   for the great rivers, lakes and seas, a line or two about it as a reader of 1790 might be told it; what water
   is for is still to come.
 

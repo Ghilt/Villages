@@ -87,7 +87,7 @@ class FirstContentSpec : StringSpec({
     "a window open on water opens the coin, whatever the water and whether or not anybody has named it" {
         val windows = listOf(
             WaterHere(WaterKind.RIVER, "Q548", "Vistula"),
-            WaterHere(WaterKind.LAKE),
+            WaterHere(WaterKind.LAKE, "ground:188,43"),
             WaterHere(WaterKind.SEA, "Q1693", "German Ocean"),
         ).map { Omen(OmenKeys.inspectingWater(it), OmenKind.WINDOW, "Inspecting ${it.called}") }
 
