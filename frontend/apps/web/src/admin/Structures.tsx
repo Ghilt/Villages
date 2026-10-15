@@ -24,14 +24,9 @@ function byLevel(values: readonly number[]): string {
   return values.every((value) => value === values[0]) ? String(values[0]) : values.join(' / ');
 }
 
-/** The zoom a significance is first drawn from, as `coarsestZoom` works it out on both ends. */
-function zoomOf(significance: number): number {
-  return Math.round(((100 - significance) / 100) * 10);
-}
-
 /**
  * Every type of structure there is, as `world/structures.json` says, for reading: what each gives its holder a
- * month at each level, how far it sees and from which zoom it is drawn, its slots and what makes each count, its
+ * month at each level, how far it sees and how significant it is, its slots and what makes each count, its
  * zone, and what each culture calls it. Read through the dev server, fresh on every load, so a number changed in
  * the file is here on a reload; the game server reads the file only when it starts.
  *
@@ -73,7 +68,7 @@ export function Structures() {
               <tr>
                 <th>type</th>
                 <th>levels</th>
-                <th>drawn from zoom</th>
+                <th>significance</th>
                 <th>sees, km</th>
                 <th>gives a month</th>
                 <th>slots</th>
@@ -104,7 +99,7 @@ function TypeRow({ spec }: { spec: StructureTypeSpec }) {
         <span className="catalogue__key">{spec.type}</span>
       </th>
       <td>{spec.levels}</td>
-      <td>{byLevel(spec.significance.map(zoomOf))}</td>
+      <td>{byLevel(spec.significance)}</td>
       <td>{byLevel(spec.sightKm)}</td>
       <td>
         {gives.length === 0 ? (

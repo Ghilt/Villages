@@ -50,9 +50,8 @@ import { useStore } from './store/useStore';
 /**
  * How close the camera comes when the house is founded.
  *
- * Not a matter of taste: a new house has the founding significance, and `coarsestZoom` makes that zoom 8,
- * so a flight that stopped at 7 would land on a seat with nothing standing on it. Past 8 the sprite is
- * drawn as a marker rather than a dot, which is what arriving at your own house should look like.
+ * Past 8.46, where everything on the map is drawn as itself rather than as its mark, so arriving at your own
+ * house lands on its seat standing there, not on a pin.
  */
 const FOUNDING_ZOOM = 8.5;
 

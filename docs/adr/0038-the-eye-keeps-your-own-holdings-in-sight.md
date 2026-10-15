@@ -71,3 +71,8 @@ in it, which makes it the place the next such lever goes.
 
 Adam's switch is one line in the World bar of the debug panel and no line anywhere else — see the
 amendment to decision 0023, made the same day, which took the panel's block of state out entirely.
+
+## Amendment, 2026-10-15: one zoom for everything
+
+`coarsestZoom` is gone: everything is sent from zoom 7 and drawn from 7.25 (0096). The eye still spares your own
+holdings that floor, as it spared them the old one.

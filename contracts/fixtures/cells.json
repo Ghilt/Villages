@@ -115,61 +115,8 @@
       }
     }
   ],
-  "coarsestZoom": {
-    "$comment": "The coarsest zoom a thing of a given significance is drawn from: the deepest zoom for significance 0 and the whole world for 100, in even steps between, a half rounded up, and a significance past either end held to it. Worked out by hand from that rule rather than by either end. The gateway sends by it and the page could draw by it, so both are held to these.",
-    "cases": [
-      {
-        "significance": -5,
-        "zoom": 10
-      },
-      {
-        "significance": 0,
-        "zoom": 10
-      },
-      {
-        "significance": 1,
-        "zoom": 10
-      },
-      {
-        "significance": 15,
-        "zoom": 9
-      },
-      {
-        "significance": 20,
-        "zoom": 8
-      },
-      {
-        "significance": 37.5,
-        "zoom": 6
-      },
-      {
-        "significance": 45,
-        "zoom": 6
-      },
-      {
-        "significance": 55,
-        "zoom": 5
-      },
-      {
-        "significance": 80,
-        "zoom": 2
-      },
-      {
-        "significance": 85,
-        "zoom": 2
-      },
-      {
-        "significance": 99,
-        "zoom": 0
-      },
-      {
-        "significance": 100,
-        "zoom": 0
-      },
-      {
-        "significance": 150,
-        "zoom": 0
-      }
-    ]
+  "onTheMapFrom": {
+    "$comment": "The coarsest zoom anything on the map is sent at, whatever its significance: every structure and every person from the same zoom, so they arrive together and the page fades them in together at 7.25. Significance ranks what is on the map and no longer decides how far out it is drawn (decision record 0096). Both ends are held to it.",
+    "zoom": 7
   }
 }

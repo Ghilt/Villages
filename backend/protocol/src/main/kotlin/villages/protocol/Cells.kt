@@ -4,7 +4,6 @@ import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.floor
 import kotlin.math.ln
-import kotlin.math.roundToInt
 import kotlin.math.tan
 
 /**
@@ -85,12 +84,11 @@ value class Cell(val quadkey: String) {
 }
 
 /**
- * The zoom a thing of this significance is still worth drawing at, and every zoom below it.
+ * The coarsest zoom anything on the map is sent at, whatever its significance: every structure and every person from
+ * the same zoom, so they arrive together and the page fades them in together at 7.25, a quarter of a level in.
  *
- * Significance is a judgement the world makes - how much this matters - and this is the one place it
- * becomes a fact about the map. A hundred is drawn from the whole world; nothing is drawn only when you
- * are standing over it. Straight-line for now, and a guess: most of what happens is ordinary and a very
- * little of it is legendary, so this probably wants a curve once there is anything to shape it against.
+ * Significance ranks what is on the map - which of a crowd of marks leads it, which two hundred a cell carries, what is
+ * seen through the fog - and no longer decides how far out a thing is drawn. It did, from 0026 to 2026-10-15, and a mill
+ * arrived two levels after a cathedral. See decision record 0096.
  */
-fun coarsestZoom(significance: Double): Int =
-    ((100.0 - significance.coerceIn(0.0, 100.0)) / 100.0 * Cell.MAX_ZOOM).roundToInt()
+const val ON_THE_MAP_FROM: Int = 7

@@ -32,7 +32,7 @@ import villages.domain.SeatEvent
 import villages.domain.VisionEvent
 import villages.domain.StructureEvent
 import villages.protocol.Cell
-import villages.protocol.coarsestZoom
+import villages.protocol.ON_THE_MAP_FROM
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.atomic.AtomicLong
@@ -52,7 +52,7 @@ import java.util.concurrent.atomic.AtomicLong
  * Disposable, like every read model: delete it, replay the feed, get it back.
  */
 class HousesProjection(feed: EventFeed) : Follower(feed), HousesByCell, HousesByPlayer, HouseById, HousesNear {
-    private class Indexed(val row: HouseRow, val quadkey: String, val coarsestZoom: Int)
+    private class Indexed(val row: HouseRow, val quadkey: String)
 
     private val rows = ConcurrentHashMap<HouseId, Indexed>()
 
@@ -137,7 +137,6 @@ class HousesProjection(feed: EventFeed) : Follower(feed), HousesByCell, HousesBy
             Indexed(
                 row = row,
                 quadkey = Cell.of(row.seat.lat, row.seat.lon).quadkey,
-                coarsestZoom = coarsestZoom(row.significance.value),
             ),
         ) == null
         byPlayer[row.player] = row.id
@@ -171,7 +170,7 @@ class HousesProjection(feed: EventFeed) : Follower(feed), HousesByCell, HousesBy
         val worthDrawing = rows.values
             .filter {
                 it.quadkey.startsWith(cell) &&
-                    (everything || it.coarsestZoom <= zoom) &&
+                    (everything || zoom >= ON_THE_MAP_FROM) &&
                     it.row.existsAt(at) &&
                     seen(it.row)
             }

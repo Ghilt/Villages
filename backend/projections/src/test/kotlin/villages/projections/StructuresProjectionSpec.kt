@@ -88,9 +88,11 @@ class StructuresProjectionSpec : StringSpec({
         face.since shouldBe today
         row.faceOn(WorldTime(today.day - 1)) shouldBe null
 
-        // Significance 10 is drawn from zoom 9: a coarser cell holds it only for the eye, which sets significance aside.
-        structures.inCell(deepest.take(8)).shouldBeEmpty()
-        structures.inCell(deepest.take(8), everything = true) shouldHaveSize 1
+        // Everything on the map is drawn from zoom 7, whatever its significance (0096): a coarser cell holds it only for
+        // the eye, which sends every zoom.
+        structures.inCell(deepest.take(7)) shouldHaveSize 1
+        structures.inCell(deepest.take(6)).shouldBeEmpty()
+        structures.inCell(deepest.take(6), everything = true) shouldHaveSize 1
     }
 
     "nobody may hold it" {

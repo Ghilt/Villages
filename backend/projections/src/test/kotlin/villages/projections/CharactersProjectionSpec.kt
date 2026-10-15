@@ -212,15 +212,17 @@ class CharactersProjectionSpec : StringSpec({
     fun cellOf(place: Location, zoom: Int) = Cell.of(place.lat, place.lon, zoom).quadkey
 
     // Ten is the significance every key figure has on the map, and it is drawn from zoom 9 in.
-    "a character moved onto the map is in the cell their place falls in, from the zoom their significance says" {
+    "a character moved onto the map is in the cell their place falls in, from the zoom everything on the map is" {
         val (feed, projection, _) = rig()
         feed.deliver(appeared(1))
         feed.deliver(CharacterMoved(figure(1), helsinki, ten, today, noon))
 
         projection.inCell(cellOf(helsinki, 9), today, 10).characters.single().row.id shouldBe figure(1)
         projection.inCell(cellOf(helsinki, 9), today, 10).characters.single().span.place shouldBe helsinki
-        projection.inCell(cellOf(helsinki, 8), today, 10).characters.shouldBeEmpty()
-        projection.inCell(cellOf(helsinki, 8), today, 10, everything = true).characters shouldHaveSize 1
+        // A significance of ten is drawn from zoom 7 like anything else, and not from 6. See decision record 0096.
+        projection.inCell(cellOf(helsinki, 7), today, 10).characters shouldHaveSize 1
+        projection.inCell(cellOf(helsinki, 6), today, 10).characters.shouldBeEmpty()
+        projection.inCell(cellOf(helsinki, 6), today, 10, everything = true).characters shouldHaveSize 1
         projection.inCell(cellOf(stockholm, 9), today, 10).characters.shouldBeEmpty()
     }
 

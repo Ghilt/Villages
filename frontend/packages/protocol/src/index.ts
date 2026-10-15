@@ -13,7 +13,7 @@ export {
   cellAt,
   cellAtZoom,
   cellsForView,
-  coarsestZoom,
+  ON_THE_MAP_FROM,
   isInside,
   quadkeyOf,
   tileAt,

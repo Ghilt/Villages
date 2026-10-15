@@ -6,7 +6,7 @@ import villages.application.WorldClock
 import villages.protocol.Cell
 import villages.protocol.StructureArrived
 import villages.protocol.StructureChanged
-import villages.protocol.coarsestZoom
+import villages.protocol.ON_THE_MAP_FROM
 
 /**
  * Structures on the map: each one raised or changed, fanned out to every connection holding a cell it stands in and
@@ -25,7 +25,7 @@ internal class StructuresPart(
     private fun fanOut(change: StructureChange) {
         val row = change.row
         val deepest = Cell.of(row.place.lat, row.place.lon)
-        // Every zoom, not only the ones it is significant enough for: a connection with the eye open holds shallower
+        // Every zoom, not only the ones on the map: a connection with the eye open holds shallower
         // cells and is owed it there too. Eleven lookups, as for a house. See 0038.
         for (zoom in 0..Cell.MAX_ZOOM) {
             val holders = core.holders(deepest.at(zoom).quadkey) ?: continue
@@ -33,7 +33,7 @@ internal class StructuresPart(
                 val looking = connection.looking
                 if (!looking.isLive) continue
                 val view = looking.sent(row, looking.day(world::today))?.takeIf { it.seenUntil == null } ?: continue
-                if (zoom >= coarsestZoom(view.significance) || looking.everything) {
+                if (zoom >= ON_THE_MAP_FROM || looking.everything) {
                     connection.enqueue(if (change.appeared) StructureArrived(view) else StructureChanged(view))
                 }
             }

@@ -96,15 +96,16 @@ private const val STOCKHOLM_Z4 = "1200"
 
 class HousesProjectionSpec : StringSpec({
 
-    "a founded house is in its own cell, and in every cell above it down to where its significance runs out" {
+    "a founded house is in its own cell, and in every cell above it down to zoom seven, whatever its significance" {
         val feed = HandFed()
         val houses = HousesProjection(feed).started()
         feed.deliver(founded("Ravenscar", 59.33, 18.07, significance = 20.0))
 
-        // Twenty is worth drawing from zoom eight in, and not from further out.
+        // Everything on the map is drawn from zoom seven in, and not from further out. See decision record 0096.
         houses.inCell(STOCKHOLM_Z10, someDay, 10).houses.map { it.name } shouldBe listOf(HouseName("Ravenscar"))
         houses.inCell(STOCKHOLM_Z8, someDay, 10).houses shouldHaveSize 1
-        houses.inCell(STOCKHOLM_Z8.take(7), someDay, 10).houses.shouldBeEmpty()
+        houses.inCell(STOCKHOLM_Z8.take(7), someDay, 10).houses shouldHaveSize 1
+        houses.inCell(STOCKHOLM_Z8.take(6), someDay, 10).houses.shouldBeEmpty()
         houses.inCell(STOCKHOLM_Z4, someDay, 10).houses.shouldBeEmpty()
         houses.inCell("", someDay, 10).houses.shouldBeEmpty()
     }
@@ -123,13 +124,14 @@ class HousesProjectionSpec : StringSpec({
         houses.inCell("", someDay - 1, 10, everything = true).houses.shouldBeEmpty()
     }
 
-    "a legendary thing is drawn from the whole world" {
+    "a legendary thing is drawn from no further out than an ordinary one" {
         val feed = HandFed()
         val houses = HousesProjection(feed).started()
         feed.deliver(founded("St John's", 59.33, 18.07, significance = 100.0))
 
-        houses.inCell("", someDay, 10).houses shouldHaveSize 1
-        houses.inCell(STOCKHOLM_Z4, someDay, 10).houses shouldHaveSize 1
+        houses.inCell("", someDay, 10).houses.shouldBeEmpty()
+        houses.inCell(STOCKHOLM_Z4, someDay, 10).houses.shouldBeEmpty()
+        houses.inCell(STOCKHOLM_Z8.take(7), someDay, 10).houses shouldHaveSize 1
     }
 
     "a house is not in a cell its seat does not fall in" {

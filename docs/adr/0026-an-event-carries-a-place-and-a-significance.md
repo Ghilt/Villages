@@ -92,3 +92,8 @@ the projection and the data-tile subscriptions that use it are the next incremen
   `subscribeCells`, and the fixtures already sit together. A new module would have been ceremony.
 - **Put the grid in `application` or `projections`.** The browser needs the same arithmetic, and only
   `protocol` is mirrored in TypeScript and tested against shared vectors.
+
+## Amendment, 2026-10-15: significance ranks, it no longer decides the zoom
+
+Everything on the map is now sent from zoom 7 and drawn from 7.25, whatever its significance, and `coarsestZoom` is
+gone. Significance still travels on every event and ranks what is drawn. See decision record 0096.

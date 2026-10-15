@@ -68,12 +68,10 @@ export function isInside(quadkey: string, tile: string): boolean {
 }
 
 /**
- * The zoom a thing of this significance is still worth drawing at, and every zoom below it. A hundred is
- * drawn from the whole world; nothing is drawn only when you are standing over it.
+ * The coarsest zoom anything on the map is sent at, whatever its significance, as `ON_THE_MAP_FROM` in `Cells.kt`:
+ * everything arrives together, and the page fades it in together at 7.25. See decision record 0096.
  */
-export function coarsestZoom(significance: number): number {
-  return Math.round(((100 - clamp(significance, 0, 100)) / 100) * MAX_ZOOM);
-}
+export const ON_THE_MAP_FROM = 7;
 
 /** What a camera is looking at: the corners of the view, and the zoom it is at. */
 export interface View {

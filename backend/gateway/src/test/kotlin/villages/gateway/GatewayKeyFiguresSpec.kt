@@ -108,8 +108,8 @@ class GatewayKeyFiguresSpec : StringSpec({
         val (looker, seen) = rig.someoneElse(fogLifted = true)
         looker.receive(subscribe(STOCKHOLM_Z10))
         val (far, farSeen) = rig.someoneElse(fogLifted = true)
-        // Zoom 8 is coarser than a key figure's significance is drawn at, which is zoom 9.
-        far.receive(subscribe(STOCKHOLM_Z8))
+        // Zoom 4 is coarser than anything on the map is drawn at, which is zoom 7 (0096).
+        far.receive(subscribe(STOCKHOLM_Z4))
         rig.later.tick()
         seen.clear()
         farSeen.clear()

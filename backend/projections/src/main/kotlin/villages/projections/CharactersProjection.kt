@@ -38,7 +38,7 @@ import villages.domain.DialogueEvent
 import villages.domain.VisionEvent
 import villages.domain.StructureEvent
 import villages.protocol.Cell
-import villages.protocol.coarsestZoom
+import villages.protocol.ON_THE_MAP_FROM
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CopyOnWriteArraySet
@@ -66,8 +66,8 @@ import java.util.concurrent.atomic.AtomicLong
 class CharactersProjection(feed: EventFeed) : Follower(feed), KeyFiguresByHouse, CharactersByCell, CharacterById {
     private class HouseFacts(val player: PlayerId, val name: HouseName, val banner: Banner)
 
-    /** A span with the deepest cell its place falls in and the coarsest zoom it is drawn at, worked out once. */
-    private class Indexed(val span: CharacterSpan, val quadkey: String, val coarsestZoom: Int)
+    /** A span with the deepest cell its place falls in, worked out once. */
+    private class Indexed(val span: CharacterSpan, val quadkey: String)
 
     private val characters = ConcurrentHashMap<CharacterId, CharacterRow>()
     private val ties = ConcurrentHashMap<HouseId, CopyOnWriteArrayList<CharacterId>>()
@@ -167,10 +167,10 @@ class CharactersProjection(feed: EventFeed) : Follower(feed), KeyFiguresByHouse,
         val open = stood.lastOrNull()?.takeIf { it.span.until == null }
         val was = open?.span?.copy(until = on)
         if (open != null && was != null) {
-            stood[stood.lastIndex] = Indexed(was, open.quadkey, open.coarsestZoom)
+            stood[stood.lastIndex] = Indexed(was, open.quadkey)
         }
         if (to != null) {
-            stood += Indexed(to, Cell.of(to.place.lat, to.place.lon).quadkey, coarsestZoom(to.significance.value))
+            stood += Indexed(to, Cell.of(to.place.lat, to.place.lon).quadkey)
         }
         val row = characters[id] ?: return
         if (was == null && to == null) {
@@ -225,7 +225,7 @@ class CharactersProjection(feed: EventFeed) : Follower(feed), KeyFiguresByHouse,
             .mapNotNull { (id, stood) ->
                 val here = stood.firstOrNull { it.span.covers(at) } ?: return@mapNotNull null
                 val row = characters[id] ?: return@mapNotNull null
-                if (here.quadkey.startsWith(cell) && (everything || here.coarsestZoom <= zoom)) {
+                if (here.quadkey.startsWith(cell) && (everything || zoom >= ON_THE_MAP_FROM)) {
                     PlacedCharacter(row, here.span).takeIf(seen)
                 } else {
                     null

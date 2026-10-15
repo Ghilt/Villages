@@ -153,9 +153,9 @@ stage alone, with none of the debug panel in it (decision record 0079).
   **Every number of the fog's look** - the haze, the mist, the fade - is in `apps/web/src/fog/look.ts`.
   See `docs/adr/0061`, `0062`, `0063`, `0064` and `docs/plans/fog-of-war.md`.
 - Looking at a whole world at once: `see everything`, in the debug panel's World bar beside `seed 20`.
-  A house is founded at significance 20, so it reaches a page only from zoom 8 in, and pulling back past
-  about z7.5 empties the map because the gateway stopped sending rather than because anything is hidden.
-  This sets significance aside for this connection and takes the renderer's distance floor off with it.
+  Everything on the map reaches a page only from zoom 7 in and is drawn from 7.25 (0096), so pulling back
+  past that empties the map because the gateway stopped sending rather than because anything is hidden.
+  This sends every zoom to this connection and takes the renderer's distance floor off with it.
   Adam's switch, not a player's.
 - Areas, in the same panel: `draw an area` arms the next drag on the map, and dragging paints one. The
   ends join themselves and escape stops. Click an area to select it, which makes its line pulse and lists

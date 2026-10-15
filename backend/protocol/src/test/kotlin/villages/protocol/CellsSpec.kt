@@ -35,11 +35,8 @@ class CellsSpec : StringSpec({
         }
     }
 
-    "says the coarsest zoom a significance is drawn from, as the shared cases the browser is held to say" {
-        val cases = fixture["coarsestZoom"]["cases"]
-        (0 until cases.size()).map { cases[it] }.forEach { case ->
-            coarsestZoom(case["significance"].asDouble()) shouldBe case["zoom"].asInt()
-        }
+    "sends everything on the map from the one zoom the browser is also held to" {
+        ON_THE_MAP_FROM shouldBe fixture["onTheMapFrom"]["zoom"].asInt()
     }
 
     "gives a place the same cell whether asked directly or by rolling up from deeper" {
@@ -120,22 +117,4 @@ class CellsSpec : StringSpec({
         shouldThrow<IllegalArgumentException> { Cell("1200").at(5) }
     }
 
-    "draws the legendary from the whole world and the ordinary only from close up" {
-        coarsestZoom(100.0) shouldBe 0
-        coarsestZoom(0.0) shouldBe Cell.MAX_ZOOM
-    }
-
-    "never draws a lesser thing from further out than a greater one" {
-        checkAll(Arb.numericDouble(0.0, 100.0), Arb.numericDouble(0.0, 100.0)) { lesser, greater ->
-            if (lesser <= greater) {
-                (coarsestZoom(lesser) >= coarsestZoom(greater)) shouldBe true
-            }
-        }
-    }
-
-    "answers with a zoom the grid has, whatever significance it is handed" {
-        checkAll(Arb.numericDouble(-1000.0, 1000.0)) { significance ->
-            (coarsestZoom(significance) in 0..Cell.MAX_ZOOM) shouldBe true
-        }
-    }
 })

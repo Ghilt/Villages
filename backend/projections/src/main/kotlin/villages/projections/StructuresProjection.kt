@@ -33,7 +33,7 @@ import villages.domain.StructureSlotEmptied
 import villages.domain.StructureSlotFilled
 import villages.domain.VisionEvent
 import villages.protocol.Cell
-import villages.protocol.coarsestZoom
+import villages.protocol.ON_THE_MAP_FROM
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.atomic.AtomicLong
@@ -52,7 +52,7 @@ import java.util.concurrent.atomic.AtomicLong
  * at least once and a face appended twice would be a change that never happened. Disposable, like every read model.
  */
 class StructuresProjection(feed: EventFeed) : Follower(feed), StructuresByCell, StructureSlots {
-    private class Indexed(val row: StructureRow, val quadkey: String, val coarsestZoom: Int, val streamVersion: Long)
+    private class Indexed(val row: StructureRow, val quadkey: String, val streamVersion: Long)
 
     private val rows = ConcurrentHashMap<StructureId, Indexed>()
     private val holders = ConcurrentHashMap<HouseId, Holder>()
@@ -154,7 +154,6 @@ class StructuresProjection(feed: EventFeed) : Follower(feed), StructuresByCell, 
         rows[row.id] = Indexed(
             row = row,
             quadkey = Cell.of(row.place.lat, row.place.lon).quadkey,
-            coarsestZoom = coarsestZoom(row.mostSignificant.value),
             streamVersion = streamVersion,
         )
         val change = StructureChange(row, appeared)
@@ -166,7 +165,7 @@ class StructuresProjection(feed: EventFeed) : Follower(feed), StructuresByCell, 
     override fun inCell(cell: String, everything: Boolean): List<StructureRow> {
         val zoom = cell.length
         return rows.values
-            .filter { it.quadkey.startsWith(cell) && (everything || it.coarsestZoom <= zoom) }
+            .filter { it.quadkey.startsWith(cell) && (everything || zoom >= ON_THE_MAP_FROM) }
             .map { it.row }
     }
 

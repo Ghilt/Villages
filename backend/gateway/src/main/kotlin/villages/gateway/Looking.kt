@@ -7,7 +7,7 @@ import villages.application.StructureRow
 import villages.application.StructuresByCell
 import villages.domain.StructureId
 import villages.domain.WorldTime
-import villages.protocol.coarsestZoom
+import villages.protocol.ON_THE_MAP_FROM
 import villages.protocol.HouseView
 import villages.protocol.StructureView
 
@@ -78,13 +78,13 @@ internal data class Looking(
         }
 
     /**
-     * What a cell holds of structures on [day] that this connection is sent and that are worth drawing at its zoom by
-     * the face it is sent - every one with the eye open - most significant first, at most [most], and how many more.
+     * What a cell holds of structures on [day] that this connection is sent, when its zoom is on the map - at any zoom
+     * with the eye open - most significant first, at most [most], and how many more.
      */
     fun structuresIn(structures: StructuresByCell, cell: String, day: WorldTime, most: Int): Pair<List<StructureView>, Int> {
         val sent = structures.inCell(cell, everything)
             .mapNotNull { sent(it, day) }
-            .filter { everything || coarsestZoom(it.significance) <= cell.length }
+            .filter { everything || cell.length >= ON_THE_MAP_FROM }
             .sortedWith(compareByDescending<StructureView> { it.significance }.thenBy { it.id })
         return sent.take(most) to (sent.size - most).coerceAtLeast(0)
     }

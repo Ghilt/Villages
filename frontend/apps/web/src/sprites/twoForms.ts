@@ -65,13 +65,14 @@ export const PRESENCE_MS = 140;
 export const LONGEST_STEP_MS = 50;
 
 /**
- * Below this a thing is not drawn at all, whatever size it would be.
+ * Below this a thing is not drawn at all, whatever it is, whatever size it would be and however significant: everything
+ * on the map fades in and out here together, a quarter of a level inside the zoom the server starts sending it at,
+ * `ON_THE_MAP_FROM`, so it has arrived before it is wanted.
  *
- * This is about distance, not about size, and it is deliberately not part of the trade: a continent
- * covered in marks says nothing, and aggregates rather than marks are what low zoom wants. See
- * decision records 0007 and 0038.
+ * This is about distance, not about size, and it is deliberately not part of the trade: a continent covered in marks
+ * says nothing, and aggregates rather than marks are what low zoom wants. See decision records 0038 and 0096.
  */
-export const DRAWN_FROM_ZOOM = 3;
+export const DRAWN_FROM_ZOOM = 7.25;
 
 /** How tall each form is on the screen right now. A form a thing has not got is nought. */
 export interface Sizes {

@@ -18,7 +18,7 @@ import villages.protocol.YourHouse
 /** The gateway: holding cells: snapshots, deltas, the eye, and a connection that falls behind or goes away. The rig is GatewayRig.kt. */
 class GatewayCellsSpec : StringSpec({
 
-    "subscribing to a cell answers with a snapshot of what is there, at every zoom it is worth drawing at" {
+    "subscribing to a cell answers with a snapshot of what is there, at every zoom on the map" {
         val rig = Rig()
         rig.aStructureIsRaised()
         val (looker, sent) = rig.introduced(fogLifted = true)
@@ -27,10 +27,11 @@ class GatewayCellsSpec : StringSpec({
 
         val snapshots = sent.map { it.shouldBeInstanceOf<Snapshot>() }
         snapshots.map { it.cell } shouldContainExactly listOf(STOCKHOLM_Z10, STOCKHOLM_Z8, STOCKHOLM_Z4)
-        // A mill is worth drawing from zoom nine in; the coarser cells are honestly empty.
+        // Everything on the map is drawn from zoom seven in, a mill as much as a cathedral (0096); zoom four is honestly
+        // empty.
         snapshots[0].structures.map { it.name } shouldBe listOf("a new mill")
         snapshots[0].structures.single().cell shouldBe STOCKHOLM_Z10
-        snapshots[1].structures.shouldBeEmpty()
+        snapshots[1].structures.map { it.name } shouldBe listOf("a new mill")
         snapshots[2].structures.shouldBeEmpty()
         snapshots.all { it.omittedStructures == 0 } shouldBe true
     }
@@ -81,10 +82,10 @@ class GatewayCellsSpec : StringSpec({
         sent.single().shouldBeInstanceOf<Batch>().deltas shouldHaveSize 1
     }
 
-    "a structure too ordinary for a coarse cell does not reach a connection holding only that cell" {
+    "a structure does not reach a connection holding only a cell coarser than the map" {
         val rig = Rig()
         val (looker, sent) = rig.introduced(fogLifted = true)
-        looker.receive(subscribe(STOCKHOLM_Z8))
+        looker.receive(subscribe(STOCKHOLM_Z4))
         sent.clear()
 
         rig.aStructureIsRaised()
@@ -93,7 +94,7 @@ class GatewayCellsSpec : StringSpec({
         sent.shouldBeEmpty()
     }
 
-    "with the eye open a structure too ordinary for a coarse cell is in its snapshot after all" {
+    "with the eye open a structure in a cell coarser than the map is in its snapshot after all" {
         val rig = Rig()
         rig.aStructureIsRaised()
         val (looker, sent) = rig.introduced(fogLifted = true)

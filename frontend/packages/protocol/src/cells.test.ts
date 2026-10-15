@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
-import { MAX_ZOOM, cellAt, cellAtZoom, cellsForView, coarsestZoom, isInside } from './cells';
+import { MAX_ZOOM, ON_THE_MAP_FROM, cellAt, cellAtZoom, cellsForView, isInside } from './cells';
 
 const vectors = JSON.parse(
   readFileSync(new URL('../../../../contracts/fixtures/cells.json', import.meta.url), 'utf8'),
@@ -9,7 +9,7 @@ const vectors = JSON.parse(
   maxZoom: number;
   zooms: number[];
   vectors: { name: string; lat: number; lon: number; quadkeys: Record<string, string> }[];
-  coarsestZoom: { cases: { significance: number; zoom: number }[] };
+  onTheMapFrom: { zoom: number };
 };
 
 describe('the shared vectors, which the Kotlin side is held to as well', () => {
@@ -22,13 +22,6 @@ describe('the shared vectors, which the Kotlin side is held to as well', () => {
       expect(cellAt(vector.lat, vector.lon, zoom)).toBe(vector.quadkeys[String(zoom)]);
     }
   });
-
-  it.each(vectors.coarsestZoom.cases)(
-    'draws a thing of significance $significance from zoom $zoom',
-    (one) => {
-      expect(coarsestZoom(one.significance)).toBe(one.zoom);
-    },
-  );
 
   it.each(vectors.vectors)('rolls $name up to the same cells it would be asked for', (vector) => {
     const deepest = cellAt(vector.lat, vector.lon);
@@ -58,29 +51,8 @@ describe('a cell and its ancestors', () => {
 });
 
 describe('how far out a thing is drawn', () => {
-  it('draws the legendary from the whole world and the ordinary only from close up', () => {
-    expect(coarsestZoom(100)).toBe(0);
-    expect(coarsestZoom(0)).toBe(MAX_ZOOM);
-  });
-
-  it('agrees with the worked example: a house at 20 appears at zoom 8, a cathedral at 85 at zoom 2', () => {
-    expect(coarsestZoom(20)).toBe(8);
-    expect(coarsestZoom(85)).toBe(2);
-  });
-
-  it('never draws a lesser thing from further out than a greater one', () => {
-    for (let lesser = 0; lesser <= 100; lesser += 5) {
-      for (let greater = lesser; greater <= 100; greater += 5) {
-        expect(coarsestZoom(lesser)).toBeGreaterThanOrEqual(coarsestZoom(greater));
-      }
-    }
-  });
-
-  it('answers with a zoom the grid has, whatever it is handed', () => {
-    for (const odd of [-1000, -0.5, 100.5, 1000, Number.MAX_SAFE_INTEGER]) {
-      expect(coarsestZoom(odd)).toBeGreaterThanOrEqual(0);
-      expect(coarsestZoom(odd)).toBeLessThanOrEqual(MAX_ZOOM);
-    }
+  it('is one zoom for everything on the map, the one the server is also held to', () => {
+    expect(ON_THE_MAP_FROM).toBe(vectors.onTheMapFrom.zoom);
   });
 });
 

@@ -273,7 +273,7 @@ sent to their session by itself (decision 0093). Every follower is bound to ever
 every read model; when a gateway keeps none of its own, it binds only the cells its sessions hold, which the
 routing key already carries, and the gateway's side does not change - it still holds an index from cell to
 sessions and, for each changed structure or
-person, walks its deepest cell up through all of its prefixes, sending to the holders at the zooms its significance is worth drawing at and to
+person, walks its deepest cell up through all of its prefixes, sending to the holders at the zooms everything on the map is sent at, 7 and in (0096), and to
 anyone who is seeing everything at the rest. A cell is a quadkey at any zoom, so a client asks for data on
 the same grid, at the same zoom, as the terrain tiles it draws; see decision record 0026.
 

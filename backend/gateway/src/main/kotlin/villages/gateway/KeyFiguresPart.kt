@@ -13,7 +13,7 @@ import villages.protocol.CharacterArrived
 import villages.protocol.CharacterChanged
 import villages.protocol.CharacterGone
 import villages.protocol.YourKeyFigures
-import villages.protocol.coarsestZoom
+import villages.protocol.ON_THE_MAP_FROM
 
 /**
  * The key figures and the people on the map: a house's own figures, which reach its player wherever they are
@@ -68,7 +68,7 @@ internal class KeyFiguresPart(
 
     /**
      * The connections a character standing in this span is drawn for: every one holding a cell their place
-     * falls in, from the zoom their significance is worth drawing at, or at any zoom with the eye open, and
+     * falls in, from the zoom everything on the map is sent at, or at any zoom with the eye open, and
      * whose fog lets them through there.
      */
     private fun heldAt(row: CharacterRow, span: CharacterSpan?): Set<Gateway.Connection> {
@@ -76,13 +76,12 @@ internal class KeyFiguresPart(
             return emptySet()
         }
         val deepest = Cell.of(span.place.lat, span.place.lon)
-        val coarsest = coarsestZoom(span.significance.value)
         val found = mutableSetOf<Gateway.Connection>()
         for (zoom in 0..Cell.MAX_ZOOM) {
             val holders = core.holders(deepest.at(zoom).quadkey) ?: continue
             for (connection in holders) {
                 val looking = connection.looking
-                if ((zoom >= coarsest || looking.everything) && looking.letsSee(row, span, looking.day(world::today))) {
+                if ((zoom >= ON_THE_MAP_FROM || looking.everything) && looking.letsSee(row, span, looking.day(world::today))) {
                     found += connection
                 }
             }
