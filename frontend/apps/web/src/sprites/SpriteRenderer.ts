@@ -32,6 +32,8 @@ export interface MapSprite {
    * shrinks with the map. Never set for anything else.
    */
   yours?: boolean;
+  /** How much it matters to the world, which decides which of a crowd of marks far out leads it. See 0096. */
+  significance?: number;
   /** The colour of the pennant flown over it, its holder's field, or absent for a thing nobody holds. */
   pennant?: number;
   /**

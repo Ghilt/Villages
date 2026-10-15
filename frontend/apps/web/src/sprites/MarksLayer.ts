@@ -3,11 +3,14 @@ import { Container, Sprite } from 'pixi.js';
 import type { Coverage } from '@villages/protocol';
 
 import { isWithinView, toScreen } from '../geometry/cameraMath';
+import { note } from '../log/log';
 import type { CameraView } from '../geometry/cameraMath';
 import { overTheFog } from './fogLayering';
 import type { Layer } from './layer';
-import { drawnOf, flyPennant, hide, letGo, show } from './markEntry';
+import { dressIcon, dressPennant, drawnOf, flyPennant, hide, letGo, show, wearBadge } from './markEntry';
 import type { Entry } from './markEntry';
+import { groupMarks } from './markGroups';
+import type { Groups, Placed } from './markGroups';
 import { lookOf } from './markLooks';
 import type { Textures } from './markTextures';
 import type { CameraSource, DrawnSprite, MapSprite } from './SpriteRenderer';
@@ -47,7 +50,13 @@ export interface MarksLayer extends Layer {
   setEverything(on: boolean): void;
   /** What the house has in vision, for which side of the fog a mark's ground form is on; null without fog. */
   setVision(vision: Coverage | null): void;
+  /**
+   * The mark or the crowd under a point: a mark's own id, or `group:<leader>` for the "+N" a crowd's leader wears.
+   * A mark hidden in a crowd takes no clicks.
+   */
   hitTest(point: { x: number; y: number }): string | null;
+  /** Every mark of the crowd a mark leads as last drawn, the leader first and the rest in rank order. */
+  groupOf(leader: string): readonly string[];
   /** Where every sprite actually ended up, for the development probe. */
   report(): Record<string, DrawnSprite>;
   /** How many marks stand in vision, for the fog's probe. */
@@ -59,6 +68,10 @@ export function createMarksLayer(camera: CameraSource, textures: Textures): Mark
   const overIt = new Container();
   const entries = new Map<string, Entry>();
   let everything = false;
+  /** The crowds far out, as last drawn. */
+  let groups: Groups = { led: new Map(), leaderOf: new Map() };
+  /** How the crowds were last said in the log, so it speaks only when they change. */
+  let said = '';
   /** What the house has in vision, for asking whether a mark stands in it; nothing while there is no fog. */
   let vision: Coverage | null = null;
   const standsInVision = (at: { lng: number; lat: number }): boolean =>
@@ -86,6 +99,8 @@ export function createMarksLayer(camera: CameraSource, textures: Textures): Mark
       blend: showing === 'ground' ? 1 : 0,
       presence: 0,
       leaving: false,
+      grouped: 1,
+      badge: null,
       inVision: standsInVision(spec.at),
     };
 
@@ -99,48 +114,22 @@ export function createMarksLayer(camera: CameraSource, textures: Textures): Mark
       (overTheFog('ground', entry.inVision) ? overIt : underTheFog).addChild(sprite);
       entry.ground = sprite;
     }
-    dressIcon(entry);
-    dressPennant(entry);
+    dressIcon(entry, overIt);
+    dressPennant(entry, textures.pennant, overIt);
     return entry;
   }
 
-  /**
-   * Gives a mark the icon its look asks for, or takes it away: a structure that changes hands into the player's
-   * becomes able to be its pin, and one that leaves them loses it.
-   */
-  function dressIcon(entry: Entry): void {
-    const { icon, iconAnchor } = entry.look;
-    if (icon === null) {
-      entry.icon?.destroy();
-      entry.icon = null;
-      return;
+  /** Tells the log how many crowds there are far out and how many marks they hide, when that changes. */
+  function sayCrowds(): void {
+    const crowds = [...groups.led.values()].filter((one) => one.length > 1);
+    const now =
+      crowds.length === 0
+        ? ''
+        : `${crowds.length} crowds of marks, ${groups.leaderOf.size} marks hidden in them`;
+    if (now !== said) {
+      said = now;
+      note('marks', now === '' ? 'no crowds of marks: every mark stands alone' : now);
     }
-    if (entry.icon === null) {
-      entry.icon = new Sprite(icon);
-      entry.icon.visible = false;
-      overIt.addChild(entry.icon);
-    }
-    entry.icon.texture = icon;
-    entry.icon.anchor.set(iconAnchor, 1);
-    entry.icon.tint = entry.spec.tint;
-  }
-
-  /** Gives a mark the pennant its holder flies, in their colours, or takes it down when nobody holds it. */
-  function dressPennant(entry: Entry): void {
-    const colour = entry.look.flag === null ? undefined : entry.spec.pennant;
-    if (colour === undefined) {
-      entry.pennant?.destroy();
-      entry.pennant = null;
-      return;
-    }
-    if (entry.pennant === null) {
-      entry.pennant = new Sprite(textures.pennant);
-      // Its staff's foot is where it stands.
-      entry.pennant.anchor.set(0.05, 1);
-      entry.pennant.visible = false;
-      (entry.ground?.parent ?? overIt).addChild(entry.pennant);
-    }
-    entry.pennant.tint = colour;
   }
 
   /**
@@ -165,6 +154,14 @@ export function createMarksLayer(camera: CameraSource, textures: Textures): Mark
       const { zoom } = view;
       let trading = false;
       const gone: string[] = [];
+      // Where each mark on the screen stands this frame, worked out first, because which of them are hidden in a
+      // crowd depends on all the others.
+      const onScreen: {
+        entry: Entry;
+        point: { x: number; y: number };
+        sizes: { ground: number; icon: number };
+      }[] = [];
+      const placed: Placed[] = [];
 
       for (const [id, entry] of entries) {
         const forms = entry.look.forms;
@@ -203,9 +200,30 @@ export function createMarksLayer(camera: CameraSource, textures: Textures): Mark
           continue;
         }
 
+        onScreen.push({ entry, point, sizes });
+        // Only a mark showing as its mark can be in a crowd: close in, every building is itself.
+        if (entry.icon !== null && entry.showing === 'icon' && entry.spec.kind !== 'candidate') {
+          const wide = (sizes.icon * entry.icon.texture.width) / entry.icon.texture.height;
+          placed.push({
+            id,
+            ...point,
+            width: wide,
+            height: sizes.icon,
+            significance: entry.spec.significance ?? 0,
+          });
+        }
+      }
+
+      groups = groupMarks(placed);
+      sayCrowds();
+      for (const { entry, point, sizes } of onScreen) {
+        const id = entry.spec.id;
+        entry.grouped = easeTowards(entry.grouped, groups.leaderOf.has(id) ? 0 : 1, elapsed, PRESENCE_MS);
+        trading = trading || midTrade(entry.grouped);
+        const here = entry.presence * entry.grouped;
         const alphas = alphasFor(entry.blend);
-        show(entry.ground, sizes.ground, alphas.ground * entry.presence);
-        show(entry.icon, sizes.icon, alphas.icon * entry.presence);
+        show(entry.ground, sizes.ground, alphas.ground * here);
+        show(entry.icon, sizes.icon, alphas.icon * here);
 
         for (const sprite of [entry.ground, entry.icon]) {
           if (sprite !== null && sprite.visible) {
@@ -214,6 +232,14 @@ export function createMarksLayer(camera: CameraSource, textures: Textures): Mark
           }
         }
         flyPennant(entry, sizes.ground * alphas.ground + sizes.icon * alphas.icon, point);
+        wearBadge(
+          entry,
+          (groups.led.get(id)?.length ?? 1) - 1,
+          point,
+          sizes.icon,
+          alphas.icon * here,
+          overIt,
+        );
       }
 
       for (const id of gone) {
@@ -259,8 +285,8 @@ export function createMarksLayer(camera: CameraSource, textures: Textures): Mark
             existing.ground.texture = existing.look.ground;
             existing.ground.tint = spec.tint;
           }
-          dressIcon(existing);
-          dressPennant(existing);
+          dressIcon(existing, overIt);
+          dressPennant(existing, textures.pennant, overIt);
           // A person who moved may have walked into vision or out of it.
           sideOfTheFog(existing);
         }
@@ -288,12 +314,24 @@ export function createMarksLayer(camera: CameraSource, textures: Textures): Mark
     hitTest(point: { x: number; y: number }): string | null {
       let nearest: { id: string; away: number } | null = null;
 
+      // A crowd's badge sits over the marks, so it answers first.
+      for (const [id, entry] of entries) {
+        const badge = entry.badge?.view;
+        if (badge?.visible === true && !entry.leaving) {
+          const box = badge.getBounds();
+          if (point.x >= box.minX && point.x <= box.maxX && point.y >= box.minY && point.y <= box.maxY) {
+            return `group:${id}`;
+          }
+        }
+      }
+
       for (const [id, entry] of entries) {
         // A mark on its way out takes no clicks: it is not a thing on the map any more, it is the
         // last of a picture of one.
         // A candidate is a place being offered rather than a thing standing in the world, so it is not
         // one; a house and a person are.
-        if (entry.spec.kind === 'candidate' || entry.leaving) {
+        // A mark hidden in a crowd is not there to be clicked: its leader stands for it.
+        if (entry.spec.kind === 'candidate' || entry.leaving || entry.grouped < 0.5) {
           continue;
         }
         // One form answers, and the switch is at the crossover where the two are the same size, so the
@@ -316,6 +354,10 @@ export function createMarksLayer(camera: CameraSource, textures: Textures): Mark
       }
 
       return nearest?.id ?? null;
+    },
+
+    groupOf(leader: string): readonly string[] {
+      return groups.led.get(leader) ?? [];
     },
 
     report(): Record<string, DrawnSprite> {

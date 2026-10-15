@@ -23,8 +23,15 @@ export function toCharacterSprite(character: CharacterOnMapView): MapSprite {
     at: { lng: character.place.lon, lat: character.place.lat },
     tint: serves === undefined ? NOBODYS : tinctureColour(serves.banner.field),
     kind: 'character',
+    significance: KEY_FIGURE_SIGNIFICANCE,
   };
 }
+
+/**
+ * What every key figure on the map matters, `KeyFigureService.ON_THE_MAP` on the server: not on the wire, because it
+ * never differs.
+ */
+const KEY_FIGURE_SIGNIFICANCE = 10;
 
 /** No tint at all: a structure is drawn in its own colours, and who holds it is said by its pennant. */
 const UNTINTED = 0xffffff;
@@ -51,6 +58,7 @@ export function toStructureSprite(
     kind: 'structure',
     ...(always ? { always } : {}),
     ...(yours ? { yours } : {}),
+    significance: structure.significance,
     // A ruin is drawn as a ruin, as tall as what it was; either in the culture of the ground it stands on.
     structure: {
       picture: pictureKey(structure.ruin === true ? RUIN_PICTURE : structure.structureType, culture),

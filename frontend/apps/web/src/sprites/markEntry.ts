@@ -1,4 +1,8 @@
-import type { Container, Sprite } from 'pixi.js';
+import { Sprite } from 'pixi.js';
+import type { Container, Texture } from 'pixi.js';
+
+import { createBadge } from './markBadge';
+import type { Badge } from './markBadge';
 
 import { pennantOn } from './markLooks';
 import { formForHit } from './twoForms';
@@ -35,6 +39,13 @@ export interface Entry {
   /** No longer among the marks to draw. It fades out and is let go of when it reaches nothing. */
   leaving: boolean;
   /**
+   * How much of it is drawn for not being hidden in a crowd far out: one alone or leading, nought when another mark
+   * stands for it. Eased like the presence, and multiplied in with it. See `markGroups.ts`.
+   */
+  grouped: number;
+  /** The "+N" it wears while it leads a crowd, made the first time it does. */
+  badge: Badge | null;
+  /**
    * Whether it stands in vision, which puts its ground form over the fog rather than under it. Worked out
    * when the mark or the house's vision changes, never a frame. See `fogLayering.ts`.
    */
@@ -70,6 +81,7 @@ export function hide(entry: Entry): void {
       sprite.visible = false;
     }
   }
+  entry.badge?.hide();
 }
 
 /** Lets go of every sprite of a mark that has gone. */
@@ -77,6 +89,7 @@ export function letGo(entry: Entry): void {
   entry.ground?.destroy();
   entry.icon?.destroy();
   entry.pennant?.destroy();
+  entry.badge?.destroy();
 }
 
 /**
@@ -90,7 +103,7 @@ export function flyPennant(entry: Entry, tall: number, at: { x: number; y: numbe
   const flies = pennantOn(entry.look, tall, at, formForHit(entry.blend));
   entry.pennant.visible = flies !== null;
   if (flies !== null) {
-    entry.pennant.alpha = entry.presence;
+    entry.pennant.alpha = entry.presence * entry.grouped;
     entry.pennant.scale.set(flies.height / entry.pennant.texture.height);
     entry.pennant.position.set(flies.x, flies.y);
   }
@@ -111,4 +124,64 @@ export function drawnOf(entry: Entry, overIt: Container): DrawnSprite {
     groundOverTheFog: entry.ground !== null && entry.ground.parent === overIt,
     ...(entry.pennant === null ? {} : { pennant: entry.pennant.visible }),
   };
+}
+
+/**
+ * Gives a mark the icon its look asks for, or takes it away: a structure that changes hands into the player's
+ * becomes able to be its pin, and one that leaves them loses it.
+ */
+export function dressIcon(entry: Entry, overIt: Container): void {
+  const { icon, iconAnchor } = entry.look;
+  if (icon === null) {
+    entry.icon?.destroy();
+    entry.icon = null;
+    return;
+  }
+  if (entry.icon === null) {
+    entry.icon = new Sprite(icon);
+    entry.icon.visible = false;
+    overIt.addChild(entry.icon);
+  }
+  entry.icon.texture = icon;
+  entry.icon.anchor.set(iconAnchor, 1);
+  entry.icon.tint = entry.spec.tint;
+}
+
+/** Puts on a crowd's leader the "+N" of how many more it stands for, or takes it off one that leads none. */
+export function wearBadge(
+  entry: Entry,
+  more: number,
+  at: { x: number; y: number },
+  tall: number,
+  alpha: number,
+  overIt: Container,
+): void {
+  if (more === 0 || entry.icon === null) {
+    entry.badge?.hide();
+    return;
+  }
+  if (entry.badge === null) {
+    entry.badge = createBadge();
+    overIt.addChild(entry.badge.view);
+  }
+  const wide = (tall * entry.icon.texture.width) / entry.icon.texture.height;
+  entry.badge.show(more, at, wide, tall, alpha);
+}
+
+/** Gives a mark the pennant its holder flies, in their colours, or takes it down when nobody holds it. */
+export function dressPennant(entry: Entry, pennant: Texture, overIt: Container): void {
+  const colour = entry.look.flag === null ? undefined : entry.spec.pennant;
+  if (colour === undefined) {
+    entry.pennant?.destroy();
+    entry.pennant = null;
+    return;
+  }
+  if (entry.pennant === null) {
+    entry.pennant = new Sprite(pennant);
+    // Its staff's foot is where it stands.
+    entry.pennant.anchor.set(0.05, 1);
+    entry.pennant.visible = false;
+    (entry.ground?.parent ?? overIt).addChild(entry.pennant);
+  }
+  entry.pennant.tint = colour;
 }
