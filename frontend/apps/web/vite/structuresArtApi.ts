@@ -9,7 +9,7 @@ import { isPicture, oneCutAtATime } from './artApi.ts';
 
 /**
  * The dev server keeps the structures' pictures cut, as `artApi.ts` keeps the scenery's: every time it starts, and
- * whenever a picture in `world/sprites/structures/` is saved, it runs `npm run world:structures`, which draws a
+ * whenever a picture in `world/sprites/structures/` or a mark in `world/sprites/marks/structures/` is saved, it runs `npm run world:structures`, which draws a
  * placeholder for any picture missing and packs them all into an atlas; when the atlas changed it tells the page,
  * which draws from the new one. Save a picture over a placeholder, look at the map. Development only. See
  * docs/plans/structures.md.
@@ -18,6 +18,7 @@ import { isPicture, oneCutAtATime } from './artApi.ts';
 const here = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(here, '..', '..', '..', '..');
 const STRUCTURES_DIR = resolve(REPO, 'world', 'sprites', 'structures');
+const MARKS_DIR = resolve(REPO, 'world', 'sprites', 'marks', 'structures');
 const WORLD_PACKAGE = resolve(REPO, 'frontend', 'packages', 'world');
 const ATLAS = resolve(REPO, 'frontend', 'apps', 'web', 'public', 'art', 'structures.json');
 
@@ -67,22 +68,21 @@ export function structuresArtApi(): Plugin {
       void cutAndSay(
         existsSync(ATLAS) ? 'the server started' : 'no pictures of structures cut in this tree yet',
       );
-      if (!existsSync(STRUCTURES_DIR)) {
-        return;
-      }
-      const watcher = watch(STRUCTURES_DIR, (_, file) => {
-        if (file === null || !isPicture(file)) {
-          return;
-        }
-        if (waiting !== null) {
-          clearTimeout(waiting);
-        }
-        waiting = setTimeout(() => {
-          waiting = null;
-          void cutAndSay(`${file} was saved`);
-        }, SETTLE_MS);
-      });
-      server.httpServer?.on('close', () => watcher.close());
+      const watchers = [STRUCTURES_DIR, MARKS_DIR].filter(existsSync).map((dir) =>
+        watch(dir, (_, file) => {
+          if (file === null || !isPicture(file)) {
+            return;
+          }
+          if (waiting !== null) {
+            clearTimeout(waiting);
+          }
+          waiting = setTimeout(() => {
+            waiting = null;
+            void cutAndSay(`${file} was saved`);
+          }, SETTLE_MS);
+        }),
+      );
+      server.httpServer?.on('close', () => watchers.forEach((watcher) => watcher.close()));
     },
   };
 }

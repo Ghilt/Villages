@@ -360,22 +360,39 @@ export function hexOf(colour: number): string {
   return `#${colour.toString(16).padStart(6, '0')}`;
 }
 
+/** How a picture's shapes are drawn: its own colours in ink, or every shape one colour under one outline. */
+export interface Inked {
+  fill?: number;
+  stroke: number;
+  width: number;
+}
+
+/** A picture's shapes as SVG elements, in the box `pictureSvg` lays them out in. */
+export function pictureParts(picture: Picture, inked: Inked = { stroke: INK, width: 2 }): string {
+  const stroke = `stroke="${hexOf(inked.stroke)}" stroke-width="${inked.width}" stroke-linejoin="round"`;
+  const fill = (colour: number) => `fill="${hexOf(inked.fill ?? colour)}"`;
+  return picture.parts
+    .map((part) => {
+      if (part[0] === 'rect') {
+        const [, x, y, width, height, colour] = part;
+        return `<rect x="${x}" y="${y}" width="${width}" height="${height}" ${fill(colour)} ${stroke}/>`;
+      }
+      if (part[0] === 'poly') {
+        return `<polygon points="${part[1].join(' ')}" ${fill(part[2])} ${stroke}/>`;
+      }
+      const [, x, y, r, colour] = part;
+      return `<circle cx="${x}" cy="${y}" r="${r}" ${fill(colour)} ${stroke}/>`;
+    })
+    .join('');
+}
+
+/** The box a picture is laid out in: room above for a crown and about for the ink. */
+export const PICTURE_BOX = '-10 -16 120 120';
+
 /**
  * A picture as an SVG document `size` pixels square, drawn as the map draws it, in ink round every shape: what a
- * placeholder picture is rendered from. The box leaves room above for a crown and about for the ink.
+ * placeholder picture is rendered from.
  */
 export function pictureSvg(picture: Picture, size: number): string {
-  const stroke = `stroke="${hexOf(INK)}" stroke-width="2" stroke-linejoin="round"`;
-  const parts = picture.parts.map((part) => {
-    if (part[0] === 'rect') {
-      const [, x, y, width, height, colour] = part;
-      return `<rect x="${x}" y="${y}" width="${width}" height="${height}" fill="${hexOf(colour)}" ${stroke}/>`;
-    }
-    if (part[0] === 'poly') {
-      return `<polygon points="${part[1].join(' ')}" fill="${hexOf(part[2])}" ${stroke}/>`;
-    }
-    const [, x, y, r, colour] = part;
-    return `<circle cx="${x}" cy="${y}" r="${r}" fill="${hexOf(colour)}" ${stroke}/>`;
-  });
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 -16 120 120" width="${size}" height="${size}">${parts.join('')}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${PICTURE_BOX}" width="${size}" height="${size}">${pictureParts(picture)}</svg>`;
 }

@@ -53,10 +53,12 @@ export {
   pictureFor,
   pictureKey,
   pictureOf,
+  pictureParts,
   pictureSvg,
   styled,
 } from './structureLooks.ts';
-export type { Part, Picture } from './structureLooks.ts';
+export type { Inked, Part, Picture } from './structureLooks.ts';
+export { markKey } from './structureMarks.ts';
 export type { StructureAtlasFile, StructureFrame } from './structureArt.ts';
 export type { CultureFile } from './culture.ts';
 export type { OriginFile, OriginGrid, WhereFrom } from './originFile.ts';

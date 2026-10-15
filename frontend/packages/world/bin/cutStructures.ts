@@ -17,8 +17,9 @@ import {
   pictureSvg,
   styled,
 } from '../src/structureLooks.ts';
+import { keyOfStructureMarkFile, structureMarkFile, structureMarkSvg } from '../src/structureMarks.ts';
 
-import { ART_DIR, STRUCTURES_DIR } from './lib/paths.ts';
+import { ART_DIR, STRUCTURE_MARKS_DIR, STRUCTURES_DIR } from './lib/paths.ts';
 
 /**
  * The pictures of structures, one a type and a culture and a ruin a culture, cut into one atlas.
@@ -29,7 +30,9 @@ import { ART_DIR, STRUCTURES_DIR } from './lib/paths.ts';
  * map draws in code, and remembers what it drew in `placeholders.json` there, so a picture saved over one is known to
  * be Adam's and is never drawn over. Then it crops every picture to what is drawn in it, scales it to one height,
  * finds where a pennant stands on it, and packs them all into `public/art/structures.webp` with `structures.json`
- * beside it, which the map draws from where it has a picture and draws in code where it has none. Nothing is written
+ * beside it, which the map draws from where it has a picture and draws in code where it has none. The marks of
+ * `world/sprites/marks/structures/`, a pin a type and the ruin's, are drawn and cut the same way into the same atlas,
+ * with a record of their own. Nothing is written
  * when nothing is new. Seconds. See docs/plans/structures.md.
  */
 
@@ -41,35 +44,56 @@ const PAD = 2;
 const WIDEST = 1024;
 
 const sha = (bytes: Uint8Array) => createHash('sha256').update(bytes).digest('hex');
-const placeholdersFile = resolve(STRUCTURES_DIR, 'placeholders.json');
+/** A folder of pictures, what a file in it is keyed by, and its record of which are still placeholders. */
+interface Folder {
+  dir: string;
+  keyOf: (file: string) => string | null;
+  record: string;
+  placeholders: Record<string, string>;
+}
 
-await mkdir(STRUCTURES_DIR, { recursive: true });
-const placeholders: Record<string, string> = existsSync(placeholdersFile)
-  ? (JSON.parse(await readFile(placeholdersFile, 'utf8')) as Record<string, string>)
-  : {};
+async function folder(dir: string, keyOf: (file: string) => string | null): Promise<Folder> {
+  await mkdir(dir, { recursive: true });
+  const record = resolve(dir, 'placeholders.json');
+  const placeholders = existsSync(record)
+    ? (JSON.parse(await readFile(record, 'utf8')) as Record<string, string>)
+    : {};
+  return { dir, keyOf, record, placeholders };
+}
+
+const pictures = await folder(STRUCTURES_DIR, keyOfStructureFile);
+const marks = await folder(STRUCTURE_MARKS_DIR, keyOfStructureMarkFile);
 
 // Draw what is missing, never over a file that is there.
 let drawn = 0;
-for (const culture of DRAWN_CULTURES) {
-  for (const picture of [...DRAWN_TYPES, RUIN_PICTURE]) {
-    const file = structurePictureFile(picture, culture);
-    const path = resolve(STRUCTURES_DIR, file);
-    if (existsSync(path)) continue;
-    const svg = pictureSvg(styled(pictureFor(picture, picture === RUIN_PICTURE), culture), DRAWN);
-    const png = await sharp(Buffer.from(svg)).png({ compressionLevel: 9 }).toBuffer();
-    await writeFile(path, png);
-    placeholders[file] = sha(png);
-    drawn += 1;
+async function drawMissing(into: Folder, file: string, svg: () => string): Promise<void> {
+  const path = resolve(into.dir, file);
+  if (existsSync(path)) return;
+  const png = await sharp(Buffer.from(svg())).png({ compressionLevel: 9 }).toBuffer();
+  await writeFile(path, png);
+  into.placeholders[file] = sha(png);
+  drawn += 1;
+}
+for (const picture of [...DRAWN_TYPES, RUIN_PICTURE]) {
+  for (const culture of DRAWN_CULTURES) {
+    await drawMissing(pictures, structurePictureFile(picture, culture), () =>
+      pictureSvg(styled(pictureFor(picture, picture === RUIN_PICTURE), culture), DRAWN),
+    );
   }
+  await drawMissing(marks, structureMarkFile(picture), () => structureMarkSvg(picture, DRAWN));
 }
 
 // Cut every picture there is.
-const files = (await readdir(STRUCTURES_DIR)).filter((file) => keyOfStructureFile(file) !== null).sort();
 const pieces: { key: string; file: string; image: Rgba; placeholder: boolean }[] = [];
-for (const file of files) {
-  const bytes = await readFile(resolve(STRUCTURES_DIR, file));
-  const placeholder = placeholders[file] === sha(bytes);
-  if (!placeholder) delete placeholders[file];
+const files = async (from: Folder) =>
+  (await readdir(from.dir))
+    .filter((file) => from.keyOf(file) !== null)
+    .sort()
+    .map((file) => ({ from, file }));
+for (const { from, file } of [...(await files(pictures)), ...(await files(marks))]) {
+  const bytes = await readFile(resolve(from.dir, file));
+  const placeholder = from.placeholders[file] === sha(bytes);
+  if (!placeholder) delete from.placeholders[file];
   const { data, info } = await sharp(bytes).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   const whole: Rgba = { width: info.width, height: info.height, data: new Uint8Array(data) };
   const box = opaqueBox(whole);
@@ -86,8 +110,8 @@ for (const file of files) {
     .raw()
     .toBuffer();
   pieces.push({
-    key: keyOfStructureFile(file)!,
-    file,
+    key: from.keyOf(file)!,
+    file: from === marks ? `../marks/structures/${file}` : file,
     image: { width, height: HEIGHT, data: new Uint8Array(scaled) },
     placeholder,
   });
@@ -136,7 +160,9 @@ const before = existsSync(atlasJson)
   ? (JSON.parse(await readFile(atlasJson, 'utf8')) as StructureAtlasFile)
   : null;
 
-await writeFile(placeholdersFile, `${JSON.stringify(placeholders, null, 2)}\n`);
+for (const { record, placeholders } of [pictures, marks]) {
+  await writeFile(record, `${JSON.stringify(placeholders, null, 2)}\n`);
+}
 const painted = pieces.filter((piece) => !piece.placeholder).length;
 const said = `${pieces.length} pictures, ${painted} painted and ${pieces.length - painted} placeholders`;
 if (before?.version === version) {

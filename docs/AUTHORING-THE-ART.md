@@ -15,6 +15,8 @@
 - `world/sprites/marks/<name>.png`, one for every mark the map places: castle, castle-icon, candidate,
   figure, figure-icon, selection-ring. These are placeholders only for now: the map still draws the marks
   in code, because they take a house's colours. See 0059.
+- `world/sprites/marks/structures/<type>.png`, the mark of every type of structure and `ruin.png`: what the map
+  draws far out, where a structure stops shrinking. Cut with the structures, and drawn from the files: see below.
 - `world/sprites/structures/<type>-<culture>.png`, one for every type of structure in every culture, and a
   ruin a culture. Cut by a tool of their own, and painted to rules of their own: see below.
 
@@ -43,6 +45,13 @@ drawn in, so the tallest tower carries it. With the dev server running, a pictur
 seconds later with no reload; `npm run world:structures --prefix frontend` cuts by hand. To have a placeholder
 back, delete your picture and cut again: it never draws over a file that is there. The Holdings tab still draws
 its small pictures in code.
+
+**A structure's mark is cut by the same tool**, from `world/sprites/marks/structures/`, with its own
+`placeholders.json`: `<type>.png` for every type and `ruin.png`, one a type in no culture's look, because a mark says
+what a thing is and not where. Seventeen placeholders, each a deep plum pin with the type's shape in outline on a
+pale face. Upright, on a transparent background, its point on the bottom edge: the point is where the structure
+stands. It is cropped and scaled to 160 tall and drawn about 44 pixels tall for a castle, so paint it 320 tall or
+more and keep the shape bold. A pennant flies from the middle of its top.
 
 ## What a picture can be
 

@@ -44,6 +44,11 @@ export const SPRITES_DIR = resolve(REPO, 'world', 'sprites');
  */
 export const STRUCTURES_DIR = resolve(SPRITES_DIR, 'structures');
 /**
+ * The marks of structures, one a type and the ruin's, which `world:structures` cuts into the same atlas, with a
+ * record of placeholders of their own. A folder inside `marks/`, which `world:art` passes over.
+ */
+export const STRUCTURE_MARKS_DIR = resolve(SPRITES_DIR, 'marks', 'structures');
+/**
  * Adam's interface pictures: a folder a kind - borders, fills, embellishments, medallions, marks,
  * controls, dividers - every picture painted at four times the size it is shown, and committed as the
  * sprites are.
