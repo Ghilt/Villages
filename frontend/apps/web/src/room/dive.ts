@@ -43,11 +43,11 @@ export interface Dive {
 /**
  * How tall a house stands on the ground, in world units.
  *
- * The same four the renderer gives it, which is not exported and is `KINDS.house` in
- * `sprites/PixiSpriteRenderer.ts`. A change there is a change here, and the dive would turn about a point
+ * The eight units the catalogue gives a castle of the first level, `groundHeight` in `world/structures.json`.
+ * A change there is a change here, and the dive would turn about a point
  * that is not the middle of the castle without it. See decision record 0051.
  */
-const HOUSE_GROUND_HEIGHT = 4;
+const HOUSE_GROUND_HEIGHT = 8;
 
 /** How wide the room is where it starts, in window pixels: a fraction of the castle, inside the keep. */
 const ROOM_IN_THE_KEEP = 18;
@@ -76,7 +76,7 @@ const clamp = (value: number, least: number, most: number): number => Math.min(m
 
 const ease = (t: number): number => t * t * (3 - 2 * t);
 
-/** How tall the castle is drawn at a zoom, in screen pixels: 64 at the closest. */
+/** How tall the castle is drawn at a zoom, in screen pixels: 128 at the closest. */
 export function castleHeight(zoom: number): number {
   return HOUSE_GROUND_HEIGHT * pixelsPerWorldUnit(zoom);
 }

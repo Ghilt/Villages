@@ -146,3 +146,11 @@ aggregates are still far off, a smaller icon is the cheaper answer than a third 
 **Size the ground form from the real world.** Refused as a lie: a surveyed castle is 1.4 pixels at the
 closest zoom this camera reaches. We would have been choosing a number to make the crossover land
 somewhere useful either way, and pretending otherwise would have put a false claim in the code.
+
+## Amendment, 2026-10-15: structures stand twice as tall
+
+Adam asked for buildings twice as big at the closest zoom. Every `groundHeight` in `world/structures.json` is doubled,
+so a castle of the first level is eight units and stands a hundred and twenty-eight pixels at zoom 10. A structure's
+sign is still `SIGN_PER_UNIT` pixels a unit, so it doubles too, to forty-four pixels for that castle, and the
+crossover stays at 8.46: the zoom where the building stops shrinking is unmoved, and that is where it becomes its
+mark. The figures above, four units and sixty-four pixels, are the house's of 2026-09-20.

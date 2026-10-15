@@ -44,7 +44,7 @@ describe("a structure's look", () => {
   });
 
   it('stands at a height of its own until the catalogue has said one', () => {
-    expect(lookOf(structure(), TEXTURES).forms.groundHeight).toBe(3);
+    expect(lookOf(structure(), TEXTURES).forms.groundHeight).toBe(6);
   });
 
   it('is its type picture in both forms, and flies a pennant where the picture says', () => {

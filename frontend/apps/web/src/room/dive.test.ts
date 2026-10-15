@@ -34,12 +34,12 @@ function diveIn(
 }
 
 describe('the castle', () => {
-  it('stands 64 pixels at the closest zoom, which is what decision 0051 says', () => {
-    expect(castleHeight(10)).toBeCloseTo(64);
+  it('stands 128 pixels at the closest zoom, as a castle of the first level does', () => {
+    expect(castleHeight(10)).toBeCloseTo(128);
   });
 
   it('is turned about its middle, half its height above the seat its foot stands on', () => {
-    expect(keepAbove({ x: 100, y: 200 }, 10)).toEqual({ x: 100, y: 200 - 32 });
+    expect(keepAbove({ x: 100, y: 200 }, 10)).toEqual({ x: 100, y: 200 - 64 });
   });
 });
 

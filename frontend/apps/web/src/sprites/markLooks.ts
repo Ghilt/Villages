@@ -20,7 +20,7 @@ import type { TwoForms } from './twoForms';
  * A character is a person, smaller than a castle on the ground and as a sign: a figure a unit and a half
  * tall, and a bust of sixteen pixels. They cross over at zoom 9.4, just in from zoom 9 where a key
  * figure's significance first has them drawn, so they arrive as the sign and stand up as the camera comes
- * in; by zoom 10 the figure is 24 pixels beside a castle's 64.
+ * in; by zoom 10 the figure is 24 pixels beside a castle's 128.
  */
 const KINDS: Record<Exclude<MapSprite['kind'], 'structure'>, TwoForms> = {
   candidate: { iconHeight: 26 },
@@ -29,15 +29,15 @@ const KINDS: Record<Exclude<MapSprite['kind'], 'structure'>, TwoForms> = {
 
 /**
  * A structure's sign, in screen pixels for each world unit it stands on the ground: one ratio for every one, so that
- * every structure crosses over at zoom 8.46, where a castle of four units is 22 pixels in both forms and by zoom 10
- * stands 64, and one a level higher is larger in both forms. The four units are a map convention and not a
+ * every structure crosses over at zoom 8.46, where a castle of eight units is 44 pixels in both forms and by zoom 10
+ * stands 128, and one a level higher is larger in both forms. The eight units are a map convention and not a
  * measurement: a surveyed castle is about a tenth of a unit here, and would cross over at zoom fourteen, four levels
  * past where the camera stops.
  */
 const SIGN_PER_UNIT = 5.5;
 
 /** How tall a structure stands when the catalogue has not said, as it has not before it is read. */
-const UNSAID_HEIGHT = 3;
+const UNSAID_HEIGHT = 6;
 
 /** What one mark is drawn as: the height of each form, the picture for each, and where a pennant flies from it. */
 export interface Look {
