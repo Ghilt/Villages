@@ -16,6 +16,7 @@ import religion from './pictures/religion.webp';
 import science from './pictures/science.webp';
 import upheaval from './pictures/upheaval.webp';
 import { CarouselsAndLists } from './CarouselsAndLists';
+import { PinGroups } from './PinGroups';
 import { FIGURES, Portrait, Stats } from './sampleFigures';
 import { Part, Specimen, Specimens } from './Specimen';
 
@@ -331,6 +332,7 @@ export function Collections() {
       </Part>
 
       <CarouselsAndLists />
+      <PinGroups />
     </>
   );
 }

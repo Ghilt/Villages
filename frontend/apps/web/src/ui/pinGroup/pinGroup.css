@@ -1,0 +1,61 @@
+/*
+ * A crowd of marks opened: a card as wide as its columns, a grid of pins in it with their names, scrolling when there
+ * are more than fit.
+ */
+
+@layer ui {
+  .ui-pin-group {
+    width: calc(var(--ui-pin-group-width) + 2.5rem);
+    max-width: 100%;
+  }
+
+  .ui-pin-group__room {
+    max-height: min(22rem, 60vh);
+    overflow-y: auto;
+  }
+
+  .ui-pin-group__pin {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    width: 100%;
+    padding: 4px 2px;
+    border: 0;
+    border-radius: 4px;
+    background: none;
+    color: var(--ui-text);
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .ui-pin-group__pin:hover {
+    background: rgb(243 217 155 / 0.12);
+  }
+
+  .ui-pin-group__pin:focus-visible {
+    outline: 2px solid var(--ui-focus);
+    outline-offset: -2px;
+  }
+
+  .ui-pin-group__picture {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    height: 44px;
+  }
+
+  .ui-pin-group__name {
+    max-width: 100%;
+    overflow: hidden;
+    font-size: 0.78rem;
+    line-height: 1.1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ui-sheet-picture {
+    display: inline-block;
+    background-repeat: no-repeat;
+  }
+}

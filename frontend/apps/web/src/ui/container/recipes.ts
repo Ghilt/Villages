@@ -97,6 +97,9 @@ export const RECIPES = {
   /** Something that happened, as the moodboard's Reformation card has it: a narrow gilt frame on night. */
   'card.event': { border: 'gilt-thin', fill: 'night', padding: 6 },
 
+  /** A crowd of marks opened over the map: the narrow gilt frame on night, as mockup A of 2026-10-15 drew it. */
+  'card.pins': { border: 'gilt-thin', fill: 'night', padding: 4 },
+
   /**
    * A place's name and its figure, on the moodboard's Paris plate: its own parchment, and as wide as its
    * words. That parchment is darker than a sheet, too dark for the softer ink, so it has none.

@@ -170,6 +170,7 @@ const HOLDS: Record<RecipeName, () => ReactNode> = {
       </p>
     </>
   ),
+  'card.pins': () => <p className="ui-body">A crowd of marks opened: see Collections.</p>,
 };
 
 export function Containers() {

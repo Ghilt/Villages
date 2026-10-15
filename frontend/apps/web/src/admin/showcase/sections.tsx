@@ -96,7 +96,7 @@ export const SECTIONS: readonly Section[] = [
   {
     id: 'collections',
     title: 'Collections',
-    says: 'The card, the grid, the carousel and its dots, and the list.',
+    says: 'The card, the grid, the carousel and its dots, the list, and a crowd of marks opened.',
     Body: Collections,
   },
   {
