@@ -81,11 +81,6 @@ export interface Scene {
   /** The one sprite marked as selected, or nothing when null. */
   selected: string | null;
   /**
-   * Whether this window is showing everything: the debug switch, which takes the distance floor off
-   * every mark rather than one. A player's own eye is `always` on the sprite instead. See 0038.
-   */
-  everything: boolean;
-  /**
    * The fog of war to draw, or null for none: the switch off, or nothing heard yet about what the house
    * sees. It is drawn inside this renderer rather than over it, because it has to lie between the world and
    * the signs for the things in it. See decision record 0062.

@@ -171,3 +171,10 @@ that has a mark is its mark, as tall as it stood at that zoom, so the size still
 on shrinking until everything fades at 7.25 (0096). Only a structure the player's house controls and one of its people have a
 mark, on Adam's word of 2026-10-15, and a mark never fades for distance: it is only gathered into crowds (0096). A person, who crossed at 9.4, crosses with everything else, and stands three units
 tall so that their bust is sixteen pixels there, as it was.
+
+## Amendment, 2026-10-15: the change-over is 7.5, and a mark is its own size
+
+`BECOMES_A_MARK_AT` is 7.5, the one zoom the whole map changes over at (0096), and a thing with no mark simply has
+nothing to show past it. A mark is `MARK_PIXELS_PER_UNIT` (5.5) pixels for each unit its thing stands, as the sign
+was before: a castle's pin 44 pixels where its sprite is 22 at 7.5. The rule that the two forms are the same size at
+the crossover is given up, because a sprite and a mark are never on the screen together.

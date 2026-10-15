@@ -49,7 +49,7 @@ import { useStore } from './store/useStore';
 /**
  * How close the camera comes when the house is founded.
  *
- * Past 8.46, where everything on the map is drawn as itself rather than as its mark, so arriving at your own
+ * Past 7.5, where everything on the map is drawn as itself rather than as its mark, so arriving at your own
  * house lands on its seat standing there, not on a pin.
  */
 const FOUNDING_ZOOM = 8.5;

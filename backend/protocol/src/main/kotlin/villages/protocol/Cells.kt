@@ -85,7 +85,8 @@ value class Cell(val quadkey: String) {
 
 /**
  * The coarsest zoom anything on the map is sent at, whatever its significance: every structure and every person from
- * the same zoom, so they arrive together and the page fades them in together at 7.25, a quarter of a level in.
+ * the same zoom, so they arrive together and have arrived before the page changes over from marks to the world at
+ * 7.5, half a level in.
  *
  * Significance ranks what is on the map - which of a crowd of marks leads it, which two hundred a cell carries, what is
  * seen through the fog - and no longer decides how far out a thing is drawn. It did, from 0026 to 2026-10-15, and a mill

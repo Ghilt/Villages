@@ -18,8 +18,7 @@ export interface TwoForms {
   /** Its height on the ground, in world units. Absent for a thing that is only ever a sign. */
   groundHeight?: number;
   /**
-   * Whether it becomes a mark, its icon, from `BECOMES_A_MARK_AT` out. A thing with none stays itself, shrinking with
-   * the map until it fades.
+   * Whether it becomes a mark, its icon, from `BECOMES_A_MARK_AT` out. A thing with none is not drawn out there at all.
    */
   marked: boolean;
   /** Its icon's height in pixels, for a thing with no ground form to take one from: a candidate. */
@@ -69,16 +68,6 @@ export const PRESENCE_MS = 140;
  */
 export const LONGEST_STEP_MS = 50;
 
-/**
- * Below this a thing with no mark is not drawn at all, whatever size it would be and however significant: anyone
- * else's building or person fades in and out here, a quarter of a level inside the zoom the server starts sending it
- * at, `ON_THE_MAP_FROM`, so it has arrived before it is wanted. A mark never fades: far out it is only gathered into
- * crowds, more of them the further back the camera goes.
- *
- * This is about distance, not about size, and it is deliberately not part of the trade. See decision record 0096.
- */
-export const DRAWN_FROM_ZOOM = 7.25;
-
 /** How tall each form is on the screen right now. A form a thing has not got is nought. */
 export interface Sizes {
   ground: number;
@@ -92,32 +81,39 @@ export interface Alphas {
 }
 
 /**
- * Where everything that becomes a mark becomes it: one zoom for every kind of thing, so the map turns from the world
- * into its marks at once. Further in, every sprite stands in scale with the map, a building growing and shrinking
- * with the ground under it; from here out, a thing that has a mark is its mark, the size of a word, and a thing that
- * has none goes on shrinking with the map until everything fades at `DRAWN_FROM_ZOOM`.
- *
- * Chosen, not worked out: it is where a castle of eight units is 44 pixels, which reads as a word. A mark is as tall
- * as its thing was here, so the trade changes the drawing and never the size. See decision record 0051.
+ * Where the map changes over, for everything on it at once: closer in it is the world - scenery, buildings and people
+ * as sprites standing in scale with the ground - and further out it is only the player's marks, their structures'
+ * pins and their people's busts. Nothing else is drawn out there, and a sprite and a mark are never on the screen
+ * together: a thing with a mark trades its sprite for it here, and a thing with none fades out here, at the same moment
+ * and over the same time. The scenery arrives and goes here too. Adam's word of 2026-10-15. See decision record 0096.
  */
-export const BECOMES_A_MARK_AT = 8.46;
+export const BECOMES_A_MARK_AT = 7.5;
 
 /**
- * How tall a thing's icon is on the screen, in pixels, or null for a thing that has none: as tall as its ground form
- * stands at `BECOMES_A_MARK_AT`, or what it says itself when it has no ground form to measure.
+ * How tall a mark stands on the screen for each world unit its thing stands on the ground, so a structure a level up
+ * has a larger pin: a castle of eight units is a pin of 44 pixels, a person of three a bust of sixteen and a half. Not
+ * the size the thing was at `BECOMES_A_MARK_AT`, where a castle is 22 pixels, too small for a pin to be read.
+ */
+export const MARK_PIXELS_PER_UNIT = 5.5;
+
+/**
+ * How tall a thing's icon is on the screen, in pixels, or null for a thing that has none: `MARK_PIXELS_PER_UNIT`
+ * for each unit it stands, or what it says itself when it has no ground form to measure.
  */
 export function iconHeightOf(forms: TwoForms): number | null {
   if (forms.groundHeight === undefined) {
     return forms.iconHeight ?? null;
   }
-  return forms.marked ? forms.groundHeight * pixelsPerWorldUnit(BECOMES_A_MARK_AT) : null;
+  return forms.marked ? forms.groundHeight * MARK_PIXELS_PER_UNIT : null;
 }
 
-/** The zoom a thing trades its two forms at, `BECOMES_A_MARK_AT`, or null when it has not got both. */
+/**
+ * The zoom a thing standing on the ground leaves its sprite at, `BECOMES_A_MARK_AT`, whether or not it has a mark to
+ * become: past it a thing with none is in a form it has nothing to draw in, so it is gone. Null for a thing that is
+ * only ever a sign.
+ */
 export function crossoverZoom(forms: TwoForms): number | null {
-  return forms.groundHeight !== undefined && forms.groundHeight > 0 && forms.marked
-    ? BECOMES_A_MARK_AT
-    : null;
+  return forms.groundHeight !== undefined && forms.groundHeight > 0 ? BECOMES_A_MARK_AT : null;
 }
 
 /**
@@ -186,28 +182,6 @@ export function alphasFor(blend: number): Alphas {
   const t = Math.min(1, Math.max(0, blend));
   const ground = t * t * (3 - 2 * t);
   return { ground, icon: 1 - ground };
-}
-
-/** What one mark in particular may be spared, on top of what the camera says about all of them. */
-export interface MarkContext {
-  /** This window is showing everything, so no mark is hidden for distance. */
-  everything?: boolean;
-  /**
-   * This mark is spared the distance floor: anything with a mark - a candidate, one of the player's own holdings or
-   * people - because a mark never fades, only gathers into crowds. Never anyone else's.
-   */
-  spared?: boolean;
-}
-
-/**
- * Whether a thing is drawn at this zoom at all.
- *
- * Kept apart from the sizes because being far away and being small are different questions, and 0038
- * leans on the difference: a spared mark is drawn where the rest are nothing, and is **no larger** for
- * being spared, because the eye is about distance and not about size.
- */
-export function isDrawn(zoom: number, of: MarkContext = {}): boolean {
-  return zoom >= DRAWN_FROM_ZOOM || of.everything === true || of.spared === true;
 }
 
 /**

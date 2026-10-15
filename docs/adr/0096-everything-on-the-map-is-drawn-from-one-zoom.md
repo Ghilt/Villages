@@ -47,3 +47,15 @@ there, gathered more. So the floor at 7.25 is for what has no mark - anyone else
 own holdings and key figures, which are marks far out (0051), are drawn at every zoom: they reach the session rather
 than a cell, so no frame changes, and the crowds they gather into grow as the camera pulls back. The eye of 0038,
 whose only work was keeping the holdings drawn far out, has nothing left to do and is gone from the house bar.
+
+## Amendment, 2026-10-15: one zoom, 7.5, and sprites and marks never meet
+
+Adam again: buildings should turn into marks and fade out at the same time, so that a mark and a sprite can never
+be on the screen together, and the scenery with them. From 10 to 7.5 the map is the world - scenery, buildings and
+people as sprites; from 7.5 out it is only the player's marks. So the floor and the crossover are one zoom,
+`BECOMES_A_MARK_AT` = 7.5 in `twoForms.ts`, and there is no floor of its own any more: past it a thing with no mark
+is in a form it has nothing to draw in, so it is gone, at the same moment and over the same time as a thing with a
+mark trades its sprite for it. Every scenery kind arrives there too, whatever its size, where it used to arrive when
+it stood twenty pixels tall (0059). A mark keeps its size, 5.5 pixels a unit, so a castle's pin is 44 pixels where its
+sprite was 22: the trade changes the size as well as the drawing, which 0051 had avoided, because the two are never
+seen together. `see everything` no longer lifts a floor, since there is none: it only sends every zoom.

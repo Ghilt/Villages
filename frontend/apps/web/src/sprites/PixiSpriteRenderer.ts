@@ -26,7 +26,6 @@ const UNDULATION_MS = 83;
 const NOTHING: Scene = {
   sprites: [],
   selected: null,
-  everything: false,
   fog: null,
   scenery: { on: false, dial: 1, spacing: 1, laterBy: 0, shadows: 0, tilesRoot: '' },
 };
@@ -254,9 +253,6 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
     }
     if (was === null || next.sprites !== was.sprites) {
       layers.marks.setSprites(next.sprites);
-    }
-    if (was === null || next.everything !== was.everything) {
-      layers.marks.setEverything(next.everything);
     }
     if (was === null || next.selected !== was.selected) {
       layers.ring.setSelected(next.selected);

@@ -14,16 +14,7 @@ import type { Groups, Placed } from './markGroups';
 import { lookOf } from './markLooks';
 import type { Textures } from './markTextures';
 import type { CameraSource, DrawnSprite, MapSprite } from './SpriteRenderer';
-import {
-  PRESENCE_MS,
-  alphasFor,
-  easeTowards,
-  formForHit,
-  isDrawn,
-  midTrade,
-  sizesAt,
-  wantedForm,
-} from './twoForms';
+import { PRESENCE_MS, alphasFor, easeTowards, formForHit, midTrade, sizesAt, wantedForm } from './twoForms';
 
 /**
  * The marks: every house, person, structure and offered seat, in both of its forms, a structure's pennant over it.
@@ -46,8 +37,6 @@ export interface MarksLayer extends Layer {
    * not drawn: what the ring is put under.
    */
   standing(id: string, zoom: number): { x: number; y: number; tall: number } | null;
-  /** Whether the distance floor is off every mark: see everything. */
-  setEverything(on: boolean): void;
   /** What the house has in vision, for which side of the fog a mark's ground form is on; null without fog. */
   setVision(vision: Coverage | null): void;
   /**
@@ -67,7 +56,6 @@ export function createMarksLayer(camera: CameraSource, textures: Textures): Mark
   const underTheFog = new Container();
   const overIt = new Container();
   const entries = new Map<string, Entry>();
-  let everything = false;
   /** The crowds far out, as last drawn. */
   let groups: Groups = { led: new Map(), leaderOf: new Map() };
   /** How the crowds were last said in the log, so it speaks only when they change. */
@@ -170,10 +158,9 @@ export function createMarksLayer(camera: CameraSource, textures: Textures): Mark
         entry.showing = wantedForm(zoom, forms, entry.showing);
         entry.blend = easeTowards(entry.blend, entry.showing === 'ground' ? 1 : 0, elapsed);
 
-        // A mark never fades for distance: far out it is only gathered into crowds. What has none - anyone
-        // else's building - goes with the rest of the world's furniture at the floor. See 0096.
-        const spared = entry.look.icon !== null;
-        const here = !entry.leaving && isDrawn(zoom, { everything, spared });
+        // Arriving and going, and nothing else: being far away is the switch at `BECOMES_A_MARK_AT`, where a thing
+        // with no mark has nothing to be drawn as. A mark never fades for distance; it gathers into crowds. See 0096.
+        const here = !entry.leaving;
         entry.presence = easeTowards(entry.presence, here ? 1 : 0, elapsed, PRESENCE_MS);
         trading = trading || midTrade(entry.blend) || midTrade(entry.presence);
 
@@ -297,10 +284,6 @@ export function createMarksLayer(camera: CameraSource, textures: Textures): Mark
       for (const [id, entry] of entries) {
         entry.leaving = !seen.has(id);
       }
-    },
-
-    setEverything(on: boolean): void {
-      everything = on;
     },
 
     setVision(next: Coverage | null): void {

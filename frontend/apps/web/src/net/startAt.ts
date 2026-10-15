@@ -11,7 +11,7 @@ export interface StartAt {
   zoom: number;
 }
 
-/** Close enough to see what stands there in its own form: a house's castle crosses over at 8.46. */
+/** Close enough to see what stands there in its own form, well in from where everything becomes its mark at 7.5. */
 export const LINKED_ZOOM = 10;
 
 /** The address that opens the game over a place. */

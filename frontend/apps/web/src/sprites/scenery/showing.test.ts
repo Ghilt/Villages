@@ -1,19 +1,17 @@
 import { describe, expect, it } from 'vitest';
 
 import { CAMERA } from '../../map/mapConfig';
-import { CROSSOVER_STICK, LONGEST_STEP_MS, PRESENCE_MS, easeTowards } from '../twoForms';
+import { BECOMES_A_MARK_AT, CROSSOVER_STICK, LONGEST_STEP_MS, PRESENCE_MS, easeTowards } from '../twoForms';
 import { CELL } from '@villages/world';
 import { EXAMPLE_KINDS as KINDS } from '@villages/world/testing';
 import {
   MOST_CELLS,
-  SPREAD,
   STEPS,
   groupCount,
   groupOf,
   nothingBelowAny,
   thresholdOf,
   wantedAt,
-  wholeAt,
   worthDrawing,
 } from './showing';
 
@@ -59,33 +57,21 @@ describe('when scenery is worth drawing at all', () => {
 });
 
 describe('a group, which is what arrives', () => {
-  it('puts every point of a kind in one of its steps, by rank', () => {
+  it('is a kind: every point of it arrives at once', () => {
+    expect(STEPS).toBe(1);
     expect(groupOf(0, 0)).toBe(0);
-    expect(groupOf(0, 0.99)).toBe(STEPS - 1);
-    expect(groupOf(1, 0)).toBe(STEPS);
-    // A rank of exactly one would fall off the end, and a hash may return anything under one.
-    expect(groupOf(3, 1)).toBe(3 * STEPS + STEPS - 1);
-    expect(groupCount(KINDS)).toBe(KINDS.length * STEPS);
+    expect(groupOf(0, 0.99)).toBe(0);
+    expect(groupOf(3, 1)).toBe(3);
+    expect(groupCount(KINDS)).toBe(KINDS.length);
   });
 
-  it('brings a kind in over a band of zoom, earliest step first, ending at its own zoom', () => {
-    const tall = KINDS[0]!.groundHeight;
-    expect(thresholdOf(KINDS, 0)).toBeCloseTo(wholeAt(tall) - SPREAD, 9);
-    expect(thresholdOf(KINDS, STEPS - 1)).toBeCloseTo(wholeAt(tall), 9);
-    for (let step = 1; step < STEPS; step += 1) {
-      expect(thresholdOf(KINDS, step)).toBeGreaterThan(thresholdOf(KINDS, step - 1));
-    }
-  });
-
-  it('brings a big kind in before a small one', () => {
+  it('arrives at the zoom everything on the map changes over at, whatever its size', () => {
     const big = KINDS.findIndex((kind) => kind.name === 'spruce');
     const small = KINDS.findIndex((kind) => kind.name === 'heather');
-    expect(thresholdOf(KINDS, big * STEPS)).toBeLessThan(thresholdOf(KINDS, small * STEPS));
-  });
-
-  it('has every kind whole by the closest the camera comes, or it is never seen whole', () => {
-    for (const kind of KINDS) {
-      expect(wholeAt(kind.groundHeight)).toBeLessThanOrEqual(CAMERA.maxZoom);
+    expect(thresholdOf(KINDS, big)).toBe(BECOMES_A_MARK_AT);
+    expect(thresholdOf(KINDS, small)).toBe(BECOMES_A_MARK_AT);
+    for (let group = 0; group < groupCount(KINDS); group += 1) {
+      expect(thresholdOf(KINDS, group)).toBe(BECOMES_A_MARK_AT);
     }
   });
 

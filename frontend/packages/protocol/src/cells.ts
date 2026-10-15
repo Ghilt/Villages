@@ -69,7 +69,7 @@ export function isInside(quadkey: string, tile: string): boolean {
 
 /**
  * The coarsest zoom anything on the map is sent at, whatever its significance, as `ON_THE_MAP_FROM` in `Cells.kt`:
- * everything arrives together, and the page fades it in together at 7.25. See decision record 0096.
+ * everything arrives together, before the page changes over from marks to the world at 7.5. See decision record 0096.
  */
 export const ON_THE_MAP_FROM = 7;
 

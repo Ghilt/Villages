@@ -46,11 +46,12 @@ describe("a structure's look", () => {
     expect(iconHeightOf(higher.forms)!).toBeGreaterThan(iconHeightOf(mill.forms)!);
   });
 
-  it("has no mark when it is someone else's: it stays itself and shrinks with the map", () => {
+  it("has no mark when it is someone else's: far out it is not drawn at all", () => {
     const theirs = lookOf(structure(8, false), TEXTURES);
 
     expect(theirs.icon).toBeNull();
-    expect(crossoverZoom(theirs.forms)).toBeNull();
+    expect(iconHeightOf(theirs.forms)).toBeNull();
+    expect(crossoverZoom(theirs.forms)).toBe(BECOMES_A_MARK_AT);
   });
 
   it('stands at a height of its own until the catalogue has said one', () => {
@@ -94,11 +95,11 @@ describe("a person's look", () => {
     expect(crossoverZoom(ours.forms)).toBe(BECOMES_A_MARK_AT);
   });
 
-  it("has no mark when they are anyone else's: they shrink with the map", () => {
+  it("has no mark when they are anyone else's: far out they are not drawn at all", () => {
     const theirs = lookOf(person(false), TEXTURES);
 
     expect(theirs.icon).toBeNull();
-    expect(crossoverZoom(theirs.forms)).toBeNull();
+    expect(iconHeightOf(theirs.forms)).toBeNull();
   });
 });
 

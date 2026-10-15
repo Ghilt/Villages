@@ -1,5 +1,5 @@
-import { WORLD_UNIT_ZOOM, pixelsPerWorldUnit } from '../../geometry/cameraMath';
-import { CROSSOVER_STICK } from '../twoForms';
+import { pixelsPerWorldUnit } from '../../geometry/cameraMath';
+import { BECOMES_A_MARK_AT, CROSSOVER_STICK } from '../twoForms';
 
 /** All this needs of a kind is how tall it stands. The rest comes from the sprite map. */
 export interface Standing {
@@ -16,56 +16,17 @@ export interface Standing {
  * which scenery belongs on the screen, and `PRESENCE_MS` decides how long it takes to get there.
  *
  * Scenery has one form, so it has nothing to trade with: it simply is not there far out, and the painted
- * terrain carries the meaning instead. What it has instead of a crossover is a size at which it becomes
- * worth looking at.
- *
- * **A kind arrives in steps rather than all at once.** Every point has a rank fixed for ever, and its
- * rank puts it in one of `STEPS` groups; each group crosses its own threshold a little earlier than the
- * next. So a wood gathers as the camera comes in rather than switching on, and every one of those steps
- * is still a thing that finishes. A group is the unit of everything here: of the threshold, of the fade,
- * and of which particles exist at all.
+ * terrain carries the meaning instead. **Every kind arrives at the one zoom everything on the map changes over
+ * at**, `BECOMES_A_MARK_AT`, whatever its size: closer in the map is the world, further out it is the player's
+ * marks, and scenery is world. It arrived by its size until 2026-10-15, a tall spruce two levels before the
+ * heather, and Adam asked for every sprite to come and go at one zoom (decision record 0096). A group, a kind, is
+ * still the unit of the fade and of which particles exist at all.
  *
  * Pure, so the whole rule can be checked without a tile or a canvas.
  */
 
-/**
- * How tall a thing has to stand on the screen before it is drawn whole, in pixels.
- *
- * Twenty, and it moved with the sizes. When the kinds doubled in world units this stayed at ten for a
- * moment, and the effect was not "bigger trees" but "trees a whole zoom level further out" - which is
- * both the wrong look and the expensive one, because the number of cells a view spans goes up by four
- * for every level back. Doubling it too means a kind arrives exactly where it used to and is twice the
- * size when it does, which is what was actually asked for.
- */
-export const READABLE = 20;
-
-/**
- * How many steps a kind's arrival is broken into.
- *
- * Four, and the number is a trade. One would be a kind switching on across the whole screen at once.
- * Many would be back to a continuous fade in zoom wearing a disguise, and would cost a group's worth of
- * bookkeeping for each. Four is enough that a wood visibly thickens twice on the way in.
- */
-export const STEPS = 4;
-
-/**
- * How far apart the first step of a kind and the last one arrive, in zoom levels.
- *
- * The steps shift a kind's threshold **earlier** rather than later, so every kind is still whole by its
- * own zoom - anchoring it the other way would push the smallest kinds past the closest the camera can
- * come, and they would never be seen whole at all.
- */
-export const SPREAD = 0.8;
-
-/**
- * The zoom at which a kind of this height is drawn whole.
- *
- * `laterBy` pushes every kind back together, which is the one knob worth having: how far in you have to
- * come before the world furnishes itself is a matter of taste, and Adam's.
- */
-export function wholeAt(groundHeight: number, laterBy = 0): number {
-  return WORLD_UNIT_ZOOM + Math.log2(READABLE / groundHeight) + laterBy;
-}
+/** How many steps a kind's arrival is broken into: one, since every kind arrives at once. */
+export const STEPS = 1;
 
 /** Which group a point belongs to: its kind, and which step of that kind's arrival its rank puts it in. */
 export function groupOf(kind: number, rank: number): number {
@@ -78,14 +39,14 @@ export function groupCount(kinds: readonly Standing[]): number {
   return kinds.length * STEPS;
 }
 
-/** The zoom a group arrives at. Step nought is the earliest, the last step is the kind's own zoom. */
+/**
+ * The zoom a group arrives at: `BECOMES_A_MARK_AT` for every kind, pushed back by `laterBy`, the debug panel's knob
+ * for how far in the world furnishes itself, which is Adam's to turn and nought unless he does.
+ */
 export function thresholdOf(kinds: readonly Standing[], group: number, laterBy = 0): number {
-  const kind = kinds[Math.floor(group / STEPS)];
-  if (kind === undefined) {
-    return Number.POSITIVE_INFINITY;
-  }
-  const step = group % STEPS;
-  return wholeAt(kind.groundHeight, laterBy) - (1 - step / (STEPS - 1)) * SPREAD;
+  return kinds[Math.floor(group / STEPS)] === undefined
+    ? Number.POSITIVE_INFINITY
+    : BECOMES_A_MARK_AT + laterBy;
 }
 
 /**
@@ -112,20 +73,19 @@ export function heightOnScreen(groundHeight: number, zoom: number): number {
  * 4 and four hundred at zoom 10 - the count does not fall gently, it falls by four for every level in.
  */
 export function nothingBelowAny(kinds: readonly Standing[], laterBy = 0): number {
-  if (kinds.length === 0) {
-    return Number.POSITIVE_INFINITY;
-  }
-  return Math.min(...kinds.map((kind) => wholeAt(kind.groundHeight, laterBy) - SPREAD)) - CROSSOVER_STICK;
+  return kinds.length === 0 ? Number.POSITIVE_INFINITY : BECOMES_A_MARK_AT + laterBy - CROSSOVER_STICK;
 }
 
 /**
  * How many cells the layer will hold at once.
  *
- * A second bound under the first, because the first still leaves several hundred cells at the zoom it
- * lets go of. It costs nothing to look at: the zoom where this binds is inside the band where no group
- * has arrived, so the ground it refuses to furnish is ground that would have been drawn empty anyway.
+ * A second bound under the first, because the first still leaves hundreds of cells at the zoom it lets go
+ * of. A thousand since scenery arrives at 7.5, where a cell is ninety pixels and a 2560 by 1440 screen holds
+ * about six hundred of them: at four hundred, a large screen would have refused the scenery the zoom it is
+ * meant to arrive at. It still binds only where no group has arrived, so the ground it refuses to furnish is
+ * ground that would have been drawn empty anyway.
  */
-export const MOST_CELLS = 400;
+export const MOST_CELLS = 1000;
 
 /**
  * How many cells may be cut in one frame.

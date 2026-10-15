@@ -177,7 +177,7 @@ export function ScenerySection() {
       />
       <p className="debug-map__note">
         {how.laterBy === 0
-          ? 'At the zoom each kind is big enough to read'
+          ? 'At 7.5, with everything else on the map'
           : `${how.laterBy > 0 ? 'Later' : 'Sooner'} than that by ${Math.abs(how.laterBy).toFixed(2)} of a zoom level`}
       </p>
 

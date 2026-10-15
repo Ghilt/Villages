@@ -18,7 +18,7 @@ const CHARACTER = 'character:';
 const STRUCTURE = 'structure:';
 /** What a crowd's "+N" answers a click with: its leader's id with this in front. See `MarksLayer.ts`. */
 const GROUP = 'group:';
-/** How close a Ctrl-click takes the camera: just in from where everything stops being its mark. */
+/** How close a Ctrl-click takes the camera: well in from where everything becomes its mark. */
 const CLOSER_ZOOM = 9;
 
 /** A person or a structure, by the id it is drawn under, or null for anything else. */
@@ -54,7 +54,6 @@ export function SpriteOverlay({ map, sprites, worldRoot, picked: top, onPick }: 
   const uncolouringRef = useRef<HTMLCanvasElement | null>(null);
   // Held in state, so that a renderer made after a switch was thrown is handed it the moment it exists.
   const [renderer, setRenderer] = useState<ReturnType<typeof createPixiSpriteRenderer> | null>(null);
-  const everything = useStore(sessionStore, (state) => state.seeAll);
   const scenery = useStore(sceneryStore);
   const sight = useStore(sessionStore, (state) => state.yourSight);
   const today = useStore(sessionStore, (state) => state.world?.today ?? null);
@@ -102,10 +101,7 @@ export function SpriteOverlay({ map, sprites, worldRoot, picked: top, onPick }: 
       : top?.kind === 'structure'
         ? `${STRUCTURE}${top.id}`
         : null;
-  const scene = useMemo(
-    () => ({ sprites, selected, everything, fog, scenery: how }),
-    [sprites, selected, everything, fog, how],
-  );
+  const scene = useMemo(() => ({ sprites, selected, fog, scenery: how }), [sprites, selected, fog, how]);
 
   // The whole scene at once: the renderer works out what changed, and draws once for however much did.
   useEffect(() => {

@@ -5,15 +5,14 @@ import {
   BECOMES_A_MARK_AT,
   CROSSFADE_MS,
   CROSSOVER_STICK,
-  DRAWN_FROM_ZOOM,
   LONGEST_STEP_MS,
+  MARK_PIXELS_PER_UNIT,
   PRESENCE_MS,
   alphasFor,
   crossoverZoom,
   easeTowards,
   formForHit,
   iconHeightOf,
-  isDrawn,
   midTrade,
   sizesAt,
   wantedForm,
@@ -41,31 +40,31 @@ function settle(zoom: number, forms: TwoForms, from: Form = 'icon'): number {
 }
 
 describe('where the two forms cross', () => {
-  it('is the one zoom everything becomes a mark at, whatever its size', () => {
+  it('is the one zoom, 7.5, for everything standing on the ground, whatever its size and with a mark or none', () => {
+    expect(BECOMES_A_MARK_AT).toBe(7.5);
     expect(crossoverZoom(HOUSE)).toBe(BECOMES_A_MARK_AT);
     expect(crossoverZoom({ groundHeight: 3, marked: true })).toBe(BECOMES_A_MARK_AT);
     expect(crossoverZoom({ groundHeight: 12.4, marked: true })).toBe(BECOMES_A_MARK_AT);
+    expect(crossoverZoom(THEIRS)).toBe(BECOMES_A_MARK_AT);
+    expect(crossoverZoom(SCENERY)).toBe(BECOMES_A_MARK_AT);
   });
 
-  it('is nowhere for a thing with only one form, because there is nothing to cross', () => {
+  it('is nowhere for a thing that is only ever a sign', () => {
     expect(crossoverZoom(CANDIDATE)).toBeNull();
-    expect(crossoverZoom(SCENERY)).toBeNull();
-    expect(crossoverZoom(THEIRS)).toBeNull();
     expect(crossoverZoom({ marked: true })).toBeNull();
   });
 
-  it('puts the two forms at the same size there, which is the point of it', () => {
-    const sizes = sizesAt(BECOMES_A_MARK_AT, HOUSE);
-
-    expect(sizes.ground).toBeCloseTo(sizes.icon, 9);
-    expect(sizes.icon).toBeCloseTo(44, 0);
+  it('gives a mark a size of its own, as tall as its thing stands in units times the same ratio for all', () => {
+    expect(iconHeightOf(HOUSE)).toBeCloseTo(44, 9);
+    expect(iconHeightOf({ groundHeight: 3, marked: true })).toBeCloseTo(3 * MARK_PIXELS_PER_UNIT, 9);
   });
 
-  it('gives a thing with no mark no icon at all, so it shrinks with the map until it fades', () => {
+  it('leaves a thing with no mark nothing to be drawn as far out, so it is gone there', () => {
     expect(iconHeightOf(THEIRS)).toBeNull();
-    expect(sizesAt(7.5, THEIRS).icon).toBe(0);
-    expect(wantedForm(7.5, THEIRS, 'icon')).toBe('ground');
-    expect(sizesAt(7.5, THEIRS).ground).toBeCloseTo(8 * pixelsPerWorldUnit(7.5), 9);
+    expect(sizesAt(7, THEIRS).icon).toBe(0);
+    expect(settle(7, THEIRS, 'ground')).toBe(0);
+    expect(settle(8, THEIRS, 'icon')).toBe(1);
+    expect(sizesAt(8, THEIRS).ground).toBeCloseTo(8 * pixelsPerWorldUnit(8), 9);
   });
 });
 
@@ -73,7 +72,7 @@ describe('every zoom the camera can rest at', () => {
   // This is the whole reason the trade is in time rather than in zoom. Fading across a band of zoom
   // left two half-drawn castles on the screen for as long as you stood inside it.
   it('settles on exactly one form, never on a blend of two', () => {
-    for (let zoom = DRAWN_FROM_ZOOM; zoom <= 10; zoom += 0.02) {
+    for (let zoom = 1; zoom <= 10; zoom += 0.02) {
       expect([0, 1]).toContain(settle(zoom, HOUSE));
       expect(midTrade(settle(zoom, HOUSE))).toBe(false);
     }
@@ -104,10 +103,9 @@ describe('which form the camera asks for', () => {
     expect(wantedForm(at - CROSSOVER_STICK + 0.01, HOUSE, 'ground')).toBe('ground');
   });
 
-  it('is whichever form a one-formed thing has, at every zoom', () => {
+  it('is the sign at every zoom for a thing that is only ever a sign', () => {
     for (const zoom of [0, 4, 8, 10]) {
       expect(wantedForm(zoom, CANDIDATE, 'icon')).toBe('icon');
-      expect(wantedForm(zoom, SCENERY, 'ground')).toBe('ground');
     }
   });
 });
@@ -203,23 +201,6 @@ describe('what each form is measured in', () => {
       expect(sizesAt(zoom, CANDIDATE).icon).toBe(26);
       expect(sizesAt(zoom, CANDIDATE).ground).toBe(0);
     }
-  });
-});
-
-describe('whether a thing is drawn at all', () => {
-  it('is a question about distance, and is asked apart from the question about size', () => {
-    expect(isDrawn(DRAWN_FROM_ZOOM - 0.01)).toBe(false);
-    expect(isDrawn(DRAWN_FROM_ZOOM)).toBe(true);
-  });
-
-  it('is lifted for a mark that is spared, and for a window seeing everything', () => {
-    expect(isDrawn(1, { spared: true })).toBe(true);
-    expect(isDrawn(1, { everything: true })).toBe(true);
-  });
-
-  it('never makes a spared mark any larger, because the eye is about distance', () => {
-    // Nothing about sparing reaches the sizes: `sizesAt` cannot be told, which is the guarantee.
-    expect(sizesAt(1, HOUSE).icon).toBeCloseTo(sizesAt(BECOMES_A_MARK_AT, HOUSE).ground, 9);
   });
 });
 

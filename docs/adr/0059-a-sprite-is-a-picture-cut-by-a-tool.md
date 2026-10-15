@@ -190,3 +190,8 @@ worked out in Python on this machine and then written in the world package, for 
 **A segmentation model** *(2026-09-26)*. It would know a tree from turf without being told, and it would
 need a download of hundreds of megabytes and a runtime the project does not have, for a kind of picture
 that three rules about where things stand handle.
+
+## Amendment, 2026-10-15: every kind arrives at 7.5
+
+A kind no longer arrives when it stands twenty pixels tall: every kind arrives at 7.5, where the whole map changes over
+from marks to the world (0096), so a heather is a few pixels when it arrives. `READABLE` is gone.

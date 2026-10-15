@@ -798,7 +798,7 @@ from the debug panel's Characters section. A character appears with a name, a se
 birthday, four stats and a portrait's key, and is kept on a stream of their own; their stats move within
 one to twenty, they can be aged out of the ordinary or given another portrait, and they die, after which
 nothing about them changes. An age is worked out in the browser from the birthday and never stored. They
-can be moved onto the map and taken off it again, at a significance of ten, drawn from zoom 7.25 like everything on the map,
+can be moved onto the map and taken off it again, at a significance of ten, drawn from zoom 7.5 like everything on the map,
 and the server keeps where they stood as spans of world-time by cell; a death leaves them where they
 stood and off the map from that day. The refusals are named for their rules, and the stored form is
 pinned by a fixture. From wire version 7 a cell's snapshot carries the characters standing in it, beside

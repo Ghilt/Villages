@@ -151,9 +151,9 @@ stage alone, with none of the debug panel in it (decision record 0079).
   **Every number of the fog's look** - the haze, the mist, the fade - is in `apps/web/src/fog/look.ts`.
   See `docs/adr/0061`, `0062`, `0063`, `0064` and `docs/plans/fog-of-war.md`.
 - Looking at a whole world at once: `see everything`, in the debug panel's World bar beside `seed 20`.
-  Everything on the map reaches a page only from zoom 7 in and is drawn from 7.25 (0096), so pulling back
-  past that empties the map because the gateway stopped sending rather than because anything is hidden.
-  This sends every zoom to this connection and takes the renderer's distance floor off with it.
+  Everything on the map reaches a page only from zoom 7 in, and below 7.5 only your own marks are drawn (0096).
+  This sends every zoom to this connection; it does not bring anyone else's buildings out past 7.5, where nothing
+  but marks is drawn.
   Adam's switch, not a player's.
 - Areas, in the same panel: `draw an area` arms the next drag on the map, and dragging paints one. The
   ends join themselves and escape stops. Click an area to select it, which makes its line pulse and lists
@@ -370,13 +370,13 @@ stage alone, with none of the debug panel in it (decision record 0079).
   own colours and in the look of the culture under it, read off the master's culture map: European as drawn,
   Islamic in plaster, sandstone and green tile under a dome, East Asian in dark tile under a flared roof, African
   in mud under a cone of thatch (`sprites/cultureStyles.ts`), a ruin too; as tall on the ground as `groundHeight` in the catalogue says at its level, and, when your house
-  controls it, far out its type's pin from `world/sprites/marks/structures/`, at the size of a word, from 8.46, where
+  controls it, far out its type's pin from `world/sprites/marks/structures/`, at the size of a word, from 7.5, where
   your house's people become their busts too; its own picture stands in for the pin until the atlas is read. **A mark
   never fades**: your holdings and key figures reach the page at every zoom, and out to the whole world they are only
   gathered into fewer, larger crowds. Anyone else's building or person has no mark: it shrinks with the map until it
-  fades at 7.25. One a house holds flies a pennant in the house's
+  fades at 7.5, with the scenery: from 7.5 out the map is marks and nothing else. One a house holds flies a pennant in the house's
   field, over the building close in and on the pin's head far out; nobody's flies none. A type with no picture is a
-  plain house. It is drawn from zoom 7.25 like everything on the map, and under the fog outside vision.
+  plain house. It is drawn from zoom 7.5 like everything on the map, and under the fog outside vision.
   Far out, marks whose pictures would overlap are a **crowd**, drawn as the most significant of them wearing a
   gold "+N" for how many more it stands for (`sprites/markGroups.ts`); the debug log says, under `marks`, how many
   crowds there are when that changes. A click on the "+N" opens the crowd's card over it (`sprites/CrowdCard.tsx`,
