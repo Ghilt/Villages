@@ -258,7 +258,9 @@ A line each: what it is for, its variants, and where on the page it is.
   and `age`; and `close`, `minimise`, `maximise`, `previous`, `next`, `fold`, `less`, `more`, `eye-open`,
   `eye-shut`, `warning` and `search`; `tower`, what a structure and the Holdings tab are known by; and a mark for each kind of omen a choice roll reads, `omen-house`,
   `omen-change`, `omen-window`, `omen-dialogue`, `omen-keyFigure`, `omen-map` and `omen-season`, drawn
-  placeholders until a picture of the same name is painted. *Marks and readouts*.
+  placeholders until a picture of the same name is painted; and a quest's, `talk`, `checklist` and `reward` for
+  the kinds of node, `unknown` for one not shown, `done` and `lost`, and the four buttons that are marks on Adam's
+  word of 2026-10-15, `deliver`, `pledge`, `collect` and `quests`, drawn placeholders too. *Marks and readouts*.
 - **`TextButton`**, `ui/button/Button.tsx`: words on a face that stretches between its end caps to fit
   them. `face` is a picture in `world/ui/controls/`, `primary` unless it says otherwise; `size` is `small`,
   `regular` or `large`, 32, 44 or 60 pixels tall. *Buttons*.
@@ -434,6 +436,18 @@ A line each: what it is for, its variants, and where on the page it is.
   apart, a beat, the options a seventh apart - and how a hurry lands the rest of the omens; **`usePlay`** plays
   one in a component. *The choice roll*, where a roll is played in each form in a room the size the game gives
   it, at each rarity, and every part on its own.
+- **`QuestNode`**, `ui/quest/QuestNode.tsx`: one node of a quest's map, a round seal of velvet in a gilt ring with
+  its kind's mark, or a seal of night with `unknown` while it is not shown for what it is, and its title under it,
+  two lines at most. `state` is `current`, lit with a gilt glow, `ahead`, `done`, with a gilt tick on its shoulder,
+  or `lost`, struck through and faded. Pressable with `onPress`, `chosen` while it is open. **`QuestMap`**, beside
+  it, lays nodes out from the top down by the row and the column the caller gives each, spread evenly across its
+  width, and draws the edges under them - walked in gilt, ahead in fine dashes, lost faded - from under a node's
+  title, so an edge never crosses one, with a stub where an edge leads to a node not drawn; `mapLayout.ts` is its
+  arithmetic. **`ChecklistRow`** is one row of the checklist a node opens to: a box, ticked once met, what it asks
+  with a mark before it, the mark button that meets it for a row the player meets, and a soft line under it saying
+  why the button is greyed or that the world ticks it. *Quests*, where every kind and state is shown, three maps -
+  at the start, on a road with a node open, and with stubs - and the checklist's rows. Drawn, nothing painted; a
+  painted mark is a picture in `world/ui/marks/` by the mark's name.
 - **`Medallion`**, `ui/medallion/Medallion.tsx`: a round or oval frame, one fixed picture and never sliced,
   drawn `size` pixels tall. Where its frame is clear inside itself it has a window, and the `picture` it is
   given - a key figure's portrait - shows through it, covering it and cut to its round; the window is found

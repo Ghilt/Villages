@@ -1,0 +1,232 @@
+/*
+ * A quest's map and its checklist. A node is a round seal of velvet in a gilt ring, its mark in cream; a question mark
+ * is a seal of night; the node the quest stands at is lit with a gilt glow, a node done carries a gilt tick on its
+ * shoulder, and a node lost is struck through and faded. Edges run under the seals: walked in gilt, ahead in fine
+ * dashes of the words' own colour, lost faded. A checklist row is a box, the words and a button. Drawn rather than
+ * painted for now, every colour a token. See decision record 0096.
+ */
+
+@layer ui {
+  .ui-quest-node {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--ui-space-1);
+  }
+
+  .ui-quest-node__seal {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    font: inherit;
+    color: var(--ui-cream);
+    background: radial-gradient(
+      circle at 50% 38%,
+      var(--ui-velvet-light) 0%,
+      var(--ui-velvet) 55%,
+      var(--ui-velvet-deep) 100%
+    );
+    box-shadow:
+      0 0 0 2px var(--ui-gilt),
+      inset 0 1px 3px rgba(0, 0, 0, 0.55);
+    transition:
+      filter 0.12s ease,
+      transform 0.12s ease,
+      box-shadow 0.12s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .ui-quest-node__seal--unknown {
+    background: radial-gradient(circle at 50% 38%, var(--ui-night-raised) 0%, var(--ui-night) 90%);
+    box-shadow:
+      0 0 0 2px var(--ui-gilt-deep),
+      inset 0 1px 3px rgba(0, 0, 0, 0.55);
+  }
+
+  .ui-quest-node__seal:enabled {
+    cursor: pointer;
+  }
+
+  .ui-quest-node__seal:disabled {
+    cursor: default;
+  }
+
+  .ui-quest-node__seal:enabled:hover,
+  .ui-quest-node__seal[data-showing='hover'] {
+    filter: brightness(1.15);
+  }
+
+  .ui-quest-node__seal:enabled:active,
+  .ui-quest-node__seal[data-showing='pressed'] {
+    filter: brightness(0.85);
+    transform: translateY(1px);
+  }
+
+  .ui-quest-node__seal:focus-visible,
+  .ui-quest-node__seal[data-showing='focus'] {
+    outline: 2px solid var(--ui-focus);
+    outline-offset: 3px;
+  }
+
+  .ui-quest-node--current .ui-quest-node__seal {
+    box-shadow:
+      0 0 0 2px var(--ui-gilt-light),
+      0 0 12px 3px color-mix(in srgb, var(--ui-gilt-light) 60%, transparent),
+      inset 0 1px 3px rgba(0, 0, 0, 0.55);
+  }
+
+  .ui-quest-node__seal--chosen {
+    box-shadow:
+      0 0 0 3px var(--ui-focus),
+      0 0 14px 4px color-mix(in srgb, var(--ui-gilt-light) 70%, transparent),
+      inset 0 1px 3px rgba(0, 0, 0, 0.55);
+  }
+
+  .ui-quest-node--lost .ui-quest-node__seal {
+    filter: saturate(0.35) brightness(0.8);
+  }
+
+  .ui-quest-node__badge {
+    position: absolute;
+    right: -10%;
+    bottom: -6%;
+    display: inline-grid;
+    place-items: center;
+    width: 42%;
+    height: 42%;
+    border-radius: 50%;
+    color: var(--ui-ink);
+    background: var(--ui-gilt-light);
+    box-shadow: 0 0 0 1px var(--ui-gilt-deep);
+  }
+
+  .ui-quest-node__struck {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: var(--ui-velvet-light);
+    pointer-events: none;
+  }
+
+  .ui-quest-node__title {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    max-width: 100%;
+    text-align: center;
+    line-height: 1.15;
+    color: var(--ui-text);
+  }
+
+  .ui-quest-node--ahead .ui-quest-node__title,
+  .ui-quest-node--lost .ui-quest-node__title {
+    color: var(--ui-text-soft);
+  }
+
+  .ui-quest-node--lost .ui-quest-node__title {
+    text-decoration: line-through;
+  }
+
+  .ui-quest-map {
+    position: relative;
+    flex: none;
+  }
+
+  .ui-quest-map__edges {
+    position: absolute;
+    inset: 0;
+    overflow: visible;
+  }
+
+  .ui-quest-map__edge {
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+
+  .ui-quest-map__edge--walked {
+    stroke: var(--ui-gilt-light);
+    stroke-width: 3;
+  }
+
+  .ui-quest-map__edge--ahead {
+    stroke: var(--ui-text);
+    stroke-dasharray: 4 5;
+    opacity: 0.75;
+  }
+
+  .ui-quest-map__edge--lost {
+    stroke: var(--ui-text-soft);
+    stroke-dasharray: 2 6;
+    opacity: 0.45;
+  }
+
+  .ui-quest-map__edge--stub {
+    stroke-dasharray: 2 4;
+  }
+
+  .ui-quest-map__node {
+    position: absolute;
+    transform: translateX(-50%);
+  }
+
+  .ui-checklist-row {
+    display: flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+    padding: var(--ui-space-1) 0;
+  }
+
+  .ui-checklist-row__box {
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    box-sizing: border-box;
+    border: 1.5px solid currentColor;
+    border-radius: 2px;
+    color: var(--ui-text);
+  }
+
+  .ui-checklist-row--met .ui-checklist-row__box {
+    border-color: var(--ui-gilt);
+    color: var(--ui-gilt-light);
+  }
+
+  .ui-checklist-row__words {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .ui-checklist-row__asks {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ui-space-1);
+    color: var(--ui-text);
+  }
+
+  .ui-checklist-row--met .ui-checklist-row__asks {
+    color: var(--ui-text-soft);
+  }
+
+  .ui-checklist-row__lead {
+    display: inline-grid;
+    flex: none;
+  }
+
+  .ui-checklist-row__note {
+    font-size: 0.8em;
+    color: var(--ui-text-soft);
+  }
+}

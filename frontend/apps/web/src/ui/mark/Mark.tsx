@@ -182,6 +182,87 @@ const DRAWN = {
       <path d={TOWER.door} className="ui-mark__line" />
     </>
   ),
+  // A quest's marks, drawn placeholders until a picture is painted for each; see decision record 0096. The kinds of
+  // node first, then what a node can be to the quest, then the quests' own buttons, every one of them a mark on
+  // Adam's word of 2026-10-15.
+  /** A dialogue node: a speech bubble with what is said in it. */
+  talk: (
+    <>
+      <path d="M4.5 5.5 H19.5 V15.5 H11.5 L7.5 19.5 V15.5 H4.5 Z" className="ui-mark__line" />
+      <path d="M8.5 10.5 H15.5" className="ui-mark__line" />
+    </>
+  ),
+  /** An objective node: a sheet of three rows, each with its box. */
+  checklist: (
+    <>
+      <path d="M5.5 3.5 H18.5 V20.5 H5.5 Z" className="ui-mark__line" />
+      <path
+        d="M8.5 8 H10 M12.5 8 H16 M8.5 12 H10 M12.5 12 H16 M8.5 16 H10 M12.5 16 H16"
+        className="ui-mark__line"
+      />
+    </>
+  ),
+  /** A reward node: a chest, shut, its clasp on the front. */
+  reward: (
+    <>
+      <path d="M4 10 H20 V19.5 H4 Z" className="ui-mark__line" />
+      <path d="M4 10 C4 6 7 4.5 12 4.5 C17 4.5 20 6 20 10" className="ui-mark__line" />
+      <path d="M10.5 10 V13.5 H13.5 V10" className="ui-mark__line" />
+    </>
+  ),
+  /** A node not yet shown: a question mark. */
+  unknown: (
+    <>
+      <path
+        d="M8.5 9 C8.5 6.4 10 4.8 12.1 4.8 C14.2 4.8 15.6 6.3 15.6 8.3 C15.6 10.9 12.1 11.4 12.1 14.6"
+        className="ui-mark__line"
+      />
+      <path d="M12.1 18.6 A0.9 0.9 0 1 1 12.09 18.6" className="ui-mark__line" />
+    </>
+  ),
+  /** Done: a tick. */
+  done: <path d="M5 12.5 L9.8 17.3 L19 7" className="ui-mark__line" />,
+  /** Lost, a road that can no longer be taken: a cross from corner to corner, unlike the close's shorter one. */
+  lost: <path d="M5 5 L19 19 M19 5 L5 19" className="ui-mark__line" />,
+  /** Deliver: a coin dropped into an open hand. */
+  deliver: (
+    <>
+      <path d="M12 3.5 A2.75 2.75 0 1 1 11.99 3.5" className="ui-mark__line" />
+      <path d="M3.5 14 C5.5 17.5 8.5 19.5 12 19.5 C15.5 19.5 18.5 17.5 20.5 14" className="ui-mark__line" />
+      <path d="M12 10.5 V15" className="ui-mark__line" />
+    </>
+  ),
+  /** Pledge: a seal pressed into wax, its two ribbons hanging. */
+  pledge: (
+    <>
+      <path d="M12 3.5 A5.5 5.5 0 1 1 11.99 3.5" className="ui-mark__line" />
+      <path
+        d="M9.5 13.5 L8 20.5 L10.5 19 L12 21 M14.5 13.5 L16 20.5 L13.5 19 L12 21"
+        className="ui-mark__line"
+      />
+    </>
+  ),
+  /** Collect: a chest thrown open. */
+  collect: (
+    <>
+      <path d="M4 12 H20 V19.5 H4 Z" className="ui-mark__line" />
+      <path d="M4 12 L6.5 5.5 H17.5 L20 12" className="ui-mark__line" />
+      <path d="M9 9 H15" className="ui-mark__line" />
+    </>
+  ),
+  /** The quests: a little map of four seals joined, one road forking and meeting again. */
+  quests: (
+    <>
+      <path
+        d="M12 3.5 A1.9 1.9 0 1 1 11.99 3.5 M6.5 10.5 A1.9 1.9 0 1 1 6.49 10.5 M17.5 10.5 A1.9 1.9 0 1 1 17.49 10.5 M12 17 A1.9 1.9 0 1 1 11.99 17"
+        className="ui-mark__line"
+      />
+      <path
+        d="M10.7 6.6 L7.6 10.7 M13.3 6.6 L16.4 10.7 M7.6 14.1 L10.7 17.5 M16.4 14.1 L13.3 17.5"
+        className="ui-mark__line"
+      />
+    </>
+  ),
   // A glass and its handle, the moodboard's search: the handle to the bottom right, as it is held.
   search: (
     <>

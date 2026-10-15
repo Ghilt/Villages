@@ -9,6 +9,7 @@ import { DialogsAndFields } from './DialogsAndFields';
 import { Foundations } from './Foundations';
 import { MarksAndReadouts } from './MarksAndReadouts';
 import { Pictures } from './Pictures';
+import { Quests } from './Quests';
 import { Rolls } from './Rolls';
 import { Slots } from './Slots';
 import { TabsAndSections } from './TabsAndSections';
@@ -79,6 +80,12 @@ export const SECTIONS: readonly Section[] = [
     title: 'The choice roll',
     says: 'The report card the omens slam into, the rarity stamped across it, and the strip it folds to.',
     Body: Rolls,
+  },
+  {
+    id: 'quests',
+    title: 'Quests',
+    says: "A quest's node in every kind and state, the map that lays them out, and the checklist a node opens to.",
+    Body: Quests,
   },
   {
     id: 'sections',
