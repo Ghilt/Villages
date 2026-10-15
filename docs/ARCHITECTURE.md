@@ -392,13 +392,13 @@ and the relief link their programs and draw their tiles with the same few helper
 
 ## What acts on its own
 
-Five things in the program act without anybody sending a command, and they keep the same rules: one
+Six things in the program act without anybody sending a command, and they keep the same rules: one
 subscription to the feed from the beginning, with a fold of their own rather than a read of a read model,
 because two subscriptions can stand at different points in the feed; commands issued through `Later`,
 never inside the feed's own callback; no cancellation table; and every refusal that means "already done"
 swallowed, which is what makes a replay write nothing twice.
 
-Those rules are kept once, in **`Reaction`**, which each of the five is: `issueLater(what, settled)`
+Those rules are kept once, in **`Reaction`**, which each of the six is: `issueLater(what, settled)`
 plans a command on `Later`, swallows the refusals the caller names as meaning "already done" and the want
 of a house a wipe took, and reports anything else - a write conflict the executor could not get past
 included - as a fault under the reaction's name and what it was doing. What it writes continues the story
@@ -437,6 +437,13 @@ did, and sets things right from its whole fold there instead.
 - **The seats listener**, `Seats`, raises a house's castle when it is founded, under an id worked out from the
   house, and names it the seat; both are refused the second time, so the history heard again writes nothing. The
   founding, the castle, the naming and the castle's sight read as one story. See decision record 0093.
+- **The listener for objectives**, `QuestObjectives`, ticks what the world meets of the checklist a quest stands
+  at: today a structure of a type held, anywhere or on an island, which it asks `Islands` of the world's master. It
+  folds every structure - type, place, holder, ruin - and every open quest, plans nothing while the history replays,
+  sets right at `caughtUp()` what its whole fold says is met and unticked, and then asks when a structure comes to a
+  house and when a quest reaches a checklist. It sends `MarkObjectiveMet` in the story of what met it, and takes
+  "already ticked", "moved past" and "over" as already done. A new kind of objective the world meets is one more
+  branch of what it checks. See decision record 0096.
 
 ## Scale principles
 

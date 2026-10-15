@@ -12,6 +12,7 @@ import villages.application.Dice
 import villages.application.FoundHouseService
 import villages.application.FreshIds
 import villages.application.Islands
+import villages.application.QuestObjectives
 import villages.application.QuestService
 import villages.application.fate.FateEngine
 import villages.application.fate.GroundIslands
@@ -293,6 +294,18 @@ class WorldConfig {
         clock: Clock,
         worldClock: WorldClock,
     ): BrokenRequirements = BrokenRequirements(world.storeFeed, later, faults, world.gate, world.executor, { clock.instant() }, worldClock)
+
+    /** Ticks a quest's objective when the world meets it: a structure held, anywhere or on an island. See 0096. */
+    @Bean(initMethod = "start", destroyMethod = "close")
+    fun questObjectives(
+        world: EventWorld,
+        later: ScheduledLater,
+        faults: Faults,
+        clock: Clock,
+        worldClock: WorldClock,
+        islands: Islands,
+    ): QuestObjectives =
+        QuestObjectives(world.storeFeed, later, faults, world.gate, world.executor, { clock.instant() }, worldClock, islands)
 
     /** The map's read model, folded from the feed. In memory, so it starts empty with the store. */
     @Bean(initMethod = "start", destroyMethod = "close")
