@@ -19,11 +19,12 @@ import type { Form, TwoForms } from './twoForms';
  * standing in the world, so it is the same size wherever the camera is.
  *
  * A character is a person: a figure three units tall, which is a bust of sixteen pixels where it becomes its mark and
- * 48 pixels at zoom 10 beside a castle's 128. Every person becomes a mark, whoever they serve.
+ * 48 pixels at zoom 10 beside a castle's 128. Only the player's own house's people become their mark, as only its
+ * structures do; anyone else's shrinks with the map.
  */
 const KINDS: Record<Exclude<MapSprite['kind'], 'structure'>, TwoForms> = {
   candidate: { marked: true, iconHeight: 26 },
-  character: { groundHeight: 3, marked: true },
+  character: { groundHeight: 3, marked: false },
 };
 
 /** Where a pennant stands on a structure's pin: the top of its head, so the holder's colours fly over the sign. */
@@ -97,8 +98,8 @@ export function lookOf(spec: MapSprite, textures: Textures): Look {
       iconFlag: mark === null ? picture.flag : PIN_TOP,
     };
   }
-  const forms = KINDS[spec.kind];
   const person = spec.kind === 'character';
+  const forms = person ? { ...KINDS.character, marked: spec.yours === true } : KINDS[spec.kind];
   return {
     forms,
     ground: forms.groundHeight === undefined ? null : textures.figure,

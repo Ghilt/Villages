@@ -631,8 +631,8 @@ world's.
 ### What it is
 
 A card saying how the player's own house is: who it is, what it has, and what it can do. It carries the
-**bar of the house's own levers** along its bottom, and the **eye** is the first of them; five places
-stand empty beside it (decision record 0038).
+**bar of the house's own levers** along its bottom, its six places empty for now: the eye that was the first
+went when the house's own marks came to be drawn at every zoom (decision records 0038 and 0096).
 
 **This is the line between it and the inspect window, and it is worth stating plainly.** An inspect window
 is *opened on* a thing and closed again; it can be about anybody's house. House status is never opened,
@@ -648,8 +648,8 @@ beside it. A player reading the map for a while should be able to have the map.
 else. If seeing that costs a click, it will not be seen, and a resource nobody watches is a resource that
 is not really in the game.
 
-**The house's own levers, in one place.** The eye is not a setting and not a debug switch: it is something
-the house does, and it belongs to the house rather than floating over the map. Everything of that kind
+**The house's own levers, in one place.** A lever there is not a setting and not a debug switch: it is
+something the house does, and it belongs to the house rather than floating over the map. Everything of that kind
 that comes later goes in the same bar, which is why the empty places are drawn rather than left out —
 the bar is already the shape it will be and nothing moves as it fills.
 
@@ -885,7 +885,6 @@ with the given names under it where there is a line to spare.
 - **Being let go** rather than dying.
 - **What another house sees** of your key figures, stats included.
 - **What it means for one person to serve two houses**, and a way to see it happen on the screen.
-- **Whether the eye keeps key figures in sight** far out, as it keeps the house's holdings.
 - **Loyalty**, and what a key figure will do for the house. Character dialogue already wants it: a character
   loyal to the house can offer a reward the same character would not offer a stranger.
 - **How the house's power state follows its key figures**, and the sacrificial knife of `SETTING.md`, which
@@ -937,7 +936,7 @@ its type says: an empty throne gives no influence, a pious bishop brings more pi
 and a relic brings piety of its own to whoever holds the cathedral keeping it. Some types have nobody in
 them at all: a mill pays by its level, and its only slot is its granary.
 
-**The seat is a role one holding plays**: where the eye goes and the room is entered. Founding a house
+**The seat is a role one holding plays**: where the room is entered. Founding a house
 raises a castle and names it the seat. A house that loses its seat plays on without one until it names
 another.
 

@@ -19,7 +19,6 @@ import { sessionStore, gateway } from './net/gateway';
 import { followMap } from './net/followMap';
 import { arriving } from './house/arrival';
 import { startAtIn } from './net/startAt';
-import { eyeStore } from './house/eye';
 import { InfluenceZone } from './areas/InfluenceZone';
 import { StoodDown } from './net/StoodDown';
 import { flyWith } from './map/focus';
@@ -99,9 +98,9 @@ export function App({ master, devTools }: AppProps) {
   const onTheMap = useStore(sessionStore, (state) => state.onTheMap);
   const yourHouse = useStore(sessionStore, (state) => state.yourHouse);
   const holdings = useStore(sessionStore, (state) => state.yourHoldings);
+  const keyFigures = useStore(sessionStore, (state) => state.yourKeyFigures);
   const yourChoice = useStore(sessionStore, (state) => state.yourChoice);
   const yourDialogues = useStore(sessionStore, (state) => state.yourDialogues);
-  const eye = useStore(eyeStore, (state) => state.open);
   const arrangement = devTools?.stageStore ?? NO_PANEL;
   const mode = useStore(arrangement, (state) => state.mode);
   const shut = useStore(arrangement, (state) => state.shut);
@@ -120,14 +119,26 @@ export function App({ master, devTools }: AppProps) {
 
   // What a choice roll reads of the camera, where it is centred and how close. See `looking.ts`.
   useEffect(() => lookThrough(map), [map]);
-  // With the eye open your own holdings are drawn whether or not a held cell carries them, and however far back the
-  // camera goes: the gateway sends them to the session rather than to a cell. No house is drawn: its structures are.
+  // Your own holdings and key figures are drawn whether or not a held cell carries them, and however far back the
+  // camera goes, because far out they are your marks: the gateway sends them to the session rather than to a cell.
+  // No house is drawn: its structures are. See decision record 0096.
   const drawn = useMemo(
     () =>
-      eye && holdings !== null
-        ? [...raised, ...holdings.filter((one) => !raised.some((r) => r.id === one.id))]
-        : raised,
-    [raised, eye, holdings],
+      holdings === null
+        ? raised
+        : [...raised, ...holdings.filter((one) => !raised.some((r) => r.id === one.id))],
+    [raised, holdings],
+  );
+  const people = useMemo(
+    () => [
+      ...standing,
+      ...(keyFigures ?? []).flatMap((one) =>
+        one.place === undefined || standing.some((there) => there.id === one.id)
+          ? []
+          : [{ ...one, place: one.place }],
+      ),
+    ],
+    [standing, keyFigures],
   );
   // Structures first, so that a person standing in front of one is drawn over it.
   const sprites = useMemo(
@@ -137,14 +148,13 @@ export function App({ master, devTools }: AppProps) {
           structure,
           catalogue,
           cultureOfPlace(cultures, structure.place),
-          eye && structure.holder !== undefined && structure.holder.id === yours?.id,
           structure.holder !== undefined && structure.holder.id === yours?.id,
         ),
       ),
-      ...standing.map(toCharacterSprite),
+      ...people.map((one) => toCharacterSprite(one, one.keyFigureOf[0]?.id === yours?.id && yours !== null)),
       ...candidatesOf(yourChoice),
     ],
-    [drawn, catalogue, cultures, standing, eye, yours, yourChoice],
+    [drawn, catalogue, cultures, people, yours, yourChoice],
   );
 
   // The one connection to the gateway, opened as the app mounts.

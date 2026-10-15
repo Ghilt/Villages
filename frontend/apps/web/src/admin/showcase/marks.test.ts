@@ -14,14 +14,11 @@ const LIBRARY = import.meta.glob<string>('../../ui/mark/Mark.tsx', {
   import: 'default',
   eager: true,
 });
-const GAME = import.meta.glob<string>(
-  ['../../marks/Mark.tsx', '../../stage/Icons.tsx', '../../house/HouseBar.tsx'],
-  {
-    query: '?raw',
-    import: 'default',
-    eager: true,
-  },
-);
+const GAME = import.meta.glob<string>(['../../marks/Mark.tsx', '../../stage/Icons.tsx'], {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+});
 
 const library = Object.values(LIBRARY).join('\n');
 const game = Object.values(GAME).join('\n');
@@ -35,8 +32,10 @@ describe("the library's marks", () => {
     expect(quotedPaths(library).length).toBeGreaterThan(20);
   });
 
-  it('draws the number marks and the eye exactly as the game does', () => {
-    const strays = quotedPaths(library).filter((path) => !game.includes(path));
+  it('draws the number marks exactly as the game does', () => {
+    // The eye is the library's own since the game's house bar gave its eye up on 2026-10-15 (0096).
+    const eye = quotedPaths(/const EYE = \{[\s\S]*?\} as const;/.exec(library)?.[0] ?? '');
+    const strays = quotedPaths(library).filter((path) => !game.includes(path) && !eye.includes(path));
     expect(strays).toEqual([]);
   });
 

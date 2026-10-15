@@ -130,11 +130,9 @@ stage alone, with none of the debug panel in it (decision record 0079).
   What the log says is what was worth saying, through `note(area, message)` in `apps/web/src/log/log.ts`:
   moving the camera about writes nothing, and the cells a move brought back are counted and said in one line
   only when they carried something. `window.villagesPainterly()` gives the paint counters from a console.
-- The player's own levers: the bar along the bottom of the house card, in the corner. The eye is the
-  first place in it and five stand empty. Open, the player's own holdings stay drawn however far back the
-  camera goes, the seat among them, and the ground about it is drawn below the zoom where everyone else's begins;
-  theirs and nobody else's, so the world still thins out with distance. It costs nothing on the wire, because a
-  player's holdings already reach them wherever they are looking. See `docs/adr/0038`.
+- The player's own levers: the bar along the bottom of the house card, in the corner. All six places
+  stand empty: the eye that was the first of them went on 2026-10-15, when the player's own marks came to be drawn
+  at every zoom without it (decision record 0096).
 - The fog of war: the `FoW` box in the Debug map section's bar, there folded or open, ticked at every page
   load, and unticking it turns the fog off for that window. A house sees from **vision points** - each structure it holds, as far as its
   type and level see, its castle 34 km at first, and each key figure standing on the map, 34 km around them - and the server works them out and sends them as `yourSight`;
@@ -373,8 +371,10 @@ stage alone, with none of the debug panel in it (decision record 0079).
   Islamic in plaster, sandstone and green tile under a dome, East Asian in dark tile under a flared roof, African
   in mud under a cone of thatch (`sprites/cultureStyles.ts`), a ruin too; as tall on the ground as `groundHeight` in the catalogue says at its level, and, when your house
   controls it, far out its type's pin from `world/sprites/marks/structures/`, at the size of a word, from 8.46, where
-  every person becomes their bust too; its own picture stands in for the pin until the atlas is read. Anyone else's
-  has no pin: it shrinks with the map until everything fades at 7.25. One a house holds flies a pennant in the house's
+  your house's people become their busts too; its own picture stands in for the pin until the atlas is read. **A mark
+  never fades**: your holdings and key figures reach the page at every zoom, and out to the whole world they are only
+  gathered into fewer, larger crowds. Anyone else's building or person has no mark: it shrinks with the map until it
+  fades at 7.25. One a house holds flies a pennant in the house's
   field, over the building close in and on the pin's head far out; nobody's flies none. A type with no picture is a
   plain house. It is drawn from zoom 7.25 like everything on the map, and under the fog outside vision.
   Far out, marks whose pictures would overlap are a **crowd**, drawn as the most significant of them wearing a

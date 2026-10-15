@@ -16,13 +16,17 @@ const NOBODYS = 0x8a7a64;
  * A character as the renderer draws them: a figure at their place, in the colours of the house they serve,
  * which is the first that took them in. Their own id space, so a person and a structure can never be one mark.
  */
-export function toCharacterSprite(character: CharacterOnMapView): MapSprite {
+export function toCharacterSprite(
+  character: Pick<CharacterOnMapView, 'id' | 'givenName' | 'place' | 'keyFigureOf'>,
+  yours = false,
+): MapSprite {
   const serves = character.keyFigureOf[0];
   return {
     id: `character:${character.id}`,
     at: { lng: character.place.lon, lat: character.place.lat },
     tint: serves === undefined ? NOBODYS : tinctureColour(serves.banner.field),
     kind: 'character',
+    ...(yours ? { yours } : {}),
     significance: KEY_FIGURE_SIGNIFICANCE,
     name: character.givenName,
   };
@@ -41,13 +45,12 @@ const UNTINTED = 0xffffff;
  * A structure as the renderer draws it: its type's picture, as tall on the ground as the catalogue says for its
  * level, and its holder's pennant over it, or none for one nobody holds. Its own id space, so a structure and a person
  * can never be one mark. Without the catalogue, before it is read, the renderer stands it at a height of its own.
- * `always` is the eye: one of the player's own holdings drawn however far back the camera goes (decision 0038).
+ * `yours` is one of the player's own holdings, which far out is its pin, drawn at every zoom (0096).
  */
 export function toStructureSprite(
   structure: StructureView,
   catalogue: StructureCatalogue | null,
   culture: Culture | null = null,
-  always = false,
   yours = false,
 ): MapSprite {
   const heights = catalogue?.types.find((one) => one.type === structure.structureType)?.groundHeight ?? [];
@@ -57,7 +60,6 @@ export function toStructureSprite(
     at: { lng: structure.place.lon, lat: structure.place.lat },
     tint: UNTINTED,
     kind: 'structure',
-    ...(always ? { always } : {}),
     ...(yours ? { yours } : {}),
     significance: structure.significance,
     name: structure.name,

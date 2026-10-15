@@ -170,10 +170,9 @@ export function createMarksLayer(camera: CameraSource, textures: Textures): Mark
         entry.showing = wantedForm(zoom, forms, entry.showing);
         entry.blend = easeTowards(entry.blend, entry.showing === 'ground' ? 1 : 0, elapsed);
 
-        // A candidate is what the player is being asked about, so it is drawn however far back the
-        // camera is; so is a house the player has asked to keep in sight. Everything else goes with the
-        // rest of the world's furniture. Distance, not size: see 0038.
-        const spared = entry.spec.kind === 'candidate' || entry.spec.always === true;
+        // A mark never fades for distance: far out it is only gathered into crowds. What has none - anyone
+        // else's building - goes with the rest of the world's furniture at the floor. See 0096.
+        const spared = entry.look.icon !== null;
         const here = !entry.leaving && isDrawn(zoom, { everything, spared });
         entry.presence = easeTowards(entry.presence, here ? 1 : 0, elapsed, PRESENCE_MS);
         trading = trading || midTrade(entry.blend) || midTrade(entry.presence);

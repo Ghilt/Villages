@@ -70,12 +70,12 @@ export const PRESENCE_MS = 140;
 export const LONGEST_STEP_MS = 50;
 
 /**
- * Below this a thing is not drawn at all, whatever it is, whatever size it would be and however significant: everything
- * on the map fades in and out here together, a quarter of a level inside the zoom the server starts sending it at,
- * `ON_THE_MAP_FROM`, so it has arrived before it is wanted.
+ * Below this a thing with no mark is not drawn at all, whatever size it would be and however significant: anyone
+ * else's building or person fades in and out here, a quarter of a level inside the zoom the server starts sending it
+ * at, `ON_THE_MAP_FROM`, so it has arrived before it is wanted. A mark never fades: far out it is only gathered into
+ * crowds, more of them the further back the camera goes.
  *
- * This is about distance, not about size, and it is deliberately not part of the trade: a continent covered in marks
- * says nothing, and aggregates rather than marks are what low zoom wants. See decision records 0038 and 0096.
+ * This is about distance, not about size, and it is deliberately not part of the trade. See decision record 0096.
  */
 export const DRAWN_FROM_ZOOM = 7.25;
 
@@ -193,8 +193,8 @@ export interface MarkContext {
   /** This window is showing everything, so no mark is hidden for distance. */
   everything?: boolean;
   /**
-   * This mark is spared the distance floor: a candidate, because it is what the player is being asked
-   * about, or one of the player's own holdings while the eye is open. Never anyone else's.
+   * This mark is spared the distance floor: anything with a mark - a candidate, one of the player's own holdings or
+   * people - because a mark never fades, only gathers into crowds. Never anyone else's.
    */
   spared?: boolean;
 }

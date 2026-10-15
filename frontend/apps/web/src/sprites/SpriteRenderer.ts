@@ -28,8 +28,8 @@ export interface MapSprite {
    */
   structure?: { picture: string; groundHeight?: number };
   /**
-   * A structure the player's house controls, which far out becomes its type's pin; anyone else's stays itself and
-   * shrinks with the map. Never set for anything else.
+   * A structure the player's house controls, or one of its key figures: far out it becomes its mark, a type's pin
+   * or a bust, and is drawn at every zoom. Anyone else's stays itself, shrinks with the map and fades at the floor.
    */
   yours?: boolean;
   /** How much it matters to the world, which decides which of a crowd of marks far out leads it. See 0096. */
@@ -38,11 +38,6 @@ export interface MapSprite {
   name?: string;
   /** The colour of the pennant flown over it, its holder's field, or absent for a thing nobody holds. */
   pennant?: number;
-  /**
-   * Drawn however far back the camera is, like a candidate and for a different reason: this one is the
-   * player's own and they asked to keep it in sight. Never set for anyone else's. See 0038.
-   */
-  always?: boolean;
 }
 
 /**

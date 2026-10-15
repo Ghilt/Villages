@@ -147,7 +147,7 @@ export function HouseStatus({ room }: { room: Room }) {
           </div>
         </div>
 
-        <HouseBar borne={house !== null} />
+        <HouseBar />
       </section>
     </div>
   );

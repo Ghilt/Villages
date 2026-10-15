@@ -39,3 +39,11 @@ longer turns into a zoom. `coarsestZoom` is gone from both ends.
 rule nobody wants for the sake of one nobody uses, and the next type added at 15 would arrive late again.
 
 **Structures only.** People would have kept arriving at zoom 9 by their significance of ten. Refused by Adam.
+
+## Amendment, 2026-10-15: a mark never fades
+
+Adam, looking at the pins: they should never fade out, only be grouped, and at the farthest zoom they should still be
+there, gathered more. So the floor at 7.25 is for what has no mark - anyone else's building or person. The player's
+own holdings and key figures, which are marks far out (0051), are drawn at every zoom: they reach the session rather
+than a cell, so no frame changes, and the crowds they gather into grow as the camera pulls back. The eye of 0038,
+whose only work was keeping the holdings drawn far out, has nothing left to do and is gone from the house bar.

@@ -77,10 +77,10 @@ describe('a structure as the map draws it', () => {
   });
 });
 
-describe('one of your holdings with the eye open', () => {
-  it('is drawn however far back the camera goes, and no other structure is', () => {
-    expect(toStructureSprite(structure('castle', 1), null, null, true).always).toBe(true);
-    expect(toStructureSprite(structure('castle', 1), null)).not.toHaveProperty('always');
+describe('one of your holdings', () => {
+  it('is said to be yours, which far out makes it a mark drawn at every zoom, and no other structure is', () => {
+    expect(toStructureSprite(structure('castle', 1), null, null, true).yours).toBe(true);
+    expect(toStructureSprite(structure('castle', 1), null)).not.toHaveProperty('yours');
   });
 });
 

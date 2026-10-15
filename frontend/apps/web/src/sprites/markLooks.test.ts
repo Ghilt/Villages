@@ -78,6 +78,30 @@ describe("a structure's look", () => {
   });
 });
 
+describe("a person's look", () => {
+  const person = (yours: boolean): MapSprite => ({
+    id: 'character:a',
+    at: { lng: 18.07, lat: 59.33 },
+    tint: 0xffffff,
+    kind: 'character',
+    ...(yours ? { yours } : {}),
+  });
+
+  it("is their bust far out when they are your house's, and becomes it where everything does", () => {
+    const ours = lookOf(person(true), TEXTURES);
+
+    expect(ours.icon).toBe(TEXTURES.bust);
+    expect(crossoverZoom(ours.forms)).toBe(BECOMES_A_MARK_AT);
+  });
+
+  it("has no mark when they are anyone else's: they shrink with the map", () => {
+    const theirs = lookOf(person(false), TEXTURES);
+
+    expect(theirs.icon).toBeNull();
+    expect(crossoverZoom(theirs.forms)).toBeNull();
+  });
+});
+
 describe('where a pennant flies', () => {
   const look = lookOf(structure(2.4), TEXTURES);
 

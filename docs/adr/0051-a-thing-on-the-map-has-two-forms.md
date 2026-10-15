@@ -168,6 +168,6 @@ close in, the pin's head far out.
 The crossover is no longer where each kind's two sizes happen to meet. It is one named zoom, `BECOMES_A_MARK_AT`
 (8.46) in `twoForms.ts`, for everything: further in, every sprite stands in scale with the map; from there out, a thing
 that has a mark is its mark, as tall as it stood at that zoom, so the size still never jumps. A thing with no mark goes
-on shrinking until everything fades at 7.25 (0096). Only a structure the player's house controls and a person have a
-mark, on Adam's word of 2026-10-15. A person, who crossed at 9.4, crosses with everything else, and stands three units
+on shrinking until everything fades at 7.25 (0096). Only a structure the player's house controls and one of its people have a
+mark, on Adam's word of 2026-10-15, and a mark never fades for distance: it is only gathered into crowds (0096). A person, who crossed at 9.4, crosses with everything else, and stands three units
 tall so that their bust is sixteen pixels there, as it was.

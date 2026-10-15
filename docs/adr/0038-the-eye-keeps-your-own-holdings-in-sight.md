@@ -76,3 +76,8 @@ amendment to decision 0023, made the same day, which took the panel's block of s
 
 `coarsestZoom` is gone: everything is sent from zoom 7 and drawn from 7.25 (0096). The eye still spares your own
 holdings that floor, as it spared them the old one.
+
+## Amendment, 2026-10-15: the eye is gone
+
+The player's own holdings and key figures are now marks drawn at every zoom (0096), so the eye has nothing left to
+keep in sight. Its button, its store and its sparing of the floor are gone; the house bar's six places stand empty.
