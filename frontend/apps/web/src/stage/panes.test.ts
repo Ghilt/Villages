@@ -22,6 +22,7 @@ import {
 import type { Subject } from '../inspect/subjects';
 import { panesOn, standingIn } from '../panes';
 import { DIALOGUE_PANE } from '../dialogues/pane';
+import { QUEST_PANE } from '../quests/pane';
 import { CHOICE_AT_REST, CHOICE_PANE } from '../choice/pane';
 import { KEY_FIGURES_PANE } from '../figures/pane';
 import { HOLDINGS_PANE } from '../holdings/pane';
@@ -32,6 +33,8 @@ const NONE = { yourChoice: null, yourDialogues: null } as unknown as SessionStat
 const ASKING = { ...NONE, yourChoice: {} } as unknown as SessionState;
 const HOUSED = { ...NONE, yourHouse: {} } as unknown as SessionState;
 const TALKING = { ...NONE, yourDialogues: [{}] } as unknown as SessionState;
+/** A house with a quest open, and the dialogue it led to. */
+const QUESTING = { ...NONE, yourDialogues: [{}], yourQuests: [{}] } as unknown as SessionState;
 const BOTH = { ...NONE, yourChoice: {}, yourDialogues: [{}] } as unknown as SessionState;
 
 /** Every pane on the stage for what the gateway has said and the subjects open, as the stage is handed them. */
@@ -251,7 +254,7 @@ describe('character dialogue', () => {
   });
 
   it('opens at its normal width, and asks for half the stage opened out and a strip put away', () => {
-    const at = (size: PaneSize): Asked => ({ heights: { [DIALOGUE_PANE.id]: size }, tiles: {} });
+    const at = (size: PaneSize): Asked => ({ heights: {}, tiles: { right: size } });
     const panes = panesFor([], TALKING);
 
     expect(sizeAsked(DIALOGUE_PANE, NOTHING_ASKED)).toBe('small');
@@ -299,12 +302,36 @@ describe('the corner', () => {
 });
 
 /**
+ * Quests, which stand from the house's first quest on, taking turns with the dialogues in the column down the right.
+ * See decision record 0096.
+ */
+describe('quests', () => {
+  it('are not a pane at all until the house has been offered a quest', () => {
+    expect(idsOf(panesFor([], TALKING))).not.toContain(QUEST_PANE.id);
+    expect(idsOf(panesFor([], QUESTING))).toContain(QUEST_PANE.id);
+  });
+
+  it('take turns with the dialogues in the column, which is one size whichever is up and opens at its normal width', () => {
+    const panes = panesFor([], QUESTING);
+
+    expect(isTabbed('right', panesIn(panes, 'right').length)).toBe(true);
+    expect(spreadWants(panes, NOTHING_ASKED).right).toBe('normal');
+    expect(spreadWants(panes, { heights: {}, tiles: { right: 'strip' } }).right).toBe('tabbedStrip');
+    const asked: Asked = { heights: {}, tiles: { right: 'full' } };
+    expect(sizeAsked(QUEST_PANE, asked)).toBe(sizeAsked(DIALOGUE_PANE, asked));
+    expect(spreadWants(panesFor([], TALKING), { heights: {}, tiles: { right: 'strip' } }).right).toBe(
+      'strip',
+    );
+  });
+});
+
+/**
  * The corner and the column down the right are never both opened out: opening one steps the other down to its
  * normal size, so the bottom row always has its middle for the letter's chip. Adam's word of 2026-10-06; 0085.
  */
 describe('one of the corner and the right column opened out', () => {
   const panes = panesFor([], TALKING);
-  const both: Asked = { heights: { [DIALOGUE_PANE.id]: 'full' }, tiles: { bottomLeft: 'full' } };
+  const both: Asked = { heights: {}, tiles: { bottomLeft: 'full', right: 'full' } };
 
   it('steps the dialogues down when the corner opens out, and the corner when the dialogues do', () => {
     const corner = askedInTheSpread(panes, both, KEY_FIGURES_PANE, 'full');
@@ -317,7 +344,7 @@ describe('one of the corner and the right column opened out', () => {
   });
 
   it('leaves the other alone when it is not opened out, or when a pane is asked anything but opened out', () => {
-    const away: Asked = { heights: { [DIALOGUE_PANE.id]: 'strip' }, tiles: { bottomLeft: 'full' } };
+    const away: Asked = { heights: {}, tiles: { bottomLeft: 'full', right: 'strip' } };
 
     expect(askedInTheSpread(panes, away, HOUSE_PANE, 'full').asked).toEqual(away);
     expect(askedInTheSpread(panes, both, HOUSE_PANE, 'small').stepped).toBeNull();

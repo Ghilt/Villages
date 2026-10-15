@@ -7,10 +7,11 @@ import {
   paneById,
   put,
   roomToRead,
+  show,
   takeOver,
   theMapsBay,
 } from './bays';
-import { MAP_PANE, type PaneSize, sizeAsked } from './panes';
+import { MAP_PANE, type PaneSize, SHARED_TILES, sizeAsked } from './panes';
 
 /**
  * Something arriving on the stage - a window asked for, a dialogue offered, a question asked - and the map shown
@@ -37,6 +38,10 @@ export function arrive(id: string, how: Arrival = {}): void {
     const pane = paneById(id);
     if (how.inTheSpread !== undefined && pane !== undefined && sizeAsked(pane, baysStore.get()) === 'strip') {
       askFor(id, how.inTheSpread);
+    }
+    // In a tile it takes turns in, what arrives comes to the front of it: a quest offered beside a dialogue.
+    if (pane !== undefined && SHARED_TILES[pane.spread] !== undefined) {
+      show(pane.spread, id);
     }
     return;
   }

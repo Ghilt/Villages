@@ -211,10 +211,10 @@ export interface SpreadWants {
 }
 
 /**
- * The three ways the column down the right edge can be: its own width top to bottom, opened out to half
- * the stage, or put away to a strip across its top. See decision record 0069.
+ * The ways the column down the right edge can be: its own width top to bottom, opened out to half the stage, or
+ * put away to a strip across its bottom, with room over it for a tab bar when its panes take turns. See 0069, 0096.
  */
-export type RightWants = 'normal' | 'half' | 'strip';
+export type RightWants = 'normal' | 'half' | 'strip' | 'tabbedStrip';
 
 export const WANTS_NOTHING: SpreadWants = { left: false, bottomLeft: null, bottomMiddle: null };
 
@@ -401,7 +401,7 @@ function tilesOnAMap(stage: Box, wants: SpreadWants): BayLayout {
   // letter's chip its least whatever size the letter is, so that opening the letter resizes nothing under it.
   if (wants.right != null) {
     const wide = rightWidth(stage, wants.right, letter === null ? beside : clear + CHIP_LEAST);
-    const tall = wants.right === 'strip' ? STRIP : stage.h;
+    const tall = wants.right === 'strip' ? STRIP : wants.right === 'tabbedStrip' ? STRIP + TAB_BAR : stage.h;
     bays.right = wide >= BAY_LEAST ? { x: stage.w - wide, y: stage.h - tall, w: wide, h: tall } : null;
   }
 

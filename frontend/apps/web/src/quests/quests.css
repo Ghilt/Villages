@@ -1,0 +1,148 @@
+/* The quests pane: the list of quests, and a quest's map over its scene. */
+
+/*
+ * **Quests**, taking turns with the dialogues in the column down the right edge. What is written in the column, and
+ * none of the frame round it, which is the column's container and drawn by the stage. See decision record 0096.
+ */
+.quests {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+}
+
+.quests__head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: none;
+  padding: 0.45rem calc(0.4rem + var(--corner-right, 0px)) 0.4rem 0.75rem;
+  border-bottom: 1px solid var(--parchment-edge);
+}
+
+.quests--open > .quests__head {
+  background: color-mix(in srgb, var(--parchment) 94%, transparent);
+}
+
+.quests__name {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: normal;
+  font-variant: small-caps;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.quests__back {
+  flex: none;
+  width: 1.7rem;
+  height: 1.7rem;
+  padding: 0.2rem;
+  border: none;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.quests__count {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.quests__list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 0 calc(0.6rem + var(--corner-bottom, 0px));
+}
+
+.quests__group {
+  margin: 0.75rem 0.75rem 0.3rem;
+  font-size: 0.72rem;
+  font-weight: normal;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.quests__none {
+  margin: 0 0.75rem;
+  font-size: 0.9rem;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.quests__rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.quests__row {
+  border-top: 1px solid var(--parchment-edge);
+}
+
+.quests__row:last-child {
+  border-bottom: 1px solid var(--parchment-edge);
+}
+
+.quests__open {
+  display: grid;
+  row-gap: 0.1rem;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  background: none;
+  font: inherit;
+  text-align: left;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.quests__open:hover {
+  background: color-mix(in srgb, var(--gold) 12%, transparent);
+}
+
+.quests__title {
+  font-size: 1.02rem;
+}
+
+.quests__line {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.quests__row--lost .quests__line {
+  font-style: italic;
+}
+
+/*
+ * The map: over the scene, centred in the column, scrolling when the road is longer than the column is tall, and
+ * padded at its foot clear of the compass on a phone.
+ */
+.quests__map {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0.5rem 0.75rem calc(0.75rem + var(--corner-bottom, 0px));
+}
+
+/*
+ * Over the scene the map is on night of its own, as a conversation's bubbles are on paper of their own, so its
+ * titles and its dashed roads read whatever the picture behind is.
+ */
+.quests__map .ui-quest-map {
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--ui-night) 78%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ui-gilt) 45%, transparent);
+}

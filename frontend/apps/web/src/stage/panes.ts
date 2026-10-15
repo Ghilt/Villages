@@ -104,8 +104,11 @@ export interface Pane {
  * height per pane that the tabs had to be kept agreeing about by hand. See decision record 0057.
  */
 export interface SharedTile {
-  /** How tall it is at the normal size and opened out. Put away it is a strip like any pane's, `STRIP`. */
-  tall: { full: number; small: number };
+  /**
+   * How tall it is at the normal size and opened out. Put away it is a strip like any pane's, `STRIP`. Absent for
+   * the column down the right, which is top to bottom at every size but put away, and whose widths are the layout's.
+   */
+  tall?: { full: number; small: number };
   /**
    * How wide it wants to be opened out, if wider than the column: the corner reaching along the bottom,
    * where the rail above keeps the column's width and a letter along the bottom moves over. Absent, and
@@ -127,13 +130,27 @@ export interface SharedTile {
  * lines of stats: as tall as the corner can be and still leave the rail room for a window on the shortest
  * stage the spread is drawn on, and reaching along the bottom to 560. A test holds all of it.
  */
-export const CORNER: SharedTile = { tall: { full: 340, small: 232 }, openWide: 560, startsAt: 'small' };
+export const CORNER = {
+  tall: { full: 340, small: 232 },
+  openWide: 560,
+  startsAt: 'small',
+} as const satisfies SharedTile;
 
 /**
  * The tiles whose panes take turns, and the sizes each has. A tile that two panes declare themselves into
  * and that is missing here fails a test, because its size would otherwise follow whichever tab was up.
  */
-export const SHARED_TILES: Readonly<Partial<Record<BayName, SharedTile>>> = { bottomLeft: CORNER };
+/**
+ * **The column down the right**, where the dialogues and the quests take turns: one size whichever of them is up,
+ * opening at its normal width, as the dialogues alone did. Its widths are the layout's, so it has no heights. See
+ * decision records 0069 and 0096.
+ */
+export const RIGHT_COLUMN: SharedTile = { startsAt: 'small' };
+
+export const SHARED_TILES: Readonly<Partial<Record<BayName, SharedTile>>> = {
+  bottomLeft: CORNER,
+  right: RIGHT_COLUMN,
+};
 
 export const MAP_PANE: Pane = {
   id: 'map',
@@ -226,7 +243,9 @@ export function spreadWants(panes: readonly Pane[], asked: Asked): SpreadWants {
       return null;
     }
     const size = sizeAsked(first, asked);
-    return size === 'strip' ? 'strip' : size === 'full' ? 'half' : 'normal';
+    // Put away, a column its panes take turns in keeps room over its strip for their tab bar.
+    const tabbed = isTabbed('right', panesIn(panes, 'right').length);
+    return size === 'strip' ? (tabbed ? 'tabbedStrip' : 'strip') : size === 'full' ? 'half' : 'normal';
   };
 
   return {

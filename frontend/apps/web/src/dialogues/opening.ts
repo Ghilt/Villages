@@ -36,8 +36,12 @@ const shown = new Set<string>();
  * stays as the player left it. On a phone it takes the bay that is not the map's, as a window does, and
  * opens it to at least half, because a dialogue that arrives as a strip is one nobody can read.
  */
-export function openOnArrival(dialogues: readonly DialogueView[]): void {
-  if (arrivals(shown, dialogues).length === 0) {
+export function openOnArrival(
+  dialogues: readonly DialogueView[],
+  throughAQuest: ReadonlySet<string> = new Set(),
+): void {
+  // A dialogue a quest leads to arrives through its quest, whose tab comes up instead. See decision record 0096.
+  if (arrivals(shown, dialogues).filter((one) => !throughAQuest.has(one.id)).length === 0) {
     return;
   }
   arrive(DIALOGUE_PANE.id, { inTheSpread: 'small' });

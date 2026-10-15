@@ -39,6 +39,8 @@ const SIDEWAYS: readonly (readonly [string, string])[] = [
   ['room', 'sprites'],
   ['dialogues', 'figures'],
   ['dialogues', 'house'],
+  // A quest's map is drawn over its scene, as a conversation is.
+  ['quests', 'dialogues'],
   // A dealt option says what it gives in the player's words for a resource.
   ['choice', 'house'],
   ['inspect', 'figures'],
@@ -99,7 +101,7 @@ function rowOf(folder: string): number {
  * with its rarity cards and Take action (0083); the inspect window the second, with the tag beside a window's name
  * saying how fresh what it shows is (0089).
  */
-const TAKEN_UP: readonly string[] = ['choice', 'inspect', 'holdings'];
+const TAKEN_UP: readonly string[] = ['choice', 'inspect', 'holdings', 'quests'];
 
 /** Whether the rows let one folder import another. */
 export function mayImport(from: string, to: string): boolean {

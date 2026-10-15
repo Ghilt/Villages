@@ -46,3 +46,34 @@ export function whatChangedIn(before: readonly QuestView[] | null, after: readon
     return revision === one.revision ? [] : [`"${one.title}": ${standing(one)}`];
   });
 }
+
+/** A quest as the list shows it: its title, and where it stands or how it ended. */
+export interface ListedQuest {
+  readonly id: string;
+  readonly title: string;
+  readonly line: string;
+  readonly lost: boolean;
+}
+
+/** The pane's list: the quests open, then those finished and lost, newest first in both. */
+export function listOf(quests: readonly QuestView[]): {
+  open: readonly ListedQuest[];
+  finished: readonly ListedQuest[];
+} {
+  const listed = [...quests].reverse().map((one) => ({
+    id: one.id,
+    title: one.title,
+    line: standing(one),
+    lost: one.ending.kind === 'lost',
+  }));
+  return {
+    open: listed.filter((one) => quests.find((quest) => quest.id === one.id)!.ending.kind === 'open'),
+    finished: listed.filter((one) => quests.find((quest) => quest.id === one.id)!.ending.kind !== 'open'),
+  };
+}
+
+/** How many quests there are, for the pane put away: how many are open, and how many are finished. */
+export function howMany(quests: readonly QuestView[]): string {
+  const open = quests.filter((one) => one.ending.kind === 'open').length;
+  return `${open} open, ${quests.length - open} finished`;
+}

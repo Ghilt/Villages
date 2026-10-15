@@ -44,3 +44,7 @@ export type { Follower, FollowerPorts, Schedule } from './follower';
 
 export { choose, keepReading, pressNext, showing, startReading } from './reading';
 export type { Press, Reading, Showing } from './reading';
+
+// Where each node of a quest stands on its map. See decision record 0096.
+export { questLayout } from './questLayout';
+export type { Placed } from './questLayout';

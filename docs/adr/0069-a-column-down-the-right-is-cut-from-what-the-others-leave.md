@@ -5,6 +5,9 @@
 - Superseded in part 2026-10-06 by 0085: the column **runs top to bottom always** and never stops above the
   letter, which is a chip between the columns put away and lies over everything opened out; it leaves the chip
   its least; put away it is a strip across its **bottom**; and it is never opened out with the corner.
+- Amended 2026-10-15 by 0096: the column's panes **take turns**, the dialogues and the quests, behind a tab bar
+  as the corner's do (0057); the column is one size whichever is up, a shared tile with no heights of its own, and
+  put away its strip keeps room for the tab bar over it.
 - Adds a tile to 0041's spread, which had a column down the left, a corner and a tile along the bottom
   middle. 0056 said a pane wider in the rail, or a second column, would be its own decision; this is the
   second column.

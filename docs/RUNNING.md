@@ -211,7 +211,10 @@ stage alone, with none of the debug panel in it (decision record 0079).
   says where each stands - *stands at "A light on the water", 1 of 2 ticked; lost "A gift to the mission"* - whenever one
   changes. On the bad road, the Structures section's *raise here* with a castle on an island and *take control of
   this building* ticks *Hold a castle on an island* a moment later, in the story of the taking; the log says *1 of 2
-  ticked*. There is no pane for it yet.
+  ticked*. In the game the quest opens in the **quests** tab of the column down the right, beside the dialogues -
+  the tab bar is two marks, the speech bubble and a little map of seals - on its map over its scene: the abbot lit,
+  two question marks below, a question mark half-way down and the blessing at the foot. The list behind its mark
+  holds every quest, open first. A node cannot be pressed yet.
   See `docs/adr/0096` and `docs/plans/quests.md`.
 - The choice roll, the player's own: **Take action**, in the bottom middle of the spread once there is a
   house, put away at rest to a **chip** in the middle of the bottom row with what a roll costs beside it - a

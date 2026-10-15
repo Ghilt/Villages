@@ -158,8 +158,10 @@ width is: normal, 480, squeezed to a third of a narrow stage first and never bel
 the stage and never less than normal; put away, a strip 44 high across its **bottom**, so the three put away
 stand along one edge. It runs top to bottom always, and it is never so wide that it leaves bottom middle's
 chip less than its least. On a desktop both columns are at their own widths, and on a narrow stage both are a
-third and the map is the middle one; below 744 wide the right column is what gives up width. See decision
-records 0069 and 0085.
+third and the map is the middle one; below 744 wide the right column is what gives up width. **Its panes take
+turns**, the dialogues and the quests, behind a tab bar across its top, as the corner's do: the column is one size
+whichever is up, and put away its strip keeps room for the tab bar over it. See decision records 0069, 0085 and
+0096.
 
 **Only one of bottom left and right is opened out at a time.** Opening one out steps the other down to its
 normal size, so the middle of the bottom row is always there for the chip. See decision record 0085.

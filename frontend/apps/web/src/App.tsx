@@ -6,6 +6,7 @@ import type { Readable } from '@villages/client-core';
 
 import { AreaOverlay } from './areas/AreaOverlay';
 import { openOnArrival } from './dialogues/opening';
+import { openOnArrival as openQuestOnArrival, questDialogues } from './quests/opening';
 import type * as DevToolsModule from './debug/devTools';
 import type { StageArrangement } from './debug/stage';
 import { Desk } from './desk/Desk';
@@ -202,9 +203,18 @@ export function App({ master, devTools }: AppProps) {
   const offered = yourDialogues;
   useEffect(() => {
     if (offered !== null) {
-      openOnArrival(offered);
+      openOnArrival(offered, questDialogues(sessionStore.get().yourQuests));
     }
   }, [offered]);
+
+  // A quest arriving opens its tab in the column, as a dialogue arriving opens its own; a dialogue a quest leads to
+  // arrives through the quest. See decision record 0096.
+  const quested = useStore(sessionStore, (state) => state.yourQuests);
+  useEffect(() => {
+    if (quested !== null) {
+      openQuestOnArrival(quested);
+    }
+  }, [quested]);
 
   useEffect(() => {
     if (map !== null) {

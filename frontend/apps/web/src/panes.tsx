@@ -6,6 +6,8 @@ import { CHOICE_AT_REST, CHOICE_PANE } from './choice/pane';
 import { Choosing } from './choice/Choosing';
 import { lookingNow } from './looking';
 import { DIALOGUE_PANE } from './dialogues/pane';
+import { QUEST_PANE } from './quests/pane';
+import { Quests } from './quests/Quests';
 import { Dialogues } from './dialogues/Dialogues';
 import { KEY_FIGURES_PANE } from './figures/pane';
 import { KeyFigures } from './figures/KeyFigures';
@@ -74,6 +76,12 @@ const STANDING: readonly Standing[] = [
     pane: DIALOGUE_PANE,
     stands: (session) => (session.yourDialogues?.length ?? 0) > 0,
     draw: (room) => <Dialogues room={room} inspect={(thing) => inspectBeside(thing, room)} />,
+  },
+  {
+    // Beside the dialogues, taking turns with them in the column down the right edge. See decision record 0096.
+    pane: QUEST_PANE,
+    stands: (session) => (session.yourQuests?.length ?? 0) > 0,
+    draw: (room) => <Quests room={room} />,
   },
 ];
 

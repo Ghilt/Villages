@@ -88,6 +88,13 @@ const TOWER = {
   door: 'M10.25 21 V17.5 A1.75 1.75 0 0 1 13.75 17.5 V21',
 } as const;
 
+/** The quests' tab, as the library draws its `quests` mark. See decision record 0096. */
+const QUESTS = {
+  seals:
+    'M12 3.5 A1.9 1.9 0 1 1 11.99 3.5 M6.5 10.5 A1.9 1.9 0 1 1 6.49 10.5 M17.5 10.5 A1.9 1.9 0 1 1 17.49 10.5 M12 17 A1.9 1.9 0 1 1 11.99 17',
+  roads: 'M10.7 6.6 L7.6 10.7 M13.3 6.6 L16.4 10.7 M7.6 14.1 L10.7 17.5 M16.4 14.1 L13.3 17.5',
+} as const;
+
 export type IconName =
   | 'shield'
   | 'compass'
@@ -103,7 +110,8 @@ export type IconName =
   | 'river'
   | 'lake'
   | 'sea'
-  | 'tower';
+  | 'tower'
+  | 'quests';
 
 /** Which way a needle points. The four are one drawing turned, never four drawings. */
 export type Point = 'up' | 'down' | 'left' | 'right';
@@ -158,6 +166,13 @@ export function Icon({ name, title }: IconProps) {
         </>
       )}
       {name === 'speech' && <path d={SPEECH} className="icon__line" />}
+      {/* The quests' tab: four seals joined, one road forking and meeting again, the library's `quests` mark. */}
+      {name === 'quests' && (
+        <>
+          <path d={QUESTS.seals} className="icon__line" />
+          <path d={QUESTS.roads} className="icon__line" />
+        </>
+      )}
       {name === 'tower' && (
         <>
           <path d={TOWER.walls} className="icon__line" />

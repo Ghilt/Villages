@@ -278,6 +278,7 @@ export function Stage({ stage, panes, overlays }: StageProps) {
             sharing={sharing}
             showing={up.id}
             onShow={(id) => show(name, id)}
+            label={name === 'right' ? 'What is in this column' : 'What is in this corner'}
             room={room}
             style={place({ ...tile, h: TAB_BAR })}
           />

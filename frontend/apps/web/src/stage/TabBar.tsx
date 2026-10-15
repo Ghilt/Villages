@@ -36,12 +36,22 @@ interface TabBarProps {
   style: CSSProperties;
   /** Whether the tile is dressed, so that the strip of tabs on top of it is in the same colours. */
   dressed?: boolean;
+  /** What the tabs are, for a screen reader: what is in this corner, or in this column. */
+  label?: string;
 }
 
-export function TabBar({ sharing, showing, onShow, room, style, dressed = false }: TabBarProps) {
+export function TabBar({
+  sharing,
+  showing,
+  onShow,
+  room,
+  style,
+  dressed = false,
+  label = 'What is in this corner',
+}: TabBarProps) {
   return (
     <div className={dressed ? 'tabs tabs--dressed' : 'tabs'} style={style}>
-      <div className="tabs__all" role="tablist" aria-label="What is in this corner">
+      <div className="tabs__all" role="tablist" aria-label={label}>
         {sharing.map((pane) => {
           const up = pane.id === showing;
           return (
