@@ -28,6 +28,8 @@ sealed class HouseError(message: String) : DomainError(message) {
     /** A step that is not where the dialogue goes next: a line already passed, one further on, or no option. */
     data object NotTheNextStep : HouseError("that is not the next step of the dialogue")
 
+    class InvalidQuest(reason: String) : HouseError("not a quest: $reason")
+
     /** A house is asked one thing at a time, and this one has not been answered. */
     data object ChoicePending : HouseError("this house already has a choice to make")
 
