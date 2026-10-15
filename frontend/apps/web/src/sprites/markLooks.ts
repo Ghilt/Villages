@@ -12,29 +12,19 @@ import type { Form, TwoForms } from './twoForms';
  */
 
 /**
- * What each kind of mark but a structure looks like, in world units on the ground and in screen pixels as a sign.
+ * What each kind of mark but a structure looks like. Every one that becomes a mark does so at `BECOMES_A_MARK_AT`,
+ * as tall as it stood there; see `twoForms.ts`.
  *
  * A candidate has no ground form at all. It is a question the world is asking rather than a thing
  * standing in the world, so it is the same size wherever the camera is.
  *
- * A character is a person, smaller than a castle on the ground and as a sign: a figure a unit and a half
- * tall, and a bust of sixteen pixels. They cross over at zoom 9.4, just in from zoom 9 where a key
- * figure's significance first has them drawn, so they arrive as the sign and stand up as the camera comes
- * in; by zoom 10 the figure is 24 pixels beside a castle's 128.
+ * A character is a person: a figure three units tall, which is a bust of sixteen pixels where it becomes its mark and
+ * 48 pixels at zoom 10 beside a castle's 128. Every person becomes a mark, whoever they serve.
  */
 const KINDS: Record<Exclude<MapSprite['kind'], 'structure'>, TwoForms> = {
-  candidate: { iconHeight: 26 },
-  character: { groundHeight: 1.5, iconHeight: 16 },
+  candidate: { marked: true, iconHeight: 26 },
+  character: { groundHeight: 3, marked: true },
 };
-
-/**
- * A structure's sign, in screen pixels for each world unit it stands on the ground: one ratio for every one, so that
- * every structure crosses over at zoom 8.46, where a castle of eight units is 44 pixels in both forms and by zoom 10
- * stands 128, and one a level higher is larger in both forms. The eight units are a map convention and not a
- * measurement: a surveyed castle is about a tenth of a unit here, and would cross over at zoom fourteen, four levels
- * past where the camera stops.
- */
-const SIGN_PER_UNIT = 5.5;
 
 /** Where a pennant stands on a structure's pin: the top of its head, so the holder's colours fly over the sign. */
 const PIN_TOP = { across: 0.5, down: 0 };
@@ -91,15 +81,17 @@ export function pennantOn(
 
 export function lookOf(spec: MapSprite, textures: Textures): Look {
   if (spec.kind === 'structure') {
-    // Far out a structure is its type's pin, once the atlas has been read; until then its own picture at that size.
+    // Far out a structure your house controls is its type's pin, once the atlas has been read, and until then its own
+    // picture at that size. Anyone else's has no mark: it shrinks with the map until it fades.
     const key = spec.structure?.picture ?? '';
     const picture = textures.structures.of(key);
     const mark = textures.structures.markOf(key);
     const groundHeight = spec.structure?.groundHeight ?? UNSAID_HEIGHT;
+    const marked = spec.yours === true;
     return {
-      forms: { groundHeight, iconHeight: groundHeight * SIGN_PER_UNIT },
+      forms: { groundHeight, marked },
       ground: picture.texture,
-      icon: mark ?? picture.texture,
+      icon: marked ? (mark ?? picture.texture) : null,
       iconAnchor: 0.5,
       flag: picture.flag,
       iconFlag: mark === null ? picture.flag : PIN_TOP,
@@ -110,7 +102,7 @@ export function lookOf(spec: MapSprite, textures: Textures): Look {
   return {
     forms,
     ground: forms.groundHeight === undefined ? null : textures.figure,
-    icon: forms.iconHeight === undefined ? null : person ? textures.bust : textures.candidate,
+    icon: !forms.marked ? null : person ? textures.bust : textures.candidate,
     iconAnchor: spec.kind === 'candidate' ? 0 : 0.5,
     flag: null,
     iconFlag: null,

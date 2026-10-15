@@ -40,6 +40,7 @@ export function toStructureSprite(
   catalogue: StructureCatalogue | null,
   culture: Culture | null = null,
   always = false,
+  yours = false,
 ): MapSprite {
   const heights = catalogue?.types.find((one) => one.type === structure.structureType)?.groundHeight ?? [];
   const groundHeight = heights[Math.min(Math.max(structure.level, 1), heights.length) - 1];
@@ -49,6 +50,7 @@ export function toStructureSprite(
     tint: UNTINTED,
     kind: 'structure',
     ...(always ? { always } : {}),
+    ...(yours ? { yours } : {}),
     // A ruin is drawn as a ruin, as tall as what it was; either in the culture of the ground it stands on.
     structure: {
       picture: pictureKey(structure.ruin === true ? RUIN_PICTURE : structure.structureType, culture),

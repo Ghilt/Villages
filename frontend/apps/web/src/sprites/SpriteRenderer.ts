@@ -27,6 +27,11 @@ export interface MapSprite {
    * raises. Its tint is white, because a structure is drawn in its own colours. Absent for every other kind.
    */
   structure?: { picture: string; groundHeight?: number };
+  /**
+   * A structure the player's house controls, which far out becomes its type's pin; anyone else's stays itself and
+   * shrinks with the map. Never set for anything else.
+   */
+  yours?: boolean;
   /** The colour of the pennant flown over it, its holder's field, or absent for a thing nobody holds. */
   pennant?: number;
   /**

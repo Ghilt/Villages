@@ -138,6 +138,7 @@ export function App({ master, devTools }: AppProps) {
           catalogue,
           cultureOfPlace(cultures, structure.place),
           eye && structure.holder !== undefined && structure.holder.id === yours?.id,
+          structure.holder !== undefined && structure.holder.id === yours?.id,
         ),
       ),
       ...standing.map(toCharacterSprite),

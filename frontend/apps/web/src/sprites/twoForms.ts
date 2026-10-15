@@ -1,4 +1,4 @@
-import { WORLD_UNIT_ZOOM, pixelsPerWorldUnit } from '../geometry/cameraMath';
+import { pixelsPerWorldUnit } from '../geometry/cameraMath';
 
 /**
  * The two ways the map has of showing a thing, and which of them is drawn at a given zoom.
@@ -17,7 +17,12 @@ import { WORLD_UNIT_ZOOM, pixelsPerWorldUnit } from '../geometry/cameraMath';
 export interface TwoForms {
   /** Its height on the ground, in world units. Absent for a thing that is only ever a sign. */
   groundHeight?: number;
-  /** Its height on the screen, in pixels. Absent for a thing that is only ever itself. */
+  /**
+   * Whether it becomes a mark, its icon, from `BECOMES_A_MARK_AT` out. A thing with none stays itself, shrinking with
+   * the map until it fades.
+   */
+  marked: boolean;
+  /** Its icon's height in pixels, for a thing with no ground form to take one from: a candidate. */
   iconHeight?: number;
 }
 
@@ -87,21 +92,32 @@ export interface Alphas {
 }
 
 /**
- * The zoom at which a thing's ground form has grown to the size of its icon, or null when it has not
- * got both forms to cross between.
+ * Where everything that becomes a mark becomes it: one zoom for every kind of thing, so the map turns from the world
+ * into its marks at once. Further in, every sprite stands in scale with the map, a building growing and shrinking
+ * with the ground under it; from here out, a thing that has a mark is its mark, the size of a word, and a thing that
+ * has none goes on shrinking with the map until everything fades at `DRAWN_FROM_ZOOM`.
  *
- * This is not a threshold chosen and then justified: it is where the two sizes are equal, which is what
- * makes the trade continuous. But the ground height that puts it at a useful zoom **is** chosen. At this
- * world's resolution a surveyed castle would be a tenth of a world unit and would cross over at zoom
- * fourteen, four levels past where the camera stops, so its ground form would never be seen. A ground
- * height here is a map convention, not a measurement.
+ * Chosen, not worked out: it is where a castle of eight units is 44 pixels, which reads as a word. A mark is as tall
+ * as its thing was here, so the trade changes the drawing and never the size. See decision record 0051.
  */
-export function crossoverZoom(forms: TwoForms): number | null {
-  const { groundHeight, iconHeight } = forms;
-  if (groundHeight === undefined || iconHeight === undefined || groundHeight <= 0) {
-    return null;
+export const BECOMES_A_MARK_AT = 8.46;
+
+/**
+ * How tall a thing's icon is on the screen, in pixels, or null for a thing that has none: as tall as its ground form
+ * stands at `BECOMES_A_MARK_AT`, or what it says itself when it has no ground form to measure.
+ */
+export function iconHeightOf(forms: TwoForms): number | null {
+  if (forms.groundHeight === undefined) {
+    return forms.iconHeight ?? null;
   }
-  return WORLD_UNIT_ZOOM + Math.log2(iconHeight / groundHeight);
+  return forms.marked ? forms.groundHeight * pixelsPerWorldUnit(BECOMES_A_MARK_AT) : null;
+}
+
+/** The zoom a thing trades its two forms at, `BECOMES_A_MARK_AT`, or null when it has not got both. */
+export function crossoverZoom(forms: TwoForms): number | null {
+  return forms.groundHeight !== undefined && forms.groundHeight > 0 && forms.marked
+    ? BECOMES_A_MARK_AT
+    : null;
 }
 
 /**
@@ -113,7 +129,7 @@ export function crossoverZoom(forms: TwoForms): number | null {
 export function sizesAt(zoom: number, forms: TwoForms): Sizes {
   return {
     ground: forms.groundHeight === undefined ? 0 : forms.groundHeight * pixelsPerWorldUnit(zoom),
-    icon: forms.iconHeight ?? 0,
+    icon: iconHeightOf(forms) ?? 0,
   };
 }
 

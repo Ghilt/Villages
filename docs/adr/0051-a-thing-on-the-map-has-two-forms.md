@@ -162,3 +162,12 @@ could be seen. Its icon is now its type's mark, a pin cut from `world/sprites/ma
 atlas, one a type and the ruin's, the same in every culture. The pin's point is the structure's place, so both forms
 still share the foot. The holder's pennant flies from the form that is more of the two: the building's tallest point
 close in, the pin's head far out.
+
+## Amendment, 2026-10-15: one zoom where things become marks, and only some do
+
+The crossover is no longer where each kind's two sizes happen to meet. It is one named zoom, `BECOMES_A_MARK_AT`
+(8.46) in `twoForms.ts`, for everything: further in, every sprite stands in scale with the map; from there out, a thing
+that has a mark is its mark, as tall as it stood at that zoom, so the size still never jumps. A thing with no mark goes
+on shrinking until everything fades at 7.25 (0096). Only a structure the player's house controls and a person have a
+mark, on Adam's word of 2026-10-15. A person, who crossed at 9.4, crosses with everything else, and stands three units
+tall so that their bust is sixteen pixels there, as it was.

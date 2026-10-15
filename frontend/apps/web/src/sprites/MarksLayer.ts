@@ -99,16 +99,30 @@ export function createMarksLayer(camera: CameraSource, textures: Textures): Mark
       (overTheFog('ground', entry.inVision) ? overIt : underTheFog).addChild(sprite);
       entry.ground = sprite;
     }
-    if (look.icon !== null) {
-      const sprite = new Sprite(look.icon);
-      sprite.anchor.set(look.iconAnchor, 1);
-      sprite.tint = spec.tint;
-      sprite.visible = false;
-      overIt.addChild(sprite);
-      entry.icon = sprite;
-    }
+    dressIcon(entry);
     dressPennant(entry);
     return entry;
+  }
+
+  /**
+   * Gives a mark the icon its look asks for, or takes it away: a structure that changes hands into the player's
+   * becomes able to be its pin, and one that leaves them loses it.
+   */
+  function dressIcon(entry: Entry): void {
+    const { icon, iconAnchor } = entry.look;
+    if (icon === null) {
+      entry.icon?.destroy();
+      entry.icon = null;
+      return;
+    }
+    if (entry.icon === null) {
+      entry.icon = new Sprite(icon);
+      entry.icon.visible = false;
+      overIt.addChild(entry.icon);
+    }
+    entry.icon.texture = icon;
+    entry.icon.anchor.set(iconAnchor, 1);
+    entry.icon.tint = entry.spec.tint;
   }
 
   /** Gives a mark the pennant its holder flies, in their colours, or takes it down when nobody holds it. */
@@ -245,10 +259,7 @@ export function createMarksLayer(camera: CameraSource, textures: Textures): Mark
             existing.ground.texture = existing.look.ground;
             existing.ground.tint = spec.tint;
           }
-          if (existing.icon !== null && existing.look.icon !== null) {
-            existing.icon.texture = existing.look.icon;
-            existing.icon.tint = spec.tint;
-          }
+          dressIcon(existing);
           dressPennant(existing);
           // A person who moved may have walked into vision or out of it.
           sideOfTheFog(existing);

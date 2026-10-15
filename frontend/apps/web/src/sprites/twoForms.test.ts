@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { WORLD_UNIT_ZOOM, pixelsPerWorldUnit } from '../geometry/cameraMath';
 import {
+  BECOMES_A_MARK_AT,
   CROSSFADE_MS,
   CROSSOVER_STICK,
   DRAWN_FROM_ZOOM,
@@ -11,6 +12,7 @@ import {
   crossoverZoom,
   easeTowards,
   formForHit,
+  iconHeightOf,
   isDrawn,
   midTrade,
   sizesAt,
@@ -18,12 +20,14 @@ import {
 } from './twoForms';
 import type { Form, TwoForms } from './twoForms';
 
-/** What a house is: a castle four world units tall, and a mark twenty-two pixels tall. */
-const HOUSE = { groundHeight: 4, iconHeight: 22 };
+/** A castle of yours: eight world units tall, and its pin far out. */
+const HOUSE: TwoForms = { groundHeight: 8, marked: true };
+/** Someone else's castle: the same building, and no mark. */
+const THEIRS: TwoForms = { groundHeight: 8, marked: false };
 /** What a candidate is: a sign and nothing else. */
-const CANDIDATE = { iconHeight: 26 };
+const CANDIDATE: TwoForms = { marked: true, iconHeight: 26 };
 /** What scenery will be: a thing and no sign for it. */
-const SCENERY = { groundHeight: 1.5 };
+const SCENERY: TwoForms = { groundHeight: 1.5, marked: false };
 
 /** Runs a trade to wherever it settles, as a still camera at one zoom would. */
 function settle(zoom: number, forms: TwoForms, from: Form = 'icon'): number {
@@ -37,26 +41,31 @@ function settle(zoom: number, forms: TwoForms, from: Form = 'icon'): number {
 }
 
 describe('where the two forms cross', () => {
-  it('is where the ground form has grown to the size of the icon', () => {
-    const at = crossoverZoom(HOUSE);
-
-    expect(at).not.toBeNull();
-    expect(at).toBeCloseTo(WORLD_UNIT_ZOOM + Math.log2(22 / 4), 9);
-    expect(at).toBeCloseTo(8.459, 3);
+  it('is the one zoom everything becomes a mark at, whatever its size', () => {
+    expect(crossoverZoom(HOUSE)).toBe(BECOMES_A_MARK_AT);
+    expect(crossoverZoom({ groundHeight: 3, marked: true })).toBe(BECOMES_A_MARK_AT);
+    expect(crossoverZoom({ groundHeight: 12.4, marked: true })).toBe(BECOMES_A_MARK_AT);
   });
 
   it('is nowhere for a thing with only one form, because there is nothing to cross', () => {
     expect(crossoverZoom(CANDIDATE)).toBeNull();
     expect(crossoverZoom(SCENERY)).toBeNull();
-    expect(crossoverZoom({})).toBeNull();
+    expect(crossoverZoom(THEIRS)).toBeNull();
+    expect(crossoverZoom({ marked: true })).toBeNull();
   });
 
   it('puts the two forms at the same size there, which is the point of it', () => {
-    const at = crossoverZoom(HOUSE) ?? 0;
-    const sizes = sizesAt(at, HOUSE);
+    const sizes = sizesAt(BECOMES_A_MARK_AT, HOUSE);
 
     expect(sizes.ground).toBeCloseTo(sizes.icon, 9);
-    expect(sizes.ground).toBeCloseTo(22, 9);
+    expect(sizes.icon).toBeCloseTo(44, 0);
+  });
+
+  it('gives a thing with no mark no icon at all, so it shrinks with the map until it fades', () => {
+    expect(iconHeightOf(THEIRS)).toBeNull();
+    expect(sizesAt(7.5, THEIRS).icon).toBe(0);
+    expect(wantedForm(7.5, THEIRS, 'icon')).toBe('ground');
+    expect(sizesAt(7.5, THEIRS).ground).toBeCloseTo(8 * pixelsPerWorldUnit(7.5), 9);
   });
 });
 
@@ -210,7 +219,7 @@ describe('whether a thing is drawn at all', () => {
 
   it('never makes a spared mark any larger, because the eye is about distance', () => {
     // Nothing about sparing reaches the sizes: `sizesAt` cannot be told, which is the guarantee.
-    expect(sizesAt(1, HOUSE).icon).toBe(22);
+    expect(sizesAt(1, HOUSE).icon).toBeCloseTo(sizesAt(BECOMES_A_MARK_AT, HOUSE).ground, 9);
   });
 });
 

@@ -4,7 +4,7 @@ import type { Texture } from 'pixi.js';
 import { lookOf, pennantOn } from './markLooks';
 import type { Textures } from './markTextures';
 import type { MapSprite } from './SpriteRenderer';
-import { crossoverZoom } from './twoForms';
+import { BECOMES_A_MARK_AT, crossoverZoom, iconHeightOf } from './twoForms';
 
 /** A picture as the renderer would have cut it, by its size alone, which is all a look reads of one. */
 const picture = (width: number, height: number) => ({ width, height }) as Texture;
@@ -24,25 +24,33 @@ const TEXTURES = {
   },
 } satisfies Textures;
 
-const structure = (groundHeight?: number): MapSprite => ({
+/** A structure of the player's house, which becomes a mark, unless it is said to be someone else's. */
+const structure = (groundHeight?: number, yours = true): MapSprite => ({
   id: 'structure:a',
   at: { lng: 18.07, lat: 59.33 },
   tint: 0xffffff,
   kind: 'structure',
   structure: { picture: 'mill', ...(groundHeight === undefined ? {} : { groundHeight }) },
+  ...(yours ? { yours } : {}),
 });
 
 describe("a structure's look", () => {
-  it('stands as tall as it was told, and crosses over where a castle of four units does, whatever its height', () => {
-    const castle = lookOf(structure(4), TEXTURES);
-    const mill = lookOf(structure(2.4), TEXTURES);
-    const higher = lookOf(structure(3), TEXTURES);
+  it('stands as tall as it was told, and becomes its mark where everything does, whatever its height', () => {
+    const castle = lookOf(structure(8), TEXTURES);
+    const mill = lookOf(structure(4.8), TEXTURES);
+    const higher = lookOf(structure(6), TEXTURES);
 
-    expect(mill.forms.groundHeight).toBe(2.4);
-    expect(crossoverZoom(castle.forms)).toBeCloseTo(8.46, 2);
-    expect(crossoverZoom(mill.forms)).toBeCloseTo(crossoverZoom(castle.forms)!, 6);
-    expect(crossoverZoom(higher.forms)).toBeCloseTo(crossoverZoom(castle.forms)!, 6);
-    expect(higher.forms.iconHeight).toBeGreaterThan(mill.forms.iconHeight!);
+    expect(mill.forms.groundHeight).toBe(4.8);
+    expect(crossoverZoom(castle.forms)).toBe(BECOMES_A_MARK_AT);
+    expect(crossoverZoom(mill.forms)).toBe(BECOMES_A_MARK_AT);
+    expect(iconHeightOf(higher.forms)!).toBeGreaterThan(iconHeightOf(mill.forms)!);
+  });
+
+  it("has no mark when it is someone else's: it stays itself and shrinks with the map", () => {
+    const theirs = lookOf(structure(8, false), TEXTURES);
+
+    expect(theirs.icon).toBeNull();
+    expect(crossoverZoom(theirs.forms)).toBeNull();
   });
 
   it('stands at a height of its own until the catalogue has said one', () => {

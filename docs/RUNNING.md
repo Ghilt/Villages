@@ -371,11 +371,12 @@ stage alone, with none of the debug panel in it (decision record 0079).
 - A structure on the map: its type's placeholder picture, drawn in code (`sprites/structurePictures.ts`) in its
   own colours and in the look of the culture under it, read off the master's culture map: European as drawn,
   Islamic in plaster, sandstone and green tile under a dome, East Asian in dark tile under a flared roof, African
-  in mud under a cone of thatch (`sprites/cultureStyles.ts`), a ruin too; as tall on the ground as `groundHeight` in the catalogue says at its level, and far out its type's
-  pin from `world/sprites/marks/structures/`, at the size of a word, from the zoom where it stops shrinking (8.46); its
-  own picture stands in for the pin until the atlas is read. One a house holds flies a pennant in the house's field,
-  over the building close in and on the pin's head far out; nobody's flies none. A type with no picture is a plain house. It is drawn from the zoom its
-  significance says, like a house, and under the fog outside vision. A click on one opens its **inspect window**,
+  in mud under a cone of thatch (`sprites/cultureStyles.ts`), a ruin too; as tall on the ground as `groundHeight` in the catalogue says at its level, and, when your house
+  controls it, far out its type's pin from `world/sprites/marks/structures/`, at the size of a word, from 8.46, where
+  every person becomes their bust too; its own picture stands in for the pin until the atlas is read. Anyone else's
+  has no pin: it shrinks with the map until everything fades at 7.25. One a house holds flies a pennant in the house's
+  field, over the building close in and on the pin's head far out; nobody's flies none. A type with no picture is a
+  plain house. It is drawn from zoom 7.25 like everything on the map, and under the fog outside vision. A click on one opens its **inspect window**,
   marked with a tower: its name, *a mill* or *an abbey* in the catalogue's word for the culture it stands in - a
   castle on Islamic ground is *a kasbah*, on African *a stockade* - who holds it with a way
   to that house, its level of the type's highest, what it yields whoever holds it a month and how far they see
