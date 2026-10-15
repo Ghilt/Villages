@@ -11,8 +11,10 @@ import villages.application.DialogueService
 import villages.application.Dice
 import villages.application.FoundHouseService
 import villages.application.FreshIds
+import villages.application.Islands
 import villages.application.QuestService
 import villages.application.fate.FateEngine
+import villages.application.fate.GroundIslands
 import villages.application.fate.GroundMaps
 import villages.application.fate.PlaceNamesByMaster
 import villages.application.fate.FirstPools
@@ -243,6 +245,11 @@ class WorldConfig {
     @Bean
     fun ground(@Value("\${villages.ground:../../world/ground}") folder: String): GroundMaps =
         FolderGround(Path.of(folder))
+
+    /** Which land is an island, read off the ground of the world's master. See decision record 0096. */
+    @Bean
+    fun islands(ground: GroundMaps, @Value("\${villages.master:$WORLD_MASTER}") master: String): Islands =
+        GroundIslands(ground, master)
 
     /** Each master's real names, from the copy `world:names` files beside its ground map. See 0087. */
     @Bean

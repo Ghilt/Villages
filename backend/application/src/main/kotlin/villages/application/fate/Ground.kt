@@ -2,6 +2,8 @@ package villages.application.fate
 
 import villages.domain.Location
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.math.PI
+import kotlin.math.cos
 import kotlin.math.floor
 
 /**
@@ -41,15 +43,41 @@ class GroundMap(
      * the whole map once, the first time it is asked about.
      */
     fun waterJoinedTo(mark: Int, index: Int): Int? =
-        joined.computeIfAbsent(mark) { follow(it) }[index].takeIf { it >= 0 }
+        joined.computeIfAbsent(mark) { follow { cell -> holds(cell, it) } }[index].takeIf { it >= 0 }
 
     private val joined = ConcurrentHashMap<Int, IntArray>()
 
-    private fun follow(mark: Int): IntArray {
+    /**
+     * The first cell, row by row, of the land that cell [index] is part of, joined side to side or corner to corner
+     * and across the antimeridian; null for water - the sea, the shallows and a lake. The same for every cell of one
+     * land mass, so a continent and an island are each one number. Followed through the whole map once, when first asked.
+     */
+    fun landJoinedTo(index: Int): Int? = land.first[index].takeIf { it >= 0 }
+
+    /** How big the land mass whose first cell is [first] is, in square kilometres: each cell measured at its latitude. */
+    fun areaOfLand(first: Int): Double = land.areas.getValue(first)
+
+    private class Land(val first: IntArray, val areas: Map<Int, Double>)
+
+    private val land: Land by lazy {
+        val water = classes.filterValues { it in WATER }.keys
+        val first = follow { cell -> (cells[cell * 2].toInt() and 0xFF) !in water }
+        val areas = HashMap<Int, Double>()
+        for (cell in first.indices) {
+            if (first[cell] >= 0) areas.merge(first[cell], areaOfCellIn(cell / width), Double::plus)
+        }
+        Land(first, areas)
+    }
+
+    /** How many square kilometres one cell of row [y] covers: narrower towards the poles, as the meridians close. */
+    private fun areaOfCellIn(y: Int): Double =
+        EQUATOR_KM / width * (MERIDIAN_KM / height) * cos((90 - (y + 0.5) / height * 180) * PI / 180)
+
+    private fun follow(holds: (Int) -> Boolean): IntArray {
         val first = IntArray(width * height) { -1 }
         val waiting = IntArray(width * height)
         for (start in first.indices) {
-            if (first[start] >= 0 || !holds(start, mark)) continue
+            if (first[start] >= 0 || !holds(start)) continue
             first[start] = start
             var head = 0
             var tail = 0
@@ -63,7 +91,7 @@ class GroundMap(
                     if (ny !in 0 until height) continue
                     for (dx in -1..1) {
                         val next = ny * width + Math.floorMod(x + dx, width)
-                        if (first[next] < 0 && holds(next, mark)) {
+                        if (first[next] < 0 && holds(next)) {
                             first[next] = start
                             waiting[tail++] = next
                         }
@@ -85,6 +113,13 @@ class GroundMap(
         const val COAST = 2
         const val LAKE = 4
         const val SEA = 8
+
+        /** The terrain classes that are water, so that the land is everything else, a river's own cells included. */
+        val WATER = setOf("ocean", "shallow-sea", "lake")
+
+        /** The world's girth at the equator and from pole to pole, in kilometres. */
+        private const val EQUATOR_KM = 40_075.0
+        private const val MERIDIAN_KM = 20_004.0
     }
 }
 
