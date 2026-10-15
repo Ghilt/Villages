@@ -1,0 +1,30 @@
+{
+  "type": "yourChoice",
+  "choice": {
+    "id": "ee000000-0000-4000-8000-00000000c501",
+    "prompt": "The abbot asks what the house will give.",
+    "options": [
+      {
+        "id": "ee000000-0000-4000-8000-000000000011",
+        "label": "Pledge your faith",
+        "detail": "Thirty piety, for half a year.",
+        "effect": {
+          "kind": "pledge",
+          "resource": "piety",
+          "amount": 30,
+          "until": 455083
+        }
+      },
+      {
+        "id": "ee000000-0000-4000-8000-000000000012",
+        "label": "Ask his blessing",
+        "detail": "A word in your favour.",
+        "effect": {
+          "kind": "grant",
+          "resource": "piety",
+          "amount": 5
+        }
+      }
+    ]
+  }
+}

@@ -85,10 +85,15 @@ private fun follows(
         HouseDecider.founded(state).treasury.enough(effect.resource, effect.amount, recordedAt)
         listOf(HouseResourceSpent(houseId, effect.resource, effect.amount, worldTime, recordedAt))
     }
+
+    // A pledge is decided by the treasury's own rule for one, so what it refuses here is what it refuses anywhere.
+    is Effect.Pledge -> HouseDecider.founded(state).treasury.decide(
+        PledgeResource(houseId, effect.pledgeId, effect.resource, effect.amount, effect.until, effect.purpose, worldTime, recordedAt),
+    )
 }
 
 /**
  * Whether taking an option or reaching a line with these effects costs the house anything: what a house that
  * cannot pay has to be able to answer otherwise than, in a choice as in a dialogue.
  */
-internal fun costsSomething(effects: List<Effect>): Boolean = effects.any { it is Effect.Spend }
+internal fun costsSomething(effects: List<Effect>): Boolean = effects.any { it is Effect.Spend || it is Effect.Pledge }

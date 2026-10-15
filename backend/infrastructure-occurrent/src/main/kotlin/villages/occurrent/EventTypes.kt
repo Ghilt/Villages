@@ -28,6 +28,9 @@ import villages.domain.PlayerRolled
 import villages.domain.PlayerLostDialogue
 import villages.domain.PlayerOfferedDialogue
 import villages.domain.PlayerOfferedQuest
+import villages.domain.PlayerMetQuestObjective
+import villages.domain.PlayerCompletedQuestNode
+import villages.domain.PlayerCompletedQuest
 import villages.domain.PlayerTookAction
 import villages.domain.StructureChangedHands
 import villages.domain.StructureLevelChanged
@@ -71,6 +74,9 @@ object EventTypes : CloudEventTypeMapper<Event> {
         PlayerLostDialogue::class to "villages.player.lostDialogue.v1",
         PlayerOfferedDialogue::class to "villages.player.offeredDialogue.v1",
         PlayerOfferedQuest::class to "villages.player.offeredQuest.v1",
+        PlayerMetQuestObjective::class to "villages.player.metQuestObjective.v1",
+        PlayerCompletedQuestNode::class to "villages.player.completedQuestNode.v1",
+        PlayerCompletedQuest::class to "villages.player.completedQuest.v1",
         PlayerRolled::class to "villages.player.rolled.v1",
         PlayerTookAction::class to "villages.player.tookAction.v1",
         HouseNamedSeat::class to "villages.house.namedSeat.v1",

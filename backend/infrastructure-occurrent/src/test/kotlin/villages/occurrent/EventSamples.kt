@@ -358,7 +358,7 @@ internal object EventSamples {
      */
     val cases: Map<String, Event> = mapOf(
         "villages.structure.slotFilled.v1.person" to agnesImprisoned,
-    )
+    ) + QuestEventSamples.cases
 
     val samples: Map<String, Event> = mapOf(
         "villages.character.aged.v1" to agnesAged,

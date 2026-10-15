@@ -95,5 +95,7 @@ export function gives(option: OptionView): string {
       return `founds ${effect.name}`;
     case 'converse':
       return `a conversation: ${effect.title}`;
+    case 'pledge':
+      return `pledges ${effect.amount} ${RESOURCE_WORDS[effect.resource].toLowerCase()}`;
   }
 }

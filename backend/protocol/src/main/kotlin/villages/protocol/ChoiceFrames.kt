@@ -46,6 +46,7 @@ data class OmenView(val key: String, val kind: String, val words: String, val va
     JsonSubTypes.Type(GrantView::class, name = "grant"),
     JsonSubTypes.Type(SpendView::class, name = "spend"),
     JsonSubTypes.Type(ConverseView::class, name = "converse"),
+    JsonSubTypes.Type(PledgeEffectView::class, name = "pledge"),
 )
 sealed interface EffectView
 
@@ -62,6 +63,13 @@ data class SpendView(val resource: String, val amount: Long) : EffectView
  * in it reaches the page as it is reached and never before. See decision records 0071 and 0083.
  */
 data class ConverseView(val title: String) : EffectView
+
+/**
+ * Some of a resource tied to an undertaking until a world-day, and given back whole then: what a quest's pledge
+ * costs. A wire name, as a grant's is. Not [PledgeView], which is a live pledge in a house's treasury. See decision
+ * record 0096.
+ */
+data class PledgeEffectView(val resource: String, val amount: Long, val until: Long) : EffectView
 
 /**
  * Take action: roll for this player's house. It says what the page is looking at and nothing it could work out for

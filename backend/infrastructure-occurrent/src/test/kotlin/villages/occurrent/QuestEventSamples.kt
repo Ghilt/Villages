@@ -1,5 +1,7 @@
 package villages.occurrent
 
+import villages.domain.Choice
+import villages.domain.ChoiceId
 import villages.domain.Dialogue
 import villages.domain.DialogueId
 import villages.domain.DialogueNode
@@ -13,8 +15,15 @@ import villages.domain.NodeId
 import villages.domain.Objective
 import villages.domain.ObjectiveId
 import villages.domain.ObjectiveNode
+import villages.domain.Option
+import villages.domain.OptionId
 import villages.domain.PlayerId
+import villages.domain.PlayerCompletedQuest
+import villages.domain.PlayerCompletedQuestNode
+import villages.domain.PlayerGivenChoice
+import villages.domain.PlayerMetQuestObjective
 import villages.domain.PlayerOfferedQuest
+import villages.domain.PledgeId
 import villages.domain.Quest
 import villages.domain.QuestId
 import villages.domain.Resource
@@ -106,7 +115,44 @@ internal object QuestEventSamples {
         recordedAt = noon,
     )
 
+    val wealthDelivered = PlayerMetQuestObjective(house, player, questId, NodeId("light"), ObjectiveId("wealth"), day, noon)
+    val pastTheLight = PlayerCompletedQuestNode(house, player, questId, NodeId("light"), NodeId("blessing"), day, noon)
+    val blessed = PlayerCompletedQuest(house, player, questId, day, noon)
+
+    /** A choice whose option pledges, which no quest event writes: the pledge effect pinned in a case of its own. */
+    val askedForAGift = PlayerGivenChoice(
+        houseId = house,
+        player = player,
+        choice = Choice(
+            id = ChoiceId(UUID.fromString("ee000000-0000-4000-8000-00000000c501")),
+            prompt = "The abbot asks what the house will give.",
+            options = listOf(
+                Option(
+                    OptionId(UUID.fromString("ee000000-0000-4000-8000-000000000011")),
+                    "Pledge your faith",
+                    "Thirty piety, for half a year.",
+                    Effect.Pledge(PledgeId(UUID.fromString("ee000000-0000-4000-8000-00000000d501")), Resource.PIETY, 30, WorldTime(455083), "The abbot of the isle"),
+                ),
+                Option(
+                    OptionId(UUID.fromString("ee000000-0000-4000-8000-000000000012")),
+                    "Ask his blessing",
+                    "A word in your favour.",
+                    Effect.Grant(Resource.PIETY, 5),
+                ),
+            ),
+        ),
+        worldTime = day,
+        recordedAt = noon,
+    )
+
+    val cases: Map<String, Event> = mapOf(
+        "villages.player.givenChoice.v1.pledge" to askedForAGift,
+    )
+
     val samples: Map<String, Event> = mapOf(
+        "villages.player.completedQuest.v1" to blessed,
+        "villages.player.completedQuestNode.v1" to pastTheLight,
+        "villages.player.metQuestObjective.v1" to wealthDelivered,
         "villages.player.offeredQuest.v1" to theAbbot,
     )
 }

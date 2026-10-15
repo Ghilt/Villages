@@ -46,8 +46,8 @@ export function impactWords(impact: RevealImpactView | undefined): string | null
 
 /**
  * What a line said did to the house, as the feed writes it under the line: each resource and how much,
- * given or, below nothing, taken. A founding has no place in a dialogue, and a conversation begun gives nothing,
- * so neither is one of them.
+ * given or, below nothing, taken. A founding has no place in a dialogue, a conversation begun gives nothing, and a
+ * pledge is given back whole, so none of them is one.
  */
 export function gainsOf(effects: readonly EffectView[]): readonly Gain[] {
   return effects.flatMap((effect): Gain[] => {
@@ -58,6 +58,7 @@ export function gainsOf(effects: readonly EffectView[]): readonly Gain[] {
         return [{ resource: effect.resource, amount: -effect.amount }];
       case 'foundAt':
       case 'converse':
+      case 'pledge':
         return [];
     }
   });

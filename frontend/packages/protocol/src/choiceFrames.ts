@@ -13,6 +13,13 @@ export const effectViewSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('spend'), resource: resourceNameSchema, amount: z.number().int().positive() }),
   /** A conversation begun, by the dialogue's title and nothing of what is said in it. See 0083. */
   z.object({ kind: z.literal('converse'), title: z.string() }),
+  /** Some of a resource tied to an undertaking until a world-day, and given back whole then. See 0096. */
+  z.object({
+    kind: z.literal('pledge'),
+    resource: resourceNameSchema,
+    amount: z.number().int().positive(),
+    until: z.number().int().nonnegative(),
+  }),
 ]);
 
 /** How good a rolled option is, by its lower-case name. See decision record 0083. */

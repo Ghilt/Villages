@@ -128,6 +128,26 @@ sealed interface Effect {
      * when the house was offered this dialogue before. See decision records 0071 and 0083.
      */
     data class Converse(val dialogue: Dialogue) : Effect
+
+    /**
+     * Tie some of a resource to an undertaking until a world-day, under a pledge's id: what a quest's pledge costs when
+     * it is met. The day and the id are worked out before the decision, as a pledge from the panel's are, because the
+     * calendar is not the domain's. Refused as pledging is, when the house has not that much free, so it costs
+     * something as a spend does. See decision record 0096.
+     */
+    data class Pledge(
+        val pledgeId: PledgeId,
+        val resource: Resource,
+        val amount: Long,
+        val until: WorldTime,
+        val purpose: String,
+    ) : Effect {
+        init {
+            if (amount <= 0) {
+                throw HouseError.InvalidAmount("a pledge is of more than nothing, and $amount is not")
+            }
+        }
+    }
 }
 
 /** The identity of one choice, so that an action can only answer the choice it was given. */

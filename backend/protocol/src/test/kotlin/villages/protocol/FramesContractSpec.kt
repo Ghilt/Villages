@@ -57,9 +57,8 @@ class FramesContractSpec : StringSpec({
     "the choice fixtures carry every kind of effect between them, so a new effect needs a fixture too" {
         val choices = serverFixtures.filter { it.name.startsWith("yourChoice") }
             .mapNotNull { (ProtocolJson.decodeServer(it.readText()) as YourChoice).choice }
-        val kinds = choices.flatMap { it.options }
-            .map { it.effect::class.simpleName!!.removeSuffix("View").replaceFirstChar(Char::lowercase) }
-            .distinct()
+        val named = EffectView::class.java.getAnnotation(JsonSubTypes::class.java).value.associate { it.value.java to it.name }
+        val kinds = choices.flatMap { it.options }.map { named.getValue(it.effect.javaClass) }.distinct()
 
         kinds shouldContainExactlyInAnyOrder namesDeclaredOn(EffectView::class.java)
     }

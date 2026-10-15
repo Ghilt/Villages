@@ -33,6 +33,9 @@ import villages.domain.HouseNamedSeat
 import villages.domain.PlayerLostDialogue
 import villages.domain.PlayerOfferedDialogue
 import villages.domain.PlayerOfferedQuest
+import villages.domain.PlayerMetQuestObjective
+import villages.domain.PlayerCompletedQuestNode
+import villages.domain.PlayerCompletedQuest
 import villages.domain.PlayerRolled
 import villages.domain.PlayerTookAction
 import villages.domain.StructureCommand
@@ -60,6 +63,9 @@ internal fun typeOf(event: HouseEvent): String = when (event) {
     is PlayerCompletedDialogue -> "villages.player.completedDialogue.v1"
     is PlayerLostDialogue -> "villages.player.lostDialogue.v1"
     is PlayerOfferedQuest -> "villages.player.offeredQuest.v1"
+    is PlayerMetQuestObjective -> "villages.player.metQuestObjective.v1"
+    is PlayerCompletedQuestNode -> "villages.player.completedQuestNode.v1"
+    is PlayerCompletedQuest -> "villages.player.completedQuest.v1"
     is PlayerRolled -> "villages.player.rolled.v1"
     is PlayerTookAction -> "villages.player.tookAction.v1"
 }
@@ -84,6 +90,9 @@ internal fun dataOf(event: HouseEvent): String = when (event) {
     is PlayerCompletedDialogue -> """{"dialogueId":"${event.dialogueId.value}"}"""
     is PlayerLostDialogue -> """{"dialogueId":"${event.dialogueId.value}"}"""
     is PlayerOfferedQuest -> """{"title":"${event.quest.title}","nodes":${event.quest.nodes.size}}"""
+    is PlayerMetQuestObjective -> """{"objectiveId":"${event.objectiveId.value}"}"""
+    is PlayerCompletedQuestNode -> """{"nodeId":"${event.nodeId.value}","onto":"${event.onto?.value}"}"""
+    is PlayerCompletedQuest -> """{"questId":"${event.questId.value}"}"""
     is PlayerRolled -> """{"rarity":"${event.rarity}","omens":${event.omens.size}}"""
     is PlayerTookAction -> """{"optionId":"${event.optionId.value}"}"""
 }

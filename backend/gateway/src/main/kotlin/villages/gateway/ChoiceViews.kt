@@ -12,6 +12,7 @@ import villages.protocol.FoundAtView
 import villages.protocol.GrantView
 import villages.protocol.OmenView
 import villages.protocol.OptionView
+import villages.protocol.PledgeEffectView
 import villages.protocol.Point
 import villages.protocol.SpendView
 
@@ -65,4 +66,6 @@ internal fun Effect.toView(): EffectView = when (this) {
     is Effect.Spend -> SpendView(resource = resource.toWire(), amount = amount)
 
     is Effect.Converse -> ConverseView(title = dialogue.title)
+
+    is Effect.Pledge -> PledgeEffectView(resource = resource.toWire(), amount = amount, until = until.day)
 }

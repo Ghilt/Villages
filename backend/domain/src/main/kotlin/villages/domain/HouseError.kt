@@ -33,6 +33,29 @@ sealed class HouseError(message: String) : DomainError(message) {
     /** A quest is offered once, so the same offer sent twice is refused rather than held twice. */
     data object QuestAlreadyOffered : HouseError("this house has already been offered that quest")
 
+    /** A move in a quest this house was never offered. */
+    data object NoSuchQuest : HouseError("this house was never offered that quest")
+
+    /** A move in a quest that has ended: completed, or lost. */
+    data object QuestOver : HouseError("that quest is over")
+
+    /** A move at a node the quest does not stand at: one passed, one ahead, or one lost. */
+    data object NotTheCurrentNode : HouseError("the quest does not stand at that node")
+
+    /** An objective the node where the quest stands does not ask for. */
+    data object NoSuchObjective : HouseError("that node has no such objective")
+
+    data object ObjectiveAlreadyMet : HouseError("that objective is met already")
+
+    /** The player pressing for an objective only the world can meet: a structure held, say. */
+    data object NotThePlayersToMeet : HouseError("that objective is met by the world, not by a press")
+
+    /** The world ticking an objective only the player's own press can meet, which pays for it. */
+    data object NotTheWorldsToMeet : HouseError("that objective is met by the player's own press")
+
+    /** Collecting at a node that is not a reward. */
+    data object NotAReward : HouseError("that node is not a reward")
+
     /** A house is asked one thing at a time, and this one has not been answered. */
     data object ChoicePending : HouseError("this house already has a choice to make")
 
