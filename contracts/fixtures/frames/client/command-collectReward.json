@@ -1,0 +1,9 @@
+{
+  "type": "command",
+  "commandId": "ee000000-0000-4000-8000-000000000042",
+  "command": {
+    "type": "collectReward",
+    "questId": "ee000000-0000-4000-8000-00000000a001",
+    "nodeId": "blessing"
+  }
+}

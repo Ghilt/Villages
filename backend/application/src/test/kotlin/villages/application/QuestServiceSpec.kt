@@ -6,21 +6,27 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import villages.domain.Banner
 import villages.domain.Charge
+import villages.domain.CompleteDialogueStep
 import villages.domain.DialogueNode
 import villages.domain.Division
 import villages.domain.FoundHouse
+import villages.domain.GrantResource
 import villages.domain.HouseCommand
 import villages.domain.HouseDecider
 import villages.domain.HouseError
 import villages.domain.HouseEvent
 import villages.domain.HouseId
 import villages.domain.HouseName
+import villages.domain.HouseResourcePledged
+import villages.domain.LineId
 import villages.domain.Location
 import villages.domain.NodeId
+import villages.domain.ObjectiveId
 import villages.domain.PlayerId
 import villages.domain.PlayerOfferedDialogue
 import villages.domain.PlayerOfferedQuest
 import villages.domain.QuestId
+import villages.domain.Resource
 import villages.domain.Tincture
 import villages.domain.WorldTime
 import villages.domain.walk
@@ -40,6 +46,21 @@ private class QuestHouses : HouseCommandExecutor {
     }
 }
 
+/** Months of thirty days, which is all a spec needs of the calendar. */
+private val monthsOfThirty = object : WorldCalendar {
+    override fun plusMonths(day: WorldTime, months: Long): WorldTime = day + months * 30
+
+    override fun monthsBetween(from: WorldTime, to: WorldTime): Long = (to.day - from.day) / 30
+}
+
+/** The quests a house was offered, read off its events, as the read model would have them. */
+private fun offered(houses: QuestHouses) = object : QuestsByHouse {
+    override fun of(house: HouseId): List<QuestRow> = houses.streams[house].orEmpty().filterIsInstance<PlayerOfferedQuest>()
+        .map { QuestRow(house, it.player, it.quest, emptyList(), QuestEnding.Open, "story", 1) }
+
+    override fun watch(listener: (QuestsChange) -> Unit): AutoCloseable = AutoCloseable {}
+}
+
 class QuestServiceSpec : StringSpec({
     val noon = Instant.parse("2026-09-04T12:00:00Z")
     val today = WorldTime(653_705)
@@ -57,7 +78,7 @@ class QuestServiceSpec : StringSpec({
             )
             houses.written.clear()
         }
-        return houses to QuestService(houses, clock = { noon }, world = { today })
+        return houses to QuestService(houses, clock = { noon }, world = { today }, calendar = monthsOfThirty, ids = { UUID.randomUUID() }, quests = offered(houses))
     }
 
     "the player's house is offered the abbot whole, and its first dialogue in the same story" {
@@ -95,5 +116,23 @@ class QuestServiceSpec : StringSpec({
         shouldThrow<HouseError.NoSuchHouse> { service.offerSample(ada, SampleQuests.ABBOT, Provenance.startedBy(sent)) }
         shouldThrow<IllegalArgumentException> { service.offerSample(ada, "nonesuch", Provenance.startedBy(sent)) }
         houses.written shouldBe emptyList()
+    }
+
+    "a pledge met by the player is tied for the months its objective asks, under the quest's title" {
+        val (houses, service) = rig()
+        val id = service.offerSample(ada, SampleQuests.ABBOT, Provenance.startedBy(sent))
+        val gate = (SampleQuests.named(SampleQuests.ABBOT, id).start() as DialogueNode).dialogue.id
+        for (line in listOf("faith", "pleased")) {
+            houses.execute(CompleteDialogueStep(house, gate, LineId(line), today, noon), Provenance.startedBy(UUID.randomUUID()))
+        }
+        houses.execute(GrantResource(house, Resource.PIETY, SampleQuests.GIFT, today, noon), Provenance.startedBy(UUID.randomUUID()))
+        houses.written.clear()
+
+        service.meet(ada, id, NodeId("gift"), ObjectiveId("piety"), Provenance.startedBy(UUID.randomUUID()))
+
+        val pledged = houses.written.map { it.first }.filterIsInstance<HouseResourcePledged>().single()
+        pledged.amount shouldBe SampleQuests.GIFT
+        pledged.until shouldBe today + SampleQuests.GIFT_MONTHS * 30L
+        pledged.purpose shouldBe "The abbot of the isle"
     }
 })

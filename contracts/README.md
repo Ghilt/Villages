@@ -136,3 +136,5 @@ recorded over. See decision record 0037. What each one changed:
 - **51** - `yourQuests`: the player's quests, each with only the nodes its walk draws - a question mark as its id, row and
   state, a node shown for what it is with its kind, title, and its dialogue, objectives or gifts - and the edges
   touching them, a stub where the far end is not drawn (decision record 0096).
+- **52** - `meetObjective` and `collectReward`, the player's own commands from the quests' pane: an objective met by a
+  press, by the quest's, the node's and the objective's ids, and a reward collected, by the quest's and the node's.

@@ -15,7 +15,7 @@ import {
   rollPayloadSchema,
 } from './choiceFrames';
 import { dialogueViewSchema } from './dialogueFrames';
-import { questViewSchema } from './questFrames';
+import { questCommandSchemas, questViewSchema } from './questFrames';
 import {
   structureArrivedSchema,
   structureChangedSchema,
@@ -209,11 +209,7 @@ export const commandPayloadSchema = z.discriminatedUnion('type', [
    * because a client that could write a dialogue could write itself a reward. Adam's lever. See 0071.
    */
   z.object({ type: z.literal('offerDialogue'), sample: z.string() }),
-  /**
-   * A sample quest, by its name: the name and none of the words, because a client that could write a quest could
-   * write itself a reward. Adam's lever. See decision record 0096.
-   */
-  z.object({ type: z.literal('offerQuest'), sample: z.string() }),
+  ...questCommandSchemas,
   /**
    * A step through one of the house's dialogues: the line that is the step, by its id within the dialogue - an
    * option of a dialogue choice, or the line the stretch read ends on. Whether it is the next step is the

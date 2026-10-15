@@ -34,6 +34,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
     JsonSubTypes.Type(TakeVisionPayload::class, name = "takeVision"),
     JsonSubTypes.Type(OfferDialoguePayload::class, name = "offerDialogue"),
     JsonSubTypes.Type(OfferQuestPayload::class, name = "offerQuest"),
+    JsonSubTypes.Type(MeetObjectivePayload::class, name = "meetObjective"),
+    JsonSubTypes.Type(CollectRewardPayload::class, name = "collectReward"),
     JsonSubTypes.Type(CompleteDialogueStepPayload::class, name = "completeDialogueStep"),
     JsonSubTypes.Type(RollPayload::class, name = "roll"),
     JsonSubTypes.Type(NextRarityPayload::class, name = "nextRarity"),
@@ -141,6 +143,16 @@ data class OfferDialoguePayload(val sample: String) : CommandPayload
  * write a quest could write itself a reward. Adam's lever. See decision record 0096.
  */
 data class OfferQuestPayload(val sample: String) : CommandPayload
+
+/**
+ * Meet one objective of the node a quest stands at, by the player's press: by the ids, and nothing of what it costs or
+ * for how long, which the house and the quest say. Whether it is the player's to meet, and whether the house can pay,
+ * is the house's to say, so the client names it and nothing else. See decision record 0096.
+ */
+data class MeetObjectivePayload(val questId: String, val nodeId: String, val objectiveId: String) : CommandPayload
+
+/** Collect the reward a quest stands at, by the ids. See decision record 0096. */
+data class CollectRewardPayload(val questId: String, val nodeId: String) : CommandPayload
 
 /**
  * Take a step through one of the house's dialogues: the line that is the step, by its id within the dialogue -

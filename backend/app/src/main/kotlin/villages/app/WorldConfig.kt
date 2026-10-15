@@ -184,8 +184,14 @@ class WorldConfig {
 
     /** Offering a house a quest. See decision record 0096. */
     @Bean
-    fun quests(world: EventWorld, clock: Clock, worldClock: WorldClock): QuestService =
-        QuestService(world.executor, clock = { clock.instant() }, world = worldClock)
+    fun quests(
+        world: EventWorld,
+        clock: Clock,
+        worldClock: WorldClock,
+        calendar: WorldCalendar,
+        ids: FreshIds,
+        questRows: QuestsProjection,
+    ): QuestService = QuestService(world.executor, { clock.instant() }, worldClock, calendar, ids, questRows)
 
     @Bean
     fun takeAction(world: EventWorld, clock: Clock, worldClock: WorldClock): TakeActionService =

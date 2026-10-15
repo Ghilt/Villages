@@ -1,0 +1,10 @@
+{
+  "type": "command",
+  "commandId": "ee000000-0000-4000-8000-000000000041",
+  "command": {
+    "type": "meetObjective",
+    "questId": "ee000000-0000-4000-8000-00000000a001",
+    "nodeId": "light",
+    "objectiveId": "wealth"
+  }
+}

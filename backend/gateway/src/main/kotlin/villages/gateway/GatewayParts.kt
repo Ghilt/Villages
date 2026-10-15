@@ -92,7 +92,7 @@ internal fun partsOf(
         StructuresPart(core, structuresOnTheMap, world),
         SightPart(core, sights),
         DialoguesPart(core, dialogues, dialogueRows),
-        QuestsPart(core, questRows),
+        QuestsPart(core, quests, questRows),
         ChoicesPart(core, arrival, takeAction, choices, rolls),
         StandsPart(stands),
         WatersPart(waters),

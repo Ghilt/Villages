@@ -78,6 +78,10 @@ export interface Session {
   pull(area: string, what: string, command: CommandPayload): void;
   /** Takes a step through one of the house's dialogues, from its pane: a player's command. See 0071. */
   completeDialogueStep(dialogueId: string, lineId: string, described: string): void;
+  /** Meets an objective of the node a quest stands at, by the player's press: a player's command. See 0096. */
+  meetObjective(questId: string, nodeId: string, objectiveId: string, described: string): void;
+  /** Collects the reward a quest stands at: a player's command. See 0096. */
+  collectReward(questId: string, nodeId: string, described: string): void;
   /**
    * Asks after a window's subject wherever the camera is: answered once into `inspected`. Asked once a connection,
    * because nothing is sent again, and not at all before the welcome. See decision record 0088.
@@ -304,6 +308,22 @@ export function createSession(ports: SessionPorts): Session {
         },
         (commandId) => ({ stepRefused: null, stepping: { commandId, dialogueId, lineId } }),
       );
+    },
+    meetObjective: (questId, nodeId, objectiveId, described) => {
+      issue({
+        lane: 'player',
+        area: 'quests',
+        what: described,
+        command: { type: 'meetObjective', questId, nodeId, objectiveId },
+      });
+    },
+    collectReward: (questId, nodeId, described) => {
+      issue({
+        lane: 'player',
+        area: 'quests',
+        what: described,
+        command: { type: 'collectReward', questId, nodeId },
+      });
     },
   };
 }
