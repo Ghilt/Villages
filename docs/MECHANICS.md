@@ -339,6 +339,129 @@ what it is meant to show. `ARCHITECTURE.md` says what it asks of the server and 
 
 ---
 
+## Quest
+
+A story with a goal, laid out as a road the player can see some of. Adam's own, described on 2026-10-15:
+nodes joined by edges, drawn in a pane over a picture, as a dialogue is.
+
+### What it is
+
+A quest is **offered to the house** and starts at once. It is a set of **nodes** joined by **edges**, read
+from the top down. It stands at one node at a time, and when that node is done it moves on along an edge to
+the next. It ends when its last node is done, or it is lost. A house can have several open at once, and keeps
+every one it has finished.
+
+A quest has:
+
+- **a title**, which the list shows;
+- **a scene**, the picture behind it, from the same folder as the dialogues' scenes;
+- **a start**, the node it begins at;
+- **everything shown from the start**, or not: a quest can draw every node from the first moment, so the
+  player can plan the whole road.
+
+Every node has:
+
+- **a title**, a line;
+- **hidden**, or not: a hidden node is a question mark until the quest reaches it;
+- **shown ahead**, or not: a node shown ahead is drawn from the moment the quest is offered, however far down
+  it is, with its edges in and out. A hidden node shown ahead is a question mark from the start. This is how
+  the final reward can be in view from the beginning, or a node half-way down can show three edges in and one
+  out, hinting at a crescendo;
+- **its edges out**, the nodes it leads to. More than one is a **fork**: the player will take one road and
+  lose the others.
+
+There are three kinds of node.
+
+**A dialogue node** offers the house a **Dialogue** when the quest reaches it, which opens in the dialogue pane.
+The node is done when the dialogue is finished, and **where the dialogue ends decides which edge is taken**:
+answer one way and the quest goes one way, answer another and it goes the other. Its edges each name which
+endings lead along them. If the dialogue lapses - a speaker dies before it is finished - the quest is lost
+with it, with the same line saying why.
+
+**An objective node** is a little **checklist** of one to six **objectives**. Every one of them must be ticked,
+in any order, and then the node is done. Pressing the node opens it. Each objective is a row: what is asked, a
+box, and a button when it is the player who meets it.
+
+**A reward node** is what the house gets: some of one or more resources. It waits with *Collect*; collecting
+pays it and the node is done. The last node of a quest is almost always a reward.
+
+**An objective is met by the player or by the world.** Three kinds come first, and more are added beside them
+without changing any of these:
+
+| Objective | Met | How |
+|---|---|---|
+| **Deliver** an amount of a resource | by the player | pressing *Deliver* pays it, and it is gone; refused while the house has not that much free |
+| **Pledge** an amount of a resource, for some months | by the player | pressing *Pledge* ties it to the quest's cause, and it comes back whole when the months are up; refused while not that much is free |
+| **Hold a structure** of a type, anywhere or on an **island** | by the world | ticked the moment the house holds one; ticked at once if it already does when the node is reached; and once ticked it stays ticked |
+
+*Defeat an enemy*, when there are enemies, is the next one the world will meet.
+
+**What the player sees of a quest:**
+
+- the nodes done, ticked;
+- the node it stands at, lit;
+- the nodes one edge ahead, as what they are, or as a question mark if hidden;
+- the nodes shown ahead, however far down;
+- the nodes **lost**: a node the house can no longer reach because the player took another road. It is drawn
+  **crossed out**, and shown for what it is, question mark or not, so the player sees what they missed;
+- and nothing else. An edge to a node that is not drawn is a short stub, so the player can see there is
+  something there.
+
+### What it is for
+
+**Carrying a story somewhere.** A dialogue is a moment; a quest is a road made of moments, with something to do
+between them and something at the end. It is what the other mechanics are strung on: a dialogue to open it,
+a structure to hold, resources to hand over or pledge, and a reward to close it.
+
+**Choices that cost.** A fork is a road lost for good, and the player sees what was on it. Answer the abbot
+badly and the cheap road is crossed out, and the house must build instead.
+
+**Planning.** What is shown ahead is the writer's to choose: a quest can keep everything a question mark, show
+only its end, hint at a climax half-way, or lay the whole road out to be planned.
+
+### Look and feel
+
+The quest's **map** stands over its scene, read from the top down: a node is a seal with the mark of its kind,
+the question mark for a hidden one, a cross over a lost one, and the one it stands at lit. The edges are lines
+between them - walked, ahead, or lost - and a stub where the far end is not drawn. A node shown ahead stands as
+far down as it really is, with the unknown above it left blank. A checklist opens from its node as a short list
+of rows with boxes. Every picture is a placeholder until Adam's.
+
+### UI
+
+**A pane, the quests' tab of the right column**, beside the dialogues, from the first quest a house is offered.
+Two states, as the dialogues have:
+
+- **The list**: the quests open, then those finished and lost, each with its title.
+- **A quest**: its map over its scene. A node pressed opens its card: an objective node's checklist, with
+  *Deliver* and *Pledge* greyed and saying why while the house cannot pay; a dialogue node's way to its
+  conversation, which turns to the dialogues' tab; a reward's gifts and *Collect*.
+
+It takes the right column's three sizes, as the dialogues do, and on a phone it is a pane like any other. A
+quest offered opens it, as a dialogue offered opens the dialogues. Whether each of *Deliver*, *Pledge*,
+*Collect* and the tab's button is a mark or words is Adam's to say before it is drawn.
+
+### Not decided
+
+- **Where quests come from**: the world, a roll's option, arrival, a place gone to; and where they are written.
+- **More objectives**: defeating an enemy, reaching a place, holding a key figure; a checklist where any one row
+  will do; a fork decided by whichever objective is met first.
+- **A resource objective that ticks itself** when the house has the amount, rather than being handed over.
+- **A dialogue node dealt by a roll** rather than offered when it is reached.
+- **Turning a quest down, abandoning one, or one expiring**, and requirements of a quest's own.
+- **A cause many houses pledge to.**
+- **The feel**: nodes lighting, edges drawing themselves, a reward landing.
+- **Every word and number of the sample**, *The abbot of the isle*.
+
+### Where it stands
+
+Planned, and nothing built. Its shape is decision record 0096: a quest offered whole on the house's stream,
+its moves and its lost nodes recorded, how it is shown worked out and never written, objectives met by the
+player in the house's own rules and by the world through one listener. `docs/plans/quests.md` is the order it
+is built in, one commit a step, and experiment 0020 is what it is meant to show.
+
+---
+
 ## Inspect window
 
 The way the game answers "what is that". Not the map's own: the map is only the first place a player

@@ -29,7 +29,8 @@ Characters and key figures are built and waiting on Adam's eye. Nothing else her
 after them wait on the same thing. Fog of war, the exception, is under way a step at a time, and so is
 character dialogue; the UI component library is built and waiting on Adam's eye, and so is the choice roll,
 and so is the origin map, the first of real names on the edited world. Structures are planned and not
-started; the world cache, the newest, is built and waiting on Adam's eye.
+started; the world cache is built and waiting on Adam's eye; and quests, the newest, are planned and not
+started.
 
 - **Characters and key figures**: the people of the world, each with a history of their own, and the
   house's tie to the few it acts through, shown in a pane in the corner beside the house status. The shape
@@ -111,6 +112,13 @@ started; the world cache, the newest, is built and waiting on Adam's eye.
   once. `npm run world:ready` becomes the one way the world is built, for the quick start and the debug panel
   alike, and the architecture page draws it with a strip of how a tree starts. The shape is decision record
   0095 and the steps, one commit each, are in `docs/plans/world-cache.md`. Adam's own, asked for on 2026-10-12.
+- **Quests**: a story with a goal, offered to a house whole and walked a node at a time - dialogue nodes,
+  objective nodes that open to a checklist, reward nodes collected at the end - drawn as a map of nodes and
+  edges over a scene, in a tab of the right column beside the dialogues. Some nodes are question marks, some
+  are shown ahead, and a fork loses a road for good, crossed out. Objectives are met by the player, handing over
+  or pledging resources, or by the world, a castle held on an island, which teaches the server what an island
+  is. The shape is decision record 0096, the steps, one commit each, are in `docs/plans/quests.md`, and the
+  hypothesis is experiment 0020. Planned and not started. Adam's own, planned with him on 2026-10-15.
 
 MongoDB and RabbitMQ are on the machine, in Docker, from `infra/docker-compose.yml`. The game server keeps
 its world in MongoDB whenever Docker is running, and RabbitMQ carries every event it stores to the read models.
