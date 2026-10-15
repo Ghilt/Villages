@@ -11,6 +11,7 @@ import villages.application.DialogueService
 import villages.application.Dice
 import villages.application.FoundHouseService
 import villages.application.FreshIds
+import villages.application.QuestService
 import villages.application.fate.FateEngine
 import villages.application.fate.GroundMaps
 import villages.application.fate.PlaceNamesByMaster
@@ -176,6 +177,11 @@ class WorldConfig {
         worldClock: WorldClock,
     ): DialogueService =
         DialogueService(world.executor, characters, houses, clock = { clock.instant() }, world = worldClock)
+
+    /** Offering a house a quest. See decision record 0096. */
+    @Bean
+    fun quests(world: EventWorld, clock: Clock, worldClock: WorldClock): QuestService =
+        QuestService(world.executor, clock = { clock.instant() }, world = worldClock)
 
     @Bean
     fun takeAction(world: EventWorld, clock: Clock, worldClock: WorldClock): TakeActionService =

@@ -1,0 +1,8 @@
+{
+  "type": "command",
+  "commandId": "ee000000-0000-4000-8000-000000000040",
+  "command": {
+    "type": "offerQuest",
+    "sample": "abbot"
+  }
+}

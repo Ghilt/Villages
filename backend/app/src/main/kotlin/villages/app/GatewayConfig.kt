@@ -10,6 +10,7 @@ import villages.application.DialogueService
 import villages.application.Faults
 import villages.application.FoundHouseService
 import villages.application.KeyFigureService
+import villages.application.QuestService
 import villages.application.ResourceService
 import villages.application.ScheduledLater
 import villages.application.Stands
@@ -64,6 +65,7 @@ class GatewayConfig {
         visions: VisionService,
         dialogues: DialogueService,
         dialogueRows: DialoguesProjection,
+        quests: QuestService,
         stands: Stands,
         ground: GroundMaps,
         placeNames: PlaceNamesByMaster,
@@ -101,6 +103,7 @@ class GatewayConfig {
             visions = visions,
             dialogues = dialogues,
             dialogueRows = dialogueRows,
+            quests = quests,
             stands = stands,
             waters = WaterAt(ground, placeNames),
             structures = structures,

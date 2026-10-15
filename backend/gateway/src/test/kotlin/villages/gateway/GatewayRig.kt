@@ -1,6 +1,7 @@
 package villages.gateway
 
 import villages.application.Antarctica
+import villages.application.QuestService
 import villages.application.StructureService
 import villages.application.AnonymousTokens
 import villages.application.Arrival
@@ -219,6 +220,7 @@ internal class Rig(
             ),
             dialogues = DialogueService(world, characters, houses, clock = { noon }, world = worldClock),
             dialogueRows = dialogueRows,
+            quests = QuestService(world, clock = { noon }, world = worldClock),
             stands = Stands { master, x, y -> if (master == "terrain") standsOnDisk[y * STAND_TILES + x] ?: ByteArray(0) else null },
             waters = WaterAt({ grounds[it] }, { names[it] }),
             structures = StructureService(world, houses, { noon }, worldClock, structuresOnTheMap, { UUID.randomUUID() }),

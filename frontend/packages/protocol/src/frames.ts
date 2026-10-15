@@ -209,6 +209,11 @@ export const commandPayloadSchema = z.discriminatedUnion('type', [
    */
   z.object({ type: z.literal('offerDialogue'), sample: z.string() }),
   /**
+   * A sample quest, by its name: the name and none of the words, because a client that could write a quest could
+   * write itself a reward. Adam's lever. See decision record 0096.
+   */
+  z.object({ type: z.literal('offerQuest'), sample: z.string() }),
+  /**
    * A step through one of the house's dialogues: the line that is the step, by its id within the dialogue - an
    * option of a dialogue choice, or the line the stretch read ends on. Whether it is the next step is the
    * house's to say, so the client names a line and nothing else. See decision record 0071.

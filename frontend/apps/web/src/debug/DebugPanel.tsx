@@ -11,6 +11,7 @@ import { CameraSection } from './CameraSection';
 import { CharactersSection } from './CharactersSection';
 import { ChoiceRollSection } from './ChoiceRollSection';
 import { DialoguesSection } from './DialoguesSection';
+import { QuestsSection } from './QuestsSection';
 import { MapSection } from './MapSection';
 import { ScenerySection } from './ScenerySection';
 import { ShadersSection } from './ShadersSection';
@@ -260,6 +261,7 @@ export function DebugPanel({ map, worldRoot, master, renderer, onRenderer }: Deb
           <StructuresSection map={map} />
           <CharactersSection map={map} />
           <DialoguesSection />
+          <QuestsSection />
           <ChoiceRollSection />
 
           <footer className="debug__foot">

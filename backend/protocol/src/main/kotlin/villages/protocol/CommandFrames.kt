@@ -33,6 +33,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
     JsonSubTypes.Type(GiveVisionPayload::class, name = "giveVision"),
     JsonSubTypes.Type(TakeVisionPayload::class, name = "takeVision"),
     JsonSubTypes.Type(OfferDialoguePayload::class, name = "offerDialogue"),
+    JsonSubTypes.Type(OfferQuestPayload::class, name = "offerQuest"),
     JsonSubTypes.Type(CompleteDialogueStepPayload::class, name = "completeDialogueStep"),
     JsonSubTypes.Type(RollPayload::class, name = "roll"),
     JsonSubTypes.Type(NextRarityPayload::class, name = "nextRarity"),
@@ -134,6 +135,12 @@ data class TakeVisionPayload(val visionId: String) : CommandPayload
  * lever. See decision record 0071.
  */
 data class OfferDialoguePayload(val sample: String) : CommandPayload
+
+/**
+ * Offer the player's house one of the sample quests, by its name. The name and none of the words: a client that could
+ * write a quest could write itself a reward. Adam's lever. See decision record 0096.
+ */
+data class OfferQuestPayload(val sample: String) : CommandPayload
 
 /**
  * Take a step through one of the house's dialogues: the line that is the step, by its id within the dialogue -

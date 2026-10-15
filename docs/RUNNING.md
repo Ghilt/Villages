@@ -198,6 +198,17 @@ stage alone, with none of the debug panel in it (decision record 0079).
   and on a phone in the other bay with the two at half each; each is a line of the log under `dialogues`.
   `offer a dialogue` opens the pane: from its strip in the spread, and on a phone into the bay the map is
   not in, at half. See `docs/adr/0071`, `0069` and `0070`, and `docs/plans/character-dialogue.md`.
+- Quests, in the same panel: the **Quests** section, below Dialogues. `offer a quest` offers the house the
+  server's sample, *the abbot of the isle*, off and saying why on hover while there is no house. It opens with a
+  dialogue at the gate, which arrives in the **dialogues** pane as any dialogue does and opens it: the abbot asks
+  what the house holds dearest, and *its faith* takes the road of a pledge of thirty piety, *its coffers* the road of
+  a castle held on an island and sixty wealth delivered, the other road lost. **That one lever is all the debug
+  panel does for quests**: it stands in for the world, which offers none yet, and meeting, collecting and seeing how
+  one ended are the player's. The page names the sample and sends none of its words. The asking and the answer are
+  lines of the log under `quests`; the quest itself, whole, and every move in it are at `/admin/inspect-events`,
+  the offer and the abbot's dialogue in one story, and finishing the dialogue writes the move past the gate and
+  the road lost in the story of its last step. The page is not yet sent the quest, and there is no pane for it.
+  See `docs/adr/0096` and `docs/plans/quests.md`.
 - The choice roll, the player's own: **Take action**, in the bottom middle of the spread once there is a
   house, put away at rest to a **chip** in the middle of the bottom row with what a roll costs beside it - a
   press anywhere on the chip but the button opens the pane out - ten wealth, and a house is founded

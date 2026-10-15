@@ -132,3 +132,4 @@ recorded over. See decision record 0037. What each one changed:
   none of its own; the castle it raises gives it, as vision given `from` that castle.
 - **49** - an effect can be a `pledge`: a resource, an amount, and the world-day it comes back on, what a quest's pledge
   objective costs when it is met (decision record 0096).
+- **50** - `offerQuest`, Adam's lever: one of the server's sample quests, by its name, offered to the sender's house.

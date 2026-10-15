@@ -6,6 +6,7 @@ import villages.application.DialogueService
 import villages.application.EventFeed
 import villages.application.FoundHouseService
 import villages.application.KeyFigureService
+import villages.application.QuestService
 import villages.application.RecentEvents
 import villages.application.ResourceService
 import villages.application.Start
@@ -87,6 +88,7 @@ internal class Instruments(
     private val kept: WorldKept,
     private val structures: StructureService,
     private val antarctica: Antarctica,
+    private val quests: QuestService,
 ) : Part {
     private val watching = ConcurrentHashMap.newKeySet<Gateway.Connection>()
 
@@ -176,6 +178,7 @@ internal class Instruments(
         }
         keyFigureLevers(commands)
         structureLevers(commands, open, structures, antarctica)
+        questLevers(commands, open, quests)
         // A place off the world is refused by the place itself, as `invalidLocation`.
         lever<GiveVisionPayload>(commands) { asking, payload ->
             visions.give(

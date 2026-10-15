@@ -162,6 +162,15 @@ export function offerDialogue(sample: string, described: string): void {
   pull('dialogues', `offering ${described}`, { type: 'offerDialogue', sample });
 }
 
+/*
+ * Offering the house a quest. Adam's lever, in the Quests section: nothing in the world offers one yet. It names one
+ * of the server's samples and sends none of its words. See decision record 0096.
+ */
+
+export function offerQuest(sample: string, described: string): void {
+  pull('quests', `offering ${described}`, { type: 'offerQuest', sample });
+}
+
 /**
  * The next roll's rarity, whatever the throw, or the throw again when null: the world's luck and not the player's
  * hand, so a legendary can be seen without a few hundred rolls. See decision record 0083.

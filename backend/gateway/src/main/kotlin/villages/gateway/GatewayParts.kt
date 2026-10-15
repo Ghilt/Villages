@@ -14,6 +14,7 @@ import villages.application.HousesByCell
 import villages.application.HousesByPlayer
 import villages.application.KeyFigureService
 import villages.application.KeyFiguresByHouse
+import villages.application.QuestService
 import villages.application.RecentEvents
 import villages.application.ResourceService
 import villages.application.SightsByHouse
@@ -53,6 +54,7 @@ class Mechanics(
     val visions: VisionService,
     val dialogues: DialogueService,
     val dialogueRows: DialoguesByHouse,
+    val quests: QuestService,
     val stands: Stands = Stands { _, _, _ -> null },
     val waters: WaterAt = WaterAt.NOWHERE,
     val structures: StructureService,
@@ -93,6 +95,6 @@ internal fun partsOf(
         WatersPart(waters),
         TimelinePart(),
         InspectingPart(houseById, onTheMap, structuresOnTheMap, world),
-        Instruments(instrumentsOpen, core, events, recent, emptyTheWorld, foundHouse, resources, keyFigures, visions, dialogues, rolls, worldKept, structures, antarctica),
+        Instruments(instrumentsOpen, core, events, recent, emptyTheWorld, foundHouse, resources, keyFigures, visions, dialogues, rolls, worldKept, structures, antarctica, quests),
     )
 }
