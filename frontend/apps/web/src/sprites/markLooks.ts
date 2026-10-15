@@ -2,7 +2,7 @@ import type { Texture } from 'pixi.js';
 
 import type { Textures } from './markTextures';
 import type { MapSprite } from './SpriteRenderer';
-import type { TwoForms } from './twoForms';
+import type { Form, TwoForms } from './twoForms';
 
 /*
  * What each mark is drawn as. The marks layer is the same for everything on the map - two forms traded at the
@@ -36,6 +36,9 @@ const KINDS: Record<Exclude<MapSprite['kind'], 'structure'>, TwoForms> = {
  */
 const SIGN_PER_UNIT = 5.5;
 
+/** Where a pennant stands on a structure's pin: the top of its head, so the holder's colours fly over the sign. */
+const PIN_TOP = { across: 0.5, down: 0 };
+
 /** How tall a structure stands when the catalogue has not said, as it has not before it is read. */
 const UNSAID_HEIGHT = 6;
 
@@ -55,42 +58,51 @@ export interface Look {
   iconAnchor: number;
   /** Where a pennant stands on the picture, as fractions of its width and height, or null for one that flies none. */
   flag: { across: number; down: number } | null;
+  /** Where it stands on the sign, which is another picture: the top of a structure's pin. */
+  iconFlag: { across: number; down: number } | null;
 }
 
 /** The least a pennant is drawn, in pixels: smaller, the holder's colours could not be told at the size of a word. */
 const PENNANT_LEAST = 11;
 
 /**
- * Where a mark's pennant flies, drawn this tall on the screen and standing at this point: from where its picture
- * says, half as tall as the mark and never less than `PENNANT_LEAST`. Null for a look that flies none.
+ * Where a mark's pennant flies, drawn this tall on the screen and standing at this point, over the form that is
+ * showing: from where its picture says, half as tall as the mark and never less than `PENNANT_LEAST`. Null for a look
+ * that flies none.
  */
 export function pennantOn(
   look: Look,
   tall: number,
   at: { x: number; y: number },
+  form: Form = 'ground',
 ): { x: number; y: number; height: number } | null {
-  if (look.flag === null || look.ground === null || tall <= 0) {
+  const picture = form === 'ground' ? look.ground : look.icon;
+  const flag = form === 'ground' ? look.flag : look.iconFlag;
+  if (flag === null || picture === null || tall <= 0) {
     return null;
   }
-  const wide = (tall * look.ground.width) / look.ground.height;
+  const wide = (tall * picture.width) / picture.height;
   return {
-    x: at.x + (look.flag.across - 0.5) * wide,
-    y: at.y - (1 - look.flag.down) * tall,
+    x: at.x + (flag.across - 0.5) * wide,
+    y: at.y - (1 - flag.down) * tall,
     height: Math.max(tall * 0.5, PENNANT_LEAST),
   };
 }
 
 export function lookOf(spec: MapSprite, textures: Textures): Look {
   if (spec.kind === 'structure') {
-    // Until the type marks are cut (step 13), a structure's sign is its own picture at the size of a word.
-    const picture = textures.structures.of(spec.structure?.picture ?? '');
+    // Far out a structure is its type's pin, once the atlas has been read; until then its own picture at that size.
+    const key = spec.structure?.picture ?? '';
+    const picture = textures.structures.of(key);
+    const mark = textures.structures.markOf(key);
     const groundHeight = spec.structure?.groundHeight ?? UNSAID_HEIGHT;
     return {
       forms: { groundHeight, iconHeight: groundHeight * SIGN_PER_UNIT },
       ground: picture.texture,
-      icon: picture.texture,
+      icon: mark ?? picture.texture,
       iconAnchor: 0.5,
       flag: picture.flag,
+      iconFlag: mark === null ? picture.flag : PIN_TOP,
     };
   }
   const forms = KINDS[spec.kind];
@@ -101,5 +113,6 @@ export function lookOf(spec: MapSprite, textures: Textures): Look {
     icon: forms.iconHeight === undefined ? null : person ? textures.bust : textures.candidate,
     iconAnchor: spec.kind === 'candidate' ? 0 : 0.5,
     flag: null,
+    iconFlag: null,
   };
 }

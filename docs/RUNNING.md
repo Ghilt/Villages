@@ -371,9 +371,10 @@ stage alone, with none of the debug panel in it (decision record 0079).
 - A structure on the map: its type's placeholder picture, drawn in code (`sprites/structurePictures.ts`) in its
   own colours and in the look of the culture under it, read off the master's culture map: European as drawn,
   Islamic in plaster, sandstone and green tile under a dome, East Asian in dark tile under a flared roof, African
-  in mud under a cone of thatch (`sprites/cultureStyles.ts`), a ruin too; as tall on the ground as `groundHeight` in the catalogue says at its level, and far out the same
-  picture at the size of a word, crossing over where a house's castle does. One a house holds flies a pennant in
-  the house's field; nobody's flies none. A type with no picture is a plain house. It is drawn from the zoom its
+  in mud under a cone of thatch (`sprites/cultureStyles.ts`), a ruin too; as tall on the ground as `groundHeight` in the catalogue says at its level, and far out its type's
+  pin from `world/sprites/marks/structures/`, at the size of a word, from the zoom where it stops shrinking (8.46); its
+  own picture stands in for the pin until the atlas is read. One a house holds flies a pennant in the house's field,
+  over the building close in and on the pin's head far out; nobody's flies none. A type with no picture is a plain house. It is drawn from the zoom its
   significance says, like a house, and under the fog outside vision. A click on one opens its **inspect window**,
   marked with a tower: its name, *a mill* or *an abbey* in the catalogue's word for the culture it stands in - a
   castle on Islamic ground is *a kasbah*, on African *a stockade* - who holds it with a way

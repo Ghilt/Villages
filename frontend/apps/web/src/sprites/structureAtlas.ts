@@ -50,11 +50,16 @@ export async function loadStructureArt(pictures: StructurePictures): Promise<boo
       scaleMode: 'linear',
     });
     pictures.paint(file, source);
-    const frames = Object.values(file.frames);
-    const painted = frames.filter((one) => !one.placeholder).length;
+    const frames = Object.entries(file.frames);
+    const said = (which: typeof frames) => {
+      const painted = which.filter(([, one]) => !one.placeholder).length;
+      return `${painted} painted and ${which.length - painted} placeholders`;
+    };
+    const marks = frames.filter(([key]) => key.startsWith('mark:'));
+    const drawings = frames.filter(([key]) => !key.startsWith('mark:'));
     note(
       'structures',
-      `${frames.length} pictures of structures, ${painted} painted and ${frames.length - painted} placeholders`,
+      `${drawings.length} pictures of structures, ${said(drawings)}; ${marks.length} marks, ${said(marks)}`,
     );
     return true;
   } catch (cause) {

@@ -154,3 +154,11 @@ so a castle of the first level is eight units and stands a hundred and twenty-ei
 sign is still `SIGN_PER_UNIT` pixels a unit, so it doubles too, to forty-four pixels for that castle, and the
 crossover stays at 8.46: the zoom where the building stops shrinking is unmoved, and that is where it becomes its
 mark. The figures above, four units and sixty-four pixels, are the house's of 2026-09-20.
+
+## Amendment, 2026-10-15: a structure's icon is its type's pin
+
+Until now a structure's icon was its own picture at the size of a word, so the trade at 8.46 changed nothing that
+could be seen. Its icon is now its type's mark, a pin cut from `world/sprites/marks/structures/` into the structures'
+atlas, one a type and the ruin's, the same in every culture. The pin's point is the structure's place, so both forms
+still share the foot. The holder's pennant flies from the form that is more of the two: the building's tallest point
+close in, the pin's head far out.

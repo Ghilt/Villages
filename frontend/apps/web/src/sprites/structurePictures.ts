@@ -7,6 +7,7 @@ import {
   INK,
   RUIN_PICTURE,
   pictureFor,
+  markKey,
   pictureKey,
   styled,
 } from '@villages/world';
@@ -71,6 +72,11 @@ function draw(picture: Picture, rasterise: Rasterise): StructurePicture {
  */
 export interface StructurePictures {
   of(key: string): StructurePicture;
+  /**
+   * The mark of the picture asked for by `pictureKey`, the same in every culture: what the map draws far out. Null
+   * until the atlas is read, and the structure's own picture stands for its mark until then.
+   */
+  markOf(key: string): Texture | null;
   /** The pictures cut into an atlas by `world:structures`, drawn in place of the ones drawn in code from now on. */
   paint(file: StructureAtlasFile, source: TextureSource): void;
 }
@@ -92,6 +98,7 @@ export function buildStructurePictures(rasterise: Rasterise): StructurePictures 
       const asked = `${picture}@${culture}`;
       return painted.get(asked) ?? drawn.get(asked) ?? drawn.get(`@${culture}`) ?? drawn.get('@european')!;
     },
+    markOf: (key) => painted.get(markKey(key.split('@')[0] ?? ''))?.texture ?? null,
     paint: (file, source) => {
       for (const one of painted.values()) one.texture.destroy();
       painted.clear();

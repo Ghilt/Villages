@@ -10,6 +10,7 @@ import { crossoverZoom } from './twoForms';
 const picture = (width: number, height: number) => ({ width, height }) as Texture;
 
 const MILL = picture(120, 160);
+const PIN = picture(100, 130);
 const TEXTURES = {
   candidate: picture(44, 64),
   figure: picture(80, 160),
@@ -18,6 +19,7 @@ const TEXTURES = {
   pennant: picture(49, 64),
   structures: {
     of: (type: string) => ({ texture: MILL, flag: { across: type === 'mill' ? 0.5 : 0.25, down: 0 } }),
+    markOf: (type: string) => (type === 'castle' ? PIN : null),
     paint: () => {},
   },
 } satisfies Textures;
@@ -53,6 +55,14 @@ describe("a structure's look", () => {
     expect(look.ground).toBe(MILL);
     expect(look.icon).toBe(MILL);
     expect(look.flag).toEqual({ across: 0.5, down: 0 });
+  });
+
+  it("is its type's pin far out once the marks are cut, and its pennant flies from the top of the pin", () => {
+    const castle = lookOf({ ...structure(8), structure: { picture: 'castle', groundHeight: 8 } }, TEXTURES);
+    expect(castle.ground).toBe(MILL);
+    expect(castle.icon).toBe(PIN);
+    // A pin drawn 130 tall is 100 wide, and its pennant stands on its head, over the place.
+    expect(pennantOn(castle, 130, { x: 200, y: 300 }, 'icon')).toEqual({ x: 200, y: 170, height: 65 });
   });
 
   it('flies no pennant on anything that is not a structure', () => {

@@ -1,6 +1,7 @@
 import type { Container, Sprite } from 'pixi.js';
 
 import { pennantOn } from './markLooks';
+import { formForHit } from './twoForms';
 import type { Look } from './markLooks';
 import type { DrawnSprite, MapSprite } from './SpriteRenderer';
 import type { Form } from './twoForms';
@@ -78,12 +79,15 @@ export function letGo(entry: Entry): void {
   entry.pennant?.destroy();
 }
 
-/** Flies a mark's pennant over it as tall as it is drawn, `tall`, standing at `at`, as `pennantOn` says. */
+/**
+ * Flies a mark's pennant over it as tall as it is drawn, `tall`, standing at `at`, as `pennantOn` says, from the form
+ * that is more of the two.
+ */
 export function flyPennant(entry: Entry, tall: number, at: { x: number; y: number }): void {
   if (entry.pennant === null) {
     return;
   }
-  const flies = pennantOn(entry.look, tall, at);
+  const flies = pennantOn(entry.look, tall, at, formForHit(entry.blend));
   entry.pennant.visible = flies !== null;
   if (flies !== null) {
     entry.pennant.alpha = entry.presence;
