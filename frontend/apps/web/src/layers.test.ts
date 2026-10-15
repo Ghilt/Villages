@@ -41,6 +41,8 @@ const SIDEWAYS: readonly (readonly [string, string])[] = [
   ['dialogues', 'house'],
   // A quest's map is drawn over its scene, as a conversation is.
   ['quests', 'dialogues'],
+  // An objective says what it asks in the player's words for a resource, as a dealt option does.
+  ['quests', 'house'],
   // A dealt option says what it gives in the player's words for a resource.
   ['choice', 'house'],
   ['inspect', 'figures'],

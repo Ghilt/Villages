@@ -144,6 +144,19 @@ export function completeDialogueStep(dialogueId: string, lineId: string, describ
 }
 
 /**
+ * Meets an objective of the node a quest stands at, from its pane, and collects a reward: the player's own commands,
+ * so nothing else is sent until each is answered. Whether the house can pay is the house's to say, and a refusal
+ * comes back as one. See decision record 0096.
+ */
+export function meetObjective(questId: string, nodeId: string, objectiveId: string, described: string): void {
+  session.meetObjective(questId, nodeId, objectiveId, described);
+}
+
+export function collectReward(questId: string, nodeId: string, described: string): void {
+  session.collectReward(questId, nodeId, described);
+}
+
+/**
  * Starts over as a new player: forgets who this browser was and reloads.
  *
  * The house the old player founded stays in the world as somebody's, because events are never deleted.

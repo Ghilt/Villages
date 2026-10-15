@@ -1,17 +1,26 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { questLayout } from '@villages/client-core';
-import type { QuestView } from '@villages/protocol';
+import { canAct, freeNow, questLayout } from '@villages/client-core';
+import type { QuestNodeView, QuestView, ResourceName } from '@villages/protocol';
 
+import { DIALOGUE_PANE } from '../dialogues/pane';
 import { Scene } from '../dialogues/Scene';
-import { sessionStore } from '../net/gateway';
+import { openConversation } from '../dialogues/toOpen';
+import { RESOURCE_WORDS } from '../house/describe';
+import { collectReward, meetObjective, sessionStore } from '../net/gateway';
+import { arrive } from '../stage/arrive';
 import { Icon } from '../stage/Icons';
 import { PaneSizeControl } from '../stage/PaneSizeControl';
 import type { Room } from '../stage/panes';
 import { useStore } from '../store/useStore';
+import { MarkButton } from '../ui/button/Button';
+import { Container } from '../ui/container/Container';
+import { Mark } from '../ui/mark/Mark';
+import type { MarkName } from '../ui/mark/Mark';
+import { ChecklistRow } from '../ui/quest/ChecklistRow';
 import { QuestMap } from '../ui/quest/QuestMap';
 import type { MapNode } from '../ui/quest/QuestMap';
-import { howMany, type ListedQuest, listOf } from './describe';
+import { howMany, type ListedQuest, listOf, objectiveWords } from './describe';
 import { questOpened, questToOpenStore } from './toOpen';
 
 /**
@@ -112,6 +121,18 @@ function QuestOpen({ quest, room, onBack }: { quest: QuestView; room: Room; onBa
   }));
   const area = useRef<HTMLDivElement | null>(null);
   const width = useWidth(area);
+  // The node whose card is open, by id. A dialogue node opens its conversation instead, on the dialogues' tab.
+  const [chosen, setChosen] = useState<string | undefined>(undefined);
+  const card = quest.nodes.find((node) => node.id === chosen);
+  const press = (id: string) => {
+    const node = quest.nodes.find((one) => one.id === id);
+    if (node?.kind === 'dialogue' && node.dialogueId !== undefined && node.state !== 'lost') {
+      openConversation(node.dialogueId);
+      arrive(DIALOGUE_PANE.id, { inTheSpread: 'small' });
+      return;
+    }
+    setChosen((was) => (was === id ? undefined : id));
+  };
 
   return (
     <section className={`quests quests--${room.size} quests--open`} aria-label={quest.title}>
@@ -137,12 +158,120 @@ function QuestOpen({ quest, room, onBack }: { quest: QuestView; room: Room; onBa
             edges={quest.edges}
             width={Math.min(width, WIDEST_MAP)}
             label={quest.title}
+            onPress={press}
+            {...(chosen === undefined ? {} : { chosen })}
           />
         )}
+        {card !== undefined && <NodeCard quest={quest} node={card} />}
       </div>
     </section>
   );
 }
+
+/**
+ * What a node holds, under the map once it is pressed: its checklist, each row with the mark that meets it while the
+ * quest stands there and the player is the one who meets it, greyed with what the house has free while it cannot pay;
+ * or what a reward gives, and *Collect* while the quest stands at it. A question mark is not yet known, and a node lost
+ * says so. The marks are Adam's word of 2026-10-15.
+ */
+function NodeCard({ quest, node }: { quest: QuestView; node: QuestNodeView }) {
+  const resources = useStore(sessionStore, (state) => state.yourHouse?.resources ?? null);
+  const acting = !useStore(sessionStore, canAct);
+  const here = node.state === 'current';
+  const free = (resource: ResourceName): number =>
+    resources === null ? 0 : Math.floor(freeNow(resources[resource], Date.now()));
+  return (
+    <div className="quests__card">
+      <Container recipe="card.figure">
+        <h3 className="quests__card-title">{node.title ?? 'Not yet known'}</h3>
+        {node.state === 'lost' && (
+          <p className="quests__card-line">Lost: the road taken does not lead here.</p>
+        )}
+        {node.kind === undefined && node.state !== 'lost' && (
+          <p className="quests__card-line">What waits here is shown when the quest reaches it.</p>
+        )}
+        {(node.objectives ?? []).map((objective) => {
+          const words = objectiveWords(objective);
+          const lead = objective.kind === 'hold' ? 'tower' : MARK_OF[objective.resource];
+          if (objective.kind === 'hold') {
+            return (
+              <ChecklistRow
+                key={objective.id}
+                words={words}
+                lead={<Mark name={lead} size={17} />}
+                met={objective.met}
+                {...(objective.met ? {} : { note: 'Ticked when your house holds one.' })}
+              />
+            );
+          }
+          const short = free(objective.resource) < objective.amount;
+          const what = RESOURCE_WORDS[objective.resource].toLowerCase();
+          return (
+            <ChecklistRow
+              key={objective.id}
+              words={words}
+              lead={<Mark name={lead} size={17} />}
+              met={objective.met}
+              {...(here && !objective.met
+                ? {
+                    action: {
+                      mark: objective.kind,
+                      label: words,
+                      disabled: short || acting,
+                      onPress: () =>
+                        meetObjective(
+                          quest.id,
+                          node.id,
+                          objective.id,
+                          `meeting "${words}" in "${quest.title}"`,
+                        ),
+                    },
+                  }
+                : {})}
+              {...(here && !objective.met && short
+                ? { note: `Your house has ${free(objective.resource)} ${what} free.` }
+                : {})}
+            />
+          );
+        })}
+        {node.kind === 'reward' && (
+          <div className="quests__gifts">
+            {(node.gives ?? []).map((gift, at) =>
+              gift.kind === 'grant' ? (
+                <span key={at} className="quests__gift">
+                  <Mark name={MARK_OF[gift.resource]} size={17} />+{gift.amount}
+                </span>
+              ) : null,
+            )}
+            {here && (
+              <MarkButton
+                label={`Collect ${node.title ?? 'the reward'}`}
+                mark="collect"
+                disabled={acting}
+                onClick={() =>
+                  collectReward(
+                    quest.id,
+                    node.id,
+                    `collecting "${node.title ?? 'the reward'}" in "${quest.title}"`,
+                  )
+                }
+              />
+            )}
+          </div>
+        )}
+      </Container>
+    </div>
+  );
+}
+
+/** A resource's mark in the library, by its wire name: the library calls Domain `domain`. */
+const MARK_OF: Record<ResourceName, MarkName> = {
+  wealth: 'wealth',
+  naturalDomain: 'domain',
+  influence: 'influence',
+  reason: 'reason',
+  piety: 'piety',
+};
 
 /** How wide an element is, kept current as its pane is resized. */
 function useWidth(element: React.RefObject<HTMLElement | null>): number {

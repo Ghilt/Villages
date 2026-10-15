@@ -284,3 +284,28 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/*
+ * The way onward from a finished conversation a quest led to: the quest by name and the needle, which means there,
+ * where *continue* stood. Adam's word of 2026-10-15; see decision record 0096.
+ */
+.dialogues__onward {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 100%;
+  padding-inline: 0.9rem;
+}
+
+/* The name whole, on a second line in a narrow column, because a quest cut short is no way to it. */
+.dialogues__onward-title {
+  min-width: 0;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+.dialogues__onward .icon {
+  flex: none;
+  width: 1.1em;
+  height: 1.1em;
+}

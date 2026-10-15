@@ -8,6 +8,8 @@ import { lookingNow } from './looking';
 import { DIALOGUE_PANE } from './dialogues/pane';
 import { QUEST_PANE } from './quests/pane';
 import { Quests } from './quests/Quests';
+import { openQuest } from './quests/toOpen';
+import { arrive } from './stage/arrive';
 import { Dialogues } from './dialogues/Dialogues';
 import { KEY_FIGURES_PANE } from './figures/pane';
 import { KeyFigures } from './figures/KeyFigures';
@@ -51,6 +53,12 @@ interface Standing {
   draw: (room: Room, along: Along, going: readonly Pane[]) => ReactNode;
 }
 
+/** Turn to a quest from a conversation that is part of it: its tab comes up, on the quest's map. See 0096. */
+function turnToQuest(questId: string): void {
+  openQuest(questId);
+  arrive(QUEST_PANE.id, { inTheSpread: 'small' });
+}
+
 const STANDING: readonly Standing[] = [
   { pane: HOUSE_PANE, draw: (room) => <HouseStatus room={room} /> },
   { pane: KEY_FIGURES_PANE, draw: (room) => <KeyFigures room={room} /> },
@@ -75,7 +83,9 @@ const STANDING: readonly Standing[] = [
   {
     pane: DIALOGUE_PANE,
     stands: (session) => (session.yourDialogues?.length ?? 0) > 0,
-    draw: (room) => <Dialogues room={room} inspect={(thing) => inspectBeside(thing, room)} />,
+    draw: (room) => (
+      <Dialogues room={room} inspect={(thing) => inspectBeside(thing, room)} toQuest={turnToQuest} />
+    ),
   },
   {
     // Beside the dialogues, taking turns with them in the column down the right edge. See decision record 0096.

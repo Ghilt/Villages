@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type { DialogueView, LineView } from '@villages/protocol';
+import type { DialogueView, LineView, QuestView } from '@villages/protocol';
 
 import {
   closingLine,
@@ -9,6 +9,7 @@ import {
   howMany,
   impactWords,
   listOf,
+  questOf,
   refusalWords,
   showsWords,
   sideOf,
@@ -239,5 +240,26 @@ describe('why a dialogue was lost', () => {
 
     expect(whyLost({ kind: 'alive', character: 'cb732500-39bd' }, speakers)).toBe('Agnes Hollin died');
     expect(whyLost({ kind: 'alive', character: '2b0e34d7-8041' }, speakers)).toBe('character 2b0e34d7 died');
+  });
+});
+
+describe('the quest a dialogue is part of', () => {
+  it('is the quest whose node leads to it, by id and title, and none for a dialogue no quest leads to', () => {
+    const quests = [
+      {
+        id: 'q1',
+        revision: 1,
+        title: 'The abbot of the isle',
+        nodes: [
+          { id: 'gate', row: 0, state: 'done', kind: 'dialogue', title: 'The gate', dialogueId: 'd-gate' },
+        ],
+        edges: [],
+        ending: { kind: 'open' },
+      },
+    ] as const satisfies readonly QuestView[];
+
+    expect(questOf('d-gate', quests)).toEqual({ id: 'q1', title: 'The abbot of the isle' });
+    expect(questOf('d-letter', quests)).toBeNull();
+    expect(questOf('d-gate', null)).toBeNull();
   });
 });

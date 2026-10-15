@@ -214,7 +214,13 @@ stage alone, with none of the debug panel in it (decision record 0079).
   ticked*. In the game the quest opens in the **quests** tab of the column down the right, beside the dialogues -
   the tab bar is two marks, the speech bubble and a little map of seals - on its map over its scene: the abbot lit,
   two question marks below, a question mark half-way down and the blessing at the foot. The list behind its mark
-  holds every quest, open first. A node cannot be pressed yet.
+  holds every quest, open first. It is played there: the abbot's node pressed opens his conversation on the
+  dialogues' tab, which ends, once finished, in a button with the quest's name and the needle that turns back to its
+  map; the gift's or the light's card under the map has *Pledge* or *Deliver*, a mark each, greyed with
+  what the house has free while it cannot pay, which the Resources section's *give* mends; and the blessing's card
+  has *Collect*. Each press is a line of the log under `quests`. A castle for the bad road must stand on land the
+  server counts as an island on the master - the British island there is at 54.8, -1.0, and 54.0, -2.0 is shallow
+  sea - which `?at=54.8,-1.0&zoom=8` and the Structures section's *raise here*, yours, do in a moment.
   See `docs/adr/0096` and `docs/plans/quests.md`.
 - The choice roll, the player's own: **Take action**, in the bottom middle of the spread once there is a
   house, put away at rest to a **chip** in the middle of the bottom row with what a roll costs beside it - a

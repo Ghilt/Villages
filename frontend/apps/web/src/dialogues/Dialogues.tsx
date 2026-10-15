@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 
 import { openDialogue } from './openDialogue';
+import { conversationOpened, conversationToOpenStore } from './toOpen';
 import {
   canAct,
   choose,
@@ -15,7 +16,7 @@ import type { DialogueView, LineView, SpeakerView } from '@villages/protocol';
 import { Portrait } from '../figures/Portrait';
 import { Mark } from '../marks/Mark';
 import { sessionStore, completeDialogueStep } from '../net/gateway';
-import { Icon } from '../stage/Icons';
+import { Icon, Needle } from '../stage/Icons';
 import { PaneSizeControl } from '../stage/PaneSizeControl';
 import type { Room } from '../stage/panes';
 import {
@@ -27,6 +28,7 @@ import {
   impactWords,
   type ListedDialogue,
   listOf,
+  questOf,
   refusalWords,
   sideOf,
   signed,
@@ -51,16 +53,28 @@ interface DialoguesProps {
   room: Room;
   /** Opens a window on a house or a person a line shows, beside this pane. Handed down; see `panes.tsx`. */
   inspect: Beside['window'];
+  /** Turns to a quest, by its id, from a finished conversation that is part of it. Handed down; see `panes.tsx`. */
+  toQuest: (questId: string) => void;
 }
 
-export function Dialogues({ room, inspect }: DialoguesProps) {
+export function Dialogues({ room, inspect, toQuest }: DialoguesProps) {
   const dialogues = useStore(sessionStore, (state) => state.yourDialogues);
+  const quests = useStore(sessionStore, (state) => state.yourQuests);
   const refused = useStore(sessionStore, (state) => state.stepRefused);
   const acting = useStore(sessionStore, canAct);
   const list = useMemo(() => listOf(dialogues ?? []), [dialogues]);
   const [open, setOpen] = useState<string | null>(null);
   // A dialogue that has gone - a wipe, another player - leaves the list behind it rather than nothing.
   const reading = dialogues?.find((one) => one.id === open) ?? null;
+
+  // A quest's dialogue node pressed asks for its conversation, which opens here once this pane has it. See 0096.
+  const asked = useStore(conversationToOpenStore, (state) => state.id);
+  useEffect(() => {
+    if (asked !== null && dialogues?.some((one) => one.id === asked)) {
+      setOpen(asked);
+      conversationOpened();
+    }
+  }, [asked, dialogues]);
 
   // Which dialogue is being read is said beside the pane, so a choice roll can read it, and none once it goes.
   const readingId = reading?.id ?? null;
@@ -86,6 +100,8 @@ export function Dialogues({ room, inspect }: DialoguesProps) {
         stepOut={!acting}
         refused={refused !== null && refused.dialogueId === reading.id ? refused : null}
         onBack={() => setOpen(null)}
+        onward={questOf(reading.id, quests)}
+        toQuest={toQuest}
       />
     );
   }
@@ -144,6 +160,9 @@ interface ConversationProps {
   /** The step through this dialogue the house last refused, and why, if one was. */
   refused: { lineId: string; reason: string } | null;
   onBack: () => void;
+  /** The quest the conversation is part of, which a finished one goes back to, or null. */
+  onward: { readonly id: string; readonly title: string } | null;
+  toQuest: (questId: string) => void;
 }
 
 /**
@@ -158,7 +177,16 @@ interface ConversationProps {
  * mark in the corner was too easily missed; the way back is a mark. Both Adam's call. The options are what
  * can be said, so they are words too.
  */
-function Conversation({ dialogue, room, beside, stepOut, refused, onBack }: ConversationProps) {
+function Conversation({
+  dialogue,
+  room,
+  beside,
+  stepOut,
+  refused,
+  onBack,
+  onward,
+  toQuest,
+}: ConversationProps) {
   const [held, setHeld] = useState<Reading | null>(null);
   const reading = keepReading(held, dialogue);
   const now = useMemo(() => showing(reading, dialogue), [reading, dialogue]);
@@ -257,6 +285,21 @@ function Conversation({ dialogue, room, beside, stepOut, refused, onBack }: Conv
           </li>
         )}
       </ol>
+
+      {/* A finished conversation that a quest led to goes back to it: the quest by name, and the needle, which means
+          there. Adam's word of 2026-10-15. See decision record 0096. */}
+      {onward !== null && dialogue.ending.kind === 'completed' && (
+        <footer className="dialogues__foot">
+          <button
+            type="button"
+            className="dialogues__continue dialogues__onward"
+            onClick={() => toQuest(onward.id)}
+          >
+            <span className="dialogues__onward-title">{onward.title}</span>
+            <Needle point="right" />
+          </button>
+        </footer>
+      )}
 
       {now.next && (
         <footer className="dialogues__foot">

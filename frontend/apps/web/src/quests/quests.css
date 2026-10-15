@@ -130,7 +130,8 @@
 .quests__map {
   position: relative;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   flex: 1;
   min-height: 0;
   overflow-y: auto;
@@ -145,4 +146,38 @@
   border-radius: 0.5rem;
   background: color-mix(in srgb, var(--ui-night) 78%, transparent);
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--ui-gilt) 45%, transparent);
+}
+
+/* A node's card, under the map: its checklist, or what it gives. */
+.quests__card {
+  position: relative;
+  width: min(100%, 440px);
+  margin-top: 0.75rem;
+}
+
+.quests__card-title {
+  margin: 0 0 0.3rem;
+  font-size: 1rem;
+  font-weight: normal;
+  font-variant: small-caps;
+  letter-spacing: 0.04em;
+}
+
+.quests__card-line {
+  margin: 0;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.quests__gifts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.quests__gift {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
 }

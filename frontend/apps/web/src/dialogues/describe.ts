@@ -1,6 +1,7 @@
 import type {
   DialogueView,
   EffectView,
+  QuestView,
   RequirementView,
   ResourceName,
   RevealImpactView,
@@ -233,4 +234,16 @@ export function whatChangedIn(
     }
     return revision === one.revision ? [] : [`"${one.title}": ${standing(one)}`];
   });
+}
+
+/**
+ * The quest a dialogue is part of, by its id and title, or null for one no quest leads to: what a finished
+ * conversation's way onward names. See decision record 0096.
+ */
+export function questOf(
+  dialogueId: string,
+  quests: readonly QuestView[] | null,
+): { readonly id: string; readonly title: string } | null {
+  const quest = (quests ?? []).find((one) => one.nodes.some((node) => node.dialogueId === dialogueId));
+  return quest === undefined ? null : { id: quest.id, title: quest.title };
 }

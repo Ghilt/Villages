@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { QuestView } from '@villages/protocol';
 
-import { standing, whatChangedIn } from './describe';
+import { objectiveWords, standing, whatChangedIn } from './describe';
 
 const abbot: QuestView = {
   id: 'q1',
@@ -58,5 +58,19 @@ describe('where a quest stands, in the log', () => {
     ]);
     expect(whatChangedIn([abbot], [abbot])).toEqual([]);
     expect(whatChangedIn([abbot], [onTheLight])).toHaveLength(1);
+  });
+});
+
+describe("an objective in the player's words", () => {
+  it("says what it asks, in the resource's own word", () => {
+    expect(objectiveWords({ kind: 'deliver', id: 'w', met: false, resource: 'wealth', amount: 60 })).toBe(
+      'Deliver 60 wealth',
+    );
+    expect(
+      objectiveWords({ kind: 'pledge', id: 'p', met: false, resource: 'piety', amount: 30, months: 6 }),
+    ).toBe('Pledge 30 piety for 6 months');
+    expect(
+      objectiveWords({ kind: 'hold', id: 'c', met: false, structureType: 'printingHouse', where: 'island' }),
+    ).toBe('Hold a printing house on an island');
   });
 });

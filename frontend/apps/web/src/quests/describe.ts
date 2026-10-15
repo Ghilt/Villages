@@ -1,4 +1,6 @@
-import type { QuestNodeView, QuestView } from '@villages/protocol';
+import type { ObjectiveView, QuestNodeView, QuestView } from '@villages/protocol';
+
+import { RESOURCE_WORDS } from '../house/describe';
 
 /** A node in the player's words: its title, or a question mark for one not yet shown. */
 function named(node: QuestNodeView): string {
@@ -76,4 +78,21 @@ export function listOf(quests: readonly QuestView[]): {
 export function howMany(quests: readonly QuestView[]): string {
   const open = quests.filter((one) => one.ending.kind === 'open').length;
   return `${open} open, ${quests.length - open} finished`;
+}
+
+/** An objective in the player's words, as its row on the checklist says it: what it asks, and nothing of whether. */
+export function objectiveWords(objective: ObjectiveView): string {
+  switch (objective.kind) {
+    case 'deliver':
+      return `Deliver ${objective.amount} ${RESOURCE_WORDS[objective.resource].toLowerCase()}`;
+    case 'pledge':
+      return `Pledge ${objective.amount} ${RESOURCE_WORDS[objective.resource].toLowerCase()} for ${objective.months} months`;
+    case 'hold':
+      return `Hold a ${inWords(objective.structureType)}${objective.where === 'island' ? ' on an island' : ''}`;
+  }
+}
+
+/** A structure's type as words: `printingHouse`, printing house. */
+function inWords(type: string): string {
+  return type.replace(/[A-Z]/g, (letter) => ` ${letter.toLowerCase()}`);
 }
