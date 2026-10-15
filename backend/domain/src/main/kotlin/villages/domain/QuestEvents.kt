@@ -61,3 +61,32 @@ data class PlayerCompletedQuest(
     override val worldTime: WorldTime,
     override val recordedAt: Instant,
 ) : QuestEvent, PlayerEvent
+
+/**
+ * The house lost the way to a node of a quest: the road taken does not lead there, so it can never be reached. What
+ * the player sees crossed out. One for every node a move cut off, drawn or not, right after the move that took the
+ * other road, in the same decision. Its own event, as a dialogue's end is, so that nothing waiting on a lost node has
+ * to work it out from the graph; a later cause of loss writes the same event. See decision record 0096.
+ */
+data class PlayerLostQuestNode(
+    override val houseId: HouseId,
+    val player: PlayerId,
+    val questId: QuestId,
+    val nodeId: NodeId,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : QuestEvent, PlayerEvent
+
+/**
+ * A quest lapsed: the dialogue of the node it stood at was lost, and `because` is that dialogue's failed
+ * requirement, the one thing about it the player learns. It ends where it stood and is no longer open. Its own event
+ * rather than an end with a reason, so that nothing waiting on an end takes a loss for one. See decision record 0096.
+ */
+data class PlayerLostQuest(
+    override val houseId: HouseId,
+    val player: PlayerId,
+    val questId: QuestId,
+    val because: Requirement,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : QuestEvent, PlayerEvent

@@ -151,4 +151,70 @@ class HouseQuestsSpec : StringSpec({
         shouldThrow<HouseError.NotAReward> { HouseDecider.decide(collecting(abbot, Abbot.gate), after(offering())) }
         shouldThrow<HouseError.NotTheCurrentNode> { HouseDecider.decide(collecting(abbot, Abbot.blessing), after(offering())) }
     }
+
+    // ---- a dialogue node moves the quest on -------------------------------------------------------
+
+    val atTheGate = Abbot.atTheGate.id
+    fun saying(line: String, dialogue: DialogueId = atTheGate) = CompleteDialogueStep(house, dialogue, LineId(line), day, noon)
+
+    "answered well, the dialogue's end moves the quest to the gift and loses the castle's road, from the same decision" {
+        val events = HouseDecider.decide(saying("pleased"), after(offering(), saying("faith")))
+
+        events shouldBe listOf(
+            PlayerCompletedDialogueStep(house, player, atTheGate, LineId("pleased"), day, noon),
+            PlayerCompletedDialogue(house, player, atTheGate, day, noon),
+            PlayerCompletedQuestNode(house, player, abbot.id, Abbot.gate, Abbot.gift, day, noon),
+            PlayerLostQuestNode(house, player, abbot.id, Abbot.light, day, noon),
+        )
+        val walk = after(offering(), saying("faith"), saying("pleased")).openQuests.single().walk()
+        walk.at shouldBe Abbot.gift
+        walk.lost shouldBe listOf(Abbot.light)
+    }
+
+    "answered badly, the cheap road is the one lost, and the quest stands at the castle and the delivery" {
+        val events = HouseDecider.decide(saying("doubts"), after(offering(), saying("wealth")))
+
+        events.filterIsInstance<PlayerCompletedQuestNode>().single().onto shouldBe Abbot.light
+        events.filterIsInstance<PlayerLostQuestNode>().map { it.nodeId } shouldBe listOf(Abbot.gift)
+    }
+
+    "a dialogue node with one edge goes that way, and the whole road ends at the blessing collected" {
+        val atTheConsecration =
+            after(offering(atTheGift), granting(Resource.PIETY, 30), meeting(Abbot.piety, Abbot.gift, terms, atTheGift))
+
+        val events = HouseDecider.decide(saying("blesses", Abbot.blesses.id), atTheConsecration)
+        events.filterIsInstance<PlayerCompletedQuestNode>().single().onto shouldBe Abbot.blessing
+        events.filterIsInstance<PlayerLostQuestNode>() shouldBe emptyList()
+
+        val blessed = after(
+            offering(atTheGift), granting(Resource.PIETY, 30), meeting(Abbot.piety, Abbot.gift, terms, atTheGift),
+            saying("blesses", Abbot.blesses.id), collecting(atTheGift, Abbot.blessing),
+        )
+        blessed.openQuests shouldBe emptyList()
+        blessed.stockOf(Resource.INFLUENCE).at(noon) shouldBe 40
+    }
+
+    "a quest that ends at a dialogue node is finished when the dialogue is" {
+        val talk = abbot.copy(nodes = listOf(Abbot.gateNode.copy(edges = emptyList())))
+
+        HouseDecider.decide(saying("pleased"), after(offering(talk), saying("faith"))).takeLast(2) shouldBe listOf(
+            PlayerCompletedQuestNode(house, player, talk.id, Abbot.gate, null, day, noon),
+            PlayerCompletedQuest(house, player, talk.id, day, noon),
+        )
+    }
+
+    "a dialogue lost at a quest's node loses the quest for the same reason, and nothing more can be done in it" {
+        val agnes = CharacterId(UUID.fromString("cb732500-39bd-3b39-a838-bb89f719578f"))
+        val needing = Abbot.atTheGate.copy(requirements = listOf(Requirement.Alive(agnes)))
+        val needy = abbot.copy(nodes = listOf(Abbot.gateNode.copy(dialogue = needing)) + abbot.nodes.drop(1))
+        val dying = FailRequirement(house, Requirement.Alive(agnes), day, noon)
+
+        HouseDecider.decide(dying, after(offering(needy))) shouldBe listOf(
+            PlayerLostDialogue(house, player, atTheGate, Requirement.Alive(agnes), day, noon),
+            PlayerLostQuest(house, player, needy.id, Requirement.Alive(agnes), day, noon),
+        )
+        val lost = after(offering(needy), dying)
+        lost.openQuests shouldBe emptyList()
+        shouldThrow<HouseError.QuestOver> { HouseDecider.decide(collecting(needy, Abbot.blessing), lost) }
+    }
 })

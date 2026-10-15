@@ -38,7 +38,11 @@ object HouseDecider : Decider<HouseCommand, House, HouseEvent> {
             is KeyFigureCommand -> founded(state).figures.decide(command)
             is VisionCommand -> founded(state).vision.decide(command)
             is SeatCommand -> founded(state).seating.decide(command)
-            is DialogueCommand -> founded(state).let { house -> house.dialogues.decide(command, house.player, follow) }
+            // A dialogue that ends or lapses at a quest's node moves the quest on or loses it, in the same decision.
+            is DialogueCommand -> founded(state).let { house ->
+                val told = house.dialogues.decide(command, house.player, follow)
+                told + house.quests.answering(told, house.player, follow)
+            }
             is QuestCommand -> founded(state).let { house -> house.quests.decide(command, house.player, follow) }
         }
     }

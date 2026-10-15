@@ -1,5 +1,6 @@
 package villages.occurrent
 
+import villages.domain.CharacterId
 import villages.domain.Choice
 import villages.domain.ChoiceId
 import villages.domain.Dialogue
@@ -19,6 +20,8 @@ import villages.domain.Option
 import villages.domain.OptionId
 import villages.domain.PlayerId
 import villages.domain.PlayerCompletedQuest
+import villages.domain.PlayerLostQuest
+import villages.domain.PlayerLostQuestNode
 import villages.domain.PlayerCompletedQuestNode
 import villages.domain.PlayerGivenChoice
 import villages.domain.PlayerMetQuestObjective
@@ -26,6 +29,7 @@ import villages.domain.PlayerOfferedQuest
 import villages.domain.PledgeId
 import villages.domain.Quest
 import villages.domain.QuestId
+import villages.domain.Requirement
 import villages.domain.Resource
 import villages.domain.RewardNode
 import villages.domain.Speaker
@@ -118,6 +122,8 @@ internal object QuestEventSamples {
     val wealthDelivered = PlayerMetQuestObjective(house, player, questId, NodeId("light"), ObjectiveId("wealth"), day, noon)
     val pastTheLight = PlayerCompletedQuestNode(house, player, questId, NodeId("light"), NodeId("blessing"), day, noon)
     val blessed = PlayerCompletedQuest(house, player, questId, day, noon)
+    val giftLost = PlayerLostQuestNode(house, player, questId, NodeId("gift"), day, noon)
+    val abbotGone = PlayerLostQuest(house, player, questId, Requirement.Alive(CharacterId(UUID.fromString("cb732500-39bd-3b39-a838-bb89f719578f"))), day, noon)
 
     /** A choice whose option pledges, which no quest event writes: the pledge effect pinned in a case of its own. */
     val askedForAGift = PlayerGivenChoice(
@@ -152,6 +158,8 @@ internal object QuestEventSamples {
     val samples: Map<String, Event> = mapOf(
         "villages.player.completedQuest.v1" to blessed,
         "villages.player.completedQuestNode.v1" to pastTheLight,
+        "villages.player.lostQuest.v1" to abbotGone,
+        "villages.player.lostQuestNode.v1" to giftLost,
         "villages.player.metQuestObjective.v1" to wealthDelivered,
         "villages.player.offeredQuest.v1" to theAbbot,
     )

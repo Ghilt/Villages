@@ -21,13 +21,15 @@ data class Quests(
             if (command.quest.id in offered) {
                 throw HouseError.QuestAlreadyOffered
             }
-            listOf(PlayerOfferedQuest(command.houseId, player, command.quest, command.worldTime, command.recordedAt)) +
-                follow.follow(arriving(command.quest.start()), player, command.worldTime, command.recordedAt)
+            val at = Moment(command.houseId, player, command.worldTime, command.recordedAt)
+            listOf(PlayerOfferedQuest(at.house, player, command.quest, at.worldTime, at.recordedAt)) +
+                at.following(follow, arriving(command.quest.start()))
         }
 
         // The tick, what it costs and, on the last objective, the move on come out of one decision, as a dialogue's
         // step and what its line gives do, so a cost is never paid without its tick nor a tick seen without its cost.
         is MeetObjective -> {
+            val at = Moment(command.houseId, player, command.worldTime, command.recordedAt)
             val (quest, objective) = ticking(command.questId, command.nodeId, command.objectiveId)
             if (objective !is Objective.MetByThePlayer) throw HouseError.NotThePlayersToMeet
             val cost = when (objective) {
@@ -38,29 +40,45 @@ data class Quests(
                     Effect.Pledge(pledging.pledgeId, objective.resource, objective.amount, pledging.until, quest.quest.title)
                 }
             }
-            val tick = PlayerMetQuestObjective(
-                command.houseId, player, quest.quest.id, command.nodeId, objective.id, command.worldTime, command.recordedAt,
-            )
-            listOf(tick) + follow.follow(listOf(cost), player, command.worldTime, command.recordedAt) +
-                movingOnIfTicked(quest, objective.id, player, follow, command.houseId, command.worldTime, command.recordedAt)
+            listOf(at.ticked(quest, objective)) + at.following(follow, listOf(cost)) + movingOnIfTicked(quest, objective, at, follow)
         }
 
         // What the world met costs nothing, and is ticked in the story of whatever met it.
         is MarkObjectiveMet -> {
+            val at = Moment(command.houseId, player, command.worldTime, command.recordedAt)
             val (quest, objective) = ticking(command.questId, command.nodeId, command.objectiveId)
             if (objective !is Objective.MetByTheWorld) throw HouseError.NotTheWorldsToMeet
-            val tick = PlayerMetQuestObjective(
-                command.houseId, player, quest.quest.id, command.nodeId, objective.id, command.worldTime, command.recordedAt,
-            )
-            listOf(tick) + movingOnIfTicked(quest, objective.id, player, follow, command.houseId, command.worldTime, command.recordedAt)
+            listOf(at.ticked(quest, objective)) + movingOnIfTicked(quest, objective, at, follow)
         }
 
         // Collecting is the move past the reward, and what it gives follows the move, as what a line gives follows
         // its step.
         is CollectReward -> {
+            val at = Moment(command.houseId, player, command.worldTime, command.recordedAt)
             val quest = standingAt(command.questId, command.nodeId)
             val reward = quest.quest.node(command.nodeId) as? RewardNode ?: throw HouseError.NotAReward
-            movingOn(quest, reward, reward.gives, player, follow, command.houseId, command.worldTime, command.recordedAt)
+            movingOn(quest, reward, reward.edges.singleOrNull()?.to, reward.gives, at, follow)
+        }
+    }
+
+    /**
+     * What the quests answer to what a dialogue command wrote: a dialogue that ended at the node a quest stands at
+     * moves the quest along the edge its ending leads along, and one that lapsed there loses the quest, for the same
+     * reason. A dialogue that is no quest's is answered with nothing. Decided with the dialogue's events, so the end
+     * and the move are one append.
+     */
+    internal fun answering(told: List<HouseEvent>, player: PlayerId, follow: Follow): List<HouseEvent> = told.flatMap { event ->
+        when (event) {
+            is PlayerCompletedDialogue -> waitingOn(event.dialogueId)?.let { (quest, node) ->
+                val at = Moment(event.houseId, player, event.worldTime, event.recordedAt)
+                val ending = told.filterIsInstance<PlayerCompletedDialogueStep>().last { it.dialogueId == event.dialogueId }
+                val edge = node.edges.firstOrNull { ending.lineId in it.endings } ?: node.edges.singleOrNull()
+                movingOn(quest, node, edge?.to, emptyList(), at, follow)
+            }.orEmpty()
+            is PlayerLostDialogue -> waitingOn(event.dialogueId)?.let { (quest, _) ->
+                listOf(PlayerLostQuest(event.houseId, player, quest.quest.id, event.because, event.worldTime, event.recordedAt))
+            }.orEmpty()
+            else -> emptyList()
         }
     }
 
@@ -68,9 +86,12 @@ data class Quests(
         is PlayerOfferedQuest -> copy(open = open + OpenQuest(event.quest), offered = offered + event.quest.id)
         is PlayerMetQuestObjective -> progressed(event.questId, QuestProgress.Ticked(event.nodeId, event.objectiveId))
         is PlayerCompletedQuestNode -> progressed(event.questId, QuestProgress.Moved(event.nodeId, event.onto))
-        // A quest that has ended is no longer open, and its id stays among those offered, so a move in it is
-        // refused as over rather than as unknown.
+        // What is lost is worked out by the walk from the moves; the event is for whatever waits on a lost node.
+        is PlayerLostQuestNode -> this
+        // A quest that has ended, finished or lost, is no longer open, and its id stays among those offered, so a
+        // move in it is refused as over rather than as unknown.
         is PlayerCompletedQuest -> copy(open = open.filterNot { it.quest.id == event.questId })
+        is PlayerLostQuest -> copy(open = open.filterNot { it.quest.id == event.questId })
     }
 
     private fun progressed(id: QuestId, step: QuestProgress): Quests =
@@ -93,45 +114,51 @@ data class Quests(
         return quest to objective
     }
 
+    /** The open quest standing at the dialogue node whose dialogue this is, if any quest is. */
+    private fun waitingOn(dialogue: DialogueId): Pair<OpenQuest, DialogueNode>? = open.firstNotNullOfOrNull { quest ->
+        val at = quest.walk().at?.let(quest.quest::node) as? DialogueNode
+        if (at?.dialogue?.id == dialogue) quest to at else null
+    }
+
     /** The move past the node the quest stands at, when this tick was the last its checklist wanted. */
-    @Suppress("LongParameterList")
-    private fun movingOnIfTicked(
-        quest: OpenQuest,
-        ticked: ObjectiveId,
-        player: PlayerId,
-        follow: Follow,
-        houseId: HouseId,
-        worldTime: WorldTime,
-        recordedAt: Instant,
-    ): List<HouseEvent> {
+    private fun movingOnIfTicked(quest: OpenQuest, ticked: Objective, at: Moment, follow: Follow): List<HouseEvent> {
         val walk = quest.walk()
         val checklist = quest.quest.node(walk.at!!) as ObjectiveNode
-        if (checklist.objectives.map { it.id }.toSet() != walk.ticked + ticked) return emptyList()
-        return movingOn(quest, checklist, emptyList(), player, follow, houseId, worldTime, recordedAt)
+        if (checklist.objectives.map { it.id }.toSet() != walk.ticked + ticked.id) return emptyList()
+        return movingOn(quest, checklist, checklist.edges.singleOrNull()?.to, emptyList(), at, follow)
     }
 
     /**
-     * The quest moving past a node along its one edge, or to its end: the move, what the node gives, what the next
-     * node does on arrival, and the end when there is no next, decided in that order against the house as each left it.
+     * The quest moving past a node onto the next, or to its end: the move, every node it cut off, what the node gives,
+     * what the next node does on arrival, and the end when there is no next, decided in that order against the house
+     * as each left it.
      */
     @Suppress("LongParameterList")
     private fun movingOn(
         quest: OpenQuest,
         from: QuestNode,
+        onto: NodeId?,
         gives: List<Effect>,
-        player: PlayerId,
+        at: Moment,
         follow: Follow,
-        houseId: HouseId,
-        worldTime: WorldTime,
-        recordedAt: Instant,
     ): List<HouseEvent> {
-        val next = from.edges.singleOrNull()?.let { quest.quest.node(it.to) }
-        val ends = listOfNotNull(
-            PlayerCompletedQuest(houseId, player, quest.quest.id, worldTime, recordedAt).takeIf { next == null },
-        )
-        return listOf(PlayerCompletedQuestNode(houseId, player, quest.quest.id, from.id, next?.id, worldTime, recordedAt)) +
-            follow.follow(gives + next?.let(::arriving).orEmpty(), player, worldTime, recordedAt) + ends
+        val id = quest.quest.id
+        val next = onto?.let(quest.quest::node)
+        val lost = quest.quest.cutOffBy(from.id, onto).map { node ->
+            PlayerLostQuestNode(at.house, at.player, id, node, at.worldTime, at.recordedAt)
+        }
+        val ends = listOfNotNull(PlayerCompletedQuest(at.house, at.player, id, at.worldTime, at.recordedAt).takeIf { next == null })
+        return listOf(PlayerCompletedQuestNode(at.house, at.player, id, from.id, onto, at.worldTime, at.recordedAt)) + lost +
+            at.following(follow, gives + next?.let(::arriving).orEmpty()) + ends
     }
+}
+
+/** Whose decision it is and when: what every event a quest writes carries. */
+private data class Moment(val house: HouseId, val player: PlayerId, val worldTime: WorldTime, val recordedAt: Instant) {
+    fun ticked(quest: OpenQuest, objective: Objective) =
+        PlayerMetQuestObjective(house, player, quest.quest.id, quest.walk().at!!, objective.id, worldTime, recordedAt)
+
+    fun following(follow: Follow, effects: List<Effect>): List<HouseEvent> = follow.follow(effects, player, worldTime, recordedAt)
 }
 
 /**
