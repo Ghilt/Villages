@@ -197,9 +197,14 @@
     color: var(--ui-text);
   }
 
+  /*
+   * Ticked: a box filled with gilt and the tick in night on it, so it reads the same on parchment as on night. A
+   * tick in light gilt on nothing of its own was all but the colour of the parchment card it stood on.
+   */
   .ui-checklist-row--met .ui-checklist-row__box {
-    border-color: var(--ui-gilt);
-    color: var(--ui-gilt-light);
+    border-color: var(--ui-gilt-deep);
+    background: var(--ui-gilt);
+    color: var(--ui-night);
   }
 
   .ui-checklist-row__words {

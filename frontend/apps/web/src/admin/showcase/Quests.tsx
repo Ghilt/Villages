@@ -81,6 +81,36 @@ const STUBS: readonly MapEdge[] = [
 export function Quests() {
   const [open, setOpen] = useState<string | undefined>('light');
   const [paid, setPaid] = useState(false);
+  /** The rows once, shown on night and on the parchment of the card the game draws them on. */
+  const checklist = (
+    <>
+      <ChecklistRow
+        words="Deliver 60"
+        lead={<Mark name="wealth" size={17} />}
+        met={paid}
+        action={{ mark: 'deliver', label: 'Deliver 60 wealth', onPress: () => setPaid(true) }}
+      />
+      <ChecklistRow
+        words="Pledge 30 for 6 months"
+        lead={<Mark name="piety" size={17} />}
+        met={false}
+        action={{
+          mark: 'pledge',
+          label: 'Pledge 30 piety for 6 months',
+          onPress: () => undefined,
+          disabled: true,
+        }}
+        note="Your house has 12 piety free."
+      />
+      <ChecklistRow
+        words="Hold a castle on an island"
+        lead={<Mark name="tower" size={17} />}
+        met={false}
+        note="Ticked when your house holds one."
+      />
+      <ChecklistRow words="Hold a castle on an island" lead={<Mark name="tower" size={17} />} met />
+    </>
+  );
 
   return (
     <>
@@ -179,33 +209,10 @@ export function Quests() {
       <Part title="The checklist">
         <Specimens>
           <Specimen name="ChecklistRow" note="the player's to meet; press deliver" wide>
-            <Container recipe="pane.right">
-              <ChecklistRow
-                words="Deliver 60"
-                lead={<Mark name="wealth" size={17} />}
-                met={paid}
-                action={{ mark: 'deliver', label: 'Deliver 60 wealth', onPress: () => setPaid(true) }}
-              />
-              <ChecklistRow
-                words="Pledge 30 for 6 months"
-                lead={<Mark name="piety" size={17} />}
-                met={false}
-                action={{
-                  mark: 'pledge',
-                  label: 'Pledge 30 piety for 6 months',
-                  onPress: () => undefined,
-                  disabled: true,
-                }}
-                note="Your house has 12 piety free."
-              />
-              <ChecklistRow
-                words="Hold a castle on an island"
-                lead={<Mark name="tower" size={17} />}
-                met={false}
-                note="Ticked when your house holds one."
-              />
-              <ChecklistRow words="Hold a castle on an island" lead={<Mark name="tower" size={17} />} met />
-            </Container>
+            <Container recipe="pane.right">{checklist}</Container>
+          </Specimen>
+          <Specimen name="ChecklistRow on parchment" note="the card under a quest's map" wide>
+            <Container recipe="card.figure">{checklist}</Container>
           </Specimen>
           <Specimen name="MarkButton collect" note="what a reward waits with">
             <div className="showcase__try">

@@ -443,10 +443,12 @@ A line each: what it is for, its variants, and where on the page it is.
   it, lays nodes out from the top down by the row and the column the caller gives each, spread evenly across its
   width, and draws the edges under them - walked in gilt, ahead in fine dashes, lost faded - from under a node's
   title, so an edge never crosses one, with a stub where an edge leads to a node not drawn; `mapLayout.ts` is its
-  arithmetic. **`ChecklistRow`** is one row of the checklist a node opens to: a box, ticked once met, what it asks
+  arithmetic. **`ChecklistRow`** is one row of the checklist a node opens to: a box, ticked once met - filled with gilt
+  and the tick in night on it, so it reads on parchment as on night, which `tick.test.ts` holds - what it asks
   with a mark before it, the mark button that meets it for a row the player meets, and a soft line under it saying
   why the button is greyed or that the world ticks it. *Quests*, where every kind and state is shown, three maps -
-  at the start, on a road with a node open, and with stubs - and the checklist's rows. Drawn, nothing painted; a
+  at the start, on a road with a node open, and with stubs - and the checklist's rows, on night and on the parchment
+  of the card the game draws them on. Drawn, nothing painted; a
   painted mark is a picture in `world/ui/marks/` by the mark's name.
 - **`Medallion`**, `ui/medallion/Medallion.tsx`: a round or oval frame, one fixed picture and never sliced,
   drawn `size` pixels tall. Where its frame is clear inside itself it has a window, and the `picture` it is
