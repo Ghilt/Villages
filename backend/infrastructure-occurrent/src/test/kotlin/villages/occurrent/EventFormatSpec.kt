@@ -10,10 +10,13 @@ import io.kotest.matchers.string.shouldMatch
 import tools.jackson.databind.JsonNode
 import villages.domain.Content
 import villages.domain.Effect
+import villages.domain.Objective
+import villages.domain.QuestNode
 import villages.domain.Requirement
 import villages.domain.RevealImpact
 import villages.domain.Shows
 import villages.domain.Then
+import villages.domain.Where
 import java.io.File
 import java.time.Instant
 import kotlin.reflect.KClass
@@ -123,18 +126,25 @@ class EventFormatSpec : StringSpec({
             RevealImpact::class to RevealImpactJson::class,
             Shows::class to ShowsJson::class,
             Content::class to ContentJson::class,
+            QuestNode::class to QuestNodeJson::class,
+            Objective::class to ObjectiveJson::class,
+            Where::class to WhereJson::class,
         )
         val named = mixIns.mapValues { (_, mixIn) -> mixIn.java.getAnnotation(JsonSubTypes::class.java).value.toList() }
 
         for ((sealed, types) in named) {
             withClue(sealed.simpleName) {
-                types.map { it.value } shouldContainExactlyInAnyOrder sealed.sealedSubclasses
+                types.map { it.value } shouldContainExactlyInAnyOrder leaves(sealed)
             }
         }
         (samples.keys.flatMap { kindsIn(fixture(it)) } + EventSamples.cases.keys.flatMap { kindsIn(case(it)) }).toSet() shouldContainAll
             named.values.flatten().map { it.name }
     }
 })
+
+/** Every case of a sealed type, through any sealed families between it and them: an objective's two, say. */
+private fun leaves(sealed: KClass<*>): List<KClass<*>> =
+    sealed.sealedSubclasses.flatMap { if (it.isSealed) leaves(it) else listOf(it) }
 
 /** Every `kind` written anywhere in a stored event, which is every case of a sealed field it holds. */
 private fun kindsIn(node: JsonNode): List<String> =

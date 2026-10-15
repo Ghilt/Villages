@@ -12,6 +12,7 @@ import villages.domain.PlayerGivenChoice
 import villages.domain.PlayerRolled
 import villages.domain.PlayerTookAction
 import villages.domain.PlayerId
+import villages.domain.QuestEvent
 import villages.domain.ResourceEvent
 import villages.domain.SeatEvent
 import villages.domain.DialogueEvent
@@ -70,7 +71,7 @@ class ChoicesProjection(feed: EventFeed) : Follower(feed), ChoicesByPlayer {
             is HouseFounded -> forget(event.player)
 
             // A dialogue choice is not a choice put to the house, however alike the two are: nothing is pending.
-            is DialogueEvent -> return
+            is DialogueEvent, is QuestEvent -> return
 
             // A choice is put to a house, never to a character.
             is CharacterEvent -> return

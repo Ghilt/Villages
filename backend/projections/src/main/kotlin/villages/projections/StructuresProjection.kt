@@ -20,6 +20,7 @@ import villages.domain.HouseId
 import villages.domain.HouseLostSeat
 import villages.domain.HouseNamedSeat
 import villages.domain.KeyFigureEvent
+import villages.domain.QuestEvent
 import villages.domain.ResourceEvent
 import villages.domain.StructureChangedHands
 import villages.domain.StructureDecider
@@ -130,7 +131,7 @@ class StructuresProjection(feed: EventFeed) : Follower(feed), StructuresByCell, 
                 put(held.row.copy(faces = held.row.faces + face), held.streamVersion, appeared = false)
             }
             // What a house has, is asked, is told, holds and sees, and what befalls a person, changes no structure.
-            is ResourceEvent, is ChoiceEvent, is DialogueEvent, is KeyFigureEvent, is VisionEvent, is CharacterEvent -> Unit
+            is ResourceEvent, is ChoiceEvent, is DialogueEvent, is QuestEvent, is KeyFigureEvent, is VisionEvent, is CharacterEvent -> Unit
         }
     }
 

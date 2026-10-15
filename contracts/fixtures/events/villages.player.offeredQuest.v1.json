@@ -1,0 +1,109 @@
+{
+  "type": "villages.player.offeredQuest.v1",
+  "source": "urn:villages",
+  "subject": "6d5b0a2e-1c3f-4d7e-9a8b-0f1e2d3c4b5a",
+  "time": "2026-09-04T12:00:00Z",
+  "data": {
+    "houseId": "6d5b0a2e-1c3f-4d7e-9a8b-0f1e2d3c4b5a",
+    "player": "0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8d",
+    "quest": {
+      "id": "ee000000-0000-4000-8000-00000000a001",
+      "title": "The abbot of the isle",
+      "scene": "harbour",
+      "nodes": [
+        {
+          "kind": "dialogue",
+          "id": "gate",
+          "title": "The abbot at the gate",
+          "dialogue": {
+            "id": "960f38f9-ac78-3750-9d54-c3adf4dc59ad",
+            "title": "The abbot at the gate",
+            "scene": "harbour",
+            "speakers": [
+              { "id": "abbot", "party": 1, "name": "The abbot", "portrait": null, "character": null },
+              { "id": "steward", "party": 0, "name": "Your steward", "portrait": null, "character": null }
+            ],
+            "lines": [
+              {
+                "id": "asks",
+                "speaker": "abbot",
+                "words": "What does your house hold dearest?",
+                "effects": [],
+                "recorded": false,
+                "then": { "kind": "dialogueChoice", "options": ["faith", "wealth"] },
+                "revealImpact": null,
+                "shows": null
+              },
+              {
+                "id": "faith",
+                "speaker": "steward",
+                "words": "Its faith, Father.",
+                "effects": [],
+                "recorded": false,
+                "then": { "kind": "end" },
+                "revealImpact": null,
+                "shows": null
+              },
+              {
+                "id": "wealth",
+                "speaker": "steward",
+                "words": "Its coffers, Father.",
+                "effects": [],
+                "recorded": false,
+                "then": { "kind": "end" },
+                "revealImpact": null,
+                "shows": null
+              }
+            ],
+            "requirements": []
+          },
+          "edges": [
+            { "to": "gift", "endings": ["faith"] },
+            { "to": "light", "endings": ["wealth"] }
+          ],
+          "hidden": false,
+          "shownAhead": false
+        },
+        {
+          "kind": "checklist",
+          "id": "gift",
+          "title": "A gift to the mission",
+          "objectives": [
+            { "kind": "pledge", "id": "piety", "resource": "PIETY", "amount": 30, "months": 6 }
+          ],
+          "edges": [{ "to": "blessing", "endings": [] }],
+          "hidden": true,
+          "shownAhead": false
+        },
+        {
+          "kind": "checklist",
+          "id": "light",
+          "title": "A light on the water",
+          "objectives": [
+            { "kind": "hold", "id": "castle", "structureType": "castle", "where": { "kind": "island" } },
+            { "kind": "hold", "id": "mill", "structureType": "mill", "where": { "kind": "anywhere" } },
+            { "kind": "deliver", "id": "wealth", "resource": "WEALTH", "amount": 60 }
+          ],
+          "edges": [{ "to": "blessing", "endings": [] }],
+          "hidden": true,
+          "shownAhead": false
+        },
+        {
+          "kind": "reward",
+          "id": "blessing",
+          "title": "The abbot's blessing",
+          "gives": [
+            { "kind": "grant", "resource": "PIETY", "amount": 150 },
+            { "kind": "grant", "resource": "INFLUENCE", "amount": 40 }
+          ],
+          "edges": [],
+          "hidden": false,
+          "shownAhead": true
+        }
+      ],
+      "shownFromTheStart": false
+    },
+    "worldTime": 454901,
+    "recordedAt": "2026-09-04T12:00:00Z"
+  }
+}

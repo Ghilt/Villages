@@ -37,6 +37,8 @@ sealed interface House {
         val dialogues: Dialogues = Dialogues(),
         /** Which of its holdings is its seat. */
         val seating: Seating = Seating(),
+        /** What it set out to do. */
+        val quests: Quests = Quests(),
         /** The world-day it was founded on, and the instant that was recorded. */
         val foundedOn: WorldTime,
         val foundedAt: Instant,
@@ -64,6 +66,12 @@ sealed interface House {
 
         /** Every dialogue it was ever offered, open or over. */
         val offeredDialogues: Set<DialogueId> get() = dialogues.offered
+
+        /** The quests this house was offered and has not finished, each with what it recorded of it. See 0096. */
+        val openQuests: List<OpenQuest> get() = quests.open
+
+        /** Every quest it was ever offered, open or over. */
+        val offeredQuests: Set<QuestId> get() = quests.offered
 
         /** What this house has of one resource. See [Treasury.stockOf]. */
         fun stockOf(resource: Resource): Stock = treasury.stockOf(resource)

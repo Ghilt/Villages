@@ -41,6 +41,9 @@ sealed interface ChoiceEvent : HouseEvent
 /** A dialogue offered, played, ended and lost. See [ResourceEvent] for what a family is. */
 sealed interface DialogueEvent : HouseEvent
 
+/** A quest offered, walked, finished and lost. See [ResourceEvent] for what a family is. */
+sealed interface QuestEvent : HouseEvent
+
 /** Whom the house holds. See [ResourceEvent] for what a family is. */
 sealed interface KeyFigureEvent : HouseEvent
 

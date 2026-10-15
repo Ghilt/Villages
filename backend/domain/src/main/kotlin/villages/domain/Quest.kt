@@ -31,8 +31,8 @@ data class Quest(
         refuseUnlessEveryRoadEnds()
     }
 
-    /** The node it starts at. */
-    val start: QuestNode get() = nodes.first()
+    /** The node it starts at. A function rather than a property, so the store writes the nodes and only them. */
+    fun start(): QuestNode = nodes.first()
 
     /** The node with this id, or null when the quest has none. */
     fun node(id: NodeId): QuestNode? = nodes.firstOrNull { it.id == id }
@@ -108,7 +108,7 @@ data class Quest(
             reached += id
         }
 
-        walk(start.id)
+        walk(start().id)
         nodes.firstOrNull { it.id !in reached }?.let { refuse("nothing leads to node ${it.id.value}") }
     }
 

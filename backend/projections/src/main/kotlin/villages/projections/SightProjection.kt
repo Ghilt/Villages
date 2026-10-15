@@ -24,6 +24,7 @@ import villages.domain.HouseLostKeyFigure
 import villages.domain.HouseLostVision
 import villages.domain.Location
 import villages.domain.PlayerId
+import villages.domain.QuestEvent
 import villages.domain.Vision
 import villages.domain.WorldTime
 import villages.domain.ResourceEvent
@@ -122,7 +123,7 @@ class SightProjection(feed: EventFeed) : Follower(feed), SightsByHouse {
 
             // Nothing else gives vision or takes it away.
             // A seat lost takes no vision of its own: what the structure gave ends with its change of hands or its ruin.
-            is ResourceEvent, is ChoiceEvent, is DialogueEvent, is HouseNamedSeat, is HouseLostSeat,
+            is ResourceEvent, is ChoiceEvent, is DialogueEvent, is QuestEvent, is HouseNamedSeat, is HouseLostSeat,
             is CharacterAppeared, is CharacterStatChanged, is CharacterAged, is CharacterPortraitChanged,
             // What a structure gives its holder to see is written into the house's own history, as vision given. 0093.
             is StructureEvent,

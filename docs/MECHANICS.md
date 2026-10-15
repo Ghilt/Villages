@@ -455,7 +455,7 @@ quest offered opens it, as a dialogue offered opens the dialogues. Whether each 
 
 ### Where it stands
 
-The quest itself is in the source: it checks itself when it is made, so one that could loop, that leads to a node it does not hold, or that forks where no dialogue's ending could decide it is refused before anything is written; and one walk works out from what a house recorded where it stands, what is done and lost, and what is drawn, as a question mark or as what it is. Nothing offers one yet. Its shape is decision record 0096: a quest offered whole on the house's stream,
+The quest itself is in the source: it checks itself when it is made, so one that could loop, that leads to a node it does not hold, or that forks where no dialogue's ending could decide it is refused before anything is written; and one walk works out from what a house recorded where it stands, what is done and lost, and what is drawn, as a question mark or as what it is. `OfferQuest` writes it whole on the house's stream, where the house keeps every one it has open, and a quest that starts at a dialogue node offers that dialogue from the same decision. Nothing offers one yet. Its shape is decision record 0096: a quest offered whole on the house's stream,
 its moves and its lost nodes recorded, how it is shown worked out and never written, objectives met by the
 player in the house's own rules and by the world through one listener. `docs/plans/quests.md` is the order it
 is built in, one commit a step, and experiment 0020 is what it is meant to show.

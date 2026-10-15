@@ -23,7 +23,7 @@ class QuestSpec : StringSpec({
     fun made(vararg nodes: QuestNode) = quest.copy(nodes = nodes.toList())
 
     "a quest is made whole, starts at its first node, and every node it leads to is its own" {
-        quest.start shouldBe Abbot.gateNode
+        quest.start() shouldBe Abbot.gateNode
         quest.node(Abbot.blessing) shouldBe Abbot.blessingNode
         quest.node(NodeId("nowhere")) shouldBe null
     }

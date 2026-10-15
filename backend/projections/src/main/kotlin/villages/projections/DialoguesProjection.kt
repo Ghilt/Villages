@@ -16,6 +16,7 @@ import villages.domain.PlayerCompletedDialogueStep
 import villages.domain.PlayerId
 import villages.domain.PlayerLostDialogue
 import villages.domain.PlayerOfferedDialogue
+import villages.domain.QuestEvent
 import villages.domain.walk
 import villages.domain.ResourceEvent
 import villages.domain.SeatEvent
@@ -68,7 +69,7 @@ class DialoguesProjection(feed: EventFeed) : Follower(feed), DialoguesByHouse {
             }
 
             // What a house has, what it was asked, whom it holds and what it sees are other read models'.
-            is HouseFounded, is ResourceEvent, is ChoiceEvent, is KeyFigureEvent, is VisionEvent, is SeatEvent -> return
+            is HouseFounded, is ResourceEvent, is ChoiceEvent, is KeyFigureEvent, is VisionEvent, is SeatEvent, is QuestEvent -> return
 
             // A dialogue is offered to a house; a character's own history says nothing about one.
             is CharacterEvent -> return

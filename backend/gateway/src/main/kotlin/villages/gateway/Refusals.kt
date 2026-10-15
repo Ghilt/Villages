@@ -18,6 +18,7 @@ internal fun DomainError.reasonCode(): String = when (this) {
     HouseError.DialogueOver -> "dialogueOver"
     HouseError.NotTheNextStep -> "notTheNextStep"
     is HouseError.InvalidQuest -> "invalidQuest"
+    HouseError.QuestAlreadyOffered -> "questAlreadyOffered"
     HouseError.ChoicePending -> "choicePending"
     HouseError.NoChoicePending -> "noChoicePending"
     HouseError.NoSuchChoice -> "noSuchChoice"

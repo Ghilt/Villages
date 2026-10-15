@@ -83,7 +83,7 @@ sealed interface QuestProgress {
  * house's to check as it decides; the walk takes the move it was given.
  */
 fun Quest.walk(progress: List<QuestProgress>): QuestWalk {
-    var at: QuestNode? = start
+    var at: QuestNode? = start()
     val done = mutableListOf<NodeId>()
     val lost = mutableListOf<NodeId>()
     var ticked = setOf<ObjectiveId>()
@@ -138,10 +138,10 @@ fun Quest.cutOffBy(from: NodeId, onto: NodeId?): List<NodeId> {
  * node shown ahead stands as far down as it really is, the unknown above it left blank.
  */
 fun Quest.rows(): Map<NodeId, Int> {
-    val rows = mutableMapOf(start.id to 0)
+    val rows = mutableMapOf(start().id to 0)
     val waiting = nodes.associate { node -> node.id to nodes.count { other -> other.edges.any { it.to == node.id } } }
         .toMutableMap()
-    val ready = ArrayDeque(listOf(start.id))
+    val ready = ArrayDeque(listOf(start().id))
     while (ready.isNotEmpty()) {
         val from = ready.removeFirst()
         for (edge in node(from)!!.edges) {

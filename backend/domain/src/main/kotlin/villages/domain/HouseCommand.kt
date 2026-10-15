@@ -20,6 +20,9 @@ sealed interface ChoiceCommand : HouseCommand
 /** A dialogue offered, a step taken through it, and a requirement it needed failing. See [ResourceCommand]. */
 sealed interface DialogueCommand : HouseCommand
 
+/** A quest offered, an objective of it met, and a reward collected. See [ResourceCommand] for what a family is. */
+sealed interface QuestCommand : HouseCommand
+
 /** Whom the house holds, and the two questions that can only be refused. See [ResourceCommand]. */
 sealed interface KeyFigureCommand : HouseCommand
 

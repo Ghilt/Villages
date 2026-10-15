@@ -30,6 +30,9 @@ sealed class HouseError(message: String) : DomainError(message) {
 
     class InvalidQuest(reason: String) : HouseError("not a quest: $reason")
 
+    /** A quest is offered once, so the same offer sent twice is refused rather than held twice. */
+    data object QuestAlreadyOffered : HouseError("this house has already been offered that quest")
+
     /** A house is asked one thing at a time, and this one has not been answered. */
     data object ChoicePending : HouseError("this house already has a choice to make")
 

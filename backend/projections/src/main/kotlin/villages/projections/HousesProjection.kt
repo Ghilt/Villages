@@ -22,6 +22,7 @@ import villages.domain.HouseIncomeChanged
 import villages.domain.HouseId
 import villages.domain.PlayerId
 import villages.domain.Location
+import villages.domain.QuestEvent
 import villages.domain.WorldTime
 import villages.domain.everyStock
 import villages.domain.ChoiceEvent
@@ -115,7 +116,7 @@ class HousesProjection(feed: EventFeed) : Follower(feed), HousesByCell, HousesBy
             is ChoiceEvent -> return
 
             // A conversation puts nothing on the map, whatever is said in it.
-            is DialogueEvent -> return
+            is DialogueEvent, is QuestEvent -> return
 
             // Whom a house holds is the characters projection's business; the map's row of a house is unchanged.
             is KeyFigureEvent -> return

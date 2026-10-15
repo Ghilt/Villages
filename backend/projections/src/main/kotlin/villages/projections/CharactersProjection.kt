@@ -28,6 +28,7 @@ import villages.domain.HouseId
 import villages.domain.HouseLostKeyFigure
 import villages.domain.HouseName
 import villages.domain.PlayerId
+import villages.domain.QuestEvent
 import villages.domain.WorldTime
 import villages.domain.everyStat
 import villages.domain.ResourceEvent
@@ -153,7 +154,7 @@ class CharactersProjection(feed: EventFeed) : Follower(feed), KeyFiguresByHouse,
             }
 
             // What a house has, what it is asked and told, and what it sees are other read models' business.
-            is ResourceEvent, is ChoiceEvent, is DialogueEvent, is VisionEvent, is SeatEvent, is StructureEvent -> Unit
+            is ResourceEvent, is ChoiceEvent, is DialogueEvent, is QuestEvent, is VisionEvent, is SeatEvent, is StructureEvent -> Unit
         }
     }
 
