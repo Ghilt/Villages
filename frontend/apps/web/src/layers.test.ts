@@ -101,9 +101,10 @@ function rowOf(folder: string): number {
  * The game's surfaces that have taken the component library up, one at a time, as `UI-COMPONENTS.md` says they
  * will: until one has, it draws its own controls and may not reach into `ui`. The choice roll was the first,
  * with its rarity cards and Take action (0083); the inspect window the second, with the tag beside a window's name
- * saying how fresh what it shows is (0089).
+ * saying how fresh what it shows is (0089); later the quests, and the marks on the map with the card a crowd of them
+ * opens into (0096).
  */
-const TAKEN_UP: readonly string[] = ['choice', 'inspect', 'holdings', 'quests'];
+const TAKEN_UP: readonly string[] = ['choice', 'inspect', 'holdings', 'quests', 'sprites'];
 
 /** Whether the rows let one folder import another. */
 export function mayImport(from: string, to: string): boolean {

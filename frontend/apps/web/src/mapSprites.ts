@@ -24,6 +24,7 @@ export function toCharacterSprite(character: CharacterOnMapView): MapSprite {
     tint: serves === undefined ? NOBODYS : tinctureColour(serves.banner.field),
     kind: 'character',
     significance: KEY_FIGURE_SIGNIFICANCE,
+    name: character.givenName,
   };
 }
 
@@ -59,6 +60,7 @@ export function toStructureSprite(
     ...(always ? { always } : {}),
     ...(yours ? { yours } : {}),
     significance: structure.significance,
+    name: structure.name,
     // A ruin is drawn as a ruin, as tall as what it was; either in the culture of the ground it stands on.
     structure: {
       picture: pictureKey(structure.ruin === true ? RUIN_PICTURE : structure.structureType, culture),

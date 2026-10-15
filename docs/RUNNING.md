@@ -376,7 +376,13 @@ stage alone, with none of the debug panel in it (decision record 0079).
   every person becomes their bust too; its own picture stands in for the pin until the atlas is read. Anyone else's
   has no pin: it shrinks with the map until everything fades at 7.25. One a house holds flies a pennant in the house's
   field, over the building close in and on the pin's head far out; nobody's flies none. A type with no picture is a
-  plain house. It is drawn from zoom 7.25 like everything on the map, and under the fog outside vision. A click on one opens its **inspect window**,
+  plain house. It is drawn from zoom 7.25 like everything on the map, and under the fog outside vision.
+  Far out, marks whose pictures would overlap are a **crowd**, drawn as the most significant of them wearing a
+  gold "+N" for how many more it stands for (`sprites/markGroups.ts`); the debug log says, under `marks`, how many
+  crowds there are when that changes. A click on the "+N" opens the crowd's card over it (`sprites/CrowdCard.tsx`,
+  the library's `PinGroup`), every mark of it with its name, most significant first; a press on one opens its
+  window, and the card shuts on Escape, a press elsewhere or the camera moving. **Ctrl-click**, or Cmd-click on a
+  Mac, on a mark on the map or in the card takes the camera to it at zoom 9 instead. A click on one opens its **inspect window**,
   marked with a tower: its name, *a mill* or *an abbey* in the catalogue's word for the culture it stands in - a
   castle on Islamic ground is *a kasbah*, on African *a stockade* - who holds it with a way
   to that house, its level of the type's highest, what it yields whoever holds it a month and how far they see

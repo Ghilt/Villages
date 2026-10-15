@@ -247,9 +247,9 @@ export function App({ master, devTools }: AppProps) {
     if (map === null) {
       return;
     }
-    flyWith((place) => {
+    flyWith((place, zoom) => {
       note('camera', `showing ${place.lat.toFixed(3)}, ${place.lon.toFixed(3)}`);
-      map.flyTo({ center: [place.lon, place.lat], zoom: Math.max(map.getZoom(), FOUNDING_ZOOM) });
+      map.flyTo({ center: [place.lon, place.lat], zoom: zoom ?? Math.max(map.getZoom(), FOUNDING_ZOOM) });
     });
     return () => flyWith(null);
   }, [map]);

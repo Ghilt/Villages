@@ -16,7 +16,8 @@ export interface Place {
   lon: number;
 }
 
-type Fly = (place: Place) => void;
+/** Takes the camera to a place, to `zoom` when it is said and otherwise to whatever zoom the map thinks best. */
+type Fly = (place: Place, zoom?: number) => void;
 
 let fly: Fly | null = null;
 
@@ -31,10 +32,10 @@ export function flyWith(how: Fly | null): void {
  * Silent when there is no map to ask - a link followed before the map has loaded is a link that does
  * nothing, which is better than one that throws.
  */
-export function focusOn(place: Place): void {
+export function focusOn(place: Place, zoom?: number): void {
   if (fly === null) {
     note('inspect', 'nothing to show it on; the map is not up');
     return;
   }
-  fly(place);
+  fly(place, zoom);
 }

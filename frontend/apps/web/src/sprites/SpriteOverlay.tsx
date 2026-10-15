@@ -5,6 +5,8 @@ import { sceneryStore } from './scenery/settings';
 import { circleOf, visionOf } from '../fog/circles';
 import { fieldOf } from '../fog/fogField';
 import { sessionStore } from '../net/gateway';
+import { focusOn } from '../map/focus';
+import { CrowdCard } from './CrowdCard';
 import { cameraOf } from './mapCamera';
 import { createPixiSpriteRenderer } from './PixiSpriteRenderer';
 import type { MapSprite } from './SpriteRenderer';
@@ -14,6 +16,19 @@ import { useStore } from '../store/useStore';
 const CHARACTER = 'character:';
 /** The id space structures are drawn under, apart from people. See `mapSprites.ts`. */
 const STRUCTURE = 'structure:';
+/** What a crowd's "+N" answers a click with: its leader's id with this in front. See `MarksLayer.ts`. */
+const GROUP = 'group:';
+/** How close a Ctrl-click takes the camera: just in from where everything stops being its mark. */
+const CLOSER_ZOOM = 9;
+
+/** A person or a structure, by the id it is drawn under, or null for anything else. */
+function thingOf(id: string): { kind: 'character' | 'structure'; id: string } | null {
+  return id.startsWith(CHARACTER)
+    ? { kind: 'character', id: id.slice(CHARACTER.length) }
+    : id.startsWith(STRUCTURE)
+      ? { kind: 'structure', id: id.slice(STRUCTURE.length) }
+      : null;
+}
 
 interface SpriteOverlayProps {
   map: maplibregl.Map;
@@ -109,20 +124,40 @@ export function SpriteOverlay({ map, sprites, worldRoot, picked: top, onPick }: 
    */
   const pick = useRef(onPick);
   pick.current = onPick;
+  const drawn = useRef(sprites);
+  drawn.current = sprites;
+  // A crowd of marks far out, opened by a click on its "+N": who is in it, and where it was opened.
+  const [crowd, setCrowd] = useState<{ members: readonly MapSprite[]; at: { x: number; y: number } } | null>(
+    null,
+  );
+  /** A mark picked, on the map or in a crowd's card: its window, or with Ctrl or Cmd, the camera taken to it. */
+  const choose = useRef((sprite: MapSprite, closer: boolean) => {
+    const thing = thingOf(sprite.id);
+    if (thing === null) return;
+    if (closer) {
+      focusOn({ lat: sprite.at.lat, lon: sprite.at.lng }, CLOSER_ZOOM);
+    } else {
+      pick.current(thing);
+    }
+  });
   useEffect(() => {
     const onClick = (event: maplibregl.MapMouseEvent) => {
       const hit = renderer?.hitTest(event.point) ?? null;
-      const thing =
-        hit === null
-          ? null
-          : hit.startsWith(CHARACTER)
-            ? { kind: 'character' as const, id: hit.slice(CHARACTER.length) }
-            : hit.startsWith(STRUCTURE)
-              ? { kind: 'structure' as const, id: hit.slice(STRUCTURE.length) }
-              : null;
-      if (thing !== null) {
-        event.preventDefault();
-        pick.current(thing);
+      if (hit === null) {
+        return;
+      }
+      event.preventDefault();
+      const byId = new Map(drawn.current.map((one) => [one.id, one]));
+      if (hit.startsWith(GROUP)) {
+        const members = (renderer?.groupOf(hit.slice(GROUP.length)) ?? []).flatMap(
+          (id) => byId.get(id) ?? [],
+        );
+        setCrowd(members.length === 0 ? null : { members, at: { x: event.point.x, y: event.point.y } });
+        return;
+      }
+      const sprite = byId.get(hit);
+      if (sprite !== undefined) {
+        choose.current(sprite, event.originalEvent.ctrlKey || event.originalEvent.metaKey);
       }
     };
 
@@ -138,6 +173,18 @@ export function SpriteOverlay({ map, sprites, worldRoot, picked: top, onPick }: 
     <>
       <canvas className="uncolouring" ref={uncolouringRef} aria-hidden="true" />
       <div className="sprites" ref={containerRef} data-testid="sprites" />
+      {crowd !== null && (
+        <CrowdCard
+          map={map}
+          members={crowd.members}
+          at={crowd.at}
+          onClose={() => setCrowd(null)}
+          onPick={(sprite, how) => {
+            setCrowd(null);
+            choose.current(sprite, how.closer);
+          }}
+        />
+      )}
     </>
   );
 }

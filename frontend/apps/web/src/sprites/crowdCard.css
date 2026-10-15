@@ -1,0 +1,6 @@
+/* A crowd of marks opened, standing over the place it was opened at, clear of the badge that opened it. */
+.crowd-card {
+  position: absolute;
+  z-index: 5;
+  transform: translate(-50%, calc(-100% - 12px));
+}

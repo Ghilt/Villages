@@ -359,6 +359,10 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       return layers?.marks.hitTest(point) ?? null;
     },
 
+    groupOf(leader: string): readonly string[] {
+      return layers?.marks.groupOf(leader) ?? [];
+    },
+
     setScene(next: Scene): void {
       const was = scene;
       scene = next;

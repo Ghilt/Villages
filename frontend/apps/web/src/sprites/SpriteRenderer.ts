@@ -34,6 +34,8 @@ export interface MapSprite {
   yours?: boolean;
   /** How much it matters to the world, which decides which of a crowd of marks far out leads it. See 0096. */
   significance?: number;
+  /** What it is called, for the card a crowd of marks opens into. */
+  name?: string;
   /** The colour of the pennant flown over it, its holder's field, or absent for a thing nobody holds. */
   pennant?: number;
   /**
@@ -64,10 +66,15 @@ export interface SpriteRenderer {
    * Which house or person is at this point on the screen, by the id they were drawn under, or null.
    *
    * The renderer answers because it is the only thing that knows where it drew: the canvas takes no
-   * pointer events, so the map hands the click over. Houses, characters and structures answer; a candidate
-   * is a place being offered rather than a thing standing in the world.
+   * pointer events, so the map hands the click over. Characters and structures answer, and a crowd's "+N" as
+   * `group:<leader>`; a candidate is a place being offered rather than a thing standing in the world.
    */
   hitTest(point: { x: number; y: number }): string | null;
+  /**
+   * Every mark of the crowd a mark leads far out, as last drawn, the leader first and the rest in rank order: what a
+   * click on its `group:<leader>` badge opens.
+   */
+  groupOf(leader: string): readonly string[];
   /** Stop following, release the canvas and the textures. */
   destroy(): void;
 }
