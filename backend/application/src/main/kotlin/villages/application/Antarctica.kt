@@ -55,10 +55,12 @@ class Antarctica(
         /**
          * Where the [at]th type stands: four to a row, the castle at the north-west corner, on the island off the
          * tip of the Antarctic Peninsula that Adam chose on 2026-10-11, about its middle at 63.247 south, 56.030 west.
-         * Four kilometres apart each way, so all sixteen are on the screen at once from zoom 9: eight hundredths of a
-         * degree east, and on a map that stretches latitude as Mercator does, 0.036 degrees south looks as far.
+         * Six kilometres apart each way, since structures stood twice as tall on 2026-10-15, so that a castle at zoom 10
+         * does not stand over its neighbour and all sixteen are still on the screen at once from zoom 9: twelve
+         * hundredths of a degree east, and on a map that stretches latitude as Mercator does, 0.054 degrees south looks
+         * as far.
          * Counted in thousandths of a degree, so a place is the number it is written as and not a hair off it.
          */
-        fun placeOf(at: Int): Location = Location((-63_193 - 36 * (at / 4)) / 1000.0, (-56_150 + 80 * (at % 4)) / 1000.0)
+        fun placeOf(at: Int): Location = Location((-63_166 - 54 * (at / 4)) / 1000.0, (-56_210 + 120 * (at % 4)) / 1000.0)
     }
 }

@@ -42,9 +42,9 @@ class AntarcticaSpec : StringSpec({
         store.commands.map { it.name } shouldBe listOf("the Antarctic castle", "the Antarctic mill", "the Antarctic printing house")
         store.commands.map { it.structureId } shouldBe catalogue.types.keys.map(StructureId::inAntarctica)
         store.commands.all { it.holder == null && it.level == 1 } shouldBe true
-        store.commands[1].place shouldBe Location(-63.193, -56.07)
-        Antarctica.placeOf(5) shouldBe Location(-63.229, -56.07)
-        Antarctica.placeOf(15) shouldBe Location(-63.301, -55.91)
+        store.commands[1].place shouldBe Location(-63.166, -56.09)
+        Antarctica.placeOf(5) shouldBe Location(-63.22, -56.09)
+        Antarctica.placeOf(15) shouldBe Location(-63.328, -55.85)
     }
 
     "starting again over a kept world raises none of them twice" {
