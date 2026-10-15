@@ -15,6 +15,7 @@ import {
   rollPayloadSchema,
 } from './choiceFrames';
 import { dialogueViewSchema } from './dialogueFrames';
+import { questViewSchema } from './questFrames';
 import {
   structureArrivedSchema,
   structureChangedSchema,
@@ -304,6 +305,11 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
    * after `yourSight` on hello and again whenever one changes, holding back what has not been reached. See 0071.
    */
   z.object({ type: z.literal('yourDialogues'), dialogues: z.array(dialogueViewSchema) }),
+  /**
+   * The player's quests, open and finished, in the order the house was offered them. Always a list, sent after
+   * `yourDialogues` on hello and again whenever one changes, with only what each quest's walk draws. See 0096.
+   */
+  z.object({ type: z.literal('yourQuests'), quests: z.array(questViewSchema) }),
   /** Another window took this player over; this session is finished. */
   z.object({ type: z.literal('takenOver'), message: z.string() }),
   /** The world was emptied and this session is finished with it. Everyone is told. See 0036. */

@@ -207,7 +207,9 @@ stage alone, with none of the debug panel in it (decision record 0079).
   one ended are the player's. The page names the sample and sends none of its words. The asking and the answer are
   lines of the log under `quests`; the quest itself, whole, and every move in it are at `/admin/inspect-events`,
   the offer and the abbot's dialogue in one story, and finishing the dialogue writes the move past the gate and
-  the road lost in the story of its last step. The page is not yet sent the quest, and there is no pane for it.
+  the road lost in the story of its last step. The page is sent the quest as its walk draws it, and the log under `quests`
+  says where each stands - *stands at "A light on the water", 1 of 2 ticked; lost "A gift to the mission"* - whenever one
+  changes. There is no pane for it yet.
   See `docs/adr/0096` and `docs/plans/quests.md`.
 - The choice roll, the player's own: **Take action**, in the bottom middle of the spread once there is a
   house, put away at rest to a **chip** in the middle of the bottom row with what a roll costs beside it - a

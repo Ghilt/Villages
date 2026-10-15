@@ -180,6 +180,7 @@ export function createSession(ports: SessionPorts): Session {
     yourHoldings: () => undefined,
     yourSight: () => undefined,
     yourDialogues: () => undefined,
+    yourQuests: () => undefined,
     // The world this window was looking at is gone. Arriving anew is the only honest thing to do. See 0036.
     worldWiped: () => ports.arriveAnew(),
     // A player plays from one place. This window is finished; the socket goes with it. See 0028.

@@ -65,6 +65,6 @@ private fun RevealImpact.toView(): RevealImpactView = when (this) {
     RevealImpact.Hidden -> RevealImpactView.Hidden
 }
 
-private fun Requirement.toView(): RequirementView = when (this) {
+internal fun Requirement.toView(): RequirementView = when (this) {
     is Requirement.Alive -> RequirementView.Alive(character.value.toString())
 }

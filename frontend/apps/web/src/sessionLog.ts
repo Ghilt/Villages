@@ -7,6 +7,7 @@ import { fullName, whatChanged } from './figures/describe';
 import { describeSight } from './fog/describe';
 import { saysIncome } from './house/describe';
 import { note, shortId } from './log/log';
+import { whatChangedIn as whatChangedInQuests } from './quests/describe';
 import {
   NOTHING_ARRIVED,
   NO_STANDS_ARRIVED,
@@ -200,6 +201,11 @@ export const sessionLog: GatewayListener = {
         // What is worth saying is the difference from what was held.
         for (const line of whatChangedIn(was.yourDialogues, frame.dialogues)) {
           note('dialogues', line);
+        }
+        return;
+      case 'yourQuests':
+        for (const line of whatChangedInQuests(was.yourQuests, frame.quests)) {
+          note('quests', line);
         }
         return;
       case 'worldWiped':

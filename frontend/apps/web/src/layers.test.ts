@@ -24,7 +24,7 @@ const ROWS: readonly (readonly string[])[] = [
   // What stands on the ground, and the room around the desk.
   ['sprites', 'room'],
   // The game's own surfaces: the panes and windows a player reads and presses.
-  ['house', 'figures', 'holdings', 'choice', 'dialogues', 'areas', 'inspect'],
+  ['house', 'figures', 'holdings', 'choice', 'dialogues', 'quests', 'areas', 'inspect'],
   // What puts it all together, and the instruments beside it.
   ['(root)', 'debug', 'admin'],
 ];

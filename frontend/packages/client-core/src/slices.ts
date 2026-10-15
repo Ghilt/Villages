@@ -3,6 +3,7 @@ import type {
   DialogueView,
   InspectedAtFrame,
   KeyFigureView,
+  QuestView,
   RollDrawnFrame,
   ServerFrame,
   StructureView,
@@ -52,6 +53,11 @@ export interface SessionState {
    * What has not been reached is never here, and nor is any requirement. See decision record 0071.
    */
   yourDialogues: readonly DialogueView[] | null;
+  /**
+   * The player's quests, open and finished, as the gateway lets them be known, or null until it has said: only
+   * what each quest's walk draws, and nothing behind a question mark. See decision record 0096.
+   */
+  yourQuests: readonly QuestView[] | null;
   /**
    * The last step through a dialogue the house refused, and why, until another is sent: which the pane says
    * under the options, because a press that seems to do nothing is a press the player cannot read.
@@ -185,6 +191,12 @@ const SLICES = {
     onFrame: { yourDialogues: (_, frame) => ({ yourDialogues: frame.dialogues }) },
     onReset: forgottenWhenTakenOver({ yourDialogues: null }),
   } satisfies Slice<'yourDialogues'>,
+
+  quests: {
+    initial: { yourQuests: null },
+    onFrame: { yourQuests: (_, frame) => ({ yourQuests: frame.quests }) },
+    onReset: forgottenWhenTakenOver({ yourQuests: null }),
+  } satisfies Slice<'yourQuests'>,
 
   /**
    * The player's command waiting on its answer, and a step refused. A refusal of the step out is said in its pane,

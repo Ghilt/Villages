@@ -32,6 +32,7 @@ import villages.application.WipeGate
 import villages.application.WorldKept
 import villages.domain.PlayerId
 import villages.domain.WorldTime
+import villages.projections.QuestsProjection
 import villages.projections.StructuresProjection
 import villages.projections.CharactersProjection
 import villages.projections.ChoicesProjection
@@ -98,6 +99,7 @@ internal class Rig(
     val characters = CharactersProjection(world).started()
     val sights = SightProjection(world).started()
     val dialogueRows = DialoguesProjection(world).started()
+    val questRows = QuestsProjection(world).started()
     val lastRolls = LastRollsProjection(world).started()
     /** The world-day the rig's clock says, which a test may move on to see what a day passing does. */
     var day: WorldTime = today
@@ -198,6 +200,7 @@ internal class Rig(
                 characters.reset()
                 sights.reset()
                 dialogueRows.reset()
+                questRows.reset()
                 gone
             },
             // A die that always comes up one, so every newcomer is the same known woman of eighteen.
@@ -221,6 +224,7 @@ internal class Rig(
             dialogues = DialogueService(world, characters, houses, clock = { noon }, world = worldClock),
             dialogueRows = dialogueRows,
             quests = QuestService(world, clock = { noon }, world = worldClock),
+            questRows = questRows,
             stands = Stands { master, x, y -> if (master == "terrain") standsOnDisk[y * STAND_TILES + x] ?: ByteArray(0) else null },
             waters = WaterAt({ grounds[it] }, { names[it] }),
             structures = StructureService(world, houses, { noon }, worldClock, structuresOnTheMap, { UUID.randomUUID() }),

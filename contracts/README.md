@@ -133,3 +133,6 @@ recorded over. See decision record 0037. What each one changed:
 - **49** - an effect can be a `pledge`: a resource, an amount, and the world-day it comes back on, what a quest's pledge
   objective costs when it is met (decision record 0096).
 - **50** - `offerQuest`, Adam's lever: one of the server's sample quests, by its name, offered to the sender's house.
+- **51** - `yourQuests`: the player's quests, each with only the nodes its walk draws - a question mark as its id, row and
+  state, a node shown for what it is with its kind, title, and its dialogue, objectives or gifts - and the edges
+  touching them, a stub where the far end is not drawn (decision record 0096).

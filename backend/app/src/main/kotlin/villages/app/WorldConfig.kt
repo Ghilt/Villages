@@ -42,6 +42,7 @@ import villages.projections.ChoicesProjection
 import villages.projections.LastRollsProjection
 import villages.projections.DialoguesProjection
 import villages.projections.HousesProjection
+import villages.projections.QuestsProjection
 import villages.projections.RecentEventsProjection
 import villages.projections.SightProjection
 import villages.protocol.Calendar
@@ -313,6 +314,10 @@ class WorldConfig {
     /** Every dialogue each house was offered, and how far each has got, folded from the same feed. See 0071. */
     @Bean(initMethod = "start", destroyMethod = "close")
     fun dialogueRows(world: EventWorld): DialoguesProjection = DialoguesProjection(world.feed)
+
+    /** Every quest each house was offered, and what it recorded of each, folded from the same feed. See 0096. */
+    @Bean(initMethod = "start", destroyMethod = "close")
+    fun questRows(world: EventWorld): QuestsProjection = QuestsProjection(world.feed)
 
     /**
      * Emptying the development world: the store and everything folded from it, in one moment that nothing written

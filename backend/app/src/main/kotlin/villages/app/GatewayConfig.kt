@@ -31,6 +31,7 @@ import villages.projections.CharactersProjection
 import villages.projections.ChoicesProjection
 import villages.projections.DialoguesProjection
 import villages.projections.HousesProjection
+import villages.projections.QuestsProjection
 import villages.projections.RecentEventsProjection
 import villages.projections.SightProjection
 import villages.projections.StructuresProjection
@@ -66,6 +67,7 @@ class GatewayConfig {
         dialogues: DialogueService,
         dialogueRows: DialoguesProjection,
         quests: QuestService,
+        questRows: QuestsProjection,
         stands: Stands,
         ground: GroundMaps,
         placeNames: PlaceNamesByMaster,
@@ -104,6 +106,7 @@ class GatewayConfig {
             dialogues = dialogues,
             dialogueRows = dialogueRows,
             quests = quests,
+            questRows = questRows,
             stands = stands,
             waters = WaterAt(ground, placeNames),
             structures = structures,

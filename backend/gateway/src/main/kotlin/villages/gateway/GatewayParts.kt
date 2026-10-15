@@ -15,6 +15,7 @@ import villages.application.HousesByPlayer
 import villages.application.KeyFigureService
 import villages.application.KeyFiguresByHouse
 import villages.application.QuestService
+import villages.application.QuestsByHouse
 import villages.application.RecentEvents
 import villages.application.ResourceService
 import villages.application.SightsByHouse
@@ -55,6 +56,7 @@ class Mechanics(
     val dialogues: DialogueService,
     val dialogueRows: DialoguesByHouse,
     val quests: QuestService,
+    val questRows: QuestsByHouse,
     val stands: Stands = Stands { _, _, _ -> null },
     val waters: WaterAt = WaterAt.NOWHERE,
     val structures: StructureService,
@@ -71,7 +73,7 @@ class Mechanics(
 
 /**
  * A part for each mechanic, in the order a player arriving is told things: the house, whom it holds, what it holds, what it sees,
- * what it was told, what it is asked; then the stands, the waters, the timeline and the windows (0088), which greet
+ * what it was told, what it set out to do, what it is asked; then the stands, the waters, the timeline and the windows (0088), which greet
  * nobody; and Adam's instruments (0076). A part watches its read models from the moment it is made, so the gateway
  * makes them after its index and its sessions.
  */
@@ -90,6 +92,7 @@ internal fun partsOf(
         StructuresPart(core, structuresOnTheMap, world),
         SightPart(core, sights),
         DialoguesPart(core, dialogues, dialogueRows),
+        QuestsPart(core, questRows),
         ChoicesPart(core, arrival, takeAction, choices, rolls),
         StandsPart(stands),
         WatersPart(waters),

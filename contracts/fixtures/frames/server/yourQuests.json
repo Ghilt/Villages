@@ -1,0 +1,54 @@
+{
+  "type": "yourQuests",
+  "quests": [
+    {
+      "id": "ee000000-0000-4000-8000-00000000a001",
+      "revision": 4,
+      "title": "The abbot of the isle",
+      "scene": "harbour",
+      "nodes": [
+        { "id": "gate", "row": 0, "state": "done", "kind": "dialogue", "title": "The abbot at the gate", "dialogueId": "960f38f9-ac78-3750-9d54-c3adf4dc59ad" },
+        {
+          "id": "gift",
+          "row": 1,
+          "state": "lost",
+          "kind": "checklist",
+          "title": "A gift to the mission",
+          "objectives": [{ "kind": "pledge", "id": "piety", "met": false, "resource": "piety", "amount": 30, "months": 6 }]
+        },
+        {
+          "id": "light",
+          "row": 1,
+          "state": "current",
+          "kind": "checklist",
+          "title": "A light on the water",
+          "objectives": [
+            { "kind": "hold", "id": "castle", "met": true, "structureType": "castle", "where": "island" },
+            { "kind": "deliver", "id": "wealth", "met": false, "resource": "wealth", "amount": 60 }
+          ]
+        },
+        { "id": "consecration", "row": 2, "state": "ahead" },
+        {
+          "id": "blessing",
+          "row": 4,
+          "state": "ahead",
+          "kind": "reward",
+          "title": "The abbot's blessing",
+          "gives": [
+            { "kind": "grant", "resource": "piety", "amount": 150 },
+            { "kind": "grant", "resource": "influence", "amount": 40 }
+          ]
+        }
+      ],
+      "edges": [
+        { "from": "gate", "to": "gift", "state": "lost" },
+        { "from": "gate", "to": "light", "state": "walked" },
+        { "from": "gift", "to": "consecration", "state": "lost" },
+        { "from": "light", "to": "consecration", "state": "ahead" },
+        { "from": "consecration", "state": "ahead" },
+        { "to": "blessing", "state": "ahead" }
+      ],
+      "ending": { "kind": "open" }
+    }
+  ]
+}
