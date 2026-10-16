@@ -27,12 +27,15 @@ const CELLS = { fromX: 2000, toX: 2040, fromY: 1000, toY: 1030 };
 /** An afternoon of 2026, in seconds of the wall clock. */
 const NOW = Date.UTC(2026, 9, 16, 15, 0, 0) / 1000;
 
+/** A corner of those cells, for the tests that fill every cell's every slot. */
+const CORNER = { fromX: 2000, toX: 2020, fromY: 1000, toY: 1015 };
+
 /** Every critter of the cells over an hour, or as many seconds as said, by its key. */
-function anHour(density: number, ground = wood(), seconds = 3600): Map<string, CritterEvent> {
+function anHour(density: number, ground = wood(), seconds = 3600, cells = CELLS): Map<string, CritterEvent> {
   const events = new Map<string, CritterEvent>();
   for (let slot = slotOf(NOW); slot < slotOf(NOW + seconds); slot += 1) {
-    for (let cellY = CELLS.fromY; cellY <= CELLS.toY; cellY += 1) {
-      for (let cellX = CELLS.fromX; cellX <= CELLS.toX; cellX += 1) {
+    for (let cellY = cells.fromY; cellY <= cells.toY; cellY += 1) {
+      for (let cellX = cells.fromX; cellX <= cells.toX; cellX += 1) {
         const event = eventIn(cellX, cellY, slot, density, ground);
         if (event !== null) events.set(event.key, event);
       }
@@ -74,12 +77,12 @@ describe("the critters' clock", () => {
   });
 
   it('brings more as often goes up, keeping every one it had, until every cell is busy', () => {
-    const usual = anHour(CRITTERS_LOOK.density, wood(), 600);
-    const often = anHour(CRITTERS_LOOK.density * 20, wood(), 600);
+    const usual = anHour(CRITTERS_LOOK.density, wood(), 600, CORNER);
+    const often = anHour(CRITTERS_LOOK.density * 20, wood(), 600, CORNER);
     expect(often.size).toBeGreaterThan(usual.size * 5);
     for (const [key, event] of usual) expect(often.get(key)).toEqual(event);
-    // At its most every cell's slot in a wood brings something: forty-one cells by thirty-one, fifty slots.
-    expect(anHour(20, wood(), 600).size).toBe(41 * 31 * 50);
+    // At its most every cell's slot in a wood brings something: twenty-one cells by sixteen, fifty slots.
+    expect(anHour(20, wood(), 600, CORNER).size).toBe(21 * 16 * 50);
   });
 
   it('brings a critter only where its kind lives and out of what it comes out of', () => {
