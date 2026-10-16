@@ -179,8 +179,9 @@ class WorldConfig {
         houses: HousesProjection,
         clock: Clock,
         worldClock: WorldClock,
+        shelf: Shelf,
     ): DialogueService =
-        DialogueService(world.executor, characters, houses, clock = { clock.instant() }, world = worldClock)
+        DialogueService(world.executor, characters, houses, clock = { clock.instant() }, world = worldClock) { shelf.dialogues }
 
     /** Offering a house a quest. See decision record 0096. */
     @Bean

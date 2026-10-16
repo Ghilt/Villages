@@ -110,13 +110,13 @@ class DialogueServiceSpec : StringSpec({
                 resources = emptyMap(), pledges = emptyList(), since = today, until = null, version = 1,
             ).takeIf { mapped && player == ada }
         }
-        return houses to DialogueService(houses, readModel, onTheMap, { noon }, { today })
+        return houses to DialogueService(houses, readModel, onTheMap, { noon }, { today }) { mapOf("letter" to TEST_LETTER) }
     }
 
     "the letter is offered to the player's house, spoken by its first key figure, in the command's story" {
         val (houses, service) = rig(agnes)
 
-        val id = service.offerSample(ada, SampleDialogues.LETTER, Provenance.startedBy(sent))
+        val id = service.offer(ada, "letter", Provenance.startedBy(sent))
 
         id shouldBe DialogueId.offered(house, sent)
         val (event, provenance) = houses.written.single()
@@ -133,26 +133,26 @@ class DialogueServiceSpec : StringSpec({
 
     "accepting costs the masons' forty and is paid the dues, asking is paid in influence, and refusing does nothing" {
         val (houses, service) = rig(agnes)
-        service.offerSample(ada, SampleDialogues.LETTER, Provenance.startedBy(sent))
+        service.offer(ada, "letter", Provenance.startedBy(sent))
         val letter = (houses.written.single().first as PlayerOfferedDialogue).dialogue
         fun effectsOf(vararg steps: String) =
             letter.walk(steps.map(::LineId)).also { it.over shouldBe true }.said.flatMap { it.effects }
 
         effectsOf("accept", "paid") shouldBe listOf(
-            Effect.Spend(Resource.WEALTH, SampleDialogues.MASONS),
-            Effect.Grant(Resource.WEALTH, SampleDialogues.DUES),
+            Effect.Spend(Resource.WEALTH, 40),
+            Effect.Grant(Resource.WEALTH, 100),
         )
-        effectsOf("ask", "answer") shouldBe listOf(Effect.Grant(Resource.INFLUENCE, SampleDialogues.GOOD_WORD))
+        effectsOf("ask", "answer") shouldBe listOf(Effect.Grant(Resource.INFLUENCE, 5))
         effectsOf("refuse", "shrugs") shouldBe emptyList()
     }
 
     "the letter's options show what they will do all three ways: accepting whole, asking hidden, refusing not at all" {
         val (houses, service) = rig(agnes)
-        service.offerSample(ada, SampleDialogues.LETTER, Provenance.startedBy(sent))
+        service.offer(ada, "letter", Provenance.startedBy(sent))
         val letter = (houses.written.single().first as PlayerOfferedDialogue).dialogue
 
         letter.line(LineId("accept"))?.revealImpact shouldBe RevealImpact.Shown(
-            listOf(Impact(Resource.WEALTH, -SampleDialogues.MASONS), Impact(Resource.WEALTH, SampleDialogues.DUES)),
+            listOf(Impact(Resource.WEALTH, -40), Impact(Resource.WEALTH, 100)),
         )
         letter.line(LineId("ask"))?.revealImpact shouldBe RevealImpact.Hidden
         letter.line(LineId("refuse"))?.revealImpact shouldBe null
@@ -162,24 +162,24 @@ class DialogueServiceSpec : StringSpec({
         val (houses, service) = rig()
 
         shouldThrow<HouseError.NoSuchKeyFigure> {
-            service.offerSample(ada, SampleDialogues.LETTER, Provenance.startedBy(sent))
+            service.offer(ada, "letter", Provenance.startedBy(sent))
         }
         houses.written shouldBe emptyList()
     }
 
     "the same command sent again is refused as already offered, rather than offering the letter twice" {
         val (houses, service) = rig(agnes)
-        service.offerSample(ada, SampleDialogues.LETTER, Provenance.startedBy(sent))
+        service.offer(ada, "letter", Provenance.startedBy(sent))
 
         shouldThrow<HouseError.DialogueAlreadyOffered> {
-            service.offerSample(ada, SampleDialogues.LETTER, Provenance.startedBy(sent))
+            service.offer(ada, "letter", Provenance.startedBy(sent))
         }
         houses.written.count { it.first is PlayerOfferedDialogue } shouldBe 1
     }
 
     "a step is taken through the player's dialogue in the story it is given, with what its line does" {
         val (houses, service) = rig(agnes)
-        val id = service.offerSample(ada, SampleDialogues.LETTER, Provenance.startedBy(sent))
+        val id = service.offer(ada, "letter", Provenance.startedBy(sent))
         houses.written.clear()
         val stepping = Provenance(commandId = UUID.randomUUID(), correlationId = sent)
 
@@ -197,7 +197,7 @@ class DialogueServiceSpec : StringSpec({
 
     "a step the walk does not allow is the house's to refuse" {
         val (houses, service) = rig(agnes)
-        val id = service.offerSample(ada, SampleDialogues.LETTER, Provenance.startedBy(sent))
+        val id = service.offer(ada, "letter", Provenance.startedBy(sent))
         houses.written.clear()
 
         shouldThrow<HouseError.NotTheNextStep> {
@@ -212,13 +212,13 @@ class DialogueServiceSpec : StringSpec({
     "a sample that does not exist is not asked of the house at all" {
         val (houses, service) = rig(agnes)
 
-        shouldThrow<IllegalArgumentException> { service.offerSample(ada, "a song", Provenance.startedBy(sent)) }
+        shouldThrow<IllegalArgumentException> { service.offer(ada, "a song", Provenance.startedBy(sent)) }
         houses.written shouldBe emptyList()
     }
 
     "the letter shows each thing a line can show once: the seat as the rider arrives, the house, and the figure" {
         val (houses, service) = rig(agnes)
-        service.offerSample(ada, SampleDialogues.LETTER, Provenance.startedBy(sent))
+        service.offer(ada, "letter", Provenance.startedBy(sent))
         val letter = (houses.written.single().first as PlayerOfferedDialogue).dialogue
 
         letter.lines.filter { it.shows != null }.associate { it.id.value to it.shows } shouldBe mapOf(
@@ -231,7 +231,7 @@ class DialogueServiceSpec : StringSpec({
     // The map's read model can be a moment behind a house just founded: the letter is offered all the same.
     "a house the map does not hold yet is offered the letter with the rider's line showing nothing" {
         val (houses, service) = rig(agnes, mapped = false)
-        service.offerSample(ada, SampleDialogues.LETTER, Provenance.startedBy(sent))
+        service.offer(ada, "letter", Provenance.startedBy(sent))
         val letter = (houses.written.single().first as PlayerOfferedDialogue).dialogue
 
         letter.line(LineId("arrives"))?.shows shouldBe null

@@ -74,6 +74,14 @@ export const INSPECT_VIEWS: readonly InspectView[] = [
     catalogue: 'character-names',
   },
   {
+    path: '/admin/inspect-dialogues',
+    title: 'Dialogues',
+    what: 'Every dialogue there is to offer, a file each: who speaks, what is said, and where each line leads.',
+    needs: 'nothing to read, the game server to save',
+    load: () => import('./dialogues/Dialogues').then((page) => page.Dialogues),
+    catalogue: 'dialogues',
+  },
+  {
     path: '/admin/inspect-architecture',
     title: 'Architecture',
     what: 'How the world is set up: what is baked beforehand, how long each step takes, and what the running game reads.',

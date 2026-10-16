@@ -254,3 +254,24 @@
   font-size: 0.72rem;
   cursor: pointer;
 }
+
+/* A catalogue that is a folder (the dialogues', the quests'): a file chosen by its name, each an address of its own. */
+
+.inspect-tab {
+  padding: 0.2rem 0.6rem;
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  text-decoration: none;
+  border: 1px solid transparent;
+  border-radius: 2px;
+}
+
+.inspect-tab:hover {
+  border-color: var(--parchment-edge);
+}
+
+.inspect-tab.is-chosen {
+  color: var(--ink);
+  border-color: var(--ink-soft);
+}

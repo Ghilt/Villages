@@ -225,7 +225,7 @@ internal class Rig(
                 world = worldClock,
                 ids = { UUID.fromString("e1000000-0000-4000-8000-%012x".format(++minted)) },
             ),
-            dialogues = DialogueService(world, characters, houses, clock = { noon }, world = worldClock),
+            dialogues = DialogueService(world, characters, houses, clock = { noon }, world = worldClock) { mapOf("letter" to RIG_LETTER) },
             dialogueRows = dialogueRows,
             quests = QuestService(
                 world,

@@ -1,0 +1,21 @@
+{
+  "$comment": "A dialogue filed as world/catalogues/dialogues/<name>.json files one, written by hand, small, with every kind of field once: the server's DialogueFile and the world package's parseDialogue both read it, and are held to it.",
+  "title": "A word at the gate",
+  "scene": "harbour",
+  "speakers": {
+    "you": { "party": 0, "is": "keyFigure" },
+    "abbot": { "party": 1, "name": "The abbot", "portrait": "man-01" }
+  },
+  "lines": {
+    "asks": { "by": "abbot", "says": "{given}, will you give?", "shows": "seat", "then": ["give", "keep"] },
+    "give": {
+      "by": "you",
+      "says": "Take this.",
+      "spends": { "piety": 10 },
+      "reveals": [{ "piety": -10 }, { "influence": 3 }],
+      "then": "thanks"
+    },
+    "keep": { "by": "you", "says": "Not today.", "reveals": "hidden" },
+    "thanks": { "by": "abbot", "says": "Bless you.", "grants": { "influence": 3 }, "shows": "keyFigure" }
+  }
+}

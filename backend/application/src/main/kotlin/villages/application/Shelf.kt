@@ -84,6 +84,9 @@ class Shelf(
     /** What a newcomer can be called, at the moment of asking. */
     val characterNames: CharacterNames get() = inForce.characterNames
 
+    /** Every dialogue there is to offer, by its name, at the moment of asking. */
+    val dialogues: Map<String, DialogueTemplate> get() = inForce.dialogues
+
     /** The fingerprint of each catalogue in force, by its name. */
     fun fingerprints(): Map<String, String> = texts.mapValues { (_, text) -> fingerprintOf(text) }
 

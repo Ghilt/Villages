@@ -1,0 +1,36 @@
+{
+  "$comment": "A dialogue, Adam's to change: a messenger brings the house's first key figure a letter, and it can be answered three ways - one that costs the house and pays it back more, one that pays in another coin, and one that does nothing at all. It shows each thing a line can show once: the rider arriving the seat, the purse paid the house, and the good word at court the figure who asked for it. Speakers and lines by their ids; a speaker is the house's keyFigure or has a name; a line is said by a speaker, says its words, {given} for the key figure's given name, grants and spends resources, reveals what an option does, hidden or as what it gives and takes, shows the seat, the house or the keyFigure, and leads then to a line, to a choice of lines, or, with none, ends. Every number a placeholder. Taken over on 2026-10-16 from the sample written in the code; the debug panel's Dialogues section offers it, and /admin/inspect-dialogues shows and edits it. See decision record 0097.",
+  "title": "A letter from the coast",
+  "scene": "harbour",
+  "speakers": { "figure": { "party": 0, "is": "keyFigure" }, "messenger": { "party": 1, "name": "A messenger" } },
+  "lines": {
+    "arrives": { "by": "messenger", "says": "{given}, a rider has come in from the coast with a letter under the harbour-master's seal.", "shows": "seat", "then": "reads" },
+    "reads": {
+      "by": "messenger",
+      "says": "The harbour-master is building a new quay, and asks whether the house will stand behind it.",
+      "then": ["accept", "ask", "refuse"]
+    },
+    "accept": {
+      "by": "figure",
+      "says": "Tell him the house will, and send forty for the masons.",
+      "spends": { "wealth": 40 },
+      "reveals": [{ "wealth": -40 }, { "wealth": 100 }],
+      "then": "paid"
+    },
+    "paid": {
+      "by": "messenger",
+      "says": "He thought you might say so. The first of the dues came with me.",
+      "grants": { "wealth": 100 },
+      "shows": "house"
+    },
+    "ask": { "by": "figure", "says": "Ask him what the house would have for it.", "reveals": "hidden", "then": "answer" },
+    "answer": {
+      "by": "messenger",
+      "says": "His good word at court, he says, and he gives it now, whatever you decide.",
+      "grants": { "influence": 5 },
+      "shows": "keyFigure"
+    },
+    "refuse": { "by": "figure", "says": "Tell him the house has quays enough of its own.", "then": "shrugs" },
+    "shrugs": { "by": "messenger", "says": "He thought you might say that too. I will tell him." }
+  }
+}

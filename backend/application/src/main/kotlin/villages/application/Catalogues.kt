@@ -12,6 +12,8 @@ data class Catalogues(
     val balance: Balance,
     val fate: FateCatalogue,
     val characterNames: CharacterNames,
+    /** Every dialogue there is to offer, by its name in `dialogues/`: `letter` for `dialogues/letter.json`. */
+    val dialogues: Map<String, DialogueTemplate> = emptyMap(),
 ) {
     /**
      * What must hold between catalogues, as one more check before the shelf takes them on: every name one of them
@@ -21,6 +23,7 @@ data class Catalogues(
         balance.check()
         fate.check()
         characterNames.check()
+        dialogues.forEach { (name, dialogue) -> dialogue.check(name) }
         return this
     }
 
@@ -36,6 +39,9 @@ data class Catalogues(
 
         /** The character names', `world/catalogues/character-names.json`: what a newcomer can be called. */
         const val CHARACTER_NAMES = "character-names"
+
+        /** The dialogues' folder, `world/catalogues/dialogues/`: a dialogue a file. */
+        const val DIALOGUES = "dialogues"
     }
 }
 

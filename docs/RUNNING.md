@@ -192,15 +192,18 @@ stage alone, with none of the debug panel in it (decision record 0079).
   `characters`, and what changed is a third; a move is a fourth, under `cells`, naming who arrived. The stat levers stay pressable at one and at twenty, so a
   refusal is seen rather than guessed. The events are at `/admin/inspect-events`. See `docs/adr/0055`.
 - Dialogues, in the same panel: the **Dialogues** section, below Characters. `offer a dialogue` offers the
-  house the server's sample, a letter from the coast spoken by the house's first key figure and a
-  messenger, ending in a dialogue choice of three: *accept* spends forty wealth and is paid a hundred,
-  *ask* is paid in influence, and *refuse* does nothing, each option showing what it will do a different
-  way - whole, hidden, or not at all. It is off, saying why on hover, while the house has no key figure.
+  house the dialogue chosen beside it, by its name in `world/catalogues/dialogues/`, a file each, which the list
+  follows as files come and go. The first is the letter from the coast, spoken by the house's first key figure and
+  a messenger, ending in a dialogue choice of three: *accept* spends forty wealth and is paid a hundred, *ask* is
+  paid in influence, and *refuse* does nothing, each option showing what it will do a different way - whole,
+  hidden, or not at all. One spoken by a key figure is refused a house that has none. Each is read by the game
+  server as it is offered, so a line changed in its file, by hand or from **`/admin/inspect-dialogues`**, is the
+  next offer's; one already offered keeps the words it was offered with.
   **That one lever is all the debug panel does for dialogues**, Adam's word on 2026-10-01: it stands in for
   the world, which offers none yet, and reading, answering and seeing how one ended are the player's, in the
   pane - never levers in the panel. The first option costs forty wealth, which the Resources section's `give`
   puts there, and `kill` on the speaker in Characters loses every open dialogue they speak in. The page names
-  the sample and sends none of its words, and a requirement is never sent to a page. The asking and the
+  the dialogue and sends none of its words, and a requirement is never sent to a page. The asking and the
   answer are lines of the log under `dialogues`, and so is where each dialogue stands whenever one changes,
   as far as the player may know it; the dialogue itself, whole, is at `/admin/inspect-events`. In the game,
   the house's first dialogue puts up the **dialogues** pane, a column down the right of the spread with its

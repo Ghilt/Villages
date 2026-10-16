@@ -288,8 +288,9 @@ Adam's idea, from the camera going home by accident when a line paid.
 - **Who the characters are.** Any character can speak, whoever they are to the house, and so can somebody
   who is not a character at all, a messenger say. NPCs from the warped history, and whether another player's
   house ever appears as a speaker, are open.
-- **What triggers one**, beyond "anything". The triggers are a list nobody has written, and so is where the
-  dialogues themselves are written: the first is a sample in the server, offered from the debug panel.
+- **What triggers one**, beyond "anything". The triggers are a list nobody has written. Where the dialogues
+  are written is decided: `world/catalogues/dialogues/`, a file each, offered from the debug panel by name
+  (decision record 0097).
 - **The characters' expressions**: whether a speaker's picture changes with what they say. The scenes are
   a folder of Adam's own pictures now, `world/scenes/`, as the portraits are, with placeholders until there
   are pictures.
@@ -308,8 +309,8 @@ one that could loop, or that leads to a line it does not have, is refused before
 option of a choice can grant a resource too, on the wire from version 14. `CompleteDialogueStep` takes a step
 where the walk says one is open, and writes what the line gives, and the end when it ends it, from the same
 decision, so a reward is paid once on every path; a conversation of forty lines writes a handful of events.
-The debug panel's Dialogues section offers a sample, a letter from the coast spoken by the house's first key
-figure and a messenger, from wire version 15, and the event page shows what was offered whole. A read model
+The debug panel's Dialogues section offers a dialogue from `world/catalogues/dialogues/` by its name, the first a
+letter from the coast spoken by the house's first key figure and a messenger, from wire version 15, and the event page shows what was offered whole. A read model
 keeps every dialogue a house was offered and how far each has got, and the player is sent each one as far as
 it has reached, from wire version 16: the lines past the next step, what a line will give and the
 requirements stay on the server. An option can spend, from version 17, and is refused while the house cannot

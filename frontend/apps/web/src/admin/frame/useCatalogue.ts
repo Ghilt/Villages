@@ -57,3 +57,34 @@ export function useCatalogue<T>(file: string, parse: (text: string) => T): Readi
 
   return reading;
 }
+
+/**
+ * The files of a catalogue that is a folder, `dialogues`, by their names in it - `letter` for `dialogues/letter.json` -
+ * listed by the dev server, and listed again when one changes on disk; null until they have been. See 0097.
+ */
+export function useCatalogueFiles(folder: string): readonly string[] | null {
+  const [names, setNames] = useState<readonly string[] | null>(null);
+  useEffect(() => {
+    let live = true;
+    const list = () =>
+      fetch('/catalogues/', { cache: 'no-store' })
+        .then((response) => response.json() as Promise<{ files: string[] }>)
+        .then(({ files }) =>
+          files
+            .filter((file) => file.startsWith(`${folder}/`))
+            .map((file) => file.slice(folder.length + 1).replace(/\.json$/, '')),
+        )
+        .then((found) => live && setNames(found))
+        .catch(() => live && setNames([]));
+    const changed = (data: { file: string }) => {
+      if (data.file.startsWith(`${folder}/`)) void list();
+    };
+    void list();
+    import.meta.hot?.on(CATALOGUE_CHANGED, changed);
+    return () => {
+      live = false;
+      import.meta.hot?.off(CATALOGUE_CHANGED, changed);
+    };
+  }, [folder]);
+  return names;
+}

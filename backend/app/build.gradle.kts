@@ -26,6 +26,7 @@ dependencies {
 testsRead(
     "world/portraits", "contracts/fixtures/names.json", "world/catalogues", "contracts/fixtures/structures.json",
     "contracts/fixtures/balance.json", "contracts/fixtures/fate.json", "contracts/fixtures/character-names.json",
+    "contracts/fixtures/dialogue.json",
     // The world's master, which the server names as the page does.
     "frontend/packages/world/src/masters.ts",
 )

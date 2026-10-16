@@ -197,7 +197,7 @@ internal class Instruments(
         // A sample by its name. A name that is not a sample is refused as malformed, and a house with no key
         // figure to speak it as `noSuchKeyFigure`. See decision record 0071.
         lever<OfferDialoguePayload>(commands) { asking, payload ->
-            dialogues.offerSample(player = asking.who, sample = payload.sample, provenance = asking.startingAStory)
+            dialogues.offer(player = asking.who, name = payload.sample, provenance = asking.startingAStory)
         }
         // The world's luck, for the next roll this player makes: a rarity, or none for the throw again. See 0083.
         lever<NextRarityPayload>(commands) { asking, payload -> rolls.forceNext(asking.who, payload.rarity?.let(::asRarity)) }
