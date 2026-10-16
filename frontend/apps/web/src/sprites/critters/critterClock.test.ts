@@ -149,6 +149,32 @@ describe("the critters' clock", () => {
     }
   });
 
+  it('hooks a bird flying off late in its fade: a sharp turn, then a bird length or two straight down the screen', () => {
+    const size = 0.55;
+    const flying = [...anHour(1).values()]
+      .flatMap((event) => event.birds.filter((bird) => bird.to === null).map((bird) => ({ event, bird })))
+      .slice(0, 30);
+    expect(flying.length).toBeGreaterThan(10);
+    const F = CRITTERS_LOOK.flush;
+    for (const { event, bird } of flying) {
+      const alone = { ...event, birds: [bird] };
+      const at = (share: number) =>
+        posesOf(alone, event.startsAt + bird.delay + share * bird.seconds, 3, size)[0]!;
+      const turning = at(F.hookAt + 0.001);
+      const last = at(0.999);
+      // Along the ground it goes on only a third of its length past where the hook begins, and then stops.
+      expect(Math.hypot(last.x - turning.x, last.y - turning.y)).toBeLessThan(F.hookTurn * size + 0.01);
+      // And it drops a bird length or two in height, which is straight down the screen, as it goes.
+      const drop = turning.height - last.height;
+      expect(drop).toBeGreaterThan(size);
+      expect(drop).toBeLessThan(2 * size);
+      // The hook leaves where the flight arrived.
+      const before = at(F.hookAt - 0.001);
+      expect(Math.hypot(turning.x - before.x, turning.y - before.y)).toBeLessThan(0.05);
+      expect(Math.abs(turning.height - before.height)).toBeLessThan(0.05);
+    }
+  });
+
   it('only bursts out of a lone bush, with no other tree near to take shelter in', () => {
     const open = [...anHour(1, wood({}, 'scrub', 'meadow', 40)).values()];
     expect(open.length).toBeGreaterThan(0);

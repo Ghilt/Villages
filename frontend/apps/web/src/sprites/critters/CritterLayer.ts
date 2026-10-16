@@ -284,7 +284,7 @@ export function createCritterLayer(repaint: () => void, around: () => CritterSur
             // Seen from its start, its own fade brings it out of its cover; seen first in flight, it fades up.
             const arriving = since - event.startsAt * 1000 > 200 ? ramp(since, since + ARRIVING_MS, now) : 1;
             const foot = feet.get(event.kind) ?? { x: 0.5, y: 1 };
-            for (const pose of posesOf(event, now / 1000, strip.length)) {
+            for (const pose of posesOf(event, now / 1000, strip.length, size)) {
               const alpha = pose.alpha * fade * arriving;
               if (alpha <= 0) continue;
               const texture = strip[pose.frame]!;

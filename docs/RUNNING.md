@@ -110,8 +110,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   become the default; `reset` puts them back. See the amendment to `docs/adr/0052`.
 - Critters, from zoom 9 in, only where your house sees now, or everywhere with the fog lifted: every so often a few
   small birds burst out of a tree or a bush the scenery drew - in the woods, the scrub and the heath, and out of a
-  lone bush or tree in the open - fan out, climb, flap and glide away, fading as they go, a few dropping into a tree
-  near by instead; or a bird or two flits from one tree into another near it, as if seeking shelter, and fades into
+  lone bush or tree in the open - fan out, climb, flap and glide away, and late in their fade hook down, a sharp
+  turn and a drop of a bird length or two down the screen, settling, a few dropping into a tree near by instead; or a bird or two flits from one tree into another near it, as if seeking shelter, and fades into
   its leaves. Each has a soft shadow below it. The same birds leave the same bush at the same moment in every browser; one first seen in flight fades
   up; a player who asked for less motion sees none. They are drawn from the critters' atlas (`world:critters`,
   below). They are the **Critters** part of the Shaders section: `off`, `low` or `high` in its bar, low at every

@@ -213,13 +213,14 @@ const ramp = (from: number, to: number, value: number): number =>
   Math.min(1, Math.max(0, (value - from) / (to - from)));
 
 /**
- * Where every bird of a flock is at this moment, for a picture of so many frames. A bird flying off comes out of its
- * cover, climbs and flies away down its own heading, flapping and then gliding, flapping again now and then, and
- * fades as it goes. A bird taking shelter flies a bowed path from one crown to the other, rising and dropping,
+ * Where every bird of a flock is at this moment, for a picture of so many frames standing `size` world units tall. A
+ * bird flying off comes out of its cover, climbs and flies away down its own heading, flapping and then gliding,
+ * flapping again now and then, and late in its fade hooks: a sharp turn and a drop of a bird length or two straight
+ * down the screen, settling. A bird taking shelter flies a bowed path from one crown to the other, rising and dropping,
  * gliding at the top, and fades as it goes into the leaves. Each comes out of its cover whole within a moment, so
  * none of it ever appears or vanishes in the open.
  */
-export function posesOf(event: CritterEvent, seconds: number, frames: number): Pose[] {
+export function posesOf(event: CritterEvent, seconds: number, frames: number, size = 0.55): Pose[] {
   const poses: Pose[] = [];
   const crown = event.from.height * 0.75;
   for (const bird of event.birds) {
@@ -232,6 +233,11 @@ export function posesOf(event: CritterEvent, seconds: number, frames: number): P
       poses.push(shelterPose(event.from, bird, share, crown, out, beat, frames));
       continue;
     }
+    const alpha = Math.min(out, ramp(1, 1 - F.fadeOut, share));
+    if (share > F.hookAt) {
+      poses.push(hookPose(event.from, bird, share, crown, alpha, beat, frames, size));
+      continue;
+    }
     const along = F.reach * bird.reach * share ** 0.85;
     // Flapping for the first part of the flight, then gliding, with a beat now and then.
     const flapping = share < F.flapping || Math.sin((flown + bird.phase * 7) * 2.1) > 0.6;
@@ -240,10 +246,38 @@ export function posesOf(event: CritterEvent, seconds: number, frames: number): P
       y: event.from.y + Math.sin(bird.heading) * along,
       height: crown + F.climb * Math.sin((share * Math.PI) / 2),
       frame: flapping ? pingPong(beat, frames) : Math.floor(frames / 2),
-      alpha: Math.min(out, ramp(1, 1 - F.fadeOut, share)),
+      alpha,
     });
   }
   return poses;
+}
+
+/**
+ * A bird flying off, past where it hooks: on along its heading for a moment, braking into the turn, and then straight
+ * down the screen, which is down in height, since what flies stands up the screen as the scenery does, so the turn is
+ * the same whichever way the camera is turned.
+ */
+function hookPose(
+  from: Cover,
+  bird: FlockBird,
+  share: number,
+  crown: number,
+  alpha: number,
+  beat: number,
+  frames: number,
+  size: number,
+): Pose {
+  const at = F.hookAt;
+  const k = (share - at) / (1 - at);
+  const along = F.reach * bird.reach * at ** 0.85 + F.hookTurn * size * (1 - (1 - Math.min(1, k / 0.3)) ** 2);
+  const high = crown + F.climb * Math.sin((at * Math.PI) / 2);
+  return {
+    x: from.x + Math.cos(bird.heading) * along,
+    y: from.y + Math.sin(bird.heading) * along,
+    height: high - F.hookDrop * size * ramp(0.1, 1, k) ** 1.4,
+    frame: pingPong(beat, frames),
+    alpha,
+  };
 }
 
 /** A bird on its way to shelter, a share of the way there: along a bowed path, over an arc, and into the crown. */
