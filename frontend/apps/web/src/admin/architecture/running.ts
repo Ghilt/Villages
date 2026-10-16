@@ -1,7 +1,10 @@
 /**
  * The running game, as the architecture page draws it beneath the line: each piece that runs, the groups that say
- * which pieces fit together, and what passes between them. Where `readers.ts` says which baked files the running
- * game reads, and which part of the page reads each, this says what it is made of once it runs.
+ * which pieces fit together, the clusters of pieces of one kind inside a group, and what passes between them. Where
+ * `readers.ts` says which baked files the running game reads, and which part of the page reads each, this says what
+ * it is made of once it runs.
+ *
+ * Every `what` opens with one short sentence, which is all its card says; the rest is shown when the card is chosen.
  */
 
 /** Where a piece runs: in the player's browser, inside the game server's one process, or in Docker beside it. */
@@ -15,6 +18,8 @@ export interface Piece {
   readonly runs: Runs;
   /** The group it fits in. */
   readonly group: GroupId;
+  /** The cluster inside its group it stands in with the pieces of its kind, if any. */
+  readonly cluster?: ClusterId;
   readonly what: string;
   /** Not built yet, and which increment of the roadmap builds it. */
   readonly yet?: string;
@@ -26,6 +31,17 @@ export type GroupId = 'page' | 'server' | 'events';
 
 export interface Group {
   readonly id: GroupId;
+  readonly name: string;
+  readonly where: string;
+  readonly what: string;
+}
+
+export type ClusterId = 'shaders';
+
+/** A box inside a group's round the pieces of one kind, saying what they are together. */
+export interface Cluster {
+  readonly id: ClusterId;
+  readonly group: GroupId;
   readonly name: string;
   readonly where: string;
   readonly what: string;
@@ -46,7 +62,7 @@ export const GROUPS: readonly Group[] = [
     id: 'page',
     name: 'The page',
     where: 'frontend/apps/web · in the browser, one tab a player',
-    what: "One player's view of the world, all of it the one page: it draws what the gateway tells it on what was baked beside it - the shaders a pixel at a time on the graphics card - and sends what the player does. It decides nothing about the world.",
+    what: "One player's view of the world, all of it the one page. It draws what the gateway tells it on what was baked beside it - the shaders a pixel at a time on the graphics card - and sends what the player does. It decides nothing about the world.",
   },
   {
     id: 'server',
@@ -58,7 +74,17 @@ export const GROUPS: readonly Group[] = [
     id: 'events',
     name: 'The event store',
     where: 'Occurrent · MongoDB · the bridge · RabbitMQ',
-    what: 'How the world is kept and passed on, four pieces with one job: Occurrent writes each event once and hands it on, MongoDB keeps it for good, and the bridge publishes every one to RabbitMQ, which carries it to the read models. Nothing is ever changed once written; everything else is worked out from it.',
+    what: 'How the world is kept and passed on, by four pieces with one job. Occurrent writes each event once and hands it on, MongoDB keeps it for good, and the bridge publishes every one to RabbitMQ, which carries it to the read models. Nothing is ever changed once written; everything else is worked out from it.',
+  },
+];
+
+export const CLUSTERS: readonly Cluster[] = [
+  {
+    id: 'shaders',
+    group: 'page',
+    name: 'The shaders',
+    where: 'WebGL · on the graphics card',
+    what: "What moves on the map and shades it, worked out on the graphics card by shaders of the page's own. The water, the relief, the grass, the trees, the critters and the clouds each have a part of the debug panel's Shaders section, and the fog its FoW box in the Debug map section's bar. The grass and the trees bend in the one wind, and the wind, the clouds and the critters keep the wall clock, so every player sees the same world moving.",
   },
 ];
 
@@ -69,7 +95,7 @@ export const PIECES: readonly Piece[] = [
     where: 'map/MapView.tsx · MapLibre',
     runs: 'browser',
     group: 'page',
-    what: "MapLibre: the world square, the camera, and the flat tiles as they were cut, with the coast's and the lakes' ink over them - the Raw look, and the Info map's and Flow's ground, quietened under what they draw. Every other look is laid on it, and the names are written over it.",
+    what: "MapLibre: the world square, the camera, and the flat tiles as they were cut. The coast's and the lakes' ink lies over them - the Raw look, and the Info map's and Flow's ground, quietened under what they draw. Every other look is laid on it, and the names are written over it.",
   },
   {
     id: 'painter',
@@ -77,7 +103,7 @@ export const PIECES: readonly Piece[] = [
     where: 'map/painterlyWorker.ts · in workers',
     runs: 'browser',
     group: 'page',
-    what: "Paints every tile again in the look chosen - Painted, Atlas, Woodblock, Ink, Dusk, Vivid, Plate - from the ground in the flat tiles and the styles. Not a shader: arithmetic on the processor, in workers off the page's own thread, handed to the map a tile at a time as a picture.",
+    what: "Paints every tile again in the look chosen, from the ground in the flat tiles and the styles. The looks are Painted, Atlas, Woodblock, Ink, Dusk, Vivid and Plate. Not a shader: arithmetic on the processor, in workers off the page's own thread, handed to the map a tile at a time as a picture.",
   },
   {
     id: 'pictures',
@@ -85,7 +111,7 @@ export const PIECES: readonly Piece[] = [
     where: 'map/renderers.ts',
     runs: 'browser',
     group: 'page',
-    what: 'Biome, Origin and Culture: one picture of the whole world square each, which its tool made, laid on the map at its corners and stretched to the nearest pixel, so how coarse it is shows. Questions about the world rather than looks; nothing in the page works them out.',
+    what: 'Biome, Origin and Culture: one picture of the whole world square each, which its tool made. Each is laid on the map at its corners and stretched to the nearest pixel, so how coarse it is shows. Questions about the world rather than looks; nothing in the page works them out.',
   },
   {
     id: 'relief',
@@ -93,7 +119,8 @@ export const PIECES: readonly Piece[] = [
     where: 'map/reliefLayer.ts · WebGL',
     runs: 'browser',
     group: 'page',
-    what: "The ground shaded by its slope, worked out on the graphics card for every pixel from the height tiles, or in a few hard tones a lattice cell. A layer of the map's own, beside MapLibre's hillshade of the same tiles to compare (decision record 0090).",
+    cluster: 'shaders',
+    what: "The ground shaded by its slope, worked out on the graphics card from the height tiles. Every pixel is shaded, or a lattice cell in a few hard tones. A layer of the map's own, beside MapLibre's hillshade of the same tiles to compare (decision record 0090).",
   },
   {
     id: 'water',
@@ -101,7 +128,8 @@ export const PIECES: readonly Piece[] = [
     where: 'water/WaterLayer.ts · WebGL',
     runs: 'browser',
     group: 'page',
-    what: "The sea, the lakes and the rivers, moving: where the water is, how far from the shore and how deep, from the flat tiles, and which way each river runs, from the flow. Worked out on the graphics card a pixel at a time - the realistic look or the wavelets - and Flow's colours and arrows in the water's place.",
+    cluster: 'shaders',
+    what: "The sea, the lakes and the rivers, moving, worked out on the graphics card a pixel at a time. Where the water is, how far from the shore and how deep come from the flat tiles, and which way each river runs from the flow. The realistic look or the wavelets, and Flow's colours and arrows in the water's place.",
   },
   {
     id: 'grass',
@@ -109,7 +137,26 @@ export const PIECES: readonly Piece[] = [
     where: 'sprites/grass/GrassLayer.ts · WebGL',
     runs: 'browser',
     group: 'page',
-    what: "A spike: grass stirring on grassland, worked out on the graphics card from the flat tiles under the view. It is drawn on the sprites' canvas under the scenery, so the fog greys it as it greys the trees.",
+    cluster: 'shaders',
+    what: "Grass stirring on grassland in the wind's gusts, worked out on the graphics card from the flat tiles. Still a spike: it is drawn on the sprites' canvas under the scenery, so the fog greys it as it greys the trees. Its gusts are the ones the trees bend in (sprites/wind.ts).",
+  },
+  {
+    id: 'trees',
+    name: "The trees' wind",
+    where: 'sprites/trees/TreesLayer.ts · WebGL',
+    runs: 'browser',
+    group: 'page',
+    cluster: 'shaders',
+    what: "The scenery bending and paling in the grass's gusts, worked out on the graphics card as it is drawn. Each kind bends and pales its own share, carried in the tint its pictures are never drawn in, and every shadow leans with its tree. The gusts are carried by the wall clock, so every player sees the same tree move at the same moment; it reads no file.",
+  },
+  {
+    id: 'critters',
+    name: 'The critters',
+    where: 'sprites/critters/CritterLayer.ts · Pixi',
+    runs: 'browser',
+    group: 'page',
+    cluster: 'shaders',
+    what: 'Birds flushing out of the trees the house sees now, made up from the place and the wall clock. Each is worked out from a cell of the world and a twelve-second slot, so every browser makes up the same ones and the server holds none of them. They fly out of the scenery the sprites stand, only where the fog says the house sees now, drawn from the critter atlas with their shadows under the scenery (decision record 0099).',
   },
   {
     id: 'fog',
@@ -117,7 +164,8 @@ export const PIECES: readonly Piece[] = [
     where: 'sprites/FogLayer.ts · WebGL',
     runs: 'browser',
     group: 'page',
-    what: 'The fog of war: one mesh over the screen, between the world and the signs for what is in it, reading how far each place is from what the house sees. Nothing baked: the distances are worked out again whenever its sight changes (decision records 0061, 0062).',
+    cluster: 'shaders',
+    what: 'The fog of war: one mesh over the screen, between the world and the signs for what is in it. It reads how far each place is from what the house sees. Nothing baked: the distances are worked out again whenever its sight changes (decision records 0061, 0062).',
   },
   {
     id: 'clouds',
@@ -125,7 +173,8 @@ export const PIECES: readonly Piece[] = [
     where: 'sprites/clouds/CloudLayer.ts · WebGL',
     runs: 'browser',
     group: 'page',
-    what: "The clouds from zoom 7 out, gone by 4.5: worked out on the graphics card a pixel at a time from noise laid along the wind, carried by the wall clock so every browser draws the same sky. Drawn on the sprites' canvas over the fog and under every sign; it reads no file (decision record 0098).",
+    cluster: 'shaders',
+    what: "The clouds from zoom 7 out, gone by 4.5, worked out on the graphics card a pixel at a time. They are noise laid along the wind, carried by the wall clock so every browser draws the same sky. Drawn on the sprites' canvas over the fog and under every sign; it reads no file (decision record 0098).",
   },
   {
     id: 'sprites',
@@ -133,7 +182,7 @@ export const PIECES: readonly Piece[] = [
     where: 'sprites/PixiSpriteRenderer.ts · Pixi',
     runs: 'browser',
     group: 'page',
-    what: "Pixi's canvas over the map: the scenery, placed by the sprite map on the ground in the flat tiles and drawn from its atlas, bending in the grass's gusts as it is drawn, and the critters out of it, made up from the place and the wall clock; the structures, drawn from theirs in the culture of the ground under each; the marks and the rings for what is there.",
+    what: "Pixi's canvas over the map: the scenery and the structures, each drawn from its atlas. The scenery is placed by the sprite map on the ground in the flat tiles, and bent by the trees' wind as it is drawn; each structure is drawn in the culture of the ground under it; the marks and the rings say what is there. The grass, the critters and the clouds are drawn on the same canvas.",
   },
   {
     id: 'panes',
@@ -141,7 +190,7 @@ export const PIECES: readonly Piece[] = [
     where: 'ui/ · holdings/ · inspect/ · dialogues/',
     runs: 'browser',
     group: 'page',
-    what: "What the player reads beside the map, built from the component library and dressed in the interface pictures: the house's holdings and what is inspected, a structure drawn in its culture; the figures' portraits, the dialogues' scenes, and the areas, counted on the flat tiles.",
+    what: "What the player reads beside the map, built from the component library. They are dressed in the interface pictures: the house's holdings and what is inspected, a structure drawn in its culture, the figures' portraits, the dialogues' scenes, and the areas, counted on the flat tiles.",
   },
   {
     id: 'connection',
@@ -149,7 +198,7 @@ export const PIECES: readonly Piece[] = [
     where: 'frontend/packages/client-core · net/gateway.ts',
     runs: 'browser',
     group: 'page',
-    what: 'The one WebSocket to the gateway, and what it has said kept as the world stands for this house: the cells and what is on them, its sight, its choices. The rest of the page draws from it, and what the player does goes out through it.',
+    what: 'The one WebSocket to the gateway, and what it has said kept as the world stands for this house. That is the cells and what is on them, its sight and its choices. The rest of the page draws from it, and what the player does goes out through it.',
   },
   {
     id: 'gateway',
@@ -173,7 +222,7 @@ export const PIECES: readonly Piece[] = [
     where: 'backend/application · Reaction',
     runs: 'server',
     group: 'server',
-    what: 'The world acting on its own: followers of the feed that issue a command of their own for some of what they hear, as a pledge given back when its time is up, or the dialogues of somebody who died ended. Each plans its command for later, never inside the feed.',
+    what: 'The world acting on its own: followers of the feed that issue commands of their own. They act on some of what they hear, as a pledge given back when its time is up, or the dialogues of somebody who died ended. Each plans its command for later, never inside the feed.',
   },
   {
     id: 'projections',
@@ -206,7 +255,7 @@ export const PIECES: readonly Piece[] = [
     runs: 'server',
     group: 'events',
     instead: 'mongodb',
-    what: "Where the events are kept when Docker is not running, and in every test: Occurrent's own store in the server's memory, behind the same ports, so nothing else can tell. Gone when the server stops, and a restart begins the world again.",
+    what: "Where the events are kept when Docker is not running, and in every test. It is Occurrent's own store in the server's memory, behind the same ports, so nothing else can tell. Gone when the server stops, and a restart begins the world again.",
   },
   {
     id: 'bridge',
@@ -214,7 +263,7 @@ export const PIECES: readonly Piece[] = [
     where: 'backend/infrastructure-rabbit',
     runs: 'server',
     group: 'events',
-    what: 'Follows every event as it is written and publishes it to RabbitMQ, counting it carried only once RabbitMQ has confirmed it, and keeps its place in MongoDB. So an event written while the server or the broker was down is published once both are back. Only when the world is kept in MongoDB.',
+    what: 'Publishes every event to RabbitMQ as it is written, and keeps its place in MongoDB. It counts an event carried only once RabbitMQ has confirmed it, so an event written while the server or the broker was down is published once both are back. Only when the world is kept in MongoDB.',
   },
   {
     id: 'rabbitmq',
@@ -222,7 +271,7 @@ export const PIECES: readonly Piece[] = [
     where: 'localhost:5672 · villages-<tree> · page on :15672',
     runs: 'docker',
     group: 'events',
-    what: "The broker. Every stored event is published to its exchange villages.events, in a virtual host of the worktree's own, addressed by its type and the cell it happened in, and the read models and the event page each follow it through a queue of their own. The reactions do not: they follow the store, so the world acts on while the broker is away. What will let more than one gateway serve one world.",
+    what: "The broker that carries every stored event to what follows it. Each is published to its exchange villages.events, in a virtual host of the worktree's own, addressed by its type and the cell it happened in, and the read models and the event page each follow it through a queue of their own. The reactions do not: they follow the store, so the world acts on while the broker is away. What will let more than one gateway serve one world.",
   },
 ];
 
@@ -231,6 +280,8 @@ export const TALKS: readonly Talk[] = [
   { from: 'connection', to: 'sprites', says: 'what stands where' },
   { from: 'connection', to: 'panes', says: 'what the house has, and does', both: true },
   { from: 'connection', to: 'fog', says: 'what the house sees' },
+  { from: 'sprites', to: 'critters', says: 'where the trees stand' },
+  { from: 'fog', to: 'critters', says: 'what the house sees now' },
   { from: 'gateway', to: 'rules', says: 'commands' },
   { from: 'rules', to: 'occurrent', says: "a house's history, and what was decided", both: true },
   { from: 'occurrent', to: 'mongodb', says: 'kept, and handed back', both: true },
@@ -253,5 +304,11 @@ export function piece(id: string): Piece {
 export function group(id: string): Group {
   const found = GROUPS.find((g) => g.id === id);
   if (found === undefined) throw new Error(`no running group called ${id}`);
+  return found;
+}
+
+export function cluster(id: string): Cluster {
+  const found = CLUSTERS.find((c) => c.id === id);
+  if (found === undefined) throw new Error(`no cluster of running pieces called ${id}`);
   return found;
 }

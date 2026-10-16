@@ -16,8 +16,8 @@ export type { Artifact, Origin, Reader, Tool } from './types';
 
 export { ARTIFACTS } from './artifacts';
 export { READERS } from './readers';
-export { GROUPS, PIECES, TALKS, group, piece } from './running';
-export type { Group, GroupId, Piece, Runs, Talk } from './running';
+export { CLUSTERS, GROUPS, PIECES, TALKS, cluster, group, piece } from './running';
+export type { Cluster, ClusterId, Group, GroupId, Piece, Runs, Talk } from './running';
 export { LEGACY, TOOLS } from './tools';
 
 export function artifact(id: string): Artifact {

@@ -75,26 +75,14 @@
   font-size: 0.8rem;
 }
 
-.card__path {
+/* One sentence, and the rest when the card is chosen. */
+.card__what {
   overflow: hidden;
-  font-size: 0.64rem !important;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.card__what,
-.card__ran {
-  overflow: hidden;
-}
-
-.card__ran {
-  font-style: italic;
-  color: var(--ink-soft);
 }
 
 /*
  * For development: a file or a tool only an agent at work reads or runs, and the game never does. The robot says so
- * in the strip, on a light ground so it reads on a tool's dark strip too, and a line at the foot says what for.
+ * in the strip, on a light ground so it reads on a tool's dark strip too; what for is said when the card is chosen.
  */
 .card__robot {
   flex: none;
@@ -109,12 +97,6 @@
   background: var(--agent-bg);
   border: 1px solid var(--agent);
   border-radius: 3px;
-}
-
-.card__for {
-  margin-top: auto;
-  font-style: italic;
-  color: var(--agent);
 }
 
 /* Files, by who makes them. */
@@ -237,14 +219,6 @@
   color: var(--docker);
 }
 
-.run-group__name code {
-  display: block;
-  margin-top: 0.1rem;
-  font-size: 0.72rem;
-  font-weight: 400;
-  color: var(--ink-soft);
-}
-
 .run-group__what {
   max-width: 25rem;
   margin-top: 0.25rem;
@@ -252,7 +226,7 @@
   line-height: 1.35;
 }
 
-/* The page's box is a row of eight wide, and says what it is across more of it, clear of the cards under it. */
+/* The page's box is a row of nine wide, and says what it is across more of it, clear of the cards under it. */
 .run-group--page .run-group__what {
   max-width: 48rem;
 }
@@ -266,6 +240,44 @@
 }
 
 .run-group.is-chosen {
+  box-shadow: 0 0 0 4px var(--chosen);
+}
+
+/* A cluster's box, inside its group's: the pieces of one kind, the shaders, and in its top left what they are. */
+.run-cluster {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: 0.5rem 0.9rem;
+  text-align: left;
+  background: rgb(199 227 209 / 45%);
+  border: 1.5px solid var(--runtime);
+  border-radius: 8px;
+  transition: opacity 120ms;
+}
+
+.run-cluster__name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--runtime);
+}
+
+.run-cluster__what {
+  max-width: 60rem;
+  margin-top: 0.15rem;
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.run-cluster.is-dim {
+  opacity: 0.35;
+}
+
+.run-cluster.is-lit {
+  box-shadow: 0 0 0 3px var(--ink-soft);
+}
+
+.run-cluster.is-chosen {
   box-shadow: 0 0 0 4px var(--chosen);
 }
 

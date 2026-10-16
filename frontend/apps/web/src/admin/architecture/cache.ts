@@ -8,10 +8,11 @@ export const WORLD_CACHE = {
   name: 'The world cache, shared by every tree',
   where: 'E:\\Code\\Villages\\.git\\world-cache\\',
   what:
-    'Each step inside is made once on the machine and filed under a fingerprint of what it was made from - the ' +
-    "master, every file it reads, the tool's own code - and every tree with the same inputs borrows it, as hard " +
-    'links: seconds where the tool takes minutes. world:ready fills it and lends it, for the quick start and the ' +
-    "Debug map's buttons alike; a tool here runs only when nobody has made its step from these inputs.",
+    'Each world step inside is made once on the machine, and every tree with the same inputs borrows it. A step is ' +
+    "filed under a fingerprint of what it was made from - the master, every file it reads, the tool's own code - " +
+    'and borrowed as hard links: seconds where the tool takes minutes. world:ready fills it and lends it, for the ' +
+    "quick start and the Debug map's buttons alike; a tool here runs only when nobody has made its step from these " +
+    'inputs.',
   tools: [
     'world:import',
     'world:tile',

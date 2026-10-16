@@ -96,7 +96,7 @@ export const READERS: readonly Reader[] = [
   {
     id: 'critter-layer',
     program: 'page',
-    piece: 'sprites',
+    piece: 'critters',
     name: 'critters',
     where: 'sprites/critters/CritterLayer.ts',
     reads: ['critter-atlas'],

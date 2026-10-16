@@ -769,18 +769,23 @@ and `-- --drop` takes them off; by hand only.
   file the world is made from - what Adam authors (gold) and what is downloaded (blue) - each under the tools
   that read it, with `world:fetch-all` above the downloads it fetches and a gold line under the row; under the
   line, the tools that bake the world from them and the files they write, each file card saying whether it is
-  one file, a few, or a folder, its path, and who makes it - Adam (gold), a download (blue), a tool (grey). A
-  file or a tool that only an agent at work reads or runs, and the game never does, carries **the robot**, for
-  development, and says at its foot what the agent does with it: the master's preview, which an agent opens to
-  see a master too big to open whole, the stills, and `world:scenery`. The world steps' tools and what they make
+  one file, a few, or a folder, and who makes it - Adam (gold), a download (blue), a tool (grey). **Every card
+  and every box says what it is in one sentence**, and the rest - its path, what runs it, what reads it - when
+  it is chosen, because with this many boxes more words up front is a wall; `sentence.test.ts` holds each to a
+  sentence of 110 characters at most. A file or a tool that only an agent at work reads or runs, and the game
+  never does, carries **the robot**, for development, and says when chosen what the agent does with it: the
+  master's preview, which an agent opens to see a master too big to open whole, the stills, and
+  `world:scenery`. The world steps' tools and what they make
   stand in a dashed box, **the world cache, shared by every tree**, which says what it is and where; choosing it
   lights everything in it. Under a dotted line is the running game, three boxes of the pieces that fit together,
   each card saying where it runs - in the browser, in the game server, or in Docker (sea green). **The page**
   box holds its parts in a row, each under the baked files it reads, which arrive at it: the painter, which is
-  arithmetic in workers and not a shader, the grass, water and relief shaders, the map, the picture renderers -
-  Biome, Origin and Culture - the sprites and the panes; under them the cloud shader and the fog shader, which
-  read nothing baked, and the connection, which talks to the gateway and tells the sprites, the panes and the fog what the house
-  has and sees. **The game server** box holds the gateway, the rules, the reactions and the projections, and
+  arithmetic in workers and not a shader, the map, the sprites, the panes and the picture renderers - Biome,
+  Origin and Culture - with **the shaders** in a box of their own in the middle of the row: the grass, water and
+  relief shaders and the critters, beside the sprites that tell them where the trees stand, and under them the
+  trees' wind, the cloud shader and the fog shader, which read nothing baked, the fog telling the critters where
+  the house sees now. Beside that box is the connection, which talks to the gateway and tells the sprites, the
+  panes and the fog what the house has and sees; choosing the shaders' box lights every shader in it. **The game server** box holds the gateway, the rules, the reactions and the projections, and
   the baked files it reads arrive at the box; **the event store** box holds Occurrent, MongoDB, the bridge,
   RabbitMQ and the in-memory store used without Docker, the last dashed because it is used only instead of
   MongoDB. Every arrow between running pieces says what passes along it - commands, the history, every event a

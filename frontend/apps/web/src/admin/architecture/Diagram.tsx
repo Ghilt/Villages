@@ -14,8 +14,8 @@ import { artifact } from './world';
 /**
  * The diagram: every card where the layout put it, arrows from what is read to what reads it, and the
  * dotted line between baked and running. Beneath it, the running pieces stand in the boxes of the groups they fit
- * in, and say on every arrow between them what passes along it. Cards cannot be joined by hand; choosing one
- * lights its chain.
+ * in, the shaders in a box of their own inside the page's, and say on every arrow between them what passes along
+ * it. Cards cannot be joined by hand; choosing one lights its chain and says the rest of what it is.
  */
 export function Diagram(props: {
   placed: readonly Placed[];
@@ -58,7 +58,9 @@ export function Diagram(props: {
         width: p.width,
         height: p.height,
         ...(p.parent === undefined ? {} : { parentId: p.parent }),
-        ...(p.card.kind === 'group' || p.card.kind === 'shelf' ? { zIndex: -1 } : {}),
+        ...(p.card.kind === 'group' || p.card.kind === 'cluster' || p.card.kind === 'shelf'
+          ? { zIndex: -1 }
+          : {}),
         data: {
           card: p.card,
           state: stateOf(p.card.id),
@@ -133,6 +135,7 @@ function colourOf(node: Node): string {
   if (card.kind === 'tool') return '#3b3229';
   if (card.kind === 'file') return ORIGIN_COLOUR[artifact(card.ref).origin];
   if (card.kind === 'group') return '#dcefe3';
+  if (card.kind === 'cluster') return '#c7e3d1';
   if (card.kind === 'shelf') return 'rgb(236 230 218 / 60%)';
   return '#2e6b4f';
 }

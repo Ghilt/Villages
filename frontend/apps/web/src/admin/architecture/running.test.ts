@@ -2,8 +2,8 @@ import { existsSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
-import { groupCard, related, runCard, runningGraph } from './graph';
-import { GROUPS, PIECES, READERS, TALKS } from './world';
+import { clusterCard, groupCard, related, runCard, runningGraph } from './graph';
+import { CLUSTERS, GROUPS, PIECES, READERS, TALKS } from './world';
 
 /** A path from the repository's root. */
 const fromRoot = (path: string) => new URL(`../../../../../../${path}`, import.meta.url);
@@ -62,7 +62,18 @@ describe('the running game, as the architecture page draws it', () => {
   it('draws a box for the page with a card for each of its shaders', () => {
     const page = PIECES.filter((p) => p.group === 'page').map((p) => p.id);
     expect(page).toEqual(
-      expect.arrayContaining(['relief', 'water', 'grass', 'fog', 'clouds', 'pictures', 'painter']),
+      expect.arrayContaining(['relief', 'water', 'grass', 'trees', 'critters', 'fog', 'clouds', 'pictures']),
     );
+  });
+
+  it("gathers the shaders in a box of their own inside the page's, and nothing else in it", () => {
+    const shaders = PIECES.filter((p) => p.cluster === 'shaders').map((p) => p.id);
+    expect(shaders.sort()).toEqual(['clouds', 'critters', 'fog', 'grass', 'relief', 'trees', 'water']);
+    for (const c of CLUSTERS)
+      expect(PIECES.filter((p) => p.cluster === c.id && p.group !== c.group).map((p) => p.id)).toEqual([]);
+    const { cards, arrows } = runningGraph();
+    const lit = related(clusterCard('shaders'), arrows, cards);
+    for (const id of shaders) expect(lit.has(runCard(id))).toBe(true);
+    expect(lit.has(runCard('panes'))).toBe(false);
   });
 });

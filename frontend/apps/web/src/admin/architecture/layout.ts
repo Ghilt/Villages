@@ -2,7 +2,7 @@ import dagre from '@dagrejs/dagre';
 
 import { SHELF_CARD, bakedGraph, inShelf, runningGraph } from './graph';
 import type { Arrow, Card } from './graph';
-import { TOOLS, artifact, piece } from './world';
+import { CLUSTERS, TOOLS, artifact, piece } from './world';
 
 /** Where a card stands, its top-left corner, and how big it is: inside its group's box when it has one. */
 export interface Placed {
@@ -37,44 +37,48 @@ export const makesSources = (card: Card): boolean =>
   card.kind === 'tool' &&
   TOOLS.find((tool) => tool.script === card.ref)!.writes.every((id) => artifact(id).origin !== 'baked');
 
+/** A file's card and a tool's: its strip, its name and one sentence (`sentence.ts`). */
 const FILE = { width: 196, height: 120 };
 const TOOL = { width: 196, height: 124 };
-/** How much taller a card is that says at its foot what an agent does with it. */
-const FOOT = 34;
 const GAP = 40;
 /** The world cache's box: room round the cards inside it, and a place inside it for what it says. */
 const SHELF = { pad: 12, words: { width: 600, height: 130 } };
 const SHELF_WORDS = `${SHELF_CARD}:words`;
 
 /** A running piece, and the room around it: columns and rows inside a group's box, and the boxes apart. */
-const PIECE = { width: 270, height: 226 };
+const PIECE = { width: 270, height: 120 };
 const COLUMN = PIECE.width + 120;
 const ROW = PIECE.height + 100;
 const PAD = 30;
 const HEADER = 100;
 const BETWEEN = 120;
+/** A cluster's box inside its group's: room round its pieces, and above them for what it says. */
+const CLUSTER = { pad: 24, head: 64 };
 
 /**
  * Where each running piece stands in its group's box, by column and row. In the page, a row of the parts that
- * read baked files, in the order of where what each reads stands above, on average, and under them the
- * connection, which talks down to the gateway and up to the parts drawing what it is told, the fog beside it
- * and the clouds, which read nothing, beside the fog. In
- * the game server and the event store, a column of three and a row of two: the gateway is above what feeds it,
- * Occurrent above what keeps its events, the bridge beside it and above the broker it publishes to, and the feed
- * runs up.
+ * read baked files, roughly in the order of where what each reads stands above, with the shaders together in the
+ * middle of it and the critters beside the sprites whose trees they fly out of, room between them for what passes
+ * from one to the other. Under them, in the shaders' box, the trees' wind under the grass whose gusts it shares, the
+ * clouds, and the fog under the critters it tells where the house sees; and beside the box the connection, which
+ * talks down to the gateway and up to the parts drawing what it is told. In the game server and the event store, a column of three and a row of two: the gateway is
+ * above what feeds it, Occurrent above what keeps its events, the bridge beside it and above the broker it
+ * publishes to, and the feed runs up.
  */
 const SPOTS: Record<string, { readonly col: number; readonly row: number }> = {
   painter: { col: 0, row: 0 },
-  grass: { col: 1, row: 0 },
-  water: { col: 2, row: 0 },
-  map: { col: 3, row: 0 },
-  pictures: { col: 4, row: 0 },
-  sprites: { col: 5, row: 0 },
-  panes: { col: 6, row: 0 },
-  relief: { col: 7, row: 0 },
+  map: { col: 1, row: 0 },
+  grass: { col: 2, row: 0 },
+  water: { col: 3, row: 0 },
+  relief: { col: 4, row: 0 },
+  critters: { col: 5, row: 0 },
+  sprites: { col: 6.25, row: 0 },
+  panes: { col: 7.25, row: 0 },
+  pictures: { col: 8.25, row: 0 },
+  trees: { col: 2, row: 1 },
   clouds: { col: 3.5, row: 1 },
-  fog: { col: 4.5, row: 1 },
-  connection: { col: 5.5, row: 1 },
+  fog: { col: 5, row: 1 },
+  connection: { col: 6.75, row: 1 },
   gateway: { col: 1, row: 0 },
   rules: { col: 0, row: 1 },
   reactions: { col: 1, row: 1 },
@@ -89,13 +93,41 @@ const SPOTS: Record<string, { readonly col: number; readonly row: number }> = {
 /** The groups' boxes, top to bottom beneath the line. */
 const GROUP_ORDER = ['group:page', 'group:server', 'group:events'];
 
+/** Room above a group's pieces for what a cluster inside it says, when it has one. */
+const headOf = (group: string): number =>
+  CLUSTERS.some((c) => `group:${c.group}` === group) ? CLUSTER.head : 0;
+
+/** Where a piece stands inside its group's box, from the box's top left corner. */
+function spotOf(id: string): { x: number; y: number } {
+  const spot = SPOTS[id]!;
+  return { x: PAD + spot.col * COLUMN, y: HEADER + headOf(`group:${piece(id).group}`) + spot.row * ROW };
+}
+
 /** A group's box: as wide and as tall as the columns and rows its pieces stand in, and room for what it says. */
 function boxOf(group: string): { width: number; height: number } {
   const spots = Object.entries(SPOTS)
     .filter(([id]) => `group:${piece(id).group}` === group)
     .map(([, spot]) => spot);
   const [cols, rows] = [Math.max(...spots.map((s) => s.col)), Math.max(...spots.map((s) => s.row))];
-  return { width: 2 * PAD + cols * COLUMN + PIECE.width, height: HEADER + rows * ROW + PIECE.height + PAD };
+  const foot = PAD + (headOf(group) > 0 ? CLUSTER.pad : 0);
+  return {
+    width: 2 * PAD + cols * COLUMN + PIECE.width,
+    height: HEADER + headOf(group) + rows * ROW + PIECE.height + foot,
+  };
+}
+
+/** A cluster's box, inside its group's: round the spots of its pieces, with room above them for what it says. */
+export function clusterBoxOf(cluster: string): { x: number; y: number; width: number; height: number } {
+  const inside = Object.keys(SPOTS).filter((id) => `cluster:${piece(id).cluster}` === cluster);
+  const xs = inside.map((id) => spotOf(id).x);
+  const ys = inside.map((id) => spotOf(id).y);
+  const [left, top] = [Math.min(...xs) - CLUSTER.pad, Math.min(...ys) - CLUSTER.head];
+  return {
+    x: left,
+    y: top,
+    width: Math.max(...xs) + PIECE.width + CLUSTER.pad - left,
+    height: Math.max(...ys) + PIECE.height + CLUSTER.pad - top,
+  };
 }
 
 /** An arrow that would cut through the cards between its ends goes round the outside instead. */
@@ -111,18 +143,18 @@ const ROUND: Record<string, readonly [Side, Side]> = {
  */
 export function sizeOf(card: Card): { width: number; height: number } {
   switch (card.kind) {
-    case 'file': {
-      const a = artifact(card.ref);
-      return { ...FILE, height: FILE.height + (a.development === undefined ? 0 : FOOT) };
-    }
-    case 'tool': {
-      const tool = TOOLS.find((one) => one.script === card.ref)!;
-      return { ...TOOL, height: TOOL.height + (tool.development === undefined ? 0 : FOOT) };
-    }
+    case 'file':
+      return { ...FILE };
+    case 'tool':
+      return { ...TOOL };
     case 'piece':
       return { ...PIECE };
     case 'group':
       return boxOf(card.id);
+    case 'cluster': {
+      const { width, height } = clusterBoxOf(card.id);
+      return { width, height };
+    }
     case 'shelf':
       return { width: 0, height: 0 };
   }
@@ -134,7 +166,8 @@ export function sizeOf(card: Card): { width: number; height: number } {
  * Under that, what the tools make of them is laid out by dagre in ranks, so each tool stands below what it reads
  * and above what it writes; each source stands over the tools that read it, so its arrows stay short. The running
  * cards are not part of that: they stand beneath a line drawn under the lowest baked card, so every arrow into them
- * crosses it: each group's box with its pieces in it, the page's first. The master's tools and what they make
+ * crosses it: each group's box with its pieces in it, the page's first, and a cluster's box inside its group's with
+ * its pieces in it in turn. The master's tools and what they make
  * stand in the world cache's box, which dagre lays out as a cluster: as big as they need, and the rest of the
  * baked cards round it.
  */
@@ -203,12 +236,21 @@ export function layOut(): { placed: Placed[]; arrows: Drawn[]; line: Line; sourc
       placed.push({ card, ...boxes.get(card.id)! });
       continue;
     }
+    if (card.kind === 'cluster') {
+      placed.push({ card, ...clusterBoxOf(card.id), parent: card.group });
+      continue;
+    }
     if (card.kind !== 'piece' || card.group === undefined) continue;
-    const spot = SPOTS[card.ref]!;
-    const [x, y] = [PAD + spot.col * COLUMN, HEADER + spot.row * ROW];
+    const { x, y } = spotOf(card.ref);
     const box = boxes.get(card.group)!;
-    placed.push({ card, x, y, ...PIECE, parent: card.group });
     at.set(card.id, { x: box.x + x, y: box.y + y });
+    if (card.cluster === undefined) {
+      placed.push({ card, x, y, ...PIECE, parent: card.group });
+      continue;
+    }
+    // A piece in a cluster stands in the cluster's box, from its corner.
+    const inside = clusterBoxOf(card.cluster);
+    placed.push({ card, x: x - inside.x, y: y - inside.y, ...PIECE, parent: card.cluster });
   }
 
   const sided = running.arrows.map((a): Drawn => {

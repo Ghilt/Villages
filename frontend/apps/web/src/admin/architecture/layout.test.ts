@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { isSource, layOut, makesSources } from './layout';
-import { ARTIFACTS, TOOLS } from './world';
+import { ARTIFACTS, PIECES, TOOLS } from './world';
 
 /**
  * What the world is made from stands on one row along the top of the diagram, so every source can be read off it
@@ -48,5 +48,43 @@ describe("the diagram's sources", () => {
     const rest = others.filter((p) => !makesSources(p.card));
     expect(rest.filter((p) => p.y < line.y).map((p) => p.card.id)).toEqual([]);
     expect(line.y).toBeGreaterThan(row.bottom);
+  });
+});
+
+/** The shaders stand together in a box of their own, inside the page's, and no other card stands in it. */
+describe("the diagram's shaders", () => {
+  const { placed } = layOut();
+  const box = placed.find((p) => p.card.id === 'cluster:shaders')!;
+  const inside = placed.filter((p) => p.parent === 'cluster:shaders');
+
+  it("stand in the shaders' box, which stands in the page's", () => {
+    expect(box.parent).toBe('group:page');
+    expect(inside.map((p) => p.card.ref).sort()).toEqual(
+      PIECES.filter((p) => p.cluster === 'shaders')
+        .map((p) => p.id)
+        .sort(),
+    );
+    for (const p of inside) {
+      expect(p.x).toBeGreaterThan(0);
+      expect(p.y).toBeGreaterThan(0);
+      expect(p.x + p.width).toBeLessThan(box.width);
+      expect(p.y + p.height).toBeLessThan(box.height);
+    }
+    const page = placed.find((p) => p.card.id === 'group:page')!;
+    expect(box.x).toBeGreaterThan(0);
+    expect(box.x + box.width).toBeLessThan(page.width);
+    expect(box.y + box.height).toBeLessThan(page.height);
+  });
+
+  it('leave no other part of the page in their box, or over it', () => {
+    const others = placed.filter((p) => p.parent === 'group:page' && p.card.kind === 'piece');
+    const over = others.filter(
+      (p) =>
+        p.x < box.x + box.width &&
+        p.x + p.width > box.x &&
+        p.y < box.y + box.height &&
+        p.y + p.height > box.y,
+    );
+    expect(over.map((p) => p.card.ref)).toEqual([]);
   });
 });

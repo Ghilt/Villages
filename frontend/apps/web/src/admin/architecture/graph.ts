@@ -1,16 +1,23 @@
 import { WORLD_CACHE } from './cache';
-import { ARTIFACTS, GROUPS, PIECES, READERS, TALKS, TOOLS } from './world';
+import { ARTIFACTS, CLUSTERS, GROUPS, PIECES, READERS, TALKS, TOOLS } from './world';
 import type { Talk } from './world';
 
 /**
- * A card on the diagram: a file, a tool, a running piece, a group of running pieces that fit together, or the
- * world cache's box round the master's tools and what they make.
+ * A card on the diagram: a file, a tool, a running piece, a group of running pieces that fit together, a cluster
+ * of pieces of one kind inside a group, or the world cache's box round the master's tools and what they make.
  */
 export type Card =
   | { readonly id: string; readonly kind: 'file'; readonly ref: string }
   | { readonly id: string; readonly kind: 'tool'; readonly ref: string }
-  | { readonly id: string; readonly kind: 'piece'; readonly ref: string; readonly group?: string }
+  | {
+      readonly id: string;
+      readonly kind: 'piece';
+      readonly ref: string;
+      readonly group?: string;
+      readonly cluster?: string;
+    }
   | { readonly id: string; readonly kind: 'group'; readonly ref: string }
+  | { readonly id: string; readonly kind: 'cluster'; readonly ref: string; readonly group: string }
   | { readonly id: string; readonly kind: 'shelf'; readonly ref: string };
 
 /**
@@ -31,6 +38,7 @@ export const fileCard = (id: string) => `file:${id}`;
 export const toolCard = (script: string) => `tool:${script}`;
 export const runCard = (id: string) => `run:${id}`;
 export const groupCard = (id: string) => `group:${id}`;
+export const clusterCard = (id: string) => `cluster:${id}`;
 export const SHELF_CARD = `shelf:${WORLD_CACHE.id}`;
 
 /** Whether a card stands inside the world cache's box: a world step's tool or a file one makes. */
@@ -66,18 +74,25 @@ export function bakedGraph(): { cards: Card[]; arrows: Arrow[] } {
 }
 
 /**
- * The running cards, groups before the pieces inside them, and the arrows into and between them. A baked file the
- * page reads arrives at the part of the page that reads it; one the game server reads arrives at its group,
- * because it is the whole process that reads them.
+ * The running cards, each box before the boxes and pieces inside it, and the arrows into and between them. A baked
+ * file the page reads arrives at the part of the page that reads it; one the game server reads arrives at its
+ * group, because it is the whole process that reads them.
  */
 export function runningGraph(): { cards: Card[]; arrows: Arrow[] } {
   const cards: Card[] = [
     ...GROUPS.map((g): Card => ({ id: groupCard(g.id), kind: 'group', ref: g.id })),
+    ...CLUSTERS.map((c): Card => ({
+      id: clusterCard(c.id),
+      kind: 'cluster',
+      ref: c.id,
+      group: groupCard(c.group),
+    })),
     ...PIECES.map((p): Card => ({
       id: runCard(p.id),
       kind: 'piece',
       ref: p.id,
       group: groupCard(p.group),
+      ...(p.cluster === undefined ? {} : { cluster: clusterCard(p.cluster) }),
     })),
   ];
   const read = new Set<string>();
@@ -107,8 +122,8 @@ function talk(t: Talk): Arrow {
 /**
  * Everything a card depends on and everything that depends on it, following only the arrows that make
  * things: so choosing the master lights the files and the programs made from it, and not the event store. A
- * running piece also lights the pieces it talks to, one step away, and a group the pieces inside it, as the world
- * cache's box does.
+ * running piece also lights the pieces it talks to, one step away, and a group or a cluster the pieces inside it,
+ * as the world cache's box does.
  */
 export function related(chosen: string, arrows: readonly Arrow[], cards: readonly Card[] = []): Set<string> {
   const flowing = arrows.filter((a) => a.flow);
@@ -131,7 +146,12 @@ export function related(chosen: string, arrows: readonly Arrow[], cards: readonl
     .filter((a) => !a.flow && (a.from === chosen || a.to === chosen))
     .flatMap((a) => [a.from, a.to]);
   const inside = cards
-    .filter((c) => (c.kind === 'piece' && c.group === chosen) || (chosen === SHELF_CARD && inShelf(c)))
+    .filter(
+      (c) =>
+        (c.kind === 'piece' && (c.group === chosen || c.cluster === chosen)) ||
+        (c.kind === 'cluster' && c.group === chosen) ||
+        (chosen === SHELF_CARD && inShelf(c)),
+    )
     .map((c) => c.id);
   return new Set([...reach((a) => [a.from, a.to]), ...reach((a) => [a.to, a.from]), ...near, ...inside]);
 }

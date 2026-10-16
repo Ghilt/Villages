@@ -6,6 +6,7 @@ import {
   TALKS,
   TOOLS,
   artifact,
+  cluster,
   downstreamOf,
   makersOf,
   readersOf,
@@ -35,6 +36,7 @@ export function Focus({ chosen, clear }: { chosen: string | null; clear: () => v
       {kind === 'tool' && <ToolFocus script={id} />}
       {kind === 'run' && <PieceFocus id={id} />}
       {kind === 'group' && <GroupFocus id={id} />}
+      {kind === 'cluster' && <ClusterFocus id={id} />}
       {kind === 'shelf' && <ShelfFocus />}
     </section>
   );
@@ -209,12 +211,32 @@ function PieceFocus({ id }: { id: string }) {
         <dd>
           {WHERE[p.runs]}
           {`, in ${group(p.group).name.toLowerCase()}`}
+          {p.cluster === undefined ? '' : `, one of ${cluster(p.cluster).name.toLowerCase()}`}
           {p.yet === undefined ? '' : `; not used until increment ${p.yet}`}
           {p.instead === undefined ? '' : `; instead of ${piece(p.instead).name} when Docker is not running`}
         </dd>
         <dt>talks to</dt>
         <dd>{talksOf(p)}</dd>
         {p.group === 'page' && <PieceReads id={id} />}
+      </dl>
+    </>
+  );
+}
+
+function ClusterFocus({ id }: { id: string }) {
+  const c = cluster(id);
+  const inside = PIECES.filter((p) => p.cluster === id);
+  return (
+    <>
+      <h3 className="arch__focus-title">
+        {c.name} <code>{c.where}</code>
+      </h3>
+      <p>{c.what}</p>
+      <dl className="arch__facts">
+        <dt>made of</dt>
+        <dd>{inside.map((p) => p.name).join(', ')}</dd>
+        <dt>in</dt>
+        <dd>{group(c.group).name.toLowerCase()}</dd>
       </dl>
     </>
   );

@@ -30,14 +30,6 @@
   color: var(--baked);
 }
 
-.shelf__name code {
-  display: block;
-  margin-top: 0.1rem;
-  font-size: 0.72rem;
-  font-weight: 400;
-  color: var(--ink-soft);
-}
-
 .shelf__what {
   max-width: 44rem;
   margin-top: 0.3rem;

@@ -3,12 +3,16 @@ import type { Node, NodeProps } from '@xyflow/react';
 import { Fragment } from 'react';
 
 import type { Card } from './graph';
+import { sentenceOf } from './sentence';
 import { took } from './Timeline';
 import { WORLD_CACHE } from './cache';
-import { TOOLS, artifact, group, piece } from './world';
+import { TOOLS, artifact, cluster, group, piece } from './world';
 import type { Piece } from './world';
 
-/** What a card is told: which card it is, and whether it is chosen, lit by the choice, or dimmed. */
+/**
+ * What a card is told: which card it is, and whether it is chosen, lit by the choice, or dimmed. Every card says
+ * what it is in one sentence (`sentence.ts`); the rest, where it lives and what reads it, is shown when it is chosen.
+ */
 export type CardData = { card: Card; state: string; words?: { x: number; y: number; width: number } };
 export type CardNode = Node<CardData>;
 
@@ -91,9 +95,7 @@ export function FileCard({ data }: NodeProps<CardNode>) {
         {a.development !== undefined && <Robot />}
       </div>
       <div className="card__name">{a.name}</div>
-      <code className="card__path">{a.path}</code>
-      <div className="card__what">{a.what}</div>
-      {a.development !== undefined && <div className="card__for">for development: {a.development}</div>}
+      <div className="card__what">{sentenceOf(a.what)}</div>
     </div>
   );
 }
@@ -112,9 +114,7 @@ export function ToolCard({ data }: NodeProps<CardNode>) {
         {tool.development !== undefined && <Robot />}
       </div>
       <div className="card__name card__name--mono">{tool.script}</div>
-      <div className="card__what">{tool.what}</div>
-      <div className="card__ran">run by {tool.ranBy}</div>
-      {tool.development !== undefined && <div className="card__for">for development: {tool.development}</div>}
+      <div className="card__what">{sentenceOf(tool.what)}</div>
     </div>
   );
 }
@@ -142,8 +142,7 @@ export function PieceCard({ data }: NodeProps<CardNode>) {
         {note !== null && <span className="card__by">{note}</span>}
       </div>
       <div className="card__name">{p.name}</div>
-      <code className="card__path">{p.where}</code>
-      <div className="card__what">{p.what}</div>
+      <div className="card__what">{sentenceOf(p.what)}</div>
     </div>
   );
 }
@@ -155,10 +154,19 @@ export function GroupCard({ data }: NodeProps<CardNode>) {
     <div className={`run-group run-group--${g.id} ${data.state}`}>
       {/* The baked files the game server reads arrive here, to one side of the page's box above it. */}
       <Handle type="target" position={Position.Top} isConnectable={false} style={{ left: '10%' }} />
-      <div className="run-group__name">
-        {g.name} <code>{g.where}</code>
-      </div>
-      <div className="run-group__what">{g.what}</div>
+      <div className="run-group__name">{g.name}</div>
+      <div className="run-group__what">{sentenceOf(g.what)}</div>
+    </div>
+  );
+}
+
+/** A box inside a group's round the pieces of one kind, saying what they are together. */
+export function ClusterCard({ data }: NodeProps<CardNode>) {
+  const c = cluster(data.card.ref);
+  return (
+    <div className={`run-cluster run-cluster--${c.id} ${data.state}`}>
+      <div className="run-cluster__name">{c.name}</div>
+      <div className="run-cluster__what">{sentenceOf(c.what)}</div>
     </div>
   );
 }
@@ -173,10 +181,8 @@ export function ShelfCard({ data }: NodeProps<CardNode>) {
           data.words === undefined ? {} : { left: data.words.x, top: data.words.y, width: data.words.width }
         }
       >
-        <div className="shelf__name">
-          {WORLD_CACHE.name} <code>{WORLD_CACHE.where}</code>
-        </div>
-        <div className="shelf__what">{WORLD_CACHE.what}</div>
+        <div className="shelf__name">{WORLD_CACHE.name}</div>
+        <div className="shelf__what">{sentenceOf(WORLD_CACHE.what)}</div>
       </div>
     </div>
   );
@@ -209,6 +215,7 @@ export const CARD_TYPES = {
   tool: ToolCard,
   piece: PieceCard,
   group: GroupCard,
+  cluster: ClusterCard,
   shelf: ShelfCard,
   line: LineCard,
 };
