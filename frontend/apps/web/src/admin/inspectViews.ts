@@ -104,6 +104,13 @@ export const INSPECT_VIEWS: readonly InspectView[] = [
     catalogue: 'quests',
   },
   {
+    path: '/admin/inspect-story',
+    title: 'Story',
+    what: "The world's history as a timeline, docs/STORY.md drawn: the gods, the ritual, and the day the houses begin.",
+    needs: 'nothing',
+    load: () => import('./story/Story').then((page) => page.Story),
+  },
+  {
     path: '/admin/inspect-pictures',
     title: 'Pictures',
     what: 'Every picture the world is drawn with - scenery, structures, marks, portraits, scenes - painted or a placeholder.',

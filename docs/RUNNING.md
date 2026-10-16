@@ -698,6 +698,16 @@ and `-- --drop` takes them off; by hand only.
   those; a box that keeps only the lines with a word in them. `copy` copies what is shown as the panel copies its
   log, and `clear` forgets every line so far. It keeps two thousand lines of a window, where the panel keeps two
   hundred, and what a closed window said. Nothing leaves the browser.
+- **`/admin/inspect-story`** is the world's history as a timeline, `docs/STORY.md` drawn, and needs nothing else
+  running. Time runs down the page from the first box to the present, where the line ends at the compass: each
+  box's day to the left of a gilt line and the box to the right, what happened in the library's `card.event`, a
+  dot for a day and a ring for no one time, and lore - what is so rather than what happened - on parchment, set a
+  little apart with a lozenge. A box's portraits, from `world/portraits/`, stand in ovals under it with their words,
+  and one whose file is not there says so in the oval's place. An invention is no box: Earth's own, its name and its
+  real year stand small to the left of the line, the printing press first, with a tick on it. It reads the document through the dev server and
+  again whenever it is saved, so a box written is a box seen, and nothing built carries it: the story is the truth
+  no player begins knowing. A rule of the document broken is said at the top, with its line. It changes nothing:
+  the story is written in the document, by the rules its "How it is kept" sets out.
 - **`/admin/inspect-pictures`** is every picture the world is drawn with, and needs nothing else running: the
   scenery and the structures as their atlases were cut, a structure a culture to a column beside its type's pin, each
   painted or still a placeholder, its size and the file it came from; the marks' pictures in `world/sprites/marks/`,

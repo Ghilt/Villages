@@ -13,6 +13,7 @@ import { performanceApi } from './vite/performanceApi.ts';
 import { portraitsApi } from './vite/portraitsApi.ts';
 import { scenesApi } from './vite/scenesApi.ts';
 import { spriteMarksApi } from './vite/spriteMarksApi.ts';
+import { storyApi } from './vite/storyApi.ts';
 import { structuresArtApi } from './vite/structuresArtApi.ts';
 import { uiArtApi } from './vite/uiArtApi.ts';
 import { worldApi } from './vite/worldApi.ts';
@@ -31,7 +32,7 @@ export default defineConfig({
   // portraitsApi and scenesApi serve Adam's portraits and scenes folders without a cache, so a picture
   // saved over another shows, spriteMarksApi the marks' pictures for the pictures' page, catalogueApi
   // serves world/catalogues/ the same way, and eventsApi docs/EVENTS.md and the events' samples for the
-  // events' page; and artApi cuts world/sprites again whenever a picture in it
+  // events' page, and storyApi docs/STORY.md for the story's; and artApi cuts world/sprites again whenever a picture in it
   // is saved, as uiArtApi does world/ui, and structuresArtApi
   // the structures' own folder in it. maplibreWorker is the build's alone: it puts MapLibre's worker beside
   // the chunk MapLibre was bundled into, where a built page looks for it. See decision record 0080. performanceApi
@@ -45,6 +46,7 @@ export default defineConfig({
     spriteMarksApi(),
     catalogueApi(),
     eventsApi(),
+    storyApi(),
     artApi(),
     structuresArtApi(),
     uiArtApi(),

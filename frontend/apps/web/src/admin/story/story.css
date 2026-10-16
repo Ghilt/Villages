@@ -1,0 +1,273 @@
+/*
+ * The story's timeline (Story.tsx): a column of three - the day, the line, the box - down a page of a reading width.
+ * The line is drawn a piece an entry, from the entry's top to its bottom, so the first piece starts at the first mark
+ * and the last ends at the present, and nothing runs on past it. Lore stands a little further from the line than
+ * the events do, and is marked with a lozenge where an event has a dot. An invention is a row of its own, short, its
+ * name and year in the day's column with an arm to a tick on the line. The cards and the ovals are the library's.
+ */
+
+.story {
+  --story-when: 11rem;
+  --story-rail: 3rem;
+  /* How far down an entry its mark sits: level with a card's name. */
+  --story-mark-at: 1.6rem;
+  --story-gilt: var(--ui-gilt);
+  max-width: 54rem;
+  margin: 0 auto;
+}
+
+.story-part + .story-part {
+  margin-top: 3rem;
+}
+
+.story-part__head {
+  margin: 1rem 0 2rem;
+  text-align: center;
+}
+
+.story-part__opening {
+  margin-top: 0.5rem;
+}
+
+.story-line {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.story-entry {
+  display: grid;
+  grid-template-columns: var(--story-when) var(--story-rail) minmax(0, 1fr);
+}
+
+.story-entry__when {
+  padding: calc(var(--story-mark-at) - 0.75rem) 0.25rem 0 0;
+  font-size: 1.35rem;
+  font-variant-numeric: oldstyle-nums;
+  line-height: 1.1;
+  text-align: right;
+  color: var(--ui-ink);
+}
+
+.story-entry__rail {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding-top: calc(var(--story-mark-at) - 0.35rem);
+}
+
+/* This entry's piece of the line, behind its mark: from its top, or from its mark for the first, to its bottom. */
+.story-entry__rail::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(50% - 1px);
+  width: 2px;
+  background: var(--story-gilt);
+}
+
+.story-entry:first-child .story-entry__rail::before {
+  top: var(--story-mark-at);
+}
+
+/* The present: the line comes down to it and ends. */
+.story-entry--now .story-entry__rail::before {
+  bottom: auto;
+  height: var(--story-mark-at);
+}
+
+.story-entry__mark {
+  position: relative;
+  box-sizing: border-box;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  background: var(--story-gilt);
+  box-shadow: 0 0 0 3px #fbf7ec;
+}
+
+/* A box at no one time: an open ring, for a moment the line passes through without a day of its own. */
+.story-entry--undated .story-entry__mark {
+  background: #fbf7ec;
+  border: 2px solid var(--story-gilt);
+}
+
+/* Lore is not on the line at all: a lozenge beside it. */
+.story-entry--lore .story-entry__mark {
+  width: 0.6rem;
+  height: 0.6rem;
+  margin-top: 0.05rem;
+  border-radius: 1px;
+  background: #fbf7ec;
+  border: 1.5px solid var(--story-gilt);
+  transform: rotate(45deg);
+}
+
+.story-entry--now .story-entry__rail {
+  padding-top: calc(var(--story-mark-at) - 22px);
+}
+
+.story-entry--now .story-entry__rail .ui-medallion {
+  position: relative;
+}
+
+.story-entry__body {
+  position: relative;
+  min-width: 0;
+  padding-bottom: 1.6rem;
+}
+
+/* The arm from the line to the card, level with its mark. */
+.story-entry__body::before {
+  content: '';
+  position: absolute;
+  top: var(--story-mark-at);
+  left: calc(var(--story-rail) / -2 + 0.6rem);
+  width: calc(var(--story-rail) / 2 - 0.6rem);
+  height: 1px;
+  background: var(--story-gilt);
+}
+
+.story-entry--lore .story-entry__body {
+  margin-left: 2rem;
+}
+
+.story-entry--lore .story-entry__body::before {
+  width: calc(var(--story-rail) / 2 + 1.4rem);
+  background: none;
+  border-top: 1px dashed var(--story-gilt);
+}
+
+.story-entry--now .story-entry__body::before {
+  display: none;
+}
+
+.story-entry__words {
+  margin: 0.4rem 0 0;
+}
+
+.story-pictures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.story-portrait {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+}
+
+.story-portrait__caption {
+  max-width: 8rem;
+  margin-top: 0.4rem;
+  font-style: italic;
+  text-align: center;
+  color: var(--ui-ink-soft);
+}
+
+.story-portrait__missing {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: 7rem;
+  padding: 0.5rem;
+  font-size: 0.75rem;
+  text-align: center;
+  color: #8f1d2f;
+  border: 1px dashed var(--parchment-edge);
+  border-radius: 50%;
+}
+
+/* An invention: short, its name and its year standing against the line, and nothing to the right of it. */
+.story-entry--invention {
+  --story-mark-at: 0.95rem;
+}
+
+.story-entry--invention .story-entry__when {
+  padding: 0.35rem 0.6rem 0.35rem 0;
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+
+.story-invention__name {
+  font-style: italic;
+  color: var(--ui-ink-soft);
+}
+
+.story-invention__year {
+  white-space: nowrap;
+}
+
+.story-entry--invention .story-entry__rail {
+  padding-top: calc(var(--story-mark-at) - 0.2rem);
+}
+
+.story-entry--invention .story-entry__mark {
+  width: 0.4rem;
+  height: 0.4rem;
+}
+
+/* The arm from the name to the line, level with the tick. */
+.story-entry--invention .story-entry__rail::after {
+  content: '';
+  position: absolute;
+  top: var(--story-mark-at);
+  left: 0;
+  width: calc(50% - 0.3rem);
+  height: 1px;
+  background: var(--story-gilt);
+}
+
+.story-entry--invention .story-entry__body {
+  padding-bottom: 0;
+}
+
+.story-entry--invention .story-entry__body::before {
+  display: none;
+}
+
+@media (width <= 600px) {
+  .story {
+    --story-when: 0rem;
+    --story-rail: 1.5rem;
+  }
+
+  /* No room for the day beside the line: it is said above the card instead. */
+  .story-entry__when {
+    grid-column: 3;
+    grid-row: 1;
+    padding: 0 0 0.3rem;
+    font-size: 1.1rem;
+    text-align: left;
+  }
+
+  .story-entry__when:empty {
+    display: none;
+  }
+
+  .story-entry__rail {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
+  .story-entry__body {
+    grid-column: 3;
+  }
+
+  .story-entry--lore .story-entry__body {
+    margin-left: 0.75rem;
+  }
+
+  .story-entry--invention .story-entry__when {
+    padding: 0.2rem 0 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .story-entry--invention .story-entry__rail::after {
+    display: none;
+  }
+}
