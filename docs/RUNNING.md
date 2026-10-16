@@ -509,7 +509,10 @@ and `-- --drop` takes them off; by hand only.
 - The names a newcomer can be given: `world/catalogues/character-names.json`, given names by sex and family names,
   every given name with every family name a name a character can have, which the game server checks as it takes the
   file on. A newcomer taken in is named from the file in force, so a name added there, by hand or from
-  **`/admin/inspect-character-names`**, can be the next one's. Not the world's place names, which are `world/names/`.
+  **`/admin/inspect-character-names`**, can be the next one's. The page shows the three lists, every name in a cell
+  of its own, changed in place, emptied to take it out, or typed into the cell at a list's end to add one, and saves
+  them through the game server; only the names that differ from the file are marked. Not the world's place names,
+  which are `world/names/`.
 - What a structure is: `world/catalogues/structures.json`, hand-edited, one entry a type - its words in each culture, and level
   by level how far out it is drawn, how far it sees, its size on the map and what it yields a world month, which is
   a real day - with its slots and its influence zone if it has one. Nothing cuts it. The game server reads it as
