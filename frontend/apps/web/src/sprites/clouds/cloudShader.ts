@@ -69,6 +69,10 @@ uniform vec2 uWarp;
 uniform float uCover;
 uniform float uPatchWeight;
 uniform float uEdge;
+// How dark a shadow is, nought to one, already times how much of the shadows the band draws; and how far from its
+// cloud it falls, away from the light, as a share of a clump.
+uniform float uShadow;
+uniform float uReach;
 out vec4 fragColor;
 
 const float TAU = 6.2831853;
@@ -85,6 +89,7 @@ const float WARP = ${float(CLOUD_LOOK.warp)};
 const float BRUSH = ${float(B.strength)};
 const float BRUSH_ALONG = ${float(B.along)};
 const float BRUSH_ACROSS = ${float(B.across)};
+const vec3 SHADE = vec3(${colour(SHADE_COLOUR)});
 const float THIN = ${float(CLOUD_LOOK.thin)};
 const float OPACITY = ${float(CLOUD_LOOK.opacity)};
 
@@ -193,7 +198,19 @@ void main() {
   float lit = 1.0 - smoothstep(cut - tone, cut + tone, towards);
   float far = 1.0 - smoothstep(cut - tone, cut + tone, away);
   vec3 rgb = mix(mix(MIDDLE, LIT, lit), FAR_SIDE, far * (1.0 - 0.5 * lit));
+  float cloudAlpha = cloud * body * OPACITY * uAmount;
 
-  fragColor = vec4(rgb, 1.0) * (cloud * body * OPACITY * uAmount * inWorld);
+  // The shadow here is the cloud standing towards the light from it: the same field, warped where that cloud is,
+  // read at its coarser sizes, so it keeps the cloud's shape without its finest lumps, in the relief's violet.
+  vec2 over = wind + SUN * (uReach * uClumps.x);
+  vec2 overPushed = over + warp(over);
+  float shade = 0.5 + 0.5 * clumps(overPushed, 4) + uPatchWeight * patches(over);
+  float shadowCut = cut - BRUSH * stroke + BRUSH * brush(overPushed);
+  float shadowSoft = max(uEdge * 1.5, fwidth(shade));
+  float shadowAlpha = smoothstep(shadowCut - shadowSoft, shadowCut + shadowSoft, shade) * uShadow;
+
+  // The cloud over its own shadow and the shadow over the ground, premultiplied.
+  vec4 shadow = vec4(SHADE, 1.0) * shadowAlpha;
+  fragColor = (vec4(rgb, 1.0) * cloudAlpha + shadow * (1.0 - cloudAlpha)) * inWorld;
 }
 `;

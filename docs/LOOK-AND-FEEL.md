@@ -239,7 +239,10 @@ little faster than the clumps, so a clump changes shape as it goes rather than s
 like the map, not photographed**: three flat tones meeting along lines a pixel soft, lit by the one light the hills
 are, from the upper right - a rim of the relief's cream where the sun strikes, white within, and a rim of white gone
 a little towards the relief's violet on the far side - with their edges broken by short strokes along the wind and
-no outline. The lumps a cumulus is built of show as rounded bumps in the outline. Every number of them is in
+no outline. The lumps a cumulus is built of show as rounded bumps in the outline. **Every cloud casts its shadow**,
+down and to the left, the way the hills' shading and the scenery's shadows fall: the cloud's own shape without its
+finest lumps, flat, in the relief's dusky violet, laid over whatever is under it, the haze included, half a clump
+from the cloud. How dark and how far are levers. Every number of them is in
 `apps/web/src/sprites/clouds/look.ts`, and the light is `apps/web/src/map/light.ts`. See decision record 0098.
 
 **Nothing on the map pops.** A thing arriving fades up, a thing gone fades out and is only then let go

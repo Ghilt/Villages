@@ -38,6 +38,10 @@ from noise laid along the wind and carried by the wall clock.**
 - **Bands by zoom.** Closer in than 7 nothing is drawn and no frame is asked for. From 6 out the clouds lie on the
   map, glued to the ground, whole down to 5.25 and fading to nothing by 4.5. Between 7 and 6 the camera is in
   them. Every fade is eased, so nothing pops at an edge (`sprites/clouds/cloudBands.ts`).
+- **One sun.** The clouds are lit, and cast their shadows, by the map's one light, `map/light.ts`, which the relief
+  reads too: a rim of the relief's cream on the side the sun strikes, a rim of its violet on the far side, and a
+  shadow falling away from the light, in the same violet, read from the same field at the cloud standing towards the
+  light from each pixel, so it keeps its cloud's shape.
 - **A shader that is a look**, so it is drawn at a level, off, low or high, high at every load, as decision
   record 0081's amendment asks of every shader added later. High is every pixel at twenty frames a second, low a
   quarter of them at ten. It asks the sprite canvas for frames at its level's rate while some cloud is on the

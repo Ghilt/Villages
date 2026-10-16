@@ -93,8 +93,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   moved, and invented land is given ground of the kind painted on it: rock a range, forest hills, farmland flat. A master with no height tiles is drawn flat and the log says what
   to run. Its numbers are in
   `apps/web/src/map/relief.ts` and `reliefTuning.ts`, and our shader is `reliefLayer.ts` and `reliefShader.ts`.
-- Clouds drift over the world from zoom 7 out, painted in three tones lit from the upper right: clumps gathered in
-  patches, whole from 6 out to 5.25, fading to
+- Clouds drift over the world from zoom 7 out, painted in three tones lit from the upper right, each with its violet
+  shadow down and to the left: clumps gathered in patches, whole from 6 out to 5.25, fading to
   nothing by 4.5, and between 7 and 6, for now, thinning away as the camera comes down through them. They lie
   over the fog's haze and under the marks and the ring, drift with the sea's wind about three minutes across the
   screen, and are the same in every browser, because where they are comes from the wall clock; a player who has
@@ -103,8 +103,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   pixel at twenty, and beside it what they are drawing at the camera's zoom, `over the clouds, 100%`, `fading, 40%`,
   `under the clouds`. Inside it, sliders: how much of the sky is cloud, how big the clumps are, how fast the wind
   carries them, how fast they change shape (how much faster their finer lumps drift than the clumps, nought for
-  clumps that slide by whole), how much they gather in patches, how soft their edges are, and the four zooms the
-  bands change at - under the clouds closer in than 7, over them from 6, fading
+  clumps that slide by whole), how much they gather in patches, how soft their edges are, how dark their shadows
+  are and how far from them their shadows fall, and the four zooms the bands change at - under the clouds closer in than 7, over them from 6, fading
   from 5.25, gone at 4.5. Every slider changes the sky on the next frame, is remembered in the browser that moved
   it, and once one stops the log says them all under `clouds` as `clouds tuned: …`, the line to hand over when a
   setting should become the default; `reset` puts them back. A browser whose sliders are not where they started

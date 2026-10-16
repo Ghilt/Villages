@@ -124,8 +124,8 @@ waiting on Adam's eye for their experiment.
   wind, the same sky in every browser, each with its shadow in the relief's violet, over the fog's haze and under
   every sign, parting round the player's marks; between 7 and 6 the camera is in them. Drawn in the sprite canvas
   (decision record 0098); the six steps, one commit each, are in `docs/plans/clouds.md`. Step 1, the clouds
-  over the map, step 2, their part of the Shaders section, and step 3, painted in three tones lit by the relief's
-  light, are built; steps 4 to 6 are a run Adam picked, verified at its end. Asked for by Adam on 2026-10-15, with
+  over the map, step 2, their part of the Shaders section, step 3, painted in three tones lit by the relief's
+  light, and step 4, their shadows, are built; steps 4 to 6 are a run Adam picked, verified at its end. Asked for by Adam on 2026-10-15, with
   a photograph.
 
 MongoDB and RabbitMQ are on the machine, in Docker, from `infra/docker-compose.yml`. The game server keeps

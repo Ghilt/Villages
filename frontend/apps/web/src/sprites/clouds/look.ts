@@ -60,6 +60,12 @@ export const CLOUD_LOOK = {
    * shade on the far side.
    */
   tones: { middle: [0.97, 0.97, 0.98], litDepth: 1.6, farSide: 0.4, litReach: 0.1, farReach: 0.2 },
+  /**
+   * How dark a cloud's shadow is, nought to one, laid in the relief's violet over whatever is under it, the haze
+   * included; and how far from its cloud it falls, away from the light, as a share of a clump.
+   */
+  shadow: 0.4,
+  reach: 0.5,
   /** How opaque a cloud is at its thin edge, as a share of its middle, and at its middle. */
   thin: 0.7,
   opacity: 0.94,

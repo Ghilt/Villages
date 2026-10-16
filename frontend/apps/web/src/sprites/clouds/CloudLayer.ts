@@ -50,6 +50,8 @@ export function createCloudLayer(renderer: Renderer, repaint: () => void): Cloud
     uCover: { value: 0, type: 'f32' },
     uPatchWeight: { value: 0, type: 'f32' },
     uEdge: { value: 0, type: 'f32' },
+    uShadow: { value: 0, type: 'f32' },
+    uReach: { value: 0, type: 'f32' },
   });
   const shader = new Shader({
     glProgram: GlProgram.from({
@@ -153,6 +155,8 @@ export function createCloudLayer(renderer: Renderer, repaint: () => void): Cloud
       u.uCover = tuning.cover;
       u.uPatchWeight = tuning.patches;
       u.uEdge = tuning.edge;
+      u.uShadow = tuning.shadow * band.shadows;
+      u.uReach = tuning.reach;
       uniforms.update();
 
       const width = Math.max(1, Math.ceil(view.width * levelLook.resolution));

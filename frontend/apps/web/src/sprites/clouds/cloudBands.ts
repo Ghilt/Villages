@@ -21,6 +21,8 @@ export interface CloudBand {
   name: CloudBandName;
   /** How much of the clouds is drawn, nought to one. */
   clouds: number;
+  /** How much of their shadows. */
+  shadows: number;
 }
 
 const ease = (from: number, to: number, value: number): number => {
@@ -43,17 +45,19 @@ export function orderedZooms(zooms: CloudZooms): CloudZooms {
 export function cloudBandAt(zoom: number, zooms: CloudZooms): CloudBand {
   const { inFrom, overFrom, fadeFrom, goneAt } = orderedZooms(zooms);
   if (zoom >= inFrom) {
-    return { name: 'under', clouds: 0 };
+    return { name: 'under', clouds: 0, shadows: 0 };
   }
   if (zoom > overFrom) {
     // Until the camera is drawn inside them, the clouds only thin away as it comes down through.
-    return { name: 'in', clouds: 1 - ease(overFrom, inFrom, zoom) };
+    const thinning = 1 - ease(overFrom, inFrom, zoom);
+    return { name: 'in', clouds: thinning, shadows: thinning };
   }
   if (zoom >= fadeFrom) {
-    return { name: 'over', clouds: 1 };
+    return { name: 'over', clouds: 1, shadows: 1 };
   }
   if (zoom > goneAt) {
-    return { name: 'fading', clouds: ease(goneAt, fadeFrom, zoom) };
+    const fading = ease(goneAt, fadeFrom, zoom);
+    return { name: 'fading', clouds: fading, shadows: fading };
   }
-  return { name: 'gone', clouds: 0 };
+  return { name: 'gone', clouds: 0, shadows: 0 };
 }

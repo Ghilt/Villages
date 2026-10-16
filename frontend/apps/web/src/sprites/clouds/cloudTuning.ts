@@ -24,6 +24,10 @@ export interface CloudTuning {
   patches: number;
   /** How soft a cloud's edge is, in the field's own measure; never less than about a pixel. */
   edge: number;
+  /** How dark a cloud's shadow is, nought to one. */
+  shadow: number;
+  /** How far from its cloud a shadow falls, away from the light, as a share of a clump. */
+  reach: number;
   /** The zooms the bands change at: closer in than `inFrom` nothing is drawn, past `goneAt` nothing either. */
   inFrom: number;
   overFrom: number;
@@ -38,6 +42,8 @@ export const CLOUD_DEFAULTS: CloudTuning = {
   change: CLOUD_LOOK.change,
   patches: CLOUD_LOOK.patches,
   edge: CLOUD_LOOK.edge,
+  shadow: CLOUD_LOOK.shadow,
+  reach: CLOUD_LOOK.reach,
   ...CLOUD_LOOK.zooms,
 };
 
