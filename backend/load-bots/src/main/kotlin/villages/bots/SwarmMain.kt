@@ -16,21 +16,45 @@ fun main(args: Array<String>) {
             warmUp = given["warm-up"]?.toInt() ?: defaults.warmUp,
         )
     }
+    val repository = File(System.getProperty("villages.repository"))
     val server = JarServer(
         java = File(System.getProperty("villages.java")),
         jar = File(System.getProperty("villages.jar")),
-        log = File(System.getProperty("villages.logs"), "swarm-server.log"),
+        log = File(repository, ".logs/swarm-server.log"),
     )
-    // Ctrl+C ends the JVM without the run's `finally`; the server it started goes with it all the same.
-    Runtime.getRuntime().addShutdownHook(Thread(server::stop))
+    val history = History(
+        File(repository, "docs/experiments/performance/runs.jsonl"),
+        Code.of(repository),
+        Machine.here(),
+        settings,
+        JarServer.HEAP_GB,
+    )
+    // Ctrl+C ends the JVM without the run's `finally`: the server it started goes with it all the same, and the run
+    // is written down as aborted, with the stages it got through.
+    var started: Started? = null
+    val stages = java.util.concurrent.CopyOnWriteArrayList<StageResult>()
+    Runtime.getRuntime().addShutdownHook(
+        Thread {
+            server.stop()
+            if (history.finish(RunResult(started, stages, aborted = "interrupted"))) println("written down as aborted")
+        },
+    )
 
     println(
         "a warm-up of ${settings.warmUp} for ${settings.warmUpMs / 1_000} s, then stages ${settings.stages.joinToString()}, " +
             "each held ${settings.holdMs / 1_000} s",
     )
     println(Report.HEADER)
-    val run = Ramp(server, { port -> Swarm(port) }, settings, onStage = { println(Report.line(it)) }).run()
+    val run = Ramp(
+        server,
+        { port -> Swarm(port) },
+        settings,
+        onStarted = { started = it },
+        onStage = { stages += it; println(Report.line(it)) },
+    ).run()
+    history.finish(run)
     println(Report.summary(run))
+    println("written to docs/experiments/performance/runs.jsonl")
 }
 
 /** The run as a table a terminal reads: one line a stage. */

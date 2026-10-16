@@ -810,3 +810,8 @@ and `-- --drop` takes them off; by hand only.
   from outside with `jcmd`; then where it bent and why. The server it started is stopped however the run ends, Ctrl+C
   included, and its log is `.logs/swarm-server.log`. `--args="--stages=100,500 --hold=20"` makes a short run, and
   `--warm-up=0` leaves the warm-up out. It is minutes long and loads the whole machine, so no check runs it.
+- **Every run is written down**, once, when it ends, as one line of `docs/experiments/performance/runs.jsonl`: when,
+  the commit and branch it measured and whether the tree had changes beyond it, the machine, the settings, the
+  server's heap limit (8 GB, pinned so that runs compare), where it bent and why, and every stage's numbers. A run
+  stopped with Ctrl+C is written as aborted, with the stages it got through. The file is committed with the work it
+  measured, so the history travels to main; the performance page charts it.

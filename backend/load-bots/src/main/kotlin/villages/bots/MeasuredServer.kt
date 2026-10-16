@@ -28,7 +28,7 @@ data class Reading(val heapUsedMb: Long, val heapTotalMb: Long, val threads: Int
  * the instruments closed; and Tomcat let take more connections than the swarm will open, so the first limit met is
  * ours. Started in `backend/app`, as the folders it reads assume. Read from outside with the JDK's own `jcmd`.
  */
-class JarServer(private val java: File, private val jar: File, private val log: File) : Server {
+class JarServer(private val java: File, private val jar: File, private val log: File, private val heapGb: Int = HEAP_GB) : Server {
     private var process: Process? = null
 
     override fun start(): Started {
@@ -36,7 +36,8 @@ class JarServer(private val java: File, private val jar: File, private val log: 
         val from = System.nanoTime()
         log.parentFile.mkdirs()
         val started = ProcessBuilder(
-            java.path, "-jar", jar.path,
+            // Pinned rather than the JVM's quarter of whatever machine it is on, so runs compare.
+            java.path, "-Xmx${heapGb}g", "-jar", jar.path,
             "--server.port=$port",
             "--villages.store=memory",
             "--villages.instruments=false",
@@ -91,6 +92,7 @@ class JarServer(private val java: File, private val jar: File, private val log: 
 
     companion object {
         const val MOST_CONNECTIONS = 20_000
+        const val HEAP_GB = 8
         private const val STARTING_SECONDS = 120L
         private const val STOPPING_SECONDS = 10L
 

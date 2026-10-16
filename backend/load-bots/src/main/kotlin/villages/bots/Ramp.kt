@@ -47,6 +47,7 @@ class Ramp(
     private val server: Server,
     private val swarm: (port: Int) -> Bots,
     private val settings: Settings = Settings(),
+    private val onStarted: (Started) -> Unit = {},
     private val onStage: (StageResult) -> Unit = {},
     private val sleep: (Long) -> Unit = Thread::sleep,
     private val now: () -> Long = System::currentTimeMillis,
@@ -56,7 +57,7 @@ class Ramp(
         val stages = mutableListOf<StageResult>()
         var bots: Bots? = null
         try {
-            started = server.start()
+            started = server.start().also(onStarted)
             val playing = swarm(started.port).also { bots = it }
             var cpuBefore = server.read().cpuMs
             val warmUp = if (settings.warmUp > 0) listOf(settings.warmUp to settings.warmUpMs) else emptyList()

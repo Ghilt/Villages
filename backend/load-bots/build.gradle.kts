@@ -6,6 +6,8 @@ plugins {
 // socket is the JDK's own. See docs/plans/bot-swarm.md.
 dependencies {
     implementation(project(":protocol"))
+    // The history of runs is written as JSON lines; the protocol already brings Jackson itself.
+    implementation(libs.jackson.module.kotlin)
 }
 
 // The bot is played against the server's own frames, which the shared fixtures hold both ends to.
@@ -35,6 +37,6 @@ tasks.register<JavaExec>("swarm") {
     doFirst {
         systemProperty("villages.java", launcher.get().executablePath.asFile.path)
         systemProperty("villages.jar", rootDir.resolve("app/build/libs/app.jar").path)
-        systemProperty("villages.logs", rootDir.parentFile.resolve(".logs").path)
+        systemProperty("villages.repository", rootDir.parentFile.path)
     }
 }
