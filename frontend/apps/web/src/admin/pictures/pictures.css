@@ -1,6 +1,7 @@
 /*
  * The pictures' page (Pictures.tsx): every picture on a light ground in a cell of its own, its name and what it is
- * under it; the structures a culture to a column. A cut out of an atlas is `inspect-cut`, the frame's.
+ * under it; the structures a culture to a column; a critter's frames in a row, and the strip played beside them, set
+ * apart by a rule. A cut out of an atlas is `inspect-cut`, the frame's.
  */
 
 .pictures-grid {
@@ -44,4 +45,15 @@
 
 .pictures-table td .inspect-cut {
   margin: 0 auto 0.2rem;
+}
+
+.pictures-strip {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.4rem;
+}
+
+.pictures-played {
+  padding-left: 0.6rem;
+  border-left: 1px solid var(--parchment-edge);
 }

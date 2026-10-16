@@ -1,0 +1,9 @@
+{
+  "$comment": "The critters: small wild animals the browser makes up from where and when, a look and nothing more. Each kind is one picture, world/sprites/critters/<name>.png (or .webp, .jpg), its frames side by side from left to right, each as wide as the picture over how many frames it has, which is the number here. Hand-edited; npm run world:critters --prefix frontend cuts them, and the dev server does whenever a picture or this file is saved. See docs/AUTHORING-THE-ART.md and docs/plans/living-world.md.",
+  "kinds": [
+    { "name": "songbird", "frames": 3 },
+    { "name": "squirrel", "frames": 3 },
+    { "name": "hare", "frames": 3 },
+    { "name": "fish", "frames": 2 }
+  ]
+}

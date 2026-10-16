@@ -19,6 +19,8 @@
   draws far out, where a structure stops shrinking. Cut with the structures, and drawn from the files: see below.
 - `world/sprites/structures/<type>-<culture>.png`, one for every type of structure in every culture, and a
   ruin a culture. Cut by a tool of their own, and painted to rules of their own: see below.
+- `world/sprites/critters/<kind>.png`, one for every kind of critter in `world/critters.json`: songbird,
+  squirrel, hare, fish. A strip of frames, cut by a tool of its own: see below.
 
 **Save your picture over the placeholder**, as `oak.webp` or `oak.png` or `oak.jpg`. Delete the placeholder if
 the extension differs, because two files that are both `oak` are refused; the placeholder's record goes with
@@ -52,6 +54,20 @@ what a thing is and not where. Seventeen placeholders, each a deep plum pin with
 pale face. Upright, on a transparent background, its point on the bottom edge: the point is where the structure
 stands. It is cropped and scaled to 160 tall and drawn about 44 pixels tall for a castle, so paint it 320 tall or
 more and keep the shape bold. A pennant flies from the middle of its top.
+
+**A critter is a strip of frames**, cut by a tool of its own from `world/sprites/critters/`, with its own
+`placeholders.json`: `<kind>.png` for every kind in `world/critters.json`, its frames side by side from left to
+right, each as wide as the picture over how many frames that file gives the kind, so a bird of three frames is a
+picture three frames wide. Paint the frames in the order they play - a wing up, level, down - with the animal in
+the same place in each, because every frame of a kind is cut to the one box that holds all of them, so the frames
+register and only what moves moves. On a transparent background or a flat one, as any sprite, with no plinth;
+where the animal stands on anything, it stands on the bottom edge. A frame is cut 64 pixels tall and a critter is
+drawn small - eight to thirty pixels at the closest zoom - so paint it 256 tall or more, keep the shape bold, and
+let three or four frames say the motion: at that size the motion is what reads, not the outline. A placeholder
+strip is drawn from simple shapes for every kind with no picture, never over a file that is there. To have one
+back, delete your picture. More frames, or fewer, is a change to the number in `world/critters.json`. With the
+dev server running, a strip saved is cut a moment later and shown, playing, on `/admin/inspect-pictures`;
+`npm run world:critters --prefix frontend` cuts by hand.
 
 ## What a picture can be
 

@@ -86,6 +86,22 @@ export const ARTIFACTS: readonly Artifact[] = [
     what: 'A picture of every type of structure in every culture, and its ruin: placeholders until painted over.',
   },
   {
+    id: 'critter-pictures',
+    form: 'folder',
+    name: 'critter pictures',
+    path: 'world/sprites/critters/',
+    origin: 'authored',
+    what: 'A strip of frames for every kind of critter, side by side: placeholders until painted over.',
+  },
+  {
+    id: 'critters',
+    form: 'file',
+    name: 'critters',
+    path: 'world/critters.json',
+    origin: 'authored',
+    what: "The kinds of critter, and how many frames each one's picture holds.",
+  },
+  {
     id: 'catalogues',
     form: 'folder',
     name: 'catalogues',
@@ -270,6 +286,16 @@ export const ARTIFACTS: readonly Artifact[] = [
     path: 'public/art/structures.webp, structures.json',
     origin: 'baked',
     what: 'Every structure picture, cut and packed into one sheet, which the map draws from.',
+  },
+  {
+    id: 'critter-atlas',
+    form: 'files',
+    name: 'critter atlas',
+    path: 'public/art/critters.webp, critters.json',
+    origin: 'baked',
+    what: "Every critter's frames, cut to one box a kind so they register, and packed into one sheet.",
+    development:
+      "Read by the pictures' page until the map draws critters from it, step 4 of docs/plans/living-world.md.",
   },
   {
     id: 'ui-cut',

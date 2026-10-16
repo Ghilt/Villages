@@ -138,6 +138,18 @@ export const TOOLS: readonly Tool[] = [
     what: 'Draws a placeholder for every structure picture missing, and cuts them all into one atlas.',
   },
   {
+    script: 'world:critters',
+    entry: 'cutCritters.ts',
+    group: 'pictures',
+    reads: ['critter-pictures', 'critters'],
+    writes: ['critter-pictures', 'critter-atlas'],
+    seconds: 1,
+    time: 'seconds',
+    perMaster: false,
+    ranBy: 'dev server, on save',
+    what: 'Draws a placeholder strip for every critter missing, and cuts their frames into one atlas.',
+  },
+  {
     script: 'world:art',
     entry: 'cutArt.ts',
     group: 'pictures',

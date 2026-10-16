@@ -31,6 +31,7 @@
     "portraits": "node bin/drawPortraits.ts",
     "scenes": "node bin/drawScenes.ts",
     "art": "node bin/cutArt.ts",
+    "critters": "node bin/cutCritters.ts",
     "ui": "node bin/cutUi.ts",
     "ready": "node bin/readyWorld.ts",
     "prune": "node bin/pruneWorld.ts"

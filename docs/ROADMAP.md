@@ -149,7 +149,8 @@ eye for their experiment; and catalogues, the newest, are built and waiting on A
   critters - birds out of the bushes, a squirrel, fish jumping - made up by the browser from where and when, the
   same in every browser, drawn as sprites rather than by a shader over the whole screen, in a Critters part of the
   Shaders section with a density. The steps, one commit each, are in `docs/plans/living-world.md`; step 1, the
-  trees in the wind, is built and verified. Asked for by Adam on 2026-10-16.
+  trees in the wind, is built and verified, and step 2, the critters' pictures, is built and waiting on Adam's
+  eye. Asked for by Adam on 2026-10-16.
 
 MongoDB and RabbitMQ are on the machine, in Docker, from `infra/docker-compose.yml`. The game server keeps
 its world in MongoDB whenever Docker is running, and RabbitMQ carries every event it stores to the read models.

@@ -7,6 +7,7 @@ import { defineConfig } from 'vite';
 import { artApi } from './vite/artApi.ts';
 import { buildApi } from './vite/build.ts';
 import { catalogueApi } from './vite/catalogueApi.ts';
+import { crittersArtApi } from './vite/crittersArtApi.ts';
 import { eventsApi } from './vite/eventsApi.ts';
 import { maplibreWorker } from './vite/maplibreWorker.ts';
 import { performanceApi } from './vite/performanceApi.ts';
@@ -32,11 +33,11 @@ export default defineConfig({
   // portraitsApi and scenesApi serve Adam's portraits and scenes folders without a cache, so a picture
   // saved over another shows, spriteMarksApi the marks' pictures for the pictures' page, catalogueApi
   // serves world/catalogues/ the same way, and eventsApi docs/EVENTS.md and the events' samples for the
-  // events' page, and storyApi docs/STORY.md for the story's; and artApi cuts world/sprites again whenever a picture in it
-  // is saved, as uiArtApi does world/ui, and structuresArtApi
-  // the structures' own folder in it. maplibreWorker is the build's alone: it puts MapLibre's worker beside
-  // the chunk MapLibre was bundled into, where a built page looks for it. See decision record 0080. performanceApi
-  // serves the history of swarm runs to the performance page.
+  // events' page, and storyApi docs/STORY.md for the story's; and artApi cuts world/sprites again whenever a
+  // picture in it is saved, as uiArtApi does world/ui, and structuresArtApi and crittersArtApi the structures'
+  // and the critters' own folders in it. maplibreWorker is the build's alone: it puts MapLibre's worker beside
+  // the chunk MapLibre was bundled into, where a built page looks for it. See decision record 0080.
+  // performanceApi serves the history of swarm runs to the performance page.
   plugins: [
     react(),
     worldApi(),
@@ -49,6 +50,7 @@ export default defineConfig({
     storyApi(),
     artApi(),
     structuresArtApi(),
+    crittersArtApi(),
     uiArtApi(),
     worktreeApi(),
     performanceApi(),

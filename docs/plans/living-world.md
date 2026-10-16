@@ -163,9 +163,11 @@ the same sky. What a slot brings is worked out once when the slot comes round, n
 size slider over all of them. From zoom 9 in, whole by 9.5.
 
 **The pictures.** A critter is one picture of its frames side by side, `world/sprites/critters/<kind>.png`, standing
-on the bottom edge, cut by `world:art` into an atlas as the scenery is, with its frames listed beside it. Placeholders
-first, drawn by the tool from simple shapes and never over a file that is there; Adam's to replace when he chooses, as
-every sprite is. The rings and the shadows are drawn in code.
+on the bottom edge, how many frames in `world/critters.json`, cut by a tool of its own, `world:critters` - the scenery's
+cutter is at its size ceiling - into an atlas, `public/art/critters.webp`, with its frames listed beside it, every
+frame of a kind cut to one box so they register. Placeholders first, drawn by the tool from simple shapes and never
+over a file that is there; Adam's to replace when he chooses, as every sprite is. The rings and the shadows are drawn
+in code.
 
 **Where in the canvas.** Two layers, both in the container the fog takes the colour out of: one on the ground, under
 the scenery, so a hare can start behind a bush and a tree in front of it hides it, holding the rings and the shadows
@@ -224,7 +226,7 @@ to approve or rename:
 | # | Step | Verification requests |
 |---|---|---|
 | 1 | **The trees in the wind.** The scenery's shader, leaning every sprite and its shadow with the gusts, each kind by its own number, a crown paling as a gust passes; the gust function shared with the grass, `sprites/wind.ts`, carried by the wall clock so every browser has the same gusts; the Trees part of the Shaders section with its two sliders, said in the log as `tuned: …`; LOOK-AND-FEEL, RUNNING, ARCHITECTURE | 👀 At zoom 9.5 where a wood meets grassland near your seat: a gust rolls across the grass and on into the wood, the trees lean with it and pale a little as it passes, and settle behind it; boulders and cactus never move. 👀 Shaders → Trees: off, low and high do what they say and the log says what each costs; pick how far they bend. |
-| 2 | **Critter pictures.** `world/sprites/critters/`, a picture a kind with its frames side by side; `world:art` cuts them into an atlas with their frames and feet; placeholders drawn by the tool for a songbird, a squirrel, a hare and a fish, never over a file that is there; AUTHORING-THE-ART | 👀 `world/sprites/critters/`: is a strip of frames side by side, standing on the bottom edge, the way you would want to paint one? The checks: the cut is tested. |
+| 2 | **Critter pictures.** `world/sprites/critters/`, a picture a kind with its frames side by side; `world:critters` cuts them into an atlas with their frames and feet; placeholders drawn by the tool for a songbird, a squirrel, a hare and a fish, never over a file that is there; AUTHORING-THE-ART | 👀 `world/sprites/critters/`: is a strip of frames side by side, standing on the bottom edge, the way you would want to paint one? The checks: the cut is tested. |
 | 3 | **The critters' clock.** The cells, the slots and the casts as pure functions, with the tests that hold one world, fewer a subset of more, nothing popping and only where they live; nothing drawn yet | The checks. Nothing to see. |
 | 4 | **Birds out of the bushes.** The two layers in the sprite canvas; songbirds flushing from the bushes and trees the scenery drew, in the woods, the scrub and the heath, with their shadows; a decision record, GLOSSARY, LOOK-AND-FEEL, ARCHITECTURE and the architecture page's card | 👀 At zoom 9.5 over woods or scrub in sight: every so often a few small birds burst out of a bush or a tree, fan out, flap and glide away, their shadows below them; none in the haze. 👀 Two windows side by side on the same place: the same birds leave the same bush at the same moment. |
 | 5 | **The Critters part.** Off, low and high in its bar; how many, from none to many, and how big, remembered in the browser and said once in the log; the reading of what is on the screen; no critters for less motion; RUNNING | 👀 Shaders → Critters: off, low and high do what they say; how many, from none up, adds birds and never moves the ones already flying; the reading names them. 👀 How big: pick it. |

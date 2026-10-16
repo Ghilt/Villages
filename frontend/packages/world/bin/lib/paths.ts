@@ -49,6 +49,12 @@ export const STRUCTURES_DIR = resolve(SPRITES_DIR, 'structures');
  */
 export const STRUCTURE_MARKS_DIR = resolve(SPRITES_DIR, 'marks', 'structures');
 /**
+ * The critters' pictures, a strip of frames a kind, which `world:critters` cuts into an atlas of their own, with
+ * their own record of placeholders; and the list of the kinds and how many frames each picture holds. Hand-edited.
+ */
+export const CRITTERS_DIR = resolve(SPRITES_DIR, 'critters');
+export const CRITTERS = resolve(REPO, 'world', 'critters.json');
+/**
  * Adam's interface pictures: a folder a kind - borders, fills, embellishments, medallions, marks,
  * controls, dividers - every picture painted at four times the size it is shown, and committed as the
  * sprites are.

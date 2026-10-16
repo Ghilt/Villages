@@ -10,3 +10,7 @@ apps/web/public/world
 
 # The cut interface pictures and their list: machine written, by npm run world:ui
 apps/web/public/ui
+
+# The cut sprites, structures and critters, and their lists: machine written, by world:art, world:structures and
+# world:critters
+apps/web/public/art

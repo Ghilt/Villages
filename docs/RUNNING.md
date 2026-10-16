@@ -617,9 +617,19 @@ and `-- --drop` takes them off; by hand only.
   server runs it as it starts and whenever a picture in the folder is saved, and tells the page, which draws from
   the new atlas at once; the map draws a structure from the atlas where it has its picture and in code where it
   has none, and the log says under `structures` how many pictures it read.
+- Critters' pictures: `world/sprites/critters/` is Adam's folder, one strip of frames a kind of critter, and
+  `world/critters.json` lists the kinds and how many frames each strip holds (`AUTHORING-THE-ART.md` says how to
+  paint one). `npm run world:critters --prefix frontend` draws a placeholder strip for every kind with no picture,
+  never over a file that is there, remembering what it drew in that folder's own `placeholders.json`, then takes each
+  picture's background away, cuts it into its frames, crops every frame of a kind to the one box that holds them
+  all, scales them to 64 tall and packs them into `public/art/critters.webp` with `critters.json` beside it, which
+  names each kind's frames in order; a picture it cannot cut is said and left out. Seconds, and nothing written when
+  nothing is new. The dev server runs it as it starts and whenever a picture in the folder or `world/critters.json`
+  is saved, sends the atlas itself, and tells the pictures' page, which shows the new one at once. Nothing on the
+  map draws from it yet: that is step 4 of `docs/plans/living-world.md`.
 - Sprites: `world/sprites/` is Adam's folder, committed as the master is, and holds every picture drawn on
   the map: `scenery/<kind>` for every kind in `world/biomes.json`, `marks/<name>` for every mark, and
-  `structures/`, which has a cut of its own, above. Any PNG, WebP or JPEG, any size, on a
+  `structures/` and `critters/`, which have cuts of their own, above. Any PNG, WebP or JPEG, any size, on a
   flat background or a transparent one, or standing on a **plinth** - the block of turf and soil an image
   model draws a thing on, which is lifted off with its paper and its shadow (`src/lift.ts`). **Saving over
   a placeholder replaces it**, and with the dev server running the picture is on the map a few seconds
@@ -726,7 +736,8 @@ and `-- --drop` takes them off; by hand only.
   scenery and the structures as their atlases were cut, a structure a culture to a column beside its type's pin, each
   painted or still a placeholder, its size and the file it came from; the marks' pictures in `world/sprites/marks/`,
   the dev server saying of each whether its bytes are still the placeholder the tools drew, the structures' pins
-  left to the structures' table; the portraits; the scenes. It
+  left to the structures' table; the critters, each kind's frames in a row as its strip holds them and the strip
+  played beside them, frame after frame; the portraits; the scenes. It
   changes nothing: Adam paints the files, as `AUTHORING-THE-ART.md` says, and a tree that has cut no atlas yet says
   which tool cuts it.
 - **`/admin/inspect-architecture`** is how the world is set up, and needs nothing else running. Along the top,

@@ -19,17 +19,21 @@ export interface Atlas {
 }
 
 /**
- * What the dev server says when it has cut an atlas again: `ART_CUT` in `vite/artApi.ts` for the scenery and
- * `STRUCTURES_CUT` in `vite/structuresArtApi.ts` for the structures and their pins.
+ * What the dev server says when it has cut an atlas again: `ART_CUT` in `vite/artApi.ts` for the scenery,
+ * `STRUCTURES_CUT` in `vite/structuresArtApi.ts` for the structures and their pins, and `CRITTERS_CUT` in
+ * `vite/crittersArtApi.ts` for the critters.
  */
 const CUT: Readonly<Record<string, string>> = {
   scenery: 'villages:art-cut',
   structures: 'villages:structures-cut',
+  critters: 'villages:critters-cut',
 };
 
 /** The atlas `public/art/<name>.json` names, read again whenever the dev server cuts it again. */
-export function useAtlas(name: 'scenery' | 'structures'): Atlas | null | 'missing' {
-  return useJson<Atlas>(`/art/${name}.json`, CUT[name]);
+export function useAtlas<A extends Atlas = Atlas>(
+  name: 'scenery' | 'structures' | 'critters',
+): A | null | 'missing' {
+  return useJson<A>(`/art/${name}.json`, CUT[name]);
 }
 
 /** One frame of an atlas, cut out of it where the atlas says, scaled to [tall] pixels at most, and [wide] if given. */

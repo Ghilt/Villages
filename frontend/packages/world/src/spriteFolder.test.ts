@@ -5,6 +5,9 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
 import type { BiomeFile } from './biome.ts';
+import { critterKindsOf } from './critterArt.ts';
+import type { CritterFile } from './critterArt.ts';
+import { critterPlaceholderKinds } from './critterPlaceholders.ts';
 import { MARK_NAMES, placeholderKinds } from './placeholderArt.ts';
 
 /**
@@ -14,10 +17,14 @@ import { MARK_NAMES, placeholderKinds } from './placeholderArt.ts';
  */
 const SPRITES = new URL('../../../../world/sprites/', import.meta.url);
 const BIOMES = new URL('../../../../world/biomes.json', import.meta.url);
+const CRITTERS = new URL('../../../../world/critters.json', import.meta.url);
 
 const PICTURES = new Set(['.png', '.webp', '.jpg', '.jpeg']);
 
 const kinds = (JSON.parse(readFileSync(BIOMES, 'utf8')) as BiomeFile).kinds.map((kind) => kind.name);
+const critters = critterKindsOf(JSON.parse(readFileSync(CRITTERS, 'utf8')) as CritterFile).map(
+  (kind) => kind.name,
+);
 
 /** The sprite names in one group's folder, one entry per picture, so a name twice is seen twice. */
 function namesIn(group: string): string[] {
@@ -29,6 +36,7 @@ function namesIn(group: string): string[] {
 describe("the sprites folder, which is Adam's", () => {
   it('holds every picture drawn on the map, a folder a group, and the record of placeholders', () => {
     expect(readdirSync(fileURLToPath(SPRITES)).sort()).toEqual([
+      'critters',
       'marks',
       'placeholders.json',
       'scenery',
@@ -72,6 +80,29 @@ describe("the sprites folder, which is Adam's", () => {
         readdirSync(fileURLToPath(new URL(`${group}/`, SPRITES))).map((file) => `${group}/${file}`),
       ),
     );
+    for (const file of Object.keys(recorded)) {
+      expect(there.has(file), file).toBe(true);
+    }
+  });
+
+  it('holds exactly one picture for every critter in world/critters.json, and a placeholder drawing for each', () => {
+    const names = namesIn('critters');
+    for (const critter of critters) {
+      expect(
+        names.filter((name) => name === critter),
+        critter,
+      ).toHaveLength(1);
+      expect(critterPlaceholderKinds(), critter).toContain(critter);
+    }
+  });
+
+  it("records the critters' placeholders only for files that are in their folder", () => {
+    const folder = new URL('critters/', SPRITES);
+    const recorded = JSON.parse(readFileSync(new URL('placeholders.json', folder), 'utf8')) as Record<
+      string,
+      string
+    >;
+    const there = new Set(readdirSync(fileURLToPath(folder)));
     for (const file of Object.keys(recorded)) {
       expect(there.has(file), file).toBe(true);
     }

@@ -1,6 +1,6 @@
 import './pictures.css';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { CULTURES, markKey, pictureKey } from '@villages/world';
 
@@ -17,7 +17,8 @@ const PINS = 'structures/';
 
 /**
  * Every picture the world is drawn with, for reading: the scenery and the structures as the tools cut them into their
- * atlases, a structure a culture to a column beside its type's pin; the marks' pictures; the portraits; the scenes. Each says whether it is
+ * atlases, a structure a culture to a column beside its type's pin; the critters, a kind's frames in a row and playing
+ * beside them; the marks' pictures; the portraits; the scenes. Each says whether it is
  * still the placeholder the tools drew or a picture painted over it, how big it is, and the file it came from; the
  * portraits and the scenes keep no record of which are placeholders. Nothing here is changed: Adam paints the files,
  * and `AUTHORING-THE-ART.md` says how. See docs/plans/catalogues.md.
@@ -25,6 +26,7 @@ const PINS = 'structures/';
 export function Pictures() {
   const scenery = useAtlas('scenery');
   const structures = useAtlas('structures');
+  const critters = useAtlas<CritterAtlas>('critters');
   const marks = useJson<{ marks: { key: string; placeholder: boolean }[] }>('/sprite-marks/');
   const portraits = useJson<{ portraits: string[] }>('/portraits/');
   const scenes = useJson<{ scenes: string[] }>('/scenes/');
@@ -45,6 +47,13 @@ export function Pictures() {
           <Missing what="world:structures" />
         ) : (
           structures !== null && <StructuresTable atlas={structures} />
+        )}
+      </Section>
+      <Section title="critters" source="world/sprites/critters/, cut to public/art/critters.webp">
+        {critters === 'missing' ? (
+          <Missing what="world:critters" />
+        ) : (
+          critters !== null && <CrittersList atlas={critters} />
         )}
       </Section>
       <Section title="marks" source="world/sprites/marks/">
@@ -218,6 +227,69 @@ function StructuresTable({ atlas }: { atlas: Atlas }) {
           </tbody>
         </table>
       </div>
+    </>
+  );
+}
+
+/** The critters' atlas, which names each kind's frames in order beside the frames themselves. */
+interface CritterAtlas extends Atlas {
+  readonly kinds: Readonly<
+    Record<string, { frames: readonly string[]; placeholder: boolean; source: string }>
+  >;
+}
+
+/** How fast a critter's frames are played beside them: about the beat of a small bird's wings, slowed to be seen. */
+const PLAYED_MS = 160;
+
+/** Each kind a row: its frames in order as the strip holds them, then the strip played, one frame after another. */
+function CrittersList({ atlas }: { atlas: CritterAtlas }) {
+  const kinds = Object.entries(atlas.kinds);
+  const painted = kinds.filter(([, kind]) => !kind.placeholder).length;
+  const [beat, setBeat] = useState(0);
+  useEffect(() => {
+    const ticking = setInterval(() => setBeat((was) => was + 1), PLAYED_MS);
+    return () => clearInterval(ticking);
+  }, []);
+  return (
+    <>
+      <p className="inspect-note">
+        {kinds.length} kinds, {painted} painted, {kinds.length - painted} placeholders: each picture is its
+        frames side by side, as many as world/critters.json says
+      </p>
+      <ul className="pictures-grid pictures-grid--wide">
+        {kinds.map(([name, kind]) => {
+          const playing = kind.frames[beat % kind.frames.length]!;
+          return (
+            <li key={name} className="pictures-cell">
+              <div className="pictures-strip">
+                {kind.frames.map((key) => (
+                  <Cut
+                    key={key}
+                    name={key}
+                    atlas={atlas}
+                    image="/art/critters.webp"
+                    frame={atlas.frames[key]!}
+                    tall={48}
+                  />
+                ))}
+                <span className="pictures-played" aria-hidden="true">
+                  <Cut
+                    name={playing}
+                    atlas={atlas}
+                    image="/art/critters.webp"
+                    frame={atlas.frames[playing]!}
+                    tall={48}
+                  />
+                </span>
+              </div>
+              <span className="pictures-name">{name}</span>
+              <span className="inspect-key">
+                {kind.frames.length} frames · {kind.placeholder ? 'placeholder' : 'painted'} · {kind.source}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
     </>
   );
 }
