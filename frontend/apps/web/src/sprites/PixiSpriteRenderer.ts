@@ -4,6 +4,7 @@ import type { CameraView } from '../geometry/cameraMath';
 import { revealedAt } from '../fog/fogField';
 import type { FogField } from '../fog/fogField';
 import { createUncolouring } from '../fog/uncolouring';
+import { hangDevHandles } from './devHandles';
 import { createFogLayer } from './FogLayer';
 import { createGrassLayer } from './grass/GrassLayer';
 import { soonest, type Layer } from './layer';
@@ -13,7 +14,7 @@ import { createMarksLayer, type MarksLayer } from './MarksLayer';
 import { createRingLayer, type RingLayer } from './RingLayer';
 import { createSceneryLayer } from './scenery/SceneryLayer';
 import { noteDrawn } from './scenery/sceneryCells';
-import type { CameraSource, DrawnSprite, FogHow, Scene, SpriteRenderer } from './SpriteRenderer';
+import type { CameraSource, FogHow, Scene, SpriteRenderer } from './SpriteRenderer';
 import { LONGEST_STEP_MS } from './twoForms';
 
 /** What the dev server says when it has cut the art again, `vite/artApi.ts`. */
@@ -330,25 +331,12 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       unwatch = camera.watch(frame);
       frame();
 
-      if (import.meta.env.DEV) {
-        (window as unknown as { villagesFog?: () => unknown }).villagesFog = () => {
-          const { drawing, field } = fog.report();
-          return {
-            drawing,
-            field:
-              field === null
-                ? null
-                : { width: field.width, height: field.height, unitsPerTexel: field.unitsPerTexel },
-            marksInVision: layers?.marks.inVision() ?? 0,
-            // Whether the haze's slow clock is running, which it does only while there is haze to move.
-            undulating: undulation !== null,
-          };
-        };
-        // Where every sprite actually ended up, for the console and for the end-to-end test, which has
-        // no other way to ask a canvas what it drew.
-        (window as unknown as { villagesSprites?: () => Record<string, DrawnSprite> }).villagesSprites = () =>
-          layers?.marks.report() ?? {};
-      }
+      hangDevHandles({
+        fog: () => fog.report(),
+        marksInVision: () => layers?.marks.inVision() ?? 0,
+        undulating: () => undulation !== null,
+        sprites: () => layers?.marks.report() ?? {},
+      });
     },
 
     hitTest(point: { x: number; y: number }): string | null {
