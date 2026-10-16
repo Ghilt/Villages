@@ -41,6 +41,13 @@ export const INSPECT_VIEWS: readonly InspectView[] = [
     load: () => import('./EventLog').then((page) => page.EventLog),
   },
   {
+    path: '/admin/inspect-logs',
+    title: 'Logs',
+    what: "The debug panel's log, from every window of the game open in this browser, as each writes it.",
+    needs: 'the game open in this browser',
+    load: () => import('./logs/Logs').then((page) => page.Logs),
+  },
+  {
     path: '/admin/inspect-ui-components',
     title: 'Components',
     what: 'The component library: every part the interface is built from, in every variant and state.',

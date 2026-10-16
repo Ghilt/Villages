@@ -136,7 +136,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   Choice roll.
   **The log is not a section but a column of its own**, the whole height of the panel on its outer side,
   so what a button did is in view while the button is. It begins folded: the `log` toggle in the panel's
-  header, beside `landscape`, opens it and `hide` in its own bar folds it away again. The events themselves are not in the
+  header, beside `landscape`, opens it and `hide` in its own bar folds it away again. The same lines are on a page of
+  their own, `/admin/inspect-logs`, from every window of the game at once. The events themselves are not in the
   panel: they are in **the events log**, at **`/admin/inspect-events-log`**, a page of their own that watches the world without
   playing in it, one line an event opening to the whole thing as the store holds it, and under it a row of where
   it leads: for now **on the map**, on every event whose data names a place - the first latitude and longitude in
@@ -688,6 +689,15 @@ and `-- --drop` takes them off; by hand only.
   it, with its sample from `contracts/fixtures/events/`, and any case in `cases/`, folded under that. It reads both through the dev server and again whenever either changes on
   disk. It changes nothing: a type of event is code and a contract. The events the world stored are the events
   log's, at `/admin/inspect-events-log`.
+- **`/admin/inspect-logs`** is the debug panel's log on a page of its own, from every window of the game open in the
+  same browser, and needs a game window open to say anything: each window shares its log on a channel the browser
+  keeps between pages of the same address (`log/shared.ts`, a development build's alone, as the panel is), sending
+  every line it held when the page asks and each line after as it writes it. The windows are across the top, each by
+  its id and where it was opened, `closed` once it has gone, and one or every one is read at once, lines of several
+  carrying their window's id; the areas below, with how many lines each, any of which can be chosen to read only
+  those; a box that keeps only the lines with a word in them. `copy` copies what is shown as the panel copies its
+  log, and `clear` forgets every line so far. It keeps two thousand lines of a window, where the panel keeps two
+  hundred, and what a closed window said. Nothing leaves the browser.
 - **`/admin/inspect-pictures`** is every picture the world is drawn with, and needs nothing else running: the
   scenery and the structures as their atlases were cut, a structure a culture to a column beside its type's pin, each
   painted or still a placeholder, its size and the file it came from; the marks' pictures in `world/sprites/marks/`,

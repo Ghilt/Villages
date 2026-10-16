@@ -1,0 +1,116 @@
+/*
+ * The logs' page (Logs.tsx): the windows of the game across the top, the areas they wrote under below them beside a box
+ * to find a word, and the lines themselves in monospace, as the debug panel's log draws them, newest first.
+ */
+
+.logs-count {
+  flex: 1;
+}
+
+.logs-button {
+  padding: 0.25rem 0.7rem;
+  font-family: inherit;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  cursor: pointer;
+  background: none;
+  border: 1px solid var(--parchment-edge);
+  border-radius: 2px;
+}
+
+.logs-empty {
+  margin-top: 1.5rem;
+}
+
+.logs-windows {
+  margin: 1rem 0 0.6rem;
+}
+
+.logs-windows .inspect-tab {
+  cursor: pointer;
+  background: none;
+}
+
+.logs-gone {
+  color: #8f1d2f;
+}
+
+.logs-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.2rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+}
+
+.logs-areas {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.logs-area {
+  padding: 0.1rem 0.45rem;
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace;
+  font-size: 0.7rem;
+  color: var(--gold, #9d7c2a);
+  cursor: pointer;
+  background: #fffdf6;
+  border: 1px solid var(--parchment-edge);
+  border-radius: 2px;
+}
+
+.logs-area.is-chosen {
+  color: var(--ink);
+  background: #f3e3b5;
+  border-color: var(--ink-soft);
+}
+
+.logs-area__count {
+  color: var(--ink-soft);
+}
+
+.logs-find {
+  width: 16rem;
+  max-width: 100%;
+  padding: 0.25rem 0.5rem;
+  font: inherit;
+  font-size: 0.8rem;
+  color: var(--ink);
+  background: #fffdf6;
+  border: 1px solid var(--parchment-edge);
+  border-radius: 2px;
+}
+
+.logs-list {
+  padding: 0.5rem 0.7rem;
+  margin: 0;
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  list-style: none;
+  background: #fffdf6;
+  border: 1px solid var(--parchment-edge);
+}
+
+.logs-list li {
+  overflow-wrap: anywhere;
+}
+
+.logs-window,
+.logs-when {
+  margin-right: 0.45rem;
+  color: var(--ink-soft);
+}
+
+.logs-area-said {
+  margin-right: 0.45rem;
+  color: var(--gold, #9d7c2a);
+}

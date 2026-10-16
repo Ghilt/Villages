@@ -5,6 +5,7 @@ import { inspectViewAt, isInspectIndex } from './admin/inspectViews';
 import { App } from './App';
 import type { DevTools } from './App';
 import { note } from './log/log';
+import { shareTheLog } from './log/shared';
 import { chosenMaster, worldRootOf } from './map/masters';
 import { registerPainterlyTiles } from './map/painterlyTiles';
 import { observeGateway } from './net/gateway';
@@ -65,6 +66,13 @@ if (isInspectIndex(window.location.pathname)) {
     ),
   );
 } else {
+  // The log is shared with the logs' inspect page, the panel's lines in a page of their own: a development build's
+  // alone, as the panel is. A window closing, or loading again, says it has gone.
+  if (import.meta.env.DEV) {
+    window.addEventListener('pagehide', shareTheLog(window.location.pathname + window.location.search), {
+      once: true,
+    });
+  }
   // The log listens to the conversation from before it begins.
   observeGateway(sessionLog);
   // The stage is told which panes the game puts on it, and the bays what they open on.

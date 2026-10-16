@@ -13,8 +13,11 @@ import { describe, expect, it } from 'vitest';
 /** Libraries for the inspect pages alone. */
 const ADMIN_ONLY_PACKAGES = [/^@xyflow\/react/, /^@dagrejs\/dagre/];
 
-/** The game's folders an inspect page may take from: the socket, the component library, the portraits. */
-const GAME_TAKEN = ['net', 'ui', 'figures'];
+/**
+ * The game's folders an inspect page may take from: the socket, the component library, the portraits, and the log,
+ * whose lines the logs' page reads as the debug panel does.
+ */
+const GAME_TAKEN = ['net', 'ui', 'figures', 'log'];
 
 /** What the entry may import from the inspect pages without `import()`: the list of them, for routing. */
 const ENTRY_STATIC = ['./admin/inspectViews'];
