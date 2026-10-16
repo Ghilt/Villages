@@ -43,8 +43,8 @@ export interface Dive {
 /**
  * How tall a house stands on the ground, in world units.
  *
- * The eight units the catalogue gives a castle of the first level, `groundHeight` in `world/structures.json`.
- * A change there is a change here, and the dive would turn about a point
+ * The eight units the catalogue gives a castle of the first level, `groundHeight` in
+ * `world/catalogues/structures.json`. A change there is a change here, and the dive would turn about a point
  * that is not the middle of the castle without it. See decision record 0051.
  */
 const HOUSE_GROUND_HEIGHT = 8;
