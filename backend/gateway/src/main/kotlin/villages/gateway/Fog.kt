@@ -143,8 +143,9 @@ internal class Fog(
      * 0061, 0089 and 0093.
      */
     fun faceOf(row: StructureRow, day: WorldTime): Pair<StructureFace, WorldTime?>? {
-        val key = Triple(row.id, day, row.faces.last().stamp)
-        val known = faces[key] ?: (workedOut(row, day) ?: NOT_SENT).also { faces[key] = it }
+        val stamp = row.faces.last().stamp
+        val kept = faces[row.id]?.takeIf { it.day == day && it.stamp == stamp }
+        val known = kept?.known ?: (workedOut(row, day) ?: NOT_SENT).also { faces[row.id] = Worked(day, stamp, it) }
         @Suppress("UNCHECKED_CAST")
         return known.takeIf { it !== NOT_SENT } as Pair<StructureFace, WorldTime?>?
     }
@@ -158,8 +159,18 @@ internal class Fog(
         return row.faceOn(hid)?.let { it to hid }
     }
 
-    /** The faces worked out, by structure, day and the stamp of its latest face. */
-    private val faces = ConcurrentHashMap<Triple<StructureId, WorldTime, Long>, Any>()
+    /**
+     * The face last worked out for each structure, for the day and the stamp of its latest face it was worked out on:
+     * one a structure, as [vision] is one a day. Nearly every question is about today and a face unchanged since the
+     * last; keeping every day and stamp ever asked about held about a thousand faces a player, for ever, and 1.3 GB at
+     * ten thousand players (experiment 0021).
+     */
+    private val faces = ConcurrentHashMap<StructureId, Worked>()
+
+    private class Worked(val day: WorldTime, val stamp: Long, val known: Any)
+
+    /** How many faces it holds worked out: one a structure at most, which its spec holds. */
+    internal fun remembered(): Int = faces.size
 
     /**
      * What [seenOn] finds on [today], with no day, or else on the latest day before it that it finds anything, with

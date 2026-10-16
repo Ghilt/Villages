@@ -88,4 +88,24 @@ class FogStructuresSpec : StringSpec({
 
         fog.faceOf(row.copy(faces = listOf(raised, levelled)), day) shouldBe (levelled to null)
     }
+
+    "asked about one day, another, and the first again, each is answered as if it were asked first" {
+        val then = face(daysAgo(20))
+        val since = face(day, level = 2, holder = holder(them), stamp = 2)
+        val mill = structure(helsinki, then, since)
+        val fog = Fog(me, seatAndAnEndedVision)
+
+        fog.faceOf(mill, day) shouldBe (then to daysAgo(1))
+        fog.faceOf(mill, daysAgo(5)) shouldBe (then to null)
+        fog.faceOf(mill, day) shouldBe (then to daysAgo(1))
+    }
+
+    "it remembers one face a structure, however many days it is asked about" {
+        val fog = Fog(me, seatAndAnEndedVision)
+        val mills = List(3) { structure(nearby, face(daysAgo(30))) }
+
+        for (back in 0L..25L) mills.forEach { fog.faceOf(it, daysAgo(back)) }
+
+        fog.remembered() shouldBe 3
+    }
 })
