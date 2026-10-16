@@ -215,10 +215,10 @@ page it names.
 
 Each persistent document opens with a line saying what belongs in it and what does not. That line is the
 rule, not a decoration: material that does not fit moves to the document that owns it rather than being
-added where it was convenient. A mechanic goes in `MECHANICS.md` and not in `SETTING.md`; the engine behind
-it goes in `ARCHITECTURE.md` and not in either; what it looks like goes in `LOOK-AND-FEEL.md`; how it
-behaves on a phone goes in `RESPONSIVE-DESIGN.md`; when it will be built goes in `ROADMAP.md`; what its
-levers do in the running program, and where they are, goes in `RUNNING.md`. A document that is about
+added where it was convenient. A mechanic goes in `MECHANICS.md` and not in `SETTING.md`; what happened in the
+world, in order, goes in `STORY.md`; the engine behind it goes in `ARCHITECTURE.md` and not in either; what it
+looks like goes in `LOOK-AND-FEEL.md`; how it behaves on a phone goes in `RESPONSIVE-DESIGN.md`; when it will
+be built goes in `ROADMAP.md`; what its levers do in the running program, and where they are, goes in `RUNNING.md`. A document that is about
 everything is read by nobody, and a claim in the
 wrong place is a claim nobody maintains. If a thing genuinely fits nowhere, that is a new document with its
 own purpose line, and saying so is part of presenting the step.
@@ -228,7 +228,7 @@ own purpose line, and saying so is part of presenting the step.
 ```
 CLAUDE.md  README.md  debug-quick-start.{ps1,cmd}  .claude/settings.json  scripts/check.{ps1,sh}
 size-ceilings.txt   every source file over 400 lines, which may only get shorter (decision 0072)
-docs/       VISION SETTING MECHANICS LOOK-AND-FEEL RESPONSIVE-DESIGN GLOSSARY ARCHITECTURE ROADMAP
+docs/       VISION SETTING STORY MECHANICS LOOK-AND-FEEL RESPONSIVE-DESIGN GLOSSARY ARCHITECTURE ROADMAP
             TESTING EVENTS BUILDING-A-MECHANIC UI-COMPONENTS AUTHORING-THE-WORLD AUTHORING-THE-ART
             RUNNING, adr/, experiments/, plans/
 scripts/    Adam's terminal tools, node <tool>.ts; nothing of the program imported, only sharp installed (0082)

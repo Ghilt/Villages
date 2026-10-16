@@ -8,7 +8,8 @@ It records what Adam has described so that it is not lost between conversations,
 and what is not. Where it speaks in his terms — house-spirit, key figure, power state — those are the words,
 and they are in the glossary.
 
-Reviewed 2026-09-20, when the age and the gods were written down for the first time. Reviewed 2026-09-19. Three things this document used to assert are gone, and the rest of the repository has
+Reviewed 2026-10-16, when the story was told in order for the first time, in `STORY.md`, and settled who broke the
+gods' plan. Reviewed 2026-09-20, when the age and the gods were written down for the first time. Reviewed 2026-09-19. Three things this document used to assert are gone, and the rest of the repository has
 been corrected to match: play is chronological, so a session is no longer a visit to a chosen century; there
 are no pins, so nothing obliges the past to have been a particular way; and the roll engine, renamed the
 **fate engine**, is described in `ARCHITECTURE.md` rather than here.
@@ -32,10 +33,12 @@ will never meet. It is not a clean break from what came before. Castles still st
 holding; a cathedral is still the largest thing for a hundred miles. The new is growing up through the old
 rather than replacing it, which is what an enlightenment actually looks like from inside one.
 
-And it is being interrupted. **The social order that held is not holding.** Cities that worked have stopped
-working - not sacked, not burned, just no longer functioning, in ways nobody can name the cause of. Where
-the order broke, **new factions rose into the gap**: whatever can organise people now does, and some of what
-can is nothing anybody would have chosen.
+And it is being interrupted. **The social order that held is not holding.** The great cities have fallen: some
+burned, some were emptied by the people who fled them, some simply came apart, and by 1790 they are **ruins
+that people have learnt to shun**. Riches lie in them still, and there are always some who go to fetch them,
+but nobody goes without risk, and nobody can say quite what the risk is. Where the order broke, **new factions
+rose into the gap**: whatever can organise people now does, and some of what can is nothing anybody would have
+chosen.
 
 To everyone living through it this is a calamity with no author. A bad century. A run of failures. Judgement,
 or somebody's fault, or the weather. Every explanation the world offers is wrong.
@@ -49,14 +52,21 @@ the things themselves, wearing whatever shape an age hands them. The Greek gods 
 of masks worn for a few centuries and then set down. They are not attached to those forms, they do not
 answer to those names now, and a player who recognises one by its Greek face is recognising a costume.
 
-**They took fright at the enlightenment, and they did something about it.** The apocalypse is what they did.
-It is deliberate, it has authors, and the authors are frightened rather than wicked - which is a different
-kind of antagonist and the more interesting one.
+**They took fright at the enlightenment, and they did something about it.** They feared reason would part
+people from the soil, the seasons and the wild, and in 1785 they worked a ritual to turn every mind back toward
+the green world by taking a little of each one's will. The apocalypse is what came of it. It was deliberate, it has
+authors, and the authors are frightened rather than wicked - which is a different kind of antagonist and the
+more interesting one.
 
-**It is not going to plan.** They had traitors in their midst. At least one of them liked the enlightenment
-and broke the plan from the inside, and the disruption is now as chaotic for the gods as it is for anybody
-standing in it. They are not a single will executing a design. They are a divided party half-way through
-something that is already going wrong, improvising, and working against each other while they do it.
+**It is not going to plan.** They had traitors in their midst. Three of them - Oriel, Veyra and Merrin - would
+not take a choice from anybody, liked the enlightenment besides, and broke the ritual from the inside: it bent
+no mind, but it warped, and the world with it. It had borne down hardest where minds were thickest, so the warp
+took hold in the great cities and poisoned the space there, which is why they fell and why their ruins are
+shunned. Oriel died of it, and every god came out of it withered and
+unsure of what had happened, so the disruption is now as chaotic for the gods as it is for anybody standing in
+it. They are not a single will executing a design. They are a divided party half-way through something that is
+already going wrong, improvising, and working against each other while they do it. The story of it, in order and
+in its own voice, is `STORY.md`.
 
 ### What the player knows, and when
 
@@ -134,10 +144,14 @@ than a figure in it. An NPC house is a house; the difference is who issues its c
   houses at once (decision 0055), and nothing in the fiction yet says what that would mean: a shared
   bishop, a double agent, a marriage that binds two lines.
 - **What the chrono-engine is for**, now that it is no longer the thing that chooses the day.
-- **Why the gods took fright.** That they did is settled; what exactly about reason spreading frightened
-  them is not, and it is the question every storyline about them eventually has to answer.
-- **How many gods there are, which ones, and who broke the plan.** Also whether a house can side with the
-  traitor, and whether that is a route or an ending.
+- **Why the gods took fright**, beyond the fear `STORY.md` gives them, that reason would part people from the
+  green world: what each of them feared in particular, which is the question every storyline about them
+  eventually has to answer.
+- **How many gods there are, and which ones** besides the three who broke the plan. Also whether the council
+  learns it was betrayed, whether a house can side with the two who remain of the three, and whether that is a
+  route or an ending.
+- **What the ruins of the great cities do to those who go in**, beyond what `STORY.md` hints - coming home
+  wanting what they never wanted - and whether a ruin can ever be made clean.
 - **Whether the apocalypse can be stopped**, survived, or only lived through. The house has no lose state;
   the world might.
 - **How far into the enlightenment the world opens**, and how much of the interruption has already happened

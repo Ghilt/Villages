@@ -12,6 +12,7 @@ thousands of concurrent players.
 - `CLAUDE.md` - how we work in this repository (conventions, layer rules, the commit gate)
 - `docs/VISION.md` - what the experience is and is not
 - `docs/SETTING.md` - the world, its two clocks, and what a house is inside it
+- `docs/STORY.md` - the world's history told in order, which `/admin/inspect-story` draws as a timeline
 - `docs/MECHANICS.md` - what the mechanics are, one entry per named mechanic
 - `docs/BUILDING-A-MECHANIC.md` - how a described mechanic becomes commands, events and panel lines
 - `docs/LOOK-AND-FEEL.md` - the shared visual language and the components more than one mechanic uses
