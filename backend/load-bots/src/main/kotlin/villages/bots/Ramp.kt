@@ -76,7 +76,8 @@ class Ramp(
                 if (stage.bent != null) break
             }
             return RunResult(started, stages, aborted = null)
-        } catch (@Suppress("TooGenericExceptionCaught") broken: Exception) {
+        } catch (@Suppress("TooGenericExceptionCaught") broken: Throwable) {
+            // An error too, the bots' own memory running out among them: the run is written down with what ended it.
             return RunResult(started, stages, aborted = "${broken.javaClass.simpleName}: ${broken.message}")
         } finally {
             bots?.close()

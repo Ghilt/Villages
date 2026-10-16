@@ -32,8 +32,8 @@ tasks.register<JavaExec>("swarm") {
     mainClass = "villages.bots.SwarmMainKt"
     val launcher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
     javaLauncher = launcher
-    // Many sockets and their buffers; the server under measurement has its own heap.
-    maxHeapSize = "2g"
+    // Ten thousand sockets and their buffers, which 2 GB was not enough for; the server measured has its own heap.
+    maxHeapSize = "6g"
     doFirst {
         systemProperty("villages.java", launcher.get().executablePath.asFile.path)
         systemProperty("villages.jar", rootDir.resolve("app/build/libs/app.jar").path)

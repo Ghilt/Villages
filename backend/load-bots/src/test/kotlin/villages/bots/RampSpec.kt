@@ -34,7 +34,7 @@ class RampSpec : StringSpec({
         var closed = false
 
         override fun growTo(count: Int) {
-            check(count != throwAt) { "the machine ran out of sockets" }
+            if (count == throwAt) throw OutOfMemoryError("the bots ran out of memory")
             players = count
             repeat(count) { trips.started(Trip.WELCOME, "$count $it", 0); trips.finished(Trip.WELCOME, "$count $it", took(count)) }
         }
@@ -84,7 +84,7 @@ class RampSpec : StringSpec({
         val run = ramp(server, bots)
 
         run.stages.map { it.players } shouldBe listOf(100)
-        run.aborted!! shouldContain "ran out of sockets"
+        run.aborted!! shouldContain "OutOfMemoryError: the bots ran out of memory"
         server.stopped shouldBe 1
         bots.closed shouldBe true
     }
