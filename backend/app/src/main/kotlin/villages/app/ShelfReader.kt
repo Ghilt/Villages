@@ -14,7 +14,7 @@ object ShelfReader : CatalogueReader {
     val READ: Set<String> = setOf(Catalogues.STRUCTURES, Catalogues.BALANCE, Catalogues.FATE, Catalogues.CHARACTER_NAMES)
 
     /** Every catalogue that is a folder, a file an entry, by its name on the shelf. */
-    val FOLDERS: Set<String> = setOf(Catalogues.DIALOGUES)
+    val FOLDERS: Set<String> = setOf(Catalogues.DIALOGUES, Catalogues.QUESTS)
 
     override fun read(files: Map<String, String>): Catalogues {
         files.keys.firstOrNull { it !in READ && it.substringBefore('/', "") !in FOLDERS }?.let {
@@ -26,6 +26,7 @@ object ShelfReader : CatalogueReader {
             fate = reading(files, Catalogues.FATE, FateFile::parse),
             characterNames = reading(files, Catalogues.CHARACTER_NAMES, CharacterNamesFile::parse),
             dialogues = inFolder(files, Catalogues.DIALOGUES) { text, name -> DialogueFile.parse(text, name) },
+            quests = inFolder(files, Catalogues.QUESTS) { text, name -> QuestFile.parse(text, name) },
         ).check()
     }
 

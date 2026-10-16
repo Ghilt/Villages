@@ -1,7 +1,12 @@
 package villages.application
 
 import villages.application.fate.FateCatalogue
+import villages.domain.LevelSpec
 import villages.domain.Rarity
+import villages.domain.Significance
+import villages.domain.StructureCatalogue
+import villages.domain.StructureSpec
+import villages.domain.StructureType
 import villages.domain.Resource
 
 /**
@@ -43,3 +48,8 @@ val TEST_FATE = FateCatalogue(
 
 /** The names the tests' newcomers are given: the first and the last of each list the file began with. */
 val TEST_NAMES = CharacterNames(women = listOf("Agnes", "Ursula"), men = listOf("Anton", "Wilhelm"), family = listOf("Achterberg", "Ystad"))
+
+/** A catalogue of structures the tests can take on: a castle of one level, which the abbot's quest asks to be held. */
+val TEST_STRUCTURES = StructureCatalogue(
+    mapOf(StructureType("castle") to StructureSpec(listOf(LevelSpec(Significance(20.0), 34.0, emptyMap())), emptyList())),
+)

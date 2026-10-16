@@ -226,12 +226,16 @@ stage alone, with none of the debug panel in it (decision record 0079).
   `offer a dialogue` opens the pane: from its strip in the spread, and on a phone into the bay the map is
   not in, at half. See `docs/adr/0071`, `0069` and `0070`, and `docs/plans/character-dialogue.md`.
 - Quests, in the same panel: the **Quests** section, below Dialogues. `offer a quest` offers the house the
-  server's sample, *the abbot of the isle*, off and saying why on hover while there is no house. It opens with a
+  quest chosen beside it, by its name in `world/catalogues/quests/`, a file each naming the dialogues of
+  `dialogues/` it offers; the first is *the abbot of the isle*. It is off, saying why on hover, while there is no
+  house. The game server reads a quest and its dialogues as it is offered, so what was saved, by hand or from
+  **`/admin/inspect-quests`**, is the next offer's, and one offered already keeps its road; it refuses, as it takes
+  the files on, a quest naming a dialogue or a type of structure there is not. It opens with a
   dialogue at the gate, which arrives in the **dialogues** pane as any dialogue does and opens it: the abbot asks
   what the house holds dearest, and *its faith* takes the road of a pledge of thirty piety, *its coffers* the road of
   a castle held on an island and sixty wealth delivered, the other road lost. **That one lever is all the debug
   panel does for quests**: it stands in for the world, which offers none yet, and meeting, collecting and seeing how
-  one ended are the player's. The page names the sample and sends none of its words. The asking and the answer are
+  one ended are the player's. The page names the quest and sends none of its words. The asking and the answer are
   lines of the log under `quests`; the quest itself, whole, and every move in it are at `/admin/inspect-events`,
   the offer and the abbot's dialogue in one story, and finishing the dialogue writes the move past the gate and
   the road lost in the story of its last step. The page is sent the quest as its walk draws it, and the log under `quests`

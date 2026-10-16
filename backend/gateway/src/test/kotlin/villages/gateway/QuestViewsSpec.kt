@@ -4,7 +4,6 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import villages.application.QuestEnding
 import villages.application.QuestRow
-import villages.application.SampleQuests
 import villages.domain.CharacterId
 import villages.domain.DialogueNode
 import villages.domain.HouseId
@@ -24,7 +23,7 @@ import java.util.UUID
 class QuestViewsSpec : StringSpec({
     val player = PlayerId(UUID.fromString("0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8d"))
     val house = HouseId.of(player)
-    val abbot = SampleQuests.named(SampleQuests.ABBOT, QuestId.offered(house, UUID.fromString("1c000007-0000-4000-8000-000000000060")))
+    val abbot = abbotOfTheIsle(QuestId.offered(house, UUID.fromString("1c000007-0000-4000-8000-000000000060")), house)
 
     fun row(vararg progress: QuestProgress, ending: QuestEnding = QuestEnding.Open, quest: villages.domain.Quest = abbot) =
         QuestRow(house, player, quest, progress.toList(), ending, correlationId = "story", revision = 1).toView()
@@ -56,7 +55,7 @@ class QuestViewsSpec : StringSpec({
         val light = view.nodes.single { it.id == "light" }
         light.objectives shouldBe listOf(
             ObjectiveView.Hold("castle", met = true, structureType = "castle", where = "island"),
-            ObjectiveView.Deliver("wealth", met = false, resource = "wealth", amount = SampleQuests.LIGHT),
+            ObjectiveView.Deliver("wealth", met = false, resource = "wealth", amount = LIGHT),
         )
         view.edges shouldBe listOf(
             QuestEdgeView("gate", "gift", "lost"),

@@ -454,7 +454,8 @@ the quests' tab are all marks, Adam's word of 2026-10-15.
 
 ### Not decided
 
-- **Where quests come from**: the world, a roll's option, arrival, a place gone to; and where they are written.
+- **Where quests come from**: the world, a roll's option, arrival, a place gone to. Where they are written is
+  decided: `world/catalogues/quests/`, a file each, naming its dialogues in `dialogues/` (decision record 0097).
 - **More objectives**: defeating an enemy, reaching a place, holding a key figure; a checklist where any one row
   will do; a fork decided by whichever objective is met first.
 - **A resource objective that ticks itself** when the house has the amount, rather than being handed over.

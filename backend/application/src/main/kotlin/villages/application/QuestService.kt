@@ -17,8 +17,8 @@ import villages.domain.QuestId
  * Offering a house a quest, and playing it: an objective met by the player's own press, a reward collected.
  *
  * A thin seam, like every use case here: it works out which house from the player, stamps the two times, and hands
- * the command to the decider, where the rules are. The debug panel offers one of the samples; the world will offer
- * through the same door. See decision record 0096.
+ * the command to the decider, where the rules are. The debug panel offers one of the quests on the shelf; the world
+ * will offer through the same door. See decision records 0096 and 0097.
  */
 class QuestService(
     private val executor: HouseCommandExecutor,
@@ -27,17 +27,21 @@ class QuestService(
     private val calendar: WorldCalendar,
     private val ids: FreshIds,
     private val quests: QuestsByHouse,
+    /** Every quest there is to offer, and the dialogues they name: the catalogues in force. See 0097. */
+    private val catalogues: () -> Catalogues,
 ) {
     /**
-     * Offers the player's house the sample of this name, and says which quest it turned out to be. The quest's id is
-     * worked out from the command, so the same command sent twice is refused as already offered rather than doubled,
-     * and a house that does not exist is refused `noSuchHouse`.
+     * Offers the player's house the quest of this name on the shelf, and says which quest it turned out to be. The
+     * quest's id is worked out from the command, so the same command sent twice is refused as already offered rather
+     * than doubled, and a house that does not exist is refused `noSuchHouse`. A name that is no quest on the shelf is
+     * refused as a malformed request rather than a refusal of the rules, because no rule was asked.
      */
-    fun offerSample(player: PlayerId, sample: String, provenance: Provenance): QuestId {
-        require(sample in SampleQuests.names) { "there is no sample quest called \"$sample\"" }
+    fun offer(player: PlayerId, name: String, provenance: Provenance): QuestId {
+        val inForce = catalogues()
+        val template = inForce.quests[name] ?: throw IllegalArgumentException("there is no quest called \"$name\" on the shelf")
         val house = HouseId.of(player)
         val id = QuestId.offered(house, provenance.commandId)
-        executor.execute(OfferQuest(house, SampleQuests.named(sample, id), world.today(), clock.now()), provenance)
+        executor.execute(OfferQuest(house, template.offered(id, house, inForce.dialogues), world.today(), clock.now()), provenance)
         return id
     }
 

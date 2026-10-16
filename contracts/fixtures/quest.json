@@ -1,0 +1,24 @@
+{
+  "$comment": "A quest filed as world/catalogues/quests/<name>.json files one, written by hand, small, with every kind of node and objective once: the server's QuestFile and the world package's parseQuest both read it, and are held to it.",
+  "title": "A road to the sea",
+  "scene": "harbour",
+  "shownFromTheStart": true,
+  "nodes": {
+    "talk": { "title": "A word", "dialogue": "a-word", "then": { "give": ["yes"], "hold": ["no"] } },
+    "give": {
+      "title": "Give",
+      "objectives": {
+        "coin": { "delivers": "wealth", "amount": 5 },
+        "oath": { "pledges": "piety", "amount": 3, "months": 2 }
+      },
+      "then": "prize"
+    },
+    "hold": {
+      "title": "Hold",
+      "hidden": true,
+      "objectives": { "mill": { "holds": "mill" }, "fort": { "holds": "castle", "on": "island" } },
+      "then": "prize"
+    },
+    "prize": { "title": "A prize", "shownAhead": true, "gives": { "reason": 7 } }
+  }
+}

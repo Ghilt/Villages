@@ -87,6 +87,9 @@ class Shelf(
     /** Every dialogue there is to offer, by its name, at the moment of asking. */
     val dialogues: Map<String, DialogueTemplate> get() = inForce.dialogues
 
+    /** Every quest there is to offer, by its name, at the moment of asking. */
+    val quests: Map<String, QuestTemplate> get() = inForce.quests
+
     /** The fingerprint of each catalogue in force, by its name. */
     fun fingerprints(): Map<String, String> = texts.mapValues { (_, text) -> fingerprintOf(text) }
 

@@ -78,13 +78,13 @@ class QuestServiceSpec : StringSpec({
             )
             houses.written.clear()
         }
-        return houses to QuestService(houses, clock = { noon }, world = { today }, calendar = monthsOfThirty, ids = { UUID.randomUUID() }, quests = offered(houses))
+        return houses to QuestService(houses, clock = { noon }, world = { today }, calendar = monthsOfThirty, ids = { UUID.randomUUID() }, quests = offered(houses)) { Catalogues(TEST_STRUCTURES, TEST_BALANCE, TEST_FATE, TEST_NAMES, ABBOT_DIALOGUES, mapOf("abbot" to ABBOT)) }
     }
 
     "the player's house is offered the abbot whole, and its first dialogue in the same story" {
         val (houses, service) = rig()
 
-        val id = service.offerSample(ada, SampleQuests.ABBOT, Provenance.startedBy(sent))
+        val id = service.offer(ada, "abbot", Provenance.startedBy(sent))
 
         id shouldBe QuestId.offered(house, sent)
         houses.written.map { it.first::class } shouldBe listOf(PlayerOfferedQuest::class, PlayerOfferedDialogue::class)
@@ -95,7 +95,7 @@ class QuestServiceSpec : StringSpec({
     }
 
     "the abbot's map at the start: two question marks ahead, the consecration one shown ahead, the blessing in view" {
-        val quest = SampleQuests.named(SampleQuests.ABBOT, QuestId.offered(house, sent))
+        val quest = abbotOfTheIsle(QuestId.offered(house, sent), house)
         val start = quest.walk(emptyList())
         val every = quest.nodes.map { it.id }
 
@@ -105,34 +105,34 @@ class QuestServiceSpec : StringSpec({
 
     "the same command sent twice is refused as already offered rather than doubled" {
         val (_, service) = rig()
-        service.offerSample(ada, SampleQuests.ABBOT, Provenance.startedBy(sent))
+        service.offer(ada, "abbot", Provenance.startedBy(sent))
 
-        shouldThrow<HouseError.QuestAlreadyOffered> { service.offerSample(ada, SampleQuests.ABBOT, Provenance.startedBy(sent)) }
+        shouldThrow<HouseError.QuestAlreadyOffered> { service.offer(ada, "abbot", Provenance.startedBy(sent)) }
     }
 
     "a house that does not exist is refused, and a name that is not a sample before anything is asked" {
         val (houses, service) = rig(founded = false)
 
-        shouldThrow<HouseError.NoSuchHouse> { service.offerSample(ada, SampleQuests.ABBOT, Provenance.startedBy(sent)) }
-        shouldThrow<IllegalArgumentException> { service.offerSample(ada, "nonesuch", Provenance.startedBy(sent)) }
+        shouldThrow<HouseError.NoSuchHouse> { service.offer(ada, "abbot", Provenance.startedBy(sent)) }
+        shouldThrow<IllegalArgumentException> { service.offer(ada, "nonesuch", Provenance.startedBy(sent)) }
         houses.written shouldBe emptyList()
     }
 
     "a pledge met by the player is tied for the months its objective asks, under the quest's title" {
         val (houses, service) = rig()
-        val id = service.offerSample(ada, SampleQuests.ABBOT, Provenance.startedBy(sent))
-        val gate = (SampleQuests.named(SampleQuests.ABBOT, id).start() as DialogueNode).dialogue.id
+        val id = service.offer(ada, "abbot", Provenance.startedBy(sent))
+        val gate = (abbotOfTheIsle(id, house).start() as DialogueNode).dialogue.id
         for (line in listOf("faith", "pleased")) {
             houses.execute(CompleteDialogueStep(house, gate, LineId(line), today, noon), Provenance.startedBy(UUID.randomUUID()))
         }
-        houses.execute(GrantResource(house, Resource.PIETY, SampleQuests.GIFT, today, noon), Provenance.startedBy(UUID.randomUUID()))
+        houses.execute(GrantResource(house, Resource.PIETY, GIFT, today, noon), Provenance.startedBy(UUID.randomUUID()))
         houses.written.clear()
 
         service.meet(ada, id, NodeId("gift"), ObjectiveId("piety"), Provenance.startedBy(UUID.randomUUID()))
 
         val pledged = houses.written.map { it.first }.filterIsInstance<HouseResourcePledged>().single()
-        pledged.amount shouldBe SampleQuests.GIFT
-        pledged.until shouldBe today + SampleQuests.GIFT_MONTHS * 30L
+        pledged.amount shouldBe GIFT
+        pledged.until shouldBe today + GIFT_MONTHS * 30L
         pledged.purpose shouldBe "The abbot of the isle"
     }
 })

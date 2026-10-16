@@ -11,6 +11,6 @@ import villages.protocol.OfferQuestPayload
  */
 internal fun questLevers(commands: Commands, open: Boolean, quests: QuestService) {
     commands.lever<OfferQuestPayload>(open) { asking, payload ->
-        quests.offerSample(player = asking.who, sample = payload.sample, provenance = asking.startingAStory)
+        quests.offer(player = asking.who, name = payload.sample, provenance = asking.startingAStory)
     }
 }

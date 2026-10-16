@@ -47,7 +47,7 @@ class QuestObjectivesSpec : StringSpec({
     val islands = Islands { place -> place.lat < -60 }
     val onAnIsland = Location(-70.0, 10.0)
     val onAContinent = Location(50.0, 10.0)
-    val abbot = SampleQuests.named(SampleQuests.ABBOT, QuestId.offered(house, UUID.fromString("1c000007-0000-4000-8000-000000000070")))
+    val abbot = abbotOfTheIsle(QuestId.offered(house, UUID.fromString("1c000007-0000-4000-8000-000000000070")), house)
     val gate = (abbot.start() as DialogueNode).dialogue.id
 
     class Rig(val world: TinyWorld, val later: ManualLater, val faults: KeptFaults)

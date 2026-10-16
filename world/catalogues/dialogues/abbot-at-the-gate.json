@@ -1,0 +1,18 @@
+{
+  "$comment": "The first node of the quest The abbot of the isle, quests/abbot.json: an abbot asks what the house holds dearest, and how it is answered decides the quest's road - pleased leads to a pledge, doubts to a castle on an island. Spoken by people of its own, as a quest's dialogues are. Every word a placeholder; taken over on 2026-10-16 from the sample written in the code. See decision record 0097.",
+  "title": "The abbot at the gate",
+  "scene": "harbour",
+  "speakers": { "abbot": { "party": 1, "name": "The abbot" }, "steward": { "party": 0, "name": "Your steward" } },
+  "lines": {
+    "arrives": { "by": "abbot", "says": "An abbot waits at the gate, salt on his habit. On his island the light has gone out, he says.", "then": "asks" },
+    "asks": {
+      "by": "abbot",
+      "says": "He would raise a mission there, and asks first what your house holds dearest.",
+      "then": ["faith", "coffers"]
+    },
+    "faith": { "by": "steward", "says": "Tell him: its faith.", "reveals": "hidden", "then": "pleased" },
+    "coffers": { "by": "steward", "says": "Tell him: its coffers.", "reveals": "hidden", "then": "doubts" },
+    "pleased": { "by": "abbot", "says": "Then a gift of faith will do. Pledge what piety the house can spare to the mission." },
+    "doubts": { "by": "abbot", "says": "Then coin alone will not light it. Hold a castle on the island, and send wealth to keep the fire." }
+  }
+}

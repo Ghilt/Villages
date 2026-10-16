@@ -1,5 +1,6 @@
 package villages.gateway
 
+import villages.application.Catalogues
 import villages.application.Antarctica
 import villages.application.QuestService
 import villages.application.StructureService
@@ -234,7 +235,7 @@ internal class Rig(
                 calendar = thirtyDayMonths,
                 ids = { UUID.fromString("f1000000-0000-4000-8000-%012x".format(++minted)) },
                 quests = questRows,
-            ),
+            ) { Catalogues(RIG_CATALOGUE, RIG_BALANCE, RIG_FATE, RIG_NAMES, ABBOT_DIALOGUES + ("letter" to RIG_LETTER), mapOf("abbot" to ABBOT)) },
             questRows = questRows,
             stands = Stands { master, x, y -> if (master == "terrain") standsOnDisk[y * STAND_TILES + x] ?: ByteArray(0) else null },
             waters = WaterAt({ grounds[it] }, { names[it] }),

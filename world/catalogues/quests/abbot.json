@@ -1,0 +1,29 @@
+{
+  "$comment": "A quest, Adam's to change: an abbot asks what the house holds dearest. Answered well, the road goes by a pledge of piety; answered badly, by a castle held on an island and a delivery of wealth, the cheap road crossed out. Both join at the consecration, a question mark shown ahead, and end at the blessing, shown from the start. Nodes by their ids, the first the one it starts at: a node offers a dialogue of dialogues/ by its name, or holds objectives - delivers a resource, pledges one for so many months, or holds a type of structure, on an island or anywhere - or gives a reward; it is hidden, a question mark, until reached, or shownAhead; and it leads then to a node, or, after a dialogue, to each node by the endings that lead there. Every word and number a placeholder. Taken over on 2026-10-16 from the sample written in the code; the debug panel's Quests section offers it, and /admin/inspect-quests shows and edits it. See decision records 0096 and 0097.",
+  "title": "The abbot of the isle",
+  "scene": "harbour",
+  "nodes": {
+    "gate": {
+      "title": "The abbot at the gate",
+      "dialogue": "abbot-at-the-gate",
+      "then": { "gift": ["pleased"], "light": ["doubts"] }
+    },
+    "gift": {
+      "title": "A gift to the mission",
+      "hidden": true,
+      "objectives": { "piety": { "pledges": "piety", "amount": 30, "months": 6 } },
+      "then": "consecration"
+    },
+    "light": {
+      "title": "A light on the water",
+      "hidden": true,
+      "objectives": {
+        "castle": { "holds": "castle", "on": "island" },
+        "wealth": { "delivers": "wealth", "amount": 60 }
+      },
+      "then": "consecration"
+    },
+    "consecration": { "title": "The consecration", "dialogue": "the-consecration", "hidden": true, "shownAhead": true, "then": "blessing" },
+    "blessing": { "title": "The abbot's blessing", "gives": { "piety": 150, "influence": 40 }, "shownAhead": true }
+  }
+}

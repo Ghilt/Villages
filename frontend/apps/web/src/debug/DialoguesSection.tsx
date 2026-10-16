@@ -1,41 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { fullName } from '../figures/describe';
 import { sessionStore } from '../net/gateway';
 import { Section } from './Section';
 import { offerDialogue } from './levers';
+import { useShelfNames } from './shelfNames';
 import { useStore } from '../store/useStore';
-
-/** What the dev server says when a catalogue changes on disk: `CATALOGUE_CHANGED` in `vite/catalogueApi.ts`. */
-const CATALOGUE_CHANGED = 'villages:catalogue-changed';
-
-/** The dialogues on the shelf by their names, `letter` for `world/catalogues/dialogues/letter.json`, listed again as they change. */
-function useDialogueNames(): readonly string[] {
-  const [names, setNames] = useState<readonly string[]>([]);
-  useEffect(() => {
-    let live = true;
-    const list = () =>
-      fetch('/catalogues/', { cache: 'no-store' })
-        .then((response) => response.json() as Promise<{ files: string[] }>)
-        .then(({ files }) =>
-          files
-            .filter((file) => file.startsWith('dialogues/'))
-            .map((file) => file.slice(10).replace(/\.json$/, '')),
-        )
-        .then((found) => live && setNames(found))
-        .catch(() => undefined);
-    const changed = (data: { file: string }) => {
-      if (data.file.startsWith('dialogues/')) void list();
-    };
-    void list();
-    import.meta.hot?.on(CATALOGUE_CHANGED, changed);
-    return () => {
-      live = false;
-      import.meta.hot?.off(CATALOGUE_CHANGED, changed);
-    };
-  }, []);
-  return names;
-}
 
 /**
  * Dialogues, on purpose: the one lever, which offers one.
@@ -51,7 +21,7 @@ export function DialoguesSection() {
   const connection = useStore(sessionStore, (state) => state.connection);
   const yourHouse = useStore(sessionStore, (state) => state.yourHouse);
   const first = useStore(sessionStore, (state) => state.yourKeyFigures?.[0] ?? null);
-  const names = useDialogueNames();
+  const names = useShelfNames('dialogues');
   const [chosen, choose] = useState<string | null>(null);
   const name = chosen !== null && names.includes(chosen) ? chosen : (names[0] ?? null);
   const off = connection !== 'open' || yourHouse === null || name === null;

@@ -192,7 +192,8 @@ class WorldConfig {
         calendar: WorldCalendar,
         ids: FreshIds,
         questRows: QuestsProjection,
-    ): QuestService = QuestService(world.executor, { clock.instant() }, worldClock, calendar, ids, questRows)
+        shelf: Shelf,
+    ): QuestService = QuestService(world.executor, { clock.instant() }, worldClock, calendar, ids, questRows) { shelf.inForce }
 
     @Bean
     fun takeAction(world: EventWorld, clock: Clock, worldClock: WorldClock): TakeActionService =

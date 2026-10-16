@@ -82,6 +82,14 @@ export const INSPECT_VIEWS: readonly InspectView[] = [
     catalogue: 'dialogues',
   },
   {
+    path: '/admin/inspect-quests',
+    title: 'Quests',
+    what: 'Every quest there is to offer, a file each: its road of nodes, the dialogues they offer, their objectives and rewards.',
+    needs: 'nothing to read, the game server to save',
+    load: () => import('./quests/Quests').then((page) => page.Quests),
+    catalogue: 'quests',
+  },
+  {
     path: '/admin/inspect-architecture',
     title: 'Architecture',
     what: 'How the world is set up: what is baked beforehand, how long each step takes, and what the running game reads.',

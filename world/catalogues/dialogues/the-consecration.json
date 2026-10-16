@@ -1,0 +1,10 @@
+{
+  "$comment": "The fourth node of the quest The abbot of the isle, quests/abbot.json, which both its roads join at. Every word a placeholder; taken over on 2026-10-16 from the sample written in the code. See decision record 0097.",
+  "title": "The consecration",
+  "scene": "harbour",
+  "speakers": { "abbot": { "party": 1, "name": "The abbot" } },
+  "lines": {
+    "stands": { "by": "abbot", "says": "The mission stands, and the light burns again.", "then": "blesses" },
+    "blesses": { "by": "abbot", "says": "Your house kept faith with me. Take my blessing." }
+  }
+}
