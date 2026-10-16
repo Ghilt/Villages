@@ -495,7 +495,10 @@ and `-- --drop` takes them off; by hand only.
   many options it deals, the odds of each rarity and what each grants; when the house's and the map's omens are
   read; how small an island is; how old a newcomer can be - each group with a `$comment` saying what its numbers do.
   The game server reads each as it decides something, so a change saved by hand or from **`/admin/inspect-balance`**
-  is the next roll's; Take action says the price from the same file. A founding's fifty wealth is not in it: it is
+  is the next roll's; Take action says the price from the same file. The page shows the file a group at a time,
+  with what its numbers do in the file's own words, every number changed in place and saved through the game server
+  as the structures' are; it is drawn from the file itself, so a number added there is on the page untold, and odds
+  that do not add up to a hundred are said in red before the server refuses them. A founding's fifty wealth is not in it: it is
   folded from the founding rather than written into it, and moving it would rewrite every house's past.
 - What a structure is: `world/catalogues/structures.json`, hand-edited, one entry a type - its words in each culture, and level
   by level how far out it is drawn, how far it sees, its size on the map and what it yields a world month, which is
