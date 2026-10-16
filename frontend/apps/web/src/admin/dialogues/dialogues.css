@@ -1,0 +1,59 @@
+/*
+ * The dialogues' page (Dialogues.tsx): the chosen dialogue's tree beside the line chosen in it, on a phone one under
+ * the other. A card a line, the house's party in the parchment's own colour and the other's in a cooler one, an
+ * ending's card edged heavier, a choice's options joined by dashed leads.
+ */
+
+.dialogue-bench {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(16rem, 2fr);
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.dialogue-tree {
+  height: 32rem;
+  background: #fffdf6;
+  border: 1px solid var(--parchment-edge);
+}
+
+.dialogue-tree .react-flow__node.dialogue-line {
+  box-sizing: border-box;
+  padding: 0.35rem 0.5rem;
+  font-family: inherit;
+  font-size: 0.72rem;
+  line-height: 1.3;
+  text-align: left;
+  color: var(--ink);
+  background: #fbf7ec;
+  border: 1px solid var(--parchment-edge);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.dialogue-tree .react-flow__node.dialogue-line--party1 {
+  background: #e8eef3;
+}
+
+.dialogue-tree .react-flow__node.dialogue-line--end {
+  border-width: 2px;
+}
+
+.dialogue-tree .react-flow__node.dialogue-line.selected {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 2px rgb(60 40 20 / 25%);
+}
+
+.dialogue-lead--option .react-flow__edge-path {
+  stroke-dasharray: 5 4;
+}
+
+.dialogue-line-editor {
+  min-width: 0;
+}
+
+@media (width <= 760px) {
+  .dialogue-bench {
+    grid-template-columns: 1fr;
+  }
+}

@@ -152,3 +152,40 @@ export function ListField({
       .filter((one) => one !== '');
   return <Field editor={editor} path={path} label={label} wide={wide} shown={each.join(', ')} read={read} />;
 }
+
+/** Words that run on, a line said in a dialogue: wrapped in a box as tall as they are, handed over when left. */
+export function ProseField({
+  editor,
+  path,
+  label,
+}: {
+  editor: CatalogueEditor<unknown>;
+  path: Path;
+  label: string;
+}) {
+  const value = editor.at(path);
+  const shown = typeof value === 'string' ? value : '';
+  const [typed, setTyped] = useState(shown);
+  useEffect(() => setTyped(shown), [shown]);
+  const commit = () => {
+    if (typed.trim() !== '' && typed.trim() !== shown) editor.set(path, typed.trim());
+    if (typed.trim() === '') setTyped(shown);
+  };
+  return (
+    <textarea
+      className={`inspect-field inspect-prose${editor.isEdited(path) ? ' is-edited' : ''}`}
+      aria-label={label}
+      value={typed}
+      rows={Math.max(2, Math.ceil(typed.length / 48))}
+      onChange={(event) => setTyped(event.target.value)}
+      onBlur={commit}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          commit();
+        }
+        if (event.key === 'Escape') setTyped(shown);
+      }}
+    />
+  );
+}

@@ -198,7 +198,12 @@ stage alone, with none of the debug panel in it (decision record 0079).
   paid in influence, and *refuse* does nothing, each option showing what it will do a different way - whole,
   hidden, or not at all. One spoken by a key figure is refused a house that has none. Each is read by the game
   server as it is offered, so a line changed in its file, by hand or from **`/admin/inspect-dialogues`**, is the
-  next offer's; one already offered keeps the words it was offered with.
+  next offer's; one already offered keeps the words it was offered with. The page names every dialogue across its
+  top, each an address of its own, `/admin/inspect-dialogues/letter`, and draws the chosen one as its tree - a card a
+  line, who says it and what, the two parties in two colours, an ending edged heavier, a choice's options under it on
+  dashed leads - beside the line chosen in it: its words, wrapping, and what it grants and spends, changed in place,
+  and what it reveals, shows and leads to said. The title, the scene and the speakers' names are above. A line
+  added or a lead moved is the whole file's, at the foot.
   **That one lever is all the debug panel does for dialogues**, Adam's word on 2026-10-01: it stands in for
   the world, which offers none yet, and reading, answering and seeing how one ended are the player's, in the
   pane - never levers in the panel. The first option costs forty wealth, which the Resources section's `give`

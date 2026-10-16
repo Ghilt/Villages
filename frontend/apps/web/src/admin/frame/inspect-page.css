@@ -275,3 +275,12 @@
   color: var(--ink);
   border-color: var(--ink-soft);
 }
+
+.inspect-prose {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  margin: 0;
+  resize: vertical;
+  line-height: 1.4;
+}
