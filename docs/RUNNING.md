@@ -95,7 +95,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   `apps/web/src/map/relief.ts` and `reliefTuning.ts`, and our shader is `reliefLayer.ts` and `reliefShader.ts`.
 - Clouds drift over the world from zoom 7 out, painted in three tones lit from the upper right, each with its violet
   shadow down and to the left: clumps gathered in patches, whole from 6 out to 5.25, fading to
-  nothing by 4.5, and between 7 and 6, for now, thinning away as the camera comes down through them. They lie
+  nothing by 4.5, and between 7 and 6 drawn as the camera among them: swelling about the middle of the screen and
+  sliding out past its edges, misty, the middle kept clear, their shadows fading, nothing left by 7. They lie
   over the fog's haze and under the marks and the ring, drift with the sea's wind about three minutes across the
   screen, and are the same in every browser, because where they are comes from the wall clock; a player who has
   asked for less motion gets them still. They are the **Clouds** part of the Shaders section: `off`, `low` or

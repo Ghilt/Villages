@@ -66,6 +66,13 @@ export const CLOUD_LOOK = {
    */
   shadow: 0.4,
   reach: 0.5,
+  /**
+   * In the clouds, between `overFrom` and `inFrom`: the ring keeping the middle of the screen clear opens out to
+   * `clearReach` of the way from the middle to a corner, soft over `clearSoft` either side; the tones run `mist` of
+   * the way together towards white, and the edges soften `mistEdge` times more, where the camera is among them. How
+   * many times the clouds are magnified there is `SWELL` in `cloudBands.ts`.
+   */
+  inside: { clearReach: 1.2, clearSoft: 0.3, mist: 0.7, mistEdge: 3 },
   /** How opaque a cloud is at its thin edge, as a share of its middle, and at its middle. */
   thin: 0.7,
   opacity: 0.94,

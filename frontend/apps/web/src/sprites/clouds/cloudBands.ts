@@ -1,10 +1,13 @@
 /**
- * Which band of the clouds a camera zoom is in, and how much of them is drawn there. Pure, so the bands can be
- * held to having no gaps and no jumps without a renderer.
+ * Which band of the clouds a camera zoom is in, and how they are drawn there. Pure, so the bands can be held to
+ * having no gaps and no jumps without a renderer.
  *
- * Closer than `inFrom` the camera is under the clouds and nothing is drawn. From `inFrom` to `overFrom` it is in
- * them; from `overFrom` out it is over them, and they lie on the map whole down to `fadeFrom`, fading to nothing
- * by `goneAt`, past which the whole world reads clearly. Every fade is eased, so nothing pops at an edge.
+ * Closer in than `inFrom` the camera is under the clouds and nothing is drawn. From `overFrom` out it is over them,
+ * and they lie on the map glued to the ground, whole down to `fadeFrom` and fading to nothing by `goneAt`, past
+ * which the whole world reads clearly. Between `overFrom` and `inFrom` it is in them: the same clouds, nearer the
+ * camera the closer it comes, so they are drawn magnified about the screen's middle, swelling and sliding out past
+ * its edges, with the middle kept clear by a ring that opens out towards `inFrom`, and their shadows on the ground
+ * fading as it comes down through. Every change is eased, so nothing pops at an edge.
  */
 
 /** The zooms the bands change at, from the closest in. */
@@ -23,7 +26,14 @@ export interface CloudBand {
   clouds: number;
   /** How much of their shadows. */
   shadows: number;
+  /** How far into the clouds the camera is: nought over them, one at `inFrom`. */
+  inside: number;
+  /** How many times the clouds are magnified about the screen's middle: exactly one over them. */
+  magnification: number;
 }
+
+/** How many times the clouds are magnified at `inFrom`, where the camera is among them. */
+export const SWELL = 4;
 
 const ease = (from: number, to: number, value: number): number => {
   if (to <= from) {
@@ -45,19 +55,26 @@ export function orderedZooms(zooms: CloudZooms): CloudZooms {
 export function cloudBandAt(zoom: number, zooms: CloudZooms): CloudBand {
   const { inFrom, overFrom, fadeFrom, goneAt } = orderedZooms(zooms);
   if (zoom >= inFrom) {
-    return { name: 'under', clouds: 0, shadows: 0 };
+    return { name: 'under', clouds: 0, shadows: 0, inside: 1, magnification: SWELL };
   }
   if (zoom > overFrom) {
-    // Until the camera is drawn inside them, the clouds only thin away as it comes down through.
-    const thinning = 1 - ease(overFrom, inFrom, zoom);
-    return { name: 'in', clouds: thinning, shadows: thinning };
+    // Linear in zoom, so the clouds swell steadily as the camera comes down; squared in the magnification, so the
+    // swelling starts from nothing at the band's edge rather than with a kink.
+    const inside = Math.min(1, Math.max(0, (zoom - overFrom) / (inFrom - overFrom)));
+    return {
+      name: 'in',
+      clouds: 1 - ease(0.75, 1, inside),
+      shadows: 1 - ease(0.3, 1, inside),
+      inside,
+      magnification: SWELL ** (inside * inside),
+    };
   }
   if (zoom >= fadeFrom) {
-    return { name: 'over', clouds: 1, shadows: 1 };
+    return { name: 'over', clouds: 1, shadows: 1, inside: 0, magnification: 1 };
   }
   if (zoom > goneAt) {
     const fading = ease(goneAt, fadeFrom, zoom);
-    return { name: 'fading', clouds: fading, shadows: fading };
+    return { name: 'fading', clouds: fading, shadows: fading, inside: 0, magnification: 1 };
   }
-  return { name: 'gone', clouds: 0, shadows: 0 };
+  return { name: 'gone', clouds: 0, shadows: 0, inside: 0, magnification: 1 };
 }

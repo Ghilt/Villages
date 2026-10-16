@@ -231,8 +231,11 @@ swallowed and given back. Every number of it is in `apps/web/src/fog/look.ts`.
 **The clouds are weather over the world when it is pulled back.** From zoom 7 out clumps of cloud drift over
 the map, a clump about a tenth of the screen wide at 5.5, gathered in patches with clear sky between, about a
 third of the sky in all. They lie on the ground: they scale with the zoom and stay over the land they float over,
-whole out to 5.25 and fading to nothing by 4.5, so the whole world reads clearly further out. Between 7 and 6 the
-camera is in them. They lie over the fog's haze, because there is weather over the unknown too, and under every
+whole out to 5.25 and fading to nothing by 4.5, so the whole world reads clearly further out. **Between 7 and 6 the
+camera is in them**: they are the same clouds, nearer the closer it comes, so they swell about the middle of the
+screen and slide out past its edges, misty, their tones run together towards white, while a ring opening out from
+the middle keeps what the camera is looking at clear, and their shadows on the ground fade; by 7 they are past, and
+the camera is under them. Every load comes down through them on its way to the house's seat. They lie over the fog's haze, because there is weather over the unknown too, and under every
 sign, the marks and the ring. They drift with the world's one wind, the sea's, slowly enough to be noticed rather
 than watched, about three minutes across the screen, and every browser sees the same sky; the finer lumps drift a
 little faster than the clumps, so a clump changes shape as it goes rather than sliding by whole. **They are painted

@@ -37,7 +37,12 @@ from noise laid along the wind and carried by the wall clock.**
   within a cloud.
 - **Bands by zoom.** Closer in than 7 nothing is drawn and no frame is asked for. From 6 out the clouds lie on the
   map, glued to the ground, whole down to 5.25 and fading to nothing by 4.5. Between 7 and 6 the camera is in
-  them. Every fade is eased, so nothing pops at an edge (`sprites/clouds/cloudBands.ts`).
+  them: the same field, drawn magnified about the screen's middle - one at 6, four at 7, eased so the swelling
+  starts from nothing - so the clouds near the camera swell and slide out past the edges, with a ring opening out
+  from the middle to keep it clear and the tones run together into mist; the shadows, which lie on the ground and
+  are never magnified, fade as it comes down. The camera is orthographic, so the swelling is drawn by the shader
+  rather than by any perspective. Every change is eased, so nothing pops at an edge
+  (`sprites/clouds/cloudBands.ts`).
 - **One sun.** The clouds are lit, and cast their shadows, by the map's one light, `map/light.ts`, which the relief
   reads too: a rim of the relief's cream on the side the sun strikes, a rim of its violet on the far side, and a
   shadow falling away from the light, in the same violet, read from the same field at the cloud standing towards the

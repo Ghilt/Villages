@@ -73,6 +73,10 @@ uniform float uEdge;
 // cloud it falls, away from the light, as a share of a clump.
 uniform float uShadow;
 uniform float uReach;
+// In the clouds: how many times they are magnified about the screen's middle, and how far into them the camera is,
+// nought over them and one where it is among them.
+uniform float uMagnify;
+uniform float uInside;
 out vec4 fragColor;
 
 const float TAU = 6.2831853;
@@ -91,6 +95,10 @@ const float BRUSH_ALONG = ${float(B.along)};
 const float BRUSH_ACROSS = ${float(B.across)};
 const vec3 SHADE = vec3(${colour(SHADE_COLOUR)});
 const float THIN = ${float(CLOUD_LOOK.thin)};
+const float CLEAR_SOFT = ${float(CLOUD_LOOK.inside.clearSoft)};
+const float CLEAR_REACH = ${float(CLOUD_LOOK.inside.clearReach)};
+const float MIST = ${float(CLOUD_LOOK.inside.mist)};
+const float MIST_EDGE = ${float(CLOUD_LOOK.inside.mistEdge)};
 const float OPACITY = ${float(CLOUD_LOOK.opacity)};
 
 float hash(ivec2 cell, int salt) {
@@ -141,14 +149,14 @@ vec2 warp(vec2 wind) {
 
 // The clumps, about -1 to 1: the first \`most\` sizes of noise at halving sizes, the two coarsest carried with the
 // clumps and the finer ones as the detail is, the second and third folded into rounded lobes, each faded out as it
-// shrinks towards a couple of pixels on the screen.
-float clumps(vec2 wind, int most) {
+// shrinks towards a couple of pixels on the screen at \`scale\`, the pixels a world unit is seen at.
+float clumps(vec2 wind, int most, float scale) {
   float sum = 0.0;
   float amplitude = 1.0;
   float cell = uClumps.x;
   float around = uClumps.y;
   for (int k = 0; k < 7; k += 1) {
-    float shown = smoothstep(2.0, 6.0, cell * uScale);
+    float shown = smoothstep(2.0, 6.0, cell * scale);
     if (k >= most || shown <= 0.0) break;
     float carried = k < 2 ? uCarried.y : uCarried.z;
     vec2 at = vec2((wind.x - carried) / cell, wind.y / cell + float(k) * 31.7);
@@ -166,9 +174,9 @@ float clumps(vec2 wind, int most) {
 }
 
 // The brush the edges are broken by, about -0.7 to 0.7: strokes long along the wind and thin across it.
-float brush(vec2 wind) {
+float brush(vec2 wind, float scale) {
   vec2 at = vec2((wind.x - uCarried.y) / (uClumps.x * BRUSH_ALONG), wind.y / (uClumps.x * BRUSH_ACROSS));
-  float shown = smoothstep(1.5, 4.0, uClumps.x * BRUSH_ACROSS * uScale);
+  float shown = smoothstep(1.5, 4.0, uClumps.x * BRUSH_ACROSS * scale);
   return shown * noise(at, uClumps.y / BRUSH_ALONG, 60);
 }
 
@@ -177,35 +185,47 @@ void main() {
   // Nothing off the world's square, where the desk shows; worked out to the end all the same, because the soft
   // edges are measured across each two by two block of pixels and a pixel that stopped early would spoil it.
   float inWorld = step(0.0, ground.x) * step(0.0, ground.y) * step(ground.x, WORLD) * step(ground.y, WORLD);
+  // In the clouds they are nearer the camera than the ground, so they are seen magnified about the screen's
+  // middle; over them, exactly as the ground is.
+  vec2 seen = uCentre + (ground - uCentre) / uMagnify;
+  float scale = uScale * uMagnify;
   // Across the wind is lifted by the world's width, so every lattice row the hash is asked about is positive.
-  vec2 wind = vec2(dot(ground, ALONG), dot(ground, ACROSS) + WORLD);
+  vec2 wind = vec2(dot(seen, ALONG), dot(seen, ACROSS) + WORLD);
   vec2 pushed = wind + warp(wind);
   float patchHere = uPatchWeight * patches(wind);
-  float field = 0.5 + 0.5 * clumps(pushed, 7) + patchHere;
-  float stroke = brush(pushed);
+  float field = 0.5 + 0.5 * clumps(pushed, 7, scale) + patchHere;
+  float stroke = brush(pushed, scale);
   float cut = 0.47 + 0.35 * (1.0 - 2.0 * uCover) + BRUSH * stroke;
-  float soft = max(uEdge, fwidth(field));
+  float soft = max(uEdge * (1.0 + MIST_EDGE * uInside), fwidth(field));
   float cloud = smoothstep(cut - soft, cut + soft, field);
   // Thin at the edge, whole a little way in.
   float body = mix(THIN, 1.0, smoothstep(cut, cut + 0.12, field));
 
   // Lit where a step towards the sun leaves the cloud, shaded where a step away from it does: a rim of cream on
   // the side the sun strikes and of violet-grey on the far side, read off the clumps' larger shapes.
-  float towards = 0.5 + 0.5 * clumps(pushed + SUN * (LIT_REACH * uClumps.x), 3) + patchHere + 0.04 * stroke;
-  float away = 0.5 + 0.5 * clumps(pushed - SUN * (FAR_REACH * uClumps.x), 3) + patchHere + 0.04 * stroke;
+  float towards = 0.5 + 0.5 * clumps(pushed + SUN * (LIT_REACH * uClumps.x), 3, scale) + patchHere + 0.04 * stroke;
+  float away = 0.5 + 0.5 * clumps(pushed - SUN * (FAR_REACH * uClumps.x), 3, scale) + patchHere + 0.04 * stroke;
   // Flat tones meet along a line a pixel or so soft, as paint does, however soft the cloud's own edge is.
   float tone = max(0.008, fwidth(towards));
   float lit = 1.0 - smoothstep(cut - tone, cut + tone, towards);
   float far = 1.0 - smoothstep(cut - tone, cut + tone, away);
   vec3 rgb = mix(mix(MIDDLE, LIT, lit), FAR_SIDE, far * (1.0 - 0.5 * lit));
-  float cloudAlpha = cloud * body * OPACITY * uAmount;
+  // Among them they are mist: the tones run together towards white.
+  rgb = mix(rgb, MIDDLE, MIST * uInside);
+  // And the middle of the screen is kept clear by a ring that opens out as the camera comes down through them.
+  float fromMiddle = length(vScreen - uSize * 0.5) / (0.5 * length(uSize));
+  float ring = uInside * CLEAR_REACH - CLEAR_SOFT;
+  float clear = smoothstep(ring - CLEAR_SOFT, ring + CLEAR_SOFT, fromMiddle);
+  float cloudAlpha = cloud * body * OPACITY * uAmount * clear;
 
   // The shadow here is the cloud standing towards the light from it: the same field, warped where that cloud is,
-  // read at its coarser sizes, so it keeps the cloud's shape without its finest lumps, in the relief's violet.
-  vec2 over = wind + SUN * (uReach * uClumps.x);
+  // read at its coarser sizes, so it keeps the cloud's shape without its finest lumps, in the relief's violet. It
+  // lies on the ground, so it is never magnified.
+  vec2 under = vec2(dot(ground, ALONG), dot(ground, ACROSS) + WORLD);
+  vec2 over = under + SUN * (uReach * uClumps.x);
   vec2 overPushed = over + warp(over);
-  float shade = 0.5 + 0.5 * clumps(overPushed, 4) + uPatchWeight * patches(over);
-  float shadowCut = cut - BRUSH * stroke + BRUSH * brush(overPushed);
+  float shade = 0.5 + 0.5 * clumps(overPushed, 4, uScale) + uPatchWeight * patches(over);
+  float shadowCut = cut - BRUSH * stroke + BRUSH * brush(overPushed, uScale);
   float shadowSoft = max(uEdge * 1.5, fwidth(shade));
   float shadowAlpha = smoothstep(shadowCut - shadowSoft, shadowCut + shadowSoft, shade) * uShadow;
 
