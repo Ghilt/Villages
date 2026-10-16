@@ -233,7 +233,7 @@ the map, a clump about a tenth of the screen wide at 5.5, about a third of the s
 systems**, as real clouds seen from orbit do: large masses swept into bands and swirls a screen or two across at
 5.5, with wide clear country between, so the sky is never an even scatter of blobs. They lie on the ground: they
 scale with the zoom and stay over the land they float over, whole out to 5.25; further out the systems lead and
-the clumps' own shapes ease back, and the clouds thin away from their edges to nothing by 4.5 rather than turning
+the clumps' own shapes ease back, and the clouds thin away from their edges to nothing by 3.5 rather than turning
 grey, so the whole world reads clearly further out. **Between 7 and 6 the
 camera is in them**: they are the same clouds, nearer the closer it comes, so they swell about the middle of the
 screen and slide out past its edges, misty, their tones run together towards white, while a ring opening out from

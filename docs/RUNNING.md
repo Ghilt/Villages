@@ -96,7 +96,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
 - Clouds drift over the world from zoom 7 out, every lump lit cream from the upper right and shaded violet-grey
   away from it, each cloud with its soft violet shadow down and to the left. They live in weather systems, masses
   swept into bands and swirls with clear country between; they are whole from 6 out to 5.25, and further out the
-  systems lead and the clouds thin away from their edges to nothing by 4.5. Between 7 and 6 they are drawn as the
+  systems lead and the clouds thin away from their edges to nothing by 3.5. Between 7 and 6 they are drawn as the
   camera among them: swelling about the middle of the screen and sliding out past its edges, misty, the middle kept
   clear, their shadows fading, nothing left by 7. They lie over the fog's haze and under the marks and the ring,
   thinning away round each of your marks; they drift with the sea's wind about three minutes across the screen, and
@@ -109,7 +109,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
   by whole), how much they gather in patches, how soft their edges are, how big the weather systems are and how
   much those decide where there is cloud, how dark their shadows are and how far from them their shadows fall, how
   far round a mark they keep clear, and the four zooms the bands change at - under the clouds closer in than 7,
-  over them from 6, fading from 5.25, gone at 4.5. Every slider changes the sky on the next frame, is remembered in
+  over them from 6, fading from 5.25, gone at 3.5. Every slider changes the sky on the next frame, is remembered in
   the browser that moved it, and once one stops the log says them all under `clouds` as `clouds tuned: …`, the line
   to hand over when a setting should become the default; `reset` puts them back. A browser whose sliders are not
   where they started draws a sky of its own; a new speed carries the sky on from where it stands rather than

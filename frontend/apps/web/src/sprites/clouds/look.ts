@@ -19,9 +19,10 @@ export const CLOUD_LOOK = {
   /**
    * The zooms the clouds are drawn between: whole from `overFrom` out to `fadeFrom`, fading to nothing by
    * `goneAt`; between `overFrom` and `inFrom` the camera is in the clouds, and closer than `inFrom` it is under
-   * them and nothing is drawn.
+   * them and nothing is drawn. Gone at 3.5 for now, Adam's number of 2026-10-16, so the weather systems are seen
+   * from further out; it was 4.5.
    */
-  zooms: { inFrom: 7, overFrom: 6, fadeFrom: 5.25, goneAt: 4.5 },
+  zooms: { inFrom: 7, overFrom: 6, fadeFrom: 5.25, goneAt: 3.5 },
   /**
    * The clumps' size, the noise's coarsest cell they are cut from: a clump comes out about two thirds of it across,
    * about a tenth of the screen at zoom 5.5.

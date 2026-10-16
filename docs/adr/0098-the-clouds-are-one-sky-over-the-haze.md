@@ -36,7 +36,8 @@ from noise laid along the wind and carried by the wall clock.**
   (`sprites/clouds/cloudClock.ts`). A shader's single-precision numbers could not hold the distance itself to
   within a cloud.
 - **Bands by zoom.** Closer in than 7 nothing is drawn and no frame is asked for. From 6 out the clouds lie on the
-  map, glued to the ground, whole down to 5.25 and fading to nothing by 4.5. Between 7 and 6 the camera is in
+  map, glued to the ground, whole down to 5.25 and fading to nothing by 3.5 - 4.5 at first, moved out by Adam on
+  2026-10-16, for now, once the weather systems were worth seeing further out. Between 7 and 6 the camera is in
   them: the same field, drawn magnified about the screen's middle - one at 6, four at 7, eased so the swelling
   starts from nothing - so the clouds near the camera swell and slide out past the edges, with a ring opening out
   from the middle to keep it clear and the tones run together into mist; the shadows, which lie on the ground and
@@ -46,7 +47,7 @@ from noise laid along the wind and carried by the wall clock.**
 - **Weather systems.** Under the clumps lies a far larger pattern, swept by a warp of its own into bands and
   swirls, that decides where there can be cloud at all, so the sky has the shape clouds have from orbit - masses and
   clear country - rather than one size of blob everywhere. It repeats along the wind as everything else does, so
-  the sky stays one. From 5.25 out the clumps' own shapes ease back and the systems lead, and the fade to 4.5 raises
+  the sky stays one. From 5.25 out the clumps' own shapes ease back and the systems lead, and the fade to 3.5 raises
   the cut so the clouds thin away from their edges instead of turning grey.
 
   *Added 2026-10-16, on Adam's word that far out the clouds "clearly look wrong":* an even scatter of one size of

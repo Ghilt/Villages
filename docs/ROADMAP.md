@@ -120,7 +120,7 @@ eye for their experiment; and catalogues, the newest, are built and waiting on A
   is. The shape is decision record 0096, the steps, one commit each, are in `docs/plans/quests.md`, and the
   hypothesis is experiment 0020. All twelve steps are built and on main, both roads of the sample played in the
   game, and the experiment waits on Adam's eye. Adam's own, planned with him on 2026-10-15.
-- **Clouds**: weather over the world from zoom 7 out, gone by 4.5: painted clumps drifting with the world's one
+- **Clouds**: weather over the world from zoom 7 out, gone by 3.5: painted clumps drifting with the world's one
   wind, the same sky in every browser, each with its shadow in the relief's violet, over the fog's haze and under
   every sign, parting round the player's marks; between 7 and 6 the camera is in them. Drawn in the sprite canvas
   (decision record 0098); the six steps, one commit each, are in `docs/plans/clouds.md`. Step 1, the clouds
