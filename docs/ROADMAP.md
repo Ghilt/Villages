@@ -141,8 +141,8 @@ eye for their experiment; and catalogues, the newest, are built and waiting on A
   measured by simulated players playing the player's own loop against one server, ramped from a hundred to ten
   thousand; every run kept in a history the inspect pages chart, and read in an experiment record with the
   capacity of one server and the path past it. Five steps in `docs/plans/bot-swarm.md`, all built. The first
-  run carried 1,000 players and ran out of memory at 2,500, on a text buffer every connection is given; without it,
-  5,000 (experiment 0021). The first milestone of the code-debt review of 2026-10-16, asked for by Adam that day.
+  run carried 1,000 players and ran out of memory at 2,500; after what a connection holds was fixed, 10,000
+  (experiment 0021). The first milestone of the code-debt review of 2026-10-16, asked for by Adam that day.
 
 MongoDB and RabbitMQ are on the machine, in Docker, from `infra/docker-compose.yml`. The game server keeps
 its world in MongoDB whenever Docker is running, and RabbitMQ carries every event it stores to the read models.
@@ -210,8 +210,8 @@ Wanted, not started, and each needs a hypothesis in `docs/experiments/` before a
   instruments reaching across servers; the read models saved with a checkpoint, so a start does not fold the
   whole history; a gateway that keeps no read models of its own and binds only its sessions' cells, which the
   routing key already carries. Left out of 1.6 on purpose, 2026-10-12.
-- **Aliveness and scale**: ten thousand connections on one machine, which the bot swarm now measures - the first
-  run carried 1,000, and 5,000 without the per-connection text buffer (experiment 0021) - aggregation of sprites at
+- **Aliveness and scale**: past ten thousand connections, which one server now carries (experiment 0021): the cells'
+  scans and the gateway's threads, then more than one server; aggregation of sprites at
   low zoom, a custom stylised map style checked in, hardened reconnection and clock correction.
 
 ## Future ideas

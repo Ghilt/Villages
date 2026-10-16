@@ -102,9 +102,35 @@ The path past one server, in the order it pays:
    Event sourcing is what makes this cheap: the write side has no global aggregate to shard, only the read side to
    partition.
 
+## After: what a connection holds (M17)
+
+The two fixes the reading named, each followed by a full run, the third and fourth lines of
+`docs/experiments/performance/runs.jsonl`:
+
+| | carried | heap at 5,000 | heap at 10,000 | p95 answer at 10,000 |
+|---|---|---|---|---|
+| the first run, `9aa0c27` | 1,000 | - | - | - |
+| a big message in pieces, every socket at 8 KB, `82d4042` | 5,000, then the bots' own 2 GB ran out | 1,177 MB | - | - |
+| the fog remembers one face a structure, `e22a1c7` | **10,000, without bending** | 1,049 MB | 2,507 MB | 336 ms |
+
+**Ten thousand players on one development machine**, the number `ARCHITECTURE.md` set out to prove, with the bots
+beside the server: every round trip's slowest twentieth under 500 ms (welcome 265, answer 336, cells 446), 14 of
+about 2.4 million trips failing - seven rolls a house could not afford, seven answers past five seconds - and nobody
+lost.
+
+The fog's memo is bounded now, and no longer grows with every day; at this load it saved about half a gigabyte, not
+the 1.3 GB it held, because what it holds is one face for each structure a connection has seen, and the bots crowd
+the gazetteer's few seats so that each sees about 740 of them. Bots that settle as players would (follow-up 4) are
+what will say how much a spread-out world holds.
+
+What bends next, from the last stage: CPU, nine cores' worth of the server's through the last minute, and the cells,
+at 446 ms the slowest of the three - the read models' scans (follow-up below) and the gateway's thread a send (0077).
+
 ## Follow-ups
 
-1. Give the 1 MiB text buffer to inspect pages only, or send a catalogue in pieces, and see the swarm carry 5,000.
-2. Bound the fog's face memo, and see the heap at 10,000 fall.
+1. Done in M17: a catalogue arrives in pieces, and the swarm carried 5,000.
+2. Done in M17: the fog's face memo is bounded, and the swarm carried 10,000.
 3. A swarm run against a stored world, to measure what a start costs (D1).
+5. Past 10,000: the cells answered by scanning every row (D2) and the gateway's thread a send (0077), which the
+   last stage's CPU and cell times point at.
 4. Bots that settle where a player would, not on the gazetteer's few seats, so cells are not crowded beyond life.

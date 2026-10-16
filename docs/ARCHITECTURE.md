@@ -501,9 +501,9 @@ did, and sets things right from its whole fold there instead.
    (0077).
 6. The map is drawn from read models. The event store is never queried to render anything.
 7. Every principle above is checked by the bot swarm, not assumed: `./gradlew :load-bots:swarm`, whose runs the
-   performance page charts. The first measured, on 2026-10-16, carried 1,000 players and ran out of memory at 2,500,
-   on a 1 MiB text buffer every connection is given; with the default buffer the same server carried 5,000 and bent
-   at 10,000 on CPU and cells. Ten thousand on one development machine is still the number to reach. See
+   performance page charts. Ten thousand connections on one development machine was the number to prove, and on
+   2026-10-16 one server carried it, with the bots beside it, every round trip's p95 under 500 ms - after the first
+   run had carried 1,000, on a text buffer every connection was given and a fog memo that never forgot. See
    experiment 0021.
 
 ## The fate engine
