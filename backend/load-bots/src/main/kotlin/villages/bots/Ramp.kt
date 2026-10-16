@@ -66,10 +66,10 @@ class Ramp(
                 val from = now()
                 playing.growTo(players)
                 val rampMs = now() - from
-                sleep(holdMs)
+                hold(holdMs)
                 val reading = server.read()
                 val warming = index < warmUp.size
-                val stage = measure(players, warming, rampMs, playing, reading, reading.cpuMs - cpuBefore)
+                val stage = measure(players, warming, rampMs, playing, reading, reading.cpuMs - cpuBefore, server.trouble())
                 cpuBefore = reading.cpuMs
                 stages += stage
                 onStage(stage)
@@ -84,7 +84,17 @@ class Ramp(
         }
     }
 
-    private fun measure(players: Int, warming: Boolean, rampMs: Long, bots: Bots, reading: Reading, cpuMs: Long): StageResult {
+    // A second at a time, so a server in trouble ends the stage there and then rather than at the end of its hold.
+    private fun hold(holdMs: Long) {
+        var left = holdMs
+        while (left > 0 && server.trouble() == null) {
+            val nap = minOf(left, HOLD_STEP_MS)
+            sleep(nap)
+            left -= nap
+        }
+    }
+
+    private fun measure(players: Int, warming: Boolean, rampMs: Long, bots: Bots, reading: Reading, cpuMs: Long, trouble: String?): StageResult {
         val measured = bots.trips.drain()
         val trips = Trip.entries.associateWith { trip ->
             val took = measured.took.getValue(trip)
@@ -100,7 +110,8 @@ class Ramp(
             }
         }
         val lost = bots.lost()
-        val bent = if (warming) null else bend(trips, measured.failed, lost, players)
+        // A server in trouble bends even the warm-up: there is nothing past it to measure.
+        val bent = trouble ?: if (warming) null else bend(trips, measured.failed, lost, players)
         return StageResult(players, warming, rampMs, trips, measured.failed, lost, measured.reasons, reading, cpuMs, bent)
     }
 
@@ -114,6 +125,7 @@ class Ramp(
     }
 
     private companion object {
+        const val HOLD_STEP_MS = 1_000L
         const val P50 = 0.50
         const val P95 = 0.95
         const val P99 = 0.99

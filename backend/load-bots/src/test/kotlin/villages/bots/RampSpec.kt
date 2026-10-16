@@ -7,13 +7,17 @@ import io.kotest.matchers.string.shouldContain
 /** The run against a stand-in server and stand-in bots, whose round trips each stage takes as long as it is told. */
 class RampSpec : StringSpec({
 
-    class FakeServer : Server {
+    class FakeServer(private val troubleAfterReads: Int? = null) : Server {
         var stopped = 0
         var cpu = 0L
+        var reads = 0
+
+        override fun trouble() = if (troubleAfterReads != null && reads > troubleAfterReads) "the server ran out of memory" else null
 
         override fun start() = Started(port = 1234, tookMs = 3_000)
 
         override fun read(): Reading {
+            reads++
             cpu += 500
             return Reading(heapUsedMb = 100, heapTotalMb = 256, threads = 40, cpuMs = cpu)
         }
@@ -92,6 +96,16 @@ class RampSpec : StringSpec({
         run.stages.map { it.players to it.warmUp } shouldBe listOf(50 to true, 100 to false)
         run.stages.map { it.bent } shouldBe listOf(null, null)
         run.stages.first().trips.getValue(Trip.WELCOME)!!.p95 shouldBe 900L
+    }
+
+    "bends at the stage where the server got into trouble, and says what the trouble was" {
+        // Read once as it starts and once after each stage: trouble after the second stage's reading.
+        val server = FakeServer(troubleAfterReads = 2)
+        val run = ramp(server, FakeBots(took = { 20 }))
+
+        run.stages.map { it.players } shouldBe listOf(100, 1_000)
+        run.stages.last().bent shouldBe "the server ran out of memory"
+        server.stopped shouldBe 1
     }
 
     "says where a run bent, or that it did not" {

@@ -1,6 +1,7 @@
 package villages.bots
 
 import java.io.File
+import java.io.RandomAccessFile
 import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.net.Socket
@@ -14,6 +15,9 @@ interface Server {
 
     /** What it holds now: its heap after a collection, its threads, and the CPU it has used so far. */
     fun read(): Reading
+
+    /** What has gone wrong with it that a player would feel - it died, or ran out of memory - or null while it is well. */
+    fun trouble(): String?
 
     fun stop()
 }
@@ -30,6 +34,8 @@ data class Reading(val heapUsedMb: Long, val heapTotalMb: Long, val threads: Int
  */
 class JarServer(private val java: File, private val jar: File, private val log: File, private val heapGb: Int = HEAP_GB) : Server {
     private var process: Process? = null
+    private var logRead = 0L
+    private var troubled: String? = null
 
     override fun start(): Started {
         val port = ServerSocket(0).use { it.localPort }
@@ -54,8 +60,26 @@ class JarServer(private val java: File, private val jar: File, private val log: 
         return Started(port, (System.nanoTime() - from) / 1_000_000)
     }
 
+    override fun trouble(): String? {
+        troubled?.let { return it }
+        val running = process ?: return null
+        if (!running.isAlive) troubled = "the server stopped, with exit code ${running.exitValue()}"
+        // Only what the log has said since the last look, so a long log is read once.
+        if (troubled == null && log.length() > logRead) {
+            RandomAccessFile(log, "r").use { file ->
+                file.seek(logRead)
+                val said = ByteArray((file.length() - logRead).toInt()).also { file.readFully(it) }.decodeToString()
+                logRead = file.length()
+                if ("OutOfMemoryError" in said) troubled = "the server ran out of memory, at its ${heapGb} GB"
+            }
+        }
+        return troubled
+    }
+
     override fun read(): Reading {
-        val pid = checkNotNull(process) { "not started" }.pid()
+        val running = checkNotNull(process) { "not started" }
+        if (!running.isAlive) return Reading(heapUsedMb = -1, heapTotalMb = -1, threads = 0, cpuMs = 0)
+        val pid = running.pid()
         jcmd(pid, "GC.run")
         val heap = HEAP.find(jcmd(pid, "GC.heap_info"))
         val threads = jcmd(pid, "Thread.print").lineSequence().count { it.startsWith("\"") }
@@ -75,12 +99,20 @@ class JarServer(private val java: File, private val jar: File, private val log: 
         process = null
     }
 
+    // Into a file and not a pipe, so a server too far gone to answer cannot hold the run: given up on after a while.
     private fun jcmd(pid: Long, command: String): String {
         val tool = File(java.parentFile, if (java.name.endsWith(".exe")) "jcmd.exe" else "jcmd")
-        val asked = ProcessBuilder(tool.path, "$pid", command).redirectErrorStream(true).start()
-        val said = asked.inputStream.bufferedReader().readText()
-        asked.waitFor(30, TimeUnit.SECONDS)
-        return said
+        val out = File.createTempFile("jcmd", ".txt")
+        try {
+            val asked = ProcessBuilder(tool.path, "$pid", command).redirectErrorStream(true).redirectOutput(out).start()
+            if (!asked.waitFor(JCMD_SECONDS, TimeUnit.SECONDS)) {
+                asked.destroyForcibly()
+                return ""
+            }
+            return out.readText()
+        } finally {
+            out.delete()
+        }
     }
 
     private fun answers(port: Int): Boolean = try {
@@ -95,6 +127,7 @@ class JarServer(private val java: File, private val jar: File, private val log: 
         const val HEAP_GB = 8
         private const val STARTING_SECONDS = 120L
         private const val STOPPING_SECONDS = 10L
+        private const val JCMD_SECONDS = 60L
 
         // G1's own words: "garbage-first heap   total 262144K, used 23456K [...".
         private val HEAP = Regex("""total (\d+)K, used (\d+)K""")
