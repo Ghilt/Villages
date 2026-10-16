@@ -24,9 +24,8 @@ import villages.application.fate.FateEngine
 import villages.application.fate.GroundMap
 import villages.application.fate.PlaceNames
 import villages.application.fate.WaterAt
-import villages.application.fate.FirstPools
 import villages.application.fate.omenSources
-import villages.application.fate.firstActions
+import villages.application.fate.FateFromCatalogue
 import villages.application.fate.RollService
 import villages.application.WipeGate
 import villages.application.WorldKept
@@ -121,7 +120,7 @@ internal class Rig(
                 months = { Calendar.monthOf(it.day) }, grounds = { grounds[it] }, housesNear = houses,
                 names = { names[it] }, balance = { RIG_BALANCE },
             ),
-            FirstPools.ALL, firstActions(houses, { UUID.randomUUID() }) { RIG_BALANCE }, { 1 }, { UUID.randomUUID() },
+            FateFromCatalogue({ RIG_FATE }, houses, { UUID.randomUUID() }) { RIG_BALANCE }, { 1 }, { UUID.randomUUID() },
             { RIG_BALANCE },
         ),
         houses, world, { noon }, worldClock, { UUID.randomUUID() }, { RIG_BALANCE },

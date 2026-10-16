@@ -1,0 +1,166 @@
+{
+  "$comment": "The pools and the actions a choice roll deals from, Adam's to change: a first draft, taken over on 2026-10-16 from the code it was written in. A roll reads the omens, rolls a rarity by the balance's odds, opens the pools the omens point at, and deals a hand of actions of that rarity from the open pools, an action in more of them likelier. Never shown to the player, so pools can be reorganised without anybody noticing. The game server takes on a change while it runs; /admin/inspect-rolls shows and edits it. See decision record 0097.",
+  "pools": {
+    "$comment": "Each pool by its name, and the omens it opens on: an omen's key exactly, or every key beginning with what comes before a *. Hearth is always open, whatever the omens, and every action is in it, so a hand can always be dealt; a pool that opens on an omen nobody reads yet - a river, the winter - is ready for the source that will.",
+    "Hearth": [],
+    "Coin": ["dialogue.missingWealth", "map.river", "map.coast", "house.weak", "window.river*", "window.lake*", "window.sea*"],
+    "Land": ["house.holdings:*", "map.ground:*"],
+    "Court": ["map.house:*", "window.house:*", "figure:*", "dialogue:*"],
+    "Learning": ["season.winter", "window.character:*"],
+    "Faith": ["house.pious", "change.piety.rose"]
+  },
+  "actions": {
+    "$comment": "Each action by its id: its rarity, its pools, and the words of the option it is dealt into. One that grants gives that resource - wealth, naturalDomain, influence, reason or piety - as much as the balance says its rarity grants. Gossip is a servant's word of the nearest other house within heardOfKm, {house} in its words, one of its rumours by the house it is about, which the house can spread for so much influence. Every rarity needs at least three that grant, so a hand can always be dealt with no omens at all.",
+    "wealth.common": {
+      "rarity": "common",
+      "pools": ["Hearth", "Coin"],
+      "grants": "wealth",
+      "label": "Collect the mill's dues",
+      "detail": "The miller pays what he owes, and a little early."
+    },
+    "wealth.uncommon": {
+      "rarity": "uncommon",
+      "pools": ["Hearth", "Coin"],
+      "grants": "wealth",
+      "label": "A merchant's debt is paid early",
+      "detail": "He wants your goodwill more than he wants his coin."
+    },
+    "wealth.rare": {
+      "rarity": "rare",
+      "pools": ["Hearth", "Coin"],
+      "grants": "wealth",
+      "label": "A wreck's cargo comes ashore on your land",
+      "detail": "Salvage is the lord's by old right."
+    },
+    "wealth.legendary": {
+      "rarity": "legendary",
+      "pools": ["Hearth", "Coin"],
+      "grants": "wealth",
+      "label": "Silver is found under the home farm",
+      "detail": "The plough turned up a seam of it."
+    },
+    "natural_domain.common": {
+      "rarity": "common",
+      "pools": ["Hearth", "Land"],
+      "grants": "naturalDomain",
+      "label": "Take the lease of a neighbouring field",
+      "detail": "Its tenant is old and his sons have gone."
+    },
+    "natural_domain.uncommon": {
+      "rarity": "uncommon",
+      "pools": ["Hearth", "Land"],
+      "grants": "naturalDomain",
+      "label": "The widow's farm passes to the house",
+      "detail": "She asked for nothing but a place by the fire."
+    },
+    "natural_domain.rare": {
+      "rarity": "rare",
+      "pools": ["Hearth", "Land"],
+      "grants": "naturalDomain",
+      "label": "A border wood is granted by charter",
+      "detail": "The seal is old and nobody alive remembers why."
+    },
+    "natural_domain.legendary": {
+      "rarity": "legendary",
+      "pools": ["Hearth", "Land"],
+      "grants": "naturalDomain",
+      "label": "A county falls to the house by marriage contract",
+      "detail": "The ink is barely dry, and the land is yours."
+    },
+    "influence.common": {
+      "rarity": "common",
+      "pools": ["Hearth", "Court"],
+      "grants": "influence",
+      "label": "Dine with the reeve",
+      "detail": "He talks, and remembers who listened."
+    },
+    "influence.uncommon": {
+      "rarity": "uncommon",
+      "pools": ["Hearth", "Court"],
+      "grants": "influence",
+      "label": "Stand godparent to a neighbour's child",
+      "detail": "A tie that will outlast both houses' quarrels."
+    },
+    "influence.rare": {
+      "rarity": "rare",
+      "pools": ["Hearth", "Court"],
+      "grants": "influence",
+      "label": "A seat on the regional council",
+      "detail": "Your voice is heard where the roads are decided."
+    },
+    "influence.legendary": {
+      "rarity": "legendary",
+      "pools": ["Hearth", "Court"],
+      "grants": "influence",
+      "label": "The Crown's ear",
+      "detail": "A word from you reaches the throne before your rivals'."
+    },
+    "reason.common": {
+      "rarity": "common",
+      "pools": ["Hearth", "Learning"],
+      "grants": "reason",
+      "label": "Read in the long evenings",
+      "detail": "Candles are cheap, and the books were already here."
+    },
+    "reason.uncommon": {
+      "rarity": "uncommon",
+      "pools": ["Hearth", "Learning"],
+      "grants": "reason",
+      "label": "Engage a tutor for the household",
+      "detail": "A thin man with a great many opinions."
+    },
+    "reason.rare": {
+      "rarity": "rare",
+      "pools": ["Hearth", "Learning"],
+      "grants": "reason",
+      "label": "Correspond with a scholar abroad",
+      "detail": "Her letters arrive months late and worth the wait."
+    },
+    "reason.legendary": {
+      "rarity": "legendary",
+      "pools": ["Hearth", "Learning"],
+      "grants": "reason",
+      "label": "A dead bishop's library comes to the house",
+      "detail": "Four carts of books, and two of them in no language you know."
+    },
+    "piety.common": {
+      "rarity": "common",
+      "pools": ["Hearth", "Faith"],
+      "grants": "piety",
+      "label": "Hear mass with the village",
+      "detail": "They notice who comes, and who does not."
+    },
+    "piety.uncommon": {
+      "rarity": "uncommon",
+      "pools": ["Hearth", "Faith"],
+      "grants": "piety",
+      "label": "Endow the chapel's candles",
+      "detail": "A small light in your name, every evening."
+    },
+    "piety.rare": {
+      "rarity": "rare",
+      "pools": ["Hearth", "Faith"],
+      "grants": "piety",
+      "label": "Shelter a pilgrim of renown",
+      "detail": "She blesses the house on leaving, and is heard to."
+    },
+    "piety.legendary": {
+      "rarity": "legendary",
+      "pools": ["Hearth", "Faith"],
+      "grants": "piety",
+      "label": "A relic is entrusted to the house",
+      "detail": "A finger bone in a silver box, and a great many visitors."
+    },
+    "gossip.common": {
+      "rarity": "common",
+      "pools": ["Hearth", "Court"],
+      "label": "Gossip from the kitchens",
+      "detail": "A servant has heard something about {house}.",
+      "gossip": {
+        "spreads": 5,
+        "heardOfKm": 1500,
+        "rumours": ["has been selling off its silver", "keeps a horse it cannot afford", "has quarrelled with its priest", "is to marry its heir to a merchant's daughter", "has not paid its masons since Michaelmas"]
+      }
+    }
+  }
+}

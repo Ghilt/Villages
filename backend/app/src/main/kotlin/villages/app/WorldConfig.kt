@@ -18,9 +18,8 @@ import villages.application.fate.FateEngine
 import villages.application.fate.GroundIslands
 import villages.application.fate.GroundMaps
 import villages.application.fate.PlaceNamesByMaster
-import villages.application.fate.FirstPools
 import villages.application.fate.omenSources
-import villages.application.fate.firstActions
+import villages.application.fate.FateFromCatalogue
 import villages.application.fate.RollService
 import villages.application.KeyFigureService
 import villages.application.FaultBoard
@@ -225,7 +224,7 @@ class WorldConfig {
                 months = { Calendar.monthOf(it.day) }, grounds = ground, housesNear = houses, names = names,
                 balance = { shelf.balance },
             ),
-            FirstPools.ALL, firstActions(houses, ids) { shelf.balance }, dice, ids, { shelf.balance },
+            FateFromCatalogue({ shelf.fate }, houses, ids) { shelf.balance }, dice, ids, { shelf.balance },
         ),
         houses, world.executor, { clock.instant() }, worldClock, ids, { shelf.balance },
     )

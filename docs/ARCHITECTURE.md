@@ -523,10 +523,13 @@ two commons. It works in four moves:
    open pools it is in; three drawn without putting back, each dealt into an option with its rarity and the
    omens that brought it.
 
-The pools and the actions are content, written in Kotlin beside the engine in `application`, so a dealt action
-is code and can read the world. The odds, the hand, the price and what each rarity grants are the balance's,
-`world/catalogues/balance.json`, read at each roll (decision record 0097). Two rules about the content are checks rather than hopes: every action is in
-Hearth, and every rarity has at least three actions that can be dealt with no omens at all.
+The pools and the actions are content, the catalogue `world/catalogues/fate.json`: a pool opens on omen-key
+patterns, and an action names the kind of code that deals it - a grant, or gossip, which reads the world - and gives
+it its words and numbers. `FateFromCatalogue` makes the catalogue in force into what the engine deals from, again
+only when it changes. The odds, the hand, the price and what each rarity grants are the balance's,
+`world/catalogues/balance.json`, read at each roll (decision record 0097). Two rules about the content are checks
+the shelf holds as it takes the catalogue on, rather than hopes: every action is in Hearth, and every rarity has at
+least three grants, which can always be dealt with no omens at all.
 
 Two things follow for the architecture:
 

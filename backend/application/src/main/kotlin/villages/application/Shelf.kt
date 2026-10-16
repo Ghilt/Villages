@@ -1,5 +1,6 @@
 package villages.application
 
+import villages.application.fate.FateCatalogue
 import villages.domain.StructureCatalogue
 import villages.domain.TakeOnCatalogue
 import villages.domain.isCatalogueName
@@ -76,6 +77,9 @@ class Shelf(
 
     /** The balance in force, at the moment of asking. */
     val balance: Balance get() = inForce.balance
+
+    /** The pools and the actions in force, at the moment of asking. */
+    val fate: FateCatalogue get() = inForce.fate
 
     /** The fingerprint of each catalogue in force, by its name. */
     fun fingerprints(): Map<String, String> = texts.mapValues { (_, text) -> fingerprintOf(text) }

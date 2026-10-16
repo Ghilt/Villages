@@ -1,6 +1,8 @@
 package villages.application
 
+import villages.application.fate.FateCatalogue
 import villages.domain.Rarity
+import villages.domain.Resource
 
 /**
  * The balance the application's tests play by: the first draft's numbers, which `world/catalogues/balance.json` began
@@ -25,4 +27,16 @@ val TEST_BALANCE = Balance(
     ),
     islands = Balance.Islands(smallerThanKm2 = 4_000_000.0),
     newcomers = Balance.Newcomers(youngest = 18, oldest = 50),
+)
+
+/** A fate catalogue the shelf's tests can take on: three grants of every rarity, in Hearth. */
+val TEST_FATE = FateCatalogue(
+    pools = listOf(FateCatalogue.PoolSpec("Hearth", emptyList())),
+    actions = Rarity.entries.flatMap { rarity ->
+        (1..3).map { n ->
+            FateCatalogue.ActionSpec(
+                "${rarity.name.lowercase()}$n", rarity, listOf("Hearth"), "Collect", "Paid.", FateCatalogue.Deals.Grant(Resource.WEALTH),
+            )
+        }
+    },
 )

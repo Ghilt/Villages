@@ -14,6 +14,7 @@ import villages.domain.HouseId
 import villages.domain.HouseName
 import villages.domain.Location
 import villages.domain.PlayerId
+import villages.domain.Rarity
 import villages.domain.Significance
 import villages.domain.Tincture
 import villages.domain.WorldTime
@@ -33,9 +34,18 @@ class GossipSpec : StringSpec({
     val varga = houseAt("Varga", Location(59.9, 10.7))
     val holm = houseAt("Holm", Location(60.17, 24.94))
     val far = houseAt("Faraway", Location(-33.9, 151.2))
+    val gossip = FateCatalogue.Deals.Gossip(
+        spreads = 5,
+        heardOfKm = 1500.0,
+        rumours = listOf("has been selling off its silver", "keeps a horse it cannot afford", "has quarrelled with its priest"),
+    )
+    val spec = FateCatalogue.ActionSpec(
+        "gossip.common", Rarity.COMMON, listOf("Hearth", "Court"),
+        "Gossip from the kitchens", "A servant has heard something about {house}.", gossip,
+    )
     fun dealing(vararg standing: HouseRow) =
-        Gossip({ place, km, _ -> standing.filter { kmBetween(it.seat, place) <= km } }) { UUID.randomUUID() }
-            .action.deal(Moment(ours, Looking.NOTHING, today, Instant.EPOCH), emptyList())
+        Gossip({ place, km, _ -> standing.filter { kmBetween(it.seat, place) <= km } }, { UUID.randomUUID() }, spec, gossip)
+            .action(setOf(Pool.HEARTH)).deal(Moment(ours, Looking.NOTHING, today, Instant.EPOCH), emptyList())
 
     "a servant brings word of the nearest other house, by its name, as a conversation" {
         val dealt = dealing(ours, varga, holm, far)!!
@@ -62,7 +72,7 @@ class GossipSpec : StringSpec({
     "spreading it pays a little influence, and keeping it costs nothing" {
         val talk = dealing(ours, holm)!!.effect.shouldBeInstanceOf<Effect.Converse>().dialogue
 
-        talk.lines.single { it.id.value == "spread" }.effects shouldBe listOf(Effect.Grant(villages.domain.Resource.INFLUENCE, Gossip.SPREAD))
+        talk.lines.single { it.id.value == "spread" }.effects shouldBe listOf(Effect.Grant(villages.domain.Resource.INFLUENCE, gossip.spreads))
         talk.lines.single { it.id.value == "keep" }.effects shouldBe emptyList()
     }
 })

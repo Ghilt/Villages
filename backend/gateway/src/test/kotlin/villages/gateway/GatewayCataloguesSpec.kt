@@ -36,7 +36,7 @@ class GatewayCataloguesSpec : StringSpec({
         },
         reader = CatalogueReader { read ->
             if (read.values.any { "broken" in it }) throw CatalogueRefused("structures", "castle has no sightKm the server can read")
-            Catalogues(RIG_CATALOGUE, RIG_BALANCE)
+            Catalogues(RIG_CATALOGUE, RIG_BALANCE, RIG_FATE)
         },
         world = WorldCommandExecutor { _, _ -> },
         clock = { Instant.parse("2026-10-16T12:00:00Z") },

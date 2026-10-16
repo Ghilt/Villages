@@ -48,8 +48,8 @@ class FateEngineSpec : StringSpec({
 
     val river = Omen(OmenKey("map.river"), OmenKind.MAP, "River")
     val pious = Omen(OmenKey("house.pious"), OmenKind.HOUSE, "Pious", 104)
-    val water = Pool("Water") { it.key == river.key }
-    val faith = Pool("Faith") { it.key == pious.key }
+    val water = Pool("Water", listOf(river.key.value))
+    val faith = Pool("Faith", listOf(pious.key.value))
 
     fun action(id: String, rarity: Rarity = Rarity.COMMON, vararg pools: Pool, dealable: Boolean = true) =
         Action(id, rarity, setOf(Pool.HEARTH, *pools)) { _, _ ->

@@ -254,7 +254,9 @@ stage alone, with none of the debug panel in it (decision record 0079).
   for it; on a phone the list and the options are one under another and the pane scrolls. Taking an option
   gives it, and the pane goes back to its chip. *Gossip from the kitchens*, a common, is a conversation rather than a
   resource: taking it offers a dialogue about the nearest other house within 1500 km, which opens in the
-  dialogues pane, and with no house that near it is never dealt. A hand already pending when the page loads is drawn as it ends. A hand cannot be rolled over while it waits. The asking and the answer are lines of the log under
+  dialogues pane, and with no house that near it is never dealt. What can be dealt, and from which pools, is
+  `world/catalogues/fate.json`, and what a roll costs and each rarity grants is the balance's: both the game
+  server takes on while it runs, the next roll dealing from what was saved. A hand already pending when the page loads is drawn as it ends. A hand cannot be rolled over while it waits. The asking and the answer are lines of the log under
   `roll`, and the hand under `choice`, with its rarity and how many omens it was rolled from. The **Choice
   roll** section of the debug panel, below Dialogues, looks into it: the hand's omens - the house's holdings,
   *Weak house*, *Pious*, what rose since the last roll, *Missing wealth* when an open dialogue waits on a cost

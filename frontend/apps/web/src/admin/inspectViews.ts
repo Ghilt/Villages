@@ -58,6 +58,14 @@ export const INSPECT_VIEWS: readonly InspectView[] = [
     catalogue: 'balance',
   },
   {
+    path: '/admin/inspect-rolls',
+    title: 'Rolls',
+    what: 'The pools a choice roll opens and the actions it deals from them: what opens each, and what each deals.',
+    needs: 'nothing to read, the game server to save',
+    load: () => import('./Rolls').then((page) => page.Rolls),
+    catalogue: 'fate',
+  },
+  {
     path: '/admin/inspect-architecture',
     title: 'Architecture',
     what: 'How the world is set up: what is baked beforehand, how long each step takes, and what the running game reads.',

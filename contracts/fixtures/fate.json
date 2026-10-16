@@ -1,0 +1,19 @@
+{
+  "$comment": "A fate catalogue filed as world/catalogues/fate.json files one, written by hand, small: the server's FateFile and the world package's parseFate both read it, and are held to what it says.",
+  "pools": {
+    "$comment": "Two pools.",
+    "Hearth": [],
+    "Coin": ["map.river", "window.river*"]
+  },
+  "actions": {
+    "wealth.common": { "rarity": "common", "pools": ["Hearth", "Coin"], "grants": "wealth", "label": "Collect dues", "detail": "Paid early." },
+    "piety.rare": { "rarity": "rare", "pools": ["Hearth"], "grants": "piety", "label": "A relic", "detail": "In a silver box." },
+    "gossip.common": {
+      "rarity": "common",
+      "pools": ["Hearth", "Coin"],
+      "label": "Gossip about {house}",
+      "detail": "A servant has heard something.",
+      "gossip": { "spreads": 7, "heardOfKm": 900, "rumours": ["keeps a horse it cannot afford", "has quarrelled with its priest"] }
+    }
+  }
+}

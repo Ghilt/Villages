@@ -34,15 +34,20 @@ data class Rolled(
  */
 class FateEngine(
     private val sources: List<OmenSource>,
-    private val pools: List<Pool>,
-    private val actions: List<Action>,
+    /** The pools and the actions in force, read at each roll: the fate catalogue's, which a retune changes. */
+    private val content: () -> FateContent,
     private val dice: Dice,
     private val ids: FreshIds,
     private val balance: () -> Balance,
 ) {
+    /** Deals from these pools and actions for good: a test's. */
+    constructor(sources: List<OmenSource>, pools: List<Pool>, actions: List<Action>, dice: Dice, ids: FreshIds, balance: () -> Balance) :
+        this(sources, { FateContent(pools, actions) }, dice, ids, balance)
+
     /** Rolls for a house at a moment. `rarity` stands in for the world's luck, from the debug panel's lever. */
     fun roll(moment: Moment, rarity: Rarity? = null): Rolled {
         val omens = sources.flatMap { it.read(moment) }.distinctBy(Omen::key)
+        val (pools, actions) = content()
         val opened = listOf(Pool.HEARTH) + pools.filter { pool -> pool != Pool.HEARTH && omens.any(pool::opensOn) }
         val numbers = balance().roll
         val rolled = rarity ?: rarityFrom(dice.roll(numbers.odds.values.sum()), numbers.odds)
@@ -50,10 +55,10 @@ class FateEngine(
         // A rarity with too little that can be dealt now falls to the one below it, so a hand is always one
         // rarity and always a choice. The content checks keep Hearth deep enough that this is never reached.
         var at = rolled
-        var draw = drawable(at, moment, omens, opened)
+        var draw = drawable(actions, at, moment, omens, opened)
         while (draw.size < Choice.FEWEST && at != Rarity.COMMON) {
             at = Rarity.entries[at.ordinal - 1]
-            draw = drawable(at, moment, omens, opened)
+            draw = drawable(actions, at, moment, omens, opened)
         }
         check(draw.size >= Choice.FEWEST) { "fewer than ${Choice.FEWEST} common actions can be dealt" }
 
@@ -75,7 +80,7 @@ class FateEngine(
         return Rolled(omens, at, hand, opened.map(Pool::name), draw.map { (action, _) -> Considered(action.id, weightOf(action, opened)) })
     }
 
-    private fun drawable(rarity: Rarity, moment: Moment, omens: List<Omen>, opened: List<Pool>): List<Pair<Action, Dealt>> =
+    private fun drawable(actions: List<Action>, rarity: Rarity, moment: Moment, omens: List<Omen>, opened: List<Pool>): List<Pair<Action, Dealt>> =
         actions
             .filter { it.rarity == rarity && it.pools.any(opened::contains) }
             .mapNotNull { action -> action.deal(moment, omens)?.let { action to it } }
