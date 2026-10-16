@@ -195,6 +195,10 @@ export function createSession(ports: SessionPorts): Session {
     inspected: () => undefined,
     // What water the page pointed at, kept in the state for the page to open a window from. See 0087.
     inspectedAt: () => undefined,
+    // A player's window never reads or saves a catalogue; the inspect pages do, with no session. See 0097.
+    cataloguesInForce: () => undefined,
+    catalogueRevised: () => undefined,
+    revisionRefused: () => undefined,
   };
 
   /** Takes a frame in: the parts fold it, the listeners are told, then what the frame makes the session do. */

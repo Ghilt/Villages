@@ -138,3 +138,6 @@ recorded over. See decision record 0037. What each one changed:
   touching them, a stub where the far end is not drawn (decision record 0096).
 - **52** - `meetObjective` and `collectReward`, the player's own commands from the quests' pane: an objective met by a
   press, by the quest's, the node's and the objective's ids, and a reward collected, by the quest's and the node's.
+- **53** - `watchCatalogues` and `cataloguesInForce`, what the game server runs on, and `reviseCatalogue` with its two
+  answers, `catalogueRevised` and `revisionRefused`: an inspect page saving a catalogue through the game server.
+  Instruments, refused while they are closed. See decision record 0097.

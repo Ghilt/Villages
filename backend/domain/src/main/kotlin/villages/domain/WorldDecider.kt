@@ -18,7 +18,7 @@ class WorldDecider(private val changes: (before: String, after: String) -> List<
 
     override fun decide(command: WorldCommand, state: WorldRecord): List<WorldStreamEvent> = when (command) {
         is TakeOnCatalogue -> {
-            if (!NAME.matches(command.catalogue)) {
+            if (!isCatalogueName(command.catalogue)) {
                 throw WorldError.InvalidCatalogue("a name on the shelf, as structures or dialogues/letter, not '${command.catalogue}'")
             }
             if (!FINGERPRINT.matches(command.fingerprint)) {
@@ -49,7 +49,6 @@ class WorldDecider(private val changes: (before: String, after: String) -> List<
     }
 
     private companion object {
-        val NAME = Regex("[a-z0-9]+(?:-[a-z0-9]+)*(?:/[a-z0-9]+(?:-[a-z0-9]+)*)?")
         val FINGERPRINT = Regex("[0-9a-f]{64}")
     }
 }

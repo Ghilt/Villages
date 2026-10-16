@@ -28,8 +28,23 @@ class CataloguesConfig {
         FolderCatalogues(Path.of(folder))
 
     @Bean(initMethod = "start")
-    fun shelf(files: FolderCatalogues, world: EventWorld, clock: Clock, worldClock: WorldClock, faults: Faults): Shelf =
-        Shelf(files, ShelfReader, world.worldExecutor(CatalogueDiff::changes), { clock.instant() }, worldClock, faults)
+    fun shelf(
+        files: FolderCatalogues,
+        world: EventWorld,
+        clock: Clock,
+        worldClock: WorldClock,
+        faults: Faults,
+        @Value("\${villages.catalogues.editable:true}") editable: Boolean,
+    ): Shelf = Shelf(
+        files = files,
+        reader = ShelfReader,
+        world = world.worldExecutor(CatalogueDiff::changes),
+        clock = { clock.instant() },
+        worldClock = worldClock,
+        faults = faults,
+        format = CatalogueText::format,
+        editable = editable,
+    )
 
     /** One thread, a daemon, for looking at the folder. */
     @Bean(destroyMethod = "shutdownNow")
@@ -39,13 +54,8 @@ class CataloguesConfig {
 
     /** The folder looked at once everything is following the feed, so a change is set right by everything. */
     @Bean
-    fun watchShelf(
-        shelf: Shelf,
-        shelfWatch: ScheduledExecutorService,
-        faults: Faults,
-        @Value("\${villages.catalogues.editable:true}") editable: Boolean,
-    ): ApplicationRunner = ApplicationRunner {
-        if (editable) {
+    fun watchShelf(shelf: Shelf, shelfWatch: ScheduledExecutorService, faults: Faults): ApplicationRunner = ApplicationRunner {
+        if (shelf.editable) {
             shelfWatch.scheduleWithFixedDelay(
                 {
                     try {

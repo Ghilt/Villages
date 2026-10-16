@@ -216,6 +216,11 @@ export const sessionLog: GatewayListener = {
         return;
       case 'event': // A player's window never asks for stored events; they have a page of their own (0023).
         return;
+      // A player's window never reads or saves a catalogue: the inspect pages do, with no session (0097).
+      case 'cataloguesInForce':
+      case 'catalogueRevised':
+      case 'revisionRefused':
+        return;
       case 'inspectedAt':
         // What water a click pointed at, as the server named it, or why it named none. See 0087.
         note('inspect', sayAnswer(frame));

@@ -44,3 +44,45 @@ class CataloguesTest {
         assertEquals(listOf("the whole file"), CatalogueDiff.changes("{}", "{ broken"))
     }
 }
+
+/** The one form every revision is written in. */
+class CatalogueTextTest {
+    @Test
+    fun `the catalogue of structures, written by hand, is already in it, byte for byte`() {
+        val text = java.io.File("../../world/catalogues/structures.json").readText()
+        val formatted = CatalogueText.format(text)
+        val differs = text.lines().zip(formatted.lines()).indexOfFirst { (was, now) -> was != now }
+
+        assertEquals(-1, differs, "line ${differs + 1}:\n${text.lines().getOrNull(differs)}\n${formatted.lines().getOrNull(differs)}")
+        assertEquals(text, formatted)
+    }
+
+    @Test
+    fun `plain values stay on one line, what holds more opens out when it does not fit, and fields keep their order`() {
+        val long = "x".repeat(130)
+        val formatted = CatalogueText.format(
+            """{"b":[1,2.5],"a":{"c":true,"d":null,"e":"$long"},"f":[{"g":[1]},{"h":"$long"}],"none":{}}""",
+        )
+
+        assertEquals(
+            listOf(
+                """{""",
+                """  "b": [1, 2.5],""",
+                """  "a": { "c": true, "d": null, "e": "$long" },""",
+                """  "f": [""",
+                """    { "g": [1] },""",
+                """    { "h": "$long" }""",
+                """  ],""",
+                """  "none": {}""",
+                """}""",
+                "",
+            ),
+            formatted.lines(),
+        )
+    }
+
+    @Test
+    fun `a word keeps its accents, and its quotes are escaped`() {
+        assertEquals("{ \"words\": \"Zürich, \\\"the city\\\"\" }\n", CatalogueText.format("""{"words":"Zürich, \"the city\""}"""))
+    }
+}

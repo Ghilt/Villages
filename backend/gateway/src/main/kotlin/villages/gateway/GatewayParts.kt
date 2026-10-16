@@ -29,6 +29,7 @@ import villages.application.WorldClock
 import villages.application.WorldWipe
 import villages.application.fate.RollService
 import villages.application.fate.WaterAt
+import villages.application.Shelf
 import villages.domain.StructureCatalogue
 
 /**
@@ -69,6 +70,8 @@ class Mechanics(
     val structureCatalogue: () -> StructureCatalogue? = { null },
     /** People by their id, for a person in a slot to be said by name. */
     val characterById: CharacterById = CharacterById { null },
+    /** The game server's catalogues, which the inspect pages read and save through; none takes no revisions. 0097. */
+    val catalogues: Shelf? = null,
 )
 
 /**
@@ -99,5 +102,6 @@ internal fun partsOf(
         TimelinePart(),
         InspectingPart(houseById, onTheMap, structuresOnTheMap, world),
         Instruments(instrumentsOpen, core, events, recent, emptyTheWorld, foundHouse, resources, keyFigures, visions, dialogues, rolls, worldKept, structures, antarctica, quests),
+        CataloguesPart(instrumentsOpen, catalogues),
     )
 }

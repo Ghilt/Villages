@@ -478,7 +478,13 @@ and `-- --drop` takes them off; by hand only.
   twice a second while it runs, so a file saved by hand is taken on within a second of holding still: a retuned
   structure moves every holder's income and sight at once, each `incomeChanged` in the retune's story. A file it
   cannot read is refused, said once in the debug panel's faults and the server's log naming the file and the field,
-  and the catalogue in force goes on. A released server turns this off with `villages.catalogues.editable=false`.
+  and the catalogue in force goes on. An inspect page saves through the game server, as one of the instruments:
+  `reviseCatalogue` names the file it read by its fingerprint, and the server refuses it `stale` when the file has
+  changed on disk since, `unreadable` with the reason when it will not take it on, and otherwise writes it whole in
+  the catalogues' one form - two spaces, plain lists and objects on one line, the rest on one line where it fits in
+  120 columns, which is how the files are written by hand - takes it on and answers with the new fingerprint.
+  `watchCatalogues` tells a page what the server runs on, and again whenever it takes something on. A released
+  server turns all of this off with `villages.catalogues.editable=false`, and closed instruments refuse it.
   See `docs/plans/catalogues.md` and decision record 0097.
 - What a structure is: `world/catalogues/structures.json`, hand-edited, one entry a type - its words in each culture, and level
   by level how far out it is drawn, how far it sees, its size on the map and what it yields a world month, which is

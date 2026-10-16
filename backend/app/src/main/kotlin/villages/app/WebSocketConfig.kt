@@ -1,5 +1,6 @@
 package villages.app
 
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.socket.CloseStatus
 import org.springframework.web.socket.TextMessage
@@ -8,6 +9,7 @@ import org.springframework.web.socket.config.annotation.EnableWebSocket
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 import org.springframework.web.socket.handler.TextWebSocketHandler
+import org.springframework.web.socket.server.standard.ServletServerContainerFactoryBean
 import villages.gateway.Gateway
 import villages.protocol.ProtocolJson
 import villages.protocol.ServerFrame
@@ -25,6 +27,19 @@ import java.util.concurrent.ConcurrentHashMap
 class WebSocketConfig(private val gateway: Gateway) : WebSocketConfigurer {
     override fun registerWebSocketHandlers(registry: WebSocketHandlerRegistry) {
         registry.addHandler(GatewaySocket(gateway), "/ws").setAllowedOriginPatterns("http://localhost:[*]")
+    }
+
+    /**
+     * A frame as large as an inspect page sends: a catalogue whole, saved from its page, is larger than the eight
+     * kilobytes the socket takes by default, which closes the connection on anything bigger. See decision 0097.
+     */
+    @Bean
+    fun largeFrames(): ServletServerContainerFactoryBean = ServletServerContainerFactoryBean().apply {
+        setMaxTextMessageBufferSize(LARGEST_FRAME)
+    }
+
+    private companion object {
+        const val LARGEST_FRAME = 1 shl 20
     }
 }
 

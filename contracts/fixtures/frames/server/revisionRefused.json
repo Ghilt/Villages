@@ -1,0 +1,6 @@
+{
+  "type": "revisionRefused",
+  "catalogue": "structures",
+  "code": "stale",
+  "reason": "world/catalogues/structures.json has changed on disk since it was read: read it again"
+}

@@ -30,6 +30,7 @@ import villages.application.fate.firstActions
 import villages.application.fate.RollService
 import villages.application.WipeGate
 import villages.application.WorldKept
+import villages.application.Shelf
 import villages.domain.PlayerId
 import villages.domain.WorldTime
 import villages.projections.QuestsProjection
@@ -90,6 +91,7 @@ internal class Rig(
     instrumentsOpen: Boolean = true,
     sendOn: Executor = Executor { it.run() },
     worldKept: WorldKept = WorldKept.IN_MEMORY,
+    catalogues: Shelf? = null,
 ) {
     val world = TinyWorld()
     val later = ManualLater()
@@ -238,6 +240,7 @@ internal class Rig(
             antarctica = Antarctica(world, { RIG_CATALOGUE }, { noon }, worldClock),
             instrumentsOpen = instrumentsOpen,
             worldKept = worldKept,
+            catalogues = catalogues,
         ),
         later = later,
         sendOn = sendOn,

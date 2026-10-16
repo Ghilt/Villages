@@ -5,6 +5,14 @@ import java.time.Instant
 /** The world's own stream: one for the whole world, for what belongs to no house, character or structure. 0097. */
 const val WORLD_STREAM = "world"
 
+/**
+ * Whether a name is one a catalogue can have on the shelf: lower-case words joined by hyphens, in a folder of such
+ * words or none, `structures`, `character-names` or `dialogues/letter`. Nothing that could reach outside the shelf.
+ */
+fun isCatalogueName(name: String): Boolean = CATALOGUE_NAME.matches(name)
+
+private val CATALOGUE_NAME = Regex("[a-z0-9]+(?:-[a-z0-9]+)*(?:/[a-z0-9]+(?:-[a-z0-9]+)*)?")
+
 /** A request to the world's own stream, named as an imperative. It may be refused, and it is not stored. */
 sealed interface WorldCommand
 

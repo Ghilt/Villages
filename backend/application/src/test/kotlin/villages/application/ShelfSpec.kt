@@ -33,7 +33,14 @@ class ShelfSpec : StringSpec({
 
     /** The folder, as a map the test changes. */
     class Folder(var files: Map<String, String>) : CatalogueFiles {
+        val written = mutableListOf<String>()
+
         override fun read() = files
+
+        override fun write(catalogue: String, text: String) {
+            files = files + (catalogue to text)
+            written += catalogue
+        }
     }
 
     /** A reader that reads a structures' file as one type named by its text, and refuses a text that says so. */
@@ -43,7 +50,7 @@ class ShelfSpec : StringSpec({
         Catalogues(StructureCatalogue(mapOf(StructureType(text.trim()) to StructureSpec(listOf(LevelSpec(Significance(10.0), 6.0, emptyMap())), emptyList()))))
     }
 
-    class Rig(files: Map<String, String>) {
+    class Rig(files: Map<String, String>, editable: Boolean = true) {
         val folder = Folder(files)
         val taken = Taken()
         val faults = mutableListOf<Fault>()
@@ -53,7 +60,7 @@ class ShelfSpec : StringSpec({
             }
 
             override fun watch(listener: (Fault) -> Unit) = AutoCloseable {}
-        })
+        }, format = { it.trim() + "\n" }, editable = editable)
 
         /** Looks twice, as the watch does, so the files have held still. */
         fun look(): Set<String> = shelf.refresh().ifEmpty { shelf.refresh() }
@@ -132,5 +139,48 @@ class ShelfSpec : StringSpec({
     "a fingerprint is the SHA-256 of the file's bytes, as the dev server works it out" {
         // `printf '{}\n' | sha256sum`
         Shelf.fingerprintOf("{}\n") shouldBe "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+    }
+    "a revision is written in the one form, taken on, recorded and told, and its fingerprint is the answer" {
+        val rig = Rig(mapOf("structures" to "castle\n"))
+        rig.shelf.start()
+        rig.taken.commands.clear()
+        val told = mutableListOf<Map<String, String>>()
+        rig.shelf.watch { told += it }
+
+        val fingerprint = rig.shelf.revise("structures", "  fort  ", Shelf.fingerprintOf("castle\n"))
+
+        rig.folder.files["structures"] shouldBe "fort\n"
+        fingerprint shouldBe Shelf.fingerprintOf("fort\n")
+        rig.shelf.structures.types.keys shouldBe setOf(StructureType("fort"))
+        rig.taken.commands.map { it.first.catalogue } shouldContainExactly listOf("structures")
+        told shouldContainExactly listOf(mapOf("structures" to fingerprint))
+        rig.look().shouldBeEmpty()
+    }
+
+    "a revision based on a file that has changed since is refused, and nothing is written" {
+        val rig = Rig(mapOf("structures" to "castle\n"))
+        rig.shelf.start()
+
+        shouldThrow<CatalogueStale> { rig.shelf.revise("structures", "fort", Shelf.fingerprintOf("mill\n")) }
+
+        rig.folder.written.shouldBeEmpty()
+    }
+
+    "a revision the server cannot read, or a name off the shelf, is refused, and nothing is written" {
+        val rig = Rig(mapOf("structures" to "castle\n"))
+        rig.shelf.start()
+
+        shouldThrow<CatalogueRefused> { rig.shelf.revise("structures", "broken", Shelf.fingerprintOf("castle\n")) }
+        shouldThrow<CatalogueRefused> { rig.shelf.revise("../structures", "fort", "") }
+
+        rig.folder.written.shouldBeEmpty()
+        rig.shelf.structures.types.keys shouldBe setOf(StructureType("castle"))
+    }
+
+    "a server that takes no revisions refuses them" {
+        val rig = Rig(mapOf("structures" to "castle\n"), editable = false)
+        rig.shelf.start()
+
+        shouldThrow<CataloguesReadOnly> { rig.shelf.revise("structures", "fort", Shelf.fingerprintOf("castle\n")) }
     }
 })

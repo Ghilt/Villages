@@ -1,0 +1,6 @@
+{
+  "type": "reviseCatalogue",
+  "catalogue": "structures",
+  "text": "{ \"types\": { \"castle\": { \"yields\": { \"naturalDomain\": [4, 5, 8] } } } }\n",
+  "basedOn": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+}
