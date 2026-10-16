@@ -238,14 +238,16 @@ the middle keeps what the camera is looking at clear, and their shadows on the g
 the camera is under them. Every load comes down through them on its way to the house's seat. They lie over the fog's haze, because there is weather over the unknown too, and under every
 sign, the marks and the ring. They drift with the world's one wind, the sea's, slowly enough to be noticed rather
 than watched, about three minutes across the screen, and every browser sees the same sky; the finer lumps drift a
-little faster than the clumps, so a clump changes shape as it goes rather than sliding by whole. **They are painted
-like the map, not photographed**: three flat tones meeting along lines a pixel soft, lit by the one light the hills
-are, from the upper right - a rim of the relief's cream where the sun strikes, white within, and a rim of white gone
-a little towards the relief's violet on the far side - with their edges broken by short strokes along the wind and
-no outline. The lumps a cumulus is built of show as rounded bumps in the outline. **Every cloud casts its shadow**,
-down and to the left, the way the hills' shading and the scenery's shadows fall: the cloud's own shape without its
-finest lumps, flat, in the relief's dusky violet, laid over whatever is under it, the haze included, half a clump
-from the cloud. How dark and how far are levers. **The clouds keep clear of the player's marks**: round each mark
+little faster than the clumps, so a clump changes shape as it goes rather than sliding by whole. **They are lit
+the way real cumulus is, in the map's own colours**: every lump a cumulus is built of has a face towards the light
+and one away from it, from the upper right as the hills are lit, so the white is never flat - the relief's cream on
+the faces the sun strikes, white between, white gone towards the relief's violet on the faces turned away - and the
+shading moves inside the white as the lumps drift and change. The tones run into each other; nothing is a band of
+fixed width along an edge, because that read as a slab cut out of card. A cloud's margin is thin, and the ground
+shows through it, before it thickens to whole. **Every cloud casts its shadow**, down and to the left, the way the
+hills' shading and the scenery's shadows fall: the cloud's own lumpy shape, soft-edged, in the relief's dusky
+violet, as dark as the cloud over it is thick, so a thin margin casts a faint one, laid over whatever is under it,
+the haze included, half a clump from the cloud. How dark and how far are levers. **The clouds keep clear of the player's marks**: round each mark
 they thin away from their own ragged edges, leaving a clear patch a little wider than the mark, and close again
 once they have drifted past; no shadow lies on a mark either. The marks are drawn over the clouds all the same. Every number of them is in
 `apps/web/src/sprites/clouds/look.ts`, and the light is `apps/web/src/map/light.ts`. See decision record 0098.

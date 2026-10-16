@@ -46,25 +46,40 @@ export const CLOUD_LOOK = {
   /** How much the patches the clumps gather in decide where there is cloud, against the clumps themselves. */
   patches: 0.35,
   /** How soft a cloud's edge is, in the field's own measure; never less than about a pixel. */
-  edge: 0.03,
+  edge: 0.035,
   /**
    * The brush their edges are broken by: how far it moves the cut, in the field's own measure, and its strokes'
    * length along the wind and width across, as shares of a clump. The length is one over a whole number, so the
    * strokes come round with the clumps.
    */
-  brush: { strength: 0.08, along: 0.25, across: 0.06 },
+  brush: { strength: 0.04, along: 0.25, across: 0.06 },
   /**
-   * The three flat tones: where a step of `litReach` of a clump towards the sun leaves the cloud, the relief's cream
-   * taken `litDepth` times as far from white; `middle` within; and where a step of `farReach` away from the sun leaves
-   * it, white taken `farSide` of the way to the relief's violet - a rim of light on the side the sun strikes and of
-   * shade on the far side.
+   * How a cloud is lit: by whether its first `lumps` sizes of noise rise or fall towards the sun over a step of
+   * `near` and one of `far` of a clump, the near one weighing `nearWeight`, times `contrast`. Lit full, it is the
+   * relief's cream taken `litDepth` times as far from white; in between, `middle`; shaded full, white taken
+   * `farSide` of the way to the relief's violet; and the three run into each other.
    */
-  tones: { middle: [0.97, 0.97, 0.98], litDepth: 1.6, farSide: 0.4, litReach: 0.1, farReach: 0.2 },
+  tones: {
+    middle: [0.97, 0.97, 0.98],
+    litDepth: 1.6,
+    farSide: 0.4,
+    lumps: 4,
+    near: 0.07,
+    far: 0.2,
+    nearWeight: 0.6,
+    contrast: 2.5,
+  },
+  /**
+   * How far above its cut a cloud's field rises before the cloud is whole, so its margins are thin and the ground
+   * shows through them; and the same for its shadow's darkness, so a thin margin casts a faint shadow.
+   */
+  thicken: 0.11,
+  shadowThicken: 0.15,
   /**
    * How dark a cloud's shadow is, nought to one, laid in the relief's violet over whatever is under it, the haze
    * included; and how far from its cloud it falls, away from the light, as a share of a clump.
    */
-  shadow: 0.4,
+  shadow: 0.5,
   reach: 0.5,
   /**
    * In the clouds, between `overFrom` and `inFrom`: the ring keeping the middle of the screen clear opens out to
@@ -81,6 +96,6 @@ export const CLOUD_LOOK = {
   lift: 0.7,
   clearing: 40,
   /** How opaque a cloud is at its thin edge, as a share of its middle, and at its middle. */
-  thin: 0.7,
+  thin: 0.5,
   opacity: 0.94,
 } as const;

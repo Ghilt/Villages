@@ -49,9 +49,15 @@ from noise laid along the wind and carried by the wall clock.**
   mark (`sprites/clouds/cloudClearings.ts`). The marks are drawn over the clouds regardless; the clearing is so the
   ground a mark stands on can be seen.
 - **One sun.** The clouds are lit, and cast their shadows, by the map's one light, `map/light.ts`, which the relief
-  reads too: a rim of the relief's cream on the side the sun strikes, a rim of its violet on the far side, and a
-  shadow falling away from the light, in the same violet, read from the same field at the cloud standing towards the
-  light from each pixel, so it keeps its cloud's shape.
+  reads too: each lump shaded by whether the field rises or falls towards the sun over a short step and a longer
+  one, running from the relief's cream through white to its violet, and a shadow falling away from the light, in the
+  same violet, read from the same field at the cloud standing towards the light from each pixel, so it keeps its
+  cloud's shape, and as dark as that cloud is thick.
+
+  *Amended 2026-10-16, on Adam's notes on what landed:* the first light was a rim of fixed width on each side, cut
+  crisp, beside a shadow as crisp; together they read as a slab of card, and the white between them was flat and
+  static. Real cumulus from above has neither: its lumps are lit and shaded each on its own, its margins thin out,
+  and a shadow is as dark as its cloud is thick.
 - **A shader that is a look**, so it is drawn at a level, off, low or high, high at every load, as decision
   record 0081's amendment asks of every shader added later. High is every pixel at twenty frames a second, low a
   quarter of them at ten. It asks the sprite canvas for frames at its level's rate while some cloud is on the

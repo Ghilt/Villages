@@ -92,8 +92,13 @@ const vec2 SUN = vec2(${float(SUN[0]!)}, ${float(SUN[1]!)});
 const vec3 LIT = vec3(${colour(LIT_SIDE)});
 const vec3 MIDDLE = vec3(${colour(T.middle)});
 const vec3 FAR_SIDE = vec3(${colour(FAR_SIDE)});
-const float LIT_REACH = ${float(T.litReach)};
-const float FAR_REACH = ${float(T.farReach)};
+const int LUMPS = ${T.lumps};
+const float LIGHT_NEAR = ${float(T.near)};
+const float LIGHT_FAR = ${float(T.far)};
+const float NEAR_WEIGHT = ${float(T.nearWeight)};
+const float CONTRAST = ${float(T.contrast)};
+const float THICKEN = ${float(CLOUD_LOOK.thicken)};
+const float SHADOW_THICKEN = ${float(CLOUD_LOOK.shadowThicken)};
 const float WARP = ${float(CLOUD_LOOK.warp)};
 const float BRUSH = ${float(B.strength)};
 const float BRUSH_ALONG = ${float(B.along)};
@@ -217,18 +222,19 @@ void main() {
   float cut = 0.47 + 0.35 * (1.0 - 2.0 * uCover) + BRUSH * stroke + lift;
   float soft = max(uEdge * (1.0 + MIST_EDGE * uInside), fwidth(field));
   float cloud = smoothstep(cut - soft, cut + soft, field);
-  // Thin at the edge, whole a little way in.
-  float body = mix(THIN, 1.0, smoothstep(cut, cut + 0.12, field));
+  // A cloud thickens over a span above its cut, so its margins are thin and the ground shows through them.
+  float thick = smoothstep(cut, cut + THICKEN, field);
+  float body = mix(THIN, 1.0, thick);
 
-  // Lit where a step towards the sun leaves the cloud, shaded where a step away from it does: a rim of cream on
-  // the side the sun strikes and of violet-grey on the far side, read off the clumps' larger shapes.
-  float towards = 0.5 + 0.5 * clumps(pushed + SUN * (LIT_REACH * uClumps.x), 3, scale) + patchHere + 0.04 * stroke;
-  float away = 0.5 + 0.5 * clumps(pushed - SUN * (FAR_REACH * uClumps.x), 3, scale) + patchHere + 0.04 * stroke;
-  // Flat tones meet along a line a pixel or so soft, as paint does, however soft the cloud's own edge is.
-  float tone = max(0.008, fwidth(towards));
-  float lit = 1.0 - smoothstep(cut - tone, cut + tone, towards);
-  float far = 1.0 - smoothstep(cut - tone, cut + tone, away);
-  vec3 rgb = mix(mix(MIDDLE, LIT, lit), FAR_SIDE, far * (1.0 - 0.5 * lit));
+  // Its light: whether the cloud rises or falls towards the sun here, over a short step and a longer one, read off
+  // its lumps as well as its larger shapes. Falling towards the sun is a lump's lit face, rising is the far face in
+  // its shade - so every lump is lit on one side and shaded on the other, and the shading moves inside the white as
+  // the lumps drift and change. The tones run into each other: violet-grey, white, the relief's cream.
+  float here = clumps(pushed, LUMPS, scale);
+  float near = clumps(pushed + SUN * (LIGHT_NEAR * uClumps.x), LUMPS, scale) - here;
+  float far = clumps(pushed + SUN * (LIGHT_FAR * uClumps.x), LUMPS, scale) - here;
+  float light = clamp(0.5 - CONTRAST * mix(far, near, NEAR_WEIGHT), 0.0, 1.0);
+  vec3 rgb = mix(mix(FAR_SIDE, MIDDLE, smoothstep(0.0, 0.5, light)), LIT, smoothstep(0.5, 1.0, light));
   // Among them they are mist: the tones run together towards white.
   rgb = mix(rgb, MIDDLE, MIST * uInside);
   // And the middle of the screen is kept clear by a ring that opens out as the camera comes down through them.
@@ -245,8 +251,9 @@ void main() {
   vec2 overPushed = over + warp(over);
   float shade = 0.5 + 0.5 * clumps(overPushed, 4, uScale) + uPatchWeight * patches(over);
   float shadowCut = cut - BRUSH * stroke + BRUSH * brush(overPushed, uScale);
-  float shadowSoft = max(uEdge * 1.5, fwidth(shade));
-  float shadowAlpha = smoothstep(shadowCut - shadowSoft, shadowCut + shadowSoft, shade) * uShadow;
+  // Soft, and as dark as the cloud over it is thick: a thin margin casts a faint shadow, a thick middle a full one.
+  float shadowSoft = max(uEdge * 2.0, fwidth(shade));
+  float shadowAlpha = smoothstep(shadowCut - shadowSoft, shadowCut + SHADOW_THICKEN, shade) * uShadow;
 
   // The cloud over its own shadow and the shadow over the ground, premultiplied.
   vec4 shadow = vec4(SHADE, 1.0) * shadowAlpha;

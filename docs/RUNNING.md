@@ -93,8 +93,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   moved, and invented land is given ground of the kind painted on it: rock a range, forest hills, farmland flat. A master with no height tiles is drawn flat and the log says what
   to run. Its numbers are in
   `apps/web/src/map/relief.ts` and `reliefTuning.ts`, and our shader is `reliefLayer.ts` and `reliefShader.ts`.
-- Clouds drift over the world from zoom 7 out, painted in three tones lit from the upper right, each with its violet
-  shadow down and to the left: clumps gathered in patches, whole from 6 out to 5.25, fading to
+- Clouds drift over the world from zoom 7 out, every lump lit cream from the upper right and shaded violet-grey
+  away from it, each cloud with its soft violet shadow down and to the left: clumps gathered in patches, whole from 6 out to 5.25, fading to
   nothing by 4.5, and between 7 and 6 drawn as the camera among them: swelling about the middle of the screen and
   sliding out past its edges, misty, the middle kept clear, their shadows fading, nothing left by 7. They lie
   over the fog's haze and under the marks and the ring, thinning away round each of your marks, drift with the sea's wind about three minutes across the
