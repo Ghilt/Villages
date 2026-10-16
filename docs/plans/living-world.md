@@ -138,7 +138,9 @@ the same sky. What a slot brings is worked out once when the slot comes round, n
 
 **How they move.** Four ways, which between them carry every cast:
 
-- **Flush**: a few birds burst out of cover together, fan out, climb, and flap and glide away, fading as they go.
+- **Flush**: a few birds burst out of cover together, fan out, climb, and flap and glide away, fading as they go,
+  some of them dropping into a tree near by instead; or a bird or two flit from one tree into another near it,
+  seeking shelter, Adam's addition of 2026-10-16.
 - **Hop**: a small animal bounds a few times from one piece of cover to another and is gone behind it.
 - **Leap**: a fish jumps clear of the water and falls back, a ring where it left and one where it fell.
 - **Soar**: a bird circles slowly high up, its shadow sweeping the ground below it and to the left.

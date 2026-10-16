@@ -110,16 +110,20 @@ stage alone, with none of the debug panel in it (decision record 0079).
   become the default; `reset` puts them back. See the amendment to `docs/adr/0052`.
 - Critters, from zoom 9 in, only where your house sees now, or everywhere with the fog lifted: every so often a few
   small birds burst out of a tree or a bush the scenery drew - in the woods, the scrub and the heath, and out of a
-  lone bush or tree in the open - fan out, climb, flap and glide away, fading as they go, each with a soft shadow
-  below it. The same birds leave the same bush at the same moment in every browser; one first seen in flight fades
+  lone bush or tree in the open - fan out, climb, flap and glide away, fading as they go, a few dropping into a tree
+  near by instead; or a bird or two flits from one tree into another near it, as if seeking shelter, and fades into
+  its leaves. Each has a soft shadow below it. The same birds leave the same bush at the same moment in every browser; one first seen in flight fades
   up; a player who asked for less motion sees none. They are drawn from the critters' atlas (`world:critters`,
   below). They are the **Critters** part of the Shaders section: `off`, `low` or `high` in its bar, low at every
   load, low moving them at fifteen frames a second and high at thirty, and beside it what is flying now, `3
-  songbirds`, or why there are none, `from zoom 9 in`, `off`. Inside it, two sliders: **how many**, from none to all
-  there can be, where fewer is always some of the same critters every browser has and never others, and **how
-  big**, as times the sizes in `apps/web/src/sprites/critters/look.ts`. They change the critters on the next frame,
-  are remembered in the browser that moved them, and once one stops the log says both under `critters` as
-  `critters tuned: …`, the line to hand over when a setting should become the default; `reset` puts them back.
+  songbirds`, or why there are none, `from zoom 9 in`, `off`. Inside it, three sliders: **how many**, from none to all
+  there can be, where fewer is always some of the same critters every browser has and never others; **how often, to
+  look at them**, from as often as a player sees them up to twenty times that, which keeps every critter of the
+  lower and adds more, until every cell of a wood has a flock at once - a lever for watching a behaviour, not
+  remembered, so every load is back at a player's; and **how big**, as times the sizes in
+  `apps/web/src/sprites/critters/look.ts`. They change the critters on the next frame, how many and how big are
+  remembered in the browser that moved them, and once one stops the log says them all under `critters` as `critters
+  tuned: …`, the line to hand over when a setting should become the default; `reset` puts them back.
   Every other number of theirs is in that `look.ts`, and who lives where is `casts.ts` beside it. See
   `docs/adr/0099`.
 - Clouds drift over the world from zoom 7 out, every lump lit cream from the upper right and shaded violet-grey

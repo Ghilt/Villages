@@ -417,7 +417,7 @@ there is scenery on the screen, and times a frame of the whole canvas, which is 
 **The critters are made up by the page** (0099): `sprites/critters/critterClock.ts` is a pure function of the
 place and the wall clock - a hash of a cell and a slot says whether a flock comes, out of which tree or bush of
 the scenery's own cells (`currentPointsOf`), which of the cast of the class under it (`casts.ts`), and how each bird
-flies - so nothing is stored or sent and every browser has the same ones. `CritterLayer.ts` asks it every frame for
+flies, away or into another tree near it - so nothing is stored or sent and every browser has the same ones. `CritterLayer.ts` asks it every frame for
 what is in flight over the view, where the fog's field says the house sees now (`visionAt`), and places a sprite a
 critter from the atlas `world:critters` cuts, and a shadow, in two containers inside the one the fog uncolours: the
 shadows under the scenery and the critters over it.

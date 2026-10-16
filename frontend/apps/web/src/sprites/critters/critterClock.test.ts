@@ -5,14 +5,15 @@ import { eventIn, eventsAt, lastsFor, posesOf, slotOf } from './critterClock';
 import type { Cover, CritterEvent, Ground } from './critterClock';
 import { CRITTERS_LOOK } from './look';
 
-/** A wood of oaks two world units apart, the house seeing all of it, unless told otherwise. */
-function wood(change: Partial<Ground> = {}, kind = 'oak', land = 'mixed-forest'): Ground {
+/** A wood of oaks so many world units apart, two unless told, the house seeing all of it, unless told otherwise. */
+function wood(change: Partial<Ground> = {}, kind = 'oak', land = 'mixed-forest', apart = 2): Ground {
   return {
     coverIn(fromX, fromY, toX, toY) {
       const cover: Cover[] = [];
-      for (let y = Math.ceil(fromY / 2) * 2; y < toY; y += 2) {
-        for (let x = Math.ceil(fromX / 2) * 2; x < toX; x += 2)
+      for (let y = Math.ceil(fromY / apart) * apart; y < toY; y += apart) {
+        for (let x = Math.ceil(fromX / apart) * apart; x < toX; x += apart) {
           cover.push({ x: x + 0.3, y: y + 0.7, kind, height: 4 });
+        }
       }
       return cover;
     },
@@ -26,10 +27,10 @@ const CELLS = { fromX: 2000, toX: 2040, fromY: 1000, toY: 1030 };
 /** An afternoon of 2026, in seconds of the wall clock. */
 const NOW = Date.UTC(2026, 9, 16, 15, 0, 0) / 1000;
 
-/** Every critter of the cells over an hour, by its key. */
-function anHour(density: number, ground = wood()): Map<string, CritterEvent> {
+/** Every critter of the cells over an hour, or as many seconds as said, by its key. */
+function anHour(density: number, ground = wood(), seconds = 3600): Map<string, CritterEvent> {
   const events = new Map<string, CritterEvent>();
-  for (let slot = slotOf(NOW); slot < slotOf(NOW + 3600); slot += 1) {
+  for (let slot = slotOf(NOW); slot < slotOf(NOW + seconds); slot += 1) {
     for (let cellY = CELLS.fromY; cellY <= CELLS.toY; cellY += 1) {
       for (let cellX = CELLS.fromX; cellX <= CELLS.toX; cellX += 1) {
         const event = eventIn(cellX, cellY, slot, density, ground);
@@ -72,11 +73,21 @@ describe("the critters' clock", () => {
     expect(eventsAt(CELLS, NOW, 0, wood())).toEqual([]);
   });
 
+  it('brings more as often goes up, keeping every one it had, until every cell is busy', () => {
+    const usual = anHour(CRITTERS_LOOK.density, wood(), 600);
+    const often = anHour(CRITTERS_LOOK.density * 20, wood(), 600);
+    expect(often.size).toBeGreaterThan(usual.size * 5);
+    for (const [key, event] of usual) expect(often.get(key)).toEqual(event);
+    // At its most every cell's slot in a wood brings something: forty-one cells by thirty-one, fifty slots.
+    expect(anHour(20, wood(), 600).size).toBe(41 * 31 * 50);
+  });
+
   it('brings a critter only where its kind lives and out of what it comes out of', () => {
-    expect(anHour(1, wood({}, 'boulder')).size).toBe(0);
-    expect(anHour(1, wood({}, 'oak', 'ocean')).size).toBe(0);
-    expect(anHour(1, wood({ classAt: () => null })).size).toBe(0);
-    for (const land of Object.keys(CASTS)) expect(anHour(1, wood({}, 'oak', land)).size).toBeGreaterThan(0);
+    expect(anHour(1, wood({}, 'boulder'), 600).size).toBe(0);
+    expect(anHour(1, wood({}, 'oak', 'ocean'), 600).size).toBe(0);
+    expect(anHour(1, wood({ classAt: () => null }), 600).size).toBe(0);
+    for (const land of Object.keys(CASTS))
+      expect(anHour(1, wood({}, 'oak', land), 600).size).toBeGreaterThan(0);
   });
 
   it('brings nothing where the house does not see now, nor where the scenery is not yet known', () => {
@@ -106,13 +117,48 @@ describe("the critters' clock", () => {
         }
         was = poses;
       }
-      // Just after it leaves a bird is at its cover, at the crown; just before it is gone it is nearly clear.
-      const first = posesOf(event, event.startsAt + 0.01, 3)[0]!;
-      expect(Math.hypot(first.x - event.from.x, first.y - event.from.y)).toBeLessThan(0.2);
-      expect(first.alpha).toBeLessThan(0.1);
-      const last = posesOf(event, event.startsAt + CRITTERS_LOOK.flush.seconds - 0.01, 3)[0]!;
-      expect(last.alpha).toBeLessThan(0.05);
+      // Just after it leaves a bird is at its cover, at the crown; just before it is gone it is nearly clear, and
+      // one taking shelter is at the tree it goes into.
+      for (const bird of event.birds) {
+        const alone = { ...event, birds: [bird] };
+        const first = posesOf(alone, event.startsAt + bird.delay + 0.01, 3)[0]!;
+        expect(Math.hypot(first.x - event.from.x, first.y - event.from.y)).toBeLessThan(0.2);
+        expect(first.alpha).toBeLessThan(0.1);
+        const last = posesOf(alone, event.startsAt + bird.delay + bird.seconds - 0.01, 3)[0]!;
+        expect(last.alpha).toBeLessThan(0.05);
+        if (bird.to !== null) expect(Math.hypot(last.x - bird.to.x, last.y - bird.to.y)).toBeLessThan(0.3);
+      }
     }
+  });
+
+  it('bursts a flock out of a tree, and flits a bird or two into the next tree, seeking shelter', () => {
+    const events = [...anHour(1).values()];
+    const flits = events.filter(
+      (event) => event.birds.length <= 2 && event.birds.every((bird) => bird.to !== null),
+    );
+    const bursts = events.filter((event) => event.birds.some((bird) => bird.to === null));
+    expect(flits.length).toBeGreaterThan(0);
+    expect(bursts.length).toBeGreaterThan(0);
+    // Some of a burst's birds drop into a tree near by too; every shelter is another tree, near enough.
+    expect(bursts.some((event) => event.birds.some((bird) => bird.to !== null))).toBe(true);
+    for (const bird of events.flatMap((event) => event.birds.map((one) => ({ one, from: event.from })))) {
+      if (bird.one.to === null) continue;
+      const away = Math.hypot(bird.one.to.x - bird.from.x, bird.one.to.y - bird.from.y);
+      expect(away).toBeGreaterThanOrEqual(CRITTERS_LOOK.flush.shelter[0]);
+      expect(away).toBeLessThanOrEqual(CRITTERS_LOOK.flush.shelter[1]);
+    }
+  });
+
+  it('only bursts out of a lone bush, with no other tree near to take shelter in', () => {
+    const open = [...anHour(1, wood({}, 'scrub', 'meadow', 40)).values()];
+    expect(open.length).toBeGreaterThan(0);
+    expect(open.every((event) => event.birds.every((bird) => bird.to === null))).toBe(true);
+  });
+
+  it('waits while the trees round a bird are not all known, rather than sending it elsewhere', () => {
+    const wide = (fromX: number, fromY: number, toX: number, toY: number) =>
+      toX - fromX > CRITTERS_LOOK.cell ? null : wood().coverIn(fromX, fromY, toX, toY);
+    expect(anHour(1, wood({ coverIn: wide }), 600).size).toBe(0);
   });
 
   it('beats its wings through the strip, forwards and back', () => {

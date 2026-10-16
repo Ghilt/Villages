@@ -25,6 +25,14 @@ const SLIDERS: readonly SliderDef<keyof CritterTuning>[] = [
     say: (value) => (value === 0 ? 'none' : `${Math.round(value * 100)}%`),
   },
   {
+    key: 'often',
+    label: 'How often, to look at them',
+    min: 1,
+    max: 20,
+    step: 1,
+    say: (value) => (value === 1 ? 'as often as a player sees them' : `${value} times as often`),
+  },
+  {
     key: 'size',
     label: 'How big',
     min: 0.5,

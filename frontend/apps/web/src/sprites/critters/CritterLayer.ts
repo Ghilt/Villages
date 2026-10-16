@@ -17,7 +17,7 @@ import { currentPointsOf, sceneryMap } from '../scenery/sceneryCells';
 import { critterCellOf, eventsAt, posesOf } from './critterClock';
 import { critterStore, readCritters } from './critterMode';
 import { critterTuningStore } from './critterTuning';
-import type { Ground } from './critterClock';
+import type { Cover, Ground } from './critterClock';
 import { CRITTERS_LOOK } from './look';
 
 /**
@@ -195,23 +195,24 @@ export function createCritterLayer(repaint: () => void, around: () => CritterSur
       const how = scenery();
       const map = sceneryMap();
       if (!how.on || map === null) return null;
-      const points = currentPointsOf(
-        how.tilesRoot,
-        Math.floor(fromX / CELL),
-        Math.floor(fromY / CELL),
-        how.dial,
-        how.spacing,
-        repaint,
-      );
-      if (points === undefined) return null;
-      return points
-        .filter((point) => point.x >= fromX && point.x < toX && point.y >= fromY && point.y < toY)
-        .map((point) => ({
-          x: point.x,
-          y: point.y,
-          kind: map.kinds[point.kind]?.name ?? '',
-          height: point.height,
-        }));
+      // Every one of the scenery's cells the square reaches, or nothing while any of them is not yet cut.
+      const cover: Cover[] = [];
+      for (let cellY = Math.floor(fromY / CELL); cellY <= Math.floor((toY - 1e-6) / CELL); cellY += 1) {
+        for (let cellX = Math.floor(fromX / CELL); cellX <= Math.floor((toX - 1e-6) / CELL); cellX += 1) {
+          const points = currentPointsOf(how.tilesRoot, cellX, cellY, how.dial, how.spacing, repaint);
+          if (points === undefined) return null;
+          for (const point of points) {
+            if (point.x < fromX || point.x >= toX || point.y < fromY || point.y >= toY) continue;
+            cover.push({
+              x: point.x,
+              y: point.y,
+              kind: map.kinds[point.kind]?.name ?? '',
+              height: point.height,
+            });
+          }
+        }
+      }
+      return cover;
     },
     classAt,
     sees(x, y) {
@@ -268,7 +269,7 @@ export function createCritterLayer(repaint: () => void, around: () => CritterSur
             toY: critterCellOf(Math.max(...south)) + 1,
           };
           const now = Date.now();
-          const events = eventsAt(cells, now / 1000, tuning.density, ground);
+          const events = eventsAt(cells, now / 1000, tuning.density * tuning.often, ground);
           const light = towardsTheLight();
           const live = new Set<string>();
           const placed: { sprite: Sprite; y: number }[] = [];

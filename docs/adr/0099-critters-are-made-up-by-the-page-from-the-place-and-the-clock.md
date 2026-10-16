@@ -22,7 +22,9 @@ out of the ones under it (0062, 0065).
 **A critter is made up by the page, from the place and the wall clock alone.** The ground is cut into cells eight
 world units across and the clock into slots of twelve seconds; a hash of a cell and a slot says whether anything
 comes there then, out of which tree or bush the scenery drew in the cell, which of the cast of the ground under it,
-when in the slot, and how each bird of a flock flies (`sprites/critters/critterClock.ts`). Nothing is stored, sent or
+when in the slot, and how each bird flies: off and away, or into another tree near by, a flock bursting out or a
+bird or two flitting to shelter (`sprites/critters/critterClock.ts`). A bird only takes shelter where every tree
+round it is known, so a browser that knows less waits rather than sending its birds somewhere else. Nothing is stored, sent or
 seen by the server, and every browser works out the same critters at the same moment, as every browser draws the
 same sky (0098). Whether a cell's slot brings anything is one draw against the density before anything else, so a
 lower density only takes critters away.

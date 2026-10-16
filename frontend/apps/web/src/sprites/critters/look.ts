@@ -27,13 +27,28 @@ export const CRITTERS_LOOK = {
   density: 0.4,
   /** How big each kind is drawn: how tall its frames stand, in world units. */
   kinds: {
-    songbird: { size: 0.9 },
+    songbird: { size: 0.55 },
     squirrel: { size: 0.45 },
     hare: { size: 0.55 },
     fish: { size: 0.6 },
   } as Record<string, { size: number } | undefined>,
-  /** A flock bursting out of cover together, fanning out, climbing, flapping and gliding away, fading as it goes. */
+  /**
+   * A flock bursting out of cover together, fanning out, climbing, flapping and gliding away, fading as it goes; or a
+   * bird or two flitting from one tree into another near it, seeking shelter. A burst's birds may drop into a tree
+   * near by too.
+   */
   flush: {
+    /** The share of the flights that are a bird or two flitting to shelter, rather than a flock bursting out. */
+    flits: 0.4,
+    /** The share of a bursting flock's birds that drop into a tree near by rather than flying off. */
+    settle: 0.35,
+    /** How near and how far another tree may stand for a bird to take shelter in it, in world units. */
+    shelter: [2.5, 10],
+    /** How fast a bird flies to its shelter, in world units a second, and the shortest and longest it takes. */
+    shelterSpeed: 3,
+    shelterSeconds: [1.2, 4],
+    /** The share of a flight to shelter a bird takes to drop into the crown, fading as it goes in. */
+    settleIn: 0.2,
     /** How many birds a flock has, the fewest and the most. */
     flock: [2, 5],
     /** How long a bird flies from its cover until it is gone, and how far it gets in that time. */
@@ -47,7 +62,7 @@ export const CRITTERS_LOOK = {
     /** How fast a wing beats, and the share of the flight it flaps before it glides, flapping again now and then. */
     flapsPerSecond: 9,
     flapping: 0.55,
-    /** The share of its flight a bird takes to come out of its cover whole, and to fade away at the end. */
+    /** The share of its flight away a bird takes to come out of its cover whole, and to fade away at the end. */
     fadeIn: 0.05,
     fadeOut: 0.35,
   },
