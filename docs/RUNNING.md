@@ -295,8 +295,13 @@ stage alone, with none of the debug panel in it (decision record 0079).
   in `world/catalogues/structures.json` as the page reads it, a row a type - what it gives its holder a month at
   each level, how far it sees and from which zoom it is drawn, its slots and what makes each count, its zone, and
   what each culture calls it. It reads the file again whenever it changes on disk; one it cannot read is said in
-  place of the table, naming the type and the field. The structures' sprites will stand there too. See
-  `docs/plans/structures.md`.
+  place of the table, naming the type and the field. **Every number and word in a cell can be changed there**: point
+  at it, type - a level at a time as `34 / 40 / 48` - and leave it or press Enter, and it is marked; the bar at the
+  top says how many changes the page holds and saves them, or discards them, and says what the game server runs on.
+  A save goes through the game server, which writes the file in its one form and takes it on at once, so a holder's
+  income moves with a yield; refused, the bar says why. What has no cell - a slot, a type added - is changed in **the
+  whole file**, folded at the foot. The structures' sprites will stand there too. See `docs/plans/structures.md` and
+  `docs/plans/catalogues.md`.
 - Every type standing at once: **Antarctica**. While the instruments are open the game server raises one structure of
   every type when it starts, held by nobody, at its first level, four to a row about six kilometres apart on the
   island off the tip of the Antarctic Peninsula, about 63.25 south and 56.03 west - the Antarctic castle at the

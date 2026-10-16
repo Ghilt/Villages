@@ -1,8 +1,16 @@
 import { CULTURES, parseStructureCatalogue } from '@villages/world';
-import type { StructureResource, StructureSlot, StructureTypeSpec } from '@villages/world';
+import type {
+  StructureCatalogue,
+  StructureResource,
+  StructureSlot,
+  StructureTypeSpec,
+} from '@villages/world';
 
+import { LevelsField, NumberField, WordsField } from './frame/Fields';
 import { InspectPage } from './frame/InspectPage';
-import { useCatalogue } from './frame/useCatalogue';
+import { SaveBar, WholeFile } from './frame/SaveBar';
+import { useCatalogueEditor } from './frame/useCatalogueEditor';
+import type { CatalogueEditor } from './frame/useCatalogueEditor';
 
 /** The resources as the page says them. */
 const SAID: Record<StructureResource, string> = {
@@ -19,19 +27,18 @@ function byLevel(values: readonly number[]): string {
 }
 
 /**
- * Every type of structure there is, as `world/catalogues/structures.json` says, for reading: what each gives its holder a
- * month at each level, how far it sees and how significant it is, its slots and what makes each count, its
- * zone, and what each culture calls it. Read through the dev server, and again whenever the file changes, so a
- * number changed in it is here at once; the game server reads the file only when it starts.
+ * Every type of structure there is, as `world/catalogues/structures.json` says, to read and to change: what each
+ * gives its holder a month at each level, how far it sees and how significant it is, its slots and what makes each
+ * count, its zone, and what each culture calls it. Read through the dev server, and again whenever the file changes.
  *
- * Its own page rather than a section of the debug panel, because it is not something the world does but a
- * catalogue to read, as the events and the components have theirs. The structures' sprites will stand here too,
- * a culture to a column. A file this cannot read is said in place of the table, naming the type and the field.
- * See docs/plans/structures.md.
+ * Every number and word in a cell is changed in place, a level at a time as `34 / 40 / 48`, and saved whole through
+ * the game server, which takes it on at once: a house's income moves with the yield. What has no cell - a slot, a
+ * type added - is changed in the whole file at the foot. A file this cannot read is said in place of the table,
+ * naming the type and the field. See docs/plans/structures.md and docs/plans/catalogues.md.
  */
 export function Structures() {
-  const reading = useCatalogue('structures.json', parseStructureCatalogue);
-  const read = reading.state === 'read' ? reading.shelved.value : null;
+  const editor = useCatalogueEditor('structures.json', parseStructureCatalogue);
+  const read = editor.value;
 
   return (
     <InspectPage
@@ -43,41 +50,52 @@ export function Structures() {
         </span>
       }
     >
-      {reading.state === 'reading' && (
+      <SaveBar editor={editor} />
+      {editor.reading.state === 'reading' && (
         <p className="inspect-quiet">reading world/catalogues/structures.json</p>
       )}
-      {reading.state === 'unread' && <p className="inspect-problem">{reading.problem}</p>}
-      {read !== null && (
-        <div className="inspect-scroll">
-          <table className="inspect-table">
-            <thead>
-              <tr>
-                <th>type</th>
-                <th>levels</th>
-                <th>significance</th>
-                <th>sees, km</th>
-                <th>gives a month</th>
-                <th>slots</th>
-                <th>zone</th>
-                <th>called</th>
-              </tr>
-            </thead>
-            <tbody>
-              {read.types.map((spec) => (
-                <TypeRow key={spec.type} spec={spec} />
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      {editor.reading.state === 'unread' && <p className="inspect-problem">{editor.reading.problem}</p>}
+      {read !== null && <TypesTable editor={editor} read={read} />}
+      <WholeFile editor={editor} />
     </InspectPage>
   );
 }
 
-function TypeRow({ spec }: { spec: StructureTypeSpec }) {
-  const gives = Object.entries(spec.yields).map(
-    ([resource, each]) => `${SAID[resource as StructureResource]} ${byLevel(each)}`,
+function TypesTable({
+  editor,
+  read,
+}: {
+  editor: CatalogueEditor<StructureCatalogue>;
+  read: StructureCatalogue;
+}) {
+  return (
+    <div className="inspect-scroll">
+      <table className="inspect-table">
+        <thead>
+          <tr>
+            <th>type</th>
+            <th>levels</th>
+            <th>significance</th>
+            <th>sees, km</th>
+            <th>gives a month</th>
+            <th>slots</th>
+            <th>zone</th>
+            <th>called</th>
+          </tr>
+        </thead>
+        <tbody>
+          {read.types.map((spec) => (
+            <TypeRow key={spec.type} editor={editor} spec={spec} />
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
+}
+
+function TypeRow({ editor, spec }: { editor: CatalogueEditor<StructureCatalogue>; spec: StructureTypeSpec }) {
+  const at = ['types', spec.type] as const;
+  const resources = Object.keys(spec.yields) as StructureResource[];
   return (
     <tr>
       <th scope="row">
@@ -85,15 +103,26 @@ function TypeRow({ spec }: { spec: StructureTypeSpec }) {
         <span className="inspect-key">{spec.type}</span>
       </th>
       <td>{spec.levels}</td>
-      <td>{byLevel(spec.significance)}</td>
-      <td>{byLevel(spec.sightKm)}</td>
       <td>
-        {gives.length === 0 ? (
+        <LevelsField editor={editor} path={[...at, 'significance']} label={`${spec.type} significance`} />
+      </td>
+      <td>
+        <LevelsField editor={editor} path={[...at, 'sightKm']} label={`${spec.type} sight`} />
+      </td>
+      <td>
+        {resources.length === 0 ? (
           <span className="inspect-quiet">nothing but sight</span>
         ) : (
           <ul className="inspect-list">
-            {gives.map((one) => (
-              <li key={one}>{one}</li>
+            {resources.map((resource) => (
+              <li key={resource}>
+                {SAID[resource]}{' '}
+                <LevelsField
+                  editor={editor}
+                  path={[...at, 'yields', resource]}
+                  label={`${spec.type} ${SAID[resource]} a month`}
+                />
+              </li>
             ))}
           </ul>
         )}
@@ -109,12 +138,26 @@ function TypeRow({ spec }: { spec: StructureTypeSpec }) {
           </ul>
         )}
       </td>
-      <td>{spec.zone === null ? <span className="inspect-quiet">none</span> : `reach ${spec.zone.reach}`}</td>
+      <td>
+        {spec.zone === null ? (
+          <span className="inspect-quiet">none</span>
+        ) : (
+          <>
+            reach{' '}
+            <NumberField editor={editor} path={[...at, 'zone', 'reach']} label={`${spec.type} zone reach`} />
+          </>
+        )}
+      </td>
       <td>
         <ul className="inspect-list">
           {CULTURES.map((culture) => (
             <li key={culture}>
-              <span className="inspect-key">{culture}</span> {spec.words[culture]}
+              <span className="inspect-key">{culture}</span>{' '}
+              <WordsField
+                editor={editor}
+                path={[...at, 'words', culture]}
+                label={`${spec.type}, ${culture}`}
+              />
             </li>
           ))}
         </ul>

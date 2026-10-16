@@ -110,3 +110,102 @@
     padding: 1rem;
   }
 }
+
+/* Editing a catalogue (Fields.tsx, SaveBar.tsx): a cell reads as text until pointed at, a change is marked. */
+
+.inspect-field {
+  box-sizing: content-box;
+  max-width: 100%;
+  padding: 0.1rem 0.2rem;
+  margin: -0.1rem -0.2rem;
+  font: inherit;
+  color: inherit;
+  font-variant-numeric: tabular-nums;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 2px;
+}
+
+.inspect-field--wide {
+  min-width: 12rem;
+}
+
+.inspect-field:hover {
+  border-color: var(--parchment-edge);
+}
+
+.inspect-field:focus {
+  background: #fffdf6;
+  border-color: var(--ink-soft);
+  outline: none;
+}
+
+.inspect-field.is-edited {
+  background: #f3e3b5;
+}
+
+.inspect-field.is-wrong {
+  border-color: #8f1d2f;
+}
+
+.inspect-save {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.3rem 1rem;
+  padding: 0.5rem 0;
+  margin-bottom: 0.8rem;
+  background: #fbf7ec;
+  border-bottom: 1px solid var(--parchment-edge);
+}
+
+.inspect-save__changes {
+  font-variant-numeric: tabular-nums;
+}
+
+.inspect-button {
+  padding: 0.25rem 0.7rem;
+  font-family: inherit;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink);
+  cursor: pointer;
+  background: none;
+  border: 1px solid var(--parchment-edge);
+  border-radius: 2px;
+}
+
+.inspect-button:hover:not(:disabled) {
+  border-color: var(--ink-soft);
+}
+
+.inspect-button:disabled {
+  color: var(--ink-soft);
+  cursor: default;
+  opacity: 0.6;
+}
+
+.inspect-whole {
+  margin-top: 1.5rem;
+}
+
+.inspect-whole summary {
+  cursor: pointer;
+  color: var(--ink-soft);
+}
+
+.inspect-whole__text {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 24rem;
+  margin: 0.6rem 0;
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  background: #fffdf6;
+  border: 1px solid var(--parchment-edge);
+}

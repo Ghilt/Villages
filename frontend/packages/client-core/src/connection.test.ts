@@ -61,6 +61,15 @@ describe('the connection', () => {
     expect(fake.sent).toEqual([{ type: 'watchEvents', on: true }]);
   });
 
+  it('asks what the catalogues are for an inspect page, and nothing about a player', () => {
+    const fake = fakeSocket();
+
+    connect({ socket: fake.socket, protocolVersion: 1, watchCatalogues: true });
+    fake.gatewayOpens();
+
+    expect(fake.sent).toEqual([{ type: 'watchCatalogues', on: true }]);
+  });
+
   it('hands decoded frames to whoever is listening', () => {
     const fake = fakeSocket();
     const heard: ServerFrame[] = [];

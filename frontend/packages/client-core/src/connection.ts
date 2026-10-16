@@ -30,6 +30,8 @@ export interface ConnectionOptions {
   master?: string;
   /** Whether to ask for every stored event, which a viewer wants and a player does not. */
   watchEvents?: boolean;
+  /** Whether to ask what the game server's catalogues are, which an inspect page wants. See 0097. */
+  watchCatalogues?: boolean;
 }
 
 export interface Connection {
@@ -45,7 +47,7 @@ export interface Connection {
 
 /**
  * Opens the conversation: hello on open when there is a player to introduce, then optionally
- * watchEvents, then whatever the interface sends. Nothing about reconnecting yet; that is 1.9 proper.
+ * watchEvents and watchCatalogues, then whatever the interface sends. Nothing about reconnecting yet; that is 1.9 proper.
  */
 export function connect(options: ConnectionOptions): Connection {
   const { socket } = options;
@@ -76,6 +78,7 @@ export function connect(options: ConnectionOptions): Connection {
       send({ type: 'hello', playerToken: playing, protocolVersion: options.protocolVersion, ...drawing });
     }
     if (options.watchEvents === true) send({ type: 'watchEvents', on: true });
+    if (options.watchCatalogues === true) send({ type: 'watchCatalogues', on: true });
   });
 
   socket.onMessage((text) => {
