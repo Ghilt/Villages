@@ -9,6 +9,7 @@ import { buildApi } from './vite/build.ts';
 import { catalogueApi } from './vite/catalogueApi.ts';
 import { eventsApi } from './vite/eventsApi.ts';
 import { maplibreWorker } from './vite/maplibreWorker.ts';
+import { performanceApi } from './vite/performanceApi.ts';
 import { portraitsApi } from './vite/portraitsApi.ts';
 import { scenesApi } from './vite/scenesApi.ts';
 import { spriteMarksApi } from './vite/spriteMarksApi.ts';
@@ -33,7 +34,8 @@ export default defineConfig({
   // events' page; and artApi cuts world/sprites again whenever a picture in it
   // is saved, as uiArtApi does world/ui, and structuresArtApi
   // the structures' own folder in it. maplibreWorker is the build's alone: it puts MapLibre's worker beside
-  // the chunk MapLibre was bundled into, where a built page looks for it. See decision record 0080.
+  // the chunk MapLibre was bundled into, where a built page looks for it. See decision record 0080. performanceApi
+  // serves the history of swarm runs to the performance page.
   plugins: [
     react(),
     worldApi(),
@@ -47,6 +49,7 @@ export default defineConfig({
     structuresArtApi(),
     uiArtApi(),
     worktreeApi(),
+    performanceApi(),
     buildApi(),
     maplibreWorker(),
   ],

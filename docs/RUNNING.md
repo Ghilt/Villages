@@ -809,7 +809,13 @@ and `-- --drop` takes them off; by hand only.
   and p99, failures, bots lost, the server's heap after a collection, its threads and its CPU over the stage, read
   from outside with `jcmd`; then where it bent and why. The server it started is stopped however the run ends, Ctrl+C
   included, and its log is `.logs/swarm-server.log`. `--args="--stages=100,500 --hold=20"` makes a short run, and
-  `--warm-up=0` leaves the warm-up out. It is minutes long and loads the whole machine, so no check runs it.
+  `--warm-up=0` leaves the warm-up out. `--histogram` saves what the server's heap holds by class after each stage, in
+  `.logs/swarm-histogram-<players>.txt`, which is how a player's cost is found. It is minutes long and loads the whole machine, so no check runs it.
+- **The performance page**, `/admin/inspect-performance`, charts the history of runs written down below: the latest run's players carried and
+  where it bent, then run by run the players each carried and the slowest twentieth of each round trip at the largest
+  load every run carried, so a step that cost something shows as a drop; then one run, picked by its commit and time,
+  stage by stage, with the server's heap after a collection and a table of every number. A `*` after a commit is a
+  run of a tree with changes beyond it. It reads the file fresh at a reload, so a run just finished is on it.
 - **Every run is written down**, once, when it ends, as one line of `docs/experiments/performance/runs.jsonl`: when,
   the commit and branch it measured and whether the tree had changes beyond it, the machine, the settings, the
   server's heap limit (8 GB, pinned so that runs compare), where it bent and why, and every stage's numbers. A run

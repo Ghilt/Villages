@@ -1,0 +1,136 @@
+/* The performance page: the history of swarm runs, charted on the paper every inspect page stands on. */
+
+.perf-headline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  max-width: 64rem;
+  margin-bottom: 1.5rem;
+}
+
+.perf-headline .inspect-said {
+  flex-basis: 100%;
+}
+
+.perf-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 14rem;
+  padding: 0.8rem 1rem;
+  background: #fffdf6;
+  border: 1px solid var(--parchment-edge);
+  border-radius: 3px;
+}
+
+.perf-tile__value {
+  font-size: 2rem;
+  color: var(--ink);
+}
+
+.perf-tile__words {
+  color: var(--ink-soft);
+}
+
+.perf-chart {
+  position: relative;
+  max-width: 48rem;
+  margin: 0.5rem 0 1.25rem;
+}
+
+.perf-chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.perf-chart__grid {
+  stroke: var(--parchment-edge);
+  stroke-width: 1;
+}
+
+.perf-chart__tick,
+.perf-chart__unit {
+  font-size: 11px;
+  fill: var(--ink-soft);
+}
+
+.perf-chart__threshold {
+  stroke: var(--ink-soft);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+}
+
+.perf-chart__cross {
+  stroke: var(--ink-soft);
+  stroke-width: 1;
+  opacity: 0.5;
+}
+
+.perf-chart__line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.perf-chart__point {
+  stroke: #fffdf6;
+  stroke-width: 2;
+}
+
+.perf-chart__hit {
+  fill: transparent;
+}
+
+.perf-chart__legend {
+  display: flex;
+  gap: 1rem;
+  color: var(--ink-soft);
+}
+
+.perf-chart__legend i,
+.perf-chart__tip i {
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 2px;
+}
+
+.perf-chart__tip {
+  position: absolute;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.4rem 0.6rem;
+  color: var(--ink);
+  pointer-events: none;
+  background: #fffdf6;
+  border: 1px solid var(--parchment-edge);
+  border-radius: 3px;
+  box-shadow: 0 2px 8px rgb(60 40 20 / 12%);
+  transform: translateX(-50%);
+}
+
+.perf-pick {
+  margin-left: 0.5rem;
+  font: inherit;
+  font-size: 0.85em;
+}
+
+.perf-table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.perf-table td,
+.perf-table th {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.perf-table__warm {
+  color: var(--ink-soft);
+}

@@ -111,6 +111,13 @@ export const INSPECT_VIEWS: readonly InspectView[] = [
     load: () => import('./pictures/Pictures').then((page) => page.Pictures),
   },
   {
+    path: '/admin/inspect-performance',
+    title: 'Performance',
+    what: 'How many players one game server carries before it bends, run by run, from the history the bot swarm writes.',
+    needs: 'nothing',
+    load: () => import('./performance/Performance').then((page) => page.Performance),
+  },
+  {
     path: '/admin/inspect-architecture',
     title: 'Architecture',
     what: 'How the world is set up: what is baked beforehand, how long each step takes, and what the running game reads.',
