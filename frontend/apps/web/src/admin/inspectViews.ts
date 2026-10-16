@@ -90,6 +90,13 @@ export const INSPECT_VIEWS: readonly InspectView[] = [
     catalogue: 'quests',
   },
   {
+    path: '/admin/inspect-pictures',
+    title: 'Pictures',
+    what: 'Every picture the world is drawn with - scenery, structures, marks, portraits, scenes - painted or a placeholder.',
+    needs: 'nothing',
+    load: () => import('./pictures/Pictures').then((page) => page.Pictures),
+  },
+  {
     path: '/admin/inspect-architecture',
     title: 'Architecture',
     what: 'How the world is set up: what is baked beforehand, how long each step takes, and what the running game reads.',

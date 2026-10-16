@@ -677,6 +677,12 @@ and `-- --drop` takes them off; by hand only.
   World section links it. A new page beside the game is one entry in `apps/web/src/admin/inspectViews.ts`, its
   `import()` with it, which is all `main.tsx` routes by, and it stands in the frame every page shares,
   `admin/frame/InspectPage.tsx`: the bar with the page's name, what it keeps there, and the way back.
+- **`/admin/inspect-pictures`** is every picture the world is drawn with, and needs nothing else running: the
+  scenery and the structures as their atlases were cut, a structure a culture to a column, each painted or still a
+  placeholder, its size and the file it came from; the marks' pictures in `world/sprites/marks/` and its folders, the
+  dev server saying of each whether its bytes are still the placeholder the tools drew; the portraits; the scenes. It
+  changes nothing: Adam paints the files, as `AUTHORING-THE-ART.md` says, and a tree that has cut no atlas yet says
+  which tool cuts it.
 - **`/admin/inspect-architecture`** is how the world is set up, and needs nothing else running. Along the top,
   the numbers: how long a brand-new worktree takes to the game with its world borrowed, how long a master's
   world takes from its painting when nobody has made it, how many tools bake it, and how many baked files the
