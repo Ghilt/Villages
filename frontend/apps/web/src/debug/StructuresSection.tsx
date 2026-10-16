@@ -35,7 +35,7 @@ interface StructuresSectionProps {
  * his own house's or nobody's, Antarctica's sixteen raised again after a wipe has taken them, and the one whose window
  * is open handed to his house, standing in for a story handing it over or a house taking it; its level, its slots
  * filled and emptied, its ruin. Each is a real
- * command, said in the log under `structures` with its answer, and each raising is an event on the event page. The
+ * command, said in the log under `structures` with its answer, and each raising is an event in the events log. The
  * types are the catalogue's, read as `/admin/inspect-structures` reads it, so a type added there is here on a reload.
  * See docs/plans/structures.md.
  */

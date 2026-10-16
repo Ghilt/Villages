@@ -1,7 +1,7 @@
 /**
  * Where a link asked the game to open, and how close: `/?at=<lat>,<lon>&zoom=<z>`.
  *
- * The event page's map link writes it and the map reads it once, when it is made, so a link opens the game over
+ * The events log's map link writes it and the map reads it once, when it is made, so a link opens the game over
  * the place an event names rather than over the house's seat. Only the camera moves: the fog is the window's, so
  * a place the house cannot see is opened on as it is. See docs/RUNNING.md.
  */

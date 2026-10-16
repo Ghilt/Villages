@@ -4,9 +4,10 @@ import { useState } from 'react';
 
 import { CULTURES, markKey, pictureKey } from '@villages/world';
 
-import { Cut, useAtlas, useJson } from '../frame/Atlas';
+import { Cut, useAtlas } from '../frame/Atlas';
 import type { Atlas } from '../frame/Atlas';
 import { InspectPage } from '../frame/InspectPage';
+import { useJson } from '../frame/useJson';
 
 /** How tall a picture is drawn on the page, at most. */
 const TALL = 96;

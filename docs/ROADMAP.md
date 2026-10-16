@@ -169,7 +169,7 @@ Wanted, not started, and each needs a hypothesis in `docs/experiments/` before a
   credit is in `AUTHORING-THE-WORLD.md` and there is nowhere in the game a player could find it. An about
   or credits surface, before anything is released.
 - **Opening the instruments to Adam alone.** They can be closed: `villages.instruments=false` refuses every
-  lever and the four looks - the event page, seeing everything, the fog's switch and the wipe - to every
+  lever and the four looks - the events log, seeing everything, the fog's switch and the wipe - to every
   socket, and the player's own commands go on (0076). What is not built is keeping them open for Adam on a
   server others play on, which wants an identity of his own; until then a shared server runs them closed.
   That has to stand before any dialogue carries the setting's secret, which the server otherwise holds back

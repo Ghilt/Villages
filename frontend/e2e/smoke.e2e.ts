@@ -7,7 +7,7 @@ import { startGame, stopGame, testPorts } from './servers.ts';
  * The game end to end, as a player meets it: the map drawn, a house founded from the parchment, a second window
  * seeing the founding as it happens, an action taken with Take action - a roll paid for, a hand dealt, a card
  * played - and the house still the player's after the game server is stopped and started again. What it reads is
- * what Adam reads, the debug panel's log and the event page; what it presses is what a player presses.
+ * what Adam reads, the debug panel's log and the events log; what it presses is what a player presses.
  */
 test('the map, a house founded, another window seeing it, an action taken, and a restart that forgets nothing', async ({
   browser,
@@ -29,7 +29,7 @@ test('the map, a house founded, another window seeing it, an action taken, and a
   });
 
   await test.step('another window watches the world happening', async () => {
-    await watcher.goto('/admin/inspect-events');
+    await watcher.goto('/admin/inspect-events-log');
     await expect(watcher.locator('.log__link--open')).toBeVisible();
   });
 

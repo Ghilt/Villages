@@ -29,6 +29,13 @@ export const INSPECT_VIEWS: readonly InspectView[] = [
   {
     path: '/admin/inspect-events',
     title: 'Events',
+    what: 'Every type of event the world can record, as docs/EVENTS.md lists them: what each carries and means, what writes it and reads it, and a sample.',
+    needs: 'nothing',
+    load: () => import('./events/Events').then((page) => page.Events),
+  },
+  {
+    path: '/admin/inspect-events-log',
+    title: 'Events log',
     what: 'Every event the world stores, as it is stored, and what happens next as it happens.',
     needs: 'the game server',
     load: () => import('./EventLog').then((page) => page.EventLog),

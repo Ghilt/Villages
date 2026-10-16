@@ -340,7 +340,7 @@ Commands are added here as the increments land:
   border from a picture of a frame, and `drop-gone-worlds` drops the MongoDB worlds and RabbitMQ virtual hosts of
   worktrees that are gone (`--list` first), which the quick start runs itself at every start. See decision 0082.
 - What the running program does, part by part, is `docs/RUNNING.md`: the debug panel and every section of
-  it, the player's own levers, the fog, the event page and the component library, and Adam's folders of
+  it, the player's own levers, the fog, the events log and the component library, and Adam's folders of
   pictures with the tools that cut them. A step that changes what a part of it does changes its entry there
   in the same commit. Three rules about the panel stay here. **Everything in it is in a folding section, and
   a step that puts something there says which section** - and asks when that is not obvious from what Adam
@@ -370,7 +370,7 @@ Commands are added here as the increments land:
   this tree's own database and outlives the server (0092); with `--villages.broker=rabbit` too, which the quick
   start also gives it, RabbitMQ carries every event stored, in this tree's own virtual host (0094).
   `--villages.instruments=false` closes Adam's instruments: every lever
-  of the debug panel and the event page, seeing everything, the fog's switch and the wipe are refused
+  of the debug panel and the events log, seeing everything, the fog's switch and the wipe are refused
   `instrumentsClosed`, and the player's own commands go on. See decision record 0076.
 - Backend, checks: `cd backend` then `./gradlew check`. Gradle fetches the JDK 21 the toolchain asks for, so
   `JAVA_HOME` may stay on the Temurin 17 that is installed; the first run downloads it. Every module's

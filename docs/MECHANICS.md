@@ -310,7 +310,7 @@ option of a choice can grant a resource too, on the wire from version 14. `Compl
 where the walk says one is open, and writes what the line gives, and the end when it ends it, from the same
 decision, so a reward is paid once on every path; a conversation of forty lines writes a handful of events.
 The debug panel's Dialogues section offers a dialogue from `world/catalogues/dialogues/` by its name, the first a
-letter from the coast spoken by the house's first key figure and a messenger, from wire version 15, and the event page shows what was offered whole. A read model
+letter from the coast spoken by the house's first key figure and a messenger, from wire version 15, and the events log shows what was offered whole. A read model
 keeps every dialogue a house was offered and how far each has got, and the player is sent each one as far as
 it has reached, from wire version 16: the lines past the next step, what a line will give and the
 requirements stay on the server. An option can spend, from version 17, and is refused while the house cannot

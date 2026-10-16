@@ -159,7 +159,7 @@ debug panel prints.
 With `villages.broker=rabbit`, which needs MongoDB and which the quick start passes with it, the world is a
 `CarriedWorld`: **the bridge** follows the store durably and publishes every event it stores to RabbitMQ's
 `villages.events`, in a virtual host of the tree's own that the server makes as it starts (decision record
-0094). The read models, the recent events and the event page then follow **the broker feed**: the same feed,
+0094). The read models, the recent events and the events log then follow **the broker feed**: the same feed,
 its live half taken from RabbitMQ, each follower through an exclusive queue named after it. The reactions follow
 the store itself, `storeFeed`, so the world goes on acting while the broker is away and only the view of it
 falls behind until the followers have made their queues again and read the history. Without the broker every

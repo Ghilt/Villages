@@ -7,6 +7,7 @@ import { defineConfig } from 'vite';
 import { artApi } from './vite/artApi.ts';
 import { buildApi } from './vite/build.ts';
 import { catalogueApi } from './vite/catalogueApi.ts';
+import { eventsApi } from './vite/eventsApi.ts';
 import { maplibreWorker } from './vite/maplibreWorker.ts';
 import { portraitsApi } from './vite/portraitsApi.ts';
 import { scenesApi } from './vite/scenesApi.ts';
@@ -27,8 +28,9 @@ export default defineConfig({
   // worldApi is the dev server's own answer to "what masters are there, and cut me that one", and worldFiles
   // sends the cut world itself, unwatched, because fifty thousand watched tiles slowed every answer;
   // portraitsApi and scenesApi serve Adam's portraits and scenes folders without a cache, so a picture
-  // saved over another shows, spriteMarksApi the marks' pictures for the pictures' page, and catalogueApi
-  // serves world/catalogues/ the same way; and artApi cuts world/sprites again whenever a picture in it
+  // saved over another shows, spriteMarksApi the marks' pictures for the pictures' page, catalogueApi
+  // serves world/catalogues/ the same way, and eventsApi docs/EVENTS.md and the events' samples for the
+  // events' page; and artApi cuts world/sprites again whenever a picture in it
   // is saved, as uiArtApi does world/ui, and structuresArtApi
   // the structures' own folder in it. maplibreWorker is the build's alone: it puts MapLibre's worker beside
   // the chunk MapLibre was bundled into, where a built page looks for it. See decision record 0080.
@@ -40,6 +42,7 @@ export default defineConfig({
     scenesApi(),
     spriteMarksApi(),
     catalogueApi(),
+    eventsApi(),
     artApi(),
     structuresArtApi(),
     uiArtApi(),

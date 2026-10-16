@@ -37,8 +37,8 @@ const NAMES = ['Ravenscar', 'Hollin', 'Thornwick', 'Ashby', 'Greymere', 'Corvane
 /** How many the seeding button founds at once: enough to see a region fill, few enough to read the log. */
 const SEED = 20;
 
-/** Where the events are read: its own page, which watches the world without playing in it. */
-const INSPECT_EVENTS = '/admin/inspect-events';
+/** Where the events are read as they are stored: the events log, a page that watches the world without playing in it. */
+const EVENTS_LOG = '/admin/inspect-events-log';
 
 /** A name a house might have. The house's identity is the server's business; this is only what to call it. */
 function aName(): string {
@@ -144,7 +144,7 @@ export function WorldSection({ map }: WorldSectionProps) {
     <Section name="World" tools={tools}>
       {levers}
       <p className="debug__quiet">
-        Events are at <a href={INSPECT_EVENTS}>{INSPECT_EVENTS}</a>, every inspect view at{' '}
+        The events log is at <a href={EVENTS_LOG}>{EVENTS_LOG}</a>, every inspect view at{' '}
         <a href="/admin">/admin</a>
       </p>
     </Section>

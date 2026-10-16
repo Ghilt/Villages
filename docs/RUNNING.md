@@ -137,7 +137,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
   **The log is not a section but a column of its own**, the whole height of the panel on its outer side,
   so what a button did is in view while the button is. It begins folded: the `log` toggle in the panel's
   header, beside `landscape`, opens it and `hide` in its own bar folds it away again. The events themselves are not in the
-  panel: they are at **`/admin/inspect-events`**, a page of their own that watches the world without
+  panel: they are in **the events log**, at **`/admin/inspect-events-log`**, a page of their own that watches the world without
   playing in it, one line an event opening to the whole thing as the store holds it, and under it a row of where
   it leads: for now **on the map**, on every event whose data names a place - the first latitude and longitude in
   it, so a structure raised, a house founded, a person who moved, vision gained, the first seat a choice offered.
@@ -192,7 +192,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
   `put them here` (where the camera is looking; drawn from about camera zoom 8.5 in), `take off the
   map` and `kill`, every one a real command: the asking and the answer are lines of the log under
   `characters`, and what changed is a third; a move is a fourth, under `cells`, naming who arrived. The stat levers stay pressable at one and at twenty, so a
-  refusal is seen rather than guessed. The events are at `/admin/inspect-events`. See `docs/adr/0055`.
+  refusal is seen rather than guessed. The events are at `/admin/inspect-events-log`. See `docs/adr/0055`.
 - Dialogues, in the same panel: the **Dialogues** section, below Characters. `offer a dialogue` offers the
   house the dialogue chosen beside it, by its name in `world/catalogues/dialogues/`, a file each, which the list
   follows as files come and go. The first is the letter from the coast, spoken by the house's first key figure and
@@ -212,7 +212,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
   puts there, and `kill` on the speaker in Characters loses every open dialogue they speak in. The page names
   the dialogue and sends none of its words, and a requirement is never sent to a page. The asking and the
   answer are lines of the log under `dialogues`, and so is where each dialogue stands whenever one changes,
-  as far as the player may know it; the dialogue itself, whole, is at `/admin/inspect-events`. In the game,
+  as far as the player may know it; the dialogue itself, whole, is at `/admin/inspect-events-log`. In the game,
   the house's first dialogue puts up the **dialogues** pane, a column down the right of the spread with its
   three sizes - put away, a strip along the bottom; opened out, it puts the corner back to its normal size,
   and opening the corner out puts it back, a line of the log under `bay` saying both - and a pane navigation
@@ -242,7 +242,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
   a castle held on an island and sixty wealth delivered, the other road lost. **That one lever is all the debug
   panel does for quests**: it stands in for the world, which offers none yet, and meeting, collecting and seeing how
   one ended are the player's. The page names the quest and sends none of its words. The asking and the answer are
-  lines of the log under `quests`; the quest itself, whole, and every move in it are at `/admin/inspect-events`,
+  lines of the log under `quests`; the quest itself, whole, and every move in it are at `/admin/inspect-events-log`,
   the offer and the abbot's dialogue in one story, and finishing the dialogue writes the move past the gate and
   the road lost in the story of its last step. The page is sent the quest as its walk draws it, and the log under `quests`
   says where each stands - *stands at "A light on the water", 1 of 2 ticked; lost "A gift to the mission"* - whenever one
@@ -315,7 +315,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
   Ocean (North Sea today)`, *a lake nobody has named*, *no water there* or *under the fog*. Take action with a
   window on water open reads it as an omen, *Inspecting the Vistula*: the page says where the window was opened and
   the server says what is there, on ground the house has revealed. See `docs/adr/0087`.
-- The structures there can be: **`/admin/inspect-structures`**, a page of its own as the events have, is every type
+- The structures there can be: **`/admin/inspect-structures`**, a page of its own as the events' types have, is every type
   in `world/catalogues/structures.json` as the page reads it, a row a type - what it gives its holder a month at
   each level, how far it sees and how significant it is, its slots and what makes each count, its zone, and
   what each culture calls it, **with the type's pin beside its name and its picture in each culture beside that
@@ -331,19 +331,19 @@ stage alone, with none of the debug panel in it (decision record 0079).
 - Every type standing at once: **Antarctica**. While the instruments are open the game server raises one structure of
   every type when it starts, held by nobody, at its first level, four to a row about six kilometres apart on the
   island off the tip of the Antarctic Peninsula, about 63.25 south and 56.03 west - the Antarctic castle at the
-  north-west corner. Each is a `villages.structure.raised.v1` on the event page, sixteen of them at every start,
+  north-west corner. Each is a `villages.structure.raised.v1` in the events log, sixteen of them at every start,
   and an id worked out from its type means a server starting over a kept world raises none twice; a world kept
   from before they moved keeps them where they were first raised. A wipe takes them with everything else, and the
   Structures section's **raise Antarctica again** puts back whichever are gone. All sixteen are on the screen at
   once from zoom 9 over the island, and every window sees them through the fog while the instruments are open, as
   if they stood in its vision, what their slots hold included; with *see everything* on, below the zoom each
-  one's significance is drawn from too; **on the map** under each one's `raised` on the event page opens the game
+  one's significance is drawn from too; **on the map** under each one's `raised` in the events log opens the game
   over it.
   The map mark in the Structures bar, there folded or open, flies the camera to the island at zoom 9.
 - Raising one where you look: the **Structures** section of the debug panel, after Resources. A type from the
   catalogue, a level it has, **yours** or **nobody's**, and **raise here** raises one at the middle of the map,
   named *a new mill* and the like; **raise Antarctica again** is the sixteen. Each is a command said in the log
-  under `structures` with its answer, and a raising is a `villages.structure.raised.v1` on the event page. Yours
+  under `structures` with its answer, and a raising is a `villages.structure.raised.v1` in the events log. Yours
   without a house is refused `noSuchHouse`; a type the catalogue lacks would be `noSuchType`. Adam's levers,
   standing in for a house building one; closed with the other instruments (0076). The log's `cells` lines count
   the structures each burst of snapshots brought, and a batch names one raised in a cell the page holds, `a new
@@ -352,7 +352,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
   through the fog while the instruments are open.
 - Taking one: **take control of this building**, under the raising levers, hands the structure whose window was
   opened last to your house; the line under it names that building, or asks for a structure's window first. One
-  `villages.structure.changedHands.v1` on the event page, from its holder to your house, and a moment after, in
+  `villages.structure.changedHands.v1` in the events log, from its holder to your house, and a moment after, in
   the same story, your house's `gainedVision` from it at the catalogue's `sightKm` for its type and level; the
   house it was taken from gets `lostVision`. The fog lifts round it, and the log says `taking control of the
   Antarctic mill` with its answer, the batch that follows `the Antarctic mill changed, held by Ravenscar`, and the
@@ -362,7 +362,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
   the same way from the moment it is raised. Standing in for a story handing one over or a house
   taking it; closed with the instruments.
 - A house's seat: founding raises its castle, *Ravenscar Castle*, where the house was founded, held by it, and names
-  it the seat, as the founding's own story on the event page: `founded`, `raised`, `namedSeat`, then the house's
+  it the seat, as the founding's own story in the events log: `founded`, `raised`, `namedSeat`, then the house's
   `gainedVision` from the castle. A house is not drawn on the map at all: its structures are, the castle that is its
   seat among them, flying the house's pennant; the game server sends a page the structures and people standing in
   the squares of the map it shows and no houses, and a house's own player is sent their house by itself. A click on
@@ -389,7 +389,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
 - Filling its slots: under the level and ruin levers, a slot of the open structure's type, someone to put in it -
   one of your key figures, or anyone standing in view - and **put them in**, **put something in** - a thing the
   slot is for, a garrison of forty, bushels of grain, a relic, or a chest - and **empty a place**, which takes out
-  what was put in last. Each writes `villages.structure.slotFilled.v1` or `slotEmptied.v1`, on the event page; a
+  what was put in last. Each writes `villages.structure.slotFilled.v1` or `slotEmptied.v1`, in the events log; a
   person already in another slot is taken out of it first, in the same story. A full slot is refused `slotFull`,
   the same person twice `alreadyInSlot`, an empty one emptied `notInSlot`, and a ruin filled `isARuin`; a level is
   not lowered under what a slot holds (`invalidLevel`).
@@ -505,7 +505,7 @@ and `-- --drop` takes them off; by hand only.
   on disk it tells the page, and the page showing it reads it again. The game server records every version of a
   catalogue it takes on as `catalogueChanged` on the world's own stream, `world`: one for each catalogue as a
   fresh world starts and again after a wipe, none on a restart over the same files, and one more for a file
-  changed since; each is on the event page, opening to the whole file and where it changed. It looks at the folder
+  changed since; each is in the events log, opening to the whole file and where it changed. It looks at the folder
   twice a second while it runs, so a file saved by hand is taken on within a second of holding still: a retuned
   structure moves every holder's income and sight at once, each `incomeChanged` in the retune's story. A file it
   cannot read is refused, said once in the debug panel's faults and the server's log naming the file and the field,
@@ -681,6 +681,13 @@ and `-- --drop` takes them off; by hand only.
   World section links it. A new page beside the game is one entry in `apps/web/src/admin/inspectViews.ts`, its
   `import()` with it, which is all `main.tsx` routes by, and it stands in the frame every page shares,
   `admin/frame/InspectPage.tsx`: the bar with the page's name, what it keeps there, and the way back.
+- **`/admin/inspect-events`** is every type of event the world can record, as `docs/EVENTS.md` lists them, and
+  needs nothing else running: a group a stream, as the document groups them, side by side where they fit, each a
+  list of the types by name alone, and a box that keeps only the types with a word in their name, their fields or
+  what is said of them. A name opens in place to what the type carries, what it means, what writes it and what reads
+  it, with its sample from `contracts/fixtures/events/`, and any case in `cases/`, folded under that. It reads both through the dev server and again whenever either changes on
+  disk. It changes nothing: a type of event is code and a contract. The events the world stored are the events
+  log's, at `/admin/inspect-events-log`.
 - **`/admin/inspect-pictures`** is every picture the world is drawn with, and needs nothing else running: the
   scenery and the structures as their atlases were cut, a structure a culture to a column beside its type's pin, each
   painted or still a placeholder, its size and the file it came from; the marks' pictures in `world/sprites/marks/`,
@@ -747,7 +754,7 @@ and `-- --drop` takes them off; by hand only.
   the top right picks between. In it, **the bridge** publishes every event the world stores to the exchange
   `villages.events`, under a routing key of its type and the cell where it happened (`EVENTS.md`), over a
   connection named *villages: the bridge*; the exchange's page shows the rate as houses are founded. The read
-  models, the recent events and the event page follow it: the Queues page lists one queue for each, named after
+  models, the recent events and the events log follow it: the Queues page lists one queue for each, named after
   it with a suffix, `HousesProjection.3f2a9c1b`, each over a connection of its own, *villages: HousesProjection*,
   and gone when the server stops. The reactions - the castle raised at a founding, the income and sight of what
   a house holds - follow the store and have none. Closing a follower's connection on the Connections page puts

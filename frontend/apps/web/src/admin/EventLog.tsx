@@ -16,7 +16,8 @@ import { InspectPage } from './frame/InspectPage';
 const MOST = 2000;
 
 /**
- * Every event the world stores, as it is stored, for reading.
+ * Every event the world stores, as it is stored, for reading: the events log. What each type of event is, is the
+ * events' own page, `events/Events.tsx`.
  *
  * Its own page rather than a panel on the map, because it is not part of the game: it is how the world's
  * history is inspected. It watches without playing - no hello, so the gateway knows of no player here and
@@ -61,7 +62,7 @@ export function EventLog() {
 
   return (
     <InspectPage
-      title="Events"
+      title="Events log"
       className="log"
       bar={
         <>

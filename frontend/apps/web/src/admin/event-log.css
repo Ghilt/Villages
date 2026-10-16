@@ -1,7 +1,7 @@
-/* The events page, at /admin/inspect-events. */
+/* The events log, at /admin/inspect-events-log. */
 
 /*
- * The event log at /admin/inspect-events: every event the world stores, for reading.
+ * The events log at /admin/inspect-events-log: every event the world stores, for reading.
  *
  * Its own page rather than a panel, so it is a document rather than an instrument: a full-width column
  * of monospace lines, each opening to the event exactly as the store holds it.
