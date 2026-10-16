@@ -137,6 +137,11 @@ eye for their experiment; and catalogues, the newest, are built and waiting on A
   is decision record 0097 and the steps, one commit each, are in `docs/plans/catalogues.md`; all eighteen are
   built, in one run, verified by Adam and on main since 2026-10-16, with the structures' pictures on their page
   after. Adam's own, planned with him on 2026-10-15.
+- **The bot swarm**: how many players one game server carries before it bends, and what gives way first,
+  measured by simulated players playing the player's own loop against one server, ramped from a hundred to ten
+  thousand; every run kept in a history the inspect pages chart, and read in an experiment record with the
+  capacity of one server and the path past it. Five steps in `docs/plans/bot-swarm.md`; the first, one bot, is
+  built. The first milestone of the code-debt review of 2026-10-16, asked for by Adam that day.
 
 MongoDB and RabbitMQ are on the machine, in Docker, from `infra/docker-compose.yml`. The game server keeps
 its world in MongoDB whenever Docker is running, and RabbitMQ carries every event it stores to the read models.
