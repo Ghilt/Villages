@@ -500,8 +500,11 @@ did, and sets things right from its whole fold there instead.
    a slow socket holds up its own connection and nobody else's, and a read model's watcher only ever queues
    (0077).
 6. The map is drawn from read models. The event store is never queried to render anything.
-7. Every principle above is checked by the bot swarm, not assumed. Ten thousand connections on one development
-   machine is the number to prove, and proving it is on the roadmap under Later rather than next.
+7. Every principle above is checked by the bot swarm, not assumed: `./gradlew :load-bots:swarm`, whose runs the
+   performance page charts. The first measured, on 2026-10-16, carried 1,000 players and ran out of memory at 2,500,
+   on a 1 MiB text buffer every connection is given; with the default buffer the same server carried 5,000 and bent
+   at 10,000 on CPU and cells. Ten thousand on one development machine is still the number to reach. See
+   experiment 0021.
 
 ## The fate engine
 
