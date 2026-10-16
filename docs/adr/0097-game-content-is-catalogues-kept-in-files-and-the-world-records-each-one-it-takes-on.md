@@ -2,6 +2,9 @@
 
 - Status: accepted
 - Date: 2026-10-15
+- Amended 2026-10-16: **a catalogue saved whole arrives in pieces**, gathered by the gateway's socket up to 1 MiB
+  while it arrives, rather than every socket being given a 1 MiB buffer as it opens. That buffer cost every player
+  about four megabytes, and one server three quarters of the players it could carry (experiment 0021).
 
 ## Context
 

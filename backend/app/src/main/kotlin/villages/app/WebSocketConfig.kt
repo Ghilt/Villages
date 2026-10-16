@@ -1,6 +1,5 @@
 package villages.app
 
-import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.socket.CloseStatus
 import org.springframework.web.socket.TextMessage
@@ -9,7 +8,6 @@ import org.springframework.web.socket.config.annotation.EnableWebSocket
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 import org.springframework.web.socket.handler.TextWebSocketHandler
-import org.springframework.web.socket.server.standard.ServletServerContainerFactoryBean
 import villages.gateway.Gateway
 import villages.protocol.ProtocolJson
 import villages.protocol.ServerFrame
@@ -28,39 +26,55 @@ class WebSocketConfig(private val gateway: Gateway) : WebSocketConfigurer {
     override fun registerWebSocketHandlers(registry: WebSocketHandlerRegistry) {
         registry.addHandler(GatewaySocket(gateway), "/ws").setAllowedOriginPatterns("http://localhost:[*]")
     }
-
-    /**
-     * A frame as large as an inspect page sends: a catalogue whole, saved from its page, is larger than the eight
-     * kilobytes the socket takes by default, which closes the connection on anything bigger. See decision 0097.
-     */
-    @Bean
-    fun largeFrames(): ServletServerContainerFactoryBean = ServletServerContainerFactoryBean().apply {
-        setMaxTextMessageBufferSize(LARGEST_FRAME)
-    }
-
-    private companion object {
-        const val LARGEST_FRAME = 1 shl 20
-    }
 }
 
 /**
  * The transport, and only the transport: one gateway connection per socket, text in, text out. Sends are
  * synchronised per session because Spring's sessions do not allow concurrent sends and the event feed
  * arrives on its own thread.
+ *
+ * A message comes in pieces as large as the socket's buffer, the container's default eight kilobytes, and is
+ * gathered here only while it is arriving: an inspect page saving a catalogue whole sends more than that (decision
+ * record 0097), and a buffer as large as the largest message, given to every socket as it opens, cost every
+ * player four megabytes and one server three quarters of the players it could carry (experiment 0021). A message
+ * past [LARGEST_MESSAGE] closes its connection, as a socket's own limit did.
  */
 class GatewaySocket(private val gateway: Gateway) : TextWebSocketHandler() {
     private val connections = ConcurrentHashMap<String, Gateway.Connection>()
+    private val gathering = ConcurrentHashMap<String, StringBuilder>()
+
+    override fun supportsPartialMessages(): Boolean = true
 
     override fun afterConnectionEstablished(session: WebSocketSession) {
         connections[session.id] = gateway.connect { frame -> session.sendUnlessGoing(frame) }
     }
 
     override fun handleTextMessage(session: WebSocketSession, message: TextMessage) {
-        connections[session.id]?.receive(message.payload)
+        val begun = gathering[session.id]
+        if (begun == null && message.isLast) {
+            connections[session.id]?.receive(message.payload)
+            return
+        }
+        val so = (begun ?: StringBuilder().also { gathering[session.id] = it }).append(message.payload)
+        if (so.length > LARGEST_MESSAGE) {
+            gathering.remove(session.id)
+            session.close(CloseStatus.TOO_BIG_TO_PROCESS)
+            return
+        }
+        if (message.isLast) {
+            gathering.remove(session.id)
+            connections[session.id]?.receive(so.toString())
+        }
     }
 
     override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
+        gathering.remove(session.id)
         connections.remove(session.id)?.disconnected()
+    }
+
+    companion object {
+        /** The largest message a connection may send: a catalogue saved whole from its page, with room to grow. */
+        const val LARGEST_MESSAGE = 1 shl 20
     }
 }
 
