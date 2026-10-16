@@ -1,0 +1,62 @@
+/*
+ * The quests' page (Quests.tsx): the chosen quest's road beside the node chosen on it, on a phone one under the other.
+ * A card a node, a dialogue's in a cooler colour, a reward's in a warmer one, a question mark's dashed, one shown ahead
+ * ringed lightly.
+ */
+
+.quest-bench {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(16rem, 2fr);
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.quest-road {
+  height: 30rem;
+  background: #fffdf6;
+  border: 1px solid var(--parchment-edge);
+}
+
+.quest-road .react-flow__node.quest-node {
+  box-sizing: border-box;
+  padding: 0.4rem 0.55rem;
+  font-family: inherit;
+  font-size: 0.75rem;
+  line-height: 1.3;
+  text-align: left;
+  color: var(--ink);
+  background: #fbf7ec;
+  border: 1px solid var(--parchment-edge);
+  border-radius: 3px;
+}
+
+.quest-road .react-flow__node.quest-node--dialogue {
+  background: #e8eef3;
+}
+
+.quest-road .react-flow__node.quest-node--reward {
+  background: #f3e3b5;
+}
+
+.quest-road .react-flow__node.quest-node--hidden {
+  border-style: dashed;
+}
+
+.quest-road .react-flow__node.quest-node--ahead {
+  box-shadow: 0 0 0 2px rgb(157 124 42 / 25%);
+}
+
+.quest-road .react-flow__node.quest-node.selected {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 2px rgb(60 40 20 / 30%);
+}
+
+.quest-node-editor {
+  min-width: 0;
+}
+
+@media (width <= 760px) {
+  .quest-bench {
+    grid-template-columns: 1fr;
+  }
+}

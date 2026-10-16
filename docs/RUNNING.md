@@ -230,7 +230,11 @@ stage alone, with none of the debug panel in it (decision record 0079).
   `dialogues/` it offers; the first is *the abbot of the isle*. It is off, saying why on hover, while there is no
   house. The game server reads a quest and its dialogues as it is offered, so what was saved, by hand or from
   **`/admin/inspect-quests`**, is the next offer's, and one offered already keeps its road; it refuses, as it takes
-  the files on, a quest naming a dialogue or a type of structure there is not. It opens with a
+  the files on, a quest naming a dialogue or a type of structure there is not. The page names every quest across
+  its top, each an address of its own, `/admin/inspect-quests/abbot`, and draws the chosen one as its road - a card a
+  node, a dialogue's cool, a reward's warm, a question mark's dashed, one shown ahead ringed, a fork's roads named by
+  the endings that take them - beside the node chosen on it: its title, its two marks, and its objectives' and
+  reward's numbers changed in place, a dialogue node linking to the dialogue's own page. It opens with a
   dialogue at the gate, which arrives in the **dialogues** pane as any dialogue does and opens it: the abbot asks
   what the house holds dearest, and *its faith* takes the road of a pledge of thirty piety, *its coffers* the road of
   a castle held on an island and sixty wealth delivered, the other road lost. **That one lever is all the debug

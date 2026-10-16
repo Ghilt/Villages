@@ -284,3 +284,7 @@
   resize: vertical;
   line-height: 1.4;
 }
+
+.inspect-pick.is-edited {
+  background: #f3e3b5;
+}

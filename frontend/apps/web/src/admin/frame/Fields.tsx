@@ -189,3 +189,25 @@ export function ProseField({
     />
   );
 }
+
+/** Yes or no, a box: set at once, and a field left out of the file is no. */
+export function FlagField({
+  editor,
+  path,
+  label,
+}: {
+  editor: CatalogueEditor<unknown>;
+  path: Path;
+  label: string;
+}) {
+  return (
+    <label className={`inspect-pick${editor.isEdited(path) ? ' is-edited' : ''}`}>
+      <input
+        type="checkbox"
+        checked={editor.at(path) === true}
+        onChange={(event) => editor.set(path, event.target.checked)}
+      />{' '}
+      {label}
+    </label>
+  );
+}
