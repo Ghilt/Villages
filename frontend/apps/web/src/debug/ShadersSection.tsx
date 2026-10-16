@@ -1,6 +1,7 @@
 import { setShadersOn, shadersStore } from '../shaders/levels';
 import { useStore } from '../store/useStore';
 import { CloudSection } from './CloudSection';
+import { CrittersSection } from './CrittersSection';
 import { GrassSection } from './GrassSection';
 import { ReliefSection } from './ReliefSection';
 import { Section } from './Section';
@@ -26,6 +27,7 @@ export function ShadersSection() {
       <ReliefSection />
       <GrassSection />
       <TreesSection />
+      <CrittersSection />
       <CloudSection />
     </Section>
   );

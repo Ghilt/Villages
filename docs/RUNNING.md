@@ -112,9 +112,15 @@ stage alone, with none of the debug panel in it (decision record 0079).
   lone bush or tree in the open - fan out, climb, flap and glide away, fading as they go, each with a soft shadow
   below it. The same birds leave the same bush at the same moment in every browser; one first seen in flight fades
   up; a player who asked for less motion sees none. They are drawn from the critters' atlas (`world:critters`,
-  below) and come and go with the Shaders section's `on` box; how many, how big and how often they move are numbers
-  in `apps/web/src/sprites/critters/look.ts` until the Critters part of the Shaders section, step 5 of
-  `docs/plans/living-world.md`. See `docs/adr/0099`.
+  below). They are the **Critters** part of the Shaders section: `off`, `low` or `high` in its bar, low at every
+  load, low moving them at fifteen frames a second and high at thirty, and beside it what is flying now, `3
+  songbirds`, or why there are none, `from zoom 9 in`, `off`. Inside it, two sliders: **how many**, from none to all
+  there can be, where fewer is always some of the same critters every browser has and never others, and **how
+  big**, as times the sizes in `apps/web/src/sprites/critters/look.ts`. They change the critters on the next frame,
+  are remembered in the browser that moved them, and once one stops the log says both under `critters` as
+  `critters tuned: …`, the line to hand over when a setting should become the default; `reset` puts them back.
+  Every other number of theirs is in that `look.ts`, and who lives where is `casts.ts` beside it. See
+  `docs/adr/0099`.
 - Clouds drift over the world from zoom 7 out, every lump lit cream from the upper right and shaded violet-grey
   away from it, each cloud with its soft violet shadow down and to the left. They live in weather systems, masses
   swept into bands and swirls with clear country between; they are whole from 6 out to 5.25, and further out the

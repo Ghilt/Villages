@@ -6,7 +6,7 @@
 export const CRITTERS_LOOK = {
   /**
    * What low and high are for the critters, the levels in the Shaders section: how often they move. They are drawn
-   * with the sprite canvas at its own size, so a level is only its frames. Low is at every load.
+   * with the sprite canvas at its own size, so a level is only its frames; the Critters part sets it, low at every load.
    */
   levels: {
     low: { resolution: 1, framesPerSecond: 15 },
