@@ -105,6 +105,16 @@
   white-space: nowrap;
 }
 
+/* A picture cut out of an atlas (Atlas.tsx), drawn from the atlas itself; a placeholder is ringed in dashes. */
+.inspect-cut {
+  background-repeat: no-repeat;
+}
+
+.inspect-cut.is-placeholder {
+  outline: 1px dashed var(--parchment-edge);
+  outline-offset: 2px;
+}
+
 @media (width <= 600px) {
   .inspect-page {
     padding: 1rem;

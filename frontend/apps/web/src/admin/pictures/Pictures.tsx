@@ -1,60 +1,29 @@
 import './pictures.css';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
-import { CULTURES } from '@villages/world';
+import { CULTURES, markKey, pictureKey } from '@villages/world';
 
+import { Cut, useAtlas, useJson } from '../frame/Atlas';
+import type { Atlas } from '../frame/Atlas';
 import { InspectPage } from '../frame/InspectPage';
-
-/** A frame of a cut atlas: where it is, how big, whether it is still a placeholder, and the file it was cut from. */
-interface Frame {
-  readonly x: number;
-  readonly y: number;
-  readonly width: number;
-  readonly height: number;
-  readonly placeholder: boolean;
-  readonly source: string;
-}
-
-/** An atlas the tools cut, `public/art/<name>.json` beside its `.webp`, as much of it as the page reads. */
-interface Atlas {
-  readonly version: string;
-  readonly width: number;
-  readonly height: number;
-  readonly frames: Readonly<Record<string, Frame>>;
-}
 
 /** How tall a picture is drawn on the page, at most. */
 const TALL = 96;
 
-/** JSON from the dev server, or null when it cannot be had: a tree that has cut nothing yet has no atlas. */
-function useJson<T>(url: string): T | null | 'missing' {
-  const [read, setRead] = useState<T | null | 'missing'>(null);
-  useEffect(() => {
-    let live = true;
-    fetch(url, { cache: 'no-store' })
-      .then((response) =>
-        response.ok ? (response.json() as Promise<T>) : Promise.reject(new Error(String(response.status))),
-      )
-      .then((json) => live && setRead(json))
-      .catch(() => live && setRead('missing'));
-    return () => {
-      live = false;
-    };
-  }, [url]);
-  return read;
-}
+/** The folder of `world/sprites/marks/` whose pins are shown with the structures, cut into their atlas. */
+const PINS = 'structures/';
 
 /**
  * Every picture the world is drawn with, for reading: the scenery and the structures as the tools cut them into their
- * atlases, a structure a culture to a column; the marks' pictures; the portraits; the scenes. Each says whether it is
+ * atlases, a structure a culture to a column beside its type's pin; the marks' pictures; the portraits; the scenes. Each says whether it is
  * still the placeholder the tools drew or a picture painted over it, how big it is, and the file it came from; the
  * portraits and the scenes keep no record of which are placeholders. Nothing here is changed: Adam paints the files,
  * and `AUTHORING-THE-ART.md` says how. See docs/plans/catalogues.md.
  */
 export function Pictures() {
-  const scenery = useJson<Atlas>('/art/scenery.json');
-  const structures = useJson<Atlas>('/art/structures.json');
+  const scenery = useAtlas('scenery');
+  const structures = useAtlas('structures');
   const marks = useJson<{ marks: { key: string; placeholder: boolean }[] }>('/sprite-marks/');
   const portraits = useJson<{ portraits: string[] }>('/portraits/');
   const scenes = useJson<{ scenes: string[] }>('/scenes/');
@@ -78,16 +47,21 @@ export function Pictures() {
         )}
       </Section>
       <Section title="marks" source="world/sprites/marks/">
+        <p className="inspect-note">
+          the structures' pins, {`world/sprites/marks/${PINS}`}, are with the structures
+        </p>
         {marks !== null && marks !== 'missing' && (
           <ul className="pictures-grid">
-            {marks.marks.map((mark) => (
-              <Picture
-                key={mark.key}
-                name={mark.key}
-                src={`/sprite-marks/${mark.key}.png`}
-                placeholder={mark.placeholder}
-              />
-            ))}
+            {marks.marks
+              .filter((mark) => !mark.key.startsWith(PINS))
+              .map((mark) => (
+                <Picture
+                  key={mark.key}
+                  name={mark.key}
+                  src={`/sprite-marks/${mark.key}.png`}
+                  placeholder={mark.placeholder}
+                />
+              ))}
           </ul>
         )}
       </Section>
@@ -165,25 +139,6 @@ function Picture({
   );
 }
 
-/** One frame of an atlas, cut out of it where the atlas says, scaled to the page's height. */
-function Cut({ name, atlas, image, frame }: { name: string; atlas: Atlas; image: string; frame: Frame }) {
-  const scale = Math.min(1, TALL / frame.height);
-  return (
-    <div
-      className="pictures-cut"
-      role="img"
-      aria-label={name}
-      style={{
-        width: frame.width * scale,
-        height: frame.height * scale,
-        backgroundImage: `url(${image}?v=${atlas.version})`,
-        backgroundSize: `${atlas.width * scale}px ${atlas.height * scale}px`,
-        backgroundPosition: `${-frame.x * scale}px ${-frame.y * scale}px`,
-      }}
-    />
-  );
-}
-
 function AtlasGrid({ name, atlas }: { name: string; atlas: Atlas }) {
   const frames = Object.entries(atlas.frames);
   const painted = frames.filter(([, frame]) => !frame.placeholder).length;
@@ -195,7 +150,7 @@ function AtlasGrid({ name, atlas }: { name: string; atlas: Atlas }) {
       <ul className="pictures-grid">
         {frames.map(([key, frame]) => (
           <li key={key} className="pictures-cell">
-            <Cut name={key} atlas={atlas} image={`/art/${name}.webp`} frame={frame} />
+            <Cut name={key} atlas={atlas} image={`/art/${name}.webp`} frame={frame} tall={TALL} />
             <span className="pictures-name">{key}</span>
             <span className="inspect-key">
               {frame.width} × {frame.height} · {frame.placeholder ? 'placeholder' : 'painted'} ·{' '}
@@ -208,10 +163,13 @@ function AtlasGrid({ name, atlas }: { name: string; atlas: Atlas }) {
   );
 }
 
-/** The structures a type to a row and a culture to a column, as their atlas names them, `castle@european`. */
+/**
+ * The structures a type to a row and a culture to a column, as their atlas names them, `castle@european`, with each
+ * type's pin beside them, `mark:castle`, cut into the same atlas.
+ */
 function StructuresTable({ atlas }: { atlas: Atlas }) {
   const frames = Object.entries(atlas.frames);
-  const types = [...new Set(frames.map(([key]) => key.split('@')[0]!))];
+  const types = [...new Set(frames.filter(([key]) => key.includes('@')).map(([key]) => key.split('@')[0]!))];
   const painted = frames.filter(([, frame]) => !frame.placeholder).length;
   return (
     <>
@@ -223,6 +181,7 @@ function StructuresTable({ atlas }: { atlas: Atlas }) {
           <thead>
             <tr>
               <th>type</th>
+              <th>pin</th>
               {CULTURES.map((culture) => (
                 <th key={culture}>{culture}</th>
               ))}
@@ -232,19 +191,20 @@ function StructuresTable({ atlas }: { atlas: Atlas }) {
             {types.map((type) => (
               <tr key={type}>
                 <th scope="row">{type}</th>
-                {CULTURES.map((culture) => {
-                  const frame = atlas.frames[`${type}@${culture}`];
+                {[markKey(type), ...CULTURES.map((culture) => pictureKey(type, culture))].map((key) => {
+                  const frame = atlas.frames[key];
                   return (
-                    <td key={culture}>
+                    <td key={key}>
                       {frame === undefined ? (
                         <span className="inspect-quiet">none</span>
                       ) : (
                         <>
                           <Cut
-                            name={`${type} ${culture}`}
+                            name={key}
                             atlas={atlas}
                             image="/art/structures.webp"
                             frame={frame}
+                            tall={TALL}
                           />
                           <span className="inspect-key">{frame.placeholder ? 'placeholder' : 'painted'}</span>
                         </>

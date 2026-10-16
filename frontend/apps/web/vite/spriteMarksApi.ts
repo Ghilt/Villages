@@ -9,7 +9,8 @@ import type { Plugin } from 'vite';
 /**
  * The marks' pictures, `world/sprites/marks/`, as the pictures' inspect page reads them: `/sprite-marks/` lists every
  * `.png` in the folder and in its folders, by its path under it without the `.png`, each saying whether it is still the
- * placeholder the tools drew - its bytes the ones `world/sprites/placeholders.json` remembers - and
+ * placeholder the tools drew - its bytes the ones its own folder's `placeholders.json` remembers, as the structures'
+ * pins' does, or else `world/sprites/placeholders.json` - and
  * `/sprite-marks/<path>.png` sends one. Nothing cached, so a picture saved over another is the one shown on the next
  * reload. Development only, as the portraits are. See docs/plans/catalogues.md.
  */
@@ -19,12 +20,15 @@ const SPRITES = resolve(here, '..', '..', '..', '..', 'world', 'sprites');
 const MARKS = resolve(SPRITES, 'marks');
 const PLACEHOLDERS = resolve(SPRITES, 'placeholders.json');
 
+/** What a `placeholders.json` remembers, a file's name to the hash of the placeholder drawn for it, or null for none. */
+async function remembered(file: string): Promise<Record<string, string> | null> {
+  return existsSync(file) ? (JSON.parse(await readFile(file, 'utf8')) as Record<string, string>) : null;
+}
+
 /** Every mark's picture by its path under the folder, `castle` or `structures/castle`, and whether it is a placeholder. */
 async function marks(): Promise<{ key: string; placeholder: boolean }[]> {
   if (!existsSync(MARKS)) return [];
-  const drawn = existsSync(PLACEHOLDERS)
-    ? (JSON.parse(await readFile(PLACEHOLDERS, 'utf8')) as Record<string, string>)
-    : {};
+  const drawn = (await remembered(PLACEHOLDERS)) ?? {};
   const entries = await readdir(MARKS, { recursive: true, withFileTypes: true });
   const pictures = entries.filter((entry) => entry.isFile() && entry.name.endsWith('.png'));
   return Promise.all(
@@ -37,7 +41,8 @@ async function marks(): Promise<{ key: string; placeholder: boolean }[]> {
       const hash = createHash('sha256')
         .update(await readFile(file))
         .digest('hex');
-      return { key, placeholder: drawn[`marks/${key}.png`] === hash };
+      const own = await remembered(resolve(entry.parentPath, 'placeholders.json'));
+      return { key, placeholder: (own === null ? drawn[`marks/${key}.png`] : own[entry.name]) === hash };
     }),
   ).then((found) => found.sort((a, b) => a.key.localeCompare(b.key)));
 }

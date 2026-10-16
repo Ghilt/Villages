@@ -1,0 +1,23 @@
+/*
+ * The structures' page (Structures.tsx): a type's pin beside its name, and its picture in each culture beside what
+ * that culture calls it, each in a box of the same size so the words stand in a line.
+ */
+
+.structures-named {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.structures-picture {
+  display: inline-flex;
+  flex: none;
+  align-items: flex-end;
+  justify-content: center;
+  width: 48px;
+  height: 40px;
+}
+
+.inspect-list .structures-named + .structures-named {
+  margin-top: 0.2rem;
+}

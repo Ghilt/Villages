@@ -1,6 +1,6 @@
 /*
  * The pictures' page (Pictures.tsx): every picture on a light ground in a cell of its own, its name and what it is
- * under it; the structures a culture to a column. A cut out of an atlas is drawn from the atlas itself, scaled.
+ * under it; the structures a culture to a column. A cut out of an atlas is `inspect-cut`, the frame's.
  */
 
 .pictures-grid {
@@ -33,10 +33,6 @@
   object-fit: contain;
 }
 
-.pictures-cut {
-  background-repeat: no-repeat;
-}
-
 .pictures-name {
   font-size: 0.8rem;
 }
@@ -46,6 +42,6 @@
   text-align: center;
 }
 
-.pictures-table td .pictures-cut {
+.pictures-table td .inspect-cut {
   margin: 0 auto 0.2rem;
 }
