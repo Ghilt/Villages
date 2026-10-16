@@ -28,6 +28,15 @@ A change to a decision, an event or a term updates its document in the same comm
 `docs/GLOSSARY.md`, `docs/ARCHITECTURE.md`. Every document has one purpose, stated in its opening line, and a claim goes in
 the document that owns it.
 
+## New content gets its catalogue and its page
+
+A plan that adds a kind of content - words, numbers, a kind of thing the game is made of - adds its catalogue under
+`world/catalogues/` and its inspect page at `/admin/inspect-<kind>`, reading and editing it, as steps of its own, with
+the page's verification requests pointing at it. A plan that only adds to a catalogue that has its page points a
+verification request at that page instead. An entry's own numbers go with the entry; a number that belongs to no one
+entry goes in the balance. `admin/catalogues.test.ts` fails for a catalogue no page names. Adam's word of 2026-10-15;
+decision record 0097 and `docs/plans/catalogues.md`.
+
 ## Steps that show the player something
 
 Whatever the player is shown is built from the component library in `frontend/apps/web/src/ui/`. A component the library

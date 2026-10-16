@@ -29,8 +29,8 @@ Characters and key figures are built and waiting on Adam's eye. Nothing else her
 after them wait on the same thing. Fog of war, the exception, is under way a step at a time, and so is
 character dialogue; the UI component library is built and waiting on Adam's eye, and so is the choice roll,
 and so is the origin map, the first of real names on the edited world. Structures are planned and not
-started; the world cache is built and waiting on Adam's eye; and quests, the newest, are built and on main,
-waiting on Adam's eye for their experiment.
+started; the world cache is built and waiting on Adam's eye; quests are built and on main, waiting on Adam's
+eye for their experiment; and catalogues, the newest, are planned, with only their documents written.
 
 - **Characters and key figures**: the people of the world, each with a history of their own, and the
   house's tie to the few it acts through, shown in a pane in the corner beside the house status. The shape
@@ -128,6 +128,14 @@ waiting on Adam's eye for their experiment.
   light, step 4, their shadows, step 5, the camera in the clouds, and step 6, the clearings round the marks, are
   built: the whole plan, steps 3 to 6 a run Adam picked, waiting on his eye at its end. Asked for by Adam on 2026-10-15, with
   a photograph.
+- **Catalogues**: the game's content moved out of the code into files under `world/catalogues/` - the
+  structures, the balance, the pools and actions, the character names, the dialogues and the quests - each
+  with an inspect page that reads it and edits it while the game runs, and a page of every picture beside
+  them. The game server checks a catalogue before it takes it on, is the one that writes it when a page
+  saves, and records each version it takes on as one event on the world's own stream, so a retuned number
+  explains every income it moves. Every later plan with content in it builds its catalogue's page. The shape
+  is decision record 0097 and the steps, one commit each, are in `docs/plans/catalogues.md`; the first,
+  the documents, is written. Adam's own, planned with him on 2026-10-15.
 
 MongoDB and RabbitMQ are on the machine, in Docker, from `infra/docker-compose.yml`. The game server keeps
 its world in MongoDB whenever Docker is running, and RabbitMQ carries every event it stores to the read models.

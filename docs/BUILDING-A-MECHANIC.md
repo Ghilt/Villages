@@ -269,6 +269,14 @@ make the mechanic happen from the parchment or from the debug panel without an a
 can read what happened in the panel's event list, one line per event, the correlation tag joining what
 belongs together, and open any line to the whole event as stored.
 
+**What the mechanic is made of is in a catalogue, on a page of its own.** Its words and numbers, and any new
+kind of thing it brings, are a catalogue under `world/catalogues/`, never constants in the code, and the
+catalogue has its inspect page at `/admin/inspect-<kind>`, where Adam reads it and changes it while the game
+runs. A mechanic that brings a new kind of content builds both as steps of its plan; one that adds to a
+catalogue shows its entries on that catalogue's page. An entry's own numbers go with the entry, and a number that
+belongs to no one entry goes in the balance. `admin/catalogues.test.ts` fails for a catalogue no page names.
+Adam's word of 2026-10-15; see decision record 0097.
+
 **The debug panel stands in for the world, never for the player.** A lever there makes happen what the world
 will one day do and nothing does yet - offering a dialogue, taking a key figure in - and what the player does
 with it is done in the player's own interface, however unfinished that is, and never in a lever beside it.
