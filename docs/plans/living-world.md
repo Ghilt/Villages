@@ -149,8 +149,8 @@ the same sky. What a slot brings is worked out once when the slot comes round, n
 |---|---|
 | forests | songbirds out of the trees (flush), a squirrel from tree to tree (hop), a hawk over the clearings (soar) |
 | heath, scrub | small birds out of a bush, grouse out of the heather (flush) |
-| grassland | a hare out from behind a bush (hop), larks rising (flush), a hawk (soar) |
-| farmland | crows lifting from the field (flush) |
+| grassland | songbirds out of a lone bush or tree (flush), a hare out from behind a bush (hop), larks rising (flush), a hawk (soar) |
+| farmland | songbirds out of the hedges and lone trees, crows lifting from the field (flush) |
 | marsh, bog, floodplain, paddy, mangrove, swamp forest | ducks off a pool (flush), a frog into a pool with a ring (hop) |
 | lakes, rivers | a fish jumping (leap) |
 | shallow sea | a fish jumping and dolphins in a row (leap), gulls wheeling low and quick (soar) |
