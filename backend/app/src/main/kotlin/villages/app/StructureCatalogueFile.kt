@@ -14,7 +14,7 @@ import villages.domain.StructureType
 import villages.domain.Takes
 
 /**
- * `world/structures.json` read into the catalogue the rules decide by. Strict where the names reader is forgiving:
+ * `world/catalogues/structures.json` read into the catalogue the rules decide by. Strict where the names reader is forgiving:
  * a field this cannot read refuses the whole file, saying which type and which field, because a structure raised with
  * half its numbers is worse than a server that will not start. The words, the sizes on the map and the zones are the
  * page's and are passed over. The shape is a contract, held by `contracts/fixtures/structures.json`. See 0093.
@@ -87,5 +87,5 @@ object StructureCatalogueFile {
             .joinToString("")
 
     private fun refuse(type: String, field: String): Nothing =
-        throw IllegalArgumentException("world/structures.json: $type has no $field the server can read")
+        throw IllegalArgumentException("world/catalogues/structures.json: $type has no $field the server can read")
 }

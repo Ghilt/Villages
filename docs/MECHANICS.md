@@ -1009,7 +1009,7 @@ other and takes the same bays.
 
 ### Where it stands
 
-The catalogue is: sixteen types in `world/structures.json`, read by the game server when it starts and listed at
+The catalogue is: sixteen types in `world/catalogues/structures.json`, read by the game server when it starts and listed at
 `/admin/inspect-structures`. A structure's history is on the server, and one of every type stands in Antarctica,
 raised by the server when it starts while the instruments are open, and the debug panel's Structures section
 raises one where the map looks. The page is sent them through the fog, each in the face its house last saw, and

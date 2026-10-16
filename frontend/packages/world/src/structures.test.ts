@@ -8,7 +8,7 @@ const fixture = readFileSync(
   new URL('../../../../contracts/fixtures/structures.json', import.meta.url),
   'utf8',
 );
-const world = readFileSync(new URL('../../../../world/structures.json', import.meta.url), 'utf8');
+const world = readFileSync(new URL('../../../../world/catalogues/structures.json', import.meta.url), 'utf8');
 
 describe('the catalogue of structures', () => {
   it('reads the shared fixture as the server does, and keeps what the server passes over', () => {
@@ -48,7 +48,7 @@ describe('the catalogue of structures', () => {
   it('refuses a field it cannot read, naming the type and the field', () => {
     const broken = fixture.replace('"sightKm": [50]', '"sightKm": ["far"]');
     expect(() => parseStructureCatalogue(broken)).toThrow(
-      'world/structures.json: watchtower has no sightKm the page can read',
+      'world/catalogues/structures.json: watchtower has no sightKm the page can read',
     );
   });
 

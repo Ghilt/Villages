@@ -7,12 +7,12 @@ import type { StructureCatalogue } from '@villages/world';
 let reading: Promise<StructureCatalogue | null> | null = null;
 
 /**
- * The catalogue of structures as the dev server serves it, `world/structures.json`: read once a page load and shared,
+ * The catalogue of structures as the dev server serves it, `world/catalogues/structures.json`: read once a page load and shared,
  * or null when it cannot be read, which a reload tries again. What the map sizes a structure by. See
  * docs/plans/structures.md.
  */
 export function readStructureCatalogue(): Promise<StructureCatalogue | null> {
-  reading ??= fetch('/structures.json')
+  reading ??= fetch('/catalogues/structures.json')
     .then((response) => (response.ok ? response.text() : Promise.reject(new Error(String(response.status)))))
     .then(parseStructureCatalogue)
     .catch(() => null);

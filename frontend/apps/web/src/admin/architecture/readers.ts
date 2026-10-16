@@ -126,6 +126,14 @@ export const READERS: readonly Reader[] = [
     reads: ['tiles', 'paint'],
   },
   {
+    id: 'page-catalogues',
+    program: 'page',
+    piece: 'panes',
+    name: 'the structures catalogue',
+    where: 'net/structureCatalogue.ts',
+    reads: ['catalogues'],
+  },
+  {
     id: 'page-portraits',
     program: 'page',
     piece: 'panes',
@@ -140,6 +148,13 @@ export const READERS: readonly Reader[] = [
     name: 'dialogue scenes',
     where: 'dialogues/scenes.ts',
     reads: ['scenes'],
+  },
+  {
+    id: 'server-catalogues',
+    program: 'server',
+    name: 'the catalogues',
+    where: 'StructuresConfig.kt',
+    reads: ['catalogues'],
   },
   { id: 'folder-stands', program: 'server', name: 'stands', where: 'FolderStands.kt', reads: ['stands'] },
   {

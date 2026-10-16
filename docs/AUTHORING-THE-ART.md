@@ -36,7 +36,7 @@ It never draws over a file that is there.
 
 **Structures are cut by a tool of their own**, from `world/sprites/structures/`, which keeps its own record of
 which are still placeholders, `placeholders.json` in that folder: `<type>-<culture>.png` for every type of
-`world/structures.json` in every culture - `castle-european.png`, `castle-islamic.png`,
+`world/catalogues/structures.json` in every culture - `castle-european.png`, `castle-islamic.png`,
 `printingHouse-eastAsian.png` - and `ruin-<culture>.png` for what any of them falls to. Sixty-eight, every one a
 placeholder drawn from the shapes the map draws in code until you save over it. Upright, the front of the
 building, on a transparent background, standing on the bottom edge: it is cropped to what is drawn and scaled to

@@ -1,14 +1,8 @@
-import { useEffect, useState } from 'react';
-
 import { CULTURES, parseStructureCatalogue } from '@villages/world';
-import type {
-  StructureCatalogue,
-  StructureResource,
-  StructureSlot,
-  StructureTypeSpec,
-} from '@villages/world';
+import type { StructureResource, StructureSlot, StructureTypeSpec } from '@villages/world';
 
 import { InspectPage } from './frame/InspectPage';
+import { useCatalogue } from './frame/useCatalogue';
 
 /** The resources as the page says them. */
 const SAID: Record<StructureResource, string> = {
@@ -25,10 +19,10 @@ function byLevel(values: readonly number[]): string {
 }
 
 /**
- * Every type of structure there is, as `world/structures.json` says, for reading: what each gives its holder a
+ * Every type of structure there is, as `world/catalogues/structures.json` says, for reading: what each gives its holder a
  * month at each level, how far it sees and how significant it is, its slots and what makes each count, its
- * zone, and what each culture calls it. Read through the dev server, fresh on every load, so a number changed in
- * the file is here on a reload; the game server reads the file only when it starts.
+ * zone, and what each culture calls it. Read through the dev server, and again whenever the file changes, so a
+ * number changed in it is here at once; the game server reads the file only when it starts.
  *
  * Its own page rather than a section of the debug panel, because it is not something the world does but a
  * catalogue to read, as the events and the components have theirs. The structures' sprites will stand here too,
@@ -36,32 +30,24 @@ function byLevel(values: readonly number[]): string {
  * See docs/plans/structures.md.
  */
 export function Structures() {
-  const [read, setRead] = useState<StructureCatalogue | string | null>(null);
-
-  useEffect(() => {
-    let live = true;
-    fetch('/structures.json', { cache: 'no-store' })
-      .then((response) => (response.ok ? response.text() : Promise.reject(new Error(response.statusText))))
-      .then((text) => live && setRead(parseStructureCatalogue(text)))
-      .catch((unread: unknown) => live && setRead(unread instanceof Error ? unread.message : String(unread)));
-    return () => {
-      live = false;
-    };
-  }, []);
+  const reading = useCatalogue('structures.json', parseStructureCatalogue);
+  const read = reading.state === 'read' ? reading.shelved.value : null;
 
   return (
     <InspectPage
       title="Structures"
       bar={
         <span className="inspect-note">
-          {typeof read === 'object' && read !== null ? `${read.types.length} types` : ''} from
-          world/structures.json, every number a placeholder
+          {read === null ? '' : `${read.types.length} types`} from world/catalogues/structures.json, every
+          number a placeholder
         </span>
       }
     >
-      {read === null && <p className="inspect-quiet">reading world/structures.json</p>}
-      {typeof read === 'string' && <p className="inspect-problem">{read}</p>}
-      {typeof read === 'object' && read !== null && (
+      {reading.state === 'reading' && (
+        <p className="inspect-quiet">reading world/catalogues/structures.json</p>
+      )}
+      {reading.state === 'unread' && <p className="inspect-problem">{reading.problem}</p>}
+      {read !== null && (
         <div className="inspect-scroll">
           <table className="inspect-table">
             <thead>

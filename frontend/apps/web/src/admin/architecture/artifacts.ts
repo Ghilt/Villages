@@ -86,6 +86,14 @@ export const ARTIFACTS: readonly Artifact[] = [
     what: 'A picture of every type of structure in every culture, and its ruin: placeholders until painted over.',
   },
   {
+    id: 'catalogues',
+    form: 'folder',
+    name: 'catalogues',
+    path: 'world/catalogues/',
+    origin: 'authored',
+    what: "The game's content, a file a kind: every type of structure, what each gives and sees. Edited by hand or from its inspect page.",
+  },
+  {
     id: 'ui-pictures',
     form: 'folder',
     name: 'interface pictures',

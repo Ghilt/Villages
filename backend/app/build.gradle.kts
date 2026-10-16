@@ -24,7 +24,7 @@ dependencies {
 // names as the world package files them, which the shared fixture holds both ends to; and it reads the catalogue of
 // structures, which the server will not start without and whose fixture holds both readers to one shape.
 testsRead(
-    "world/portraits", "contracts/fixtures/names.json", "world/structures.json", "contracts/fixtures/structures.json",
+    "world/portraits", "contracts/fixtures/names.json", "world/catalogues", "contracts/fixtures/structures.json",
     // The world's master, which the server names as the page does.
     "frontend/packages/world/src/masters.ts",
 )

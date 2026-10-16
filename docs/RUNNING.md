@@ -292,10 +292,11 @@ stage alone, with none of the debug panel in it (decision record 0079).
   window on water open reads it as an omen, *Inspecting the Vistula*: the page says where the window was opened and
   the server says what is there, on ground the house has revealed. See `docs/adr/0087`.
 - The structures there can be: **`/admin/inspect-structures`**, a page of its own as the events have, is every type
-  in `world/structures.json` as the page reads it, a row a type - what it gives its holder a month at each level,
-  how far it sees and from which zoom it is drawn, its slots and what makes each count, its zone, and what each
-  culture calls it. It reads the file again on every load; one it cannot read is said in place of the table, naming
-  the type and the field. The structures' sprites will stand there too. See `docs/plans/structures.md`.
+  in `world/catalogues/structures.json` as the page reads it, a row a type - what it gives its holder a month at
+  each level, how far it sees and from which zoom it is drawn, its slots and what makes each count, its zone, and
+  what each culture calls it. It reads the file again whenever it changes on disk; one it cannot read is said in
+  place of the table, naming the type and the field. The structures' sprites will stand there too. See
+  `docs/plans/structures.md`.
 - Every type standing at once: **Antarctica**. While the instruments are open the game server raises one structure of
   every type when it starts, held by nobody, at its first level, four to a row about six kilometres apart on the
   island off the tip of the Antarctic Peninsula, about 63.25 south and 56.03 west - the Antarctic castle at the
@@ -467,11 +468,16 @@ and `-- --drop` takes them off; by hand only.
   both stale. The panel also watches `world/biomes.json`'s own mtime, because tuning a look makes every
   sprite map stale without touching a master. See `docs/adr/0054` and
   `docs/plans/biome-sprite-map.md`.
-- What a structure is: `world/structures.json`, hand-edited, one entry a type - its words in each culture, and level
+- The catalogues: `world/catalogues/`, the game's content, a file a kind, each with its inspect page under `/admin`,
+  which `admin/catalogues.test.ts` holds. The dev server serves every file in it at `/catalogues/<its path>`,
+  read again on every ask and sent with the SHA-256 of its bytes, and `/catalogues/` lists them; when one changes
+  on disk it tells the page, and the page showing it reads it again. See `docs/plans/catalogues.md` and decision
+  record 0097.
+- What a structure is: `world/catalogues/structures.json`, hand-edited, one entry a type - its words in each culture, and level
   by level how far out it is drawn, how far it sees, its size on the map and what it yields a world month, which is
   a real day - with its slots and its influence zone if it has one. Nothing cuts it. The game server reads it once,
   when it starts, and will not start on one it cannot read, saying which type and which field; the page reads it
-  through the dev server at `/structures.json` on every load, so `/admin/inspect-structures` shows a change at
+  through the dev server at `/catalogues/structures.json`, so `/admin/inspect-structures` shows a change at
   once and the game server after a restart. Every number in it is a placeholder. See `docs/plans/structures.md`.
 - What the ground is, for the game server: `npm run world:ground --prefix frontend` reads a master into its
   **ground map**, `world/ground/<master>/`, a cell every sixteen master pixels each way, each keeping its

@@ -14,6 +14,11 @@ export interface InspectView {
   readonly needs: string;
   /** The page, fetched with `import()` only when it is opened, so none of it is in the game's bundle (0091). */
   readonly load: () => Promise<ComponentType>;
+  /**
+   * The catalogue it shows and edits, by its name on the shelf, `world/catalogues/<name>.json` or the folder
+   * `world/catalogues/<name>/`, when it shows one. Every catalogue has a page, which `catalogues.test.ts` holds.
+   */
+  readonly catalogue?: string;
 }
 
 /**
@@ -39,9 +44,10 @@ export const INSPECT_VIEWS: readonly InspectView[] = [
   {
     path: '/admin/inspect-structures',
     title: 'Structures',
-    what: 'Every type of structure in world/structures.json: what each gives its holder, sees, holds and is called.',
+    what: 'Every type of structure in world/catalogues/structures.json: what each gives its holder, sees, holds and is called.',
     needs: 'nothing',
     load: () => import('./Structures').then((page) => page.Structures),
+    catalogue: 'structures',
   },
   {
     path: '/admin/inspect-architecture',

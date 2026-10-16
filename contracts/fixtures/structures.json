@@ -1,5 +1,5 @@
 {
-  "$comment": "A catalogue of structures filed as world/structures.json files one, two types small: the server's reader (StructureCatalogueFileTest) and the world package's (structures.test.ts) are both held to what it says. Between them it uses every field: a type of two levels with a zone and slots with every rule, and a type of one level with no yields, no zone, no slots and a word in one culture alone. See docs/plans/structures.md.",
+  "$comment": "A catalogue of structures filed as world/catalogues/structures.json files one, two types small: the server's reader (StructureCatalogueFileTest) and the world package's (structures.test.ts) are both held to what it says. Between them it uses every field: a type of two levels with a zone and slots with every rule, and a type of one level with no yields, no zone, no slots and a word in one culture alone. See docs/plans/structures.md.",
   "types": {
     "castle": {
       "words": { "european": "castle", "islamic": "kasbah", "eastAsian": "castle", "african": "stockade" },

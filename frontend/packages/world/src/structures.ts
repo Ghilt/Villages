@@ -1,5 +1,5 @@
 /**
- * The catalogue of structures, `world/structures.json`, as the page and the tools read it: every type, what each
+ * The catalogue of structures, `world/catalogues/structures.json`, as the page and the tools read it: every type, what each
  * culture calls it, and what it is at each of its levels. The server reads the same file for its rules, and the two
  * readers are held to one shape by `contracts/fixtures/structures.json`. This side keeps what the server passes over
  * - the words, the size on the map, the influence zone - as well as everything the debug panel lists. A file this
@@ -60,7 +60,7 @@ const isObject = (value: unknown): value is Json =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
 function refuse(type: string, field: string): never {
-  throw new Error(`world/structures.json: ${type} has no ${field} the page can read`);
+  throw new Error(`world/catalogues/structures.json: ${type} has no ${field} the page can read`);
 }
 
 function numbers(node: Json, field: string, type: string, length?: number): number[] {

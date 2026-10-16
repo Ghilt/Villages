@@ -14,7 +14,7 @@ import java.io.File
 
 /**
  * The catalogue of structures as the server reads it: the shared fixture, which the world package's reader is held to
- * as well, and the real `world/structures.json`, which has to read for the server to start. JUnit, as in the rest of
+ * as well, and the real `world/catalogues/structures.json`, which has to read for the server to start. JUnit, as in the rest of
  * this module. See docs/plans/structures.md.
  */
 class StructureCatalogueFileTest {
@@ -49,7 +49,7 @@ class StructureCatalogueFileTest {
 
     @Test
     fun `the world's own catalogue reads, sixteen types of three levels`() {
-        val catalogue = StructureCatalogueFile.parse(File("../../world/structures.json").readText())
+        val catalogue = StructureCatalogueFile.parse(File("../../world/catalogues/structures.json").readText())
         assertEquals(16, catalogue.types.size)
         assertTrue(catalogue.types.values.all { it.highest == 3 })
     }
@@ -58,6 +58,6 @@ class StructureCatalogueFileTest {
     fun `a field the server cannot read refuses the file, naming the type and the field`() {
         val broken = fixture.replace("\"sightKm\": [50]", "\"sightKm\": [\"far\"]")
         val refused = assertThrows<IllegalArgumentException> { StructureCatalogueFile.parse(broken) }
-        assertEquals("world/structures.json: watchtower has no sightKm the server can read", refused.message)
+        assertEquals("world/catalogues/structures.json: watchtower has no sightKm the server can read", refused.message)
     }
 }

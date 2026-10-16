@@ -24,7 +24,7 @@ import java.time.Clock
 import java.util.UUID
 
 /**
- * Structures, wired: the catalogue of their types, read once when the server starts from `world/structures.json`, or
+ * Structures, wired: the catalogue of their types, read once when the server starts from `world/catalogues/structures.json`, or
  * from `villages.structures`; their streams, in the one store with everything else; and the sixteen standing in
  * Antarctica. A configuration of its own rather than more of `WorldConfig`, so that structures grow here. See
  * docs/plans/structures.md and decision record 0093.
@@ -32,7 +32,7 @@ import java.util.UUID
 @Configuration
 class StructuresConfig {
     @Bean
-    fun structureCatalogue(@Value("\${villages.structures:../../world/structures.json}") file: String): StructureCatalogue =
+    fun structureCatalogue(@Value("\${villages.structures:../../world/catalogues/structures.json}") file: String): StructureCatalogue =
         StructureCatalogueFile.parse(Files.readString(Path.of(file)))
 
     @Bean

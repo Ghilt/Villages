@@ -64,7 +64,7 @@ export function StructuresSection({ map }: StructuresSectionProps) {
 
   useEffect(() => {
     let live = true;
-    fetch('/structures.json', { cache: 'no-store' })
+    fetch('/catalogues/structures.json', { cache: 'no-store' })
       .then((response) => response.text())
       .then((text) => live && setTypes(parseStructureCatalogue(text).types))
       .catch(() => live && setTypes([]));
