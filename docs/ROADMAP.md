@@ -30,7 +30,7 @@ after them wait on the same thing. Fog of war, the exception, is under way a ste
 character dialogue; the UI component library is built and waiting on Adam's eye, and so is the choice roll,
 and so is the origin map, the first of real names on the edited world. Structures are planned and not
 started; the world cache is built and waiting on Adam's eye; quests are built and on main, waiting on Adam's
-eye for their experiment; and catalogues, the newest, are planned, with only their documents written.
+eye for their experiment; and catalogues, the newest, are built and waiting on Adam's eye.
 
 - **Characters and key figures**: the people of the world, each with a history of their own, and the
   house's tie to the few it acts through, shown in a pane in the corner beside the house status. The shape
@@ -134,8 +134,8 @@ eye for their experiment; and catalogues, the newest, are planned, with only the
   them. The game server checks a catalogue before it takes it on, is the one that writes it when a page
   saves, and records each version it takes on as one event on the world's own stream, so a retuned number
   explains every income it moves. Every later plan with content in it builds its catalogue's page. The shape
-  is decision record 0097 and the steps, one commit each, are in `docs/plans/catalogues.md`; the first,
-  the documents, is written. Adam's own, planned with him on 2026-10-15.
+  is decision record 0097 and the steps, one commit each, are in `docs/plans/catalogues.md`; all eighteen are
+  built, in one run Adam asked for on 2026-10-16, and wait on his eye. Adam's own, planned with him on 2026-10-15.
 
 MongoDB and RabbitMQ are on the machine, in Docker, from `infra/docker-compose.yml`. The game server keeps
 its world in MongoDB whenever Docker is running, and RabbitMQ carries every event it stores to the read models.

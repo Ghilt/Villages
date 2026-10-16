@@ -210,6 +210,22 @@ verification request at that page.** `admin/catalogues.test.ts` holds it: it fai
 | 17 | **The quests' page.** | 1. 👀 Edit the blessing, offer the quest, collect it. |
 | 18 | **The pictures' page**, once the session working on the map's marks has landed. | 1. 👀 Every picture there, the placeholders marked. |
 
+Built on 2026-10-16, in one run, a commit a step. What the building settled, beside the plan:
+
+- **One setting, `villages.catalogues.editable`**, on unless a released server turns it off, as the instruments are,
+  rather than one for watching and one for writing: a released server should do neither.
+- **`changed` is where the file differs**, as paths, `types.castle.yields.naturalDomain`, worked out by the server,
+  which reads JSON; a list is one place. A folder's catalogue is recorded a file at a time, `dialogues/letter`.
+- **The shelf swaps, then records**, so whatever hears the record reads the new catalogue; a record that fails takes
+  the swap back.
+- **The one form** keeps a list or an object of plain values on one line however long, and opens out one that holds
+  others, or carries a `$comment`, when it does not fit in 120 columns: what the files were written in by hand.
+- **A founding's fifty wealth stays in the code**: it is folded from the founding, not written into it.
+- **Gossip's dialogue stays in the code**, its numbers, rumours and option words in `fate.json`.
+- **A quest's dialogues are spoken by people of their own** for now: the shelf refuses one the key figure speaks.
+- **A folder's page gives each file an address**, `/admin/inspect-dialogues/letter`.
+- **The tests keep their own copies** of the content they play, so a retune never moves a test.
+
 The order is a suggestion, as every order here is. Each run is whole on its own: 1 to 7 is the shelf and the
 way of editing, 8 and 9 the balance, 10 and 11 the rolls, 12 and 13 the names, 14 to 17 the dialogues and
 quests, and 18 the pictures, which needs nothing before it but step 2.
