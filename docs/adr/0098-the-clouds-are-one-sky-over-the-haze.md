@@ -71,7 +71,10 @@ from noise laid along the wind and carried by the wall clock.**
   the speed times the seconds since 1970, a new speed taken straight would throw the whole sky somewhere else; so a
   speed slider moved carries the sky on from where it stands (`respeed`), and the speed it started at gives the
   shared sky back.
-- It measured 0.84 ms of the graphics card a frame at high on the first machine it ran on, 1.7% of its time.
+- It measured 0.84 ms of the graphics card a frame at high on the first machine it ran on, 1.7% of its time, as
+  plain white clumps; painted, shadowed and kept clear of the marks, 2.41 ms, 4.8% of its time at twenty frames a
+  second. While the camera moves it is drawn with every frame the map draws, so a panning map costs about three
+  times that share; low is a quarter of it.
 - Every number of the look is in `sprites/clouds/look.ts`.
 
 ## Alternatives considered
