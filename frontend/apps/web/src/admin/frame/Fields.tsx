@@ -130,3 +130,25 @@ export function WordsField({
     />
   );
 }
+
+/** A list of words, said `Hearth, Coin`: split again at the commas, each trimmed, none empty. */
+export function ListField({
+  editor,
+  path,
+  label,
+  wide,
+}: {
+  editor: CatalogueEditor<unknown>;
+  path: Path;
+  label: string;
+  wide?: boolean;
+}) {
+  const value = editor.at(path);
+  const each = Array.isArray(value) ? value.filter((one): one is string => typeof one === 'string') : [];
+  const read = (typed: string) =>
+    typed
+      .split(',')
+      .map((one) => one.trim())
+      .filter((one) => one !== '');
+  return <Field editor={editor} path={path} label={label} wide={wide} shown={each.join(', ')} read={read} />;
+}

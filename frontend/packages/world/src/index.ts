@@ -66,7 +66,7 @@ export { namesAt } from './names.ts';
 export { CULTURES, STRUCTURE_RESOURCES, parseStructureCatalogue } from './structures.ts';
 export { RARITIES, parseBalance } from './balance.ts';
 export type { Balance, BalanceRarity } from './balance.ts';
-export { FATE_RESOURCES, parseFate } from './fate.ts';
+export { FATE_RESOURCES, dealFrom, opensOn, parseFate } from './fate.ts';
 export type { Fate, FateAction, FateDeals, FatePool, FateResource } from './fate.ts';
 export type {
   Culture,

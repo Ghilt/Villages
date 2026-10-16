@@ -62,7 +62,7 @@ export const INSPECT_VIEWS: readonly InspectView[] = [
     title: 'Rolls',
     what: 'The pools a choice roll opens and the actions it deals from them: what opens each, and what each deals.',
     needs: 'nothing to read, the game server to save',
-    load: () => import('./Rolls').then((page) => page.Rolls),
+    load: () => import('./rolls/Rolls').then((page) => page.Rolls),
     catalogue: 'fate',
   },
   {

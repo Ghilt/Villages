@@ -109,3 +109,39 @@ export function parseFate(text: string): Fate {
     said: { '': comment(file), pools: comment(pools), actions: comment(actions) },
   };
 }
+
+/** Whether a pool opens on an omen's key: a key exactly, or, ending in `*`, every key beginning with what comes before. */
+export function opensOn(pool: FatePool, key: string): boolean {
+  if (pool.opensOn.length === 0) return pool.name === 'Hearth';
+  return pool.opensOn.some((pattern) =>
+    pattern.endsWith('*') ? key.startsWith(pattern.slice(0, -1)) : key === pattern,
+  );
+}
+
+/**
+ * What a roll would deal from, with these omens: the pools they open, Hearth always, and each action of a rarity in
+ * an open pool with its weight - how many open pools it is in - and its share of the first draw, as the fate engine
+ * deals. Gossip is weighed with the rest, though with no house near it is never dealt.
+ */
+export function dealFrom(
+  fate: Fate,
+  keys: readonly string[],
+): {
+  opened: readonly string[];
+  weighed: ReadonlyMap<BalanceRarity, readonly { action: FateAction; weight: number; share: number }[]>;
+} {
+  const opened = fate.pools
+    .filter((pool) => pool.name === 'Hearth' || keys.some((key) => opensOn(pool, key)))
+    .map((pool) => pool.name);
+  const weighed = new Map(
+    RARITIES.map((rarity) => {
+      const each = fate.actions
+        .filter((action) => action.rarity === rarity)
+        .map((action) => ({ action, weight: action.pools.filter((pool) => opened.includes(pool)).length }))
+        .filter(({ weight }) => weight > 0);
+      const total = each.reduce((sum, { weight }) => sum + weight, 0);
+      return [rarity, each.map((one) => ({ ...one, share: total === 0 ? 0 : one.weight / total }))] as const;
+    }),
+  );
+  return { opened, weighed };
+}

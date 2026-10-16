@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
-import { parseFate } from './fate.ts';
+import { dealFrom, opensOn, parseFate } from './fate.ts';
 
 const fixture = readFileSync(new URL('../../../../contracts/fixtures/fate.json', import.meta.url), 'utf8');
 const world = readFileSync(new URL('../../../../world/catalogues/fate.json', import.meta.url), 'utf8');
@@ -41,5 +41,26 @@ describe('the pools and the actions', () => {
     ).toThrow(
       'world/catalogues/fate.json: no actions.wealth.common.grants or gossip, and only one, the page can read',
     );
+  });
+});
+
+describe('a deal from the pools and the actions', () => {
+  const fate = parseFate(fixture);
+
+  it('opens Hearth always, and a pool on a key exactly or on every key beginning with what comes before its star', () => {
+    const coin = fate.pools[1]!;
+    expect(
+      ['map.river', 'window.river', 'window.river:Q548', 'map.rivers'].map((key) => opensOn(coin, key)),
+    ).toEqual([true, true, true, false]);
+    expect(dealFrom(fate, []).opened).toEqual(['Hearth']);
+    expect(dealFrom(fate, ['map.river']).opened).toEqual(['Hearth', 'Coin']);
+  });
+
+  it('weighs each action by the open pools it is in, and shares the first draw by weight', () => {
+    const commons = dealFrom(fate, ['map.river']).weighed.get('common')!;
+    expect(commons.map(({ action, weight, share }) => [action.id, weight, share])).toEqual([
+      ['wealth.common', 2, 0.5],
+      ['gossip.common', 2, 0.5],
+    ]);
   });
 });
