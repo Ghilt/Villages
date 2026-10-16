@@ -14,7 +14,7 @@
 436 frontend/apps/web/src/areas/AreaOverlay.tsx
 490 frontend/apps/web/src/map/painterlyTiles.ts
 429 frontend/apps/web/src/sprites/FogLayer.ts
-731 frontend/apps/web/src/sprites/scenery/SceneryLayer.ts
+730 frontend/apps/web/src/sprites/scenery/SceneryLayer.ts
 600 frontend/apps/web/src/stage/bayBox.test.ts
 456 frontend/apps/web/src/stage/bayBox.ts
 439 frontend/apps/web/src/stage/bays.test.ts

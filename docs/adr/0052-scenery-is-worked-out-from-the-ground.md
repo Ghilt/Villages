@@ -111,3 +111,18 @@ decode a second copy of it.
 **Ordinary sprites rather than particles.** Simpler, and what the marks use. It loses at the count
 this exists to reach: twenty thousand `Sprite`s each carry a transform, a bounds and a place in the
 scene graph, where twenty thousand particles are four vertices in one buffer and one draw call.
+
+## Amendment, 2026-10-16: the scenery bends in the wind
+
+Adam asked for the world to come alive, and said what the scenery layer is for: pieces that are the same for every
+player at places worked out the same everywhere, the trees now and mountains later. So the scenery bends in the
+wind as it is drawn and nowhere else. Its two particle containers are drawn with shaders of their own
+(`sprites/trees/`), which lean the top of every sprite and the far end of its shadow down the wind by the gust at
+its foot, and keep the foot where it is: a point's place, size and rank are as this record says, and only how it
+is drawn moves. How far a kind bends and how much its crown pales come in the particle's tint, which nothing else
+uses, since a picture is never tinted; a kind given no numbers stands still, and a test fails until every kind in
+`world/biomes.json` has its own, a mountain's nought. The gusts are the grass's, one function of the place and the
+wall clock laid along the wind and carried modulo the world's width as the clouds are (0098), so every browser
+bends the same tree with the same gust. It is the Trees part of the Shaders section, `off`, `low` or `high`: a
+level is only how often the trees move, and each of their frames is the whole sprite canvas drawn again, asked for
+only while some of the scenery is on the screen.

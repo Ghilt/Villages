@@ -93,6 +93,20 @@ stage alone, with none of the debug panel in it (decision record 0079).
   moved, and invented land is given ground of the kind painted on it: rock a range, forest hills, farmland flat. A master with no height tiles is drawn flat and the log says what
   to run. Its numbers are in
   `apps/web/src/map/relief.ts` and `reliefTuning.ts`, and our shader is `reliefLayer.ts` and `reliefShader.ts`.
+- The scenery bends in the wind, from zoom 7.5 in, wherever it is drawn: every tree, bush, reed and tuft leans down
+  the wind as a gust passes, its foot where it stands and its shadow leaning with it, and its crown turns a little
+  paler, as the grass's field does; with no gust it sways a little on its own. How far each kind bends is its own -
+  a birch, a palm or a reed a lot, an oak or a spruce a little, a boulder or a cactus not at all - in
+  `apps/web/src/sprites/trees/look.ts`, and a kind it does not name stands still. The gusts are the grass's, one
+  wind blowing the sea's way (`apps/web/src/sprites/wind.ts`), and come from the wall clock, so every browser bends
+  the same tree with the same gust; a player who has asked for less motion gets them standing still. They are the
+  **Trees** part of the Shaders section: `off`, `low` or `high` in its bar, high at every load, low fifteen frames
+  a second and high thirty, asked for only while some of the scenery is on the screen; a frame is the whole sprite
+  canvas drawn again, and the first time the trees move at a level the log says once what a frame costs. Inside
+  it, two sliders: how far a whole gust bends the bendiest kind, as a share of its height, and how much the palest
+  crown pales. They change the trees on the next frame, are remembered in the browser that moved them, and once
+  one stops the log says both under `trees` as `trees tuned: …`, the line to hand over when a setting should
+  become the default; `reset` puts them back. See the amendment to `docs/adr/0052`.
 - Clouds drift over the world from zoom 7 out, every lump lit cream from the upper right and shaded violet-grey
   away from it, each cloud with its soft violet shadow down and to the left. They live in weather systems, masses
   swept into bands and swirls with clear country between; they are whole from 6 out to 5.25, and further out the

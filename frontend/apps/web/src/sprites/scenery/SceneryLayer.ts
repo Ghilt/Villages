@@ -4,7 +4,8 @@ import { note } from '../../log/log';
 import { WORLD_MASTER_WIDTH } from '../../geometry/world';
 import * as camera from '../../geometry/cameraMath';
 import { LONGEST_STEP_MS, PRESENCE_MS, easeTowards, midTrade } from '../twoForms';
-import { CELL, biomeAt, cellOf, type ArtAtlasFile, type Kind, type ScatteredPoint } from '@villages/world';
+import { biomeAt, cellOf, type ArtAtlasFile, type Kind, type ScatteredPoint } from '@villages/world';
+import type { SceneryShaders } from '../trees/TreesLayer';
 import { currentPointsOf, noteDrawn, pointsOf, sceneryMap, sceneryTally } from './sceneryCells';
 import { MOST_CUT_AT_ONCE, groupCount, groupOf, thresholdOf, wantedAt, worthDrawing } from './showing';
 
@@ -79,23 +80,23 @@ interface Held {
   shade: Map<number, Particle[]>;
 }
 
-export function createSceneryLayer() {
-  // Only the colour moves. The positions and the sizes are in world units and never change, so the
-  // vertex buffer is written once a group rather than once a frame.
+export function createSceneryLayer(sway: SceneryShaders) {
+  // Only the colour moves: positions and sizes are in world units and never change, so the vertex buffer
+  // is written once a group, not once a frame. The trees' shaders bend the sprites in the wind as they draw.
   const dynamicProperties = { position: false, vertex: false, rotation: false, uvs: false, color: true };
-  const container = new ParticleContainer({ dynamicProperties });
+  const container = new ParticleContainer({ dynamicProperties, shader: sway.standing });
   // The shadows, under every sprite and blended by the greater, so that two overlapping are no darker
   // than one. Drawn first onto the cleared canvas, which is what makes the greater safe: there is
   // nothing under it but the transparency the map shows through.
-  const shadowLayer = new ParticleContainer({ dynamicProperties });
+  const shadowLayer = new ParticleContainer({ dynamicProperties, shader: sway.shadows });
   shadowLayer.blendMode = 'max';
   shadowLayer.visible = false;
   const layers = new Container();
   layers.addChild(shadowLayer, container);
   const shown = new Map<string, Held>();
   let frames: Texture[] = [];
-  /** Where each kind stands in its own frame, as a fraction of it: the anchor. */
-  let feet: { x: number; y: number }[] = [];
+  /** Where each kind stands in its own frame, as a fraction of it, and its tint: how it bends in the wind. */
+  let feet: { x: number; y: number; tint: number }[] = [];
   /** Each kind's shadow, and where the kind's foot falls in it. Empty for an atlas cut without them. */
   let shadowFrames: Texture[] = [];
   let shadowFeet: { x: number; y: number }[] = [];
@@ -185,11 +186,11 @@ export function createSceneryLayer() {
       }
       const frame = own ?? Object.values(file.frames)[0];
       if (frame === undefined) {
-        return { texture: Texture.EMPTY, foot: { x: 0.5, y: 1 } };
+        return { texture: Texture.EMPTY, foot: { x: 0.5, y: 1, tint: sway.tintOf(kind.name) } };
       }
       return {
         texture: new Texture({ source, frame: new Rectangle(frame.x, frame.y, frame.width, frame.height) }),
-        foot: { x: frame.footX / frame.width, y: frame.footY / frame.height },
+        foot: { x: frame.footX / frame.width, y: frame.footY / frame.height, tint: sway.tintOf(kind.name) },
       };
     });
     frames = cut.map((one) => one.texture);
@@ -302,9 +303,9 @@ export function createSceneryLayer() {
     }
     const made = points.map((point) => {
       const texture = frames[point.kind] ?? frames[0]!;
-      const foot = feet[point.kind] ?? { x: 0.5, y: 1 };
-      // The art carries its own colour, so nothing tints it; only the fade's alpha moves after this.
-      const particle = new Particle({ texture });
+      const foot = feet[point.kind] ?? { x: 0.5, y: 1, tint: sway.tintOf('') };
+      // The art carries its own colour: the tint is how its kind bends, which only the trees' shaders read.
+      const particle = new Particle({ texture, tint: foot.tint });
       place(particle, point);
       // The foot stands on the place, the same anchor a castle's forms share, and it is where the
       // picture itself stands - measured when the art was cut - rather than the middle of its box.
@@ -337,7 +338,7 @@ export function createSceneryLayer() {
       const texture = shadowFrames[point.kind] ?? shadowFrames[0]!;
       const foot = shadowFeet[point.kind] ?? { x: 0.5, y: 0 };
       const standing = frames[point.kind] ?? frames[0]!;
-      const particle = new Particle({ texture });
+      const particle = new Particle({ texture, tint: feet[point.kind]?.tint ?? sway.tintOf('') });
       place(particle, point);
       particle.anchorX = foot.x;
       particle.anchorY = foot.y;
@@ -727,5 +728,3 @@ export function createSceneryLayer() {
     },
   };
 }
-
-export { CELL };

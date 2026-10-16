@@ -16,6 +16,7 @@ import { createRingLayer, type RingLayer } from './RingLayer';
 import { createSceneryLayer } from './scenery/SceneryLayer';
 import { noteDrawn } from './scenery/sceneryCells';
 import type { CameraSource, FogHow, Scene, SpriteRenderer } from './SpriteRenderer';
+import { createTreesLayer, type TreesLayer } from './trees/TreesLayer';
 import { LONGEST_STEP_MS } from './twoForms';
 
 /** What the dev server says when it has cut the art again, `vite/artApi.ts`. */
@@ -63,7 +64,8 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
   let uncolouring: ReturnType<typeof createUncolouring> | null = null;
   let scenery: ReturnType<typeof createSceneryLayer> | null = null;
   /** The marks and the ring, once there is a canvas to draw them on; the scene waits for them until then. */
-  let layers: { marks: MarksLayer; ring: RingLayer; drawn: readonly Layer[] } | null = null;
+  let layers: { marks: MarksLayer; ring: RingLayer; trees: TreesLayer; drawn: readonly Layer[] } | null =
+    null;
   /** What is on the map: the last scene handed in, which a renderer mounted late is given whole. */
   let scene: Scene = NOTHING;
   /**
@@ -211,7 +213,9 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
     for (const layer of layers.drawn) {
       wants = soonest(wants, layer.draw(view, now, elapsed));
     }
+    const measuring = layers.trees.measure();
     app.render();
+    layers.trees.measured(measuring);
 
     if (wants === 0) {
       drawSoon();
@@ -293,8 +297,9 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
         drawSoon();
       });
       const ring = createRingLayer(textures, marks);
-      // Under everything, because it is the ground the rest stands on.
-      scenery = createSceneryLayer();
+      // Under everything, because it is the ground the rest stands on; drawn bending in the wind by the trees' layer.
+      const trees = createTreesLayer(app.renderer, drawSoon);
+      scenery = createSceneryLayer(trees.shaders);
       scenery.setGround(groundOf(groundField));
       // WIP spike: the grass, swaying on the ground under everything that stands on it.
       const grass = createGrassLayer(app.renderer, () => scene.scenery.tilesRoot, drawSoon);
@@ -319,11 +324,13 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       container.appendChild(app.canvas);
 
       // Drawn in the order the old frame drew them: the marks, the ring put where they were just drawn, the
-      // fog, the colour taken out, and the scenery; then the clouds, after the marks they keep clear of.
+      // fog, the colour taken out, and the scenery, then the wind it bends in; then the clouds, after the marks
+      // they keep clear of.
       layers = {
         marks,
         ring,
-        drawn: [marks, ring, hazeLayer, uncolouringLayer, grass, sceneryLayer, clouds],
+        trees,
+        drawn: [marks, ring, hazeLayer, uncolouringLayer, grass, sceneryLayer, trees, clouds],
       };
       // Whatever was handed over before the canvas was ready - the seats a founding choice offers always are,
       // since they arrive with the first frames - is given now, whole.

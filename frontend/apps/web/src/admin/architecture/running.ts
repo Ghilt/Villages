@@ -133,7 +133,7 @@ export const PIECES: readonly Piece[] = [
     where: 'sprites/PixiSpriteRenderer.ts · Pixi',
     runs: 'browser',
     group: 'page',
-    what: "Pixi's canvas over the map: the scenery, placed by the sprite map on the ground in the flat tiles and drawn from its atlas; the structures, drawn from theirs in the culture of the ground under each; the marks and the rings for what is there.",
+    what: "Pixi's canvas over the map: the scenery, placed by the sprite map on the ground in the flat tiles and drawn from its atlas, bending in the grass's gusts as it is drawn; the structures, drawn from theirs in the culture of the ground under each; the marks and the rings for what is there.",
   },
   {
     id: 'panes',

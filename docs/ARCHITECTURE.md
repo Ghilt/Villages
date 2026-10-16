@@ -377,12 +377,14 @@ browser's saturation blend, and the sprites under the fog by a filter on the con
 fog shader's code for where a pixel lies and how far inside each edge is shared by the fog and the filter.
 **The sprite canvas is a stack of layers**, each a `Layer` (`sprites/layer.ts`): the scenery, the marks under
 the fog and over it (`MarksLayer.ts`), the fog with the haze's clock, the clouds over the fog with theirs, the
-selection ring (`RingLayer.ts`), and the colour taken out of the map on its own canvas. Each draws its part of a
+selection ring (`RingLayer.ts`), the colour taken out of the map on its own canvas, and the wind the scenery bends
+in, which draws nothing of its own. Each draws its part of a
 frame from the same camera and says how soon it wants the next - the next frame, a time, or never - and the
 renderer asks for the soonest. So the canvas draws when the map has drawn and has no clock of its own, except the
 haze's and the clouds': while the fog is drawn close in with unknown ground on the screen, it asks for a frame
 twelve times a second, so the haze can drift, and stops asking the moment there is none; while a cloud is on the
-screen, from zoom 7 out, the clouds ask at their level's rate. The development build's handles on the window,
+screen, from zoom 7 out, the clouds ask at their level's rate; and while any of the scenery is on the screen, the
+trees ask at theirs. The development build's handles on the window,
 what the fog is drawing and where every sprite ended up, are `sprites/devHandles.ts`. The page hands it the whole scene at once (`setScene`) and it works out what
 changed and asks for one frame, so however much changes together, it draws once. A new way of drawing is a
 layer of its own and a line in the renderer's stack, where it goes in the drawing's order. **A new kind of
@@ -402,6 +404,16 @@ weather system and the coarsest sizes of noise, and skips the rest of the work w
 after the marks in the stack's update order, because they keep clear
 of where the marks layer says it drew its icons this frame (`iconsDrawn`). They are lit by the map's one light, `map/light.ts`, which the relief reads too and
 which imports nothing, so a shader anywhere can take it without bringing MapLibre along.
+**The scenery bends in the world's one wind**, as it is drawn and nowhere else (the amendment to 0052). Its two
+particle containers are drawn with shaders of the trees' own (`sprites/trees/`), one for the sprites and one for
+their shadows, which lean the top of every sprite down the wind by the gust at the ground under its foot - the
+stored foot with the camera's turn and tip taken back out - and keep the foot where it is, so a point's place,
+size and rank are untouched. What a kind does in the wind comes in its particle's tint, which nothing else reads,
+since a picture is never tinted. The gusts are one GLSL function, `sprites/wind.ts`, which the grass takes too:
+noise laid along the wind and carried by the wall clock modulo the world's width, as the clouds are, so every
+browser bends the same tree with the same gust. `TreesLayer.ts` is a layer of the stack after the scenery: it
+hands the shaders the camera, the gusts and the sliders each frame, asks for frames at its level's rate while
+there is scenery on the screen, and times a frame of the whole canvas, which is what its frames cost.
 **The water is not in the sprite canvas but in the map**, a MapLibre custom layer (`water/WaterLayer.ts`) drawn
 in WebGL2 over the painted terrain and under the ink lines, so the fog and everything in the sprite canvas are over
 it (0081). Where the water is comes from the flat tiles, a mask a tile worked out in the browser by the fog's

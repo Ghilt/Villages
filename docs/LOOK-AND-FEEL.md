@@ -160,6 +160,14 @@ the Scenery section, 40 per cent where a shadow is whole to begin with; experime
 disappears into the painted forest is a question for the eye. How to hand one over is `AUTHORING-THE-ART.md`; why it works this way is
 decision record 0059.
 
+**The scenery bends in the wind.** Close in, every tree, bush, reed and tuft leans down the wind as a gust passes
+and settles behind it, its foot where it stands and its shadow leaning with it, and its crown turns a little paler,
+as the grass's field shows its paler side; with no gust it sways a little on its own. A birch, a palm or a reed
+bends a lot, an oak or a spruce a little, a stone or a cactus not at all, and a kind given no numbers stands
+still, as a mountain will. The gusts are the grass's, the world's one wind blowing the sea's way, and the same in
+every browser. A player who asked for less motion sees it all standing still. Every number is in
+`apps/web/src/sprites/trees/look.ts`; see the amendment to decision record 0052.
+
 **The seam.** The join between the two **bays**, drawn as a moulding lying over it: three gold rules
 running the length of the stage — a heavy one on the join and a lighter one either side — with a fixed
 **knot** of **ornament** at the middle. The knot is one size whatever the length, because an ornament that

@@ -4,6 +4,7 @@ import { CloudSection } from './CloudSection';
 import { GrassSection } from './GrassSection';
 import { ReliefSection } from './ReliefSection';
 import { Section } from './Section';
+import { TreesSection } from './TreesSection';
 import { WaterSection } from './WaterSection';
 
 /**
@@ -24,6 +25,7 @@ export function ShadersSection() {
       <WaterSection />
       <ReliefSection />
       <GrassSection />
+      <TreesSection />
       <CloudSection />
     </Section>
   );

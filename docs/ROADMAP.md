@@ -143,6 +143,13 @@ eye for their experiment; and catalogues, the newest, are built and waiting on A
   capacity of one server and the path past it. Five steps in `docs/plans/bot-swarm.md`, all built. The first
   run carried 1,000 players and ran out of memory at 2,500; after what a connection holds was fixed, 10,000
   (experiment 0021). The first milestone of the code-debt review of 2026-10-16, asked for by Adam that day.
+- **A living world**: the land, the trees and the critters moving close in. One land layer for every kind of
+  terrain, which the grass spike becomes, each kind with a motion of its own or standing still on purpose; the
+  scenery bending in the world's one wind, the same gusts as the grass and the same in every browser; and
+  critters - birds out of the bushes, a squirrel, fish jumping - made up by the browser from where and when, the
+  same in every browser, drawn as sprites rather than by a shader over the whole screen, in a Critters part of the
+  Shaders section with a density. The steps, one commit each, are in `docs/plans/living-world.md`; step 1, the
+  trees in the wind, is built and verified. Asked for by Adam on 2026-10-16.
 
 MongoDB and RabbitMQ are on the machine, in Docker, from `infra/docker-compose.yml`. The game server keeps
 its world in MongoDB whenever Docker is running, and RabbitMQ carries every event it stores to the read models.
