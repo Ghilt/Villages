@@ -57,7 +57,8 @@ const BETWEEN = 120;
 /**
  * Where each running piece stands in its group's box, by column and row. In the page, a row of the parts that
  * read baked files, in the order of where what each reads stands above, on average, and under them the
- * connection, which talks down to the gateway and up to the parts drawing what it is told, the fog beside it. In
+ * connection, which talks down to the gateway and up to the parts drawing what it is told, the fog beside it
+ * and the clouds, which read nothing, beside the fog. In
  * the game server and the event store, a column of three and a row of two: the gateway is above what feeds it,
  * Occurrent above what keeps its events, the bridge beside it and above the broker it publishes to, and the feed
  * runs up.
@@ -71,6 +72,7 @@ const SPOTS: Record<string, { readonly col: number; readonly row: number }> = {
   sprites: { col: 5, row: 0 },
   panes: { col: 6, row: 0 },
   relief: { col: 7, row: 0 },
+  clouds: { col: 3.5, row: 1 },
   fog: { col: 4.5, row: 1 },
   connection: { col: 5.5, row: 1 },
   gateway: { col: 1, row: 0 },

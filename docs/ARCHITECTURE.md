@@ -357,12 +357,14 @@ between the map and the sprites that `fog/uncolouring.ts` lays a grey picture of
 browser's saturation blend, and the sprites under the fog by a filter on the container that holds them. The
 fog shader's code for where a pixel lies and how far inside each edge is shared by the fog and the filter.
 **The sprite canvas is a stack of layers**, each a `Layer` (`sprites/layer.ts`): the scenery, the marks under
-the fog and over it (`MarksLayer.ts`), the fog with the haze's clock, the selection ring (`RingLayer.ts`), and
-the colour taken out of the map on its own canvas. Each draws its part of a frame from the same camera and says
-how soon it wants the next - the next frame, a time, or never - and the renderer asks for the soonest. So the
-canvas draws when the map has drawn and has no clock of its own, except the haze's: while the fog is drawn close
-in with unknown ground on the screen, it asks for a frame twelve times a second, so the haze can drift, and stops
-asking the moment there is none. The page hands it the whole scene at once (`setScene`) and it works out what
+the fog and over it (`MarksLayer.ts`), the fog with the haze's clock, the clouds over the fog with theirs, the
+selection ring (`RingLayer.ts`), and the colour taken out of the map on its own canvas. Each draws its part of a
+frame from the same camera and says how soon it wants the next - the next frame, a time, or never - and the
+renderer asks for the soonest. So the canvas draws when the map has drawn and has no clock of its own, except the
+haze's and the clouds': while the fog is drawn close in with unknown ground on the screen, it asks for a frame
+twelve times a second, so the haze can drift, and stops asking the moment there is none; while a cloud is on the
+screen, from zoom 7 out, the clouds ask at their level's rate. The development build's handles on the window,
+what the fog is drawing and where every sprite ended up, are `sprites/devHandles.ts`. The page hands it the whole scene at once (`setScene`) and it works out what
 changed and asks for one frame, so however much changes together, it draws once. A new way of drawing is a
 layer of its own and a line in the renderer's stack, where it goes in the drawing's order. **A new kind of
 thing standing on the map is a kind of mark instead**: the marks layer is the same for every kind - the trade
@@ -370,6 +372,13 @@ between two forms, the fade in and out, the side of the fog, the click and the r
 pictures, the heights of the two forms and where a pennant flies, is its look (`sprites/markLooks.ts`). A
 structure was the first added that way; one mark's own sprites and what is done to them alone are
 `markEntry.ts`.
+**The clouds are in the sprite canvas**, not the map, so they can lie over the fog's haze (0098): a layer
+(`sprites/clouds/CloudLayer.ts`) between the fog and the ring, worked out a pixel at a time like the grass, into a
+picture at its level's share of the screen. They read no file. Where they are is a function of the place and the
+wall-clock time, so every browser draws the same sky: the noise is laid along the wind and repeats along it at the
+world's width, and how far the wind has carried it is worked out on the processor in full precision and handed in
+modulo that (`sprites/clouds/cloudClock.ts`). Which band of them a zoom is in, and how much is drawn there, is
+`sprites/clouds/cloudBands.ts`.
 **The water is not in the sprite canvas but in the map**, a MapLibre custom layer (`water/WaterLayer.ts`) drawn
 in WebGL2 over the painted terrain and under the ink lines, so the fog and everything in the sprite canvas are over
 it (0081). Where the water is comes from the flat tiles, a mask a tile worked out in the browser by the fog's

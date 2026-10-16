@@ -228,6 +228,17 @@ is a flat haze. Close in the bands swell and thin where they lie and drift slowl
 noticed rather than watched. The edge of what is seen stays still, so nothing that stands on it seems to be
 swallowed and given back. Every number of it is in `apps/web/src/fog/look.ts`.
 
+**The clouds are weather over the world when it is pulled back.** From zoom 7 out clumps of cloud drift over
+the map, a clump about a tenth of the screen wide at 5.5, gathered in patches with clear sky between, about a
+third of the sky in all. They lie on the ground: they scale with the zoom and stay over the land they float over,
+whole out to 5.25 and fading to nothing by 4.5, so the whole world reads clearly further out. Between 7 and 6 the
+camera is in them. They lie over the fog's haze, because there is weather over the unknown too, and under every
+sign, the marks and the ring. They drift with the world's one wind, the sea's, slowly enough to be noticed rather
+than watched, about three minutes across the screen, and every browser sees the same sky. They are to be painted
+like the map, in a few flat tones lit from the upper right, with shadows in the relief's violet; until that step of
+`docs/plans/clouds.md` they are soft and white. Every number of them is in `apps/web/src/sprites/clouds/look.ts`.
+See decision record 0098.
+
 **Nothing on the map pops.** A thing arriving fades up, a thing gone fades out and is only then let go
 of, and a thing changing form crosses over rather than swapping. All of it is a fifth of a second or
 less, so it reads as the world settling rather than as an animation. See decision record 0051.

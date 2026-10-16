@@ -5,6 +5,7 @@ import { revealedAt } from '../fog/fogField';
 import type { FogField } from '../fog/fogField';
 import { createUncolouring } from '../fog/uncolouring';
 import { hangDevHandles } from './devHandles';
+import { createCloudLayer } from './clouds/CloudLayer';
 import { createFogLayer } from './FogLayer';
 import { createGrassLayer } from './grass/GrassLayer';
 import { soonest, type Layer } from './layer';
@@ -45,7 +46,7 @@ const NOTHING: Scene = {
  * ring, and the colour taken out of the map on a canvas of its own, each a \`Layer\` that draws its part of a
  * frame and says when it wants the next. The stack's order is the drawing's, bottom to top: the scenery and
  * the world outside vision, which lose their colour together on ground only revealed; the fog over them; the
- * ring; and every sign the fog must not cover. See \`layer.ts\` and decision 0062.
+ * clouds over the fog; the ring; and every sign the fog must not cover. See \`layer.ts\` and decisions 0062, 0098.
  */
 export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
   const app = new Application();
@@ -301,7 +302,9 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       // fog over them, and everything the fog must not cover above that.
       world.addChild(grass.sprite, scenery.container, marks.underTheFog);
       stage.addChild(world);
-      stage.addChild(fog.mesh);
+      // The clouds over the fog, and under the ring and every sign. See decision record 0098.
+      const clouds = createCloudLayer(app.renderer, drawSoon);
+      stage.addChild(fog.mesh, clouds.sprite);
       if (uncolourCanvas !== undefined) {
         uncolouring = createUncolouring(uncolourCanvas);
         uncolouring.show(groundField ?? null);
@@ -316,8 +319,12 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       container.appendChild(app.canvas);
 
       // Drawn in the order the old frame drew them: the marks, the ring put where they were just drawn, the
-      // fog, the colour taken out, and the scenery.
-      layers = { marks, ring, drawn: [marks, ring, hazeLayer, uncolouringLayer, grass, sceneryLayer] };
+      // fog, the colour taken out, and the scenery; then the clouds, after the marks they keep clear of.
+      layers = {
+        marks,
+        ring,
+        drawn: [marks, ring, hazeLayer, uncolouringLayer, grass, sceneryLayer, clouds],
+      };
       // Whatever was handed over before the canvas was ready - the seats a founding choice offers always are,
       // since they arrive with the first frames - is given now, whole.
       apply(null, scene);

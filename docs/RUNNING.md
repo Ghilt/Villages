@@ -93,6 +93,14 @@ stage alone, with none of the debug panel in it (decision record 0079).
   moved, and invented land is given ground of the kind painted on it: rock a range, forest hills, farmland flat. A master with no height tiles is drawn flat and the log says what
   to run. Its numbers are in
   `apps/web/src/map/relief.ts` and `reliefTuning.ts`, and our shader is `reliefLayer.ts` and `reliefShader.ts`.
+- Clouds drift over the world from zoom 7 out: clumps gathered in patches, whole from 6 out to 5.25, fading to
+  nothing by 4.5, and between 7 and 6, for now, thinning away as the camera comes down through them. They lie
+  over the fog's haze and under the marks and the ring, drift with the sea's wind about three minutes across the
+  screen, and are the same in every browser, because where they are comes from the wall clock; a player who has
+  asked for less motion gets them still. The Shaders section's `on` box turns them off with the rest, and the
+  first time they are drawn the log says under `clouds` what that costs the graphics card. They are high at every
+  load; their own part of the Shaders section, with their level and sliders, is the next step of
+  `docs/plans/clouds.md`. Every number of them is in `apps/web/src/sprites/clouds/look.ts`. See `docs/adr/0098`.
 - What the program thinks is happening: the debug panel, one space docked down the right-hand side
   holding everything that helps during development, which minimises to a badge and remembers that,
   and is only in a development build: a production build leaves it out whole (0079).
@@ -612,8 +620,8 @@ and `-- --drop` takes them off; by hand only.
   each card saying where it runs - in the browser, in the game server, or in Docker (sea green). **The page**
   box holds its parts in a row, each under the baked files it reads, which arrive at it: the painter, which is
   arithmetic in workers and not a shader, the grass, water and relief shaders, the map, the picture renderers -
-  Biome, Origin and Culture - the sprites and the panes; under them the fog shader, which reads nothing baked,
-  and the connection, which talks to the gateway and tells the sprites, the panes and the fog what the house
+  Biome, Origin and Culture - the sprites and the panes; under them the cloud shader and the fog shader, which
+  read nothing baked, and the connection, which talks to the gateway and tells the sprites, the panes and the fog what the house
   has and sees. **The game server** box holds the gateway, the rules, the reactions and the projections, and
   the baked files it reads arrive at the box; **the event store** box holds Occurrent, MongoDB, the bridge,
   RabbitMQ and the in-memory store used without Docker, the last dashed because it is used only instead of

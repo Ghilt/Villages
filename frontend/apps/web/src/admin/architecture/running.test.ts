@@ -61,6 +61,8 @@ describe('the running game, as the architecture page draws it', () => {
 
   it('draws a box for the page with a card for each of its shaders', () => {
     const page = PIECES.filter((p) => p.group === 'page').map((p) => p.id);
-    expect(page).toEqual(expect.arrayContaining(['relief', 'water', 'grass', 'fog', 'pictures', 'painter']));
+    expect(page).toEqual(
+      expect.arrayContaining(['relief', 'water', 'grass', 'fog', 'clouds', 'pictures', 'painter']),
+    );
   });
 });

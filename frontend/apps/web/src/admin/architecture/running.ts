@@ -120,6 +120,14 @@ export const PIECES: readonly Piece[] = [
     what: 'The fog of war: one mesh over the screen, between the world and the signs for what is in it, reading how far each place is from what the house sees. Nothing baked: the distances are worked out again whenever its sight changes (decision records 0061, 0062).',
   },
   {
+    id: 'clouds',
+    name: 'The cloud shader',
+    where: 'sprites/clouds/CloudLayer.ts · WebGL',
+    runs: 'browser',
+    group: 'page',
+    what: "The clouds from zoom 7 out, gone by 4.5: worked out on the graphics card a pixel at a time from noise laid along the wind, carried by the wall clock so every browser draws the same sky. Drawn on the sprites' canvas over the fog and under every sign; it reads no file (decision record 0098).",
+  },
+  {
     id: 'sprites',
     name: 'The sprites',
     where: 'sprites/PixiSpriteRenderer.ts · Pixi',
