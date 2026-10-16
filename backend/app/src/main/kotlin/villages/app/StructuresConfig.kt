@@ -14,30 +14,24 @@ import villages.application.StructureCommandExecutor
 import villages.application.StructureService
 import villages.application.VisionService
 import villages.application.WorldClock
-import villages.domain.StructureCatalogue
+import villages.application.Shelf
 import villages.occurrent.EventWorld
 import villages.projections.HousesProjection
 import villages.projections.StructuresProjection
-import java.nio.file.Files
-import java.nio.file.Path
 import java.time.Clock
 import java.util.UUID
 
 /**
- * Structures, wired: the catalogue of their types, read once when the server starts from `world/catalogues/structures.json`, or
- * from `villages.structures`; their streams, in the one store with everything else; and the sixteen standing in
+ * Structures, wired: the catalogue of their types, the one the shelf holds in force, `world/catalogues/structures.json`;
+ * their streams, in the one store with everything else; and the sixteen standing in
  * Antarctica. A configuration of its own rather than more of `WorldConfig`, so that structures grow here. See
  * docs/plans/structures.md and decision record 0093.
  */
 @Configuration
 class StructuresConfig {
     @Bean
-    fun structureCatalogue(@Value("\${villages.structures:../../world/catalogues/structures.json}") file: String): StructureCatalogue =
-        StructureCatalogueFile.parse(Files.readString(Path.of(file)))
-
-    @Bean
-    fun structureExecutor(world: EventWorld, catalogue: StructureCatalogue): StructureCommandExecutor =
-        world.structureExecutor(catalogue)
+    fun structureExecutor(world: EventWorld, shelf: Shelf): StructureCommandExecutor =
+        world.structureExecutor { shelf.structures }
 
     /** The structures on the map, by cell, with every face each has had: what a snapshot and the fog read. */
     @Bean(initMethod = "start", destroyMethod = "close")
@@ -64,16 +58,16 @@ class StructuresConfig {
         world: EventWorld,
         later: ScheduledLater,
         faults: Faults,
-        catalogue: StructureCatalogue,
+        shelf: Shelf,
         visions: VisionService,
         clock: Clock,
         worldClock: WorldClock,
     ): StandingEffects =
-        StandingEffects(world.storeFeed, later, faults, world.gate, catalogue, visions, IncomeService(world.executor, { clock.instant() }, worldClock))
+        StandingEffects(world.storeFeed, later, faults, world.gate, { shelf.structures }, visions, IncomeService(world.executor, { clock.instant() }, worldClock))
 
     @Bean
-    fun antarctica(structures: StructureCommandExecutor, catalogue: StructureCatalogue, clock: Clock, worldClock: WorldClock): Antarctica =
-        Antarctica(structures, catalogue, { clock.instant() }, worldClock)
+    fun antarctica(structures: StructureCommandExecutor, shelf: Shelf, clock: Clock, worldClock: WorldClock): Antarctica =
+        Antarctica(structures, { shelf.structures }, { clock.instant() }, worldClock)
 
     /**
      * The sixteen raised once everything is wired and following the feed, and only while the instruments are open:

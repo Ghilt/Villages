@@ -75,8 +75,8 @@ events name - a type of structure, an action - is retired and never deleted or r
   catalogue, and a few roles a dialogue names rather than a person - the house's key figure, its seat.
 - A released page has no dev server to read a catalogue through, which the structures' page already lacks.
   It is answered when a released build is.
-- Editing needs the game server running and `villages.catalogues.editable`, which the quick start sets and a
-  released server does not; reading needs nothing.
+- Editing needs the game server running and `villages.catalogues.editable`, which is on unless a released server
+  turns it off, as it turns off the instruments; reading needs nothing.
 
 ## Alternatives considered
 

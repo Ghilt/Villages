@@ -88,7 +88,7 @@ class StandingEffectsSpec : StringSpec({
 
     fun Rig.listening(): StandingEffects =
         StandingEffects(
-            world, later, faults, WipeGate(), catalogue,
+            world, later, faults, WipeGate(), { catalogue },
             VisionService(world, { noon }, { today }, { UUID.randomUUID() }),
             IncomeService(world, { noon }, { today }),
         ).started()

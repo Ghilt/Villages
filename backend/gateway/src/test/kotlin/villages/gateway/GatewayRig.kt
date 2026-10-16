@@ -146,7 +146,7 @@ internal class Rig(
         val gate = WipeGate()
         Seats(world, reactions, faults, gate, world, world, { noon }).started()
         StandingEffects(
-            world, reactions, faults, gate, RIG_CATALOGUE,
+            world, reactions, faults, gate, { RIG_CATALOGUE },
             VisionService(world, { noon }, worldClock) { UUID.fromString("e2000000-0000-4000-8000-%012x".format(++minted)) },
             IncomeService(world, { noon }, worldClock),
         ).started()
@@ -235,7 +235,7 @@ internal class Rig(
             stands = Stands { master, x, y -> if (master == "terrain") standsOnDisk[y * STAND_TILES + x] ?: ByteArray(0) else null },
             waters = WaterAt({ grounds[it] }, { names[it] }),
             structures = StructureService(world, houses, { noon }, worldClock, structuresOnTheMap, { UUID.randomUUID() }),
-            antarctica = Antarctica(world, RIG_CATALOGUE, { noon }, worldClock),
+            antarctica = Antarctica(world, { RIG_CATALOGUE }, { noon }, worldClock),
             instrumentsOpen = instrumentsOpen,
             worldKept = worldKept,
         ),

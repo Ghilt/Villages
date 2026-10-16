@@ -189,12 +189,12 @@ class OccurrentCharacterCommandExecutor(
 
 /**
  * The structure command executor port: the same loop, over a structure's stream and a structure's rules, which read the
- * catalogue the server started with. See decision record 0093.
+ * catalogue in force at each decision. See decision records 0093 and 0097.
  */
 class OccurrentStructureCommandExecutor(
     store: EventStore,
     converter: CloudEventConverter<Event>,
-    catalogue: StructureCatalogue,
+    catalogue: () -> StructureCatalogue,
     gate: WipeGate,
 ) : StructureCommandExecutor {
     private val loop = StreamExecutor(store, converter, StructureDecider(catalogue), StructureEvent::class.java, gate)

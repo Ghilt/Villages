@@ -20,10 +20,10 @@ import villages.protocol.SlotView
  * what it is. Asked only for a structure seen now, on the live day: out of sight, or on a day gone by, there is
  * nothing to show, because what is in a slot is only ever now. See docs/plans/structures.md.
  */
-internal class SlotsSeen(private val catalogue: StructureCatalogue?, private val people: CharacterById) {
+internal class SlotsSeen(private val catalogue: () -> StructureCatalogue?, private val people: CharacterById) {
     /** The slots of [row] in [face] as [viewer] is shown them, every one with [everything]; null for a type with none. */
     fun of(row: StructureRow, face: StructureFace, viewer: HouseId?, everything: Boolean): List<SlotView>? {
-        val spec = catalogue?.of(face.type) ?: return null
+        val spec = catalogue()?.of(face.type) ?: return null
         if (spec.slots.isEmpty()) return null
         val own = everything || (viewer != null && face.holder?.house == viewer)
         return spec.slots.map { slot ->
@@ -43,7 +43,7 @@ internal class SlotsSeen(private val catalogue: StructureCatalogue?, private val
      */
     fun yieldsOf(row: StructureRow, face: StructureFace, viewer: HouseId?, everything: Boolean): Map<String, Double>? {
         if (face.ruin || !(everything || (viewer != null && face.holder?.house == viewer))) return null
-        val spec = catalogue?.of(face.type) ?: return null
+        val spec = catalogue()?.of(face.type) ?: return null
         return Yields.of(spec, face.level, row.slots) { person, stat ->
             people.ofCharacter(person)?.takeIf { it.diedOn == null }?.stats?.get(stat)
         }.mapKeys { (resource, _) -> resource.toWire() }
@@ -75,6 +75,6 @@ internal class SlotsSeen(private val catalogue: StructureCatalogue?, private val
         const val SOMEONE = "someone"
 
         /** Shows no slots at all: a gateway made without the catalogue. */
-        val NONE = SlotsSeen(null) { _: CharacterId -> null }
+        val NONE = SlotsSeen({ null }) { _: CharacterId -> null }
     }
 }

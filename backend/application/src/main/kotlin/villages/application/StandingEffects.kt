@@ -28,6 +28,7 @@ import villages.domain.StructureSlotFilled
 import villages.domain.StructureType
 import villages.domain.VisionId
 import villages.domain.Yields
+import villages.domain.WorldCatalogueChanged
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -44,7 +45,9 @@ import java.util.concurrent.ConcurrentHashMap
  * `incomeChanged` under the structure's own source, per second; a structure handed away, fallen or nobody's pays
  * nothing, which is the same event with no rates. What fills its slots counts, by `Yields`: so it folds the slots
  * itself, and the stats and deaths of everyone, for the people in them. What was paid is what was written, so retuning the catalogue
- * changes what is paid from the next change and never what was. See docs/plans/structures.md.
+ * changes what is paid from the next change and never what was. See docs/plans/structures.md. **A retune is a change**:
+ * the world recording a new structures' catalogue, `catalogueChanged`, sets every holding right in that change's own
+ * story, so the event list reads the retune and then every income it moved (0097).
  *
  * **It reconciles rather than replays.** For a house and a structure it plans one thing - set this right - and works
  * out what is right when that runs, from its own fold at that moment: the vision the house should have from the
@@ -60,7 +63,7 @@ class StandingEffects(
     later: Later,
     faults: Faults,
     gate: WipeGate,
-    private val catalogue: StructureCatalogue,
+    private val inForce: () -> StructureCatalogue,
     private val visions: VisionService,
     private val incomes: IncomeService,
 ) : Reaction("the standing-effects listener", feed, later, faults, gate) {
@@ -169,6 +172,14 @@ class StandingEffects(
                 seen.computeIfPresent(key) { _, held -> held.takeIf { it.id != event.visionId } }
             }
 
+            // A retuned catalogue changes what every structure gives: each holding is set right, in the change's story. 0097.
+            is WorldCatalogueChanged -> if (event.catalogue == Catalogues.STRUCTURES) {
+                for ((id, standing) in structures) {
+                    structures[id] = standing.copy(because = stored)
+                    standing.holder?.let { reconcile(it, id) }
+                }
+            }
+
             else -> Unit
         }
     }
@@ -190,7 +201,7 @@ class StandingEffects(
     }
 
     /** What [standing] yields its holder a month, by its type and level and what fills its slots. */
-    private fun yieldsOf(standing: Standing): Map<Resource, Double> = catalogue.of(standing.type)?.let { spec ->
+    private fun yieldsOf(standing: Standing): Map<Resource, Double> = inForce().of(standing.type)?.let { spec ->
         Yields.of(spec, standing.level, standing.slots) { person, stat -> if (person in dead) null else stats[person]?.get(stat) }
     }.orEmpty()
 
@@ -216,7 +227,7 @@ class StandingEffects(
             settled = setOf(HouseError.InvalidVision::class, HouseError.NoSuchVision::class),
         ) {
             val standing = structures[structure]
-            val radius = standing?.takeIf { it.holder == house }?.let { catalogue.of(it.type)?.at(it.level)?.sightKm }
+            val radius = standing?.takeIf { it.holder == house }?.let { inForce().of(it.type)?.at(it.level)?.sightKm }
             val has = seen[house to structure]
             val provenance = Provenance.continuing(story = because)
             if (radius == null && has != null) {

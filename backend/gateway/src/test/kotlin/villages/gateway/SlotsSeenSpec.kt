@@ -57,7 +57,7 @@ private val catalogue = StructureCatalogue(
 )
 private val agnes = CharacterId(UUID.fromString("cb732500-39bd-3b39-a838-bb89f719578f"))
 private val garrison = Content.Item(ContentId(UUID.fromString("7a000000-0000-4000-8000-000000000040")), "a garrison", "", 40)
-private val seen = SlotsSeen(catalogue, CharacterById { null })
+private val seen = SlotsSeen({ catalogue }, CharacterById { null })
 private fun holder(of: PlayerId) =
     Holder(HouseId.of(of), HouseName.of("Kestrel"), Banner(Tincture.SABLE, Division.PLAIN, null, Charge.STAG, Tincture.ARGENT))
 

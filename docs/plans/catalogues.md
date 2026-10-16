@@ -97,9 +97,12 @@ dialogue's when it is made; every reference into another catalogue, such as a qu
 type that exists and an action's pools existing; and the content rules `FirstContentSpec` holds today. A file
 that fails is refused, the catalogue in force goes on running, and the log says why.
 
-**With `villages.catalogues.editable`**, which the quick start sets and a released server does not, the shelf
-also watches the folder and takes on a file saved by hand while the server runs, and the server accepts a
-revision from an inspect page.
+**With `villages.catalogues.editable`**, on unless a released server turns it off as it turns off the instruments,
+the shelf also looks at the folder twice a second and takes on a file saved by hand once it has held still, and the
+server accepts a revision from an inspect page.
+
+**It swaps, then records.** Whatever hears the record - the standing-effects listener setting every income right -
+reads the new catalogue, and a record that fails takes the swap back.
 
 ## The event
 
@@ -174,7 +177,7 @@ verification request at that page.** `admin/catalogues.test.ts` holds it: it fai
 | Rule | Held by | When |
 |---|---|---|
 | The server runs only on a catalogue that passed every check | the shelf: a refused file leaves the one in force | at the instant |
-| Every catalogue the server runs on is recorded, once for each fingerprint | the world's stream, decided before the shelf swaps | at the instant |
+| Every catalogue the server runs on is recorded, once for each fingerprint | the world's stream; the shelf swaps and records in one step, and a record that fails takes the swap back | at the instant |
 | What happened is never rewritten | events carry the numbers they used (0074, 0093) | at the instant |
 | Every house is paid and sees what the catalogue in force says | the standing-effects listener, reacting to `catalogueChanged` | a moment after |
 | Every reference between catalogues resolves | the shelf's checks, and the same over the committed files in `gradlew check` | at the instant |

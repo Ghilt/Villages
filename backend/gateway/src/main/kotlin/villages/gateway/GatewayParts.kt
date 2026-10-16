@@ -66,7 +66,7 @@ class Mechanics(
     val worldKept: WorldKept = WorldKept.IN_MEMORY,
 
     /** The catalogue, for what a structure's slots are and how many places each has; none shows no slots. */
-    val structureCatalogue: StructureCatalogue? = null,
+    val structureCatalogue: () -> StructureCatalogue? = { null },
     /** People by their id, for a person in a slot to be said by name. */
     val characterById: CharacterById = CharacterById { null },
 )

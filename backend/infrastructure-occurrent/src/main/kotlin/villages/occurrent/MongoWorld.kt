@@ -101,7 +101,7 @@ class MongoWorld(
      */
     fun follow(live: Live): EventFeed = OccurrentEventFeed(live, store, converter, faults, gate, markers)
 
-    override fun structureExecutor(catalogue: StructureCatalogue): StructureCommandExecutor =
+    override fun structureExecutor(catalogue: () -> StructureCatalogue): StructureCommandExecutor =
         OccurrentStructureCommandExecutor(store, converter, catalogue, gate)
 
     override fun worldExecutor(changes: (before: String, after: String) -> List<String>): WorldCommandExecutor =

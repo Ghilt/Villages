@@ -167,6 +167,25 @@ follower follows the store, in-process, as before.
 The whole path is proven by `AppBootsTest`: a real socket, hello, a founded house, the event back; the
 store itself by `MongoWorldDockerSpec`, against a MongoDB of its own in a container.
 
+## Where the game's content is kept
+
+What the game is made of - the types of structure, and in time the balance, the pools and actions, the names, the
+dialogues and the quests - is **catalogues**: committed files under `world/catalogues/`, never MongoDB, which keeps
+only what happened (decision record 0097). A branch carries its content to main with its code, and a wipe forgets
+the world and never the game.
+
+The game server holds them on **the shelf**, `Shelf` in `application`, over two ports whose adapters are in `app`:
+`CatalogueFiles`, the folder, and `CatalogueReader`, one strict reader a catalogue and the checks between them,
+which together make `Catalogues`, everything in force. Whatever reads a catalogue asks the shelf at the moment it
+reads - the structures' decider, the standing-effects listener, Antarctica, the gateway's view of a slot - so a
+catalogue taken on while the server runs is the one every decision after it reads. The shelf takes one on only once
+every check has passed, swaps, and then records it on **the world's own stream**, `world`, as
+`villages.world.catalogueChanged.v1`, carrying the whole text; a version recorded already writes nothing. It reads
+the shelf as the server starts, and will not start on one it cannot read; with `villages.catalogues.editable`, on
+unless a released server turns it off, it looks at the folder twice a second and takes on a file that has held
+still; a file it refuses is said as a fault, and the catalogues in force go on. After a wipe it records again what
+is in force.
+
 ## What was verified about Occurrent
 
 Increment 0.7 compiled and ran the plan's riskiest assumption, on Occurrent 0.33.0 under Spring Boot 4.1.1:
@@ -444,7 +463,9 @@ did, and sets things right from its whole fold there instead.
   `lostVision` when it changes hands. It **reconciles** rather than replays: for a house and a structure it plans
   "set this right" and works out what is right when that runs, from its own fold, so a change of hands comes right
   in either order and an id worked out from the holding refuses a second gift. It plans nothing while the history
-  replays, and sets every holding right at `caughtUp()`. See docs/plans/structures.md.
+  replays, and sets every holding right at `caughtUp()`. A retune is a change like any other: the world recording
+  a new structures' catalogue sets every holding right, in the retune's own story. See docs/plans/structures.md
+  and decision record 0097.
 - **The seats listener**, `Seats`, raises a house's castle when it is founded, under an id worked out from the
   house, and names it the seat; both are refused the second time, so the history heard again writes nothing. The
   founding, the castle, the naming and the castle's sight read as one story. See decision record 0093.

@@ -474,14 +474,18 @@ and `-- --drop` takes them off; by hand only.
   on disk it tells the page, and the page showing it reads it again. The game server records every version of a
   catalogue it takes on as `catalogueChanged` on the world's own stream, `world`: one for each catalogue as a
   fresh world starts and again after a wipe, none on a restart over the same files, and one more for a file
-  changed since; each is on the event page, opening to the whole file and where it changed. See
-  `docs/plans/catalogues.md` and decision record 0097.
+  changed since; each is on the event page, opening to the whole file and where it changed. It looks at the folder
+  twice a second while it runs, so a file saved by hand is taken on within a second of holding still: a retuned
+  structure moves every holder's income and sight at once, each `incomeChanged` in the retune's story. A file it
+  cannot read is refused, said once in the debug panel's faults and the server's log naming the file and the field,
+  and the catalogue in force goes on. A released server turns this off with `villages.catalogues.editable=false`.
+  See `docs/plans/catalogues.md` and decision record 0097.
 - What a structure is: `world/catalogues/structures.json`, hand-edited, one entry a type - its words in each culture, and level
   by level how far out it is drawn, how far it sees, its size on the map and what it yields a world month, which is
-  a real day - with its slots and its influence zone if it has one. Nothing cuts it. The game server reads it once,
-  when it starts, and will not start on one it cannot read, saying which type and which field; the page reads it
-  through the dev server at `/catalogues/structures.json`, so `/admin/inspect-structures` shows a change at
-  once and the game server after a restart. Every number in it is a placeholder. See `docs/plans/structures.md`.
+  a real day - with its slots and its influence zone if it has one. Nothing cuts it. The game server reads it as
+  it starts, and will not start on one it cannot read, saying which type and which field, and takes on a change
+  while it runs, as every catalogue; the page reads it through the dev server at `/catalogues/structures.json`, so
+  `/admin/inspect-structures` and the game server both show a change at once. Every number in it is a placeholder. See `docs/plans/structures.md`.
 - What the ground is, for the game server: `npm run world:ground --prefix frontend` reads a master into its
   **ground map**, `world/ground/<master>/`, a cell every sixteen master pixels each way, each keeping its
   commonest terrain and whether a river, a lake, the sea or a coast is in it: four megabytes and fifteen seconds

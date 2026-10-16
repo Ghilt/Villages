@@ -2,10 +2,16 @@ package villages.domain
 
 /**
  * A structure's rules, decided against its own history and the catalogue. A class rather than an object, because
- * what a type is - its levels, and how far out each is drawn - is the catalogue's, and the catalogue is read when
- * the server starts: every decision of a running server reads the same one. See decision record 0093.
+ * what a type is - its levels, and how far out each is drawn - is the catalogue's, and [inForce] is the one the game
+ * server runs on at the moment of a decision, which a retune changes while it runs. See decision records 0093 and
+ * 0097.
  */
-class StructureDecider(private val catalogue: StructureCatalogue) : Decider<StructureCommand, Structure, StructureEvent> {
+class StructureDecider(private val inForce: () -> StructureCatalogue) : Decider<StructureCommand, Structure, StructureEvent> {
+    /** Decides by one catalogue for good: a test's, or a tool's. */
+    constructor(catalogue: StructureCatalogue) : this({ catalogue })
+
+    private val catalogue: StructureCatalogue get() = inForce()
+
     override val initial: Structure = Structure.NotRaised
 
     override fun decide(command: StructureCommand, state: Structure): List<StructureEvent> = when (command) {

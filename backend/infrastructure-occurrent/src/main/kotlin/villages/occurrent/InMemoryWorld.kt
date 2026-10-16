@@ -73,7 +73,7 @@ class InMemoryWorld(val faults: Faults = FaultBoard()) : EventWorld {
 
     override fun unreadable(): Unreadable = reading ?: store.readEverything(converter).also { reading = it }
 
-    override fun structureExecutor(catalogue: StructureCatalogue): StructureCommandExecutor =
+    override fun structureExecutor(catalogue: () -> StructureCatalogue): StructureCommandExecutor =
         OccurrentStructureCommandExecutor(store, converter, catalogue, gate)
 
     override fun worldExecutor(changes: (before: String, after: String) -> List<String>): WorldCommandExecutor =

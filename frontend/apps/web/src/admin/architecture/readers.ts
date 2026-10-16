@@ -153,7 +153,7 @@ export const READERS: readonly Reader[] = [
     id: 'server-catalogues',
     program: 'server',
     name: 'the catalogues',
-    where: 'StructuresConfig.kt',
+    where: 'FolderCatalogues.kt',
     reads: ['catalogues'],
   },
   { id: 'folder-stands', program: 'server', name: 'stands', where: 'FolderStands.kt', reads: ['stands'] },

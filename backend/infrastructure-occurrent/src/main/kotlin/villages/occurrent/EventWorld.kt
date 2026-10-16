@@ -34,8 +34,8 @@ interface EventWorld : WorldKept, AutoCloseable {
      */
     val storeFeed: EventFeed get() = feed
 
-    /** Structures' streams in this store, decided by the catalogue the server started with, which a world has not. */
-    fun structureExecutor(catalogue: StructureCatalogue): StructureCommandExecutor
+    /** Structures' streams in this store, decided by the catalogue the server runs on at each decision. 0093, 0097. */
+    fun structureExecutor(catalogue: () -> StructureCatalogue): StructureCommandExecutor
 
     /** The world's own stream in this store, told by the server where two texts of a catalogue differ. 0097. */
     fun worldExecutor(changes: (before: String, after: String) -> List<String>): WorldCommandExecutor

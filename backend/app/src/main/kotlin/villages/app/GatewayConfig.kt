@@ -23,7 +23,7 @@ import villages.application.fate.GroundMaps
 import villages.application.fate.PlaceNamesByMaster
 import villages.application.fate.RollService
 import villages.application.fate.WaterAt
-import villages.domain.StructureCatalogue
+import villages.application.Shelf
 import villages.gateway.Gateway
 import villages.gateway.Mechanics
 import villages.occurrent.EventWorld
@@ -77,7 +77,7 @@ class GatewayConfig {
         structures: StructureService,
         antarctica: Antarctica,
         structuresOnTheMap: StructuresProjection,
-        catalogue: StructureCatalogue,
+        shelf: Shelf,
         @Value("\${villages.instruments:true}") instruments: Boolean,
     ): Gateway = Gateway(
         tokens = AnonymousTokens,
@@ -114,7 +114,7 @@ class GatewayConfig {
             instrumentsOpen = instruments,
             worldKept = world,
 
-            structureCatalogue = catalogue,
+            structureCatalogue = { shelf.structures },
             characterById = characters,
         ),
         later = gatewayLater,

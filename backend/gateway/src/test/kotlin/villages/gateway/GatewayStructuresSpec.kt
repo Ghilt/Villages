@@ -103,7 +103,7 @@ class GatewayStructuresSpec : StringSpec({
         val rig = Rig(instrumentsOpen = false)
         val (window, sent) = rig.introduced()
         window.receive(founding())
-        Antarctica(rig.world, RIG_CATALOGUE, { noon }, rig.worldClock).raise()
+        Antarctica(rig.world, { RIG_CATALOGUE }, { noon }, rig.worldClock).raise()
         sent.clear()
 
         window.receive(subscribe(ANTARCTICA_Z10))

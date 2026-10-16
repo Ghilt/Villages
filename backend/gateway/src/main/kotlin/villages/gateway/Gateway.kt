@@ -11,6 +11,7 @@ import villages.application.PlayerTokens
 import villages.application.StructuresByCell
 import villages.application.WorldClock
 import villages.domain.PlayerId
+import villages.domain.StructureId
 import villages.protocol.Batch
 import villages.protocol.ClientFrame
 import villages.protocol.Command
@@ -73,8 +74,12 @@ class Gateway(
     /** What every connection is shown of a structure's slots. */
     private val slotsSeen = SlotsSeen(mechanics.structureCatalogue, mechanics.characterById)
 
-    /** What every connection sees through the fog: Antarctica's structures, while the instruments are open. */
-    private val seenThroughTheFog = if (instrumentsOpen) mechanics.antarctica.standing else emptySet()
+    /**
+     * What every connection sees through the fog: Antarctica's structures, while the instruments are open, one of every
+     * type in the catalogue in force, which a retune can grow while the server runs (0097).
+     */
+    private val antarctica = mechanics.antarctica
+    private val seenThroughTheFog: Set<StructureId> get() = if (instrumentsOpen) antarctica.standing else emptySet()
 
     /** Which connections hold each cell: the whole of the fan-out index. */
     private val holding = CellIndex<Connection>()
