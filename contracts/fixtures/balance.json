@@ -1,0 +1,22 @@
+{
+  "$comment": "A balance filed as world/catalogues/balance.json files one, written by hand with numbers of its own: the server's BalanceFile and the world package's parseBalance both read it, and are held to what it says.",
+  "roll": {
+    "$comment": "A roll.",
+    "price": 12,
+    "hand": 4,
+    "odds": { "common": 60, "uncommon": 30, "rare": 9, "legendary": 1 },
+    "grants": { "common": 20, "uncommon": 50, "rare": 150, "legendary": 500 }
+  },
+  "omens": {
+    "weakForDays": 365,
+    "piousAt": 80,
+    "groundPresent": 0.2,
+    "riversWithinKm": 300,
+    "housesWithinKm": 120,
+    "mostHouses": 2,
+    "townsWithinKm": 100,
+    "mostTowns": 1
+  },
+  "islands": { "smallerThanKm2": 3500000 },
+  "newcomers": { "youngest": 16, "oldest": 60 }
+}

@@ -1,5 +1,6 @@
 package villages.application.fate
 
+import villages.application.Balance
 import villages.application.CharacterById
 import villages.application.CharacterRow
 import villages.application.DialogueEnding
@@ -102,14 +103,15 @@ fun omenSources(
     grounds: GroundMaps,
     housesNear: HousesNear,
     names: PlaceNamesByMaster = PlaceNamesByMaster { null },
+    balance: () -> Balance,
 ): List<OmenSource> = listOf(
-    HouseOmens(),
+    HouseOmens(balance),
     ChangeOmens(lastRolls),
     MissingWealthOmens(dialogues),
     WindowOmens(houses, characters, sights, figures),
     WaterWindowOmens(WaterAt(grounds, names), sights),
     DialogueOmens(dialogues),
     FigureOmens(figures),
-    MapOmens(grounds, sights, housesNear, names),
+    MapOmens(grounds, sights, housesNear, names, balance),
     SeasonOmens(months),
 )

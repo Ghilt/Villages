@@ -3,6 +3,7 @@ import type { Looking } from '@villages/client-core';
 import type { OptionView } from '@villages/protocol';
 
 import { RESOURCE_WORDS } from '../house/describe';
+import { useBalance } from '../net/balance';
 import { sessionStore, takeAction } from '../net/gateway';
 import { PaneSizeControl } from '../stage/PaneSizeControl';
 import type { Along, Room } from '../stage/panes';
@@ -10,13 +11,6 @@ import { openingOut } from '../stage/strip';
 import { useStore } from '../store/useStore';
 import { TextButton } from '../ui/button/Button';
 import { expectHand, overOf } from './rolling';
-
-/**
- * What a roll costs in wealth, as the page says it before pressing. The server's `ROLL_PRICE` is the price, and a
- * roll the house cannot pay is refused there whatever this says; this is only so the button can say why it is
- * greyed rather than be pressed to find out. A temporary number, Adam's, on both sides. See decision record 0083.
- */
-export const ROLL_PRICE_WEALTH = 10;
 
 /**
  * **Take action**: the choice roll at rest, which is the button that provokes one. Words and not a mark, Adam's
@@ -31,16 +25,20 @@ export function TakeAction({ room, along, looking }: { room: Room; along: Along;
     return wealth === undefined ? null : freeNow(wealth, Date.now());
   });
   const ready = useStore(sessionStore, canAct);
+  // What a roll costs, as the page says it before pressing: the balance's, the file the game server reads, so the
+  // button can say why it is greyed rather than be pressed to find out. A roll the house cannot pay is refused by the
+  // server whatever this says. See decision records 0083 and 0097.
+  const cost = useBalance()?.roll.price ?? null;
 
   const whyNot =
     free === null
       ? 'the house is not founded yet'
-      : free < ROLL_PRICE_WEALTH
-        ? `a roll costs ${ROLL_PRICE_WEALTH} wealth, and the house has ${free} free`
+      : cost !== null && free < cost
+        ? `a roll costs ${cost} wealth, and the house has ${free} free`
         : !ready
           ? 'waiting on an answer'
           : null;
-  const price = `${ROLL_PRICE_WEALTH} ${RESOURCE_WORDS.wealth.toLowerCase()}`;
+  const price = `${cost === null ? '' : `${cost} `}${RESOURCE_WORDS.wealth.toLowerCase()}`;
 
   const button = (
     <TextButton

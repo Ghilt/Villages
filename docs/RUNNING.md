@@ -491,6 +491,12 @@ and `-- --drop` takes them off; by hand only.
   `watchCatalogues` tells a page what the server runs on, and again whenever it takes something on. A released
   server turns all of this off with `villages.catalogues.editable=false`, and closed instruments refuse it.
   See `docs/plans/catalogues.md` and decision record 0097.
+- The balance: `world/catalogues/balance.json`, the numbers that belong to no one thing - what a roll costs, how
+  many options it deals, the odds of each rarity and what each grants; when the house's and the map's omens are
+  read; how small an island is; how old a newcomer can be - each group with a `$comment` saying what its numbers do.
+  The game server reads each as it decides something, so a change saved by hand or from **`/admin/inspect-balance`**
+  is the next roll's; Take action says the price from the same file. A founding's fifty wealth is not in it: it is
+  folded from the founding rather than written into it, and moving it would rewrite every house's past.
 - What a structure is: `world/catalogues/structures.json`, hand-edited, one entry a type - its words in each culture, and level
   by level how far out it is drawn, how far it sees, its size on the map and what it yields a world month, which is
   a real day - with its slots and its influence zone if it has one. Nothing cuts it. The game server reads it as

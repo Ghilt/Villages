@@ -1,5 +1,6 @@
 package villages.application.fate
 
+import villages.application.Balance
 import villages.application.FreshIds
 import villages.application.HouseRow
 import villages.domain.Dialogue
@@ -76,4 +77,5 @@ class Gossip(private val houses: HousesNear, private val ids: FreshIds) {
  * Every action there is to deal from, which needs the world for those that name a part of it. One list, so the app
  * and every test that rolls deal from the same content. A new action is a line here.
  */
-fun firstActions(houses: HousesNear, ids: FreshIds): List<Action> = ResourceActions.ALL + Gossip(houses, ids).action
+fun firstActions(houses: HousesNear, ids: FreshIds, balance: () -> Balance): List<Action> =
+    ResourceActions.all { balance().roll.grants } + Gossip(houses, ids).action

@@ -1,5 +1,6 @@
 package villages.application.fate
 
+import villages.application.TEST_BALANCE
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
@@ -58,13 +59,13 @@ class FateEngineSpec : StringSpec({
     val ids = FreshIds { UUID.randomUUID() }
 
     fun engine(actions: List<Action>, omens: List<Omen> = emptyList(), dice: Dice = Dice { 1 }) =
-        FateEngine(listOf(OmenSource { omens }), listOf(Pool.HEARTH, water, faith), actions, dice, ids)
+        FateEngine(listOf(OmenSource { omens }), listOf(Pool.HEARTH, water, faith), actions, dice, ids) { TEST_BALANCE }
 
     val commons = listOf(action("a"), action("b"), action("c"), action("d"))
 
     "the odds run seventy, twenty-two, seven and one, in a throw of a hundred" {
-        ODDS.values.sum() shouldBe 100
-        listOf(1, 70, 71, 92, 93, 99, 100).map(FateEngine::rarityFrom) shouldBe listOf(
+        TEST_BALANCE.roll.odds.values.sum() shouldBe 100
+        listOf(1, 70, 71, 92, 93, 99, 100).map { FateEngine.rarityFrom(it, TEST_BALANCE.roll.odds) } shouldBe listOf(
             Rarity.COMMON, Rarity.COMMON, Rarity.UNCOMMON, Rarity.UNCOMMON, Rarity.RARE, Rarity.RARE, Rarity.LEGENDARY,
         )
     }

@@ -40,6 +40,8 @@ class KeyFigureService(
     private val calendar: WorldCalendar,
     private val dice: Dice,
     private val portraits: Portraits,
+    /** How old a newcomer can be is the balance's. See decision record 0097. */
+    private val balance: () -> Balance,
 ) {
     /**
      * Bring a newcomer in as one of the player's house's key figures, and say who they are.
@@ -56,7 +58,7 @@ class KeyFigureService(
 
         houses.execute(CheckRoomForKeyFigure(house), provenance)
         try {
-            characters.execute(Newcomers.roll(id, today, now, calendar, dice, portraits), provenance)
+            characters.execute(Newcomers.roll(id, today, now, calendar, dice, portraits, balance().newcomers.ages), provenance)
         } catch (@Suppress("SwallowedException") again: CharacterError.AlreadyAppeared) {
             // Sent before: they are in the world already, and the tie below is what is left to do.
             Unit

@@ -61,7 +61,7 @@ A **catalogue** is a file of the game's content under `world/catalogues/`, or a 
 | Catalogue | What is in it | Comes from |
 |---|---|---|
 | `structures.json` | every type of structure: its words, its numbers by level, its slots | `world/structures.json`, moved |
-| `balance.json` | every number that belongs to no one entry: the roll's price, the odds, the hand, what each rarity grants, founding wealth, the omens' thresholds, how small an island is, a newcomer's ages | `const`s in `domain` and `application` |
+| `balance.json` | every number that belongs to no one entry: the roll's price, the odds, the hand, what each rarity grants, the omens' thresholds, how small an island is, a newcomer's ages | `const`s in `application` |
 | `fate.json` | the pools, what opens each, and the actions: rarity, pools, words, what taking one does | `FirstContent.kt`, `Gossip.kt` |
 | `character-names.json` | the given names by sex and the family names | `Names.kt` |
 | `dialogues/<name>.json` | one dialogue a file | `SampleDialogues.kt` |
@@ -70,7 +70,10 @@ A **catalogue** is a file of the game's content under `world/catalogues/`, or a 
 **An entry's own numbers live with the entry; a number that belongs to no one entry lives in the balance.** A
 castle's yield is the castle's, so it is in `structures.json`; what any common action grants is nobody's, so it
 is in `balance.json`. A number is balance when changing it changes how the game plays and nothing else has to
-change with it: the most options a choice can have is a shape the pane is drawn for, and stays in the code.
+change with it: the most options a choice can have is a shape the pane is drawn for, and stays in the code. And a
+number is balance only when it is read as something is decided and what it decided is written down: a founding's
+fifty wealth is folded from the founding event rather than written into it, so retuning it would rewrite every
+house's past, and it stays in the code until the founding carries it.
 
 **Each catalogue is the structures' pattern again**: a value in the domain, as `StructureCatalogue` is; a
 Kotlin reader in `app` that refuses the whole file for one bad field; a TypeScript reader in `@villages/world`;
@@ -218,6 +221,7 @@ quests, and 18 the pictures, which needs nothing before it but step 2.
 - The place names, the biomes and the cultures, which the world is built from rather than played with; the
   architecture page already draws their files.
 - Items, which have no catalogue yet. Their plan makes one.
+- A founding's wealth in the balance, which needs `founded` to carry what it gave first, a change to a stored event.
 - A released page reading the catalogues, which has no dev server. Structures have the same gap today.
 - Tuning a shared server while it runs, without a deploy: that is where a store of catalogues might earn its
   place, with Adam's own identity on the server.

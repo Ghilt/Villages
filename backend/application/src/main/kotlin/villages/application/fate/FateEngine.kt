@@ -1,5 +1,6 @@
 package villages.application.fate
 
+import villages.application.Balance
 import villages.application.Dice
 import villages.application.FreshIds
 import villages.domain.Choice
@@ -26,20 +27,10 @@ data class Rolled(
 )
 
 /**
- * Chance out of a hundred of each rarity: the same for everyone, and nothing moves them. Omens decide what a hand is
- * about, never how good it is. See `MECHANICS.md`, the choice roll.
- */
-val ODDS: Map<Rarity, Int> = linkedMapOf(
-    Rarity.COMMON to 70,
-    Rarity.UNCOMMON to 22,
-    Rarity.RARE to 7,
-    Rarity.LEGENDARY to 1,
-)
-
-/**
  * The fate engine: it reads the omens, rolls a rarity, opens the pools the omens point at, and deals a hand of
  * actions from them. All the luck is here, before the command; `decide` only checks and records what this dealt.
- * See `ARCHITECTURE.md` and decision record 0083.
+ * The odds - chance out of a hundred of each rarity, the same for everyone, which omens never move - and how many
+ * options a hand deals are the balance's, read at each roll. See `ARCHITECTURE.md` and decision records 0083 and 0097.
  */
 class FateEngine(
     private val sources: List<OmenSource>,
@@ -47,12 +38,14 @@ class FateEngine(
     private val actions: List<Action>,
     private val dice: Dice,
     private val ids: FreshIds,
+    private val balance: () -> Balance,
 ) {
     /** Rolls for a house at a moment. `rarity` stands in for the world's luck, from the debug panel's lever. */
     fun roll(moment: Moment, rarity: Rarity? = null): Rolled {
         val omens = sources.flatMap { it.read(moment) }.distinctBy(Omen::key)
         val opened = listOf(Pool.HEARTH) + pools.filter { pool -> pool != Pool.HEARTH && omens.any(pool::opensOn) }
-        val rolled = rarity ?: rarityFrom(dice.roll(ODDS.values.sum()))
+        val numbers = balance().roll
+        val rolled = rarity ?: rarityFrom(dice.roll(numbers.odds.values.sum()), numbers.odds)
 
         // A rarity with too little that can be dealt now falls to the one below it, so a hand is always one
         // rarity and always a choice. The content checks keep Hearth deep enough that this is never reached.
@@ -64,7 +57,7 @@ class FateEngine(
         }
         check(draw.size >= Choice.FEWEST) { "fewer than ${Choice.FEWEST} common actions can be dealt" }
 
-        val picked = pick(draw, opened, HAND)
+        val picked = pick(draw, opened, numbers.hand)
         val hand = Choice(
             id = ChoiceId(ids.fresh()),
             prompt = PROMPT,
@@ -108,15 +101,13 @@ class FateEngine(
         omens.filter { omen -> action.pools.any { it != Pool.HEARTH && it in opened && it.opensOn(omen) } }.map(Omen::key)
 
     companion object {
-        /** How many options a roll deals, when there are that many to deal. */
-        const val HAND = 3
-
         const val PROMPT = "What will the house do?"
 
-        /** A rarity from a throw of one to a hundred, in the order of the odds. */
-        fun rarityFrom(throwOfHundred: Int): Rarity {
+        /** A rarity from a throw of one to a hundred, in the order of [odds]: the most common first. */
+        fun rarityFrom(throwOfHundred: Int, odds: Map<Rarity, Int>): Rarity {
             var left = throwOfHundred
-            for ((rarity, chance) in ODDS) {
+            for (rarity in Rarity.entries) {
+                val chance = odds[rarity] ?: 0
                 if (left <= chance) return rarity
                 left -= chance
             }

@@ -64,6 +64,8 @@ export type { CultureFile } from './culture.ts';
 export type { OriginFile, OriginGrid, WhereFrom } from './originFile.ts';
 export { namesAt } from './names.ts';
 export { CULTURES, STRUCTURE_RESOURCES, parseStructureCatalogue } from './structures.ts';
+export { RARITIES, parseBalance } from './balance.ts';
+export type { Balance, BalanceRarity } from './balance.ts';
 export type {
   Culture,
   StructureCatalogue,

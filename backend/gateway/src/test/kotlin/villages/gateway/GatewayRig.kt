@@ -119,11 +119,12 @@ internal class Rig(
             omenSources(
                 houses, characters, characters, sights, dialogueRows, lastRolls,
                 months = { Calendar.monthOf(it.day) }, grounds = { grounds[it] }, housesNear = houses,
-                names = { names[it] },
+                names = { names[it] }, balance = { RIG_BALANCE },
             ),
-            FirstPools.ALL, firstActions(houses) { UUID.randomUUID() }, { 1 }, { UUID.randomUUID() },
+            FirstPools.ALL, firstActions(houses, { UUID.randomUUID() }) { RIG_BALANCE }, { 1 }, { UUID.randomUUID() },
+            { RIG_BALANCE },
         ),
-        houses, world, { noon }, worldClock, { UUID.randomUUID() },
+        houses, world, { noon }, worldClock, { UUID.randomUUID() }, { RIG_BALANCE },
     )
     var minted = 0
 
@@ -214,6 +215,7 @@ internal class Rig(
                 calendar = thirtyDayMonths,
                 dice = { 1 },
                 portraits = { listOf("woman-01", "man-01") },
+                balance = { RIG_BALANCE },
             ),
             figures = characters,
             sights = sights,

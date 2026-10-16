@@ -74,6 +74,9 @@ class Shelf(
     /** The structures' catalogue in force, at the moment of asking. */
     val structures: StructureCatalogue get() = inForce.structures
 
+    /** The balance in force, at the moment of asking. */
+    val balance: Balance get() = inForce.balance
+
     /** The fingerprint of each catalogue in force, by its name. */
     fun fingerprints(): Map<String, String> = texts.mapValues { (_, text) -> fingerprintOf(text) }
 

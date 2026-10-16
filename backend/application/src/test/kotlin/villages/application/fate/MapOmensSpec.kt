@@ -1,5 +1,6 @@
 package villages.application.fate
 
+import villages.application.TEST_BALANCE
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldNotContain
@@ -67,7 +68,7 @@ class MapOmensSpec : StringSpec({
         }
     }
     fun omensOf(centre: Location, zoom: Double, seenKm: Double = 2000.0, named: PlaceNames? = null) =
-        MapOmens({ map }, sightOf(seenKm), houses = { _, _, _ -> listOf(ours, neighbour) }, names = { named })
+        MapOmens({ map }, sightOf(seenKm), houses = { _, _, _ -> listOf(ours, neighbour) }, names = { named }) { TEST_BALANCE }
             .read(Moment(ours, Looking(centre = centre, zoom = zoom, master = "terrain"), today, Instant.EPOCH))
     fun omens(centre: Location, zoom: Double, seenKm: Double = 2000.0) = omensOf(centre, zoom, seenKm).map { it.words }
 
@@ -123,7 +124,7 @@ class MapOmensSpec : StringSpec({
     }
 
     "a page with no master, or no view, reads nothing of the map" {
-        MapOmens({ null }, sightOf(2000.0), houses = { _, _, _ -> emptyList() })
+        MapOmens({ null }, sightOf(2000.0), houses = { _, _, _ -> emptyList() }) { TEST_BALANCE }
             .read(Moment(ours, Looking(centre = seat, zoom = 6.0, master = "none"), today, Instant.EPOCH)) shouldBe emptyList()
     }
 

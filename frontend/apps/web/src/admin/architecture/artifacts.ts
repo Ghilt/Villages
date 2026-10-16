@@ -91,7 +91,7 @@ export const ARTIFACTS: readonly Artifact[] = [
     name: 'catalogues',
     path: 'world/catalogues/',
     origin: 'authored',
-    what: "The game's content, a file a kind: every type of structure, what each gives and sees. Edited by hand or from its inspect page.",
+    what: "The game's content, a file a kind: every type of structure, and the balance's numbers. Edited by hand or from its inspect page.",
   },
   {
     id: 'ui-pictures',

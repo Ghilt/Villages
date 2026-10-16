@@ -129,8 +129,8 @@ export const READERS: readonly Reader[] = [
     id: 'page-catalogues',
     program: 'page',
     piece: 'panes',
-    name: 'the structures catalogue',
-    where: 'net/structureCatalogue.ts',
+    name: 'the catalogues',
+    where: 'net/shelved.ts',
     reads: ['catalogues'],
   },
   {

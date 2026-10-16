@@ -45,9 +45,17 @@ export const INSPECT_VIEWS: readonly InspectView[] = [
     path: '/admin/inspect-structures',
     title: 'Structures',
     what: 'Every type of structure in world/catalogues/structures.json: what each gives its holder, sees, holds and is called.',
-    needs: 'nothing',
+    needs: 'nothing to read, the game server to save',
     load: () => import('./Structures').then((page) => page.Structures),
     catalogue: 'structures',
+  },
+  {
+    path: '/admin/inspect-balance',
+    title: 'Balance',
+    what: 'The numbers that belong to no one thing: what a roll costs and deals, when an omen is read, how old a newcomer is.',
+    needs: 'nothing to read, the game server to save',
+    load: () => import('./Balance').then((page) => page.Balance),
+    catalogue: 'balance',
   },
   {
     path: '/admin/inspect-architecture',

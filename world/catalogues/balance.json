@@ -1,0 +1,30 @@
+{
+  "$comment": "The numbers that belong to no one entry of a catalogue, Adam's to tune: every one a first draft, taken over on 2026-10-16 from the constants they were in the code. Each is read at the moment it decides something, and what it decided is written into the event, so a retune changes what happens next and never what happened. An entry's own numbers live with the entry, in its catalogue: a structure's yield is the structure's. The game server takes on a change while it runs; /admin/inspect-balance shows and edits them. See decision record 0097.",
+  "roll": {
+    "$comment": "A choice roll: what it costs in wealth, how many options a hand deals (two to four), the chance out of a hundred of each rarity, which no omen moves, and what an action of each rarity grants of its resource. A common pays a roll back and a little more.",
+    "price": 10,
+    "hand": 3,
+    "odds": { "common": 70, "uncommon": 22, "rare": 7, "legendary": 1 },
+    "grants": { "common": 15, "uncommon": 40, "rare": 120, "legendary": 400 }
+  },
+  "omens": {
+    "$comment": "When an omen is read at a roll. A house is weak for so many world-days after its founding (730 is two world-years, about twenty-four real days) and pious from so much piety. A kind of ground is an omen when it is this share of the revealed land in the circle the player is looking at; a river only when that circle is this many kilometres across or less, because from further out every land has one; the nearest few houses and towns by name only when it is this close.",
+    "weakForDays": 730,
+    "piousAt": 100,
+    "groundPresent": 0.15,
+    "riversWithinKm": 400,
+    "housesWithinKm": 150,
+    "mostHouses": 3,
+    "townsWithinKm": 150,
+    "mostTowns": 2
+  },
+  "islands": {
+    "$comment": "A land mass smaller than this many square kilometres is an island: between the largest island and the smallest continent on the master, measured on 2026-10-15 at 2.15 million, Greenland, and 5.84 million, the land Adam set at 45 south.",
+    "smallerThanKm2": 4000000
+  },
+  "newcomers": {
+    "$comment": "The youngest and the oldest a newcomer can be, in whole years: grown, and with years left.",
+    "youngest": 18,
+    "oldest": 50
+  }
+}

@@ -29,7 +29,7 @@ class NewcomersSpec : StringSpec({
     val highest = Dice { sides -> sides }
     val folder = Portraits { listOf("man-02", "woman-02", "man-01", "woman-01") }
 
-    fun roll(dice: Dice, portraits: Portraits = folder) = Newcomers.roll(id, today, noon, calendar, dice, portraits)
+    fun roll(dice: Dice, portraits: Portraits = folder) = Newcomers.roll(id, today, noon, calendar, dice, portraits, TEST_BALANCE.newcomers.ages)
 
     "with a die that always comes up one, the newcomer is a woman of eighteen with three in everything" {
         val agnes = roll(lowest)

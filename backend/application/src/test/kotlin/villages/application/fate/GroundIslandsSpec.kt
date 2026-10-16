@@ -1,5 +1,6 @@
 package villages.application.fate
 
+import villages.application.TEST_BALANCE
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -23,7 +24,7 @@ class GroundIslandsSpec : StringSpec({
     for (y in 89..90) for (x in 330..331) paint(x, y, 0)
     for (y in 10..11) { paint(0, y, 3); paint(359, y, 0) }
     val ground = GroundMap(360, 180, mapOf(0 to "grassland", 1 to "ocean", 2 to "lake", 3 to "river"), cells)
-    val islands = GroundIslands({ if (it == "terrain") ground else null }, "terrain")
+    val islands = GroundIslands({ if (it == "terrain") ground else null }, "terrain") { TEST_BALANCE }
 
     "every cell of one land mass is the same land, a lake's cells none, and a strip across the antimeridian one land" {
         val continent = ground.landJoinedTo(ground.indexOf(Location(0.5, 10.5)))
@@ -44,6 +45,6 @@ class GroundIslandsSpec : StringSpec({
         islands.onAnIsland(Location(0.5, 10.5)).shouldBeFalse()
         islands.onAnIsland(Location(0.5, 50.5)).shouldBeFalse()
         islands.onAnIsland(Location(-50.0, 50.0)).shouldBeFalse()
-        GroundIslands({ null }, "terrain").onAnIsland(Location(0.5, 150.5)).shouldBeFalse()
+        GroundIslands({ null }, "terrain") { TEST_BALANCE }.onAnIsland(Location(0.5, 150.5)).shouldBeFalse()
     }
 })

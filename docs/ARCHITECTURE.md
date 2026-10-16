@@ -524,7 +524,8 @@ two commons. It works in four moves:
    omens that brought it.
 
 The pools and the actions are content, written in Kotlin beside the engine in `application`, so a dealt action
-is code and can read the world. Two rules about the content are checks rather than hopes: every action is in
+is code and can read the world. The odds, the hand, the price and what each rarity grants are the balance's,
+`world/catalogues/balance.json`, read at each roll (decision record 0097). Two rules about the content are checks rather than hopes: every action is in
 Hearth, and every rarity has at least three actions that can be dealt with no omens at all.
 
 Two things follow for the architecture:

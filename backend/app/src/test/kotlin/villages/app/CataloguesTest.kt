@@ -86,3 +86,43 @@ class CatalogueTextTest {
         assertEquals("{ \"words\": \"Zürich, \\\"the city\\\"\" }\n", CatalogueText.format("""{"words":"Zürich, \"the city\""}"""))
     }
 }
+
+/** The balance as the server reads it, held to the same fixture as the world package's reader. */
+class BalanceFileTest {
+    @Test
+    fun `the fixture reads as it says, number for number`() {
+        val balance = BalanceFile.parse(java.io.File("../../contracts/fixtures/balance.json").readText())
+
+        assertEquals(12, balance.roll.price)
+        assertEquals(4, balance.roll.hand)
+        assertEquals(listOf(60, 30, 9, 1), villages.domain.Rarity.entries.map { balance.roll.odds.getValue(it) })
+        assertEquals(listOf(20L, 50L, 150L, 500L), villages.domain.Rarity.entries.map { balance.roll.grants.getValue(it) })
+        assertEquals(villages.application.Balance.Omens(365, 80, 0.2, 300.0, 120.0, 2, 100.0, 1), balance.omens)
+        assertEquals(3_500_000.0, balance.islands.smallerThanKm2)
+        assertEquals(16..60, balance.newcomers.ages)
+    }
+
+    @Test
+    fun `the real balance reads, holds within itself, and is in the one form`() {
+        val text = java.io.File("../../world/catalogues/balance.json").readText()
+
+        BalanceFile.parse(text).check()
+        assertEquals(text, CatalogueText.format(text))
+    }
+
+    @Test
+    fun `a number it cannot read refuses the file, naming where`() {
+        val text = java.io.File("../../contracts/fixtures/balance.json").readText().replace("\"hand\": 4", "\"hand\": \"four\"")
+
+        val refused = org.junit.jupiter.api.assertThrows<IllegalArgumentException> { BalanceFile.parse(text) }
+        assertEquals("world/catalogues/balance.json: no roll.hand the server can read", refused.message)
+    }
+
+    @Test
+    fun `odds that do not add up to a hundred are refused by the shelf's check`() {
+        val text = java.io.File("../../contracts/fixtures/balance.json").readText().replace("\"common\": 60", "\"common\": 61")
+
+        val refused = org.junit.jupiter.api.assertThrows<villages.application.CatalogueRefused> { BalanceFile.parse(text).check() }
+        assertEquals("world/catalogues/balance.json: roll.odds are chances out of a hundred, and add up to 101", refused.message)
+    }
+}

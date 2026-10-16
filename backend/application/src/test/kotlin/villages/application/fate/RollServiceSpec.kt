@@ -1,5 +1,6 @@
 package villages.application.fate
 
+import villages.application.TEST_BALANCE
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
@@ -47,9 +48,9 @@ class RollServiceSpec : StringSpec({
         val actions = listOf(Rarity.COMMON, Rarity.RARE).flatMap { rarity ->
             (1..3).map { n -> Action("$rarity$n", rarity, setOf(Pool.HEARTH)) { _, _ -> Dealt("$rarity$n", "", Effect.Grant(Resource.WEALTH, 15)) } }
         }
-        val engine = FateEngine(emptyList(), listOf(Pool.HEARTH), actions, Dice { 1 }) { UUID.randomUUID() }
+        val engine = FateEngine(emptyList(), listOf(Pool.HEARTH), actions, Dice { 1 }, { UUID.randomUUID() }) { TEST_BALANCE }
         val houses = HousesByPlayer { player -> row.takeIf { player == ada } }
-        return world to RollService(engine, houses, world, { noon }, { today }) { UUID.randomUUID() }
+        return world to RollService(engine, houses, world, { noon }, { today }, { UUID.randomUUID() }) { TEST_BALANCE }
     }
 
     "a roll is paid for, and leaves its hand pending" {
@@ -59,7 +60,7 @@ class RollServiceSpec : StringSpec({
 
         world.stored.map { it.event }.filterIsInstance<PlayerRolled>().single().rarity shouldBe Rarity.COMMON
         val house = world.founded(HouseId.of(ada))
-        house.stockOf(Resource.WEALTH).at(noon) shouldBe FOUNDING_WEALTH - ROLL_PRICE.amount
+        house.stockOf(Resource.WEALTH).at(noon) shouldBe FOUNDING_WEALTH - TEST_BALANCE.roll.price
         house.pending shouldBe rolled.hand
     }
 

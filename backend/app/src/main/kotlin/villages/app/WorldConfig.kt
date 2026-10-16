@@ -217,15 +217,17 @@ class WorldConfig {
         worldClock: WorldClock,
         dice: Dice,
         ids: FreshIds,
+        shelf: Shelf,
     ): RollService = RollService(
         FateEngine(
             omenSources(
                 houses, characters, characters, sights, dialogueRows, lastRolls,
                 months = { Calendar.monthOf(it.day) }, grounds = ground, housesNear = houses, names = names,
+                balance = { shelf.balance },
             ),
-            FirstPools.ALL, firstActions(houses, ids), dice, ids,
+            FirstPools.ALL, firstActions(houses, ids) { shelf.balance }, dice, ids, { shelf.balance },
         ),
-        houses, world.executor, { clock.instant() }, worldClock, ids,
+        houses, world.executor, { clock.instant() }, worldClock, ids, { shelf.balance },
     )
 
     /** Chance, for whatever the world rolls. Never seeded from anything a client sends. */
@@ -256,8 +258,8 @@ class WorldConfig {
 
     /** Which land is an island, read off the ground of the world's master. See decision record 0096. */
     @Bean
-    fun islands(ground: GroundMaps, @Value("\${villages.master:$WORLD_MASTER}") master: String): Islands =
-        GroundIslands(ground, master)
+    fun islands(ground: GroundMaps, @Value("\${villages.master:$WORLD_MASTER}") master: String, shelf: Shelf): Islands =
+        GroundIslands(ground, master) { shelf.balance }
 
     /** Each master's real names, from the copy `world:names` files beside its ground map. See 0087. */
     @Bean
@@ -273,6 +275,7 @@ class WorldConfig {
         calendar: WorldCalendar,
         dice: Dice,
         portraits: Portraits,
+        shelf: Shelf,
     ): KeyFigureService = KeyFigureService(
         houses = world.executor,
         characters = world.characterExecutor,
@@ -281,6 +284,7 @@ class WorldConfig {
         calendar = calendar,
         dice = dice,
         portraits = portraits,
+        balance = { shelf.balance },
     )
 
     /** Writes a character's death into every house that held them. See decision record 0055. */

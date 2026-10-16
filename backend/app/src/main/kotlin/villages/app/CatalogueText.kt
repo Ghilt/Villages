@@ -7,13 +7,16 @@ import java.io.StringWriter
 
 /**
  * A catalogue's one form, which the game server writes every revision in: two spaces; a list or an object of plain
- * values on one line however long, `{ "european": "castle", ... }` and `[3, 5, 8]`; one holding others on one line
- * wherever it fits in [WIDTH] columns with what follows it, and on lines of its own where it does not; the fields in
- * the order they came, and a line feed at the end. What `world/catalogues/` is
+ * values on one line however long, `{ "european": "castle", ... }` and `[3, 5, 8]`; one holding others, or carrying a
+ * `$comment`, which makes it a section, on one line wherever it fits in [WIDTH] columns with what follows it, and on
+ * lines of its own where it does not; the fields in the order they came, and a line feed at the end. What `world/catalogues/` is
  * written in by hand, so a number saved from an inspect page is a diff of one line. See decision record 0097.
  */
 object CatalogueText {
     const val WIDTH = 120
+
+    /** What says what a section is: an object carrying it opens out like one holding others. */
+    private const val COMMENT = "\$comment"
 
     private val json = JsonMapper.builder().build()
 
@@ -23,7 +26,7 @@ object CatalogueText {
     /** [node] at [indent], with [before] columns of its line already taken and [after] to follow it on the line. */
     private fun written(node: JsonNode, indent: Int, before: Int, after: Int): String {
         val flat = flat(node)
-        val plain = node.isContainer && children(node).none { it.isContainer }
+        val plain = node.isContainer && children(node).none { it.isContainer } && !node.has(COMMENT)
         if (!node.isContainer || node.isEmpty || plain || indent + before + flat.length + after <= WIDTH) {
             return flat
         }

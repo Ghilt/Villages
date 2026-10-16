@@ -33,18 +33,11 @@ object FirstPools {
 }
 
 /**
- * The first actions: one of each rarity for each resource, giving 15, 40, 120 or 400 of it. A first draft of the
- * words, for Adam to change; a house gains influence over what is already there more often than it builds anew.
+ * The first actions: one of each rarity for each resource, granting what the balance says an action of its rarity
+ * grants, read as it is dealt. A first draft of the words, for Adam to change; a house gains influence over what is
+ * already there more often than it builds anew.
  */
 object ResourceActions {
-    /** What an action of each rarity gives. A common pays a roll back and a little more. */
-    val AMOUNTS: Map<Rarity, Long> = mapOf(
-        Rarity.COMMON to 15,
-        Rarity.UNCOMMON to 40,
-        Rarity.RARE to 120,
-        Rarity.LEGENDARY to 400,
-    )
-
     private val wordsFor: Map<Resource, Pair<Pool, List<Pair<String, String>>>> = mapOf(
         Resource.WEALTH to (FirstPools.COIN to listOf(
             "Collect the mill's dues" to "The miller pays what he owes, and a little early.",
@@ -78,16 +71,16 @@ object ResourceActions {
         )),
     )
 
-    val ALL: List<Action> = wordsFor.flatMap { (resource, poolAndWords) ->
+    /** Every one of them, each granting [grants] of its rarity at the moment it is dealt. */
+    fun all(grants: () -> Map<Rarity, Long>): List<Action> = wordsFor.flatMap { (resource, poolAndWords) ->
         val (pool, words) = poolAndWords
         Rarity.entries.zip(words).map { (rarity, labelAndDetail) ->
             val (label, detail) = labelAndDetail
-            val amount = AMOUNTS.getValue(rarity)
             Action(
                 id = "${resource.name.lowercase()}.${rarity.name.lowercase()}",
                 rarity = rarity,
                 pools = setOf(Pool.HEARTH, pool),
-            ) { _, _: List<Omen> -> Dealt(label, detail, Effect.Grant(resource, amount)) }
+            ) { _, _: List<Omen> -> Dealt(label, detail, Effect.Grant(resource, grants().getValue(rarity))) }
         }
     }
 }

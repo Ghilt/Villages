@@ -1,5 +1,6 @@
 package villages.application.fate
 
+import villages.application.TEST_BALANCE
 import io.kotest.assertions.withClue
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContain
@@ -41,10 +42,11 @@ class FirstContentSpec : StringSpec({
         Banner(Tincture.SABLE, Division.PLAIN, null, Charge.STAG, Tincture.ARGENT),
         resources = foundingStocks(noon), pledges = emptyList(), since = founded, until = null, version = 1,
     )
+    val resourceActions = ResourceActions.all { TEST_BALANCE.roll.grants }
     val bare = Moment(house, Looking.NOTHING, founded, noon)
 
     "every action is in Hearth and in at least one pool besides" {
-        for (action in ResourceActions.ALL) {
+        for (action in resourceActions) {
             withClue(action.id) {
                 action.pools shouldContain Pool.HEARTH
                 (action.pools - Pool.HEARTH).size shouldBeGreaterThanOrEqual 1
@@ -56,22 +58,22 @@ class FirstContentSpec : StringSpec({
     "every rarity has at least three actions in Hearth that can be dealt with no omens" {
         for (rarity in Rarity.entries) {
             withClue(rarity) {
-                ResourceActions.ALL.count { it.rarity == rarity && Pool.HEARTH in it.pools && it.deal(bare, emptyList()) != null } shouldBeGreaterThanOrEqual 3
+                resourceActions.count { it.rarity == rarity && Pool.HEARTH in it.pools && it.deal(bare, emptyList()) != null } shouldBeGreaterThanOrEqual 3
             }
         }
     }
 
     "one action of each rarity gives each resource, as much as its rarity says" {
-        ResourceActions.ALL shouldHaveSize Resource.entries.size * Rarity.entries.size
-        ResourceActions.ALL.map { it.id }.toSet() shouldHaveSize ResourceActions.ALL.size
+        resourceActions shouldHaveSize Resource.entries.size * Rarity.entries.size
+        resourceActions.map { it.id }.toSet() shouldHaveSize resourceActions.size
     }
 
     "a newly founded house reads its holdings and is a weak house; a pious one is pious" {
-        HouseOmens().read(bare).map { it.words } shouldBe listOf("Holdings in the northern reaches", "Weak house")
+        HouseOmens { TEST_BALANCE }.read(bare).map { it.words } shouldBe listOf("Holdings in the northern reaches", "Weak house")
 
-        val older = bare.copy(today = WorldTime(founded.day + HouseOmens.WEAK_FOR_DAYS))
+        val older = bare.copy(today = WorldTime(founded.day + TEST_BALANCE.omens.weakForDays))
         val pious = older.copy(house = house.withStock(Resource.PIETY) { Stock(104, 0.0, noon) })
-        val read = HouseOmens().read(pious)
+        val read = HouseOmens { TEST_BALANCE }.read(pious)
 
         read.map { it.words } shouldBe listOf("Holdings in the northern reaches", "Pious")
         read.last().value shouldBe 104
@@ -79,7 +81,7 @@ class FirstContentSpec : StringSpec({
     }
 
     "the omens a house reads open the pools they should" {
-        val read = HouseOmens().read(bare.copy(house = house.withStock(Resource.PIETY) { Stock(100, 0.0, noon) }))
+        val read = HouseOmens { TEST_BALANCE }.read(bare.copy(house = house.withStock(Resource.PIETY) { Stock(100, 0.0, noon) }))
 
         FirstPools.ALL.filter { pool -> read.any(pool::opensOn) }.map { it.name } shouldBe listOf("Coin", "Land", "Faith")
     }

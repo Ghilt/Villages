@@ -6,7 +6,6 @@ import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import villages.application.fate.GroundMap
-import villages.application.fate.ROLL_PRICE
 import villages.domain.FOUNDING_WEALTH
 import villages.protocol.CommandAccepted
 import villages.protocol.CommandRejected
@@ -40,7 +39,7 @@ class GatewayRollsSpec : StringSpec({
         hand.options.map { it.rarity }.toSet() shouldBe setOf("common")
         hand.omens.map { it.words } shouldBe listOf("Holdings in the northern reaches", "Weak house", "Summer")
         sent.filterIsInstance<YourHouse>().last().yours!!.resources.getValue("wealth").total shouldBe
-            FOUNDING_WEALTH - ROLL_PRICE.amount
+            FOUNDING_WEALTH - RIG_BALANCE.roll.price
     }
 
     "a second Take action before the hand is answered is refused, and nothing is paid for it" {
@@ -53,14 +52,14 @@ class GatewayRollsSpec : StringSpec({
 
         sent.last() shouldBe CommandRejected(COMMAND_THREE, "choicePending")
         sent.filterIsInstance<YourHouse>().last().yours!!.resources.getValue("wealth").total shouldBe
-            FOUNDING_WEALTH - ROLL_PRICE.amount
+            FOUNDING_WEALTH - RIG_BALANCE.roll.price
     }
 
     "a house without the price free cannot roll" {
         val rig = Rig()
         val (player, sent) = rig.introduced()
         player.receive(founding())
-        player.receive(spending(amount = FOUNDING_WEALTH - ROLL_PRICE.amount + 1))
+        player.receive(spending(amount = FOUNDING_WEALTH - RIG_BALANCE.roll.price + 1))
 
         player.receive(rolling(COMMAND_THREE))
 

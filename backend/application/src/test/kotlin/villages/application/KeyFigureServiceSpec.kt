@@ -74,7 +74,7 @@ class KeyFigureServiceSpec : StringSpec({
 
     fun world(): Pair<TwoKindsOfStream, KeyFigureService> {
         val streams = TwoKindsOfStream()
-        val service = KeyFigureService(streams, streams, { noon }, { today }, calendar, { 1 }, portraits)
+        val service = KeyFigureService(streams, streams, { noon }, { today }, calendar, { 1 }, portraits, { TEST_BALANCE })
         for (player in listOf(ada, bea)) {
             streams.execute(
                 FoundHouse(

@@ -1,5 +1,6 @@
 package villages.application.fate
 
+import villages.application.Balance
 import villages.application.HouseRow
 import villages.application.SightsByHouse
 import villages.domain.Location
@@ -34,6 +35,8 @@ class MapOmens(
     private val sights: SightsByHouse,
     private val houses: HousesNear,
     private val names: PlaceNamesByMaster = PlaceNamesByMaster { null },
+    /** When ground, rivers, houses and towns are omens, and how many of them: the balance's. See 0097. */
+    private val balance: () -> Balance,
 ) : OmenSource {
     override fun read(moment: Moment): List<Omen> {
         val centre = moment.looking.centre ?: return emptyList()
@@ -41,6 +44,7 @@ class MapOmens(
         val ground = moment.looking.master?.let(grounds::of) ?: return emptyList()
         val named = moment.looking.master?.let(names::of)
         val radius = radiusAt(zoom, centre.lat)
+        val numbers = balance().omens
         val sight = sights.of(moment.house.id)
 
         val revealed = sample(ground, centre, radius).filter { (place, _) -> sight.reveals(place) }
@@ -55,25 +59,25 @@ class MapOmens(
             omens += Omen(OmenKeys.OPEN_SEA, OmenKind.MAP, sea?.let { the(it.name) } ?: "Open sea")
         }
         if (seen.any { it.has(GroundMap.COAST) }) omens += Omen(OmenKeys.COAST, OmenKind.MAP, "Coast")
-        if (radius <= RIVERS_WITHIN_KM && seen.any { it.has(GroundMap.RIVER) }) {
+        if (radius <= numbers.riversWithinKm && seen.any { it.has(GroundMap.RIVER) }) {
             val river = named?.let { riverOf(it, revealed, centre) }
             omens += Omen(OmenKeys.RIVER, OmenKind.MAP, river?.let { the(it.name) } ?: "River")
         }
-        if (named != null && radius <= TOWNS_WITHIN_KM) {
+        if (named != null && radius <= numbers.townsWithinKm) {
             named.near(NameKind.TOWN, centre, radius)
                 .filter { sight.reveals(it.name.at) }
-                .take(MOST_TOWNS)
+                .take(numbers.mostTowns)
                 .forEach { omens += Omen(OmenKeys.town(it.name.id), OmenKind.MAP, "Near ${it.name.name}") }
         }
         GROUNDS.forEach { (word, terrains) ->
             val share = land.count { it.terrain in terrains }.toDouble() / max(1, land.size)
-            if (share >= PRESENT) omens += Omen(OmenKeys.ground(word.lowercase()), OmenKind.MAP, word)
+            if (share >= numbers.groundPresent) omens += Omen(OmenKeys.ground(word.lowercase()), OmenKind.MAP, word)
         }
-        if (radius <= HOUSES_WITHIN_KM) {
+        if (radius <= numbers.housesWithinKm) {
             houses.near(centre, radius, moment.today)
                 .filter { it.id != moment.house.id && sight.reveals(it.seat) }
                 .sortedBy { kmBetween(it.seat, centre) }
-                .take(MOST_HOUSES)
+                .take(numbers.mostHouses)
                 .forEach { omens += Omen(OmenKeys.houseOnTheMap(it.id), OmenKind.MAP, "House ${it.name.value}") }
         }
         return omens
@@ -125,22 +129,6 @@ class MapOmens(
         const val LEAST_KM = 5.0
 
         private const val KM_A_DEGREE = 111.32
-
-        /** The share of the revealed land in the circle a kind of ground needs to be an omen. */
-        const val PRESENT = 0.15
-
-        /** A river is an omen only this close: from further out every land has one, and it says nothing. */
-        const val RIVERS_WITHIN_KM = 400.0
-
-        /** Houses are omens by name only zoomed in this close: a circle this wide or less. */
-        const val HOUSES_WITHIN_KM = 150.0
-
-        const val MOST_HOUSES = 3
-
-        /** Towns of 1790 are omens by name as close in as the houses are, the nearest few. */
-        const val TOWNS_WITHIN_KM = HOUSES_WITHIN_KM
-
-        const val MOST_TOWNS = 2
 
         /**
          * How far from a cell the ground marks with a river a named river's line may run and still be the river painted

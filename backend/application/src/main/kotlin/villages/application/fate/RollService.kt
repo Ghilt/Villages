@@ -1,5 +1,6 @@
 package villages.application.fate
 
+import villages.application.Balance
 import villages.application.Clock
 import villages.application.FreshIds
 import villages.application.HouseCommandExecutor
@@ -17,9 +18,6 @@ import villages.domain.RollId
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArraySet
 
-/** What a roll costs: ten wealth, Adam's temporary number. The application's, so the domain stays content-free. */
-val ROLL_PRICE = Effect.Spend(Resource.WEALTH, 10)
-
 /**
  * The player pressed Take action: the fate engine rolls for their house at this moment, and what it dealt is sent
  * to `decide` as one `Roll`, which records the roll, spends its price and gives its hand, or refuses all three.
@@ -32,6 +30,8 @@ class RollService(
     private val clock: Clock,
     private val world: WorldClock,
     private val ids: FreshIds,
+    /** What a roll costs in wealth is the balance's, so the domain stays content-free. See 0083 and 0097. */
+    private val balance: () -> Balance,
 ) {
     /** The rarity each player's next roll is, where the debug panel's lever has said one. */
     private val forced = ConcurrentHashMap<PlayerId, Rarity>()
@@ -54,7 +54,7 @@ class RollService(
                 rollId = RollId(ids.fresh()),
                 omens = rolled.omens,
                 rarity = rolled.rarity,
-                price = ROLL_PRICE,
+                price = Effect.Spend(Resource.WEALTH, balance().roll.price),
                 hand = rolled.hand,
                 worldTime = today,
                 recordedAt = clock.now(),

@@ -61,7 +61,7 @@ class CharacterDeathsSpec : StringSpec({
     fun rig(): Rig {
         val world = TinyWorld()
         val later = ManualLater()
-        val keyFigures = KeyFigureService(world, world, { noon }, { today }, calendar, { 1 }, { emptyList() })
+        val keyFigures = KeyFigureService(world, world, { noon }, { today }, calendar, { 1 }, { emptyList() }, { TEST_BALANCE })
         found(world, ada)
         found(world, bea)
         val faults = KeptFaults()

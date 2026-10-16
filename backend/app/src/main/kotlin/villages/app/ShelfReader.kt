@@ -11,12 +11,13 @@ import villages.application.Catalogues
  */
 object ShelfReader : CatalogueReader {
     /** Every catalogue the game reads, by its name on the shelf. */
-    val READ: Set<String> = setOf(Catalogues.STRUCTURES)
+    val READ: Set<String> = setOf(Catalogues.STRUCTURES, Catalogues.BALANCE)
 
     override fun read(files: Map<String, String>): Catalogues {
         files.keys.firstOrNull { it !in READ }?.let { throw CatalogueRefused(it, "the game reads no catalogue of that name") }
         return Catalogues(
             structures = reading(files, Catalogues.STRUCTURES, StructureCatalogueFile::parse),
+            balance = reading(files, Catalogues.BALANCE, BalanceFile::parse),
         ).check()
     }
 
