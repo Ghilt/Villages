@@ -11,8 +11,9 @@ import type { ShaderLevel } from '../../shaders/levels';
 import type { Layer } from '../layer';
 
 import { cloudBandAt } from './cloudBands';
-import { carried, latticeNear } from './cloudClock';
-import { cloudStore } from './cloudMode';
+import { carriedBy, latticeNear, respeed, sharedDrift } from './cloudClock';
+import { cloudStore, readClouds } from './cloudMode';
+import { CLOUD_DEFAULTS, cloudTuningStore } from './cloudTuning';
 import { CLOUD_FRAGMENT, CLOUD_VERTEX } from './cloudShader';
 import { CLOUD_LOOK } from './look';
 
@@ -43,9 +44,9 @@ export function createCloudLayer(renderer: Renderer, repaint: () => void): Cloud
     uTilt: { value: new Float32Array([1, 0, 1]), type: 'vec3<f32>' },
     uAmount: { value: 0, type: 'f32' },
     uCarried: { value: new Float32Array(3), type: 'vec3<f32>' },
-    uClumps: { value: new Float32Array([CLOUD_LOOK.size, 1]), type: 'vec2<f32>' },
-    uPatches: { value: new Float32Array([CLOUD_LOOK.size * 16, 1]), type: 'vec2<f32>' },
-    uCover: { value: CLOUD_LOOK.cover, type: 'f32' },
+    uClumps: { value: new Float32Array(2), type: 'vec2<f32>' },
+    uPatches: { value: new Float32Array(2), type: 'vec2<f32>' },
+    uCover: { value: 0, type: 'f32' },
     uPatchWeight: { value: CLOUD_LOOK.patches, type: 'f32' },
     uEdge: { value: CLOUD_LOOK.edge, type: 'f32' },
   });
@@ -72,6 +73,8 @@ export function createCloudLayer(renderer: Renderer, repaint: () => void): Cloud
   const still = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   // A still sky is the sky as it was when the page opened.
   const stillAt = Date.now();
+  // How the wind carries the patches, the clumps and their detail: the one sky until a slider moves the speed.
+  let drift = sharedDrift(cloudTuningStore.get().speed);
 
   // What each level costs, measured on the graphics card where it will say, and said once a level.
   const meter = createCostMeter((renderer as WebGLRenderer).gl as WebGL2RenderingContext | undefined);
@@ -80,6 +83,8 @@ export function createCloudLayer(renderer: Renderer, repaint: () => void): Cloud
 
   const stopWatching = cloudStore.watch(repaint);
   const stopWatchingShaders = shadersStore.watch(repaint);
+  // A slider moved shows on the next frame even where nothing else is moving the map.
+  const stopWatchingTuning = cloudTuningStore.watch(repaint);
 
   return {
     sprite,
@@ -96,7 +101,9 @@ export function createCloudLayer(renderer: Renderer, repaint: () => void): Cloud
           `${sayLevel(lastLevel, look)}: ${ms.toFixed(2)} ms of the graphics card a frame, ${share}% of its time`,
         );
       }
-      const band = cloudBandAt(view.zoom, CLOUD_LOOK.zooms);
+      const tuning = cloudTuningStore.get();
+      const band = cloudBandAt(view.zoom, tuning);
+      readClouds(band.name, level === 'off' ? 0 : band.clouds);
       if (level === 'off' || band.clouds <= 0) {
         sprite.visible = false;
         return null;
@@ -110,9 +117,11 @@ export function createCloudLayer(renderer: Renderer, repaint: () => void): Cloud
       const centre = toMercatorExact(view.center);
       const tilt = groundTilt(view);
       const resolution = renderer.resolution;
-      const clumps = latticeNear(CLOUD_LOOK.size);
-      const patches = latticeNear(CLOUD_LOOK.size * 16);
+      const clumps = latticeNear(tuning.size);
+      const patches = latticeNear(tuning.size * 16);
       const at = still ? stillAt : Date.now();
+      drift = respeed(drift, at, tuning.speed, CLOUD_DEFAULTS.speed);
+      const carried = carriedBy(drift, at);
       const u = uniforms.uniforms;
       u.uSize[0] = view.width;
       u.uSize[1] = view.height;
@@ -123,13 +132,14 @@ export function createCloudLayer(renderer: Renderer, repaint: () => void): Cloud
       u.uTilt[1] = tilt.sin;
       u.uTilt[2] = tilt.lean;
       u.uAmount = band.clouds;
-      u.uCarried[0] = carried(at, CLOUD_LOOK.speed);
-      u.uCarried[1] = carried(at, CLOUD_LOOK.speed);
-      u.uCarried[2] = carried(at, CLOUD_LOOK.speed);
+      u.uCarried[0] = carried;
+      u.uCarried[1] = carried;
+      u.uCarried[2] = carried;
       u.uClumps[0] = clumps.cell;
       u.uClumps[1] = clumps.around;
       u.uPatches[0] = patches.cell;
       u.uPatches[1] = patches.around;
+      u.uCover = tuning.cover;
       uniforms.update();
 
       const width = Math.max(1, Math.ceil(view.width * levelLook.resolution));
@@ -149,6 +159,7 @@ export function createCloudLayer(renderer: Renderer, repaint: () => void): Cloud
     destroy(): void {
       stopWatching();
       stopWatchingShaders();
+      stopWatchingTuning();
       meter.dispose();
       sprite.destroy();
       target.destroy(true);

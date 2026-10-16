@@ -53,7 +53,10 @@ from noise laid along the wind and carried by the wall clock.**
   but those are not drawn from 7.5 out, where the clouds are.
 - The sky is the same in every browser only as far as their clocks agree: two seconds apart is about seventeen
   pixels at 5.5. The welcome frame carries the server's time if that ever matters. A browser whose own sliders
-  differ, or whose player asked for less motion, sees a sky of its own, knowingly.
+  differ, or whose player asked for less motion, sees a sky of its own, knowingly. Because the clock's distance is
+  the speed times the seconds since 1970, a new speed taken straight would throw the whole sky somewhere else; so a
+  speed slider moved carries the sky on from where it stands (`respeed`), and the speed it started at gives the
+  shared sky back.
 - It measured 0.84 ms of the graphics card a frame at high on the first machine it ran on, 1.7% of its time.
 - Every number of the look is in `sprites/clouds/look.ts`.
 

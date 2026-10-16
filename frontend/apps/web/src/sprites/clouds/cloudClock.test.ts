@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { CLOUD_PERIOD, carried, latticeNear } from './cloudClock';
+import { CLOUD_PERIOD, carried, carriedBy, latticeNear, respeed, sharedDrift } from './cloudClock';
 
 /** A moment in the game's own lifetime, so the numbers are as large as they really are. */
 const NOW = Date.UTC(2026, 9, 16, 12, 0, 0);
@@ -47,5 +47,24 @@ describe("the clouds' clock", () => {
     // A clump's size is a few hundred units, so it is never more than a percent from the size asked.
     expect(Math.abs(latticeNear(320).cell - 320) / 320).toBeLessThan(0.01);
     expect(latticeNear(100_000)).toEqual({ cell: CLOUD_PERIOD, around: 1 });
+  });
+
+  it('carries the shared sky as the clock does', () => {
+    expect(carriedBy(sharedDrift(12), NOW)).toBe(carried(NOW, 12));
+  });
+
+  it('changes pace where the sky stands when a slider moves the speed, without a jump', () => {
+    const faster = respeed(sharedDrift(12), NOW, 30, 12);
+    expect(round(carriedBy(faster, NOW), carried(NOW, 12))).toBeLessThan(1e-6);
+    expect(Math.abs(round(carriedBy(faster, NOW), carriedBy(faster, NOW + 1000)) - 30)).toBeLessThan(1e-6);
+    const slower = respeed(faster, NOW + 5000, 4, 12);
+    expect(round(carriedBy(slower, NOW + 5000), carriedBy(faster, NOW + 5000))).toBeLessThan(1e-6);
+  });
+
+  it('goes back to the one sky at the shared speed', () => {
+    const faster = respeed(sharedDrift(12), NOW, 30, 12);
+    const back = respeed(faster, NOW + 60_000, 12, 12);
+    expect(carriedBy(back, NOW + 61_000)).toBe(carried(NOW + 61_000, 12));
+    expect(respeed(back, NOW, 12, 12)).toBe(back);
   });
 });
