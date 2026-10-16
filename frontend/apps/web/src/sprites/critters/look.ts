@@ -63,16 +63,15 @@ export const CRITTERS_LOOK = {
     flapsPerSecond: 9,
     flapping: 0.55,
     /**
-     * Where a bird flying off hooks down, as a share of its flight, late in its fade: from here it turns sharply and
-     * drops straight down the screen, settling, as it goes. How far it carries on along its heading into the turn, and
-     * how far it drops after it, in lengths of its own picture: Adam's word of 2026-10-16, a turn and then a bird
-     * length or two.
+     * Where a bird flying off hooks down, as a share of its flight: from here it turns sharply and drops straight down
+     * the screen, settling, fading from the moment it turns until it is gone. How far it carries on along its heading
+     * into the turn, and how far it drops after it, in lengths of its own picture: Adam's word of 2026-10-16, a turn
+     * and then a little over a bird length.
      */
     hookAt: 0.8,
     hookTurn: 0.3,
-    hookDrop: 1.5,
-    /** The share of its flight away a bird takes to come out of its cover whole, and to fade away at the end. */
+    hookDrop: 1.25,
+    /** The share of its flight away a bird takes to come out of its cover whole. */
     fadeIn: 0.05,
-    fadeOut: 0.35,
   },
 } as const;

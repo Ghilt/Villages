@@ -170,8 +170,8 @@ every browser. A player who asked for less motion sees it all standing still. Ev
 
 **Critters live where the house sees.** From zoom 9 in, every so often a few small birds burst out of a tree or a
 bush the scenery drew - in the woods, the scrub and the heath, and out of a lone bush or tree in the open - fan
-out, climb, flap and glide away, and late in their fade hook down - a sharp turn and a drop of a bird length or
-two straight down the screen, settling; a few of them drop into a tree near by instead; or a bird
+out, climb, flap and glide away, and then hook down - a sharp turn, fading from it, and a drop of a little over a
+bird length straight down the screen, settling; a few of them drop into a tree near by instead; or a bird
 or two flits from one tree into another near it, as if seeking shelter, and goes into its leaves. Each has a soft
 shadow on the ground below it and away from the light, which a tree in front of it hides. They are drawn at the scenery's scale, smaller than any other sprite,
 so what tells a bird from a speck is its wingbeat rather than its outline. They come only where the house sees now:

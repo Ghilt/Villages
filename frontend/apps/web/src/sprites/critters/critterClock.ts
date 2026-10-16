@@ -215,8 +215,8 @@ const ramp = (from: number, to: number, value: number): number =>
 /**
  * Where every bird of a flock is at this moment, for a picture of so many frames standing `size` world units tall. A
  * bird flying off comes out of its cover, climbs and flies away down its own heading, flapping and then gliding,
- * flapping again now and then, and late in its fade hooks: a sharp turn and a drop of a bird length or two straight
- * down the screen, settling. A bird taking shelter flies a bowed path from one crown to the other, rising and dropping,
+ * flapping again now and then, and then hooks: a sharp turn, fading from it, and a drop of a little over a bird
+ * length straight down the screen, settling. A bird taking shelter flies a bowed path from one crown to the other, rising and dropping,
  * gliding at the top, and fades as it goes into the leaves. Each comes out of its cover whole within a moment, so
  * none of it ever appears or vanishes in the open.
  */
@@ -233,7 +233,8 @@ export function posesOf(event: CritterEvent, seconds: number, frames: number, si
       poses.push(shelterPose(event.from, bird, share, crown, out, beat, frames));
       continue;
     }
-    const alpha = Math.min(out, ramp(1, 1 - F.fadeOut, share));
+    // Whole until it hooks, and fading from the turn until it is gone.
+    const alpha = Math.min(out, ramp(1, F.hookAt, share));
     if (share > F.hookAt) {
       poses.push(hookPose(event.from, bird, share, crown, alpha, beat, frames, size));
       continue;
