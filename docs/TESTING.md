@@ -17,7 +17,7 @@ Every increment lands with the test that proves it. The tests are the reason we 
 | Edge | The gateway protocol over a real WebSocket; interface components against a fake client | Spring WebSocket test client, React Testing Library | yes |
 | Contract | The same JSON fixtures parse and round-trip in Kotlin and in TypeScript | Kotest and Vitest over the shared fixtures | yes |
 | End to end | The whole stack in a browser: the map is painted, a house is founded, another window sees it, an action is taken with Take action, a restart of the game server forgets nothing | Playwright, in the machine's own Chrome | yes, needs this tree's world cut; the restart and RabbitMQ need Docker |
-| Load | Thousands of simultaneous connections | the bot swarm | manual |
+| Load | Thousands of simultaneous connections, each a simulated player playing the player's own loop | `backend/load-bots`: a bot over the JDK's WebSocket client, tested against the shared frame fixtures; the swarm itself is run by hand (`docs/plans/bot-swarm.md`) | the bot's tests, yes; a run, no |
 
 ## Rules
 

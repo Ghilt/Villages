@@ -789,3 +789,14 @@ and `-- --drop` takes them off; by hand only.
   end-to-end test's world of a checkout that is still here is kept, because a test may be running in it. It asks
   MongoDB through the stack's own container and RabbitMQ through its management page, so it needs the stack up and
   nothing installed.
+
+## The bot swarm
+
+- **One bot**, a simulated player, against the game server already running: `cd backend` then
+  `./gradlew :load-bots:bot --args=--port=<the game port>`, which `node frontend/apps/web/vite/worktreePort.ts --game`
+  prints for a tree. It says hello as a player of its own, takes one of the seats it is offered, follows the nine
+  cells round its seat, and then pans to cells nearby about every twenty seconds and rolls about every minute,
+  playing one option of the hand it is dealt. Its house is on the map like anyone's, and its `rolled` and `took
+  action` on the event page. Every ten seconds it prints its stage and how long the server took to welcome it,
+  answer its commands and send its cells, and why anything failed. Ctrl+C stops it; its house stays in the world
+  until the World section's wipe. See `docs/plans/bot-swarm.md`.
