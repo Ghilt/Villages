@@ -38,13 +38,6 @@
   color: var(--ink-soft);
 }
 
-.arch__bar {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
 .arch__side-title {
   margin: 0 0 0.8rem;
   font-size: 0.8rem;

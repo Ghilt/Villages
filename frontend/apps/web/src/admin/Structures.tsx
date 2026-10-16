@@ -1,5 +1,3 @@
-import './structures.css';
-
 import { useEffect, useState } from 'react';
 
 import { CULTURES, parseStructureCatalogue } from '@villages/world';
@@ -9,6 +7,8 @@ import type {
   StructureSlot,
   StructureTypeSpec,
 } from '@villages/world';
+
+import { InspectPage } from './frame/InspectPage';
 
 /** The resources as the page says them. */
 const SAID: Record<StructureResource, string> = {
@@ -50,20 +50,20 @@ export function Structures() {
   }, []);
 
   return (
-    <main className="catalogue">
-      <header className="catalogue__bar">
-        <h1 className="catalogue__title">Structures</h1>
-        <span className="catalogue__count">
+    <InspectPage
+      title="Structures"
+      bar={
+        <span className="inspect-note">
           {typeof read === 'object' && read !== null ? `${read.types.length} types` : ''} from
           world/structures.json, every number a placeholder
         </span>
-      </header>
-
-      {read === null && <p className="catalogue__quiet">reading world/structures.json</p>}
-      {typeof read === 'string' && <p className="catalogue__problem">{read}</p>}
+      }
+    >
+      {read === null && <p className="inspect-quiet">reading world/structures.json</p>}
+      {typeof read === 'string' && <p className="inspect-problem">{read}</p>}
       {typeof read === 'object' && read !== null && (
-        <div className="catalogue__scroll">
-          <table className="catalogue__table">
+        <div className="inspect-scroll">
+          <table className="inspect-table">
             <thead>
               <tr>
                 <th>type</th>
@@ -84,7 +84,7 @@ export function Structures() {
           </table>
         </div>
       )}
-    </main>
+    </InspectPage>
   );
 }
 
@@ -96,16 +96,16 @@ function TypeRow({ spec }: { spec: StructureTypeSpec }) {
     <tr>
       <th scope="row">
         {spec.words.european}
-        <span className="catalogue__key">{spec.type}</span>
+        <span className="inspect-key">{spec.type}</span>
       </th>
       <td>{spec.levels}</td>
       <td>{byLevel(spec.significance)}</td>
       <td>{byLevel(spec.sightKm)}</td>
       <td>
         {gives.length === 0 ? (
-          <span className="catalogue__quiet">nothing but sight</span>
+          <span className="inspect-quiet">nothing but sight</span>
         ) : (
-          <ul className="catalogue__slots">
+          <ul className="inspect-list">
             {gives.map((one) => (
               <li key={one}>{one}</li>
             ))}
@@ -114,23 +114,21 @@ function TypeRow({ spec }: { spec: StructureTypeSpec }) {
       </td>
       <td>
         {spec.slots.length === 0 ? (
-          <span className="catalogue__quiet">none</span>
+          <span className="inspect-quiet">none</span>
         ) : (
-          <ul className="catalogue__slots">
+          <ul className="inspect-list">
             {spec.slots.map((slot) => (
               <li key={slot.name}>{saySlot(slot)}</li>
             ))}
           </ul>
         )}
       </td>
+      <td>{spec.zone === null ? <span className="inspect-quiet">none</span> : `reach ${spec.zone.reach}`}</td>
       <td>
-        {spec.zone === null ? <span className="catalogue__quiet">none</span> : `reach ${spec.zone.reach}`}
-      </td>
-      <td>
-        <ul className="catalogue__slots">
+        <ul className="inspect-list">
           {CULTURES.map((culture) => (
             <li key={culture}>
-              <span className="catalogue__key">{culture}</span> {spec.words[culture]}
+              <span className="inspect-key">{culture}</span> {spec.words[culture]}
             </li>
           ))}
         </ul>

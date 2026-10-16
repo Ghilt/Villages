@@ -1,6 +1,7 @@
 import './inspect-index.css';
 
-import { INSPECT_INDEX, INSPECT_VIEWS } from './inspectViews';
+import { InspectPage } from './frame/InspectPage';
+import { INSPECT_VIEWS } from './inspectViews';
 
 /**
  * The pages beside the game, listed: what each is for and what it needs running. Its own page at
@@ -8,11 +9,7 @@ import { INSPECT_INDEX, INSPECT_VIEWS } from './inspectViews';
  */
 export function InspectIndex() {
   return (
-    <main className="inspect-index">
-      <header className="inspect-index__bar">
-        <h1 className="inspect-index__title">Inspect</h1>
-        <p className="inspect-index__epigraph">The pages beside the game, for looking into it</p>
-      </header>
+    <InspectPage title="Inspect" epigraph="The pages beside the game, for looking into it" back={false}>
       <ul className="inspect-index__list">
         {INSPECT_VIEWS.map((view) => (
           <li key={view.path}>
@@ -33,15 +30,6 @@ export function InspectIndex() {
           </a>
         </li>
       </ul>
-    </main>
-  );
-}
-
-/** The way back to the index, for the top of every inspect view. */
-export function BackToIndex() {
-  return (
-    <a className="inspect-back" href={INSPECT_INDEX}>
-      ← all inspect views
-    </a>
+    </InspectPage>
   );
 }

@@ -6,29 +6,6 @@
  * Its own page rather than a panel, so it is a document rather than an instrument: a full-width column
  * of monospace lines, each opening to the event exactly as the store holds it.
  */
-.log {
-  min-height: 100%;
-  padding: 1.5rem 2rem 3rem;
-  background: #fbf7ec;
-}
-
-.log__bar {
-  display: flex;
-  align-items: baseline;
-  gap: 1rem;
-  padding-bottom: 0.7rem;
-  margin-bottom: 0.9rem;
-  border-bottom: 1px solid var(--parchment-edge);
-}
-
-.log__title {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: normal;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-}
-
 .log__link,
 .log__count {
   font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace;

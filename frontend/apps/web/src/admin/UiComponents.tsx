@@ -3,7 +3,7 @@ import './showcase/showcase.css';
 
 import { useRef } from 'react';
 
-import { BackToIndex } from './InspectIndex';
+import { BackToIndex } from './frame/InspectPage';
 import { ContrastSummary, useUnreadable } from './showcase/ContrastCheck';
 import { useDensity } from './showcase/density';
 import { SECTIONS } from './showcase/sections';

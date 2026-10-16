@@ -612,7 +612,9 @@ and `-- --drop` takes them off; by hand only.
 
 - Every page beside the game is listed at **`/admin`** on this tree's dev server: what each is for, what it
   needs running, and the game itself. Each of them has a way back to it at the top, and the debug panel's
-  World section links it. A new page beside the game is added to `apps/web/src/admin/inspectViews.ts`.
+  World section links it. A new page beside the game is one entry in `apps/web/src/admin/inspectViews.ts`, its
+  `import()` with it, which is all `main.tsx` routes by, and it stands in the frame every page shares,
+  `admin/frame/InspectPage.tsx`: the bar with the page's name, what it keeps there, and the way back.
 - **`/admin/inspect-architecture`** is how the world is set up, and needs nothing else running. Along the top,
   the numbers: how long a brand-new worktree takes to the game with its world borrowed, how long a master's
   world takes from its painting when nobody has made it, how many tools bake it, and how many baked files the

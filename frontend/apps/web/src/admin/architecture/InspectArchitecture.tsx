@@ -1,10 +1,9 @@
-import '../inspect-index.css';
 import './architecture.css';
 import './overview.css';
 
 import { useCallback, useMemo, useState } from 'react';
 
-import { BackToIndex } from '../InspectIndex';
+import { InspectPage } from '../frame/InspectPage';
 import { Robot } from './Cards';
 import { Diagram } from './Diagram';
 import { Focus } from './Focus';
@@ -43,17 +42,11 @@ export function InspectArchitecture() {
   const minutes = Math.round(secondsForAMaster() / 60);
 
   return (
-    <main className="arch inspect-index">
-      <header className="inspect-index__bar arch__bar">
-        <div>
-          <h1 className="inspect-index__title">Architecture</h1>
-          <p className="inspect-index__epigraph">
-            How the world is set up: what is baked beforehand, and what the running game reads
-          </p>
-        </div>
-        <BackToIndex />
-      </header>
-
+    <InspectPage
+      title="Architecture"
+      epigraph="How the world is set up: what is baked beforehand, and what the running game reads"
+      className="arch"
+    >
       <section className="arch__tiles" aria-label="In numbers">
         <Tile
           figure={`${FRESH_TREE.seconds} s`}
@@ -103,7 +96,7 @@ export function InspectArchitecture() {
           worktrees that are gone); and {LEGACY.map((l) => `${l.script} (${l.why})`).join('; ')}.
         </p>
       </footer>
-    </main>
+    </InspectPage>
   );
 }
 

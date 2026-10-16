@@ -1,26 +1,27 @@
 /*
- * The catalogue of structures at /admin/inspect-structures: every type in world/structures.json, for reading.
- *
- * Its own page, a document like the events', so a full-width table on paper: a type to a row, the numbers set
- * so a column reads down. A table wider than a phone scrolls inside its frame rather than the page.
+ * The frame every inspect page stands in (InspectPage.tsx): paper, a bar across its head, and the few things every
+ * page sets alike - a quiet word, a problem, a key in monospace, a list without marks, and a table of figures that
+ * scrolls in its frame on a phone rather than the page.
  */
-.catalogue {
+
+.inspect-page {
+  box-sizing: border-box;
   min-height: 100%;
   padding: 1.5rem 2rem 3rem;
   background: #fbf7ec;
 }
 
-.catalogue__bar {
+.inspect-page__bar {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   gap: 0.3rem 1rem;
   padding-bottom: 0.7rem;
-  margin-bottom: 0.9rem;
+  margin-bottom: 1rem;
   border-bottom: 1px solid var(--parchment-edge);
 }
 
-.catalogue__title {
+.inspect-page__title {
   margin: 0;
   font-size: 1rem;
   font-weight: normal;
@@ -28,39 +29,61 @@
   text-transform: uppercase;
 }
 
-.catalogue__count,
-.catalogue__key {
+.inspect-page__epigraph {
+  margin: 0.3rem 0 0;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.inspect-note,
+.inspect-key,
+.inspect-back {
   font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace;
   font-size: 0.7rem;
   color: var(--ink-soft);
 }
 
-.catalogue__quiet {
+.inspect-back {
+  margin-left: auto;
+  text-decoration: none;
+}
+
+.inspect-back:hover {
+  text-decoration: underline;
+}
+
+.inspect-quiet {
   color: var(--ink-soft);
 }
 
-.catalogue__problem {
+.inspect-problem {
   color: #8f1d2f;
 }
 
-.catalogue__scroll {
+.inspect-scroll {
   overflow-x: auto;
 }
 
-.catalogue__table {
+.inspect-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.inspect-table {
   border-collapse: collapse;
   font-size: 0.8rem;
 }
 
-.catalogue__table th,
-.catalogue__table td {
+.inspect-table th,
+.inspect-table td {
   padding: 0.45rem 0.8rem 0.45rem 0;
   vertical-align: top;
   text-align: left;
   border-bottom: 1px solid var(--parchment-edge);
 }
 
-.catalogue__table thead th {
+.inspect-table thead th {
   font-weight: normal;
   font-size: 0.68rem;
   letter-spacing: 0.12em;
@@ -68,22 +91,22 @@
   color: var(--ink-soft);
 }
 
-.catalogue__table tbody th {
+.inspect-table tbody th {
   white-space: nowrap;
 }
 
-.catalogue__table tbody th .catalogue__key {
+.inspect-table tbody th .inspect-key {
   display: block;
 }
 
 /* A figure never breaks across lines: the table scrolls in its frame before "34 / 40 / 48" splits. */
-.catalogue__table td {
+.inspect-table td {
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
-.catalogue__slots {
-  margin: 0;
-  padding: 0;
-  list-style: none;
+@media (width <= 600px) {
+  .inspect-page {
+    padding: 1rem;
+  }
 }

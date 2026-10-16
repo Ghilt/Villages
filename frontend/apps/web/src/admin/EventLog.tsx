@@ -10,7 +10,7 @@ import { browserSocket } from '../net/browserSocket';
 import { GATEWAY_URL } from '../net/address';
 import { mapLink } from '../net/startAt';
 import { placeIn } from './eventLinks';
-import { BackToIndex } from './InspectIndex';
+import { InspectPage } from './frame/InspectPage';
 
 /** Enough to hold a session's worth of play. Past this the oldest go, as in any log. */
 const MOST = 2000;
@@ -60,19 +60,21 @@ export function EventLog() {
   }, []);
 
   return (
-    <main className="log">
-      <header className="log__bar">
-        <h1 className="log__title">Events</h1>
-        <span className={`log__link log__link--${state}`}>{state}</span>
-        <span className="log__count">
-          {events.length} {events.length === 1 ? 'event' : 'events'}, newest first
-        </span>
-        <button type="button" className="log__button" onClick={() => setEvents([])}>
-          clear
-        </button>
-        <BackToIndex />
-      </header>
-
+    <InspectPage
+      title="Events"
+      className="log"
+      bar={
+        <>
+          <span className={`log__link log__link--${state}`}>{state}</span>
+          <span className="log__count">
+            {events.length} {events.length === 1 ? 'event' : 'events'}, newest first
+          </span>
+          <button type="button" className="log__button" onClick={() => setEvents([])}>
+            clear
+          </button>
+        </>
+      }
+    >
       {problem !== null && <p className="log__problem">{problem}</p>}
 
       <ol className="log__list">
@@ -87,7 +89,7 @@ export function EventLog() {
           <Entry key={event.id} event={event} />
         ))}
       </ol>
-    </main>
+    </InspectPage>
   );
 }
 

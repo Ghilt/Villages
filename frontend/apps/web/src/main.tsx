@@ -41,10 +41,11 @@ window.addEventListener('pageshow', (event) => {
 
 /**
  * Which page this is, by its address. A check rather than a router: the pages beside the game are listed in
- * `admin/inspectViews.ts`, the index of them is `/admin`, and anything else is the game. Every inspect page is
- * fetched with `import()`, so none of them, nor what they carry, is part of the game's bundle (0091).
+ * `admin/inspectViews.ts`, each with how it is fetched, the index of them is `/admin`, and anything else is the
+ * game. Every inspect page is fetched with `import()`, so none of them, nor what they carry, is part of the game's
+ * bundle (0091).
  */
-const inspecting = inspectViewAt(window.location.pathname)?.path;
+const inspecting = inspectViewAt(window.location.pathname);
 if (isInspectIndex(window.location.pathname)) {
   document.title = 'Villages: inspect';
   void import('./admin/InspectIndex').then(({ InspectIndex }) =>
@@ -54,40 +55,12 @@ if (isInspectIndex(window.location.pathname)) {
       </StrictMode>,
     ),
   );
-} else if (inspecting === '/admin/inspect-events') {
-  document.title = 'Villages: events';
-  void import('./admin/EventLog').then(({ EventLog }) =>
+} else if (inspecting !== undefined) {
+  document.title = `Villages: ${inspecting.title.toLowerCase()}`;
+  void inspecting.load().then((Page) =>
     root.render(
       <StrictMode>
-        <EventLog />
-      </StrictMode>,
-    ),
-  );
-} else if (inspecting === '/admin/inspect-ui-components') {
-  document.title = 'Villages: components';
-  // Fetched only here, so neither the library nor its fonts and pictures are part of the game's bundle.
-  void import('./admin/UiComponents').then(({ UiComponents }) =>
-    root.render(
-      <StrictMode>
-        <UiComponents />
-      </StrictMode>,
-    ),
-  );
-} else if (inspecting === '/admin/inspect-structures') {
-  document.title = 'Villages: structures';
-  void import('./admin/Structures').then(({ Structures }) =>
-    root.render(
-      <StrictMode>
-        <Structures />
-      </StrictMode>,
-    ),
-  );
-} else if (inspecting === '/admin/inspect-architecture') {
-  document.title = 'Villages: architecture';
-  void import('./admin/architecture/InspectArchitecture').then(({ InspectArchitecture }) =>
-    root.render(
-      <StrictMode>
-        <InspectArchitecture />
+        <Page />
       </StrictMode>,
     ),
   );

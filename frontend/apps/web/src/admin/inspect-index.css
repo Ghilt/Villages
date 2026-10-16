@@ -1,30 +1,4 @@
-/* The index of the pages beside the game, at /admin, and the way back to it from each of them. */
-
-.inspect-index {
-  min-height: 100%;
-  padding: 1.5rem 2rem 3rem;
-  background: #fbf7ec;
-}
-
-.inspect-index__bar {
-  padding-bottom: 0.7rem;
-  margin-bottom: 1.2rem;
-  border-bottom: 1px solid var(--parchment-edge);
-}
-
-.inspect-index__title {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: normal;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-}
-
-.inspect-index__epigraph {
-  margin: 0.3rem 0 0;
-  font-style: italic;
-  color: var(--ink-soft);
-}
+/* The index of the pages beside the game, at /admin: a card for each, in the frame every inspect page stands in. */
 
 .inspect-index__list {
   display: grid;
@@ -71,23 +45,8 @@
   line-height: 1.4;
 }
 
-.inspect-index__meta,
-.inspect-back {
+.inspect-index__meta {
   font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace;
   font-size: 0.7rem;
   color: var(--ink-soft);
-}
-
-.inspect-back {
-  text-decoration: none;
-}
-
-.inspect-back:hover {
-  text-decoration: underline;
-}
-
-@media (width <= 600px) {
-  .inspect-index {
-    padding: 1rem;
-  }
 }
