@@ -25,6 +25,7 @@ import villages.domain.QuestProgress
 import villages.domain.ResourceEvent
 import villages.domain.SeatEvent
 import villages.domain.StructureEvent
+import villages.domain.WorldStreamEvent
 import villages.domain.VisionEvent
 import villages.domain.walk
 import java.util.concurrent.ConcurrentHashMap
@@ -85,6 +86,8 @@ class QuestsProjection(feed: EventFeed) : Follower(feed), QuestsByHouse {
             // A quest is offered to a house; a character's or a structure's own history says nothing about one.
             is CharacterEvent -> return
             is StructureEvent -> return
+            // What the world takes on from its catalogues is read by no read model. See decision record 0097.
+            is WorldStreamEvent -> return
         }
     }
 

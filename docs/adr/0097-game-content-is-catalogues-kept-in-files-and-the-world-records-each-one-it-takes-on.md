@@ -41,7 +41,7 @@ the catalogue names it and gives it its numbers and its words.
 
 **The world records each catalogue it takes on, and only that.** When the game server takes on a version of a
 catalogue whose fingerprint it has not recorded, it writes `villages.world.catalogueChanged.v1` on the world's
-own stream, carrying the catalogue's name, its fingerprint, the previous one, the entries that differ and the
+own stream, carrying the catalogue's name, its fingerprint, the previous one, where the two differ and the
 whole text. What a change sets right - a house's income, its sight - is written after it, by the listeners
 that already write it, with the change as the cause. A number touches three things, and each differently:
 

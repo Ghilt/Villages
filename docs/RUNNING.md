@@ -471,8 +471,11 @@ and `-- --drop` takes them off; by hand only.
 - The catalogues: `world/catalogues/`, the game's content, a file a kind, each with its inspect page under `/admin`,
   which `admin/catalogues.test.ts` holds. The dev server serves every file in it at `/catalogues/<its path>`,
   read again on every ask and sent with the SHA-256 of its bytes, and `/catalogues/` lists them; when one changes
-  on disk it tells the page, and the page showing it reads it again. See `docs/plans/catalogues.md` and decision
-  record 0097.
+  on disk it tells the page, and the page showing it reads it again. The game server records every version of a
+  catalogue it takes on as `catalogueChanged` on the world's own stream, `world`: one for each catalogue as a
+  fresh world starts and again after a wipe, none on a restart over the same files, and one more for a file
+  changed since; each is on the event page, opening to the whole file and where it changed. See
+  `docs/plans/catalogues.md` and decision record 0097.
 - What a structure is: `world/catalogues/structures.json`, hand-edited, one entry a type - its words in each culture, and level
   by level how far out it is drawn, how far it sees, its size on the map and what it yields a world month, which is
   a real day - with its slots and its influence zone if it has one. Nothing cuts it. The game server reads it once,

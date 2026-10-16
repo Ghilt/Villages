@@ -37,6 +37,7 @@ import villages.domain.ChoiceEvent
 import villages.domain.DialogueEvent
 import villages.domain.VisionEvent
 import villages.domain.StructureEvent
+import villages.domain.WorldStreamEvent
 import villages.protocol.Cell
 import villages.protocol.ON_THE_MAP_FROM
 import java.util.concurrent.ConcurrentHashMap
@@ -155,6 +156,8 @@ class CharactersProjection(feed: EventFeed) : Follower(feed), KeyFiguresByHouse,
 
             // What a house has, what it is asked and told, and what it sees are other read models' business.
             is ResourceEvent, is ChoiceEvent, is DialogueEvent, is QuestEvent, is VisionEvent, is SeatEvent, is StructureEvent -> Unit
+            // What the world takes on from its catalogues is read by no read model. See decision record 0097.
+            is WorldStreamEvent -> Unit
         }
     }
 

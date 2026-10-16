@@ -25,6 +25,7 @@ import villages.application.StructureCommandExecutor
 import villages.application.Resettable
 import villages.application.Unreadable
 import villages.application.WipeGate
+import villages.application.WorldCommandExecutor
 import villages.domain.Event
 import villages.domain.StructureCatalogue
 import java.time.Duration
@@ -102,6 +103,9 @@ class MongoWorld(
 
     override fun structureExecutor(catalogue: StructureCatalogue): StructureCommandExecutor =
         OccurrentStructureCommandExecutor(store, converter, catalogue, gate)
+
+    override fun worldExecutor(changes: (before: String, after: String) -> List<String>): WorldCommandExecutor =
+        OccurrentWorldCommandExecutor(store, converter, changes, gate)
 
     override val keptIn = "in MongoDB, database $database, which outlives the server"
 

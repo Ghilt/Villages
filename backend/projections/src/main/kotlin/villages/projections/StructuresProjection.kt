@@ -32,6 +32,7 @@ import villages.domain.StructureRuined
 import villages.domain.StructureSlotEmptied
 import villages.domain.StructureSlotFilled
 import villages.domain.VisionEvent
+import villages.domain.WorldStreamEvent
 import villages.protocol.Cell
 import villages.protocol.ON_THE_MAP_FROM
 import java.util.concurrent.ConcurrentHashMap
@@ -132,6 +133,8 @@ class StructuresProjection(feed: EventFeed) : Follower(feed), StructuresByCell, 
             }
             // What a house has, is asked, is told, holds and sees, and what befalls a person, changes no structure.
             is ResourceEvent, is ChoiceEvent, is DialogueEvent, is QuestEvent, is KeyFigureEvent, is VisionEvent, is CharacterEvent -> Unit
+            // What the world takes on from its catalogues is read by no read model. See decision record 0097.
+            is WorldStreamEvent -> Unit
         }
     }
 

@@ -33,6 +33,7 @@ import villages.application.Resettable
 import villages.application.Stands
 import villages.application.ResourceService
 import villages.application.ScheduledLater
+import villages.application.Shelf
 import villages.application.TakeActionService
 import villages.application.VisionService
 import villages.application.WorldCalendar
@@ -349,9 +350,10 @@ class WorldConfig {
      * Emptying the development world: the store and everything folded from it, in one moment that nothing written
      * crosses, so that nothing is left holding a house whose events are gone. Everything is every `Resettable` there
      * is, so a read model or a listener added later is emptied without being named here. See decision record 0036.
+     * The emptied world then records the catalogues it runs on, as a fresh one does when the server starts (0097).
      */
     @Bean
-    fun worldWipe(world: EventWorld, folded: List<Resettable>): WorldWipe = WorldWipe {
-        world.wipe(folded)
+    fun worldWipe(world: EventWorld, folded: List<Resettable>, shelf: Shelf): WorldWipe = WorldWipe {
+        world.wipe(folded).also { shelf.recordAll() }
     }
 }

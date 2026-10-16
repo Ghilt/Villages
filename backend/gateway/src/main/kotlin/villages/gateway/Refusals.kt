@@ -4,6 +4,7 @@ import villages.domain.CharacterError
 import villages.domain.DomainError
 import villages.domain.HouseError
 import villages.domain.StructureError
+import villages.domain.WorldError
 
 /** A domain refusal as the short code the protocol carries, which the interface turns into words. */
 internal fun DomainError.reasonCode(): String = when (this) {
@@ -66,4 +67,5 @@ internal fun DomainError.reasonCode(): String = when (this) {
     StructureError.AlreadyInSlot -> "alreadyInSlot"
     StructureError.NotInSlot -> "notInSlot"
     is StructureError.InvalidContent -> "invalidContent"
+    is WorldError.InvalidCatalogue -> "invalidCatalogue"
 }

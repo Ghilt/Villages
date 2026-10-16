@@ -44,7 +44,12 @@ class EventCatalogueSpec : StringSpec({
      * new kind of stream is a row here; until it has one, the test below says its events are kept nowhere.
      */
     val streams: Map<KClass<out Event>, String> =
-        mapOf(HouseEvent::class to "house", CharacterEvent::class to "character", StructureEvent::class to "structure")
+        mapOf(
+            HouseEvent::class to "house",
+            CharacterEvent::class to "character",
+            StructureEvent::class to "structure",
+            WorldStreamEvent::class to "world",
+        )
 
     fun streamOf(event: KClass<out Event>): KClass<out Event> = streams.keys.single { event.isSubclassOf(it) }
 

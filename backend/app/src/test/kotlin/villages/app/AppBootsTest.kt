@@ -10,6 +10,7 @@ import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.web.socket.TextMessage
 import org.springframework.web.socket.WebSocketSession
 import org.springframework.web.socket.client.standard.StandardWebSocketClient
+import villages.app.TestSockets.LARGE_FRAMES
 import org.springframework.web.socket.handler.TextWebSocketHandler
 import villages.protocol.Batch
 import villages.protocol.Cell
@@ -52,7 +53,7 @@ class AppBootsTest {
     /** One window: a socket, and everything the gateway has said to it. */
     private class Window(port: Int) {
         val heard = CopyOnWriteArrayList<ServerFrame>()
-        private val session: WebSocketSession = StandardWebSocketClient()
+        private val session: WebSocketSession = StandardWebSocketClient(LARGE_FRAMES)
             .execute(
                 object : TextWebSocketHandler() {
                     override fun handleTextMessage(session: WebSocketSession, message: TextMessage) {

@@ -19,6 +19,7 @@ import villages.application.Resettable
 import villages.application.StructureCommandExecutor
 import villages.application.Unreadable
 import villages.application.WipeGate
+import villages.application.WorldCommandExecutor
 import villages.domain.StructureCatalogue
 import java.lang.reflect.Method
 import java.time.Duration
@@ -74,6 +75,9 @@ class InMemoryWorld(val faults: Faults = FaultBoard()) : EventWorld {
 
     override fun structureExecutor(catalogue: StructureCatalogue): StructureCommandExecutor =
         OccurrentStructureCommandExecutor(store, converter, catalogue, gate)
+
+    override fun worldExecutor(changes: (before: String, after: String) -> List<String>): WorldCommandExecutor =
+        OccurrentWorldCommandExecutor(store, converter, changes, gate)
 
     /**
      * Waits until every subscription has handed on what it was given. One that never does is stuck whatever the

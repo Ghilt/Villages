@@ -11,6 +11,7 @@ import villages.application.Resettable
 import villages.application.StructureCommandExecutor
 import villages.application.Unreadable
 import villages.application.WipeGate
+import villages.application.WorldCommandExecutor
 import villages.application.WorldKept
 import villages.domain.Event
 import villages.domain.StructureCatalogue
@@ -35,6 +36,9 @@ interface EventWorld : WorldKept, AutoCloseable {
 
     /** Structures' streams in this store, decided by the catalogue the server started with, which a world has not. */
     fun structureExecutor(catalogue: StructureCatalogue): StructureCommandExecutor
+
+    /** The world's own stream in this store, told by the server where two texts of a catalogue differ. 0097. */
+    fun worldExecutor(changes: (before: String, after: String) -> List<String>): WorldCommandExecutor
 
     /** The moment a wipe takes. Every command here is run outside it, and what acts on its own must be too. */
     val gate: WipeGate

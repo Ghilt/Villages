@@ -33,6 +33,7 @@ import villages.domain.HouseNamedSeat
 import villages.domain.ChoiceEvent
 import villages.domain.DialogueEvent
 import villages.domain.StructureEvent
+import villages.domain.WorldStreamEvent
 import villages.domain.StructureId
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
@@ -127,6 +128,8 @@ class SightProjection(feed: EventFeed) : Follower(feed), SightsByHouse {
             is CharacterAppeared, is CharacterStatChanged, is CharacterAged, is CharacterPortraitChanged,
             // What a structure gives its holder to see is written into the house's own history, as vision given. 0093.
             is StructureEvent,
+            // What the world takes on from its catalogues is not sight: what it changes for a house is written as vision. 0097.
+            is WorldStreamEvent,
             -> Unit
         }
     }

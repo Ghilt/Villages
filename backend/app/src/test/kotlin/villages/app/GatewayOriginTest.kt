@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.web.socket.WebSocketHttpHeaders
 import org.springframework.web.socket.client.standard.StandardWebSocketClient
+import villages.app.TestSockets.LARGE_FRAMES
 import org.springframework.web.socket.handler.TextWebSocketHandler
 import java.net.URI
 import java.util.concurrent.ExecutionException
@@ -25,7 +26,7 @@ class GatewayOriginTest {
     @LocalServerPort
     var port: Int = 0
 
-    private fun handshake(from: String) = StandardWebSocketClient()
+    private fun handshake(from: String) = StandardWebSocketClient(LARGE_FRAMES)
         .execute(
             object : TextWebSocketHandler() {},
             WebSocketHttpHeaders().apply { origin = from },

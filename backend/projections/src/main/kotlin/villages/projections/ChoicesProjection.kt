@@ -19,6 +19,7 @@ import villages.domain.DialogueEvent
 import villages.domain.KeyFigureEvent
 import villages.domain.VisionEvent
 import villages.domain.StructureEvent
+import villages.domain.WorldStreamEvent
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArraySet
 
@@ -76,6 +77,8 @@ class ChoicesProjection(feed: EventFeed) : Follower(feed), ChoicesByPlayer {
             // A choice is put to a house, never to a character.
             is CharacterEvent -> return
             is StructureEvent -> return
+            // What the world takes on from its catalogues is read by no read model. See decision record 0097.
+            is WorldStreamEvent -> return
         }
     }
 

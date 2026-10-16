@@ -31,6 +31,7 @@ import villages.domain.KeyFigureEvent
 import villages.domain.SeatEvent
 import villages.domain.VisionEvent
 import villages.domain.StructureEvent
+import villages.domain.WorldStreamEvent
 import villages.protocol.Cell
 import villages.protocol.ON_THE_MAP_FROM
 import java.util.concurrent.ConcurrentHashMap
@@ -129,6 +130,8 @@ class HousesProjection(feed: EventFeed) : Follower(feed), HousesByCell, HousesBy
             is CharacterEvent -> return
             // A structure is drawn from a read model of its own. See decision record 0093.
             is StructureEvent -> return
+            // What the world takes on from its catalogues is read by no read model. See decision record 0097.
+            is WorldStreamEvent -> return
         }
         // Whether this house was already on the map is the read model's to say. A stream version cannot:
         // a house founded from a choice arrives at version three, behind the choice and the action.

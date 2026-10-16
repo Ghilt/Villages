@@ -1,0 +1,15 @@
+{
+  "type": "villages.world.catalogueChanged.v1",
+  "source": "urn:villages",
+  "subject": "world",
+  "time": "2026-09-04T12:00:00Z",
+  "data": {
+    "catalogue": "structures",
+    "fingerprint": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "previous": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "changed": ["types.castle.yields.naturalDomain"],
+    "text": "{ \"types\": { \"castle\": { \"yields\": { \"naturalDomain\": [4, 5, 8] } } } }\n",
+    "worldTime": 653712,
+    "recordedAt": "2026-09-04T12:00:00Z"
+  }
+}

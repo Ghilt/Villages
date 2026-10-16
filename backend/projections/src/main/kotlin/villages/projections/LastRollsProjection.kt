@@ -21,6 +21,7 @@ import villages.domain.Resource
 import villages.domain.ResourceEvent
 import villages.domain.VisionEvent
 import villages.domain.StructureEvent
+import villages.domain.WorldStreamEvent
 import villages.domain.Stock
 import villages.domain.everyStock
 import java.util.concurrent.ConcurrentHashMap
@@ -65,6 +66,8 @@ class LastRollsProjection(feed: EventFeed) : Follower(feed), StandingAtLastRoll 
 
             // What else a house is asked, told, holds and sees, and the characters, are other read models' business.
             is ChoiceEvent, is DialogueEvent, is QuestEvent, is KeyFigureEvent, is VisionEvent, is SeatEvent, is CharacterEvent, is StructureEvent -> return
+            // What the world takes on from its catalogues is read by no read model. See decision record 0097.
+            is WorldStreamEvent -> return
         }
     }
 

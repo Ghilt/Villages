@@ -151,6 +151,15 @@ world's. A structure decides its own holder, so who holds it is here and on no h
 | `villages.structure.slotFilled.v1` | `structureId`, `slot`, `content`, `worldTime`, `recordedAt` | A person or an item was put in a place of one of the structure's slots, after whatever was in it already. `content` says which by its `kind`: `person` with a `characterId`, or `item` with an `itemId` minted when it was first put anywhere, a `name`, a line `about` it, an `amount` or none, and the `yields` of its own a world month by resource, which a slot that takes an item's own pays its holder. Strict about how many - the slot's places at the structure's level - and about once each; permissive about what, so a story may put a relic on a throne. A person already in another slot is taken out of it first, by the use case, in the same story. Refused `noSuchSlot`, `slotFull`, `alreadyInSlot`, `invalidContent`, and `isARuin` for a ruin. See docs/plans/structures.md. | `FillSlot`: Adam's *put someone in* and *put something in* in the Structures section | The structures projection, whose row holds what each slot holds now and which slot each person is in; the event list |
 | `villages.structure.slotEmptied.v1` | `structureId`, `slot`, `contentId`, `worldTime`, `recordedAt` | One content was taken out of a slot, the rest staying as they were: one prisoner let out of cells that hold four. What it was is on the event that put it in. A ruin keeps what is in it until something takes it out. Refused `notInSlot` for what is not there. | `EmptySlot`: Adam's *empty a place*, taking out what was put in last; and the use case putting a person somewhere else | The structures projection; the event list |
 
+## The world's own events
+
+One stream for the whole world, addressed as `world`, for what belongs to no house, character or structure. Every one
+of them is the world's. See decision record 0097.
+
+| Type | Payload | Meaning | Produced by | Consumers |
+|---|---|---|---|---|
+| `villages.world.catalogueChanged.v1` | `catalogue`, `fingerprint`, `previous`, `changed`, `text`, `worldTime`, `recordedAt` | The world took on a version of a catalogue it had not recorded: `catalogue` is its name on the shelf, `world/catalogues/<catalogue>.json`; `fingerprint` the SHA-256 of its bytes; `previous` the one it replaced, or none for the first; `changed` where in the file the two differ, as paths such as `types.castle.yields`, none for the first; `text` the file whole, so the world's history alone says which numbers were in force. Taking on the version last recorded writes nothing, held by the world's stream at once, so a fresh world opens with one for each catalogue and a restart on the same files is silent. | `TakeOnCatalogue`: the game server as it starts, and again after a wipe | The event list |
+
 ## The player's events
 
 On the same stream as the house they concern, for the reason above.

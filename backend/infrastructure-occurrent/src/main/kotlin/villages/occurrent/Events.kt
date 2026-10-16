@@ -14,6 +14,7 @@ import villages.application.HouseCommandExecutor
 import villages.application.Provenance
 import villages.application.StructureCommandExecutor
 import villages.application.WipeGate
+import villages.application.WorldCommandExecutor
 import villages.application.WriteConflict
 import villages.domain.CharacterCommand
 import villages.domain.CharacterDecider
@@ -36,6 +37,10 @@ import villages.domain.StructureCommand
 import villages.domain.StructureDecider
 import villages.domain.StructureEvent
 import villages.domain.Then
+import villages.domain.WORLD_STREAM
+import villages.domain.WorldCommand
+import villages.domain.WorldDecider
+import villages.domain.WorldStreamEvent
 import java.net.URI
 import java.time.ZoneOffset
 
@@ -84,6 +89,7 @@ object Events {
         is HouseEvent -> event.houseId.value.toString()
         is CharacterEvent -> event.characterId.value.toString()
         is StructureEvent -> event.structureId.value.toString()
+        is WorldStreamEvent -> WORLD_STREAM
     }
 }
 
@@ -195,4 +201,19 @@ class OccurrentStructureCommandExecutor(
 
     override fun execute(command: StructureCommand, provenance: Provenance) =
         loop.execute(command.structureId.stream, command, provenance)
+}
+
+/**
+ * The world command executor port: the same loop, over the world's own stream, one for the whole world, and its rules,
+ * which are told where two texts of a catalogue differ by [changes]. See decision record 0097.
+ */
+class OccurrentWorldCommandExecutor(
+    store: EventStore,
+    converter: CloudEventConverter<Event>,
+    changes: (before: String, after: String) -> List<String>,
+    gate: WipeGate,
+) : WorldCommandExecutor {
+    private val loop = StreamExecutor(store, converter, WorldDecider(changes), WorldStreamEvent::class.java, gate)
+
+    override fun execute(command: WorldCommand, provenance: Provenance) = loop.execute(WORLD_STREAM, command, provenance)
 }

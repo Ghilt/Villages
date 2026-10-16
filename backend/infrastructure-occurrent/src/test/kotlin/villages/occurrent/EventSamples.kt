@@ -394,5 +394,5 @@ internal object EventSamples {
         "villages.structure.raised.v1" to castleRaised,
         "villages.structure.rebuilt.v1" to castleRebuilt,
         "villages.structure.ruined.v1" to castleFell,
-    ) + QuestEventSamples.samples
+    ) + QuestEventSamples.samples + WorldEventSamples.samples
 }

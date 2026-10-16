@@ -41,6 +41,7 @@ import villages.domain.StructureSlotFilled
 import villages.domain.StructureRebuilt
 import villages.domain.StructureRuined
 import villages.domain.StructureRaised
+import villages.domain.WorldCatalogueChanged
 import kotlin.reflect.KClass
 
 /**
@@ -92,6 +93,7 @@ object EventTypes : CloudEventTypeMapper<Event> {
         StructureSlotEmptied::class to "villages.structure.slotEmptied.v1",
         StructureRuined::class to "villages.structure.ruined.v1",
         StructureRebuilt::class to "villages.structure.rebuilt.v1",
+        WorldCatalogueChanged::class to "villages.world.catalogueChanged.v1",
     )
 
     private val byType: Map<String, KClass<out Event>> = rows.entries.associate { (klass, type) -> type to klass }

@@ -105,7 +105,7 @@ revision from an inspect page.
 
 | Event | Stream | What it means | Carries |
 |---|---|---|---|
-| `villages.world.catalogueChanged.v1` | `world` | the world took on a version of a catalogue it had not recorded | `catalogue`, its name; `fingerprint`, SHA-256 of its text; `previous`, the last one recorded or none; `changed`, the ids of the entries that differ; `text`, the whole catalogue |
+| `villages.world.catalogueChanged.v1` | `world` | the world took on a version of a catalogue it had not recorded | `catalogue`, its name on the shelf, a file's path without `.json`; `fingerprint`, SHA-256 of its bytes; `previous`, the last one recorded or none; `changed`, where the file differs, as paths such as `types.castle.yields`; `text`, the whole file |
 
 **The world's own stream**, one for the whole world, because a catalogue belongs to no house, character or
 structure. It is decided against that stream's history: a catalogue whose fingerprint is the last recorded for
@@ -113,7 +113,9 @@ its name writes nothing, so a restart on the same files is silent, and a fresh w
 for each catalogue it was made of.
 
 **It carries the whole text**, so the world's history alone says which numbers were in force at every moment,
-as an offered quest carries its words. `changed` is worked out against the previous event's text.
+as an offered quest carries its words. `changed` is worked out against the previous event's text, by the server,
+which reads JSON where the domain cannot: a field at a time through objects, and a list or a value as one place.
+A catalogue in a folder is a catalogue a file, `dialogues/letter`, each recorded on its own.
 
 **The standing-effects listener reacts to it**, setting every holding right with the change as its cause, so
 the events page reads *the structures changed*, then each house's new income under it.
