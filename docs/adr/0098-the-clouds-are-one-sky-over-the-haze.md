@@ -35,6 +35,10 @@ from noise laid along the wind and carried by the wall clock.**
   processor in full precision and handed to the shader modulo that, so it comes round without a seam
   (`sprites/clouds/cloudClock.ts`). A shader's single-precision numbers could not hold the distance itself to
   within a cloud.
+
+  *Amended 2026-10-16, Adam's word:* "it's not important that different players see the same clouds, this is
+  just for flavor." The shared sky stays because it costs nothing, but it is a nicety and not a rule: nothing is to
+  be spent keeping it, such as reading the server's clock, and a change that is better for losing it may lose it.
 - **Bands by zoom.** Closer in than 7 nothing is drawn and no frame is asked for. From 6 out the clouds lie on the
   map, glued to the ground, whole down to 5.25 and fading to nothing by 3.5 - 4.5 at first, moved out by Adam on
   2026-10-16, for now, once the weather systems were worth seeing further out. Between 7 and 6 the camera is in
@@ -67,6 +71,13 @@ from noise laid along the wind and carried by the wall clock.**
   crisp, beside a shadow as crisp; together they read as a slab of card, and the white between them was flat and
   static. Real cumulus from above has neither: its lumps are lit and shaded each on its own, its margins thin out,
   and a shadow is as dark as its cloud is thick.
+- **Clear sky is cheap.** Each pixel first works out the weather system and the patches over it, the clumps'
+  two coarsest sizes and the most the finer ones could add; where even that cannot reach the cut there can be no
+  cloud, and the rest of the clouds' work is skipped there - the finer sizes, the brush, the light. The shadow is
+  tested the same way at the cloud that would cast it, and skipped under a cloud that is whole. How fast the field
+  changes across a pixel, which keeps the edges soft, is read off the coarse sizes, outside the skipping, because a
+  graphics card can only measure that where every pixel round it is working too. Measured on one still sky in the
+  same window: 1.08 ms a frame down to 0.83 on a cloudy view, 1.07 down to 0.80 on a far, mostly clear one.
 - **A shader that is a look**, so it is drawn at a level, off, low or high, high at every load, as decision
   record 0081's amendment asks of every shader added later. High is every pixel at twenty frames a second, low a
   quarter of them at ten. It asks the sprite canvas for frames at its level's rate while some cloud is on the

@@ -118,6 +118,13 @@ const float MIST_EDGE = ${float(CLOUD_LOOK.inside.mistEdge)};
 const float LIFT = ${float(CLOUD_LOOK.lift)};
 const float SWIRL = ${float(CLOUD_LOOK.systems.swirl)};
 const float DISSOLVE = ${float(CLOUD_LOOK.dissolve)};
+// The most the clumps' sizes from the third on can add, for the clouds' seven and for the shadows' four: the third,
+// folded, at most a quarter of 0.86, and each after it at most its share of 0.71, the most this noise reaches.
+const float FINER_MOST = 0.39;
+const float SHADE_FINER_MOST = 0.31;
+// The most the brush moves the cut, and the softest a cut is ever drawn, so nothing is skipped that could show.
+const float BRUSH_MOST = ${float(B.strength * 0.75)};
+const float MOST_SOFT = 0.12;
 const float OPACITY = ${float(CLOUD_LOOK.opacity)};
 
 float hash(ivec2 cell, int salt) {
@@ -195,25 +202,27 @@ vec2 warp(vec2 wind) {
   return vec2(noise(at, uWarp.y, 40), noise(at + vec2(0.0, 23.0), uWarp.y, 41)) * (WARP * uClumps.x);
 }
 
-// The clumps, about -1 to 1: the first \`most\` sizes of noise at halving sizes, the two coarsest carried with the
+// The clumps, about -1 to 1: the sizes of noise from \`from\` up to \`to\` at halving sizes, the two coarsest carried with the
 // clumps and the finer ones as the detail is, the second and third folded into rounded lobes, each faded out as it
 // shrinks towards a couple of pixels on the screen at \`scale\`, the pixels a world unit is seen at.
-float clumps(vec2 wind, int most, float scale) {
+float clumps(vec2 wind, int from, int to, float scale) {
   float sum = 0.0;
   float amplitude = 1.0;
   float cell = uClumps.x;
   float around = uClumps.y;
   for (int k = 0; k < 7; k += 1) {
     float shown = smoothstep(2.0, 6.0, cell * scale);
-    if (k >= most || shown <= 0.0) break;
-    float carried = k < 2 ? uCarried.y : uCarried.z;
-    vec2 at = vec2((wind.x - carried) / cell, wind.y / cell + float(k) * 31.7);
-    float n = noise(at, around, 10 + k);
-    if (k == 1 || k == 2) {
-      // Folded: rounded bumps with creases between, the lumps a cumulus is built of.
-      n = (abs(n) - 0.17) * 1.6;
+    if (k >= to || shown <= 0.0) break;
+    if (k >= from) {
+      float carried = k < 2 ? uCarried.y : uCarried.z;
+      vec2 at = vec2((wind.x - carried) / cell, wind.y / cell + float(k) * 31.7);
+      float n = noise(at, around, 10 + k);
+      if (k == 1 || k == 2) {
+        // Folded: rounded bumps with creases between, the lumps a cumulus is built of.
+        n = (abs(n) - 0.17) * 1.6;
+      }
+      sum += amplitude * shown * n;
     }
-    sum += amplitude * shown * n;
     amplitude *= 0.5;
     cell *= 0.5;
     around *= 2.0;
@@ -230,8 +239,7 @@ float brush(vec2 wind, float scale) {
 
 void main() {
   vec2 ground = groundUnder(vScreen);
-  // Nothing off the world's square, where the desk shows; worked out to the end all the same, because the soft
-  // edges are measured across each two by two block of pixels and a pixel that stopped early would spoil it.
+  // Nothing off the world's square, where the desk shows.
   float inWorld = step(0.0, ground.x) * step(0.0, ground.y) * step(ground.x, WORLD) * step(ground.y, WORLD);
   // In the clouds they are nearer the camera than the ground, so they are seen magnified about the screen's
   // middle; over them, exactly as the ground is.
@@ -242,47 +250,66 @@ void main() {
   vec2 pushed = wind + warp(wind);
   float patchHere = uPatchWeight * patches(wind);
   float systemHere = uSystemWeight * systems(wind);
-  float field = 0.5 + 0.5 * uDetail * clumps(pushed, 7, scale) + patchHere + systemHere;
-  float stroke = brush(pushed, scale);
-  // Round a mark the cut is lifted, so the clouds thin away from their own edges and leave it clear.
-  float lift = LIFT * clearingAt(vScreen);
-  // As the band fades them, the cut rises and they thin away from their edges rather than turning grey.
-  float cut = 0.42 + 0.35 * (1.0 - 2.0 * uCover) + BRUSH * stroke + lift + DISSOLVE * (1.0 - uAmount);
-  float soft = max(uEdge * (1.0 + MIST_EDGE * uInside), fwidth(field));
-  float cloud = smoothstep(cut - soft, cut + soft, field);
-  // A cloud thickens over a span above its cut, so its margins are thin and the ground shows through them.
-  float thick = smoothstep(cut, cut + THICKEN, field);
-  float body = mix(THIN, 1.0, thick);
+  // Round a mark the cut is lifted, so the clouds thin away from their own edges and leave it clear; and as the
+  // band fades them it rises, so they thin away from their edges rather than turning grey. The brush moves it a
+  // little either way, further in.
+  float level = 0.42 + 0.35 * (1.0 - 2.0 * uCover) + LIFT * clearingAt(vScreen) + DISSOLVE * (1.0 - uAmount);
+  float edge = uEdge * (1.0 + MIST_EDGE * uInside);
 
-  // Its light: whether the cloud rises or falls towards the sun here, over a short step and a longer one, read off
-  // its lumps as well as its larger shapes. Falling towards the sun is a lump's lit face, rising is the far face in
-  // its shade - so every lump is lit on one side and shaded on the other, and the shading moves inside the white as
-  // the lumps drift and change. The tones run into each other: violet-grey, white, the relief's cream.
-  float here = clumps(pushed, LUMPS, scale);
-  float near = clumps(pushed + SUN * (LIGHT_NEAR * uClumps.x), LUMPS, scale) - here;
-  float far = clumps(pushed + SUN * (LIGHT_FAR * uClumps.x), LUMPS, scale) - here;
-  float light = clamp(0.5 - CONTRAST * mix(far, near, NEAR_WEIGHT), 0.0, 1.0);
-  vec3 rgb = mix(mix(FAR_SIDE, MIDDLE, smoothstep(0.0, 0.5, light)), LIT, smoothstep(0.5, 1.0, light));
-  // Among them they are mist: the tones run together towards white.
-  rgb = mix(rgb, MIDDLE, MIST * uInside);
-  // And the middle of the screen is kept clear by a ring that opens out as the camera comes down through them.
-  float fromMiddle = length(vScreen - uSize * 0.5) / (0.5 * length(uSize));
-  float ring = uInside * CLEAR_REACH - CLEAR_SOFT;
-  float clear = smoothstep(ring - CLEAR_SOFT, ring + CLEAR_SOFT, fromMiddle);
-  float cloudAlpha = cloud * body * OPACITY * smoothstep(0.0, 0.5, uAmount) * clear;
+  // The clumps' two coarsest sizes, and the most the finer ones could add: enough to know where there can be no
+  // cloud, which with the weather systems is most of the sky far out, and to skip the rest of its work there. How
+  // fast the field changes across a pixel is read off these too, out here where every pixel works it out, because
+  // a graphics card can only measure that where its neighbours are working as well.
+  float coarse = clumps(pushed, 0, 2, scale);
+  float most = 0.5 + 0.5 * uDetail * (coarse + FINER_MOST) + patchHere + systemHere;
+  float soft = max(edge, min(2.0 * fwidth(0.5 * uDetail * coarse + systemHere), MOST_SOFT));
+  vec3 rgb = MIDDLE;
+  float cloudAlpha = 0.0;
+  if (most > level - BRUSH_MOST - max(edge, MOST_SOFT)) {
+    float lumps = coarse + clumps(pushed, 2, LUMPS, scale);
+    float field = 0.5 + 0.5 * uDetail * (lumps + clumps(pushed, LUMPS, 7, scale)) + patchHere + systemHere;
+    float cut = level + BRUSH * brush(pushed, scale);
+    float cloud = smoothstep(cut - soft, cut + soft, field);
+    if (cloud > 0.0) {
+      // A cloud thickens over a span above its cut, so its margins are thin and the ground shows through them.
+      float body = mix(THIN, 1.0, smoothstep(cut, cut + THICKEN, field));
+      // Its light: whether the cloud rises or falls towards the sun here, over a short step and a longer one, read
+      // off its lumps as well as its larger shapes. Falling towards the sun is a lump's lit face, rising is the far
+      // face in its shade - so every lump is lit on one side and shaded on the other, and the shading moves inside
+      // the white as the lumps drift and change. The tones run into each other: violet-grey, white, the relief's
+      // cream.
+      float near = clumps(pushed + SUN * (LIGHT_NEAR * uClumps.x), 0, LUMPS, scale) - lumps;
+      float far = clumps(pushed + SUN * (LIGHT_FAR * uClumps.x), 0, LUMPS, scale) - lumps;
+      float light = clamp(0.5 - CONTRAST * mix(far, near, NEAR_WEIGHT), 0.0, 1.0);
+      rgb = mix(mix(FAR_SIDE, MIDDLE, smoothstep(0.0, 0.5, light)), LIT, smoothstep(0.5, 1.0, light));
+      // Among them they are mist: the tones run together towards white.
+      rgb = mix(rgb, MIDDLE, MIST * uInside);
+      // And the middle of the screen is kept clear by a ring that opens out as the camera comes down through them.
+      float fromMiddle = length(vScreen - uSize * 0.5) / (0.5 * length(uSize));
+      float ring = uInside * CLEAR_REACH - CLEAR_SOFT;
+      float clear = smoothstep(ring - CLEAR_SOFT, ring + CLEAR_SOFT, fromMiddle);
+      cloudAlpha = cloud * body * OPACITY * smoothstep(0.0, 0.5, uAmount) * clear;
+    }
+  }
 
   // The shadow here is the cloud standing towards the light from it: the same field, warped where that cloud is,
   // read at its coarser sizes, so it keeps the cloud's shape without its finest lumps, in the relief's violet. It
-  // lies on the ground, so it is never magnified.
+  // lies on the ground, so it is never magnified; the systems are far larger than its reach, so the ones here stand
+  // for the ones over the cloud. Skipped as the cloud is, where there can be none, and under a cloud whole.
   vec2 under = vec2(dot(ground, ALONG), dot(ground, ACROSS) + WORLD);
   vec2 over = under + SUN * (uReach * uClumps.x);
   vec2 overPushed = over + warp(over);
-  // The systems are far larger than the shadow's reach, so the ones here stand for the ones over the cloud.
-  float shade = 0.5 + 0.5 * uDetail * clumps(overPushed, 4, uScale) + uPatchWeight * patches(over) + systemHere;
-  float shadowCut = cut - BRUSH * stroke + BRUSH * brush(overPushed, uScale);
+  float overPatch = uPatchWeight * patches(over);
+  float shadeCoarse = clumps(overPushed, 0, 2, uScale);
+  float shadeMost = 0.5 + 0.5 * uDetail * (shadeCoarse + SHADE_FINER_MOST) + overPatch + systemHere;
   // Soft, and as dark as the cloud over it is thick: a thin margin casts a faint shadow, a thick middle a full one.
-  float shadowSoft = max(uEdge * 2.0, fwidth(shade));
-  float shadowAlpha = smoothstep(shadowCut - shadowSoft, shadowCut + SHADOW_THICKEN, shade) * uShadow;
+  float shadowSoft = max(uEdge * 2.0, min(1.4 * fwidth(0.5 * uDetail * shadeCoarse + systemHere), MOST_SOFT));
+  float shadowAlpha = 0.0;
+  if (cloudAlpha < 0.999 && shadeMost > level - BRUSH_MOST - max(uEdge * 2.0, MOST_SOFT)) {
+    float shade = 0.5 + 0.5 * uDetail * (shadeCoarse + clumps(overPushed, 2, 4, uScale)) + overPatch + systemHere;
+    float shadowCut = level + BRUSH * brush(overPushed, uScale);
+    shadowAlpha = smoothstep(shadowCut - shadowSoft, shadowCut + SHADOW_THICKEN, shade) * uShadow;
+  }
 
   // The cloud over its own shadow and the shadow over the ground, premultiplied.
   vec4 shadow = vec4(SHADE, 1.0) * shadowAlpha;
