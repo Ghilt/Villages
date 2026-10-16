@@ -27,6 +27,14 @@ import { PRESENCE_MS, alphasFor, easeTowards, formForHit, midTrade, sizesAt, wan
  * or destroyed by the zoom, only faded: putting the switch on existence rather than on appearance is
  * what keeps a camera resting on the crossover from churning sprites. See docs/adr/0051.
  */
+/** Where an icon was drawn this frame, in CSS pixels: its middle, its larger side, and how much of it is there. */
+export interface IconDrawn {
+  x: number;
+  y: number;
+  size: number;
+  alpha: number;
+}
+
 export interface MarksLayer extends Layer {
   readonly underTheFog: Container;
   readonly overIt: Container;
@@ -50,6 +58,8 @@ export interface MarksLayer extends Layer {
   report(): Record<string, DrawnSprite>;
   /** How many marks stand in vision, for the fog's probe. */
   inVision(): number;
+  /** Every icon drawn this frame, for the clouds to keep clear of: the layer draws before them. */
+  iconsDrawn(): readonly IconDrawn[];
 }
 
 export function createMarksLayer(camera: CameraSource, textures: Textures): MarksLayer {
@@ -58,6 +68,8 @@ export function createMarksLayer(camera: CameraSource, textures: Textures): Mark
   const entries = new Map<string, Entry>();
   /** The crowds far out, as last drawn. */
   let groups: Groups = { led: new Map(), leaderOf: new Map() };
+  /** The icons as last drawn. */
+  let icons: IconDrawn[] = [];
   /** How the crowds were last said in the log, so it speaks only when they change. */
   let said = '';
   /** What the house has in vision, for asking whether a mark stands in it; nothing while there is no fog. */
@@ -202,6 +214,7 @@ export function createMarksLayer(camera: CameraSource, textures: Textures): Mark
 
       groups = groupMarks(placed);
       sayCrowds();
+      icons = [];
       for (const { entry, point, sizes } of onScreen) {
         const id = entry.spec.id;
         entry.grouped = easeTowards(entry.grouped, groups.leaderOf.has(id) ? 0 : 1, elapsed, PRESENCE_MS);
@@ -216,6 +229,15 @@ export function createMarksLayer(camera: CameraSource, textures: Textures): Mark
             sprite.x = point.x;
             sprite.y = point.y;
           }
+        }
+        const icon = entry.icon;
+        if (icon?.visible === true) {
+          icons.push({
+            x: icon.x + (0.5 - icon.anchor.x) * icon.width,
+            y: icon.y + (0.5 - icon.anchor.y) * icon.height,
+            size: Math.max(icon.width, icon.height),
+            alpha: icon.alpha,
+          });
         }
         flyPennant(entry, sizes.ground * alphas.ground + sizes.icon * alphas.icon, point);
         wearBadge(
@@ -344,6 +366,10 @@ export function createMarksLayer(camera: CameraSource, textures: Textures): Mark
 
     report(): Record<string, DrawnSprite> {
       return Object.fromEntries([...entries].map(([id, entry]) => [id, drawnOf(entry, overIt)]));
+    },
+
+    iconsDrawn(): readonly IconDrawn[] {
+      return icons;
     },
 
     inVision(): number {

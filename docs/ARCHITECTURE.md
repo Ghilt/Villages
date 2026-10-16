@@ -378,7 +378,8 @@ picture at its level's share of the screen. They read no file. Where they are is
 wall-clock time, so every browser draws the same sky: the noise is laid along the wind and repeats along it at the
 world's width, and how far the wind has carried it is worked out on the processor in full precision and handed in
 modulo that (`sprites/clouds/cloudClock.ts`). Which band of them a zoom is in, and how much is drawn there, is
-`sprites/clouds/cloudBands.ts`. They are lit by the map's one light, `map/light.ts`, which the relief reads too and
+`sprites/clouds/cloudBands.ts`. They are drawn after the marks in the stack's update order, because they keep clear
+of where the marks layer says it drew its icons this frame (`iconsDrawn`). They are lit by the map's one light, `map/light.ts`, which the relief reads too and
 which imports nothing, so a shader anywhere can take it without bringing MapLibre along.
 **The water is not in the sprite canvas but in the map**, a MapLibre custom layer (`water/WaterLayer.ts`) drawn
 in WebGL2 over the painted terrain and under the ink lines, so the fog and everything in the sprite canvas are over

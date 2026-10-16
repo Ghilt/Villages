@@ -97,7 +97,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
   shadow down and to the left: clumps gathered in patches, whole from 6 out to 5.25, fading to
   nothing by 4.5, and between 7 and 6 drawn as the camera among them: swelling about the middle of the screen and
   sliding out past its edges, misty, the middle kept clear, their shadows fading, nothing left by 7. They lie
-  over the fog's haze and under the marks and the ring, drift with the sea's wind about three minutes across the
+  over the fog's haze and under the marks and the ring, thinning away round each of your marks, drift with the sea's wind about three minutes across the
   screen, and are the same in every browser, because where they are comes from the wall clock; a player who has
   asked for less motion gets them still. They are the **Clouds** part of the Shaders section: `off`, `low` or
   `high` in its bar, high at every load, where low is a quarter of the pixels at ten frames a second and high every
@@ -105,7 +105,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   `under the clouds`. Inside it, sliders: how much of the sky is cloud, how big the clumps are, how fast the wind
   carries them, how fast they change shape (how much faster their finer lumps drift than the clumps, nought for
   clumps that slide by whole), how much they gather in patches, how soft their edges are, how dark their shadows
-  are and how far from them their shadows fall, and the four zooms the bands change at - under the clouds closer in than 7, over them from 6, fading
+  are and how far from them their shadows fall, how far round a mark they keep clear, and the four zooms the bands
+  change at - under the clouds closer in than 7, over them from 6, fading
   from 5.25, gone at 4.5. Every slider changes the sky on the next frame, is remembered in the browser that moved
   it, and once one stops the log says them all under `clouds` as `clouds tuned: …`, the line to hand over when a
   setting should become the default; `reset` puts them back. A browser whose sliders are not where they started

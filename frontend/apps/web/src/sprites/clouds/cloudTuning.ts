@@ -28,6 +28,8 @@ export interface CloudTuning {
   shadow: number;
   /** How far from its cloud a shadow falls, away from the light, as a share of a clump. */
   reach: number;
+  /** How far round a mark the clouds and their shadows keep clear, in pixels beyond the mark. */
+  clearing: number;
   /** The zooms the bands change at: closer in than `inFrom` nothing is drawn, past `goneAt` nothing either. */
   inFrom: number;
   overFrom: number;
@@ -44,6 +46,7 @@ export const CLOUD_DEFAULTS: CloudTuning = {
   edge: CLOUD_LOOK.edge,
   shadow: CLOUD_LOOK.shadow,
   reach: CLOUD_LOOK.reach,
+  clearing: CLOUD_LOOK.clearing,
   ...CLOUD_LOOK.zooms,
 };
 

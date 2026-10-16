@@ -303,7 +303,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       world.addChild(grass.sprite, scenery.container, marks.underTheFog);
       stage.addChild(world);
       // The clouds over the fog, and under the ring and every sign. See decision record 0098.
-      const clouds = createCloudLayer(app.renderer, drawSoon);
+      const clouds = createCloudLayer(app.renderer, drawSoon, () => marks.iconsDrawn());
       stage.addChild(fog.mesh, clouds.sprite);
       if (uncolourCanvas !== undefined) {
         uncolouring = createUncolouring(uncolourCanvas);

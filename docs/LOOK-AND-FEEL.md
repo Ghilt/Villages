@@ -245,7 +245,9 @@ a little towards the relief's violet on the far side - with their edges broken b
 no outline. The lumps a cumulus is built of show as rounded bumps in the outline. **Every cloud casts its shadow**,
 down and to the left, the way the hills' shading and the scenery's shadows fall: the cloud's own shape without its
 finest lumps, flat, in the relief's dusky violet, laid over whatever is under it, the haze included, half a clump
-from the cloud. How dark and how far are levers. Every number of them is in
+from the cloud. How dark and how far are levers. **The clouds keep clear of the player's marks**: round each mark
+they thin away from their own ragged edges, leaving a clear patch a little wider than the mark, and close again
+once they have drifted past; no shadow lies on a mark either. The marks are drawn over the clouds all the same. Every number of them is in
 `apps/web/src/sprites/clouds/look.ts`, and the light is `apps/web/src/map/light.ts`. See decision record 0098.
 
 **Nothing on the map pops.** A thing arriving fades up, a thing gone fades out and is only then let go

@@ -43,6 +43,11 @@ from noise laid along the wind and carried by the wall clock.**
   are never magnified, fade as it comes down. The camera is orthographic, so the swelling is drawn by the shader
   rather than by any perspective. Every change is eased, so nothing pops at an edge
   (`sprites/clouds/cloudBands.ts`).
+- **Clear round the marks.** The marks layer draws first and says where it drew its icons; near each, up to
+  thirty-two a frame and the nearest the middle when there are more, the clouds' cut is lifted, whole over the mark
+  and easing out a slider's pixels beyond it, so the clouds thin from their own edges and their shadows keep off the
+  mark (`sprites/clouds/cloudClearings.ts`). The marks are drawn over the clouds regardless; the clearing is so the
+  ground a mark stands on can be seen.
 - **One sun.** The clouds are lit, and cast their shadows, by the map's one light, `map/light.ts`, which the relief
   reads too: a rim of the relief's cream on the side the sun strikes, a rim of its violet on the far side, and a
   shadow falling away from the light, in the same violet, read from the same field at the cloud standing towards the

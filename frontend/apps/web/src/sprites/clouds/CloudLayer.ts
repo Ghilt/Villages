@@ -10,7 +10,10 @@ import { drawnAt, sayLevel, shadersStore } from '../../shaders/levels';
 import type { ShaderLevel } from '../../shaders/levels';
 import type { Layer } from '../layer';
 
+import type { IconDrawn } from '../MarksLayer';
+
 import { cloudBandAt } from './cloudBands';
+import { MOST_CLEARINGS, clearingsFrom, packClearings } from './cloudClearings';
 import { carriedBy, latticeNear, respeed, sharedDrift } from './cloudClock';
 import { cloudStore, readClouds } from './cloudMode';
 import { CLOUD_DEFAULTS, cloudTuningStore } from './cloudTuning';
@@ -36,7 +39,11 @@ export interface CloudLayer extends Layer {
   sprite: Sprite;
 }
 
-export function createCloudLayer(renderer: Renderer, repaint: () => void): CloudLayer {
+export function createCloudLayer(
+  renderer: Renderer,
+  repaint: () => void,
+  iconsDrawn: () => readonly IconDrawn[],
+): CloudLayer {
   const uniforms = new UniformGroup({
     uSize: { value: new Float32Array(2), type: 'vec2<f32>' },
     uCentre: { value: new Float32Array(2), type: 'vec2<f32>' },
@@ -54,6 +61,8 @@ export function createCloudLayer(renderer: Renderer, repaint: () => void): Cloud
     uReach: { value: 0, type: 'f32' },
     uMagnify: { value: 1, type: 'f32' },
     uInside: { value: 0, type: 'f32' },
+    uClearings: { value: new Float32Array(MOST_CLEARINGS * 4), type: 'vec4<f32>', size: MOST_CLEARINGS },
+    uClearingCount: { value: 0, type: 'i32' },
   });
   const shader = new Shader({
     glProgram: GlProgram.from({
@@ -161,6 +170,8 @@ export function createCloudLayer(renderer: Renderer, repaint: () => void): Cloud
       u.uReach = tuning.reach;
       u.uMagnify = band.magnification;
       u.uInside = band.inside;
+      const clearings = clearingsFrom(iconsDrawn(), tuning.clearing, view.width, view.height);
+      u.uClearingCount = packClearings(clearings, u.uClearings);
       uniforms.update();
 
       const width = Math.max(1, Math.ceil(view.width * levelLook.resolution));

@@ -1,6 +1,7 @@
 import { WORLD_MASTER_WIDTH } from '../../geometry/world';
 import { LIGHT_COLOUR, SHADE_COLOUR, towardsTheLight } from '../../map/light';
 
+import { MOST_CLEARINGS } from './cloudClearings';
 import { CLOUD_LOOK } from './look';
 
 /**
@@ -77,6 +78,10 @@ uniform float uReach;
 // nought over them and one where it is among them.
 uniform float uMagnify;
 uniform float uInside;
+// The clear patches round the marks, in CSS pixels: each one's middle, where the lift is whole and where it has
+// eased out; and how many there are. cloudClearings.ts.
+uniform vec4 uClearings[${MOST_CLEARINGS}];
+uniform int uClearingCount;
 out vec4 fragColor;
 
 const float TAU = 6.2831853;
@@ -99,6 +104,7 @@ const float CLEAR_SOFT = ${float(CLOUD_LOOK.inside.clearSoft)};
 const float CLEAR_REACH = ${float(CLOUD_LOOK.inside.clearReach)};
 const float MIST = ${float(CLOUD_LOOK.inside.mist)};
 const float MIST_EDGE = ${float(CLOUD_LOOK.inside.mistEdge)};
+const float LIFT = ${float(CLOUD_LOOK.lift)};
 const float OPACITY = ${float(CLOUD_LOOK.opacity)};
 
 float hash(ivec2 cell, int salt) {
@@ -126,6 +132,17 @@ float noise(vec2 at, float around, int salt) {
   float c = corner(whole + vec2(0.0, 1.0), part - vec2(0.0, 1.0), around, salt);
   float d = corner(whole + vec2(1.0, 1.0), part - vec2(1.0, 1.0), around, salt);
   return mix(mix(a, b, w.x), mix(c, d, w.x), w.y);
+}
+
+// How much the cut is lifted here by the marks' clearings, nought to one: whole over a mark, easing out round it.
+float clearingAt(vec2 screen) {
+  float lift = 0.0;
+  for (int i = 0; i < ${MOST_CLEARINGS}; i += 1) {
+    if (i >= uClearingCount) break;
+    vec4 one = uClearings[i];
+    lift = max(lift, 1.0 - smoothstep(one.z, max(one.w, one.z + 0.001), length(screen - one.xy)));
+  }
+  return lift;
 }
 
 vec2 groundUnder(vec2 screen) {
@@ -195,7 +212,9 @@ void main() {
   float patchHere = uPatchWeight * patches(wind);
   float field = 0.5 + 0.5 * clumps(pushed, 7, scale) + patchHere;
   float stroke = brush(pushed, scale);
-  float cut = 0.47 + 0.35 * (1.0 - 2.0 * uCover) + BRUSH * stroke;
+  // Round a mark the cut is lifted, so the clouds thin away from their own edges and leave it clear.
+  float lift = LIFT * clearingAt(vScreen);
+  float cut = 0.47 + 0.35 * (1.0 - 2.0 * uCover) + BRUSH * stroke + lift;
   float soft = max(uEdge * (1.0 + MIST_EDGE * uInside), fwidth(field));
   float cloud = smoothstep(cut - soft, cut + soft, field);
   // Thin at the edge, whole a little way in.

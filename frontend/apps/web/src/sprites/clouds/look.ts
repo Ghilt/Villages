@@ -73,6 +73,13 @@ export const CLOUD_LOOK = {
    * many times the clouds are magnified there is `SWELL` in `cloudBands.ts`.
    */
   inside: { clearReach: 1.2, clearSoft: 0.3, mist: 0.7, mistEdge: 3 },
+  /**
+   * How far a mark's clearing lifts the cut, in the field's own measure, where it is whole: enough to clear all but
+   * the thickest middle of a cloud, so the clouds thin from their edges. How far round a mark it reaches is the
+   * `clearing` slider, in pixels.
+   */
+  lift: 0.7,
+  clearing: 40,
   /** How opaque a cloud is at its thin edge, as a share of its middle, and at its middle. */
   thin: 0.7,
   opacity: 0.94,
