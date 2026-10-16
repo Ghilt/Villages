@@ -168,6 +168,15 @@ still, as a mountain will. The gusts are the grass's, the world's one wind blowi
 every browser. A player who asked for less motion sees it all standing still. Every number is in
 `apps/web/src/sprites/trees/look.ts`; see the amendment to decision record 0052.
 
+**Critters live where the house sees.** From zoom 9 in, every so often a few small birds burst out of a tree or a
+bush the scenery drew - in the woods, the scrub and the heath, and out of a lone bush or tree in the open - fan
+out, climb, flap and glide away, and fade as they go, each with a soft shadow on the ground below it and away from
+the light, which a tree in front of it hides. They are drawn at the scenery's scale, smaller than any other sprite,
+so what tells a bird from a speck is its wingbeat rather than its outline. They come only where the house sees now:
+the grey ground is a memory and holds still. Nothing pops: a bird comes out of its cover, and one first seen in
+flight fades up. The same birds leave the same bush at the same moment in every browser. A player who asked for
+less motion sees none. Every number is in `apps/web/src/sprites/critters/look.ts`; see decision record 0099.
+
 **The seam.** The join between the two **bays**, drawn as a moulding lying over it: three gold rules
 running the length of the stage — a heavy one on the join and a lighter one either side — with a fixed
 **knot** of **ornament** at the middle. The knot is one size whatever the length, because an ornament that

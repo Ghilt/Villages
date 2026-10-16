@@ -68,6 +68,19 @@ export function revealedAt(field: FogField, x: number, y: number): boolean {
   return field.distances[(row * field.width + column) * 2]! < 0;
 }
 
+/**
+ * Whether a piece of ground, in world units, lies in what the house sees now: inside the edge of its vision,
+ * surface tension and all. What decides where the critters are, so that only the land in sight is alive.
+ */
+export function visionAt(field: FogField, x: number, y: number): boolean {
+  const column = Math.floor((x - field.originX) / field.unitsPerTexel);
+  const row = Math.floor((y - field.originY) / field.unitsPerTexel);
+  if (column < 0 || row < 0 || column >= field.width || row >= field.height) {
+    return false;
+  }
+  return field.distances[(row * field.width + column) * 2 + 1]! < 0;
+}
+
 /** How many points across the view, and as many down, are asked whether they stand on unknown ground. */
 const ASKED = 12;
 

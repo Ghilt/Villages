@@ -107,6 +107,14 @@ stage alone, with none of the debug panel in it (decision record 0079).
   crown pales. They change the trees on the next frame, are remembered in the browser that moved them, and once
   one stops the log says both under `trees` as `trees tuned: …`, the line to hand over when a setting should
   become the default; `reset` puts them back. See the amendment to `docs/adr/0052`.
+- Critters, from zoom 9 in, only where your house sees now, or everywhere with the fog lifted: every so often a few
+  small birds burst out of a tree or a bush the scenery drew - in the woods, the scrub and the heath, and out of a
+  lone bush or tree in the open - fan out, climb, flap and glide away, fading as they go, each with a soft shadow
+  below it. The same birds leave the same bush at the same moment in every browser; one first seen in flight fades
+  up; a player who asked for less motion sees none. They are drawn from the critters' atlas (`world:critters`,
+  below) and come and go with the Shaders section's `on` box; how many, how big and how often they move are numbers
+  in `apps/web/src/sprites/critters/look.ts` until the Critters part of the Shaders section, step 5 of
+  `docs/plans/living-world.md`. See `docs/adr/0099`.
 - Clouds drift over the world from zoom 7 out, every lump lit cream from the upper right and shaded violet-grey
   away from it, each cloud with its soft violet shadow down and to the left. They live in weather systems, masses
   swept into bands and swirls with clear country between; they are whole from 6 out to 5.25, and further out the
@@ -625,8 +633,7 @@ and `-- --drop` takes them off; by hand only.
   all, scales them to 64 tall and packs them into `public/art/critters.webp` with `critters.json` beside it, which
   names each kind's frames in order; a picture it cannot cut is said and left out. Seconds, and nothing written when
   nothing is new. The dev server runs it as it starts and whenever a picture in the folder or `world/critters.json`
-  is saved, sends the atlas itself, and tells the pictures' page, which shows the new one at once. Nothing on the
-  map draws from it yet: that is step 4 of `docs/plans/living-world.md`.
+  is saved, sends the atlas itself, and tells the pictures' page and the map, which draw the new one at once.
 - Sprites: `world/sprites/` is Adam's folder, committed as the master is, and holds every picture drawn on
   the map: `scenery/<kind>` for every kind in `world/biomes.json`, `marks/<name>` for every mark, and
   `structures/` and `critters/`, which have cuts of their own, above. Any PNG, WebP or JPEG, any size, on a

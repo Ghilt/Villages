@@ -294,8 +294,6 @@ export const ARTIFACTS: readonly Artifact[] = [
     path: 'public/art/critters.webp, critters.json',
     origin: 'baked',
     what: "Every critter's frames, cut to one box a kind so they register, and packed into one sheet.",
-    development:
-      "Read by the pictures' page until the map draws critters from it, step 4 of docs/plans/living-world.md.",
   },
   {
     id: 'ui-cut',

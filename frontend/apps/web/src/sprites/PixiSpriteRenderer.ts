@@ -6,6 +6,7 @@ import type { FogField } from '../fog/fogField';
 import { createUncolouring } from '../fog/uncolouring';
 import { hangDevHandles } from './devHandles';
 import { createCloudLayer } from './clouds/CloudLayer';
+import { createCritterLayer } from './critters/CritterLayer';
 import { createFogLayer } from './FogLayer';
 import { createGrassLayer } from './grass/GrassLayer';
 import { soonest, type Layer } from './layer';
@@ -305,7 +306,9 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       const grass = createGrassLayer(app.renderer, () => scene.scenery.tilesRoot, drawSoon);
       // The world outside vision over the scenery, both losing their colour on ground only revealed; then the
       // fog over them, and everything the fog must not cover above that.
-      world.addChild(grass.sprite, scenery.container, marks.underTheFog);
+      // The critters' shadows under the scenery, and the critters over it: only where the house sees now.
+      const critters = createCritterLayer(drawSoon, () => ({ scenery: scene.scenery, sight: groundField }));
+      world.addChild(grass.sprite, critters.shadows, scenery.container, critters.flying, marks.underTheFog);
       stage.addChild(world);
       // The clouds over the fog, and under the ring and every sign. See decision record 0098.
       const clouds = createCloudLayer(app.renderer, drawSoon, () => marks.iconsDrawn());
@@ -330,7 +333,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
         marks,
         ring,
         trees,
-        drawn: [marks, ring, hazeLayer, uncolouringLayer, grass, sceneryLayer, trees, clouds],
+        drawn: [marks, ring, hazeLayer, uncolouringLayer, grass, sceneryLayer, trees, critters, clouds],
       };
       // Whatever was handed over before the canvas was ready - the seats a founding choice offers always are,
       // since they arrive with the first frames - is given now, whole.

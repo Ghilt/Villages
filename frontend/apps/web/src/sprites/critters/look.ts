@@ -27,7 +27,7 @@ export const CRITTERS_LOOK = {
   density: 0.4,
   /** How big each kind is drawn: how tall its frames stand, in world units. */
   kinds: {
-    songbird: { size: 0.55 },
+    songbird: { size: 0.9 },
     squirrel: { size: 0.45 },
     hare: { size: 0.55 },
     fish: { size: 0.6 },
