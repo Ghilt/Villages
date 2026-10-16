@@ -50,7 +50,12 @@ fun main(args: Array<String>) {
         { port -> Swarm(port) },
         settings,
         onStarted = { started = it },
-        onStage = { stages += it; println(Report.line(it)) },
+        onStage = { stage ->
+            stages += stage
+            println(Report.line(stage))
+            // What the heap holds by class at each stage, when asked for: what a player costs, and in what.
+            if ("histogram" in given) server.histogram(File(repository, ".logs/swarm-histogram-${stage.players}.txt"))
+        },
     ).run()
     history.finish(run)
     println(Report.summary(run))

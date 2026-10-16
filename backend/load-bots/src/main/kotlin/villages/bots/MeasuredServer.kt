@@ -92,6 +92,13 @@ class JarServer(private val java: File, private val jar: File, private val log: 
         )
     }
 
+    /** What the heap holds, by class, largest first: `jcmd GC.class_histogram`, for finding what a player costs. */
+    fun histogram(to: File) {
+        val running = process?.takeIf { it.isAlive } ?: return
+        to.parentFile.mkdirs()
+        to.writeText(jcmd(running.pid(), "GC.class_histogram"))
+    }
+
     override fun stop() {
         val running = process ?: return
         running.destroy()
