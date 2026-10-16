@@ -29,6 +29,12 @@ interface SectionProps {
    * after.
    */
   control?: ReactNode;
+  /**
+   * What the section is, in a sentence or three, behind a question mark in its bar while it is open: shown when the
+   * mark is hovered or reached with the keyboard, so a long explanation does not stand above the controls every
+   * time. Adam's word of 2026-10-16.
+   */
+  about?: string;
   children: ReactNode;
 }
 
@@ -36,7 +42,7 @@ function rememberedAs(name: string): string {
   return `villages.debug.fold.${name.toLowerCase().replace(/\s+/g, '-')}`;
 }
 
-export function Section({ name, tools, reading, control, children }: SectionProps) {
+export function Section({ name, tools, reading, control, about, children }: SectionProps) {
   // Every section starts folded, so the panel opens as a row of titles with their switches, and what is
   // opened is what is being watched. Adam's word of 2026-10-11.
   const [open, setOpen] = useState(() => {
@@ -74,6 +80,14 @@ export function Section({ name, tools, reading, control, children }: SectionProp
           </span>
           <span className="debug__title">{name}</span>
         </button>
+        {open && about !== undefined && (
+          <span className="debug__about" tabIndex={0} aria-label={`about ${name}: ${about}`}>
+            ?
+            <span className="debug__about-tip" role="tooltip">
+              {about}
+            </span>
+          </span>
+        )}
         {reading}
         {control}
         {open && tools}

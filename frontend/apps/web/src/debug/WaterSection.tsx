@@ -83,6 +83,10 @@ const SLIDERS: readonly SliderDef<keyof RiverTuning>[] = [
   },
 ];
 
+/** What the part is, behind the question mark in its bar. */
+const ABOUT =
+  'From zoom 8.5 in. The sliders are the rivers’ own look, on the realistic water. Turn the fog of war off to see it clearly.';
+
 export function WaterSection() {
   const tuning = useStore(riverStore);
   const level = useStore(waterStore, (state) => state.level);
@@ -101,6 +105,7 @@ export function WaterSection() {
   return (
     <Section
       name="Water"
+      about={ABOUT}
       tools={tools}
       control={<LevelSwitch level={level} onChange={setWaterLevel} overruled={!on} what="the water" />}
     >
@@ -116,10 +121,6 @@ export function WaterSection() {
         <option value="realistic">Realistic</option>
         <option value="wavelets">Wavelets, its first look</option>
       </select>
-      <p className="debug-map__note">
-        From zoom 8.5 in. The sliders are the rivers’ own look, on the realistic water. Turn the fog of war
-        off to see it clearly.
-      </p>
       <Sliders idPrefix="water" sliders={SLIDERS} values={tuning} onChange={setRiverTuning} />
     </Section>
   );

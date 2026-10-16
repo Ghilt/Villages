@@ -43,6 +43,10 @@ export function sayCritters({ flying, none }: CritterReading): string {
     : kinds.map(([kind, count]) => `${count} ${kind}${count === 1 ? '' : 's'}`).join(', ');
 }
 
+/** What the part is, behind the question mark in its bar. */
+const ABOUT =
+  'Birds out of the trees and the bushes the scenery drew, from zoom 9 in, only where your house sees now, the same in every browser: a flock bursts out and scatters, or a bird or two flits to the next tree. Fewer is always some of the same ones, never others. Low moves them at fifteen frames a second and high at thirty. None for a player who asked for less motion.';
+
 export function CrittersSection() {
   const level = useStore(critterStore, (state) => state.level);
   const on = useStore(shadersStore, (state) => state.on);
@@ -61,15 +65,11 @@ export function CrittersSection() {
   return (
     <Section
       name="Critters"
+      about={ABOUT}
       tools={tools}
       reading={<span className="debug__quiet">{sayCritters(reading)}</span>}
       control={<LevelSwitch level={level} onChange={setCritterLevel} overruled={!on} what="the critters" />}
     >
-      <p className="debug-map__note">
-        Birds out of the trees and the bushes the scenery drew, from zoom 9 in, only where your house sees
-        now, the same in every browser; fewer is always some of the same ones, never others. Low moves them at
-        fifteen frames a second and high at thirty. None for a player who asked for less motion.
-      </p>
       <Sliders idPrefix="critters" sliders={SLIDERS} values={tuning} onChange={setCritterTuning} />
     </Section>
   );

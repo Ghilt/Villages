@@ -97,6 +97,10 @@ function sayReading({ band, share }: CloudReading): string {
   return band === 'under' || band === 'gone' ? BANDS[band] : `${BANDS[band]}, ${share}%`;
 }
 
+/** What the part is, behind the question mark in its bar. */
+const ABOUT =
+  "Clouds over the world from zoom 7 out, gone further out, over the fog's haze and under every sign, the same sky in every browser while the sliders are where they started. What a level costs the graphics card is said once in the log, the first time the clouds are drawn at it.";
+
 export function CloudSection() {
   const level = useStore(cloudStore, (state) => state.level);
   const on = useStore(shadersStore, (state) => state.on);
@@ -115,15 +119,11 @@ export function CloudSection() {
   return (
     <Section
       name="Clouds"
+      about={ABOUT}
       tools={tools}
       reading={<span className="debug__quiet">{sayReading(reading)}</span>}
       control={<LevelSwitch level={level} onChange={setCloudLevel} overruled={!on} what="the clouds" />}
     >
-      <p className="debug-map__note">
-        Clouds over the world from zoom 7 out, gone further out, over the fog's haze and under every sign, the
-        same sky in every browser while the sliders are where they started. What a level costs the graphics
-        card is said once in the log, the first time the clouds are drawn at it.
-      </p>
       <Sliders idPrefix="clouds" sliders={SLIDERS} values={tuning} onChange={setCloudTuning} />
     </Section>
   );

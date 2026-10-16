@@ -62,7 +62,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
 - The water moves, from about zoom 8.5 in: depth, waves lit by a sun in the north-west, caustics on the bottom
   of the shallows, and surf along the shore, over every renderer. It is the **Water** part of the **Shaders**
   section, below Debug map, which holds a part for each shader that is a look and nothing more, with `off`,
-  `low` and `high` in each part's bar, and an `on` box in the section's own bar that turns every shader off and
+  `low` and `high` in each part's bar and, while a part is open, a `?` there that says what the part is when it is
+  hovered or reached with the keyboard, and an `on` box in the section's own bar that turns every shader off and
   back on at the levels they had. High is every pixel at thirty frames a second; low is a quarter of them,
   worked out into a picture of its own and laid over the map, at fifteen; the first time a shader is drawn at a
   level, the log says once what that costs the graphics card. The water is high at every load, and its Look is

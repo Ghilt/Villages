@@ -85,3 +85,54 @@
 .debug__levels--overruled {
   opacity: 0.45;
 }
+
+/*
+  A section's explanation, behind a question mark in its bar: shown on hover, or when the mark has the keyboard,
+  under the bar and as wide as it, so it is never cut off at the panel's edge.
+*/
+.debug__sectionbar {
+  position: relative;
+}
+
+.debug__about {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.95rem;
+  height: 0.95rem;
+  font-size: 0.62rem;
+  color: var(--ink-soft);
+  border: 1px solid var(--parchment-edge);
+  border-radius: 50%;
+  cursor: help;
+}
+
+.debug__about:hover,
+.debug__about:focus-visible {
+  color: var(--ink);
+  outline: none;
+  border-color: var(--gold);
+}
+
+.debug__about-tip {
+  display: none;
+  position: absolute;
+  top: calc(100% + 0.2rem);
+  left: 0.5rem;
+  right: 0.5rem;
+  z-index: 20;
+  padding: 0.45rem 0.55rem;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  text-align: left;
+  color: var(--ink);
+  background: rgba(251, 247, 236, 0.98);
+  border: 1px solid var(--parchment-edge);
+  border-radius: 3px;
+  box-shadow: 0 2px 8px rgba(43, 32, 18, 0.18);
+}
+
+.debug__about:hover .debug__about-tip,
+.debug__about:focus-visible .debug__about-tip {
+  display: block;
+}

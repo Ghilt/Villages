@@ -58,6 +58,10 @@ const OURS: readonly SliderDef<keyof ReliefTuning>[] = [
   },
 ];
 
+/** What the part is, behind the question mark in its bar. */
+const ABOUT =
+  'The ground shaded by its slope, the whole world, lit from the upper right as the shadows are. Heavy far out and light close in unless the sliders say otherwise; they are remembered in this browser, and said in the log once one stops.';
+
 export function ReliefSection() {
   const level = useStore(reliefStore, (state) => state.level);
   const drawnBy = useStore(reliefStore, (state) => state.drawnBy);
@@ -78,16 +82,12 @@ export function ReliefSection() {
   return (
     <Section
       name="Relief"
+      about={ABOUT}
       tools={tools}
       control={
         <LevelSwitch level={level} onChange={setReliefLevel} overruled={!on} what="the relief" said={SAID} />
       }
     >
-      <p className="debug-map__note">
-        The ground shaded by its slope, the whole world, lit from the upper right as the shadows are. Heavy
-        far out and light close in unless the sliders say otherwise; they are remembered in this browser, and
-        said in the log once one stops.
-      </p>
       <Sliders idPrefix="relief" sliders={BY_ZOOM} values={tuning} onChange={setReliefTuning} />
       <label className="debug-map__label" htmlFor="relief-drawer">
         Drawn by

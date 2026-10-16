@@ -50,6 +50,10 @@ const SLIDERS: readonly SliderDef<keyof GrassTuning>[] = [
   { key: 'density', label: 'How thickly the tufts grow', min: 0.1, max: 1, step: 0.01, say: share },
 ];
 
+/** What the part is, behind the question mark in its bar. */
+const ABOUT =
+  'Gusts, tufts, tall grass and brush on steppe, meadow, savanna and alpine meadow, from zoom 8.5 in. What a level costs the graphics card is said once in the log, the first time the grass is drawn at it.';
+
 export function GrassSection() {
   const level = useStore(grassStore, (state) => state.level);
   const on = useStore(shadersStore, (state) => state.on);
@@ -67,13 +71,10 @@ export function GrassSection() {
   return (
     <Section
       name="Grass"
+      about={ABOUT}
       tools={tools}
       control={<LevelSwitch level={level} onChange={setGrassLevel} overruled={!on} what="the grass" />}
     >
-      <p className="debug-map__note">
-        Gusts, tufts, tall grass and brush on steppe, meadow, savanna and alpine meadow, from zoom 8.5 in.
-        What a level costs the graphics card is said once in the log, the first time the grass is drawn at it.
-      </p>
       <Sliders idPrefix="grass" sliders={SLIDERS} values={tuning} onChange={setGrassTuning} />
     </Section>
   );
