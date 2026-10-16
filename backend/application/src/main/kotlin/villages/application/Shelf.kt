@@ -81,6 +81,9 @@ class Shelf(
     /** The pools and the actions in force, at the moment of asking. */
     val fate: FateCatalogue get() = inForce.fate
 
+    /** What a newcomer can be called, at the moment of asking. */
+    val characterNames: CharacterNames get() = inForce.characterNames
+
     /** The fingerprint of each catalogue in force, by its name. */
     fun fingerprints(): Map<String, String> = texts.mapValues { (_, text) -> fingerprintOf(text) }
 

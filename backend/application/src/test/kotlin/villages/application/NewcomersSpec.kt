@@ -1,5 +1,6 @@
 package villages.application
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.ints.shouldBeInRange
 import io.kotest.matchers.nulls.shouldBeNull
@@ -29,7 +30,7 @@ class NewcomersSpec : StringSpec({
     val highest = Dice { sides -> sides }
     val folder = Portraits { listOf("man-02", "woman-02", "man-01", "woman-01") }
 
-    fun roll(dice: Dice, portraits: Portraits = folder) = Newcomers.roll(id, today, noon, calendar, dice, portraits, TEST_BALANCE.newcomers.ages)
+    fun roll(dice: Dice, portraits: Portraits = folder) = Newcomers.roll(id, today, noon, calendar, dice, portraits, TEST_BALANCE.newcomers.ages, TEST_NAMES)
 
     "with a die that always comes up one, the newcomer is a woman of eighteen with three in everything" {
         val agnes = roll(lowest)
@@ -71,14 +72,12 @@ class NewcomersSpec : StringSpec({
         Newcomers.suits("man-hat-03", Sex.MAN) shouldBe true
     }
 
-    "every name on the list is a name a character can have" {
-        for (sex in Sex.entries) {
-            for (given in Names.given(sex)) {
-                for (family in Names.family) {
-                    CharacterName(given, family)
-                }
-            }
-        }
+    "a name that is not one a character can have is refused as the names are taken on" {
+        TEST_NAMES.check()
+        shouldThrow<CatalogueRefused> { TEST_NAMES.copy(family = listOf(" Ystad")).check() }.message shouldBe
+            "world/catalogues/character-names.json: family are names a character can have: ' Ystad' is not, " +
+            "not a character's name: the family name has space at either end"
+        shouldThrow<CatalogueRefused> { TEST_NAMES.copy(men = emptyList()).check() }
     }
 
     "with ordinary dice, every newcomer is eighteen to fifty and every stat is three to eighteen" {

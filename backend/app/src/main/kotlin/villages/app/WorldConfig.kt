@@ -284,6 +284,7 @@ class WorldConfig {
         dice = dice,
         portraits = portraits,
         balance = { shelf.balance },
+        names = { shelf.characterNames },
     )
 
     /** Writes a character's death into every house that held them. See decision record 0055. */

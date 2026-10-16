@@ -1,0 +1,5 @@
+{
+  "$comment": "Character names filed as world/catalogues/character-names.json files them, written by hand, small: the server's CharacterNamesFile and the world package's parseCharacterNames both read it, and are held to it.",
+  "given": { "woman": ["Agnes", "Ursula"], "man": ["Anton", "Wilhelm"] },
+  "family": ["Achterberg", "Ystad"]
+}

@@ -7,7 +7,12 @@ import villages.domain.StructureCatalogue
  * Every catalogue the game reads, read and checked: what the shelf holds in force, a field a catalogue. A new kind of
  * content adds its field here, its reader in `app`, and its checks against the rest to [check]. See decision record 0097.
  */
-data class Catalogues(val structures: StructureCatalogue, val balance: Balance, val fate: FateCatalogue) {
+data class Catalogues(
+    val structures: StructureCatalogue,
+    val balance: Balance,
+    val fate: FateCatalogue,
+    val characterNames: CharacterNames,
+) {
     /**
      * What must hold between catalogues, as one more check before the shelf takes them on: every name one of them
      * gives another resolves, and each holds within itself. Throws [CatalogueRefused] naming the catalogue at fault.
@@ -15,6 +20,7 @@ data class Catalogues(val structures: StructureCatalogue, val balance: Balance, 
     fun check(): Catalogues {
         balance.check()
         fate.check()
+        characterNames.check()
         return this
     }
 
@@ -27,6 +33,9 @@ data class Catalogues(val structures: StructureCatalogue, val balance: Balance, 
 
         /** The fate's, `world/catalogues/fate.json`: the pools and the actions a choice roll deals from. */
         const val FATE = "fate"
+
+        /** The character names', `world/catalogues/character-names.json`: what a newcomer can be called. */
+        const val CHARACTER_NAMES = "character-names"
     }
 }
 

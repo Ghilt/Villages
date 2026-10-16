@@ -66,6 +66,14 @@ export const INSPECT_VIEWS: readonly InspectView[] = [
     catalogue: 'fate',
   },
   {
+    path: '/admin/inspect-character-names',
+    title: 'Character names',
+    what: 'The names a newcomer can be given: given names by sex, and family names.',
+    needs: 'nothing to read, the game server to save',
+    load: () => import('./CharacterNames').then((page) => page.CharacterNames),
+    catalogue: 'character-names',
+  },
+  {
     path: '/admin/inspect-architecture',
     title: 'Architecture',
     what: 'How the world is set up: what is baked beforehand, how long each step takes, and what the running game reads.',

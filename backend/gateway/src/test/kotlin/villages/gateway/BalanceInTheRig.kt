@@ -1,6 +1,7 @@
 package villages.gateway
 
 import villages.application.Balance
+import villages.application.CharacterNames
 import villages.domain.Rarity
 
 /**
@@ -26,4 +27,11 @@ internal val RIG_BALANCE = Balance(
     ),
     islands = Balance.Islands(smallerThanKm2 = 4_000_000.0),
     newcomers = Balance.Newcomers(youngest = 18, oldest = 50),
+)
+
+/** The names the rig's newcomers are given: a woman of eighteen is Agnes Achterberg, as she always was. */
+internal val RIG_NAMES = CharacterNames(
+    women = listOf("Agnes", "Ursula"),
+    men = listOf("Anton", "Wilhelm"),
+    family = listOf("Achterberg", "Ystad"),
 )

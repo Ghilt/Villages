@@ -1,0 +1,8 @@
+{
+  "$comment": "The names a newcomer can be given, Adam's to steer: given names of the 1790s by sex, and family names from across the old continent, bent the way the coastlines are bent. None of them is anybody famous on purpose, because a player who meets a character called after a real person meets a joke rather than a person. Every given name with every family name has to be a name a character can have, which the game server checks as it takes the file on. Not the place names of the world, which are world/names/. Taken over on 2026-10-16 from the code they were written in; /admin/inspect-character-names shows and edits them. See decision record 0097.",
+  "given": {
+    "woman": ["Agnes", "Anne", "Catherine", "Charlotte", "Dorothea", "Eleanor", "Elisabeth", "Frances", "Hannah", "Harriet", "Henriette", "Isabella", "Johanna", "Louise", "Margarethe", "Marianne", "Sophia", "Susanna", "Theresa", "Ursula"],
+    "man": ["Anton", "Augustin", "Balthasar", "Christian", "Edmund", "Frederick", "Gottfried", "Henri", "Jacob", "Johann", "Joseph", "Laurent", "Matthias", "Nicholas", "Philip", "Pieter", "Samuel", "Thomas", "Tobias", "Wilhelm"]
+  },
+  "family": ["Achterberg", "Ashby", "Aubert", "Bellamy", "Bonnard", "Brandt", "Carrow", "Castell", "Corder", "Dufresne", "Duvall", "Ellery", "Everard", "Falk", "Fenwick", "Garnier", "Hartwell", "Holm", "Ingram", "Jessop", "Kemble", "Lindqvist", "Marchand", "Morell", "Norrey", "Orme", "Pelham", "Quarles", "Rennard", "Ricci", "Sallow", "Scheel", "Thorne", "Tremaine", "Ulver", "Vane", "Varga", "Waldron", "Wren", "Ystad"]
+}

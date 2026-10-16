@@ -40,3 +40,6 @@ val TEST_FATE = FateCatalogue(
         }
     },
 )
+
+/** The names the tests' newcomers are given: the first and the last of each list the file began with. */
+val TEST_NAMES = CharacterNames(women = listOf("Agnes", "Ursula"), men = listOf("Anton", "Wilhelm"), family = listOf("Achterberg", "Ystad"))

@@ -506,6 +506,10 @@ and `-- --drop` takes them off; by hand only.
   as the structures' are; it is drawn from the file itself, so a number added there is on the page untold, and odds
   that do not add up to a hundred are said in red before the server refuses them. A founding's fifty wealth is not in it: it is
   folded from the founding rather than written into it, and moving it would rewrite every house's past.
+- The names a newcomer can be given: `world/catalogues/character-names.json`, given names by sex and family names,
+  every given name with every family name a name a character can have, which the game server checks as it takes the
+  file on. A newcomer taken in is named from the file in force, so a name added there, by hand or from
+  **`/admin/inspect-character-names`**, can be the next one's. Not the world's place names, which are `world/names/`.
 - What a structure is: `world/catalogues/structures.json`, hand-edited, one entry a type - its words in each culture, and level
   by level how far out it is drawn, how far it sees, its size on the map and what it yields a world month, which is
   a real day - with its slots and its influence zone if it has one. Nothing cuts it. The game server reads it as

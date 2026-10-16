@@ -31,10 +31,12 @@ object Newcomers {
         portraits: Portraits,
         /** The youngest and the oldest a newcomer can be, in whole years: the balance's. */
         ages: IntRange,
+        /** What a newcomer can be called: the character names' catalogue. */
+        names: CharacterNames,
     ): IntroduceCharacter {
         val sex = if (dice.roll(2) == 1) Sex.WOMAN else Sex.MAN
-        val given = Names.given(sex)
-        val name = CharacterName(given[dice.roll(given.size) - 1], Names.family[dice.roll(Names.family.size) - 1])
+        val given = names.given(sex)
+        val name = CharacterName(given[dice.roll(given.size) - 1], names.family[dice.roll(names.family.size) - 1])
 
         // A year and a number of months back, then a few days more, so birthdays fall anywhere in a month.
         val years = ages.first - 1 + dice.roll(ages.last - ages.first + 1)

@@ -47,7 +47,7 @@ class ShelfSpec : StringSpec({
     val reader = CatalogueReader { files ->
         val text = files[Catalogues.STRUCTURES] ?: throw CatalogueRefused(Catalogues.STRUCTURES, "it is not on the shelf")
         if ("broken" in text) throw CatalogueRefused(Catalogues.STRUCTURES, "castle has no sightKm the server can read")
-        Catalogues(StructureCatalogue(mapOf(StructureType(text.trim()) to StructureSpec(listOf(LevelSpec(Significance(10.0), 6.0, emptyMap())), emptyList()))), TEST_BALANCE, TEST_FATE)
+        Catalogues(StructureCatalogue(mapOf(StructureType(text.trim()) to StructureSpec(listOf(LevelSpec(Significance(10.0), 6.0, emptyMap())), emptyList()))), TEST_BALANCE, TEST_FATE, TEST_NAMES)
     }
 
     class Rig(files: Map<String, String>, editable: Boolean = true) {

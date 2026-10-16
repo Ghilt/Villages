@@ -215,6 +215,7 @@ internal class Rig(
                 dice = { 1 },
                 portraits = { listOf("woman-01", "man-01") },
                 balance = { RIG_BALANCE },
+                names = { RIG_NAMES },
             ),
             figures = characters,
             sights = sights,
