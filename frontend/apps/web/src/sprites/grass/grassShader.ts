@@ -1,3 +1,4 @@
+import { GUSTS_GLSL } from '../wind';
 import { GRASS_LOOK } from './look';
 
 /**
@@ -5,10 +6,10 @@ import { GRASS_LOOK } from './look';
  * covers it, and for each pixel the ground under it, found by the sprites' own projection backwards.
  *
  * Two things move. Gusts travel down the wind as soft bands, and where one blows the field shows its paler
- * side. And close in, a tuft stands up in every small cell of the ground, a stroke from a shaded root to a lit
- * tip, which the gust bends down the wind and which sways a little when there is none. A tuft stands up the
- * screen, as the trees and the castles do, so it is drawn in pixels from its root rather than lying on the
- * ground. Every number is in `look.ts`.
+ * side: the world's one wind, `../wind.ts`, which the trees bend in too. And close in, a tuft stands up in every
+ * small cell of the ground, a stroke from a shaded root to a lit tip, which the gust bends down the wind and which
+ * sways a little when there is none. A tuft stands up the screen, as the trees and the castles do, so it is drawn
+ * in pixels from its root rather than lying on the ground. Every number is in `look.ts`.
  */
 
 const float = (value: number): string => (Number.isInteger(value) ? value.toFixed(1) : String(value));
@@ -17,7 +18,6 @@ const colour = (rgb: readonly number[]): string => rgb.map(float).join(', ');
 const G = GRASS_LOOK.gusts;
 const B = GRASS_LOOK.blades;
 const P = GRASS_LOOK.patches;
-const WIND = (GRASS_LOOK.wind * Math.PI) / 180;
 
 export const GRASS_VERTEX = `#version 300 es
 precision highp float;
@@ -41,6 +41,8 @@ uniform vec2 uCentre;
 uniform float uScale;
 uniform vec3 uTilt;
 uniform float uTime;
+// How far the wind has carried the gusts, in world units modulo the period they come round at: ../wind.ts.
+uniform float uCarried;
 uniform float uFade;
 uniform float uPixel;
 uniform sampler2D uMask;
@@ -60,9 +62,6 @@ uniform float uDensity;
 out vec4 fragColor;
 
 const float TAU = 6.2831853;
-const vec2 WIND = vec2(${float(Math.cos(WIND))}, ${float(Math.sin(WIND))});
-const float GUST_SIZE = ${float(G.size)};
-const float GUST_SPEED = ${float(G.speed)};
 const vec3 SHEEN = vec3(${colour(G.colour)});
 const float SHEEN_ALPHA = ${float(G.opacity)};
 const float CELL = ${float(B.cell)};
@@ -82,6 +81,7 @@ const vec3 TALL_TIP = vec3(${colour(P.tallTip)});
 const vec3 BRUSH_DARK = vec3(${colour(P.brushDark)});
 const vec3 BRUSH_LIGHT = vec3(${colour(P.brushLight)});
 const float BRUSH_ALPHA = ${float(P.brushOpacity)};
+${GUSTS_GLSL}
 
 float hash(ivec2 cell, int salt) {
   uvec3 u = uvec3(ivec3(cell, salt)) * uvec3(1597334673u, 3812015801u, 2798796415u);
@@ -130,14 +130,6 @@ float grassAt(vec2 world) {
   sum += texture(uMask, at + vec2(texel.x, 0.0)).r + texture(uMask, at - vec2(texel.x, 0.0)).r;
   sum += texture(uMask, at + vec2(0.0, texel.y)).r + texture(uMask, at - vec2(0.0, texel.y)).r;
   return smoothstep(0.4, 0.95, sum / 6.0);
-}
-
-// How hard the wind is blowing here, nought to one: gusts that travel down the wind.
-float gustAt(vec2 world) {
-  vec2 moved = world - WIND * uTime * GUST_SPEED;
-  float big = noise(moved / GUST_SIZE);
-  float small = noise(moved / (GUST_SIZE * 0.4) + vec2(17.0, 3.0));
-  return smoothstep(0.42, 0.8, big * 0.65 + small * 0.35);
 }
 
 // The two slow fields over the ground that mark out the patches.
@@ -193,7 +185,7 @@ void main() {
   }
   // The gusts show least on bare ground and most in tall grass, and the brush hardly bends.
   vec3 kindHere = chancesOf(fieldsAt(world));
-  float gust = gustAt(world) * (1.0 - 0.85 * kindHere.x) * (1.0 + 0.6 * kindHere.y) * (1.0 - 0.5 * kindHere.z);
+  float gust = gustAt(world, uCarried) * (1.0 - 0.85 * kindHere.x) * (1.0 + 0.6 * kindHere.y) * (1.0 - 0.5 * kindHere.z);
   vec3 rgb = SHEEN * gust * SHEEN_ALPHA;
   float alpha = gust * SHEEN_ALPHA;
 
@@ -217,7 +209,7 @@ void main() {
     vec2 fields = fieldsAt(about);
     vec2 east = fieldsAt(about + vec2(1.0, 0.0)) - fields;
     vec2 south = fieldsAt(about + vec2(0.0, 1.0)) - fields;
-    float blow = gustAt(about);
+    float blow = gustAt(about, uCarried);
     float ink = 0.0;
     vec3 colour = vec3(0.0);
     float inkAlpha = 0.0;

@@ -1,5 +1,3 @@
-import { WATER_LOOK } from '../../water/look';
-
 /**
  * WIP SPIKE: every number of the grass's look, for Adam's eye. Colours are red, green and blue from nought to
  * one; sizes are world units, a master pixel each, unless they say pixels.
@@ -18,12 +16,8 @@ export const GRASS_LOOK = {
     low: { resolution: 0.5, framesPerSecond: 15 },
     high: { resolution: 1, framesPerSecond: 30 },
   },
-  /** The way the wind blows, in degrees from east towards south: the sea's, so the two agree. */
-  wind: WATER_LOOK.realistic.waves.wind,
+  /** The gusts are the world's one wind's, `../wind.ts`, blowing the sea's way; the grass gives them its colour. */
   gusts: {
-    /** How big a gust is, and how fast it travels down the wind, in world units a second. */
-    size: 9,
-    speed: 2.2,
     /** The paler side a bent field shows, and how much of it a full gust shows. */
     colour: [0.93, 0.9, 0.7],
     opacity: 0.22,

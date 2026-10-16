@@ -19,6 +19,7 @@ import { createCostMeter } from '../../shaders/costMeter';
 import { drawnAt, sayLevel, shadersStore } from '../../shaders/levels';
 import type { ShaderLevel } from '../../shaders/levels';
 import type { Layer } from '../layer';
+import { gustsCarried, windTime } from '../wind';
 
 import { grassStore } from './grassMode';
 import { grassMaskOf, sameRange, tilesUnder } from './grassMask';
@@ -70,6 +71,7 @@ export function createGrassLayer(
     uScale: { value: 1, type: 'f32' },
     uTilt: { value: new Float32Array([1, 0, 1]), type: 'vec3<f32>' },
     uTime: { value: 0, type: 'f32' },
+    uCarried: { value: 0, type: 'f32' },
     uFade: { value: 0, type: 'f32' },
     uPixel: { value: 1, type: 'f32' },
     uMaskOrigin: { value: new Float32Array(2), type: 'vec2<f32>' },
@@ -186,7 +188,7 @@ export function createGrassLayer(
   return {
     sprite,
 
-    draw(view: CameraView, now: number): number | null {
+    draw(view: CameraView): number | null {
       const level = drawnAt(grassStore.get().level);
       const ms = meter.read();
       if (ms !== null && lastLevel !== null && lastLevel !== 'off') {
@@ -221,7 +223,10 @@ export function createGrassLayer(
       u.uTilt[0] = tilt.cos;
       u.uTilt[1] = tilt.sin;
       u.uTilt[2] = tilt.lean;
-      u.uTime = still ? 0 : (now / 1000) % 3600;
+      // By the wall clock, so every browser has the same gusts: see ../wind.ts.
+      const wall = Date.now();
+      u.uTime = still ? 0 : windTime(wall);
+      u.uCarried = still ? 0 : gustsCarried(wall);
       u.uFade = fade;
       u.uPixel = 1 / (levelLook.resolution * resolution);
       const tuning = grassTuningStore.get();
