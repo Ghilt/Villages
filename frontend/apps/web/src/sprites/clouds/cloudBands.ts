@@ -10,6 +10,8 @@
  * fading as it comes down through. Every change is eased, so nothing pops at an edge.
  */
 
+import { CLOUD_LOOK } from './look';
+
 /** The zooms the bands change at, from the closest in. */
 export interface CloudZooms {
   inFrom: number;
@@ -30,7 +32,12 @@ export interface CloudBand {
   inside: number;
   /** How many times the clouds are magnified about the screen's middle: exactly one over them. */
   magnification: number;
+  /** How much of the clumps' own shapes is kept: all of it from `fadeFrom` in, `FAR_DETAIL` by `goneAt`. */
+  detail: number;
 }
+
+/** How much of the clumps' own shapes is kept by `goneAt`, so the weather systems lead far out. */
+export const FAR_DETAIL = CLOUD_LOOK.systems.farDetail;
 
 /** How many times the clouds are magnified at `inFrom`, where the camera is among them. */
 export const SWELL = 4;
@@ -55,7 +62,7 @@ export function orderedZooms(zooms: CloudZooms): CloudZooms {
 export function cloudBandAt(zoom: number, zooms: CloudZooms): CloudBand {
   const { inFrom, overFrom, fadeFrom, goneAt } = orderedZooms(zooms);
   if (zoom >= inFrom) {
-    return { name: 'under', clouds: 0, shadows: 0, inside: 1, magnification: SWELL };
+    return { name: 'under', clouds: 0, shadows: 0, inside: 1, magnification: SWELL, detail: 1 };
   }
   if (zoom > overFrom) {
     // Linear in zoom, so the clouds swell steadily as the camera comes down; squared in the magnification, so the
@@ -67,14 +74,16 @@ export function cloudBandAt(zoom: number, zooms: CloudZooms): CloudBand {
       shadows: 1 - ease(0.3, 1, inside),
       inside,
       magnification: SWELL ** (inside * inside),
+      detail: 1,
     };
   }
   if (zoom >= fadeFrom) {
-    return { name: 'over', clouds: 1, shadows: 1, inside: 0, magnification: 1 };
+    return { name: 'over', clouds: 1, shadows: 1, inside: 0, magnification: 1, detail: 1 };
   }
   if (zoom > goneAt) {
     const fading = ease(goneAt, fadeFrom, zoom);
-    return { name: 'fading', clouds: fading, shadows: fading, inside: 0, magnification: 1 };
+    const detail = FAR_DETAIL + (1 - FAR_DETAIL) * fading;
+    return { name: 'fading', clouds: fading, shadows: fading, inside: 0, magnification: 1, detail };
   }
-  return { name: 'gone', clouds: 0, shadows: 0, inside: 0, magnification: 1 };
+  return { name: 'gone', clouds: 0, shadows: 0, inside: 0, magnification: 1, detail: FAR_DETAIL };
 }

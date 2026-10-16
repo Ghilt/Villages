@@ -43,6 +43,15 @@ export const CLOUD_LOOK = {
   change: 0.35,
   /** How far the warp pushes the clumps about, a share of a clump's size. Its own cell is twice a clump's. */
   warp: 0.35,
+  /**
+   * The weather systems the clumps live in: a pattern `size` world units across, pushed about by a warp of its own
+   * whose cell is `warp` times that, `swirl` of a system far, so it sweeps into bands and swirls; and how much it
+   * decides where there can be cloud, `weight`, against the clumps themselves. Further out than `fadeFrom` the clumps
+   * keep only `farDetail` of their own shapes by `goneAt`, so the systems lead where a clump is a few pixels.
+   */
+  systems: { size: 1500, warp: 2, swirl: 0.45, weight: 0.6, farDetail: 0.55 },
+  /** How far the cut rises as the band fades them, so they thin away from their edges rather than turning grey. */
+  dissolve: 0.3,
   /** How much the patches the clumps gather in decide where there is cloud, against the clumps themselves. */
   patches: 0.35,
   /** How soft a cloud's edge is, in the field's own measure; never less than about a pixel. */

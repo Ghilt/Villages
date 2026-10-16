@@ -53,6 +53,15 @@ const SLIDERS: readonly SliderDef<keyof CloudTuning>[] = [
     step: 0.005,
     say: (v) => v.toFixed(3),
   },
+  {
+    key: 'systemSize',
+    label: 'How big the weather systems are',
+    min: 600,
+    max: 8000,
+    step: 100,
+    say: (v) => `${Math.round(v)} world units`,
+  },
+  { key: 'systems', label: 'How much the weather systems decide', min: 0, max: 1.2, step: 0.01, say: share },
   { key: 'shadow', label: 'How dark their shadows are', min: 0, max: 1, step: 0.01, say: share },
   {
     key: 'reach',

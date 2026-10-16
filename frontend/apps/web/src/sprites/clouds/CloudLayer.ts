@@ -63,6 +63,10 @@ export function createCloudLayer(
     uInside: { value: 0, type: 'f32' },
     uClearings: { value: new Float32Array(MOST_CLEARINGS * 4), type: 'vec4<f32>', size: MOST_CLEARINGS },
     uClearingCount: { value: 0, type: 'i32' },
+    uSystems: { value: new Float32Array(2), type: 'vec2<f32>' },
+    uSystemWarp: { value: new Float32Array(2), type: 'vec2<f32>' },
+    uSystemWeight: { value: 0, type: 'f32' },
+    uDetail: { value: 1, type: 'f32' },
   });
   const shader = new Shader({
     glProgram: GlProgram.from({
@@ -172,6 +176,14 @@ export function createCloudLayer(
       u.uInside = band.inside;
       const clearings = clearingsFrom(iconsDrawn(), tuning.clearing, view.width, view.height);
       u.uClearingCount = packClearings(clearings, u.uClearings);
+      const systems = latticeNear(tuning.systemSize);
+      const systemWarp = latticeNear(tuning.systemSize * CLOUD_LOOK.systems.warp);
+      u.uSystems[0] = systems.cell;
+      u.uSystems[1] = systems.around;
+      u.uSystemWarp[0] = systemWarp.cell;
+      u.uSystemWarp[1] = systemWarp.around;
+      u.uSystemWeight = tuning.systems;
+      u.uDetail = band.detail;
       uniforms.update();
 
       const width = Math.max(1, Math.ceil(view.width * levelLook.resolution));

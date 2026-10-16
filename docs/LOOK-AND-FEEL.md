@@ -229,9 +229,12 @@ noticed rather than watched. The edge of what is seen stays still, so nothing th
 swallowed and given back. Every number of it is in `apps/web/src/fog/look.ts`.
 
 **The clouds are weather over the world when it is pulled back.** From zoom 7 out clumps of cloud drift over
-the map, a clump about a tenth of the screen wide at 5.5, gathered in patches with clear sky between, about a
-third of the sky in all. They lie on the ground: they scale with the zoom and stay over the land they float over,
-whole out to 5.25 and fading to nothing by 4.5, so the whole world reads clearly further out. **Between 7 and 6 the
+the map, a clump about a tenth of the screen wide at 5.5, about a third of the sky in all. They live in **weather
+systems**, as real clouds seen from orbit do: large masses swept into bands and swirls a screen or two across at
+5.5, with wide clear country between, so the sky is never an even scatter of blobs. They lie on the ground: they
+scale with the zoom and stay over the land they float over, whole out to 5.25; further out the systems lead and
+the clumps' own shapes ease back, and the clouds thin away from their edges to nothing by 4.5 rather than turning
+grey, so the whole world reads clearly further out. **Between 7 and 6 the
 camera is in them**: they are the same clouds, nearer the closer it comes, so they swell about the middle of the
 screen and slide out past its edges, misty, their tones run together towards white, while a ring opening out from
 the middle keeps what the camera is looking at clear, and their shadows on the ground fade; by 7 they are past, and

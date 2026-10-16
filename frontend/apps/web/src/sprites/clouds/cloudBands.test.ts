@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { SWELL, cloudBandAt, orderedZooms } from './cloudBands';
+import { FAR_DETAIL, SWELL, cloudBandAt, orderedZooms } from './cloudBands';
 import type { CloudBand } from './cloudBands';
 
 const ZOOMS = { inFrom: 7, overFrom: 6, fadeFrom: 5.25, goneAt: 4.5 };
@@ -10,6 +10,7 @@ const PARTS = [
   'shadows',
   'inside',
   'magnification',
+  'detail',
 ] as const satisfies readonly (keyof CloudBand)[];
 
 describe('the clouds by zoom', () => {
@@ -30,6 +31,7 @@ describe('the clouds by zoom', () => {
         shadows: 0,
         inside: 0,
         magnification: 1,
+        detail: FAR_DETAIL,
       });
     }
   });
@@ -42,6 +44,7 @@ describe('the clouds by zoom', () => {
         shadows: 1,
         inside: 0,
         magnification: 1,
+        detail: 1,
       });
     }
   });
@@ -53,7 +56,18 @@ describe('the clouds by zoom', () => {
       shadows: 0.5,
       inside: 0,
       magnification: 1,
+      detail: FAR_DETAIL + (1 - FAR_DETAIL) * 0.5,
     });
+  });
+
+  it('keeps the clumps whole from 5.25 in, and lets the weather systems lead as they fade further out', () => {
+    for (const zoom of [5.25, 5.5, 6, 6.5, 7, 8]) {
+      expect(cloudBandAt(zoom, ZOOMS).detail).toBe(1);
+    }
+    expect(cloudBandAt(4.9, ZOOMS).detail).toBeLessThan(1);
+    expect(cloudBandAt(4.9, ZOOMS).detail).toBeGreaterThan(FAR_DETAIL);
+    expect(FAR_DETAIL).toBeGreaterThan(0);
+    expect(FAR_DETAIL).toBeLessThan(1);
   });
 
   it('swells them about the middle in the clouds, more the closer the camera comes', () => {

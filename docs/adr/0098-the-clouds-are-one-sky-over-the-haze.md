@@ -43,6 +43,14 @@ from noise laid along the wind and carried by the wall clock.**
   are never magnified, fade as it comes down. The camera is orthographic, so the swelling is drawn by the shader
   rather than by any perspective. Every change is eased, so nothing pops at an edge
   (`sprites/clouds/cloudBands.ts`).
+- **Weather systems.** Under the clumps lies a far larger pattern, swept by a warp of its own into bands and
+  swirls, that decides where there can be cloud at all, so the sky has the shape clouds have from orbit - masses and
+  clear country - rather than one size of blob everywhere. It repeats along the wind as everything else does, so
+  the sky stays one. From 5.25 out the clumps' own shapes ease back and the systems lead, and the fade to 4.5 raises
+  the cut so the clouds thin away from their edges instead of turning grey.
+
+  *Added 2026-10-16, on Adam's word that far out the clouds "clearly look wrong":* an even scatter of one size of
+  blob, greyed by the fade.
 - **Clear round the marks.** The marks layer draws first and says where it drew its icons; near each, up to
   thirty-two a frame and the nearest the middle when there are more, the clouds' cut is lifted, whole over the mark
   and easing out a slider's pixels beyond it, so the clouds thin from their own edges and their shadows keep off the

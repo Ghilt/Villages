@@ -82,6 +82,12 @@ uniform float uInside;
 // eased out; and how many there are. cloudClearings.ts.
 uniform vec4 uClearings[${MOST_CLEARINGS}];
 uniform int uClearingCount;
+// The weather systems: their lattice and their warp's, each one's cell along the wind and how many go round the
+// period; how much they decide where there can be cloud; and how much of the clumps' own detail is kept at this zoom.
+uniform vec2 uSystems;
+uniform vec2 uSystemWarp;
+uniform float uSystemWeight;
+uniform float uDetail;
 out vec4 fragColor;
 
 const float TAU = 6.2831853;
@@ -110,6 +116,8 @@ const float CLEAR_REACH = ${float(CLOUD_LOOK.inside.clearReach)};
 const float MIST = ${float(CLOUD_LOOK.inside.mist)};
 const float MIST_EDGE = ${float(CLOUD_LOOK.inside.mistEdge)};
 const float LIFT = ${float(CLOUD_LOOK.lift)};
+const float SWIRL = ${float(CLOUD_LOOK.systems.swirl)};
+const float DISSOLVE = ${float(CLOUD_LOOK.dissolve)};
 const float OPACITY = ${float(CLOUD_LOOK.opacity)};
 
 float hash(ivec2 cell, int salt) {
@@ -161,6 +169,24 @@ vec2 groundUnder(vec2 screen) {
 float patches(vec2 wind) {
   vec2 at = vec2((wind.x - uCarried.x) / uPatches.x, wind.y * 4.0 / uPatches.x);
   return noise(at, uPatches.y, 1) + 0.5 * noise(at * 2.0 + vec2(0.0, 17.0), uPatches.y * 2.0, 2);
+}
+
+// The weather systems the clumps live in, about -1 to 1: a large pattern pushed about by a warp of its own, so it
+// sweeps into bands and swirls with wide clear stretches between, rather than lying in round blotches. The warp
+// drifts with the clumps and the pattern with the patches, so the systems turn and change shape slowly as they go.
+float systems(vec2 wind) {
+  vec2 swirlAt = vec2((wind.x - uCarried.y) / uSystemWarp.x, wind.y / uSystemWarp.x);
+  vec2 swirl = vec2(
+    noise(swirlAt, uSystemWarp.y, 70) + 0.5 * noise(swirlAt * 2.0 + vec2(0.0, 7.0), uSystemWarp.y * 2.0, 71),
+    noise(swirlAt + vec2(0.0, 31.0), uSystemWarp.y, 72) + 0.5 * noise(swirlAt * 2.0 + vec2(0.0, 43.0), uSystemWarp.y * 2.0, 73)
+  );
+  vec2 swept = wind + swirl * (SWIRL * uSystems.x);
+  vec2 at = vec2((swept.x - uCarried.x) / uSystems.x, swept.y / uSystems.x);
+  return 1.4 * (
+    noise(at, uSystems.y, 80) +
+    0.5 * noise(at * 2.0 + vec2(0.0, 11.0), uSystems.y * 2.0, 81) +
+    0.25 * noise(at * 4.0 + vec2(0.0, 29.0), uSystems.y * 4.0, 82)
+  );
 }
 
 // How far the slow warp pushes the clumps about here, in world units; it drifts with the detail.
@@ -215,11 +241,13 @@ void main() {
   vec2 wind = vec2(dot(seen, ALONG), dot(seen, ACROSS) + WORLD);
   vec2 pushed = wind + warp(wind);
   float patchHere = uPatchWeight * patches(wind);
-  float field = 0.5 + 0.5 * clumps(pushed, 7, scale) + patchHere;
+  float systemHere = uSystemWeight * systems(wind);
+  float field = 0.5 + 0.5 * uDetail * clumps(pushed, 7, scale) + patchHere + systemHere;
   float stroke = brush(pushed, scale);
   // Round a mark the cut is lifted, so the clouds thin away from their own edges and leave it clear.
   float lift = LIFT * clearingAt(vScreen);
-  float cut = 0.47 + 0.35 * (1.0 - 2.0 * uCover) + BRUSH * stroke + lift;
+  // As the band fades them, the cut rises and they thin away from their edges rather than turning grey.
+  float cut = 0.42 + 0.35 * (1.0 - 2.0 * uCover) + BRUSH * stroke + lift + DISSOLVE * (1.0 - uAmount);
   float soft = max(uEdge * (1.0 + MIST_EDGE * uInside), fwidth(field));
   float cloud = smoothstep(cut - soft, cut + soft, field);
   // A cloud thickens over a span above its cut, so its margins are thin and the ground shows through them.
@@ -241,7 +269,7 @@ void main() {
   float fromMiddle = length(vScreen - uSize * 0.5) / (0.5 * length(uSize));
   float ring = uInside * CLEAR_REACH - CLEAR_SOFT;
   float clear = smoothstep(ring - CLEAR_SOFT, ring + CLEAR_SOFT, fromMiddle);
-  float cloudAlpha = cloud * body * OPACITY * uAmount * clear;
+  float cloudAlpha = cloud * body * OPACITY * smoothstep(0.0, 0.5, uAmount) * clear;
 
   // The shadow here is the cloud standing towards the light from it: the same field, warped where that cloud is,
   // read at its coarser sizes, so it keeps the cloud's shape without its finest lumps, in the relief's violet. It
@@ -249,7 +277,8 @@ void main() {
   vec2 under = vec2(dot(ground, ALONG), dot(ground, ACROSS) + WORLD);
   vec2 over = under + SUN * (uReach * uClumps.x);
   vec2 overPushed = over + warp(over);
-  float shade = 0.5 + 0.5 * clumps(overPushed, 4, uScale) + uPatchWeight * patches(over);
+  // The systems are far larger than the shadow's reach, so the ones here stand for the ones over the cloud.
+  float shade = 0.5 + 0.5 * uDetail * clumps(overPushed, 4, uScale) + uPatchWeight * patches(over) + systemHere;
   float shadowCut = cut - BRUSH * stroke + BRUSH * brush(overPushed, uScale);
   // Soft, and as dark as the cloud over it is thick: a thin margin casts a faint shadow, a thick middle a full one.
   float shadowSoft = max(uEdge * 2.0, fwidth(shade));

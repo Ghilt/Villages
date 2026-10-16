@@ -24,6 +24,10 @@ export interface CloudTuning {
   patches: number;
   /** How soft a cloud's edge is, in the field's own measure; never less than about a pixel. */
   edge: number;
+  /** How big the weather systems the clumps live in are, in world units. */
+  systemSize: number;
+  /** How much the weather systems decide where there can be cloud, against the clumps themselves. */
+  systems: number;
   /** How dark a cloud's shadow is, nought to one. */
   shadow: number;
   /** How far from its cloud a shadow falls, away from the light, as a share of a clump. */
@@ -44,6 +48,8 @@ export const CLOUD_DEFAULTS: CloudTuning = {
   change: CLOUD_LOOK.change,
   patches: CLOUD_LOOK.patches,
   edge: CLOUD_LOOK.edge,
+  systemSize: CLOUD_LOOK.systems.size,
+  systems: CLOUD_LOOK.systems.weight,
   shadow: CLOUD_LOOK.shadow,
   reach: CLOUD_LOOK.reach,
   clearing: CLOUD_LOOK.clearing,

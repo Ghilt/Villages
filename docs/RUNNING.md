@@ -94,26 +94,28 @@ stage alone, with none of the debug panel in it (decision record 0079).
   to run. Its numbers are in
   `apps/web/src/map/relief.ts` and `reliefTuning.ts`, and our shader is `reliefLayer.ts` and `reliefShader.ts`.
 - Clouds drift over the world from zoom 7 out, every lump lit cream from the upper right and shaded violet-grey
-  away from it, each cloud with its soft violet shadow down and to the left: clumps gathered in patches, whole from 6 out to 5.25, fading to
-  nothing by 4.5, and between 7 and 6 drawn as the camera among them: swelling about the middle of the screen and
-  sliding out past its edges, misty, the middle kept clear, their shadows fading, nothing left by 7. They lie
-  over the fog's haze and under the marks and the ring, thinning away round each of your marks, drift with the sea's wind about three minutes across the
-  screen, and are the same in every browser, because where they are comes from the wall clock; a player who has
-  asked for less motion gets them still. They are the **Clouds** part of the Shaders section: `off`, `low` or
-  `high` in its bar, high at every load, where low is a quarter of the pixels at ten frames a second and high every
-  pixel at twenty, and beside it what they are drawing at the camera's zoom, `over the clouds, 100%`, `fading, 40%`,
-  `under the clouds`. Inside it, sliders: how much of the sky is cloud, how big the clumps are, how fast the wind
-  carries them, how fast they change shape (how much faster their finer lumps drift than the clumps, nought for
-  clumps that slide by whole), how much they gather in patches, how soft their edges are, how dark their shadows
-  are and how far from them their shadows fall, how far round a mark they keep clear, and the four zooms the bands
-  change at - under the clouds closer in than 7, over them from 6, fading
-  from 5.25, gone at 4.5. Every slider changes the sky on the next frame, is remembered in the browser that moved
-  it, and once one stops the log says them all under `clouds` as `clouds tuned: …`, the line to hand over when a
-  setting should become the default; `reset` puts them back. A browser whose sliders are not where they started
-  draws a sky of its own; a new speed carries the sky on from where it stands rather than jumping, and the speed it
-  started at gives the shared sky back. The first time the clouds are drawn at a level the log says under `clouds`
-  what that costs the graphics card. Every other number of them is in `apps/web/src/sprites/clouds/look.ts`, and the
-  sliders' are `cloudTuning.ts`. See `docs/adr/0098`.
+  away from it, each cloud with its soft violet shadow down and to the left. They live in weather systems, masses
+  swept into bands and swirls with clear country between; they are whole from 6 out to 5.25, and further out the
+  systems lead and the clouds thin away from their edges to nothing by 4.5. Between 7 and 6 they are drawn as the
+  camera among them: swelling about the middle of the screen and sliding out past its edges, misty, the middle kept
+  clear, their shadows fading, nothing left by 7. They lie over the fog's haze and under the marks and the ring,
+  thinning away round each of your marks; they drift with the sea's wind about three minutes across the screen, and
+  are the same in every browser, because where they are comes from the wall clock; a player who has asked for less
+  motion gets them still. They are the **Clouds** part of the Shaders section: `off`, `low` or `high` in its bar,
+  high at every load, where low is a quarter of the pixels at ten frames a second and high every pixel at twenty,
+  and beside it what they are drawing at the camera's zoom, `over the clouds, 100%`, `fading, 40%`, `under the
+  clouds`. Inside it, sliders: how much of the sky is cloud, how big the clumps are, how fast the wind carries them,
+  how fast they change shape (how much faster their finer lumps drift than the clumps, nought for clumps that slide
+  by whole), how much they gather in patches, how soft their edges are, how big the weather systems are and how
+  much those decide where there is cloud, how dark their shadows are and how far from them their shadows fall, how
+  far round a mark they keep clear, and the four zooms the bands change at - under the clouds closer in than 7,
+  over them from 6, fading from 5.25, gone at 4.5. Every slider changes the sky on the next frame, is remembered in
+  the browser that moved it, and once one stops the log says them all under `clouds` as `clouds tuned: …`, the line
+  to hand over when a setting should become the default; `reset` puts them back. A browser whose sliders are not
+  where they started draws a sky of its own; a new speed carries the sky on from where it stands rather than
+  jumping, and the speed it started at gives the shared sky back. The first time the clouds are drawn at a level the
+  log says under `clouds` what that costs the graphics card. Every other number of them is in
+  `apps/web/src/sprites/clouds/look.ts`, and the sliders' are `cloudTuning.ts`. See `docs/adr/0098`.
 - What the program thinks is happening: the debug panel, one space docked down the right-hand side
   holding everything that helps during development, which minimises to a badge and remembers that,
   and is only in a development build: a production build leaves it out whole (0079).
