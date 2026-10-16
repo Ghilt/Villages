@@ -26,7 +26,9 @@ One program, run by hand, never by the checks:
    Tomcat's connection limit raised past 10,000 so that the first limit met is ours. Startup is timed from the
    process starting to its port answering.
 2. It ramps **bots** at it in stages of 100, 1,000, 2,500, 5,000 and 10,000, and holds each stage for 60 seconds
-   after its last bot is in.
+   after its last bot is in. First comes a **warm-up** of 50 for 20 seconds, measured and shown but never judged:
+   a server is cold once, as it starts, and the first short run bent at ten players on a welcome of 745 ms that was
+   only the JVM compiling its first calls; warm, a hundred were welcomed in 22 ms.
 3. A bot is one simulated player on one WebSocket, playing the player's own loop: `hello` with a token of its own,
    a seat taken from its `yourChoice` with `takeAction`, the cells round its seat followed, a pan every 20 seconds
    (unsubscribe, subscribe), a roll and its action every 60 seconds, each with jitter so that they do not move in step.

@@ -800,3 +800,13 @@ and `-- --drop` takes them off; by hand only.
   action` on the event page. Every ten seconds it prints its stage and how long the server took to welcome it,
   answer its commands and send its cells, and why anything failed. Ctrl+C stops it; its house stays in the world
   until the World section's wipe. See `docs/plans/bot-swarm.md`.
+- **The swarm**, how many players one game server carries: `cd backend` then `./gradlew :load-bots:swarm`. It
+  builds the app's jar and starts one game server of its own from it, on a port the operating system picks, its world
+  in memory and its instruments closed, so it is no tree's and leaves nothing behind; then ramps bots at it - a
+  warm-up of 50 for 20 seconds, shown but never judged, then 100, 1,000, 2,500, 5,000 and 10,000, each held a minute -
+  and stops at the first stage that **bends**: the slowest twentieth of the welcomes, the answers or the cells over
+  500 ms, or more than one in a hundred trips or bots failing. A line a stage as it goes: the round trips at p50, p95
+  and p99, failures, bots lost, the server's heap after a collection, its threads and its CPU over the stage, read
+  from outside with `jcmd`; then where it bent and why. The server it started is stopped however the run ends, Ctrl+C
+  included, and its log is `.logs/swarm-server.log`. `--args="--stages=100,500 --hold=20"` makes a short run, and
+  `--warm-up=0` leaves the warm-up out. It is minutes long and loads the whole machine, so no check runs it.

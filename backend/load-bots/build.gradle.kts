@@ -19,3 +19,22 @@ tasks.register<JavaExec>("bot") {
     mainClass = "villages.bots.OneBotKt"
     javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
 }
+
+// The swarm: starts one game server from the app's own jar and ramps bots at it until it bends.
+// ./gradlew :load-bots:swarm, or --args="--stages=100,500 --hold=20" for a short run. See docs/plans/bot-swarm.md.
+tasks.register<JavaExec>("swarm") {
+    group = "application"
+    description = "Measures how many simulated players one game server carries before it bends."
+    dependsOn(":app:bootJar")
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "villages.bots.SwarmMainKt"
+    val launcher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+    javaLauncher = launcher
+    // Many sockets and their buffers; the server under measurement has its own heap.
+    maxHeapSize = "2g"
+    doFirst {
+        systemProperty("villages.java", launcher.get().executablePath.asFile.path)
+        systemProperty("villages.jar", rootDir.resolve("app/build/libs/app.jar").path)
+        systemProperty("villages.logs", rootDir.parentFile.resolve(".logs").path)
+    }
+}
