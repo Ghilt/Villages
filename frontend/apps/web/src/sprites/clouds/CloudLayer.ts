@@ -46,9 +46,10 @@ export function createCloudLayer(renderer: Renderer, repaint: () => void): Cloud
     uCarried: { value: new Float32Array(3), type: 'vec3<f32>' },
     uClumps: { value: new Float32Array(2), type: 'vec2<f32>' },
     uPatches: { value: new Float32Array(2), type: 'vec2<f32>' },
+    uWarp: { value: new Float32Array(2), type: 'vec2<f32>' },
     uCover: { value: 0, type: 'f32' },
-    uPatchWeight: { value: CLOUD_LOOK.patches, type: 'f32' },
-    uEdge: { value: CLOUD_LOOK.edge, type: 'f32' },
+    uPatchWeight: { value: 0, type: 'f32' },
+    uEdge: { value: 0, type: 'f32' },
   });
   const shader = new Shader({
     glProgram: GlProgram.from({
@@ -73,8 +74,15 @@ export function createCloudLayer(renderer: Renderer, repaint: () => void): Cloud
   const still = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   // A still sky is the sky as it was when the page opened.
   const stillAt = Date.now();
-  // How the wind carries the patches, the clumps and their detail: the one sky until a slider moves the speed.
-  let drift = sharedDrift(cloudTuningStore.get().speed);
+  // How the wind carries the patches, the clumps, and their detail with the warp: the one sky until a slider
+  // moves a speed.
+  const paces = (tuning: { speed: number; change: number }) => [
+    tuning.speed * CLOUD_LOOK.patchPace,
+    tuning.speed,
+    tuning.speed * (1 + tuning.change),
+  ];
+  const sharedPaces = paces(CLOUD_DEFAULTS);
+  let drifts = paces(cloudTuningStore.get()).map(sharedDrift);
 
   // What each level costs, measured on the graphics card where it will say, and said once a level.
   const meter = createCostMeter((renderer as WebGLRenderer).gl as WebGL2RenderingContext | undefined);
@@ -119,9 +127,10 @@ export function createCloudLayer(renderer: Renderer, repaint: () => void): Cloud
       const resolution = renderer.resolution;
       const clumps = latticeNear(tuning.size);
       const patches = latticeNear(tuning.size * 16);
+      const warp = latticeNear(tuning.size * 2);
       const at = still ? stillAt : Date.now();
-      drift = respeed(drift, at, tuning.speed, CLOUD_DEFAULTS.speed);
-      const carried = carriedBy(drift, at);
+      const wanted = paces(tuning);
+      drifts = drifts.map((drift, part) => respeed(drift, at, wanted[part]!, sharedPaces[part]!));
       const u = uniforms.uniforms;
       u.uSize[0] = view.width;
       u.uSize[1] = view.height;
@@ -132,14 +141,18 @@ export function createCloudLayer(renderer: Renderer, repaint: () => void): Cloud
       u.uTilt[1] = tilt.sin;
       u.uTilt[2] = tilt.lean;
       u.uAmount = band.clouds;
-      u.uCarried[0] = carried;
-      u.uCarried[1] = carried;
-      u.uCarried[2] = carried;
+      u.uCarried[0] = carriedBy(drifts[0]!, at);
+      u.uCarried[1] = carriedBy(drifts[1]!, at);
+      u.uCarried[2] = carriedBy(drifts[2]!, at);
       u.uClumps[0] = clumps.cell;
       u.uClumps[1] = clumps.around;
       u.uPatches[0] = patches.cell;
       u.uPatches[1] = patches.around;
+      u.uWarp[0] = warp.cell;
+      u.uWarp[1] = warp.around;
       u.uCover = tuning.cover;
+      u.uPatchWeight = tuning.patches;
+      u.uEdge = tuning.edge;
       uniforms.update();
 
       const width = Math.max(1, Math.ceil(view.width * levelLook.resolution));

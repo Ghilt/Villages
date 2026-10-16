@@ -18,6 +18,12 @@ export interface CloudTuning {
   size: number;
   /** How fast the wind carries them, in world units a second. */
   speed: number;
+  /** How much faster than the clumps their detail drifts, so they change shape as they go: nought keeps them whole. */
+  change: number;
+  /** How much the patches decide where there is cloud, against the clumps themselves. */
+  patches: number;
+  /** How soft a cloud's edge is, in the field's own measure; never less than about a pixel. */
+  edge: number;
   /** The zooms the bands change at: closer in than `inFrom` nothing is drawn, past `goneAt` nothing either. */
   inFrom: number;
   overFrom: number;
@@ -29,6 +35,9 @@ export const CLOUD_DEFAULTS: CloudTuning = {
   cover: CLOUD_LOOK.cover,
   size: CLOUD_LOOK.size,
   speed: CLOUD_LOOK.speed,
+  change: CLOUD_LOOK.change,
+  patches: CLOUD_LOOK.patches,
+  edge: CLOUD_LOOK.edge,
   ...CLOUD_LOOK.zooms,
 };
 

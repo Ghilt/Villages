@@ -6,6 +6,7 @@ import type { Lattice } from '@villages/world';
 import { note } from '../log/log';
 import { linkProgram, unitQuad } from '../shaders/webgl';
 
+import { LIGHT_COLOUR, SHADE_COLOUR } from './light';
 import { RELIEF_FRAGMENT, RELIEF_VERTEX } from './reliefShader';
 import { createReliefTiles } from './reliefTiles';
 import type { TileRange } from './reliefTiles';
@@ -53,9 +54,6 @@ interface Tile {
   x: number;
   y: number;
 }
-
-const SHADE_COLOUR = [52 / 255, 44 / 255, 72 / 255] as const;
-const LIGHT_COLOUR = [1, 249 / 255, 230 / 255] as const;
 
 function linked(gl: WebGL2RenderingContext) {
   return { ...linkProgram(gl, RELIEF_VERTEX, RELIEF_FRAGMENT, UNIFORMS, 'relief'), ...unitQuad(gl) };

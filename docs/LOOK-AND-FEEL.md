@@ -139,7 +139,7 @@ each other from the two sides. With no picture the pane is its own paper. `Scene
 light in a dusky violet, faces towards it in a warm cream, the flat left as painted. Heavy on the continent,
 out to zoom 6, where the mountain ranges stand out of the paint as an atlas draws them; easing to a light
 shading by zoom 9 and in, where the scenery and the paint carry the ground and the relief only gives it some
-variety. The light is the one the shadows are cut for, from the upper right. Over a renderer that draws the
+variety. The light is the one the shadows are cut for, from the upper right, and the clouds are lit by it too. Over a renderer that draws the
 ground in hard cells, `plate`, it can come in the same cells, in a few hard tones. See decision record 0090.
 
 **A picture on the map.** Every sprite on the map is a picture Adam hands over, and every one of them has
@@ -234,10 +234,13 @@ third of the sky in all. They lie on the ground: they scale with the zoom and st
 whole out to 5.25 and fading to nothing by 4.5, so the whole world reads clearly further out. Between 7 and 6 the
 camera is in them. They lie over the fog's haze, because there is weather over the unknown too, and under every
 sign, the marks and the ring. They drift with the world's one wind, the sea's, slowly enough to be noticed rather
-than watched, about three minutes across the screen, and every browser sees the same sky. They are to be painted
-like the map, in a few flat tones lit from the upper right, with shadows in the relief's violet; until that step of
-`docs/plans/clouds.md` they are soft and white. Every number of them is in `apps/web/src/sprites/clouds/look.ts`.
-See decision record 0098.
+than watched, about three minutes across the screen, and every browser sees the same sky; the finer lumps drift a
+little faster than the clumps, so a clump changes shape as it goes rather than sliding by whole. **They are painted
+like the map, not photographed**: three flat tones meeting along lines a pixel soft, lit by the one light the hills
+are, from the upper right - a rim of the relief's cream where the sun strikes, white within, and a rim of white gone
+a little towards the relief's violet on the far side - with their edges broken by short strokes along the wind and
+no outline. The lumps a cumulus is built of show as rounded bumps in the outline. Every number of them is in
+`apps/web/src/sprites/clouds/look.ts`, and the light is `apps/web/src/map/light.ts`. See decision record 0098.
 
 **Nothing on the map pops.** A thing arriving fades up, a thing gone fades out and is only then let go
 of, and a thing changing form crosses over rather than swapping. All of it is a fifth of a second or

@@ -8,6 +8,7 @@ import { note } from '../log/log';
 import { drawnAt, shadersStore } from '../shaders/levels';
 import type { ShaderLevel } from '../shaders/levels';
 
+import { LIGHT } from './light';
 import { steepenedAt, strengthAt, strengthByZoom } from './reliefCurve';
 import { OUR_RELIEF_LAYER, createReliefLayer } from './reliefLayer';
 import type { ReliefLook } from './reliefLayer';
@@ -52,12 +53,6 @@ interface ReliefState {
 const relief = createStore<ReliefState>({ level: 'high', drawnBy: 'ours', method: 'igor', pixels: false });
 
 export const reliefStore: Readable<ReliefState> = relief;
-
-/**
- * The light, from the upper right as the scenery's shadows are cut for (`LOOK-AND-FEEL.md`): they fall a third of
- * a sprite's height to the left and a tenth below, so the light stands seventy degrees round from north.
- */
-const LIGHT = { direction: 70, altitude: 40 } as const;
 
 /** Each level at its fullest, before the zoom takes its share: how dark the shade, how bright the light. */
 const STRENGTH: Record<

@@ -31,12 +31,36 @@ export const CLOUD_LOOK = {
   cover: 0.35,
   /** How fast the wind carries them, in world units a second: about three minutes across the screen at 5.5. */
   speed: 12,
+  /**
+   * How fast the patches drift against the clumps, a share of the speed: a little slower, so clumps come and go at a
+   * patch's edge as they pass through it.
+   */
+  patchPace: 0.85,
+  /**
+   * How much faster than the clumps their finer detail and the warp drift, a share of the speed more: so the clumps
+   * change shape as they go, slowly, rather than sliding by whole.
+   */
+  change: 0.35,
+  /** How far the warp pushes the clumps about, a share of a clump's size. Its own cell is twice a clump's. */
+  warp: 0.35,
   /** How much the patches the clumps gather in decide where there is cloud, against the clumps themselves. */
   patches: 0.35,
   /** How soft a cloud's edge is, in the field's own measure; never less than about a pixel. */
-  edge: 0.06,
-  /** A cloud where it is thin, and where it is thick, and how opaque it is at its thickest. */
-  thin: [0.86, 0.87, 0.9],
-  thick: [1, 1, 1],
-  opacity: 0.92,
+  edge: 0.03,
+  /**
+   * The brush their edges are broken by: how far it moves the cut, in the field's own measure, and its strokes'
+   * length along the wind and width across, as shares of a clump. The length is one over a whole number, so the
+   * strokes come round with the clumps.
+   */
+  brush: { strength: 0.08, along: 0.25, across: 0.06 },
+  /**
+   * The three flat tones: where a step of `litReach` of a clump towards the sun leaves the cloud, the relief's cream
+   * taken `litDepth` times as far from white; `middle` within; and where a step of `farReach` away from the sun leaves
+   * it, white taken `farSide` of the way to the relief's violet - a rim of light on the side the sun strikes and of
+   * shade on the far side.
+   */
+  tones: { middle: [0.97, 0.97, 0.98], litDepth: 1.6, farSide: 0.4, litReach: 0.1, farReach: 0.2 },
+  /** How opaque a cloud is at its thin edge, as a share of its middle, and at its middle. */
+  thin: 0.7,
+  opacity: 0.94,
 } as const;

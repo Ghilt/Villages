@@ -1,4 +1,5 @@
 import { WORLD_MASTER_WIDTH } from '../../geometry/world';
+import { LIGHT_COLOUR, SHADE_COLOUR, towardsTheLight } from '../../map/light';
 
 import { CLOUD_LOOK } from './look';
 
@@ -8,15 +9,31 @@ import { CLOUD_LOOK } from './look';
  *
  * The field the clouds are cut from is laid out along the wind: a slow pattern of patches, stretched along it so
  * the clumps gather in loose rows with clear stretches between, and the clumps themselves, a sum of noise at
- * halving sizes, each faded in and out by how big it is on the screen. Every size repeats along the wind once
- * every 32768 world units, the world's width, and the wind's carrying is handed in modulo that, worked out on
- * the processor from the wall clock: `cloudClock.ts`. Every number is in `look.ts`.
+ * halving sizes, the second and third folded into rounded lobes, each faded in and out by how big it is on the
+ * screen. A slow warp pushes the clumps about, and drifts past them with the finer detail, so they change shape as
+ * they go; a brush stretched along the wind breaks their edges. They are painted in three flat tones by which way
+ * the field falls off towards the light: the relief's cream on the side the sun strikes, white, and a violet-grey on
+ * the far side, as the hills are shaded. Every size repeats along the wind once every 32768 world units, the world's
+ * width, and the wind's carrying is handed in modulo that, worked out on the processor from the wall clock:
+ * `cloudClock.ts`. Every number is in `look.ts`.
  */
 
 const float = (value: number): string => (Number.isInteger(value) ? value.toFixed(1) : String(value));
 const colour = (rgb: readonly number[]): string => rgb.map(float).join(', ');
 
 const WIND = (CLOUD_LOOK.wind * Math.PI) / 180;
+const ALONG = [Math.cos(WIND), Math.sin(WIND)] as const;
+const ACROSS = [-Math.sin(WIND), Math.cos(WIND)] as const;
+const LIGHT = towardsTheLight();
+/** Towards the light in the wind's own frame: along it and across it. */
+const SUN = [
+  LIGHT.east * ALONG[0] + LIGHT.south * ALONG[1],
+  LIGHT.east * ACROSS[0] + LIGHT.south * ACROSS[1],
+];
+const T = CLOUD_LOOK.tones;
+const FAR_SIDE = SHADE_COLOUR.map((shade) => 1 + (shade - 1) * T.farSide);
+const LIT_SIDE = LIGHT_COLOUR.map((light) => 1 + (light - 1) * T.litDepth);
+const B = CLOUD_LOOK.brush;
 
 export const CLOUD_VERTEX = `#version 300 es
 precision highp float;
@@ -41,11 +58,13 @@ uniform float uScale;
 uniform vec3 uTilt;
 // How much of the clouds the camera's band draws, nought to one: cloudBands.ts.
 uniform float uAmount;
-// How far the wind has carried the patches, the clumps and their finer detail, in world units modulo the period.
+// How far the wind has carried the patches, the clumps, and their detail with the warp, in world units modulo the
+// period.
 uniform vec3 uCarried;
 // Each lattice's cell along the wind, in world units, and how many of its cells go round the period.
 uniform vec2 uClumps;
 uniform vec2 uPatches;
+uniform vec2 uWarp;
 // How much of the sky is cloud, how much the patches decide where, and how soft an edge is.
 uniform float uCover;
 uniform float uPatchWeight;
@@ -54,10 +73,19 @@ out vec4 fragColor;
 
 const float TAU = 6.2831853;
 const float WORLD = ${float(WORLD_MASTER_WIDTH)};
-const vec2 ALONG = vec2(${float(Math.cos(WIND))}, ${float(Math.sin(WIND))});
-const vec2 ACROSS = vec2(${float(-Math.sin(WIND))}, ${float(Math.cos(WIND))});
-const vec3 THIN = vec3(${colour(CLOUD_LOOK.thin)});
-const vec3 THICK = vec3(${colour(CLOUD_LOOK.thick)});
+const vec2 ALONG = vec2(${float(ALONG[0])}, ${float(ALONG[1])});
+const vec2 ACROSS = vec2(${float(ACROSS[0])}, ${float(ACROSS[1])});
+const vec2 SUN = vec2(${float(SUN[0]!)}, ${float(SUN[1]!)});
+const vec3 LIT = vec3(${colour(LIT_SIDE)});
+const vec3 MIDDLE = vec3(${colour(T.middle)});
+const vec3 FAR_SIDE = vec3(${colour(FAR_SIDE)});
+const float LIT_REACH = ${float(T.litReach)};
+const float FAR_REACH = ${float(T.farReach)};
+const float WARP = ${float(CLOUD_LOOK.warp)};
+const float BRUSH = ${float(B.strength)};
+const float BRUSH_ALONG = ${float(B.along)};
+const float BRUSH_ACROSS = ${float(B.across)};
+const float THIN = ${float(CLOUD_LOOK.thin)};
 const float OPACITY = ${float(CLOUD_LOOK.opacity)};
 
 float hash(ivec2 cell, int salt) {
@@ -100,24 +128,43 @@ float patches(vec2 wind) {
   return noise(at, uPatches.y, 1) + 0.5 * noise(at * 2.0 + vec2(0.0, 17.0), uPatches.y * 2.0, 2);
 }
 
-// The clumps, about -1 to 1: noise at halving sizes, the two coarsest carried with the patches and the finer ones
-// as the detail is, each faded out as it shrinks towards a couple of pixels on the screen.
-float clumps(vec2 wind) {
+// How far the slow warp pushes the clumps about here, in world units; it drifts with the detail.
+vec2 warp(vec2 wind) {
+  vec2 at = vec2((wind.x - uCarried.z) / uWarp.x, wind.y / uWarp.x);
+  return vec2(noise(at, uWarp.y, 40), noise(at + vec2(0.0, 23.0), uWarp.y, 41)) * (WARP * uClumps.x);
+}
+
+// The clumps, about -1 to 1: the first \`most\` sizes of noise at halving sizes, the two coarsest carried with the
+// clumps and the finer ones as the detail is, the second and third folded into rounded lobes, each faded out as it
+// shrinks towards a couple of pixels on the screen.
+float clumps(vec2 wind, int most) {
   float sum = 0.0;
   float amplitude = 1.0;
   float cell = uClumps.x;
   float around = uClumps.y;
   for (int k = 0; k < 7; k += 1) {
     float shown = smoothstep(2.0, 6.0, cell * uScale);
-    if (shown <= 0.0) break;
+    if (k >= most || shown <= 0.0) break;
     float carried = k < 2 ? uCarried.y : uCarried.z;
     vec2 at = vec2((wind.x - carried) / cell, wind.y / cell + float(k) * 31.7);
-    sum += amplitude * shown * noise(at, around, 10 + k);
+    float n = noise(at, around, 10 + k);
+    if (k == 1 || k == 2) {
+      // Folded: rounded bumps with creases between, the lumps a cumulus is built of.
+      n = (abs(n) - 0.17) * 1.6;
+    }
+    sum += amplitude * shown * n;
     amplitude *= 0.5;
     cell *= 0.5;
     around *= 2.0;
   }
   return sum;
+}
+
+// The brush the edges are broken by, about -0.7 to 0.7: strokes long along the wind and thin across it.
+float brush(vec2 wind) {
+  vec2 at = vec2((wind.x - uCarried.y) / (uClumps.x * BRUSH_ALONG), wind.y / (uClumps.x * BRUSH_ACROSS));
+  float shown = smoothstep(1.5, 4.0, uClumps.x * BRUSH_ACROSS * uScale);
+  return shown * noise(at, uClumps.y / BRUSH_ALONG, 60);
 }
 
 void main() {
@@ -127,11 +174,26 @@ void main() {
   float inWorld = step(0.0, ground.x) * step(0.0, ground.y) * step(ground.x, WORLD) * step(ground.y, WORLD);
   // Across the wind is lifted by the world's width, so every lattice row the hash is asked about is positive.
   vec2 wind = vec2(dot(ground, ALONG), dot(ground, ACROSS) + WORLD);
-  float field = 0.5 + 0.5 * clumps(wind) + uPatchWeight * patches(wind);
-  float cut = 0.5 + 0.4 * (1.0 - 2.0 * uCover);
+  vec2 pushed = wind + warp(wind);
+  float patchHere = uPatchWeight * patches(wind);
+  float field = 0.5 + 0.5 * clumps(pushed, 7) + patchHere;
+  float stroke = brush(pushed);
+  float cut = 0.47 + 0.35 * (1.0 - 2.0 * uCover) + BRUSH * stroke;
   float soft = max(uEdge, fwidth(field));
   float cloud = smoothstep(cut - soft, cut + soft, field);
-  vec3 rgb = mix(THIN, THICK, smoothstep(cut, cut + 0.12, field));
-  fragColor = vec4(rgb, 1.0) * (cloud * OPACITY * uAmount * inWorld);
+  // Thin at the edge, whole a little way in.
+  float body = mix(THIN, 1.0, smoothstep(cut, cut + 0.12, field));
+
+  // Lit where a step towards the sun leaves the cloud, shaded where a step away from it does: a rim of cream on
+  // the side the sun strikes and of violet-grey on the far side, read off the clumps' larger shapes.
+  float towards = 0.5 + 0.5 * clumps(pushed + SUN * (LIT_REACH * uClumps.x), 3) + patchHere + 0.04 * stroke;
+  float away = 0.5 + 0.5 * clumps(pushed - SUN * (FAR_REACH * uClumps.x), 3) + patchHere + 0.04 * stroke;
+  // Flat tones meet along a line a pixel or so soft, as paint does, however soft the cloud's own edge is.
+  float tone = max(0.008, fwidth(towards));
+  float lit = 1.0 - smoothstep(cut - tone, cut + tone, towards);
+  float far = 1.0 - smoothstep(cut - tone, cut + tone, away);
+  vec3 rgb = mix(mix(MIDDLE, LIT, lit), FAR_SIDE, far * (1.0 - 0.5 * lit));
+
+  fragColor = vec4(rgb, 1.0) * (cloud * body * OPACITY * uAmount * inWorld);
 }
 `;
