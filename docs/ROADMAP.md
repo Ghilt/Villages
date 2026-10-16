@@ -135,7 +135,8 @@ eye for their experiment; and catalogues, the newest, are built and waiting on A
   saves, and records each version it takes on as one event on the world's own stream, so a retuned number
   explains every income it moves. Every later plan with content in it builds its catalogue's page. The shape
   is decision record 0097 and the steps, one commit each, are in `docs/plans/catalogues.md`; all eighteen are
-  built, in one run Adam asked for on 2026-10-16, and wait on his eye. Adam's own, planned with him on 2026-10-15.
+  built, in one run, verified by Adam and on main since 2026-10-16, with the structures' pictures on their page
+  after. Adam's own, planned with him on 2026-10-15.
 
 MongoDB and RabbitMQ are on the machine, in Docker, from `infra/docker-compose.yml`. The game server keeps
 its world in MongoDB whenever Docker is running, and RabbitMQ carries every event it stores to the read models.
