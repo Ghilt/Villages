@@ -1,23 +1,19 @@
 import { Container, ImageSource, Rectangle, Sprite, Texture } from 'pixi.js';
 
-import { CELL } from '@villages/world';
 import type { CritterAtlasFile } from '@villages/world';
 
 import * as camera from '../../geometry/cameraMath';
-import { classesOfTile, terrainPalette } from '../../geometry/terrainClasses';
-import { FLAT_MAX_ZOOM, TILE, WORLD_MASTER_WIDTH } from '../../geometry/world';
+import { WORLD_MASTER_WIDTH } from '../../geometry/world';
 import { note } from '../../log/log';
-import { visionAt } from '../../fog/fogField';
-import type { FogField } from '../../fog/fogField';
 import { towardsTheLight } from '../../map/light';
 import { drawnAt, shadersStore } from '../../shaders/levels';
 import type { Layer } from '../layer';
-import { currentPointsOf, sceneryMap } from '../scenery/sceneryCells';
 
 import { critterCellOf, eventsAt, posesOf, ringsOf } from './critterClock';
+import { critterGround } from './critterGround';
+import type { CritterSurroundings } from './critterGround';
 import { critterStore, readCritters } from './critterMode';
 import { critterTuningStore } from './critterTuning';
-import type { Cover, Ground } from './critterClock';
 import { ringTexture, shadowTexture } from './drawnInCode';
 import { CRITTERS_LOOK } from './look';
 
@@ -29,7 +25,8 @@ import { CRITTERS_LOOK } from './look';
  * now, so the land in sight is the living land and what is only remembered holds still.
  *
  * Every frame it asks the clock (`critterClock.ts`) what is in flight over the view - which reads the very trees and
- * bushes the scenery drew, the ground's class under them and the fog's sight - and places a sprite for each, a frame of
+ * bushes the scenery drew, the ground's class under them and the fog's sight, `critterGround.ts` - and places a sprite
+ * for each, a frame of
  * its kind's strip from the atlas `world:critters` cuts, and a soft shadow under it, away from the light by its height;
  * one on the ground faces the way it is going across the screen, whichever way the map is turned, and a leaping fish
  * tips along its arc. A fish's rings are drawn in code (`drawnInCode.ts`), flattened as the ground is tipped.
@@ -58,28 +55,10 @@ export interface CritterLayer extends Layer {
   flying: Container;
 }
 
-/** What the scenery is drawn with, so the critters come out of the same trees: as the renderer's scene says it. */
-export interface SceneryHow {
-  on: boolean;
-  tilesRoot: string;
-  dial: number;
-  spacing: number;
-}
-
 const ramp = (from: number, to: number, value: number): number =>
   Math.min(1, Math.max(0, (value - from) / (to - from)));
 
-/**
- * What the renderer knows that the critters need, read every frame: how the scenery is drawn, and what the house sees
- * now - undefined with the fog lifted, where everything is seen, and null for a house that sees nothing.
- */
-export interface CritterSurroundings {
-  scenery: SceneryHow;
-  sight: FogField | null | undefined;
-}
-
 export function createCritterLayer(repaint: () => void, around: () => CritterSurroundings): CritterLayer {
-  const scenery = () => around().scenery;
   const ripples = new Container();
   const shadows = new Container();
   const running = new Container();
@@ -148,71 +127,7 @@ export function createCritterLayer(repaint: () => void, around: () => CritterSur
   const cutAgain = () => void loadArt();
   import.meta.hot?.on(CRITTERS_CUT, cutAgain);
 
-  // The terrain class of every world unit under the view, a zoom 7 tile at a time, asked for as it is needed.
-  let names: string[] | null = null;
-  let askedForNames = false;
-  const classes = new Map<string, Uint8Array | null | 'asking'>();
-  function classAt(x: number, y: number): string | null {
-    const root = scenery().tilesRoot;
-    if (names === null) {
-      if (!askedForNames) {
-        askedForNames = true;
-        void terrainPalette().then((palette) => {
-          names = [];
-          for (const one of palette.classes) names[one.id] = one.name;
-          repaint();
-        });
-      }
-      return null;
-    }
-    const tileX = Math.floor(x / TILE);
-    const tileY = Math.floor(y / TILE);
-    const key = `${root}/${tileX}/${tileY}`;
-    const held = classes.get(key);
-    if (held === undefined) {
-      classes.set(key, 'asking');
-      void terrainPalette()
-        .then((palette) => classesOfTile(root, FLAT_MAX_ZOOM, tileX, tileY, palette))
-        .then((tile) => {
-          classes.set(key, tile);
-          repaint();
-        });
-      return null;
-    }
-    if (held === null || held === 'asking') return null;
-    return names[held[(Math.floor(y) - tileY * TILE) * TILE + (Math.floor(x) - tileX * TILE)]!] ?? null;
-  }
-
-  const world: Ground = {
-    coverIn(fromX, fromY, toX, toY) {
-      const how = scenery();
-      const map = sceneryMap();
-      if (!how.on || map === null) return null;
-      // Every one of the scenery's cells the square reaches, or nothing while any of them is not yet cut.
-      const cover: Cover[] = [];
-      for (let cellY = Math.floor(fromY / CELL); cellY <= Math.floor((toY - 1e-6) / CELL); cellY += 1) {
-        for (let cellX = Math.floor(fromX / CELL); cellX <= Math.floor((toX - 1e-6) / CELL); cellX += 1) {
-          const points = currentPointsOf(how.tilesRoot, cellX, cellY, how.dial, how.spacing, repaint);
-          if (points === undefined) return null;
-          for (const point of points) {
-            if (point.x < fromX || point.x >= toX || point.y < fromY || point.y >= toY) continue;
-            cover.push({
-              x: point.x,
-              y: point.y,
-              kind: map.kinds[point.kind]?.name ?? '',
-              height: point.height,
-            });
-          }
-        }
-      }
-      return cover;
-    },
-    classAt,
-    sees(x, y) {
-      const sight = around().sight;
-      return sight === undefined ? true : sight !== null && visionAt(sight, x, y);
-    },
-  };
+  const world = critterGround(around, repaint);
 
   /** When each critter on the screen was first seen, so one first seen in flight fades up. */
   const firstSeen = new Map<string, number>();
