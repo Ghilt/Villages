@@ -55,7 +55,6 @@ import java.time.Instant
 import java.util.UUID
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.ThreadLocalRandom
 
 private val feedLog = LoggerFactory.getLogger("villages.feed")
@@ -138,21 +137,15 @@ class WorldConfig {
 
     /**
      * The threads the gateway sends frames on, so that a slow socket holds up its own connection and nobody else's,
-     * and a read model's watcher only ever queues. A thread a socket that is sending, made as wanted and let go when
-     * idle; a send that never finishes is ended by Tomcat's own timeout. Without this bean's line in the gateway's
-     * wiring, frames are sent on whatever thread queued them, as they were before. See decision record 0077.
-     *
-     * Not virtual threads, yet: tried on 2026-10-17, the server stopped sending anything at all past about forty
-     * connections, every carrier pinned by a send waiting inside Tomcat's own blocking write, which JDK 21 cannot
-     * unmount from a monitor (experiment 0023). JDK 24 can (JEP 491).
+     * and a read model's watcher only ever queues. A virtual thread a send, which a socket that will not take a frame
+     * parks rather than holds; a send that never finishes is ended by Tomcat's own timeout. Without this bean's line in
+     * the gateway's wiring, frames are sent on whatever thread queued them, as they were before. See decision record
+     * 0077. It needs Java 24 or later: on 21 a send blocked inside Tomcat's own write pinned its carrier, and past forty
+     * connections the server answered nobody (experiment 0023); `SocketCrowdTest` holds it to two hundred at once.
      */
     @Bean(destroyMethod = "shutdownNow")
-    fun gatewaySending(): ExecutorService {
-        val made = AtomicInteger()
-        return Executors.newCachedThreadPool { runnable ->
-            Thread(runnable, "villages-sending-${made.incrementAndGet()}").apply { isDaemon = true }
-        }
-    }
+    fun gatewaySending(): ExecutorService =
+        Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("villages-sending-", 1).factory())
 
     /** Gives a pledge back when its span is up. One wake-up a pledge, and none at all without one. */
     @Bean(initMethod = "start", destroyMethod = "close")
