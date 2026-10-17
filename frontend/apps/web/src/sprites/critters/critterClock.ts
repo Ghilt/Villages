@@ -61,7 +61,7 @@ const LONGEST = Math.max(F.stagger + Math.max(F.seconds, F.shelterSeconds[1]), H
  * to five; null while the ground round it is not all known, so a browser that knows less waits rather than sending
  * it elsewhere.
  */
-function coverNear(
+export function coverNear(
   from: Cover,
   kinds: readonly string[],
   ground: Ground,
@@ -120,38 +120,56 @@ export function eventIn(
   const near = coverNear(from, member.from, ground, F.shelter);
   if (near === null) return null;
   // A bird or two flitting to shelter, or a flock bursting out; a flit needs a tree to go to.
-  const flit = critterHash(cellX, cellY, slot, 6) < F.flits;
+  const flit = draw(6) < F.flits;
   if (flit && near.length === 0) return null;
-  const pair = critterHash(cellX, cellY, slot, 3) < 0.3;
+  return {
+    key,
+    kind: member.kind,
+    behaviour: member.behaviour,
+    startsAt,
+    from,
+    animals: flockOf(from, near, flit, draw),
+  };
+}
+
+/**
+ * The birds of a flush out of `from`, given the trees near it they could take shelter in: a bird or two flitting into
+ * one of them, or a flock bursting out and fanning, some of it dropping into one.
+ */
+export function flockOf(
+  from: Cover,
+  near: readonly Cover[],
+  flit: boolean,
+  draw: (salt: number) => number,
+): Animal[] {
   const count = flit
-    ? pair
+    ? draw(3) < 0.3
       ? 2
       : 1
-    : F.flock[0] + Math.floor(critterHash(cellX, cellY, slot, 3) * (F.flock[1] - F.flock[0] + 1));
-  const heading = critterHash(cellX, cellY, slot, 4) * Math.PI * 2;
+    : F.flock[0] + Math.floor(draw(3) * (F.flock[1] - F.flock[0] + 1));
+  const heading = draw(4) * Math.PI * 2;
   const spread = (F.spread * Math.PI) / 180;
   const [quickest, slowest] = F.shelterSeconds;
-  const animals = Array.from({ length: count }, (_, at) => {
+  return Array.from({ length: count }, (_, at) => {
     const salt = 10 + at * 6;
-    const settles = near.length > 0 && (flit || critterHash(cellX, cellY, slot, salt + 4) < F.settle);
-    const to = settles ? near[Math.floor(critterHash(cellX, cellY, slot, salt + 5) * near.length)]! : null;
+    const settles = near.length > 0 && (flit || draw(salt + 4) < F.settle);
+    const to = settles ? near[Math.floor(draw(salt + 5) * near.length)]! : null;
     const away = to === null ? 0 : Math.hypot(to.x - from.x, to.y - from.y);
+    // Where in the fan it is, from minus one on one side to one on the other.
+    const side = count === 1 ? 0 : (at / (count - 1) - 0.5) * 2;
     return {
       heading:
         to !== null
           ? Math.atan2(to.y - from.y, to.x - from.x)
-          : heading +
-            spread * (count === 1 ? 0 : at / (count - 1) - 0.5) +
-            (critterHash(cellX, cellY, slot, salt) - 0.5) * 0.3,
-      delay: at === 0 ? 0 : critterHash(cellX, cellY, slot, salt + 1) * F.stagger,
-      reach: 0.8 + critterHash(cellX, cellY, slot, salt + 2) * 0.4,
-      phase: critterHash(cellX, cellY, slot, salt + 3),
+          : heading + (spread * side) / 2 + (draw(salt) - 0.5) * 0.3,
+      delay: at === 0 ? 0 : draw(salt + 1) * F.stagger,
+      reach: 0.8 + draw(salt + 2) * 0.4,
+      phase: draw(salt + 3),
       to,
       seconds: to === null ? F.seconds : Math.min(slowest, Math.max(quickest, away / F.shelterSpeed)),
-      bow: (critterHash(cellX, cellY, slot, salt) - 0.5) * 2,
+      bow: (draw(salt) - 0.5) * 2,
     };
   });
-  return { key, kind: member.kind, behaviour: member.behaviour, startsAt, from, animals };
 }
 
 /** Every critter in flight at this moment over these cells, inclusive, at this density. */

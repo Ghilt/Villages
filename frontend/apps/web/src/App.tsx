@@ -40,6 +40,7 @@ import { placeRelief } from './map/relief';
 import { DEFAULT_RENDERER, RENDERERS, applyRenderer } from './map/renderers';
 import { watchInfoMap } from './map/infoMap';
 import { SpriteOverlay } from './sprites/SpriteOverlay';
+import { CritterClicks } from './sprites/critters/CritterClicks';
 import { placeWater } from './water/WaterLayer';
 import { setFlowView, waterStore } from './water/waterMode';
 import { candidatesOf, toCharacterSprite, toStructureSprite } from './mapSprites';
@@ -304,6 +305,8 @@ export function App({ master, devTools }: AppProps) {
             />
           )}
         </Room>
+        {/* Before the areas' and the water's, so that a click putting a critter down is only that. */}
+        <CritterClicks map={map} />
         <AreaOverlay
           map={map}
           worldRoot={worldRoot}

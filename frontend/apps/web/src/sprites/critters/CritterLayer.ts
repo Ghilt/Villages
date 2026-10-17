@@ -9,13 +9,16 @@ import { towardsTheLight } from '../../map/light';
 import { drawnAt, shadersStore } from '../../shaders/levels';
 import type { Layer } from '../layer';
 
-import { critterCellOf, eventsAt, posesOf, ringsOf } from './critterClock';
+import { critterCellOf, eventsAt, lastsFor, posesOf, ringsOf } from './critterClock';
 import { critterGround } from './critterGround';
 import type { CritterSurroundings } from './critterGround';
 import { critterStore, readCritters } from './critterMode';
+import { critterSpawnStore, takeSpawns } from './critterSpawn';
 import { critterTuningStore } from './critterTuning';
 import { ringTexture, shadowTexture } from './drawnInCode';
 import { CRITTERS_LOOK } from './look';
+import { spawnedAt } from './spawned';
+import type { CritterEvent, SpawnAsk } from './types';
 
 /**
  * The critters, as two layers of the sprite canvas: one on the ground under the scenery, of the shadows, of what runs
@@ -33,7 +36,7 @@ import { CRITTERS_LOOK } from './look';
  * While one is in flight it asks for frames at its level's rate, and a few a second otherwise, so the next is seen
  * leaving. One first seen already in flight, where the view has just moved to, fades up, so nothing pops. A player
  * who asked for less motion gets none. Its level, how many and how big are the Critters part of the Shaders
- * section's, and what is flying is said in that part's bar. See decision record 0099.
+ * section's, and what is about is said inside that part. See decision record 0099.
  */
 
 const L = CRITTERS_LOOK;
@@ -67,7 +70,9 @@ export function createCritterLayer(repaint: () => void, around: () => CritterSur
   const flying = new Container();
   const still = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   // A level or a slider moved shows on the next frame even where nothing else is moving the map.
-  const stopWatching = [critterStore, critterTuningStore, shadersStore].map((store) => store.watch(repaint));
+  const stopWatching = [critterStore, critterTuningStore, shadersStore, critterSpawnStore].map((store) =>
+    store.watch(repaint),
+  );
   const shade = shadowTexture();
   const ripple = ringTexture();
   let frames = new Map<string, Texture[]>();
@@ -128,6 +133,23 @@ export function createCritterLayer(repaint: () => void, around: () => CritterSur
   import.meta.hot?.on(CRITTERS_CUT, cutAgain);
 
   const world = critterGround(around, repaint);
+  /** Critters put where a click asked, while they last, and the clicks whose ground is not known yet. */
+  let spawned: CritterEvent[] = [];
+  let waiting: SpawnAsk[] = [];
+
+  /** Every click taken since the last frame made up into a critter beginning now, or said why not. */
+  function spawnFor(seconds: number): void {
+    const asks = [...waiting, ...takeSpawns()];
+    waiting = [];
+    for (const ask of asks) {
+      const made = spawnedAt(ask, seconds, world);
+      if (made === null && seconds - ask.at < 3) waiting.push(ask);
+      else if (made === null) note('critters', `no ${ask.kind}: the ground there is not known yet`);
+      else if (typeof made === 'string') note('critters', `no ${ask.kind} there: ${made}`);
+      else spawned.push(made);
+    }
+    spawned = spawned.filter((event) => seconds < event.startsAt + lastsFor(event));
+  }
 
   /** When each critter on the screen was first seen, so one first seen in flight fades up. */
   const firstSeen = new Map<string, number>();
@@ -160,7 +182,9 @@ export function createCritterLayer(repaint: () => void, around: () => CritterSur
       let rippled = 0;
       let wanted: number | null = null;
       const counted: Record<string, number> = {};
-      if (level !== 'off' && !still && fade > 0 && !noArt && tuning.density > 0) {
+      // What a click asked for comes even where the clock would bring none.
+      const asked = critterSpawnStore.get().asked.length + waiting.length + spawned.length > 0;
+      if (level !== 'off' && !still && fade > 0 && !noArt && (tuning.density > 0 || asked)) {
         if (atlas === null && !loading) void loadArt();
         if (atlas !== null) {
           const layer = camera.standingLayer(view);
@@ -181,7 +205,8 @@ export function createCritterLayer(repaint: () => void, around: () => CritterSur
             toY: critterCellOf(Math.max(...south)) + 1,
           };
           const now = Date.now();
-          const events = eventsAt(cells, now / 1000, tuning.density * tuning.often, world);
+          spawnFor(now / 1000);
+          const events = [...eventsAt(cells, now / 1000, tuning.density * tuning.often, world), ...spawned];
           const light = towardsTheLight();
           // How far the ground is flattened up the screen as it tips: a ring on it is that much wider than tall.
           const [across, up] = [camera.tiltGround(1, 0, layer.tilt), camera.tiltGround(0, 1, layer.tilt)];

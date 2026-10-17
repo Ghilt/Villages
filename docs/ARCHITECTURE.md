@@ -420,7 +420,9 @@ the scenery's own cells (`currentPointsOf`), which of the cast of the class unde
 flies, away or into another tree near it, or which piece of cover near it a squirrel or a hare bounds to
 (`hop.ts`); a fish needs no cover and leaps from a place of the cell drawn for it, where the water there has fish
 (`leap.ts`) - so nothing is stored or sent and every browser has the same ones. `CritterLayer.ts` asks it every frame for
-what is in flight over the view, where the fog's field says the house sees now (`visionAt`), and places a sprite a
+what is in flight over the view, where the fog's field says the house sees now (`visionAt`, read with the scenery
+and the class tiles in `critterGround.ts`), with any a click in the Critters part asked for (`critterSpawn.ts`,
+`spawned.ts`, this window's own and outside the shared world), and places a sprite a
 critter from the atlas `world:critters` cuts, and a shadow, in two containers inside the one the fog uncolours: the
 shadows, a fish's rings on the water, drawn in code, and what runs or leaps on the ground under the scenery, turned
 to face the way it goes across the screen, and what flies over it.

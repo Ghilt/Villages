@@ -1,6 +1,7 @@
 import { shadersStore } from '../shaders/levels';
 import { critterReadingStore, critterStore, setCritterLevel } from '../sprites/critters/critterMode';
 import type { CritterReading } from '../sprites/critters/critterMode';
+import { SPAWNABLE, armSpawn, critterSpawnStore } from '../sprites/critters/critterSpawn';
 import { critterTuningStore, resetCritterTuning, setCritterTuning } from '../sprites/critters/critterTuning';
 import type { CritterTuning } from '../sprites/critters/critterTuning';
 import { useStore } from '../store/useStore';
@@ -10,8 +11,8 @@ import { Sliders } from './Sliders';
 import type { SliderDef } from './Sliders';
 
 /**
- * The critters, a part of the Shaders section: their level in the bar beside what is about now, and on sliders how
- * many there are and how big they are drawn. What each kind is and does is in `sprites/critters/look.ts` and
+ * The critters, a part of the Shaders section: their level in the bar, and inside what is about now, a button a kind
+ * that puts one where you then click on the map, and on sliders how many there are and how big they are drawn. What each kind is and does is in `sprites/critters/look.ts` and
  * `casts.ts`. See decision record 0099.
  */
 
@@ -60,6 +61,7 @@ export function CrittersSection() {
   const on = useStore(shadersStore, (state) => state.on);
   const tuning = useStore(critterTuningStore);
   const reading = useStore(critterReadingStore);
+  const armed = useStore(critterSpawnStore, (state) => state.armed);
   const tools = (
     <button
       type="button"
@@ -75,9 +77,33 @@ export function CrittersSection() {
       name="Critters"
       about={ABOUT}
       tools={tools}
-      reading={<span className="debug__quiet">{sayCritters(reading)}</span>}
       control={<LevelSwitch level={level} onChange={setCritterLevel} overruled={!on} what="the critters" />}
     >
+      <dl className="debug__state">
+        <div className="debug__row">
+          <dt>about now</dt>
+          <dd>{sayCritters(reading)}</dd>
+        </div>
+      </dl>
+      <div className="debug__levers">
+        <span className="debug__quiet">spawn</span>
+        {SPAWNABLE.map((kind) => (
+          <button
+            key={kind}
+            type="button"
+            className={armed === kind ? 'debug__button debug__button--on' : 'debug__button'}
+            onClick={() => armSpawn(armed === kind ? null : kind)}
+            title={`then click on the map to put a ${kind} there`}
+          >
+            {kind}
+          </button>
+        ))}
+      </div>
+      {armed !== null && (
+        <p className="debug__quiet">
+          Click on the map to put a {armed} there, seen or not; again for another. Escape stops.
+        </p>
+      )}
       <Sliders idPrefix="critters" sliders={SLIDERS} values={tuning} onChange={setCritterTuning} />
     </Section>
   );

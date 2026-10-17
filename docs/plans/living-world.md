@@ -185,7 +185,7 @@ of everything that flies; and one in the air, over the scenery and under every m
 | **Land**, which the Grass part becomes | off, low, high | a fold for each motion's kinds of land, each with an on box and its sliders: Grass with its ten as now, Crops, Heath and scrub, Wet land, Ice, salt and sand |
 | **Trees** | off, low, high | how far a gust bends them, how much a crown pales |
 | Clouds | off, low, high | as now |
-| **Critters** | off, low, high: low fifteen frames a second, high thirty | how many, from none to many; how big; a reading of what is on the screen |
+| **Critters** | off, low, high: low fifteen frames a second, high thirty | what is about now; a button a kind that puts one where you then click on the map (Adam's of 2026-10-17); how many, from none to many; how often, to look at them; how big |
 
 A player who asked for less motion gets the land and the trees still, as the grass is now, and no critters at all.
 

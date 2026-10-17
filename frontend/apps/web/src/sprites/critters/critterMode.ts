@@ -8,7 +8,7 @@ import { CRITTERS_LOOK } from './look';
 
 /**
  * How this window draws the critters: their level, off, low or high, low at every load, and what is about at this
- * moment, for the Critters part's bar. A way of looking, neither remembered nor sent. Stores, the one shape every
+ * moment, for the Critters part. A way of looking, neither remembered nor sent. Stores, the one shape every
  * piece of state the page watches takes.
  */
 const critters = createStore<{ level: ShaderLevel }>({ level: 'low' });
@@ -37,7 +37,7 @@ export interface CritterReading {
 
 const reading = createStore<CritterReading>({ about: {}, none: 'not yet drawn' });
 
-/** The reading in the Critters part's bar. Set only when it changes, never every frame. */
+/** What is about, said inside the Critters part. Set only when it changes, never every frame. */
 export const critterReadingStore: Readable<CritterReading> = reading;
 
 export function readCritters(about: Readonly<Record<string, number>>, none: string | null): void {

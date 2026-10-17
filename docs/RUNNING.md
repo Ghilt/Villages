@@ -119,8 +119,13 @@ stage alone, with none of the debug panel in it (decision record 0079).
   it. The same
   critters leave the same bush at the same moment in every browser; one first seen on its way fades up; a player who asked for less motion sees none. They are drawn from the critters' atlas (`world:critters`,
   below). They are the **Critters** part of the Shaders section: `off`, `low` or `high` in its bar, low at every
-  load, low moving them at fifteen frames a second and high at thirty, and beside it what is about now, `3
-  songbirds, 1 hare`, or why there are none, `from zoom 9 in`, `off`. Inside it, three sliders: **how many**, from none to all
+  load, low moving them at fifteen frames a second and high at thirty. Inside it, first what is about now, `3
+  songbirds, 1 hare`, or why there are none, `from zoom 9 in`, `off`; then **spawn** and a button a kind,
+  `songbird`, `squirrel`, `hare` and `fish`: press one and every click on the map puts one of that kind there, now,
+  seen or not - a flock out of the tree or bush nearest the click, a squirrel or a hare from the cover nearest it to
+  more near it, a fish out of the water clicked - this window's own and nobody else's, with the log saying why when
+  nothing of the kind could come there; the cursor is a cross while one is armed, and the button again or escape
+  stops. Then three sliders: **how many**, from none to all
   there can be, where fewer is always some of the same critters every browser has and never others; **how often, to
   look at them**, from as often as a player sees them up to twenty times that, which keeps every critter of the
   lower and adds more, until every cell of a wood has a flock at once - a lever for watching a behaviour, not

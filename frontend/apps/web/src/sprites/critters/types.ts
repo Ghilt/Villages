@@ -74,3 +74,12 @@ export interface Ring {
   radius: number;
   alpha: number;
 }
+
+/** A critter asked for by a click on the map (`critterSpawn.ts`): what, where in world units, and when, in seconds. */
+export interface SpawnAsk {
+  id: number;
+  kind: string;
+  x: number;
+  y: number;
+  at: number;
+}
