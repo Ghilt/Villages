@@ -97,6 +97,11 @@ class QuestObjectives(
         }
     }
 
+    /** Holds back again while a load replays the history: it acts once caught up, as at a start. See 0101. */
+    override fun replaying() {
+        live = false
+    }
+
     /** Sets right what the whole history says the world has met and the house has not ticked, once, as it goes live. */
     override fun caughtUp() {
         live = true

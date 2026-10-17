@@ -34,6 +34,33 @@ abstract class Follower(private val feed: EventFeed) : Resettable, AutoCloseable
      */
     protected open fun caughtUp() {}
 
+    /**
+     * Stops hearing the feed, for a history about to be replaced under it by a load (decision record 0101). It stays
+     * started, and hears nothing until [resume].
+     */
+    fun pause() {
+        synchronized(lock) {
+            subscription?.close()
+            subscription = null
+        }
+    }
+
+    /**
+     * Folds the whole history again from its beginning, as [start] does, once [pause]d and reset: what a load does
+     * to every follower, so that each comes back from the saved history as it would from a start on it. 0101.
+     */
+    fun resume() {
+        synchronized(lock) {
+            check(started && subscription == null) { "${javaClass.simpleName} is not paused" }
+            replaying()
+            subscription = feed.subscribe(Start.FROM_THE_BEGINNING, NamedSubscriber(javaClass.simpleName, ::apply))
+        }
+        caughtUp()
+    }
+
+    /** Called as a [resume] begins, for a listener that holds back while the past replays to hold back again. */
+    protected open fun replaying() {}
+
     /** Whether it has been started: what the app's own test asks of every follower it is made of. */
     val isStarted: Boolean
         get() = synchronized(lock) { started }

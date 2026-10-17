@@ -216,6 +216,11 @@ class StandingEffects(
         Yields.of(spec, standing.level, standing.slots) { person, stat -> if (person in dead) null else stats[person]?.get(stat) }
     }.orEmpty()
 
+    /** Holds back again while a load replays the history: it acts once caught up, as at a start. See 0101. */
+    override fun replaying() {
+        live = false
+    }
+
     /** Sets every holding right, once the history is folded: what each structure's holder should see, and should not. */
     override fun caughtUp() {
         live = true
