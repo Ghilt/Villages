@@ -29,6 +29,12 @@ every reader of the store uses.** The code writes only today's types and reads o
   no type is reached twice and no chain goes round; every retired type keeps its fixture, and it still reads back. The
   stage itself is proved on a made-up retired founding, since no real type is retired yet.
 
+- **A recorded store** is the other half: `contracts/fixtures/stores/` holds whole histories of little worlds, each
+  written once through the real executors (`StoredWorldSpec`, run with `-Dstore.record=true`) and never changed. Every
+  event in every recording must still read and every stream fold, so a change that would strand what an older code
+  wrote fails the checks until it brings its upcaster. The first, of 2026-10-17, holds ten events: two houses, a grant
+  and a spend, a person brought in, moved and grown more pious, a mill raised, filled and handed on.
+
 ## Consequences
 
 - Changing an event's shape after the world-persistence milestone is a new type, a step, a fixture moved and a line in

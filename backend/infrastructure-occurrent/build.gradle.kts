@@ -39,4 +39,9 @@ dependencies {
 }
 
 // One stored event for every catalogued type, and the catalogue that lists the types.
-testsRead("contracts/fixtures/events", "docs/EVENTS.md")
+testsRead("contracts/fixtures/events", "contracts/fixtures/stores", "docs/EVENTS.md")
+
+tasks.test {
+    // Recording today's store is a deliberate act, and the switch has to reach the test's own JVM to do it (0100).
+    systemProperty("store.record", providers.systemProperty("store.record").getOrElse("false"))
+}

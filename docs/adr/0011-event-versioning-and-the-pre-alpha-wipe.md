@@ -2,6 +2,10 @@
 
 - Status: accepted
 - Date: 2026-09-01
+- Amended 2026-10-17: **the way past the wipe is built**, ahead of the world-persistence milestone: an event of an older
+  shape is upcast to today's as it is read (0100), and a store recorded by the code of a day is replayed by every day's
+  checks after (`contracts/fixtures/stores/`). The wipe stays allowed until that milestone; what replaces it now exists.
+  Worlds have been kept in MongoDB, a tree each, since 0092 and 0094.
 
 ## Context
 

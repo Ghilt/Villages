@@ -15,7 +15,7 @@ Every increment lands with the test that proves it. The tests are the reason we 
 | Application | Use cases against the in-memory event store; the connection state machine against a fake socket | Kotest with the Occurrent in-memory store, Vitest | yes |
 | Integration | Real infrastructure: an appended event reaches the broker with the right routing key, a projection updates | Testcontainers with MongoDB and RabbitMQ: `MongoWorldDockerSpec`, `CarryDockerSpec`, `BrokerDockerSpec`, `BridgeDockerSpec`, `BrokerLiveDockerSpec` | yes, needs Docker |
 | Edge | The gateway protocol over a real WebSocket; interface components against a fake client | Spring WebSocket test client, React Testing Library | yes |
-| Contract | The same JSON fixtures parse and round-trip in Kotlin and in TypeScript | Kotest and Vitest over the shared fixtures | yes |
+| Contract | The same JSON fixtures parse and round-trip in Kotlin and in TypeScript; every store ever recorded still reads and folds, through the upcasters (0100) | Kotest and Vitest over the shared fixtures; `StoredWorldSpec` over `contracts/fixtures/stores/` | yes |
 | End to end | The whole stack in a browser: the map is painted, a house is founded, another window sees it, an action is taken with Take action, a restart of the game server forgets nothing | Playwright, in the machine's own Chrome | yes, needs this tree's world cut; the restart and RabbitMQ need Docker |
 | Load | Thousands of simultaneous connections, each a simulated player playing the player's own loop | `backend/load-bots`: a bot over the JDK's WebSocket client, tested against the shared frame fixtures; the swarm itself is run by hand (`docs/plans/bot-swarm.md`) | the bot's tests, yes; a run, no |
 
