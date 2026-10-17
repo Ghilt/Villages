@@ -817,7 +817,9 @@ and `-- --drop` takes them off; by hand only.
   painted or still a placeholder, its size and the file it came from; the marks' pictures in `world/sprites/marks/`,
   the dev server saying of each whether its bytes are still the placeholder the tools drew, the structures' pins
   left to the structures' table; the critters, each kind's frames in a row as its strip holds them and the strip
-  played beside them, frame after frame; the portraits; the scenes. It
+  played beside them, frame after frame; the pieces of the ruins of the towns of 1790, cut into the scenery's atlas, a
+  piece to a row and a culture to a column, each with the height it is cut at, which is the height to paint it at; the
+  portraits; the scenes. It
   changes nothing: Adam paints the files, as `AUTHORING-THE-ART.md` says, and a tree that has cut no atlas yet says
   which tool cuts it.
 - **`/admin/inspect-renders`** is a square of every kind of land side by side, and needs nothing else running: the
