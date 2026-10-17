@@ -18,7 +18,7 @@ import { critterTuningStore } from './critterTuning';
 import { ringTexture, shadowTexture } from './drawnInCode';
 import { CRITTERS_LOOK } from './look';
 import { spawnedAt } from './spawned';
-import type { CritterEvent, SpawnAsk } from './types';
+import type { CritterEvent, Ground, SpawnAsk } from './types';
 
 /**
  * The critters, as two layers of the sprite canvas: one on the ground under the scenery, of the shadows, of what runs
@@ -63,7 +63,15 @@ export interface CritterLayer extends Layer {
 const ramp = (from: number, to: number, value: number): number =>
   Math.min(1, Math.max(0, (value - from) / (to - from)));
 
-export function createCritterLayer(repaint: () => void, around: () => CritterSurroundings): CritterLayer {
+/**
+ * `given` is the ground the critters come out of and over: the map's, read from the scenery, the class tiles and the fog,
+ * unless a page with a world of its own - the renders page's squares - hands it another.
+ */
+export function createCritterLayer(
+  repaint: () => void,
+  around: () => CritterSurroundings,
+  given?: Ground,
+): CritterLayer {
   const ripples = new Container();
   const shadows = new Container();
   const running = new Container();
@@ -134,7 +142,7 @@ export function createCritterLayer(repaint: () => void, around: () => CritterSur
   const cutAgain = () => void loadArt();
   import.meta.hot?.on(CRITTERS_CUT, cutAgain);
 
-  const world = critterGround(around, repaint);
+  const world = given ?? critterGround(around, repaint);
   /** Critters put where a click asked, while they last, and the clicks whose ground is not known yet. */
   let spawned: CritterEvent[] = [];
   let waiting: SpawnAsk[] = [];

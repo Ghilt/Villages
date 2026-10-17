@@ -118,6 +118,13 @@ export const INSPECT_VIEWS: readonly InspectView[] = [
     load: () => import('./pictures/Pictures').then((page) => page.Pictures),
   },
   {
+    path: '/admin/inspect-renders',
+    title: 'Renders',
+    what: "A square of every kind of land and of every critter, drawn by the map's own shaders side by side at one zoom.",
+    needs: 'nothing',
+    load: () => import('./renders/InspectRenders').then((page) => page.InspectRenders),
+  },
+  {
     path: '/admin/inspect-performance',
     title: 'Performance',
     what: 'How many players one game server carries before it bends, run by run, from the history the bot swarm writes.',

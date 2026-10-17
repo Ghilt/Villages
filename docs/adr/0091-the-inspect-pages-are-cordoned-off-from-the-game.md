@@ -41,3 +41,13 @@ repository: a `world:` script with no place on the page, a reader that moved, or
 - A new inspect page is added to `inspectViews.ts`, routed in `main.tsx` with `import()`, and listed in
   `docs/RUNNING.md`. A new reach into the game is a line in the boundary test's list, which is where it is
   argued.
+
+## Amendment, 2026-10-17: the renders page draws with the game's own layers
+
+The renders page, `/admin/inspect-renders`, asked for by Adam on 2026-10-17, is a square of every kind of land and of
+every critter drawn as the map draws them, to verify a look on without hunting the map for it. A copy of the land,
+the trees and the critters would be a second renderer that could disagree with the first, which is the one thing
+such a page must not do; so it takes the sprite canvas's own layers from `sprites/`, the geometry they are placed by
+from `geometry/`, and which master is drawn from `map/masters.ts`, and hands them a world of its own. Those three
+folders are added to the boundary test's list. It is still an instrument: it changes nothing, and nothing in the
+game imports it.

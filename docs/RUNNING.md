@@ -804,6 +804,15 @@ and `-- --drop` takes them off; by hand only.
   played beside them, frame after frame; the portraits; the scenes. It
   changes nothing: Adam paints the files, as `AUTHORING-THE-ART.md` says, and a tree that has cut no atlas yet says
   which tool cuts it.
+- **`/admin/inspect-renders`** is a square of every kind of land side by side, and needs nothing else running: the
+  thirty-two of `world/palette.json`, by its groups, each painted as the map paints it with the land moving on it,
+  its trees and bushes grown by the map's own scatter bending in the wind, and the critters the clock brings there;
+  and under them a square for each critter - a songbird, a squirrel, a hare, a fish, a hawk - one put in its middle
+  every few seconds. One zoom, 10, and a camera that never moves, so a look is compared across every kind at once
+  without hunting the map for it; as many squares to a row as the window is wide. The levels and the sliders of the
+  debug panel's Shaders section are the game's own, and those it remembers are as the game was left in this
+  browser. The water's own motion is the map's and the clouds the sky's, and neither is drawn there. It changes
+  nothing. It draws the game's own layers over a world of the page's own (`apps/web/src/admin/renders/`).
 - **`/admin/inspect-architecture`** is how the world is set up, and needs nothing else running. Along the top,
   the numbers: how long a brand-new worktree takes to the game with its world borrowed, how long a master's
   world takes from its painting when nobody has made it, how many tools bake it, and how many baked files the

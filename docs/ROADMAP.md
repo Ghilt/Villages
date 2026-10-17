@@ -156,7 +156,8 @@ eye for their experiment; and catalogues, the newest, are built and waiting on A
   Adam's notes on them: a button a kind in the Critters part that puts one where you click, and a burst flying off
   like a shotgun's blast, and step 13, a hawk overhead. Steps 6 and 7, the land layer the grass becomes and
   crops, are built, verified and on main; in the run Adam picked on 2026-10-17, step 8, heath, scrub and tundra, is
-  built and waits on his eye. Asked for by Adam on 2026-10-16.
+  built and waits on his eye, with an inspect page of a square of every kind of land and every critter,
+  `/admin/inspect-renders`, asked for by Adam that day to verify them on. Asked for by Adam on 2026-10-16.
 
 MongoDB and RabbitMQ are on the machine, in Docker, from `infra/docker-compose.yml`. The game server keeps
 its world in MongoDB whenever Docker is running, and RabbitMQ carries every event it stores to the read models.

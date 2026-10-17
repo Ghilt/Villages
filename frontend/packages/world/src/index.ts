@@ -11,7 +11,7 @@
  * worked examples are `@villages/world/testing`. A page file that reaches through either is an ESLint error.
  */
 
-export { NO_STANDS, decodeStands } from './stands.ts';
+export { NO_FAVOURITE, NO_STANDS, decodeStands } from './stands.ts';
 export type { StandChunk } from './stands.ts';
 export type { Kind } from './biome.ts';
 export type { ArtAtlasFile } from './art.ts';

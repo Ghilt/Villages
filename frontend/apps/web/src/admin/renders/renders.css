@@ -1,0 +1,38 @@
+/*
+ * The renders page (InspectRenders.tsx): one canvas with every square drawn on it, on the page's own paper between
+ * them, and each square's name over its top edge, in the room left above it.
+ */
+
+.renders {
+  overflow-x: auto;
+  margin: 0.75rem 0 1.5rem;
+}
+
+.renders__board {
+  position: relative;
+}
+
+.renders__canvas canvas {
+  display: block;
+}
+
+/* On a chip of the paper, so a name reads over the crowns of the trees reaching up into the room above a square. */
+.renders__label {
+  position: absolute;
+  transform: translateY(-100%);
+  box-sizing: border-box;
+  padding: 0.05rem 0.3rem;
+  margin-top: -0.2rem;
+  background: rgb(250 246 236 / 85%);
+  border-radius: 2px;
+  overflow: hidden;
+  font-size: 0.72rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+.renders__motion {
+  opacity: 0.6;
+}

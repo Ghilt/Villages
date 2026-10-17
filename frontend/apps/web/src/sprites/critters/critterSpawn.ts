@@ -39,9 +39,11 @@ export function armSpawn(kind: Spawnable | null): void {
 
 let asks = 0;
 
-/** A click on the map while a kind is armed: one of it there, now. */
-export function askSpawn(x: number, y: number): void {
-  const kind = spawn.get().armed;
+/**
+ * A click on the map while a kind is armed: one of it there, now. A page that puts its own - the renders page's
+ * squares - names the kind instead of arming one.
+ */
+export function askSpawn(x: number, y: number, kind: Spawnable | null = spawn.get().armed): void {
   if (kind === null) return;
   asks += 1;
   spawn.set({

@@ -59,6 +59,16 @@ export interface LandLayer extends Layer {
   sprite: Sprite;
 }
 
+/**
+ * Where the land layer reads what each world unit is: a flat tile of class ids, by the tiles root it is asked for and
+ * the tile's column and row at the deepest zoom, null for one that is not there. The map's own tiles, unless a page
+ * with a world of its own - the renders page's squares - hands it another.
+ */
+export type ClassTiles = (root: string, x: number, y: number) => Promise<Uint8Array | null>;
+
+const servedTiles: ClassTiles = async (root, x, y) =>
+  classesOfTile(root, FLAT_MAX_ZOOM, x, y, await terrainPalette());
+
 interface Mask {
   range: TileRange;
   root: string;
@@ -69,7 +79,12 @@ interface Mask {
   counts: readonly number[];
 }
 
-export function createLandLayer(renderer: Renderer, tilesRoot: () => string, repaint: () => void): LandLayer {
+export function createLandLayer(
+  renderer: Renderer,
+  tilesRoot: () => string,
+  repaint: () => void,
+  tilesOf: ClassTiles = servedTiles,
+): LandLayer {
   const uniforms = new UniformGroup({
     uSize: { value: new Float32Array(2), type: 'vec2<f32>' },
     uCentre: { value: new Float32Array(2), type: 'vec2<f32>' },
@@ -182,7 +197,7 @@ export function createLandLayer(renderer: Renderer, tilesRoot: () => string, rep
     const asked: Promise<Uint8Array | null>[] = [];
     for (let y = range.fromY; y <= range.toY; y += 1) {
       for (let x = range.fromX; x <= range.toX; x += 1) {
-        asked.push(classesOfTile(root, FLAT_MAX_ZOOM, x, y, palette));
+        asked.push(tilesOf(root, x, y));
       }
     }
     const tiles = await Promise.all(asked);
