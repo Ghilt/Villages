@@ -60,7 +60,7 @@ class Mechanics(
     val dialogueRows: DialoguesByHouse,
     val quests: QuestService,
     val questRows: QuestsByHouse,
-    val stands: Stands = Stands { _, _, _ -> null },
+    val stands: Stands = Stands { _, _, _, _ -> null },
     val waters: WaterAt = WaterAt.NOWHERE,
     val structures: StructureService,
     val antarctica: Antarctica,

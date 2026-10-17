@@ -5,7 +5,7 @@
  */
 
 /** Sent on the handshake so that the gateway can refuse a client it cannot speak to. */
-export const PROTOCOL_VERSION = 56;
+export const PROTOCOL_VERSION = 57;
 
 export {
   MAX_ZOOM,
@@ -23,7 +23,14 @@ export type { Tile, View } from './cells';
 export { EQUATOR_KM, mercatorX, mercatorY, reachAcross, reaches } from './reach';
 export { coverageOf } from './coverage';
 export type { Coverage, CoverageCircle } from './coverage';
-export { STANDS_FROM_ZOOM, STAND_TILES, STAND_TILE_MARGIN, standTilesUnder } from './standTiles';
+export {
+  STANDS_FROM_ZOOM,
+  STAND_LAYERS,
+  STAND_TILES,
+  STAND_TILE_MARGIN,
+  standTilesUnder,
+} from './standTiles';
+export type { StandLayer } from './standTiles';
 
 export {
   MONTHS,

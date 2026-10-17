@@ -1,4 +1,11 @@
-import type { ChoiceView, CommandPayload, OptionView, Point, ServerFrame } from '@villages/protocol';
+import type {
+  ChoiceView,
+  CommandPayload,
+  OptionView,
+  Point,
+  ServerFrame,
+  StandLayer,
+} from '@villages/protocol';
 
 import { NOTHING_IN_FLIGHT, answered, goingOut } from './commands';
 import type { InFlight, Outgoing } from './commands';
@@ -29,8 +36,8 @@ export interface SessionPorts {
   schedule: Schedule;
   /** A fresh UUID, for a command's id. See decision record 0035. */
   newId(): string;
-  /** The scenery's stands for a tile, as far as the fog lets them through, and which cells are followed. See 0067. */
-  standsArrived(x: number, y: number, stands: string): void;
+  /** A layer of the stands for a tile, as far as the fog lets them through, and which cells are followed. See 0067. */
+  standsArrived(x: number, y: number, stands: string, layer: StandLayer): void;
   followStands(cells: string[]): void;
   /** Arrives anew, for a world that has been emptied: a reload, in a browser. See decision record 0036. */
   arriveAnew(): void;
@@ -175,7 +182,7 @@ export function createSession(ports: SessionPorts): Session {
     },
     snapshot: (frame) => following.answered(frame.cell),
     // What the scenery grows from, as far as the fog lets it through. See decision record 0067.
-    stands: (frame) => ports.standsArrived(frame.x, frame.y, frame.stands),
+    stands: (frame) => ports.standsArrived(frame.x, frame.y, frame.stands, frame.layer),
     batch: () => undefined,
     // The gateway let these go. Asking again is what gets fresh snapshots.
     resync: (frame) => connection?.send({ type: 'subscribeCells', cells: frame.cells }),

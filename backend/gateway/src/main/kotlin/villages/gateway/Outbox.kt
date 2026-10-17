@@ -95,12 +95,12 @@ internal class Outbox(private val transport: Outbound, private val sendOn: Execu
     /** What makes two frames the same one, the later replacing the earlier; null for a frame that always goes. */
     private fun kindOf(frame: ServerFrame): Any? = when (frame) {
         is Snapshot -> SnapshotOf(frame.cell)
-        is StandsFrame -> StandsOf(frame.x, frame.y)
+        is StandsFrame -> StandsOf(frame.layer, frame.x, frame.y)
         is YourHouse, is YourKeyFigures, is YourHoldings, is YourSight, is YourDialogues, is YourChoice -> frame::class
         else -> null
     }
 
     private data class SnapshotOf(val cell: String)
 
-    private data class StandsOf(val x: Int, val y: Int)
+    private data class StandsOf(val layer: String, val x: Int, val y: Int)
 }

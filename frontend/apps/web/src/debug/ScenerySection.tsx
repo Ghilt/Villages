@@ -205,6 +205,13 @@ export function ScenerySection() {
           </dd>
         </div>
         <div className="debug__row">
+          <dt>ruins</dt>
+          <dd>
+            {drawn.ruins.stands.toLocaleString()} ruined {drawn.ruins.stands === 1 ? 'town' : 'towns'} held,
+            in {drawn.ruins.tiles.toLocaleString()} tiles the game server sent
+          </dd>
+        </div>
+        <div className="debug__row">
           <dt>frame</dt>
           <dd>
             {drawn.frameGapMs === 0

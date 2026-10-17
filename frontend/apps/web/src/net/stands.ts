@@ -1,11 +1,14 @@
 import { STAND_TILES, standTilesUnder } from '@villages/protocol';
+import type { StandLayer } from '@villages/protocol';
 import { NO_STANDS, decodeStands } from '@villages/world';
 import type { StandChunk } from '@villages/world';
 
 import { TILE } from '../geometry/world';
 
 /**
- * The stands the gateway has sent this page, a zoom 7 tile at a time, and nothing else.
+ * The stands the gateway has sent this page, a layer of a zoom 7 tile at a time, and nothing else: the scenery's own,
+ * `biome`, and the towns of 1790 laid in ruins, `ruins` (decision record 0101). Each layer is kept apart, and every
+ * question asks of the scenery's unless it names the other.
  *
  * The scenery grows from stands, and since decision 0067 they are the server's to hand out: a page is sent the
  * stands of every tile under the cells it follows, as far as they touch ground its house has revealed, once
@@ -27,10 +30,10 @@ export interface SentStands {
 /** A tile off the top or the bottom of the world, where nothing stands and nothing is sent. */
 const OFF_THE_WORLD: SentStands = { chunk: NO_STANDS, records: '' };
 
-const sent = new Map<number, SentStands>();
+const sent: Record<StandLayer, Map<number, SentStands>> = { biome: new Map(), ruins: new Map() };
 /** The tiles under the cells being followed: the only ones the gateway sends, and so the only ones kept. */
 let coming = new Set<number>();
-const arrivals = new Set<(tile: number, stands: SentStands) => void>();
+const arrivals = new Set<(tile: number, stands: SentStands, layer: StandLayer) => void>();
 const followings = new Set<() => void>();
 
 /** A tile's key, `y * STAND_TILES + x`, with the column wrapped round the world as the gateway's are. */
@@ -53,15 +56,21 @@ function bytesOf(records: string): Uint8Array {
  * changed; a frame for a tile nothing is followed over any more was sent before the gateway heard so, and it has
  * let the tile go too.
  */
-export function standsArrived(tileX: number, tileY: number, records: string): void {
+export function standsArrived(
+  tileX: number,
+  tileY: number,
+  records: string,
+  layer: StandLayer = 'biome',
+): void {
   const tile = tileKey(tileX, tileY);
-  if (!coming.has(tile) || sent.get(tile)?.records === records) {
+  const held = sent[layer];
+  if (!coming.has(tile) || held.get(tile)?.records === records) {
     return;
   }
   const stands = { chunk: decodeStands(bytesOf(records), tileX, tileY, TILE), records };
-  sent.set(tile, stands);
+  held.set(tile, stands);
   for (const told of arrivals) {
-    told(tile, stands);
+    told(tile, stands, layer);
   }
 }
 
@@ -71,9 +80,11 @@ export function standsArrived(tileX: number, tileY: number, records: string): vo
  */
 export function followStandsUnder(cells: readonly string[]): void {
   coming = new Set(cells.flatMap(standTilesUnder));
-  for (const tile of sent.keys()) {
-    if (!coming.has(tile)) {
-      sent.delete(tile);
+  for (const held of Object.values(sent)) {
+    for (const tile of held.keys()) {
+      if (!coming.has(tile)) {
+        held.delete(tile);
+      }
     }
   }
   for (const told of followings) {
@@ -87,11 +98,11 @@ export function followStandsUnder(cells: readonly string[]): void {
  * Null means *not yet*, as a missing terrain tile does, and for the same reason: 0022 says ground already on the
  * screen must not change under the player, and a wood thickening when its stands land is that fault.
  */
-export function sentStandsOf(tileX: number, tileY: number): SentStands | null {
+export function sentStandsOf(tileX: number, tileY: number, layer: StandLayer = 'biome'): SentStands | null {
   if (tileY < 0 || tileY >= STAND_TILES) {
     return OFF_THE_WORLD;
   }
-  return sent.get(tileKey(tileX, tileY)) ?? null;
+  return sent[layer].get(tileKey(tileX, tileY)) ?? null;
 }
 
 /** Whether the gateway will send this tile: whether a followed cell is over it. */
@@ -99,8 +110,10 @@ export function standsComing(tile: number): boolean {
   return coming.has(tile);
 }
 
-/** Told of every tile that arrives new or changed. Returns what stops it. */
-export function onStandsArrived(listener: (tile: number, stands: SentStands) => void): () => void {
+/** Told of every layer of a tile that arrives new or changed, and which layer. Returns what stops it. */
+export function onStandsArrived(
+  listener: (tile: number, stands: SentStands, layer: StandLayer) => void,
+): () => void {
   arrivals.add(listener);
   return () => arrivals.delete(listener);
 }
@@ -111,17 +124,18 @@ export function onStandsFollowed(listener: () => void): () => void {
   return () => followings.delete(listener);
 }
 
-/** How many tiles are held, and the stands in them, for the panel. */
-export function standsHeld(): { tiles: number; stands: number } {
+/** How many tiles of a layer are held, and the stands in them, for the panel. */
+export function standsHeld(layer: StandLayer = 'biome'): { tiles: number; stands: number } {
   let stands = 0;
-  for (const tile of sent.values()) {
+  for (const tile of sent[layer].values()) {
     stands += tile.chunk.count;
   }
-  return { tiles: sent.size, stands };
+  return { tiles: sent[layer].size, stands };
 }
 
 /** Everything sent is forgotten, and nothing is followed. For the tests. */
 export function forgetStands(): void {
-  sent.clear();
+  sent.biome.clear();
+  sent.ruins.clear();
   coming = new Set();
 }

@@ -3,6 +3,7 @@ package villages.gateway
 import villages.application.Stands
 import villages.domain.PlayerId
 import villages.protocol.Hello
+import villages.protocol.STAND_LAYERS
 import villages.protocol.STAND_TILES
 import villages.protocol.StandRecords
 import villages.protocol.StandsFrame
@@ -10,9 +11,11 @@ import villages.protocol.standTilesUnder
 import java.util.Base64
 
 /**
- * The scenery's stands: a page is sent them tile by tile under the cells it holds, for the world it draws, which
- * hello names, and only where they touch ground its house has revealed. A tile is sent once while it is held, and
- * again only when what the fog lets through of it changes. See decision records 0061, 0067 and 0075.
+ * The stands of the sprite map's layers - the scenery's and the ruined towns' - a page is sent tile by tile under the
+ * cells it holds, every layer of a tile, for the world it draws, which hello names, and only where they touch ground
+ * its house has revealed. A tile's layer is sent once while it is held, empty where the world has no such layer so
+ * the page knows it has all there is, and again only when what the fog lets through of it changes. See decision
+ * records 0061, 0067, 0075 and 0101.
  */
 internal class StandsPart(private val stands: Stands) : Part {
     /** What one connection draws, and what it has been sent of it. */
@@ -21,8 +24,8 @@ internal class StandsPart(private val stands: Stands) : Part {
         @Volatile
         var master: String? = null
 
-        /** The tiles a held cell is over, as `y * STAND_TILES + x`, with what was last sent of each. */
-        val tiles = HashMap<Int, ByteArray>()
+        /** The tiles a held cell is over, as `y * STAND_TILES + x`, with what was last sent of each, a layer at a time. */
+        val tiles = HashMap<Int, Array<ByteArray?>>()
     }
 
     private fun sentTo(connection: Gateway.Connection): Sent = connection.keptBy(this) { Sent() }
@@ -69,25 +72,28 @@ internal class StandsPart(private val stands: Stands) : Part {
         for (tile in tiles) {
             val x = tile % STAND_TILES
             val y = tile / STAND_TILES
-            val through = standsOf(sent.master, looking, x, y)
-            val send = synchronized(sent) {
-                val was = sent.tiles[tile]
-                if ((again && was == null) || (was != null && was.contentEquals(through))) {
-                    false
-                } else {
-                    sent.tiles[tile] = through
-                    true
+            for ((at, layer) in STAND_LAYERS.withIndex()) {
+                val through = standsOf(sent.master, layer, looking, x, y)
+                val send = synchronized(sent) {
+                    val held = sent.tiles[tile]
+                    val was = held?.get(at)
+                    if ((again && was == null) || (was != null && was.contentEquals(through))) {
+                        false
+                    } else {
+                        sent.tiles.getOrPut(tile) { arrayOfNulls(STAND_LAYERS.size) }[at] = through
+                        true
+                    }
                 }
-            }
-            if (send) {
-                connection.out.send(StandsFrame(x, y, Base64.getEncoder().encodeToString(through)))
+                if (send) {
+                    connection.out.send(StandsFrame(x, y, Base64.getEncoder().encodeToString(through), layer))
+                }
             }
         }
     }
 
-    /** The stands of one tile of a world that a way of looking lets through. A world with none of them has none. */
-    private fun standsOf(master: String?, looking: Looking, x: Int, y: Int): ByteArray {
-        val all = master?.let { stands.of(it, x, y) } ?: return ByteArray(0)
+    /** The stands of one layer of one tile of a world that a way of looking lets through. A world with none has none. */
+    private fun standsOf(master: String?, layer: String, looking: Looking, x: Int, y: Int): ByteArray {
+        val all = master?.let { stands.of(it, layer, x, y) } ?: return ByteArray(0)
         if (!looking.fogged) {
             return all
         }

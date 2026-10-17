@@ -54,6 +54,25 @@ describe('the stands the gateway sent', () => {
     expect(standsHeld()).toEqual({ tiles: 1, stands: 1 });
   });
 
+  it('keeps the ruins of a tile apart from its scenery, and lets both go with the tile', () => {
+    const layers: string[] = [];
+    const stop = onStandsArrived((_, __, layer) => layers.push(layer));
+    followStandsUnder([cellInside(70, 37)]);
+    standsArrived(70, 37, recordsOf([oneStand(70 * 256 + 10, 37 * 256 + 20, 6)], 70, 37));
+    standsArrived(70, 37, recordsOf([oneStand(70 * 256 + 40, 37 * 256 + 40, 30)], 70, 37), 'ruins');
+    stop();
+
+    expect(sentStandsOf(70, 37)?.chunk.x[0]).toBe(70 * 256 + 10);
+    expect(sentStandsOf(70, 37, 'ruins')?.chunk.reach[0]).toBe(30);
+    expect(standsHeld()).toEqual({ tiles: 1, stands: 1 });
+    expect(standsHeld('ruins')).toEqual({ tiles: 1, stands: 1 });
+    expect(layers).toEqual(['biome', 'ruins']);
+
+    followStandsUnder([]);
+    expect(sentStandsOf(70, 37, 'ruins')).toBeNull();
+    expect(standsHeld('ruins')).toEqual({ tiles: 0, stands: 0 });
+  });
+
   it('keeps an empty tile as empty, which is all there is, rather than not yet', () => {
     followStandsUnder([cellInside(70, 37)]);
     standsArrived(70, 37, '');

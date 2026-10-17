@@ -45,6 +45,10 @@ private val farOff = stockholmStand(100.0, 6.0)
 /** The records a stands frame carries, as bytes to compare. */
 private fun recordsOf(frame: StandsFrame): List<Byte> = Base64.getDecoder().decode(frame.stands).toList()
 
+/** The frames of one layer of the stands among what was sent: the scenery's unless said. */
+private fun List<Any?>.standsOf(layer: String = "biome"): List<StandsFrame> =
+    filterIsInstance<StandsFrame>().filter { it.layer == layer }
+
 /** The gateway: the scenery's stands, sent as far as the fog lets them through. The rig is GatewayRig.kt. */
 class GatewayStandsSpec : StringSpec({
 
@@ -58,7 +62,7 @@ class GatewayStandsSpec : StringSpec({
 
         mine.receive(subscribe(STOCKHOLM_Z10))
 
-        val stands = sent.filterIsInstance<StandsFrame>().single()
+        val stands = sent.standsOf().single()
         (stands.x to stands.y) shouldBe (70 to 37)
         recordsOf(stands) shouldBe (atTheSeat + justOutside).toList()
         // After the cell's own snapshot, which is what the page draws first.
@@ -75,11 +79,11 @@ class GatewayStandsSpec : StringSpec({
         sent.clear()
 
         mine.receive(fogOfWar(false))
-        recordsOf(sent.filterIsInstance<StandsFrame>().single()) shouldBe (atTheSeat + justOutside + farOff).toList()
+        recordsOf(sent.standsOf().single()) shouldBe (atTheSeat + justOutside + farOff).toList()
         sent.clear()
 
         mine.receive(fogOfWar(true))
-        recordsOf(sent.filterIsInstance<StandsFrame>().single()) shouldBe (atTheSeat + justOutside).toList()
+        recordsOf(sent.standsOf().single()) shouldBe (atTheSeat + justOutside).toList()
     }
 
     "vision given near a held tile sends it again with what it now reaches, and a sight change that alters it not sends nothing" {
@@ -93,12 +97,12 @@ class GatewayStandsSpec : StringSpec({
 
         // Over the far stand: a hundred units east of the seat on the map.
         mine.receive(givingVision(59.33, 18.07 + 100.0 / 32768.0 * 360.0, commandNumber(1)))
-        recordsOf(sent.filterIsInstance<StandsFrame>().single()) shouldBe (atTheSeat + justOutside + farOff).toList()
+        recordsOf(sent.standsOf().single()) shouldBe (atTheSeat + justOutside + farOff).toList()
         sent.clear()
 
         mine.receive(givingVision(HELSINKI_LAT, HELSINKI_LON, commandNumber(2)))
         sent.filterIsInstance<YourSight>().shouldNotBeEmpty()
-        sent.filterIsInstance<StandsFrame>().shouldBeEmpty()
+        sent.standsOf().shouldBeEmpty()
     }
 
     "a tile is sent once while any held cell is over it, and afresh once none is and one comes back" {
@@ -111,16 +115,16 @@ class GatewayStandsSpec : StringSpec({
         sent.clear()
 
         mine.receive(subscribe(STOCKHOLM_Z10, eastOfIt))
-        sent.filterIsInstance<StandsFrame>() shouldHaveSize 1
+        sent.standsOf() shouldHaveSize 1
         sent.clear()
 
         mine.receive(unsubscribe(STOCKHOLM_Z10))
         mine.receive(subscribe(STOCKHOLM_Z10))
-        sent.filterIsInstance<StandsFrame>().shouldBeEmpty()
+        sent.standsOf().shouldBeEmpty()
 
         mine.receive(unsubscribe(STOCKHOLM_Z10, eastOfIt))
         mine.receive(subscribe(STOCKHOLM_Z10))
-        recordsOf(sent.filterIsInstance<StandsFrame>().single()) shouldBe atTheSeat.toList()
+        recordsOf(sent.standsOf().single()) shouldBe atTheSeat.toList()
     }
 
     "a tile nothing stands in is sent empty, so the page knows it has all there is" {
@@ -131,7 +135,7 @@ class GatewayStandsSpec : StringSpec({
 
         mine.receive(subscribe(STOCKHOLM_Z10))
 
-        sent.filterIsInstance<StandsFrame>().single().stands shouldBe ""
+        sent.standsOf().single().stands shouldBe ""
     }
 
     "a page that names no master is sent no stands, and one the folder has none of is sent every tile empty" {
@@ -141,13 +145,36 @@ class GatewayStandsSpec : StringSpec({
         nameless.receive(founding())
         toldNothing.clear()
         nameless.receive(subscribe(STOCKHOLM_Z10))
-        toldNothing.filterIsInstance<StandsFrame>().shouldBeEmpty()
+        toldNothing.standsOf().shouldBeEmpty()
 
         val (wrong, toldEmpty) = rig.introduced(token = UUID.randomUUID().toString(), master = "nowhere")
         wrong.receive(founding())
         toldEmpty.clear()
         wrong.receive(subscribe(STOCKHOLM_Z10))
-        toldEmpty.filterIsInstance<StandsFrame>().single().stands shouldBe ""
+        toldEmpty.standsOf().single().stands shouldBe ""
+    }
+
+    "a tile's ruins are sent beside its scenery, as far as the fog lets them through, and empty where there are none" {
+        val rig = Rig()
+        rig.standsOnDisk[STOCKHOLM_TILE] = atTheSeat
+        rig.ruinsOnDisk[STOCKHOLM_TILE] = justOutside + farOff
+        val (mine, sent) = rig.introduced(master = "terrain")
+        mine.receive(founding())
+        rig.settle()
+        sent.clear()
+
+        mine.receive(subscribe(STOCKHOLM_Z10))
+
+        recordsOf(sent.standsOf("biome").single()) shouldBe atTheSeat.toList()
+        recordsOf(sent.standsOf("ruins").single()) shouldBe justOutside.toList()
+        sent.filterIsInstance<StandsFrame>().map { it.layer }.toSet() shouldBe setOf("biome", "ruins")
+
+        rig.ruinsOnDisk.clear()
+        val (other, toldOther) = rig.introduced(token = UUID.randomUUID().toString(), master = "terrain")
+        other.receive(founding())
+        toldOther.clear()
+        other.receive(subscribe(STOCKHOLM_Z10))
+        toldOther.standsOf("ruins").single().stands shouldBe ""
     }
 
     "a cell too coarse for the scenery to be drawn in brings no stands" {
@@ -159,7 +186,7 @@ class GatewayStandsSpec : StringSpec({
 
         mine.receive(subscribe(STOCKHOLM_Z4))
 
-        sent.filterIsInstance<StandsFrame>().shouldBeEmpty()
+        sent.standsOf().shouldBeEmpty()
         StandRecords.count(atTheSeat) shouldBe 1
     }
 })

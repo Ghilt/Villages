@@ -15,6 +15,7 @@ import {
   rollPayloadSchema,
 } from './choiceFrames';
 import { dialogueViewSchema } from './dialogueFrames';
+import { standsFrameSchema } from './standTiles';
 import { questCommandSchemas, questViewSchema } from './questFrames';
 import {
   structureArrivedSchema,
@@ -316,13 +317,8 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('takenOver'), message: z.string() }),
   /** The world was emptied and this session is finished with it. Everyone is told. See 0036. */
   z.object({ type: z.literal('worldWiped'), message: z.string() }),
-  /**
-   * The scenery's stands in one zoom 7 tile, `x` across and `y` down, that touch ground the house has revealed:
-   * the sprite map's own records, eight bytes a stand, in base64, which `decodeStands` reads. Sent for every tile
-   * under a held cell from zoom 6 in, and again when the house's sight or the fog switch changes what it lets
-   * through; empty when nothing there does. What the fog holds back is left out. See decision record 0067.
-   */
-  z.object({ type: z.literal('stands'), x: z.number().int(), y: z.number().int(), stands: z.base64() }),
+  /** One layer of the sprite map's stands in one zoom 7 tile, as far as the fog lets them through. See `standTiles.ts`. */
+  standsFrameSchema,
   z.object({
     type: z.literal('snapshot'),
     cell: cellSchema,

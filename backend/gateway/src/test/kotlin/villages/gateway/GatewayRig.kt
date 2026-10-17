@@ -133,6 +133,9 @@ internal class Rig(
     /** The one master's stands, tile by tile, as the sprite map's folder would hold them. */
     val standsOnDisk = mutableMapOf<Int, ByteArray>()
 
+    /** The one master's ruined towns, tile by tile, as `world:ruins` would write them. */
+    val ruinsOnDisk = mutableMapOf<Int, ByteArray>()
+
     /** The structures on the map, folded from the world as the app's are. */
     val structuresOnTheMap = StructuresProjection(world).started()
 
@@ -239,7 +242,15 @@ internal class Rig(
                 quests = questRows,
             ) { Catalogues(RIG_CATALOGUE, RIG_BALANCE, RIG_FATE, RIG_NAMES, ABBOT_DIALOGUES + ("letter" to RIG_LETTER), mapOf("abbot" to ABBOT)) },
             questRows = questRows,
-            stands = Stands { master, x, y -> if (master == "terrain") standsOnDisk[y * STAND_TILES + x] ?: ByteArray(0) else null },
+            stands = Stands { master, layer, x, y ->
+                val tile = y * STAND_TILES + x
+                when {
+                    master != "terrain" -> null
+                    layer == "biome" -> standsOnDisk[tile] ?: ByteArray(0)
+                    layer == "ruins" -> ruinsOnDisk[tile] ?: ByteArray(0)
+                    else -> null
+                }
+            },
             waters = WaterAt({ grounds[it] }, { names[it] }),
             structures = StructureService(world, houses, { noon }, worldClock, structuresOnTheMap, { UUID.randomUUID() }),
             antarctica = Antarctica(world, { RIG_CATALOGUE }, { noon }, worldClock),

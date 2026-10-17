@@ -38,7 +38,9 @@ city as a wood.
 ## Consequences
 
 - The ruins come through the channel the scenery does, and the fog lets a town through when revealed ground lies
-  within its reach. The frame the gateway sends them in has to say which layer it carries.
+  within its reach. The `stands` frame says which layer it carries, `biome` or `ruins`, from `STAND_LAYERS` at both
+  ends (protocol version 57); the gateway sends every layer of every held tile, empty where a world has none; and
+  its outbox keeps one frame a layer a tile, or a tile's ruins would replace its woods while both waited.
 - How a ruin is laid out is the page's, from the record alone (decision record 0102), so that every player draws the
   same ruins.
 - A stand written into the tile across the edge of the world is written as standing beside it, so its offset stays

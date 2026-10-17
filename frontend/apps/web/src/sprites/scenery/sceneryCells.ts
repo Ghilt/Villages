@@ -77,7 +77,10 @@ let noMap = false;
 const keyOf = (dial: number, spacing: number, cellX: number, cellY: number): string =>
   `${dial}/${spacing}/${cellX}/${cellY}`;
 
-onStandsArrived((tile, stands) => {
+onStandsArrived((tile, stands, layer) => {
+  if (layer !== 'biome') {
+    return;
+  }
   forStands.came(tile);
   let stale = false;
   for (const cut of held.values()) {
@@ -126,6 +129,8 @@ export interface SceneryTally {
   /** Tiles of stands the gateway sent and the page holds, and the stands in them. */
   tiles: number;
   stands: number;
+  /** Tiles of the ruins the gateway sent and the page holds, and the ruined towns in them. */
+  ruins: { tiles: number; stands: number };
 }
 
 /** What the last frame actually drew, put here by the layer so the panel has one thing to read. */
@@ -161,7 +166,14 @@ export function sceneryTally(): SceneryTally {
   for (const cell of held.values()) {
     points += cell.points.length;
   }
-  return { held: held.size, waiting: asking.size, waitingOnStands: forStands.cells, points, ...standsHeld() };
+  return {
+    held: held.size,
+    waiting: asking.size,
+    waitingOnStands: forStands.cells,
+    points,
+    ...standsHeld(),
+    ruins: standsHeld('ruins'),
+  };
 }
 
 /**

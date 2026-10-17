@@ -8,8 +8,32 @@
  * holds the two ends to the same tiles. See decision record 0067.
  */
 
+import { z } from 'zod';
+
 /** How many zoom 7 tiles the world is across, and down: the sprite map's chunks, 256 world units a side. */
 export const STAND_TILES = 128;
+
+/**
+ * The layers of the sprite map whose stands the gateway sends: the scenery's own, `biome`, and the towns of 1790 laid
+ * in ruins, `ruins`, a stand a town. A stands frame says which it carries. See decision records 0067 and 0101.
+ */
+export const STAND_LAYERS = ['biome', 'ruins'] as const;
+export type StandLayer = (typeof STAND_LAYERS)[number];
+
+/**
+ * The stands of one layer of the sprite map in one zoom 7 tile, `x` across and `y` down, that touch ground the house
+ * has revealed: the layer's own records, eight bytes a stand, in base64, which `decodeStands` reads. Sent for every
+ * layer of every tile under a held cell from zoom 6 in, and again when the house's sight or the fog switch changes
+ * what it lets through; empty when nothing there does. What the fog holds back is left out. See decision records 0067
+ * and 0101.
+ */
+export const standsFrameSchema = z.object({
+  type: z.literal('stands'),
+  x: z.number().int(),
+  y: z.number().int(),
+  stands: z.base64(),
+  layer: z.enum(STAND_LAYERS),
+});
 
 /** Held cells coarser than this are a quarter of a continent and more, and the scenery is never drawn so far out. */
 export const STANDS_FROM_ZOOM = 6;

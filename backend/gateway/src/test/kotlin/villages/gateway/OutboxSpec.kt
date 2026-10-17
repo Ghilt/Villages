@@ -74,6 +74,17 @@ class OutboxSpec : StringSpec({
         )
     }
 
+    "a tile's layers of stands are kept apart: the ruins never replace the scenery of the same tile" {
+        val held = Held()
+
+        held.outbox.send(StandsFrame(1, 2, "trees", "biome"))
+        held.outbox.send(StandsFrame(1, 2, "ruins", "ruins"))
+        held.outbox.send(StandsFrame(1, 2, "more trees", "biome"))
+        held.go()
+
+        held.sent shouldBe listOf(StandsFrame(1, 2, "more trees", "biome"), StandsFrame(1, 2, "ruins", "ruins"))
+    }
+
     "past the cap a watcher's events are left out, it is told so once, and once caught up it is sent them again" {
         val held = Held()
 

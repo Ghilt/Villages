@@ -362,6 +362,14 @@ keeps a tile exactly as long as the gateway thinks it was sent, by `standTilesUn
 differently makes every cell cut from its old records stale, and one already on the screen keeps its points
 until the new ones are cut, so nothing blinks while the fog moves.
 
+The sprite map has two layers of stands now, each a folder of its own under `world/stands/<master>/`: the
+scenery's, `biome`, and the towns of 1790 laid in ruins, `ruins`, a stand a town, which `world:ruins` writes (0101).
+A `stands` frame says which layer it carries; the gateway sends every layer of every held tile, empty where the
+world has no such layer, so the page never waits on one it will not get; the port is asked for a layer by name and
+the adapter only ever looks for one of `STAND_LAYERS`; and the gateway's outbox keeps the latest frame of each
+layer of each tile, so a tile's ruins never replace its woods while both wait to be sent. The page keeps each layer
+apart (`net/stands.ts`) and asks of the scenery's unless it names the ruins.
+
 **The fog is a layer of the sprite canvas**, `sprites/FogLayer.ts`, drawn between the world and the signs for
 the things in it: the scenery and whatever stands outside vision under it, every icon and whatever stands in
 vision over it (0063). It asks the projection in `geometry/cameraMath.ts` backwards for the ground under each

@@ -14,8 +14,13 @@ class FolderStandsTest {
     private val someStands = ByteArray(16) { it.toByte() }
 
     /** Writes a master's stands as the generator does: the tiles, then `stands.json` last. */
-    private fun furnish(masters: Path, master: String, tiles: Map<Pair<Int, Int>, ByteArray>): Path {
-        val layer = masters.resolve(master).resolve("biome")
+    private fun furnish(
+        masters: Path,
+        master: String,
+        tiles: Map<Pair<Int, Int>, ByteArray>,
+        layerName: String = "biome",
+    ): Path {
+        val layer = masters.resolve(master).resolve(layerName)
         for ((at, bytes) in tiles) {
             val file = layer.resolve(at.first.toString()).resolve("${at.second}.bin")
             Files.createDirectories(file.parent)
@@ -74,5 +79,29 @@ class FolderStandsTest {
     @Test
     fun `a folder that is not there means no stands rather than a server that will not start`(@TempDir masters: Path) {
         assertNull(FolderStands(masters.resolve("nowhere")).of("terrain", 70, 37))
+    }
+
+    @Test
+    fun `each layer is read from its own folder, and a layer it does not know is never looked for`(@TempDir masters: Path) {
+        val ruins = ByteArray(8) { (it + 100).toByte() }
+        furnish(masters, "terrain", mapOf((70 to 37) to someStands))
+        furnish(masters, "terrain", mapOf((70 to 37) to ruins), "ruins")
+        Files.createDirectories(masters.resolve("terrain").resolve("secrets"))
+        Files.writeString(masters.resolve("terrain").resolve("secrets").resolve("stands.json"), "{}")
+        val stands = FolderStands(masters)
+
+        assertArrayEquals(someStands, stands.of("terrain", "biome", 70, 37))
+        assertArrayEquals(ruins, stands.of("terrain", "ruins", 70, 37))
+        assertNull(stands.of("terrain", "secrets", 70, 37))
+        assertNull(stands.of("terrain", "../terrain/biome", 70, 37))
+    }
+
+    @Test
+    fun `a master with no ruins laid has none, and its scenery is still read`(@TempDir masters: Path) {
+        furnish(masters, "terrain", mapOf((70 to 37) to someStands))
+        val stands = FolderStands(masters)
+
+        assertNull(stands.of("terrain", "ruins", 70, 37))
+        assertArrayEquals(someStands, stands.of("terrain", 70, 37))
     }
 }

@@ -21,7 +21,7 @@ import tools.jackson.databind.JsonNode
  * It goes up whenever a frame or a field changes, and `ProtocolShapeSpec` makes sure of that: every frame's shape
  * is recorded in contracts/protocol-v<n>.txt, and what each version changed is in contracts/README.md.
  */
-const val PROTOCOL_VERSION = 56
+const val PROTOCOL_VERSION = 57
 
 data class Point(val lat: Double, val lon: Double)
 
@@ -258,13 +258,14 @@ data class Snapshot(
 ) : ServerFrame
 
 /**
- * The stands of the scenery in one zoom 7 tile, `x` across and `y` down, that touch ground the house has
- * revealed: the sprite map's own records, eight bytes each, in base64, which `StandRecords` reads. Sent for
- * every tile under a held cell from zoom 6 in, once while a held cell stays over it, and again when the
- * house's sight or the fog switch changes what it lets through; empty when nothing there does. What the fog
- * holds back is simply not in it, and nothing says how much. See decision records 0054 and 0067.
+ * The stands of one layer of the sprite map in one zoom 7 tile, `x` across and `y` down, that touch ground the house
+ * has revealed: the layer's own records, eight bytes each, in base64, which `StandRecords` reads - the scenery's,
+ * `biome`, or the ruined towns of 1790, `ruins`, one of `STAND_LAYERS`. Sent for every layer of every tile under a
+ * held cell from zoom 6 in, once while a held cell stays over it, and again when the house's sight or the fog switch
+ * changes what it lets through; empty when nothing there does. What the fog holds back is simply not in it, and
+ * nothing says how much. See decision records 0054, 0067 and 0101.
  */
-data class StandsFrame(val x: Int, val y: Int, val stands: String) : ServerFrame
+data class StandsFrame(val x: Int, val y: Int, val stands: String, val layer: String = "biome") : ServerFrame
 
 /** Deltas coalesced over a short window into one frame. */
 data class Batch(val deltas: List<Delta>) : ServerFrame
