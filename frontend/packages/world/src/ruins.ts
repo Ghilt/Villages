@@ -86,6 +86,11 @@ export interface RuinsLayout {
   readonly wall: readonly [number, number];
   /** How much of a wall still stands: the share of its lots that hold a stretch of it or a gate. */
   readonly walls: number;
+  /**
+   * What the ruins leave of the trees: the share kept at a town's middle and at its built radius, rising between, and
+   * how far past a piece's half width no tree stands, in world units. See `furnish.ts`.
+   */
+  readonly trees: { readonly core: number; readonly built: number; readonly clear: number };
 }
 
 /** Everything the page needs to lay a ruined city out from its record, which `world:ruins` copies into `map.json`. */
@@ -203,12 +208,19 @@ function lookOf(pieces: unknown, layout: unknown, streets: unknown): RuinsLook {
   if (
     !positive(numbers.lot) ||
     shares.some((share) => typeof share !== 'number' || share < 0 || share > 1) ||
+    typeof numbers.trees?.core !== 'number' ||
+    typeof numbers.trees.built !== 'number' ||
+    numbers.trees.core < 0 ||
+    numbers.trees.core > numbers.trees.built ||
+    numbers.trees.built > 1 ||
+    typeof numbers.trees.clear !== 'number' ||
+    numbers.trees.clear < 0 ||
     !Array.isArray(numbers.wall) ||
     !(numbers.wall[0]! < numbers.wall[1]!) ||
     numbers.wall[1]! > 1
   ) {
     throw new Error(
-      'world/ruins.json: layout wants a lot, shares from 0 to 1, and a wall inside the built radius',
+      'world/ruins.json: layout wants a lot, shares from 0 to 1, trees kept from the core up, and a wall inside the built radius',
     );
   }
   const ways = (streets ?? {}) as Partial<Record<Culture, Partial<CultureStreets>>>;

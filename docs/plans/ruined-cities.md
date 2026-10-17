@@ -89,8 +89,9 @@ containers cannot sort in depth with each other, and a ruin's overgrown edge is 
 - **Two towns meeting**: a lot belongs to the town it is nearest, measured against each town's size.
 - **No trigonometry**: the turn is a table of numbers and distances are compared squared, so every browser's engine
   draws the same city.
-- **Trees**: `furnishCell` joins the trees and the pieces of a cell, and a small hook in the scatter opens the core and
-  overgrows the ring; no tree grows through a piece. The page and the stills both call it.
+- **Trees**: `furnishCell` joins the trees and the pieces of a cell and thins the trees after they are scattered: none
+  near a piece, few in the core, the outer ruins as wooded as their ground. The scatter is not touched. The page and
+  the stills both call it.
 
 ## The crows and the rats
 

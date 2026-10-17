@@ -14,10 +14,11 @@ import { encodeRgbPng } from '../src/png.ts';
 import type { RgbImage } from '../src/png.ts';
 import type { ClassRaster } from '../src/raster.ts';
 import type { NamesFile } from '../src/namesFile.ts';
-import { ruinsIn } from '../src/ruinLayout.ts';
+import { furnishCell } from '../src/furnish.ts';
+import type { RuinsAround } from '../src/furnish.ts';
 import type { RuinPiece } from '../src/ruinLayout.ts';
 import type { RuinsMapFile } from '../src/ruins.ts';
-import { CELL, cellOf, scatterCell } from '../src/scatter.ts';
+import { CELL, cellOf } from '../src/scatter.ts';
 import type { ScatteredPoint } from '../src/scatter.ts';
 import { biomeAt, spriteMapOf } from '../src/spriteMap.ts';
 import type { SpriteMap, SpriteMapFile } from '../src/spriteMap.ts';
@@ -54,7 +55,7 @@ import { flatColoursOf, mercatorY, stamp, stampRuin, standsReader } from './lib/
  * it was before experiment 0012, which is how to see what the spacing took out.
  *
  * The ruins of the towns of 1790 are stamped over the scenery wherever `world:ruins` laid them, each piece its
- * footprint in its culture's stone, from the same `ruinsIn` the browser runs. `--city` looks at one town, by its
+ * footprint in its culture's stone, and the trees thinned among them, from the same `furnishCell` the browser runs. `--city` looks at one town, by its
  * Wikidata id or its name of 1790, `--city Q90` or `--city Paris`. See docs/plans/ruined-cities.md.
  */
 
@@ -231,12 +232,27 @@ function renderPlace(
   const bottomCell = cellOf(top + height * perPixel) + spare;
 
   const drawn: [number, number, ScatteredPoint][] = [];
+  const pieces: RuinPiece[] = [];
+  const around: RuinsAround | null =
+    ruins === null
+      ? null
+      : {
+          ground: {
+            look: { ...ruins.file.look, ring: ruins.file.ring },
+            side: ruins.file.world.side,
+            classAt,
+            water: isWater,
+          },
+          standsOf: ruins.standsOf,
+        };
   for (let cellY = topCell; cellY <= bottomCell; cellY += 1) {
     for (let cellX = fromCell; cellX <= toCell; cellX += 1) {
       // The ground the whole world over, so a cell can space its points against its neighbours' on any
       // tile its margin reaches. See experiment 0012.
       const ground = { classAt, standsOf: biomeStands };
-      for (const point of scatterCell(cellX, cellY, dial, ground, map, spacing)) {
+      const furnished = furnishCell(cellX, cellY, dial, ground, map, around, spacing);
+      pieces.push(...furnished.ruins);
+      for (const point of furnished.trees) {
         points += 1;
         const name = map.kinds[point.kind]?.name ?? '?';
         kindCount.set(name, (kindCount.get(name) ?? 0) + 1);
@@ -254,28 +270,9 @@ function renderPlace(
     stamp(canvas, x, y, point, tallest, perPixel);
   }
 
-  // The ruins over the scenery, a cell at a time from the tile's records, the furthest first.
-  const pieces: RuinPiece[] = [];
+  // The ruins over the scenery, the furthest first.
   if (ruins !== null) {
-    const { file, standsOf } = ruins;
-    const ground = {
-      look: { ...file.look, ring: file.ring },
-      side: file.world.side,
-      classAt,
-      water: isWater,
-    };
-    const tileUnits = file.world.tileUnits;
-    for (let cellY = topCell; cellY <= bottomCell; cellY += 1) {
-      for (let cellX = fromCell; cellX <= toCell; cellX += 1) {
-        const towns = standsOf(
-          Math.floor((cellX * CELL) / tileUnits),
-          Math.floor((cellY * CELL) / tileUnits),
-        );
-        const x = cellX * CELL;
-        const y = cellY * CELL;
-        pieces.push(...ruinsIn(x, y, x + CELL, y + CELL, towns, ground, dial));
-      }
-    }
+    const { file } = ruins;
     const tallestRuin = Math.max(...file.look.pieces.map((piece) => piece.height));
     pieces.sort((one, other) => one.y - other.y);
     for (const piece of pieces) {

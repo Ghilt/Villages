@@ -37,6 +37,13 @@ scenery already shows the other way.
 - **Where towns meet**, a lot belongs to the town it lies furthest inside as a share of each one's size.
 - **A piece belongs to the cell its foot stands in**, so the cells of a grid between them hold every piece once.
 
+**The trees are thinned by the ruins after they are scattered**, by `furnishCell` in `packages/world/src/furnish.ts`,
+which the page and the stills call for a cell's trees and its ruins together: no tree stands within a piece's half
+width and `clear` of it, the pieces laid out at the full dial for this so a thinner drawing clears the same ground;
+inside a town's built radius only `core` of the trees are kept at its middle, rising to `built` at its outline, by
+each tree's own roll; beyond the outline the land's own woods grow among the outer ruins. The scatter itself is not
+touched, so a cell with no town near it grows exactly what it grew.
+
 The numbers - the pieces and how tall each stands, the layout, each culture's streets - are in `world/ruins.json`,
 which `world:ruins` copies into the master's `sprites/ruins/map.json` for the page.
 
