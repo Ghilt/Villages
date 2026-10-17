@@ -19,8 +19,10 @@ import { createCostMeter } from '../../shaders/costMeter';
 import { drawnAt, sayLevel, shadersStore } from '../../shaders/levels';
 import type { ShaderLevel } from '../../shaders/levels';
 import type { Layer } from '../layer';
+import { carried, latticeNear } from '../clouds/cloudClock';
 import { gustsCarried, windTime } from '../wind';
 
+import { cropsTuningStore } from './cropsTuning';
 import { grassTuningStore } from './grassTuning';
 import { DRAWN, channelOf, landMaskOf, sameRange, tilesUnder } from './landMask';
 import type { TileRange } from './landMask';
@@ -90,6 +92,15 @@ export function createLandLayer(renderer: Renderer, tilesRoot: () => string, rep
     uBrushSize: { value: 0.17, type: 'f32' },
     uDensity: { value: 1, type: 'f32' },
   });
+  const cropsUniforms = new UniformGroup({
+    uFieldSize: { value: 3.5, type: 'f32' },
+    uFallow: { value: 0, type: 'f32' },
+    uRows: { value: 0.4, type: 'f32' },
+    uCropHeight: { value: 0.3, type: 'f32' },
+    uWaves: { value: 0, type: 'f32' },
+    uWaveLattice: { value: new Float32Array([16, 1]), type: 'vec2<f32>' },
+    uWaveCarried: { value: 0, type: 'f32' },
+  });
   const empty = new BufferImageSource({
     resource: new Uint8Array(4),
     width: 1,
@@ -104,7 +115,7 @@ export function createLandLayer(renderer: Renderer, tilesRoot: () => string, rep
       // World units run to 32768, which a medium-precision float cannot place to within a unit.
       preferredFragmentPrecision: 'highp',
     }),
-    resources: { landUniforms: uniforms, grassUniforms, uMask: empty },
+    resources: { landUniforms: uniforms, grassUniforms, cropsUniforms, uMask: empty },
   });
   const mesh = new Mesh({
     geometry: new Geometry({
@@ -131,6 +142,7 @@ export function createLandLayer(renderer: Renderer, tilesRoot: () => string, rep
   const stopWatchingShaders = shadersStore.watch(repaint);
   // A slider moved shows on the next frame even where nothing else is moving the map.
   const stopWatchingTuning = grassTuningStore.watch(repaint);
+  const stopWatchingCrops = cropsTuningStore.watch(repaint);
 
   /** Pieces the mask for a range of tiles, and puts it in place unless the view has moved on meanwhile. */
   async function build(range: TileRange, root: string): Promise<void> {
@@ -253,6 +265,19 @@ export function createLandLayer(renderer: Renderer, tilesRoot: () => string, rep
       g.uBrushSize = tuning.brushSize;
       g.uDensity = tuning.density;
       grassUniforms.update();
+      const crops = cropsTuningStore.get();
+      const c = cropsUniforms.uniforms;
+      c.uFieldSize = crops.fieldSize;
+      c.uFallow = crops.fallow;
+      c.uRows = crops.rows;
+      c.uCropHeight = crops.height;
+      c.uWaves = crops.waves;
+      // The waves on a lattice that comes round with the world's width, carried by the wall clock as the gusts are.
+      const waves = latticeNear(crops.waveSize);
+      c.uWaveLattice[0] = waves.cell;
+      c.uWaveLattice[1] = waves.around;
+      c.uWaveCarried = still ? 0 : carried(wall, LAND_LOOK.crops.waves.speed);
+      cropsUniforms.update();
 
       const width = Math.max(1, Math.ceil(view.width * levelLook.resolution));
       const height = Math.max(1, Math.ceil(view.height * levelLook.resolution));
@@ -272,6 +297,7 @@ export function createLandLayer(renderer: Renderer, tilesRoot: () => string, rep
       stopWatching();
       stopWatchingShaders();
       stopWatchingTuning();
+      stopWatchingCrops();
       meter.dispose();
       sprite.destroy();
       target.destroy(true);

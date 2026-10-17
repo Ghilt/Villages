@@ -161,11 +161,15 @@ disappears into the painted forest is a question for the eye. How to hand one ov
 decision record 0059.
 
 **The land moves.** Close in, from zoom 8.5, on the grassland - steppe, meadow, savanna and alpine meadow - gusts
-travel down the wind as soft bands, and where one blows the grass shows its paler side; closer still, tufts stand up from the
-ground and lean with the gust, tall grass in patches with a paler straw tip, low round clumps of brush that a gust only
-nudges, and bare ground between. It is one layer for every kind of land, and the rest of the land stands still as it
-is painted until its own motion comes: the water moves by its own shader, a wood by its trees, and bare stone not at
-all, on purpose. Every number is in `apps/web/src/sprites/land/look.ts`; see decision record 0102.
+travel down the wind as soft bands, and where one blows the grass shows its paler side; closer still, tufts stand up
+from the ground and lean with the gust, tall grass in patches with a paler straw tip, low round clumps of brush that
+a gust only nudges, and bare ground between. On the farmland the land is cut into fields, a patchwork of uneven
+shapes a few world units across with a bare track between them, each lying fallow or standing ripe or green, faintly
+washed in its own colour, its crops in rows running its own way; long slow waves roll through them down the wind, a
+band of light where the crops bend with a darker one behind it where they stand again, and close in each stalk leans
+as a wave passes. It is one layer for every kind of land, and the rest of the land stands still as it is painted
+until its own motion comes: the water moves by its own shader, a wood by its trees, and bare stone not at all, on
+purpose. Every number is in `apps/web/src/sprites/land/look.ts`; see decision record 0102.
 
 **The scenery bends in the wind.** Close in, every tree, bush, reed and tuft leans down the wind as a gust passes
 and settles behind it, its foot where it stands and its shadow leaning with it, and its crown turns a little paler,

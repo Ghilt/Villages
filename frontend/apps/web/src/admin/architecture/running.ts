@@ -138,7 +138,7 @@ export const PIECES: readonly Piece[] = [
     runs: 'browser',
     group: 'page',
     cluster: 'shaders',
-    what: "The land moving in the wind and the light, worked out on the graphics card from the flat tiles. One layer for every kind of land: a table says what moves on each, and each pixel works out only the motions of the land under it - so far the grass, swaying on grassland. It is drawn on the sprites' canvas under the scenery, so the fog greys it as it greys the trees, and its gusts are the ones the trees bend in (sprites/wind.ts; decision record 0102).",
+    what: "The land moving in the wind and the light, worked out on the graphics card from the flat tiles. One layer for every kind of land: a table says what moves on each, and each pixel works out only the motions of the land under it - so far the grass swaying on grassland, and the crops in their rows on farmland with long waves rolling through them. It is drawn on the sprites' canvas under the scenery, so the fog greys it as it greys the trees, and its gusts are the ones the trees bend in (sprites/wind.ts; decision record 0102).",
   },
   {
     id: 'trees',

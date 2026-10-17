@@ -25,6 +25,14 @@ describe('the land', () => {
     expect(DRAWN).toContain('grass');
   });
 
+  it('stands crops on the farmland, with woods and without', () => {
+    expect(KINDS.filter((kind) => motionOf(kind) === 'crops').sort()).toEqual([
+      'farmland',
+      'farmland-with-woods',
+    ]);
+    expect(DRAWN).toContain('crops');
+  });
+
   it('leaves the water to the water shader, the woods to their trees and bare stone still', () => {
     expect(KINDS.filter((kind) => motionOf(kind) === 'water').sort()).toEqual([
       'lake',

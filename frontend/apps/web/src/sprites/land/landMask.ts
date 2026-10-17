@@ -12,10 +12,11 @@ import type { LandMotion } from './look';
  */
 
 /**
- * The land motions the land layer draws so far, in the order of the mask's channels: red the grass. The others in
- * `LAND_LOOK.lands` stand still until the steps that draw them, and a fifth would need a texture of its own.
+ * The land motions the land layer draws so far, in the order of the mask's channels: red the grass, green the crops.
+ * The others in `LAND_LOOK.lands` stand still until the steps that draw them, and a fifth would need a texture of its
+ * own.
  */
-export const DRAWN = ['grass'] as const satisfies readonly LandMotion[];
+export const DRAWN = ['grass', 'crops'] as const satisfies readonly LandMotion[];
 
 export type DrawnMotion = (typeof DRAWN)[number];
 

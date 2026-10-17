@@ -418,7 +418,8 @@ there is scenery on the screen, and times a frame of the whole canvas, which is 
 uncolours: a fragment shader over the whole screen that finds the ground under each pixel by the sprites' own
 projection backwards, reads what moves there from a mask of the flat tiles under the view, a channel a land motion
 (`landMask.ts`, from the table in `look.ts`), and works out only those motions there, each a part of the shader of its
-own (`grassShader.ts`, so far), laid over one another where two meet.
+own (`grassShader.ts`, `cropsShader.ts`), laid over one another where two meet. The crops' long waves keep the wall
+clock on a lattice of their own that comes round with the world's width, as the gusts' does.
 **The critters are made up by the page** (0099): `sprites/critters/critterClock.ts` is a pure function of the
 place and the wall clock - a hash of a cell and a slot says whether a critter comes, out of which tree or bush of
 the scenery's own cells (`currentPointsOf`), which of the cast of the class under it (`casts.ts`), and how each bird

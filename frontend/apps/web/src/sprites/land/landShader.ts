@@ -1,12 +1,13 @@
 import { GUSTS_GLSL } from '../wind';
 
+import { CROPS_GLSL } from './cropsShader';
 import { GRASS_GLSL } from './grassShader';
 
 /**
  * The land, worked out a pixel at a time over the whole screen, as the fog is: one triangle that covers it, and for
  * each pixel the ground under it, found by the sprites' own projection backwards, and what moves on the land there,
  * from the mask (`landMask.ts`). Each pixel works out only the motions of the land under it, each a part of its own
- * - so far the grass, `grassShader.ts` - laid over one another where two meet, so a screen of rock costs almost
+ * - the grass, `grassShader.ts`, and the crops, `cropsShader.ts` - laid over one another where two meet, so a screen of rock costs almost
  * nothing and a screen of grass what the grass costs. Every number is in `look.ts`.
  */
 
@@ -112,6 +113,7 @@ vec4 rootsAt(vec2 world) {
   return texture(uMask, at);
 }
 ${GRASS_GLSL}
+${CROPS_GLSL}
 
 void main() {
   vec2 world = groundUnder(vScreen);
@@ -123,6 +125,10 @@ void main() {
   if (land[GRASS] > 0.002) {
     vec4 grass = grassHere(world) * land[GRASS];
     drawn = grass + drawn * (1.0 - grass.a);
+  }
+  if (land[CROPS] > 0.002) {
+    vec4 crops = cropsHere(world) * land[CROPS];
+    drawn = crops + drawn * (1.0 - crops.a);
   }
   fragColor = drawn;
 }

@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
 
 import { shadersStore } from '../shaders/levels';
+import { cropsTuningStore, resetCropsTuning, setCropsTuning } from '../sprites/land/cropsTuning';
+import type { CropsTuning } from '../sprites/land/cropsTuning';
 import { grassTuningStore, resetGrassTuning, setGrassTuning } from '../sprites/land/grassTuning';
 import type { GrassTuning } from '../sprites/land/grassTuning';
 import type { DrawnMotion } from '../sprites/land/landMask';
@@ -14,7 +16,7 @@ import type { SliderDef } from './Sliders';
 /**
  * The land, a part of the Shaders section: its level in the bar, and inside it a fold for each motion of the land,
  * each with its box, whether it is drawn, and its sliders. What moves on each kind of land is the table in
- * `sprites/land/look.ts`, and what each grass slider means is in `sprites/land/grassTuning.ts`.
+ * `sprites/land/look.ts`, and what each slider means is in `sprites/land/grassTuning.ts` and `cropsTuning.ts`.
  */
 
 const share = (value: number) => `${Math.round(value * 100)}%`;
@@ -54,17 +56,30 @@ const GRASS_SLIDERS: readonly SliderDef<keyof GrassTuning>[] = [
   { key: 'density', label: 'How thickly the tufts grow', min: 0.1, max: 1, step: 0.01, say: share },
 ];
 
+const CROPS_SLIDERS: readonly SliderDef<keyof CropsTuning>[] = [
+  { key: 'fieldSize', label: 'How big the fields are', min: 1, max: 10, step: 0.1, say: units },
+  { key: 'fallow', label: 'How many fields lie fallow', min: 0, max: 0.6, step: 0.01, say: share },
+  { key: 'rows', label: 'How far apart the rows are', min: 0.2, max: 0.8, step: 0.01, say: units },
+  { key: 'height', label: 'How tall the crops stand', min: 0.1, max: 0.8, step: 0.01, say: units },
+  { key: 'waveSize', label: 'How broad the waves are', min: 4, max: 40, step: 0.5, say: units },
+  { key: 'waves', label: 'How strongly the waves show', min: 0, max: 0.6, step: 0.01, say: share },
+];
+
 /** What the part is, behind the question mark in its bar. */
 const ABOUT =
-  'The land moving in the wind and the light, one layer for every kind of land, from zoom 8.5 in: so far the grass. Each kind of land has its own motion or stands still on purpose, and the rest come a fold at a time. What a level costs the graphics card is said once in the log, the first time the land is drawn at it.';
+  'The land moving in the wind and the light, one layer for every kind of land, from zoom 8.5 in: so far the grass and the crops. Each kind of land has its own motion or stands still on purpose, and the rest come a fold at a time. What a level costs the graphics card is said once in the log, the first time the land is drawn at it.';
 
 const GRASS_ABOUT =
   'Gusts, tufts, tall grass and brush on steppe, meadow, savanna and alpine meadow, bending in the one wind the trees bend in.';
+
+const CROPS_ABOUT =
+  'Farmland and farmland with woods cut into fields, each fallow, ripe or green, its crops standing in rows its own way, with long slow waves rolling through them down the wind, the same in every browser.';
 
 export function LandSection() {
   const level = useStore(landStore, (state) => state.level);
   const on = useStore(shadersStore, (state) => state.on);
   const tuning = useStore(grassTuningStore);
+  const crops = useStore(cropsTuningStore);
   return (
     <Section
       name="Land"
@@ -79,6 +94,15 @@ export function LandSection() {
         resetTitle="put every grass slider back where it started"
       >
         <Sliders idPrefix="grass" sliders={GRASS_SLIDERS} values={tuning} onChange={setGrassTuning} />
+      </LandFold>
+      <LandFold
+        name="Crops"
+        motion="crops"
+        about={CROPS_ABOUT}
+        reset={resetCropsTuning}
+        resetTitle="put every crops slider back where it started"
+      >
+        <Sliders idPrefix="crops" sliders={CROPS_SLIDERS} values={crops} onChange={setCropsTuning} />
       </LandFold>
     </Section>
   );

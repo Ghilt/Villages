@@ -1,12 +1,8 @@
-import { createStore } from '@villages/client-core';
-import type { Readable } from '@villages/client-core';
-
-import { note } from '../../log/log';
+import { createTuning } from './tuning';
 
 /**
  * How the grass grows in patches, as numbers Adam moves with the sliders in the Grass fold of the Land part of the
- * debug panel's Shaders section. Remembered in this browser, and said once in the log after a slider stops, so the
- * log's copy button carries them to whoever is to write them down. A way of looking, never sent.
+ * debug panel's Shaders section, remembered and said as `tuning.ts` says.
  *
  * Two slow patterns over the ground mark out the patches: where the first is high the ground is bare, where the
  * second is high the grass stands tall, and where it is low it is brush. Each tuft then draws its kind by chance,
@@ -47,51 +43,8 @@ export const GRASS_DEFAULTS: GrassTuning = {
   density: 1,
 };
 
-const KEPT = 'villages.grass.tuning';
+const grass = createTuning('villages.grass.tuning', GRASS_DEFAULTS, 'grass');
 
-function remembered(): GrassTuning {
-  try {
-    const kept = localStorage.getItem(KEPT);
-    if (kept === null) {
-      return GRASS_DEFAULTS;
-    }
-    // Only the numbers there are now: one remembered from an older set of sliders is dropped.
-    const parsed = JSON.parse(kept) as Record<string, unknown>;
-    const known = Object.fromEntries(
-      Object.keys(GRASS_DEFAULTS)
-        .filter((key) => typeof parsed[key] === 'number')
-        .map((key) => [key, parsed[key]]),
-    );
-    return { ...GRASS_DEFAULTS, ...known };
-  } catch {
-    return GRASS_DEFAULTS;
-  }
-}
-
-const tuning = createStore<GrassTuning>(remembered());
-let saying: ReturnType<typeof setTimeout> | null = null;
-
-export const grassTuningStore: Readable<GrassTuning> = tuning;
-
-export function setGrassTuning(change: Partial<GrassTuning>): void {
-  tuning.set(change);
-  try {
-    localStorage.setItem(KEPT, JSON.stringify(tuning.get()));
-  } catch {
-    // Not remembered across a reload, then; still in force until one.
-  }
-  if (saying !== null) {
-    clearTimeout(saying);
-  }
-  saying = setTimeout(() => {
-    saying = null;
-    const said = Object.entries(tuning.get())
-      .map(([name, value]) => `${name} ${Number(value.toFixed(2))}`)
-      .join(', ');
-    note('land', `grass tuned: ${said}`);
-  }, 700);
-}
-
-export function resetGrassTuning(): void {
-  setGrassTuning(GRASS_DEFAULTS);
-}
+export const grassTuningStore = grass.store;
+export const setGrassTuning = grass.set;
+export const resetGrassTuning = grass.reset;
