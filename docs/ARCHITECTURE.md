@@ -521,7 +521,9 @@ did, and sets things right from its whole fold there instead.
    command's answer always goes. Frames are queued where they come from and sent on the gateway's own threads, so
    a slow socket holds up its own connection and nobody else's, and a read model's watcher only ever queues
    (0077).
-6. The map is drawn from read models. The event store is never queried to render anything.
+6. The map is drawn from read models. The event store is never queried to render anything. A read model answers a
+   question about a place, a holder or a person from an index it keeps as its rows change - a cell is one range of an
+   index sorted by quadkey - and never by walking every row; a spec holds each index to such a walk (experiment 0022).
 7. Every principle above is checked by the bot swarm, not assumed: `./gradlew :load-bots:swarm`, whose runs the
    performance page charts. Ten thousand connections on one development machine was the number to prove, and on
    2026-10-16 one server carried it, with the bots beside it, every round trip's p95 under 500 ms - after the first

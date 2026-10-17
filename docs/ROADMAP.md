@@ -142,7 +142,8 @@ eye for their experiment; and catalogues, the newest, are built and waiting on A
   thousand; every run kept in a history the inspect pages chart, and read in an experiment record with the
   capacity of one server and the path past it. Five steps in `docs/plans/bot-swarm.md`, all built. The first
   run carried 1,000 players and ran out of memory at 2,500; after what a connection holds was fixed, 10,000
-  (experiment 0021). The first milestone of the code-debt review of 2026-10-16, asked for by Adam that day.
+  (experiment 0021); with the read models indexed, 10,000 on 38% less of the server's CPU (experiment 0022). The
+  first milestone of the code-debt review of 2026-10-16, asked for by Adam that day.
 - **A living world**: the land, the trees and the critters moving close in. One land layer for every kind of
   terrain, which the grass spike becomes, each kind with a motion of its own or standing still on purpose; the
   scenery bending in the world's one wind, the same gusts as the grass and the same in every browser; and
@@ -220,8 +221,8 @@ Wanted, not started, and each needs a hypothesis in `docs/experiments/` before a
   instruments reaching across servers; the read models saved with a checkpoint, so a start does not fold the
   whole history; a gateway that keeps no read models of its own and binds only its sessions' cells, which the
   routing key already carries. Left out of 1.6 on purpose, 2026-10-12.
-- **Aliveness and scale**: past ten thousand connections, which one server now carries (experiment 0021): the cells'
-  scans and the gateway's threads, then more than one server; aggregation of sprites at
+- **Aliveness and scale**: past ten thousand connections, which one server now carries (experiments 0021 and
+  0022): the gateway's thread a send and what a command costs, then more than one server; aggregation of sprites at
   low zoom, a custom stylised map style checked in, hardened reconnection and clock correction.
 
 ## Future ideas
