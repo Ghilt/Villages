@@ -40,6 +40,7 @@ import villages.domain.StructureEvent
 import villages.domain.WorldStreamEvent
 import villages.protocol.Cell
 import villages.protocol.ON_THE_MAP_FROM
+import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CopyOnWriteArraySet
@@ -76,6 +77,11 @@ class CharactersProjection(feed: EventFeed) : Follower(feed), KeyFiguresByHouse,
     private val houses = ConcurrentHashMap<HouseId, HouseFacts>()
     private val listeners = CopyOnWriteArraySet<(KeyFiguresChange) -> Unit>()
     private val spans = ConcurrentHashMap<CharacterId, CopyOnWriteArrayList<Indexed>>()
+
+    // Every cell anyone has stood in, on any day, written with the span: a cell is answered from those who have stood
+    // in it, and which span covers the day asked is still each one's own question. A span is never forgotten, so
+    // neither is its entry.
+    private val byCell = CellIndex<CharacterId>({ it.value.toString() }, { CharacterId(UUID.fromString(it)) })
     private val mapListeners = CopyOnWriteArraySet<(CharacterMapChange) -> Unit>()
     private val revisions = AtomicLong()
 
@@ -173,7 +179,9 @@ class CharactersProjection(feed: EventFeed) : Follower(feed), KeyFiguresByHouse,
             stood[stood.lastIndex] = Indexed(was, open.quadkey)
         }
         if (to != null) {
-            stood += Indexed(to, Cell.of(to.place.lat, to.place.lon).quadkey)
+            val quadkey = Cell.of(to.place.lat, to.place.lon).quadkey
+            stood += Indexed(to, quadkey)
+            byCell.add(quadkey, id)
         }
         val row = characters[id] ?: return
         if (was == null && to == null) {
@@ -223,17 +231,14 @@ class CharactersProjection(feed: EventFeed) : Follower(feed), KeyFiguresByHouse,
         everything: Boolean,
         seen: (PlacedCharacter) -> Boolean,
     ): CharactersInCell {
-        val zoom = cell.length
-        val standing = spans.entries
-            .mapNotNull { (id, stood) ->
-                val here = stood.firstOrNull { it.span.covers(at) } ?: return@mapNotNull null
+        if (!everything && cell.length < ON_THE_MAP_FROM) return CharactersInCell(emptyList(), 0)
+        val standing = byCell.inCell(cell).distinct()
+            .mapNotNull { id ->
+                val here = spans[id]?.firstOrNull { it.span.covers(at) } ?: return@mapNotNull null
                 val row = characters[id] ?: return@mapNotNull null
-                if (here.quadkey.startsWith(cell) && (everything || zoom >= ON_THE_MAP_FROM)) {
-                    PlacedCharacter(row, here.span).takeIf(seen)
-                } else {
-                    null
-                }
+                PlacedCharacter(row, here.span).takeIf { here.quadkey.startsWith(cell) && seen(it) }
             }
+            .toList()
             .sortedWith(
                 compareByDescending<PlacedCharacter> { it.span.significance.value }.thenBy { it.row.id.value },
             )
@@ -268,5 +273,6 @@ class CharactersProjection(feed: EventFeed) : Follower(feed), KeyFiguresByHouse,
         holders.clear()
         houses.clear()
         spans.clear()
+        byCell.clear()
     }
 }
