@@ -114,7 +114,9 @@ stage alone, with none of the debug panel in it (decision record 0079).
   turn, fading from it, and a drop of a little over a bird length down the screen, settling, a few dropping into a tree near by instead; or a bird or two flits from one tree into another near it, as if seeking shelter, and fades into
   its leaves. In the woods a squirrel bounds now and then from one tree to another near it, stopping once on the
   way, and is gone behind it; on grassland a hare comes out from behind a bush or a tuft of grass, a few bounds and
-  a stop, and is gone behind another, each facing the way it goes. Each has a soft shadow below it. The same
+  a stop, and is gone behind another, each facing the way it goes; over a lake, a river or the shallow sea a fish
+  jumps clear and falls back, a ring spreading where it left and one where it fell. Each has a soft shadow below
+  it. The same
   critters leave the same bush at the same moment in every browser; one first seen on its way fades up; a player who asked for less motion sees none. They are drawn from the critters' atlas (`world:critters`,
   below). They are the **Critters** part of the Shaders section: `off`, `low` or `high` in its bar, low at every
   load, low moving them at fifteen frames a second and high at thirty, and beside it what is about now, `3

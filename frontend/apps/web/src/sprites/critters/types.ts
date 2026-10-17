@@ -2,8 +2,9 @@ import type { Behaviour } from './casts';
 
 /**
  * The shapes the critters are told in: the cover they come out of, what the clock needs of the ground, a critter and
- * its animals, and where one is at a moment. Apart from the clock (`critterClock.ts`) so the hop (`hop.ts`), which the
- * clock calls, can take them without the two importing each other round a ring.
+ * its animals, where one is at a moment, and the rings a fish leaves on the water. Apart from the clock
+ * (`critterClock.ts`) so the hop and the leap (`hop.ts`, `leap.ts`), which the clock calls, can take them without
+ * importing each other round a ring.
  */
 
 /** A piece of the scenery a critter can come out of: where it stands, what kind it is, and how tall. */
@@ -61,5 +62,15 @@ export interface Pose {
   y: number;
   height: number;
   frame: number;
+  alpha: number;
+  /** How far its nose is tipped up from level, in radians, down below nought: a leaping fish's. */
+  tilt?: number;
+}
+
+/** A ring spreading on the water at a moment: where, how wide across from its middle, and how bright. */
+export interface Ring {
+  x: number;
+  y: number;
+  radius: number;
   alpha: number;
 }

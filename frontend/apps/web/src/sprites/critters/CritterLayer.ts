@@ -9,28 +9,30 @@ import { FLAT_MAX_ZOOM, TILE, WORLD_MASTER_WIDTH } from '../../geometry/world';
 import { note } from '../../log/log';
 import { visionAt } from '../../fog/fogField';
 import type { FogField } from '../../fog/fogField';
-import { SHADE_COLOUR, towardsTheLight } from '../../map/light';
+import { towardsTheLight } from '../../map/light';
 import { drawnAt, shadersStore } from '../../shaders/levels';
 import type { Layer } from '../layer';
 import { currentPointsOf, sceneryMap } from '../scenery/sceneryCells';
 
-import { critterCellOf, eventsAt, posesOf } from './critterClock';
+import { critterCellOf, eventsAt, posesOf, ringsOf } from './critterClock';
 import { critterStore, readCritters } from './critterMode';
 import { critterTuningStore } from './critterTuning';
 import type { Cover, Ground } from './critterClock';
+import { ringTexture, shadowTexture } from './drawnInCode';
 import { CRITTERS_LOOK } from './look';
 
 /**
- * The critters, as two layers of the sprite canvas: one on the ground under the scenery, of the shadows and of what
- * runs there, a squirrel or a hare, so a tree in front of one hides it; and one in the air over the scenery and under
- * every mark, of what flies. Both are in the
+ * The critters, as two layers of the sprite canvas: one on the ground under the scenery, of the shadows, of what runs
+ * there, a squirrel or a hare, and of a fish leaping out of the water with the rings it leaves, so a tree in front of
+ * one hides it; and one in the air over the scenery and under every mark, of what flies. Both are in the
  * container the fog takes the colour out of, so they are hazed with the trees; and they come only where the house sees
  * now, so the land in sight is the living land and what is only remembered holds still.
  *
  * Every frame it asks the clock (`critterClock.ts`) what is in flight over the view - which reads the very trees and
  * bushes the scenery drew, the ground's class under them and the fog's sight - and places a sprite for each, a frame of
  * its kind's strip from the atlas `world:critters` cuts, and a soft shadow under it, away from the light by its height;
- * one on the ground faces the way it is going across the screen, whichever way the map is turned.
+ * one on the ground faces the way it is going across the screen, whichever way the map is turned, and a leaping fish
+ * tips along its arc. A fish's rings are drawn in code (`drawnInCode.ts`), flattened as the ground is tipped.
  * While one is in flight it asks for frames at its level's rate, and a few a second otherwise, so the next is seen
  * leaving. One first seen already in flight, where the view has just moved to, fades up, so nothing pops. A player
  * who asked for less motion gets none. Its level, how many and how big are the Critters part of the Shaders
@@ -67,22 +69,6 @@ export interface SceneryHow {
 const ramp = (from: number, to: number, value: number): number =>
   Math.min(1, Math.max(0, (value - from) / (to - from)));
 
-/** A soft dark oval, the shadow every critter casts, drawn once. */
-function shadowTexture(): Texture {
-  const canvas = document.createElement('canvas');
-  canvas.width = 32;
-  canvas.height = 16;
-  const paint = canvas.getContext('2d')!;
-  const [r, g, b] = SHADE_COLOUR.map((one) => Math.round(one * 255));
-  const fall = paint.createRadialGradient(16, 8, 0, 16, 8, 8);
-  fall.addColorStop(0, `rgba(${r},${g},${b},1)`);
-  fall.addColorStop(1, `rgba(${r},${g},${b},0)`);
-  paint.setTransform(2, 0, 0, 1, 0, 0);
-  paint.fillStyle = fall;
-  paint.fillRect(0, 0, 16, 16);
-  return Texture.from(canvas);
-}
-
 /**
  * What the renderer knows that the critters need, read every frame: how the scenery is drawn, and what the house sees
  * now - undefined with the fog lifted, where everything is seen, and null for a house that sees nothing.
@@ -94,15 +80,17 @@ export interface CritterSurroundings {
 
 export function createCritterLayer(repaint: () => void, around: () => CritterSurroundings): CritterLayer {
   const scenery = () => around().scenery;
+  const ripples = new Container();
   const shadows = new Container();
   const running = new Container();
   const ground = new Container();
-  ground.addChild(shadows, running);
+  ground.addChild(ripples, shadows, running);
   const flying = new Container();
   const still = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   // A level or a slider moved shows on the next frame even where nothing else is moving the map.
   const stopWatching = [critterStore, critterTuningStore, shadersStore].map((store) => store.watch(repaint));
   const shade = shadowTexture();
+  const ripple = ringTexture();
   let frames = new Map<string, Texture[]>();
   let feet = new Map<string, { x: number; y: number }>();
   let atlas: ImageSource | null = null;
@@ -231,6 +219,7 @@ export function createCritterLayer(repaint: () => void, around: () => CritterSur
   const sprites: Sprite[] = [];
   const runners: Sprite[] = [];
   const shapes: Sprite[] = [];
+  const rings: Sprite[] = [];
   const spriteAt = (pool: Sprite[], into: Container, at: number, texture: Texture): Sprite => {
     let sprite = pool[at];
     if (sprite === undefined) {
@@ -253,6 +242,7 @@ export function createCritterLayer(repaint: () => void, around: () => CritterSur
       const fade = ramp(L.fromZoom, L.wholeAt, view.zoom);
       let drawn = 0;
       let ran = 0;
+      let rippled = 0;
       let wanted: number | null = null;
       const counted: Record<string, number> = {};
       if (level !== 'off' && !still && fade > 0 && !noArt && tuning.density > 0) {
@@ -278,6 +268,9 @@ export function createCritterLayer(repaint: () => void, around: () => CritterSur
           const now = Date.now();
           const events = eventsAt(cells, now / 1000, tuning.density * tuning.often, world);
           const light = towardsTheLight();
+          // How far the ground is flattened up the screen as it tips: a ring on it is that much wider than tall.
+          const [across, up] = [camera.tiltGround(1, 0, layer.tilt), camera.tiltGround(0, 1, layer.tilt)];
+          const squash = Math.abs(across.x * up.y - across.y * up.x);
           const live = new Set<string>();
           const placed: { sprite: Sprite; y: number }[] = [];
           const onFoot: { sprite: Sprite; y: number }[] = [];
@@ -292,16 +285,12 @@ export function createCritterLayer(repaint: () => void, around: () => CritterSur
             // Seen from its start, its own fade brings it out of its cover; seen first in flight, it fades up.
             const arriving = since - event.startsAt * 1000 > 200 ? ramp(since, since + ARRIVING_MS, now) : 1;
             const foot = feet.get(event.kind) ?? { x: 0.5, y: 1 };
-            // What runs on the ground faces the way it goes across the screen; the pictures face right.
-            const hops = event.behaviour === 'hop';
-            const to = event.animals[0]?.to ?? null;
-            const facing =
-              hops && to !== null
-                ? Math.sign(
-                    camera.tiltGround(to.x, to.y, layer.tilt).x -
-                      camera.tiltGround(event.from.x, event.from.y, layer.tilt).x,
-                  ) || 1
-                : 1;
+            // What is on the ground faces the way it goes across the screen; the pictures face right.
+            const onGround = event.behaviour !== 'flush';
+            const heading = event.animals[0]?.heading ?? 0;
+            const facing = onGround
+              ? Math.sign(camera.tiltGround(Math.cos(heading), Math.sin(heading), layer.tilt).x) || 1
+              : 1;
             for (const pose of posesOf(event, now / 1000, strip.length, size)) {
               const alpha = pose.alpha * fade * arriving;
               if (alpha <= 0) continue;
@@ -310,7 +299,7 @@ export function createCritterLayer(repaint: () => void, around: () => CritterSur
               const at = camera.tiltGround(pose.x, pose.y, layer.tilt);
               const x = layer.x + at.x * layer.scale;
               const y = layer.y + at.y * layer.scale;
-              const bird = hops
+              const bird = onGround
                 ? spriteAt(runners, running, ran, texture)
                 : spriteAt(sprites, flying, drawn - ran, texture);
               bird.anchor.set(foot.x, foot.y);
@@ -318,9 +307,11 @@ export function createCritterLayer(repaint: () => void, around: () => CritterSur
               const scale = tall / texture.height;
               bird.scale.set(scale * facing, scale);
               bird.position.set(x, y - pose.height * layer.scale);
+              // A leaping fish tips its nose up and then down, the same way round whichever way it faces.
+              bird.rotation = -(pose.tilt ?? 0) * facing;
               bird.alpha = alpha;
-              (hops ? onFoot : placed).push({ sprite: bird, y });
-              if (hops) ran += 1;
+              (onGround ? onFoot : placed).push({ sprite: bird, y });
+              if (onGround) ran += 1;
               // Its shadow on the ground under it, away from the light by its height, fainter the higher it is.
               const below = camera.tiltGround(
                 pose.x - light.east * pose.height * SHADOW_REACH,
@@ -336,6 +327,17 @@ export function createCritterLayer(repaint: () => void, around: () => CritterSur
               counted[event.kind] = (counted[event.kind] ?? 0) + 1;
               drawn += 1;
             }
+            for (const ring of ringsOf(event, now / 1000)) {
+              const at = camera.tiltGround(ring.x, ring.y, layer.tilt);
+              const wide = ring.radius * 2 * layer.scale;
+              const sprite = spriteAt(rings, ripples, rippled, ripple);
+              sprite.anchor.set(0.5, 0.5);
+              sprite.width = wide;
+              sprite.height = wide * squash;
+              sprite.position.set(layer.x + at.x * layer.scale, layer.y + at.y * layer.scale);
+              sprite.alpha = ring.alpha * fade * arriving;
+              rippled += 1;
+            }
           }
           for (const key of firstSeen.keys()) if (!live.has(key)) firstSeen.delete(key);
           // Farthest first, as the scenery is drawn.
@@ -348,12 +350,13 @@ export function createCritterLayer(repaint: () => void, around: () => CritterSur
               .forEach((one, index) => into.setChildIndex(one.sprite, index));
           }
           const rate = 1000 / L.levels[level].framesPerSecond;
-          wanted = drawn > 0 ? rate : WATCHING_MS;
+          wanted = drawn + rippled > 0 ? rate : WATCHING_MS;
         }
       }
       for (let at = drawn - ran; at < sprites.length; at += 1) sprites[at]!.visible = false;
       for (let at = ran; at < runners.length; at += 1) runners[at]!.visible = false;
       for (let at = drawn; at < shapes.length; at += 1) shapes[at]!.visible = false;
+      for (let at = rippled; at < rings.length; at += 1) rings[at]!.visible = false;
       readCritters(
         counted,
         level === 'off'
@@ -377,6 +380,7 @@ export function createCritterLayer(repaint: () => void, around: () => CritterSur
       ground.destroy({ children: true });
       flying.destroy({ children: true });
       shade.destroy(true);
+      ripple.destroy(true);
       atlas?.destroy();
     },
   };

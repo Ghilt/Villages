@@ -1,17 +1,20 @@
 import { CASTS, memberOf } from './casts';
 import { HOP_LONGEST, hopPose, hopper } from './hop';
+import { LEAP_LONGEST, leapPose, leapRings, leaper } from './leap';
 import { CRITTERS_LOOK } from './look';
-import type { Animal, Cover, CritterEvent, Ground, Pose } from './types';
+import type { Animal, Cover, CritterEvent, Ground, Pose, Ring } from './types';
 
-export type { Animal, Cover, CritterEvent, Ground, Pose } from './types';
+export type { Animal, Cover, CritterEvent, Ground, Pose, Ring } from './types';
 
 /**
  * When and where the critters are: a pure function of the place and the wall clock, so nothing about them is
  * remembered or sent and every browser works out the same ones at the same moment, as every browser draws the same
  * sky. The ground is cut into cells and the clock into slots; a hash of a cell and a slot says whether anything comes
  * there then, out of which piece of the scenery standing in the cell, which of that ground's cast, when in the slot,
- * and everything about how it goes: a flock bursting out of cover, here, or a small animal hopping to the next piece
- * of cover, `hop.ts`. After that it is a function of the seconds since it began. See docs/plans/living-world.md.
+ * and everything about how it goes: a flock bursting out of cover, here, a small animal hopping to the next piece of
+ * cover, `hop.ts`, or a fish jumping out of the water, `leap.ts`, which comes out of no scenery but the water at a
+ * place of the cell drawn for it. After that it is a function of the seconds since it began. See
+ * docs/plans/living-world.md.
  *
  * Whether a cell's slot brings anything is decided by one draw against the density before anything else, so turning
  * the density down only ever takes critters away: fewer is a subset of more. The density may be more than one, which
@@ -51,7 +54,7 @@ export function lastsFor(event: CritterEvent): number {
 }
 
 /** The longest anything lasts, so the slots before the current one that can still be in flight are asked too. */
-const LONGEST = Math.max(F.stagger + Math.max(F.seconds, F.shelterSeconds[1]), HOP_LONGEST);
+const LONGEST = Math.max(F.stagger + Math.max(F.seconds, F.shelterSeconds[1]), HOP_LONGEST, LEAP_LONGEST);
 
 /**
  * The trees and bushes near a critter's cover, as near and as far as said, that it could go into, nearest first, up
@@ -87,6 +90,18 @@ export function eventIn(
   if (critterHash(cellX, cellY, slot, 0) >= Math.min(1, L.chance * Math.max(0, density))) return null;
   const fromX = cellX * L.cell;
   const fromY = cellY * L.cell;
+  const draw = (salt: number) => critterHash(cellX, cellY, slot, salt);
+  const key = `${cellX}/${cellY}/${slot}`;
+  const startsAt = slot * L.slot + draw(5) * L.slot;
+  // A fish needs no cover: a place of the cell is drawn, and where the water there has fish, one leaps from it.
+  const at = { x: fromX + draw(20) * L.cell, y: fromY + draw(21) * L.cell };
+  const water = ground.classAt(at.x, at.y);
+  const fish = water === null ? null : memberOf(CASTS[water], draw(2));
+  if (fish?.behaviour === 'leap') {
+    if (!ground.sees(at.x, at.y)) return null;
+    const from = { ...at, kind: water!, height: 0 };
+    return { key, kind: fish.kind, behaviour: 'leap', startsAt, from, animals: [leaper(draw)] };
+  }
   const cover = ground.coverIn(fromX, fromY, fromX + L.cell, fromY + L.cell);
   if (cover === null || cover.length === 0) return null;
   const sorted = [...cover].sort((one, other) => one.y - other.y || one.x - other.x);
@@ -94,13 +109,11 @@ export function eventIn(
   const land = ground.classAt(from.x, from.y);
   const member = memberOf(land === null ? undefined : CASTS[land], critterHash(cellX, cellY, slot, 2));
   if (member === null || !member.from.includes(from.kind) || !ground.sees(from.x, from.y)) return null;
-  const key = `${cellX}/${cellY}/${slot}`;
-  const startsAt = slot * L.slot + critterHash(cellX, cellY, slot, 5) * L.slot;
   if (member.behaviour === 'hop') {
     // One animal bounding to cover near by; with none near enough, nothing comes.
     const near = coverNear(from, member.from, ground, L.hop[member.kind]?.reach ?? [0, 0]);
     if (near === null) return null;
-    const animal = hopper(member.kind, from, near, (salt) => critterHash(cellX, cellY, slot, salt));
+    const animal = hopper(member.kind, from, near, draw);
     if (animal === null) return null;
     return { key, kind: member.kind, behaviour: 'hop', startsAt, from, animals: [animal] };
   }
@@ -168,7 +181,7 @@ const ramp = (from: number, to: number, value: number): number =>
 
 /**
  * Where every animal of a critter is at this moment, for a picture of so many frames standing `size` world units tall:
- * one hopping is `hop.ts`'s, and a flock's are here. A bird flying off comes out of its cover, climbs and flies away
+ * one hopping is `hop.ts`'s, one leaping `leap.ts`'s, and a flock's are here. A bird flying off comes out of its cover, climbs and flies away
  * down its own heading, flapping and then gliding, flapping again now and then, and then hooks: a sharp turn, fading
  * from it, and a drop of a little over a bird length straight down the screen, settling. A bird taking shelter flies
  * a bowed path from one crown to the other, rising and dropping, gliding at the top, and fades as it goes into the
@@ -183,6 +196,10 @@ export function posesOf(event: CritterEvent, seconds: number, frames: number, si
     if (share <= 0 || share >= 1) continue;
     if (event.behaviour === 'hop') {
       poses.push(hopPose(event.kind, event.from, bird, flown, frames));
+      continue;
+    }
+    if (event.behaviour === 'leap') {
+      poses.push(leapPose(event.from, bird, flown, frames));
       continue;
     }
     const beat = Math.floor((flown + bird.phase) * F.flapsPerSecond);
@@ -209,6 +226,14 @@ export function posesOf(event: CritterEvent, seconds: number, frames: number, si
     });
   }
   return poses;
+}
+
+/** The rings on the water a critter leaves at this moment: a leaping fish's, and nothing of any other. */
+export function ringsOf(event: CritterEvent, seconds: number): Ring[] {
+  if (event.behaviour !== 'leap') return [];
+  return event.animals.flatMap((animal) =>
+    leapRings(event.from, animal, seconds - event.startsAt - animal.delay),
+  );
 }
 
 /**

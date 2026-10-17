@@ -418,11 +418,12 @@ there is scenery on the screen, and times a frame of the whole canvas, which is 
 place and the wall clock - a hash of a cell and a slot says whether a critter comes, out of which tree or bush of
 the scenery's own cells (`currentPointsOf`), which of the cast of the class under it (`casts.ts`), and how each bird
 flies, away or into another tree near it, or which piece of cover near it a squirrel or a hare bounds to
-(`hop.ts`) - so nothing is stored or sent and every browser has the same ones. `CritterLayer.ts` asks it every frame for
+(`hop.ts`); a fish needs no cover and leaps from a place of the cell drawn for it, where the water there has fish
+(`leap.ts`) - so nothing is stored or sent and every browser has the same ones. `CritterLayer.ts` asks it every frame for
 what is in flight over the view, where the fog's field says the house sees now (`visionAt`), and places a sprite a
 critter from the atlas `world:critters` cuts, and a shadow, in two containers inside the one the fog uncolours: the
-shadows and what runs on the ground under the scenery, turned to face the way it goes across the screen, and what
-flies over it.
+shadows, a fish's rings on the water, drawn in code, and what runs or leaps on the ground under the scenery, turned
+to face the way it goes across the screen, and what flies over it.
 **The water is not in the sprite canvas but in the map**, a MapLibre custom layer (`water/WaterLayer.ts`) drawn
 in WebGL2 over the painted terrain and under the ink lines, so the fog and everything in the sprite canvas are over
 it (0081). Where the water is comes from the flat tiles, a mask a tile worked out in the browser by the fog's

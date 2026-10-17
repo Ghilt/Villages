@@ -6,17 +6,17 @@
  */
 
 /**
- * How a critter moves: a flock bursting out of cover, or a small animal bounding from one piece of cover to another.
- * Leap and soar come with steps 12 and 13.
+ * How a critter moves: a flock bursting out of cover, a small animal bounding from one piece of cover to another, or
+ * a fish jumping out of the water. Soar comes with step 13.
  */
-export type Behaviour = 'flush' | 'hop';
+export type Behaviour = 'flush' | 'hop' | 'leap';
 
 export interface CastMember {
   kind: string;
   behaviour: Behaviour;
   /** How common it is on this ground, against the rest of the cast: a weight, not a chance. */
   weight: number;
-  /** The scenery it comes out of. */
+  /** The scenery it comes out of; none for a fish, which comes out of the water itself. */
   from: readonly string[];
 }
 
@@ -56,7 +56,13 @@ const HARES: CastMember = {
   from: ['grass', 'scrub', 'heather'],
 };
 
+/** A fish, jumping out of the water and falling back. */
+const FISH: CastMember = { kind: 'fish', behaviour: 'leap', weight: 1, from: [] };
+
 export const CASTS: Readonly<Record<string, readonly CastMember[]>> = {
+  lake: [FISH],
+  river: [FISH],
+  'shallow-sea': [FISH],
   taiga: [SONGBIRDS, SQUIRRELS],
   'taiga-open': [SONGBIRDS, SQUIRRELS],
   'conifer-forest': [SONGBIRDS, SQUIRRELS],

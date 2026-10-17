@@ -60,7 +60,10 @@ more and keep the shape bold. A pennant flies from the middle of its top.
 right, each as wide as the picture over how many frames that file gives the kind, so a bird of three frames is a
 picture three frames wide. Paint the frames in the order they play - a wing up, level, down - with the animal in
 the same place in each, because every frame of a kind is cut to the one box that holds all of them, so the frames
-register and only what moves moves. On a transparent background or a flat one, as any sprite, with no plinth;
+register and only what moves moves. An animal of the ground or the water faces right, and the map turns it to face
+the way it goes: a squirrel gathered, in the air, landing; a hare sitting up, in the air, gathered; a fish level, its
+tail one way and then the other, which the map tips along its leap. Which frame is which is in
+`apps/web/src/sprites/critters/look.ts`. On a transparent background or a flat one, as any sprite, with no plinth;
 where the animal stands on anything, it stands on the bottom edge. A frame is cut 64 pixels tall and a critter is
 drawn small - eight to thirty pixels at the closest zoom - so paint it 256 tall or more, keep the shape bold, and
 let three or four frames say the motion: at that size the motion is what reads, not the outline. A placeholder

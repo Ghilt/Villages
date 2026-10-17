@@ -53,7 +53,7 @@ export function sayCritters({ about, none }: CritterReading): string {
 
 /** What the part is, behind the question mark in its bar. */
 const ABOUT =
-  'Birds out of the trees and the bushes the scenery drew, a squirrel bounding from tree to tree in the woods and a hare from bush to bush on grassland, from zoom 9 in, only where your house sees now, the same in every browser: a flock bursts out and scatters, or a bird or two flits to the next tree. Fewer is always some of the same ones, never others. Low moves them at fifteen frames a second and high at thirty. None for a player who asked for less motion.';
+  'Birds out of the trees and the bushes the scenery drew, a squirrel bounding from tree to tree in the woods, a hare from bush to bush on grassland, and a fish jumping out of a lake, a river or the shallow sea, from zoom 9 in, only where your house sees now, the same in every browser: a flock bursts out and scatters, or a bird or two flits to the next tree. Fewer is always some of the same ones, never others. Low moves them at fifteen frames a second and high at thirty. None for a player who asked for less motion.';
 
 export function CrittersSection() {
   const level = useStore(critterStore, (state) => state.level);

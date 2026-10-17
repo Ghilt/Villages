@@ -102,6 +102,23 @@ export const CRITTERS_LOOK = {
   } as Record<string, HopLook | undefined>,
   /** How long a hopping animal takes to come out from behind its cover, and to go behind the next. */
   hopFade: 0.25,
+  /**
+   * A fish jumping clear of the water and falling back, a ring spreading where it left and one where it fell. It
+   * leaps across the screen, east or west and a little either way, so it is seen from the side as its picture is.
+   */
+  leap: {
+    /** How far it carries through the air, in world units, and how high it goes: the least and the most of each. */
+    reach: [0.5, 1.1],
+    high: [0.35, 0.7],
+    /** How long it is out of the water, the least and the most, in seconds. */
+    seconds: [0.6, 0.95],
+    /** How many times a second its tail flicks from one side to the other. */
+    flicksPerSecond: 8,
+    /** How long it takes to come clear of the water, and to go back into it. */
+    splash: 0.12,
+    /** A ring on the water: how wide it starts and ends, in world units, how long it spreads, and how bright at first. */
+    ring: { from: 0.08, to: 0.7, seconds: 1.4, alpha: 0.7 },
+  },
 } as const;
 
 /** A hopping kind's numbers: see `CRITTERS_LOOK.hop`. */
