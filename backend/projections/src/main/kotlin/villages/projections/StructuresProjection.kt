@@ -35,6 +35,7 @@ import villages.domain.VisionEvent
 import villages.domain.WorldStreamEvent
 import villages.protocol.Cell
 import villages.protocol.ON_THE_MAP_FROM
+import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.atomic.AtomicLong
@@ -56,6 +57,10 @@ class StructuresProjection(feed: EventFeed) : Follower(feed), StructuresByCell, 
     private class Indexed(val row: StructureRow, val quadkey: String, val streamVersion: Long)
 
     private val rows = ConcurrentHashMap<StructureId, Indexed>()
+
+    // Written with the row, in the one handler: a cell is answered from its own structures, a house's from its own.
+    private val byCell = CellIndex<StructureId>({ it.value.toString() }, { StructureId(UUID.fromString(it)) })
+    private val byHolder = HolderIndex<HouseId, StructureId>()
     private val holders = ConcurrentHashMap<HouseId, Holder>()
     private val people = ConcurrentHashMap<CharacterId, PlaceInSlot>()
     private val listeners = CopyOnWriteArraySet<(StructureChange) -> Unit>()
@@ -154,11 +159,11 @@ class StructuresProjection(feed: EventFeed) : Follower(feed), StructuresByCell, 
     }
 
     private fun put(row: StructureRow, streamVersion: Long, appeared: Boolean) {
-        rows[row.id] = Indexed(
-            row = row,
-            quadkey = Cell.of(row.place.lat, row.place.lon).quadkey,
-            streamVersion = streamVersion,
-        )
+        val quadkey = Cell.of(row.place.lat, row.place.lon).quadkey
+        val was = rows.put(row.id, Indexed(row = row, quadkey = quadkey, streamVersion = streamVersion))
+        // A structure never moves, so its cell is the one it was raised in.
+        if (was == null) byCell.add(quadkey, row.id)
+        byHolder.moved(row.id, was?.row?.faces?.last()?.holder?.house, row.faces.last().holder?.house)
         val change = StructureChange(row, appeared)
         for (listener in listeners) {
             listener(change)
@@ -166,16 +171,13 @@ class StructuresProjection(feed: EventFeed) : Follower(feed), StructuresByCell, 
     }
 
     override fun inCell(cell: String, everything: Boolean): List<StructureRow> {
-        val zoom = cell.length
-        return rows.values
-            .filter { it.quadkey.startsWith(cell) && (everything || zoom >= ON_THE_MAP_FROM) }
-            .map { it.row }
+        if (!everything && cell.length < ON_THE_MAP_FROM) return emptyList()
+        return byCell.inCell(cell).mapNotNull { rows[it]?.row }.toList()
     }
 
     override fun row(id: StructureId): StructureRow? = rows[id]?.row
 
-    override fun heldBy(house: HouseId): List<StructureRow> =
-        rows.values.map { it.row }.filter { it.faces.last().holder?.house == house }
+    override fun heldBy(house: HouseId): List<StructureRow> = byHolder.of(house).mapNotNull { rows[it]?.row }
 
     override fun of(structure: StructureId): Map<String, List<Content>> = rows[structure]?.row?.slots.orEmpty()
 
@@ -195,6 +197,8 @@ class StructuresProjection(feed: EventFeed) : Follower(feed), StructuresByCell, 
      */
     override fun reset() {
         rows.clear()
+        byCell.clear()
+        byHolder.clear()
         holders.clear()
         people.clear()
         applied.incrementAndGet()
