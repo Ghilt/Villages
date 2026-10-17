@@ -100,6 +100,17 @@ invented land the culture of the nearest land that came from Earth. Moving a pie
 it European. To change where a culture reaches, add or move an anchor there and save; the quick start works the
 map out again, and the Culture renderer shows it.
 
+**And so do the ruins of its towns.** Every town of 1790 is a ruin at the world's start, standing wherever the
+origin map carried the town, and `world/ruins.json` says how big each one was: a town by its Wikidata id, as
+`world/names/1790.json` keys it, with about how many people lived in it then and its name of 1790 to read it by -
+`"Q90": [550000, "Paris"]`. A town not listed had the few people of a hamlet (`unlisted`). Its people set the ground
+its ruins cover: the square root of its thousands of people times `perRootThousand` world units of radius, between
+`least` and `most`, and an overgrown `ring` beyond, so Pekin's ruins spread over forty units and a hamlet's over
+three. `tiers` names how big a town was by the fewest people each takes, great to small. The populations are rough,
+from the estimates for about 1800; to make a town bigger or smaller, change its number, or add it. A test refuses a
+town that is not a town of 1790 by the name the review gives it then, and a size whose ruins would reach past the
+63.75 units a stand holds. See `docs/plans/ruined-cities.md`.
+
 ## Seeing your edit
 
 Save the image, alt-tab to the running app, and pick it in the **Debug map** part of the debug panel,
