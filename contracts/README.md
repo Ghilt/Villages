@@ -145,3 +145,5 @@ recorded over. See decision record 0037. What each one changed:
   an `error` of code `saveRefused`. Instruments, refused while they are closed. See decision record 0101.
 - **55** - `listSaves` and `loadSave`, the saves listed and one loaded in place of the world, which ends every session
   with `worldWiped`; a save in `savesListed` says what of it this code cannot read, `unreadable`. See decision record 0101.
+- **56** - `listPlayers`, answered by `playersListed`: every player with a house in the world, by the house's name, for
+  the debug panel to switch this browser to one. Instruments, refused while they are closed. See decision record 0101.

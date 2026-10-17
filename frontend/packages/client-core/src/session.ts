@@ -74,6 +74,8 @@ export interface Session {
    * wipe, so the answer is arriving anew. See 0101.
    */
   loadSave(name: string): void;
+  /** Asks who plays in this world, into `players`. Nothing is asked while the connection is not open. See 0101. */
+  listPlayers(): void;
   /**
    * Asks what water is at a place on the map, which a click that hit nothing else does: the answer comes back as
    * `inspectedAt`, kept in the state. Nothing is asked while the connection is not open. See 0087.
@@ -210,6 +212,7 @@ export function createSession(ports: SessionPorts): Session {
     revisionRefused: () => undefined,
     // What saves there are: the panel's to say and show. See 0101.
     savesListed: () => undefined,
+    playersListed: () => undefined,
   };
 
   /** Takes a frame in: the parts fold it, the listeners are told, then what the frame makes the session do. */
@@ -303,6 +306,10 @@ export function createSession(ports: SessionPorts): Session {
 
     listSaves: () => {
       if (open()) connection?.send({ type: 'listSaves' });
+    },
+
+    listPlayers: () => {
+      if (open()) connection?.send({ type: 'listPlayers' });
     },
 
     loadSave: (name) => {

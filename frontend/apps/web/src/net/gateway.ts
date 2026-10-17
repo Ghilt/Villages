@@ -135,6 +135,21 @@ export function loadSave(name: string): void {
   session.loadSave(name);
 }
 
+/** Asks who plays in this world, into the session's `players`. See decision record 0101. */
+export function listPlayers(): void {
+  session.listPlayers();
+}
+
+/**
+ * Plays as another player of this world from now on: this browser takes their token and reloads, arriving as them.
+ * A debug affordance, as starting over is: a token is all a player is until accounts exist. See decision record 0101.
+ */
+export function switchPlayer(player: string): void {
+  becomePlayer(tokens, player);
+  note('player', 'switching to another player of this world');
+  window.location.reload();
+}
+
 /**
  * Takes one option of the choice this player has, and says so in the log.
  *

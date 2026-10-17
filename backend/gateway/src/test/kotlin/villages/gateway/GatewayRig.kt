@@ -247,6 +247,7 @@ internal class Rig(
             worldKept = worldKept,
             catalogues = catalogues,
             saves = saves,
+            everyHouse = houses,
         ),
         later = later,
         sendOn = sendOn,

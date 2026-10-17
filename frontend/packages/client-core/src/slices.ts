@@ -3,6 +3,7 @@ import type {
   DialogueView,
   InspectedAtFrame,
   KeyFigureView,
+  PlayerView,
   QuestView,
   RollDrawnFrame,
   SaveView,
@@ -90,6 +91,8 @@ export interface SessionState {
    * Only the debug panel asks, and only it reads them. See decision record 0101.
    */
   saves: readonly SaveView[] | null;
+  /** Every player with a house in this world, as the gateway last listed them, or null until it has: the panel's. 0101. */
+  players: readonly PlayerView[] | null;
 }
 
 /**
@@ -250,6 +253,13 @@ const SLICES = {
     onFrame: { savesListed: (_, frame) => ({ saves: frame.saves }) },
     onReset: (state) => state,
   } satisfies Slice<'saves'>,
+
+  /** The players of the world, which only the debug panel asks for, to switch to one. Forgotten with nothing. */
+  players: {
+    initial: { players: null },
+    onFrame: { playersListed: (_, frame) => ({ players: frame.players }) },
+    onReset: (state) => state,
+  } satisfies Slice<'players'>,
 
   switches: {
     initial: { seeAll: false, fogOfWar: true },

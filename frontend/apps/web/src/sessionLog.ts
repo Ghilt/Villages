@@ -221,6 +221,8 @@ export const sessionLog: GatewayListener = {
       case 'catalogueRevised':
       case 'revisionRefused':
         return;
+      case 'playersListed': // The panel's to show, in the World section's dropdown. See 0101.
+        return;
       case 'savesListed': {
         // The answer to a save this window asked for; a refusal is an error, said like any other. See 0101.
         const saved = frame.saves.find((save) => save.name === frame.saved);

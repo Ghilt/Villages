@@ -99,4 +99,17 @@ describe("the page's saves of the world", () => {
     expect(localStorage.getItem('villages.playerToken')).toBe('0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8d');
     expect(window.location.reload).toHaveBeenCalledOnce();
   });
+
+  it('lists the players of the world, and switching to one plays as them from the reload on', async () => {
+    const page = await arrived();
+    page.gateway.listPlayers();
+    expect(page.socket.sent.at(-1)).toEqual({ type: 'listPlayers' });
+    page.socket.says(fixture('playersListed'));
+    expect(page.gateway.sessionStore.get().players?.map((one) => one.house)).toEqual(['Ravenscar', 'Hollin']);
+
+    page.gateway.switchPlayer('0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8e');
+
+    expect(localStorage.getItem('villages.playerToken')).toBe('0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8e');
+    expect(window.location.reload).toHaveBeenCalledOnce();
+  });
 });

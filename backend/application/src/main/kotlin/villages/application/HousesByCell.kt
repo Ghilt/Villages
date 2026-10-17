@@ -118,3 +118,11 @@ fun interface HousesByPlayer {
 fun interface HouseById {
     fun ofHouse(id: HouseId): HouseRow?
 }
+
+/**
+ * Every house there is, by name: what the debug panel lists to switch players by, a player being whose house it is
+ * (0028). Adam's, never a player's: no player is told who the others are. See decision record 0101.
+ */
+fun interface EveryHouse {
+    fun everyHouse(): List<HouseRow>
+}

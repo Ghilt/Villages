@@ -48,6 +48,12 @@ tree, and switching between its players, and nothing about it in the event store
 - A save this code cannot read is listed as such, with the first event it cannot read, and cannot be picked; asked for
   anyway, it is refused whole, `saveRefused`, and the world is left as it was. So is a save that is not there.
 
+**And this browser can play as any player of the world.** A player is a token until accounts exist (0008), and the
+player's id is the token, so the World section lists every player with a house, by the house's name (`listPlayers`,
+answered by `playersListed`), and `switch` takes the picked player's token and reloads, arriving as them. The player
+this browser is now is marked and cannot be picked. One of the instruments too: closed, nobody is listed, because a
+token is all it takes to play as somebody.
+
 ## Consequences
 
 - A world worth keeping can be kept, in seconds, and given to any tree. The stored events are already the whole
@@ -61,6 +67,8 @@ tree, and switching between its players, and nothing about it in the event store
 ## Alternatives considered
 
 - **A kept world that is never wiped**, declared by an event. Adam's word: this is a debug feature, and needs no event.
+- **A frame that switches the player on the server.** The token is the player; the browser holds it, so the browser
+  changes it, and the server never learns a session was anybody else.
 - **A dump of the tree's MongoDB database.** Only where Docker runs, and no save at all of a world in memory.
 - **Saves in MongoDB**, a database of their own. Shared too, but gone with the stack's volume, and not there without
   Docker; a file is there whichever store the tree runs on.

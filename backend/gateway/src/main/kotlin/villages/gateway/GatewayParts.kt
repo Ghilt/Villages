@@ -8,6 +8,7 @@ import villages.application.ChoicesByPlayer
 import villages.application.DialogueService
 import villages.application.DialoguesByHouse
 import villages.application.EventFeed
+import villages.application.EveryHouse
 import villages.application.FoundHouseService
 import villages.application.HouseById
 import villages.application.HousesByCell
@@ -75,6 +76,8 @@ class Mechanics(
     val catalogues: Shelf? = null,
     /** The development world's saves, which the debug panel makes; nowhere keeps none. 0101. */
     val saves: WorldSaves = WorldSaves.NOWHERE,
+    /** Every house there is, for the debug panel to switch players by; none lists nobody. 0101. */
+    val everyHouse: EveryHouse = EveryHouse { emptyList() },
 )
 
 /**
@@ -107,5 +110,6 @@ internal fun partsOf(
         Instruments(instrumentsOpen, core, events, recent, emptyTheWorld, foundHouse, resources, keyFigures, visions, dialogues, rolls, worldKept, structures, antarctica, quests),
         CataloguesPart(instrumentsOpen, catalogues),
         SavesPart(instrumentsOpen, core, saves),
+        PlayersPart(instrumentsOpen, everyHouse),
     )
 }

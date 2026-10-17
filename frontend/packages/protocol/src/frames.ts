@@ -25,6 +25,7 @@ import {
 } from './structureFrames';
 import { inspectAtFrameSchema, inspectedAtFrameSchema } from './placeFrames';
 import { catalogueClientFrames, catalogueServerFrames } from './catalogueFrames';
+import { playerClientFrames, playerServerFrames } from './playerFrames';
 import { saveClientFrames, saveServerFrames } from './saveFrames';
 
 /**
@@ -258,6 +259,7 @@ export const clientFrameSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('inspect'), kind: z.enum(['house', 'character', 'structure']), id: z.string() }),
   ...catalogueClientFrames,
   ...saveClientFrames,
+  ...playerClientFrames,
 ]);
 
 /**
@@ -369,6 +371,7 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
   }),
   ...catalogueServerFrames,
   ...saveServerFrames,
+  ...playerServerFrames,
 ]);
 
 export type PledgeView = z.infer<typeof pledgeViewSchema>;

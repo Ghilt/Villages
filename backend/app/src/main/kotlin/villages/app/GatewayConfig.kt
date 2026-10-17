@@ -119,6 +119,7 @@ class GatewayConfig {
             structureCatalogue = { shelf.structures },
             catalogues = shelf,
             saves = saves,
+            everyHouse = houses,
             characterById = characters,
         ),
         later = gatewayLater,

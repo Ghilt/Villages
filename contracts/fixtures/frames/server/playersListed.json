@@ -1,0 +1,7 @@
+{
+  "type": "playersListed",
+  "players": [
+    { "player": "0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8d", "house": "Ravenscar" },
+    { "player": "0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8e", "house": "Hollin" }
+  ]
+}

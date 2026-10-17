@@ -5,7 +5,7 @@
  */
 
 /** Sent on the handshake so that the gateway can refuse a client it cannot speak to. */
-export const PROTOCOL_VERSION = 55;
+export const PROTOCOL_VERSION = 56;
 
 export {
   MAX_ZOOM,
@@ -121,3 +121,4 @@ export {
 export type { ContentView, SlotView, StructureView } from './structureFrames';
 export type { CatalogueRevisedFrame, CataloguesInForceFrame, RevisionRefusedFrame } from './catalogueFrames';
 export type { SaveView, SavesListedFrame } from './saveFrames';
+export type { PlayerView } from './playerFrames';

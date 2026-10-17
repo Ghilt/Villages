@@ -2,6 +2,7 @@ package villages.projections
 
 import villages.application.CellContents
 import villages.application.EventFeed
+import villages.application.EveryHouse
 import villages.application.HouseChange
 import villages.application.HouseRow
 import villages.application.HousesByCell
@@ -53,7 +54,7 @@ import java.util.concurrent.atomic.AtomicLong
  *
  * Disposable, like every read model: delete it, replay the feed, get it back.
  */
-class HousesProjection(feed: EventFeed) : Follower(feed), HousesByCell, HousesByPlayer, HouseById, HousesNear {
+class HousesProjection(feed: EventFeed) : Follower(feed), HousesByCell, HousesByPlayer, HouseById, HousesNear, EveryHouse {
     private class Indexed(val row: HouseRow, val quadkey: String)
 
     // Written with the row: the cells round a place hold the houses near it, which are found without a walk of all.
@@ -191,6 +192,8 @@ class HousesProjection(feed: EventFeed) : Follower(feed), HousesByCell, HousesBy
     override fun ofPlayer(player: PlayerId): HouseRow? = byPlayer[player]?.let { rows[it]?.row }
 
     override fun ofHouse(id: HouseId): HouseRow? = rows[id]?.row
+
+    override fun everyHouse(): List<HouseRow> = rows.values.map { it.row }.sortedBy { it.name.value }
 
     /** Every house standing within the distance on the day: of those in the cells round the place, the ones that near. */
     override fun near(place: Location, km: Double, at: WorldTime): List<HouseRow> =
