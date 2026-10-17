@@ -170,7 +170,8 @@ none of them could have said how.
 ### 1785 · Where the minds were many
 
 A city is many minds held close, and the ritual had leaned upon every mind at once; so it bore down hardest where
-minds were thickest, on the great cities, where a hundred thousand wills lay packed together street on street. When
+minds were thickest, on every town, and on the great cities most of all, where a hundred thousand wills lay packed
+together street on street. When
 the working twisted, it was there the twist took hold. The weight that was meant to turn each mind toward the green
 sank into the streets with no mind left to turn, and poisoned the very space between the houses: a crowd's thoughts
 with no crowd to think them, hanging in the air like smoke that will not clear.
@@ -188,16 +189,16 @@ Every god came out of the working withered, thin as the last light of evening an
 None of them is sure what happened. Whether the working failed by flaw or by treachery the council cannot tell, the
 two who remain of the three hardly know what they have made, and in the confusion every god watches every other.
 
-### 1785–1790 · The fall of the great cities
+### 1785–1790 · The fall of the cities
 
-In the years that followed, the great cities fell. Their people grew strange in streets that whispered at them, and
+In the years that followed, the cities fell: every town that had stood in 1785, and the great ones worst. Their people grew strange in streets that whispered at them, and
 fled, or fought, or stayed too long; fires were set and not put out, and what the fires spared, neglect undid. By
 1790 the greatest names of the old world lay in ruins, and where the old order fell with them, new factions rose into
 the gap, and some of what rose was nothing anyone would have chosen.
 
-### Lore · The ruins of the great cities
+### Lore · The ruins of the old towns
 
-People have learnt to shun the ruins of the great cities of old. Riches lie in them still, where they were dropped -
+People have learnt to shun the ruins of the towns and cities of old, and the great ones most of all. Riches lie in them still, where they were dropped -
 plate and coin, libraries, strongrooms no one came back for - and there are always some who go to fetch them. Not all
 return; and of those who do, some come home wanting things they never wanted, and are no longer sure which of their
 thoughts are their own.
@@ -216,7 +217,7 @@ whose face is known in another hall under another name.
 
 ### 1 January 1790 · Now
 
-And so the world stands on the first of January, 1790: bent out of its old shape, its great cities in ruins, its
+And so the world stands on the first of January, 1790: bent out of its old shape, its towns and cities in ruins, its
 gods withered and at odds, its people sure only that something has gone wrong. Every explanation they are offered is mistaken: a bad run of years,
 a judgement, somebody's fault, the weather. Into this world the houses come.
 

@@ -30,7 +30,8 @@ after them wait on the same thing. Fog of war, the exception, is under way a ste
 character dialogue; the UI component library is built and waiting on Adam's eye, and so is the choice roll,
 and so is the origin map, the first of real names on the edited world. Structures are planned and not
 started; the world cache is built and waiting on Adam's eye; quests are built and on main, waiting on Adam's
-eye for their experiment; and catalogues, the newest, are built and waiting on Adam's eye.
+eye for their experiment; catalogues are built and waiting on Adam's eye; and ruined cities, the newest, are
+planned and not started.
 
 - **Characters and key figures**: the people of the world, each with a history of their own, and the
   house's tie to the few it acts through, shown in a pane in the corner beside the house status. The shape
@@ -159,6 +160,11 @@ eye for their experiment; and catalogues, the newest, are built and waiting on A
   built and verified, with an inspect page of a square of every kind of land and every critter,
   `/admin/inspect-renders`, asked for by Adam that day to verify them on; and step 9, wet land, is built and waits on
   his eye. Asked for by Adam on 2026-10-16.
+- **Ruined cities**: every town of 1790 a ruin on the map at the world's start, the bigger the town the more ground
+  its ruins cover - ruin pieces in each place's culture laid out by the browser as a ruined city, the same for every
+  player, sent as the scenery is, only near revealed ground, with crows and rats in them. The ground and the roads
+  under them are left for later. The steps, one commit each, are in `docs/plans/ruined-cities.md`; none is built.
+  What the story says of the ruins is `STORY.md`. Asked for by Adam on 2026-10-17.
 
 MongoDB and RabbitMQ are on the machine, in Docker, from `infra/docker-compose.yml`. The game server keeps
 its world in MongoDB whenever Docker is running, and RabbitMQ carries every event it stores to the read models.
@@ -226,9 +232,6 @@ Wanted, not started, and each needs a hypothesis in `docs/experiments/` before a
   instruments reaching across servers; the read models saved with a checkpoint, so a start does not fold the
   whole history; a gateway that keeps no read models of its own and binds only its sessions' cells, which the
   routing key already carries. Left out of 1.6 on purpose, 2026-10-12.
-- **The ruins of the great cities**: the greatest towns of 1790 fallen to ruins that people shun, riches in them
-  at a risk, so that most houses are founded with one within reach. What the story says of them is `STORY.md`, and
-  what they do to those who go in is not decided. The first thing the guides need. Adam's own, 2026-10-16.
 - **The guides**: the story the player plays, told by the withered gods meeting the houses in human form, each
   wanting something and acting on the world by its own decision, with the ruin nearby as part of it; the player is
   never told, and may see that the figure is not quite a person. Proposed: one guide to each great ruin, shared by

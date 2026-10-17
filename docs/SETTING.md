@@ -34,9 +34,10 @@ will never meet. It is not a clean break from what came before. Castles still st
 holding; a cathedral is still the largest thing for a hundred miles. The new is growing up through the old
 rather than replacing it, which is what an enlightenment actually looks like from inside one.
 
-And it is being interrupted. **The social order that held is not holding.** The great cities have fallen: some
-burned, some were emptied by the people who fled them, some simply came apart, and by 1790 they are **ruins
-that people have learnt to shun**. Riches lie in them still, and there are always some who go to fetch them,
+And it is being interrupted. **The social order that held is not holding.** The towns and cities have fallen,
+every one that stood in 1785 and the greatest worst: some burned, some were emptied by the people who fled them,
+some simply came apart, and by 1790 they are **ruins that people have learnt to shun** - a great city's for miles,
+a market town's a few roofless houses. Riches lie in them still, and there are always some who go to fetch them,
 but nobody goes without risk, and nobody can say quite what the risk is. Where the order broke, **new factions
 rose into the gap**: whatever can organise people now does, and some of what can is nothing anybody would have
 chosen.
@@ -65,8 +66,8 @@ more interesting one.
 **It is not going to plan.** They had traitors in their midst. Three of them - Oriel, Veyra and Merrin - would
 not take a choice from anybody, liked the enlightenment besides, and broke the ritual from the inside: it bent
 no mind, but it warped, and the world with it. It had borne down hardest where minds were thickest, so the warp
-took hold in the great cities and poisoned the space there, which is why they fell and why their ruins are
-shunned. Oriel died of it, and every god came out of it withered and
+took hold in every town and city, deepest where the most minds had been, and poisoned the space there, which is
+why they fell and why their ruins are shunned. Oriel died of it, and every god came out of it withered and
 unsure of what had happened, so the disruption is now as chaotic for the gods as it is for anybody standing in
 it. They are not a single will executing a design. They are a divided party half-way through something that is
 already going wrong, improvising, and working against each other while they do it. The story of it, in order and
@@ -96,9 +97,9 @@ an age that never moves while everyone else's counts, the same face in another h
 knowledge nobody living could have, a ruin that does not touch them.
 
 **A guide wants something**, and acts on the shared world to get it by its own decision, as the NPCs do. At heart
-every withered god wants to be strong again, and the ruins of the great cities, where the ritual's weight sank into
-the streets, are the richest food there is. Houses are founded all over the globe and most will have a ruin within
-reach, so the ruin nearby is part of their guide's story.
+every withered god wants to be strong again, and the ruins of the towns and cities, where the ritual's weight sank into
+the streets, are the richest food there is. Every town of 1790 is a ruin, so wherever on the globe a house is
+founded there is one within reach, and the ruin nearby is part of its guide's story.
 
 Proposed on 2026-10-16 and not decided: **one guide to each great ruin, shared by every house founded within reach
 of it, and every meeting with it the house's own.** Each meeting is offered to one house and walked on its own
@@ -205,7 +206,7 @@ than a figure in it. An NPC house is a house; the difference is who issues its c
 - **How many gods there are, and which ones** besides the three who broke the plan. Also whether the council
   learns it was betrayed, whether a house can side with the two who remain of the three, and whether that is a
   route or an ending.
-- **What the ruins of the great cities do to those who go in**, beyond what `STORY.md` hints - coming home
+- **What the ruins do to those who go in**, beyond what `STORY.md` hints - coming home
   wanting what they never wanted - and whether a ruin can ever be made clean.
 - **Whether the apocalypse can be stopped**, survived, or only lived through. The house has no lose state;
   the world might.
