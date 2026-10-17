@@ -30,6 +30,7 @@ import villages.application.fate.FateFromCatalogue
 import villages.application.fate.RollService
 import villages.application.WipeGate
 import villages.application.WorldKept
+import villages.application.WorldSaves
 import villages.application.Shelf
 import villages.domain.PlayerId
 import villages.domain.WorldTime
@@ -92,6 +93,7 @@ internal class Rig(
     sendOn: Executor = Executor { it.run() },
     worldKept: WorldKept = WorldKept.IN_MEMORY,
     catalogues: Shelf? = null,
+    saves: WorldSaves = WorldSaves.NOWHERE,
 ) {
     val world = TinyWorld()
     val later = ManualLater()
@@ -244,6 +246,7 @@ internal class Rig(
             instrumentsOpen = instrumentsOpen,
             worldKept = worldKept,
             catalogues = catalogues,
+            saves = saves,
         ),
         later = later,
         sendOn = sendOn,

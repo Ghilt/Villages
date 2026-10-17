@@ -65,6 +65,8 @@ export interface Session {
   fogOfWar(on: boolean): void;
   /** Empties the development world, for everyone connected to it. See 0036. */
   wipeWorld(): void;
+  /** Saves the development world under a name, beside every tree; answered by `savesListed`. See 0101. */
+  saveWorld(name: string): void;
   /**
    * Asks what water is at a place on the map, which a click that hit nothing else does: the answer comes back as
    * `inspectedAt`, kept in the state. Nothing is asked while the connection is not open. See 0087.
@@ -199,6 +201,8 @@ export function createSession(ports: SessionPorts): Session {
     cataloguesInForce: () => undefined,
     catalogueRevised: () => undefined,
     revisionRefused: () => undefined,
+    // What saves there are: the panel's to say and show. See 0101.
+    savesListed: () => undefined,
   };
 
   /** Takes a frame in: the parts fold it, the listeners are told, then what the frame makes the session do. */
@@ -282,6 +286,12 @@ export function createSession(ports: SessionPorts): Session {
       if (!open()) return;
       ports.note('world', 'emptying the world');
       connection?.send({ type: 'wipeWorld' });
+    },
+
+    saveWorld: (name) => {
+      if (!open()) return;
+      ports.note('world', `saving the world as ${name}`);
+      connection?.send({ type: 'saveWorld', name });
     },
 
     roll: (looking) => {

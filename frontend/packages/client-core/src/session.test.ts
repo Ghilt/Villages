@@ -238,4 +238,26 @@ describe('the session, folded from what each mechanic folds', () => {
     socket.says({ type: 'takenOver', message: 'another window took this player over' });
     expect(session.state().inspectedAt).toBeNull();
   });
+
+  it('saves the world only while open, saying so in the world part of the log', () => {
+    const socket = fakeSocket();
+    const notes: string[] = [];
+    const session = createSession({
+      schedule: { after: () => () => undefined },
+      newId: () => 'c-1',
+      standsArrived: () => undefined,
+      followStands: () => undefined,
+      arriveAnew: () => undefined,
+      note: (area, message) => notes.push(`${area}: ${message}`),
+    });
+    session.saveWorld('too-soon');
+    expect(notes).toEqual([]);
+
+    session.connect({ socket: socket.socket, playerToken: 't', protocolVersion: 1, address: 'ws://here' });
+    socket.opens();
+    socket.says(welcome);
+    session.saveWorld('first-test');
+    expect(socket.sent.at(-1)).toEqual({ type: 'saveWorld', name: 'first-test' });
+    expect(notes).toEqual(['world: saving the world as first-test']);
+  });
 });

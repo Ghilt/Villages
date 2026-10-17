@@ -18,6 +18,7 @@ import villages.application.StructureService
 import villages.application.TakeActionService
 import villages.application.VisionService
 import villages.application.WorldClock
+import villages.application.WorldSaves
 import villages.application.WorldWipe
 import villages.application.fate.GroundMaps
 import villages.application.fate.PlaceNamesByMaster
@@ -78,6 +79,7 @@ class GatewayConfig {
         antarctica: Antarctica,
         structuresOnTheMap: StructuresProjection,
         shelf: Shelf,
+        saves: WorldSaves,
         @Value("\${villages.instruments:true}") instruments: Boolean,
     ): Gateway = Gateway(
         tokens = AnonymousTokens,
@@ -116,6 +118,7 @@ class GatewayConfig {
 
             structureCatalogue = { shelf.structures },
             catalogues = shelf,
+            saves = saves,
             characterById = characters,
         ),
         later = gatewayLater,

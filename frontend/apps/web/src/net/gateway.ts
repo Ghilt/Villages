@@ -102,6 +102,11 @@ export function wipeWorld(): void {
   session.wipeWorld();
 }
 
+/** Saves the development world under a name, beside every tree, so any tree can load it. See decision record 0101. */
+export function saveWorld(name: string): void {
+  session.saveWorld(name);
+}
+
 /**
  * Takes one option of the choice this player has, and says so in the log.
  *

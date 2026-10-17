@@ -1,0 +1,18 @@
+{
+  "type": "savesListed",
+  "saves": [
+    {
+      "name": "completed-many-quests",
+      "savedAt": 1792238400000,
+      "by": "0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8d",
+      "events": 412
+    },
+    {
+      "name": "first-test",
+      "savedAt": 1792152000000,
+      "by": null,
+      "events": 10
+    }
+  ],
+  "saved": "completed-many-quests"
+}

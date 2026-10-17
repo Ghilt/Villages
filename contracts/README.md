@@ -141,3 +141,5 @@ recorded over. See decision record 0037. What each one changed:
 - **53** - `watchCatalogues` and `cataloguesInForce`, what the game server runs on, and `reviseCatalogue` with its two
   answers, `catalogueRevised` and `revisionRefused`: an inspect page saving a catalogue through the game server.
   Instruments, refused while they are closed. See decision record 0097.
+- **54** - `saveWorld`, the development world saved under a name, answered by `savesListed`, every save there is, or by
+  an `error` of code `saveRefused`. Instruments, refused while they are closed. See decision record 0101.

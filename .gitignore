@@ -84,6 +84,10 @@ Thumbs.db
 .sessions/*
 !.sessions/README.md
 
+# The development world's saves, made from the debug panel and every tree's, beside the shared .git. A save is a
+# world somebody was trying something in, not part of the project. See decision record 0101.
+.saves/
+
 # The cut sprites: an atlas and its frames, rebuilt from world/sprites/ by npm run world:art. Output.
 frontend/apps/web/public/art/
 

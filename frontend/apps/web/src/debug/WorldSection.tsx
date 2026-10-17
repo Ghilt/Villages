@@ -1,11 +1,13 @@
 import type * as maplibregl from 'maplibre-gl';
+import { useState } from 'react';
 
 import type { BannerSpec } from '@villages/protocol';
 
 import { clampBoundsToWorld } from '../map/sheet';
-import { sessionStore, restart, wipeWorld } from '../net/gateway';
+import { sessionStore, restart, saveWorld, wipeWorld } from '../net/gateway';
 import { seedHouses } from '../net/seed';
 import { note } from '../log/log';
+import { SaveDialog } from './SaveDialog';
 import { Section } from './Section';
 import { seeEverything } from './seeEverything';
 import { foundHouseHere } from './levers';
@@ -58,6 +60,7 @@ function aName(): string {
 export function WorldSection({ map }: WorldSectionProps) {
   const connection = useStore(sessionStore, (state) => state.connection);
   const everything = useStore(sessionStore, (state) => state.seeAll);
+  const [naming, setNaming] = useState(false);
 
   /** Founds this player's one house, here. Pressed twice, the second is refused: you have a house. */
   const foundHere = () => {
@@ -137,12 +140,29 @@ export function WorldSection({ map }: WorldSectionProps) {
       >
         wipe
       </button>
+      <button
+        type="button"
+        className="debug__button"
+        onClick={() => setNaming(true)}
+        disabled={connection !== 'open'}
+        title="save every event of this world under a name, for any tree to load"
+      >
+        save
+      </button>
     </div>
   );
 
   return (
     <Section name="World" tools={tools}>
       {levers}
+      <SaveDialog
+        open={naming}
+        onSave={(name) => {
+          saveWorld(name);
+          setNaming(false);
+        }}
+        onClose={() => setNaming(false)}
+      />
       <p className="debug__quiet">
         The events log is at <a href={EVENTS_LOG}>{EVENTS_LOG}</a>, every inspect view at{' '}
         <a href="/admin">/admin</a>

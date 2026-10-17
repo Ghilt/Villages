@@ -136,3 +136,27 @@
 .debug__about:focus-visible .debug__about-tip {
   display: block;
 }
+
+/* The dialog a save of the world is named in: the panel's parchment, over a dimmed page. See 0101. */
+.debug-save {
+  width: min(22rem, calc(100vw - 2rem));
+  padding: 0.6rem 0.7rem;
+  color: var(--ink);
+  background: var(--parchment, #f4ecd8);
+  border: 1px solid var(--parchment-edge);
+  border-radius: 3px;
+}
+
+.debug-save::backdrop {
+  background: rgba(20, 16, 8, 0.35);
+}
+
+.debug-save form {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.debug-save__name {
+  width: 100%;
+  box-sizing: border-box;
+}

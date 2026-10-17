@@ -217,6 +217,10 @@ stage alone, with none of the debug panel in it (decision record 0079).
   this browser's player and reloads, so the opening can be tried again from nothing; the house the old
   player founded stays in the world, because events are never deleted. `wipe` beside it empties the world
   for everyone connected to it, and every window reloads and arrives anew. See `docs/adr/0036`.
+  `save` asks for a name, `completed-many-quests`, and writes every event of this tree's world to
+  `E:/Code/Villages/.saves/<name>.jsonl`, beside the shared `.git`, so every tree sees it; the log says
+  `saved the world as <name>: <n> events`, and a name taken, or not lower-case letters, digits and single hyphens, is
+  refused as `error saveRefused`. Loading one is the next step of `docs/plans/world-saves.md`. See decision record 0101.
   What the log says is what was worth saying, through `note(area, message)` in `apps/web/src/log/log.ts`:
   moving the camera about writes nothing, and the cells a move brought back are counted and said in one line
   only when they carried something. `window.villagesPainterly()` gives the paint counters from a console.

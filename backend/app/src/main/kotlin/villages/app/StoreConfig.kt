@@ -81,7 +81,7 @@ class StoreConfig {
         }
     }
 
-    private companion object {
+    internal companion object {
         /** The stack in `infra/docker-compose.yml`, and a server told to use it says so in five seconds if it is not up. */
         const val LOCAL_MONGO = "mongodb://localhost:27017/?replicaSet=rs0&serverSelectionTimeoutMS=5000"
 

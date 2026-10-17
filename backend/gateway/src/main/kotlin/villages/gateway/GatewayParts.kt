@@ -26,6 +26,7 @@ import villages.application.TakeActionService
 import villages.application.VisionService
 import villages.application.WorldKept
 import villages.application.WorldClock
+import villages.application.WorldSaves
 import villages.application.WorldWipe
 import villages.application.fate.RollService
 import villages.application.fate.WaterAt
@@ -72,6 +73,8 @@ class Mechanics(
     val characterById: CharacterById = CharacterById { null },
     /** The game server's catalogues, which the inspect pages read and save through; none takes no revisions. 0097. */
     val catalogues: Shelf? = null,
+    /** The development world's saves, which the debug panel makes; nowhere keeps none. 0101. */
+    val saves: WorldSaves = WorldSaves.NOWHERE,
 )
 
 /**
@@ -103,5 +106,6 @@ internal fun partsOf(
         InspectingPart(houseById, onTheMap, structuresOnTheMap, world),
         Instruments(instrumentsOpen, core, events, recent, emptyTheWorld, foundHouse, resources, keyFigures, visions, dialogues, rolls, worldKept, structures, antarctica, quests),
         CataloguesPart(instrumentsOpen, catalogues),
+        SavesPart(instrumentsOpen, saves),
     )
 }

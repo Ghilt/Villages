@@ -25,6 +25,7 @@ import {
 } from './structureFrames';
 import { inspectAtFrameSchema, inspectedAtFrameSchema } from './placeFrames';
 import { catalogueClientFrames, catalogueServerFrames } from './catalogueFrames';
+import { saveClientFrames, saveServerFrames } from './saveFrames';
 
 /**
  * The frames that cross the WebSocket, as zod schemas, so that a frame is checked at the edge and typed
@@ -256,6 +257,7 @@ export const clientFrameSchema = z.discriminatedUnion('type', [
    */
   z.object({ type: z.literal('inspect'), kind: z.enum(['house', 'character', 'structure']), id: z.string() }),
   ...catalogueClientFrames,
+  ...saveClientFrames,
 ]);
 
 /**
@@ -366,6 +368,7 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
     data: z.record(z.string(), z.unknown()),
   }),
   ...catalogueServerFrames,
+  ...saveServerFrames,
 ]);
 
 export type PledgeView = z.infer<typeof pledgeViewSchema>;

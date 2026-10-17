@@ -324,6 +324,26 @@ describe("the page's conversation with the gateway", () => {
     expect(state.yourHouse?.house.name).toBe('Ravenscar');
   });
 
+  it('says the save it asked for, as the gateway lists it, and a refused one as the error it is', async () => {
+    const page = await arrived();
+    const before = page.lines();
+
+    page.gateway.saveWorld('completed-many-quests');
+    page.socket.says(fixture('savesListed'));
+    page.socket.says({
+      type: 'error',
+      code: 'saveRefused',
+      message: 'there is a save called first-test already',
+    });
+
+    expect(page.socket.sent.at(-1)).toEqual({ type: 'saveWorld', name: 'completed-many-quests' });
+    expect(page.said(before)).toEqual([
+      'world: saving the world as completed-many-quests',
+      'world: saved the world as completed-many-quests: 412 events',
+      'gateway: error saveRefused: there is a save called first-test already',
+    ]);
+  });
+
   it('taken over, forgets the house and closes its own socket without saying the backend has gone', async () => {
     const page = await arrived();
     page.socket.says(fixture('yourHouse'));

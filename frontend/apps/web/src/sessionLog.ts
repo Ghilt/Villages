@@ -221,6 +221,12 @@ export const sessionLog: GatewayListener = {
       case 'catalogueRevised':
       case 'revisionRefused':
         return;
+      case 'savesListed': {
+        // The answer to a save this window asked for; a refusal is an error, said like any other. See 0101.
+        const saved = frame.saves.find((save) => save.name === frame.saved);
+        if (saved !== undefined) note('world', `saved the world as ${saved.name}: ${saved.events} events`);
+        return;
+      }
       case 'inspectedAt':
         // What water a click pointed at, as the server named it, or why it named none. See 0087.
         note('inspect', sayAnswer(frame));
