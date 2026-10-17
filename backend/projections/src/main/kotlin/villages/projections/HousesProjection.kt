@@ -48,8 +48,8 @@ import java.util.concurrent.atomic.AtomicLong
  * quadkey starts with the cell, the cell's zoom is at least the row's coarsest, and the house exists on the
  * world-day asked about. Move the day and the same query is the timeline scrubber. Drop the second and it
  * is the eye, which is why that is a flag on the same query rather than a query of its own. In memory the
- * first condition is a `startsWith` over every row; in MongoDB it is an anchored regex over an index, and
- * nothing above this class changes.
+ * first condition is a range of an index sorted by quadkey (`CellIndex`), so a cell's own rows and no others are
+ * looked at; in MongoDB it would be an anchored regex over an index, and nothing above this class changes.
  *
  * Disposable, like every read model: delete it, replay the feed, get it back.
  */
@@ -174,13 +174,10 @@ class HousesProjection(feed: EventFeed) : Follower(feed), HousesByCell, HousesBy
         seen: (HouseRow) -> Boolean,
     ): CellContents {
         val zoom = cell.length
-        val worthDrawing = rows.values
-            .filter {
-                it.quadkey.startsWith(cell) &&
-                    (everything || zoom >= ON_THE_MAP_FROM) &&
-                    it.row.existsAt(at) &&
-                    seen(it.row)
-            }
+        val worthDrawing = (if (everything || zoom >= ON_THE_MAP_FROM) byCell.inCell(cell) else emptySequence())
+            .mapNotNull { rows[it] }
+            .filter { it.row.existsAt(at) && seen(it.row) }
+            .toList()
             .sortedWith(compareByDescending<Indexed> { it.row.significance.value }.thenBy { it.row.id.value })
         return CellContents(
             houses = worthDrawing.take(most).map { it.row },

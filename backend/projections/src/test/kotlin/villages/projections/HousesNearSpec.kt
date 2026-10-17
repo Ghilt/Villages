@@ -24,6 +24,7 @@ import villages.domain.Significance
 import villages.domain.Tincture
 import villages.domain.WorldTime
 import villages.domain.emptyStocks
+import villages.protocol.Cell
 import java.time.Instant
 import java.util.UUID
 import kotlin.random.Random
@@ -57,7 +58,7 @@ class HousesNearSpec : StringSpec({
     val today = WorldTime(653_705)
     val banner = Banner(Tincture.SABLE, Division.PLAIN, null, Charge.STAG, Tincture.ARGENT)
 
-    "the houses near a place are those a walk of every house finds that near" {
+    "the houses near a place, and in a cell, are those a walk of every house finds there" {
         checkAll(80, Arb.int(1, 80), Arb.long()) { count, seed ->
             val random = Random(seed)
             val feed = Founding()
@@ -78,6 +79,13 @@ class HousesNearSpec : StringSpec({
                 val km = listOf(5.0, 50.0, 300.0, 1_500.0, 6_000.0).random(random) * random.nextDouble(0.5, 1.5)
                 val scanned = every.filter { kmBetween(it.seat, place) <= km }.map { it.id }.toSet()
                 houses.near(place, km, today).map { it.id }.toSet() shouldBe scanned
+            }
+            // And a cell at any zoom holds the houses whose seats are in it, as a walk of every house would find.
+            for (house in every) {
+                val deepest = Cell.of(house.seat.lat, house.seat.lon).quadkey
+                val cell = deepest.take(random.nextInt(0, deepest.length + 1))
+                val walked = every.filter { Cell.of(it.seat.lat, it.seat.lon).quadkey.startsWith(cell) }.map { it.id }.toSet()
+                houses.inCell(cell, today, most = Int.MAX_VALUE, everything = true).houses.map { it.id }.toSet() shouldBe walked
             }
         }
     }
