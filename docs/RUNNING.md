@@ -58,7 +58,11 @@ stage alone, with none of the debug panel in it (decision record 0079).
   italic along them, peaks in brown with their height, seas in spaced blue italic and named lands in spaced
   capitals. The important are written first and none covers another, so more appear as the camera comes in;
   the same words are not written twice close together. A click says what the Origin renderer's does. It is
-  the first place to look when a name is wrong, and it draws nothing the data does not hold.
+  the first place to look when a name is wrong, and it draws nothing the data does not hold. Under the names it
+  rings every ruined town of 1790 the game server sent: a ring at the radius its ruins are built over and a dashed
+  one at how far they reach, in the Culture renderer's colour for the culture they are built in - so only what the
+  fog let through, every town under what the page follows with the fog lifted, and from zoom 6 in, as the
+  scenery's stands are sent.
 - The water moves, from about zoom 8.5 in: depth, waves lit by a sun in the north-west, caustics on the bottom
   of the shallows, and surf along the shore, over every renderer. It is the **Water** part of the **Shaders**
   section, below Debug map, which holds a part for each shader that is a look and nothing more, with `off`,

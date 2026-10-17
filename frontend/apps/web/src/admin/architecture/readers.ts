@@ -22,6 +22,14 @@ export const READERS: readonly Reader[] = [
     reads: ['origin', 'names'],
   },
   {
+    id: 'info-ruins',
+    program: 'page',
+    piece: 'map',
+    name: 'the ruins on the Info map',
+    where: 'map/infoRuins.ts',
+    reads: ['ruins-map'],
+  },
+  {
     id: 'painterly-tiles',
     program: 'page',
     piece: 'painter',
@@ -164,7 +172,13 @@ export const READERS: readonly Reader[] = [
     where: 'FolderCatalogues.kt',
     reads: ['catalogues'],
   },
-  { id: 'folder-stands', program: 'server', name: 'stands', where: 'FolderStands.kt', reads: ['stands'] },
+  {
+    id: 'folder-stands',
+    program: 'server',
+    name: "stands, the scenery's and the ruins'",
+    where: 'FolderStands.kt',
+    reads: ['stands', 'ruins-stands'],
+  },
   {
     id: 'folder-ground',
     program: 'server',

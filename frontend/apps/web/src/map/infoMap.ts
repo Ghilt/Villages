@@ -3,13 +3,15 @@ import type { WorldName } from '@villages/world';
 
 import { note } from '../log/log';
 import { placeLabels } from './infoLabels';
+import { drawRuins, repaintOnRuins, ruinsMapOf } from './infoRuins';
+import type { RuinsMapFile } from '@villages/world';
 import type { LabelCandidate } from './infoLabels';
 import { displayName, loadWorldNames } from './worldNames';
 import type { NamedRegion, WorldNames } from './worldNames';
 
 /**
  * The Info map: every name the world has gathered, written over the quietened terrain as an atlas would write
- * it. A picture of the data in `names.json` and `regions.bin` rather than a look: towns of 1790 in black beside
+ * it, over the rings of the ruined towns of 1790 the game server sent (`infoRuins.ts`). A picture of the data in `names.json` and `regions.bin` rather than a look: towns of 1790 in black beside
  * their dots, rivers and lakes in blue italic, peaks with their height, seas in spaced italic and named lands in
  * spaced capitals, the important first and more as the camera comes in. See `docs/plans/real-world-names.md`.
  *
@@ -95,7 +97,7 @@ export function watchInfoMap(map: maplibregl.Map, master: string): () => void {
       note('names', `${master} has no names yet: npm run world:origin --prefix frontend -- ${master}`);
       return;
     }
-    hide = showInfoMap(map, world);
+    hide = showInfoMap(map, world, master);
     note(
       'names',
       `the Info map writes from ${world.names.length} names and ${world.regions?.list.length ?? 0} seas and lands, ` +
@@ -109,8 +111,17 @@ export function watchInfoMap(map: maplibregl.Map, master: string): () => void {
 }
 
 /** Shows the Info map over a map until the returned function is called. */
-export function showInfoMap(map: maplibregl.Map, world: WorldNames): () => void {
+export function showInfoMap(map: maplibregl.Map, world: WorldNames, master?: string): () => void {
   const names = world.names ?? [];
+  // The ruined towns the game server sent, drawn under the names: see infoRuins.ts.
+  let ruins: RuinsMapFile | null = null;
+  if (master !== undefined) {
+    void ruinsMapOf(master).then((file) => {
+      ruins = file;
+      map.triggerRepaint();
+    });
+  }
+  const stopRuins = repaintOnRuins(map);
   addLines(map, names);
   const canvas = document.createElement('canvas');
   canvas.className = 'info-map';
@@ -139,6 +150,7 @@ export function showInfoMap(map: maplibregl.Map, world: WorldNames): () => void 
     }
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
     context.clearRect(0, 0, width, height);
+    if (ruins !== null) drawRuins(context, map, ruins);
     const zoom = map.getZoom();
     const bounds = map.getBounds();
     const measure = (text: string, style: Style) => {
@@ -210,6 +222,7 @@ export function showInfoMap(map: maplibregl.Map, world: WorldNames): () => void 
   map.triggerRepaint();
   return () => {
     map.off('render', draw);
+    stopRuins();
     canvas.remove();
     removeLines(map);
   };

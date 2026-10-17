@@ -124,6 +124,11 @@ export function onStandsFollowed(listener: () => void): () => void {
   return () => followings.delete(listener);
 }
 
+/** Every tile of a layer held now, for whatever draws what was sent: the Info map's ruins. */
+export function heldStandsOf(layer: StandLayer): Iterable<SentStands> {
+  return sent[layer].values();
+}
+
 /** How many tiles of a layer are held, and the stands in them, for the panel. */
 export function standsHeld(layer: StandLayer = 'biome'): { tiles: number; stands: number } {
   let stands = 0;
