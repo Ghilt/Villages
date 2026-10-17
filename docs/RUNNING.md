@@ -112,11 +112,13 @@ stage alone, with none of the debug panel in it (decision record 0079).
   small birds burst out of a tree or a bush the scenery drew - in the woods, the scrub and the heath, and out of a
   lone bush or tree in the open - fan out, climb, flap and glide away, and then hook down, a sharp
   turn, fading from it, and a drop of a little over a bird length down the screen, settling, a few dropping into a tree near by instead; or a bird or two flits from one tree into another near it, as if seeking shelter, and fades into
-  its leaves. Each has a soft shadow below it. The same birds leave the same bush at the same moment in every browser; one first seen in flight fades
-  up; a player who asked for less motion sees none. They are drawn from the critters' atlas (`world:critters`,
+  its leaves. In the woods a squirrel bounds now and then from one tree to another near it, stopping once on the
+  way, and is gone behind it; on grassland a hare comes out from behind a bush or a tuft of grass, a few bounds and
+  a stop, and is gone behind another, each facing the way it goes. Each has a soft shadow below it. The same
+  critters leave the same bush at the same moment in every browser; one first seen on its way fades up; a player who asked for less motion sees none. They are drawn from the critters' atlas (`world:critters`,
   below). They are the **Critters** part of the Shaders section: `off`, `low` or `high` in its bar, low at every
-  load, low moving them at fifteen frames a second and high at thirty, and beside it what is flying now, `3
-  songbirds`, or why there are none, `from zoom 9 in`, `off`. Inside it, three sliders: **how many**, from none to all
+  load, low moving them at fifteen frames a second and high at thirty, and beside it what is about now, `3
+  songbirds, 1 hare`, or why there are none, `from zoom 9 in`, `off`. Inside it, three sliders: **how many**, from none to all
   there can be, where fewer is always some of the same critters every browser has and never others; **how often, to
   look at them**, from as often as a player sees them up to twenty times that, which keeps every critter of the
   lower and adds more, until every cell of a wood has a flock at once - a lever for watching a behaviour, not

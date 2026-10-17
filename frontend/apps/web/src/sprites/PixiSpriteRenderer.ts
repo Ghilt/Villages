@@ -308,7 +308,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       // fog over them, and everything the fog must not cover above that.
       // The critters' shadows under the scenery, and the critters over it: only where the house sees now.
       const critters = createCritterLayer(drawSoon, () => ({ scenery: scene.scenery, sight: groundField }));
-      world.addChild(grass.sprite, critters.shadows, scenery.container, critters.flying, marks.underTheFog);
+      world.addChild(grass.sprite, critters.ground, scenery.container, critters.flying, marks.underTheFog);
       stage.addChild(world);
       // The clouds over the fog, and under the ring and every sign. See decision record 0098.
       const clouds = createCloudLayer(app.renderer, drawSoon, () => marks.iconsDrawn());

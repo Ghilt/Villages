@@ -7,7 +7,7 @@ import type { ShaderLevel } from '../../shaders/levels';
 import { CRITTERS_LOOK } from './look';
 
 /**
- * How this window draws the critters: their level, off, low or high, low at every load, and what is flying at this
+ * How this window draws the critters: their level, off, low or high, low at every load, and what is about at this
  * moment, for the Critters part's bar. A way of looking, neither remembered nor sent. Stores, the one shape every
  * piece of state the page watches takes.
  */
@@ -30,19 +30,19 @@ export function setCritterLevel(level: ShaderLevel): void {
 
 /** How many of each kind are on the screen, by kind, and why there are none when there are none. */
 export interface CritterReading {
-  flying: Readonly<Record<string, number>>;
+  about: Readonly<Record<string, number>>;
   /** Null while some are drawn or could be; otherwise what keeps them away, in a few words. */
   none: string | null;
 }
 
-const reading = createStore<CritterReading>({ flying: {}, none: 'not yet drawn' });
+const reading = createStore<CritterReading>({ about: {}, none: 'not yet drawn' });
 
 /** The reading in the Critters part's bar. Set only when it changes, never every frame. */
 export const critterReadingStore: Readable<CritterReading> = reading;
 
-export function readCritters(flying: Readonly<Record<string, number>>, none: string | null): void {
+export function readCritters(about: Readonly<Record<string, number>>, none: string | null): void {
   const was = reading.get();
-  if (was.none !== none || JSON.stringify(was.flying) !== JSON.stringify(flying)) {
-    reading.set({ flying, none });
+  if (was.none !== none || JSON.stringify(was.about) !== JSON.stringify(about)) {
+    reading.set({ about, none });
   }
 }

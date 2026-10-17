@@ -172,11 +172,14 @@ every browser. A player who asked for less motion sees it all standing still. Ev
 bush the scenery drew - in the woods, the scrub and the heath, and out of a lone bush or tree in the open - fan
 out, climb, flap and glide away, and then hook down - a sharp turn, fading from it, and a drop of a little over a
 bird length straight down the screen, settling; a few of them drop into a tree near by instead; or a bird
-or two flits from one tree into another near it, as if seeking shelter, and goes into its leaves. Each has a soft
-shadow on the ground below it and away from the light, which a tree in front of it hides. They are drawn at the scenery's scale, smaller than any other sprite,
+or two flits from one tree into another near it, as if seeking shelter, and goes into its leaves. In the woods a
+squirrel bounds now and then from one tree to another near it, stopping once on the way, and is gone behind it; on
+grassland a hare comes out from behind a bush or a tuft of grass, a few bounds and a stop, and is gone behind
+another. They run on the ground, so a tree in front of one hides it, and each faces the way it is going. Each has
+a soft shadow on the ground below it and away from the light, which a tree in front of it hides. They are drawn at the scenery's scale, smaller than any other sprite,
 so what tells a bird from a speck is its wingbeat rather than its outline. They come only where the house sees now:
-the grey ground is a memory and holds still. Nothing pops: a bird comes out of its cover, and one first seen in
-flight fades up. The same birds leave the same bush at the same moment in every browser. A player who asked for
+the grey ground is a memory and holds still. Nothing pops: a critter comes out of its cover, and one first seen on
+its way fades up. The same birds leave the same bush at the same moment in every browser. A player who asked for
 less motion sees none. Every number is in `apps/web/src/sprites/critters/look.ts`; see decision record 0099.
 
 **The seam.** The join between the two **bays**, drawn as a moulding lying over it: three gold rules

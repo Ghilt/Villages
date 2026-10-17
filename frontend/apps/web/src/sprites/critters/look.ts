@@ -74,4 +74,42 @@ export const CRITTERS_LOOK = {
     /** The share of its flight away a bird takes to come out of its cover whole. */
     fadeIn: 0.05,
   },
+  /**
+   * A small animal bounding a few times from one piece of cover to another near it, and gone behind it: a squirrel
+   * from tree to tree in the woods, a hare out from behind a bush or a tuft on grassland. Each kind's own numbers.
+   */
+  hop: {
+    squirrel: {
+      /** How near and how far the cover it bounds to may stand, in world units. */
+      reach: [2, 7],
+      /** How far one bound carries it, how high it goes, and how many it makes a second. */
+      bound: 0.7,
+      high: 0.35,
+      boundsPerSecond: 2.6,
+      /** How long it stops once on the way, sitting still, before going on. */
+      pause: 0.4,
+      /** Which frame of its strip is it gathered, in the air, landing, and sitting still. */
+      frames: { gathered: 0, air: 1, landing: 2, still: 0 },
+    },
+    hare: {
+      reach: [2.5, 8],
+      bound: 1,
+      high: 0.4,
+      boundsPerSecond: 2.2,
+      pause: 0.9,
+      frames: { gathered: 2, air: 1, landing: 2, still: 0 },
+    },
+  } as Record<string, HopLook | undefined>,
+  /** How long a hopping animal takes to come out from behind its cover, and to go behind the next. */
+  hopFade: 0.25,
 } as const;
+
+/** A hopping kind's numbers: see `CRITTERS_LOOK.hop`. */
+export interface HopLook {
+  reach: readonly [number, number];
+  bound: number;
+  high: number;
+  boundsPerSecond: number;
+  pause: number;
+  frames: { gathered: number; air: number; landing: number; still: number };
+}

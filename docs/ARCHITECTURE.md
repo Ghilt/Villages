@@ -378,7 +378,7 @@ fog shader's code for where a pixel lies and how far inside each edge is shared 
 **The sprite canvas is a stack of layers**, each a `Layer` (`sprites/layer.ts`): the scenery, the marks under
 the fog and over it (`MarksLayer.ts`), the fog with the haze's clock, the clouds over the fog with theirs, the
 selection ring (`RingLayer.ts`), the colour taken out of the map on its own canvas, the wind the scenery bends
-in, which draws nothing of its own, and the critters, their shadows under the scenery and themselves over it. Each draws its part of a
+in, which draws nothing of its own, and the critters, their shadows and what runs on the ground under the scenery and what flies over it. Each draws its part of a
 frame from the same camera and says how soon it wants the next - the next frame, a time, or never - and the
 renderer asks for the soonest. So the canvas draws when the map has drawn and has no clock of its own, except the
 haze's and the clouds': while the fog is drawn close in with unknown ground on the screen, it asks for a frame
@@ -415,12 +415,14 @@ browser bends the same tree with the same gust. `TreesLayer.ts` is a layer of th
 hands the shaders the camera, the gusts and the sliders each frame, asks for frames at its level's rate while
 there is scenery on the screen, and times a frame of the whole canvas, which is what its frames cost.
 **The critters are made up by the page** (0099): `sprites/critters/critterClock.ts` is a pure function of the
-place and the wall clock - a hash of a cell and a slot says whether a flock comes, out of which tree or bush of
+place and the wall clock - a hash of a cell and a slot says whether a critter comes, out of which tree or bush of
 the scenery's own cells (`currentPointsOf`), which of the cast of the class under it (`casts.ts`), and how each bird
-flies, away or into another tree near it - so nothing is stored or sent and every browser has the same ones. `CritterLayer.ts` asks it every frame for
+flies, away or into another tree near it, or which piece of cover near it a squirrel or a hare bounds to
+(`hop.ts`) - so nothing is stored or sent and every browser has the same ones. `CritterLayer.ts` asks it every frame for
 what is in flight over the view, where the fog's field says the house sees now (`visionAt`), and places a sprite a
 critter from the atlas `world:critters` cuts, and a shadow, in two containers inside the one the fog uncolours: the
-shadows under the scenery and the critters over it.
+shadows and what runs on the ground under the scenery, turned to face the way it goes across the screen, and what
+flies over it.
 **The water is not in the sprite canvas but in the map**, a MapLibre custom layer (`water/WaterLayer.ts`) drawn
 in WebGL2 over the painted terrain and under the ink lines, so the fog and everything in the sprite canvas are over
 it (0081). Where the water is comes from the flat tiles, a mask a tile worked out in the browser by the fog's

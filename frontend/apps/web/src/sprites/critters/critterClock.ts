@@ -1,14 +1,17 @@
 import { CASTS, memberOf } from './casts';
-import type { Behaviour } from './casts';
+import { HOP_LONGEST, hopPose, hopper } from './hop';
 import { CRITTERS_LOOK } from './look';
+import type { Animal, Cover, CritterEvent, Ground, Pose } from './types';
+
+export type { Animal, Cover, CritterEvent, Ground, Pose } from './types';
 
 /**
  * When and where the critters are: a pure function of the place and the wall clock, so nothing about them is
  * remembered or sent and every browser works out the same ones at the same moment, as every browser draws the same
  * sky. The ground is cut into cells and the clock into slots; a hash of a cell and a slot says whether anything comes
  * there then, out of which piece of the scenery standing in the cell, which of that ground's cast, when in the slot,
- * and everything about how it goes. After that it is a function of the seconds since it began. See
- * docs/plans/living-world.md.
+ * and everything about how it goes: a flock bursting out of cover, here, or a small animal hopping to the next piece
+ * of cover, `hop.ts`. After that it is a function of the seconds since it began. See docs/plans/living-world.md.
  *
  * Whether a cell's slot brings anything is decided by one draw against the density before anything else, so turning
  * the density down only ever takes critters away: fewer is a subset of more. The density may be more than one, which
@@ -18,63 +21,6 @@ import { CRITTERS_LOOK } from './look';
 
 const L = CRITTERS_LOOK;
 const F = L.flush;
-
-/** A piece of the scenery a critter can come out of: where it stands, what kind it is, and how tall. */
-export interface Cover {
-  x: number;
-  y: number;
-  kind: string;
-  height: number;
-}
-
-/** What the clock needs to know about the ground. */
-export interface Ground {
-  /** The scenery standing in a square of world units, in its own order; null while it is not yet known. */
-  coverIn(fromX: number, fromY: number, toX: number, toY: number): readonly Cover[] | null;
-  /** The terrain class at a place, by its name in `world/palette.json`, or null where there is none. */
-  classAt(x: number, y: number): string | null;
-  /** Whether the house sees the place now. Critters are only where it does. */
-  sees(x: number, y: number): boolean;
-}
-
-/**
- * One bird of a flock: which way it flies, how long after the first it leaves, how far, its own wingbeat, and the
- * tree it takes shelter in, if it does, with how long it takes to get there and which way its path bows.
- */
-export interface FlockBird {
-  /** On the ground, in radians from east towards south, as world units run. */
-  heading: number;
-  delay: number;
-  /** A share of the flock's reach. */
-  reach: number;
-  phase: number;
-  /** The tree or bush it drops into; null for a bird that flies off and fades. */
-  to: Cover | null;
-  seconds: number;
-  /** From one side to the other, minus one to one. */
-  bow: number;
-}
-
-export interface CritterEvent {
-  /** Its identity: the cell and the slot it came out of. */
-  key: string;
-  kind: string;
-  behaviour: Behaviour;
-  /** When it begins, in seconds of the wall clock since 1970. */
-  startsAt: number;
-  /** What it comes out of. */
-  from: Cover;
-  birds: readonly FlockBird[];
-}
-
-/** Where one critter is at a moment: the ground under it, how high above that, which frame, and how much of it. */
-export interface Pose {
-  x: number;
-  y: number;
-  height: number;
-  frame: number;
-  alpha: number;
-}
 
 /** A number from nought to one for a cell, a slot and a salt: the same everywhere, for ever. */
 export function critterHash(cellX: number, cellY: number, slot: number, salt: number): number {
@@ -101,18 +47,23 @@ export function slotOf(seconds: number): number {
 
 /** How long a critter lasts from its start until the last of it is gone. */
 export function lastsFor(event: CritterEvent): number {
-  return Math.max(...event.birds.map((bird) => bird.delay + bird.seconds));
+  return Math.max(...event.animals.map((animal) => animal.delay + animal.seconds));
 }
 
 /** The longest anything lasts, so the slots before the current one that can still be in flight are asked too. */
-const LONGEST = F.stagger + Math.max(F.seconds, F.shelterSeconds[1]);
+const LONGEST = Math.max(F.stagger + Math.max(F.seconds, F.shelterSeconds[1]), HOP_LONGEST);
 
 /**
- * The trees and bushes near a bird's cover that it could take shelter in, nearest first, up to five; null while the
- * ground round it is not all known, so a browser that knows less waits rather than sending its birds elsewhere.
+ * The trees and bushes near a critter's cover, as near and as far as said, that it could go into, nearest first, up
+ * to five; null while the ground round it is not all known, so a browser that knows less waits rather than sending
+ * it elsewhere.
  */
-function shelterNear(from: Cover, kinds: readonly string[], ground: Ground): Cover[] | null {
-  const [least, most] = F.shelter;
+function coverNear(
+  from: Cover,
+  kinds: readonly string[],
+  ground: Ground,
+  [least, most]: readonly [number, number],
+): Cover[] | null {
   const around = ground.coverIn(from.x - most, from.y - most, from.x + most, from.y + most);
   if (around === null) return null;
   const away = (one: Cover) => Math.hypot(one.x - from.x, one.y - from.y);
@@ -143,7 +94,17 @@ export function eventIn(
   const land = ground.classAt(from.x, from.y);
   const member = memberOf(land === null ? undefined : CASTS[land], critterHash(cellX, cellY, slot, 2));
   if (member === null || !member.from.includes(from.kind) || !ground.sees(from.x, from.y)) return null;
-  const near = shelterNear(from, member.from, ground);
+  const key = `${cellX}/${cellY}/${slot}`;
+  const startsAt = slot * L.slot + critterHash(cellX, cellY, slot, 5) * L.slot;
+  if (member.behaviour === 'hop') {
+    // One animal bounding to cover near by; with none near enough, nothing comes.
+    const near = coverNear(from, member.from, ground, L.hop[member.kind]?.reach ?? [0, 0]);
+    if (near === null) return null;
+    const animal = hopper(member.kind, from, near, (salt) => critterHash(cellX, cellY, slot, salt));
+    if (animal === null) return null;
+    return { key, kind: member.kind, behaviour: 'hop', startsAt, from, animals: [animal] };
+  }
+  const near = coverNear(from, member.from, ground, F.shelter);
   if (near === null) return null;
   // A bird or two flitting to shelter, or a flock bursting out; a flit needs a tree to go to.
   const flit = critterHash(cellX, cellY, slot, 6) < F.flits;
@@ -157,7 +118,7 @@ export function eventIn(
   const heading = critterHash(cellX, cellY, slot, 4) * Math.PI * 2;
   const spread = (F.spread * Math.PI) / 180;
   const [quickest, slowest] = F.shelterSeconds;
-  const birds = Array.from({ length: count }, (_, at) => {
+  const animals = Array.from({ length: count }, (_, at) => {
     const salt = 10 + at * 6;
     const settles = near.length > 0 && (flit || critterHash(cellX, cellY, slot, salt + 4) < F.settle);
     const to = settles ? near[Math.floor(critterHash(cellX, cellY, slot, salt + 5) * near.length)]! : null;
@@ -177,14 +138,7 @@ export function eventIn(
       bow: (critterHash(cellX, cellY, slot, salt) - 0.5) * 2,
     };
   });
-  return {
-    key: `${cellX}/${cellY}/${slot}`,
-    kind: member.kind,
-    behaviour: member.behaviour,
-    startsAt: slot * L.slot + critterHash(cellX, cellY, slot, 5) * L.slot,
-    from,
-    birds,
-  };
+  return { key, kind: member.kind, behaviour: member.behaviour, startsAt, from, animals };
 }
 
 /** Every critter in flight at this moment over these cells, inclusive, at this density. */
@@ -213,20 +167,24 @@ const ramp = (from: number, to: number, value: number): number =>
   Math.min(1, Math.max(0, (value - from) / (to - from)));
 
 /**
- * Where every bird of a flock is at this moment, for a picture of so many frames standing `size` world units tall. A
- * bird flying off comes out of its cover, climbs and flies away down its own heading, flapping and then gliding,
- * flapping again now and then, and then hooks: a sharp turn, fading from it, and a drop of a little over a bird
- * length straight down the screen, settling. A bird taking shelter flies a bowed path from one crown to the other, rising and dropping,
- * gliding at the top, and fades as it goes into the leaves. Each comes out of its cover whole within a moment, so
- * none of it ever appears or vanishes in the open.
+ * Where every animal of a critter is at this moment, for a picture of so many frames standing `size` world units tall:
+ * one hopping is `hop.ts`'s, and a flock's are here. A bird flying off comes out of its cover, climbs and flies away
+ * down its own heading, flapping and then gliding, flapping again now and then, and then hooks: a sharp turn, fading
+ * from it, and a drop of a little over a bird length straight down the screen, settling. A bird taking shelter flies
+ * a bowed path from one crown to the other, rising and dropping, gliding at the top, and fades as it goes into the
+ * leaves. Each comes out of its cover whole within a moment, so none of it ever appears or vanishes in the open.
  */
 export function posesOf(event: CritterEvent, seconds: number, frames: number, size = 0.55): Pose[] {
   const poses: Pose[] = [];
   const crown = event.from.height * 0.75;
-  for (const bird of event.birds) {
+  for (const bird of event.animals) {
     const flown = seconds - event.startsAt - bird.delay;
     const share = flown / bird.seconds;
     if (share <= 0 || share >= 1) continue;
+    if (event.behaviour === 'hop') {
+      poses.push(hopPose(event.kind, event.from, bird, flown, frames));
+      continue;
+    }
     const beat = Math.floor((flown + bird.phase) * F.flapsPerSecond);
     const out = ramp(0, F.fadeIn * F.seconds, flown);
     if (bird.to !== null) {
@@ -260,7 +218,7 @@ export function posesOf(event: CritterEvent, seconds: number, frames: number, si
  */
 function hookPose(
   from: Cover,
-  bird: FlockBird,
+  bird: Animal,
   share: number,
   crown: number,
   alpha: number,
@@ -284,7 +242,7 @@ function hookPose(
 /** A bird on its way to shelter, a share of the way there: along a bowed path, over an arc, and into the crown. */
 function shelterPose(
   from: Cover,
-  bird: FlockBird,
+  bird: Animal,
   share: number,
   crown: number,
   out: number,

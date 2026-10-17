@@ -44,12 +44,16 @@ function anHour(density: number, ground = wood(), seconds = 3600, cells = CELLS)
   return events;
 }
 
+/** The flocks among some critters: the birds bursting out of cover or flitting to shelter. */
+const flocks = (events: Iterable<CritterEvent>) => [...events].filter((event) => event.behaviour === 'flush');
+
 describe("the critters' clock", () => {
-  it('brings birds out of the wood every so often', () => {
-    const events = anHour(CRITTERS_LOOK.density);
-    // About one cell's slot in fifty at the fullest density, so at the usual one a few hundred flocks an hour here.
-    expect(events.size).toBeGreaterThan(100);
-    expect([...events.values()].every((event) => event.kind === 'songbird')).toBe(true);
+  it('brings birds and squirrels out of the wood every so often', () => {
+    const events = [...anHour(CRITTERS_LOOK.density).values()];
+    // About one cell's slot in fifty at the fullest density, so at the usual one a few hundred an hour here.
+    expect(events.length).toBeGreaterThan(100);
+    const kinds = new Set(events.map((event) => `${event.kind} ${event.behaviour}`));
+    expect([...kinds].sort()).toEqual(['songbird flush', 'squirrel hop']);
   });
 
   it('is the same in every browser: the same critters from the same place and the same moment', () => {
@@ -122,8 +126,8 @@ describe("the critters' clock", () => {
       }
       // Just after it leaves a bird is at its cover, at the crown; just before it is gone it is nearly clear, and
       // one taking shelter is at the tree it goes into.
-      for (const bird of event.birds) {
-        const alone = { ...event, birds: [bird] };
+      for (const bird of event.animals) {
+        const alone = { ...event, animals: [bird] };
         const first = posesOf(alone, event.startsAt + bird.delay + 0.01, 3)[0]!;
         expect(Math.hypot(first.x - event.from.x, first.y - event.from.y)).toBeLessThan(0.2);
         expect(first.alpha).toBeLessThan(0.1);
@@ -135,16 +139,16 @@ describe("the critters' clock", () => {
   });
 
   it('bursts a flock out of a tree, and flits a bird or two into the next tree, seeking shelter', () => {
-    const events = [...anHour(1).values()];
+    const events = flocks(anHour(1).values());
     const flits = events.filter(
-      (event) => event.birds.length <= 2 && event.birds.every((bird) => bird.to !== null),
+      (event) => event.animals.length <= 2 && event.animals.every((bird) => bird.to !== null),
     );
-    const bursts = events.filter((event) => event.birds.some((bird) => bird.to === null));
+    const bursts = events.filter((event) => event.animals.some((bird) => bird.to === null));
     expect(flits.length).toBeGreaterThan(0);
     expect(bursts.length).toBeGreaterThan(0);
     // Some of a burst's birds drop into a tree near by too; every shelter is another tree, near enough.
-    expect(bursts.some((event) => event.birds.some((bird) => bird.to !== null))).toBe(true);
-    for (const bird of events.flatMap((event) => event.birds.map((one) => ({ one, from: event.from })))) {
+    expect(bursts.some((event) => event.animals.some((bird) => bird.to !== null))).toBe(true);
+    for (const bird of events.flatMap((event) => event.animals.map((one) => ({ one, from: event.from })))) {
       if (bird.one.to === null) continue;
       const away = Math.hypot(bird.one.to.x - bird.from.x, bird.one.to.y - bird.from.y);
       expect(away).toBeGreaterThanOrEqual(CRITTERS_LOOK.flush.shelter[0]);
@@ -154,13 +158,13 @@ describe("the critters' clock", () => {
 
   it('hooks a bird flying off late in its fade: a sharp turn, then a bird length or two straight down the screen', () => {
     const size = 0.55;
-    const flying = [...anHour(1).values()]
-      .flatMap((event) => event.birds.filter((bird) => bird.to === null).map((bird) => ({ event, bird })))
+    const flying = flocks(anHour(1).values())
+      .flatMap((event) => event.animals.filter((bird) => bird.to === null).map((bird) => ({ event, bird })))
       .slice(0, 30);
     expect(flying.length).toBeGreaterThan(10);
     const F = CRITTERS_LOOK.flush;
     for (const { event, bird } of flying) {
-      const alone = { ...event, birds: [bird] };
+      const alone = { ...event, animals: [bird] };
       const at = (share: number) =>
         posesOf(alone, event.startsAt + bird.delay + share * bird.seconds, 3, size)[0]!;
       const turning = at(F.hookAt + 0.001);
@@ -181,7 +185,7 @@ describe("the critters' clock", () => {
   it('only bursts out of a lone bush, with no other tree near to take shelter in', () => {
     const open = [...anHour(1, wood({}, 'scrub', 'meadow', 40)).values()];
     expect(open.length).toBeGreaterThan(0);
-    expect(open.every((event) => event.birds.every((bird) => bird.to === null))).toBe(true);
+    expect(open.every((event) => event.animals.every((bird) => bird.to === null))).toBe(true);
   });
 
   it('waits while the trees round a bird are not all known, rather than sending it elsewhere', () => {
@@ -191,11 +195,69 @@ describe("the critters' clock", () => {
   });
 
   it('beats its wings through the strip, forwards and back', () => {
-    const event = [...anHour(1).values()][0]!;
+    const event = flocks(anHour(1).values())[0]!;
     const frames = new Set<number>();
     for (let at = 0; at < 1; at += 0.02) {
       for (const pose of posesOf(event, event.startsAt + 0.05 + at, 3)) frames.add(pose.frame);
     }
     expect([...frames].sort()).toEqual([0, 1, 2]);
+  });
+
+  it('sends a squirrel bounding from one tree to another near it, low over the ground, and behind it', () => {
+    const H = CRITTERS_LOOK.hop.squirrel!;
+    const squirrels = [...anHour(1).values()].filter((event) => event.kind === 'squirrel').slice(0, 30);
+    expect(squirrels.length).toBeGreaterThan(10);
+    for (const event of squirrels) {
+      expect(event.animals.length).toBe(1);
+      const to = event.animals[0]!.to!;
+      const away = Math.hypot(to.x - event.from.x, to.y - event.from.y);
+      expect(away).toBeGreaterThanOrEqual(H.reach[0]);
+      expect(away).toBeLessThanOrEqual(H.reach[1]);
+      const poses = Array.from({ length: 200 }, (_, at) =>
+        posesOf(event, event.startsAt + ((at + 0.5) / 200) * lastsFor(event), 3),
+      ).flat();
+      // Never higher than a bound takes it, down on the ground between bounds, and never far off its way.
+      expect(Math.max(...poses.map((pose) => pose.height))).toBeLessThanOrEqual(H.high + 1e-9);
+      expect(poses.some((pose) => pose.height < 0.02 && pose.alpha > 0.5)).toBe(true);
+      const off = (pose: { x: number; y: number }) =>
+        Math.abs(
+          (pose.x - event.from.x) * (to.y - event.from.y) - (pose.y - event.from.y) * (to.x - event.from.x),
+        ) / away;
+      expect(Math.max(...poses.map(off))).toBeLessThan(away * 0.1 + 1e-9);
+      expect(new Set(poses.map((pose) => pose.frame))).toEqual(new Set([0, 1, 2]));
+    }
+  });
+
+  it('stops a hopping animal once on its way, sitting still, and then it goes on', () => {
+    const event = [...anHour(1).values()].find((one) => one.kind === 'squirrel')!;
+    const H = CRITTERS_LOOK.hop.squirrel!;
+    const step = 0.02;
+    let still = 0;
+    let longest = 0;
+    let was: { x: number; y: number } | null = null;
+    for (let at = event.startsAt + step; at < event.startsAt + lastsFor(event); at += step) {
+      const pose = posesOf(event, at, 3)[0]!;
+      const sits = was !== null && Math.hypot(pose.x - was.x, pose.y - was.y) < 1e-9 && pose.height === 0;
+      still = sits ? still + step : 0;
+      longest = Math.max(longest, still);
+      was = pose;
+    }
+    expect(longest).toBeGreaterThan(H.pause * 0.8);
+    expect(longest).toBeLessThan(H.pause + step);
+  });
+
+  it('brings a hare out from behind a bush or a tuft on grassland, and a squirrel only in the woods', () => {
+    const meadow = [...anHour(1, wood({}, 'grass', 'meadow', 3), 600).values()];
+    expect(meadow.length).toBeGreaterThan(0);
+    expect(meadow.every((event) => event.kind === 'hare' && event.behaviour === 'hop')).toBe(true);
+    // Neither comes out of what it does not live in: no hare in a wood of tufts, no squirrel among a meadow's oaks.
+    expect(anHour(1, wood({}, 'grass', 'mixed-forest', 3), 600).size).toBe(0);
+    const oaks = [...anHour(1, wood({}, 'oak', 'meadow'), 600).values()];
+    expect(oaks.length).toBeGreaterThan(0);
+    expect(oaks.every((event) => event.kind === 'songbird')).toBe(true);
+  });
+
+  it('brings no hare where there is no cover near enough to run to', () => {
+    expect(anHour(1, wood({}, 'grass', 'meadow', 40), 600).size).toBe(0);
   });
 });

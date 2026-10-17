@@ -5,8 +5,11 @@
  * rest of the casts come with step 14 of docs/plans/living-world.md.
  */
 
-/** How a critter moves: so far, a flock bursting out of cover. Hop, leap and soar come with steps 11 to 13. */
-export type Behaviour = 'flush';
+/**
+ * How a critter moves: a flock bursting out of cover, or a small animal bounding from one piece of cover to another.
+ * Leap and soar come with steps 12 and 13.
+ */
+export type Behaviour = 'flush' | 'hop';
 
 export interface CastMember {
   kind: string;
@@ -37,21 +40,37 @@ const SONGBIRDS: CastMember = {
   ],
 };
 
+/** A squirrel, bounding from one tree to the next in the woods and gone behind it. */
+const SQUIRRELS: CastMember = {
+  kind: 'squirrel',
+  behaviour: 'hop',
+  weight: 0.5,
+  from: ['oak', 'beech', 'birch', 'pine', 'spruce', 'jungle', 'acacia'],
+};
+
+/** A hare, out from behind a bush or a tuft of grass on grassland, a few bounds, and gone behind another. */
+const HARES: CastMember = {
+  kind: 'hare',
+  behaviour: 'hop',
+  weight: 0.6,
+  from: ['grass', 'scrub', 'heather'],
+};
+
 export const CASTS: Readonly<Record<string, readonly CastMember[]>> = {
-  taiga: [SONGBIRDS],
-  'taiga-open': [SONGBIRDS],
-  'conifer-forest': [SONGBIRDS],
-  'broadleaf-forest': [SONGBIRDS],
-  'mixed-forest': [SONGBIRDS],
-  rainforest: [SONGBIRDS],
-  'dry-forest': [SONGBIRDS],
+  taiga: [SONGBIRDS, SQUIRRELS],
+  'taiga-open': [SONGBIRDS, SQUIRRELS],
+  'conifer-forest': [SONGBIRDS, SQUIRRELS],
+  'broadleaf-forest': [SONGBIRDS, SQUIRRELS],
+  'mixed-forest': [SONGBIRDS, SQUIRRELS],
+  rainforest: [SONGBIRDS, SQUIRRELS],
+  'dry-forest': [SONGBIRDS, SQUIRRELS],
   'swamp-forest': [SONGBIRDS],
   scrub: [SONGBIRDS],
   heath: [SONGBIRDS],
   'farmland-with-woods': [SONGBIRDS],
-  meadow: [SONGBIRDS],
-  steppe: [SONGBIRDS],
-  savanna: [SONGBIRDS],
+  meadow: [SONGBIRDS, HARES],
+  steppe: [SONGBIRDS, HARES],
+  savanna: [SONGBIRDS, HARES],
   'alpine-meadow': [SONGBIRDS],
   farmland: [SONGBIRDS],
 };

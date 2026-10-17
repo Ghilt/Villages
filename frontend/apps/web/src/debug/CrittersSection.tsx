@@ -10,7 +10,7 @@ import { Sliders } from './Sliders';
 import type { SliderDef } from './Sliders';
 
 /**
- * The critters, a part of the Shaders section: their level in the bar beside what is flying now, and on sliders how
+ * The critters, a part of the Shaders section: their level in the bar beside what is about now, and on sliders how
  * many there are and how big they are drawn. What each kind is and does is in `sprites/critters/look.ts` and
  * `casts.ts`. See decision record 0099.
  */
@@ -42,18 +42,18 @@ const SLIDERS: readonly SliderDef<keyof CritterTuning>[] = [
   },
 ];
 
-/** What is flying, said in a few words: `3 songbirds`, or why there are none. */
-export function sayCritters({ flying, none }: CritterReading): string {
+/** What is about, said in a few words: `3 songbirds, 1 hare`, or why there are none. */
+export function sayCritters({ about, none }: CritterReading): string {
   if (none !== null) return none;
-  const kinds = Object.entries(flying);
+  const kinds = Object.entries(about);
   return kinds.length === 0
-    ? 'none flying'
+    ? 'none about'
     : kinds.map(([kind, count]) => `${count} ${kind}${count === 1 ? '' : 's'}`).join(', ');
 }
 
 /** What the part is, behind the question mark in its bar. */
 const ABOUT =
-  'Birds out of the trees and the bushes the scenery drew, from zoom 9 in, only where your house sees now, the same in every browser: a flock bursts out and scatters, or a bird or two flits to the next tree. Fewer is always some of the same ones, never others. Low moves them at fifteen frames a second and high at thirty. None for a player who asked for less motion.';
+  'Birds out of the trees and the bushes the scenery drew, a squirrel bounding from tree to tree in the woods and a hare from bush to bush on grassland, from zoom 9 in, only where your house sees now, the same in every browser: a flock bursts out and scatters, or a bird or two flits to the next tree. Fewer is always some of the same ones, never others. Low moves them at fifteen frames a second and high at thirty. None for a player who asked for less motion.';
 
 export function CrittersSection() {
   const level = useStore(critterStore, (state) => state.level);

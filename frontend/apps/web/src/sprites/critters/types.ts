@@ -1,0 +1,65 @@
+import type { Behaviour } from './casts';
+
+/**
+ * The shapes the critters are told in: the cover they come out of, what the clock needs of the ground, a critter and
+ * its animals, and where one is at a moment. Apart from the clock (`critterClock.ts`) so the hop (`hop.ts`), which the
+ * clock calls, can take them without the two importing each other round a ring.
+ */
+
+/** A piece of the scenery a critter can come out of: where it stands, what kind it is, and how tall. */
+export interface Cover {
+  x: number;
+  y: number;
+  kind: string;
+  height: number;
+}
+
+/** What the clock needs to know about the ground. */
+export interface Ground {
+  /** The scenery standing in a square of world units, in its own order; null while it is not yet known. */
+  coverIn(fromX: number, fromY: number, toX: number, toY: number): readonly Cover[] | null;
+  /** The terrain class at a place, by its name in `world/palette.json`, or null where there is none. */
+  classAt(x: number, y: number): string | null;
+  /** Whether the house sees the place now. Critters are only where it does. */
+  sees(x: number, y: number): boolean;
+}
+
+/**
+ * One animal of a critter, a bird of a flock or the one that hops: which way it goes, how long after the first it
+ * leaves, how far, its own wingbeat or where on its way it stops, and the cover it goes into, if it does, with how
+ * long it takes to get there and which way its path bows.
+ */
+export interface Animal {
+  /** On the ground, in radians from east towards south, as world units run. */
+  heading: number;
+  delay: number;
+  /** A share of the flock's reach. */
+  reach: number;
+  phase: number;
+  /** The tree or bush it goes into; null for a bird that flies off and fades. */
+  to: Cover | null;
+  seconds: number;
+  /** From one side to the other, minus one to one. */
+  bow: number;
+}
+
+export interface CritterEvent {
+  /** Its identity: the cell and the slot it came out of. */
+  key: string;
+  kind: string;
+  behaviour: Behaviour;
+  /** When it begins, in seconds of the wall clock since 1970. */
+  startsAt: number;
+  /** What it comes out of. */
+  from: Cover;
+  animals: readonly Animal[];
+}
+
+/** Where one critter is at a moment: the ground under it, how high above that, which frame, and how much of it. */
+export interface Pose {
+  x: number;
+  y: number;
+  height: number;
+  frame: number;
+  alpha: number;
+}

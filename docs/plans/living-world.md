@@ -141,7 +141,8 @@ the same sky. What a slot brings is worked out once when the slot comes round, n
 - **Flush**: a few birds burst out of cover together, fan out, climb, and flap and glide away, hooking down at the
   end, a sharp turn, fading from it, and a drop of a little over a bird length, settling, some of them dropping into a tree near by instead; or a bird or two flit from one tree into another near it,
   seeking shelter, Adam's addition of 2026-10-16.
-- **Hop**: a small animal bounds a few times from one piece of cover to another and is gone behind it.
+- **Hop**: a small animal bounds a few times from one piece of cover to another, stopping once on the way, and is
+  gone behind it.
 - **Leap**: a fish jumps clear of the water and falls back, a ring where it left and one where it fell.
 - **Soar**: a bird circles slowly high up, its shadow sweeping the ground below it and to the left.
 
@@ -151,7 +152,7 @@ the same sky. What a slot brings is worked out once when the slot comes round, n
 |---|---|
 | forests | songbirds out of the trees (flush), a squirrel from tree to tree (hop), a hawk over the clearings (soar) |
 | heath, scrub | small birds out of a bush, grouse out of the heather (flush) |
-| grassland | songbirds out of a lone bush or tree (flush), a hare out from behind a bush (hop), larks rising (flush), a hawk (soar) |
+| grassland | songbirds out of a lone bush or tree (flush), a hare out from behind a bush or a tuft of grass (hop), larks rising (flush), a hawk (soar) |
 | farmland | songbirds out of the hedges and lone trees, crows lifting from the field (flush) |
 | marsh, bog, floodplain, paddy, mangrove, swamp forest | ducks off a pool (flush), a frog into a pool with a ring (hop) |
 | lakes, rivers | a fish jumping (leap) |

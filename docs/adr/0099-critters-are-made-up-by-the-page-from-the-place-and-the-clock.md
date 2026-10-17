@@ -63,3 +63,12 @@ flight, where the view has just moved, fades up.
 - **Sprites placed by the server.** Critters hold no gameplay significance, and sending them would cost every house a
   stream of events for nothing it can act on.
 - **Critters on remembered ground too.** Asked of Adam and declined: a critter is news, and the grey ground is memory.
+
+## Amendment, 2026-10-17: the hop
+
+A critter of the ground hops (`sprites/critters/hop.ts`): a squirrel bounds from one tree to another near it in the
+woods, and a hare from one bush or tuft of grass to another on grassland, stopping once on the way, as made up from
+the cell and the slot as a flock is, and waiting, as a bird taking shelter does, while the cover round it is not all
+known. What runs on the ground is drawn in the layer under the scenery with the shadows, so a tree in front of it
+hides it, and its picture is turned to face the way it goes across the screen, worked out there because the map can
+be turned. The layer under the scenery is the critters' ground now, not only their shadows.

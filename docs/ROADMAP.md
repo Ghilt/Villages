@@ -150,8 +150,9 @@ eye for their experiment; and catalogues, the newest, are built and waiting on A
   same in every browser, drawn as sprites rather than by a shader over the whole screen, in a Critters part of the
   Shaders section with a density. The steps, one commit each, are in `docs/plans/living-world.md`; steps 1 and 2,
   the trees in the wind and the critters' pictures, are built and verified, and steps 3 and 4, the critters'
-  clock and birds out of the bushes, are built and verified; step 5, the Critters part of the Shaders section, ends
-  the run Adam picked and waits on his eye. Asked for by Adam on 2026-10-16.
+  clock and birds out of the bushes, are built and verified, and so is step 5, the Critters part of the Shaders
+  section. Step 11, a squirrel and a hare, is built in the run Adam picked on 2026-10-17 and waits on his eye; step
+  12, fish jumping, comes after it. Asked for by Adam on 2026-10-16.
 
 MongoDB and RabbitMQ are on the machine, in Docker, from `infra/docker-compose.yml`. The game server keeps
 its world in MongoDB whenever Docker is running, and RabbitMQ carries every event it stores to the read models.
