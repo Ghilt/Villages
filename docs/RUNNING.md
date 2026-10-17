@@ -99,12 +99,14 @@ stage alone, with none of the debug panel in it (decision record 0079).
   grass in patches, brush in clumps and bare ground between; and the farmland, with woods or without, is cut into a
   patchwork of fields, each fallow, ripe or green and washed faintly in its colour, its crops standing in rows its own
   way, with long slow waves rolling through them down the wind, a band of light and a darker one behind it, carried by
-  the wall clock so every browser has the same wave at the same place. It is one layer for every kind of land, the
-  **Land** part of the Shaders section (decision record 0102): `off`, `low` or `high` in its bar, low at every load,
-  low a quarter of the screen's pixels at fifteen frames a second and high all of them at thirty, asked for only while
-  some land that moves is on the screen; the first time it is drawn at a level the log says once under `land` what
-  that costs the graphics card. What moves on every kind of land is the table in `apps/web/src/sprites/land/look.ts`;
-  so far the grass and the crops move, and the rest stand still until their steps. Inside the part a fold for each
+  the wall clock so every browser has the same wave at the same place; and on heath, scrub and tundra the low woody
+  growth stirs as a gust passes, far more gently than the grass, each in clumps of its own size and colours, with
+  cotton grass nodding on the tundra. It is one layer for every kind of land, the **Land** part of the Shaders section
+  (decision record 0102): `off`, `low` or `high` in its bar, low at every load, low a quarter of the screen's pixels
+  at fifteen frames a second and high all of them at thirty, asked for only while some land that moves is on the
+  screen; the first time it is drawn at a level the log says once under `land` what that costs the graphics card. What
+  moves on every kind of land is the table in `apps/web/src/sprites/land/look.ts`; so far the grass, the crops and the
+  heath, the scrub and the tundra move, and the rest stand still until their steps. Inside the part a fold for each
   motion, with its box in its bar, drawn or left as painted: **Grass**, with ten sliders - how big the patches are,
   how ragged their edges, how softly one kind gives way to the next, how much the kinds mingle, how much ground is
   bare, how much stands tall and how much is brush, how tall the tall grass is, how big a clump of brush, how thickly
@@ -112,8 +114,10 @@ stage alone, with none of the debug panel in it (decision record 0079).
   stops the log says them all under `land` as `grass tuned: …`, the line to hand over when a setting should become the
   default; `reset` puts them back. **Crops**, with six - how big the fields are, how many lie fallow, how far apart
   the rows are, how tall the crops stand, how broad the waves are and how strongly they show - remembered and said the
-  same way, as `crops tuned: …`, with a `reset` of their own. The gusts are the one wind the trees bend in, and a
-  player who has asked for less motion gets the land still.
+  same way, as `crops tuned: …`, with a `reset` of their own. **Heath, scrub and tundra**, with four - how big the
+  clumps are, how thickly they grow, how much cotton grass grows on the tundra and how much a gust stirs them - said
+  as `heath tuned: …`. The gusts are the one wind the trees bend in, and a player who has asked for less motion gets
+  the land still.
 - The scenery bends in the wind, from zoom 7.5 in, wherever it is drawn: every tree, bush, reed and tuft leans down
   the wind as a gust passes, its foot where it stands and its shadow leaning with it, and its crown turns a little
   paler, as the grass's field does; with no gust it sways a little on its own. How far each kind bends is its own -

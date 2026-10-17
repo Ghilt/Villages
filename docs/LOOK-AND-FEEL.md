@@ -167,9 +167,12 @@ a gust only nudges, and bare ground between. On the farmland the land is cut int
 shapes a few world units across with a bare track between them, each lying fallow or standing ripe or green, faintly
 washed in its own colour, its crops in rows running its own way; long slow waves roll through them down the wind, a
 band of light where the crops bend with a darker one behind it where they stand again, and close in each stalk leans
-as a wave passes. It is one layer for every kind of land, and the rest of the land stands still as it is painted
-until its own motion comes: the water moves by its own shader, a wood by its trees, and bare stone not at all, on
-purpose. Every number is in `apps/web/src/sprites/land/look.ts`; see decision record 0102.
+as a wave passes. On heath, scrub and tundra a gust only stirs the low woody growth, far more gently than the grass:
+heather in small purple clumps close together, scrub in bigger grey-green bushes with bare ground between, the tundra
+a low khaki mat with here and there cotton grass nodding its white head. It is one layer for every kind of land, and
+the rest of the land stands still as it is painted until its own motion comes: the water moves by its own shader, a
+wood by its trees, and bare stone not at all, on purpose. Every number is in `apps/web/src/sprites/land/look.ts`; see
+decision record 0102.
 
 **The scenery bends in the wind.** Close in, every tree, bush, reed and tuft leans down the wind as a gust passes
 and settles behind it, its foot where it stands and its shadow leaning with it, and its crown turns a little paler,

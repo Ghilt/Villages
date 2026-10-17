@@ -46,3 +46,12 @@ leaves its land as painted, and its sliders; the grass's ten and their remembere
 - A kind of land that should move but is not drawn yet stands still, and the table says which step it waits for.
 - The water stays a layer of the map's own (0081), and the trees bend in the scenery's own shader (the amendment to
   0052): the land layer is the ground between them.
+
+## Amendment, 2026-10-17: a look a world unit
+
+A motion can be drawn on more than one kind of land, each in its own look: the heath's on heath, scrub and tundra, in
+clumps of their own sizes and colours. So beside the mask's four channels the layer keeps a byte a world unit saying
+which of its motion's looks the land there has, by the kind's place among the looks its motion names in `land/look.ts`,
+and reads it as it is, never blended, so a clump on the edge between heath and scrub is one or the other and never
+something between. The channels say how strongly a motion is there and are softened; the look says only which, at the
+place a clump or a stalk is rooted.

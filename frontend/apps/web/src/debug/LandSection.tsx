@@ -5,6 +5,8 @@ import { cropsTuningStore, resetCropsTuning, setCropsTuning } from '../sprites/l
 import type { CropsTuning } from '../sprites/land/cropsTuning';
 import { grassTuningStore, resetGrassTuning, setGrassTuning } from '../sprites/land/grassTuning';
 import type { GrassTuning } from '../sprites/land/grassTuning';
+import { heathTuningStore, resetHeathTuning, setHeathTuning } from '../sprites/land/heathTuning';
+import type { HeathTuning } from '../sprites/land/heathTuning';
 import type { DrawnMotion } from '../sprites/land/landMask';
 import { landStore, setLandLevel, setLandShown } from '../sprites/land/landMode';
 import { useStore } from '../store/useStore';
@@ -16,7 +18,7 @@ import type { SliderDef } from './Sliders';
 /**
  * The land, a part of the Shaders section: its level in the bar, and inside it a fold for each motion of the land,
  * each with its box, whether it is drawn, and its sliders. What moves on each kind of land is the table in
- * `sprites/land/look.ts`, and what each slider means is in `sprites/land/grassTuning.ts` and `cropsTuning.ts`.
+ * `sprites/land/look.ts`, and what each slider means is in `sprites/land/grassTuning.ts`, `cropsTuning.ts` and `heathTuning.ts`.
  */
 
 const share = (value: number) => `${Math.round(value * 100)}%`;
@@ -65,12 +67,24 @@ const CROPS_SLIDERS: readonly SliderDef<keyof CropsTuning>[] = [
   { key: 'waves', label: 'How strongly the waves show', min: 0, max: 0.6, step: 0.01, say: share },
 ];
 
+const times = (value: number) => `${value.toFixed(2)} times`;
+
+const HEATH_SLIDERS: readonly SliderDef<keyof HeathTuning>[] = [
+  { key: 'size', label: 'How big the clumps are', min: 0.5, max: 2, step: 0.05, say: times },
+  { key: 'density', label: 'How thickly they grow', min: 0.1, max: 1, step: 0.01, say: share },
+  { key: 'cotton', label: 'How much cotton grass on the tundra', min: 0, max: 1, step: 0.01, say: share },
+  { key: 'stir', label: 'How much a gust stirs them', min: 0, max: 3, step: 0.05, say: times },
+];
+
 /** What the part is, behind the question mark in its bar. */
 const ABOUT =
-  'The land moving in the wind and the light, one layer for every kind of land, from zoom 8.5 in: so far the grass and the crops. Each kind of land has its own motion or stands still on purpose, and the rest come a fold at a time. What a level costs the graphics card is said once in the log, the first time the land is drawn at it.';
+  'The land moving in the wind and the light, one layer for every kind of land, from zoom 8.5 in: so far the grass, the crops, and the heath, the scrub and the tundra. Each kind of land has its own motion or stands still on purpose, and the rest come a fold at a time. What a level costs the graphics card is said once in the log, the first time the land is drawn at it.';
 
 const GRASS_ABOUT =
   'Gusts, tufts, tall grass and brush on steppe, meadow, savanna and alpine meadow, bending in the one wind the trees bend in.';
+
+const HEATH_ABOUT =
+  'Low woody growth a gust only stirs, gentler than the grass: small purple clumps of heather close together, bigger grey-green bushes of scrub with bare ground between, the low mat of the tundra, and cotton grass nodding its white heads there.';
 
 const CROPS_ABOUT =
   'Farmland and farmland with woods cut into fields, each fallow, ripe or green, its crops standing in rows its own way, with long slow waves rolling through them down the wind, the same in every browser.';
@@ -80,6 +94,7 @@ export function LandSection() {
   const on = useStore(shadersStore, (state) => state.on);
   const tuning = useStore(grassTuningStore);
   const crops = useStore(cropsTuningStore);
+  const heath = useStore(heathTuningStore);
   return (
     <Section
       name="Land"
@@ -103,6 +118,15 @@ export function LandSection() {
         resetTitle="put every crops slider back where it started"
       >
         <Sliders idPrefix="crops" sliders={CROPS_SLIDERS} values={crops} onChange={setCropsTuning} />
+      </LandFold>
+      <LandFold
+        name="Heath, scrub and tundra"
+        motion="heath"
+        about={HEATH_ABOUT}
+        reset={resetHeathTuning}
+        resetTitle="put every heath slider back where it started"
+      >
+        <Sliders idPrefix="heath" sliders={HEATH_SLIDERS} values={heath} onChange={setHeathTuning} />
       </LandFold>
     </Section>
   );

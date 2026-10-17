@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 import { DRAWN } from './landMask';
-import { LAND_LOOK, motionOf } from './look';
+import { LAND_LOOK, lookOf, motionOf } from './look';
 
 /** Every kind of land, by name, as `world/palette.json` lists them. */
 const KINDS = (
@@ -31,6 +31,16 @@ describe('the land', () => {
       'farmland-with-woods',
     ]);
     expect(DRAWN).toContain('crops');
+  });
+
+  it('stirs the heath, the scrub and the tundra, each in a look of its own', () => {
+    const heath = KINDS.filter((kind) => motionOf(kind) === 'heath').sort();
+    expect(heath).toEqual(['heath', 'scrub', 'tundra']);
+    // A kind of land the heath's motion takes, with no look of its own, fails here rather than drawing as another.
+    expect(Object.keys(LAND_LOOK.heath.kinds).sort()).toEqual(heath);
+    expect(new Set(heath.map(lookOf)).size).toBe(heath.length);
+    expect(lookOf('meadow')).toBe(0);
+    expect(DRAWN).toContain('heath');
   });
 
   it('leaves the water to the water shader, the woods to their trees and bare stone still', () => {

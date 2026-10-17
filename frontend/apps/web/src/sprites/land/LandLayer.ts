@@ -24,11 +24,12 @@ import { gustsCarried, windTime } from '../wind';
 
 import { cropsTuningStore } from './cropsTuning';
 import { grassTuningStore } from './grassTuning';
+import { heathTuningStore } from './heathTuning';
 import { DRAWN, channelOf, landMaskOf, sameRange, tilesUnder } from './landMask';
 import type { TileRange } from './landMask';
 import { landStore } from './landMode';
 import { LAND_FRAGMENT, LAND_VERTEX } from './landShader';
-import { LAND_LOOK, motionOf } from './look';
+import { LAND_LOOK, lookOf, motionOf } from './look';
 
 /**
  * The land moving in the wind and the light, one layer for every kind of land, as a layer of the sprite canvas:
@@ -62,6 +63,8 @@ interface Mask {
   range: TileRange;
   root: string;
   source: BufferImageSource;
+  /** Which look of its motion each world unit's land has. */
+  looks: BufferImageSource;
   /** How many world units of the mask have each channel's motion. */
   counts: readonly number[];
 }
@@ -101,11 +104,23 @@ export function createLandLayer(renderer: Renderer, tilesRoot: () => string, rep
     uWaveLattice: { value: new Float32Array([16, 1]), type: 'vec2<f32>' },
     uWaveCarried: { value: 0, type: 'f32' },
   });
+  const heathUniforms = new UniformGroup({
+    uHeathSize: { value: 1, type: 'f32' },
+    uHeathDensity: { value: 1, type: 'f32' },
+    uCotton: { value: 0, type: 'f32' },
+    uStir: { value: 1, type: 'f32' },
+  });
   const empty = new BufferImageSource({
     resource: new Uint8Array(4),
     width: 1,
     height: 1,
     format: 'rgba8unorm',
+  });
+  const noLooks = new BufferImageSource({
+    resource: new Uint8Array(1),
+    width: 1,
+    height: 1,
+    format: 'r8unorm',
   });
   const shader = new Shader({
     glProgram: GlProgram.from({
@@ -115,7 +130,14 @@ export function createLandLayer(renderer: Renderer, tilesRoot: () => string, rep
       // World units run to 32768, which a medium-precision float cannot place to within a unit.
       preferredFragmentPrecision: 'highp',
     }),
-    resources: { landUniforms: uniforms, grassUniforms, cropsUniforms, uMask: empty },
+    resources: {
+      landUniforms: uniforms,
+      grassUniforms,
+      cropsUniforms,
+      heathUniforms,
+      uMask: empty,
+      uLooks: noLooks,
+    },
   });
   const mesh = new Mesh({
     geometry: new Geometry({
@@ -132,6 +154,7 @@ export function createLandLayer(renderer: Renderer, tilesRoot: () => string, rep
   let wanted: { range: TileRange; root: string } | null = null;
   // The channel of the mask each class of the palette is drawn in, by its id; null for land the layer leaves alone.
   let channels: (number | null)[] | null = null;
+  let looks: number[] | null = null;
 
   // What each level costs, measured on the graphics card where it will say, and said once a level.
   const meter = createCostMeter((renderer as WebGLRenderer).gl as WebGL2RenderingContext | undefined);
@@ -143,6 +166,7 @@ export function createLandLayer(renderer: Renderer, tilesRoot: () => string, rep
   // A slider moved shows on the next frame even where nothing else is moving the map.
   const stopWatchingTuning = grassTuningStore.watch(repaint);
   const stopWatchingCrops = cropsTuningStore.watch(repaint);
+  const stopWatchingHeath = heathTuningStore.watch(repaint);
 
   /** Pieces the mask for a range of tiles, and puts it in place unless the view has moved on meanwhile. */
   async function build(range: TileRange, root: string): Promise<void> {
@@ -151,6 +175,9 @@ export function createLandLayer(renderer: Renderer, tilesRoot: () => string, rep
       const ofIds = new Array<number | null>(256).fill(null);
       for (const one of palette.classes) ofIds[one.id] = channelOf(motionOf(one.name));
       channels = ofIds;
+      const looksOf = new Array<number>(256).fill(0);
+      for (const one of palette.classes) looksOf[one.id] = lookOf(one.name);
+      looks = looksOf;
     }
     const asked: Promise<Uint8Array | null>[] = [];
     for (let y = range.fromY; y <= range.toY; y += 1) {
@@ -162,7 +189,7 @@ export function createLandLayer(renderer: Renderer, tilesRoot: () => string, rep
     if (wanted === null || !sameRange(wanted.range, range) || wanted.root !== root) {
       return;
     }
-    const built = landMaskOf(range, tiles, channels);
+    const built = landMaskOf(range, tiles, channels, looks ?? []);
     const source = new BufferImageSource({
       resource: built.texels,
       width: built.width,
@@ -174,10 +201,22 @@ export function createLandLayer(renderer: Renderer, tilesRoot: () => string, rep
       addressMode: 'clamp-to-edge',
       autoGenerateMipmaps: false,
     });
-    const previous = mask?.source ?? null;
-    mask = { range, root, source, counts: built.counts };
+    // Read as they are, a look a texel, never blended between two.
+    const lookSource = new BufferImageSource({
+      resource: built.looks,
+      width: built.width,
+      height: built.height,
+      format: 'r8unorm',
+      scaleMode: 'nearest',
+      addressMode: 'clamp-to-edge',
+      autoGenerateMipmaps: false,
+    });
+    const previous = mask;
+    mask = { range, root, source, looks: lookSource, counts: built.counts };
     shader.resources.uMask = source;
-    previous?.destroy();
+    shader.resources.uLooks = lookSource;
+    previous?.source.destroy();
+    previous?.looks.destroy();
     uniforms.uniforms.uMaskOrigin[0] = range.fromX * TILE;
     uniforms.uniforms.uMaskOrigin[1] = range.fromY * TILE;
     uniforms.uniforms.uMaskSize[0] = built.width;
@@ -278,6 +317,13 @@ export function createLandLayer(renderer: Renderer, tilesRoot: () => string, rep
       c.uWaveLattice[1] = waves.around;
       c.uWaveCarried = still ? 0 : carried(wall, LAND_LOOK.crops.waves.speed);
       cropsUniforms.update();
+      const heath = heathTuningStore.get();
+      const h = heathUniforms.uniforms;
+      h.uHeathSize = heath.size;
+      h.uHeathDensity = heath.density;
+      h.uCotton = heath.cotton;
+      h.uStir = heath.stir;
+      heathUniforms.update();
 
       const width = Math.max(1, Math.ceil(view.width * levelLook.resolution));
       const height = Math.max(1, Math.ceil(view.height * levelLook.resolution));
@@ -298,13 +344,16 @@ export function createLandLayer(renderer: Renderer, tilesRoot: () => string, rep
       stopWatchingShaders();
       stopWatchingTuning();
       stopWatchingCrops();
+      stopWatchingHeath();
       meter.dispose();
       sprite.destroy();
       target.destroy(true);
       mesh.destroy();
       shader.destroy();
       mask?.source.destroy();
+      mask?.looks.destroy();
       empty.destroy();
+      noLooks.destroy();
     },
   };
 }

@@ -53,7 +53,10 @@ describe('the land mask', () => {
     const channels = new Array<number | null>(256).fill(null);
     channels[17] = 0;
     channels[21] = 3;
-    const mask = landMaskOf(range, [west, east], channels);
+    // Class 21 the second look of its motion, the rest the first.
+    const looks = new Array<number>(256).fill(0);
+    looks[21] = 1;
+    const mask = landMaskOf(range, [west, east], channels, looks);
     expect(mask.width).toBe(2 * TILE);
     expect(mask.height).toBe(TILE);
     const texel = (x: number) => [...mask.texels.subarray(x * 4, x * 4 + 4)];
@@ -62,14 +65,16 @@ describe('the land mask', () => {
     expect(texel(TILE + 1)).toEqual([0, 0, 0, 255]);
     expect(texel(TILE + 2)).toEqual([0, 0, 0, 0]);
     expect(mask.counts).toEqual([TILE * TILE + 1, 0, 0, 1]);
+    expect([...mask.looks.subarray(TILE, TILE + 3)]).toEqual([0, 1, 0]);
     // A tile that is not there moves nothing.
-    expect(landMaskOf(range, [null, null], channels).counts).toEqual([0, 0, 0, 0]);
+    expect(landMaskOf(range, [null, null], channels, looks).counts).toEqual([0, 0, 0, 0]);
   });
 
-  it('draws each motion drawn from a channel of its own, four at the most: the grass the first, the crops the second', () => {
+  it('draws each motion drawn from a channel of its own, four at the most: the grass, the crops, the heath', () => {
     expect(DRAWN.length).toBeLessThanOrEqual(4);
     expect(channelOf('grass')).toBe(0);
     expect(channelOf('crops')).toBe(1);
+    expect(channelOf('heath')).toBe(2);
     expect(new Set(DRAWN.map(channelOf)).size).toBe(DRAWN.length);
     expect(channelOf('still')).toBeNull();
     expect(channelOf(null)).toBeNull();

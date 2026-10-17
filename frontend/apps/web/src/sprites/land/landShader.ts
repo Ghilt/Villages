@@ -2,12 +2,14 @@ import { GUSTS_GLSL } from '../wind';
 
 import { CROPS_GLSL } from './cropsShader';
 import { GRASS_GLSL } from './grassShader';
+import { HEATH_GLSL } from './heathShader';
 
 /**
  * The land, worked out a pixel at a time over the whole screen, as the fog is: one triangle that covers it, and for
  * each pixel the ground under it, found by the sprites' own projection backwards, and what moves on the land there,
  * from the mask (`landMask.ts`). Each pixel works out only the motions of the land under it, each a part of its own
- * - the grass, `grassShader.ts`, and the crops, `cropsShader.ts` - laid over one another where two meet, so a screen of rock costs almost
+ * - the grass, `grassShader.ts`, the crops, `cropsShader.ts`, and the heath, `heathShader.ts` - laid over one another
+ * where two meet, so a screen of rock costs almost
  * nothing and a screen of grass what the grass costs. Every number is in `look.ts`.
  */
 
@@ -40,6 +42,8 @@ uniform float uPixel;
 uniform sampler2D uMask;
 uniform vec2 uMaskOrigin;
 uniform vec2 uMaskSize;
+// Which of its motion's looks the land of each world unit has, a byte each, read as it is: landMask.ts.
+uniform sampler2D uLooks;
 // Which of the mask's motions are drawn, one or nought each: the boxes of the Land part's folds.
 uniform vec4 uShown;
 out vec4 fragColor;
@@ -112,8 +116,18 @@ vec4 rootsAt(vec2 world) {
   }
   return texture(uMask, at);
 }
+
+// Which of its motion's looks the land at a point of the ground has - heath, scrub or tundra, say - unblended.
+int lookAt(vec2 world) {
+  ivec2 texel = ivec2(floor(world - uMaskOrigin));
+  if (any(lessThan(texel, ivec2(0))) || any(greaterThanEqual(texel, ivec2(uMaskSize)))) {
+    return 0;
+  }
+  return int(texelFetch(uLooks, texel, 0).r * 255.0 + 0.5);
+}
 ${GRASS_GLSL}
 ${CROPS_GLSL}
+${HEATH_GLSL}
 
 void main() {
   vec2 world = groundUnder(vScreen);
@@ -129,6 +143,10 @@ void main() {
   if (land[CROPS] > 0.002) {
     vec4 crops = cropsHere(world) * land[CROPS];
     drawn = crops + drawn * (1.0 - crops.a);
+  }
+  if (land[HEATH] > 0.002) {
+    vec4 heath = heathHere(world) * land[HEATH];
+    drawn = heath + drawn * (1.0 - heath.a);
   }
   fragColor = drawn;
 }
