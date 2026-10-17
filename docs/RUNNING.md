@@ -125,6 +125,13 @@ stage alone, with none of the debug panel in it (decision record 0079).
   gust stirs them - said as `heath tuned: …`. **Wet land**, with four - how much mist, how much open water, how often
   a ring spreads and how tall the reeds and the shoots stand - said as `wet tuned: …`. The gusts are the one wind the
   trees bend in, and a player who has asked for less motion gets the land still.
+- The towns of 1790 stand in ruins among the scenery, from zoom 7.5 in, wherever the game server sent their records
+  of the `ruins` layer - only near revealed ground, as the scenery's stands: a cell is furnished with the pieces
+  whose feet stand in it and its trees thinned by them (`furnishCell`), in the scenery's own particle layer, so trees
+  and ruins sort in depth together; it waits for the ruins of the tiles under it and the eight cells about it, and is
+  cut again when they change. The pieces are kinds of scenery after the sprite map's own, `ruin:<piece>-<culture>`,
+  so the Scenery part says 48 kinds where the sprite map has 16, and its `ruins` row says how many ruined towns are
+  held. The dial thins them with the trees. See `docs/plans/ruined-cities.md`.
 - The scenery bends in the wind, from zoom 7.5 in, wherever it is drawn: every tree, bush, reed and tuft leans down
   the wind as a gust passes, its foot where it stands and its shadow leaning with it, and its crown turns a little
   paler, as the grass's field does; with no gust it sways a little on its own. How far each kind bends is its own -

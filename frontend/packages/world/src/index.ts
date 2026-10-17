@@ -91,6 +91,9 @@ export { onLattice, paintPixel, preparePainterly, seedOf } from './painterly.ts'
 export type { ClassSampler, PainterlyStyle, PreparedPainterly } from './painterly.ts';
 
 export { CELL, cellOf, reachBeyond, scatterCell } from './scatter.ts';
+export { furnishCell } from './furnish.ts';
+export type { Furnished, RuinsAround } from './furnish.ts';
+export type { RuinPiece, RuinsGround } from './ruinLayout.ts';
 export type { ScatteredPoint } from './scatter.ts';
 export { biomeAt, spriteMapOf } from './spriteMap.ts';
 export type { SpriteMap, SpriteMapFile } from './spriteMap.ts';

@@ -185,6 +185,15 @@ still, as a mountain will. The gusts are the grass's, the world's one wind blowi
 every browser. A player who asked for less motion sees it all standing still. Every number is in
 `apps/web/src/sprites/trees/look.ts`; see the amendment to decision record 0052.
 
+**Every town of 1790 is a ruin.** From zoom 7.5 in, as the scenery arrives, where a town stood its ruins stand
+among the trees: rows of roofless houses and empty shells along the lines of its old streets, broken towers, a hall
+open to the sky in its core with a square about it, rubble and lone walls at its edge, and where its culture walled
+its towns a broken wall with gates where the streets met it. A great city's ruins spread for tens of world units, a
+hamlet's are a handful of shells. The core is open ground, the outer ruins as wooded as the land about them, and
+nothing stands in a river or the sea: a port's ruins stop at the shore. Each piece is drawn in the culture's own
+look - grey stone, sand and green tile, dark tile and lacquer, mud and thatch - and East Asian towns stand square to
+the four quarters. It is the same city in every browser. See decision records 0101 and 0102.
+
 **Critters live where the house sees.** From zoom 9 in, every so often a few small birds burst out of a tree or a
 bush the scenery drew - in the woods, the scrub and the heath, and out of a lone bush or tree in the open - each
 from a little apart in it, all off in one direction like a shotgun's blast, curving the same way together as a flock
