@@ -13,6 +13,9 @@ import villages.protocol.ProtocolJson
 import villages.protocol.ServerFrame
 import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.locks.Lock
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 /**
  * The gateway on a WebSocket at /ws. A page served from this machine may connect from whichever port it is
@@ -46,6 +49,7 @@ class GatewaySocket(private val gateway: Gateway) : TextWebSocketHandler() {
     override fun supportsPartialMessages(): Boolean = true
 
     override fun afterConnectionEstablished(session: WebSocketSession) {
+        session.attributes[SENDING] = ReentrantLock()
         connections[session.id] = gateway.connect { frame -> session.sendUnlessGoing(frame) }
     }
 
@@ -85,16 +89,24 @@ class GatewaySocket(private val gateway: Gateway) : TextWebSocketHandler() {
  */
 internal fun WebSocketSession.sendUnlessGoing(frame: ServerFrame) {
     val message = TextMessage(ProtocolJson.encode(frame))
-    synchronized(this) {
-        if (!isOpen) {
-            return
-        }
-        try {
-            sendMessage(message)
-        } catch (@Suppress("SwallowedException") closed: IllegalStateException) {
-            // Not delivered: the session was closed under the send.
-        } catch (@Suppress("SwallowedException") broken: IOException) {
-            // Not delivered: the connection failed, and Tomcat closes the session behind it.
-        }
+    // A lock a virtual thread parks on, where `synchronized` would pin the thread it runs on to it for the length of a
+    // slow send (JDK 21); a session made without one, a test's, is locked on itself as before.
+    val lock = attributes[SENDING] as? Lock
+    if (lock == null) synchronized(this) { send(message) } else lock.withLock { send(message) }
+}
+
+private fun WebSocketSession.send(message: TextMessage) {
+    if (!isOpen) {
+        return
+    }
+    try {
+        sendMessage(message)
+    } catch (@Suppress("SwallowedException") closed: IllegalStateException) {
+        // Not delivered: the session was closed under the send.
+    } catch (@Suppress("SwallowedException") broken: IOException) {
+        // Not delivered: the connection failed, and Tomcat closes the session behind it.
     }
 }
+
+/** The attribute a session's sending lock is kept under. */
+private const val SENDING = "villages.sending"

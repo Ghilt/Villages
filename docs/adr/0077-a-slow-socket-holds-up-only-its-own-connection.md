@@ -2,6 +2,9 @@
 
 - Status: accepted
 - Date: 2026-10-02
+- Amended 2026-10-17: **a send is a virtual thread**, behind a lock a virtual thread parks on rather than `synchronized`,
+  which on JDK 21 would pin it for the length of a slow send. A platform thread a send had ten thousand players
+  running 982 of them (experiment 0022); see experiment 0023.
 
 ## Context
 

@@ -15,10 +15,11 @@ import java.lang.reflect.Proxy
  * open while its send fails, because that is what Tomcat's session does while it is closing.
  */
 class GatewaySocketTest {
-    private fun session(send: (TextMessage) -> Unit): WebSocketSession =
+    private fun session(attributes: MutableMap<String, Any> = mutableMapOf(), send: (TextMessage) -> Unit): WebSocketSession =
         Proxy.newProxyInstance(javaClass.classLoader, arrayOf(WebSocketSession::class.java)) { _, method, args ->
             when (method.name) {
                 "isOpen" -> true
+                "getAttributes" -> attributes
                 "sendMessage" -> send(args!![0] as TextMessage)
                 else -> throw UnsupportedOperationException(method.name)
             }
@@ -47,5 +48,16 @@ class GatewaySocketTest {
         val broken = session { throw IOException("An established connection was aborted") }
 
         assertDoesNotThrow { broken.sendUnlessGoing(Pong(1, 2)) }
+    }
+
+    @Test
+    fun `a session given a sending lock is sent under it, so a virtual thread parks rather than pins`() {
+        val lock = java.util.concurrent.locks.ReentrantLock()
+        var heldWhileSending = false
+
+        session(mutableMapOf("villages.sending" to lock)) { heldWhileSending = lock.isHeldByCurrentThread }
+            .sendUnlessGoing(Pong(1, 2))
+
+        assertEquals(true, heldWhileSending)
     }
 }
