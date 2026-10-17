@@ -178,6 +178,8 @@ class MongoWorld(
         }
     }
 
+    override fun everyEvent(): List<CloudEvent> = gate.wiping { store.inOrder() }
+
     /** The last reading of the whole store: made the first time it is asked, and nothing unreadable after a wipe. */
     @Volatile
     private var reading: Unreadable? = null

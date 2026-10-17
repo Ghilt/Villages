@@ -1,5 +1,6 @@
 package villages.occurrent
 
+import io.cloudevents.CloudEvent
 import org.occurrent.application.converter.CloudEventConverter
 import org.occurrent.eventstore.api.SortBy
 import org.occurrent.eventstore.api.blocking.EventStoreOperations
@@ -56,7 +57,17 @@ interface EventWorld : WorldKept, AutoCloseable {
      * decision record 0036.
      */
     fun wipe(folded: Iterable<Resettable> = emptyList()): Int
+
+    /**
+     * Every event the store holds, oldest first and as it is stored, its stream and its place in it included: what a
+     * save is (decision record 0101). Read in the moment a wipe takes, so no command is half written while it is.
+     */
+    fun everyEvent(): List<CloudEvent>
 }
+
+/** Every event the store holds, oldest first, as it is stored. */
+internal fun EventStoreQueries.inOrder(): List<CloudEvent> =
+    all(SortBy.natural(SortBy.SortDirection.ASCENDING)).use { everything -> everything.toList() }
 
 /** The wipe, over any Occurrent store: every stream it holds deleted, and the count of what they held. */
 internal fun <S> S.wipeEveryStream(): Int where S : EventStoreQueries, S : EventStoreOperations {
