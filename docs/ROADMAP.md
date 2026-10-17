@@ -229,8 +229,8 @@ Wanted, not started, and each needs a hypothesis in `docs/experiments/` before a
   never told, and may see that the figure is not quite a person. Proposed: one guide to each great ruin, shared by
   the houses within reach of it and every meeting a house's own, so nobody waits on anybody, and four temperaments
   to begin from. The shape is *The guides* in `SETTING.md`. Adam's own, 2026-10-16.
-- **Aliveness and scale**: past ten thousand connections, which one server now carries (experiments 0021 and
-  0022): the gateway's thread a send and what a command costs, then more than one server; aggregation of sprites at
+- **Aliveness and scale**: past ten thousand connections, which one server now carries (experiments 0021 to
+  0023): what a command costs, then more than one server; aggregation of sprites at
   low zoom, a custom stylised map style checked in, hardened reconnection and clock correction.
 
 ## Future ideas

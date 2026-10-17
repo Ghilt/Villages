@@ -2,10 +2,10 @@
 
 - Status: accepted
 - Date: 2026-10-02
-- Amended 2026-10-17: **virtual threads were tried for the sends and put back**: on JDK 21 the server stopped sending
-  anything past about forty connections, a carrier pinned by every send waiting inside Tomcat's blocking write. A
-  session's sends are serialised by a lock a virtual thread parks on, ready for them on a JDK that unmounts from a
-  monitor (24, JEP 491). See experiment 0023.
+- Amended 2026-10-17: **a send is a virtual thread**, on Java 25, behind a lock a virtual thread parks on. Tried first on
+  21, the server stopped sending anything past about forty connections, a carrier pinned by every send waiting inside
+  Tomcat's blocking write; 25 unpins it (JEP 491). Ten thousand players' server keeps 285 platform threads where a
+  thread a send kept 998, and `SocketCrowdTest` holds two hundred at once. See experiment 0023.
 
 ## Context
 
