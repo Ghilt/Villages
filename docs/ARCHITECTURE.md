@@ -418,8 +418,8 @@ there is scenery on the screen, and times a frame of the whole canvas, which is 
 place and the wall clock - a hash of a cell and a slot says whether a critter comes, out of which tree or bush of
 the scenery's own cells (`currentPointsOf`), which of the cast of the class under it (`casts.ts`), and how each bird
 flies, away or into another tree near it, or which piece of cover near it a squirrel or a hare bounds to
-(`hop.ts`); a fish needs no cover and leaps from a place of the cell drawn for it, where the water there has fish
-(`leap.ts`) - so nothing is stored or sent and every browser has the same ones. `CritterLayer.ts` asks it every frame for
+(`hop.ts`); a fish and a hawk need no cover, and leap from or circle over a place of the cell drawn for them, where
+the water or the open ground there has one (`leap.ts`, `soar.ts`) - so nothing is stored or sent and every browser has the same ones. `CritterLayer.ts` asks it every frame for
 what is in flight over the view, where the fog's field says the house sees now (`visionAt`, read with the scenery
 and the class tiles in `critterGround.ts`), with any a click in the Critters part asked for (`critterSpawn.ts`,
 `spawned.ts`, this window's own and outside the shared world), and places a sprite a

@@ -64,7 +64,7 @@ flight, where the view has just moved, fades up.
   stream of events for nothing it can act on.
 - **Critters on remembered ground too.** Asked of Adam and declined: a critter is news, and the grey ground is memory.
 
-## Amendment, 2026-10-17: the hop and the leap
+## Amendment, 2026-10-17: the hop, the leap and the soar
 
 A critter of the ground hops (`sprites/critters/hop.ts`): a squirrel bounds from one tree to another near it in the
 woods, and a hare from one bush or tuft of grass to another on grassland, stopping once on the way, as made up from
@@ -77,3 +77,10 @@ A critter of the water leaps (`sprites/critters/leap.ts`): a fish jumps clear of
 falls back. It comes out of no scenery, so the clock draws a place of the cell before it looks at the scenery, and
 where the water there has fish, one leaps from it; everywhere else the cell goes on to its cover as before. Its two
 rings on the water are drawn in code in the layer under the scenery, as the shadows are.
+
+A critter high in the air soars (`sprites/critters/soar.ts`): a hawk circles slowly over open ground, rock and desert,
+coming and going over two seconds far up, its circle drifting down the world's one wind. It comes out of no scenery,
+as a fish does, from a place of the cell over ground whose cast has it. It is drawn from above, as the map is seen,
+nose up in its picture, and the layer turns it on the screen to the way it flies; its shadow is its own shape, dark,
+turned with it and laid on the ground, and keeps a strength of its own rather than fading with height, so it can be
+seen sweeping the ground under the trees.

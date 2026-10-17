@@ -15,7 +15,7 @@ import type { SpawnAsk } from './types';
  */
 
 /** The kinds a button puts on the map, in the order of their buttons. */
-export const SPAWNABLE = ['songbird', 'squirrel', 'hare', 'fish'] as const;
+export const SPAWNABLE = ['songbird', 'squirrel', 'hare', 'fish', 'hawk'] as const;
 export type Spawnable = (typeof SPAWNABLE)[number];
 
 interface SpawnState {

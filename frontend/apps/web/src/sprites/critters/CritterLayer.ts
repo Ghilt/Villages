@@ -5,7 +5,7 @@ import type { CritterAtlasFile } from '@villages/world';
 import * as camera from '../../geometry/cameraMath';
 import { WORLD_MASTER_WIDTH } from '../../geometry/world';
 import { note } from '../../log/log';
-import { towardsTheLight } from '../../map/light';
+import { SHADE_COLOUR, towardsTheLight } from '../../map/light';
 import { drawnAt, shadersStore } from '../../shaders/levels';
 import type { Layer } from '../layer';
 
@@ -31,8 +31,8 @@ import type { CritterEvent, SpawnAsk } from './types';
  * bushes the scenery drew, the ground's class under them and the fog's sight, `critterGround.ts` - and places a sprite
  * for each, a frame of
  * its kind's strip from the atlas `world:critters` cuts, and a soft shadow under it, away from the light by its height;
- * one on the ground faces the way it is going across the screen, whichever way the map is turned, and a leaping fish
- * tips along its arc. A fish's rings are drawn in code (`drawnInCode.ts`), flattened as the ground is tipped.
+ * one on the ground faces the way it is going across the screen, whichever way the map is turned, a leaping fish
+ * tips along its arc, and a soaring hawk, seen from above, is turned to the way it flies. A fish's rings are drawn in code (`drawnInCode.ts`), flattened as the ground is tipped.
  * While one is in flight it asks for frames at its level's rate, and a few a second otherwise, so the next is seen
  * leaving. One first seen already in flight, where the view has just moved to, fades up, so nothing pops. A player
  * who asked for less motion gets none. Its level, how many and how big are the Critters part of the Shaders
@@ -50,6 +50,8 @@ const ARRIVING_MS = 250;
 /** How far below a bird its shadow falls, away from the light, as a share of its height, and how dark it is. */
 const SHADOW_REACH = 0.5;
 const SHADOW_ALPHA = 0.5;
+/** The shade the one light casts, as a tint: a soaring bird's shadow is its own shape in it. */
+const SHADE_TINT = SHADE_COLOUR.reduce((tint, one) => tint * 256 + Math.round(one * 255), 0);
 
 export interface CritterLayer extends Layer {
   /** What is on the ground, every critter's shadow and what runs there, to go under the scenery. */
@@ -226,7 +228,8 @@ export function createCritterLayer(repaint: () => void, around: () => CritterSur
             const arriving = since - event.startsAt * 1000 > 200 ? ramp(since, since + ARRIVING_MS, now) : 1;
             const foot = feet.get(event.kind) ?? { x: 0.5, y: 1 };
             // What is on the ground faces the way it goes across the screen; the pictures face right.
-            const onGround = event.behaviour !== 'flush';
+            const onGround = event.behaviour === 'hop' || event.behaviour === 'leap';
+            const soars = event.behaviour === 'soar';
             const heading = event.animals[0]?.heading ?? 0;
             const facing = onGround
               ? Math.sign(camera.tiltGround(Math.cos(heading), Math.sin(heading), layer.tilt).x) || 1
@@ -242,13 +245,19 @@ export function createCritterLayer(repaint: () => void, around: () => CritterSur
               const bird = onGround
                 ? spriteAt(runners, running, ran, texture)
                 : spriteAt(sprites, flying, drawn - ran, texture);
-              bird.anchor.set(foot.x, foot.y);
+              // A soaring bird is seen from above and turns about its middle; the rest stand on their feet.
+              if (soars) bird.anchor.set(0.5, 0.5);
+              else bird.anchor.set(foot.x, foot.y);
               // Its scale set whole each frame, so a sprite turned one way keeps no sign of it the next.
               const scale = tall / texture.height;
               bird.scale.set(scale * facing, scale);
               bird.position.set(x, y - pose.height * layer.scale);
               // A leaping fish tips its nose up and then down, the same way round whichever way it faces.
-              bird.rotation = -(pose.tilt ?? 0) * facing;
+              if (pose.heading !== undefined) {
+                // Its picture's nose, up the frame, turned to the way it flies across the screen.
+                const way = camera.tiltGround(Math.cos(pose.heading), Math.sin(pose.heading), layer.tilt);
+                bird.rotation = Math.atan2(way.x, -way.y);
+              } else bird.rotation = -(pose.tilt ?? 0) * facing;
               bird.alpha = alpha;
               (onGround ? onFoot : placed).push({ sprite: bird, y });
               if (onGround) ran += 1;
@@ -258,12 +267,22 @@ export function createCritterLayer(repaint: () => void, around: () => CritterSur
                 pose.y - light.south * pose.height * SHADOW_REACH,
                 layer.tilt,
               );
-              const shadow = spriteAt(shapes, shadows, drawn, shade);
+              const shadow = spriteAt(shapes, shadows, drawn, soars ? texture : shade);
               shadow.anchor.set(0.5, 0.5);
-              shadow.width = tall * 1.1;
-              shadow.height = tall * 0.45;
+              if (soars) {
+                // Seen from above, a soaring bird's shadow is its own shape, turned with it and laid on the ground.
+                shadow.scale.set(scale, scale * squash);
+                shadow.rotation = bird.rotation;
+                shadow.tint = SHADE_TINT;
+              } else {
+                shadow.rotation = 0;
+                shadow.tint = 0xffffff;
+                shadow.width = tall * 1.1;
+                shadow.height = tall * 0.45;
+              }
               shadow.position.set(layer.x + below.x * layer.scale, layer.y + below.y * layer.scale);
-              shadow.alpha = (alpha * SHADOW_ALPHA) / (1 + pose.height / 6);
+              // Fainter the higher it is, but a soaring bird's stays, so its shadow can be seen sweeping the ground.
+              shadow.alpha = alpha * SHADOW_ALPHA * (soars ? L.soar.shadow : 1 / (1 + pose.height / 6));
               counted[event.kind] = (counted[event.kind] ?? 0) + 1;
               drawn += 1;
             }

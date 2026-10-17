@@ -4,6 +4,7 @@
     { "name": "songbird", "frames": 3 },
     { "name": "squirrel", "frames": 3 },
     { "name": "hare", "frames": 3 },
-    { "name": "fish", "frames": 2 }
+    { "name": "fish", "frames": 2 },
+    { "name": "hawk", "frames": 2 }
   ]
 }

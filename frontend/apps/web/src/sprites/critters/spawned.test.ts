@@ -56,6 +56,14 @@ describe('a critter put where a click asks', () => {
     expect(spawnedAt(ask('fish'), NOW, ground())).toMatch(/water/);
   });
 
+  it('circles a hawk over the open ground clicked, and says why not over a wood', () => {
+    const hawk = spawnedAt(ask('hawk'), NOW, ground('meadow'));
+    if (hawk === null || typeof hawk === 'string') throw new Error(`no hawk: ${hawk}`);
+    expect(hawk.behaviour).toBe('soar');
+    expect(hawk.from).toMatchObject({ x: 1000.7, y: 2000.2 });
+    expect(spawnedAt(ask('hawk'), NOW, ground())).toMatch(/open ground/);
+  });
+
   it('says why when nothing near could come there, and waits while the ground is not known', () => {
     expect(spawnedAt(ask('songbird'), NOW, ground('mixed-forest', 'boulder'))).toMatch(/nothing/);
     expect(

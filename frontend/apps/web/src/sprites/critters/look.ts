@@ -31,6 +31,7 @@ export const CRITTERS_LOOK = {
     squirrel: { size: 0.45 },
     hare: { size: 0.55 },
     fish: { size: 0.6 },
+    hawk: { size: 1.1 },
   } as Record<string, { size: number } | undefined>,
   /**
    * A flock bursting out of cover together, fanning out, climbing, flapping and gliding away, fading as it goes; or a
@@ -135,6 +136,32 @@ export const CRITTERS_LOOK = {
     splash: 0.12,
     /** A ring on the water: how wide it starts and ends, in world units, how long it spreads, and how bright at first. */
     ring: { from: 0.08, to: 0.7, seconds: 1.4, alpha: 0.7 },
+  },
+  /**
+   * A bird circling slowly high over open ground, a hawk, its shadow sweeping the ground below it and away from the
+   * light and passing under the trees. Seen from above, as the map is, and turned to the way it flies, its circle
+   * drifting slowly down the wind.
+   */
+  soar: {
+    /** How high it circles, the least and the most, in world units above the ground. */
+    high: [6, 9],
+    /** How wide its circle is from its middle, the least and the most, in world units. */
+    radius: [2.5, 4],
+    /** How long one turn of its circle takes, in seconds. */
+    circleSeconds: 11,
+    /** How long it is in sight, the least and the most, and how long it takes to come and to go, in seconds. */
+    seconds: [14, 22],
+    fade: 2,
+    /** How far down the wind its circle drifts, in world units a second. */
+    drift: 0.12,
+    /** The share of the time it beats its wings, between long glides, and how fast while it does. */
+    flapping: 0.12,
+    flapsPerSecond: 4,
+    /**
+     * How dark its shadow is, its own shape on the ground, against a low bird's, whose fades as it climbs: a hawk's
+     * stays, so it can be seen sweeping the ground.
+     */
+    shadow: 0.8,
   },
 } as const;
 

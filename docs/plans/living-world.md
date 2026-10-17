@@ -146,7 +146,9 @@ the same sky. What a slot brings is worked out once when the slot comes round, n
 - **Hop**: a small animal bounds a few times from one piece of cover to another, stopping once on the way, and is
   gone behind it.
 - **Leap**: a fish jumps clear of the water and falls back, a ring where it left and one where it fell.
-- **Soar**: a bird circles slowly high up, its shadow sweeping the ground below it and to the left.
+- **Soar**: a bird circles slowly high up, its shadow sweeping the ground below it and to the left. Drawn from above,
+  as the map is, and turned to the way it flies, its circle drifting down the wind; for now a hawk over grassland,
+  farmland, rock and desert, until step 14 gives the rock its eagles and the desert its vultures.
 
 **Who lives where: the casts.**
 

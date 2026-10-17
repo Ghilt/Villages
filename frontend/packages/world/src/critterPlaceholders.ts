@@ -145,7 +145,30 @@ const fish: Frame = (at) => {
   );
 };
 
-const DRAWINGS: Record<string, Frame> = { songbird, squirrel, hare, fish };
+/**
+ * A hawk seen from above, as the map is, its nose to the top of the frame, its broad wings spread to glide, then
+ * swept a little back and up in a beat. The map turns it to the way it flies, so it is drawn facing up.
+ */
+const hawk: Frame = (at) => {
+  const [tip, sweep] = at === 0 ? [62, 0] : [52, 10];
+  const wing = (side: number) =>
+    path(
+      `M ${64 + 7 * side} 56 C ${64 + 30 * side} ${46 + sweep} ${64 + tip * side} ${50 + sweep} ` +
+        `${64 + (tip - 2) * side} ${60 + sweep} C ${64 + 40 * side} ${70 + sweep} ${64 + 22 * side} 72 ${64 + 7 * side} 70 Z`,
+      side > 0 ? '#8a6a4c' : '#6b4e36',
+    );
+  return (
+    wing(1) +
+    wing(-1) +
+    path('M 56 86 L 72 86 L 80 112 L 48 112 Z', '#7a5c42') +
+    ellipse(64, 66, 9, 24, '#6b4e36') +
+    ellipse(66, 62, 4, 14, '#9a7a5a') +
+    circle(64, 40, 8, '#5b4030') +
+    path('M 61 33 L 64 27 L 67 33 Z', '#d9b25a')
+  );
+};
+
+const DRAWINGS: Record<string, Frame> = { songbird, squirrel, hare, fish, hawk };
 
 /** The kinds a placeholder can be drawn for. A kind listed in `world/critters.json` and not here is drawn as a blot. */
 export function critterPlaceholderKinds(): string[] {

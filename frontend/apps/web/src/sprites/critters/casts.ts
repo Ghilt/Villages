@@ -6,17 +6,17 @@
  */
 
 /**
- * How a critter moves: a flock bursting out of cover, a small animal bounding from one piece of cover to another, or
- * a fish jumping out of the water. Soar comes with step 13.
+ * How a critter moves: a flock bursting out of cover, a small animal bounding from one piece of cover to another, a
+ * fish jumping out of the water, or a bird circling high over open ground.
  */
-export type Behaviour = 'flush' | 'hop' | 'leap';
+export type Behaviour = 'flush' | 'hop' | 'leap' | 'soar';
 
 export interface CastMember {
   kind: string;
   behaviour: Behaviour;
   /** How common it is on this ground, against the rest of the cast: a weight, not a chance. */
   weight: number;
-  /** The scenery it comes out of; none for a fish, which comes out of the water itself. */
+  /** The scenery it comes out of; none for a fish or a hawk, which come out of the water or the open sky. */
   from: readonly string[];
 }
 
@@ -59,6 +59,9 @@ const HARES: CastMember = {
 /** A fish, jumping out of the water and falling back. */
 const FISH: CastMember = { kind: 'fish', behaviour: 'leap', weight: 1, from: [] };
 
+/** A hawk, circling high and slow over open ground: rare, and long in sight. */
+const HAWKS: CastMember = { kind: 'hawk', behaviour: 'soar', weight: 0.12, from: [] };
+
 export const CASTS: Readonly<Record<string, readonly CastMember[]>> = {
   lake: [FISH],
   river: [FISH],
@@ -74,11 +77,14 @@ export const CASTS: Readonly<Record<string, readonly CastMember[]>> = {
   scrub: [SONGBIRDS],
   heath: [SONGBIRDS],
   'farmland-with-woods': [SONGBIRDS],
-  meadow: [SONGBIRDS, HARES],
-  steppe: [SONGBIRDS, HARES],
-  savanna: [SONGBIRDS, HARES],
-  'alpine-meadow': [SONGBIRDS],
-  farmland: [SONGBIRDS],
+  meadow: [SONGBIRDS, HARES, HAWKS],
+  steppe: [SONGBIRDS, HARES, HAWKS],
+  savanna: [SONGBIRDS, HARES, HAWKS],
+  'alpine-meadow': [SONGBIRDS, HAWKS],
+  farmland: [SONGBIRDS, HAWKS],
+  'bare-rock': [HAWKS],
+  'desert-sand': [HAWKS],
+  'desert-stone': [HAWKS],
 };
 
 /** The member of a cast a draw from nought to one picks, by weight, or null for ground with no cast. */

@@ -20,7 +20,7 @@
 - `world/sprites/structures/<type>-<culture>.png`, one for every type of structure in every culture, and a
   ruin a culture. Cut by a tool of their own, and painted to rules of their own: see below.
 - `world/sprites/critters/<kind>.png`, one for every kind of critter in `world/critters.json`: songbird,
-  squirrel, hare, fish. A strip of frames, cut by a tool of its own: see below.
+  squirrel, hare, fish, hawk. A strip of frames, cut by a tool of its own: see below.
 
 **Save your picture over the placeholder**, as `oak.webp` or `oak.png` or `oak.jpg`. Delete the placeholder if
 the extension differs, because two files that are both `oak` are refused; the placeholder's record goes with
@@ -62,7 +62,9 @@ picture three frames wide. Paint the frames in the order they play - a wing up, 
 the same place in each, because every frame of a kind is cut to the one box that holds all of them, so the frames
 register and only what moves moves. An animal of the ground or the water faces right, and the map turns it to face
 the way it goes: a squirrel gathered, in the air, landing; a hare sitting up, in the air, gathered; a fish level, its
-tail one way and then the other, which the map tips along its leap. Which frame is which is in
+tail one way and then the other, which the map tips along its leap. A hawk is seen from above, as the map is, its
+nose to the top of the frame, wings spread to glide and then a beat, because the map turns it to the way it flies
+round its circle. Which frame is which is in
 `apps/web/src/sprites/critters/look.ts`. On a transparent background or a flat one, as any sprite, with no plinth;
 where the animal stands on anything, it stands on the bottom edge. A frame is cut 64 pixels tall and a critter is
 drawn small - eight to thirty pixels at the closest zoom - so paint it 256 tall or more, keep the shape bold, and

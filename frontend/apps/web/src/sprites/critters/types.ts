@@ -67,6 +67,8 @@ export interface Pose {
   alpha: number;
   /** How far its nose is tipped up from level, in radians, down below nought: a leaping fish's. */
   tilt?: number;
+  /** Which way it flies, on the ground, in radians from east towards south: a soaring bird's, seen from above. */
+  heading?: number;
 }
 
 /** A ring spreading on the water at a moment: where, how wide across from its middle, and how bright. */

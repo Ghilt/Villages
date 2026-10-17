@@ -2,6 +2,7 @@ import { CASTS, memberOf } from './casts';
 import { HOP_LONGEST, hopPose, hopper } from './hop';
 import { LEAP_LONGEST, leapPose, leapRings, leaper } from './leap';
 import { CRITTERS_LOOK } from './look';
+import { SOAR_LONGEST, soarPose, soarer } from './soar';
 import type { Animal, Cover, CritterEvent, Ground, Pose, Ring } from './types';
 
 export type { Animal, Cover, CritterEvent, Ground, Pose, Ring } from './types';
@@ -12,8 +13,8 @@ export type { Animal, Cover, CritterEvent, Ground, Pose, Ring } from './types';
  * sky. The ground is cut into cells and the clock into slots; a hash of a cell and a slot says whether anything comes
  * there then, out of which piece of the scenery standing in the cell, which of that ground's cast, when in the slot,
  * and everything about how it goes: a flock bursting out of cover, here, a small animal hopping to the next piece of
- * cover, `hop.ts`, or a fish jumping out of the water, `leap.ts`, which comes out of no scenery but the water at a
- * place of the cell drawn for it. After that it is a function of the seconds since it began. See
+ * cover, `hop.ts`, a fish jumping out of the water, `leap.ts`, or a hawk circling over open ground, `soar.ts`, the
+ * last two out of no scenery but the water or the ground at a place of the cell drawn for them. After that it is a function of the seconds since it began. See
  * docs/plans/living-world.md.
  *
  * Whether a cell's slot brings anything is decided by one draw against the density before anything else, so turning
@@ -54,7 +55,12 @@ export function lastsFor(event: CritterEvent): number {
 }
 
 /** The longest anything lasts, so the slots before the current one that can still be in flight are asked too. */
-const LONGEST = Math.max(F.stagger + Math.max(F.seconds, F.shelterSeconds[1]), HOP_LONGEST, LEAP_LONGEST);
+const LONGEST = Math.max(
+  F.stagger + Math.max(F.seconds, F.shelterSeconds[1]),
+  HOP_LONGEST,
+  LEAP_LONGEST,
+  SOAR_LONGEST,
+);
 
 /**
  * The trees and bushes near a critter's cover, as near and as far as said, that it could go into, nearest first, up
@@ -93,14 +99,16 @@ export function eventIn(
   const draw = (salt: number) => critterHash(cellX, cellY, slot, salt);
   const key = `${cellX}/${cellY}/${slot}`;
   const startsAt = slot * L.slot + draw(5) * L.slot;
-  // A fish needs no cover: a place of the cell is drawn, and where the water there has fish, one leaps from it.
+  // A fish or a hawk needs no cover: a place of the cell is drawn, and where the water or the open ground there has
+  // one, it leaps from it or circles over it.
   const at = { x: fromX + draw(20) * L.cell, y: fromY + draw(21) * L.cell };
-  const water = ground.classAt(at.x, at.y);
-  const fish = water === null ? null : memberOf(CASTS[water], draw(2));
-  if (fish?.behaviour === 'leap') {
+  const open = ground.classAt(at.x, at.y);
+  const free = open === null ? null : memberOf(CASTS[open], draw(2));
+  if (free?.behaviour === 'leap' || free?.behaviour === 'soar') {
     if (!ground.sees(at.x, at.y)) return null;
-    const from = { ...at, kind: water!, height: 0 };
-    return { key, kind: fish.kind, behaviour: 'leap', startsAt, from, animals: [leaper(draw)] };
+    const from = { ...at, kind: open!, height: 0 };
+    const animal = free.behaviour === 'leap' ? leaper(draw) : soarer(draw);
+    return { key, kind: free.kind, behaviour: free.behaviour, startsAt, from, animals: [animal] };
   }
   const cover = ground.coverIn(fromX, fromY, fromX + L.cell, fromY + L.cell);
   if (cover === null || cover.length === 0) return null;
@@ -209,7 +217,7 @@ const ramp = (from: number, to: number, value: number): number =>
 
 /**
  * Where every animal of a critter is at this moment, for a picture of so many frames standing `size` world units tall:
- * one hopping is `hop.ts`'s, one leaping `leap.ts`'s, and a flock's are here. A bird flying off comes out of its
+ * one hopping is `hop.ts`'s, one leaping `leap.ts`'s, one soaring `soar.ts`'s, and a flock's are here. A bird flying off comes out of its
  * cover, climbs and flies away on an arc, turning with the rest of its flock, flapping and then gliding, flapping again
  * now and then, and then hooks: a sharp turn and a drop of a little over half a bird length straight down the
  * screen, settling, and then fades quickly. A bird taking shelter flies a bowed path from one crown to the other,
@@ -229,6 +237,10 @@ export function posesOf(event: CritterEvent, seconds: number, frames: number, si
     }
     if (event.behaviour === 'leap') {
       poses.push(leapPose(event.from, bird, flown, frames));
+      continue;
+    }
+    if (event.behaviour === 'soar') {
+      poses.push(soarPose(event.from, bird, flown, frames));
       continue;
     }
     const beat = Math.floor((flown + bird.phase) * F.flapsPerSecond);
