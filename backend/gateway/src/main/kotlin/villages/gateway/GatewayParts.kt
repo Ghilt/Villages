@@ -106,6 +106,6 @@ internal fun partsOf(
         InspectingPart(houseById, onTheMap, structuresOnTheMap, world),
         Instruments(instrumentsOpen, core, events, recent, emptyTheWorld, foundHouse, resources, keyFigures, visions, dialogues, rolls, worldKept, structures, antarctica, quests),
         CataloguesPart(instrumentsOpen, catalogues),
-        SavesPart(instrumentsOpen, saves),
+        SavesPart(instrumentsOpen, core, saves),
     )
 }

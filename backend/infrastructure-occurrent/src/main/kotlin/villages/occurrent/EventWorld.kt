@@ -1,12 +1,15 @@
 package villages.occurrent
 
 import io.cloudevents.CloudEvent
+import io.cloudevents.core.builder.CloudEventBuilder
 import org.occurrent.application.converter.CloudEventConverter
 import org.occurrent.eventstore.api.SortBy
+import org.occurrent.eventstore.api.blocking.EventStore
 import org.occurrent.eventstore.api.blocking.EventStoreOperations
 import org.occurrent.eventstore.api.blocking.EventStoreQueries
 import villages.application.CharacterCommandExecutor
 import villages.application.EventFeed
+import villages.application.Follower
 import villages.application.HouseCommandExecutor
 import villages.application.Resettable
 import villages.application.StructureCommandExecutor
@@ -63,7 +66,41 @@ interface EventWorld : WorldKept, AutoCloseable {
      * save is (decision record 0101). Read in the moment a wipe takes, so no command is half written while it is.
      */
     fun everyEvent(): List<CloudEvent>
+
+    /**
+     * Replaces every event in the store with [events], a save's, oldest first and each with the stream it was stored
+     * on, and has every one of [followers] fold the new history from its beginning, as at a start. In the moment a wipe
+     * takes: each follower paused, the store emptied and everything folded forgotten, the events written back on their
+     * own streams in the order they were first written, and each follower resumed. See decision record 0101.
+     */
+    fun replace(events: List<CloudEvent>, followers: Iterable<Follower>)
 }
+
+/**
+ * The events of a save written back, on the streams they were stored on and in the order they were first written, a
+ * run of one stream's events at a time. The store's own marks on them - the stream, the place in it, MongoDB's position
+ * - are the store's to make again.
+ */
+internal fun EventStore.writeBack(events: List<CloudEvent>) {
+    var stream: String? = null
+    val run = mutableListOf<CloudEvent>()
+    fun flush() {
+        stream?.let { write(it, run.toList()) }
+        run.clear()
+    }
+    for (event in events) {
+        val on = event.getExtension(STREAM_ID).toString()
+        if (on != stream) {
+            flush()
+            stream = on
+        }
+        run += CloudEventBuilder.v1(event).apply { STORES_OWN.forEach { withoutExtension(it) } }.build()
+    }
+    flush()
+}
+
+/** What a store writes on every event itself, and so never takes from the event it is given. */
+private val STORES_OWN = listOf(STREAM_ID, STREAM_VERSION, "position")
 
 /** Every event the store holds, oldest first, as it is stored. */
 internal fun EventStoreQueries.inOrder(): List<CloudEvent> =

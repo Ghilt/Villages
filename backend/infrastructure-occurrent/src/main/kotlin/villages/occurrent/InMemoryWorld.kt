@@ -12,6 +12,7 @@ import org.occurrent.subscription.inmemory.InMemorySubscriptionModel
 import villages.application.CharacterCommandExecutor
 import villages.application.EventFeed
 import villages.application.FaultBoard
+import villages.application.Follower
 import villages.application.Faults
 import villages.application.HouseCommandExecutor
 import villages.application.Fault
@@ -68,6 +69,16 @@ class InMemoryWorld(val faults: Faults = FaultBoard()) : EventWorld {
     }
 
     override fun everyEvent(): List<CloudEvent> = gate.wiping { store.inOrder() }
+
+    override fun replace(events: List<CloudEvent>, followers: Iterable<Follower>) = gate.wiping {
+        followers.forEach(Follower::pause)
+        store.wipeEveryStream()
+        handedOn()
+        followers.forEach(Resettable::reset)
+        store.writeBack(events)
+        reading = null
+        followers.forEach(Follower::resume)
+    }
 
     /** The last reading of the whole store: made the first time it is asked, and nothing unreadable after a wipe. */
     @Volatile

@@ -21,7 +21,7 @@ import tools.jackson.databind.JsonNode
  * It goes up whenever a frame or a field changes, and `ProtocolShapeSpec` makes sure of that: every frame's shape
  * is recorded in contracts/protocol-v<n>.txt, and what each version changed is in contracts/README.md.
  */
-const val PROTOCOL_VERSION = 54
+const val PROTOCOL_VERSION = 55
 
 data class Point(val lat: Double, val lon: Double)
 
@@ -128,6 +128,8 @@ data class WorldNow(val today: Long, val earliest: Long)
     JsonSubTypes.Type(WatchCatalogues::class, name = "watchCatalogues"),
     JsonSubTypes.Type(ReviseCatalogue::class, name = "reviseCatalogue"),
     JsonSubTypes.Type(SaveWorld::class, name = "saveWorld"),
+    JsonSubTypes.Type(ListSaves::class, name = "listSaves"),
+    JsonSubTypes.Type(LoadSave::class, name = "loadSave"),
 )
 sealed interface ClientFrame
 

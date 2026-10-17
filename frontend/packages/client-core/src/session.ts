@@ -67,6 +67,13 @@ export interface Session {
   wipeWorld(): void;
   /** Saves the development world under a name, beside every tree; answered by `savesListed`. See 0101. */
   saveWorld(name: string): void;
+  /** Asks which saves there are, into `saves`. Nothing is asked while the connection is not open. See 0101. */
+  listSaves(): void;
+  /**
+   * Gives the world one of the saves, for everybody connected to it. Every session is ended when it is in, as by a
+   * wipe, so the answer is arriving anew. See 0101.
+   */
+  loadSave(name: string): void;
   /**
    * Asks what water is at a place on the map, which a click that hit nothing else does: the answer comes back as
    * `inspectedAt`, kept in the state. Nothing is asked while the connection is not open. See 0087.
@@ -292,6 +299,16 @@ export function createSession(ports: SessionPorts): Session {
       if (!open()) return;
       ports.note('world', `saving the world as ${name}`);
       connection?.send({ type: 'saveWorld', name });
+    },
+
+    listSaves: () => {
+      if (open()) connection?.send({ type: 'listSaves' });
+    },
+
+    loadSave: (name) => {
+      if (!open()) return;
+      ports.note('world', `loading the save ${name}`);
+      connection?.send({ type: 'loadSave', name });
     },
 
     roll: (looking) => {

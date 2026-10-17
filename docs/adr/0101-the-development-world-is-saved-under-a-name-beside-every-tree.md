@@ -29,10 +29,24 @@ tree, and switching between its players, and nothing about it in the event store
 - **Nothing in the world records it.** A save is not something that happened in the world; it is Adam keeping a copy.
 - One of the instruments: refused `instrumentsClosed` where they are closed (0076). Answered to the window that asked,
   with every save there is, `savesListed`.
-- Loading one is a start on the saved history: the followers stop, the store is replaced by the save's events, and
-  every follower folds it again, as when the server starts on a world already kept. The reactions find their work
-  done, as at every start. The clock runs on: a save loaded a week later wakes seven months on. That is the next
-  step of `docs/plans/world-saves.md`, and this record is amended when it lands.
+
+**A load is a start on the saved history.** The World section lists every save, every tree's, in a dropdown, and
+`load` gives this tree's world the one picked:
+
+- In the moment a wipe takes, every follower - every read model and every reaction - is paused, the store emptied and
+  everything folded forgotten, the save's events written back on their own streams in the order they were first
+  written, ids and all, and every follower resumed: it folds the whole history again from its beginning, as it does
+  when the server starts on a world already kept (`Follower.pause`, `resume`).
+- So the reactions find their work done, as at every start: what they would ask again is refused as already done and
+  the refusal swallowed (`Reaction`). The two that hold back while the past replays and set things right once caught
+  up, the standing effects and the quest objectives, hold back again for a load's replay (`Follower.replaying`).
+- What a load can write is what a start writes: the catalogues the server runs on taken on, when they differ from the
+  save's (0097), and whatever the clock has made due since the save was made. **The clock runs on**: a save loaded a
+  week later wakes seven months on, as a server stopped for a week would, its pledges past their day released.
+- Every session is ended with `worldWiped`, as by a wipe, and each window arrives anew on the saved world; the window
+  that loaded it arrives as the player who made the save, so it is looking at that house again.
+- A save this code cannot read is listed as such, with the first event it cannot read, and cannot be picked; asked for
+  anyway, it is refused whole, `saveRefused`, and the world is left as it was. So is a save that is not there.
 
 ## Consequences
 

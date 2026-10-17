@@ -3,6 +3,7 @@ package villages.occurrent
 import io.cloudevents.CloudEvent
 import io.cloudevents.core.builder.CloudEventBuilder
 import tools.jackson.databind.node.ObjectNode
+import villages.application.Follower
 import villages.application.Save
 import villages.application.SaveRefused
 import villages.application.WorldSaves
@@ -26,7 +27,15 @@ import kotlin.io.path.name
  * oldest first, one a line, its stream and its place in it among its extensions. The folder is every tree's, beside
  * the shared `.git`, so a save made in one tree is there in all of them. See decision record 0101.
  */
-class FileSaves(private val folder: Path, private val world: EventWorld, private val clock: Clock) : WorldSaves {
+class FileSaves(
+    private val folder: Path,
+    private val world: EventWorld,
+    private val clock: Clock,
+    /** Everything built from the store, which a load folds again from the save. */
+    private val followers: () -> List<Follower> = { emptyList() },
+    /** What the server does once a load is in, as after a wipe: take on the catalogues it runs on. */
+    private val loaded: () -> Unit = {},
+) : WorldSaves {
     override fun save(name: String, by: PlayerId?): Save {
         if (!NAME.matches(name)) {
             throw SaveRefused("\"$name\" is not a save's name: lower-case letters, digits and single hyphens, at most $LONGEST")
@@ -51,10 +60,45 @@ class FileSaves(private val folder: Path, private val world: EventWorld, private
         if (!folder.exists()) {
             emptyList()
         } else {
-            folder.listDirectoryEntries("*$SUFFIX").mapNotNull { file ->
-                file.bufferedReader().use { it.readLine() }?.let { saveOf(it, file.name.removeSuffix(SUFFIX)) }
-            }.sortedByDescending { it.savedAt }
+            folder.listDirectoryEntries("*$SUFFIX").mapNotNull { read(it)?.first }.sortedByDescending { it.savedAt }
         }
+
+    override fun load(name: String): Save {
+        val file = folder.resolve("$name$SUFFIX")
+        val (save, events) = (if (NAME.matches(name) && file.exists()) read(file) else null)
+            ?: throw SaveRefused("there is no save called $name")
+        save.unreadable?.let { throw SaveRefused("$name cannot be read by this code: $it") }
+        world.replace(events, followers())
+        loaded()
+        return save
+    }
+
+    /**
+     * A save's file read whole: what its first line says it is, saying whether this code can read every event in it,
+     * and the events. Null for a file whose first line says no save.
+     */
+    private fun read(file: Path): Pair<Save, List<CloudEvent>>? {
+        val lines = file.bufferedReader().use { it.readLines() }
+        val save = lines.firstOrNull()?.let { saveOf(it, file.name.removeSuffix(SUFFIX)) } ?: return null
+        val events = mutableListOf<CloudEvent>()
+        var unreadable: String? = null
+        for ((at, line) in lines.drop(1).withIndex()) {
+            try {
+                events += eventOf(line).also(CONVERTER::toDomainEvent)
+            } catch (@Suppress("TooGenericExceptionCaught") cannot: RuntimeException) {
+                unreadable = unreadable ?: "event ${at + 1}, ${typeIn(line)} (${cannot.javaClass.simpleName})"
+            }
+        }
+        return save.copy(unreadable = unreadable) to events
+    }
+
+    /** The type a line of a save says it holds, for saying which could not be read; a line that is no event says so. */
+    @Suppress("TooGenericExceptionCaught", "SwallowedException")
+    private fun typeIn(line: String): String = try {
+        Events.json.readTree(line)["type"].asString()
+    } catch (notJson: RuntimeException) {
+        "a line that is no event"
+    }
 
     private fun headerOf(save: Save): String {
         val header = Events.json.createObjectNode()
@@ -78,6 +122,8 @@ class FileSaves(private val folder: Path, private val world: EventWorld, private
     }
 
     companion object {
+        /** The one reader of the store's events, the upcasters of 0100 included, as every other reader uses. */
+        private val CONVERTER = Events.converter()
         const val SUFFIX = ".jsonl"
         const val LONGEST = 60
         private val NAME = Regex("(?=.{1,$LONGEST}$)[a-z0-9]+(-[a-z0-9]+)*")

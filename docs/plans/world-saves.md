@@ -35,9 +35,10 @@ have gone on at their rates. A save that resumes at the moment it was made would
 
 - **A save is the world whole, or nothing.** No command runs while it is read: it is taken under the wipe's lock,
   so it never holds half of a story that was being written. Held at the instant of the save.
-- **A load never writes an event of its own.** The events put back are the save's, ids and all, and the reactions
-  that see them act only where the history leaves work undone, which a whole save does not. Held at the instant of
-  the load, by the same refusals that hold it at every start.
+- **A load does nothing twice.** The events put back are the save's, ids and all, and the reactions that see them act
+  only where the history leaves work undone, which a whole save does not. What it can write is what a start writes:
+  the catalogues taken on when they differ from the save's, and what the clock has made due since. Held at the
+  instant of the load, by the same refusals that hold it at every start.
 - **A save this code cannot read is refused whole**, naming the first event it cannot read, and the world is left
   as it was. Held at the instant of the load.
 

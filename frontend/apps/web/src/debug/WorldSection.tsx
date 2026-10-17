@@ -8,6 +8,7 @@ import { sessionStore, restart, saveWorld, wipeWorld } from '../net/gateway';
 import { seedHouses } from '../net/seed';
 import { note } from '../log/log';
 import { SaveDialog } from './SaveDialog';
+import { SavesPicker } from './SavesPicker';
 import { Section } from './Section';
 import { seeEverything } from './seeEverything';
 import { foundHouseHere } from './levers';
@@ -155,6 +156,7 @@ export function WorldSection({ map }: WorldSectionProps) {
   return (
     <Section name="World" tools={tools}>
       {levers}
+      <SavesPicker />
       <SaveDialog
         open={naming}
         onSave={(name) => {

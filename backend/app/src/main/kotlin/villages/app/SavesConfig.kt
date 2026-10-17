@@ -1,8 +1,11 @@
 package villages.app
 
+import org.springframework.beans.factory.ObjectProvider
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import villages.application.Follower
+import villages.application.Shelf
 import villages.application.WorldSaves
 import villages.occurrent.EventWorld
 import villages.occurrent.FileSaves
@@ -18,9 +21,24 @@ import kotlin.io.path.readText
  */
 @Configuration
 class SavesConfig {
+    /**
+     * A load folds every follower again from the save, and then takes on the catalogues the server runs on, as a wipe
+     * does, so the world records the numbers in force now when they differ from the save's.
+     */
     @Bean
-    fun worldSaves(world: EventWorld, clock: Clock, @Value("\${villages.saves:}") folder: String): WorldSaves =
-        FileSaves(folder.ifBlank { null }?.let(Path::of) ?: savesBesideTheSharedGit(Path.of(StoreConfig.CHECKOUT)), world, clock)
+    fun worldSaves(
+        world: EventWorld,
+        clock: Clock,
+        followers: ObjectProvider<Follower>,
+        shelf: Shelf,
+        @Value("\${villages.saves:}") folder: String,
+    ): WorldSaves = FileSaves(
+        folder = folder.ifBlank { null }?.let(Path::of) ?: savesBesideTheSharedGit(Path.of(StoreConfig.CHECKOUT)),
+        world = world,
+        clock = clock,
+        followers = { followers.orderedStream().toList() },
+        loaded = { shelf.recordAll() },
+    )
 }
 
 /**

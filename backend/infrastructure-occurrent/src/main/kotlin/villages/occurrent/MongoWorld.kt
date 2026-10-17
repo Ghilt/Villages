@@ -20,6 +20,7 @@ import villages.application.EventFeed
 import villages.application.Fault
 import villages.application.FaultBoard
 import villages.application.Faults
+import villages.application.Follower
 import villages.application.HouseCommandExecutor
 import villages.application.StructureCommandExecutor
 import villages.application.Resettable
@@ -179,6 +180,16 @@ class MongoWorld(
     }
 
     override fun everyEvent(): List<CloudEvent> = gate.wiping { store.inOrder() }
+
+    override fun replace(events: List<CloudEvent>, followers: Iterable<Follower>) = gate.wiping {
+        followers.forEach(Follower::pause)
+        store.delete(Filter.all())
+        handedOn()
+        followers.forEach(Resettable::reset)
+        store.writeBack(events)
+        reading = null
+        followers.forEach(Follower::resume)
+    }
 
     /** The last reading of the whole store: made the first time it is asked, and nothing unreadable after a wipe. */
     @Volatile

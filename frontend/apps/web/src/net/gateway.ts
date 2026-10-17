@@ -1,4 +1,4 @@
-import { createSession, ensurePlayerToken, forgetPlayerToken } from '@villages/client-core';
+import { becomePlayer, createSession, ensurePlayerToken, forgetPlayerToken } from '@villages/client-core';
 import type { Connection, Looking, Readable, SessionListener, SessionState } from '@villages/client-core';
 import { PROTOCOL_VERSION } from '@villages/protocol';
 import type { ChoiceView, CommandPayload, OptionView, Point } from '@villages/protocol';
@@ -29,7 +29,11 @@ const session = createSession({
   newId: () => crypto.randomUUID(),
   standsArrived,
   followStands: followStandsUnder,
-  arriveAnew: () => window.location.reload(),
+  // Arriving anew as the player who made the save this window loaded, when it loaded one. See 0101.
+  arriveAnew: () => {
+    if (becoming !== null) becomePlayer(tokens, becoming);
+    window.location.reload();
+  },
   note,
 });
 
@@ -105,6 +109,30 @@ export function wipeWorld(): void {
 /** Saves the development world under a name, beside every tree, so any tree can load it. See decision record 0101. */
 export function saveWorld(name: string): void {
   session.saveWorld(name);
+}
+
+/** Who this window is to arrive as once the save it asked for is loaded: the save's maker, if it names one. */
+let becoming: string | null = null;
+
+// A load refused changes nobody: the next arrival, a wipe's say, is as the player this window is now.
+session.observe({
+  heard: (frame) => {
+    if (frame.type === 'error' && frame.code === 'saveRefused') becoming = null;
+  },
+});
+
+/** Asks which saves there are, into the session's `saves`. See decision record 0101. */
+export function listSaves(): void {
+  session.listSaves();
+}
+
+/**
+ * Gives this tree's world one of the saves, for everybody connected to it. Every window then arrives anew on it, and
+ * this one as the player who made the save, so it is looking at that house again. See decision record 0101.
+ */
+export function loadSave(name: string): void {
+  becoming = session.state().saves?.find((save) => save.name === name)?.by ?? null;
+  session.loadSave(name);
 }
 
 /**

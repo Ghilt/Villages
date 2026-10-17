@@ -143,3 +143,5 @@ recorded over. See decision record 0037. What each one changed:
   Instruments, refused while they are closed. See decision record 0097.
 - **54** - `saveWorld`, the development world saved under a name, answered by `savesListed`, every save there is, or by
   an `error` of code `saveRefused`. Instruments, refused while they are closed. See decision record 0101.
+- **55** - `listSaves` and `loadSave`, the saves listed and one loaded in place of the world, which ends every session
+  with `worldWiped`; a save in `savesListed` says what of it this code cannot read, `unreadable`. See decision record 0101.

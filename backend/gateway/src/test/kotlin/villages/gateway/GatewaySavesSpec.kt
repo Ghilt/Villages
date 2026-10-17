@@ -11,6 +11,8 @@ import villages.protocol.ErrorFrame
 import villages.protocol.SaveView
 import villages.protocol.SavesListed
 import villages.protocol.ServerFrame
+import villages.protocol.WorldWiped
+import io.kotest.matchers.collections.shouldBeEmpty
 import java.time.Instant
 import java.util.UUID
 
@@ -27,6 +29,13 @@ class GatewaySavesSpec : StringSpec({
         }
 
         override fun saves(): List<Save> = made.toList()
+
+        val loaded = mutableListOf<String>()
+
+        override fun load(name: String): Save {
+            val save = made.find { it.name == name } ?: throw SaveRefused("there is no save called $name")
+            return save.also { loaded += name }
+        }
     }
 
     fun window(rig: Rig): Pair<Gateway.Connection, MutableList<ServerFrame>> {
@@ -43,7 +52,7 @@ class GatewaySavesSpec : StringSpec({
 
         saves.made.single().by shouldBe PlayerId(UUID.fromString(TOKEN))
         sent shouldContainExactly listOf(
-            SavesListed(listOf(SaveView("first-test", 1_792_238_400_000, TOKEN, 3)), saved = "first-test"),
+            SavesListed(listOf(SaveView("first-test", 1_792_238_400_000, TOKEN, 3, null)), saved = "first-test"),
         )
     }
 
@@ -61,5 +70,33 @@ class GatewaySavesSpec : StringSpec({
         shut.receive("""{"type":"saveWorld","name":"first-test"}""")
         told.map { (it as ErrorFrame).code } shouldBe listOf("instrumentsClosed")
         closed.made shouldBe emptyList()
+    }
+
+    "the saves are listed to the window that asks, and a load ends every session, each told what the world is now" {
+        val saves = Kept()
+        val rig = Rig(saves = saves)
+        val (connection, sent) = window(rig)
+        connection.receive("""{"type":"saveWorld","name":"first-test"}""")
+        val (_, theirs) = rig.someoneElse()
+        sent.clear()
+        theirs.clear()
+
+        connection.receive("""{"type":"listSaves"}""")
+        sent shouldContainExactly listOf(SavesListed(listOf(SaveView("first-test", 1_792_238_400_000, TOKEN, 3, null)), saved = null))
+        theirs.shouldBeEmpty()
+
+        sent.clear()
+        connection.receive("""{"type":"loadSave","name":"first-test"}""")
+        saves.loaded shouldBe listOf("first-test")
+        val told = WorldWiped("the world is the save first-test now, 3 events")
+        sent shouldContainExactly listOf(told)
+        theirs shouldContainExactly listOf(told)
+    }
+
+    "a load of a save there is not is refused to the window that asked, and ends nobody's session" {
+        val (connection, sent) = window(Rig(saves = Kept()))
+        sent.clear()
+        connection.receive("""{"type":"loadSave","name":"never-made"}""")
+        sent shouldContainExactly listOf(ErrorFrame("saveRefused", "there is no save called never-made"))
     }
 })

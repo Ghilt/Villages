@@ -5,6 +5,7 @@ import type {
   KeyFigureView,
   QuestView,
   RollDrawnFrame,
+  SaveView,
   ServerFrame,
   StructureView,
   VisionPointView,
@@ -84,6 +85,11 @@ export interface SessionState {
    * has revealed the place, and the water there by name. What an inspect window on water is opened from. See 0087.
    */
   inspectedAt: InspectedAtFrame | null;
+  /**
+   * Every save of the development world there is, newest first, as the gateway last listed them, or null until it has.
+   * Only the debug panel asks, and only it reads them. See decision record 0101.
+   */
+  saves: readonly SaveView[] | null;
 }
 
 /**
@@ -237,6 +243,13 @@ const SLICES = {
     onFrame: { inspectedAt: (_, frame) => ({ inspectedAt: frame }) },
     onReset: forgottenWhenTakenOver({ inspectedAt: null }),
   } satisfies Slice<'inspectedAt'>,
+
+  /** The saves of the world, which only the debug panel asks for. Kept through any end: they are files, not the world. */
+  saves: {
+    initial: { saves: null },
+    onFrame: { savesListed: (_, frame) => ({ saves: frame.saves }) },
+    onReset: (state) => state,
+  } satisfies Slice<'saves'>,
 
   switches: {
     initial: { seeAll: false, fogOfWar: true },

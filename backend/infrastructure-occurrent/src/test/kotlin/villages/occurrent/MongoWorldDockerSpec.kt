@@ -165,6 +165,25 @@ class MongoWorldDockerSpec : StringSpec({
             }
         }
 
+    "a save written back is the world again, every event on its stream in its place, folded once (needs Docker)"
+        .config(enabledOrReasonIf = needsDocker) {
+            world("villages-load").use { world ->
+                world.executor.execute(ravenscar, sent)
+                // As a save holds them: through a file's lines, MongoDB's own position and all.
+                val saved = world.everyEvent().map { FileSaves.eventOf(FileSaves.lineOf(it)) }
+                val heard = Heard(world.feed).also { it.start() }
+                world.executor.execute(ravenscar.copy(houseId = HouseId(UUID.randomUUID())), sent)
+
+                world.replace(saved, listOf(heard))
+
+                world.everyEvent().map { it.id } shouldBe saved.map { it.id }
+                world.everyEvent().map { it.getExtension("streamid") to it.getExtension("streamversion") } shouldBe
+                    saved.map { it.getExtension("streamid") to it.getExtension("streamversion") }
+                heard.ids shouldBe saved.map { it.id }
+                heard.close()
+            }
+        }
+
     "the wipe empties the world and counts what went (needs Docker)"
         .config(enabledOrReasonIf = needsDocker) {
             world("villages-wipe").use { world ->

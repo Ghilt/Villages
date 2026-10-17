@@ -33,3 +33,12 @@ export function ensurePlayerToken(store: TokenStore, newToken: () => string): st
 export function forgetPlayerToken(store: TokenStore): void {
   store.set(PLAYER_TOKEN_KEY, '');
 }
+
+/**
+ * Makes this browser play as the player of [token] from its next hello: a token is all a player is until accounts
+ * exist (0008), so a debug panel that knows another player's knows enough to be them. What a load does, so the
+ * browser that loaded a save arrives as the player who made it, and what switching players does. See 0101.
+ */
+export function becomePlayer(store: TokenStore, token: string): void {
+  store.set(PLAYER_TOKEN_KEY, token);
+}

@@ -16,8 +16,15 @@ interface WorldSaves {
      */
     fun save(name: String, by: PlayerId?): Save
 
-    /** Every save there is, newest first. */
+    /** Every save there is, newest first, each saying whether this code can read it. */
     fun saves(): List<Save>
+
+    /**
+     * Gives the world the save called [name]: every event in the store replaced by the save's, and everything built
+     * from the store folded from it again, as at a start, so nothing it holds is done twice. Refused whole, the world
+     * left as it was, for a save there is not or one this code cannot read: see [SaveRefused].
+     */
+    fun load(name: String): Save
 
     companion object {
         /** A server or a test told of nowhere to keep saves: it lists none, and refuses to make one. */
@@ -25,12 +32,17 @@ interface WorldSaves {
             override fun save(name: String, by: PlayerId?): Save = throw SaveRefused("this server keeps no saves")
 
             override fun saves(): List<Save> = emptyList()
+
+            override fun load(name: String): Save = throw SaveRefused("this server keeps no saves")
         }
     }
 }
 
-/** One save: its [name], when it was made and by whom, and how many events it holds. */
-data class Save(val name: String, val savedAt: Instant, val by: PlayerId?, val events: Int)
+/**
+ * One save: its [name], when it was made and by whom, and how many events it holds; [unreadable] the first of them
+ * this code cannot read, in a line, or null when it can read them all.
+ */
+data class Save(val name: String, val savedAt: Instant, val by: PlayerId?, val events: Int, val unreadable: String? = null)
 
 /** A save refused, and nothing written; the message says why, in words the panel shows. */
 class SaveRefused(message: String) : RuntimeException(message)

@@ -4,9 +4,14 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.engine.spec.tempdir
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
+import villages.application.EventFeed
+import villages.application.Follower
 import villages.application.Provenance
+import villages.application.StoredEvent
 import villages.application.SaveRefused
 import villages.domain.Banner
 import villages.domain.Charge
@@ -25,6 +30,8 @@ import java.time.Instant
 import java.time.ZoneOffset
 import java.util.UUID
 import kotlin.io.path.readLines
+import kotlin.io.path.readText
+import kotlin.io.path.writeText
 
 class FileSavesSpec : StringSpec({
     val ada = PlayerId(UUID.fromString("0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8d"))
@@ -90,4 +97,64 @@ class FileSavesSpec : StringSpec({
     "a folder that is not there yet holds no saves" {
         FileSaves(tempdir().toPath().resolve("not-yet"), InMemoryWorld(), at(noon)).saves().shouldBeEmpty()
     }
+
+    "a load replaces the world with the save, and everything built from it folds the save's history again" {
+        val world = aWorld()
+        val folder = tempdir().toPath()
+        val heard = Heard(world.feed).also(Follower::start)
+        val saves = FileSaves(folder, world, at(noon), followers = { listOf(heard) })
+        saves.save("first-test", ada)
+        val saved = world.everyEvent().map { it.id }
+
+        world.executor.execute(
+            GrantResource(HouseId.of(ada), Resource.WEALTH, 5, WorldTime(653_711), noon),
+            Provenance.startedBy(UUID.randomUUID()),
+        )
+        saves.load("first-test")
+
+        world.everyEvent().map { it.id } shouldBe saved
+        world.everyEvent().map { it.getExtension("streamversion") } shouldBe listOf(1L, 2L)
+        heard.ids shouldBe saved
+        heard.resets shouldBe 1
+        world.close()
+    }
+
+    "a save this code cannot read is listed as such and refused whole, and the world is left as it was" {
+        val world = aWorld()
+        val folder = tempdir().toPath()
+        val saves = FileSaves(folder, world, at(noon))
+        saves.save("broken", ada)
+        val file = folder.resolve("broken.jsonl")
+        file.writeText(file.readText().replace("villages.house.resourceGranted.v1", "villages.house.resourceGranted.v9"))
+        val before = world.everyEvent().map { it.id }
+
+        saves.saves().single().unreadable.shouldNotBeNull() shouldContain "event 2, villages.house.resourceGranted.v9"
+        shouldThrow<SaveRefused> { saves.load("broken") }.message shouldContain "broken cannot be read by this code"
+        shouldThrow<SaveRefused> { saves.load("never-made") }.message shouldContain "there is no save called never-made"
+        world.everyEvent().map { it.id } shouldBe before
+        world.close()
+    }
+
+    "a save this code reads whole is listed as readable" {
+        val world = aWorld()
+        val saves = FileSaves(tempdir().toPath(), world, at(noon))
+        saves.save("fine", null)
+        saves.saves().single().unreadable.shouldBeNull()
+        world.close()
+    }
 })
+
+/** A follower that keeps the id of every event it hears, and counts the times it was told to forget them. */
+internal class Heard(feed: EventFeed) : Follower(feed) {
+    val ids = mutableListOf<String>()
+    var resets = 0
+
+    override fun apply(stored: StoredEvent) {
+        synchronized(ids) { ids += stored.id }
+    }
+
+    override fun reset() {
+        resets++
+        synchronized(ids) { ids.clear() }
+    }
+}

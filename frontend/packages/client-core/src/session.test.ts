@@ -260,4 +260,34 @@ describe('the session, folded from what each mechanic folds', () => {
     expect(socket.sent.at(-1)).toEqual({ type: 'saveWorld', name: 'first-test' });
     expect(notes).toEqual(['world: saving the world as first-test']);
   });
+
+  it('keeps the saves as last listed, through any end, and asks or loads only while open', () => {
+    const socket = fakeSocket();
+    const notes: string[] = [];
+    const session = createSession({
+      schedule: { after: () => () => undefined },
+      newId: () => 'c-1',
+      standsArrived: () => undefined,
+      followStands: () => undefined,
+      arriveAnew: () => undefined,
+      note: (area, message) => notes.push(`${area}: ${message}`),
+    });
+    session.listSaves();
+    session.loadSave('too-soon');
+    expect(socket.sent).toEqual([]);
+
+    session.connect({ socket: socket.socket, playerToken: 't', protocolVersion: 1, address: 'ws://here' });
+    socket.opens();
+    socket.says(welcome);
+    session.listSaves();
+    const saves = [{ name: 'first-test', savedAt: 2, by: null, events: 37, unreadable: null }];
+    socket.says({ type: 'savesListed', saves, saved: null });
+    session.loadSave('first-test');
+
+    expect(socket.sent.slice(-2)).toEqual([{ type: 'listSaves' }, { type: 'loadSave', name: 'first-test' }]);
+    expect(notes).toEqual(['world: loading the save first-test']);
+    expect(session.state().saves).toEqual(saves);
+    socket.says({ type: 'takenOver', message: 'another window took this player over' });
+    expect(session.state().saves).toEqual(saves);
+  });
 });
