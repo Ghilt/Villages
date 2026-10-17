@@ -136,7 +136,8 @@ class JarServer(private val java: File, private val jar: File, private val log: 
         private const val STOPPING_SECONDS = 10L
         private const val JCMD_SECONDS = 60L
 
-        // G1's own words: "garbage-first heap   total 262144K, used 23456K [...".
-        private val HEAP = Regex("""total (\d+)K, used (\d+)K""")
+        // G1's own words, which JDK 25 changed: "total 262144K, used 23456K" on 21, "total reserved 262144K, committed
+        // 262144K, used 25238K" on 25, where what is committed is the heap the server has, as the total was on 21.
+        internal val HEAP = Regex("""(?:total|committed) (\d+)K, used (\d+)K""")
     }
 }
