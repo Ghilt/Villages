@@ -136,6 +136,7 @@ const map: RuinsMapFile & { $comment: string } = {
   world: { side, tileUnits: TILE_UNITS },
   ring: ruins.size.ring,
   cultures: CULTURES,
+  look: ruins.look,
   stands: placed.length,
   chunks: byTile.size,
   bytes,

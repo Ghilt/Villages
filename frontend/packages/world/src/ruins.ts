@@ -1,5 +1,6 @@
 import type { AddedTown, Reviewed } from './review1790.ts';
 import type { Stand } from './stands.ts';
+import { CULTURES } from './structures.ts';
 import type { Culture } from './structures.ts';
 
 /*
@@ -46,17 +47,77 @@ export interface RuinedTown {
   readonly why?: string;
 }
 
+/** One picture a ruined city is laid out in, and how big it stands, in world units, as a tree's height is. */
+export interface RuinPieceSpec {
+  readonly name: string;
+  readonly height: number;
+  /** How wide its foot is: what may not stand in water. */
+  readonly width: number;
+  /** How much taller or shorter one may be than another, as a share of its height. */
+  readonly vary: number;
+}
+
+/** How a culture lays its streets: blocks of so many lots, how far a lot strays, walls, and the outline. */
+export interface CultureStreets {
+  /** Lots to a block each way, between streets a lot wide. */
+  readonly block: number;
+  /** How far a lot strays from its place on the grid, as a share of a lot. */
+  readonly jitter: number;
+  readonly walls: boolean;
+  /** A round town, or a square one walled to the four sides of its own grid. */
+  readonly outline: 'round' | 'square';
+  /** Whether a town's grid is turned by its seed, or laid to north, south, east and west. */
+  readonly turn: boolean;
+}
+
+/**
+ * The numbers the page lays a ruined city out with (`ruinLayout.ts`): how big a lot is, how much of the radius is
+ * the core, how thin the edge is, how ragged the outline, how often a core block is a landmark, a lot a tower, a
+ * street an arch, where the wall stands, as shares of the built radius, and how much of it still stands.
+ */
+export interface RuinsLayout {
+  readonly lot: number;
+  readonly core: number;
+  readonly edge: number;
+  readonly ragged: number;
+  readonly landmarks: number;
+  readonly towers: number;
+  readonly arches: number;
+  readonly wall: readonly [number, number];
+  /** How much of a wall still stands: the share of its lots that hold a stretch of it or a gate. */
+  readonly walls: number;
+}
+
+/** Everything the page needs to lay a ruined city out from its record, which `world:ruins` copies into `map.json`. */
+export interface RuinsLook {
+  readonly pieces: readonly RuinPieceSpec[];
+  readonly layout: RuinsLayout;
+  readonly streets: Readonly<Record<Culture, CultureStreets>>;
+}
+
+/** The pieces the layout names, in the order it names them. */
+export const RUIN_PIECES = ['shell', 'row', 'tower', 'hall', 'arch', 'wall', 'gate', 'rubble'] as const;
+export type RuinPieceName = (typeof RUIN_PIECES)[number];
+
 export interface Ruins {
   readonly tiers: Readonly<Record<Tier, number>>;
   readonly size: RuinsSize;
   readonly towns: ReadonlyMap<string, RuinedTown>;
+  readonly look: RuinsLook;
 }
 
 const positive = (value: unknown): value is number => typeof value === 'number' && value > 0;
 
 /** `world/ruins.json`, or the refusal naming the first thing in it that cannot be read. */
 export function parseRuins(text: string): Ruins {
-  const file = JSON.parse(text) as { tiers?: unknown; size?: unknown; towns?: unknown };
+  const file = JSON.parse(text) as {
+    tiers?: unknown;
+    size?: unknown;
+    towns?: unknown;
+    pieces?: unknown;
+    layout?: unknown;
+    streets?: unknown;
+  };
   const tiers = (file.tiers ?? {}) as Partial<Record<Tier, unknown>>;
   for (const [at, tier] of TIERS.entries()) {
     const fewest = tiers[tier];
@@ -105,7 +166,75 @@ export function parseRuins(text: string): Ruins {
     }
     towns.set(id, typeof why === 'string' && why !== '' ? { people, name, why } : { people, name });
   }
-  return { tiers: tiers as Record<Tier, number>, size: size as RuinsSize, towns };
+  return {
+    tiers: tiers as Record<Tier, number>,
+    size: size as RuinsSize,
+    towns,
+    look: lookOf(file.pieces, file.layout, file.streets),
+  };
+}
+
+/** The pieces, the layout and the streets, or the refusal naming the first that cannot be read. */
+function lookOf(pieces: unknown, layout: unknown, streets: unknown): RuinsLook {
+  const named = Array.isArray(pieces) ? (pieces as Partial<RuinPieceSpec>[]) : [];
+  if (named.map((one) => one.name).join() !== RUIN_PIECES.join()) {
+    throw new Error(`world/ruins.json: pieces wants ${RUIN_PIECES.join(', ')}, in that order`);
+  }
+  for (const piece of named) {
+    if (
+      !positive(piece.height) ||
+      !positive(piece.width) ||
+      typeof piece.vary !== 'number' ||
+      piece.vary < 0
+    ) {
+      throw new Error(`world/ruins.json: the piece ${piece.name} wants a height, a width and a vary`);
+    }
+  }
+  const numbers = (layout ?? {}) as Partial<RuinsLayout>;
+  const shares = [
+    numbers.core,
+    numbers.edge,
+    numbers.ragged,
+    numbers.landmarks,
+    numbers.towers,
+    numbers.arches,
+    numbers.walls,
+  ];
+  if (
+    !positive(numbers.lot) ||
+    shares.some((share) => typeof share !== 'number' || share < 0 || share > 1) ||
+    !Array.isArray(numbers.wall) ||
+    !(numbers.wall[0]! < numbers.wall[1]!) ||
+    numbers.wall[1]! > 1
+  ) {
+    throw new Error(
+      'world/ruins.json: layout wants a lot, shares from 0 to 1, and a wall inside the built radius',
+    );
+  }
+  const ways = (streets ?? {}) as Partial<Record<Culture, Partial<CultureStreets>>>;
+  for (const culture of CULTURES) {
+    const way = ways[culture];
+    if (
+      way === undefined ||
+      !positive(way.block) ||
+      !Number.isInteger(way.block) ||
+      typeof way.jitter !== 'number' ||
+      way.jitter < 0 ||
+      way.jitter > 0.5 ||
+      typeof way.walls !== 'boolean' ||
+      (way.outline !== 'round' && way.outline !== 'square') ||
+      typeof way.turn !== 'boolean'
+    ) {
+      throw new Error(
+        `world/ruins.json: the streets of ${culture} want a block, a jitter up to 0.5, walls, an outline and a turn`,
+      );
+    }
+  }
+  return {
+    pieces: named as RuinPieceSpec[],
+    layout: numbers as RuinsLayout,
+    streets: ways as Record<Culture, CultureStreets>,
+  };
 }
 
 /**
@@ -193,6 +322,8 @@ export interface RuinsMapFile {
   readonly ring: number;
   /** The cultures in the order a stand's favourite byte names them. */
   readonly cultures: readonly Culture[];
+  /** How a city is laid out from its record. */
+  readonly look: RuinsLook;
   readonly stands: number;
   readonly chunks: number;
   readonly bytes: number;

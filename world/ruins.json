@@ -1,8 +1,26 @@
 {
-  "$comment": "Every town of 1790 is a ruin at the world's start, and the bigger it was the more ground its ruins cover. A town is its Wikidata id, as world/names/1790.json keys it, with about how many people lived in it then - from the estimates for about 1800 - and its name of 1790 to read it by. A town of 1790 not listed here had `unlisted` people. `tiers` names how big a town was by the fewest people it takes; `size` turns people into the radius its ruins are built over, in world units: `perRootThousand` times the square root of its people in thousands, never less than `least` or more than `most`, and `ring` more of overgrowth beyond that, which with `most` stays inside the 63.75 units a stand record holds; `fullness` is how built-up the core of the least town's ruins is and of the greatest's, the share of its lots that hold a piece. Read by `npm run world:ruins --prefix frontend`. See docs/plans/ruined-cities.md.",
+  "$comment": "Every town of 1790 is a ruin at the world's start, and the bigger it was the more ground its ruins cover. A town is its Wikidata id, as world/names/1790.json keys it, with about how many people lived in it then - from the estimates for about 1800 - and its name of 1790 to read it by. A town of 1790 not listed here had `unlisted` people. `tiers` names how big a town was by the fewest people it takes; `size` turns people into the radius its ruins are built over, in world units: `perRootThousand` times the square root of its people in thousands, never less than `least` or more than `most`, and `ring` more of overgrowth beyond that, which with `most` stays inside the 63.75 units a stand record holds; `fullness` is how built-up the core of the least town's ruins is and of the greatest's, the share of its lots that hold a piece. `pieces`, `layout` and `streets` are how the page lays a ruined city out from its record: every picture it is made of and how tall it stands in world units, as a tree's height is; the lot a piece stands on, how much of the radius is the core and how thin the edge, how ragged the outline, how often a core block is a landmark hall, a lot a tower, a street an arch, where the wall stands as shares of the built radius, and how much of it still stands; and how each culture lays its streets - lots to a block, how far a lot strays, whether it walls itself, a round town or a square one, turned or laid to the four quarters. Read by `npm run world:ruins --prefix frontend`. See docs/plans/ruined-cities.md.",
 
   "tiers": {"great": 250000, "large": 80000, "city": 30000, "town": 10000, "small": 0},
-  "size": {"perRootThousand": 1.25, "least": 3, "most": 42, "ring": 0.3, "unlisted": 3000, "fullness": [0.35, 0.6]},
+  "size": {"perRootThousand": 1.25, "least": 5, "most": 42, "ring": 0.3, "unlisted": 3000, "fullness": [0.5, 0.62]},
+
+  "pieces": [
+    {"name": "shell", "height": 2.8, "width": 1.6, "vary": 0.15},
+    {"name": "row", "height": 3.0, "width": 2.6, "vary": 0.15},
+    {"name": "tower", "height": 5.5, "width": 1.6, "vary": 0.2},
+    {"name": "hall", "height": 8.0, "width": 4.5, "vary": 0.1},
+    {"name": "arch", "height": 3.6, "width": 2.4, "vary": 0.1},
+    {"name": "wall", "height": 2.6, "width": 2.6, "vary": 0.1},
+    {"name": "gate", "height": 4.0, "width": 3.0, "vary": 0.1},
+    {"name": "rubble", "height": 1.4, "width": 1.8, "vary": 0.3}
+  ],
+  "layout": {"lot": 2.0, "core": 0.4, "edge": 0.35, "ragged": 0.35, "landmarks": 0.12, "towers": 0.12, "arches": 0.05, "wall": [0.9, 0.97], "walls": 0.6},
+  "streets": {
+    "european": {"block": 4, "jitter": 0.22, "walls": true, "outline": "round", "turn": true},
+    "islamic": {"block": 3, "jitter": 0.3, "walls": true, "outline": "round", "turn": true},
+    "eastAsian": {"block": 5, "jitter": 0.08, "walls": true, "outline": "square", "turn": false},
+    "african": {"block": 2, "jitter": 0.4, "walls": false, "outline": "round", "turn": true}
+  },
 
   "towns": {
     "Q956": [1100000,"Pekin","the largest city in the world"],

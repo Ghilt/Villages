@@ -9,21 +9,24 @@ import { DEFAULT_MASTER, masterNameOf, standsDirOf, worldDirOf } from '../src/ma
 import { GROUND_LATTICE } from '../src/lattice.ts';
 import { onLattice, paintPixel, preparePainterly } from '../src/painterly.ts';
 import type { ClassSampler, PainterlyStyle, PreparedPainterly } from '../src/painterly.ts';
-import type { Palette, Rgb } from '../src/palette.ts';
+import type { Palette } from '../src/palette.ts';
 import { encodeRgbPng } from '../src/png.ts';
 import type { RgbImage } from '../src/png.ts';
 import type { ClassRaster } from '../src/raster.ts';
+import type { NamesFile } from '../src/namesFile.ts';
+import { ruinsIn } from '../src/ruinLayout.ts';
+import type { RuinPiece } from '../src/ruinLayout.ts';
+import type { RuinsMapFile } from '../src/ruins.ts';
 import { CELL, cellOf, scatterCell } from '../src/scatter.ts';
 import type { ScatteredPoint } from '../src/scatter.ts';
 import { biomeAt, spriteMapOf } from '../src/spriteMap.ts';
 import type { SpriteMap, SpriteMapFile } from '../src/spriteMap.ts';
-import { NO_STANDS, decodeStands } from '../src/stands.ts';
 import type { StandChunk } from '../src/stands.ts';
 
 import { flag, named } from './lib/flags.ts';
 import { classSamplerOf, readMaster } from './lib/master.ts';
 import { OUTPUT_DIR, PAINTERLY, PAINTERLY_DIR, PALETTE, RENDER, STANDS_DIR, masterAt } from './lib/paths.ts';
-import { flatColoursOf, mercatorY } from './lib/stills.ts';
+import { flatColoursOf, mercatorY, stamp, stampRuin, standsReader } from './lib/stills.ts';
 
 /**
  * Stills of what the sprite map put on the ground, painted onto the ground it put it on.
@@ -45,10 +48,14 @@ import { flatColoursOf, mercatorY } from './lib/stills.ts';
  * thinned itself the same way would be arguing about the renderer when the subject is the generator.
  *
  *   node bin/renderScenery.ts [master] [--view name] [--style painted] [--zoom 9.6]
- *                             [--at lng,lat] [--width 1200] [--dial 1] [--spacing 1] [--out dir]
+ *                             [--at lng,lat] [--city Q90|Paris] [--width 1200] [--dial 1] [--spacing 1] [--out dir]
  *
  * `--spacing` is the multiplier on every kind's `apart`, as the debug panel's is: nought is the scatter as
  * it was before experiment 0012, which is how to see what the spacing took out.
+ *
+ * The ruins of the towns of 1790 are stamped over the scenery wherever `world:ruins` laid them, each piece its
+ * footprint in its culture's stone, from the same `ruinsIn` the browser runs. `--city` looks at one town, by its
+ * Wikidata id or its name of 1790, `--city Q90` or `--city Paris`. See docs/plans/ruined-cities.md.
  */
 
 const masterPath = masterAt(named[0]);
@@ -102,6 +109,19 @@ const flatColours = flatColoursOf(palette, render.colours);
  * whose whole point is that it is too far out for any of this. `--at` overrides with a point.
  */
 function places(): Place[] {
+  const city = flag('city');
+  if (city !== undefined) {
+    const names = JSON.parse(
+      readFileSync(resolve(OUTPUT_DIR, worldDirOf(master), 'names.json'), 'utf8'),
+    ) as NamesFile;
+    const town = names.names.find(
+      (one) => one.kind === 'town' && (one.id === city || one.name.toLowerCase() === city.toLowerCase()),
+    );
+    if (town === undefined) {
+      throw new Error(`no town of 1790 is ${city} on ${master}`);
+    }
+    return [{ name: town.name.toLowerCase().replace(/[^a-z]+/g, '-'), lng: town.at[0]!, lat: town.at[1]! }];
+  }
   const at = flag('at');
   if (at !== undefined) {
     const [lng, lat] = at.split(',').map(Number);
@@ -157,98 +177,9 @@ async function readSpriteMap(): Promise<SpriteMap> {
   return spriteMapOf(file, decoded.data, palette);
 }
 
-/** One tile's stands, read once and kept. */
-const chunks = new Map<string, StandChunk>();
-function standsOfTile(map: SpriteMap, tileX: number, tileY: number): StandChunk {
-  const across = map.file.world.side / map.file.world.tileUnits;
-  if (tileY < 0 || tileY >= across) {
-    return NO_STANDS;
-  }
-  const wrapped = ((tileX % across) + across) % across;
-  const key = `${wrapped}/${tileY}`;
-  const held = chunks.get(key);
-  if (held !== undefined) {
-    return held;
-  }
-  // Most tiles are sea and have no file at all, which is not a failure: they have no stands.
-  let chunk: StandChunk;
-  try {
-    const bytes = readFileSync(resolve(standsDir, String(wrapped), `${tileY}.bin`));
-    chunk = decodeStands(
-      new Uint8Array(bytes.buffer, bytes.byteOffset, bytes.byteLength),
-      wrapped,
-      tileY,
-      map.file.world.tileUnits,
-    );
-  } catch {
-    chunk = NO_STANDS;
-  }
-  chunks.set(key, chunk);
-  return chunk;
-}
-
-/**
- * What one point is drawn as: a blob for its crown and a stroke for its stem, both in world units.
- *
- * Sized off `groundHeight` exactly as the sprite is, so the picture is to scale with the map even
- * though the shape is not the map's shape. Taller things are drawn darker, which is the one thing that
- * lets a mixed wood be read as mixed without a legend nobody wants on a still.
- */
-const CROWN = 0.34;
-const STEM = 0.4;
-
-function stamp(
-  pixels: Uint8Array,
-  imageWidth: number,
-  imageHeight: number,
-  atX: number,
-  atY: number,
-  point: ScatteredPoint,
-  tallest: number,
-): void {
-  const tall = point.height / perPixel;
-  const radius = Math.max(0.6, tall * CROWN);
-  // Nought for the floor, one for the canopy: the darker a mark is, the bigger the thing it stands for.
-  const weight = tallest === 0 ? 1 : Math.min(1, point.height / tallest);
-  const ink: Rgb = [
-    Math.round(96 - 56 * weight),
-    Math.round(112 - 58 * weight),
-    Math.round(80 - 44 * weight),
-  ];
-  const alpha = 0.55 + 0.3 * weight;
-
-  const blend = (x: number, y: number, cover: number): void => {
-    if (cover <= 0 || x < 0 || y < 0 || x >= imageWidth || y >= imageHeight) {
-      return;
-    }
-    const at = (y * imageWidth + x) * 3;
-    const mix = Math.min(1, cover) * alpha;
-    pixels[at] = Math.round(pixels[at]! * (1 - mix) + ink[0] * mix);
-    pixels[at + 1] = Math.round(pixels[at + 1]! * (1 - mix) + ink[1] * mix);
-    pixels[at + 2] = Math.round(pixels[at + 2]! * (1 - mix) + ink[2] * mix);
-  };
-
-  // The stem first, so the crown sits on top of it.
-  const foot = atY + tall * STEM;
-  for (let y = Math.floor(atY); y <= Math.ceil(foot); y += 1) {
-    blend(Math.round(atX), y, 0.8);
-  }
-
-  const from = Math.floor(atX - radius - 1);
-  const to = Math.ceil(atX + radius + 1);
-  const top = Math.floor(atY - radius - 1);
-  const bottom = Math.ceil(atY + radius + 1);
-  for (let y = top; y <= bottom; y += 1) {
-    for (let x = from; x <= to; x += 1) {
-      const dx = x + 0.5 - atX;
-      const dy = y + 0.5 - atY;
-      blend(x, y, radius + 0.5 - Math.sqrt(dx * dx + dy * dy));
-    }
-  }
-}
-
 interface Reading {
   points: number;
+  ruins: number;
   perUnit: number;
   byKind: [string, number][];
   byBiome: [string, number][];
@@ -260,6 +191,7 @@ function renderPlace(
   world: ClassRaster,
   classAt: ClassSampler,
   map: SpriteMap,
+  ruins: Ruins | null,
 ): { image: RgbImage; reading: Reading } {
   const side = world.width;
   const centreX = ((place.lng + 180) / 360) * side;
@@ -303,7 +235,7 @@ function renderPlace(
     for (let cellX = fromCell; cellX <= toCell; cellX += 1) {
       // The ground the whole world over, so a cell can space its points against its neighbours' on any
       // tile its margin reaches. See experiment 0012.
-      const ground = { classAt, standsOf: (tileX: number, tileY: number) => standsOfTile(map, tileX, tileY) };
+      const ground = { classAt, standsOf: biomeStands };
       for (const point of scatterCell(cellX, cellY, dial, ground, map, spacing)) {
         points += 1;
         const name = map.kinds[point.kind]?.name ?? '?';
@@ -317,8 +249,47 @@ function renderPlace(
 
   // Shortest first, so the canopy is stamped over the floor rather than under it.
   drawn.sort((one, other) => one[2].height - other[2].height);
+  const canvas = { pixels, width, height };
   for (const [x, y, point] of drawn) {
-    stamp(pixels, width, height, x, y, point, tallest);
+    stamp(canvas, x, y, point, tallest, perPixel);
+  }
+
+  // The ruins over the scenery, a cell at a time from the tile's records, the furthest first.
+  const pieces: RuinPiece[] = [];
+  if (ruins !== null) {
+    const { file, standsOf } = ruins;
+    const ground = {
+      look: { ...file.look, ring: file.ring },
+      side: file.world.side,
+      classAt,
+      water: isWater,
+    };
+    const tileUnits = file.world.tileUnits;
+    for (let cellY = topCell; cellY <= bottomCell; cellY += 1) {
+      for (let cellX = fromCell; cellX <= toCell; cellX += 1) {
+        const towns = standsOf(
+          Math.floor((cellX * CELL) / tileUnits),
+          Math.floor((cellY * CELL) / tileUnits),
+        );
+        const x = cellX * CELL;
+        const y = cellY * CELL;
+        pieces.push(...ruinsIn(x, y, x + CELL, y + CELL, towns, ground, dial));
+      }
+    }
+    const tallestRuin = Math.max(...file.look.pieces.map((piece) => piece.height));
+    pieces.sort((one, other) => one.y - other.y);
+    for (const piece of pieces) {
+      const spec = file.look.pieces[piece.piece]!;
+      stampRuin(
+        canvas,
+        (piece.x - left) / perPixel,
+        (piece.y - top) / perPixel,
+        piece,
+        spec,
+        tallestRuin,
+        perPixel,
+      );
+    }
   }
 
   const share = (counts: Map<string, number>): [string, number][] =>
@@ -328,6 +299,7 @@ function renderPlace(
     image: { width, height, pixels },
     reading: {
       points,
+      ruins: pieces.length,
       // Over the cells scattered, not the view, because that is the ground the points came off.
       perUnit: points / ((toCell - fromCell + 1) * (bottomCell - topCell + 1) * CELL * CELL),
       byKind: share(kindCount),
@@ -337,6 +309,27 @@ function renderPlace(
 }
 
 const map = await readSpriteMap();
+const biomeStands = standsReader(standsDir, map.file.world.side, map.file.world.tileUnits);
+const isWater = (terrain: number): boolean =>
+  palette.classes.some((one) => one.id === terrain && one.water === true);
+
+interface Ruins {
+  file: RuinsMapFile;
+  standsOf: (tileX: number, tileY: number) => StandChunk;
+}
+
+/** The ruins `world:ruins` laid, or none for a master it has not laid yet: the scenery is painted without them. */
+function readRuins(): Ruins | null {
+  const mapFile = resolve(OUTPUT_DIR, worldDirOf(master), 'sprites', 'ruins', 'map.json');
+  if (!existsSync(mapFile)) {
+    console.log(`${master} has no ruins laid: run npm run world:ruins --prefix frontend -- ${master}`);
+    return null;
+  }
+  const file = JSON.parse(readFileSync(mapFile, 'utf8')) as RuinsMapFile;
+  const dir = resolve(STANDS_DIR, standsDirOf(master, 'ruins'));
+  return { file, standsOf: standsReader(dir, file.world.side, file.world.tileUnits) };
+}
+const ruins = readRuins();
 const reading = Date.now();
 const world = readMaster(masterPath, palette);
 console.log(
@@ -358,7 +351,7 @@ console.log(
 
 for (const place of chosen) {
   const started = Date.now();
-  const { image, reading } = renderPlace(place, world, classAt, map);
+  const { image, reading } = renderPlace(place, world, classAt, map, ruins);
   const name = `${place.name}-scenery`;
   const png = encodeRgbPng(image, deflate);
   await writeFile(resolve(outputDir, `${name}.png`), png);
@@ -378,6 +371,9 @@ for (const place of chosen) {
       `${reading.perUnit.toFixed(3)} a square unit against ${map.file.density.ceiling}`,
   );
   console.log(`  ${''.padEnd(24)} ${top3(reading.byBiome)} | ${top3(reading.byKind)}`);
+  if (ruins !== null) {
+    console.log(`  ${''.padEnd(24)} ${reading.ruins.toLocaleString()} pieces of ruins`);
+  }
 }
 
 console.log(

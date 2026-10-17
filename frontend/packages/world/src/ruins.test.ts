@@ -26,8 +26,14 @@ const REVIEW = JSON.parse(
   added: Record<string, AddedTown>;
 };
 
+/** The look of the real file, so a sample is a whole file and only what a test is about differs. */
+const { pieces, layout, streets } = JSON.parse(RUINS) as Record<string, unknown>;
+
 const sample = (over: Record<string, unknown> = {}) =>
   JSON.stringify({
+    pieces,
+    layout,
+    streets,
     tiers: { great: 250000, large: 80000, city: 30000, town: 10000, small: 0 },
     size: { perRootThousand: 1.25, least: 3, most: 42, ring: 0.3, unlisted: 3000, fullness: [0.35, 0.6] },
     towns: { Q90: [550000, 'Paris'], Q1792: [40000, 'Dantzic', 'a free city'] },
@@ -129,6 +135,28 @@ describe('how big every town of 1790 was', () => {
     };
     expect(at(MOST_REACH, MOST_THICKNESS)).toEqual([MOST_REACH, Math.fround(MOST_THICKNESS)]);
     expect(at(MOST_REACH + 1, MOST_THICKNESS + 0.1)).toEqual([MOST_REACH, Math.fround(MOST_THICKNESS)]);
+  });
+
+  it('reads the pieces in their order, and refuses a look it cannot lay a city out with', () => {
+    expect(parseRuins(sample()).look.pieces.map((piece) => piece.name)).toEqual([
+      'shell',
+      'row',
+      'tower',
+      'hall',
+      'arch',
+      'wall',
+      'gate',
+      'rubble',
+    ]);
+    expect(() => parseRuins(sample({ pieces: (pieces as unknown[]).slice(1) }))).toThrow(
+      'pieces wants shell',
+    );
+    expect(() => parseRuins(sample({ layout: { ...(layout as object), wall: [0.9, 1.2] } }))).toThrow(
+      'a wall inside the built radius',
+    );
+    expect(() =>
+      parseRuins(sample({ streets: { ...(streets as object), african: { block: 2, jitter: 0.9 } } })),
+    ).toThrow('the streets of african');
   });
 
   it('says where a town is not a town of 1790, or not by the name the review gives it then', () => {

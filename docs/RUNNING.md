@@ -685,7 +685,10 @@ and `-- --drop` takes them off; by hand only.
   silhouettes**: the shapes are drawn in Pixi and this is the generator's answer, not the map's. `-- --at
   lng,lat` looks anywhere, `-- --view alps` at one of them, `-- --zoom 10.4` closer, `-- --style flat`
   without the paint, `-- --spacing 0` without the spacing that keeps trees off each other (two, three to
-  see more of it). This is what a change to `world/biomes.json` is argued from.
+  see more of it). This is what a change to `world/biomes.json` is argued from. The ruins of the towns of 1790 are
+  stamped over the scenery wherever `world:ruins` laid them, each piece its footprint in its culture's stone, grey,
+  sand, red-brown or ochre, a taller piece darker, from the same layout the browser will run; it prints how many
+  pieces. `-- --city Paris`, or a Wikidata id, `-- --city Q90`, looks at one town.
 - Structures' pictures: `world/sprites/structures/` is Adam's folder, one picture a type and a culture and a ruin
   a culture, sixty-eight, every one a placeholder drawn from the map's own shapes until he saves over it
   (`AUTHORING-THE-ART.md` says how). `npm run world:structures --prefix frontend` draws whatever placeholder is

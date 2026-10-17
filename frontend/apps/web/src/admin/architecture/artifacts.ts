@@ -232,8 +232,7 @@ export const ARTIFACTS: readonly Artifact[] = [
     name: 'ruins map',
     path: `${M}/sprites/ruins/map.json`,
     origin: 'baked',
-    what: 'How to read a stand of the ruins layer, and no word of where any town is.',
-    development: 'Read by nothing yet: the page lays the ruins out from it once ruins are in the game.',
+    what: 'How to read a stand of the ruins layer and lay a city out from it, and no word of where any town is.',
   },
   {
     id: 'ruins-stands',
@@ -242,7 +241,6 @@ export const ARTIFACTS: readonly Artifact[] = [
     path: 'world/stands/<m>/ruins/',
     origin: 'baked',
     what: 'Every town of 1790 as a stand of ruins; the server will hand out only what the fog shows.',
-    development: 'Read by nothing yet: the stills and the server take it up as the ruins come into the game.',
   },
   {
     id: 'ruins-pictures',
