@@ -56,7 +56,17 @@ class QuestObjectives(
     private class Open(val house: HouseId, val quest: Quest, val progress: List<QuestProgress>)
 
     private val structures = ConcurrentHashMap<StructureId, Standing>()
+
+    /** The structures each house holds, kept as they change hands, so whether a house holds one is not a walk of all. */
+    private val heldBy = ConcurrentHashMap<HouseId, MutableSet<StructureId>>()
     private val quests = ConcurrentHashMap<QuestId, Open>()
+
+    private fun put(id: StructureId, standing: Standing) {
+        val was = structures.put(id, standing)?.holder
+        if (was == standing.holder) return
+        was?.let { house -> heldBy.computeIfPresent(house) { _, ids -> ids.apply { remove(id) }.ifEmpty { null } } }
+        standing.holder?.let { house -> heldBy.computeIfAbsent(house) { ConcurrentHashMap.newKeySet() }.add(id) }
+    }
 
     @Volatile
     private var live = false
@@ -70,7 +80,7 @@ class QuestObjectives(
             is StructureChangedHands -> structures[event.structureId]?.let {
                 held(event.structureId, Standing(it.type, it.place, event.to, it.ruin), stored)
             }
-            is StructureRuined -> structures.computeIfPresent(event.structureId) { _, it -> Standing(it.type, it.place, null, ruin = true) }
+            is StructureRuined -> structures[event.structureId]?.let { put(event.structureId, Standing(it.type, it.place, null, ruin = true)) }
 
             is PlayerOfferedQuest -> {
                 quests[event.quest.id] = Open(event.houseId, event.quest, emptyList())
@@ -94,7 +104,7 @@ class QuestObjectives(
     }
 
     private fun held(id: StructureId, standing: Standing, because: StoredEvent) {
-        structures[id] = standing
+        put(id, standing)
         val house = standing.holder ?: return
         if (live) quests.filterValues { it.house == house }.keys.forEach { ask(it, because) }
     }
@@ -120,8 +130,8 @@ class QuestObjectives(
 
     /** Whether the world, as folded, meets an objective for a house: the one branch a new world-met kind adds. */
     private fun meets(house: HouseId, objective: Objective.MetByTheWorld): Boolean = when (objective) {
-        is Objective.Hold -> structures.values.any { standing ->
-            standing.holder == house && !standing.ruin && standing.type == objective.structureType &&
+        is Objective.Hold -> heldBy[house].orEmpty().mapNotNull(structures::get).any { standing ->
+            !standing.ruin && standing.type == objective.structureType &&
                 when (objective.where) {
                     Where.Anywhere -> true
                     Where.Island -> islands.onAnIsland(standing.place)
@@ -146,6 +156,7 @@ class QuestObjectives(
     /** Forgets what it knew of, because the world it was in has been emptied. See decision 0036. */
     override fun forget() {
         structures.clear()
+        heldBy.clear()
         quests.clear()
     }
 }

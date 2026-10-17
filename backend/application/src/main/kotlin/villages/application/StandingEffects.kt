@@ -83,6 +83,9 @@ class StandingEffects(
 
     private val structures = ConcurrentHashMap<StructureId, Standing>()
 
+    /** The structures each person is in a slot of, kept as slots fill and empty, so a person's are found without a walk. */
+    private val slottedIn = ConcurrentHashMap<CharacterId, MutableSet<StructureId>>()
+
     /** A vision a house was given from a structure, and how far it sees. */
     private data class Seen(val id: VisionId, val radius: Double)
 
@@ -187,18 +190,26 @@ class StandingEffects(
     /** The structure with its slots as [change] makes them, and its holder set right, in the story of [stored]. */
     private fun slotted(id: StructureId, stored: StoredEvent, change: (Map<String, List<Content>>) -> Map<String, List<Content>>) {
         val was = structures[id] ?: return
-        structures[id] = was.copy(slots = change(was.slots), because = stored)
+        val now = was.copy(slots = change(was.slots), because = stored)
+        structures[id] = now
+        val before = peopleIn(was.slots)
+        val after = peopleIn(now.slots)
+        (before - after).forEach { person -> slottedIn.computeIfPresent(person) { _, ids -> ids.apply { remove(id) }.ifEmpty { null } } }
+        (after - before).forEach { person -> slottedIn.computeIfAbsent(person) { ConcurrentHashMap.newKeySet() }.add(id) }
         was.holder?.let { reconcile(it, id) }
     }
 
     /** Every structure [person] is in a slot of has its holder set right, in the story of what changed them. */
     private fun inSlots(person: CharacterId, stored: StoredEvent) {
-        for ((id, standing) in structures) {
-            if (standing.slots.values.none { held -> held.any { it == Content.Person(person) } }) continue
+        for (id in slottedIn[person].orEmpty().toList()) {
+            val standing = structures[id] ?: continue
             structures[id] = standing.copy(because = stored)
             standing.holder?.let { reconcile(it, id) }
         }
     }
+
+    private fun peopleIn(slots: Map<String, List<Content>>): Set<CharacterId> =
+        slots.values.flatten().mapNotNull { (it as? Content.Person)?.characterId }.toSet()
 
     /** What [standing] yields its holder a month, by its type and level and what fills its slots. */
     private fun yieldsOf(standing: Standing): Map<Resource, Double> = inForce().of(standing.type)?.let { spec ->
@@ -250,6 +261,7 @@ class StandingEffects(
     /** Forgets every structure and every vision it knew of, because the world they were in has been emptied. */
     override fun forget() {
         structures.clear()
+        slottedIn.clear()
         seen.clear()
         seenBy.clear()
         paid.clear()

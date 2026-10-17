@@ -5,6 +5,13 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
 import villages.domain.Banner
+import villages.domain.Stat
+import villages.domain.Species
+import villages.domain.Sex
+import villages.domain.IntroduceCharacter
+import villages.domain.ChangeStat
+import villages.domain.CharacterName
+import villages.domain.CharacterId
 import villages.domain.ChangeLevel
 import villages.domain.Charge
 import villages.domain.Content
@@ -203,6 +210,42 @@ class StandingEffectsSpec : StringSpec({
         rig.paid(ada).last().ratesPerSecond shouldBe mapOf(Resource.WEALTH to 1.0)
         rig.gained(ada).size shouldBe 1
         rig.faults.reported.shouldBeEmpty()
+    }
+
+    "a person in a slot that scales pays by their stat, and a change to it is paid from that day" {
+        val abbey = StructureType("abbey")
+        val abbeys = StructureCatalogue(
+            mapOf(
+                abbey to StructureSpec(
+                    listOf(LevelSpec(Significance(8.0), 6.0, mapOf(Resource.WEALTH to 86_400.0))),
+                    listOf(SlotSpec("abbot", Takes.CHARACTER, listOf(1), SeenBy.ALL, scales = Stat.PIETY)),
+                ),
+            ),
+        )
+        val world = TinyWorld(abbeys)
+        val later = ManualLater()
+        val faults = KeptFaults()
+        found(world, ada)
+        StandingEffects(
+            world, later, faults, WipeGate(), { abbeys },
+            VisionService(world, { noon }, { today }, { UUID.randomUUID() }),
+            IncomeService(world, { noon }, { today }),
+        ).started()
+        val abbot = CharacterId(UUID.fromString("cc000000-0000-4000-8000-000000000001"))
+        val stats = mapOf(Stat.PIETY to 10, Stat.REASON to 10, Stat.KINDNESS to 10, Stat.PHYSICAL to 10)
+        val provenance = { Provenance.startedBy(UUID.randomUUID()) }
+        world.execute(IntroduceCharacter(abbot, CharacterName("Odo", "of Cluny"), Sex.MAN, Species.PERSON, WorldTime(642_700), stats, null, today, noon), provenance())
+        world.execute(RaiseStructure(theMill, abbey, "the abbey at Dantzic", dantzic, 1, HouseId.of(ada), today, noon), provenance())
+        world.execute(FillSlot(theMill, "abbot", Content.Person(abbot), today, noon), provenance())
+        later.tick()
+        fun paid() = world.stored.map { it.event }.filterIsInstance<HouseIncomeChanged>().last { it.houseId == HouseId.of(ada) }
+        paid().ratesPerSecond shouldBe mapOf(Resource.WEALTH to 1.0)
+
+        world.execute(ChangeStat(abbot, Stat.PIETY, 5, today, noon), provenance())
+        later.tick()
+
+        paid().ratesPerSecond shouldBe mapOf(Resource.WEALTH to 1.5)
+        faults.reported.shouldBeEmpty()
     }
 
     "a structure fallen to ruin takes back its holder's vision from it" {

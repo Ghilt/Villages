@@ -1,7 +1,9 @@
 package villages.projections
 
+import villages.protocol.Cell
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentSkipListSet
+import kotlin.math.cos
 
 /**
  * Which rows stand in which cell, kept so that a cell is answered from its own rows and not by walking every row a read
@@ -49,4 +51,43 @@ internal class HolderIndex<Holder : Any, Id : Any> {
     fun of(holder: Holder): Set<Id> = held[holder].orEmpty()
 
     fun clear() = held.clear()
+}
+
+/**
+ * The cells that between them hold every place within [km] of a place: the one it is in and the eight round it, at the
+ * deepest zoom whose cells are twice [km] wide there - twice, because a cell is narrower nearer the pole than at the
+ * place, so that no place that near can lie beyond them. Coarser cells hold more; the world is the cell of zoom zero.
+ */
+internal fun cellsRound(lat: Double, lon: Double, km: Double): List<String> {
+    val across = EARTH_KM * cos(Math.toRadians(lat.coerceIn(-MOST_LATITUDE, MOST_LATITUDE)))
+    val zoom = (Cell.MAX_ZOOM downTo 0).firstOrNull { across / (1 shl it) >= 2 * km } ?: return listOf("")
+    if (zoom == 0) return listOf("")
+    val (x, y) = tileOf(Cell.of(lat, lon, zoom).quadkey)
+    val tiles = 1 shl zoom
+    return (-1..1).flatMap { dy ->
+        (-1..1).mapNotNull { dx ->
+            val ty = y + dy
+            if (ty !in 0 until tiles) null else quadkeyOf(Math.floorMod(x + dx, tiles), ty, zoom)
+        }
+    }.distinct()
+}
+
+private const val EARTH_KM = 40_075.0
+
+// Past it a cell's width shrinks towards nothing; the map's own projection stops at about 85.
+private const val MOST_LATITUDE = 85.0
+
+private fun tileOf(quadkey: String): Pair<Int, Int> {
+    var x = 0
+    var y = 0
+    for (digit in quadkey) {
+        val d = digit - '0'
+        x = (x shl 1) or (d and 1)
+        y = (y shl 1) or (d shr 1)
+    }
+    return x to y
+}
+
+private fun quadkeyOf(x: Int, y: Int, zoom: Int): String = buildString {
+    for (level in zoom - 1 downTo 0) append(((x shr level) and 1) + 2 * ((y shr level) and 1))
 }

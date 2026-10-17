@@ -34,6 +34,7 @@ import villages.domain.StructureEvent
 import villages.domain.WorldStreamEvent
 import villages.protocol.Cell
 import villages.protocol.ON_THE_MAP_FROM
+import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.atomic.AtomicLong
@@ -54,6 +55,9 @@ import java.util.concurrent.atomic.AtomicLong
  */
 class HousesProjection(feed: EventFeed) : Follower(feed), HousesByCell, HousesByPlayer, HouseById, HousesNear {
     private class Indexed(val row: HouseRow, val quadkey: String)
+
+    // Written with the row: the cells round a place hold the houses near it, which are found without a walk of all.
+    private val byCell = CellIndex<HouseId>({ it.value.toString() }, { HouseId(UUID.fromString(it)) })
 
     private val rows = ConcurrentHashMap<HouseId, Indexed>()
 
@@ -135,13 +139,13 @@ class HousesProjection(feed: EventFeed) : Follower(feed), HousesByCell, HousesBy
         }
         // Whether this house was already on the map is the read model's to say. A stream version cannot:
         // a house founded from a choice arrives at version three, behind the choice and the action.
-        val appeared = rows.put(
-            row.id,
-            Indexed(
-                row = row,
-                quadkey = Cell.of(row.seat.lat, row.seat.lon).quadkey,
-            ),
-        ) == null
+        val quadkey = Cell.of(row.seat.lat, row.seat.lon).quadkey
+        val was = rows.put(row.id, Indexed(row = row, quadkey = quadkey))
+        val appeared = was == null
+        if (was?.quadkey != quadkey) {
+            was?.let { byCell.remove(it.quadkey, row.id) }
+            byCell.add(quadkey, row.id)
+        }
         byPlayer[row.player] = row.id
         applied.incrementAndGet()
         val change = HouseChange(row, appeared)
@@ -191,9 +195,14 @@ class HousesProjection(feed: EventFeed) : Follower(feed), HousesByCell, HousesBy
 
     override fun ofHouse(id: HouseId): HouseRow? = rows[id]?.row
 
-    /** Every house standing within the distance on the day, by looking at each: a few thousand at most, for now. */
+    /** Every house standing within the distance on the day: of those in the cells round the place, the ones that near. */
     override fun near(place: Location, km: Double, at: WorldTime): List<HouseRow> =
-        rows.values.map { it.row }.filter { it.existsAt(at) && kmBetween(it.seat, place) <= km }
+        cellsRound(place.lat, place.lon, km).asSequence()
+            .flatMap { byCell.inCell(it) }
+            .distinct()
+            .mapNotNull { rows[it]?.row }
+            .filter { it.existsAt(at) && kmBetween(it.seat, place) <= km }
+            .toList()
 
     override fun watch(listener: (HouseChange) -> Unit): AutoCloseable {
         listeners += listener
@@ -212,6 +221,7 @@ class HousesProjection(feed: EventFeed) : Follower(feed), HousesByCell, HousesBy
      */
     override fun reset() {
         rows.clear()
+        byCell.clear()
         byPlayer.clear()
         applied.incrementAndGet()
     }
