@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
-import { GRASS_LOOK } from '../grass/look';
+import { LAND_LOOK } from '../land/look';
 import { TREES_LOOK, tintOf } from './look';
 
 /** The kinds of scenery the sprite map grows, by name, as `world/biomes.json` lists them. */
@@ -34,6 +34,6 @@ describe('the trees in the wind', () => {
   it('sways on its own in a rhythm that comes round with the hour of the wall clock', () => {
     // Anything that sways back and forth by `windTime` jumps once an hour unless its turns an hour are whole.
     expect(Number.isInteger(TREES_LOOK.idleSpeed * 3600)).toBe(true);
-    expect(Number.isInteger(GRASS_LOOK.blades.swaySpeed * 3600)).toBe(true);
+    expect(Number.isInteger(LAND_LOOK.grass.blades.swaySpeed * 3600)).toBe(true);
   });
 });

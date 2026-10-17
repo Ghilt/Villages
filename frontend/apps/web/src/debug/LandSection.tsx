@@ -1,0 +1,119 @@
+import type { ReactNode } from 'react';
+
+import { shadersStore } from '../shaders/levels';
+import { grassTuningStore, resetGrassTuning, setGrassTuning } from '../sprites/land/grassTuning';
+import type { GrassTuning } from '../sprites/land/grassTuning';
+import type { DrawnMotion } from '../sprites/land/landMask';
+import { landStore, setLandLevel, setLandShown } from '../sprites/land/landMode';
+import { useStore } from '../store/useStore';
+import { LevelSwitch } from './LevelSwitch';
+import { Section } from './Section';
+import { Sliders } from './Sliders';
+import type { SliderDef } from './Sliders';
+
+/**
+ * The land, a part of the Shaders section: its level in the bar, and inside it a fold for each motion of the land,
+ * each with its box, whether it is drawn, and its sliders. What moves on each kind of land is the table in
+ * `sprites/land/look.ts`, and what each grass slider means is in `sprites/land/grassTuning.ts`.
+ */
+
+const share = (value: number) => `${Math.round(value * 100)}%`;
+const units = (value: number) => `${value.toFixed(2)} world units`;
+
+const GRASS_SLIDERS: readonly SliderDef<keyof GrassTuning>[] = [
+  { key: 'size', label: 'How big the patches are', min: 1, max: 30, step: 0.5, say: units },
+  { key: 'ragged', label: 'How ragged their edges are', min: 0, max: 1, step: 0.01, say: share },
+  {
+    key: 'soft',
+    label: 'How softly one kind gives way to the next',
+    min: 0,
+    max: 0.4,
+    step: 0.01,
+    say: (v) => v.toFixed(2),
+  },
+  {
+    key: 'mingle',
+    label: 'How much the kinds mingle outside their patches',
+    min: 0,
+    max: 0.6,
+    step: 0.01,
+    say: share,
+  },
+  { key: 'bare', label: 'How much ground is bare', min: 0, max: 1, step: 0.01, say: share },
+  { key: 'tall', label: 'How much grass stands tall', min: 0, max: 1, step: 0.01, say: share },
+  { key: 'brush', label: 'How much is brush', min: 0, max: 1, step: 0.01, say: share },
+  {
+    key: 'tallHeight',
+    label: 'How tall the tall grass is',
+    min: 1,
+    max: 2.5,
+    step: 0.05,
+    say: (v) => `${v.toFixed(2)} times`,
+  },
+  { key: 'brushSize', label: 'How big a clump of brush is', min: 0.06, max: 0.4, step: 0.01, say: units },
+  { key: 'density', label: 'How thickly the tufts grow', min: 0.1, max: 1, step: 0.01, say: share },
+];
+
+/** What the part is, behind the question mark in its bar. */
+const ABOUT =
+  'The land moving in the wind and the light, one layer for every kind of land, from zoom 8.5 in: so far the grass. Each kind of land has its own motion or stands still on purpose, and the rest come a fold at a time. What a level costs the graphics card is said once in the log, the first time the land is drawn at it.';
+
+const GRASS_ABOUT =
+  'Gusts, tufts, tall grass and brush on steppe, meadow, savanna and alpine meadow, bending in the one wind the trees bend in.';
+
+export function LandSection() {
+  const level = useStore(landStore, (state) => state.level);
+  const on = useStore(shadersStore, (state) => state.on);
+  const tuning = useStore(grassTuningStore);
+  return (
+    <Section
+      name="Land"
+      about={ABOUT}
+      control={<LevelSwitch level={level} onChange={setLandLevel} overruled={!on} what="the land" />}
+    >
+      <LandFold
+        name="Grass"
+        motion="grass"
+        about={GRASS_ABOUT}
+        reset={resetGrassTuning}
+        resetTitle="put every grass slider back where it started"
+      >
+        <Sliders idPrefix="grass" sliders={GRASS_SLIDERS} values={tuning} onChange={setGrassTuning} />
+      </LandFold>
+    </Section>
+  );
+}
+
+interface LandFoldProps {
+  name: string;
+  motion: DrawnMotion;
+  about: string;
+  reset: () => void;
+  resetTitle: string;
+  children: ReactNode;
+}
+
+/** One motion of the land: its box in the bar, whether it is drawn, and inside, its sliders with their reset. */
+function LandFold({ name, motion, about, reset, resetTitle, children }: LandFoldProps) {
+  const shown = useStore(landStore, (state) => state.shown[motion]);
+  const control = (
+    <label className="debug__check" title={`draw the ${name.toLowerCase()}, or leave that land as painted`}>
+      <input
+        type="checkbox"
+        checked={shown}
+        onChange={(event) => setLandShown(motion, event.target.checked)}
+      />
+      on
+    </label>
+  );
+  const tools = (
+    <button type="button" className="debug__button" onClick={reset} title={resetTitle}>
+      reset
+    </button>
+  );
+  return (
+    <Section name={name} about={about} control={control} tools={tools}>
+      {children}
+    </Section>
+  );
+}

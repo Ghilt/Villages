@@ -145,7 +145,7 @@ eye for their experiment; and catalogues, the newest, are built and waiting on A
   (experiment 0021); with the read models indexed, 10,000 on 38% less of the server's CPU (experiment 0022). The
   first milestone of the code-debt review of 2026-10-16, asked for by Adam that day.
 - **A living world**: the land, the trees and the critters moving close in. One land layer for every kind of
-  terrain, which the grass spike becomes, each kind with a motion of its own or standing still on purpose; the
+  terrain, which the grass spike has become, each kind with a motion of its own or standing still on purpose; the
   scenery bending in the world's one wind, the same gusts as the grass and the same in every browser; and
   critters - birds out of the bushes, a squirrel, fish jumping - made up by the browser from where and when, the
   same in every browser, drawn as sprites rather than by a shader over the whole screen, in a Critters part of the
@@ -154,7 +154,8 @@ eye for their experiment; and catalogues, the newest, are built and waiting on A
   clock and birds out of the bushes, are built and verified, and so is step 5, the Critters part of the Shaders
   section. Steps 11 and 12, a squirrel and a hare and fish jumping, are built, verified and on main, and so are
   Adam's notes on them: a button a kind in the Critters part that puts one where you click, and a burst flying off
-  like a shotgun's blast. Step 13, a hawk overhead, is built and waits on his eye. Asked for by Adam on 2026-10-16.
+  like a shotgun's blast, and step 13, a hawk overhead. In the run Adam picked on 2026-10-17, step 6, the land
+  layer the grass becomes, is built. Asked for by Adam on 2026-10-16.
 
 MongoDB and RabbitMQ are on the machine, in Docker, from `infra/docker-compose.yml`. The game server keeps
 its world in MongoDB whenever Docker is running, and RabbitMQ carries every event it stores to the read models.

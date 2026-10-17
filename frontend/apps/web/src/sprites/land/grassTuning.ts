@@ -4,8 +4,8 @@ import type { Readable } from '@villages/client-core';
 import { note } from '../../log/log';
 
 /**
- * WIP SPIKE: how the grass grows in patches, as numbers Adam moves with the sliders in the Grass part of the debug
- * panel's Shaders section. Remembered in this browser, and said once in the log after a slider stops, so the
+ * How the grass grows in patches, as numbers Adam moves with the sliders in the Grass fold of the Land part of the
+ * debug panel's Shaders section. Remembered in this browser, and said once in the log after a slider stops, so the
  * log's copy button carries them to whoever is to write them down. A way of looking, never sent.
  *
  * Two slow patterns over the ground mark out the patches: where the first is high the ground is bare, where the
@@ -88,7 +88,7 @@ export function setGrassTuning(change: Partial<GrassTuning>): void {
     const said = Object.entries(tuning.get())
       .map(([name, value]) => `${name} ${Number(value.toFixed(2))}`)
       .join(', ');
-    note('grass', `grass tuned: ${said}`);
+    note('land', `grass tuned: ${said}`);
   }, 700);
 }
 

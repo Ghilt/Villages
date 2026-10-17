@@ -59,7 +59,7 @@ const CLUSTER = { pad: 24, head: 64 };
  * Where each running piece stands in its group's box, by column and row. In the page, a row of the parts that
  * read baked files, roughly in the order of where what each reads stands above, with the shaders together in the
  * middle of it and the critters beside the sprites whose trees they fly out of, room between them for what passes
- * from one to the other. Under them, in the shaders' box, the trees' wind under the grass whose gusts it shares, the
+ * from one to the other. Under them, in the shaders' box, the trees' wind under the land whose gusts it shares, the
  * clouds, and the fog under the critters it tells where the house sees; and beside the box the connection, which
  * talks down to the gateway and up to the parts drawing what it is told. In the game server and the event store, a column of three and a row of two: the gateway is
  * above what feeds it, Occurrent above what keeps its events, the bridge beside it and above the broker it
@@ -68,7 +68,7 @@ const CLUSTER = { pad: 24, head: 64 };
 const SPOTS: Record<string, { readonly col: number; readonly row: number }> = {
   painter: { col: 0, row: 0 },
   map: { col: 1, row: 0 },
-  grass: { col: 2, row: 0 },
+  land: { col: 2, row: 0 },
   water: { col: 3, row: 0 },
   relief: { col: 4, row: 0 },
   critters: { col: 5, row: 0 },

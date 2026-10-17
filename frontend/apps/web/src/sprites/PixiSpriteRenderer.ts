@@ -8,7 +8,7 @@ import { hangDevHandles } from './devHandles';
 import { createCloudLayer } from './clouds/CloudLayer';
 import { createCritterLayer } from './critters/CritterLayer';
 import { createFogLayer } from './FogLayer';
-import { createGrassLayer } from './grass/GrassLayer';
+import { createLandLayer } from './land/LandLayer';
 import { soonest, type Layer } from './layer';
 import { buildMarkTextures } from './markTextures';
 import { watchStructureArt } from './structureAtlas';
@@ -302,13 +302,13 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       const trees = createTreesLayer(app.renderer, drawSoon);
       scenery = createSceneryLayer(trees.shaders);
       scenery.setGround(groundOf(groundField));
-      // WIP spike: the grass, swaying on the ground under everything that stands on it.
-      const grass = createGrassLayer(app.renderer, () => scene.scenery.tilesRoot, drawSoon);
+      // The land moving in the wind and the light, on the ground under everything that stands on it.
+      const land = createLandLayer(app.renderer, () => scene.scenery.tilesRoot, drawSoon);
       // The world outside vision over the scenery, both losing their colour on ground only revealed; then the
       // fog over them, and everything the fog must not cover above that.
       // The critters' shadows under the scenery, and the critters over it: only where the house sees now.
       const critters = createCritterLayer(drawSoon, () => ({ scenery: scene.scenery, sight: groundField }));
-      world.addChild(grass.sprite, critters.ground, scenery.container, critters.flying, marks.underTheFog);
+      world.addChild(land.sprite, critters.ground, scenery.container, critters.flying, marks.underTheFog);
       stage.addChild(world);
       // The clouds over the fog, and under the ring and every sign. See decision record 0098.
       const clouds = createCloudLayer(app.renderer, drawSoon, () => marks.iconsDrawn());
@@ -333,7 +333,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
         marks,
         ring,
         trees,
-        drawn: [marks, ring, hazeLayer, uncolouringLayer, grass, sceneryLayer, trees, critters, clouds],
+        drawn: [marks, ring, hazeLayer, uncolouringLayer, land, sceneryLayer, trees, critters, clouds],
       };
       // Whatever was handed over before the canvas was ready - the seats a founding choice offers always are,
       // since they arrive with the first frames - is given now, whole.

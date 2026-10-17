@@ -62,11 +62,11 @@ export const READERS: readonly Reader[] = [
     reads: ['flow'],
   },
   {
-    id: 'grass-mask',
+    id: 'land-mask',
     program: 'page',
-    piece: 'grass',
-    name: 'where the grass grows',
-    where: 'sprites/grass/GrassLayer.ts',
+    piece: 'land',
+    name: 'what moves on the land',
+    where: 'sprites/land/LandLayer.ts, landMask.ts',
     reads: ['tiles', 'paint'],
   },
   {

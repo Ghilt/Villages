@@ -21,23 +21,26 @@ import type { ShaderLevel } from '../../shaders/levels';
 import type { Layer } from '../layer';
 import { gustsCarried, windTime } from '../wind';
 
-import { grassStore } from './grassMode';
-import { grassMaskOf, sameRange, tilesUnder } from './grassMask';
 import { grassTuningStore } from './grassTuning';
-import type { TileRange } from './grassMask';
-import { GRASS_FRAGMENT, GRASS_VERTEX } from './grassShader';
-import { GRASS_LOOK } from './look';
+import { DRAWN, channelOf, landMaskOf, sameRange, tilesUnder } from './landMask';
+import type { TileRange } from './landMask';
+import { landStore } from './landMode';
+import { LAND_FRAGMENT, LAND_VERTEX } from './landShader';
+import { LAND_LOOK, motionOf } from './look';
 
 /**
- * WIP SPIKE: the grass, as a layer of the sprite canvas: under the scenery and the marks, and in the container
- * the fog takes the colour out of, so it is hazed and loses its colour exactly as the trees on it do.
+ * The land moving in the wind and the light, one layer for every kind of land, as a layer of the sprite canvas:
+ * under the scenery and the marks, and in the container the fog takes the colour out of, so it is hazed and loses
+ * its colour exactly as the trees on it do. What moves on each kind of land is the table in `look.ts`; the mask says
+ * which world unit has which (`landMask.ts`), and the shader works out only those motions there (`landShader.ts`).
+ * See decision record 0102.
  *
  * It is worked out into a picture of its own at its level's share of the screen's size, then laid over the whole
  * screen: low is a half across and down, a quarter of the pixels, high is all of them. It asks for frames at its
- * level's rate while some of it is on the screen, and for none otherwise, so the sprite canvas redraws for it and
- * the map does not. The first time it is drawn at a level it says once in the log what that costs the graphics
- * card, measured rather than guessed. Its level is in the bar of the Grass part of the debug panel's Shaders
- * section, under the switch over all of them.
+ * level's rate while some land that moves is on the screen, and for none otherwise, so the sprite canvas redraws for
+ * it and the map does not. The first time it is drawn at a level it says once in the log what that costs the
+ * graphics card, measured rather than guessed. Its level is in the bar of the Land part of the debug panel's Shaders
+ * section, under the switch over all of them, and each motion's box in a fold of its own inside it.
  */
 
 /** One triangle that covers the screen, in clip space, so the fragment shader runs once for every pixel. */
@@ -48,8 +51,8 @@ const smoothstep = (from: number, to: number, value: number): number => {
   return t * t * (3 - 2 * t);
 };
 
-export interface GrassLayer extends Layer {
-  /** The grass as it is drawn: a picture the size of the screen, to go under the scenery. */
+export interface LandLayer extends Layer {
+  /** The land as it is drawn: a picture the size of the screen, to go under the scenery. */
   sprite: Sprite;
 }
 
@@ -57,14 +60,11 @@ interface Mask {
   range: TileRange;
   root: string;
   source: BufferImageSource;
-  grassy: number;
+  /** How many world units of the mask have each channel's motion. */
+  counts: readonly number[];
 }
 
-export function createGrassLayer(
-  renderer: Renderer,
-  tilesRoot: () => string,
-  repaint: () => void,
-): GrassLayer {
+export function createLandLayer(renderer: Renderer, tilesRoot: () => string, repaint: () => void): LandLayer {
   const uniforms = new UniformGroup({
     uSize: { value: new Float32Array(2), type: 'vec2<f32>' },
     uCentre: { value: new Float32Array(2), type: 'vec2<f32>' },
@@ -76,6 +76,9 @@ export function createGrassLayer(
     uPixel: { value: 1, type: 'f32' },
     uMaskOrigin: { value: new Float32Array(2), type: 'vec2<f32>' },
     uMaskSize: { value: new Float32Array([1, 1]), type: 'vec2<f32>' },
+    uShown: { value: new Float32Array(4), type: 'vec4<f32>' },
+  });
+  const grassUniforms = new UniformGroup({
     uPatch: { value: 7, type: 'f32' },
     uRagged: { value: 0, type: 'f32' },
     uSoft: { value: 0, type: 'f32' },
@@ -91,17 +94,17 @@ export function createGrassLayer(
     resource: new Uint8Array(4),
     width: 1,
     height: 1,
-    format: 'r8unorm',
+    format: 'rgba8unorm',
   });
   const shader = new Shader({
     glProgram: GlProgram.from({
-      vertex: GRASS_VERTEX,
-      fragment: GRASS_FRAGMENT,
-      name: 'grass',
+      vertex: LAND_VERTEX,
+      fragment: LAND_FRAGMENT,
+      name: 'land',
       // World units run to 32768, which a medium-precision float cannot place to within a unit.
       preferredFragmentPrecision: 'highp',
     }),
-    resources: { grassUniforms: uniforms, uMask: empty },
+    resources: { landUniforms: uniforms, grassUniforms, uMask: empty },
   });
   const mesh = new Mesh({
     geometry: new Geometry({
@@ -116,14 +119,15 @@ export function createGrassLayer(
   const still = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   let mask: Mask | null = null;
   let wanted: { range: TileRange; root: string } | null = null;
-  let grassIds: Set<number> | null = null;
+  // The channel of the mask each class of the palette is drawn in, by its id; null for land the layer leaves alone.
+  let channels: (number | null)[] | null = null;
 
   // What each level costs, measured on the graphics card where it will say, and said once a level.
   const meter = createCostMeter((renderer as WebGLRenderer).gl as WebGL2RenderingContext | undefined);
   const measured = new Set<ShaderLevel>();
   let lastLevel: ShaderLevel | null = null;
 
-  const stopWatching = grassStore.watch(repaint);
+  const stopWatching = landStore.watch(repaint);
   const stopWatchingShaders = shadersStore.watch(repaint);
   // A slider moved shows on the next frame even where nothing else is moving the map.
   const stopWatchingTuning = grassTuningStore.watch(repaint);
@@ -131,11 +135,11 @@ export function createGrassLayer(
   /** Pieces the mask for a range of tiles, and puts it in place unless the view has moved on meanwhile. */
   async function build(range: TileRange, root: string): Promise<void> {
     const palette = await terrainPalette();
-    grassIds ??= new Set(
-      palette.classes
-        .filter((one) => (GRASS_LOOK.classes as readonly string[]).includes(one.name))
-        .map((one) => one.id),
-    );
+    if (channels === null) {
+      const ofIds = new Array<number | null>(256).fill(null);
+      for (const one of palette.classes) ofIds[one.id] = channelOf(motionOf(one.name));
+      channels = ofIds;
+    }
     const asked: Promise<Uint8Array | null>[] = [];
     for (let y = range.fromY; y <= range.toY; y += 1) {
       for (let x = range.fromX; x <= range.toX; x += 1) {
@@ -146,18 +150,20 @@ export function createGrassLayer(
     if (wanted === null || !sameRange(wanted.range, range) || wanted.root !== root) {
       return;
     }
-    const built = grassMaskOf(range, tiles, grassIds);
+    const built = landMaskOf(range, tiles, channels);
     const source = new BufferImageSource({
       resource: built.texels,
       width: built.width,
       height: built.height,
-      format: 'r8unorm',
+      format: 'rgba8unorm',
+      // Four channels of their own, not a colour: multiplied by the fourth on the way up, the other three would be lost.
+      alphaMode: 'no-premultiply-alpha',
       scaleMode: 'linear',
       addressMode: 'clamp-to-edge',
       autoGenerateMipmaps: false,
     });
     const previous = mask?.source ?? null;
-    mask = { range, root, source, grassy: built.grassy };
+    mask = { range, root, source, counts: built.counts };
     shader.resources.uMask = source;
     previous?.destroy();
     uniforms.uniforms.uMaskOrigin[0] = range.fromX * TILE;
@@ -189,24 +195,27 @@ export function createGrassLayer(
     sprite,
 
     draw(view: CameraView): number | null {
-      const level = drawnAt(grassStore.get().level);
+      const { level: own, shown } = landStore.get();
+      const level = drawnAt(own);
       const ms = meter.read();
       if (ms !== null && lastLevel !== null && lastLevel !== 'off') {
         measured.add(lastLevel);
-        const look = GRASS_LOOK.levels[lastLevel];
+        const look = LAND_LOOK.levels[lastLevel];
         const share = ((ms * look.framesPerSecond) / 10).toFixed(1);
         note(
-          'grass',
+          'land',
           `${sayLevel(lastLevel, look)}: ${ms.toFixed(2)} ms of the graphics card a frame, ${share}% of its time`,
         );
       }
-      const fade = smoothstep(GRASS_LOOK.fromZoom - 0.5, GRASS_LOOK.fromZoom + 0.5, view.zoom);
+      const fade = smoothstep(LAND_LOOK.fromZoom - 0.5, LAND_LOOK.fromZoom + 0.5, view.zoom);
       const held = fade > 0 && level !== 'off' ? maskFor(view) : null;
-      if (level === 'off' || held === null || held.grassy === 0) {
+      // Only the motions shown that the land under the view has: with none, nothing is drawn or asked for.
+      const moving = DRAWN.map((motion, channel) => shown[motion] && (held?.counts[channel] ?? 0) > 0);
+      if (level === 'off' || held === null || !moving.includes(true)) {
         sprite.visible = false;
         return null;
       }
-      const levelLook = GRASS_LOOK.levels[level];
+      const levelLook = LAND_LOOK.levels[level];
       if (level !== lastLevel) {
         lastLevel = level;
         if (!measured.has(level)) meter.again();
@@ -229,18 +238,21 @@ export function createGrassLayer(
       u.uCarried = still ? 0 : gustsCarried(wall);
       u.uFade = fade;
       u.uPixel = 1 / (levelLook.resolution * resolution);
-      const tuning = grassTuningStore.get();
-      u.uPatch = tuning.size;
-      u.uRagged = tuning.ragged;
-      u.uSoft = tuning.soft;
-      u.uMingle = tuning.mingle;
-      u.uBare = tuning.bare;
-      u.uTall = tuning.tall;
-      u.uBrush = tuning.brush;
-      u.uTallHeight = tuning.tallHeight;
-      u.uBrushSize = tuning.brushSize;
-      u.uDensity = tuning.density;
+      for (let channel = 0; channel < 4; channel += 1) u.uShown[channel] = moving[channel] === true ? 1 : 0;
       uniforms.update();
+      const tuning = grassTuningStore.get();
+      const g = grassUniforms.uniforms;
+      g.uPatch = tuning.size;
+      g.uRagged = tuning.ragged;
+      g.uSoft = tuning.soft;
+      g.uMingle = tuning.mingle;
+      g.uBare = tuning.bare;
+      g.uTall = tuning.tall;
+      g.uBrush = tuning.brush;
+      g.uTallHeight = tuning.tallHeight;
+      g.uBrushSize = tuning.brushSize;
+      g.uDensity = tuning.density;
+      grassUniforms.update();
 
       const width = Math.max(1, Math.ceil(view.width * levelLook.resolution));
       const height = Math.max(1, Math.ceil(view.height * levelLook.resolution));

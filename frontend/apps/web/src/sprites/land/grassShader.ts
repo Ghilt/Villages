@@ -1,53 +1,25 @@
-import { GUSTS_GLSL } from '../wind';
-import { GRASS_LOOK } from './look';
+import { channelOf } from './landMask';
+import { LAND_LOOK } from './look';
 
 /**
- * WIP SPIKE: the grass, worked out a pixel at a time over the whole screen, as the fog is: one triangle that
- * covers it, and for each pixel the ground under it, found by the sprites' own projection backwards.
+ * The grass, the first of the land's motions: a part of the land shader, `landShader.ts`, which finds the ground under
+ * each pixel and asks `grassHere` for the grass wherever the land there sways as grass does.
  *
  * Two things move. Gusts travel down the wind as soft bands, and where one blows the field shows its paler
  * side: the world's one wind, `../wind.ts`, which the trees bend in too. And close in, a tuft stands up in every
  * small cell of the ground, a stroke from a shaded root to a lit tip, which the gust bends down the wind and which
  * sways a little when there is none. A tuft stands up the screen, as the trees and the castles do, so it is drawn
- * in pixels from its root rather than lying on the ground. Every number is in `look.ts`.
+ * in pixels from its root rather than lying on the ground. Every number is in `look.ts`, under `grass`.
  */
 
 const float = (value: number): string => (Number.isInteger(value) ? value.toFixed(1) : String(value));
 const colour = (rgb: readonly number[]): string => rgb.map(float).join(', ');
 
-const G = GRASS_LOOK.gusts;
-const B = GRASS_LOOK.blades;
-const P = GRASS_LOOK.patches;
+const G = LAND_LOOK.grass.gusts;
+const B = LAND_LOOK.grass.blades;
+const P = LAND_LOOK.grass.patches;
 
-export const GRASS_VERTEX = `#version 300 es
-precision highp float;
-in vec2 aPosition;
-uniform vec2 uSize;
-out vec2 vScreen;
-void main() {
-  vScreen = vec2((aPosition.x + 1.0) * 0.5 * uSize.x, (1.0 - aPosition.y) * 0.5 * uSize.y);
-  // Drawn into a picture of its own, which WebGL keeps bottom row first and Pixi shows the other way up: so it
-  // is drawn upside down, to be shown the right way. Straight onto the screen, as the fog is, it would not be.
-  gl_Position = vec4(aPosition.x, -aPosition.y, 0.0, 1.0);
-}
-`;
-
-export const GRASS_FRAGMENT = `#version 300 es
-precision highp float;
-precision highp int;
-in vec2 vScreen;
-uniform vec2 uSize;
-uniform vec2 uCentre;
-uniform float uScale;
-uniform vec3 uTilt;
-uniform float uTime;
-// How far the wind has carried the gusts, in world units modulo the period they come round at: ../wind.ts.
-uniform float uCarried;
-uniform float uFade;
-uniform float uPixel;
-uniform sampler2D uMask;
-uniform vec2 uMaskOrigin;
-uniform vec2 uMaskSize;
+export const GRASS_GLSL = `
 // How the grass grows in patches, from the sliders: grassTuning.ts says what each is.
 uniform float uPatch;
 uniform float uRagged;
@@ -59,9 +31,8 @@ uniform float uBrush;
 uniform float uTallHeight;
 uniform float uBrushSize;
 uniform float uDensity;
-out vec4 fragColor;
 
-const float TAU = 6.2831853;
+const int GRASS = ${channelOf('grass')};
 const vec3 SHEEN = vec3(${colour(G.colour)});
 const float SHEEN_ALPHA = ${float(G.opacity)};
 const float CELL = ${float(B.cell)};
@@ -81,56 +52,6 @@ const vec3 TALL_TIP = vec3(${colour(P.tallTip)});
 const vec3 BRUSH_DARK = vec3(${colour(P.brushDark)});
 const vec3 BRUSH_LIGHT = vec3(${colour(P.brushLight)});
 const float BRUSH_ALPHA = ${float(P.brushOpacity)};
-${GUSTS_GLSL}
-
-float hash(ivec2 cell, int salt) {
-  uvec3 u = uvec3(ivec3(cell, salt)) * uvec3(1597334673u, 3812015801u, 2798796415u);
-  uint n = (u.x ^ u.y ^ u.z) * 1597334673u;
-  n ^= n >> 16u;
-  n *= 2246822519u;
-  n ^= n >> 13u;
-  return float(n) / 4294967296.0;
-}
-
-float noise(vec2 at) {
-  vec2 whole = floor(at);
-  vec2 part = at - whole;
-  vec2 w = part * part * (3.0 - 2.0 * part);
-  ivec2 c = ivec2(whole);
-  return mix(
-    mix(hash(c, 0), hash(c + ivec2(1, 0), 0), w.x),
-    mix(hash(c + ivec2(0, 1), 0), hash(c + ivec2(1, 1), 0), w.x),
-    w.y
-  );
-}
-
-vec2 groundUnder(vec2 screen) {
-  vec2 onScreen = screen - uSize * 0.5;
-  float along = onScreen.y / max(uTilt.z, 0.0001);
-  vec2 ground = vec2(onScreen.x * uTilt.x - along * uTilt.y, onScreen.x * uTilt.y + along * uTilt.x);
-  return uCentre + ground / uScale;
-}
-
-// Where a piece of ground lands on the screen, in pixels: groundUnder forwards.
-vec2 screenOf(vec2 world) {
-  vec2 ground = (world - uCentre) * uScale;
-  return uSize * 0.5 + vec2(ground.x * uTilt.x + ground.y * uTilt.y, (ground.y * uTilt.x - ground.x * uTilt.y) * uTilt.z);
-}
-
-// How much grass grows here, nought to one, softened over a world unit or so, so the square master pixels
-// of a meadow's edge are not drawn as squares.
-float grassAt(vec2 world) {
-  vec2 at = (world - uMaskOrigin) / uMaskSize;
-  // Off the tiles the mask was pieced from, which is where the view has moved before the next one comes.
-  if (any(lessThan(at, vec2(0.0))) || any(greaterThan(at, vec2(1.0)))) {
-    return 0.0;
-  }
-  vec2 texel = 1.0 / uMaskSize;
-  float sum = texture(uMask, at).r * 2.0;
-  sum += texture(uMask, at + vec2(texel.x, 0.0)).r + texture(uMask, at - vec2(texel.x, 0.0)).r;
-  sum += texture(uMask, at + vec2(0.0, texel.y)).r + texture(uMask, at - vec2(0.0, texel.y)).r;
-  return smoothstep(0.4, 0.95, sum / 6.0);
-}
 
 // The two slow fields over the ground that mark out the patches.
 vec2 fieldsAt(vec2 world) {
@@ -161,28 +82,9 @@ vec3 chancesOf(vec2 fields) {
   return vec3(bare, mix(uMingle, 1.0, tall), mix(uMingle, 1.0, brush));
 }
 
-// Whether a tuft's root is in the grassland: one look at the mask, where grassAt softens the edge with five.
-float maskAt(vec2 world) {
-  vec2 at = (world - uMaskOrigin) / uMaskSize;
-  if (any(lessThan(at, vec2(0.0))) || any(greaterThan(at, vec2(1.0)))) {
-    return 0.0;
-  }
-  return texture(uMask, at).r;
-}
-
-float segment(vec2 p, vec2 a, vec2 b) {
-  vec2 pa = p - a;
-  vec2 ba = b - a;
-  float h = clamp(dot(pa, ba) / max(dot(ba, ba), 1e-6), 0.0, 1.0);
-  return length(pa - ba * h);
-}
-
-void main() {
-  vec2 world = groundUnder(vScreen);
-  float grass = grassAt(world) * uFade;
-  if (grass <= 0.002) {
-    discard;
-  }
+// The grass over the ground under this pixel, premultiplied: the gusts' paler side, and close in the tufts and the
+// brush rooted in the grassland about it.
+vec4 grassHere(vec2 world) {
   // The gusts show least on bare ground and most in tall grass, and the brush hardly bends.
   vec3 kindHere = chancesOf(fieldsAt(world));
   float gust = gustAt(world, uCarried) * (1.0 - 0.85 * kindHere.x) * (1.0 + 0.6 * kindHere.y) * (1.0 - 0.5 * kindHere.z);
@@ -217,7 +119,7 @@ void main() {
       for (int dx = -2; dx <= 2; dx++) {
         ivec2 cell = middle + ivec2(dx, dy);
         vec2 rootWorld = (vec2(cell) + vec2(hash(cell, 1), hash(cell, 2))) * CELL;
-        if (maskAt(rootWorld) < 0.5) {
+        if (rootsAt(rootWorld)[GRASS] < 0.5) {
           continue;
         }
         vec2 off = rootWorld - about;
@@ -265,6 +167,6 @@ void main() {
     rgb = colour * ink + rgb * (1.0 - strokeAlpha);
     alpha = strokeAlpha + alpha * (1.0 - strokeAlpha);
   }
-  fragColor = vec4(rgb, alpha) * grass;
+  return vec4(rgb, alpha);
 }
 `;

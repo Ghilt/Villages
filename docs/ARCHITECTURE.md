@@ -409,11 +409,16 @@ particle containers are drawn with shaders of the trees' own (`sprites/trees/`),
 their shadows, which lean the top of every sprite down the wind by the gust at the ground under its foot - the
 stored foot with the camera's turn and tip taken back out - and keep the foot where it is, so a point's place,
 size and rank are untouched. What a kind does in the wind comes in its particle's tint, which nothing else reads,
-since a picture is never tinted. The gusts are one GLSL function, `sprites/wind.ts`, which the grass takes too:
+since a picture is never tinted. The gusts are one GLSL function, `sprites/wind.ts`, which the land takes too:
 noise laid along the wind and carried by the wall clock modulo the world's width, as the clouds are, so every
 browser bends the same tree with the same gust. `TreesLayer.ts` is a layer of the stack after the scenery: it
 hands the shaders the camera, the gusts and the sliders each frame, asks for frames at its level's rate while
 there is scenery on the screen, and times a frame of the whole canvas, which is what its frames cost.
+**The land moves in one layer** (0102), `sprites/land/LandLayer.ts`, under the scenery in the container the fog
+uncolours: a fragment shader over the whole screen that finds the ground under each pixel by the sprites' own
+projection backwards, reads what moves there from a mask of the flat tiles under the view, a channel a land motion
+(`landMask.ts`, from the table in `look.ts`), and works out only those motions there, each a part of the shader of its
+own (`grassShader.ts`, so far), laid over one another where two meet.
 **The critters are made up by the page** (0099): `sprites/critters/critterClock.ts` is a pure function of the
 place and the wall clock - a hash of a cell and a slot says whether a critter comes, out of which tree or bush of
 the scenery's own cells (`currentPointsOf`), which of the cast of the class under it (`casts.ts`), and how each bird
@@ -435,7 +440,7 @@ writes beside the cut tiles, worked out offline from the master because it is a 
 own coordinates. It has a clock of its own, while some of it is on the screen and none otherwise, and it asks
 the map, not the sprite canvas, for frames. Each such shader is drawn at a level, `shaders/levels.ts`, off, low or
 high: at low the water is drawn into a picture of its own at half the map's width and height and laid over the
-map (`water/picture.ts`), at half the frame rate, and the grass, in the sprite canvas, the same way.
+map (`water/picture.ts`), at half the frame rate, and the land, in the sprite canvas, the same way.
 **The relief is in the map too**, a custom layer of its own (`map/reliefLayer.ts`) between the painted terrain
 and the water, beside MapLibre's own hillshade, which is kept to compare (0090). It reads the height tiles
 `world:height` cuts from ETOPO 2022, read through the master's origin map, into a texture a tile with a margin of its neighbours' (`map/reliefTiles.ts`):

@@ -101,6 +101,8 @@ Thirty-two kinds in `world/palette.json`. The water's four are the water shader'
 
 ## The land layer
 
+Built in step 6, and decided in decision record 0102; the motions after the grass are still to come.
+
 The grass spike becomes the land layer, `sprites/land/`, where it stands now: under the scenery, in the container the
 fog takes the colour out of. It pieces the same flat tiles under the view the grass's mask is pieced from, but keeps
 what each world unit is rather than whether it is grass: for each unit, how strongly each motion is there and in what

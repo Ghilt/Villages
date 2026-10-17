@@ -62,13 +62,13 @@ describe('the running game, as the architecture page draws it', () => {
   it('draws a box for the page with a card for each of its shaders', () => {
     const page = PIECES.filter((p) => p.group === 'page').map((p) => p.id);
     expect(page).toEqual(
-      expect.arrayContaining(['relief', 'water', 'grass', 'trees', 'critters', 'fog', 'clouds', 'pictures']),
+      expect.arrayContaining(['relief', 'water', 'land', 'trees', 'critters', 'fog', 'clouds', 'pictures']),
     );
   });
 
   it("gathers the shaders in a box of their own inside the page's, and nothing else in it", () => {
     const shaders = PIECES.filter((p) => p.cluster === 'shaders').map((p) => p.id);
-    expect(shaders.sort()).toEqual(['clouds', 'critters', 'fog', 'grass', 'relief', 'trees', 'water']);
+    expect(shaders.sort()).toEqual(['clouds', 'critters', 'fog', 'land', 'relief', 'trees', 'water']);
     for (const c of CLUSTERS)
       expect(PIECES.filter((p) => p.cluster === c.id && p.group !== c.group).map((p) => p.id)).toEqual([]);
     const { cards, arrows } = runningGraph();

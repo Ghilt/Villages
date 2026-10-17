@@ -84,7 +84,7 @@ export const CLUSTERS: readonly Cluster[] = [
     group: 'page',
     name: 'The shaders',
     where: 'WebGL · on the graphics card',
-    what: "What moves on the map and shades it, worked out on the graphics card by shaders of the page's own. The water, the relief, the grass, the trees, the critters and the clouds each have a part of the debug panel's Shaders section, and the fog its FoW box in the Debug map section's bar. The grass and the trees bend in the one wind, and the wind, the clouds and the critters keep the wall clock, so every player sees the same world moving.",
+    what: "What moves on the map and shades it, worked out on the graphics card by shaders of the page's own. The water, the relief, the land, the trees, the critters and the clouds each have a part of the debug panel's Shaders section, and the fog its FoW box in the Debug map section's bar. The grass and the trees bend in the one wind, and the wind, the clouds and the critters keep the wall clock, so every player sees the same world moving.",
   },
 ];
 
@@ -132,13 +132,13 @@ export const PIECES: readonly Piece[] = [
     what: "The sea, the lakes and the rivers, moving, worked out on the graphics card a pixel at a time. Where the water is, how far from the shore and how deep come from the flat tiles, and which way each river runs from the flow. The realistic look or the wavelets, and Flow's colours and arrows in the water's place.",
   },
   {
-    id: 'grass',
-    name: 'The grass shader',
-    where: 'sprites/grass/GrassLayer.ts · WebGL',
+    id: 'land',
+    name: 'The land shader',
+    where: 'sprites/land/LandLayer.ts · WebGL',
     runs: 'browser',
     group: 'page',
     cluster: 'shaders',
-    what: "Grass stirring on grassland in the wind's gusts, worked out on the graphics card from the flat tiles. Still a spike: it is drawn on the sprites' canvas under the scenery, so the fog greys it as it greys the trees. Its gusts are the ones the trees bend in (sprites/wind.ts).",
+    what: "The land moving in the wind and the light, worked out on the graphics card from the flat tiles. One layer for every kind of land: a table says what moves on each, and each pixel works out only the motions of the land under it - so far the grass, swaying on grassland. It is drawn on the sprites' canvas under the scenery, so the fog greys it as it greys the trees, and its gusts are the ones the trees bend in (sprites/wind.ts; decision record 0102).",
   },
   {
     id: 'trees',
@@ -182,7 +182,7 @@ export const PIECES: readonly Piece[] = [
     where: 'sprites/PixiSpriteRenderer.ts · Pixi',
     runs: 'browser',
     group: 'page',
-    what: "Pixi's canvas over the map: the scenery and the structures, each drawn from its atlas. The scenery is placed by the sprite map on the ground in the flat tiles, and bent by the trees' wind as it is drawn; each structure is drawn in the culture of the ground under it; the marks and the rings say what is there. The grass, the critters and the clouds are drawn on the same canvas.",
+    what: "Pixi's canvas over the map: the scenery and the structures, each drawn from its atlas. The scenery is placed by the sprite map on the ground in the flat tiles, and bent by the trees' wind as it is drawn; each structure is drawn in the culture of the ground under it; the marks and the rings say what is there. The land, the critters and the clouds are drawn on the same canvas.",
   },
   {
     id: 'panes',
