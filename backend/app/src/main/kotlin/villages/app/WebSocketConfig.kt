@@ -89,8 +89,9 @@ class GatewaySocket(private val gateway: Gateway) : TextWebSocketHandler() {
  */
 internal fun WebSocketSession.sendUnlessGoing(frame: ServerFrame) {
     val message = TextMessage(ProtocolJson.encode(frame))
-    // A lock a virtual thread parks on, where `synchronized` would pin the thread it runs on to it for the length of a
-    // slow send (JDK 21); a session made without one, a test's, is locked on itself as before.
+    // A lock a virtual thread would park on, where `synchronized` pins the thread it runs on for the length of a slow
+    // send (JDK 21): ready for sends on virtual threads (experiment 0023). A session made without one, a test's, is
+    // locked on itself as before.
     val lock = attributes[SENDING] as? Lock
     if (lock == null) synchronized(this) { send(message) } else lock.withLock { send(message) }
 }
