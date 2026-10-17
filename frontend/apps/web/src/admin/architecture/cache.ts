@@ -23,6 +23,7 @@ export const WORLD_CACHE = {
     'world:origin',
     'world:names',
     'world:culture',
+    'world:ruins',
     'world:height',
   ],
   files: [
@@ -38,6 +39,8 @@ export const WORLD_CACHE = {
     'names',
     'names-server',
     'culture',
+    'ruins-map',
+    'ruins-stands',
     'height',
   ],
 } as const;

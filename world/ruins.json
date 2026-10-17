@@ -1,8 +1,8 @@
 {
-  "$comment": "Every town of 1790 is a ruin at the world's start, and the bigger it was the more ground its ruins cover. A town is its Wikidata id, as world/names/1790.json keys it, with about how many people lived in it then - from the estimates for about 1800 - and its name of 1790 to read it by. A town of 1790 not listed here had `unlisted` people. `tiers` names how big a town was by the fewest people it takes; `size` turns people into the radius its ruins are built over, in world units: `perRootThousand` times the square root of its people in thousands, never less than `least` or more than `most`, and `ring` more of overgrowth beyond that, which with `most` stays inside the 63.75 units a stand record holds. Read by `npm run world:ruins --prefix frontend`. See docs/plans/ruined-cities.md.",
+  "$comment": "Every town of 1790 is a ruin at the world's start, and the bigger it was the more ground its ruins cover. A town is its Wikidata id, as world/names/1790.json keys it, with about how many people lived in it then - from the estimates for about 1800 - and its name of 1790 to read it by. A town of 1790 not listed here had `unlisted` people. `tiers` names how big a town was by the fewest people it takes; `size` turns people into the radius its ruins are built over, in world units: `perRootThousand` times the square root of its people in thousands, never less than `least` or more than `most`, and `ring` more of overgrowth beyond that, which with `most` stays inside the 63.75 units a stand record holds; `fullness` is how built-up the core of the least town's ruins is and of the greatest's, the share of its lots that hold a piece. Read by `npm run world:ruins --prefix frontend`. See docs/plans/ruined-cities.md.",
 
   "tiers": {"great": 250000, "large": 80000, "city": 30000, "town": 10000, "small": 0},
-  "size": {"perRootThousand": 1.25, "least": 3, "most": 42, "ring": 0.3, "unlisted": 3000},
+  "size": {"perRootThousand": 1.25, "least": 3, "most": 42, "ring": 0.3, "unlisted": 3000, "fullness": [0.35, 0.6]},
 
   "towns": {
     "Q956": [1100000,"Pekin","the largest city in the world"],

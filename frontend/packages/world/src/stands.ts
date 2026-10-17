@@ -47,16 +47,12 @@ const SEED = {
 const PLACE_STEP = 8;
 /** Quarters of a world unit, so a reach fits one byte up to sixty-four. */
 const REACH_STEP = 4;
-/** The longest reach a stand record holds: a byte of quarters. */
-export const MOST_REACH = 255 / REACH_STEP;
 /**
  * Thickness is points to the square world unit in one byte. Four hundred steps to the unit puts the
  * whole usable range - nothing up to about 0.64 - inside a byte at a resolution far finer than an eye
  * could read, and experiment 0006's ceiling of 0.44 sits comfortably inside it.
  */
 const THICKNESS_STEP = 400;
-/** The thickest a stand record holds: a byte of four-hundredths. */
-export const MOST_THICKNESS = 255 / THICKNESS_STEP;
 
 export interface Stand {
   /** World units, absolute. */

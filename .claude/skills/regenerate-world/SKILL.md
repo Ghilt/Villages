@@ -1,6 +1,6 @@
 ---
 name: regenerate-world
-description: Rebuild everything a change made stale in the world - tiles, rivers' flow, sprite map, ground, origin map and names, culture map, height, scenery stills, painted views - then say what moved with a number and a picture. Use whenever a step changes the master, world/palette.json, world/render.json, world/painterly.json, world/biomes.json, world/names/, world/cultures.json, or any tool or code the tiles, the paint or the maps go through; also when a worktree has no world cut yet. Never offered as an option: it is part of the step.
+description: Rebuild everything a change made stale in the world - tiles, rivers' flow, sprite map, ground, origin map and names, culture map, height, scenery stills, painted views - then say what moved with a number and a picture. Use whenever a step changes the master, world/palette.json, world/render.json, world/painterly.json, world/biomes.json, world/names/, world/cultures.json, world/ruins.json, or any tool or code the tiles, the paint or the maps go through; also when a worktree has no world cut yet. Never offered as an option: it is part of the step.
 ---
 
 # Regenerate the world
@@ -59,6 +59,8 @@ when it was made; `-- --only <step> --force` makes it again to read all of it:
 
 - `world:origin`: how much of the land is from Earth, invented and copied, and how many names went nowhere.
 - `world:culture`: what share of the land is of each culture. The Culture renderer is its picture.
+- `world:ruins`: how many towns of 1790 are in ruins in each tier and each culture, and how many stand in a square of
+  sea. `-- --picture` draws every town's ruins as rings around a few great cities into `world/painterly/ruins/`.
 - `world:sprites`: the density of every biome against experiment 0006's ceiling. Without a sprite map a
   master draws no scenery at all.
 - `world:scenery`: the counts beside every picture. Say which places moved and by how much.

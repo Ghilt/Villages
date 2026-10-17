@@ -93,7 +93,9 @@ export function isStale(master: MasterOnDisk): boolean {
  * a master. Separate from `isStale` because the two go stale together and are mended apart.
  */
 export function isUnfurnished(master: MasterOnDisk): boolean {
-  return master.steps.some((step) => step.name === 'sprites' && step.standing !== 'current');
+  return master.steps.some(
+    (step) => (step.name === 'sprites' || step.name === 'ruins') && step.standing !== 'current',
+  );
 }
 
 /**

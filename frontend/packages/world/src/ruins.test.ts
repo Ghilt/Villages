@@ -3,8 +3,20 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 import type { AddedTown, Reviewed } from './review1790.ts';
-import { TIERS, builtOf, parseRuins, peopleOf, reachOf, ruinsProblems, tierOf } from './ruins.ts';
-import { MOST_REACH } from './stands.ts';
+import {
+  MOST_REACH,
+  MOST_THICKNESS,
+  TIERS,
+  builtOf,
+  fullnessOf,
+  parseRuins,
+  peopleOf,
+  reachOf,
+  ruinStand,
+  ruinsProblems,
+  tierOf,
+} from './ruins.ts';
+import { decodeStands, encodeStands } from './stands.ts';
 
 const RUINS = readFileSync(new URL('../../../../world/ruins.json', import.meta.url), 'utf8');
 const REVIEW = JSON.parse(
@@ -17,7 +29,7 @@ const REVIEW = JSON.parse(
 const sample = (over: Record<string, unknown> = {}) =>
   JSON.stringify({
     tiers: { great: 250000, large: 80000, city: 30000, town: 10000, small: 0 },
-    size: { perRootThousand: 1.25, least: 3, most: 42, ring: 0.3, unlisted: 3000 },
+    size: { perRootThousand: 1.25, least: 3, most: 42, ring: 0.3, unlisted: 3000, fullness: [0.35, 0.6] },
     towns: { Q90: [550000, 'Paris'], Q1792: [40000, 'Dantzic', 'a free city'] },
     ...over,
   });
@@ -63,12 +75,60 @@ describe('how big every town of 1790 was', () => {
       parseRuins(sample({ tiers: { great: 10, large: 80000, city: 30000, town: 10000, small: 0 } })),
     ).toThrow('the tier large must take fewer people than great');
     expect(() =>
-      parseRuins(sample({ size: { perRootThousand: 1, least: 3, most: 60, ring: 0.3, unlisted: 3000 } })),
+      parseRuins(
+        sample({
+          size: { perRootThousand: 1, least: 3, most: 60, ring: 0.3, unlisted: 3000, fullness: [0.35, 0.6] },
+        }),
+      ),
     ).toThrow('past the 63.75 units a stand holds');
     expect(() => parseRuins(sample({ towns: { Paris: [550000, 'Paris'] } }))).toThrow(
       'Paris is not a Wikidata id',
     );
     expect(() => parseRuins(sample({ towns: { Q90: [550000.5, 'Paris'] } }))).toThrow('Q90 is not');
+  });
+
+  it('builds a greater town thicker, from the least fullness to the most, and refuses one a stand cannot hold', () => {
+    const ruins = parseRuins(sample());
+    expect(fullnessOf(ruins, 1000)).toBeCloseTo(0.35);
+    expect(fullnessOf(ruins, 5000000)).toBeCloseTo(0.6);
+    expect(fullnessOf(ruins, 100000)).toBeGreaterThan(fullnessOf(ruins, 10000));
+    expect(() =>
+      parseRuins(
+        sample({
+          size: { perRootThousand: 1, least: 3, most: 40, ring: 0.3, unlisted: 3000, fullness: [0.35, 0.7] },
+        }),
+      ),
+    ).toThrow('a fullness up to 0.6375');
+  });
+
+  it('makes a town a stand of its reach, culture, fullness and a seed of its id, which survives the wire', () => {
+    const ruins = parseRuins(sample());
+    const stand = ruinStand(ruins, { id: 'Q90', x: 16540.25, y: 11002.5 }, 0);
+    expect(stand).toEqual({
+      x: 16540.25,
+      y: 11002.5,
+      reach: reachOf(ruins, 550000),
+      dominant: 0,
+      thickness: fullnessOf(ruins, 550000),
+      seed: 90,
+    });
+    const tileX = Math.floor(stand.x / 256);
+    const tileY = Math.floor(stand.y / 256);
+    const back = decodeStands(encodeStands([stand], tileX, tileY, 256), tileX, tileY, 256);
+    expect(back.x[0]).toBeCloseTo(stand.x, 2);
+    expect(back.reach[0]).toBeCloseTo(stand.reach, 0);
+    expect(back.dominant[0]).toBe(0);
+    expect(back.seed[0]).toBe(90);
+  });
+
+  it('holds the longest reach and the thickest core to what a stand record carries, and no further', () => {
+    const at = (reach: number, thickness: number) => {
+      const stand = { x: 100, y: 100, reach, dominant: 0, thickness, seed: 0 };
+      const back = decodeStands(encodeStands([stand], 0, 0, 256), 0, 0, 256);
+      return [back.reach[0], back.thickness[0]];
+    };
+    expect(at(MOST_REACH, MOST_THICKNESS)).toEqual([MOST_REACH, Math.fround(MOST_THICKNESS)]);
+    expect(at(MOST_REACH + 1, MOST_THICKNESS + 0.1)).toEqual([MOST_REACH, Math.fround(MOST_THICKNESS)]);
   });
 
   it('says where a town is not a town of 1790, or not by the name the review gives it then', () => {

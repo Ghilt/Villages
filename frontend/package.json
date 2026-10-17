@@ -29,6 +29,7 @@
     "world:origin": "npm run origin --workspace @villages/world --",
     "world:names": "npm run names --workspace @villages/world --",
     "world:culture": "npm run culture --workspace @villages/world --",
+    "world:ruins": "npm run ruins --workspace @villages/world --",
     "world:structures": "npm run structures --workspace @villages/world --",
     "world:height": "npm run height --workspace @villages/world --",
     "world:scenery": "npm run scenery --workspace @villages/world --",

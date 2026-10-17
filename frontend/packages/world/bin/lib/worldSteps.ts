@@ -11,7 +11,17 @@ import { ETOPO_WORLD } from './worldSources.ts';
  */
 
 export type StepName =
-  'import' | 'tile' | 'styles' | 'flow' | 'sprites' | 'ground' | 'origin' | 'names' | 'culture' | 'height';
+  | 'import'
+  | 'tile'
+  | 'styles'
+  | 'flow'
+  | 'sprites'
+  | 'ground'
+  | 'origin'
+  | 'names'
+  | 'culture'
+  | 'ruins'
+  | 'height';
 
 /** A file a step is made from. */
 export interface MadeFrom {
@@ -211,6 +221,26 @@ export const WORLD_STEPS: readonly WorldStep[] = [
     makes: [{ path: `${M}/culture`, is: 'culture', folder: true }],
     doing: 'working out the culture of every part of the world',
     done: 'the cultures are worked out',
+  },
+  {
+    name: 'ruins',
+    tool: `${BIN}/ruinsWorld.ts`,
+    options: [],
+    memory: 2048,
+    heavy: false,
+    perMaster: true,
+    from: [
+      { path: 'world/ruins.json', is: 'ruins' },
+      { path: 'world/cultures.json', is: 'cultures' },
+      PALETTE,
+    ],
+    after: ['names', 'culture'],
+    makes: [
+      { path: `${M}/sprites/ruins`, is: 'ruins-map', folder: true },
+      { path: 'world/stands/<m>/ruins', is: 'ruins-stands', folder: true },
+    ],
+    doing: 'laying the towns of 1790 in ruins',
+    done: 'the towns are ruins',
   },
   {
     name: 'height',

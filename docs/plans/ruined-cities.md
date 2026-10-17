@@ -51,9 +51,11 @@ files, and comes through the stands channel. So it does:
 - **A town is one stand record** of the `ruins` layer: its middle, its reach, how built-up its core is in the
   thickness byte, a seed - and **its culture in the favourite byte**, worked out by the bake from the culture map at its
   place, so the page needs no culture map and a still matches the game.
-- **The bake**, `world:ruins` (`bin/ruinsWorld.ts`), takes each town from the master's `names.json`, moves a middle that
-  lies in water onto land within half its built radius or drops the town and says so, and writes the records into
-  `world/stands/<master>/ruins/` and what the page needs into `public/world/masters/<master>/sprites/ruins/map.json`.
+- **The bake**, `world:ruins` (`bin/ruinsWorld.ts`), takes each town from the master's `names.json` and writes the
+  records into `world/stands/<master>/ruins/` and what the page needs into
+  `public/world/masters/<master>/sprites/ruins/map.json`. A town whose middle stands in water keeps it: the page lays
+  pieces only on land, so a port's ruins stop at its shore, and a town on a square of sea in the culture map takes the
+  culture of the place on Earth it came from.
   A step of the world cache of its own (decision record 0095), after the tiles, the names and the culture, and about a
   second long.
 - **The wire**: the stands frame says which layer it carries, so the protocol's version goes up at both ends. The
@@ -141,7 +143,7 @@ Proposed, for Adam to rename before they are written into the glossary and the c
 |---|---|---|
 | 0 | **This plan.** SETTING and STORY say every town of 1790 fell, the greatest worst; the ROADMAP's entry; the names above in the glossary. | Read the plan, and the changed boxes at `/admin/inspect-story`. |
 | 1 | **A size for every town.** `world/ruins.json`; `src/ruins.ts` and its tests: every id a town of 1790, the largest reach within its byte. AUTHORING-THE-WORLD. | A table of the tiers and their towns, each with its radius in units and in kilometres: is any town in the wrong tier? |
-| 2 | **The bake.** `world:ruins`, the `ruins` world step, the architecture page, the regenerate-world skill, RUNNING; decision record 0101. | 👀 `world/painterly/ruins-overview.png`, a ring for every town over the culture map. The bake's report: placed, moved onto land, dropped. |
+| 2 | **The bake.** `world:ruins`, the `ruins` world step, the architecture page, the regenerate-world skill, RUNNING; decision record 0101. | 👀 `world/painterly/ruins/`, a ring for every town over the culture map around five great cities. The bake's report: how many towns in each tier and culture. |
 | 3 | **The layout, in stills.** `ruinLayout.ts` and its tests; `world:scenery` stamps a town; decision record 0102. | 👀 Stills of Paris, Constantinople, Pekin, Grand Cairo, Mexico and a small town: does each read as a ruined city, in its culture's streets? |
 | 4 | **Trees in the ruins.** The scatter's hook and `furnishCell`; the stills on it. | 👀 The same stills: an open core, an overgrown edge, no tree through a ruin. |
 | 5 | **The pieces' pictures.** `ruinLooks.ts`; `cutArt` takes `world/sprites/ruins/`; a Ruins table on the Pictures page; AUTHORING-THE-ART says the size to paint each at. | 👀 `/admin/inspect-pictures`, Ruins: thirty-two pieces, four cultures, all placeholders. Is the list of pieces right before you paint? |

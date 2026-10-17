@@ -80,6 +80,17 @@ export const TOOLS: readonly Tool[] = [
     what: 'Works out the building tradition each part of the world is drawn in.',
   },
   {
+    script: 'world:ruins',
+    entry: 'ruinsWorld.ts',
+    group: 'master',
+    reads: ['ruins', 'names', 'culture', 'cultures', 'palette'],
+    writes: ['ruins-map', 'ruins-stands', 'ruins-pictures'],
+    seconds: 1,
+    perMaster: true,
+    ranBy: 'world:ready, when nobody has made its step',
+    what: 'Lays every town of 1790 in ruins, a stand of the ruins layer each, as big as the town was.',
+  },
+  {
     script: 'world:names',
     entry: 'namesWorld.ts',
     group: 'master',

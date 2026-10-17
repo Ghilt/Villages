@@ -655,6 +655,16 @@ and `-- --drop` takes them off; by hand only.
   makes it again whenever the origin map or `world/cultures.json` changed. Under the Culture renderer a
   click says in the log, under `culture`, what culture the place is built in. A structure is drawn in the culture
   under it, read from the map when it is drawn, so a repainted master redraws its structures.
+- The towns of 1790 in ruins: `npm run world:ruins --prefix frontend` lays every town a master's names carried in
+  ruins, as big as `world/ruins.json` says it was, a stand of the `ruins` layer each - its middle, how far its ruins
+  reach, the culture they are built in from the culture map, how built-up its core is - into
+  `world/stands/<master>/ruins/` for the game server and the stills, and how to read them into the master's
+  `sprites/ruins/map.json`, which names no town. It prints how many towns are ruins in each tier and each culture, and
+  how many stand in a square of sea, whose culture comes from where they came from on Earth. A second a master;
+  `world:ready` makes it again whenever the names, the culture map or `world/ruins.json` changed. `-- --picture`
+  draws every town's ruins as rings over the culture map around Paris, Pekin, Grand Cairo, Mexico and London into
+  `world/painterly/ruins/`, the built radius solid and the overgrown reach faint; `--around Q84,Q90` picks the towns.
+  Nothing draws the ruins yet: see `docs/plans/ruined-cities.md`.
 - How high the ground is, for the relief: `npm run world:height --prefix frontend` reads ETOPO 2022's whole world,
   a height every 60 arc-seconds, through the master's origin map, so every point of the master has the height of
   where on Earth it was cut from, and invented land is given ground of the kind the master paints on it, and
