@@ -42,6 +42,8 @@ export interface Animal {
   seconds: number;
   /** From one side to the other, minus one to one. */
   bow: number;
+  /** Where in its cover a bird of a burst starts, off the cover's own point and up or down in its crown. */
+  nudge?: { x: number; y: number; height: number };
 }
 
 export interface CritterEvent {

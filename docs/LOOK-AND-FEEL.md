@@ -169,9 +169,11 @@ every browser. A player who asked for less motion sees it all standing still. Ev
 `apps/web/src/sprites/trees/look.ts`; see the amendment to decision record 0052.
 
 **Critters live where the house sees.** From zoom 9 in, every so often a few small birds burst out of a tree or a
-bush the scenery drew - in the woods, the scrub and the heath, and out of a lone bush or tree in the open - fan
-out, climb, flap and glide away, and then hook down - a sharp turn, fading from it, and a drop of a little over a
-bird length straight down the screen, settling; a few of them drop into a tree near by instead; or a bird
+bush the scenery drew - in the woods, the scrub and the heath, and out of a lone bush or tree in the open - each
+from a little apart in it, all off in one direction like a shotgun's blast, curving the same way together as a flock
+in flight turns; they climb, flap and glide away, and then hook down - a sharp turn and a drop of a little over half
+a bird length straight down the screen, settling, and then a quick fade; a
+few of them drop into a tree near by instead; or a bird
 or two flits from one tree into another near it, as if seeking shelter, and goes into its leaves. In the woods a
 squirrel bounds now and then from one tree to another near it, stopping once on the way, and is gone behind it; on
 grassland a hare comes out from behind a bush or a tuft of grass, a few bounds and a stop, and is gone behind

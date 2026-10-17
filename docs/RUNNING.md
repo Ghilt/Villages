@@ -110,8 +110,10 @@ stage alone, with none of the debug panel in it (decision record 0079).
   become the default; `reset` puts them back. See the amendment to `docs/adr/0052`.
 - Critters, from zoom 9 in, only where your house sees now, or everywhere with the fog lifted: every so often a few
   small birds burst out of a tree or a bush the scenery drew - in the woods, the scrub and the heath, and out of a
-  lone bush or tree in the open - fan out, climb, flap and glide away, and then hook down, a sharp
-  turn, fading from it, and a drop of a little over a bird length down the screen, settling, a few dropping into a tree near by instead; or a bird or two flits from one tree into another near it, as if seeking shelter, and fades into
+  lone bush or tree in the open - each from a little apart in it, all off in one direction like a shotgun's blast,
+  curving the same way together; they climb, flap and glide away, and then hook down, a sharp turn and a drop of a
+  little over half a bird length down the screen,
+  settling, and then fade quickly, a few dropping into a tree near by instead; or a bird or two flits from one tree into another near it, as if seeking shelter, and fades into
   its leaves. In the woods a squirrel bounds now and then from one tree to another near it, stopping once on the
   way, and is gone behind it; on grassland a hare comes out from behind a bush or a tuft of grass, a few bounds and
   a stop, and is gone behind another, each facing the way it goes; over a lake, a river or the shallow sea a fish

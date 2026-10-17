@@ -138,8 +138,10 @@ the same sky. What a slot brings is worked out once when the slot comes round, n
 
 **How they move.** Four ways, which between them carry every cast:
 
-- **Flush**: a few birds burst out of cover together, fan out, climb, and flap and glide away, hooking down at the
-  end, a sharp turn, fading from it, and a drop of a little over a bird length, settling, some of them dropping into a tree near by instead; or a bird or two flit from one tree into another near it,
+- **Flush**: a few birds burst out of cover together, each from a little apart in it, all off in one direction
+  like a shotgun's blast, curving the same way together as a flock in flight turns (Adam's of 2026-10-17), climb,
+  and flap and glide away, hooking down at the end, a sharp turn and a drop of a little over half a bird length,
+  settling, and then a quick fade (Adam's of 2026-10-17), some of them dropping into a tree near by instead; or a bird or two flit from one tree into another near it,
   seeking shelter, Adam's addition of 2026-10-16.
 - **Hop**: a small animal bounds a few times from one piece of cover to another, stopping once on the way, and is
   gone behind it.

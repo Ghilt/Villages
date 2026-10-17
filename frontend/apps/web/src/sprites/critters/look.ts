@@ -56,21 +56,38 @@ export const CRITTERS_LOOK = {
     reach: 9,
     /** How high above its cover it climbs on the way. */
     climb: 2.5,
-    /** How wide the flock fans out, in degrees, and how long after the first the last one leaves. */
-    spread: 70,
+    /**
+     * How far a bird flying off turns as it goes, at the most, in radians over its flight to the hook: the birds of a
+     * burst all curve the same way, by much the same, so the flock turns together as birds in flight do, each on an
+     * arc rather than a straight line. Adam's of 2026-10-17.
+     */
+    arc: 0.9,
+    /**
+     * How wide the flock fans out, in degrees, and how long after the first the last one leaves: narrow, a shotgun's
+     * blast in one direction rather than a burst every way, Adam's of 2026-10-17.
+     */
+    spread: 16,
     stagger: 0.35,
+    /**
+     * How far apart in its cover the birds of a burst start, at the most, in world units, to each side and up or down
+     * in the crown: a little, so they leave as a few birds and not as one.
+     */
+    scatter: 0.3,
     /** How fast a wing beats, and the share of the flight it flaps before it glides, flapping again now and then. */
     flapsPerSecond: 9,
     flapping: 0.55,
     /**
      * Where a bird flying off hooks down, as a share of its flight: from here it turns sharply and drops straight down
-     * the screen, settling, fading from the moment it turns until it is gone. How far it carries on along its heading
-     * into the turn, and how far it drops after it, in lengths of its own picture: Adam's word of 2026-10-16, a turn
-     * and then a little over a bird length.
+     * the screen, settling, whole, and once settled it fades, quickly, over the last `fadeOut` of its flight. How far it
+     * carries on along its way into the turn, and how far it drops after it, in lengths of its own picture: Adam's
+     * word of 2026-10-16, a turn and then a drop; and of 2026-10-17, the fade after the hook, and the drop half what it
+     * was, a little over half a bird length. The share of the hook the turn takes; the rest is the drop.
      */
-    hookAt: 0.8,
+    hookAt: 0.845,
     hookTurn: 0.3,
-    hookDrop: 1.25,
+    hookDrop: 0.625,
+    hookTurning: 0.46,
+    fadeOut: 0.07,
     /** The share of its flight away a bird takes to come out of its cover whole. */
     fadeIn: 0.05,
   },
